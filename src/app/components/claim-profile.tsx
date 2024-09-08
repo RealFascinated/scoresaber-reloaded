@@ -1,0 +1,53 @@
+"use client";
+
+import { CheckIcon } from "@heroicons/react/24/solid";
+import { useLiveQuery } from "dexie-react-hooks";
+import useDatabase from "../hooks/use-database";
+import { useToast } from "../hooks/use-toast";
+import { Button } from "./ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
+
+type Props = {
+  /**
+   * The ID of the players profile to claim.
+   */
+  playerId: string;
+};
+
+export default function ClaimProfile({ playerId }: Props) {
+  const database = useDatabase();
+  const { toast } = useToast();
+  const settings = useLiveQuery(() => database.getSettings());
+
+  /**
+   * Claims the profile.
+   */
+  async function claimProfile() {
+    const settings = await database.getSettings();
+    settings?.setPlayerId(playerId);
+
+    // Set the playerId cookie
+    document.cookie = `playerId=${playerId}`;
+    toast({
+      title: "Profile Claimed",
+      description: "You have claimed this profile.",
+    });
+  }
+
+  if (settings?.playerId == playerId || settings == undefined) {
+    return null; // Don't show the claim button if it's the same user.
+  }
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button variant={"outline"} onClick={claimProfile}>
+          <CheckIcon className="size-6 text-green-500" />
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>
+        <p>Set as your profile</p>
+      </TooltipContent>
+    </Tooltip>
+  );
+}
