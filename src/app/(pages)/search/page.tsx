@@ -7,7 +7,7 @@ export const metadata: Metadata = {
 
 export default function Search() {
   return (
-    <div className="flex flex-col h-full w-full items-center justify-center gap-2">
+    <div className="flex flex-col items-center justify-center gap-2">
       <div className="mb-4 mt-2 flex h-[150px] w-[150px] items-center justify-center rounded-full select-none bg-gray-600">
         <p className="text-9xl">?</p>
       </div>

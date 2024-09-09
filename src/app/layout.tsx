@@ -63,7 +63,7 @@ export default function RootLayout({
           <BackgroundImage />
           <TooltipProvider>
             <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
-              <main className="z-[9999] m-auto flex h-screen min-h-full flex-col items-center opacity-90 md:max-w-[1200px]">
+              <main className="z-[9999] m-auto flex h-screen flex-col items-center md:max-w-[1200px]">
                 <NavBar />
                 {children}
               </main>
