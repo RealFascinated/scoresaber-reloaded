@@ -2,6 +2,7 @@
 
 import { CheckIcon } from "@heroicons/react/24/solid";
 import { useLiveQuery } from "dexie-react-hooks";
+import { setPlayerIdCookie } from "../common/website-utils";
 import useDatabase from "../hooks/use-database";
 import { useToast } from "../hooks/use-toast";
 import { Button } from "./ui/button";
@@ -24,10 +25,9 @@ export default function ClaimProfile({ playerId }: Props) {
    */
   async function claimProfile() {
     const settings = await database.getSettings();
-    settings?.setPlayerId(playerId);
 
-    // Set the playerId cookie
-    document.cookie = `playerId=${playerId}`;
+    settings?.setPlayerId(playerId);
+    setPlayerIdCookie(playerId);
     toast({
       title: "Profile Claimed",
       description: "You have claimed this profile.",

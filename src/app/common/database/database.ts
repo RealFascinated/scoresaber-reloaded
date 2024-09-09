@@ -1,4 +1,5 @@
 import Dexie, { EntityTable } from "dexie";
+import { setPlayerIdCookie } from "../website-utils";
 import Settings from "./types/settings";
 
 const SETTINGS_ID = "SSR"; // DO NOT CHANGE
@@ -19,6 +20,15 @@ export default class Database extends Dexie {
 
     // Populate default settings if the table is empty
     this.on("populate", () => this.populateDefaults());
+
+    this.on("ready", async () => {
+      const settings = await this.getSettings();
+      // If the settings are not found, return
+      if (settings == undefined || settings.playerId == undefined) {
+        return;
+      }
+      setPlayerIdCookie(settings.playerId);
+    });
   }
 
   async populateDefaults() {
