@@ -2,6 +2,7 @@ import { scoresaberLeaderboard } from "@/app/common/leaderboard/impl/scoresaber"
 import { ScoreSort } from "@/app/common/leaderboard/sort";
 import ScoreSaberPlayer from "@/app/common/leaderboard/types/scoresaber/scoresaber-player";
 import { formatNumberWithCommas } from "@/app/common/number-utils";
+import CountryFlag from "@/app/components/country-flag";
 import ClaimProfile from "@/app/components/player/claim-profile";
 import PlayerSubName from "@/app/components/player/player-sub-name";
 import { Avatar, AvatarFallback, AvatarImage } from "@/app/components/ui/avatar";
@@ -11,13 +12,17 @@ import { Metadata } from "next";
 
 const playerSubNames = [
   {
-    icon: <GlobeAmericasIcon className="h-5 w-5" />,
+    icon: () => {
+      return <GlobeAmericasIcon className="h-5 w-5" />;
+    },
     render: (player: ScoreSaberPlayer) => {
       return <p>#{formatNumberWithCommas(player.rank)}</p>;
     },
   },
   {
-    icon: <GlobeAmericasIcon className="h-5 w-5" />,
+    icon: (player: ScoreSaberPlayer) => {
+      return <CountryFlag country={player.country} size={15} />;
+    },
     render: (player: ScoreSaberPlayer) => {
       return <p>#{formatNumberWithCommas(player.countryRank)}</p>;
     },
@@ -91,7 +96,7 @@ export default async function Search({ params: { slug } }: Props) {
                 <div className="flex gap-2">
                   {playerSubNames.map((subName, index) => {
                     return (
-                      <PlayerSubName icon={subName.icon} key={index}>
+                      <PlayerSubName icon={subName.icon && subName.icon(player)} key={index}>
                         {subName.render(player)}
                       </PlayerSubName>
                     );
