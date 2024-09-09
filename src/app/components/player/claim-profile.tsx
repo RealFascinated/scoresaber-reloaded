@@ -2,11 +2,11 @@
 
 import { CheckIcon } from "@heroicons/react/24/solid";
 import { useLiveQuery } from "dexie-react-hooks";
-import { setPlayerIdCookie } from "../common/website-utils";
-import useDatabase from "../hooks/use-database";
-import { useToast } from "../hooks/use-toast";
-import { Button } from "./ui/button";
-import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
+import { setPlayerIdCookie } from "../../common/website-utils";
+import useDatabase from "../../hooks/use-database";
+import { useToast } from "../../hooks/use-toast";
+import { Button } from "../ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 type Props = {
   /**

@@ -8,7 +8,7 @@ export function middleware(request: NextRequest) {
   const playerIdCookie = cookies.get("playerId");
   if (pathname == "/") {
     if (playerIdCookie) {
-      return NextResponse.redirect(new URL(`/player/${playerIdCookie.value}/top/1`, request.url));
+      return NextResponse.redirect(new URL(`/player/${playerIdCookie.value}`, request.url));
     } else {
       return NextResponse.redirect(new URL("/search", request.url));
     }

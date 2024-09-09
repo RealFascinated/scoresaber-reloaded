@@ -30,7 +30,7 @@ const renderNavbarItem = (item: NavbarItem) => (
 
 export default function Navbar() {
   return (
-    <div className="p-2">
+    <div className="w-full py-2">
       <div className="px-2 h-10 rounded-md items-center flex justify-between bg-secondary">
         {/* Left-aligned items */}
         <div className="flex items-center gap-2">
