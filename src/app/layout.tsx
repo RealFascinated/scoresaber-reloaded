@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import BackgroundImage from "./components/background-image";
 import DatabaseLoader from "./components/loaders/database-loader";
-import NavBar from "./components/navbar";
+import NavBar from "./components/navbar/navbar";
+import { QueryProvider } from "./components/providers/query-provider";
 import { ThemeProvider } from "./components/providers/theme-provider";
 import { Toaster } from "./components/ui/toaster";
 import { TooltipProvider } from "./components/ui/tooltip";
@@ -63,10 +64,12 @@ export default function RootLayout({
           <BackgroundImage />
           <TooltipProvider>
             <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
-              <main className="z-[9999] m-auto flex h-screen flex-col items-center md:max-w-[1200px]">
-                <NavBar />
-                {children}
-              </main>
+              <QueryProvider>
+                <main className="z-[9999] m-auto flex h-screen flex-col items-center md:max-w-[1200px]">
+                  <NavBar />
+                  {children}
+                </main>
+              </QueryProvider>
             </ThemeProvider>
           </TooltipProvider>
         </DatabaseLoader>

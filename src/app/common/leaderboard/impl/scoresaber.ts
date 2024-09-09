@@ -16,6 +16,7 @@ class ScoreSaberLeaderboard extends Leaderboard {
    * @returns the players that match the query, or undefined if no players were found
    */
   async searchPlayers(query: string, useProxy = true): Promise<ScoreSaberPlayerSearch | undefined> {
+    console.log(`SS API: Searching for players matching "${query}"...`);
     try {
       const results = await ky
         .get((useProxy ? "https://proxy.fascinated.cc/" : "") + SEARCH_PLAYERS_ENDPOINT.replace("{query}", query))
@@ -38,6 +39,7 @@ class ScoreSaberLeaderboard extends Leaderboard {
    * @returns the player that matches the ID, or undefined
    */
   async lookupPlayer(playerId: string, useProxy = true): Promise<ScoreSaberPlayer | undefined> {
+    console.log(`SS API: Looking up player "${playerId}"...`);
     try {
       const results = await ky
         .get((useProxy ? "https://proxy.fascinated.cc/" : "") + LOOKUP_PLAYER_ENDPOINT.replace("{playerId}", playerId))

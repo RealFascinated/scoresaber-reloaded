@@ -1,5 +1,9 @@
+import { HomeIcon } from "@heroicons/react/24/solid";
+import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
 import Link from "next/link";
 import React from "react";
+import NavbarButton from "./navbar-button";
+import ProfileButton from "./profile-button";
 
 type NavbarItem = {
   name: string;
@@ -11,12 +15,12 @@ const items: NavbarItem[] = [
   {
     name: "Home",
     link: "/",
-    icon: undefined, // Add your home icon here
+    icon: <HomeIcon className="h-5 w-5" />, // Add your home icon here
   },
   {
     name: "Search",
     link: "/search",
-    icon: undefined, // Add your search icon here
+    icon: <MagnifyingGlassIcon className="h-5 w-5" />, // Add your search icon here
   },
 ];
 
@@ -31,20 +35,22 @@ const renderNavbarItem = (item: NavbarItem) => (
 export default function Navbar() {
   return (
     <div className="w-full py-2">
-      <div className="px-2 h-10 rounded-md items-center flex justify-between bg-secondary">
+      <div className="h-10 rounded-md items-center flex justify-between bg-secondary">
         {/* Left-aligned items */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center h-full">
+          <ProfileButton />
+
           {items.slice(0, -1).map((item, index) => (
-            <div key={index}>
+            <NavbarButton key={index}>
               <Link href={item.link}>{renderNavbarItem(item)}</Link>
-            </div>
+            </NavbarButton>
           ))}
         </div>
 
         {/* Right-aligned item */}
-        <div>
+        <NavbarButton>
           <Link href={items[items.length - 1].link}>{renderNavbarItem(items[items.length - 1])}</Link>
-        </div>
+        </NavbarButton>
       </div>
     </div>
   );

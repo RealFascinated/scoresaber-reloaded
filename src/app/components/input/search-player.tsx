@@ -69,7 +69,7 @@ export default function SearchPlayer() {
             {results?.map((player) => {
               return (
                 <Link
-                  href={`/player/${player.id}/top/1`}
+                  href={`/player/${player.id}`}
                   key={player.id}
                   className="bg-secondary p-2 rounded-md flex gap-2 items-center hover:brightness-75 transition-all transform-gpu"
                 >

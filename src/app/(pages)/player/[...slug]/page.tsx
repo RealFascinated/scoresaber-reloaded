@@ -1,38 +1,10 @@
 import { scoresaberLeaderboard } from "@/app/common/leaderboard/impl/scoresaber";
 import { ScoreSort } from "@/app/common/leaderboard/sort";
-import ScoreSaberPlayer from "@/app/common/leaderboard/types/scoresaber/scoresaber-player";
 import { formatNumberWithCommas } from "@/app/common/number-utils";
-import CountryFlag from "@/app/components/country-flag";
-import ClaimProfile from "@/app/components/player/claim-profile";
-import PlayerSubName from "@/app/components/player/player-sub-name";
-import { Avatar, AvatarFallback, AvatarImage } from "@/app/components/ui/avatar";
+import PlayerData from "@/app/components/player/player-data";
 import { format } from "@formkit/tempo";
-import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import { Metadata } from "next";
-
-const playerSubNames = [
-  {
-    icon: () => {
-      return <GlobeAmericasIcon className="h-5 w-5" />;
-    },
-    render: (player: ScoreSaberPlayer) => {
-      return <p>#{formatNumberWithCommas(player.rank)}</p>;
-    },
-  },
-  {
-    icon: (player: ScoreSaberPlayer) => {
-      return <CountryFlag country={player.country} size={15} />;
-    },
-    render: (player: ScoreSaberPlayer) => {
-      return <p>#{formatNumberWithCommas(player.countryRank)}</p>;
-    },
-  },
-  {
-    render: (player: ScoreSaberPlayer) => {
-      return <p className="tex-pp">{formatNumberWithCommas(player.pp)}pp</p>;
-    },
-  },
-];
+import { redirect } from "next/navigation";
 
 type Props = {
   params: {
@@ -76,49 +48,13 @@ export default async function Search({ params: { slug } }: Props) {
   console.log("sort", sort);
   console.log("page", page);
 
+  if (player == undefined) {
+    return redirect("/");
+  }
+
   return (
     <div className="flex flex-col h-full w-full">
-      {player === undefined && (
-        <div>
-          <p>idek mate</p>
-        </div>
-      )}
-      {player !== undefined && (
-        <div className="flex flex-col gap-2">
-          <div className="flex flex-col bg-secondary p-2 rounded-md">
-            <div className="flex gap-3 flex-col items-center text-center sm:flex-row sm:items-start sm:text-start relative select-none">
-              <Avatar className="w-32 h-32 pointer-events-none">
-                <AvatarImage src={player.profilePicture} />
-                <AvatarFallback>{player.name}</AvatarFallback>
-              </Avatar>
-              <div>
-                <p className="font-bold text-2xl">{player.name}</p>
-                <div className="flex gap-2">
-                  {playerSubNames.map((subName, index) => {
-                    return (
-                      <PlayerSubName icon={subName.icon && subName.icon(player)} key={index}>
-                        {subName.render(player)}
-                      </PlayerSubName>
-                    );
-                  })}
-                  {/* <PlayerSubName icon={<GlobeAmericasIcon className="size-6" />}>
-                    <p>#{formatNumberWithCommas(player.rank)}</p>
-                  </PlayerSubName>
-                  <PlayerSubName icon={<GlobeAmericasIcon className="size-6" />}>
-                    <p>#{formatNumberWithCommas(player.countryRank)}</p>
-                  </PlayerSubName>
-                  <PlayerSubName>
-                    <p className="text-pp">{formatNumberWithCommas(player.pp)}pp</p>
-                  </PlayerSubName> */}
-                </div>
-                <div className="absolute top-0 right-0">
-                  <ClaimProfile playerId={id} />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <PlayerData initalPlayerData={player} />
     </div>
   );
 }
