@@ -1,5 +1,4 @@
 import { scoresaberLeaderboard } from "@/app/common/leaderboard/impl/scoresaber";
-import { ScoreSort } from "@/app/common/leaderboard/sort";
 import { formatNumberWithCommas } from "@/app/common/number-utils";
 import PlayerData from "@/app/components/player/player-data";
 import { format } from "@formkit/tempo";
@@ -40,15 +39,12 @@ export async function generateMetadata({ params: { slug } }: Props): Promise<Met
 
 export default async function Search({ params: { slug } }: Props) {
   const id = slug[0]; // The players id
-  const sort: ScoreSort = (slug[1] as ScoreSort) || "recent"; // The sorting method
-  const page = slug[2] || 1; // The page number
+  // const sort: ScoreSort = (slug[1] as ScoreSort) || "recent"; // The sorting method
+  // const page = slug[2] || 1; // The page number
   const player = await scoresaberLeaderboard.lookupPlayer(id, false);
 
-  console.log("id", id);
-  console.log("sort", sort);
-  console.log("page", page);
-
   if (player == undefined) {
+    // Invalid player id
     return redirect("/");
   }
 
