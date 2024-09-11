@@ -1,10 +1,13 @@
 import Leaderboard from "../leaderboard";
+import { ScoreSort } from "../sort";
 import ScoreSaberPlayer from "../types/scoresaber/scoresaber-player";
+import ScoreSaberPlayerScoresPage from "../types/scoresaber/scoresaber-player-scores-page";
 import { ScoreSaberPlayerSearch } from "../types/scoresaber/scoresaber-player-search";
 
 const API_BASE = "https://scoresaber.com/api";
-const SEARCH_PLAYERS_ENDPOINT = `${API_BASE}/players?search={query}`;
-const LOOKUP_PLAYER_ENDPOINT = `${API_BASE}/player/{playerId}/full`;
+const SEARCH_PLAYERS_ENDPOINT = `${API_BASE}/players?search=:query`;
+const LOOKUP_PLAYER_ENDPOINT = `${API_BASE}/player/:id/full`;
+const LOOKUP_PLAYER_SCORES_ENDPOINT = `${API_BASE}/player/:id/scores?limit=:limit&sort=:sort&page=:page`;
 
 class ScoreSaberLeaderboard extends Leaderboard {
   constructor() {
@@ -20,19 +23,15 @@ class ScoreSaberLeaderboard extends Leaderboard {
    */
   async searchPlayers(query: string, useProxy = true): Promise<ScoreSaberPlayerSearch | undefined> {
     this.log(`Searching for players matching "${query}"...`);
-    try {
-      const results = await this.fetch<ScoreSaberPlayerSearch>(
-        useProxy,
-        SEARCH_PLAYERS_ENDPOINT.replace("{query}", query)
-      );
-      if (results.players.length === 0) {
-        return undefined;
-      }
-      results.players.sort((a, b) => a.rank - b.rank);
-      return results;
-    } catch {
+    const results = await this.fetch<ScoreSaberPlayerSearch>(
+      useProxy,
+      SEARCH_PLAYERS_ENDPOINT.replace(":query", query)
+    );
+    if (results.players.length === 0) {
       return undefined;
     }
+    results.players.sort((a, b) => a.rank - b.rank);
+    return results;
   }
 
   /**
@@ -44,11 +43,32 @@ class ScoreSaberLeaderboard extends Leaderboard {
    */
   async lookupPlayer(playerId: string, useProxy = true): Promise<ScoreSaberPlayer | undefined> {
     this.log(`Looking up player "${playerId}"...`);
-    try {
-      return await this.fetch<ScoreSaberPlayer>(useProxy, LOOKUP_PLAYER_ENDPOINT.replace("{playerId}", playerId));
-    } catch {
-      return undefined;
-    }
+    return await this.fetch<ScoreSaberPlayer>(useProxy, LOOKUP_PLAYER_ENDPOINT.replace(":id", playerId));
+  }
+
+  /**
+   * Looks up a page of scores for a player
+   *
+   * @param playerId the ID of the player to look up
+   * @param sort the sort to use
+   * @param page the page to get scores for
+   * @param useProxy whether to use the proxy or not
+   * @returns the scores of the player, or undefined
+   */
+  async lookupPlayerScores(
+    playerId: string,
+    sort: ScoreSort,
+    page: number,
+    useProxy = true
+  ): Promise<ScoreSaberPlayerScoresPage | undefined> {
+    this.log(`Looking up scores for player "${playerId}", sort "${sort}", page "${page}"...`);
+    return await this.fetch<ScoreSaberPlayerScoresPage>(
+      useProxy,
+      LOOKUP_PLAYER_SCORES_ENDPOINT.replace(":id", playerId)
+        .replace(":limit", 8 + "")
+        .replace(":sort", sort)
+        .replace(":page", page.toString())
+    );
   }
 }
 

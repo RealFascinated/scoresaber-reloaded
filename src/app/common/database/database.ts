@@ -5,6 +5,9 @@ import Settings from "./types/settings";
 const SETTINGS_ID = "SSR"; // DO NOT CHANGE
 
 export default class Database extends Dexie {
+  /**
+   * The settings for the website.
+   */
   settings!: EntityTable<Settings, "id">;
 
   constructor() {
@@ -31,6 +34,9 @@ export default class Database extends Dexie {
     });
   }
 
+  /**
+   * Populates the default settings
+   */
   async populateDefaults() {
     await this.settings.add({
       id: SETTINGS_ID, // Fixed ID for the single settings object

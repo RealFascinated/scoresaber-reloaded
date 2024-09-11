@@ -38,12 +38,17 @@ export default class Leaderboard {
    * @returns the fetched data
    */
   public async fetch<T>(useProxy: boolean, url: string): Promise<T> {
-    return await ky
-      .get<T>(this.buildRequestUrl(useProxy, url), {
-        next: {
-          revalidate: 60, // 1 minute
-        },
-      })
-      .json();
+    try {
+      return await ky
+        .get<T>(this.buildRequestUrl(useProxy, url), {
+          next: {
+            revalidate: 60, // 1 minute
+          },
+        })
+        .json();
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 }

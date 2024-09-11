@@ -31,7 +31,7 @@ export default function BackgroundImage() {
       src={getImageUrl(backgroundImage)}
       alt="Background image"
       fetchPriority="high"
-      className={`absolute -z-50 object-cover w-screen h-screen blur-sm brightness-[33%] pointer-events-none select-none`}
+      className={`fixed -z-50 object-cover w-screen h-screen blur-sm brightness-[33%] pointer-events-none select-none`}
     />
   );
 }

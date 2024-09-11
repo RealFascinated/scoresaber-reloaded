@@ -1,18 +1,22 @@
 "use client";
 
 import { scoresaberLeaderboard } from "@/app/common/leaderboard/impl/scoresaber";
+import { ScoreSort } from "@/app/common/leaderboard/sort";
 import ScoreSaberPlayer from "@/app/common/leaderboard/types/scoresaber/scoresaber-player";
 import { useQuery } from "@tanstack/react-query";
 import PlayerHeader from "./player-header";
 import PlayerRankChart from "./player-rank-chart";
+import PlayerScores from "./player-scores";
 
 const REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes
 
 type Props = {
   initalPlayerData: ScoreSaberPlayer;
+  sort: ScoreSort;
+  page: number;
 };
 
-export default function PlayerData({ initalPlayerData }: Props) {
+export default function PlayerData({ initalPlayerData, sort, page }: Props) {
   let player = initalPlayerData;
   const { data, isLoading, isError } = useQuery({
     queryKey: ["player", player.id],
@@ -28,6 +32,7 @@ export default function PlayerData({ initalPlayerData }: Props) {
     <div className="flex flex-col gap-2">
       <PlayerHeader player={player} />
       <PlayerRankChart player={player} />
+      <PlayerScores player={player} sort={sort} page={page} />
     </div>
   );
 }
