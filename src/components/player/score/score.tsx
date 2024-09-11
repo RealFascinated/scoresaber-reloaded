@@ -5,9 +5,11 @@ import { beatsaverFetcher } from "@/common/data-fetcher/impl/beatsaver";
 import ScoreSaberPlayerScore from "@/common/data-fetcher/types/scoresaber/scoresaber-player-score";
 import { formatNumberWithCommas } from "@/common/number-utils";
 import { getDifficultyFromScoreSaberDifficulty } from "@/common/scoresaber-utils";
-import { songNameToYouTubeLink } from "@/common/song-utils";
+import { songDifficultyToColor } from "@/common/song-utils";
 import { timeAgo } from "@/common/time-utils";
+import { songNameToYouTubeLink } from "@/common/youtube-utils";
 import YouTubeLogo from "@/components/logos/youtube-logo";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useToast } from "@/hooks/use-toast";
 import { GlobeAmericasIcon, StarIcon } from "@heroicons/react/24/solid";
 import Image from "next/image";
@@ -34,6 +36,8 @@ export default function Score({ playerScore }: Props) {
     })();
   }, [playerScore, leaderboard.songHash]);
 
+  const diff = getDifficultyFromScoreSaberDifficulty(leaderboard.difficulty.difficulty);
+
   return (
     <div className="grid gap-2 md:gap-0 pb-2 pt-2 first:pt-0 last:pb-0 grid-cols-[20px 1fr_1fr] md:grid-cols-[0.85fr_5fr_1fr_1.2fr]">
       <div className="flex w-full flex-row justify-between items-center md:w-[125px] md:justify-center md:flex-col">
@@ -45,16 +49,34 @@ export default function Score({ playerScore }: Props) {
       </div>
       <div className="flex gap-3">
         <div className="relative flex justify-center">
-          <div className="absolute bg-pp/95 w-[85%] h-[20px] bottom-0 mb-[-5px] rounded-sm flex justify-center items-center text-xs">
-            {leaderboard.stars > 0 ? (
-              <div className="flex gap-1 items-center justify-center">
-                <p>{leaderboard.stars}</p>
-                <StarIcon className="w-4 h-4" />
-              </div>
-            ) : (
-              <p>{getDifficultyFromScoreSaberDifficulty(leaderboard.difficulty.difficulty)}</p>
-            )}
-          </div>
+          <Tooltip>
+            <TooltipTrigger
+              asChild
+              className="absolute w-[85%] h-[20px] bottom-0 mb-[-5px] rounded-sm flex justify-center items-center text-xs"
+              style={{
+                backgroundColor: songDifficultyToColor(diff) + "f0", // Transparency value (in hex 0-255)
+              }}
+            >
+              {leaderboard.stars > 0 ? (
+                <div className="flex gap-1 items-center justify-center">
+                  <p>{leaderboard.stars}</p>
+                  <StarIcon className="w-4 h-4" />
+                </div>
+              ) : (
+                <p>{diff}</p>
+              )}
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>
+                Difficulty: <span className="font-bold">{diff}</span>
+              </p>
+              {leaderboard.stars > 0 && (
+                <p>
+                  Stars: <span className="font-bold">{leaderboard.stars}</span>
+                </p>
+              )}
+            </TooltipContent>
+          </Tooltip>
           <Image
             unoptimized
             src={leaderboard.coverImage}

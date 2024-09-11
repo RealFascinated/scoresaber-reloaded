@@ -1,22 +1,22 @@
 /**
- * Turns a song name and author into a YouTube link
+ * Turns the difficulty of a song into a color
  *
- * @param name the name of the song
- * @param songSubName the sub name of the song
- * @param author the author of the song
- * @returns the YouTube link for the song
+ * @param diff the difficulty to get the color for
+ * @returns the color for the difficulty
  */
-export function songNameToYouTubeLink(name: string, songSubName: string, author: string) {
-  const baseUrl = "https://www.youtube.com/results?search_query=";
-  let query = "";
-  if (name) {
-    query += `${name} `;
+export function songDifficultyToColor(diff: string) {
+  switch (diff.toLowerCase()) {
+    case "easy":
+      return "#3cb371";
+    case "normal":
+      return "#59b0f4";
+    case "hard":
+      return "#FF6347";
+    case "expert":
+      return "#bf2a42";
+    case "expert+":
+      return "#8f48db";
+    default:
+      return "gray";
   }
-  if (songSubName) {
-    query += `${songSubName} `;
-  }
-  if (author) {
-    query += `${author} `;
-  }
-  return encodeURI(baseUrl + query.trim().replaceAll(" ", "+"));
 }
