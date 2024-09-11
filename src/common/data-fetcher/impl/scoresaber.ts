@@ -27,6 +27,9 @@ class ScoreSaberFetcher extends DataFetcher {
       useProxy,
       SEARCH_PLAYERS_ENDPOINT.replace(":query", query)
     );
+    if (results === undefined) {
+      return undefined;
+    }
     if (results.players.length === 0) {
       return undefined;
     }

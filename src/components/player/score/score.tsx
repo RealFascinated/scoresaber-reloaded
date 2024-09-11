@@ -4,11 +4,12 @@ import { copyToClipboard } from "@/common/browser-utils";
 import { beatsaverFetcher } from "@/common/data-fetcher/impl/beatsaver";
 import ScoreSaberPlayerScore from "@/common/data-fetcher/types/scoresaber/scoresaber-player-score";
 import { formatNumberWithCommas } from "@/common/number-utils";
+import { getDifficultyFromScoreSaberDifficulty } from "@/common/scoresaber-utils";
 import { songNameToYouTubeLink } from "@/common/song-utils";
 import { timeAgo } from "@/common/time-utils";
 import YouTubeLogo from "@/components/logos/youtube-logo";
 import { useToast } from "@/hooks/use-toast";
-import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
+import { GlobeAmericasIcon, StarIcon } from "@heroicons/react/24/solid";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import BeatSaverLogo from "../../logos/beatsaver-logo";
@@ -43,14 +44,26 @@ export default function Score({ playerScore }: Props) {
         <p className="text-sm">{timeAgo(new Date(score.timeSet))}</p>
       </div>
       <div className="flex gap-3">
-        <Image
-          unoptimized
-          src={leaderboard.coverImage}
-          width={64}
-          height={64}
-          alt="Song Artwork"
-          className="rounded-md"
-        />
+        <div className="relative flex justify-center">
+          <div className="absolute bg-pp/95 w-[85%] h-[20px] bottom-0 mb-[-5px] rounded-sm flex justify-center items-center text-xs">
+            {leaderboard.stars > 0 ? (
+              <div className="flex gap-1 items-center justify-center">
+                <p>{leaderboard.stars}</p>
+                <StarIcon className="w-4 h-4" />
+              </div>
+            ) : (
+              <p>{getDifficultyFromScoreSaberDifficulty(leaderboard.difficulty.difficulty)}</p>
+            )}
+          </div>
+          <Image
+            unoptimized
+            src={leaderboard.coverImage}
+            width={64}
+            height={64}
+            alt="Song Artwork"
+            className="rounded-md"
+          />
+        </div>
         <div className="flex">
           <div className="flex flex-col">
             <p className="text-pp text-ellipsis">{leaderboard.songName}</p>
