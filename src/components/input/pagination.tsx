@@ -62,10 +62,10 @@ export default function Pagination({ mobilePagination, page, totalPages, onPageC
     if (startPage > 1 && !mobilePagination) {
       pageNumbers.push(
         <>
-          <PaginationItem key="start">
+          <PaginationItem key="start" className="cursor-pointer">
             <PaginationLink onClick={() => handlePageChange(1)}>1</PaginationLink>
           </PaginationItem>
-          <PaginationItem key="ellipsis-start">
+          <PaginationItem key="ellipsis-start" className="cursor-pointer">
             <PaginationEllipsis />
           </PaginationItem>
         </>
@@ -75,7 +75,7 @@ export default function Pagination({ mobilePagination, page, totalPages, onPageC
     // Generate page numbers between startPage and endPage for desktop view
     for (let i = startPage; i <= endPage; i++) {
       pageNumbers.push(
-        <PaginationItem key={i}>
+        <PaginationItem key={i} className="cursor-pointer">
           <PaginationLink isActive={i === currentPage} onClick={() => handlePageChange(i)}>
             {i}
           </PaginationLink>
@@ -90,7 +90,7 @@ export default function Pagination({ mobilePagination, page, totalPages, onPageC
     <ShadCnPagination className="select-none">
       <PaginationContent>
         {/* Previous button for mobile and desktop */}
-        <PaginationItem>
+        <PaginationItem className="cursor-pointer">
           <PaginationPrevious onClick={() => handlePageChange(currentPage - 1)} />
         </PaginationItem>
 
@@ -100,16 +100,16 @@ export default function Pagination({ mobilePagination, page, totalPages, onPageC
         {!mobilePagination && currentPage < totalPages && (
           <>
             <PaginationItem key="ellipsis-end">
-              <PaginationEllipsis />
+              <PaginationEllipsis className="cursor-default" />
             </PaginationItem>
-            <PaginationItem key="end">
+            <PaginationItem key="end" className="cursor-pointer">
               <PaginationLink onClick={() => handlePageChange(totalPages)}>{totalPages}</PaginationLink>
             </PaginationItem>
           </>
         )}
 
         {/* Next button for mobile and desktop */}
-        <PaginationItem>
+        <PaginationItem className="cursor-pointer">
           <PaginationNext onClick={() => handlePageChange(currentPage + 1)} />
         </PaginationItem>
       </PaginationContent>

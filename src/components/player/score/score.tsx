@@ -1,5 +1,6 @@
 "use client";
 
+import { copyToClipboard } from "@/common/browser-utils";
 import { beatsaverFetcher } from "@/common/data-fetcher/impl/beatsaver";
 import ScoreSaberPlayerScore from "@/common/data-fetcher/types/scoresaber/scoresaber-player-score";
 import { formatNumberWithCommas } from "@/common/number-utils";
@@ -30,7 +31,7 @@ export default function Score({ playerScore }: Props) {
       const bsrFound = await beatsaverFetcher.getMapBsr(leaderboard.songHash);
       setBsr(bsrFound);
     })();
-  }, [playerScore]);
+  }, [playerScore, leaderboard.songHash]);
 
   return (
     <div className="grid gap-2 md:gap-0 pb-2 pt-2 first:pt-0 last:pb-0 grid-cols-[20px 1fr_1fr] md:grid-cols-[0.85fr_5fr_1fr_1.2fr]">
@@ -68,6 +69,7 @@ export default function Score({ playerScore }: Props) {
                   title: "Copied!",
                   description: `Copied "!bsr ${bsr}" to your clipboard!`,
                 });
+                copyToClipboard(`!bsr ${bsr}`);
               }}
               tooltip={<p>Click to copy the bsr code</p>}
             >
