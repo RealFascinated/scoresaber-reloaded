@@ -1,1 +1,4 @@
-export type ScoreSort = "top" | "recent";
+export enum ScoreSort {
+  top = "top",
+  recent = "recent",
+}
