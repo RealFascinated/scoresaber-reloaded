@@ -14,6 +14,10 @@ export default function ProfileButton() {
     return; // Settings hasn't loaded yet
   }
 
+  if (settings.playerId == null) {
+    return; // No player profile claimed
+  }
+
   return (
     <NavbarButton>
       <Link href={`/player/${settings.playerId}`} className="flex items-center gap-2">

@@ -1,4 +1,3 @@
-import ky from "ky";
 import Leaderboard from "../leaderboard";
 import ScoreSaberPlayer from "../types/scoresaber/scoresaber-player";
 import { ScoreSaberPlayerSearch } from "../types/scoresaber/scoresaber-player-search";
@@ -8,6 +7,10 @@ const SEARCH_PLAYERS_ENDPOINT = `${API_BASE}/players?search={query}`;
 const LOOKUP_PLAYER_ENDPOINT = `${API_BASE}/player/{playerId}/full`;
 
 class ScoreSaberLeaderboard extends Leaderboard {
+  constructor() {
+    super("ScoreSaber");
+  }
+
   /**
    * Gets the players that match the query.
    *
@@ -16,11 +19,12 @@ class ScoreSaberLeaderboard extends Leaderboard {
    * @returns the players that match the query, or undefined if no players were found
    */
   async searchPlayers(query: string, useProxy = true): Promise<ScoreSaberPlayerSearch | undefined> {
-    console.log(`SS API: Searching for players matching "${query}"...`);
+    this.log(`Searching for players matching "${query}"...`);
     try {
-      const results = await ky
-        .get((useProxy ? "https://proxy.fascinated.cc/" : "") + SEARCH_PLAYERS_ENDPOINT.replace("{query}", query))
-        .json<ScoreSaberPlayerSearch>();
+      const results = await this.fetch<ScoreSaberPlayerSearch>(
+        useProxy,
+        SEARCH_PLAYERS_ENDPOINT.replace("{query}", query)
+      );
       if (results.players.length === 0) {
         return undefined;
       }
@@ -39,12 +43,9 @@ class ScoreSaberLeaderboard extends Leaderboard {
    * @returns the player that matches the ID, or undefined
    */
   async lookupPlayer(playerId: string, useProxy = true): Promise<ScoreSaberPlayer | undefined> {
-    console.log(`SS API: Looking up player "${playerId}"...`);
+    this.log(`Looking up player "${playerId}"...`);
     try {
-      const results = await ky
-        .get((useProxy ? "https://proxy.fascinated.cc/" : "") + LOOKUP_PLAYER_ENDPOINT.replace("{playerId}", playerId))
-        .json<ScoreSaberPlayer>();
-      return results;
+      return await this.fetch<ScoreSaberPlayer>(useProxy, LOOKUP_PLAYER_ENDPOINT.replace("{playerId}", playerId));
     } catch {
       return undefined;
     }

@@ -4,6 +4,7 @@ import { scoresaberLeaderboard } from "@/app/common/leaderboard/impl/scoresaber"
 import ScoreSaberPlayer from "@/app/common/leaderboard/types/scoresaber/scoresaber-player";
 import { useQuery } from "@tanstack/react-query";
 import PlayerHeader from "./player-header";
+import PlayerRankChart from "./player-rank-chart";
 
 const REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes
 
@@ -26,6 +27,7 @@ export default function PlayerData({ initalPlayerData }: Props) {
   return (
     <div className="flex flex-col gap-2">
       <PlayerHeader player={player} />
+      <PlayerRankChart player={player} />
     </div>
   );
 }

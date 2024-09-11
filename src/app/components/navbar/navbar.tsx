@@ -35,7 +35,7 @@ const renderNavbarItem = (item: NavbarItem) => (
 export default function Navbar() {
   return (
     <div className="w-full py-2">
-      <div className="h-10 rounded-md items-center flex justify-between bg-secondary">
+      <div className="h-10 rounded-md items-center flex justify-between bg-secondary/90">
         {/* Left-aligned items */}
         <div className="flex items-center h-full">
           <ProfileButton />

@@ -1,10 +1,11 @@
 import ScoreSaberPlayer from "@/app/common/leaderboard/types/scoresaber/scoresaber-player";
 import { formatNumberWithCommas } from "@/app/common/number-utils";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
+import Card from "../card";
 import CountryFlag from "../country-flag";
 import { Avatar, AvatarImage } from "../ui/avatar";
 import ClaimProfile from "./claim-profile";
-import PlayerSubName from "./player-sub-name";
+import PlayerDataPoint from "./player-data-point";
 
 const playerSubNames = [
   {
@@ -25,7 +26,7 @@ const playerSubNames = [
   },
   {
     render: (player: ScoreSaberPlayer) => {
-      return <p className="tex-pp">{formatNumberWithCommas(player.pp)}pp</p>;
+      return <p className="text-pp">{formatNumberWithCommas(player.pp)}pp</p>;
     },
   },
 ];
@@ -36,7 +37,7 @@ type Props = {
 
 export default function PlayerHeader({ player }: Props) {
   return (
-    <div className="flex flex-col bg-secondary p-2 rounded-md">
+    <Card>
       <div className="flex gap-3 flex-col items-center text-center sm:flex-row sm:items-start sm:text-start relative select-none">
         <Avatar className="w-32 h-32 pointer-events-none">
           <AvatarImage fetchPriority="high" src={player.profilePicture} />
@@ -46,9 +47,9 @@ export default function PlayerHeader({ player }: Props) {
           <div className="flex gap-2">
             {playerSubNames.map((subName, index) => {
               return (
-                <PlayerSubName icon={subName.icon && subName.icon(player)} key={index}>
+                <PlayerDataPoint icon={subName.icon && subName.icon(player)} key={index}>
                   {subName.render(player)}
-                </PlayerSubName>
+                </PlayerDataPoint>
               );
             })}
           </div>
@@ -57,6 +58,6 @@ export default function PlayerHeader({ player }: Props) {
           </div>
         </div>
       </div>
-    </div>
+    </Card>
   );
 }
