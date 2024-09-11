@@ -18,7 +18,7 @@ const playerSubNames = [
   },
   {
     icon: (player: ScoreSaberPlayer) => {
-      return <CountryFlag country={player.country} size={15} />;
+      return <CountryFlag country={player.country.toLowerCase()} size={15} />;
     },
     render: (player: ScoreSaberPlayer) => {
       return <p>#{formatNumberWithCommas(player.countryRank)}</p>;
