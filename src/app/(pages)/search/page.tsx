@@ -1,4 +1,4 @@
-import SearchPlayer from "@/app/components/input/search-player";
+import SearchPlayer from "@/components/input/search-player";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {

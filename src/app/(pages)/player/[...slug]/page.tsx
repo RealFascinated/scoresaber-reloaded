@@ -1,7 +1,7 @@
-import { scoresaberLeaderboard } from "@/app/common/leaderboard/impl/scoresaber";
-import { ScoreSort } from "@/app/common/leaderboard/sort";
-import { formatNumberWithCommas } from "@/app/common/number-utils";
-import PlayerData from "@/app/components/player/player-data";
+import { scoresaberFetcher } from "@/common/data-fetcher/impl/scoresaber";
+import { ScoreSort } from "@/common/data-fetcher/sort";
+import { formatNumberWithCommas } from "@/common/number-utils";
+import PlayerData from "@/components/player/player-data";
 import { format } from "@formkit/tempo";
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
@@ -14,7 +14,7 @@ type Props = {
 
 export async function generateMetadata({ params: { slug } }: Props): Promise<Metadata> {
   const id = slug[0]; // The players id
-  const player = await scoresaberLeaderboard.lookupPlayer(id, false);
+  const player = await scoresaberFetcher.lookupPlayer(id, false);
   if (player === undefined) {
     return {
       title: `Unknown Player`,
@@ -42,7 +42,7 @@ export default async function Search({ params: { slug } }: Props) {
   const id = slug[0]; // The players id
   const sort: ScoreSort = (slug[1] as ScoreSort) || "recent"; // The sorting method
   const page = parseInt(slug[2]) || 1; // The page number
-  const player = await scoresaberLeaderboard.lookupPlayer(id, false);
+  const player = await scoresaberFetcher.lookupPlayer(id, false);
 
   if (player == undefined) {
     // Invalid player id
