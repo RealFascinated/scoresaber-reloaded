@@ -1,6 +1,7 @@
 import ScoreSaberPlayerScore from "@/app/common/leaderboard/types/scoresaber/scoresaber-player-score";
 import { timeAgo } from "@/app/common/time-utils";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
+import Image from "next/image";
 
 type Props = {
   /**
@@ -22,7 +23,14 @@ export default function Score({ playerScore }: Props) {
         <p className="text-sm">{timeAgo(new Date(score.timeSet))}</p>
       </div>
       <div className="flex gap-3">
-        <img src={leaderboard.coverImage} className="w-16 h-16 rounded-md" />
+        <Image
+          unoptimized
+          src={leaderboard.coverImage}
+          width={64}
+          height={64}
+          alt="Song Artwork"
+          className="rounded-md"
+        />
         <div className="flex">
           <div className="flex flex-col">
             <p>{leaderboard.songName}</p>
