@@ -12,13 +12,24 @@ import {
 } from "../ui/pagination";
 
 type PaginationItemWrapperProps = {
+  /**
+   * Whether a page is currently loading.
+   */
   isLoadingPage: boolean;
+
+  /**
+   * The children to render.
+   */
   children: React.ReactNode;
 };
 
 function PaginationItemWrapper({ isLoadingPage, children }: PaginationItemWrapperProps) {
   return (
-    <PaginationItem className={clsx(isLoadingPage ? "cursor-not-allowed" : "cursor-pointer")}>
+    <PaginationItem
+      className={clsx(isLoadingPage ? "cursor-not-allowed" : "cursor-pointer")}
+      aria-disabled={isLoadingPage}
+      tabIndex={isLoadingPage ? -1 : undefined}
+    >
       {children}
     </PaginationItem>
   );

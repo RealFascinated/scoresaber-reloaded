@@ -28,6 +28,7 @@ export default function PlayerScores({ player, sort, page }: Props) {
   const { data, isError, isLoading, refetch } = useQuery({
     queryKey: ["playerScores", player.id, currentSort, currentPage],
     queryFn: () => scoresaberFetcher.lookupPlayerScores(player.id, currentSort, currentPage),
+    staleTime: 30 * 1000, // Data will be cached for 30 seconds
   });
 
   useEffect(() => {
