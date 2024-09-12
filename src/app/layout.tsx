@@ -10,7 +10,7 @@ import { TooltipProvider } from "../components/ui/tooltip";
 import "./globals.css";
 
 const siteFont = localFont({
-  src: "./fonts/RobotoMono-Regular.ttf",
+  src: "./fonts/JetBrainsMono-Regular.woff2",
   weight: "100 900",
 });
 
