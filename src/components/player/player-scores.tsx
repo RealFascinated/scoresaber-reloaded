@@ -28,47 +28,29 @@ const scoreSort = [
   },
 ];
 
+const scoreAnimation: Variants = {
+  hiddenRight: {
+    opacity: 0,
+    x: 50,
+  },
+  hiddenLeft: {
+    opacity: 0,
+    x: -50,
+  },
+  visible: {
+    opacity: 1,
+    x: 0,
+    transition: {
+      staggerChildren: 0.03,
+    },
+  },
+};
+
 type Props = {
   initialScoreData?: ScoreSaberPlayerScoresPage;
   player: ScoreSaberPlayer;
   sort: ScoreSort;
   page: number;
-};
-
-const containerVariants: Variants = {
-  hiddenRight: {
-    opacity: 0,
-    x: 50,
-  },
-  hiddenLeft: {
-    opacity: 0,
-    x: -50,
-  },
-  visible: {
-    opacity: 1,
-    x: 0,
-    transition: {
-      staggerChildren: 0.05,
-    },
-  },
-};
-
-const childVariants: Variants = {
-  hiddenRight: {
-    opacity: 0,
-    x: 50,
-  },
-  hiddenLeft: {
-    opacity: 0,
-    x: -50,
-  },
-  visible: {
-    opacity: 1,
-    x: 0,
-    transition: {
-      ease: "anticipate",
-    },
-  },
 };
 
 export default function PlayerScores({ initialScoreData, player, sort, page }: Props) {
@@ -145,11 +127,11 @@ export default function PlayerScores({ initialScoreData, player, sort, page }: P
       <motion.div
         initial="hidden"
         animate={controls}
-        variants={containerVariants}
+        variants={scoreAnimation}
         className="grid min-w-full grid-cols-1 divide-y divide-border"
       >
         {currentScores.playerScores.map((playerScore, index) => (
-          <motion.div key={index} variants={childVariants}>
+          <motion.div key={index} variants={scoreAnimation}>
             <Score playerScore={playerScore} />
           </motion.div>
         ))}
