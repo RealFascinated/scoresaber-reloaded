@@ -5,10 +5,10 @@ import Card from "../card";
 import CountryFlag from "../country-flag";
 import { Avatar, AvatarImage } from "../ui/avatar";
 import ClaimProfile from "./claim-profile";
-import PlayerDataPoint from "./player-data-point";
 
-const playerSubNames = [
+const playerData = [
   {
+    showWhenInactiveOrBanned: false,
     icon: () => {
       return <GlobeAmericasIcon className="h-5 w-5" />;
     },
@@ -17,6 +17,7 @@ const playerSubNames = [
     },
   },
   {
+    showWhenInactiveOrBanned: false,
     icon: (player: ScoreSaberPlayer) => {
       return <CountryFlag country={player.country.toLowerCase()} size={15} />;
     },
@@ -25,6 +26,7 @@ const playerSubNames = [
     },
   },
   {
+    showWhenInactiveOrBanned: true,
     render: (player: ScoreSaberPlayer) => {
       return <p className="text-pp">{formatNumberWithCommas(player.pp)}pp</p>;
     },
@@ -44,14 +46,26 @@ export default function PlayerHeader({ player }: Props) {
         </Avatar>
         <div>
           <p className="font-bold text-2xl">{player.name}</p>
-          <div className="flex gap-2">
-            {playerSubNames.map((subName, index) => {
-              return (
-                <PlayerDataPoint icon={subName.icon && subName.icon(player)} key={index}>
-                  {subName.render(player)}
-                </PlayerDataPoint>
-              );
-            })}
+          <div className="flex flex-col">
+            <div>
+              {player.inactive && <p className="text-gray-400">Inactive Account</p>}
+              {player.banned && <p className="text-red-500">Banned Account</p>}
+            </div>
+            <div className="flex gap-2">
+              {playerData.map((subName, index) => {
+                // Check if the player is inactive or banned and if the data should be shown
+                if (!subName.showWhenInactiveOrBanned && (player.inactive || player.banned)) {
+                  return null;
+                }
+
+                return (
+                  <div key={index} className="flex gap-1 items-center">
+                    {subName.icon && subName.icon(player)}
+                    {subName.render && subName.render(player)}
+                  </div>
+                );
+              })}
+            </div>
           </div>
           <div className="absolute top-0 right-0">
             <ClaimProfile playerId={player.id} />

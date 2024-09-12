@@ -7,7 +7,8 @@ import ScoreSaberPlayerScoresPage from "@/common/data-fetcher/types/scoresaber/s
 import { capitalizeFirstLetter } from "@/common/string-utils";
 import useWindowDimensions from "@/hooks/use-window-dimensions";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { motion, useAnimation } from "framer-motion";
+import { useCallback, useEffect, useState } from "react";
 import Card from "../card";
 import Pagination from "../input/pagination";
 import { Button } from "../ui/button";
@@ -21,6 +22,8 @@ type Props = {
 
 export default function PlayerScores({ player, sort, page }: Props) {
   const { width } = useWindowDimensions();
+  const controls = useAnimation();
+
   const [currentSort, setCurrentSort] = useState(sort);
   const [currentPage, setCurrentPage] = useState(page);
   const [previousScores, setPreviousScores] = useState<ScoreSaberPlayerScoresPage | undefined>();
@@ -31,11 +34,25 @@ export default function PlayerScores({ player, sort, page }: Props) {
     staleTime: 30 * 1000, // Data will be cached for 30 seconds
   });
 
+  const handleAnimation = useCallback(() => {
+    controls.set({
+      x: -50,
+      opacity: 0,
+    });
+    controls.start({
+      x: 0,
+      opacity: 1,
+      transition: { duration: 0.25 },
+    });
+  }, [controls]);
+
   useEffect(() => {
-    if (data) {
-      setPreviousScores(data);
+    if (data == undefined) {
+      return;
     }
-  }, [data]);
+    setPreviousScores(data);
+    handleAnimation();
+  }, [data, handleAnimation]);
 
   useEffect(() => {
     // Update URL and refetch data when currentSort or currentPage changes
@@ -80,11 +97,13 @@ export default function PlayerScores({ player, sort, page }: Props) {
         ))}
       </div>
 
-      <div className="grid min-w-full grid-cols-1 divide-y divide-border">
-        {previousScores.playerScores.map((playerScore, index) => (
-          <Score key={index} playerScore={playerScore} />
-        ))}
-      </div>
+      <motion.div animate={controls}>
+        <div className="grid min-w-full grid-cols-1 divide-y divide-border">
+          {previousScores.playerScores.map((playerScore, index) => (
+            <Score key={index} playerScore={playerScore} />
+          ))}
+        </div>
+      </motion.div>
 
       <Pagination
         mobilePagination={width < 768}

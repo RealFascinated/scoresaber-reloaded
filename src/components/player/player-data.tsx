@@ -31,7 +31,11 @@ export default function PlayerData({ initalPlayerData, sort, page }: Props) {
   return (
     <div className="flex flex-col gap-2">
       <PlayerHeader player={player} />
-      <PlayerRankChart player={player} />
+      {!player.inactive && (
+        <>
+          <PlayerRankChart player={player} />
+        </>
+      )}
       <PlayerScores player={player} sort={sort} page={page} />
     </div>
   );

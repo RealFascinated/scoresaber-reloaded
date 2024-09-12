@@ -84,6 +84,7 @@ export default function Score({ playerScore }: Props) {
             height={64}
             alt="Song Artwork"
             className="rounded-md min-w-[64px]"
+            priority
           />
         </div>
         <div className="flex">
