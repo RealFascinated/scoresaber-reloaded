@@ -73,7 +73,7 @@ export default function ScoreStats({ playerScore }: Props) {
                 .map((_, index) => <div key={`empty-${index}`} className="flex-1 min-w-[30%]"></div>)}
             {rowStats.map((stat) => (
               <div key={stat.name} className="flex-1 min-w-[30%]">
-                <StatValue value={stat.create(playerScore)} />
+                {stat.create(playerScore) && <StatValue value={stat.create(playerScore)} />}
               </div>
             ))}
           </div>
