@@ -43,7 +43,7 @@ export default function PlayerHeader({ player }: Props) {
     <Card>
       <div className="flex gap-3 flex-col items-center text-center lg:flex-row lg:items-start lg:text-start relative select-none">
         <Avatar className="w-32 h-32 pointer-events-none">
-          <AvatarImage src={player.profilePicture} />
+          <AvatarImage alt="Profile Picture" src={player.profilePicture} />
         </Avatar>
         <div className="w-full flex gap-2 flex-col justify-center items-center lg:justify-start lg:items-start">
           <div>
