@@ -41,7 +41,7 @@ export default function ScoreButtons({
               onClick={() => {
                 toast({
                   title: "Copied!",
-                  description: `Copied "!bsr ${beatSaverMap}" to your clipboard!`,
+                  description: `Copied "!bsr ${beatSaverMap.bsr}" to your clipboard!`,
                 });
                 copyToClipboard(`!bsr ${beatSaverMap.bsr}`);
               }}
