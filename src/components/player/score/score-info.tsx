@@ -1,4 +1,4 @@
-import ScoreSaberPlayerScore from "@/common/data-fetcher/types/scoresaber/scoresaber-player-score";
+import ScoreSaberLeaderboard from "@/common/data-fetcher/types/scoresaber/scoresaber-leaderboard";
 import BeatSaverMap from "@/common/database/types/beatsaver-map";
 import { getDifficultyFromScoreSaberDifficulty } from "@/common/scoresaber-utils";
 import { songDifficultyToColor } from "@/common/song-utils";
@@ -9,12 +9,11 @@ import clsx from "clsx";
 import Image from "next/image";
 
 type Props = {
-  playerScore: ScoreSaberPlayerScore;
+  leaderboard: ScoreSaberLeaderboard;
   beatSaverMap?: BeatSaverMap;
 };
 
-export default function ScoreSongInfo({ playerScore, beatSaverMap }: Props) {
-  const { leaderboard } = playerScore;
+export default function ScoreSongInfo({ leaderboard, beatSaverMap }: Props) {
   const diff = getDifficultyFromScoreSaberDifficulty(leaderboard.difficulty.difficulty);
   const mappersProfile =
     beatSaverMap != undefined ? `https://beatsaver.com/profile/${beatSaverMap?.fullData.uploader.id}` : undefined;

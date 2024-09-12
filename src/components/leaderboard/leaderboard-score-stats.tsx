@@ -29,20 +29,6 @@ const badges: Badge[] = [
     },
   },
   {
-    name: "Score",
-    create: (score: ScoreSaberScore) => {
-      return `${formatNumberWithCommas(score.baseScore)}`;
-    },
-  },
-  {
-    name: "",
-    create: () => undefined,
-  },
-  {
-    name: "",
-    create: () => undefined,
-  },
-  {
     name: "Full Combo",
     create: (score: ScoreSaberScore) => {
       const fullCombo = score.missedNotes === 0;
@@ -62,9 +48,9 @@ type Props = {
   leaderboard: ScoreSaberLeaderboard;
 };
 
-export default function ScoreStats({ score, leaderboard }: Props) {
+export default function LeaderboardScoreStats({ score, leaderboard }: Props) {
   return (
-    <div className={`grid grid-cols-3 grid-rows-2 gap-1 ml-0 lg:ml-2`}>
+    <div className={`grid grid-cols-3 grid-rows-1 gap-1 ml-0 lg:ml-2`}>
       {badges.map((badge, index) => {
         const toRender = badge.create(score, leaderboard);
         if (toRender === undefined) {
