@@ -6,6 +6,7 @@ import ScoreSaberPlayer from "@/common/data-fetcher/types/scoresaber/scoresaber-
 import ScoreSaberPlayerScoresPage from "@/common/data-fetcher/types/scoresaber/scoresaber-player-scores-page";
 import { capitalizeFirstLetter } from "@/common/string-utils";
 import useWindowDimensions from "@/hooks/use-window-dimensions";
+import { ClockIcon, TrophyIcon } from "@heroicons/react/24/solid";
 import { useQuery } from "@tanstack/react-query";
 import { motion, useAnimation } from "framer-motion";
 import { useCallback, useEffect, useState } from "react";
@@ -13,6 +14,19 @@ import Card from "../card";
 import Pagination from "../input/pagination";
 import { Button } from "../ui/button";
 import Score from "./score/score";
+
+const scoreSort = [
+  {
+    name: "Top",
+    value: ScoreSort.top,
+    icon: <TrophyIcon className="w-5 h-5" />,
+  },
+  {
+    name: "Recent",
+    value: ScoreSort.recent,
+    icon: <ClockIcon className="w-5 h-5" />,
+  },
+];
 
 type Props = {
   initialScoreData?: ScoreSaberPlayerScoresPage;
@@ -77,13 +91,16 @@ export default function PlayerScores({ initialScoreData, player, sort, page }: P
   return (
     <Card className="flex gap-4">
       <div className="flex items-center flex-row w-full gap-2 justify-center">
-        {Object.values(ScoreSort).map((sortOption) => (
+        {Object.values(scoreSort).map((sortOption, index) => (
           <Button
-            variant={sortOption === currentSort ? "default" : "outline"}
-            key={sortOption}
-            onClick={() => handleSortChange(sortOption)}
+            variant={sortOption.value === currentSort ? "default" : "outline"}
+            key={index}
+            onClick={() => handleSortChange(sortOption.value)}
+            size="sm"
+            className="flex items-center gap-1"
           >
-            {capitalizeFirstLetter(sortOption)}
+            {sortOption.icon}
+            {`${capitalizeFirstLetter(sortOption.name)} Scores`}
           </Button>
         ))}
       </div>
