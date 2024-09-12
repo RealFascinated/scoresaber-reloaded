@@ -1,3 +1,5 @@
+import clsx, { ClassValue } from "clsx";
+
 type Props = {
   /**
    * The stat name.
@@ -5,14 +7,24 @@ type Props = {
   name?: string;
 
   /**
+   * The background color of the stat.
+   */
+  color?: ClassValue;
+
+  /**
    * The value of the stat.
    */
   value: React.ReactNode;
 };
 
-export default function StatValue({ name, value }: Props) {
+export default function StatValue({ name, color, value }: Props) {
   return (
-    <div className="flex min-w-16 gap-2 bg-accent h-[28px] p-1 items-center justify-center rounded-md text-sm">
+    <div
+      className={clsx(
+        "flex min-w-16 gap-2 h-[28px] p-1 items-center justify-center rounded-md text-sm",
+        color ? color : "bg-accent"
+      )}
+    >
       {name && (
         <>
           <p>{name}</p>

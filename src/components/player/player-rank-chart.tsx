@@ -97,7 +97,7 @@ export default function PlayerRankChart({ player }: Props) {
         lineTension: 0.5,
         data: playerRankHistory,
         label: "Rank",
-        borderColor: "#c084fc",
+        borderColor: "#a147fa",
         fill: false,
         color: "#fff",
       },
