@@ -18,11 +18,12 @@ class BeatSaverFetcher extends DataFetcher {
    * @returns the map that match the query, or undefined if no map were found
    */
   async getMapBsr(query: string, useProxy = true): Promise<string | undefined> {
-    this.log(`Looking up the bsr for the map with hash ${query}...`);
+    this.log(`Looking up the bsr for map hash ${query}...`);
 
     const map = await db.beatSaverMaps.get(query);
     // The map is cached
     if (map != undefined) {
+      this.log(`Found cached bsr ${map.bsr} for map hash ${query}`);
       return map.bsr;
     }
 
@@ -42,6 +43,7 @@ class BeatSaverFetcher extends DataFetcher {
       hash: query,
       bsr: bsr,
     });
+    this.log(`Looked up bsr ${bsr} for map hash ${query}`);
     return bsr;
   }
 }

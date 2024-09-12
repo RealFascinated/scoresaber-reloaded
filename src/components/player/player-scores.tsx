@@ -15,70 +15,63 @@ import { Button } from "../ui/button";
 import Score from "./score/score";
 
 type Props = {
+  initialScoreData?: ScoreSaberPlayerScoresPage;
   player: ScoreSaberPlayer;
   sort: ScoreSort;
   page: number;
 };
 
-export default function PlayerScores({ player, sort, page }: Props) {
+export default function PlayerScores({ initialScoreData, player, sort, page }: Props) {
   const { width } = useWindowDimensions();
   const controls = useAnimation();
 
   const [currentSort, setCurrentSort] = useState(sort);
   const [currentPage, setCurrentPage] = useState(page);
-  const [previousScores, setPreviousScores] = useState<ScoreSaberPlayerScoresPage | undefined>();
 
-  const { data, isError, isLoading, refetch } = useQuery({
+  const {
+    data: scores,
+    isError,
+    isLoading,
+    refetch,
+  } = useQuery({
     queryKey: ["playerScores", player.id, currentSort, currentPage],
     queryFn: () => scoresaberFetcher.lookupPlayerScores(player.id, currentSort, currentPage),
-    staleTime: 30 * 1000, // Data will be cached for 30 seconds
+    staleTime: 30 * 1000, // Cache data for 30 seconds
+    initialData: initialScoreData,
   });
 
   const handleAnimation = useCallback(() => {
-    controls.set({
-      x: -50,
-      opacity: 0,
-    });
-    controls.start({
-      x: 0,
-      opacity: 1,
-      transition: { duration: 0.25 },
-    });
+    controls.set({ x: -50, opacity: 0 });
+    controls.start({ x: 0, opacity: 1, transition: { duration: 0.25 } });
   }, [controls]);
 
   useEffect(() => {
-    if (data == undefined) {
-      return;
+    if (scores) {
+      handleAnimation();
     }
-    setPreviousScores(data);
-    handleAnimation();
-  }, [data, handleAnimation]);
+  }, [scores, handleAnimation]);
 
   useEffect(() => {
-    // Update URL and refetch data when currentSort or currentPage changes
     const newUrl = `/player/${player.id}/${currentSort}/${currentPage}`;
     window.history.replaceState({ ...window.history.state, as: newUrl, url: newUrl }, "", newUrl);
     refetch();
   }, [currentSort, currentPage, refetch, player.id]);
 
-  /**
-   * Updates the current sort and resets the page to 1
-   */
-  function handleSortChange(newSort: ScoreSort) {
+  const handleSortChange = (newSort: ScoreSort) => {
     if (newSort !== currentSort) {
       setCurrentSort(newSort);
-      setCurrentPage(1); // Reset the page
+      setCurrentPage(1); // Reset page to 1 on sort change
     }
-  }
+  };
 
-  if (previousScores === undefined) {
-    return null;
+  if (scores === undefined) {
+    return undefined;
   }
 
   if (isError) {
     return (
       <Card className="gap-2">
-        <p>Oopsies!</p>
+        <p>Oopsies! Something went wrong.</p>
       </Card>
     );
   }
@@ -86,20 +79,20 @@ export default function PlayerScores({ player, sort, page }: Props) {
   return (
     <Card className="flex gap-4">
       <div className="flex items-center flex-row w-full gap-2 justify-center">
-        {Object.keys(ScoreSort).map((sort, index) => (
+        {Object.values(ScoreSort).map((sortOption) => (
           <Button
-            variant={sort == currentSort ? "default" : "outline"}
-            key={index}
-            onClick={() => handleSortChange(sort as ScoreSort)}
+            variant={sortOption === currentSort ? "default" : "outline"}
+            key={sortOption}
+            onClick={() => handleSortChange(sortOption)}
           >
-            {capitalizeFirstLetter(sort)}
+            {capitalizeFirstLetter(sortOption)}
           </Button>
         ))}
       </div>
 
       <motion.div animate={controls}>
         <div className="grid min-w-full grid-cols-1 divide-y divide-border">
-          {previousScores.playerScores.map((playerScore, index) => (
+          {scores.playerScores.map((playerScore, index) => (
             <Score key={index} playerScore={playerScore} />
           ))}
         </div>
@@ -108,11 +101,9 @@ export default function PlayerScores({ player, sort, page }: Props) {
       <Pagination
         mobilePagination={width < 768}
         page={currentPage}
-        totalPages={Math.ceil(previousScores.metadata.total / previousScores.metadata.itemsPerPage)}
+        totalPages={Math.ceil(scores.metadata.total / scores.metadata.itemsPerPage)}
         loadingPage={isLoading ? currentPage : undefined}
-        onPageChange={(newPage) => {
-          setCurrentPage(newPage);
-        }}
+        onPageChange={setCurrentPage}
       />
     </Card>
   );

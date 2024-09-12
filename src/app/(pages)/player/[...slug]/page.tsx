@@ -43,6 +43,7 @@ export default async function Search({ params: { slug } }: Props) {
   const sort: ScoreSort = (slug[1] as ScoreSort) || "recent"; // The sorting method
   const page = parseInt(slug[2]) || 1; // The page number
   const player = await scoresaberFetcher.lookupPlayer(id, false);
+  const scores = await scoresaberFetcher.lookupPlayerScores(id, sort, page);
 
   if (player == undefined) {
     // Invalid player id
@@ -51,7 +52,7 @@ export default async function Search({ params: { slug } }: Props) {
 
   return (
     <div className="flex flex-col h-full w-full">
-      <PlayerData initalPlayerData={player} sort={sort} page={page} />
+      <PlayerData initalPlayerData={player} initialScoreData={scores} sort={sort} page={page} />
     </div>
   );
 }
