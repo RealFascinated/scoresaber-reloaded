@@ -37,7 +37,7 @@ dependencies:
     version: 1.1.2(@types/react-dom@18.3.0)(@types/react@18.3.5)(react-dom@18.3.1)(react@18.3.1)
   '@tanstack/react-query':
     specifier: ^5.55.4
-    version: 5.55.4(react@18.3.1)
+    version: 5.56.0(react@18.3.1)
   chart.js:
     specifier: ^4.4.4
     version: 4.4.4
@@ -885,16 +885,16 @@ packages:
       tslib: 2.7.0
     dev: false
 
-  /@tanstack/query-core@5.55.4:
-    resolution: {integrity: sha512-uoRqNnRfzOH4OMIoxj8E2+Us89UIGXfau981qYJWsNMkFS1GXR4UIyzUTVGq4N7SDLHgFPpo6IOazqUV5gkMZA==}
+  /@tanstack/query-core@5.56.0:
+    resolution: {integrity: sha512-Kgp2X6CqI1dh201OHI4I1Ji8NISzG6bylxxNopsMUh2gwaDGNZ11oaGkRDveQpEsaKgvy0nFTCxIypHi80gENA==}
     dev: false
 
-  /@tanstack/react-query@5.55.4(react@18.3.1):
-    resolution: {integrity: sha512-e3uX5XkLD9oTV66/VsVpkYz3Ds/ps/Yk+V5d89xthAbtNIKKBEm4FdNb9yISFzGEGezUzVO68qmfmiSrtScvsg==}
+  /@tanstack/react-query@5.56.0(react@18.3.1):
+    resolution: {integrity: sha512-3hb6IjBF7oNolv/dKPK5Vu8pcY9dcMCCsY6+JZlZuWILiALcoqCayAhP2vYTHbKdFmERK/3Ch/uOVJ9t9NRkAA==}
     peerDependencies:
       react: ^18 || ^19
     dependencies:
-      '@tanstack/query-core': 5.55.4
+      '@tanstack/query-core': 5.56.0
       react: 18.3.1
     dev: false
 
