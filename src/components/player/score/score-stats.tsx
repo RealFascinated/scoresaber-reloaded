@@ -13,7 +13,7 @@ const stats = [
       if (pp === 0) {
         return undefined;
       }
-      return <StatValue value={`${score.pp.toFixed(2)}pp`} />;
+      return `${score.pp.toFixed(2)}pp`;
     },
   },
   {
@@ -21,14 +21,14 @@ const stats = [
     create: (playerScore: ScoreSaberPlayerScore) => {
       const { score, leaderboard } = playerScore;
       const acc = (score.baseScore / leaderboard.maxScore) * 100;
-      return <StatValue value={`${acc.toFixed(2)}%`} />;
+      return `${acc.toFixed(2)}%`;
     },
   },
   {
     name: "Score",
     create: (playerScore: ScoreSaberPlayerScore) => {
       const { score } = playerScore;
-      return <StatValue value={`${formatNumberWithCommas(score.baseScore)}`} />;
+      return `${formatNumberWithCommas(score.baseScore)}`;
     },
   },
   {
@@ -38,14 +38,10 @@ const stats = [
       const fullCombo = score.missedNotes === 0;
 
       return (
-        <StatValue
-          value={
-            <>
-              <p>{fullCombo ? "FC" : formatNumberWithCommas(score.missedNotes)}</p>
-              <XMarkIcon className={clsx("w-5 h-5", fullCombo ? "hidden" : "text-red-400")} />
-            </>
-          }
-        />
+        <>
+          <p>{fullCombo ? "FC" : formatNumberWithCommas(score.missedNotes)}</p>
+          <XMarkIcon className={clsx("w-5 h-5", fullCombo ? "hidden" : "text-red-400")} />
+        </>
       );
     },
   },
@@ -58,31 +54,31 @@ type Props = {
 export default function ScoreStats({ playerScore }: Props) {
   const itemsPerRow = 3;
   const totalStats = stats.length;
-  const remainingItems = totalStats % itemsPerRow;
-  const emptySpaces = remainingItems > 0 ? itemsPerRow - remainingItems : 0;
+  const numRows = Math.ceil(totalStats / itemsPerRow);
 
   return (
     <div className="flex flex-wrap gap-2 pl-0 lg:pl-2">
-      {/* Render all but the last row of stats normally */}
-      {stats.slice(0, totalStats - remainingItems).map((stat) => (
-        <div key={stat.name} className="flex-1 min-w-[30%]">
-          {stat.create(playerScore)}
-        </div>
-      ))}
+      {Array.from({ length: numRows }).map((_, rowIndex) => {
+        const startIndex = rowIndex * itemsPerRow;
+        const endIndex = startIndex + itemsPerRow;
+        const rowStats = stats.slice(startIndex, endIndex);
+        const emptySpaces = itemsPerRow - rowStats.length;
 
-      {/* Handle the last row - align right and push empty spaces to the left */}
-      <div className="flex justify-end w-full gap-2">
-        {Array(emptySpaces)
-          .fill(null)
-          .map((_, index) => (
-            <div key={`empty-${index}`} className="flex-1 min-w-[30%]"></div>
-          ))}
-        {stats.slice(totalStats - remainingItems).map((stat) => (
-          <div key={stat.name} className="flex-1 min-w-[30%]">
-            {stat.create(playerScore)}
+        return (
+          <div key={rowIndex} className="flex w-full gap-2">
+            {rowIndex === numRows - 1 &&
+              emptySpaces > 0 &&
+              Array(emptySpaces)
+                .fill(null)
+                .map((_, index) => <div key={`empty-${index}`} className="flex-1 min-w-[30%]"></div>)}
+            {rowStats.map((stat) => (
+              <div key={stat.name} className="flex-1 min-w-[30%]">
+                <StatValue value={stat.create(playerScore)} />
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+        );
+      })}
     </div>
   );
 }
