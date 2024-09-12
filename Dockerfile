@@ -1,4 +1,4 @@
-FROM fascinated/docker-images:node-pnpm-latest AS base
+FROM fascinated/docker-images:nodejs_20_with_pnpm AS base
 
 # Install depends
 FROM base AS deps
