@@ -89,7 +89,9 @@ export default function Score({ playerScore }: Props) {
         </div>
         <div className="flex">
           <div className="overflow-y-clip">
-            <p className="text-pp">{leaderboard.songName}</p>
+            <p className="text-pp">
+              {leaderboard.songName} {leaderboard.songSubName}
+            </p>
             <p className="text-sm text-gray-400">{leaderboard.songAuthorName}</p>
             <p className="text-sm">{leaderboard.levelAuthorName}</p>
           </div>
