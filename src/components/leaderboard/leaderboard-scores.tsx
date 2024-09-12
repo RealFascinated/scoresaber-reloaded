@@ -47,7 +47,7 @@ export default function LeaderboardScores({ leaderboard }: Props) {
   }
 
   return (
-    <motion.div initial={{ opacity: 0, y: -50 }} animate={{ opacity: 1, y: 0 }}>
+    <motion.div initial={{ opacity: 0, y: -50 }} exit={{ opacity: 0, y: -50 }} animate={{ opacity: 1, y: 0 }}>
       <Card className="flex gap-2">
         <div className="text-center">
           {isError && <p>Oopsies! Something went wrong.</p>}

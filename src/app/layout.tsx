@@ -1,4 +1,5 @@
 import { PreloadResources } from "@/components/preload-resources";
+import { AnimatePresence } from "framer-motion";
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import BackgroundImage from "../components/background-image";
@@ -67,10 +68,12 @@ export default function RootLayout({
           <TooltipProvider>
             <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
               <QueryProvider>
-                <main className="z-[9999] m-auto flex h-screen flex-col items-center md:max-w-[1200px]">
-                  <NavBar />
-                  {children}
-                </main>
+                <AnimatePresence>
+                  <main className="z-[9999] m-auto flex h-screen flex-col items-center md:max-w-[1200px]">
+                    <NavBar />
+                    {children}
+                  </main>
+                </AnimatePresence>
               </QueryProvider>
             </ThemeProvider>
           </TooltipProvider>

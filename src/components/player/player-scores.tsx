@@ -8,7 +8,7 @@ import { capitalizeFirstLetter } from "@/common/string-utils";
 import useWindowDimensions from "@/hooks/use-window-dimensions";
 import { ClockIcon, TrophyIcon } from "@heroicons/react/24/solid";
 import { useQuery } from "@tanstack/react-query";
-import { motion, useAnimation } from "framer-motion";
+import { motion, useAnimation, Variants } from "framer-motion";
 import { useCallback, useEffect, useState } from "react";
 import Card from "../card";
 import Pagination from "../input/pagination";
@@ -35,11 +35,48 @@ type Props = {
   page: number;
 };
 
+const containerVariants: Variants = {
+  hiddenRight: {
+    opacity: 0,
+    x: 50,
+  },
+  hiddenLeft: {
+    opacity: 0,
+    x: -50,
+  },
+  visible: {
+    opacity: 1,
+    x: 0,
+    transition: {
+      staggerChildren: 0.05,
+    },
+  },
+};
+
+const childVariants: Variants = {
+  hiddenRight: {
+    opacity: 0,
+    x: 50,
+  },
+  hiddenLeft: {
+    opacity: 0,
+    x: -50,
+  },
+  visible: {
+    opacity: 1,
+    x: 0,
+    transition: {
+      ease: "anticipate",
+    },
+  },
+};
+
 export default function PlayerScores({ initialScoreData, player, sort, page }: Props) {
   const { width } = useWindowDimensions();
   const controls = useAnimation();
 
   const [currentSort, setCurrentSort] = useState(sort);
+  const [previousPage, setPreviousPage] = useState(page);
   const [currentPage, setCurrentPage] = useState(page);
   const [currentScores, setCurrentScores] = useState<ScoreSaberPlayerScoresPage | undefined>(initialScoreData);
 
@@ -54,22 +91,17 @@ export default function PlayerScores({ initialScoreData, player, sort, page }: P
     staleTime: 30 * 1000, // Cache data for 30 seconds
   });
 
-  const handleAnimation = useCallback(() => {
-    controls.set({ x: -50, opacity: 0 });
-    controls.start({ x: 0, opacity: 1, transition: { duration: 0.25 } });
-  }, [controls]);
+  const handleScoreLoad = useCallback(async () => {
+    await controls.start(previousPage >= currentPage ? "hiddenRight" : "hiddenLeft");
+    setCurrentScores(scores);
+    await controls.start("visible");
+  }, [scores, controls]);
 
   useEffect(() => {
     if (scores) {
-      setCurrentScores(scores);
+      handleScoreLoad();
     }
   }, [scores]);
-
-  useEffect(() => {
-    if (scores) {
-      handleAnimation();
-    }
-  }, [scores, handleAnimation]);
 
   useEffect(() => {
     const newUrl = `/player/${player.id}/${currentSort}/${currentPage}`;
@@ -89,7 +121,7 @@ export default function PlayerScores({ initialScoreData, player, sort, page }: P
   }
 
   return (
-    <Card className="flex gap-2">
+    <Card className="flex gap-4">
       <div className="flex items-center flex-row w-full gap-2 justify-center">
         {Object.values(scoreSort).map((sortOption, index) => (
           <Button
@@ -110,12 +142,17 @@ export default function PlayerScores({ initialScoreData, player, sort, page }: P
         {currentScores.playerScores.length === 0 && <p>No scores found. Invalid Page?</p>}
       </div>
 
-      <motion.div animate={controls}>
-        <div className="grid min-w-full grid-cols-1 divide-y divide-border">
-          {currentScores.playerScores.map((playerScore, index) => (
-            <Score key={index} playerScore={playerScore} />
-          ))}
-        </div>
+      <motion.div
+        initial="hidden"
+        animate={controls}
+        variants={containerVariants}
+        className="grid min-w-full grid-cols-1 divide-y divide-border"
+      >
+        {currentScores.playerScores.map((playerScore, index) => (
+          <motion.div key={index} variants={childVariants}>
+            <Score playerScore={playerScore} />
+          </motion.div>
+        ))}
       </motion.div>
 
       <Pagination
@@ -123,7 +160,10 @@ export default function PlayerScores({ initialScoreData, player, sort, page }: P
         page={currentPage}
         totalPages={Math.ceil(currentScores.metadata.total / currentScores.metadata.itemsPerPage)}
         loadingPage={isLoading ? currentPage : undefined}
-        onPageChange={setCurrentPage}
+        onPageChange={(page) => {
+          setPreviousPage(currentPage);
+          setCurrentPage(page);
+        }}
       />
     </Card>
   );
