@@ -1,10 +1,9 @@
 import ScoreSaberPlayerScore from "@/common/data-fetcher/types/scoresaber/scoresaber-player-score";
 import BeatSaverMap from "@/common/database/types/beatsaver-map";
 import { getDifficultyFromScoreSaberDifficulty } from "@/common/scoresaber-utils";
-import { songDifficultyToColor } from "@/common/song-utils";
 import FallbackLink from "@/components/fallback-link";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { StarIcon } from "@radix-ui/react-icons";
+import Tooltip from "@/components/tooltip";
+import { StarIcon } from "@heroicons/react/24/solid";
 import clsx from "clsx";
 import Image from "next/image";
 
@@ -22,14 +21,21 @@ export default function ScoreSongInfo({ playerScore, beatSaverMap }: Props) {
   return (
     <div className="flex gap-3">
       <div className="relative flex justify-center  h-[64px]">
-        <Tooltip>
-          <TooltipTrigger
-            asChild
-            className="absolute w-full h-[20px] bottom-0 right-0 rounded-sm flex justify-center items-center text-xs"
-            style={{
-              backgroundColor: songDifficultyToColor(diff) + "f0", // Transparency value (in hex 0-255)
-            }}
-          >
+        <Tooltip
+          display={
+            <>
+              <p>
+                Difficulty: <span className="font-bold">{diff}</span>
+              </p>
+              {leaderboard.stars > 0 && (
+                <p>
+                  Stars: <span className="font-bold">{leaderboard.stars}</span>
+                </p>
+              )}
+            </>
+          }
+        >
+          <div className="absolute w-full h-[20px] bottom-0 right-0 rounded-sm flex justify-center items-center text-xs">
             {leaderboard.stars > 0 ? (
               <div className="flex gap-1 items-center justify-center">
                 <p>{leaderboard.stars}</p>
@@ -38,17 +44,7 @@ export default function ScoreSongInfo({ playerScore, beatSaverMap }: Props) {
             ) : (
               <p>{diff}</p>
             )}
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>
-              Difficulty: <span className="font-bold">{diff}</span>
-            </p>
-            {leaderboard.stars > 0 && (
-              <p>
-                Stars: <span className="font-bold">{leaderboard.stars}</span>
-              </p>
-            )}
-          </TooltipContent>
+          </div>
         </Tooltip>
         <Image
           unoptimized

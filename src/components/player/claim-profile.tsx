@@ -5,8 +5,8 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { setPlayerIdCookie } from "../../common/website-utils";
 import useDatabase from "../../hooks/use-database";
 import { useToast } from "../../hooks/use-toast";
+import Tooltip from "../tooltip";
 import { Button } from "../ui/button";
-import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 type Props = {
   /**
@@ -39,15 +39,10 @@ export default function ClaimProfile({ playerId }: Props) {
   }
 
   return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Button variant={"outline"} onClick={claimProfile}>
-          <CheckIcon className="size-6 text-green-500" />
-        </Button>
-      </TooltipTrigger>
-      <TooltipContent>
-        <p>Set as your profile</p>
-      </TooltipContent>
+    <Tooltip display={<p>Set as your profile</p>}>
+      <Button variant={"outline"} onClick={claimProfile}>
+        <CheckIcon className="size-6 text-green-500" />
+      </Button>
     </Tooltip>
   );
 }
