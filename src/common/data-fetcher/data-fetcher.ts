@@ -16,7 +16,7 @@ export default class DataFetcher {
    * @param data the data to log
    */
   public log(data: unknown) {
-    console.log(`[${this.name}]: ${data}`);
+    console.debug(`[${this.name}]: ${data}`);
   }
 
   /**

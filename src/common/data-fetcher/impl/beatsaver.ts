@@ -1,6 +1,7 @@
+import BeatSaverMap from "@/common/database/types/beatsaver-map";
 import { db } from "../../database/database";
 import DataFetcher from "../data-fetcher";
-import { BeatSaverMap } from "../types/beatsaver/beatsaver-map";
+import { BeatSaverMap as BSMap } from "../types/beatsaver/beatsaver-map";
 
 const API_BASE = "https://api.beatsaver.com";
 const LOOKUP_MAP_BY_HASH_ENDPOINT = `${API_BASE}/maps/hash/:query`;
@@ -17,17 +18,18 @@ class BeatSaverFetcher extends DataFetcher {
    * @param useProxy whether to use the proxy or not
    * @returns the map that match the query, or undefined if no map were found
    */
-  async getMapBsr(query: string, useProxy = true): Promise<string | undefined> {
-    this.log(`Looking up the bsr for map hash ${query}...`);
+  async lookupMap(query: string, useProxy = true): Promise<BeatSaverMap | undefined> {
+    const before = performance.now();
+    this.log(`Looking up map "${query}"...`);
 
-    const map = await db.beatSaverMaps.get(query);
+    let map = await db.beatSaverMaps.get(query);
     // The map is cached
     if (map != undefined) {
-      this.log(`Found cached bsr ${map.bsr} for map hash ${query}`);
-      return map.bsr;
+      this.log(`Found cached map "${query}" in ${(performance.now() - before).toFixed(2)}ms`);
+      return map;
     }
 
-    const response = await this.fetch<BeatSaverMap>(useProxy, LOOKUP_MAP_BY_HASH_ENDPOINT.replace(":query", query));
+    const response = await this.fetch<BSMap>(useProxy, LOOKUP_MAP_BY_HASH_ENDPOINT.replace(":query", query));
     // Map not found
     if (response == undefined) {
       return undefined;
@@ -42,9 +44,11 @@ class BeatSaverFetcher extends DataFetcher {
     await db.beatSaverMaps.add({
       hash: query,
       bsr: bsr,
+      fullData: response,
     });
-    this.log(`Looked up bsr ${bsr} for map hash ${query}`);
-    return bsr;
+    map = await db.beatSaverMaps.get(query);
+    this.log(`Found map "${query}" in ${(performance.now() - before).toFixed(2)}ms`);
+    return map;
   }
 }
 

@@ -22,6 +22,7 @@ class ScoreSaberFetcher extends DataFetcher {
    * @returns the players that match the query, or undefined if no players were found
    */
   async searchPlayers(query: string, useProxy = true): Promise<ScoreSaberPlayerSearch | undefined> {
+    const before = performance.now();
     this.log(`Searching for players matching "${query}"...`);
     const results = await this.fetch<ScoreSaberPlayerSearch>(
       useProxy,
@@ -34,6 +35,7 @@ class ScoreSaberFetcher extends DataFetcher {
       return undefined;
     }
     results.players.sort((a, b) => a.rank - b.rank);
+    this.log(`Found ${results.players.length} players in ${(performance.now() - before).toFixed(2)}ms`);
     return results;
   }
 
@@ -45,8 +47,14 @@ class ScoreSaberFetcher extends DataFetcher {
    * @returns the player that matches the ID, or undefined
    */
   async lookupPlayer(playerId: string, useProxy = true): Promise<ScoreSaberPlayer | undefined> {
+    const before = performance.now();
     this.log(`Looking up player "${playerId}"...`);
-    return await this.fetch<ScoreSaberPlayer>(useProxy, LOOKUP_PLAYER_ENDPOINT.replace(":id", playerId));
+    const response = await this.fetch<ScoreSaberPlayer>(useProxy, LOOKUP_PLAYER_ENDPOINT.replace(":id", playerId));
+    if (response === undefined) {
+      return undefined;
+    }
+    this.log(`Found player "${playerId}" in ${(performance.now() - before).toFixed(2)}ms`);
+    return response;
   }
 
   /**
@@ -64,14 +72,20 @@ class ScoreSaberFetcher extends DataFetcher {
     page: number,
     useProxy = true
   ): Promise<ScoreSaberPlayerScoresPage | undefined> {
+    const before = performance.now();
     this.log(`Looking up scores for player "${playerId}", sort "${sort}", page "${page}"...`);
-    return await this.fetch<ScoreSaberPlayerScoresPage>(
+    const response = await this.fetch<ScoreSaberPlayerScoresPage>(
       useProxy,
       LOOKUP_PLAYER_SCORES_ENDPOINT.replace(":id", playerId)
         .replace(":limit", 8 + "")
         .replace(":sort", sort)
         .replace(":page", page.toString())
     );
+    if (response === undefined) {
+      return undefined;
+    }
+    this.log(`Found scores for player "${playerId}" in ${(performance.now() - before).toFixed(2)}ms`);
+    return response;
   }
 }
 

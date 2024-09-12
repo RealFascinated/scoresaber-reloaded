@@ -3,15 +3,18 @@
 import { copyToClipboard } from "@/common/browser-utils";
 import { beatsaverFetcher } from "@/common/data-fetcher/impl/beatsaver";
 import ScoreSaberPlayerScore from "@/common/data-fetcher/types/scoresaber/scoresaber-player-score";
+import BeatSaverMap from "@/common/database/types/beatsaver-map";
 import { formatNumberWithCommas } from "@/common/number-utils";
 import { getDifficultyFromScoreSaberDifficulty } from "@/common/scoresaber-utils";
 import { songDifficultyToColor } from "@/common/song-utils";
 import { timeAgo } from "@/common/time-utils";
 import { songNameToYouTubeLink } from "@/common/youtube-utils";
+import FallbackLink from "@/components/fallback-link";
 import YouTubeLogo from "@/components/logos/youtube-logo";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useToast } from "@/hooks/use-toast";
 import { GlobeAmericasIcon, StarIcon } from "@heroicons/react/24/solid";
+import clsx from "clsx";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import BeatSaverLogo from "../../logos/beatsaver-logo";
@@ -27,16 +30,18 @@ type Props = {
 export default function Score({ playerScore }: Props) {
   const { score, leaderboard } = playerScore;
   const { toast } = useToast();
-  const [bsr, setBsr] = useState<string | undefined>();
+  const [beatSaverMap, setBeatSaverMap] = useState<BeatSaverMap | undefined>();
 
   useEffect(() => {
     (async () => {
-      const bsrFound = await beatsaverFetcher.getMapBsr(leaderboard.songHash);
-      setBsr(bsrFound);
+      const beatSaverMap = await beatsaverFetcher.lookupMap(leaderboard.songHash);
+      setBeatSaverMap(beatSaverMap);
     })();
   }, [playerScore, leaderboard.songHash]);
 
   const diff = getDifficultyFromScoreSaberDifficulty(leaderboard.difficulty.difficulty);
+  const mappersProfile =
+    beatSaverMap != undefined ? `https://beatsaver.com/profile/${beatSaverMap?.fullData.uploader.id}` : undefined;
 
   return (
     <div className="grid gap-2 md:gap-0 pb-2 pt-2 first:pt-0 last:pb-0 grid-cols-[20px 1fr_1fr] md:grid-cols-[0.85fr_5fr_1fr_1.2fr]">
@@ -93,21 +98,25 @@ export default function Score({ playerScore }: Props) {
               {leaderboard.songName} {leaderboard.songSubName}
             </p>
             <p className="text-sm text-gray-400">{leaderboard.songAuthorName}</p>
-            <p className="text-sm">{leaderboard.levelAuthorName}</p>
+            <FallbackLink href={mappersProfile}>
+              <p className={clsx("text-sm", mappersProfile && "hover:brightness-75 transform-gpu transition-all")}>
+                {leaderboard.levelAuthorName}
+              </p>
+            </FallbackLink>
           </div>
         </div>
       </div>
       <div className="hidden md:flex flex-row flex-wrap gap-1 justify-end">
-        {bsr != undefined && (
+        {beatSaverMap != undefined && (
           <>
             {/* Copy BSR */}
             <ScoreButton
               onClick={() => {
                 toast({
                   title: "Copied!",
-                  description: `Copied "!bsr ${bsr}" to your clipboard!`,
+                  description: `Copied "!bsr ${beatSaverMap}" to your clipboard!`,
                 });
-                copyToClipboard(`!bsr ${bsr}`);
+                copyToClipboard(`!bsr ${beatSaverMap.bsr}`);
               }}
               tooltip={<p>Click to copy the bsr code</p>}
             >
@@ -117,7 +126,7 @@ export default function Score({ playerScore }: Props) {
             {/* Open map in BeatSaver */}
             <ScoreButton
               onClick={() => {
-                window.open(`https://beatsaver.com/maps/${bsr}`, "_blank");
+                window.open(`https://beatsaver.com/maps/${beatSaverMap.bsr}`, "_blank");
               }}
               tooltip={<p>Click to open the map</p>}
             >
