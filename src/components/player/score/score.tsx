@@ -48,7 +48,7 @@ export default function Score({ playerScore }: Props) {
         <p className="text-sm">{timeAgo(new Date(score.timeSet))}</p>
       </div>
       <div className="flex gap-3">
-        <div className="relative flex justify-center">
+        <div className="relative flex justify-center  h-[64px]">
           <Tooltip>
             <TooltipTrigger
               asChild
@@ -83,14 +83,14 @@ export default function Score({ playerScore }: Props) {
             width={64}
             height={64}
             alt="Song Artwork"
-            className="rounded-md"
+            className="rounded-md min-w-[64px]"
           />
         </div>
         <div className="flex">
-          <div className="flex flex-col">
-            <p className="text-pp text-ellipsis">{leaderboard.songName}</p>
-            <p className="text-sm text-gray-400 text-ellipsis">{leaderboard.songAuthorName}</p>
-            <p className="text-sm text-ellipsis">{leaderboard.levelAuthorName}</p>
+          <div className="overflow-y-clip">
+            <p className="text-pp">{leaderboard.songName}</p>
+            <p className="text-sm text-gray-400">{leaderboard.songAuthorName}</p>
+            <p className="text-sm">{leaderboard.levelAuthorName}</p>
           </div>
         </div>
       </div>
