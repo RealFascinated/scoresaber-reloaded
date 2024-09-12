@@ -97,9 +97,12 @@ export default function Pagination({ mobilePagination, page, totalPages, loading
           <PaginationItemWrapper key="start" isLoadingPage={isLoading}>
             <PaginationLink onClick={() => handlePageChange(1)}>1</PaginationLink>
           </PaginationItemWrapper>
-          <PaginationItemWrapper key="ellipsis-start" isLoadingPage={isLoading}>
-            <PaginationEllipsis />
-          </PaginationItemWrapper>
+          {/* Only show ellipsis if more than 2 pages from the start */}
+          {startPage > 2 && (
+            <PaginationItemWrapper key="ellipsis-start" isLoadingPage={isLoading}>
+              <PaginationEllipsis />
+            </PaginationItemWrapper>
+          )}
         </>
       );
     }
@@ -129,7 +132,7 @@ export default function Pagination({ mobilePagination, page, totalPages, loading
         {renderPageNumbers()}
 
         {/* For desktop, show ellipsis and link to the last page */}
-        {!mobilePagination && currentPage < totalPages && (
+        {!mobilePagination && currentPage < totalPages && totalPages - currentPage > 2 && (
           <>
             <PaginationItemWrapper key="ellipsis-end" isLoadingPage={isLoading}>
               <PaginationEllipsis className="cursor-default" />
