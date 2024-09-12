@@ -1,5 +1,6 @@
 import ScoreSaberScore from "@/common/data-fetcher/types/scoresaber/scoresaber-score";
 import Image from "next/image";
+import Link from "next/link";
 
 type Props = {
   score: ScoreSaberScore;
@@ -19,9 +20,13 @@ export default function LeaderboardPlayer({ score }: Props) {
         className="rounded-md min-w-[48px]"
         priority
       />
-      <div>
+      <Link
+        href={`/player/${player.id}`}
+        target="_blank"
+        className="h-fit hover:brightness-75 transition-all transform-gpu"
+      >
         <p>{player.name}</p>
-      </div>
+      </Link>
     </div>
   );
 }
