@@ -32,10 +32,16 @@ const scoreAnimation: Variants = {
   hiddenRight: {
     opacity: 0,
     x: 50,
+    transition: {
+      delay: 0,
+    },
   },
   hiddenLeft: {
     opacity: 0,
     x: -50,
+    transition: {
+      delay: 0,
+    },
   },
   visible: {
     opacity: 1,
