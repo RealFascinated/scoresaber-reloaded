@@ -25,7 +25,7 @@ export default function PlayerScores({ player, sort, page }: Props) {
   const [currentPage, setCurrentPage] = useState(page);
   const [previousScores, setPreviousScores] = useState<ScoreSaberPlayerScoresPage | undefined>();
 
-  const { data, isError, refetch } = useQuery({
+  const { data, isError, isLoading, refetch } = useQuery({
     queryKey: ["playerScores", player.id, currentSort, currentPage],
     queryFn: () => scoresaberFetcher.lookupPlayerScores(player.id, currentSort, currentPage),
   });
@@ -89,6 +89,7 @@ export default function PlayerScores({ player, sort, page }: Props) {
         mobilePagination={width < 768}
         page={currentPage}
         totalPages={Math.ceil(previousScores.metadata.total / previousScores.metadata.itemsPerPage)}
+        loadingPage={isLoading ? currentPage : undefined}
         onPageChange={(newPage) => {
           setCurrentPage(newPage);
         }}

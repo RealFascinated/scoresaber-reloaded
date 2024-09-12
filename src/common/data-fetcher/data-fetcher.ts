@@ -28,6 +28,7 @@ export default class DataFetcher {
    */
   private buildRequestUrl(useProxy: boolean, url: string): string {
     return (useProxy ? "https://proxy.fascinated.cc/" : "") + url;
+    // return (useProxy ? config.siteUrl + "/api/proxy?url=" : "") + url;
   }
 
   /**
