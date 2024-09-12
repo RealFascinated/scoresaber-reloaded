@@ -13,10 +13,10 @@ export default function LeaderboardPlayer({ score }: Props) {
       <Image
         unoptimized
         src={player.profilePicture}
-        width={32}
-        height={32}
+        width={48}
+        height={48}
         alt="Song Artwork"
-        className="rounded-md min-w-[32px]"
+        className="rounded-md min-w-[48px]"
         priority
       />
       <div>
