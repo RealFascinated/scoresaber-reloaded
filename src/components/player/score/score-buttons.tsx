@@ -19,7 +19,7 @@ export default function ScoreButtons({ playerScore, beatSaverMap }: Props) {
   const { toast } = useToast();
 
   return (
-    <div className="hidden lg:flex flex-row flex-wrap gap-1 justify-end">
+    <div className="flex flex-row justify-center flex-wrap gap-1 lg:justify-end">
       {beatSaverMap != undefined && (
         <>
           {/* Copy BSR */}
