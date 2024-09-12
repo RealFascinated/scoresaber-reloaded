@@ -89,7 +89,7 @@ export default function PlayerScores({ initialScoreData, player, sort, page }: P
   }
 
   return (
-    <Card className="flex gap-4">
+    <Card className="flex gap-2">
       <div className="flex items-center flex-row w-full gap-2 justify-center">
         {Object.values(scoreSort).map((sortOption, index) => (
           <Button

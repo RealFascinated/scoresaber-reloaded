@@ -4,7 +4,12 @@ import StatValue from "@/components/stat-value";
 import { XMarkIcon } from "@heroicons/react/24/solid";
 import clsx from "clsx";
 
-const stats = [
+type Badge = {
+  name: string;
+  create: (playerScore: ScoreSaberPlayerScore) => string | React.ReactNode | undefined;
+};
+
+const badges: Badge[] = [
   {
     name: "PP",
     create: (playerScore: ScoreSaberPlayerScore) => {
@@ -32,6 +37,14 @@ const stats = [
     },
   },
   {
+    name: "",
+    create: () => undefined,
+  },
+  {
+    name: "",
+    create: () => undefined,
+  },
+  {
     name: "Full Combo",
     create: (playerScore: ScoreSaberPlayerScore) => {
       const { score } = playerScore;
@@ -39,7 +52,7 @@ const stats = [
 
       return (
         <>
-          <p>{fullCombo ? "FC" : formatNumberWithCommas(score.missedNotes)}</p>
+          <p>{fullCombo ? <span className="text-green-400">FC</span> : formatNumberWithCommas(score.missedNotes)}</p>
           <XMarkIcon className={clsx("w-5 h-5", fullCombo ? "hidden" : "text-red-400")} />
         </>
       );
@@ -52,32 +65,15 @@ type Props = {
 };
 
 export default function ScoreStats({ playerScore }: Props) {
-  const itemsPerRow = 3;
-  const totalStats = stats.length;
-  const numRows = Math.ceil(totalStats / itemsPerRow);
-
   return (
-    <div className="flex flex-wrap gap-2 pl-0 lg:pl-2">
-      {Array.from({ length: numRows }).map((_, rowIndex) => {
-        const startIndex = rowIndex * itemsPerRow;
-        const endIndex = startIndex + itemsPerRow;
-        const rowStats = stats.slice(startIndex, endIndex);
-        const emptySpaces = itemsPerRow - rowStats.length;
+    <div className={`grid grid-cols-3 grid-rows-2 gap-1 ml-0 lg:ml-2`}>
+      {badges.map((badge, index) => {
+        const toRender = badge.create(playerScore);
+        if (toRender === undefined) {
+          return <div key={index} />;
+        }
 
-        return (
-          <div key={rowIndex} className="flex w-full gap-2">
-            {rowIndex === numRows - 1 &&
-              emptySpaces > 0 &&
-              Array(emptySpaces)
-                .fill(null)
-                .map((_, index) => <div key={`empty-${index}`} className="flex-1 min-w-[30%]"></div>)}
-            {rowStats.map((stat) => (
-              <div key={stat.name} className="flex-1 min-w-[30%]">
-                {stat.create(playerScore) && <StatValue value={stat.create(playerScore)} />}
-              </div>
-            ))}
-          </div>
-        );
+        return <StatValue key={index} value={toRender} />;
       })}
     </div>
   );

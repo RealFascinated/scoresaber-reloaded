@@ -1,6 +1,7 @@
 import ScoreSaberPlayerScore from "@/common/data-fetcher/types/scoresaber/scoresaber-player-score";
 import BeatSaverMap from "@/common/database/types/beatsaver-map";
 import { getDifficultyFromScoreSaberDifficulty } from "@/common/scoresaber-utils";
+import { songDifficultyToColor } from "@/common/song-utils";
 import FallbackLink from "@/components/fallback-link";
 import Tooltip from "@/components/tooltip";
 import { StarIcon } from "@heroicons/react/24/solid";
@@ -19,8 +20,8 @@ export default function ScoreSongInfo({ playerScore, beatSaverMap }: Props) {
     beatSaverMap != undefined ? `https://beatsaver.com/profile/${beatSaverMap?.fullData.uploader.id}` : undefined;
 
   return (
-    <div className="flex gap-3">
-      <div className="relative flex justify-center  h-[64px]">
+    <div className="flex gap-3 items-center">
+      <div className="relative flex justify-center h-[64px]">
         <Tooltip
           display={
             <>
@@ -35,7 +36,12 @@ export default function ScoreSongInfo({ playerScore, beatSaverMap }: Props) {
             </>
           }
         >
-          <div className="absolute w-full h-[20px] bottom-0 right-0 rounded-sm flex justify-center items-center text-xs">
+          <div
+            className="absolute w-full h-[20px] bottom-0 right-0 rounded-sm flex justify-center items-center text-xs"
+            style={{
+              backgroundColor: songDifficultyToColor(diff) + "f0", // Transparency value (in hex 0-255)
+            }}
+          >
             {leaderboard.stars > 0 ? (
               <div className="flex gap-1 items-center justify-center">
                 <p>{leaderboard.stars}</p>
