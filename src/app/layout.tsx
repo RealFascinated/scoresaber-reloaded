@@ -1,3 +1,4 @@
+import { PreloadResources } from "@/components/preload-resources";
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import BackgroundImage from "../components/background-image";
@@ -62,6 +63,7 @@ export default function RootLayout({
         <DatabaseLoader>
           <Toaster />
           <BackgroundImage />
+          <PreloadResources />
           <TooltipProvider>
             <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
               <QueryProvider>
