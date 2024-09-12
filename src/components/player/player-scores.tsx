@@ -27,6 +27,7 @@ export default function PlayerScores({ initialScoreData, player, sort, page }: P
 
   const [currentSort, setCurrentSort] = useState(sort);
   const [currentPage, setCurrentPage] = useState(page);
+  const [currentScores, setCurrentScores] = useState<ScoreSaberPlayerScoresPage | undefined>(initialScoreData);
 
   const {
     data: scores,
@@ -37,13 +38,18 @@ export default function PlayerScores({ initialScoreData, player, sort, page }: P
     queryKey: ["playerScores", player.id, currentSort, currentPage],
     queryFn: () => scoresaberFetcher.lookupPlayerScores(player.id, currentSort, currentPage),
     staleTime: 30 * 1000, // Cache data for 30 seconds
-    initialData: initialScoreData,
   });
 
   const handleAnimation = useCallback(() => {
     controls.set({ x: -50, opacity: 0 });
     controls.start({ x: 0, opacity: 1, transition: { duration: 0.25 } });
   }, [controls]);
+
+  useEffect(() => {
+    if (scores) {
+      setCurrentScores(scores);
+    }
+  }, [scores]);
 
   useEffect(() => {
     if (scores) {
@@ -64,16 +70,8 @@ export default function PlayerScores({ initialScoreData, player, sort, page }: P
     }
   };
 
-  if (scores === undefined) {
+  if (currentScores === undefined) {
     return undefined;
-  }
-
-  if (isError) {
-    return (
-      <Card className="gap-2">
-        <p>Oopsies! Something went wrong.</p>
-      </Card>
-    );
   }
 
   return (
@@ -90,9 +88,14 @@ export default function PlayerScores({ initialScoreData, player, sort, page }: P
         ))}
       </div>
 
+      <div className="text-center">
+        {isError && <p>Oopsies! Something went wrong.</p>}
+        {currentScores.playerScores.length === 0 && <p>No scores found. Invalid Page?</p>}
+      </div>
+
       <motion.div animate={controls}>
         <div className="grid min-w-full grid-cols-1 divide-y divide-border">
-          {scores.playerScores.map((playerScore, index) => (
+          {currentScores.playerScores.map((playerScore, index) => (
             <Score key={index} playerScore={playerScore} />
           ))}
         </div>
@@ -101,7 +104,7 @@ export default function PlayerScores({ initialScoreData, player, sort, page }: P
       <Pagination
         mobilePagination={width < 768}
         page={currentPage}
-        totalPages={Math.ceil(scores.metadata.total / scores.metadata.itemsPerPage)}
+        totalPages={Math.ceil(currentScores.metadata.total / currentScores.metadata.itemsPerPage)}
         loadingPage={isLoading ? currentPage : undefined}
         onPageChange={setCurrentPage}
       />

@@ -52,7 +52,7 @@ export default async function Search({ params: { slug } }: Props) {
 
   return (
     <div className="flex flex-col h-full w-full">
-      <PlayerData initalPlayerData={player} initialScoreData={scores} sort={sort} page={page} />
+      <PlayerData initialPlayerData={player} initialScoreData={scores} sort={sort} page={page} />
     </div>
   );
 }

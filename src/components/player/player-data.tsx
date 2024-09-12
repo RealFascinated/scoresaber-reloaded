@@ -12,13 +12,13 @@ import PlayerScores from "./player-scores";
 const REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes
 
 type Props = {
-  initalPlayerData: ScoreSaberPlayer;
+  initialPlayerData: ScoreSaberPlayer;
   initialScoreData?: ScoreSaberPlayerScoresPage;
   sort: ScoreSort;
   page: number;
 };
 
-export default function PlayerData({ initalPlayerData, initialScoreData, sort, page }: Props) {
+export default function PlayerData({ initialPlayerData: initalPlayerData, initialScoreData, sort, page }: Props) {
   let player = initalPlayerData;
   const { data, isLoading, isError } = useQuery({
     queryKey: ["player", player.id],
