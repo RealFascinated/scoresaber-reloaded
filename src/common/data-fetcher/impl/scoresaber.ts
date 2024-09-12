@@ -35,7 +35,7 @@ class ScoreSaberFetcher extends DataFetcher {
       return undefined;
     }
     results.players.sort((a, b) => a.rank - b.rank);
-    this.log(`Found ${results.players.length} players in ${(performance.now() - before).toFixed(2)}ms`);
+    this.log(`Found ${results.players.length} players in ${(performance.now() - before).toFixed(0)}ms`);
     return results;
   }
 
@@ -53,7 +53,7 @@ class ScoreSaberFetcher extends DataFetcher {
     if (response === undefined) {
       return undefined;
     }
-    this.log(`Found player "${playerId}" in ${(performance.now() - before).toFixed(2)}ms`);
+    this.log(`Found player "${playerId}" in ${(performance.now() - before).toFixed(0)}ms`);
     return response;
   }
 
@@ -84,7 +84,7 @@ class ScoreSaberFetcher extends DataFetcher {
     if (response === undefined) {
       return undefined;
     }
-    this.log(`Found scores for player "${playerId}" in ${(performance.now() - before).toFixed(2)}ms`);
+    this.log(`Found scores for player "${playerId}" in ${(performance.now() - before).toFixed(0)}ms`);
     return response;
   }
 }

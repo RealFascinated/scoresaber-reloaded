@@ -25,7 +25,7 @@ class BeatSaverFetcher extends DataFetcher {
     let map = await db.beatSaverMaps.get(query);
     // The map is cached
     if (map != undefined) {
-      this.log(`Found cached map "${query}" in ${(performance.now() - before).toFixed(2)}ms`);
+      this.log(`Found cached map "${query}" in ${(performance.now() - before).toFixed(0)}ms`);
       return map;
     }
 
@@ -47,7 +47,7 @@ class BeatSaverFetcher extends DataFetcher {
       fullData: response,
     });
     map = await db.beatSaverMaps.get(query);
-    this.log(`Found map "${query}" in ${(performance.now() - before).toFixed(2)}ms`);
+    this.log(`Found map "${query}" in ${(performance.now() - before).toFixed(0)}ms`);
     return map;
   }
 }
