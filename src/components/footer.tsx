@@ -1,4 +1,3 @@
-import NavbarButton from "@/components/navbar/navbar-button";
 import Link from "next/link";
 import { getBuildInformation } from "@/common/website-utils";
 
@@ -29,7 +28,11 @@ export default function Footer() {
       <div className="h-14 w-full flex items-center justify-center bg-secondary/95 divide-x divide-input">
         {items.map((item, index) => {
           return (
-            <Link className="px-2 text-pp hover:brightness-75" href={item.link}>
+            <Link
+              key={index}
+              className="px-2 text-pp hover:brightness-75"
+              href={item.link}
+            >
               {item.name}
             </Link>
           );
