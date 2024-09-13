@@ -89,7 +89,6 @@ export default function PlayerScores({
   const [currentScores, setCurrentScores] = useState<
     ScoreSaberPlayerScoresPage | undefined
   >(initialScoreData);
-  const [searchQuery, setSearchQuery] = useState<string>();
 
   const {
     data: scores,
