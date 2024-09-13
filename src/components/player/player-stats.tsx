@@ -5,7 +5,7 @@ import { ClassValue } from "clsx";
 
 type Badge = {
   name: string;
-  color?: ClassValue;
+  color?: string;
   create: (player: ScoreSaberPlayer) => string | React.ReactNode | undefined;
 };
 

@@ -14,6 +14,7 @@ import Card from "../card";
 import Pagination from "../input/pagination";
 import { Button } from "../ui/button";
 import Score from "./score/score";
+import { leaderboards } from "@/common/leaderboards";
 
 type Props = {
   initialScoreData?: ScoreSaberPlayerScoresPage;
@@ -32,22 +33,6 @@ type PageState = {
    * The current sort
    */
   sort: ScoreSort;
-};
-
-const leaderboards = {
-  ScoreSaber: {
-    capabilities: {
-      search: true,
-    },
-    queries: {
-      lookupScores: (player: ScoreSaberPlayer, pageState: PageState) =>
-        scoresaberFetcher.lookupPlayerScores({
-          playerId: player.id,
-          sort: ScoreSort.top,
-          page: 1,
-        }),
-    },
-  },
 };
 
 const scoreSort = [
@@ -114,7 +99,8 @@ export default function PlayerScores({
     refetch,
   } = useQuery({
     queryKey: ["playerScores", player.id, leaderboard, pageState],
-    queryFn: () => leaderboard.queries.lookupScores(player, pageState),
+    queryFn: () =>
+      leaderboard.queries.lookupScores(player, pageState.sort, pageState.page),
     staleTime: 30 * 1000, // Cache data for 30 seconds
   });
 
