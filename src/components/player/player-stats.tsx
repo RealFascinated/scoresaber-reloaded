@@ -1,7 +1,6 @@
 import ScoreSaberPlayer from "@/common/data-fetcher/types/scoresaber/scoresaber-player";
 import { formatNumberWithCommas } from "@/common/number-utils";
 import StatValue from "@/components/stat-value";
-import { ClassValue } from "clsx";
 
 type Badge = {
   name: string;

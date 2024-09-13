@@ -1,6 +1,5 @@
 "use client";
 
-import { scoresaberFetcher } from "@/common/data-fetcher/impl/scoresaber";
 import { ScoreSort } from "@/common/data-fetcher/sort";
 import ScoreSaberPlayer from "@/common/data-fetcher/types/scoresaber/scoresaber-player";
 import ScoreSaberPlayerScoresPage from "@/common/data-fetcher/types/scoresaber/scoresaber-player-scores-page";
