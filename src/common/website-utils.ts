@@ -26,6 +26,7 @@ export function getBuildInformation() {
       : "dev"
     : "";
   const buildTime = process.env.NEXT_PUBLIC_BUILD_TIME;
+  const buildTimeShort = process.env.NEXT_PUBLIC_BUILD_TIME_SHORT;
 
-  return { buildId, buildTime };
+  return { buildId, buildTime, buildTimeShort };
 }

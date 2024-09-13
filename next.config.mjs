@@ -1,6 +1,8 @@
 import nextBuildId from "next-build-id";
 import path from 'path';
 import { fileURLToPath } from 'url';
+import {format} from '@formkit/tempo'
+
 
 const __filename = fileURLToPath(import.meta.url); // get the resolved path to the file
 const __dirname = path.dirname(__filename); // get the name of the directory
@@ -16,8 +18,14 @@ const nextConfig = {
       hour: "numeric",
       minute: "numeric",
       timeZoneName: "short",
+    }),
+    NEXT_PUBLIC_BUILD_TIME_SHORT: format(new Date(), {
+      date: "short",
+      time: "short",
     })
   }
 };
+
+console.log(`NEXT_PUBLIC_BUILD_TIME_SHORT: ${nextConfig.env.NEXT_PUBLIC_BUILD_TIME_SHORT}`);
 
 export default nextConfig;
