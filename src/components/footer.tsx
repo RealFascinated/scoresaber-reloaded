@@ -21,7 +21,7 @@ export default function Footer() {
   const { buildId, buildTime } = getBuildInformation();
 
   return (
-    <div className="flex items-center w-full flex-col gap-1">
+    <div className="flex items-center w-full flex-col gap-1 mt-6">
       <p className="text-input text-sm">
         Build: {buildId} ({buildTime})
       </p>
