@@ -4,9 +4,14 @@ import { formatNumberWithCommas } from "@/common/number-utils";
 import StatValue from "@/components/stat-value";
 import { XMarkIcon } from "@heroicons/react/24/solid";
 import clsx from "clsx";
+import { accuracyToColor } from "@/common/song-utils";
 
 type Badge = {
   name: string;
+  color?: (
+    score: ScoreSaberScore,
+    leaderboard: ScoreSaberLeaderboard,
+  ) => string | undefined;
   create: (
     score: ScoreSaberScore,
     leaderboard: ScoreSaberLeaderboard,
@@ -16,6 +21,9 @@ type Badge = {
 const badges: Badge[] = [
   {
     name: "PP",
+    color: () => {
+      return "bg-pp";
+    },
     create: (score: ScoreSaberScore) => {
       const pp = score.pp;
       if (pp === 0) {
@@ -26,6 +34,10 @@ const badges: Badge[] = [
   },
   {
     name: "Accuracy",
+    color: (score: ScoreSaberScore, leaderboard: ScoreSaberLeaderboard) => {
+      const acc = (score.baseScore / leaderboard.maxScore) * 100;
+      return accuracyToColor(acc);
+    },
     create: (score: ScoreSaberScore, leaderboard: ScoreSaberLeaderboard) => {
       const acc = (score.baseScore / leaderboard.maxScore) * 100;
       return `${acc.toFixed(2)}%`;
@@ -78,11 +90,11 @@ export default function ScoreStats({ score, leaderboard }: Props) {
     <div className={`grid grid-cols-3 grid-rows-2 gap-1 ml-0 lg:ml-2`}>
       {badges.map((badge, index) => {
         const toRender = badge.create(score, leaderboard);
+        let color = badge.color?.(score, leaderboard);
         if (toRender === undefined) {
           return <div key={index} />;
         }
-
-        return <StatValue key={index} value={toRender} />;
+        return <StatValue key={index} color={color} value={toRender} />;
       })}
     </div>
   );

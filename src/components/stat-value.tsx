@@ -1,4 +1,4 @@
-import clsx, { ClassValue } from "clsx";
+import clsx from "clsx";
 
 type Props = {
   /**
@@ -9,7 +9,7 @@ type Props = {
   /**
    * The background color of the stat.
    */
-  color?: ClassValue;
+  color?: string;
 
   /**
    * The value of the stat.
@@ -24,6 +24,9 @@ export default function StatValue({ name, color, value }: Props) {
         "flex min-w-16 gap-2 h-[28px] p-1 items-center justify-center rounded-md text-sm",
         color ? color : "bg-accent",
       )}
+      style={{
+        backgroundColor: (!color?.includes("bg") && color) || undefined,
+      }}
     >
       {name && (
         <>
