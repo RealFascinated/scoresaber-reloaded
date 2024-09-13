@@ -59,14 +59,37 @@ type Props = {
   page: number;
 };
 
-export default function PlayerScores({ initialScoreData, player, sort, page }: Props) {
+type PageState = {
+  /**
+   * The current page
+   */
+  page: number;
+
+  /**
+   * The current sort
+   */
+  sort: ScoreSort;
+};
+
+export default function PlayerScores({
+  initialScoreData,
+  player,
+  sort,
+  page,
+}: Props) {
   const { width } = useWindowDimensions();
   const controls = useAnimation();
 
-  const [currentSort, setCurrentSort] = useState(sort);
+  const [firstLoad, setFirstLoad] = useState(true);
+  const [pageState, setPageState] = useState<PageState>({
+    page: page,
+    sort: sort,
+  });
   const [previousPage, setPreviousPage] = useState(page);
-  const [currentPage, setCurrentPage] = useState(page);
-  const [currentScores, setCurrentScores] = useState<ScoreSaberPlayerScoresPage | undefined>(initialScoreData);
+  const [currentScores, setCurrentScores] = useState<
+    ScoreSaberPlayerScoresPage | undefined
+  >(initialScoreData);
+  const [searchQuery, setSearchQuery] = useState<string>();
 
   const {
     data: scores,
@@ -74,85 +97,114 @@ export default function PlayerScores({ initialScoreData, player, sort, page }: P
     isLoading,
     refetch,
   } = useQuery({
-    queryKey: ["playerScores", player.id, currentSort, currentPage],
-    queryFn: () => scoresaberFetcher.lookupPlayerScores(player.id, currentSort, currentPage),
+    queryKey: ["playerScores", player.id, pageState],
+    queryFn: () =>
+      scoresaberFetcher.lookupPlayerScores({
+        playerId: player.id,
+        sort: pageState.sort,
+        page: pageState.page,
+      }),
     staleTime: 30 * 1000, // Cache data for 30 seconds
   });
 
   const handleScoreLoad = useCallback(async () => {
-    await controls.start(previousPage >= currentPage ? "hiddenRight" : "hiddenLeft");
+    setFirstLoad(false);
+    if (!firstLoad) {
+      await controls.start(
+        previousPage >= pageState.page ? "hiddenRight" : "hiddenLeft",
+      );
+    }
     setCurrentScores(scores);
     await controls.start("visible");
-  }, [scores, controls]);
+  }, [scores, controls, previousPage, firstLoad, pageState.page]);
+
+  const handleSortChange = (newSort: ScoreSort) => {
+    if (newSort !== pageState.sort) {
+      setPageState({ page: 1, sort: newSort });
+    }
+  };
 
   useEffect(() => {
     if (scores) {
       handleScoreLoad();
     }
-  }, [scores]);
+  }, [scores, isError]);
 
   useEffect(() => {
-    const newUrl = `/player/${player.id}/${currentSort}/${currentPage}`;
-    window.history.replaceState({ ...window.history.state, as: newUrl, url: newUrl }, "", newUrl);
+    const newUrl = `/player/${player.id}/${pageState.sort}/${pageState.page}`;
+    window.history.replaceState(
+      { ...window.history.state, as: newUrl, url: newUrl },
+      "",
+      newUrl,
+    );
     refetch();
-  }, [currentSort, currentPage, refetch, player.id]);
-
-  const handleSortChange = (newSort: ScoreSort) => {
-    if (newSort !== currentSort) {
-      setCurrentSort(newSort);
-      setCurrentPage(1); // Reset page to 1 on sort change
-    }
-  };
-
-  if (currentScores === undefined) {
-    return undefined;
-  }
+  }, [pageState, refetch, player.id]);
 
   return (
     <Card className="flex gap-1">
-      <div className="flex items-center flex-row w-full gap-2 justify-center">
-        {Object.values(scoreSort).map((sortOption, index) => (
-          <Button
-            variant={sortOption.value === currentSort ? "default" : "outline"}
-            key={index}
-            onClick={() => handleSortChange(sortOption.value)}
-            size="sm"
-            className="flex items-center gap-1"
+      <div className="flex items-center flex-col w-full gap-2 justify-center relative">
+        <div className="flex items-center flex-row gap-2">
+          {Object.values(scoreSort).map((sortOption, index) => (
+            <Button
+              variant={
+                sortOption.value === pageState.sort ? "default" : "outline"
+              }
+              key={index}
+              onClick={() => handleSortChange(sortOption.value)}
+              size="sm"
+              className="flex items-center gap-1"
+            >
+              {sortOption.icon}
+              {`${capitalizeFirstLetter(sortOption.name)} Scores`}
+            </Button>
+          ))}
+        </div>
+
+        {/* todo: add search */}
+        {/*<Input*/}
+        {/*  type="search"*/}
+        {/*  placeholder="Search..."*/}
+        {/*  className="w-72 flex lg:absolute right-0 top-0"*/}
+        {/*/>*/}
+      </div>
+
+      {currentScores && (
+        <>
+          <div className="text-center">
+            {isError && <p>Oopsies! Something went wrong.</p>}
+            {currentScores.playerScores.length === 0 && (
+              <p>No scores found. Invalid Page?</p>
+            )}
+          </div>
+
+          <motion.div
+            initial="hidden"
+            animate={controls}
+            variants={scoreAnimation}
+            className="grid min-w-full grid-cols-1 divide-y divide-border"
           >
-            {sortOption.icon}
-            {`${capitalizeFirstLetter(sortOption.name)} Scores`}
-          </Button>
-        ))}
-      </div>
-
-      <div className="text-center">
-        {isError && <p>Oopsies! Something went wrong.</p>}
-        {currentScores.playerScores.length === 0 && <p>No scores found. Invalid Page?</p>}
-      </div>
-
-      <motion.div
-        initial="hidden"
-        animate={controls}
-        variants={scoreAnimation}
-        className="grid min-w-full grid-cols-1 divide-y divide-border"
-      >
-        {currentScores.playerScores.map((playerScore, index) => (
-          <motion.div key={index} variants={scoreAnimation}>
-            <Score playerScore={playerScore} />
+            {currentScores.playerScores.map((playerScore, index) => (
+              <motion.div key={index} variants={scoreAnimation}>
+                <Score playerScore={playerScore} />
+              </motion.div>
+            ))}
           </motion.div>
-        ))}
-      </motion.div>
 
-      <Pagination
-        mobilePagination={width < 768}
-        page={currentPage}
-        totalPages={Math.ceil(currentScores.metadata.total / currentScores.metadata.itemsPerPage)}
-        loadingPage={isLoading ? currentPage : undefined}
-        onPageChange={(page) => {
-          setPreviousPage(currentPage);
-          setCurrentPage(page);
-        }}
-      />
+          <Pagination
+            mobilePagination={width < 768}
+            page={pageState.page}
+            totalPages={Math.ceil(
+              currentScores.metadata.total /
+                currentScores.metadata.itemsPerPage,
+            )}
+            loadingPage={isLoading ? pageState.page : undefined}
+            onPageChange={(page) => {
+              setPreviousPage(pageState.page);
+              setPageState({ page, sort: pageState.sort });
+            }}
+          />
+        </>
+      )}
     </Card>
   );
 }

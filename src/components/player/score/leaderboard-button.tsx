@@ -8,7 +8,10 @@ type Props = {
   setIsLeaderboardExpanded: Dispatch<SetStateAction<boolean>>;
 };
 
-export default function LeaderboardButton({ isLeaderboardExpanded, setIsLeaderboardExpanded }: Props) {
+export default function LeaderboardButton({
+  isLeaderboardExpanded,
+  setIsLeaderboardExpanded,
+}: Props) {
   return (
     <div className="pr-2 flex items-center justify-center h-full">
       <Button
@@ -17,7 +20,10 @@ export default function LeaderboardButton({ isLeaderboardExpanded, setIsLeaderbo
         onClick={() => setIsLeaderboardExpanded(!isLeaderboardExpanded)}
       >
         <ArrowDownIcon
-          className={clsx("w-6 h-6 transition-all transform-gpu", isLeaderboardExpanded ? "" : "rotate-180")}
+          className={clsx(
+            "w-6 h-6 transition-all transform-gpu",
+            isLeaderboardExpanded ? "" : "rotate-180",
+          )}
         />
       </Button>
     </div>

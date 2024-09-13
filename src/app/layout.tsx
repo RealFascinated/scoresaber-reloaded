@@ -45,12 +45,14 @@ export const metadata: Metadata = {
     "Stream enhancement, Professional overlay, Easy to use overlay builder.",
   openGraph: {
     title: "Scoresaber Reloaded",
-    description: "Scoresaber Reloaded is a new way to view your scores and get more stats about your and your plays",
+    description:
+      "Scoresaber Reloaded is a new way to view your scores and get more stats about your and your plays",
     url: "https://ssr.fascinated.cc",
     locale: "en_US",
     type: "website",
   },
-  description: "Scoresaber Reloaded is a new way to view your scores and get more stats about your and your plays",
+  description:
+    "Scoresaber Reloaded is a new way to view your scores and get more stats about your and your plays",
 };
 
 export default function RootLayout({
@@ -60,13 +62,20 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${siteFont.className} antialiased w-full h-full relative`}>
+      <body
+        className={`${siteFont.className} antialiased w-full h-full relative`}
+      >
         <DatabaseLoader>
           <Toaster />
           <BackgroundImage />
           <PreloadResources />
           <TooltipProvider>
-            <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="dark"
+              enableSystem
+              disableTransitionOnChange
+            >
               <QueryProvider>
                 <AnimatePresence>
                   <main className="z-[9999] m-auto flex h-screen flex-col items-center md:max-w-[1200px]">

@@ -49,7 +49,9 @@ export default function Navbar() {
 
         {/* Right-aligned item */}
         <NavbarButton>
-          <Link href={items[items.length - 1].link}>{renderNavbarItem(items[items.length - 1])}</Link>
+          <Link href={items[items.length - 1].link}>
+            {renderNavbarItem(items[items.length - 1])}
+          </Link>
         </NavbarButton>
       </div>
     </div>

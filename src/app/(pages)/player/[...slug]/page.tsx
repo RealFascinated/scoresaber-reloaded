@@ -12,7 +12,9 @@ type Props = {
   };
 };
 
-export async function generateMetadata({ params: { slug } }: Props): Promise<Metadata> {
+export async function generateMetadata({
+  params: { slug },
+}: Props): Promise<Metadata> {
   const id = slug[0]; // The players id
   const player = await scoresaberFetcher.lookupPlayer(id, false);
   if (player === undefined) {
@@ -43,7 +45,11 @@ export default async function Search({ params: { slug } }: Props) {
   const sort: ScoreSort = (slug[1] as ScoreSort) || "recent"; // The sorting method
   const page = parseInt(slug[2]) || 1; // The page number
   const player = await scoresaberFetcher.lookupPlayer(id, false);
-  const scores = await scoresaberFetcher.lookupPlayerScores(id, sort, page);
+  const scores = await scoresaberFetcher.lookupPlayerScores({
+    playerId: id,
+    sort,
+    page,
+  });
 
   if (player == undefined) {
     // Invalid player id
@@ -52,7 +58,12 @@ export default async function Search({ params: { slug } }: Props) {
 
   return (
     <div className="flex flex-col h-full w-full">
-      <PlayerData initialPlayerData={player} initialScoreData={scores} sort={sort} page={page} />
+      <PlayerData
+        initialPlayerData={player}
+        initialScoreData={scores}
+        sort={sort}
+        page={page}
+      />
     </div>
   );
 }

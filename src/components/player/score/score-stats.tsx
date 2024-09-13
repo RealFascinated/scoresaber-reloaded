@@ -7,7 +7,10 @@ import clsx from "clsx";
 
 type Badge = {
   name: string;
-  create: (score: ScoreSaberScore, leaderboard: ScoreSaberLeaderboard) => string | React.ReactNode | undefined;
+  create: (
+    score: ScoreSaberScore,
+    leaderboard: ScoreSaberLeaderboard,
+  ) => string | React.ReactNode | undefined;
 };
 
 const badges: Badge[] = [
@@ -49,8 +52,16 @@ const badges: Badge[] = [
 
       return (
         <>
-          <p>{fullCombo ? <span className="text-green-400">FC</span> : formatNumberWithCommas(score.missedNotes)}</p>
-          <XMarkIcon className={clsx("w-5 h-5", fullCombo ? "hidden" : "text-red-400")} />
+          <p>
+            {fullCombo ? (
+              <span className="text-green-400">FC</span>
+            ) : (
+              formatNumberWithCommas(score.missedNotes)
+            )}
+          </p>
+          <XMarkIcon
+            className={clsx("w-5 h-5", fullCombo ? "hidden" : "text-red-400")}
+          />
         </>
       );
     },

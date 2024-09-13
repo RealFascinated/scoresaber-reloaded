@@ -18,7 +18,12 @@ type Props = {
   page: number;
 };
 
-export default function PlayerData({ initialPlayerData: initalPlayerData, initialScoreData, sort, page }: Props) {
+export default function PlayerData({
+  initialPlayerData: initalPlayerData,
+  initialScoreData,
+  sort,
+  page,
+}: Props) {
   let player = initalPlayerData;
   const { data, isLoading, isError } = useQuery({
     queryKey: ["player", player.id],
@@ -38,7 +43,12 @@ export default function PlayerData({ initialPlayerData: initalPlayerData, initia
           <PlayerRankChart player={player} />
         </>
       )}
-      <PlayerScores initialScoreData={initialScoreData} player={player} sort={sort} page={page} />
+      <PlayerScores
+        initialScoreData={initialScoreData}
+        player={player}
+        sort={sort}
+        page={page}
+      />
     </div>
   );
 }

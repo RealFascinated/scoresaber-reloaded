@@ -57,14 +57,23 @@ type Props = {
 
 export default function PlayerStats({ player }: Props) {
   return (
-    <div className={`flex flex-wrap gap-2 w-full justify-center lg:justify-start`}>
+    <div
+      className={`flex flex-wrap gap-2 w-full justify-center lg:justify-start`}
+    >
       {badges.map((badge, index) => {
         const toRender = badge.create(player);
         if (toRender === undefined) {
           return <div key={index} />;
         }
 
-        return <StatValue key={index} color={badge.color} name={badge.name} value={toRender} />;
+        return (
+          <StatValue
+            key={index}
+            color={badge.color}
+            name={badge.name}
+            value={toRender}
+          />
+        );
       })}
     </div>
   );

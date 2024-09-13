@@ -20,7 +20,10 @@ export function timeAgo(input: Date | number) {
   for (const key in ranges) {
     if (ranges[key] < Math.abs(secondsElapsed)) {
       const delta = secondsElapsed / ranges[key];
-      return formatter.format(Math.round(delta), key as Intl.RelativeTimeFormatUnit);
+      return formatter.format(
+        Math.round(delta),
+        key as Intl.RelativeTimeFormatUnit,
+      );
     }
   }
 }

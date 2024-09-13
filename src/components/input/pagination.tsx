@@ -2,13 +2,13 @@ import { ArrowPathIcon } from "@heroicons/react/24/solid";
 import clsx from "clsx";
 import { useEffect, useState } from "react";
 import {
+  Pagination as ShadCnPagination,
   PaginationContent,
   PaginationEllipsis,
   PaginationItem,
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-  Pagination as ShadCnPagination,
 } from "../ui/pagination";
 
 type PaginationItemWrapperProps = {
@@ -23,7 +23,10 @@ type PaginationItemWrapperProps = {
   children: React.ReactNode;
 };
 
-function PaginationItemWrapper({ isLoadingPage, children }: PaginationItemWrapperProps) {
+function PaginationItemWrapper({
+  isLoadingPage,
+  children,
+}: PaginationItemWrapperProps) {
   return (
     <PaginationItem
       className={clsx(isLoadingPage ? "cursor-not-allowed" : "cursor-pointer")}
@@ -62,7 +65,13 @@ type Props = {
   onPageChange: (page: number) => void;
 };
 
-export default function Pagination({ mobilePagination, page, totalPages, loadingPage, onPageChange }: Props) {
+export default function Pagination({
+  mobilePagination,
+  page,
+  totalPages,
+  loadingPage,
+  onPageChange,
+}: Props) {
   totalPages = Math.round(totalPages);
   const isLoading = loadingPage !== undefined;
   const [currentPage, setCurrentPage] = useState(page);
@@ -72,7 +81,12 @@ export default function Pagination({ mobilePagination, page, totalPages, loading
   }, [page]);
 
   const handlePageChange = (newPage: number) => {
-    if (newPage < 1 || newPage > totalPages || newPage == currentPage || isLoading) {
+    if (
+      newPage < 1 ||
+      newPage > totalPages ||
+      newPage == currentPage ||
+      isLoading
+    ) {
       return;
     }
 
@@ -95,15 +109,20 @@ export default function Pagination({ mobilePagination, page, totalPages, loading
       pageNumbers.push(
         <>
           <PaginationItemWrapper key="start" isLoadingPage={isLoading}>
-            <PaginationLink onClick={() => handlePageChange(1)}>1</PaginationLink>
+            <PaginationLink onClick={() => handlePageChange(1)}>
+              1
+            </PaginationLink>
           </PaginationItemWrapper>
           {/* Only show ellipsis if more than 2 pages from the start */}
           {startPage > 2 && (
-            <PaginationItemWrapper key="ellipsis-start" isLoadingPage={isLoading}>
+            <PaginationItemWrapper
+              key="ellipsis-start"
+              isLoadingPage={isLoading}
+            >
               <PaginationEllipsis />
             </PaginationItemWrapper>
           )}
-        </>
+        </>,
       );
     }
 
@@ -111,10 +130,17 @@ export default function Pagination({ mobilePagination, page, totalPages, loading
     for (let i = startPage; i <= endPage; i++) {
       pageNumbers.push(
         <PaginationItemWrapper key={i} isLoadingPage={isLoading}>
-          <PaginationLink isActive={i === currentPage} onClick={() => handlePageChange(i)}>
-            {loadingPage === i ? <ArrowPathIcon className="w-4 h-4 animate-spin" /> : i}
+          <PaginationLink
+            isActive={i === currentPage}
+            onClick={() => handlePageChange(i)}
+          >
+            {loadingPage === i ? (
+              <ArrowPathIcon className="w-4 h-4 animate-spin" />
+            ) : (
+              i
+            )}
           </PaginationLink>
-        </PaginationItemWrapper>
+        </PaginationItemWrapper>,
       );
     }
 
@@ -126,22 +152,31 @@ export default function Pagination({ mobilePagination, page, totalPages, loading
       <PaginationContent>
         {/* Previous button for mobile and desktop */}
         <PaginationItemWrapper isLoadingPage={isLoading}>
-          <PaginationPrevious onClick={() => handlePageChange(currentPage - 1)} />
+          <PaginationPrevious
+            onClick={() => handlePageChange(currentPage - 1)}
+          />
         </PaginationItemWrapper>
 
         {renderPageNumbers()}
 
         {/* For desktop, show ellipsis and link to the last page */}
-        {!mobilePagination && currentPage < totalPages && totalPages - currentPage > 2 && (
-          <>
-            <PaginationItemWrapper key="ellipsis-end" isLoadingPage={isLoading}>
-              <PaginationEllipsis className="cursor-default" />
-            </PaginationItemWrapper>
-            <PaginationItemWrapper key="end" isLoadingPage={isLoading}>
-              <PaginationLink onClick={() => handlePageChange(totalPages)}>{totalPages}</PaginationLink>
-            </PaginationItemWrapper>
-          </>
-        )}
+        {!mobilePagination &&
+          currentPage < totalPages &&
+          totalPages - currentPage > 2 && (
+            <>
+              <PaginationItemWrapper
+                key="ellipsis-end"
+                isLoadingPage={isLoading}
+              >
+                <PaginationEllipsis className="cursor-default" />
+              </PaginationItemWrapper>
+              <PaginationItemWrapper key="end" isLoadingPage={isLoading}>
+                <PaginationLink onClick={() => handlePageChange(totalPages)}>
+                  {totalPages}
+                </PaginationLink>
+              </PaginationItemWrapper>
+            </>
+          )}
 
         {/* Next button for mobile and desktop */}
         <PaginationItemWrapper isLoadingPage={isLoading}>

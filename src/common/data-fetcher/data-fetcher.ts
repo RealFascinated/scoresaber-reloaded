@@ -38,7 +38,10 @@ export default class DataFetcher {
    * @param url the url to fetch
    * @returns the fetched data
    */
-  public async fetch<T>(useProxy: boolean, url: string): Promise<T | undefined> {
+  public async fetch<T>(
+    useProxy: boolean,
+    url: string,
+  ): Promise<T | undefined> {
     try {
       return await ky
         .get<T>(this.buildRequestUrl(useProxy, url), {

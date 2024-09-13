@@ -22,7 +22,7 @@ export default function StatValue({ name, color, value }: Props) {
     <div
       className={clsx(
         "flex min-w-16 gap-2 h-[28px] p-1 items-center justify-center rounded-md text-sm",
-        color ? color : "bg-accent"
+        color ? color : "bg-accent",
       )}
     >
       {name && (
@@ -31,7 +31,9 @@ export default function StatValue({ name, color, value }: Props) {
           <div className="h-4 w-[1px] bg-primary" />
         </>
       )}
-      <div className="flex gap-1 items-center">{typeof value === "string" ? <p>{value}</p> : value}</div>
+      <div className="flex gap-1 items-center">
+        {typeof value === "string" ? <p>{value}</p> : value}
+      </div>
     </div>
   );
 }

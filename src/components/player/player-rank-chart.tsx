@@ -3,11 +3,28 @@
 
 import ScoreSaberPlayer from "@/common/data-fetcher/types/scoresaber/scoresaber-player";
 import { formatNumberWithCommas } from "@/common/number-utils";
-import { CategoryScale, Chart, Legend, LinearScale, LineElement, PointElement, Title, Tooltip } from "chart.js";
+import {
+  CategoryScale,
+  Chart,
+  Legend,
+  LinearScale,
+  LineElement,
+  PointElement,
+  Title,
+  Tooltip,
+} from "chart.js";
 import { Line } from "react-chartjs-2";
 import Card from "../card";
 
-Chart.register(LinearScale, CategoryScale, PointElement, LineElement, Title, Tooltip, Legend);
+Chart.register(
+  LinearScale,
+  CategoryScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+);
 
 export const options: any = {
   maintainAspectRatio: false,
