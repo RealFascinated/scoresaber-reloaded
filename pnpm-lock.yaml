@@ -37,7 +37,7 @@ dependencies:
     version: 1.1.2(@types/react-dom@18.3.0)(@types/react@18.3.5)(react-dom@18.3.1)(react@18.3.1)
   '@tanstack/react-query':
     specifier: ^5.55.4
-    version: 5.56.1(react@18.3.1)
+    version: 5.56.2(react@18.3.1)
   chart.js:
     specifier: ^4.4.4
     version: 4.4.4
@@ -63,8 +63,8 @@ dependencies:
     specifier: ^1.7.2
     version: 1.7.2
   lucide-react:
-    specifier: ^0.440.0
-    version: 0.440.0(react@18.3.1)
+    specifier: ^0.441.0
+    version: 0.441.0(react@18.3.1)
   next:
     specifier: 14.2.11
     version: 14.2.11(react-dom@18.3.1)(react@18.3.1)
@@ -894,16 +894,16 @@ packages:
       tslib: 2.7.0
     dev: false
 
-  /@tanstack/query-core@5.56.1:
-    resolution: {integrity: sha512-hH9LvpGCr3yKbHUgi2b+vOwx2pj4dMFnGY7Cjvrm5mOqynWPr015h/GCLiSi5M5JaXXnB8VnLOSLh5KzjBh5fA==}
+  /@tanstack/query-core@5.56.2:
+    resolution: {integrity: sha512-gor0RI3/R5rVV3gXfddh1MM+hgl0Z4G7tj6Xxpq6p2I03NGPaJ8dITY9Gz05zYYb/EJq9vPas/T4wn9EaDPd4Q==}
     dev: false
 
-  /@tanstack/react-query@5.56.1(react@18.3.1):
-    resolution: {integrity: sha512-jlRCrE1qXEVtJ0i/bubQpqoEuQQSfRo9O26tWciKmNMwg2oXp96+D7A/0sU52sjSTrcKIQE4o7dSlbOOTYKTIg==}
+  /@tanstack/react-query@5.56.2(react@18.3.1):
+    resolution: {integrity: sha512-SR0GzHVo6yzhN72pnRhkEFRAHMsUo5ZPzAxfTMvUxFIDVS6W9LYUp6nXW3fcHVdg0ZJl8opSH85jqahvm6DSVg==}
     peerDependencies:
       react: ^18 || ^19
     dependencies:
-      '@tanstack/query-core': 5.56.1
+      '@tanstack/query-core': 5.56.2
       react: 18.3.1
     dev: false
 
@@ -2612,8 +2612,8 @@ packages:
   /lru-cache@10.4.3:
     resolution: {integrity: sha512-JNAzZcXrCt42VGLuYz0zfAzDfAvJWW6AfYlDBQyDV5DClI2m5sAmK+OIO7s59XfsRsWHp02jAJrRadPRGTt6SQ==}
 
-  /lucide-react@0.440.0(react@18.3.1):
-    resolution: {integrity: sha512-FW6Z0IJ/WVG968jscSiPXvQWo5B2DddynpgDMyGmTqnBo7pxzJrFMFMChM/d5YEsdHiNoLq0GIZJn14tH70GYQ==}
+  /lucide-react@0.441.0(react@18.3.1):
+    resolution: {integrity: sha512-0vfExYtvSDhkC2lqg0zYVW1Uu9GsI4knuV9GP9by5z0Xhc4Zi5RejTxfz9LsjRmCyWVzHCJvxGKZWcRyvQCWVg==}
     peerDependencies:
       react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0-rc
     dependencies:
