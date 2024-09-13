@@ -1,16 +1,16 @@
 import * as Comlink from "comlink";
-import { scoresaberFetcher } from "@/common/data-fetcher/impl/scoresaber";
+import { scoresaberService } from "@/common/service/impl/scoresaber";
 
 export interface WorkerApi {
-  getName: typeof getName;
+  getPlayerExample: typeof getPlayerExample;
 }
 
 const workerApi: WorkerApi = {
-  getName,
+  getPlayerExample: getPlayerExample,
 };
 
-async function getName() {
-  return await scoresaberFetcher.lookupPlayer("76561198449412074");
+async function getPlayerExample() {
+  return await scoresaberService.lookupPlayer("76561198449412074");
 }
 
 Comlink.expose(workerApi);

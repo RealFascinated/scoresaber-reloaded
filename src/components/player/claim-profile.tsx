@@ -2,9 +2,9 @@
 
 import { CheckIcon } from "@heroicons/react/24/solid";
 import { useLiveQuery } from "dexie-react-hooks";
-import { setPlayerIdCookie } from "../../common/website-utils";
+import { setPlayerIdCookie } from "@/common/website-utils";
 import useDatabase from "../../hooks/use-database";
-import { useToast } from "../../hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import Tooltip from "../tooltip";
 import { Button } from "../ui/button";
 

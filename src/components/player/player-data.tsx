@@ -1,15 +1,13 @@
 "use client";
 
-import { scoresaberFetcher } from "@/common/data-fetcher/impl/scoresaber";
-import { ScoreSort } from "@/common/data-fetcher/sort";
-import ScoreSaberPlayer from "@/common/data-fetcher/types/scoresaber/scoresaber-player";
-import ScoreSaberPlayerScoresPage from "@/common/data-fetcher/types/scoresaber/scoresaber-player-scores-page";
+import { scoresaberService } from "@/common/service/impl/scoresaber";
+import { ScoreSort } from "@/common/service/score-sort";
+import ScoreSaberPlayer from "@/common/service/types/scoresaber/scoresaber-player";
+import ScoreSaberPlayerScoresPage from "@/common/service/types/scoresaber/scoresaber-player-scores-page";
 import { useQuery } from "@tanstack/react-query";
 import PlayerHeader from "./player-header";
 import PlayerRankChart from "./player-rank-chart";
 import PlayerScores from "./player-scores";
-import { useEffect } from "react";
-import { scoresaberReloadedWorker } from "@/common/workers/workers";
 
 const REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes
 
@@ -29,16 +27,9 @@ export default function PlayerData({
   let player = initalPlayerData;
   const { data, isLoading, isError } = useQuery({
     queryKey: ["player", player.id],
-    queryFn: () => scoresaberFetcher.lookupPlayer(player.id),
+    queryFn: () => scoresaberService.lookupPlayer(player.id),
     refetchInterval: REFRESH_INTERVAL,
   });
-
-  useEffect(() => {
-    (async () => {
-      const worker = scoresaberReloadedWorker();
-      console.log(await worker.getName());
-    })();
-  }, []);
 
   if (data && (!isLoading || !isError)) {
     player = data;

@@ -1,6 +1,6 @@
-import ScoreSaberPlayer from "@/common/data-fetcher/types/scoresaber/scoresaber-player";
-import { scoresaberFetcher } from "@/common/data-fetcher/impl/scoresaber";
-import { ScoreSort } from "@/common/data-fetcher/sort";
+import ScoreSaberPlayer from "@/common/service/types/scoresaber/scoresaber-player";
+import { scoresaberService } from "@/common/service/impl/scoresaber";
+import { ScoreSort } from "@/common/service/score-sort";
 
 export const leaderboards = {
   ScoreSaber: {
@@ -9,7 +9,7 @@ export const leaderboards = {
     },
     queries: {
       lookupScores: (player: ScoreSaberPlayer, sort: ScoreSort, page: number) =>
-        scoresaberFetcher.lookupPlayerScores({
+        scoresaberService.lookupPlayerScores({
           playerId: player.id,
           sort: sort,
           page: page,

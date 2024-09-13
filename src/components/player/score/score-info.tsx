@@ -1,4 +1,4 @@
-import ScoreSaberLeaderboard from "@/common/data-fetcher/types/scoresaber/scoresaber-leaderboard";
+import ScoreSaberLeaderboard from "@/common/service/types/scoresaber/scoresaber-leaderboard";
 import BeatSaverMap from "@/common/database/types/beatsaver-map";
 import { getDifficultyFromScoreSaberDifficulty } from "@/common/scoresaber-utils";
 import { songDifficultyToColor } from "@/common/song-utils";

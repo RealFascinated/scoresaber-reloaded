@@ -1,4 +1,4 @@
-import ScoreSaberScore from "@/common/data-fetcher/types/scoresaber/scoresaber-score";
+import ScoreSaberScore from "@/common/service/types/scoresaber/scoresaber-score";
 import Image from "next/image";
 import Link from "next/link";
 

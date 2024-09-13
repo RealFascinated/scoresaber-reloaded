@@ -1,7 +1,7 @@
 "use client";
 
 import { copyToClipboard } from "@/common/browser-utils";
-import ScoreSaberPlayerScore from "@/common/data-fetcher/types/scoresaber/scoresaber-player-score";
+import ScoreSaberPlayerScore from "@/common/service/types/scoresaber/scoresaber-player-score";
 import BeatSaverMap from "@/common/database/types/beatsaver-map";
 import { songNameToYouTubeLink } from "@/common/youtube-utils";
 import BeatSaverLogo from "@/components/logos/beatsaver-logo";

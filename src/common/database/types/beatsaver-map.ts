@@ -1,4 +1,4 @@
-import { BeatSaverMap as BSMap } from "@/common/data-fetcher/types/beatsaver/beatsaver-map";
+import { BeatSaverMap as BSMap } from "@/common/service/types/beatsaver/beatsaver-map";
 import { Entity } from "dexie";
 import Database from "../database";
 

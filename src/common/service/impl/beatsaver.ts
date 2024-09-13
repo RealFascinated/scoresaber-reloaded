@@ -1,12 +1,12 @@
 import BeatSaverMap from "@/common/database/types/beatsaver-map";
 import { db } from "../../database/database";
-import DataFetcher from "../data-fetcher";
+import Service from "../service";
 import { BeatSaverMap as BSMap } from "../types/beatsaver/beatsaver-map";
 
 const API_BASE = "https://api.beatsaver.com";
 const LOOKUP_MAP_BY_HASH_ENDPOINT = `${API_BASE}/maps/hash/:query`;
 
-class BeatSaverFetcher extends DataFetcher {
+class BeatSaverService extends Service {
   constructor() {
     super("BeatSaver");
   }
@@ -62,4 +62,4 @@ class BeatSaverFetcher extends DataFetcher {
   }
 }
 
-export const beatsaverFetcher = new BeatSaverFetcher();
+export const beatsaverService = new BeatSaverService();

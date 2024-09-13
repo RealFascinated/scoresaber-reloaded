@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import ScoreSaberPlayer from "@/common/data-fetcher/types/scoresaber/scoresaber-player";
+import ScoreSaberPlayer from "@/common/service/types/scoresaber/scoresaber-player";
 import { formatNumberWithCommas } from "@/common/number-utils";
 import {
   CategoryScale,

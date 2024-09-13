@@ -1,8 +1,5 @@
 "use client";
 
-import { ScoreSort } from "@/common/data-fetcher/sort";
-import ScoreSaberPlayer from "@/common/data-fetcher/types/scoresaber/scoresaber-player";
-import ScoreSaberPlayerScoresPage from "@/common/data-fetcher/types/scoresaber/scoresaber-player-scores-page";
 import { capitalizeFirstLetter } from "@/common/string-utils";
 import useWindowDimensions from "@/hooks/use-window-dimensions";
 import { ClockIcon, TrophyIcon } from "@heroicons/react/24/solid";
@@ -14,6 +11,9 @@ import Pagination from "../input/pagination";
 import { Button } from "../ui/button";
 import Score from "./score/score";
 import { leaderboards } from "@/common/leaderboards";
+import { ScoreSort } from "@/common/service/score-sort";
+import ScoreSaberPlayer from "@/common/service/types/scoresaber/scoresaber-player";
+import ScoreSaberPlayerScoresPage from "@/common/service/types/scoresaber/scoresaber-player-scores-page";
 
 type Props = {
   initialScoreData?: ScoreSaberPlayerScoresPage;

@@ -1,8 +1,9 @@
 import ky from "ky";
+import { isRunningAsWorker } from "@/common/browser-utils";
 
-export default class DataFetcher {
+export default class Service {
   /**
-   * The name of the leaderboard.
+   * The name of the service.
    */
   private name: string;
 
@@ -16,7 +17,9 @@ export default class DataFetcher {
    * @param data the data to log
    */
   public log(data: unknown) {
-    console.debug(`[${this.name}]: ${data}`);
+    console.log(
+      `[${isRunningAsWorker() ? "Worker - " : ""}${this.name}]: ${data}`,
+    );
   }
 
   /**

@@ -1,7 +1,7 @@
 "use client";
 
-import ScoreSaberLeaderboard from "@/common/data-fetcher/types/scoresaber/scoresaber-leaderboard";
-import ScoreSaberScore from "@/common/data-fetcher/types/scoresaber/scoresaber-score";
+import ScoreSaberLeaderboard from "@/common/service/types/scoresaber/scoresaber-leaderboard";
+import ScoreSaberScore from "@/common/service/types/scoresaber/scoresaber-score";
 import ScoreRankInfo from "../player/score/score-rank-info";
 import LeaderboardPlayer from "./leaderboard-player";
 import LeaderboardScoreStats from "./leaderboard-score-stats";

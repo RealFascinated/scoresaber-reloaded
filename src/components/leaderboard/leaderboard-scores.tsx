@@ -1,8 +1,8 @@
 "use client";
 
-import { scoresaberFetcher } from "@/common/data-fetcher/impl/scoresaber";
-import ScoreSaberLeaderboard from "@/common/data-fetcher/types/scoresaber/scoresaber-leaderboard";
-import ScoreSaberLeaderboardScoresPage from "@/common/data-fetcher/types/scoresaber/scoresaber-leaderboard-scores-page";
+import { scoresaberService } from "@/common/service/impl/scoresaber";
+import ScoreSaberLeaderboard from "@/common/service/types/scoresaber/scoresaber-leaderboard";
+import ScoreSaberLeaderboardScoresPage from "@/common/service/types/scoresaber/scoresaber-leaderboard-scores-page";
 import useWindowDimensions from "@/hooks/use-window-dimensions";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
@@ -31,7 +31,7 @@ export default function LeaderboardScores({ leaderboard }: Props) {
   } = useQuery({
     queryKey: ["playerScores", leaderboard.id, currentPage],
     queryFn: () =>
-      scoresaberFetcher.lookupLeaderboardScores(
+      scoresaberService.lookupLeaderboardScores(
         leaderboard.id + "",
         currentPage,
       ),

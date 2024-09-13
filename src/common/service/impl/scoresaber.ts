@@ -1,5 +1,5 @@
-import DataFetcher from "../data-fetcher";
-import { ScoreSort } from "../sort";
+import Service from "../service";
+import { ScoreSort } from "../score-sort";
 import ScoreSaberLeaderboardScoresPage from "../types/scoresaber/scoresaber-leaderboard-scores-page";
 import ScoreSaberPlayer from "../types/scoresaber/scoresaber-player";
 import ScoreSaberPlayerScoresPage from "../types/scoresaber/scoresaber-player-scores-page";
@@ -11,7 +11,7 @@ const LOOKUP_PLAYER_ENDPOINT = `${API_BASE}/player/:id/full`;
 const LOOKUP_PLAYER_SCORES_ENDPOINT = `${API_BASE}/player/:id/scores?limit=:limit&sort=:sort&page=:page`;
 const LOOKUP_LEADERBOARD_SCORES_ENDPOINT = `${API_BASE}/leaderboard/by-id/:id/scores?page=:page`;
 
-class ScoreSaberFetcher extends DataFetcher {
+class ScoreSaberService extends Service {
   constructor() {
     super("ScoreSaber");
   }
@@ -110,7 +110,7 @@ class ScoreSaberFetcher extends DataFetcher {
       return undefined;
     }
     this.log(
-      `Found scores for player "${playerId}" in ${(performance.now() - before).toFixed(0)}ms`,
+      `Found ${response.playerScores.length} scores for player "${playerId}" in ${(performance.now() - before).toFixed(0)}ms`,
     );
     return response;
   }
@@ -144,10 +144,10 @@ class ScoreSaberFetcher extends DataFetcher {
       return undefined;
     }
     this.log(
-      `Found scores for leaderboard "${leaderboardId}" in ${(performance.now() - before).toFixed(0)}ms`,
+      `Found ${response.scores.length} scores for leaderboard "${leaderboardId}" in ${(performance.now() - before).toFixed(0)}ms`,
     );
     return response;
   }
 }
 
-export const scoresaberFetcher = new ScoreSaberFetcher();
+export const scoresaberService = new ScoreSaberService();

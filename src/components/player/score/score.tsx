@@ -1,7 +1,7 @@
 "use client";
 
-import { beatsaverFetcher } from "@/common/data-fetcher/impl/beatsaver";
-import ScoreSaberPlayerScore from "@/common/data-fetcher/types/scoresaber/scoresaber-player-score";
+import { beatsaverService } from "@/common/service/impl/beatsaver";
+import ScoreSaberPlayerScore from "@/common/service/types/scoresaber/scoresaber-player-score";
 import BeatSaverMap from "@/common/database/types/beatsaver-map";
 import LeaderboardScores from "@/components/leaderboard/leaderboard-scores";
 import { useCallback, useEffect, useState } from "react";
@@ -23,7 +23,7 @@ export default function Score({ playerScore }: Props) {
   const [isLeaderboardExpanded, setIsLeaderboardExpanded] = useState(false);
 
   const fetchBeatSaverData = useCallback(async () => {
-    const beatSaverMap = await beatsaverFetcher.lookupMap(leaderboard.songHash);
+    const beatSaverMap = await beatsaverService.lookupMap(leaderboard.songHash);
     setBeatSaverMap(beatSaverMap);
   }, [leaderboard.songHash]);
 

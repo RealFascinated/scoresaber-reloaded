@@ -1,4 +1,4 @@
-import ScoreSaberScore from "@/common/data-fetcher/types/scoresaber/scoresaber-score";
+import ScoreSaberScore from "@/common/service/types/scoresaber/scoresaber-score";
 import { formatNumberWithCommas } from "@/common/number-utils";
 import { timeAgo } from "@/common/time-utils";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";

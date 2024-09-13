@@ -1,7 +1,7 @@
 "use client";
 
-import { scoresaberFetcher } from "@/common/data-fetcher/impl/scoresaber";
-import ScoreSaberPlayer from "@/common/data-fetcher/types/scoresaber/scoresaber-player";
+import { scoresaberService } from "@/common/service/impl/scoresaber";
+import ScoreSaberPlayer from "@/common/service/types/scoresaber/scoresaber-player";
 import { formatNumberWithCommas } from "@/common/number-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
@@ -31,7 +31,7 @@ export default function SearchPlayer() {
   async function onSubmit({ username }: z.infer<typeof formSchema>) {
     setLoading(true);
     setResults(undefined); // Reset results
-    const results = await scoresaberFetcher.searchPlayers(username);
+    const results = await scoresaberService.searchPlayers(username);
     setResults(results?.players);
     setLoading(false);
   }
