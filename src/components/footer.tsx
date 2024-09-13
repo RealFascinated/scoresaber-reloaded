@@ -22,11 +22,12 @@ export default function Footer() {
 
   return (
     <div className="flex items-center w-full flex-col gap-1 mt-6">
-      <p className="text-input text-sm">
-        Build: {buildId} <span className="hidden lg:block">({buildTime})</span>
-        <span className="none lg:hidden">({buildTimeShort})</span>
-      </p>
-      <div className="h-14 w-full flex flex-wrap items-center justify-center bg-secondary/95 divide-x divide-input">
+      <div className="flex items-center gap-2 text-input text-sm">
+        <p>Build: {buildId}</p>
+        <p className="hidden md:block">({buildTime})</p>
+        <p className="none md:hidden">({buildTimeShort})</p>
+      </div>
+      <div className="h-12 w-full flex flex-wrap items-center justify-center bg-secondary/95 divide-x divide-input">
         {items.map((item, index) => {
           return (
             <Link

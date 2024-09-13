@@ -9,11 +9,11 @@ import { useCallback, useEffect, useState } from "react";
 import Card from "../card";
 import Pagination from "../input/pagination";
 import { Button } from "../ui/button";
-import Score from "./score/score";
 import { leaderboards } from "@/common/leaderboards";
 import { ScoreSort } from "@/common/service/score-sort";
 import ScoreSaberPlayer from "@/common/service/types/scoresaber/scoresaber-player";
 import ScoreSaberPlayerScoresPage from "@/common/service/types/scoresaber/scoresaber-player-scores-page";
+import Score from "@/components/score/score";
 
 type Props = {
   initialScoreData?: ScoreSaberPlayerScoresPage;

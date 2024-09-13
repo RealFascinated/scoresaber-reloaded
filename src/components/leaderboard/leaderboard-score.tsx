@@ -2,9 +2,9 @@
 
 import ScoreSaberLeaderboard from "@/common/service/types/scoresaber/scoresaber-leaderboard";
 import ScoreSaberScore from "@/common/service/types/scoresaber/scoresaber-score";
-import ScoreRankInfo from "../player/score/score-rank-info";
 import LeaderboardPlayer from "./leaderboard-player";
 import LeaderboardScoreStats from "./leaderboard-score-stats";
+import ScoreRankInfo from "@/components/score/score-rank-info";
 
 type Props = {
   /**
