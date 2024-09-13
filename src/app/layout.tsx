@@ -10,6 +10,7 @@ import { ThemeProvider } from "@/components/providers/theme-provider";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import "./globals.css";
+import Footer from "@/components/footer";
 
 const siteFont = localFont({
   src: "./fonts/JetBrainsMono-Regular.woff2",
@@ -78,9 +79,12 @@ export default function RootLayout({
             >
               <QueryProvider>
                 <AnimatePresence>
-                  <main className="z-[9999] m-auto flex h-screen flex-col items-center md:max-w-[1200px]">
+                  <main className="flex flex-col min-h-screen gap-2">
                     <NavBar />
-                    {children}
+                    <div className="z-[1] m-auto flex flex-col flex-grow items-center md:max-w-[1200px]">
+                      {children}
+                    </div>
+                    <Footer />
                   </main>
                 </AnimatePresence>
               </QueryProvider>
