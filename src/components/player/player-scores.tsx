@@ -139,7 +139,7 @@ export default function PlayerScores({
     if (scores) {
       handleScoreLoad();
     }
-  }, [scores, isError]);
+  }, [scores, isError, handleScoreLoad]);
 
   useEffect(() => {
     const newUrl = `/player/${player.id}/${pageState.sort}/${pageState.page}`;

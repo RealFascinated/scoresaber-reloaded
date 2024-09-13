@@ -90,7 +90,7 @@ export default function ScoreStats({ score, leaderboard }: Props) {
     <div className={`grid grid-cols-3 grid-rows-2 gap-1 ml-0 lg:ml-2`}>
       {badges.map((badge, index) => {
         const toRender = badge.create(score, leaderboard);
-        let color = badge.color?.(score, leaderboard);
+        const color = badge.color?.(score, leaderboard);
         if (toRender === undefined) {
           return <div key={index} />;
         }
