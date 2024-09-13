@@ -15,6 +15,41 @@ import Pagination from "../input/pagination";
 import { Button } from "../ui/button";
 import Score from "./score/score";
 
+type Props = {
+  initialScoreData?: ScoreSaberPlayerScoresPage;
+  player: ScoreSaberPlayer;
+  sort: ScoreSort;
+  page: number;
+};
+
+type PageState = {
+  /**
+   * The current page
+   */
+  page: number;
+
+  /**
+   * The current sort
+   */
+  sort: ScoreSort;
+};
+
+const leaderboards = {
+  ScoreSaber: {
+    capabilities: {
+      search: true,
+    },
+    queries: {
+      lookupScores: (player: ScoreSaberPlayer, pageState: PageState) =>
+        scoresaberFetcher.lookupPlayerScores({
+          playerId: player.id,
+          sort: ScoreSort.top,
+          page: 1,
+        }),
+    },
+  },
+};
+
 const scoreSort = [
   {
     name: "Top",
@@ -52,31 +87,13 @@ const scoreAnimation: Variants = {
   },
 };
 
-type Props = {
-  initialScoreData?: ScoreSaberPlayerScoresPage;
-  player: ScoreSaberPlayer;
-  sort: ScoreSort;
-  page: number;
-};
-
-type PageState = {
-  /**
-   * The current page
-   */
-  page: number;
-
-  /**
-   * The current sort
-   */
-  sort: ScoreSort;
-};
-
 export default function PlayerScores({
   initialScoreData,
   player,
   sort,
   page,
 }: Props) {
+  const leaderboard = leaderboards.ScoreSaber;
   const { width } = useWindowDimensions();
   const controls = useAnimation();
 
@@ -96,13 +113,8 @@ export default function PlayerScores({
     isLoading,
     refetch,
   } = useQuery({
-    queryKey: ["playerScores", player.id, pageState],
-    queryFn: () =>
-      scoresaberFetcher.lookupPlayerScores({
-        playerId: player.id,
-        sort: pageState.sort,
-        page: pageState.page,
-      }),
+    queryKey: ["playerScores", player.id, leaderboard, pageState],
+    queryFn: () => leaderboard.queries.lookupScores(player, pageState),
     staleTime: 30 * 1000, // Cache data for 30 seconds
   });
 

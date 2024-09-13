@@ -5,10 +5,10 @@ import localFont from "next/font/local";
 import BackgroundImage from "../components/background-image";
 import DatabaseLoader from "../components/loaders/database-loader";
 import NavBar from "../components/navbar/navbar";
-import { QueryProvider } from "../components/providers/query-provider";
-import { ThemeProvider } from "../components/providers/theme-provider";
-import { Toaster } from "../components/ui/toaster";
-import { TooltipProvider } from "../components/ui/tooltip";
+import { QueryProvider } from "@/components/providers/query-provider";
+import { ThemeProvider } from "@/components/providers/theme-provider";
+import { Toaster } from "@/components/ui/toaster";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import "./globals.css";
 
 const siteFont = localFont({

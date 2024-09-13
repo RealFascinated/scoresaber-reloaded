@@ -1,4 +1,4 @@
-export const diffColors: Record<string, string> = {
+const diffColors: Record<string, string> = {
   easy: "MediumSeaGreen",
   normal: "#59b0f4",
   hard: "tomato",
@@ -45,6 +45,5 @@ export function accuracyToColor(acc: number): string {
       return badge.color;
     }
   }
-  // Return a default color if no badge matches
-  return "#000000"; // black or any default color
+  return "#000000"; // fallback color
 }

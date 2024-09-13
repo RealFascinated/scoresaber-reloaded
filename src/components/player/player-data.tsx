@@ -8,6 +8,8 @@ import { useQuery } from "@tanstack/react-query";
 import PlayerHeader from "./player-header";
 import PlayerRankChart from "./player-rank-chart";
 import PlayerScores from "./player-scores";
+import { useEffect } from "react";
+import { scoresaberReloadedWorker } from "@/common/workers/workers";
 
 const REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes
 
@@ -30,6 +32,13 @@ export default function PlayerData({
     queryFn: () => scoresaberFetcher.lookupPlayer(player.id),
     refetchInterval: REFRESH_INTERVAL,
   });
+
+  useEffect(() => {
+    (async () => {
+      const worker = scoresaberReloadedWorker();
+      console.log(await worker.getName());
+    })();
+  }, []);
 
   if (data && (!isLoading || !isError)) {
     player = data;
