@@ -1,9 +1,9 @@
 const diffColors: Record<string, string> = {
-  easy: "MediumSeaGreen",
+  easy: "#3CB371",
   normal: "#59b0f4",
-  hard: "tomato",
+  hard: "#FF6347",
   expert: "#bf2a42",
-  expertPlus: "#8f48db",
+  expertplus: "#8f48db",
 };
 
 const badgesDef: {
