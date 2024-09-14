@@ -123,7 +123,7 @@ export default function PlayerRankChart({ player }: Props) {
 
   return (
     <Card className="h-96">
-      <Line options={options} data={data} />
+      <Line className="w-fit" options={options} data={data} />
     </Card>
   );
 }
