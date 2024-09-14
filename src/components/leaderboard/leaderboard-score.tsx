@@ -1,7 +1,7 @@
 "use client";
 
-import ScoreSaberLeaderboard from "@/common/service/types/scoresaber/scoresaber-leaderboard";
-import ScoreSaberScore from "@/common/service/types/scoresaber/scoresaber-score";
+import ScoreSaberLeaderboardToken from "@/common/model/token/scoresaber/score-saber-leaderboard-token";
+import ScoreSaberScoreToken from "@/common/model/token/scoresaber/score-saber-score-token";
 import LeaderboardPlayer from "./leaderboard-player";
 import LeaderboardScoreStats from "./leaderboard-score-stats";
 import ScoreRankInfo from "@/components/score/score-rank-info";
@@ -10,12 +10,12 @@ type Props = {
   /**
    * The score to display.
    */
-  score: ScoreSaberScore;
+  score: ScoreSaberScoreToken;
 
   /**
    * The leaderboard to display.
    */
-  leaderboard: ScoreSaberLeaderboard;
+  leaderboard: ScoreSaberLeaderboardToken;
 };
 
 export default function LeaderboardScore({ score, leaderboard }: Props) {

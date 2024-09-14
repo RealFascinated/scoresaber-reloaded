@@ -1,7 +1,7 @@
 "use client";
 
 import { scoresaberService } from "@/common/service/impl/scoresaber";
-import ScoreSaberPlayer from "@/common/service/types/scoresaber/scoresaber-player";
+import ScoreSaberPlayerToken from "@/common/model/token/scoresaber/score-saber-player-token";
 import { formatNumberWithCommas } from "@/common/number-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
@@ -25,7 +25,7 @@ export default function SearchPlayer() {
       username: "",
     },
   });
-  const [results, setResults] = useState<ScoreSaberPlayer[] | undefined>();
+  const [results, setResults] = useState<ScoreSaberPlayerToken[] | undefined>();
   const [loading, setLoading] = useState(false);
 
   async function onSubmit({ username }: z.infer<typeof formSchema>) {

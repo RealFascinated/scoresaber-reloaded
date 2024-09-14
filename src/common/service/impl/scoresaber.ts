@@ -1,9 +1,9 @@
 import Service from "../service";
 import { ScoreSort } from "../score-sort";
-import ScoreSaberLeaderboardScoresPage from "../types/scoresaber/scoresaber-leaderboard-scores-page";
-import ScoreSaberPlayer from "../types/scoresaber/scoresaber-player";
-import ScoreSaberPlayerScoresPage from "../types/scoresaber/scoresaber-player-scores-page";
-import { ScoreSaberPlayerSearch } from "../types/scoresaber/scoresaber-player-search";
+import ScoreSaberLeaderboardScoresPageToken from "@/common/model/token/scoresaber/score-saber-leaderboard-scores-page-token";
+import ScoreSaberPlayerToken from "@/common/model/token/scoresaber/score-saber-player-token";
+import ScoreSaberPlayerScoresPageToken from "@/common/model/token/scoresaber/score-saber-player-scores-page-token";
+import { ScoreSaberPlayerSearchToken } from "@/common/model/token/scoresaber/score-saber-player-search-token";
 
 const API_BASE = "https://scoresaber.com/api";
 const SEARCH_PLAYERS_ENDPOINT = `${API_BASE}/players?search=:query`;
@@ -26,10 +26,10 @@ class ScoreSaberService extends Service {
   async searchPlayers(
     query: string,
     useProxy = true,
-  ): Promise<ScoreSaberPlayerSearch | undefined> {
+  ): Promise<ScoreSaberPlayerSearchToken | undefined> {
     const before = performance.now();
     this.log(`Searching for players matching "${query}"...`);
-    const results = await this.fetch<ScoreSaberPlayerSearch>(
+    const results = await this.fetch<ScoreSaberPlayerSearchToken>(
       useProxy,
       SEARCH_PLAYERS_ENDPOINT.replace(":query", query),
     );
@@ -56,10 +56,10 @@ class ScoreSaberService extends Service {
   async lookupPlayer(
     playerId: string,
     useProxy = true,
-  ): Promise<ScoreSaberPlayer | undefined> {
+  ): Promise<ScoreSaberPlayerToken | undefined> {
     const before = performance.now();
     this.log(`Looking up player "${playerId}"...`);
-    const response = await this.fetch<ScoreSaberPlayer>(
+    const response = await this.fetch<ScoreSaberPlayerToken>(
       useProxy,
       LOOKUP_PLAYER_ENDPOINT.replace(":id", playerId),
     );
@@ -94,12 +94,12 @@ class ScoreSaberService extends Service {
     page: number;
     search?: string;
     useProxy?: boolean;
-  }): Promise<ScoreSaberPlayerScoresPage | undefined> {
+  }): Promise<ScoreSaberPlayerScoresPageToken | undefined> {
     const before = performance.now();
     this.log(
       `Looking up scores for player "${playerId}", sort "${sort}", page "${page}"${search ? `, search "${search}"` : ""}...`,
     );
-    const response = await this.fetch<ScoreSaberPlayerScoresPage>(
+    const response = await this.fetch<ScoreSaberPlayerScoresPageToken>(
       useProxy,
       LOOKUP_PLAYER_SCORES_ENDPOINT.replace(":id", playerId)
         .replace(":limit", 8 + "")
@@ -128,12 +128,12 @@ class ScoreSaberService extends Service {
     leaderboardId: string,
     page: number,
     useProxy = true,
-  ): Promise<ScoreSaberLeaderboardScoresPage | undefined> {
+  ): Promise<ScoreSaberLeaderboardScoresPageToken | undefined> {
     const before = performance.now();
     this.log(
       `Looking up scores for leaderboard "${leaderboardId}", page "${page}"...`,
     );
-    const response = await this.fetch<ScoreSaberLeaderboardScoresPage>(
+    const response = await this.fetch<ScoreSaberLeaderboardScoresPageToken>(
       useProxy,
       LOOKUP_LEADERBOARD_SCORES_ENDPOINT.replace(":id", leaderboardId).replace(
         ":page",

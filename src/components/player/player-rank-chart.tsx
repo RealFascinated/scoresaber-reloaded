@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import ScoreSaberPlayer from "@/common/service/types/scoresaber/scoresaber-player";
+import ScoreSaberPlayerToken from "@/common/model/token/scoresaber/score-saber-player-token";
 import { formatNumberWithCommas } from "@/common/number-utils";
 import {
   CategoryScale,
@@ -86,7 +86,7 @@ export const options: any = {
 };
 
 type Props = {
-  player: ScoreSaberPlayer;
+  player: ScoreSaberPlayerToken;
 };
 
 export default function PlayerRankChart({ player }: Props) {

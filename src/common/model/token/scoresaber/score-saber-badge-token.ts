@@ -1,4 +1,4 @@
-export interface ScoreSaberBadge {
+export interface ScoreSaberBadgeToken {
   /**
    * The description of the badge.
    */

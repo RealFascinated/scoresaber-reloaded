@@ -32,7 +32,7 @@ export default function Footer() {
           return (
             <Link
               key={index}
-              className="px-2 text-pp hover:brightness-75"
+              className="px-2 text-pp hover:brightness-75 transition-all transform-gpu"
               href={item.link}
             >
               {item.name}

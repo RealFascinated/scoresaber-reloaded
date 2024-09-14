@@ -1,9 +1,9 @@
-import ScoreSaberLeaderboard from "./scoresaber-leaderboard";
-import ScoreSaberLeaderboardPlayerInfo from "./scoresaber-leaderboard-player-info";
+import ScoreSaberLeaderboardToken from "./score-saber-leaderboard-token";
+import ScoreSaberLeaderboardPlayerInfoToken from "./score-saber-leaderboard-player-info-token";
 
-export default interface ScoreSaberScore {
+export default interface ScoreSaberScoreToken {
   id: string;
-  leaderboardPlayerInfo: ScoreSaberLeaderboardPlayerInfo;
+  leaderboardPlayerInfo: ScoreSaberLeaderboardPlayerInfoToken;
   rank: number;
   baseScore: number;
   modifiedScore: number;
@@ -21,5 +21,5 @@ export default interface ScoreSaberScore {
   deviceHmd: string;
   deviceControllerLeft: string;
   deviceControllerRight: string;
-  leaderboard: ScoreSaberLeaderboard;
+  leaderboard: ScoreSaberLeaderboardToken;
 }

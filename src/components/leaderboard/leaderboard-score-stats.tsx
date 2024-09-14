@@ -1,5 +1,5 @@
-import ScoreSaberLeaderboard from "@/common/service/types/scoresaber/scoresaber-leaderboard";
-import ScoreSaberScore from "@/common/service/types/scoresaber/scoresaber-score";
+import ScoreSaberLeaderboardToken from "@/common/model/token/scoresaber/score-saber-leaderboard-token";
+import ScoreSaberScoreToken from "@/common/model/token/scoresaber/score-saber-score-token";
 import { formatNumberWithCommas } from "@/common/number-utils";
 import StatValue from "@/components/stat-value";
 import { XMarkIcon } from "@heroicons/react/24/solid";
@@ -8,15 +8,15 @@ import clsx from "clsx";
 type Badge = {
   name: string;
   create: (
-    score: ScoreSaberScore,
-    leaderboard: ScoreSaberLeaderboard,
+    score: ScoreSaberScoreToken,
+    leaderboard: ScoreSaberLeaderboardToken,
   ) => string | React.ReactNode | undefined;
 };
 
 const badges: Badge[] = [
   {
     name: "PP",
-    create: (score: ScoreSaberScore) => {
+    create: (score: ScoreSaberScoreToken) => {
       const pp = score.pp;
       if (pp === 0) {
         return undefined;
@@ -26,14 +26,17 @@ const badges: Badge[] = [
   },
   {
     name: "Accuracy",
-    create: (score: ScoreSaberScore, leaderboard: ScoreSaberLeaderboard) => {
+    create: (
+      score: ScoreSaberScoreToken,
+      leaderboard: ScoreSaberLeaderboardToken,
+    ) => {
       const acc = (score.baseScore / leaderboard.maxScore) * 100;
       return `${acc.toFixed(2)}%`;
     },
   },
   {
     name: "Full Combo",
-    create: (score: ScoreSaberScore) => {
+    create: (score: ScoreSaberScoreToken) => {
       const fullCombo = score.missedNotes === 0;
 
       return (
@@ -55,8 +58,8 @@ const badges: Badge[] = [
 ];
 
 type Props = {
-  score: ScoreSaberScore;
-  leaderboard: ScoreSaberLeaderboard;
+  score: ScoreSaberScoreToken;
+  leaderboard: ScoreSaberLeaderboardToken;
 };
 
 export default function LeaderboardScoreStats({ score, leaderboard }: Props) {

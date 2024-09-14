@@ -1,57 +1,59 @@
 import { formatNumberWithCommas } from "@/common/number-utils";
 import StatValue from "@/components/stat-value";
-import ScoreSaberPlayer from "@/common/service/types/scoresaber/scoresaber-player";
+import ScoreSaberPlayerToken from "@/common/model/token/scoresaber/score-saber-player-token";
 
 type Badge = {
   name: string;
   color?: string;
-  create: (player: ScoreSaberPlayer) => string | React.ReactNode | undefined;
+  create: (
+    player: ScoreSaberPlayerToken,
+  ) => string | React.ReactNode | undefined;
 };
 
 const badges: Badge[] = [
   {
     name: "Ranked Play Count",
     color: "bg-pp",
-    create: (player: ScoreSaberPlayer) => {
+    create: (player: ScoreSaberPlayerToken) => {
       return formatNumberWithCommas(player.scoreStats.rankedPlayCount);
     },
   },
   {
     name: "Total Ranked Score",
     color: "bg-pp",
-    create: (player: ScoreSaberPlayer) => {
+    create: (player: ScoreSaberPlayerToken) => {
       return formatNumberWithCommas(player.scoreStats.totalRankedScore);
     },
   },
   {
     name: "Average Ranked Accuracy",
     color: "bg-pp",
-    create: (player: ScoreSaberPlayer) => {
+    create: (player: ScoreSaberPlayerToken) => {
       return player.scoreStats.averageRankedAccuracy.toFixed(2) + "%";
     },
   },
   {
     name: "Total Play Count",
-    create: (player: ScoreSaberPlayer) => {
+    create: (player: ScoreSaberPlayerToken) => {
       return formatNumberWithCommas(player.scoreStats.totalPlayCount);
     },
   },
   {
     name: "Total Score",
-    create: (player: ScoreSaberPlayer) => {
+    create: (player: ScoreSaberPlayerToken) => {
       return formatNumberWithCommas(player.scoreStats.totalScore);
     },
   },
   {
     name: "Total Replays Watched",
-    create: (player: ScoreSaberPlayer) => {
+    create: (player: ScoreSaberPlayerToken) => {
       return formatNumberWithCommas(player.scoreStats.replaysWatched);
     },
   },
 ];
 
 type Props = {
-  player: ScoreSaberPlayer;
+  player: ScoreSaberPlayerToken;
 };
 
 export default function PlayerStats({ player }: Props) {

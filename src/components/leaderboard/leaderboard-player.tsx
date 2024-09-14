@@ -1,9 +1,9 @@
-import ScoreSaberScore from "@/common/service/types/scoresaber/scoresaber-score";
+import ScoreSaberScoreToken from "@/common/model/token/scoresaber/score-saber-score-token";
 import Image from "next/image";
 import Link from "next/link";
 
 type Props = {
-  score: ScoreSaberScore;
+  score: ScoreSaberScoreToken;
 };
 
 export default function LeaderboardPlayer({ score }: Props) {

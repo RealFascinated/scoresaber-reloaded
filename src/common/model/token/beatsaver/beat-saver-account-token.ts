@@ -1,4 +1,4 @@
-export default interface BeatSaverAccount {
+export default interface BeatSaverAccountToken {
   /**
    * The id of the mapper
    */

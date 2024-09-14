@@ -1,8 +1,8 @@
 "use client";
 
 import { scoresaberService } from "@/common/service/impl/scoresaber";
-import ScoreSaberLeaderboard from "@/common/service/types/scoresaber/scoresaber-leaderboard";
-import ScoreSaberLeaderboardScoresPage from "@/common/service/types/scoresaber/scoresaber-leaderboard-scores-page";
+import ScoreSaberLeaderboardToken from "@/common/model/token/scoresaber/score-saber-leaderboard-token";
+import ScoreSaberLeaderboardScoresPageToken from "@/common/model/token/scoresaber/score-saber-leaderboard-scores-page-token";
 import useWindowDimensions from "@/hooks/use-window-dimensions";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
@@ -12,7 +12,7 @@ import Pagination from "../input/pagination";
 import LeaderboardScore from "./leaderboard-score";
 
 type Props = {
-  leaderboard: ScoreSaberLeaderboard;
+  leaderboard: ScoreSaberLeaderboardToken;
 };
 
 export default function LeaderboardScores({ leaderboard }: Props) {
@@ -20,7 +20,7 @@ export default function LeaderboardScores({ leaderboard }: Props) {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [currentScores, setCurrentScores] = useState<
-    ScoreSaberLeaderboardScoresPage | undefined
+    ScoreSaberLeaderboardScoresPageToken | undefined
   >();
 
   const {

@@ -1,4 +1,4 @@
-import ScoreSaberPlayer from "@/common/service/types/scoresaber/scoresaber-player";
+import ScoreSaberPlayerToken from "@/common/model/token/scoresaber/score-saber-player-token";
 import { formatNumberWithCommas } from "@/common/number-utils";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import Card from "../card";
@@ -13,29 +13,29 @@ const playerData = [
     icon: () => {
       return <GlobeAmericasIcon className="h-5 w-5" />;
     },
-    render: (player: ScoreSaberPlayer) => {
+    render: (player: ScoreSaberPlayerToken) => {
       return <p>#{formatNumberWithCommas(player.rank)}</p>;
     },
   },
   {
     showWhenInactiveOrBanned: false,
-    icon: (player: ScoreSaberPlayer) => {
+    icon: (player: ScoreSaberPlayerToken) => {
       return <CountryFlag country={player.country.toLowerCase()} size={15} />;
     },
-    render: (player: ScoreSaberPlayer) => {
+    render: (player: ScoreSaberPlayerToken) => {
       return <p>#{formatNumberWithCommas(player.countryRank)}</p>;
     },
   },
   {
     showWhenInactiveOrBanned: true,
-    render: (player: ScoreSaberPlayer) => {
+    render: (player: ScoreSaberPlayerToken) => {
       return <p className="text-pp">{formatNumberWithCommas(player.pp)}pp</p>;
     },
   },
 ];
 
 type Props = {
-  player: ScoreSaberPlayer;
+  player: ScoreSaberPlayerToken;
 };
 
 export default function PlayerHeader({ player }: Props) {

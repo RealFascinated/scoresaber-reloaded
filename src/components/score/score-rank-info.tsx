@@ -1,10 +1,10 @@
-import ScoreSaberScore from "@/common/service/types/scoresaber/scoresaber-score";
+import ScoreSaberScoreToken from "@/common/model/token/scoresaber/score-saber-score-token";
 import { formatNumberWithCommas } from "@/common/number-utils";
 import { timeAgo } from "@/common/time-utils";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 
 type Props = {
-  score: ScoreSaberScore;
+  score: ScoreSaberScoreToken;
 };
 
 export default function ScoreRankInfo({ score }: Props) {

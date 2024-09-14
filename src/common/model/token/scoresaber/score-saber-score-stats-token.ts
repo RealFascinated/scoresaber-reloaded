@@ -1,4 +1,4 @@
-export default interface ScoreSaberScoreStats {
+export default interface ScoreSaberScoreStatsToken {
   /**
    * The total amount of score accumulated over all scores.
    */

@@ -1,4 +1,4 @@
-import ScoreSaberPlayer from "@/common/service/types/scoresaber/scoresaber-player";
+import ScoreSaberPlayerToken from "@/common/model/token/scoresaber/score-saber-player-token";
 import { scoresaberService } from "@/common/service/impl/scoresaber";
 import { ScoreSort } from "@/common/service/score-sort";
 
@@ -8,7 +8,11 @@ export const leaderboards = {
       search: true,
     },
     queries: {
-      lookupScores: (player: ScoreSaberPlayer, sort: ScoreSort, page: number) =>
+      lookupScores: (
+        player: ScoreSaberPlayerToken,
+        sort: ScoreSort,
+        page: number,
+      ) =>
         scoresaberService.lookupPlayerScores({
           playerId: player.id,
           sort: sort,

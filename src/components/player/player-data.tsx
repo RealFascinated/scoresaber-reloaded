@@ -2,8 +2,8 @@
 
 import { scoresaberService } from "@/common/service/impl/scoresaber";
 import { ScoreSort } from "@/common/service/score-sort";
-import ScoreSaberPlayer from "@/common/service/types/scoresaber/scoresaber-player";
-import ScoreSaberPlayerScoresPage from "@/common/service/types/scoresaber/scoresaber-player-scores-page";
+import ScoreSaberPlayerToken from "@/common/model/token/scoresaber/score-saber-player-token";
+import ScoreSaberPlayerScoresPageToken from "@/common/model/token/scoresaber/score-saber-player-scores-page-token";
 import { useQuery } from "@tanstack/react-query";
 import PlayerHeader from "./player-header";
 import PlayerRankChart from "./player-rank-chart";
@@ -12,8 +12,8 @@ import PlayerScores from "./player-scores";
 const REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes
 
 type Props = {
-  initialPlayerData: ScoreSaberPlayer;
-  initialScoreData?: ScoreSaberPlayerScoresPage;
+  initialPlayerData: ScoreSaberPlayerToken;
+  initialScoreData?: ScoreSaberPlayerScoresPageToken;
   sort: ScoreSort;
   page: number;
 };

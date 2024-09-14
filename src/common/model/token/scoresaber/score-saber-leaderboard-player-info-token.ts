@@ -1,4 +1,4 @@
-export default interface ScoreSaberLeaderboardPlayerInfo {
+export default interface ScoreSaberLeaderboardPlayerInfoToken {
   id: string;
   name: string;
   profilePicture: string;

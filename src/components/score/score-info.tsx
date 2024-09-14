@@ -1,4 +1,4 @@
-import ScoreSaberLeaderboard from "@/common/service/types/scoresaber/scoresaber-leaderboard";
+import ScoreSaberLeaderboardToken from "@/common/model/token/scoresaber/score-saber-leaderboard-token";
 import BeatSaverMap from "@/common/database/types/beatsaver-map";
 import { getDifficultyFromScoreSaberDifficulty } from "@/common/scoresaber-utils";
 import { songDifficultyToColor } from "@/common/song-utils";
@@ -9,7 +9,7 @@ import clsx from "clsx";
 import Image from "next/image";
 
 type Props = {
-  leaderboard: ScoreSaberLeaderboard;
+  leaderboard: ScoreSaberLeaderboardToken;
   beatSaverMap?: BeatSaverMap;
 };
 

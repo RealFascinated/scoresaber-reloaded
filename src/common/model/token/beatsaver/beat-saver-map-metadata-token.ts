@@ -1,4 +1,4 @@
-export default interface BeatSaverMapMetadata {
+export default interface BeatSaverMapMetadataToken {
   /**
    * The bpm of the song.
    */

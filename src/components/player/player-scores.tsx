@@ -11,13 +11,13 @@ import Pagination from "../input/pagination";
 import { Button } from "../ui/button";
 import { leaderboards } from "@/common/leaderboards";
 import { ScoreSort } from "@/common/service/score-sort";
-import ScoreSaberPlayer from "@/common/service/types/scoresaber/scoresaber-player";
-import ScoreSaberPlayerScoresPage from "@/common/service/types/scoresaber/scoresaber-player-scores-page";
+import ScoreSaberPlayerToken from "@/common/model/token/scoresaber/score-saber-player-token";
+import ScoreSaberPlayerScoresPageToken from "@/common/model/token/scoresaber/score-saber-player-scores-page-token";
 import Score from "@/components/score/score";
 
 type Props = {
-  initialScoreData?: ScoreSaberPlayerScoresPage;
-  player: ScoreSaberPlayer;
+  initialScoreData?: ScoreSaberPlayerScoresPageToken;
+  player: ScoreSaberPlayerToken;
   sort: ScoreSort;
   page: number;
 };
@@ -88,7 +88,7 @@ export default function PlayerScores({
   });
   const [previousPage, setPreviousPage] = useState(page);
   const [currentScores, setCurrentScores] = useState<
-    ScoreSaberPlayerScoresPage | undefined
+    ScoreSaberPlayerScoresPageToken | undefined
   >(initialScoreData);
 
   const {

@@ -1,4 +1,4 @@
-import { BeatSaverMap as BSMap } from "@/common/service/types/beatsaver/beatsaver-map";
+import { BeatSaverMapToken as BSMap } from "@/common/model/token/beatsaver/beat-saver-map-token";
 import { Entity } from "dexie";
 import Database from "../database";
 

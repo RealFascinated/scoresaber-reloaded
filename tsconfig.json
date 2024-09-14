@@ -27,7 +27,6 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     "tailwind.config.ts",
-    "src/components/leaderboard/leaderboard-score-statstsx"
   ],
   "exclude": ["node_modules"]
 }

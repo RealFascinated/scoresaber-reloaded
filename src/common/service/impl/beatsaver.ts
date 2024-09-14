@@ -1,7 +1,7 @@
 import BeatSaverMap from "@/common/database/types/beatsaver-map";
 import { db } from "../../database/database";
 import Service from "../service";
-import { BeatSaverMap as BSMap } from "../types/beatsaver/beatsaver-map";
+import { BeatSaverMapToken as BSMap } from "@/common/model/token/beatsaver/beat-saver-map-token";
 
 const API_BASE = "https://api.beatsaver.com";
 const LOOKUP_MAP_BY_HASH_ENDPOINT = `${API_BASE}/maps/hash/:query`;

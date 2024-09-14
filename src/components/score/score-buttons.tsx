@@ -1,7 +1,7 @@
 "use client";
 
 import { copyToClipboard } from "@/common/browser-utils";
-import ScoreSaberPlayerScore from "@/common/service/types/scoresaber/scoresaber-player-score";
+import ScoreSaberPlayerScoreToken from "@/common/model/token/scoresaber/score-saber-player-score-token";
 import BeatSaverMap from "@/common/database/types/beatsaver-map";
 import { songNameToYouTubeLink } from "@/common/youtube-utils";
 import BeatSaverLogo from "@/components/logos/beatsaver-logo";
@@ -12,7 +12,7 @@ import LeaderboardButton from "./leaderboard-button";
 import ScoreButton from "./score-button";
 
 type Props = {
-  playerScore: ScoreSaberPlayerScore;
+  playerScore: ScoreSaberPlayerScoreToken;
   beatSaverMap?: BeatSaverMap;
   isLeaderboardExpanded: boolean;
   setIsLeaderboardExpanded: Dispatch<SetStateAction<boolean>>;

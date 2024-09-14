@@ -1,13 +1,13 @@
-import ScoreSaberDifficulty from "./scoresaber-difficulty";
+import ScoreSaberDifficultyToken from "./score-saber-difficulty-token";
 
-export default interface ScoreSaberLeaderboard {
+export default interface ScoreSaberLeaderboardToken {
   id: number;
   songHash: string;
   songName: string;
   songSubName: string;
   songAuthorName: string;
   levelAuthorName: string;
-  difficulty: ScoreSaberDifficulty;
+  difficulty: ScoreSaberDifficultyToken;
   maxScore: number;
   createdDate: string;
   rankedDate: string;
@@ -22,5 +22,5 @@ export default interface ScoreSaberLeaderboard {
   plays: boolean;
   dailyPlays: boolean;
   coverImage: string;
-  difficulties: ScoreSaberDifficulty[];
+  difficulties: ScoreSaberDifficultyToken[];
 }

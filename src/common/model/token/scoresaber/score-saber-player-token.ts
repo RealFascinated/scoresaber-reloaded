@@ -1,7 +1,7 @@
-import { ScoreSaberBadge } from "./scoresaber-badge";
-import ScoreSaberScoreStats from "./scoresaber-score-stats";
+import { ScoreSaberBadgeToken } from "./score-saber-badge-token";
+import ScoreSaberScoreStatsToken from "./score-saber-score-stats-token";
 
-export default interface ScoreSaberPlayer {
+export default interface ScoreSaberPlayerToken {
   /**
    * The ID of the player.
    */
@@ -50,7 +50,7 @@ export default interface ScoreSaberPlayer {
   /**
    * The badges the player has.
    */
-  badges: ScoreSaberBadge[] | null;
+  badges: ScoreSaberBadgeToken[] | null;
 
   /**
    * The previous 50 days of rank history.
@@ -60,7 +60,7 @@ export default interface ScoreSaberPlayer {
   /**
    * The score stats of the player.
    */
-  scoreStats: ScoreSaberScoreStats;
+  scoreStats: ScoreSaberScoreStatsToken;
 
   /**
    * The permissions of the player. (bitwise)

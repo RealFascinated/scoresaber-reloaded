@@ -1,7 +1,7 @@
 "use client";
 
 import { beatsaverService } from "@/common/service/impl/beatsaver";
-import ScoreSaberPlayerScore from "@/common/service/types/scoresaber/scoresaber-player-score";
+import ScoreSaberPlayerScoreToken from "@/common/model/token/scoresaber/score-saber-player-score-token";
 import BeatSaverMap from "@/common/database/types/beatsaver-map";
 import LeaderboardScores from "@/components/leaderboard/leaderboard-scores";
 import { useCallback, useEffect, useState } from "react";
@@ -14,7 +14,7 @@ type Props = {
   /**
    * The score to display.
    */
-  playerScore: ScoreSaberPlayerScore;
+  playerScore: ScoreSaberPlayerScoreToken;
 };
 
 export default function Score({ playerScore }: Props) {

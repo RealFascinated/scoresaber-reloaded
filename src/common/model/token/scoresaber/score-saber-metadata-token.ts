@@ -1,4 +1,4 @@
-export default interface ScoreSaberMetadata {
+export default interface ScoreSaberMetadataToken {
   /**
    * The total amount of returned results.
    */

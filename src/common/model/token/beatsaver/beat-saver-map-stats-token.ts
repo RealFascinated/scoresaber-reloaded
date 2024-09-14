@@ -1,4 +1,4 @@
-export default interface BeatSaverMapStats {
+export default interface BeatSaverMapStatsToken {
   /**
    * The amount of time the map has been played.
    */
