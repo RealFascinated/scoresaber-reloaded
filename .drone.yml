@@ -1,0 +1,16 @@
+---
+kind: pipeline
+type: kubernetes
+name: hello-world
+
+steps:
+  - name: docker
+    image: plugins/docker
+    settings:
+      repo: fascinated/test-image
+      username:
+        from_secret: docker_username
+      password:
+        from_secret: docker_token
+      tags:
+        - latest
