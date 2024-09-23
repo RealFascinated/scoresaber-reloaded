@@ -12,11 +12,11 @@ FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-ENV NEXT_TELEMETRY_DISABLED 1
+ENV NEXT_TELEMETRY_DISABLED=1
 
 # Add the commit hash
 ARG GIT_REV
-ENV GIT_REV ${GIT_REV}
+ENV GIT_REV=${GIT_REV}
 
 # Build the app
 RUN pnpm run build
@@ -25,8 +25,8 @@ RUN pnpm run build
 FROM base AS runner
 WORKDIR /app
 
-ENV NODE_ENV production
-ENV NEXT_TELEMETRY_DISABLED 1
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
@@ -42,6 +42,6 @@ COPY --from=builder --chown=nextjs:nodejs /app/next.config.mjs ./next.config.mjs
 
 USER nextjs
 EXPOSE 80
-ENV HOSTNAME "0.0.0.0"
-ENV PORT 80
+ENV HOSTNAME="0.0.0.0"
+ENV PORT=80
 CMD ["pnpm", "start"]
