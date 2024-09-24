@@ -23,6 +23,8 @@ jobs:
           username: ${{ secrets.REGISTRY_USERNAME }}
           password: ${{ secrets.REGISTRY_TOKEN }}
           registry: git.fascinated.cc
+          env:
+            GIT_REV: "${{ gitea.sha }}"
           build-args: |
             GIT_REV=${{ gitea.sha }}
 
