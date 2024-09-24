@@ -30,8 +30,13 @@ jobs:
           tags: git.fascinated.cc/fascinated/scoresaber-reloaded:latest
           build-args: |
             GIT_REV=${{ gitea.sha }}
+          cache-from: type=registry,ref=git.fascinated.cc/fascinated/scoresaber-reloaded:cache
+          cache-to: type=registry,ref=git.fascinated.cc/fascinated/scoresaber-reloaded:cache,mode=max
 
-      - name: Set up Kubectl
+      - name: Install kubectl
+        run: sudo apt-get install -y kubectl
+
+      - name: Setup kubernetes context
         uses: azure/k8s-set-context@v4
         with:
           kubeconfig: ${{ secrets.KUBECONFIG }}
