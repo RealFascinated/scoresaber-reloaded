@@ -4,17 +4,17 @@ type: kubernetes
 name: ssr-deploy
 
 steps:
-  - name: Build Docker Image
-    image: plugins/docker
-    settings:
-      registry: git.fascinated.cc
-      repo: git.fascinated.cc/fascinated/scoresaber-reloaded
-      username:
-        from_secret: username
-      password:
-        from_secret: token
-      tags:
-        - latest
+  # - name: Build Docker Image
+  #   image: plugins/docker
+  #   settings:
+  #     registry: git.fascinated.cc
+  #     repo: git.fascinated.cc/fascinated/scoresaber-reloaded
+  #     username:
+  #       from_secret: username
+  #     password:
+  #       from_secret: token
+  #     tags:
+  #       - latest
 
   - name: Deploy SSR
     image: danielgormly/drone-plugin-kube:0.2.0
