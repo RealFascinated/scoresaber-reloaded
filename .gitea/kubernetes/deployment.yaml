@@ -17,8 +17,6 @@ spec:
         - name: scoresaber-reloaded-container
           image: git.fascinated.cc/fascinated/scoresaber-reloaded:latest
           imagePullPolicy: Always
-          securityContext:
-            allowPrivilegeEscalation: false
           ports:
             - containerPort: 3000
           resources:
