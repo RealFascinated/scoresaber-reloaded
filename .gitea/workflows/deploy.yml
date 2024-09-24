@@ -9,6 +9,8 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
+      - run: echo ${{ gitea.sha }}
+
       - name: Checkout code
         uses: actions/checkout@v2
 
