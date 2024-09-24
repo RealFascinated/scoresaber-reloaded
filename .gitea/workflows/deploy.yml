@@ -38,8 +38,8 @@ jobs:
           tags: git.fascinated.cc/fascinated/scoresaber-reloaded:latest
           build-args: |
             GIT_REV=${{ gitea.sha }}
-          cache-from: type=local, src=/tmp/.buildx-cache
-          cache-to: type=local, dest=/tmp/.buildx-cache
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
 
       - name: Install kubectl
         uses: azure/setup-kubectl@v4
