@@ -32,7 +32,8 @@ jobs:
       #       GIT_REV=${{ gitea.sha }}
 
       - name: Install kubectl
-        run: sudo apt-get install -y kubectl
+        uses: azure/setup-kubectl@v4
+        id: install
 
       - name: Setup kubernetes context
         uses: azure/k8s-set-context@v4
