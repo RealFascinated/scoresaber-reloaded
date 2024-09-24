@@ -55,6 +55,7 @@ jobs:
         with:
           action: deploy
           namespace: public-services
+          force: true
           manifests: |
             .gitea/kubernetes/deployment.yaml
             .gitea/kubernetes/service.yaml
