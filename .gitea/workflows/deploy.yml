@@ -32,7 +32,7 @@ jobs:
             GIT_REV=${{ gitea.sha }}
 
       - name: Set up Kubectl
-        uses: azure/k8s-set-context@v1
+        uses: azure/k8s-set-context@v4
         with:
           kubeconfig: ${{ secrets.KUBECONFIG }}
 
