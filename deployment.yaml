@@ -1,0 +1,66 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scoresaber-reloaded
+  namespace: public-services
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: scoresaber-reloaded
+  template:
+    metadata:
+      labels:
+        app: scoresaber-reloaded
+    spec:
+      containers:
+        - name: scoresaber-reloaded-container
+          image: git.fascinated.cc/fascinated/scoresaber-reloaded:latest
+          alwaysPullImage: true
+          securityContext:
+            allowPrivilegeEscalation: false
+          ports:
+            - containerPort: 3000
+          resources:
+            requests:
+              cpu: 50m
+              memory: 100Mi
+            limits:
+              cpu: 1000m # 1 vCPU
+              memory: 200Mi
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: scoresaber-reloaded-ingress
+  namespace: public-services
+  annotations:
+    kubernetes.io/ingress.class: traefik-external
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`ssr-staging.fascinated.cc`)
+      kind: Rule
+      middlewares:
+        - name: default-headers
+          namespace: traefik
+      services:
+        - name: scoresaber-reloaded-service
+          port: 3000
+  tls:
+    secretName: fascinated-cc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: scoresaber-reloaded-service
+  namespace: public-services
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3000
+      targetPort: 3000
+  selector:
+    app: scoresaber-reloaded

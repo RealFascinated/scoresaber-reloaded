@@ -15,3 +15,15 @@ steps:
         from_secret: token
       tags:
         - latest
+
+  - name: Deploy SSR
+    image: danielgormly/drone-plugin-kube:0.2.0
+    settings:
+      build_number: ${DRONE_BUILD_NUMBER}
+      template: deployment.yaml
+      ca:
+        from_secret: k8s_crt
+      server:
+        from_secret: k8s_server
+      token:
+        from_secret: k8s_token
