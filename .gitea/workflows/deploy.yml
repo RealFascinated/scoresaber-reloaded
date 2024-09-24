@@ -40,8 +40,13 @@ jobs:
         with:
           kubeconfig: ${{ secrets.KUBECONFIG }}
 
-      - name: Deploy
-        run: |
-          kubectl apply -f .gitea/kubernetes/deployment.yaml
-          kubectl apply -f .gitea/kubernetes/service.yaml
-          kubectl apply -f .gitea/kubernetes/ingress.yaml
+      - uses: Azure/k8s-deploy@v5
+        with:
+          action: deploy
+          strategy: basic
+
+          private-cluster: true
+          manifests: |
+            .gitea/kubernetes/deployment.yaml
+            .gitea/kubernetes/service.yaml
+            .gitea/kubernetes/ingress.yaml
