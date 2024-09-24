@@ -27,7 +27,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: fascinated/scoresaber-reloaded:latest
+          tags: git.fascinated.cc/fascinated/scoresaber-reloaded:latest
           build-args: |
             GIT_REV=${{ gitea.sha }}
 
