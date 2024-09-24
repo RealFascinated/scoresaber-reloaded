@@ -22,7 +22,15 @@ jobs:
           password: ${{ secrets.REGISTRY_TOKEN }}
           registry: git.fascinated.cc
 
-      - name: Build and push
+      - name: Cache Docker Layers
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: Build Image
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -30,22 +38,22 @@ jobs:
           tags: git.fascinated.cc/fascinated/scoresaber-reloaded:latest
           build-args: |
             GIT_REV=${{ gitea.sha }}
+          cache-from: type=local, src=/tmp/.buildx-cache
+          cache-to: type=local, dest=/tmp/.buildx-cache
 
       - name: Install kubectl
         uses: azure/setup-kubectl@v4
         id: install
 
-      - name: Setup kubernetes context
+      - name: Setup Kubernetes Context
         uses: azure/k8s-set-context@v4
         with:
           kubeconfig: ${{ secrets.KUBECONFIG }}
 
-      - uses: Azure/k8s-deploy@v5
+      - name: Deploy to Kubernetes
+        uses: Azure/k8s-deploy@v5
         with:
           action: deploy
-          strategy: basic
-
-          private-cluster: true
           manifests: |
             .gitea/kubernetes/deployment.yaml
             .gitea/kubernetes/service.yaml
