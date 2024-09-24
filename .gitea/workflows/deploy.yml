@@ -21,6 +21,8 @@ jobs:
           username: ${{ secrets.REGISTRY_USERNAME }}
           password: ${{ secrets.REGISTRY_TOKEN }}
           registry: git.fascinated.cc
+          build-args: |
+            GIT_REV=${{ gitea.sha }}
 
       - name: Build and push
         uses: docker/build-push-action@v6
