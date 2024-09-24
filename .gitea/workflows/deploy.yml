@@ -54,6 +54,7 @@ jobs:
         uses: Azure/k8s-deploy@v5
         with:
           action: deploy
+          namespace: public-services
           manifests: |
             .gitea/kubernetes/deployment.yaml
             .gitea/kubernetes/service.yaml
