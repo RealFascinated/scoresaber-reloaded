@@ -1,0 +1,17 @@
+---
+kind: pipeline
+type: kubernetes
+name: ssr-deploy
+
+steps:
+  - name: Build Docker Image
+    image: plugins/docker
+    settings:
+      registry: git.fascinated.cc
+      repo: fascinated/scoresaber-reloaded
+      username:
+        from_secret: username
+      password:
+        from_secret: token
+      tags:
+        - latest
