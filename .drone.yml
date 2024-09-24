@@ -8,7 +8,7 @@ steps:
     image: plugins/docker
     settings:
       registry: git.fascinated.cc
-      repo: fascinated/scoresaber-reloaded
+      repo: git.fascinated.cc/fascinated/scoresaber-reloaded
       username:
         from_secret: username
       password:
