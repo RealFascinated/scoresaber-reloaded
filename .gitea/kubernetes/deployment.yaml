@@ -1,4 +1,3 @@
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -17,7 +16,7 @@ spec:
       containers:
         - name: scoresaber-reloaded-container
           image: git.fascinated.cc/fascinated/scoresaber-reloaded:latest
-          alwaysPullImage: true
+          imagePullPolicy: Always
           securityContext:
             allowPrivilegeEscalation: false
           ports:
