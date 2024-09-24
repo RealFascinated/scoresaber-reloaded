@@ -22,7 +22,7 @@ spec:
           resources:
             requests:
               cpu: 50m
-              memory: 100Mi
+              memory: 128Mi
             limits:
-              cpu: 1000m # 1 vCPU
+              cpu: 200Mi
               memory: 256Mi
