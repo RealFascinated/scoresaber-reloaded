@@ -25,4 +25,4 @@ spec:
               memory: 100Mi
             limits:
               cpu: 1000m # 1 vCPU
-              memory: 200Mi
+              memory: 256Mi

@@ -10,7 +10,7 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`ssr-staging.fascinated.cc`)
+    - match: Host(`ssr.fascinated.cc`)
       kind: Rule
       middlewares:
         - name: default-headers
