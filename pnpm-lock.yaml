@@ -61,7 +61,7 @@ importers:
         version: 1.1.7(@types/react@18.3.9)(dexie@4.0.8)(react@18.3.1)
       framer-motion:
         specifier: ^11.5.4
-        version: 11.6.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: 11.7.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       ky:
         specifier: ^1.7.2
         version: 1.7.2
@@ -1140,8 +1140,8 @@ packages:
     resolution: {integrity: sha512-Ld2g8rrAyMYFXBhEqMz8ZAHBi4J4uS1i/CxGMDnjyFWddMXLVcDp051DZfu+t7+ab7Wv6SMqpWmyFIj5UbfFvg==}
     engines: {node: '>=14'}
 
-  framer-motion@11.6.0:
-    resolution: {integrity: sha512-+NJ8MpS2A7apQf3WjSrMl6xlQeYVmPGp8OZ0grNKJEyEILl6EerQrvj2bc+MgrsUndbweZsYdog1/NsxRrkWdA==}
+  framer-motion@11.7.0:
+    resolution: {integrity: sha512-m+1E3mMzDIQ5DsVghMvXyC+jSkZSm5RHBLA2gHa/LczcXwW6JbQK4Uz48LsuCTGV8bZFVUezcauHj3M33tY/5w==}
     peerDependencies:
       '@emotion/is-prop-valid': '*'
       react: ^18.0.0
@@ -3224,7 +3224,7 @@ snapshots:
       cross-spawn: 7.0.3
       signal-exit: 4.1.0
 
-  framer-motion@11.6.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+  framer-motion@11.7.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
       tslib: 2.7.0
     optionalDependencies:
