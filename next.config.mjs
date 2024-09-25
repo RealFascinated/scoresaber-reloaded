@@ -8,6 +8,9 @@ const __dirname = path.dirname(__filename); // get the name of the directory
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  experimental: {
+    webpackMemoryOptimizations: true,
+  },
   env: {
     NEXT_PUBLIC_BUILD_ID: process.env.GIT_REV || nextBuildId.sync({ dir: __dirname }),
     NEXT_PUBLIC_BUILD_TIME: new Date().toLocaleDateString("en-US", {
