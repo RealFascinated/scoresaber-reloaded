@@ -1,17 +1,17 @@
+import Footer from "@/components/footer";
 import { PreloadResources } from "@/components/preload-resources";
+import { QueryProvider } from "@/components/providers/query-provider";
+import { ThemeProvider } from "@/components/providers/theme-provider";
+import { Toaster } from "@/components/ui/toaster";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { AnimatePresence } from "framer-motion";
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import BackgroundImage from "../components/background-image";
 import DatabaseLoader from "../components/loaders/database-loader";
 import NavBar from "../components/navbar/navbar";
-import { QueryProvider } from "@/components/providers/query-provider";
-import { ThemeProvider } from "@/components/providers/theme-provider";
-import { Toaster } from "@/components/ui/toaster";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import "./globals.css";
-import Footer from "@/components/footer";
 
+import "./globals.css";
 const siteFont = localFont({
   src: "./fonts/JetBrainsMono-Regular.woff2",
   weight: "100 900",
@@ -20,7 +20,7 @@ const siteFont = localFont({
 export const metadata: Metadata = {
   title: {
     default: "ScoreSaber Reloaded",
-    template: "SSR - %s",
+    template: "%s - SSR",
   },
   applicationName: "ScoreSaber Reloaded",
   authors: [
@@ -46,14 +46,12 @@ export const metadata: Metadata = {
     "Stream enhancement, Professional overlay, Easy to use overlay builder.",
   openGraph: {
     title: "Scoresaber Reloaded",
-    description:
-      "Scoresaber Reloaded is a new way to view your scores and get more stats about your and your plays",
+    description: "Scoresaber Reloaded is a new way to view your scores and get more stats about your and your plays",
     url: "https://ssr.fascinated.cc",
     locale: "en_US",
     type: "website",
   },
-  description:
-    "Scoresaber Reloaded is a new way to view your scores and get more stats about your and your plays",
+  description: "Scoresaber Reloaded is a new way to view your scores and get more stats about your and your plays",
 };
 
 export default function RootLayout({
@@ -63,20 +61,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${siteFont.className} antialiased w-full h-full relative`}
-      >
+      <body className={`${siteFont.className} antialiased w-full h-full relative`}>
         <DatabaseLoader>
           <Toaster />
           <BackgroundImage />
           <PreloadResources />
           <TooltipProvider>
-            <ThemeProvider
-              attribute="class"
-              defaultTheme="dark"
-              enableSystem
-              disableTransitionOnChange
-            >
+            <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
               <QueryProvider>
                 <AnimatePresence>
                   <main className="flex flex-col min-h-screen gap-2">
