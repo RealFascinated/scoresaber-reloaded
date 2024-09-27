@@ -26,7 +26,9 @@ export default function ScoreRankInfo({ score }: Props) {
           </p>
         }
       >
-        <p className="text-sm cursor-default">{timeAgo(new Date(score.timeSet))}</p>
+        <p className="text-sm cursor-default">
+          {timeAgo(new Date(score.timeSet))}
+        </p>
       </Tooltip>
     </div>
   );

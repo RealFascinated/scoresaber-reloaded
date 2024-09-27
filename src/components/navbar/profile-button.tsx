@@ -19,10 +19,16 @@ export default function ProfileButton() {
   }
 
   return (
-    <Link href={`/player/${settings.playerId}`} className="flex items-center gap-2 h-full">
+    <Link
+      href={`/player/${settings.playerId}`}
+      className="flex items-center gap-2 h-full"
+    >
       <NavbarButton>
         <Avatar className="w-6 h-6">
-          <AvatarImage alt="Profile Picture" src={`https://cdn.scoresaber.com/avatars/${settings.playerId}.jpg`} />
+          <AvatarImage
+            alt="Profile Picture"
+            src={`https://cdn.scoresaber.com/avatars/${settings.playerId}.jpg`}
+          />
         </Avatar>
         <p>You</p>
       </NavbarButton>

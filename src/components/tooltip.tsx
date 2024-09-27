@@ -1,4 +1,8 @@
-import { Tooltip as ShadCnTooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
+import {
+  Tooltip as ShadCnTooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "./ui/tooltip";
 
 type Props = {
   /**
@@ -10,13 +14,18 @@ type Props = {
    * What will be displayed in the tooltip
    */
   display: React.ReactNode;
+
+  /**
+   * Where the tooltip will be displayed
+   */
+  side?: "top" | "bottom" | "left" | "right";
 };
 
-export default function Tooltip({ children, display }: Props) {
+export default function Tooltip({ children, display, side = "top" }: Props) {
   return (
     <ShadCnTooltip>
       <TooltipTrigger asChild>{children}</TooltipTrigger>
-      <TooltipContent>{display}</TooltipContent>
+      <TooltipContent side={side}>{display}</TooltipContent>
     </ShadCnTooltip>
   );
 }

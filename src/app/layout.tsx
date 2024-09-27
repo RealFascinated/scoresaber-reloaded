@@ -12,6 +12,7 @@ import DatabaseLoader from "../components/loaders/database-loader";
 import NavBar from "../components/navbar/navbar";
 
 import "./globals.css";
+
 const siteFont = localFont({
   src: "./fonts/JetBrainsMono-Regular.woff2",
   weight: "100 900",
@@ -46,12 +47,14 @@ export const metadata: Metadata = {
     "Stream enhancement, Professional overlay, Easy to use overlay builder.",
   openGraph: {
     title: "Scoresaber Reloaded",
-    description: "Scoresaber Reloaded is a new way to view your scores and get more stats about your and your plays",
+    description:
+      "Scoresaber Reloaded is a new way to view your scores and get more stats about your and your plays",
     url: "https://ssr.fascinated.cc",
     locale: "en_US",
     type: "website",
   },
-  description: "Scoresaber Reloaded is a new way to view your scores and get more stats about your and your plays",
+  description:
+    "Scoresaber Reloaded is a new way to view your scores and get more stats about your and your plays",
 };
 
 export default function RootLayout({
@@ -61,13 +64,20 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${siteFont.className} antialiased w-full h-full relative`}>
+      <body
+        className={`${siteFont.className} antialiased w-full h-full relative`}
+      >
         <DatabaseLoader>
           <Toaster />
           <BackgroundImage />
           <PreloadResources />
           <TooltipProvider delayDuration={100}>
-            <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="dark"
+              enableSystem
+              disableTransitionOnChange
+            >
               <QueryProvider>
                 <AnimatePresence>
                   <main className="flex flex-col min-h-screen gap-2 text-white">

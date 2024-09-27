@@ -1,4 +1,3 @@
-import ScoreSaberPlayerToken from "@/common/model/token/scoresaber/score-saber-player-token";
 import { formatNumberWithCommas, formatPp } from "@/common/number-utils";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import Card from "../card";
@@ -6,6 +5,7 @@ import CountryFlag from "../country-flag";
 import { Avatar, AvatarImage } from "../ui/avatar";
 import ClaimProfile from "./claim-profile";
 import PlayerStats from "./player-stats";
+import ScoreSaberPlayer from "@/common/model/player/impl/scoresaber-player";
 
 const playerData = [
   {
@@ -13,29 +13,29 @@ const playerData = [
     icon: () => {
       return <GlobeAmericasIcon className="h-5 w-5" />;
     },
-    render: (player: ScoreSaberPlayerToken) => {
+    render: (player: ScoreSaberPlayer) => {
       return <p>#{formatNumberWithCommas(player.rank)}</p>;
     },
   },
   {
     showWhenInactiveOrBanned: false,
-    icon: (player: ScoreSaberPlayerToken) => {
+    icon: (player: ScoreSaberPlayer) => {
       return <CountryFlag code={player.country} size={15} />;
     },
-    render: (player: ScoreSaberPlayerToken) => {
+    render: (player: ScoreSaberPlayer) => {
       return <p>#{formatNumberWithCommas(player.countryRank)}</p>;
     },
   },
   {
     showWhenInactiveOrBanned: true,
-    render: (player: ScoreSaberPlayerToken) => {
+    render: (player: ScoreSaberPlayer) => {
       return <p className="text-pp">{formatPp(player.pp)}pp</p>;
     },
   },
 ];
 
 type Props = {
-  player: ScoreSaberPlayerToken;
+  player: ScoreSaberPlayer;
 };
 
 export default function PlayerHeader({ player }: Props) {
@@ -43,20 +43,27 @@ export default function PlayerHeader({ player }: Props) {
     <Card>
       <div className="flex gap-3 flex-col items-center text-center lg:flex-row lg:items-start lg:text-start relative select-none">
         <Avatar className="w-32 h-32 pointer-events-none">
-          <AvatarImage alt="Profile Picture" src={player.profilePicture} />
+          <AvatarImage alt="Profile Picture" src={player.avatar} />
         </Avatar>
         <div className="w-full flex gap-2 flex-col justify-center items-center lg:justify-start lg:items-start">
           <div>
             <p className="font-bold text-2xl">{player.name}</p>
             <div className="flex flex-col">
               <div>
-                {player.inactive && <p className="text-gray-400">Inactive Account</p>}
-                {player.banned && <p className="text-red-500">Banned Account</p>}
+                {player.inactive && (
+                  <p className="text-gray-400">Inactive Account</p>
+                )}
+                {player.banned && (
+                  <p className="text-red-500">Banned Account</p>
+                )}
               </div>
               <div className="flex gap-2">
                 {playerData.map((subName, index) => {
                   // Check if the player is inactive or banned and if the data should be shown
-                  if (!subName.showWhenInactiveOrBanned && (player.inactive || player.banned)) {
+                  if (
+                    !subName.showWhenInactiveOrBanned &&
+                    (player.inactive || player.banned)
+                  ) {
                     return null;
                   }
 

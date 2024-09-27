@@ -9,21 +9,25 @@ import { ReactElement } from "react";
 import Card from "../card";
 import CountryFlag from "../country-flag";
 import { Avatar, AvatarImage } from "../ui/avatar";
+import ScoreSaberPlayer from "@/common/model/player/impl/scoresaber-player";
 
 const REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes
 const PLAYER_NAME_MAX_LENGTH = 14;
 
 type MiniProps = {
   type: "Global" | "Country";
-  player: ScoreSaberPlayerToken;
+  player: ScoreSaberPlayer;
 };
 
 type Variants = {
   [key: string]: {
     itemsPerPage: number;
-    icon: (player: ScoreSaberPlayerToken) => ReactElement;
-    getPage: (player: ScoreSaberPlayerToken, itemsPerPage: number) => number;
-    query: (page: number, country: string) => Promise<ScoreSaberPlayersPageToken | undefined>;
+    icon: (player: ScoreSaberPlayer) => ReactElement;
+    getPage: (player: ScoreSaberPlayer, itemsPerPage: number) => number;
+    query: (
+      page: number,
+      country: string,
+    ) => Promise<ScoreSaberPlayersPageToken | undefined>;
   };
 };
 
@@ -31,7 +35,7 @@ const miniVariants: Variants = {
   Global: {
     itemsPerPage: 50,
     icon: () => <GlobeAmericasIcon className="w-6 h-6" />,
-    getPage: (player: ScoreSaberPlayerToken, itemsPerPage: number) => {
+    getPage: (player: ScoreSaberPlayer, itemsPerPage: number) => {
       return Math.floor((player.rank - 1) / itemsPerPage) + 1;
     },
     query: (page: number) => {
@@ -40,14 +44,17 @@ const miniVariants: Variants = {
   },
   Country: {
     itemsPerPage: 50,
-    icon: (player: ScoreSaberPlayerToken) => {
+    icon: (player: ScoreSaberPlayer) => {
       return <CountryFlag code={player.country} size={12} />;
     },
-    getPage: (player: ScoreSaberPlayerToken, itemsPerPage: number) => {
+    getPage: (player: ScoreSaberPlayer, itemsPerPage: number) => {
       return Math.floor((player.countryRank - 1) / itemsPerPage) + 1;
     },
     query: (page: number, country: string) => {
-      return leaderboards.ScoreSaber.queries.lookupGlobalPlayersByCountry(page, country);
+      return leaderboards.ScoreSaber.queries.lookupGlobalPlayersByCountry(
+        page,
+        country,
+      );
     },
   },
 };
@@ -107,7 +114,8 @@ export default function Mini({ type, player }: MiniProps) {
         {isLoading && <p className="text-gray-400">Loading...</p>}
         {isError && <p className="text-red-500">Error</p>}
         {players?.map((playerRanking, index) => {
-          const rank = type == "Global" ? playerRanking.rank : playerRanking.countryRank;
+          const rank =
+            type == "Global" ? playerRanking.rank : playerRanking.countryRank;
           const playerName =
             playerRanking.name.length > PLAYER_NAME_MAX_LENGTH
               ? playerRanking.name.substring(0, PLAYER_NAME_MAX_LENGTH) + "..."
@@ -122,9 +130,18 @@ export default function Mini({ type, player }: MiniProps) {
               <div className="flex gap-2">
                 <p className="text-gray-400">#{formatNumberWithCommas(rank)}</p>
                 <Avatar className="w-6 h-6 pointer-events-none">
-                  <AvatarImage alt="Profile Picture" src={playerRanking.profilePicture} />
+                  <AvatarImage
+                    alt="Profile Picture"
+                    src={playerRanking.profilePicture}
+                  />
                 </Avatar>
-                <p className={playerRanking.id === player.id ? "text-gray-400" : ""}>{playerName}</p>
+                <p
+                  className={
+                    playerRanking.id === player.id ? "text-gray-400" : ""
+                  }
+                >
+                  {playerName}
+                </p>
               </div>
               <p className="text-pp">{formatPp(playerRanking.pp)}pp</p>
             </Link>

@@ -1,13 +1,29 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import ScoreSaberPlayerToken from "@/common/model/token/scoresaber/score-saber-player-token";
 import { formatNumberWithCommas } from "@/common/number-utils";
-import { CategoryScale, Chart, Legend, LinearScale, LineElement, PointElement, Title, Tooltip } from "chart.js";
+import {
+  CategoryScale,
+  Chart,
+  Legend,
+  LinearScale,
+  LineElement,
+  PointElement,
+  Title,
+  Tooltip,
+} from "chart.js";
 import { Line } from "react-chartjs-2";
-import Card from "../card";
+import ScoreSaberPlayer from "@/common/model/player/impl/scoresaber-player";
 
-Chart.register(LinearScale, CategoryScale, PointElement, LineElement, Title, Tooltip, Legend);
+Chart.register(
+  LinearScale,
+  CategoryScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+);
 
 export const options: any = {
   maintainAspectRatio: false,
@@ -69,17 +85,12 @@ export const options: any = {
 };
 
 type Props = {
-  player: ScoreSaberPlayerToken;
+  player: ScoreSaberPlayer;
 };
 
 export default function PlayerRankChart({ player }: Props) {
-  const playerRankHistory = player.histories.split(",").map((value) => {
-    return parseInt(value);
-  });
-  playerRankHistory.push(player.rank);
-
   const labels = [];
-  for (let i = playerRankHistory.length; i > 0; i--) {
+  for (let i = player.rankHistory.length; i > 0; i--) {
     let label = `${i} days ago`;
     if (i === 1) {
       label = "now";
@@ -95,7 +106,7 @@ export default function PlayerRankChart({ player }: Props) {
     datasets: [
       {
         lineTension: 0.5,
-        data: playerRankHistory,
+        data: player.rankHistory,
         label: "Rank",
         borderColor: "#606fff",
         fill: false,
@@ -105,8 +116,8 @@ export default function PlayerRankChart({ player }: Props) {
   };
 
   return (
-    <Card className="h-96">
+    <div className="h-96">
       <Line className="w-fit" options={options} data={data} />
-    </Card>
+    </div>
   );
 }

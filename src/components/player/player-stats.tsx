@@ -1,59 +1,57 @@
 import { formatNumberWithCommas } from "@/common/number-utils";
 import StatValue from "@/components/stat-value";
-import ScoreSaberPlayerToken from "@/common/model/token/scoresaber/score-saber-player-token";
+import ScoreSaberPlayer from "@/common/model/player/impl/scoresaber-player";
 
 type Badge = {
   name: string;
   color?: string;
-  create: (
-    player: ScoreSaberPlayerToken,
-  ) => string | React.ReactNode | undefined;
+  create: (player: ScoreSaberPlayer) => string | React.ReactNode | undefined;
 };
 
 const badges: Badge[] = [
   {
     name: "Ranked Play Count",
     color: "bg-pp",
-    create: (player: ScoreSaberPlayerToken) => {
-      return formatNumberWithCommas(player.scoreStats.rankedPlayCount);
+    create: (player: ScoreSaberPlayer) => {
+      return formatNumberWithCommas(player.statistics.rankedPlayCount);
     },
   },
   {
     name: "Total Ranked Score",
     color: "bg-pp",
-    create: (player: ScoreSaberPlayerToken) => {
-      return formatNumberWithCommas(player.scoreStats.totalRankedScore);
+    create: (player: ScoreSaberPlayer) => {
+      return formatNumberWithCommas(player.statistics.totalRankedScore);
     },
   },
   {
     name: "Average Ranked Accuracy",
     color: "bg-pp",
-    create: (player: ScoreSaberPlayerToken) => {
-      return player.scoreStats.averageRankedAccuracy.toFixed(2) + "%";
+    create: (player: ScoreSaberPlayer) => {
+      return player.statistics.averageRankedAccuracy.toFixed(2) + "%";
     },
   },
   {
     name: "Total Play Count",
-    create: (player: ScoreSaberPlayerToken) => {
-      return formatNumberWithCommas(player.scoreStats.totalPlayCount);
+    create: (player: ScoreSaberPlayer) => {
+      return formatNumberWithCommas(player.statistics.totalPlayCount);
     },
   },
   {
     name: "Total Score",
-    create: (player: ScoreSaberPlayerToken) => {
-      return formatNumberWithCommas(player.scoreStats.totalScore);
+    create: (player: ScoreSaberPlayer) => {
+      return formatNumberWithCommas(player.statistics.totalScore);
     },
   },
   {
     name: "Total Replays Watched",
-    create: (player: ScoreSaberPlayerToken) => {
-      return formatNumberWithCommas(player.scoreStats.replaysWatched);
+    create: (player: ScoreSaberPlayer) => {
+      return formatNumberWithCommas(player.statistics.replaysWatched);
     },
   },
 ];
 
 type Props = {
-  player: ScoreSaberPlayerToken;
+  player: ScoreSaberPlayer;
 };
 
 export default function PlayerStats({ player }: Props) {

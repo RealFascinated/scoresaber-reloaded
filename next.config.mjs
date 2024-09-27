@@ -11,6 +11,16 @@ const nextConfig = {
   experimental: {
     webpackMemoryOptimizations: true,
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'cdn.scoresaber.com',
+        port: '',
+        pathname: '/**',
+      },
+    ],
+  },
   env: {
     NEXT_PUBLIC_BUILD_ID: process.env.GIT_REV || nextBuildId.sync({ dir: __dirname }),
     NEXT_PUBLIC_BUILD_TIME: new Date().toLocaleDateString("en-US", {

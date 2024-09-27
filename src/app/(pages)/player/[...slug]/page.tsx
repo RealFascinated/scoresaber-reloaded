@@ -32,7 +32,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description: `
       PP: ${formatPp(player.pp)}pp
       Rank: #${formatNumberWithCommas(player.rank)} (#${formatPp(player.countryRank)} ${player.country})
-      Joined ScoreSaber: ${format(player.firstSeen, { date: "medium", time: "short" })}
+      Joined ScoreSaber: ${format(player.joinedDate, { date: "medium", time: "short" })}
       
       View the scores for ${player.name}!`,
     },
@@ -58,7 +58,12 @@ export default async function Search({ params }: Props) {
 
   return (
     <div className="flex flex-col h-full w-full">
-      <PlayerData initialPlayerData={player} initialScoreData={scores} sort={sort} page={page} />
+      <PlayerData
+        initialPlayerData={player}
+        initialScoreData={scores}
+        sort={sort}
+        page={page}
+      />
     </div>
   );
 }
