@@ -36,7 +36,7 @@ export default function ScoreSongInfo({ leaderboard, beatSaverMap }: Props) {
           }
         >
           <div
-            className="absolute w-full h-[20px] bottom-0 right-0 rounded-sm flex justify-center items-center text-xs"
+            className="absolute w-full h-[20px] bottom-0 right-0 rounded-sm flex justify-center items-center text-xs cursor-default"
             style={{
               backgroundColor: songDifficultyToColor(diff) + "f0", // Transparency value (in hex 0-255)
             }}
