@@ -42,7 +42,7 @@ export default function PlayerData({ initialPlayerData: initalPlayerData, initia
         )}
         <PlayerScores initialScoreData={initialScoreData} player={player} sort={sort} page={page} />
       </article>
-      <aside className="w-[500px] hidden xl:flex flex-col gap-2">
+      <aside className="w-[550px] hidden xl:flex flex-col gap-2">
         <Mini type="Global" player={player} />
         <Mini type="Country" player={player} />
       </aside>
