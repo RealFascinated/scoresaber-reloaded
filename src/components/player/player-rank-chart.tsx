@@ -3,28 +3,11 @@
 
 import ScoreSaberPlayerToken from "@/common/model/token/scoresaber/score-saber-player-token";
 import { formatNumberWithCommas } from "@/common/number-utils";
-import {
-  CategoryScale,
-  Chart,
-  Legend,
-  LinearScale,
-  LineElement,
-  PointElement,
-  Title,
-  Tooltip,
-} from "chart.js";
+import { CategoryScale, Chart, Legend, LinearScale, LineElement, PointElement, Title, Tooltip } from "chart.js";
 import { Line } from "react-chartjs-2";
 import Card from "../card";
 
-Chart.register(
-  LinearScale,
-  CategoryScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-);
+Chart.register(LinearScale, CategoryScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 export const options: any = {
   maintainAspectRatio: false,
@@ -122,7 +105,7 @@ export default function PlayerRankChart({ player }: Props) {
   };
 
   return (
-    <Card className="h-96">
+    <Card className="h-96 w-full">
       <Line className="w-fit" options={options} data={data} />
     </Card>
   );

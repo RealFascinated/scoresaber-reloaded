@@ -8,7 +8,7 @@ export default function CountryFlag({ code, size = 24 }: Props) {
     // eslint-disable-next-line @next/next/no-img-element
     <img
       alt="Player Country"
-      src={`/assets/flags/${code}.png`}
+      src={`/assets/flags/${code.toLowerCase()}.png`}
       width={size * 2}
       height={size}
       className={`w-[${size * 2}px] h-[${size}px] object-contain`}

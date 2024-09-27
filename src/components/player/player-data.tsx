@@ -7,6 +7,7 @@ import { ScoreSort } from "@/common/service/score-sort";
 import { useQuery } from "@tanstack/react-query";
 import Mini from "../ranking/mini";
 import PlayerHeader from "./player-header";
+import PlayerRankChart from "./player-rank-chart";
 import PlayerScores from "./player-scores";
 
 const REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes
@@ -34,7 +35,11 @@ export default function PlayerData({ initialPlayerData: initalPlayerData, initia
     <div className="flex gap-2">
       <article className="flex flex-col gap-2">
         <PlayerHeader player={player} />
-        {!player.inactive && <>{/* <PlayerRankChart player={player} /> */}</>}
+        {!player.inactive && (
+          <>
+            <PlayerRankChart player={player} />
+          </>
+        )}
         <PlayerScores initialScoreData={initialScoreData} player={player} sort={sort} page={page} />
       </article>
       <aside className="w-[500px] hidden xl:flex flex-col gap-2">
