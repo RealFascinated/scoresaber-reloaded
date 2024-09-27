@@ -1,9 +1,10 @@
-import Link from "next/link";
 import { getBuildInformation } from "@/common/website-utils";
+import Link from "next/link";
 
 type NavbarItem = {
   name: string;
   link: string;
+  openInNewTab?: boolean;
 };
 
 const items: NavbarItem[] = [
@@ -14,6 +15,7 @@ const items: NavbarItem[] = [
   {
     name: "Source",
     link: "https://git.fascinated.cc/Fascinated/scoresaber-reloadedv3",
+    openInNewTab: true,
   },
 ];
 
@@ -34,6 +36,7 @@ export default function Footer() {
               key={index}
               className="px-2 text-pp hover:brightness-75 transition-all transform-gpu"
               href={item.link}
+              target={item.openInNewTab ? "_blank" : undefined}
             >
               {item.name}
             </Link>
