@@ -1,20 +1,17 @@
 import ScoreSaberLeaderboardToken from "@/common/model/token/scoresaber/score-saber-leaderboard-token";
 import ScoreSaberScoreToken from "@/common/model/token/scoresaber/score-saber-score-token";
-import { formatNumberWithCommas } from "@/common/number-utils";
+import { formatNumberWithCommas, formatPp } from "@/common/number-utils";
+import { accuracyToColor } from "@/common/song-utils";
 import StatValue from "@/components/stat-value";
 import { XMarkIcon } from "@heroicons/react/24/solid";
 import clsx from "clsx";
-import { accuracyToColor } from "@/common/song-utils";
 
 type Badge = {
   name: string;
-  color?: (
-    score: ScoreSaberScoreToken,
-    leaderboard: ScoreSaberLeaderboardToken,
-  ) => string | undefined;
+  color?: (score: ScoreSaberScoreToken, leaderboard: ScoreSaberLeaderboardToken) => string | undefined;
   create: (
     score: ScoreSaberScoreToken,
-    leaderboard: ScoreSaberLeaderboardToken,
+    leaderboard: ScoreSaberLeaderboardToken
   ) => string | React.ReactNode | undefined;
 };
 
@@ -29,22 +26,16 @@ const badges: Badge[] = [
       if (pp === 0) {
         return undefined;
       }
-      return `${score.pp.toFixed(2)}pp`;
+      return `${formatPp(pp)}pp`;
     },
   },
   {
     name: "Accuracy",
-    color: (
-      score: ScoreSaberScoreToken,
-      leaderboard: ScoreSaberLeaderboardToken,
-    ) => {
+    color: (score: ScoreSaberScoreToken, leaderboard: ScoreSaberLeaderboardToken) => {
       const acc = (score.baseScore / leaderboard.maxScore) * 100;
       return accuracyToColor(acc);
     },
-    create: (
-      score: ScoreSaberScoreToken,
-      leaderboard: ScoreSaberLeaderboardToken,
-    ) => {
+    create: (score: ScoreSaberScoreToken, leaderboard: ScoreSaberLeaderboardToken) => {
       const acc = (score.baseScore / leaderboard.maxScore) * 100;
       return `${acc.toFixed(2)}%`;
     },
@@ -70,16 +61,8 @@ const badges: Badge[] = [
 
       return (
         <>
-          <p>
-            {fullCombo ? (
-              <span className="text-green-400">FC</span>
-            ) : (
-              formatNumberWithCommas(score.missedNotes)
-            )}
-          </p>
-          <XMarkIcon
-            className={clsx("w-5 h-5", fullCombo ? "hidden" : "text-red-400")}
-          />
+          <p>{fullCombo ? <span className="text-green-400">FC</span> : formatNumberWithCommas(score.missedNotes)}</p>
+          <XMarkIcon className={clsx("w-5 h-5", fullCombo ? "hidden" : "text-red-400")} />
         </>
       );
     },

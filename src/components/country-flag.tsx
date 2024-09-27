@@ -1,16 +1,17 @@
 type Props = {
-  country: string;
+  code: string;
   size?: number;
 };
 
-export default function CountryFlag({ country, size = 24 }: Props) {
+export default function CountryFlag({ code, size = 24 }: Props) {
   return (
     // eslint-disable-next-line @next/next/no-img-element
     <img
       alt="Player Country"
-      src={`/assets/flags/${country}.png`}
+      src={`/assets/flags/${code}.png`}
       width={size * 2}
       height={size}
+      className={`w-[${size * 2}px] h-[${size}px] object-contain`}
     />
   );
 }

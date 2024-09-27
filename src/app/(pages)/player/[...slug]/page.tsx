@@ -1,6 +1,6 @@
+import { formatNumberWithCommas, formatPp } from "@/common/number-utils";
 import { scoresaberService } from "@/common/service/impl/scoresaber";
 import { ScoreSort } from "@/common/service/score-sort";
-import { formatNumberWithCommas } from "@/common/number-utils";
 import PlayerData from "@/components/player/player-data";
 import { format } from "@formkit/tempo";
 import { Metadata } from "next";
@@ -12,9 +12,7 @@ type Props = {
   };
 };
 
-export async function generateMetadata({
-  params: { slug },
-}: Props): Promise<Metadata> {
+export async function generateMetadata({ params: { slug } }: Props): Promise<Metadata> {
   const id = slug[0]; // The players id
   const player = await scoresaberService.lookupPlayer(id, false);
   if (player === undefined) {
@@ -31,8 +29,8 @@ export async function generateMetadata({
     openGraph: {
       title: `ScoreSaber Reloaded - ${player.name}`,
       description: `
-      PP: ${formatNumberWithCommas(player.pp)}pp
-      Rank: #${formatNumberWithCommas(player.rank)} (#${formatNumberWithCommas(player.countryRank)} ${player.country})
+      PP: ${formatPp(player.pp)}pp
+      Rank: #${formatNumberWithCommas(player.rank)} (#${formatPp(player.countryRank)} ${player.country})
       Joined ScoreSaber: ${format(player.firstSeen, { date: "medium", time: "short" })}
       
       View the scores for ${player.name}!`,
@@ -58,12 +56,7 @@ export default async function Search({ params: { slug } }: Props) {
 
   return (
     <div className="flex flex-col h-full w-full">
-      <PlayerData
-        initialPlayerData={player}
-        initialScoreData={scores}
-        sort={sort}
-        page={page}
-      />
+      <PlayerData initialPlayerData={player} initialScoreData={scores} sort={sort} page={page} />
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import ScoreSaberPlayerToken from "@/common/model/token/scoresaber/score-saber-player-token";
-import { formatNumberWithCommas } from "@/common/number-utils";
+import { formatNumberWithCommas, formatPp } from "@/common/number-utils";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import Card from "../card";
 import CountryFlag from "../country-flag";
@@ -20,7 +20,7 @@ const playerData = [
   {
     showWhenInactiveOrBanned: false,
     icon: (player: ScoreSaberPlayerToken) => {
-      return <CountryFlag country={player.country.toLowerCase()} size={15} />;
+      return <CountryFlag code={player.country.toLowerCase()} size={15} />;
     },
     render: (player: ScoreSaberPlayerToken) => {
       return <p>#{formatNumberWithCommas(player.countryRank)}</p>;
@@ -29,7 +29,7 @@ const playerData = [
   {
     showWhenInactiveOrBanned: true,
     render: (player: ScoreSaberPlayerToken) => {
-      return <p className="text-pp">{formatNumberWithCommas(player.pp)}pp</p>;
+      return <p className="text-pp">{formatPp(player.pp)}pp</p>;
     },
   },
 ];
@@ -50,20 +50,13 @@ export default function PlayerHeader({ player }: Props) {
             <p className="font-bold text-2xl">{player.name}</p>
             <div className="flex flex-col">
               <div>
-                {player.inactive && (
-                  <p className="text-gray-400">Inactive Account</p>
-                )}
-                {player.banned && (
-                  <p className="text-red-500">Banned Account</p>
-                )}
+                {player.inactive && <p className="text-gray-400">Inactive Account</p>}
+                {player.banned && <p className="text-red-500">Banned Account</p>}
               </div>
               <div className="flex gap-2">
                 {playerData.map((subName, index) => {
                   // Check if the player is inactive or banned and if the data should be shown
-                  if (
-                    !subName.showWhenInactiveOrBanned &&
-                    (player.inactive || player.banned)
-                  ) {
+                  if (!subName.showWhenInactiveOrBanned && (player.inactive || player.banned)) {
                     return null;
                   }
 

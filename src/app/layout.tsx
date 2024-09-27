@@ -72,7 +72,7 @@ export default function RootLayout({
                 <AnimatePresence>
                   <main className="flex flex-col min-h-screen gap-2 text-white">
                     <NavBar />
-                    <div className="z-[1] m-auto flex flex-col flex-grow items-center md:max-w-[1200px]">
+                    <div className="z-[1] m-auto flex flex-col flex-grow items-center md:max-w-[1600px]">
                       {children}
                     </div>
                     <Footer />

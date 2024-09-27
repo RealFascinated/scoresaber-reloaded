@@ -8,16 +8,16 @@ export const leaderboards = {
       search: true,
     },
     queries: {
-      lookupScores: (
-        player: ScoreSaberPlayerToken,
-        sort: ScoreSort,
-        page: number,
-      ) =>
+      lookupScores: (player: ScoreSaberPlayerToken, sort: ScoreSort, page: number) =>
         scoresaberService.lookupPlayerScores({
           playerId: player.id,
           sort: sort,
           page: page,
         }),
+
+      lookupGlobalPlayers: (page: number) => scoresaberService.lookupPlayers(page),
+      lookupGlobalPlayersByCountry: (page: number, country: string) =>
+        scoresaberService.lookupPlayersByCountry(page, country),
     },
   },
 };
