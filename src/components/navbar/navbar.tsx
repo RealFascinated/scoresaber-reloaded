@@ -33,6 +33,8 @@ const renderNavbarItem = (item: NavbarItem) => (
 );
 
 export default function Navbar() {
+  const rightItem = items[items.length - 1];
+
   return (
     <div className="w-full sticky top-0 z-[999]">
       <div className="h-10 items-center flex justify-between bg-secondary/95">
@@ -41,18 +43,16 @@ export default function Navbar() {
           <ProfileButton />
 
           {items.slice(0, -1).map((item, index) => (
-            <NavbarButton key={index}>
-              <Link href={item.link}>{renderNavbarItem(item)}</Link>
-            </NavbarButton>
+            <Link href={item.link} key={index} className="h-full">
+              <NavbarButton key={index}>{renderNavbarItem(item)}</NavbarButton>
+            </Link>
           ))}
         </div>
 
         {/* Right-aligned item */}
-        <NavbarButton>
-          <Link href={items[items.length - 1].link}>
-            {renderNavbarItem(items[items.length - 1])}
-          </Link>
-        </NavbarButton>
+        <Link href={rightItem.link} className="h-full">
+          <NavbarButton>{renderNavbarItem(rightItem)}</NavbarButton>
+        </Link>
       </div>
     </div>
   );
