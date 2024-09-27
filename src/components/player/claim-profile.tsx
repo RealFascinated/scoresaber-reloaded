@@ -39,7 +39,7 @@ export default function ClaimProfile({ playerId }: Props) {
   }
 
   return (
-    <Tooltip display={<p>Set as your profile</p>}>
+    <Tooltip display={<p>Set as your profile</p>} side={"bottom"}>
       <Button variant={"outline"} onClick={claimProfile}>
         <CheckIcon className="size-6 text-green-500" />
       </Button>
