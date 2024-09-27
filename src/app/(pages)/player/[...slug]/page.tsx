@@ -7,12 +7,13 @@ import { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 type Props = {
-  params: {
+  params: Promise<{
     slug: string[];
-  };
+  }>;
 };
 
-export async function generateMetadata({ params: { slug } }: Props): Promise<Metadata> {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
   const id = slug[0]; // The players id
   const player = await scoresaberService.lookupPlayer(id, false);
   if (player === undefined) {
@@ -38,7 +39,8 @@ export async function generateMetadata({ params: { slug } }: Props): Promise<Met
   };
 }
 
-export default async function Search({ params: { slug } }: Props) {
+export default async function Search({ params }: Props) {
+  const { slug } = await params;
   const id = slug[0]; // The players id
   const sort: ScoreSort = (slug[1] as ScoreSort) || "recent"; // The sorting method
   const page = parseInt(slug[2]) || 1; // The page number

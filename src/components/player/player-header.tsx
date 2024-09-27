@@ -20,7 +20,7 @@ const playerData = [
   {
     showWhenInactiveOrBanned: false,
     icon: (player: ScoreSaberPlayerToken) => {
-      return <CountryFlag code={player.country.toLowerCase()} size={15} />;
+      return <CountryFlag code={player.country} size={15} />;
     },
     render: (player: ScoreSaberPlayerToken) => {
       return <p>#{formatNumberWithCommas(player.countryRank)}</p>;

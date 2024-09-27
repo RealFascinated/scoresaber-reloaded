@@ -1,7 +1,7 @@
 import { leaderboards } from "@/common/leaderboards";
 import ScoreSaberPlayerToken from "@/common/model/token/scoresaber/score-saber-player-token";
 import { ScoreSaberPlayersPageToken } from "@/common/model/token/scoresaber/score-saber-players-page-token";
-import { formatPp } from "@/common/number-utils";
+import { formatNumberWithCommas, formatPp } from "@/common/number-utils";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
@@ -11,6 +11,7 @@ import CountryFlag from "../country-flag";
 import { Avatar, AvatarImage } from "../ui/avatar";
 
 const REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes
+const PLAYER_NAME_MAX_LENGTH = 14;
 
 type MiniProps = {
   type: "Global" | "Country";
@@ -97,7 +98,7 @@ export default function Mini({ type, player }: MiniProps) {
   }
 
   return (
-    <Card className="w-full flex gap-2">
+    <Card className="w-full flex gap-2 sticky">
       <div className="flex gap-2">
         {icon}
         <p>{type} Ranking</p>
@@ -107,6 +108,10 @@ export default function Mini({ type, player }: MiniProps) {
         {isError && <p className="text-red-500">Error</p>}
         {players?.map((player, index) => {
           const rank = type == "Global" ? player.rank : player.countryRank;
+          const playerName =
+            player.name.length > PLAYER_NAME_MAX_LENGTH
+              ? player.name.substring(0, PLAYER_NAME_MAX_LENGTH) + "..."
+              : player.name;
 
           return (
             <Link
@@ -115,11 +120,11 @@ export default function Mini({ type, player }: MiniProps) {
               className="flex justify-between gap-2 bg-accent px-2 py-1.5 cursor-pointer transform-gpu transition-all hover:brightness-75 first:rounded-t last:rounded-b"
             >
               <div className="flex gap-2">
-                <p className="text-gray-400">#{rank}</p>
+                <p className="text-gray-400">#{formatNumberWithCommas(rank)}</p>
                 <Avatar className="w-6 h-6 pointer-events-none">
                   <AvatarImage alt="Profile Picture" src={player.profilePicture} />
                 </Avatar>
-                <p>{player.name}</p>
+                <p>{playerName}</p>
               </div>
               <p className="text-pp">{formatPp(player.pp)}pp</p>
             </Link>
