@@ -98,7 +98,7 @@ export default function Mini({ type, player }: MiniProps) {
   }
 
   return (
-    <Card className="w-full flex gap-2 sticky">
+    <Card className="w-full flex gap-2 sticky select-none">
       <div className="flex gap-2">
         {icon}
         <p>{type} Ranking</p>
@@ -106,27 +106,27 @@ export default function Mini({ type, player }: MiniProps) {
       <div className="flex flex-col">
         {isLoading && <p className="text-gray-400">Loading...</p>}
         {isError && <p className="text-red-500">Error</p>}
-        {players?.map((player, index) => {
-          const rank = type == "Global" ? player.rank : player.countryRank;
+        {players?.map((playerRanking, index) => {
+          const rank = type == "Global" ? playerRanking.rank : playerRanking.countryRank;
           const playerName =
-            player.name.length > PLAYER_NAME_MAX_LENGTH
-              ? player.name.substring(0, PLAYER_NAME_MAX_LENGTH) + "..."
-              : player.name;
+            playerRanking.name.length > PLAYER_NAME_MAX_LENGTH
+              ? playerRanking.name.substring(0, PLAYER_NAME_MAX_LENGTH) + "..."
+              : playerRanking.name;
 
           return (
             <Link
               key={index}
-              href={`/player/${player.id}`}
+              href={`/player/${playerRanking.id}`}
               className="flex justify-between gap-2 bg-accent px-2 py-1.5 cursor-pointer transform-gpu transition-all hover:brightness-75 first:rounded-t last:rounded-b"
             >
               <div className="flex gap-2">
                 <p className="text-gray-400">#{formatNumberWithCommas(rank)}</p>
                 <Avatar className="w-6 h-6 pointer-events-none">
-                  <AvatarImage alt="Profile Picture" src={player.profilePicture} />
+                  <AvatarImage alt="Profile Picture" src={playerRanking.profilePicture} />
                 </Avatar>
-                <p>{playerName}</p>
+                <p className={playerRanking.id === player.id ? "text-gray-400" : ""}>{playerName}</p>
               </div>
-              <p className="text-pp">{formatPp(player.pp)}pp</p>
+              <p className="text-pp">{formatPp(playerRanking.pp)}pp</p>
             </Link>
           );
         })}
