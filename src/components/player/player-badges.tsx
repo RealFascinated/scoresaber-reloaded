@@ -25,6 +25,7 @@ export default function PlayerBadges({ player }: Props) {
                 alt={badge.description}
                 width={80}
                 height={30}
+                unoptimized
               />
             </div>
           </Tooltip>
