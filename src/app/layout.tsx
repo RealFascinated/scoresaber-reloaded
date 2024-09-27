@@ -66,7 +66,7 @@ export default function RootLayout({
           <Toaster />
           <BackgroundImage />
           <PreloadResources />
-          <TooltipProvider>
+          <TooltipProvider delayDuration={100}>
             <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
               <QueryProvider>
                 <AnimatePresence>
