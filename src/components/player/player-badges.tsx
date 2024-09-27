@@ -12,9 +12,12 @@ export default function PlayerBadges({ player }: Props) {
       {player.badges?.map((badge, index) => {
         return (
           <Tooltip
-            side={"bottom"}
             key={index}
-            display={<p>{badge.description}</p>}
+            display={
+              <p className="cursor-default pointer-events-none">
+                {badge.description}
+              </p>
+            }
           >
             <div>
               <Image
