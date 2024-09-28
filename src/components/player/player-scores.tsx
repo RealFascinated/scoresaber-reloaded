@@ -1,6 +1,6 @@
 import { capitalizeFirstLetter } from "@/common/string-utils";
 import useWindowDimensions from "@/hooks/use-window-dimensions";
-import { ClockIcon, TrophyIcon, XMarkIcon } from "@heroicons/react/24/solid"; // Import XMarkIcon for the clear button
+import { ClockIcon, TrophyIcon, XMarkIcon } from "@heroicons/react/24/solid";
 import { useQuery } from "@tanstack/react-query";
 import { motion, useAnimation, Variants } from "framer-motion";
 import { useCallback, useEffect, useState } from "react";
@@ -72,6 +72,7 @@ export default function PlayerScores({
   );
 
   const isSearchActive = debouncedSearchTerm.length >= 3;
+  const [shouldFetch, setShouldFetch] = useState(false); // New state to control fetching
 
   // Debounce the search query
   useEffect(() => {
@@ -98,7 +99,8 @@ export default function PlayerScores({
     },
     staleTime: 30 * 1000, // 30 seconds
     enabled:
-      debouncedSearchTerm.length >= 3 || debouncedSearchTerm.length === 0, // Enable if valid search query or empty
+      shouldFetch &&
+      (debouncedSearchTerm.length >= 3 || debouncedSearchTerm.length === 0), // Only enable if we set shouldFetch to true
   });
 
   const handleScoreLoad = useCallback(async () => {
@@ -112,6 +114,7 @@ export default function PlayerScores({
   const handleSortChange = (newSort: ScoreSort) => {
     if (newSort !== pageState.sort) {
       setPageState({ page: 1, sort: newSort });
+      setShouldFetch(true); // Set to true to trigger fetch
     }
   };
 
@@ -130,6 +133,11 @@ export default function PlayerScores({
 
   const handleSearchChange = (query: string) => {
     setSearchState({ query });
+    if (query.length >= 3) {
+      setShouldFetch(true); // Set to true to trigger fetch
+    } else {
+      setShouldFetch(false); // Disable fetch if the search query is less than 3 characters
+    }
   };
 
   const clearSearch = () => {
@@ -216,6 +224,7 @@ export default function PlayerScores({
             onPageChange={(newPage) => {
               setPreviousPage(pageState.page);
               setPageState({ ...pageState, page: newPage });
+              setShouldFetch(true); // Set to true to trigger fetch on page change
             }}
           />
         </>
