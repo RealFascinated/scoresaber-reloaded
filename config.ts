@@ -1,3 +1,3 @@
 export const config = {
-  siteUrl: "https://ssr.fascinated.cc",
+  siteUrl: process.env.NEXT_PUBLIC_SITE_URL || "https://ssr.fascinated.cc",
 };

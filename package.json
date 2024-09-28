@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbo",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -20,6 +20,9 @@
     "@radix-ui/react-toast": "^1.2.1",
     "@radix-ui/react-tooltip": "^1.1.2",
     "@tanstack/react-query": "^5.55.4",
+    "@trigger.dev/nextjs": "^3.0.8",
+    "@trigger.dev/react": "^3.0.8",
+    "@trigger.dev/sdk": "^3.0.8",
     "chart.js": "^4.4.4",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
@@ -27,8 +30,10 @@
     "dexie": "^4.0.8",
     "dexie-react-hooks": "^1.1.7",
     "framer-motion": "^11.5.4",
+    "js-cookie": "^3.0.5",
     "ky": "^1.7.2",
     "lucide-react": "^0.446.0",
+    "mongoose": "^8.7.0",
     "next": "15.0.0-rc.0",
     "next-build-id": "^3.0.0",
     "next-themes": "^0.3.0",
@@ -41,6 +46,7 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@types/js-cookie": "^3.0.6",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
@@ -49,5 +55,8 @@
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
     "typescript": "^5"
+  },
+  "trigger.dev": {
+    "endpointId": "scoresaber-reloaded-KB0Z"
   }
 }

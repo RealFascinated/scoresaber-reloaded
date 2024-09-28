@@ -15,8 +15,8 @@ type Props = {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const id = slug[0]; // The players id
-  const player = await scoresaberService.lookupPlayer(id, false);
-  if (player === undefined) {
+  const response = await scoresaberService.lookupPlayer(id, false);
+  if (response === undefined) {
     return {
       title: `Unknown Player`,
       openGraph: {
@@ -24,6 +24,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       },
     };
   }
+  const { player } = response;
 
   return {
     title: `${player.name}`,
@@ -44,18 +45,18 @@ export default async function Search({ params }: Props) {
   const id = slug[0]; // The players id
   const sort: ScoreSort = (slug[1] as ScoreSort) || "recent"; // The sorting method
   const page = parseInt(slug[2]) || 1; // The page number
-  const player = await scoresaberService.lookupPlayer(id, false);
+  const response = await scoresaberService.lookupPlayer(id, false);
+  if (response == undefined) {
+    // Invalid player id
+    return redirect("/");
+  }
+
   const scores = await scoresaberService.lookupPlayerScores({
     playerId: id,
     sort,
     page,
   });
-
-  if (player == undefined) {
-    // Invalid player id
-    return redirect("/");
-  }
-
+  const { player } = response;
   return (
     <div className="flex flex-col h-full w-full">
       <PlayerData

@@ -1,5 +1,9 @@
 import Player from "../player";
 import ScoreSaberPlayerToken from "@/common/model/token/scoresaber/score-saber-player-token";
+import { PlayerHistory } from "@/common/player/player-history";
+import { config } from "../../../../../config";
+import ky from "ky";
+import { getDaysAgoDate, getMidnightAlignedDate } from "@/common/time-utils";
 
 /**
  * A ScoreSaber player.
@@ -28,7 +32,7 @@ export default interface ScoreSaberPlayer extends Player {
   /**
    * The rank history for this player.
    */
-  rankHistory: number[];
+  statisticHistory: { [date: string]: PlayerHistory };
 
   /**
    * The statistics for this player.
@@ -51,9 +55,9 @@ export default interface ScoreSaberPlayer extends Player {
   inactive: boolean;
 }
 
-export function getScoreSaberPlayerFromToken(
+export async function getScoreSaberPlayerFromToken(
   token: ScoreSaberPlayerToken,
-): ScoreSaberPlayer {
+): Promise<ScoreSaberPlayer> {
   const bio: ScoreSaberBio = {
     lines: token.bio?.split("\n") || [],
     linesStripped: token.bio?.replace(/<[^>]+>/g, "")?.split("\n") || [],
@@ -66,7 +70,50 @@ export function getScoreSaberPlayerFromToken(
         description: badge.description,
       };
     }) || [];
-  const rankHistory = token.histories.split(",").map((rank) => Number(rank));
+
+  let statisticHistory: { [key: string]: PlayerHistory } = {};
+  try {
+    const history = await ky
+      .get<{
+        [key: string]: PlayerHistory;
+      }>(`${config.siteUrl}/api/player/history?id=${token.id}`)
+      .json();
+    if (history === undefined || Object.entries(history).length === 0) {
+      console.log("Player has no history, using fallback");
+      throw new Error();
+    }
+    if (history) {
+      // Use the latest data for today
+      history[getMidnightAlignedDate(new Date()).toString()] = {
+        rank: token.rank,
+        countryRank: token.countryRank,
+        pp: token.pp,
+      };
+    }
+    statisticHistory = history;
+  } catch (error) {
+    // Fallback to ScoreSaber History if the player has no history
+    const playerRankHistory = token.histories.split(",").map((value) => {
+      return parseInt(value);
+    });
+    playerRankHistory.push(token.rank);
+
+    let daysAgo = 0; // Start from current day
+    for (let i = playerRankHistory.length - 1; i >= 0; i--) {
+      const rank = playerRankHistory[i];
+      const date = getMidnightAlignedDate(getDaysAgoDate(daysAgo));
+      daysAgo += 1; // Increment daysAgo for each earlier rank
+
+      statisticHistory[date.toString()] = {
+        rank: rank,
+      };
+    }
+
+    // Sort the fallback history
+    statisticHistory = Object.entries(statisticHistory)
+      .sort()
+      .reduce((obj, [key, value]) => ({ ...obj, [key]: value }), {});
+  }
 
   return {
     id: token.id,
@@ -80,7 +127,7 @@ export function getScoreSaberPlayerFromToken(
     pp: token.pp,
     role: role,
     badges: badges,
-    rankHistory: rankHistory,
+    statisticHistory: statisticHistory,
     statistics: token.scoreStats,
     permissions: token.permissions,
     banned: token.banned,

@@ -48,6 +48,7 @@ jobs:
           action: deploy
           namespace: public-services
           manifests: |
+            .gitea/kubernetes/sealed-secrets.yaml
             .gitea/kubernetes/deployment.yaml
             .gitea/kubernetes/service.yaml
             .gitea/kubernetes/ingress.yaml

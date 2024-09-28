@@ -35,7 +35,7 @@ export default function PlayerData({
   });
 
   if (data && (!isLoading || !isError)) {
-    player = data;
+    player = data.player;
   }
 
   return (
@@ -55,7 +55,7 @@ export default function PlayerData({
           page={page}
         />
       </article>
-      <aside className="w-[550px] hidden xl:flex flex-col gap-2">
+      <aside className="w-[550px] hidden 2xl:flex flex-col gap-2">
         <Mini type="Global" player={player} />
         <Mini type="Country" player={player} />
       </aside>

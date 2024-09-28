@@ -12,7 +12,7 @@ import { Avatar, AvatarImage } from "../ui/avatar";
 import ScoreSaberPlayer from "@/common/model/player/impl/scoresaber-player";
 
 const REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes
-const PLAYER_NAME_MAX_LENGTH = 14;
+const PLAYER_NAME_MAX_LENGTH = 18;
 
 type MiniProps = {
   type: "Global" | "Country";

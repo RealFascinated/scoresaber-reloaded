@@ -62,7 +62,13 @@ class ScoreSaberService extends Service {
   async lookupPlayer(
     playerId: string,
     useProxy = true,
-  ): Promise<ScoreSaberPlayer | undefined> {
+  ): Promise<
+    | {
+        player: ScoreSaberPlayer;
+        rawPlayer: ScoreSaberPlayerToken;
+      }
+    | undefined
+  > {
     const before = performance.now();
     this.log(`Looking up player "${playerId}"...`);
     const token = await this.fetch<ScoreSaberPlayerToken>(
@@ -75,7 +81,10 @@ class ScoreSaberService extends Service {
     this.log(
       `Found player "${playerId}" in ${(performance.now() - before).toFixed(0)}ms`,
     );
-    return getScoreSaberPlayerFromToken(token);
+    return {
+      player: await getScoreSaberPlayerFromToken(token),
+      rawPlayer: token,
+    };
   }
 
   /**
