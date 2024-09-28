@@ -108,7 +108,7 @@ export async function getScoreSaberPlayerFromToken(
       const date = getMidnightAlignedDate(getDaysAgoDate(daysAgo));
       daysAgo += 1; // Increment daysAgo for each earlier rank
 
-      statisticHistory[date.toString()] = {
+      statisticHistory[formatDateMinimal(date)] = {
         rank: rank,
       };
     }
