@@ -7,6 +7,33 @@ import ClaimProfile from "./claim-profile";
 import PlayerStats from "./player-stats";
 import ScoreSaberPlayer from "@/common/model/player/impl/scoresaber-player";
 import Tooltip from "@/components/tooltip";
+import { ReactElement } from "react";
+
+/**
+ * Renders the change for a stat.
+ *
+ * @param change the amount of change
+ * @param tooltip the tooltip to display
+ * @param format the function to format the value
+ */
+const renderChange = (
+  change: number,
+  tooltip: ReactElement,
+  format?: (value: number) => string,
+) => {
+  format = format ?? formatNumberWithCommas;
+
+  return (
+    <Tooltip display={tooltip}>
+      <p
+        className={`text-sm ${change > 0 ? "text-green-400" : "text-red-400"}`}
+      >
+        {change > 0 ? "+" : ""}
+        {format(change)}
+      </p>
+    </Tooltip>
+  );
+};
 
 const playerData = [
   {
@@ -15,7 +42,19 @@ const playerData = [
       return <GlobeAmericasIcon className="h-5 w-5" />;
     },
     render: (player: ScoreSaberPlayer) => {
-      return <p>#{formatNumberWithCommas(player.rank)}</p>;
+      const statisticChange = player.statisticChange;
+      const rankChange = statisticChange?.rank ?? 0;
+
+      return (
+        <div className="text-gray-300 flex gap-1 items-center">
+          <p>#{formatNumberWithCommas(player.rank)}</p>
+          {rankChange != 0 &&
+            renderChange(
+              rankChange,
+              <p>The change in your rank compared to yesterday</p>,
+            )}
+        </div>
+      );
     },
   },
   {
@@ -24,27 +63,38 @@ const playerData = [
       return <CountryFlag code={player.country} size={15} />;
     },
     render: (player: ScoreSaberPlayer) => {
-      return <p>#{formatNumberWithCommas(player.countryRank)}</p>;
+      const statisticChange = player.statisticChange;
+      const rankChange = statisticChange?.countryRank ?? 0;
+
+      return (
+        <div className="text-gray-300 flex gap-1 items-center">
+          <p>#{formatNumberWithCommas(player.countryRank)}</p>
+          {rankChange != 0 &&
+            renderChange(
+              rankChange,
+              <p>The change in your rank compared to yesterday</p>,
+            )}
+        </div>
+      );
     },
   },
   {
     showWhenInactiveOrBanned: true,
     render: (player: ScoreSaberPlayer) => {
+      const statisticChange = player.statisticChange;
+      const ppChange = statisticChange?.pp ?? 0;
+
       return (
         <div className="text-pp flex gap-1 items-center">
           <p>{formatPp(player.pp)}pp</p>
-          {player.ppChange != 0 && (
-            <Tooltip
-              display={<p>The change in your pp compared to yesterday</p>}
-            >
-              <p
-                className={`text-sm ${player.ppChange > 0 ? "text-green-400" : "text-red-400"}`}
-              >
-                {player.ppChange > 0 ? "+" : ""}
-                {formatPp(player.ppChange)}pp
-              </p>
-            </Tooltip>
-          )}
+          {ppChange != 0 &&
+            renderChange(
+              ppChange,
+              <p>The change in your pp compared to yesterday</p>,
+              (number) => {
+                return `${formatPp(number)}pp`;
+              },
+            )}
         </div>
       );
     },

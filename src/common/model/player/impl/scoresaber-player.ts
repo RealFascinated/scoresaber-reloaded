@@ -1,4 +1,4 @@
-import Player from "../player";
+import Player, { StatisticChange } from "../player";
 import ScoreSaberPlayerToken from "@/common/model/token/scoresaber/score-saber-player-token";
 import { PlayerHistory } from "@/common/player/player-history";
 import { config } from "../../../../../config";
@@ -26,7 +26,7 @@ export default interface ScoreSaberPlayer extends Player {
   /**
    * The change in pp compared to yesterday.
    */
-  ppChange: number;
+  statisticChange: StatisticChange | undefined;
 
   /**
    * The role the player has.
@@ -129,12 +129,27 @@ export async function getScoreSaberPlayerFromToken(
   );
   const todayStats = statisticHistory[todayDate];
   const yesterdayStats = statisticHistory[yesterdayDate];
+  const hasChange = !!(todayStats && yesterdayStats);
 
-  // Calculate the pp change
-  const ppChange =
-    todayStats && yesterdayStats && todayStats.pp && yesterdayStats.pp
-      ? todayStats.pp - yesterdayStats.pp
-      : 0;
+  /**
+   * Gets the change in the given stat
+   *
+   * @param statType the stat to check
+   * @return the change
+   */
+  const getChange = (statType: "rank" | "countryRank" | "pp"): number => {
+    if (!hasChange) {
+      return 0;
+    }
+    const statToday = todayStats[`${statType}`];
+    const statYesterday = yesterdayStats[`${statType}`];
+    return !!(statToday && statYesterday) ? statToday - statYesterday : 0;
+  };
+
+  // Calculate the changes
+  const rankChange = getChange("rank");
+  const countryRankChange = getChange("countryRank");
+  const ppChange = getChange("pp");
 
   return {
     id: token.id,
@@ -146,7 +161,11 @@ export async function getScoreSaberPlayerFromToken(
     joinedDate: new Date(token.firstSeen),
     bio: bio,
     pp: token.pp,
-    ppChange: ppChange,
+    statisticChange: {
+      rank: rankChange * -1, // Reverse the rank change
+      countryRank: countryRankChange * -1, // Reverse the country rank change
+      pp: ppChange,
+    },
     role: role,
     badges: badges,
     statisticHistory: statisticHistory,

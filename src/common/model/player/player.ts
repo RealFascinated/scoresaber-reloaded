@@ -1,3 +1,5 @@
+import { PlayerHistory } from "@/common/player/player-history";
+
 export default class Player {
   /**
    * The ID of this player.
@@ -41,7 +43,7 @@ export default class Player {
     country: string,
     rank: number,
     countryRank: number,
-    joinedDate: Date
+    joinedDate: Date,
   ) {
     this.id = id;
     this.name = name;
@@ -52,3 +54,5 @@ export default class Player {
     this.joinedDate = joinedDate;
   }
 }
+
+export type StatisticChange = PlayerHistory;
