@@ -86,7 +86,6 @@ export default function PlayerScores({
     data: scores,
     isError,
     isLoading,
-    refetch,
   } = useQuery({
     queryKey: ["playerScores", player.id, pageState, debouncedSearchTerm],
     queryFn: () => {
@@ -97,7 +96,9 @@ export default function PlayerScores({
         ...(isSearchActive && { search: debouncedSearchTerm }),
       });
     },
-    staleTime: 30 * 1000,
+    staleTime: 30 * 1000, // 30 seconds
+    enabled:
+      debouncedSearchTerm.length >= 3 || debouncedSearchTerm.length === 0, // Enable if valid search query or empty
   });
 
   const handleScoreLoad = useCallback(async () => {
@@ -126,10 +127,6 @@ export default function PlayerScores({
       newUrl,
     );
   }, [pageState, debouncedSearchTerm, player.id]);
-
-  useEffect(() => {
-    refetch();
-  }, [pageState, debouncedSearchTerm, refetch]);
 
   const handleSearchChange = (query: string) => {
     setSearchState({ query });
