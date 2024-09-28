@@ -9,6 +9,7 @@ import { InformationCircleIcon } from "@heroicons/react/16/solid";
 import { format } from "@formkit/tempo";
 import { PlayerTrackedSince } from "@/common/player/player-tracked-since";
 import { getDaysAgo } from "@/common/time-utils";
+import { formatNumberWithCommas } from "@/common/number-utils";
 
 type Props = {
   player: ScoreSaberPlayer;
@@ -31,7 +32,7 @@ export default function PlayerTrackedStatus({ player }: Props) {
 
   const trackedSince = new Date(data.trackedSince!);
   const daysAgo = getDaysAgo(trackedSince) + 1;
-  let daysAgoFormatted = `${daysAgo} day${daysAgo > 1 ? "s" : ""} ago`;
+  let daysAgoFormatted = `${formatNumberWithCommas(daysAgo)} day${daysAgo > 1 ? "s" : ""} ago`;
   if (daysAgo === 1) {
     daysAgoFormatted = "Today";
   }
