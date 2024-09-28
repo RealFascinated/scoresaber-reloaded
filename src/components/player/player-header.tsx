@@ -6,6 +6,7 @@ import { Avatar, AvatarImage } from "../ui/avatar";
 import ClaimProfile from "./claim-profile";
 import PlayerStats from "./player-stats";
 import ScoreSaberPlayer from "@/common/model/player/impl/scoresaber-player";
+import Tooltip from "@/components/tooltip";
 
 const playerData = [
   {
@@ -29,7 +30,16 @@ const playerData = [
   {
     showWhenInactiveOrBanned: true,
     render: (player: ScoreSaberPlayer) => {
-      return <p className="text-pp">{formatPp(player.pp)}pp</p>;
+      return (
+        <div className="text-pp flex gap-1 items-center">
+          <p>{formatPp(player.pp)}pp</p>
+          {player.ppGain > 0 && (
+            <Tooltip display={<p>The amount of PP you have gained today</p>}>
+              <span className="text-green-400 text-sm">+{player.ppGain}pp</span>
+            </Tooltip>
+          )}
+        </div>
+      );
     },
   },
 ];

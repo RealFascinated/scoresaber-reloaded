@@ -24,6 +24,11 @@ export default interface ScoreSaberPlayer extends Player {
   pp: number;
 
   /**
+   * The amount of pp gained compared to yesterday.
+   */
+  ppGain: number;
+
+  /**
    * The role the player has.
    */
   role: ScoreSaberRole | undefined;
@@ -75,6 +80,7 @@ export async function getScoreSaberPlayerFromToken(
       };
     }) || [];
 
+  const todayDate = formatDateMinimal(getMidnightAlignedDate(new Date()));
   let statisticHistory: { [key: string]: PlayerHistory } = {};
   try {
     const history = await ky
@@ -88,7 +94,7 @@ export async function getScoreSaberPlayerFromToken(
     }
     if (history) {
       // Use the latest data for today
-      history[formatDateMinimal(getMidnightAlignedDate(new Date()))] = {
+      history[todayDate] = {
         rank: token.rank,
         countryRank: token.countryRank,
         pp: token.pp,
@@ -118,6 +124,12 @@ export async function getScoreSaberPlayerFromToken(
       .sort()
       .reduce((obj, [key, value]) => ({ ...obj, [key]: value }), {});
   }
+  const yesterdayDate = formatDateMinimal(
+    getMidnightAlignedDate(getDaysAgoDate(1)),
+  );
+  const ppGain =
+    (statisticHistory[yesterdayDate]?.pp || 0) -
+    (statisticHistory[todayDate]?.pp || 0);
 
   return {
     id: token.id,
@@ -129,6 +141,7 @@ export async function getScoreSaberPlayerFromToken(
     joinedDate: new Date(token.firstSeen),
     bio: bio,
     pp: token.pp,
+    ppGain: ppGain < 0 ? 0 : ppGain,
     role: role,
     badges: badges,
     statisticHistory: statisticHistory,
