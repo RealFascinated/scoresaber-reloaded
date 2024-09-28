@@ -8,6 +8,7 @@ import PlayerStats from "./player-stats";
 import ScoreSaberPlayer from "@/common/model/player/impl/scoresaber-player";
 import Tooltip from "@/components/tooltip";
 import { ReactElement } from "react";
+import PlayerTrackedStatus from "@/components/player/player-tracked-status";
 
 /**
  * Renders the change for a stat.
@@ -114,7 +115,10 @@ export default function PlayerHeader({ player }: Props) {
         </Avatar>
         <div className="w-full flex gap-2 flex-col justify-center items-center lg:justify-start lg:items-start">
           <div>
-            <p className="font-bold text-2xl">{player.name}</p>
+            <div className="flex gap-2 items-center">
+              <p className="font-bold text-2xl">{player.name}</p>
+              <PlayerTrackedStatus player={player} />
+            </div>
             <div className="flex flex-col">
               <div>
                 {player.inactive && (
