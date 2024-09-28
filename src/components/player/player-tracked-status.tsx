@@ -34,7 +34,7 @@ export default function PlayerTrackedStatus({ player }: Props) {
         display={
           <div className="flex flex-col justify-center items-center">
             <p>This player is having their statistics tracked!</p>
-            <p>Tracked Since: {format(data.trackedSince!)}</p>
+            <p>Tracked Since: {format(new Date(data.trackedSince!))}</p>
           </div>
         }
         side="bottom"
