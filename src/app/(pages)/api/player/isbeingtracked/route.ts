@@ -13,11 +13,11 @@ export async function GET(request: NextRequest) {
   await connectMongo(); // Connect to Mongo
 
   const foundPlayer: IPlayer | null = await PlayerModel.findById(id);
-  const response: { tracked: boolean; lastTracked?: string } = {
+  const response: { tracked: boolean; trackedSince?: string } = {
     tracked: foundPlayer != null,
   };
   if (foundPlayer != null) {
-    response["lastTracked"] = foundPlayer.trackedSince?.toUTCString();
+    response["trackedSince"] = foundPlayer.trackedSince?.toUTCString();
   }
   return NextResponse.json(response);
 }

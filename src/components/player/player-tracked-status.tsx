@@ -6,6 +6,7 @@ import ky from "ky";
 import { config } from "../../../config";
 import Tooltip from "@/components/tooltip";
 import { InformationCircleIcon } from "@heroicons/react/16/solid";
+import { format } from "@formkit/tempo";
 
 type Props = {
   player: ScoreSaberPlayer;
@@ -18,6 +19,7 @@ export default function PlayerTrackedStatus({ player }: Props) {
       ky
         .get<{
           tracked: boolean;
+          trackedSince: string;
         }>(`${config.siteUrl}/api/player/isbeingtracked?id=${player.id}`)
         .json(),
   });
@@ -29,7 +31,12 @@ export default function PlayerTrackedStatus({ player }: Props) {
   return (
     <div className="flex gap-2">
       <Tooltip
-        display={<p>This player is having their statistics tracked!</p>}
+        display={
+          <div className="flex flex-col justify-center items-center">
+            <p>This player is having their statistics tracked!</p>
+            <p>Tracked Since: {format(data.trackedSince)}</p>
+          </div>
+        }
         side="bottom"
       >
         <InformationCircleIcon className="w-6 h-6 text-neutral-200" />
