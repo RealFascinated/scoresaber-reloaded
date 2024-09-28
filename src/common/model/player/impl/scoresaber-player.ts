@@ -24,9 +24,9 @@ export default interface ScoreSaberPlayer extends Player {
   pp: number;
 
   /**
-   * The amount of pp gained compared to yesterday.
+   * The change in pp compared to yesterday.
    */
-  ppGain: number;
+  ppChange: number;
 
   /**
    * The role the player has.
@@ -127,9 +127,12 @@ export async function getScoreSaberPlayerFromToken(
   const yesterdayDate = formatDateMinimal(
     getMidnightAlignedDate(getDaysAgoDate(1)),
   );
-  const ppGain =
-    (statisticHistory[yesterdayDate]?.pp || 0) -
-    (statisticHistory[todayDate]?.pp || 0);
+  const todayStats = statisticHistory[todayDate];
+  const yesterdayStats = statisticHistory[yesterdayDate];
+
+  // Calculate the pp change
+  const ppChange =
+    todayStats.pp && todayStats.pp ? todayStats.pp - (todayStats.pp + 10) : 0;
 
   return {
     id: token.id,
@@ -141,7 +144,7 @@ export async function getScoreSaberPlayerFromToken(
     joinedDate: new Date(token.firstSeen),
     bio: bio,
     pp: token.pp,
-    ppGain: ppGain < 0 ? 0 : ppGain,
+    ppChange: ppChange,
     role: role,
     badges: badges,
     statisticHistory: statisticHistory,

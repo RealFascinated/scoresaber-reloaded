@@ -33,11 +33,14 @@ const playerData = [
       return (
         <div className="text-pp flex gap-1 items-center">
           <p>{formatPp(player.pp)}pp</p>
-          {player.ppGain > 0 && (
-            <Tooltip display={<p>The amount of PP you have gained today</p>}>
-              <span className="text-green-400 text-sm">+{player.ppGain}pp</span>
-            </Tooltip>
-          )}
+          <Tooltip display={<p>The change in your pp compared to yesterday</p>}>
+            <p
+              className={`text-sm ${player.ppChange > 0 ? "text-green-400" : "text-red-400"}`}
+            >
+              {player.ppChange > 0 ? "+" : ""}
+              {formatPp(player.ppChange)}pp
+            </p>
+          </Tooltip>
         </div>
       );
     },
