@@ -26,6 +26,11 @@ export interface IPlayer extends Document {
   rawPlayer: ScoreSaberPlayer;
 
   /**
+   * The first time the player was tracked
+   */
+  trackedSince: Date;
+
+  /**
    * Gets when this player was last tracked.
    */
   getLastTracked(): Date;
@@ -62,6 +67,7 @@ const PlayerSchema = new Schema<IPlayer>({
   lastTracked: { type: Date, default: new Date(), required: false },
   rawPlayer: { type: Object, required: false },
   statisticHistory: { type: Map, default: () => new Map(), required: false },
+  trackedSince: { type: Date, default: new Date(), required: false },
 });
 
 PlayerSchema.methods.getLastTracked = function (): Date {

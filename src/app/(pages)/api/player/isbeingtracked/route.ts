@@ -14,7 +14,12 @@ export async function GET(request: NextRequest) {
 
   // Fetch the player and return their statistic history
   let foundPlayer: IPlayer | null = await PlayerModel.findById(id);
-  return NextResponse.json({
+
+  const response: { tracked: boolean; lastTracked?: string } = {
     tracked: foundPlayer != null,
-  });
+  };
+  if (foundPlayer != null) {
+    response["lastTracked"] = foundPlayer.trackedSince?.toUTCString();
+  }
+  return NextResponse.json(response);
 }

@@ -23,6 +23,7 @@ export async function GET(request: NextRequest) {
   if (shouldCreatePlayer && foundPlayer == null) {
     foundPlayer = await PlayerModel.create({
       _id: id,
+      trackedSince: new Date(),
     });
     const response = await scoresaberService.lookupPlayer(id, true);
     if (response != undefined) {
