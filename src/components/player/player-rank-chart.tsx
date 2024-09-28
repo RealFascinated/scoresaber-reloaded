@@ -58,12 +58,14 @@ type Dataset = {
  * Generate an axis
  *
  * @param id the id of the axis
+ * @param reverse if the axis should be reversed
  * @param display if the axis should be displayed
  * @param position the position of the axis
  * @param displayName the optional name to display for the axis
  */
 const generateAxis = (
   id: string,
+  reverse: boolean,
   display: boolean,
   position: "right" | "left",
   displayName: string,
@@ -83,7 +85,7 @@ const generateAxis = (
   ticks: {
     stepSize: 10,
   },
-  reverse: true,
+  reverse: reverse,
 });
 
 /**
@@ -96,9 +98,9 @@ const createAxes = () => ({
     },
     reverse: true,
   },
-  y: generateAxis("y", true, "left", "Global Rank"), // Rank axis with display name
-  y1: generateAxis("y1", false, "left", "Country Rank"), // Country Rank axis with display name
-  y2: generateAxis("y2", true, "right", "PP"), // PP axis with display name
+  y: generateAxis("y", true, true, "left", "Global Rank"), // Rank axis with display name
+  y1: generateAxis("y1", true, false, "left", "Country Rank"), // Country Rank axis with display name
+  y2: generateAxis("y2", false, true, "right", "PP"), // PP axis with display name
 });
 
 /**
