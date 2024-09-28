@@ -19,6 +19,7 @@ export async function GET(request: NextRequest) {
   };
   if (foundPlayer != null) {
     response["trackedSince"] = foundPlayer.trackedSince?.toUTCString();
+    response["daysTracked"] = foundPlayer.getStatisticHistory().size;
   }
   return NextResponse.json(response);
 }

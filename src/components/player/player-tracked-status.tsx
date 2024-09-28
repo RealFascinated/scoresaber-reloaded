@@ -49,6 +49,7 @@ export default function PlayerTrackedStatus({ player }: Props) {
             <p>
               Tracked Since: {format(trackedSince)} ({daysAgoFormatted})
             </p>
+            <p>Days Tracked: {formatNumberWithCommas(data.daysTracked!)}</p>
           </div>
         }
         side="bottom"

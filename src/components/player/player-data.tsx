@@ -11,6 +11,7 @@ import PlayerScores from "./player-scores";
 import ScoreSaberPlayer from "@/common/model/player/impl/scoresaber-player";
 import Card from "@/components/card";
 import PlayerBadges from "@/components/player/player-badges";
+import { useIsMobile } from "@/hooks/use-is-mobile";
 
 const REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes
 
@@ -29,6 +30,8 @@ export default function PlayerData({
   sort,
   page,
 }: Props) {
+  const isMobile = useIsMobile();
+
   let player = initalPlayerData;
   const { data, isLoading, isError } = useQuery({
     queryKey: ["player", player.id],
@@ -58,10 +61,12 @@ export default function PlayerData({
           page={page}
         />
       </article>
-      <aside className="w-[550px] hidden 2xl:flex flex-col gap-2">
-        <Mini type="Global" player={player} />
-        <Mini type="Country" player={player} />
-      </aside>
+      {!isMobile && (
+        <aside className="w-[550px] hidden 2xl:flex flex-col gap-2">
+          <Mini type="Global" player={player} />
+          <Mini type="Country" player={player} />
+        </aside>
+      )}
     </div>
   );
 }

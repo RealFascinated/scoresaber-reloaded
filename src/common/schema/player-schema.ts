@@ -18,7 +18,7 @@ export interface IPlayer extends Document {
   /**
    * The last time the player was tracked
    */
-  lastTracked: Date;
+  ked: Date;
 
   /**
    * The raw player data.
@@ -33,7 +33,7 @@ export interface IPlayer extends Document {
   /**
    * Gets when this player was last tracked.
    */
-  getLastTracked(): Date;
+  getked(): Date;
 
   /**
    * Gets the history for the given date
@@ -64,14 +64,14 @@ export interface IPlayer extends Document {
 // Mongoose Schema definition for Player
 const PlayerSchema = new Schema<IPlayer>({
   _id: { type: String, required: true },
-  lastTracked: { type: Date, default: new Date(), required: false },
+  ked: { type: Date, default: new Date(), required: false },
   rawPlayer: { type: Object, required: false },
   statisticHistory: { type: Map, default: () => new Map(), required: false },
   trackedSince: { type: Date, default: new Date(), required: false },
 });
 
-PlayerSchema.methods.getLastTracked = function (): Date {
-  return this.lastTracked || new Date();
+PlayerSchema.methods.getked = function (): Date {
+  return this.ked || new Date();
 };
 
 PlayerSchema.methods.getHistory = function (date: Date): PlayerHistory {
