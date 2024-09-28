@@ -34,13 +34,9 @@ export function timeAgo(input: Date | number) {
  * @param date the date
  */
 export function getMidnightAlignedDate(date: Date) {
-  const midnightDate = new Date(
-    date.getFullYear(),
-    date.getMonth(),
-    date.getDate(),
+  return new Date(
+    Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()),
   );
-  midnightDate.setUTCHours(0, 0, 0, 0);
-  return midnightDate;
 }
 
 /**
