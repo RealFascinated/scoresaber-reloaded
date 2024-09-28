@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Player not found" }, { status: 404 });
   }
 
-  let history: Map<string, PlayerHistory> = foundPlayer.getStatisticHistory();
+  const history: Map<string, PlayerHistory> = foundPlayer.getStatisticHistory();
   let fetchedHistory = sortPlayerHistory(history);
   fetchedHistory = fetchedHistory.slice(-50); // Get the last 50 entries
   const resultHistory: { [key: string]: PlayerHistory } = {};

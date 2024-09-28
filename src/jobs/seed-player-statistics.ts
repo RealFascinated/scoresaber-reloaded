@@ -13,7 +13,7 @@ client.defineJob({
     // Run at 00:01 every day (midnight)
     cron: "0 1 * * *",
   }),
-  run: async (payload, io, ctx) => {
+  run: async (payload, io) => {
     await io.logger.info("Connecting to Mongo");
     await connectMongo();
 
