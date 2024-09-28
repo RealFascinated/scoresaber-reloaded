@@ -8,6 +8,7 @@ import Tooltip from "@/components/tooltip";
 import { InformationCircleIcon } from "@heroicons/react/16/solid";
 import { format } from "@formkit/tempo";
 import { PlayerTrackedSince } from "@/common/player/player-tracked-since";
+import { getDaysAgo } from "@/common/time-utils";
 
 type Props = {
   player: ScoreSaberPlayer;
@@ -28,13 +29,25 @@ export default function PlayerTrackedStatus({ player }: Props) {
     return undefined;
   }
 
+  const trackedSince = new Date(data.trackedSince!);
+  const daysAgo = getDaysAgo(trackedSince) + 1;
+  let daysAgoFormatted = `${daysAgo} day${daysAgo > 1 ? "s" : ""} ago`;
+  if (daysAgo === 1) {
+    daysAgoFormatted = "Today";
+  }
+  if (daysAgo === 2) {
+    daysAgoFormatted = "Yesterday";
+  }
+
   return (
     <div className="flex gap-2">
       <Tooltip
         display={
           <div className="flex flex-col justify-center items-center">
             <p>This player is having their statistics tracked!</p>
-            <p>Tracked Since: {format(new Date(data.trackedSince!))}</p>
+            <p>
+              Tracked Since: {format(trackedSince)} ({daysAgoFormatted})
+            </p>
           </div>
         }
         side="bottom"
