@@ -74,7 +74,8 @@ export async function trackScoreSaberPlayer(
   if (
     foundPlayer.rawPlayer &&
     foundPlayer.rawPlayer.inactive &&
-    Date.now() - foundPlayer.getked().getTime() > INACTIVE_CHECK_AGAIN_TIME
+    Date.now() - foundPlayer.getLastTracked().getTime() >
+      INACTIVE_CHECK_AGAIN_TIME
   ) {
     io &&
       (await io.logger.warn(

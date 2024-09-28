@@ -50,6 +50,7 @@ export default async function Search({ params, searchParams }: Props) {
   const sort: ScoreSort = (slug[1] as ScoreSort) || "recent"; // The sorting method
   const page = parseInt(slug[2]) || 1; // The page number
   const search = searchParamss["search"] || ""; // The search query
+
   const response = await scoresaberService.lookupPlayer(id, false);
   if (response == undefined) {
     // Invalid player id
