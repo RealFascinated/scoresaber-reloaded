@@ -132,7 +132,9 @@ export async function getScoreSaberPlayerFromToken(
 
   // Calculate the pp change
   const ppChange =
-    todayStats.pp && yesterdayStats.pp ? todayStats.pp - yesterdayStats.pp : 0;
+    todayStats && yesterdayStats && todayStats.pp && yesterdayStats.pp
+      ? todayStats.pp - yesterdayStats.pp
+      : 0;
 
   return {
     id: token.id,
