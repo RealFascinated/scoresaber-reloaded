@@ -169,6 +169,7 @@ type Props = {
 };
 
 export default function PlayerRankChart({ player }: Props) {
+  console.log(player.statisticHistory);
   if (
     player.statisticHistory === undefined ||
     Object.keys(player.statisticHistory).length === 0
@@ -193,6 +194,7 @@ export default function PlayerRankChart({ player }: Props) {
     // Create labels based on days ago
     if (daysAgo === 0) {
       labels.push("Today");
+      console.log(dateString);
     } else if (daysAgo === 1) {
       labels.push("Yesterday");
     } else {

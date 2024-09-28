@@ -29,6 +29,17 @@ export function timeAgo(input: Date | number) {
 }
 
 /**
+ * Formats the date
+ *
+ * @param date the date
+ */
+export function formatDate(date: Date) {
+  return date.toLocaleString("en-US", {
+    timeZone: "Europe/London",
+  });
+}
+
+/**
  * Gets the midnight aligned date
  *
  * @param date the date

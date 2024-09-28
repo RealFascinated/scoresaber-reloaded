@@ -3,7 +3,11 @@ import ScoreSaberPlayerToken from "@/common/model/token/scoresaber/score-saber-p
 import { PlayerHistory } from "@/common/player/player-history";
 import { config } from "../../../../../config";
 import ky from "ky";
-import { getDaysAgoDate, getMidnightAlignedDate } from "@/common/time-utils";
+import {
+  formatDate,
+  getDaysAgoDate,
+  getMidnightAlignedDate,
+} from "@/common/time-utils";
 
 /**
  * A ScoreSaber player.
@@ -84,7 +88,7 @@ export async function getScoreSaberPlayerFromToken(
     }
     if (history) {
       // Use the latest data for today
-      history[getMidnightAlignedDate(new Date()).toString()] = {
+      history[formatDate(getMidnightAlignedDate(new Date()))] = {
         rank: token.rank,
         countryRank: token.countryRank,
         pp: token.pp,
