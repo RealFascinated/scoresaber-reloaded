@@ -12,9 +12,7 @@ export async function GET(request: NextRequest) {
   }
   await connectMongo(); // Connect to Mongo
 
-  // Fetch the player and return their statistic history
-  let foundPlayer: IPlayer | null = await PlayerModel.findById(id);
-
+  const foundPlayer: IPlayer | null = await PlayerModel.findById(id);
   const response: { tracked: boolean; lastTracked?: string } = {
     tracked: foundPlayer != null,
   };

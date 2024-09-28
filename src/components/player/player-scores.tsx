@@ -129,7 +129,7 @@ export default function PlayerScores({
       "",
       newUrl,
     );
-  }, [pageState, debouncedSearchTerm, player.id]);
+  }, [pageState, debouncedSearchTerm, player.id, isSearchActive]);
 
   const handleSearchChange = (query: string) => {
     setSearchState({ query });
