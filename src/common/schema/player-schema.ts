@@ -70,7 +70,7 @@ PlayerSchema.methods.getLastTracked = function (): Date {
 
 PlayerSchema.methods.getHistory = function (date: Date): PlayerHistory {
   return (
-    this.statisticHistory.get(getMidnightAlignedDate(date).toString()) || {}
+    this.statisticHistory.get(getMidnightAlignedDate(date).toUTCString()) || {}
   );
 };
 
@@ -91,7 +91,7 @@ PlayerSchema.methods.setStatisticHistory = function (
   if (!this.statisticHistory) {
     this.statisticHistory = new Map();
   }
-  const alignedDate = getMidnightAlignedDate(date).toString();
+  const alignedDate = getMidnightAlignedDate(date).toUTCString();
   return this.statisticHistory.set(alignedDate, data);
 };
 
@@ -111,7 +111,7 @@ PlayerSchema.methods.sortStatisticHistory = function (): Map<
           Date.parse(b[0]) - Date.parse(a[0]),
       )
       // Convert the date strings back to Date objects for the resulting Map
-      .map(([date, history]) => [new Date(date).toString(), history]),
+      .map(([date, history]) => [new Date(date).toUTCString(), history]),
   );
   return this.statisticHistory;
 };
