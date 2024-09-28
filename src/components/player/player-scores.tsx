@@ -9,11 +9,11 @@ import { useCallback, useEffect, useState } from "react";
 import Card from "../card";
 import Pagination from "../input/pagination";
 import { Button } from "../ui/button";
-import { leaderboards } from "@/common/leaderboards";
 import { ScoreSort } from "@/common/service/score-sort";
 import ScoreSaberPlayerScoresPageToken from "@/common/model/token/scoresaber/score-saber-player-scores-page-token";
 import Score from "@/components/score/score";
 import ScoreSaberPlayer from "@/common/model/player/impl/scoresaber-player";
+import { scoresaberService } from "@/common/service/impl/scoresaber";
 
 type Props = {
   initialScoreData?: ScoreSaberPlayerScoresPageToken;
@@ -77,7 +77,6 @@ export default function PlayerScores({
   sort,
   page,
 }: Props) {
-  const leaderboard = leaderboards.ScoreSaber;
   const { width } = useWindowDimensions();
   const controls = useAnimation();
 
@@ -97,9 +96,13 @@ export default function PlayerScores({
     isLoading,
     refetch,
   } = useQuery({
-    queryKey: ["playerScores", player.id, leaderboard, pageState],
+    queryKey: ["playerScores", player.id, pageState],
     queryFn: () =>
-      leaderboard.queries.lookupScores(player, pageState.sort, pageState.page),
+      scoresaberService.lookupPlayerScores({
+        playerId: player.id,
+        sort: pageState.sort,
+        page: pageState.page,
+      }),
     staleTime: 30 * 1000, // Cache data for 30 seconds
   });
 

@@ -15,7 +15,7 @@ import { Input } from "../ui/input";
 import { ScrollArea } from "../ui/scroll-area";
 
 const formSchema = z.object({
-  username: z.string().min(2).max(50),
+  username: z.string().min(3).max(50),
 });
 
 export default function SearchPlayer() {

@@ -1,4 +1,3 @@
-import { leaderboards } from "@/common/leaderboards";
 import ScoreSaberPlayerToken from "@/common/model/token/scoresaber/score-saber-player-token";
 import { ScoreSaberPlayersPageToken } from "@/common/model/token/scoresaber/score-saber-players-page-token";
 import { formatNumberWithCommas, formatPp } from "@/common/number-utils";
@@ -10,6 +9,7 @@ import Card from "../card";
 import CountryFlag from "../country-flag";
 import { Avatar, AvatarImage } from "../ui/avatar";
 import ScoreSaberPlayer from "@/common/model/player/impl/scoresaber-player";
+import { scoresaberService } from "@/common/service/impl/scoresaber";
 
 const REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes
 const PLAYER_NAME_MAX_LENGTH = 18;
@@ -39,7 +39,7 @@ const miniVariants: Variants = {
       return Math.floor((player.rank - 1) / itemsPerPage) + 1;
     },
     query: (page: number) => {
-      return leaderboards.ScoreSaber.queries.lookupGlobalPlayers(page);
+      return scoresaberService.lookupPlayers(page);
     },
   },
   Country: {
@@ -51,10 +51,7 @@ const miniVariants: Variants = {
       return Math.floor((player.countryRank - 1) / itemsPerPage) + 1;
     },
     query: (page: number, country: string) => {
-      return leaderboards.ScoreSaber.queries.lookupGlobalPlayersByCountry(
-        page,
-        country,
-      );
+      return scoresaberService.lookupPlayersByCountry(page, country);
     },
   },
 };
