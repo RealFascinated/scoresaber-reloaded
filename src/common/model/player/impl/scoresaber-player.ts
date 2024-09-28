@@ -4,7 +4,7 @@ import { PlayerHistory } from "@/common/player/player-history";
 import { config } from "../../../../../config";
 import ky from "ky";
 import {
-  formatDate,
+  formatDateMinimal,
   getDaysAgoDate,
   getMidnightAlignedDate,
 } from "@/common/time-utils";
@@ -88,7 +88,7 @@ export async function getScoreSaberPlayerFromToken(
     }
     if (history) {
       // Use the latest data for today
-      history[formatDate(getMidnightAlignedDate(new Date()))] = {
+      history[formatDateMinimal(getMidnightAlignedDate(new Date()))] = {
         rank: token.rank,
         countryRank: token.countryRank,
         pp: token.pp,

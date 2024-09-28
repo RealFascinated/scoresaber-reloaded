@@ -1,6 +1,6 @@
 import mongoose, { Document, Schema } from "mongoose";
 import { PlayerHistory } from "@/common/player/player-history";
-import { formatDate, getMidnightAlignedDate } from "@/common/time-utils";
+import { formatDateMinimal, getMidnightAlignedDate } from "@/common/time-utils";
 import ScoreSaberPlayer from "@/common/model/player/impl/scoresaber-player";
 
 // Interface for Player Document
@@ -70,7 +70,9 @@ PlayerSchema.methods.getLastTracked = function (): Date {
 
 PlayerSchema.methods.getHistory = function (date: Date): PlayerHistory {
   return (
-    this.statisticHistory.get(formatDate(getMidnightAlignedDate(date))) || {}
+    this.statisticHistory.get(
+      formatDateMinimal(getMidnightAlignedDate(date)),
+    ) || {}
   );
 };
 
@@ -92,7 +94,7 @@ PlayerSchema.methods.setStatisticHistory = function (
     this.statisticHistory = new Map();
   }
   return this.statisticHistory.set(
-    formatDate(getMidnightAlignedDate(date)),
+    formatDateMinimal(getMidnightAlignedDate(date)),
     data,
   );
 };

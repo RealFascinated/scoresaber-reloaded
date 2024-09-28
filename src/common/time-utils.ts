@@ -29,13 +29,16 @@ export function timeAgo(input: Date | number) {
 }
 
 /**
- * Formats the date
+ * Formats the date in the format "DD MMMM YYYY"
  *
  * @param date the date
  */
-export function formatDate(date: Date) {
+export function formatDateMinimal(date: Date) {
   return date.toLocaleString("en-US", {
     timeZone: "Europe/London",
+    day: "numeric",
+    month: "short",
+    year: "numeric",
   });
 }
 
