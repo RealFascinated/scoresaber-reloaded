@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectMongo } from "@/common/mongo";
 import { IPlayer, PlayerModel } from "@/common/schema/player-schema";
+import { PlayerTrackedSince } from "@/common/player/player-tracked-since";
 
 export async function GET(request: NextRequest) {
   const id = request.nextUrl.searchParams.get("id");
@@ -13,7 +14,7 @@ export async function GET(request: NextRequest) {
   await connectMongo(); // Connect to Mongo
 
   const foundPlayer: IPlayer | null = await PlayerModel.findById(id);
-  const response: { tracked: boolean; trackedSince?: string } = {
+  const response: PlayerTrackedSince = {
     tracked: foundPlayer != null,
   };
   if (foundPlayer != null) {

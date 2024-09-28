@@ -7,6 +7,7 @@ import { config } from "../../../config";
 import Tooltip from "@/components/tooltip";
 import { InformationCircleIcon } from "@heroicons/react/16/solid";
 import { format } from "@formkit/tempo";
+import { PlayerTrackedSince } from "@/common/player/player-tracked-since";
 
 type Props = {
   player: ScoreSaberPlayer;
@@ -17,10 +18,9 @@ export default function PlayerTrackedStatus({ player }: Props) {
     queryKey: ["playerIsBeingTracked", player.id],
     queryFn: () =>
       ky
-        .get<{
-          tracked: boolean;
-          trackedSince: string;
-        }>(`${config.siteUrl}/api/player/isbeingtracked?id=${player.id}`)
+        .get<PlayerTrackedSince>(
+          `${config.siteUrl}/api/player/isbeingtracked?id=${player.id}`,
+        )
         .json(),
   });
 
@@ -34,7 +34,7 @@ export default function PlayerTrackedStatus({ player }: Props) {
         display={
           <div className="flex flex-col justify-center items-center">
             <p>This player is having their statistics tracked!</p>
-            <p>Tracked Since: {format(data.trackedSince)}</p>
+            <p>Tracked Since: {format(data.trackedSince!)}</p>
           </div>
         }
         side="bottom"
