@@ -17,6 +17,7 @@ const REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes
 type Props = {
   initialPlayerData: ScoreSaberPlayer;
   initialScoreData?: ScoreSaberPlayerScoresPageToken;
+  initialSearch?: string;
   sort: ScoreSort;
   page: number;
 };
@@ -24,6 +25,7 @@ type Props = {
 export default function PlayerData({
   initialPlayerData: initalPlayerData,
   initialScoreData,
+  initialSearch,
   sort,
   page,
 }: Props) {
@@ -50,6 +52,7 @@ export default function PlayerData({
         )}
         <PlayerScores
           initialScoreData={initialScoreData}
+          initialSearch={initialSearch}
           player={player}
           sort={sort}
           page={page}

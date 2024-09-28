@@ -10,6 +10,9 @@ type Props = {
   params: Promise<{
     slug: string[];
   }>;
+  searchParams: Promise<{
+    [key: string]: string | undefined;
+  }>;
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -40,11 +43,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function Search({ params }: Props) {
+export default async function Search({ params, searchParams }: Props) {
   const { slug } = await params;
+  const searchParamss = await searchParams;
   const id = slug[0]; // The players id
   const sort: ScoreSort = (slug[1] as ScoreSort) || "recent"; // The sorting method
   const page = parseInt(slug[2]) || 1; // The page number
+  const search = searchParamss["search"] || ""; // The search query
   const response = await scoresaberService.lookupPlayer(id, false);
   if (response == undefined) {
     // Invalid player id
@@ -55,6 +60,7 @@ export default async function Search({ params }: Props) {
     playerId: id,
     sort,
     page,
+    search,
   });
   const { player } = response;
   return (
@@ -62,6 +68,7 @@ export default async function Search({ params }: Props) {
       <PlayerData
         initialPlayerData={player}
         initialScoreData={scores}
+        initialSearch={search}
         sort={sort}
         page={page}
       />

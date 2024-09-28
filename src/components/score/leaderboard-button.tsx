@@ -13,7 +13,7 @@ export default function LeaderboardButton({
   setIsLeaderboardExpanded,
 }: Props) {
   return (
-    <div className="pr-2 flex items-center justify-center h-full">
+    <div className="pr-2 flex items-center justify-center h-full cursor-default">
       <Button
         className="p-0 hover:bg-transparent"
         variant="ghost"

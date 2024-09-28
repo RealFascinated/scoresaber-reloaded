@@ -1,8 +1,6 @@
-"use client";
-
 import { capitalizeFirstLetter } from "@/common/string-utils";
 import useWindowDimensions from "@/hooks/use-window-dimensions";
-import { ClockIcon, TrophyIcon } from "@heroicons/react/24/solid";
+import { ClockIcon, TrophyIcon, XMarkIcon } from "@heroicons/react/24/solid"; // Import XMarkIcon for the clear button
 import { useQuery } from "@tanstack/react-query";
 import { motion, useAnimation, Variants } from "framer-motion";
 import { useCallback, useEffect, useState } from "react";
@@ -14,23 +12,21 @@ import ScoreSaberPlayerScoresPageToken from "@/common/model/token/scoresaber/sco
 import Score from "@/components/score/score";
 import ScoreSaberPlayer from "@/common/model/player/impl/scoresaber-player";
 import { scoresaberService } from "@/common/service/impl/scoresaber";
+import { Input } from "@/components/ui/input";
+import { clsx } from "clsx";
+
+const INPUT_DEBOUNCE_DELAY = 250; // milliseconds
 
 type Props = {
   initialScoreData?: ScoreSaberPlayerScoresPageToken;
+  initialSearch?: string;
   player: ScoreSaberPlayer;
   sort: ScoreSort;
   page: number;
 };
 
 type PageState = {
-  /**
-   * The current page
-   */
   page: number;
-
-  /**
-   * The current sort
-   */
   sort: ScoreSort;
 };
 
@@ -48,31 +44,14 @@ const scoreSort = [
 ];
 
 const scoreAnimation: Variants = {
-  hiddenRight: {
-    opacity: 0,
-    x: 50,
-    transition: {
-      delay: 0,
-    },
-  },
-  hiddenLeft: {
-    opacity: 0,
-    x: -50,
-    transition: {
-      delay: 0,
-    },
-  },
-  visible: {
-    opacity: 1,
-    x: 0,
-    transition: {
-      staggerChildren: 0.03,
-    },
-  },
+  hiddenRight: { opacity: 0, x: 50 },
+  hiddenLeft: { opacity: 0, x: -50 },
+  visible: { opacity: 1, x: 0, transition: { staggerChildren: 0.03 } },
 };
 
 export default function PlayerScores({
   initialScoreData,
+  initialSearch,
   player,
   sort,
   page,
@@ -80,15 +59,28 @@ export default function PlayerScores({
   const { width } = useWindowDimensions();
   const controls = useAnimation();
 
-  const [firstLoad, setFirstLoad] = useState(true);
-  const [pageState, setPageState] = useState<PageState>({
-    page: page,
-    sort: sort,
-  });
+  const [pageState, setPageState] = useState<PageState>({ page, sort });
   const [previousPage, setPreviousPage] = useState(page);
   const [currentScores, setCurrentScores] = useState<
     ScoreSaberPlayerScoresPageToken | undefined
   >(initialScoreData);
+  const [searchState, setSearchState] = useState({
+    query: initialSearch || "",
+  });
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(
+    initialSearch || "",
+  );
+
+  const isSearchActive = debouncedSearchTerm.length >= 3;
+
+  // Debounce the search query
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchTerm(searchState.query);
+    }, INPUT_DEBOUNCE_DELAY);
+
+    return () => clearTimeout(handler);
+  }, [searchState.query]);
 
   const {
     data: scores,
@@ -96,26 +88,25 @@ export default function PlayerScores({
     isLoading,
     refetch,
   } = useQuery({
-    queryKey: ["playerScores", player.id, pageState],
-    queryFn: () =>
-      scoresaberService.lookupPlayerScores({
+    queryKey: ["playerScores", player.id, pageState, debouncedSearchTerm],
+    queryFn: () => {
+      return scoresaberService.lookupPlayerScores({
         playerId: player.id,
-        sort: pageState.sort,
         page: pageState.page,
-      }),
-    staleTime: 30 * 1000, // Cache data for 30 seconds
+        sort: pageState.sort,
+        ...(isSearchActive && { search: debouncedSearchTerm }),
+      });
+    },
+    staleTime: 30 * 1000,
   });
 
   const handleScoreLoad = useCallback(async () => {
-    setFirstLoad(false);
-    if (!firstLoad) {
-      await controls.start(
-        previousPage >= pageState.page ? "hiddenRight" : "hiddenLeft",
-      );
-    }
+    await controls.start(
+      previousPage >= pageState.page ? "hiddenRight" : "hiddenLeft",
+    );
     setCurrentScores(scores);
     await controls.start("visible");
-  }, [scores, controls, previousPage, firstLoad, pageState.page]);
+  }, [scores, controls, previousPage, pageState.page]);
 
   const handleSortChange = (newSort: ScoreSort) => {
     if (newSort !== pageState.sort) {
@@ -124,31 +115,44 @@ export default function PlayerScores({
   };
 
   useEffect(() => {
-    if (scores) {
-      handleScoreLoad();
-    }
-  }, [scores, isError, handleScoreLoad]);
+    if (scores) handleScoreLoad();
+  }, [scores, handleScoreLoad]);
 
   useEffect(() => {
-    const newUrl = `/player/${player.id}/${pageState.sort}/${pageState.page}`;
+    const newUrl = `/player/${player.id}/${pageState.sort}/${pageState.page}${isSearchActive ? `?search=${debouncedSearchTerm}` : ""}`;
     window.history.replaceState(
       { ...window.history.state, as: newUrl, url: newUrl },
       "",
       newUrl,
     );
+  }, [pageState, debouncedSearchTerm, player.id]);
+
+  useEffect(() => {
     refetch();
-  }, [pageState, refetch, player.id]);
+  }, [pageState, debouncedSearchTerm, refetch]);
+
+  const handleSearchChange = (query: string) => {
+    setSearchState({ query });
+  };
+
+  const clearSearch = () => {
+    setSearchState({ query: "" });
+    setDebouncedSearchTerm(""); // Clear the debounced term
+  };
+
+  const invalidSearch =
+    searchState.query.length >= 1 && searchState.query.length < 3;
 
   return (
     <Card className="flex gap-1">
-      <div className="flex items-center flex-col w-full gap-2 justify-center relative">
-        <div className="flex items-center flex-row gap-2">
-          {Object.values(scoreSort).map((sortOption, index) => (
+      <div className="flex flex-col items-center w-full gap-2 relative">
+        <div className="flex gap-2">
+          {scoreSort.map((sortOption) => (
             <Button
+              key={sortOption.value}
               variant={
                 sortOption.value === pageState.sort ? "default" : "outline"
               }
-              key={index}
               onClick={() => handleSortChange(sortOption.value)}
               size="sm"
               className="flex items-center gap-1"
@@ -159,21 +163,36 @@ export default function PlayerScores({
           ))}
         </div>
 
-        {/* todo: add search */}
-        {/*<Input*/}
-        {/*  type="search"*/}
-        {/*  placeholder="Search..."*/}
-        {/*  className="w-72 flex lg:absolute right-0 top-0"*/}
-        {/*/>*/}
+        <div className="relative w-72 lg:absolute right-0 top-0">
+          <Input
+            type="search"
+            placeholder="Search..."
+            className={clsx(
+              "pr-10", // Add padding right for the clear button
+              invalidSearch && "border-red-500",
+            )}
+            value={searchState.query}
+            onChange={(e) => handleSearchChange(e.target.value)}
+          />
+          {searchState.query && ( // Show clear button only if there's a query
+            <button
+              onClick={clearSearch}
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-300 hover:brightness-75 transform-gpu transition-all cursor-default"
+              aria-label="Clear search"
+            >
+              <XMarkIcon className="w-5 h-5" />
+            </button>
+          )}
+        </div>
       </div>
 
       {currentScores && (
         <>
           <div className="text-center">
-            {isError && <p>Oopsies! Something went wrong.</p>}
-            {currentScores.playerScores.length === 0 && (
-              <p>No scores found. Invalid Page?</p>
-            )}
+            {isError ||
+              (currentScores.playerScores.length === 0 && (
+                <p>No scores found. Invalid Page or Search?</p>
+              ))}
           </div>
 
           <motion.div
@@ -197,9 +216,9 @@ export default function PlayerScores({
                 currentScores.metadata.itemsPerPage,
             )}
             loadingPage={isLoading ? pageState.page : undefined}
-            onPageChange={(page) => {
+            onPageChange={(newPage) => {
               setPreviousPage(pageState.page);
-              setPageState({ page, sort: pageState.sort });
+              setPageState({ ...pageState, page: newPage });
             }}
           />
         </>
