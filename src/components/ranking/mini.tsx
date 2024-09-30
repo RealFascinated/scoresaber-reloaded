@@ -11,7 +11,6 @@ import { Avatar, AvatarImage } from "../ui/avatar";
 import ScoreSaberPlayer from "@/common/model/player/impl/scoresaber-player";
 import { scoresaberService } from "@/common/service/impl/scoresaber";
 
-const REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes
 const PLAYER_NAME_MAX_LENGTH = 18;
 
 type MiniProps = {
@@ -91,7 +90,6 @@ export default function Mini({ type, player }: MiniProps) {
 
       return players;
     },
-    refetchInterval: REFRESH_INTERVAL,
   });
 
   let players = data; // So we can update it later

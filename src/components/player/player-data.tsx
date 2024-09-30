@@ -13,8 +13,6 @@ import Card from "@/components/card";
 import PlayerBadges from "@/components/player/player-badges";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 
-const REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes
-
 type Props = {
   initialPlayerData: ScoreSaberPlayer;
   initialScoreData?: ScoreSaberPlayerScoresPageToken;
@@ -36,7 +34,6 @@ export default function PlayerData({
   const { data, isLoading, isError } = useQuery({
     queryKey: ["player", player.id],
     queryFn: () => scoresaberService.lookupPlayer(player.id),
-    refetchInterval: REFRESH_INTERVAL,
   });
 
   if (data && (!isLoading || !isError)) {
