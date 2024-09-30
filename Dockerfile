@@ -14,7 +14,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 # Install runtime dependencies
-RUN apk add --no-cache cairo pango libjpeg-turbo
+RUN apk add --no-cache cairo pango libjpeg-turbo giflib
 
 ENV NEXT_TELEMETRY_DISABLED=1
 
@@ -30,7 +30,7 @@ FROM base AS runner
 WORKDIR /app
 
 # Install runtime dependencies
-RUN apk add --no-cache cairo pango libjpeg-turbo
+RUN apk add --no-cache cairo pango libjpeg-turbo giflib
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
