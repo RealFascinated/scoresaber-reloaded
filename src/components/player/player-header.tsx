@@ -1,13 +1,13 @@
-import {formatNumberWithCommas, formatPp} from "@/common/number-utils";
-import {GlobeAmericasIcon} from "@heroicons/react/24/solid";
+import { formatNumberWithCommas, formatPp } from "@/common/number-utils";
+import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import Card from "../card";
 import CountryFlag from "../country-flag";
-import {Avatar, AvatarImage} from "../ui/avatar";
+import { Avatar, AvatarImage } from "../ui/avatar";
 import ClaimProfile from "./claim-profile";
 import PlayerStats from "./player-stats";
 import ScoreSaberPlayer from "@/common/model/player/impl/scoresaber-player";
 import Tooltip from "@/components/tooltip";
-import {ReactElement} from "react";
+import { ReactElement } from "react";
 import PlayerTrackedStatus from "@/components/player/player-tracked-status";
 
 /**
@@ -111,7 +111,10 @@ export default function PlayerHeader({ player }: Props) {
     <Card>
       <div className="flex gap-3 flex-col items-center text-center lg:flex-row lg:items-start lg:text-start relative select-none">
         <Avatar className="w-32 h-32 pointer-events-none">
-          <AvatarImage alt="Profile Picture" src={player.avatar} />
+          <AvatarImage
+            alt="Profile Picture"
+            src={`https://img.fascinated.cc/upload/w_128,h_128/${player.avatar}`}
+          />
         </Avatar>
         <div className="w-full flex gap-2 flex-col justify-center items-center lg:justify-start lg:items-start">
           <div>
