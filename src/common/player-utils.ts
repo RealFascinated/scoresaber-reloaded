@@ -112,7 +112,7 @@ export async function trackScoreSaberPlayer(
   }
 
   // Update current day's statistics
-  let history = foundPlayer.getHistory(dateToday);
+  let history = foundPlayer.getHistoryByDate(dateToday);
   if (history == undefined) {
     history = {}; // Initialize if history is not found
   }
