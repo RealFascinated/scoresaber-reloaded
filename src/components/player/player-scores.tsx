@@ -58,7 +58,7 @@ export default function PlayerScores({ initialScoreData, initialSearch, player, 
   const [searchTerm, setSearchTerm] = useState(initialSearch || "");
   const debouncedSearchTerm = useDebounce(searchTerm, 250);
   const [shouldFetch, setShouldFetch] = useState(false); // New state to control fetching
-  const topOfScoresRef = useRef(null);
+  const topOfScoresRef = useRef<HTMLDivElement>(null);
 
   const isSearchActive = debouncedSearchTerm.length >= 3;
   const {
@@ -143,7 +143,7 @@ export default function PlayerScores({ initialScoreData, initialSearch, player, 
    */
   useEffect(() => {
     if (topOfScoresRef.current && shouldFetch) {
-      const topOfScoresPosition = (topOfScoresRef.current as any).getBoundingClientRect().top + window.scrollY;
+      const topOfScoresPosition = topOfScoresRef.current.getBoundingClientRect().top + window.scrollY;
       window.scrollTo({
         top: topOfScoresPosition - 55, // Navbar height (plus some padding)
         behavior: "smooth",
