@@ -15,6 +15,7 @@ import { scoresaberService } from "@/common/service/impl/scoresaber";
 import { Input } from "@/components/ui/input";
 import { clsx } from "clsx";
 import { useDebounce } from "@uidotdev/usehooks";
+import { scoreAnimation } from "@/components/score/score-animation";
 
 type Props = {
   initialScoreData?: ScoreSaberPlayerScoresPageToken;
@@ -41,12 +42,6 @@ const scoreSort = [
     icon: <ClockIcon className="w-5 h-5" />,
   },
 ];
-
-const scoreAnimation: Variants = {
-  hiddenRight: { opacity: 0, x: 50 },
-  hiddenLeft: { opacity: 0, x: -50 },
-  visible: { opacity: 1, x: 0, transition: { staggerChildren: 0.03 } },
-};
 
 export default function PlayerScores({ initialScoreData, initialSearch, player, sort, page }: Props) {
   const { width } = useWindowDimensions();
@@ -156,7 +151,7 @@ export default function PlayerScores({ initialScoreData, initialSearch, player, 
     <Card className="flex gap-1">
       <div className="flex flex-col items-center w-full gap-2 relative">
         {/* Where to scroll to when new scores are loaded */}
-        <div ref={topOfScoresRef} className="absolute flex h-11 p-11" />
+        <div ref={topOfScoresRef} className="absolute" />
 
         <div className="flex gap-2">
           {scoreSort.map(sortOption => (

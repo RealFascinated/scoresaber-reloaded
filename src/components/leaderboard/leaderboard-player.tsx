@@ -13,7 +13,7 @@ export default function LeaderboardPlayer({ score }: Props) {
     <div className="flex gap-2">
       <Image
         unoptimized
-        src={player.profilePicture}
+        src={`https://img.fascinated.cc/upload/w_48,h_48/${player.profilePicture}`}
         width={48}
         height={48}
         alt="Song Artwork"

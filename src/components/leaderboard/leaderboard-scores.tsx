@@ -5,11 +5,12 @@ import ScoreSaberLeaderboardToken from "@/common/model/token/scoresaber/score-sa
 import ScoreSaberLeaderboardScoresPageToken from "@/common/model/token/scoresaber/score-saber-leaderboard-scores-page-token";
 import useWindowDimensions from "@/hooks/use-window-dimensions";
 import { useQuery } from "@tanstack/react-query";
-import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { motion, useAnimation, Variants } from "framer-motion";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Card from "../card";
 import Pagination from "../input/pagination";
 import LeaderboardScore from "./leaderboard-score";
+import { scoreAnimation } from "@/components/score/score-animation";
 
 type Props = {
   leaderboard: ScoreSaberLeaderboardToken;
@@ -17,9 +18,12 @@ type Props = {
 
 export default function LeaderboardScores({ leaderboard }: Props) {
   const { width } = useWindowDimensions();
+  const controls = useAnimation();
 
+  const [previousPage, setPreviousPage] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
   const [currentScores, setCurrentScores] = useState<ScoreSaberLeaderboardScoresPageToken | undefined>();
+  const topOfScoresRef = useRef<HTMLDivElement>(null);
 
   const {
     data: scores,
@@ -32,15 +36,44 @@ export default function LeaderboardScores({ leaderboard }: Props) {
     staleTime: 30 * 1000, // Cache data for 30 seconds
   });
 
+  /**
+   * Starts the animation for the scores.
+   */
+  const handleScoreAnimation = useCallback(async () => {
+    await controls.start(previousPage >= currentPage ? "hiddenRight" : "hiddenLeft");
+    setCurrentScores(scores);
+    await controls.start("visible");
+  }, [controls, currentPage, previousPage, scores]);
+
+  /**
+   * Set the current scores.
+   */
   useEffect(() => {
     if (scores) {
-      setCurrentScores(scores);
+      handleScoreAnimation();
     }
-  }, [scores]);
+  }, [scores, handleScoreAnimation]);
 
+  /**
+   * Handle page change.
+   */
   useEffect(() => {
     refetch();
   }, [leaderboard, currentPage, refetch]);
+
+  /**
+   * Handle scrolling to the top of the
+   * scores when new scores are loaded.
+   */
+  useEffect(() => {
+    if (topOfScoresRef.current) {
+      const topOfScoresPosition = topOfScoresRef.current.getBoundingClientRect().top + window.scrollY;
+      window.scrollTo({
+        top: topOfScoresPosition - 75, // Navbar height (plus some padding)
+        behavior: "smooth",
+      });
+    }
+  }, [currentPage, topOfScoresRef]);
 
   if (currentScores === undefined) {
     return undefined;
@@ -49,23 +82,36 @@ export default function LeaderboardScores({ leaderboard }: Props) {
   return (
     <motion.div initial={{ opacity: 0, y: -50 }} exit={{ opacity: 0, y: -50 }} animate={{ opacity: 1, y: 0 }}>
       <Card className="flex gap-2 border border-input mt-2">
+        {/* Where to scroll to when new scores are loaded */}
+        <div ref={topOfScoresRef} className="absolute" />
+
         <div className="text-center">
           {isError && <p>Oopsies! Something went wrong.</p>}
           {currentScores.scores.length === 0 && <p>No scores found. Invalid Page?</p>}
         </div>
 
-        <div className="grid min-w-full grid-cols-1 divide-y divide-border">
+        <motion.div
+          initial="hidden"
+          animate={controls}
+          variants={scoreAnimation}
+          className="grid min-w-full grid-cols-1 divide-y divide-border"
+        >
           {currentScores.scores.map((playerScore, index) => (
-            <LeaderboardScore key={index} score={playerScore} leaderboard={leaderboard} />
+            <motion.div key={index} variants={scoreAnimation}>
+              <LeaderboardScore key={index} score={playerScore} leaderboard={leaderboard} />
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
 
         <Pagination
           mobilePagination={width < 768}
           page={currentPage}
           totalPages={Math.ceil(currentScores.metadata.total / currentScores.metadata.itemsPerPage)}
           loadingPage={isLoading ? currentPage : undefined}
-          onPageChange={setCurrentPage}
+          onPageChange={newPage => {
+            setCurrentPage(newPage);
+            setPreviousPage(currentPage);
+          }}
         />
       </Card>
     </motion.div>
