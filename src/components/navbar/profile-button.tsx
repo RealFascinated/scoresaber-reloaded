@@ -27,7 +27,7 @@ export default function ProfileButton() {
         <Avatar className="w-6 h-6">
           <AvatarImage
             alt="Profile Picture"
-            src={`https://cdn.scoresaber.com/avatars/${settings.playerId}.jpg`}
+            src={`https://img.fascinated.cc/upload/w_24,h_24/https://cdn.scoresaber.com/avatars/${settings.playerId}.jpg`}
           />
         </Avatar>
         <p>You</p>

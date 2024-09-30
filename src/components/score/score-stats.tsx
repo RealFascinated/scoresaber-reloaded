@@ -1,7 +1,7 @@
 import ScoreSaberLeaderboardToken from "@/common/model/token/scoresaber/score-saber-leaderboard-token";
 import ScoreSaberScoreToken from "@/common/model/token/scoresaber/score-saber-score-token";
 import { formatNumberWithCommas, formatPp } from "@/common/number-utils";
-import { accuracyToColor } from "@/common/song-utils";
+import { getScoreColorFromAccuracy } from "@/common/song-utils";
 import StatValue from "@/components/stat-value";
 import { XMarkIcon } from "@heroicons/react/24/solid";
 import clsx from "clsx";
@@ -39,7 +39,7 @@ const badges: Badge[] = [
       leaderboard: ScoreSaberLeaderboardToken,
     ) => {
       const acc = (score.baseScore / leaderboard.maxScore) * 100;
-      return accuracyToColor(acc);
+      return getScoreColorFromAccuracy(acc).color;
     },
     create: (
       score: ScoreSaberScoreToken,
