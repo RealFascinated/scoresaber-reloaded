@@ -229,8 +229,11 @@ export default function PlayerRankChart({ player }: Props) {
     const daysAgo = getDaysAgo(currentDate);
     labels.push(daysAgo === 0 ? "Today" : `${daysAgo} days ago`);
 
+    // stupid typescript crying wahh wahh wahh - https://youtu.be/hBEKgHDzm_s?si=ekOdMMdb-lFnA1Yz&t=11
     datasetConfig.forEach((config) => {
-      histories[config.field].push(history[config.field] ?? null);
+      (histories as any)[config.field].push(
+        (history as any)[config.field] ?? null,
+      );
     });
 
     previousDate = currentDate;
