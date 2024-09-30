@@ -80,6 +80,11 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
       Joined ScoreSaber: ${format(player.joinedDate, { date: "medium", time: "short" })}
       
       View the scores for ${player.name}!`,
+      images: [
+        {
+          url: player.avatar,
+        },
+      ],
     },
   };
 }

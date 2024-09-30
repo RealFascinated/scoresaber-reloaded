@@ -22,6 +22,10 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ARG GIT_REV
 ENV GIT_REV=${GIT_REV}
 
+# Add the sentry auth token
+ARG SENTRY_AUTH_TOKEN
+ENV SENTRY_AUTH_TOKEN=${SENTRY_AUTH_TOKEN}
+
 # Build the app
 RUN pnpm run build
 

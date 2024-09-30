@@ -19,6 +19,7 @@
     "@radix-ui/react-slot": "^1.1.0",
     "@radix-ui/react-toast": "^1.2.1",
     "@radix-ui/react-tooltip": "^1.1.2",
+    "@sentry/nextjs": "8",
     "@tanstack/react-query": "^5.55.4",
     "@trigger.dev/nextjs": "^3.0.8",
     "@trigger.dev/react": "^3.0.8",
