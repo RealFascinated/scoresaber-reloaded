@@ -43,10 +43,10 @@ importers:
         version: 5.56.2(react@19.0.0-rc-3edc000d-20240926)
       '@trigger.dev/nextjs':
         specifier: ^3.0.8
-        version: 3.0.8(@trigger.dev/sdk@3.0.9)(next@15.0.0-rc.0(@opentelemetry/api@1.9.0)(react-dom@19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926))
+        version: 3.0.9(@trigger.dev/sdk@3.0.9)(next@15.0.0-rc.0(@opentelemetry/api@1.9.0)(react-dom@19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926))
       '@trigger.dev/react':
         specifier: ^3.0.8
-        version: 3.0.8(react-dom@19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926)
+        version: 3.0.9(react-dom@19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926)
       '@trigger.dev/sdk':
         specifier: ^3.0.8
         version: 3.0.9
@@ -918,23 +918,19 @@ packages:
     peerDependencies:
       react: ^18 || ^19
 
-  '@trigger.dev/core@3.0.8':
-    resolution: {integrity: sha512-wmKemzAe+x/sav8ZX6ltpCKCIHLnQmha/YuyT6KooKJ2jDvgSi7rFK/2dn5kF6/XB51NN4/Sh1umWeEPfgjMCg==}
-    engines: {node: '>=18.20.0'}
-
   '@trigger.dev/core@3.0.9':
     resolution: {integrity: sha512-J8JtlL8ibqCajgkWZyZMz9CO+KVuZka/VxActzn4f8YmujDfOcZuNkRhT0tNsYVm+XApP2FqVspN/Akmdo6eIw==}
     engines: {node: '>=18.20.0'}
 
-  '@trigger.dev/nextjs@3.0.8':
-    resolution: {integrity: sha512-nT0akL5uLWGcj64dFboYQD/o1DtZpDOyRl2DzfVojaugaItxBwgi/AxLS16059oXNfJY2FTT1wGUgo0vwz1p0Q==}
+  '@trigger.dev/nextjs@3.0.9':
+    resolution: {integrity: sha512-X+A1WCSIQl0IgPsDrQSIBlbHbUDULvDiel4B7kQzFuB0Guxvkg9kLUQjc6DIfaylyy6U8gJd/S/Atc2CoyjC8Q==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
       '@trigger.dev/sdk': ~2.3.0 || ^3.0.0
       next: '>=12.0.0'
 
-  '@trigger.dev/react@3.0.8':
-    resolution: {integrity: sha512-tcyFQ/Qp5aW4+5veSl8mIHIuVvFzVO6fr6TOMLYm494NOtiClKhI8BjvCTJwvpv25UOOhSUgB3xrPfDxbbrQ4w==}
+  '@trigger.dev/react@3.0.9':
+    resolution: {integrity: sha512-8whDt31KiisCVeHzYvbNxuK8nWoZXyHwlBj0L9U0is2p6f9qBpdbniehaB2EPEsOdLm2WSKGgYQiUt8R3TahHw==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18
 
@@ -3545,32 +3541,6 @@ snapshots:
       '@tanstack/query-core': 5.56.2
       react: 19.0.0-rc-3edc000d-20240926
 
-  '@trigger.dev/core@3.0.8':
-    dependencies:
-      '@google-cloud/precise-date': 4.0.0
-      '@opentelemetry/api': 1.9.0
-      '@opentelemetry/api-logs': 0.52.1
-      '@opentelemetry/exporter-logs-otlp-http': 0.52.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/exporter-trace-otlp-http': 0.52.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/instrumentation': 0.52.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/resources': 1.25.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/sdk-logs': 0.52.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/sdk-node': 0.52.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/sdk-trace-base': 1.25.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/sdk-trace-node': 1.25.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.25.1
-      execa: 8.0.1
-      humanize-duration: 3.32.1
-      socket.io-client: 4.7.5
-      superjson: 2.2.1
-      zod: 3.22.3
-      zod-error: 1.5.0
-      zod-validation-error: 1.5.0(zod@3.22.3)
-    transitivePeerDependencies:
-      - bufferutil
-      - supports-color
-      - utf-8-validate
-
   '@trigger.dev/core@3.0.9':
     dependencies:
       '@google-cloud/precise-date': 4.0.0
@@ -3597,7 +3567,7 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@trigger.dev/nextjs@3.0.8(@trigger.dev/sdk@3.0.9)(next@15.0.0-rc.0(@opentelemetry/api@1.9.0)(react-dom@19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926))':
+  '@trigger.dev/nextjs@3.0.9(@trigger.dev/sdk@3.0.9)(next@15.0.0-rc.0(@opentelemetry/api@1.9.0)(react-dom@19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926))':
     dependencies:
       '@trigger.dev/sdk': 3.0.9
       debug: 4.3.7
@@ -3605,10 +3575,10 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@trigger.dev/react@3.0.8(react-dom@19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926)':
+  '@trigger.dev/react@3.0.9(react-dom@19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926)':
     dependencies:
       '@tanstack/react-query': 5.0.0-beta.2(react-dom@19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926)
-      '@trigger.dev/core': 3.0.8
+      '@trigger.dev/core': 3.0.9
       debug: 4.3.7
       react: 19.0.0-rc-3edc000d-20240926
       zod: 3.22.3
