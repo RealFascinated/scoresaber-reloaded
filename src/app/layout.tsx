@@ -69,9 +69,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${siteFont.className} antialiased w-full h-full relative`}
-      >
+      <body className={`${siteFont.className} antialiased w-full h-full`}>
         <DatabaseLoader>
           <Toaster />
           <BackgroundImage />

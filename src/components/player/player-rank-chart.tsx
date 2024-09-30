@@ -16,6 +16,7 @@ import { Line } from "react-chartjs-2";
 import ScoreSaberPlayer from "@/common/model/player/impl/scoresaber-player";
 import { getDaysAgo, parseDate } from "@/common/time-utils";
 import { useIsMobile } from "@/hooks/use-is-mobile";
+import { useEffect } from "react";
 
 Chart.register(
   LinearScale,
@@ -276,7 +277,7 @@ export default function PlayerRankChart({ player }: Props) {
 
   const options: any = {
     maintainAspectRatio: false,
-    aspectRatio: 1,
+    responsive: true,
     interaction: {
       mode: "index",
       intersect: false,
@@ -314,9 +315,9 @@ export default function PlayerRankChart({ player }: Props) {
   };
 
   return (
-    <div className="h-96">
+    <div className="block h-[320px] w-full relative">
       <Line
-        className="w-fit"
+        className="max-w-[100%]"
         options={options}
         data={data}
         plugins={[
