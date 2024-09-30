@@ -108,7 +108,7 @@ PlayerSchema.methods.getHistoryPrevious = function (amount: number): {
   const toReturn: { [key: string]: PlayerHistory } = {};
   const history = sortPlayerHistory(this.getStatisticHistory());
 
-  for (let [date, stat] of history) {
+  for (const [date, stat] of history) {
     const parsedDate = new Date(date);
     if (getDaysAgo(parsedDate) + 1 <= amount) {
       toReturn[date] = stat;

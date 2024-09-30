@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectMongo } from "@/common/mongo";
 import { IPlayer, PlayerModel } from "@/common/schema/player-schema";
-import { PlayerHistory } from "@/common/player/player-history";
-import { seedPlayerHistory, sortPlayerHistory } from "@/common/player-utils";
+import { seedPlayerHistory } from "@/common/player-utils";
 import { scoresaberService } from "@/common/service/impl/scoresaber";
 
 export async function GET(request: NextRequest) {
