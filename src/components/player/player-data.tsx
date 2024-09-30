@@ -2,7 +2,7 @@
 
 import ScoreSaberPlayerScoresPageToken from "@/common/model/token/scoresaber/score-saber-player-scores-page-token";
 import { scoresaberService } from "@/common/service/impl/scoresaber";
-import { ScoreSort } from "@/common/service/score-sort";
+import { ScoreSort } from "@/common/model/score/score-sort";
 import { useQuery } from "@tanstack/react-query";
 import Mini from "../ranking/mini";
 import PlayerHeader from "./player-header";

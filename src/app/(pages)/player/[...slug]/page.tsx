@@ -1,6 +1,6 @@
 import { formatNumberWithCommas, formatPp } from "@/common/number-utils";
 import { scoresaberService } from "@/common/service/impl/scoresaber";
-import { ScoreSort } from "@/common/service/score-sort";
+import { ScoreSort } from "@/common/model/score/score-sort";
 import PlayerData from "@/components/player/player-data";
 import { format } from "@formkit/tempo";
 import { Metadata, Viewport } from "next";

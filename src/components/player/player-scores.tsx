@@ -7,7 +7,7 @@ import { useCallback, useEffect, useState } from "react";
 import Card from "../card";
 import Pagination from "../input/pagination";
 import { Button } from "../ui/button";
-import { ScoreSort } from "@/common/service/score-sort";
+import { ScoreSort } from "@/common/model/score/score-sort";
 import ScoreSaberPlayerScoresPageToken from "@/common/model/token/scoresaber/score-saber-player-scores-page-token";
 import Score from "@/components/score/score";
 import ScoreSaberPlayer from "@/common/model/player/impl/scoresaber-player";

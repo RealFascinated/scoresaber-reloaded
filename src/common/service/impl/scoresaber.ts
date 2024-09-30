@@ -3,7 +3,7 @@ import ScoreSaberPlayerScoresPageToken from "@/common/model/token/scoresaber/sco
 import { ScoreSaberPlayerSearchToken } from "@/common/model/token/scoresaber/score-saber-player-search-token";
 import ScoreSaberPlayerToken from "@/common/model/token/scoresaber/score-saber-player-token";
 import { ScoreSaberPlayersPageToken } from "@/common/model/token/scoresaber/score-saber-players-page-token";
-import { ScoreSort } from "../score-sort";
+import { ScoreSort } from "../../model/score/score-sort";
 import Service from "../service";
 import ScoreSaberPlayer, {
   getScoreSaberPlayerFromToken,
