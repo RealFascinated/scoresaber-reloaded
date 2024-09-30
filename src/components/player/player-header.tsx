@@ -115,7 +115,7 @@ export default function PlayerHeader({ player }: Props) {
         </Avatar>
         <div className="w-full flex gap-2 flex-col justify-center items-center lg:justify-start lg:items-start">
           <div>
-            <div className="flex gap-2 items-center">
+            <div className="flex gap-2 items-center justify-center lg:justify-start">
               <p className="font-bold text-2xl">{player.name}</p>
               <PlayerTrackedStatus player={player} />
             </div>
