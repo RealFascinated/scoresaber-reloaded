@@ -26,7 +26,7 @@ RUN pnpm run build
 FROM base AS runner
 WORKDIR /app
 
-RUN apk add --no-cache python3
+RUN apk add --no-cache libc6-compat python3 make g++ gcc pkgconfig pixman cairo-dev libjpeg-turbo-dev pango-dev giflib-dev
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
