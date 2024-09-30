@@ -4,16 +4,11 @@ import { formatNumberWithCommas } from "@/common/number-utils";
 import StatValue from "@/components/stat-value";
 import { XMarkIcon } from "@heroicons/react/24/solid";
 import clsx from "clsx";
+import { getScoreBadgeFromAccuracy } from "@/common/song-utils";
+import Tooltip from "@/components/tooltip";
+import { ScoreBadge } from "@/components/score/score-badge";
 
-type Badge = {
-  name: string;
-  create: (
-    score: ScoreSaberScoreToken,
-    leaderboard: ScoreSaberLeaderboardToken
-  ) => string | React.ReactNode | undefined;
-};
-
-const badges: Badge[] = [
+const badges: ScoreBadge[] = [
   {
     name: "PP",
     create: (score: ScoreSaberScoreToken) => {
@@ -26,9 +21,35 @@ const badges: Badge[] = [
   },
   {
     name: "Accuracy",
+    color: (score: ScoreSaberScoreToken, leaderboard: ScoreSaberLeaderboardToken) => {
+      const acc = (score.baseScore / leaderboard.maxScore) * 100;
+      return getScoreBadgeFromAccuracy(acc).color;
+    },
     create: (score: ScoreSaberScoreToken, leaderboard: ScoreSaberLeaderboardToken) => {
       const acc = (score.baseScore / leaderboard.maxScore) * 100;
-      return `${acc.toFixed(2)}%`;
+      const scoreBadge = getScoreBadgeFromAccuracy(acc);
+      let accDetails = `Accuracy ${scoreBadge.name != "-" ? scoreBadge.name : ""}`;
+      if (scoreBadge.max == null) {
+        accDetails += ` (> ${scoreBadge.min}%)`;
+      } else if (scoreBadge.min == null) {
+        accDetails += ` (< ${scoreBadge.max}%)`;
+      } else {
+        accDetails += ` (${scoreBadge.min}% - ${scoreBadge.max}%)`;
+      }
+
+      return (
+        <>
+          <Tooltip
+            display={
+              <div>
+                <p>{accDetails}</p>
+              </div>
+            }
+          >
+            <p className="cursor-default">{acc.toFixed(2)}%</p>
+          </Tooltip>
+        </>
+      );
     },
   },
   {
@@ -56,11 +77,11 @@ export default function LeaderboardScoreStats({ score, leaderboard }: Props) {
     <div className={`grid grid-cols-3 grid-rows-1 gap-1 ml-0 lg:ml-2`}>
       {badges.map((badge, index) => {
         const toRender = badge.create(score, leaderboard);
+        const color = badge.color?.(score, leaderboard);
         if (toRender === undefined) {
           return <div key={index} />;
         }
-
-        return <StatValue key={index} value={toRender} />;
+        return <StatValue key={index} color={color} value={toRender} />;
       })}
     </div>
   );

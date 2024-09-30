@@ -6,17 +6,9 @@ import StatValue from "@/components/stat-value";
 import { XMarkIcon } from "@heroicons/react/24/solid";
 import clsx from "clsx";
 import Tooltip from "@/components/tooltip";
+import { ScoreBadge } from "@/components/score/score-badge";
 
-type Badge = {
-  name: string;
-  color?: (score: ScoreSaberScoreToken, leaderboard: ScoreSaberLeaderboardToken) => string | undefined;
-  create: (
-    score: ScoreSaberScoreToken,
-    leaderboard: ScoreSaberLeaderboardToken
-  ) => string | React.ReactNode | undefined;
-};
-
-const badges: Badge[] = [
+const badges: ScoreBadge[] = [
   {
     name: "PP",
     color: () => {
