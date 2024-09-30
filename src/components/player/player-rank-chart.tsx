@@ -15,6 +15,7 @@ import {
 import { Line } from "react-chartjs-2";
 import ScoreSaberPlayer from "@/common/model/player/impl/scoresaber-player";
 import { getDaysAgo, parseDate } from "@/common/time-utils";
+import { useIsMobile } from "@/hooks/use-is-mobile";
 
 Chart.register(
   LinearScale,
@@ -26,19 +27,21 @@ Chart.register(
   Legend,
 );
 
+type AxisPosition = "left" | "right";
+
 /**
  * A ChartJS axis
  */
 type Axis = {
-  id: string;
-  position: "left" | "right";
-  display: boolean;
+  id?: string;
+  position?: AxisPosition;
+  display?: boolean;
   grid?: { color?: string; drawOnChartArea?: boolean };
   title?: { display: boolean; text: string; color?: string };
   ticks?: {
-    stepSize: number;
+    stepSize?: number;
   };
-  reverse: boolean;
+  reverse?: boolean;
 };
 
 /**
@@ -67,7 +70,7 @@ const generateAxis = (
   id: string,
   reverse: boolean,
   display: boolean,
-  position: "right" | "left",
+  position: AxisPosition,
   displayName: string,
 ): Axis => ({
   id,
@@ -85,22 +88,7 @@ const generateAxis = (
   ticks: {
     stepSize: 10,
   },
-  reverse: reverse,
-});
-
-/**
- * Create the axes
- */
-const createAxes = () => ({
-  x: {
-    grid: {
-      color: "#252525", // gray grid lines
-    },
-    reverse: false,
-  },
-  y: generateAxis("y", true, true, "left", "Global Rank"), // Rank axis with display name
-  y1: generateAxis("y1", true, false, "left", "Country Rank"), // Country Rank axis with display name
-  y2: generateAxis("y2", false, true, "right", "PP"), // PP axis with display name
+  reverse,
 });
 
 /**
@@ -126,53 +114,73 @@ const generateDataset = (
   yAxisID,
 });
 
-export const options: any = {
-  maintainAspectRatio: false,
-  aspectRatio: 1,
-  interaction: {
-    mode: "index",
-    intersect: false,
-  },
-  scales: createAxes(), // Use createAxes to configure axes
-  elements: {
-    point: {
-      radius: 0,
-    },
-  },
-  plugins: {
-    legend: {
-      position: "top" as const,
-      labels: {
-        color: "white",
-      },
-    },
-    tooltip: {
-      callbacks: {
-        label(context: any) {
-          switch (context.dataset.label) {
-            case "Rank": {
-              return `Rank #${formatNumberWithCommas(Number(context.parsed.y))}`;
-            }
-            case "Country Rank": {
-              return `Country Rank #${formatNumberWithCommas(Number(context.parsed.y))}`;
-            }
-            case "PP": {
-              return `PP ${formatNumberWithCommas(Number(context.parsed.y))}pp`;
-            }
-          }
-        },
-      },
-    },
-  },
+type DatasetConfig = {
+  title: string;
+  field: string;
+  color: string;
+  axisId: string;
+  axisConfig: {
+    reverse: boolean;
+    display: boolean;
+    displayName: string;
+    position: AxisPosition;
+  };
+  labelFormatter: (value: number) => string;
 };
+
+// Configuration array for datasets and axes with label formatters
+const datasetConfig: DatasetConfig[] = [
+  {
+    title: "Rank",
+    field: "rank",
+    color: "#3EC1D3",
+    axisId: "y",
+    axisConfig: {
+      reverse: true,
+      display: true,
+      displayName: "Global Rank",
+      position: "left",
+    },
+    labelFormatter: (value: number) => `Rank #${formatNumberWithCommas(value)}`,
+  },
+  {
+    title: "Country Rank",
+    field: "countryRank",
+    color: "#FFEA00",
+    axisId: "y1",
+    axisConfig: {
+      reverse: true,
+      display: false,
+      displayName: "Country Rank",
+      position: "left",
+    },
+    labelFormatter: (value: number) =>
+      `Country Rank #${formatNumberWithCommas(value)}`,
+  },
+  {
+    title: "PP",
+    field: "pp",
+    color: "#606fff",
+    axisId: "y2",
+    axisConfig: {
+      reverse: false,
+      display: true,
+      displayName: "PP",
+      position: "right",
+    },
+    labelFormatter: (value: number) => `PP ${formatNumberWithCommas(value)}pp`,
+  },
+];
 
 type Props = {
   player: ScoreSaberPlayer;
 };
 
 export default function PlayerRankChart({ player }: Props) {
+  const isMobile = useIsMobile();
+
   if (
-    player.statisticHistory === undefined ||
+    !player.statisticHistory ||
     Object.keys(player.statisticHistory).length === 0
   ) {
     return (
@@ -183,7 +191,7 @@ export default function PlayerRankChart({ player }: Props) {
   }
 
   const labels: string[] = [];
-  const histories: Record<"rank" | "countryRank" | "pp", (number | null)[]> = {
+  const histories: Record<string, (number | null)[]> = {
     rank: [],
     countryRank: [],
     pp: [],
@@ -208,35 +216,90 @@ export default function PlayerRankChart({ player }: Props) {
 
       for (let i = 1; i < diffDays; i++) {
         labels.push(
-          `${getDaysAgo(new Date(currentDate.getTime() - i * 24 * 60 * 60 * 1000))} days ago`,
+          `${getDaysAgo(
+            new Date(currentDate.getTime() - i * 24 * 60 * 60 * 1000),
+          )} days ago`,
         );
-        histories.rank.push(null);
-        histories.countryRank.push(null);
-        histories.pp.push(null);
+        datasetConfig.forEach((config) => {
+          histories[config.field].push(null);
+        });
       }
     }
 
     const daysAgo = getDaysAgo(currentDate);
-    if (daysAgo === 0) {
-      labels.push("Today");
-    } else if (daysAgo === 1) {
-      labels.push("Yesterday");
-    } else {
-      labels.push(`${daysAgo} days ago`);
-    }
+    labels.push(daysAgo === 0 ? "Today" : `${daysAgo} days ago`);
 
-    histories.rank.push(history.rank ?? null);
-    histories.countryRank.push(history.countryRank ?? null);
-    histories.pp.push(history.pp ?? null);
+    datasetConfig.forEach((config) => {
+      histories[config.field].push(history[config.field] ?? null);
+    });
 
     previousDate = currentDate;
   }
 
-  const datasets: Dataset[] = [
-    generateDataset("Rank", histories["rank"], "#3EC1D3", "y"),
-    generateDataset("Country Rank", histories["countryRank"], "#FFEA00", "y1"),
-    generateDataset("PP", histories["pp"], "#606fff", "y2"),
-  ];
+  // Dynamically create axes and datasets based on datasetConfig
+  const axes: Record<string, Axis> = {
+    x: {
+      grid: {
+        color: "#252525", // gray grid lines
+      },
+      reverse: false,
+    },
+  };
+
+  const datasets: Dataset[] = datasetConfig
+    .map((config) => {
+      if (histories[config.field].some((value) => value !== null)) {
+        axes[config.axisId] = generateAxis(
+          config.axisId,
+          config.axisConfig.reverse,
+          isMobile ? false : config.axisConfig.display,
+          config.axisConfig.position,
+          config.axisConfig.displayName,
+        );
+        return generateDataset(
+          config.title,
+          histories[config.field],
+          config.color,
+          config.axisId,
+        );
+      }
+      return null;
+    })
+    .filter(Boolean) as Dataset[];
+
+  const options: any = {
+    maintainAspectRatio: false,
+    aspectRatio: 1,
+    interaction: {
+      mode: "index",
+      intersect: false,
+    },
+    scales: axes,
+    elements: {
+      point: {
+        radius: 0,
+      },
+    },
+    plugins: {
+      legend: {
+        position: "top" as const,
+        labels: {
+          color: "white",
+        },
+      },
+      tooltip: {
+        callbacks: {
+          label(context: any) {
+            const value = Number(context.parsed.y);
+            const config = datasetConfig.find(
+              (cfg) => cfg.title === context.dataset.label,
+            );
+            return config?.labelFormatter(value) ?? "";
+          },
+        },
+      },
+    },
+  };
 
   const data = {
     labels,
