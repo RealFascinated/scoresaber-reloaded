@@ -1,7 +1,6 @@
 import ScoreSaberLeaderboardToken from "@/common/model/token/scoresaber/score-saber-leaderboard-token";
 import ScoreSaberScoreToken from "@/common/model/token/scoresaber/score-saber-score-token";
 import { formatNumberWithCommas } from "@/common/number-utils";
-import StatValue from "@/components/stat-value";
 import { XMarkIcon } from "@heroicons/react/24/solid";
 import clsx from "clsx";
 import { getScoreBadgeFromAccuracy } from "@/common/song-utils";
