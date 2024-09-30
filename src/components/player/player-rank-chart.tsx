@@ -16,7 +16,6 @@ import { Line } from "react-chartjs-2";
 import ScoreSaberPlayer from "@/common/model/player/impl/scoresaber-player";
 import { getDaysAgo, parseDate } from "@/common/time-utils";
 import { useIsMobile } from "@/hooks/use-is-mobile";
-import { useEffect } from "react";
 
 Chart.register(
   LinearScale,
