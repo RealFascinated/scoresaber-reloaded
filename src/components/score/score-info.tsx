@@ -57,7 +57,7 @@ export default function ScoreSongInfo({ leaderboard, beatSaverMap }: Props) {
         </Tooltip>
         <Image
           unoptimized
-          src={leaderboard.coverImage}
+          src={`https://img.fascinated.cc/upload/w_64,h_64/${leaderboard.coverImage}`}
           width={64}
           height={64}
           alt="Song Artwork"
