@@ -13,7 +13,8 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-RUN apk add --no-cache python3 make g++ gcc pkgconfig pixman cairo-dev libjpeg-turbo-dev pango-dev giflib-dev
+# Install runtime dependencies
+RUN apk add --no-cache cairo pango libjpeg-turbo
 
 ENV NEXT_TELEMETRY_DISABLED=1
 
@@ -28,8 +29,8 @@ RUN pnpm run build
 FROM base AS runner
 WORKDIR /app
 
-# Install only runtime dependencies (not -dev packages) for canvas and cairo
-RUN apk add --no-cache cairo pango
+# Install runtime dependencies
+RUN apk add --no-cache cairo pango libjpeg-turbo
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
