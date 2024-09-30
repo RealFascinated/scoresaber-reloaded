@@ -34,6 +34,7 @@ export default function PlayerData({
   const { data, isLoading, isError } = useQuery({
     queryKey: ["player", player.id],
     queryFn: () => scoresaberService.lookupPlayer(player.id),
+    staleTime: 1000 * 60 * 5, // Cache data for 5 minutes
   });
 
   if (data && (!isLoading || !isError)) {
