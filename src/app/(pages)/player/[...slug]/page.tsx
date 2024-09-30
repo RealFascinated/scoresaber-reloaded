@@ -89,6 +89,9 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
         },
       ],
     },
+    twitter: {
+      card: "summary",
+    },
   };
 }
 
