@@ -1,7 +1,12 @@
 import mongoose, { Document, Schema } from "mongoose";
 import { PlayerHistory } from "@/common/player/player-history";
-import { formatDateMinimal, getMidnightAlignedDate } from "@/common/time-utils";
+import {
+  formatDateMinimal,
+  getDaysAgo,
+  getMidnightAlignedDate,
+} from "@/common/time-utils";
 import ScoreSaberPlayer from "@/common/model/player/impl/scoresaber-player";
+import { sortPlayerHistory } from "@/common/player-utils";
 
 // Interface for Player Document
 export interface IPlayer extends Document {
@@ -32,6 +37,8 @@ export interface IPlayer extends Document {
 
   /**
    * Gets when this player was last tracked.
+   *
+   * @returns the date when the player was last tracked
    */
   getLastTracked(): Date;
 
@@ -39,11 +46,22 @@ export interface IPlayer extends Document {
    * Gets the history for the given date
    *
    * @param date
+   * @returns the player history
    */
-  getHistory(date: Date): PlayerHistory;
+  getHistoryByDate(date: Date): PlayerHistory;
+
+  /**
+   * Gets the history for the previous X days
+   *
+   * @param amount the amount of days
+   * @returns the player history
+   */
+  getHistoryPrevious(amount: number): { [key: string]: PlayerHistory };
 
   /**
    * Gets all the statistic history
+   *
+   * @returns the statistic history
    */
   getStatisticHistory(): Map<string, PlayerHistory>;
 
@@ -57,6 +75,8 @@ export interface IPlayer extends Document {
 
   /**
    * Sorts the statistic history
+   *
+   * @returns the sorted statistic history
    */
   sortStatisticHistory(): Map<string, PlayerHistory>;
 }
@@ -74,12 +94,28 @@ PlayerSchema.methods.getLastTracked = function (): Date {
   return this.ked || new Date();
 };
 
-PlayerSchema.methods.getHistory = function (date: Date): PlayerHistory {
+PlayerSchema.methods.getHistoryByDate = function (date: Date): PlayerHistory {
   return (
     this.statisticHistory.get(
       formatDateMinimal(getMidnightAlignedDate(date)),
     ) || {}
   );
+};
+
+PlayerSchema.methods.getHistoryPrevious = function (amount: number): {
+  [key: string]: PlayerHistory;
+} {
+  const toReturn: { [key: string]: PlayerHistory } = {};
+  const history = sortPlayerHistory(this.getStatisticHistory());
+
+  for (let [date, stat] of history) {
+    const parsedDate = new Date(date);
+    if (getDaysAgo(parsedDate) + 1 <= amount) {
+      toReturn[date] = stat;
+    }
+  }
+
+  return toReturn;
 };
 
 PlayerSchema.methods.getStatisticHistory = function (): Map<
