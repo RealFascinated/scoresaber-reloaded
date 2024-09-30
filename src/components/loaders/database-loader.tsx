@@ -29,7 +29,7 @@ export default function DatabaseLoader({ children }: Props) {
         description: "The database was loaded successfully.",
       });
     });
-  }, []);
+  }, [toast]);
 
   return (
     <DatabaseContext.Provider value={database}>
