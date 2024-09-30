@@ -46,7 +46,7 @@ type Axis = {
  */
 type Dataset = {
   label: string;
-  data: number[];
+  data: (number | null)[]; // Allow null values for gaps
   borderColor: string;
   fill: boolean;
   lineTension: number;
@@ -96,7 +96,7 @@ const createAxes = () => ({
     grid: {
       color: "#252525", // gray grid lines
     },
-    reverse: true,
+    reverse: false,
   },
   y: generateAxis("y", true, true, "left", "Global Rank"), // Rank axis with display name
   y1: generateAxis("y1", true, false, "left", "Country Rank"), // Country Rank axis with display name
@@ -113,7 +113,7 @@ const createAxes = () => ({
  */
 const generateDataset = (
   label: string,
-  data: number[],
+  data: (number | null)[],
   borderColor: string,
   yAxisID: string,
 ): Dataset => ({
@@ -122,7 +122,7 @@ const generateDataset = (
   borderColor,
   fill: false,
   lineTension: 0.5,
-  spanGaps: true,
+  spanGaps: false, // Set to false to allow gaps
   yAxisID,
 });
 
@@ -183,27 +183,53 @@ export default function PlayerRankChart({ player }: Props) {
   }
 
   const labels: string[] = [];
-  const histories: Record<"rank" | "countryRank" | "pp", number[]> = {
+  const histories: Record<"rank" | "countryRank" | "pp", (number | null)[]> = {
     rank: [],
     countryRank: [],
     pp: [],
   };
 
+  const statisticEntries = Object.entries(player.statisticHistory).sort(
+    ([a], [b]) => parseDate(a).getTime() - parseDate(b).getTime(),
+  );
+
+  let previousDate: Date | null = null;
+
   // Create labels and history data
-  for (const [dateString, history] of Object.entries(player.statisticHistory)) {
-    const daysAgo = getDaysAgo(parseDate(dateString));
-    // Create labels based on days ago
+  for (const [dateString, history] of statisticEntries) {
+    const currentDate = parseDate(dateString);
+
+    // Insert nulls for missing days
+    if (previousDate) {
+      const diffDays = Math.floor(
+        (currentDate.getTime() - previousDate.getTime()) /
+          (1000 * 60 * 60 * 24),
+      );
+
+      for (let i = 1; i < diffDays; i++) {
+        labels.push(
+          `${getDaysAgo(new Date(currentDate.getTime() - i * 24 * 60 * 60 * 1000))} days ago`,
+        );
+        histories.rank.push(null);
+        histories.countryRank.push(null);
+        histories.pp.push(null);
+      }
+    }
+
+    const daysAgo = getDaysAgo(currentDate);
     if (daysAgo === 0) {
       labels.push("Today");
     } else if (daysAgo === 1) {
       labels.push("Yesterday");
     } else {
-      labels.push(`${daysAgo + 1} days ago`);
+      labels.push(`${daysAgo} days ago`);
     }
 
-    history.rank && histories.rank.push(history.rank);
-    history.countryRank && histories.countryRank.push(history.countryRank);
-    history.pp && histories.pp.push(history.pp);
+    histories.rank.push(history.rank ?? null);
+    histories.countryRank.push(history.countryRank ?? null);
+    histories.pp.push(history.pp ?? null);
+
+    previousDate = currentDate;
   }
 
   const datasets: Dataset[] = [
