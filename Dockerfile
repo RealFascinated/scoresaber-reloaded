@@ -1,8 +1,9 @@
 FROM fascinated/docker-images:nodejs_20_with_pnpm AS base
 
-# Install dependencies, including Python
+# Install dependencies, including Python and build tools
 FROM base AS deps
-RUN apk add --no-cache libc6-compat python3 make g++ gcc
+# Install necessary packages for canvas
+RUN apk add --no-cache libc6-compat python3 make g++ gcc pkgconfig pixman cairo-dev libjpeg-turbo-dev pango-dev giflib-dev
 WORKDIR /app
 COPY package.json* pnpm-lock.yaml* ./
 RUN pnpm install --frozen-lockfile --quiet
