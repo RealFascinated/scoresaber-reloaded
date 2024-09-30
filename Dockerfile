@@ -1,9 +1,8 @@
 FROM fascinated/docker-images:nodejs_20_with_pnpm AS base
 
-# Install dependencies, including Python and build tools for building the app
+# Install dependencies and build tools for canvas
 FROM base AS deps
-# Install necessary packages for canvas build
-RUN apk add --no-cache libc6-compat python3 make g++ gcc pkgconfig pixman cairo-dev libjpeg-turbo-dev pango-dev giflib-dev
+RUN apk add --no-cache libc6-compat
 WORKDIR /app
 COPY package.json* pnpm-lock.yaml* ./
 RUN pnpm install --frozen-lockfile --quiet
@@ -13,6 +12,9 @@ FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+
+RUN apk add --no-cache python3 make g++ gcc pkgconfig pixman cairo-dev libjpeg-turbo-dev pango-dev giflib-dev
+
 ENV NEXT_TELEMETRY_DISABLED=1
 
 # Add the commit hash
@@ -22,12 +24,12 @@ ENV GIT_REV=${GIT_REV}
 # Build the app
 RUN pnpm run build
 
-# Run the app
+# Final stage to run the app
 FROM base AS runner
 WORKDIR /app
 
-# Install runtime dependencies (not dev packages) needed for canvas
-RUN apk add --no-cache libc6-compat cairo pango libjpeg-turbo giflib
+# Install only runtime dependencies (not -dev packages) for canvas and cairo
+RUN apk add --no-cache cairo pango
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
@@ -42,6 +44,7 @@ RUN chown nextjs:nodejs .next
 ARG GIT_REV
 ENV GIT_REV=${GIT_REV}
 
+# Copy the built app from the builder stage
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
