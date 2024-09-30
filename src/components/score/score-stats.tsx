@@ -1,10 +1,11 @@
 import ScoreSaberLeaderboardToken from "@/common/model/token/scoresaber/score-saber-leaderboard-token";
 import ScoreSaberScoreToken from "@/common/model/token/scoresaber/score-saber-score-token";
 import { formatNumberWithCommas, formatPp } from "@/common/number-utils";
-import { getScoreColorFromAccuracy } from "@/common/song-utils";
+import { getScoreBadgeFromAccuracy } from "@/common/song-utils";
 import StatValue from "@/components/stat-value";
 import { XMarkIcon } from "@heroicons/react/24/solid";
 import clsx from "clsx";
+import Tooltip from "@/components/tooltip";
 
 type Badge = {
   name: string;
@@ -39,14 +40,36 @@ const badges: Badge[] = [
       leaderboard: ScoreSaberLeaderboardToken,
     ) => {
       const acc = (score.baseScore / leaderboard.maxScore) * 100;
-      return getScoreColorFromAccuracy(acc).color;
+      return getScoreBadgeFromAccuracy(acc).color;
     },
     create: (
       score: ScoreSaberScoreToken,
       leaderboard: ScoreSaberLeaderboardToken,
     ) => {
       const acc = (score.baseScore / leaderboard.maxScore) * 100;
-      return `${acc.toFixed(2)}%`;
+      const scoreBadge = getScoreBadgeFromAccuracy(acc);
+      let accDetails = `Accuracy ${scoreBadge.name != "-" ? scoreBadge.name : ""}`;
+      if (scoreBadge.max == null) {
+        accDetails += ` (> ${scoreBadge.min}%)`;
+      } else if (scoreBadge.min == null) {
+        accDetails += ` (< ${scoreBadge.max}%)`;
+      } else {
+        accDetails += ` (${scoreBadge.min}% - ${scoreBadge.max}%)`;
+      }
+
+      return (
+        <>
+          <Tooltip
+            display={
+              <div>
+                <p>{accDetails}</p>
+              </div>
+            }
+          >
+            <p className="cursor-default">{acc.toFixed(2)}%</p>
+          </Tooltip>
+        </>
+      );
     },
   },
   {

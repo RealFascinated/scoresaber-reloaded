@@ -28,7 +28,7 @@ const scoreBadges: ScoreBadge[] = [
  * @param acc - The accuracy for the score
  * @returns The corresponding color for the accuracy.
  */
-export function getScoreColorFromAccuracy(acc: number): ScoreBadge {
+export function getScoreBadgeFromAccuracy(acc: number): ScoreBadge {
   // Check for SS+ first since it has no upper limit
   if (acc >= 95) {
     return scoreBadges[0]; // SS+ color
