@@ -19,9 +19,7 @@ client.defineJob({
 
     await io.logger.info("Finding players...");
     const players: IPlayer[] = await PlayerModel.find({});
-    await io.logger.info(
-      `Found ${players.length} player${players.length > 1 ? "s" : ""}.`,
-    );
+    await io.logger.info(`Found ${players.length} player${players.length > 1 ? "s" : ""}.`);
 
     const dateToday = getMidnightAlignedDate(new Date());
     for (const foundPlayer of players) {

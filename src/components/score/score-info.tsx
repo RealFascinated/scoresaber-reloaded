@@ -14,13 +14,9 @@ type Props = {
 };
 
 export default function ScoreSongInfo({ leaderboard, beatSaverMap }: Props) {
-  const diff = getDifficultyFromScoreSaberDifficulty(
-    leaderboard.difficulty.difficulty,
-  );
+  const diff = getDifficultyFromScoreSaberDifficulty(leaderboard.difficulty.difficulty);
   const mappersProfile =
-    beatSaverMap != undefined
-      ? `https://beatsaver.com/profile/${beatSaverMap?.fullData.uploader.id}`
-      : undefined;
+    beatSaverMap != undefined ? `https://beatsaver.com/profile/${beatSaverMap?.fullData.uploader.id}` : undefined;
 
   return (
     <div className="flex gap-3 items-center">
@@ -72,13 +68,7 @@ export default function ScoreSongInfo({ leaderboard, beatSaverMap }: Props) {
           </p>
           <p className="text-sm text-gray-400">{leaderboard.songAuthorName}</p>
           <FallbackLink href={mappersProfile}>
-            <p
-              className={clsx(
-                "text-sm",
-                mappersProfile &&
-                  "hover:brightness-75 transform-gpu transition-all",
-              )}
-            >
+            <p className={clsx("text-sm", mappersProfile && "hover:brightness-75 transform-gpu transition-all")}>
               {leaderboard.levelAuthorName}
             </p>
           </FallbackLink>

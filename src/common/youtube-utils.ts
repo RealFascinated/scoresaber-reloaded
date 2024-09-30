@@ -6,11 +6,7 @@
  * @param author the author of the song
  * @returns the YouTube link for the song
  */
-export function songNameToYouTubeLink(
-  name: string,
-  songSubName: string,
-  author: string,
-) {
+export function songNameToYouTubeLink(name: string, songSubName: string, author: string) {
   const baseUrl = "https://www.youtube.com/results?search_query=";
   let query = "";
   if (name) {

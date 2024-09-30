@@ -21,8 +21,7 @@ export async function GET(request: NextRequest) {
     const { status, headers } = response;
     if (
       !headers.has("content-type") ||
-      (headers.has("content-type") &&
-        !headers.get("content-type")?.includes("application/json"))
+      (headers.has("content-type") && !headers.get("content-type")?.includes("application/json"))
     ) {
       return NextResponse.json({
         error: "We only support proxying JSON responses",
@@ -42,7 +41,7 @@ export async function GET(request: NextRequest) {
         headers: {
           "Access-Control-Allow-Origin": "*",
         },
-      },
+      }
     );
   }
 }

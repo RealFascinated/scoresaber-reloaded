@@ -9,13 +9,10 @@ import Tooltip from "@/components/tooltip";
 
 type Badge = {
   name: string;
-  color?: (
-    score: ScoreSaberScoreToken,
-    leaderboard: ScoreSaberLeaderboardToken,
-  ) => string | undefined;
+  color?: (score: ScoreSaberScoreToken, leaderboard: ScoreSaberLeaderboardToken) => string | undefined;
   create: (
     score: ScoreSaberScoreToken,
-    leaderboard: ScoreSaberLeaderboardToken,
+    leaderboard: ScoreSaberLeaderboardToken
   ) => string | React.ReactNode | undefined;
 };
 
@@ -35,17 +32,11 @@ const badges: Badge[] = [
   },
   {
     name: "Accuracy",
-    color: (
-      score: ScoreSaberScoreToken,
-      leaderboard: ScoreSaberLeaderboardToken,
-    ) => {
+    color: (score: ScoreSaberScoreToken, leaderboard: ScoreSaberLeaderboardToken) => {
       const acc = (score.baseScore / leaderboard.maxScore) * 100;
       return getScoreBadgeFromAccuracy(acc).color;
     },
-    create: (
-      score: ScoreSaberScoreToken,
-      leaderboard: ScoreSaberLeaderboardToken,
-    ) => {
+    create: (score: ScoreSaberScoreToken, leaderboard: ScoreSaberLeaderboardToken) => {
       const acc = (score.baseScore / leaderboard.maxScore) * 100;
       const scoreBadge = getScoreBadgeFromAccuracy(acc);
       let accDetails = `Accuracy ${scoreBadge.name != "-" ? scoreBadge.name : ""}`;
@@ -93,16 +84,8 @@ const badges: Badge[] = [
 
       return (
         <>
-          <p>
-            {fullCombo ? (
-              <span className="text-green-400">FC</span>
-            ) : (
-              formatNumberWithCommas(score.missedNotes)
-            )}
-          </p>
-          <XMarkIcon
-            className={clsx("w-5 h-5", fullCombo ? "hidden" : "text-red-400")}
-          />
+          <p>{fullCombo ? <span className="text-green-400">FC</span> : formatNumberWithCommas(score.missedNotes)}</p>
+          <XMarkIcon className={clsx("w-5 h-5", fullCombo ? "hidden" : "text-red-400")} />
         </>
       );
     },

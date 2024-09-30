@@ -24,6 +24,7 @@
     "@trigger.dev/nextjs": "^3.0.8",
     "@trigger.dev/react": "^3.0.8",
     "@trigger.dev/sdk": "^3.0.8",
+    "@uidotdev/usehooks": "^2.4.1",
     "canvas": "3.0.0-rc2",
     "chart.js": "^4.4.4",
     "class-variance-authority": "^0.7.0",

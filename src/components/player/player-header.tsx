@@ -1,13 +1,13 @@
-import {formatNumberWithCommas, formatPp} from "@/common/number-utils";
-import {GlobeAmericasIcon} from "@heroicons/react/24/solid";
+import { formatNumberWithCommas, formatPp } from "@/common/number-utils";
+import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import Card from "../card";
 import CountryFlag from "../country-flag";
-import {Avatar, AvatarImage} from "../ui/avatar";
+import { Avatar, AvatarImage } from "../ui/avatar";
 import ClaimProfile from "./claim-profile";
 import PlayerStats from "./player-stats";
 import ScoreSaberPlayer from "@/common/model/player/impl/scoresaber-player";
 import Tooltip from "@/components/tooltip";
-import {ReactElement} from "react";
+import { ReactElement } from "react";
 import PlayerTrackedStatus from "@/components/player/player-tracked-status";
 
 /**
@@ -17,18 +17,12 @@ import PlayerTrackedStatus from "@/components/player/player-tracked-status";
  * @param tooltip the tooltip to display
  * @param format the function to format the value
  */
-const renderChange = (
-  change: number,
-  tooltip: ReactElement,
-  format?: (value: number) => string,
-) => {
+const renderChange = (change: number, tooltip: ReactElement, format?: (value: number) => string) => {
   format = format ?? formatNumberWithCommas;
 
   return (
     <Tooltip display={tooltip}>
-      <p
-        className={`text-sm ${change > 0 ? "text-green-400" : "text-red-400"}`}
-      >
+      <p className={`text-sm ${change > 0 ? "text-green-400" : "text-red-400"}`}>
         {change > 0 ? "+" : ""}
         {format(change)}
       </p>
@@ -49,11 +43,7 @@ const playerData = [
       return (
         <div className="text-gray-300 flex gap-1 items-center">
           <p>#{formatNumberWithCommas(player.rank)}</p>
-          {rankChange != 0 &&
-            renderChange(
-              rankChange,
-              <p>The change in your rank compared to yesterday</p>,
-            )}
+          {rankChange != 0 && renderChange(rankChange, <p>The change in your rank compared to yesterday</p>)}
         </div>
       );
     },
@@ -70,11 +60,7 @@ const playerData = [
       return (
         <div className="text-gray-300 flex gap-1 items-center">
           <p>#{formatNumberWithCommas(player.countryRank)}</p>
-          {rankChange != 0 &&
-            renderChange(
-              rankChange,
-              <p>The change in your rank compared to yesterday</p>,
-            )}
+          {rankChange != 0 && renderChange(rankChange, <p>The change in your rank compared to yesterday</p>)}
         </div>
       );
     },
@@ -89,13 +75,9 @@ const playerData = [
         <div className="text-pp flex gap-1 items-center">
           <p>{formatPp(player.pp)}pp</p>
           {ppChange != 0 &&
-            renderChange(
-              ppChange,
-              <p>The change in your pp compared to yesterday</p>,
-              (number) => {
-                return `${formatPp(number)}pp`;
-              },
-            )}
+            renderChange(ppChange, <p>The change in your pp compared to yesterday</p>, number => {
+              return `${formatPp(number)}pp`;
+            })}
         </div>
       );
     },
@@ -111,10 +93,7 @@ export default function PlayerHeader({ player }: Props) {
     <Card>
       <div className="flex gap-3 flex-col items-center text-center lg:flex-row lg:items-start lg:text-start relative select-none">
         <Avatar className="w-32 h-32 pointer-events-none">
-          <AvatarImage
-            alt="Profile Picture"
-            src={`https://img.fascinated.cc/upload/w_128,h_128/${player.avatar}`}
-          />
+          <AvatarImage alt="Profile Picture" src={`https://img.fascinated.cc/upload/w_128,h_128/${player.avatar}`} />
         </Avatar>
         <div className="w-full flex gap-2 flex-col justify-center items-center lg:justify-start lg:items-start">
           <div>
@@ -124,20 +103,13 @@ export default function PlayerHeader({ player }: Props) {
             </div>
             <div className="flex flex-col">
               <div>
-                {player.inactive && (
-                  <p className="text-gray-400">Inactive Account</p>
-                )}
-                {player.banned && (
-                  <p className="text-red-500">Banned Account</p>
-                )}
+                {player.inactive && <p className="text-gray-400">Inactive Account</p>}
+                {player.banned && <p className="text-red-500">Banned Account</p>}
               </div>
               <div className="flex gap-2">
                 {playerData.map((subName, index) => {
                   // Check if the player is inactive or banned and if the data should be shown
-                  if (
-                    !subName.showWhenInactiveOrBanned &&
-                    (player.inactive || player.banned)
-                  ) {
+                  if (!subName.showWhenInactiveOrBanned && (player.inactive || player.banned)) {
                     return null;
                   }
 

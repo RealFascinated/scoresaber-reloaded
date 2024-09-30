@@ -12,19 +12,9 @@ export default class ScoreSaberScore extends Score {
     misses: number,
     badCuts: number,
     fullCombo: boolean,
-    timestamp: Date,
+    timestamp: Date
   ) {
-    super(
-      score,
-      weight,
-      rank,
-      worth,
-      modifiers,
-      misses,
-      badCuts,
-      fullCombo,
-      timestamp,
-    );
+    super(score, weight, rank, worth, modifiers, misses, badCuts, fullCombo, timestamp);
   }
 
   /**
@@ -33,7 +23,7 @@ export default class ScoreSaberScore extends Score {
    * @param token the token to convert
    */
   public static fromToken(token: ScoreSaberScoreToken): ScoreSaberScore {
-    const modifiers: Modifier[] = token.modifiers.split(",").map((mod) => {
+    const modifiers: Modifier[] = token.modifiers.split(",").map(mod => {
       mod = mod.toUpperCase();
       const modifier = Modifier[mod as keyof typeof Modifier];
       if (modifier === undefined) {
@@ -51,7 +41,7 @@ export default class ScoreSaberScore extends Score {
       token.missedNotes,
       token.badCuts,
       token.fullCombo,
-      new Date(token.timeSet),
+      new Date(token.timeSet)
     );
   }
 }

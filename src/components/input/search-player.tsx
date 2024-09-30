@@ -40,10 +40,7 @@ export default function SearchPlayer() {
     <div className="flex flex-col gap-3">
       {/* Search */}
       <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="flex items-end gap-2"
-        >
+        <form onSubmit={form.handleSubmit(onSubmit)} className="flex items-end gap-2">
           <FormField
             control={form.control}
             name="username"
@@ -51,11 +48,7 @@ export default function SearchPlayer() {
               <FormItem>
                 <FormLabel>Username</FormLabel>
                 <FormControl>
-                  <Input
-                    className="w-full sm:w-72 text-sm"
-                    placeholder="Query..."
-                    {...field}
-                  />
+                  <Input className="w-full sm:w-72 text-sm" placeholder="Query..." {...field} />
                 </FormControl>
               </FormItem>
             )}
@@ -73,7 +66,7 @@ export default function SearchPlayer() {
       {results !== undefined && (
         <ScrollArea>
           <div className="flex flex-col gap-1 max-h-60">
-            {results?.map((player) => {
+            {results?.map(player => {
               return (
                 <Link
                   href={`/player/${player.id}`}
@@ -86,9 +79,7 @@ export default function SearchPlayer() {
                   </Avatar>
                   <div>
                     <p>{player.name}</p>
-                    <p className="text-gray-400 text-sm">
-                      #{formatNumberWithCommas(player.rank)}
-                    </p>
+                    <p className="text-gray-400 text-sm">#{formatNumberWithCommas(player.rank)}</p>
                   </div>
                 </Link>
               );

@@ -65,7 +65,7 @@ export default class Score {
     misses: number,
     badCuts: number,
     fullCombo: boolean,
-    timestamp: Date,
+    timestamp: Date
   ) {
     this._score = score;
     this._weight = weight;

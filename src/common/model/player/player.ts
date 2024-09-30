@@ -43,7 +43,7 @@ export default class Player {
     country: string,
     rank: number,
     countryRank: number,
-    joinedDate: Date,
+    joinedDate: Date
   ) {
     this.id = id;
     this.name = name;

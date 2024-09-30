@@ -6,10 +6,7 @@ import { PlayerTrackedSince } from "@/common/player/player-tracked-since";
 export async function GET(request: NextRequest) {
   const id = request.nextUrl.searchParams.get("id");
   if (id == null) {
-    return NextResponse.json(
-      { error: "Unknown player. Missing: ?id=" },
-      { status: 400 },
-    );
+    return NextResponse.json({ error: "Unknown player. Missing: ?id=" }, { status: 400 });
   }
   await connectMongo(); // Connect to Mongo
 

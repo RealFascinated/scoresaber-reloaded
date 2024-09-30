@@ -31,34 +31,32 @@ type Props = {
  * @param fetchScores whether to fetch the scores
  * @returns the player data and scores
  */
-const getPlayerData = cache(
-  async ({ params }: Props, fetchScores: boolean = true) => {
-    const { slug } = await params;
-    const id = slug[0]; // The players id
-    const sort: ScoreSort = (slug[1] as ScoreSort) || "recent"; // The sorting method
-    const page = parseInt(slug[2]) || 1; // The page number
-    const search = (slug[3] as string) || ""; // The search query
+const getPlayerData = cache(async ({ params }: Props, fetchScores: boolean = true) => {
+  const { slug } = await params;
+  const id = slug[0]; // The players id
+  const sort: ScoreSort = (slug[1] as ScoreSort) || "recent"; // The sorting method
+  const page = parseInt(slug[2]) || 1; // The page number
+  const search = (slug[3] as string) || ""; // The search query
 
-    const player = (await scoresaberService.lookupPlayer(id, false))?.player;
-    let scores: ScoreSaberPlayerScoresPageToken | undefined;
-    if (fetchScores) {
-      scores = await scoresaberService.lookupPlayerScores({
-        playerId: id,
-        sort,
-        page,
-        search,
-      });
-    }
+  const player = (await scoresaberService.lookupPlayer(id, false))?.player;
+  let scores: ScoreSaberPlayerScoresPageToken | undefined;
+  if (fetchScores) {
+    scores = await scoresaberService.lookupPlayerScores({
+      playerId: id,
+      sort,
+      page,
+      search,
+    });
+  }
 
-    return {
-      sort: sort,
-      page: page,
-      search: search,
-      player: player,
-      scores: scores,
-    };
-  },
-);
+  return {
+    sort: sort,
+    page: page,
+    search: search,
+    player: player,
+    scores: scores,
+  };
+});
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
   const { player } = await getPlayerData(props, false);
@@ -123,13 +121,7 @@ export default async function Search(props: Props) {
 
   return (
     <div className="flex flex-col h-full w-full">
-      <PlayerData
-        initialPlayerData={player}
-        initialScoreData={scores}
-        initialSearch={search}
-        sort={sort}
-        page={page}
-      />
+      <PlayerData initialPlayerData={player} initialScoreData={scores} initialSearch={search} sort={sort} page={page} />
     </div>
   );
 }

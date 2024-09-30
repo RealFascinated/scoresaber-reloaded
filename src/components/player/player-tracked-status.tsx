@@ -18,12 +18,7 @@ type Props = {
 export default function PlayerTrackedStatus({ player }: Props) {
   const { data, isLoading, isError } = useQuery({
     queryKey: ["playerIsBeingTracked", player.id],
-    queryFn: () =>
-      ky
-        .get<PlayerTrackedSince>(
-          `${config.siteUrl}/api/player/isbeingtracked?id=${player.id}`,
-        )
-        .json(),
+    queryFn: () => ky.get<PlayerTrackedSince>(`${config.siteUrl}/api/player/isbeingtracked?id=${player.id}`).json(),
   });
 
   if (isLoading || isError || !data?.tracked) {

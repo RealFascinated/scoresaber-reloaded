@@ -3,10 +3,7 @@ type YouTubeLogoProps = {
   className?: string;
 };
 
-export default function YouTubeLogo({
-  size = 32,
-  className,
-}: YouTubeLogoProps) {
+export default function YouTubeLogo({ size = 32, className }: YouTubeLogoProps) {
   return (
     <svg
       height={size}

@@ -17,9 +17,7 @@ export default class Service {
    * @param data the data to log
    */
   public log(data: unknown) {
-    console.log(
-      `[${isRunningAsWorker() ? "Worker - " : ""}${this.name}]: ${data}`,
-    );
+    console.log(`[${isRunningAsWorker() ? "Worker - " : ""}${this.name}]: ${data}`);
   }
 
   /**
@@ -41,10 +39,7 @@ export default class Service {
    * @param url the url to fetch
    * @returns the fetched data
    */
-  public async fetch<T>(
-    useProxy: boolean,
-    url: string,
-  ): Promise<T | undefined> {
+  public async fetch<T>(useProxy: boolean, url: string): Promise<T | undefined> {
     try {
       return await ky
         .get<T>(this.buildRequestUrl(useProxy, url), {

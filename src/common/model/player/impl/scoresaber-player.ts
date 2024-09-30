@@ -3,11 +3,7 @@ import ScoreSaberPlayerToken from "@/common/model/token/scoresaber/score-saber-p
 import { PlayerHistory } from "@/common/player/player-history";
 import { config } from "../../../../../config";
 import ky from "ky";
-import {
-  formatDateMinimal,
-  getDaysAgoDate,
-  getMidnightAlignedDate,
-} from "@/common/time-utils";
+import { formatDateMinimal, getDaysAgoDate, getMidnightAlignedDate } from "@/common/time-utils";
 
 /**
  * A ScoreSaber player.
@@ -64,16 +60,14 @@ export default interface ScoreSaberPlayer extends Player {
   inactive: boolean;
 }
 
-export async function getScoreSaberPlayerFromToken(
-  token: ScoreSaberPlayerToken,
-): Promise<ScoreSaberPlayer> {
+export async function getScoreSaberPlayerFromToken(token: ScoreSaberPlayerToken): Promise<ScoreSaberPlayer> {
   const bio: ScoreSaberBio = {
     lines: token.bio?.split("\n") || [],
     linesStripped: token.bio?.replace(/<[^>]+>/g, "")?.split("\n") || [],
   };
   const role = token.role == null ? undefined : (token.role as ScoreSaberRole);
   const badges: ScoreSaberBadge[] =
-    token.badges?.map((badge) => {
+    token.badges?.map(badge => {
       return {
         url: badge.image,
         description: badge.description,
@@ -103,7 +97,7 @@ export async function getScoreSaberPlayerFromToken(
     statisticHistory = history;
   } catch (error) {
     // Fallback to ScoreSaber History if the player has no history
-    const playerRankHistory = token.histories.split(",").map((value) => {
+    const playerRankHistory = token.histories.split(",").map(value => {
       return parseInt(value);
     });
     playerRankHistory.push(token.rank);
@@ -124,9 +118,7 @@ export async function getScoreSaberPlayerFromToken(
     .sort((a, b) => Date.parse(b[0]) - Date.parse(a[0]))
     .reduce((obj, [key, value]) => ({ ...obj, [key]: value }), {});
 
-  const yesterdayDate = formatDateMinimal(
-    getMidnightAlignedDate(getDaysAgoDate(1)),
-  );
+  const yesterdayDate = formatDateMinimal(getMidnightAlignedDate(getDaysAgoDate(1)));
   const todayStats = statisticHistory[todayDate];
   const yesterdayStats = statisticHistory[yesterdayDate];
   const hasChange = !!(todayStats && yesterdayStats);

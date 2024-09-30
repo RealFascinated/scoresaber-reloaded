@@ -8,10 +8,7 @@ export async function GET(request: NextRequest) {
   const playerIdCookie = request.cookies.get("playerId");
   const id = request.nextUrl.searchParams.get("id");
   if (id == null) {
-    return NextResponse.json(
-      { error: "Unknown player. Missing: ?id=" },
-      { status: 400 },
-    );
+    return NextResponse.json({ error: "Unknown player. Missing: ?id=" }, { status: 400 });
   }
   const shouldCreatePlayer = playerIdCookie?.value === id;
 

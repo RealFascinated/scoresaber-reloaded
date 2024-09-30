@@ -23,10 +23,7 @@ type Variants = {
     itemsPerPage: number;
     icon: (player: ScoreSaberPlayer) => ReactElement;
     getPage: (player: ScoreSaberPlayer, itemsPerPage: number) => number;
-    query: (
-      page: number,
-      country: string,
-    ) => Promise<ScoreSaberPlayersPageToken | undefined>;
+    query: (page: number, country: string) => Promise<ScoreSaberPlayersPageToken | undefined>;
   };
 };
 
@@ -95,7 +92,7 @@ export default function Mini({ type, player }: MiniProps) {
   let players = data; // So we can update it later
   if (players && (!isLoading || !isError)) {
     // Find the player's position and show 3 players above and 1 below
-    const playerPosition = players.findIndex((p) => p.id === player.id);
+    const playerPosition = players.findIndex(p => p.id === player.id);
     players = players.slice(playerPosition - 3, playerPosition + 2);
   }
 
@@ -109,8 +106,7 @@ export default function Mini({ type, player }: MiniProps) {
         {isLoading && <p className="text-gray-400">Loading...</p>}
         {isError && <p className="text-red-500">Error</p>}
         {players?.map((playerRanking, index) => {
-          const rank =
-            type == "Global" ? playerRanking.rank : playerRanking.countryRank;
+          const rank = type == "Global" ? playerRanking.rank : playerRanking.countryRank;
           const playerName =
             playerRanking.name.length > PLAYER_NAME_MAX_LENGTH
               ? playerRanking.name.substring(0, PLAYER_NAME_MAX_LENGTH) + "..."
@@ -126,29 +122,14 @@ export default function Mini({ type, player }: MiniProps) {
               <p className="text-gray-400">#{formatNumberWithCommas(rank)}</p>
               <div className="flex gap-1 items-center">
                 <Avatar className="w-6 h-6 pointer-events-none">
-                  <AvatarImage
-                    alt="Profile Picture"
-                    src={playerRanking.profilePicture}
-                  />
+                  <AvatarImage alt="Profile Picture" src={playerRanking.profilePicture} />
                 </Avatar>
-                <p
-                  className={
-                    playerRanking.id === player.id
-                      ? "text-pp font-semibold"
-                      : ""
-                  }
-                >
-                  {playerName}
-                </p>
+                <p className={playerRanking.id === player.id ? "text-pp font-semibold" : ""}>{playerName}</p>
               </div>
               <div className="inline-flex min-w-[10.75em] gap-1 items-center">
-                <p className="text-pp text-right">
-                  {formatPp(playerRanking.pp)}pp
-                </p>
+                <p className="text-pp text-right">{formatPp(playerRanking.pp)}pp</p>
                 {playerRanking.id !== player.id && (
-                  <p
-                    className={`text-xs text-right ${ppDifference > 0 ? "text-green-400" : "text-red-400"}`}
-                  >
+                  <p className={`text-xs text-right ${ppDifference > 0 ? "text-green-400" : "text-red-400"}`}>
                     {ppDifference > 0 ? "+" : ""}
                     {formatPp(ppDifference)}
                   </p>

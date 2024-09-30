@@ -53,10 +53,7 @@ export default function ScoreButtons({
             {/* Open map in BeatSaver */}
             <ScoreButton
               onClick={() => {
-                window.open(
-                  `https://beatsaver.com/maps/${beatSaverMap.bsr}`,
-                  "_blank",
-                );
+                window.open(`https://beatsaver.com/maps/${beatSaverMap.bsr}`, "_blank");
               }}
               tooltip={<p>Click to open the map</p>}
             >
@@ -69,12 +66,8 @@ export default function ScoreButtons({
         <ScoreButton
           onClick={() => {
             window.open(
-              songNameToYouTubeLink(
-                leaderboard.songName,
-                leaderboard.songSubName,
-                leaderboard.songAuthorName,
-              ),
-              "_blank",
+              songNameToYouTubeLink(leaderboard.songName, leaderboard.songSubName, leaderboard.songAuthorName),
+              "_blank"
             );
           }}
           tooltip={<p>Click to open the song in YouTube</p>}

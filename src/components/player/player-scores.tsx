@@ -14,8 +14,7 @@ import ScoreSaberPlayer from "@/common/model/player/impl/scoresaber-player";
 import { scoresaberService } from "@/common/service/impl/scoresaber";
 import { Input } from "@/components/ui/input";
 import { clsx } from "clsx";
-
-const INPUT_DEBOUNCE_DELAY = 250; // milliseconds
+import { useDebounce } from "@uidotdev/usehooks";
 
 type Props = {
   initialScoreData?: ScoreSaberPlayerScoresPageToken;
@@ -49,39 +48,18 @@ const scoreAnimation: Variants = {
   visible: { opacity: 1, x: 0, transition: { staggerChildren: 0.03 } },
 };
 
-export default function PlayerScores({
-  initialScoreData,
-  initialSearch,
-  player,
-  sort,
-  page,
-}: Props) {
+export default function PlayerScores({ initialScoreData, initialSearch, player, sort, page }: Props) {
   const { width } = useWindowDimensions();
   const controls = useAnimation();
 
   const [pageState, setPageState] = useState<PageState>({ page, sort });
   const [previousPage, setPreviousPage] = useState(page);
-  const [currentScores, setCurrentScores] = useState<
-    ScoreSaberPlayerScoresPageToken | undefined
-  >(initialScoreData);
-  const [searchState, setSearchState] = useState({
-    query: initialSearch || "",
-  });
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(
-    initialSearch || "",
-  );
+  const [currentScores, setCurrentScores] = useState<ScoreSaberPlayerScoresPageToken | undefined>(initialScoreData);
+  const [searchTerm, setSearchTerm] = useState(initialSearch || "");
+  const debouncedSearchTerm = useDebounce(searchTerm, 250);
 
   const isSearchActive = debouncedSearchTerm.length >= 3;
   const [shouldFetch, setShouldFetch] = useState(false); // New state to control fetching
-
-  // Debounce the search query
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedSearchTerm(searchState.query);
-    }, INPUT_DEBOUNCE_DELAY);
-
-    return () => clearTimeout(handler);
-  }, [searchState.query]);
 
   const {
     data: scores,
@@ -98,15 +76,11 @@ export default function PlayerScores({
       });
     },
     staleTime: 30 * 1000, // 30 seconds
-    enabled:
-      shouldFetch &&
-      (debouncedSearchTerm.length >= 3 || debouncedSearchTerm.length === 0), // Only enable if we set shouldFetch to true
+    enabled: shouldFetch && (debouncedSearchTerm.length >= 3 || debouncedSearchTerm.length === 0), // Only enable if we set shouldFetch to true
   });
 
   const handleScoreLoad = useCallback(async () => {
-    await controls.start(
-      previousPage >= pageState.page ? "hiddenRight" : "hiddenLeft",
-    );
+    await controls.start(previousPage >= pageState.page ? "hiddenRight" : "hiddenLeft");
     setCurrentScores(scores);
     await controls.start("visible");
   }, [scores, controls, previousPage, pageState.page]);
@@ -124,15 +98,11 @@ export default function PlayerScores({
 
   useEffect(() => {
     const newUrl = `/player/${player.id}/${pageState.sort}/${pageState.page}${isSearchActive ? `?search=${debouncedSearchTerm}` : ""}`;
-    window.history.replaceState(
-      { ...window.history.state, as: newUrl, url: newUrl },
-      "",
-      newUrl,
-    );
+    window.history.replaceState({ ...window.history.state, as: newUrl, url: newUrl }, "", newUrl);
   }, [pageState, debouncedSearchTerm, player.id, isSearchActive]);
 
   const handleSearchChange = (query: string) => {
-    setSearchState({ query });
+    setSearchTerm(query);
     if (query.length >= 3) {
       setShouldFetch(true); // Set to true to trigger fetch
     } else {
@@ -141,23 +111,18 @@ export default function PlayerScores({
   };
 
   const clearSearch = () => {
-    setSearchState({ query: "" });
-    setDebouncedSearchTerm(""); // Clear the debounced term
+    setSearchTerm("");
   };
 
-  const invalidSearch =
-    searchState.query.length >= 1 && searchState.query.length < 3;
-
+  const invalidSearch = searchTerm.length >= 1 && searchTerm.length < 3;
   return (
     <Card className="flex gap-1">
       <div className="flex flex-col items-center w-full gap-2 relative">
         <div className="flex gap-2">
-          {scoreSort.map((sortOption) => (
+          {scoreSort.map(sortOption => (
             <Button
               key={sortOption.value}
-              variant={
-                sortOption.value === pageState.sort ? "default" : "outline"
-              }
+              variant={sortOption.value === pageState.sort ? "default" : "outline"}
               onClick={() => handleSortChange(sortOption.value)}
               size="sm"
               className="flex items-center gap-1"
@@ -174,12 +139,12 @@ export default function PlayerScores({
             placeholder="Search..."
             className={clsx(
               "pr-10", // Add padding right for the clear button
-              invalidSearch && "border-red-500",
+              invalidSearch && "border-red-500"
             )}
-            value={searchState.query}
-            onChange={(e) => handleSearchChange(e.target.value)}
+            value={searchTerm}
+            onChange={e => handleSearchChange(e.target.value)}
           />
-          {searchState.query && ( // Show clear button only if there's a query
+          {searchTerm && ( // Show clear button only if there's a query
             <button
               onClick={clearSearch}
               className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-300 hover:brightness-75 transform-gpu transition-all cursor-default"
@@ -194,10 +159,7 @@ export default function PlayerScores({
       {currentScores && (
         <>
           <div className="text-center">
-            {isError ||
-              (currentScores.playerScores.length === 0 && (
-                <p>No scores found. Invalid Page or Search?</p>
-              ))}
+            {isError || (currentScores.playerScores.length === 0 && <p>No scores found. Invalid Page or Search?</p>)}
           </div>
 
           <motion.div
@@ -216,12 +178,9 @@ export default function PlayerScores({
           <Pagination
             mobilePagination={width < 768}
             page={pageState.page}
-            totalPages={Math.ceil(
-              currentScores.metadata.total /
-                currentScores.metadata.itemsPerPage,
-            )}
+            totalPages={Math.ceil(currentScores.metadata.total / currentScores.metadata.itemsPerPage)}
             loadingPage={isLoading ? pageState.page : undefined}
-            onPageChange={(newPage) => {
+            onPageChange={newPage => {
               setPreviousPage(pageState.page);
               setPageState({ ...pageState, page: newPage });
               setShouldFetch(true); // Set to true to trigger fetch on page change

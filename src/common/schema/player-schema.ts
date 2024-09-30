@@ -1,10 +1,6 @@
 import mongoose, { Document, Schema } from "mongoose";
 import { PlayerHistory } from "@/common/player/player-history";
-import {
-  formatDateMinimal,
-  getDaysAgo,
-  getMidnightAlignedDate,
-} from "@/common/time-utils";
+import { formatDateMinimal, getDaysAgo, getMidnightAlignedDate } from "@/common/time-utils";
 import ScoreSaberPlayer from "@/common/model/player/impl/scoresaber-player";
 import { sortPlayerHistory } from "@/common/player-utils";
 
@@ -95,11 +91,7 @@ PlayerSchema.methods.getLastTracked = function (): Date {
 };
 
 PlayerSchema.methods.getHistoryByDate = function (date: Date): PlayerHistory {
-  return (
-    this.statisticHistory.get(
-      formatDateMinimal(getMidnightAlignedDate(date)),
-    ) || {}
-  );
+  return this.statisticHistory.get(formatDateMinimal(getMidnightAlignedDate(date))) || {};
 };
 
 PlayerSchema.methods.getHistoryPrevious = function (amount: number): {
@@ -118,33 +110,21 @@ PlayerSchema.methods.getHistoryPrevious = function (amount: number): {
   return toReturn;
 };
 
-PlayerSchema.methods.getStatisticHistory = function (): Map<
-  Date,
-  PlayerHistory
-> {
+PlayerSchema.methods.getStatisticHistory = function (): Map<Date, PlayerHistory> {
   if (!this.statisticHistory) {
     this.statisticHistory = new Map();
   }
   return this.statisticHistory;
 };
 
-PlayerSchema.methods.setStatisticHistory = function (
-  date: Date,
-  data: PlayerHistory,
-): void {
+PlayerSchema.methods.setStatisticHistory = function (date: Date, data: PlayerHistory): void {
   if (!this.statisticHistory) {
     this.statisticHistory = new Map();
   }
-  return this.statisticHistory.set(
-    formatDateMinimal(getMidnightAlignedDate(date)),
-    data,
-  );
+  return this.statisticHistory.set(formatDateMinimal(getMidnightAlignedDate(date)), data);
 };
 
-PlayerSchema.methods.sortStatisticHistory = function (): Map<
-  Date,
-  PlayerHistory
-> {
+PlayerSchema.methods.sortStatisticHistory = function (): Map<Date, PlayerHistory> {
   if (!this.statisticHistory) {
     this.statisticHistory = new Map();
   }
@@ -152,18 +132,14 @@ PlayerSchema.methods.sortStatisticHistory = function (): Map<
   // Sort the player's history
   this.statisticHistory = new Map(
     Array.from(this.statisticHistory.entries() as [string, PlayerHistory][])
-      .sort(
-        (a: [string, PlayerHistory], b: [string, PlayerHistory]) =>
-          Date.parse(b[0]) - Date.parse(a[0]),
-      )
+      .sort((a: [string, PlayerHistory], b: [string, PlayerHistory]) => Date.parse(b[0]) - Date.parse(a[0]))
       // Convert the date strings back to Date objects for the resulting Map
-      .map(([date, history]) => [formatDateMinimal(new Date(date)), history]),
+      .map(([date, history]) => [formatDateMinimal(new Date(date)), history])
   );
   return this.statisticHistory;
 };
 
 // Mongoose Model for Player
-const PlayerModel =
-  mongoose.models.Player || mongoose.model<IPlayer>("Player", PlayerSchema);
+const PlayerModel = mongoose.models.Player || mongoose.model<IPlayer>("Player", PlayerSchema);
 
 export { PlayerModel };

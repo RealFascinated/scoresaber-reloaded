@@ -1,8 +1,4 @@
-import {
-  Tooltip as ShadCnTooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "./ui/tooltip";
+import { Tooltip as ShadCnTooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
 type Props = {
   /**

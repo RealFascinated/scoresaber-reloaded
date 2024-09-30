@@ -1,3 +1,4 @@
+import "./globals.css";
 import Footer from "@/components/footer";
 import { PreloadResources } from "@/components/preload-resources";
 import { QueryProvider } from "@/components/providers/query-provider";
@@ -10,13 +11,12 @@ import localFont from "next/font/local";
 import BackgroundImage from "../components/background-image";
 import DatabaseLoader from "../components/loaders/database-loader";
 import NavBar from "../components/navbar/navbar";
-
-import "./globals.css";
 import { Colors } from "@/common/colors";
+import OfflineNetwork from "@/components/offline-network";
 
 const siteFont = localFont({
   src: "./fonts/JetBrainsMono.ttf",
-  weight: "100 400",
+  weight: "100 300",
 });
 
 export const metadata: Metadata = {
@@ -48,14 +48,12 @@ export const metadata: Metadata = {
     "Stream enhancement, Professional overlay, Easy to use overlay builder.",
   openGraph: {
     title: "Scoresaber Reloaded",
-    description:
-      "Scoresaber Reloaded is a new way to view your scores and get more stats about your and your plays",
+    description: "Scoresaber Reloaded is a new way to view your scores and get more stats about your and your plays",
     url: "https://ssr.fascinated.cc",
     locale: "en_US",
     type: "website",
   },
-  description:
-    "Scoresaber Reloaded is a new way to view your scores and get more stats about your and your plays",
+  description: "Scoresaber Reloaded is a new way to view your scores and get more stats about your and your plays",
 };
 
 export const viewport: Viewport = {
@@ -75,24 +73,21 @@ export default function RootLayout({
           <BackgroundImage />
           <PreloadResources />
           <TooltipProvider delayDuration={100}>
-            <ThemeProvider
-              attribute="class"
-              defaultTheme="dark"
-              enableSystem
-              disableTransitionOnChange
-            >
-              <QueryProvider>
-                <AnimatePresence>
-                  <main className="flex flex-col min-h-screen gap-2 text-white">
-                    <NavBar />
-                    <div className="z-[1] m-auto flex flex-col flex-grow items-center md:max-w-[1600px]">
-                      {children}
-                    </div>
-                    <Footer />
-                  </main>
-                </AnimatePresence>
-              </QueryProvider>
-            </ThemeProvider>
+            <OfflineNetwork>
+              <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
+                <QueryProvider>
+                  <AnimatePresence>
+                    <main className="flex flex-col min-h-screen gap-2 text-white">
+                      <NavBar />
+                      <div className="z-[1] m-auto flex flex-col flex-grow items-center md:max-w-[1600px]">
+                        {children}
+                      </div>
+                      <Footer />
+                    </main>
+                  </AnimatePresence>
+                </QueryProvider>
+              </ThemeProvider>
+            </OfflineNetwork>
           </TooltipProvider>
         </DatabaseLoader>
       </body>

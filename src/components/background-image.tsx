@@ -2,17 +2,14 @@
 
 import { useLiveQuery } from "dexie-react-hooks";
 import { config } from "../../config";
-import { getImageUrl } from "../common/image-utils";
+import { getImageUrl } from "@/common/image-utils";
 import useDatabase from "../hooks/use-database";
 
 export default function BackgroundImage() {
   const database = useDatabase();
   const settings = useLiveQuery(() => database.getSettings());
 
-  if (
-    settings?.backgroundImage == undefined ||
-    settings?.backgroundImage == ""
-  ) {
+  if (settings == undefined || settings?.backgroundImage == undefined || settings?.backgroundImage == "") {
     return null; // Don't render anything if the background image is not set
   }
 

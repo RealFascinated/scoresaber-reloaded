@@ -18,26 +18,18 @@ class BeatSaverService extends Service {
    * @param useProxy whether to use the proxy or not
    * @returns the map that match the query, or undefined if no map were found
    */
-  async lookupMap(
-    query: string,
-    useProxy = true,
-  ): Promise<BeatSaverMap | undefined> {
+  async lookupMap(query: string, useProxy = true): Promise<BeatSaverMap | undefined> {
     const before = performance.now();
     this.log(`Looking up map "${query}"...`);
 
     let map = await db.beatSaverMaps.get(query);
     // The map is cached
     if (map != undefined) {
-      this.log(
-        `Found cached map "${query}" in ${(performance.now() - before).toFixed(0)}ms`,
-      );
+      this.log(`Found cached map "${query}" in ${(performance.now() - before).toFixed(0)}ms`);
       return map;
     }
 
-    const response = await this.fetch<BSMap>(
-      useProxy,
-      LOOKUP_MAP_BY_HASH_ENDPOINT.replace(":query", query),
-    );
+    const response = await this.fetch<BSMap>(useProxy, LOOKUP_MAP_BY_HASH_ENDPOINT.replace(":query", query));
     // Map not found
     if (response == undefined) {
       return undefined;
@@ -55,9 +47,7 @@ class BeatSaverService extends Service {
       fullData: response,
     });
     map = await db.beatSaverMaps.get(query);
-    this.log(
-      `Found map "${query}" in ${(performance.now() - before).toFixed(0)}ms`,
-    );
+    this.log(`Found map "${query}" in ${(performance.now() - before).toFixed(0)}ms`);
     return map;
   }
 }

@@ -6,14 +6,5 @@ type Props = {
 };
 
 export default function Card({ children, className }: Props) {
-  return (
-    <div
-      className={clsx(
-        "flex flex-col bg-secondary/90 p-3 rounded-md",
-        className,
-      )}
-    >
-      {children}
-    </div>
-  );
+  return <div className={clsx("flex flex-col bg-secondary/90 p-3 rounded-md", className)}>{children}</div>;
 }

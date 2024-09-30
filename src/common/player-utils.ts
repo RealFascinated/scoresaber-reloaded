@@ -16,7 +16,7 @@ const INACTIVE_CHECK_AGAIN_TIME = 3 * 24 * 60 * 60 * 1000; // 3 days
  */
 export function sortPlayerHistory(history: Map<string, PlayerHistory>) {
   return Array.from(history.entries()).sort(
-    (a, b) => Date.parse(b[0]) - Date.parse(a[0]), // Sort in descending order
+    (a, b) => Date.parse(b[0]) - Date.parse(a[0]) // Sort in descending order
   );
 }
 
@@ -31,10 +31,10 @@ export function sortPlayerHistory(history: Map<string, PlayerHistory>) {
 export async function seedPlayerHistory(
   foundPlayer: IPlayer,
   player: ScoreSaberPlayer,
-  rawPlayer: ScoreSaberPlayerToken,
+  rawPlayer: ScoreSaberPlayerToken
 ): Promise<Map<string, PlayerHistory>> {
   // Loop through rankHistory in reverse, from current day backwards
-  const playerRankHistory = rawPlayer.histories.split(",").map((value) => {
+  const playerRankHistory = rawPlayer.histories.split(",").map(value => {
     return parseInt(value);
   });
   playerRankHistory.push(player.rank);
@@ -63,34 +63,23 @@ export async function seedPlayerHistory(
  * @param dateToday the date to use
  * @param foundPlayer the player to track
  */
-export async function trackScoreSaberPlayer(
-  dateToday: Date,
-  foundPlayer: IPlayer,
-  io?: IO,
-) {
+export async function trackScoreSaberPlayer(dateToday: Date, foundPlayer: IPlayer, io?: IO) {
   io && (await io.logger.info(`Updating statistics for ${foundPlayer.id}...`));
 
   // Check if the player is inactive and if we check their inactive status again
   if (
     foundPlayer.rawPlayer &&
     foundPlayer.rawPlayer.inactive &&
-    Date.now() - foundPlayer.getLastTracked().getTime() >
-      INACTIVE_CHECK_AGAIN_TIME
+    Date.now() - foundPlayer.getLastTracked().getTime() > INACTIVE_CHECK_AGAIN_TIME
   ) {
-    io &&
-      (await io.logger.warn(
-        `Player ${foundPlayer.id} is inactive, skipping...`,
-      ));
+    io && (await io.logger.warn(`Player ${foundPlayer.id} is inactive, skipping...`));
     return;
   }
 
   // Lookup player data from the ScoreSaber service
   const response = await scoresaberService.lookupPlayer(foundPlayer.id, true);
   if (response == undefined) {
-    io &&
-      (await io.logger.warn(
-        `Player ${foundPlayer.id} not found on ScoreSaber`,
-      ));
+    io && (await io.logger.warn(`Player ${foundPlayer.id} not found on ScoreSaber`));
     return;
   }
   const { player, rawPlayer } = response;

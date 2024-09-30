@@ -1,8 +1,8 @@
-import {createCanvas, loadImage} from "canvas";
-import {config} from "../../config";
+import { createCanvas, loadImage } from "canvas";
+import { config } from "../../config";
 import ky from "ky";
-import {extractColors} from "extract-colors";
-import {cache} from "react";
+import { extractColors } from "extract-colors";
+import { cache } from "react";
 
 /**
  * Proxies all non-localhost images to make them load faster.
@@ -46,9 +46,7 @@ export const getAverageColor = cache(async (src: string) => {
     // Use your extractColors function to calculate the average color
     const color = await extractColors({ data, width, height });
 
-    console.log(
-      `Found average color of "${src}" in ${(performance.now() - before).toFixed(0)}ms`,
-    );
+    console.log(`Found average color of "${src}" in ${(performance.now() - before).toFixed(0)}ms`);
     return color[2];
   } catch (error) {
     console.error("Error while getting average color:", error);

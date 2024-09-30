@@ -1,5 +1,5 @@
-import {BeatSaverMapToken as BSMap} from "@/common/model/token/beatsaver/beat-saver-map-token";
-import {Entity} from "dexie";
+import { BeatSaverMapToken as BSMap } from "@/common/model/token/beatsaver/beat-saver-map-token";
+import { Entity } from "dexie";
 import Database from "../database";
 
 /**

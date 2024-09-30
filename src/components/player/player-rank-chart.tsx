@@ -2,30 +2,13 @@
 "use client";
 
 import { formatNumberWithCommas } from "@/common/number-utils";
-import {
-  CategoryScale,
-  Chart,
-  Legend,
-  LinearScale,
-  LineElement,
-  PointElement,
-  Title,
-  Tooltip,
-} from "chart.js";
+import { CategoryScale, Chart, Legend, LinearScale, LineElement, PointElement, Title, Tooltip } from "chart.js";
 import { Line } from "react-chartjs-2";
 import ScoreSaberPlayer from "@/common/model/player/impl/scoresaber-player";
 import { getDaysAgo, parseDate } from "@/common/time-utils";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 
-Chart.register(
-  LinearScale,
-  CategoryScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-);
+Chart.register(LinearScale, CategoryScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 type AxisPosition = "left" | "right";
 
@@ -71,7 +54,7 @@ const generateAxis = (
   reverse: boolean,
   display: boolean,
   position: AxisPosition,
-  displayName: string,
+  displayName: string
 ): Axis => ({
   id,
   position,
@@ -99,12 +82,7 @@ const generateAxis = (
  * @param borderColor the border color of the dataset
  * @param yAxisID the ID of the y-axis
  */
-const generateDataset = (
-  label: string,
-  data: (number | null)[],
-  borderColor: string,
-  yAxisID: string,
-): Dataset => ({
+const generateDataset = (label: string, data: (number | null)[], borderColor: string, yAxisID: string): Dataset => ({
   label,
   data,
   borderColor,
@@ -155,8 +133,7 @@ const datasetConfig: DatasetConfig[] = [
       displayName: "Country Rank",
       position: "left",
     },
-    labelFormatter: (value: number) =>
-      `Country Rank #${formatNumberWithCommas(value)}`,
+    labelFormatter: (value: number) => `Country Rank #${formatNumberWithCommas(value)}`,
   },
   {
     title: "PP",
@@ -181,10 +158,7 @@ type Props = {
 export default function PlayerRankChart({ player }: Props) {
   const isMobile = useIsMobile();
 
-  if (
-    !player.statisticHistory ||
-    Object.keys(player.statisticHistory).length === 0
-  ) {
+  if (!player.statisticHistory || Object.keys(player.statisticHistory).length === 0) {
     return (
       <div className="flex justify-center">
         <p>Unable to load player rank chart, missing data...</p>
@@ -200,7 +174,7 @@ export default function PlayerRankChart({ player }: Props) {
   };
 
   const statisticEntries = Object.entries(player.statisticHistory).sort(
-    ([a], [b]) => parseDate(a).getTime() - parseDate(b).getTime(),
+    ([a], [b]) => parseDate(a).getTime() - parseDate(b).getTime()
   );
 
   let previousDate: Date | null = null;
@@ -211,18 +185,11 @@ export default function PlayerRankChart({ player }: Props) {
 
     // Insert nulls for missing days
     if (previousDate) {
-      const diffDays = Math.floor(
-        (currentDate.getTime() - previousDate.getTime()) /
-          (1000 * 60 * 60 * 24),
-      );
+      const diffDays = Math.floor((currentDate.getTime() - previousDate.getTime()) / (1000 * 60 * 60 * 24));
 
       for (let i = 1; i < diffDays; i++) {
-        labels.push(
-          `${getDaysAgo(
-            new Date(currentDate.getTime() - i * 24 * 60 * 60 * 1000),
-          )} days ago`,
-        );
-        datasetConfig.forEach((config) => {
+        labels.push(`${getDaysAgo(new Date(currentDate.getTime() - i * 24 * 60 * 60 * 1000))} days ago`);
+        datasetConfig.forEach(config => {
           histories[config.field].push(null);
         });
       }
@@ -232,10 +199,8 @@ export default function PlayerRankChart({ player }: Props) {
     labels.push(daysAgo === 0 ? "Today" : `${daysAgo} days ago`);
 
     // stupid typescript crying wahh wahh wahh - https://youtu.be/hBEKgHDzm_s?si=ekOdMMdb-lFnA1Yz&t=11
-    datasetConfig.forEach((config) => {
-      (histories as any)[config.field].push(
-        (history as any)[config.field] ?? null,
-      );
+    datasetConfig.forEach(config => {
+      (histories as any)[config.field].push((history as any)[config.field] ?? null);
     });
 
     previousDate = currentDate;
@@ -252,23 +217,16 @@ export default function PlayerRankChart({ player }: Props) {
   };
 
   const datasets: Dataset[] = datasetConfig
-    .map((config) => {
-      if (histories[config.field].some((value) => value !== null)) {
+    .map(config => {
+      if (histories[config.field].some(value => value !== null)) {
         axes[config.axisId] = generateAxis(
           config.axisId,
           config.axisConfig.reverse,
-          isMobile && config.axisConfig.hideOnMobile
-            ? false
-            : config.axisConfig.display,
+          isMobile && config.axisConfig.hideOnMobile ? false : config.axisConfig.display,
           config.axisConfig.position,
-          config.axisConfig.displayName,
+          config.axisConfig.displayName
         );
-        return generateDataset(
-          config.title,
-          histories[config.field],
-          config.color,
-          config.axisId,
-        );
+        return generateDataset(config.title, histories[config.field], config.color, config.axisId);
       }
       return null;
     })
@@ -298,9 +256,7 @@ export default function PlayerRankChart({ player }: Props) {
         callbacks: {
           label(context: any) {
             const value = Number(context.parsed.y);
-            const config = datasetConfig.find(
-              (cfg) => cfg.title === context.dataset.label,
-            );
+            const config = datasetConfig.find(cfg => cfg.title === context.dataset.label);
             return config?.labelFormatter(value) ?? "";
           },
         },

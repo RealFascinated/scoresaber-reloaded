@@ -20,10 +20,7 @@ export function timeAgo(input: Date | number) {
   for (const key in ranges) {
     if (ranges[key] < Math.abs(secondsElapsed)) {
       const delta = secondsElapsed / ranges[key];
-      return formatter.format(
-        Math.round(delta),
-        key as Intl.RelativeTimeFormatUnit,
-      );
+      return formatter.format(Math.round(delta), key as Intl.RelativeTimeFormatUnit);
     }
   }
 }
@@ -48,9 +45,7 @@ export function formatDateMinimal(date: Date) {
  * @param date the date
  */
 export function getMidnightAlignedDate(date: Date) {
-  return new Date(
-    Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()),
-  );
+  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
 }
 
 /**

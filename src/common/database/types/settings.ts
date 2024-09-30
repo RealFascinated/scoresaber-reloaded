@@ -1,4 +1,4 @@
-import {Entity} from "dexie";
+import { Entity } from "dexie";
 import Database from "../database";
 
 /**
