@@ -5,7 +5,7 @@ import ScoreSaberLeaderboardToken from "@/common/model/token/scoresaber/score-sa
 import ScoreSaberLeaderboardScoresPageToken from "@/common/model/token/scoresaber/score-saber-leaderboard-scores-page-token";
 import useWindowDimensions from "@/hooks/use-window-dimensions";
 import { useQuery } from "@tanstack/react-query";
-import { motion, useAnimation, Variants } from "framer-motion";
+import { motion, useAnimation } from "framer-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
 import Card from "../card";
 import Pagination from "../input/pagination";

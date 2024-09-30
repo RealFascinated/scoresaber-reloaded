@@ -2,7 +2,7 @@ import { capitalizeFirstLetter } from "@/common/string-utils";
 import useWindowDimensions from "@/hooks/use-window-dimensions";
 import { ClockIcon, TrophyIcon, XMarkIcon } from "@heroicons/react/24/solid";
 import { useQuery } from "@tanstack/react-query";
-import { motion, useAnimation, Variants } from "framer-motion";
+import { motion, useAnimation } from "framer-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
 import Card from "../card";
 import Pagination from "../input/pagination";
