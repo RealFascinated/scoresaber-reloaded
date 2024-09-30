@@ -110,7 +110,7 @@ const generateDataset = (
   borderColor,
   fill: false,
   lineTension: 0.5,
-  spanGaps: false, // Set to false to allow gaps
+  spanGaps: false, // Set to false, so we can allow gaps
   yAxisID,
 });
 
@@ -122,6 +122,7 @@ type DatasetConfig = {
   axisConfig: {
     reverse: boolean;
     display: boolean;
+    hideOnMobile?: boolean;
     displayName: string;
     position: AxisPosition;
   };
@@ -165,6 +166,7 @@ const datasetConfig: DatasetConfig[] = [
     axisConfig: {
       reverse: false,
       display: true,
+      hideOnMobile: true,
       displayName: "PP",
       position: "right",
     },
@@ -255,7 +257,9 @@ export default function PlayerRankChart({ player }: Props) {
         axes[config.axisId] = generateAxis(
           config.axisId,
           config.axisConfig.reverse,
-          isMobile ? false : config.axisConfig.display,
+          isMobile && config.axisConfig.hideOnMobile
+            ? false
+            : config.axisConfig.display,
           config.axisConfig.position,
           config.axisConfig.displayName,
         );
