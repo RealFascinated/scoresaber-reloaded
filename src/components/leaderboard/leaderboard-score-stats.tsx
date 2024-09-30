@@ -6,7 +6,7 @@ import { XMarkIcon } from "@heroicons/react/24/solid";
 import clsx from "clsx";
 import { getScoreBadgeFromAccuracy } from "@/common/song-utils";
 import Tooltip from "@/components/tooltip";
-import { ScoreBadge } from "@/components/score/score-badge";
+import { ScoreBadge, ScoreBadges } from "@/components/score/score-badge";
 
 const badges: ScoreBadge[] = [
   {
@@ -75,14 +75,7 @@ type Props = {
 export default function LeaderboardScoreStats({ score, leaderboard }: Props) {
   return (
     <div className={`grid grid-cols-3 grid-rows-1 gap-1 ml-0 lg:ml-2`}>
-      {badges.map((badge, index) => {
-        const toRender = badge.create(score, leaderboard);
-        const color = badge.color?.(score, leaderboard);
-        if (toRender === undefined) {
-          return <div key={index} />;
-        }
-        return <StatValue key={index} color={color} value={toRender} />;
-      })}
+      <ScoreBadges badges={badges} score={score} leaderboard={leaderboard} />
     </div>
   );
 }
