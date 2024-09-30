@@ -3,7 +3,7 @@ import useWindowDimensions from "@/hooks/use-window-dimensions";
 import { ClockIcon, TrophyIcon, XMarkIcon } from "@heroicons/react/24/solid";
 import { useQuery } from "@tanstack/react-query";
 import { motion, useAnimation, Variants } from "framer-motion";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Card from "../card";
 import Pagination from "../input/pagination";
 import { Button } from "../ui/button";
@@ -57,10 +57,10 @@ export default function PlayerScores({ initialScoreData, initialSearch, player, 
   const [currentScores, setCurrentScores] = useState<ScoreSaberPlayerScoresPageToken | undefined>(initialScoreData);
   const [searchTerm, setSearchTerm] = useState(initialSearch || "");
   const debouncedSearchTerm = useDebounce(searchTerm, 250);
+  const [shouldFetch, setShouldFetch] = useState(false); // New state to control fetching
+  const topOfScoresRef = useRef(null);
 
   const isSearchActive = debouncedSearchTerm.length >= 3;
-  const [shouldFetch, setShouldFetch] = useState(false); // New state to control fetching
-
   const {
     data: scores,
     isError,
@@ -79,12 +79,20 @@ export default function PlayerScores({ initialScoreData, initialSearch, player, 
     enabled: shouldFetch && (debouncedSearchTerm.length >= 3 || debouncedSearchTerm.length === 0), // Only enable if we set shouldFetch to true
   });
 
-  const handleScoreLoad = useCallback(async () => {
+  /**
+   * Starts the animation for the scores.
+   */
+  const handleScoreAnimation = useCallback(async () => {
     await controls.start(previousPage >= pageState.page ? "hiddenRight" : "hiddenLeft");
     setCurrentScores(scores);
     await controls.start("visible");
   }, [scores, controls, previousPage, pageState.page]);
 
+  /**
+   * Change the score sort.
+   *
+   * @param newSort the new sort
+   */
   const handleSortChange = (newSort: ScoreSort) => {
     if (newSort !== pageState.sort) {
       setPageState({ page: 1, sort: newSort });
@@ -92,15 +100,11 @@ export default function PlayerScores({ initialScoreData, initialSearch, player, 
     }
   };
 
-  useEffect(() => {
-    if (scores) handleScoreLoad();
-  }, [scores, handleScoreLoad]);
-
-  useEffect(() => {
-    const newUrl = `/player/${player.id}/${pageState.sort}/${pageState.page}${isSearchActive ? `?search=${debouncedSearchTerm}` : ""}`;
-    window.history.replaceState({ ...window.history.state, as: newUrl, url: newUrl }, "", newUrl);
-  }, [pageState, debouncedSearchTerm, player.id, isSearchActive]);
-
+  /**
+   * Change the score search term.
+   *
+   * @param query the new search term
+   */
   const handleSearchChange = (query: string) => {
     setSearchTerm(query);
     if (query.length >= 3) {
@@ -110,14 +114,50 @@ export default function PlayerScores({ initialScoreData, initialSearch, player, 
     }
   };
 
+  /**
+   * Clears the score search term.
+   */
   const clearSearch = () => {
     setSearchTerm("");
   };
+
+  /**
+   * Handle score animation.
+   */
+  useEffect(() => {
+    if (scores) handleScoreAnimation();
+  }, [scores, handleScoreAnimation]);
+
+  /**
+   * Handle updating the URL when the page number,
+   * sort, or search term changes.
+   */
+  useEffect(() => {
+    const newUrl = `/player/${player.id}/${pageState.sort}/${pageState.page}${isSearchActive ? `?search=${debouncedSearchTerm}` : ""}`;
+    window.history.replaceState({ ...window.history.state, as: newUrl, url: newUrl }, "", newUrl);
+  }, [pageState, debouncedSearchTerm, player.id, isSearchActive]);
+
+  /**
+   * Handle scrolling to the top of the
+   * scores when new scores are loaded.
+   */
+  useEffect(() => {
+    if (topOfScoresRef.current) {
+      const topOfScoresPosition = (topOfScoresRef.current as any).getBoundingClientRect().top + window.scrollY;
+      window.scrollTo({
+        top: topOfScoresPosition - 55, // Navbar height (plus some padding)
+        behavior: "smooth",
+      });
+    }
+  }, [pageState, topOfScoresRef]);
 
   const invalidSearch = searchTerm.length >= 1 && searchTerm.length < 3;
   return (
     <Card className="flex gap-1">
       <div className="flex flex-col items-center w-full gap-2 relative">
+        {/* Where to scroll to when new scores are loaded */}
+        <div ref={topOfScoresRef} className="absolute flex h-11 p-11" />
+
         <div className="flex gap-2">
           {scoreSort.map(sortOption => (
             <Button
