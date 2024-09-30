@@ -142,14 +142,14 @@ export default function PlayerScores({ initialScoreData, initialSearch, player, 
    * scores when new scores are loaded.
    */
   useEffect(() => {
-    if (topOfScoresRef.current) {
+    if (topOfScoresRef.current && shouldFetch) {
       const topOfScoresPosition = (topOfScoresRef.current as any).getBoundingClientRect().top + window.scrollY;
       window.scrollTo({
         top: topOfScoresPosition - 55, // Navbar height (plus some padding)
         behavior: "smooth",
       });
     }
-  }, [pageState, topOfScoresRef]);
+  }, [pageState, topOfScoresRef, shouldFetch]);
 
   const invalidSearch = searchTerm.length >= 1 && searchTerm.length < 3;
   return (
