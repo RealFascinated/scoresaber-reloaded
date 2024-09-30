@@ -5,13 +5,14 @@ import { ThemeProvider } from "@/components/providers/theme-provider";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AnimatePresence } from "framer-motion";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import BackgroundImage from "../components/background-image";
 import DatabaseLoader from "../components/loaders/database-loader";
 import NavBar from "../components/navbar/navbar";
 
 import "./globals.css";
+import { Colors } from "@/common/colors";
 
 const siteFont = localFont({
   src: "./fonts/JetBrainsMono-Regular.woff2",
@@ -55,6 +56,10 @@ export const metadata: Metadata = {
   },
   description:
     "Scoresaber Reloaded is a new way to view your scores and get more stats about your and your plays",
+};
+
+export const viewport: Viewport = {
+  themeColor: Colors.primary,
 };
 
 export default function RootLayout({

@@ -121,8 +121,9 @@ export async function getScoreSaberPlayerFromToken(
   }
   // Sort the fallback history
   statisticHistory = Object.entries(statisticHistory)
-    .sort()
+    .sort((a, b) => Date.parse(b[0]) - Date.parse(a[0]))
     .reduce((obj, [key, value]) => ({ ...obj, [key]: value }), {});
+
   const yesterdayDate = formatDateMinimal(
     getMidnightAlignedDate(getDaysAgoDate(1)),
   );
