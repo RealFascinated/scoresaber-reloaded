@@ -315,7 +315,24 @@ export default function PlayerRankChart({ player }: Props) {
 
   return (
     <div className="h-96">
-      <Line className="w-fit" options={options} data={data} />
+      <Line
+        className="w-fit"
+        options={options}
+        data={data}
+        plugins={[
+          {
+            id: "legend-padding",
+            beforeInit: (chart: any) => {
+              const originalFit = chart.legend.fit;
+
+              chart.legend.fit = function fit() {
+                originalFit.bind(chart.legend)();
+                this.height += 2;
+              };
+            },
+          },
+        ]}
+      />
     </div>
   );
 }
