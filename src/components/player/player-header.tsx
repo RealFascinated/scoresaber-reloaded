@@ -1,13 +1,13 @@
-import { formatNumberWithCommas, formatPp } from "@/common/number-utils";
-import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
+import {formatNumberWithCommas, formatPp} from "@/common/number-utils";
+import {GlobeAmericasIcon} from "@heroicons/react/24/solid";
 import Card from "../card";
 import CountryFlag from "../country-flag";
-import { Avatar, AvatarImage } from "../ui/avatar";
+import {Avatar, AvatarImage} from "../ui/avatar";
 import ClaimProfile from "./claim-profile";
 import PlayerStats from "./player-stats";
 import ScoreSaberPlayer from "@/common/model/player/impl/scoresaber-player";
 import Tooltip from "@/components/tooltip";
-import { ReactElement } from "react";
+import {ReactElement} from "react";
 import PlayerTrackedStatus from "@/components/player/player-tracked-status";
 
 /**

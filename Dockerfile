@@ -1,8 +1,8 @@
 FROM fascinated/docker-images:nodejs_20_with_pnpm AS base
 
-# Install depends
+# Install dependencies, including Python
 FROM base AS deps
-RUN apk add --no-cache libc6-compat
+RUN apk add --no-cache libc6-compat python3 make g++ gcc
 WORKDIR /app
 COPY package.json* pnpm-lock.yaml* ./
 RUN pnpm install --frozen-lockfile --quiet

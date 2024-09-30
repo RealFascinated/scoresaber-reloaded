@@ -1,7 +1,7 @@
 "use client";
 
-import { createContext, useEffect, useState } from "react";
-import Database, { db } from "../../common/database/database";
+import {createContext, useEffect, useState} from "react";
+import Database, {db} from "../../common/database/database";
 import FullscreenLoader from "./fullscreen-loader";
 
 /**

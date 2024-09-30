@@ -1,8 +1,8 @@
-import { createCanvas, loadImage } from "canvas";
-import { config } from "../../config";
+import {createCanvas, loadImage} from "canvas";
+import {config} from "../../config";
 import ky from "ky";
-import { extractColors } from "extract-colors";
-import { cache } from "react";
+import {extractColors} from "extract-colors";
+import {cache} from "react";
 
 /**
  * Proxies all non-localhost images to make them load faster.

@@ -1,13 +1,9 @@
-import Player, { StatisticChange } from "../player";
+import Player, {StatisticChange} from "../player";
 import ScoreSaberPlayerToken from "@/common/model/token/scoresaber/score-saber-player-token";
-import { PlayerHistory } from "@/common/player/player-history";
-import { config } from "../../../../../config";
+import {PlayerHistory} from "@/common/player/player-history";
+import {config} from "../../../../../config";
 import ky from "ky";
-import {
-  formatDateMinimal,
-  getDaysAgoDate,
-  getMidnightAlignedDate,
-} from "@/common/time-utils";
+import {formatDateMinimal, getDaysAgoDate, getMidnightAlignedDate,} from "@/common/time-utils";
 
 /**
  * A ScoreSaber player.
