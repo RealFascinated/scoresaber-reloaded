@@ -27,7 +27,7 @@ export default function ProfileButton() {
             src={`https://img.fascinated.cc/upload/w_24,h_24/https://cdn.scoresaber.com/avatars/${settings.playerId}.jpg`}
           />
         </Avatar>
-        <p>You</p>
+        <p className="hidden lg:block">You</p>
       </NavbarButton>
     </Link>
   );

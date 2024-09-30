@@ -10,6 +10,7 @@ import CountryFlag from "../country-flag";
 import { Avatar, AvatarImage } from "../ui/avatar";
 import ScoreSaberPlayer from "@/common/model/player/impl/scoresaber-player";
 import { scoresaberService } from "@/common/service/impl/scoresaber";
+import { PlayerRankingSkeleton } from "@/components/ranking/player-ranking-skeleton";
 
 const PLAYER_NAME_MAX_LENGTH = 18;
 
@@ -96,6 +97,10 @@ export default function Mini({ type, player }: MiniProps) {
     players = players.slice(playerPosition - 3, playerPosition + 2);
   }
 
+  if (isLoading) {
+    return <PlayerRankingSkeleton />;
+  }
+
   return (
     <Card className="w-full flex gap-2 sticky select-none">
       <div className="flex gap-2">
@@ -103,7 +108,6 @@ export default function Mini({ type, player }: MiniProps) {
         <p>{type} Ranking</p>
       </div>
       <div className="flex flex-col text-sm">
-        {isLoading && <p className="text-gray-400">Loading...</p>}
         {isError && <p className="text-red-500">Error</p>}
         {players?.map((playerRanking, index) => {
           const rank = type == "Global" ? playerRanking.rank : playerRanking.countryRank;
@@ -120,13 +124,13 @@ export default function Mini({ type, player }: MiniProps) {
               className="grid gap-2 grid-cols-[auto_1fr_auto] items-center bg-accent px-2 py-1.5 cursor-pointer transform-gpu transition-all hover:brightness-75 first:rounded-t last:rounded-b"
             >
               <p className="text-gray-400">#{formatNumberWithCommas(rank)}</p>
-              <div className="flex gap-1 items-center">
+              <div className="flex gap-2 items-center">
                 <Avatar className="w-6 h-6 pointer-events-none">
                   <AvatarImage alt="Profile Picture" src={playerRanking.profilePicture} />
                 </Avatar>
                 <p className={playerRanking.id === player.id ? "text-pp font-semibold" : ""}>{playerName}</p>
               </div>
-              <div className="inline-flex min-w-[10.75em] gap-1 items-center">
+              <div className="inline-flex min-w-[10.75em] gap-2 items-center">
                 <p className="text-pp text-right">{formatPp(playerRanking.pp)}pp</p>
                 {playerRanking.id !== player.id && (
                   <p className={`text-xs text-right ${ppDifference > 0 ? "text-green-400" : "text-red-400"}`}>

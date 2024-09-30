@@ -26,9 +26,9 @@ const items: NavbarItem[] = [
 
 // Helper function to render each navbar item
 const renderNavbarItem = (item: NavbarItem) => (
-  <div className="flex items-center">
-    {item.icon && <div className="mr-2">{item.icon}</div>}
-    <div>{item.name}</div>
+  <div className="flex items-center w-fit gap-2">
+    {item.icon && <div>{item.icon}</div>}
+    <p className="hidden lg:block">{item.name}</p>
   </div>
 );
 
@@ -37,7 +37,7 @@ export default function Navbar() {
 
   return (
     <div className="w-full sticky top-0 z-[999]">
-      <div className="h-10 items-center flex justify-between bg-secondary/95">
+      <div className="h-10 items-center flex justify-between bg-secondary/95 px-1">
         {/* Left-aligned items */}
         <div className="flex items-center h-full">
           <ProfileButton />

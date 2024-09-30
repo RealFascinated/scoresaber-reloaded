@@ -12,11 +12,11 @@ import Pagination from "../input/pagination";
 import LeaderboardScore from "./leaderboard-score";
 import { scoreAnimation } from "@/components/score/score-animation";
 
-type Props = {
+type LeaderboardScoresProps = {
   leaderboard: ScoreSaberLeaderboardToken;
 };
 
-export default function LeaderboardScores({ leaderboard }: Props) {
+export default function LeaderboardScores({ leaderboard }: LeaderboardScoresProps) {
   const { width } = useWindowDimensions();
   const controls = useAnimation();
 
