@@ -105,7 +105,7 @@ export default function Mini({ type, player }: MiniProps) {
         {icon}
         <p>{type} Ranking</p>
       </div>
-      <div className="flex flex-col">
+      <div className="flex flex-col text-sm">
         {isLoading && <p className="text-gray-400">Loading...</p>}
         {isError && <p className="text-red-500">Error</p>}
         {players?.map((playerRanking, index) => {
@@ -115,15 +115,16 @@ export default function Mini({ type, player }: MiniProps) {
             playerRanking.name.length > PLAYER_NAME_MAX_LENGTH
               ? playerRanking.name.substring(0, PLAYER_NAME_MAX_LENGTH) + "..."
               : playerRanking.name;
+          const ppDifference = playerRanking.pp - player.pp;
 
           return (
             <Link
               key={index}
               href={`/player/${playerRanking.id}`}
-              className="flex justify-between gap-2 bg-accent px-2 py-1.5 cursor-pointer transform-gpu transition-all hover:brightness-75 first:rounded-t last:rounded-b"
+              className="grid gap-2 grid-cols-[auto_1fr_auto] items-center bg-accent px-2 py-1.5 cursor-pointer transform-gpu transition-all hover:brightness-75 first:rounded-t last:rounded-b"
             >
-              <div className="flex gap-2">
-                <p className="text-gray-400">#{formatNumberWithCommas(rank)}</p>
+              <p className="text-gray-400">#{formatNumberWithCommas(rank)}</p>
+              <div className="flex gap-1 items-center">
                 <Avatar className="w-6 h-6 pointer-events-none">
                   <AvatarImage
                     alt="Profile Picture"
@@ -138,7 +139,19 @@ export default function Mini({ type, player }: MiniProps) {
                   {playerName}
                 </p>
               </div>
-              <p className="text-pp">{formatPp(playerRanking.pp)}pp</p>
+              <div className="inline-flex min-w-[10.75em] gap-1 items-center">
+                <p className="text-pp text-right">
+                  {formatPp(playerRanking.pp)}pp
+                </p>
+                {playerRanking.id !== player.id && (
+                  <p
+                    className={`text-xs text-right ${ppDifference > 0 ? "text-green-400" : "text-red-400"}`}
+                  >
+                    {ppDifference > 0 ? "+" : ""}
+                    {formatPp(ppDifference)}
+                  </p>
+                )}
+              </div>
             </Link>
           );
         })}

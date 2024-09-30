@@ -29,6 +29,7 @@ export default function PlayerData({
   page,
 }: Props) {
   const isMobile = useIsMobile();
+  console.log("mobile", isMobile);
 
   let player = initalPlayerData;
   const { data, isLoading, isError } = useQuery({
@@ -60,7 +61,7 @@ export default function PlayerData({
         />
       </article>
       {!isMobile && (
-        <aside className="w-[550px] hidden 2xl:flex flex-col gap-2">
+        <aside className="w-[600px] hidden 2xl:flex flex-col gap-2">
           <Mini type="Global" player={player} />
           <Mini type="Country" player={player} />
         </aside>
