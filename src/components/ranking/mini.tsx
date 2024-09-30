@@ -133,7 +133,9 @@ export default function Mini({ type, player }: MiniProps) {
                 </Avatar>
                 <p
                   className={
-                    playerRanking.id === player.id ? "text-gray-400" : ""
+                    playerRanking.id === player.id
+                      ? "text-pp font-semibold"
+                      : ""
                   }
                 >
                   {playerName}

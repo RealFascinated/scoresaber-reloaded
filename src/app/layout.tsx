@@ -15,8 +15,8 @@ import "./globals.css";
 import { Colors } from "@/common/colors";
 
 const siteFont = localFont({
-  src: "./fonts/JetBrainsMono-Regular.woff2",
-  weight: "100 900",
+  src: "./fonts/JetBrainsMono.ttf",
+  weight: "100 400",
 });
 
 export const metadata: Metadata = {
