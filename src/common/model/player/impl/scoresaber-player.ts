@@ -118,12 +118,11 @@ export async function getScoreSaberPlayerFromToken(
         rank: rank,
       };
     }
-
-    // Sort the fallback history
-    statisticHistory = Object.entries(statisticHistory)
-      .sort()
-      .reduce((obj, [key, value]) => ({ ...obj, [key]: value }), {});
   }
+  // Sort the fallback history
+  statisticHistory = Object.entries(statisticHistory)
+    .sort()
+    .reduce((obj, [key, value]) => ({ ...obj, [key]: value }), {});
   const yesterdayDate = formatDateMinimal(
     getMidnightAlignedDate(getDaysAgoDate(1)),
   );
