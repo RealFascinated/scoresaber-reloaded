@@ -1,8 +1,8 @@
 FROM fascinated/docker-images:nodejs_20_with_pnpm AS base
 
-# Install dependencies, including Python and build tools
+# Install dependencies, including Python and build tools for building the app
 FROM base AS deps
-# Install necessary packages for canvas
+# Install necessary packages for canvas build
 RUN apk add --no-cache libc6-compat python3 make g++ gcc pkgconfig pixman cairo-dev libjpeg-turbo-dev pango-dev giflib-dev
 WORKDIR /app
 COPY package.json* pnpm-lock.yaml* ./
@@ -26,7 +26,8 @@ RUN pnpm run build
 FROM base AS runner
 WORKDIR /app
 
-RUN apk add --no-cache libc6-compat python3 make g++ gcc pkgconfig pixman cairo-dev libjpeg-turbo-dev pango-dev giflib-dev
+# Install runtime dependencies (not dev packages) needed for canvas
+RUN apk add --no-cache libc6-compat cairo pango libjpeg-turbo giflib
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
