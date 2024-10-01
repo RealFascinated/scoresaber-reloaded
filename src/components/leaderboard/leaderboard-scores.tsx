@@ -158,6 +158,7 @@ export default function LeaderboardScores({
           leaderboard.difficulties.map(({ difficulty, leaderboardId }) => {
             return (
               <Button
+                key={difficulty}
                 variant={leaderboardId === selectedLeaderboardId ? "default" : "outline"}
                 onClick={() => {
                   handleLeaderboardChange(leaderboardId);
