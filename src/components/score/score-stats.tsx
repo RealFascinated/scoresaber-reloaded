@@ -18,7 +18,23 @@ const badges: ScoreBadge[] = [
       if (pp === 0) {
         return undefined;
       }
-      return `${formatPp(pp)}pp`;
+      const weightedPp = pp * score.weight;
+
+      return (
+        <>
+          <Tooltip
+            display={
+              <div>
+                <p>
+                  Weighted: {formatPp(weightedPp)}pp ({(100 * score.weight).toFixed(2)}%)
+                </p>
+              </div>
+            }
+          >
+            <p>{formatPp(pp)}pp</p>
+          </Tooltip>
+        </>
+      );
     },
   },
   {

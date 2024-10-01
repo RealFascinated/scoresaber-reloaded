@@ -29,7 +29,6 @@ export default function PlayerData({
   page,
 }: Props) {
   const isMobile = useIsMobile();
-  console.log("mobile", isMobile);
 
   let player = initalPlayerData;
   const { data, isLoading, isError } = useQuery({

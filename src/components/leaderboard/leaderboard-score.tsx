@@ -1,5 +1,3 @@
-"use client";
-
 import ScoreSaberLeaderboardToken from "@/common/model/token/scoresaber/score-saber-leaderboard-token";
 import ScoreSaberScoreToken from "@/common/model/token/scoresaber/score-saber-score-token";
 import LeaderboardPlayer from "./leaderboard-player";
@@ -27,7 +25,7 @@ type Props = {
 export default function LeaderboardScore({ player, score, leaderboard }: Props) {
   return (
     <div className="pb-1 pt-1">
-      <div className="grid items-center w-full gap-2 first:pt-0 last:pb-0 grid-cols-[20px 1fr_1fr] lg:grid-cols-[130px_4fr_300px]">
+      <div className="grid items-center w-full gap-2 grid-cols-[20px 1fr_1fr] lg:grid-cols-[130px_4fr_300px]">
         <ScoreRankInfo score={score} />
         <LeaderboardPlayer player={player} score={score} />
         <LeaderboardScoreStats score={score} leaderboard={leaderboard} />
