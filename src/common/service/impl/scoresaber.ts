@@ -6,13 +6,23 @@ import { ScoreSaberPlayersPageToken } from "@/common/model/token/scoresaber/scor
 import { ScoreSort } from "../../model/score/score-sort";
 import Service from "../service";
 import ScoreSaberPlayer, { getScoreSaberPlayerFromToken } from "@/common/model/player/impl/scoresaber-player";
+import ScoreSaberLeaderboardToken from "@/common/model/token/scoresaber/score-saber-leaderboard-token";
 
 const API_BASE = "https://scoresaber.com/api";
+
+/**
+ * Player
+ */
 const SEARCH_PLAYERS_ENDPOINT = `${API_BASE}/players?search=:query`;
 const LOOKUP_PLAYER_ENDPOINT = `${API_BASE}/player/:id/full`;
 const LOOKUP_PLAYERS_ENDPOINT = `${API_BASE}/players?page=:page`;
 const LOOKUP_PLAYERS_BY_COUNTRY_ENDPOINT = `${API_BASE}/players?page=:page&countries=:country`;
 const LOOKUP_PLAYER_SCORES_ENDPOINT = `${API_BASE}/player/:id/scores?limit=:limit&sort=:sort&page=:page`;
+
+/**
+ * Leaderboard
+ */
+const LOOKUP_LEADERBOARD_ENDPOINT = `${API_BASE}/leaderboard/by-id/:id/info`;
 const LOOKUP_LEADERBOARD_SCORES_ENDPOINT = `${API_BASE}/leaderboard/by-id/:id/scores?page=:page`;
 
 class ScoreSaberService extends Service {
@@ -166,10 +176,29 @@ class ScoreSaberService extends Service {
   }
 
   /**
+   * Looks up a leaderboard
+   *
+   * @param leaderboardId the ID of the leaderboard to look up
+   * @param useProxy whether to use the proxy or not
+   */
+  async lookupLeaderboard(leaderboardId: string, useProxy = true): Promise<ScoreSaberLeaderboardToken | undefined> {
+    const before = performance.now();
+    this.log(`Looking up leaderboard "${leaderboardId}"...`);
+    const response = await this.fetch<ScoreSaberLeaderboardToken>(
+      useProxy,
+      LOOKUP_LEADERBOARD_ENDPOINT.replace(":id", leaderboardId)
+    );
+    if (response === undefined) {
+      return undefined;
+    }
+    this.log(`Found leaderboard "${leaderboardId}" in ${(performance.now() - before).toFixed(0)}ms`);
+    return response;
+  }
+
+  /**
    * Looks up a page of scores for a leaderboard
    *
    * @param leaderboardId the ID of the leaderboard to look up
-   * @param sort the sort to use
    * @param page the page to get scores for
    * @param useProxy whether to use the proxy or not
    * @returns the scores of the leaderboard, or undefined

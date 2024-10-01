@@ -7,6 +7,7 @@ import { StarIcon } from "@heroicons/react/24/solid";
 import clsx from "clsx";
 import Image from "next/image";
 import { songDifficultyToColor } from "@/common/song-utils";
+import Link from "next/link";
 
 type Props = {
   leaderboard: ScoreSaberLeaderboardToken;
@@ -63,10 +64,15 @@ export default function ScoreSongInfo({ leaderboard, beatSaverMap }: Props) {
       </div>
       <div className="flex">
         <div className="overflow-y-clip">
-          <p className="text-pp">
-            {leaderboard.songName} {leaderboard.songSubName}
-          </p>
-          <p className="text-sm text-gray-400">{leaderboard.songAuthorName}</p>
+          <Link
+            href={`/leaderboard/${leaderboard.id}`}
+            className="cursor-pointer select-none hover:brightness-75 transform-gpu transition-all"
+          >
+            <p className="text-pp">
+              {leaderboard.songName} {leaderboard.songSubName}
+            </p>
+            <p className="text-sm text-gray-400">{leaderboard.songAuthorName}</p>
+          </Link>
           <FallbackLink href={mappersProfile}>
             <p className={clsx("text-sm", mappersProfile && "hover:brightness-75 transform-gpu transition-all w-fit")}>
               {leaderboard.levelAuthorName}

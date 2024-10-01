@@ -4,12 +4,13 @@ import BeatSaverMap from "@/common/database/types/beatsaver-map";
 import ScoreSaberPlayerScoreToken from "@/common/model/token/scoresaber/score-saber-player-score-token";
 import { beatsaverService } from "@/common/service/impl/beatsaver";
 import LeaderboardScores from "@/components/leaderboard/leaderboard-scores";
-import { cache, useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import ScoreButtons from "./score-buttons";
 import ScoreSongInfo from "./score-info";
 import ScoreRankInfo from "./score-rank-info";
 import ScoreStats from "./score-stats";
 import ScoreSaberPlayer from "@/common/model/player/impl/scoresaber-player";
+import { motion } from "framer-motion";
 
 type Props = {
   /**
@@ -29,7 +30,7 @@ export default function Score({ player, playerScore }: Props) {
   const [isLeaderboardExpanded, setIsLeaderboardExpanded] = useState(false);
 
   const fetchBeatSaverData = useCallback(async () => {
-    const beatSaverMap = await cache(async () => await beatsaverService.lookupMap(leaderboard.songHash))();
+    const beatSaverMap = await beatsaverService.lookupMap(leaderboard.songHash);
     setBeatSaverMap(beatSaverMap);
   }, [leaderboard.songHash]);
 
@@ -46,14 +47,23 @@ export default function Score({ player, playerScore }: Props) {
         <ScoreRankInfo score={score} />
         <ScoreSongInfo leaderboard={leaderboard} beatSaverMap={beatSaverMap} />
         <ScoreButtons
-          playerScore={playerScore}
+          leaderboard={leaderboard}
           beatSaverMap={beatSaverMap}
           isLeaderboardExpanded={isLeaderboardExpanded}
           setIsLeaderboardExpanded={setIsLeaderboardExpanded}
         />
         <ScoreStats score={score} leaderboard={leaderboard} />
       </div>
-      {isLeaderboardExpanded && <LeaderboardScores initialPage={page} player={player} leaderboard={leaderboard} />}
+      {isLeaderboardExpanded && (
+        <motion.div
+          initial={{ opacity: 0, y: -50 }}
+          exit={{ opacity: 0, y: -50 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="w-full mt-2"
+        >
+          <LeaderboardScores initialPage={page} player={player} leaderboard={leaderboard} />
+        </motion.div>
+      )}
     </div>
   );
 }

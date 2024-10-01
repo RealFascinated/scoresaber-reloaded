@@ -77,9 +77,9 @@ export default function RootLayout({
               <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
                 <QueryProvider>
                   <AnimatePresence>
-                    <main className="flex flex-col min-h-screen gap-2 text-white">
+                    <main className="flex flex-col min-h-screen gap-2 text-white w-full">
                       <NavBar />
-                      <div className="z-[1] m-auto flex flex-col flex-grow items-center md:max-w-[1600px]">
+                      <div className="z-[1] m-auto flex flex-col flex-grow items-center w-full md:max-w-[1600px]">
                         {children}
                       </div>
                       <Footer />

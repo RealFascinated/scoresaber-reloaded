@@ -12,12 +12,20 @@ import Pagination from "../input/pagination";
 import LeaderboardScore from "./leaderboard-score";
 import { scoreAnimation } from "@/components/score/score-animation";
 import ScoreSaberPlayer from "@/common/model/player/impl/scoresaber-player";
+import { Button } from "@/components/ui/button";
+import { getDifficultyFromScoreSaberDifficulty } from "@/common/scoresaber-utils";
+import { clsx } from "clsx";
 
 type LeaderboardScoresProps = {
   /**
    * The page to show when opening the leaderboard.
    */
   initialPage?: number;
+
+  /**
+   * The initial scores to show.
+   */
+  initialScores?: ScoreSaberLeaderboardScoresPageToken;
 
   /**
    * The player who set the score.
@@ -28,29 +36,56 @@ type LeaderboardScoresProps = {
    * The leaderboard to display.
    */
   leaderboard: ScoreSaberLeaderboardToken;
+
+  /**
+   * Whether to show the difficulties.
+   */
+  showDifficulties?: boolean;
+
+  /**
+   * Whether this is the full leaderboard page.
+   */
+  isLeaderboardPage?: boolean;
+
+  /**
+   * Called when the leaderboard changes.
+   *
+   * @param id the new leaderboard id
+   */
+  leaderboardChanged?: (id: number) => void;
 };
 
-export default function LeaderboardScores({ initialPage, player, leaderboard }: LeaderboardScoresProps) {
+export default function LeaderboardScores({
+  initialPage,
+  initialScores,
+  player,
+  leaderboard,
+  showDifficulties,
+  isLeaderboardPage,
+  leaderboardChanged,
+}: LeaderboardScoresProps) {
   if (!initialPage) {
     initialPage = 1;
   }
   const { width } = useWindowDimensions();
   const controls = useAnimation();
 
+  const [selectedLeaderboardId, setSelectedLeaderboardId] = useState(leaderboard.id);
   const [previousPage, setPreviousPage] = useState(initialPage);
   const [currentPage, setCurrentPage] = useState(initialPage);
-  const [currentScores, setCurrentScores] = useState<ScoreSaberLeaderboardScoresPageToken | undefined>();
+  const [currentScores, setCurrentScores] = useState<ScoreSaberLeaderboardScoresPageToken | undefined>(initialScores);
   const topOfScoresRef = useRef<HTMLDivElement>(null);
+  const [shouldFetch, setShouldFetch] = useState(false); // New state to control fetching
 
   const {
     data: scores,
     isError,
     isLoading,
-    refetch,
   } = useQuery({
-    queryKey: ["playerScores", leaderboard.id, currentPage],
-    queryFn: () => scoresaberService.lookupLeaderboardScores(leaderboard.id + "", currentPage),
+    queryKey: ["leaderboardScores-" + leaderboard.id, selectedLeaderboardId, currentPage],
+    queryFn: () => scoresaberService.lookupLeaderboardScores(selectedLeaderboardId + "", currentPage),
     staleTime: 30 * 1000, // Cache data for 30 seconds
+    enabled: shouldFetch || isLeaderboardPage,
   });
 
   /**
@@ -63,6 +98,25 @@ export default function LeaderboardScores({ initialPage, player, leaderboard }: 
   }, [controls, currentPage, previousPage, scores]);
 
   /**
+   * Set the selected leaderboard.
+   */
+  const handleLeaderboardChange = useCallback(
+    (id: number) => {
+      setSelectedLeaderboardId(id);
+      setCurrentPage(1);
+      setShouldFetch(true);
+
+      if (leaderboardChanged) {
+        leaderboardChanged(id);
+      }
+
+      // Update the URL
+      window.history.replaceState(null, "", `/leaderboard/${id}`);
+    },
+    [leaderboardChanged]
+  );
+
+  /**
    * Set the current scores.
    */
   useEffect(() => {
@@ -70,13 +124,6 @@ export default function LeaderboardScores({ initialPage, player, leaderboard }: 
       handleScoreAnimation();
     }
   }, [scores, handleScoreAnimation]);
-
-  /**
-   * Handle page change.
-   */
-  useEffect(() => {
-    refetch();
-  }, [leaderboard, currentPage, refetch]);
 
   /**
    * Handle scrolling to the top of the
@@ -97,40 +144,55 @@ export default function LeaderboardScores({ initialPage, player, leaderboard }: 
   }
 
   return (
-    <motion.div initial={{ opacity: 0, y: -50 }} exit={{ opacity: 0, y: -50 }} animate={{ opacity: 1, y: 0 }}>
-      <Card className="flex gap-2 border border-input mt-2">
-        {/* Where to scroll to when new scores are loaded */}
-        <div ref={topOfScoresRef} className="absolute" />
+    <Card className={clsx("flex gap-2 w-full relative", !isLeaderboardPage && "border border-input")}>
+      {/* Where to scroll to when new scores are loaded */}
+      <div ref={topOfScoresRef} className="absolute" />
 
-        <div className="text-center">
-          {isError && <p>Oopsies! Something went wrong.</p>}
-          {currentScores.scores.length === 0 && <p>No scores found. Invalid Page?</p>}
-        </div>
+      <div className="text-center">
+        {isError && <p>Oopsies! Something went wrong.</p>}
+        {currentScores.scores.length === 0 && <p>No scores found. Invalid Page?</p>}
+      </div>
 
-        <motion.div
-          initial="hidden"
-          animate={controls}
-          variants={scoreAnimation}
-          className="grid min-w-full grid-cols-1 divide-y divide-border"
-        >
-          {currentScores.scores.map((playerScore, index) => (
-            <motion.div key={index} variants={scoreAnimation}>
-              <LeaderboardScore key={index} player={player} score={playerScore} leaderboard={leaderboard} />
-            </motion.div>
-          ))}
-        </motion.div>
+      <div className="flex gap-2 justify-center items-center">
+        {showDifficulties &&
+          leaderboard.difficulties.map(({ difficulty, leaderboardId }) => {
+            return (
+              <Button
+                variant={leaderboardId === selectedLeaderboardId ? "default" : "outline"}
+                onClick={() => {
+                  handleLeaderboardChange(leaderboardId);
+                }}
+              >
+                {getDifficultyFromScoreSaberDifficulty(difficulty)}
+              </Button>
+            );
+          })}
+      </div>
 
-        <Pagination
-          mobilePagination={width < 768}
-          page={currentPage}
-          totalPages={Math.ceil(currentScores.metadata.total / currentScores.metadata.itemsPerPage)}
-          loadingPage={isLoading ? currentPage : undefined}
-          onPageChange={newPage => {
-            setCurrentPage(newPage);
-            setPreviousPage(currentPage);
-          }}
-        />
-      </Card>
-    </motion.div>
+      <motion.div
+        initial="hidden"
+        animate={controls}
+        variants={scoreAnimation}
+        className="grid min-w-full grid-cols-1 divide-y divide-border"
+      >
+        {currentScores.scores.map((playerScore, index) => (
+          <motion.div key={index} variants={scoreAnimation}>
+            <LeaderboardScore key={index} player={player} score={playerScore} leaderboard={leaderboard} />
+          </motion.div>
+        ))}
+      </motion.div>
+
+      <Pagination
+        mobilePagination={width < 768}
+        page={currentPage}
+        totalPages={Math.ceil(currentScores.metadata.total / currentScores.metadata.itemsPerPage)}
+        loadingPage={isLoading ? currentPage : undefined}
+        onPageChange={newPage => {
+          setCurrentPage(newPage);
+          setPreviousPage(currentPage);
+          setShouldFetch(true);
+        }}
+      />
+    </Card>
   );
 }

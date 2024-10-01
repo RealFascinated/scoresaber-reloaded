@@ -24,7 +24,7 @@ export const getAverageColor = cache(async (src: string) => {
   const before = performance.now();
   console.log(`Getting average color of "${src}"...`);
   try {
-    const response = await ky.get(`https://img.fascinated.cc/upload/w_64,h_64/${src}`);
+    const response = await ky.get(`https://img.fascinated.cc/upload/w_64,h_64,o_jpg/${src}`);
     if (response.status !== 200) {
       return undefined;
     }

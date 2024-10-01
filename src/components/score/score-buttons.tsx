@@ -1,7 +1,6 @@
 "use client";
 
 import { copyToClipboard } from "@/common/browser-utils";
-import ScoreSaberPlayerScoreToken from "@/common/model/token/scoresaber/score-saber-player-score-token";
 import BeatSaverMap from "@/common/database/types/beatsaver-map";
 import { songNameToYouTubeLink } from "@/common/youtube-utils";
 import BeatSaverLogo from "@/components/logos/beatsaver-logo";
@@ -10,26 +9,30 @@ import { useToast } from "@/hooks/use-toast";
 import { Dispatch, SetStateAction } from "react";
 import LeaderboardButton from "./leaderboard-button";
 import ScoreButton from "./score-button";
+import ScoreSaberLeaderboardToken from "@/common/model/token/scoresaber/score-saber-leaderboard-token";
 
 type Props = {
-  playerScore: ScoreSaberPlayerScoreToken;
+  leaderboard: ScoreSaberLeaderboardToken;
   beatSaverMap?: BeatSaverMap;
-  isLeaderboardExpanded: boolean;
-  setIsLeaderboardExpanded: Dispatch<SetStateAction<boolean>>;
+  alwaysSingleLine?: boolean;
+  isLeaderboardExpanded?: boolean;
+  setIsLeaderboardExpanded?: Dispatch<SetStateAction<boolean>>;
 };
 
 export default function ScoreButtons({
-  playerScore,
+  leaderboard,
   beatSaverMap,
+  alwaysSingleLine,
   isLeaderboardExpanded,
   setIsLeaderboardExpanded,
 }: Props) {
-  const { leaderboard } = playerScore;
   const { toast } = useToast();
 
   return (
     <div className="flex justify-end gap-2">
-      <div className="flex flex-row items-center lg:items-start justify-center flex-wrap gap-1 lg:justify-end">
+      <div
+        className={`flex ${alwaysSingleLine ? "flex-nowrap" : "flex-wrap"} items-center lg:items-start justify-center lg:justify-end gap-1`}
+      >
         {beatSaverMap != undefined && (
           <>
             {/* Copy BSR */}
@@ -71,10 +74,12 @@ export default function ScoreButtons({
           <YouTubeLogo />
         </ScoreButton>
       </div>
-      <LeaderboardButton
-        isLeaderboardExpanded={isLeaderboardExpanded}
-        setIsLeaderboardExpanded={setIsLeaderboardExpanded}
-      />
+      {isLeaderboardExpanded && setIsLeaderboardExpanded && (
+        <LeaderboardButton
+          isLeaderboardExpanded={isLeaderboardExpanded}
+          setIsLeaderboardExpanded={setIsLeaderboardExpanded}
+        />
+      )}
     </div>
   );
 }

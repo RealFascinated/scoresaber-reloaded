@@ -113,7 +113,7 @@ export async function generateViewport(props: Props): Promise<Viewport> {
   };
 }
 
-export default async function Search(props: Props) {
+export default async function PlayerPage(props: Props) {
   const { player, scores, sort, page, search } = await getPlayerData(props);
   if (player == undefined) {
     return redirect("/");
