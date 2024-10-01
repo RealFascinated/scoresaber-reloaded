@@ -13,6 +13,7 @@ import DatabaseLoader from "../components/loaders/database-loader";
 import NavBar from "../components/navbar/navbar";
 import { Colors } from "@/common/colors";
 import OfflineNetwork from "@/components/offline-network";
+import Script from "next/script";
 
 const siteFont = localFont({
   src: "./fonts/JetBrainsMono.ttf",
@@ -68,6 +69,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${siteFont.className} antialiased w-full h-full`}>
+        <Script defer data-domain="ssr.fascinated.cc" src="https://analytics.fascinated.cc/js/script.js" />
         <DatabaseLoader>
           <Toaster />
           <BackgroundImage />
