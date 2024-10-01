@@ -24,17 +24,17 @@ type Props = {
 };
 
 export default function PlayerData({
-  initialPlayerData: initalPlayerData,
+  initialPlayerData: initialPlayerData,
   initialScoreData,
   initialSearch,
   sort,
   page,
 }: Props) {
   const isMobile = useIsMobile();
-  const miniRankingsRef = useRef<any>();
+  const miniRankingsRef = useRef<HTMLDivElement>(null);
   const isMiniRankingsVisible = useIsVisible(miniRankingsRef);
 
-  let player = initalPlayerData;
+  let player = initialPlayerData;
   const { data, isLoading, isError } = useQuery({
     queryKey: ["player", player.id],
     queryFn: () => scoresaberService.lookupPlayer(player.id),

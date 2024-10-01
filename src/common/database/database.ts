@@ -12,7 +12,7 @@ export default class Database extends Dexie {
   settings!: EntityTable<Settings, "id">;
 
   /**
-   * BeatSaver maps
+   * Cached BeatSaver maps
    */
   beatSaverMaps!: EntityTable<BeatSaverMap, "hash">;
 
@@ -58,7 +58,7 @@ export default class Database extends Dexie {
    * @returns the settings
    */
   async getSettings(): Promise<Settings | undefined> {
-    return await this.settings.get(SETTINGS_ID);
+    return this.settings.get(SETTINGS_ID);
   }
 
   /**
@@ -68,7 +68,7 @@ export default class Database extends Dexie {
    * @returns the settings
    */
   async setSettings(settings: Settings) {
-    return await this.settings.update(SETTINGS_ID, settings);
+    return this.settings.update(SETTINGS_ID, settings);
   }
 }
 

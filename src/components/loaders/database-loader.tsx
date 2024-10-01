@@ -26,7 +26,7 @@ export default function DatabaseLoader({ children }: Props) {
     db.on("ready", () => {
       toast({
         title: "Database loaded",
-        description: "The database was loaded successfully.",
+        description: `The database was loaded in ${performance.now() - before}ms.`,
       });
     });
   }, [toast]);
