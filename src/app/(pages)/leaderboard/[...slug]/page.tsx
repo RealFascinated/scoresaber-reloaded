@@ -68,7 +68,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
       Plays: ${leaderboard.plays} (${leaderboard.dailyPlays} today)
       Status: ${leaderboard.stars > 0 ? "Ranked" : "Unranked"}
       
-      View the scores on ${leaderboard.songName}!`,
+      View the scores for ${leaderboard.songName} by ${leaderboard.songAuthorName}!`,
       images: [
         {
           url: leaderboard.coverImage,
