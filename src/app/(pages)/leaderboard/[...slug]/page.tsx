@@ -62,8 +62,11 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   return {
     title: `${leaderboard.songName}`,
     openGraph: {
-      title: `ScoreSaber Reloaded - ${leaderboard.songName}`,
+      title: `ScoreSaber Reloaded - ${leaderboard.songName} ${leaderboard.songSubName}`,
       description: `
+      Mapper: ${leaderboard.levelAuthorName}
+      Plays: ${leaderboard.plays} (${leaderboard.dailyPlays} today)
+      Status: ${leaderboard.stars > 0 ? "Ranked" : "Unranked"}
       
       View the scores on ${leaderboard.songName}!`,
       images: [
