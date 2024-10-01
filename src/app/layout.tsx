@@ -22,7 +22,7 @@ const siteFont = localFont({
 export const metadata: Metadata = {
   title: {
     default: "ScoreSaber Reloaded",
-    template: "%s - SSR",
+    template: "%s - ScoreSaber Reloaded",
   },
   applicationName: "ScoreSaber Reloaded",
   authors: [
