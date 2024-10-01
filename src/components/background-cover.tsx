@@ -5,7 +5,7 @@ import { config } from "../../config";
 import { getImageUrl } from "@/common/image-utils";
 import useDatabase from "../hooks/use-database";
 
-export default function BackgroundImage() {
+export default function BackgroundCover() {
   const database = useDatabase();
   const settings = useLiveQuery(() => database.getSettings());
 
@@ -23,6 +23,16 @@ export default function BackgroundImage() {
   }
   if (prependWebsiteUrl) {
     backgroundImage = config.siteUrl + "/" + backgroundImage;
+  }
+
+  // Static background color
+  if (backgroundImage.startsWith("#")) {
+    return (
+      <div
+        className={`fixed -z-50 object-cover w-screen h-screen pointer-events-none select-none`}
+        style={{ backgroundColor: backgroundImage }}
+      />
+    );
   }
 
   return (

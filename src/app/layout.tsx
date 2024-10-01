@@ -8,7 +8,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AnimatePresence } from "framer-motion";
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
-import BackgroundImage from "../components/background-image";
+import BackgroundCover from "../components/background-cover";
 import DatabaseLoader from "../components/loaders/database-loader";
 import NavBar from "../components/navbar/navbar";
 import { Colors } from "@/common/colors";
@@ -72,7 +72,7 @@ export default function RootLayout({
         <Script defer data-domain="ssr.fascinated.cc" src="https://analytics.fascinated.cc/js/script.js" />
         <DatabaseLoader>
           <Toaster />
-          <BackgroundImage />
+          <BackgroundCover />
           <PreloadResources />
           <TooltipProvider delayDuration={100}>
             <OfflineNetwork>
