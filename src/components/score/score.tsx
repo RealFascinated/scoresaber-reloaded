@@ -9,15 +9,21 @@ import ScoreButtons from "./score-buttons";
 import ScoreSongInfo from "./score-info";
 import ScoreRankInfo from "./score-rank-info";
 import ScoreStats from "./score-stats";
+import ScoreSaberPlayer from "@/common/model/player/impl/scoresaber-player";
 
 type Props = {
+  /**
+   * The claimed player
+   */
+  player: ScoreSaberPlayer;
+
   /**
    * The score to display.
    */
   playerScore: ScoreSaberPlayerScoreToken;
 };
 
-export default function Score({ playerScore }: Props) {
+export default function Score({ player, playerScore }: Props) {
   const { score, leaderboard } = playerScore;
   const [beatSaverMap, setBeatSaverMap] = useState<BeatSaverMap | undefined>();
   const [isLeaderboardExpanded, setIsLeaderboardExpanded] = useState(false);
@@ -31,6 +37,7 @@ export default function Score({ playerScore }: Props) {
     fetchBeatSaverData();
   }, [fetchBeatSaverData]);
 
+  const page = Math.floor(score.rank / 12) + 1;
   return (
     <div className="pb-2 pt-2">
       <div
@@ -46,7 +53,7 @@ export default function Score({ playerScore }: Props) {
         />
         <ScoreStats score={score} leaderboard={leaderboard} />
       </div>
-      {isLeaderboardExpanded && <LeaderboardScores leaderboard={leaderboard} />}
+      {isLeaderboardExpanded && <LeaderboardScores initialPage={page} player={player} leaderboard={leaderboard} />}
     </div>
   );
 }

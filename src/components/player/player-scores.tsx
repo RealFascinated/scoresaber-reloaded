@@ -205,7 +205,7 @@ export default function PlayerScores({ initialScoreData, initialSearch, player, 
           >
             {currentScores.playerScores.map((playerScore, index) => (
               <motion.div key={index} variants={scoreAnimation}>
-                <Score playerScore={playerScore} />
+                <Score player={player} playerScore={playerScore} />
               </motion.div>
             ))}
           </motion.div>

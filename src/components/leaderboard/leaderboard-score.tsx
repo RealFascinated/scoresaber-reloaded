@@ -5,8 +5,14 @@ import ScoreSaberScoreToken from "@/common/model/token/scoresaber/score-saber-sc
 import LeaderboardPlayer from "./leaderboard-player";
 import LeaderboardScoreStats from "./leaderboard-score-stats";
 import ScoreRankInfo from "@/components/score/score-rank-info";
+import ScoreSaberPlayer from "@/common/model/player/impl/scoresaber-player";
 
 type Props = {
+  /**
+   * The claimed player.
+   */
+  player: ScoreSaberPlayer;
+
   /**
    * The score to display.
    */
@@ -18,12 +24,12 @@ type Props = {
   leaderboard: ScoreSaberLeaderboardToken;
 };
 
-export default function LeaderboardScore({ score, leaderboard }: Props) {
+export default function LeaderboardScore({ player, score, leaderboard }: Props) {
   return (
     <div className="pb-1 pt-1">
       <div className="grid items-center w-full gap-2 first:pt-0 last:pb-0 grid-cols-[20px 1fr_1fr] lg:grid-cols-[130px_4fr_300px]">
         <ScoreRankInfo score={score} />
-        <LeaderboardPlayer score={score} />
+        <LeaderboardPlayer player={player} score={score} />
         <LeaderboardScoreStats score={score} leaderboard={leaderboard} />
       </div>
     </div>

@@ -11,17 +11,23 @@ import Card from "../card";
 import Pagination from "../input/pagination";
 import LeaderboardScore from "./leaderboard-score";
 import { scoreAnimation } from "@/components/score/score-animation";
+import ScoreSaberPlayer from "@/common/model/player/impl/scoresaber-player";
 
 type LeaderboardScoresProps = {
+  initialPage?: number;
+  player: ScoreSaberPlayer;
   leaderboard: ScoreSaberLeaderboardToken;
 };
 
-export default function LeaderboardScores({ leaderboard }: LeaderboardScoresProps) {
+export default function LeaderboardScores({ initialPage, player, leaderboard }: LeaderboardScoresProps) {
+  if (!initialPage) {
+    initialPage = 1;
+  }
   const { width } = useWindowDimensions();
   const controls = useAnimation();
 
-  const [previousPage, setPreviousPage] = useState(1);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [previousPage, setPreviousPage] = useState(initialPage);
+  const [currentPage, setCurrentPage] = useState(initialPage);
   const [currentScores, setCurrentScores] = useState<ScoreSaberLeaderboardScoresPageToken | undefined>();
   const topOfScoresRef = useRef<HTMLDivElement>(null);
 
@@ -98,7 +104,7 @@ export default function LeaderboardScores({ leaderboard }: LeaderboardScoresProp
         >
           {currentScores.scores.map((playerScore, index) => (
             <motion.div key={index} variants={scoreAnimation}>
-              <LeaderboardScore key={index} score={playerScore} leaderboard={leaderboard} />
+              <LeaderboardScore key={index} player={player} score={playerScore} leaderboard={leaderboard} />
             </motion.div>
           ))}
         </motion.div>
