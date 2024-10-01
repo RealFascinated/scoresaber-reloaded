@@ -13,8 +13,8 @@ import LeaderboardScore from "./leaderboard-score";
 import { scoreAnimation } from "@/components/score/score-animation";
 import ScoreSaberPlayer from "@/common/model/player/impl/scoresaber-player";
 import { Button } from "@/components/ui/button";
-import { getDifficultyFromScoreSaberDifficulty } from "@/common/scoresaber-utils";
 import { clsx } from "clsx";
+import { getDifficultyFromRawDifficulty } from "@/common/song-utils";
 
 type LeaderboardScoresProps = {
   /**
@@ -130,14 +130,14 @@ export default function LeaderboardScores({
    * scores when new scores are loaded.
    */
   useEffect(() => {
-    if (topOfScoresRef.current) {
+    if (topOfScoresRef.current && shouldFetch) {
       const topOfScoresPosition = topOfScoresRef.current.getBoundingClientRect().top + window.scrollY;
       window.scrollTo({
         top: topOfScoresPosition - 75, // Navbar height (plus some padding)
         behavior: "smooth",
       });
     }
-  }, [currentPage, topOfScoresRef]);
+  }, [currentPage, topOfScoresRef, shouldFetch]);
 
   if (currentScores === undefined) {
     return undefined;
@@ -153,18 +153,24 @@ export default function LeaderboardScores({
         {currentScores.scores.length === 0 && <p>No scores found. Invalid Page?</p>}
       </div>
 
-      <div className="flex gap-2 justify-center items-center">
+      <div className="flex gap-2 justify-center items-center flex-wrap">
         {showDifficulties &&
-          leaderboard.difficulties.map(({ difficulty, leaderboardId }) => {
+          leaderboard.difficulties.map(({ difficultyRaw, leaderboardId }) => {
+            const difficulty = getDifficultyFromRawDifficulty(difficultyRaw);
+            // todo: add support for other gamemodes?
+            if (difficulty.gamemode !== "Standard") {
+              return null;
+            }
+
             return (
               <Button
-                key={difficulty}
+                key={difficultyRaw}
                 variant={leaderboardId === selectedLeaderboardId ? "default" : "outline"}
                 onClick={() => {
                   handleLeaderboardChange(leaderboardId);
                 }}
               >
-                {getDifficultyFromScoreSaberDifficulty(difficulty)}
+                {difficulty.name}
               </Button>
             );
           })}

@@ -48,7 +48,7 @@ export function LeaderboardInfo({ leaderboard, beatSaverMap }: LeaderboardInfoPr
         <Image
           src={leaderboard.coverImage}
           alt={`${leaderboard.songName} Cover Image`}
-          className="rounded-md w-fit h-fit"
+          className="rounded-md w-[96px] h-[96px]"
           width={96}
           height={96}
         />

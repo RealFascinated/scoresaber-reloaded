@@ -1,10 +1,18 @@
-const diffColors: Record<string, string> = {
-  easy: "#3CB371",
-  normal: "#59b0f4",
-  hard: "#FF6347",
-  expert: "#bf2a42",
-  expertplus: "#8f48db",
+type Difficulty = {
+  name: DifficultyName;
+  gamemode?: string;
+  color: string;
 };
+
+type DifficultyName = "Easy" | "Normal" | "Hard" | "Expert" | "Expert+";
+
+const difficulties: Difficulty[] = [
+  { name: "Easy", color: "#59b0f4" },
+  { name: "Normal", color: "#59b0f4" },
+  { name: "Hard", color: "#FF6347" },
+  { name: "Expert", color: "#bf2a42" },
+  { name: "Expert+", color: "#8f48db" },
+];
 
 export type ScoreBadge = {
   name: string;
@@ -14,11 +22,11 @@ export type ScoreBadge = {
 };
 
 const scoreBadges: ScoreBadge[] = [
-  { name: "SS+", min: 95, max: null, color: diffColors.expertplus },
-  { name: "SS", min: 90, max: 95, color: diffColors.expert },
-  { name: "S+", min: 85, max: 90, color: diffColors.hard },
-  { name: "S", min: 80, max: 85, color: diffColors.normal },
-  { name: "A", min: 70, max: 80, color: diffColors.easy },
+  { name: "SS+", min: 95, max: null, color: getDifficulty("Expert+")!.color },
+  { name: "SS", min: 90, max: 95, color: getDifficulty("Expert")!.color },
+  { name: "S+", min: 85, max: 90, color: getDifficulty("Hard")!.color },
+  { name: "S", min: 80, max: 85, color: getDifficulty("Normal")!.color },
+  { name: "A", min: 70, max: 80, color: getDifficulty("Easy")!.color },
   { name: "-", min: null, max: 70, color: "hsl(var(--accent))" },
 ];
 
@@ -50,12 +58,44 @@ export function getScoreBadgeFromAccuracy(acc: number): ScoreBadge {
 }
 
 /**
+ * Parses a raw difficulty into a {@link Difficulty}
+ * Example: _Easy_SoloStandard -> { name: "Easy", type: "Standard", color: "#59b0f4" }
+ *
+ * @param rawDifficulty the raw difficulty to parse
+ * @return the parsed difficulty
+ */
+export function getDifficultyFromRawDifficulty(rawDifficulty: string): Difficulty {
+  const [name, ...type] = rawDifficulty
+    .replace("Plus", "+") // Replaces Plus with + so we can match it to our difficulty names
+    .replace("Solo", "") // Removes "Solo"
+    .replace(/^_+|_+$/g, "") // Removes leading and trailing underscores
+    .split("_");
+  const difficulty = difficulties.find(d => d.name === name);
+  if (!difficulty) {
+    throw new Error(`Unknown difficulty: ${rawDifficulty}`);
+  }
+  return {
+    ...difficulty,
+    gamemode: type.join("_"),
+  };
+}
+
+/**
+ * Gets a {@link Difficulty} from its name
+ *
+ * @param diff the name of the difficulty
+ * @returns the difficulty
+ */
+export function getDifficulty(diff: DifficultyName) {
+  return difficulties.find(d => d.name === diff);
+}
+
+/**
  * Turns the difficulty of a song into a color
  *
  * @param diff the difficulty to get the color for
  * @returns the color for the difficulty
  */
 export function songDifficultyToColor(diff: string) {
-  diff = diff.replace("+", "Plus");
-  return diffColors[diff.toLowerCase() as keyof typeof diffColors];
+  return getDifficultyFromRawDifficulty(diff).color;
 }
