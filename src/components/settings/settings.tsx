@@ -12,7 +12,7 @@ import { useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
-  backgroundCover: z.string().min(4).max(128),
+  backgroundCover: z.string().min(0).max(128),
 });
 
 export default function Settings() {
@@ -22,10 +22,6 @@ export default function Settings() {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      // They will get overwritten later...
-      backgroundCover: "",
-    },
   });
 
   /**
