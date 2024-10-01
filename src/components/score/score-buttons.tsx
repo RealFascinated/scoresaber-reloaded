@@ -74,7 +74,7 @@ export default function ScoreButtons({
           <YouTubeLogo />
         </ScoreButton>
       </div>
-      {isLeaderboardExpanded && setIsLeaderboardExpanded && (
+      {isLeaderboardExpanded != undefined && setIsLeaderboardExpanded != undefined && (
         <LeaderboardButton
           isLeaderboardExpanded={isLeaderboardExpanded}
           setIsLeaderboardExpanded={setIsLeaderboardExpanded}
