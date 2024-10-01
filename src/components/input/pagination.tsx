@@ -60,9 +60,21 @@ type Props = {
    * Callback function that is called when the user clicks on a page number.
    */
   onPageChange: (page: number) => void;
+
+  /**
+   * Optional callback to generate the URL for each page.
+   */
+  generatePageUrl?: (page: number) => string;
 };
 
-export default function Pagination({ mobilePagination, page, totalPages, loadingPage, onPageChange }: Props) {
+export default function Pagination({
+  mobilePagination,
+  page,
+  totalPages,
+  loadingPage,
+  onPageChange,
+  generatePageUrl,
+}: Props) {
   totalPages = Math.round(totalPages);
   const isLoading = loadingPage !== undefined;
   const [currentPage, setCurrentPage] = useState(page);
@@ -72,12 +84,17 @@ export default function Pagination({ mobilePagination, page, totalPages, loading
   }, [page]);
 
   const handlePageChange = (newPage: number) => {
-    if (newPage < 1 || newPage > totalPages || newPage == currentPage || isLoading) {
+    if (newPage < 1 || newPage > totalPages || newPage === currentPage || isLoading) {
       return;
     }
 
     setCurrentPage(newPage);
     onPageChange(newPage);
+  };
+
+  const handleLinkClick = (newPage: number, event: React.MouseEvent) => {
+    event.preventDefault(); // Prevent default navigation behavior
+    handlePageChange(newPage);
   };
 
   const renderPageNumbers = () => {
@@ -95,7 +112,9 @@ export default function Pagination({ mobilePagination, page, totalPages, loading
       pageNumbers.push(
         <>
           <PaginationItemWrapper key="start" isLoadingPage={isLoading}>
-            <PaginationLink onClick={() => handlePageChange(1)}>1</PaginationLink>
+            <PaginationLink href={generatePageUrl ? generatePageUrl(1) : ""} onClick={e => handleLinkClick(1, e)}>
+              1
+            </PaginationLink>
           </PaginationItemWrapper>
           {/* Only show ellipsis if more than 2 pages from the start */}
           {startPage > 2 && (
@@ -111,7 +130,11 @@ export default function Pagination({ mobilePagination, page, totalPages, loading
     for (let i = startPage; i <= endPage; i++) {
       pageNumbers.push(
         <PaginationItemWrapper key={i} isLoadingPage={isLoading}>
-          <PaginationLink isActive={i === currentPage} onClick={() => handlePageChange(i)}>
+          <PaginationLink
+            isActive={i === currentPage}
+            href={generatePageUrl ? generatePageUrl(i) : ""}
+            onClick={e => handleLinkClick(i, e)}
+          >
             {loadingPage === i ? <ArrowPathIcon className="w-4 h-4 animate-spin" /> : i}
           </PaginationLink>
         </PaginationItemWrapper>
@@ -126,7 +149,10 @@ export default function Pagination({ mobilePagination, page, totalPages, loading
       <PaginationContent>
         {/* Previous button for mobile and desktop */}
         <PaginationItemWrapper isLoadingPage={isLoading}>
-          <PaginationPrevious onClick={() => handlePageChange(currentPage - 1)} />
+          <PaginationPrevious
+            href={generatePageUrl ? generatePageUrl(currentPage - 1) : ""}
+            onClick={e => handleLinkClick(currentPage - 1, e)}
+          />
         </PaginationItemWrapper>
 
         {renderPageNumbers()}
@@ -138,14 +164,22 @@ export default function Pagination({ mobilePagination, page, totalPages, loading
               <PaginationEllipsis className="cursor-default" />
             </PaginationItemWrapper>
             <PaginationItemWrapper key="end" isLoadingPage={isLoading}>
-              <PaginationLink onClick={() => handlePageChange(totalPages)}>{totalPages}</PaginationLink>
+              <PaginationLink
+                href={generatePageUrl ? generatePageUrl(totalPages) : ""}
+                onClick={e => handleLinkClick(totalPages, e)}
+              >
+                {totalPages}
+              </PaginationLink>
             </PaginationItemWrapper>
           </>
         )}
 
         {/* Next button for mobile and desktop */}
         <PaginationItemWrapper isLoadingPage={isLoading}>
-          <PaginationNext onClick={() => handlePageChange(currentPage + 1)} />
+          <PaginationNext
+            href={generatePageUrl ? generatePageUrl(currentPage + 1) : ""}
+            onClick={e => handleLinkClick(currentPage + 1, e)}
+          />
         </PaginationItemWrapper>
       </PaginationContent>
     </ShadCnPagination>

@@ -109,9 +109,6 @@ export default function LeaderboardScores({
       if (leaderboardChanged) {
         leaderboardChanged(id);
       }
-
-      // Update the URL
-      window.history.replaceState(null, "", `/leaderboard/${id}`);
     },
     [leaderboardChanged]
   );
@@ -138,6 +135,11 @@ export default function LeaderboardScores({
       });
     }
   }, [currentPage, topOfScoresRef, shouldFetch]);
+
+  useEffect(() => {
+    // Update the URL
+    window.history.replaceState(null, "", `/leaderboard/${selectedLeaderboardId}/${currentPage}`);
+  }, [selectedLeaderboardId, currentPage]);
 
   if (currentScores === undefined) {
     return undefined;
@@ -194,6 +196,9 @@ export default function LeaderboardScores({
         page={currentPage}
         totalPages={Math.ceil(currentScores.metadata.total / currentScores.metadata.itemsPerPage)}
         loadingPage={isLoading ? currentPage : undefined}
+        generatePageUrl={page => {
+          return `/leaderboard/${selectedLeaderboardId}/${page}`;
+        }}
         onPageChange={newPage => {
           setCurrentPage(newPage);
           setPreviousPage(currentPage);

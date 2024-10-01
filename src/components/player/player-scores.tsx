@@ -124,11 +124,18 @@ export default function PlayerScores({ initialScoreData, initialSearch, player, 
   }, [scores, handleScoreAnimation]);
 
   /**
+   * Gets the URL to the page.
+   */
+  const getUrl = (page: number) => {
+    return `/player/${player.id}/${pageState.sort}/${page}${isSearchActive ? `?search=${debouncedSearchTerm}` : ""}`;
+  };
+
+  /**
    * Handle updating the URL when the page number,
    * sort, or search term changes.
    */
   useEffect(() => {
-    const newUrl = `/player/${player.id}/${pageState.sort}/${pageState.page}${isSearchActive ? `?search=${debouncedSearchTerm}` : ""}`;
+    const newUrl = getUrl(pageState.page);
     window.history.replaceState({ ...window.history.state, as: newUrl, url: newUrl }, "", newUrl);
   }, [pageState, debouncedSearchTerm, player.id, isSearchActive]);
 
@@ -215,6 +222,9 @@ export default function PlayerScores({ initialScoreData, initialSearch, player, 
             page={pageState.page}
             totalPages={Math.ceil(currentScores.metadata.total / currentScores.metadata.itemsPerPage)}
             loadingPage={isLoading ? pageState.page : undefined}
+            generatePageUrl={page => {
+              return getUrl(page);
+            }}
             onPageChange={newPage => {
               setPreviousPage(pageState.page);
               setPageState({ ...pageState, page: newPage });
