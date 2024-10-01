@@ -15,8 +15,20 @@ import { PlayerRankingSkeleton } from "@/components/ranking/player-ranking-skele
 const PLAYER_NAME_MAX_LENGTH = 18;
 
 type MiniProps = {
+  /**
+   * The type of ranking to display.
+   */
   type: "Global" | "Country";
+
+  /**
+   * The player on this profile.
+   */
   player: ScoreSaberPlayer;
+
+  /**
+   * Whether the data should be updated
+   */
+  shouldUpdate?: boolean;
 };
 
 type Variants = {
@@ -53,7 +65,11 @@ const miniVariants: Variants = {
   },
 };
 
-export default function Mini({ type, player }: MiniProps) {
+export default function Mini({ type, player, shouldUpdate }: MiniProps) {
+  if (shouldUpdate == undefined) {
+    // Default to true
+    shouldUpdate = true;
+  }
   const variant = miniVariants[type];
   const icon = variant.icon(player);
 
@@ -88,6 +104,7 @@ export default function Mini({ type, player }: MiniProps) {
 
       return players;
     },
+    enabled: shouldUpdate,
   });
 
   let players = data; // So we can update it later

@@ -12,6 +12,8 @@ import ScoreSaberPlayer from "@/common/model/player/impl/scoresaber-player";
 import Card from "@/components/card";
 import PlayerBadges from "@/components/player/player-badges";
 import { useIsMobile } from "@/hooks/use-is-mobile";
+import { useIsVisible } from "@/hooks/use-is-visible";
+import { useRef } from "react";
 
 type Props = {
   initialPlayerData: ScoreSaberPlayer;
@@ -29,6 +31,8 @@ export default function PlayerData({
   page,
 }: Props) {
   const isMobile = useIsMobile();
+  const miniRankingsRef = useRef<any>();
+  const isMiniRankingsVisible = useIsVisible(miniRankingsRef);
 
   let player = initalPlayerData;
   const { data, isLoading, isError } = useQuery({
@@ -60,9 +64,9 @@ export default function PlayerData({
         />
       </article>
       {!isMobile && (
-        <aside className="w-[600px] hidden 2xl:flex flex-col gap-2">
-          <Mini type="Global" player={player} />
-          <Mini type="Country" player={player} />
+        <aside ref={miniRankingsRef} className="w-[600px] hidden 2xl:flex flex-col gap-2">
+          <Mini shouldUpdate={isMiniRankingsVisible} type="Global" player={player} />
+          <Mini shouldUpdate={isMiniRankingsVisible} type="Country" player={player} />
         </aside>
       )}
     </div>
