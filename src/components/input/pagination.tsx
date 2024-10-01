@@ -94,6 +94,11 @@ export default function Pagination({
 
   const handleLinkClick = (newPage: number, event: React.MouseEvent) => {
     event.preventDefault(); // Prevent default navigation behavior
+
+    // Check if the new page is valid
+    if (newPage < 1 || newPage > totalPages || newPage === currentPage || isLoading) {
+      return;
+    }
     handlePageChange(newPage);
   };
 
@@ -107,7 +112,6 @@ export default function Pagination({
       startPage = Math.max(1, endPage - maxPagesToShow + 1);
     }
 
-    // Show "Jump to Start" with Ellipsis if currentPage is greater than 3 in desktop view
     if (startPage > 1 && !mobilePagination) {
       pageNumbers.push(
         <>
@@ -116,7 +120,6 @@ export default function Pagination({
               1
             </PaginationLink>
           </PaginationItemWrapper>
-          {/* Only show ellipsis if more than 2 pages from the start */}
           {startPage > 2 && (
             <PaginationItemWrapper key="ellipsis-start" isLoadingPage={isLoading}>
               <PaginationEllipsis />
@@ -126,7 +129,6 @@ export default function Pagination({
       );
     }
 
-    // Generate page numbers between startPage and endPage for desktop view
     for (let i = startPage; i <= endPage; i++) {
       pageNumbers.push(
         <PaginationItemWrapper key={i} isLoadingPage={isLoading}>
@@ -147,17 +149,18 @@ export default function Pagination({
   return (
     <ShadCnPagination className="select-none">
       <PaginationContent>
-        {/* Previous button for mobile and desktop */}
+        {/* Previous button - disabled on the first page */}
         <PaginationItemWrapper isLoadingPage={isLoading}>
           <PaginationPrevious
-            href={generatePageUrl ? generatePageUrl(currentPage - 1) : ""}
+            href={currentPage > 1 && generatePageUrl ? generatePageUrl(currentPage - 1) : ""}
             onClick={e => handleLinkClick(currentPage - 1, e)}
+            aria-disabled={currentPage === 1}
+            className={clsx(currentPage === 1 && "cursor-not-allowed")}
           />
         </PaginationItemWrapper>
 
         {renderPageNumbers()}
 
-        {/* For desktop, show ellipsis and link to the last page */}
         {!mobilePagination && currentPage < totalPages && totalPages - currentPage > 2 && (
           <>
             <PaginationItemWrapper key="ellipsis-end" isLoadingPage={isLoading}>
@@ -174,11 +177,13 @@ export default function Pagination({
           </>
         )}
 
-        {/* Next button for mobile and desktop */}
+        {/* Next button - disabled on the last page */}
         <PaginationItemWrapper isLoadingPage={isLoading}>
           <PaginationNext
-            href={generatePageUrl ? generatePageUrl(currentPage + 1) : ""}
+            href={currentPage < totalPages && generatePageUrl ? generatePageUrl(currentPage + 1) : ""}
             onClick={e => handleLinkClick(currentPage + 1, e)}
+            aria-disabled={currentPage === totalPages}
+            className={clsx(currentPage === totalPages && "cursor-not-allowed")}
           />
         </PaginationItemWrapper>
       </PaginationContent>
