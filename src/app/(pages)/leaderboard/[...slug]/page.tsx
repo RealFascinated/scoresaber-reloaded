@@ -60,7 +60,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   }
 
   return {
-    title: `${leaderboard.songName}`,
+    title: `${leaderboard.songName} ${leaderboard.songSubName} by ${leaderboard.songAuthorName}`,
     openGraph: {
       title: `ScoreSaber Reloaded - ${leaderboard.songName} ${leaderboard.songSubName}`,
       description: `
