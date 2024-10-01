@@ -68,7 +68,7 @@ export default function ScoreSongInfo({ leaderboard, beatSaverMap }: Props) {
           </p>
           <p className="text-sm text-gray-400">{leaderboard.songAuthorName}</p>
           <FallbackLink href={mappersProfile}>
-            <p className={clsx("text-sm", mappersProfile && "hover:brightness-75 transform-gpu transition-all")}>
+            <p className={clsx("text-sm", mappersProfile && "hover:brightness-75 transform-gpu transition-all w-fit")}>
               {leaderboard.levelAuthorName}
             </p>
           </FallbackLink>

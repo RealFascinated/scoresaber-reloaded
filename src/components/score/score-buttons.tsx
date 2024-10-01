@@ -28,12 +28,8 @@ export default function ScoreButtons({
   const { toast } = useToast();
 
   return (
-    <div className="flex justify-end">
-      <LeaderboardButton
-        isLeaderboardExpanded={isLeaderboardExpanded}
-        setIsLeaderboardExpanded={setIsLeaderboardExpanded}
-      />
-      <div className="flex flex-row justify-center flex-wrap gap-1 lg:justify-end">
+    <div className="flex justify-end gap-2">
+      <div className="flex flex-row items-center lg:items-start justify-center flex-wrap gap-1 lg:justify-end">
         {beatSaverMap != undefined && (
           <>
             {/* Copy BSR */}
@@ -75,6 +71,10 @@ export default function ScoreButtons({
           <YouTubeLogo />
         </ScoreButton>
       </div>
+      <LeaderboardButton
+        isLeaderboardExpanded={isLeaderboardExpanded}
+        setIsLeaderboardExpanded={setIsLeaderboardExpanded}
+      />
     </div>
   );
 }

@@ -14,7 +14,7 @@ type Props = {
 
 export default function FallbackLink({ href, children }: Props) {
   return href ? (
-    <NextLink href={href} target="_blank">
+    <NextLink href={href} target="_blank" className="w-fit">
       {children}
     </NextLink>
   ) : (

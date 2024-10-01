@@ -24,7 +24,7 @@ type Props = {
 
 export default function LeaderboardScore({ player, score, leaderboard }: Props) {
   return (
-    <div className="pb-1 pt-1">
+    <div className="pb-1.5 pt-1.5">
       <div className="grid items-center w-full gap-2 grid-cols-[20px 1fr_1fr] lg:grid-cols-[130px_4fr_300px]">
         <ScoreRankInfo score={score} />
         <LeaderboardPlayer player={player} score={score} />

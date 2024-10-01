@@ -4,12 +4,12 @@
  * @param input Date | number (timestamp)
  * @returns the format of the time ago
  */
-export function timeAgo(input: number) {
+export function timeAgo(input: Date) {
   const inputDate = new Date(input).getTime(); // Convert input to a Date object if it's not already
   const now = new Date().getTime();
   const deltaSeconds = Math.floor((now - inputDate) / 1000); // Get time difference in seconds
 
-  if (deltaSeconds < 60) {
+  if (deltaSeconds <= 60) {
     return "just now";
   }
 
@@ -21,10 +21,10 @@ export function timeAgo(input: number) {
     { unit: "m", seconds: 60 }, // minutes
   ];
 
-  let result = [];
+  const result = [];
   let remainingSeconds = deltaSeconds;
 
-  for (let { unit, seconds } of timeUnits) {
+  for (const { unit, seconds } of timeUnits) {
     const count = Math.floor(remainingSeconds / seconds);
     if (count > 0) {
       result.push(`${count}${unit}`);
