@@ -14,8 +14,19 @@ import { scoreAnimation } from "@/components/score/score-animation";
 import ScoreSaberPlayer from "@/common/model/player/impl/scoresaber-player";
 
 type LeaderboardScoresProps = {
+  /**
+   * The page to show when opening the leaderboard.
+   */
   initialPage?: number;
-  player: ScoreSaberPlayer;
+
+  /**
+   * The player who set the score.
+   */
+  player?: ScoreSaberPlayer;
+
+  /**
+   * The leaderboard to display.
+   */
   leaderboard: ScoreSaberLeaderboardToken;
 };
 

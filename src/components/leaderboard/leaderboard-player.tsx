@@ -5,9 +5,9 @@ import Link from "next/link";
 
 type Props = {
   /**
-   * The claimed player.
+   * The player who set the score.
    */
-  player: ScoreSaberPlayer;
+  player?: ScoreSaberPlayer;
 
   /**
    * The score to display.
@@ -17,6 +17,7 @@ type Props = {
 
 export default function LeaderboardPlayer({ player, score }: Props) {
   const scorePlayer = score.leaderboardPlayerInfo;
+  const isPlayerWhoSetScore = player && scorePlayer.id === player.id;
 
   return (
     <div className="flex gap-2">
@@ -34,7 +35,7 @@ export default function LeaderboardPlayer({ player, score }: Props) {
         target="_blank"
         className="h-fit hover:brightness-75 transition-all transform-gpu"
       >
-        <p className={`${scorePlayer.id === player.id && "text-pp"}`}>{scorePlayer.name}</p>
+        <p className={`${isPlayerWhoSetScore && "text-pp"}`}>{scorePlayer.name}</p>
       </Link>
     </div>
   );
