@@ -13,9 +13,9 @@ import ScoreSaberPlayer from "@/common/model/player/impl/scoresaber-player";
 
 type Props = {
   /**
-   * The claimed player
+   * The player who set the score.
    */
-  player: ScoreSaberPlayer;
+  player?: ScoreSaberPlayer;
 
   /**
    * The score to display.

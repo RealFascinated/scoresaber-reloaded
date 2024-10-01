@@ -111,6 +111,7 @@ export async function trackScoreSaberPlayer(dateToday: Date, foundPlayer: IPlaye
   history.rank = player.rank;
   foundPlayer.setStatisticHistory(dateToday, history);
   foundPlayer.sortStatisticHistory();
+  foundPlayer.lastTracked = new Date();
   await foundPlayer.save();
 
   io && (await io.logger.info(`Updated statistics for ${foundPlayer.id}`));
