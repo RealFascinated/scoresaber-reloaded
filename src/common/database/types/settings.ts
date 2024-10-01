@@ -16,9 +16,9 @@ export default class Settings extends Entity<Database> {
   playerId?: string;
 
   /**
-   * The background image to use
+   * The background image or color to use
    */
-  backgroundImage?: string;
+  backgroundCover?: string;
 
   /**
    * Sets the players id
@@ -36,7 +36,7 @@ export default class Settings extends Entity<Database> {
    * @param image the new background image
    */
   public setBackgroundImage(image: string) {
-    this.backgroundImage = image;
+    this.backgroundCover = image;
     this.db.setSettings(this);
   }
 }

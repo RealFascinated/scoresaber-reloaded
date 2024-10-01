@@ -1,4 +1,4 @@
-import { HomeIcon } from "@heroicons/react/24/solid";
+import { CogIcon, HomeIcon } from "@heroicons/react/24/solid";
 import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
 import Link from "next/link";
 import React from "react";
@@ -8,6 +8,7 @@ import ProfileButton from "./profile-button";
 type NavbarItem = {
   name: string;
   link: string;
+  align: "left" | "right";
   icon: React.ReactNode;
 };
 
@@ -15,12 +16,20 @@ const items: NavbarItem[] = [
   {
     name: "Home",
     link: "/",
-    icon: <HomeIcon className="h-5 w-5" />, // Add your home icon here
+    align: "left",
+    icon: <HomeIcon className="h-5 w-5" />,
   },
   {
     name: "Search",
     link: "/search",
-    icon: <MagnifyingGlassIcon className="h-5 w-5" />, // Add your search icon here
+    align: "right",
+    icon: <MagnifyingGlassIcon className="h-5 w-5" />,
+  },
+  {
+    name: "Settings",
+    link: "/settings",
+    align: "right",
+    icon: <CogIcon className="h-5 w-5" />,
   },
 ];
 
@@ -33,7 +42,8 @@ const renderNavbarItem = (item: NavbarItem) => (
 );
 
 export default function Navbar() {
-  const rightItem = items[items.length - 1];
+  const rightItems = items.filter(item => item.align === "right");
+  const leftItems = items.filter(item => item.align === "left");
 
   return (
     <div className="w-full sticky top-0 z-[999]">
@@ -42,17 +52,21 @@ export default function Navbar() {
         <div className="flex items-center h-full">
           <ProfileButton />
 
-          {items.slice(0, -1).map((item, index) => (
+          {leftItems.map((item, index) => (
             <Link href={item.link} key={index} className="h-full">
               <NavbarButton key={index}>{renderNavbarItem(item)}</NavbarButton>
             </Link>
           ))}
         </div>
 
-        {/* Right-aligned item */}
-        <Link href={rightItem.link} className="h-full">
-          <NavbarButton>{renderNavbarItem(rightItem)}</NavbarButton>
-        </Link>
+        {/* Right-aligned items */}
+        <div className="flex items-center h-full">
+          {rightItems.map((item, index) => (
+            <Link href={item.link} key={index} className="h-full">
+              <NavbarButton key={index}>{renderNavbarItem(item)}</NavbarButton>
+            </Link>
+          ))}
+        </div>
       </div>
     </div>
   );

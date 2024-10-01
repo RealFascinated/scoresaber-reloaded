@@ -46,10 +46,7 @@ export default class Database extends Dexie {
    * Populates the default settings
    */
   async populateDefaults() {
-    await this.settings.add({
-      id: SETTINGS_ID, // Fixed ID for the single settings object
-      backgroundImage: "/assets/background.jpg",
-    });
+    await this.resetSettings();
   }
 
   /**
@@ -69,6 +66,19 @@ export default class Database extends Dexie {
    */
   async setSettings(settings: Settings) {
     return this.settings.update(SETTINGS_ID, settings);
+  }
+
+  /**
+   * Resets the settings in the database
+   */
+  async resetSettings() {
+    this.settings.delete(SETTINGS_ID);
+    this.settings.add({
+      id: SETTINGS_ID, // Fixed ID for the single settings object
+      backgroundCover: "/assets/background.jpg",
+    });
+
+    return this.getSettings();
   }
 }
 
