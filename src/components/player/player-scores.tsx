@@ -130,7 +130,7 @@ export default function PlayerScores({ initialScoreData, initialSearch, player, 
     (page: number) => {
       return `/player/${player.id}/${pageState.sort}/${page}${isSearchActive ? `?search=${debouncedSearchTerm}` : ""}`;
     },
-    [debouncedSearchTerm, player.id, pageState.sort]
+    [debouncedSearchTerm, player.id, pageState.sort, isSearchActive]
   );
 
   /**
@@ -140,7 +140,7 @@ export default function PlayerScores({ initialScoreData, initialSearch, player, 
   useEffect(() => {
     const newUrl = getUrl(pageState.page);
     window.history.replaceState({ ...window.history.state, as: newUrl, url: newUrl }, "", newUrl);
-  }, [pageState, debouncedSearchTerm, player.id, isSearchActive]);
+  }, [pageState, debouncedSearchTerm, player.id, isSearchActive, getUrl]);
 
   /**k
    * Handle scrolling to the top of the
