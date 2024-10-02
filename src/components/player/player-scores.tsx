@@ -137,9 +137,9 @@ export default function PlayerScores({ initialScoreData, initialSearch, player, 
   useEffect(() => {
     const newUrl = getUrl(pageState.page);
     window.history.replaceState({ ...window.history.state, as: newUrl, url: newUrl }, "", newUrl);
-  }, [pageState, debouncedSearchTerm, player.id, isSearchActive]);
+  }, [pageState, debouncedSearchTerm, player.id, isSearchActive, getUrl]);
 
-  /**
+  /**k
    * Handle scrolling to the top of the
    * scores when new scores are loaded.
    */

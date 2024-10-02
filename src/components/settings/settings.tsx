@@ -49,7 +49,7 @@ export default function Settings() {
    */
   useEffect(() => {
     form.setValue("backgroundCover", settings?.backgroundCover || "");
-  }, [settings]);
+  }, [settings, form]);
 
   return (
     <div className="flex flex-col gap-3">
