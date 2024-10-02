@@ -75,7 +75,7 @@ export default function LeaderboardScores({
   const [currentPage, setCurrentPage] = useState(initialPage);
   const [currentScores, setCurrentScores] = useState<ScoreSaberLeaderboardScoresPageToken | undefined>(initialScores);
   const topOfScoresRef = useRef<HTMLDivElement>(null);
-  const [shouldFetch, setShouldFetch] = useState(false); // New state to control fetching
+  const [shouldFetch, setShouldFetch] = useState(false);
 
   const {
     data: scores,
@@ -84,8 +84,8 @@ export default function LeaderboardScores({
   } = useQuery({
     queryKey: ["leaderboardScores-" + leaderboard.id, selectedLeaderboardId, currentPage],
     queryFn: () => scoresaberService.lookupLeaderboardScores(selectedLeaderboardId + "", currentPage),
-    staleTime: 30 * 1000, // Cache data for 30 seconds
-    enabled: shouldFetch || isLeaderboardPage,
+    staleTime: 30 * 1000,
+    enabled: (shouldFetch && isLeaderboardPage) || !isLeaderboardPage,
   });
 
   /**
@@ -102,9 +102,9 @@ export default function LeaderboardScores({
    */
   const handleLeaderboardChange = useCallback(
     (id: number) => {
+      setShouldFetch(true);
       setSelectedLeaderboardId(id);
       setCurrentPage(1);
-      setShouldFetch(true);
 
       if (leaderboardChanged) {
         leaderboardChanged(id);

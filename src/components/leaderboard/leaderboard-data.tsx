@@ -2,7 +2,6 @@
 
 import ScoreSaberLeaderboardScoresPageToken from "@/common/model/token/scoresaber/score-saber-leaderboard-scores-page-token";
 import ScoreSaberLeaderboardToken from "@/common/model/token/scoresaber/score-saber-leaderboard-token";
-import { LeaderboardContext } from "@/components/context/leaderboard-context";
 import LeaderboardScores from "@/components/leaderboard/leaderboard-scores";
 import { LeaderboardInfo } from "@/components/leaderboard/leaderboard-info";
 import { useQuery } from "@tanstack/react-query";
@@ -36,6 +35,7 @@ export function LeaderboardData({ initialPage, initialScores, initialLeaderboard
   const { data: leaderboard } = useQuery({
     queryKey: ["leaderboard-" + initialLeaderboard.id, selectedLeaderboardId],
     queryFn: () => scoresaberService.lookupLeaderboard(selectedLeaderboardId + ""),
+    initialData: initialLeaderboard,
     staleTime: 30 * 1000, // Cache data for 30 seconds
   });
 
@@ -64,17 +64,15 @@ export function LeaderboardData({ initialPage, initialScores, initialLeaderboard
 
   return (
     <main className="flex flex-col-reverse xl:flex-row w-full gap-2">
-      <LeaderboardContext.Provider value={currentLeaderboard}>
-        <LeaderboardScores
-          leaderboard={currentLeaderboard}
-          initialScores={initialScores}
-          initialPage={initialPage}
-          showDifficulties
-          isLeaderboardPage
-          leaderboardChanged={id => setSelectedLeaderboardId(id)}
-        />
-        <LeaderboardInfo leaderboard={currentLeaderboard} beatSaverMap={beatSaverMap} />
-      </LeaderboardContext.Provider>
+      <LeaderboardScores
+        leaderboard={currentLeaderboard}
+        initialScores={initialScores}
+        initialPage={initialPage}
+        showDifficulties
+        isLeaderboardPage
+        leaderboardChanged={id => setSelectedLeaderboardId(id)}
+      />
+      <LeaderboardInfo leaderboard={currentLeaderboard} beatSaverMap={beatSaverMap} />
     </main>
   );
 }

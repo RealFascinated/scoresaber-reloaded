@@ -52,7 +52,7 @@ export default function PlayerScores({ initialScoreData, initialSearch, player, 
   const [currentScores, setCurrentScores] = useState<ScoreSaberPlayerScoresPageToken | undefined>(initialScoreData);
   const [searchTerm, setSearchTerm] = useState(initialSearch || "");
   const debouncedSearchTerm = useDebounce(searchTerm, 250);
-  const [shouldFetch, setShouldFetch] = useState(false); // New state to control fetching
+  const [shouldFetch, setShouldFetch] = useState(false);
   const topOfScoresRef = useRef<HTMLDivElement>(null);
 
   const isSearchActive = debouncedSearchTerm.length >= 3;
@@ -71,7 +71,7 @@ export default function PlayerScores({ initialScoreData, initialSearch, player, 
       });
     },
     staleTime: 30 * 1000, // 30 seconds
-    enabled: shouldFetch && (debouncedSearchTerm.length >= 3 || debouncedSearchTerm.length === 0), // Only enable if we set shouldFetch to true
+    enabled: shouldFetch && (debouncedSearchTerm.length >= 3 || debouncedSearchTerm.length === 0),
   });
 
   /**
