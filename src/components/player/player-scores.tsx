@@ -126,9 +126,12 @@ export default function PlayerScores({ initialScoreData, initialSearch, player, 
   /**
    * Gets the URL to the page.
    */
-  const getUrl = (page: number) => {
-    return `/player/${player.id}/${pageState.sort}/${page}${isSearchActive ? `?search=${debouncedSearchTerm}` : ""}`;
-  };
+  const getUrl = useCallback(
+    (page: number) => {
+      return `/player/${player.id}/${pageState.sort}/${page}${isSearchActive ? `?search=${debouncedSearchTerm}` : ""}`;
+    },
+    [debouncedSearchTerm, player.id, pageState.sort]
+  );
 
   /**
    * Handle updating the URL when the page number,
@@ -137,7 +140,7 @@ export default function PlayerScores({ initialScoreData, initialSearch, player, 
   useEffect(() => {
     const newUrl = getUrl(pageState.page);
     window.history.replaceState({ ...window.history.state, as: newUrl, url: newUrl }, "", newUrl);
-  }, [pageState, debouncedSearchTerm, player.id, isSearchActive, getUrl]);
+  }, [pageState, debouncedSearchTerm, player.id, isSearchActive]);
 
   /**k
    * Handle scrolling to the top of the

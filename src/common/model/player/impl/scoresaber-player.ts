@@ -37,7 +37,7 @@ export default interface ScoreSaberPlayer extends Player {
   /**
    * The rank history for this player.
    */
-  statisticHistory: { [date: string]: PlayerHistory };
+  statisticHistory: { [key: string]: PlayerHistory };
 
   /**
    * The statistics for this player.
@@ -58,6 +58,12 @@ export default interface ScoreSaberPlayer extends Player {
    * Whether the player is inactive or not.
    */
   inactive: boolean;
+
+  /**
+   * Whether the player is having their
+   * statistics being tracked or not.
+   */
+  isBeingTracked?: boolean;
 }
 
 export async function getScoreSaberPlayerFromToken(token: ScoreSaberPlayerToken): Promise<ScoreSaberPlayer> {
@@ -74,6 +80,7 @@ export async function getScoreSaberPlayerFromToken(token: ScoreSaberPlayerToken)
       };
     }) || [];
 
+  let isBeingTracked = false;
   const todayDate = formatDateMinimal(getMidnightAlignedDate(new Date()));
   let statisticHistory: { [key: string]: PlayerHistory } = {};
   try {
@@ -96,6 +103,8 @@ export async function getScoreSaberPlayerFromToken(token: ScoreSaberPlayerToken)
           averageRankedAccuracy: token.scoreStats.averageRankedAccuracy,
         },
       };
+
+      isBeingTracked = true;
     }
     statisticHistory = history;
   } catch (error) {
@@ -168,6 +177,7 @@ export async function getScoreSaberPlayerFromToken(token: ScoreSaberPlayerToken)
     permissions: token.permissions,
     banned: token.banned,
     inactive: token.inactive,
+    isBeingTracked: isBeingTracked,
   };
 }
 
