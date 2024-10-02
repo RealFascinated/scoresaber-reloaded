@@ -6,7 +6,6 @@ import { ScoreSort } from "@/common/model/score/score-sort";
 import { useQuery } from "@tanstack/react-query";
 import Mini from "../ranking/mini";
 import PlayerHeader from "./player-header";
-import PlayerRankChart from "./player-rank-chart";
 import PlayerScores from "./player-scores";
 import ScoreSaberPlayer from "@/common/model/player/impl/scoresaber-player";
 import Card from "@/components/card";
@@ -14,6 +13,7 @@ import PlayerBadges from "@/components/player/player-badges";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { useIsVisible } from "@/hooks/use-is-visible";
 import { useRef } from "react";
+import PlayerCharts from "@/components/player/chart/player-charts";
 
 type Props = {
   initialPlayerData: ScoreSaberPlayer;
@@ -52,7 +52,7 @@ export default function PlayerData({
         {!player.inactive && (
           <Card className="gap-1">
             <PlayerBadges player={player} />
-            <PlayerRankChart player={player} />
+            <PlayerCharts player={player} />
           </Card>
         )}
         <PlayerScores

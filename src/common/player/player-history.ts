@@ -13,4 +13,14 @@ export interface PlayerHistory {
    * The pp of the player.
    */
   pp?: number;
+
+  /**
+   * The player's accuracy.
+   */
+  accuracy?: {
+    /**
+     * The player's average ranked accuracy.
+     */
+    averageRankedAccuracy?: number;
+  };
 }

@@ -21,6 +21,30 @@ export function sortPlayerHistory(history: Map<string, PlayerHistory>) {
 }
 
 /**
+ * Gets a value from an {@link PlayerHistory}
+ * based on the field
+ *
+ * @param history the history to get the value from
+ * @param field the field to get
+ */
+export function getValueFromHistory(history: PlayerHistory, field: string): number | null {
+  const keys = field.split(".");
+  let value: any = history;
+
+  // Navigate through the keys safely
+  for (const key of keys) {
+    if (value && key in value) {
+      value = value[key];
+    } else {
+      return null; // Return null if the key doesn't exist
+    }
+  }
+
+  // Ensure we return a number or null
+  return typeof value === "number" ? value : null;
+}
+
+/**
  * Sorts the player history based on date,
  * so the most recent date is first
  *
@@ -105,10 +129,14 @@ export async function trackScoreSaberPlayer(dateToday: Date, foundPlayer: IPlaye
   if (history == undefined) {
     history = {}; // Initialize if history is not found
   }
+
   // Set the history data
   history.pp = player.pp;
   history.countryRank = player.countryRank;
   history.rank = player.rank;
+  history.accuracy = {
+    averageRankedAccuracy: rawPlayer.scoreStats.averageRankedAccuracy,
+  };
   foundPlayer.setStatisticHistory(dateToday, history);
   foundPlayer.sortStatisticHistory();
   foundPlayer.lastTracked = new Date();

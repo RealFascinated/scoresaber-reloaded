@@ -92,6 +92,9 @@ export async function getScoreSaberPlayerFromToken(token: ScoreSaberPlayerToken)
         rank: token.rank,
         countryRank: token.countryRank,
         pp: token.pp,
+        accuracy: {
+          averageRankedAccuracy: token.scoreStats.averageRankedAccuracy,
+        },
       };
     }
     statisticHistory = history;
