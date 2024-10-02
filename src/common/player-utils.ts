@@ -29,6 +29,7 @@ export function sortPlayerHistory(history: Map<string, PlayerHistory>) {
  */
 export function getValueFromHistory(history: PlayerHistory, field: string): number | null {
   const keys = field.split(".");
+  /* eslint-disable @typescript-eslint/no-explicit-any */
   let value: any = history;
 
   // Navigate through the keys safely
