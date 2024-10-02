@@ -25,7 +25,7 @@ jobs:
       - name: Build Image
         uses: docker/build-push-action@v6
         with:
-          context: ./Frontend/Dockerfile
+          context: ./Frontend
           push: true
           tags: |
             git.fascinated.cc/fascinated/scoresaber-reloaded:${{ github.sha }}
