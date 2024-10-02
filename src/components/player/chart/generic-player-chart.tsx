@@ -1,6 +1,6 @@
 "use client";
 
-import { getDaysAgo, parseDate } from "@/common/time-utils";
+import { parseDate } from "@/common/time-utils";
 import ScoreSaberPlayer from "@/common/model/player/impl/scoresaber-player";
 import React from "react";
 import GenericChart, { DatasetConfig } from "@/components/chart/generic-chart";
@@ -18,6 +18,20 @@ type Props = {
   datasetConfig: DatasetConfig[];
 };
 
+// Set up the labels
+const labels: string[] = [];
+const historyDays = 50;
+for (let day = 0; day < historyDays; day++) {
+  if (day == 0) {
+    labels.push("Today");
+  } else if (day == 1) {
+    labels.push("Yesterday");
+  } else {
+    labels.push(`${day + 1} days ago`);
+  }
+}
+labels.reverse();
+
 export default function GenericPlayerChart({ player, datasetConfig }: Props) {
   if (!player.statisticHistory || Object.keys(player.statisticHistory).length === 0) {
     return (
@@ -26,8 +40,6 @@ export default function GenericPlayerChart({ player, datasetConfig }: Props) {
       </div>
     );
   }
-
-  const labels: string[] = [];
   const histories: Record<string, (number | null)[]> = {};
 
   // Initialize histories for each dataset
@@ -49,18 +61,12 @@ export default function GenericPlayerChart({ player, datasetConfig }: Props) {
     // Fill in missing days with null values
     if (previousDate) {
       const diffDays = Math.floor((currentDate.getTime() - previousDate.getTime()) / (1000 * 60 * 60 * 24));
-
       for (let i = 1; i < diffDays; i++) {
-        labels.push(`${getDaysAgo(new Date(currentDate.getTime() - i * 24 * 60 * 60 * 1000))} days ago`);
         datasetConfig.forEach(config => {
           histories[config.field].push(null);
         });
       }
     }
-
-    // Add today's label
-    const daysAgo = getDaysAgo(currentDate);
-    labels.push(daysAgo === 0 ? "Today" : `${daysAgo} days ago`);
 
     // Push the historical data to histories
     datasetConfig.forEach(config => {
