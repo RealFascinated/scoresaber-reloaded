@@ -131,7 +131,7 @@ export default function GenericChart({ labels, datasetConfig, histories }: Chart
   const data = { labels, datasets };
 
   return (
-    <div className="block h-[320px] w-full relative">
+    <div className="block h-[360px] w-full relative">
       <Line
         className="max-w-[100%]"
         options={options}

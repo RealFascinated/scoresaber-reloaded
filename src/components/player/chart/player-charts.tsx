@@ -5,6 +5,8 @@ import PlayerRankingChart from "@/components/player/chart/player-ranking-chart";
 import { FC, useState } from "react";
 import Tooltip from "@/components/tooltip";
 import PlayerAccuracyChart from "@/components/player/chart/player-accuracy-chart";
+import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
+import { TrendingUpIcon } from "lucide-react";
 
 type PlayerChartsProps = {
   /**
@@ -20,29 +22,36 @@ type SelectedChart = {
   index: number;
 
   /**
-   * The chart to render.
-   */
-  chart: FC<PlayerChartsProps>;
-
-  /**
    * The label of the selected chart.
    */
   label: string;
+
+  /**
+   * The icon of the selected chart.
+   */
+  icon: React.ReactNode;
+
+  /**
+   * The chart to render.
+   */
+  chart: FC<PlayerChartsProps>;
 };
 
 export default function PlayerCharts({ player }: PlayerChartsProps) {
   const charts: SelectedChart[] = [
     {
       index: 0,
-      chart: PlayerRankingChart,
       label: "Ranking",
+      icon: <GlobeAmericasIcon className="w-5 h-5" />,
+      chart: PlayerRankingChart,
     },
   ];
   if (player.isBeingTracked) {
     charts.push({
       index: 1,
-      chart: PlayerAccuracyChart,
       label: "Accuracy",
+      icon: <TrendingUpIcon className="w-[18px] h-[18px]" />,
+      chart: PlayerAccuracyChart,
     });
   }
 
@@ -69,8 +78,10 @@ export default function PlayerCharts({ player }: PlayerChartsProps) {
               >
                 <button
                   onClick={() => setSelectedChart(chart)}
-                  className={`border ${isSelected ? "bg-input brightness-75" : "border-input"}  w-fit p-2 rounded-full`}
-                />
+                  className={`border ${isSelected ? "border-1" : "border-input"} flex items-center justify-center p-[2px] w-[26px] h-[26px] rounded-full hover:brightness-75 transform-gpu transition-all`}
+                >
+                  {chart.icon}
+                </button>
               </Tooltip>
             );
           })}
