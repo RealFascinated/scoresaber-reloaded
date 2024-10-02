@@ -82,7 +82,8 @@ export default function Mini({ type, player, shouldUpdate }: MiniProps) {
     queryFn: async () => {
       // Determine pages to search based on player's rank within the page
       const pagesToSearch = [page];
-      if (rankWithinPage < 5 && page > 0) {
+      if (rankWithinPage < 5 && page > 1) {
+        // Allow page 1 to be valid
         // Player is near the start of the page, so search the previous page too
         pagesToSearch.push(page - 1);
       }
@@ -109,9 +110,20 @@ export default function Mini({ type, player, shouldUpdate }: MiniProps) {
 
   let players = data; // So we can update it later
   if (players && (!isLoading || !isError)) {
-    // Find the player's position and show 3 players above and 1 below
+    // Find the player's position in the list
     const playerPosition = players.findIndex(p => p.id === player.id);
-    players = players.slice(playerPosition - 3, playerPosition + 2);
+
+    // Ensure we always show 5 players
+    const start = Math.max(0, playerPosition - 3); // Start showing 3 players above the player, but not less than index 0
+    const end = Math.min(players.length, start + 5); // Ensure there are 5 players shown
+
+    players = players.slice(start, end);
+
+    // If there are less than 5 players at the top, append more players from below
+    if (players.length < 5 && start === 0) {
+      const additionalPlayers = players.slice(playerPosition + 1, playerPosition + (5 - players.length + 1));
+      players = [...players, ...additionalPlayers];
+    }
   }
 
   if (isLoading) {
