@@ -14,8 +14,11 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
+    "moduleDetection": "force",
     "jsx": "preserve",
     "incremental": true,
+    "declaration": true,
+    "declarationMap": true,
     "plugins": [
       {
         "name": "next"

@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
       _id: id,
       trackedSince: new Date().toISOString(),
     });
-    const response = await scoresaberService.lookupPlayer(id, true);
+    const response = await scoresaberService.lookupPlayer(id);
     if (response != undefined) {
       const { player, rawPlayer } = response;
       await seedPlayerHistory(foundPlayer!, player, rawPlayer);
