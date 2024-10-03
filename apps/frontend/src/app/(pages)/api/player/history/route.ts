@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { connectMongo } from "@/common/mongo";
 import { IPlayer, PlayerModel } from "@/common/schema/player-schema";
 import { seedPlayerHistory } from "@/common/player-utils";
 import { scoresaberService } from "@/common/service/impl/scoresaber";
+import { connectMongo } from "@/common/mongo";
 
 export async function GET(request: NextRequest) {
   const playerIdCookie = request.cookies.get("playerId");
