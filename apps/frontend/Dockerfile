@@ -1,65 +1,44 @@
 FROM fascinated/docker-images:nodejs_20_with_pnpm AS base
 
-# Install dependencies and build tools for canvas
-FROM base AS deps
-RUN apk add --no-cache python3 make g++ gcc pkgconfig pixman cairo-dev libjpeg-turbo-dev pango-dev giflib-dev
-WORKDIR /app
-COPY package.json* pnpm-lock.yaml* ./
-RUN pnpm install --frozen-lockfile --quiet
-
-# Build from source
 FROM base AS builder
+RUN apk update
+RUN apk add --no-cache libc6-compat
+# Set working directory
 WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
+
+RUN pnpm global add turbo@^2
 COPY . .
 
-# Install runtime dependencies
-RUN apk add --no-cache cairo pango libjpeg-turbo giflib
+# Generate a partial monorepo with a pruned lockfile for a target workspace.
+# Assuming "frontend" is the name entered in the project's package.json: { name: "frontend" }
+RUN turbo prune frontend --docker
 
-ENV NEXT_TELEMETRY_DISABLED=1
+# Add lockfile and package.json's of isolated subworkspace
+FROM base AS installer
+RUN apk update
+RUN apk add --no-cache libc6-compat
+WORKDIR /app
 
-# Add the commit hash
-ARG GIT_REV
-ENV GIT_REV=${GIT_REV}
+# First install the dependencies (as they change less often)
+COPY --from=builder /app/out/json/ .
+RUN pnpm install --frozen-lockfile --quiet
 
-# Add the sentry auth token
-ARG SENTRY_AUTH_TOKEN
-ENV SENTRY_AUTH_TOKEN=${SENTRY_AUTH_TOKEN}
+# Build the project
+COPY --from=builder /app/out/full/ .
+RUN pnpm turbo run build --filter=frontend...
 
-# Build the app
-RUN pnpm run build
-
-# Final stage to run the app
 FROM base AS runner
 WORKDIR /app
 
-# Install runtime dependencies
-RUN apk add --no-cache cairo pango libjpeg-turbo giflib
-
-ENV NODE_ENV=production
-ENV NEXT_TELEMETRY_DISABLED=1
-
+# Don't run production as root
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
-
-RUN mkdir .next
-RUN chown nextjs:nodejs .next
-
-# Add the commit hash
-ARG GIT_REV
-ENV GIT_REV=${GIT_REV}
-
-# Copy the built app from the builder stage
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
-COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
-COPY --from=builder --chown=nextjs:nodejs /app/public ./public
-COPY --from=builder --chown=nextjs:nodejs /app/package.json ./package.json
-COPY --from=builder --chown=nextjs:nodejs /app/next.config.mjs ./next.config.mjs
-
 USER nextjs
 
-EXPOSE 3000
-ENV HOSTNAME="0.0.0.0"
-ENV PORT=3000
+# Automatically leverage output traces to reduce image size
+# https://nextjs.org/docs/advanced-features/output-file-tracing
+COPY --from=installer --chown=nextjs:nodejs /app/apps/frontend/.next/standalone ./
+COPY --from=installer --chown=nextjs:nodejs /app/apps/frontend/.next/static ./apps/frontend/.next/static
+COPY --from=installer --chown=nextjs:nodejs /app/apps/frontend/public ./apps/frontend/public
 
-CMD ["pnpm", "start"]
+CMD node apps/frontend/server.js
