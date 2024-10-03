@@ -30,6 +30,8 @@ ENV SENTRY_AUTH_TOKEN=${SENTRY_AUTH_TOKEN}
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
+RUN pnpm i -g turbo@^2
+
 # First install the dependencies (as they change less often)
 COPY --from=builder /app/out/json/ .
 RUN pnpm install --frozen-lockfile --quiet
