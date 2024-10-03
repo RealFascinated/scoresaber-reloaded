@@ -34,16 +34,12 @@ class ScoreSaberService extends Service {
    * Gets the players that match the query.
    *
    * @param query the query to search for
-   * @param useProxy whether to use the proxy or not
    * @returns the players that match the query, or undefined if no players were found
    */
-  async searchPlayers(query: string, useProxy = true): Promise<ScoreSaberPlayerSearchToken | undefined> {
+  async searchPlayers(query: string): Promise<ScoreSaberPlayerSearchToken | undefined> {
     const before = performance.now();
     this.log(`Searching for players matching "${query}"...`);
-    const results = await this.fetch<ScoreSaberPlayerSearchToken>(
-      useProxy,
-      SEARCH_PLAYERS_ENDPOINT.replace(":query", query)
-    );
+    const results = await this.fetch<ScoreSaberPlayerSearchToken>(SEARCH_PLAYERS_ENDPOINT.replace(":query", query));
     if (results === undefined) {
       return undefined;
     }
@@ -59,13 +55,9 @@ class ScoreSaberService extends Service {
    * Looks up a player by their ID.
    *
    * @param playerId the ID of the player to look up
-   * @param useProxy whether to use the proxy or not
    * @returns the player that matches the ID, or undefined
    */
-  async lookupPlayer(
-    playerId: string,
-    useProxy = true
-  ): Promise<
+  async lookupPlayer(playerId: string): Promise<
     | {
         player: ScoreSaberPlayer;
         rawPlayer: ScoreSaberPlayerToken;
@@ -74,7 +66,7 @@ class ScoreSaberService extends Service {
   > {
     const before = performance.now();
     this.log(`Looking up player "${playerId}"...`);
-    const token = await this.fetch<ScoreSaberPlayerToken>(useProxy, LOOKUP_PLAYER_ENDPOINT.replace(":id", playerId));
+    const token = await this.fetch<ScoreSaberPlayerToken>(LOOKUP_PLAYER_ENDPOINT.replace(":id", playerId));
     if (token === undefined) {
       return undefined;
     }
@@ -89,14 +81,12 @@ class ScoreSaberService extends Service {
    * Lookup players on a specific page
    *
    * @param page the page to get players for
-   * @param useProxy whether to use the proxy or not
    * @returns the players on the page, or undefined
    */
-  async lookupPlayers(page: number, useProxy = true): Promise<ScoreSaberPlayersPageToken | undefined> {
+  async lookupPlayers(page: number): Promise<ScoreSaberPlayersPageToken | undefined> {
     const before = performance.now();
     this.log(`Looking up players on page "${page}"...`);
     const response = await this.fetch<ScoreSaberPlayersPageToken>(
-      useProxy,
       LOOKUP_PLAYERS_ENDPOINT.replace(":page", page.toString())
     );
     if (response === undefined) {
@@ -111,18 +101,12 @@ class ScoreSaberService extends Service {
    *
    * @param page the page to get players for
    * @param country the country to get players for
-   * @param useProxy whether to use the proxy or not
    * @returns the players on the page, or undefined
    */
-  async lookupPlayersByCountry(
-    page: number,
-    country: string,
-    useProxy = true
-  ): Promise<ScoreSaberPlayersPageToken | undefined> {
+  async lookupPlayersByCountry(page: number, country: string): Promise<ScoreSaberPlayersPageToken | undefined> {
     const before = performance.now();
     this.log(`Looking up players on page "${page}" for country "${country}"...`);
     const response = await this.fetch<ScoreSaberPlayersPageToken>(
-      useProxy,
       LOOKUP_PLAYERS_BY_COUNTRY_ENDPOINT.replace(":page", page.toString()).replace(":country", country)
     );
     if (response === undefined) {
@@ -138,8 +122,7 @@ class ScoreSaberService extends Service {
    * @param playerId the ID of the player to look up
    * @param sort the sort to use
    * @param page the page to get scores for
-   * @param search
-   * @param useProxy whether to use the proxy or not
+   * @param search the search query
    * @returns the scores of the player, or undefined
    */
   async lookupPlayerScores({
@@ -147,7 +130,6 @@ class ScoreSaberService extends Service {
     sort,
     page,
     search,
-    useProxy = true,
   }: {
     playerId: string;
     sort: ScoreSort;
@@ -160,7 +142,6 @@ class ScoreSaberService extends Service {
       `Looking up scores for player "${playerId}", sort "${sort}", page "${page}"${search ? `, search "${search}"` : ""}...`
     );
     const response = await this.fetch<ScoreSaberPlayerScoresPageToken>(
-      useProxy,
       LOOKUP_PLAYER_SCORES_ENDPOINT.replace(":id", playerId)
         .replace(":limit", 8 + "")
         .replace(":sort", sort)
@@ -179,13 +160,11 @@ class ScoreSaberService extends Service {
    * Looks up a leaderboard
    *
    * @param leaderboardId the ID of the leaderboard to look up
-   * @param useProxy whether to use the proxy or not
    */
-  async lookupLeaderboard(leaderboardId: string, useProxy = true): Promise<ScoreSaberLeaderboardToken | undefined> {
+  async lookupLeaderboard(leaderboardId: string): Promise<ScoreSaberLeaderboardToken | undefined> {
     const before = performance.now();
     this.log(`Looking up leaderboard "${leaderboardId}"...`);
     const response = await this.fetch<ScoreSaberLeaderboardToken>(
-      useProxy,
       LOOKUP_LEADERBOARD_ENDPOINT.replace(":id", leaderboardId)
     );
     if (response === undefined) {
@@ -200,18 +179,15 @@ class ScoreSaberService extends Service {
    *
    * @param leaderboardId the ID of the leaderboard to look up
    * @param page the page to get scores for
-   * @param useProxy whether to use the proxy or not
    * @returns the scores of the leaderboard, or undefined
    */
   async lookupLeaderboardScores(
     leaderboardId: string,
-    page: number,
-    useProxy = true
+    page: number
   ): Promise<ScoreSaberLeaderboardScoresPageToken | undefined> {
     const before = performance.now();
     this.log(`Looking up scores for leaderboard "${leaderboardId}", page "${page}"...`);
     const response = await this.fetch<ScoreSaberLeaderboardScoresPageToken>(
-      useProxy,
       LOOKUP_LEADERBOARD_SCORES_ENDPOINT.replace(":id", leaderboardId).replace(":page", page.toString())
     );
     if (response === undefined) {

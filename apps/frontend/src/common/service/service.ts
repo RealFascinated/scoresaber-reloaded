@@ -35,14 +35,13 @@ export default class Service {
   /**
    * Fetches data from the given url.
    *
-   * @param useProxy whether to use proxy or not
    * @param url the url to fetch
    * @returns the fetched data
    */
-  public async fetch<T>(useProxy: boolean, url: string): Promise<T | undefined> {
+  public async fetch<T>(url: string): Promise<T | undefined> {
     try {
       return await ky
-        .get<T>(this.buildRequestUrl(useProxy, url), {
+        .get<T>(this.buildRequestUrl(true, url), {
           next: {
             revalidate: 60, // 1 minute
           },
