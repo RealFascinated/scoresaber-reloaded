@@ -87,12 +87,10 @@ const badges: ScoreBadge[] = [
   {
     name: "Full Combo",
     create: (score: ScoreSaberScoreToken) => {
-      const fullCombo = score.missedNotes === 0;
-
       return (
         <>
-          <p>{fullCombo ? <span className="text-green-400">FC</span> : formatNumberWithCommas(score.missedNotes)}</p>
-          <XMarkIcon className={clsx("w-5 h-5", fullCombo ? "hidden" : "text-red-400")} />
+          <p>{score.fullCombo ? <span className="text-green-400">FC</span> : formatNumberWithCommas(score.missedNotes + score.badCuts)}</p>
+          <XMarkIcon className={clsx("w-5 h-5", score.fullCombo ? "hidden" : "text-red-400")} />
         </>
       );
     },
