@@ -1,7 +1,6 @@
 import mongoose, { Document, Schema } from "mongoose";
 import { PlayerHistory } from "@/common/player/player-history";
 import { formatDateMinimal, getDaysAgo, getMidnightAlignedDate } from "@/common/time-utils";
-import ScoreSaberPlayer from "@/common/model/player/impl/scoresaber-player";
 import { sortPlayerHistory } from "@/common/player-utils";
 
 // Interface for Player Document
@@ -20,11 +19,6 @@ export interface IPlayer extends Document {
    * The last time the player was tracked
    */
   lastTracked: Date;
-
-  /**
-   * The raw player data.
-   */
-  rawPlayer: ScoreSaberPlayer;
 
   /**
    * The first time the player was tracked
@@ -81,7 +75,6 @@ export interface IPlayer extends Document {
 const PlayerSchema = new Schema<IPlayer>({
   _id: { type: String, required: true },
   lastTracked: { type: Date, default: new Date(), required: false },
-  rawPlayer: { type: Object, required: false },
   statisticHistory: { type: Map, default: () => new Map(), required: false },
   trackedSince: { type: Date, default: new Date(), required: false },
 });

@@ -6,8 +6,6 @@ import { getDaysAgoDate, getMidnightAlignedDate } from "@/common/time-utils";
 import { scoresaberService } from "@/common/service/impl/scoresaber";
 import { IO } from "@trigger.dev/sdk";
 
-const INACTIVE_CHECK_AGAIN_TIME = 3 * 24 * 60 * 60 * 1000; // 3 days
-
 /**
  * Sorts the player history based on date,
  * so the most recent date is first
@@ -91,16 +89,6 @@ export async function seedPlayerHistory(
 export async function trackScoreSaberPlayer(dateToday: Date, foundPlayer: IPlayer, io?: IO) {
   io && (await io.logger.info(`Updating statistics for ${foundPlayer.id}...`));
 
-  // Check if the player is inactive and if we check their inactive status again
-  if (
-    foundPlayer.rawPlayer &&
-    foundPlayer.rawPlayer.inactive &&
-    Date.now() - foundPlayer.getLastTracked().getTime() > INACTIVE_CHECK_AGAIN_TIME
-  ) {
-    io && (await io.logger.warn(`Player ${foundPlayer.id} is inactive, skipping...`));
-    return;
-  }
-
   // Lookup player data from the ScoreSaber service
   const response = await scoresaberService.lookupPlayer(foundPlayer.id, true);
   if (response == undefined) {
@@ -108,11 +96,9 @@ export async function trackScoreSaberPlayer(dateToday: Date, foundPlayer: IPlaye
     return;
   }
   const { player, rawPlayer } = response;
-  foundPlayer.rawPlayer = player; // Update the raw player data
 
-  if (player.inactive) {
-    io && (await io.logger.warn(`Player ${foundPlayer.id} is inactive`));
-    await foundPlayer.save(); // Save the player
+  if (rawPlayer.inactive) {
+    io && (await io.logger.warn(`Player ${foundPlayer.id} is inactive on ScoreSaber`));
     return;
   }
 
