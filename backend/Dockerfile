@@ -11,8 +11,6 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./backend ./
 RUN pnpm install --filter backend
 RUN pnpm run build:backend
 
-COPY --from=builder /app/backend/dist ./backend/dist
-
 EXPOSE 8080
 
 CMD ["pnpm", "start:backend"]
