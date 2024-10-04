@@ -6,7 +6,6 @@ ENV PNPM_HOME=/usr/local/bin
 
 # Install build tools for canvas (Python, GCC, etc.)
 FROM base AS deps
-RUN apk add --no-cache python3 make g++ gcc pkgconfig pixman cairo-dev libjpeg-turbo-dev pango-dev giflib-dev
 WORKDIR /app
 
 # Copy website package and lock files only
@@ -22,9 +21,6 @@ COPY --from=deps /app/node_modules ./node_modules
 
 COPY website ./website
 
-# Install runtime dependencies
-RUN apk add --no-cache cairo pango libjpeg-turbo giflib
-
 # Build the website app
 WORKDIR /app/website
 RUN pnpm run build
@@ -32,9 +28,6 @@ RUN pnpm run build
 # Final stage for running the app
 FROM base AS runner
 WORKDIR /app
-
-# Install runtime dependencies
-RUN apk add --no-cache cairo pango libjpeg-turbo giflib
 
 # Set environment variables for production
 ENV NODE_ENV=production
