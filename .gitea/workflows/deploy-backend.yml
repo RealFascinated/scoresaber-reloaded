@@ -7,6 +7,7 @@ on:
       - master
     paths:
       - backend/**
+      - common/**
       - .gitea/kubernetes/backend/**
       - .gitea/workflows/deploy-backend.yml
 
