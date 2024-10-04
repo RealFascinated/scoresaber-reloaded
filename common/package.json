@@ -1,0 +1,16 @@
+{
+  "name": "@ssr/common",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "tsup src/index.ts --watch"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "tsup": "^6.5.0",
+    "typescript": "^5"
+  }
+}

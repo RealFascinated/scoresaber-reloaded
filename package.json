@@ -2,9 +2,7 @@
   "name": "scoresaber-reloadedv3",
   "version": "1.0.0",
   "scripts": {
-    "dev": "pnpm run -r dev",
-    "dev:backend": "pnpm --filter backend dev",
-    "dev:website": "pnpm --filter website dev",
+    "dev": "pnpm --parallel --workspace-concurrency=4 run -r dev",
 
     "build:website": "pnpm --filter website build",
     "build:backend": "pnpm --filter backend build",
