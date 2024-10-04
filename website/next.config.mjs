@@ -9,9 +9,6 @@ const __dirname = path.dirname(__filename); // get the name of the directory
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {
-    webpackMemoryOptimizations: true,
-  },
   images: {
     remotePatterns: [
       {

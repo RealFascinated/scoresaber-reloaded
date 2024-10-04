@@ -1,4 +1,4 @@
-name: "Deploy"
+name: "Deploy Backend"
 
 on:
   push:
@@ -26,10 +26,11 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
+          file: ./backend/Dockerfile
           push: true
           tags: |
-            git.fascinated.cc/fascinated/scoresaber-reloaded:${{ github.sha }}
-            git.fascinated.cc/fascinated/scoresaber-reloaded:latest
+            git.fascinated.cc/fascinated/scoresaber-reloaded-backend:${{ github.sha }}
+            git.fascinated.cc/fascinated/scoresaber-reloaded-backend:latest
           build-args: |
             GIT_REV=${{ gitea.sha }}
             SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
@@ -43,15 +44,15 @@ jobs:
         with:
           kubeconfig: ${{ secrets.KUBECONFIG }}
 
-      - name: Deploy to Kubernetes
-        uses: Azure/k8s-deploy@v5
-        with:
-          action: deploy
-          namespace: public-services
-          manifests: |
-            .gitea/kubernetes/sealed-secrets.yaml
-            .gitea/kubernetes/deployment.yaml
-            .gitea/kubernetes/service.yaml
-            .gitea/kubernetes/ingress.yaml
-          images: |
-            git.fascinated.cc/fascinated/scoresaber-reloaded:${{ github.sha }}
+#      - name: Deploy to Kubernetes
+#        uses: Azure/k8s-deploy@v5
+#        with:
+#          action: deploy
+#          namespace: public-services
+#          manifests: |
+#            .gitea/kubernetes/sealed-secrets.yaml
+#            .gitea/kubernetes/deployment.yaml
+#            .gitea/kubernetes/service.yaml
+#            .gitea/kubernetes/ingress.yaml
+#          images: |
+#            git.fascinated.cc/fascinated/scoresaber-reloaded-backend:${{ github.sha }}
