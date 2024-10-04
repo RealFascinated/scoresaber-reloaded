@@ -39,7 +39,7 @@ COPY --from=builder /app/out/full/ .
 
 RUN ls -la
 
-RUN pnpm turbo run build --filter=frontend...
+RUN pnpm turbo run build --filter=frontend
 
 FROM base AS runner
 WORKDIR /app
