@@ -1,20 +1,37 @@
 FROM fascinated/docker-images:nodejs_20_with_pnpm AS base
 
-FROM base AS installer
+FROM base AS builder
+RUN apk update
+RUN apk add --no-cache libc6-compat
+# Set working directory
 WORKDIR /app
+
+RUN pnpm i -g turbo@^2
 COPY . .
 
-RUN pnpm install
+RUN turbo prune frontend --docker
 
-ENV NEXT_TELEMETRY_DISABLED 1
+FROM base AS installer
+WORKDIR /app
 
 # Add the commit hash
 ARG GIT_REV
 ENV GIT_REV=${GIT_REV}
 
+# Add the sentry auth token
+ARG SENTRY_AUTH_TOKEN
+ENV SENTRY_AUTH_TOKEN=${SENTRY_AUTH_TOKEN}
+
 RUN pnpm i -g turbo@^2
-RUN turbo prune frontend --docker
-RUN turbo run build --filter=frontend
+
+# First install the dependencies (as they change less often)
+COPY --from=builder /app/out/json/ .
+RUN pnpm install
+
+# Build the project
+COPY --from=builder /app/out/full/ .
+
+RUN pnpm turbo run build --filter=frontend
 
 FROM base AS runner
 
@@ -33,7 +50,6 @@ USER nextjs
 
 # Automatically leverage output traces to reduce image size
 # https://nextjs.org/docs/advanced-features/output-file-tracing
-COPY --from=installer --chown=nextjs:nodejs /app/apps/frontend/node_modules ./apps/frontend/node_modules
 COPY --from=installer --chown=nextjs:nodejs /app/apps/frontend/.next/standalone ./apps/frontend
 COPY --from=installer --chown=nextjs:nodejs /app/apps/frontend/.next/static ./apps/frontend/.next/static
 COPY --from=installer --chown=nextjs:nodejs /app/apps/frontend/public ./apps/frontend/public
