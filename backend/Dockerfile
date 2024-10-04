@@ -15,7 +15,7 @@ COPY backend ./backend
 RUN pnpm install --filter ...backend
 
 # Build the backend
-RUN pnpm --filter backend build
+RUN pnpm --filter ...backend build
 
 # Expose the port your application runs on
 EXPOSE 8080
