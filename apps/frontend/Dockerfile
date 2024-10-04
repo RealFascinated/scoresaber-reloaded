@@ -17,4 +17,4 @@ ENV GIT_REV=${GIT_REV}
 
 EXPOSE 3000
 
-CMD node /app/apps/frontend/server.js
+CMD node /app/apps/frontend/.next/standalone/server.js
