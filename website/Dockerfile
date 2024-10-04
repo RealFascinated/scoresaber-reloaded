@@ -1,5 +1,8 @@
-# Base image with Node.js 20 and pnpm
-FROM fascinated/docker-images:nodejs_20_with_pnpm AS base
+FROM node:20-alpine3.17
+
+# Install pnpm
+RUN npm install -g pnpm
+ENV PNPM_HOME=/usr/local/bin
 
 # Install build tools for canvas (Python, GCC, etc.)
 FROM base AS deps
@@ -7,7 +10,7 @@ RUN apk add --no-cache python3 make g++ gcc pkgconfig pixman cairo-dev libjpeg-t
 WORKDIR /app
 
 # Copy website package and lock files only
-COPY package.json* /pnpm-lock.yaml* ./
+COPY package.json* pnpm-lock.yaml* pnpm-workspace.yaml* ./
 RUN pnpm install --frozen-lockfile --quiet --filter website
 
 # Build stage
@@ -17,7 +20,7 @@ WORKDIR /app
 # Copy node_modules from deps stage
 COPY --from=deps /app/node_modules ./node_modules
 
-COPY ./website ./website
+COPY website ./website
 
 # Install runtime dependencies
 RUN apk add --no-cache cairo pango libjpeg-turbo giflib
