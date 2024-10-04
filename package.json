@@ -2,10 +2,16 @@
   "name": "ssr",
   "version": "0.1.0",
   "private": true,
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ],
+  "workspaces": {
+    "nohoist": [
+      "**/frontend",
+      "**/frontend/**"
+    ],
+    "packages": [
+      "apps/*",
+      "packages/*"
+    ]
+  },
   "scripts": {
     "build": "turbo run build",
     "clean": "turbo run clean",
