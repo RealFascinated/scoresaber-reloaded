@@ -9,6 +9,9 @@ WORKDIR /app
 RUN pnpm i -g turbo@^2
 COPY . .
 
+# Install depends
+RUN pnpm install
+
 # Add the commit hash
 ARG GIT_REV
 ENV GIT_REV=${GIT_REV}
@@ -17,18 +20,7 @@ ENV GIT_REV=${GIT_REV}
 ARG SENTRY_AUTH_TOKEN
 ENV SENTRY_AUTH_TOKEN=${SENTRY_AUTH_TOKEN}
 
-RUN pnpm i -g turbo@^2
-
-RUN pnpm install
-
 RUN pnpm turbo run build --filter=frontend
 
-# Add the commit hash
-ARG GIT_REV
-ENV GIT_REV=${GIT_REV}
-
 EXPOSE 3000
-
-COPY /app/apps/frontend/.next/standalone ./apps/frontend
-
-CMD node /app/apps/frontend/server.js
+CMD node /app/apps/frontend/.next/standalone/server.js
