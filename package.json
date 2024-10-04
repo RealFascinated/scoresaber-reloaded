@@ -3,10 +3,14 @@
   "version": "1.0.0",
   "scripts": {
     "dev": "pnpm run -r dev",
-    "dev:website": "pnpm --filter website dev",
     "dev:backend": "pnpm --filter backend dev",
-    "start:backend": "pnpm --filter backend start",
-    "start:frontend": "pnpm --filter frontend start"
+    "dev:website": "pnpm --filter website dev",
+
+    "build:website": "pnpm --filter website start",
+    "build:backend": "pnpm --filter backend start",
+
+    "start:website": "pnpm --filter website start",
+    "start:backend": "pnpm --filter backend start"
   },
   "author": "fascinated7",
   "license": "MIT"

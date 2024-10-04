@@ -6,7 +6,7 @@ WORKDIR /app
 COPY package.json* pnpm-lock.yaml* ./
 RUN pnpm install --frozen-lockfile --quiet --filter backend
 COPY . .
-RUN pnpm run build --filter backend
+RUN pnpm run build:backend
 
 # Final stage to run the app
 FROM base AS runner
