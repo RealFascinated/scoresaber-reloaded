@@ -90,7 +90,7 @@ export async function trackScoreSaberPlayer(dateToday: Date, foundPlayer: IPlaye
   io && (await io.logger.info(`Updating statistics for ${foundPlayer.id}...`));
 
   // Lookup player data from the ScoreSaber service
-  const response = await scoresaberService.lookupPlayer(foundPlayer.id, true);
+  const response = await scoresaberService.lookupPlayer(foundPlayer.id);
   if (response == undefined) {
     io && (await io.logger.warn(`Player ${foundPlayer.id} not found on ScoreSaber`));
     return;

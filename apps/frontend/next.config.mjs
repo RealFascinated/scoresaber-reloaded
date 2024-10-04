@@ -4,9 +4,6 @@ import { format } from "@formkit/tempo";
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: "standalone",
-  experimental: {
-    webpackMemoryOptimizations: true,
-  },
   images: {
     remotePatterns: [
       {
@@ -35,22 +32,24 @@ const nextConfig = {
   },
 };
 
-export default withSentryConfig(nextConfig, {
-  org: "scoresaber-reloaded",
-  project: "frontend",
-  sentryUrl: "https://glitchtip.fascinated.cc/",
-  silent: !process.env.CI,
-  reactComponentAnnotation: {
-    enabled: true,
-  },
-  tunnelRoute: "/monitoring",
-  hideSourceMaps: true,
-  disableLogger: true,
-  sourcemaps: {
-    disable: true,
-  },
-  release: {
-    create: false,
-    finalize: false,
-  },
-});
+export default nextConfig;
+
+// export default withSentryConfig(nextConfig, {
+//   org: "scoresaber-reloaded",
+//   project: "frontend",
+//   sentryUrl: "https://glitchtip.fascinated.cc/",
+//   silent: !process.env.CI,
+//   reactComponentAnnotation: {
+//     enabled: true,
+//   },
+//   tunnelRoute: "/monitoring",
+//   hideSourceMaps: true,
+//   disableLogger: true,
+//   sourcemaps: {
+//     disable: true,
+//   },
+//   release: {
+//     create: false,
+//     finalize: false,
+//   },
+// });

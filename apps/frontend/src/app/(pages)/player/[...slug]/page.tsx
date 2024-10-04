@@ -38,7 +38,7 @@ const getPlayerData = cache(async ({ params }: Props, fetchScores: boolean = tru
   const page = parseInt(slug[2]) || 1; // The page number
   const search = (slug[3] as string) || ""; // The search query
 
-  const player = (await scoresaberService.lookupPlayer(id, false))?.player;
+  const player = (await scoresaberService.lookupPlayer(id))?.player;
   let scores: ScoreSaberPlayerScoresPageToken | undefined;
   if (fetchScores) {
     scores = await scoresaberService.lookupPlayerScores({
