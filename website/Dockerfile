@@ -11,6 +11,9 @@ WORKDIR /app
 COPY package.json* pnpm-lock.yaml* pnpm-workspace.yaml* ./
 COPY website ./website
 
+ARG GIT_REV
+ENV GIT_REV=${GIT_REV}
+
 RUN pnpm install --filter website
 RUN pnpm run build:website
 
