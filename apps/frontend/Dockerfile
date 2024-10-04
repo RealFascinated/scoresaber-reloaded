@@ -1,4 +1,4 @@
-FROM fascinated/docker-images:nodejs_20_with_pnpm
+FROM fascinated/docker-images:nodejs_20_with_pnpm AS base
 
 FROM base AS installer
 WORKDIR /app
