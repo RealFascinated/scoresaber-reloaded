@@ -30,7 +30,9 @@
         "./src/*"
       ]
     },
-    "target": "ES2022"
+    "target": "ES2022",
+    "rootDir": "./src/",
+    "outDir": "./out/"
   },
   "include": [
     "next-env.d.ts",
