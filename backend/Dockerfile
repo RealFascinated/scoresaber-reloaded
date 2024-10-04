@@ -3,8 +3,8 @@ FROM fascinated/docker-images:nodejs_20_with_pnpm AS base
 # Install dependencies and build the app
 FROM base AS builder
 WORKDIR /app
-COPY ./backend/package.json* ./backend/pnpm-lock.yaml* ./
-RUN pnpm install --frozen-lockfile --quiet
+COPY package.json* pnpm-lock.yaml* ./
+RUN pnpm install --frozen-lockfile --quiet --filter backend
 COPY ./backend .
 RUN pnpm run build
 
