@@ -7,6 +7,8 @@ on:
       - master
     paths:
       - website/**
+      - .gitea/kubernetes/website/**
+      - .gitea/workflows/deploy-website.yml
 
 jobs:
   deploy:
@@ -53,9 +55,9 @@ jobs:
           action: deploy
           namespace: public-services
           manifests: |
-            .gitea/kubernetes/sealed-secrets.yaml
-            .gitea/kubernetes/deployment.yaml
-            .gitea/kubernetes/service.yaml
-            .gitea/kubernetes/ingress.yaml
+            .gitea/kubernetes/website/sealed-secrets.yaml
+            .gitea/kubernetes/website/deployment.yaml
+            .gitea/kubernetes/website/service.yaml
+            .gitea/kubernetes/website/ingress.yaml
           images: |
             git.fascinated.cc/fascinated/scoresaber-reloaded-website:${{ github.sha }}

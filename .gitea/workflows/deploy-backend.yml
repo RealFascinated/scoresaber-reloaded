@@ -7,6 +7,8 @@ on:
       - master
     paths:
       - backend/**
+      - .gitea/kubernetes/backend/**
+      - .gitea/workflows/deploy-backend.yml
 
 jobs:
   deploy:
@@ -47,15 +49,15 @@ jobs:
         with:
           kubeconfig: ${{ secrets.KUBECONFIG }}
 
-#      - name: Deploy to Kubernetes
-#        uses: Azure/k8s-deploy@v5
-#        with:
-#          action: deploy
-#          namespace: public-services
-#          manifests: |
-#            .gitea/kubernetes/sealed-secrets.yaml
-#            .gitea/kubernetes/deployment.yaml
-#            .gitea/kubernetes/service.yaml
-#            .gitea/kubernetes/ingress.yaml
-#          images: |
-#            git.fascinated.cc/fascinated/scoresaber-reloaded-backend:${{ github.sha }}
+      - name: Deploy to Kubernetes
+        uses: Azure/k8s-deploy@v5
+        with:
+          action: deploy
+          namespace: public-services
+          manifests: |
+            .gitea/kubernetes/backend/sealed-secrets.yaml
+            .gitea/kubernetes/backend/deployment.yaml
+            .gitea/kubernetes/backend/service.yaml
+            .gitea/kubernetes/backend/ingress.yaml
+          images: |
+            git.fascinated.cc/fascinated/scoresaber-reloaded-backend:${{ github.sha }}
