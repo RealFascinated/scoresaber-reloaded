@@ -45,7 +45,7 @@ RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
 # Ensure necessary directories exist and are writable
-RUN mkdir /app/website/.next
+RUN mkdir -p /app/website/.next
 RUN chown nextjs:nodejs /app/website/.next
 
 # Copy built files from the builder stage
