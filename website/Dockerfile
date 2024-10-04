@@ -6,8 +6,8 @@ FROM base AS deps
 RUN apk add --no-cache python3 make g++ gcc pkgconfig pixman cairo-dev libjpeg-turbo-dev pango-dev giflib-dev
 WORKDIR /app
 
-# Copy frontend package and lock files only
-COPY ./frontend/package.json* ./frontend/pnpm-lock.yaml* ./
+# Copy website package and lock files only
+COPY ./website/package.json* ./website/pnpm-lock.yaml* ./
 RUN pnpm install --frozen-lockfile --quiet
 
 # Build stage
@@ -17,15 +17,13 @@ WORKDIR /app
 # Copy node_modules from deps stage
 COPY --from=deps /app/node_modules ./node_modules
 
-# Copy all necessary files from both ./frontend and ./
-# This ensures you have access to both frontend code and shared types in root
-COPY ./frontend ./frontend
+COPY ./website ./website
 
 # Install runtime dependencies
 RUN apk add --no-cache cairo pango libjpeg-turbo giflib
 
-# Build the frontend app
-WORKDIR /app/frontend
+# Build the website app
+WORKDIR /app/website
 RUN pnpm run build
 
 # Final stage for running the app
@@ -44,15 +42,15 @@ RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
 # Ensure necessary directories exist and are writable
-RUN mkdir /app/frontend/.next
-RUN chown nextjs:nodejs /app/frontend/.next
+RUN mkdir /app/website/.next
+RUN chown nextjs:nodejs /app/website/.next
 
 # Copy built files from the builder stage
-COPY --from=builder --chown=nextjs:nodejs /app/frontend/node_modules ./frontend/node_modules
-COPY --from=builder --chown=nextjs:nodejs /app/frontend/.next ./frontend/.next
-COPY --from=builder --chown=nextjs:nodejs /app/frontend/public ./frontend/public
-COPY --from=builder --chown=nextjs:nodejs /app/frontend/package.json ./frontend/package.json
-COPY --from=builder --chown=nextjs:nodejs /app/frontend/next.config.mjs ./frontend/next.config.mjs
+COPY --from=builder --chown=nextjs:nodejs /app/website/node_modules ./website/node_modules
+COPY --from=builder --chown=nextjs:nodejs /app/website/.next ./website/.next
+COPY --from=builder --chown=nextjs:nodejs /app/website/public ./website/public
+COPY --from=builder --chown=nextjs:nodejs /app/website/package.json ./website/package.json
+COPY --from=builder --chown=nextjs:nodejs /app/website/next.config.mjs ./website/next.config.mjs
 
 # Switch to non-root user
 USER nextjs
