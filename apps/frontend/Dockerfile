@@ -50,9 +50,6 @@ RUN apk add --no-cache cairo pango libjpeg-turbo giflib
 ARG GIT_REV
 ENV GIT_REV=${GIT_REV}
 
-# Debug to check .next output
-RUN ls -al /app/apps/frontend/.next/standalone
-
 # Don't run production as root
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
