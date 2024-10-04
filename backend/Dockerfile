@@ -22,4 +22,4 @@ RUN pnpm --filter ...backend build
 EXPOSE 8080
 
 # Command to run your app
-CMD ["node", "dist/main.js"]
+CMD ["node", "backend/dist/main.js"]
