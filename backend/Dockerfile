@@ -6,7 +6,8 @@ ENV PNPM_HOME=/usr/local/bin
 
 WORKDIR /app
 
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./backend ./
+COPY package.json* pnpm-lock.yaml* pnpm-workspace.yaml* ./
+COPY backend ./backend
 
 RUN pnpm install --filter backend
 RUN pnpm run build:backend
