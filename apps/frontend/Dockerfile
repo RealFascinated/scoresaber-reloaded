@@ -8,8 +8,7 @@ WORKDIR /app
 RUN pnpm i -g turbo@^2
 COPY . .
 
-# Temporarily skip prune for debugging
-# RUN turbo prune frontend --docker
+RUN turbo prune frontend --docker
 
 # Add lockfile and package.json's of isolated subworkspace
 FROM base AS installer
