@@ -2,6 +2,7 @@ import { format } from "@formkit/tempo";
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: "standalone",
   experimental: {
     webpackMemoryOptimizations: true,
   },

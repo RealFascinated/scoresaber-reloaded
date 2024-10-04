@@ -17,4 +17,4 @@ ENV GIT_REV=${GIT_REV}
 
 EXPOSE 3000
 
-CMD pnpm run start
+CMD node apps/frontend/server.js
