@@ -1,4 +1,4 @@
-name: "Deploy"
+name: "Deploy Frontend"
 
 on:
   push:
@@ -26,10 +26,11 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
+          file: ./apps/frontend/Dockerfile
           push: true
           tags: |
-            git.fascinated.cc/fascinated/scoresaber-reloaded:${{ github.sha }}
-            git.fascinated.cc/fascinated/scoresaber-reloaded:latest
+            git.fascinated.cc/fascinated/scoresaber-reloaded-frontend:${{ github.sha }}
+            git.fascinated.cc/fascinated/scoresaber-reloaded-frontend:latest
           build-args: |
             GIT_REV=${{ gitea.sha }}
             SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
@@ -49,9 +50,9 @@ jobs:
           action: deploy
           namespace: public-services
           manifests: |
-            .gitea/kubernetes/sealed-secrets.yaml
-            .gitea/kubernetes/deployment.yaml
-            .gitea/kubernetes/service.yaml
-            .gitea/kubernetes/ingress.yaml
+            .gitea/kubernetes/frontend/sealed-secrets.yaml
+            .gitea/kubernetes/frontend/deployment.yaml
+            .gitea/kubernetes/frontend/service.yaml
+            .gitea/kubernetes/frontend/ingress.yaml
           images: |
-            git.fascinated.cc/fascinated/scoresaber-reloaded:${{ github.sha }}
+            git.fascinated.cc/fascinated/scoresaber-reloaded-frontend:${{ github.sha }}
