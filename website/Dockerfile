@@ -7,8 +7,8 @@ RUN apk add --no-cache python3 make g++ gcc pkgconfig pixman cairo-dev libjpeg-t
 WORKDIR /app
 
 # Copy website package and lock files only
-COPY ./website/package.json* ./website/pnpm-lock.yaml* ./
-RUN pnpm install --frozen-lockfile --quiet
+COPY package.json* /pnpm-lock.yaml* ./
+RUN pnpm install --frozen-lockfile --quiet --filter website
 
 # Build stage
 FROM base AS builder
