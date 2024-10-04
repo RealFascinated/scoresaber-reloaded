@@ -5,9 +5,11 @@
     "dev": "tsup src/index.ts --watch",
     "build": "tsup src/index.ts"
   },
+  "dependencies": {
+    "tsup": "^6.5.0"
+  },
   "devDependencies": {
     "@types/node": "^22.7.4",
-    "tsup": "^6.5.0",
     "typescript": "^5"
   }
 }
