@@ -6,8 +6,8 @@
     "dev:backend": "pnpm --filter backend dev",
     "dev:website": "pnpm --filter website dev",
 
-    "build:website": "pnpm --filter website start",
-    "build:backend": "pnpm --filter backend start",
+    "build:website": "pnpm --filter website build",
+    "build:backend": "pnpm --filter backend build",
 
     "start:website": "pnpm --filter website start",
     "start:backend": "pnpm --filter backend start"
