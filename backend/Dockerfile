@@ -11,10 +11,11 @@ COPY package.json* pnpm-lock.yaml* pnpm-workspace.yaml* ./
 COPY common ./common
 COPY backend ./backend
 
-# Install dependencies for all workspaces, including backend
-RUN pnpm install --filter ...backend
+# Install all dependencies (for common and backend)
+RUN pnpm install
 
-# Build the backend
+# Build the common workspace first, then the backend
+RUN pnpm --filter ...common build
 RUN pnpm --filter ...backend build
 
 # Expose the port your application runs on
