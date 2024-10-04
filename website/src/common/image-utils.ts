@@ -1,7 +1,4 @@
-import { createCanvas, loadImage } from "canvas";
 import { config } from "../../config";
-import ky from "ky";
-import { extractColors } from "extract-colors";
 import { cache } from "react";
 
 /**
