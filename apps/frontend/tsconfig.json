@@ -22,7 +22,7 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "preserveWatchOutput": true,
-    "baseUrl": "./",
+    "baseUrl": "../../",
     "paths": {
       "@/*": ["./src/*.ts", "./src/*"]
     }
