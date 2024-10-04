@@ -12,7 +12,7 @@ COPY common ./common
 COPY backend ./backend
 
 # Install dependencies for all workspaces, including backend
-RUN pnpm install --filter backend...
+RUN pnpm install --filter ...backend
 
 # Build the backend
 RUN pnpm --filter backend build
