@@ -4,27 +4,15 @@ FROM node:20-alpine3.17 AS base
 RUN npm install -g pnpm
 ENV PNPM_HOME=/usr/local/bin
 
-# Install build tools for canvas (Python, GCC, etc.)
-FROM base AS deps
+FROM base AS builder
 WORKDIR /app
 
 # Copy website package and lock files only
 COPY package.json* pnpm-lock.yaml* pnpm-workspace.yaml* ./
 COPY website/package.json* ./website/
-RUN pnpm install --frozen-lockfile --quiet --filter website
 
-# Build stage
-FROM base AS builder
-WORKDIR /app
-
-# Copy node_modules from deps stage
-COPY --from=deps /app/node_modules ./node_modules
-
-COPY website ./website
-
-# Build the website app
-WORKDIR /app/website
-RUN pnpm run build
+RUN pnpm install --filter website
+RUN pnpm run build:website
 
 # Final stage for running the app
 FROM base AS runner
@@ -43,7 +31,6 @@ RUN mkdir -p /app/website/.next
 RUN chown nextjs:nodejs /app/website/.next
 
 # Copy built files from the builder stage
-COPY --from=builder --chown=nextjs:nodejs /app/website/node_modules ./website/node_modules
 COPY --from=builder --chown=nextjs:nodejs /app/website/.next ./website/.next
 COPY --from=builder --chown=nextjs:nodejs /app/website/public ./website/public
 COPY --from=builder --chown=nextjs:nodejs /app/website/package.json ./website/package.json
@@ -57,4 +44,4 @@ EXPOSE 3000
 ENV HOSTNAME="0.0.0.0"
 ENV PORT=3000
 
-CMD ["pnpm", "start"]
+CMD ["pnpm", "start:website"]
