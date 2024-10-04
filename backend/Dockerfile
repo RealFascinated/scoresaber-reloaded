@@ -9,6 +9,9 @@ WORKDIR /app
 ARG GIT_REV
 ENV GIT_REV=${GIT_REV}
 
+# Run in production mode
+ENV NODE_ENV=production
+
 # Copy necessary files for installation
 COPY package.json* pnpm-lock.yaml* pnpm-workspace.yaml* ./
 COPY common ./common
