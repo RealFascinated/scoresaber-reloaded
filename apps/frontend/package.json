@@ -43,6 +43,7 @@
     "react-chartjs-2": "^5.2.0",
     "react-dom": "19.0.0-rc-3edc000d-20240926",
     "react-hook-form": "^7.53.0",
+    "styled-jsx": "^5.1.6",
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7",
     "zod": "^3.23.8"
