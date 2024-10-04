@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: scoresaber-reloaded-service
+  name: scoresaber-reloaded-website-service
   namespace: public-services
 spec:
   type: ClusterIP
@@ -10,4 +10,4 @@ spec:
     - port: 3000
       targetPort: 3000
   selector:
-    app: scoresaber-reloaded
+    app: scoresaber-reloaded-website

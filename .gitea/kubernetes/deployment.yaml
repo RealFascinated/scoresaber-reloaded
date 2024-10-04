@@ -1,21 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: scoresaber-reloaded
+  name: scoresaber-reloaded-website
   namespace: public-services
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: scoresaber-reloaded
+      app: scoresaber-reloaded-website
   template:
     metadata:
       labels:
-        app: scoresaber-reloaded
+        app: scoresaber-reloaded-website
     spec:
       containers:
-        - name: scoresaber-reloaded-container
-          image: git.fascinated.cc/fascinated/scoresaber-reloaded-frontend:latest
+        - name: scoresaber-reloaded-website-container
+          image: git.fascinated.cc/fascinated/scoresaber-reloaded-website:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 3000

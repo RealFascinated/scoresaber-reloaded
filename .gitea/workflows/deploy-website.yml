@@ -1,9 +1,11 @@
-name: "Deploy Frontend"
+name: "Deploy Website"
 
 on:
   push:
     branches:
       - master
+    paths:
+      - website/**
 
 jobs:
   deploy:
@@ -26,11 +28,11 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: ./frontend/Dockerfile
+          file: ./website/Dockerfile
           push: true
           tags: |
-            git.fascinated.cc/fascinated/scoresaber-reloaded-frontend:${{ github.sha }}
-            git.fascinated.cc/fascinated/scoresaber-reloaded-frontend:latest
+            git.fascinated.cc/fascinated/scoresaber-reloaded-website:${{ github.sha }}
+            git.fascinated.cc/fascinated/scoresaber-reloaded-website:latest
           build-args: |
             GIT_REV=${{ gitea.sha }}
             SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
@@ -55,4 +57,4 @@ jobs:
             .gitea/kubernetes/service.yaml
             .gitea/kubernetes/ingress.yaml
           images: |
-            git.fascinated.cc/fascinated/scoresaber-reloaded-frontend:${{ github.sha }}
+            git.fascinated.cc/fascinated/scoresaber-reloaded-website:${{ github.sha }}
