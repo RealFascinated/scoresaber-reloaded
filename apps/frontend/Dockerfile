@@ -18,6 +18,8 @@ RUN turbo run build --filter=frontend
 
 FROM base AS runner
 
+WORKDIR /app
+
 # Add the commit hash
 ARG GIT_REV
 ENV GIT_REV=${GIT_REV}
