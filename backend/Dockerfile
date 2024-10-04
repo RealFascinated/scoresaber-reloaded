@@ -1,7 +1,7 @@
 FROM fascinated/docker-images:nodejs_20_with_pnpm
 WORKDIR /app
 
-COPY . .
+COPY package.json pnpm-lock.yaml ./backend ./
 
 RUN pnpm install --filter backend
 RUN pnpm run build:backend
