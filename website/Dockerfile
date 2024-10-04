@@ -10,6 +10,7 @@ WORKDIR /app
 
 # Copy website package and lock files only
 COPY package.json* pnpm-lock.yaml* pnpm-workspace.yaml* ./
+COPY website/package.json* ./website/
 RUN pnpm install --frozen-lockfile --quiet --filter website
 
 # Build stage
