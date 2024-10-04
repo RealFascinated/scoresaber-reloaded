@@ -1,3 +1,1 @@
-export function helloMeowMeow() {
-  return "hi";
-}
+export * from "src/utils";

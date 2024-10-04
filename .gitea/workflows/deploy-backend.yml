@@ -39,7 +39,6 @@ jobs:
             git.fascinated.cc/fascinated/scoresaber-reloaded-backend:latest
           build-args: |
             GIT_REV=${{ gitea.sha }}
-            SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
 
       - name: Install kubectl
         uses: azure/setup-kubectl@v4

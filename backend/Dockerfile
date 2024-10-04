@@ -6,6 +6,9 @@ ENV PNPM_HOME=/usr/local/bin
 
 WORKDIR /app
 
+ARG GIT_REV
+ENV GIT_REV=${GIT_REV}
+
 # Copy necessary files for installation
 COPY package.json* pnpm-lock.yaml* pnpm-workspace.yaml* ./
 COPY common ./common
