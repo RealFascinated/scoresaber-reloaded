@@ -32,7 +32,7 @@ RUN pnpm i -g turbo@^2
 
 # First install the dependencies (as they change less often)
 COPY --from=builder /app/out/json/ .
-RUN pnpm install --frozen-lockfile --quiet
+RUN pnpm install
 
 # Build the project
 COPY --from=builder /app/out/full/ .
