@@ -22,7 +22,7 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "preserveWatchOutput": true,
-    "baseUrl": "../../apps/frontend",
+    "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*.ts", "./src/*"]
     }
