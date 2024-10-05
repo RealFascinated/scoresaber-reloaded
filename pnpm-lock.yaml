@@ -34,9 +34,6 @@ importers:
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
-      tsup:
-        specifier: ^8.3.0
-        version: 8.3.0(jiti@1.21.6)(postcss@8.4.47)(typescript@5.6.2)(yaml@2.5.1)
     devDependencies:
       '@nestjs/cli':
         specifier: ^10.0.0
@@ -92,19 +89,21 @@ importers:
       ts-node:
         specifier: ^10.9.1
         version: 10.9.2(@types/node@20.16.10)(typescript@5.6.2)
+      tsup:
+        specifier: ^8.3.0
+        version: 8.3.0(jiti@1.21.6)(postcss@8.4.47)(typescript@5.6.2)(yaml@2.5.1)
       typescript:
         specifier: ^5
         version: 5.6.2
 
   common:
-    dependencies:
-      tsup:
-        specifier: ^6.5.0
-        version: 6.7.0(postcss@8.4.47)(ts-node@10.9.2(@types/node@22.7.4)(typescript@5.6.2))(typescript@5.6.2)
     devDependencies:
       '@types/node':
         specifier: ^22.7.4
         version: 22.7.4
+      tsup:
+        specifier: ^6.5.0
+        version: 6.7.0(postcss@8.4.47)(ts-node@10.9.2(@types/node@22.7.4)(typescript@5.6.2))(typescript@5.6.2)
       typescript:
         specifier: ^5
         version: 5.6.2
@@ -149,13 +148,13 @@ importers:
         version: 5.59.0(react@19.0.0-rc-3edc000d-20240926)
       '@trigger.dev/nextjs':
         specifier: ^3.0.8
-        version: 3.0.9(@trigger.dev/sdk@3.0.9)(next@15.0.0-rc.0(@babel/core@7.25.7)(@opentelemetry/api@1.9.0)(react-dom@19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926))
+        version: 3.0.9(@trigger.dev/sdk@3.0.10)(next@15.0.0-rc.0(@babel/core@7.25.7)(@opentelemetry/api@1.9.0)(react-dom@19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926))
       '@trigger.dev/react':
         specifier: ^3.0.8
         version: 3.0.9(react-dom@19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926)
       '@trigger.dev/sdk':
         specifier: ^3.0.8
-        version: 3.0.9
+        version: 3.0.10
       '@uidotdev/usehooks':
         specifier: ^2.4.1
         version: 2.4.1(react-dom@19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926)
@@ -1947,6 +1946,10 @@ packages:
     peerDependencies:
       react: ^18 || ^19
 
+  '@trigger.dev/core@3.0.10':
+    resolution: {integrity: sha512-46G8WEZoS3wWeiiKaBW8lJ9YImwy9dtNbSaF5sxb0eHe9a35llRLkMFPK1yIjA78NOFd8E7V5khijSRGsXg0kw==}
+    engines: {node: '>=18.20.0'}
+
   '@trigger.dev/core@3.0.9':
     resolution: {integrity: sha512-J8JtlL8ibqCajgkWZyZMz9CO+KVuZka/VxActzn4f8YmujDfOcZuNkRhT0tNsYVm+XApP2FqVspN/Akmdo6eIw==}
     engines: {node: '>=18.20.0'}
@@ -1963,8 +1966,8 @@ packages:
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18
 
-  '@trigger.dev/sdk@3.0.9':
-    resolution: {integrity: sha512-QaUgXkFFEYjZDl9nBx9j90ALjgXqIN1JvoCLSQmzpCOyU7zj6syq6NDTeu5omy8OeaolnSBIwSj0qxw5gwAyaw==}
+  '@trigger.dev/sdk@3.0.10':
+    resolution: {integrity: sha512-0jETV8vIf9JADBFisEnjMtVFRMoKPKXHzqZDsYY6DJcjxfmJM7+7aGWZ9en+lrCNHmD3floDzHobS76IvM+TjA==}
     engines: {node: '>=18.20.0'}
 
   '@tsconfig/node10@1.0.11':
@@ -6915,6 +6918,32 @@ snapshots:
       '@tanstack/query-core': 5.59.0
       react: 19.0.0-rc-3edc000d-20240926
 
+  '@trigger.dev/core@3.0.10':
+    dependencies:
+      '@google-cloud/precise-date': 4.0.0
+      '@opentelemetry/api': 1.9.0
+      '@opentelemetry/api-logs': 0.52.1
+      '@opentelemetry/exporter-logs-otlp-http': 0.52.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/exporter-trace-otlp-http': 0.52.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/instrumentation': 0.52.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/resources': 1.25.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/sdk-logs': 0.52.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/sdk-node': 0.52.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/sdk-trace-base': 1.25.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/sdk-trace-node': 1.25.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/semantic-conventions': 1.25.1
+      execa: 8.0.1
+      humanize-duration: 3.32.1
+      socket.io-client: 4.7.5
+      superjson: 2.2.1
+      zod: 3.22.3
+      zod-error: 1.5.0
+      zod-validation-error: 1.5.0(zod@3.22.3)
+    transitivePeerDependencies:
+      - bufferutil
+      - supports-color
+      - utf-8-validate
+
   '@trigger.dev/core@3.0.9':
     dependencies:
       '@google-cloud/precise-date': 4.0.0
@@ -6941,9 +6970,9 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@trigger.dev/nextjs@3.0.9(@trigger.dev/sdk@3.0.9)(next@15.0.0-rc.0(@babel/core@7.25.7)(@opentelemetry/api@1.9.0)(react-dom@19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926))':
+  '@trigger.dev/nextjs@3.0.9(@trigger.dev/sdk@3.0.10)(next@15.0.0-rc.0(@babel/core@7.25.7)(@opentelemetry/api@1.9.0)(react-dom@19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926))':
     dependencies:
-      '@trigger.dev/sdk': 3.0.9
+      '@trigger.dev/sdk': 3.0.10
       debug: 4.3.7(supports-color@5.5.0)
       next: 15.0.0-rc.0(@babel/core@7.25.7)(@opentelemetry/api@1.9.0)(react-dom@19.0.0-rc-3edc000d-20240926(react@19.0.0-rc-3edc000d-20240926))(react@19.0.0-rc-3edc000d-20240926)
     transitivePeerDependencies:
@@ -6963,12 +6992,12 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@trigger.dev/sdk@3.0.9':
+  '@trigger.dev/sdk@3.0.10':
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/api-logs': 0.52.1
       '@opentelemetry/semantic-conventions': 1.25.1
-      '@trigger.dev/core': 3.0.9
+      '@trigger.dev/core': 3.0.10
       chalk: 5.3.0
       cronstrue: 2.50.0
       debug: 4.3.7(supports-color@5.5.0)
@@ -8081,7 +8110,7 @@ snapshots:
       '@typescript-eslint/parser': 8.8.0(eslint@8.57.1)(typescript@5.6.2)
       eslint: 8.57.1
       eslint-import-resolver-node: 0.3.9
-      eslint-import-resolver-typescript: 3.6.3(@typescript-eslint/parser@8.8.0(eslint@8.57.1)(typescript@5.6.2))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.31.0)(eslint@8.57.1)
+      eslint-import-resolver-typescript: 3.6.3(@typescript-eslint/parser@8.8.0(eslint@8.57.1)(typescript@5.6.2))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.8.0(eslint@8.57.1)(typescript@5.6.2))(eslint@8.57.1))(eslint@8.57.1)
       eslint-plugin-import: 2.31.0(@typescript-eslint/parser@8.8.0(eslint@8.57.1)(typescript@5.6.2))(eslint-import-resolver-typescript@3.6.3)(eslint@8.57.1)
       eslint-plugin-jsx-a11y: 6.10.0(eslint@8.57.1)
       eslint-plugin-react: 7.37.1(eslint@8.57.1)
@@ -8105,13 +8134,13 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-import-resolver-typescript@3.6.3(@typescript-eslint/parser@8.8.0(eslint@8.57.1)(typescript@5.6.2))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.31.0)(eslint@8.57.1):
+  eslint-import-resolver-typescript@3.6.3(@typescript-eslint/parser@8.8.0(eslint@8.57.1)(typescript@5.6.2))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.8.0(eslint@8.57.1)(typescript@5.6.2))(eslint@8.57.1))(eslint@8.57.1):
     dependencies:
       '@nolyfill/is-core-module': 1.0.39
       debug: 4.3.7(supports-color@5.5.0)
       enhanced-resolve: 5.17.1
       eslint: 8.57.1
-      eslint-module-utils: 2.12.0(@typescript-eslint/parser@8.8.0(eslint@8.57.1)(typescript@5.6.2))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.3)(eslint@8.57.1)
+      eslint-module-utils: 2.12.0(@typescript-eslint/parser@8.8.0(eslint@8.57.1)(typescript@5.6.2))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.3(@typescript-eslint/parser@8.8.0(eslint@8.57.1)(typescript@5.6.2))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.8.0(eslint@8.57.1)(typescript@5.6.2))(eslint@8.57.1))(eslint@8.57.1))(eslint@8.57.1)
       fast-glob: 3.3.2
       get-tsconfig: 4.8.1
       is-bun-module: 1.2.1
@@ -8124,14 +8153,14 @@ snapshots:
       - eslint-import-resolver-webpack
       - supports-color
 
-  eslint-module-utils@2.12.0(@typescript-eslint/parser@8.8.0(eslint@8.57.1)(typescript@5.6.2))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.3)(eslint@8.57.1):
+  eslint-module-utils@2.12.0(@typescript-eslint/parser@8.8.0(eslint@8.57.1)(typescript@5.6.2))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.3(@typescript-eslint/parser@8.8.0(eslint@8.57.1)(typescript@5.6.2))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.8.0(eslint@8.57.1)(typescript@5.6.2))(eslint@8.57.1))(eslint@8.57.1))(eslint@8.57.1):
     dependencies:
       debug: 3.2.7
     optionalDependencies:
       '@typescript-eslint/parser': 8.8.0(eslint@8.57.1)(typescript@5.6.2)
       eslint: 8.57.1
       eslint-import-resolver-node: 0.3.9
-      eslint-import-resolver-typescript: 3.6.3(@typescript-eslint/parser@8.8.0(eslint@8.57.1)(typescript@5.6.2))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.31.0)(eslint@8.57.1)
+      eslint-import-resolver-typescript: 3.6.3(@typescript-eslint/parser@8.8.0(eslint@8.57.1)(typescript@5.6.2))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.8.0(eslint@8.57.1)(typescript@5.6.2))(eslint@8.57.1))(eslint@8.57.1)
     transitivePeerDependencies:
       - supports-color
 
@@ -8146,7 +8175,7 @@ snapshots:
       doctrine: 2.1.0
       eslint: 8.57.1
       eslint-import-resolver-node: 0.3.9
-      eslint-module-utils: 2.12.0(@typescript-eslint/parser@8.8.0(eslint@8.57.1)(typescript@5.6.2))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.3)(eslint@8.57.1)
+      eslint-module-utils: 2.12.0(@typescript-eslint/parser@8.8.0(eslint@8.57.1)(typescript@5.6.2))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.3(@typescript-eslint/parser@8.8.0(eslint@8.57.1)(typescript@5.6.2))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.8.0(eslint@8.57.1)(typescript@5.6.2))(eslint@8.57.1))(eslint@8.57.1))(eslint@8.57.1)
       hasown: 2.0.2
       is-core-module: 2.15.1
       is-glob: 4.0.3
