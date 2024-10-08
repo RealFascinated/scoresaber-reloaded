@@ -1,0 +1,17 @@
+{
+  "name": "@ssr/common",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "tsup src/index.ts --watch",
+    "build": "tsup src/index.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.4",
+    "tsup": "^8",
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "ky": "^1.7.2"
+  }
+}

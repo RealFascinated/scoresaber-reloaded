@@ -1,14 +1,13 @@
 {
-  "name": "scoresaber-reloadedv3",
+  "name": "scoresaber-reloaded",
   "version": "1.0.0",
+  "workspaces": [
+    "projects/backend",
+    "projects/website",
+    "projects/common"
+  ],
   "scripts": {
-    "dev": "pnpm --parallel --workspace-concurrency=4 run -r dev",
-
-    "build:website": "pnpm --filter website build",
-    "build:backend": "pnpm --filter backend build",
-
-    "start:website": "pnpm --filter website start",
-    "start:backend": "pnpm --filter backend start"
+    "dev": "bun run --filter '*' dev"
   },
   "author": "fascinated7",
   "license": "MIT"
