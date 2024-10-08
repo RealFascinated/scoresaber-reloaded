@@ -6,8 +6,8 @@ name: "Deploy Website"
 #    branches:
 #      - master
 #    paths:
-#      - website/**
-#      - common/**
+#      - projects/website/**
+#      - projects/common/**
 #      - .gitea/kubernetes/website/**
 #      - .gitea/workflows/deploy-website.yml
 
