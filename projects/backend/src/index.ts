@@ -2,7 +2,12 @@ import { Elysia } from "elysia";
 import cors from "@elysiajs/cors";
 import { decorators } from "elysia-decorators";
 import { logger } from "@tqman/nice-logger";
-import AppController from "./controller/app";
+import { swagger } from '@elysiajs/swagger'
+import { rateLimit } from 'elysia-rate-limit'
+import { RateLimitError } from "./error/rate-limit-error";
+import { helmet } from 'elysia-helmet';
+import { etag } from '@bogeychan/elysia-etag'
+import AppController from "./controller/app.controller";
 
 const app = new Elysia();
 
@@ -24,6 +29,11 @@ app.onError({ as: "global" }, ({ code, error }) => {
 });
 
 /**
+ * Enable E-Tags
+ */
+app.use(etag());
+
+/**
  * Enable CORS
  */
 app.use(cors());
@@ -38,6 +48,30 @@ app.use(
 );
 
 /**
+ * Rate limit (100 requests per minute)
+ */
+app.use(rateLimit({
+  scoping: "global",
+  duration: 60 * 1000,
+  max: 100,
+  skip: (request) => {
+    let [ _, path ] = request.url.split("/"); // Get the url parts
+    path === "" || path === undefined && (path = "/"); // If we're on /, the path is undefined, so we set it to /
+    return path === "/"; // ignore all requests to /
+  },
+  errorResponse: new RateLimitError("Too many requests, please try again later"),
+}))
+
+/**
+ * Security settings
+ */
+app.use(helmet({
+  hsts: false, // Disable HSTS
+  contentSecurityPolicy: false, // Disable CSP
+  dnsPrefetchControl: true, // Enable DNS prefetch
+}))
+
+/**
  * Controllers
  */
 app.use(
@@ -45,6 +79,11 @@ app.use(
     controllers: [AppController],
   })
 );
+
+/**
+ * Swagger Documentation
+ */
+app.use(swagger());
 
 app.onStart(() => {
   console.log("Listening on port http://localhost:8080");

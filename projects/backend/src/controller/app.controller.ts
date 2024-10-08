@@ -1,9 +1,9 @@
 import { Controller, Get } from "elysia-decorators";
 import { getAppVersion } from "../common/app-utils";
 
-@Controller("/")
+@Controller()
 export default class AppController {
-  @Get()
+  @Get("/")
   public index() {
     return {
       app: "backend",
