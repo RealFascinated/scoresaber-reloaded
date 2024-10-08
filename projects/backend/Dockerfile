@@ -1,4 +1,4 @@
-FROM imbios/bun-node AS base
+FROM oven/bun:1.1.30-alpine AS base
 
 # Install dependencies
 FROM base AS depends
