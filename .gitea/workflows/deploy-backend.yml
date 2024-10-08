@@ -32,7 +32,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: ./backend/Dockerfile
+          file: ./projects/backend/Dockerfile
           push: true
           tags: |
             git.fascinated.cc/fascinated/scoresaber-reloaded-backend:${{ github.sha }}
