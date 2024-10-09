@@ -35,8 +35,6 @@ type PlayerData = {
   search: string;
 };
 
-const playerCache = new NodeCache({ stdTTL: 60, checkperiod: 120 });
-
 /**
  * Gets the player data and scores
  *
@@ -51,11 +49,6 @@ const getPlayerData = async ({ params }: Props, fetchScores: boolean = true): Pr
   const page = parseInt(slug[2]) || 1; // The page number
   const search = (slug[3] as string) || ""; // The search query
 
-  const cacheId = `${id}-${sort}-${page}-${search}`;
-  if (playerCache.has(cacheId)) {
-    return playerCache.get(cacheId) as PlayerData;
-  }
-
   const playerToken = await scoresaberService.lookupPlayer(id);
   const player =
     playerToken && (await getScoreSaberPlayerFromToken(playerToken, config.siteApi, cookies().get("playerId")?.value));
@@ -69,15 +62,13 @@ const getPlayerData = async ({ params }: Props, fetchScores: boolean = true): Pr
     });
   }
 
-  const playerData = {
+  return {
     sort: sort,
     page: page,
     search: search,
     player: player,
     scores: scores,
   };
-  playerCache.set(cacheId, playerData);
-  return playerData;
 };
 
 export async function generateMetadata(props: Props): Promise<Metadata> {

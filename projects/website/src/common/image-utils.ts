@@ -1,5 +1,4 @@
 import { config } from "../../config";
-import { cache } from "react";
 
 /**
  * Proxies all non-localhost images to make them load faster.
