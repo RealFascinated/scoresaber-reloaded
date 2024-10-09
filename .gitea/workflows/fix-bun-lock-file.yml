@@ -1,0 +1,26 @@
+name: Fix bun lock file
+
+on:
+  push:
+    paths:
+      - package.json
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Commit bun lock file
+        run: |
+          git config --global user.email "helper@fascinated.cc"
+          git config --global user.name "Bun Fixer"
+          git add bun.lockb
+          git commit -m "Fix bun lock file"
+          git push
