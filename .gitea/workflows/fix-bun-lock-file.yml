@@ -3,7 +3,7 @@ name: Fix bun lock file
 on:
   push:
     paths:
-      - package.json
+      - '**/package.json' # Detect changes in any package.json file in any directory
 
 jobs:
   build:
