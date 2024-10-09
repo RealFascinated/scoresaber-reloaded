@@ -16,7 +16,7 @@ ARG GIT_REV
 ENV GIT_REV=${GIT_REV}
 
 COPY --from=depends /app/projects/common ./projects/common
-RUN bun --filter common build
+RUN bun --filter '@ssr/common' build
 
 COPY --from=depends /app/node_modules ./node_modules
 COPY --from=depends /app/package.json* /app/bun.lockb* ./
