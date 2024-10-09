@@ -78,3 +78,4 @@ sketch
 .vercel
 next-env.d.ts
 .idea
+secret.yaml
