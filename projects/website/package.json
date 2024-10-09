@@ -1,6 +1,6 @@
 {
   "name": "website",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev --turbo",
@@ -22,9 +22,6 @@
     "@radix-ui/react-tooltip": "^1.1.2",
     "@sentry/nextjs": "8",
     "@tanstack/react-query": "^5.55.4",
-    "@trigger.dev/nextjs": "^3.0.8",
-    "@trigger.dev/react": "^3.0.8",
-    "@trigger.dev/sdk": "^3.0.8",
     "@uidotdev/usehooks": "^2.4.1",
     "chart.js": "^4.4.4",
     "class-variance-authority": "^0.7.0",
@@ -36,7 +33,6 @@
     "js-cookie": "^3.0.5",
     "ky": "^1.7.2",
     "lucide-react": "^0.447.0",
-    "mongoose": "^8.7.0",
     "next": "15.0.0-rc.0",
     "next-build-id": "^3.0.0",
     "next-themes": "^0.3.0",

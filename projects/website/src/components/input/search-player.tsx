@@ -1,7 +1,5 @@
 "use client";
 
-import { scoresaberService } from "@/common/service/impl/scoresaber";
-import ScoreSaberPlayerToken from "@/common/model/token/scoresaber/score-saber-player-token";
 import { formatNumberWithCommas } from "@/common/number-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
@@ -13,6 +11,8 @@ import { Button } from "../ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "../ui/form";
 import { Input } from "../ui/input";
 import { ScrollArea } from "../ui/scroll-area";
+import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/score-saber-player-token";
+import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 
 const formSchema = z.object({
   username: z.string().min(3).max(50),

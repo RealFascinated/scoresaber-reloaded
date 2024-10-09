@@ -1,7 +1,7 @@
-import ScoreSaberPlayer from "@/common/model/player/impl/scoresaber-player";
-import ScoreSaberScoreToken from "@/common/model/token/scoresaber/score-saber-score-token";
 import Image from "next/image";
 import Link from "next/link";
+import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score-saber-score-token";
+import ScoreSaberPlayer from "@ssr/common/types/player/impl/scoresaber-player";
 
 type Props = {
   /**

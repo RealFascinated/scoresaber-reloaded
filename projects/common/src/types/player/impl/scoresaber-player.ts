@@ -3,6 +3,7 @@ import ky from "ky";
 import { PlayerHistory } from "../player-history";
 import ScoreSaberPlayerToken from "../../token/scoresaber/score-saber-player-token";
 import { formatDateMinimal, getDaysAgoDate, getMidnightAlignedDate } from "../../../utils/time-utils";
+import { getPlayerIdCookie } from "website/src/common/website-utils";
 
 /**
  * A ScoreSaber player.
@@ -65,9 +66,15 @@ export default interface ScoreSaberPlayer extends Player {
   isBeingTracked?: boolean;
 }
 
+/**
+ * Gets the ScoreSaber Player from an {@link ScoreSaberPlayerToken}.
+ *
+ * @param token the player token
+ * @param apiUrl the api url for SSR
+ */
 export async function getScoreSaberPlayerFromToken(
-  apiUrl: string,
-  token: ScoreSaberPlayerToken
+  token: ScoreSaberPlayerToken,
+  apiUrl: string
 ): Promise<ScoreSaberPlayer> {
   const bio: ScoreSaberBio = {
     lines: token.bio?.split("\n") || [],
@@ -86,10 +93,10 @@ export async function getScoreSaberPlayerFromToken(
   const todayDate = formatDateMinimal(getMidnightAlignedDate(new Date()));
   let statisticHistory: { [key: string]: PlayerHistory } = {};
   try {
-    const history = await ky
+    const { statistics: history } = await ky
       .get<{
-        [key: string]: PlayerHistory;
-      }>(`${apiUrl}/api/player/history?id=${token.id}`)
+        statistics: { [key: string]: PlayerHistory };
+      }>(`${apiUrl}/player/history/${token.id}${getPlayerIdCookie() == token.id ? "?createIfMissing=true" : ""}`)
       .json();
     if (history === undefined || Object.entries(history).length === 0) {
       console.log("Player has no history, using fallback");

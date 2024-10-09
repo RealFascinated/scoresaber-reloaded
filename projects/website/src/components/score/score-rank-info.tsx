@@ -1,9 +1,9 @@
-import ScoreSaberScoreToken from "@/common/model/token/scoresaber/score-saber-score-token";
 import { formatNumberWithCommas } from "@/common/number-utils";
-import { timeAgo } from "@/common/time-utils";
 import { format } from "@formkit/tempo";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import Tooltip from "../tooltip";
+import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score-saber-score-token";
+import { timeAgo } from "@ssr/common/utils/time-utils";
 
 type Props = {
   score: ScoreSaberScoreToken;

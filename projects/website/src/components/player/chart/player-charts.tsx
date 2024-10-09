@@ -1,12 +1,12 @@
 "use client";
 
-import ScoreSaberPlayer from "@/common/model/player/impl/scoresaber-player";
 import PlayerRankingChart from "@/components/player/chart/player-ranking-chart";
 import { FC, useState } from "react";
 import Tooltip from "@/components/tooltip";
 import PlayerAccuracyChart from "@/components/player/chart/player-accuracy-chart";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import { TrendingUpIcon } from "lucide-react";
+import ScoreSaberPlayer from "@ssr/common/types/player/impl/scoresaber-player";
 
 type PlayerChartsProps = {
   /**

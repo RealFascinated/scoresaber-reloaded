@@ -10,7 +10,7 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`ssr.fascinated.cc`) && PathPrefix(`/api-test`)
+    - match: Host(`ssr.fascinated.cc`) && PathPrefix(`/api`)
       kind: Rule
       middlewares:
         - name: default-headers

@@ -1,25 +1,30 @@
-FROM node:20-alpine3.17 AS base
+FROM oven/bun:1.1.30-alpine AS base
 
-# Install pnpm
-RUN npm install -g pnpm
-ENV PNPM_HOME=/usr/local/bin
+# Install dependencies
+FROM base AS depends
+WORKDIR /app
+COPY . .
+RUN bun install --frozen-lockfile
 
+# Run the app
 FROM base AS runner
 WORKDIR /app
 
-# Copy website package and lock files only
-COPY package.json* pnpm-lock.yaml* pnpm-workspace.yaml* ./
-COPY website ./website
-
+# Set the environment
+ENV NODE_ENV production
 ARG GIT_REV
 ENV GIT_REV=${GIT_REV}
 
-RUN pnpm install --filter website
-RUN pnpm run build:website
+COPY --from=depends /app/node_modules ./node_modules
+COPY --from=depends /app/package.json* /app/bun.lockb* ./
+COPY --from=depends /app/projects/website ./projects/website
 
-# Expose the app port and start it
+# Build the website
+RUN bun run  --filter website build
+
+# Expose the app port
 EXPOSE 3000
 ENV HOSTNAME="0.0.0.0"
 ENV PORT=3000
 
-CMD ["pnpm", "start:website"]
+CMD ["bun", "run", "--filter", "backend", "start"]

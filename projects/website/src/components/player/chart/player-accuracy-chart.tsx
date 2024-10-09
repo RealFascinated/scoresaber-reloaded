@@ -1,9 +1,9 @@
 "use client";
 
-import ScoreSaberPlayer from "@/common/model/player/impl/scoresaber-player";
 import React from "react";
 import { DatasetConfig } from "@/components/chart/generic-chart";
 import GenericPlayerChart from "@/components/player/chart/generic-player-chart";
+import ScoreSaberPlayer from "@ssr/common/types/player/impl/scoresaber-player";
 
 type Props = {
   player: ScoreSaberPlayer;

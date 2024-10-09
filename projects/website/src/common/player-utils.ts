@@ -1,4 +1,4 @@
-import { PlayerHistory } from "@/common/player/player-history";
+import { PlayerHistory } from "@ssr/common/types/player/player-history";
 
 /**
  * Gets a value from an {@link PlayerHistory}

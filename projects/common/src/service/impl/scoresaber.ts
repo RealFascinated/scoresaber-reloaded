@@ -1,7 +1,6 @@
 import Service from "../service";
 import { ScoreSaberPlayerSearchToken } from "../../types/token/scoresaber/score-saber-player-search-token";
 import ScoreSaberPlayerToken from "../../types/token/scoresaber/score-saber-player-token";
-import ScoreSaberPlayer, { getScoreSaberPlayerFromToken } from "../../types/player/impl/scoresaber-player";
 import { ScoreSaberPlayersPageToken } from "../../types/token/scoresaber/score-saber-players-page-token";
 import { ScoreSort } from "../../types/score/score-sort";
 import ScoreSaberPlayerScoresPageToken from "../../types/token/scoresaber/score-saber-player-scores-page-token";
@@ -55,19 +54,9 @@ class ScoreSaberService extends Service {
    * Looks up a player by their ID.
    *
    * @param playerId the ID of the player to look up
-   * @param apiUrl the url to the API for SSR
    * @returns the player that matches the ID, or undefined
    */
-  async lookupPlayer(
-    playerId: string,
-    apiUrl: string
-  ): Promise<
-    | {
-        player: ScoreSaberPlayer;
-        rawPlayer: ScoreSaberPlayerToken;
-      }
-    | undefined
-  > {
+  async lookupPlayer(playerId: string): Promise<ScoreSaberPlayerToken | undefined> {
     const before = performance.now();
     this.log(`Looking up player "${playerId}"...`);
     const token = await this.fetch<ScoreSaberPlayerToken>(LOOKUP_PLAYER_ENDPOINT.replace(":id", playerId));
@@ -75,10 +64,7 @@ class ScoreSaberService extends Service {
       return undefined;
     }
     this.log(`Found player "${playerId}" in ${(performance.now() - before).toFixed(0)}ms`);
-    return {
-      player: await getScoreSaberPlayerFromToken(apiUrl, token),
-      rawPlayer: token,
-    };
+    return token;
   }
 
   /**

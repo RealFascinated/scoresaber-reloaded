@@ -1,5 +1,5 @@
 import * as Comlink from "comlink";
-import { scoresaberService } from "@/common/service/impl/scoresaber";
+import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 
 export interface WorkerApi {
   getPlayerExample: typeof getPlayerExample;

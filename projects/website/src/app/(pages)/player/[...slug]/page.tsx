@@ -1,14 +1,16 @@
 import { formatNumberWithCommas, formatPp } from "@/common/number-utils";
-import { scoresaberService } from "@/common/service/impl/scoresaber";
-import { ScoreSort } from "@/common/model/score/score-sort";
 import PlayerData from "@/components/player/player-data";
 import { format } from "@formkit/tempo";
 import { Metadata, Viewport } from "next";
 import { redirect } from "next/navigation";
 import { Colors } from "@/common/colors";
-import ScoreSaberPlayerScoresPageToken from "@/common/model/token/scoresaber/score-saber-player-scores-page-token";
 import { getAverageColor } from "@/common/image-utils";
 import { cache } from "react";
+import { ScoreSort } from "@ssr/common/types/score/score-sort";
+import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
+import ScoreSaberPlayerScoresPageToken from "@ssr/common/types/token/scoresaber/score-saber-player-scores-page-token";
+import { getScoreSaberPlayerFromToken } from "@ssr/common/types/player/impl/scoresaber-player";
+import { config } from "../../../../../config";
 
 const UNKNOWN_PLAYER = {
   title: "ScoreSaber Reloaded - Unknown Player",
@@ -38,7 +40,8 @@ const getPlayerData = cache(async ({ params }: Props, fetchScores: boolean = tru
   const page = parseInt(slug[2]) || 1; // The page number
   const search = (slug[3] as string) || ""; // The search query
 
-  const player = (await scoresaberService.lookupPlayer(id, false))?.player;
+  const playerToken = await scoresaberService.lookupPlayer(id);
+  const player = playerToken && (await getScoreSaberPlayerFromToken(playerToken, config.siteApi));
   let scores: ScoreSaberPlayerScoresPageToken | undefined;
   if (fetchScores) {
     scores = await scoresaberService.lookupPlayerScores({

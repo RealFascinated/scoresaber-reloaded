@@ -1,5 +1,5 @@
 import Card from "@/components/card";
-import { Skeleton } from "@/app/components/ui/skeleton";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export function PlayerRankingSkeleton() {
   const skeletonArray = new Array(5).fill(0);

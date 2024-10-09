@@ -1,5 +1,3 @@
-import ScoreSaberPlayerToken from "@/common/model/token/scoresaber/score-saber-player-token";
-import { ScoreSaberPlayersPageToken } from "@/common/model/token/scoresaber/score-saber-players-page-token";
 import { formatNumberWithCommas, formatPp } from "@/common/number-utils";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import { useQuery } from "@tanstack/react-query";
@@ -8,9 +6,11 @@ import { ReactElement } from "react";
 import Card from "../card";
 import CountryFlag from "../country-flag";
 import { Avatar, AvatarImage } from "../ui/avatar";
-import ScoreSaberPlayer from "@/common/model/player/impl/scoresaber-player";
-import { scoresaberService } from "@/common/service/impl/scoresaber";
 import { PlayerRankingSkeleton } from "@/components/ranking/player-ranking-skeleton";
+import ScoreSaberPlayer from "@ssr/common/types/player/impl/scoresaber-player";
+import { ScoreSaberPlayersPageToken } from "@ssr/common/types/token/scoresaber/score-saber-players-page-token";
+import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
+import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/score-saber-player-token";
 
 const PLAYER_NAME_MAX_LENGTH = 18;
 

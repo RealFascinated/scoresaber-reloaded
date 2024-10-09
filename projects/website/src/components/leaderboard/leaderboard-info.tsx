@@ -1,9 +1,9 @@
 import Card from "@/components/card";
-import ScoreSaberLeaderboardToken from "@/common/model/token/scoresaber/score-saber-leaderboard-token";
 import Image from "next/image";
 import { LeaderboardSongStarCount } from "@/components/leaderboard/leaderboard-song-star-count";
 import ScoreButtons from "@/components/score/score-buttons";
 import BeatSaverMap from "@/common/database/types/beatsaver-map";
+import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/score-saber-leaderboard-token";
 
 type LeaderboardInfoProps = {
   /**

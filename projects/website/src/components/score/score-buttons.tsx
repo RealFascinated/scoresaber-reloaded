@@ -1,6 +1,5 @@
 "use client";
 
-import { copyToClipboard } from "../../../../common/src/utils/browser-utils";
 import BeatSaverMap from "@/common/database/types/beatsaver-map";
 import { songNameToYouTubeLink } from "@/common/youtube-utils";
 import BeatSaverLogo from "@/components/logos/beatsaver-logo";
@@ -9,7 +8,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Dispatch, SetStateAction } from "react";
 import LeaderboardButton from "./leaderboard-button";
 import ScoreButton from "./score-button";
-import ScoreSaberLeaderboardToken from "@/common/model/token/scoresaber/score-saber-leaderboard-token";
+import { copyToClipboard } from "@/common/browser-utils";
+import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/score-saber-leaderboard-token";
 
 type Props = {
   leaderboard: ScoreSaberLeaderboardToken;

@@ -1,6 +1,6 @@
-import ScoreSaberScoreToken from "@/common/model/token/scoresaber/score-saber-score-token";
-import ScoreSaberLeaderboardToken from "@/common/model/token/scoresaber/score-saber-leaderboard-token";
 import StatValue from "@/components/stat-value";
+import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score-saber-score-token";
+import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/score-saber-leaderboard-token";
 
 /**
  * A badge to display in the score stats.

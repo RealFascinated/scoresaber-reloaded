@@ -7,4 +7,4 @@ metadata:
 spec:
   stripPrefix:
     prefixes:
-      - "/api-test"
+      - "/api"

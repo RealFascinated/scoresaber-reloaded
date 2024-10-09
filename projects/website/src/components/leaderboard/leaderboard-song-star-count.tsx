@@ -1,7 +1,7 @@
 import { songDifficultyToColor } from "@/common/song-utils";
 import { StarIcon } from "@heroicons/react/24/solid";
-import ScoreSaberLeaderboardToken from "@/common/model/token/scoresaber/score-saber-leaderboard-token";
 import { getDifficultyFromScoreSaberDifficulty } from "@/common/scoresaber-utils";
+import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/score-saber-leaderboard-token";
 
 type LeaderboardSongStarCountProps = {
   /**

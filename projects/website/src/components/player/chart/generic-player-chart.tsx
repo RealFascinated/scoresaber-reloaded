@@ -1,10 +1,10 @@
 "use client";
 
-import { parseDate } from "@/common/time-utils";
-import ScoreSaberPlayer from "@/common/model/player/impl/scoresaber-player";
 import React from "react";
 import GenericChart, { DatasetConfig } from "@/components/chart/generic-chart";
 import { getValueFromHistory } from "@/common/player-utils";
+import ScoreSaberPlayer from "@ssr/common/types/player/impl/scoresaber-player";
+import { parseDate } from "@ssr/common/utils/time-utils";
 
 type Props = {
   /**

@@ -1,6 +1,6 @@
 import { formatNumberWithCommas } from "@/common/number-utils";
 import StatValue from "@/components/stat-value";
-import ScoreSaberPlayer from "@/common/model/player/impl/scoresaber-player";
+import ScoreSaberPlayer from "@ssr/common/types/player/impl/scoresaber-player";
 
 type Badge = {
   name: string;

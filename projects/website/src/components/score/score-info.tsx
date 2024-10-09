@@ -1,5 +1,4 @@
 import BeatSaverMap from "@/common/database/types/beatsaver-map";
-import ScoreSaberLeaderboardToken from "@/common/model/token/scoresaber/score-saber-leaderboard-token";
 import { getDifficultyFromScoreSaberDifficulty } from "@/common/scoresaber-utils";
 import FallbackLink from "@/components/fallback-link";
 import Tooltip from "@/components/tooltip";
@@ -8,6 +7,7 @@ import clsx from "clsx";
 import Image from "next/image";
 import { songDifficultyToColor } from "@/common/song-utils";
 import Link from "next/link";
+import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/score-saber-leaderboard-token";
 
 type Props = {
   leaderboard: ScoreSaberLeaderboardToken;

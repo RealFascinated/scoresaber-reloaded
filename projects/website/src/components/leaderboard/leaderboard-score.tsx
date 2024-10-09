@@ -1,9 +1,9 @@
-import ScoreSaberLeaderboardToken from "@/common/model/token/scoresaber/score-saber-leaderboard-token";
-import ScoreSaberScoreToken from "@/common/model/token/scoresaber/score-saber-score-token";
 import LeaderboardPlayer from "./leaderboard-player";
 import LeaderboardScoreStats from "./leaderboard-score-stats";
 import ScoreRankInfo from "@/components/score/score-rank-info";
-import ScoreSaberPlayer from "@/common/model/player/impl/scoresaber-player";
+import ScoreSaberPlayer from "@ssr/common/types/player/impl/scoresaber-player";
+import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score-saber-score-token";
+import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/score-saber-leaderboard-token";
 
 type Props = {
   /**

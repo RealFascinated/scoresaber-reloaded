@@ -26,3 +26,9 @@ spec:
             limits:
               cpu: 1000m # 1 vCPU
               memory: 512Mi
+          env:
+            - name: MONGO_URI
+              valueFrom:
+                secretKeyRef:
+                  name: ssr-backend-secret
+                  key: MONGO_URI

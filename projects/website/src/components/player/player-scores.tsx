@@ -7,15 +7,15 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Card from "../card";
 import Pagination from "../input/pagination";
 import { Button } from "../ui/button";
-import { ScoreSort } from "@/common/model/score/score-sort";
-import ScoreSaberPlayerScoresPageToken from "@/common/model/token/scoresaber/score-saber-player-scores-page-token";
 import Score from "@/components/score/score";
-import ScoreSaberPlayer from "@/common/model/player/impl/scoresaber-player";
-import { scoresaberService } from "@/common/service/impl/scoresaber";
 import { Input } from "@/components/ui/input";
 import { clsx } from "clsx";
 import { useDebounce } from "@uidotdev/usehooks";
 import { scoreAnimation } from "@/components/score/score-animation";
+import ScoreSaberPlayer from "@ssr/common/types/player/impl/scoresaber-player";
+import ScoreSaberPlayerScoresPageToken from "@ssr/common/types/token/scoresaber/score-saber-player-scores-page-token";
+import { ScoreSort } from "@ssr/common/types/score/score-sort";
+import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 
 type Props = {
   initialScoreData?: ScoreSaberPlayerScoresPageToken;

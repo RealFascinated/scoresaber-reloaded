@@ -3,12 +3,19 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "tsup src/index.ts --watch",
-    "build": "tsup src/index.ts"
+    "dev": "tsc --watch --preserveWatchOutput",
+    "build": "tsc"
+  },
+  "exports": {
+    "./*": {
+      "types": "./dist/*.d.ts",
+      "import": "./dist/*.js",
+      "require": "./dist/*.js",
+      "default": "./dist/*.js"
+    }
   },
   "devDependencies": {
     "@types/node": "^22.7.4",
-    "tsup": "^8",
     "typescript": "^5"
   },
   "dependencies": {

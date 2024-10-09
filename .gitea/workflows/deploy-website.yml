@@ -1,15 +1,15 @@
 name: "Deploy Website"
 
-#on:
-#  workflow_dispatch:
-#  push:
-#    branches:
-#      - master
-#    paths:
-#      - projects/website/**
-#      - projects/common/**
-#      - .gitea/kubernetes/website/**
-#      - .gitea/workflows/deploy-website.yml
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+    paths:
+      - projects/website/**
+      - projects/common/**
+      - .gitea/kubernetes/website/**
+      - .gitea/workflows/deploy-website.yml
 
 jobs:
   deploy:

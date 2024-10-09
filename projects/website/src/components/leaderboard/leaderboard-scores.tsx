@@ -1,8 +1,5 @@
 "use client";
 
-import { scoresaberService } from "@/common/service/impl/scoresaber";
-import ScoreSaberLeaderboardToken from "@/common/model/token/scoresaber/score-saber-leaderboard-token";
-import ScoreSaberLeaderboardScoresPageToken from "@/common/model/token/scoresaber/score-saber-leaderboard-scores-page-token";
 import useWindowDimensions from "@/hooks/use-window-dimensions";
 import { useQuery } from "@tanstack/react-query";
 import { motion, useAnimation } from "framer-motion";
@@ -11,10 +8,13 @@ import Card from "../card";
 import Pagination from "../input/pagination";
 import LeaderboardScore from "./leaderboard-score";
 import { scoreAnimation } from "@/components/score/score-animation";
-import ScoreSaberPlayer from "@/common/model/player/impl/scoresaber-player";
 import { Button } from "@/components/ui/button";
 import { clsx } from "clsx";
 import { getDifficultyFromRawDifficulty } from "@/common/song-utils";
+import ScoreSaberLeaderboardScoresPageToken from "@ssr/common/types/token/scoresaber/score-saber-leaderboard-scores-page-token";
+import ScoreSaberPlayer from "@ssr/common/types/player/impl/scoresaber-player";
+import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/score-saber-leaderboard-token";
+import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 
 type LeaderboardScoresProps = {
   /**

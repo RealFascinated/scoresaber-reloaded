@@ -10,6 +10,15 @@ export function setPlayerIdCookie(playerId: string) {
 }
 
 /**
+ * Gets the player id cookie
+ *
+ * @returns the player id cookie
+ */
+export function getPlayerIdCookie() {
+  return Cookies.get("playerId");
+}
+
+/**
  * Gets if we're in production
  */
 export function isProduction() {
