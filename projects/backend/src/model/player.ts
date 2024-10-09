@@ -1,4 +1,4 @@
-import { getModelForClass, prop, ReturnModelType } from "@typegoose/typegoose";
+import { getModelForClass, modelOptions, prop, ReturnModelType, Severity } from "@typegoose/typegoose";
 import { Document } from "mongoose";
 import { PlayerHistory } from "@ssr/common/types/player/player-history";
 import { formatDateMinimal, getDaysAgoDate, getMidnightAlignedDate } from "@ssr/common/utils/time-utils";
@@ -6,6 +6,7 @@ import { formatDateMinimal, getDaysAgoDate, getMidnightAlignedDate } from "@ssr/
 /**
  * The model for a player.
  */
+@modelOptions({ options: { allowMixed: Severity.ALLOW } })
 export class Player {
   /**
    * The id of the player.
