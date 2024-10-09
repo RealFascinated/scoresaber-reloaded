@@ -5,13 +5,13 @@ import { Metadata, Viewport } from "next";
 import { redirect } from "next/navigation";
 import { Colors } from "@/common/colors";
 import { getAverageColor } from "@/common/image-utils";
-import { cache } from "react";
 import { ScoreSort } from "@ssr/common/types/score/score-sort";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import ScoreSaberPlayerScoresPageToken from "@ssr/common/types/token/scoresaber/score-saber-player-scores-page-token";
-import { getScoreSaberPlayerFromToken } from "@ssr/common/types/player/impl/scoresaber-player";
+import ScoreSaberPlayer, { getScoreSaberPlayerFromToken } from "@ssr/common/types/player/impl/scoresaber-player";
 import { config } from "../../../../../config";
 import { cookies } from "next/headers";
+import NodeCache from "node-cache";
 
 const UNKNOWN_PLAYER = {
   title: "ScoreSaber Reloaded - Unknown Player",
@@ -27,6 +27,16 @@ type Props = {
   }>;
 };
 
+type PlayerData = {
+  player: ScoreSaberPlayer | undefined;
+  scores: ScoreSaberPlayerScoresPageToken | undefined;
+  sort: ScoreSort;
+  page: number;
+  search: string;
+};
+
+const playerCache = new NodeCache({ stdTTL: 60, checkperiod: 120 });
+
 /**
  * Gets the player data and scores
  *
@@ -34,12 +44,17 @@ type Props = {
  * @param fetchScores whether to fetch the scores
  * @returns the player data and scores
  */
-const getPlayerData = cache(async ({ params }: Props, fetchScores: boolean = true) => {
+const getPlayerData = async ({ params }: Props, fetchScores: boolean = true): Promise<PlayerData> => {
   const { slug } = await params;
   const id = slug[0]; // The players id
   const sort: ScoreSort = (slug[1] as ScoreSort) || "recent"; // The sorting method
   const page = parseInt(slug[2]) || 1; // The page number
   const search = (slug[3] as string) || ""; // The search query
+
+  const cacheId = `${id}-${sort}-${page}-${search}`;
+  if (playerCache.has(cacheId)) {
+    return playerCache.get(cacheId) as PlayerData;
+  }
 
   const playerToken = await scoresaberService.lookupPlayer(id);
   const player =
@@ -54,14 +69,16 @@ const getPlayerData = cache(async ({ params }: Props, fetchScores: boolean = tru
     });
   }
 
-  return {
+  const playerData = {
     sort: sort,
     page: page,
     search: search,
     player: player,
     scores: scores,
   };
-});
+  playerCache.set(cacheId, playerData);
+  return playerData;
+};
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
   const { player } = await getPlayerData(props, false);

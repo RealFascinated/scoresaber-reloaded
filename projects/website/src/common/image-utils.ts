@@ -17,8 +17,8 @@ export function getImageUrl(originalUrl: string) {
  * @param src the image url
  * @returns the average color
  */
-export const getAverageColor = cache(async (src: string) => {
+export const getAverageColor = async (src: string) => {
   return {
     hex: "#fff",
   };
-});
+};

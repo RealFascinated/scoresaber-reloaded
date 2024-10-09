@@ -9,7 +9,6 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@ssr/common": "workspace:*",
     "@formkit/tempo": "^0.1.2",
     "@heroicons/react": "^2.1.5",
     "@hookform/resolvers": "^3.9.0",
@@ -21,6 +20,7 @@
     "@radix-ui/react-toast": "^1.2.1",
     "@radix-ui/react-tooltip": "^1.1.2",
     "@sentry/nextjs": "8",
+    "@ssr/common": "workspace:*",
     "@tanstack/react-query": "^5.55.4",
     "@uidotdev/usehooks": "^2.4.1",
     "chart.js": "^4.4.4",
@@ -36,6 +36,7 @@
     "next": "15.0.0-rc.0",
     "next-build-id": "^3.0.0",
     "next-themes": "^0.3.0",
+    "node-cache": "^5.1.2",
     "react": "19.0.0-rc-d5bba18b-20241009",
     "react-chartjs-2": "^5.2.0",
     "react-dom": "19.0.0-rc-d5bba18b-20241009",
