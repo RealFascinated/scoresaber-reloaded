@@ -1,11 +1,11 @@
-import ScoreSaberLeaderboardToken from "@/common/model/token/scoresaber/score-saber-leaderboard-token";
-import ScoreSaberScoreToken from "@/common/model/token/scoresaber/score-saber-score-token";
 import { formatNumberWithCommas, formatPp } from "@/common/number-utils";
 import { getScoreBadgeFromAccuracy } from "@/common/song-utils";
 import { XMarkIcon } from "@heroicons/react/24/solid";
 import clsx from "clsx";
 import Tooltip from "@/components/tooltip";
 import { ScoreBadge, ScoreBadges } from "@/components/score/score-badge";
+import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score-saber-score-token";
+import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/score-saber-leaderboard-token";
 
 const badges: ScoreBadge[] = [
   {

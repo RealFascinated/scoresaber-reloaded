@@ -1,11 +1,11 @@
-import { scoresaberService } from "@/common/service/impl/scoresaber";
 import { Metadata, Viewport } from "next";
 import { redirect } from "next/navigation";
 import { Colors } from "@/common/colors";
 import { getAverageColor } from "@/common/image-utils";
 import { cache } from "react";
-import ScoreSaberLeaderboardScoresPageToken from "@/common/model/token/scoresaber/score-saber-leaderboard-scores-page-token";
 import { LeaderboardData } from "@/components/leaderboard/leaderboard-data";
+import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
+import ScoreSaberLeaderboardScoresPageToken from "@ssr/common/types/token/scoresaber/score-saber-leaderboard-scores-page-token";
 
 const UNKNOWN_LEADERBOARD = {
   title: "ScoreSaber Reloaded - Unknown Leaderboard",

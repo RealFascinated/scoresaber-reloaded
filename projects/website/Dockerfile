@@ -15,12 +15,16 @@ ENV NODE_ENV production
 ARG GIT_REV
 ENV GIT_REV=${GIT_REV}
 
+# Copy the depends
+COPY --from=depends /app/package.json* /app/bun.lockb* ./
+COPY --from=depends /app/node_modules ./node_modules
+
+# Build the common library
 COPY --from=depends /app/projects/common ./projects/common
 RUN bun i -g typescript
 RUN bun --filter '@ssr/common' build
 
-COPY --from=depends /app/node_modules ./node_modules
-COPY --from=depends /app/package.json* /app/bun.lockb* ./
+# Copy the website project
 COPY --from=depends /app/projects/website ./projects/website
 
 # Build the website

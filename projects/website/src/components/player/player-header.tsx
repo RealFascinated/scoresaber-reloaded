@@ -5,10 +5,10 @@ import CountryFlag from "../country-flag";
 import { Avatar, AvatarImage } from "../ui/avatar";
 import ClaimProfile from "./claim-profile";
 import PlayerStats from "./player-stats";
-import ScoreSaberPlayer from "@/common/model/player/impl/scoresaber-player";
 import Tooltip from "@/components/tooltip";
 import { ReactElement } from "react";
 import PlayerTrackedStatus from "@/components/player/player-tracked-status";
+import ScoreSaberPlayer from "@ssr/common/types/player/impl/scoresaber-player";
 
 /**
  * Renders the change for a stat.
