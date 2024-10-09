@@ -15,6 +15,7 @@ import ScoreSaberPlayerScoresPageToken from "@ssr/common/types/token/scoresaber/
 import { ScoreSort } from "@ssr/common/types/score/score-sort";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { config } from "../../../config";
+import { getPlayerIdCookie } from "@/common/website-utils";
 
 type Props = {
   initialPlayerData: ScoreSaberPlayer;
@@ -43,7 +44,7 @@ export default function PlayerData({
       if (playerResponse == undefined) {
         return undefined;
       }
-      return await getScoreSaberPlayerFromToken(playerResponse, config.siteApi);
+      return await getScoreSaberPlayerFromToken(playerResponse, config.siteApi, getPlayerIdCookie());
     },
     staleTime: 1000 * 60 * 5, // Cache data for 5 minutes
   });

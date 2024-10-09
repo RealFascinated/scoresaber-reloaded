@@ -3,7 +3,6 @@ import ky from "ky";
 import { PlayerHistory } from "../player-history";
 import ScoreSaberPlayerToken from "../../token/scoresaber/score-saber-player-token";
 import { formatDateMinimal, getDaysAgoDate, getMidnightAlignedDate } from "../../../utils/time-utils";
-import { getPlayerIdCookie } from "website/src/common/website-utils";
 
 /**
  * A ScoreSaber player.
@@ -71,10 +70,12 @@ export default interface ScoreSaberPlayer extends Player {
  *
  * @param token the player token
  * @param apiUrl the api url for SSR
+ * @param playerIdCookie the player id cookie (doesn't need to be set)
  */
 export async function getScoreSaberPlayerFromToken(
   token: ScoreSaberPlayerToken,
-  apiUrl: string
+  apiUrl: string,
+  playerIdCookie?: string
 ): Promise<ScoreSaberPlayer> {
   const bio: ScoreSaberBio = {
     lines: token.bio?.split("\n") || [],
@@ -96,7 +97,7 @@ export async function getScoreSaberPlayerFromToken(
     const { statistics: history } = await ky
       .get<{
         statistics: { [key: string]: PlayerHistory };
-      }>(`${apiUrl}/player/history/${token.id}${getPlayerIdCookie() == token.id ? "?createIfMissing=true" : ""}`)
+      }>(`${apiUrl}/player/history/${token.id}${playerIdCookie == token.id ? "?createIfMissing=true" : ""}`)
       .json();
     if (history === undefined || Object.entries(history).length === 0) {
       console.log("Player has no history, using fallback");

@@ -11,6 +11,7 @@ import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import ScoreSaberPlayerScoresPageToken from "@ssr/common/types/token/scoresaber/score-saber-player-scores-page-token";
 import { getScoreSaberPlayerFromToken } from "@ssr/common/types/player/impl/scoresaber-player";
 import { config } from "../../../../../config";
+import { getPlayerIdCookie } from "@/common/website-utils";
 
 const UNKNOWN_PLAYER = {
   title: "ScoreSaber Reloaded - Unknown Player",
@@ -41,7 +42,7 @@ const getPlayerData = cache(async ({ params }: Props, fetchScores: boolean = tru
   const search = (slug[3] as string) || ""; // The search query
 
   const playerToken = await scoresaberService.lookupPlayer(id);
-  const player = playerToken && (await getScoreSaberPlayerFromToken(playerToken, config.siteApi));
+  const player = playerToken && (await getScoreSaberPlayerFromToken(playerToken, config.siteApi, getPlayerIdCookie()));
   let scores: ScoreSaberPlayerScoresPageToken | undefined;
   if (fetchScores) {
     scores = await scoresaberService.lookupPlayerScores({
