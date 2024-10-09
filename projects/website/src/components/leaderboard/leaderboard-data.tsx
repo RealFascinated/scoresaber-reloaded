@@ -3,11 +3,12 @@
 import LeaderboardScores from "@/components/leaderboard/leaderboard-scores";
 import { LeaderboardInfo } from "@/components/leaderboard/leaderboard-info";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import BeatSaverMap from "@/common/database/types/beatsaver-map";
 import ScoreSaberLeaderboardScoresPageToken from "@ssr/common/types/token/scoresaber/score-saber-leaderboard-scores-page-token";
 import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/score-saber-leaderboard-token";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
+import { lookupBeatSaverMap } from "@/common/beatsaver-utils";
 
 type LeaderboardDataProps = {
   /**
@@ -38,15 +39,14 @@ export function LeaderboardData({ initialPage, initialScores, initialLeaderboard
     staleTime: 30 * 1000, // Cache data for 30 seconds
   });
 
-  // todo: fix
-  // const fetchBeatSaverData = useCallback(async () => {
-  //   const beatSaverMap = await beatsaverService.lookupMap(initialLeaderboard.songHash);
-  //   setBeatSaverMap(beatSaverMap);
-  // }, [initialLeaderboard.songHash]);
-  //
-  // useEffect(() => {
-  //   fetchBeatSaverData();
-  // }, [fetchBeatSaverData]);
+  const fetchBeatSaverData = useCallback(async () => {
+    const beatSaverMap = await lookupBeatSaverMap(initialLeaderboard.songHash);
+    setBeatSaverMap(beatSaverMap);
+  }, [initialLeaderboard.songHash]);
+
+  useEffect(() => {
+    fetchBeatSaverData();
+  }, [fetchBeatSaverData]);
 
   /**
    * When the leaderboard changes, update the previous and current leaderboards.

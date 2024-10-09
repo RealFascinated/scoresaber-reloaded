@@ -2,7 +2,7 @@
 
 import BeatSaverMap from "@/common/database/types/beatsaver-map";
 import LeaderboardScores from "@/components/leaderboard/leaderboard-scores";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import ScoreButtons from "./score-buttons";
 import ScoreSongInfo from "./score-info";
 import ScoreRankInfo from "./score-rank-info";
@@ -10,6 +10,7 @@ import ScoreStats from "./score-stats";
 import { motion } from "framer-motion";
 import ScoreSaberPlayer from "@ssr/common/types/player/impl/scoresaber-player";
 import ScoreSaberPlayerScoreToken from "@ssr/common/types/token/scoresaber/score-saber-player-score-token";
+import { lookupBeatSaverMap } from "@/common/beatsaver-utils";
 
 type Props = {
   /**
@@ -28,15 +29,14 @@ export default function Score({ player, playerScore }: Props) {
   const [beatSaverMap, setBeatSaverMap] = useState<BeatSaverMap | undefined>();
   const [isLeaderboardExpanded, setIsLeaderboardExpanded] = useState(false);
 
-  // todo: fix
-  // const fetchBeatSaverData = useCallback(async () => {
-  //   const beatSaverMap = await beatsaverService.lookupMap(leaderboard.songHash);
-  //   setBeatSaverMap(beatSaverMap);
-  // }, [leaderboard.songHash]);
-  //
-  // useEffect(() => {
-  //   fetchBeatSaverData();
-  // }, [fetchBeatSaverData]);
+  const fetchBeatSaverData = useCallback(async () => {
+    const beatSaverMap = await lookupBeatSaverMap(leaderboard.songHash);
+    setBeatSaverMap(beatSaverMap);
+  }, [leaderboard.songHash]);
+
+  useEffect(() => {
+    fetchBeatSaverData();
+  }, [fetchBeatSaverData]);
 
   const page = Math.floor(score.rank / 12) + 1;
   return (
