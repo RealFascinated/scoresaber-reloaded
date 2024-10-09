@@ -46,8 +46,8 @@ export default function Navbar() {
   const leftItems = items.filter(item => item.align === "left");
 
   return (
-    <div className="w-full sticky top-0 z-[999]">
-      <div className="h-10 items-center flex justify-between bg-secondary/95 px-1">
+    <div className="w-full sticky top-0 z-[999] h-10 items-center flex justify-between bg-secondary/95 px-1">
+      <div className="md:max-w-[1600px] w-full flex justify-between m-auto">
         {/* Left-aligned items */}
         <div className="flex items-center h-full">
           <ProfileButton />
