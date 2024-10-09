@@ -18,7 +18,6 @@ type DatabaseLoaderProps = {
 };
 
 export default function DatabaseLoader({ children }: DatabaseLoaderProps) {
-  const { toast } = useToast();
   const [database, setDatabase] = useState<Database | undefined>(undefined);
 
   useEffect(() => {
@@ -28,12 +27,8 @@ export default function DatabaseLoader({ children }: DatabaseLoaderProps) {
     db.on("ready", () => {
       const loadTime = (performance.now() - before).toFixed(0);
       console.log(`Loaded database in ${loadTime}ms`);
-      toast({
-        title: "Database loaded",
-        description: `The database was loaded in ${loadTime}ms.`,
-      });
     });
-  }, [toast]);
+  }, []);
 
   return (
     <DatabaseContext.Provider value={database}>
