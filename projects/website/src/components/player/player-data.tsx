@@ -16,9 +16,10 @@ import { ScoreSort } from "@ssr/common/types/score/score-sort";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { config } from "../../../config";
 import { getPlayerIdCookie } from "@/common/website-utils";
-import { useGetPlayerIdCookie } from "@/hooks/use-player-id-cookie";
 import useDatabase from "@/hooks/use-database";
 import { useLiveQuery } from "dexie-react-hooks";
+
+const REFRESH_INTERVAL = 1000 * 60 * 5;
 
 type Props = {
   initialPlayerData: ScoreSaberPlayer;
@@ -51,7 +52,9 @@ export default function PlayerData({
       }
       return await getScoreSaberPlayerFromToken(playerResponse, config.siteApi, getPlayerIdCookie());
     },
-    staleTime: 1000 * 60 * 5, // Cache data for 5 minutes
+    staleTime: REFRESH_INTERVAL,
+    refetchInterval: REFRESH_INTERVAL,
+    refetchIntervalInBackground: false,
   });
 
   if (data && (!isLoading || !isError)) {

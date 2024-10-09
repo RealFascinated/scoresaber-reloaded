@@ -7,7 +7,6 @@ import useDatabase from "../../hooks/use-database";
 import { useToast } from "@/hooks/use-toast";
 import Tooltip from "../tooltip";
 import { Button } from "../ui/button";
-import { router } from "next/client";
 import { revalidatePath } from "next/cache";
 
 type Props = {
