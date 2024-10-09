@@ -23,7 +23,7 @@ const labels: string[] = [];
 const historyDays = 50;
 for (let day = 0; day < historyDays; day++) {
   if (day == 0) {
-    labels.push("Today");
+    labels.push("Now");
   } else if (day == 1) {
     labels.push("Yesterday");
   } else {
