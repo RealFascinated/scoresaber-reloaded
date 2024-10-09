@@ -106,7 +106,7 @@ export default function PlayerHeader({ player }: Props) {
                 {player.inactive && <p className="text-gray-400">Inactive Account</p>}
                 {player.banned && <p className="text-red-500">Banned Account</p>}
               </div>
-              <div className="flex gap-2 flex-wrap">
+              <div className="flex gap-2 flex-wrap justify-center items-center">
                 {playerData.map((subName, index) => {
                   // Check if the player is inactive or banned and if the data should be shown
                   if (!subName.showWhenInactiveOrBanned && (player.inactive || player.banned)) {
