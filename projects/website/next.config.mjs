@@ -14,6 +14,7 @@ const nextConfig = {
     ],
   },
   env: {
+    HOSTNAME: "0.0.0.0",
     NEXT_PUBLIC_BUILD_ID: process.env.GIT_REV || "dev",
     NEXT_PUBLIC_BUILD_TIME: new Date().toLocaleDateString("en-US", {
       year: "numeric",
