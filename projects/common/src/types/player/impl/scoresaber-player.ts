@@ -97,7 +97,9 @@ export async function getScoreSaberPlayerFromToken(
     const { statistics: history } = await ky
       .get<{
         statistics: { [key: string]: PlayerHistory };
-      }>(`${apiUrl}/player/history/${token.id}${playerIdCookie == token.id ? "?createIfMissing=true" : ""}`)
+      }>(
+        `${apiUrl}/player/history/${token.id}${playerIdCookie && playerIdCookie == token.id ? "?createIfMissing=true" : ""}`
+      )
       .json();
     if (history === undefined || Object.entries(history).length === 0) {
       console.log("Player has no history, using fallback");

@@ -16,6 +16,9 @@ import { ScoreSort } from "@ssr/common/types/score/score-sort";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { config } from "../../../config";
 import { getPlayerIdCookie } from "@/common/website-utils";
+import { useGetPlayerIdCookie } from "@/hooks/use-player-id-cookie";
+import useDatabase from "@/hooks/use-database";
+import { useLiveQuery } from "dexie-react-hooks";
 
 type Props = {
   initialPlayerData: ScoreSaberPlayer;
@@ -35,10 +38,12 @@ export default function PlayerData({
   const isMobile = useIsMobile();
   const miniRankingsRef = useRef<HTMLDivElement>(null);
   const isMiniRankingsVisible = useIsVisible(miniRankingsRef);
+  const database = useDatabase();
+  const settings = useLiveQuery(() => database.getSettings());
 
   let player = initialPlayerData;
   const { data, isLoading, isError } = useQuery({
-    queryKey: ["player", player.id],
+    queryKey: ["playerData", player.id, settings?.playerId],
     queryFn: async (): Promise<ScoreSaberPlayer | undefined> => {
       const playerResponse = await scoresaberService.lookupPlayer(player.id);
       if (playerResponse == undefined) {

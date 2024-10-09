@@ -7,6 +7,8 @@ import useDatabase from "../../hooks/use-database";
 import { useToast } from "@/hooks/use-toast";
 import Tooltip from "../tooltip";
 import { Button } from "../ui/button";
+import { router } from "next/client";
+import { revalidatePath } from "next/cache";
 
 type Props = {
   /**
@@ -32,6 +34,7 @@ export default function ClaimProfile({ playerId }: Props) {
       title: "Profile Claimed",
       description: "You have claimed this profile.",
     });
+    revalidatePath("/player/[...slug]");
   }
 
   if (settings?.playerId == playerId || settings == undefined) {
