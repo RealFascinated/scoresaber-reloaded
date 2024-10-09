@@ -25,10 +25,4 @@ spec:
               memory: 128Mi
             limits:
               cpu: 1000m # 1 vCPU
-              memory: 256Mi
-          env:
-            - name: NEXT_PUBLIC_SITE_URL
-              valueFrom:
-                secretKeyRef:
-                  name: ssr-secret
-                  key: NEXT_PUBLIC_SITE_URL
+              memory: 1024Mi
