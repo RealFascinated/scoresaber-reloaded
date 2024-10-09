@@ -5,6 +5,7 @@ import { app } from "../index";
 import { getDaysAgoDate, getMidnightAlignedDate } from "@ssr/common/utils/time-utils";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/score-saber-player-token";
+import { InternalServerError } from "../error/internal-server-error";
 
 export class PlayerService {
   /**
@@ -49,8 +50,9 @@ export class PlayerService {
       console.log(`Creating player "${id}"...`);
       player = (await PlayerModel.create({ _id: id })) as any;
       if (player === null) {
-        throw new NotFoundError(`Player "${id}" not found`);
+        throw new InternalServerError(`Failed to create player document for "${id}"`);
       }
+      player.trackedSince = new Date();
       await this.seedPlayerHistory(player, playerToken);
       console.log(`Created player "${id}".`);
     } else {

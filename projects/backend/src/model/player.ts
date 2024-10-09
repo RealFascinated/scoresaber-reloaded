@@ -20,8 +20,17 @@ export class Player {
   @prop()
   private statisticHistory?: Record<string, PlayerHistory>;
 
+  /**
+   * The date the player was last tracked.
+   */
   @prop()
   public lastTracked?: Date;
+
+  /**
+   * The date the player was first tracked.
+   */
+  @prop()
+  public trackedSince?: Date;
 
   /**
    * Gets the player's statistic history.
