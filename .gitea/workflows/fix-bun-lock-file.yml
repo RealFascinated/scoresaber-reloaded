@@ -1,6 +1,7 @@
 name: Fix bun lock file
 
 on:
+  workflow_dispatch:
   push:
     paths:
       - '**/package.json' # Detect changes in any package.json file in any directory
