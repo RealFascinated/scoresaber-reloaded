@@ -13,6 +13,7 @@ WORKDIR /app
 ENV NODE_ENV production
 
 COPY --from=depends /app/projects/common ./projects/common
+RUN bun i -g typescript
 RUN bun --filter '@ssr/common' build
 
 COPY --from=depends /app/node_modules ./node_modules
