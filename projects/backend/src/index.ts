@@ -14,6 +14,9 @@ import { Config } from "./common/config";
 import { setLogLevel } from "@typegoose/typegoose";
 import PlayerController from "./controller/player.controller";
 import { PlayerService } from "./service/player.service";
+import { cron } from "@elysiajs/cron";
+import { PlayerDocument, PlayerModel } from "./model/player";
+import { getMidnightAlignedDate } from "@ssr/common/utils/time-utils";
 
 // Load .env file
 dotenv.config({
@@ -25,6 +28,22 @@ dotenv.config({
 await mongoose.connect(Config.mongoUri!); // Connect to MongoDB
 setLogLevel("DEBUG");
 export const app = new Elysia();
+
+app.use(
+  cron({
+    name: "player-statistics-tracker-cron",
+    pattern: "0 1 * * *", // Every day at 00:01 (midnight)
+    timezone: "Europe/London",
+    run: async () => {
+      console.log("Tracking player statistics...");
+      const players: PlayerDocument[] = await PlayerModel.find({});
+      for (const player of players) {
+        await PlayerService.trackScoreSaberPlayer(getMidnightAlignedDate(new Date()), player);
+      }
+      console.log("Finished tracking player statistics.");
+    },
+  })
+);
 
 /**
  * Custom error handler
@@ -98,11 +117,6 @@ app.use(
     controllers: [AppController, PlayerController],
   })
 );
-
-/**
- * Start cronjobs
- */
-PlayerService.initCronjobs();
 
 /**
  * Swagger Documentation
