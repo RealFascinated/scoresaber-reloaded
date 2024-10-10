@@ -100,6 +100,11 @@ app.use(
 );
 
 /**
+ * Start cronjobs
+ */
+PlayerService.initCronjobs();
+
+/**
  * Swagger Documentation
  */
 app.use(swagger());
@@ -107,10 +112,5 @@ app.use(swagger());
 app.onStart(() => {
   console.log("Listening on port http://localhost:8080");
 });
-
-/**
- * Start cronjobs
- */
-PlayerService.initCronjobs();
 
 app.listen(8080);

@@ -12,15 +12,26 @@ export class PlayerService {
    * Initialize the cron jobs
    */
   public static initCronjobs() {
+    (async () => {
+      console.log("Tracking player statistics...");
+      const players: PlayerDocument[] = await PlayerModel.find({});
+      for (const player of players) {
+        await PlayerService.trackScoreSaberPlayer(getMidnightAlignedDate(new Date()), player);
+      }
+      console.log("Finished tracking player statistics.");
+    })();
+
     app.use(
       cron({
         name: "player-statistics-tracker-cron",
         pattern: "0 1 * * *", // Every day at 00:01 (midnight)
         run: async () => {
+          console.log("Tracking player statistics...");
           const players: PlayerDocument[] = await PlayerModel.find({});
           for (const player of players) {
             await PlayerService.trackScoreSaberPlayer(getMidnightAlignedDate(new Date()), player);
           }
+          console.log("Finished tracking player statistics.");
         },
       })
     );
