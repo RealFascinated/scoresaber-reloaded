@@ -68,7 +68,8 @@ export class PlayerService {
    * @param dateToday the date to track
    * @param foundPlayer the player to track
    */
-  public static async trackScoreSaberPlayer(dateToday: Date, foundPlayer: PlayerDocument) {
+  public static async trackScoreSaberPlayer(foundPlayer: PlayerDocument) {
+    const dateToday = getMidnightAlignedDate(new Date());
     const player = await scoresaberService.lookupPlayer(foundPlayer.id);
     if (player == undefined) {
       console.log(`Player "${foundPlayer.id}" not found on ScoreSaber`);

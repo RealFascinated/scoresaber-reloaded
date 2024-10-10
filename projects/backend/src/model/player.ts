@@ -60,13 +60,11 @@ export class Player {
    * @param days the number of days to get the history for.
    */
   public getHistoryPreviousDays(days: number): Record<string, PlayerHistory> {
-    if (this.statisticHistory === undefined) {
-      this.statisticHistory = {};
-    }
+    const statisticHistory = this.getStatisticHistory();
     const history: Record<string, PlayerHistory> = {};
     for (let i = 0; i < days; i++) {
       const date = formatDateMinimal(getMidnightAlignedDate(getDaysAgoDate(i)));
-      const playerHistory = this.getStatisticHistory()[date];
+      const playerHistory = statisticHistory[date];
       if (playerHistory === undefined || Object.keys(playerHistory).length === 0) {
         continue;
       }
@@ -85,7 +83,7 @@ export class Player {
     if (this.statisticHistory === undefined) {
       this.statisticHistory = {};
     }
-    this.getStatisticHistory()[formatDateMinimal(getMidnightAlignedDate(date))] = history;
+    this.statisticHistory[formatDateMinimal(getMidnightAlignedDate(date))] = history;
   }
 
   /**
@@ -96,9 +94,9 @@ export class Player {
     if (this.statisticHistory === undefined) {
       this.statisticHistory = {};
     }
-    return Object.entries(this.getStatisticHistory())
-      .sort((a, b) => Date.parse(b[0]) - Date.parse(a[0]))
-      .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {});
+    this.statisticHistory = Object.fromEntries(
+      Object.entries(this.statisticHistory).sort((a, b) => new Date(b[0]).getTime() - new Date(a[0]).getTime())
+    );
   }
 
   /**

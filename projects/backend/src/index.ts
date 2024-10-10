@@ -32,13 +32,13 @@ export const app = new Elysia();
 app.use(
   cron({
     name: "player-statistics-tracker-cron",
-    pattern: "0 1 * * *", // Every day at 00:01 (midnight)
+    pattern: "*/1 * * * *", // Every day at 00:01 (midnight)
     timezone: "Europe/London",
     run: async () => {
       console.log("Tracking player statistics...");
       const players: PlayerDocument[] = await PlayerModel.find({});
       for (const player of players) {
-        await PlayerService.trackScoreSaberPlayer(getMidnightAlignedDate(new Date()), player);
+        await PlayerService.trackScoreSaberPlayer(player);
       }
       console.log("Finished tracking player statistics.");
     },
