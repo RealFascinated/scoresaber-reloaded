@@ -36,6 +36,7 @@ type Variants = {
     itemsPerPage: number;
     icon: (player: ScoreSaberPlayer) => ReactElement;
     getPage: (player: ScoreSaberPlayer, itemsPerPage: number) => number;
+    getRank: (player: ScoreSaberPlayer) => number;
     query: (page: number, country: string) => Promise<ScoreSaberPlayersPageToken | undefined>;
   };
 };
@@ -46,6 +47,9 @@ const miniVariants: Variants = {
     icon: () => <GlobeAmericasIcon className="w-6 h-6" />,
     getPage: (player: ScoreSaberPlayer, itemsPerPage: number) => {
       return Math.floor((player.rank - 1) / itemsPerPage) + 1;
+    },
+    getRank: (player: ScoreSaberPlayer) => {
+      return player.rank;
     },
     query: (page: number) => {
       return scoresaberService.lookupPlayers(page);
@@ -59,6 +63,9 @@ const miniVariants: Variants = {
     getPage: (player: ScoreSaberPlayer, itemsPerPage: number) => {
       return Math.floor((player.countryRank - 1) / itemsPerPage) + 1;
     },
+    getRank: (player: ScoreSaberPlayer) => {
+      return player.countryRank;
+    },
     query: (page: number, country: string) => {
       return scoresaberService.lookupPlayersByCountry(page, country);
     },
@@ -67,67 +74,72 @@ const miniVariants: Variants = {
 
 export default function Mini({ type, player, shouldUpdate }: MiniProps) {
   if (shouldUpdate == undefined) {
-    // Default to true
     shouldUpdate = true;
   }
+
   const variant = miniVariants[type];
   const icon = variant.icon(player);
-
   const itemsPerPage = variant.itemsPerPage;
+
+  // Calculate the page and the rank of the player within that page
   const page = variant.getPage(player, itemsPerPage);
-  const rankWithinPage = player.rank % itemsPerPage;
+  const rankWithinPage = variant.getRank(player) % itemsPerPage;
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: ["player-" + type, player.id, type, page],
+    queryKey: ["mini-ranking-" + type, player.id, type, page],
     queryFn: async () => {
-      // Determine pages to search based on player's rank within the page
       const pagesToSearch = [page];
       if (rankWithinPage < 5 && page > 1) {
-        // Allow page 1 to be valid
-        // Player is near the start of the page, so search the previous page too
         pagesToSearch.push(page - 1);
       }
       if (rankWithinPage > itemsPerPage - 5) {
-        // Player is near the end of the page, so search the next page too
         pagesToSearch.push(page + 1);
       }
 
-      // Fetch players from the determined pages
       const players: ScoreSaberPlayerToken[] = [];
       for (const p of pagesToSearch) {
         const response = await variant.query(p, player.country);
-        if (response === undefined) {
-          return undefined;
+        if (response) {
+          players.push(...response.players);
         }
-
-        players.push(...response.players);
       }
 
-      return players;
+      // Sort players by rank to ensure correct order
+      return players.sort((a, b) => {
+        // This is the wrong type but it still works.
+        return variant.getRank(a as unknown as ScoreSaberPlayer) - variant.getRank(b as unknown as ScoreSaberPlayer);
+      });
     },
     enabled: shouldUpdate,
   });
 
-  let players = data; // So we can update it later
-  if (players && (!isLoading || !isError)) {
-    // Find the player's position in the list
-    const playerPosition = players.findIndex(p => p.id === player.id);
-
-    // Ensure we always show 5 players
-    const start = Math.max(0, playerPosition - 3); // Start showing 3 players above the player, but not less than index 0
-    const end = Math.min(players.length, start + 5); // Ensure there are 5 players shown
-
-    players = players.slice(start, end);
-
-    // If there are less than 5 players at the top, append more players from below
-    if (players.length < 5 && start === 0) {
-      const additionalPlayers = players.slice(playerPosition + 1, playerPosition + (5 - players.length + 1));
-      players = [...players, ...additionalPlayers];
-    }
-  }
-
   if (isLoading) {
     return <PlayerRankingSkeleton />;
+  }
+
+  if (isError || !data) {
+    return <p className="text-red-500">Error loading ranking</p>;
+  }
+
+  let players = data;
+  const playerPosition = players.findIndex(p => p.id === player.id);
+
+  // Always show 5 players: 3 above and 1 below the player
+  const start = Math.max(0, playerPosition - 3);
+  const end = Math.min(players.length, start + 5);
+
+  players = players.slice(start, end);
+
+  // If fewer than 5 players, append/prepend more
+  if (players.length < 5) {
+    const missingPlayers = 5 - players.length;
+    if (start === 0) {
+      const additionalPlayers = players.slice(playerPosition + 1, playerPosition + 1 + missingPlayers);
+      players = [...players, ...additionalPlayers];
+    } else if (end === players.length) {
+      const additionalPlayers = players.slice(Math.max(0, start - missingPlayers), start);
+      players = [...additionalPlayers, ...players];
+    }
   }
 
   return (
@@ -137,8 +149,7 @@ export default function Mini({ type, player, shouldUpdate }: MiniProps) {
         <p>{type} Ranking</p>
       </div>
       <div className="flex flex-col text-sm">
-        {isError && <p className="text-red-500">Error</p>}
-        {players?.map((playerRanking, index) => {
+        {players.map((playerRanking, index) => {
           const rank = type == "Global" ? playerRanking.rank : playerRanking.countryRank;
           const playerName =
             playerRanking.name.length > PLAYER_NAME_MAX_LENGTH
