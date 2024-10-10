@@ -32,7 +32,7 @@ export const app = new Elysia();
 app.use(
   cron({
     name: "player-statistics-tracker-cron",
-    pattern: "*/1 * * * *", // Every day at 00:01 (midnight)
+    pattern: "0 1 * * *", // Every day at 00:01 (midnight)
     timezone: "Europe/London",
     run: async () => {
       console.log("Tracking player statistics...");
