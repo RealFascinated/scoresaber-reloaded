@@ -12,15 +12,6 @@ export class PlayerService {
    * Initialize the cron jobs
    */
   public static initCronjobs() {
-    (async () => {
-      console.log("Tracking player statistics...");
-      const players: PlayerDocument[] = await PlayerModel.find({});
-      for (const player of players) {
-        await PlayerService.trackScoreSaberPlayer(getMidnightAlignedDate(new Date()), player);
-      }
-      console.log("Finished tracking player statistics.");
-    })();
-
     app.use(
       cron({
         name: "player-statistics-tracker-cron",
@@ -46,10 +37,8 @@ export class PlayerService {
    * @throws NotFoundError if the player is not found
    */
   public static async getPlayer(id: string, create: boolean = false): Promise<PlayerDocument> {
-    console.log(`Fetching player "${id}"...`);
     let player: PlayerDocument | null = await PlayerModel.findById(id);
     if (player === null && !create) {
-      console.log(`Player "${id}" not found.`);
       throw new NotFoundError(`Player "${id}" not found`);
     }
     if (player === null) {
@@ -65,9 +54,6 @@ export class PlayerService {
       }
       player.trackedSince = new Date();
       await this.seedPlayerHistory(player, playerToken);
-      console.log(`Created player "${id}".`);
-    } else {
-      console.log(`Found player "${id}".`);
     }
     return player;
   }
