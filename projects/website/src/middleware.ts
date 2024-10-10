@@ -7,7 +7,7 @@ export function middleware(request: NextRequest) {
   const connectingIp = request.headers.get("CF-Connecting-IP") || request.ip;
 
   // Log requests in production
-  if (!isProduction()) {
+  if (isProduction()) {
     console.log(
       ` ${request.method} ${request.nextUrl.pathname}${connectingIp != undefined ? ` ${connectingIp}` : ""} ${response.status} in ${(Date.now() - before).toFixed(0)}ms`
     );
