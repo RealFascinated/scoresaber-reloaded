@@ -147,7 +147,7 @@ export async function getScoreSaberPlayerFromToken(
       };
     }
   }
-  if (missingDays > 0) {
+  if (missingDays > 0 && missingDays != playerRankHistory.length) {
     console.log(
       `Player has ${missingDays} missing day${missingDays > 1 ? "s" : ""}, filling in with fallback history...`
     );
