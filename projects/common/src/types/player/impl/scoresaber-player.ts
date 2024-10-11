@@ -167,7 +167,31 @@ export async function getScoreSaberPlayerFromToken(
    */
   const getChange = (statType: "rank" | "countryRank" | "pp", daysAgo: number = 1): number => {
     const todayStats = statisticHistory[todayDate];
-    const otherDate = formatDateMinimal(getMidnightAlignedDate(getDaysAgoDate(daysAgo)));
+    let otherDate: string | undefined;
+
+    // Yesterday
+    if (daysAgo == 1) {
+      otherDate = todayDate;
+    } else {
+      // get the closest next date
+      let closestDateDiff = Infinity;
+
+      for (const dateKey in statisticHistory) {
+        const date = new Date(dateKey);
+        const daysDiff = Math.abs(date.getTime() - getDaysAgoDate(daysAgo).getTime());
+
+        // If this date is closer, update the closest date
+        if (daysDiff < closestDateDiff) {
+          closestDateDiff = daysDiff;
+          otherDate = formatDateMinimal(date);
+        }
+      }
+    }
+
+    if (!otherDate) {
+      return 0;
+    }
+
     const otherStats = statisticHistory[otherDate];
     const hasChange = !!(todayStats && otherStats);
 
