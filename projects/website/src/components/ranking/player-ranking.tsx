@@ -7,6 +7,7 @@ import Link from "next/link";
 import useDatabase from "@/hooks/use-database";
 import { useLiveQuery } from "dexie-react-hooks";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { clsx } from "clsx";
 
 type PlayerRankingProps = {
   player: ScoreSaberPlayerToken;
@@ -16,6 +17,9 @@ type PlayerRankingProps = {
 export function PlayerRanking({ player, isCountry }: PlayerRankingProps) {
   const database = useDatabase();
   const settings = useLiveQuery(() => database.getSettings());
+
+  const history = player.histories.split(",").map(Number);
+  const weeklyRankChange = history[history?.length - 6] - player.rank;
 
   return (
     <>
@@ -41,10 +45,18 @@ export function PlayerRanking({ player, isCountry }: PlayerRankingProps) {
           </p>
         </Link>
       </td>
-      <td className="px-4 py-2 text-pp-blue">{formatPp(player.pp)}pp</td>
-      <td className="px-4 py-2">{formatNumberWithCommas(player.scoreStats.totalPlayCount)}</td>
-      <td className="px-4 py-2">{formatNumberWithCommas(player.scoreStats.rankedPlayCount)}</td>
-      <td className="px-4 py-2">{player.scoreStats.averageRankedAccuracy.toFixed(2) + "%"}</td>
+      <td className="px-4 py-2 text-pp-blue text-center">{formatPp(player.pp)}pp</td>
+      <td className="px-4 py-2 text-center">{formatNumberWithCommas(player.scoreStats.totalPlayCount)}</td>
+      <td className="px-4 py-2 text-center">{formatNumberWithCommas(player.scoreStats.rankedPlayCount)}</td>
+      <td className="px-4 py-2 text-center">{player.scoreStats.averageRankedAccuracy.toFixed(2) + "%"}</td>
+      <td
+        className={clsx(
+          "px-4 py-2 text-center",
+          weeklyRankChange >= 0 ? weeklyRankChange != 0 && "text-green-500" : "text-red-500"
+        )}
+      >
+        {weeklyRankChange}
+      </td>
     </>
   );
 }

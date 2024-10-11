@@ -84,14 +84,15 @@ export default function RankingData({ initialPage, country, initialPageData }: R
         <thead>
           <tr>
             <th className="px-4 py-2">Rank</th>
-            <th className="px-4 py-2">Profile</th>
-            <th className="px-4 py-2">Performance Points</th>
-            <th className="px-4 py-2">Total Plays</th>
-            <th className="px-4 py-2">Total Ranked Plays</th>
-            <th className="px-4 py-2">Avg Ranked Accuracy</th>
+            <th className="px-4 py-2">Player</th>
+            <th className="px-4 py-2 text-center">Performance Points</th>
+            <th className="px-4 py-2 text-center">Total Plays</th>
+            <th className="px-4 py-2 text-center">Total Ranked Plays</th>
+            <th className="px-4 py-2 text-center">Avg Ranked Accuracy</th>
+            <th className="px-4 py-2 text-center">Weekly Change</th>
           </tr>
         </thead>
-        <tbody className="border-none">
+        <tbody className="border-none overflow-x-scroll w-full">
           {players.map(player => (
             <tr key={player.rank} className="border-b border-border">
               <PlayerRanking isCountry={country != undefined} player={player} />
