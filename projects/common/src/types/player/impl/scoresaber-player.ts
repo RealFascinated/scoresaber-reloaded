@@ -124,24 +124,35 @@ export async function getScoreSaberPlayerFromToken(
       isBeingTracked = true;
     }
     statisticHistory = history;
-  } catch (error) {
-    // Fallback to ScoreSaber History if the player has no history
-    const playerRankHistory = token.histories.split(",").map(value => {
-      return parseInt(value);
-    });
-    playerRankHistory.push(token.rank);
+  } catch (e) {
+    console.log("Player has no history, using fallback");
+  }
 
-    let daysAgo = 0; // Start from current day
-    for (let i = playerRankHistory.length - 1; i >= 0; i--) {
-      const rank = playerRankHistory[i];
-      const date = getMidnightAlignedDate(getDaysAgoDate(daysAgo));
-      daysAgo += 1; // Increment daysAgo for each earlier rank
+  const playerRankHistory = token.histories.split(",").map(value => {
+    return parseInt(value);
+  });
+  playerRankHistory.push(token.rank);
 
+  let missingDays = 0;
+  let daysAgo = 0; // Start from current day
+  for (let i = playerRankHistory.length - 1; i >= 0; i--) {
+    const rank = playerRankHistory[i];
+    const date = getMidnightAlignedDate(getDaysAgoDate(daysAgo));
+    daysAgo += 1; // Increment daysAgo for each earlier rank
+
+    if (statisticHistory[formatDateMinimal(date)] == undefined) {
+      missingDays += 1;
       statisticHistory[formatDateMinimal(date)] = {
         rank: rank,
       };
     }
   }
+  if (missingDays > 0) {
+    console.log(
+      `Player has ${missingDays} missing day${missingDays > 1 ? "s" : ""}, filling in with fallback history...`
+    );
+  }
+
   // Sort the fallback history
   statisticHistory = Object.entries(statisticHistory)
     .sort((a, b) => Date.parse(b[0]) - Date.parse(a[0]))
