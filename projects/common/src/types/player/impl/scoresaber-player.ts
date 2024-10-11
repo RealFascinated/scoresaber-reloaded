@@ -176,7 +176,7 @@ export async function getScoreSaberPlayerFromToken(
     }
     const statToday = todayStats[`${statType}`];
     const statOther = otherStats[`${statType}`];
-    return (!!(statToday && statOther) ? statToday - statOther : 0) * -1;
+    return (!!(statToday && statOther) ? statToday - statOther : 0) * (statType == "pp" ? 1 : -1);
   };
 
   const getRankPosition = (rank: number): number => {
