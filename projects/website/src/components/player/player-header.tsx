@@ -92,15 +92,17 @@ const playerData = [
       const statisticChange = player.statisticChange;
       const rankChange = statisticChange?.today?.rank ?? 0;
 
-      return renderChange(
-        player,
-        "rank",
-        <Link href={`/ranking/${player.rankPages.global}`}>
-          <div className="text-gray-300 flex gap-1 items-center">
-            <p className="hover:brightness-75 transition-all transform-gpu">#{formatNumberWithCommas(player.rank)}</p>
-            {rankChange != 0 && renderDailyChange(rankChange, <p>The change in your rank compared to yesterday</p>)}
-          </div>
-        </Link>
+      return (
+        <div className="text-gray-300 flex gap-1 items-center">
+          {renderChange(
+            player,
+            "rank",
+            <Link href={`/ranking/${player.rankPages.global}`}>
+              <p className="hover:brightness-75 transition-all transform-gpu">#{formatNumberWithCommas(player.rank)}</p>
+            </Link>
+          )}
+          {rankChange != 0 && renderDailyChange(rankChange, <p>The change in your rank compared to yesterday</p>)}
+        </div>
       );
     },
   },
@@ -113,18 +115,20 @@ const playerData = [
       const statisticChange = player.statisticChange;
       const rankChange = statisticChange?.today?.countryRank ?? 0;
 
-      return renderChange(
-        player,
-        "countryRank",
-        <Link href={`/ranking/${player.country}/${player.rankPages.country}`}>
-          <div className="text-gray-300 flex gap-1 items-center">
-            <p className="hover:brightness-75 transition-all transform-gpu">
-              #{formatNumberWithCommas(player.countryRank)}
-            </p>
-            {rankChange != 0 &&
-              renderDailyChange(rankChange, <p>The change in your country rank compared to yesterday</p>)}
-          </div>
-        </Link>
+      return (
+        <div className="text-gray-300 flex gap-1 items-center">
+          {renderChange(
+            player,
+            "countryRank",
+            <Link href={`/ranking/${player.country}/${player.rankPages.global}`}>
+              <p className="hover:brightness-75 transition-all transform-gpu">
+                #{formatNumberWithCommas(player.countryRank)}
+              </p>
+            </Link>
+          )}
+          {rankChange != 0 &&
+            renderDailyChange(rankChange, <p>The change in your country rank compared to yesterday</p>)}
+        </div>
       );
     },
   },
@@ -134,15 +138,14 @@ const playerData = [
       const statisticChange = player.statisticChange;
       const ppChange = statisticChange?.today?.pp ?? 0;
 
-      return renderChange(
-        player,
-        "pp",
-        <div className="text-pp flex gap-1 items-center">
-          <p>{formatPp(player.pp)}pp</p>
-          {ppChange != 0 &&
-            renderDailyChange(ppChange, <p>The change in your pp compared to yesterday</p>, number => {
-              return `${formatPp(number)}pp`;
-            })}
+      return (
+        <div className="text-gray-300 flex gap-1 items-center">
+          {renderChange(
+            player,
+            "pp",
+            <p className="hover:brightness-75 transition-all transform-gpu text-pp">{formatPp(player.pp)}pp</p>
+          )}
+          {ppChange != 0 && renderDailyChange(ppChange, <p>The change in your pp compared to yesterday</p>)}
         </div>
       );
     },
