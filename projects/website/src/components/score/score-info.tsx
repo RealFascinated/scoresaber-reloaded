@@ -37,7 +37,7 @@ export default function ScoreSongInfo({ leaderboard, beatSaverMap }: Props) {
           }
         >
           <div
-            className="absolute w-full h-[20px] bottom-0 right-0 rounded-sm flex justify-center items-center text-xs cursor-default"
+            className="absolute w-full h-[18px] bottom-0 right-0 rounded-sm flex justify-center items-center text-[0.70rem] cursor-default"
             style={{
               backgroundColor: songDifficultyToColor(diff) + "f0", // Transparency value (in hex 0-255)
             }}
@@ -45,7 +45,7 @@ export default function ScoreSongInfo({ leaderboard, beatSaverMap }: Props) {
             {leaderboard.stars > 0 ? (
               <div className="flex gap-1 items-center justify-center">
                 <p>{leaderboard.stars}</p>
-                <StarIcon className="w-4 h-4" />
+                <StarIcon className="w-[14px] h-[14px]" />
               </div>
             ) : (
               <p>{diff}</p>
