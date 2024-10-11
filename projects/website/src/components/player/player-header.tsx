@@ -42,7 +42,7 @@ const playerData = [
       const rankChange = statisticChange?.rank ?? 0;
 
       return (
-        <Link href={`/ranking/${player.country}/${player.rankPages.global}`}>
+        <Link href={`/ranking/${player.rankPages.global}`}>
           <div className="text-gray-300 flex gap-1 items-center hover:brightness-75 transition-all transform-gpu">
             <p>#{formatNumberWithCommas(player.rank)}</p>
             {rankChange != 0 && renderChange(rankChange, <p>The change in your rank compared to yesterday</p>)}
