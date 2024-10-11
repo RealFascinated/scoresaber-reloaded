@@ -16,17 +16,15 @@ export class PlayerService {
    */
   public static async getPlayer(id: string, create: boolean = false): Promise<PlayerDocument> {
     let player: PlayerDocument | null = await PlayerModel.findById(id);
-    if (player === null && !create) {
-      throw new NotFoundError(`Player "${id}" not found`);
-    }
     if (player === null) {
-      const playerToken = await scoresaberService.lookupPlayer(id);
+      // If create is on, create the player, otherwise return unknown player
+      const playerToken = create ? await scoresaberService.lookupPlayer(id) : undefined;
       if (playerToken === undefined) {
         throw new NotFoundError(`Player "${id}" not found`);
       }
 
       console.log(`Creating player "${id}"...`);
-      player = (await PlayerModel.create({ _id: id })) as any;
+      player = (await PlayerModel.create({ _id: id })) as PlayerDocument;
       if (player === null) {
         throw new InternalServerError(`Failed to create player document for "${id}"`);
       }
