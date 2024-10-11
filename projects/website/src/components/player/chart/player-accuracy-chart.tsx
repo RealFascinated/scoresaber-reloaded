@@ -23,7 +23,7 @@ const datasetConfig: DatasetConfig[] = [
       displayName: "Average Ranked Accuracy",
       position: "left",
     },
-    labelFormatter: (value: number) => `Average Ranked Accuracy ${value.toFixed(2)}%`,
+    labelFormatter: (value: number) => `Average Ranked Accuracy ${value.toFixed(4)}%`,
   },
 ];
 
