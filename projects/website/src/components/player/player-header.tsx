@@ -55,7 +55,7 @@ const renderChange = (player: ScoreSaberPlayer, type: "rank" | "countryRank" | "
       if (value == 0) {
         return 0;
       }
-      return type == "pp" ? formatPp(value) : formatNumberWithCommas(value);
+      return type == "pp" ? formatPp(value) + "pp" : formatNumberWithCommas(value);
     };
 
     return (
