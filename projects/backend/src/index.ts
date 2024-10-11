@@ -50,6 +50,7 @@ app.use(
         const page = await scoresaberService.lookupPlayers(pageNumber);
         if (page === undefined) {
           console.log(`Failed to fetch players on page ${pageNumber}, skipping page...`);
+          await delay(cooldown);
           continue;
         }
         for (const player of page.players) {
@@ -57,6 +58,7 @@ app.use(
           await PlayerService.trackScoreSaberPlayer(foundPlayer, player);
           toRemoveIds.push(foundPlayer.id);
         }
+        await delay(cooldown);
       }
       console.log(`Finished tracking player statistics for ${pages} pages, found ${toRemoveIds.length} players.`);
 
