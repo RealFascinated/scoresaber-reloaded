@@ -17,6 +17,7 @@ import { PlayerService } from "./service/player.service";
 import { cron } from "@elysiajs/cron";
 import { PlayerDocument, PlayerModel } from "./model/player";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
+import { delay } from "@ssr/common/utils/utils";
 
 // Load .env file
 dotenv.config({
@@ -36,6 +37,8 @@ app.use(
     timezone: "Europe/London",
     run: async () => {
       const pages = 10;
+      const cooldown = 60_000 / 200; // 200 requests per minute
+
       let toTrack: PlayerDocument[] = await PlayerModel.find({});
       const toRemoveIds: string[] = [];
 
@@ -63,6 +66,7 @@ app.use(
       console.log(`Tracking ${toTrack.length} player statistics...`);
       for (const player of toTrack) {
         await PlayerService.trackScoreSaberPlayer(player);
+        await delay(cooldown);
       }
       console.log("Finished tracking player statistics.");
     },
