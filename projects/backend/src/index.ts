@@ -16,7 +16,7 @@ import PlayerController from "./controller/player.controller";
 import { PlayerService } from "./service/player.service";
 import { cron } from "@elysiajs/cron";
 import { PlayerDocument, PlayerModel } from "./model/player";
-import { getMidnightAlignedDate } from "@ssr/common/utils/time-utils";
+import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 
 // Load .env file
 dotenv.config({
@@ -35,6 +35,19 @@ app.use(
     pattern: "1 0 * * *", // Every day at 00:01 (London time)
     timezone: "Europe/London",
     run: async () => {
+      console.log("Fetching first page of players from ScoreSaber...");
+      const page = await scoresaberService.lookupPlayers(1);
+      if (page === undefined) {
+        console.log("Failed to fetch players from ScoreSaber");
+        return;
+      }
+      for (const player of page.players) {
+        await PlayerService.getPlayer(player.id, true);
+      }
+      console.log("All players on the front page are now being tracked :)");
+
+      // ---
+
       console.log("Tracking player statistics...");
       const players: PlayerDocument[] = await PlayerModel.find({});
       for (const player of players) {
