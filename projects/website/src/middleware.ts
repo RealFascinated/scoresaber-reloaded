@@ -1,4 +1,4 @@
-import { NextResponse, type NextRequest } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { isProduction } from "@ssr/common/utils/utils";
 
 export function middleware(request: NextRequest) {

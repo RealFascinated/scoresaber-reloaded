@@ -42,7 +42,7 @@ const getLeaderboardData = async ({ params }: Props, fetchScores: boolean = true
   const id = slug[0]; // The leaderboard id
   const page = parseInt(slug[1]) || 1; // The page number
 
-  const cacheId = `${id}-${page}`;
+  const cacheId = `${id}-${page}-${fetchScores}`;
   if (leaderboardCache.has(cacheId)) {
     return leaderboardCache.get(cacheId) as LeaderboardData;
   }

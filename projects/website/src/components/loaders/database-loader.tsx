@@ -3,7 +3,6 @@
 import { createContext, ReactNode, useEffect, useState } from "react";
 import Database, { db } from "../../common/database/database";
 import FullscreenLoader from "./fullscreen-loader";
-import { useToast } from "@/hooks/use-toast";
 
 /**
  * The context for the database. This is used to access the database from within the app.

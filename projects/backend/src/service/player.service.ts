@@ -24,12 +24,15 @@ export class PlayerService {
       }
 
       console.log(`Creating player "${id}"...`);
-      player = (await PlayerModel.create({ _id: id })) as PlayerDocument;
-      if (player === null) {
-        throw new InternalServerError(`Failed to create player document for "${id}"`);
+      try {
+        player = (await PlayerModel.create({ _id: id })) as PlayerDocument;
+        player.trackedSince = new Date();
+        await this.seedPlayerHistory(player, playerToken);
+      } catch (err) {
+        const message = `Failed to create player document for "${id}"`;
+        console.log(message, err);
+        throw new InternalServerError(message);
       }
-      player.trackedSince = new Date();
-      await this.seedPlayerHistory(player, playerToken);
     }
     return player;
   }

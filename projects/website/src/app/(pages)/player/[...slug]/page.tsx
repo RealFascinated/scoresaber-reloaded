@@ -51,7 +51,7 @@ const getPlayerData = async ({ params }: Props, fetchScores: boolean = true): Pr
   const page = parseInt(slug[2]) || 1; // The page number
   const search = (slug[3] as string) || ""; // The search query
 
-  const cacheId = `${id}-${sort}-${page}-${search}`;
+  const cacheId = `${id}-${sort}-${page}-${search}-${fetchScores}`;
   if (playerCache.has(cacheId)) {
     return playerCache.get(cacheId) as PlayerData;
   }

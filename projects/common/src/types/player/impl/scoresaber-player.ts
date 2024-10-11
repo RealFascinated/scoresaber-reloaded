@@ -49,6 +49,11 @@ export default interface ScoreSaberPlayer extends Player {
   permissions: number;
 
   /**
+   * The pages for the players positions.
+   */
+  rankPages: ScoreSaberRankPages;
+
+  /**
    * Whether the player is banned or not.
    */
   banned: boolean;
@@ -167,6 +172,10 @@ export async function getScoreSaberPlayerFromToken(
   const countryRankChange = getChange("countryRank");
   const ppChange = getChange("pp");
 
+  const getRankPosition = (rank: number): number => {
+    return Math.floor(rank / 50) + 1;
+  };
+
   return {
     id: token.id,
     name: token.name,
@@ -186,6 +195,10 @@ export async function getScoreSaberPlayerFromToken(
     badges: badges,
     statisticHistory: statisticHistory,
     statistics: token.scoreStats,
+    rankPages: {
+      global: getRankPosition(token.rank),
+      country: getRankPosition(token.countryRank),
+    },
     permissions: token.permissions,
     banned: token.banned,
     inactive: token.inactive,
@@ -261,4 +274,16 @@ export type ScoreSaberPlayerStatistics = {
    * The amount of times their replays were watched.
    */
   replaysWatched: number;
+};
+
+export type ScoreSaberRankPages = {
+  /**
+   * Their page for their global rank position.
+   */
+  global: number;
+
+  /**
+   * Their page for their country rank position.
+   */
+  country: number;
 };

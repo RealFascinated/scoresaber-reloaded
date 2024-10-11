@@ -4,6 +4,7 @@ import Link from "next/link";
 import React from "react";
 import NavbarButton from "./navbar-button";
 import ProfileButton from "./profile-button";
+import { TrendingUpIcon } from "lucide-react";
 
 type NavbarItem = {
   name: string;
@@ -18,6 +19,12 @@ const items: NavbarItem[] = [
     link: "/",
     align: "left",
     icon: <HomeIcon className="h-5 w-5" />,
+  },
+  {
+    name: "Ranking",
+    link: "/ranking",
+    align: "left",
+    icon: <TrendingUpIcon className="h-5 w-5" />,
   },
   {
     name: "Search",

@@ -9,6 +9,7 @@ import Tooltip from "@/components/tooltip";
 import { ReactElement } from "react";
 import PlayerTrackedStatus from "@/components/player/player-tracked-status";
 import ScoreSaberPlayer from "@ssr/common/types/player/impl/scoresaber-player";
+import Link from "next/link";
 
 /**
  * Renders the change for a stat.
@@ -41,10 +42,12 @@ const playerData = [
       const rankChange = statisticChange?.rank ?? 0;
 
       return (
-        <div className="text-gray-300 flex gap-1 items-center">
-          <p>#{formatNumberWithCommas(player.rank)}</p>
-          {rankChange != 0 && renderChange(rankChange, <p>The change in your rank compared to yesterday</p>)}
-        </div>
+        <Link href={`/ranking/${player.country}/${player.rankPages.global}`}>
+          <div className="text-gray-300 flex gap-1 items-center hover:brightness-75 transition-all transform-gpu">
+            <p>#{formatNumberWithCommas(player.rank)}</p>
+            {rankChange != 0 && renderChange(rankChange, <p>The change in your rank compared to yesterday</p>)}
+          </div>
+        </Link>
       );
     },
   },
@@ -58,10 +61,12 @@ const playerData = [
       const rankChange = statisticChange?.countryRank ?? 0;
 
       return (
-        <div className="text-gray-300 flex gap-1 items-center">
-          <p>#{formatNumberWithCommas(player.countryRank)}</p>
-          {rankChange != 0 && renderChange(rankChange, <p>The change in your rank compared to yesterday</p>)}
-        </div>
+        <Link href={`/ranking/${player.country}/${player.rankPages.country}`}>
+          <div className="text-gray-300 flex gap-1 items-center hover:brightness-75 transition-all transform-gpu">
+            <p>#{formatNumberWithCommas(player.countryRank)}</p>
+            {rankChange != 0 && renderChange(rankChange, <p>The change in your country rank compared to yesterday</p>)}
+          </div>
+        </Link>
       );
     },
   },
