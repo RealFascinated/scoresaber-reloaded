@@ -43,8 +43,8 @@ const playerData = [
 
       return (
         <Link href={`/ranking/${player.rankPages.global}`}>
-          <div className="text-gray-300 flex gap-1 items-center hover:brightness-75 transition-all transform-gpu">
-            <p>#{formatNumberWithCommas(player.rank)}</p>
+          <div className="text-gray-300 flex gap-1 items-center">
+            <p className="hover:brightness-75 transition-all transform-gpu">#{formatNumberWithCommas(player.rank)}</p>
             {rankChange != 0 && renderChange(rankChange, <p>The change in your rank compared to yesterday</p>)}
           </div>
         </Link>
@@ -62,8 +62,10 @@ const playerData = [
 
       return (
         <Link href={`/ranking/${player.country}/${player.rankPages.country}`}>
-          <div className="text-gray-300 flex gap-1 items-center hover:brightness-75 transition-all transform-gpu">
-            <p>#{formatNumberWithCommas(player.countryRank)}</p>
+          <div className="text-gray-300 flex gap-1 items-center">
+            <p className="hover:brightness-75 transition-all transform-gpu">
+              #{formatNumberWithCommas(player.countryRank)}
+            </p>
             {rankChange != 0 && renderChange(rankChange, <p>The change in your country rank compared to yesterday</p>)}
           </div>
         </Link>
