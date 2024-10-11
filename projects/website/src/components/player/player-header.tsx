@@ -18,7 +18,7 @@ import Link from "next/link";
  * @param tooltip the tooltip to display
  * @param format the function to format the value
  */
-const renderChange = (change: number, tooltip: ReactElement, format?: (value: number) => string) => {
+const renderDailyChange = (change: number, tooltip: ReactElement, format?: (value: number) => string) => {
   format = format ?? formatNumberWithCommas;
 
   return (
@@ -31,6 +31,34 @@ const renderChange = (change: number, tooltip: ReactElement, format?: (value: nu
   );
 };
 
+/**
+ * Renders the change over time a stat eg: rank, country rank
+ *
+ * @param player the player to get the stats for
+ * @param children the children to render
+ * @param type the type of stat to get the change for
+ */
+const renderChange = (player: ScoreSaberPlayer, type: "rank" | "countryRank" | "pp", children: ReactElement) => {
+  const todayStats = player.statisticChange?.today;
+  const weeklyStats = player.statisticChange?.weekly;
+  const monthlyStats = player.statisticChange?.monthly;
+
+  return (
+    <Tooltip
+      side="bottom"
+      display={
+        <div>
+          <p>Daily Change: {todayStats?.[type] || "Missing Data"}</p>
+          <p>Weekly Change: {weeklyStats?.[type] || "Missing Data"}</p>
+          <p>Monthly Change: {monthlyStats?.[type] || "Missing Data"}</p>
+        </div>
+      }
+    >
+      {children}
+    </Tooltip>
+  );
+};
+
 const playerData = [
   {
     showWhenInactiveOrBanned: false,
@@ -39,13 +67,15 @@ const playerData = [
     },
     render: (player: ScoreSaberPlayer) => {
       const statisticChange = player.statisticChange;
-      const rankChange = statisticChange?.rank ?? 0;
+      const rankChange = statisticChange?.today?.rank ?? 0;
 
-      return (
+      return renderChange(
+        player,
+        "rank",
         <Link href={`/ranking/${player.rankPages.global}`}>
           <div className="text-gray-300 flex gap-1 items-center">
             <p className="hover:brightness-75 transition-all transform-gpu">#{formatNumberWithCommas(player.rank)}</p>
-            {rankChange != 0 && renderChange(rankChange, <p>The change in your rank compared to yesterday</p>)}
+            {rankChange != 0 && renderDailyChange(rankChange, <p>The change in your rank compared to yesterday</p>)}
           </div>
         </Link>
       );
@@ -58,15 +88,18 @@ const playerData = [
     },
     render: (player: ScoreSaberPlayer) => {
       const statisticChange = player.statisticChange;
-      const rankChange = statisticChange?.countryRank ?? 0;
+      const rankChange = statisticChange?.today?.countryRank ?? 0;
 
-      return (
+      return renderChange(
+        player,
+        "countryRank",
         <Link href={`/ranking/${player.country}/${player.rankPages.country}`}>
           <div className="text-gray-300 flex gap-1 items-center">
             <p className="hover:brightness-75 transition-all transform-gpu">
               #{formatNumberWithCommas(player.countryRank)}
             </p>
-            {rankChange != 0 && renderChange(rankChange, <p>The change in your country rank compared to yesterday</p>)}
+            {rankChange != 0 &&
+              renderDailyChange(rankChange, <p>The change in your country rank compared to yesterday</p>)}
           </div>
         </Link>
       );
@@ -76,13 +109,15 @@ const playerData = [
     showWhenInactiveOrBanned: true,
     render: (player: ScoreSaberPlayer) => {
       const statisticChange = player.statisticChange;
-      const ppChange = statisticChange?.pp ?? 0;
+      const ppChange = statisticChange?.today?.pp ?? 0;
 
-      return (
+      return renderChange(
+        player,
+        "pp",
         <div className="text-pp flex gap-1 items-center">
           <p>{formatPp(player.pp)}pp</p>
           {ppChange != 0 &&
-            renderChange(ppChange, <p>The change in your pp compared to yesterday</p>, number => {
+            renderDailyChange(ppChange, <p>The change in your pp compared to yesterday</p>, number => {
               return `${formatPp(number)}pp`;
             })}
         </div>

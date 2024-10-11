@@ -158,30 +158,26 @@ export async function getScoreSaberPlayerFromToken(
     .sort((a, b) => Date.parse(b[0]) - Date.parse(a[0]))
     .reduce((obj, [key, value]) => ({ ...obj, [key]: value }), {});
 
-  const yesterdayDate = formatDateMinimal(getMidnightAlignedDate(getDaysAgoDate(1)));
-  const todayStats = statisticHistory[todayDate];
-  const yesterdayStats = statisticHistory[yesterdayDate];
-  const hasChange = !!(todayStats && yesterdayStats);
-
   /**
    * Gets the change in the given stat
    *
    * @param statType the stat to check
+   * @param daysAgo the amount of days ago to get the stat for
    * @return the change
    */
-  const getChange = (statType: "rank" | "countryRank" | "pp"): number => {
+  const getChange = (statType: "rank" | "countryRank" | "pp", daysAgo: number = 1): number => {
+    const todayStats = statisticHistory[todayDate];
+    const otherDate = formatDateMinimal(getMidnightAlignedDate(getDaysAgoDate(daysAgo)));
+    const otherStats = statisticHistory[otherDate];
+    const hasChange = !!(todayStats && otherStats);
+
     if (!hasChange) {
       return 0;
     }
     const statToday = todayStats[`${statType}`];
-    const statYesterday = yesterdayStats[`${statType}`];
-    return !!(statToday && statYesterday) ? statToday - statYesterday : 0;
+    const statOther = otherStats[`${statType}`];
+    return (!!(statToday && statOther) ? statToday - statOther : 0) * -1;
   };
-
-  // Calculate the changes
-  const rankChange = getChange("rank");
-  const countryRankChange = getChange("countryRank");
-  const ppChange = getChange("pp");
 
   const getRankPosition = (rank: number): number => {
     return Math.floor(rank / 50) + 1;
@@ -198,9 +194,21 @@ export async function getScoreSaberPlayerFromToken(
     bio: bio,
     pp: token.pp,
     statisticChange: {
-      rank: rankChange * -1, // Reverse the rank change
-      countryRank: countryRankChange * -1, // Reverse the country rank change
-      pp: ppChange,
+      today: {
+        rank: getChange("rank", 1),
+        countryRank: getChange("countryRank", 1),
+        pp: getChange("pp", 1),
+      },
+      weekly: {
+        rank: getChange("rank", 7),
+        countryRank: getChange("countryRank", 7),
+        pp: getChange("pp", 7),
+      },
+      monthly: {
+        rank: getChange("rank", 30),
+        countryRank: getChange("countryRank", 30),
+        pp: getChange("pp", 30),
+      },
     },
     role: role,
     badges: badges,

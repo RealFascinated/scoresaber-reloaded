@@ -55,4 +55,8 @@ export default class Player {
   }
 }
 
-export type StatisticChange = PlayerHistory;
+export type StatisticChange = {
+  today: PlayerHistory;
+  weekly: PlayerHistory;
+  monthly: PlayerHistory;
+};
