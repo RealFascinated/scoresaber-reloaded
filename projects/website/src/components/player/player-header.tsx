@@ -10,6 +10,7 @@ import { ReactElement } from "react";
 import PlayerTrackedStatus from "@/components/player/player-tracked-status";
 import ScoreSaberPlayer from "@ssr/common/types/player/impl/scoresaber-player";
 import Link from "next/link";
+import { capitalizeFirstLetter } from "@/common/string-utils";
 
 /**
  * Renders the change for a stat.
@@ -42,15 +43,37 @@ const renderChange = (player: ScoreSaberPlayer, type: "rank" | "countryRank" | "
   const todayStats = player.statisticChange?.today;
   const weeklyStats = player.statisticChange?.weekly;
   const monthlyStats = player.statisticChange?.monthly;
+  const todayStat = todayStats?.[type];
+  const weeklyStat = weeklyStats?.[type];
+  const monthlyStat = monthlyStats?.[type];
+
+  const renderChange = (value: number | undefined, timeFrame: "daily" | "weekly" | "monthly") => {
+    if (value == undefined) {
+      return "Missing Data";
+    }
+    const format = (value: number) => {
+      if (value == 0) {
+        return 0;
+      }
+      return type == "pp" ? formatPp(value) : formatNumberWithCommas(value);
+    };
+
+    return (
+      <p>
+        {capitalizeFirstLetter(timeFrame)} Change:{" "}
+        <span className={`${value >= 0 ? (value == 0 ? "" : "text-green-500") : "text-red-500"}`}>{format(value)}</span>
+      </p>
+    );
+  };
 
   return (
     <Tooltip
       side="bottom"
       display={
         <div>
-          <p>Daily Change: {todayStats?.[type] || "Missing Data"}</p>
-          <p>Weekly Change: {weeklyStats?.[type] || "Missing Data"}</p>
-          <p>Monthly Change: {monthlyStats?.[type] || "Missing Data"}</p>
+          {renderChange(todayStat, "daily")}
+          {renderChange(weeklyStat, "weekly")}
+          {renderChange(monthlyStat, "monthly")}
         </div>
       }
     >
