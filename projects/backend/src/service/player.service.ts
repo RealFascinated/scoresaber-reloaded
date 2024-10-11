@@ -93,6 +93,9 @@ export class PlayerService {
     history.pp = player.pp;
     history.countryRank = player.countryRank;
     history.rank = player.rank;
+    history.accuracy = {
+      averageRankedAccuracy: player.scoreStats.averageRankedAccuracy,
+    };
     foundPlayer.setStatisticHistory(dateToday, history);
     foundPlayer.sortStatisticHistory();
     foundPlayer.lastTracked = new Date();
