@@ -35,7 +35,7 @@ export function PlayerRanking({ player, isCountry }: PlayerRankingProps) {
           />
         </Avatar>
         <CountryFlag code={player.country} size={14} />
-        <Link className="transform-gpu transition-all hover:text-blue-500" href={`/player/${player.id}/top/1`}>
+        <Link className="transform-gpu transition-all hover:text-blue-500" href={`/player/${player.id}`}>
           <p
             className={
               player.id == settings?.playerId ? "transform-gpu text-pp transition-all hover:brightness-75" : ""
