@@ -67,10 +67,14 @@ export class PlayerService {
    * Tracks a players statistics
    *
    * @param foundPlayer the player to track
+   * @param playerToken an optional player token
    */
-  public static async trackScoreSaberPlayer(foundPlayer: PlayerDocument) {
+  public static async trackScoreSaberPlayer(
+    foundPlayer: PlayerDocument,
+    playerToken?: ScoreSaberPlayerToken
+  ): Promise<void> {
     const dateToday = getMidnightAlignedDate(new Date());
-    const player = await scoresaberService.lookupPlayer(foundPlayer.id);
+    const player = playerToken ? playerToken : await scoresaberService.lookupPlayer(foundPlayer.id);
     if (player == undefined) {
       console.log(`Player "${foundPlayer.id}" not found on ScoreSaber`);
       return;

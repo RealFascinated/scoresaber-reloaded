@@ -35,22 +35,33 @@ app.use(
     pattern: "1 0 * * *", // Every day at 00:01 (London time)
     timezone: "Europe/London",
     run: async () => {
-      console.log("Fetching first page of players from ScoreSaber...");
-      const page = await scoresaberService.lookupPlayers(1);
-      if (page === undefined) {
-        console.log("Failed to fetch players from ScoreSaber");
-        return;
-      }
-      for (const player of page.players) {
-        await PlayerService.getPlayer(player.id, true);
-      }
-      console.log("All players on the front page are now being tracked :)");
+      const pages = 10;
+      let toTrack: PlayerDocument[] = await PlayerModel.find({});
+      const toRemoveIds: string[] = [];
 
-      // ---
+      // loop through pages to fetch the top players
+      console.log(`Fetching ${pages} pages of players from ScoreSaber...`);
+      for (let i = 0; i < pages; i++) {
+        const pageNumber = i + 1;
+        console.log(`Fetching page ${pageNumber}...`);
+        const page = await scoresaberService.lookupPlayers(pageNumber);
+        if (page === undefined) {
+          console.log(`Failed to fetch players on page ${pageNumber}, skipping page...`);
+          continue;
+        }
+        for (const player of page.players) {
+          const foundPlayer = await PlayerService.getPlayer(player.id, true);
+          await PlayerService.trackScoreSaberPlayer(foundPlayer, player);
+          toRemoveIds.push(foundPlayer.id);
+        }
+      }
+      console.log(`Finished tracking player statistics for ${pages} pages, found ${toRemoveIds.length} players.`);
 
-      console.log("Tracking player statistics...");
-      const players: PlayerDocument[] = await PlayerModel.find({});
-      for (const player of players) {
+      // remove all players that have been tracked
+      toTrack = toTrack.filter(player => !toRemoveIds.includes(player.id));
+
+      console.log(`Tracking ${toTrack.length} player statistics...`);
+      for (const player of toTrack) {
         await PlayerService.trackScoreSaberPlayer(player);
       }
       console.log("Finished tracking player statistics.");
