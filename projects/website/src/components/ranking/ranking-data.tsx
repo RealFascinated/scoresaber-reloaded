@@ -11,19 +11,8 @@ import { PlayerRanking } from "@/components/ranking/player-ranking";
 const REFRESH_INTERVAL = 1000 * 60 * 5;
 
 type RankingDataProps = {
-  /**
-   * The page to show when opening the leaderboard.
-   */
   initialPage: number;
-
-  /**
-   * The country to show when opening the leaderboard.
-   */
   country?: string | undefined;
-
-  /**
-   * The leaderboard to display.
-   */
   initialPageData?: ScoreSaberPlayersPageToken;
 };
 
@@ -53,9 +42,6 @@ export default function RankingData({ initialPage, country, initialPageData }: R
     }
   }, [data, isLoading, isError]);
 
-  /**
-   * Gets the URL to the page.
-   */
   const getUrl = useCallback(
     (page: number) => {
       return `/ranking/${country != undefined ? `${country}/` : ""}${page}`;
@@ -63,10 +49,6 @@ export default function RankingData({ initialPage, country, initialPageData }: R
     [country]
   );
 
-  /**
-   * Handle updating the URL when the page number,
-   * sort, or search term changes.
-   */
   useEffect(() => {
     const newUrl = getUrl(currentPage);
     window.history.replaceState({ ...window.history.state, as: newUrl, url: newUrl }, "", newUrl);
@@ -80,26 +62,29 @@ export default function RankingData({ initialPage, country, initialPageData }: R
 
   return (
     <div className="flex flex-col gap-2">
-      <table className="table w-full table-auto border-spacing-2 border-none text-left">
-        <thead>
-          <tr>
-            <th className="px-4 py-2">Rank</th>
-            <th className="px-4 py-2">Player</th>
-            <th className="px-4 py-2 text-center">Performance Points</th>
-            <th className="px-4 py-2 text-center">Total Plays</th>
-            <th className="px-4 py-2 text-center">Total Ranked Plays</th>
-            <th className="px-4 py-2 text-center">Avg Ranked Accuracy</th>
-            <th className="px-4 py-2 text-center">Weekly Change</th>
-          </tr>
-        </thead>
-        <tbody className="border-none overflow-x-scroll w-full">
-          {players.map(player => (
-            <tr key={player.rank} className="border-b border-border">
-              <PlayerRanking isCountry={country != undefined} player={player} />
+      {/* Wrapping the table in a scrollable container */}
+      <div className="overflow-x-auto">
+        <table className="table w-full table-auto border-spacing-2 border-none text-left">
+          <thead>
+            <tr>
+              <th className="px-4 py-2">Rank</th>
+              <th className="px-4 py-2">Player</th>
+              <th className="px-4 py-2 text-center">Performance Points</th>
+              <th className="px-4 py-2 text-center">Total Plays</th>
+              <th className="px-4 py-2 text-center">Total Ranked Plays</th>
+              <th className="px-4 py-2 text-center">Avg Ranked Accuracy</th>
+              <th className="px-4 py-2 text-center">Weekly Change</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody className="border-none">
+            {players.map(player => (
+              <tr key={player.rank} className="border-b border-border">
+                <PlayerRanking isCountry={country != undefined} player={player} />
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
       {/* Pagination */}
       <Pagination
