@@ -65,7 +65,6 @@ export class PlayerService {
   /**
    * Tracks a players statistics
    *
-   * @param dateToday the date to track
    * @param foundPlayer the player to track
    */
   public static async trackScoreSaberPlayer(foundPlayer: PlayerDocument) {
