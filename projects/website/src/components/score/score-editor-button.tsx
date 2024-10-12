@@ -46,9 +46,7 @@ export default function ScoreEditorButton({ score, leaderboard, setScore }: Scor
         }}
       >
         <PopoverTrigger>
-          <Button className="p-0 hover:bg-transparent" variant="ghost">
-            <CogIcon className={clsx("w-6 h-6 transition-all transform-gpu", isScoreEditMode ? "" : "rotate-180")} />
-          </Button>
+          <CogIcon className={clsx("w-6 h-6 transition-all transform-gpu p-0", isScoreEditMode ? "" : "rotate-180")} />
         </PopoverTrigger>
         <PopoverContent className="p-0" side="left">
           <div className="p-3 flex flex-col gap-2">

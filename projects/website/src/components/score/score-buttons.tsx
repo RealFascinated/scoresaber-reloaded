@@ -9,7 +9,6 @@ import { useState } from "react";
 import ScoreButton from "./score-button";
 import { copyToClipboard } from "@/common/browser-utils";
 import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/score-saber-leaderboard-token";
-import { Button } from "@/components/ui/button";
 import { ArrowDownIcon } from "@heroicons/react/24/solid";
 import clsx from "clsx";
 import ScoreEditorButton from "@/components/score/score-editor-button";
@@ -81,7 +80,9 @@ export default function ScoreButtons({
           <YouTubeLogo />
         </ScoreButton>
       </div>
-      <div className={`flex ${alwaysSingleLine ? "flex-row" : "flex-row lg:flex-col"} items-center justify-center`}>
+      <div
+        className={`flex gap-2 ${alwaysSingleLine ? "flex-row" : "flex-row lg:flex-col"} items-center justify-center`}
+      >
         {/* Edit score button */}
         {score && leaderboard && setScore && (
           <ScoreEditorButton score={score} leaderboard={leaderboard} setScore={setScore} />
@@ -90,18 +91,16 @@ export default function ScoreButtons({
         {/* View Leaderboard button */}
         {leaderboardExpanded != undefined && setIsLeaderboardExpanded != undefined && (
           <div className="pr-2 flex items-center justify-center cursor-default">
-            <Button
-              className="p-0 hover:bg-transparent"
-              variant="ghost"
+            <ArrowDownIcon
+              className={clsx(
+                "w-6 h-6 transition-all transform-gpu cursor-pointer",
+                leaderboardExpanded ? "" : "rotate-180"
+              )}
               onClick={() => {
                 setLeaderboardExpanded(!leaderboardExpanded);
                 setIsLeaderboardExpanded?.(!leaderboardExpanded);
               }}
-            >
-              <ArrowDownIcon
-                className={clsx("w-6 h-6 transition-all transform-gpu", leaderboardExpanded ? "" : "rotate-180")}
-              />
-            </Button>
+            />
           </div>
         )}
       </div>
