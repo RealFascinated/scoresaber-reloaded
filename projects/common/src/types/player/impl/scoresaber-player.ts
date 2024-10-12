@@ -169,23 +169,19 @@ export async function getScoreSaberPlayerFromToken(
     const todayStats = statisticHistory[todayDate];
     let otherDate: string | undefined;
 
-    // Yesterday
-    if (daysAgo == 1) {
-      otherDate = todayDate;
+    // Use the same logic as the first version to get the date exactly 'daysAgo' days earlier
+    if (daysAgo === 1) {
+      otherDate = formatDateMinimal(getMidnightAlignedDate(getDaysAgoDate(1))); // Yesterday
     } else {
-      // get the closest next date
-      let closestDateDiff = Infinity;
-
-      for (const dateKey in statisticHistory) {
-        const date = new Date(dateKey);
-        const daysDiff = Math.abs(date.getTime() - getDaysAgoDate(daysAgo).getTime());
-
-        // If this date is closer, update the closest date
-        if (daysDiff < closestDateDiff) {
-          closestDateDiff = daysDiff;
-          otherDate = formatDateMinimal(date);
-        }
-      }
+      const targetDate = getDaysAgoDate(daysAgo);
+      const date = Object.keys(statisticHistory)
+        .map(dateKey => new Date(dateKey))
+        .reduce((closestDate, currentDate) => {
+          const currentDiff = Math.abs(currentDate.getTime() - targetDate.getTime());
+          const closestDiff = Math.abs(closestDate.getTime() - targetDate.getTime());
+          return currentDiff < closestDiff ? currentDate : closestDate;
+        }, targetDate);
+      otherDate = formatDateMinimal(date);
     }
 
     if (!otherDate) {
@@ -194,10 +190,10 @@ export async function getScoreSaberPlayerFromToken(
 
     const otherStats = statisticHistory[otherDate];
     const hasChange = !!(todayStats && otherStats);
-
     if (!hasChange) {
       return 0;
     }
+
     const statToday = todayStats[`${statType}`];
     const statOther = otherStats[`${statType}`];
     return (!!(statToday && statOther) ? statToday - statOther : 0) * (statType == "pp" ? 1 : -1);
