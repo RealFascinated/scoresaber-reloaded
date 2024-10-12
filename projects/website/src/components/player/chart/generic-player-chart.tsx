@@ -33,6 +33,7 @@ for (let day = 0; day < historyDays; day++) {
 labels.reverse();
 
 export default function GenericPlayerChart({ player, datasetConfig }: Props) {
+  // Check if player statistics are available
   if (!player.statisticHistory || Object.keys(player.statisticHistory).length === 0) {
     return (
       <div className="flex justify-center">
@@ -42,6 +43,7 @@ export default function GenericPlayerChart({ player, datasetConfig }: Props) {
   }
 
   const histories: Record<string, (number | null)[]> = {};
+  // Initialize histories for each dataset
   datasetConfig.forEach(config => {
     histories[config.field] = [];
   });
@@ -54,19 +56,20 @@ export default function GenericPlayerChart({ player, datasetConfig }: Props) {
   const today = new Date();
   let currentHistoryIndex = 0;
 
-  // Iterate from 50 days ago to today
-  for (let dayAgo = historyDays - 1; dayAgo >= 0; dayAgo--) {
+  // Iterate from historyDays-1 to 0 (last 'historyDays' days)
+  for (let dayAgo = historyDays; dayAgo >= 0; dayAgo--) {
     const targetDate = new Date();
     targetDate.setDate(today.getDate() - dayAgo);
 
-    // Check if there is a statistic entry that matches this date
+    // Find if there's a matching entry for this date
     let matchedEntry = false;
 
+    // Check if currentHistoryIndex is within bounds of statisticEntries
     if (currentHistoryIndex < statisticEntries.length) {
       const [dateString, history] = statisticEntries[currentHistoryIndex];
       const entryDate = parseDate(dateString);
 
-      // If the current statistic entry matches the target date, use it
+      // If the entry date matches the target date, use this entry
       if (entryDate.toDateString() === targetDate.toDateString()) {
         datasetConfig.forEach(config => {
           histories[config.field].push(getValueFromHistory(history, config.field) ?? null);
