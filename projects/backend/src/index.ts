@@ -36,7 +36,7 @@ app.use(
     pattern: "1 0 * * *", // Every day at 00:01 (London time)
     timezone: "Europe/London",
     run: async () => {
-      const pages = 10;
+      const pages = 20; // top 1000 players
       const cooldown = 60_000 / 250; // 250 requests per minute
 
       let toTrack: PlayerDocument[] = await PlayerModel.find({});
