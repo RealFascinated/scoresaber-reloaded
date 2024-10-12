@@ -45,7 +45,7 @@ export function PlayerRanking({ player, isCountry }: PlayerRankingProps) {
           </p>
         </Link>
       </td>
-      <td className="px-4 py-2 text-pp-blue text-center">{formatPp(player.pp)}pp</td>
+      <td className="px-4 py-2 text-pp text-center">{formatPp(player.pp)}pp</td>
       <td className="px-4 py-2 text-center">{formatNumberWithCommas(player.scoreStats.totalPlayCount)}</td>
       <td className="px-4 py-2 text-center">{formatNumberWithCommas(player.scoreStats.rankedPlayCount)}</td>
       <td className="px-4 py-2 text-center">{player.scoreStats.averageRankedAccuracy.toFixed(2) + "%"}</td>

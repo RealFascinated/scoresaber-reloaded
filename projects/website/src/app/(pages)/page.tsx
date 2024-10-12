@@ -24,9 +24,11 @@ export default async function HomePage() {
         <Statistic title="Total Tracked Players" value={statistics.trackedPlayers} />
       </div>
 
-      <Link href="/search">
-        <Button className="w-fit">Get started</Button>
-      </Link>
+      <div className="flex gap-2 flex-wrap">
+        <Link href="/search">
+          <Button className="w-fit">Get started</Button>
+        </Link>
+      </div>
     </main>
   );
 }
