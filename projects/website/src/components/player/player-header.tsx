@@ -11,6 +11,7 @@ import PlayerTrackedStatus from "@/components/player/player-tracked-status";
 import ScoreSaberPlayer from "@ssr/common/types/player/impl/scoresaber-player";
 import Link from "next/link";
 import { capitalizeFirstLetter } from "@/common/string-utils";
+import { normalizedRegionName } from "@ssr/common/utils/region-utils";
 
 /**
  * Renders the change for a stat.
@@ -23,7 +24,7 @@ const renderDailyChange = (change: number, tooltip: ReactElement, format?: (valu
   format = format ?? formatNumberWithCommas;
 
   return (
-    <Tooltip display={tooltip}>
+    <Tooltip display={tooltip} side="bottom">
       <p className={`text-sm ${change > 0 ? "text-green-400" : "text-red-400"}`}>
         {change > 0 ? "+" : ""}
         {format(change)}

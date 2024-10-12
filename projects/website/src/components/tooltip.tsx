@@ -12,15 +12,20 @@ type Props = {
   display: React.ReactNode;
 
   /**
+   * Display the trigger as a child element.
+   */
+  asChild?: boolean;
+
+  /**
    * Where the tooltip will be displayed
    */
   side?: "top" | "bottom" | "left" | "right";
 };
 
-export default function Tooltip({ children, display, side = "top" }: Props) {
+export default function Tooltip({ children, display, asChild = true, side = "top" }: Props) {
   return (
     <ShadCnTooltip>
-      <TooltipTrigger asChild>{children}</TooltipTrigger>
+      <TooltipTrigger asChild={asChild}>{children}</TooltipTrigger>
       <TooltipContent side={side}>{display}</TooltipContent>
     </ShadCnTooltip>
   );
