@@ -16,12 +16,12 @@ import ScoreEditorButton from "@/components/score/score-editor-button";
 import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score-saber-score-token";
 
 type Props = {
-  score: ScoreSaberScoreToken;
+  score?: ScoreSaberScoreToken;
   leaderboard: ScoreSaberLeaderboardToken;
   beatSaverMap?: BeatSaverMap;
   alwaysSingleLine?: boolean;
-  setIsLeaderboardExpanded: (isExpanded: boolean) => void;
-  setScore: (score: ScoreSaberScoreToken) => void;
+  setIsLeaderboardExpanded?: (isExpanded: boolean) => void;
+  setScore?: (score: ScoreSaberScoreToken) => void;
 };
 
 export default function ScoreButtons({
