@@ -10,7 +10,7 @@ type Statistic = {
 export default function Statistic({ title, value }: Statistic) {
   return (
     <p className="text-center">
-      {title}: <CountUp end={value} duration={0.75} />
+      {title}: <CountUp end={value} duration={1.2} />
     </p>
   );
 }
