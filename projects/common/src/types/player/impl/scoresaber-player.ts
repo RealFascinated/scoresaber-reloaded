@@ -165,7 +165,7 @@ export async function getScoreSaberPlayerFromToken(
    * @param daysAgo the amount of days ago to get the stat for
    * @return the change
    */
-  const getChange = (statType: "rank" | "countryRank" | "pp", daysAgo: number = 1): number => {
+  const getChange = (statType: "rank" | "countryRank" | "pp", daysAgo: number = 1): number | undefined => {
     const todayStats = statisticHistory[todayDate];
     let otherDate: string | undefined;
 
@@ -184,19 +184,19 @@ export async function getScoreSaberPlayerFromToken(
       otherDate = formatDateMinimal(date);
     }
     if (!otherDate) {
-      return 0;
+      return undefined;
     }
 
     const otherStats = statisticHistory[otherDate];
     const hasChange = !!(todayStats && otherStats);
     if (!hasChange) {
-      return 0;
+      return undefined;
     }
 
     const statToday = todayStats[`${statType}`];
     const statOther = otherStats[`${statType}`];
     if (!statToday || !statOther) {
-      return 0;
+      return undefined;
     }
 
     return (statToday - statOther) * (statType == "pp" ? 1 : -1);

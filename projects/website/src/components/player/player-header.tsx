@@ -48,12 +48,12 @@ const renderChange = (player: ScoreSaberPlayer, type: "rank" | "countryRank" | "
   const monthlyStat = monthlyStats?.[type];
 
   const renderChange = (value: number | undefined, timeFrame: "daily" | "weekly" | "monthly") => {
-    if (value == undefined) {
-      return "Missing Data";
-    }
-    const format = (value: number) => {
+    const format = (value: number | undefined) => {
       if (value == 0) {
         return 0;
+      }
+      if (value == undefined) {
+        return "No Data";
       }
       return type == "pp" ? formatPp(value) + "pp" : formatNumberWithCommas(value);
     };
@@ -61,7 +61,11 @@ const renderChange = (player: ScoreSaberPlayer, type: "rank" | "countryRank" | "
     return (
       <p>
         {capitalizeFirstLetter(timeFrame)} Change:{" "}
-        <span className={`${value >= 0 ? (value == 0 ? "" : "text-green-500") : "text-red-500"}`}>{format(value)}</span>
+        <span
+          className={`${value == undefined ? "" : value >= 0 ? (value == 0 ? "" : "text-green-500") : "text-red-500"}`}
+        >
+          {format(value)}
+        </span>
       </p>
     );
   };
