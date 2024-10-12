@@ -38,11 +38,17 @@ export default function Score({ player, playerScore }: Props) {
   }, [leaderboard.songHash]);
 
   useEffect(() => {
+    if (playerScore?.score?.baseScore) {
+      setBaseScore(playerScore.score.baseScore);
+    }
+  }, [playerScore]);
+
+  useEffect(() => {
     fetchBeatSaverData();
   }, [fetchBeatSaverData]);
 
   const accuracy = (baseScore / leaderboard.maxScore) * 100;
-  const pp = scoresaberService.getPp(leaderboard.stars, accuracy);
+  const pp = baseScore == score.baseScore ? score.pp : scoresaberService.getPp(leaderboard.stars, accuracy);
   return (
     <div className="pb-2 pt-2">
       {/* Score Info */}
