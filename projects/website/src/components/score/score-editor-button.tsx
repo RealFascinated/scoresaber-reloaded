@@ -12,10 +12,10 @@ import Tooltip from "@/components/tooltip";
 type ScoreEditorButtonProps = {
   score: ScoreSaberScoreToken;
   leaderboard: ScoreSaberLeaderboardToken;
-  setScore: (score: ScoreSaberScoreToken) => void;
+  updateScore: (score: ScoreSaberScoreToken) => void;
 };
 
-export default function ScoreEditorButton({ score, leaderboard, setScore }: ScoreEditorButtonProps) {
+export default function ScoreEditorButton({ score, leaderboard, updateScore }: ScoreEditorButtonProps) {
   const [isScoreEditMode, setIsScoreEditMode] = useState(false);
 
   const maxScore = leaderboard.maxScore || 1; // Use 1 to prevent division by zero
@@ -24,14 +24,14 @@ export default function ScoreEditorButton({ score, leaderboard, setScore }: Scor
   const handleSliderChange = (value: number[]) => {
     const newAccuracy = Math.max(0, Math.min(value[0], 100)); // Ensure the accuracy stays within 0-100
     const newBaseScore = (newAccuracy / 100) * maxScore;
-    setScore({
+    updateScore({
       ...score,
       baseScore: newBaseScore,
     });
   };
 
   const handleSliderReset = () => {
-    setScore({
+    updateScore({
       ...score,
       baseScore: (accuracy / 100) * maxScore,
     });

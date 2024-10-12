@@ -60,7 +60,7 @@ export default function Score({ player, playerScore }: Props) {
           beatSaverMap={beatSaverMap}
           score={score}
           setIsLeaderboardExpanded={setIsLeaderboardExpanded}
-          setScore={score => {
+          updateScore={score => {
             setBaseScore(score.baseScore);
           }}
         />

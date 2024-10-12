@@ -20,7 +20,7 @@ type Props = {
   beatSaverMap?: BeatSaverMap;
   alwaysSingleLine?: boolean;
   setIsLeaderboardExpanded?: (isExpanded: boolean) => void;
-  setScore?: (score: ScoreSaberScoreToken) => void;
+  updateScore?: (score: ScoreSaberScoreToken) => void;
 };
 
 export default function ScoreButtons({
@@ -29,7 +29,7 @@ export default function ScoreButtons({
   beatSaverMap,
   alwaysSingleLine,
   setIsLeaderboardExpanded,
-  setScore,
+  updateScore,
 }: Props) {
   const [leaderboardExpanded, setLeaderboardExpanded] = useState(false);
   const { toast } = useToast();
@@ -84,8 +84,8 @@ export default function ScoreButtons({
         className={`flex gap-2 ${alwaysSingleLine ? "flex-row" : "flex-row lg:flex-col"} items-center justify-center`}
       >
         {/* Edit score button */}
-        {score && leaderboard && setScore && (
-          <ScoreEditorButton score={score} leaderboard={leaderboard} setScore={setScore} />
+        {score && leaderboard && updateScore && (
+          <ScoreEditorButton score={score} leaderboard={leaderboard} updateScore={updateScore} />
         )}
 
         {/* View Leaderboard button */}
