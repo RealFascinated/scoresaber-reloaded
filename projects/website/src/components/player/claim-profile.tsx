@@ -41,7 +41,18 @@ export default function ClaimProfile({ playerId }: Props) {
   }
 
   return (
-    <Tooltip display={<p>Set as your profile</p>} side={"bottom"}>
+    <Tooltip
+      display={
+        <div className="flex flex-col gap-2">
+          <div>
+            <p>Set as your profile!</p>
+            <p>Claiming a profile will also initialize it for data tracking.</p>
+          </div>
+          <p className="text-red-600">This will overwrite your currently set profile (if any)</p>
+        </div>
+      }
+      side={"bottom"}
+    >
       <Button variant={"outline"} onClick={claimProfile}>
         <CheckIcon className="size-6 text-green-500" />
       </Button>
