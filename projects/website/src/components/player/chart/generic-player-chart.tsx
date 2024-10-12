@@ -40,9 +40,8 @@ export default function GenericPlayerChart({ player, datasetConfig }: Props) {
       </div>
     );
   }
-  const histories: Record<string, (number | null)[]> = {};
 
-  // Initialize histories for each dataset
+  const histories: Record<string, (number | null)[]> = {};
   datasetConfig.forEach(config => {
     histories[config.field] = [];
   });
@@ -52,30 +51,39 @@ export default function GenericPlayerChart({ player, datasetConfig }: Props) {
     ([a], [b]) => parseDate(a).getTime() - parseDate(b).getTime()
   );
 
-  let previousDate: Date | null = null;
+  const today = new Date();
+  let currentHistoryIndex = 0;
 
-  // Iterate through each statistic entry
-  for (const [dateString, history] of statisticEntries) {
-    const currentDate = parseDate(dateString);
+  // Iterate from 50 days ago to today
+  for (let dayAgo = historyDays - 1; dayAgo >= 0; dayAgo--) {
+    const targetDate = new Date();
+    targetDate.setDate(today.getDate() - dayAgo);
 
-    // Fill in missing days with null values
-    if (previousDate) {
-      const diffDays = Math.floor((currentDate.getTime() - previousDate.getTime()) / (1000 * 60 * 60 * 24));
-      for (let i = 1; i < diffDays; i++) {
+    // Check if there is a statistic entry that matches this date
+    let matchedEntry = false;
+
+    if (currentHistoryIndex < statisticEntries.length) {
+      const [dateString, history] = statisticEntries[currentHistoryIndex];
+      const entryDate = parseDate(dateString);
+
+      // If the current statistic entry matches the target date, use it
+      if (entryDate.toDateString() === targetDate.toDateString()) {
         datasetConfig.forEach(config => {
-          histories[config.field].push(null);
+          histories[config.field].push(getValueFromHistory(history, config.field) ?? null);
         });
+        currentHistoryIndex++;
+        matchedEntry = true;
       }
     }
 
-    // Push the historical data to histories
-    datasetConfig.forEach(config => {
-      histories[config.field].push(getValueFromHistory(history, config.field) ?? null);
-    });
-
-    previousDate = currentDate; // Update the previousDate for the next iteration
+    // If no matching entry, fill the current day with null
+    if (!matchedEntry) {
+      datasetConfig.forEach(config => {
+        histories[config.field].push(null);
+      });
+    }
   }
 
-  // Render the GenericChart with collected data
+  // Render the chart with collected data
   return <GenericChart labels={labels} datasetConfig={datasetConfig} histories={histories} />;
 }

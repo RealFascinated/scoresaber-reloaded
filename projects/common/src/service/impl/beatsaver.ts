@@ -13,7 +13,6 @@ class BeatSaverService extends Service {
    * Gets the map that match the query.
    *
    * @param query the query to search for
-   * @param useProxy whether to use the proxy or not
    * @returns the map that match the query, or undefined if no map were found
    */
   async lookupMap(query: string): Promise<BeatSaverMapToken | undefined> {
