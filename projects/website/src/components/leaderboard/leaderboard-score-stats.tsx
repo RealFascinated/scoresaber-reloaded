@@ -10,6 +10,9 @@ import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/score
 const badges: ScoreBadge[] = [
   {
     name: "PP",
+    color: () => {
+      return "bg-pp";
+    },
     create: (score: ScoreSaberScoreToken) => {
       const pp = score.pp;
       if (pp === 0) {
