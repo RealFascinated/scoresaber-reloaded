@@ -35,7 +35,7 @@ export default function ScoreButtons({
   const { toast } = useToast();
 
   return (
-    <div className="flex justify-end gap-2">
+    <div className="flex justify-end gap-2 h-[64px]">
       <div
         className={`flex ${alwaysSingleLine ? "flex-nowrap" : "flex-wrap"} items-center lg:items-start justify-center lg:justify-end gap-1`}
       >

@@ -125,7 +125,7 @@ type Props = {
 
 export default function ScoreStats({ score, leaderboard }: Props) {
   return (
-    <div className={`grid grid-cols-3 grid-rows-2 gap-1 ml-0 lg:ml-2`}>
+    <div className={`grid grid-cols-3 grid-rows-2 gap-1 ml-0 lg:ml-2 h-[64px]`}>
       <ScoreBadges badges={badges} score={score} leaderboard={leaderboard} />
     </div>
   );
