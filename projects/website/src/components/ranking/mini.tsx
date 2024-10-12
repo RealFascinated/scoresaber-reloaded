@@ -114,11 +114,11 @@ export default function Mini({ type, player, shouldUpdate }: MiniProps) {
     enabled: shouldUpdate,
   });
 
-  if (isLoading) {
+  if (isLoading || !data) {
     return <PlayerRankingSkeleton />;
   }
 
-  if (isError || !data) {
+  if (isError) {
     return <p className="text-red-500">Error loading ranking</p>;
   }
 
