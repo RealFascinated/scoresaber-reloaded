@@ -73,7 +73,7 @@ const badges: ScoreBadge[] = [
   {
     name: "Score",
     create: (score: ScoreSaberScoreToken) => {
-      return `${formatNumberWithCommas(score.baseScore)}`;
+      return `${formatNumberWithCommas(Number(score.baseScore.toFixed(0)))}`;
     },
   },
   {

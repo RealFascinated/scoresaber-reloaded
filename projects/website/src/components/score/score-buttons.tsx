@@ -5,27 +5,34 @@ import { songNameToYouTubeLink } from "@/common/youtube-utils";
 import BeatSaverLogo from "@/components/logos/beatsaver-logo";
 import YouTubeLogo from "@/components/logos/youtube-logo";
 import { useToast } from "@/hooks/use-toast";
-import { Dispatch, SetStateAction } from "react";
-import LeaderboardButton from "./leaderboard-button";
+import { useState } from "react";
 import ScoreButton from "./score-button";
 import { copyToClipboard } from "@/common/browser-utils";
 import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/score-saber-leaderboard-token";
+import { Button } from "@/components/ui/button";
+import { ArrowDownIcon } from "@heroicons/react/24/solid";
+import clsx from "clsx";
+import ScoreEditorButton from "@/components/score/score-editor-button";
+import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score-saber-score-token";
 
 type Props = {
+  score: ScoreSaberScoreToken;
   leaderboard: ScoreSaberLeaderboardToken;
   beatSaverMap?: BeatSaverMap;
   alwaysSingleLine?: boolean;
-  isLeaderboardExpanded?: boolean;
-  setIsLeaderboardExpanded?: Dispatch<SetStateAction<boolean>>;
+  setIsLeaderboardExpanded: (isExpanded: boolean) => void;
+  setScore: (score: ScoreSaberScoreToken) => void;
 };
 
 export default function ScoreButtons({
+  score,
   leaderboard,
   beatSaverMap,
   alwaysSingleLine,
-  isLeaderboardExpanded,
   setIsLeaderboardExpanded,
+  setScore,
 }: Props) {
+  const [leaderboardExpanded, setLeaderboardExpanded] = useState(false);
   const { toast } = useToast();
 
   return (
@@ -74,12 +81,30 @@ export default function ScoreButtons({
           <YouTubeLogo />
         </ScoreButton>
       </div>
-      {isLeaderboardExpanded != undefined && setIsLeaderboardExpanded != undefined && (
-        <LeaderboardButton
-          isLeaderboardExpanded={isLeaderboardExpanded}
-          setIsLeaderboardExpanded={setIsLeaderboardExpanded}
-        />
-      )}
+      <div className={`flex ${alwaysSingleLine ? "flex-row" : "flex-row lg:flex-col"} items-center justify-center`}>
+        {/* Edit score button */}
+        {score && leaderboard && setScore && (
+          <ScoreEditorButton score={score} leaderboard={leaderboard} setScore={setScore} />
+        )}
+
+        {/* View Leaderboard button */}
+        {leaderboardExpanded != undefined && setIsLeaderboardExpanded != undefined && (
+          <div className="pr-2 flex items-center justify-center cursor-default">
+            <Button
+              className="p-0 hover:bg-transparent"
+              variant="ghost"
+              onClick={() => {
+                setLeaderboardExpanded(!leaderboardExpanded);
+                setIsLeaderboardExpanded?.(!leaderboardExpanded);
+              }}
+            >
+              <ArrowDownIcon
+                className={clsx("w-6 h-6 transition-all transform-gpu", leaderboardExpanded ? "" : "rotate-180")}
+              />
+            </Button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -12,6 +12,7 @@ import ScoreSaberPlayer from "@ssr/common/types/player/impl/scoresaber-player";
 import ScoreSaberPlayerScoreToken from "@ssr/common/types/token/scoresaber/score-saber-player-score-token";
 import { lookupBeatSaverMap } from "@/common/beatsaver-utils";
 import { getPageFromRank } from "@ssr/common/utils/utils";
+import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 
 type Props = {
   /**
@@ -27,33 +28,47 @@ type Props = {
 
 export default function Score({ player, playerScore }: Props) {
   const { score, leaderboard } = playerScore;
+  const [baseScore, setBaseScore] = useState<number>(score.baseScore);
   const [beatSaverMap, setBeatSaverMap] = useState<BeatSaverMap | undefined>();
   const [isLeaderboardExpanded, setIsLeaderboardExpanded] = useState(false);
 
   const fetchBeatSaverData = useCallback(async () => {
-    const beatSaverMap = await lookupBeatSaverMap(leaderboard.songHash);
-    setBeatSaverMap(beatSaverMap);
+    const beatSaverMapData = await lookupBeatSaverMap(leaderboard.songHash);
+    setBeatSaverMap(beatSaverMapData);
   }, [leaderboard.songHash]);
 
   useEffect(() => {
     fetchBeatSaverData();
   }, [fetchBeatSaverData]);
 
+  const accuracy = (baseScore / leaderboard.maxScore) * 100;
+  const pp = scoresaberService.getPp(leaderboard.stars, accuracy);
   return (
     <div className="pb-2 pt-2">
-      <div
-        className={`grid w-full gap-2 lg:gap-0 first:pt-0 last:pb-0 grid-cols-[20px 1fr_1fr] lg:grid-cols-[0.5fr_4fr_1fr_300px]`}
-      >
+      {/* Score Info */}
+      <div className="grid w-full gap-2 lg:gap-0 grid-cols-[20px 1fr_1fr] lg:grid-cols-[0.5fr_4fr_1fr_300px]">
         <ScoreRankInfo score={score} leaderboard={leaderboard} />
         <ScoreSongInfo leaderboard={leaderboard} beatSaverMap={beatSaverMap} />
         <ScoreButtons
           leaderboard={leaderboard}
           beatSaverMap={beatSaverMap}
-          isLeaderboardExpanded={isLeaderboardExpanded}
+          score={score}
           setIsLeaderboardExpanded={setIsLeaderboardExpanded}
+          setScore={score => {
+            setBaseScore(score.baseScore);
+          }}
         />
-        <ScoreStats score={score} leaderboard={leaderboard} />
+        <ScoreStats
+          score={{
+            ...score,
+            baseScore,
+            pp: pp ? pp : score.pp,
+          }}
+          leaderboard={leaderboard}
+        />
       </div>
+
+      {/* Leaderboard */}
       {isLeaderboardExpanded && (
         <motion.div
           initial={{ opacity: 0, y: -50 }}
