@@ -37,7 +37,7 @@ app.use(
     timezone: "Europe/London",
     run: async () => {
       const pages = 10;
-      const cooldown = 60_000 / 200; // 200 requests per minute
+      const cooldown = 60_000 / 250; // 250 requests per minute
 
       let toTrack: PlayerDocument[] = await PlayerModel.find({});
       const toRemoveIds: string[] = [];
@@ -54,7 +54,7 @@ app.use(
           continue;
         }
         for (const player of page.players) {
-          const foundPlayer = await PlayerService.getPlayer(player.id, true);
+          const foundPlayer = await PlayerService.getPlayer(player.id, true, player);
           await PlayerService.trackScoreSaberPlayer(foundPlayer, player);
           toRemoveIds.push(foundPlayer.id);
         }

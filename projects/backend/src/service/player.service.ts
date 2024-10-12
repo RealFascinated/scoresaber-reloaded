@@ -11,14 +11,19 @@ export class PlayerService {
    *
    * @param id the player to fetch
    * @param create if true, create the player if it doesn't exist
+   * @param playerToken an optional player token for the player
    * @returns the player
    * @throws NotFoundError if the player is not found
    */
-  public static async getPlayer(id: string, create: boolean = false): Promise<PlayerDocument> {
+  public static async getPlayer(
+    id: string,
+    create: boolean = false,
+    playerToken?: ScoreSaberPlayerToken
+  ): Promise<PlayerDocument> {
     let player: PlayerDocument | null = await PlayerModel.findById(id);
     if (player === null) {
       // If create is on, create the player, otherwise return unknown player
-      const playerToken = create ? await scoresaberService.lookupPlayer(id) : undefined;
+      playerToken = create ? (playerToken ? playerToken : await scoresaberService.lookupPlayer(id)) : undefined;
       if (playerToken === undefined) {
         throw new NotFoundError(`Player "${id}" not found`);
       }
