@@ -23,7 +23,7 @@ export default function RankingData({ initialPage, country, initialPageData }: R
   const [rankingData, setRankingData] = useState<ScoreSaberPlayersPageToken | undefined>(initialPageData);
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: ["rankingData", currentPage],
+    queryKey: ["rankingData", currentPage, country],
     queryFn: async () => {
       const players =
         country == undefined
