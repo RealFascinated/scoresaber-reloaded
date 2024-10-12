@@ -79,7 +79,7 @@ export default function PlayerData({
           page={page}
         />
       </article>
-      {!isMobile && (
+      {!isMobile && !player.inactive && !player.banned && (
         <aside ref={miniRankingsRef} className="w-[600px] hidden 2xl:flex flex-col gap-2">
           <Mini shouldUpdate={isMiniRankingsVisible} type="Global" player={player} />
           <Mini shouldUpdate={isMiniRankingsVisible} type="Country" player={player} />
