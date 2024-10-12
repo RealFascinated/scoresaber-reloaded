@@ -124,7 +124,7 @@ const playerData = [
           {renderChange(
             player,
             "countryRank",
-            <Link href={`/ranking/${player.country}/${player.rankPages.global}`}>
+            <Link href={`/ranking/${player.country}/${player.rankPages.country}`}>
               <p className="hover:brightness-75 transition-all transform-gpu">
                 #{formatNumberWithCommas(player.countryRank)}
               </p>
