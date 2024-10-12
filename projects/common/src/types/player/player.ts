@@ -56,7 +56,7 @@ export default class Player {
 }
 
 export type StatisticChange = {
-  today: PlayerHistory;
+  daily: PlayerHistory;
   weekly: PlayerHistory;
   monthly: PlayerHistory;
 };

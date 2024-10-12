@@ -40,7 +40,7 @@ const renderDailyChange = (change: number, tooltip: ReactElement, format?: (valu
  * @param type the type of stat to get the change for
  */
 const renderChange = (player: ScoreSaberPlayer, type: "rank" | "countryRank" | "pp", children: ReactElement) => {
-  const todayStats = player.statisticChange?.today;
+  const todayStats = player.statisticChange?.daily;
   const weeklyStats = player.statisticChange?.weekly;
   const monthlyStats = player.statisticChange?.monthly;
   const todayStat = todayStats?.[type];
@@ -94,7 +94,7 @@ const playerData = [
     },
     render: (player: ScoreSaberPlayer) => {
       const statisticChange = player.statisticChange;
-      const rankChange = statisticChange?.today?.rank ?? 0;
+      const rankChange = statisticChange?.daily?.rank ?? 0;
 
       return (
         <div className="text-gray-300 flex gap-1 items-center">
@@ -117,7 +117,7 @@ const playerData = [
     },
     render: (player: ScoreSaberPlayer) => {
       const statisticChange = player.statisticChange;
-      const rankChange = statisticChange?.today?.countryRank ?? 0;
+      const rankChange = statisticChange?.daily?.countryRank ?? 0;
 
       return (
         <div className="text-gray-300 flex gap-1 items-center">
@@ -139,7 +139,7 @@ const playerData = [
     showWhenInactiveOrBanned: true,
     render: (player: ScoreSaberPlayer) => {
       const statisticChange = player.statisticChange;
-      const ppChange = statisticChange?.today?.pp ?? 0;
+      const ppChange = statisticChange?.daily?.pp ?? 0;
 
       return (
         <div className="text-gray-300 flex gap-1 items-center">

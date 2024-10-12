@@ -168,39 +168,62 @@ export async function getScoreSaberPlayerFromToken(
    */
   const getChange = (statType: "rank" | "countryRank" | "pp", daysAgo: number = 1): number | undefined => {
     const todayStats = statisticHistory[todayDate];
-    let otherDate: string | undefined;
+    let otherDate: Date | undefined;
 
     // Use the same logic as the first version to get the date exactly 'daysAgo' days earlier
     if (daysAgo === 1) {
-      otherDate = formatDateMinimal(getMidnightAlignedDate(getDaysAgoDate(1))); // Yesterday
+      otherDate = getMidnightAlignedDate(getDaysAgoDate(1)); // Yesterday
     } else {
       const targetDate = getDaysAgoDate(daysAgo);
-      const date = Object.keys(statisticHistory)
+
+      // Filter available dates to find the closest one to the target
+      const availableDates = Object.keys(statisticHistory)
         .map(dateKey => new Date(dateKey))
-        .reduce((closestDate, currentDate) => {
-          const currentDiff = Math.abs(currentDate.getTime() - targetDate.getTime());
-          const closestDiff = Math.abs(closestDate.getTime() - targetDate.getTime());
-          return currentDiff < closestDiff ? currentDate : closestDate;
-        }, targetDate);
-      otherDate = formatDateMinimal(date);
+        .filter(date => {
+          // Convert date back to the correct format for statisticHistory lookup
+          const formattedDate = formatDateMinimal(date);
+          const statsForDate = statisticHistory[formattedDate];
+          const hasStat = statsForDate && statType in statsForDate;
+
+          // Only consider past dates with the required statType
+          const isPast = date.getTime() < new Date().getTime();
+          return hasStat && isPast;
+        });
+
+      // If no valid dates are found, return undefined
+      if (availableDates.length === 0) {
+        return undefined;
+      }
+
+      // Find the closest date from the filtered available dates
+      otherDate = availableDates.reduce((closestDate, currentDate) => {
+        const currentDiff = Math.abs(currentDate.getTime() - targetDate.getTime());
+        const closestDiff = Math.abs(closestDate.getTime() - targetDate.getTime());
+        return currentDiff < closestDiff ? currentDate : closestDate;
+      }, availableDates[0]); // Start with the first available date
     }
-    if (!otherDate) {
+
+    // Ensure todayStats exists and contains the statType
+    if (!todayStats || !(statType in todayStats)) {
       return undefined;
     }
 
-    const otherStats = statisticHistory[otherDate];
-    const hasChange = !!(todayStats && otherStats);
-    if (!hasChange) {
+    const otherStats = statisticHistory[formatDateMinimal(otherDate)]; // This is now validated
+
+    // Ensure otherStats exists and contains the statType
+    if (!otherStats || !(statType in otherStats)) {
       return undefined;
     }
 
-    const statToday = todayStats[`${statType}`];
-    const statOther = otherStats[`${statType}`];
-    if (!statToday || !statOther) {
+    const statToday = todayStats[statType];
+    const statOther = otherStats[statType];
+
+    if (statToday === undefined || statOther === undefined) {
       return undefined;
     }
 
-    return (statToday - statOther) * (statType == "pp" ? 1 : -1);
+    // Return the difference, accounting for negative changes in ranks
+    return (statToday - statOther) * (statType === "pp" ? 1 : -1);
   };
 
   return {
@@ -214,7 +237,7 @@ export async function getScoreSaberPlayerFromToken(
     bio: bio,
     pp: token.pp,
     statisticChange: {
-      today: {
+      daily: {
         rank: getChange("rank", 1),
         countryRank: getChange("countryRank", 1),
         pp: getChange("pp", 1),
