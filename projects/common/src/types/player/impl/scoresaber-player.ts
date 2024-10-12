@@ -3,7 +3,7 @@ import ky from "ky";
 import { PlayerHistory } from "../player-history";
 import ScoreSaberPlayerToken from "../../token/scoresaber/score-saber-player-token";
 import { formatDateMinimal, getDaysAgoDate, getMidnightAlignedDate } from "../../../utils/time-utils";
-import { getPageFromRank } from "@ssr/utils/utils";
+import { getPageFromRank } from "../../../utils/utils";
 
 /**
  * A ScoreSaber player.
