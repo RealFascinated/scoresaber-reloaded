@@ -30,14 +30,17 @@ type LeaderboardDataProps = {
 export function LeaderboardData({ initialPage, initialScores, initialLeaderboard }: LeaderboardDataProps) {
   const [beatSaverMap, setBeatSaverMap] = useState<BeatSaverMap | undefined>();
   const [selectedLeaderboardId, setSelectedLeaderboardId] = useState(initialLeaderboard.id);
-  const [currentLeaderboard, setCurrentLeaderboard] = useState(initialLeaderboard);
 
-  const { data: leaderboard } = useQuery({
-    queryKey: ["leaderboard-" + initialLeaderboard.id, selectedLeaderboardId],
+  let currentLeaderboard = initialLeaderboard;
+  const { data } = useQuery({
+    queryKey: ["leaderboard", selectedLeaderboardId],
     queryFn: () => scoresaberService.lookupLeaderboard(selectedLeaderboardId + ""),
     initialData: initialLeaderboard,
-    staleTime: 30 * 1000, // Cache data for 30 seconds
   });
+
+  if (data) {
+    currentLeaderboard = data;
+  }
 
   const fetchBeatSaverData = useCallback(async () => {
     const beatSaverMap = await lookupBeatSaverMap(initialLeaderboard.songHash);
@@ -47,16 +50,6 @@ export function LeaderboardData({ initialPage, initialScores, initialLeaderboard
   useEffect(() => {
     fetchBeatSaverData();
   }, [fetchBeatSaverData]);
-
-  /**
-   * When the leaderboard changes, update the previous and current leaderboards.
-   * This is to prevent flickering between leaderboards.
-   */
-  useEffect(() => {
-    if (leaderboard) {
-      setCurrentLeaderboard(leaderboard);
-    }
-  }, [leaderboard]);
 
   if (!currentLeaderboard) {
     return null;

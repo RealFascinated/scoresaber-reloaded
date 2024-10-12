@@ -106,6 +106,7 @@ export default function LeaderboardScores({
       setSelectedLeaderboardId(id);
       setCurrentPage(1);
 
+      // Call the leaderboard changed callback
       if (leaderboardChanged) {
         leaderboardChanged(id);
       }
