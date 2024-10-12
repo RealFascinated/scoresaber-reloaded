@@ -34,7 +34,7 @@ export function PlayerRanking({ player, isCountry }: PlayerRankingProps) {
             src={`https://img.fascinated.cc/upload/w_128,h_128/${player.profilePicture}`}
           />
         </Avatar>
-        <CountryFlag code={player.country} size={14} />
+        <CountryFlag code={player.country} size={12} />
         <Link className="transform-gpu transition-all hover:text-blue-500" href={`/player/${player.id}`}>
           <p
             className={
