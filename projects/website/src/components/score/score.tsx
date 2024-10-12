@@ -11,6 +11,7 @@ import { motion } from "framer-motion";
 import ScoreSaberPlayer from "@ssr/common/types/player/impl/scoresaber-player";
 import ScoreSaberPlayerScoreToken from "@ssr/common/types/token/scoresaber/score-saber-player-score-token";
 import { lookupBeatSaverMap } from "@/common/beatsaver-utils";
+import { getPageFromRank } from "@ssr/common/utils/utils";
 
 type Props = {
   /**
@@ -38,13 +39,12 @@ export default function Score({ player, playerScore }: Props) {
     fetchBeatSaverData();
   }, [fetchBeatSaverData]);
 
-  const page = Math.floor(score.rank / 12) + 1;
   return (
     <div className="pb-2 pt-2">
       <div
         className={`grid w-full gap-2 lg:gap-0 first:pt-0 last:pb-0 grid-cols-[20px 1fr_1fr] lg:grid-cols-[0.5fr_4fr_1fr_300px]`}
       >
-        <ScoreRankInfo score={score} />
+        <ScoreRankInfo score={score} leaderboard={leaderboard} />
         <ScoreSongInfo leaderboard={leaderboard} beatSaverMap={beatSaverMap} />
         <ScoreButtons
           leaderboard={leaderboard}
@@ -61,7 +61,7 @@ export default function Score({ player, playerScore }: Props) {
           animate={{ opacity: 1, y: 0 }}
           className="w-full mt-2"
         >
-          <LeaderboardScores initialPage={page} player={player} leaderboard={leaderboard} />
+          <LeaderboardScores initialPage={getPageFromRank(score.rank, 12)} player={player} leaderboard={leaderboard} />
         </motion.div>
       )}
     </div>

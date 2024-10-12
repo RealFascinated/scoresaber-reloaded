@@ -11,6 +11,7 @@ import ScoreSaberPlayer from "@ssr/common/types/player/impl/scoresaber-player";
 import { ScoreSaberPlayersPageToken } from "@ssr/common/types/token/scoresaber/score-saber-players-page-token";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/score-saber-player-token";
+import { getPageFromRank } from "@ssr/common/utils/utils";
 
 const PLAYER_NAME_MAX_LENGTH = 18;
 
@@ -46,7 +47,7 @@ const miniVariants: Variants = {
     itemsPerPage: 50,
     icon: () => <GlobeAmericasIcon className="w-6 h-6" />,
     getPage: (player: ScoreSaberPlayer, itemsPerPage: number) => {
-      return Math.floor((player.rank - 1) / itemsPerPage) + 1;
+      return getPageFromRank(player.rank - 1, itemsPerPage);
     },
     getRank: (player: ScoreSaberPlayer) => {
       return player.rank;
@@ -61,7 +62,7 @@ const miniVariants: Variants = {
       return <CountryFlag code={player.country} size={12} />;
     },
     getPage: (player: ScoreSaberPlayer, itemsPerPage: number) => {
-      return Math.floor((player.countryRank - 1) / itemsPerPage) + 1;
+      return getPageFromRank(player.countryRank - 1, itemsPerPage);
     },
     getRank: (player: ScoreSaberPlayer) => {
       return player.countryRank;

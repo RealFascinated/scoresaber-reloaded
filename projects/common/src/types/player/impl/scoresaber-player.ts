@@ -3,6 +3,7 @@ import ky from "ky";
 import { PlayerHistory } from "../player-history";
 import ScoreSaberPlayerToken from "../../token/scoresaber/score-saber-player-token";
 import { formatDateMinimal, getDaysAgoDate, getMidnightAlignedDate } from "../../../utils/time-utils";
+import { getPageFromRank } from "@ssr/utils/utils";
 
 /**
  * A ScoreSaber player.
@@ -202,10 +203,6 @@ export async function getScoreSaberPlayerFromToken(
     return (statToday - statOther) * (statType == "pp" ? 1 : -1);
   };
 
-  const getRankPosition = (rank: number): number => {
-    return Math.floor(rank / 50) + 1;
-  };
-
   return {
     id: token.id,
     name: token.name,
@@ -238,8 +235,8 @@ export async function getScoreSaberPlayerFromToken(
     statisticHistory: statisticHistory,
     statistics: token.scoreStats,
     rankPages: {
-      global: getRankPosition(token.rank),
-      country: getRankPosition(token.countryRank),
+      global: getPageFromRank(token.rank, 50),
+      country: getPageFromRank(token.countryRank, 50),
     },
     permissions: token.permissions,
     banned: token.banned,
