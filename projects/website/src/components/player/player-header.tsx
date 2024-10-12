@@ -101,7 +101,7 @@ const playerData = [
               <p className="hover:brightness-75 transition-all transform-gpu">#{formatNumberWithCommas(player.rank)}</p>
             </Link>
           )}
-          {rankChange != 0 && renderDailyChange(rankChange, <p>The change in your rank compared to yesterday</p>)}
+          {rankChange != 0 && renderDailyChange(rankChange, <p>The change in rank compared to yesterday</p>)}
         </div>
       );
     },
@@ -126,8 +126,7 @@ const playerData = [
               </p>
             </Link>
           )}
-          {rankChange != 0 &&
-            renderDailyChange(rankChange, <p>The change in your country rank compared to yesterday</p>)}
+          {rankChange != 0 && renderDailyChange(rankChange, <p>The change in country rank compared to yesterday</p>)}
         </div>
       );
     },
@@ -145,7 +144,7 @@ const playerData = [
             "pp",
             <p className="hover:brightness-75 transition-all transform-gpu text-pp">{formatPp(player.pp)}pp</p>
           )}
-          {ppChange != 0 && renderDailyChange(ppChange, <p>The change in your pp compared to yesterday</p>)}
+          {ppChange != 0 && renderDailyChange(ppChange, <p>The change in pp compared to yesterday</p>)}
         </div>
       );
     },
