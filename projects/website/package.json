@@ -39,6 +39,7 @@
     "node-cache": "^5.1.2",
     "react": "19.0.0-rc-3edc000d-20240926",
     "react-chartjs-2": "^5.2.0",
+    "react-countup": "^6.5.3",
     "react-dom": "19.0.0-rc-3edc000d-20240926",
     "react-hook-form": "^7.53.0",
     "tailwind-merge": "^2.5.2",
