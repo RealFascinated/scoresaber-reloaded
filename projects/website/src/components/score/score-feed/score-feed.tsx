@@ -1,14 +1,15 @@
 "use client";
 
-import { useScoreSaberWebsocket } from "@/hooks/use-scoresaber-websocket";
 import { useEffect, useState } from "react";
 import ScoreSaberPlayerScoreToken from "@ssr/common/types/token/scoresaber/score-saber-player-score-token";
 import Score from "@/components/score/score";
 import { parseDate } from "@ssr/common/utils/time-utils";
 import Link from "next/link";
+import { useWebSocket } from "@/hooks/use-websocket";
+import { ScoreSaberWebsocketMessageToken } from "@ssr/common/types/token/scoresaber/websocket/scoresaber-websocket-message";
 
 export default function ScoreFeed() {
-  const { connected, message } = useScoreSaberWebsocket();
+  const { connected, message } = useWebSocket<ScoreSaberWebsocketMessageToken>("wss://scoresaber.com/ws");
   const [scores, setScores] = useState<ScoreSaberPlayerScoreToken[]>([]);
 
   useEffect(() => {
@@ -21,7 +22,7 @@ export default function ScoreFeed() {
     }
 
     setScores(prev => {
-      const newScores = [...prev, message.commandData];
+      const newScores = [...prev, commandData];
       if (newScores.length > 8) {
         newScores.pop();
       }

@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from "react";
-import { ScoreSaberWebsocketMessageToken } from "@ssr/common/types/token/scoresaber/websocket/scoresaber-websocket-message";
 
 /**
- * Connects to the ScoreSaber websocket.
+ * Generic WebSocket hook for connecting and handling WebSocket messages of type T.
+ *
+ * @param url - The WebSocket server URL.
+ * @param reconnectDelay - Optional delay (in milliseconds) before attempting to reconnect (default is 5000ms).
  */
-export const useScoreSaberWebsocket = () => {
+export const useWebSocket = <T>(url: string, reconnectDelay: number = 5000) => {
   const [connected, setConnected] = useState(false);
-  const [message, setMessage] = useState<ScoreSaberWebsocketMessageToken | null>(null); // Store the incoming message
+  const [message, setMessage] = useState<T | null>(null); // Store the incoming message of type T
   const socketRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [mounted, setMounted] = useState(false);
@@ -21,21 +23,20 @@ export const useScoreSaberWebsocket = () => {
     }
 
     const connectWebSocket = () => {
-      socketRef.current = new WebSocket("wss://scoresaber.com/ws");
+      socketRef.current = new WebSocket(url);
 
       socketRef.current.onopen = () => {
         setConnected(true);
       };
 
       socketRef.current.onmessage = event => {
-        // Ignore welcome message
-        if (event.data === "Connected to the ScoreSaber WSS") {
-          return;
+        try {
+          // Handle incoming messages and store them in state as type T
+          const messageData: T = JSON.parse(event.data);
+          setMessage(messageData);
+        } catch (error) {
+          console.error("Error parsing WebSocket message:", error);
         }
-
-        // Handle incoming messages here and store them in state
-        const messageData = JSON.parse(event.data);
-        setMessage(messageData); // Store the message in the state
       };
 
       socketRef.current.onclose = () => {
@@ -53,10 +54,10 @@ export const useScoreSaberWebsocket = () => {
       if (reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current);
       }
-      // Try reconnecting after 5 seconds
+      // Try reconnecting after the specified delay
       reconnectTimeoutRef.current = setTimeout(() => {
         connectWebSocket();
-      }, 5000);
+      }, reconnectDelay);
     };
 
     // Initialize WebSocket connection
@@ -72,7 +73,7 @@ export const useScoreSaberWebsocket = () => {
         clearTimeout(reconnectTimeoutRef.current);
       }
     };
-  }, [mounted]);
+  }, [mounted, url, reconnectDelay]);
 
   return { connected, message };
 };
