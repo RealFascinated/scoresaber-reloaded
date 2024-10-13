@@ -107,10 +107,6 @@ export async function getScoreSaberPlayerFromToken(
         `${apiUrl}/player/history/${token.id}${playerIdCookie && playerIdCookie == token.id ? "?createIfMissing=true" : ""}`
       )
       .json();
-    if (history === undefined || Object.entries(history).length === 0) {
-      console.log("Player has no history, using fallback");
-      throw new Error();
-    }
     if (history) {
       // Use the latest data for today
       history[todayDate] = {
@@ -125,9 +121,7 @@ export async function getScoreSaberPlayerFromToken(
       isBeingTracked = true;
     }
     statisticHistory = history;
-  } catch (e) {
-    console.log("Player has no history, using fallback");
-  }
+  } catch (e) {}
 
   const playerRankHistory = token.histories.split(",").map(value => {
     return parseInt(value);
