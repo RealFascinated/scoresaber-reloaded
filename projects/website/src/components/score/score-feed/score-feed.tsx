@@ -5,18 +5,18 @@ import ScoreSaberPlayerScoreToken from "@ssr/common/types/token/scoresaber/score
 import Score from "@/components/score/score";
 import { parseDate } from "@ssr/common/utils/time-utils";
 import Link from "next/link";
-import { useWebSocket } from "@/hooks/use-websocket";
+import useWebSocket, { ReadyState } from "react-use-websocket";
 import { ScoreSaberWebsocketMessageToken } from "@ssr/common/types/token/scoresaber/websocket/scoresaber-websocket-message";
 
 export default function ScoreFeed() {
-  const { connected, message } = useWebSocket<ScoreSaberWebsocketMessageToken>("wss://scoresaber.com/ws");
+  const { readyState, lastJsonMessage } = useWebSocket<ScoreSaberWebsocketMessageToken>("wss://scoresaber.com/ws");
   const [scores, setScores] = useState<ScoreSaberPlayerScoreToken[]>([]);
 
   useEffect(() => {
-    if (!message) {
+    if (!lastJsonMessage) {
       return;
     }
-    const { commandName, commandData } = message;
+    const { commandName, commandData } = lastJsonMessage;
     if (commandName !== "score") {
       return;
     }
@@ -30,9 +30,9 @@ export default function ScoreFeed() {
       // Newest to oldest
       return newScores.sort((a, b) => parseDate(b.score.timeSet).getTime() - parseDate(a.score.timeSet).getTime());
     });
-  }, [message]);
+  }, [lastJsonMessage]);
 
-  if (!connected) {
+  if (readyState == ReadyState.CONNECTING) {
     return <p>Not Connected to the ScoreSaber Websocket :(</p>;
   }
 

@@ -44,6 +44,7 @@
     "react-countup": "^6.5.3",
     "react-dom": "^19.0.0-rc-1460d67c-20241003",
     "react-hook-form": "^7.53.0",
+    "react-use-websocket": "^4.9.0",
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7",
     "zod": "^3.23.8"
