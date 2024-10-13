@@ -1,32 +1,26 @@
 import { useEffect, useRef, useState } from "react";
-import {
-  ScoreSaberWebsocketMessageToken,
-} from "@ssr/common/types/token/scoresaber/websocket/scoresaber-websocket-message";
+import { ScoreSaberWebsocketMessageToken } from "@ssr/common/types/token/scoresaber/websocket/scoresaber-websocket-message";
 
 /**
  * Connects to the ScoreSaber websocket.
- * Waits until the page is loaded before establishing the connection.
  */
 export const useScoreSaberWebsocket = () => {
   const [connected, setConnected] = useState(false);
   const [message, setMessage] = useState<ScoreSaberWebsocketMessageToken | null>(null); // Store the incoming message
   const socketRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const [isClient, setIsClient] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    // Only set isClient to true when we're on the client side
-    setIsClient(true);
+    setMounted(true);
   }, []);
 
   useEffect(() => {
-    // If not on the client side, don't attempt to connect
-    if (!isClient) {
+    if (!mounted) {
       return;
     }
 
     const connectWebSocket = () => {
-      // Create a new WebSocket instance
       socketRef.current = new WebSocket("wss://scoresaber.com/ws");
 
       socketRef.current.onopen = () => {
@@ -78,7 +72,7 @@ export const useScoreSaberWebsocket = () => {
         clearTimeout(reconnectTimeoutRef.current);
       }
     };
-  }, [isClient]); // Depend on isClient to ensure the code only runs on the client
+  }, [mounted]);
 
-  return { connected, message }; // Return both the connection status and the last received message
+  return { connected, message };
 };
