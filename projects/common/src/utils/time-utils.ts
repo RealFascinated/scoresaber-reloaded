@@ -19,6 +19,7 @@ export function timeAgo(input: Date) {
     { unit: "d", seconds: 60 * 60 * 24 }, // days
     { unit: "h", seconds: 60 * 60 }, // hours
     { unit: "m", seconds: 60 }, // minutes
+    { unit: "s", seconds: 1 }, // seconds
   ];
 
   const result = [];
