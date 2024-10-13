@@ -18,20 +18,15 @@ export default function ScoreSongInfo({ leaderboard, beatSaverMap }: Props) {
   const mappersProfile =
     beatSaverMap != undefined ? `https://beatsaver.com/profile/${beatSaverMap?.fullData.uploader.id}` : undefined;
 
+  const starCount = leaderboard.stars;
   return (
     <div className="flex gap-3 items-center">
       <div className="relative flex justify-center h-[64px]">
         <Tooltip
           display={
             <>
-              <p>
-                Difficulty: <span className="font-bold">{diff}</span>
-              </p>
-              {leaderboard.stars > 0 && (
-                <p>
-                  Stars: <span className="font-bold">{leaderboard.stars}</span>
-                </p>
-              )}
+              <p>Difficulty: {diff}</p>
+              {starCount > 0 && <p>Stars: {starCount.toFixed(2)}</p>}
             </>
           }
         >
@@ -41,9 +36,9 @@ export default function ScoreSongInfo({ leaderboard, beatSaverMap }: Props) {
               backgroundColor: songDifficultyToColor(diff) + "f0", // Transparency value (in hex 0-255)
             }}
           >
-            {leaderboard.stars > 0 ? (
+            {starCount > 0 ? (
               <div className="flex gap-1 items-center justify-center">
-                <p>{leaderboard.stars}</p>
+                <p>{starCount.toFixed(2)}</p>
                 <StarIcon className="w-[14px] h-[14px]" />
               </div>
             ) : (

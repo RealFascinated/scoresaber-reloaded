@@ -24,15 +24,26 @@ type Props = {
    * The score to display.
    */
   playerScore: ScoreSaberPlayerScoreToken;
+
+  /**
+   * Score settings
+   */
+  settings?: {
+    noScoreButtons: boolean;
+  };
 };
 
-export default function Score({ player, playerScore }: Props) {
+export default function Score({ player, playerScore, settings }: Props) {
   const { score, leaderboard } = playerScore;
   const [baseScore, setBaseScore] = useState<number>(score.baseScore);
   const [beatSaverMap, setBeatSaverMap] = useState<BeatSaverMap | undefined>();
   const [isLeaderboardExpanded, setIsLeaderboardExpanded] = useState(false);
 
   const fetchBeatSaverData = useCallback(async () => {
+    // No need to fetch if no buttons
+    if (!settings?.noScoreButtons) {
+      return;
+    }
     const beatSaverMapData = await lookupBeatSaverMap(leaderboard.songHash);
     setBeatSaverMap(beatSaverMapData);
   }, [leaderboard.songHash]);
@@ -48,22 +59,30 @@ export default function Score({ player, playerScore }: Props) {
   }, [fetchBeatSaverData]);
 
   const accuracy = (baseScore / leaderboard.maxScore) * 100;
-  const pp = baseScore == score.baseScore ? score.pp : scoresaberService.getPp(leaderboard.stars, accuracy);
+  const pp = baseScore === score.baseScore ? score.pp : scoresaberService.getPp(leaderboard.stars, accuracy);
+
+  // Dynamic grid column classes
+  const gridColsClass = settings?.noScoreButtons
+    ? "grid-cols-[20px 1fr_1fr] lg:grid-cols-[0.5fr_4fr_300px]" // Fewer columns if no buttons
+    : "grid-cols-[20px 1fr_1fr] lg:grid-cols-[0.5fr_4fr_1fr_300px]"; // Original with buttons
+
   return (
     <div className="pb-2 pt-2">
       {/* Score Info */}
-      <div className="grid w-full gap-2 lg:gap-0 grid-cols-[20px 1fr_1fr] lg:grid-cols-[0.5fr_4fr_1fr_300px]">
+      <div className={`grid w-full gap-2 lg:gap-0 ${gridColsClass}`}>
         <ScoreRankInfo score={score} leaderboard={leaderboard} />
         <ScoreSongInfo leaderboard={leaderboard} beatSaverMap={beatSaverMap} />
-        <ScoreButtons
-          leaderboard={leaderboard}
-          beatSaverMap={beatSaverMap}
-          score={score}
-          setIsLeaderboardExpanded={setIsLeaderboardExpanded}
-          updateScore={score => {
-            setBaseScore(score.baseScore);
-          }}
-        />
+        {settings?.noScoreButtons !== true && (
+          <ScoreButtons
+            leaderboard={leaderboard}
+            beatSaverMap={beatSaverMap}
+            score={score}
+            setIsLeaderboardExpanded={setIsLeaderboardExpanded}
+            updateScore={score => {
+              setBaseScore(score.baseScore);
+            }}
+          />
+        )}
         <ScoreStats
           score={{
             ...score,

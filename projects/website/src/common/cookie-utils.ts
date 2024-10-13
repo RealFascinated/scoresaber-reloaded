@@ -41,7 +41,7 @@ export async function setCookieValue(name: CookieName, value: string) {
     });
   }
   const { set } = (await import("js-cookie")).default;
-  return set(name, value, {
+  set(name, value, {
     path: "/",
   });
 }
