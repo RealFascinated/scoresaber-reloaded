@@ -41,7 +41,7 @@ export default function Score({ player, playerScore, settings }: Props) {
 
   const fetchBeatSaverData = useCallback(async () => {
     // No need to fetch if no buttons
-    if (!settings?.noScoreButtons) {
+    if (settings?.noScoreButtons == true) {
       return;
     }
     const beatSaverMapData = await lookupBeatSaverMap(leaderboard.songHash);
