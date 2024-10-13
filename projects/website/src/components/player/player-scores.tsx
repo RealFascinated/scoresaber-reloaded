@@ -16,6 +16,7 @@ import ScoreSaberPlayer from "@ssr/common/types/player/impl/scoresaber-player";
 import ScoreSaberPlayerScoresPageToken from "@ssr/common/types/token/scoresaber/score-saber-player-scores-page-token";
 import { ScoreSort } from "@ssr/common/types/score/score-sort";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
+import { setCookieValue } from "@/common/cookie-utils";
 
 type Props = {
   initialScoreData?: ScoreSaberPlayerScoresPageToken;
@@ -88,10 +89,11 @@ export default function PlayerScores({ initialScoreData, initialSearch, player, 
    *
    * @param newSort the new sort
    */
-  const handleSortChange = (newSort: ScoreSort) => {
+  const handleSortChange = async (newSort: ScoreSort) => {
     if (newSort !== pageState.sort) {
       setPageState({ page: 1, sort: newSort });
       setShouldFetch(true); // Set to true to trigger fetch
+      await setCookieValue("lastScoreSort", newSort); // Set the default score sort
     }
   };
 

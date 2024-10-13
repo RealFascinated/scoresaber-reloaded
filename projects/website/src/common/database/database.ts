@@ -1,7 +1,7 @@
 import Dexie, { EntityTable } from "dexie";
-import { setPlayerIdCookie } from "../website-utils";
 import BeatSaverMap from "./types/beatsaver-map";
 import Settings from "./types/settings";
+import { setCookieValue } from "@/common/cookie-utils";
 
 const SETTINGS_ID = "SSR"; // DO NOT CHANGE
 
@@ -38,7 +38,7 @@ export default class Database extends Dexie {
       if (settings == undefined || settings.playerId == undefined) {
         return;
       }
-      setPlayerIdCookie(settings.playerId);
+      await setCookieValue("playerId", settings.playerId);
     });
   }
 

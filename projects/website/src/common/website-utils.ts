@@ -1,23 +1,3 @@
-import Cookies from "js-cookie";
-
-/**
- * Sets the player id cookie
- *
- * @param playerId the player id to set
- */
-export function setPlayerIdCookie(playerId: string) {
-  Cookies.set("playerId", playerId, { path: "/" });
-}
-
-/**
- * Gets the player id cookie
- *
- * @returns the player id cookie
- */
-export function getPlayerIdCookie() {
-  return Cookies.get("playerId");
-}
-
 /**
  * Gets if we're in production
  */

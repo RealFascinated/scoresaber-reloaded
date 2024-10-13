@@ -10,8 +10,8 @@ import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import ScoreSaberPlayerScoresPageToken from "@ssr/common/types/token/scoresaber/score-saber-player-scores-page-token";
 import ScoreSaberPlayer, { getScoreSaberPlayerFromToken } from "@ssr/common/types/player/impl/scoresaber-player";
 import { config } from "../../../../../config";
-import { cookies } from "next/headers";
 import NodeCache from "node-cache";
+import { getCookieValue } from "@/common/cookie-utils";
 
 const UNKNOWN_PLAYER = {
   title: "ScoreSaber Reloaded - Unknown Player",
@@ -47,7 +47,7 @@ const playerCache = new NodeCache({ stdTTL: 60, checkperiod: 120 });
 const getPlayerData = async ({ params }: Props, fetchScores: boolean = true): Promise<PlayerData> => {
   const { slug } = await params;
   const id = slug[0]; // The players id
-  const sort: ScoreSort = (slug[1] as ScoreSort) || "recent"; // The sorting method
+  const sort: ScoreSort = (slug[1] as ScoreSort) || (await getCookieValue("lastScoreSort", "recent")); // The sorting method
   const page = parseInt(slug[2]) || 1; // The page number
   const search = (slug[3] as string) || ""; // The search query
 
@@ -58,8 +58,7 @@ const getPlayerData = async ({ params }: Props, fetchScores: boolean = true): Pr
 
   const playerToken = await scoresaberService.lookupPlayer(id);
   const player =
-    playerToken &&
-    (await getScoreSaberPlayerFromToken(playerToken, config.siteApi, (await cookies()).get("playerId")?.value));
+    playerToken && (await getScoreSaberPlayerFromToken(playerToken, config.siteApi, await getCookieValue("playerId")));
   let scores: ScoreSaberPlayerScoresPageToken | undefined;
   if (fetchScores) {
     scores = await scoresaberService.lookupPlayerScores({
