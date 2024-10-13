@@ -11,7 +11,6 @@ import PlayerTrackedStatus from "@/components/player/player-tracked-status";
 import ScoreSaberPlayer from "@ssr/common/types/player/impl/scoresaber-player";
 import Link from "next/link";
 import { capitalizeFirstLetter } from "@/common/string-utils";
-import { normalizedRegionName } from "@ssr/common/utils/region-utils";
 
 /**
  * Renders the change for a stat.

@@ -3,7 +3,6 @@ import { getDifficultyFromScoreSaberDifficulty } from "@/common/scoresaber-utils
 import FallbackLink from "@/components/fallback-link";
 import Tooltip from "@/components/tooltip";
 import { StarIcon } from "@heroicons/react/24/solid";
-import clsx from "clsx";
 import Image from "next/image";
 import { songDifficultyToColor } from "@/common/song-utils";
 import Link from "next/link";

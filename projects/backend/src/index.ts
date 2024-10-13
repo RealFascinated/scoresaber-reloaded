@@ -21,7 +21,7 @@ import { delay } from "@ssr/common/utils/utils";
 
 // Load .env file
 dotenv.config({
-  logLevel: "success",
+  logLevel: (await Bun.file(".env").exists()) ? "success" : "warn",
   path: ".env",
   override: true,
 });
@@ -33,8 +33,8 @@ export const app = new Elysia();
 app.use(
   cron({
     name: "player-statistics-tracker-cron",
-    pattern: "1 0 * * *", // Every day at 00:01 (London time)
-    timezone: "Europe/London",
+    pattern: "1 0 * * *", // Every day at 00:01
+    timezone: "Europe/London", // UTC time
     run: async () => {
       const pages = 20; // top 1000 players
       const cooldown = 60_000 / 250; // 250 requests per minute
