@@ -22,13 +22,9 @@ export default function ScoreFeed() {
     }
 
     setScores(prev => {
-      const newScores = [...prev, commandData];
-      if (newScores.length > 8) {
-        newScores.pop();
-      }
-
-      // Newest to oldest
-      return newScores.sort((a, b) => parseDate(b.score.timeSet).getTime() - parseDate(a.score.timeSet).getTime());
+      return [...prev, commandData]
+        .sort((a, b) => parseDate(b.score.timeSet).getTime() - parseDate(a.score.timeSet).getTime())
+        .slice(0, 8);
     });
   }, [lastJsonMessage]);
 
