@@ -4,7 +4,7 @@ import { isProduction } from "@ssr/common/utils/utils";
 export function middleware(request: NextRequest) {
   const before = Date.now();
   const response = NextResponse.next();
-  const ip = request.headers.get("CF-Connecting-IP") || request.headers.get("X-Forwarded-For") || request.ip;
+  const ip = request.headers.get("CF-Connecting-IP") || request.headers.get("X-Forwarded-For");
 
   // Log requests in production
   if (isProduction()) {
