@@ -151,7 +151,7 @@ export default function Pagination({
   };
 
   return (
-    <ShadCnPagination className="select-none scale-75">
+    <ShadCnPagination className="select-none">
       <PaginationContent>
         {/* ">>" before the Previous button in mobile mode */}
         {mobilePagination && (
