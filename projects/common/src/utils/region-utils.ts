@@ -7,5 +7,9 @@ let regionNames = new Intl.DisplayNames(["en"], { type: "region" });
  * @returns the normalized region name
  */
 export function normalizedRegionName(region: string) {
-  return regionNames.of(region);
+  try {
+    return regionNames.of(region) || region;
+  } catch {
+    return region;
+  }
 }
