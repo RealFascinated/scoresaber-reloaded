@@ -55,7 +55,7 @@ export function PlayerRanking({ player, isCountry }: PlayerRankingProps) {
           weeklyRankChange >= 0 ? weeklyRankChange != 0 && "text-green-500" : "text-red-500"
         )}
       >
-        {weeklyRankChange}
+        {formatNumberWithCommas(weeklyRankChange)}
       </td>
     </>
   );
