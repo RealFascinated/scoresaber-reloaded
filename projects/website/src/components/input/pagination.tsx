@@ -112,7 +112,7 @@ export default function Pagination({
       startPage = Math.max(1, endPage - maxPagesToShow + 1);
     }
 
-    if (startPage > 1 && !mobilePagination) {
+    if (startPage > 1) {
       pageNumbers.push(
         <>
           <PaginationItemWrapper key="start" isLoadingPage={isLoading}>
@@ -120,7 +120,7 @@ export default function Pagination({
               1
             </PaginationLink>
           </PaginationItemWrapper>
-          {startPage > 2 && (
+          {startPage > 2 && !mobilePagination && (
             <PaginationItemWrapper key="ellipsis-start" isLoadingPage={isLoading}>
               <PaginationEllipsis />
             </PaginationItemWrapper>
@@ -147,7 +147,7 @@ export default function Pagination({
   };
 
   return (
-    <ShadCnPagination className="select-none">
+    <ShadCnPagination className="select-none scale-75">
       <PaginationContent>
         {/* Previous button - disabled on the first page */}
         <PaginationItemWrapper isLoadingPage={isLoading}>
@@ -161,11 +161,13 @@ export default function Pagination({
 
         {renderPageNumbers()}
 
-        {!mobilePagination && currentPage < totalPages && totalPages - currentPage > 2 && (
+        {currentPage < totalPages && totalPages - currentPage > 2 && (
           <>
-            <PaginationItemWrapper key="ellipsis-end" isLoadingPage={isLoading}>
-              <PaginationEllipsis className="cursor-default" />
-            </PaginationItemWrapper>
+            {!mobilePagination && (
+              <PaginationItemWrapper key="ellipsis-end" isLoadingPage={isLoading}>
+                <PaginationEllipsis className="cursor-default" />
+              </PaginationItemWrapper>
+            )}
             <PaginationItemWrapper key="end" isLoadingPage={isLoading}>
               <PaginationLink
                 href={generatePageUrl ? generatePageUrl(totalPages) : ""}
