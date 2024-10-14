@@ -46,7 +46,7 @@ export type DatasetConfig = {
     hideOnMobile?: boolean;
     displayName: string;
     position: AxisPosition;
-    precision?: number; // Added precision option here
+    valueFormatter?: (value: number) => string; // Added precision option here
   };
   labelFormatter: (value: number) => string;
 };
@@ -63,7 +63,7 @@ const generateAxis = (
   display: boolean,
   position: AxisPosition,
   displayName: string,
-  precision: number | undefined // Adding precision parameter
+  valueFormatter?: (value: number) => string
 ): Axis => ({
   id,
   position,
@@ -74,7 +74,7 @@ const generateAxis = (
     stepSize: 10,
     callback: (value: number) => {
       // Apply precision if specified, otherwise default to no decimal places
-      return precision !== undefined ? value.toFixed(precision) : value.toString();
+      return valueFormatter !== undefined ? valueFormatter(value) : value.toString();
     },
   },
   reverse,
@@ -127,7 +127,7 @@ export default function GenericChart({ labels, datasetConfig, histories }: Chart
           isMobile && config.axisConfig.hideOnMobile ? false : config.axisConfig.display,
           config.axisConfig.position,
           config.axisConfig.displayName,
-          config.axisConfig.precision // Pass precision from config to generateAxis
+          config.axisConfig.valueFormatter
         );
 
         return generateDataset(config.title, historyArray, config.color, config.axisId);
