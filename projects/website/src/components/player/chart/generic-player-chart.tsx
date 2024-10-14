@@ -57,7 +57,7 @@ export default function GenericPlayerChart({ player, datasetConfig }: Props) {
   let currentHistoryIndex = 0;
 
   // Iterate from historyDays-1 to 0 (last 'historyDays' days)
-  for (let dayAgo = historyDays; dayAgo >= 0; dayAgo--) {
+  for (let dayAgo = historyDays - 1; dayAgo >= 0; dayAgo--) {
     const targetDate = new Date();
     targetDate.setDate(today.getDate() - dayAgo);
 
