@@ -1,4 +1,5 @@
-import { ChevronLeftIcon, ChevronRightIcon, DotsHorizontalIcon } from "@radix-ui/react-icons";
+import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/16/solid";
+import { DotsHorizontalIcon } from "@radix-ui/react-icons";
 import * as React from "react";
 
 import { cn } from "@/common/utils";

@@ -10,6 +10,8 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "../ui/pagination";
+import * as React from "react";
+import { ChevronDoubleLeftIcon, ChevronDoubleRightIcon } from "@heroicons/react/16/solid";
 
 type PaginationItemWrapperProps = {
   /**
@@ -116,9 +118,11 @@ export default function Pagination({
       pageNumbers.push(
         <>
           <PaginationItemWrapper key="start" isLoadingPage={isLoading}>
-            <PaginationLink href={generatePageUrl ? generatePageUrl(1) : ""} onClick={e => handleLinkClick(1, e)}>
-              1
-            </PaginationLink>
+            {!mobilePagination && (
+              <PaginationLink href={generatePageUrl ? generatePageUrl(1) : ""} onClick={e => handleLinkClick(1, e)}>
+                1
+              </PaginationLink>
+            )}
           </PaginationItemWrapper>
           {startPage > 2 && !mobilePagination && (
             <PaginationItemWrapper key="ellipsis-start" isLoadingPage={isLoading}>
@@ -149,6 +153,15 @@ export default function Pagination({
   return (
     <ShadCnPagination className="select-none scale-75">
       <PaginationContent>
+        {/* ">>" before the Previous button in mobile mode */}
+        {mobilePagination && (
+          <PaginationItemWrapper key="mobile-start" isLoadingPage={isLoading}>
+            <PaginationLink href={generatePageUrl ? generatePageUrl(1) : ""} onClick={e => handleLinkClick(1, e)}>
+              <ChevronDoubleLeftIcon className="h-4 w-4" />
+            </PaginationLink>
+          </PaginationItemWrapper>
+        )}
+
         {/* Previous button - disabled on the first page */}
         <PaginationItemWrapper isLoadingPage={isLoading}>
           <PaginationPrevious
@@ -161,24 +174,6 @@ export default function Pagination({
 
         {renderPageNumbers()}
 
-        {currentPage < totalPages && totalPages - currentPage > 2 && (
-          <>
-            {!mobilePagination && (
-              <PaginationItemWrapper key="ellipsis-end" isLoadingPage={isLoading}>
-                <PaginationEllipsis className="cursor-default" />
-              </PaginationItemWrapper>
-            )}
-            <PaginationItemWrapper key="end" isLoadingPage={isLoading}>
-              <PaginationLink
-                href={generatePageUrl ? generatePageUrl(totalPages) : ""}
-                onClick={e => handleLinkClick(totalPages, e)}
-              >
-                {totalPages}
-              </PaginationLink>
-            </PaginationItemWrapper>
-          </>
-        )}
-
         {/* Next button - disabled on the last page */}
         <PaginationItemWrapper isLoadingPage={isLoading}>
           <PaginationNext
@@ -188,6 +183,18 @@ export default function Pagination({
             className={clsx(currentPage === totalPages && "cursor-not-allowed")}
           />
         </PaginationItemWrapper>
+
+        {/* ">>" after the Next button in mobile mode */}
+        {mobilePagination && (
+          <PaginationItemWrapper key="mobile-end" isLoadingPage={isLoading}>
+            <PaginationLink
+              href={generatePageUrl ? generatePageUrl(totalPages) : ""}
+              onClick={e => handleLinkClick(totalPages, e)}
+            >
+              <ChevronDoubleRightIcon className="h-4 w-4" />
+            </PaginationLink>
+          </PaginationItemWrapper>
+        )}
       </PaginationContent>
     </ShadCnPagination>
   );
