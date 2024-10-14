@@ -4,6 +4,7 @@ import React from "react";
 import { DatasetConfig } from "@/components/chart/generic-chart";
 import GenericPlayerChart from "@/components/player/chart/generic-player-chart";
 import ScoreSaberPlayer from "@ssr/common/types/player/impl/scoresaber-player";
+import { isWholeNumber } from "@ssr/common/utils/number-utils";
 
 type Props = {
   player: ScoreSaberPlayer;
@@ -22,6 +23,12 @@ const datasetConfig: DatasetConfig[] = [
       hideOnMobile: false,
       displayName: "Average Ranked Accuracy",
       position: "left",
+      valueFormatter: value => {
+        if (isWholeNumber(value)) {
+          return value.toString();
+        }
+        return value.toFixed(1);
+      },
     },
     labelFormatter: (value: number) => `Average Ranked Accuracy ${value.toFixed(3)}%`,
   },
