@@ -24,11 +24,10 @@ export default function ErrorPage({ error }: { error: Error & { digest?: string 
         <p className="text-lg text-gray-400 mt-2">
           We&#39;re experiencing some technical difficulties. Please try again later.
         </p>
-        {error?.digest && <p className="text-sm text-gray-500 mt-1">Error Code: {error.digest}</p>}
 
         <div className="mt-6">
-          <Link href="/" className="text-blue-500 hover:underline">
-            Go back to the homepage
+          <Link href="/" className="text-blue-500 hover:brightness-75 transition-all transform-gpu">
+            Go Home
           </Link>
         </div>
       </div>
