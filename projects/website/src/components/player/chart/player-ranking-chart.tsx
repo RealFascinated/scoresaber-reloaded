@@ -20,7 +20,7 @@ const datasetConfig: DatasetConfig[] = [
     axisConfig: {
       reverse: true,
       display: true,
-      displayName: "Global Rank",
+      displayName: "Rank",
       position: "left",
     },
     labelFormatter: (value: number) => `Rank #${formatNumberWithCommas(value)}`,
@@ -49,6 +49,7 @@ const datasetConfig: DatasetConfig[] = [
       hideOnMobile: true,
       displayName: "PP",
       position: "right",
+      precision: 1,
     },
     labelFormatter: (value: number) => `PP ${formatNumberWithCommas(value)}pp`,
   },

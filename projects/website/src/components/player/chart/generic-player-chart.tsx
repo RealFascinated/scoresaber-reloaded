@@ -18,20 +18,6 @@ type Props = {
   datasetConfig: DatasetConfig[];
 };
 
-// Set up the labels
-const labels: string[] = [];
-const historyDays = 50;
-for (let day = 0; day < historyDays; day++) {
-  if (day == 0) {
-    labels.push("Now");
-  } else if (day == 1) {
-    labels.push("Yesterday");
-  } else {
-    labels.push(`${day + 1} days ago`);
-  }
-}
-labels.reverse();
-
 export default function GenericPlayerChart({ player, datasetConfig }: Props) {
   // Check if player statistics are available
   if (!player.statisticHistory || Object.keys(player.statisticHistory).length === 0) {
@@ -47,6 +33,9 @@ export default function GenericPlayerChart({ player, datasetConfig }: Props) {
   datasetConfig.forEach(config => {
     histories[config.field] = [];
   });
+
+  const labels: Date[] = [];
+  const historyDays = 50;
 
   // Sort the statistic entries by date
   const statisticEntries = Object.entries(player.statisticHistory).sort(
@@ -85,6 +74,7 @@ export default function GenericPlayerChart({ player, datasetConfig }: Props) {
         histories[config.field].push(null);
       });
     }
+    labels.push(targetDate);
   }
 
   // Render the chart with collected data

@@ -4,6 +4,7 @@
 import { CategoryScale, Chart, Legend, LinearScale, LineElement, PointElement, Title, Tooltip } from "chart.js";
 import { Line } from "react-chartjs-2";
 import { useIsMobile } from "@/hooks/use-is-mobile";
+import { formatDateMinimal, getDaysAgoDate, parseDate } from "@ssr/common/utils/time-utils";
 
 Chart.register(LinearScale, CategoryScale, PointElement, LineElement, Title, Tooltip, Legend);
 
@@ -17,6 +18,9 @@ export type Axis = {
   title?: { display: boolean; text: string; color?: string };
   ticks?: {
     stepSize?: number;
+    callback?: (value: number, index: number, values: any) => string;
+    font?: (context: any) => { weight: string; color?: string } | undefined;
+    color?: (context: any) => string | undefined;
   };
   reverse?: boolean;
 };
@@ -42,12 +46,13 @@ export type DatasetConfig = {
     hideOnMobile?: boolean;
     displayName: string;
     position: AxisPosition;
+    precision?: number; // Added precision option here
   };
   labelFormatter: (value: number) => string;
 };
 
 export type ChartProps = {
-  labels: string[];
+  labels: Date[];
   datasetConfig: DatasetConfig[];
   histories: Record<string, (number | null)[]>;
 };
@@ -57,14 +62,21 @@ const generateAxis = (
   reverse: boolean,
   display: boolean,
   position: AxisPosition,
-  displayName: string
+  displayName: string,
+  precision: number | undefined // Adding precision parameter
 ): Axis => ({
   id,
   position,
   display,
   grid: { drawOnChartArea: id === "y", color: id === "y" ? "#252525" : "" },
   title: { display: true, text: displayName, color: "#ffffff" },
-  ticks: { stepSize: 10 },
+  ticks: {
+    stepSize: 10,
+    callback: (value: number) => {
+      // Apply precision if specified, otherwise default to no decimal places
+      return precision !== undefined ? value.toFixed(precision) : value.toString();
+    },
+  },
   reverse,
 });
 
@@ -85,6 +97,22 @@ export default function GenericChart({ labels, datasetConfig, histories }: Chart
     x: {
       grid: { color: "#252525" },
       reverse: false,
+      ticks: {
+        font: (context: any) => {
+          // Make the first of the month bold
+          if (parseDate(context.tick.label).getDate() === 1) {
+            return {
+              weight: "bold",
+            };
+          }
+        },
+        color: (context: any) => {
+          if (parseDate(context.tick.label).getDate() === 1) {
+            return "#ffffff";
+          }
+          return "#717171";
+        },
+      },
     },
   };
 
@@ -98,7 +126,8 @@ export default function GenericChart({ labels, datasetConfig, histories }: Chart
           config.axisConfig.reverse,
           isMobile && config.axisConfig.hideOnMobile ? false : config.axisConfig.display,
           config.axisConfig.position,
-          config.axisConfig.displayName
+          config.axisConfig.displayName,
+          config.axisConfig.precision // Pass precision from config to generateAxis
         );
 
         return generateDataset(config.title, historyArray, config.color, config.axisId);
@@ -118,6 +147,22 @@ export default function GenericChart({ labels, datasetConfig, histories }: Chart
       legend: { position: "top", labels: { color: "white" } },
       tooltip: {
         callbacks: {
+          title(context: any) {
+            const date = labels[context[0].dataIndex];
+            const currentDate = new Date();
+            const differenceInTime = currentDate.getTime() - new Date(date).getTime();
+            const differenceInDays = Math.ceil(differenceInTime / (1000 * 3600 * 24)) - 1;
+            let formattedDate: string;
+            if (differenceInDays === 0) {
+              formattedDate = "Today";
+            } else if (differenceInDays === 1) {
+              formattedDate = "Yesterday";
+            } else {
+              formattedDate = formatDateMinimal(date);
+            }
+
+            return `${formattedDate} ${differenceInDays > 0 ? `(${differenceInDays} day${differenceInDays > 1 ? "s" : ""} ago)` : ""}`;
+          },
           label(context: any) {
             const value = Number(context.parsed.y);
             const config = datasetConfig.find(cfg => cfg.title === context.dataset.label);
@@ -128,7 +173,18 @@ export default function GenericChart({ labels, datasetConfig, histories }: Chart
     },
   };
 
-  const data = { labels, datasets };
+  const formattedLabels = labels.map(date => {
+    if (formatDateMinimal(getDaysAgoDate(0)) === formatDateMinimal(date)) {
+      return "Now";
+    }
+    if (formatDateMinimal(getDaysAgoDate(1)) === formatDateMinimal(date)) {
+      return "Yesterday";
+    }
+
+    return formatDateMinimal(date);
+  });
+
+  const data = { labels: formattedLabels, datasets };
 
   return (
     <div className="block h-[360px] w-full relative">
