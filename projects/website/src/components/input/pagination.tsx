@@ -174,6 +174,22 @@ export default function Pagination({
 
         {renderPageNumbers()}
 
+        {!mobilePagination && currentPage < totalPages && totalPages - currentPage > 2 && (
+          <>
+            <PaginationItemWrapper key="ellipsis-start" isLoadingPage={isLoading}>
+              <PaginationEllipsis />
+            </PaginationItemWrapper>
+            <PaginationItemWrapper key="end" isLoadingPage={isLoading}>
+              <PaginationLink
+                href={generatePageUrl ? generatePageUrl(totalPages) : ""}
+                onClick={e => handleLinkClick(totalPages, e)}
+              >
+                {totalPages}
+              </PaginationLink>
+            </PaginationItemWrapper>
+          </>
+        )}
+
         {/* Next button - disabled on the last page */}
         <PaginationItemWrapper isLoadingPage={isLoading}>
           <PaginationNext
