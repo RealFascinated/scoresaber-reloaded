@@ -51,4 +51,14 @@ export default class PlayerController {
       };
     }
   }
+
+  @Get("/og/:id", {
+    config: {},
+    params: t.Object({
+      id: t.String({ required: true }),
+    }),
+  })
+  public async getOpenGraphImage({ params: { id } }: { params: { id: string } }) {
+    return await PlayerService.generateOpenGraphImage(id);
+  }
 }

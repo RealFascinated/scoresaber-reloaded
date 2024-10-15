@@ -1,19 +1,10 @@
-import { ImageResponse } from "next/og";
-import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
-import { NextRequest } from "next/server";
-import { formatNumberWithCommas, formatPp } from "@/common/number-utils";
-import { config } from "../../../../../../config";
+import { ImageResponse } from "@vercel/og";
+import { formatNumberWithCommas, formatPp } from "website/src/common/number-utils";
+import { config } from "website/config";
+import React from "react";
+import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/score-saber-player-token";
 
-export async function GET(request: NextRequest) {
-  const playerId = request.nextUrl.searchParams.get("id");
-  if (!playerId) {
-    return new Response(null, { status: 400 });
-  }
-  const player = await scoresaberService.lookupPlayer(playerId);
-  if (!player) {
-    return new Response(null, { status: 404 });
-  }
-
+export function generatePlayerOgImage(player: ScoreSaberPlayerToken) {
   return new ImageResponse(
     (
       <div tw="w-full h-full flex flex-col text-white bg-black text-3xl p-3 justify-center items-center">
@@ -42,7 +33,12 @@ export async function GET(request: NextRequest) {
               <p tw="m-0">#{formatNumberWithCommas(player.rank)}</p>
             </div>
             <div tw="flex items-center px-2 justify-center items-center">
-              <img src={`${config.siteUrl}/assets/flags/${player.country}.png`} height={20} alt="Player's Country" />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={`${config.siteUrl}/assets/flags/${player.country.toLowerCase()}.png`}
+                height={20}
+                alt="Player's Country"
+              />
               <p tw="pl-1 m-0">#{formatNumberWithCommas(player.countryRank)}</p>
             </div>
           </div>

@@ -5,6 +5,7 @@ import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/score-saber-player-token";
 import { InternalServerError } from "../error/internal-server-error";
 import ScoreSaberPlayerScoreToken from "@ssr/common/types/token/scoresaber/score-saber-player-score-token";
+import { generatePlayerOgImage } from "../common/open-graph";
 
 export class PlayerService {
   /**
@@ -154,5 +155,18 @@ export class PlayerService {
     console.log(
       `Updated scores set statistic for "${playerName}"(${playerId}), scores today: ${scores.rankedScores} ranked, ${scores.unrankedScores} unranked`
     );
+  }
+
+  /**
+   * Generates the OpenGraph image for the player
+   *
+   * @param id the player's id
+   */
+  public static async generateOpenGraphImage(id: string) {
+    const player = await scoresaberService.lookupPlayer(id);
+    if (player == undefined) {
+      return undefined;
+    }
+    return generatePlayerOgImage(player);
   }
 }

@@ -14,12 +14,14 @@
     "@ssr/common": "workspace:common",
     "@tqman/nice-logger": "^1.0.1",
     "@typegoose/typegoose": "^12.8.0",
+    "@vercel/og": "^0.6.3",
     "elysia": "latest",
     "elysia-autoroutes": "^0.5.0",
     "elysia-decorators": "^1.0.2",
     "elysia-helmet": "^2.0.0",
     "elysia-rate-limit": "^4.1.0",
-    "mongoose": "^8.7.0"
+    "mongoose": "^8.7.0",
+    "react": "^18.3.1"
   },
   "devDependencies": {
     "bun-types": "latest"
