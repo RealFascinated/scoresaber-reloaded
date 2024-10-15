@@ -3,7 +3,7 @@
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import Link from "next/link";
 
-export default function Error({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
+export default function Error() {
   return (
     <div className="flex flex-col items-center justify-center text-center">
       <GlobeAmericasIcon className="h-24 w-24 text-red-500" />
@@ -11,7 +11,6 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
       <p className="text-lg text-gray-400 mt-2">
         We&#39;re experiencing some technical difficulties. Please try again later.
       </p>
-      {error?.digest && <p className="text-sm text-gray-500 mt-1">Error Code: {error.digest}</p>}
 
       <div className="mt-6">
         <Link href="/" className="text-blue-500 hover:underline">
