@@ -5,10 +5,6 @@ import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/score-saber-player-token";
 import { InternalServerError } from "../error/internal-server-error";
 import ScoreSaberPlayerScoreToken from "@ssr/common/types/token/scoresaber/score-saber-player-score-token";
-import { ImageResponse } from "@vercel/og";
-import { formatNumberWithCommas, formatPp } from "website/src/common/number-utils";
-import { config } from "website/config";
-import React from "react";
 
 export class PlayerService {
   /**
