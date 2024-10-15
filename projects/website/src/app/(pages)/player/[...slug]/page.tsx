@@ -95,6 +95,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     title: `${player.name}`,
     openGraph: {
       title: `ScoreSaber Reloaded - ${player.name}`,
+      description: `Click here to view the scores for ${player.name}!`,
       images: [
         {
           url: `${config.siteApi}/image/player/${player.id}`,
