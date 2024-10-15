@@ -62,13 +62,13 @@ export class Player {
   public getHistoryPreviousDays(days: number): Record<string, PlayerHistory> {
     const statisticHistory = this.getStatisticHistory();
     const history: Record<string, PlayerHistory> = {};
+
     for (let i = 0; i < days; i++) {
       const date = formatDateMinimal(getMidnightAlignedDate(getDaysAgoDate(i)));
       const playerHistory = statisticHistory[date];
-      if (playerHistory === undefined || Object.keys(playerHistory).length === 0) {
-        continue;
+      if (playerHistory !== undefined && Object.keys(playerHistory).length > 0) {
+        history[date] = playerHistory;
       }
-      history[date] = playerHistory;
     }
     return history;
   }

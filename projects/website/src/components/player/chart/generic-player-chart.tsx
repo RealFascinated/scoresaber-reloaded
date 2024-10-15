@@ -29,13 +29,14 @@ export default function GenericPlayerChart({ player, datasetConfig }: Props) {
   }
 
   const histories: Record<string, (number | null)[]> = {};
-  // Initialize histories for each dataset
+  const historyDays = 50;
+
+  // Initialize histories for each dataset with null values for all days
   datasetConfig.forEach(config => {
-    histories[config.field] = [];
+    histories[config.field] = Array(historyDays).fill(null);
   });
 
   const labels: Date[] = [];
-  const historyDays = 50;
 
   // Sort the statistic entries by date
   const statisticEntries = Object.entries(player.statisticHistory).sort(
@@ -49,9 +50,7 @@ export default function GenericPlayerChart({ player, datasetConfig }: Props) {
   for (let dayAgo = historyDays - 1; dayAgo >= 0; dayAgo--) {
     const targetDate = new Date();
     targetDate.setDate(today.getDate() - dayAgo);
-
-    // Find if there's a matching entry for this date
-    let matchedEntry = false;
+    labels.push(targetDate); // Push the target date to labels
 
     // Check if currentHistoryIndex is within bounds of statisticEntries
     if (currentHistoryIndex < statisticEntries.length) {
@@ -61,20 +60,12 @@ export default function GenericPlayerChart({ player, datasetConfig }: Props) {
       // If the entry date matches the target date, use this entry
       if (entryDate.toDateString() === targetDate.toDateString()) {
         datasetConfig.forEach(config => {
-          histories[config.field].push(getValueFromHistory(history, config.field) ?? null);
+          // Use the correct index for histories
+          histories[config.field][historyDays - 1 - dayAgo] = getValueFromHistory(history, config.field) ?? null;
         });
         currentHistoryIndex++;
-        matchedEntry = true;
       }
     }
-
-    // If no matching entry, fill the current day with null
-    if (!matchedEntry) {
-      datasetConfig.forEach(config => {
-        histories[config.field].push(null);
-      });
-    }
-    labels.push(targetDate);
   }
 
   // Render the chart with collected data

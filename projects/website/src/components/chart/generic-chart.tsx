@@ -1,14 +1,25 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { CategoryScale, Chart, Legend, LinearScale, LineElement, PointElement, Title, Tooltip } from "chart.js";
+import {
+  BarElement,
+  CategoryScale,
+  Chart,
+  Legend,
+  LinearScale,
+  LineElement,
+  PointElement,
+  Title,
+  Tooltip,
+} from "chart.js";
 import { Line } from "react-chartjs-2";
 import { useIsMobile } from "@/hooks/use-is-mobile";
-import { formatDateMinimal, getDaysAgoDate, parseDate } from "@ssr/common/utils/time-utils";
+import { formatDateMinimal, getDaysAgo, getDaysAgoDate, parseDate } from "@ssr/common/utils/time-utils";
 
-Chart.register(LinearScale, CategoryScale, PointElement, LineElement, Title, Tooltip, Legend);
+Chart.register(LinearScale, CategoryScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend);
 
 export type AxisPosition = "left" | "right";
+export type DatasetDisplayType = "line" | "bar";
 
 export type Axis = {
   id?: string;
@@ -33,6 +44,7 @@ export type Dataset = {
   lineTension: number;
   spanGaps: boolean;
   yAxisID: string;
+  type?: DatasetDisplayType;
 };
 
 export type DatasetConfig = {
@@ -48,6 +60,7 @@ export type DatasetConfig = {
     position: AxisPosition;
     valueFormatter?: (value: number) => string; // Added precision option here
   };
+  type?: DatasetDisplayType;
   labelFormatter: (value: number) => string;
 };
 
@@ -80,7 +93,13 @@ const generateAxis = (
   reverse,
 });
 
-const generateDataset = (label: string, data: (number | null)[], borderColor: string, yAxisID: string): Dataset => ({
+const generateDataset = (
+  label: string,
+  data: (number | null)[],
+  borderColor: string,
+  yAxisID: string,
+  type?: DatasetDisplayType
+): Dataset => ({
   label,
   data,
   borderColor,
@@ -88,6 +107,10 @@ const generateDataset = (label: string, data: (number | null)[], borderColor: st
   lineTension: 0.5,
   spanGaps: false,
   yAxisID,
+  type,
+  ...(type === "bar" && {
+    backgroundColor: borderColor,
+  }),
 });
 
 export default function GenericChart({ labels, datasetConfig, histories }: ChartProps) {
@@ -130,7 +153,7 @@ export default function GenericChart({ labels, datasetConfig, histories }: Chart
           config.axisConfig.valueFormatter
         );
 
-        return generateDataset(config.title, historyArray, config.color, config.axisId);
+        return generateDataset(config.title, historyArray, config.color, config.axisId, config.type || "line");
       }
 
       return null;
@@ -149,12 +172,10 @@ export default function GenericChart({ labels, datasetConfig, histories }: Chart
         callbacks: {
           title(context: any) {
             const date = labels[context[0].dataIndex];
-            const currentDate = new Date();
-            const differenceInTime = currentDate.getTime() - new Date(date).getTime();
-            const differenceInDays = Math.ceil(differenceInTime / (1000 * 3600 * 24)) - 1;
+            const differenceInDays = getDaysAgo(date);
             let formattedDate: string;
             if (differenceInDays === 0) {
-              formattedDate = "Today";
+              formattedDate = "Now";
             } else if (differenceInDays === 1) {
               formattedDate = "Yesterday";
             } else {
@@ -174,17 +195,18 @@ export default function GenericChart({ labels, datasetConfig, histories }: Chart
   };
 
   const formattedLabels = labels.map(date => {
-    if (formatDateMinimal(getDaysAgoDate(0)) === formatDateMinimal(date)) {
+    const formattedDate = formatDateMinimal(date);
+    if (formatDateMinimal(getDaysAgoDate(0)) === formattedDate) {
       return "Now";
     }
-    if (formatDateMinimal(getDaysAgoDate(1)) === formatDateMinimal(date)) {
+    if (formatDateMinimal(getDaysAgoDate(1)) === formattedDate) {
       return "Yesterday";
     }
 
-    return formatDateMinimal(date);
+    return formattedDate;
   });
 
-  const data = { labels: formattedLabels, datasets };
+  const data: any = { labels: formattedLabels, datasets };
 
   return (
     <div className="block h-[360px] w-full relative">

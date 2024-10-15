@@ -15,6 +15,21 @@ export interface PlayerHistory {
   pp?: number;
 
   /**
+   * The amount of scores set for this day.
+   */
+  scores?: {
+    /**
+     * The amount of score set.
+     */
+    rankedScores?: number;
+
+    /**
+     * The amount of unranked scores set.
+     */
+    unrankedScores?: number;
+  };
+
+  /**
    * The player's accuracy.
    */
   accuracy?: {

@@ -59,6 +59,34 @@ const datasetConfig: DatasetConfig[] = [
     },
     labelFormatter: (value: number) => `PP ${formatNumberWithCommas(value)}pp`,
   },
+  {
+    title: "Ranked Scores",
+    field: "scores.rankedScores",
+    color: "#ffae4d",
+    axisId: "y3",
+    axisConfig: {
+      reverse: false,
+      display: false,
+      displayName: "Ranked Scores",
+      position: "left",
+    },
+    type: "bar",
+    labelFormatter: (value: number) => `Ranked Scores ${formatNumberWithCommas(value)}`,
+  },
+  {
+    title: "Unranked Scores",
+    field: "scores.unrankedScores",
+    color: "#616161",
+    axisId: "y3",
+    axisConfig: {
+      reverse: false,
+      display: false,
+      displayName: "Unranked Scores",
+      position: "left",
+    },
+    type: "bar",
+    labelFormatter: (value: number) => `Unranked Scores ${formatNumberWithCommas(value)}`,
+  },
 ];
 
 export default function PlayerRankingChart({ player }: Props) {

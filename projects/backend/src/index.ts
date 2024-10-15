@@ -18,6 +18,7 @@ import { cron } from "@elysiajs/cron";
 import { PlayerDocument, PlayerModel } from "./model/player";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { delay } from "@ssr/common/utils/utils";
+import { connectScoreSaberWebSocket } from "@ssr/common/websocket/scoresaber-websocket";
 
 // Load .env file
 dotenv.config({
@@ -28,8 +29,14 @@ dotenv.config({
 
 await mongoose.connect(Config.mongoUri!); // Connect to MongoDB
 setLogLevel("DEBUG");
-export const app = new Elysia();
 
+connectScoreSaberWebSocket({
+  onScore: async score => {
+    await PlayerService.trackScore(score);
+  },
+});
+
+export const app = new Elysia();
 app.use(
   cron({
     name: "player-statistics-tracker-cron",

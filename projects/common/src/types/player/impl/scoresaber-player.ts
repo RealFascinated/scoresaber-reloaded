@@ -110,6 +110,13 @@ export async function getScoreSaberPlayerFromToken(
     if (history) {
       // Use the latest data for today
       history[todayDate] = {
+        ...{
+          scores: {
+            rankedScores: 0,
+            unrankedScores: 0,
+          },
+        },
+        ...history[todayDate],
         rank: token.rank,
         countryRank: token.countryRank,
         pp: token.pp,
@@ -133,15 +140,17 @@ export async function getScoreSaberPlayerFromToken(
   for (let i = playerRankHistory.length - 1; i >= 0; i--) {
     const rank = playerRankHistory[i];
     const date = getMidnightAlignedDate(getDaysAgoDate(daysAgo));
-    daysAgo += 1; // Increment daysAgo for each earlier rank
+    daysAgo += 1;
 
-    if (statisticHistory[formatDateMinimal(date)] == undefined) {
+    const dateKey = formatDateMinimal(date);
+    if (!statisticHistory[dateKey]) {
       missingDays += 1;
-      statisticHistory[formatDateMinimal(date)] = {
+      statisticHistory[dateKey] = {
         rank: rank,
       };
     }
   }
+
   if (missingDays > 0 && missingDays != playerRankHistory.length) {
     console.log(
       `Player has ${missingDays} missing day${missingDays > 1 ? "s" : ""}, filling in with fallback history...`
