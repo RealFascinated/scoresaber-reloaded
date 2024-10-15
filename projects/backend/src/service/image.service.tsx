@@ -16,7 +16,13 @@ export class ImageService {
     }
     return new ImageResponse(
       (
-        <div tw="w-full h-full flex flex-col text-white bg-black text-3xl p-3 justify-center items-center">
+        <div
+          tw="w-full h-full flex flex-col text-white text-3xl p-3 justify-center items-center"
+          style={{
+            backgroundColor: "#0a0a0a",
+            background: "radial-gradient(ellipse 60% 60% at 50% -20%, rgba(120,119,198,0.15), rgba(255,255,255,0))",
+          }}
+        >
           <img src={player.profilePicture} width={256} height={256} alt="Player's Avatar" tw="rounded-full" />
           <div tw="flex flex-col pl-3 items-center">
             <p tw="font-bold text-6xl m-0">{player.name}</p>
