@@ -24,7 +24,7 @@ const datasetConfig: DatasetConfig[] = [
       displayName: "Rank",
       position: "left",
     },
-    labelFormatter: (value: number) => `Rank #${formatNumberWithCommas(value)}`,
+    labelFormatter: (value: number) => `Rank: #${formatNumberWithCommas(value)}`,
   },
   {
     title: "Country Rank",
@@ -37,7 +37,7 @@ const datasetConfig: DatasetConfig[] = [
       displayName: "Country Rank",
       position: "left",
     },
-    labelFormatter: (value: number) => `Country Rank #${formatNumberWithCommas(value)}`,
+    labelFormatter: (value: number) => `Country Rank: #${formatNumberWithCommas(value)}`,
   },
   {
     title: "PP",
@@ -57,7 +57,7 @@ const datasetConfig: DatasetConfig[] = [
         return value.toFixed(1);
       },
     },
-    labelFormatter: (value: number) => `PP ${formatNumberWithCommas(value)}pp`,
+    labelFormatter: (value: number) => `PP: ${formatNumberWithCommas(value)}pp`,
   },
   {
     title: "Ranked Scores",
@@ -71,7 +71,7 @@ const datasetConfig: DatasetConfig[] = [
       position: "left",
     },
     type: "bar",
-    labelFormatter: (value: number) => `Ranked Scores ${formatNumberWithCommas(value)}`,
+    labelFormatter: (value: number) => `Ranked Scores: ${formatNumberWithCommas(value)}`,
   },
   {
     title: "Unranked Scores",
@@ -85,7 +85,7 @@ const datasetConfig: DatasetConfig[] = [
       position: "left",
     },
     type: "bar",
-    labelFormatter: (value: number) => `Unranked Scores ${formatNumberWithCommas(value)}`,
+    labelFormatter: (value: number) => `Unranked Scores: ${formatNumberWithCommas(value)}`,
   },
 ];
 
