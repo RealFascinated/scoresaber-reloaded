@@ -1,22 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import {
-  BarElement,
-  CategoryScale,
-  Chart,
-  Legend,
-  LinearScale,
-  LineElement,
-  PointElement,
-  Title,
-  Tooltip,
-} from "chart.js";
+import { Chart, registerables } from "chart.js";
+Chart.register(...registerables);
+
 import { Line } from "react-chartjs-2";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { formatDateMinimal, getDaysAgo, getDaysAgoDate, parseDate } from "@ssr/common/utils/time-utils";
-
-Chart.register(LinearScale, CategoryScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend);
 
 export type AxisPosition = "left" | "right";
 export type DatasetDisplayType = "line" | "bar";
