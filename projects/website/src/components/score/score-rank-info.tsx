@@ -1,4 +1,4 @@
-import { formatNumberWithCommas } from "@/common/number-utils";
+import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { format } from "@formkit/tempo";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import Tooltip from "../tooltip";

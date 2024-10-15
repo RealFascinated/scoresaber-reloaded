@@ -1,4 +1,4 @@
-import { formatNumberWithCommas, formatPp } from "@/common/number-utils";
+import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";

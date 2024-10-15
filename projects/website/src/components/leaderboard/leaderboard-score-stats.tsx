@@ -1,4 +1,4 @@
-import { formatNumberWithCommas } from "@/common/number-utils";
+import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { XMarkIcon } from "@heroicons/react/24/solid";
 import clsx from "clsx";
 import { getScoreBadgeFromAccuracy } from "@/common/song-utils";

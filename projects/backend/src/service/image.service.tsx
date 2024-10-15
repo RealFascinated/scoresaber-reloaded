@@ -1,7 +1,7 @@
 import { ImageResponse } from "@vercel/og";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
-import { formatNumberWithCommas, formatPp } from "website/src/common/number-utils";
 import React from "react";
+import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
 
 export class ImageService {
   /**
@@ -9,7 +9,7 @@ export class ImageService {
    *
    * @param id the player's id
    */
-  public static async generateOpenGraphImage(id: string) {
+  public static async generatePlayerImage(id: string) {
     const player = await scoresaberService.lookupPlayer(id);
     if (player == undefined) {
       return undefined;

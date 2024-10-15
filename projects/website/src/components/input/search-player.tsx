@@ -1,6 +1,6 @@
 "use client";
 
-import { formatNumberWithCommas } from "@/common/number-utils";
+import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useState } from "react";

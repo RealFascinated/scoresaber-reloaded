@@ -1,6 +1,6 @@
 "use client";
 
-import { formatNumberWithCommas } from "@/common/number-utils";
+import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import React from "react";
 import { DatasetConfig } from "@/components/chart/generic-chart";
 import GenericPlayerChart from "@/components/player/chart/generic-player-chart";

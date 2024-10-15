@@ -1,4 +1,4 @@
-import { formatNumberWithCommas } from "@/common/number-utils";
+import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import StatValue from "@/components/stat-value";
 import ScoreSaberPlayer from "@ssr/common/types/player/impl/scoresaber-player";
 

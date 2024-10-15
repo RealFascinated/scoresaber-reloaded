@@ -1,6 +1,6 @@
 "use client";
 
-import { formatNumberWithCommas, formatPp } from "@/common/number-utils";
+import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
 import CountryFlag from "@/components/country-flag";
 import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/score-saber-player-token";
 import Link from "next/link";

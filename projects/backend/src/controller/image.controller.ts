@@ -11,6 +11,6 @@ export default class ImageController {
     }),
   })
   public async getOpenGraphImage({ params: { id } }: { params: { id: string } }) {
-    return await ImageService.generateOpenGraphImage(id);
+    return await ImageService.generatePlayerImage(id);
   }
 }
