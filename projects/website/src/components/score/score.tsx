@@ -46,7 +46,7 @@ export default function Score({ player, playerScore, settings }: Props) {
     }
     const beatSaverMapData = await lookupBeatSaverMap(leaderboard.songHash);
     setBeatSaverMap(beatSaverMapData);
-  }, [leaderboard.songHash]);
+  }, [leaderboard.songHash, settings?.noScoreButtons]);
 
   useEffect(() => {
     if (playerScore?.score?.baseScore) {
