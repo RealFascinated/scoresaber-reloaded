@@ -19,6 +19,7 @@ import { PlayerDocument, PlayerModel } from "./model/player";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { delay } from "@ssr/common/utils/utils";
 import { connectScoreSaberWebSocket } from "@ssr/common/websocket/scoresaber-websocket";
+import ImageController from "./controller/image.controller";
 
 // Load .env file
 dotenv.config({
@@ -151,7 +152,7 @@ app.use(
  */
 app.use(
   decorators({
-    controllers: [AppController, PlayerController],
+    controllers: [AppController, PlayerController, ImageController],
   })
 );
 

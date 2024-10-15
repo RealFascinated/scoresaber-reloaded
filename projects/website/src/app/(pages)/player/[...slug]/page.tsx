@@ -97,7 +97,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
       title: `ScoreSaber Reloaded - ${player.name}`,
       images: [
         {
-          url: `${config.siteApi}/player/og/${player.id}`,
+          url: `${config.siteApi}/image/player/${player.id}`,
         },
       ],
     },
