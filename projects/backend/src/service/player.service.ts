@@ -123,6 +123,7 @@ export class PlayerService {
    */
   public static async trackScore({ score, leaderboard }: ScoreSaberPlayerScoreToken) {
     const playerId = score.leaderboardPlayerInfo.id;
+    const playerName = score.leaderboardPlayerInfo.name;
     const player: PlayerDocument | null = await PlayerModel.findById(playerId);
     // Player is not tracked, so ignore the score.
     if (player == undefined) {
@@ -151,7 +152,7 @@ export class PlayerService {
     await player.save();
 
     console.log(
-      `Updated scores set statistic for "${player.id}", scores today: ${scores.rankedScores} ranked, ${scores.unrankedScores} unranked`
+      `Updated scores set statistic for "${playerName}"(${playerId}), scores today: ${scores.rankedScores} ranked, ${scores.unrankedScores} unranked`
     );
   }
 }

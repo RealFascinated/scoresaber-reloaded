@@ -1,5 +1,6 @@
 import { ArrowPathIcon } from "@heroicons/react/24/solid";
 import clsx from "clsx";
+import * as React from "react";
 import { useEffect, useState } from "react";
 import {
   Pagination as ShadCnPagination,
@@ -10,7 +11,6 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "../ui/pagination";
-import * as React from "react";
 import { ChevronDoubleLeftIcon, ChevronDoubleRightIcon } from "@heroicons/react/16/solid";
 
 type PaginationItemWrapperProps = {

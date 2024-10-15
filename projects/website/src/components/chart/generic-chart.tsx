@@ -2,11 +2,11 @@
 "use client";
 
 import { Chart, registerables } from "chart.js";
-Chart.register(...registerables);
-
 import { Line } from "react-chartjs-2";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { formatDateMinimal, getDaysAgo, getDaysAgoDate, parseDate } from "@ssr/common/utils/time-utils";
+
+Chart.register(...registerables);
 
 export type AxisPosition = "left" | "right";
 export type DatasetDisplayType = "line" | "bar";
