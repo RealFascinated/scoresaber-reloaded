@@ -3,6 +3,12 @@ import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import React from "react";
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
 import { getDifficultyFromScoreSaberDifficulty } from "website/src/common/scoresaber-utils";
+import NodeCache from "node-cache";
+
+const imageCache = new NodeCache({
+  stdTTL: 60 * 60, // 1 hour
+  checkperiod: 120,
+});
 
 export class ImageService {
   /**
@@ -11,11 +17,16 @@ export class ImageService {
    * @param id the player's id
    */
   public static async generatePlayerImage(id: string) {
+    const cacheKey = `player-${id}`;
+    if (imageCache.has(cacheKey)) {
+      return imageCache.get(cacheKey) as ImageResponse;
+    }
+
     const player = await scoresaberService.lookupPlayer(id);
     if (player == undefined) {
       return undefined;
     }
-    return new ImageResponse(
+    const imageResponse = new ImageResponse(
       (
         <div
           tw="w-full h-full flex flex-col text-white text-3xl p-3 justify-center items-center"
@@ -67,6 +78,8 @@ export class ImageService {
         emoji: "twemoji",
       }
     );
+    imageCache.set(cacheKey, imageResponse);
+    return imageResponse;
   }
 
   /**
@@ -75,14 +88,18 @@ export class ImageService {
    * @param id the player's id
    */
   public static async generateLeaderboardImage(id: string) {
+    const cacheKey = `leaderboard-${id}`;
+    if (imageCache.has(cacheKey)) {
+      return imageCache.get(cacheKey) as ImageResponse;
+    }
+
     const leaderboard = await scoresaberService.lookupLeaderboard(id);
     if (leaderboard == undefined) {
       return undefined;
     }
 
     const ranked = leaderboard.stars > 0;
-
-    return new ImageResponse(
+    const imageResponse = new ImageResponse(
       (
         <div
           tw="w-full h-full flex flex-col text-white text-3xl p-3 justify-center items-center"
@@ -130,5 +147,8 @@ export class ImageService {
         emoji: "twemoji",
       }
     );
+
+    imageCache.set(cacheKey, imageResponse);
+    return imageResponse;
   }
 }
