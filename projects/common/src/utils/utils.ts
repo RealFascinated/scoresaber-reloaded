@@ -1,3 +1,5 @@
+import ky from "ky";
+
 /**
  * Checks if we're in production
  */
@@ -23,4 +25,18 @@ export function delay(ms: number) {
  */
 export function getPageFromRank(rank: number, itemsPerPage: number) {
   return Math.floor(rank / itemsPerPage) + 1;
+}
+
+/**
+ * Fetches data from the given url.
+ *
+ * @param url the url to fetch
+ */
+export async function kyFetch<T>(url: string): Promise<T | undefined> {
+  try {
+    return await ky.get<T>(url).json();
+  } catch (error) {
+    console.error(`Error fetching data from ${url}:`, error);
+    return undefined;
+  }
 }

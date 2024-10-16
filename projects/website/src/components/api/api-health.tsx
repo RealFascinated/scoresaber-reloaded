@@ -34,6 +34,7 @@ export function ApiHealth() {
         title: `The API is now ${online ? "Online" : "Offline"}!`,
         description: online ? "The API has recovered connectivity." : "The API has lost connectivity.",
         variant: online ? "success" : "destructive",
+        duration: 10_000, // 10 seconds
       });
     }
 

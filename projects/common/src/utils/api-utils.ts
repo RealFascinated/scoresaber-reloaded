@@ -11,7 +11,11 @@ type ApiHealth = {
  */
 export async function getApiHealth(url: string): Promise<ApiHealth> {
   try {
-    await ky.get(url);
+    await ky
+      .get(url, {
+        cache: "no-cache",
+      })
+      .json();
     return {
       online: true,
     };
