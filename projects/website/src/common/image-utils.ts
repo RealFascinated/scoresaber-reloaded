@@ -1,4 +1,6 @@
 import { config } from "../../config";
+import ky from "ky";
+import { Colors } from "@/common/colors";
 
 /**
  * Proxies all non-localhost images to make them load faster.
@@ -17,7 +19,11 @@ export function getImageUrl(originalUrl: string) {
  * @returns the average color
  */
 export const getAverageColor = async (src: string) => {
-  return {
-    hex: "#fff",
-  };
+  try {
+    return await ky.get<{ hex: string }>(`${config.siteApi}/image/averagecolor/${encodeURIComponent(src)}`).json();
+  } catch {
+    return {
+      hex: Colors.primary,
+    };
+  }
 };

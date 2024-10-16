@@ -117,14 +117,8 @@ export async function generateViewport(props: Props): Promise<Viewport> {
   }
 
   const color = await getAverageColor(player.avatar);
-  if (color === undefined) {
-    return {
-      themeColor: Colors.primary,
-    };
-  }
-
   return {
-    themeColor: color?.hex,
+    themeColor: color.hex,
   };
 }
 

@@ -9,11 +9,58 @@ import NodeCache from "node-cache";
 import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/score-saber-leaderboard-token";
 import ScoreSaberPlayer, { getScoreSaberPlayerFromToken } from "@ssr/common/types/player/impl/scoresaber-player";
 import { Config } from "../common/config";
+import ky from "ky";
+import { createCanvas, loadImage } from "canvas";
+import { extractColors } from "extract-colors";
 
 const cache = new NodeCache({ stdTTL: 60 * 60, checkperiod: 120 });
 const imageOptions = { width: 1200, height: 630 };
 
 export class ImageService {
+  /**
+   * Gets the average color of an image
+   *
+   * @param src the image url
+   * @returns the average color
+   * @private
+   */
+  public static async getAverageImageColor(src: string): Promise<{ color: string } | undefined> {
+    src = decodeURIComponent(src);
+
+    return await this.fetchWithCache<{ color: string }>(`average_color-${src}`, async () => {
+      try {
+        const response = await ky.get(src);
+        if (response.status !== 200) {
+          throw new Error(`Failed to fetch image: ${src}`);
+        }
+
+        const imageBuffer = await response.arrayBuffer();
+
+        // Create an image from the buffer using canvas
+        const img = await loadImage(Buffer.from(imageBuffer));
+        const canvas = createCanvas(img.width, img.height);
+        const ctx = canvas.getContext("2d");
+
+        // Draw the image onto the canvas
+        ctx.drawImage(img, 0, 0);
+
+        // Get the pixel data from the canvas
+        const imageData = ctx.getImageData(0, 0, img.width, img.height);
+        const { data, width, height } = imageData;
+
+        // Extract the colors
+        const color = await extractColors({ data, width, height });
+        return {
+          color: color[2].hex,
+        };
+      } catch (error) {
+        return {
+          color: "#fff",
+        };
+      }
+    });
+  }
+
   /**
    * Fetches data with caching.
    *

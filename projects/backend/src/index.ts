@@ -21,6 +21,10 @@ import { delay } from "@ssr/common/utils/utils";
 import { connectScoreSaberWebSocket } from "@ssr/common/websocket/scoresaber-websocket";
 import ImageController from "./controller/image.controller";
 import ReplayController from "./controller/replay.controller";
+// @ts-ignore
+import { MessageBuilder, Webhook } from "discord-webhook-node";
+import { formatPp } from "@ssr/common/utils/number-utils";
+import { ScoreService } from "./service/score.service";
 
 // Load .env file
 dotenv.config({
@@ -33,8 +37,9 @@ await mongoose.connect(Config.mongoUri!); // Connect to MongoDB
 setLogLevel("DEBUG");
 
 connectScoreSaberWebSocket({
-  onScore: async score => {
-    await PlayerService.trackScore(score);
+  onScore: async playerScore => {
+    await PlayerService.trackScore(playerScore);
+    await ScoreService.notifyNumberOne(playerScore);
   },
 });
 

@@ -1,5 +1,18 @@
 FROM oven/bun:1.1.30-alpine AS base
 
+# Install system dependencies for node-canvas
+RUN apk add --no-cache \
+  build-base \
+  cairo-dev \
+  pango-dev \
+  giflib-dev \
+  libjpeg-turbo-dev \
+  freetype-dev \
+  fontconfig-dev \
+  pixman-dev \
+  python3 \
+  pkgconfig
+
 # Install dependencies
 FROM base AS depends
 WORKDIR /app
