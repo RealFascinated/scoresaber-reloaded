@@ -25,6 +25,6 @@ RUN bun --filter '@ssr/common' build
 COPY --from=depends /app/projects/backend ./projects/backend
 
 # Lint before starting
-RUN bun --filter 'website' lint
+RUN bun --filter 'backend' lint
 
 CMD ["bun", "run", "--filter", "backend", "start"]

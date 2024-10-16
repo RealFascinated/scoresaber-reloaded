@@ -14,6 +14,7 @@ import NavBar from "../components/navbar/navbar";
 import { Colors } from "@/common/colors";
 import OfflineNetwork from "@/components/offline-network";
 import Script from "next/script";
+import { ApiHealth } from "@/components/api/api-health";
 
 const siteFont = localFont({
   src: "./fonts/JetBrainsMono.ttf",
@@ -79,6 +80,7 @@ export default function RootLayout({
               <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
                 <QueryProvider>
                   <AnimatePresence>
+                    <ApiHealth />
                     <main className="flex flex-col min-h-screen gap-2 text-white w-full">
                       <NavBar />
                       <div className="z-[1] m-auto flex flex-col flex-grow items-center w-full md:max-w-[1600px]">
