@@ -89,6 +89,7 @@ export class PlayerService {
       });
       daysAgo += 1; // Increment daysAgo for each earlier rank
     }
+    player.markModified("statisticHistory");
     await player.save();
   }
 

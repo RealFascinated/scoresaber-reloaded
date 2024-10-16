@@ -27,6 +27,11 @@ const items: NavbarItem[] = [
     link: "https://discord.gg/kmNfWGA4A8",
     openInNewTab: true,
   },
+  {
+    name: "Status",
+    link: "https://status.fascinated.cc/status/scoresaber-reloaded",
+    openInNewTab: true,
+  },
 ];
 
 export default function Footer() {
