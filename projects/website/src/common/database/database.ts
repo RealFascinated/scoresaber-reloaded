@@ -2,8 +2,12 @@ import Dexie, { EntityTable } from "dexie";
 import BeatSaverMap from "./types/beatsaver-map";
 import Settings from "./types/settings";
 import { setCookieValue } from "@/common/cookie-utils";
+import { Friend } from "@/common/database/types/friends";
+import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/score-saber-player-token";
+import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 
 const SETTINGS_ID = "SSR"; // DO NOT CHANGE
+const FRIENDS_ID = "FRIENDS"; // DO NOT CHANGE
 
 export default class Database extends Dexie {
   /**
@@ -16,6 +20,11 @@ export default class Database extends Dexie {
    */
   beatSaverMaps!: EntityTable<BeatSaverMap, "hash">;
 
+  /**
+   * The added friends
+   */
+  friends!: EntityTable<Friend, "id">;
+
   constructor() {
     super("ScoreSaberReloaded");
 
@@ -23,6 +32,7 @@ export default class Database extends Dexie {
     this.version(1).stores({
       settings: "id",
       beatSaverMaps: "hash",
+      friends: "id",
     });
 
     // Mapped tables
@@ -66,6 +76,49 @@ export default class Database extends Dexie {
    */
   async setSettings(settings: Settings) {
     return this.settings.update(SETTINGS_ID, settings);
+  }
+
+  /**
+   * Adds a friend
+   *
+   * @param id the id of the friend
+   */
+  public async addFriend(id: string) {
+    await this.friends.add({ id });
+  }
+
+  /**
+   * Removes a friend
+   *
+   * @param id the id of the friend
+   */
+  public async removeFriend(id: string) {
+    await this.friends.delete(id);
+  }
+
+  /**
+   * Checks if this player is a friend
+   *
+   * @param id the id of the player
+   */
+  public async isFriend(id: string): Promise<boolean> {
+    const friend = await this.friends.get(id);
+    return friend != undefined;
+  }
+
+  /**
+   * Gets all friends as {@link ScoreSaberPlayerToken}'s
+   *
+   * @returns the friends
+   */
+  public async getFriends(): Promise<ScoreSaberPlayerToken[]> {
+    const friends = await this.friends.toArray();
+    const players = await Promise.all(
+      friends.map(async ({ id }) => {
+        return await scoresaberService.lookupPlayer(id, true);
+      })
+    );
+    return players.filter(player => player !== undefined) as ScoreSaberPlayerToken[];
   }
 
   /**

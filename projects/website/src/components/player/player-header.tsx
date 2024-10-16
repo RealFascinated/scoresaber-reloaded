@@ -11,6 +11,7 @@ import PlayerTrackedStatus from "@/components/player/player-tracked-status";
 import ScoreSaberPlayer from "@ssr/common/types/player/impl/scoresaber-player";
 import Link from "next/link";
 import { capitalizeFirstLetter } from "@/common/string-utils";
+import AddFriend from "@/components/friend/add-friend";
 
 /**
  * Renders the change for a stat.
@@ -197,7 +198,8 @@ export default function PlayerHeader({ player }: Props) {
 
           <PlayerStats player={player} />
 
-          <div className="absolute top-0 right-0">
+          <div className="absolute top-0 right-0 gap-2 flex">
+            <AddFriend player={player} />
             <ClaimProfile playerId={player.id} />
           </div>
         </div>

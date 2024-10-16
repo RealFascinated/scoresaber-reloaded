@@ -8,6 +8,7 @@ import ScoreSaberLeaderboardToken from "../../types/token/scoresaber/score-saber
 import ScoreSaberLeaderboardScoresPageToken from "../../types/token/scoresaber/score-saber-leaderboard-scores-page-token";
 import { clamp, lerp } from "../../utils/math-utils";
 import { CurvePoint } from "../../utils/curve-point";
+import { SSRCache } from "../../cache";
 
 const API_BASE = "https://scoresaber.com/api";
 
@@ -27,6 +28,10 @@ const LOOKUP_LEADERBOARD_ENDPOINT = `${API_BASE}/leaderboard/by-id/:id/info`;
 const LOOKUP_LEADERBOARD_SCORES_ENDPOINT = `${API_BASE}/leaderboard/by-id/:id/scores?page=:page`;
 
 const STAR_MULTIPLIER = 42.117208413;
+
+const playerCache = new SSRCache({
+  ttl: 60 * 30, // 30 minutes
+});
 
 class ScoreSaberService extends Service {
   private curvePoints = [
@@ -98,9 +103,13 @@ class ScoreSaberService extends Service {
    * Looks up a player by their ID.
    *
    * @param playerId the ID of the player to look up
+   * @param cache whether to use the local cache
    * @returns the player that matches the ID, or undefined
    */
-  public async lookupPlayer(playerId: string): Promise<ScoreSaberPlayerToken | undefined> {
+  public async lookupPlayer(playerId: string, cache: boolean = false): Promise<ScoreSaberPlayerToken | undefined> {
+    if (cache && playerCache.has(playerId)) {
+      return playerCache.get(playerId);
+    }
     const before = performance.now();
     this.log(`Looking up player "${playerId}"...`);
     const token = await this.fetch<ScoreSaberPlayerToken>(LOOKUP_PLAYER_ENDPOINT.replace(":id", playerId));
@@ -108,6 +117,9 @@ class ScoreSaberService extends Service {
       return undefined;
     }
     this.log(`Found player "${playerId}" in ${(performance.now() - before).toFixed(0)}ms`);
+    if (cache) {
+      playerCache.set(playerId, token);
+    }
     return token;
   }
 

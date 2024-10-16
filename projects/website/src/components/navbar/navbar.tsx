@@ -1,10 +1,11 @@
-import { CogIcon, HomeIcon } from "@heroicons/react/24/solid";
+import { CogIcon } from "@heroicons/react/24/solid";
 import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
 import Link from "next/link";
 import React from "react";
 import NavbarButton from "./navbar-button";
 import ProfileButton from "./profile-button";
 import { SwordIcon, TrendingUpIcon } from "lucide-react";
+import FriendsButton from "@/components/navbar/friends-button";
 
 type NavbarItem = {
   name: string;
@@ -14,12 +15,6 @@ type NavbarItem = {
 };
 
 const items: NavbarItem[] = [
-  {
-    name: "Home",
-    link: "/",
-    align: "left",
-    icon: <HomeIcon className="h-5 w-5" />,
-  },
   {
     name: "Ranking",
     link: "/ranking",
@@ -61,11 +56,25 @@ export default function Navbar() {
   return (
     <div className="w-full sticky top-0 z-[999] h-10 items-center flex justify-between bg-secondary/95 px-1">
       <div className="md:max-w-[1600px] w-full h-full flex justify-between m-auto">
-        {/* Left-aligned items */}
         <div className="flex items-center h-full">
-          <ProfileButton />
+          {/* Home Button */}
+          <Link href="/" className="h-full">
+            <NavbarButton>
+              {renderNavbarItem({
+                name: "Home",
+                link: "/",
+                align: "left",
+                icon: <img src="/assets/logos/scoresaber.png" className="h-5 w-5" alt="Website Logo" />,
+              })}
+            </NavbarButton>
+          </Link>
 
-          {leftItems.map((item, index) => (
+          {/* Player Buttons */}
+          <ProfileButton />
+          <FriendsButton />
+
+          {/* Left-aligned items */}
+          {leftItems.splice(0, leftItems.length).map((item, index) => (
             <Link href={item.link} key={index} className="h-full">
               <NavbarButton key={index}>{renderNavbarItem(item)}</NavbarButton>
             </Link>
