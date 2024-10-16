@@ -7,6 +7,7 @@ import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import ScoreSaberLeaderboardScoresPageToken from "@ssr/common/types/token/scoresaber/score-saber-leaderboard-scores-page-token";
 import NodeCache from "node-cache";
 import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/score-saber-leaderboard-token";
+import { config } from "../../../../../config";
 
 const UNKNOWN_LEADERBOARD = {
   title: "ScoreSaber Reloaded - Unknown Leaderboard",
@@ -80,20 +81,15 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     title: `${leaderboard.songName} ${leaderboard.songSubName} by ${leaderboard.songAuthorName}`,
     openGraph: {
       title: `ScoreSaber Reloaded - ${leaderboard.songName} ${leaderboard.songSubName}`,
-      description: `
-      Mapper: ${leaderboard.levelAuthorName}
-      Plays: ${leaderboard.plays} (${leaderboard.dailyPlays} today)
-      Status: ${leaderboard.stars > 0 ? "Ranked" : "Unranked"}
-      
-      View the scores for ${leaderboard.songName} by ${leaderboard.songAuthorName}!`,
+      description: `View the scores for ${leaderboard.songName} by ${leaderboard.songAuthorName}!`,
       images: [
         {
-          url: leaderboard.coverImage,
+          url: `${config.siteApi}/image/leaderboard/${leaderboard.id}`,
         },
       ],
     },
     twitter: {
-      card: "summary",
+      card: "summary_large_image",
     },
   };
 }

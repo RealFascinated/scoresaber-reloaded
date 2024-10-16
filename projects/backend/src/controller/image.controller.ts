@@ -10,7 +10,17 @@ export default class ImageController {
       id: t.String({ required: true }),
     }),
   })
-  public async getOpenGraphImage({ params: { id } }: { params: { id: string } }) {
+  public async getPlayerImage({ params: { id } }: { params: { id: string } }) {
     return await ImageService.generatePlayerImage(id);
+  }
+
+  @Get("/leaderboard/:id", {
+    config: {},
+    params: t.Object({
+      id: t.String({ required: true }),
+    }),
+  })
+  public async getLeaderboardImage({ params: { id } }: { params: { id: string } }) {
+    return await ImageService.generateLeaderboardImage(id);
   }
 }
