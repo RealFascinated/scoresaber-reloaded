@@ -10,6 +10,7 @@ import ScoreSaberPlayerScoreToken from "@ssr/common/types/token/scoresaber/score
 import { MessageBuilder, Webhook } from "discord-webhook-node";
 import { Config } from "../common/config";
 import { formatPp } from "@ssr/common/utils/number-utils";
+import { isProduction } from "@ssr/common/utils/utils";
 
 export class PlayerService {
   /**
@@ -40,19 +41,22 @@ export class PlayerService {
         player.trackedSince = new Date();
         await this.seedPlayerHistory(player, playerToken);
 
-        const hook = new Webhook({
-          url: Config.trackedPlayerWebhook,
-        });
-        hook.setUsername("Player Tracker");
-        const embed = new MessageBuilder();
-        embed.setTitle("New Player Tracked");
-        embed.addField("Username", playerToken.name, true);
-        embed.addField("ID", playerToken.id, true);
-        embed.addField("PP", formatPp(playerToken.pp) + "pp", true);
-        embed.setDescription(`https://ssr.fascinated.cc/player/${playerToken.id}`);
-        embed.setThumbnail(playerToken.profilePicture);
-        embed.setColor("#00ff00");
-        await hook.send(embed);
+        // Only notify in production
+        if (isProduction()) {
+          const hook = new Webhook({
+            url: Config.trackedPlayerWebhook,
+          });
+          hook.setUsername("Player Tracker");
+          const embed = new MessageBuilder();
+          embed.setTitle("New Player Tracked");
+          embed.addField("Username", playerToken.name, true);
+          embed.addField("ID", playerToken.id, true);
+          embed.addField("PP", formatPp(playerToken.pp) + "pp", true);
+          embed.setDescription(`https://ssr.fascinated.cc/player/${playerToken.id}`);
+          embed.setThumbnail(playerToken.profilePicture);
+          embed.setColor("#00ff00");
+          await hook.send(embed);
+        }
       } catch (err) {
         const message = `Failed to create player document for "${id}"`;
         console.log(message, err);

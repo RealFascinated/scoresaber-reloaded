@@ -20,10 +20,10 @@ export function getImageUrl(originalUrl: string) {
  */
 export const getAverageColor = async (src: string) => {
   try {
-    return await ky.get<{ hex: string }>(`${config.siteApi}/image/averagecolor/${encodeURIComponent(src)}`).json();
+    return await ky.get<{ color: string }>(`${config.siteApi}/image/averagecolor/${encodeURIComponent(src)}`).json();
   } catch {
     return {
-      hex: Colors.primary,
+      color: Colors.primary,
     };
   }
 };

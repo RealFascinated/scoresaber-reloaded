@@ -4,9 +4,15 @@ import ScoreSaberPlayerScoreToken from "@ssr/common/types/token/scoresaber/score
 import { MessageBuilder, Webhook } from "discord-webhook-node";
 import { Config } from "../common/config";
 import { formatPp } from "@ssr/common/utils/number-utils";
+import { isProduction } from "@ssr/common/utils/utils";
 
 export class ScoreService {
   public static async notifyNumberOne(playerScore: ScoreSaberPlayerScoreToken) {
+    // Only notify in production
+    if (!isProduction()) {
+      return;
+    }
+
     const { score, leaderboard } = playerScore;
     const player = score.leaderboardPlayerInfo;
 

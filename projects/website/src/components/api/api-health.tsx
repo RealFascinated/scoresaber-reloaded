@@ -32,7 +32,9 @@ export function ApiHealth() {
     if (previousOnlineStatus.current !== online) {
       toast({
         title: `The API is now ${online ? "Online" : "Offline"}!`,
-        description: online ? "The API has recovered connectivity." : "The API has lost connectivity.",
+        description: online
+          ? "The API has recovered connectivity."
+          : "The API has lost connectivity, some data may be unavailable.",
         variant: online ? "success" : "destructive",
         duration: 10_000, // 10 seconds
       });
