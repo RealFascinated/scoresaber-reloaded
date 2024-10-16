@@ -15,9 +15,6 @@ export default function FriendsButton() {
 
   const database = useDatabase();
   const friends = useLiveQuery(() => database.getFriends());
-  if (friends == undefined) {
-    return; // Friends haven't loaded yet
-  }
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -28,7 +25,7 @@ export default function FriendsButton() {
         </NavbarButton>
       </PopoverTrigger>
       <PopoverContent className="p-2">
-        {friends.length > 0 ? (
+        {friends && friends.length > 0 ? (
           friends.map(friend => <Friend player={friend} key={friend.id} onClick={() => setOpen(false)} />)
         ) : (
           <div className="text-sm flex flex-col gap-2 justify-center items-center">
