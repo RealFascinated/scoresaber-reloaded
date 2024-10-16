@@ -133,6 +133,7 @@ export class PlayerService {
     foundPlayer.setStatisticHistory(dateToday, history);
     foundPlayer.sortStatisticHistory();
     foundPlayer.lastTracked = new Date();
+    foundPlayer.markModified("statisticHistory");
     await foundPlayer.save();
 
     console.log(`Tracked player "${foundPlayer.id}"!`);
