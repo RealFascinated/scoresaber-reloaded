@@ -17,6 +17,11 @@ const items: NavbarItem[] = [
     link: "https://git.fascinated.cc/Fascinated/scoresaber-reloadedv3",
     openInNewTab: true,
   },
+  {
+    name: "Twitter",
+    link: "https://x.com/ssr_reloaded",
+    openInNewTab: true,
+  },
 ];
 
 export default function Footer() {
@@ -29,7 +34,7 @@ export default function Footer() {
         <p className="hidden md:block">({buildTime})</p>
         <p className="none md:hidden">({buildTimeShort})</p>
       </div>
-      <div className="h-12 w-full flex flex-wrap items-center justify-center bg-secondary/95 divide-x divide-input">
+      <div className="h-10 w-full flex flex-wrap items-center justify-center bg-secondary/95 divide-x divide-input">
         {items.map((item, index) => {
           return (
             <Link
