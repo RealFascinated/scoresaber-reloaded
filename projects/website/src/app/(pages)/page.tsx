@@ -5,6 +5,8 @@ import { config } from "../../../config";
 import { AppStatistics } from "@ssr/common/types/backend/app-statistics";
 import Statistic from "@/components/home/statistic";
 
+export const dynamic = "force-dynamic"; // Always generate the page on load
+
 export default async function HomePage() {
   const statistics = await ky.get(config.siteApi + "/statistics").json<AppStatistics>();
 
