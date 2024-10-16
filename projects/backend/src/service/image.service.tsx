@@ -6,25 +6,45 @@ import { getDifficultyFromScoreSaberDifficulty } from "@ssr/common/utils/scoresa
 import { StarIcon } from "../../components/star-icon";
 import { GlobeIcon } from "../../components/globe-icon";
 import NodeCache from "node-cache";
-import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/score-saber-player-token";
 import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/score-saber-leaderboard-token";
+import ScoreSaberPlayer, { getScoreSaberPlayerFromToken } from "@ssr/common/types/player/impl/scoresaber-player";
+import { Config } from "../common/config";
 
-const cache = new NodeCache({
-  stdTTL: 60 * 60, // 1 hour
-  checkperiod: 120,
-});
+const cache = new NodeCache({ stdTTL: 60 * 60, checkperiod: 120 });
+const imageOptions = { width: 1200, height: 630 };
 
 export class ImageService {
+  /**
+   * Fetches data with caching.
+   *
+   * @param cacheKey The key used for caching.
+   * @param fetchFn The function to fetch data if it's not in cache.
+   */
+  private static async fetchWithCache<T>(
+    cacheKey: string,
+    fetchFn: () => Promise<T | undefined>
+  ): Promise<T | undefined> {
+    if (cache.has(cacheKey)) {
+      return cache.get<T>(cacheKey);
+    }
+
+    const data = await fetchFn();
+    if (data) {
+      cache.set(cacheKey, data);
+    }
+
+    return data;
+  }
+
   /**
    * The base of the OpenGraph image
    *
    * @param children the content of the image
-   * @private
    */
   public static BaseImage({ children }: { children: React.ReactNode }) {
     return (
       <div
-        tw="w-full h-full flex flex-col text-white text-3xl p-3 justify-center items-center"
+        tw="w-full h-full flex flex-col text-white text-3xl p-3 justify-center items-center relative"
         style={{
           backgroundColor: "#0a0a0a",
           background: "radial-gradient(ellipse 60% 60% at 50% -20%, rgba(120,119,198,0.15), rgba(255,255,255,0))",
@@ -36,55 +56,21 @@ export class ImageService {
   }
 
   /**
-   * Generates the OpenGraph image for the player
+   * Renders the change for a stat.
    *
-   * @param id the player's id
+   * @param change the amount of change
+   * @param format the function to format the value
    */
-  public static async generatePlayerImage(id: string) {
-    const cacheKey = `player-${id}`;
-    let player: undefined | ScoreSaberPlayerToken;
-    if (cache.has(cacheKey)) {
-      player = cache.get<ScoreSaberPlayerToken>(cacheKey);
-    } else {
-      player = await scoresaberService.lookupPlayer(id);
-      if (player != undefined) {
-        cache.set(cacheKey, player);
-      }
-    }
-    if (player == undefined) {
-      return undefined;
+  private static renderDailyChange(change: number, format: (value: number) => string = formatNumberWithCommas) {
+    if (change === 0) {
+      return null;
     }
 
-    return new ImageResponse(
-      (
-        <ImageService.BaseImage>
-          <img src={player.profilePicture} width={256} height={256} alt="Player's Avatar" tw="rounded-full mb-3" />
-          <div tw="flex flex-col pl-3 items-center">
-            <p tw="font-bold text-6xl m-0">{player.name}</p>
-            <p tw="text-[#606fff] m-0">{formatPp(player.pp)}pp</p>
-            <div tw="flex">
-              <div tw="flex px-2 justify-center items-center">
-                <GlobeIcon />
-                <p tw="m-0">#{formatNumberWithCommas(player.rank)}</p>
-              </div>
-              <div tw="flex items-center px-2 justify-center items-center">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={`https://ssr.fascinated.cc/assets/flags/${player.country.toLowerCase()}.png`}
-                  height={20}
-                  alt="Player's Country"
-                />
-                <p tw="pl-1 m-0">#{formatNumberWithCommas(player.countryRank)}</p>
-              </div>
-            </div>
-          </div>
-        </ImageService.BaseImage>
-      ),
-      {
-        width: 1200,
-        height: 630,
-        emoji: "twemoji",
-      }
+    return (
+      <p tw={`text-[23px] pl-1 m-0 ${change > 0 ? "text-green-400" : "text-red-400"}`}>
+        {change > 0 ? "+" : ""}
+        {format(change)}
+      </p>
     );
   }
 
@@ -93,48 +79,121 @@ export class ImageService {
    *
    * @param id the player's id
    */
-  public static async generateLeaderboardImage(id: string) {
-    const cacheKey = `leaderboard-${id}`;
-    let leaderboard: undefined | ScoreSaberLeaderboardToken;
-    if (cache.has(cacheKey)) {
-      leaderboard = cache.get(cacheKey) as ScoreSaberLeaderboardToken;
-    } else {
-      leaderboard = await scoresaberService.lookupLeaderboard(id);
-      if (leaderboard != undefined) {
-        cache.set(cacheKey, leaderboard);
-      }
+  public static async generatePlayerImage(id: string) {
+    const player = await this.fetchWithCache<ScoreSaberPlayer>(`player-${id}`, async () => {
+      const token = await scoresaberService.lookupPlayer(id);
+      return token ? await getScoreSaberPlayerFromToken(token, Config.apiUrl) : undefined;
+    });
+    if (!player) {
+      return undefined;
     }
-    if (leaderboard == undefined) {
+
+    const { statisticChange } = player;
+    const { daily } = statisticChange ?? {};
+    const rankChange = daily?.countryRank ?? 0;
+    const countryRankChange = daily?.rank ?? 0;
+    const ppChange = daily?.pp ?? 0;
+
+    return new ImageResponse(
+      (
+        <ImageService.BaseImage>
+          {/* Player Avatar */}
+          <img src={player.avatar} width={256} height={256} alt="Player's Avatar" tw="rounded-full mb-3" />
+
+          {/* Player Stats */}
+          <div tw="flex flex-col pl-3 items-center">
+            {/* Player Name */}
+            <p tw="font-bold text-6xl m-0">{player.name}</p>
+
+            {/* Player PP */}
+            <div tw="flex justify-center items-center text-[33px]">
+              <p tw="text-[#606fff] m-0">{formatPp(player.pp)}pp</p>
+              {this.renderDailyChange(ppChange)}
+            </div>
+
+            {/* Player Stats */}
+            <div tw="flex">
+              {/* Player Rank */}
+              <div tw="flex px-2 justify-center items-center">
+                <GlobeIcon />
+                <p tw="m-0">#{formatNumberWithCommas(player.rank)}</p>
+                {this.renderDailyChange(rankChange)}
+              </div>
+
+              {/* Player Country Rank */}
+              <div tw="flex px-2 justify-center items-center">
+                <img
+                  src={`https://ssr.fascinated.cc/assets/flags/${player.country.toLowerCase()}.png`}
+                  height={20}
+                  alt="Player's Country"
+                />
+                <p tw="pl-1 m-0">#{formatNumberWithCommas(player.countryRank)}</p>
+                {this.renderDailyChange(countryRankChange)}
+              </div>
+            </div>
+
+            {/* Joined Date */}
+            <p tw="m-0 text-gray-400 mt-2">
+              Joined ScoreSaber in{" "}
+              {player.joinedDate.toLocaleString("en-US", {
+                timeZone: "Europe/London",
+                month: "long",
+                year: "numeric",
+              })}
+            </p>
+          </div>
+        </ImageService.BaseImage>
+      ),
+      imageOptions
+    );
+  }
+
+  /**
+   * Generates the OpenGraph image for the leaderboard
+   *
+   * @param id the leaderboard's id
+   */
+  public static async generateLeaderboardImage(id: string) {
+    const leaderboard = await this.fetchWithCache<ScoreSaberLeaderboardToken>(`leaderboard-${id}`, () =>
+      scoresaberService.lookupLeaderboard(id)
+    );
+    if (!leaderboard) {
       return undefined;
     }
 
     const ranked = leaderboard.stars > 0;
+
     return new ImageResponse(
       (
         <ImageService.BaseImage>
-          <img src={leaderboard.coverImage} width={256} height={256} alt="Player's Avatar" tw="rounded-full mb-3" />
+          {/* Leaderboard Cover Image */}
+          <img src={leaderboard.coverImage} width={256} height={256} alt="Leaderboard Cover" tw="rounded-full mb-3" />
+
+          {/* Leaderboard Name */}
           <p tw="font-bold text-6xl m-0">
             {leaderboard.songName} {leaderboard.songSubName}
           </p>
+
           <div tw="flex justify-center items-center text-center">
+            {/* Leaderboard Stars */}
             {ranked && (
               <div tw="flex justify-center items-center text-4xl">
                 <p tw="font-bold m-0">{leaderboard.stars}</p>
                 <StarIcon />
               </div>
             )}
+
+            {/* Leaderboard Difficulty */}
             <p tw={"font-bold m-0 text-4xl" + (ranked ? " pl-3" : "")}>
               {getDifficultyFromScoreSaberDifficulty(leaderboard.difficulty.difficulty)}
             </p>
           </div>
-          <p tw="font-bold text-2xl text-gray-400 m-0">Mapped by {leaderboard.levelAuthorName}</p>
+
+          {/* Leaderboard Author */}
+          <p tw="font-bold text-2xl text-gray-400 m-0 mt-2">Mapped by {leaderboard.levelAuthorName}</p>
         </ImageService.BaseImage>
       ),
-      {
-        width: 1200,
-        height: 630,
-        emoji: "twemoji",
-      }
+      imageOptions
     );
   }
 }
