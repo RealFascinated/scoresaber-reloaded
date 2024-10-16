@@ -1,11 +1,10 @@
 "use client";
 
-import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
+import { formatNumberWithCommas, isWholeNumber } from "@ssr/common/utils/number-utils";
 import React from "react";
 import { DatasetConfig } from "@/components/chart/generic-chart";
 import GenericPlayerChart from "@/components/player/chart/generic-player-chart";
 import ScoreSaberPlayer from "@ssr/common/types/player/impl/scoresaber-player";
-import { isWholeNumber } from "@ssr/common/utils/number-utils";
 
 type Props = {
   player: ScoreSaberPlayer;
