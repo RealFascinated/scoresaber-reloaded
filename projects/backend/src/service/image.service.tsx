@@ -2,8 +2,8 @@ import { ImageResponse } from "@vercel/og";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import React from "react";
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
-import { getDifficultyFromScoreSaberDifficulty } from "website/src/common/scoresaber-utils";
 import NodeCache from "node-cache";
+import { getDifficultyFromScoreSaberDifficulty } from "@ssr/common/utils/scoresaber-utils";
 
 const imageCache = new NodeCache({
   stdTTL: 60 * 60, // 1 hour

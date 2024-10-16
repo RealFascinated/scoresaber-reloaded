@@ -1,5 +1,5 @@
 import BeatSaverMap from "@/common/database/types/beatsaver-map";
-import { getDifficultyFromScoreSaberDifficulty } from "@/common/scoresaber-utils";
+import { getDifficultyFromScoreSaberDifficulty } from "@ssr/common/utils/scoresaber-utils";
 import FallbackLink from "@/components/fallback-link";
 import Tooltip from "@/components/tooltip";
 import { StarIcon } from "@heroicons/react/24/solid";
