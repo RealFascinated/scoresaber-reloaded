@@ -118,6 +118,7 @@ app.use(cors());
  */
 app.use(
   logger({
+    enabled: true,
     mode: "combined",
   })
 );
