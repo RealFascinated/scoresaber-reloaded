@@ -5,10 +5,10 @@ import { AppService } from "../service/app.service";
 @Controller()
 export default class AppController {
   @Get("/")
-  public index() {
+  public async index() {
     return {
       app: "backend",
-      version: getAppVersion(),
+      version: await getAppVersion(),
     };
   }
 

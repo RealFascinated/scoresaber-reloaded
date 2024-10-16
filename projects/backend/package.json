@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "scripts": {
     "dev": "bun run --watch src/index.ts",
-    "start": "bun run src/index.ts"
+    "start": "bun run src/index.ts",
+    "lint": "eslint src/**/*.ts"
   },
   "dependencies": {
     "@bogeychan/elysia-etag": "^0.0.6",
@@ -14,15 +15,18 @@
     "@ssr/common": "workspace:common",
     "@tqman/nice-logger": "^1.0.1",
     "@typegoose/typegoose": "^12.8.0",
+    "@typescript-eslint/eslint-plugin": "^8.9.0",
+    "@typescript-eslint/parser": "^8.9.0",
     "@vercel/og": "^0.6.3",
-    "canvas": "^3.0.0-rc2",
     "discord-webhook-node": "^1.1.8",
     "elysia": "latest",
     "elysia-autoroutes": "^0.5.0",
     "elysia-decorators": "^1.0.2",
     "elysia-helmet": "^2.0.0",
     "elysia-rate-limit": "^4.1.0",
+    "eslint": "^8.57.1",
     "extract-colors": "^4.1.0",
+    "jimp": "^1.6.0",
     "ky": "^1.7.2",
     "mongoose": "^8.7.0",
     "node-cache": "^5.1.2",

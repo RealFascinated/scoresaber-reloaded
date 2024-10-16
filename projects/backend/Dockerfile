@@ -1,18 +1,5 @@
 FROM oven/bun:1.1.30-alpine AS base
 
-# Install system dependencies for node-canvas
-RUN apk add --no-cache \
-  build-base \
-  cairo-dev \
-  pango-dev \
-  giflib-dev \
-  libjpeg-turbo-dev \
-  freetype-dev \
-  fontconfig-dev \
-  pixman-dev \
-  python3 \
-  pkgconfig
-
 # Install dependencies
 FROM base AS depends
 WORKDIR /app
@@ -36,5 +23,8 @@ RUN bun --filter '@ssr/common' build
 
 # Copy the backend project
 COPY --from=depends /app/projects/backend ./projects/backend
+
+# Lint before starting
+RUN bun --filter '@ssr/common' lint
 
 CMD ["bun", "run", "--filter", "backend", "start"]

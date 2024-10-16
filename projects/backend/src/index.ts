@@ -21,9 +21,6 @@ import { delay } from "@ssr/common/utils/utils";
 import { connectScoreSaberWebSocket } from "@ssr/common/websocket/scoresaber-websocket";
 import ImageController from "./controller/image.controller";
 import ReplayController from "./controller/replay.controller";
-// @ts-ignore
-import { MessageBuilder, Webhook } from "discord-webhook-node";
-import { formatPp } from "@ssr/common/utils/number-utils";
 import { ScoreService } from "./service/score.service";
 
 // Load .env file
@@ -98,7 +95,7 @@ app.onError({ as: "global" }, ({ code, error }) => {
     return error.all;
   }
 
-  let status = "status" in error ? error.status : undefined;
+  const status = "status" in error ? error.status : undefined;
   return {
     ...((status && { statusCode: status }) || { status: code }),
     ...(error.message != code && { message: error.message }),
@@ -134,7 +131,10 @@ app.use(
     duration: 60 * 1000,
     max: 100,
     skip: request => {
+      // Skip requests to /
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars,prefer-const
       let [_, path] = request.url.split("/"); // Get the url parts
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       path === "" || (path === undefined && (path = "/")); // If we're on /, the path is undefined, so we set it to /
       return path === "/"; // ignore all requests to /
     },
