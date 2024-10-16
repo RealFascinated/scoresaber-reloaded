@@ -5,6 +5,10 @@ import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/score-saber-player-token";
 import { InternalServerError } from "../error/internal-server-error";
 import ScoreSaberPlayerScoreToken from "@ssr/common/types/token/scoresaber/score-saber-player-score-token";
+// @ts-ignore
+import { MessageBuilder, Webhook } from "discord-webhook-node";
+import { Config } from "../common/config";
+import { formatPp } from "@ssr/common/utils/number-utils";
 
 export class PlayerService {
   /**
@@ -34,6 +38,20 @@ export class PlayerService {
         player = (await PlayerModel.create({ _id: id })) as PlayerDocument;
         player.trackedSince = new Date();
         await this.seedPlayerHistory(player, playerToken);
+
+        const hook = new Webhook({
+          url: Config.trackedPlayerWebhook,
+        });
+        hook.setUsername("Player Tracker");
+        const embed = new MessageBuilder();
+        embed.setTitle("New Player Tracked");
+        embed.addField("Username", playerToken.name, true);
+        embed.addField("ID", playerToken.id, true);
+        embed.addField("PP", formatPp(playerToken.pp) + "pp", true);
+        embed.setDescription(`https://ssr.fascinated.cc/player/${playerToken.id}`);
+        embed.setThumbnail(playerToken.profilePicture);
+        embed.setColor("#00ff00");
+        await hook.send(embed);
       } catch (err) {
         const message = `Failed to create player document for "${id}"`;
         console.log(message, err);

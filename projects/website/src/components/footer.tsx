@@ -22,6 +22,11 @@ const items: NavbarItem[] = [
     link: "https://x.com/ssr_reloaded",
     openInNewTab: true,
   },
+  {
+    name: "Discord",
+    link: "https://discord.gg/kmNfWGA4A8",
+    openInNewTab: true,
+  },
 ];
 
 export default function Footer() {
