@@ -9,8 +9,8 @@ import ScoreSaberScore from "@ssr/common/score/impl/scoresaber-score";
 import { LeaderboardResponse } from "@ssr/common/response/leaderboard-response";
 import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
 import { fetchLeaderboard } from "@ssr/common/utils/leaderboard.util";
-import PlayerScoresResponse from "../../../../../../common/src/response/player-scores-response.ts";
 import { fetchLeaderboardScores } from "@ssr/common/utils/score-utils";
+import PlayerScoresResponse from "@ssr/common/response/player-scores-response";
 
 const UNKNOWN_LEADERBOARD = {
   title: "ScoreSaber Reloaded - Unknown Leaderboard",
