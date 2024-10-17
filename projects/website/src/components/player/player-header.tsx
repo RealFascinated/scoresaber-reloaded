@@ -71,6 +71,11 @@ const renderChange = (player: ScoreSaberPlayer, type: "rank" | "countryRank" | "
     );
   };
 
+  // Don't show change if the player is banned or inactive
+  if (player.banned || player.inactive) {
+    return children;
+  }
+
   return (
     <Tooltip
       side="bottom"
