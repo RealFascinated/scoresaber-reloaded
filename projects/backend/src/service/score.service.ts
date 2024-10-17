@@ -91,10 +91,15 @@ export class ScoreService {
           search: search,
         });
         if (leaderboardScores == undefined) {
-          throw new NotFoundError(
-            `No scores found for "${id}", leaderboard "${leaderboardName}", page "${page}", sort "${sort}", search "${search}"`
-          );
+          break;
         }
+
+        metadata = new Metadata(
+          Math.ceil(leaderboardScores.metadata.total / leaderboardScores.metadata.itemsPerPage),
+          leaderboardScores.metadata.total,
+          leaderboardScores.metadata.page,
+          leaderboardScores.metadata.itemsPerPage
+        );
 
         for (const token of leaderboardScores.playerScores) {
           const score = getScoreSaberScoreFromToken(token.score);
@@ -113,13 +118,6 @@ export class ScoreService {
             beatSaver: beatSaverMap,
           });
         }
-
-        metadata = new Metadata(
-          Math.ceil(leaderboardScores.metadata.total / leaderboardScores.metadata.itemsPerPage),
-          leaderboardScores.metadata.total,
-          leaderboardScores.metadata.page,
-          leaderboardScores.metadata.itemsPerPage
-        );
         break;
       }
       default: {
@@ -145,7 +143,7 @@ export class ScoreService {
     leaderboardName: Leaderboards,
     id: string,
     page: number
-  ): Promise<LeaderboardScoresResponse<unknown>> {
+  ): Promise<LeaderboardScoresResponse<unknown, unknown>> {
     const scores: Score[] = [];
     let leaderboard: Leaderboard | undefined;
     let beatSaverMap: BeatSaverMap | undefined;
@@ -153,17 +151,17 @@ export class ScoreService {
 
     switch (leaderboardName) {
       case "scoresaber": {
-        const leaderboardScores = await scoresaberService.lookupLeaderboardScores(id, page);
-        if (leaderboardScores == undefined) {
-          throw new NotFoundError(`No scores found for "${id}", leaderboard "${leaderboardName}", page "${page}""`);
-        }
-
         const leaderboardResponse = await LeaderboardService.getLeaderboard(leaderboardName, id);
         if (leaderboardResponse == undefined) {
           throw new NotFoundError(`Leaderboard "${leaderboardName}" not found`);
         }
         leaderboard = leaderboardResponse.leaderboard;
         beatSaverMap = leaderboardResponse.beatsaver;
+
+        const leaderboardScores = await scoresaberService.lookupLeaderboardScores(id, page);
+        if (leaderboardScores == undefined) {
+          break;
+        }
 
         for (const token of leaderboardScores.scores) {
           const score = getScoreSaberScoreFromToken(token);

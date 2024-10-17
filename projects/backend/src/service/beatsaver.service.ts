@@ -11,20 +11,28 @@ export default class BeatSaverService {
   public static async getMap(hash: string): Promise<BeatSaverMap | undefined> {
     let map = await BeatSaverMapModel.findById(hash);
     if (map != undefined) {
-      return map.toObject() as BeatSaverMap;
+      const toObject = map.toObject() as BeatSaverMap;
+      if (toObject.unknownMap) {
+        return undefined;
+      }
+      return toObject;
     }
 
     const token = await beatsaverService.lookupMap(hash);
-    if (token == undefined) {
-      return undefined;
-    }
-    map = await BeatSaverMapModel.create({
-      _id: hash,
-      bsr: token.id,
-      author: {
-        id: token.uploader.id,
-      },
-    });
+    map = await BeatSaverMapModel.create(
+      token
+        ? {
+            _id: hash,
+            bsr: token.id,
+            author: {
+              id: token.uploader.id,
+            },
+          }
+        : {
+            _id: hash,
+            unknownMap: true,
+          }
+    );
     return map.toObject() as BeatSaverMap;
   }
 }

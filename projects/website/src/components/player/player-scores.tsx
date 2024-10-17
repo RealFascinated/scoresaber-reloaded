@@ -229,20 +229,22 @@ export default function PlayerScores({ initialScoreData, initialSearch, player, 
             ))}
           </motion.div>
 
-          <Pagination
-            mobilePagination={width < 768}
-            page={pageState.page}
-            totalPages={scores.metadata.totalPages}
-            loadingPage={isLoading ? pageState.page : undefined}
-            generatePageUrl={page => {
-              return getUrl(page);
-            }}
-            onPageChange={newPage => {
-              setPreviousPage(pageState.page);
-              setPageState({ ...pageState, page: newPage });
-              setShouldFetch(true); // Set to true to trigger fetch on page change
-            }}
-          />
+          {scores.metadata.totalPages > 1 && (
+            <Pagination
+              mobilePagination={width < 768}
+              page={pageState.page}
+              totalPages={scores.metadata.totalPages}
+              loadingPage={isLoading ? pageState.page : undefined}
+              generatePageUrl={page => {
+                return getUrl(page);
+              }}
+              onPageChange={newPage => {
+                setPreviousPage(pageState.page);
+                setPageState({ ...pageState, page: newPage });
+                setShouldFetch(true); // Set to true to trigger fetch on page change
+              }}
+            />
+          )}
         </>
       )}
     </Card>

@@ -30,14 +30,20 @@ export class BeatSaverMap {
    * The bsr code for the map.
    * @private
    */
-  @prop({ required: true })
+  @prop({ required: false })
   public bsr!: string;
 
   /**
    * The author of the map.
    */
-  @prop({ required: true, _id: false, type: () => BeatsaverAuthor })
+  @prop({ required: false, _id: false, type: () => BeatsaverAuthor })
   public author!: BeatsaverAuthor;
+
+  /**
+   * True if the map is unknown on beatsaver.
+   */
+  @prop({ required: false })
+  public unknownMap?: boolean;
 
   /**
    * Exposes `id` as a virtual field mapped from `_id`.
