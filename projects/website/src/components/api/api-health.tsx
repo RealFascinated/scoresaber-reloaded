@@ -3,9 +3,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { getApiHealth } from "@ssr/common/utils/api-utils";
-import { config } from "../../../config";
 import { useToast } from "@/hooks/use-toast";
 import { useIsFirstRender } from "@uidotdev/usehooks";
+import { Config } from "@ssr/common/config";
 
 export function ApiHealth() {
   const { toast } = useToast();
@@ -16,7 +16,7 @@ export function ApiHealth() {
   useQuery({
     queryKey: ["api-health"],
     queryFn: async () => {
-      const status = (await getApiHealth(config.siteApi + "/health")).online;
+      const status = (await getApiHealth(Config.apiUrl + "/health")).online;
       setOnline(status);
       return status;
     },

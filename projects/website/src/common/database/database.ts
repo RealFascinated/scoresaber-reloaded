@@ -5,6 +5,7 @@ import { Friend } from "@/common/database/types/friends";
 import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/score-saber-player-token";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { setCookieValue } from "@ssr/common/utils/cookie-utils";
+import { trackPlayer } from "@ssr/common/utils/player-utils";
 
 const SETTINGS_ID = "SSR"; // DO NOT CHANGE
 
@@ -114,7 +115,12 @@ export default class Database extends Dexie {
     const friends = await this.friends.toArray();
     const players = await Promise.all(
       friends.map(async ({ id }) => {
-        return await scoresaberService.lookupPlayer(id, true);
+        const token = await scoresaberService.lookupPlayer(id, true);
+        if (token == undefined) {
+          return undefined;
+        }
+        await trackPlayer(id); // Track the player
+        return token;
       })
     );
     return players.filter(player => player !== undefined) as ScoreSaberPlayerToken[];

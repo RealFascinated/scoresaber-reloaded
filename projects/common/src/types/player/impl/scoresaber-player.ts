@@ -4,6 +4,7 @@ import { PlayerHistory } from "../player-history";
 import ScoreSaberPlayerToken from "../../token/scoresaber/score-saber-player-token";
 import { formatDateMinimal, getDaysAgoDate, getMidnightAlignedDate } from "../../../utils/time-utils";
 import { getPageFromRank } from "../../../utils/utils";
+import { Config } from "../../../config";
 
 /**
  * A ScoreSaber player.
@@ -75,12 +76,10 @@ export default interface ScoreSaberPlayer extends Player {
  * Gets the ScoreSaber Player from an {@link ScoreSaberPlayerToken}.
  *
  * @param token the player token
- * @param apiUrl the api url for SSR
  * @param playerIdCookie the id of the claimed player
  */
 export async function getScoreSaberPlayerFromToken(
   token: ScoreSaberPlayerToken,
-  apiUrl: string,
   playerIdCookie?: string
 ): Promise<ScoreSaberPlayer> {
   const bio: ScoreSaberBio = {
@@ -105,7 +104,7 @@ export async function getScoreSaberPlayerFromToken(
       .get<{
         statistics: { [key: string]: PlayerHistory };
       }>(
-        `${apiUrl}/player/history/${token.id}${playerIdCookie && playerIdCookie == token.id ? "?createIfMissing=true" : ""}`
+        `${Config.apiUrl}/player/history/${token.id}${playerIdCookie && playerIdCookie == token.id ? "?createIfMissing=true" : ""}`
       )
       .json();
     if (history) {

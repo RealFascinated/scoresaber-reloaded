@@ -8,9 +8,9 @@ import { GlobeIcon } from "../../components/globe-icon";
 import NodeCache from "node-cache";
 import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/score-saber-leaderboard-token";
 import ScoreSaberPlayer, { getScoreSaberPlayerFromToken } from "@ssr/common/types/player/impl/scoresaber-player";
-import { Config } from "../common/config";
 import { Jimp } from "jimp";
 import { extractColors } from "extract-colors";
+import { Config } from "@ssr/common/config";
 
 const cache = new NodeCache({ stdTTL: 60 * 60, checkperiod: 120 });
 const imageOptions = { width: 1200, height: 630 };

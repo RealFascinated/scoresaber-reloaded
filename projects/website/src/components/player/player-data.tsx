@@ -14,7 +14,6 @@ import ScoreSaberPlayer, { getScoreSaberPlayerFromToken } from "@ssr/common/type
 import ScoreSaberPlayerScoresPageToken from "@ssr/common/types/token/scoresaber/score-saber-player-scores-page-token";
 import { ScoreSort } from "@ssr/common/types/score/score-sort";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
-import { config } from "../../../config";
 import useDatabase from "@/hooks/use-database";
 import { useLiveQuery } from "dexie-react-hooks";
 
@@ -40,16 +39,17 @@ export default function PlayerData({
   const isMiniRankingsVisible = useIsVisible(miniRankingsRef);
   const database = useDatabase();
   const settings = useLiveQuery(() => database.getSettings());
+  const isFriend = useLiveQuery(() => database.isFriend(initialPlayerData.id));
 
   let player = initialPlayerData;
   const { data, isLoading, isError } = useQuery({
-    queryKey: ["playerData", player.id, settings?.playerId],
+    queryKey: ["playerData", player.id, settings?.playerId, isFriend],
     queryFn: async (): Promise<ScoreSaberPlayer | undefined> => {
       const playerResponse = await scoresaberService.lookupPlayer(player.id);
       if (playerResponse == undefined) {
         return undefined;
       }
-      return await getScoreSaberPlayerFromToken(playerResponse, config.siteApi, settings?.playerId);
+      return await getScoreSaberPlayerFromToken(playerResponse, settings?.playerId);
     },
     refetchInterval: REFRESH_INTERVAL,
     refetchIntervalInBackground: false,

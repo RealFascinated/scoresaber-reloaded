@@ -1,14 +1,14 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { config } from "../../../config";
 import { AppStatistics } from "@ssr/common/types/backend/app-statistics";
 import Statistic from "@/components/home/statistic";
 import { kyFetch } from "@ssr/common/utils/utils";
+import { Config } from "@ssr/common/config";
 
 export const dynamic = "force-dynamic"; // Always generate the page on load
 
 export default async function HomePage() {
-  const statistics = await kyFetch<AppStatistics>(config.siteApi + "/statistics");
+  const statistics = await kyFetch<AppStatistics>(Config.apiUrl + "/statistics");
 
   return (
     <main className="flex flex-col items-center w-full gap-6 text-center">

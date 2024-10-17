@@ -2,12 +2,12 @@
 
 import { useQuery } from "@tanstack/react-query";
 import ky from "ky";
-import { config } from "../../../config";
 import Tooltip from "@/components/tooltip";
 import { InformationCircleIcon } from "@heroicons/react/16/solid";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { PlayerTrackedSince } from "@ssr/common/types/player/player-tracked-since";
 import ScoreSaberPlayer from "@ssr/common/types/player/impl/scoresaber-player";
+import { Config } from "@ssr/common/config";
 
 type Props = {
   player: ScoreSaberPlayer;
@@ -16,7 +16,7 @@ type Props = {
 export default function PlayerTrackedStatus({ player }: Props) {
   const { data, isLoading, isError } = useQuery({
     queryKey: ["playerIsBeingTracked", player.id],
-    queryFn: () => ky.get<PlayerTrackedSince>(`${config.siteApi}/player/tracked/${player.id}`).json(),
+    queryFn: () => ky.get<PlayerTrackedSince>(`${Config.apiUrl}/player/tracked/${player.id}`).json(),
   });
 
   if (isLoading || isError || !data?.tracked) {

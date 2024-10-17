@@ -1,6 +1,6 @@
-import { config } from "../../config";
 import ky from "ky";
 import { Colors } from "@/common/colors";
+import { Config } from "@ssr/common/config";
 
 /**
  * Proxies all non-localhost images to make them load faster.
@@ -9,7 +9,7 @@ import { Colors } from "@/common/colors";
  * @returns the new image url
  */
 export function getImageUrl(originalUrl: string) {
-  return `${!config.siteUrl.includes("localhost") ? "https://img.fascinated.cc/upload/q_70/" : ""}${originalUrl}`;
+  return `${!Config.websiteUrl.includes("localhost") ? "https://img.fascinated.cc/upload/q_70/" : ""}${originalUrl}`;
 }
 
 /**
@@ -20,7 +20,7 @@ export function getImageUrl(originalUrl: string) {
  */
 export const getAverageColor = async (src: string) => {
   try {
-    return await ky.get<{ color: string }>(`${config.siteApi}/image/averagecolor/${encodeURIComponent(src)}`).json();
+    return await ky.get<{ color: string }>(`${Config.apiUrl}/image/averagecolor/${encodeURIComponent(src)}`).json();
   } catch {
     return {
       color: Colors.primary,

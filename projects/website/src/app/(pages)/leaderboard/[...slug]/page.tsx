@@ -7,7 +7,7 @@ import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import ScoreSaberLeaderboardScoresPageToken from "@ssr/common/types/token/scoresaber/score-saber-leaderboard-scores-page-token";
 import NodeCache from "node-cache";
 import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/score-saber-leaderboard-token";
-import { config } from "../../../../../config";
+import { Config } from "@ssr/common/config";
 
 const UNKNOWN_LEADERBOARD = {
   title: "ScoreSaber Reloaded - Unknown Leaderboard",
@@ -84,7 +84,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
       description: `View the scores for ${leaderboard.songName} by ${leaderboard.songAuthorName}!`,
       images: [
         {
-          url: `${config.siteApi}/image/leaderboard/${leaderboard.id}`,
+          url: `${Config.apiUrl}/image/leaderboard/${leaderboard.id}`,
         },
       ],
     },

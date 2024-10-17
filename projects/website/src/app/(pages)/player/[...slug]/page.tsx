@@ -7,9 +7,9 @@ import { ScoreSort } from "@ssr/common/types/score/score-sort";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import ScoreSaberPlayerScoresPageToken from "@ssr/common/types/token/scoresaber/score-saber-player-scores-page-token";
 import ScoreSaberPlayer, { getScoreSaberPlayerFromToken } from "@ssr/common/types/player/impl/scoresaber-player";
-import { config } from "../../../../../config";
 import NodeCache from "node-cache";
 import { getCookieValue } from "@ssr/common/utils/cookie-utils";
+import { Config } from "@ssr/common/config";
 
 const UNKNOWN_PLAYER = {
   title: "ScoreSaber Reloaded - Unknown Player",
@@ -55,8 +55,7 @@ const getPlayerData = async ({ params }: Props, fetchScores: boolean = true): Pr
   }
 
   const playerToken = await scoresaberService.lookupPlayer(id);
-  const player =
-    playerToken && (await getScoreSaberPlayerFromToken(playerToken, config.siteApi, await getCookieValue("playerId")));
+  const player = playerToken && (await getScoreSaberPlayerFromToken(playerToken, await getCookieValue("playerId")));
   let scores: ScoreSaberPlayerScoresPageToken | undefined;
   if (fetchScores) {
     scores = await scoresaberService.lookupPlayerScores({
@@ -98,7 +97,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
       description: `Click here to view the scores for ${player.name}!`,
       images: [
         {
-          url: `${config.siteApi}/image/player/${player.id}`,
+          url: `${Config.apiUrl}/image/player/${player.id}`,
         },
       ],
     },

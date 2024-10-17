@@ -1,9 +1,9 @@
 "use client";
 
 import { useLiveQuery } from "dexie-react-hooks";
-import { config } from "../../config";
 import { getImageUrl } from "@/common/image-utils";
 import useDatabase from "../hooks/use-database";
+import { Config } from "@ssr/common/config";
 
 export default function BackgroundCover() {
   const database = useDatabase();
@@ -22,7 +22,7 @@ export default function BackgroundCover() {
     backgroundCover = backgroundCover.substring(1);
   }
   if (prependWebsiteUrl) {
-    backgroundCover = config.siteUrl + "/" + backgroundCover;
+    backgroundCover = Config.websiteUrl + "/" + backgroundCover;
   }
 
   // Static background color

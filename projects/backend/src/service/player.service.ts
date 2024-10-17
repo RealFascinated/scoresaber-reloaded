@@ -8,9 +8,9 @@ import ScoreSaberPlayerScoreToken from "@ssr/common/types/token/scoresaber/score
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import { MessageBuilder, Webhook } from "discord-webhook-node";
-import { Config } from "../common/config";
 import { formatPp } from "@ssr/common/utils/number-utils";
 import { isProduction } from "@ssr/common/utils/utils";
+import { Config } from "@ssr/common/config";
 
 export class PlayerService {
   /**

@@ -10,7 +10,6 @@ import { etag } from "@bogeychan/elysia-etag";
 import AppController from "./controller/app.controller";
 import * as dotenv from "@dotenvx/dotenvx";
 import mongoose from "mongoose";
-import { Config } from "./common/config";
 import { setLogLevel } from "@typegoose/typegoose";
 import PlayerController from "./controller/player.controller";
 import { PlayerService } from "./service/player.service";
@@ -22,6 +21,7 @@ import { connectScoreSaberWebSocket } from "@ssr/common/websocket/scoresaber-web
 import ImageController from "./controller/image.controller";
 import ReplayController from "./controller/replay.controller";
 import { ScoreService } from "./service/score.service";
+import { Config } from "@ssr/common/config";
 
 // Load .env file
 dotenv.config({

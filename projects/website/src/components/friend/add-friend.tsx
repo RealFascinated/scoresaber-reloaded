@@ -7,6 +7,7 @@ import Tooltip from "../tooltip";
 import { Button } from "../ui/button";
 import { PersonIcon } from "@radix-ui/react-icons";
 import ScoreSaberPlayer from "@ssr/common/types/player/impl/scoresaber-player";
+import { trackPlayer } from "@ssr/common/utils/player-utils";
 
 type Props = {
   /**
@@ -27,6 +28,7 @@ export default function AddFriend({ player }: Props) {
    * Adds this player as a friend
    */
   async function addFriend() {
+    await trackPlayer(id);
     await database.addFriend(id);
     toast({
       title: "Friend Added",
