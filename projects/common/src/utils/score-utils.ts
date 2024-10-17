@@ -3,6 +3,7 @@ import { kyFetch } from "./utils";
 import PlayerScoresResponse from "../response/player-scores-response";
 import { Config } from "../config";
 import { ScoreSort } from "../score/score-sort";
+import LeaderboardScoresResponse from "../response/leaderboard-scores-response";
 
 /**
  * Fetches the player's scores
@@ -33,5 +34,5 @@ export async function fetchPlayerScores<S, L>(
  * @param page the page
  */
 export async function fetchLeaderboardScores<S, L>(leaderboard: Leaderboards, id: string, page: number) {
-  return kyFetch<PlayerScoresResponse<S, L>>(`${Config.apiUrl}/scores/leaderboard/${leaderboard}/${id}/${page}`);
+  return kyFetch<LeaderboardScoresResponse<S, L>>(`${Config.apiUrl}/scores/leaderboard/${leaderboard}/${id}/${page}`);
 }

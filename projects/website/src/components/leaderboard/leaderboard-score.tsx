@@ -2,8 +2,8 @@ import LeaderboardPlayer from "./leaderboard-player";
 import LeaderboardScoreStats from "./leaderboard-score-stats";
 import ScoreRankInfo from "@/components/score/score-rank-info";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import ScoreSaberScore from "@ssr/common/score/impl/scoresaber-score";
 import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
+import ScoreSaberScore from "@ssr/common/score/impl/scoresaber-score";
 
 type Props = {
   /**

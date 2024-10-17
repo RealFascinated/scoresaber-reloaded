@@ -15,7 +15,7 @@ import { fetchLeaderboardScores } from "@ssr/common/utils/score-utils";
 import ScoreSaberScore from "@ssr/common/score/impl/scoresaber-score";
 import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import PlayerScoresResponse from "../../../../common/src/response/player-scores-response.ts";
+import LeaderboardScoresResponse from "@ssr/common/response/leaderboard-scores-response";
 
 type LeaderboardScoresProps = {
   /**
@@ -26,7 +26,7 @@ type LeaderboardScoresProps = {
   /**
    * The initial scores to show.
    */
-  initialScores?: PlayerScoresResponse<ScoreSaberScore, ScoreSaberLeaderboard>;
+  initialScores?: LeaderboardScoresResponse<ScoreSaberScore, ScoreSaberLeaderboard>;
 
   /**
    * The leaderboard to display.
@@ -75,7 +75,7 @@ export default function LeaderboardScores({
   const [previousPage, setPreviousPage] = useState(initialPage);
   const [currentPage, setCurrentPage] = useState(initialPage);
   const [currentScores, setCurrentScores] = useState<
-    PlayerScoresResponse<ScoreSaberScore, ScoreSaberLeaderboard> | undefined
+    LeaderboardScoresResponse<ScoreSaberScore, ScoreSaberLeaderboard> | undefined
   >(initialScores);
   const topOfScoresRef = useRef<HTMLDivElement>(null);
   const [shouldFetch, setShouldFetch] = useState(true);

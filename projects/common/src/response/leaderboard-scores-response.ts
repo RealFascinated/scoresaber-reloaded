@@ -1,12 +1,11 @@
 import { Metadata } from "../types/metadata";
 import { BeatSaverMap } from "../model/beatsaver/beatsaver-map";
-import Score from "../score/score";
 
-export default interface LeaderboardScoresResponse<L> {
+export default interface LeaderboardScoresResponse<S, L> {
   /**
    * The scores that were set.
    */
-  readonly scores: Score[];
+  readonly scores: S[];
 
   /**
    * The leaderboard that was used.

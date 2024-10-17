@@ -8,7 +8,7 @@ import { LeaderboardResponse } from "@ssr/common/response/leaderboard-response";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { fetchLeaderboard } from "@ssr/common/utils/leaderboard.util";
-import PlayerScoresResponse from "../../../../common/src/response/player-scores-response.ts";
+import LeaderboardScoresResponse from "@ssr/common/response/leaderboard-scores-response";
 
 const REFRESH_INTERVAL = 1000 * 60 * 5;
 
@@ -21,7 +21,7 @@ type LeaderboardDataProps = {
   /**
    * The initial score data.
    */
-  initialScores: PlayerScoresResponse<ScoreSaberScore, ScoreSaberLeaderboard>;
+  initialScores?: LeaderboardScoresResponse<ScoreSaberScore, ScoreSaberLeaderboard>;
 };
 
 export function LeaderboardData({ initialLeaderboard, initialScores }: LeaderboardDataProps) {
