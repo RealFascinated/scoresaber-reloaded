@@ -32,13 +32,8 @@ spec:
                 secretKeyRef:
                   name: ssr-backend-secret
                   key: MONGO_URI
-            - name: NUMBER_ONE_WEBHOOK
+            - name: DISCORD_BOT_TOKEN
               valueFrom:
                 secretKeyRef:
                   name: ssr-backend-secret
-                  key: NUMBER_ONE_WEBHOOK
-            - name: TRACKED_PLAYERS_WEBHOOK
-              valueFrom:
-                secretKeyRef:
-                  name: ssr-backend-secret
-                  key: TRACKED_PLAYERS_WEBHOOK
+                  key: DISCORD_BOT_TOKEN

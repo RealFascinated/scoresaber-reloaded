@@ -8,8 +8,6 @@ export const Config = {
   /**
    * Backend
    */
-  trackedPlayerWebhook: process.env.TRACKED_PLAYERS_WEBHOOK,
-  numberOneWebhook: process.env.NUMBER_ONE_WEBHOOK,
   mongoUri: process.env.MONGO_URI,
   discordBotToken: process.env.DISCORD_BOT_TOKEN,
 } as const;
