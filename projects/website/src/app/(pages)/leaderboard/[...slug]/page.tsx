@@ -10,7 +10,7 @@ import { LeaderboardResponse } from "@ssr/common/response/leaderboard-response";
 import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
 import { fetchLeaderboard } from "@ssr/common/utils/leaderboard.util";
 import { fetchLeaderboardScores } from "@ssr/common/utils/score-utils";
-import PlayerScoresResponse from "@ssr/common/response/player-scores-response";
+import LeaderboardScoresResponse from "@ssr/common/response/leaderboard-scores-response";
 
 const UNKNOWN_LEADERBOARD = {
   title: "ScoreSaber Reloaded - Unknown Leaderboard",
@@ -28,7 +28,7 @@ type Props = {
 
 type LeaderboardData = {
   leaderboardResponse: LeaderboardResponse<ScoreSaberLeaderboard>;
-  scores?: PlayerScoresResponse<ScoreSaberScore, ScoreSaberLeaderboard>;
+  scores?: LeaderboardScoresResponse<ScoreSaberScore, ScoreSaberLeaderboard>;
   page: number;
 };
 
