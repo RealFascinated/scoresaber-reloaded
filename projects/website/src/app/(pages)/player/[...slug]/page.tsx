@@ -9,7 +9,7 @@ import ScoreSaberPlayerScoresPageToken from "@ssr/common/types/token/scoresaber/
 import ScoreSaberPlayer, { getScoreSaberPlayerFromToken } from "@ssr/common/types/player/impl/scoresaber-player";
 import { config } from "../../../../../config";
 import NodeCache from "node-cache";
-import { getCookieValue } from "@/common/cookie-utils";
+import { getCookieValue } from "@ssr/common/utils/cookie-utils";
 
 const UNKNOWN_PLAYER = {
   title: "ScoreSaber Reloaded - Unknown Player",

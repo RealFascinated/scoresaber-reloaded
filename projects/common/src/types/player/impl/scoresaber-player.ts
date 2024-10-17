@@ -4,9 +4,9 @@ import { PlayerHistory } from "../player-history";
 import ScoreSaberPlayerToken from "../../token/scoresaber/score-saber-player-token";
 import { formatDateMinimal, getDaysAgoDate, getMidnightAlignedDate } from "../../../utils/time-utils";
 import { getPageFromRank } from "../../../utils/utils";
-import { getCookieValue } from "website/src/common/cookie-utils";
 import { db } from "website/src/common/database/database";
 import { isServer } from "@tanstack/react-query";
+import { getCookieValue } from "@ssr/utils/cookie-utils";
 
 /**
  * A ScoreSaber player.
@@ -107,7 +107,7 @@ export async function getScoreSaberPlayerFromToken(
       .get<{
         statistics: { [key: string]: PlayerHistory };
       }>(
-        `${apiUrl}/player/history/${token.id}${playerIdCookie && playerIdCookie == token.id ? "?createIfMissing=true" : ""}`
+        `${apiUrl}/player/history/${token.id}${playerIdCookie && playerIdCookie === token.id ? "?createIfMissing=true" : ""}`
       )
       .json();
     if (history) {

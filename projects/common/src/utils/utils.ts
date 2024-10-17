@@ -8,6 +8,13 @@ export function isProduction() {
 }
 
 /**
+ * Checks if we're running on the server
+ */
+export function isServer() {
+  return typeof window === "undefined";
+}
+
+/**
  * Delays a promise
  *
  * @param ms the number of milliseconds to delay

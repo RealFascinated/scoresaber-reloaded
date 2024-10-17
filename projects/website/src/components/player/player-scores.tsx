@@ -16,7 +16,7 @@ import ScoreSaberPlayer from "@ssr/common/types/player/impl/scoresaber-player";
 import ScoreSaberPlayerScoresPageToken from "@ssr/common/types/token/scoresaber/score-saber-player-scores-page-token";
 import { ScoreSort } from "@ssr/common/types/score/score-sort";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
-import { setCookieValue } from "@/common/cookie-utils";
+import { setCookieValue } from "@ssr/common/utils/cookie-utils";
 
 type Props = {
   initialScoreData?: ScoreSaberPlayerScoresPageToken;

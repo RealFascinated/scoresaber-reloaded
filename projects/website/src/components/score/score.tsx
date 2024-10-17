@@ -48,15 +48,28 @@ export default function Score({ player, playerScore, settings }: Props) {
     setBeatSaverMap(beatSaverMapData);
   }, [leaderboard.songHash, settings?.noScoreButtons]);
 
+  /**
+   * Set the base score
+   */
   useEffect(() => {
     if (playerScore?.score?.baseScore) {
       setBaseScore(playerScore.score.baseScore);
     }
   }, [playerScore]);
 
+  /**
+   * Fetch the beatSaver data on page load
+   */
   useEffect(() => {
     fetchBeatSaverData();
   }, [fetchBeatSaverData]);
+
+  /**
+   * Close the leaderboard when the score changes
+   */
+  useEffect(() => {
+    setIsLeaderboardExpanded(false);
+  }, [score]);
 
   const accuracy = (baseScore / leaderboard.maxScore) * 100;
   const pp = baseScore === score.baseScore ? score.pp : scoresaberService.getPp(leaderboard.stars, accuracy);

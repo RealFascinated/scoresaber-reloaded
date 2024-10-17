@@ -7,6 +7,11 @@ import { formatPp } from "@ssr/common/utils/number-utils";
 import { isProduction } from "@ssr/common/utils/utils";
 
 export class ScoreService {
+  /**
+   * Notifies the number one score in Discord.
+   *
+   * @param playerScore the score to notify
+   */
   public static async notifyNumberOne(playerScore: ScoreSaberPlayerScoreToken) {
     // Only notify in production
     if (!isProduction()) {

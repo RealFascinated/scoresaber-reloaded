@@ -1,13 +1,12 @@
 import Dexie, { EntityTable } from "dexie";
 import BeatSaverMap from "./types/beatsaver-map";
 import Settings from "./types/settings";
-import { setCookieValue } from "@/common/cookie-utils";
 import { Friend } from "@/common/database/types/friends";
 import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/score-saber-player-token";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
+import { setCookieValue } from "@ssr/common/utils/cookie-utils";
 
 const SETTINGS_ID = "SSR"; // DO NOT CHANGE
-const FRIENDS_ID = "FRIENDS"; // DO NOT CHANGE
 
 export default class Database extends Dexie {
   /**

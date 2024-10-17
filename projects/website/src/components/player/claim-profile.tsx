@@ -7,7 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import Tooltip from "../tooltip";
 import { Button } from "../ui/button";
 import { revalidatePath } from "next/cache";
-import { setCookieValue } from "@/common/cookie-utils";
+import { setCookieValue } from "@ssr/common/utils/cookie-utils";
 
 type Props = {
   /**

@@ -1,4 +1,4 @@
-import { isServer } from "@tanstack/react-query";
+import { isServer } from "./utils";
 
 export type CookieName = "playerId" | "lastScoreSort";
 
@@ -11,7 +11,7 @@ export type CookieName = "playerId" | "lastScoreSort";
  */
 export async function getCookieValue(name: CookieName, defaultValue?: string): Promise<string | undefined> {
   let value: string | undefined;
-  if (isServer) {
+  if (isServer()) {
     const { cookies } = await import("next/headers");
 
     const cookieStore = await cookies();
@@ -32,7 +32,7 @@ export async function getCookieValue(name: CookieName, defaultValue?: string): P
  * @param value the value of the cookie
  */
 export async function setCookieValue(name: CookieName, value: string) {
-  if (isServer) {
+  if (isServer()) {
     const { cookies } = await import("next/headers");
 
     const cookieStore = await cookies();
