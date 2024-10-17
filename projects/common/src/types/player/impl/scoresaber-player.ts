@@ -143,9 +143,10 @@ export async function getScoreSaberPlayerFromToken(
     daysAgo += 1;
 
     const dateKey = formatDateMinimal(date);
-    if (!statisticHistory[dateKey]) {
+    if (!statisticHistory[dateKey] || statisticHistory[dateKey].rank == undefined) {
       missingDays += 1;
       statisticHistory[dateKey] = {
+        ...statisticHistory[dateKey],
         rank: rank,
       };
     }
