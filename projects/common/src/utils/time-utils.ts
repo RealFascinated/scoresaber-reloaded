@@ -54,6 +54,46 @@ export function formatDateMinimal(date: Date) {
 }
 
 /**
+ * Formats the date
+ *
+ * @param date the date to format
+ * @param format the format to return
+ * @returns the formatted date
+ */
+export function formatDate(date: Date, format: "MMMM YYYY" | "DD MMMM YYYY" | "DD MMMM YYYY HH:mm" = "MMMM YYYY") {
+  switch (format) {
+    case "MMMM YYYY": {
+      return date.toLocaleString("en-US", {
+        timeZone: "Europe/London",
+        month: "long",
+        year: "numeric",
+      });
+    }
+    case "DD MMMM YYYY": {
+      return date.toLocaleString("en-US", {
+        timeZone: "Europe/London",
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      });
+    }
+    case "DD MMMM YYYY HH:mm": {
+      return date.toLocaleString("en-US", {
+        timeZone: "Europe/London",
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+        hour: "numeric",
+        minute: "numeric",
+      });
+    }
+    default: {
+      return formatDateMinimal(date);
+    }
+  }
+}
+
+/**
  * Gets the midnight aligned date
  *
  * @param date the date

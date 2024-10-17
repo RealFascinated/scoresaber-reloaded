@@ -1,11 +1,17 @@
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import StatValue from "@/components/stat-value";
 import ScoreSaberPlayer from "@ssr/common/types/player/impl/scoresaber-player";
+import { formatDate } from "@ssr/common/utils/time-utils";
+import { ReactNode } from "react";
+import Tooltip from "@/components/tooltip";
 
 type Badge = {
   name: string;
   color?: string;
-  create: (player: ScoreSaberPlayer) => string | React.ReactNode | undefined;
+  create: (player: ScoreSaberPlayer) => {
+    tooltip?: string | ReactNode;
+    value: string | ReactNode;
+  };
 };
 
 const badges: Badge[] = [
@@ -13,39 +19,60 @@ const badges: Badge[] = [
     name: "Ranked Play Count",
     color: "bg-pp",
     create: (player: ScoreSaberPlayer) => {
-      return formatNumberWithCommas(player.statistics.rankedPlayCount);
+      return {
+        value: formatNumberWithCommas(player.statistics.rankedPlayCount),
+      };
     },
   },
   {
     name: "Total Ranked Score",
     color: "bg-pp",
     create: (player: ScoreSaberPlayer) => {
-      return formatNumberWithCommas(player.statistics.totalRankedScore);
+      return {
+        value: formatNumberWithCommas(player.statistics.totalRankedScore),
+      };
     },
   },
   {
     name: "Average Ranked Accuracy",
     color: "bg-pp",
     create: (player: ScoreSaberPlayer) => {
-      return player.statistics.averageRankedAccuracy.toFixed(2) + "%";
+      return {
+        value: player.statistics.averageRankedAccuracy.toFixed(2) + "%",
+      };
     },
   },
   {
     name: "Total Play Count",
     create: (player: ScoreSaberPlayer) => {
-      return formatNumberWithCommas(player.statistics.totalPlayCount);
+      return {
+        value: formatNumberWithCommas(player.statistics.totalPlayCount),
+      };
     },
   },
   {
     name: "Total Score",
     create: (player: ScoreSaberPlayer) => {
-      return formatNumberWithCommas(player.statistics.totalScore);
+      return {
+        value: formatNumberWithCommas(player.statistics.totalScore),
+      };
     },
   },
   {
     name: "Total Replays Watched",
     create: (player: ScoreSaberPlayer) => {
-      return formatNumberWithCommas(player.statistics.replaysWatched);
+      return {
+        value: formatNumberWithCommas(player.statistics.replaysWatched),
+      };
+    },
+  },
+  {
+    name: "Joined Date",
+    create: (player: ScoreSaberPlayer) => {
+      return {
+        tooltip: formatDate(player.joinedDate, "DD MMMM YYYY HH:mm"),
+        value: formatDate(player.joinedDate),
+      };
     },
   },
 ];
@@ -62,8 +89,16 @@ export default function PlayerStats({ player }: Props) {
         if (toRender === undefined) {
           return <div key={index} />;
         }
+        const { tooltip, value } = toRender;
+        const stat = <StatValue key={index} color={badge.color} name={badge.name} value={value} />;
 
-        return <StatValue key={index} color={badge.color} name={badge.name} value={toRender} />;
+        return tooltip ? (
+          <Tooltip asChild={false} display={tooltip}>
+            {stat}
+          </Tooltip>
+        ) : (
+          stat
+        );
       })}
     </div>
   );
