@@ -6,7 +6,7 @@ import { formatDateMinimal, getDaysAgoDate, getMidnightAlignedDate } from "../..
 import { getPageFromRank } from "../../../utils/utils";
 import { db } from "website/src/common/database/database";
 import { isServer } from "@tanstack/react-query";
-import { getCookieValue } from "@ssr/utils/cookie-utils";
+import { getCookieValue } from "../../../utils/cookie-utils";
 
 /**
  * A ScoreSaber player.
