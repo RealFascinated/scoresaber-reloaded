@@ -5,7 +5,7 @@ import Image from "next/image";
 import { songDifficultyToColor } from "@/common/song-utils";
 import Link from "next/link";
 import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
-import { BeatSaverMap } from "@ssr/common/model/beatsaver-map";
+import { BeatSaverMap } from "@ssr/common/model/beatsaver/beatsaver-map";
 
 type Props = {
   leaderboard: ScoreSaberLeaderboard;
@@ -14,7 +14,7 @@ type Props = {
 
 export default function ScoreSongInfo({ leaderboard, beatSaverMap }: Props) {
   const mappersProfile =
-    beatSaverMap != undefined ? `https://beatsaver.com/profile/${beatSaverMap?.author.authorId}` : undefined;
+    beatSaverMap != undefined ? `https://beatsaver.com/profile/${beatSaverMap?.author.id}` : undefined;
 
   const starCount = leaderboard.stars;
   const difficulty = leaderboard.difficulty;

@@ -7,6 +7,8 @@ import { parseDate } from "@ssr/common/utils/time-utils";
 import Link from "next/link";
 import useWebSocket, { ReadyState } from "react-use-websocket";
 import { ScoreSaberWebsocketMessageToken } from "@ssr/common/types/token/scoresaber/websocket/scoresaber-websocket-message";
+import { getScoreSaberScoreFromToken } from "@ssr/common/score/impl/scoresaber-score";
+import { getScoreSaberLeaderboardFromToken } from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
 
 export default function ScoreFeed() {
   const { readyState, lastJsonMessage } = useWebSocket<ScoreSaberWebsocketMessageToken>("wss://scoresaber.com/ws");
@@ -49,7 +51,8 @@ export default function ScoreFeed() {
               </Link>
             </p>
             <Score
-              score={score}
+              score={getScoreSaberScoreFromToken(score.score)}
+              leaderboard={getScoreSaberLeaderboardFromToken(score.leaderboard)}
               settings={{
                 noScoreButtons: true,
               }}

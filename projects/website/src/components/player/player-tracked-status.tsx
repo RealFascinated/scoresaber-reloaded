@@ -5,7 +5,7 @@ import ky from "ky";
 import Tooltip from "@/components/tooltip";
 import { InformationCircleIcon } from "@heroicons/react/16/solid";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
-import { PlayerTrackedSince } from "@ssr/common/types/player/player-tracked-since";
+import { PlayerTrackedSince } from "@ssr/common/player/player-tracked-since";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { Config } from "@ssr/common/config";
 
