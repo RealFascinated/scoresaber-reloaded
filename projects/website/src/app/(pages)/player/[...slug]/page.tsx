@@ -55,7 +55,8 @@ const getPlayerData = async ({ params }: Props, fetchScores: boolean = true): Pr
   }
 
   const playerToken = await scoresaberService.lookupPlayer(id);
-  const player = playerToken && (await getScoreSaberPlayerFromToken(playerToken, config.siteApi));
+  const player =
+    playerToken && (await getScoreSaberPlayerFromToken(playerToken, config.siteApi, await getCookieValue("playerId")));
   let scores: ScoreSaberPlayerScoresPageToken | undefined;
   if (fetchScores) {
     scores = await scoresaberService.lookupPlayerScores({

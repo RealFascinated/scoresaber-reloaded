@@ -49,7 +49,7 @@ export default function PlayerData({
       if (playerResponse == undefined) {
         return undefined;
       }
-      return await getScoreSaberPlayerFromToken(playerResponse, config.siteApi);
+      return await getScoreSaberPlayerFromToken(playerResponse, config.siteApi, settings?.playerId);
     },
     refetchInterval: REFRESH_INTERVAL,
     refetchIntervalInBackground: false,
