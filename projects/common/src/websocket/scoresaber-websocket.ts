@@ -22,30 +22,23 @@ type ScoresaberSocket = {
  */
 export function connectScoreSaberWebSocket({ onMessage, onScore }: ScoresaberSocket) {
   let websocket: WebSocket | null = null;
-  let heartbeatInterval: NodeJS.Timeout | null = null; // To store heartbeat interval ID
 
   function connectWs() {
     websocket = new WebSocket("wss://scoresaber.com/ws");
 
     websocket.onopen = () => {
       console.log("Connected to the ScoreSaber WebSocket!");
-
-      // Start sending heartbeats
-      heartbeatInterval = setInterval(() => {
-        if (websocket && websocket.readyState === WebSocket.OPEN) {
-          websocket.send(JSON.stringify({ type: "heartbeat" })); // Send heartbeat message
-          console.log("Heartbeat sent");
-        }
-      }, 30000); // Sends a heartbeat every 30 seconds
     };
 
     websocket.onerror = error => {
       console.error("WebSocket Error:", error);
+      if (websocket) {
+        websocket.close(); // Close the connection on error
+      }
     };
 
     websocket.onclose = () => {
       console.log("Lost connection to the ScoreSaber WebSocket. Attempting to reconnect...");
-      clearInterval(heartbeatInterval!); // Clear the heartbeat interval
       setTimeout(connectWs, 5000); // Reconnect after 5 seconds
     };
 
