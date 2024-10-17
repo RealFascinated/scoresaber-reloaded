@@ -4,7 +4,6 @@ import ScoreSaberPlayerScoreToken from "@ssr/common/types/token/scoresaber/score
 import { MessageBuilder, Webhook } from "discord-webhook-node";
 import { formatPp } from "@ssr/common/utils/number-utils";
 import { isProduction } from "@ssr/common/utils/utils";
-import { Config } from "@ssr/common/config";
 import { Metadata } from "@ssr/common/types/metadata";
 import { NotFoundError } from "elysia";
 import BeatSaverService from "./beatsaver.service";
@@ -20,6 +19,8 @@ import { PlayerScore } from "@ssr/common/score/player-score";
 import LeaderboardScoresResponse from "@ssr/common/response/leaderboard-scores-response";
 import Score from "@ssr/common/score/score";
 import PlayerScoresResponse from "@ssr/common/response/player-scores-response";
+import { DiscordChannels, logToChannel } from "../bot/bot";
+import { EmbedBuilder } from "discord.js";
 
 export class ScoreService {
   /**
@@ -45,20 +46,20 @@ export class ScoreService {
       return;
     }
 
-    const hook = new Webhook({
-      url: Config.numberOneWebhook,
-    });
-    hook.setUsername("Number One Feed");
-    const embed = new MessageBuilder();
-    embed.setTitle(`${player.name} set a #${score.rank} on ${leaderboard.songName} ${leaderboard.songSubName}`);
-    embed.setDescription(`
-    **Player:** https://ssr.fascinated.cc/player/${player.id}
-    **Leaderboard:** https://ssr.fascinated.cc/leaderboard/${leaderboard.id}
-    **PP:** ${formatPp(score.pp)}
-    `);
-    embed.setThumbnail(leaderboard.coverImage);
-    embed.setColor("#00ff00");
-    await hook.send(embed);
+    logToChannel(
+      DiscordChannels.numberOneFeed,
+      new EmbedBuilder()
+        .setTitle(`${player.name} set a #1 on ${leaderboard.songName} ${leaderboard.songSubName}`)
+        .setDescription(
+          `
+        **Player:** https://ssr.fascinated.cc/player/${player.id}
+        **Leaderboard:** https://ssr.fascinated.cc/leaderboard/${leaderboard.id}
+        **PP:** ${formatPp(score.pp)}
+        `
+        )
+        .setThumbnail(leaderboard.coverImage)
+        .setColor("#00ff00")
+    );
   }
 
   /**

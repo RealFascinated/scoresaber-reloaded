@@ -18,7 +18,7 @@
     "@typescript-eslint/eslint-plugin": "^8.9.0",
     "@typescript-eslint/parser": "^8.9.0",
     "@vercel/og": "^0.6.3",
-    "discord-webhook-node": "^1.1.8",
+    "discordx": "^11.12.1",
     "elysia": "latest",
     "elysia-autoroutes": "^0.5.0",
     "elysia-decorators": "^1.0.2",

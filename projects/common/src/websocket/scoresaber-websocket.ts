@@ -5,22 +5,29 @@ type ScoresaberSocket = {
   /**
    * Invoked when a general message is received.
    *
-   * @param message The received message.
+   * @param message the received message.
    */
   onMessage?: (message: unknown) => void;
 
   /**
    * Invoked when a score message is received.
    *
-   * @param score The received score data.
+   * @param score the received score data.
    */
   onScore?: (score: ScoreSaberPlayerScoreToken) => void;
+
+  /**
+   * Invoked when the connection is closed.
+   *
+   * @param error the error that caused the connection to close
+   */
+  onDisconnect?: (error: WebSocket.ErrorEvent) => void;
 };
 
 /**
  * Connects to the ScoreSaber websocket and handles incoming messages.
  */
-export function connectScoreSaberWebSocket({ onMessage, onScore }: ScoresaberSocket) {
+export function connectScoreSaberWebSocket({ onMessage, onScore, onDisconnect }: ScoresaberSocket) {
   let websocket: WebSocket | null = null;
 
   function connectWs() {
@@ -35,6 +42,8 @@ export function connectScoreSaberWebSocket({ onMessage, onScore }: ScoresaberSoc
       if (websocket) {
         websocket.close(); // Close the connection on error
       }
+
+      onDisconnect && onDisconnect(error);
     };
 
     websocket.onclose = () => {

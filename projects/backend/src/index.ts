@@ -15,7 +15,7 @@ import PlayerController from "./controller/player.controller";
 import { PlayerService } from "./service/player.service";
 import { cron } from "@elysiajs/cron";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
-import { delay } from "@ssr/common/utils/utils";
+import { delay, isProduction } from "@ssr/common/utils/utils";
 import { connectScoreSaberWebSocket } from "@ssr/common/websocket/scoresaber-websocket";
 import ImageController from "./controller/image.controller";
 import ReplayController from "./controller/replay.controller";
@@ -24,6 +24,8 @@ import { Config } from "@ssr/common/config";
 import { PlayerDocument, PlayerModel } from "@ssr/common/model/player";
 import ScoresController from "./controller/scores.controller";
 import LeaderboardController from "./controller/leaderboard.controller";
+import { DiscordChannels, initDiscordBot, logToChannel } from "./bot/bot";
+import { EmbedBuilder } from "discord.js";
 
 // Load .env file
 dotenv.config({
@@ -39,6 +41,12 @@ connectScoreSaberWebSocket({
   onScore: async playerScore => {
     await PlayerService.trackScore(playerScore);
     await ScoreService.notifyNumberOne(playerScore);
+  },
+  onDisconnect: error => {
+    logToChannel(
+      DiscordChannels.backendLogs,
+      new EmbedBuilder().setDescription(`ScoreSaber websocket disconnected: ${error}`)
+    );
   },
 });
 
@@ -179,6 +187,9 @@ app.use(swagger());
 
 app.onStart(() => {
   console.log("Listening on port http://localhost:8080");
+  if (isProduction()) {
+    initDiscordBot();
+  }
 });
 
 app.listen(8080);

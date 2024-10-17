@@ -10,7 +10,8 @@ import ScoreSaberPlayerScoreToken from "@ssr/common/types/token/scoresaber/score
 import { MessageBuilder, Webhook } from "discord-webhook-node";
 import { formatPp } from "@ssr/common/utils/number-utils";
 import { isProduction } from "@ssr/common/utils/utils";
-import { Config } from "@ssr/common/config";
+import { DiscordChannels, logToChannel } from "../bot/bot";
+import { EmbedBuilder } from "discord.js";
 
 export class PlayerService {
   /**
@@ -43,19 +44,31 @@ export class PlayerService {
 
         // Only notify in production
         if (isProduction()) {
-          const hook = new Webhook({
-            url: Config.trackedPlayerWebhook,
-          });
-          hook.setUsername("Player Tracker");
-          const embed = new MessageBuilder();
-          embed.setTitle("New Player Tracked");
-          embed.addField("Username", playerToken.name, true);
-          embed.addField("ID", playerToken.id, true);
-          embed.addField("PP", formatPp(playerToken.pp) + "pp", true);
-          embed.setDescription(`https://ssr.fascinated.cc/player/${playerToken.id}`);
-          embed.setThumbnail(playerToken.profilePicture);
-          embed.setColor("#00ff00");
-          await hook.send(embed);
+          logToChannel(
+            DiscordChannels.trackedPlayerLogs,
+            new EmbedBuilder()
+              .setTitle("New Player Tracked")
+              .setDescription(`https://ssr.fascinated.cc/player/${playerToken.id}`)
+              .addFields([
+                {
+                  name: "Username",
+                  value: playerToken.name,
+                  inline: true,
+                },
+                {
+                  name: "ID",
+                  value: playerToken.id,
+                  inline: true,
+                },
+                {
+                  name: "PP",
+                  value: formatPp(playerToken.pp) + "pp",
+                  inline: true,
+                },
+              ])
+              .setThumbnail(playerToken.profilePicture)
+              .setColor("#00ff00")
+          );
         }
       } catch (err) {
         const message = `Failed to create player document for "${id}"`;
