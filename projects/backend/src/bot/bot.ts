@@ -8,7 +8,7 @@ export enum DiscordChannels {
   backendLogs = "1296524935237468250",
 }
 
-export const DiscordBot = new Client({
+const DiscordBot = new Client({
   intents: [],
   presence: {
     status: "online",

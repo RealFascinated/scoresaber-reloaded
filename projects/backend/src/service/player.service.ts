@@ -7,7 +7,6 @@ import { InternalServerError } from "../error/internal-server-error";
 import ScoreSaberPlayerScoreToken from "@ssr/common/types/token/scoresaber/score-saber-player-score-token";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import { MessageBuilder, Webhook } from "discord-webhook-node";
 import { formatPp } from "@ssr/common/utils/number-utils";
 import { isProduction } from "@ssr/common/utils/utils";
 import { DiscordChannels, logToChannel } from "../bot/bot";
