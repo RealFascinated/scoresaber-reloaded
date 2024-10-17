@@ -17,7 +17,7 @@ import ScoreSaberPlayer, { getScoreSaberPlayerFromToken } from "@ssr/common/play
 import { ScoreSort } from "@ssr/common/score/score-sort";
 import ScoreSaberScore from "@ssr/common/score/impl/scoresaber-score";
 import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
-import PlayerScoresResponse from "../../../../common/src/response/player-scores-response.ts";
+import PlayerScoresResponse from "@ssr/common/response/player-scores-response";
 
 const REFRESH_INTERVAL = 1000 * 60 * 5;
 

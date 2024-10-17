@@ -12,7 +12,7 @@ import { ScoreSort } from "@ssr/common/score/score-sort";
 import ScoreSaberScore from "@ssr/common/score/impl/scoresaber-score";
 import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
 import { fetchPlayerScores } from "@ssr/common/utils/score-utils";
-import PlayerScoresResponse from "../../../../../../common/src/response/player-scores-response";
+import PlayerScoresResponse from "@ssr/common/response/player-scores-response";
 
 const UNKNOWN_PLAYER = {
   title: "ScoreSaber Reloaded - Unknown Player",
@@ -61,7 +61,7 @@ const getPlayerData = async ({ params }: Props, fetchScores: boolean = true): Pr
   const player = playerToken && (await getScoreSaberPlayerFromToken(playerToken, await getCookieValue("playerId")));
   let scores: PlayerScoresResponse<ScoreSaberScore, ScoreSaberLeaderboard> | undefined;
   if (fetchScores) {
-    scores = await fetchPlayerScores("scoresaber", id, page, sort, search);
+    scores = await fetchPlayerScores<ScoreSaberScore, ScoreSaberLeaderboard>("scoresaber", id, page, sort, search);
   }
 
   const playerData = {
