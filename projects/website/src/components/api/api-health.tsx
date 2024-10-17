@@ -16,7 +16,7 @@ export function ApiHealth() {
   useQuery({
     queryKey: ["api-health"],
     queryFn: async () => {
-      const status = (await getApiHealth(config.siteApi)).online;
+      const status = (await getApiHealth(config.siteApi + "/health")).online;
       setOnline(status);
       return status;
     },

@@ -17,7 +17,6 @@ import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { config } from "../../../config";
 import useDatabase from "@/hooks/use-database";
 import { useLiveQuery } from "dexie-react-hooks";
-import { getCookieValue } from "@/common/cookie-utils";
 
 const REFRESH_INTERVAL = 1000 * 60 * 5;
 
@@ -50,9 +49,8 @@ export default function PlayerData({
       if (playerResponse == undefined) {
         return undefined;
       }
-      return await getScoreSaberPlayerFromToken(playerResponse, config.siteApi, await getCookieValue("playerId"));
+      return await getScoreSaberPlayerFromToken(playerResponse, config.siteApi);
     },
-    staleTime: REFRESH_INTERVAL,
     refetchInterval: REFRESH_INTERVAL,
     refetchIntervalInBackground: false,
   });

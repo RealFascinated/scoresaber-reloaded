@@ -4,6 +4,9 @@ import { PlayerHistory } from "../player-history";
 import ScoreSaberPlayerToken from "../../token/scoresaber/score-saber-player-token";
 import { formatDateMinimal, getDaysAgoDate, getMidnightAlignedDate } from "../../../utils/time-utils";
 import { getPageFromRank } from "../../../utils/utils";
+import { getCookieValue } from "website/src/common/cookie-utils";
+import { db } from "website/src/common/database/database";
+import { isServer } from "@tanstack/react-query";
 
 /**
  * A ScoreSaber player.
@@ -76,12 +79,10 @@ export default interface ScoreSaberPlayer extends Player {
  *
  * @param token the player token
  * @param apiUrl the api url for SSR
- * @param playerIdCookie the player id cookie (doesn't need to be set)
  */
 export async function getScoreSaberPlayerFromToken(
   token: ScoreSaberPlayerToken,
-  apiUrl: string,
-  playerIdCookie?: string
+  apiUrl: string
 ): Promise<ScoreSaberPlayer> {
   const bio: ScoreSaberBio = {
     lines: token.bio?.split("\n") || [],
@@ -99,6 +100,8 @@ export async function getScoreSaberPlayerFromToken(
   let isBeingTracked = false;
   const todayDate = formatDateMinimal(getMidnightAlignedDate(new Date()));
   let statisticHistory: { [key: string]: PlayerHistory } = {};
+
+  const playerIdCookie = isServer ? await getCookieValue("playerId") : (await db.getSettings())?.playerId;
   try {
     const { statistics: history } = await ky
       .get<{
