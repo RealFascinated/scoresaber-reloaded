@@ -49,7 +49,7 @@ export default function ScoreFeed() {
               </Link>
             </p>
             <Score
-              playerScore={score}
+              score={score}
               settings={{
                 noScoreButtons: true,
               }}

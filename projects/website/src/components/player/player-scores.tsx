@@ -12,14 +12,16 @@ import { Input } from "@/components/ui/input";
 import { clsx } from "clsx";
 import { useDebounce } from "@uidotdev/usehooks";
 import { scoreAnimation } from "@/components/score/score-animation";
-import ScoreSaberPlayer from "@ssr/common/types/player/impl/scoresaber-player";
-import ScoreSaberPlayerScoresPageToken from "@ssr/common/types/token/scoresaber/score-saber-player-scores-page-token";
-import { ScoreSort } from "@ssr/common/types/score/score-sort";
-import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
+import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
+import { ScoreSort } from "@ssr/common/score/score-sort";
 import { setCookieValue } from "@ssr/common/utils/cookie-utils";
+import ScoreSaberScore from "@ssr/common/score/impl/scoresaber-score";
+import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
+import { fetchPlayerScores } from "@ssr/common/utils/score-utils";
+import PlayerScoresResponse from "@ssr/common/response/player-scores-response";
 
 type Props = {
-  initialScoreData?: ScoreSaberPlayerScoresPageToken;
+  initialScoreData?: PlayerScoresResponse<ScoreSaberScore, ScoreSaberLeaderboard>;
   initialSearch?: string;
   player: ScoreSaberPlayer;
   sort: ScoreSort;
@@ -50,27 +52,25 @@ export default function PlayerScores({ initialScoreData, initialSearch, player, 
 
   const [pageState, setPageState] = useState<PageState>({ page, sort });
   const [previousPage, setPreviousPage] = useState(page);
-  const [currentScores, setCurrentScores] = useState<ScoreSaberPlayerScoresPageToken | undefined>(initialScoreData);
+  const [scores, setScores] = useState<PlayerScoresResponse<ScoreSaberScore, ScoreSaberLeaderboard> | undefined>(
+    initialScoreData
+  );
   const [searchTerm, setSearchTerm] = useState(initialSearch || "");
   const debouncedSearchTerm = useDebounce(searchTerm, 250);
   const [shouldFetch, setShouldFetch] = useState(false);
   const topOfScoresRef = useRef<HTMLDivElement>(null);
 
   const isSearchActive = debouncedSearchTerm.length >= 3;
-  const {
-    data: scores,
-    isError,
-    isLoading,
-  } = useQuery({
+  const { data, isError, isLoading } = useQuery({
     queryKey: ["playerScores", player.id, pageState, debouncedSearchTerm],
-    queryFn: () => {
-      return scoresaberService.lookupPlayerScores({
-        playerId: player.id,
-        page: pageState.page,
-        sort: pageState.sort,
-        ...(isSearchActive && { search: debouncedSearchTerm }),
-      });
-    },
+    queryFn: () =>
+      fetchPlayerScores<ScoreSaberScore, ScoreSaberLeaderboard>(
+        "scoresaber",
+        player.id,
+        pageState.page,
+        pageState.sort,
+        debouncedSearchTerm
+      ),
     staleTime: 30 * 1000, // 30 seconds
     enabled: shouldFetch && (debouncedSearchTerm.length >= 3 || debouncedSearchTerm.length === 0),
   });
@@ -80,9 +80,9 @@ export default function PlayerScores({ initialScoreData, initialSearch, player, 
    */
   const handleScoreAnimation = useCallback(async () => {
     await controls.start(previousPage >= pageState.page ? "hiddenRight" : "hiddenLeft");
-    setCurrentScores(scores);
+    setScores(data);
     await controls.start("visible");
-  }, [scores, controls, previousPage, pageState.page]);
+  }, [controls, previousPage, pageState.page, data]);
 
   /**
    * Change the score sort.
@@ -122,8 +122,10 @@ export default function PlayerScores({ initialScoreData, initialSearch, player, 
    * Handle score animation.
    */
   useEffect(() => {
-    if (scores) handleScoreAnimation();
-  }, [scores, handleScoreAnimation]);
+    if (data) {
+      handleScoreAnimation();
+    }
+  }, [data, handleScoreAnimation]);
 
   /**
    * Gets the URL to the page.
@@ -203,10 +205,10 @@ export default function PlayerScores({ initialScoreData, initialSearch, player, 
         </div>
       </div>
 
-      {currentScores && (
+      {scores !== undefined && (
         <>
           <div className="text-center">
-            {isError || (currentScores.playerScores.length === 0 && <p>No scores found. Invalid Page or Search?</p>)}
+            {isError || (scores.scores.length === 0 && <p>No scores found. Invalid Page or Search?</p>)}
           </div>
 
           <motion.div
@@ -215,9 +217,14 @@ export default function PlayerScores({ initialScoreData, initialSearch, player, 
             variants={scoreAnimation}
             className="grid min-w-full grid-cols-1 divide-y divide-border"
           >
-            {currentScores.playerScores.map((playerScore, index) => (
-              <motion.div key={index} variants={scoreAnimation}>
-                <Score player={player} playerScore={playerScore} />
+            {scores.scores.map((score, index) => (
+              <motion.div key={score.score.id} variants={scoreAnimation}>
+                <Score
+                  player={player}
+                  score={score.score}
+                  leaderboard={score.leaderboard}
+                  beatSaverMap={score.beatSaver}
+                />
               </motion.div>
             ))}
           </motion.div>
@@ -225,7 +232,7 @@ export default function PlayerScores({ initialScoreData, initialSearch, player, 
           <Pagination
             mobilePagination={width < 768}
             page={pageState.page}
-            totalPages={Math.ceil(currentScores.metadata.total / currentScores.metadata.itemsPerPage)}
+            totalPages={scores.metadata.totalPages}
             loadingPage={isLoading ? pageState.page : undefined}
             generatePageUrl={page => {
               return getUrl(page);

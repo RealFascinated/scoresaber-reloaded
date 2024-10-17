@@ -1,17 +1,14 @@
 import StatValue from "@/components/stat-value";
-import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score-saber-score-token";
-import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/score-saber-leaderboard-token";
+import ScoreSaberScore from "@ssr/common/score/impl/scoresaber-score";
+import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
 
 /**
  * A badge to display in the score stats.
  */
 export type ScoreBadge = {
   name: string;
-  color?: (score: ScoreSaberScoreToken, leaderboard: ScoreSaberLeaderboardToken) => string | undefined;
-  create: (
-    score: ScoreSaberScoreToken,
-    leaderboard: ScoreSaberLeaderboardToken
-  ) => string | React.ReactNode | undefined;
+  color?: (score: ScoreSaberScore, leaderboard: ScoreSaberLeaderboard) => string | undefined;
+  create: (score: ScoreSaberScore, leaderboard: ScoreSaberLeaderboard) => string | React.ReactNode | undefined;
 };
 
 /**
@@ -19,8 +16,8 @@ export type ScoreBadge = {
  */
 type ScoreBadgeProps = {
   badges: ScoreBadge[];
-  score: ScoreSaberScoreToken;
-  leaderboard: ScoreSaberLeaderboardToken;
+  score: ScoreSaberScore;
+  leaderboard: ScoreSaberLeaderboard;
 };
 
 export function ScoreBadges({ badges, score, leaderboard }: ScoreBadgeProps) {

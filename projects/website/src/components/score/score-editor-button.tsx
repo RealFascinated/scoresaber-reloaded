@@ -1,44 +1,44 @@
 import { Button } from "@/components/ui/button";
 import { CogIcon } from "@heroicons/react/24/solid";
 import clsx from "clsx";
-import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score-saber-score-token";
 import { useState } from "react";
 import { Slider } from "@/components/ui/slider";
-import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/score-saber-leaderboard-token";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ResetIcon } from "@radix-ui/react-icons";
 import Tooltip from "@/components/tooltip";
+import ScoreSaberScore from "@ssr/common/score/impl/scoresaber-score";
+import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
 
 type ScoreEditorButtonProps = {
-  score: ScoreSaberScoreToken;
-  leaderboard: ScoreSaberLeaderboardToken;
-  updateScore: (score: ScoreSaberScoreToken) => void;
+  score: ScoreSaberScore;
+  leaderboard: ScoreSaberLeaderboard;
+  updateScore: (score: ScoreSaberScore) => void;
 };
 
 export default function ScoreEditorButton({ score, leaderboard, updateScore }: ScoreEditorButtonProps) {
   const [isScoreEditMode, setIsScoreEditMode] = useState(false);
 
   const maxScore = leaderboard.maxScore || 1; // Use 1 to prevent division by zero
-  const accuracy = (score.baseScore / maxScore) * 100;
+  const accuracy = (score.score / maxScore) * 100;
 
   const handleSliderChange = (value: number[]) => {
     const newAccuracy = Math.max(0, Math.min(value[0], 100)); // Ensure the accuracy stays within 0-100
     const newBaseScore = (newAccuracy / 100) * maxScore;
     updateScore({
       ...score,
-      baseScore: newBaseScore,
+      score: newBaseScore,
     });
   };
 
   const handleSliderReset = () => {
     updateScore({
       ...score,
-      baseScore: (accuracy / 100) * maxScore,
+      score: (accuracy / 100) * maxScore,
     });
   };
 
   return (
-    <div className="pr-2 flex items-center justify-center cursor-default relative">
+    <div className="flex items-center justify-center cursor-default relative">
       <Popover
         onOpenChange={open => {
           setIsScoreEditMode(open);

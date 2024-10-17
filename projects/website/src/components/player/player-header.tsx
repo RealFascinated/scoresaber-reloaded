@@ -8,7 +8,7 @@ import PlayerStats from "./player-stats";
 import Tooltip from "@/components/tooltip";
 import { ReactElement } from "react";
 import PlayerTrackedStatus from "@/components/player/player-tracked-status";
-import ScoreSaberPlayer from "@ssr/common/types/player/impl/scoresaber-player";
+import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import Link from "next/link";
 import { capitalizeFirstLetter } from "@/common/string-utils";
 import AddFriend from "@/components/friend/add-friend";

@@ -3,11 +3,14 @@ import { redirect } from "next/navigation";
 import { Colors } from "@/common/colors";
 import { getAverageColor } from "@/common/image-utils";
 import { LeaderboardData } from "@/components/leaderboard/leaderboard-data";
-import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
-import ScoreSaberLeaderboardScoresPageToken from "@ssr/common/types/token/scoresaber/score-saber-leaderboard-scores-page-token";
 import NodeCache from "node-cache";
-import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/score-saber-leaderboard-token";
 import { Config } from "@ssr/common/config";
+import ScoreSaberScore from "@ssr/common/score/impl/scoresaber-score";
+import { LeaderboardResponse } from "@ssr/common/response/leaderboard-response";
+import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
+import { fetchLeaderboard } from "@ssr/common/utils/leaderboard.util";
+import PlayerScoresResponse from "../../../../../../common/src/response/player-scores-response.ts";
+import { fetchLeaderboardScores } from "@ssr/common/utils/score-utils";
 
 const UNKNOWN_LEADERBOARD = {
   title: "ScoreSaber Reloaded - Unknown Leaderboard",
@@ -24,8 +27,8 @@ type Props = {
 };
 
 type LeaderboardData = {
-  leaderboard: ScoreSaberLeaderboardToken | undefined;
-  scores: ScoreSaberLeaderboardScoresPageToken | undefined;
+  leaderboardResponse: LeaderboardResponse<ScoreSaberLeaderboard>;
+  scores?: PlayerScoresResponse<ScoreSaberScore, ScoreSaberLeaderboard>;
   page: number;
 };
 
@@ -38,7 +41,10 @@ const leaderboardCache = new NodeCache({ stdTTL: 60, checkperiod: 120 });
  * @param fetchScores whether to fetch the scores
  * @returns the leaderboard data and scores
  */
-const getLeaderboardData = async ({ params }: Props, fetchScores: boolean = true) => {
+const getLeaderboardData = async (
+  { params }: Props,
+  fetchScores: boolean = true
+): Promise<LeaderboardData | undefined> => {
   const { slug } = await params;
   const id = slug[0]; // The leaderboard id
   const page = parseInt(slug[1]) || 1; // The page number
@@ -47,16 +53,17 @@ const getLeaderboardData = async ({ params }: Props, fetchScores: boolean = true
   if (leaderboardCache.has(cacheId)) {
     return leaderboardCache.get(cacheId) as LeaderboardData;
   }
-
-  const leaderboard = await scoresaberService.lookupLeaderboard(id);
-  let scores: ScoreSaberLeaderboardScoresPageToken | undefined;
-  if (fetchScores) {
-    scores = await scoresaberService.lookupLeaderboardScores(id + "", page);
+  const leaderboard = await fetchLeaderboard<ScoreSaberLeaderboard>("scoresaber", id + "");
+  if (leaderboard === undefined) {
+    return undefined;
   }
 
-  const leaderboardData = {
+  const scores = fetchScores
+    ? await fetchLeaderboardScores<ScoreSaberScore, ScoreSaberLeaderboard>("scoresaber", id + "", page)
+    : undefined;
+  const leaderboardData: LeaderboardData = {
+    leaderboardResponse: leaderboard,
     page: page,
-    leaderboard: leaderboard,
     scores: scores,
   };
 
@@ -65,8 +72,8 @@ const getLeaderboardData = async ({ params }: Props, fetchScores: boolean = true
 };
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
-  const { leaderboard } = await getLeaderboardData(props, false);
-  if (leaderboard === undefined) {
+  const response = await getLeaderboardData(props, false);
+  if (response === undefined) {
     return {
       title: UNKNOWN_LEADERBOARD.title,
       description: UNKNOWN_LEADERBOARD.description,
@@ -77,6 +84,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     };
   }
 
+  const { leaderboard } = response.leaderboardResponse;
   return {
     title: `${leaderboard.songName} ${leaderboard.songSubName} by ${leaderboard.songAuthorName}`,
     openGraph: {
@@ -95,24 +103,25 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 }
 
 export async function generateViewport(props: Props): Promise<Viewport> {
-  const { leaderboard } = await getLeaderboardData(props, false);
-  if (leaderboard === undefined) {
+  const response = await getLeaderboardData(props, false);
+  if (response === undefined) {
     return {
       themeColor: Colors.primary,
     };
   }
 
-  const color = await getAverageColor(leaderboard.coverImage);
+  const color = await getAverageColor(response.leaderboardResponse.leaderboard.songArt);
   return {
     themeColor: color.color,
   };
 }
 
 export default async function LeaderboardPage(props: Props) {
-  const { leaderboard, scores, page } = await getLeaderboardData(props);
-  if (leaderboard == undefined) {
+  const response = await getLeaderboardData(props);
+  if (response == undefined) {
     return redirect("/");
   }
+  const { leaderboardResponse, scores } = response;
 
-  return <LeaderboardData initialLeaderboard={leaderboard} initialPage={page} initialScores={scores} />;
+  return <LeaderboardData initialLeaderboard={response.leaderboardResponse} initialScores={scores} />;
 }

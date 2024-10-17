@@ -3,7 +3,7 @@
 import React from "react";
 import GenericChart, { DatasetConfig } from "@/components/chart/generic-chart";
 import { getValueFromHistory } from "@/common/player-utils";
-import ScoreSaberPlayer from "@ssr/common/types/player/impl/scoresaber-player";
+import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { parseDate } from "@ssr/common/utils/time-utils";
 
 type Props = {

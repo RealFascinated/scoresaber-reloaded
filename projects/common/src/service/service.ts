@@ -40,7 +40,6 @@ export default class Service {
     try {
       return await ky.get<T>(this.buildRequestUrl(true, url)).json();
     } catch (error) {
-      console.error(`Error fetching data from ${url}:`, error);
       return undefined;
     }
   }

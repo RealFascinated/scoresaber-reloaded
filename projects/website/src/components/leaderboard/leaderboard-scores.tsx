@@ -11,10 +11,11 @@ import { scoreAnimation } from "@/components/score/score-animation";
 import { Button } from "@/components/ui/button";
 import { clsx } from "clsx";
 import { getDifficultyFromRawDifficulty } from "@/common/song-utils";
-import ScoreSaberLeaderboardScoresPageToken from "@ssr/common/types/token/scoresaber/score-saber-leaderboard-scores-page-token";
-import ScoreSaberPlayer from "@ssr/common/types/player/impl/scoresaber-player";
-import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/score-saber-leaderboard-token";
-import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
+import { fetchLeaderboardScores } from "@ssr/common/utils/score-utils";
+import ScoreSaberScore from "@ssr/common/score/impl/scoresaber-score";
+import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
+import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
+import PlayerScoresResponse from "../../../../common/src/response/player-scores-response.ts";
 
 type LeaderboardScoresProps = {
   /**
@@ -25,17 +26,17 @@ type LeaderboardScoresProps = {
   /**
    * The initial scores to show.
    */
-  initialScores?: ScoreSaberLeaderboardScoresPageToken;
+  initialScores?: PlayerScoresResponse<ScoreSaberScore, ScoreSaberLeaderboard>;
+
+  /**
+   * The leaderboard to display.
+   */
+  leaderboard: ScoreSaberLeaderboard;
 
   /**
    * The player who set the score.
    */
   player?: ScoreSaberPlayer;
-
-  /**
-   * The leaderboard to display.
-   */
-  leaderboard: ScoreSaberLeaderboardToken;
 
   /**
    * Whether to show the difficulties.
@@ -73,17 +74,20 @@ export default function LeaderboardScores({
   const [selectedLeaderboardId, setSelectedLeaderboardId] = useState(leaderboard.id);
   const [previousPage, setPreviousPage] = useState(initialPage);
   const [currentPage, setCurrentPage] = useState(initialPage);
-  const [currentScores, setCurrentScores] = useState<ScoreSaberLeaderboardScoresPageToken | undefined>(initialScores);
+  const [currentScores, setCurrentScores] = useState<
+    PlayerScoresResponse<ScoreSaberScore, ScoreSaberLeaderboard> | undefined
+  >(initialScores);
   const topOfScoresRef = useRef<HTMLDivElement>(null);
-  const [shouldFetch, setShouldFetch] = useState(false);
+  const [shouldFetch, setShouldFetch] = useState(true);
 
-  const {
-    data: scores,
-    isError,
-    isLoading,
-  } = useQuery({
-    queryKey: ["leaderboardScores-" + leaderboard.id, selectedLeaderboardId, currentPage],
-    queryFn: () => scoresaberService.lookupLeaderboardScores(selectedLeaderboardId + "", currentPage),
+  const { data, isError, isLoading } = useQuery({
+    queryKey: ["leaderboardScores", selectedLeaderboardId, currentPage],
+    queryFn: () =>
+      fetchLeaderboardScores<ScoreSaberScore, ScoreSaberLeaderboard>(
+        "scoresaber",
+        selectedLeaderboardId + "",
+        currentPage
+      ),
     staleTime: 30 * 1000,
     enabled: (shouldFetch && isLeaderboardPage) || !isLeaderboardPage,
   });
@@ -93,9 +97,9 @@ export default function LeaderboardScores({
    */
   const handleScoreAnimation = useCallback(async () => {
     await controls.start(previousPage >= currentPage ? "hiddenRight" : "hiddenLeft");
-    setCurrentScores(scores);
+    setCurrentScores(data);
     await controls.start("visible");
-  }, [controls, currentPage, previousPage, scores]);
+  }, [controls, currentPage, previousPage, data]);
 
   /**
    * Set the selected leaderboard.
@@ -118,10 +122,10 @@ export default function LeaderboardScores({
    * Set the current scores.
    */
   useEffect(() => {
-    if (scores) {
+    if (data) {
       handleScoreAnimation();
     }
-  }, [scores, handleScoreAnimation]);
+  }, [data, handleScoreAnimation]);
 
   /**
    * Handle scrolling to the top of the
@@ -185,17 +189,19 @@ export default function LeaderboardScores({
         variants={scoreAnimation}
         className="grid min-w-full grid-cols-1 divide-y divide-border"
       >
-        {currentScores.scores.map((playerScore, index) => (
-          <motion.div key={index} variants={scoreAnimation}>
-            <LeaderboardScore key={index} player={player} score={playerScore} leaderboard={leaderboard} />
-          </motion.div>
-        ))}
+        {currentScores.scores.map((playerScore, index) => {
+          return (
+            <motion.div key={index} variants={scoreAnimation}>
+              <LeaderboardScore key={index} player={player} score={playerScore} leaderboard={leaderboard} />
+            </motion.div>
+          );
+        })}
       </motion.div>
 
       <Pagination
         mobilePagination={width < 768}
         page={currentPage}
-        totalPages={Math.ceil(currentScores.metadata.total / currentScores.metadata.itemsPerPage)}
+        totalPages={currentScores.metadata.totalPages}
         loadingPage={isLoading ? currentPage : undefined}
         generatePageUrl={page => {
           return `/leaderboard/${selectedLeaderboardId}/${page}`;

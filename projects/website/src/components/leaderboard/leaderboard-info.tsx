@@ -2,14 +2,14 @@ import Card from "@/components/card";
 import Image from "next/image";
 import { LeaderboardSongStarCount } from "@/components/leaderboard/leaderboard-song-star-count";
 import ScoreButtons from "@/components/score/score-buttons";
-import BeatSaverMap from "@/common/database/types/beatsaver-map";
-import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/score-saber-leaderboard-token";
+import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
+import { BeatSaverMap } from "@ssr/common/model/beatsaver/beatsaver-map";
 
 type LeaderboardInfoProps = {
   /**
    * The leaderboard to display.
    */
-  leaderboard: ScoreSaberLeaderboardToken;
+  leaderboard: ScoreSaberLeaderboard;
 
   /**
    * The beat saver map associated with the leaderboard.
@@ -46,7 +46,7 @@ export function LeaderboardInfo({ leaderboard, beatSaverMap }: LeaderboardInfoPr
           </div>
         </div>
         <Image
-          src={leaderboard.coverImage}
+          src={leaderboard.songArt}
           alt={`${leaderboard.songName} Cover Image`}
           className="rounded-md w-[96px] h-[96px]"
           width={96}

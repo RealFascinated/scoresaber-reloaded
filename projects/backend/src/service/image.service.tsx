@@ -7,7 +7,7 @@ import { StarIcon } from "../../components/star-icon";
 import { GlobeIcon } from "../../components/globe-icon";
 import NodeCache from "node-cache";
 import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/score-saber-leaderboard-token";
-import ScoreSaberPlayer, { getScoreSaberPlayerFromToken } from "@ssr/common/types/player/impl/scoresaber-player";
+import ScoreSaberPlayer, { getScoreSaberPlayerFromToken } from "@ssr/common/player/impl/scoresaber-player";
 import { Jimp } from "jimp";
 import { extractColors } from "extract-colors";
 import { Config } from "@ssr/common/config";

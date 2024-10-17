@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
-import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score-saber-score-token";
-import ScoreSaberPlayer from "@ssr/common/types/player/impl/scoresaber-player";
+import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
+import ScoreSaberScore from "@ssr/common/score/impl/scoresaber-score";
 
 type Props = {
   /**
@@ -12,11 +12,11 @@ type Props = {
   /**
    * The score to display.
    */
-  score: ScoreSaberScoreToken;
+  score: ScoreSaberScore;
 };
 
 export default function LeaderboardPlayer({ player, score }: Props) {
-  const scorePlayer = score.leaderboardPlayerInfo;
+  const scorePlayer = score.playerInfo;
   const isPlayerWhoSetScore = player && scorePlayer.id === player.id;
 
   return (

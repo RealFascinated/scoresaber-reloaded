@@ -3,13 +3,16 @@ import { Metadata, Viewport } from "next";
 import { redirect } from "next/navigation";
 import { Colors } from "@/common/colors";
 import { getAverageColor } from "@/common/image-utils";
-import { ScoreSort } from "@ssr/common/types/score/score-sort";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
-import ScoreSaberPlayerScoresPageToken from "@ssr/common/types/token/scoresaber/score-saber-player-scores-page-token";
-import ScoreSaberPlayer, { getScoreSaberPlayerFromToken } from "@ssr/common/types/player/impl/scoresaber-player";
 import NodeCache from "node-cache";
 import { getCookieValue } from "@ssr/common/utils/cookie-utils";
 import { Config } from "@ssr/common/config";
+import ScoreSaberPlayer, { getScoreSaberPlayerFromToken } from "@ssr/common/player/impl/scoresaber-player";
+import { ScoreSort } from "@ssr/common/score/score-sort";
+import ScoreSaberScore from "@ssr/common/score/impl/scoresaber-score";
+import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
+import { fetchPlayerScores } from "@ssr/common/utils/score-utils";
+import PlayerScoresResponse from "../../../../../../common/src/response/player-scores-response";
 
 const UNKNOWN_PLAYER = {
   title: "ScoreSaber Reloaded - Unknown Player",
@@ -27,7 +30,7 @@ type Props = {
 
 type PlayerData = {
   player: ScoreSaberPlayer | undefined;
-  scores: ScoreSaberPlayerScoresPageToken | undefined;
+  scores: PlayerScoresResponse<ScoreSaberScore, ScoreSaberLeaderboard> | undefined;
   sort: ScoreSort;
   page: number;
   search: string;
@@ -56,14 +59,9 @@ const getPlayerData = async ({ params }: Props, fetchScores: boolean = true): Pr
 
   const playerToken = await scoresaberService.lookupPlayer(id);
   const player = playerToken && (await getScoreSaberPlayerFromToken(playerToken, await getCookieValue("playerId")));
-  let scores: ScoreSaberPlayerScoresPageToken | undefined;
+  let scores: PlayerScoresResponse<ScoreSaberScore, ScoreSaberLeaderboard> | undefined;
   if (fetchScores) {
-    scores = await scoresaberService.lookupPlayerScores({
-      playerId: id,
-      sort,
-      page,
-      search,
-    });
+    scores = await fetchPlayerScores("scoresaber", id, page, sort, search);
   }
 
   const playerData = {

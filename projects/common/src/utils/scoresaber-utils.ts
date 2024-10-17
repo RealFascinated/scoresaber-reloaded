@@ -1,9 +1,11 @@
+import { Difficulty } from "../score/difficulty";
+
 /**
  * Formats the ScoreSaber difficulty number
  *
  * @param diff the diffuiclity number
  */
-export function getDifficultyFromScoreSaberDifficulty(diff: number) {
+export function getDifficultyFromScoreSaberDifficulty(diff: number): Difficulty {
   switch (diff) {
     case 1: {
       return "Easy";

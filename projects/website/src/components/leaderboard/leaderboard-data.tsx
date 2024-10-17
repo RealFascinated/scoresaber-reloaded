@@ -2,70 +2,55 @@
 
 import LeaderboardScores from "@/components/leaderboard/leaderboard-scores";
 import { LeaderboardInfo } from "@/components/leaderboard/leaderboard-info";
+import ScoreSaberScore from "@ssr/common/score/impl/scoresaber-score";
+import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
+import { LeaderboardResponse } from "@ssr/common/response/leaderboard-response";
 import { useQuery } from "@tanstack/react-query";
-import { useCallback, useEffect, useState } from "react";
-import BeatSaverMap from "@/common/database/types/beatsaver-map";
-import ScoreSaberLeaderboardScoresPageToken from "@ssr/common/types/token/scoresaber/score-saber-leaderboard-scores-page-token";
-import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/score-saber-leaderboard-token";
-import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
-import { lookupBeatSaverMap } from "@/common/beatsaver-utils";
+import { useState } from "react";
+import { fetchLeaderboard } from "@ssr/common/utils/leaderboard.util";
+import PlayerScoresResponse from "../../../../common/src/response/player-scores-response.ts";
+
+const REFRESH_INTERVAL = 1000 * 60 * 5;
 
 type LeaderboardDataProps = {
   /**
-   * The page to show when opening the leaderboard.
+   * The initial leaderboard data.
    */
-  initialPage?: number;
+  initialLeaderboard: LeaderboardResponse<ScoreSaberLeaderboard>;
 
   /**
-   * The initial scores to show.
+   * The initial score data.
    */
-  initialScores?: ScoreSaberLeaderboardScoresPageToken;
-
-  /**
-   * The leaderboard to display.
-   */
-  initialLeaderboard: ScoreSaberLeaderboardToken;
+  initialScores: PlayerScoresResponse<ScoreSaberScore, ScoreSaberLeaderboard>;
 };
 
-export function LeaderboardData({ initialPage, initialScores, initialLeaderboard }: LeaderboardDataProps) {
-  const [beatSaverMap, setBeatSaverMap] = useState<BeatSaverMap | undefined>();
-  const [selectedLeaderboardId, setSelectedLeaderboardId] = useState(initialLeaderboard.id);
+export function LeaderboardData({ initialLeaderboard, initialScores }: LeaderboardDataProps) {
+  const [currentLeaderboardId, setCurrentLeaderboardId] = useState(initialLeaderboard.leaderboard.id);
 
-  let currentLeaderboard = initialLeaderboard;
-  const { data } = useQuery({
-    queryKey: ["leaderboard", selectedLeaderboardId],
-    queryFn: () => scoresaberService.lookupLeaderboard(selectedLeaderboardId + ""),
-    initialData: initialLeaderboard,
+  let leaderboard = initialLeaderboard;
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["leaderboard", currentLeaderboardId],
+    queryFn: async (): Promise<LeaderboardResponse<ScoreSaberLeaderboard> | undefined> => {
+      return fetchLeaderboard<ScoreSaberLeaderboard>("scoresaber", currentLeaderboardId + "");
+    },
+    refetchInterval: REFRESH_INTERVAL,
+    refetchIntervalInBackground: false,
   });
 
-  if (data) {
-    currentLeaderboard = data;
-  }
-
-  const fetchBeatSaverData = useCallback(async () => {
-    const beatSaverMap = await lookupBeatSaverMap(initialLeaderboard.songHash);
-    setBeatSaverMap(beatSaverMap);
-  }, [initialLeaderboard.songHash]);
-
-  useEffect(() => {
-    fetchBeatSaverData();
-  }, [fetchBeatSaverData]);
-
-  if (!currentLeaderboard) {
-    return null;
+  if (data && (!isLoading || !isError)) {
+    leaderboard = data;
   }
 
   return (
     <main className="flex flex-col-reverse xl:flex-row w-full gap-2">
       <LeaderboardScores
-        leaderboard={currentLeaderboard}
+        leaderboard={leaderboard.leaderboard}
         initialScores={initialScores}
-        initialPage={initialPage}
+        leaderboardChanged={newId => setCurrentLeaderboardId(newId)}
         showDifficulties
         isLeaderboardPage
-        leaderboardChanged={id => setSelectedLeaderboardId(id)}
       />
-      <LeaderboardInfo leaderboard={currentLeaderboard} beatSaverMap={beatSaverMap} />
+      <LeaderboardInfo leaderboard={leaderboard.leaderboard} beatSaverMap={leaderboard.beatsaver} />
     </main>
   );
 }

@@ -1,18 +1,18 @@
 "use client";
 
-import BeatSaverMap from "@/common/database/types/beatsaver-map";
 import LeaderboardScores from "@/components/leaderboard/leaderboard-scores";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import ScoreButtons from "./score-buttons";
 import ScoreSongInfo from "./score-info";
 import ScoreRankInfo from "./score-rank-info";
 import ScoreStats from "./score-stats";
 import { motion } from "framer-motion";
-import ScoreSaberPlayer from "@ssr/common/types/player/impl/scoresaber-player";
-import ScoreSaberPlayerScoreToken from "@ssr/common/types/token/scoresaber/score-saber-player-score-token";
-import { lookupBeatSaverMap } from "@/common/beatsaver-utils";
+import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { getPageFromRank } from "@ssr/common/utils/utils";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
+import ScoreSaberScore from "@ssr/common/score/impl/scoresaber-score";
+import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
+import { BeatSaverMap } from "@ssr/common/model/beatsaver/beatsaver-map";
 
 type Props = {
   /**
@@ -21,9 +21,19 @@ type Props = {
   player?: ScoreSaberPlayer;
 
   /**
+   * The leaderboard.
+   */
+  leaderboard: ScoreSaberLeaderboard;
+
+  /**
+   * The beat saver map for this song.
+   */
+  beatSaverMap?: BeatSaverMap;
+
+  /**
    * The score to display.
    */
-  playerScore: ScoreSaberPlayerScoreToken;
+  score: ScoreSaberScore;
 
   /**
    * Score settings
@@ -33,36 +43,18 @@ type Props = {
   };
 };
 
-export default function Score({ player, playerScore, settings }: Props) {
-  const { score, leaderboard } = playerScore;
-  const [baseScore, setBaseScore] = useState<number>(score.baseScore);
-  const [beatSaverMap, setBeatSaverMap] = useState<BeatSaverMap | undefined>();
+export default function Score({ player, leaderboard, beatSaverMap, score, settings }: Props) {
+  const [baseScore, setBaseScore] = useState<number>(score.score);
   const [isLeaderboardExpanded, setIsLeaderboardExpanded] = useState(false);
-
-  const fetchBeatSaverData = useCallback(async () => {
-    // No need to fetch if no buttons
-    if (settings?.noScoreButtons == true) {
-      return;
-    }
-    const beatSaverMapData = await lookupBeatSaverMap(leaderboard.songHash);
-    setBeatSaverMap(beatSaverMapData);
-  }, [leaderboard.songHash, settings?.noScoreButtons]);
 
   /**
    * Set the base score
    */
   useEffect(() => {
-    if (playerScore?.score?.baseScore) {
-      setBaseScore(playerScore.score.baseScore);
+    if (score?.score) {
+      setBaseScore(score.score);
     }
-  }, [playerScore]);
-
-  /**
-   * Fetch the beatSaver data on page load
-   */
-  useEffect(() => {
-    fetchBeatSaverData();
-  }, [fetchBeatSaverData]);
+  }, [score]);
 
   /**
    * Close the leaderboard when the score changes
@@ -72,7 +64,7 @@ export default function Score({ player, playerScore, settings }: Props) {
   }, [score]);
 
   const accuracy = (baseScore / leaderboard.maxScore) * 100;
-  const pp = baseScore === score.baseScore ? score.pp : scoresaberService.getPp(leaderboard.stars, accuracy);
+  const pp = baseScore === score.score ? score.pp : scoresaberService.getPp(leaderboard.stars, accuracy);
 
   // Dynamic grid column classes
   const gridColsClass = settings?.noScoreButtons
@@ -92,14 +84,14 @@ export default function Score({ player, playerScore, settings }: Props) {
             score={score}
             setIsLeaderboardExpanded={setIsLeaderboardExpanded}
             updateScore={score => {
-              setBaseScore(score.baseScore);
+              setBaseScore(score.score);
             }}
           />
         )}
         <ScoreStats
           score={{
             ...score,
-            baseScore,
+            score: baseScore,
             pp: pp ? pp : score.pp,
           }}
           leaderboard={leaderboard}

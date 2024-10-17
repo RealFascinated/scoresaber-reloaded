@@ -1,4 +1,4 @@
-import { PlayerHistory } from "../types/player/player-history";
+import { PlayerHistory } from "../player/player-history";
 import { kyFetch } from "./utils";
 import { Config } from "../config";
 

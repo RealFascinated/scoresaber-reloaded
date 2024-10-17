@@ -10,30 +10,26 @@ import { useIsMobile } from "@/hooks/use-is-mobile";
 import { useIsVisible } from "@/hooks/use-is-visible";
 import { useRef } from "react";
 import PlayerCharts from "@/components/player/chart/player-charts";
-import ScoreSaberPlayer, { getScoreSaberPlayerFromToken } from "@ssr/common/types/player/impl/scoresaber-player";
-import ScoreSaberPlayerScoresPageToken from "@ssr/common/types/token/scoresaber/score-saber-player-scores-page-token";
-import { ScoreSort } from "@ssr/common/types/score/score-sort";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import useDatabase from "@/hooks/use-database";
 import { useLiveQuery } from "dexie-react-hooks";
+import ScoreSaberPlayer, { getScoreSaberPlayerFromToken } from "@ssr/common/player/impl/scoresaber-player";
+import { ScoreSort } from "@ssr/common/score/score-sort";
+import ScoreSaberScore from "@ssr/common/score/impl/scoresaber-score";
+import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
+import PlayerScoresResponse from "../../../../common/src/response/player-scores-response.ts";
 
 const REFRESH_INTERVAL = 1000 * 60 * 5;
 
 type Props = {
   initialPlayerData: ScoreSaberPlayer;
-  initialScoreData?: ScoreSaberPlayerScoresPageToken;
+  initialScoreData?: PlayerScoresResponse<ScoreSaberScore, ScoreSaberLeaderboard>;
   initialSearch?: string;
   sort: ScoreSort;
   page: number;
 };
 
-export default function PlayerData({
-  initialPlayerData: initialPlayerData,
-  initialScoreData,
-  initialSearch,
-  sort,
-  page,
-}: Props) {
+export default function PlayerData({ initialPlayerData, initialScoreData, initialSearch, sort, page }: Props) {
   const isMobile = useIsMobile();
   const miniRankingsRef = useRef<HTMLDivElement>(null);
   const isMiniRankingsVisible = useIsVisible(miniRankingsRef);

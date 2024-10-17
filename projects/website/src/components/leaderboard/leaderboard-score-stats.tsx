@@ -4,8 +4,8 @@ import clsx from "clsx";
 import { getScoreBadgeFromAccuracy } from "@/common/song-utils";
 import Tooltip from "@/components/tooltip";
 import { ScoreBadge, ScoreBadges } from "@/components/score/score-badge";
-import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score-saber-score-token";
-import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/score-saber-leaderboard-token";
+import ScoreSaberScore from "@ssr/common/score/impl/scoresaber-score";
+import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
 
 const badges: ScoreBadge[] = [
   {
@@ -13,7 +13,7 @@ const badges: ScoreBadge[] = [
     color: () => {
       return "bg-pp";
     },
-    create: (score: ScoreSaberScoreToken) => {
+    create: (score: ScoreSaberScore) => {
       const pp = score.pp;
       if (pp === 0) {
         return undefined;
@@ -23,12 +23,12 @@ const badges: ScoreBadge[] = [
   },
   {
     name: "Accuracy",
-    color: (score: ScoreSaberScoreToken, leaderboard: ScoreSaberLeaderboardToken) => {
-      const acc = (score.baseScore / leaderboard.maxScore) * 100;
+    color: (score: ScoreSaberScore, leaderboard: ScoreSaberLeaderboard) => {
+      const acc = (score.score / leaderboard.maxScore) * 100;
       return getScoreBadgeFromAccuracy(acc).color;
     },
-    create: (score: ScoreSaberScoreToken, leaderboard: ScoreSaberLeaderboardToken) => {
-      const acc = (score.baseScore / leaderboard.maxScore) * 100;
+    create: (score: ScoreSaberScore, leaderboard: ScoreSaberLeaderboard) => {
+      const acc = (score.score / leaderboard.maxScore) * 100;
       const scoreBadge = getScoreBadgeFromAccuracy(acc);
       let accDetails = `Accuracy ${scoreBadge.name != "-" ? scoreBadge.name : ""}`;
       if (scoreBadge.max == null) {
@@ -56,12 +56,12 @@ const badges: ScoreBadge[] = [
   },
   {
     name: "Full Combo",
-    create: (score: ScoreSaberScoreToken) => {
-      const fullCombo = score.missedNotes === 0;
+    create: (score: ScoreSaberScore) => {
+      const fullCombo = score.misses === 0;
 
       return (
         <>
-          <p>{fullCombo ? <span className="text-green-400">FC</span> : formatNumberWithCommas(score.missedNotes)}</p>
+          <p>{fullCombo ? <span className="text-green-400">FC</span> : formatNumberWithCommas(score.misses)}</p>
           <XMarkIcon className={clsx("w-5 h-5", fullCombo ? "hidden" : "text-red-400")} />
         </>
       );
@@ -70,8 +70,8 @@ const badges: ScoreBadge[] = [
 ];
 
 type Props = {
-  score: ScoreSaberScoreToken;
-  leaderboard: ScoreSaberLeaderboardToken;
+  score: ScoreSaberScore;
+  leaderboard: ScoreSaberLeaderboard;
 };
 
 export default function LeaderboardScoreStats({ score, leaderboard }: Props) {

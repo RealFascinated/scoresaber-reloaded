@@ -1,4 +1,4 @@
-import { PlayerDocument, PlayerModel } from "../model/player";
+import { PlayerDocument, PlayerModel } from "@ssr/common/model/player";
 import { NotFoundError } from "../error/not-found-error";
 import { getDaysAgoDate, getMidnightAlignedDate } from "@ssr/common/utils/time-utils";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";

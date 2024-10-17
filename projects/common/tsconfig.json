@@ -7,6 +7,8 @@
     "moduleResolution": "node",
     "skipLibCheck": true,
     "allowSyntheticDefaultImports": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
     "strict": true,
     "baseUrl": "./",
     "paths": {

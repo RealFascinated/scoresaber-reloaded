@@ -2,15 +2,15 @@ import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { format } from "@formkit/tempo";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import Tooltip from "../tooltip";
-import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score-saber-score-token";
 import { timeAgo } from "@ssr/common/utils/time-utils";
 import Link from "next/link";
 import { getPageFromRank } from "@ssr/common/utils/utils";
-import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/score-saber-leaderboard-token";
+import ScoreSaberScore from "@ssr/common/score/impl/scoresaber-score";
+import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
 
 type Props = {
-  score: ScoreSaberScoreToken;
-  leaderboard: ScoreSaberLeaderboardToken;
+  score: ScoreSaberScore;
+  leaderboard: ScoreSaberLeaderboard;
 };
 
 export default function ScoreRankInfo({ score, leaderboard }: Props) {
@@ -29,13 +29,13 @@ export default function ScoreRankInfo({ score, leaderboard }: Props) {
         display={
           <p>
             {format({
-              date: new Date(score.timeSet),
+              date: new Date(score.timestamp),
               format: "DD MMMM YYYY HH:mm a",
             })}
           </p>
         }
       >
-        <p className="text-sm cursor-default select-none">{timeAgo(new Date(score.timeSet))}</p>
+        <p className="text-sm cursor-default select-none">{timeAgo(new Date(score.timestamp))}</p>
       </Tooltip>
     </div>
   );

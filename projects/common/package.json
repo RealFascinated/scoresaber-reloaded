@@ -20,6 +20,7 @@
   },
   "dependencies": {
     "ky": "^1.7.2",
-    "ws": "^8.18.0"
+    "ws": "^8.18.0",
+    "@typegoose/typegoose": "^12.8.0"
   }
 }

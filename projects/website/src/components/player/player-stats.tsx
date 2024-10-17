@@ -1,6 +1,6 @@
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import StatValue from "@/components/stat-value";
-import ScoreSaberPlayer from "@ssr/common/types/player/impl/scoresaber-player";
+import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { formatDate } from "@ssr/common/utils/time-utils";
 import { ReactNode } from "react";
 import Tooltip from "@/components/tooltip";

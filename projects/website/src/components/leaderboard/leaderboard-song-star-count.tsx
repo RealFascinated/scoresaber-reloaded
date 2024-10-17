@@ -1,13 +1,12 @@
 import { songDifficultyToColor } from "@/common/song-utils";
 import { StarIcon } from "@heroicons/react/24/solid";
-import { getDifficultyFromScoreSaberDifficulty } from "@ssr/common/utils/scoresaber-utils";
-import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/score-saber-leaderboard-token";
+import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
 
 type LeaderboardSongStarCountProps = {
   /**
    * The leaderboard for the song
    */
-  leaderboard: ScoreSaberLeaderboardToken;
+  leaderboard: ScoreSaberLeaderboard;
 };
 
 export function LeaderboardSongStarCount({ leaderboard }: LeaderboardSongStarCountProps) {
@@ -15,12 +14,11 @@ export function LeaderboardSongStarCount({ leaderboard }: LeaderboardSongStarCou
     return null;
   }
 
-  const diff = getDifficultyFromScoreSaberDifficulty(leaderboard.difficulty.difficulty);
   return (
     <div
       className="w-fit h-[20px] rounded-sm flex justify-center items-center text-xs cursor-default"
       style={{
-        backgroundColor: songDifficultyToColor(diff) + "f0", // Transparency value (in hex 0-255)
+        backgroundColor: songDifficultyToColor(leaderboard.difficulty.difficultyRaw) + "f0", // Transparency value (in hex 0-255)
       }}
     >
       <div className="flex gap-1 items-center justify-center p-1">

@@ -4,7 +4,7 @@ import { formatNumberWithCommas, isWholeNumber } from "@ssr/common/utils/number-
 import React from "react";
 import { DatasetConfig } from "@/components/chart/generic-chart";
 import GenericPlayerChart from "@/components/player/chart/generic-player-chart";
-import ScoreSaberPlayer from "@ssr/common/types/player/impl/scoresaber-player";
+import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 
 type Props = {
   player: ScoreSaberPlayer;

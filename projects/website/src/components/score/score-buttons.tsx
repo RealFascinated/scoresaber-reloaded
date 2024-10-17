@@ -1,6 +1,5 @@
 "use client";
 
-import BeatSaverMap from "@/common/database/types/beatsaver-map";
 import { songNameToYouTubeLink } from "@/common/youtube-utils";
 import BeatSaverLogo from "@/components/logos/beatsaver-logo";
 import YouTubeLogo from "@/components/logos/youtube-logo";
@@ -8,19 +7,20 @@ import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import ScoreButton from "./score-button";
 import { copyToClipboard } from "@/common/browser-utils";
-import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/score-saber-leaderboard-token";
 import { ArrowDownIcon } from "@heroicons/react/24/solid";
 import clsx from "clsx";
 import ScoreEditorButton from "@/components/score/score-editor-button";
-import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score-saber-score-token";
+import ScoreSaberScore from "@ssr/common/score/impl/scoresaber-score";
+import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
+import { BeatSaverMap } from "@ssr/common/model/beatsaver/beatsaver-map";
 
 type Props = {
-  score?: ScoreSaberScoreToken;
-  leaderboard: ScoreSaberLeaderboardToken;
+  score?: ScoreSaberScore;
+  leaderboard: ScoreSaberLeaderboard;
   beatSaverMap?: BeatSaverMap;
   alwaysSingleLine?: boolean;
   setIsLeaderboardExpanded?: (isExpanded: boolean) => void;
-  updateScore?: (score: ScoreSaberScoreToken) => void;
+  updateScore?: (score: ScoreSaberScore) => void;
 };
 
 export default function ScoreButtons({
@@ -35,7 +35,7 @@ export default function ScoreButtons({
   const { toast } = useToast();
 
   return (
-    <div className="flex justify-end gap-2 h-[64px]">
+    <div className={`flex justify-end gap-2 h-[${alwaysSingleLine ? "32" : "64"}px]`}>
       <div
         className={`flex ${alwaysSingleLine ? "flex-nowrap" : "flex-wrap"} items-center lg:items-start justify-center lg:justify-end gap-1`}
       >
@@ -90,7 +90,7 @@ export default function ScoreButtons({
 
         {/* View Leaderboard button */}
         {leaderboardExpanded != undefined && setIsLeaderboardExpanded != undefined && (
-          <div className="pr-2 flex items-center justify-center cursor-default">
+          <div className="flex items-center justify-center cursor-default">
             <ArrowDownIcon
               className={clsx(
                 "w-6 h-6 transition-all transform-gpu cursor-pointer",

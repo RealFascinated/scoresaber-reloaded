@@ -1,5 +1,4 @@
 import Dexie, { EntityTable } from "dexie";
-import BeatSaverMap from "./types/beatsaver-map";
 import Settings from "./types/settings";
 import { Friend } from "@/common/database/types/friends";
 import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/score-saber-player-token";
@@ -14,11 +13,6 @@ export default class Database extends Dexie {
    * The settings for the website.
    */
   settings!: EntityTable<Settings, "id">;
-
-  /**
-   * Cached BeatSaver maps
-   */
-  beatSaverMaps!: EntityTable<BeatSaverMap, "hash">;
 
   /**
    * The added friends
@@ -37,7 +31,6 @@ export default class Database extends Dexie {
 
     // Mapped tables
     this.settings.mapToClass(Settings);
-    this.beatSaverMaps.mapToClass(BeatSaverMap);
 
     // Populate default settings if the table is empty
     this.on("populate", () => this.populateDefaults());

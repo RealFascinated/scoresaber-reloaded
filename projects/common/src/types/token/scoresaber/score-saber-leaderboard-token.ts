@@ -19,8 +19,8 @@ export default interface ScoreSaberLeaderboardToken {
   maxPP: number;
   stars: number;
   positiveModifiers: boolean;
-  plays: boolean;
-  dailyPlays: boolean;
+  plays: number;
+  dailyPlays: number;
   coverImage: string;
   difficulties: ScoreSaberDifficultyToken[];
 }

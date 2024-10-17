@@ -1,8 +1,8 @@
 import { Controller, Get } from "elysia-decorators";
 import { PlayerService } from "../service/player.service";
 import { t } from "elysia";
-import { PlayerHistory } from "@ssr/common/types/player/player-history";
-import { PlayerTrackedSince } from "@ssr/common/types/player/player-tracked-since";
+import { PlayerHistory } from "@ssr/common/player/player-history";
+import { PlayerTrackedSince } from "@ssr/common/player/player-tracked-since";
 
 @Controller("/player")
 export default class PlayerController {

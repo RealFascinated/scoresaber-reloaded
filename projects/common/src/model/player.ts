@@ -1,7 +1,7 @@
 import { getModelForClass, modelOptions, prop, ReturnModelType, Severity } from "@typegoose/typegoose";
 import { Document } from "mongoose";
-import { PlayerHistory } from "@ssr/common/types/player/player-history";
-import { formatDateMinimal, getDaysAgoDate, getMidnightAlignedDate } from "@ssr/common/utils/time-utils";
+import { PlayerHistory } from "../player/player-history";
+import { formatDateMinimal, getDaysAgoDate, getMidnightAlignedDate } from "../utils/time-utils";
 
 /**
  * The model for a player.
@@ -109,8 +109,5 @@ export class Player {
   }
 }
 
-// This type defines a Mongoose document based on Player.
 export type PlayerDocument = Player & Document;
-
-// This type ensures that PlayerModel returns Mongoose documents (PlayerDocument) that have Mongoose methods (save, remove, etc.)
 export const PlayerModel: ReturnModelType<typeof Player> = getModelForClass(Player);

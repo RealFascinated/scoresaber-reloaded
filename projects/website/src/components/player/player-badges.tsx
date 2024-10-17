@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Tooltip from "@/components/tooltip";
-import ScoreSaberPlayer from "@ssr/common/types/player/impl/scoresaber-player";
+import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 
 type Props = {
   player: ScoreSaberPlayer;

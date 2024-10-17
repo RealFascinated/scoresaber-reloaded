@@ -1,4 +1,4 @@
-import { PlayerModel } from "../model/player";
+import { PlayerModel } from "@ssr/common/model/player";
 import { AppStatistics } from "@ssr/common/types/backend/app-statistics";
 
 export class AppService {

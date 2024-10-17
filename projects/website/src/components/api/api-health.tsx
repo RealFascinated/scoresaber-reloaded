@@ -36,7 +36,7 @@ export function ApiHealth() {
           ? "The API has recovered connectivity."
           : "The API has lost connectivity, some data may be unavailable.",
         variant: online ? "success" : "destructive",
-        duration: 10_000, // 10 seconds
+        duration: 5_000, // 5 seconds
       });
     }
 

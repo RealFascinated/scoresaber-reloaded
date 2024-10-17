@@ -6,7 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import Tooltip from "../tooltip";
 import { Button } from "../ui/button";
 import { PersonIcon } from "@radix-ui/react-icons";
-import ScoreSaberPlayer from "@ssr/common/types/player/impl/scoresaber-player";
+import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { trackPlayer } from "@ssr/common/utils/player-utils";
 
 type Props = {

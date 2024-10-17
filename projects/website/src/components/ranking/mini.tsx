@@ -7,7 +7,7 @@ import Card from "../card";
 import CountryFlag from "../country-flag";
 import { Avatar, AvatarImage } from "../ui/avatar";
 import { PlayerRankingSkeleton } from "@/components/ranking/player-ranking-skeleton";
-import ScoreSaberPlayer from "@ssr/common/types/player/impl/scoresaber-player";
+import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { ScoreSaberPlayersPageToken } from "@ssr/common/types/token/scoresaber/score-saber-players-page-token";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/score-saber-player-token";

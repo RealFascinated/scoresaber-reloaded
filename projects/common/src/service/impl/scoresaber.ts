@@ -2,7 +2,7 @@ import Service from "../service";
 import { ScoreSaberPlayerSearchToken } from "../../types/token/scoresaber/score-saber-player-search-token";
 import ScoreSaberPlayerToken from "../../types/token/scoresaber/score-saber-player-token";
 import { ScoreSaberPlayersPageToken } from "../../types/token/scoresaber/score-saber-players-page-token";
-import { ScoreSort } from "../../types/score/score-sort";
+import { ScoreSort } from "../../score/score-sort";
 import ScoreSaberPlayerScoresPageToken from "../../types/token/scoresaber/score-saber-player-scores-page-token";
 import ScoreSaberLeaderboardToken from "../../types/token/scoresaber/score-saber-leaderboard-token";
 import ScoreSaberLeaderboardScoresPageToken from "../../types/token/scoresaber/score-saber-leaderboard-scores-page-token";

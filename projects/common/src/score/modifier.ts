@@ -15,4 +15,6 @@ export enum Modifier {
   CS = "Fail on Saber Clash",
   IF = "One Life",
   BE = "Battery Energy",
+  NF = "No Fail",
+  NB = "No Bombs",
 }

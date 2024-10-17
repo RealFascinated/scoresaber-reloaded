@@ -1,9 +1,9 @@
 import LeaderboardPlayer from "./leaderboard-player";
 import LeaderboardScoreStats from "./leaderboard-score-stats";
 import ScoreRankInfo from "@/components/score/score-rank-info";
-import ScoreSaberPlayer from "@ssr/common/types/player/impl/scoresaber-player";
-import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score-saber-score-token";
-import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/score-saber-leaderboard-token";
+import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
+import ScoreSaberScore from "@ssr/common/score/impl/scoresaber-score";
+import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
 
 type Props = {
   /**
@@ -14,12 +14,12 @@ type Props = {
   /**
    * The score to display.
    */
-  score: ScoreSaberScoreToken;
+  score: ScoreSaberScore;
 
   /**
    * The leaderboard to display.
    */
-  leaderboard: ScoreSaberLeaderboardToken;
+  leaderboard: ScoreSaberLeaderboard;
 };
 
 export default function LeaderboardScore({ player, score, leaderboard }: Props) {

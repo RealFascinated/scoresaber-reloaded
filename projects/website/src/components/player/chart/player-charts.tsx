@@ -6,7 +6,7 @@ import Tooltip from "@/components/tooltip";
 import PlayerAccuracyChart from "@/components/player/chart/player-accuracy-chart";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import { TrendingUpIcon } from "lucide-react";
-import ScoreSaberPlayer from "@ssr/common/types/player/impl/scoresaber-player";
+import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 
 type PlayerChartsProps = {
   /**

@@ -14,7 +14,6 @@ import { setLogLevel } from "@typegoose/typegoose";
 import PlayerController from "./controller/player.controller";
 import { PlayerService } from "./service/player.service";
 import { cron } from "@elysiajs/cron";
-import { PlayerDocument, PlayerModel } from "./model/player";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { delay } from "@ssr/common/utils/utils";
 import { connectScoreSaberWebSocket } from "@ssr/common/websocket/scoresaber-websocket";
@@ -22,6 +21,9 @@ import ImageController from "./controller/image.controller";
 import ReplayController from "./controller/replay.controller";
 import { ScoreService } from "./service/score.service";
 import { Config } from "@ssr/common/config";
+import { PlayerDocument, PlayerModel } from "@ssr/common/model/player";
+import ScoresController from "./controller/scores.controller";
+import LeaderboardController from "./controller/leaderboard.controller";
 
 // Load .env file
 dotenv.config({
@@ -159,7 +161,14 @@ app.use(
  */
 app.use(
   decorators({
-    controllers: [AppController, PlayerController, ImageController, ReplayController],
+    controllers: [
+      AppController,
+      PlayerController,
+      ImageController,
+      ReplayController,
+      ScoresController,
+      LeaderboardController,
+    ],
   })
 );
 
