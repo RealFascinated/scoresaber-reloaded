@@ -42,8 +42,8 @@ connectScoreSaberWebSocket({
     await PlayerService.trackScore(playerScore);
     await ScoreService.notifyNumberOne(playerScore);
   },
-  onDisconnect: error => {
-    logToChannel(
+  onDisconnect: async error => {
+    await logToChannel(
       DiscordChannels.backendLogs,
       new EmbedBuilder().setDescription(`ScoreSaber websocket disconnected: ${error}`)
     );

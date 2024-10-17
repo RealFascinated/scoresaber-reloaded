@@ -43,7 +43,7 @@ export class PlayerService {
 
         // Only notify in production
         if (isProduction()) {
-          logToChannel(
+          await logToChannel(
             DiscordChannels.trackedPlayerLogs,
             new EmbedBuilder()
               .setTitle("New Player Tracked")

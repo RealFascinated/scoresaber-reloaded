@@ -45,7 +45,7 @@ export class ScoreService {
       return;
     }
 
-    logToChannel(
+    await logToChannel(
       DiscordChannels.numberOneFeed,
       new EmbedBuilder()
         .setTitle(`${player.name} set a #1 on ${leaderboard.songName} ${leaderboard.songSubName}`)

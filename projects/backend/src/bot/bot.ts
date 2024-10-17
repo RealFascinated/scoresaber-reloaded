@@ -40,8 +40,8 @@ export function initDiscordBot() {
  * @param channelId the channel id to log to
  * @param message the message to log
  */
-export function logToChannel(channelId: DiscordChannels, message: EmbedBuilder) {
-  const channel = DiscordBot.channels.cache.find(c => c.id === channelId);
+export async function logToChannel(channelId: DiscordChannels, message: EmbedBuilder) {
+  const channel = await DiscordBot.channels.fetch(channelId);
   if (channel == undefined) {
     throw new Error(`Channel "${channelId}" not found`);
   }
