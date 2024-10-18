@@ -2,7 +2,7 @@ import Score from "../score";
 import { Modifier } from "../modifier";
 import ScoreSaberScoreToken from "../../types/token/scoresaber/score-saber-score-token";
 import ScoreSaberLeaderboardPlayerInfoToken from "../../types/token/scoresaber/score-saber-leaderboard-player-info-token";
-import ScoreSaberLeaderboardToken from "@ssr/types/token/scoresaber/score-saber-leaderboard-token";
+import ScoreSaberLeaderboardToken from "../../types/token/scoresaber/score-saber-leaderboard-token";
 
 export default interface ScoreSaberScore extends Score {
   /**
