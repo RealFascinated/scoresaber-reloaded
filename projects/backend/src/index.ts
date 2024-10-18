@@ -3,8 +3,6 @@ import cors from "@elysiajs/cors";
 import { decorators } from "elysia-decorators";
 import { logger } from "@tqman/nice-logger";
 import { swagger } from "@elysiajs/swagger";
-import { rateLimit } from "elysia-rate-limit";
-import { RateLimitError } from "./error/rate-limit-error";
 import { helmet } from "elysia-helmet";
 import { etag } from "@bogeychan/elysia-etag";
 import AppController from "./controller/app.controller";
@@ -130,26 +128,6 @@ app.use(
   logger({
     enabled: true,
     mode: "combined",
-  })
-);
-
-/**
- * Rate limit (100 requests per minute)
- */
-app.use(
-  rateLimit({
-    scoping: "global",
-    duration: 60 * 1000,
-    max: 100,
-    skip: request => {
-      // Skip requests to /
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars,prefer-const
-      let [_, path] = request.url.split("/"); // Get the url parts
-      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-      path === "" || (path === undefined && (path = "/")); // If we're on /, the path is undefined, so we set it to /
-      return path === "/"; // ignore all requests to /
-    },
-    errorResponse: new RateLimitError("Too many requests, please try again later"),
   })
 );
 
