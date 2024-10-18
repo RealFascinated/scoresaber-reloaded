@@ -1,7 +1,7 @@
 import ScoreSaberPlayerScoreToken from "@ssr/common/types/token/scoresaber/score-saber-player-score-token";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import { formatPp } from "@ssr/common/utils/number-utils";
+import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
 import { isProduction } from "@ssr/common/utils/utils";
 import { Metadata } from "@ssr/common/types/metadata";
 import { NotFoundError } from "elysia";
@@ -33,8 +33,14 @@ export class ScoreService {
       return;
     }
 
-    const { score, leaderboard } = playerScore;
-    const player = score.leaderboardPlayerInfo;
+    const { score: scoreToken, leaderboard: leaderboardToken } = playerScore;
+    const score = getScoreSaberScoreFromToken(scoreToken, leaderboardToken);
+    const leaderboard = getScoreSaberLeaderboardFromToken(leaderboardToken);
+    const playerInfo = score.playerInfo;
+    const player = await scoresaberService.lookupPlayer(playerInfo.id);
+    if (!player) {
+      return;
+    }
 
     // Not ranked
     if (leaderboard.stars <= 0) {
@@ -48,15 +54,44 @@ export class ScoreService {
     await logToChannel(
       DiscordChannels.numberOneFeed,
       new EmbedBuilder()
-        .setTitle(`${player.name} set a #1 on ${leaderboard.songName} ${leaderboard.songSubName}`)
+        .setTitle(`${player.name} just set a #1!`)
         .setDescription(
-          `
-        **Player:** https://ssr.fascinated.cc/player/${player.id}
-        **Leaderboard:** https://ssr.fascinated.cc/leaderboard/${leaderboard.id}
-        **PP:** ${formatPp(score.pp)}
-        `
+          `${leaderboard.songName} ${leaderboard.songSubName} (${leaderboard.difficulty.difficulty} ${leaderboard.stars.toFixed(2)}★)`
         )
-        .setThumbnail(leaderboard.coverImage)
+        .addFields([
+          {
+            name: "Accuracy",
+            value: `${score.accuracy.toFixed(2)}%`,
+            inline: true,
+          },
+          {
+            name: "PP",
+            value: formatPp(score.pp),
+            inline: true,
+          },
+          {
+            name: "Player Rank",
+            value: formatNumberWithCommas(player.rank),
+            inline: true,
+          },
+          {
+            name: "Misses",
+            value: formatNumberWithCommas(score.missedNotes),
+            inline: true,
+          },
+          {
+            name: "Bad Cuts",
+            value: formatNumberWithCommas(score.badCuts),
+            inline: true,
+          },
+          {
+            name: "Max Combo",
+            value: formatNumberWithCommas(score.maxCombo),
+            inline: true,
+          },
+        ])
+        .setThumbnail(leaderboard.songArt)
+        .setTimestamp(score.timestamp)
         .setColor("#00ff00")
     );
   }

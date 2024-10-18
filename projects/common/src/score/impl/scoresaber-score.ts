@@ -2,6 +2,7 @@ import Score from "../score";
 import { Modifier } from "../modifier";
 import ScoreSaberScoreToken from "../../types/token/scoresaber/score-saber-score-token";
 import ScoreSaberLeaderboardPlayerInfoToken from "../../types/token/scoresaber/score-saber-leaderboard-player-info-token";
+import ScoreSaberLeaderboardToken from "@ssr/types/token/scoresaber/score-saber-leaderboard-token";
 
 export default interface ScoreSaberScore extends Score {
   /**
@@ -22,6 +23,11 @@ export default interface ScoreSaberScore extends Score {
   readonly weight?: number;
 
   /**
+   * The max combo of the score.
+   */
+  readonly maxCombo: number;
+
+  /**
    * The player who set the score
    */
   readonly playerInfo: ScoreSaberLeaderboardPlayerInfoToken;
@@ -31,8 +37,12 @@ export default interface ScoreSaberScore extends Score {
  * Gets a {@link ScoreSaberScore} from a {@link ScoreSaberScoreToken}.
  *
  * @param token the token to convert
+ * @param leaderboard the leaderboard the score was set on
  */
-export function getScoreSaberScoreFromToken(token: ScoreSaberScoreToken): ScoreSaberScore {
+export function getScoreSaberScoreFromToken(
+  token: ScoreSaberScoreToken,
+  leaderboard?: ScoreSaberLeaderboardToken
+): ScoreSaberScore {
   const modifiers: Modifier[] =
     token.modifiers == undefined || token.modifiers === ""
       ? []
@@ -48,15 +58,18 @@ export function getScoreSaberScoreFromToken(token: ScoreSaberScoreToken): ScoreS
   return {
     leaderboard: "scoresaber",
     score: token.baseScore,
+    accuracy: leaderboard ? token.baseScore / leaderboard.maxScore : Infinity,
     rank: token.rank,
     modifiers: modifiers,
-    misses: token.missedNotes,
+    misses: token.missedNotes + token.badCuts,
+    missedNotes: token.missedNotes,
     badCuts: token.badCuts,
     fullCombo: token.fullCombo,
     timestamp: new Date(token.timeSet),
     id: token.id,
     pp: token.pp,
     weight: token.weight,
+    maxCombo: token.maxCombo,
     playerInfo: token.leaderboardPlayerInfo,
   };
 }

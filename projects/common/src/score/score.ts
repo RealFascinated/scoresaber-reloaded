@@ -14,6 +14,11 @@ export default interface Score {
   readonly score: number;
 
   /**
+   * The accuracy of the score.
+   */
+  readonly accuracy: number;
+
+  /**
    * The rank for the score.
    * @private
    */
@@ -26,10 +31,15 @@ export default interface Score {
   readonly modifiers: Modifier[];
 
   /**
-   * The amount missed notes.
+   * The amount total amount of misses.
    * @private
    */
   readonly misses: number;
+
+  /**
+   * The amount of missed notes.
+   */
+  readonly missedNotes: number;
 
   /**
    * The amount of bad cuts.

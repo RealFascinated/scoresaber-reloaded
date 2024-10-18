@@ -1,11 +1,10 @@
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
 import { getScoreBadgeFromAccuracy } from "@/common/song-utils";
-import { XMarkIcon } from "@heroicons/react/24/solid";
-import clsx from "clsx";
 import Tooltip from "@/components/tooltip";
 import { ScoreBadge, ScoreBadges } from "@/components/score/score-badge";
 import ScoreSaberScore from "@ssr/common/score/impl/scoresaber-score";
 import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
+import FullComboBadge from "@/components/score/badges/full-combo";
 
 const badges: ScoreBadge[] = [
   {
@@ -88,33 +87,7 @@ const badges: ScoreBadge[] = [
   {
     name: "Full Combo",
     create: (score: ScoreSaberScore) => {
-      return (
-        <Tooltip
-          display={
-            <div className="flex flex-col justify-center items-center">
-              {!score.fullCombo ? (
-                <>
-                  <p>Missed Notes: {formatNumberWithCommas(score.misses)}</p>
-                  <p>Bad Cuts: {formatNumberWithCommas(score.badCuts)}</p>
-                </>
-              ) : (
-                <p>Full Combo</p>
-              )}
-            </div>
-          }
-        >
-          <div className="flex gap-1">
-            <p>
-              {score.fullCombo ? (
-                <span className="text-green-400">FC</span>
-              ) : (
-                formatNumberWithCommas(score.misses + score.badCuts)
-              )}
-            </p>
-            <XMarkIcon className={clsx("w-5 h-5", score.fullCombo ? "hidden" : "text-red-400")} />
-          </div>
-        </Tooltip>
-      );
+      return <FullComboBadge score={score} />;
     },
   },
 ];

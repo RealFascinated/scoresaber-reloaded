@@ -1,11 +1,9 @@
-import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
-import { XMarkIcon } from "@heroicons/react/24/solid";
-import clsx from "clsx";
 import { getScoreBadgeFromAccuracy } from "@/common/song-utils";
 import Tooltip from "@/components/tooltip";
 import { ScoreBadge, ScoreBadges } from "@/components/score/score-badge";
 import ScoreSaberScore from "@ssr/common/score/impl/scoresaber-score";
 import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
+import FullComboBadge from "@/components/score/badges/full-combo";
 
 const badges: ScoreBadge[] = [
   {
@@ -57,14 +55,7 @@ const badges: ScoreBadge[] = [
   {
     name: "Full Combo",
     create: (score: ScoreSaberScore) => {
-      const fullCombo = score.misses === 0;
-
-      return (
-        <>
-          <p>{fullCombo ? <span className="text-green-400">FC</span> : formatNumberWithCommas(score.misses)}</p>
-          <XMarkIcon className={clsx("w-5 h-5", fullCombo ? "hidden" : "text-red-400")} />
-        </>
-      );
+      return <FullComboBadge score={score} />;
     },
   },
 ];
