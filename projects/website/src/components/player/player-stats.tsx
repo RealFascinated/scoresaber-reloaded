@@ -93,7 +93,7 @@ export default function PlayerStats({ player }: Props) {
         const stat = <StatValue key={index} color={badge.color} name={badge.name} value={value} />;
 
         return tooltip ? (
-          <Tooltip asChild={false} display={tooltip}>
+          <Tooltip asChild={false} display={tooltip} key={index}>
             {stat}
           </Tooltip>
         ) : (

@@ -33,6 +33,9 @@ export default class BeatSaverService {
             unknownMap: true,
           }
     );
+    if (map.unknownMap) {
+      return undefined;
+    }
     return map.toObject() as BeatSaverMap;
   }
 }
