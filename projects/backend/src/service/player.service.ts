@@ -95,6 +95,11 @@ export class PlayerService {
     let daysAgo = 1; // Start from yesterday
     for (let i = playerRankHistory.length - daysAgo - 1; i >= 0; i--) {
       const rank = playerRankHistory[i];
+      // Skip inactive days
+      if (rank == 999_999) {
+        continue;
+      }
+
       const date = getMidnightAlignedDate(getDaysAgoDate(daysAgo));
       player.setStatisticHistory(date, {
         rank: rank,

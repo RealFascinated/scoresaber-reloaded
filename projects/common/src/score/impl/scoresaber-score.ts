@@ -58,7 +58,7 @@ export function getScoreSaberScoreFromToken(
   return {
     leaderboard: "scoresaber",
     score: token.baseScore,
-    accuracy: leaderboard ? token.baseScore / leaderboard.maxScore : Infinity,
+    accuracy: leaderboard ? (token.baseScore / leaderboard.maxScore) * 100 : Infinity,
     rank: token.rank,
     modifiers: modifiers,
     misses: token.missedNotes + token.badCuts,

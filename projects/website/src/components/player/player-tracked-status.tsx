@@ -34,7 +34,7 @@ export default function PlayerTrackedStatus({ player }: Props) {
         }
         side="bottom"
       >
-        <InformationCircleIcon className="w-6 h-6 text-neutral-200" />
+        <InformationCircleIcon className="w-[22px] h-[22px] text-neutral-200" />
       </Tooltip>
     </div>
   );

@@ -12,6 +12,7 @@ import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import Link from "next/link";
 import { capitalizeFirstLetter } from "@/common/string-utils";
 import AddFriend from "@/components/friend/add-friend";
+import PlayerSteamProfile from "@/components/player/player-steam-profile";
 
 /**
  * Renders the change for a stat.
@@ -176,7 +177,10 @@ export default function PlayerHeader({ player }: Props) {
           <div>
             <div className="flex gap-2 items-center justify-center lg:justify-start">
               <p className="font-bold text-2xl">{player.name}</p>
-              <PlayerTrackedStatus player={player} />
+              <div className="absolute lg:relative top-0 left-0 flex flex-col lg:flex-row gap-2">
+                <PlayerTrackedStatus player={player} />
+                <PlayerSteamProfile player={player} />
+              </div>
             </div>
             <div className="flex flex-col">
               <div>
@@ -203,7 +207,7 @@ export default function PlayerHeader({ player }: Props) {
 
           <PlayerStats player={player} />
 
-          <div className="absolute top-0 right-0 gap-2 flex">
+          <div className="absolute top-0 right-0 gap-2 flex flex-col lg:flex-row">
             <AddFriend player={player} />
             <ClaimProfile playerId={player.id} />
           </div>
