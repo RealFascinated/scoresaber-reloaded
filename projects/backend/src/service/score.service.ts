@@ -20,6 +20,7 @@ import Score from "@ssr/common/score/score";
 import PlayerScoresResponse from "@ssr/common/response/player-scores-response";
 import { DiscordChannels, logToChannel } from "../bot/bot";
 import { EmbedBuilder } from "discord.js";
+import { Config } from "@ssr/common/config";
 
 export class ScoreService {
   /**
@@ -56,7 +57,10 @@ export class ScoreService {
       new EmbedBuilder()
         .setTitle(`${player.name} just set a #1!`)
         .setDescription(
-          `${leaderboard.songName} ${leaderboard.songSubName} (${leaderboard.difficulty.difficulty} ${leaderboard.stars.toFixed(2)}★)`
+          [
+            `${leaderboard.songName} ${leaderboard.songSubName} (${leaderboard.difficulty.difficulty} ${leaderboard.stars.toFixed(2)}★)`,
+            `([Player])(${Config.websiteUrl}/player/${player.id}) ([Leaderboard])(${Config.websiteUrl}/leaderboard/${leaderboard.id})`,
+          ].join("\n")
         )
         .addFields([
           {
