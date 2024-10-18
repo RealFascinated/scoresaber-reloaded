@@ -70,12 +70,12 @@ export class ScoreService {
           },
           {
             name: "PP",
-            value: formatPp(score.pp),
+            value: `${formatPp(score.pp)}pp`,
             inline: true,
           },
           {
             name: "Player Rank",
-            value: formatNumberWithCommas(player.rank),
+            value: `#${formatNumberWithCommas(player.rank)}`,
             inline: true,
           },
           {
