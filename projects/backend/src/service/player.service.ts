@@ -257,7 +257,14 @@ export class PlayerService {
     // Show 3 players above and 1 below the requested player
     const playerPosition = players.findIndex(p => p.id === player.id);
     const start = Math.max(0, playerPosition - 3);
-    const end = Math.min(players.length, playerPosition + 2);
+    let end = Math.min(players.length, playerPosition + 2);
+
+    const playersLength = players.slice(start, end).length;
+
+    // If there is less than 5 players to return, add more players to the end
+    if (playersLength < 5) {
+      end = Math.min(end + 5 - playersLength, players.length);
+    }
 
     return players.slice(start, end);
   }
