@@ -163,16 +163,17 @@ export default function LeaderboardScores({
       </div>
 
       <div className="overflow-x-auto">
-        <table className="table w-full table-auto border-spacing-2 border-none text-left">
+        <table className="table w-full table-auto border-spacing-2 border-none text-left text-sm">
           <thead>
             <tr>
-              <th className="px-4 py-2">Rank</th>
-              <th className="px-4 py-2">Player</th>
-              <th className="px-4 py-2 text-center">Time Set</th>
-              <th className="px-4 py-2 text-center">Score</th>
-              <th className="px-4 py-2 text-center">Accuracy</th>
-              <th className="px-4 py-2 text-center">Misses</th>
-              <th className="px-4 py-2 text-center">PP</th>
+              <th className="px-2 py-1">Rank</th>
+              <th className="px-2 py-1">Player</th>
+              <th className="px-2 py-1 text-center">Time Set</th>
+              <th className="px-2 py-1 text-center">Score</th>
+              <th className="px-2 py-1 text-center">Accuracy</th>
+              <th className="px-2 py-1 text-center">Misses</th>
+              <th className="px-2 py-1 text-center">PP</th>
+              <th className="px-2 py-1 text-center">Modifiers</th>
             </tr>
           </thead>
           <motion.tbody initial="hidden" animate={controls} className="border-none" variants={scoreAnimation}>

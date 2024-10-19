@@ -25,7 +25,7 @@ type TablePlayerProps = {
 
 export function PlayerInfo({ player, highlightedPlayer, hideCountryFlag }: TablePlayerProps) {
   return (
-    <>
+    <div className="flex gap-2 items-center">
       <Avatar className="w-[24px] h-[24px] pointer-events-none">
         <AvatarImage
           alt="Profile Picture"
@@ -33,7 +33,7 @@ export function PlayerInfo({ player, highlightedPlayer, hideCountryFlag }: Table
         />
       </Avatar>
       {!hideCountryFlag && <CountryFlag code={player.country} size={12} />}
-      <Link className="transform-gpu transition-all hover:text-blue-500" href={`/player/${player.id}`}>
+      <Link className="transform-gpu transition-all hover:brightness-50" href={`/player/${player.id}`}>
         <p
           className={player.id == highlightedPlayer?.id ? "font-bold" : ""}
           style={{
@@ -43,6 +43,6 @@ export function PlayerInfo({ player, highlightedPlayer, hideCountryFlag }: Table
           {player.name}
         </p>
       </Link>
-    </>
+    </div>
   );
 }

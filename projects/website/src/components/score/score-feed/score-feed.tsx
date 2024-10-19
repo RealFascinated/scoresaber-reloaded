@@ -47,7 +47,7 @@ export default function ScoreFeed() {
             <p className="text-sm">
               Set by{" "}
               <Link href={`/player/${player.id}`}>
-                <span className="text-pp hover:brightness-75 transition-all transform-gpu">{player.name}</span>
+                <span className="text-pp hover:brightness-50 transition-all transform-gpu">{player.name}</span>
               </Link>
             </p>
             <Score

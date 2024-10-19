@@ -97,7 +97,7 @@ export default function Mini({ type, player, shouldUpdate }: MiniProps) {
             <Link
               key={index}
               href={`/player/${playerRanking.id}`}
-              className="grid gap-2 grid-cols-[auto_1fr_auto] items-center bg-accent px-2 py-1.5 cursor-pointer transform-gpu transition-all hover:brightness-75 first:rounded-t last:rounded-b"
+              className="grid gap-2 grid-cols-[auto_1fr_auto] items-center bg-accent px-2 py-1.5 cursor-pointer transform-gpu transition-all hover:brightness-50 first:rounded-t last:rounded-b"
             >
               <p className="text-gray-400">#{formatNumberWithCommas(rank)}</p>
               <div className="flex gap-2 items-center">

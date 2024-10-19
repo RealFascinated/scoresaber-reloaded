@@ -67,13 +67,13 @@ export default function RankingData({ initialPage, country, initialPageData }: R
         <table className="table w-full table-auto border-spacing-2 border-none text-left">
           <thead>
             <tr>
-              <th className="px-4 py-2">Rank</th>
-              <th className="px-4 py-2">Player</th>
-              <th className="px-4 py-2 text-center">Performance Points</th>
-              <th className="px-4 py-2 text-center">Total Plays</th>
-              <th className="px-4 py-2 text-center">Total Ranked Plays</th>
-              <th className="px-4 py-2 text-center">Avg Ranked Accuracy</th>
-              <th className="px-4 py-2 text-center">Weekly Change</th>
+              <th className="px-2 py-1">Rank</th>
+              <th className="px-2 py-1">Player</th>
+              <th className="px-2 py-1 text-center">Performance Points</th>
+              <th className="px-2 py-1 text-center">Total Plays</th>
+              <th className="px-2 py-1 text-center">Total Ranked Plays</th>
+              <th className="px-2 py-1 text-center">Avg Ranked Accuracy</th>
+              <th className="px-2 py-1 text-center">Weekly Change</th>
             </tr>
           </thead>
           <tbody className="border-none">

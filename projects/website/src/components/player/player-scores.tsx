@@ -199,7 +199,7 @@ export default function PlayerScores({ initialScoreData, initialSearch, player, 
           {searchTerm && ( // Show clear button only if there's a query
             <button
               onClick={clearSearch}
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-300 hover:brightness-75 transform-gpu transition-all cursor-default"
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-300 hover:brightness-50 transform-gpu transition-all cursor-default"
               aria-label="Clear search"
             >
               <XMarkIcon className="w-5 h-5" />

@@ -78,7 +78,7 @@ export default function PlayerCharts({ player }: PlayerChartsProps) {
               >
                 <button
                   onClick={() => setSelectedChart(chart)}
-                  className={`border ${isSelected ? "border-1" : "border-input"} flex items-center justify-center p-[2px] w-[26px] h-[26px] rounded-full hover:brightness-75 transform-gpu transition-all`}
+                  className={`border ${isSelected ? "border-1" : "border-input"} flex items-center justify-center p-[2px] w-[26px] h-[26px] rounded-full hover:brightness-50 transform-gpu transition-all`}
                 >
                   {chart.icon}
                 </button>
