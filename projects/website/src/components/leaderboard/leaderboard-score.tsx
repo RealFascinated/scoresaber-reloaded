@@ -3,9 +3,9 @@ import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils
 import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/score-saber-player-token";
 import { PlayerInfo } from "@/components/player/player-info";
 import { clsx } from "clsx";
-import { Modifier } from "@ssr/common/score/modifier";
 import Tooltip from "@/components/tooltip";
 import { ScoreTimeSet } from "@/components/score/score-time-set";
+import { ScoreModifiers } from "@/components/score/score-modifiers";
 
 type Props = {
   /**
@@ -62,15 +62,12 @@ export default function LeaderboardScore({ score, claimedPlayer }: Props) {
           display={
             <div>
               <p className="font-semibold">Modifiers</p>
-              <p>{score.modifiers.join(", ")}</p>
+              <ScoreModifiers type="full" score={score} />
             </div>
           }
         >
           <p className="cursor-pointer">
-            {Object.entries(Modifier)
-              .filter(mod => score.modifiers.includes(mod[1] as Modifier))
-              .map(mod => mod[0])
-              .join(",")}
+            <ScoreModifiers type="simple" score={score} />
           </p>
         </Tooltip>
       </td>

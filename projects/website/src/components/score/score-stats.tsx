@@ -6,6 +6,7 @@ import ScoreSaberScore from "@ssr/common/score/impl/scoresaber-score";
 import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
 import FullComboBadge from "@/components/score/badges/full-combo";
 import { Modifier } from "@ssr/common/score/modifier";
+import { ScoreModifiers } from "@/components/score/score-modifiers";
 
 const badges: ScoreBadge[] = [
   {
@@ -71,22 +72,14 @@ const badges: ScoreBadge[] = [
                 {modCount > 0 && (
                   <div>
                     <p className="font-semibold">Modifiers</p>
-                    <p>{score.modifiers.join(", ")}</p>
+                    <ScoreModifiers type="full" score={score} />
                   </div>
                 )}
               </div>
             }
           >
             <p className="cursor-default">
-              {acc.toFixed(2)}%
-              {modCount > 0
-                ? ` ${
-                    Object.entries(Modifier)
-                      .filter(mod => score.modifiers.includes(mod[1] as Modifier))
-                      .map(mod => mod[0])
-                      .slice(0, 1)[0]
-                  }`
-                : ""}
+              {acc.toFixed(2)}% {modCount > 0 && <ScoreModifiers type="simple" score={score} />}
             </p>
           </Tooltip>
         </>
