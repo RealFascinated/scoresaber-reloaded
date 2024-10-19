@@ -5,7 +5,7 @@ import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/score-sabe
 import useDatabase from "@/hooks/use-database";
 import { useLiveQuery } from "dexie-react-hooks";
 import { clsx } from "clsx";
-import { TablePlayer } from "@/components/table-player";
+import { PlayerInfo } from "@/components/player/player-info";
 
 type PlayerRankingProps = {
   player: ScoreSaberPlayerToken;
@@ -26,7 +26,7 @@ export function PlayerRanking({ player, isCountry }: PlayerRankingProps) {
         <span className="text-sm">{isCountry && "(#" + formatNumberWithCommas(player.rank) + ")"}</span>
       </td>
       <td className="flex items-center gap-2 px-4 py-2">
-        <TablePlayer player={player} claimedPlayer={claimedPlayer} />
+        <PlayerInfo player={player} claimedPlayer={claimedPlayer} />
       </td>
       <td className="px-4 py-2 text-pp text-center">{formatPp(player.pp)}pp</td>
       <td className="px-4 py-2 text-center">{formatNumberWithCommas(player.scoreStats.totalPlayCount)}</td>

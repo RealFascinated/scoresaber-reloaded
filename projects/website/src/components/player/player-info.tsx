@@ -22,7 +22,7 @@ type TablePlayerProps = {
   hideCountryFlag?: boolean;
 };
 
-export function TablePlayer({ player, claimedPlayer, hideCountryFlag }: TablePlayerProps) {
+export function PlayerInfo({ player, claimedPlayer, hideCountryFlag }: TablePlayerProps) {
   return (
     <>
       <Avatar className="w-[24px] h-[24px] pointer-events-none">

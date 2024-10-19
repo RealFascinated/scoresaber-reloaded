@@ -2,7 +2,7 @@ import ScoreSaberScore from "@ssr/common/score/impl/scoresaber-score";
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
 import { timeAgo } from "@ssr/common/utils/time-utils";
 import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/score-saber-player-token";
-import { TablePlayer } from "@/components/table-player";
+import { PlayerInfo } from "@/components/player/player-info";
 
 type Props = {
   /**
@@ -26,7 +26,7 @@ export default function LeaderboardScore({ score, claimedPlayer }: Props) {
 
       {/* Player */}
       <td className="px-4 py-2 flex gap-2 whitespace-nowrap">
-        <TablePlayer player={scorePlayer} claimedPlayer={claimedPlayer} />
+        <PlayerInfo player={scorePlayer} claimedPlayer={claimedPlayer} />
       </td>
 
       {/* Time Set */}

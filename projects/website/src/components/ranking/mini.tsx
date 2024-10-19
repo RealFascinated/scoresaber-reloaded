@@ -5,12 +5,11 @@ import Link from "next/link";
 import { ReactElement } from "react";
 import Card from "../card";
 import CountryFlag from "../country-flag";
-import { Avatar, AvatarImage } from "../ui/avatar";
 import { PlayerRankingSkeleton } from "@/components/ranking/player-ranking-skeleton";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { getPlayersAroundPlayer } from "@ssr/common/utils/player-utils";
 import { AroundPlayer } from "@ssr/common/types/around-player";
-import { TablePlayer } from "@/components/table-player";
+import { PlayerInfo } from "@/components/player/player-info";
 import useDatabase from "@/hooks/use-database";
 import { useLiveQuery } from "dexie-react-hooks";
 
@@ -102,7 +101,7 @@ export default function Mini({ type, player, shouldUpdate }: MiniProps) {
             >
               <p className="text-gray-400">#{formatNumberWithCommas(rank)}</p>
               <div className="flex gap-2 items-center">
-                <TablePlayer player={playerRanking} claimedPlayer={claimedPlayer} hideCountryFlag />
+                <PlayerInfo player={playerRanking} claimedPlayer={claimedPlayer} hideCountryFlag />
               </div>
               <div className="inline-flex min-w-[11.5em] gap-2 items-center">
                 <p className="text-pp text-right">{formatPp(playerRanking.pp)}pp</p>
