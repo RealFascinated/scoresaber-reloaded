@@ -39,7 +39,11 @@ export default class Service {
    */
   public async fetch<T>(url: string): Promise<T | undefined> {
     try {
-      return await ky.get<T>(this.buildRequestUrl(!isServer(), url)).json();
+      const response = await ky.get<T>(this.buildRequestUrl(!isServer(), url));
+      if (response.headers.has("X-RateLimit-Remaining")) {
+        this.log(`Rate limit remaining: ${response.headers.get("X-RateLimit-Remaining")}`);
+      }
+      return response.json();
     } catch (error) {
       return undefined;
     }
