@@ -25,6 +25,7 @@ type LeaderboardScoresProps = {
   showDifficulties?: boolean;
   isLeaderboardPage?: boolean;
   leaderboardChanged?: (id: number) => void;
+  disableUrlChanging?: boolean;
 };
 
 export default function LeaderboardScores({
@@ -34,6 +35,7 @@ export default function LeaderboardScores({
   showDifficulties,
   isLeaderboardPage,
   leaderboardChanged,
+  disableUrlChanging,
 }: LeaderboardScoresProps) {
   if (!initialPage) {
     initialPage = 1;
@@ -115,9 +117,13 @@ export default function LeaderboardScores({
   }, [currentPage, topOfScoresRef, shouldFetch]);
 
   useEffect(() => {
+    if (disableUrlChanging) {
+      return;
+    }
+
     // Update the URL
     window.history.replaceState(null, "", `/leaderboard/${selectedLeaderboardId}/${currentPage}`);
-  }, [selectedLeaderboardId, currentPage]);
+  }, [selectedLeaderboardId, currentPage, disableUrlChanging]);
 
   if (currentScores === undefined) {
     return undefined;

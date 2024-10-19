@@ -103,7 +103,11 @@ export default function Score({ leaderboard, beatSaverMap, score, settings }: Pr
           animate={{ opacity: 1, y: 0 }}
           className="w-full mt-2"
         >
-          <LeaderboardScores initialPage={getPageFromRank(score.rank, 12)} leaderboard={leaderboard} />
+          <LeaderboardScores
+            initialPage={getPageFromRank(score.rank, 12)}
+            leaderboard={leaderboard}
+            disableUrlChanging
+          />
         </motion.div>
       )}
     </div>
