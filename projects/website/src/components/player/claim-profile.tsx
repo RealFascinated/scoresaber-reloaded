@@ -36,7 +36,12 @@ export default function ClaimProfile({ playerId }: Props) {
     revalidatePath("/player/[...slug]");
   }
 
-  if (settings?.playerId == playerId || settings == undefined) {
+  // Database is not ready
+  if (settings == undefined || database == undefined) {
+    return null;
+  }
+
+  if (settings?.playerId == playerId) {
     return null; // Don't show the claim button if it's the same user.
   }
 

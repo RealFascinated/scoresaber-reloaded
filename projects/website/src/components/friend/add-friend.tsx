@@ -36,6 +36,11 @@ export default function AddFriend({ player }: Props) {
     });
   }
 
+  // Database is not ready
+  if (settings == undefined || database == undefined) {
+    return null;
+  }
+
   // If the player is already a friend, don't show the button
   if (isFriend || settings?.playerId == id) {
     return null;
