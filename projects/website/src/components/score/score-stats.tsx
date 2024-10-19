@@ -57,18 +57,35 @@ const badges: ScoreBadge[] = [
       }
 
       const failed = score.modifiers.includes("No Fail" as Modifier);
+      const modCount = score.modifiers.length;
       return (
         <>
           <Tooltip
             display={
-              <div>
-                <p>{accDetails}</p>
-                {failed && <p className="text-red-500">Failed</p>}
+              <div className="flex flex-col gap-2">
+                <div>
+                  <p>{accDetails}</p>
+                  {failed && <p className="text-red-500">Failed</p>}
+                </div>
+
+                {modCount > 0 && (
+                  <div>
+                    <p className="font-semibold">Modifiers</p>
+                    <p>{score.modifiers.join(", ")}</p>
+                  </div>
+                )}
               </div>
             }
           >
             <p className="cursor-default">
-              {acc.toFixed(2)}% {failed && <span>NF</span>}
+              {acc.toFixed(2)}%
+              {modCount > 0
+                ? ` ${Object.entries(Modifier)
+                    .filter(mod => score.modifiers.includes(mod[1] as Modifier))
+                    .map(mod => mod[0])
+                    .splice(0, Object.entries(Modifier).length - 1)
+                    .join("")}`
+                : ""}
             </p>
           </Tooltip>
         </>

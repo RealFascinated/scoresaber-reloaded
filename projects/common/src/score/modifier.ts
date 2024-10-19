@@ -2,19 +2,18 @@
  * The score modifiers.
  */
 export enum Modifier {
-  DA = "Disappearing Arrows",
+  NF = "No Fail",
+  PM = "Pro Mode",
   FS = "Faster Song",
   SF = "Super Fast Song",
   SS = "Slower Song",
   GN = "Ghost Notes",
-  NA = "No Arrows",
-  NO = "No Obstacles",
+  DA = "Disappearing Arrows",
   SA = "Strict Angles",
   SC = "Small Notes",
-  PM = "Pro Mode",
-  CS = "Fail on Saber Clash",
   IF = "One Life",
+  NO = "No Obstacles",
   BE = "Battery Energy",
-  NF = "No Fail",
   NB = "No Bombs",
+  NA = "No Arrows",
 }
