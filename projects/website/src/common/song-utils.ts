@@ -7,7 +7,7 @@ type Difficulty = {
 type DifficultyName = "Easy" | "Normal" | "Hard" | "Expert" | "Expert+";
 
 const difficulties: Difficulty[] = [
-  { name: "Easy", color: "#59b0f4" },
+  { name: "Easy", color: "#3cb371" },
   { name: "Normal", color: "#59b0f4" },
   { name: "Hard", color: "#FF6347" },
   { name: "Expert", color: "#bf2a42" },
