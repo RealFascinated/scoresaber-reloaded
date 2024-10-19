@@ -1,4 +1,5 @@
 import ky from "ky";
+import { isServer } from "../utils/utils";
 
 export default class Service {
   /**
@@ -38,7 +39,7 @@ export default class Service {
    */
   public async fetch<T>(url: string): Promise<T | undefined> {
     try {
-      return await ky.get<T>(this.buildRequestUrl(true, url)).json();
+      return await ky.get<T>(this.buildRequestUrl(!isServer(), url)).json();
     } catch (error) {
       return undefined;
     }

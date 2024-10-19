@@ -1,5 +1,3 @@
-"use client";
-
 import { FaSteam } from "react-icons/fa";
 import Tooltip from "@/components/tooltip";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
