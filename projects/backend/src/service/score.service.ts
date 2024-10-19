@@ -68,7 +68,7 @@ export class ScoreService {
         .setDescription(
           [
             `${leaderboard.songName} ${leaderboard.songSubName} (${leaderboard.difficulty.difficulty} ${leaderboard.stars.toFixed(2)}★)`,
-            `([Player])(${Config.websiteUrl}/player/${player.id}) ([Leaderboard])(${Config.websiteUrl}/leaderboard/${leaderboard.id})`,
+            `[[Player]](${Config.websiteUrl}/player/${player.id}) [[Leaderboard]](${Config.websiteUrl}/leaderboard/${leaderboard.id})`,
           ].join("\n")
         )
         .addFields([
