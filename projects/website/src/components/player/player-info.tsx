@@ -4,6 +4,7 @@ import Link from "next/link";
 import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/score-saber-player-token";
 import ScoreSaberLeaderboardPlayerInfoToken from "@ssr/common/types/token/scoresaber/score-saber-leaderboard-player-info-token";
 import { getScoreSaberRole } from "@ssr/common/scoresaber.util";
+import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 
 type TablePlayerProps = {
   /**
@@ -12,9 +13,9 @@ type TablePlayerProps = {
   player: ScoreSaberPlayerToken | ScoreSaberLeaderboardPlayerInfoToken;
 
   /**
-   * The claimed player.
+   * The player to highlight.
    */
-  claimedPlayer?: ScoreSaberPlayerToken;
+  highlightedPlayer?: ScoreSaberPlayerToken | ScoreSaberPlayer;
 
   /**
    * Hide the country flag
@@ -22,7 +23,7 @@ type TablePlayerProps = {
   hideCountryFlag?: boolean;
 };
 
-export function PlayerInfo({ player, claimedPlayer, hideCountryFlag }: TablePlayerProps) {
+export function PlayerInfo({ player, highlightedPlayer, hideCountryFlag }: TablePlayerProps) {
   return (
     <>
       <Avatar className="w-[24px] h-[24px] pointer-events-none">
@@ -34,7 +35,7 @@ export function PlayerInfo({ player, claimedPlayer, hideCountryFlag }: TablePlay
       {!hideCountryFlag && <CountryFlag code={player.country} size={12} />}
       <Link className="transform-gpu transition-all hover:text-blue-500" href={`/player/${player.id}`}>
         <p
-          className={player.id == claimedPlayer?.id ? "font-bold" : ""}
+          className={player.id == highlightedPlayer?.id ? "font-bold" : ""}
           style={{
             color: getScoreSaberRole(player)?.color,
           }}

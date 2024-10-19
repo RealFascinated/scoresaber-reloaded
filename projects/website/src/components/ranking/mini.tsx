@@ -40,7 +40,7 @@ type Variants = {
 
 const miniVariants: Variants = {
   Global: {
-    icon: () => <GlobeAmericasIcon className="w-6 h-6" />,
+    icon: () => <GlobeAmericasIcon className="w-5 h-5" />,
   },
   Country: {
     icon: (player: ScoreSaberPlayer) => {
@@ -79,12 +79,12 @@ export default function Mini({ type, player, shouldUpdate }: MiniProps) {
   }
 
   return (
-    <Card className="w-full flex gap-2 sticky select-none">
+    <Card className="w-full flex gap-2 sticky select-none text-sm">
       <div className="flex gap-2">
         {icon}
         <p>{type} Ranking</p>
       </div>
-      <div className="flex flex-col text-sm">
+      <div className="flex flex-col text-xs">
         {response.players.map((playerRanking, index) => {
           const rank = type == "Global" ? playerRanking.rank : playerRanking.countryRank;
           const playerName =
@@ -101,7 +101,7 @@ export default function Mini({ type, player, shouldUpdate }: MiniProps) {
             >
               <p className="text-gray-400">#{formatNumberWithCommas(rank)}</p>
               <div className="flex gap-2 items-center">
-                <PlayerInfo player={playerRanking} claimedPlayer={claimedPlayer} hideCountryFlag />
+                <PlayerInfo player={playerRanking} highlightedPlayer={player} hideCountryFlag />
               </div>
               <div className="inline-flex min-w-[11.5em] gap-2 items-center">
                 <p className="text-pp text-right">{formatPp(playerRanking.pp)}pp</p>

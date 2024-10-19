@@ -26,7 +26,7 @@ export default function LeaderboardScore({ score, claimedPlayer }: Props) {
 
       {/* Player */}
       <td className="px-4 py-2 flex gap-2 whitespace-nowrap">
-        <PlayerInfo player={scorePlayer} claimedPlayer={claimedPlayer} />
+        <PlayerInfo player={scorePlayer} highlightedPlayer={claimedPlayer} />
       </td>
 
       {/* Time Set */}
