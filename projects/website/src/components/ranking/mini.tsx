@@ -10,6 +10,9 @@ import { PlayerRankingSkeleton } from "@/components/ranking/player-ranking-skele
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { getPlayersAroundPlayer } from "@ssr/common/utils/player-utils";
 import { AroundPlayer } from "@ssr/common/types/around-player";
+import { TablePlayer } from "@/components/table-player";
+import useDatabase from "@/hooks/use-database";
+import { useLiveQuery } from "dexie-react-hooks";
 
 const PLAYER_NAME_MAX_LENGTH = 18;
 
@@ -48,6 +51,9 @@ const miniVariants: Variants = {
 };
 
 export default function Mini({ type, player, shouldUpdate }: MiniProps) {
+  const database = useDatabase();
+  const claimedPlayer = useLiveQuery(() => database.getClaimedPlayer());
+
   if (shouldUpdate == undefined) {
     shouldUpdate = true;
   }
@@ -96,10 +102,7 @@ export default function Mini({ type, player, shouldUpdate }: MiniProps) {
             >
               <p className="text-gray-400">#{formatNumberWithCommas(rank)}</p>
               <div className="flex gap-2 items-center">
-                <Avatar className="w-6 h-6 pointer-events-none">
-                  <AvatarImage alt="Profile Picture" src={playerRanking.profilePicture} />
-                </Avatar>
-                <p className={playerRanking.id === player.id ? "text-pp font-semibold" : ""}>{playerName}</p>
+                <TablePlayer player={playerRanking} claimedPlayer={claimedPlayer} hideCountryFlag />
               </div>
               <div className="inline-flex min-w-[11.5em] gap-2 items-center">
                 <p className="text-pp text-right">{formatPp(playerRanking.pp)}pp</p>

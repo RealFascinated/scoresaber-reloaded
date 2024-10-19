@@ -203,7 +203,7 @@ export class PlayerService {
    * @param id the player to get around
    * @param type the type to get around
    */
-  public static async getAround(id: string, type: AroundPlayer): Promise<ScoreSaberPlayerToken[]> {
+  public static async getPlayersAroundPlayer(id: string, type: AroundPlayer): Promise<ScoreSaberPlayerToken[]> {
     const getRank = (player: ScoreSaberPlayerToken, type: AroundPlayer) => {
       switch (type) {
         case "global":

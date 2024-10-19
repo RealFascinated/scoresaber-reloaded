@@ -66,7 +66,7 @@ export default class PlayerController {
     params: { id: string; type: "global" | "country" };
   }): Promise<AroundPlayerResponse> {
     return {
-      players: await PlayerService.getAround(id, type),
+      players: await PlayerService.getPlayersAroundPlayer(id, type),
     };
   }
 }
