@@ -28,10 +28,10 @@ export function delay(ms: number) {
  *
  * @param rank the rank
  * @param itemsPerPage the items per page
- * @returns the page
+ * @returns the page number
  */
 export function getPageFromRank(rank: number, itemsPerPage: number) {
-  return Math.floor(rank / itemsPerPage) + 1;
+  return Math.floor((rank - 1) / itemsPerPage) + 1;
 }
 
 /**

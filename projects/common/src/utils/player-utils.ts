@@ -1,6 +1,8 @@
 import { PlayerHistory } from "../player/player-history";
 import { kyFetch } from "./utils";
 import { Config } from "../config";
+import { AroundPlayer } from "../types/around-player";
+import { AroundPlayerResponse } from "../response/around-player-response";
 
 /**
  * Sorts the player history based on date,
@@ -21,4 +23,14 @@ export function sortPlayerHistory(history: Map<string, PlayerHistory>) {
  */
 export async function trackPlayer(id: string) {
   await kyFetch(`${Config.apiUrl}/player/history/${id}?createIfMissing=true`);
+}
+
+/**
+ * Gets the players around a player.
+ *
+ * @param id the player to get around
+ * @param type the type to get
+ */
+export async function getPlayersAroundPlayer(id: string, type: AroundPlayer) {
+  return await kyFetch<AroundPlayerResponse>(`${Config.apiUrl}/player/around/${id}/${type}`);
 }

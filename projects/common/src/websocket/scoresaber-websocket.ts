@@ -21,7 +21,7 @@ type ScoresaberSocket = {
    *
    * @param error the error that caused the connection to close
    */
-  onDisconnect?: (error?: WebSocket.ErrorEvent) => void;
+  onDisconnect?: (error?: WebSocket.ErrorEvent | WebSocket.CloseEvent) => void;
 };
 
 /**
@@ -46,10 +46,10 @@ export function connectScoreSaberWebSocket({ onMessage, onScore, onDisconnect }:
       onDisconnect && onDisconnect(error);
     };
 
-    websocket.onclose = () => {
+    websocket.onclose = event => {
       console.log("Lost connection to the ScoreSaber WebSocket. Attempting to reconnect...");
 
-      onDisconnect && onDisconnect();
+      onDisconnect && onDisconnect(event);
       setTimeout(connectWs, 5000); // Reconnect after 5 seconds
     };
 

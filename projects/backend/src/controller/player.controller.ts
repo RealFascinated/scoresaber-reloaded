@@ -3,6 +3,7 @@ import { PlayerService } from "../service/player.service";
 import { t } from "elysia";
 import { PlayerHistory } from "@ssr/common/player/player-history";
 import { PlayerTrackedSince } from "@ssr/common/player/player-tracked-since";
+import { AroundPlayerResponse } from "@ssr/common/response/around-player-response";
 
 @Controller("/player")
 export default class PlayerController {
@@ -50,5 +51,22 @@ export default class PlayerController {
         tracked: false,
       };
     }
+  }
+
+  @Get("/around/:id/:type", {
+    config: {},
+    params: t.Object({
+      id: t.String({ required: true }),
+      type: t.String({ required: true }),
+    }),
+  })
+  public async getPlayersAround({
+    params: { id, type },
+  }: {
+    params: { id: string; type: "global" | "country" };
+  }): Promise<AroundPlayerResponse> {
+    return {
+      players: await PlayerService.getAround(id, type),
+    };
   }
 }

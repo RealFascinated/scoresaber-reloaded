@@ -8,10 +8,8 @@ import CountryFlag from "../country-flag";
 import { Avatar, AvatarImage } from "../ui/avatar";
 import { PlayerRankingSkeleton } from "@/components/ranking/player-ranking-skeleton";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import { ScoreSaberPlayersPageToken } from "@ssr/common/types/token/scoresaber/score-saber-players-page-token";
-import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
-import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/score-saber-player-token";
-import { getPageFromRank } from "@ssr/common/utils/utils";
+import { getPlayersAroundPlayer } from "@ssr/common/utils/player-utils";
+import { AroundPlayer } from "@ssr/common/types/around-player";
 
 const PLAYER_NAME_MAX_LENGTH = 18;
 
@@ -34,41 +32,17 @@ type MiniProps = {
 
 type Variants = {
   [key: string]: {
-    itemsPerPage: number;
     icon: (player: ScoreSaberPlayer) => ReactElement;
-    getPage: (player: ScoreSaberPlayer, itemsPerPage: number) => number;
-    getRank: (player: ScoreSaberPlayer) => number;
-    query: (page: number, country: string) => Promise<ScoreSaberPlayersPageToken | undefined>;
   };
 };
 
 const miniVariants: Variants = {
   Global: {
-    itemsPerPage: 50,
     icon: () => <GlobeAmericasIcon className="w-6 h-6" />,
-    getPage: (player: ScoreSaberPlayer, itemsPerPage: number) => {
-      return getPageFromRank(player.rank - 1, itemsPerPage);
-    },
-    getRank: (player: ScoreSaberPlayer) => {
-      return player.rank;
-    },
-    query: (page: number) => {
-      return scoresaberService.lookupPlayers(page);
-    },
   },
   Country: {
-    itemsPerPage: 50,
     icon: (player: ScoreSaberPlayer) => {
       return <CountryFlag code={player.country} size={12} />;
-    },
-    getPage: (player: ScoreSaberPlayer, itemsPerPage: number) => {
-      return getPageFromRank(player.countryRank - 1, itemsPerPage);
-    },
-    getRank: (player: ScoreSaberPlayer) => {
-      return player.countryRank;
-    },
-    query: (page: number, country: string) => {
-      return scoresaberService.lookupPlayersByCountry(page, country);
     },
   },
 };
@@ -80,67 +54,23 @@ export default function Mini({ type, player, shouldUpdate }: MiniProps) {
 
   const variant = miniVariants[type];
   const icon = variant.icon(player);
-  const itemsPerPage = variant.itemsPerPage;
 
-  // Calculate the page and the rank of the player within that page
-  const page = variant.getPage(player, itemsPerPage);
-  const rankWithinPage = variant.getRank(player) % itemsPerPage;
-
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ["mini-ranking-" + type, player.id, type, page],
-    queryFn: async () => {
-      const pagesToSearch = [page];
-      if (rankWithinPage < 5 && page > 1) {
-        pagesToSearch.push(page - 1);
-      }
-      if (rankWithinPage > itemsPerPage - 5) {
-        pagesToSearch.push(page + 1);
-      }
-
-      const players: ScoreSaberPlayerToken[] = [];
-      for (const p of pagesToSearch) {
-        const response = await variant.query(p, player.country);
-        if (response) {
-          players.push(...response.players);
-        }
-      }
-
-      // Sort players by rank to ensure correct order
-      return players.sort((a, b) => {
-        // This is the wrong type but it still works.
-        return variant.getRank(a as unknown as ScoreSaberPlayer) - variant.getRank(b as unknown as ScoreSaberPlayer);
-      });
-    },
+  const {
+    data: response,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["mini-ranking-" + type, player.id, type],
+    queryFn: () => getPlayersAroundPlayer(player.id, type.toLowerCase() as AroundPlayer),
     enabled: shouldUpdate,
   });
 
-  if (isLoading || !data) {
+  if (isLoading || !response) {
     return <PlayerRankingSkeleton />;
   }
 
   if (isError) {
     return <p className="text-red-500">Error loading ranking</p>;
-  }
-
-  let players = data;
-  const playerPosition = players.findIndex(p => p.id === player.id);
-
-  // Always show 5 players: 3 above and 1 below the player
-  const start = Math.max(0, playerPosition - 3);
-  const end = Math.min(players.length, start + 5);
-
-  players = players.slice(start, end);
-
-  // If fewer than 5 players, append/prepend more
-  if (players.length < 5) {
-    const missingPlayers = 5 - players.length;
-    if (start === 0) {
-      const additionalPlayers = players.slice(playerPosition + 1, playerPosition + 1 + missingPlayers);
-      players = [...players, ...additionalPlayers];
-    } else if (end === players.length) {
-      const additionalPlayers = players.slice(Math.max(0, start - missingPlayers), start);
-      players = [...additionalPlayers, ...players];
-    }
   }
 
   return (
@@ -150,7 +80,7 @@ export default function Mini({ type, player, shouldUpdate }: MiniProps) {
         <p>{type} Ranking</p>
       </div>
       <div className="flex flex-col text-sm">
-        {players.map((playerRanking, index) => {
+        {response.players.map((playerRanking, index) => {
           const rank = type == "Global" ? playerRanking.rank : playerRanking.countryRank;
           const playerName =
             playerRanking.name.length > PLAYER_NAME_MAX_LENGTH

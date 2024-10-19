@@ -5,12 +5,11 @@ import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/score-saber-player-token";
 import { InternalServerError } from "../error/internal-server-error";
 import ScoreSaberPlayerScoreToken from "@ssr/common/types/token/scoresaber/score-saber-player-score-token";
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
 import { formatPp } from "@ssr/common/utils/number-utils";
-import { isProduction } from "@ssr/common/utils/utils";
+import { getPageFromRank, isProduction } from "@ssr/common/utils/utils";
 import { DiscordChannels, logToChannel } from "../bot/bot";
 import { EmbedBuilder } from "discord.js";
+import { AroundPlayer } from "@ssr/common/types/around-player";
 
 export class PlayerService {
   /**
@@ -196,5 +195,70 @@ export class PlayerService {
     console.log(
       `Updated scores set statistic for "${playerName}"(${playerId}), scores today: ${scores.rankedScores} ranked, ${scores.unrankedScores} unranked`
     );
+  }
+
+  /**
+   * Gets the players around a player.
+   *
+   * @param id the player to get around
+   * @param type the type to get around
+   */
+  public static async getAround(id: string, type: AroundPlayer): Promise<ScoreSaberPlayerToken[]> {
+    const getRank = (player: ScoreSaberPlayerToken, type: AroundPlayer) => {
+      switch (type) {
+        case "global":
+          return player.rank;
+        case "country":
+          return player.countryRank;
+      }
+    };
+
+    const itemsPerPage = 50;
+    const player = await scoresaberService.lookupPlayer(id, true);
+    if (player == undefined) {
+      throw new NotFoundError(`Player "${id}" not found`);
+    }
+    const rank = getRank(player, type);
+    const rankWithinPage = rank % itemsPerPage;
+
+    const pagesToSearch = [getPageFromRank(rank, itemsPerPage)];
+    if (rankWithinPage > 0) {
+      pagesToSearch.push(getPageFromRank(rank - 1, itemsPerPage));
+    } else if (rankWithinPage < itemsPerPage - 1) {
+      pagesToSearch.push(getPageFromRank(rank + 1, itemsPerPage));
+    }
+
+    const rankings: Map<string, ScoreSaberPlayerToken> = new Map();
+    for (const page of pagesToSearch) {
+      const response =
+        type == "global"
+          ? await scoresaberService.lookupPlayers(page)
+          : await scoresaberService.lookupPlayersByCountry(page, player.country);
+      if (response == undefined) {
+        continue;
+      }
+
+      for (const player of response.players) {
+        if (rankings.has(player.id)) {
+          continue;
+        }
+
+        rankings.set(player.id, player);
+      }
+    }
+
+    const players = rankings
+      .values()
+      .toArray()
+      .sort((a, b) => {
+        return getRank(a, type) - getRank(b, type);
+      });
+
+    // Show 3 players above and 1 below the requested player
+    const playerPosition = players.findIndex(p => p.id === player.id);
+    const start = Math.max(0, playerPosition - 3);
+    const end = Math.min(players.length, playerPosition + 2);
+
+    return players.slice(start, end);
   }
 }

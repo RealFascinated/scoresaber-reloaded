@@ -43,7 +43,7 @@ connectScoreSaberWebSocket({
   onDisconnect: async error => {
     await logToChannel(
       DiscordChannels.backendLogs,
-      new EmbedBuilder().setDescription(`ScoreSaber websocket disconnected: ${error}`)
+      new EmbedBuilder().setDescription(`ScoreSaber websocket disconnected: ${error?.message}`)
     );
   },
 });
