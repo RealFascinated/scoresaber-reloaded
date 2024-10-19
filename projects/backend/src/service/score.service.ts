@@ -46,10 +46,6 @@ export class ScoreService {
     const score = getScoreSaberScoreFromToken(scoreToken, leaderboardToken);
     const leaderboard = getScoreSaberLeaderboardFromToken(leaderboardToken);
     const playerInfo = score.playerInfo;
-    const player = await scoresaberService.lookupPlayer(playerInfo.id);
-    if (!player) {
-      return;
-    }
 
     // Not ranked
     if (leaderboard.stars <= 0) {
@@ -57,6 +53,11 @@ export class ScoreService {
     }
     // Not #1 rank
     if (score.rank !== 1) {
+      return;
+    }
+
+    const player = await scoresaberService.lookupPlayer(playerInfo.id);
+    if (!player) {
       return;
     }
 
