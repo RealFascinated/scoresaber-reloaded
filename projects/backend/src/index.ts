@@ -24,6 +24,7 @@ import ScoresController from "./controller/scores.controller";
 import LeaderboardController from "./controller/leaderboard.controller";
 import { DiscordChannels, initDiscordBot, logToChannel } from "./bot/bot";
 import { EmbedBuilder } from "discord.js";
+import { getAppVersion } from "./common/app.util";
 
 // Load .env file
 dotenv.config({
@@ -163,7 +164,12 @@ app.use(
  */
 app.use(
   swagger({
-    path: isProduction() ? "/api/swagger" : "/swagger",
+    documentation: {
+      info: {
+        title: "ScoreSaber Reloaded Documentation",
+        version: await getAppVersion(),
+      },
+    },
   })
 );
 

@@ -24,3 +24,29 @@ spec:
           port: 8080
   tls:
     secretName: fascinated-cc
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: scoresaber-reloaded-backend-swagger-ingress
+  namespace: public-services
+  annotations:
+    kubernetes.io/ingress.class: traefik-external
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`ssr.fascinated.cc`) && PathPrefix(`/swagger`)
+      kind: Rule
+      middlewares:
+        - name: default-headers
+          namespace: traefik
+        - name: compress
+          namespace: traefik
+        - name: scoresaber-reloaded-backend-strip-swagger-prefix
+          namespace: public-services
+      services:
+        - name: scoresaber-reloaded-backend-service
+          port: 8080
+  tls:
+    secretName: fascinated-cc

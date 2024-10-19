@@ -1,0 +1,10 @@
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: scoresaber-reloaded-backend-strip-swagger-prefix
+  namespace: public-services
+spec:
+  stripPrefix:
+    prefixes:
+      - "/swagger"
