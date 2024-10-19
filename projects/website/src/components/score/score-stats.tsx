@@ -80,11 +80,12 @@ const badges: ScoreBadge[] = [
             <p className="cursor-default">
               {acc.toFixed(2)}%
               {modCount > 0
-                ? ` ${Object.entries(Modifier)
-                    .filter(mod => score.modifiers.includes(mod[1] as Modifier))
-                    .map(mod => mod[0])
-                    .splice(0, Object.entries(Modifier).length - 1)
-                    .join("")}`
+                ? ` ${
+                    Object.entries(Modifier)
+                      .filter(mod => score.modifiers.includes(mod[1] as Modifier))
+                      .map(mod => mod[0])
+                      .slice(0, 1)[0]
+                  }`
                 : ""}
             </p>
           </Tooltip>

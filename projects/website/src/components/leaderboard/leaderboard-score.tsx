@@ -70,8 +70,7 @@ export default function LeaderboardScore({ score, claimedPlayer }: Props) {
             {Object.entries(Modifier)
               .filter(mod => score.modifiers.includes(mod[1] as Modifier))
               .map(mod => mod[0])
-              .splice(0, Object.entries(Modifier).length - 1)
-              .join("")}
+              .join(",")}
           </p>
         </Tooltip>
       </td>
