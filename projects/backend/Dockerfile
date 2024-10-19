@@ -27,4 +27,8 @@ COPY --from=depends /app/projects/backend ./projects/backend
 # Lint before starting
 RUN bun --filter 'backend' lint
 
+ARG PORT=8080
+ENV PORT $PORT
+EXPOSE $PORT
+
 CMD ["bun", "run", "--filter", "backend", "start"]
