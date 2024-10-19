@@ -3,7 +3,6 @@ import { redirect } from "next/navigation";
 import { Colors } from "@/common/colors";
 import { getAverageColor } from "@/common/image-utils";
 import { LeaderboardData } from "@/components/leaderboard/leaderboard-data";
-import NodeCache from "node-cache";
 import { Config } from "@ssr/common/config";
 import ScoreSaberScore from "@ssr/common/score/impl/scoresaber-score";
 import { LeaderboardResponse } from "@ssr/common/response/leaderboard-response";
@@ -11,6 +10,7 @@ import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leade
 import { fetchLeaderboard } from "@ssr/common/utils/leaderboard.util";
 import { fetchLeaderboardScores } from "@ssr/common/utils/score-utils";
 import LeaderboardScoresResponse from "@ssr/common/response/leaderboard-scores-response";
+import { SSRCache } from "@ssr/common/cache";
 
 const UNKNOWN_LEADERBOARD = {
   title: "ScoreSaber Reloaded - Unknown Leaderboard",
@@ -32,7 +32,9 @@ type LeaderboardData = {
   page: number;
 };
 
-const leaderboardCache = new NodeCache({ stdTTL: 60, checkperiod: 120 });
+const leaderboardCache = new SSRCache({
+  ttl: 1000 * 60, // 1 minute
+});
 
 /**
  * Gets the leaderboard data and scores

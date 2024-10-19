@@ -5,14 +5,17 @@ import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils
 import { getDifficultyFromScoreSaberDifficulty } from "@ssr/common/utils/scoresaber-utils";
 import { StarIcon } from "../../components/star-icon";
 import { GlobeIcon } from "../../components/globe-icon";
-import NodeCache from "node-cache";
 import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/score-saber-leaderboard-token";
 import ScoreSaberPlayer, { getScoreSaberPlayerFromToken } from "@ssr/common/player/impl/scoresaber-player";
 import { Jimp } from "jimp";
 import { extractColors } from "extract-colors";
 import { Config } from "@ssr/common/config";
+import { fetchWithCache } from "../common/cache.util";
+import { SSRCache } from "@ssr/common/cache";
 
-const cache = new NodeCache({ stdTTL: 60 * 60, checkperiod: 120 });
+const cache = new SSRCache({
+  ttl: 1000 * 60 * 60, // 1 hour
+});
 const imageOptions = { width: 1200, height: 630 };
 
 export class ImageService {
@@ -26,7 +29,7 @@ export class ImageService {
   public static async getAverageImageColor(src: string): Promise<{ color: string } | undefined> {
     src = decodeURIComponent(src);
 
-    return await this.fetchWithCache<{ color: string }>(`average_color-${src}`, async () => {
+    return await fetchWithCache<{ color: string }>(cache, `average_color-${src}`, async () => {
       try {
         const image = await Jimp.read(src); // Load image using Jimp
         const { width, height, data } = image.bitmap; // Access image dimensions and pixel data
@@ -52,28 +55,6 @@ export class ImageService {
         };
       }
     });
-  }
-
-  /**
-   * Fetches data with caching.
-   *
-   * @param cacheKey The key used for caching.
-   * @param fetchFn The function to fetch data if it's not in cache.
-   */
-  private static async fetchWithCache<T>(
-    cacheKey: string,
-    fetchFn: () => Promise<T | undefined>
-  ): Promise<T | undefined> {
-    if (cache.has(cacheKey)) {
-      return cache.get<T>(cacheKey);
-    }
-
-    const data = await fetchFn();
-    if (data) {
-      cache.set(cacheKey, data);
-    }
-
-    return data;
   }
 
   /**
@@ -120,7 +101,7 @@ export class ImageService {
    * @param id the player's id
    */
   public static async generatePlayerImage(id: string) {
-    const player = await this.fetchWithCache<ScoreSaberPlayer>(`player-${id}`, async () => {
+    const player = await fetchWithCache<ScoreSaberPlayer>(cache, `player-${id}`, async () => {
       const token = await scoresaberService.lookupPlayer(id);
       return token ? await getScoreSaberPlayerFromToken(token, Config.apiUrl) : undefined;
     });
@@ -194,7 +175,7 @@ export class ImageService {
    * @param id the leaderboard's id
    */
   public static async generateLeaderboardImage(id: string) {
-    const leaderboard = await this.fetchWithCache<ScoreSaberLeaderboardToken>(`leaderboard-${id}`, () =>
+    const leaderboard = await fetchWithCache<ScoreSaberLeaderboardToken>(cache, `leaderboard-${id}`, () =>
       scoresaberService.lookupLeaderboard(id)
     );
     if (!leaderboard) {

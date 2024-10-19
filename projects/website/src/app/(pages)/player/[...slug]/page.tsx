@@ -4,7 +4,6 @@ import { redirect } from "next/navigation";
 import { Colors } from "@/common/colors";
 import { getAverageColor } from "@/common/image-utils";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
-import NodeCache from "node-cache";
 import { getCookieValue } from "@ssr/common/utils/cookie-utils";
 import { Config } from "@ssr/common/config";
 import ScoreSaberPlayer, { getScoreSaberPlayerFromToken } from "@ssr/common/player/impl/scoresaber-player";
@@ -13,6 +12,7 @@ import ScoreSaberScore from "@ssr/common/score/impl/scoresaber-score";
 import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
 import { fetchPlayerScores } from "@ssr/common/utils/score-utils";
 import PlayerScoresResponse from "@ssr/common/response/player-scores-response";
+import { SSRCache } from "@ssr/common/cache";
 
 const UNKNOWN_PLAYER = {
   title: "ScoreSaber Reloaded - Unknown Player",
@@ -36,7 +36,9 @@ type PlayerData = {
   search: string;
 };
 
-const playerCache = new NodeCache({ stdTTL: 60, checkperiod: 120 });
+const playerCache = new SSRCache({
+  ttl: 1000 * 60, // 1 minute
+});
 
 /**
  * Gets the player data and scores

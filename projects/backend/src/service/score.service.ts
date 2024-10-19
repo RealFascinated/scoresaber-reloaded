@@ -21,6 +21,16 @@ import PlayerScoresResponse from "@ssr/common/response/player-scores-response";
 import { DiscordChannels, logToChannel } from "../bot/bot";
 import { EmbedBuilder } from "discord.js";
 import { Config } from "@ssr/common/config";
+import { SSRCache } from "@ssr/common/cache";
+import { fetchWithCache } from "../common/cache.util";
+
+const playerScoresCache = new SSRCache({
+  ttl: 1000 * 60, // 1 minute
+});
+
+const leaderboardScoresCache = new SSRCache({
+  ttl: 1000 * 60, // 1 minute
+});
 
 export class ScoreService {
   /**
@@ -116,58 +126,64 @@ export class ScoreService {
     page: number,
     sort: string,
     search?: string
-  ): Promise<PlayerScoresResponse<unknown, unknown>> {
-    const scores: PlayerScore<unknown, unknown>[] | undefined = [];
-    let beatSaverMap: BeatSaverMap | undefined;
-    let metadata: Metadata = new Metadata(0, 0, 0, 0); // Default values
+  ): Promise<PlayerScoresResponse<unknown, unknown> | undefined> {
+    return fetchWithCache(
+      playerScoresCache,
+      `player-scores-${leaderboardName}-${id}-${page}-${sort}-${search}`,
+      async () => {
+        const scores: PlayerScore<unknown, unknown>[] | undefined = [];
+        let beatSaverMap: BeatSaverMap | undefined;
+        let metadata: Metadata = new Metadata(0, 0, 0, 0); // Default values
 
-    switch (leaderboardName) {
-      case "scoresaber": {
-        const leaderboardScores = await scoresaberService.lookupPlayerScores({
-          playerId: id,
-          page: page,
-          sort: sort as ScoreSort,
-          search: search,
-        });
-        if (leaderboardScores == undefined) {
-          break;
+        switch (leaderboardName) {
+          case "scoresaber": {
+            const leaderboardScores = await scoresaberService.lookupPlayerScores({
+              playerId: id,
+              page: page,
+              sort: sort as ScoreSort,
+              search: search,
+            });
+            if (leaderboardScores == undefined) {
+              break;
+            }
+
+            metadata = new Metadata(
+              Math.ceil(leaderboardScores.metadata.total / leaderboardScores.metadata.itemsPerPage),
+              leaderboardScores.metadata.total,
+              leaderboardScores.metadata.page,
+              leaderboardScores.metadata.itemsPerPage
+            );
+
+            for (const token of leaderboardScores.playerScores) {
+              const score = getScoreSaberScoreFromToken(token.score);
+              if (score == undefined) {
+                continue;
+              }
+              const tokenLeaderboard = getScoreSaberLeaderboardFromToken(token.leaderboard);
+              if (tokenLeaderboard == undefined) {
+                continue;
+              }
+              beatSaverMap = await BeatSaverService.getMap(tokenLeaderboard.songHash);
+
+              scores.push({
+                score: score,
+                leaderboard: tokenLeaderboard,
+                beatSaver: beatSaverMap,
+              });
+            }
+            break;
+          }
+          default: {
+            throw new NotFoundError(`Leaderboard "${leaderboardName}" not found`);
+          }
         }
 
-        metadata = new Metadata(
-          Math.ceil(leaderboardScores.metadata.total / leaderboardScores.metadata.itemsPerPage),
-          leaderboardScores.metadata.total,
-          leaderboardScores.metadata.page,
-          leaderboardScores.metadata.itemsPerPage
-        );
-
-        for (const token of leaderboardScores.playerScores) {
-          const score = getScoreSaberScoreFromToken(token.score);
-          if (score == undefined) {
-            continue;
-          }
-          const tokenLeaderboard = getScoreSaberLeaderboardFromToken(token.leaderboard);
-          if (tokenLeaderboard == undefined) {
-            continue;
-          }
-          beatSaverMap = await BeatSaverService.getMap(tokenLeaderboard.songHash);
-
-          scores.push({
-            score: score,
-            leaderboard: tokenLeaderboard,
-            beatSaver: beatSaverMap,
-          });
-        }
-        break;
+        return {
+          scores: scores,
+          metadata: metadata,
+        };
       }
-      default: {
-        throw new NotFoundError(`Leaderboard "${leaderboardName}" not found`);
-      }
-    }
-
-    return {
-      scores: scores,
-      metadata: metadata,
-    };
+    );
   }
 
   /**
@@ -182,52 +198,54 @@ export class ScoreService {
     leaderboardName: Leaderboards,
     id: string,
     page: number
-  ): Promise<LeaderboardScoresResponse<unknown, unknown>> {
-    const scores: Score[] = [];
-    let leaderboard: Leaderboard | undefined;
-    let beatSaverMap: BeatSaverMap | undefined;
-    let metadata: Metadata = new Metadata(0, 0, 0, 0); // Default values
+  ): Promise<LeaderboardScoresResponse<unknown, unknown> | undefined> {
+    return fetchWithCache(leaderboardScoresCache, `leaderboard-scores-${leaderboardName}-${id}-${page}`, async () => {
+      const scores: Score[] = [];
+      let leaderboard: Leaderboard | undefined;
+      let beatSaverMap: BeatSaverMap | undefined;
+      let metadata: Metadata = new Metadata(0, 0, 0, 0); // Default values
 
-    switch (leaderboardName) {
-      case "scoresaber": {
-        const leaderboardResponse = await LeaderboardService.getLeaderboard(leaderboardName, id);
-        if (leaderboardResponse == undefined) {
-          throw new NotFoundError(`Leaderboard "${leaderboardName}" not found`);
-        }
-        leaderboard = leaderboardResponse.leaderboard;
-        beatSaverMap = leaderboardResponse.beatsaver;
+      switch (leaderboardName) {
+        case "scoresaber": {
+          const leaderboardResponse = await LeaderboardService.getLeaderboard(leaderboardName, id);
+          if (leaderboardResponse == undefined) {
+            throw new NotFoundError(`Leaderboard "${leaderboardName}" not found`);
+          }
+          leaderboard = leaderboardResponse.leaderboard;
+          beatSaverMap = leaderboardResponse.beatsaver;
 
-        const leaderboardScores = await scoresaberService.lookupLeaderboardScores(id, page);
-        if (leaderboardScores == undefined) {
+          const leaderboardScores = await scoresaberService.lookupLeaderboardScores(id, page);
+          if (leaderboardScores == undefined) {
+            break;
+          }
+
+          for (const token of leaderboardScores.scores) {
+            const score = getScoreSaberScoreFromToken(token);
+            if (score == undefined) {
+              continue;
+            }
+            scores.push(score);
+          }
+
+          metadata = new Metadata(
+            Math.ceil(leaderboardScores.metadata.total / leaderboardScores.metadata.itemsPerPage),
+            leaderboardScores.metadata.total,
+            leaderboardScores.metadata.page,
+            leaderboardScores.metadata.itemsPerPage
+          );
           break;
         }
-
-        for (const token of leaderboardScores.scores) {
-          const score = getScoreSaberScoreFromToken(token);
-          if (score == undefined) {
-            continue;
-          }
-          scores.push(score);
+        default: {
+          throw new NotFoundError(`Leaderboard "${leaderboardName}" not found`);
         }
-
-        metadata = new Metadata(
-          Math.ceil(leaderboardScores.metadata.total / leaderboardScores.metadata.itemsPerPage),
-          leaderboardScores.metadata.total,
-          leaderboardScores.metadata.page,
-          leaderboardScores.metadata.itemsPerPage
-        );
-        break;
       }
-      default: {
-        throw new NotFoundError(`Leaderboard "${leaderboardName}" not found`);
-      }
-    }
 
-    return {
-      scores: scores,
-      leaderboard: leaderboard,
-      beatSaver: beatSaverMap,
-      metadata: metadata,
-    };
+      return {
+        scores: scores,
+        leaderboard: leaderboard,
+        beatSaver: beatSaverMap,
+        metadata: metadata,
+      };
+    });
   }
 }

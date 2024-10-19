@@ -1,5 +1,5 @@
 import { Controller, Get } from "elysia-decorators";
-import { getAppVersion } from "../common/app-utils";
+import { getAppVersion } from "../common/app.util";
 import { AppService } from "../service/app.service";
 
 @Controller()
