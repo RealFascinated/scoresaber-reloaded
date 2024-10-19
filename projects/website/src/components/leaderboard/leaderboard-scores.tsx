@@ -162,7 +162,7 @@ export default function LeaderboardScores({
           })}
       </div>
 
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto relative">
         <table className="table w-full table-auto border-spacing-2 border-none text-left text-sm">
           <thead>
             <tr>
