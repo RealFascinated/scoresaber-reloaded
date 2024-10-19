@@ -5,6 +5,7 @@ import { ScoreBadge, ScoreBadges } from "@/components/score/score-badge";
 import ScoreSaberScore from "@ssr/common/score/impl/scoresaber-score";
 import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
 import FullComboBadge from "@/components/score/badges/full-combo";
+import { Modifier } from "@ssr/common/score/modifier";
 
 const badges: ScoreBadge[] = [
   {
@@ -55,16 +56,20 @@ const badges: ScoreBadge[] = [
         accDetails += ` (${scoreBadge.min}% - ${scoreBadge.max}%)`;
       }
 
+      const failed = score.modifiers.includes("No Fail" as Modifier);
       return (
         <>
           <Tooltip
             display={
               <div>
                 <p>{accDetails}</p>
+                {failed && <p className="text-red-500">Failed</p>}
               </div>
             }
           >
-            <p className="cursor-default">{acc.toFixed(2)}%</p>
+            <p className="cursor-default">
+              {acc.toFixed(2)}% {failed && <span>NF</span>}
+            </p>
           </Tooltip>
         </>
       );
