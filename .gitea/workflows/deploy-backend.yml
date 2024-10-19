@@ -59,7 +59,6 @@ jobs:
             .gitea/kubernetes/backend/deployment.yaml
             .gitea/kubernetes/backend/service.yaml
             .gitea/kubernetes/backend/strip-api-prefix-middleware.yaml
-            .gitea/kubernetes/backend/strip-swagger-prefix-middleware.yaml
             .gitea/kubernetes/backend/ingress.yaml
           images: |
             git.fascinated.cc/fascinated/scoresaber-reloaded-backend:${{ github.sha }}
