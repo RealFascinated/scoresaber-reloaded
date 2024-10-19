@@ -6,7 +6,7 @@ import ScoreSaberScore from "@ssr/common/score/impl/scoresaber-score";
 import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
 import { LeaderboardResponse } from "@ssr/common/response/leaderboard-response";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { fetchLeaderboard } from "@ssr/common/utils/leaderboard.util";
 import LeaderboardScoresResponse from "@ssr/common/response/leaderboard-scores-response";
 
@@ -22,12 +22,17 @@ type LeaderboardDataProps = {
    * The initial score data.
    */
   initialScores?: LeaderboardScoresResponse<ScoreSaberScore, ScoreSaberLeaderboard>;
+
+  /**
+   * The initial page.
+   */
+  initialPage?: number;
 };
 
-export function LeaderboardData({ initialLeaderboard, initialScores }: LeaderboardDataProps) {
+export function LeaderboardData({ initialLeaderboard, initialScores, initialPage }: LeaderboardDataProps) {
   const [currentLeaderboardId, setCurrentLeaderboardId] = useState(initialLeaderboard.leaderboard.id);
+  const [currentLeaderboard, setCurrentLeaderboard] = useState(initialLeaderboard);
 
-  let leaderboard = initialLeaderboard;
   const { data, isLoading, isError } = useQuery({
     queryKey: ["leaderboard", currentLeaderboardId],
     queryFn: async (): Promise<LeaderboardResponse<ScoreSaberLeaderboard> | undefined> => {
@@ -37,20 +42,23 @@ export function LeaderboardData({ initialLeaderboard, initialScores }: Leaderboa
     refetchIntervalInBackground: false,
   });
 
-  if (data && (!isLoading || !isError)) {
-    leaderboard = data;
-  }
+  useEffect(() => {
+    if (data) {
+      setCurrentLeaderboard(data);
+    }
+  }, [data]);
 
   return (
     <main className="flex flex-col-reverse xl:flex-row w-full gap-2">
       <LeaderboardScores
-        leaderboard={leaderboard.leaderboard}
+        leaderboard={currentLeaderboard.leaderboard}
         initialScores={initialScores}
+        initialPage={initialPage}
         leaderboardChanged={newId => setCurrentLeaderboardId(newId)}
         showDifficulties
         isLeaderboardPage
       />
-      <LeaderboardInfo leaderboard={leaderboard.leaderboard} beatSaverMap={leaderboard.beatsaver} />
+      <LeaderboardInfo leaderboard={currentLeaderboard.leaderboard} beatSaverMap={currentLeaderboard.beatsaver} />
     </main>
   );
 }

@@ -45,10 +45,7 @@ export default class LeaderboardService {
    * @param id the players id
    * @returns the scores
    */
-  public static async getLeaderboard(
-    leaderboardName: Leaderboards,
-    id: string
-  ): Promise<LeaderboardResponse<Leaderboard>> {
+  public static async getLeaderboard<L>(leaderboardName: Leaderboards, id: string): Promise<LeaderboardResponse<L>> {
     let leaderboard: Leaderboard | undefined;
     let beatSaverMap: BeatSaverMap | undefined;
 
@@ -71,7 +68,7 @@ export default class LeaderboardService {
     }
 
     return {
-      leaderboard: leaderboard,
+      leaderboard: leaderboard as L,
       beatsaver: beatSaverMap,
     };
   }

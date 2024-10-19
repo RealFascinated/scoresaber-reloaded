@@ -123,5 +123,11 @@ export default async function LeaderboardPage(props: Props) {
   if (response == undefined) {
     return redirect("/");
   }
-  return <LeaderboardData initialLeaderboard={response.leaderboardResponse} initialScores={response.scores} />;
+  return (
+    <LeaderboardData
+      initialLeaderboard={response.leaderboardResponse}
+      initialScores={response.scores}
+      initialPage={response.page}
+    />
+  );
 }

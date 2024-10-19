@@ -72,6 +72,17 @@ export default class Database extends Dexie {
   }
 
   /**
+   * Gets the claimed player's scoresaber token
+   */
+  async getClaimedPlayer(): Promise<ScoreSaberPlayerToken | undefined> {
+    const settings = await this.getSettings();
+    if (settings == undefined || settings.playerId == undefined) {
+      return;
+    }
+    return scoresaberService.lookupPlayer(settings.playerId, true);
+  }
+
+  /**
    * Adds a friend
    *
    * @param id the id of the friend

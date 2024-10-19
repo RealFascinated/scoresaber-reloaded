@@ -3,6 +3,7 @@ import { Modifier } from "../modifier";
 import ScoreSaberScoreToken from "../../types/token/scoresaber/score-saber-score-token";
 import ScoreSaberLeaderboardPlayerInfoToken from "../../types/token/scoresaber/score-saber-leaderboard-player-info-token";
 import ScoreSaberLeaderboardToken from "../../types/token/scoresaber/score-saber-leaderboard-token";
+import ScoreSaberLeaderboard from "../../leaderboard/impl/scoresaber-leaderboard";
 
 export default interface ScoreSaberScore extends Score {
   /**
@@ -41,7 +42,7 @@ export default interface ScoreSaberScore extends Score {
  */
 export function getScoreSaberScoreFromToken(
   token: ScoreSaberScoreToken,
-  leaderboard?: ScoreSaberLeaderboardToken
+  leaderboard?: ScoreSaberLeaderboardToken | ScoreSaberLeaderboard
 ): ScoreSaberScore {
   const modifiers: Modifier[] =
     token.modifiers == undefined || token.modifiers === ""

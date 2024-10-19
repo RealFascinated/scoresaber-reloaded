@@ -4,7 +4,9 @@ import { isProduction } from "@ssr/common/utils/utils";
 import { Metadata } from "@ssr/common/types/metadata";
 import { NotFoundError } from "elysia";
 import BeatSaverService from "./beatsaver.service";
-import { getScoreSaberLeaderboardFromToken } from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
+import ScoreSaberLeaderboard, {
+  getScoreSaberLeaderboardFromToken,
+} from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
 import { getScoreSaberScoreFromToken } from "@ssr/common/score/impl/scoresaber-score";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { ScoreSort } from "@ssr/common/score/score-sort";
@@ -154,7 +156,7 @@ export class ScoreService {
             );
 
             for (const token of leaderboardScores.playerScores) {
-              const score = getScoreSaberScoreFromToken(token.score);
+              const score = getScoreSaberScoreFromToken(token.score, token.leaderboard);
               if (score == undefined) {
                 continue;
               }
@@ -206,7 +208,10 @@ export class ScoreService {
 
       switch (leaderboardName) {
         case "scoresaber": {
-          const leaderboardResponse = await LeaderboardService.getLeaderboard(leaderboardName, id);
+          const leaderboardResponse = await LeaderboardService.getLeaderboard<ScoreSaberLeaderboard>(
+            leaderboardName,
+            id
+          );
           if (leaderboardResponse == undefined) {
             throw new NotFoundError(`Leaderboard "${leaderboardName}" not found`);
           }
@@ -219,7 +224,7 @@ export class ScoreService {
           }
 
           for (const token of leaderboardScores.scores) {
-            const score = getScoreSaberScoreFromToken(token);
+            const score = getScoreSaberScoreFromToken(token, leaderboardResponse.leaderboard);
             if (score == undefined) {
               continue;
             }

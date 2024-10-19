@@ -10,56 +10,26 @@ import LeaderboardScore from "./leaderboard-score";
 import { scoreAnimation } from "@/components/score/score-animation";
 import { Button } from "@/components/ui/button";
 import { clsx } from "clsx";
-import { getDifficulty, getDifficultyFromRawDifficulty } from "@/common/song-utils";
+import { getDifficultyFromRawDifficulty } from "@/common/song-utils";
 import { fetchLeaderboardScores } from "@ssr/common/utils/score-utils";
 import ScoreSaberScore from "@ssr/common/score/impl/scoresaber-score";
 import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
-import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import LeaderboardScoresResponse from "@ssr/common/response/leaderboard-scores-response";
+import useDatabase from "@/hooks/use-database";
+import { useLiveQuery } from "dexie-react-hooks";
 
 type LeaderboardScoresProps = {
-  /**
-   * The page to show when opening the leaderboard.
-   */
   initialPage?: number;
-
-  /**
-   * The initial scores to show.
-   */
   initialScores?: LeaderboardScoresResponse<ScoreSaberScore, ScoreSaberLeaderboard>;
-
-  /**
-   * The leaderboard to display.
-   */
   leaderboard: ScoreSaberLeaderboard;
-
-  /**
-   * The player who set the score.
-   */
-  player?: ScoreSaberPlayer;
-
-  /**
-   * Whether to show the difficulties.
-   */
   showDifficulties?: boolean;
-
-  /**
-   * Whether this is the full leaderboard page.
-   */
   isLeaderboardPage?: boolean;
-
-  /**
-   * Called when the leaderboard changes.
-   *
-   * @param id the new leaderboard id
-   */
   leaderboardChanged?: (id: number) => void;
 };
 
 export default function LeaderboardScores({
   initialPage,
   initialScores,
-  player,
   leaderboard,
   showDifficulties,
   isLeaderboardPage,
@@ -68,6 +38,9 @@ export default function LeaderboardScores({
   if (!initialPage) {
     initialPage = 1;
   }
+  const database = useDatabase();
+  const claimedPlayer = useLiveQuery(() => database.getClaimedPlayer());
+
   const { width } = useWindowDimensions();
   const controls = useAnimation();
 
@@ -78,7 +51,7 @@ export default function LeaderboardScores({
     LeaderboardScoresResponse<ScoreSaberScore, ScoreSaberLeaderboard> | undefined
   >(initialScores);
   const topOfScoresRef = useRef<HTMLDivElement>(null);
-  const [shouldFetch, setShouldFetch] = useState(true);
+  const [shouldFetch, setShouldFetch] = useState(false);
 
   const { data, isError, isLoading } = useQuery({
     queryKey: ["leaderboardScores", selectedLeaderboardId, currentPage],
@@ -93,7 +66,7 @@ export default function LeaderboardScores({
   });
 
   /**
-   * Starts the animation for the scores.
+   * Starts the animation for the scores, but only after the initial load.
    */
   const handleScoreAnimation = useCallback(async () => {
     await controls.start(previousPage >= currentPage ? "hiddenRight" : "hiddenLeft");
@@ -189,20 +162,28 @@ export default function LeaderboardScores({
           })}
       </div>
 
-      <motion.div
-        initial="hidden"
-        animate={controls}
-        variants={scoreAnimation}
-        className="grid min-w-full grid-cols-1 divide-y divide-border"
-      >
-        {currentScores.scores.map((playerScore, index) => {
-          return (
-            <motion.div key={index} variants={scoreAnimation}>
-              <LeaderboardScore key={index} player={player} score={playerScore} leaderboard={leaderboard} />
-            </motion.div>
-          );
-        })}
-      </motion.div>
+      <div className="overflow-x-auto">
+        <table className="table w-full table-auto border-spacing-2 border-none text-left">
+          <thead>
+            <tr>
+              <th className="px-4 py-2">Rank</th>
+              <th className="px-4 py-2">Player</th>
+              <th className="px-4 py-2 text-center">Time Set</th>
+              <th className="px-4 py-2 text-center">Score</th>
+              <th className="px-4 py-2 text-center">Accuracy</th>
+              <th className="px-4 py-2 text-center">Misses</th>
+              <th className="px-4 py-2 text-center">PP</th>
+            </tr>
+          </thead>
+          <motion.tbody initial="hidden" animate={controls} className="border-none" variants={scoreAnimation}>
+            {currentScores.scores.map((playerScore, index) => (
+              <motion.tr key={index} className="border-b border-border" variants={scoreAnimation}>
+                <LeaderboardScore score={playerScore} claimedPlayer={claimedPlayer} />
+              </motion.tr>
+            ))}
+          </motion.tbody>
+        </table>
+      </div>
 
       <Pagination
         mobilePagination={width < 768}

@@ -1,35 +1,48 @@
-import LeaderboardPlayer from "./leaderboard-player";
-import LeaderboardScoreStats from "./leaderboard-score-stats";
-import ScoreRankInfo from "@/components/score/score-rank-info";
-import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
 import ScoreSaberScore from "@ssr/common/score/impl/scoresaber-score";
+import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
+import { timeAgo } from "@ssr/common/utils/time-utils";
+import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/score-saber-player-token";
+import { TablePlayer } from "@/components/table-player";
 
 type Props = {
-  /**
-   * The player who set the score.
-   */
-  player?: ScoreSaberPlayer;
-
   /**
    * The score to display.
    */
   score: ScoreSaberScore;
 
   /**
-   * The leaderboard to display.
+   * The claimed player.
    */
-  leaderboard: ScoreSaberLeaderboard;
+  claimedPlayer?: ScoreSaberPlayerToken;
 };
 
-export default function LeaderboardScore({ player, score, leaderboard }: Props) {
+export default function LeaderboardScore({ score, claimedPlayer }: Props) {
+  const scorePlayer = score.playerInfo;
+
   return (
-    <div className="py-1.5">
-      <div className="grid items-center w-full gap-2 grid-cols-[20px 1fr_1fr] lg:grid-cols-[130px_4fr_300px]">
-        <ScoreRankInfo score={score} leaderboard={leaderboard} />
-        <LeaderboardPlayer player={player} score={score} />
-        <LeaderboardScoreStats score={score} leaderboard={leaderboard} />
-      </div>
-    </div>
+    <>
+      {/* Score Rank */}
+      <td className="px-4 py-2 whitespace-nowrap">#{score.rank}</td>
+
+      {/* Player */}
+      <td className="px-4 py-2 flex gap-2 whitespace-nowrap">
+        <TablePlayer player={scorePlayer} claimedPlayer={claimedPlayer} />
+      </td>
+
+      {/* Time Set */}
+      <td className="px-4 py-2 text-center whitespace-nowrap">{timeAgo(score.timestamp)}</td>
+
+      {/* Score */}
+      <td className="px-4 py-2 text-center whitespace-nowrap">{formatNumberWithCommas(score.score)}</td>
+
+      {/* Score Accuracy */}
+      <td className="px-4 py-2 text-center whitespace-nowrap">{score.accuracy.toFixed(2)}%</td>
+
+      {/* Score Misses */}
+      <td className="px-4 py-2 text-center whitespace-nowrap">{score.misses > 0 ? `${score.misses}x` : "FC"}</td>
+
+      {/* Score PP */}
+      <td className="px-4 py-2 text-center text-pp whitespace-nowrap">{formatPp(score.pp)}pp</td>
+    </>
   );
 }

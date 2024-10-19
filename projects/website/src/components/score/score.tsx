@@ -7,7 +7,6 @@ import ScoreSongInfo from "./score-info";
 import ScoreRankInfo from "./score-rank-info";
 import ScoreStats from "./score-stats";
 import { motion } from "framer-motion";
-import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { getPageFromRank } from "@ssr/common/utils/utils";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import ScoreSaberScore from "@ssr/common/score/impl/scoresaber-score";
@@ -16,11 +15,6 @@ import { BeatSaverMap } from "@ssr/common/model/beatsaver/beatsaver-map";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 
 type Props = {
-  /**
-   * The player who set the score.
-   */
-  player?: ScoreSaberPlayer;
-
   /**
    * The leaderboard.
    */
@@ -44,7 +38,7 @@ type Props = {
   };
 };
 
-export default function Score({ player, leaderboard, beatSaverMap, score, settings }: Props) {
+export default function Score({ leaderboard, beatSaverMap, score, settings }: Props) {
   const isMobile = useIsMobile();
   const [baseScore, setBaseScore] = useState<number>(score.score);
   const [isLeaderboardExpanded, setIsLeaderboardExpanded] = useState(false);
@@ -109,7 +103,7 @@ export default function Score({ player, leaderboard, beatSaverMap, score, settin
           animate={{ opacity: 1, y: 0 }}
           className="w-full mt-2"
         >
-          <LeaderboardScores initialPage={getPageFromRank(score.rank, 12)} player={player} leaderboard={leaderboard} />
+          <LeaderboardScores initialPage={getPageFromRank(score.rank, 12)} leaderboard={leaderboard} />
         </motion.div>
       )}
     </div>
