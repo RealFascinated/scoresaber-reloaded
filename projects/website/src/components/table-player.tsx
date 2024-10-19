@@ -3,6 +3,7 @@ import CountryFlag from "@/components/country-flag";
 import Link from "next/link";
 import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/score-saber-player-token";
 import ScoreSaberLeaderboardPlayerInfoToken from "@ssr/common/types/token/scoresaber/score-saber-leaderboard-player-info-token";
+import { getScoreSaberRole } from "@ssr/common/scoresaber.util";
 
 type TablePlayerProps = {
   /**
@@ -27,7 +28,12 @@ export function TablePlayer({ player, claimedPlayer }: TablePlayerProps) {
       </Avatar>
       <CountryFlag code={player.country} size={12} />
       <Link className="transform-gpu transition-all hover:text-blue-500" href={`/player/${player.id}`}>
-        <p className={player.id == claimedPlayer?.id ? "transform-gpu text-pp transition-all hover:brightness-75" : ""}>
+        <p
+          className={player.id == claimedPlayer?.id ? "font-bold" : ""}
+          style={{
+            color: getScoreSaberRole(player)?.color,
+          }}
+        >
           {player.name}
         </p>
       </Link>
