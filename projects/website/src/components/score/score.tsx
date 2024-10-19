@@ -13,6 +13,7 @@ import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import ScoreSaberScore from "@ssr/common/score/impl/scoresaber-score";
 import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
 import { BeatSaverMap } from "@ssr/common/model/beatsaver/beatsaver-map";
+import { useIsMobile } from "@/hooks/use-is-mobile";
 
 type Props = {
   /**
@@ -44,6 +45,7 @@ type Props = {
 };
 
 export default function Score({ player, leaderboard, beatSaverMap, score, settings }: Props) {
+  const isMobile = useIsMobile();
   const [baseScore, setBaseScore] = useState<number>(score.score);
   const [isLeaderboardExpanded, setIsLeaderboardExpanded] = useState(false);
 
@@ -82,6 +84,7 @@ export default function Score({ player, leaderboard, beatSaverMap, score, settin
             leaderboard={leaderboard}
             beatSaverMap={beatSaverMap}
             score={score}
+            alwaysSingleLine={isMobile}
             setIsLeaderboardExpanded={setIsLeaderboardExpanded}
             updateScore={score => {
               setBaseScore(score.score);

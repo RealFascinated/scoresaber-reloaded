@@ -43,8 +43,6 @@ spec:
           namespace: traefik
         - name: compress
           namespace: traefik
-        - name: scoresaber-reloaded-backend-strip-swagger-prefix
-          namespace: public-services
       services:
         - name: scoresaber-reloaded-backend-service
           port: 8080

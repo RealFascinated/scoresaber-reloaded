@@ -32,6 +32,11 @@ const items: NavbarItem[] = [
     link: "https://status.fascinated.cc/status/scoresaber-reloaded",
     openInNewTab: true,
   },
+  {
+    name: "Swagger",
+    link: "/swagger",
+    openInNewTab: true,
+  },
 ];
 
 export default function Footer() {
@@ -44,7 +49,7 @@ export default function Footer() {
         <p className="hidden md:block">({buildTime})</p>
         <p className="none md:hidden">({buildTimeShort})</p>
       </div>
-      <div className="h-10 w-full flex flex-wrap items-center justify-center bg-secondary/95 divide-x divide-input">
+      <div className="w-full flex flex-wrap items-center justify-center bg-secondary/95 divide-x divide-input text-sm py-2">
         {items.map((item, index) => {
           return (
             <Link
