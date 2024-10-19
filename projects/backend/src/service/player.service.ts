@@ -214,7 +214,7 @@ export class PlayerService {
     };
 
     const itemsPerPage = 50;
-    const player = await scoresaberService.lookupPlayer(id, true);
+    const player = await scoresaberService.lookupPlayer(id);
     if (player == undefined) {
       throw new NotFoundError(`Player "${id}" not found`);
     }
