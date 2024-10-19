@@ -5,6 +5,7 @@ import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/score-sabe
 import ScoreSaberLeaderboardPlayerInfoToken from "@ssr/common/types/token/scoresaber/score-saber-leaderboard-player-info-token";
 import { getScoreSaberRole } from "@ssr/common/scoresaber.util";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
+import { clsx } from "clsx";
 
 type TablePlayerProps = {
   /**
@@ -21,9 +22,14 @@ type TablePlayerProps = {
    * Hide the country flag
    */
   hideCountryFlag?: boolean;
+
+  /**
+   * Whether to apply hover brightness
+   */
+  hoverBrightness?: boolean;
 };
 
-export function PlayerInfo({ player, highlightedPlayer, hideCountryFlag }: TablePlayerProps) {
+export function PlayerInfo({ player, highlightedPlayer, hideCountryFlag, hoverBrightness = true }: TablePlayerProps) {
   return (
     <div className="flex gap-2 items-center">
       <Avatar className="w-[24px] h-[24px] pointer-events-none">
@@ -33,7 +39,10 @@ export function PlayerInfo({ player, highlightedPlayer, hideCountryFlag }: Table
         />
       </Avatar>
       {!hideCountryFlag && <CountryFlag code={player.country} size={12} />}
-      <Link className="transform-gpu transition-all hover:brightness-[66%]" href={`/player/${player.id}`}>
+      <Link
+        className={clsx(hoverBrightness ? "transform-gpu transition-all hover:brightness-[66%]" : "")}
+        href={`/player/${player.id}`}
+      >
         <p
           className={player.id == highlightedPlayer?.id ? "font-bold" : ""}
           style={{
