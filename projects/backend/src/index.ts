@@ -161,7 +161,11 @@ app.use(
 /**
  * Swagger Documentation
  */
-app.use(swagger());
+app.use(
+  swagger({
+    path: isProduction() ? "/api/swagger" : "/swagger",
+  })
+);
 
 app.onStart(() => {
   console.log("Listening on port http://localhost:8080");
