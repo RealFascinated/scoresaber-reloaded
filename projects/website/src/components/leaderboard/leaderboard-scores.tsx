@@ -10,7 +10,7 @@ import LeaderboardScore from "./leaderboard-score";
 import { scoreAnimation } from "@/components/score/score-animation";
 import { Button } from "@/components/ui/button";
 import { clsx } from "clsx";
-import { getDifficultyFromRawDifficulty } from "@/common/song-utils";
+import { getDifficulty, getDifficultyFromRawDifficulty } from "@/common/song-utils";
 import { fetchLeaderboardScores } from "@ssr/common/utils/score-utils";
 import ScoreSaberScore from "@ssr/common/score/impl/scoresaber-score";
 import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
@@ -169,12 +169,18 @@ export default function LeaderboardScores({
               return null;
             }
 
+            const isSelected = leaderboardId === selectedLeaderboardId;
             return (
               <Button
                 key={difficultyRaw}
-                variant={leaderboardId === selectedLeaderboardId ? "default" : "outline"}
+                variant={isSelected ? "default" : "outline"}
                 onClick={() => {
                   handleLeaderboardChange(leaderboardId);
+                }}
+                className={`border ${isSelected ? "bg-primary/5 font-bold" : ""}`}
+                style={{
+                  color: getDifficultyFromRawDifficulty(difficultyRaw).color,
+                  borderColor: getDifficultyFromRawDifficulty(difficultyRaw).color,
                 }}
               >
                 {difficulty.name}
