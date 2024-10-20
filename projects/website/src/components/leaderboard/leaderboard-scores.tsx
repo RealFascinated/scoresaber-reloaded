@@ -186,7 +186,7 @@ export default function LeaderboardScores({
           <motion.tbody initial="hidden" animate={controls} className="border-none" variants={scoreAnimation}>
             {currentScores.scores.map((playerScore, index) => (
               <motion.tr key={index} className="border-b border-border" variants={scoreAnimation}>
-                <LeaderboardScore score={playerScore} claimedPlayer={claimedPlayer} />
+                <LeaderboardScore score={playerScore} leaderboard={leaderboard} claimedPlayer={claimedPlayer} />
               </motion.tr>
             ))}
           </motion.tbody>

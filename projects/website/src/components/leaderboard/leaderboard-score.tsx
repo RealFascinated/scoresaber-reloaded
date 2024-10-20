@@ -6,6 +6,7 @@ import { clsx } from "clsx";
 import Tooltip from "@/components/tooltip";
 import { ScoreTimeSet } from "@/components/score/score-time-set";
 import { ScoreModifiers } from "@/components/score/score-modifiers";
+import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
 
 type Props = {
   /**
@@ -14,12 +15,17 @@ type Props = {
   score: ScoreSaberScore;
 
   /**
+   * The leaderboard for the score.
+   */
+  leaderboard: ScoreSaberLeaderboard;
+
+  /**
    * The claimed player.
    */
   claimedPlayer?: ScoreSaberPlayerToken;
 };
 
-export default function LeaderboardScore({ score, claimedPlayer }: Props) {
+export default function LeaderboardScore({ score, leaderboard, claimedPlayer }: Props) {
   const scorePlayer = score.playerInfo;
 
   return (
@@ -54,7 +60,9 @@ export default function LeaderboardScore({ score, claimedPlayer }: Props) {
       </td>
 
       {/* Score PP */}
-      {score.pp > 0 && <td className="px-4 py-2 text-center text-pp whitespace-nowrap">{formatPp(score.pp)}pp</td>}
+      {leaderboard.stars > 0 && (
+        <td className="px-4 py-2 text-center text-pp whitespace-nowrap">{formatPp(score.pp)}pp</td>
+      )}
 
       {/* Score Modifiers */}
       <td className="px-4 py-2 text-center whitespace-nowrap">
