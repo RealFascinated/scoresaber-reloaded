@@ -3,6 +3,19 @@ import { kyFetch } from "./utils";
 import { Config } from "../config";
 import { AroundPlayer } from "../types/around-player";
 import { AroundPlayerResponse } from "../response/around-player-response";
+import ScoreSaberPlayer from "../player/impl/scoresaber-player";
+import { formatDateMinimal, getMidnightAlignedDate } from "./time-utils";
+
+/**
+ * Gets the player's history for today.
+ *
+ * @param player the player to get the history for
+ * @returns the player's history
+ */
+export function getPlayerHistoryToday(player: ScoreSaberPlayer) {
+  const today = getMidnightAlignedDate(new Date());
+  return player.statisticHistory[formatDateMinimal(today)] || {};
+}
 
 /**
  * Sorts the player history based on date,

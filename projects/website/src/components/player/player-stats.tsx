@@ -4,8 +4,11 @@ import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { formatDate } from "@ssr/common/utils/time-utils";
 import { ReactNode } from "react";
 import Tooltip from "@/components/tooltip";
+import { getPlayerHistoryToday } from "@ssr/common/utils/player-utils";
+import { DailyChange } from "@/components/statistic/daily-change";
+import { PlayerStat } from "@ssr/common/player/player-stat";
 
-type Badge = {
+type Stat = {
   name: string;
   color?: string;
   create: (player: ScoreSaberPlayer) => {
@@ -14,13 +17,21 @@ type Badge = {
   };
 };
 
-const badges: Badge[] = [
+const playerStats: Stat[] = [
   {
     name: "Ranked Play Count",
     color: "bg-pp",
     create: (player: ScoreSaberPlayer) => {
+      const history = getPlayerHistoryToday(player);
+      const rankedScores = history.scores?.rankedScores;
+
       return {
-        value: formatNumberWithCommas(player.statistics.rankedPlayCount),
+        value: (
+          <>
+            {formatNumberWithCommas(player.statistics.rankedPlayCount)}{" "}
+            <DailyChange type={PlayerStat.RankedPlayCount} change={rankedScores} />
+          </>
+        ),
       };
     },
   },
@@ -45,8 +56,18 @@ const badges: Badge[] = [
   {
     name: "Total Play Count",
     create: (player: ScoreSaberPlayer) => {
+      const history = getPlayerHistoryToday(player);
+      const rankedScores = history.scores?.rankedScores;
+      const unrankedScores = history.scores?.unrankedScores;
+      const totalChange = (rankedScores ?? 0) + (unrankedScores ?? 0);
+
       return {
-        value: formatNumberWithCommas(player.statistics.totalPlayCount),
+        value: (
+          <>
+            {formatNumberWithCommas(player.statistics.totalPlayCount)}{" "}
+            <DailyChange type={PlayerStat.TotalPlayCount} change={totalChange} />
+          </>
+        ),
       };
     },
   },
@@ -84,7 +105,7 @@ type Props = {
 export default function PlayerStats({ player }: Props) {
   return (
     <div className={`flex flex-wrap gap-2 w-full justify-center lg:justify-start`}>
-      {badges.map((badge, index) => {
+      {playerStats.map((badge, index) => {
         const toRender = badge.create(player);
         if (toRender === undefined) {
           return <div key={index} />;

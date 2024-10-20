@@ -27,3 +27,17 @@ export function formatNumberWithCommas(num: number) {
 export function formatPp(num: number) {
   return num.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
+
+/**
+ * Formats the number
+ *
+ * @param num the number to format
+ * @param type the type of number to format
+ * @returns the formatted number
+ */
+export function formatNumber(num: number, type: "number" | "pp" = "number") {
+  if (type == "pp") {
+    return formatPp(num);
+  }
+  return formatNumberWithCommas(num);
+}
