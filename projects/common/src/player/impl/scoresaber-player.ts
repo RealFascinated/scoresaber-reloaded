@@ -5,7 +5,7 @@ import ScoreSaberPlayerToken from "../../types/token/scoresaber/score-saber-play
 import { formatDateMinimal, getDaysAgoDate, getMidnightAlignedDate } from "../../utils/time-utils";
 import { getPageFromRank } from "../../utils/utils";
 import { Config } from "../../config";
-import { getValueFromHistory } from "website/src/common/player-utils";
+import { getValueFromHistory } from "../../utils/player-utils";
 
 /**
  * A ScoreSaber player.
