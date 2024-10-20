@@ -17,15 +17,22 @@ type Props = {
   asChild?: boolean;
 
   /**
+   * The additional class names
+   */
+  className?: string;
+
+  /**
    * Where the tooltip will be displayed
    */
   side?: "top" | "bottom" | "left" | "right";
 };
 
-export default function Tooltip({ children, display, asChild = true, side = "top" }: Props) {
+export default function Tooltip({ children, display, asChild = true, side = "top", className }: Props) {
   return (
     <ShadCnTooltip>
-      <TooltipTrigger asChild={asChild}>{children}</TooltipTrigger>
+      <TooltipTrigger className={className} asChild={asChild}>
+        {children}
+      </TooltipTrigger>
       <TooltipContent side={side}>{display}</TooltipContent>
     </ShadCnTooltip>
   );

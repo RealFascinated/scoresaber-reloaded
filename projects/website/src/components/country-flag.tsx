@@ -8,13 +8,13 @@ type Props = {
 
 export default function CountryFlag({ code, size = 24 }: Props) {
   return (
-    <Tooltip display={<p>{normalizedRegionName(code)}</p>} asChild={false}>
+    <Tooltip display={<p>{normalizedRegionName(code)}</p>} className={`w-[${size * 2}px] min-w-[${size * 2}px]`}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         alt="Player Country"
         src={`/assets/flags/${code.toLowerCase()}.png`}
         width={size * 2}
-        className={`w-[${size * 2}px] object-contain`}
+        className={`w-[${size * 2}px] min-w-[${size * 2}px] object-contain`}
       />
     </Tooltip>
   );
