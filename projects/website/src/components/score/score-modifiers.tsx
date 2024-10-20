@@ -14,14 +14,19 @@ type ScoreModifiersProps = {
 };
 
 export function ScoreModifiers({ score, type }: ScoreModifiersProps) {
+  const modifiers = score.modifiers;
+  if (modifiers.length === 0) {
+    return <p>-</p>;
+  }
+
   switch (type) {
     case "full":
-      return <span>{score.modifiers.join(", ")}</span>;
+      return <span>{modifiers.join(", ")}</span>;
     case "simple":
       return (
         <span>
           {Object.entries(Modifier)
-            .filter(mod => score.modifiers.includes(mod[1] as Modifier))
+            .filter(mod => modifiers.includes(mod[1] as Modifier))
             .map(mod => mod[0])
             .join(",")}
         </span>
