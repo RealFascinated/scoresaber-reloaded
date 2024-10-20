@@ -13,7 +13,7 @@ import Link from "next/link";
 import { capitalizeFirstLetter } from "@/common/string-utils";
 import AddFriend from "@/components/friend/add-friend";
 import PlayerSteamProfile from "@/components/player/player-steam-profile";
-import { getScoreSaberRole } from "@ssr/common/scoresaber.util";
+import { getScoreSaberRole } from "@ssr/common/utils/scoresaber.util";
 
 /**
  * Renders the change for a stat.

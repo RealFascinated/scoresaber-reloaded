@@ -5,7 +5,7 @@ import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/score-sabe
 import ScoreSaberLeaderboardPlayerInfoToken from "@ssr/common/types/token/scoresaber/score-saber-leaderboard-player-info-token";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { clsx } from "clsx";
-import { getScoreSaberRole } from "@ssr/common/scoresaber.util";
+import { getScoreSaberRole } from "@ssr/common/utils/scoresaber.util";
 
 type TablePlayerProps = {
   /**
