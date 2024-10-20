@@ -114,6 +114,8 @@ export async function getScoreSaberPlayerFromToken(
           scores: {
             rankedScores: 0,
             unrankedScores: 0,
+            totalScores: 0,
+            totalRankedScores: 0,
           },
         },
         ...history[todayDate],
@@ -152,6 +154,10 @@ export async function getScoreSaberPlayerFromToken(
       statisticHistory[dateKey] = {
         ...statisticHistory[dateKey],
         rank: rank,
+        scores: {
+          totalScores: token.scoreStats.totalPlayCount,
+          totalRankedScores: token.scoreStats.rankedPlayCount,
+        },
       };
     }
   }

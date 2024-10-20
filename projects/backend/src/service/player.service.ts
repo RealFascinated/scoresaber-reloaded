@@ -140,13 +140,21 @@ export class PlayerService {
     if (history == undefined) {
       history = {}; // Initialize if history is not found
     }
+
+    const scoreStats = player.scoreStats;
+
     // Set the history data
     history.pp = player.pp;
     history.countryRank = player.countryRank;
     history.rank = player.rank;
     history.accuracy = {
-      averageRankedAccuracy: player.scoreStats.averageRankedAccuracy,
+      averageRankedAccuracy: scoreStats.averageRankedAccuracy,
     };
+    history.scores = {
+      totalScores: scoreStats.totalPlayCount,
+      totalRankedScores: scoreStats.rankedPlayCount,
+    };
+
     foundPlayer.setStatisticHistory(dateToday, history);
     foundPlayer.sortStatisticHistory();
     foundPlayer.lastTracked = new Date();

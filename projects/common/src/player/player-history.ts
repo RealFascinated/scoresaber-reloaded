@@ -27,6 +27,16 @@ export interface PlayerHistory {
      * The amount of unranked scores set.
      */
     unrankedScores?: number;
+
+    /**
+     * The total amount of ranked scores
+     */
+    totalRankedScores?: number;
+
+    /**
+     * The total amount of scores
+     */
+    totalScores?: number;
   };
 
   /**
