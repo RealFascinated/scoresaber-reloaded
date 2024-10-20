@@ -27,6 +27,8 @@ const badges: ScoreBadge[] = [
           <Tooltip
             display={
               <div>
+                <p className="font-semibold">Performance Points</p>
+                <p>Raw: {formatPp(pp)}pp</p>
                 <p>
                   Weighted: {formatPp(weightedPp)}pp ({(100 * weight).toFixed(2)}%)
                 </p>
@@ -48,7 +50,7 @@ const badges: ScoreBadge[] = [
     create: (score: ScoreSaberScore, leaderboard: ScoreSaberLeaderboard) => {
       const acc = (score.score / leaderboard.maxScore) * 100;
       const scoreBadge = getScoreBadgeFromAccuracy(acc);
-      let accDetails = `Accuracy ${scoreBadge.name != "-" ? scoreBadge.name : ""}`;
+      let accDetails = `${scoreBadge.name != "-" ? scoreBadge.name : ""}`;
       if (scoreBadge.max == null) {
         accDetails += ` (> ${scoreBadge.min}%)`;
       } else if (scoreBadge.min == null) {
@@ -65,8 +67,8 @@ const badges: ScoreBadge[] = [
             display={
               <div className="flex flex-col gap-2">
                 <div>
+                  <p className="font-semibold">Accuracy</p>
                   <p>{accDetails}</p>
-                  {failed && <p className="text-red-500">Failed</p>}
                 </div>
 
                 {modCount > 0 && (
@@ -75,6 +77,7 @@ const badges: ScoreBadge[] = [
                     <ScoreModifiers type="full" score={score} />
                   </div>
                 )}
+                {failed && <p className="text-red-500">Failed</p>}
               </div>
             }
           >

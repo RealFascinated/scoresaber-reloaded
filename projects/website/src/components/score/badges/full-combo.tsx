@@ -8,9 +8,10 @@ export default function FullComboBadge({ score }: ScoreBadgeProps) {
   return (
     <Tooltip
       display={
-        <div className="flex flex-col justify-center items-center">
+        <div className="flex flex-col">
           {!score.fullCombo ? (
             <>
+              <p className="font-semibold">Misses</p>
               <p>Missed Notes: {formatNumberWithCommas(score.missedNotes)}</p>
               <p>Bad Cuts: {formatNumberWithCommas(score.badCuts)}</p>
             </>
