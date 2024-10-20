@@ -59,4 +59,5 @@ export type StatisticChange = {
   daily: PlayerHistory;
   weekly: PlayerHistory;
   monthly: PlayerHistory;
+  yearly: PlayerHistory;
 };

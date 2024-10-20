@@ -22,14 +22,13 @@ const playerStats: Stat[] = [
     name: "Ranked Play Count",
     color: "bg-pp",
     create: (player: ScoreSaberPlayer) => {
-      const history = getPlayerHistoryToday(player);
-      const rankedScores = history.scores?.rankedScores;
+      const rankedScoresChange = player.statisticChange?.daily.scores?.totalRankedScores;
 
       return {
         value: (
           <>
             {formatNumberWithCommas(player.statistics.rankedPlayCount)}{" "}
-            <DailyChange type={PlayerStat.RankedPlayCount} change={rankedScores} />
+            <DailyChange type={PlayerStat.RankedPlayCount} change={rankedScoresChange} />
           </>
         ),
       };
@@ -56,16 +55,13 @@ const playerStats: Stat[] = [
   {
     name: "Total Play Count",
     create: (player: ScoreSaberPlayer) => {
-      const history = getPlayerHistoryToday(player);
-      const rankedScores = history.scores?.rankedScores;
-      const unrankedScores = history.scores?.unrankedScores;
-      const totalChange = (rankedScores ?? 0) + (unrankedScores ?? 0);
+      const scoresChange = player.statisticChange?.daily.scores;
 
       return {
         value: (
           <>
             {formatNumberWithCommas(player.statistics.totalPlayCount)}{" "}
-            <DailyChange type={PlayerStat.TotalPlayCount} change={totalChange} />
+            <DailyChange type={PlayerStat.TotalPlayCount} change={scoresChange?.totalScores} />
           </>
         ),
       };

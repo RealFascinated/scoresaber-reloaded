@@ -7,7 +7,7 @@ import { PlayerHistory } from "@ssr/common/player/player-history";
  * @param history the history to get the value from
  * @param field the field to get
  */
-export function getValueFromHistory(history: PlayerHistory, field: string): number | null {
+export function getValueFromHistory(history: PlayerHistory, field: string): number | undefined {
   const keys = field.split(".");
   /* eslint-disable @typescript-eslint/no-explicit-any */
   let value: any = history;
@@ -17,10 +17,10 @@ export function getValueFromHistory(history: PlayerHistory, field: string): numb
     if (value && key in value) {
       value = value[key];
     } else {
-      return null; // Return null if the key doesn't exist
+      return undefined; // Return null if the key doesn't exist
     }
   }
 
   // Ensure we return a number or null
-  return typeof value === "number" ? value : null;
+  return typeof value === "number" ? value : undefined;
 }

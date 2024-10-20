@@ -5,6 +5,7 @@ import ScoreSaberPlayerToken from "../../types/token/scoresaber/score-saber-play
 import { formatDateMinimal, getDaysAgoDate, getMidnightAlignedDate } from "../../utils/time-utils";
 import { getPageFromRank } from "../../utils/utils";
 import { Config } from "../../config";
+import { getValueFromHistory } from "website/src/common/player-utils";
 
 /**
  * A ScoreSaber player.
@@ -180,7 +181,7 @@ export async function getScoreSaberPlayerFromToken(
    * @param daysAgo the amount of days ago to get the stat for
    * @return the change
    */
-  const getChange = (statType: "rank" | "countryRank" | "pp", daysAgo: number = 1): number | undefined => {
+  const getStatisticChange = (statType: string, daysAgo: number = 1): number | undefined => {
     const todayStats = statisticHistory[todayDate];
     let otherDate: Date | undefined;
 
@@ -229,8 +230,8 @@ export async function getScoreSaberPlayerFromToken(
       return undefined;
     }
 
-    const statToday = todayStats[statType];
-    const statOther = otherStats[statType];
+    const statToday = getValueFromHistory(todayStats, statType);
+    const statOther = getValueFromHistory(otherStats, statType);
 
     if (statToday === undefined || statOther === undefined) {
       return undefined;
@@ -238,6 +239,18 @@ export async function getScoreSaberPlayerFromToken(
 
     // Return the difference, accounting for negative changes in ranks
     return (statToday - statOther) * (statType === "pp" ? 1 : -1);
+  };
+
+  const getStatisticChanges = (daysAgo: number): PlayerHistory => {
+    return {
+      rank: getStatisticChange("rank", daysAgo),
+      countryRank: getStatisticChange("countryRank", daysAgo),
+      pp: getStatisticChange("pp", daysAgo),
+      scores: {
+        totalScores: getStatisticChange("scores.totalScores", daysAgo),
+        totalRankedScores: getStatisticChange("scores.totalRankedScores", daysAgo),
+      },
+    };
   };
 
   return {
@@ -251,21 +264,10 @@ export async function getScoreSaberPlayerFromToken(
     bio: bio,
     pp: token.pp,
     statisticChange: {
-      daily: {
-        rank: getChange("rank", 1),
-        countryRank: getChange("countryRank", 1),
-        pp: getChange("pp", 1),
-      },
-      weekly: {
-        rank: getChange("rank", 7),
-        countryRank: getChange("countryRank", 7),
-        pp: getChange("pp", 7),
-      },
-      monthly: {
-        rank: getChange("rank", 30),
-        countryRank: getChange("countryRank", 30),
-        pp: getChange("pp", 30),
-      },
+      daily: getStatisticChanges(1),
+      weekly: getStatisticChanges(7),
+      monthly: getStatisticChanges(30),
+      yearly: getStatisticChanges(365),
     },
     role: role,
     badges: badges,
