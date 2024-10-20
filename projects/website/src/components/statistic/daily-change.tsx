@@ -3,11 +3,27 @@ import Tooltip from "@/components/tooltip";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { PlayerStatValue } from "@ssr/common/player/player-stat";
 
-// Props for DailyChangeComponent
 interface DailyChangeProps {
+  /**
+   * The type of change
+   */
   type: PlayerStatValue;
+
+  /**
+   * The value of the change
+   */
   change: number | undefined;
+
+  /**
+   * The tooltip to display
+   */
   tooltip?: React.ReactElement | string;
+
+  /**
+   * The formater for the change
+   *
+   * @param value
+   */
   format?: (value: number) => string;
 }
 

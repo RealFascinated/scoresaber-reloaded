@@ -179,7 +179,7 @@ export default function LeaderboardScores({
               <th className="px-2 py-1 text-center">Score</th>
               <th className="px-2 py-1 text-center">Accuracy</th>
               <th className="px-2 py-1 text-center">Misses</th>
-              <th className="px-2 py-1 text-center">PP</th>
+              {leaderboard.stars > 0 && <th className="px-2 py-1 text-center">PP</th>}
               <th className="px-2 py-1 text-center">Mods</th>
             </tr>
           </thead>

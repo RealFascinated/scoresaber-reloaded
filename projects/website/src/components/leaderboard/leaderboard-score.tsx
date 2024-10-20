@@ -54,7 +54,7 @@ export default function LeaderboardScore({ score, claimedPlayer }: Props) {
       </td>
 
       {/* Score PP */}
-      <td className="px-4 py-2 text-center text-pp whitespace-nowrap">{formatPp(score.pp)}pp</td>
+      {score.pp > 0 && <td className="px-4 py-2 text-center text-pp whitespace-nowrap">{formatPp(score.pp)}pp</td>}
 
       {/* Score Modifiers */}
       <td className="px-4 py-2 text-center whitespace-nowrap">

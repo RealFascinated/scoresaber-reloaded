@@ -15,7 +15,7 @@ const datasetConfig: DatasetConfig[] = [
   {
     title: "Average Ranked Accuracy",
     field: "accuracy.averageRankedAccuracy",
-    color: "#606fff",
+    color: "#4858ff",
     axisId: "y",
     axisConfig: {
       reverse: false,

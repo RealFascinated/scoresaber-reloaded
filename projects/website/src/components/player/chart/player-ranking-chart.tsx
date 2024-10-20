@@ -41,7 +41,7 @@ const datasetConfig: DatasetConfig[] = [
   {
     title: "PP",
     field: "pp",
-    color: "#606fff",
+    color: "#4858ff",
     axisId: "y2",
     axisConfig: {
       reverse: false,

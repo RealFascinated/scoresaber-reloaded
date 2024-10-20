@@ -128,7 +128,7 @@ export class ImageService {
 
             {/* Player PP */}
             <div tw="flex justify-center items-center text-[33px]">
-              <p tw="text-[#606fff] m-0">{formatPp(player.pp)}pp</p>
+              <p tw="text-[#4858ff] m-0">{formatPp(player.pp)}pp</p>
               {this.renderDailyChange(ppChange)}
             </div>
 
