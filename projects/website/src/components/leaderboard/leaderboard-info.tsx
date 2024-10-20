@@ -4,6 +4,8 @@ import { LeaderboardSongStarCount } from "@/components/leaderboard/leaderboard-s
 import ScoreButtons from "@/components/score/score-buttons";
 import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
 import { BeatSaverMap } from "@ssr/common/model/beatsaver/beatsaver-map";
+import { getBeatSaverMapperProfileUrl } from "@ssr/common/utils/beatsaver.util";
+import FallbackLink from "@/components/fallback-link";
 
 type LeaderboardInfoProps = {
   /**
@@ -35,7 +37,12 @@ export function LeaderboardInfo({ leaderboard, beatSaverMap }: LeaderboardInfoPr
           {/* Song Stats */}
           <div className="text-sm">
             <p>
-              Mapper: <span className="text-pp font-semibold">{leaderboard.levelAuthorName}</span>
+              Mapper:{" "}
+              <FallbackLink href={getBeatSaverMapperProfileUrl(beatSaverMap)}>
+                <span className="text-pp font-semibold hover:brightness-[66%] transform-gpu transition-all">
+                  {leaderboard.levelAuthorName}
+                </span>
+              </FallbackLink>
             </p>
             <p>
               Plays: <span className="font-semibold">{leaderboard.plays}</span> ({leaderboard.dailyPlays} today)

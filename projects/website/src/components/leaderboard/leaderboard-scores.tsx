@@ -139,9 +139,9 @@ export default function LeaderboardScores({
         {currentScores.scores.length === 0 && <p>No scores found. Invalid Page?</p>}
       </div>
 
-      <div className="flex gap-2 justify-center items-center flex-wrap">
-        {showDifficulties &&
-          leaderboard.difficulties.map(({ difficultyRaw, leaderboardId }) => {
+      {showDifficulties && (
+        <div className="flex gap-2 justify-center items-center flex-wrap">
+          {leaderboard.difficulties.map(({ difficultyRaw, leaderboardId }) => {
             const difficulty = getDifficultyFromRawDifficulty(difficultyRaw);
             // todo: add support for other gamemodes?
             if (difficulty.gamemode !== "Standard") {
@@ -166,7 +166,8 @@ export default function LeaderboardScores({
               </Button>
             );
           })}
-      </div>
+        </div>
+      )}
 
       <div className="overflow-x-auto relative">
         <table className="table w-full table-auto border-spacing-2 border-none text-left text-sm">
@@ -179,7 +180,7 @@ export default function LeaderboardScores({
               <th className="px-2 py-1 text-center">Accuracy</th>
               <th className="px-2 py-1 text-center">Misses</th>
               <th className="px-2 py-1 text-center">PP</th>
-              <th className="px-2 py-1 text-center">Modifiers</th>
+              <th className="px-2 py-1 text-center">Mods</th>
             </tr>
           </thead>
           <motion.tbody initial="hidden" animate={controls} className="border-none" variants={scoreAnimation}>

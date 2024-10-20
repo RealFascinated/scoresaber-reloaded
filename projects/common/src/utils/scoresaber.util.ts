@@ -1,6 +1,6 @@
-import ScoreSaberPlayerToken from "./types/token/scoresaber/score-saber-player-token";
-import ScoreSaberLeaderboardPlayerInfoToken from "./types/token/scoresaber/score-saber-leaderboard-player-info-token";
-import ScoreSaberPlayer from "./player/impl/scoresaber-player";
+import ScoreSaberPlayerToken from "../types/token/scoresaber/score-saber-player-token";
+import ScoreSaberLeaderboardPlayerInfoToken from "../types/token/scoresaber/score-saber-leaderboard-player-info-token";
+import ScoreSaberPlayer from "../player/impl/scoresaber-player";
 
 type ScoreSaberRole = {
   /**

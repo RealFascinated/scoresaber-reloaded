@@ -3,9 +3,9 @@ import CountryFlag from "@/components/country-flag";
 import Link from "next/link";
 import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/score-saber-player-token";
 import ScoreSaberLeaderboardPlayerInfoToken from "@ssr/common/types/token/scoresaber/score-saber-leaderboard-player-info-token";
-import { getScoreSaberRole } from "@ssr/common/scoresaber.util";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { clsx } from "clsx";
+import { getScoreSaberRole } from "@ssr/common/scoresaber.util";
 
 type TablePlayerProps = {
   /**
