@@ -151,6 +151,7 @@ export class PlayerService {
       averageRankedAccuracy: scoreStats.averageRankedAccuracy,
     };
     history.scores = {
+      ...history.scores,
       totalScores: scoreStats.totalPlayCount,
       totalRankedScores: scoreStats.rankedPlayCount,
     };
