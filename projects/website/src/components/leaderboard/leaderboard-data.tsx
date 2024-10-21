@@ -11,8 +11,6 @@ import { fetchLeaderboard } from "@ssr/common/utils/leaderboard.util";
 import LeaderboardScoresResponse from "@ssr/common/response/leaderboard-scores-response";
 import LeaderboardPpChart from "@/components/leaderboard/leaderboard-pp-chart";
 
-const REFRESH_INTERVAL = 1000 * 60 * 5;
-
 type LeaderboardDataProps = {
   /**
    * The initial leaderboard data.
@@ -39,8 +37,6 @@ export function LeaderboardData({ initialLeaderboard, initialScores, initialPage
     queryFn: async (): Promise<LeaderboardResponse<ScoreSaberLeaderboard> | undefined> => {
       return fetchLeaderboard<ScoreSaberLeaderboard>("scoresaber", currentLeaderboardId + "");
     },
-    refetchInterval: REFRESH_INTERVAL,
-    refetchIntervalInBackground: false,
   });
 
   useEffect(() => {

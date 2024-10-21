@@ -8,8 +8,6 @@ import { useIsMobile } from "@/hooks/use-is-mobile";
 import Pagination from "@/components/input/pagination";
 import { PlayerRanking } from "@/components/ranking/player-ranking";
 
-const REFRESH_INTERVAL = 1000 * 60 * 5;
-
 type RankingDataProps = {
   initialPage: number;
   country?: string | undefined;
@@ -31,8 +29,6 @@ export default function RankingData({ initialPage, country, initialPageData }: R
           : await scoresaberService.lookupPlayersByCountry(currentPage, country);
       return players && players.players.length > 0 ? players : undefined;
     },
-    staleTime: REFRESH_INTERVAL,
-    refetchInterval: REFRESH_INTERVAL,
     refetchIntervalInBackground: false,
   });
 

@@ -26,8 +26,8 @@ export function ScoreModifiers({ score, type }: ScoreModifiersProps) {
       return (
         <span>
           {Object.entries(Modifier)
-            .filter(mod => modifiers.includes(mod[1] as Modifier))
-            .map(mod => mod[0])
+            .filter(([_, mod]) => modifiers.includes(mod))
+            .map(([mod, _]) => mod)
             .join(",")}
         </span>
       );
