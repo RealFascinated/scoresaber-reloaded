@@ -4,7 +4,7 @@
 import { Chart, registerables } from "chart.js";
 import { Line } from "react-chartjs-2";
 import { useIsMobile } from "@/hooks/use-is-mobile";
-import { formatDateMinimal, getDaysAgoDate, parseDate } from "@ssr/common/utils/time-utils";
+import { formatDateMinimal, getDaysAgo, getDaysAgoDate, parseDate } from "@ssr/common/utils/time-utils";
 
 Chart.register(...registerables);
 
@@ -171,22 +171,47 @@ export default function GenericChart({ labels, datasetConfig, histories }: Chart
         position: "top",
         labels: {
           color: "white",
-          // Filter out datasets where showLegend is false
           filter: (legendItem: any, chartData: any) => {
-            // Access showLegend from chartData.datasets
             const dataset = chartData.datasets[legendItem.datasetIndex];
-            return dataset.showLegend !== false; // Only show if showLegend is not false
+            return dataset.showLegend !== false;
+          },
+        },
+      },
+      tooltip: {
+        callbacks: {
+          title(context: any) {
+            const value = labels[context[0].dataIndex];
+            if (typeof value === "string") {
+              return value;
+            }
+            const date = value as Date;
+            const differenceInDays = getDaysAgo(date);
+            let formattedDate: string;
+            if (differenceInDays === 0) {
+              formattedDate = "Now";
+            } else if (differenceInDays === 1) {
+              formattedDate = "Yesterday";
+            } else {
+              formattedDate = formatDateMinimal(date);
+            }
+
+            return `${formattedDate} ${differenceInDays > 0 ? `(${differenceInDays} day${differenceInDays > 1 ? "s" : ""} ago)` : ""}`;
+          },
+          label(context: any) {
+            const value = Number(context.parsed.y);
+            const config = datasetConfig.find(cfg => cfg.title === context.dataset.label);
+            return config?.labelFormatter(value) ?? "";
           },
         },
       },
     },
   };
 
-  const formattedLabels = labels.map(date => {
-    if (typeof date === "string") {
-      return date;
+  const formattedLabels = labels.map(value => {
+    if (typeof value === "string") {
+      return value;
     }
-    const formattedDate = formatDateMinimal(date);
+    const formattedDate = formatDateMinimal(value);
     if (formatDateMinimal(getDaysAgoDate(0)) === formattedDate) {
       return "Now";
     }
