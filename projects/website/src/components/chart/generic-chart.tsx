@@ -4,7 +4,7 @@
 import { Chart, registerables } from "chart.js";
 import { Line } from "react-chartjs-2";
 import { useIsMobile } from "@/hooks/use-is-mobile";
-import { formatDateMinimal, getDaysAgo, getDaysAgoDate, parseDate } from "@ssr/common/utils/time-utils";
+import { formatDateMinimal, getDaysAgoDate, parseDate } from "@ssr/common/utils/time-utils";
 
 Chart.register(...registerables);
 
@@ -16,7 +16,7 @@ export type Axis = {
   position?: AxisPosition;
   display?: boolean;
   grid?: { color?: string; drawOnChartArea?: boolean };
-  title?: { display: boolean; text: string; color?: string };
+  title?: { display: boolean; text?: string; color?: string };
   ticks?: {
     stepSize?: number;
     callback?: (value: number, index: number, values: any) => string;
@@ -34,6 +34,7 @@ export type Dataset = {
   lineTension: number;
   spanGaps: boolean;
   yAxisID: string;
+  hidden?: boolean;
   type?: DatasetDisplayType;
 };
 
@@ -46,16 +47,17 @@ export type DatasetConfig = {
     reverse: boolean;
     display: boolean;
     hideOnMobile?: boolean;
-    displayName: string;
+    displayName?: string;
     position: AxisPosition;
-    valueFormatter?: (value: number) => string; // Added precision option here
+    valueFormatter?: (value: number) => string;
   };
   type?: DatasetDisplayType;
   labelFormatter: (value: number) => string;
+  showLegend?: boolean;
 };
 
 export type ChartProps = {
-  labels: Date[];
+  labels: Date[] | string[];
   datasetConfig: DatasetConfig[];
   histories: Record<string, (number | null)[]>;
 };
@@ -65,7 +67,7 @@ const generateAxis = (
   reverse: boolean,
   display: boolean,
   position: AxisPosition,
-  displayName: string,
+  displayName?: string,
   valueFormatter?: (value: number) => string
 ): Axis => ({
   id,
@@ -88,6 +90,7 @@ const generateDataset = (
   data: (number | null)[],
   borderColor: string,
   yAxisID: string,
+  showLegend: boolean = true,
   type?: DatasetDisplayType
 ): Dataset => ({
   label,
@@ -97,6 +100,7 @@ const generateDataset = (
   lineTension: 0.5,
   spanGaps: false,
   yAxisID,
+  hidden: !showLegend, // Use hidden to disable legend
   type,
   ...(type === "bar" && {
     backgroundColor: borderColor,
@@ -112,7 +116,6 @@ export default function GenericChart({ labels, datasetConfig, histories }: Chart
       reverse: false,
       ticks: {
         font: (context: any) => {
-          // Make the first of the month bold
           if (parseDate(context.tick.label).getDate() === 1) {
             return {
               weight: "bold",
@@ -143,7 +146,14 @@ export default function GenericChart({ labels, datasetConfig, histories }: Chart
           config.axisConfig.valueFormatter
         );
 
-        return generateDataset(config.title, historyArray, config.color, config.axisId, config.type || "line");
+        return generateDataset(
+          config.title,
+          historyArray,
+          config.color,
+          config.axisId,
+          config.showLegend !== false, // Respect showLegend property
+          config.type || "line"
+        );
       }
 
       return null;
@@ -157,27 +167,15 @@ export default function GenericChart({ labels, datasetConfig, histories }: Chart
     scales: axes,
     elements: { point: { radius: 0 } },
     plugins: {
-      legend: { position: "top", labels: { color: "white" } },
-      tooltip: {
-        callbacks: {
-          title(context: any) {
-            const date = labels[context[0].dataIndex];
-            const differenceInDays = getDaysAgo(date);
-            let formattedDate: string;
-            if (differenceInDays === 0) {
-              formattedDate = "Now";
-            } else if (differenceInDays === 1) {
-              formattedDate = "Yesterday";
-            } else {
-              formattedDate = formatDateMinimal(date);
-            }
-
-            return `${formattedDate} ${differenceInDays > 0 ? `(${differenceInDays} day${differenceInDays > 1 ? "s" : ""} ago)` : ""}`;
-          },
-          label(context: any) {
-            const value = Number(context.parsed.y);
-            const config = datasetConfig.find(cfg => cfg.title === context.dataset.label);
-            return config?.labelFormatter(value) ?? "";
+      legend: {
+        position: "top",
+        labels: {
+          color: "white",
+          // Filter out datasets where showLegend is false
+          filter: (legendItem: any, chartData: any) => {
+            // Access showLegend from chartData.datasets
+            const dataset = chartData.datasets[legendItem.datasetIndex];
+            return dataset.showLegend !== false; // Only show if showLegend is not false
           },
         },
       },
@@ -185,6 +183,9 @@ export default function GenericChart({ labels, datasetConfig, histories }: Chart
   };
 
   const formattedLabels = labels.map(date => {
+    if (typeof date === "string") {
+      return date;
+    }
     const formattedDate = formatDateMinimal(date);
     if (formatDateMinimal(getDaysAgoDate(0)) === formattedDate) {
       return "Now";

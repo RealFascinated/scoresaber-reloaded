@@ -9,6 +9,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { fetchLeaderboard } from "@ssr/common/utils/leaderboard.util";
 import LeaderboardScoresResponse from "@ssr/common/response/leaderboard-scores-response";
+import LeaderboardPpChart from "@/components/leaderboard/leaderboard-pp-chart";
 
 const REFRESH_INTERVAL = 1000 * 60 * 5;
 
@@ -48,17 +49,21 @@ export function LeaderboardData({ initialLeaderboard, initialScores, initialPage
     }
   }, [data]);
 
+  const leaderboard = currentLeaderboard.leaderboard;
   return (
     <main className="flex flex-col-reverse xl:flex-row w-full gap-2">
       <LeaderboardScores
-        leaderboard={currentLeaderboard.leaderboard}
+        leaderboard={leaderboard}
         initialScores={initialScores}
         initialPage={initialPage}
         leaderboardChanged={newId => setCurrentLeaderboardId(newId)}
         showDifficulties
         isLeaderboardPage
       />
-      <LeaderboardInfo leaderboard={currentLeaderboard.leaderboard} beatSaverMap={currentLeaderboard.beatsaver} />
+      <div className="flex flex-col gap-2 w-full xl:w-[500px]">
+        <LeaderboardInfo leaderboard={leaderboard} beatSaverMap={currentLeaderboard.beatsaver} />
+        {leaderboard.stars > 0 && <LeaderboardPpChart leaderboard={leaderboard} />}
+      </div>
     </main>
   );
 }

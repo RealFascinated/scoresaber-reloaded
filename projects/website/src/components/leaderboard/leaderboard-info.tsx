@@ -21,7 +21,7 @@ type LeaderboardInfoProps = {
 
 export function LeaderboardInfo({ leaderboard, beatSaverMap }: LeaderboardInfoProps) {
   return (
-    <Card className="xl:w-[500px] h-fit w-full">
+    <Card className="w-full h-fit">
       <div className="flex flex-row justify-between w-full">
         <div className="flex flex-col justify-between w-full min-h-[160px]">
           {/* Song Info */}
