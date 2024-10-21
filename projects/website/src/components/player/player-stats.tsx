@@ -6,7 +6,7 @@ import { ReactNode } from "react";
 import Tooltip from "@/components/tooltip";
 import { DailyChange } from "@/components/statistic/daily-change";
 import { PlayerStat } from "@ssr/common/player/player-stat";
-import { getScoreSaberRole } from "@ssr/common/scoresaber.util";
+import { getScoreSaberRole } from "@ssr/common/utils/scoresaber.util";
 
 type Stat = {
   name: string;
