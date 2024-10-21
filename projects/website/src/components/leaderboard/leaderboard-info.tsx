@@ -6,6 +6,7 @@ import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leade
 import { BeatSaverMap } from "@ssr/common/model/beatsaver/beatsaver-map";
 import { getBeatSaverMapperProfileUrl } from "@ssr/common/utils/beatsaver.util";
 import FallbackLink from "@/components/fallback-link";
+import { formatNumber } from "@ssr/common/utils/number-utils";
 
 type LeaderboardInfoProps = {
   /**
@@ -26,9 +27,14 @@ export function LeaderboardInfo({ leaderboard, beatSaverMap }: LeaderboardInfoPr
         <div className="flex flex-col justify-between w-full min-h-[160px]">
           {/* Song Info */}
           <div className="flex flex-col gap-1">
-            <p className="font-semibold">
-              {leaderboard.songName} {leaderboard.songSubName}
-            </p>
+            <FallbackLink
+              href={`https://beatsaver.com/maps/${beatSaverMap?.bsr}`}
+              className="hover:brightness-[66%] transform-gpu transition-all"
+            >
+              <p className="font-semibold">
+                {leaderboard.songName} {leaderboard.songSubName}
+              </p>
+            </FallbackLink>
             <p className="text-sm text-gray-400">
               By <span className="text-pp">{leaderboard.songAuthorName}</span>
             </p>
@@ -45,7 +51,8 @@ export function LeaderboardInfo({ leaderboard, beatSaverMap }: LeaderboardInfoPr
               </FallbackLink>
             </p>
             <p>
-              Plays: <span className="font-semibold">{leaderboard.plays}</span> ({leaderboard.dailyPlays} today)
+              Plays: <span className="font-semibold">{formatNumber(leaderboard.plays)}</span> (
+              {formatNumber(leaderboard.dailyPlays)} today)
             </p>
             <p>
               Status: <span className="font-semibold">{leaderboard.stars > 0 ? "Ranked" : "Unranked"}</span>
