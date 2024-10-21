@@ -4,7 +4,7 @@ import Tooltip from "@/components/tooltip";
 import { ScoreBadge, ScoreBadges } from "@/components/score/score-badge";
 import ScoreSaberScore from "@ssr/common/score/impl/scoresaber-score";
 import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
-import FullComboBadge from "@/components/score/badges/full-combo";
+import ScoreMissesBadge from "@/components/score/badges/score-misses";
 import { Modifier } from "@ssr/common/score/modifier";
 import { ScoreModifiers } from "@/components/score/score-modifiers";
 
@@ -106,7 +106,7 @@ const badges: ScoreBadge[] = [
   {
     name: "Full Combo",
     create: (score: ScoreSaberScore) => {
-      return <FullComboBadge score={score} />;
+      return <ScoreMissesBadge score={score} />;
     },
   },
 ];

@@ -4,7 +4,14 @@ import clsx from "clsx";
 import Tooltip from "@/components/tooltip";
 import { ScoreBadgeProps } from "@/components/score/badges/badge-props";
 
-export default function FullComboBadge({ score }: ScoreBadgeProps) {
+type ScoreMissesBadgeProps = ScoreBadgeProps & {
+  /**
+   * Hide the "X" mark for misses.
+   */
+  hideXMark?: boolean;
+};
+
+export default function ScoreMissesBadge({ score, hideXMark }: ScoreMissesBadgeProps) {
   return (
     <Tooltip
       display={
@@ -21,9 +28,9 @@ export default function FullComboBadge({ score }: ScoreBadgeProps) {
         </div>
       }
     >
-      <div className="flex gap-1">
+      <div className="flex gap-1 items-center justify-center">
         <p>{score.fullCombo ? <span className="text-green-400">FC</span> : formatNumberWithCommas(score.misses)}</p>
-        <XMarkIcon className={clsx("w-5 h-5", score.fullCombo ? "hidden" : "text-red-400")} />
+        {!hideXMark && <XMarkIcon className={clsx("w-5 h-5", score.fullCombo ? "hidden" : "text-red-400")} />}
       </div>
     </Tooltip>
   );

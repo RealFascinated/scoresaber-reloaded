@@ -7,6 +7,7 @@ import Tooltip from "@/components/tooltip";
 import { ScoreTimeSet } from "@/components/score/score-time-set";
 import { ScoreModifiers } from "@/components/score/score-modifiers";
 import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
+import ScoreMissesBadge from "@/components/score/badges/score-misses";
 
 type Props = {
   /**
@@ -52,11 +53,11 @@ export default function LeaderboardScore({ score, leaderboard, claimedPlayer }: 
       {/* Score Misses */}
       <td
         className={clsx(
-          "px-4 py-2 text-center whitespace-nowrap",
+          "px-4 py-2 whitespace-nowrap cursor-default",
           score.misses > 0 ? "text-red-500" : "text-green-500"
         )}
       >
-        {score.misses > 0 ? `${score.misses}x` : "FC"}
+        <ScoreMissesBadge score={score} hideXMark />
       </td>
 
       {/* Score PP */}
@@ -74,7 +75,7 @@ export default function LeaderboardScore({ score, leaderboard, claimedPlayer }: 
             </div>
           }
         >
-          <p className="cursor-pointer">
+          <p className="cursor-default">
             <ScoreModifiers type="simple" score={score} />
           </p>
         </Tooltip>
