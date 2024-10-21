@@ -19,8 +19,6 @@ import ScoreSaberScore from "@ssr/common/score/impl/scoresaber-score";
 import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
 import PlayerScoresResponse from "@ssr/common/response/player-scores-response";
 
-const REFRESH_INTERVAL = 1000 * 60 * 5;
-
 type Props = {
   initialPlayerData: ScoreSaberPlayer;
   initialScoreData?: PlayerScoresResponse<ScoreSaberScore, ScoreSaberLeaderboard>;
@@ -47,8 +45,6 @@ export default function PlayerData({ initialPlayerData, initialScoreData, initia
       }
       return await getScoreSaberPlayerFromToken(playerResponse, settings?.playerId);
     },
-    refetchInterval: REFRESH_INTERVAL,
-    refetchIntervalInBackground: false,
   });
 
   if (data && (!isLoading || !isError)) {

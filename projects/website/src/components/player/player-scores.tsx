@@ -20,8 +20,6 @@ import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leade
 import { fetchPlayerScores } from "@ssr/common/utils/score-utils";
 import PlayerScoresResponse from "@ssr/common/response/player-scores-response";
 
-const REFRESH_INTERVAL = 1000 * 60 * 5;
-
 type Props = {
   initialScoreData?: PlayerScoresResponse<ScoreSaberScore, ScoreSaberLeaderboard>;
   initialSearch?: string;
@@ -73,8 +71,6 @@ export default function PlayerScores({ initialScoreData, initialSearch, player, 
         pageState.sort,
         debouncedSearchTerm
       ),
-    refetchInterval: REFRESH_INTERVAL,
-    refetchIntervalInBackground: false,
     enabled: shouldFetch && (debouncedSearchTerm.length >= 3 || debouncedSearchTerm.length === 0),
   });
 
