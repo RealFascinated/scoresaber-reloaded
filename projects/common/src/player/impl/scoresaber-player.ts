@@ -29,7 +29,7 @@ export default interface ScoreSaberPlayer extends Player {
   /**
    * The role the player has.
    */
-  role: ScoreSaberRole | undefined;
+  role: string | undefined;
 
   /**
    * The badges the player has.
@@ -87,7 +87,6 @@ export async function getScoreSaberPlayerFromToken(
     lines: token.bio?.split("\n") || [],
     linesStripped: token.bio?.replace(/<[^>]+>/g, "")?.split("\n") || [],
   };
-  const role = token.role == null ? undefined : (token.role as ScoreSaberRole);
   const badges: ScoreSaberBadge[] =
     token.badges?.map(badge => {
       return {
@@ -269,7 +268,7 @@ export async function getScoreSaberPlayerFromToken(
       monthly: getStatisticChanges(30),
       yearly: getStatisticChanges(365),
     },
-    role: role,
+    role: token.role == null ? undefined : token.role,
     badges: badges,
     statisticHistory: statisticHistory,
     statistics: token.scoreStats,
@@ -298,11 +297,6 @@ export type ScoreSaberBio = {
    */
   linesStripped: string[];
 };
-
-/**
- * The ScoreSaber account roles.
- */
-export type ScoreSaberRole = "Admin";
 
 /**
  * A badge for a player.

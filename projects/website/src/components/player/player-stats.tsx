@@ -4,9 +4,9 @@ import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { formatDate } from "@ssr/common/utils/time-utils";
 import { ReactNode } from "react";
 import Tooltip from "@/components/tooltip";
-import { getPlayerHistoryToday } from "@ssr/common/utils/player-utils";
 import { DailyChange } from "@/components/statistic/daily-change";
 import { PlayerStat } from "@ssr/common/player/player-stat";
+import { getScoreSaberRole } from "@ssr/common/scoresaber.util";
 
 type Stat = {
   name: string;
@@ -92,6 +92,16 @@ const playerStats: Stat[] = [
       };
     },
   },
+  {
+    name: "Role",
+    create: (player: ScoreSaberPlayer) => {
+      const role = getScoreSaberRole(player);
+
+      return {
+        value: role?.name,
+      };
+    },
+  },
 ];
 
 type Props = {
@@ -103,7 +113,7 @@ export default function PlayerStats({ player }: Props) {
     <div className={`flex flex-wrap gap-2 w-full justify-center lg:justify-start`}>
       {playerStats.map((badge, index) => {
         const toRender = badge.create(player);
-        if (toRender === undefined) {
+        if (toRender === undefined || toRender.value === undefined) {
           return <div key={index} />;
         }
         const { tooltip, value } = toRender;

@@ -2,7 +2,7 @@ import ScoreSaberPlayerToken from "../types/token/scoresaber/score-saber-player-
 import ScoreSaberLeaderboardPlayerInfoToken from "../types/token/scoresaber/score-saber-leaderboard-player-info-token";
 import ScoreSaberPlayer from "../player/impl/scoresaber-player";
 
-type ScoreSaberRole = {
+export type ScoreSaberRole = {
   /**
    * The name of the role.
    */
