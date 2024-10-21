@@ -3,6 +3,7 @@ import LeaderboardDifficulty from "../leaderboard-difficulty";
 import ScoreSaberLeaderboardToken from "../../types/token/scoresaber/score-saber-leaderboard-token";
 import { getDifficultyFromScoreSaberDifficulty } from "../../utils/scoresaber-utils";
 import { parseDate } from "../../utils/time-utils";
+import { LeaderboardStatus } from "../leaderboard-status";
 
 export default interface ScoreSaberLeaderboard extends Leaderboard {
   /**
@@ -19,6 +20,16 @@ export default interface ScoreSaberLeaderboard extends Leaderboard {
    * The amount of plays today.
    */
   readonly dailyPlays: number;
+
+  /**
+   * Whether this leaderboard is qualified to be ranked.
+   */
+  readonly qualified: boolean;
+
+  /**
+   * The status of the map.
+   */
+  readonly status: LeaderboardStatus;
 }
 
 /**
@@ -33,6 +44,14 @@ export function getScoreSaberLeaderboardFromToken(token: ScoreSaberLeaderboardTo
     gameMode: token.difficulty.gameMode,
     difficultyRaw: token.difficulty.difficultyRaw,
   };
+
+  let status: LeaderboardStatus = "Unranked";
+  if (token.qualified) {
+    status = "Qualified";
+  } else if (token.ranked) {
+    status = "Ranked";
+  }
+
   return {
     id: token.id,
     songHash: token.songHash,
@@ -59,5 +78,7 @@ export function getScoreSaberLeaderboardFromToken(token: ScoreSaberLeaderboardTo
     stars: token.stars,
     plays: token.plays,
     dailyPlays: token.dailyPlays,
+    qualified: token.qualified,
+    status: status,
   };
 }

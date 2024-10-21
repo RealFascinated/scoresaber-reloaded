@@ -55,7 +55,7 @@ export function LeaderboardInfo({ leaderboard, beatSaverMap }: LeaderboardInfoPr
               {formatNumber(leaderboard.dailyPlays)} today)
             </p>
             <p>
-              Status: <span className="font-semibold">{leaderboard.stars > 0 ? "Ranked" : "Unranked"}</span>
+              Status: <span className="font-semibold">{leaderboard.status}</span>
             </p>
           </div>
         </div>
