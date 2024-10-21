@@ -3,7 +3,7 @@
 import React from "react";
 import GenericChart, { DatasetConfig } from "@/components/chart/generic-chart";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import { parseDate } from "@ssr/common/utils/time-utils";
+import { getDaysAgoDate, parseDate } from "@ssr/common/utils/time-utils";
 import { getValueFromHistory } from "@ssr/common/utils/player-utils";
 
 type Props = {
@@ -43,25 +43,19 @@ export default function GenericPlayerChart({ player, datasetConfig }: Props) {
     ([a], [b]) => parseDate(a).getTime() - parseDate(b).getTime()
   );
 
-  const today = new Date();
   let currentHistoryIndex = 0;
 
-  // Iterate from historyDays-1 to 0 (last 'historyDays' days)
-  for (let dayAgo = historyDays - 1; dayAgo >= 0; dayAgo--) {
-    const targetDate = new Date();
-    targetDate.setDate(today.getDate() - dayAgo);
-    labels.push(targetDate); // Push the target date to labels
+  for (let dayAgo = historyDays; dayAgo >= 0; dayAgo--) {
+    const targetDate = getDaysAgoDate(dayAgo);
+    labels.push(targetDate); // Add the target date to labels
 
-    // Check if currentHistoryIndex is within bounds of statisticEntries
     if (currentHistoryIndex < statisticEntries.length) {
       const [dateString, history] = statisticEntries[currentHistoryIndex];
       const entryDate = parseDate(dateString);
 
-      // If the entry date matches the target date, use this entry
       if (entryDate.toDateString() === targetDate.toDateString()) {
         datasetConfig.forEach(config => {
-          // Use the correct index for histories
-          histories[config.field][historyDays - 1 - dayAgo] = getValueFromHistory(history, config.field) ?? null;
+          histories[config.field][historyDays - dayAgo] = getValueFromHistory(history, config.field) ?? null;
         });
         currentHistoryIndex++;
       }
