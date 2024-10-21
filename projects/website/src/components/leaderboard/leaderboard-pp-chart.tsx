@@ -17,14 +17,15 @@ type Props = {
 
 export default function LeaderboardPpChart({ leaderboard }: Props) {
   const [values, setValues] = useState([60, 100]);
-  const debouncedMin = useDebounce(values[0], 100);
+  const debouncedValues = useDebounce(values, 100);
 
   const histories: Record<string, (number | null)[]> = {};
   const labels: string[] = [];
-  const min = debouncedMin;
-  const precision = min >= 60 ? 0.1 : 0.2;
 
-  for (let accuracy = min; accuracy <= 100; accuracy += precision) {
+  const min = debouncedValues[0];
+  const max = debouncedValues[1];
+  const precision = min >= 60 ? 0.1 : 0.2;
+  for (let accuracy = min; accuracy <= max; accuracy += precision) {
     const label = accuracy.toFixed(2) + "%";
     labels.push(label);
 
