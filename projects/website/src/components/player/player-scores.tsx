@@ -221,7 +221,7 @@ export default function PlayerScores({ initialScoreData, initialSearch, player, 
             className="grid min-w-full grid-cols-1 divide-y divide-border"
           >
             {scores.scores.map((score, index) => (
-              <motion.div key={score.score.id} variants={scoreAnimation}>
+              <motion.div key={index} variants={scoreAnimation}>
                 <Score score={score.score} leaderboard={score.leaderboard} beatSaverMap={score.beatSaver} />
               </motion.div>
             ))}
