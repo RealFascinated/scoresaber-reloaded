@@ -1,10 +1,12 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import GenericChart, { DatasetConfig } from "@/components/chart/generic-chart";
 import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import Card from "@/components/card";
+import { DualRangeSlider } from "@/components/ui/dual-range-slider";
+import { useDebounce } from "@uidotdev/usehooks";
 
 type Props = {
   /**
@@ -14,10 +16,15 @@ type Props = {
 };
 
 export default function LeaderboardPpChart({ leaderboard }: Props) {
+  const [values, setValues] = useState([60, 100]);
+  const debouncedMin = useDebounce(values[0], 100);
+
   const histories: Record<string, (number | null)[]> = {};
   const labels: string[] = [];
+  const min = debouncedMin;
+  const precision = min >= 60 ? 0.1 : 0.2;
 
-  for (let accuracy = 60; accuracy <= 100; accuracy += 0.2) {
+  for (let accuracy = min; accuracy <= 100; accuracy += precision) {
     const label = accuracy.toFixed(2) + "%";
     labels.push(label);
 
@@ -45,9 +52,24 @@ export default function LeaderboardPpChart({ leaderboard }: Props) {
   ];
 
   return (
-    <Card className="h-64 w-full">
-      <p className="font-semibold">PP Curve</p>
-      <GenericChart labels={labels} datasetConfig={datasetConfig} histories={histories} />
+    <Card className="w-full gap-7">
+      <div className="flex flex-col h-64">
+        <p className="font-semibold">PP Curve</p>
+        <GenericChart labels={labels} datasetConfig={datasetConfig} histories={histories} />
+      </div>
+
+      <div className="flex items-center justify-center">
+        <div className="w-[95%]">
+          <DualRangeSlider
+            label={value => <span>{value}%</span>}
+            value={values}
+            onValueChange={setValues}
+            min={5}
+            max={100}
+            step={1}
+          />
+        </div>
+      </div>
     </Card>
   );
 }
