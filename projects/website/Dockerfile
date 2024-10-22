@@ -3,7 +3,7 @@ FROM oven/bun:1.1.31-alpine AS base
 # Install dependencies
 FROM base AS depends
 WORKDIR /app
-COPY package.json bun.lockb* ./
+COPY . .
 RUN bun install --frozen-lockfile
 
 # Run the app
@@ -20,12 +20,12 @@ COPY --from=depends /app/package.json* /app/bun.lockb* ./
 COPY --from=depends /app/node_modules ./node_modules
 
 # Build the common library
-COPY projects/common ./projects/common
+COPY --from=depends /app/projects/common ./projects/common
 RUN bun i -g typescript
 RUN bun --filter '@ssr/common' build
 
 # Copy the website project
-COPY projects/website ./projects/website
+COPY --from=depends /app/projects/website ./projects/website
 
 # Build the website
 RUN bun run  --filter website build
