@@ -51,7 +51,7 @@ export default function ScoreMissesBadge({ score, hideXMark }: ScoreMissesBadgeP
             fullCombo={scoreImprovement.fullCombo}
           >
             <div className="flex gap-1 items-center">
-              {previousScoreMisses.missedNotes == 0 ? (
+              {scoreImprovement.fullCombo ? (
                 <p className="text-green-400">FC</p>
               ) : (
                 formatNumberWithCommas(previousScoreMisses.misses)

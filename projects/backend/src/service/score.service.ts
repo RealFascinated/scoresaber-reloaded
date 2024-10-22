@@ -191,7 +191,7 @@ export class ScoreService {
       songDifficulty: difficultyKey,
       songScore: score.baseScore,
       misses: {
-        misses: score.missedNotes + score.badCuts,
+        misses: score.missedNotes + score.badCuts + score.bombCuts,
         missedNotes: score.missedNotes,
         bombCuts: score.bombCuts,
         badCuts: score.badCuts,
@@ -209,7 +209,7 @@ export class ScoreService {
       data.scoreImprovement = {
         score: rawScoreImprovement.score,
         misses: {
-          misses: rawScoreImprovement.missedNotes + rawScoreImprovement.badCuts,
+          misses: rawScoreImprovement.missedNotes + rawScoreImprovement.badCuts + rawScoreImprovement.bombCuts,
           missedNotes: rawScoreImprovement.missedNotes,
           bombCuts: rawScoreImprovement.bombCuts,
           badCuts: rawScoreImprovement.badCuts,
