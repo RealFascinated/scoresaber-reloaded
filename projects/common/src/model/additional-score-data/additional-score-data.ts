@@ -120,6 +120,12 @@ export class AdditionalScoreData {
      */
     handAccuracy: HandAccuracy;
   };
+
+  /**
+   * The date the score was set on.
+   */
+  @prop({ required: true, index: true })
+  public timestamp!: Date;
 }
 
 export type AdditionalScoreDataDocument = AdditionalScoreData & Document;

@@ -211,6 +211,7 @@ export class ScoreService {
         left: score.accLeft,
         right: score.accRight,
       },
+      timestamp: new Date(score.timeset),
     } as AdditionalScoreData;
     if (rawScoreImprovement && rawScoreImprovement.score > 0) {
       data.scoreImprovement = {
