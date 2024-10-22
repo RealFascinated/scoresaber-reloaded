@@ -26,6 +26,7 @@ export default function ScoreMissesBadge({ score, hideXMark }: ScoreMissesBadgeP
       bombCuts: (scoreImprovement.misses.bombCuts + misses.bombCuts) * -1,
       wallsHit: (scoreImprovement.misses.wallsHit - misses.wallsHit) * -1,
     };
+  const previousScoreFc = previousScoreMisses?.misses == 0;
 
   return (
     <div className="flex flex-col justify-center items-center">
@@ -48,9 +49,10 @@ export default function ScoreMissesBadge({ score, hideXMark }: ScoreMissesBadgeP
             badCuts={previousScoreMisses.badCuts}
             bombCuts={previousScoreMisses.bombCuts}
             wallsHit={previousScoreMisses.wallsHit}
+            fullCombo={previousScoreFc}
           >
             <div className="flex gap-1 items-center">
-              {previousScoreMisses.misses == 0 ? (
+              {previousScoreFc ? (
                 <p className="text-green-400">FC</p>
               ) : (
                 formatNumberWithCommas(previousScoreMisses.misses)
