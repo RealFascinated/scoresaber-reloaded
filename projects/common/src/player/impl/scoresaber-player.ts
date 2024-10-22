@@ -181,15 +181,14 @@ export async function getScoreSaberPlayerFromToken(
    * Gets the change in the given stat
    *
    * @param statType the stat to check
-   * @param positive whether to multiply the change by 1 or -1
+   * @param isNegativeChange whether to multiply the change by 1 or -1
    * @param daysAgo the amount of days ago to get the stat for
    * @return the change
    */
-  const getStatisticChange = (statType: string, positive: boolean, daysAgo: number = 1): number | undefined => {
+  const getStatisticChange = (statType: string, isNegativeChange: boolean, daysAgo: number = 1): number | undefined => {
     const todayStats = statisticHistory[todayDate];
     let otherDate: Date | undefined;
 
-    // Use the same logic as the first version to get the date exactly 'daysAgo' days earlier
     if (daysAgo === 1) {
       otherDate = getMidnightAlignedDate(getDaysAgoDate(1)); // Yesterday
     } else {
@@ -240,7 +239,7 @@ export async function getScoreSaberPlayerFromToken(
     if (statToday === undefined || statOther === undefined) {
       return undefined;
     }
-    return (statToday - statOther) * (!positive ? 1 : -1);
+    return (statToday - statOther) * (!isNegativeChange ? 1 : -1);
   };
 
   const getStatisticChanges = (daysAgo: number): PlayerHistory => {
