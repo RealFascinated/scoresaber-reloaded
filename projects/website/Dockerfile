@@ -4,7 +4,7 @@ FROM oven/bun:1.1.31-alpine AS base
 FROM base AS depends
 WORKDIR /app
 COPY package.json bun.lockb* ./
-RUN bun install --frozen-lockfile
+RUN bun install
 
 # Run the app
 FROM base AS runner
