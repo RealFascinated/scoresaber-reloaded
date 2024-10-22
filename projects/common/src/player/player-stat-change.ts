@@ -51,7 +51,7 @@ export const PlayerStatChange: Record<PlayerStatChangeType, PlayerStatValue> = {
   },
   TotalRankedScore: {
     type: "Total Ranked Score",
-    value: (player, range) => player.statisticChange?.[range].scores?.totalRankedScores,
+    value: (player, range) => player.statisticChange?.[range].score?.totalRankedScore,
   },
   AverageRankedAccuracy: {
     type: "Average Ranked Accuracy",
