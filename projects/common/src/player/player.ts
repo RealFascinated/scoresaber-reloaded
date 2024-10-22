@@ -55,9 +55,7 @@ export default class Player {
   }
 }
 
+export type ChangeRange = "daily" | "weekly" | "monthly";
 export type StatisticChange = {
-  daily: PlayerHistory;
-  weekly: PlayerHistory;
-  monthly: PlayerHistory;
-  yearly: PlayerHistory;
+  [key in ChangeRange]: PlayerHistory;
 };

@@ -2,8 +2,9 @@ import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
 import { capitalizeFirstLetter } from "@/common/string-utils";
 import Tooltip from "@/components/tooltip";
-import { PlayerStatValue } from "@ssr/common/player/player-stat";
 import { ReactElement } from "react";
+import { ChangeRange } from "@ssr/common/player/player";
+import { PlayerStatValue } from "@ssr/common/player/player-stat-change";
 
 type ChangeOverTimeProps = {
   /**
@@ -23,13 +24,9 @@ type ChangeOverTimeProps = {
 };
 
 export function ChangeOverTime({ player, type, children }: ChangeOverTimeProps) {
-  const todayStats = player.statisticChange?.daily;
-  const weeklyStats = player.statisticChange?.weekly;
-  const monthlyStats = player.statisticChange?.monthly;
-
-  const todayStat = todayStats?.[type.value!];
-  const weeklyStat = weeklyStats?.[type.value!];
-  const monthlyStat = monthlyStats?.[type.value!];
+  const daily = type.value(player, "daily");
+  const weekly = type.value(player, "weekly");
+  const monthly = type.value(player, "monthly");
 
   // Format values based on stat type
   const formatChangeValue = (value: number | undefined): string | number => {
@@ -39,13 +36,13 @@ export function ChangeOverTime({ player, type, children }: ChangeOverTimeProps) 
     if (value === undefined) {
       return "No Data";
     }
-    return type.value === "pp" ? formatPp(value) + "pp" : formatNumberWithCommas(value);
+    return type.type === "Performance Points" ? formatPp(value) + "pp" : formatNumberWithCommas(value);
   };
 
   // Renders the change for a given time frame
-  const renderChange = (value: number | undefined, timeFrame: "daily" | "weekly" | "monthly") => (
+  const renderChange = (value: number | undefined, range: ChangeRange) => (
     <p>
-      {capitalizeFirstLetter(timeFrame)} Change:{" "}
+      {capitalizeFirstLetter(range)} Change:{" "}
       <span className={value === undefined ? "" : value >= 0 ? (value === 0 ? "" : "text-green-500") : "text-red-500"}>
         {formatChangeValue(value)}
       </span>
@@ -62,9 +59,9 @@ export function ChangeOverTime({ player, type, children }: ChangeOverTimeProps) 
       side="bottom"
       display={
         <div>
-          {renderChange(todayStat, "daily")}
-          {renderChange(weeklyStat, "weekly")}
-          {renderChange(monthlyStat, "monthly")}
+          {renderChange(daily, "daily")}
+          {renderChange(weekly, "weekly")}
+          {renderChange(monthly, "monthly")}
         </div>
       }
     >

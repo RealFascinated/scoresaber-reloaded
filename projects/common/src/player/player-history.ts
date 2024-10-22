@@ -15,6 +15,26 @@ export interface PlayerHistory {
   pp?: number;
 
   /**
+   * How many times replays of the player scores have been watched
+   */
+  replaysWatched?: number;
+
+  /**
+   * The player's score stats.
+   */
+  score?: {
+    /**
+     * The total amount of unranked and ranked score.
+     */
+    totalScore?: number;
+
+    /**
+     * The total amount of ranked score.
+     */
+    totalRankedScore?: number;
+  };
+
+  /**
    * The amount of scores set for this day.
    */
   scores?: {

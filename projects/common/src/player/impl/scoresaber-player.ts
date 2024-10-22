@@ -110,24 +110,21 @@ export async function getScoreSaberPlayerFromToken(
     if (history) {
       // Use the latest data for today
       history[todayDate] = {
-        ...{
-          scores: {
-            rankedScores: 0,
-            unrankedScores: 0,
-            totalScores: 0,
-            totalRankedScores: 0,
-          },
-        },
         ...history[todayDate],
         rank: token.rank,
         countryRank: token.countryRank,
         pp: token.pp,
+        replaysWatched: token.scoreStats.replaysWatched,
         accuracy: {
           averageRankedAccuracy: token.scoreStats.averageRankedAccuracy,
         },
         scores: {
           totalScores: token.scoreStats.totalPlayCount,
           totalRankedScores: token.scoreStats.rankedPlayCount,
+        },
+        score: {
+          totalScore: token.scoreStats.totalScore,
+          totalRankedScore: token.scoreStats.totalRankedScore,
         },
       };
 
@@ -158,10 +155,6 @@ export async function getScoreSaberPlayerFromToken(
       statisticHistory[dateKey] = {
         ...statisticHistory[dateKey],
         rank: rank,
-        scores: {
-          totalScores: token.scoreStats.totalPlayCount,
-          totalRankedScores: token.scoreStats.rankedPlayCount,
-        },
       };
     }
   }
@@ -247,9 +240,15 @@ export async function getScoreSaberPlayerFromToken(
       rank: getStatisticChange("rank", true, daysAgo),
       countryRank: getStatisticChange("countryRank", true, daysAgo),
       pp: getStatisticChange("pp", false, daysAgo),
+      replaysWatched: getStatisticChange("replaysWatched", false, daysAgo),
+      accuracy: {
+        averageRankedAccuracy: getStatisticChange("accuracy.averageRankedAccuracy", false, daysAgo),
+      },
       scores: {
         totalScores: getStatisticChange("scores.totalScores", false, daysAgo),
         totalRankedScores: getStatisticChange("scores.totalRankedScores", false, daysAgo),
+        rankedScores: getStatisticChange("scores.rankedScores", false, daysAgo),
+        unrankedScores: getStatisticChange("scores.unrankedScores", false, daysAgo),
       },
     };
   };
@@ -268,7 +267,6 @@ export async function getScoreSaberPlayerFromToken(
       daily: getStatisticChanges(1),
       weekly: getStatisticChanges(7),
       monthly: getStatisticChanges(30),
-      yearly: getStatisticChanges(365),
     },
     role: token.role == null ? undefined : token.role,
     badges: badges,

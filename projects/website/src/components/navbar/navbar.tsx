@@ -4,8 +4,9 @@ import Link from "next/link";
 import React from "react";
 import NavbarButton from "./navbar-button";
 import ProfileButton from "./profile-button";
-import { SwordIcon, TrendingUpIcon } from "lucide-react";
+import { TrendingUpIcon } from "lucide-react";
 import FriendsButton from "@/components/navbar/friends-button";
+import { PiSwordFill } from "react-icons/pi";
 
 type NavbarItem = {
   name: string;
@@ -25,7 +26,7 @@ const items: NavbarItem[] = [
     name: "Score Feed",
     link: "/scores",
     align: "left",
-    icon: <SwordIcon className="h-5 w-5" />,
+    icon: <PiSwordFill className="h-5 w-5" />,
   },
   {
     name: "Search",

@@ -13,7 +13,7 @@ import PlayerSteamProfile from "@/components/player/player-steam-profile";
 import { getScoreSaberRole } from "@ssr/common/utils/scoresaber.util";
 import { DailyChange } from "@/components/statistic/daily-change";
 import { ChangeOverTime } from "@/components/statistic/change-over-time";
-import { PlayerStat } from "@ssr/common/player/player-stat";
+import { PlayerStatChange } from "@ssr/common/player/player-stat-change";
 
 const playerData = [
   {
@@ -27,14 +27,14 @@ const playerData = [
 
       return (
         <div className="text-gray-300 flex gap-1 items-center">
-          <ChangeOverTime player={player} type={PlayerStat.Rank}>
+          <ChangeOverTime player={player} type={PlayerStatChange.Rank}>
             <Link href={`/ranking/${player.rankPages.global}`}>
               <p className="hover:brightness-[66%] transition-all transform-gpu">
                 #{formatNumberWithCommas(player.rank)}
               </p>
             </Link>
           </ChangeOverTime>
-          <DailyChange type={PlayerStat.Rank} change={rankChange} />
+          <DailyChange type={PlayerStatChange.Rank} change={rankChange} />
         </div>
       );
     },
@@ -50,14 +50,14 @@ const playerData = [
 
       return (
         <div className="text-gray-300 flex gap-1 items-center">
-          <ChangeOverTime player={player} type={PlayerStat.CountryRank}>
+          <ChangeOverTime player={player} type={PlayerStatChange.CountryRank}>
             <Link href={`/ranking/${player.country}/${player.rankPages.country}`}>
               <p className="hover:brightness-[66%] transition-all transform-gpu">
                 #{formatNumberWithCommas(player.countryRank)}
               </p>
             </Link>
           </ChangeOverTime>
-          <DailyChange type={PlayerStat.CountryRank} change={rankChange} />
+          <DailyChange type={PlayerStatChange.CountryRank} change={rankChange} />
         </div>
       );
     },
@@ -70,10 +70,10 @@ const playerData = [
 
       return (
         <div className="text-gray-300 flex gap-1 items-center">
-          <ChangeOverTime player={player} type={PlayerStat.PerformancePoints}>
+          <ChangeOverTime player={player} type={PlayerStatChange.PerformancePoints}>
             <p className="hover:brightness-[66%] transition-all transform-gpu text-pp">{formatPp(player.pp)}pp</p>
           </ChangeOverTime>
-          <DailyChange type={PlayerStat.PerformancePoints} change={ppChange} />
+          <DailyChange type={PlayerStatChange.PerformancePoints} change={ppChange} />
         </div>
       );
     },

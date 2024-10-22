@@ -5,8 +5,8 @@ import { formatDate } from "@ssr/common/utils/time-utils";
 import { ReactNode } from "react";
 import Tooltip from "@/components/tooltip";
 import { DailyChange } from "@/components/statistic/daily-change";
-import { PlayerStat } from "@ssr/common/player/player-stat";
 import { getScoreSaberRole } from "@ssr/common/utils/scoresaber.util";
+import { PlayerStatChange } from "@ssr/common/player/player-stat-change";
 
 type Stat = {
   name: string;
@@ -22,13 +22,11 @@ const playerStats: Stat[] = [
     name: "Ranked Play Count",
     color: "bg-pp",
     create: (player: ScoreSaberPlayer) => {
-      const rankedScoresChange = player.statisticChange?.daily.scores?.totalRankedScores;
-
       return {
         value: (
           <>
             {formatNumberWithCommas(player.statistics.rankedPlayCount)}{" "}
-            <DailyChange type={PlayerStat.RankedPlayCount} change={rankedScoresChange} />
+            <DailyChange type={PlayerStatChange.RankedPlayCount} player={player} />
           </>
         ),
       };
@@ -39,7 +37,12 @@ const playerStats: Stat[] = [
     color: "bg-pp",
     create: (player: ScoreSaberPlayer) => {
       return {
-        value: formatNumberWithCommas(player.statistics.totalRankedScore),
+        value: (
+          <>
+            {formatNumberWithCommas(player.statistics.totalRankedScore)}{" "}
+            <DailyChange type={PlayerStatChange.TotalRankedScore} player={player} />
+          </>
+        ),
       };
     },
   },
@@ -48,20 +51,23 @@ const playerStats: Stat[] = [
     color: "bg-pp",
     create: (player: ScoreSaberPlayer) => {
       return {
-        value: player.statistics.averageRankedAccuracy.toFixed(2) + "%",
+        value: (
+          <>
+            {player.statistics.averageRankedAccuracy.toFixed(2) + "%"}{" "}
+            <DailyChange type={PlayerStatChange.AverageRankedAccuracy} player={player} />
+          </>
+        ),
       };
     },
   },
   {
     name: "Total Play Count",
     create: (player: ScoreSaberPlayer) => {
-      const scoresChange = player.statisticChange?.daily.scores;
-
       return {
         value: (
           <>
             {formatNumberWithCommas(player.statistics.totalPlayCount)}{" "}
-            <DailyChange type={PlayerStat.TotalPlayCount} change={scoresChange?.totalScores} />
+            <DailyChange type={PlayerStatChange.TotalPlayCount} player={player} />
           </>
         ),
       };
@@ -71,7 +77,12 @@ const playerStats: Stat[] = [
     name: "Total Score",
     create: (player: ScoreSaberPlayer) => {
       return {
-        value: formatNumberWithCommas(player.statistics.totalScore),
+        value: (
+          <>
+            {formatNumberWithCommas(player.statistics.totalScore)}{" "}
+            <DailyChange type={PlayerStatChange.TotalScore} player={player} />
+          </>
+        ),
       };
     },
   },
@@ -79,7 +90,12 @@ const playerStats: Stat[] = [
     name: "Total Replays Watched",
     create: (player: ScoreSaberPlayer) => {
       return {
-        value: formatNumberWithCommas(player.statistics.replaysWatched),
+        value: (
+          <>
+            {formatNumberWithCommas(player.statistics.replaysWatched)}{" "}
+            <DailyChange type={PlayerStatChange.TotalReplaysWatched} player={player} />
+          </>
+        ),
       };
     },
   },

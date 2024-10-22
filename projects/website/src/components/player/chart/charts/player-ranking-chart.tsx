@@ -1,10 +1,11 @@
 "use client";
 
-import { formatNumberWithCommas, isWholeNumber } from "@ssr/common/utils/number-utils";
 import React from "react";
 import { DatasetConfig } from "@/components/chart/generic-chart";
 import GenericPlayerChart from "@/components/player/chart/generic-player-chart";
+import { scoreBarsDataset } from "@/components/player/chart/charts/player-scores-chart";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
+import { formatNumberWithCommas, isWholeNumber } from "@ssr/common/utils/number-utils";
 
 type Props = {
   player: ScoreSaberPlayer;
@@ -58,62 +59,7 @@ const datasetConfig: DatasetConfig[] = [
     },
     labelFormatter: (value: number) => `PP: ${formatNumberWithCommas(value)}pp`,
   },
-  {
-    title: "Total Scores",
-    field: "scores.totalScores",
-    color: "#616161",
-    axisId: "y3",
-    showLegend: false,
-    axisConfig: {
-      reverse: false,
-      display: false,
-      displayName: "Total Scores",
-      position: "left",
-    },
-    labelFormatter: (value: number) => `Total Scores: ${formatNumberWithCommas(value)}`,
-  },
-  {
-    title: "Total Ranked Scores",
-    field: "scores.totalRankedScores",
-    color: "#6773ff",
-    axisId: "y4",
-    showLegend: false,
-    axisConfig: {
-      reverse: false,
-      display: false,
-      displayName: "Total Ranked Scores",
-      position: "left",
-    },
-    labelFormatter: (value: number) => `Total Ranked Scores: ${formatNumberWithCommas(value)}`,
-  },
-  {
-    title: "Ranked Scores",
-    field: "scores.rankedScores",
-    color: "#ffae4d",
-    axisId: "y5",
-    axisConfig: {
-      reverse: false,
-      display: false,
-      displayName: "Ranked Scores",
-      position: "left",
-    },
-    type: "bar",
-    labelFormatter: (value: number) => `Ranked Scores: ${formatNumberWithCommas(value)}`,
-  },
-  {
-    title: "Unranked Scores",
-    field: "scores.unrankedScores",
-    color: "#616161",
-    axisId: "y5",
-    axisConfig: {
-      reverse: false,
-      display: false,
-      displayName: "Unranked Scores",
-      position: "left",
-    },
-    type: "bar",
-    labelFormatter: (value: number) => `Unranked Scores: ${formatNumberWithCommas(value)}`,
-  },
+  ...scoreBarsDataset,
 ];
 
 export default function PlayerRankingChart({ player }: Props) {

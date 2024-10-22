@@ -1,12 +1,14 @@
 "use client";
 
-import PlayerRankingChart from "@/components/player/chart/player-ranking-chart";
+import PlayerRankingChart from "@/components/player/chart/charts/player-ranking-chart";
 import { FC, useState } from "react";
 import Tooltip from "@/components/tooltip";
-import PlayerAccuracyChart from "@/components/player/chart/player-accuracy-chart";
+import PlayerAccuracyChart from "@/components/player/chart/charts/player-accuracy-chart";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import { TrendingUpIcon } from "lucide-react";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
+import PlayerScoresChart from "@/components/player/chart/charts/player-scores-chart";
+import { PiSwordFill } from "react-icons/pi";
 
 type PlayerChartsProps = {
   /**
@@ -52,6 +54,12 @@ export default function PlayerCharts({ player }: PlayerChartsProps) {
       label: "Accuracy",
       icon: <TrendingUpIcon className="w-[18px] h-[18px]" />,
       chart: PlayerAccuracyChart,
+    });
+    charts.push({
+      index: 2,
+      label: "Scores",
+      icon: <PiSwordFill className="w-[18px] h-[18px]" />,
+      chart: PlayerScoresChart,
     });
   }
 

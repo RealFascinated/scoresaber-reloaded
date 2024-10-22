@@ -148,12 +148,18 @@ export class PlayerService {
     history.countryRank = player.countryRank;
     history.rank = player.rank;
     history.accuracy = {
+      ...history.accuracy,
       averageRankedAccuracy: scoreStats.averageRankedAccuracy,
     };
     history.scores = {
       ...history.scores,
       totalScores: scoreStats.totalPlayCount,
       totalRankedScores: scoreStats.rankedPlayCount,
+    };
+    history.score = {
+      ...history.score,
+      totalScore: scoreStats.totalScore,
+      totalRankedScore: scoreStats.totalRankedScore,
     };
 
     foundPlayer.setStatisticHistory(dateToday, history);
@@ -181,12 +187,11 @@ export class PlayerService {
     }
 
     const today = new Date();
-    let history = player.getHistoryByDate(today);
-    if (history == undefined || Object.keys(history).length === 0) {
-      history = { scores: { rankedScores: 0, unrankedScores: 0 } }; // Ensure initialization
-    }
-
-    const scores = history.scores || {};
+    const history = player.getHistoryByDate(today);
+    const scores = history.scores || {
+      rankedScores: 0,
+      unrankedScores: 0,
+    };
     if (leaderboard.stars > 0) {
       scores.rankedScores!++;
     } else {
