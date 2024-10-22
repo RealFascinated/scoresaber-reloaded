@@ -13,6 +13,7 @@ import ScoreEditorButton from "@/components/score/score-editor-button";
 import ScoreSaberScore from "@ssr/common/score/impl/scoresaber-score";
 import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
 import { BeatSaverMap } from "@ssr/common/model/beatsaver/beatsaver-map";
+import BeatSaberPepeLogo from "@/components/logos/beatsaber-pepe-logo";
 
 type Props = {
   score?: ScoreSaberScore;
@@ -34,6 +35,7 @@ export default function ScoreButtons({
   const [leaderboardExpanded, setLeaderboardExpanded] = useState(false);
   const { toast } = useToast();
 
+  const additionalData = score?.additionalData;
   return (
     <div className={`flex justify-end gap-2 items-center`}>
       <div
@@ -79,6 +81,20 @@ export default function ScoreButtons({
         >
           <YouTubeLogo />
         </ScoreButton>
+
+        {additionalData != undefined && (
+          <>
+            {/* Open score replay */}
+            <ScoreButton
+              onClick={() => {
+                window.open(`https://replay.beatleader.xyz/?scoreId=${additionalData.scoreId}`, "_blank");
+              }}
+              tooltip={<p>Click to view the score replay!</p>}
+            >
+              <BeatSaberPepeLogo />
+            </ScoreButton>
+          </>
+        )}
       </div>
       <div
         className={`flex gap-2 ${alwaysSingleLine ? "flex-row" : "flex-row lg:flex-col"} items-center justify-center`}
