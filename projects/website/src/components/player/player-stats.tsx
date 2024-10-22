@@ -133,14 +133,18 @@ export default function PlayerStats({ player }: Props) {
           return <div key={index} />;
         }
         const { tooltip, value } = toRender;
-        const stat = <StatValue key={index} color={badge.color} name={badge.name} value={value} />;
+        const stat = <StatValue color={badge.color} name={badge.name} value={value} />;
 
-        return tooltip ? (
-          <Tooltip asChild={false} display={tooltip} key={index}>
-            {stat}
-          </Tooltip>
-        ) : (
-          stat
+        return (
+          <div key={index}>
+            {tooltip ? (
+              <Tooltip asChild={false} display={tooltip}>
+                {stat}
+              </Tooltip>
+            ) : (
+              stat
+            )}
+          </div>
         );
       })}
     </div>
