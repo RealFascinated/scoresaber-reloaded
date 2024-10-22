@@ -28,7 +28,8 @@ import { BeatLeaderScoreToken } from "@ssr/common/types/token/beatleader/beatlea
 import {
   AdditionalScoreData,
   AdditionalScoreDataModel,
-} from "../../../common/src/model/additional-score-data/additional-score-data";
+} from "@ssr/common/model/additional-score-data/additional-score-data";
+import { BeatLeaderScoreImprovementToken } from "@ssr/common/types/token/beatleader/beatleader-score-improvement-token";
 
 const playerScoresCache = new SSRCache({
   ttl: 1000 * 60, // 1 minute
@@ -182,6 +183,10 @@ export class ScoreService {
       return;
     }
 
+    const getMisses = (score: BeatLeaderScoreToken | BeatLeaderScoreImprovementToken) => {
+      return score.missedNotes + score.badCuts + score.bombCuts;
+    };
+
     const difficulty = leaderboard.difficulty;
     const difficultyKey = `${difficulty.difficultyName.replace("Plus", "+")}-${difficulty.modeName}`;
     const rawScoreImprovement = score.scoreImprovement;
@@ -191,7 +196,7 @@ export class ScoreService {
       songDifficulty: difficultyKey,
       songScore: score.baseScore,
       misses: {
-        misses: score.missedNotes + score.badCuts + score.bombCuts,
+        misses: getMisses(score),
         missedNotes: score.missedNotes,
         bombCuts: score.bombCuts,
         badCuts: score.badCuts,
@@ -209,18 +214,13 @@ export class ScoreService {
       data.scoreImprovement = {
         score: rawScoreImprovement.score,
         misses: {
-          misses: rawScoreImprovement.missedNotes + rawScoreImprovement.badCuts + rawScoreImprovement.bombCuts,
+          misses: getMisses(rawScoreImprovement),
           missedNotes: rawScoreImprovement.missedNotes,
           bombCuts: rawScoreImprovement.bombCuts,
           badCuts: rawScoreImprovement.badCuts,
           wallsHit: rawScoreImprovement.wallsHit,
         },
         accuracy: rawScoreImprovement.accuracy * 100,
-        fullCombo:
-          rawScoreImprovement.missedNotes == 0 &&
-          rawScoreImprovement.bombCuts == 0 &&
-          rawScoreImprovement.badCuts == 0 &&
-          rawScoreImprovement.wallsHit == 0,
         handAccuracy: {
           left: rawScoreImprovement.accLeft,
           right: rawScoreImprovement.accRight,

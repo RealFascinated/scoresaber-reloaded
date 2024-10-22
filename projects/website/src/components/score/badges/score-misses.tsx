@@ -20,11 +20,11 @@ export default function ScoreMissesBadge({ score, hideXMark }: ScoreMissesBadgeP
   const previousScoreMisses: Misses | undefined = misses &&
     additionalData &&
     scoreImprovement && {
-      misses: misses.misses - scoreImprovement.misses.misses,
-      missedNotes: misses.missedNotes - scoreImprovement.misses.missedNotes,
-      badCuts: misses.badCuts - scoreImprovement.misses.badCuts,
-      bombCuts: misses.bombCuts - scoreImprovement.misses.bombCuts,
-      wallsHit: misses.wallsHit - scoreImprovement.misses.wallsHit,
+      misses: (scoreImprovement.misses.misses - misses.misses) * -1,
+      missedNotes: (scoreImprovement.misses.missedNotes + misses.missedNotes) * -1,
+      badCuts: (scoreImprovement.misses.badCuts + misses.badCuts) * -1,
+      bombCuts: (scoreImprovement.misses.bombCuts + misses.bombCuts) * -1,
+      wallsHit: (scoreImprovement.misses.wallsHit - misses.wallsHit) * -1,
     };
 
   return (
@@ -48,10 +48,9 @@ export default function ScoreMissesBadge({ score, hideXMark }: ScoreMissesBadgeP
             badCuts={previousScoreMisses.badCuts}
             bombCuts={previousScoreMisses.bombCuts}
             wallsHit={previousScoreMisses.wallsHit}
-            fullCombo={scoreImprovement.fullCombo}
           >
             <div className="flex gap-1 items-center">
-              {scoreImprovement.fullCombo ? (
+              {previousScoreMisses.misses == 0 ? (
                 <p className="text-green-400">FC</p>
               ) : (
                 formatNumberWithCommas(previousScoreMisses.misses)

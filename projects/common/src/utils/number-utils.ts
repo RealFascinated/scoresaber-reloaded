@@ -41,3 +41,16 @@ export function formatNumber(num: number, type: "number" | "pp" = "number") {
   }
   return formatNumberWithCommas(num);
 }
+
+/**
+ * Ensures a number is always positive
+ *
+ * @param num the number to ensure
+ * @returns the positive number
+ */
+export function ensurePositiveNumber(num: number) {
+  if (num == -0) {
+    return 0;
+  }
+  return num < 0 ? num * -1 : num;
+}

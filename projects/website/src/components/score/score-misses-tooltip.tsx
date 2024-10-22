@@ -1,4 +1,4 @@
-import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
+import { ensurePositiveNumber, formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import Tooltip from "@/components/tooltip";
 
 type ScoreMissesTooltipProps = {
@@ -29,12 +29,12 @@ export function ScoreMissesTooltip({
           {!fullCombo ? (
             <>
               <p className="font-semibold">Misses</p>
-              <p>Missed Notes: {formatNumberWithCommas(missedNotes)}</p>
-              <p>Bad Cuts: {formatNumberWithCommas(badCuts)}</p>
+              <p>Missed Notes: {formatNumberWithCommas(ensurePositiveNumber(missedNotes))}</p>
+              <p>Bad Cuts: {formatNumberWithCommas(ensurePositiveNumber(badCuts))}</p>
               {bombCuts !== undefined && wallsHit !== undefined && (
                 <>
-                  <p>Bomb Cuts: {formatNumberWithCommas(bombCuts)}</p>
-                  <p>Wall Hits: {formatNumberWithCommas(wallsHit)}</p>
+                  <p>Bomb Cuts: {formatNumberWithCommas(ensurePositiveNumber(bombCuts))}</p>
+                  <p>Wall Hits: {formatNumberWithCommas(ensurePositiveNumber(wallsHit))}</p>
                 </>
               )}
             </>

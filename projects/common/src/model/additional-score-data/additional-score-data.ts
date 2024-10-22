@@ -104,11 +104,6 @@ export class AdditionalScoreData {
     misses: Misses;
 
     /**
-     * Whether the play was a full combo.
-     */
-    fullCombo: boolean;
-
-    /**
      * The change in the hand accuracy.
      */
     handAccuracy: HandAccuracy;
