@@ -59,10 +59,38 @@ const datasetConfig: DatasetConfig[] = [
     labelFormatter: (value: number) => `PP: ${formatNumberWithCommas(value)}pp`,
   },
   {
+    title: "Total Scores",
+    field: "scores.totalScores",
+    color: "#616161",
+    axisId: "y3",
+    showLegend: false,
+    axisConfig: {
+      reverse: false,
+      display: false,
+      displayName: "Total Scores",
+      position: "left",
+    },
+    labelFormatter: (value: number) => `Total Scores: ${formatNumberWithCommas(value)}`,
+  },
+  {
+    title: "Total Ranked Scores",
+    field: "scores.totalRankedScores",
+    color: "#6773ff",
+    axisId: "y4",
+    showLegend: false,
+    axisConfig: {
+      reverse: false,
+      display: false,
+      displayName: "Total Ranked Scores",
+      position: "left",
+    },
+    labelFormatter: (value: number) => `Total Ranked Scores: ${formatNumberWithCommas(value)}`,
+  },
+  {
     title: "Ranked Scores",
     field: "scores.rankedScores",
     color: "#ffae4d",
-    axisId: "y3",
+    axisId: "y5",
     axisConfig: {
       reverse: false,
       display: false,
@@ -76,7 +104,7 @@ const datasetConfig: DatasetConfig[] = [
     title: "Unranked Scores",
     field: "scores.unrankedScores",
     color: "#616161",
-    axisId: "y3",
+    axisId: "y5",
     axisConfig: {
       reverse: false,
       display: false,

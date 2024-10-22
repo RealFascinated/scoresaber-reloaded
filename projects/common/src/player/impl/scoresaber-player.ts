@@ -125,6 +125,10 @@ export async function getScoreSaberPlayerFromToken(
         accuracy: {
           averageRankedAccuracy: token.scoreStats.averageRankedAccuracy,
         },
+        scores: {
+          totalScores: token.scoreStats.totalPlayCount,
+          totalRankedScores: token.scoreStats.rankedPlayCount,
+        },
       };
 
       isBeingTracked = true;
@@ -177,10 +181,11 @@ export async function getScoreSaberPlayerFromToken(
    * Gets the change in the given stat
    *
    * @param statType the stat to check
+   * @param positive whether to multiply the change by 1 or -1
    * @param daysAgo the amount of days ago to get the stat for
    * @return the change
    */
-  const getStatisticChange = (statType: string, daysAgo: number = 1): number | undefined => {
+  const getStatisticChange = (statType: string, positive: boolean, daysAgo: number = 1): number | undefined => {
     const todayStats = statisticHistory[todayDate];
     let otherDate: Date | undefined;
 
@@ -218,14 +223,14 @@ export async function getScoreSaberPlayerFromToken(
     }
 
     // Ensure todayStats exists and contains the statType
-    if (!todayStats || !(statType in todayStats)) {
+    if (!todayStats || !getValueFromHistory(todayStats, statType)) {
       return undefined;
     }
 
     const otherStats = statisticHistory[formatDateMinimal(otherDate)]; // This is now validated
 
     // Ensure otherStats exists and contains the statType
-    if (!otherStats || !(statType in otherStats)) {
+    if (!otherStats || !getValueFromHistory(otherStats, statType)) {
       return undefined;
     }
 
@@ -235,19 +240,17 @@ export async function getScoreSaberPlayerFromToken(
     if (statToday === undefined || statOther === undefined) {
       return undefined;
     }
-
-    // Return the difference, accounting for negative changes in ranks
-    return (statToday - statOther) * (statType === "pp" ? 1 : -1);
+    return (statToday - statOther) * (!positive ? 1 : -1);
   };
 
   const getStatisticChanges = (daysAgo: number): PlayerHistory => {
     return {
-      rank: getStatisticChange("rank", daysAgo),
-      countryRank: getStatisticChange("countryRank", daysAgo),
-      pp: getStatisticChange("pp", daysAgo),
+      rank: getStatisticChange("rank", true, daysAgo),
+      countryRank: getStatisticChange("countryRank", true, daysAgo),
+      pp: getStatisticChange("pp", false, daysAgo),
       scores: {
-        totalScores: getStatisticChange("scores.totalScores", daysAgo),
-        totalRankedScores: getStatisticChange("scores.totalRankedScores", daysAgo),
+        totalScores: getStatisticChange("scores.totalScores", false, daysAgo),
+        totalRankedScores: getStatisticChange("scores.totalRankedScores", false, daysAgo),
       },
     };
   };
