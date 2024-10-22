@@ -1,6 +1,4 @@
 import WebSocket from "ws";
-import { DiscordChannels, logToChannel } from "backend/src/bot/bot";
-import { EmbedBuilder } from "discord.js";
 
 export type WebsocketCallbacks = {
   /**
@@ -36,18 +34,6 @@ type Websocket = {
 export function connectWebSocket({ name, url, onMessage, onDisconnect }: Websocket) {
   let websocket: WebSocket | null = null;
 
-  /**
-   * Logs to the backend logs channel.
-   *
-   * @param error the error to log
-   */
-  async function log(error: WebSocket.ErrorEvent | WebSocket.CloseEvent) {
-    await logToChannel(
-      DiscordChannels.backendLogs,
-      new EmbedBuilder().setDescription(`${name} websocket disconnected: ${JSON.stringify(error)}`)
-    );
-  }
-
   function connectWs() {
     websocket = new WebSocket(url);
 
@@ -62,14 +48,12 @@ export function connectWebSocket({ name, url, onMessage, onDisconnect }: Websock
       }
 
       onDisconnect && onDisconnect(event);
-      log(event);
     };
 
     websocket.onclose = event => {
       console.log(`Lost connection to the ${name} WebSocket. Attempting to reconnect...`);
 
       onDisconnect && onDisconnect(event);
-      log(event);
       setTimeout(connectWs, 5000); // Reconnect after 5 seconds
     };
 

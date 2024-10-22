@@ -23,7 +23,8 @@ import LeaderboardController from "./controller/leaderboard.controller";
 import { getAppVersion } from "./common/app.util";
 import { connectScoresaberWebsocket } from "@ssr/common/websocket/scoresaber-websocket";
 import { connectBeatLeaderWebsocket } from "@ssr/common/websocket/beatleader-websocket";
-import { initDiscordBot } from "./bot/bot";
+import { DiscordChannels, initDiscordBot, logToChannel } from "./bot/bot";
+import { EmbedBuilder } from "discord.js";
 
 // Load .env file
 dotenv.config({
@@ -40,10 +41,22 @@ connectScoresaberWebsocket({
     await ScoreService.trackScoreSaberScore(score);
     await ScoreService.notifyNumberOne(score);
   },
+  onDisconnect: async error => {
+    await logToChannel(
+      DiscordChannels.backendLogs,
+      new EmbedBuilder().setDescription(`ScoreSaber websocket disconnected: ${JSON.stringify(error)}`)
+    );
+  },
 });
 connectBeatLeaderWebsocket({
   onScore: async score => {
     await ScoreService.trackBeatLeaderScore(score);
+  },
+  onDisconnect: async error => {
+    await logToChannel(
+      DiscordChannels.backendLogs,
+      new EmbedBuilder().setDescription(`BeatLeader websocket disconnected: ${JSON.stringify(error)}`)
+    );
   },
 });
 
