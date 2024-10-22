@@ -116,13 +116,16 @@ export async function getScoreSaberPlayerFromToken(
         pp: token.pp,
         replaysWatched: token.scoreStats.replaysWatched,
         accuracy: {
+          ...history[todayDate]?.accuracy,
           averageRankedAccuracy: token.scoreStats.averageRankedAccuracy,
         },
         scores: {
+          ...history[todayDate]?.scores,
           totalScores: token.scoreStats.totalPlayCount,
           totalRankedScores: token.scoreStats.rankedPlayCount,
         },
         score: {
+          ...history[todayDate]?.score,
           totalScore: token.scoreStats.totalScore,
           totalRankedScore: token.scoreStats.totalRankedScore,
         },
