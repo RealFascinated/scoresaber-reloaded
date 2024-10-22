@@ -62,7 +62,7 @@ export default function LeaderboardScore({ score, leaderboard, claimedPlayer }: 
 
       {/* Score PP */}
       {leaderboard.stars > 0 && (
-        <td className="px-4 py-2 text-center text-pp whitespace-nowrap">{formatPp(score.pp)}pp</td>
+        <td className="px-4 py-2 text-center text-ssr whitespace-nowrap">{formatPp(score.pp)}pp</td>
       )}
 
       {/* Score Modifiers */}

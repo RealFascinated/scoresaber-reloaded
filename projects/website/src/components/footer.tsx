@@ -54,7 +54,7 @@ export default function Footer() {
           return (
             <Link
               key={index}
-              className="px-2 text-pp hover:brightness-[66%] transition-all transform-gpu"
+              className="px-2 text-ssr hover:brightness-[66%] transition-all transform-gpu"
               href={item.link}
               target={item.openInNewTab ? "_blank" : undefined}
             >

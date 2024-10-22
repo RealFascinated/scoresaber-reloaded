@@ -36,7 +36,7 @@ export function LeaderboardInfo({ leaderboard, beatSaverMap }: LeaderboardInfoPr
               </p>
             </FallbackLink>
             <p className="text-sm text-gray-400">
-              By <span className="text-pp">{leaderboard.songAuthorName}</span>
+              By <span className="text-ssr">{leaderboard.songAuthorName}</span>
             </p>
           </div>
 
@@ -45,7 +45,7 @@ export function LeaderboardInfo({ leaderboard, beatSaverMap }: LeaderboardInfoPr
             <p>
               Mapper:{" "}
               <FallbackLink href={getBeatSaverMapperProfileUrl(beatSaverMap)}>
-                <span className="text-pp font-semibold hover:brightness-[66%] transform-gpu transition-all">
+                <span className="text-ssr font-semibold hover:brightness-[66%] transform-gpu transition-all">
                   {leaderboard.levelAuthorName}
                 </span>
               </FallbackLink>

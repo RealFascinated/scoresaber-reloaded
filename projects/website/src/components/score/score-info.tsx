@@ -59,7 +59,7 @@ export default function ScoreSongInfo({ leaderboard, beatSaverMap }: Props) {
         <div className="overflow-y-clip">
           <Link
             href={`/leaderboard/${leaderboard.id}`}
-            className="cursor-pointer select-none hover:brightness-[66%] transform-gpu transition-all text-pp w-fit"
+            className="cursor-pointer select-none hover:brightness-[66%] transform-gpu transition-all text-ssr w-fit"
           >
             {leaderboard.songName} {leaderboard.songSubName}
           </Link>

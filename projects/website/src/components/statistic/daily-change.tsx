@@ -36,7 +36,7 @@ export function DailyChange({ type, change, tooltip, format }: DailyChangeProps)
   const value = (
     <p className={`text-sm ${change > 0 ? "text-green-400" : "text-red-400"}`}>
       {change > 0 ? "+" : ""}
-      {formatValue(change)}
+      {`${formatValue(change)}${type.value == "pp" ? "pp" : ""}`}
     </p>
   );
 
