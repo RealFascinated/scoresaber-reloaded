@@ -247,6 +247,10 @@ export async function getScoreSaberPlayerFromToken(
       accuracy: {
         averageRankedAccuracy: getStatisticChange("accuracy.averageRankedAccuracy", false, daysAgo),
       },
+      score: {
+        totalScore: getStatisticChange("score.totalScore", false, daysAgo),
+        totalRankedScore: getStatisticChange("score.totalRankedScore", false, daysAgo),
+      },
       scores: {
         totalScores: getStatisticChange("scores.totalScores", false, daysAgo),
         totalRankedScores: getStatisticChange("scores.totalRankedScores", false, daysAgo),
