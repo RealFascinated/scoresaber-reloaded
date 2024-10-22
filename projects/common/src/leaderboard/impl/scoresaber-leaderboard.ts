@@ -54,7 +54,7 @@ export function getScoreSaberLeaderboardFromToken(token: ScoreSaberLeaderboardTo
 
   return {
     id: token.id,
-    songHash: token.songHash,
+    songHash: token.songHash.toUpperCase(),
     songName: token.songName,
     songSubName: token.songSubName,
     songAuthorName: token.songAuthorName,

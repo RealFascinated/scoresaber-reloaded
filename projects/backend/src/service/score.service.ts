@@ -25,7 +25,10 @@ import { SSRCache } from "@ssr/common/cache";
 import { fetchWithCache } from "../common/cache.util";
 import { PlayerDocument, PlayerModel } from "@ssr/common/model/player";
 import { BeatLeaderScoreToken } from "@ssr/common/types/token/beatleader/beatleader-score-token";
-import { AdditionalScoreData, AdditionalScoreDataModel } from "@ssr/common/model/additional-score-data";
+import {
+  AdditionalScoreData,
+  AdditionalScoreDataModel,
+} from "../../../common/src/model/additional-score-data/additional-score-data";
 
 const playerScoresCache = new SSRCache({
   ttl: 1000 * 60, // 1 minute
@@ -167,22 +170,65 @@ export class ScoreService {
       return;
     }
 
+    // The score has already been tracked, so ignore it.
+    if (
+      (await this.getAdditionalScoreData(
+        playerId,
+        leaderboard.song.hash,
+        leaderboard.difficulty.difficultyName,
+        score.baseScore
+      )) !== undefined
+    ) {
+      return;
+    }
+
     const difficulty = leaderboard.difficulty;
     const difficultyKey = `${difficulty.difficultyName.replace("Plus", "+")}-${difficulty.modeName}`;
-    await AdditionalScoreDataModel.create({
+    const rawScoreImprovement = score.scoreImprovement;
+    const data = {
       playerId: playerId,
-      songHash: leaderboard.song.hash,
+      songHash: leaderboard.song.hash.toUpperCase(),
       songDifficulty: difficultyKey,
       songScore: score.baseScore,
-      bombCuts: score.bombCuts,
-      wallsHit: score.wallsHit,
+      misses: {
+        misses: score.missedNotes + score.badCuts,
+        missedNotes: score.missedNotes,
+        bombCuts: score.bombCuts,
+        badCuts: score.badCuts,
+        wallsHit: score.wallsHit,
+      },
       pauses: score.pauses,
       fcAccuracy: score.fcAccuracy * 100,
+      fullCombo: score.fullCombo,
       handAccuracy: {
         left: score.accLeft,
         right: score.accRight,
       },
-    } as AdditionalScoreData);
+    } as AdditionalScoreData;
+    if (rawScoreImprovement.score > 0) {
+      data.scoreImprovement = {
+        score: rawScoreImprovement.score,
+        misses: {
+          misses: rawScoreImprovement.missedNotes + rawScoreImprovement.badCuts,
+          missedNotes: rawScoreImprovement.missedNotes,
+          bombCuts: rawScoreImprovement.bombCuts,
+          badCuts: rawScoreImprovement.badCuts,
+          wallsHit: rawScoreImprovement.wallsHit,
+        },
+        accuracy: rawScoreImprovement.accuracy * 100,
+        fullCombo:
+          rawScoreImprovement.missedNotes == 0 &&
+          rawScoreImprovement.bombCuts == 0 &&
+          rawScoreImprovement.badCuts == 0 &&
+          rawScoreImprovement.wallsHit == 0,
+        handAccuracy: {
+          left: rawScoreImprovement.accLeft,
+          right: rawScoreImprovement.accRight,
+        },
+      };
+    }
+
+    await AdditionalScoreDataModel.create(data);
     console.log(
       `Tracked additional score data for "${scorePlayer.name}"(${playerId}), difficulty: ${difficultyKey}, score: ${score.baseScore}`
     );
@@ -205,7 +251,7 @@ export class ScoreService {
   ): Promise<AdditionalScoreData | undefined> {
     const additionalData = await AdditionalScoreDataModel.findOne({
       playerId: playerId,
-      songHash: songHash,
+      songHash: songHash.toUpperCase(),
       songDifficulty: songDifficulty,
       songScore: songScore,
     });
@@ -232,7 +278,6 @@ export class ScoreService {
     sort: string,
     search?: string
   ): Promise<PlayerScoresResponse<unknown, unknown> | undefined> {
-    console.log("hi");
     return fetchWithCache(
       playerScoresCache,
       `player-scores-${leaderboardName}-${id}-${page}-${sort}-${search}`,
@@ -275,7 +320,6 @@ export class ScoreService {
                 `${tokenLeaderboard.difficulty.difficulty}-${tokenLeaderboard.difficulty.gameMode}`,
                 score.score
               );
-              console.log("additionalData", additionalData);
               if (additionalData !== undefined) {
                 score.additionalData = additionalData;
               }

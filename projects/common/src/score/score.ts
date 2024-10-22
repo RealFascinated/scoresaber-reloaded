@@ -1,6 +1,6 @@
 import { Modifier } from "./modifier";
 import { Leaderboards } from "../leaderboard";
-import { AdditionalScoreData } from "../model/additional-score-data";
+import { AdditionalScoreData } from "../model/additional-score-data/additional-score-data";
 
 export default interface Score {
   /**

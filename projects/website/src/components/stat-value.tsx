@@ -21,7 +21,7 @@ export default function StatValue({ name, color, value }: Props) {
   return (
     <div
       className={clsx(
-        "flex min-w-16 gap-2 h-[28px] p-1 items-center justify-center rounded-md text-sm cursor-default",
+        "flex min-w-16 gap-2 h-full p-1 items-center justify-center rounded-md text-sm cursor-default",
         color ? color : "bg-accent"
       )}
       style={{

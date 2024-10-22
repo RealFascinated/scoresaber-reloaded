@@ -7,6 +7,7 @@ import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leade
 import ScoreMissesBadge from "@/components/score/badges/score-misses";
 import { Modifier } from "@ssr/common/score/modifier";
 import { ScoreModifiers } from "@/components/score/score-modifiers";
+import { renderChange } from "@/common/change";
 
 const badges: ScoreBadge[] = [
   {
@@ -48,6 +49,8 @@ const badges: ScoreBadge[] = [
       return getScoreBadgeFromAccuracy(acc).color;
     },
     create: (score: ScoreSaberScore, leaderboard: ScoreSaberLeaderboard) => {
+      const scoreImprovement = score.additionalData?.scoreImprovement;
+
       const acc = (score.score / leaderboard.maxScore) * 100;
       const fcAccuracy = score.additionalData?.fcAccuracy;
       const scoreBadge = getScoreBadgeFromAccuracy(acc);
@@ -83,9 +86,15 @@ const badges: ScoreBadge[] = [
               </div>
             }
           >
-            <p className="cursor-default">
-              {acc.toFixed(2)}% {modCount > 0 && <ScoreModifiers type="simple" limit={1} score={score} />}
-            </p>
+            <div className="flex flex-col items-center justify-center cursor-default">
+              <p>
+                {acc.toFixed(2)}% {modCount > 0 && <ScoreModifiers type="simple" limit={1} score={score} />}
+              </p>
+              {scoreImprovement &&
+                renderChange(scoreImprovement.accuracy, false, num => {
+                  return `${num.toFixed(2)}%`;
+                })}
+            </div>
           </Tooltip>
         </>
       );
@@ -94,7 +103,14 @@ const badges: ScoreBadge[] = [
   {
     name: "Score",
     create: (score: ScoreSaberScore) => {
-      return `${formatNumberWithCommas(Number(score.score.toFixed(0)))}`;
+      const scoreImprovement = score.additionalData?.scoreImprovement;
+
+      return (
+        <div className="flex flex-col items-center justify-center">
+          <p>{formatNumberWithCommas(Number(score.score.toFixed(0)))}</p>
+          {scoreImprovement && renderChange(scoreImprovement.score, false, formatNumberWithCommas)}
+        </div>
+      );
     },
   },
   {
@@ -104,11 +120,15 @@ const badges: ScoreBadge[] = [
       if (!score.additionalData) {
         return undefined;
       }
-
       const { handAccuracy } = score.additionalData;
+      const scoreImprovement = score.additionalData.scoreImprovement;
+
       return (
         <Tooltip display={"Left Hand Accuracy"}>
-          <p>{handAccuracy.left.toFixed(2)}</p>
+          <div className="flex flex-col items-center justify-center">
+            <p>{handAccuracy.left.toFixed(2)}</p>
+            {scoreImprovement && renderChange(scoreImprovement.handAccuracy.left, false, num => num.toFixed(2))}
+          </div>
         </Tooltip>
       );
     },
@@ -122,9 +142,13 @@ const badges: ScoreBadge[] = [
       }
 
       const { handAccuracy } = score.additionalData;
+      const scoreImprovement = score.additionalData.scoreImprovement;
       return (
         <Tooltip display={"Right Hand Accuracy"}>
-          <p>{handAccuracy.right.toFixed(2)}</p>
+          <div className="flex flex-col items-center justify-center">
+            <p>{handAccuracy.right.toFixed(2)}</p>
+            {scoreImprovement && renderChange(scoreImprovement.handAccuracy.right, false, num => num.toFixed(2))}
+          </div>
         </Tooltip>
       );
     },
@@ -144,7 +168,7 @@ type Props = {
 
 export default function ScoreStats({ score, leaderboard }: Props) {
   return (
-    <div className={`grid grid-cols-3 grid-rows-2 gap-1 ml-0 lg:ml-2 h-[64px]`}>
+    <div className={`grid grid-cols-3 grid-rows-2 gap-1 ml-0 lg:ml-2 `}>
       <ScoreBadges badges={badges} score={score} leaderboard={leaderboard} />
     </div>
   );

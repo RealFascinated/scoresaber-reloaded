@@ -1,5 +1,7 @@
 import { getModelForClass, modelOptions, prop, ReturnModelType, Severity } from "@typegoose/typegoose";
 import { Document } from "mongoose";
+import { HandAccuracy } from "./hand-accuracy";
+import { Misses } from "./misses";
 
 /**
  * The model for a BeatSaver map.
@@ -47,18 +49,8 @@ export class AdditionalScoreData {
   @prop({ required: true, index: true })
   public songScore!: number;
 
-  /**
-   * The amount of times a bomb was hit.
-   */
-
-  @prop({ required: false })
-  public bombCuts!: number;
-
-  /**
-   * The amount of walls hit in the play.
-   */
-  @prop({ required: false })
-  public wallsHit!: number;
+  // Above data is only so we can fetch it
+  // --------------------------------
 
   /**
    * The amount of pauses in the play.
@@ -67,27 +59,60 @@ export class AdditionalScoreData {
   public pauses!: number;
 
   /**
+   * The miss data for the play.
+   */
+  @prop({ required: false, _id: false })
+  public misses!: Misses;
+
+  /**
    * The hand accuracy for each hand.
    * @private
    */
-  @prop({ required: false })
-  public handAccuracy!: {
-    /**
-     * The left hand accuracy.
-     */
-    left: number;
-
-    /**
-     * The right hand accuracy.
-     */
-    right: number;
-  };
+  @prop({ required: false, _id: false })
+  public handAccuracy!: HandAccuracy;
 
   /**
    * The full combo accuracy of the play.
    */
   @prop({ required: true })
   public fcAccuracy!: number;
+
+  /**
+   * Whether the play was a full combo.
+   */
+  @prop({ required: true })
+  public fullCombo!: boolean;
+
+  /**
+   * The score improvement.
+   */
+  @prop({ required: false, _id: false })
+  public scoreImprovement?: {
+    /**
+     * The change in the score.
+     */
+    score: number;
+
+    /**
+     * The change in the accuracy.
+     */
+    accuracy: number;
+
+    /**
+     * The change in the misses.
+     */
+    misses: Misses;
+
+    /**
+     * Whether the play was a full combo.
+     */
+    fullCombo: boolean;
+
+    /**
+     * The change in the hand accuracy.
+     */
+    handAccuracy: HandAccuracy;
+  };
 }
 
 export type AdditionalScoreDataDocument = AdditionalScoreData & Document;
