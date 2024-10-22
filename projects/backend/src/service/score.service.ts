@@ -212,7 +212,7 @@ export class ScoreService {
         right: score.accRight,
       },
     } as AdditionalScoreData;
-    if (rawScoreImprovement.score > 0) {
+    if (rawScoreImprovement && rawScoreImprovement.score > 0) {
       data.scoreImprovement = {
         score: rawScoreImprovement.score,
         misses: {
