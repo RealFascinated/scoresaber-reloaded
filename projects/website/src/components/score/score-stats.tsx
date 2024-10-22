@@ -8,6 +8,7 @@ import ScoreMissesBadge from "@/components/score/badges/score-misses";
 import { Modifier } from "@ssr/common/score/modifier";
 import { ScoreModifiers } from "@/components/score/score-modifiers";
 import { renderChange } from "@/common/change";
+import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 
 const badges: ScoreBadge[] = [
   {
@@ -15,7 +16,8 @@ const badges: ScoreBadge[] = [
     color: () => {
       return "bg-pp";
     },
-    create: (score: ScoreSaberScore) => {
+    create: (score: ScoreSaberScore, leaderboard: ScoreSaberLeaderboard) => {
+      const fcAccuracy = score.additionalData?.fcAccuracy;
       const pp = score.pp;
       const weight = score.weight;
       if (pp === 0 || pp === undefined || weight === undefined) {
@@ -33,6 +35,7 @@ const badges: ScoreBadge[] = [
                 <p>
                   Weighted: {formatPp(weightedPp)}pp ({(100 * weight).toFixed(2)}%)
                 </p>
+                {fcAccuracy && <p>Full Combo: {scoresaberService.getPp(leaderboard.stars, fcAccuracy).toFixed(0)}pp</p>}
               </div>
             }
           >
