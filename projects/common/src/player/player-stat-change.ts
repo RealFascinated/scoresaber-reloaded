@@ -1,5 +1,5 @@
-import ScoreSaberPlayer from "@ssr/player/impl/scoresaber-player";
-import { ChangeRange } from "@ssr/player/player";
+import ScoreSaberPlayer from "./impl/scoresaber-player";
+import { ChangeRange } from "./player";
 
 export type PlayerStatValue = {
   /**
