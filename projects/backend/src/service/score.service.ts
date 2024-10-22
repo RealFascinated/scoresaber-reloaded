@@ -195,6 +195,8 @@ export class ScoreService {
       songHash: leaderboard.song.hash.toUpperCase(),
       songDifficulty: difficultyKey,
       songScore: score.baseScore,
+      scoreId: score.id,
+      leaderboardId: leaderboard.id,
       misses: {
         misses: getMisses(score),
         missedNotes: score.missedNotes,

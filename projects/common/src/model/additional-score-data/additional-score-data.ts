@@ -53,6 +53,18 @@ export class AdditionalScoreData {
   // --------------------------------
 
   /**
+   * The BeatLeader score id for this score.
+   */
+  @prop({ required: false })
+  public scoreId!: number;
+
+  /**
+   * The BeatLeader leaderboard id for this score.
+   */
+  @prop({ required: false })
+  public leaderboardId!: string;
+
+  /**
    * The amount of pauses in the play.
    */
   @prop({ required: false })
