@@ -10,8 +10,6 @@ import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { getPlayersAroundPlayer } from "@ssr/common/utils/player-utils";
 import { AroundPlayer } from "@ssr/common/types/around-player";
 import { PlayerInfo } from "@/components/player/player-info";
-import useDatabase from "@/hooks/use-database";
-import { useLiveQuery } from "dexie-react-hooks";
 
 const PLAYER_NAME_MAX_LENGTH = 18;
 
@@ -50,9 +48,6 @@ const miniVariants: Variants = {
 };
 
 export default function Mini({ type, player, shouldUpdate }: MiniProps) {
-  const database = useDatabase();
-  const claimedPlayer = useLiveQuery(() => database.getClaimedPlayer());
-
   if (shouldUpdate == undefined) {
     shouldUpdate = true;
   }
@@ -79,7 +74,7 @@ export default function Mini({ type, player, shouldUpdate }: MiniProps) {
   }
 
   return (
-    <Card className="w-full flex gap-2 sticky select-none text-sm">
+    <Card className="flex gap-2 sticky select-none text-sm w-[400px]">
       <div className="flex gap-2">
         {icon}
         <p>{type} Ranking</p>
@@ -87,10 +82,6 @@ export default function Mini({ type, player, shouldUpdate }: MiniProps) {
       <div className="flex flex-col text-xs">
         {response.players.map((playerRanking, index) => {
           const rank = type == "Global" ? playerRanking.rank : playerRanking.countryRank;
-          const playerName =
-            playerRanking.name.length > PLAYER_NAME_MAX_LENGTH
-              ? playerRanking.name.substring(0, PLAYER_NAME_MAX_LENGTH) + "..."
-              : playerRanking.name;
           const ppDifference = playerRanking.pp - player.pp;
 
           return (

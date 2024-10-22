@@ -23,6 +23,9 @@ import { EmbedBuilder } from "discord.js";
 import { Config } from "@ssr/common/config";
 import { SSRCache } from "@ssr/common/cache";
 import { fetchWithCache } from "../common/cache.util";
+import { PlayerDocument, PlayerModel } from "@ssr/common/model/player";
+import { BeatLeaderScoreToken } from "@ssr/common/types/token/beatleader/beatleader-score-token";
+import { AdditionalScoreData, AdditionalScoreDataModel } from "@ssr/common/model/additional-score-data";
 
 const playerScoresCache = new SSRCache({
   ttl: 1000 * 60, // 1 minute
@@ -112,6 +115,107 @@ export class ScoreService {
   }
 
   /**
+   * Tracks ScoreSaber score.
+   *
+   * @param score the score to track
+   * @param leaderboard the leaderboard to track
+   */
+  public static async trackScoreSaberScore({ score, leaderboard }: ScoreSaberPlayerScoreToken) {
+    const playerId = score.leaderboardPlayerInfo.id;
+    const playerName = score.leaderboardPlayerInfo.name;
+    const player: PlayerDocument | null = await PlayerModel.findById(playerId);
+    // Player is not tracked, so ignore the score.
+    if (player == undefined) {
+      return;
+    }
+
+    const today = new Date();
+    const history = player.getHistoryByDate(today);
+    const scores = history.scores || {
+      rankedScores: 0,
+      unrankedScores: 0,
+    };
+    if (leaderboard.stars > 0) {
+      scores.rankedScores!++;
+    } else {
+      scores.unrankedScores!++;
+    }
+
+    history.scores = scores;
+    player.setStatisticHistory(today, history);
+    player.sortStatisticHistory();
+
+    // Save the changes
+    player.markModified("statisticHistory");
+    await player.save();
+
+    console.log(
+      `Updated scores set statistic for "${playerName}"(${playerId}), scores today: ${scores.rankedScores} ranked, ${scores.unrankedScores} unranked`
+    );
+  }
+
+  /**
+   * Tracks BeatLeader score.
+   *
+   * @param score the score to track
+   */
+  public static async trackBeatLeaderScore(score: BeatLeaderScoreToken) {
+    const { playerId, player: scorePlayer, leaderboard } = score;
+    const player: PlayerDocument | null = await PlayerModel.findById(playerId);
+    // Player is not tracked, so ignore the score.
+    if (player == undefined) {
+      return;
+    }
+
+    const difficulty = leaderboard.difficulty;
+    const difficultyKey = `${difficulty.difficultyName.replace("Plus", "+")}-${difficulty.modeName}`;
+    await AdditionalScoreDataModel.create({
+      playerId: playerId,
+      songHash: leaderboard.song.hash,
+      songDifficulty: difficultyKey,
+      songScore: score.baseScore,
+      bombCuts: score.bombCuts,
+      wallsHit: score.wallsHit,
+      pauses: score.pauses,
+      fcAccuracy: score.fcAccuracy * 100,
+      handAccuracy: {
+        left: score.accLeft,
+        right: score.accRight,
+      },
+    } as AdditionalScoreData);
+    console.log(
+      `Tracked additional score data for "${scorePlayer.name}"(${playerId}), difficulty: ${difficultyKey}, score: ${score.baseScore}`
+    );
+  }
+
+  /**
+   * Gets the additional score data for a player's score.
+   *
+   * @param playerId the id of the player
+   * @param songHash the hash of the map
+   * @param songDifficulty the difficulty of the map
+   * @param songScore the score of the play
+   * @private
+   */
+  private static async getAdditionalScoreData(
+    playerId: string,
+    songHash: string,
+    songDifficulty: string,
+    songScore: number
+  ): Promise<AdditionalScoreData | undefined> {
+    const additionalData = await AdditionalScoreDataModel.findOne({
+      playerId: playerId,
+      songHash: songHash,
+      songDifficulty: songDifficulty,
+      songScore: songScore,
+    });
+    if (!additionalData) {
+      return undefined;
+    }
+    return additionalData.toObject();
+  }
+
+  /**
    * Gets scores for a player.
    *
    * @param leaderboardName the leaderboard to get the scores from
@@ -128,12 +232,12 @@ export class ScoreService {
     sort: string,
     search?: string
   ): Promise<PlayerScoresResponse<unknown, unknown> | undefined> {
+    console.log("hi");
     return fetchWithCache(
       playerScoresCache,
       `player-scores-${leaderboardName}-${id}-${page}-${sort}-${search}`,
       async () => {
         const scores: PlayerScore<unknown, unknown>[] | undefined = [];
-        let beatSaverMap: BeatSaverMap | undefined;
         let metadata: Metadata = new Metadata(0, 0, 0, 0); // Default values
 
         switch (leaderboardName) {
@@ -164,12 +268,22 @@ export class ScoreService {
               if (tokenLeaderboard == undefined) {
                 continue;
               }
-              beatSaverMap = await BeatSaverService.getMap(tokenLeaderboard.songHash);
+
+              const additionalData = await this.getAdditionalScoreData(
+                id,
+                tokenLeaderboard.songHash,
+                `${tokenLeaderboard.difficulty.difficulty}-${tokenLeaderboard.difficulty.gameMode}`,
+                score.score
+              );
+              console.log("additionalData", additionalData);
+              if (additionalData !== undefined) {
+                score.additionalData = additionalData;
+              }
 
               scores.push({
                 score: score,
                 leaderboard: tokenLeaderboard,
-                beatSaver: beatSaverMap,
+                beatSaver: await BeatSaverService.getMap(tokenLeaderboard.songHash),
               });
             }
             break;

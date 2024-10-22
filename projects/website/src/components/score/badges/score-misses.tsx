@@ -21,6 +21,12 @@ export default function ScoreMissesBadge({ score, hideXMark }: ScoreMissesBadgeP
               <p className="font-semibold">Misses</p>
               <p>Missed Notes: {formatNumberWithCommas(score.missedNotes)}</p>
               <p>Bad Cuts: {formatNumberWithCommas(score.badCuts)}</p>
+              {score.additionalData && (
+                <>
+                  <p>Bomb Cuts: {formatNumberWithCommas(score.additionalData.bombCuts)}</p>
+                  <p>Wall Hits: {formatNumberWithCommas(score.additionalData.wallsHit)}</p>
+                </>
+              )}
             </>
           ) : (
             <p>Full Combo</p>

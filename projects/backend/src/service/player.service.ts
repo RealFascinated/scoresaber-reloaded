@@ -4,7 +4,6 @@ import { getDaysAgoDate, getMidnightAlignedDate } from "@ssr/common/utils/time-u
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/score-saber-player-token";
 import { InternalServerError } from "../error/internal-server-error";
-import ScoreSaberPlayerScoreToken from "@ssr/common/types/token/scoresaber/score-saber-player-score-token";
 import { formatPp } from "@ssr/common/utils/number-utils";
 import { getPageFromRank, isProduction } from "@ssr/common/utils/utils";
 import { DiscordChannels, logToChannel } from "../bot/bot";
@@ -169,46 +168,6 @@ export class PlayerService {
     await foundPlayer.save();
 
     console.log(`Tracked player "${foundPlayer.id}"!`);
-  }
-
-  /**
-   * Track player score.
-   *
-   * @param score the score to track
-   * @param leaderboard the leaderboard to track
-   */
-  public static async trackScore({ score, leaderboard }: ScoreSaberPlayerScoreToken) {
-    const playerId = score.leaderboardPlayerInfo.id;
-    const playerName = score.leaderboardPlayerInfo.name;
-    const player: PlayerDocument | null = await PlayerModel.findById(playerId);
-    // Player is not tracked, so ignore the score.
-    if (player == undefined) {
-      return;
-    }
-
-    const today = new Date();
-    const history = player.getHistoryByDate(today);
-    const scores = history.scores || {
-      rankedScores: 0,
-      unrankedScores: 0,
-    };
-    if (leaderboard.stars > 0) {
-      scores.rankedScores!++;
-    } else {
-      scores.unrankedScores!++;
-    }
-
-    history.scores = scores;
-    player.setStatisticHistory(today, history);
-    player.sortStatisticHistory();
-
-    // Save the changes
-    player.markModified("statisticHistory");
-    await player.save();
-
-    console.log(
-      `Updated scores set statistic for "${playerName}"(${playerId}), scores today: ${scores.rankedScores} ranked, ${scores.unrankedScores} unranked`
-    );
   }
 
   /**

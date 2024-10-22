@@ -1,5 +1,6 @@
 import { Modifier } from "./modifier";
 import { Leaderboards } from "../leaderboard";
+import { AdditionalScoreData } from "../model/additional-score-data";
 
 export default interface Score {
   /**
@@ -52,6 +53,11 @@ export default interface Score {
    * @private
    */
   readonly fullCombo: boolean;
+
+  /**
+   * The additional data for the score.
+   */
+  additionalData?: AdditionalScoreData;
 
   /**
    * The time the score was set.

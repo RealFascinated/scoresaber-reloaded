@@ -35,7 +35,7 @@ export interface PlayerHistory {
   };
 
   /**
-   * The amount of scores set for this day.
+   * The player's scores stats.
    */
   scores?: {
     /**
@@ -60,7 +60,7 @@ export interface PlayerHistory {
   };
 
   /**
-   * The player's accuracy.
+   * The player's accuracy stats.
    */
   accuracy?: {
     /**

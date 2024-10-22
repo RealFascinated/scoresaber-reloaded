@@ -10,6 +10,7 @@ import { useEffect, useState } from "react";
 import { fetchLeaderboard } from "@ssr/common/utils/leaderboard.util";
 import LeaderboardScoresResponse from "@ssr/common/response/leaderboard-scores-response";
 import LeaderboardPpChart from "@/components/leaderboard/leaderboard-pp-chart";
+import Card from "@/components/card";
 
 type LeaderboardDataProps = {
   /**
@@ -48,14 +49,16 @@ export function LeaderboardData({ initialLeaderboard, initialScores, initialPage
   const leaderboard = currentLeaderboard.leaderboard;
   return (
     <main className="flex flex-col-reverse xl:flex-row w-full gap-2">
-      <LeaderboardScores
-        leaderboard={leaderboard}
-        initialScores={initialScores}
-        initialPage={initialPage}
-        leaderboardChanged={newId => setCurrentLeaderboardId(newId)}
-        showDifficulties
-        isLeaderboardPage
-      />
+      <Card className="flex gap-2 w-full relative">
+        <LeaderboardScores
+          leaderboard={leaderboard}
+          initialScores={initialScores}
+          initialPage={initialPage}
+          leaderboardChanged={newId => setCurrentLeaderboardId(newId)}
+          showDifficulties
+          isLeaderboardPage
+        />
+      </Card>
       <div className="flex flex-col gap-2 w-full xl:w-[550px]">
         <LeaderboardInfo leaderboard={leaderboard} beatSaverMap={currentLeaderboard.beatsaver} />
         {leaderboard.stars > 0 && <LeaderboardPpChart leaderboard={leaderboard} />}

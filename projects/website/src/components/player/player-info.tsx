@@ -24,12 +24,38 @@ type TablePlayerProps = {
   hideCountryFlag?: boolean;
 
   /**
+   * Whether to make the player name a link
+   */
+  useLink?: boolean;
+
+  /**
    * Whether to apply hover brightness
    */
   hoverBrightness?: boolean;
 };
 
-export function PlayerInfo({ player, highlightedPlayer, hideCountryFlag, hoverBrightness = true }: TablePlayerProps) {
+export function PlayerInfo({
+  player,
+  highlightedPlayer,
+  hideCountryFlag,
+  useLink,
+  hoverBrightness = true,
+}: TablePlayerProps) {
+  const name = (
+    <p
+      className={clsx(
+        hoverBrightness ? "transform-gpu transition-all hover:brightness-[66%]" : "",
+        player.id == highlightedPlayer?.id ? "font-bold" : "",
+        "text-ellipsis w-[140px] overflow-hidden whitespace-nowrap"
+      )}
+      style={{
+        color: getScoreSaberRole(player)?.color,
+      }}
+    >
+      {player.name}
+    </p>
+  );
+
   return (
     <div className="flex gap-2 items-center">
       <Avatar className="w-[24px] h-[24px] pointer-events-none">
@@ -39,19 +65,7 @@ export function PlayerInfo({ player, highlightedPlayer, hideCountryFlag, hoverBr
         />
       </Avatar>
       {!hideCountryFlag && <CountryFlag code={player.country} size={12} />}
-      <Link
-        className={clsx(hoverBrightness ? "transform-gpu transition-all hover:brightness-[66%]" : "")}
-        href={`/player/${player.id}`}
-      >
-        <p
-          className={player.id == highlightedPlayer?.id ? "font-bold" : ""}
-          style={{
-            color: getScoreSaberRole(player)?.color,
-          }}
-        >
-          {player.name}
-        </p>
-      </Link>
+      {useLink ? <Link href={`/player/${player.id}`}>{name}</Link> : name}
     </div>
   );
 }

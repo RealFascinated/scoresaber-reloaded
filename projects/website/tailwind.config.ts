@@ -14,6 +14,10 @@ const config: Config = {
         ssr: {
           DEFAULT: "#6773ff",
         },
+        hands: {
+          left: "rgba(168,32,32,1)",
+          right: "rgba(32,100,168,1)",
+        },
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         card: {

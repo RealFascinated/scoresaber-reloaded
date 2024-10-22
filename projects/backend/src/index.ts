@@ -14,16 +14,16 @@ import { PlayerService } from "./service/player.service";
 import { cron } from "@elysiajs/cron";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { delay, isProduction } from "@ssr/common/utils/utils";
-import { connectScoreSaberWebSocket } from "@ssr/common/websocket/scoresaber-websocket";
 import ImageController from "./controller/image.controller";
 import { ScoreService } from "./service/score.service";
 import { Config } from "@ssr/common/config";
 import { PlayerDocument, PlayerModel } from "@ssr/common/model/player";
 import ScoresController from "./controller/scores.controller";
 import LeaderboardController from "./controller/leaderboard.controller";
-import { DiscordChannels, initDiscordBot, logToChannel } from "./bot/bot";
-import { EmbedBuilder } from "discord.js";
 import { getAppVersion } from "./common/app.util";
+import { connectScoresaberWebsocket } from "@ssr/common/websocket/scoresaber-websocket";
+import { connectBeatLeaderWebsocket } from "@ssr/common/websocket/beatleader-websocket";
+import { initDiscordBot } from "./bot/bot";
 
 // Load .env file
 dotenv.config({
@@ -35,16 +35,15 @@ dotenv.config({
 await mongoose.connect(Config.mongoUri!); // Connect to MongoDB
 setLogLevel("DEBUG");
 
-connectScoreSaberWebSocket({
-  onScore: async playerScore => {
-    await PlayerService.trackScore(playerScore);
-    await ScoreService.notifyNumberOne(playerScore);
+connectScoresaberWebsocket({
+  onScore: async score => {
+    await ScoreService.trackScoreSaberScore(score);
+    await ScoreService.notifyNumberOne(score);
   },
-  onDisconnect: async error => {
-    await logToChannel(
-      DiscordChannels.backendLogs,
-      new EmbedBuilder().setDescription(`ScoreSaber websocket disconnected: ${error}`)
-    );
+});
+connectBeatLeaderWebsocket({
+  onScore: async score => {
+    await ScoreService.trackBeatLeaderScore(score);
   },
 });
 

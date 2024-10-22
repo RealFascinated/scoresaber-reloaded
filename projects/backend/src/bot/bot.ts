@@ -1,6 +1,6 @@
 import { Client, MetadataStorage } from "discordx";
-import { Config } from "@ssr/common/config";
 import { ActivityType, EmbedBuilder } from "discord.js";
+import { Config } from "@ssr/common/config";
 
 export enum DiscordChannels {
   trackedPlayerLogs = "1295985197262569512",
@@ -12,6 +12,7 @@ const DiscordBot = new Client({
   intents: [],
   presence: {
     status: "online",
+
     activities: [
       {
         name: "scores...",

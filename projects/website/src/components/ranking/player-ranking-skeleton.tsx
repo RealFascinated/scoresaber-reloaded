@@ -5,7 +5,7 @@ export function PlayerRankingSkeleton() {
   const skeletonArray = new Array(5).fill(0);
 
   return (
-    <Card className="w-full flex gap-2 sticky select-none">
+    <Card className="w-[400px] flex gap-2 sticky select-none">
       <div className="flex gap-2">
         <Skeleton className="w-6 h-6 rounded-full animate-pulse" /> {/* Icon Skeleton */}
         <Skeleton className="w-32 h-6 animate-pulse" /> {/* Text Skeleton for Ranking */}

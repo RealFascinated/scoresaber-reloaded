@@ -41,7 +41,7 @@ export function getScoreSaberLeaderboardFromToken(token: ScoreSaberLeaderboardTo
   const difficulty: LeaderboardDifficulty = {
     leaderboardId: token.difficulty.leaderboardId,
     difficulty: getDifficultyFromScoreSaberDifficulty(token.difficulty.difficulty),
-    gameMode: token.difficulty.gameMode,
+    gameMode: token.difficulty.gameMode.replace("Solo", ""),
     difficultyRaw: token.difficulty.difficultyRaw,
   };
 
@@ -66,7 +66,7 @@ export function getScoreSaberLeaderboardFromToken(token: ScoreSaberLeaderboardTo
             return {
               leaderboardId: difficulty.leaderboardId,
               difficulty: getDifficultyFromScoreSaberDifficulty(difficulty.difficulty),
-              gameMode: difficulty.gameMode,
+              gameMode: difficulty.gameMode.replace("Solo", ""),
               difficultyRaw: difficulty.difficultyRaw,
             };
           })

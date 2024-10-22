@@ -49,6 +49,7 @@ const badges: ScoreBadge[] = [
     },
     create: (score: ScoreSaberScore, leaderboard: ScoreSaberLeaderboard) => {
       const acc = (score.score / leaderboard.maxScore) * 100;
+      const fcAccuracy = score.additionalData?.fcAccuracy;
       const scoreBadge = getScoreBadgeFromAccuracy(acc);
       let accDetails = `${scoreBadge.name != "-" ? scoreBadge.name : ""}`;
       if (scoreBadge.max == null) {
@@ -68,7 +69,8 @@ const badges: ScoreBadge[] = [
               <div className="flex flex-col gap-2">
                 <div>
                   <p className="font-semibold">Accuracy</p>
-                  <p>{accDetails}</p>
+                  <p>Score: {accDetails}</p>
+                  {fcAccuracy && <p>Full Combo: {fcAccuracy.toFixed(2)}%</p>}
                 </div>
 
                 {modCount > 0 && (
@@ -82,7 +84,7 @@ const badges: ScoreBadge[] = [
             }
           >
             <p className="cursor-default">
-              {acc.toFixed(2)}% {modCount > 0 && <ScoreModifiers type="simple" score={score} />}
+              {acc.toFixed(2)}% {modCount > 0 && <ScoreModifiers type="simple" limit={1} score={score} />}
             </p>
           </Tooltip>
         </>
@@ -96,12 +98,36 @@ const badges: ScoreBadge[] = [
     },
   },
   {
-    name: "",
-    create: () => undefined,
+    name: "Left Hand Accuracy",
+    color: () => "bg-hands-left",
+    create: (score: ScoreSaberScore) => {
+      if (!score.additionalData) {
+        return undefined;
+      }
+
+      const { handAccuracy } = score.additionalData;
+      return (
+        <Tooltip display={"Left Hand Accuracy"}>
+          <p>{handAccuracy.left.toFixed(2)}</p>
+        </Tooltip>
+      );
+    },
   },
   {
-    name: "",
-    create: () => undefined,
+    name: "Right Hand Accuracy",
+    color: () => "bg-hands-right",
+    create: (score: ScoreSaberScore) => {
+      if (!score.additionalData) {
+        return undefined;
+      }
+
+      const { handAccuracy } = score.additionalData;
+      return (
+        <Tooltip display={"Right Hand Accuracy"}>
+          <p>{handAccuracy.right.toFixed(2)}</p>
+        </Tooltip>
+      );
+    },
   },
   {
     name: "Full Combo",

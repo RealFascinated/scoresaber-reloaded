@@ -4,12 +4,10 @@ import useWindowDimensions from "@/hooks/use-window-dimensions";
 import { useQuery } from "@tanstack/react-query";
 import { motion, useAnimation } from "framer-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
-import Card from "../card";
 import Pagination from "../input/pagination";
 import LeaderboardScore from "./leaderboard-score";
 import { scoreAnimation } from "@/components/score/score-animation";
 import { Button } from "@/components/ui/button";
-import { clsx } from "clsx";
 import { getDifficultyFromRawDifficulty } from "@/common/song-utils";
 import { fetchLeaderboardScores } from "@ssr/common/utils/score-utils";
 import ScoreSaberScore from "@ssr/common/score/impl/scoresaber-score";
@@ -17,6 +15,7 @@ import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leade
 import LeaderboardScoresResponse from "@ssr/common/response/leaderboard-scores-response";
 import useDatabase from "@/hooks/use-database";
 import { useLiveQuery } from "dexie-react-hooks";
+import LeaderboardScoresSkeleton from "@/components/leaderboard/skeleton/leaderboard-scores-skeleton";
 
 type LeaderboardScoresProps = {
   initialPage?: number;
@@ -126,11 +125,11 @@ export default function LeaderboardScores({
   }, [selectedLeaderboardId, currentPage, disableUrlChanging]);
 
   if (currentScores === undefined) {
-    return undefined;
+    return <LeaderboardScoresSkeleton />;
   }
 
   return (
-    <Card className={clsx("flex gap-2 w-full relative", !isLeaderboardPage && "border border-input")}>
+    <>
       {/* Where to scroll to when new scores are loaded */}
       <div ref={topOfScoresRef} className="absolute" />
 
@@ -207,6 +206,6 @@ export default function LeaderboardScores({
           setShouldFetch(true);
         }}
       />
-    </Card>
+    </>
   );
 }

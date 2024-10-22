@@ -1,5 +1,6 @@
 import { SSRCache } from "@ssr/common/cache";
 import { InternalServerError } from "../error/internal-server-error";
+import { isProduction } from "@ssr/common/utils/utils";
 
 /**
  * Fetches data with caching.
@@ -13,6 +14,10 @@ export async function fetchWithCache<T>(
   cacheKey: string,
   fetchFn: () => Promise<T | undefined>
 ): Promise<T | undefined> {
+  if (!isProduction()) {
+    return await fetchFn();
+  }
+
   if (cache == undefined) {
     throw new InternalServerError(`Cache is not defined`);
   }

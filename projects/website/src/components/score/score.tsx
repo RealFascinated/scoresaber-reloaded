@@ -13,6 +13,8 @@ import ScoreSaberScore from "@ssr/common/score/impl/scoresaber-score";
 import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
 import { BeatSaverMap } from "@ssr/common/model/beatsaver/beatsaver-map";
 import { useIsMobile } from "@/hooks/use-is-mobile";
+import Card from "@/components/card";
+import StatValue from "@/components/stat-value";
 
 type Props = {
   /**
@@ -103,11 +105,19 @@ export default function Score({ leaderboard, beatSaverMap, score, settings }: Pr
           animate={{ opacity: 1, y: 0 }}
           className="w-full mt-2"
         >
-          <LeaderboardScores
-            initialPage={getPageFromRank(score.rank, 12)}
-            leaderboard={leaderboard}
-            disableUrlChanging
-          />
+          <Card className="flex gap-4 w-full relative border border-input">
+            {score.additionalData && (
+              <div className="flex w-full items-center justify-center gap-2">
+                <StatValue name="Pauses" value={score.additionalData.pauses} />
+              </div>
+            )}
+
+            <LeaderboardScores
+              initialPage={getPageFromRank(score.rank, 12)}
+              leaderboard={leaderboard}
+              disableUrlChanging
+            />
+          </Card>
         </motion.div>
       )}
     </div>
