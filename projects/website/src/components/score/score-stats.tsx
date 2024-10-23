@@ -7,8 +7,9 @@ import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leade
 import ScoreMissesBadge from "@/components/score/badges/score-misses";
 import { Modifier } from "@ssr/common/score/modifier";
 import { ScoreModifiers } from "@/components/score/score-modifiers";
-import { renderChange } from "@/common/change";
+import { Change } from "@/common/change";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
+import { HandAccuracy } from "@/components/score/hand-accuracy";
 
 const badges: ScoreBadge[] = [
   {
@@ -17,6 +18,8 @@ const badges: ScoreBadge[] = [
       return "bg-pp";
     },
     create: (score: ScoreSaberScore, leaderboard: ScoreSaberLeaderboard) => {
+      const scoreImprovement = score.additionalData?.scoreImprovement;
+      const previousAccuracy = scoreImprovement ? score.accuracy - scoreImprovement?.accuracy : undefined;
       const fcAccuracy = score.additionalData?.fcAccuracy;
       const pp = score.pp;
       const weight = score.weight;
@@ -39,7 +42,10 @@ const badges: ScoreBadge[] = [
               </div>
             }
           >
-            <p>{formatPp(pp)}pp</p>
+            <div className="flex flex-col items-center justify-center cursor-default">
+              <p>{formatPp(pp)}pp</p>
+              {previousAccuracy && <Change change={previousAccuracy} isPp />}
+            </div>
           </Tooltip>
         </>
       );
@@ -93,10 +99,9 @@ const badges: ScoreBadge[] = [
               <p>
                 {acc.toFixed(2)}% {modCount > 0 && <ScoreModifiers type="simple" limit={1} score={score} />}
               </p>
-              {scoreImprovement &&
-                renderChange(scoreImprovement.accuracy, false, num => {
-                  return `${num.toFixed(2)}%`;
-                })}
+              {scoreImprovement && (
+                <Change change={scoreImprovement.accuracy} formatValue={num => `${num.toFixed(2)}%`} />
+              )}
             </div>
           </Tooltip>
         </>
@@ -111,7 +116,7 @@ const badges: ScoreBadge[] = [
       return (
         <div className="flex flex-col items-center justify-center">
           <p>{formatNumberWithCommas(Number(score.score.toFixed(0)))}</p>
-          {scoreImprovement && renderChange(scoreImprovement.score, false, formatNumberWithCommas)}
+          {scoreImprovement && <Change change={scoreImprovement.score} />}
         </div>
       );
     },
@@ -120,40 +125,14 @@ const badges: ScoreBadge[] = [
     name: "Left Hand Accuracy",
     color: () => "bg-hands-left",
     create: (score: ScoreSaberScore) => {
-      if (!score.additionalData) {
-        return undefined;
-      }
-      const { handAccuracy } = score.additionalData;
-      const scoreImprovement = score.additionalData.scoreImprovement;
-
-      return (
-        <Tooltip display={"Left Hand Accuracy"}>
-          <div className="flex flex-col items-center justify-center">
-            <p>{handAccuracy.left.toFixed(2)}</p>
-            {scoreImprovement && renderChange(scoreImprovement.handAccuracy.left, false, num => num.toFixed(2))}
-          </div>
-        </Tooltip>
-      );
+      return <HandAccuracy score={score} hand="left" />;
     },
   },
   {
     name: "Right Hand Accuracy",
     color: () => "bg-hands-right",
     create: (score: ScoreSaberScore) => {
-      if (!score.additionalData) {
-        return undefined;
-      }
-
-      const { handAccuracy } = score.additionalData;
-      const scoreImprovement = score.additionalData.scoreImprovement;
-      return (
-        <Tooltip display={"Right Hand Accuracy"}>
-          <div className="flex flex-col items-center justify-center">
-            <p>{handAccuracy.right.toFixed(2)}</p>
-            {scoreImprovement && renderChange(scoreImprovement.handAccuracy.right, false, num => num.toFixed(2))}
-          </div>
-        </Tooltip>
-      );
+      return <HandAccuracy score={score} hand="right" />;
     },
   },
   {
