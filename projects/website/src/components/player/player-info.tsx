@@ -46,7 +46,7 @@ export function PlayerInfo({
       className={clsx(
         hoverBrightness ? "transform-gpu transition-all hover:brightness-[66%]" : "",
         player.id == highlightedPlayer?.id ? "font-bold" : "",
-        "text-ellipsis w-[140px] overflow-hidden whitespace-nowrap"
+        "text-ellipsis overflow-hidden whitespace-nowrap"
       )}
       style={{
         color: getScoreSaberRole(player)?.color,
@@ -57,7 +57,7 @@ export function PlayerInfo({
   );
 
   return (
-    <div className="flex gap-2 items-center">
+    <div className="flex gap-2 items-center w-[175px]">
       <Avatar className="w-[24px] h-[24px] pointer-events-none">
         <AvatarImage
           alt="Profile Picture"

@@ -94,7 +94,7 @@ export default function Mini({ type, player, shouldUpdate }: MiniProps) {
               <div className="flex gap-2 items-center">
                 <PlayerInfo player={playerRanking} highlightedPlayer={player} hideCountryFlag hoverBrightness={false} />
               </div>
-              <div className="inline-flex min-w-[11.5em] gap-2 items-center">
+              <div className="inline-flex min-w-[13em] gap-2 items-center">
                 <p className="text-ssr text-right">{formatPp(playerRanking.pp)}pp</p>
                 {playerRanking.id !== player.id && (
                   <p className={`text-xs text-right ${ppDifference > 0 ? "text-green-400" : "text-red-400"}`}>
