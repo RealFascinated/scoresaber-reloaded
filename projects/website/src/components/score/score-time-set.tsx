@@ -1,7 +1,7 @@
 import { format } from "@formkit/tempo";
 import { timeAgo } from "@ssr/common/utils/time-utils";
 import Tooltip from "@/components/tooltip";
-import ScoreSaberScore from "@ssr/common/score/impl/scoresaber-score";
+import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 
 type ScoreTimeSetProps = {
   /**

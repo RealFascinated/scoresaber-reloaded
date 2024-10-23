@@ -10,7 +10,7 @@ import { scoreAnimation } from "@/components/score/score-animation";
 import { Button } from "@/components/ui/button";
 import { getDifficulty } from "@/common/song-utils";
 import { fetchLeaderboardScores } from "@ssr/common/utils/score-utils";
-import ScoreSaberScore from "@ssr/common/score/impl/scoresaber-score";
+import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
 import LeaderboardScoresResponse from "@ssr/common/response/leaderboard-scores-response";
 import useDatabase from "@/hooks/use-database";

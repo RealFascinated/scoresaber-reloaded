@@ -1,4 +1,4 @@
-import ScoreSaberScore from "@ssr/common/score/impl/scoresaber-score";
+import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { Modifier } from "@ssr/common/score/modifier";
 
 type ScoreModifiersProps = {

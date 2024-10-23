@@ -9,7 +9,7 @@ import ScoreStats from "./score-stats";
 import { motion } from "framer-motion";
 import { getPageFromRank } from "@ssr/common/utils/utils";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
-import ScoreSaberScore from "@ssr/common/score/impl/scoresaber-score";
+import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
 import { BeatSaverMap } from "@ssr/common/model/beatsaver/map";
 import { useIsMobile } from "@/hooks/use-is-mobile";

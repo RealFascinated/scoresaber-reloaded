@@ -15,7 +15,7 @@ import { scoreAnimation } from "@/components/score/score-animation";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { ScoreSort } from "@ssr/common/score/score-sort";
 import { setCookieValue } from "@ssr/common/utils/cookie-utils";
-import ScoreSaberScore from "@ssr/common/score/impl/scoresaber-score";
+import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
 import { fetchPlayerScores } from "@ssr/common/utils/score-utils";
 import PlayerScoresResponse from "@ssr/common/response/player-scores-response";

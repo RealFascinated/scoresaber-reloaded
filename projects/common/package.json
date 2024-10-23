@@ -19,6 +19,7 @@
     "typescript": "^5"
   },
   "dependencies": {
+    "@typegoose/auto-increment": "^4.7.0",
     "@typegoose/typegoose": "^12.8.0",
     "ky": "^1.7.2",
     "ws": "^8.18.0"

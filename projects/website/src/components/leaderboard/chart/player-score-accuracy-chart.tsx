@@ -1,6 +1,5 @@
 "use client";
 
-import ScoreSaberScore from "@ssr/common/score/impl/scoresaber-score";
 import { ScoreStatsToken } from "@ssr/common/types/token/beatleader/score-stats/score-stats";
 import { formatTime } from "@ssr/common/utils/time-utils";
 import GenericChart, { DatasetConfig } from "@/components/chart/generic-chart";

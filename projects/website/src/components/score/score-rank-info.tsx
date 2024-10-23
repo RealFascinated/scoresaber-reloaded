@@ -2,7 +2,7 @@ import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import Link from "next/link";
 import { getPageFromRank } from "@ssr/common/utils/utils";
-import ScoreSaberScore from "@ssr/common/score/impl/scoresaber-score";
+import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreTimeSet } from "@/components/score/score-time-set";
 

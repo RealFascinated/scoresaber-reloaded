@@ -4,7 +4,7 @@ import { HandAccuracy } from "./hand-accuracy";
 import { Misses } from "./misses";
 
 /**
- * The model for a BeatSaver map.
+ * The model for additional score data.
  */
 @modelOptions({
   options: { allowMixed: Severity.ALLOW },

@@ -1,5 +1,5 @@
 import ScoreSaberLeaderboardToken from "./score-saber-leaderboard-token";
-import ScoreSaberLeaderboardPlayerInfoToken from "./score-saber-leaderboard-player-info-token";
+import { ScoreSaberLeaderboardPlayerInfoToken } from "./score-saber-leaderboard-player-info-token";
 
 export default interface ScoreSaberScoreToken {
   id: string;

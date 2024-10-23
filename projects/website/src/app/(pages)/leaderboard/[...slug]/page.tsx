@@ -4,7 +4,7 @@ import { Colors } from "@/common/colors";
 import { getAverageColor } from "@/common/image-utils";
 import { LeaderboardData } from "@/components/leaderboard/leaderboard-data";
 import { Config } from "@ssr/common/config";
-import ScoreSaberScore from "@ssr/common/score/impl/scoresaber-score";
+import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { LeaderboardResponse } from "@ssr/common/response/leaderboard-response";
 import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
 import { fetchLeaderboard } from "@ssr/common/utils/leaderboard.util";

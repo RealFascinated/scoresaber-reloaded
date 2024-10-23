@@ -8,7 +8,6 @@ import { etag } from "@bogeychan/elysia-etag";
 import AppController from "./controller/app.controller";
 import * as dotenv from "@dotenvx/dotenvx";
 import mongoose from "mongoose";
-import { setLogLevel } from "@typegoose/typegoose";
 import PlayerController from "./controller/player.controller";
 import { PlayerService } from "./service/player.service";
 import { cron } from "@elysiajs/cron";
@@ -33,9 +32,10 @@ dotenv.config({
   override: true,
 });
 
+// Connect to Mongo
 await mongoose.connect(Config.mongoUri!); // Connect to MongoDB
-setLogLevel("DEBUG");
 
+// Connect to websockets
 connectScoresaberWebsocket({
   onScore: async score => {
     await ScoreService.trackScoreSaberScore(score);
