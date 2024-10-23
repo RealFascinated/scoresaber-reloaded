@@ -21,9 +21,9 @@ export default function ScoreMissesBadge({ score, hideXMark }: ScoreMissesBadgeP
     additionalData &&
     scoreImprovement && {
       misses: (scoreImprovement.misses.misses - misses.misses) * -1,
-      missedNotes: (scoreImprovement.misses.missedNotes + misses.missedNotes) * -1,
-      badCuts: (scoreImprovement.misses.badCuts + misses.badCuts) * -1,
-      bombCuts: (scoreImprovement.misses.bombCuts + misses.bombCuts) * -1,
+      missedNotes: (scoreImprovement.misses.missedNotes - misses.missedNotes) * -1,
+      badCuts: (scoreImprovement.misses.badCuts - misses.badCuts) * -1,
+      bombCuts: (scoreImprovement.misses.bombCuts - misses.bombCuts) * -1,
       wallsHit: (scoreImprovement.misses.wallsHit - misses.wallsHit) * -1,
     };
   const previousScoreFc = previousScoreMisses?.misses == 0;
