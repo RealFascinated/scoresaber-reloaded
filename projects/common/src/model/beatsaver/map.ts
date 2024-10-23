@@ -27,7 +27,7 @@ export class BeatSaverMap {
    * The internal MongoDB ID (_id).
    */
   @prop({ required: true })
-  protected _id!: string;
+  private _id!: string;
 
   /**
    * The name of the map.
