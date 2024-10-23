@@ -38,7 +38,7 @@ export default class BeatSaverService {
     const newMapData: BeatSaverMap =
       token && uploader && metadata
         ? {
-            _id: hash,
+            _id: hash, // todo: change this to an incrementing id
             bsr: token.id,
             name: token.name,
             description: token.description,

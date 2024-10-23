@@ -174,6 +174,14 @@ app.use(
         version: await getAppVersion(),
       },
     },
+    scalarConfig: {
+      servers: [
+        {
+          url: "https://ssr.fascinated.cc/api",
+          description: "Production server",
+        },
+      ],
+    },
   })
 );
 
