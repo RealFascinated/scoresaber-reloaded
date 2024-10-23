@@ -45,7 +45,11 @@ export function MapStats({ leaderboard, beatSaver }: MapAndScoreData) {
             icon={<BombIcon className="w-4 h-4" />}
             value={formatNumberWithCommas(mapDiff.bombs)}
           />
-          <StatValue name="Obstacles" icon={<BrickWallIcon className="w-4 h-4" />} value={mapDiff.obstacles} />
+          <StatValue
+            name="Obstacles"
+            icon={<BrickWallIcon className="w-4 h-4" />}
+            value={formatNumberWithCommas(mapDiff.obstacles)}
+          />
         </div>
       )}
     </div>
