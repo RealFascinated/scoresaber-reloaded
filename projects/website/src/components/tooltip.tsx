@@ -3,6 +3,7 @@
 import { Tooltip as ShadCnTooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 import { useState } from "react";
 import { cn } from "@/common/utils";
+import { useDebounce } from "@uidotdev/usehooks";
 
 type Props = {
   /**
@@ -33,9 +34,10 @@ type Props = {
 
 export default function Tooltip({ children, display, asChild = true, side = "top", className }: Props) {
   const [open, setOpen] = useState(false);
+  const openDebounce = useDebounce(open, 100);
 
   return (
-    <ShadCnTooltip>
+    <ShadCnTooltip open={openDebounce}>
       <TooltipTrigger className={className} asChild={asChild}>
         <div
           className={cn("cursor-default", className)}
