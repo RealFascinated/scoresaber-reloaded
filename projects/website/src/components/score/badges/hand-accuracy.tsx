@@ -1,21 +1,16 @@
 import Tooltip from "@/components/tooltip";
 import { Change } from "@/common/change";
-import ScoreSaberScore from "@ssr/common/score/impl/scoresaber-score";
 import { capitalizeFirstLetter } from "@/common/string-utils";
+import { ScoreBadgeProps } from "@/components/score/badges/badge-props";
 
-type HandAccuracyProps = {
-  /**
-   * The score to get the hand accuracy from
-   */
-  score: ScoreSaberScore;
-
+type HandAccuracyProps = ScoreBadgeProps & {
   /**
    * The hand to get the hand accuracy from
    */
   hand: "left" | "right";
 };
 
-export function HandAccuracy({ score, hand }: HandAccuracyProps) {
+export function HandAccuracyBadge({ score, hand }: HandAccuracyProps) {
   if (!score.additionalData) {
     return undefined;
   }

@@ -1,15 +1,12 @@
-import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
 import { getScoreBadgeFromAccuracy } from "@/common/song-utils";
-import Tooltip from "@/components/tooltip";
 import { ScoreBadge, ScoreBadges } from "@/components/score/score-badge";
 import ScoreSaberScore from "@ssr/common/score/impl/scoresaber-score";
 import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
 import ScoreMissesBadge from "@/components/score/badges/score-misses";
-import { Modifier } from "@ssr/common/score/modifier";
-import { ScoreModifiers } from "@/components/score/score-modifiers";
-import { Change } from "@/common/change";
-import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
-import { HandAccuracy } from "@/components/score/hand-accuracy";
+import { HandAccuracyBadge } from "@/components/score/badges/hand-accuracy";
+import { ScoreAccuracyBadge } from "@/components/score/badges/score-accuracy";
+import { ScorePpBadge } from "@/components/score/badges/score-pp";
+import { ScoreScoreBadge } from "@/components/score/badges/score-score";
 
 const badges: ScoreBadge[] = [
   {
@@ -18,37 +15,10 @@ const badges: ScoreBadge[] = [
       return "bg-pp";
     },
     create: (score: ScoreSaberScore, leaderboard: ScoreSaberLeaderboard) => {
-      const scoreImprovement = score.additionalData?.scoreImprovement;
-      const previousAccuracy = scoreImprovement ? score.accuracy - scoreImprovement?.accuracy : undefined;
-      const fcAccuracy = score.additionalData?.fcAccuracy;
-      const pp = score.pp;
-      const weight = score.weight;
-      if (pp === 0 || pp === undefined || weight === undefined) {
+      if (!score.pp) {
         return undefined;
       }
-      const weightedPp = pp * weight;
-
-      return (
-        <>
-          <Tooltip
-            display={
-              <div>
-                <p className="font-semibold">Performance Points</p>
-                <p>Raw: {formatPp(pp)}pp</p>
-                <p>
-                  Weighted: {formatPp(weightedPp)}pp ({(100 * weight).toFixed(2)}%)
-                </p>
-                {fcAccuracy && <p>Full Combo: {scoresaberService.getPp(leaderboard.stars, fcAccuracy).toFixed(0)}pp</p>}
-              </div>
-            }
-          >
-            <div className="flex flex-col items-center justify-center cursor-default">
-              <p>{formatPp(pp)}pp</p>
-              {previousAccuracy && <Change change={previousAccuracy} isPp />}
-            </div>
-          </Tooltip>
-        </>
-      );
+      return <ScorePpBadge score={score} leaderboard={leaderboard} />;
     },
   },
   {
@@ -58,67 +28,13 @@ const badges: ScoreBadge[] = [
       return getScoreBadgeFromAccuracy(acc).color;
     },
     create: (score: ScoreSaberScore, leaderboard: ScoreSaberLeaderboard) => {
-      const scoreImprovement = score.additionalData?.scoreImprovement;
-
-      const acc = (score.score / leaderboard.maxScore) * 100;
-      const fcAccuracy = score.additionalData?.fcAccuracy;
-      const scoreBadge = getScoreBadgeFromAccuracy(acc);
-      let accDetails = `${scoreBadge.name != "-" ? scoreBadge.name : ""}`;
-      if (scoreBadge.max == null) {
-        accDetails += ` (> ${scoreBadge.min}%)`;
-      } else if (scoreBadge.min == null) {
-        accDetails += ` (< ${scoreBadge.max}%)`;
-      } else {
-        accDetails += ` (${scoreBadge.min}% - ${scoreBadge.max}%)`;
-      }
-
-      const failed = score.modifiers.includes("No Fail" as Modifier);
-      const modCount = score.modifiers.length;
-      return (
-        <>
-          <Tooltip
-            display={
-              <div className="flex flex-col gap-2">
-                <div>
-                  <p className="font-semibold">Accuracy</p>
-                  <p>Score: {accDetails}</p>
-                  {fcAccuracy && <p>Full Combo: {fcAccuracy.toFixed(2)}%</p>}
-                </div>
-
-                {modCount > 0 && (
-                  <div>
-                    <p className="font-semibold">Modifiers</p>
-                    <ScoreModifiers type="full" score={score} />
-                  </div>
-                )}
-                {failed && <p className="text-red-500">Failed</p>}
-              </div>
-            }
-          >
-            <div className="flex flex-col items-center justify-center cursor-default">
-              <p>
-                {acc.toFixed(2)}% {modCount > 0 && <ScoreModifiers type="simple" limit={1} score={score} />}
-              </p>
-              {scoreImprovement && (
-                <Change change={scoreImprovement.accuracy} formatValue={num => `${num.toFixed(2)}%`} />
-              )}
-            </div>
-          </Tooltip>
-        </>
-      );
+      return <ScoreAccuracyBadge score={score} leaderboard={leaderboard} />;
     },
   },
   {
     name: "Score",
     create: (score: ScoreSaberScore) => {
-      const scoreImprovement = score.additionalData?.scoreImprovement;
-
-      return (
-        <div className="flex flex-col items-center justify-center">
-          <p>{formatNumberWithCommas(Number(score.score.toFixed(0)))}</p>
-          {scoreImprovement && <Change change={scoreImprovement.score} />}
-        </div>
-      );
+      return <ScoreScoreBadge score={score} />;
     },
   },
   {
@@ -128,7 +44,7 @@ const badges: ScoreBadge[] = [
       if (!score.additionalData) {
         return undefined;
       }
-      return <HandAccuracy score={score} hand="left" />;
+      return <HandAccuracyBadge score={score} hand="left" />;
     },
   },
   {
@@ -138,7 +54,7 @@ const badges: ScoreBadge[] = [
       if (!score.additionalData) {
         return undefined;
       }
-      return <HandAccuracy score={score} hand="right" />;
+      return <HandAccuracyBadge score={score} hand="right" />;
     },
   },
   {
