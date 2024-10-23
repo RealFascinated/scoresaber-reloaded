@@ -3,6 +3,9 @@ import { format } from "@formkit/tempo";
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  experimental: {
+    optimizePackageImports: ["@ssr/common", "@radix-ui/react-icons", "chart.js", "react-chartjs-2"],
+  },
   images: {
     remotePatterns: [
       {
