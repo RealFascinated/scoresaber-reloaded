@@ -2,7 +2,6 @@ import { getModelForClass, modelOptions, plugin, Prop, ReturnModelType, Severity
 import Score from "../score";
 import { Modifier } from "../../../score/modifier";
 import ScoreSaberScoreToken from "../../../types/token/scoresaber/score-saber-score-token";
-import ScoreSaberLeaderboardToken from "../../../types/token/scoresaber/score-saber-leaderboard-token";
 import ScoreSaberLeaderboard from "../../../leaderboard/impl/scoresaber-leaderboard";
 import { type ScoreSaberLeaderboardPlayerInfoToken } from "../../../types/token/scoresaber/score-saber-leaderboard-player-info-token";
 import { Document } from "mongoose";
@@ -82,7 +81,7 @@ export type ScoreSaberScore = InstanceType<typeof ScoreSaberScorePublic>;
  */
 export function getScoreSaberScoreFromToken(
   token: ScoreSaberScoreToken,
-  leaderboard: ScoreSaberLeaderboardToken | ScoreSaberLeaderboard,
+  leaderboard: ScoreSaberLeaderboard,
   playerId?: string
 ): ScoreSaberScore {
   const modifiers: Modifier[] =
@@ -100,6 +99,8 @@ export function getScoreSaberScoreFromToken(
   return {
     playerId: playerId || token.leaderboardPlayerInfo.id,
     leaderboardId: leaderboard.id,
+    difficulty: leaderboard.difficulty.difficulty,
+    characteristic: leaderboard.difficulty.characteristic,
     score: token.baseScore,
     accuracy: (token.baseScore / leaderboard.maxScore) * 100,
     rank: token.rank,

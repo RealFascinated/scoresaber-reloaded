@@ -52,8 +52,8 @@ export class ScoreService {
     }
 
     const { score: scoreToken, leaderboard: leaderboardToken } = playerScore;
-    const score = getScoreSaberScoreFromToken(scoreToken, leaderboardToken, scoreToken.leaderboardPlayerInfo.id);
     const leaderboard = getScoreSaberLeaderboardFromToken(leaderboardToken);
+    const score = getScoreSaberScoreFromToken(scoreToken, leaderboard, scoreToken.leaderboardPlayerInfo.id);
     const playerInfo = score.playerInfo;
 
     // Not ranked
@@ -124,7 +124,8 @@ export class ScoreService {
    * @param score the score to track
    * @param leaderboard the leaderboard to track
    */
-  public static async trackScoreSaberScore({ score, leaderboard }: ScoreSaberPlayerScoreToken) {
+  public static async trackScoreSaberScore({ score, leaderboard: leaderboardToken }: ScoreSaberPlayerScoreToken) {
+    const leaderboard = getScoreSaberLeaderboardFromToken(leaderboardToken);
     const playerId = score.leaderboardPlayerInfo.id;
     const playerName = score.leaderboardPlayerInfo.name;
     const player: PlayerDocument | null = await PlayerModel.findById(playerId);
@@ -164,6 +165,8 @@ export class ScoreService {
         playerId: playerId,
         leaderboardId: leaderboard.id,
         score: scoreToken.score,
+        difficulty: leaderboard.difficulty.difficulty,
+        characteristic: leaderboard.difficulty.characteristic,
       })
     ) {
       console.log(
@@ -328,13 +331,13 @@ export class ScoreService {
             );
 
             for (const token of leaderboardScores.playerScores) {
-              const score = getScoreSaberScoreFromToken(token.score, token.leaderboard, playerId);
-              if (score == undefined) {
+              const leaderboard = getScoreSaberLeaderboardFromToken(token.leaderboard);
+              if (leaderboard == undefined) {
                 continue;
               }
 
-              const leaderboard = getScoreSaberLeaderboardFromToken(token.leaderboard);
-              if (leaderboard == undefined) {
+              const score = getScoreSaberScoreFromToken(token.score, leaderboard, playerId);
+              if (score == undefined) {
                 continue;
               }
 

@@ -1,7 +1,8 @@
 import { Modifier } from "../../score/modifier";
 import { AdditionalScoreData } from "../additional-score-data/additional-score-data";
-import { type Leaderboards } from "../../leaderboard";
 import { prop } from "@typegoose/typegoose";
+import { type MapDifficulty } from "@ssr/score/map-difficulty";
+import { type MapCharacteristic } from "@ssr/types/map-characteristic";
 
 /**
  * The model for a score.
@@ -15,10 +16,21 @@ export default class Score {
 
   /**
    * The id of the player who set the score.
-   * @private
    */
   @prop({ required: true, index: true })
   public readonly playerId!: string;
+
+  /**
+   * The map difficulty played in the score.
+   */
+  @prop({ required: true })
+  public readonly difficulty!: MapDifficulty;
+
+  /**
+   * The characteristic of the map.
+   */
+  @prop({ required: true })
+  public readonly characteristic!: MapCharacteristic;
 
   /**
    * The base score for the score.
