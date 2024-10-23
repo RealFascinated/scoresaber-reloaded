@@ -19,6 +19,11 @@ type TablePlayerProps = {
   highlightedPlayer?: ScoreSaberPlayerToken | ScoreSaberPlayer;
 
   /**
+   * The additional class names
+   */
+  className?: string;
+
+  /**
    * Hide the country flag
    */
   hideCountryFlag?: boolean;
@@ -37,6 +42,7 @@ type TablePlayerProps = {
 export function PlayerInfo({
   player,
   highlightedPlayer,
+  className,
   hideCountryFlag,
   useLink,
   hoverBrightness = true,
@@ -46,7 +52,8 @@ export function PlayerInfo({
       className={clsx(
         hoverBrightness ? "transform-gpu transition-all hover:brightness-[66%]" : "",
         player.id == highlightedPlayer?.id ? "font-bold" : "",
-        "text-ellipsis overflow-hidden whitespace-nowrap"
+        `text-ellipsis max-w-[250px] overflow-hidden whitespace-nowrap break-all`,
+        className
       )}
       style={{
         color: getScoreSaberRole(player)?.color,
@@ -57,7 +64,7 @@ export function PlayerInfo({
   );
 
   return (
-    <div className="flex gap-2 items-center w-[175px]">
+    <div className="flex gap-2 items-center">
       <Avatar className="w-[24px] h-[24px] pointer-events-none">
         <AvatarImage
           alt="Profile Picture"

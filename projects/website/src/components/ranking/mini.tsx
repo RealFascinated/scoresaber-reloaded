@@ -92,7 +92,13 @@ export default function Mini({ type, player, shouldUpdate }: MiniProps) {
             >
               <p className="text-gray-400">#{formatNumberWithCommas(rank)}</p>
               <div className="flex gap-2 items-center">
-                <PlayerInfo player={playerRanking} highlightedPlayer={player} hideCountryFlag hoverBrightness={false} />
+                <PlayerInfo
+                  className="w-[145px]"
+                  player={playerRanking}
+                  highlightedPlayer={player}
+                  hideCountryFlag
+                  hoverBrightness={false}
+                />
               </div>
               <div className="inline-flex min-w-[13em] gap-2 items-center">
                 <p className="text-ssr text-right">{formatPp(playerRanking.pp)}pp</p>
