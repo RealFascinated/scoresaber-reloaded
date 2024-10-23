@@ -98,7 +98,6 @@ export function getScoreSaberScoreFromToken(
         });
 
   return {
-    leaderboard: "scoresaber",
     playerId: playerId || token.leaderboardPlayerInfo.id,
     leaderboardId: leaderboard.id,
     score: token.baseScore,

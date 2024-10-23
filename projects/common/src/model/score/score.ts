@@ -14,12 +14,6 @@ export default class Score {
   private _id?: number;
 
   /**
-   * The leaderboard the score is from.
-   */
-  @prop({ required: true })
-  public readonly leaderboard!: Leaderboards;
-
-  /**
    * The id of the player who set the score.
    * @private
    */
