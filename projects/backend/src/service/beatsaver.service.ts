@@ -21,7 +21,7 @@ export default class BeatSaverService {
       }
 
       // If the map does not need to be refreshed, return it
-      if (!toObject.shouldRefresh()) {
+      if (!map.shouldRefresh()) {
         return toObject;
       }
     }
