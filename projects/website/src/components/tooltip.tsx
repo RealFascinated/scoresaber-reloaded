@@ -41,7 +41,6 @@ export default function Tooltip({ children, display, asChild = true, side = "top
       <TooltipTrigger className={className} asChild={asChild}>
         <div
           className={cn("cursor-default", className)}
-          onClick={() => setOpen(!open)}
           onMouseEnter={() => setOpen(true)}
           onMouseLeave={() => setOpen(false)}
           onTouchStart={() => setOpen(!open)}
