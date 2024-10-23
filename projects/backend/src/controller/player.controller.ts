@@ -7,24 +7,32 @@ import { AroundPlayerResponse } from "@ssr/common/response/around-player-respons
 
 @Controller("/player")
 export default class PlayerController {
-  @Get("/history/:id", {
+  @Get("/history/:id/:days", {
     config: {},
     params: t.Object({
       id: t.String({ required: true }),
+      days: t.Number({ default: 50, required: false }),
     }),
     query: t.Object({
       createIfMissing: t.Boolean({ default: false, required: false }),
     }),
   })
   public async getPlayer({
-    params: { id },
+    params: { id, days },
     query: { createIfMissing },
   }: {
-    params: { id: string };
+    params: { id: string; days: number };
     query: { createIfMissing: boolean };
   }): Promise<{ statistics: Record<string, PlayerHistory> }> {
+    if (days < 1) {
+      days = 1;
+    }
+    // Limit to 10 years
+    if (days > 365 * 10) {
+      days = 365 * 10;
+    }
     const player = await PlayerService.getPlayer(id, createIfMissing);
-    return { statistics: player.getHistoryPreviousDays(50) };
+    return { statistics: player.getHistoryPreviousDays(days) };
   }
 
   @Get("/tracked/:id", {
