@@ -157,6 +157,21 @@ export class ScoreService {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
     delete scoreToken.playerInfo;
+
+    // Check if the score already exists
+    if (
+      await ScoreSaberScoreModel.exists({
+        playerId: playerId,
+        leaderboardId: leaderboard.id,
+        score: scoreToken.score,
+      })
+    ) {
+      console.log(
+        `Score already exists for "${playerName}"(${playerId}), scoreId=${scoreToken.scoreId}, score=${scoreToken.score}`
+      );
+      return;
+    }
+
     await ScoreSaberScoreModel.create(scoreToken);
     console.log(
       `Tracked score and updated scores set statistic for "${playerName}"(${playerId}), scores today: ${scores.rankedScores} ranked, ${scores.unrankedScores} unranked`
