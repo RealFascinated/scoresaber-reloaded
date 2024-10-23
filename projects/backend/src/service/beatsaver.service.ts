@@ -15,7 +15,10 @@ export default class BeatSaverService {
       if (toObject.notFound) {
         return undefined;
       }
-      return toObject;
+      // Return the map if it doesn't need to be refreshed
+      if (!toObject.shouldRefresh()) {
+        return toObject;
+      }
     }
 
     const token = await beatsaverService.lookupMap(hash);
