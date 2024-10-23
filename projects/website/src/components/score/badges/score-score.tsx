@@ -8,7 +8,7 @@ export function ScoreScoreBadge({ score }: ScoreBadgeProps) {
   return (
     <div className="flex flex-col items-center justify-center">
       <p>{formatNumberWithCommas(Number(score.score.toFixed(0)))}</p>
-      {scoreImprovement && <Change change={scoreImprovement.score} />}
+      {scoreImprovement && <Change className="text-xs" change={scoreImprovement.score} />}
     </div>
   );
 }

@@ -26,7 +26,11 @@ export function HandAccuracyBadge({ score, hand }: HandAccuracyProps) {
       </Tooltip>
       {scoreImprovement && previousHandAccuracy && (
         <Tooltip display={`Previous ${formattedHand} Hand Accuracy: ${previousHandAccuracy.toFixed(2)}`}>
-          <Change change={scoreImprovement.handAccuracy[hand]} formatValue={num => num.toFixed(2)} />
+          <Change
+            className="text-xs"
+            change={scoreImprovement.handAccuracy[hand]}
+            formatValue={num => num.toFixed(2)}
+          />
         </Tooltip>
       )}
     </div>

@@ -1,9 +1,10 @@
 import { ScoreBadgeProps } from "@/components/score/badges/badge-props";
 import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
 import Tooltip from "@/components/tooltip";
-import { formatPp } from "@ssr/common/utils/number-utils";
+import { ensurePositiveNumber, formatPp } from "@ssr/common/utils/number-utils";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { Change } from "@/common/change";
+import { Warning } from "@/components/warning";
 
 type ScorePpProps = ScoreBadgeProps & {
   /**
@@ -22,26 +23,42 @@ export function ScorePpBadge({ score, leaderboard }: ScorePpProps) {
     return undefined;
   }
   const weightedPp = pp * weight;
-  const previousPp = fcAccuracy ? scoresaberService.getPp(leaderboard.stars, fcAccuracy).toFixed(0) : undefined;
-  const isSamePp = previousPp === pp.toFixed(0);
+  const fcPp =
+    !score.fullCombo && fcAccuracy ? scoresaberService.getPp(leaderboard.stars, fcAccuracy).toFixed(0) : undefined;
 
   return (
     <>
       <Tooltip
         display={
-          <div>
-            <p className="font-semibold">Performance Points</p>
-            <p>Raw: {formatPp(pp)}pp</p>
-            <p>
-              Weighted: {formatPp(weightedPp)}pp ({(100 * weight).toFixed(2)}%)
-            </p>
-            {previousPp && !isSamePp && <p>Full Combo: {previousPp}pp</p>}
+          <div className="flex flex-col gap-2">
+            <div>
+              <p className="font-semibold">Performance Points</p>
+              <p>Raw: {formatPp(pp)}pp</p>
+              <p>
+                Weighted: {formatPp(weightedPp)}pp ({(100 * weight).toFixed(2)}%)
+              </p>
+              {fcPp && <p>Full Combo: {fcPp}pp</p>}
+            </div>
+
+            {previousAccuracy && (
+              <Warning>
+                <p className="text-red-700">
+                  The previous pp may not be 100% accurate due to ScoreSaber API limitations.
+                </p>
+              </Warning>
+            )}
           </div>
         }
       >
         <div className="flex flex-col items-center justify-center cursor-default">
           <p>{formatPp(pp)}pp</p>
-          {previousAccuracy && <Change change={previousAccuracy} isPp />}
+          {previousAccuracy && (
+            <Change
+              className="text-xs"
+              change={ensurePositiveNumber(pp - scoresaberService.getPp(leaderboard.stars, previousAccuracy))}
+              isPp
+            />
+          )}
         </div>
       </Tooltip>
     </>

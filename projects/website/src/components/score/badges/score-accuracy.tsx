@@ -58,7 +58,7 @@ export function ScoreAccuracyBadge({ score, leaderboard }: ScoreAccuracyProps) {
         </Tooltip>
         {scoreImprovement && previousAccuracy && (
           <Tooltip display={`Previous Accuracy: ${previousAccuracy.toFixed(2)}%`}>
-            <Change change={scoreImprovement.accuracy} formatValue={num => `${num.toFixed(2)}%`} />
+            <Change className="text-xs" change={scoreImprovement.accuracy} formatValue={num => `${num.toFixed(2)}%`} />
           </Tooltip>
         )}
       </div>

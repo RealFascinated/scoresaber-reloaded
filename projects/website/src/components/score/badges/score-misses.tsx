@@ -27,6 +27,8 @@ export default function ScoreMissesBadge({ score, hideXMark }: ScoreMissesBadgeP
       wallsHit: (scoreImprovement.misses.wallsHit - misses.wallsHit) * -1,
     };
   const previousScoreFc = previousScoreMisses?.misses == 0;
+  const isMissImprovement =
+    previousScoreMisses && scoreImprovement && previousScoreMisses.misses > scoreImprovement.misses.misses;
 
   return (
     <div className="flex flex-col justify-center items-center">
@@ -42,7 +44,7 @@ export default function ScoreMissesBadge({ score, hideXMark }: ScoreMissesBadgeP
           {!hideXMark && <XMarkIcon className={clsx("w-5 h-5", score.fullCombo ? "hidden" : "text-red-400")} />}
         </div>
       </ScoreMissesTooltip>
-      {additionalData && previousScoreMisses && scoreImprovement && misses && (
+      {additionalData && previousScoreMisses && scoreImprovement && misses && isMissImprovement && (
         <div className="flex gap-2 items-center justify-center">
           <ScoreMissesTooltip
             missedNotes={previousScoreMisses.missedNotes}
@@ -51,7 +53,7 @@ export default function ScoreMissesBadge({ score, hideXMark }: ScoreMissesBadgeP
             wallsHit={previousScoreMisses.wallsHit}
             fullCombo={previousScoreFc}
           >
-            <div className="flex gap-1 items-center">
+            <div className="flex gap-1 items-center text-xs">
               {previousScoreFc ? (
                 <p className="text-green-400">FC</p>
               ) : (
@@ -67,7 +69,7 @@ export default function ScoreMissesBadge({ score, hideXMark }: ScoreMissesBadgeP
             wallsHit={misses.wallsHit}
             fullCombo={additionalData.fullCombo}
           >
-            <div className="flex gap-1 items-center">
+            <div className="flex gap-1 items-center text-xs">
               {additionalData.fullCombo ? <p className="text-green-400">FC</p> : formatNumberWithCommas(misses.misses)}
             </div>
           </ScoreMissesTooltip>

@@ -48,7 +48,9 @@ export default function Tooltip({ children, display, asChild = true, side = "top
           {children}
         </button>
       </TooltipTrigger>
-      <TooltipContent side={side}>{display}</TooltipContent>
+      <TooltipContent className="max-w-[350px]" side={side}>
+        {display}
+      </TooltipContent>
     </ShadCnTooltip>
   );
 }
