@@ -36,7 +36,7 @@ export function DailyChange({ type, player, change, tooltip }: DailyChangeProps)
   }
 
   const value = (
-    <p className={`text-sm ${change > 0 ? "text-green-400" : "text-red-400"}`}>
+    <p className={`text-xs ${change > 0 ? "text-green-400" : "text-red-400"}`}>
       {change > 0 ? "+" : ""}
       {`${formatValue(change)}${type.type == "Performance Points" ? "pp" : ""}`}
     </p>

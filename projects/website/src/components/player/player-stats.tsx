@@ -4,13 +4,11 @@ import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { formatDate } from "@ssr/common/utils/time-utils";
 import { ReactNode } from "react";
 import Tooltip from "@/components/tooltip";
-import { DailyChange } from "@/components/statistic/daily-change";
 import { getScoreSaberRole } from "@ssr/common/utils/scoresaber.util";
-import { PlayerStatChange } from "@ssr/common/player/player-stat-change";
 
 type Stat = {
   name: string;
-  color?: string;
+  color?: (player: ScoreSaberPlayer) => string;
   create: (player: ScoreSaberPlayer) => {
     tooltip?: string | ReactNode;
     value: string | ReactNode;
@@ -20,43 +18,28 @@ type Stat = {
 const playerStats: Stat[] = [
   {
     name: "Ranked Play Count",
-    color: "bg-pp",
+    color: () => "bg-pp",
     create: (player: ScoreSaberPlayer) => {
       return {
-        value: (
-          <>
-            {formatNumberWithCommas(player.statistics.rankedPlayCount)}{" "}
-            <DailyChange type={PlayerStatChange.RankedPlayCount} player={player} />
-          </>
-        ),
+        value: <>{formatNumberWithCommas(player.statistics.rankedPlayCount)}</>,
       };
     },
   },
   {
     name: "Total Ranked Score",
-    color: "bg-pp",
+    color: () => "bg-pp",
     create: (player: ScoreSaberPlayer) => {
       return {
-        value: (
-          <>
-            {formatNumberWithCommas(player.statistics.totalRankedScore)}{" "}
-            <DailyChange type={PlayerStatChange.TotalRankedScore} player={player} />
-          </>
-        ),
+        value: <>{formatNumberWithCommas(player.statistics.totalRankedScore)}</>,
       };
     },
   },
   {
     name: "Average Ranked Accuracy",
-    color: "bg-pp",
+    color: () => "bg-pp",
     create: (player: ScoreSaberPlayer) => {
       return {
-        value: (
-          <>
-            {player.statistics.averageRankedAccuracy.toFixed(2) + "%"}{" "}
-            <DailyChange type={PlayerStatChange.AverageRankedAccuracy} player={player} />
-          </>
-        ),
+        value: <>{player.statistics.averageRankedAccuracy.toFixed(2) + "%"}</>,
       };
     },
   },
@@ -64,12 +47,7 @@ const playerStats: Stat[] = [
     name: "Total Play Count",
     create: (player: ScoreSaberPlayer) => {
       return {
-        value: (
-          <>
-            {formatNumberWithCommas(player.statistics.totalPlayCount)}{" "}
-            <DailyChange type={PlayerStatChange.TotalPlayCount} player={player} />
-          </>
-        ),
+        value: <>{formatNumberWithCommas(player.statistics.totalPlayCount)}</>,
       };
     },
   },
@@ -77,12 +55,7 @@ const playerStats: Stat[] = [
     name: "Total Score",
     create: (player: ScoreSaberPlayer) => {
       return {
-        value: (
-          <>
-            {formatNumberWithCommas(player.statistics.totalScore)}{" "}
-            <DailyChange type={PlayerStatChange.TotalScore} player={player} />
-          </>
-        ),
+        value: <>{formatNumberWithCommas(player.statistics.totalScore)}</>,
       };
     },
   },
@@ -90,12 +63,7 @@ const playerStats: Stat[] = [
     name: "Total Replays Watched",
     create: (player: ScoreSaberPlayer) => {
       return {
-        value: (
-          <>
-            {formatNumberWithCommas(player.statistics.replaysWatched)}{" "}
-            <DailyChange type={PlayerStatChange.TotalReplaysWatched} player={player} />
-          </>
-        ),
+        value: <>{formatNumberWithCommas(player.statistics.replaysWatched)}</>,
       };
     },
   },
@@ -114,7 +82,15 @@ const playerStats: Stat[] = [
       const role = getScoreSaberRole(player);
 
       return {
-        value: role?.name,
+        value: !role ? undefined : (
+          <p
+            style={{
+              color: role.color,
+            }}
+          >
+            {role.name}
+          </p>
+        ),
       };
     },
   },
@@ -133,7 +109,7 @@ export default function PlayerStats({ player }: Props) {
           return <div key={index} />;
         }
         const { tooltip, value } = toRender;
-        const stat = <StatValue color={badge.color} name={badge.name} value={value} />;
+        const stat = <StatValue color={badge.color?.(player)} name={badge.name} value={value} />;
 
         return (
           <div key={index}>
