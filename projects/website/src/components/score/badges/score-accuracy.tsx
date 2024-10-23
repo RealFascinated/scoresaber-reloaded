@@ -53,7 +53,8 @@ export function ScoreAccuracyBadge({ score, leaderboard }: ScoreAccuracyProps) {
           }
         >
           <p>
-            {score.accuracy.toFixed(2)}% {modCount > 0 && <ScoreModifiers type="simple" limit={1} score={score} />}
+            {score.accuracy == Infinity ? "∞" : score.accuracy.toFixed(2)}%{" "}
+            {modCount > 0 && <ScoreModifiers type="simple" limit={1} score={score} />}
           </p>
         </Tooltip>
         {scoreImprovement && previousAccuracy && (

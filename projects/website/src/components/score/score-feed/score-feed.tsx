@@ -42,6 +42,8 @@ export default function ScoreFeed() {
     <div className="flex flex-col divide-y divide-border">
       {scores.map(score => {
         const player = score.score.leaderboardPlayerInfo;
+        const leaderboard = getScoreSaberLeaderboardFromToken(score.leaderboard);
+
         return (
           <div key={score.score.id} className="flex flex-col py-2">
             <p className="text-sm">
@@ -51,8 +53,8 @@ export default function ScoreFeed() {
               </Link>
             </p>
             <Score
-              score={getScoreSaberScoreFromToken(score.score)}
-              leaderboard={getScoreSaberLeaderboardFromToken(score.leaderboard)}
+              score={getScoreSaberScoreFromToken(score.score, leaderboard)}
+              leaderboard={leaderboard}
               settings={{
                 noScoreButtons: true,
               }}
