@@ -1,5 +1,5 @@
-import { BeatLeaderSongToken } from "./beatleader-song-token";
-import { BeatLeaderDifficultyToken } from "./beatleader-difficulty-token";
+import { BeatLeaderSongToken } from "./score/song";
+import { BeatLeaderDifficultyToken } from "./difficulty";
 
 export type BeatLeaderLeaderboardToken = {
   id: string;

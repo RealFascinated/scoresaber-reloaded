@@ -9,7 +9,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { fetchLeaderboard } from "@ssr/common/utils/leaderboard.util";
 import LeaderboardScoresResponse from "@ssr/common/response/leaderboard-scores-response";
-import LeaderboardPpChart from "@/components/leaderboard/leaderboard-pp-chart";
+import LeaderboardPpChart from "@/components/leaderboard/chart/leaderboard-pp-chart";
 import Card from "@/components/card";
 
 type LeaderboardDataProps = {

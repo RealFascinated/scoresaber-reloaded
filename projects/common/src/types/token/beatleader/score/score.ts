@@ -1,7 +1,7 @@
-import { BeatLeaderLeaderboardToken } from "./beatleader-leaderboard-token";
-import { BeatLeaderScoreImprovementToken } from "./beatleader-score-improvement-token";
-import { BeatLeaderScoreOffsetsToken } from "./beatleader-score-offsets-token";
-import { BeatLeaderPlayerToken } from "./beatleader-player-token";
+import { BeatLeaderLeaderboardToken } from "../leaderboard";
+import { BeatLeaderScoreImprovementToken } from "./score-improvement";
+import { BeatLeaderScoreOffsetsToken } from "./score-offsets";
+import { BeatLeaderPlayerToken } from "../player";
 
 export type BeatLeaderScoreToken = {
   myScore: null; // ??

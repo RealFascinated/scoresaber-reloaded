@@ -15,6 +15,12 @@ import { BeatSaverMap } from "@ssr/common/model/beatsaver/map";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import Card from "@/components/card";
 import { MapStats } from "@/components/score/map-stats";
+import PlayerScoreAccuracyChart from "@/components/leaderboard/chart/player-score-accuracy-chart";
+import { useQuery } from "@tanstack/react-query";
+import { fetchLeaderboardScores } from "@ssr/common/utils/score-utils";
+import LeaderboardScoresResponse from "@ssr/common/response/leaderboard-scores-response";
+import { ScoreStatsToken } from "@ssr/common/types/token/beatleader/score-stats/score-stats";
+import { beatLeaderService } from "@ssr/common/service/impl/beatleader";
 
 type Props = {
   /**
@@ -40,10 +46,67 @@ type Props = {
   };
 };
 
+type LeaderboardDropdownData = {
+  /**
+   * The initial scores.
+   */
+  scores?: LeaderboardScoresResponse<ScoreSaberScore, ScoreSaberLeaderboard>;
+
+  /**
+   * The score stats for this score,
+   */
+  scoreStats?: ScoreStatsToken;
+};
+
 export default function Score({ leaderboard, beatSaverMap, score, settings }: Props) {
+  const scoresPage = getPageFromRank(score.rank, 12);
+
   const isMobile = useIsMobile();
   const [baseScore, setBaseScore] = useState<number>(score.score);
   const [isLeaderboardExpanded, setIsLeaderboardExpanded] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [leaderboardDropdownData, setLeaderboardDropdownData] = useState<LeaderboardDropdownData | undefined>();
+
+  const { data, isError, isLoading } = useQuery<LeaderboardDropdownData>({
+    queryKey: ["leaderboardDropdownData", leaderboard.id, score.id, isLeaderboardExpanded],
+    queryFn: async () => {
+      const scores = await fetchLeaderboardScores<ScoreSaberScore, ScoreSaberLeaderboard>(
+        "scoresaber",
+        leaderboard.id + "",
+        scoresPage
+      );
+      const scoreStats = score.additionalData
+        ? await beatLeaderService.lookupScoreStats(score.additionalData.scoreId)
+        : undefined;
+
+      return {
+        scores: scores,
+        scoreStats: scoreStats,
+      };
+    },
+    staleTime: 30 * 1000,
+    enabled: loading,
+  });
+
+  useEffect(() => {
+    if (data) {
+      setLeaderboardDropdownData({
+        ...data,
+        scores: data.scores,
+        scoreStats: data.scoreStats,
+      });
+      setLoading(false);
+    }
+  }, [data]);
+
+  const handleLeaderboardOpen = (isExpanded: boolean) => {
+    if (!isExpanded) {
+      setLeaderboardDropdownData(undefined);
+    }
+
+    setLoading(true);
+    setIsLeaderboardExpanded(isExpanded);
+  };
 
   /**
    * Set the base score
@@ -59,6 +122,7 @@ export default function Score({ leaderboard, beatSaverMap, score, settings }: Pr
    */
   useEffect(() => {
     setIsLeaderboardExpanded(false);
+    setLeaderboardDropdownData(undefined);
   }, [score]);
 
   const accuracy = (baseScore / leaderboard.maxScore) * 100;
@@ -81,7 +145,9 @@ export default function Score({ leaderboard, beatSaverMap, score, settings }: Pr
             beatSaverMap={beatSaverMap}
             score={score}
             alwaysSingleLine={isMobile}
-            setIsLeaderboardExpanded={setIsLeaderboardExpanded}
+            setIsLeaderboardExpanded={(isExpanded: boolean) => {
+              handleLeaderboardOpen(isExpanded);
+            }}
             updateScore={score => {
               setBaseScore(score.score);
             }}
@@ -98,7 +164,7 @@ export default function Score({ leaderboard, beatSaverMap, score, settings }: Pr
       </div>
 
       {/* Leaderboard */}
-      {isLeaderboardExpanded && (
+      {isLeaderboardExpanded && leaderboardDropdownData && !loading && (
         <motion.div
           initial={{ opacity: 0, y: -50 }}
           exit={{ opacity: 0, y: -50 }}
@@ -108,8 +174,15 @@ export default function Score({ leaderboard, beatSaverMap, score, settings }: Pr
           <Card className="flex gap-4 w-full relative border border-input">
             <MapStats leaderboard={leaderboard} beatSaver={beatSaverMap} />
 
+            {leaderboardDropdownData.scoreStats && (
+              <div className="flex gap-2">
+                <PlayerScoreAccuracyChart scoreStats={leaderboardDropdownData.scoreStats} />
+              </div>
+            )}
+
             <LeaderboardScores
-              initialPage={getPageFromRank(score.rank, 12)}
+              initialPage={scoresPage}
+              initialScores={leaderboardDropdownData.scores}
               leaderboard={leaderboard}
               disableUrlChanging
             />

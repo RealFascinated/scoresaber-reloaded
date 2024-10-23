@@ -62,8 +62,7 @@ export default function LeaderboardScores({
         selectedLeaderboardId + "",
         currentPage
       ),
-    staleTime: 30 * 1000,
-    enabled: (shouldFetch && isLeaderboardPage) || !isLeaderboardPage,
+    enabled: shouldFetch,
   });
 
   /**

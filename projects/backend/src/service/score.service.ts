@@ -24,12 +24,12 @@ import { Config } from "@ssr/common/config";
 import { SSRCache } from "@ssr/common/cache";
 import { fetchWithCache } from "../common/cache.util";
 import { PlayerDocument, PlayerModel } from "@ssr/common/model/player";
-import { BeatLeaderScoreToken } from "@ssr/common/types/token/beatleader/beatleader-score-token";
+import { BeatLeaderScoreToken } from "@ssr/common/types/token/beatleader/score/score";
 import {
   AdditionalScoreData,
   AdditionalScoreDataModel,
 } from "@ssr/common/model/additional-score-data/additional-score-data";
-import { BeatLeaderScoreImprovementToken } from "@ssr/common/types/token/beatleader/beatleader-score-improvement-token";
+import { BeatLeaderScoreImprovementToken } from "@ssr/common/types/token/beatleader/score/score-improvement";
 
 const playerScoresCache = new SSRCache({
   ttl: 1000 * 60, // 1 minute

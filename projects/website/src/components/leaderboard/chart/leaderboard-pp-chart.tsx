@@ -2,11 +2,11 @@
 
 import React, { useState } from "react";
 import GenericChart, { DatasetConfig } from "@/components/chart/generic-chart";
-import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
-import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import Card from "@/components/card";
 import { DualRangeSlider } from "@/components/ui/dual-range-slider";
 import { useDebounce } from "@uidotdev/usehooks";
+import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
+import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
 
 type Props = {
   /**
