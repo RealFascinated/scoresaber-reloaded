@@ -6,11 +6,12 @@ export default class BeatSaverService {
    * Gets a map by its hash, updates if necessary, or inserts if not found.
    *
    * @param hash the hash of the map
-   * @returns the beatsaver map or undefined if not found
+   * @returns the beatsaver map, or undefined if not found
    */
   public static async getMap(hash: string): Promise<BeatSaverMap | undefined> {
-    // Try to find the existing map by its hash
-    let map = await BeatSaverMapModel.findById(hash);
+    let map = await BeatSaverMapModel.findOne({
+      "versions.hash": hash.toUpperCase(),
+    });
 
     if (map) {
       const toObject = map.toObject() as BeatSaverMap;
