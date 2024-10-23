@@ -104,7 +104,7 @@ export async function getScoreSaberPlayerFromToken(
       .get<{
         statistics: { [key: string]: PlayerHistory };
       }>(
-        `${Config.apiUrl}/player/history/50/${token.id}${playerIdCookie && playerIdCookie == token.id ? "?createIfMissing=true" : ""}`
+        `${Config.apiUrl}/player/history/${token.id}/50/${playerIdCookie && playerIdCookie == token.id ? "?createIfMissing=true" : ""}`
       )
       .json();
     if (history) {
