@@ -20,7 +20,7 @@ class BeatLeaderService extends Service {
     this.log(`Looking score stats for "${scoreId}"...`);
 
     const response = await this.fetch<ScoreStatsToken>(
-      LOOKUP_MAP_STATS_BY_SCORE_ID_ENDPOINT.replace(":scoreId", scoreId)
+      LOOKUP_MAP_STATS_BY_SCORE_ID_ENDPOINT.replace(":scoreId", scoreId + "")
     );
     // Score stats not found
     if (response == undefined) {
