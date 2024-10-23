@@ -1,5 +1,5 @@
 import { prop } from "@typegoose/typegoose";
-import { MapDifficulty } from "../../score/map-difficulty";
+import { type MapDifficulty } from "../../score/map-difficulty";
 
 export default class BeatSaverMapDifficulty {
   /**
