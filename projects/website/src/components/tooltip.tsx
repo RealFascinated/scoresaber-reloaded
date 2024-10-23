@@ -34,16 +34,16 @@ type Props = {
 
 export default function Tooltip({ children, display, asChild = true, side = "top", className }: Props) {
   const [open, setOpen] = useState(false);
-  const openDebounce = useDebounce(open, 100);
 
   return (
-    <ShadCnTooltip open={openDebounce}>
+    <ShadCnTooltip open={open}>
       <TooltipTrigger className={className} asChild={asChild}>
         <div
           className={cn("cursor-default", className)}
           onMouseEnter={() => setOpen(true)}
           onMouseLeave={() => setOpen(false)}
           onTouchStart={() => setOpen(!open)}
+          onTouchEnd={() => setOpen(!open)}
         >
           {children}
         </div>
