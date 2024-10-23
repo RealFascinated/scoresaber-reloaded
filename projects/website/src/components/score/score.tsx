@@ -68,7 +68,7 @@ export default function Score({ leaderboard, beatSaverMap, score, settings }: Pr
   const [leaderboardDropdownData, setLeaderboardDropdownData] = useState<LeaderboardDropdownData | undefined>();
 
   const { data, isError, isLoading } = useQuery<LeaderboardDropdownData>({
-    queryKey: ["leaderboardDropdownData", leaderboard.id, score.id, isLeaderboardExpanded],
+    queryKey: ["leaderboardDropdownData", leaderboard.id, score.scoreId, isLeaderboardExpanded],
     queryFn: async () => {
       const scores = await fetchLeaderboardScores<ScoreSaberScore, ScoreSaberLeaderboard>(
         "scoresaber",
