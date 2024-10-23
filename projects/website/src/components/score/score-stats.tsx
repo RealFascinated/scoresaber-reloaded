@@ -125,6 +125,9 @@ const badges: ScoreBadge[] = [
     name: "Left Hand Accuracy",
     color: () => "bg-hands-left",
     create: (score: ScoreSaberScore) => {
+      if (!score.additionalData) {
+        return undefined;
+      }
       return <HandAccuracy score={score} hand="left" />;
     },
   },
@@ -132,6 +135,9 @@ const badges: ScoreBadge[] = [
     name: "Right Hand Accuracy",
     color: () => "bg-hands-right",
     create: (score: ScoreSaberScore) => {
+      if (!score.additionalData) {
+        return undefined;
+      }
       return <HandAccuracy score={score} hand="right" />;
     },
   },

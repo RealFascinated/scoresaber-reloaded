@@ -22,8 +22,8 @@ export function HandAccuracy({ score, hand }: HandAccuracyProps) {
   const { handAccuracy } = score.additionalData;
   const scoreImprovement = score.additionalData.scoreImprovement;
   const previousHandAccuracy = scoreImprovement ? handAccuracy[hand] - scoreImprovement.handAccuracy[hand] : undefined;
-
   const formattedHand = capitalizeFirstLetter(hand);
+
   return (
     <div className="flex flex-col items-center justify-center">
       <Tooltip display={`${formattedHand} Hand Accuracy`}>
