@@ -65,6 +65,7 @@ const datasetConfig: DatasetConfig[] = [
     axisConfig: {
       reverse: false,
       display: true,
+      hideOnMobile: true,
       displayName: "Total Ranked Scores",
       position: "right",
     },
