@@ -3,33 +3,40 @@ import { BeatSaverMap, BeatSaverMapModel } from "@ssr/common/model/beatsaver/map
 
 export default class BeatSaverService {
   /**
-   * Gets a map by its hash.
+   * Gets a map by its hash, updates if necessary, or inserts if not found.
    *
    * @param hash the hash of the map
-   * @returns the beatsaver map
+   * @returns the beatsaver map or undefined if not found
    */
   public static async getMap(hash: string): Promise<BeatSaverMap | undefined> {
+    // Try to find the existing map by its hash
     let map = await BeatSaverMapModel.findById(hash);
-    if (map != undefined) {
+
+    if (map) {
       const toObject = map.toObject() as BeatSaverMap;
+
+      // If the map is not found, return undefined
       if (toObject.notFound) {
         return undefined;
       }
-      // Return the map if it doesn't need to be refreshed
+
+      // If the map does not need to be refreshed, return it
       if (!toObject.shouldRefresh()) {
         return toObject;
       }
     }
 
+    // Map needs to be fetched or refreshed
     const token = await beatsaverService.lookupMap(hash);
     const uploader = token?.uploader;
     const metadata = token?.metadata;
 
-    map = await BeatSaverMapModel.create(
+    // Create the new map object based on fetched data
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
+    const newMapData: BeatSaverMap =
       token && uploader && metadata
-        ? // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-expect-error
-          ({
+        ? {
             _id: hash,
             bsr: token.id,
             name: token.name,
@@ -47,39 +54,42 @@ export default class BeatSaverService {
               songName: metadata.songName,
               songSubName: metadata.songSubName,
             },
-            versions: token.versions.map(version => {
-              return {
-                hash: version.hash.toUpperCase(),
-                difficulties: version.diffs.map(diff => {
-                  return {
-                    njs: diff.njs,
-                    offset: diff.offset,
-                    notes: diff.notes,
-                    bombs: diff.bombs,
-                    obstacles: diff.obstacles,
-                    nps: diff.nps,
-                    characteristic: diff.characteristic,
-                    difficulty: diff.difficulty,
-                    events: diff.events,
-                    chroma: diff.chroma,
-                    mappingExtensions: diff.me,
-                    noodleExtensions: diff.ne,
-                    cinema: diff.cinema,
-                    maxScore: diff.maxScore,
-                    label: diff.label,
-                  };
-                }),
-                createdAt: new Date(version.createdAt),
-              };
-            }),
+            versions: token.versions.map(version => ({
+              hash: version.hash.toUpperCase(),
+              difficulties: version.diffs.map(diff => ({
+                njs: diff.njs,
+                offset: diff.offset,
+                notes: diff.notes,
+                bombs: diff.bombs,
+                obstacles: diff.obstacles,
+                nps: diff.nps,
+                characteristic: diff.characteristic,
+                difficulty: diff.difficulty,
+                events: diff.events,
+                chroma: diff.chroma,
+                mappingExtensions: diff.me,
+                noodleExtensions: diff.ne,
+                cinema: diff.cinema,
+                maxScore: diff.maxScore,
+                label: diff.label,
+              })),
+              createdAt: new Date(version.createdAt),
+            })),
             lastRefreshed: new Date(),
-          } as BeatSaverMap)
+          }
         : {
             _id: hash,
             notFound: true,
-          }
-    );
-    if (map.notFound) {
+          };
+
+    // Upsert the map: if it exists, update it; if not, create a new one
+    map = await BeatSaverMapModel.findOneAndUpdate({ _id: hash }, newMapData, {
+      upsert: true,
+      new: true,
+      setDefaultsOnInsert: true,
+    });
+
+    if (map == null || map.notFound) {
       return undefined;
     }
     return map.toObject() as BeatSaverMap;
