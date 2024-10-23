@@ -134,3 +134,20 @@ export function getDaysAgo(date: Date): number {
 export function parseDate(date: string): Date {
   return new Date(date);
 }
+
+/**
+ * Formats the time in the format "MM:SS"
+ *
+ * @param seconds the time to format in seconds
+ * @returns the formatted time in "MM:SS" format
+ */
+export function formatTime(seconds: number): string {
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = seconds % 60;
+
+  // Zero pad minutes and seconds to ensure two digits
+  const formattedMinutes = minutes < 10 ? `0${minutes}` : `${minutes}`;
+  const formattedSeconds = remainingSeconds < 10 ? `0${remainingSeconds}` : `${remainingSeconds}`;
+
+  return `${formattedMinutes}:${formattedSeconds}`;
+}

@@ -1,4 +1,4 @@
-import { songDifficultyToColor } from "@/common/song-utils";
+import { getDifficulty } from "@/common/song-utils";
 import { StarIcon } from "@heroicons/react/24/solid";
 import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
 
@@ -18,7 +18,7 @@ export function LeaderboardSongStarCount({ leaderboard }: LeaderboardSongStarCou
     <div
       className="w-fit h-[20px] rounded-sm flex justify-center items-center text-xs cursor-default"
       style={{
-        backgroundColor: songDifficultyToColor(leaderboard.difficulty.difficultyRaw) + "f0", // Transparency value (in hex 0-255)
+        backgroundColor: getDifficulty(leaderboard.difficulty.difficulty).color + "f0", // Transparency value (in hex 0-255)
       }}
     >
       <div className="flex gap-1 items-center justify-center p-1">

@@ -26,7 +26,7 @@ export default function FriendsButton() {
       </PopoverTrigger>
       <PopoverContent className="p-2">
         {friends && friends.length > 0 ? (
-          friends.map(friend => <Friend player={friend} key={friend.id} onClick={() => setOpen(false)} />)
+          friends.map((friend, index) => <Friend player={friend} key={index} onClick={() => setOpen(false)} />)
         ) : (
           <div className="text-sm flex flex-col gap-2 justify-center items-center">
             <p>You don&#39;t have any friends :(</p>

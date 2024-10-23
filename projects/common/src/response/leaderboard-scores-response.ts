@@ -1,5 +1,5 @@
 import { Metadata } from "../types/metadata";
-import { BeatSaverMap } from "../model/beatsaver/beatsaver-map";
+import { BeatSaverMap } from "../model/beatsaver/map";
 
 export default interface LeaderboardScoresResponse<S, L> {
   /**

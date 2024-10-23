@@ -3,7 +3,7 @@
 import LeaderboardScores from "@/components/leaderboard/leaderboard-scores";
 import { useEffect, useState } from "react";
 import ScoreButtons from "./score-buttons";
-import ScoreSongInfo from "./score-info";
+import ScoreSongInfo from "./score-song-info";
 import ScoreRankInfo from "./score-rank-info";
 import ScoreStats from "./score-stats";
 import { motion } from "framer-motion";
@@ -11,10 +11,10 @@ import { getPageFromRank } from "@ssr/common/utils/utils";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import ScoreSaberScore from "@ssr/common/score/impl/scoresaber-score";
 import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
-import { BeatSaverMap } from "@ssr/common/model/beatsaver/beatsaver-map";
+import { BeatSaverMap } from "@ssr/common/model/beatsaver/map";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import Card from "@/components/card";
-import StatValue from "@/components/stat-value";
+import { MapStats } from "@/components/score/map-stats";
 
 type Props = {
   /**
@@ -106,11 +106,7 @@ export default function Score({ leaderboard, beatSaverMap, score, settings }: Pr
           className="w-full mt-2"
         >
           <Card className="flex gap-4 w-full relative border border-input">
-            {score.additionalData && (
-              <div className="flex w-full items-center justify-center gap-2">
-                <StatValue name="Pauses" value={score.additionalData.pauses} />
-              </div>
-            )}
+            <MapStats leaderboard={leaderboard} beatSaver={beatSaverMap} />
 
             <LeaderboardScores
               initialPage={getPageFromRank(score.rank, 12)}

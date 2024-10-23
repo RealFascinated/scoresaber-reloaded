@@ -14,14 +14,7 @@ import {
 import { ChevronDoubleLeftIcon, ChevronDoubleRightIcon } from "@heroicons/react/16/solid";
 
 type PaginationItemWrapperProps = {
-  /**
-   * Whether a page is currently loading.
-   */
   isLoadingPage: boolean;
-
-  /**
-   * The children to render.
-   */
   children: React.ReactNode;
 };
 
@@ -38,34 +31,11 @@ function PaginationItemWrapper({ isLoadingPage, children }: PaginationItemWrappe
 }
 
 type Props = {
-  /**
-   * If true, the pagination will be rendered as a mobile-friendly pagination.
-   */
   mobilePagination: boolean;
-
-  /**
-   * The current page.
-   */
   page: number;
-
-  /**
-   * The total number of pages.
-   */
   totalPages: number;
-
-  /**
-   * The page to show a loading icon on.
-   */
   loadingPage: number | undefined;
-
-  /**
-   * Callback function that is called when the user clicks on a page number.
-   */
   onPageChange: (page: number) => void;
-
-  /**
-   * Optional callback to generate the URL for each page.
-   */
   generatePageUrl?: (page: number) => string;
 };
 
@@ -89,15 +59,12 @@ export default function Pagination({
     if (newPage < 1 || newPage > totalPages || newPage === currentPage || isLoading) {
       return;
     }
-
     setCurrentPage(newPage);
     onPageChange(newPage);
   };
 
   const handleLinkClick = (newPage: number, event: React.MouseEvent) => {
-    event.preventDefault(); // Prevent default navigation behavior
-
-    // Check if the new page is valid
+    event.preventDefault();
     if (newPage < 1 || newPage > totalPages || newPage === currentPage || isLoading) {
       return;
     }
@@ -116,26 +83,26 @@ export default function Pagination({
 
     if (startPage > 1) {
       pageNumbers.push(
-        <>
-          <PaginationItemWrapper key="start" isLoadingPage={isLoading}>
-            {!mobilePagination && (
-              <PaginationLink href={generatePageUrl ? generatePageUrl(1) : ""} onClick={e => handleLinkClick(1, e)}>
-                1
-              </PaginationLink>
-            )}
-          </PaginationItemWrapper>
-          {startPage > 2 && !mobilePagination && (
-            <PaginationItemWrapper key="ellipsis-start" isLoadingPage={isLoading}>
-              <PaginationEllipsis />
-            </PaginationItemWrapper>
+        <PaginationItemWrapper key={`start-1`} isLoadingPage={isLoading}>
+          {!mobilePagination && (
+            <PaginationLink href={generatePageUrl ? generatePageUrl(1) : ""} onClick={e => handleLinkClick(1, e)}>
+              1
+            </PaginationLink>
           )}
-        </>
+        </PaginationItemWrapper>
       );
+      if (startPage > 2 && !mobilePagination) {
+        pageNumbers.push(
+          <PaginationItemWrapper key={`ellipsis-start`} isLoadingPage={isLoading}>
+            <PaginationEllipsis />
+          </PaginationItemWrapper>
+        );
+      }
     }
 
     for (let i = startPage; i <= endPage; i++) {
       pageNumbers.push(
-        <PaginationItemWrapper key={i} isLoadingPage={isLoading}>
+        <PaginationItemWrapper key={`page-${i}`} isLoadingPage={isLoading}>
           <PaginationLink
             isActive={i === currentPage}
             href={generatePageUrl ? generatePageUrl(i) : ""}
@@ -153,17 +120,15 @@ export default function Pagination({
   return (
     <ShadCnPagination className="select-none">
       <PaginationContent>
-        {/* ">>" before the Previous button in mobile mode */}
         {mobilePagination && (
-          <PaginationItemWrapper key="mobile-start" isLoadingPage={isLoading}>
+          <PaginationItemWrapper key={`mobile-start`} isLoadingPage={isLoading}>
             <PaginationLink href={generatePageUrl ? generatePageUrl(1) : ""} onClick={e => handleLinkClick(1, e)}>
               <ChevronDoubleLeftIcon className="h-4 w-4" />
             </PaginationLink>
           </PaginationItemWrapper>
         )}
 
-        {/* Previous button - disabled on the first page */}
-        <PaginationItemWrapper isLoadingPage={isLoading}>
+        <PaginationItemWrapper key={`previous`} isLoadingPage={isLoading}>
           <PaginationPrevious
             href={currentPage > 1 && generatePageUrl ? generatePageUrl(currentPage - 1) : ""}
             onClick={e => handleLinkClick(currentPage - 1, e)}
@@ -176,10 +141,10 @@ export default function Pagination({
 
         {!mobilePagination && currentPage < totalPages && totalPages - currentPage > 2 && (
           <>
-            <PaginationItemWrapper key="ellipsis-start" isLoadingPage={isLoading}>
+            <PaginationItemWrapper key={`ellipsis-end`} isLoadingPage={isLoading}>
               <PaginationEllipsis />
             </PaginationItemWrapper>
-            <PaginationItemWrapper key="end" isLoadingPage={isLoading}>
+            <PaginationItemWrapper key={`end`} isLoadingPage={isLoading}>
               <PaginationLink
                 href={generatePageUrl ? generatePageUrl(totalPages) : ""}
                 onClick={e => handleLinkClick(totalPages, e)}
@@ -190,8 +155,7 @@ export default function Pagination({
           </>
         )}
 
-        {/* Next button - disabled on the last page */}
-        <PaginationItemWrapper isLoadingPage={isLoading}>
+        <PaginationItemWrapper key={`next`} isLoadingPage={isLoading}>
           <PaginationNext
             href={currentPage < totalPages && generatePageUrl ? generatePageUrl(currentPage + 1) : ""}
             onClick={e => handleLinkClick(currentPage + 1, e)}
@@ -200,9 +164,8 @@ export default function Pagination({
           />
         </PaginationItemWrapper>
 
-        {/* ">>" after the Next button in mobile mode */}
         {mobilePagination && (
-          <PaginationItemWrapper key="mobile-end" isLoadingPage={isLoading}>
+          <PaginationItemWrapper key={`mobile-end`} isLoadingPage={isLoading}>
             <PaginationLink
               href={generatePageUrl ? generatePageUrl(totalPages) : ""}
               onClick={e => handleLinkClick(totalPages, e)}

@@ -7,7 +7,7 @@ import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/score
 import { NotFoundError } from "elysia";
 import { getScoreSaberLeaderboardFromToken } from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
 import BeatSaverService from "./beatsaver.service";
-import { BeatSaverMap } from "@ssr/common/model/beatsaver/beatsaver-map";
+import { BeatSaverMap } from "@ssr/common/model/beatsaver/map";
 
 const leaderboardCache = new SSRCache({
   ttl: 1000 * 60 * 60 * 24,

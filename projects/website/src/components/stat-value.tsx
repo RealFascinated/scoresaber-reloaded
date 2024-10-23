@@ -7,6 +7,11 @@ type Props = {
   name?: string;
 
   /**
+   * The icon for the stat.
+   */
+  icon?: React.ReactNode;
+
+  /**
    * The background color of the stat.
    */
   color?: string;
@@ -17,7 +22,7 @@ type Props = {
   value: React.ReactNode;
 };
 
-export default function StatValue({ name, color, value }: Props) {
+export default function StatValue({ name, icon, color, value }: Props) {
   return (
     <div
       className={clsx(
@@ -28,6 +33,7 @@ export default function StatValue({ name, color, value }: Props) {
         backgroundColor: (!color?.includes("bg") && color) || undefined,
       }}
     >
+      {icon}
       {name && (
         <>
           <p>{name}</p>

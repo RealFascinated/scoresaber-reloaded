@@ -1,4 +1,4 @@
-import { BeatSaverMap } from "../model/beatsaver/beatsaver-map";
+import { BeatSaverMap } from "../model/beatsaver/map";
 
 export type LeaderboardResponse<L> = {
   /**

@@ -66,11 +66,11 @@ export default function SearchPlayer() {
       {results !== undefined && (
         <ScrollArea>
           <div className="flex flex-col gap-1 max-h-60">
-            {results?.map(player => {
+            {results?.map((player, index) => {
               return (
                 <Link
                   href={`/player/${player.id}`}
-                  key={player.id}
+                  key={index}
                   className="bg-secondary p-2 rounded-md flex gap-2 items-center hover:brightness-75 transition-all transform-gpu"
                 >
                   <Avatar>

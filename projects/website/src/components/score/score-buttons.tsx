@@ -12,7 +12,7 @@ import clsx from "clsx";
 import ScoreEditorButton from "@/components/score/score-editor-button";
 import ScoreSaberScore from "@ssr/common/score/impl/scoresaber-score";
 import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
-import { BeatSaverMap } from "@ssr/common/model/beatsaver/beatsaver-map";
+import { BeatSaverMap } from "@ssr/common/model/beatsaver/map";
 import BeatSaberPepeLogo from "@/components/logos/beatsaber-pepe-logo";
 
 type Props = {

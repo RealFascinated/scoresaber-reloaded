@@ -1,5 +1,5 @@
 import Service from "../service";
-import { BeatSaverMapToken } from "../../types/token/beatsaver/beat-saver-map-token";
+import { BeatSaverMapToken } from "../../types/token/beatsaver/map";
 
 const API_BASE = "https://api.beatsaver.com";
 const LOOKUP_MAP_BY_HASH_ENDPOINT = `${API_BASE}/maps/hash/:query`;

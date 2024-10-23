@@ -1,4 +1,5 @@
-import { Difficulty } from "../score/difficulty";
+import { MapDifficulty } from "../score/map-difficulty";
+import { MapCharacteristic } from "../types/map-characteristic";
 
 export default interface LeaderboardDifficulty {
   /**
@@ -9,12 +10,12 @@ export default interface LeaderboardDifficulty {
   /**
    * The difficulty of the leaderboard.
    */
-  difficulty: Difficulty;
+  difficulty: MapDifficulty;
 
   /**
-   * The game mode of the leaderboard.
+   * The characteristic of the leaderboard.
    */
-  gameMode: string;
+  characteristic: MapCharacteristic;
 
   /**
    * The raw difficulty of the leaderboard.

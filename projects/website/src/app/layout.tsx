@@ -5,7 +5,6 @@ import { QueryProvider } from "@/components/providers/query-provider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { AnimatePresence } from "framer-motion";
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import BackgroundCover from "../components/background-cover";
@@ -79,16 +78,14 @@ export default function RootLayout({
             <OfflineNetwork>
               <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
                 <QueryProvider>
-                  <AnimatePresence>
-                    <ApiHealth />
-                    <main className="flex flex-col min-h-screen gap-2 text-white w-full">
-                      <NavBar />
-                      <div className="z-[1] m-auto flex flex-col flex-grow items-center w-full md:max-w-[1600px]">
-                        {children}
-                      </div>
-                      <Footer />
-                    </main>
-                  </AnimatePresence>
+                  <ApiHealth />
+                  <main className="flex flex-col min-h-screen gap-2 text-white w-full">
+                    <NavBar />
+                    <div className="z-[1] m-auto flex flex-col flex-grow items-center w-full md:max-w-[1600px]">
+                      {children}
+                    </div>
+                    <Footer />
+                  </main>
                 </QueryProvider>
               </ThemeProvider>
             </OfflineNetwork>

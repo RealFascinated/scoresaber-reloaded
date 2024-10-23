@@ -37,8 +37,7 @@ export default function Tooltip({ children, display, asChild = true, side = "top
   return (
     <ShadCnTooltip>
       <TooltipTrigger className={className} asChild={asChild}>
-        <button
-          type="button"
+        <div
           className={cn("cursor-default", className)}
           onClick={() => setOpen(!open)}
           onMouseEnter={() => setOpen(true)}
@@ -46,7 +45,7 @@ export default function Tooltip({ children, display, asChild = true, side = "top
           onTouchStart={() => setOpen(!open)}
         >
           {children}
-        </button>
+        </div>
       </TooltipTrigger>
       <TooltipContent className="max-w-[350px]" side={side}>
         {display}

@@ -2,10 +2,10 @@ import FallbackLink from "@/components/fallback-link";
 import Tooltip from "@/components/tooltip";
 import { StarIcon } from "@heroicons/react/24/solid";
 import Image from "next/image";
-import { songDifficultyToColor } from "@/common/song-utils";
 import Link from "next/link";
 import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
-import { BeatSaverMap } from "@ssr/common/model/beatsaver/beatsaver-map";
+import { BeatSaverMap } from "@ssr/common/model/beatsaver/map";
+import { getDifficulty } from "@/common/song-utils";
 
 type Props = {
   leaderboard: ScoreSaberLeaderboard;
@@ -14,25 +14,25 @@ type Props = {
 
 export default function ScoreSongInfo({ leaderboard, beatSaverMap }: Props) {
   const mappersProfile =
-    beatSaverMap != undefined ? `https://beatsaver.com/profile/${beatSaverMap?.author.id}` : undefined;
+    beatSaverMap != undefined ? `https://beatsaver.com/profile/${beatSaverMap.author.id}` : undefined;
 
   const starCount = leaderboard.stars;
-  const difficulty = leaderboard.difficulty;
+  const difficulty = leaderboard.difficulty.difficulty.replace("Plus", "+");
   return (
     <div className="flex gap-3 items-center">
       <div className="relative flex justify-center h-[64px]">
         <Tooltip
           display={
-            <>
-              <p>Difficulty: {difficulty.difficulty}</p>
+            <div>
+              <p>Difficulty: {difficulty}</p>
               {starCount > 0 && <p>Stars: {starCount.toFixed(2)}</p>}
-            </>
+            </div>
           }
         >
           <div
             className="absolute w-full h-[18px] bottom-0 right-0 rounded-sm flex justify-center items-center text-[0.70rem] cursor-default"
             style={{
-              backgroundColor: songDifficultyToColor(difficulty.difficultyRaw) + "f0", // Transparency value (in hex 0-255)
+              backgroundColor: getDifficulty(leaderboard.difficulty.difficulty).color + "f0", // Transparency value (in hex 0-255)
             }}
           >
             {starCount > 0 ? (
@@ -41,7 +41,7 @@ export default function ScoreSongInfo({ leaderboard, beatSaverMap }: Props) {
                 <StarIcon className="w-[14px] h-[14px]" />
               </div>
             ) : (
-              <p>{difficulty.difficulty}</p>
+              <p>{difficulty}</p>
             )}
           </div>
         </Tooltip>

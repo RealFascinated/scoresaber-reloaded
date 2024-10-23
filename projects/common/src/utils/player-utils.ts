@@ -60,7 +60,7 @@ export function sortPlayerHistory(history: Map<string, PlayerHistory>) {
  * @param id the player id
  */
 export async function trackPlayer(id: string) {
-  await kyFetch(`${Config.apiUrl}/player/history/1/${id}?createIfMissing=true`);
+  await kyFetch(`${Config.apiUrl}/player/history/${id}/1?createIfMissing=true`);
 }
 
 /**

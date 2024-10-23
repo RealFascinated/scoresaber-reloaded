@@ -4,6 +4,7 @@ import ScoreSaberLeaderboardToken from "../../types/token/scoresaber/score-saber
 import { getDifficultyFromScoreSaberDifficulty } from "../../utils/scoresaber-utils";
 import { parseDate } from "../../utils/time-utils";
 import { LeaderboardStatus } from "../leaderboard-status";
+import { MapCharacteristic } from "../../types/map-characteristic";
 
 export default interface ScoreSaberLeaderboard extends Leaderboard {
   /**
@@ -41,7 +42,7 @@ export function getScoreSaberLeaderboardFromToken(token: ScoreSaberLeaderboardTo
   const difficulty: LeaderboardDifficulty = {
     leaderboardId: token.difficulty.leaderboardId,
     difficulty: getDifficultyFromScoreSaberDifficulty(token.difficulty.difficulty),
-    gameMode: token.difficulty.gameMode.replace("Solo", ""),
+    characteristic: token.difficulty.gameMode.replace("Solo", "") as MapCharacteristic,
     difficultyRaw: token.difficulty.difficultyRaw,
   };
 
@@ -66,7 +67,7 @@ export function getScoreSaberLeaderboardFromToken(token: ScoreSaberLeaderboardTo
             return {
               leaderboardId: difficulty.leaderboardId,
               difficulty: getDifficultyFromScoreSaberDifficulty(difficulty.difficulty),
-              gameMode: difficulty.gameMode.replace("Solo", ""),
+              characteristic: difficulty.gameMode.replace("Solo", "") as MapCharacteristic,
               difficultyRaw: difficulty.difficultyRaw,
             };
           })

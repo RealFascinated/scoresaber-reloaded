@@ -21,7 +21,7 @@ type ScoreModifiersProps = {
 export function ScoreModifiers({ score, type, limit }: ScoreModifiersProps) {
   const modifiers = score.modifiers;
   if (modifiers.length === 0) {
-    return <p>-</p>;
+    return <span>-</span>;
   }
 
   switch (type) {

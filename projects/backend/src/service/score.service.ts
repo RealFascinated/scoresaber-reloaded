@@ -13,7 +13,7 @@ import { ScoreSort } from "@ssr/common/score/score-sort";
 import { Leaderboards } from "@ssr/common/leaderboard";
 import Leaderboard from "@ssr/common/leaderboard/leaderboard";
 import LeaderboardService from "./leaderboard.service";
-import { BeatSaverMap } from "@ssr/common/model/beatsaver/beatsaver-map";
+import { BeatSaverMap } from "@ssr/common/model/beatsaver/map";
 import { PlayerScore } from "@ssr/common/score/player-score";
 import LeaderboardScoresResponse from "@ssr/common/response/leaderboard-scores-response";
 import Score from "@ssr/common/score/score";
@@ -188,7 +188,7 @@ export class ScoreService {
     };
 
     const difficulty = leaderboard.difficulty;
-    const difficultyKey = `${difficulty.difficultyName.replace("Plus", "+")}-${difficulty.modeName}`;
+    const difficultyKey = `${difficulty.difficultyName}-${difficulty.modeName}`;
     const rawScoreImprovement = score.scoreImprovement;
     const data = {
       playerId: playerId,
@@ -312,15 +312,15 @@ export class ScoreService {
               if (score == undefined) {
                 continue;
               }
-              const tokenLeaderboard = getScoreSaberLeaderboardFromToken(token.leaderboard);
-              if (tokenLeaderboard == undefined) {
+              const leaderboard = getScoreSaberLeaderboardFromToken(token.leaderboard);
+              if (leaderboard == undefined) {
                 continue;
               }
 
               const additionalData = await this.getAdditionalScoreData(
                 id,
-                tokenLeaderboard.songHash,
-                `${tokenLeaderboard.difficulty.difficulty}-${tokenLeaderboard.difficulty.gameMode}`,
+                leaderboard.songHash,
+                `${leaderboard.difficulty.difficulty}-${leaderboard.difficulty.characteristic}`,
                 score.score
               );
               if (additionalData !== undefined) {
@@ -329,8 +329,8 @@ export class ScoreService {
 
               scores.push({
                 score: score,
-                leaderboard: tokenLeaderboard,
-                beatSaver: await BeatSaverService.getMap(tokenLeaderboard.songHash),
+                leaderboard: leaderboard,
+                beatSaver: await BeatSaverService.getMap(leaderboard.songHash),
               });
             }
             break;

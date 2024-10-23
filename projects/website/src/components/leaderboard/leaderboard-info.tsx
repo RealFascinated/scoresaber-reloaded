@@ -3,7 +3,7 @@ import Image from "next/image";
 import { LeaderboardSongStarCount } from "@/components/leaderboard/leaderboard-song-star-count";
 import ScoreButtons from "@/components/score/score-buttons";
 import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
-import { BeatSaverMap } from "@ssr/common/model/beatsaver/beatsaver-map";
+import { BeatSaverMap } from "../../../../common/src/model/beatsaver/map";
 import { getBeatSaverMapperProfileUrl } from "@ssr/common/utils/beatsaver.util";
 import FallbackLink from "@/components/fallback-link";
 import { formatNumber } from "@ssr/common/utils/number-utils";

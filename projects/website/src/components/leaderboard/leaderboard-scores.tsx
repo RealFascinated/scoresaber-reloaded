@@ -8,7 +8,7 @@ import Pagination from "../input/pagination";
 import LeaderboardScore from "./leaderboard-score";
 import { scoreAnimation } from "@/components/score/score-animation";
 import { Button } from "@/components/ui/button";
-import { getDifficultyFromRawDifficulty } from "@/common/song-utils";
+import { getDifficulty } from "@/common/song-utils";
 import { fetchLeaderboardScores } from "@ssr/common/utils/score-utils";
 import ScoreSaberScore from "@ssr/common/score/impl/scoresaber-score";
 import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
@@ -140,28 +140,26 @@ export default function LeaderboardScores({
 
       {showDifficulties && (
         <div className="flex gap-2 justify-center items-center flex-wrap">
-          {leaderboard.difficulties.map(({ difficultyRaw, leaderboardId }) => {
-            const difficulty = getDifficultyFromRawDifficulty(difficultyRaw);
-            // todo: add support for other gamemodes?
-            if (difficulty.gamemode !== "Standard") {
+          {leaderboard.difficulties.map(({ difficulty, characteristic, leaderboardId }, index) => {
+            if (characteristic !== "Standard") {
               return null;
             }
 
             const isSelected = leaderboardId === selectedLeaderboardId;
             return (
               <Button
-                key={difficultyRaw}
+                key={index}
                 variant={isSelected ? "default" : "outline"}
                 onClick={() => {
                   handleLeaderboardChange(leaderboardId);
                 }}
                 className={`border ${isSelected ? "bg-primary/5 font-bold" : ""}`}
                 style={{
-                  color: getDifficultyFromRawDifficulty(difficultyRaw).color,
-                  borderColor: getDifficultyFromRawDifficulty(difficultyRaw).color,
+                  color: getDifficulty(difficulty).color,
+                  borderColor: getDifficulty(difficulty).color,
                 }}
               >
-                {difficulty.name}
+                {difficulty}
               </Button>
             );
           })}

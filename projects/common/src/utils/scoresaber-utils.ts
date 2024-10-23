@@ -1,11 +1,11 @@
-import { Difficulty } from "../score/difficulty";
+import { MapDifficulty } from "../score/map-difficulty";
 
 /**
  * Formats the ScoreSaber difficulty number
  *
  * @param diff the diffuiclity number
  */
-export function getDifficultyFromScoreSaberDifficulty(diff: number): Difficulty {
+export function getDifficultyFromScoreSaberDifficulty(diff: number): MapDifficulty {
   switch (diff) {
     case 1: {
       return "Easy";
@@ -20,7 +20,7 @@ export function getDifficultyFromScoreSaberDifficulty(diff: number): Difficulty 
       return "Expert";
     }
     case 9: {
-      return "Expert+";
+      return "ExpertPlus";
     }
     default: {
       return "Unknown";
