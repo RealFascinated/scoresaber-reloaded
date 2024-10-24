@@ -7,19 +7,21 @@ import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import ScoreButton from "./score-button";
 import { copyToClipboard } from "@/common/browser-utils";
-import { ArrowDownIcon } from "@heroicons/react/24/solid";
+import { ArrowDownIcon, ArrowPathIcon } from "@heroicons/react/24/solid";
 import clsx from "clsx";
 import ScoreEditorButton from "@/components/score/score-editor-button";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
 import { BeatSaverMap } from "@ssr/common/model/beatsaver/map";
 import BeatSaberPepeLogo from "@/components/logos/beatsaber-pepe-logo";
+import * as React from "react";
 
 type Props = {
   score?: ScoreSaberScore;
   leaderboard: ScoreSaberLeaderboard;
   beatSaverMap?: BeatSaverMap;
   alwaysSingleLine?: boolean;
+  isLeaderboardLoading?: boolean;
   setIsLeaderboardExpanded?: (isExpanded: boolean) => void;
   updateScore?: (score: ScoreSaberScore) => void;
 };
@@ -29,6 +31,7 @@ export default function ScoreButtons({
   leaderboard,
   beatSaverMap,
   alwaysSingleLine,
+  isLeaderboardLoading,
   setIsLeaderboardExpanded,
   updateScore,
 }: Props) {
@@ -107,16 +110,20 @@ export default function ScoreButtons({
         {/* View Leaderboard button */}
         {leaderboardExpanded != undefined && setIsLeaderboardExpanded != undefined && (
           <div className="flex items-center justify-center cursor-default">
-            <ArrowDownIcon
-              className={clsx(
-                "w-6 h-6 transition-all transform-gpu cursor-pointer",
-                leaderboardExpanded ? "" : "rotate-180"
-              )}
-              onClick={() => {
-                setLeaderboardExpanded(!leaderboardExpanded);
-                setIsLeaderboardExpanded?.(!leaderboardExpanded);
-              }}
-            />
+            {isLeaderboardLoading ? (
+              <ArrowPathIcon className="w-5 h-5 animate-spin" />
+            ) : (
+              <ArrowDownIcon
+                className={clsx(
+                  "w-6 h-6 transition-all transform-gpu cursor-pointer",
+                  leaderboardExpanded ? "" : "rotate-180"
+                )}
+                onClick={() => {
+                  setLeaderboardExpanded(!leaderboardExpanded);
+                  setIsLeaderboardExpanded?.(!leaderboardExpanded);
+                }}
+              />
+            )}
           </div>
         )}
       </div>

@@ -102,9 +102,9 @@ export default function Score({ leaderboard, beatSaverMap, score, settings }: Pr
   const handleLeaderboardOpen = (isExpanded: boolean) => {
     if (!isExpanded) {
       setLeaderboardDropdownData(undefined);
+    } else {
+      setLoading(true);
     }
-
-    setLoading(true);
     setIsLeaderboardExpanded(isExpanded);
   };
 
@@ -148,6 +148,7 @@ export default function Score({ leaderboard, beatSaverMap, score, settings }: Pr
             setIsLeaderboardExpanded={(isExpanded: boolean) => {
               handleLeaderboardOpen(isExpanded);
             }}
+            isLeaderboardLoading={isLoading}
             updateScore={score => {
               setBaseScore(score.score);
             }}
@@ -156,7 +157,7 @@ export default function Score({ leaderboard, beatSaverMap, score, settings }: Pr
         <ScoreStats
           score={{
             ...score,
-            score: baseScore,
+            accuracy: accuracy ? accuracy : score.accuracy,
             pp: pp ? pp : score.pp,
           }}
           leaderboard={leaderboard}
