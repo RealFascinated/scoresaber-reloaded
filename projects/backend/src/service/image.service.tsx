@@ -6,12 +6,13 @@ import { getDifficultyFromScoreSaberDifficulty } from "@ssr/common/utils/scoresa
 import { StarIcon } from "../../components/star-icon";
 import { GlobeIcon } from "../../components/globe-icon";
 import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/score-saber-leaderboard-token";
-import ScoreSaberPlayer, { getScoreSaberPlayerFromToken } from "@ssr/common/player/impl/scoresaber-player";
+import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { Jimp } from "jimp";
 import { extractColors } from "extract-colors";
 import { Config } from "@ssr/common/config";
 import { fetchWithCache } from "../common/cache.util";
 import { SSRCache } from "@ssr/common/cache";
+import { getScoreSaberPlayerFromToken } from "@ssr/common/token-creators";
 
 const cache = new SSRCache({
   ttl: 1000 * 60 * 60, // 1 hour

@@ -4,9 +4,6 @@ import { isProduction } from "@ssr/common/utils/utils";
 import { Metadata } from "@ssr/common/types/metadata";
 import { NotFoundError } from "elysia";
 import BeatSaverService from "./beatsaver.service";
-import ScoreSaberLeaderboard, {
-  getScoreSaberLeaderboardFromToken,
-} from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { ScoreSort } from "@ssr/common/score/score-sort";
 import { Leaderboards } from "@ssr/common/leaderboard";
@@ -28,8 +25,10 @@ import {
   AdditionalScoreDataModel,
 } from "@ssr/common/model/additional-score-data/additional-score-data";
 import { BeatLeaderScoreImprovementToken } from "@ssr/common/types/token/beatleader/score/score-improvement";
-import { getScoreSaberScoreFromToken, ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import { ScoreType } from "@ssr/common/model/score/score";
+import { getScoreSaberLeaderboardFromToken, getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
+import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
+import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
 
 const playerScoresCache = new SSRCache({
   ttl: 1000 * 60, // 1 minute

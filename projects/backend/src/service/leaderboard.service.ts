@@ -5,9 +5,9 @@ import { LeaderboardResponse } from "@ssr/common/response/leaderboard-response";
 import Leaderboard from "@ssr/common/leaderboard/leaderboard";
 import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/score-saber-leaderboard-token";
 import { NotFoundError } from "elysia";
-import { getScoreSaberLeaderboardFromToken } from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
 import BeatSaverService from "./beatsaver.service";
 import { BeatSaverMap } from "@ssr/common/model/beatsaver/map";
+import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
 
 const leaderboardCache = new SSRCache({
   ttl: 1000 * 60 * 60 * 24,

@@ -24,6 +24,11 @@ import { beatLeaderService } from "@ssr/common/service/impl/beatleader";
 
 type Props = {
   /**
+   * The score to display.
+   */
+  score: ScoreSaberScore;
+
+  /**
    * The leaderboard.
    */
   leaderboard: ScoreSaberLeaderboard;
@@ -32,11 +37,6 @@ type Props = {
    * The beat saver map for this song.
    */
   beatSaverMap?: BeatSaverMap;
-
-  /**
-   * The score to display.
-   */
-  score: ScoreSaberScore;
 
   /**
    * Score settings
@@ -123,7 +123,7 @@ export default function Score({ leaderboard, beatSaverMap, score, settings }: Pr
   useEffect(() => {
     setIsLeaderboardExpanded(false);
     setLeaderboardDropdownData(undefined);
-  }, [score]);
+  }, [score.scoreId]);
 
   const accuracy = (baseScore / leaderboard.maxScore) * 100;
   const pp = baseScore === score.score ? score.pp : scoresaberService.getPp(leaderboard.stars, accuracy);

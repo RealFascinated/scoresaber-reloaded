@@ -2,13 +2,12 @@
 
 import { useEffect, useState } from "react";
 import ScoreSaberPlayerScoreToken from "@ssr/common/types/token/scoresaber/score-saber-player-score-token";
-import Score from "@/components/score/score";
 import { parseDate } from "@ssr/common/utils/time-utils";
 import Link from "next/link";
 import useWebSocket, { ReadyState } from "react-use-websocket";
 import { ScoreSaberWebsocketMessageToken } from "@ssr/common/types/token/scoresaber/websocket/scoresaber-websocket-message";
-import { getScoreSaberScoreFromToken } from "@ssr/common/model/score/impl/scoresaber-score";
-import { getScoreSaberLeaderboardFromToken } from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
+import Score from "@/components/score/score";
+import { getScoreSaberLeaderboardFromToken, getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 
 export default function ScoreFeed() {
   const { readyState, lastJsonMessage } = useWebSocket<ScoreSaberWebsocketMessageToken>("wss://scoresaber.com/ws");
@@ -40,12 +39,18 @@ export default function ScoreFeed() {
 
   return (
     <div className="flex flex-col divide-y divide-border">
-      {scores.map(score => {
-        const player = score.score.leaderboardPlayerInfo;
-        const leaderboard = getScoreSaberLeaderboardFromToken(score.leaderboard);
+      {scores.map(scoreToken => {
+        if (!scoreToken.leaderboard || !scoreToken.score) {
+          console.error("Invalid leaderboard or score data:", scoreToken);
+          return null;
+        }
+
+        const player = scoreToken.score.leaderboardPlayerInfo;
+        const leaderboard = getScoreSaberLeaderboardFromToken(scoreToken.leaderboard);
+        const score = getScoreSaberScoreFromToken(scoreToken.score, leaderboard);
 
         return (
-          <div key={score.score.id} className="flex flex-col py-2">
+          <div key={score.scoreId} className="flex flex-col py-2">
             <p className="text-sm">
               Set by{" "}
               <Link href={`/player/${player.id}`}>
@@ -53,7 +58,7 @@ export default function ScoreFeed() {
               </Link>
             </p>
             <Score
-              score={getScoreSaberScoreFromToken(score.score, leaderboard)}
+              score={score}
               leaderboard={leaderboard}
               settings={{
                 noScoreButtons: true,
