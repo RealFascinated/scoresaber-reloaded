@@ -1,11 +1,5 @@
 import Player, { StatisticChange } from "../player";
-import ky from "ky";
 import { PlayerHistory } from "../player-history";
-import ScoreSaberPlayerToken from "../../types/token/scoresaber/score-saber-player-token";
-import { formatDateMinimal, getDaysAgoDate, getMidnightAlignedDate } from "../../utils/time-utils";
-import { getPageFromRank } from "../../utils/utils";
-import { Config } from "../../config";
-import { getValueFromHistory } from "../../utils/player-utils";
 
 /**
  * A ScoreSaber player.

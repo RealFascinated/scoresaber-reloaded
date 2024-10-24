@@ -1,10 +1,5 @@
 import Leaderboard from "../leaderboard";
-import LeaderboardDifficulty from "../leaderboard-difficulty";
-import ScoreSaberLeaderboardToken from "../../types/token/scoresaber/score-saber-leaderboard-token";
-import { getDifficultyFromScoreSaberDifficulty } from "../../utils/scoresaber-utils";
-import { parseDate } from "../../utils/time-utils";
 import { LeaderboardStatus } from "../leaderboard-status";
-import { MapCharacteristic } from "../../types/map-characteristic";
 
 export default interface ScoreSaberLeaderboard extends Leaderboard {
   /**

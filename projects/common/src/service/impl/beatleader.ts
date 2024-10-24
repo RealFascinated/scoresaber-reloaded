@@ -1,5 +1,4 @@
 import Service from "../service";
-import { BeatSaverMapToken } from "../../types/token/beatsaver/map";
 import { ScoreStatsToken } from "../../types/token/beatleader/score-stats/score-stats";
 
 const LOOKUP_MAP_STATS_BY_SCORE_ID_ENDPOINT = `https://cdn.scorestats.beatleader.xyz/:scoreId.json`;

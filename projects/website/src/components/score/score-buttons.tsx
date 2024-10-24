@@ -4,6 +4,7 @@ import { songNameToYouTubeLink } from "@/common/youtube-utils";
 import BeatSaverLogo from "@/components/logos/beatsaver-logo";
 import YouTubeLogo from "@/components/logos/youtube-logo";
 import { useToast } from "@/hooks/use-toast";
+import * as React from "react";
 import { useState } from "react";
 import ScoreButton from "./score-button";
 import { copyToClipboard } from "@/common/browser-utils";
@@ -14,7 +15,6 @@ import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
 import { BeatSaverMap } from "@ssr/common/model/beatsaver/map";
 import BeatSaberPepeLogo from "@/components/logos/beatsaber-pepe-logo";
-import * as React from "react";
 
 type Props = {
   score?: ScoreSaberScore;

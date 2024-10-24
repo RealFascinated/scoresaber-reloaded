@@ -1,8 +1,5 @@
 import { getModelForClass, modelOptions, plugin, Prop, ReturnModelType, Severity } from "@typegoose/typegoose";
 import Score from "../score";
-import { Modifier } from "../../../score/modifier";
-import ScoreSaberScoreToken from "../../../types/token/scoresaber/score-saber-score-token";
-import ScoreSaberLeaderboard from "../../../leaderboard/impl/scoresaber-leaderboard";
 import { type ScoreSaberLeaderboardPlayerInfoToken } from "../../../types/token/scoresaber/score-saber-leaderboard-player-info-token";
 import { Document } from "mongoose";
 import { AutoIncrementID } from "@typegoose/auto-increment";
