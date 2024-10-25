@@ -38,7 +38,7 @@ type Props = {
   };
 };
 
-type LeaderboardDropdownData = {
+type DropdownData = {
   scores?: LeaderboardScoresResponse<ScoreSaberScore, ScoreSaberLeaderboard>;
   scoreStats?: ScoreStatsToken;
 };
@@ -57,13 +57,13 @@ export default function Score({ leaderboard, beatSaverMap, score, settings }: Pr
   const [baseScore, setBaseScore] = useState(score.score);
   const [isLeaderboardExpanded, setIsLeaderboardExpanded] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [leaderboardDropdownData, setLeaderboardDropdownData] = useState<LeaderboardDropdownData | undefined>();
+  const [dropdownData, setDropdownData] = useState<DropdownData | undefined>();
   const [selectedMode, setSelectedMode] = useState<Mode>(modes[0]);
 
   const scoresPage = getPageFromRank(score.rank, 12);
   const isMobile = useIsMobile();
 
-  const { data, isLoading } = useQuery<LeaderboardDropdownData>({
+  const { data, isLoading } = useQuery<DropdownData>({
     queryKey: [`leaderboardDropdownData:${leaderboard.id}`, leaderboard.id, score.scoreId, isLeaderboardExpanded],
     queryFn: async () => {
       const scores = await fetchLeaderboardScores<ScoreSaberScore, ScoreSaberLeaderboard>(
@@ -82,14 +82,18 @@ export default function Score({ leaderboard, beatSaverMap, score, settings }: Pr
 
   useEffect(() => {
     if (data) {
-      setLeaderboardDropdownData(data);
+      setDropdownData(data);
       setLoading(false);
     }
   }, [data]);
 
   useEffect(() => {
+    /**
+     * Reset the leaderboard dropdown when the score changes
+     */
     setIsLeaderboardExpanded(false);
-    setLeaderboardDropdownData(undefined);
+    setDropdownData(undefined);
+    setSelectedMode(modes[0]);
   }, [score.scoreId]);
 
   useEffect(() => {
@@ -101,7 +105,8 @@ export default function Score({ leaderboard, beatSaverMap, score, settings }: Pr
 
   const handleLeaderboardOpen = (isExpanded: boolean) => {
     if (!isExpanded) {
-      setLeaderboardDropdownData(undefined);
+      setSelectedMode(modes[0]);
+      setDropdownData(undefined);
     } else {
       setLoading(true);
     }
@@ -137,7 +142,7 @@ export default function Score({ leaderboard, beatSaverMap, score, settings }: Pr
         <ScoreStats score={{ ...score, accuracy, pp }} leaderboard={leaderboard} />
       </div>
 
-      {isLeaderboardExpanded && leaderboardDropdownData && !loading && (
+      {isLeaderboardExpanded && dropdownData && !loading && (
         <motion.div
           initial={{ opacity: 0, y: -50 }}
           exit={{ opacity: 0, y: -50 }}
@@ -167,10 +172,10 @@ export default function Score({ leaderboard, beatSaverMap, score, settings }: Pr
 
             {selectedMode.name === "Overview" && (
               <ScoreOverview
-                scores={leaderboardDropdownData.scores}
+                scores={dropdownData.scores}
                 leaderboard={leaderboard}
                 initialPage={scoresPage}
-                scoreStats={leaderboardDropdownData.scoreStats}
+                scoreStats={dropdownData.scoreStats}
               />
             )}
 
