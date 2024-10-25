@@ -1,103 +1,103 @@
 "use client";
 
-import LeaderboardScores from "@/components/leaderboard/leaderboard-scores";
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { useQuery } from "@tanstack/react-query";
+import { CubeIcon } from "@heroicons/react/24/solid";
+import { GitGraph } from "lucide-react";
 import ScoreButtons from "./score-buttons";
 import ScoreSongInfo from "./score-song-info";
 import ScoreRankInfo from "./score-rank-info";
 import ScoreStats from "./score-stats";
-import { motion } from "framer-motion";
+import Card from "@/components/card";
+import { MapStats } from "@/components/score/map-stats";
+import { Button } from "@/components/ui/button";
+import { ScoreOverview } from "@/components/score/score-views/score-overview";
+import { ScoreHistory } from "@/components/score/score-views/score-history";
+
 import { getPageFromRank } from "@ssr/common/utils/utils";
+import { fetchLeaderboardScores } from "@ssr/common/utils/score-utils";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
+import { beatLeaderService } from "@ssr/common/service/impl/beatleader";
+import { useIsMobile } from "@/hooks/use-is-mobile";
+
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
 import { BeatSaverMap } from "@ssr/common/model/beatsaver/map";
-import { useIsMobile } from "@/hooks/use-is-mobile";
-import Card from "@/components/card";
-import { MapStats } from "@/components/score/map-stats";
-import PlayerScoreAccuracyChart from "@/components/leaderboard/chart/player-score-accuracy-chart";
-import { useQuery } from "@tanstack/react-query";
-import { fetchLeaderboardScores } from "@ssr/common/utils/score-utils";
 import LeaderboardScoresResponse from "@ssr/common/response/leaderboard-scores-response";
 import { ScoreStatsToken } from "@ssr/common/types/token/beatleader/score-stats/score-stats";
-import { beatLeaderService } from "@ssr/common/service/impl/beatleader";
 
 type Props = {
-  /**
-   * The score to display.
-   */
   score: ScoreSaberScore;
-
-  /**
-   * The leaderboard.
-   */
   leaderboard: ScoreSaberLeaderboard;
-
-  /**
-   * The beat saver map for this song.
-   */
   beatSaverMap?: BeatSaverMap;
-
-  /**
-   * Score settings
-   */
   settings?: {
-    noScoreButtons: boolean;
+    noScoreButtons?: boolean;
+    hideLeaderboardDropdown?: boolean;
+    hideAccuracyChanger?: boolean;
   };
 };
 
 type LeaderboardDropdownData = {
-  /**
-   * The initial scores.
-   */
   scores?: LeaderboardScoresResponse<ScoreSaberScore, ScoreSaberLeaderboard>;
-
-  /**
-   * The score stats for this score,
-   */
   scoreStats?: ScoreStatsToken;
 };
 
-export default function Score({ leaderboard, beatSaverMap, score, settings }: Props) {
-  const scoresPage = getPageFromRank(score.rank, 12);
+type Mode = {
+  name: string;
+  icon: React.ReactElement;
+};
 
-  const isMobile = useIsMobile();
-  const [baseScore, setBaseScore] = useState<number>(score.score);
+const modes: Mode[] = [
+  { name: "Overview", icon: <CubeIcon className="w-4 h-4" /> },
+  { name: "Score History", icon: <GitGraph className="w-4 h-4" /> },
+];
+
+export default function Score({ leaderboard, beatSaverMap, score, settings }: Props) {
+  const [baseScore, setBaseScore] = useState(score.score);
   const [isLeaderboardExpanded, setIsLeaderboardExpanded] = useState(false);
   const [loading, setLoading] = useState(false);
   const [leaderboardDropdownData, setLeaderboardDropdownData] = useState<LeaderboardDropdownData | undefined>();
+  const [selectedMode, setSelectedMode] = useState<Mode>(modes[0]);
 
-  const { data, isError, isLoading } = useQuery<LeaderboardDropdownData>({
-    queryKey: ["leaderboardDropdownData", leaderboard.id, score.scoreId, isLeaderboardExpanded],
+  const scoresPage = getPageFromRank(score.rank, 12);
+  const isMobile = useIsMobile();
+
+  const { data, isLoading } = useQuery<LeaderboardDropdownData>({
+    queryKey: [`leaderboardDropdownData:${leaderboard.id}`, leaderboard.id, score.scoreId, isLeaderboardExpanded],
     queryFn: async () => {
       const scores = await fetchLeaderboardScores<ScoreSaberScore, ScoreSaberLeaderboard>(
         "scoresaber",
-        leaderboard.id + "",
+        leaderboard.id.toString(),
         scoresPage
       );
       const scoreStats = score.additionalData
         ? await beatLeaderService.lookupScoreStats(score.additionalData.scoreId)
         : undefined;
-
-      return {
-        scores: scores,
-        scoreStats: scoreStats,
-      };
+      return { scores, scoreStats };
     },
-    staleTime: 30 * 1000,
+    staleTime: 30000,
     enabled: loading,
   });
 
   useEffect(() => {
     if (data) {
-      setLeaderboardDropdownData({
-        ...data,
-        scores: data.scores,
-        scoreStats: data.scoreStats,
-      });
+      setLeaderboardDropdownData(data);
       setLoading(false);
     }
   }, [data]);
+
+  useEffect(() => {
+    setIsLeaderboardExpanded(false);
+    setLeaderboardDropdownData(undefined);
+  }, [score.scoreId]);
+
+  useEffect(() => {
+    setBaseScore(score.score);
+  }, [score]);
+
+  const accuracy = (baseScore / leaderboard.maxScore) * 100;
+  const pp = baseScore === score.score ? score.pp : scoresaberService.getPp(leaderboard.stars, accuracy);
 
   const handleLeaderboardOpen = (isExpanded: boolean) => {
     if (!isExpanded) {
@@ -108,63 +108,35 @@ export default function Score({ leaderboard, beatSaverMap, score, settings }: Pr
     setIsLeaderboardExpanded(isExpanded);
   };
 
-  /**
-   * Set the base score
-   */
-  useEffect(() => {
-    if (score?.score) {
-      setBaseScore(score.score);
-    }
-  }, [score]);
+  const handleModeChange = (mode: Mode) => {
+    setSelectedMode(mode);
+  };
 
-  /**
-   * Close the leaderboard when the score changes
-   */
-  useEffect(() => {
-    setIsLeaderboardExpanded(false);
-    setLeaderboardDropdownData(undefined);
-  }, [score.scoreId]);
-
-  const accuracy = (baseScore / leaderboard.maxScore) * 100;
-  const pp = baseScore === score.score ? score.pp : scoresaberService.getPp(leaderboard.stars, accuracy);
-
-  // Dynamic grid column classes
   const gridColsClass = settings?.noScoreButtons
-    ? "grid-cols-[20px 1fr_1fr] lg:grid-cols-[0.5fr_4fr_300px]" // Fewer columns if no buttons
-    : "grid-cols-[20px 1fr_1fr] lg:grid-cols-[0.5fr_4fr_1fr_300px]"; // Original with buttons
+    ? "grid-cols-[20px_1fr_1fr] lg:grid-cols-[0.5fr_4fr_300px]"
+    : "grid-cols-[20px_1fr_1fr] lg:grid-cols-[0.5fr_4fr_1fr_300px]";
 
   return (
     <div className="pb-2 pt-2">
-      {/* Score Info */}
       <div className={`grid w-full gap-2 lg:gap-0 ${gridColsClass}`}>
         <ScoreRankInfo score={score} leaderboard={leaderboard} />
         <ScoreSongInfo leaderboard={leaderboard} beatSaverMap={beatSaverMap} />
-        {settings?.noScoreButtons !== true && (
+        {!settings?.noScoreButtons && (
           <ScoreButtons
             leaderboard={leaderboard}
             beatSaverMap={beatSaverMap}
             score={score}
             alwaysSingleLine={isMobile}
-            setIsLeaderboardExpanded={(isExpanded: boolean) => {
-              handleLeaderboardOpen(isExpanded);
-            }}
+            hideLeaderboardDropdown={settings?.hideLeaderboardDropdown}
+            hideAccuracyChanger={settings?.hideAccuracyChanger}
+            setIsLeaderboardExpanded={handleLeaderboardOpen}
             isLeaderboardLoading={isLoading}
-            updateScore={score => {
-              setBaseScore(score.score);
-            }}
+            updateScore={updatedScore => setBaseScore(updatedScore.score)}
           />
         )}
-        <ScoreStats
-          score={{
-            ...score,
-            accuracy: accuracy ? accuracy : score.accuracy,
-            pp: pp ? pp : score.pp,
-          }}
-          leaderboard={leaderboard}
-        />
+        <ScoreStats score={{ ...score, accuracy, pp }} leaderboard={leaderboard} />
       </div>
 
-      {/* Leaderboard */}
       {isLeaderboardExpanded && leaderboardDropdownData && !loading && (
         <motion.div
           initial={{ opacity: 0, y: -50 }}
@@ -173,20 +145,38 @@ export default function Score({ leaderboard, beatSaverMap, score, settings }: Pr
           className="w-full mt-2"
         >
           <Card className="flex gap-4 w-full relative border border-input">
-            <MapStats leaderboard={leaderboard} beatSaver={beatSaverMap} />
-
-            {leaderboardDropdownData.scoreStats && (
-              <div className="flex gap-2">
-                <PlayerScoreAccuracyChart scoreStats={leaderboardDropdownData.scoreStats} />
+            <div className="flex flex-col lg:flex-row w-full gap-2 justify-center">
+              <div className="flex clex-col justify-center lg:justify-start gap-2">
+                {modes.map((mode, i) => (
+                  <Button
+                    key={i}
+                    variant={mode.name === selectedMode.name ? "default" : "outline"}
+                    onClick={() => handleModeChange(mode)}
+                    className="flex gap-2"
+                  >
+                    {mode.icon}
+                    <p>{mode.name}</p>
+                  </Button>
+                ))}
               </div>
+
+              <div>
+                <MapStats leaderboard={leaderboard} beatSaver={beatSaverMap} />
+              </div>
+            </div>
+
+            {selectedMode.name === "Overview" && (
+              <ScoreOverview
+                scores={leaderboardDropdownData.scores}
+                leaderboard={leaderboard}
+                initialPage={scoresPage}
+                scoreStats={leaderboardDropdownData.scoreStats}
+              />
             )}
 
-            <LeaderboardScores
-              initialPage={scoresPage}
-              initialScores={leaderboardDropdownData.scores}
-              leaderboard={leaderboard}
-              disableUrlChanging
-            />
+            {selectedMode.name === "Score History" && (
+              <ScoreHistory playerId={score.playerId} leaderboard={leaderboard} />
+            )}
           </Card>
         </motion.div>
       )}

@@ -52,4 +52,25 @@ export default class ScoresController {
   }): Promise<unknown> {
     return await ScoreService.getLeaderboardScores(leaderboard, id, page);
   }
+
+  @Get("/history/:playerId/:leaderboardId/:page", {
+    config: {},
+    params: t.Object({
+      playerId: t.String({ required: true }),
+      leaderboardId: t.String({ required: true }),
+      page: t.Number({ required: true }),
+    }),
+  })
+  public async getScoreHistory({
+    params: { playerId, leaderboardId, page },
+  }: {
+    params: {
+      playerId: string;
+      leaderboardId: string;
+      page: number;
+    };
+    query: { search?: string };
+  }): Promise<unknown> {
+    return (await ScoreService.getPreviousScores(playerId, leaderboardId, page)).toJSON();
+  }
 }

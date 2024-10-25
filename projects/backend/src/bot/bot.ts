@@ -54,13 +54,17 @@ export async function initDiscordBot() {
  * @param message the message to log
  */
 export async function logToChannel(channelId: DiscordChannels, message: EmbedBuilder) {
-  const channel = await client.channels.fetch(channelId);
-  if (channel == undefined) {
-    throw new Error(`Channel "${channelId}" not found`);
-  }
-  if (!channel.isSendable()) {
-    throw new Error(`Channel "${channelId}" is not sendable`);
-  }
+  try {
+    const channel = await client.channels.fetch(channelId);
+    if (channel == undefined) {
+      throw new Error(`Channel "${channelId}" not found`);
+    }
+    if (!channel.isSendable()) {
+      throw new Error(`Channel "${channelId}" is not sendable`);
+    }
 
-  channel.send({ embeds: [message] });
+    channel.send({ embeds: [message] });
+  } catch (error) {
+    console.error(error);
+  }
 }

@@ -27,12 +27,13 @@ import {
 import { BeatLeaderScoreImprovementToken } from "@ssr/common/types/token/beatleader/score/score-improvement";
 import { ScoreType } from "@ssr/common/model/score/score";
 import { getScoreSaberLeaderboardFromToken, getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
-import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
+import { ScoreSaberScore, ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
 import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score-saber-score-token";
 import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/score-saber-leaderboard-token";
 import { MapDifficulty } from "@ssr/common/score/map-difficulty";
 import { MapCharacteristic } from "@ssr/common/types/map-characteristic";
+import { Page, Pagination } from "@ssr/common/pagination";
 
 const playerScoresCache = new SSRCache({
   ttl: 1000 * 60, // 1 minute
@@ -486,5 +487,60 @@ export class ScoreService {
         };
       }
     );
+  }
+
+  /**
+   * Gets the previous scores for a player.
+   *
+   * @param playerId the player's id to get the previous scores for
+   * @param leaderboardId the leaderboard to get the previous scores on
+   * @param page the page to get
+   */
+  public static async getPreviousScores(
+    playerId: string,
+    leaderboardId: string,
+    page: number
+  ): Promise<Page<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>> {
+    const scores = await ScoreSaberScoreModel.find({ playerId: playerId, leaderboardId: leaderboardId })
+      .sort({ timestamp: -1 })
+      .skip(1);
+    if (scores == null || scores.length == 0) {
+      throw new NotFoundError(`No previous scores found for ${playerId} in ${leaderboardId}`);
+    }
+
+    return new Pagination<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>()
+      .setItemsPerPage(8)
+      .setTotalItems(scores.length)
+      .getPage(page, async () => {
+        const toReturn: PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>[] = [];
+        for (const score of scores) {
+          const leaderboardResponse = await LeaderboardService.getLeaderboard<ScoreSaberLeaderboard>(
+            "scoresaber",
+            leaderboardId
+          );
+          if (leaderboardResponse == undefined) {
+            throw new NotFoundError(`Leaderboard "${leaderboardId}" not found`);
+          }
+          const { leaderboard, beatsaver } = leaderboardResponse;
+
+          const additionalData = await this.getAdditionalScoreData(
+            playerId,
+            leaderboard.songHash,
+            `${leaderboard.difficulty.difficulty}-${leaderboard.difficulty.characteristic}`,
+            score.score
+          );
+          if (additionalData !== undefined) {
+            score.additionalData = additionalData;
+          }
+
+          toReturn.push({
+            score: score as unknown as ScoreSaberScore,
+            leaderboard: leaderboard,
+            beatSaver: beatsaver,
+          });
+        }
+
+        return toReturn;
+      });
   }
 }

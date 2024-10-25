@@ -12,7 +12,7 @@ export default class Score {
    * The internal score id.
    */
   @prop()
-  private _id?: number;
+  public _id?: number;
 
   /**
    * The id of the player who set the score.

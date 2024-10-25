@@ -21,6 +21,8 @@ type Props = {
   leaderboard: ScoreSaberLeaderboard;
   beatSaverMap?: BeatSaverMap;
   alwaysSingleLine?: boolean;
+  hideLeaderboardDropdown?: boolean;
+  hideAccuracyChanger?: boolean;
   isLeaderboardLoading?: boolean;
   setIsLeaderboardExpanded?: (isExpanded: boolean) => void;
   updateScore?: (score: ScoreSaberScore) => void;
@@ -31,6 +33,8 @@ export default function ScoreButtons({
   leaderboard,
   beatSaverMap,
   alwaysSingleLine,
+  hideLeaderboardDropdown,
+  hideAccuracyChanger,
   isLeaderboardLoading,
   setIsLeaderboardExpanded,
   updateScore,
@@ -103,12 +107,12 @@ export default function ScoreButtons({
         className={`flex gap-2 ${alwaysSingleLine ? "flex-row" : "flex-row lg:flex-col"} items-center justify-center`}
       >
         {/* Edit score button */}
-        {score && leaderboard && updateScore && (
+        {score && leaderboard && updateScore && !hideAccuracyChanger && (
           <ScoreEditorButton score={score} leaderboard={leaderboard} updateScore={updateScore} />
         )}
 
         {/* View Leaderboard button */}
-        {leaderboardExpanded != undefined && setIsLeaderboardExpanded != undefined && (
+        {leaderboardExpanded != undefined && setIsLeaderboardExpanded != undefined && !hideLeaderboardDropdown && (
           <div className="flex items-center justify-center cursor-default">
             {isLeaderboardLoading ? (
               <ArrowPathIcon className="w-5 h-5 animate-spin" />
