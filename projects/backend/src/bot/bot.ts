@@ -1,4 +1,4 @@
-import { Client } from "discordx";
+import { Client, MetadataStorage } from "discordx";
 import { ActivityType, EmbedBuilder } from "discord.js";
 import { Config } from "@ssr/common/config";
 
@@ -10,7 +10,7 @@ export enum DiscordChannels {
 }
 
 const client = new Client({
-  intents: [],
+  intents: ["Guilds", "GuildMessages"],
   presence: {
     status: "online",
 
@@ -31,15 +31,20 @@ client.once("ready", () => {
 export async function initDiscordBot() {
   console.log("Initializing discord bot...");
 
-  // Setup slash commands
-  client.once("ready", async () => {
-    await client.initApplicationCommands();
-  });
-  client.on("interactionCreate", interaction => {
-    client.executeInteraction(interaction);
-  });
+  // We will now build our application to load all the commands/events for both bots.
+  MetadataStorage.instance.build().then(async () => {
+    // Setup slash commands
+    client.once("ready", async () => {
+      await client.initApplicationCommands();
+      console.log(client.applicationCommands);
+    });
+    client.on("interactionCreate", interaction => {
+      client.executeInteraction(interaction);
+    });
 
-  await client.login(Config.discordBotToken!);
+    // Login
+    await client.login(Config.discordBotToken!);
+  });
 }
 
 /**

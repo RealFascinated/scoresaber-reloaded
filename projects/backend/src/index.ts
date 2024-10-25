@@ -162,10 +162,10 @@ app.use(
   })
 );
 
-app.onStart(() => {
+app.onStart(async () => {
   console.log("Listening on port http://localhost:8080");
   if (isProduction()) {
-    initDiscordBot();
+    await initDiscordBot();
   }
 });
 
