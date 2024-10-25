@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { CubeIcon } from "@heroicons/react/24/solid";
-import { GitGraph } from "lucide-react";
+import { GitGraph, TrendingUpIcon } from "lucide-react";
 import ScoreButtons from "./score-buttons";
 import ScoreSongInfo from "./score-song-info";
 import ScoreRankInfo from "./score-rank-info";
@@ -50,7 +50,7 @@ type Mode = {
 
 const modes: Mode[] = [
   { name: "Overview", icon: <CubeIcon className="w-4 h-4" /> },
-  { name: "Score History", icon: <GitGraph className="w-4 h-4" /> },
+  { name: "Score History", icon: <TrendingUpIcon className="w-4 h-4" /> },
 ];
 
 export default function Score({ leaderboard, beatSaverMap, score, settings }: Props) {
