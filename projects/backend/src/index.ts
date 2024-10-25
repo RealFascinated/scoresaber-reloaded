@@ -73,7 +73,7 @@ app.use(
 );
 app.use(
   cron({
-    name: "scores-background-refresh",
+    name: "player-scores-tracker-cron",
     pattern: "0 4 * * *", // Every day at 04:00
     timezone: "Europe/London", // UTC time
     protect: true,
