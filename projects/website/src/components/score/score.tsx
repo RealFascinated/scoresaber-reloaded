@@ -118,8 +118,8 @@ export default function Score({ leaderboard, beatSaverMap, score, settings }: Pr
   };
 
   const gridColsClass = settings?.noScoreButtons
-    ? "grid-cols-[20px_1fr_1fr] lg:grid-cols-[0.5fr_4fr_300px]"
-    : "grid-cols-[20px_1fr_1fr] lg:grid-cols-[0.5fr_4fr_1fr_300px]";
+    ? "grid-cols-[20px 1fr_1fr] lg:grid-cols-[0.5fr_4fr_300px]" // Fewer columns if no buttons
+    : "grid-cols-[20px 1fr_1fr] lg:grid-cols-[0.5fr_4fr_1fr_300px]"; // Original with buttons
 
   return (
     <div className="pb-2 pt-2">
