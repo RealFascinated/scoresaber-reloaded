@@ -24,6 +24,7 @@ import { connectScoresaberWebsocket } from "@ssr/common/websocket/scoresaber-web
 import { connectBeatLeaderWebsocket } from "@ssr/common/websocket/beatleader-websocket";
 import { DiscordChannels, initDiscordBot, logToChannel } from "./bot/bot";
 import { EmbedBuilder } from "discord.js";
+import { ScoreSort } from "@ssr/common/score/score-sort";
 
 // Load .env file
 dotenv.config({
@@ -38,7 +39,9 @@ await mongoose.connect(Config.mongoUri!); // Connect to MongoDB
 // Connect to websockets
 connectScoresaberWebsocket({
   onScore: async score => {
-    await ScoreService.trackScoreSaberScore(score);
+    await ScoreService.trackScoreSaberScore(score.score, score.leaderboard);
+    await ScoreService.updatePlayerScoresSet(score);
+
     await ScoreService.notifyNumberOne(score);
   },
   onDisconnect: async error => {
@@ -102,6 +105,46 @@ app.use(
         await delay(cooldown);
       }
       console.log("Finished tracking player statistics.");
+    },
+  })
+);
+
+app.use(
+  cron({
+    name: "scores-background-refresh",
+    pattern: "*/1 * * * *",
+    protect: true,
+    run: async () => {
+      console.log(`Refreshing player score data...`);
+      const players = await PlayerModel.find({});
+      console.log(`Found ${players.length} players to refresh.`);
+
+      for (const player of players) {
+        console.log(`Refreshing scores for ${player.id}...`);
+        let page = 1;
+        let hasMorePages = true;
+
+        while (hasMorePages) {
+          const scoresPage = await scoresaberService.lookupPlayerScores({
+            playerId: player.id,
+            page: page,
+            limit: 100,
+            sort: ScoreSort.recent,
+          });
+          if (!scoresPage) {
+            break;
+          }
+          if (scoresPage.metadata.total <= page * 100) {
+            hasMorePages = false;
+          }
+          page++;
+
+          for (const score of scoresPage.playerScores) {
+            await ScoreService.trackScoreSaberScore(score.score, score.leaderboard, player.id);
+          }
+        }
+        console.log(`Finished refreshing scores for ${player.id}, total pages refreshed: ${page - 1}.`);
+      }
     },
   })
 );

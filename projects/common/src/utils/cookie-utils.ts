@@ -1,6 +1,6 @@
 import { isServer } from "./utils";
 
-export type CookieName = "playerId" | "lastScoreSort";
+export type CookieName = "playerId" | "lastScoreSort" | "lastScoreSortDirection";
 
 /**
  * Gets the value of a cookie

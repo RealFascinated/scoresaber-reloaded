@@ -1,6 +1,6 @@
 import { capitalizeFirstLetter } from "@/common/string-utils";
 import useWindowDimensions from "@/hooks/use-window-dimensions";
-import { ClockIcon, TrophyIcon, XMarkIcon } from "@heroicons/react/24/solid";
+import { ArrowDownIcon, ClockIcon, TrophyIcon, XMarkIcon } from "@heroicons/react/24/solid";
 import { useQuery } from "@tanstack/react-query";
 import { motion, useAnimation } from "framer-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -13,44 +13,55 @@ import { clsx } from "clsx";
 import { useDebounce } from "@uidotdev/usehooks";
 import { scoreAnimation } from "@/components/score/score-animation";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import { ScoreSort } from "@ssr/common/score/score-sort";
 import { setCookieValue } from "@ssr/common/utils/cookie-utils";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
 import { fetchPlayerScores } from "@ssr/common/utils/score-utils";
 import PlayerScoresResponse from "@ssr/common/response/player-scores-response";
+import { SortDirection } from "@ssr/common/sorter/sort-direction";
+import { ScoreSortType } from "@ssr/common/sorter/sort-type";
 
 type Props = {
   initialScoreData?: PlayerScoresResponse<ScoreSaberScore, ScoreSaberLeaderboard>;
   initialSearch?: string;
   player: ScoreSaberPlayer;
-  sort: ScoreSort;
+  sort: ScoreSortType;
+  direction: SortDirection;
   page: number;
 };
 
 type PageState = {
   page: number;
-  sort: ScoreSort;
+  sort: ScoreSortType;
+  direction: SortDirection;
 };
 
 const scoreSort = [
   {
-    name: "Top",
-    value: ScoreSort.top,
-    icon: <TrophyIcon className="w-5 h-5" />,
+    name: "PP",
+    value: ScoreSortType.pp,
   },
   {
-    name: "Recent",
-    value: ScoreSort.recent,
-    icon: <ClockIcon className="w-5 h-5" />,
+    name: "Date",
+    value: ScoreSortType.date,
+  },
+  {
+    name: "Acc",
+    value: ScoreSortType.accuracy,
+    requiresTrackedPlayer: true,
+  },
+  {
+    name: "Misses",
+    value: ScoreSortType.misses,
+    requiresTrackedPlayer: true,
   },
 ];
 
-export default function PlayerScores({ initialScoreData, initialSearch, player, sort, page }: Props) {
+export default function PlayerScores({ initialScoreData, initialSearch, player, sort, direction, page }: Props) {
   const { width } = useWindowDimensions();
   const controls = useAnimation();
 
-  const [pageState, setPageState] = useState<PageState>({ page, sort });
+  const [pageState, setPageState] = useState<PageState>({ page, sort, direction });
   const [previousPage, setPreviousPage] = useState(page);
   const [scores, setScores] = useState<PlayerScoresResponse<ScoreSaberScore, ScoreSaberLeaderboard> | undefined>(
     initialScoreData
@@ -69,6 +80,7 @@ export default function PlayerScores({ initialScoreData, initialSearch, player, 
         player.id,
         pageState.page,
         pageState.sort,
+        pageState.direction,
         debouncedSearchTerm
       ),
     enabled: shouldFetch && (debouncedSearchTerm.length >= 3 || debouncedSearchTerm.length === 0),
@@ -88,12 +100,28 @@ export default function PlayerScores({ initialScoreData, initialSearch, player, 
    *
    * @param newSort the new sort
    */
-  const handleSortChange = async (newSort: ScoreSort) => {
+  const handleSortChange = async (newSort: ScoreSortType) => {
     if (newSort !== pageState.sort) {
-      setPageState({ page: 1, sort: newSort });
+      setPageState({ ...pageState, page: 1, sort: newSort, direction: SortDirection.DESC });
       setShouldFetch(true); // Set to true to trigger fetch
       await setCookieValue("lastScoreSort", newSort); // Set the default score sort
     }
+  };
+
+  /**
+   * Change the score sort direction.
+   *
+   * @param newDirection the new sort direction
+   */
+  const handleSortDirectionChange = async (newDirection: SortDirection) => {
+    // Player doesn't have scores tracked anyway, so no need to change this.
+    if (!player.isBeingTracked) {
+      return;
+    }
+
+    setPageState({ ...pageState, page: 1, direction: newDirection });
+    setShouldFetch(true); // Set to true to trigger fetch
+    await setCookieValue("lastScoreSortDirection", newDirection); // Set the default score sort
   };
 
   /**
@@ -131,9 +159,9 @@ export default function PlayerScores({ initialScoreData, initialSearch, player, 
    */
   const getUrl = useCallback(
     (page: number) => {
-      return `/player/${player.id}/${pageState.sort}/${page}${isSearchActive ? `?search=${debouncedSearchTerm}` : ""}`;
+      return `/player/${player.id}/${pageState.sort}/${pageState.direction}/${page}${isSearchActive ? `?search=${debouncedSearchTerm}` : ""}`;
     },
-    [debouncedSearchTerm, player.id, pageState.sort, isSearchActive]
+    [player.id, pageState.sort, pageState.direction, isSearchActive, debouncedSearchTerm]
   );
 
   /**
@@ -167,18 +195,32 @@ export default function PlayerScores({ initialScoreData, initialSearch, player, 
         <div ref={topOfScoresRef} className="absolute" />
 
         <div className="flex gap-2">
-          {scoreSort.map(sortOption => (
-            <Button
-              key={sortOption.value}
-              variant={sortOption.value === pageState.sort ? "default" : "outline"}
-              onClick={() => handleSortChange(sortOption.value)}
-              size="sm"
-              className="flex items-center gap-1"
-            >
-              {sortOption.icon}
-              {`${capitalizeFirstLetter(sortOption.name)} Scores`}
-            </Button>
-          ))}
+          {scoreSort
+            .filter(sort => !(!player.isBeingTracked && sort.requiresTrackedPlayer))
+            .map(sortOption => (
+              <Button
+                key={sortOption.value}
+                variant={sortOption.value === pageState.sort ? "default" : "outline"}
+                onClick={async () => {
+                  if (sortOption.value !== pageState.sort) {
+                    await handleSortChange(sortOption.value);
+                  } else {
+                    await handleSortDirectionChange(
+                      pageState.direction === SortDirection.ASC ? SortDirection.DESC : SortDirection.ASC
+                    );
+                  }
+                }}
+                size="sm"
+                className="flex items-center justify-center gap-1"
+              >
+                {`${capitalizeFirstLetter(sortOption.name)}`}
+                {player.isBeingTracked && (
+                  <ArrowDownIcon
+                    className={`w-4 h-4 ${pageState.direction === SortDirection.ASC && pageState.sort === sortOption.value ? "rotate-180" : ""}`}
+                  />
+                )}
+              </Button>
+            ))}
         </div>
 
         <div className="relative w-72 lg:absolute right-0 top-0">
@@ -223,7 +265,7 @@ export default function PlayerScores({ initialScoreData, initialSearch, player, 
             ))}
           </motion.div>
 
-          {scores.metadata.totalPages > 1 && (
+          {scores.metadata.totalPages >= 1 && (
             <Pagination
               mobilePagination={width < 768}
               page={pageState.page}

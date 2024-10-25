@@ -3,9 +3,7 @@ import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils
 import { isProduction } from "@ssr/common/utils/utils";
 import { Metadata } from "@ssr/common/types/metadata";
 import { NotFoundError } from "elysia";
-import BeatSaverService from "./beatsaver.service";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
-import { ScoreSort } from "@ssr/common/score/score-sort";
 import { Leaderboards } from "@ssr/common/leaderboard";
 import Leaderboard from "@ssr/common/leaderboard/leaderboard";
 import LeaderboardService from "./leaderboard.service";
@@ -25,10 +23,24 @@ import {
   AdditionalScoreDataModel,
 } from "@ssr/common/model/additional-score-data/additional-score-data";
 import { BeatLeaderScoreImprovementToken } from "@ssr/common/types/token/beatleader/score/score-improvement";
-import { ScoreType } from "@ssr/common/model/score/score";
+import Score, { ScoreType } from "@ssr/common/model/score/score";
 import { getScoreSaberLeaderboardFromToken, getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
-import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
+import {
+  ScoreSaberScore,
+  ScoreSaberScoreInternal,
+  ScoreSaberScoreModel,
+} from "@ssr/common/model/score/impl/scoresaber-score";
 import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
+import { ScoreSorters } from "@ssr/common/sorter/sorters";
+import { ScoreSortType } from "@ssr/common/sorter/sort-type";
+import { SortDirection } from "@ssr/common/sorter/sort-direction";
+import { Pagination } from "../../../common/src/pagination";
+import { PlayerService } from "./player.service";
+import { ScoreSort } from "@ssr/common/score/score-sort";
+import BeatSaverService from "./beatsaver.service";
+import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/score-saber-player-token";
+import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score-saber-score-token";
+import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/score-saber-leaderboard-token";
 
 const playerScoresCache = new SSRCache({
   ttl: 1000 * 60, // 1 minute
@@ -37,6 +49,8 @@ const playerScoresCache = new SSRCache({
 const leaderboardScoresCache = new SSRCache({
   ttl: 1000 * 60, // 1 minute
 });
+
+const ITEMS_PER_PAGE = 8;
 
 export class ScoreService {
   /**
@@ -118,15 +132,17 @@ export class ScoreService {
   }
 
   /**
-   * Tracks ScoreSaber score.
+   * Updates the players set scores count for today.
    *
-   * @param score the score to track
-   * @param leaderboard the leaderboard to track
+   * @param score the score
    */
-  public static async trackScoreSaberScore({ score, leaderboard: leaderboardToken }: ScoreSaberPlayerScoreToken) {
+  public static async updatePlayerScoresSet({
+    score: scoreToken,
+    leaderboard: leaderboardToken,
+  }: ScoreSaberPlayerScoreToken) {
+    const playerId = scoreToken.leaderboardPlayerInfo.id;
+
     const leaderboard = getScoreSaberLeaderboardFromToken(leaderboardToken);
-    const playerId = score.leaderboardPlayerInfo.id;
-    const playerName = score.leaderboardPlayerInfo.name;
     const player: PlayerDocument | null = await PlayerModel.findById(playerId);
     // Player is not tracked, so ignore the score.
     if (player == undefined) {
@@ -147,37 +163,36 @@ export class ScoreService {
 
     history.scores = scores;
     player.setStatisticHistory(today, history);
-    player.sortStatisticHistory();
-
-    // Save the changes
-    player.markModified("statisticHistory");
     await player.save();
+  }
 
-    const scoreToken = getScoreSaberScoreFromToken(score, leaderboard, playerId);
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
-    delete scoreToken.playerInfo;
+  /**
+   * Tracks ScoreSaber score.
+   *
+   * @param scoreToken the score to track
+   * @param leaderboardToken the leaderboard for the score
+   * @param playerId the id of the player
+   */
+  public static async trackScoreSaberScore(
+    scoreToken: ScoreSaberScoreToken,
+    leaderboardToken: ScoreSaberLeaderboardToken,
+    playerId?: string
+  ) {
+    playerId = playerId || scoreToken.leaderboardPlayerInfo.id;
 
-    // Check if the score already exists
-    if (
-      await ScoreSaberScoreModel.exists({
-        playerId: playerId,
-        leaderboardId: leaderboard.id,
-        score: scoreToken.score,
-        difficulty: leaderboard.difficulty.difficulty,
-        characteristic: leaderboard.difficulty.characteristic,
-      })
-    ) {
-      console.log(
-        `Score already exists for "${playerName}"(${playerId}), scoreId=${scoreToken.scoreId}, score=${scoreToken.score}`
-      );
+    const leaderboard = getScoreSaberLeaderboardFromToken(leaderboardToken);
+    const score = getScoreSaberScoreFromToken(scoreToken, leaderboard, playerId);
+    const player: PlayerDocument | null = await PlayerModel.findById(playerId);
+    // Player is not tracked, so ignore the score.
+    if (player == undefined) {
       return;
     }
 
-    await ScoreSaberScoreModel.create(scoreToken);
-    console.log(
-      `Tracked score and updated scores set statistic for "${playerName}"(${playerId}), scores today: ${scores.rankedScores} ranked, ${scores.unrankedScores} unranked`
-    );
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
+    delete score.playerInfo;
+
+    await ScoreSaberScoreModel.create(score);
   }
 
   /**
@@ -292,7 +307,8 @@ export class ScoreService {
    * @param leaderboardName the leaderboard to get the scores from
    * @param playerId the players id
    * @param page the page to get
-   * @param sort the sort to use
+   * @param sort the sort type to use
+   * @param direction the direction to sort the scores
    * @param search the search to use
    * @returns the scores
    */
@@ -300,62 +316,132 @@ export class ScoreService {
     leaderboardName: Leaderboards,
     playerId: string,
     page: number,
-    sort: string,
+    sort: ScoreSortType,
+    direction: SortDirection,
     search?: string
   ): Promise<PlayerScoresResponse<unknown, unknown> | undefined> {
+    console.log(
+      `Fetching scores for ${playerId} on ${leaderboardName}, page: ${page}, sort: ${sort}, direction: ${direction}, search: ${search}`
+    );
+
     return fetchWithCache(
       playerScoresCache,
       `player-scores-${leaderboardName}-${playerId}-${page}-${sort}-${search}`,
       async () => {
-        const scores: PlayerScore<unknown, unknown>[] | undefined = [];
+        const toReturn: PlayerScore<unknown, unknown>[] | undefined = [];
         let metadata: Metadata = new Metadata(0, 0, 0, 0); // Default values
 
         switch (leaderboardName) {
           case "scoresaber": {
-            const leaderboardScores = await scoresaberService.lookupPlayerScores({
-              playerId: playerId,
-              page: page,
-              sort: sort as ScoreSort,
-              search: search,
-            });
-            if (leaderboardScores == undefined) {
-              break;
+            let isPlayerTracked = false;
+            try {
+              isPlayerTracked = (await PlayerService.getPlayer(playerId, false)) != undefined;
+            } catch {
+              /* ignored */
             }
-
-            metadata = new Metadata(
-              Math.ceil(leaderboardScores.metadata.total / leaderboardScores.metadata.itemsPerPage),
-              leaderboardScores.metadata.total,
-              leaderboardScores.metadata.page,
-              leaderboardScores.metadata.itemsPerPage
-            );
-
-            for (const token of leaderboardScores.playerScores) {
-              const leaderboard = getScoreSaberLeaderboardFromToken(token.leaderboard);
-              if (leaderboard == undefined) {
-                continue;
-              }
-
-              const score = getScoreSaberScoreFromToken(token.score, leaderboard, playerId);
-              if (score == undefined) {
-                continue;
-              }
-
-              const additionalData = await this.getAdditionalScoreData(
-                playerId,
-                leaderboard.songHash,
-                `${leaderboard.difficulty.difficulty}-${leaderboard.difficulty.characteristic}`,
-                score.score
+            if (isPlayerTracked) {
+              const rawScores = ScoreSorters.scoreSaber.sort(
+                sort,
+                direction,
+                (await ScoreSaberScoreModel.find({ playerId: playerId }).exec()) as unknown as ScoreSaberScore[]
               );
-              if (additionalData !== undefined) {
-                score.additionalData = additionalData;
+              if (!rawScores || rawScores.length === 0) {
+                break;
               }
 
-              scores.push({
-                score: score,
-                leaderboard: leaderboard,
-                beatSaver: await BeatSaverService.getMap(leaderboard.songHash),
+              const pagination = new Pagination<ScoreSaberScore>().setItemsPerPage(ITEMS_PER_PAGE).setItems(rawScores);
+              const paginatedPage = pagination.getPage(page);
+              metadata = paginatedPage.metadata;
+
+              for (const score of paginatedPage.items) {
+                const { leaderboard, beatsaver } = await LeaderboardService.getLeaderboard<ScoreSaberLeaderboard>(
+                  "scoresaber",
+                  String(score.leaderboardId)
+                );
+                if (leaderboard == undefined) {
+                  continue;
+                }
+
+                const additionalData = await this.getAdditionalScoreData(
+                  playerId,
+                  leaderboard.songHash,
+                  `${leaderboard.difficulty.difficulty}-${leaderboard.difficulty.characteristic}`,
+                  score.score
+                );
+                if (additionalData == undefined) {
+                  continue;
+                }
+
+                toReturn.push({
+                  score: score,
+                  leaderboard: leaderboard,
+                  beatSaver: beatsaver,
+                });
+              }
+            } else {
+              // Convert the sort type
+              let scoreSaberSort: ScoreSort;
+              switch (sort) {
+                case ScoreSortType.date: {
+                  scoreSaberSort = ScoreSort.recent;
+                  break;
+                }
+                case ScoreSortType.pp: {
+                  scoreSaberSort = ScoreSort.top;
+                  break;
+                }
+                default: {
+                  scoreSaberSort = ScoreSort.recent;
+                  break;
+                }
+              }
+
+              const rawScores = await scoresaberService.lookupPlayerScores({
+                playerId: playerId,
+                page: page,
+                sort: scoreSaberSort,
+                search: search,
               });
+              if (!rawScores || rawScores.playerScores.length === 0) {
+                break;
+              }
+
+              metadata = new Metadata(
+                Math.ceil(rawScores.metadata.total / rawScores.metadata.itemsPerPage),
+                rawScores.metadata.total,
+                rawScores.metadata.page,
+                rawScores.metadata.itemsPerPage
+              );
+
+              for (const token of rawScores.playerScores) {
+                const leaderboard = getScoreSaberLeaderboardFromToken(token.leaderboard);
+                if (leaderboard == undefined) {
+                  continue;
+                }
+
+                const score = getScoreSaberScoreFromToken(token.score, leaderboard, playerId);
+                if (score == undefined) {
+                  continue;
+                }
+
+                const additionalData = await this.getAdditionalScoreData(
+                  playerId,
+                  leaderboard.songHash,
+                  `${leaderboard.difficulty.difficulty}-${leaderboard.difficulty.characteristic}`,
+                  score.score
+                );
+                if (additionalData !== undefined) {
+                  score.additionalData = additionalData;
+                }
+
+                toReturn.push({
+                  score: score,
+                  leaderboard: leaderboard,
+                  beatSaver: await BeatSaverService.getMap(leaderboard.songHash),
+                });
+              }
             }
+
             break;
           }
           default: {
@@ -363,8 +449,9 @@ export class ScoreService {
           }
         }
 
+        console.log(metadata);
         return {
-          scores: scores,
+          scores: toReturn,
           metadata: metadata,
         };
       }

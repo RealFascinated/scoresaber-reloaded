@@ -168,6 +168,7 @@ class ScoreSaberService extends Service {
    * @param playerId the ID of the player to look up
    * @param sort the sort to use
    * @param page the page to get scores for
+   * @param limit the amount of scores to fetch
    * @param search
    * @returns the scores of the player, or undefined
    */
@@ -175,11 +176,13 @@ class ScoreSaberService extends Service {
     playerId,
     sort,
     page,
+    limit = 8,
     search,
   }: {
     playerId: string;
     sort: ScoreSort;
     page: number;
+    limit?: number;
     search?: string;
     useProxy?: boolean;
   }): Promise<ScoreSaberPlayerScoresPageToken | undefined> {
@@ -189,7 +192,7 @@ class ScoreSaberService extends Service {
     );
     const response = await this.fetch<ScoreSaberPlayerScoresPageToken>(
       LOOKUP_PLAYER_SCORES_ENDPOINT.replace(":id", playerId)
-        .replace(":limit", 8 + "")
+        .replace(":limit", limit + "")
         .replace(":sort", sort)
         .replace(":page", page + "") + (search ? `&search=${search}` : "")
     );

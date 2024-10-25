@@ -19,16 +19,26 @@ import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
 import PlayerScoresResponse from "@ssr/common/response/player-scores-response";
 import { getScoreSaberPlayerFromToken } from "@ssr/common/token-creators";
+import { ScoreSortType } from "@ssr/common/sorter/sort-type";
+import { SortDirection } from "@ssr/common/sorter/sort-direction";
 
 type Props = {
   initialPlayerData: ScoreSaberPlayer;
   initialScoreData?: PlayerScoresResponse<ScoreSaberScore, ScoreSaberLeaderboard>;
   initialSearch?: string;
-  sort: ScoreSort;
+  sort: ScoreSortType;
+  direction: SortDirection;
   page: number;
 };
 
-export default function PlayerData({ initialPlayerData, initialScoreData, initialSearch, sort, page }: Props) {
+export default function PlayerData({
+  initialPlayerData,
+  initialScoreData,
+  initialSearch,
+  sort,
+  direction,
+  page,
+}: Props) {
   const isMobile = useIsMobile();
   const miniRankingsRef = useRef<HTMLDivElement>(null);
   const isMiniRankingsVisible = useIsVisible(miniRankingsRef);
@@ -65,6 +75,7 @@ export default function PlayerData({ initialPlayerData, initialScoreData, initia
           initialSearch={initialSearch}
           player={player}
           sort={sort}
+          direction={direction}
           page={page}
         />
       </article>
