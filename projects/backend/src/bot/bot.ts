@@ -8,7 +8,7 @@ export enum DiscordChannels {
   backendLogs = "1296524935237468250",
 }
 
-const DiscordBot = new Client({
+const client = new Client({
   intents: [],
   presence: {
     status: "online",
@@ -23,16 +23,17 @@ const DiscordBot = new Client({
   },
 });
 
-DiscordBot.once("ready", () => {
+client.once("ready", () => {
   console.log("Discord bot ready!");
 });
 
-export function initDiscordBot() {
+export async function initDiscordBot() {
   console.log("Initializing discord bot...");
 
-  MetadataStorage.instance.build().then(async () => {
-    await DiscordBot.login(Config.discordBotToken!).then();
+  client.once("ready", async () => {
+    await client.initApplicationCommands();
   });
+  await client.login(Config.discordBotToken!);
 }
 
 /**
@@ -42,7 +43,7 @@ export function initDiscordBot() {
  * @param message the message to log
  */
 export async function logToChannel(channelId: DiscordChannels, message: EmbedBuilder) {
-  const channel = await DiscordBot.channels.fetch(channelId);
+  const channel = await client.channels.fetch(channelId);
   if (channel == undefined) {
     throw new Error(`Channel "${channelId}" not found`);
   }
