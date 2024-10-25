@@ -2,6 +2,7 @@ import { Client } from "discordx";
 import { ActivityType, EmbedBuilder } from "discord.js";
 import { Config } from "@ssr/common/config";
 
+export const guildId = "1295984874942894100";
 export enum DiscordChannels {
   trackedPlayerLogs = "1295985197262569512",
   numberOneFeed = "1295988063817830430",

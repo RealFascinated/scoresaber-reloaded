@@ -1,9 +1,11 @@
-import { Discord, Slash } from "discordx";
+import { Discord, Guild, Slash } from "discordx";
 import { CommandInteraction } from "discord.js";
 import { PlayerService } from "../../service/player.service";
+import { guildId } from "../bot";
 
 @Discord()
 export class RefreshPlayerScoresCommand {
+  @Guild(guildId)
   @Slash({
     description: "Refreshes scores for all tracked players",
     name: "refresh-player-scores",
