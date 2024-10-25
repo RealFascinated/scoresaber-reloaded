@@ -105,14 +105,14 @@ export default function LeaderboardScores({
    * scores when new scores are loaded.
    */
   useEffect(() => {
-    if (topOfScoresRef.current && shouldFetch) {
+    if (topOfScoresRef.current && shouldFetch && isLeaderboardPage) {
       const topOfScoresPosition = topOfScoresRef.current.getBoundingClientRect().top + window.scrollY;
       window.scrollTo({
         top: topOfScoresPosition - 75, // Navbar height (plus some padding)
         behavior: "smooth",
       });
     }
-  }, [currentPage, topOfScoresRef, shouldFetch]);
+  }, [currentPage, topOfScoresRef, shouldFetch, isLeaderboardPage]);
 
   useEffect(() => {
     if (disableUrlChanging) {
