@@ -24,9 +24,9 @@ export default async function HomePage() {
       {statistics && (
         <div className="flex items-center flex-col">
           <p className="font-semibold">Site Statistics</p>
-          <Statistic title="Total Tracked Players" value={statistics.trackedPlayers} />
-          <Statistic title="Total Tracked Scores" value={statistics.trackedScores} />
-          <Statistic title="Total Additional Scores Data" value={statistics.additionalScoresData} />
+          <Statistic title="Tracked Players" value={statistics.trackedPlayers} />
+          <Statistic title="Tracked Scores" value={statistics.trackedScores} />
+          <Statistic title="Additional Scores Data" value={statistics.additionalScoresData} />
           <Statistic title="Cached BeatSaver Maps" value={statistics.cachedBeatSaverMaps} />
         </div>
       )}
