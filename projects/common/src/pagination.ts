@@ -1,5 +1,5 @@
-import { NotFoundError } from "backend/src/error/not-found-error";
 import { Metadata } from "./types/metadata";
+import { NotFoundError } from "./error/not-found-error";
 
 type FetchItemsFunction<T> = (fetchItems: FetchItems) => Promise<T[]>;
 

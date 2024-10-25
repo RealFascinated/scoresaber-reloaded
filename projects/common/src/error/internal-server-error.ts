@@ -1,4 +1,4 @@
-import { HttpCode } from "../common/http-codes";
+import { HttpCode } from "backend/src/common/http-codes";
 
 export class InternalServerError extends Error {
   constructor(

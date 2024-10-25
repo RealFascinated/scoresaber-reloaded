@@ -1,9 +1,9 @@
 import { PlayerDocument, PlayerModel } from "@ssr/common/model/player";
-import { NotFoundError } from "../error/not-found-error";
+import { NotFoundError } from "@ssr/common/error/not-found-error";
 import { getDaysAgoDate, getMidnightAlignedDate } from "@ssr/common/utils/time-utils";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/score-saber-player-token";
-import { InternalServerError } from "../error/internal-server-error";
+import { InternalServerError } from "@ssr/common/error/internal-server-error";
 import { formatPp } from "@ssr/common/utils/number-utils";
 import { delay, getPageFromRank, isProduction } from "@ssr/common/utils/utils";
 import { DiscordChannels, logToChannel } from "../bot/bot";
