@@ -30,9 +30,14 @@ client.once("ready", () => {
 export async function initDiscordBot() {
   console.log("Initializing discord bot...");
 
+  // Setup slash commands
   client.once("ready", async () => {
     await client.initApplicationCommands();
   });
+  client.on("interactionCreate", interaction => {
+    client.executeInteraction(interaction);
+  });
+
   await client.login(Config.discordBotToken!);
 }
 
