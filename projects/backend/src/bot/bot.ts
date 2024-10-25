@@ -1,4 +1,4 @@
-import { Client, MetadataStorage } from "discordx";
+import { Client } from "discordx";
 import { ActivityType, EmbedBuilder } from "discord.js";
 import { Config } from "@ssr/common/config";
 
