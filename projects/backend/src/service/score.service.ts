@@ -29,6 +29,10 @@ import { ScoreType } from "@ssr/common/model/score/score";
 import { getScoreSaberLeaderboardFromToken, getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
+import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score-saber-score-token";
+import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/score-saber-leaderboard-token";
+import { MapDifficulty } from "@ssr/common/score/map-difficulty";
+import { MapCharacteristic } from "@ssr/common/types/map-characteristic";
 
 const playerScoresCache = new SSRCache({
   ttl: 1000 * 60, // 1 minute
@@ -118,15 +122,17 @@ export class ScoreService {
   }
 
   /**
-   * Tracks ScoreSaber score.
+   * Updates the players set scores count for today.
    *
-   * @param score the score to track
-   * @param leaderboard the leaderboard to track
+   * @param score the score
    */
-  public static async trackScoreSaberScore({ score, leaderboard: leaderboardToken }: ScoreSaberPlayerScoreToken) {
+  public static async updatePlayerScoresSet({
+    score: scoreToken,
+    leaderboard: leaderboardToken,
+  }: ScoreSaberPlayerScoreToken) {
+    const playerId = scoreToken.leaderboardPlayerInfo.id;
+
     const leaderboard = getScoreSaberLeaderboardFromToken(leaderboardToken);
-    const playerId = score.leaderboardPlayerInfo.id;
-    const playerName = score.leaderboardPlayerInfo.name;
     const player: PlayerDocument | null = await PlayerModel.findById(playerId);
     // Player is not tracked, so ignore the score.
     if (player == undefined) {
@@ -147,37 +153,49 @@ export class ScoreService {
 
     history.scores = scores;
     player.setStatisticHistory(today, history);
-    player.sortStatisticHistory();
-
-    // Save the changes
-    player.markModified("statisticHistory");
     await player.save();
+  }
 
-    const scoreToken = getScoreSaberScoreFromToken(score, leaderboard, playerId);
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
-    delete scoreToken.playerInfo;
+  /**
+   * Tracks ScoreSaber score.
+   *
+   * @param scoreToken the score to track
+   * @param leaderboardToken the leaderboard for the score
+   * @param playerId the id of the player
+   */
+  public static async trackScoreSaberScore(
+    scoreToken: ScoreSaberScoreToken,
+    leaderboardToken: ScoreSaberLeaderboardToken,
+    playerId?: string
+  ) {
+    playerId = playerId || scoreToken.leaderboardPlayerInfo.id;
 
-    // Check if the score already exists
-    if (
-      await ScoreSaberScoreModel.exists({
-        playerId: playerId,
-        leaderboardId: leaderboard.id,
-        score: scoreToken.score,
-        difficulty: leaderboard.difficulty.difficulty,
-        characteristic: leaderboard.difficulty.characteristic,
-      })
-    ) {
-      console.log(
-        `Score already exists for "${playerName}"(${playerId}), scoreId=${scoreToken.scoreId}, score=${scoreToken.score}`
-      );
+    const leaderboard = getScoreSaberLeaderboardFromToken(leaderboardToken);
+    const score = getScoreSaberScoreFromToken(scoreToken, leaderboard, playerId);
+    const player: PlayerDocument | null = await PlayerModel.findById(playerId);
+    // Player is not tracked, so ignore the score.
+    if (player == undefined) {
       return;
     }
 
-    await ScoreSaberScoreModel.create(scoreToken);
-    console.log(
-      `Tracked score and updated scores set statistic for "${playerName}"(${playerId}), scores today: ${scores.rankedScores} ranked, ${scores.unrankedScores} unranked`
-    );
+    // The score has already been tracked, so ignore it.
+    if (
+      (await this.getScoreSaberScore(
+        playerId,
+        leaderboard.id + "",
+        leaderboard.difficulty.difficulty,
+        leaderboard.difficulty.characteristic,
+        score.score
+      )) !== null
+    ) {
+      return;
+    }
+
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
+    delete score.playerInfo;
+
+    await ScoreSaberScoreModel.create(score);
   }
 
   /**
@@ -284,6 +302,31 @@ export class ScoreService {
       return undefined;
     }
     return additionalData.toObject();
+  }
+
+  /**
+   * Gets a ScoreSaber score.
+   *
+   * @param playerId the player who set the score
+   * @param leaderboardId the leaderboard id the score was set on
+   * @param difficulty the difficulty played
+   * @param characteristic the characteristic played
+   * @param score the score of the score set
+   */
+  public static async getScoreSaberScore(
+    playerId: string,
+    leaderboardId: string,
+    difficulty: MapDifficulty,
+    characteristic: MapCharacteristic,
+    score: number
+  ) {
+    return ScoreSaberScoreModel.findOne({
+      playerId: playerId,
+      leaderboardId: leaderboardId,
+      difficulty: difficulty,
+      characteristic: characteristic,
+      score: score,
+    });
   }
 
   /**

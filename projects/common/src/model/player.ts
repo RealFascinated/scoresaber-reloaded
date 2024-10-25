@@ -21,6 +21,12 @@ export class Player {
   private statisticHistory?: Record<string, PlayerHistory>;
 
   /**
+   * Whether the player has their scores seeded.
+   */
+  @prop()
+  public seededScores?: boolean;
+
+  /**
    * The date the player was last tracked.
    */
   @prop()

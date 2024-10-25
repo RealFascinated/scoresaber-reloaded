@@ -5,10 +5,13 @@ import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/score-saber-player-token";
 import { InternalServerError } from "../error/internal-server-error";
 import { formatPp } from "@ssr/common/utils/number-utils";
-import { getPageFromRank, isProduction } from "@ssr/common/utils/utils";
+import { delay, getPageFromRank, isProduction } from "@ssr/common/utils/utils";
 import { DiscordChannels, logToChannel } from "../bot/bot";
 import { EmbedBuilder } from "discord.js";
 import { AroundPlayer } from "@ssr/common/types/around-player";
+import { ScoreSort } from "@ssr/common/score/score-sort";
+import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
+import { ScoreService } from "./score.service";
 
 export class PlayerService {
   /**
@@ -242,5 +245,109 @@ export class PlayerService {
     }
 
     return players.slice(start, end);
+  }
+
+  /**
+   * Ensures all player scores are up-to-date.
+   */
+  public static async refreshPlayerScores() {
+    const cooldown = 60_000 / 250; // 250 requests per minute
+    console.log(`Refreshing player score data...`);
+
+    const players = await PlayerModel.find({});
+    console.log(`Found ${players.length} players to refresh.`);
+
+    for (const player of players) {
+      console.log(`Refreshing scores for ${player.id}...`);
+      let page = 1;
+      let hasMorePages = true;
+
+      while (hasMorePages) {
+        const scoresPage = await scoresaberService.lookupPlayerScores({
+          playerId: player.id,
+          page: page,
+          limit: 100,
+          sort: ScoreSort.recent,
+        });
+
+        if (!scoresPage) {
+          console.warn(`Failed to fetch scores for ${player.id} on page ${page}.`);
+          break;
+        }
+
+        let missingScores = 0;
+        for (const score of scoresPage.playerScores) {
+          const leaderboard = getScoreSaberLeaderboardFromToken(score.leaderboard);
+          const scoreSaberScore = await ScoreService.getScoreSaberScore(
+            player.id,
+            leaderboard.id + "",
+            leaderboard.difficulty.difficulty,
+            leaderboard.difficulty.characteristic,
+            score.score.baseScore
+          );
+
+          if (scoreSaberScore == null) {
+            missingScores++;
+          }
+          await ScoreService.trackScoreSaberScore(score.score, score.leaderboard, player.id);
+        }
+
+        // Stop paginating if no scores are missing OR if player has seededScores marked true
+        if ((missingScores === 0 && player.seededScores) || page >= Math.ceil(scoresPage.metadata.total / 100)) {
+          hasMorePages = false;
+        }
+
+        page++;
+        await delay(cooldown); // Cooldown between page requests
+      }
+
+      // Mark player as seeded
+      player.seededScores = true;
+      await player.save();
+
+      console.log(`Finished refreshing scores for ${player.id}, total pages refreshed: ${page - 1}.`);
+      await delay(cooldown); // Cooldown between players
+    }
+  }
+
+  /**
+   * Updates the player statistics for all players.
+   */
+  public static async updatePlayerStatistics() {
+    const pages = 20; // top 1000 players
+    const cooldown = 60_000 / 250; // 250 requests per minute
+
+    let toTrack: PlayerDocument[] = await PlayerModel.find({});
+    const toRemoveIds: string[] = [];
+
+    // loop through pages to fetch the top players
+    console.log(`Fetching ${pages} pages of players from ScoreSaber...`);
+    for (let i = 0; i < pages; i++) {
+      const pageNumber = i + 1;
+      console.log(`Fetching page ${pageNumber}...`);
+      const page = await scoresaberService.lookupPlayers(pageNumber);
+      if (page === undefined) {
+        console.log(`Failed to fetch players on page ${pageNumber}, skipping page...`);
+        await delay(cooldown);
+        continue;
+      }
+      for (const player of page.players) {
+        const foundPlayer = await PlayerService.getPlayer(player.id, true, player);
+        await PlayerService.trackScoreSaberPlayer(foundPlayer, player);
+        toRemoveIds.push(foundPlayer.id);
+      }
+      await delay(cooldown);
+    }
+    console.log(`Finished tracking player statistics for ${pages} pages, found ${toRemoveIds.length} players.`);
+
+    // remove all players that have been tracked
+    toTrack = toTrack.filter(player => !toRemoveIds.includes(player.id));
+
+    console.log(`Tracking ${toTrack.length} player statistics...`);
+    for (const player of toTrack) {
+      await PlayerService.trackScoreSaberPlayer(player);
+      await delay(cooldown);
+    }
+    console.log("Finished tracking player statistics.");
   }
 }
