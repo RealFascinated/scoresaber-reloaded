@@ -37,6 +37,11 @@ const items: NavbarItem[] = [
     link: "/swagger",
     openInNewTab: true,
   },
+  {
+    name: "Score Feed",
+    link: "/scores",
+    openInNewTab: false,
+  },
 ];
 
 export default function Footer() {

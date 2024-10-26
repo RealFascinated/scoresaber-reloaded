@@ -23,12 +23,6 @@ const items: NavbarItem[] = [
     icon: <TrendingUpIcon className="h-5 w-5" />,
   },
   {
-    name: "Score Feed",
-    link: "/scores",
-    align: "left",
-    icon: <PiSwordFill className="h-5 w-5" />,
-  },
-  {
     name: "Search",
     link: "/search",
     align: "right",
