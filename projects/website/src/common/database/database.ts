@@ -5,8 +5,13 @@ import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/score-sabe
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { setCookieValue } from "@ssr/common/utils/cookie-utils";
 import { trackPlayer } from "@ssr/common/utils/player-utils";
+import { SSRCache } from "@ssr/common/cache";
 
 const SETTINGS_ID = "SSR"; // DO NOT CHANGE
+
+const playerCache = new SSRCache({
+  ttl: 60 * 30, // 30 minutes
+});
 
 export default class Database extends Dexie {
   /**
@@ -79,7 +84,15 @@ export default class Database extends Dexie {
     if (settings == undefined || settings.playerId == undefined) {
       return;
     }
-    return scoresaberService.lookupPlayer(settings.playerId, true);
+    if (playerCache.has(settings.playerId)) {
+      return playerCache.get(settings.playerId);
+    }
+    const player = scoresaberService.lookupPlayer(settings.playerId);
+    if (player == undefined) {
+      return undefined;
+    }
+    playerCache.set(settings.playerId, player);
+    return player;
   }
 
   /**
@@ -119,10 +132,15 @@ export default class Database extends Dexie {
     const friends = await this.friends.toArray();
     const players = await Promise.all(
       friends.map(async ({ id }) => {
-        const token = await scoresaberService.lookupPlayer(id, true);
+        if (playerCache.has(id)) {
+          return playerCache.get(id);
+        }
+
+        const token = await scoresaberService.lookupPlayer(id);
         if (token == undefined) {
           return undefined;
         }
+        playerCache.set(id, token);
         await trackPlayer(id); // Track the player
         return token;
       })

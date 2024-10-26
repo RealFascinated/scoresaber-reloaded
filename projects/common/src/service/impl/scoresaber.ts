@@ -30,7 +30,7 @@ const LOOKUP_LEADERBOARD_SCORES_ENDPOINT = `${API_BASE}/leaderboard/by-id/:id/sc
 const STAR_MULTIPLIER = 42.117208413;
 
 const playerCache = new SSRCache({
-  ttl: 60 * 30, // 30 minutes
+  ttl: 60, // 1 minute
 });
 
 class ScoreSaberService extends Service {

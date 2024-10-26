@@ -38,7 +38,7 @@ type PlayerData = {
 };
 
 const getPlayer = cache(async (id: string): Promise<ScoreSaberPlayer | undefined> => {
-  const playerToken = await scoresaberService.lookupPlayer(id);
+  const playerToken = await scoresaberService.lookupPlayer(id, true);
   return playerToken && (await getScoreSaberPlayerFromToken(playerToken, await getCookieValue("playerId")));
 });
 
