@@ -1,10 +1,13 @@
 import { withSentryConfig } from "@sentry/nextjs";
 import { format } from "@formkit/tempo";
+import type { NextConfig } from "next";
 
-/** @type {import('next').NextConfig} */
-const nextConfig = {
+const nextConfig: NextConfig = {
   experimental: {
     optimizePackageImports: ["@ssr/common", "@radix-ui/react-icons", "chart.js", "react-chartjs-2"],
+    staleTimes: {
+      dynamic: 30,
+    },
   },
   images: {
     remotePatterns: [
