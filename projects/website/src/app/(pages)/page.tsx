@@ -28,6 +28,7 @@ export default async function HomePage() {
           <Statistic title="Tracked Scores" value={statistics.trackedScores} />
           <Statistic title="Additional Scores Data" value={statistics.additionalScoresData} />
           <Statistic title="Cached BeatSaver Maps" value={statistics.cachedBeatSaverMaps} />
+          <Statistic title="Cached ScoreSaber Leaderboards" value={statistics.cachedScoreSaberLeaderboards} />
         </div>
       )}
 

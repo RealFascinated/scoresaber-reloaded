@@ -44,7 +44,7 @@ export class ScoreSaberScoreInternal extends Score {
    * @private
    */
   @Prop({ required: true })
-  public readonly pp!: number;
+  public pp!: number;
 
   /**
    * The weight of the score, or undefined if not ranked.

@@ -7,7 +7,7 @@ import LeaderboardScoresResponse from "../response/leaderboard-scores-response";
 import { Page } from "../pagination";
 import { ScoreSaberScore } from "src/model/score/impl/scoresaber-score";
 import { PlayerScore } from "../score/player-score";
-import ScoreSaberLeaderboard from "../leaderboard/impl/scoresaber-leaderboard";
+import ScoreSaberLeaderboard from "../model/leaderboard/impl/scoresaber-leaderboard";
 
 /**
  * Fetches the player's scores

@@ -1,9 +1,9 @@
-import ScoreSaberLeaderboard from "./leaderboard/impl/scoresaber-leaderboard";
+import ScoreSaberLeaderboard from "./model/leaderboard/impl/scoresaber-leaderboard";
 import ScoreSaberLeaderboardToken from "./types/token/scoresaber/score-saber-leaderboard-token";
-import LeaderboardDifficulty from "./leaderboard/leaderboard-difficulty";
+import LeaderboardDifficulty from "./model/leaderboard/leaderboard-difficulty";
 import { getDifficultyFromScoreSaberDifficulty } from "./utils/scoresaber-utils";
 import { MapCharacteristic } from "./types/map-characteristic";
-import { LeaderboardStatus } from "./leaderboard/leaderboard-status";
+import { LeaderboardStatus } from "./model/leaderboard/leaderboard-status";
 import { formatDateMinimal, getDaysAgoDate, getMidnightAlignedDate, parseDate } from "./utils/time-utils";
 import ScoreSaberPlayerToken from "./types/token/scoresaber/score-saber-player-token";
 import ScoreSaberPlayer, { ScoreSaberBadge, ScoreSaberBio } from "./player/impl/scoresaber-player";

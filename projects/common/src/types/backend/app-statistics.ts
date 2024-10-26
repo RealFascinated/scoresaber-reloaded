@@ -18,4 +18,9 @@ export type AppStatistics = {
    * The amount of cached BeatSaver maps.
    */
   cachedBeatSaverMaps: number;
+
+  /**
+   * The amount of cached ScoreSaber leaderboards.
+   */
+  cachedScoreSaberLeaderboards: number;
 };
