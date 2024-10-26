@@ -10,7 +10,7 @@ export function ScoreScoreBadge({ score }: ScoreBadgeProps) {
     <div className="flex flex-col items-center justify-center">
       <p>{formatNumberWithCommas(Number(score.score.toFixed(0)))}</p>
       {previousScore && previousScore.change && (
-        <Tooltip display={<p>Previous Score: {previousScore.score}</p>}>
+        <Tooltip display={<p>Previous Score: {formatNumberWithCommas(previousScore.score)}</p>}>
           <Change className="text-xs" change={previousScore.change.score} />
         </Tooltip>
       )}
