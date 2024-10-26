@@ -26,8 +26,11 @@ import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leade
 import { BeatSaverMap } from "@ssr/common/model/beatsaver/map";
 import LeaderboardScoresResponse from "@ssr/common/response/leaderboard-scores-response";
 import { ScoreStatsToken } from "@ssr/common/types/token/beatleader/score-stats/score-stats";
+import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/score-saber-player-token";
+import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 
 type Props = {
+  highlightedPlayer?: ScoreSaberPlayer;
   score: ScoreSaberScore;
   leaderboard: ScoreSaberLeaderboard;
   beatSaverMap?: BeatSaverMap;
@@ -53,7 +56,7 @@ const modes: Mode[] = [
   { name: "Score History", icon: <TrendingUpIcon className="w-4 h-4" /> },
 ];
 
-export default function Score({ leaderboard, beatSaverMap, score, settings }: Props) {
+export default function Score({ leaderboard, beatSaverMap, score, settings, highlightedPlayer }: Props) {
   const [baseScore, setBaseScore] = useState(score.score);
   const [isLeaderboardExpanded, setIsLeaderboardExpanded] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -176,6 +179,7 @@ export default function Score({ leaderboard, beatSaverMap, score, settings }: Pr
                 leaderboard={leaderboard}
                 initialPage={scoresPage}
                 scoreStats={dropdownData.scoreStats}
+                highlightedPlayer={highlightedPlayer}
               />
             )}
 

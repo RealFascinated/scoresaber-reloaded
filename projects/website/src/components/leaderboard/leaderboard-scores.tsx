@@ -16,6 +16,7 @@ import LeaderboardScoresResponse from "@ssr/common/response/leaderboard-scores-r
 import useDatabase from "@/hooks/use-database";
 import { useLiveQuery } from "dexie-react-hooks";
 import LeaderboardScoresSkeleton from "@/components/leaderboard/skeleton/leaderboard-scores-skeleton";
+import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 
 type LeaderboardScoresProps = {
   initialPage?: number;
@@ -25,6 +26,7 @@ type LeaderboardScoresProps = {
   isLeaderboardPage?: boolean;
   leaderboardChanged?: (id: number) => void;
   disableUrlChanging?: boolean;
+  highlightedPlayer?: ScoreSaberPlayer;
 };
 
 export default function LeaderboardScores({
@@ -35,12 +37,11 @@ export default function LeaderboardScores({
   isLeaderboardPage,
   leaderboardChanged,
   disableUrlChanging,
+  highlightedPlayer,
 }: LeaderboardScoresProps) {
   if (!initialPage) {
     initialPage = 1;
   }
-  const database = useDatabase();
-  const claimedPlayer = useLiveQuery(() => database.getClaimedPlayer());
 
   const { width } = useWindowDimensions();
   const controls = useAnimation();
@@ -182,7 +183,7 @@ export default function LeaderboardScores({
           <motion.tbody initial="hidden" animate={controls} className="border-none" variants={scoreAnimation}>
             {currentScores.scores.map((playerScore, index) => (
               <motion.tr key={index} className="border-b border-border" variants={scoreAnimation}>
-                <LeaderboardScore score={playerScore} leaderboard={leaderboard} claimedPlayer={claimedPlayer} />
+                <LeaderboardScore score={playerScore} leaderboard={leaderboard} highlightedPlayer={highlightedPlayer} />
               </motion.tr>
             ))}
           </motion.tbody>

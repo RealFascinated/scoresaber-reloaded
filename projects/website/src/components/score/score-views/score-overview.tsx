@@ -4,8 +4,14 @@ import { ScoreStatsToken } from "@ssr/common/types/token/beatleader/score-stats/
 import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
 import LeaderboardScoresResponse from "@ssr/common/response/leaderboard-scores-response";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
+import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 
 type ScoreOverviewProps = {
+  /**
+   * The player to highlight
+   */
+  highlightedPlayer?: ScoreSaberPlayer;
+
   /**
    * The initial page to show
    */
@@ -27,7 +33,7 @@ type ScoreOverviewProps = {
   scores?: LeaderboardScoresResponse<ScoreSaberScore, ScoreSaberLeaderboard>;
 };
 
-export function ScoreOverview({ scoreStats, initialPage, leaderboard, scores }: ScoreOverviewProps) {
+export function ScoreOverview({ highlightedPlayer, scoreStats, initialPage, leaderboard, scores }: ScoreOverviewProps) {
   return (
     <>
       {scoreStats && (
@@ -40,6 +46,7 @@ export function ScoreOverview({ scoreStats, initialPage, leaderboard, scores }: 
         initialPage={initialPage}
         initialScores={scores}
         leaderboard={leaderboard}
+        highlightedPlayer={highlightedPlayer}
         disableUrlChanging
       />
     </>

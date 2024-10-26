@@ -8,6 +8,7 @@ import { ScoreTimeSet } from "@/components/score/score-time-set";
 import { ScoreModifiers } from "@/components/score/score-modifiers";
 import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
 import ScoreMissesBadge from "@/components/score/badges/score-misses";
+import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 
 type Props = {
   /**
@@ -23,10 +24,10 @@ type Props = {
   /**
    * The claimed player.
    */
-  claimedPlayer?: ScoreSaberPlayerToken;
+  highlightedPlayer?: ScoreSaberPlayer;
 };
 
-export default function LeaderboardScore({ score, leaderboard, claimedPlayer }: Props) {
+export default function LeaderboardScore({ score, leaderboard, highlightedPlayer }: Props) {
   const scorePlayer = score.playerInfo;
 
   return (
@@ -36,7 +37,7 @@ export default function LeaderboardScore({ score, leaderboard, claimedPlayer }: 
 
       {/* Player */}
       <td className="px-4 py-2 flex gap-2 whitespace-nowrap">
-        <PlayerInfo player={scorePlayer} highlightedPlayer={claimedPlayer} />
+        <PlayerInfo player={scorePlayer} highlightedPlayer={highlightedPlayer} useLink />
       </td>
 
       {/* Time Set */}
