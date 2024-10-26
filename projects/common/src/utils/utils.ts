@@ -43,7 +43,6 @@ export async function kyFetch<T>(url: string): Promise<T | undefined> {
   try {
     return await ky.get<T>(url).json();
   } catch (error) {
-    console.error(`Error fetching data from ${url}:`, error);
     return undefined;
   }
 }
