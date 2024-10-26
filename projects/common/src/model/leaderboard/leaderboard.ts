@@ -7,7 +7,7 @@ export default class Leaderboard {
    * @private
    */
   @Prop({ required: true })
-  private readonly _id!: number;
+  private readonly _id?: number;
 
   /**
    * The hash of the song this leaderboard is for.
@@ -93,20 +93,7 @@ export default class Leaderboard {
   @Prop({ required: true })
   lastRefreshed?: Date;
 
-  /**
-   * Should the map data be refreshed?
-   *
-   * @returns true if the map data should be refreshed
-   */
-  public shouldRefresh(): boolean {
-    if (!this.lastRefreshed) {
-      return true;
-    }
-    const now = new Date();
-    return now.getTime() - this.lastRefreshed.getTime() > 1000 * 60 * 60 * 24; // 1 day
-  }
-
   get id(): number {
-    return this._id;
+    return this._id ?? 0;
   }
 }

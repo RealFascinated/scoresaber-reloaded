@@ -40,13 +40,17 @@ export default class LeaderboardService {
     let leaderboard: Leaderboard | undefined;
     let beatSaverMap: BeatSaverMap | undefined;
 
+    const now = new Date();
     switch (leaderboardName) {
       case "scoresaber": {
         let foundLeaderboard = false;
         const cachedLeaderboard = await ScoreSaberLeaderboardModel.findById(id);
         if (cachedLeaderboard != null) {
           leaderboard = cachedLeaderboard as unknown as ScoreSaberLeaderboard;
-          if (!leaderboard.shouldRefresh()) {
+          if (
+            leaderboard.lastRefreshed == undefined ||
+            now.getTime() - leaderboard.lastRefreshed.getTime() > 1000 * 60 * 60 * 24
+          ) {
             foundLeaderboard = true;
           }
         }
