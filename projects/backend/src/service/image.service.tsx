@@ -2,10 +2,8 @@ import { ImageResponse } from "@vercel/og";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import React from "react";
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
-import { getDifficultyFromScoreSaberDifficulty } from "@ssr/common/utils/scoresaber-utils";
 import { StarIcon } from "../../components/star-icon";
 import { GlobeIcon } from "../../components/globe-icon";
-import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/score-saber-leaderboard-token";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { Jimp } from "jimp";
 import { extractColors } from "extract-colors";
@@ -13,6 +11,8 @@ import { Config } from "@ssr/common/config";
 import { fetchWithCache } from "../common/cache.util";
 import { SSRCache } from "@ssr/common/cache";
 import { getScoreSaberPlayerFromToken } from "@ssr/common/token-creators";
+import LeaderboardService from "./leaderboard.service";
+import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 
 const cache = new SSRCache({
   ttl: 1000 * 60 * 60, // 1 hour
@@ -176,12 +176,11 @@ export class ImageService {
    * @param id the leaderboard's id
    */
   public static async generateLeaderboardImage(id: string) {
-    const leaderboard = await fetchWithCache<ScoreSaberLeaderboardToken>(cache, `leaderboard-${id}`, () =>
-      scoresaberService.lookupLeaderboard(id)
-    );
-    if (!leaderboard) {
+    const response = await LeaderboardService.getLeaderboard<ScoreSaberLeaderboard>("scoresaber", id);
+    if (!response) {
       return undefined;
     }
+    const { leaderboard } = response;
 
     const ranked = leaderboard.stars > 0;
 
@@ -189,7 +188,7 @@ export class ImageService {
       (
         <ImageService.BaseImage>
           {/* Leaderboard Cover Image */}
-          <img src={leaderboard.coverImage} width={256} height={256} alt="Leaderboard Cover" tw="rounded-full mb-3" />
+          <img src={leaderboard.songArt} width={256} height={256} alt="Leaderboard Cover" tw="rounded-full mb-3" />
 
           {/* Leaderboard Name */}
           <p tw="font-bold text-6xl m-0">
@@ -206,9 +205,7 @@ export class ImageService {
             )}
 
             {/* Leaderboard Difficulty */}
-            <p tw={"font-bold m-0 text-4xl" + (ranked ? " pl-3" : "")}>
-              {getDifficultyFromScoreSaberDifficulty(leaderboard.difficulty.difficulty)}
-            </p>
+            <p tw={"font-bold m-0 text-4xl" + (ranked ? " pl-3" : "")}>{leaderboard.difficulty.difficulty}</p>
           </div>
 
           {/* Leaderboard Author */}
