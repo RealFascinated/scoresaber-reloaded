@@ -3,6 +3,7 @@ import Score from "../score";
 import { type ScoreSaberLeaderboardPlayerInfoToken } from "../../../types/token/scoresaber/score-saber-leaderboard-player-info-token";
 import { Document } from "mongoose";
 import { AutoIncrementID } from "@typegoose/auto-increment";
+import { PreviousScore } from "../previous-score";
 
 @modelOptions({
   options: { allowMixed: Severity.ALLOW },
@@ -58,6 +59,11 @@ export class ScoreSaberScoreInternal extends Score {
    */
   @Prop({ required: true })
   public readonly maxCombo!: number;
+
+  /**
+   * The previous score, if any.
+   */
+  public previousScore?: ScoreSaberPreviousScore;
 }
 
 class ScoreSaberScorePublic extends ScoreSaberScoreInternal {
@@ -66,6 +72,28 @@ class ScoreSaberScorePublic extends ScoreSaberScoreInternal {
    */
   public playerInfo!: ScoreSaberLeaderboardPlayerInfoToken;
 }
+
+export type ScoreSaberPreviousScore = PreviousScore & {
+  /**
+   * The pp of the previous score.
+   */
+  pp: number;
+
+  /**
+   * The weight of the previous score.
+   */
+  weight: number;
+
+  /**
+   * The max combo of the previous score.
+   */
+  maxCombo: number;
+
+  /**
+   * The change between the previous score and the current score.
+   */
+  change?: ScoreSaberPreviousScore;
+};
 
 export type ScoreSaberScore = InstanceType<typeof ScoreSaberScorePublic>;
 export type ScoreSaberScoreDocument = ScoreSaberScore & Document;

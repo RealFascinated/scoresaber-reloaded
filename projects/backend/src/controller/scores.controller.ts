@@ -71,6 +71,6 @@ export default class ScoresController {
     };
     query: { search?: string };
   }): Promise<unknown> {
-    return (await ScoreService.getPreviousScores(playerId, leaderboardId, page)).toJSON();
+    return (await ScoreService.getScoreHistory(playerId, leaderboardId, page)).toJSON();
   }
 }

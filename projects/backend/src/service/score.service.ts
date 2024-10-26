@@ -7,7 +7,6 @@ import BeatSaverService from "./beatsaver.service";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { ScoreSort } from "@ssr/common/score/score-sort";
 import { Leaderboards } from "@ssr/common/leaderboard";
-import Leaderboard from "@ssr/common/leaderboard/leaderboard";
 import LeaderboardService from "./leaderboard.service";
 import { BeatSaverMap } from "@ssr/common/model/beatsaver/map";
 import { PlayerScore } from "@ssr/common/score/player-score";
@@ -27,13 +26,18 @@ import {
 import { BeatLeaderScoreImprovementToken } from "@ssr/common/types/token/beatleader/score/score-improvement";
 import { ScoreType } from "@ssr/common/model/score/score";
 import { getScoreSaberLeaderboardFromToken, getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
-import { ScoreSaberScore, ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
-import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
+import {
+  ScoreSaberPreviousScore,
+  ScoreSaberScore,
+  ScoreSaberScoreModel,
+} from "@ssr/common/model/score/impl/scoresaber-score";
 import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score-saber-score-token";
 import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/score-saber-leaderboard-token";
 import { MapDifficulty } from "@ssr/common/score/map-difficulty";
 import { MapCharacteristic } from "@ssr/common/types/map-characteristic";
 import { Page, Pagination } from "@ssr/common/pagination";
+import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
+import Leaderboard from "@ssr/common/model/leaderboard/leaderboard";
 
 const playerScoresCache = new SSRCache({
   ttl: 1000 * 60, // 1 minute
@@ -394,6 +398,10 @@ export class ScoreService {
               if (additionalData !== undefined) {
                 score.additionalData = additionalData;
               }
+              const previousScore = await this.getPreviousScore(playerId, leaderboard.id + "", score.timestamp);
+              if (previousScore !== undefined) {
+                score.previousScore = previousScore;
+              }
 
               scores.push({
                 score: score,
@@ -491,13 +499,13 @@ export class ScoreService {
   }
 
   /**
-   * Gets the previous scores for a player.
+   * Gets the player's score history for a map.
    *
    * @param playerId the player's id to get the previous scores for
    * @param leaderboardId the leaderboard to get the previous scores on
    * @param page the page to get
    */
-  public static async getPreviousScores(
+  public static async getScoreHistory(
     playerId: string,
     leaderboardId: string,
     page: number
@@ -533,6 +541,10 @@ export class ScoreService {
           if (additionalData !== undefined) {
             score.additionalData = additionalData;
           }
+          const previousScore = await this.getPreviousScore(playerId, leaderboardId, score.timestamp);
+          if (previousScore !== undefined) {
+            score.previousScore = previousScore;
+          }
 
           toReturn.push({
             score: score as unknown as ScoreSaberScore,
@@ -543,5 +555,56 @@ export class ScoreService {
 
         return toReturn;
       });
+  }
+
+  /**
+   * Gets the player's previous score for a map.
+   *
+   * @param playerId the player's id to get the previous score for
+   * @param leaderboardId the leaderboard to get the previous score on
+   * @param timestamp the score's timestamp to get the previous score for
+   * @returns the score, or undefined if none
+   */
+  public static async getPreviousScore(
+    playerId: string,
+    leaderboardId: string,
+    timestamp: Date
+  ): Promise<ScoreSaberPreviousScore | undefined> {
+    const scores = await ScoreSaberScoreModel.find({ playerId: playerId, leaderboardId: leaderboardId });
+    if (scores == null || scores.length == 0) {
+      return undefined;
+    }
+
+    const scoreIndex = scores.findIndex(score => score.timestamp.getTime() == timestamp.getTime());
+    const score = scores.find(score => score.timestamp.getTime() == timestamp.getTime());
+    if (scoreIndex == -1 || score == undefined) {
+      return undefined;
+    }
+    const previousScore = scores[scoreIndex - 1];
+    if (previousScore == undefined) {
+      return undefined;
+    }
+    return {
+      score: previousScore.score,
+      accuracy: previousScore.accuracy,
+      modifiers: previousScore.modifiers,
+      misses: previousScore.misses,
+      missedNotes: previousScore.missedNotes,
+      badCuts: previousScore.badCuts,
+      fullCombo: previousScore.fullCombo,
+      pp: previousScore.pp,
+      weight: previousScore.weight,
+      maxCombo: previousScore.maxCombo,
+      change: {
+        score: score.score - previousScore.score,
+        accuracy: score.accuracy - previousScore.accuracy,
+        misses: score.misses - previousScore.misses,
+        missedNotes: score.missedNotes - previousScore.missedNotes,
+        badCuts: score.badCuts - previousScore.badCuts,
+        pp: score.pp - previousScore.pp,
+        weight: score.weight && previousScore.weight && score.weight - previousScore.weight,
+        maxCombo: score.maxCombo - previousScore.maxCombo,
+      },
+    } as ScoreSaberPreviousScore;
   }
 }

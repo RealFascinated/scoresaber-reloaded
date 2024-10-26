@@ -61,27 +61,30 @@ connectBeatLeaderWebsocket({
 });
 
 export const app = new Elysia();
-app.use(
-  cron({
-    name: "player-statistics-tracker-cron",
-    pattern: "1 0 * * *", // Every day at 00:01
-    timezone: "Europe/London", // UTC time
-    run: async () => {
-      await PlayerService.updatePlayerStatistics();
-    },
-  })
-);
-app.use(
-  cron({
-    name: "player-scores-tracker-cron",
-    pattern: "0 4 * * *", // Every day at 04:00
-    timezone: "Europe/London", // UTC time
-    protect: true,
-    run: async () => {
-      await PlayerService.refreshPlayerScores();
-    },
-  })
-);
+if (isProduction()) {
+  app.use(
+    cron({
+      name: "player-statistics-tracker-cron",
+      pattern: "1 0 * * *", // Every day at 00:01
+      timezone: "Europe/London", // UTC time
+      protect: true,
+      run: async () => {
+        await PlayerService.updatePlayerStatistics();
+      },
+    })
+  );
+  app.use(
+    cron({
+      name: "player-scores-tracker-cron",
+      pattern: "0 4 * * *", // Every day at 04:00
+      timezone: "Europe/London", // UTC time
+      protect: true,
+      run: async () => {
+        await PlayerService.refreshPlayerScores();
+      },
+    })
+  );
+}
 
 /**
  * Custom error handler

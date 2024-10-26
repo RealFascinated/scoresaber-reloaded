@@ -14,8 +14,7 @@ type ScoreAccuracyProps = ScoreBadgeProps & {
 };
 
 export function ScoreAccuracyBadge({ score, leaderboard }: ScoreAccuracyProps) {
-  const scoreImprovement = score.additionalData?.scoreImprovement;
-  const previousAccuracy = scoreImprovement ? score.accuracy - scoreImprovement.accuracy : undefined;
+  const previousScore = score.previousScore;
 
   const fcAccuracy = score.additionalData?.fcAccuracy;
   const scoreBadge = getScoreBadgeFromAccuracy(score.accuracy);
@@ -57,9 +56,13 @@ export function ScoreAccuracyBadge({ score, leaderboard }: ScoreAccuracyProps) {
             {modCount > 0 && <ScoreModifiers type="simple" limit={1} score={score} />}
           </p>
         </Tooltip>
-        {scoreImprovement && previousAccuracy && (
-          <Tooltip display={`Previous Accuracy: ${previousAccuracy.toFixed(2)}%`}>
-            <Change className="text-xs" change={scoreImprovement.accuracy} formatValue={num => `${num.toFixed(2)}%`} />
+        {previousScore && previousScore.change && (
+          <Tooltip display={`Previous Accuracy: ${previousScore.accuracy.toFixed(2)}%`}>
+            <Change
+              className="text-xs"
+              change={previousScore.change.accuracy}
+              formatValue={num => `${num.toFixed(2)}%`}
+            />
           </Tooltip>
         )}
       </div>
