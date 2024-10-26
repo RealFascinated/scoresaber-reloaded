@@ -48,8 +48,9 @@ export default class LeaderboardService {
         if (cachedLeaderboard != null) {
           leaderboard = cachedLeaderboard as unknown as ScoreSaberLeaderboard;
           if (
-            leaderboard.lastRefreshed == undefined ||
-            now.getTime() - leaderboard.lastRefreshed.getTime() > 1000 * 60 * 60 * 24
+            leaderboard.ranked || // Never refresh ranked leaderboards (it will get refreshed every night)
+            leaderboard.lastRefreshed == undefined || // Refresh if it has never been refreshed
+            now.getTime() - leaderboard.lastRefreshed.getTime() > 1000 * 60 * 60 * 24 // Refresh every day
           ) {
             foundLeaderboard = true;
           }
