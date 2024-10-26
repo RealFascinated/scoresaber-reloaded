@@ -1,11 +1,11 @@
 import { Metadata } from "next";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
-import NodeCache from "node-cache";
 import { ScoreSaberPlayersPageToken } from "@ssr/common/types/token/scoresaber/score-saber-players-page-token";
 import Card from "@/components/card";
 import RankingData from "@/components/ranking/ranking-data";
 import CountryFlag from "@/components/country-flag";
 import { normalizedRegionName } from "@ssr/common/utils/region-utils";
+import { cache } from "react";
 
 const UNKNOWN_PAGE = {
   title: "ScoreSaber Reloaded - Unknown Page",
@@ -24,36 +24,27 @@ type RankingPageData = {
   country: string | undefined;
 };
 
-const rankingCache = new NodeCache({ stdTTL: 60, checkperiod: 120 });
-
 /**
  * Gets the ranking data.
  *
  * @param params the params
  * @returns the ranking data
  */
-const getRankingData = async ({ params }: Props): Promise<RankingPageData> => {
+const getRankingData = cache(async ({ params }: Props): Promise<RankingPageData> => {
   const { slug } = await params;
   const country = (slug && slug.length > 1 && (slug[0] as string).toUpperCase()) || undefined; // The country query
   const page = (slug && parseInt(slug[country != undefined ? 1 : 0])) || 1; // The page number
-
-  const cacheId = `${country === undefined ? "global" : country}-${page}`;
-  if (rankingCache.has(cacheId)) {
-    return rankingCache.get(cacheId) as RankingPageData;
-  }
 
   const players =
     country == undefined
       ? await scoresaberService.lookupPlayers(page)
       : await scoresaberService.lookupPlayersByCountry(page, country);
-  const rankingData = {
+  return {
     players: players && players.players.length > 0 ? players : undefined,
     page,
     country,
   };
-  rankingCache.set(cacheId, rankingData);
-  return rankingData;
-};
+});
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
   const { players, page, country } = await getRankingData(props);

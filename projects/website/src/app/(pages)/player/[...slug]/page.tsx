@@ -12,8 +12,8 @@ import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { fetchPlayerScores } from "@ssr/common/utils/score-utils";
 import PlayerScoresResponse from "@ssr/common/response/player-scores-response";
-import { SSRCache } from "@ssr/common/cache";
 import { getScoreSaberPlayerFromToken } from "@ssr/common/token-creators";
+import { cache } from "react";
 
 const UNKNOWN_PLAYER = {
   title: "ScoreSaber Reloaded - Unknown Player",
@@ -37,8 +37,9 @@ type PlayerData = {
   search: string;
 };
 
-const playerCache = new SSRCache({
-  ttl: 1000 * 60, // 1 minute
+const getPlayer = cache(async (id: string): Promise<ScoreSaberPlayer | undefined> => {
+  const playerToken = await scoresaberService.lookupPlayer(id);
+  return playerToken && (await getScoreSaberPlayerFromToken(playerToken, await getCookieValue("playerId")));
 });
 
 /**
@@ -48,35 +49,27 @@ const playerCache = new SSRCache({
  * @param fetchScores whether to fetch the scores
  * @returns the player data and scores
  */
-const getPlayerData = async ({ params }: Props, fetchScores: boolean = true): Promise<PlayerData> => {
+const getPlayerData = cache(async ({ params }: Props, fetchScores: boolean = true): Promise<PlayerData> => {
   const { slug } = await params;
   const id = slug[0]; // The players id
   const sort: ScoreSort = (slug[1] as ScoreSort) || (await getCookieValue("lastScoreSort", "recent")); // The sorting method
   const page = parseInt(slug[2]) || 1; // The page number
   const search = (slug[3] as string) || ""; // The search query
 
-  const cacheId = `${id}-${sort}-${page}-${search}-${fetchScores}`;
-  if (playerCache.has(cacheId)) {
-    return playerCache.get(cacheId) as PlayerData;
-  }
-
-  const playerToken = await scoresaberService.lookupPlayer(id);
-  const player = playerToken && (await getScoreSaberPlayerFromToken(playerToken, await getCookieValue("playerId")));
+  const player = await getPlayer(id);
   let scores: PlayerScoresResponse<ScoreSaberScore, ScoreSaberLeaderboard> | undefined;
-  if (fetchScores) {
+  if (fetchScores && player !== undefined) {
     scores = await fetchPlayerScores<ScoreSaberScore, ScoreSaberLeaderboard>("scoresaber", id, page, sort, search);
   }
 
-  const playerData = {
+  return {
     sort: sort,
     page: page,
     search: search,
     player: player,
     scores: scores,
   };
-  playerCache.set(cacheId, playerData);
-  return playerData;
-};
+});
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
   const { player } = await getPlayerData(props, false);
