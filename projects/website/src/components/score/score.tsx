@@ -22,7 +22,7 @@ import { beatLeaderService } from "@ssr/common/service/impl/beatleader";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
-import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
+import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { BeatSaverMap } from "@ssr/common/model/beatsaver/map";
 import LeaderboardScoresResponse from "@ssr/common/response/leaderboard-scores-response";
 import { ScoreStatsToken } from "@ssr/common/types/token/beatleader/score-stats/score-stats";

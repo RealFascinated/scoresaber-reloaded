@@ -5,7 +5,7 @@ import { clsx } from "clsx";
 import Tooltip from "@/components/tooltip";
 import { ScoreTimeSet } from "@/components/score/score-time-set";
 import { ScoreModifiers } from "@/components/score/score-modifiers";
-import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
+import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import ScoreMissesBadge from "@/components/score/badges/score-misses";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 

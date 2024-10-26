@@ -6,7 +6,7 @@ import { LeaderboardData } from "@/components/leaderboard/leaderboard-data";
 import { Config } from "@ssr/common/config";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { LeaderboardResponse } from "@ssr/common/response/leaderboard-response";
-import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
+import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { fetchLeaderboard } from "@ssr/common/utils/leaderboard.util";
 import { fetchLeaderboardScores } from "@ssr/common/utils/score-utils";
 import LeaderboardScoresResponse from "@ssr/common/response/leaderboard-scores-response";

@@ -6,7 +6,7 @@ import Card from "@/components/card";
 import { DualRangeSlider } from "@/components/ui/dual-range-slider";
 import { useDebounce } from "@uidotdev/usehooks";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
-import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
+import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 
 type Props = {
   /**

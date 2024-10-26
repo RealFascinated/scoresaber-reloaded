@@ -1,7 +1,7 @@
 import { BeatSaverMap } from "@ssr/common/model/beatsaver/map";
 import StatValue from "@/components/stat-value";
 import { getBeatSaverDifficulty } from "@ssr/common/utils/beatsaver.util";
-import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
+import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { formatTime } from "@ssr/common/utils/time-utils";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { BombIcon, BrickWallIcon, DrumIcon, MusicIcon, TimerIcon } from "lucide-react";

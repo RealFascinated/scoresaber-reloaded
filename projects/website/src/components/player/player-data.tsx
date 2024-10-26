@@ -16,7 +16,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { ScoreSort } from "@ssr/common/score/score-sort";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
-import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
+import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import PlayerScoresResponse from "@ssr/common/response/player-scores-response";
 import { getScoreSaberPlayerFromToken } from "@ssr/common/token-creators";
 

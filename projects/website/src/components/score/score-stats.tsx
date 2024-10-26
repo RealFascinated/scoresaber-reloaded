@@ -1,7 +1,7 @@
 import { getScoreBadgeFromAccuracy } from "@/common/song-utils";
 import { ScoreBadge, ScoreBadges } from "@/components/score/score-badge";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
-import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
+import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import ScoreMissesBadge from "@/components/score/badges/score-misses";
 import { HandAccuracyBadge } from "@/components/score/badges/hand-accuracy";
 import { ScoreAccuracyBadge } from "@/components/score/badges/score-accuracy";

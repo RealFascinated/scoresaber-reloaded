@@ -3,7 +3,7 @@
 import LeaderboardScores from "@/components/leaderboard/leaderboard-scores";
 import { LeaderboardInfo } from "@/components/leaderboard/leaderboard-info";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
-import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
+import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { LeaderboardResponse } from "@ssr/common/response/leaderboard-response";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";

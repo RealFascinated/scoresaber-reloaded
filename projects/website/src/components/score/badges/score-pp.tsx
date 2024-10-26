@@ -1,5 +1,5 @@
 import { ScoreBadgeProps } from "@/components/score/badges/badge-props";
-import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
+import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import Tooltip from "@/components/tooltip";
 import { ensurePositiveNumber, formatPp } from "@ssr/common/utils/number-utils";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";

@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { getDifficulty } from "@/common/song-utils";
 import { fetchLeaderboardScores } from "@ssr/common/utils/score-utils";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
-import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
+import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import LeaderboardScoresResponse from "@ssr/common/response/leaderboard-scores-response";
 import LeaderboardScoresSkeleton from "@/components/leaderboard/skeleton/leaderboard-scores-skeleton";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";

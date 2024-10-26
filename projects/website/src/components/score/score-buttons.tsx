@@ -12,7 +12,7 @@ import { ArrowDownIcon, ArrowPathIcon } from "@heroicons/react/24/solid";
 import clsx from "clsx";
 import ScoreEditorButton from "@/components/score/score-editor-button";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
-import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
+import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { BeatSaverMap } from "@ssr/common/model/beatsaver/map";
 import BeatSaberPepeLogo from "@/components/logos/beatsaber-pepe-logo";
 

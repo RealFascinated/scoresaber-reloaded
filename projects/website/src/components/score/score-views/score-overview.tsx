@@ -1,7 +1,7 @@
 import PlayerScoreAccuracyChart from "@/components/leaderboard/chart/player-score-accuracy-chart";
 import LeaderboardScores from "@/components/leaderboard/leaderboard-scores";
 import { ScoreStatsToken } from "@ssr/common/types/token/beatleader/score-stats/score-stats";
-import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
+import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import LeaderboardScoresResponse from "@ssr/common/response/leaderboard-scores-response";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";

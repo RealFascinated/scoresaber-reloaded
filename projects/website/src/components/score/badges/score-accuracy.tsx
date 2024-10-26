@@ -4,7 +4,7 @@ import Tooltip from "@/components/tooltip";
 import { ScoreModifiers } from "@/components/score/score-modifiers";
 import { Change } from "@/common/change";
 import { ScoreBadgeProps } from "@/components/score/badges/badge-props";
-import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
+import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 
 type ScoreAccuracyProps = ScoreBadgeProps & {
   /**

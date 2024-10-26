@@ -3,7 +3,7 @@ import Tooltip from "@/components/tooltip";
 import { StarIcon } from "@heroicons/react/24/solid";
 import Image from "next/image";
 import Link from "next/link";
-import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
+import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { BeatSaverMap } from "@ssr/common/model/beatsaver/map";
 import { getDifficulty } from "@/common/song-utils";
 

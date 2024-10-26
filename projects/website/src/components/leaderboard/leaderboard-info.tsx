@@ -2,7 +2,7 @@ import Card from "@/components/card";
 import Image from "next/image";
 import { LeaderboardSongStarCount } from "@/components/leaderboard/leaderboard-song-star-count";
 import ScoreButtons from "@/components/score/score-buttons";
-import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
+import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { BeatSaverMap } from "@ssr/common/model/beatsaver/map";
 import { getBeatSaverMapperProfileUrl } from "@ssr/common/utils/beatsaver.util";
 import FallbackLink from "@/components/fallback-link";

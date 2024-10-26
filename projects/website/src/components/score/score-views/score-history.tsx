@@ -1,6 +1,6 @@
 "use client";
 
-import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leaderboard";
+import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import Score from "@/components/score/score";
 import { fetchPlayerScoresHistory } from "@ssr/common/utils/score-utils";
 import { useQuery } from "@tanstack/react-query";
