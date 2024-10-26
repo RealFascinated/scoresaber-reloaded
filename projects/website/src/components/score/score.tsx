@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { CubeIcon } from "@heroicons/react/24/solid";
-import { GitGraph, TrendingUpIcon } from "lucide-react";
+import { TrendingUpIcon } from "lucide-react";
 import ScoreButtons from "./score-buttons";
 import ScoreSongInfo from "./score-song-info";
 import ScoreRankInfo from "./score-rank-info";
@@ -26,7 +26,6 @@ import ScoreSaberLeaderboard from "@ssr/common/leaderboard/impl/scoresaber-leade
 import { BeatSaverMap } from "@ssr/common/model/beatsaver/map";
 import LeaderboardScoresResponse from "@ssr/common/response/leaderboard-scores-response";
 import { ScoreStatsToken } from "@ssr/common/types/token/beatleader/score-stats/score-stats";
-import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/score-saber-player-token";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 
 type Props = {

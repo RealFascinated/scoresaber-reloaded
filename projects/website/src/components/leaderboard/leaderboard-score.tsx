@@ -1,6 +1,5 @@
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
-import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/score-saber-player-token";
 import { PlayerInfo } from "@/components/player/player-info";
 import { clsx } from "clsx";
 import Tooltip from "@/components/tooltip";
