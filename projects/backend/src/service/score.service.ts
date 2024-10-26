@@ -154,6 +154,7 @@ export class ScoreService {
 
     history.scores = scores;
     player.setStatisticHistory(today, history);
+    player.markModified("statisticHistory");
     await player.save();
   }
 
