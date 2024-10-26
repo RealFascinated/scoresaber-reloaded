@@ -16,16 +16,33 @@ export function HandAccuracyBadge({ score, hand }: HandAccuracyProps) {
   }
   const { handAccuracy } = score.additionalData;
   const scoreImprovement = score.additionalData.scoreImprovement;
+  const currentHandAccuracy = handAccuracy[hand];
   const previousHandAccuracy = scoreImprovement ? handAccuracy[hand] - scoreImprovement.handAccuracy[hand] : undefined;
   const formattedHand = capitalizeFirstLetter(hand);
 
   return (
     <div className="flex flex-col items-center justify-center">
-      <Tooltip display={`${formattedHand} Hand Accuracy`}>
-        <p>{handAccuracy[hand].toFixed(2)}</p>
+      <Tooltip
+        display={
+          <>
+            <p className="font-semibold">{formattedHand} Hand Accuracy</p>
+            <p>Hand Accuracy: {currentHandAccuracy.toFixed(2)}</p>
+            <p>Accuracy: {((currentHandAccuracy / 115) * 100).toFixed(2)}%</p>
+          </>
+        }
+      >
+        <p>{currentHandAccuracy.toFixed(2)}</p>
       </Tooltip>
       {scoreImprovement && previousHandAccuracy && (
-        <Tooltip display={`Previous ${formattedHand} Hand Accuracy: ${previousHandAccuracy.toFixed(2)}`}>
+        <Tooltip
+          display={
+            <>
+              <p className="font-semibold">{formattedHand} Hand Accuracy</p>
+              <p>Hand Accuracy: {previousHandAccuracy.toFixed(2)}</p>
+              <p>Accuracy: {((previousHandAccuracy / 115) * 100).toFixed(2)}%</p>
+            </>
+          }
+        >
           <Change
             className="text-xs"
             change={scoreImprovement.handAccuracy[hand]}
