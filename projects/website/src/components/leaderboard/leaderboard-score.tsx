@@ -6,7 +6,7 @@ import Tooltip from "@/components/tooltip";
 import { ScoreTimeSet } from "@/components/score/score-time-set";
 import { ScoreModifiers } from "@/components/score/score-modifiers";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import ScoreMissesBadge from "@/components/score/badges/score-misses";
+import ScoreMissesAndPausesBadge from "@/components/score/badges/score-misses-and-pauses";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 
 type Props = {
@@ -57,7 +57,7 @@ export default function LeaderboardScore({ score, leaderboard, highlightedPlayer
           score.misses > 0 ? "text-red-500" : "text-green-500"
         )}
       >
-        <ScoreMissesBadge score={score} hideXMark />
+        <ScoreMissesAndPausesBadge score={score} hideXMark />
       </td>
 
       {/* Score PP */}

@@ -25,7 +25,7 @@ export function ScoreMissesTooltip({
   return (
     <Tooltip
       display={
-        <div className="flex flex-col">
+        <div className="flex flex-col w-full">
           {!fullCombo ? (
             <>
               <p className="font-semibold">Misses</p>
