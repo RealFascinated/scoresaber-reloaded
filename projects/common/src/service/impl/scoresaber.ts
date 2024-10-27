@@ -7,7 +7,7 @@ import ScoreSaberPlayerScoresPageToken from "../../types/token/scoresaber/score-
 import ScoreSaberLeaderboardToken from "../../types/token/scoresaber/score-saber-leaderboard-token";
 import ScoreSaberLeaderboardScoresPageToken from "../../types/token/scoresaber/score-saber-leaderboard-scores-page-token";
 import { clamp, lerp } from "../../utils/math-utils";
-import { CurvePoint } from "../../utils/curve-point";
+import { CurvePoint } from "../../curve-point";
 import { SSRCache } from "../../cache";
 
 const API_BASE = "https://scoresaber.com/api";

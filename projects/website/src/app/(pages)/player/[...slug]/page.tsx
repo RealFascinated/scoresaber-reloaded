@@ -14,6 +14,7 @@ import { fetchPlayerScores } from "@ssr/common/utils/score-utils";
 import PlayerScoresResponse from "@ssr/common/response/player-scores-response";
 import { getScoreSaberPlayerFromToken } from "@ssr/common/token-creators";
 import { cache } from "react";
+import { randomString } from "@ssr/common/utils/string.util";
 
 const UNKNOWN_PLAYER = {
   title: "ScoreSaber Reloaded - Unknown Player",
@@ -91,7 +92,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
       description: `Click here to view the scores for ${player.name}!`,
       images: [
         {
-          url: `${Config.apiUrl}/image/player/${player.id}`,
+          url: `${Config.apiUrl}/image/player/${player.id}?id=${randomString(8)}`,
         },
       ],
     },
