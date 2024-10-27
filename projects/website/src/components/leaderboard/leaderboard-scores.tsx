@@ -64,6 +64,8 @@ export default function LeaderboardScores({
     enabled: shouldFetch,
   });
 
+  console.log(leaderboard);
+
   /**
    * Starts the animation for the scores, but only after the initial load.
    */
@@ -118,6 +120,8 @@ export default function LeaderboardScores({
       return;
     }
 
+    console.log(selectedLeaderboardId);
+
     // Update the URL
     window.history.replaceState(null, "", `/leaderboard/${selectedLeaderboardId}/${currentPage}`);
   }, [selectedLeaderboardId, currentPage, disableUrlChanging]);
@@ -157,7 +161,7 @@ export default function LeaderboardScores({
                   borderColor: getDifficulty(difficulty).color,
                 }}
               >
-                {difficulty}
+                {difficulty.replace("Plus", "+")}
               </Button>
             );
           })}

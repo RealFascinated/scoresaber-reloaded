@@ -18,7 +18,7 @@ import { Document } from "mongoose";
     },
   },
 })
-export default class ScoreSaberLeaderboard extends Leaderboard {
+export default class ScoreSaberLeaderboardInternal extends Leaderboard {
   /**
    * The star count for the leaderboard.
    */
@@ -50,6 +50,7 @@ export default class ScoreSaberLeaderboard extends Leaderboard {
   readonly status!: LeaderboardStatus;
 }
 
+export type ScoreSaberLeaderboard = InstanceType<typeof ScoreSaberLeaderboardInternal>;
 export type ScoreSaberLeaderboardDocument = ScoreSaberLeaderboard & Document;
-export const ScoreSaberLeaderboardModel: ReturnModelType<typeof ScoreSaberLeaderboard> =
-  getModelForClass(ScoreSaberLeaderboard);
+export const ScoreSaberLeaderboardModel: ReturnModelType<typeof ScoreSaberLeaderboardInternal> =
+  getModelForClass(ScoreSaberLeaderboardInternal);

@@ -6,7 +6,8 @@ import { NotFoundError } from "elysia";
 import BeatSaverService from "./beatsaver.service";
 import { BeatSaverMap } from "@ssr/common/model/beatsaver/map";
 import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
-import ScoreSaberLeaderboard, {
+import {
+  ScoreSaberLeaderboard,
   ScoreSaberLeaderboardModel,
 } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import Leaderboard from "@ssr/common/model/leaderboard/leaderboard";
@@ -46,11 +47,12 @@ export default class LeaderboardService {
         let foundLeaderboard = false;
         const cachedLeaderboard = await ScoreSaberLeaderboardModel.findById(id);
         if (cachedLeaderboard != null) {
-          leaderboard = cachedLeaderboard as unknown as ScoreSaberLeaderboard;
+          leaderboard = cachedLeaderboard.toObject() as unknown as ScoreSaberLeaderboard;
           if (
-            leaderboard.ranked || // Never refresh ranked leaderboards (it will get refreshed every night)
-            leaderboard.lastRefreshed == undefined || // Refresh if it has never been refreshed
-            now.getTime() - leaderboard.lastRefreshed.getTime() > 1000 * 60 * 60 * 24 // Refresh every day
+            leaderboard &&
+            (leaderboard.ranked || // Never refresh ranked leaderboards (it will get refreshed every night)
+              leaderboard.lastRefreshed == undefined || // Refresh if it has never been refreshed
+              now.getTime() - leaderboard.lastRefreshed.getTime() > 1000 * 60 * 60 * 24) // Refresh every day
           ) {
             foundLeaderboard = true;
           }
