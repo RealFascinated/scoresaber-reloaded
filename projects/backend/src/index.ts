@@ -172,4 +172,7 @@ app.onStart(async () => {
   }
 });
 
-app.listen(8080);
+app.listen({
+  port: 8080,
+  idleTimeout: 120, // 2 minutes
+});
