@@ -202,6 +202,7 @@ export class ScoreService {
     delete score.playerInfo;
 
     await ScoreSaberScoreModel.create(score);
+    console.log(`Tracked ScoreSaber score for ${playerId}, difficulty: ${score.difficulty}, score: ${score.score}`);
   }
 
   /**
