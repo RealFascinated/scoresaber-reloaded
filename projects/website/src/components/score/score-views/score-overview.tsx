@@ -38,7 +38,7 @@ export function ScoreOverview({ highlightedPlayer, scoreStats, initialPage, lead
     <>
       {scoreStats && (
         <div className="flex gap-2">
-          <PlayerScoreAccuracyChart scoreStats={scoreStats} />
+          <PlayerScoreAccuracyChart scoreStats={scoreStats} leaderboard={leaderboard} />
         </div>
       )}
 
