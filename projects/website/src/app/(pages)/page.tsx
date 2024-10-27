@@ -1,9 +1,9 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { AppStatistics } from "@ssr/common/types/backend/app-statistics";
-import Statistic from "@/components/home/statistic";
 import { kyFetch } from "@ssr/common/utils/utils";
 import { Config } from "@ssr/common/config";
+import { AppStats } from "@/components/app-statistics";
 
 export const dynamic = "force-dynamic"; // Always generate the page on load
 
@@ -21,16 +21,7 @@ export default async function HomePage() {
         <p>ScoreSaber Reloaded is a website that allows you to track your ScoreSaber data over time.</p>
       </div>
 
-      {statistics && (
-        <div className="flex items-center flex-col">
-          <p className="font-semibold">Site Statistics</p>
-          <Statistic title="Tracked Players" value={statistics.trackedPlayers} />
-          <Statistic title="Tracked Scores" value={statistics.trackedScores} />
-          <Statistic title="Additional Scores Data" value={statistics.additionalScoresData} />
-          <Statistic title="Cached BeatSaver Maps" value={statistics.cachedBeatSaverMaps} />
-          <Statistic title="Cached ScoreSaber Leaderboards" value={statistics.cachedScoreSaberLeaderboards} />
-        </div>
-      )}
+      {statistics && <AppStats initialStatistics={statistics} />}
 
       <div className="flex gap-2 flex-wrap">
         <Link href="/search">
