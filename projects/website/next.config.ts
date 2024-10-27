@@ -4,12 +4,11 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   experimental: {
+    webpackMemoryOptimizations: true,
     optimizePackageImports: ["@ssr/common", "@radix-ui/react-icons", "chart.js", "react-chartjs-2"],
-    staleTimes: {
-      dynamic: 30,
-    },
   },
   images: {
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: "https",
