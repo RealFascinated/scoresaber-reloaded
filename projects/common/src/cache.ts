@@ -1,6 +1,6 @@
 type CacheOptions = {
   /**
-   * The time the cached object will be valid for
+   * The time (in ms) the cached object will be valid for
    */
   ttl?: number;
 
