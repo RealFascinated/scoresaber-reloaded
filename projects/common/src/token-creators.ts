@@ -97,7 +97,7 @@ export function getScoreSaberScoreFromToken(
     difficulty: leaderboard.difficulty.difficulty,
     characteristic: leaderboard.difficulty.characteristic,
     score: token.baseScore,
-    accuracy: (token.baseScore / leaderboard.maxScore) * 100,
+    accuracy: leaderboard.maxScore ? (token.baseScore / leaderboard.maxScore) * 100 : Infinity,
     rank: token.rank,
     modifiers: modifiers,
     misses: token.missedNotes + token.badCuts,
