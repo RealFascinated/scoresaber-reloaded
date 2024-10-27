@@ -175,6 +175,7 @@ export class ScoreService {
     playerId?: string
   ) {
     playerId = playerId || scoreToken.leaderboardPlayerInfo.id;
+    const playerName = scoreToken.leaderboardPlayerInfo.name;
 
     const leaderboard = getScoreSaberLeaderboardFromToken(leaderboardToken);
     const score = getScoreSaberScoreFromToken(scoreToken, leaderboard, playerId);
@@ -202,7 +203,9 @@ export class ScoreService {
     delete score.playerInfo;
 
     await ScoreSaberScoreModel.create(score);
-    console.log(`Tracked ScoreSaber score for ${playerId}, difficulty: ${score.difficulty}, score: ${score.score}`);
+    console.log(
+      `Tracked ScoreSaber score for "${playerName}"(${playerId}), difficulty: ${score.difficulty}, score: ${score.score}, pp: ${score.pp.toFixed(2)}pp, leaderboard: ${leaderboard.id}`
+    );
   }
 
   /**
