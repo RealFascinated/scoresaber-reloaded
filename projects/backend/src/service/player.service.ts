@@ -93,7 +93,7 @@ export class PlayerService {
     });
     playerRankHistory.push(playerToken.rank);
 
-    let daysAgo = 1; // Start from yesterday
+    let daysAgo = 0; // Start from today
     for (let i = playerRankHistory.length - daysAgo - 1; i >= 0; i--) {
       const rank = playerRankHistory[i];
       // Skip inactive days
