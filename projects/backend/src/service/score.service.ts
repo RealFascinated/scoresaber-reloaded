@@ -174,8 +174,8 @@ export class ScoreService {
     leaderboardToken: ScoreSaberLeaderboardToken,
     playerId?: string
   ) {
-    playerId = playerId || scoreToken.leaderboardPlayerInfo.id;
-    const playerName = scoreToken.leaderboardPlayerInfo.name;
+    playerId = scoreToken.leaderboardPlayerInfo && (playerId || scoreToken.leaderboardPlayerInfo.id);
+    const playerName = (scoreToken.leaderboardPlayerInfo && scoreToken.leaderboardPlayerInfo.name) || "Unknown";
 
     const leaderboard = getScoreSaberLeaderboardFromToken(leaderboardToken);
     const score = getScoreSaberScoreFromToken(scoreToken, leaderboard, playerId);
@@ -195,6 +195,10 @@ export class ScoreService {
         score.score
       )) !== null
     ) {
+      await logToChannel(
+        DiscordChannels.backendLogs,
+        new EmbedBuilder().setDescription(`Score ${score.scoreId} already tracked`)
+      );
       return;
     }
 
