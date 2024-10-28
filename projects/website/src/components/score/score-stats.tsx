@@ -72,8 +72,10 @@ type Props = {
 
 export default function ScoreStats({ score, leaderboard }: Props) {
   return (
-    <div className={`grid grid-cols-3 grid-rows-2 gap-1 ml-0 lg:ml-2 `}>
-      <ScoreBadges badges={badges} score={score} leaderboard={leaderboard} />
+    <div className="flex flex-col justify-center h-full">
+      <div className={`grid grid-cols-3 gap-1 ml-0 lg:ml-2 justify-center`}>
+        <ScoreBadges badges={badges} score={score} leaderboard={leaderboard} />
+      </div>
     </div>
   );
 }

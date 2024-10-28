@@ -120,12 +120,12 @@ export default function Score({ leaderboard, beatSaverMap, score, settings, high
   };
 
   const gridColsClass = settings?.noScoreButtons
-    ? "grid-cols-[20px 1fr_1fr] lg:grid-cols-[0.5fr_4fr_300px]" // Fewer columns if no buttons
-    : "grid-cols-[20px 1fr_1fr] lg:grid-cols-[0.5fr_4fr_1fr_300px]"; // Original with buttons
+    ? "grid-cols-[20px 1fr_1fr] lg:grid-cols-[0.5fr_4fr_350px]" // Fewer columns if no buttons
+    : "grid-cols-[20px 1fr_1fr] lg:grid-cols-[0.5fr_4fr_1fr_350px]"; // Original with buttons
 
   return (
-    <div className="pb-2 pt-2">
-      <div className={`grid w-full gap-2 lg:gap-0 ${gridColsClass}`}>
+    <div className="pb-2 pt-2 w-full h-full">
+      <div className={`grid w-full h-full gap-2 lg:gap-0 ${gridColsClass}`}>
         <ScoreRankInfo score={score} leaderboard={leaderboard} />
         <ScoreSongInfo leaderboard={leaderboard} beatSaverMap={beatSaverMap} />
         {!settings?.noScoreButtons && (

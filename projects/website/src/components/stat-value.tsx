@@ -17,17 +17,23 @@ type Props = {
   color?: string;
 
   /**
+   * The additional classes for the stat.
+   */
+  className?: string;
+
+  /**
    * The value of the stat.
    */
   value: React.ReactNode;
 };
 
-export default function StatValue({ name, icon, color, value }: Props) {
+export default function StatValue({ name, icon, color, className, value }: Props) {
   return (
     <div
       className={clsx(
         "flex min-w-16 gap-2 h-full p-1 items-center justify-center rounded-md text-sm cursor-default",
-        color ? color : "bg-accent"
+        color ? color : "bg-accent",
+        className
       )}
       style={{
         backgroundColor: (!color?.includes("bg") && color) || undefined,

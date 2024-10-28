@@ -1,9 +1,7 @@
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
-import { PauseIcon } from "@heroicons/react/24/solid";
 import { ScoreBadgeProps } from "@/components/score/badges/badge-props";
 import { ScoreMissesTooltip } from "@/components/score/score-misses-tooltip";
 import { Misses } from "@ssr/common/model/additional-score-data/misses";
-import Tooltip from "@/components/tooltip";
 
 type ScoreMissesBadgeProps = ScoreBadgeProps & {
   /**
@@ -34,69 +32,82 @@ export default function ScoreMissesAndPausesBadge({ score, hideXMark }: ScoreMis
   return (
     <div className="flex flex-col justify-center items-center w-full">
       <div className="flex items-center gap-1">
-        <ScoreMissesTooltip
-          missedNotes={score.missedNotes}
-          badCuts={score.badCuts}
-          bombCuts={misses?.bombCuts}
-          wallsHit={misses?.wallsHit}
-          fullCombo={score.fullCombo}
-        >
-          <div className="flex items-center">
+        <div className="flex items-center gap-1">
+          <ScoreMissesTooltip
+            missedNotes={score.missedNotes}
+            badCuts={score.badCuts}
+            bombCuts={misses?.bombCuts}
+            wallsHit={misses?.wallsHit}
+            fullCombo={score.fullCombo}
+          >
             <p>
               {score.fullCombo ? <span className="text-green-400">FC</span> : formatNumberWithCommas(score.misses)}
               {!hideXMark && !score.fullCombo && <span>x</span>}
             </p>
-          </div>
-        </ScoreMissesTooltip>
-        {additionalData && !!pauses && pauses > 0 && (
-          <>
-            <p>|</p>
-            <Tooltip
-              display={
-                <p>
-                  {pauses}x Pause{pauses > 1 ? "s" : ""}
-                </p>
-              }
+          </ScoreMissesTooltip>
+          {additionalData && previousScoreMisses && scoreImprovement && misses && isMissImprovement && (
+            <ScoreMissesTooltip
+              missedNotes={previousScoreMisses.missedNotes}
+              badCuts={previousScoreMisses.badCuts}
+              bombCuts={previousScoreMisses.bombCuts}
+              wallsHit={previousScoreMisses.wallsHit}
+              fullCombo={previousScoreFc}
             >
-              <div className="flex gap-1 items-center">
-                <p>{pauses && pauses}</p>
-                <PauseIcon className="w-4 h-4" />
+              <div className="text-xs flex flex-row gap-1">
+                <p>(vs {previousScoreFc ? "FC" : formatNumberWithCommas(previousScoreMisses.misses)}x)</p>
               </div>
-            </Tooltip>
-          </>
-        )}
-      </div>
-      {additionalData && previousScoreMisses && scoreImprovement && misses && isMissImprovement && (
-        <div className="flex gap-2 items-center justify-center">
-          <ScoreMissesTooltip
-            missedNotes={previousScoreMisses.missedNotes}
-            badCuts={previousScoreMisses.badCuts}
-            bombCuts={previousScoreMisses.bombCuts}
-            wallsHit={previousScoreMisses.wallsHit}
-            fullCombo={previousScoreFc}
-          >
-            <div className="flex gap-1 items-center text-xs">
-              {previousScoreFc ? (
-                <p className="text-green-400">FC</p>
-              ) : (
-                formatNumberWithCommas(previousScoreMisses.misses)
-              )}
-            </div>
-          </ScoreMissesTooltip>
-          <p>-&gt;</p>
-          <ScoreMissesTooltip
-            missedNotes={misses.missedNotes}
-            badCuts={misses.badCuts}
-            bombCuts={misses.bombCuts}
-            wallsHit={misses.wallsHit}
-            fullCombo={additionalData.fullCombo}
-          >
-            <div className="flex gap-1 items-center text-xs">
-              {additionalData.fullCombo ? <p className="text-green-400">FC</p> : formatNumberWithCommas(misses.misses)}
-            </div>
-          </ScoreMissesTooltip>
+            </ScoreMissesTooltip>
+          )}
         </div>
-      )}
+        {/*{additionalData && !!pauses && pauses > 0 && (*/}
+        {/*  <>*/}
+        {/*    <p>|</p>*/}
+        {/*    <Tooltip*/}
+        {/*      display={*/}
+        {/*        <p>*/}
+        {/*          {pauses}x Pause{pauses > 1 ? "s" : ""}*/}
+        {/*        </p>*/}
+        {/*      }*/}
+        {/*    >*/}
+        {/*      <div className="flex gap-1 items-center">*/}
+        {/*        <p>{pauses && pauses}</p>*/}
+        {/*        <PauseIcon className="w-4 h-4" />*/}
+        {/*      </div>*/}
+        {/*    </Tooltip>*/}
+        {/*  </>*/}
+        {/*)}*/}
+      </div>
+      {/*{additionalData && previousScoreMisses && scoreImprovement && misses && isMissImprovement && (*/}
+      {/*  <div className="flex gap-2 items-center justify-center">*/}
+      {/*    <ScoreMissesTooltip*/}
+      {/*      missedNotes={previousScoreMisses.missedNotes}*/}
+      {/*      badCuts={previousScoreMisses.badCuts}*/}
+      {/*      bombCuts={previousScoreMisses.bombCuts}*/}
+      {/*      wallsHit={previousScoreMisses.wallsHit}*/}
+      {/*      fullCombo={previousScoreFc}*/}
+      {/*    >*/}
+      {/*      <div className="flex gap-1 items-center text-xs">*/}
+      {/*        {previousScoreFc ? (*/}
+      {/*          <p className="text-green-400">FC</p>*/}
+      {/*        ) : (*/}
+      {/*          formatNumberWithCommas(previousScoreMisses.misses)*/}
+      {/*        )}*/}
+      {/*      </div>*/}
+      {/*    </ScoreMissesTooltip>*/}
+      {/*    <p>-&gt;</p>*/}
+      {/*    <ScoreMissesTooltip*/}
+      {/*      missedNotes={misses.missedNotes}*/}
+      {/*      badCuts={misses.badCuts}*/}
+      {/*      bombCuts={misses.bombCuts}*/}
+      {/*      wallsHit={misses.wallsHit}*/}
+      {/*      fullCombo={additionalData.fullCombo}*/}
+      {/*    >*/}
+      {/*      <div className="flex gap-1 items-center text-xs">*/}
+      {/*        {additionalData.fullCombo ? <p className="text-green-400">FC</p> : formatNumberWithCommas(misses.misses)}*/}
+      {/*      </div>*/}
+      {/*    </ScoreMissesTooltip>*/}
+      {/*  </div>*/}
+      {/*)}*/}
     </div>
   );
 }

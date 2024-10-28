@@ -63,7 +63,7 @@ export default function ScoreSongInfo({ leaderboard, beatSaverMap }: Props) {
           >
             {leaderboard.songName} {leaderboard.songSubName}
           </Link>
-          <div className="flex flex-col text-sm">
+          <div className="flex flex-row text-sm gap-2">
             <p className="text-gray-400">{leaderboard.songAuthorName}</p>
             <FallbackLink
               href={mappersProfile}

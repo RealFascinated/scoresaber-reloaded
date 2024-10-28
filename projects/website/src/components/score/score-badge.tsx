@@ -1,6 +1,6 @@
-import StatValue from "@/components/stat-value";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
+import clsx from "clsx";
 
 /**
  * A badge to display in the score stats.
@@ -27,6 +27,19 @@ export function ScoreBadges({ badges, score, leaderboard }: ScoreBadgeProps) {
     if (toRender === undefined) {
       return <div key={index} />;
     }
-    return <StatValue key={index} color={color} value={toRender} />;
+    return (
+      <div
+        key={index}
+        className={clsx(
+          "flex h-fit p-1 items-center justify-center rounded-md text-sm cursor-default",
+          color ? color : "bg-accent"
+        )}
+        style={{
+          backgroundColor: (!color?.includes("bg") && color) || undefined,
+        }}
+      >
+        {toRender}
+      </div>
+    );
   });
 }
