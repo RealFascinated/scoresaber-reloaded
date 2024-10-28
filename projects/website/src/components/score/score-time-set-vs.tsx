@@ -20,7 +20,7 @@ export function ScoreTimeSetVs({ score }: ScoreTimeSetProps) {
       display={
         <p>
           {format({
-            date: new Date(score.timestamp),
+            date: new Date(score.previousScore.timestamp),
             format: "DD MMMM YYYY HH:mm a",
           })}
         </p>
