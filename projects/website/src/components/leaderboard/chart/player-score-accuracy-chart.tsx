@@ -56,6 +56,7 @@ export default function PlayerScoreAccuracyChart({ scoreStats, leaderboard }: Pr
       axisConfig: {
         reverse: false,
         display: true,
+        hideOnMobile: true,
         displayName: "PP",
         position: "right",
       },

@@ -6,8 +6,8 @@ import { Slider } from "@/components/ui/slider";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ResetIcon } from "@radix-ui/react-icons";
 import Tooltip from "@/components/tooltip";
-import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
-import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
+import { ScoreSaberScore } from "@ssr/common/dist/model/score/impl/scoresaber-score.ts";
+import ScoreSaberLeaderboard from "@ssr/common/dist/model/leaderboard/impl/scoresaber-leaderboard.ts";
 
 type ScoreEditorButtonProps = {
   score: ScoreSaberScore;

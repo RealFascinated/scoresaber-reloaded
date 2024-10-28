@@ -1,20 +1,17 @@
 "use client";
 
-import { songNameToYouTubeLink } from "@/common/youtube-utils";
-import BeatSaverLogo from "@/components/logos/beatsaver-logo";
-import YouTubeLogo from "@/components/logos/youtube-logo";
-import { useToast } from "@/hooks/use-toast";
 import * as React from "react";
 import { useState } from "react";
-import ScoreButton from "./score-button";
-import { copyToClipboard } from "@/common/browser-utils";
 import { ArrowDownIcon, ArrowPathIcon } from "@heroicons/react/24/solid";
 import clsx from "clsx";
-import ScoreEditorButton from "@/components/score/score-editor-button";
+import ScoreEditorButton from "@/components/score/button/score-editor-button";
+import { ScoreBsrButton } from "@/components/score/button/score-bsr-button";
+import { BeatSaverMapButton } from "@/components/score/button/beat-saver-map-button";
+import { SongOpenInYoutubeButton } from "@/components/score/button/song-open-in-youtube-button";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
-import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
+import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { BeatSaverMap } from "@ssr/common/model/beatsaver/map";
-import BeatSaberPepeLogo from "@/components/logos/beatsaber-pepe-logo";
+import { ScoreReplayButton } from "@/components/score/button/score-replay-button";
 
 type Props = {
   score?: ScoreSaberScore;
@@ -33,78 +30,39 @@ export default function ScoreButtons({
   leaderboard,
   beatSaverMap,
   alwaysSingleLine,
+  setIsLeaderboardExpanded,
+  isLeaderboardLoading,
+  updateScore,
   hideLeaderboardDropdown,
   hideAccuracyChanger,
-  isLeaderboardLoading,
-  setIsLeaderboardExpanded,
-  updateScore,
 }: Props) {
   const [leaderboardExpanded, setLeaderboardExpanded] = useState(false);
-  const { toast } = useToast();
 
   const additionalData = score?.additionalData;
   return (
-    <div className={`flex justify-end gap-2 items-center`}>
-      <div
-        className={`flex ${alwaysSingleLine ? "flex-nowrap" : "flex-wrap"} items-center lg:items-start justify-center lg:justify-end gap-1`}
-      >
+    <div className={`flex justify-end gap-2 items-center mr-1`}>
+      <div className={`flex lg:grid grid-cols-3 gap-1 items-center justify-center min-w-[92px]`}>
         {beatSaverMap != undefined && (
           <>
-            {/* Copy BSR */}
-            <ScoreButton
-              onClick={() => {
-                toast({
-                  title: "Copied!",
-                  description: `Copied "!bsr ${beatSaverMap.bsr}" to your clipboard!`,
-                });
-                copyToClipboard(`!bsr ${beatSaverMap.bsr}`);
-              }}
-              tooltip={<p>Click to copy the bsr code</p>}
-            >
-              <p>!</p>
-            </ScoreButton>
-
-            {/* Open map in BeatSaver */}
-            <ScoreButton
-              onClick={() => {
-                window.open(`https://beatsaver.com/maps/${beatSaverMap.bsr}`, "_blank");
-              }}
-              tooltip={<p>Click to open the map</p>}
-            >
-              <BeatSaverLogo />
-            </ScoreButton>
+            <ScoreBsrButton beatSaverMap={beatSaverMap} />
+            <BeatSaverMapButton beatSaverMap={beatSaverMap} />
           </>
         )}
 
-        {/* Open song in YouTube */}
-        <ScoreButton
-          onClick={() => {
-            window.open(
-              songNameToYouTubeLink(leaderboard.songName, leaderboard.songSubName, leaderboard.songAuthorName),
-              "_blank"
-            );
-          }}
-          tooltip={<p>Click to open the song in YouTube</p>}
-        >
-          <YouTubeLogo />
-        </ScoreButton>
+        <SongOpenInYoutubeButton leaderboard={leaderboard} />
+
+        <div className="hidden lg:block" />
+        <div className="hidden lg:block" />
 
         {additionalData != undefined && (
           <>
-            {/* Open score replay */}
-            <ScoreButton
-              onClick={() => {
-                window.open(`https://replay.beatleader.xyz/?scoreId=${additionalData.scoreId}`, "_blank");
-              }}
-              tooltip={<p>Click to view the score replay!</p>}
-            >
-              <BeatSaberPepeLogo />
-            </ScoreButton>
+            <ScoreReplayButton additionalData={additionalData} />
           </>
         )}
       </div>
+
       <div
-        className={`flex gap-2 ${alwaysSingleLine ? "flex-row" : "flex-row lg:flex-col"} items-center justify-center`}
+        className={`flex gap-2 ${alwaysSingleLine ? "flex-row" : "flex-row lg:flex-col"} items-center justify-center pr-1`}
       >
         {/* Edit score button */}
         {score && leaderboard && updateScore && !hideAccuracyChanger && (
