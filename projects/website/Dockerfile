@@ -15,6 +15,9 @@ ENV NODE_ENV production
 ARG GIT_REV
 ENV GIT_REV=${GIT_REV}
 
+ARG SENTRY_AUTH_TOKEN
+ENV SENTRY_AUTH_TOKEN=${SENTRY_AUTH_TOKEN}
+
 # Copy the depends
 COPY --from=depends /app/package.json* /app/bun.lockb* ./
 COPY --from=depends /app/node_modules ./node_modules
