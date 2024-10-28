@@ -47,8 +47,8 @@ export class PlayerService {
           newPlayer.trackedSince = new Date();
           await newPlayer.save();
 
-          await this.seedPlayerHistory(newPlayer.id, playerToken);
-          await this.refreshAllPlayerScores(newPlayer.id);
+          await this.seedPlayerHistory(newPlayer, playerToken);
+          await this.refreshAllPlayerScores(newPlayer);
 
           // Notify in production
           if (isProduction()) {
@@ -83,15 +83,10 @@ export class PlayerService {
    * Seeds the player's history using data from
    * the ScoreSaber API.
    *
-   * @param playerId the player id
+   * @param player the player to seed
    * @param playerToken the SoreSaber player token
    */
-  public static async seedPlayerHistory(playerId: string, playerToken: ScoreSaberPlayerToken): Promise<void> {
-    const player = await PlayerModel.findById(playerId);
-    if (player == null) {
-      throw new NotFoundError(`Player "${playerId}" not found`);
-    }
-
+  public static async seedPlayerHistory(player: PlayerDocument, playerToken: ScoreSaberPlayerToken): Promise<void> {
     // Loop through rankHistory in reverse, from current day backwards
     const playerRankHistory = playerToken.histories.split(",").map((value: string) => {
       return parseInt(value);
@@ -255,14 +250,9 @@ export class PlayerService {
   /**
    * Refreshes all the players scores.
    *
-   * @param playerId the player's id
+   * @param player the player to refresh
    */
-  public static async refreshAllPlayerScores(playerId: string) {
-    const player = await PlayerModel.findById(playerId);
-    if (player == null) {
-      throw new NotFoundError(`Player "${playerId}" not found`);
-    }
-
+  public static async refreshAllPlayerScores(player: PlayerDocument) {
     await this.refreshPlayerScoreSaberScores(player);
   }
 
