@@ -67,6 +67,12 @@ export class PlayerService {
 
       // Wait for the player creation to complete
       player = await accountCreationLock[id];
+
+      // Update player name
+      if (player.name !== playerToken.name) {
+        player.name = playerToken.name;
+        await player.save();
+      }
     }
 
     // Ensure that the player is now of type PlayerDocument
