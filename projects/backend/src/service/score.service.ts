@@ -343,16 +343,6 @@ export class ScoreService {
     });
   }
 
-  /**
-   * Gets scores for a player.
-   *
-   * @param leaderboardName the leaderboard to get the scores from
-   * @param playerId the players id
-   * @param page the page to get
-   * @param sort the sort to use
-   * @param search the search to use
-   * @returns the scores
-   */
   public static async getPlayerScores(
     leaderboardName: Leaderboards,
     playerId: string,
@@ -364,16 +354,16 @@ export class ScoreService {
       playerScoresCache,
       `player-scores-${leaderboardName}-${playerId}-${page}-${sort}-${search}`,
       async () => {
-        const scores: PlayerScore<unknown, unknown>[] | undefined = [];
+        const scores: PlayerScore<unknown, unknown>[] = [];
         let metadata: Metadata = new Metadata(0, 0, 0, 0); // Default values
 
         switch (leaderboardName) {
           case "scoresaber": {
             const leaderboardScores = await scoresaberService.lookupPlayerScores({
-              playerId: playerId,
-              page: page,
+              playerId,
+              page,
               sort: sort as ScoreSort,
-              search: search,
+              search,
             });
             if (leaderboardScores == undefined) {
               break;
@@ -386,37 +376,43 @@ export class ScoreService {
               leaderboardScores.metadata.itemsPerPage
             );
 
-            for (const token of leaderboardScores.playerScores) {
+            const scorePromises = leaderboardScores.playerScores.map(async token => {
               const leaderboard = getScoreSaberLeaderboardFromToken(token.leaderboard);
-              if (leaderboard == undefined) {
-                continue;
-              }
+              if (!leaderboard) return undefined;
 
               const score = getScoreSaberScoreFromToken(token.score, leaderboard, playerId);
-              if (score == undefined) {
-                continue;
-              }
+              if (!score) return undefined;
 
-              const additionalData = await this.getAdditionalScoreData(
-                playerId,
-                leaderboard.songHash,
-                `${leaderboard.difficulty.difficulty}-${leaderboard.difficulty.characteristic}`,
-                score.score
-              );
-              if (additionalData !== undefined) {
+              // Fetch additional data, previous score, and BeatSaver map concurrently
+              const [additionalData, previousScore, beatSaverMap] = await Promise.all([
+                this.getAdditionalScoreData(
+                  playerId,
+                  leaderboard.songHash,
+                  `${leaderboard.difficulty.difficulty}-${leaderboard.difficulty.characteristic}`,
+                  score.score
+                ),
+                this.getPreviousScore(playerId, leaderboard.id + "", score.timestamp),
+                BeatSaverService.getMap(leaderboard.songHash),
+              ]);
+
+              if (additionalData) {
                 score.additionalData = additionalData;
               }
-              const previousScore = await this.getPreviousScore(playerId, leaderboard.id + "", score.timestamp);
-              if (previousScore !== undefined) {
+              if (previousScore) {
                 score.previousScore = previousScore;
               }
 
-              scores.push({
+              return {
                 score: score,
                 leaderboard: leaderboard,
-                beatSaver: await BeatSaverService.getMap(leaderboard.songHash),
-              });
-            }
+                beatSaver: beatSaverMap,
+              } as PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>;
+            });
+
+            const resolvedScores = (await Promise.all(scorePromises)).filter(
+              (s): s is PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard> => s !== undefined
+            );
+            scores.push(...resolvedScores);
             break;
           }
           default: {
