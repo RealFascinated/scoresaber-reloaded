@@ -56,15 +56,10 @@ export async function initDiscordBot() {
 export async function logToChannel(channelId: DiscordChannels, message: EmbedBuilder) {
   try {
     const channel = await client.channels.fetch(channelId);
-    if (channel == undefined) {
-      throw new Error(`Channel "${channelId}" not found`);
+    if (channel != undefined && channel.isSendable()) {
+      channel.send({ embeds: [message] });
     }
-    if (!channel.isSendable()) {
-      throw new Error(`Channel "${channelId}" is not sendable`);
-    }
-
-    channel.send({ embeds: [message] });
-  } catch (error) {
-    console.error(error);
+  } catch {
+    /* empty */
   }
 }

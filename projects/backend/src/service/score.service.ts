@@ -488,6 +488,8 @@ export class ScoreService {
               const score = getScoreSaberScoreFromToken(token.score, leaderboard, playerId);
               if (!score) return undefined;
 
+              console.log("boobs");
+
               // Fetch additional data, previous score, and BeatSaver map concurrently
               const [additionalData, previousScore, beatSaverMap] = await Promise.all([
                 this.getAdditionalScoreData(
@@ -679,7 +681,9 @@ export class ScoreService {
     leaderboardId: string,
     timestamp: Date
   ): Promise<ScoreSaberPreviousScore | undefined> {
-    const scores = await ScoreSaberScoreModel.find({ playerId: playerId, leaderboardId: leaderboardId });
+    const scores = await ScoreSaberScoreModel.find({ playerId: playerId, leaderboardId: leaderboardId }).sort({
+      timestamp: -1,
+    });
     if (scores == null || scores.length == 0) {
       return undefined;
     }
@@ -689,7 +693,7 @@ export class ScoreService {
     if (scoreIndex == -1 || score == undefined) {
       return undefined;
     }
-    const previousScore = scores[scoreIndex - 1];
+    const previousScore = scores[scoreIndex + 1];
     if (previousScore == undefined) {
       return undefined;
     }
