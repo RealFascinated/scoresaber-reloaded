@@ -1,6 +1,7 @@
 import { Controller, Get } from "elysia-decorators";
 import { t } from "elysia";
 import { Leaderboards } from "@ssr/common/leaderboard";
+import { TopScoresResponse } from "@ssr/common/response/top-scores-response";
 import { ScoreService } from "../service/score.service";
 
 @Controller("/scores")
@@ -72,5 +73,15 @@ export default class ScoresController {
     query: { search?: string };
   }): Promise<unknown> {
     return (await ScoreService.getScoreHistory(playerId, leaderboardId, page)).toJSON();
+  }
+
+  @Get("/top", {
+    config: {},
+  })
+  public async getTopScores(): Promise<TopScoresResponse> {
+    const scores = await ScoreService.getTopScores();
+    return {
+      scores,
+    };
   }
 }

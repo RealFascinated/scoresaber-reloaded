@@ -184,6 +184,9 @@ export class ScoreService {
     if (player == undefined) {
       return;
     }
+    // Update player name
+    player.name = playerName;
+    await player.save();
 
     // The score has already been tracked, so ignore it.
     if (
@@ -288,6 +291,103 @@ export class ScoreService {
     await AdditionalScoreDataModel.create(data);
     console.log(
       `Tracked additional score data for "${scorePlayer.name}"(${playerId}), difficulty: ${difficultyKey}, score: ${score.baseScore}`
+    );
+  }
+
+  /**
+   * Gets the top tracked scores.
+   *
+   * @param amount the amount of scores to get
+   * @returns the top scores
+   */
+  public static async getTopScores(amount: number = 100) {
+    const foundScores = await ScoreSaberScoreModel.aggregate([
+      // Start sorting by timestamp descending using the new compound index
+      { $sort: { leaderboardId: 1, playerId: 1, timestamp: -1 } },
+      {
+        $group: {
+          _id: { leaderboardId: "$leaderboardId", playerId: "$playerId" },
+          latestScore: { $first: "$$ROOT" }, // Retrieve the latest score per group
+        },
+      },
+      // Sort by pp of the latest scores in descending order
+      { $sort: { "latestScore.pp": -1 } },
+      { $limit: amount },
+    ]);
+
+    // Collect unique leaderboard IDs
+    const leaderboardIds = [...new Set(foundScores.map(s => s.latestScore.leaderboardId))];
+    const leaderboardMap = await this.fetchLeaderboardsInBatch(leaderboardIds);
+
+    // Collect player IDs for batch retrieval
+    const playerIds = foundScores.map(result => result.latestScore.playerId);
+    const players = await PlayerModel.find({ _id: { $in: playerIds } }).exec();
+    const playerMap = new Map(players.map(player => [player._id.toString(), player]));
+
+    // Prepare to fetch additional data concurrently
+    const scoreDataPromises = foundScores.map(async result => {
+      const score: ScoreSaberScore = result.latestScore;
+      const leaderboardResponse = leaderboardMap[score.leaderboardId];
+      if (!leaderboardResponse) {
+        return null; // Skip if leaderboard data is not available
+      }
+
+      const { leaderboard, beatsaver } = leaderboardResponse;
+
+      // Fetch additional data concurrently
+      const [additionalData, previousScore] = await Promise.all([
+        this.getAdditionalScoreData(
+          score.playerId,
+          leaderboard.songHash,
+          `${leaderboard.difficulty.difficulty}-${leaderboard.difficulty.characteristic}`,
+          score.score
+        ),
+        this.getPreviousScore(score.playerId, leaderboard.id + "", score.timestamp),
+      ]);
+
+      // Attach additional and previous score data if available
+      if (additionalData) score.additionalData = additionalData;
+      if (previousScore) score.previousScore = previousScore;
+
+      // Attach player info if available
+      const player = playerMap.get(score.playerId.toString());
+      if (player) {
+        score.playerInfo = {
+          id: player._id,
+          name: player.name,
+        };
+      }
+
+      return {
+        score: score as ScoreSaberScore,
+        leaderboard: leaderboard,
+        beatSaver: beatsaver,
+      };
+    });
+    return (await Promise.all(scoreDataPromises)).filter(score => score !== null);
+  }
+
+  /**
+   * Fetches leaderboards in a batch.
+   *
+   * @param leaderboardIds the ids of the leaderboards
+   * @returns the fetched leaderboards
+   * @private
+   */
+  private static async fetchLeaderboardsInBatch(leaderboardIds: string[]) {
+    // Remove duplicates from leaderboardIds
+    const uniqueLeaderboardIds = Array.from(new Set(leaderboardIds));
+
+    const leaderboardResponses = await Promise.all(
+      uniqueLeaderboardIds.map(id => LeaderboardService.getLeaderboard<ScoreSaberLeaderboard>("scoresaber", id))
+    );
+
+    return leaderboardResponses.reduce(
+      (map, response) => {
+        if (response) map[response.leaderboard.id] = response;
+        return map;
+      },
+      {} as Record<string, { leaderboard: ScoreSaberLeaderboard; beatsaver?: BeatSaverMap }>
     );
   }
 

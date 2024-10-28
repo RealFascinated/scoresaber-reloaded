@@ -48,7 +48,7 @@ export class PlayerService {
           await newPlayer.save();
 
           await this.seedPlayerHistory(newPlayer.id, playerToken);
-          await this.trackPlayerScores(newPlayer.id, SCORESABER_REQUEST_COOLDOWN);
+          await this.refreshAllPlayerScores(newPlayer.id);
 
           // Notify in production
           if (isProduction()) {
@@ -247,17 +247,27 @@ export class PlayerService {
   }
 
   /**
-   * Tracks a player's scores from the ScoreSaber API.
+   * Refreshes all the players scores.
    *
    * @param playerId the player's id
-   * @param perPageCooldown the cooldown between pages
    */
-  public static async trackPlayerScores(playerId: string, perPageCooldown: number) {
+  public static async refreshAllPlayerScores(playerId: string) {
     const player = await PlayerModel.findById(playerId);
     if (player == null) {
       throw new NotFoundError(`Player "${playerId}" not found`);
     }
 
+    await this.refreshPlayerScoreSaberScores(player);
+  }
+
+  /**
+   * Ensures that all the players scores from the
+   * ScoreSaber API are up-to-date.
+   *
+   * @param player the player to refresh
+   * @private
+   */
+  private static async refreshPlayerScoreSaberScores(player: PlayerDocument) {
     console.log(`Refreshing scores for ${player.id}...`);
     let page = 1;
     let hasMorePages = true;
@@ -298,7 +308,7 @@ export class PlayerService {
       }
 
       page++;
-      await delay(perPageCooldown); // Cooldown between page requests
+      await delay(SCORESABER_REQUEST_COOLDOWN); // Cooldown between page requests
     }
 
     // Mark player as seeded
@@ -318,7 +328,7 @@ export class PlayerService {
     console.log(`Found ${players.length} players to refresh.`);
 
     for (const player of players) {
-      await this.trackPlayerScores(player.id, SCORESABER_REQUEST_COOLDOWN);
+      await this.refreshAllPlayerScores(player.id);
       await delay(SCORESABER_REQUEST_COOLDOWN); // Cooldown between players
     }
   }

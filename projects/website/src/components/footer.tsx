@@ -39,7 +39,12 @@ const items: NavbarItem[] = [
   },
   {
     name: "Score Feed",
-    link: "/scores",
+    link: "/scores/live",
+    openInNewTab: false,
+  },
+  {
+    name: "Top Scores",
+    link: "/scores/top",
     openInNewTab: false,
   },
 ];

@@ -95,7 +95,7 @@ export default class Score {
    * The time the score was set.
    * @private
    */
-  @prop({ required: true })
+  @prop({ required: true, index: true })
   public readonly timestamp!: Date;
 }
 
