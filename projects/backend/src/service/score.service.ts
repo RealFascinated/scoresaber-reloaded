@@ -174,7 +174,12 @@ export class ScoreService {
     leaderboardToken: ScoreSaberLeaderboardToken,
     playerId?: string
   ) {
-    playerId = scoreToken.leaderboardPlayerInfo && (playerId || scoreToken.leaderboardPlayerInfo.id);
+    playerId = (scoreToken.leaderboardPlayerInfo && scoreToken.leaderboardPlayerInfo.id) || playerId;
+    if (!playerId) {
+      console.error(`Player ID is undefined, unable to track score: ${scoreToken.id}`);
+      return;
+    }
+
     const playerName = (scoreToken.leaderboardPlayerInfo && scoreToken.leaderboardPlayerInfo.name) || "Unknown";
 
     const leaderboard = getScoreSaberLeaderboardFromToken(leaderboardToken);
