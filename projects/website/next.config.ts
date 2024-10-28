@@ -2,6 +2,7 @@ import { withSentryConfig } from "@sentry/nextjs";
 import { format } from "@formkit/tempo";
 import nextBundleAnalyzer from "@next/bundle-analyzer";
 import type { NextConfig } from "next";
+import { isProduction } from "@/common/website-utils";
 
 const nextConfig: NextConfig = {
   experimental: {
@@ -41,14 +42,18 @@ const withBundleAnalyzer = nextBundleAnalyzer({
   enabled: process.env.ANALYZE === "true",
 });
 
-export default withSentryConfig(withBundleAnalyzer(nextConfig), {
-  org: "fascinatedcc",
-  project: "scoresaber-reloaded",
-  silent: !process.env.CI,
-  widenClientFileUpload: true,
-  reactComponentAnnotation: {
-    enabled: true,
-  },
-  hideSourceMaps: true,
-  disableLogger: true,
-});
+const config = withBundleAnalyzer(nextConfig);
+
+export default isProduction()
+  ? withSentryConfig(config, {
+      org: "fascinatedcc",
+      project: "scoresaber-reloaded",
+      silent: !process.env.CI,
+      widenClientFileUpload: true,
+      reactComponentAnnotation: {
+        enabled: true,
+      },
+      hideSourceMaps: true,
+      disableLogger: true,
+    })
+  : config;
