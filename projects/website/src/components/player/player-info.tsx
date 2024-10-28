@@ -71,7 +71,7 @@ export function PlayerInfo({
           src={`https://img.fascinated.cc/upload/w_128,h_128/${player.profilePicture}`}
         />
       </Avatar>
-      {!hideCountryFlag && <CountryFlag code={player.country} size={12} />}
+      {!hideCountryFlag && <CountryFlag code={player.country!} size={12} />}
       {useLink ? <Link href={`/player/${player.id}`}>{name}</Link> : name}
     </div>
   );
