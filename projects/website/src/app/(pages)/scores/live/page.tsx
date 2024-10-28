@@ -4,6 +4,10 @@ import Card from "@/components/card";
 
 export const metadata: Metadata = {
   title: "Score Feed",
+  openGraph: {
+    title: "ScoreSaber Reloaded - Live Scores",
+    description: "View the live scores set by players on ScoreSaber.",
+  },
 };
 
 export default function ScoresPage() {

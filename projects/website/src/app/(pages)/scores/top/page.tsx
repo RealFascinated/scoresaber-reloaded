@@ -8,6 +8,10 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Top Scores",
+  openGraph: {
+    title: "ScoreSaber Reloaded - Top Scores",
+    description: "View the top 100 scores set by players on ScoreSaber.",
+  },
 };
 
 export default async function TopScoresPage() {
