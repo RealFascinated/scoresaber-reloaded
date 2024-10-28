@@ -5,7 +5,7 @@ import { getPageFromRank } from "@ssr/common/utils/utils";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreTimeSet } from "@/components/score/score-time-set";
-import { timeAgo } from "@ssr/common/utils/time-utils";
+import { ScoreTimeSetVs } from "@/components/score/score-time-set-vs";
 
 type Props = {
   score: ScoreSaberScore;
@@ -23,13 +23,10 @@ export default function ScoreRankInfo({ score, leaderboard }: Props) {
           </p>
         </Link>
       </div>
-      <ScoreTimeSet score={score} />
-      {score.previousScore?.timestamp && (
-        <div className="text-xs text-gray-400 flex flex-row gap-2 items-center">
-          <p>vs</p>
-          <p>{timeAgo(new Date(score.previousScore.timestamp))}</p>
-        </div>
-      )}
+      <div className="flex items-center gap-2 lg:flex-col lg:gap-0">
+        <ScoreTimeSet score={score} />
+        <ScoreTimeSetVs score={score} />
+      </div>
     </div>
   );
 }
