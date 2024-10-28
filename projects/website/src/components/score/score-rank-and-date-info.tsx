@@ -12,7 +12,7 @@ type Props = {
   leaderboard: ScoreSaberLeaderboard;
 };
 
-export default function ScoreRankInfo({ score, leaderboard }: Props) {
+export default function ScoreRankAndDateInfo({ score, leaderboard }: Props) {
   return (
     <div className="flex w-full flex-row justify-between lg:w-[125px] lg:flex-col lg:justify-center items-center">
       <div className="flex gap-1 items-center">

@@ -56,18 +56,20 @@ export default function ScoreSongInfo({ leaderboard, beatSaverMap }: Props) {
         />
       </div>
       <div className="flex">
-        <div className="overflow-y-clip">
+        <div className="overflow-y-clip flex flex-col gap-1">
           <Link
             href={`/leaderboard/${leaderboard.id}`}
             className="cursor-pointer select-none hover:brightness-[66%] transform-gpu transition-all text-ssr w-fit"
           >
             {leaderboard.songName} {leaderboard.songSubName}
           </Link>
-          <div className="flex flex-row text-sm gap-2">
+          <div className="flex flex-row text-sm gap-1.5 items-end leading-none">
             <p className="text-gray-400">{leaderboard.songAuthorName}</p>
             <FallbackLink
               href={mappersProfile}
-              className={mappersProfile && "hover:brightness-[66%] transform-gpu transition-all w-fit"}
+              className={
+                mappersProfile && "hover:brightness-[66%] transform-gpu transition-all w-fit text-xs leading-none"
+              }
             >
               {leaderboard.levelAuthorName}
             </FallbackLink>
