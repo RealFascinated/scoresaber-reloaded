@@ -708,6 +708,7 @@ export class ScoreService {
       pp: previousScore.pp,
       weight: previousScore.weight,
       maxCombo: previousScore.maxCombo,
+      timestamp: previousScore.timestamp,
       change: {
         score: score.score - previousScore.score,
         accuracy: score.accuracy - previousScore.accuracy,

@@ -35,4 +35,9 @@ export type PreviousScore = {
    * The full combo of the previous score.
    */
   fullCombo?: boolean;
+
+  /**
+   * When the previous score was set.
+   */
+  timestamp: Date;
 };
