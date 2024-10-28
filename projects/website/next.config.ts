@@ -1,5 +1,6 @@
 import { withSentryConfig } from "@sentry/nextjs";
 import { format } from "@formkit/tempo";
+import nextBundleAnalyzer from "@next/bundle-analyzer";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
@@ -36,22 +37,28 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withSentryConfig(nextConfig, {
-  org: "scoresaber-reloaded",
-  project: "frontend",
-  sentryUrl: "https://glitchtip.fascinated.cc/",
-  silent: !process.env.CI,
-  reactComponentAnnotation: {
-    enabled: true,
-  },
-  tunnelRoute: "/monitoring",
-  hideSourceMaps: true,
-  disableLogger: true,
-  sourcemaps: {
-    disable: true,
-  },
-  release: {
-    create: false,
-    finalize: false,
-  },
+const withBundleAnalyzer = nextBundleAnalyzer({
+  enabled: process.env.ANALYZE === "true",
 });
+
+export default withBundleAnalyzer(
+  withSentryConfig(nextConfig, {
+    org: "scoresaber-reloaded",
+    project: "frontend",
+    sentryUrl: "https://glitchtip.fascinated.cc/",
+    silent: !process.env.CI,
+    reactComponentAnnotation: {
+      enabled: true,
+    },
+    tunnelRoute: "/monitoring",
+    hideSourceMaps: true,
+    disableLogger: true,
+    sourcemaps: {
+      disable: true,
+    },
+    release: {
+      create: false,
+      finalize: false,
+    },
+  })
+);
