@@ -1,4 +1,4 @@
-import { Database } from "lucide-react";
+import { UsersRound } from "lucide-react";
 
 export default function Friends() {
   return (
@@ -6,7 +6,7 @@ export default function Friends() {
       {/* Header */}
       <div className="flex flex-col gap-2.5 text-right items-end">
         <div className="flex flex-row-reverse gap-3 items-center text-purple-600">
-          <Database className="p-2 size-11 bg-purple-800/15 rounded-lg" />
+          <UsersRound className="p-2 size-11 bg-purple-800/15 rounded-lg" />
           <h1 className="text-3xl sm:text-4xl font-bold">Friends</h1>
         </div>
         <p className="max-w-5xl text-sm sm:text-base opacity-85">

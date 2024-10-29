@@ -1,4 +1,4 @@
-import { Database } from "lucide-react";
+import { ChartNoAxesCombined, Database, Flame } from "lucide-react";
 import { getRandomInteger } from "@/common/utils";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import { Difficulty, getDifficulty, getRandomDifficulty } from "@/common/song-utils";
@@ -51,7 +51,7 @@ export default function RealtimeScores() {
       {/* Header */}
       <div className="flex flex-col gap-2.5 text-right items-end">
         <div className="flex flex-row-reverse gap-3 items-center text-yellow-400">
-          <Database className="p-2 size-11 bg-yellow-800/15 rounded-lg" />
+          <Flame className="p-2 size-11 bg-yellow-800/15 rounded-lg" />
           <h1 className="text-3xl sm:text-4xl font-bold">Realtime Scores</h1>
         </div>
         <p className="max-w-2xl lg:max-w-5xl text-sm sm:text-base opacity-85">
@@ -62,8 +62,8 @@ export default function RealtimeScores() {
       </div>
 
       {/* Content */}
-      <div className="w-full flex flex-col justify-center items-center">
-        <AnimatedList className="w-full max-w-[32rem] h-96 divide-y divide-muted overflow-hidden" delay={1500}>
+      <div className="w-full flex flex-col justify-center items-center overflow-hidden">
+        <AnimatedList className="w-full max-w-[32rem] h-96 divide-y divide-muted" delay={1500}>
           {scores.map((score, index) => (
             <Score key={index} {...score} />
           ))}
