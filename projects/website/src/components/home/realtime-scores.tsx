@@ -88,9 +88,9 @@ function Score({ songArt, songName, songAuthor, setBy }: ScoreProps) {
       </span>
 
       {/* Score */}
-      <div className="py-3 flex gap-5 items-center">
+      <div className="py-3 flex gap-4 xs:gap-5 items-center transition-all transform-gpu">
         {/* Position & Time */}
-        <div className="w-24 flex flex-col gap-1 text-center items-center">
+        <div className="w-20 xs:w-24 flex flex-col gap-1 text-center items-center">
           <div className="flex gap-2 items-center">
             <GlobeAmericasIcon className="size-5" />
             <span className="text-ssr">#{getRandomInteger(1, 900)}</span>
@@ -113,8 +113,8 @@ function Score({ songArt, songName, songAuthor, setBy }: ScoreProps) {
 
         {/* Song Name & Author */}
         <div className="flex flex-col gap-1">
-          <h1 className="text-ssr">{songName}</h1>
-          <p className="opacity-75">{songAuthor}</p>
+          <h1 className="max-w-[11rem] xs:max-w-full text-ssr">{songName}</h1>
+          <p className="max-w-[11rem] xs:max-w-full opacity-75">{songAuthor}</p>
         </div>
       </div>
     </figure>
