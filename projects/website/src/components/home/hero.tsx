@@ -1,3 +1,5 @@
+"use client";
+
 import AnimatedShinyText from "@/components/ui/animated-shiny-text";
 import { ArrowRight, UserSearch } from "lucide-react";
 import Link from "next/link";
@@ -5,15 +7,23 @@ import { Button } from "@/components/ui/button";
 import { SiGithub } from "react-icons/si";
 import { BorderBeam } from "@/components/ui/border-beam";
 import { Separator } from "@/components/ui/separator";
+import { motion } from "framer-motion";
 
 export default function HeroSection() {
   return (
     <div className="flex flex-col gap-3.5 text-center items-center select-none">
-      <Alert />
-      <Title />
+      <motion.div
+        className="flex flex-col gap-3.5 text-center items-center"
+        initial={{ opacity: 0, y: -40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+      >
+        <Alert />
+        <Title />
+      </motion.div>
       <Buttons />
       <AppPreview />
-      <Separator className="my-14 w-screen" />
+      <Separator className="my-12 w-screen" />
     </div>
   );
 }
@@ -42,7 +52,7 @@ function Title() {
         ScoreSaber Reloaded
       </h1>
       <p className="max-w-sm md:max-w-xl md:text-lg opacity-85">
-        Scoresaber Reloaded is a new way to view your scores and get more stats about your and your plays
+        ScoreSaber Reloaded is a new way to view your scores and get more stats about you and your plays
       </p>
     </>
   );
@@ -50,8 +60,13 @@ function Title() {
 
 function Buttons() {
   return (
-    <div className="mt-4 flex gap-4">
-      <Link href="https://discord.gg/kmNfWGA4A8" target="_blank">
+    <motion.div
+      className="mt-4 flex flex-col xs:flex-row gap-4 items-center"
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.35, duration: 0.7, ease: "easeOut" }}
+    >
+      <Link href="/search" target="_blank">
         <Button className="max-w-52 flex gap-2.5 bg-pp hover:bg-pp/85 text-white text-base">
           <UserSearch className="size-6" />
           <span>Player Search</span>
@@ -64,19 +79,24 @@ function Buttons() {
           <span>Join our Discord</span>
         </Button>
       </Link>
-    </div>
+    </motion.div>
   );
 }
 
 function AppPreview() {
   return (
-    <div className="mx-5 my-24 relative max-w-[1280px] shadow-[0_3rem_20rem_-15px_rgba(15,15,15,0.6)] shadow-pp/50 rounded-xl overflow-hidden">
+    <motion.div
+      className="mx-5 my-20 relative max-w-[1280px] shadow-[0_3rem_20rem_-15px_rgba(15,15,15,0.6)] shadow-pp/50 rounded-2xl overflow-hidden"
+      initial={{ opacity: 0, y: -35 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.45, duration: 0.7, ease: "easeOut" }}
+    >
       <BorderBeam colorFrom="#6773ff" colorTo="#4858ff" />
       <img
-        className="w-full h-full border-4 border-pp/20 rounded-xl"
+        className="w-full h-full border-4 border-pp/20 rounded-2xl"
         src="/assets/home/app-preview.png"
         draggable={false}
       />
-    </div>
+    </motion.div>
   );
 }
