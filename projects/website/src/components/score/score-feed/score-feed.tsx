@@ -59,7 +59,7 @@ export default function ScoreFeed() {
               <Link href={`/player/${player.id}`}>
                 <span className="text-ssr hover:brightness-[66%] transition-all transform-gpu">{player.name}</span>
               </Link>
-              <p className="text-gray-400 text-xs"> on {scoreToken.score.deviceHmd}</p>
+              <p className="text-gray-400 text-xs"> on {scoreToken.score.deviceHmd || "Unknown Device"}</p>
             </div>
             <Score
               score={score}
