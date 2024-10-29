@@ -206,9 +206,8 @@ export class ScoreService {
         score.score
       )) !== null
     ) {
-      await logToChannel(
-        DiscordChannels.backendLogs,
-        new EmbedBuilder().setDescription(`Score ${score.scoreId} already tracked`)
+      console.log(
+        `ScoreSaber score already tracked for "${playerName}"(${playerId}), difficulty: ${score.difficulty}, score: ${score.score}, leaderboard: ${leaderboard.id}, ignoring...`
       );
       return;
     }
