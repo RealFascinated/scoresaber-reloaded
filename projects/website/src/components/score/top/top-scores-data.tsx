@@ -30,10 +30,6 @@ const timeframes: TimeframesType[] = [
     timeframe: "monthly",
     display: "This Month",
   },
-  {
-    timeframe: "all",
-    display: "All Time",
-  },
 ];
 
 type TopScoresDataProps = {

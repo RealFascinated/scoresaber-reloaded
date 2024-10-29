@@ -1,1 +1,1 @@
-export type Timeframe = "daily" | "weekly" | "monthly" | "all";
+export type Timeframe = "daily" | "weekly" | "monthly";

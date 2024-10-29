@@ -93,9 +93,6 @@ export default class ScoresController {
     } else if (limit > 100) {
       limit = 100;
     }
-    if ((timeframe.toLowerCase() as keyof Timeframe) === undefined) {
-      timeframe = "all";
-    }
 
     const scores = await ScoreService.getTopScores(limit, timeframe);
     return {
