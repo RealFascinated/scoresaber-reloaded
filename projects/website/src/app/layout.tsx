@@ -1,5 +1,4 @@
 import "./globals.css";
-import Footer from "@/components/footer";
 import { PreloadResources } from "@/components/preload-resources";
 import { QueryProvider } from "@/components/providers/query-provider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
@@ -14,6 +13,8 @@ import { Colors } from "@/common/colors";
 import OfflineNetwork from "@/components/offline-network";
 import Script from "next/script";
 import { ApiHealth } from "@/components/api/api-health";
+import Footer from "@/components/footer";
+import { getBuildInformation } from "@/common/website-utils";
 
 const siteFont = localFont({
   src: "./fonts/JetBrainsMono.ttf",
@@ -66,6 +67,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const { buildId, buildTimeShort } = getBuildInformation();
   return (
     <html lang="en">
       <body className={`${siteFont.className} antialiased w-full h-full`}>
@@ -84,7 +86,8 @@ export default function RootLayout({
                     <div className="mt-3 z-[1] m-auto flex flex-col flex-grow items-center w-full md:max-w-[1600px]">
                       {children}
                     </div>
-                    <Footer />
+                    {/*<Footer />*/}
+                    <Footer buildId={buildId} buildTimeShort={buildTimeShort} />
                   </main>
                 </QueryProvider>
               </ThemeProvider>

@@ -1,78 +1,176 @@
-import { getBuildInformation } from "@/common/website-utils";
-import Link from "next/link";
+"use client";
 
-type NavbarItem = {
+import Link from "next/link";
+import { ExternalLink } from "lucide-react";
+import { cn } from "@/common/utils";
+import { ReactElement } from "react";
+import { SiGithub, SiX } from "react-icons/si";
+import { usePathname } from "next/navigation";
+
+type FooterLink = {
+  /**
+   * The name of this link.
+   */
   name: string;
-  link: string;
-  openInNewTab?: boolean;
+
+  /**
+   * The href for this link.
+   */
+  href: string;
+
+  /**
+   * The optional name to show
+   * when the screen size is small.
+   */
+  shortName?: string;
 };
 
-const items: NavbarItem[] = [
-  {
-    name: "Home",
-    link: "/",
-  },
-  {
-    name: "Source",
-    link: "https://git.fascinated.cc/Fascinated/scoresaber-reloadedv3",
-    openInNewTab: true,
-  },
+type SocialLinkType = {
+  /**
+   * The name of this social link.
+   */
+  name: string;
+
+  /**
+   * The logo for this social link.
+   */
+  logo: ReactElement;
+
+  /**
+   * The href for this social link.
+   */
+  href: string;
+};
+
+const links: {
+  [category: string]: FooterLink[];
+} = {
+  Resources: [
+    {
+      name: "Swagger Docs",
+      shortName: "Swagger",
+      href: "/swagger",
+    },
+    {
+      name: "Source Code",
+      shortName: "Source",
+      href: "https://git.fascinated.cc/Fascinated/scoresaber-reloadedv3",
+    },
+    {
+      name: "System Status",
+      shortName: "Status",
+      href: "https://status.fascinated.cc/status/scoresaber-reloaded",
+    },
+  ],
+  App: [
+    {
+      name: "Score Feed",
+      href: "/scores/live",
+    },
+    {
+      name: "Top Scores",
+      href: "/scores/top/weekly",
+    },
+  ],
+};
+
+const socialLinks: SocialLinkType[] = [
   {
     name: "Twitter",
-    link: "https://x.com/ssr_reloaded",
-    openInNewTab: true,
+    logo: <SiX className="size-5 lg:size-6" />,
+    href: "https://x.com/ssr_reloaded",
   },
   {
     name: "Discord",
-    link: "https://discord.gg/kmNfWGA4A8",
-    openInNewTab: true,
+    logo: <img className="size-6 lg:size-7" src="/assets/logos/discord.svg" />,
+    href: "https://discord.gg/kmNfWGA4A8",
   },
   {
-    name: "Status",
-    link: "https://status.fascinated.cc/status/scoresaber-reloaded",
-    openInNewTab: true,
-  },
-  {
-    name: "Swagger",
-    link: "/swagger",
-    openInNewTab: true,
-  },
-  {
-    name: "Score Feed",
-    link: "/scores/live",
-    openInNewTab: false,
-  },
-  {
-    name: "Top Scores",
-    link: "/scores/top/weekly",
-    openInNewTab: false,
+    name: "GitHub",
+    logo: <SiGithub className="size-5 lg:size-6" />,
+    href: "https://git.fascinated.cc/Fascinated/scoresaber-reloadedv3",
   },
 ];
 
-export default function Footer() {
-  const { buildId, buildTime, buildTimeShort } = getBuildInformation();
-
+export default function Footer({ buildId, buildTimeShort }: { buildId: string; buildTimeShort: string | undefined }) {
+  const isHome: boolean = usePathname() === "/";
   return (
-    <div className="flex items-center w-full flex-col gap-1 mt-6">
-      <div className="flex items-center gap-2 text-input text-sm">
-        <p>Build: {buildId}</p>
-        <p className="hidden md:block">({buildTime})</p>
-        <p className="none md:hidden">({buildTimeShort})</p>
+    <footer
+      className={cn(
+        "px-10 min-h-80 py-5 flex flex-col gap-10 lg:gap-0 justify-between border-t border-muted select-none",
+        isHome ? "bg-[#121212]" : "mt-5 bg-[#121212]/60"
+      )}
+    >
+      {/* Top Section */}
+      <div className="flex justify-center">
+        {/* Branding & Social Links */}
+        <div className="w-full max-w-screen-2xl flex flex-col gap-7 lg:flex-row justify-between items-center lg:items-start">
+          <div className="flex flex-col gap-5">
+            {/* Branding */}
+            <div className="flex flex-col gap-2 text-center items-center lg:text-left lg:items-start">
+              <Link
+                className="flex gap-3 items-center hover:opacity-75 transition-all transform-gpu"
+                href="/"
+                draggable={false}
+              >
+                <img className="size-9" src="/assets/logos/scoresaber.png" alt="Scoresaber Logo" />
+                <h1 className="text-xl font-bold text-pp">ScoreSaber Reloaded</h1>
+              </Link>
+              <p className="max-w-md text-sm opacity-85">
+                ScoreSaber Reloaded is a new way to view your scores and get more stats about you and your plays
+              </p>
+            </div>
+
+            {/* Social Links */}
+            <div className="flex gap-4 justify-center lg:justify-start items-center">
+              {socialLinks.map(link => (
+                <Link
+                  key={link.name}
+                  className="hover:opacity-75 transition-all transform-gpu"
+                  href={link.href}
+                  target="_blank"
+                  draggable={false}
+                >
+                  {link.logo}
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          {/* Links */}
+          <div className="flex gap-20 md:gap-32 transition-all transform-gpu">
+            {Object.entries(links).map(([title, links]) => (
+              <div key={title} className="flex flex-col gap-0.5">
+                <h1 className="pb-1 text-lg font-semibold text-ssr">{title}</h1>
+                {links.map(link => {
+                  const external: boolean = !link.href.startsWith("/");
+                  return (
+                    <Link
+                      key={link.name}
+                      className="flex gap-2 items-center hover:opacity-75 transition-all transform-gpu"
+                      href={link.href}
+                      target={external ? "_blank" : undefined}
+                      draggable={false}
+                    >
+                      <span className={cn("hidden sm:flex", !link.shortName && "flex")}>{link.name}</span>
+                      {link.shortName && <span className="flex sm:hidden">{link.shortName}</span>}
+                      {external && <ExternalLink className="w-3.5 h-3.5" />}
+                    </Link>
+                  );
+                })}
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
-      <div className="w-full flex flex-wrap items-center justify-center bg-secondary/95 divide-x divide-input text-sm py-2">
-        {items.map((item, index) => {
-          return (
-            <Link
-              key={index}
-              className="px-2 text-ssr hover:brightness-[66%] transition-all transform-gpu"
-              href={item.link}
-              target={item.openInNewTab ? "_blank" : undefined}
-            >
-              {item.name}
-            </Link>
-          );
-        })}
+
+      {/* Bottom Section */}
+      <div className="flex justify-center">
+        {/* Build Info */}
+        <p className="text-sm opacity-50">
+          Build {buildId} ({buildTimeShort})
+        </p>
       </div>
-    </div>
+    </footer>
   );
 }

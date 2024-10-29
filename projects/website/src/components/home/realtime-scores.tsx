@@ -1,5 +1,5 @@
 import { ChartNoAxesCombined, Database, Flame } from "lucide-react";
-import { getRandomInteger } from "@/common/utils";
+import { cn, getRandomInteger } from "@/common/utils";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import { Difficulty, getDifficulty, getRandomDifficulty } from "@/common/song-utils";
 import { AnimatedList } from "@/components/ui/animated-list";
@@ -47,7 +47,12 @@ scores = Array.from({ length: 32 }, () => scores).flat();
 
 export default function RealtimeScores() {
   return (
-    <div className="px-5 -mt-20 flex flex-col lg:flex-row-reverse gap-10 select-none">
+    <div
+      className={cn(
+        "relative px-5 -mt-20 flex flex-col lg:flex-row-reverse gap-10 select-none",
+        "before:absolute before:-left-40 before:-bottom-36 before:size-[28rem] before:bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] before:from-yellow-600 before:rounded-full before:blur-3xl before:opacity-30"
+      )}
+    >
       {/* Header */}
       <div className="flex flex-col gap-2.5 text-right items-end">
         <div className="flex flex-row-reverse gap-3 items-center text-yellow-400">

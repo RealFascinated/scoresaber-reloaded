@@ -1,4 +1,5 @@
 import { UsersRound } from "lucide-react";
+import { cn } from "@/common/utils";
 
 export default function Friends() {
   return (
@@ -15,13 +16,20 @@ export default function Friends() {
       </div>
 
       {/* Content */}
-      <div className="max-w-[900px]">
-        <img
-          className="w-full h-full rounded-2xl border border-ssr/20"
-          src="/assets/home/friends.png"
-          alt="Friends"
-          draggable={false}
-        />
+      <div
+        className={cn(
+          "relative",
+          "before:absolute before:-left-36 before:-top-28 before:size-[32rem] before:bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] before:from-purple-600 before:rounded-full before:blur-3xl before:opacity-30 before:z-[1]"
+        )}
+      >
+        <div className={cn("relative max-w-[900px] z-20")}>
+          <img
+            className="w-full h-full rounded-2xl border border-ssr/20"
+            src="/assets/home/friends.png"
+            alt="Friends"
+            draggable={false}
+          />
+        </div>
       </div>
     </div>
   );

@@ -52,7 +52,7 @@ function Title() {
         ScoreSaber Reloaded
       </h1>
       <p className="max-w-sm md:max-w-xl md:text-lg opacity-85">
-        Scoresaber Reloaded is a new way to view your scores and get more stats about your and your plays
+        ScoreSaber Reloaded is a new way to view your scores and get more stats about you and your plays
       </p>
     </>
   );
@@ -66,7 +66,7 @@ function Buttons() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.35, duration: 0.7, ease: "easeOut" }}
     >
-      <Link href="https://discord.gg/kmNfWGA4A8" target="_blank">
+      <Link href="/search" target="_blank">
         <Button className="max-w-52 flex gap-2.5 bg-pp hover:bg-pp/85 text-white text-base">
           <UserSearch className="size-6" />
           <span>Player Search</span>
