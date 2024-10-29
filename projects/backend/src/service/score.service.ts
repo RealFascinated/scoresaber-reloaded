@@ -189,9 +189,12 @@ export class ScoreService {
     if (player == undefined) {
       return;
     }
+
     // Update player name
-    player.name = playerName;
-    await player.save();
+    if (playerName !== "Unknown") {
+      player.name = playerName;
+      await player.save();
+    }
 
     // The score has already been tracked, so ignore it.
     if (
@@ -487,8 +490,6 @@ export class ScoreService {
 
               const score = getScoreSaberScoreFromToken(token.score, leaderboard, playerId);
               if (!score) return undefined;
-
-              console.log("boobs");
 
               // Fetch additional data, previous score, and BeatSaver map concurrently
               const [additionalData, previousScore, beatSaverMap] = await Promise.all([
