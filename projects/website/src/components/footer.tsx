@@ -54,7 +54,7 @@ const links: {
     {
       name: "Source Code",
       shortName: "Source",
-      href: "https://git.fascinated.cc/Fascinated/scoresaber-reloadedv3",
+      href: "https://github.com/RealFascinated/scoresaber-reloaded",
     },
     {
       name: "System Status",
@@ -88,7 +88,7 @@ const socialLinks: SocialLinkType[] = [
   {
     name: "GitHub",
     logo: <SiGithub className="size-5 lg:size-6" />,
-    href: "https://git.fascinated.cc/Fascinated/scoresaber-reloadedv3",
+    href: "https://github.com/RealFascinated/scoresaber-reloaded",
   },
 ];
 

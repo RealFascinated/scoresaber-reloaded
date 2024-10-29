@@ -32,7 +32,7 @@ function Alert() {
   return (
     <Link
       className="group mb-1.5 bg-neutral-900 hover:opacity-85 border border-white/5 rounded-full transition-all transform-gpu"
-      href="https://git.fascinated.cc/Fascinated/scoresaber-reloadedv3"
+      href="https://github.com/RealFascinated/scoresaber-reloaded"
       target="_blank"
       draggable={false}
     >
