@@ -90,7 +90,7 @@ function Score({ songArt, songName, songAuthor, setBy }: ScoreProps) {
       {/* Score */}
       <div className="py-3 flex gap-5 items-center">
         {/* Position & Time */}
-        <div className="w-24 flex flex-col gap-1 items-center">
+        <div className="w-24 flex flex-col gap-1 text-center items-center">
           <div className="flex gap-2 items-center">
             <GlobeAmericasIcon className="size-5" />
             <span className="text-ssr">#{getRandomInteger(1, 900)}</span>
