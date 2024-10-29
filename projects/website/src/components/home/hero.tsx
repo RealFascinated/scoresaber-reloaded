@@ -47,14 +47,14 @@ function Alert() {
 
 function Title() {
   return (
-    <>
+    <div className="px-5 flex flex-col">
       <h1 className="text-4xl sm:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-ssr to-pp/85">
         ScoreSaber Reloaded
       </h1>
       <p className="max-w-sm md:max-w-xl md:text-lg opacity-85">
         ScoreSaber Reloaded is a new way to view your scores and get more stats about you and your plays
       </p>
-    </>
+    </div>
   );
 }
 
