@@ -1,6 +1,6 @@
 import { MapDifficulty } from "@ssr/common/score/map-difficulty";
 
-type Difficulty = {
+export type Difficulty = {
   /**
    * The name of the difficulty
    */
@@ -64,13 +64,20 @@ export function getScoreBadgeFromAccuracy(acc: number): ScoreBadge {
 }
 
 /**
+ * Get a random difficulty, except ExpertPlus.
+ */
+export function getRandomDifficulty(): Difficulty {
+  return difficulties[Math.floor(Math.random() * (difficulties.length - 1))];
+}
+
+/**
  * Gets a {@link Difficulty} from its name
  *
  * @param diff the name of the difficulty
  * @returns the difficulty
  */
-export function getDifficulty(diff: MapDifficulty) {
-  const difficulty = difficulties.find(d => d.name === diff);
+export function getDifficulty(diff: Difficulty | MapDifficulty) {
+  const difficulty = difficulties.find(d => d.name === (typeof diff === "string" ? diff : diff.name));
   if (!difficulty) {
     throw new Error(`Unknown difficulty: ${diff}`);
   }

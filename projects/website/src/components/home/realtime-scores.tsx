@@ -1,7 +1,7 @@
 import { Database } from "lucide-react";
 import { getRandomInteger } from "@/common/utils";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
-import { getDifficulty } from "@/common/song-utils";
+import { Difficulty, getDifficulty, getRandomDifficulty } from "@/common/song-utils";
 import { AnimatedList } from "@/components/ui/animated-list";
 
 type ScoreProps = {
@@ -28,7 +28,7 @@ let scores: ScoreProps[] = [
     songArt: "https://cdn.scoresaber.com/covers/8E4B7917C01E5987A5B3FF13FAA3CA8F27D21D34.png",
     songName: "RATATA",
     songAuthor: "Skrillex, Missy Elliot & Mr. Oizo",
-    setBy: "Minion",
+    setBy: "Rainnny",
   },
   {
     songArt: "https://cdn.scoresaber.com/covers/98F73BD330852EAAEBDC695140EAC8F2027AEEC8.png",
@@ -63,7 +63,7 @@ export default function RealtimeScores() {
 
       {/* Content */}
       <div className="w-full flex flex-col justify-center items-center">
-        <AnimatedList className="w-full max-w-[32rem] h-96 divide-y divide-muted overflow-hidden">
+        <AnimatedList className="w-full max-w-[32rem] h-96 divide-y divide-muted overflow-hidden" delay={1500}>
           {scores.map((score, index) => (
             <Score key={index} {...score} />
           ))}
@@ -74,6 +74,7 @@ export default function RealtimeScores() {
 }
 
 function Score({ songArt, songName, songAuthor, setBy }: ScoreProps) {
+  const difficulty: Difficulty = getRandomDifficulty();
   return (
     <figure className="py-2 flex flex-col text-sm">
       {/* Set By */}
@@ -98,10 +99,10 @@ function Score({ songArt, songName, songAuthor, setBy }: ScoreProps) {
           <div
             className="absolute inset-x-0 bottom-0 py-px flex justify-center text-xs rounded-t-lg"
             style={{
-              backgroundColor: getDifficulty("Hard").color + "f0", // Transparency value (in hex 0-255)
+              backgroundColor: getDifficulty(difficulty).color + "f0", // Transparency value (in hex 0-255)
             }}
           >
-            Hard
+            {difficulty.name}
           </div>
         </div>
 
