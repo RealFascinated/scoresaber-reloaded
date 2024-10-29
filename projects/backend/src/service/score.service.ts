@@ -340,13 +340,15 @@ export class ScoreService {
     const scores: PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>[] = [];
     for (const { score: scoreData } of foundScores) {
       const score = new ScoreSaberScoreModel(scoreData).toObject() as ScoreSaberScore;
-      const leaderboard = await LeaderboardService.getLeaderboard<ScoreSaberLeaderboard>(
+      const leaderboardResponse = await LeaderboardService.getLeaderboard<ScoreSaberLeaderboard>(
         "scoresaber",
         score.leaderboardId + ""
       );
-      if (!leaderboard) {
+      if (!leaderboardResponse) {
         continue;
       }
+      const { leaderboard, beatsaver } = leaderboardResponse;
+
       try {
         const player = await PlayerService.getPlayer(score.playerId);
         if (player !== undefined) {
@@ -361,10 +363,20 @@ export class ScoreService {
         };
       }
 
+      const additionalData = await ScoreService.getAdditionalScoreData(
+        score.playerId,
+        leaderboard.songHash,
+        `${leaderboard.difficulty.difficulty}-${leaderboard.difficulty.characteristic}`,
+        score.score
+      );
+      if (additionalData) {
+        score.additionalData = additionalData;
+      }
+
       scores.push({
         score: score,
-        leaderboard: leaderboard.leaderboard,
-        beatSaver: leaderboard.beatsaver,
+        leaderboard: leaderboard,
+        beatSaver: beatsaver,
       });
     }
     console.log(`Got ${scores.length} scores in ${Date.now() - before}ms (timeframe: ${timeframe}, limit: ${amount})`);
