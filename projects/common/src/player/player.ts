@@ -57,5 +57,5 @@ export default class Player {
 }
 
 export type StatisticChange = {
-  [key in Timeframe]: PlayerHistory;
+  [key in Timeframe]?: PlayerHistory;
 };
