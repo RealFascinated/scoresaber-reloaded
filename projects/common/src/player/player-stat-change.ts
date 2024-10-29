@@ -1,5 +1,5 @@
 import ScoreSaberPlayer from "./impl/scoresaber-player";
-import { Timeframe } from "../timeframe";
+import { StatisticRange } from "./player";
 
 export type PlayerStatValue = {
   /**
@@ -10,7 +10,7 @@ export type PlayerStatValue = {
   /**
    * The value of the stat.
    */
-  value: (player: ScoreSaberPlayer, range: Timeframe) => number | undefined;
+  value: (player: ScoreSaberPlayer, range: StatisticRange) => number | undefined;
 };
 
 export type PlayerStatChangeType =

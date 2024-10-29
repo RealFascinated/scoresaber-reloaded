@@ -4,7 +4,7 @@ import { capitalizeFirstLetter } from "@/common/string-utils";
 import Tooltip from "@/components/tooltip";
 import { ReactElement } from "react";
 import { PlayerStatValue } from "@ssr/common/player/player-stat-change";
-import { Timeframe } from "@ssr/common/timeframe";
+import { StatisticRange } from "@ssr/common/player/player";
 
 type ChangeOverTimeProps = {
   /**
@@ -40,7 +40,7 @@ export function ChangeOverTime({ player, type, children }: ChangeOverTimeProps) 
   };
 
   // Renders the change for a given time frame
-  const renderChange = (value: number | undefined, range: Timeframe) => (
+  const renderChange = (value: number | undefined, range: StatisticRange) => (
     <p>
       {capitalizeFirstLetter(range)} Change:{" "}
       <span className={value === undefined ? "" : value >= 0 ? (value === 0 ? "" : "text-green-500") : "text-red-500"}>
