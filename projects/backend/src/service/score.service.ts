@@ -373,6 +373,11 @@ export class ScoreService {
         score.additionalData = additionalData;
       }
 
+      const previousScore = await this.getPreviousScore(score.playerId, leaderboard.id + "", score.timestamp);
+      if (previousScore) {
+        score.previousScore = previousScore;
+      }
+
       scores.push({
         score: score,
         leaderboard: leaderboard,
