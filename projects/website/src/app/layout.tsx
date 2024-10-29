@@ -50,12 +50,12 @@ export const metadata: Metadata = {
     "Stream enhancement, Professional overlay, Easy to use overlay builder.",
   openGraph: {
     title: "Scoresaber Reloaded",
-    description: "Scoresaber Reloaded is a new way to view your scores and get more stats about your and your plays",
+    description: "ScoreSaber Reloaded is a new way to view your scores and get more stats about you and your plays",
     url: "https://ssr.fascinated.cc",
     locale: "en_US",
     type: "website",
   },
-  description: "Scoresaber Reloaded is a new way to view your scores and get more stats about your and your plays",
+  description: "ScoreSaber Reloaded is a new way to view your scores and get more stats about you and your plays",
 };
 
 export const viewport: Viewport = {
