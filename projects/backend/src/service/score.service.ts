@@ -363,17 +363,18 @@ export class ScoreService {
         };
       }
 
-      const additionalData = await ScoreService.getAdditionalScoreData(
-        score.playerId,
-        leaderboard.songHash,
-        `${leaderboard.difficulty.difficulty}-${leaderboard.difficulty.characteristic}`,
-        score.score
-      );
+      const [additionalData, previousScore] = await Promise.all([
+        this.getAdditionalScoreData(
+          score.playerId,
+          leaderboard.songHash,
+          `${leaderboard.difficulty.difficulty}-${leaderboard.difficulty.characteristic}`,
+          score.score
+        ),
+        this.getPreviousScore(score.playerId, leaderboard.id + "", score.timestamp),
+      ]);
       if (additionalData) {
         score.additionalData = additionalData;
       }
-
-      const previousScore = await this.getPreviousScore(score.playerId, leaderboard.id + "", score.timestamp);
       if (previousScore) {
         score.previousScore = previousScore;
       }
