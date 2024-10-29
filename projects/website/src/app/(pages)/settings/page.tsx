@@ -3,7 +3,7 @@ import Settings from "@/components/settings/settings";
 
 export default function SettingsPage() {
   return (
-    <main className="w-full">
+    <main className="min-h-screen w-full">
       <Card className="w-full gap-4">
         <div>
           <p className="font-semibold">Settings</p>
