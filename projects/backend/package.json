@@ -24,7 +24,7 @@
     "elysia-autoroutes": "^0.5.0",
     "elysia-decorators": "^1.0.2",
     "elysia-helmet": "^2.0.0",
-    "eslint": "^8.57.1",
+    "eslint": "^9.13.0",
     "extract-colors": "^4.1.0",
     "jimp": "^1.6.0",
     "ky": "^1.7.2",
