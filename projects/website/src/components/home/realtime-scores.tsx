@@ -47,14 +47,14 @@ scores = Array.from({ length: 32 }, () => scores).flat();
 
 export default function RealtimeScores() {
   return (
-    <div className="px-5 -mt-20 flex flex-row-reverse gap-10 select-none">
+    <div className="px-5 -mt-20 flex flex-col lg:flex-row-reverse gap-10 select-none">
       {/* Header */}
       <div className="flex flex-col gap-2.5 text-right items-end">
         <div className="flex flex-row-reverse gap-3 items-center text-yellow-400">
           <Database className="p-2 size-11 bg-yellow-800/15 rounded-lg" />
           <h1 className="text-3xl sm:text-4xl font-bold">Realtime Scores</h1>
         </div>
-        <p className="max-w-5xl text-sm sm:text-base opacity-85">
+        <p className="max-w-2xl lg:max-w-5xl text-sm sm:text-base opacity-85">
           <span className="text-lg font-semibold text-yellow-500">Nec detracto voluptatibus!</span> Vulputate duis
           dolorum iuvaret disputationi ceteros te noluisse himenaeos bibendum dolores molestiae lorem elaboraret porro
           brute tation simul laudem netus odio has in tibique.
@@ -63,7 +63,7 @@ export default function RealtimeScores() {
 
       {/* Content */}
       <div className="w-full flex flex-col justify-center items-center">
-        <AnimatedList className="h-96 divide-y divide-muted overflow-hidden">
+        <AnimatedList className="w-full max-w-[32rem] h-96 divide-y divide-muted overflow-hidden">
           {scores.map((score, index) => (
             <Score key={index} {...score} />
           ))}
@@ -75,7 +75,7 @@ export default function RealtimeScores() {
 
 function Score({ songArt, songName, songAuthor, setBy }: ScoreProps) {
   return (
-    <figure className="w-[32rem] py-2 flex flex-col text-sm">
+    <figure className="py-2 flex flex-col text-sm">
       {/* Set By */}
       <span>
         Set by <span className="text-ssr">{setBy}</span>
