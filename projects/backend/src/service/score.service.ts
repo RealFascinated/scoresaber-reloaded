@@ -326,7 +326,6 @@ export class ScoreService {
     const date: Date = daysAgo == -1 ? new Date(0) : getDaysAgoDate(daysAgo);
     const foundScores = await ScoreSaberScoreModel.aggregate([
       { $match: { timestamp: { $gte: date } } },
-      { $sort: { timestamp: -1 } },
       {
         $group: {
           _id: { leaderboardId: "$leaderboardId", playerId: "$playerId" },
