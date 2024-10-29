@@ -75,7 +75,7 @@ app.use(
 app.use(
   cron({
     name: "player-scores-tracker-cron",
-    pattern: "0 4 * * *", // Every day at 04:00
+    pattern: "*/1 * * * *", // Every day at 04:00
     timezone: "Europe/London", // UTC time
     protect: true,
     run: async () => {

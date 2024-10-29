@@ -264,6 +264,7 @@ export class PlayerService {
    * @private
    */
   private static async refreshPlayerScoreSaberScores(player: PlayerDocument) {
+    console.log(player);
     console.log(`Refreshing scores for ${player.id}...`);
     let page = 1;
     let hasMorePages = true;
@@ -324,7 +325,7 @@ export class PlayerService {
     console.log(`Found ${players.length} players to refresh.`);
 
     for (const player of players) {
-      await this.refreshAllPlayerScores(player.id);
+      await this.refreshAllPlayerScores(player);
       await delay(SCORESABER_REQUEST_COOLDOWN); // Cooldown between players
     }
   }
