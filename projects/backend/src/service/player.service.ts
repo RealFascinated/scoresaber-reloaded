@@ -264,7 +264,6 @@ export class PlayerService {
    * @private
    */
   private static async refreshPlayerScoreSaberScores(player: PlayerDocument) {
-    console.log(player);
     console.log(`Refreshing scores for ${player.id}...`);
     let page = 1;
     let hasMorePages = true;
