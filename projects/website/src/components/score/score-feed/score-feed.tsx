@@ -8,6 +8,7 @@ import useWebSocket, { ReadyState } from "react-use-websocket";
 import { ScoreSaberWebsocketMessageToken } from "@ssr/common/types/token/scoresaber/websocket/scoresaber-websocket-message";
 import Score from "@/components/score/score";
 import { getScoreSaberLeaderboardFromToken, getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
 
 export default function ScoreFeed() {
   const { readyState, lastJsonMessage } = useWebSocket<ScoreSaberWebsocketMessageToken>("wss://scoresaber.com/ws");
@@ -51,12 +52,15 @@ export default function ScoreFeed() {
 
         return (
           <div key={score.scoreId} className="flex flex-col py-2">
-            <p className="text-sm">
-              Set by{" "}
+            <div className="flex flex-row gap-2 items-center">
+              <Avatar className="w-6 h-6">
+                <AvatarImage src={player.profilePicture} />
+              </Avatar>
               <Link href={`/player/${player.id}`}>
                 <span className="text-ssr hover:brightness-[66%] transition-all transform-gpu">{player.name}</span>
               </Link>
-            </p>
+              <p className="text-gray-400 text-xs"> on {scoreToken.score.deviceHmd}</p>
+            </div>
             <Score
               score={score}
               leaderboard={leaderboard}
