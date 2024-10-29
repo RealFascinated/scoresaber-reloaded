@@ -44,7 +44,7 @@ const items: NavbarItem[] = [
   },
   {
     name: "Top Scores",
-    link: "/scores/top",
+    link: "/scores/top/weekly",
     openInNewTab: false,
   },
 ];

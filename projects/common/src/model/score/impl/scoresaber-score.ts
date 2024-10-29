@@ -1,4 +1,4 @@
-import { getModelForClass, index, modelOptions, plugin, Prop, ReturnModelType, Severity } from "@typegoose/typegoose";
+import { getModelForClass, modelOptions, plugin, Prop, ReturnModelType, Severity } from "@typegoose/typegoose";
 import Score from "../score";
 import { type ScoreSaberLeaderboardPlayerInfoToken } from "../../../types/token/scoresaber/score-saber-leaderboard-player-info-token";
 import { Document } from "mongoose";
@@ -20,7 +20,6 @@ import { PreviousScore } from "../previous-score";
     },
   },
 })
-@index({ leaderboardId: 1, playerId: 1, timestamp: -1 }) // Compound index for optimized queries
 @plugin(AutoIncrementID, {
   field: "_id",
   startAt: 1,

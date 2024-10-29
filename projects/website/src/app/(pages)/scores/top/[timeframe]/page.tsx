@@ -1,0 +1,23 @@
+import { Metadata } from "next";
+import { Timeframe } from "@ssr/common/timeframe";
+import { TopScoresData } from "@/components/score/top/top-scores-data";
+
+export const metadata: Metadata = {
+  title: "Top Scores",
+  openGraph: {
+    title: "ScoreSaber Reloaded - Top Scores",
+    description: "View the top 50 scores set by players on ScoreSaber.",
+  },
+};
+
+type TopScoresPageProps = {
+  params: Promise<{
+    timeframe: Timeframe;
+  }>;
+};
+
+export default async function TopScoresPage({ params }: TopScoresPageProps) {
+  const { timeframe } = await params;
+
+  return <TopScoresData timeframe={timeframe} />;
+}

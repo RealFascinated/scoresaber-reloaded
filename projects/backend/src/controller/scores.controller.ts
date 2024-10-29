@@ -3,6 +3,7 @@ import { t } from "elysia";
 import { Leaderboards } from "@ssr/common/leaderboard";
 import { TopScoresResponse } from "@ssr/common/response/top-scores-response";
 import { ScoreService } from "../service/score.service";
+import { Timeframe } from "@ssr/common/timeframe";
 
 @Controller("/scores")
 export default class ScoresController {
@@ -77,11 +78,30 @@ export default class ScoresController {
 
   @Get("/top", {
     config: {},
+    query: t.Object({
+      limit: t.Number({ required: true }),
+      timeframe: t.String({ required: true }),
+    }),
   })
-  public async getTopScores(): Promise<TopScoresResponse> {
-    const scores = await ScoreService.getTopScores();
+  public async getTopScores({
+    query: { limit, timeframe },
+  }: {
+    query: { limit: number; timeframe: Timeframe };
+  }): Promise<TopScoresResponse> {
+    if (limit <= 0) {
+      limit = 1;
+    } else if (limit > 100) {
+      limit = 100;
+    }
+    if ((timeframe.toLowerCase() as keyof Timeframe) === undefined) {
+      timeframe = "all";
+    }
+
+    const scores = await ScoreService.getTopScores(limit, timeframe);
     return {
       scores,
+      timeframe,
+      limit,
     };
   }
 }

@@ -1,4 +1,5 @@
 import { PlayerHistory } from "./player-history";
+import { Timeframe } from "../timeframe";
 
 export default class Player {
   /**
@@ -55,7 +56,6 @@ export default class Player {
   }
 }
 
-export type ChangeRange = "daily" | "weekly" | "monthly";
 export type StatisticChange = {
-  [key in ChangeRange]: PlayerHistory;
+  [key in Timeframe]: PlayerHistory;
 };
