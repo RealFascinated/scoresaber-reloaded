@@ -1,32 +1,20 @@
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import { AppStatistics } from "@ssr/common/types/backend/app-statistics";
-import { kyFetch } from "@ssr/common/utils/utils";
-import { Config } from "@ssr/common/config";
-import { AppStats } from "@/components/app-statistics";
-
-export const dynamic = "force-dynamic"; // Always generate the page on load
+import HeroSection from "@/components/home/hero";
+import DataCollection from "@/components/home/data-collection";
+import Friends from "@/components/home/friends";
+import SiteStats from "@/components/home/site-stats";
+import RealtimeScores from "@/components/home/realtime-scores";
 
 export default async function HomePage() {
-  const statistics = await kyFetch<AppStatistics>(Config.apiUrl + "/statistics");
-
   return (
-    <main className="flex flex-col items-center w-full gap-6 text-center">
-      <div className="flex items-center flex-col">
-        <p className="font-semibold text-2xl">ScoreSaber Reloaded</p>
-        <p className="text-center">Welcome to the ScoreSaber Reloaded website.</p>
-      </div>
-
-      <div className="flex items-center flex-col">
-        <p>ScoreSaber Reloaded is a website that allows you to track your ScoreSaber data over time.</p>
-      </div>
-
-      {statistics && <AppStats initialStatistics={statistics} />}
-
-      <div className="flex gap-2 flex-wrap">
-        <Link href="/search">
-          <Button className="w-fit">Get started</Button>
-        </Link>
+    <main className="-mt-3 w-screen min-h-screen bg-[#0f0f0f]">
+      <div className="flex flex-col items-center">
+        <div className="max-w-screen-2xl mt-48 flex flex-col gap-56">
+          <HeroSection />
+          <DataCollection />
+          <Friends />
+          <SiteStats />
+          <RealtimeScores />
+        </div>
       </div>
     </main>
   );

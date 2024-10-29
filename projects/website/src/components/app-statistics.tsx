@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { kyFetch } from "@ssr/common/utils/utils";
 import { Config } from "@ssr/common/config";
 import { useEffect, useState } from "react";
+import { User } from "lucide-react";
 
 type AppStatisticsProps = {
   /**
@@ -29,13 +30,24 @@ export function AppStats({ initialStatistics }: AppStatisticsProps) {
   }, [data]);
 
   return (
-    <div className="flex items-center flex-col">
-      <p className="font-semibold">Site Statistics</p>
-      <Statistic title="Tracked Players" value={statistics.trackedPlayers} />
-      <Statistic title="Tracked Scores" value={statistics.trackedScores} />
-      <Statistic title="Additional Scores Data" value={statistics.additionalScoresData} />
-      <Statistic title="Cached BeatSaver Maps" value={statistics.cachedBeatSaverMaps} />
-      <Statistic title="Cached ScoreSaber Leaderboards" value={statistics.cachedScoreSaberLeaderboards} />
+    <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 sm:gap-7 md:grid-cols-4 md:gap-12 lg:grid-cols-5">
+      <Statistic icon={<User className="size-10" />} title="Tracked Players" value={statistics.trackedPlayers} />
+      <Statistic icon={<User className="size-10" />} title="Tracked Scores" value={statistics.trackedScores} />
+      <Statistic
+        icon={<User className="size-10" />}
+        title="Additional Scores Data"
+        value={statistics.additionalScoresData}
+      />
+      <Statistic
+        icon={<User className="size-10" />}
+        title="Cached BeatSaver Maps"
+        value={statistics.cachedBeatSaverMaps}
+      />
+      <Statistic
+        icon={<User className="size-10" />}
+        title="Cached ScoreSaber Leaderboards"
+        value={statistics.cachedScoreSaberLeaderboards}
+      />
     </div>
   );
 }

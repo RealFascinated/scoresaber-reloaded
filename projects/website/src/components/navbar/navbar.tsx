@@ -6,7 +6,6 @@ import NavbarButton from "./navbar-button";
 import ProfileButton from "./profile-button";
 import { TrendingUpIcon } from "lucide-react";
 import FriendsButton from "@/components/navbar/friends-button";
-import { PiSwordFill } from "react-icons/pi";
 
 type NavbarItem = {
   name: string;
