@@ -6,7 +6,6 @@ import useDatabase from "../../hooks/use-database";
 import { useToast } from "@/hooks/use-toast";
 import Tooltip from "../tooltip";
 import { Button } from "../ui/button";
-import { revalidatePath } from "next/cache";
 import { setCookieValue } from "@ssr/common/utils/cookie-utils";
 
 type Props = {
@@ -33,7 +32,6 @@ export default function ClaimProfile({ playerId }: Props) {
       title: "Profile Claimed",
       description: "You have claimed this profile.",
     });
-    revalidatePath("/player/[...slug]");
   }
 
   // Database is not ready

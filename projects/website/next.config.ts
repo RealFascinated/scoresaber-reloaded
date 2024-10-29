@@ -43,7 +43,6 @@ const withBundleAnalyzer = nextBundleAnalyzer({
 });
 
 const config = withBundleAnalyzer(nextConfig);
-
 export default isProduction()
   ? withSentryConfig(config, {
       org: "fascinatedcc",
