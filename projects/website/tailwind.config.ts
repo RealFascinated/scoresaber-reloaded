@@ -1,5 +1,8 @@
 import type { Config } from "tailwindcss";
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const defaultTheme = require("tailwindcss/defaultTheme");
+
 const config: Config = {
   darkMode: ["class"],
   content: [
@@ -8,6 +11,10 @@ const config: Config = {
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
+    screens: {
+      xs: "475px",
+      ...defaultTheme.screens,
+    },
     extend: {
       colors: {
         pp: "#4858ff",
