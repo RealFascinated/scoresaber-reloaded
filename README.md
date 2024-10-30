@@ -13,12 +13,11 @@ ScoreSaber Reloaded is a new way to view your scores and get more stats about yo
 - [Support](#support)
 
 ## Features
-- Score Data Collection
-- Friends
-- Statistics
-- Realtime Scores
+- [Score Data Collection](https://ssr.fascinated.cc/#data-collection)
+- [Friends](https://ssr.fascinated.cc/#friends)
+- [Statistics](https://ssr.fascinated.cc/#statistics)
+- [Realtime Scores](https://ssr.fascinated.cc/scores/live)
 - More to come...
-
 
 ## App Preview
 
