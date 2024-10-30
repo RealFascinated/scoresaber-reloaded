@@ -8,7 +8,7 @@ import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { LeaderboardResponse } from "@ssr/common/response/leaderboard-response";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { fetchLeaderboard } from "@ssr/common/utils/leaderboard.util";
-import { fetchLeaderboardScores } from "../../../../../../common/src/utils/score.util.ts";
+import { fetchLeaderboardScores } from "@ssr/common/utils/score.util";
 import LeaderboardScoresResponse from "@ssr/common/response/leaderboard-scores-response";
 import { SSRCache } from "@ssr/common/cache";
 
