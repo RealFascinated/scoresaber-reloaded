@@ -23,7 +23,12 @@ type MapAndScoreData = {
 export function MapStats({ leaderboard, beatSaver }: MapAndScoreData) {
   const metadata = beatSaver?.metadata;
   const mapDiff = beatSaver
-    ? getBeatSaverDifficulty(beatSaver, leaderboard.songHash, leaderboard.difficulty.difficulty)
+    ? getBeatSaverDifficulty(
+        beatSaver,
+        leaderboard.songHash,
+        leaderboard.difficulty.difficulty,
+        leaderboard.difficulty.characteristic
+      )
     : undefined;
 
   return (

@@ -3,7 +3,6 @@ import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils
 import { isProduction } from "@ssr/common/utils/utils";
 import { Metadata } from "@ssr/common/types/metadata";
 import { NotFoundError } from "elysia";
-import BeatSaverService from "./beatsaver.service";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { ScoreSort } from "@ssr/common/score/score-sort";
 import { Leaderboards } from "@ssr/common/leaderboard";
@@ -474,14 +473,22 @@ export class ScoreService {
             );
 
             const scorePromises = leaderboardScores.playerScores.map(async token => {
-              const leaderboard = getScoreSaberLeaderboardFromToken(token.leaderboard);
-              if (!leaderboard) return undefined;
+              const leaderboardResponse = await LeaderboardService.getLeaderboard<ScoreSaberLeaderboard>(
+                "scoresaber",
+                token.leaderboard.id + ""
+              );
+              if (!leaderboardResponse) {
+                return undefined;
+              }
+              const { leaderboard, beatsaver } = leaderboardResponse;
 
               const score = getScoreSaberScoreFromToken(token.score, leaderboard, playerId);
-              if (!score) return undefined;
+              if (!score) {
+                return undefined;
+              }
 
               // Fetch additional data, previous score, and BeatSaver map concurrently
-              const [additionalData, previousScore, beatSaverMap] = await Promise.all([
+              const [additionalData, previousScore] = await Promise.all([
                 this.getAdditionalScoreData(
                   playerId,
                   leaderboard.songHash,
@@ -489,7 +496,6 @@ export class ScoreService {
                   score.score
                 ),
                 this.getPreviousScore(playerId, leaderboard.id + "", score.timestamp),
-                BeatSaverService.getMap(leaderboard.songHash),
               ]);
 
               if (additionalData) {
@@ -502,7 +508,7 @@ export class ScoreService {
               return {
                 score: score,
                 leaderboard: leaderboard,
-                beatSaver: beatSaverMap,
+                beatSaver: beatsaver,
               } as PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>;
             });
 
