@@ -41,7 +41,7 @@ export default function Navbar() {
   return (
     <nav
       className={cn(
-        "sticky inset-x-0 top-0 w-screen px-1 xs:px-5 py-1 flex justify-between lg:justify-around items-center backdrop-blur-md border-b border-muted transition-all transform-gpu select-none z-50",
+        "sticky inset-x-0 top-0 w-screen px-1 xs:px-5 py-1 flex justify-between lg:justify-around items-center backdrop-blur-md border-b border-muted select-none z-50",
         hasScrolled ? "h-11 bg-landing/75" : "h-[3.25rem] bg-landing"
       )}
     >
