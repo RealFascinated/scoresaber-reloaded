@@ -1,7 +1,6 @@
 "use client";
 
 import { useLiveQuery } from "dexie-react-hooks";
-import { getImageUrl } from "@/common/image-utils";
 import useDatabase from "../hooks/use-database";
 import { Config } from "@ssr/common/config";
 
@@ -38,7 +37,7 @@ export default function BackgroundCover() {
   return (
     // eslint-disable-next-line @next/next/no-img-element
     <img
-      src={getImageUrl(backgroundCover)}
+      src={backgroundCover}
       alt="Background image"
       fetchPriority="high"
       className={`fixed -z-50 object-cover w-screen h-screen blur-sm brightness-[33%] pointer-events-none select-none`}

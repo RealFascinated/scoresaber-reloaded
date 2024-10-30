@@ -3,16 +3,6 @@ import { Colors } from "@/common/colors";
 import { Config } from "@ssr/common/config";
 
 /**
- * Proxies all non-localhost images to make them load faster.
- *
- * @param originalUrl the original image url
- * @returns the new image url
- */
-export function getImageUrl(originalUrl: string) {
-  return `${!Config.websiteUrl.includes("localhost") ? "https://img.fascinated.cc/upload/q_70/" : ""}${originalUrl}`;
-}
-
-/**
  * Gets the average color of an image
  *
  * @param src the image url
