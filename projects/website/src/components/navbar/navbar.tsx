@@ -64,7 +64,7 @@ export default function Navbar() {
       </div>
 
       {/* Right */}
-      <div className="pl-6 flex gap-2 md:gap-4 items-center divide-x md:divide-x-2 divide-muted transition-all transform-gpu">
+      <div className="md:pl-6 flex gap-2 md:gap-4 items-center divide-x md:divide-x-2 divide-muted transition-all transform-gpu">
         <div className="flex gap-2 md:gap-4 items-center transition-all transform-gpu">
           <PlayerSearch />
           <SimpleNavLink
