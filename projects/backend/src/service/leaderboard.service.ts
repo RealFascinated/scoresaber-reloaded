@@ -14,7 +14,7 @@ import Leaderboard from "@ssr/common/model/leaderboard/leaderboard";
 import { getBeatSaverDifficulty } from "@ssr/common/utils/beatsaver.util";
 
 export default class LeaderboardService {
-  /**
+  /**s
    * Gets the leaderboard.
    *
    * @param leaderboard the leaderboard
