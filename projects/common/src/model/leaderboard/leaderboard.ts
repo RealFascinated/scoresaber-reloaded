@@ -63,7 +63,7 @@ export default class Leaderboard {
    * @private
    */
   @Prop({ required: true })
-  readonly maxScore!: number;
+  maxScore!: number;
 
   /**
    * Whether the leaderboard is ranked.

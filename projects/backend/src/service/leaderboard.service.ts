@@ -79,7 +79,6 @@ export default class LeaderboardService {
         if (leaderboard == undefined) {
           throw new NotFoundError(`Leaderboard not found for "${id}"`);
         }
-
         beatSaverMap = await BeatSaverService.getMap(leaderboard.songHash);
         break;
       }
@@ -88,6 +87,7 @@ export default class LeaderboardService {
       }
     }
 
+    console.log(`Found leaderboard for ${leaderboardName}, id=${id} in ${new Date().getTime() - now.getTime()}ms`);
     return {
       leaderboard: leaderboard as L,
       beatsaver: beatSaverMap,

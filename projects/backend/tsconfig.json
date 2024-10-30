@@ -10,7 +10,6 @@
     "skipLibCheck": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "jsx": "react",
-    "incremental": true
+    "jsx": "react"
   }
 }

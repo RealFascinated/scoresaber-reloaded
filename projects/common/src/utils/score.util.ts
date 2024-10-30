@@ -5,10 +5,10 @@ import { Config } from "../config";
 import { ScoreSort } from "../score/score-sort";
 import LeaderboardScoresResponse from "../response/leaderboard-scores-response";
 import { Page } from "../pagination";
-import { ScoreSaberScore } from "src/model/score/impl/scoresaber-score";
 import { PlayerScore } from "../score/player-score";
 import ScoreSaberLeaderboard from "../model/leaderboard/impl/scoresaber-leaderboard";
 import Score from "../model/score/score";
+import { ScoreSaberScore } from "../model/score/impl/scoresaber-score";
 
 /**
  * Fetches the player's scores
