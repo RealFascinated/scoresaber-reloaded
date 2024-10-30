@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandList } from "@/components/ui/command";
 import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
+import { Search, UserSearch } from "lucide-react";
 import { cn } from "@/common/utils";
 
 export default function PlayerSearch() {
@@ -36,15 +36,15 @@ export default function PlayerSearch() {
     <>
       {/* Button to open */}
       <div
-        className="flex cursor-pointer hover:opacity-85 transition-all transform-gpu select-none"
+        className="group flex cursor-pointer hover:opacity-85 transition-all transform-gpu select-none"
         onClick={() => setOpen(true)}
       >
         <div className={cn("absolute top-1.5 z-10", smallScreen ? "inset-x-0 flex justify-center" : "inset-x-2.5")}>
-          <Search className="size-5" />
+          <UserSearch className="size-5" />
         </div>
 
         <Input
-          className="px-0 pl-9 w-10 md:w-full h-8 rounded-lg cursor-pointer"
+          className="px-0 pl-9 w-10 md:w-full h-8 rounded-lg cursor-pointer group-hover:border-ssr/75 transition-all transform-gpu"
           type="search"
           name="search"
           placeholder={smallScreen ? undefined : "Query..."}

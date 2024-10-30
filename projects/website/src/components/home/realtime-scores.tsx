@@ -57,10 +57,10 @@ export default function RealtimeScores() {
       {/* Header */}
       <div className="flex flex-col gap-2.5 text-right items-end">
         <div className="flex flex-row-reverse gap-3 items-center text-yellow-400">
-          <Flame className="p-2 size-11 bg-yellow-800/15 rounded-lg" />
-          <h1 className="text-3xl sm:text-4xl font-bold">Realtime Scores</h1>
+          <Flame className="p-2 size-10 bg-yellow-800/15 rounded-lg" />
+          <h1 className="text-2xl sm:text-3xl font-bold">Realtime Scores</h1>
         </div>
-        <p className="max-w-2xl lg:max-w-5xl text-sm sm:text-base opacity-85">
+        <p className="max-w-2xl lg:max-w-5xl opacity-85">
           <span className="text-lg font-semibold text-yellow-500">Catch the latest scores as they happen!</span> Stay
           updated with the most recent achievements from Beat Saber players around the world. Watch in real-time as
           players push their limits, hit personal bests, and climb the leaderboard with every score set. Dive into the
