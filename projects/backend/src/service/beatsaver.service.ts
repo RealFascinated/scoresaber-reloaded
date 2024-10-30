@@ -17,14 +17,10 @@ export default class BeatSaverService {
       const toObject = map.toObject() as BeatSaverMap;
 
       // If the map is not found, return undefined
-      if (toObject.notFound) {
+      if (toObject.notFound == true) {
         return undefined;
       }
-
-      // If the map does not need to be refreshed, return it
-      if (!(map as unknown as BeatSaverMap).shouldRefresh()) {
-        return toObject;
-      }
+      return toObject;
     }
 
     // Map needs to be fetched or refreshed

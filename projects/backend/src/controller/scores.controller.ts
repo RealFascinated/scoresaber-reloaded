@@ -93,6 +93,9 @@ export default class ScoresController {
     } else if (limit > 100) {
       limit = 100;
     }
+    if (!["daily", "weekly", "monthly"].includes(timeframe)) {
+      timeframe = "daily";
+    }
 
     const scores = await ScoreService.getTopScores(limit, timeframe);
     return {

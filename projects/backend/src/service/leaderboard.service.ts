@@ -87,7 +87,6 @@ export default class LeaderboardService {
       }
     }
 
-    console.log(`Found leaderboard for ${leaderboardName}, id=${id} in ${new Date().getTime() - now.getTime()}ms`);
     return {
       leaderboard: leaderboard as L,
       beatsaver: beatSaverMap,
