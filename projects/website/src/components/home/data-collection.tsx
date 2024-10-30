@@ -2,7 +2,7 @@ import { Database } from "lucide-react";
 
 export default function DataCollection() {
   return (
-    <div className="px-5 -mt-40 flex flex-col gap-10 select-none">
+    <div id="data-collection" className="px-5 -mt-40 flex flex-col gap-10 select-none">
       {/* Header */}
       <div className="flex flex-col gap-2.5">
         <div className="flex gap-3 items-center text-pp">

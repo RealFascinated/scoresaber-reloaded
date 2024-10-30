@@ -3,7 +3,7 @@ import { cn } from "@/common/utils";
 
 export default function Friends() {
   return (
-    <div className="px-5 -mt-20 flex flex-col gap-10 items-end select-none">
+    <div id="friends" className="px-5 -mt-20 flex flex-col gap-10 items-end select-none">
       {/* Header */}
       <div className="flex flex-col gap-2.5 text-right items-end">
         <div className="flex flex-row-reverse gap-3 items-center text-purple-600">

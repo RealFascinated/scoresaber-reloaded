@@ -48,6 +48,7 @@ scores = Array.from({ length: 32 }, () => scores).flat();
 export default function RealtimeScores() {
   return (
     <div
+      id="realtime"
       className={cn(
         "relative px-5 -mt-20 flex flex-col lg:flex-row-reverse gap-10 select-none",
         "before:absolute before:-left-40 before:-bottom-36 before:size-[28rem] before:bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] before:from-yellow-600 before:rounded-full before:blur-3xl before:opacity-30"

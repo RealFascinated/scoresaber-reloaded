@@ -7,7 +7,7 @@ import { AppStats } from "@/components/app-statistics";
 export default async function SiteStats() {
   const statistics = await kyFetch<AppStatistics>(Config.apiUrl + "/statistics");
   return (
-    <div className="px-5 -mt-20 flex flex-col gap-10 select-none">
+    <div id="stats" className="px-5 -mt-20 flex flex-col gap-10 select-none">
       {/* Header */}
       <div className="flex flex-col gap-2.5">
         <div className="flex gap-3 items-center text-orange-600">
