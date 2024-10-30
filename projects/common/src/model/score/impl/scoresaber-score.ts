@@ -31,7 +31,7 @@ export class ScoreSaberScoreInternal extends Score {
   /**
    * The score's id.
    */
-  @Prop({ required: true, index: true })
+  @Prop({ required: true })
   public readonly scoreId!: string;
 
   /**
@@ -44,7 +44,7 @@ export class ScoreSaberScoreInternal extends Score {
    * The amount of pp for the score.
    * @private
    */
-  @Prop({ required: true, index: true })
+  @Prop({ required: true })
   public pp!: number;
 
   /**
