@@ -335,56 +335,69 @@ export class ScoreService {
       { $limit: amount },
     ]);
 
-    const scores: PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>[] = [];
-    for (const { score: scoreData } of foundScores) {
-      const score = new ScoreSaberScoreModel(scoreData).toObject() as ScoreSaberScore;
-      const leaderboardResponse = await LeaderboardService.getLeaderboard<ScoreSaberLeaderboard>(
-        "scoresaber",
-        score.leaderboardId + ""
-      );
-      if (!leaderboardResponse) {
-        continue;
-      }
-      const { leaderboard, beatsaver } = leaderboardResponse;
+    const scores: (PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard> | null)[] = await Promise.all(
+      foundScores.map(async ({ score: scoreData }) => {
+        const score = new ScoreSaberScoreModel(scoreData).toObject() as ScoreSaberScore;
 
-      try {
-        const player = await PlayerService.getPlayer(score.playerId);
-        if (player !== undefined) {
+        const leaderboardResponse = await LeaderboardService.getLeaderboard<ScoreSaberLeaderboard>(
+          "scoresaber",
+          score.leaderboardId + ""
+        );
+        if (!leaderboardResponse) {
+          return null; // Skip this score if no leaderboardResponse is found
+        }
+
+        const { leaderboard, beatsaver } = leaderboardResponse;
+
+        try {
+          const player = await PlayerService.getPlayer(score.playerId);
+          if (player) {
+            score.playerInfo = {
+              id: player.id,
+              name: player.name,
+            };
+          }
+        } catch {
           score.playerInfo = {
-            id: player.id,
-            name: player.name,
+            id: score.playerId,
           };
         }
-      } catch {
-        score.playerInfo = {
-          id: score.playerId,
+
+        const [additionalData, previousScore] = await Promise.all([
+          this.getAdditionalScoreData(
+            score.playerId,
+            leaderboard.songHash,
+            `${leaderboard.difficulty.difficulty}-${leaderboard.difficulty.characteristic}`,
+            score.score
+          ),
+          this.getPreviousScore(score.playerId, leaderboard.id + "", score.timestamp),
+        ]);
+
+        if (additionalData) {
+          score.additionalData = additionalData;
+        }
+        if (previousScore) {
+          score.previousScore = previousScore;
+        }
+
+        return {
+          score: score,
+          leaderboard: leaderboard,
+          beatSaver: beatsaver,
         };
-      }
+      })
+    );
 
-      const [additionalData, previousScore] = await Promise.all([
-        this.getAdditionalScoreData(
-          score.playerId,
-          leaderboard.songHash,
-          `${leaderboard.difficulty.difficulty}-${leaderboard.difficulty.characteristic}`,
-          score.score
-        ),
-        this.getPreviousScore(score.playerId, leaderboard.id + "", score.timestamp),
-      ]);
-      if (additionalData) {
-        score.additionalData = additionalData;
-      }
-      if (previousScore) {
-        score.previousScore = previousScore;
-      }
+    // Filter out any null entries that might result from skipped scores
+    const filteredScores = scores.filter(score => score !== null) as PlayerScore<
+      ScoreSaberScore,
+      ScoreSaberLeaderboard
+    >[];
 
-      scores.push({
-        score: score,
-        leaderboard: leaderboard,
-        beatSaver: beatsaver,
-      });
-    }
-    console.log(`Got ${scores.length} scores in ${Date.now() - before}ms (timeframe: ${timeframe}, limit: ${amount})`);
-    return scores;
+    console.log(
+      `Got ${filteredScores.length} scores in ${Date.now() - before}ms (timeframe: ${timeframe}, limit: ${amount})`
+    );
+    return filteredScores;
   }
 
   /**
