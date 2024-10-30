@@ -10,7 +10,9 @@ export default function DataCollection() {
           <h1 className="text-3xl sm:text-4xl font-bold">Data Collection</h1>
         </div>
         <p className="max-w-5xl text-sm sm:text-base opacity-85">
-          posidonium novum ancillae ius conclusionemque splendide vel.
+          Our platform collects and curates extensive player data, from scores to performance metrics, giving you an
+          in-depth view of your gameplay like never before. Unlike other sites, we go beyond the basics, providing
+          unmatched insights and tracking precision.
         </p>
       </div>
 

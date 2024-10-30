@@ -60,9 +60,10 @@ export default function RealtimeScores() {
           <h1 className="text-3xl sm:text-4xl font-bold">Realtime Scores</h1>
         </div>
         <p className="max-w-2xl lg:max-w-5xl text-sm sm:text-base opacity-85">
-          <span className="text-lg font-semibold text-yellow-500">Nec detracto voluptatibus!</span> Vulputate duis
-          dolorum iuvaret disputationi ceteros te noluisse himenaeos bibendum dolores molestiae lorem elaboraret porro
-          brute tation simul laudem netus odio has in tibique.
+          <span className="text-lg font-semibold text-yellow-500">Catch the latest scores as they happen!</span> Stay
+          updated with the most recent achievements from Beat Saber players around the world. Watch in real-time as
+          players push their limits, hit personal bests, and climb the leaderboard with every score set. Dive into the
+          action and track the excitement!
         </p>
       </div>
 

@@ -15,7 +15,8 @@ export default async function SiteStats() {
           <h1 className="text-3xl sm:text-4xl font-bold">Site Statistics</h1>
         </div>
         <p className="max-w-5xl text-sm sm:text-base opacity-85">
-          posidonium novum ancillae ius conclusionemque splendide vel.
+          Discover insights into our community’s activity with real-time site statistics, showcasing the total scores
+          set, additional scores data, and more.
         </p>
       </div>
 
