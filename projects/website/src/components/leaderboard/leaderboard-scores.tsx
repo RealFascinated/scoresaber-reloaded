@@ -120,8 +120,6 @@ export default function LeaderboardScores({
       return;
     }
 
-    console.log(selectedLeaderboardId);
-
     // Update the URL
     window.history.replaceState(null, "", `/leaderboard/${selectedLeaderboardId}/${currentPage}`);
   }, [selectedLeaderboardId, currentPage, disableUrlChanging]);

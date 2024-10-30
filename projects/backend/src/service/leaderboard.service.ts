@@ -14,7 +14,7 @@ import Leaderboard from "@ssr/common/model/leaderboard/leaderboard";
 import { getBeatSaverDifficulty } from "@ssr/common/utils/beatsaver.util";
 
 export default class LeaderboardService {
-  /**s
+  /**
    * Gets the leaderboard.
    *
    * @param leaderboard the leaderboard
@@ -81,22 +81,6 @@ export default class LeaderboardService {
           throw new NotFoundError(`Leaderboard not found for "${id}"`);
         }
         beatSaverMap = await BeatSaverService.getMap(leaderboard.songHash);
-
-        // Fix maxScore for leaderboards that don't have it
-        if (leaderboard.maxScore == 0) {
-          const beatSaverDifficulty = beatSaverMap
-            ? getBeatSaverDifficulty(
-                beatSaverMap,
-                leaderboard.songHash,
-                leaderboard.difficulty.difficulty,
-                leaderboard.difficulty.characteristic
-              )
-            : undefined;
-          if (beatSaverDifficulty && cachedLeaderboard != null && beatSaverDifficulty.maxScore != 0) {
-            leaderboard.maxScore = beatSaverDifficulty.maxScore;
-            await cachedLeaderboard.save();
-          }
-        }
         break;
       }
       default: {
@@ -104,6 +88,7 @@ export default class LeaderboardService {
       }
     }
 
+    console.log(`Found leaderboard for ${leaderboardName}, id=${id} in ${now.getTime() - new Date().getTime()}ms`);
     return {
       leaderboard: leaderboard as L,
       beatsaver: beatSaverMap,
