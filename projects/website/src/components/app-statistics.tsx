@@ -6,7 +6,8 @@ import { useQuery } from "@tanstack/react-query";
 import { kyFetch } from "@ssr/common/utils/utils";
 import { Config } from "@ssr/common/config";
 import { useEffect, useState } from "react";
-import { User } from "lucide-react";
+import { Box, List, TrendingUp, User } from "lucide-react";
+import { PiSwordFill } from "react-icons/pi";
 
 type AppStatisticsProps = {
   /**
@@ -32,19 +33,19 @@ export function AppStats({ initialStatistics }: AppStatisticsProps) {
   return (
     <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 sm:gap-7 md:grid-cols-4 md:gap-12 lg:grid-cols-5">
       <Statistic icon={<User className="size-10" />} title="Tracked Players" value={statistics.trackedPlayers} />
-      <Statistic icon={<User className="size-10" />} title="Tracked Scores" value={statistics.trackedScores} />
+      <Statistic icon={<Box className="size-10" />} title="Tracked Scores" value={statistics.trackedScores} />
       <Statistic
-        icon={<User className="size-10" />}
+        icon={<TrendingUp className="size-10" />}
         title="Additional Scores Data"
         value={statistics.additionalScoresData}
       />
       <Statistic
-        icon={<User className="size-10" />}
+        icon={<PiSwordFill className="size-10" />}
         title="Cached BeatSaver Maps"
         value={statistics.cachedBeatSaverMaps}
       />
       <Statistic
-        icon={<User className="size-10" />}
+        icon={<List className="size-10" />}
         title="Cached ScoreSaber Leaderboards"
         value={statistics.cachedScoreSaberLeaderboards}
       />
