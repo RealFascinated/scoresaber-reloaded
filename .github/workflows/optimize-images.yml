@@ -1,8 +1,8 @@
-name: Compress Images on Push to main branch
+name: Compress Images
 on:
   push:
     branches:
-      - main
+      - master
     paths:
       - '**.jpg'
       - '**.jpeg'
