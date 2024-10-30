@@ -11,7 +11,6 @@ import {
   ScoreSaberLeaderboardModel,
 } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import Leaderboard from "@ssr/common/model/leaderboard/leaderboard";
-import { getBeatSaverDifficulty } from "@ssr/common/utils/beatsaver.util";
 
 export default class LeaderboardService {
   /**
