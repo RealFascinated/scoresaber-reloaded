@@ -12,7 +12,7 @@ export default function PlayerSearch() {
 
   useEffect(() => {
     const handleResize = (): void => {
-      setSmallScreen(window.innerWidth <= 768);
+      setSmallScreen(window.innerWidth <= 767);
     };
     handleResize();
     window.addEventListener("resize", handleResize);

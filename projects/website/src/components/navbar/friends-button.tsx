@@ -45,7 +45,11 @@ export default function FriendsButton() {
           <span className="hidden sm:flex">Friends</span>
         </NavbarButton>
       </PopoverTrigger>
-      <PopoverContent className="p-2 select-none" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+      <PopoverContent
+        className="mt-2.5 p-2 select-none"
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
         {friends && friends.length > 0 ? (
           friends.map((friend, index) => <Friend player={friend} key={index} onClick={() => setOpen(false)} />)
         ) : (
