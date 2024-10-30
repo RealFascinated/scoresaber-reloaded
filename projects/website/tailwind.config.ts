@@ -18,6 +18,7 @@ const config: Config = {
     extend: {
       colors: {
         pp: "#4858ff",
+        landing: "#0f0f0f",
         ssr: {
           DEFAULT: "#6773ff",
         },
@@ -74,6 +75,7 @@ const config: Config = {
       animation: {
         "shiny-text": "shiny-text 8s infinite",
         "border-beam": "border-beam calc(var(--duration)*1s) infinite linear",
+        "spin-slow": "spin 2s linear infinite",
       },
       keyframes: {
         "shiny-text": {

@@ -8,13 +8,14 @@ import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import BackgroundCover from "../components/background-cover";
 import DatabaseLoader from "../components/loaders/database-loader";
-import NavBar from "../components/navbar/navbar";
+import NavBar from "../components/navbar/navbar-old";
 import { Colors } from "@/common/colors";
 import OfflineNetwork from "@/components/offline-network";
 import Script from "next/script";
 import { ApiHealth } from "@/components/api/api-health";
 import Footer from "@/components/footer";
 import { getBuildInformation } from "@/common/website-utils";
+import Navbar from "@/components/navbar/navbar";
 
 const siteFont = localFont({
   src: "./fonts/JetBrainsMono.ttf",
@@ -30,7 +31,7 @@ export const metadata: Metadata = {
   authors: [
     {
       name: "Fascinated",
-      url: "https://git.fascinated.cc/Fascinated",
+      url: "https://github.com/RealFascinated/scoresaber-reloaded",
     },
   ],
   robots: {
@@ -82,7 +83,8 @@ export default function RootLayout({
                 <QueryProvider>
                   <ApiHealth />
                   <main className="flex flex-col min-h-screen text-white w-full">
-                    <NavBar />
+                    {/*<NavBar />*/}
+                    <Navbar />
                     <div className="mt-3 z-[1] m-auto flex flex-col flex-grow items-center w-full md:max-w-[1600px]">
                       {children}
                     </div>

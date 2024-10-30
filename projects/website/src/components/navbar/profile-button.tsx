@@ -5,29 +5,30 @@ import { useLiveQuery } from "dexie-react-hooks";
 import Link from "next/link";
 import { Avatar, AvatarImage } from "../ui/avatar";
 import NavbarButton from "./navbar-button";
+import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/score-saber-player-token";
+import Settings from "@/common/database/types/settings";
+import Database from "@/common/database/database";
+import { truncateText } from "@/common/string-utils";
 
 export default function ProfileButton() {
-  const database = useDatabase();
-  const settings = useLiveQuery(() => database.getSettings());
+  const database: Database = useDatabase();
+  const settings = useLiveQuery<Settings | undefined>(() => database.getSettings());
+  const claimedPlayer = useLiveQuery<ScoreSaberPlayerToken | undefined>(() => database.getClaimedPlayer());
 
-  if (settings == undefined) {
-    return; // Settings hasn't loaded yet
-  }
-
-  if (settings.playerId == null) {
-    return; // No player profile claimed
+  if (settings == undefined || claimedPlayer == undefined) {
+    return; // Settings or player hasn't loaded yet
   }
 
   return (
-    <Link href={`/player/${settings.playerId}`} className="flex items-center gap-2 h-full">
+    <Link href={`/player/${settings.playerId}`} className="pl-1 md:pl-2 flex items-center gap-4 h-full">
       <NavbarButton>
-        <Avatar className="w-6 h-6">
+        <Avatar className="size-7">
           <AvatarImage
             alt="Profile Picture"
-            src={`https://img.fascinated.cc/upload/w_24,h_24/https://cdn.scoresaber.com/avatars/${settings.playerId}.jpg`}
+            src={`https://img.fascinated.cc/upload/w_24,h_24/${claimedPlayer.profilePicture}`}
           />
         </Avatar>
-        <p className="hidden lg:block">You</p>
+        <p className="pl-0.5 hidden lg:block text-ssr">{truncateText(claimedPlayer.name, 20)}</p>
       </NavbarButton>
     </Link>
   );

@@ -1,10 +1,15 @@
+import { HTMLAttributes, ReactNode } from "react";
+
 type Props = {
-  children: React.ReactNode;
+  children: ReactNode;
 };
 
-export default function NavbarButton({ children }: Props) {
+export default function NavbarButton({ children, ...props }: Props & HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className="px-2 gap-2 rounded-md hover:bg-blue-500 transform-gpu transition-all h-full flex items-center">
+    <div
+      className="px-2 gap-2 rounded-md hover:opacity-80 transform-gpu transition-all h-full flex items-center"
+      {...props}
+    >
       {children}
     </div>
   );
