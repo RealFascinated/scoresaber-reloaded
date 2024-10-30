@@ -9,17 +9,28 @@ import Friend from "@/components/friend/friend";
 import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { useIsMobile } from "@/hooks/use-is-mobile";
 
 export default function FriendsButton() {
+  const isMobile: boolean = useIsMobile();
+
   const [open, setOpen] = useState<boolean>(false);
   const closeTimeout = useRef<NodeJS.Timeout | null>(null);
 
   const handleMouseEnter = () => {
-    if (closeTimeout.current) clearTimeout(closeTimeout.current);
+    if (isMobile) {
+      return;
+    }
+    if (closeTimeout.current) {
+      clearTimeout(closeTimeout.current);
+    }
     setOpen(true);
   };
 
   const handleMouseLeave = () => {
+    if (isMobile) {
+      return;
+    }
     closeTimeout.current = setTimeout(() => setOpen(false), 200); // Adjust delay as needed
   };
 

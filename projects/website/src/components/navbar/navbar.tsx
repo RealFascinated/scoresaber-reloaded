@@ -40,7 +40,7 @@ export default function Navbar() {
   return (
     <nav
       className={cn(
-        "sticky inset-x-0 top-0 w-screen px-1 xs:px-5 py-1 flex justify-around items-center backdrop-blur-md border-b border-muted transition-all transform-gpu select-none z-50",
+        "sticky inset-x-0 top-0 w-screen px-1 xs:px-5 py-1 flex justify-between lg:justify-around items-center backdrop-blur-md border-b border-muted transition-all transform-gpu select-none z-50",
         hasScrolled ? "h-11 bg-landing/75" : "h-[3.25rem] bg-landing"
       )}
     >
@@ -53,17 +53,17 @@ export default function Navbar() {
           draggable={false}
         >
           <img className="size-7" src="/assets/logos/scoresaber.png" alt="ScoreSaber Logo" />
-          <h1 className="text-xl font-bold text-ssr">SSR</h1>
+          <h1 className="hidden md:flex text-xl font-bold text-ssr">SSR</h1>
         </Link>
 
         {/* Links */}
-        <div className="xs:pl-2 sm:pl-7 flex gap-3 md:gap-5 items-center transition-all transform-gpu">
+        <div className="xs:pl-2 flex gap-3 md:gap-5 items-center transition-all transform-gpu">
           {links.map(link => link)}
         </div>
       </div>
 
       {/* Right */}
-      <div className="pl-7 flex gap-2 md:gap-4 items-center divide-x md:divide-x-2 divide-muted transition-all transform-gpu">
+      <div className="pl-6 flex gap-2 md:gap-4 items-center divide-x md:divide-x-2 divide-muted transition-all transform-gpu">
         <div className="flex gap-2 md:gap-4 items-center transition-all transform-gpu">
           <PlayerSearch />
           <SimpleNavLink content={<CogIcon className="size-7 hover:animate-spin-slow" />} href="/settings" />

@@ -12,7 +12,7 @@ export default function PlayerSearch() {
 
   useEffect(() => {
     const handleResize = (): void => {
-      setSmallScreen(window.innerWidth < 640);
+      setSmallScreen(window.innerWidth <= 768);
     };
     handleResize();
     window.addEventListener("resize", handleResize);
@@ -44,7 +44,7 @@ export default function PlayerSearch() {
         </div>
 
         <Input
-          className="px-0 pl-9 w-10 sm:w-full h-8 rounded-lg cursor-pointer"
+          className="px-0 pl-9 w-10 md:w-full h-8 rounded-lg cursor-pointer"
           type="search"
           name="search"
           placeholder={smallScreen ? undefined : "Query..."}
