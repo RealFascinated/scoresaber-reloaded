@@ -66,7 +66,7 @@ function Buttons() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.35, duration: 0.7, ease: "easeOut" }}
     >
-      <Link href="/search" target="_blank">
+      <Link href="/search">
         <Button className="max-w-52 flex gap-2.5 bg-pp hover:bg-pp/85 text-white text-base">
           <UserSearch className="size-6" />
           <span>Player Search</span>

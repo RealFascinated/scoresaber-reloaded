@@ -40,25 +40,23 @@ export default function SearchPlayer() {
     <div className="flex flex-col gap-3">
       {/* Search */}
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="flex items-end gap-2">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="w-full max-w-72 bg-red-500 flex items-end gap-2">
           <FormField
             control={form.control}
             name="username"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Username</FormLabel>
                 <FormControl>
-                  <Input className="w-full sm:w-72 text-sm" placeholder="Query..." {...field} />
+                  <Input className="text-sm" placeholder="Query..." {...field} />
                 </FormControl>
               </FormItem>
             )}
           />
-          <Button type="submit">Search</Button>
         </form>
       </Form>
 
       {/* Results */}
-      {loading == true && (
+      {loading && (
         <div className="flex items-center justify-center">
           <p>Loading...</p>
         </div>
