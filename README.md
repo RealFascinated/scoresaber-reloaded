@@ -1,7 +1,24 @@
-# ScoreSaber Reloaded (v3)
+<img src="./assets/logo.webp" alt="ScoreSaber Reloaded" width="200" align="right">
 
-This is the 3rd re-code of this project. The first one was a mess, the second one was a mess, and this one is a mess. But it's a mess that I'm proud of.
+> [!IMPORTANT]
+> This repository is a work-in-progress, if you have an issue, please create one <a href="https://git.rainnny.club/Rainnny/Feather/issues/new">here</a>
 
-## meow
+# ScoreSaber Reloaded
+ScoreSaber Reloaded is a new way to view your scores and get more stats about you and your plays.
 
-meow
+## Table of Contents
+- [Features](#features)
+- [Support](#support)
+
+## Features
+- Score Data Collection
+- Friends
+- Statistics
+- Realtime Scores
+- More to come...
+
+## Stars
+[![Star History Chart](https://api.star-history.com/svg?repos=RealFascinated/scoresaber-reloaded&type=Timeline)](https://star-history.com/#RealFascinated/scoresaber-reloaded&Timeline)
+
+## Support
+Looking for support? Join the [**Discord**](https://discord.gg/kmNfWGA4A8) or contact **fascinated7** on Discord.
