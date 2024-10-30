@@ -8,6 +8,7 @@ import { TrendingUpIcon } from "lucide-react";
 import ProfileButton from "@/components/navbar/profile-button";
 import { CogIcon } from "@heroicons/react/24/solid";
 import PlayerSearch from "@/components/navbar/player-search";
+import Tooltip from "@/components/tooltip";
 
 const links: ReactElement[] = [
   <FriendsButton key="friends" />,
@@ -15,7 +16,7 @@ const links: ReactElement[] = [
     key="ranking"
     content={
       <>
-        <TrendingUpIcon className="size-6" />
+        <TrendingUpIcon className="size-5" />
         <span className="hidden sm:flex">Ranking</span>
       </>
     }
@@ -52,8 +53,8 @@ export default function Navbar() {
           href="/"
           draggable={false}
         >
-          <img className="size-7" src="/assets/logos/scoresaber.png" alt="ScoreSaber Logo" />
-          <h1 className="hidden md:flex text-xl font-bold text-ssr">SSR</h1>
+          <img className="size-6" src="/assets/logos/scoresaber.png" alt="ScoreSaber Logo" />
+          <h1 className="hidden md:flex text-lg font-bold text-ssr">SSR</h1>
         </Link>
 
         {/* Links */}
@@ -66,7 +67,10 @@ export default function Navbar() {
       <div className="pl-6 flex gap-2 md:gap-4 items-center divide-x md:divide-x-2 divide-muted transition-all transform-gpu">
         <div className="flex gap-2 md:gap-4 items-center transition-all transform-gpu">
           <PlayerSearch />
-          <SimpleNavLink content={<CogIcon className="size-7 hover:animate-spin-slow" />} href="/settings" />
+          <SimpleNavLink
+            content={<CogIcon className="size-6 text-zinc-200 hover:animate-spin-slow" />}
+            href="/settings"
+          />
         </div>
         <ProfileButton />
       </div>
@@ -77,7 +81,7 @@ export default function Navbar() {
 function SimpleNavLink({ content, href }: { content: ReactElement; href: string }) {
   return (
     <Link
-      className="flex gap-3 items-center hover:opacity-80 transition-all transform-gpu"
+      className="flex gap-3 items-center text-sm hover:opacity-80 transition-all transform-gpu"
       href={href}
       target={href.startsWith("/") ? "_self" : "_blank"}
       draggable={false}

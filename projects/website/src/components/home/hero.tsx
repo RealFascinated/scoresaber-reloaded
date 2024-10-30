@@ -11,9 +11,9 @@ import { motion } from "framer-motion";
 
 export default function HeroSection() {
   return (
-    <div className="flex flex-col gap-3.5 text-center items-center select-none">
+    <div className="flex flex-col gap-2 text-center items-center select-none">
       <motion.div
-        className="flex flex-col gap-3.5 text-center items-center"
+        className="flex flex-col gap-2.5 text-center items-center"
         initial={{ opacity: 0, y: -40 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
@@ -36,7 +36,7 @@ function Alert() {
       target="_blank"
       draggable={false}
     >
-      <AnimatedShinyText className="px-3.5 py-1 flex gap-2 items-center justify-center">
+      <AnimatedShinyText className="px-3.5 py-1 flex gap-2 text-sm items-center justify-center">
         <SiGithub className="size-5" />
         <span>Check out our Source Code</span>
         <ArrowRight className="size-4 group-hover:translate-x-0.5 transition-all transform-gpu" />
@@ -47,11 +47,11 @@ function Alert() {
 
 function Title() {
   return (
-    <div className="px-5 flex flex-col">
-      <h1 className="text-4xl sm:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-ssr to-pp/85">
+    <div className="px-5 flex flex-col gap-1.5">
+      <h1 className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-ssr to-pp/85">
         ScoreSaber Reloaded
       </h1>
-      <p className="max-w-sm md:max-w-xl md:text-lg opacity-85">
+      <p className="max-w-sm md:max-w-lg opacity-85">
         ScoreSaber Reloaded is a new way to view your scores and get more stats about you and your plays
       </p>
     </div>
@@ -67,14 +67,14 @@ function Buttons() {
       transition={{ delay: 0.35, duration: 0.7, ease: "easeOut" }}
     >
       <Link href="/search">
-        <Button className="max-w-52 flex gap-2.5 bg-pp hover:bg-pp/85 text-white text-base">
+        <Button className="max-w-52 flex gap-2.5 bg-pp hover:bg-pp/85 text-white">
           <UserSearch className="size-6" />
           <span>Player Search</span>
         </Button>
       </Link>
 
       <Link href="https://discord.gg/kmNfWGA4A8" target="_blank">
-        <Button className="max-w-52 flex gap-2.5 bg-[#5865F2] hover:bg-[#5865F2]/85 text-white text-base">
+        <Button className="max-w-52 flex gap-2.5 bg-[#5865F2] hover:bg-[#5865F2]/85 text-white">
           <img className="size-6" src="/assets/logos/discord.svg" />
           <span>Join our Discord</span>
         </Button>
@@ -86,7 +86,7 @@ function Buttons() {
 function AppPreview() {
   return (
     <motion.div
-      className="mx-5 my-20 relative max-w-[1280px] shadow-[0_3rem_20rem_-15px_rgba(15,15,15,0.6)] shadow-pp/50 rounded-2xl overflow-hidden"
+      className="mx-5 my-20 relative max-w-[1190px] shadow-[0_3rem_20rem_-15px_rgba(15,15,15,0.6)] shadow-pp/50 rounded-2xl overflow-hidden"
       initial={{ opacity: 0, y: -35 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.45, duration: 0.7, ease: "easeOut" }}

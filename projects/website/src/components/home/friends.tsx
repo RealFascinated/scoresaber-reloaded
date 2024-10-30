@@ -7,10 +7,10 @@ export default function Friends() {
       {/* Header */}
       <div className="flex flex-col gap-2.5 text-right items-end">
         <div className="flex flex-row-reverse gap-3 items-center text-purple-600">
-          <UsersRound className="p-2 size-11 bg-purple-800/15 rounded-lg" />
-          <h1 className="text-3xl sm:text-4xl font-bold">Friends</h1>
+          <UsersRound className="p-2 size-10 bg-purple-800/15 rounded-lg" />
+          <h1 className="text-2xl sm:text-3xl font-bold">Friends</h1>
         </div>
-        <p className="max-w-5xl text-sm sm:text-base opacity-85">
+        <p className="max-w-5xl opacity-85">
           Connect with friends to share your Beat Saber experience! Add friends to your list and see their latest
           scores, achievements, and play history in a dynamic feed. Keep up with their top plays, challenge their
           records, and join them in competitive runs as you progress together.
