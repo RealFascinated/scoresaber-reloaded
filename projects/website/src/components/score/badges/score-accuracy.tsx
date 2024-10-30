@@ -5,6 +5,7 @@ import { ScoreModifiers } from "@/components/score/score-modifiers";
 import { Change } from "@/common/change";
 import { ScoreBadgeProps } from "@/components/score/badges/badge-props";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
+import { formatScoreAccuracy } from "@ssr/common/utils/score.util";
 
 type ScoreAccuracyProps = ScoreBadgeProps & {
   /**
@@ -29,6 +30,7 @@ export function ScoreAccuracyBadge({ score, leaderboard }: ScoreAccuracyProps) {
 
   const failed = score.modifiers.includes("No Fail" as Modifier);
   const modCount = score.modifiers.length;
+
   return (
     <>
       <div className="flex flex-col items-center justify-center cursor-default">
@@ -52,11 +54,10 @@ export function ScoreAccuracyBadge({ score, leaderboard }: ScoreAccuracyProps) {
           }
         >
           <p>
-            {score.accuracy == Infinity ? "∞" : score.accuracy.toFixed(2)}%{" "}
-            {modCount > 0 && <ScoreModifiers type="simple" limit={1} score={score} />}
+            {formatScoreAccuracy(score)} {modCount > 0 && <ScoreModifiers type="simple" limit={1} score={score} />}
           </p>
         </Tooltip>
-        {previousScore && previousScore.change && (
+        {previousScore && previousScore.accuracy && previousScore.change && (
           <Tooltip display={`Previous Accuracy: ${previousScore.accuracy.toFixed(2)}%`}>
             <Change
               className="text-xs"

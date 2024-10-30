@@ -9,7 +9,7 @@ import LeaderboardScore from "./leaderboard-score";
 import { scoreAnimation } from "@/components/score/score-animation";
 import { Button } from "@/components/ui/button";
 import { getDifficulty } from "@/common/song-utils";
-import { fetchLeaderboardScores } from "@ssr/common/utils/score-utils";
+import { fetchLeaderboardScores } from "@ssr/common/utils/score.util";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import LeaderboardScoresResponse from "@ssr/common/response/leaderboard-scores-response";

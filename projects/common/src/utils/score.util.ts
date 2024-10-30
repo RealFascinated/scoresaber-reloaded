@@ -8,6 +8,7 @@ import { Page } from "../pagination";
 import { ScoreSaberScore } from "src/model/score/impl/scoresaber-score";
 import { PlayerScore } from "../score/player-score";
 import ScoreSaberLeaderboard from "../model/leaderboard/impl/scoresaber-leaderboard";
+import Score from "../model/score/score";
 
 /**
  * Fetches the player's scores
@@ -52,4 +53,14 @@ export async function fetchPlayerScores<S, L>(
  */
 export async function fetchLeaderboardScores<S, L>(leaderboard: Leaderboards, id: string, page: number) {
   return kyFetch<LeaderboardScoresResponse<S, L>>(`${Config.apiUrl}/scores/leaderboard/${leaderboard}/${id}/${page}`);
+}
+
+/**
+ * Formats the accuracy for a score.
+ *
+ * @param score the score to format
+ * @returns the formatted accuracy
+ */
+export function formatScoreAccuracy(score: Score) {
+  return (score.accuracy == null || score.accuracy == Infinity ? "-" : score.accuracy.toFixed(2)) + "%";
 }

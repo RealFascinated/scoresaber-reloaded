@@ -8,6 +8,7 @@ import { ScoreModifiers } from "@/components/score/score-modifiers";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import ScoreMissesAndPausesBadge from "@/components/score/badges/score-misses-and-pauses";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
+import { formatScoreAccuracy } from "@ssr/common/utils/score.util";
 
 type Props = {
   /**
@@ -48,7 +49,7 @@ export default function LeaderboardScore({ score, leaderboard, highlightedPlayer
       <td className="px-4 py-2 text-center whitespace-nowrap">{formatNumberWithCommas(score.score)}</td>
 
       {/* Score Accuracy */}
-      <td className="px-4 py-2 text-center whitespace-nowrap">{score.accuracy.toFixed(2)}%</td>
+      <td className="px-4 py-2 text-center whitespace-nowrap">{formatScoreAccuracy(score)}</td>
 
       {/* Score Misses */}
       <td

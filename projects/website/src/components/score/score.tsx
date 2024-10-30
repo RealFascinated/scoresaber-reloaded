@@ -16,7 +16,7 @@ import { ScoreOverview } from "@/components/score/score-views/score-overview";
 import { ScoreHistory } from "@/components/score/score-views/score-history";
 
 import { getPageFromRank } from "@ssr/common/utils/utils";
-import { fetchLeaderboardScores } from "@ssr/common/utils/score-utils";
+import { fetchLeaderboardScores } from "@ssr/common/utils/score.util";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { beatLeaderService } from "@ssr/common/service/impl/beatleader";
 import { useIsMobile } from "@/hooks/use-is-mobile";

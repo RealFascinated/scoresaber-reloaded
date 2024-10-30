@@ -2,7 +2,7 @@
 
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import Score from "@/components/score/score";
-import { fetchPlayerScoresHistory } from "@ssr/common/utils/score-utils";
+import { fetchPlayerScoresHistory } from "../../../../../common/src/utils/score.util.ts";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import Pagination from "@/components/input/pagination";
