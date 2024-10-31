@@ -4,7 +4,7 @@ import { SSRCache } from "@ssr/common/cache";
 import { fetchWithCache } from "../common/cache.util";
 
 const mapCache = new SSRCache({
-  ttl: 1000 * 60 * 10, // 10 minutes
+  ttl: 1000 * 60 * 60 * 24, // 1 day
 });
 
 export default class BeatSaverService {

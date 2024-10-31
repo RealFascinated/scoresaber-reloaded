@@ -10,15 +10,9 @@ import { ScoreSort } from "@ssr/common/score/score-sort";
 import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
 import { ScoreService } from "./score.service";
 import { logNewTrackedPlayer } from "../common/embds";
-import { SSRCache } from "@ssr/common/cache";
-import { fetchWithCache } from "../common/cache.util";
 
 const SCORESABER_REQUEST_COOLDOWN = 60_000 / 250; // 250 requests per minute
 const accountCreationLock: { [id: string]: Promise<PlayerDocument> } = {};
-
-const playerCache = new SSRCache({
-  ttl: 1000 * 60 * 10, // 10 minutes
-});
 
 export class PlayerService {
   /**
@@ -38,58 +32,56 @@ export class PlayerService {
       await accountCreationLock[id];
     }
 
-    return fetchWithCache(playerCache, `${id}`, async () => {
-      let player: PlayerDocument | null = await PlayerModel.findById(id);
-      if (player === null) {
-        if (!create) {
-          throw new NotFoundError(`Player "${id}" not found`);
-        }
-
-        playerToken = playerToken || (await scoresaberService.lookupPlayer(id));
-
-        if (!playerToken) {
-          throw new NotFoundError(`Player "${id}" not found`);
-        }
-
-        // Create a new lock promise and assign it
-        accountCreationLock[id] = (async () => {
-          let newPlayer: PlayerDocument;
-          try {
-            console.log(`Creating player "${id}"...`);
-            newPlayer = (await PlayerModel.create({ _id: id })) as PlayerDocument;
-            newPlayer.trackedSince = new Date();
-            await newPlayer.save();
-
-            await this.seedPlayerHistory(newPlayer, playerToken);
-            await this.refreshAllPlayerScores(newPlayer);
-
-            // Notify in production
-            if (isProduction()) {
-              await logNewTrackedPlayer(playerToken);
-            }
-          } catch (err) {
-            console.log(`Failed to create player document for "${id}"`, err);
-            throw new InternalServerError(`Failed to create player document for "${id}"`);
-          } finally {
-            // Ensure the lock is always removed
-            delete accountCreationLock[id];
-          }
-
-          return newPlayer;
-        })();
-
-        // Wait for the player creation to complete
-        player = await accountCreationLock[id];
-
-        // Update player name
-        if (player.name !== playerToken.name) {
-          player.name = playerToken.name;
-          await player.save();
-        }
+    let player: PlayerDocument | null = await PlayerModel.findById(id);
+    if (player === null) {
+      if (!create) {
+        throw new NotFoundError(`Player "${id}" not found`);
       }
 
-      return player as PlayerDocument;
-    });
+      playerToken = playerToken || (await scoresaberService.lookupPlayer(id));
+
+      if (!playerToken) {
+        throw new NotFoundError(`Player "${id}" not found`);
+      }
+
+      // Create a new lock promise and assign it
+      accountCreationLock[id] = (async () => {
+        let newPlayer: PlayerDocument;
+        try {
+          console.log(`Creating player "${id}"...`);
+          newPlayer = (await PlayerModel.create({ _id: id })) as PlayerDocument;
+          newPlayer.trackedSince = new Date();
+          await newPlayer.save();
+
+          await this.seedPlayerHistory(newPlayer, playerToken);
+          await this.refreshAllPlayerScores(newPlayer);
+
+          // Notify in production
+          if (isProduction()) {
+            await logNewTrackedPlayer(playerToken);
+          }
+        } catch (err) {
+          console.log(`Failed to create player document for "${id}"`, err);
+          throw new InternalServerError(`Failed to create player document for "${id}"`);
+        } finally {
+          // Ensure the lock is always removed
+          delete accountCreationLock[id];
+        }
+
+        return newPlayer;
+      })();
+
+      // Wait for the player creation to complete
+      player = await accountCreationLock[id];
+
+      // Update player name
+      if (player.name !== playerToken.name) {
+        player.name = playerToken.name;
+        await player.save();
+      }
+    }
+
+    return player as PlayerDocument;
   }
 
   /**
