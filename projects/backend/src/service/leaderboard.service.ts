@@ -11,6 +11,7 @@ import {
   ScoreSaberLeaderboardModel,
 } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import Leaderboard from "@ssr/common/model/leaderboard/leaderboard";
+import { getBeatSaverDifficulty } from "@ssr/common/utils/beatsaver.util";
 
 export default class LeaderboardService {
   /**
@@ -80,6 +81,22 @@ export default class LeaderboardService {
           throw new NotFoundError(`Leaderboard not found for "${id}"`);
         }
         beatSaverMap = await BeatSaverService.getMap(leaderboard.songHash);
+
+        // Fix max score if it's broken (ScoreSaber is annoying)
+        if (leaderboard.maxScore == 0 && beatSaverMap != undefined && cachedLeaderboard != null) {
+          const difficulty = leaderboard.difficulty;
+          const beatSaverDiff = getBeatSaverDifficulty(
+            beatSaverMap,
+            leaderboard.songHash,
+            difficulty.difficulty,
+            difficulty.characteristic.includes("Standard") ? "Standard" : difficulty.characteristic
+          );
+
+          if (beatSaverDiff != undefined) {
+            leaderboard.maxScore = beatSaverDiff.maxScore;
+            await cachedLeaderboard.save();
+          }
+        }
         break;
       }
       default: {
