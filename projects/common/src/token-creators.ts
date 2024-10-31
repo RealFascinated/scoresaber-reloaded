@@ -1,7 +1,6 @@
 import ScoreSaberLeaderboard from "./model/leaderboard/impl/scoresaber-leaderboard";
 import ScoreSaberLeaderboardToken from "./types/token/scoresaber/score-saber-leaderboard-token";
 import LeaderboardDifficulty from "./model/leaderboard/leaderboard-difficulty";
-import { getDifficultyFromScoreSaberDifficulty } from "./utils/scoresaber-utils";
 import { MapCharacteristic } from "./types/map-characteristic";
 import { LeaderboardStatus } from "./model/leaderboard/leaderboard-status";
 import { formatDateMinimal, getDaysAgoDate, getMidnightAlignedDate, parseDate } from "./utils/time-utils";
@@ -15,6 +14,7 @@ import { getPageFromRank } from "./utils/utils";
 import ScoreSaberScoreToken from "./types/token/scoresaber/score-saber-score-token";
 import { ScoreSaberScore } from "./model/score/impl/scoresaber-score";
 import { Modifier } from "./score/modifier";
+import { getDifficultyFromScoreSaberDifficulty } from "./utils/scoresaber.util";
 
 /**
  * Parses a {@link ScoreSaberLeaderboardToken} into a {@link ScoreSaberLeaderboard}.

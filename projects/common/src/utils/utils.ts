@@ -1,4 +1,5 @@
 import ky from "ky";
+import { formatNumberWithCommas, formatPp } from "./number-utils";
 
 /**
  * Checks if we're in production
@@ -45,4 +46,31 @@ export async function kyFetch<T>(url: string): Promise<T | undefined> {
   } catch (error) {
     return undefined;
   }
+}
+
+/**
+ * Formats a value change
+ *
+ * @param change the change to format
+ * @param formatValue the function to format the value
+ * @param isPp whether the value is a pp number
+ */
+export function formatChange(
+  change: number | undefined,
+  formatValue?: (value: number) => string,
+  isPp = false
+): string | undefined {
+  if (change === 0 || (change && change > 0 && change < 0.01) || change === undefined) {
+    return undefined;
+  }
+
+  // Default formats
+  if (!formatValue) {
+    formatValue = formatNumberWithCommas;
+    if (isPp) {
+      formatValue = formatPp;
+    }
+  }
+
+  return (change > 0 ? "+" : "") + formatValue(change) + (isPp ? "pp" : "");
 }

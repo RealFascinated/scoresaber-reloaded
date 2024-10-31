@@ -1,6 +1,7 @@
 import ScoreSaberPlayerToken from "../types/token/scoresaber/score-saber-player-token";
 import ScoreSaberPlayer from "../player/impl/scoresaber-player";
 import { ScoreSaberLeaderboardPlayerInfoToken } from "../types/token/scoresaber/score-saber-leaderboard-player-info-token";
+import { MapDifficulty } from "../score/map-difficulty";
 
 export type ScoreSaberRole = {
   /**
@@ -96,6 +97,34 @@ export function getScoreSaberRole(
   for (const role of scoreSaberRoles) {
     if (roles.includes(role.name)) {
       return role;
+    }
+  }
+}
+
+/**
+ * Formats the ScoreSaber difficulty number
+ *
+ * @param diff the difficulty number
+ */
+export function getDifficultyFromScoreSaberDifficulty(diff: number): MapDifficulty {
+  switch (diff) {
+    case 1: {
+      return "Easy";
+    }
+    case 3: {
+      return "Normal";
+    }
+    case 5: {
+      return "Hard";
+    }
+    case 7: {
+      return "Expert";
+    }
+    case 9: {
+      return "ExpertPlus";
+    }
+    default: {
+      return "Unknown";
     }
   }
 }
