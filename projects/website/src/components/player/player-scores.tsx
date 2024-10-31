@@ -131,7 +131,11 @@ export default function PlayerScores({ initialScoreData, initialSearch, player, 
    */
   const getUrl = useCallback(
     (page: number) => {
-      return `/player/${player.id}/${pageState.sort}/${page}${isSearchActive ? `?search=${debouncedSearchTerm}` : ""}`;
+      const baseUrl = `/player/${player.id}`;
+      if (page == 1 && pageState.sort == ScoreSort.recent) {
+        return baseUrl;
+      }
+      return `/${baseUrl}/${pageState.sort}/${page}${isSearchActive ? `?search=${debouncedSearchTerm}` : ""}`;
     },
     [debouncedSearchTerm, player.id, pageState.sort, isSearchActive]
   );
