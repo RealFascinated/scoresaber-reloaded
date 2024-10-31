@@ -17,12 +17,13 @@ import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/score-sabe
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { useRouter } from "next/navigation";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
+import { useSearch } from "@/components/providers/search-provider";
 
 export default function PlayerSearch() {
   const router: AppRouterInstance = useRouter();
+  const { isOpen, openSearch, closeSearch } = useSearch();
 
   const [smallScreen, setSmallScreen] = useState<boolean>(false);
-  const [open, setOpen] = useState<boolean>(false);
 
   const [loading, setLoading] = useState<boolean>(false);
   const [query, setQuery] = useState<string>("");
@@ -42,12 +43,16 @@ export default function PlayerSearch() {
     const handleKeyDown = (event: KeyboardEvent): void => {
       if ((event.ctrlKey || event.metaKey) && event.key === "k") {
         event.preventDefault();
-        setOpen((open: boolean) => !open);
+        if (isOpen) {
+          closeSearch();
+        } else {
+          openSearch();
+        }
       }
     };
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, []);
+  }, [isOpen, openSearch, closeSearch]);
 
   // Handle searching for a player
   const searchPlayers = useDebouncedCallback(async (query: string) => {
@@ -61,7 +66,7 @@ export default function PlayerSearch() {
       {/* Button to open */}
       <div
         className="group flex cursor-pointer hover:opacity-85 transition-all transform-gpu select-none"
-        onClick={() => setOpen(true)}
+        onClick={openSearch}
       >
         <div className={cn("absolute top-1.5 z-10", smallScreen ? "inset-x-0 flex justify-center" : "inset-x-2.5")}>
           <UserSearch className="size-5" />
@@ -83,7 +88,16 @@ export default function PlayerSearch() {
       </div>
 
       {/* Dialog */}
-      <CommandDialog open={open} onOpenChange={setOpen}>
+      <CommandDialog
+        open={isOpen}
+        onOpenChange={state => {
+          if (state) {
+            openSearch();
+          } else {
+            closeSearch();
+          }
+        }}
+      >
         {/* Input */}
         <div className="relative">
           <CommandInput
@@ -110,7 +124,7 @@ export default function PlayerSearch() {
                     key={player.id}
                     className="cursor-pointer"
                     onSelect={() => {
-                      setOpen(false);
+                      closeSearch();
                       router.push(`/player/${player.id}`);
                     }}
                   >
