@@ -144,7 +144,7 @@ export class ScoreService {
         .setThumbnail(leaderboard.songArt)
         .setTimestamp(score.timestamp)
         .setFooter({
-          text: `[ScoreSaber Reloaded](${Config.websiteUrl})`,
+          text: `Powered by ${Config.websiteUrl}`,
         })
         .setColor("#00ff00")
     );
