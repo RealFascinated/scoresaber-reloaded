@@ -13,6 +13,7 @@ import { SSRCache } from "@ssr/common/cache";
 import { getScoreSaberPlayerFromToken } from "@ssr/common/token-creators";
 import LeaderboardService from "./leaderboard.service";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
+import { NotFoundError } from "elysia";
 
 const cache = new SSRCache({
   ttl: 1000 * 60 * 60, // 1 hour
@@ -102,12 +103,12 @@ export class ImageService {
    * @param id the player's id
    */
   public static async generatePlayerImage(id: string) {
-    const player = await fetchWithCache<ScoreSaberPlayer>(cache, `player-${id}`, async () => {
+    const player = await fetchWithCache<ScoreSaberPlayer | undefined>(cache, `player-${id}`, async () => {
       const token = await scoresaberService.lookupPlayer(id);
       return token ? await getScoreSaberPlayerFromToken(token, Config.apiUrl) : undefined;
     });
     if (!player) {
-      return undefined;
+      throw new NotFoundError(`Player "${id}" not found`);
     }
 
     const { statisticChange } = player;

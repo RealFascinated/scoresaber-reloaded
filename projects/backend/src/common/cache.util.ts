@@ -9,11 +9,7 @@ import { isProduction } from "@ssr/common/utils/utils";
  * @param cacheKey The key used for caching.
  * @param fetchFn The function to fetch data if it's not in cache.
  */
-export async function fetchWithCache<T>(
-  cache: SSRCache,
-  cacheKey: string,
-  fetchFn: () => Promise<T | undefined>
-): Promise<T | undefined> {
+export async function fetchWithCache<T>(cache: SSRCache, cacheKey: string, fetchFn: () => Promise<T>): Promise<T> {
   if (!isProduction()) {
     return await fetchFn();
   }
@@ -23,7 +19,7 @@ export async function fetchWithCache<T>(
   }
 
   if (cache.has(cacheKey)) {
-    return cache.get<T>(cacheKey);
+    return cache.get<T>(cacheKey)!;
   }
 
   const data = await fetchFn();

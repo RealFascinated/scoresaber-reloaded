@@ -7,7 +7,7 @@ export default class Leaderboard {
    * @private
    */
   @Prop({ required: true })
-  private readonly _id?: number;
+  public readonly _id?: number;
 
   /**
    * The hash of the song this leaderboard is for.

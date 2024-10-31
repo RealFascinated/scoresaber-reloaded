@@ -8,10 +8,16 @@ import { BeatSaverMap } from "@ssr/common/model/beatsaver/map";
 import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
 import {
   ScoreSaberLeaderboard,
+  ScoreSaberLeaderboardDocument,
   ScoreSaberLeaderboardModel,
 } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import Leaderboard from "@ssr/common/model/leaderboard/leaderboard";
 import { getBeatSaverDifficulty } from "@ssr/common/utils/beatsaver.util";
+import { SSRCache } from "@ssr/common/cache";
+import { fetchWithCache } from "../common/cache.util";
+
+const leaderboardCache = new SSRCache({
+  ttl: 1000 * 60 * 10, // 10 minutes
+});
 
 export default class LeaderboardService {
   /**
@@ -39,74 +45,88 @@ export default class LeaderboardService {
    * @returns the scores
    */
   public static async getLeaderboard<L>(leaderboardName: Leaderboards, id: string): Promise<LeaderboardResponse<L>> {
-    let leaderboard: Leaderboard | undefined;
-    let beatSaverMap: BeatSaverMap | undefined;
-
     const now = new Date();
     switch (leaderboardName) {
       case "scoresaber": {
-        let foundLeaderboard = false;
-        const cachedLeaderboard = await ScoreSaberLeaderboardModel.findById(id);
-        if (cachedLeaderboard != null) {
-          leaderboard = cachedLeaderboard.toObject() as unknown as ScoreSaberLeaderboard;
-          if (
-            leaderboard &&
-            (leaderboard.ranked || // Never refresh ranked leaderboards (it will get refreshed every night)
-              leaderboard.lastRefreshed == undefined || // Refresh if it has never been refreshed
-              now.getTime() - leaderboard.lastRefreshed.getTime() > 1000 * 60 * 60 * 24) // Refresh every day
-          ) {
-            foundLeaderboard = true;
+        return fetchWithCache(leaderboardCache, `${leaderboardName}-${id}`, async () => {
+          let foundLeaderboard: ScoreSaberLeaderboardDocument | undefined = undefined;
+          const cachedLeaderboard: ScoreSaberLeaderboardDocument | null = await ScoreSaberLeaderboardModel.findById(id);
+          if (cachedLeaderboard != null) {
+            if (
+              cachedLeaderboard &&
+              (cachedLeaderboard.ranked || // Never refresh ranked leaderboards (it will get refreshed every night)
+                cachedLeaderboard.lastRefreshed == undefined || // Refresh if it has never been refreshed
+                now.getTime() - cachedLeaderboard.lastRefreshed.getTime() > 1000 * 60 * 60 * 24) // Refresh every day
+            ) {
+              foundLeaderboard = cachedLeaderboard;
+            }
           }
-        }
 
-        if (!foundLeaderboard) {
-          const leaderboardToken = await LeaderboardService.getLeaderboardToken<ScoreSaberLeaderboardToken>(
-            leaderboardName,
-            id
-          );
-          if (leaderboardToken == undefined) {
+          if (!foundLeaderboard) {
+            const leaderboardToken = await LeaderboardService.getLeaderboardToken<ScoreSaberLeaderboardToken>(
+              leaderboardName,
+              id
+            );
+            if (leaderboardToken == undefined) {
+              throw new NotFoundError(`Leaderboard not found for "${id}"`);
+            }
+
+            foundLeaderboard = await ScoreSaberLeaderboardModel.findOneAndUpdate(
+              { _id: id },
+              {
+                $setOnInsert: { lastRefreshed: new Date() }, // only sets if inserted
+                ...getScoreSaberLeaderboardFromToken(leaderboardToken),
+              },
+              {
+                upsert: true,
+                new: true,
+                setDefaultsOnInsert: true,
+              }
+            );
+          }
+          if (foundLeaderboard == undefined) {
             throw new NotFoundError(`Leaderboard not found for "${id}"`);
           }
+          const beatSaverMap = await BeatSaverService.getMap(foundLeaderboard.songHash);
+          const leaderboard = (
+            await LeaderboardService.fixMaxScore(foundLeaderboard, beatSaverMap)
+          ).toObject() as ScoreSaberLeaderboard;
 
-          leaderboard = getScoreSaberLeaderboardFromToken(leaderboardToken);
-          leaderboard.lastRefreshed = new Date();
-
-          await ScoreSaberLeaderboardModel.findOneAndUpdate({ _id: id }, leaderboard, {
-            upsert: true,
-            new: true,
-            setDefaultsOnInsert: true,
-          });
-        }
-        if (leaderboard == undefined) {
-          throw new NotFoundError(`Leaderboard not found for "${id}"`);
-        }
-        beatSaverMap = await BeatSaverService.getMap(leaderboard.songHash);
-
-        // Fix max score if it's broken (ScoreSaber is annoying)
-        if (leaderboard.maxScore == 0 && beatSaverMap != undefined && cachedLeaderboard != null) {
-          const difficulty = leaderboard.difficulty;
-          const beatSaverDiff = getBeatSaverDifficulty(
-            beatSaverMap,
-            leaderboard.songHash,
-            difficulty.difficulty,
-            difficulty.characteristic.includes("Standard") ? "Standard" : difficulty.characteristic
-          );
-
-          if (beatSaverDiff != undefined) {
-            leaderboard.maxScore = beatSaverDiff.maxScore;
-            await cachedLeaderboard.save();
-          }
-        }
-        break;
+          return {
+            leaderboard: leaderboard as L,
+            beatsaver: beatSaverMap,
+          } as LeaderboardResponse<L>;
+        });
       }
       default: {
         throw new NotFoundError(`Leaderboard "${leaderboardName}" not found`);
       }
     }
+  }
 
-    return {
-      leaderboard: leaderboard as L,
-      beatsaver: beatSaverMap,
-    };
+  /**
+   * Fixes the max score if it's broken.
+   *
+   * @param leaderboard the leaderboard
+   * @param beatSaverMap the beatSaverMap
+   */
+  private static async fixMaxScore(leaderboard: ScoreSaberLeaderboardDocument, beatSaverMap: BeatSaverMap | undefined) {
+    // Fix max score if it's broken (ScoreSaber is annoying)
+    if (leaderboard.maxScore == 0 && beatSaverMap != undefined) {
+      const difficulty = leaderboard.difficulty;
+      const beatSaverDiff = getBeatSaverDifficulty(
+        beatSaverMap,
+        leaderboard.songHash,
+        difficulty.difficulty,
+        difficulty.characteristic.includes("Standard") ? "Standard" : difficulty.characteristic
+      );
+
+      if (beatSaverDiff != undefined) {
+        leaderboard.maxScore = beatSaverDiff.maxScore;
+        await leaderboard.save();
+      }
+    }
+
+    return leaderboard;
   }
 }

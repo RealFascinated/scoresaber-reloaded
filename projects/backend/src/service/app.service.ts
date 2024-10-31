@@ -5,6 +5,7 @@ import { AdditionalScoreDataModel } from "@ssr/common/model/additional-score-dat
 import { BeatSaverMapModel } from "@ssr/common/model/beatsaver/map";
 import { ScoreSaberLeaderboardModel } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { SSRCache } from "@ssr/common/cache";
+import { fetchWithCache } from "../common/cache.util";
 
 const statisticsCache = new SSRCache({
   ttl: 120 * 1000, // 2 minutes
@@ -15,24 +16,20 @@ export class AppService {
    * Gets the app statistics.
    */
   public static async getAppStatistics(): Promise<AppStatistics> {
-    if (statisticsCache.has("app-statistics")) {
-      return statisticsCache.get<AppStatistics>("app-statistics")!;
-    }
+    return fetchWithCache(statisticsCache, "stats", async () => {
+      const trackedPlayers = await PlayerModel.countDocuments();
+      const trackedScores = await ScoreSaberScoreModel.countDocuments();
+      const additionalScoresData = await AdditionalScoreDataModel.countDocuments();
+      const cachedBeatSaverMaps = await BeatSaverMapModel.countDocuments();
+      const cachedScoreSaberLeaderboards = await ScoreSaberLeaderboardModel.countDocuments();
 
-    const trackedPlayers = await PlayerModel.countDocuments();
-    const trackedScores = await ScoreSaberScoreModel.countDocuments();
-    const additionalScoresData = await AdditionalScoreDataModel.countDocuments();
-    const cachedBeatSaverMaps = await BeatSaverMapModel.countDocuments();
-    const cachedScoreSaberLeaderboards = await ScoreSaberLeaderboardModel.countDocuments();
-
-    const response = {
-      trackedPlayers,
-      trackedScores,
-      additionalScoresData,
-      cachedBeatSaverMaps,
-      cachedScoreSaberLeaderboards,
-    };
-    statisticsCache.set("app-statistics", response);
-    return response;
+      return {
+        trackedPlayers,
+        trackedScores,
+        additionalScoresData,
+        cachedBeatSaverMaps,
+        cachedScoreSaberLeaderboards,
+      };
+    });
   }
 }

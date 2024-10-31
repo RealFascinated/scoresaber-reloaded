@@ -526,6 +526,7 @@ export class ScoreService {
                 "scoresaber",
                 token.leaderboard.id + ""
               );
+
               if (!leaderboardResponse) {
                 return undefined;
               }
