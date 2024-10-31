@@ -42,6 +42,7 @@ import Leaderboard from "@ssr/common/model/leaderboard/leaderboard";
 import { Timeframe } from "@ssr/common/timeframe";
 import { getDaysAgoDate } from "@ssr/common/utils/time-utils";
 import { PlayerService } from "./player.service";
+import { formatScoreAccuracy } from "@ssr/common/utils/score.util";
 
 const playerScoresCache = new SSRCache({
   ttl: 1000 * 60, // 1 minute
@@ -85,13 +86,13 @@ export class ScoreService {
     const previousScore = await ScoreService.getPreviousScore(player.id, leaderboard, score.timestamp);
     const change = {
       accuracy:
-        previousScore && previousScore.change
-          ? `${formatChange(previousScore.change.accuracy, value => value.toFixed(2))}%`
-          : "",
-      pp: previousScore && previousScore.change ? `${formatChange(previousScore.change.pp, undefined, true)}` : "",
-      misses: previousScore && previousScore.change ? `${formatChange(previousScore.change.misses)}` : "",
-      badCuts: previousScore && previousScore.change ? `${formatChange(previousScore.change.badCuts)}` : "",
-      maxCombo: previousScore && previousScore.change ? `${formatChange(previousScore.change.maxCombo)}` : "",
+        previousScore &&
+        previousScore.change &&
+        `${formatChange(previousScore.change.accuracy, value => value.toFixed(2) + "%") || ""}`,
+      pp: previousScore && previousScore.change && `${formatChange(previousScore.change.pp, undefined, true) || ""}`,
+      misses: previousScore && previousScore.change && `${formatChange(previousScore.change.misses) || ""}`,
+      badCuts: previousScore && previousScore.change && `${formatChange(previousScore.change.badCuts) || ""}`,
+      maxCombo: previousScore && previousScore.change && `${formatChange(previousScore.change.maxCombo) || ""}`,
     };
 
     await logToChannel(
@@ -107,7 +108,7 @@ export class ScoreService {
         .addFields([
           {
             name: "Accuracy",
-            value: `${score.accuracy.toFixed(2)}% ${change.accuracy}`,
+            value: `${formatScoreAccuracy(score)} ${change.accuracy}`,
             inline: true,
           },
           {
