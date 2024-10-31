@@ -135,7 +135,7 @@ export default function PlayerScores({ initialScoreData, initialSearch, player, 
       if (page == 1 && pageState.sort == ScoreSort.recent) {
         return baseUrl;
       }
-      return `/${baseUrl}/${pageState.sort}/${page}${isSearchActive ? `?search=${debouncedSearchTerm}` : ""}`;
+      return `${baseUrl}/${pageState.sort}/${page}${isSearchActive ? `?search=${debouncedSearchTerm}` : ""}`;
     },
     [debouncedSearchTerm, player.id, pageState.sort, isSearchActive]
   );
