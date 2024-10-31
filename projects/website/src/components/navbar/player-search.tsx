@@ -25,6 +25,7 @@ export default function PlayerSearch() {
   const [open, setOpen] = useState<boolean>(false);
 
   const [loading, setLoading] = useState<boolean>(false);
+  const [query, setQuery] = useState<string>("");
   const [results, setResults] = useState<ScoreSaberPlayerToken[] | undefined>();
 
   useEffect(() => {
@@ -88,8 +89,10 @@ export default function PlayerSearch() {
           <CommandInput
             className="select-none"
             placeholder="Start typing to find a player..."
+            value={query}
             onValueChange={async value => {
               setLoading(true);
+              setQuery(value);
               await searchPlayers(value);
             }}
           />
