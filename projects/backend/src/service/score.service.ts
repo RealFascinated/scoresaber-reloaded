@@ -524,7 +524,8 @@ export class ScoreService {
             const scorePromises = leaderboardScores.playerScores.map(async token => {
               const leaderboardResponse = await LeaderboardService.getLeaderboard<ScoreSaberLeaderboard>(
                 "scoresaber",
-                token.leaderboard.id + ""
+                token.leaderboard.id + "",
+                token.leaderboard
               );
 
               if (!leaderboardResponse) {

@@ -42,9 +42,14 @@ export default class LeaderboardService {
    *
    * @param leaderboardName the leaderboard to get
    * @param id the players id
+   * @param creationData the data to create the leaderboard from if it does not exist in the database
    * @returns the scores
    */
-  public static async getLeaderboard<L>(leaderboardName: Leaderboards, id: string): Promise<LeaderboardResponse<L>> {
+  public static async getLeaderboard<L>(
+    leaderboardName: Leaderboards,
+    id: string,
+    creationData?: unknown
+  ): Promise<LeaderboardResponse<L>> {
     switch (leaderboardName) {
       case "scoresaber": {
         return fetchWithCache(leaderboardCache, `${leaderboardName}-${id}`, async () => {
@@ -64,10 +69,9 @@ export default class LeaderboardService {
           if (!foundLeaderboard) {
             console.log(`Leaderboard "${id}" not found in cache, refreshing...`);
 
-            const leaderboardToken = await LeaderboardService.getLeaderboardToken<ScoreSaberLeaderboardToken>(
-              leaderboardName,
-              id
-            );
+            const leaderboardToken = creationData
+              ? (creationData as ScoreSaberLeaderboardToken)
+              : await LeaderboardService.getLeaderboardToken<ScoreSaberLeaderboardToken>(leaderboardName, id);
             if (leaderboardToken == undefined) {
               throw new NotFoundError(`Leaderboard not found for "${id}"`);
             }
