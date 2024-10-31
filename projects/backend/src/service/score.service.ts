@@ -95,7 +95,7 @@ export class ScoreService {
         maxCombo: `${formatChange(previousScore.change.maxCombo) || ""}`,
       };
 
-    await logToChannel(
+    const message = await logToChannel(
       DiscordChannels.numberOneFeed,
       new EmbedBuilder()
         .setTitle(`${player.name} just set a #1!`)
@@ -148,6 +148,14 @@ export class ScoreService {
         })
         .setColor("#00ff00")
     );
+
+    try {
+      if (message) {
+        await message.crosspost();
+      }
+    } catch (error) {
+      console.error("Failed to cross-post number one score message", error);
+    }
   }
 
   /**

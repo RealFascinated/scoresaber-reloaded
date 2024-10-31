@@ -51,15 +51,16 @@ export async function initDiscordBot() {
  * Logs the message to a discord channel.
  *
  * @param channelId the channel id to log to
- * @param message the message to log
+ * @param embed the embed to log
  */
-export async function logToChannel(channelId: DiscordChannels, message: EmbedBuilder) {
+export async function logToChannel(channelId: DiscordChannels, embed: EmbedBuilder) {
   try {
     const channel = await client.channels.fetch(channelId);
     if (channel != undefined && channel.isSendable()) {
-      channel.send({ embeds: [message] });
+      return await channel.send({ embeds: [embed] });
     }
   } catch {
     /* empty */
   }
+  return undefined;
 }
