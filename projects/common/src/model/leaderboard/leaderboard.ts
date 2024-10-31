@@ -27,7 +27,7 @@ export default class Leaderboard {
    * The sub name of the leaderboard.
    * @private
    */
-  @Prop({ required: true })
+  @Prop({ required: false })
   readonly songSubName!: string;
 
   /**

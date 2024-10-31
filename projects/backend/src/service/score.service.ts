@@ -35,7 +35,9 @@ import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/score
 import { MapDifficulty } from "@ssr/common/score/map-difficulty";
 import { MapCharacteristic } from "@ssr/common/types/map-characteristic";
 import { Page, Pagination } from "@ssr/common/pagination";
-import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
+import ScoreSaberLeaderboard, {
+  ScoreSaberLeaderboardModel,
+} from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import Leaderboard from "@ssr/common/model/leaderboard/leaderboard";
 import { Timeframe } from "@ssr/common/timeframe";
 import { getDaysAgoDate } from "@ssr/common/utils/time-utils";
@@ -185,6 +187,12 @@ export class ScoreService {
     const playerName = (scoreToken.leaderboardPlayerInfo && scoreToken.leaderboardPlayerInfo.name) || "Unknown";
 
     const leaderboard = getScoreSaberLeaderboardFromToken(leaderboardToken);
+    await ScoreSaberLeaderboardModel.updateOne(
+      { _id: leaderboard.id },
+      { $setOnInsert: { _id: leaderboard.id, lastRefreshed: new Date(), ...leaderboard } },
+      { upsert: true }
+    );
+
     const score = getScoreSaberScoreFromToken(scoreToken, leaderboard, playerId);
     const player: PlayerDocument | null = await PlayerModel.findById(playerId);
     // Player is not tracked, so ignore the score.
