@@ -67,8 +67,6 @@ export default class LeaderboardService {
           }
 
           if (!foundLeaderboard) {
-            console.log(`Leaderboard "${id}" not found in cache, refreshing...`);
-
             const leaderboardToken = creationData
               ? (creationData as ScoreSaberLeaderboardToken)
               : await LeaderboardService.getLeaderboardToken<ScoreSaberLeaderboardToken>(leaderboardName, id);
