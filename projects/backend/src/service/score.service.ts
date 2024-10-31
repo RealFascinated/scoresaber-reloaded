@@ -84,16 +84,14 @@ export class ScoreService {
     }
 
     const previousScore = await ScoreService.getPreviousScore(player.id, leaderboard, score.timestamp);
-    const change = {
-      accuracy:
-        previousScore &&
-        previousScore.change &&
-        `${formatChange(previousScore.change.accuracy, value => value.toFixed(2) + "%") || ""}`,
-      pp: previousScore && previousScore.change && `${formatChange(previousScore.change.pp, undefined, true) || ""}`,
-      misses: previousScore && previousScore.change && `${formatChange(previousScore.change.misses) || ""}`,
-      badCuts: previousScore && previousScore.change && `${formatChange(previousScore.change.badCuts) || ""}`,
-      maxCombo: previousScore && previousScore.change && `${formatChange(previousScore.change.maxCombo) || ""}`,
-    };
+    const change = previousScore &&
+      previousScore.change && {
+        accuracy: `${formatChange(previousScore.change.accuracy, value => value.toFixed(2) + "%") || ""}`,
+        pp: `${formatChange(previousScore.change.pp, undefined, true) || ""}`,
+        misses: `${formatChange(previousScore.change.misses) || ""}`,
+        badCuts: `${formatChange(previousScore.change.badCuts) || ""}`,
+        maxCombo: `${formatChange(previousScore.change.maxCombo) || ""}`,
+      };
 
     await logToChannel(
       DiscordChannels.numberOneFeed,
@@ -108,12 +106,12 @@ export class ScoreService {
         .addFields([
           {
             name: "Accuracy",
-            value: `${formatScoreAccuracy(score)} ${change.accuracy}`,
+            value: `${formatScoreAccuracy(score)} ${change ? change.accuracy : ""}`,
             inline: true,
           },
           {
             name: "PP",
-            value: `${formatPp(score.pp)}pp ${change.pp}`,
+            value: `${formatPp(score.pp)}pp ${change ? change.pp : ""}`,
             inline: true,
           },
           {
@@ -123,17 +121,17 @@ export class ScoreService {
           },
           {
             name: "Misses",
-            value: `${formatNumberWithCommas(score.missedNotes)} ${change.misses}`,
+            value: `${formatNumberWithCommas(score.missedNotes)} ${change ? change.misses : ""}`,
             inline: true,
           },
           {
             name: "Bad Cuts",
-            value: `${formatNumberWithCommas(score.badCuts)} ${change.badCuts}`,
+            value: `${formatNumberWithCommas(score.badCuts)} ${change ? change.badCuts : ""}`,
             inline: true,
           },
           {
             name: "Max Combo",
-            value: `${formatNumberWithCommas(score.maxCombo)} ${change.maxCombo}`,
+            value: `${formatNumberWithCommas(score.maxCombo)} ${change ? change.maxCombo : ""}`,
             inline: true,
           },
         ])
