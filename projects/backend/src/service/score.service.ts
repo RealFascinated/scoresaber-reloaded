@@ -378,7 +378,7 @@ export class ScoreService {
             `${leaderboard.difficulty.difficulty}-${leaderboard.difficulty.characteristic}`,
             score.score
           ),
-          this.getPreviousScore(score.playerId, leaderboard.id + "", score.timestamp),
+          this.getPreviousScore(score.playerId, leaderboard, score.timestamp),
         ]);
 
         if (additionalData) {
@@ -515,7 +515,7 @@ export class ScoreService {
                   `${leaderboard.difficulty.difficulty}-${leaderboard.difficulty.characteristic}`,
                   score.score
                 ),
-                this.getPreviousScore(playerId, leaderboard.id + "", score.timestamp),
+                this.getPreviousScore(playerId, leaderboard, score.timestamp),
               ]);
 
               if (additionalData) {
@@ -668,7 +668,7 @@ export class ScoreService {
           if (additionalData !== undefined) {
             score.additionalData = additionalData;
           }
-          const previousScore = await this.getPreviousScore(playerId, leaderboardId, score.timestamp);
+          const previousScore = await this.getPreviousScore(playerId, leaderboard, score.timestamp);
           if (previousScore !== undefined) {
             score.previousScore = previousScore;
           }
@@ -688,16 +688,16 @@ export class ScoreService {
    * Gets the player's previous score for a map.
    *
    * @param playerId the player's id to get the previous score for
-   * @param leaderboardId the leaderboard to get the previous score on
+   * @param leaderboard the leaderboard to get the previous score on
    * @param timestamp the score's timestamp to get the previous score for
    * @returns the score, or undefined if none
    */
   public static async getPreviousScore(
     playerId: string,
-    leaderboardId: string,
+    leaderboard: Leaderboard,
     timestamp: Date
   ): Promise<ScoreSaberPreviousScore | undefined> {
-    const scores = await ScoreSaberScoreModel.find({ playerId: playerId, leaderboardId: leaderboardId }).sort({
+    const scores = await ScoreSaberScoreModel.find({ playerId: playerId, leaderboardId: leaderboard.id }).sort({
       timestamp: -1,
     });
     if (scores == null || scores.length == 0) {
@@ -715,7 +715,7 @@ export class ScoreService {
     }
     return {
       score: previousScore.score,
-      accuracy: previousScore.accuracy,
+      accuracy: previousScore.accuracy || (score.score / leaderboard.maxScore) * 100,
       modifiers: previousScore.modifiers,
       misses: previousScore.misses,
       missedNotes: previousScore.missedNotes,
@@ -727,7 +727,9 @@ export class ScoreService {
       timestamp: previousScore.timestamp,
       change: {
         score: score.score - previousScore.score,
-        accuracy: score.accuracy - previousScore.accuracy,
+        accuracy:
+          (score.accuracy || (score.score / leaderboard.maxScore) * 100) -
+          (previousScore.accuracy || (previousScore.score / leaderboard.maxScore) * 100),
         misses: score.misses - previousScore.misses,
         missedNotes: score.missedNotes - previousScore.missedNotes,
         badCuts: score.badCuts - previousScore.badCuts,
