@@ -8,7 +8,6 @@ import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import BackgroundCover from "../components/background-cover";
 import DatabaseLoader from "../components/loaders/database-loader";
-import NavBar from "../components/navbar/navbar-old";
 import { Colors } from "@/common/colors";
 import OfflineNetwork from "@/components/offline-network";
 import Script from "next/script";

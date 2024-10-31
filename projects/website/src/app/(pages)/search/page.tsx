@@ -3,6 +3,11 @@ import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Search",
+  description: "Find yourself or a friend",
+  openGraph: {
+    title: "ScoreSaber Reloaded - Search",
+    description: "Find yourself or a friend",
+  },
 };
 
 export default function SearchPage() {

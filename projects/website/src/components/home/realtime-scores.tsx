@@ -1,4 +1,4 @@
-import { ChartNoAxesCombined, Database, Flame } from "lucide-react";
+import { Flame } from "lucide-react";
 import { cn, getRandomInteger } from "@/common/utils";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import { Difficulty, getDifficulty, getRandomDifficulty } from "@/common/song-utils";

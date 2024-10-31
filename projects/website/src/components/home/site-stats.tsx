@@ -1,4 +1,4 @@
-import { ChartNoAxesCombined, Database } from "lucide-react";
+import { ChartNoAxesCombined } from "lucide-react";
 import { kyFetch } from "@ssr/common/utils/utils";
 import { AppStatistics } from "@ssr/common/types/backend/app-statistics";
 import { Config } from "@ssr/common/config";
