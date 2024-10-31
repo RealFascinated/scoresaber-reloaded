@@ -45,24 +45,25 @@ export default class LeaderboardService {
    * @returns the scores
    */
   public static async getLeaderboard<L>(leaderboardName: Leaderboards, id: string): Promise<LeaderboardResponse<L>> {
-    const now = new Date();
     switch (leaderboardName) {
       case "scoresaber": {
         return fetchWithCache(leaderboardCache, `${leaderboardName}-${id}`, async () => {
+          const now = new Date();
+
           let foundLeaderboard: ScoreSaberLeaderboardDocument | undefined = undefined;
           const cachedLeaderboard: ScoreSaberLeaderboardDocument | null = await ScoreSaberLeaderboardModel.findById(id);
-          if (cachedLeaderboard != null) {
-            if (
-              cachedLeaderboard &&
-              (cachedLeaderboard.ranked || // Never refresh ranked leaderboards (it will get refreshed every night)
-                cachedLeaderboard.lastRefreshed == undefined || // Refresh if it has never been refreshed
-                now.getTime() - cachedLeaderboard.lastRefreshed.getTime() > 1000 * 60 * 60 * 24) // Refresh every day
-            ) {
-              foundLeaderboard = cachedLeaderboard;
-            }
+          if (
+            cachedLeaderboard != null &&
+            (cachedLeaderboard.ranked || // Never refresh ranked leaderboards (it will get refreshed every night)
+              (cachedLeaderboard.lastRefreshed &&
+                now.getTime() - cachedLeaderboard.lastRefreshed.getTime() > 1000 * 60 * 60 * 24)) // Refresh every day
+          ) {
+            foundLeaderboard = cachedLeaderboard;
           }
 
           if (!foundLeaderboard) {
+            console.log(`Leaderboard "${id}" not found in cache, refreshing...`);
+
             const leaderboardToken = await LeaderboardService.getLeaderboardToken<ScoreSaberLeaderboardToken>(
               leaderboardName,
               id
