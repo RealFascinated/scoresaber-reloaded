@@ -43,6 +43,7 @@ import { Timeframe } from "@ssr/common/timeframe";
 import { getDaysAgoDate } from "@ssr/common/utils/time-utils";
 import { PlayerService } from "./player.service";
 import { formatScoreAccuracy } from "@ssr/common/utils/score.util";
+import BeatSaverService from "./beatsaver.service";
 
 const playerScoresCache = new SSRCache({
   ttl: 1000 * 60, // 1 minute
@@ -78,6 +79,7 @@ export class ScoreService {
       return;
     }
 
+    const beatSaver = await BeatSaverService.getMap(leaderboard.songHash);
     const player = await scoresaberService.lookupPlayer(playerInfo.id);
     if (!player) {
       return;
@@ -100,7 +102,11 @@ export class ScoreService {
         .setDescription(
           [
             `${leaderboard.songName} ${leaderboard.songSubName} (${leaderboard.difficulty.difficulty} ${leaderboard.stars.toFixed(2)}★)`,
-            `[[Player]](${Config.websiteUrl}/player/${player.id}) [[Leaderboard]](${Config.websiteUrl}/leaderboard/${leaderboard.id})`,
+            [
+              `[[Player]](${Config.websiteUrl}/player/${player.id})`,
+              `[[Leaderboard]](${Config.websiteUrl}/leaderboard/${leaderboard.id})`,
+              beatSaver ? `[[Map]](https://beatsaver.com/maps/${beatSaver.bsr})` : undefined,
+            ].join(" "),
           ].join("\n")
         )
         .addFields([
