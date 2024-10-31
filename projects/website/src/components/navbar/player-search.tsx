@@ -12,12 +12,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { LoaderCircle, UserSearch } from "lucide-react";
 import { cn } from "@/common/utils";
-import { useDebouncedCallback } from "use-debounce";
 import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/score-saber-player-token";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { useRouter } from "next/navigation";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { useSearch } from "@/components/providers/search-provider";
+import { useDebounce } from "@uidotdev/usehooks";
 
 export default function PlayerSearch() {
   const router: AppRouterInstance = useRouter();
@@ -55,7 +55,7 @@ export default function PlayerSearch() {
   }, [isOpen, openSearch, closeSearch]);
 
   // Handle searching for a player
-  const searchPlayers = useDebouncedCallback(async (query: string) => {
+  const searchPlayers = useDebounce(async (query: string) => {
     setResults(!query ? undefined : (await scoresaberService.searchPlayers(query))?.players);
     setLoading(false);
   }, 500);
