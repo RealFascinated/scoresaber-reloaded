@@ -6,7 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { kyFetch } from "@ssr/common/utils/utils";
 import { Config } from "@ssr/common/config";
 import { useEffect, useState } from "react";
-import { Box, List, Sword, SwordIcon, TrendingUp, User } from "lucide-react";
+import { Box, List, SwordIcon, TrendingUp, User } from "lucide-react";
 
 type AppStatisticsProps = {
   /**
