@@ -19,6 +19,8 @@ import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.share
 import { useDebounce } from "@uidotdev/usehooks";
 import { useQuery } from "@tanstack/react-query";
 import { useIsMobile } from "@/hooks/use-is-mobile";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
 
 export default function PlayerSearch() {
   const router: AppRouterInstance = useRouter();
@@ -114,7 +116,16 @@ export default function PlayerSearch() {
                       router.push(`/player/${player.id}`);
                     }}
                   >
-                    {player.name}
+                    <Avatar>
+                      <AvatarImage src={player.profilePicture} alt={player.name} />
+                    </Avatar>
+                    <div className="flex flex-col">
+                      <p>{player.name}</p>
+                      <p>
+                        <span className="text-gray-400">#{formatNumberWithCommas(player.rank)}</span> -{" "}
+                        <span className="text-pp">{formatPp(player.pp)}pp</span>
+                      </p>
+                    </div>
                   </CommandItem>
                 );
               })}
