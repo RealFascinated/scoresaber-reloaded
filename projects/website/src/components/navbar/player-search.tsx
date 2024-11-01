@@ -22,6 +22,7 @@ import { useIsMobile } from "@/hooks/use-is-mobile";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
 import { useSearch } from "@/components/providers/search-provider";
+import { CommandLoading } from "cmdk";
 
 export default function PlayerSearch() {
   const router: AppRouterInstance = useRouter();
@@ -119,7 +120,12 @@ export default function PlayerSearch() {
 
         {/* Results */}
         <CommandList className="select-none">
-          <CommandEmpty className="py-2 text-center text-red-500">No results were found.</CommandEmpty>
+          {isLoading ? (
+            <CommandLoading className="py-2 text-center opacity-85">Loading...</CommandLoading>
+          ) : (
+            <CommandEmpty className="py-2 text-center text-red-500">No results were found.</CommandEmpty>
+          )}
+
           {results && (
             <CommandGroup heading="Results">
               {results.map(player => {
