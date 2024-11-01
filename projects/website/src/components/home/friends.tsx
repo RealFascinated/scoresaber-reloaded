@@ -3,7 +3,7 @@ import { cn } from "@/common/utils";
 
 export default function Friends() {
   return (
-    <div id="friends" className="px-5 -mt-20 flex flex-col gap-10 items-end select-none overflow-hidden">
+    <div id="friends" className="px-5 -mt-20 flex flex-col gap-10 items-end select-none">
       {/* Header */}
       <div className="flex flex-col gap-2.5 text-right items-end">
         <div className="flex flex-row-reverse gap-3 items-center text-purple-600">
@@ -21,10 +21,10 @@ export default function Friends() {
       <div
         className={cn(
           "relative",
-          "before:absolute before:-left-36 before:-top-28 before:size-[32rem] before:bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] before:from-purple-600 before:rounded-full before:blur-3xl before:opacity-30 before:z-[1]"
+          "before:absolute before:-left-36 before:-top-28 before:size-[23.5rem] before:xs:size-[32rem] before:bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] before:from-purple-600 before:rounded-full before:blur-3xl before:opacity-30 before:overflow-hidden before:z-[1]"
         )}
       >
-        <div className={cn("relative max-w-[900px] z-20")}>
+        <div className={cn("relative max-w-[900px] z-20 overflow-hidden")}>
           <img
             className="w-full h-full rounded-2xl border border-purple-600/20"
             src="/assets/home/friends.png"

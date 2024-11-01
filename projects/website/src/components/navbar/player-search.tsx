@@ -113,6 +113,7 @@ export default function PlayerSearch() {
           <CommandInput
             className="select-none"
             placeholder="Start typing to find a player..."
+            maxLength={26}
             value={query}
             onValueChange={setQuery}
           />
