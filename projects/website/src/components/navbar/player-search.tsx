@@ -21,12 +21,12 @@ import { useQuery } from "@tanstack/react-query";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
+import { useSearch } from "@/components/providers/search-provider";
 
 export default function PlayerSearch() {
   const router: AppRouterInstance = useRouter();
   const isMobile = useIsMobile();
-
-  const [open, setOpen] = useState<boolean>(false);
+  const { isOpen, openSearch, closeSearch } = useSearch();
 
   const [query, setQuery] = useState<string>("");
   const [results, setResults] = useState<ScoreSaberPlayerToken[] | undefined>();
@@ -57,7 +57,11 @@ export default function PlayerSearch() {
     const handleKeyDown = (event: KeyboardEvent): void => {
       if ((event.ctrlKey || event.metaKey) && event.key === "k") {
         event.preventDefault();
-        setOpen((open: boolean) => !open);
+        if (isOpen) {
+          closeSearch();
+        } else {
+          openSearch();
+        }
       }
     };
     document.addEventListener("keydown", handleKeyDown);
@@ -70,7 +74,7 @@ export default function PlayerSearch() {
       {/* Button to open */}
       <div
         className="group flex cursor-pointer hover:opacity-85 transition-all transform-gpu select-none"
-        onClick={() => setOpen(true)}
+        onClick={openSearch}
       >
         <div className={cn("absolute top-1.5 z-10", isMobile ? "inset-x-0 flex justify-center" : "inset-x-2.5")}>
           <UserSearch className="size-5" />
@@ -92,7 +96,16 @@ export default function PlayerSearch() {
       </div>
 
       {/* Dialog */}
-      <CommandDialog open={open} onOpenChange={setOpen}>
+      <CommandDialog
+        open={isOpen}
+        onOpenChange={state => {
+          if (state) {
+            openSearch();
+          } else {
+            closeSearch();
+          }
+        }}
+      >
         {/* Input */}
         <div className="relative">
           <CommandInput
@@ -116,7 +129,7 @@ export default function PlayerSearch() {
                     value={player.name}
                     className="cursor-pointer flex items-center justify-start"
                     onSelect={() => {
-                      setOpen(false);
+                      closeSearch();
                       router.push(`/player/${player.id}`);
                     }}
                   >
