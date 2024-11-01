@@ -281,7 +281,7 @@ export class ScoreService {
     // Cache score stats for this score
     const scoreStats = await beatLeaderService.lookupScoreStats(score.id);
     let savedScoreStats = false;
-    if (scoreStats !== undefined) {
+    if (scoreStats !== undefined && isProduction()) {
       try {
         await saveFile(MinioBucket.BeatLeaderScoreStats, `${score.id}.json`, Buffer.from(JSON.stringify(scoreStats)));
         savedScoreStats = true;
