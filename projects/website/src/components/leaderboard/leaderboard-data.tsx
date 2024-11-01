@@ -48,8 +48,8 @@ export function LeaderboardData({ initialLeaderboard, initialScores, initialPage
 
   const leaderboard = currentLeaderboard.leaderboard;
   return (
-    <main className="flex flex-col-reverse xl:flex-row w-full gap-2">
-      <Card className="flex gap-2 w-full relative">
+    <main className="flex flex-col-reverse xl:flex-row w-full gap-2 max-w-[1600px]">
+      <Card className="flex gap-2 w-full relative h-fit">
         <LeaderboardScores
           leaderboard={leaderboard}
           initialScores={initialScores}

@@ -125,13 +125,11 @@ export default async function LeaderboardPage(props: Props) {
   }
   return (
     <main className="w-full flex justify-center min-h-screen">
-      <div>
-        <LeaderboardData
-          initialLeaderboard={response.leaderboardResponse}
-          initialScores={response.scores}
-          initialPage={response.page}
-        />
-      </div>
+      <LeaderboardData
+        initialLeaderboard={response.leaderboardResponse}
+        initialScores={response.scores}
+        initialPage={response.page}
+      />
     </main>
   );
 }
