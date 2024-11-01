@@ -22,7 +22,7 @@ export class AppService {
       const additionalScoresData = await AdditionalScoreDataModel.countDocuments();
       const cachedBeatSaverMaps = await BeatSaverMapModel.countDocuments();
       const cachedScoreSaberLeaderboards = await ScoreSaberLeaderboardModel.countDocuments();
-      const cachedBeatLeaderScoreStats = await ScoreSaberLeaderboardModel.countDocuments({ cachedScoreStats: true });
+      const cachedBeatLeaderScoreStats = await AdditionalScoreDataModel.countDocuments({ cachedScoreStats: true });
 
       return {
         trackedPlayers,
