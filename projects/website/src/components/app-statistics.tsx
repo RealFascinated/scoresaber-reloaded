@@ -48,6 +48,11 @@ export function AppStats({ initialStatistics }: AppStatisticsProps) {
         title="Cached ScoreSaber Leaderboards"
         value={statistics.cachedScoreSaberLeaderboards}
       />
+      <Statistic
+        icon={<List className="size-10" />}
+        title="BeatLeader Score Stats"
+        value={statistics.cachedBeatLeaderScoreStats}
+      />
     </div>
   );
 }

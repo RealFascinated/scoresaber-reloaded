@@ -23,4 +23,9 @@ export type AppStatistics = {
    * The amount of cached ScoreSaber leaderboards.
    */
   cachedScoreSaberLeaderboards: number;
+
+  /**
+   * The amount of cached BeatLeader score stats.
+   */
+  cachedBeatLeaderScoreStats: number;
 };
