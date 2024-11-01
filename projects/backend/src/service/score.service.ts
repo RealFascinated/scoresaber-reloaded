@@ -107,7 +107,9 @@ export class ScoreService {
               `[[Leaderboard]](${Config.websiteUrl}/leaderboard/${leaderboard.id})`,
               beatSaver ? `[[Map]](https://beatsaver.com/maps/${beatSaver.bsr})` : undefined,
             ].join(" "),
-          ].join("\n")
+          ]
+            .join("\n")
+            .trim()
         )
         .addFields([
           {
