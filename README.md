@@ -1,7 +1,7 @@
 <img src="./assets/logo.webp" alt="ScoreSaber Reloaded" width="165" align="right">
 
 > [!IMPORTANT]
-> This repository is a work-in-progress, if you have an issue, please create one <a href="https://github.com/RealFascinated/scoresaber-reloaded/issues/new">here</a>
+> This project is a work-in-progress, if you have an issue, please create one <a href="https://github.com/RealFascinated/scoresaber-reloaded/issues/new">here</a>
 
 # ScoreSaber Reloaded
 ScoreSaber Reloaded is a new way to view your scores and get more stats about you and your plays.
