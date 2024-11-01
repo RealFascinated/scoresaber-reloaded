@@ -40,7 +40,7 @@ export default function FriendsButton() {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger className="h-full" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
-        <NavbarButton>
+        <NavbarButton className="px-0">
           <PersonIcon className="size-5" />
           <span className="hidden sm:flex">Friends</span>
         </NavbarButton>

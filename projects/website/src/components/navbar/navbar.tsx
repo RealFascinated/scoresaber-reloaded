@@ -45,7 +45,7 @@ export default function Navbar() {
       )}
     >
       {/* Left */}
-      <div className="flex gap-2 items-center transition-all transform-gpu">
+      <div className="flex gap-3 md:gap-4 items-center transition-all transform-gpu">
         {/* Branding */}
         <Link
           className="flex gap-2.5 items-center hover:opacity-85 transition-all transform-gpu"
@@ -57,14 +57,12 @@ export default function Navbar() {
         </Link>
 
         {/* Links */}
-        <div className="xs:pl-2 flex gap-3 md:gap-5 items-center transition-all transform-gpu">
-          {links.map(link => link)}
-        </div>
+        <div className="flex gap-3 md:gap-5 items-center transition-all transform-gpu">{links.map(link => link)}</div>
       </div>
 
       {/* Right */}
-      <div className="md:pl-6 flex gap-2 md:gap-2.5 items-center divide-x md:divide-x-2 divide-muted transition-all transform-gpu">
-        <div className="flex gap-2 md:gap-2.5 items-center transition-all transform-gpu">
+      <div className="md:pl-6 flex gap-2.5 items-center divide-x divide-muted transition-all transform-gpu">
+        <div className="flex gap-2.5 items-center transition-all transform-gpu">
           <PlayerSearch />
           <SimpleNavLink
             content={<CogIcon className="size-6 text-zinc-200 hover:animate-spin-slow" />}
