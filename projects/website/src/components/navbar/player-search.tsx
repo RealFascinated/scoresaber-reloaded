@@ -35,7 +35,7 @@ export default function PlayerSearch() {
   const { data, isLoading } = useQuery({
     queryKey: ["playerSearch", debouncedQuery],
     queryFn: async (): Promise<ScoreSaberPlayerToken[] | undefined> => {
-      if (debouncedQuery.length <= 3) {
+      if (debouncedQuery.length <= 3 && debouncedQuery.length !== 0) {
         return [];
       }
       return (
