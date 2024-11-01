@@ -121,7 +121,12 @@ export default function PlayerSearch() {
 
         {/* Results */}
         <CommandList className="select-none">
-          <CommandEmpty className="py-2 text-center text-red-500">No results were found.</CommandEmpty>
+          {isLoading ? (
+            <CommandLoading className="py-2 text-center opacity-85">Loading...</CommandLoading>
+          ) : (
+            <CommandEmpty className="py-2 text-center text-red-500">No results were found.</CommandEmpty>
+          )}
+
           {results && (
             <CommandGroup heading="Results">
               {results.map(player => {
