@@ -87,7 +87,7 @@ export default async function RankingPage(props: Props) {
 
   return (
     <main className="w-full flex justify-center">
-      <Card className="h-full w-full max-w-screen-2xl gap-2">
+      <Card className="h-full w-full max-w-[1600px] gap-2">
         <div className="flex items-center gap-2 font-semibold">
           {country && <CountryFlag code={country} size={16} />}
           <p>
