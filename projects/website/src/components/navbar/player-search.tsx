@@ -38,7 +38,11 @@ export default function PlayerSearch() {
       if (debouncedQuery.length <= 3) {
         return [];
       }
-      return (await scoresaberService.searchPlayers(debouncedQuery))?.players || [];
+      return (
+        (await scoresaberService.searchPlayers(debouncedQuery))?.players.sort((a, b) => {
+          return b.pp - a.pp;
+        }) || []
+      );
     },
   });
 
