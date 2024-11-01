@@ -90,7 +90,7 @@ export class ScoreService {
       previousScore.change && {
         accuracy: `${formatChange(previousScore.change.accuracy, value => value.toFixed(2) + "%") || ""}`,
         pp: `${formatChange(previousScore.change.pp, undefined, true) || ""}`,
-        misses: `${formatChange(previousScore.change.misses) || ""}`,
+        misses: ` vs ${previousScore.misses || ""}`,
         badCuts: `${formatChange(previousScore.change.badCuts) || ""}`,
         maxCombo: `${formatChange(previousScore.change.maxCombo) || ""}`,
       };
