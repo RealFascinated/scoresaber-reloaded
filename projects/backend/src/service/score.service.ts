@@ -45,7 +45,7 @@ import { PlayerService } from "./player.service";
 import { formatScoreAccuracy } from "@ssr/common/utils/score.util";
 import BeatSaverService from "./beatsaver.service";
 import { beatLeaderService } from "@ssr/common/service/impl/beatleader";
-import { MinioBucket } from "../common/minio/minio-buckets";
+import { MinioBucket } from "../../../common/src/minio-buckets";
 import { saveFile } from "../common/minio/minio";
 
 const playerScoresCache = new SSRCache({

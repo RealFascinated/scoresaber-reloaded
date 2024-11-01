@@ -1,4 +1,4 @@
-import { isProduction } from "@ssr/common/utils/utils";
+import { isProduction } from "./utils/utils";
 
 export enum MinioBucket {
   BeatLeaderScoreStats = "beatleader-score-stats",

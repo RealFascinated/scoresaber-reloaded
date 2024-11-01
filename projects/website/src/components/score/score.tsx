@@ -28,7 +28,7 @@ import { ScoreStatsToken } from "@ssr/common/types/token/beatleader/score-stats/
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { Config } from "@ssr/common/config";
 import { beatLeaderService } from "@ssr/common/service/impl/beatleader";
-import { getMinioBucketName, MinioBucket } from "backend/src/common/minio/minio-buckets";
+import { getMinioBucketName, MinioBucket } from "@ssr/common/minio-buckets";
 
 type Props = {
   highlightedPlayer?: ScoreSaberPlayer;

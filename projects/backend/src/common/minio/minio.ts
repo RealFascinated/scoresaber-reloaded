@@ -1,5 +1,5 @@
 import { Client } from "minio";
-import { getMinioBucketName, MinioBucket } from "./minio-buckets";
+import { getMinioBucketName, MinioBucket } from "@ssr/common/minio-buckets";
 
 const minioClient = new Client({
   endPoint: process.env.MINIO_ENDPOINT!,
