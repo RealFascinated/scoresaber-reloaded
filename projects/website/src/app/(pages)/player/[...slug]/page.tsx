@@ -123,8 +123,16 @@ export default async function PlayerPage(props: Props) {
   }
 
   return (
-    <div className="flex flex-col h-full w-full">
-      <PlayerData initialPlayerData={player} initialScoreData={scores} initialSearch={search} sort={sort} page={page} />
-    </div>
+    <main className="w-full flex justify-center">
+      <div className="flex flex-col h-full w-full max-w-screen-2xl">
+        <PlayerData
+          initialPlayerData={player}
+          initialScoreData={scores}
+          initialSearch={search}
+          sort={sort}
+          page={page}
+        />
+      </div>
+    </main>
   );
 }

@@ -24,7 +24,7 @@ export default function HeroSection() {
       </motion.div>
       <Buttons />
       <AppPreview />
-      <Separator className="my-12 w-screen" />
+      <Separator className="my-12 w-full" />
     </div>
   );
 }

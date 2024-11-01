@@ -124,10 +124,14 @@ export default async function LeaderboardPage(props: Props) {
     return redirect("/");
   }
   return (
-    <LeaderboardData
-      initialLeaderboard={response.leaderboardResponse}
-      initialScores={response.scores}
-      initialPage={response.page}
-    />
+    <main className="w-full flex justify-center min-h-screen">
+      <div>
+        <LeaderboardData
+          initialLeaderboard={response.leaderboardResponse}
+          initialScores={response.scores}
+          initialPage={response.page}
+        />
+      </div>
+    </main>
   );
 }

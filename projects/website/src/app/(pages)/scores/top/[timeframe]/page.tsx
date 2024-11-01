@@ -19,5 +19,9 @@ type TopScoresPageProps = {
 export default async function TopScoresPage({ params }: TopScoresPageProps) {
   const { timeframe } = await params;
 
-  return <TopScoresData timeframe={timeframe} />;
+  return (
+    <main className="w-full flex justify-center">
+      <TopScoresData timeframe={timeframe} />
+    </main>
+  );
 }

@@ -86,15 +86,17 @@ export default async function RankingPage(props: Props) {
   const { players, page, country } = await getRankingData(props);
 
   return (
-    <Card className="h-full w-full gap-2">
-      <div className="flex items-center gap-2 font-semibold">
-        {country && <CountryFlag code={country} size={16} />}
-        <p>
-          You are viewing {country ? "players from " + normalizedRegionName(country.toUpperCase()) : "Global players"}
-        </p>
-      </div>
+    <main className="w-full flex justify-center">
+      <Card className="h-full w-full max-w-screen-2xl gap-2">
+        <div className="flex items-center gap-2 font-semibold">
+          {country && <CountryFlag code={country} size={16} />}
+          <p>
+            You are viewing {country ? "players from " + normalizedRegionName(country.toUpperCase()) : "Global players"}
+          </p>
+        </div>
 
-      <RankingData initialPage={page} initialPageData={players} country={country} />
-    </Card>
+        <RankingData initialPage={page} initialPageData={players} country={country} />
+      </Card>
+    </main>
   );
 }

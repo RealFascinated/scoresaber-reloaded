@@ -14,8 +14,8 @@ import Script from "next/script";
 import { ApiHealth } from "@/components/api/api-health";
 import Footer from "@/components/footer";
 import { getBuildInformation } from "@/common/website-utils";
-import Navbar from "@/components/navbar/navbar";
 import { SearchProvider } from "@/components/providers/search-provider";
+import Navbar from "@/components/navbar/navbar";
 
 const siteFont = localFont({
   src: "./fonts/JetBrainsMono.ttf",
@@ -85,9 +85,7 @@ export default function RootLayout({
                   <main className="flex flex-col min-h-screen text-white w-full">
                     <SearchProvider>
                       <Navbar />
-                      <div className="mt-3 z-[1] m-auto flex flex-col flex-grow items-center w-full md:max-w-[1600px]">
-                        {children}
-                      </div>
+                      <div className="w-full mt-3 z-[1] flex">{children}</div>
                     </SearchProvider>
                     <Footer buildId={buildId} buildTimeShort={buildTimeShort} />
                   </main>
