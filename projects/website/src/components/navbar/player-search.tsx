@@ -23,6 +23,7 @@ import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
 import { useSearch } from "@/components/providers/search-provider";
 import { truncateText } from "@/common/string-utils";
+import { CommandLoading } from "cmdk";
 
 export default function PlayerSearch() {
   const router: AppRouterInstance = useRouter();
@@ -138,7 +139,7 @@ export default function PlayerSearch() {
                       <AvatarImage src={player.profilePicture} alt={player.name} />
                     </Avatar>
                     <div className="flex flex-col">
-                      <p>{truncateText(player.name, 32)}</p>
+                      <p>{player.name}</p>
                       <p>
                         <span className="text-gray-400">#{formatNumberWithCommas(player.rank)}</span> -{" "}
                         <span className="text-pp">{formatPp(player.pp)}pp</span>

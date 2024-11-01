@@ -141,13 +141,13 @@ export default function Footer({ buildId, buildTimeShort }: { buildId: string; b
           <div className="flex gap-20 md:gap-32 transition-all transform-gpu">
             {Object.entries(links).map(([title, links]) => (
               <div key={title} className="flex flex-col gap-0.5">
-                <h1 className="pb-1 text-lg font-semibold text-ssr">{title}</h1>
+                <h1 className="pb-0.5 text-lg font-semibold text-ssr">{title}</h1>
                 {links.map(link => {
                   const external: boolean = !link.href.startsWith("/");
                   return (
                     <Link
                       key={link.name}
-                      className="flex gap-2 items-center hover:opacity-75 transition-all transform-gpu"
+                      className="flex gap-2 items-center text-sm hover:opacity-75 transition-all transform-gpu"
                       href={link.href}
                       target={external ? "_blank" : undefined}
                       draggable={false}
