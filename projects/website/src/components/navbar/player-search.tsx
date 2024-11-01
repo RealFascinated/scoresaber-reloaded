@@ -139,7 +139,7 @@ export default function PlayerSearch() {
                       <AvatarImage src={player.profilePicture} alt={player.name} />
                     </Avatar>
                     <div className="flex flex-col">
-                      <p>{player.name}</p>
+                      <p>{truncateText(player.name, 32)}</p>
                       <p>
                         <span className="text-gray-400">#{formatNumberWithCommas(player.rank)}</span> -{" "}
                         <span className="text-pp">{formatPp(player.pp)}pp</span>
