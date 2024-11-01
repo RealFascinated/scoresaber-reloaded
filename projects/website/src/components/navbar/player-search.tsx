@@ -22,6 +22,7 @@ import { useIsMobile } from "@/hooks/use-is-mobile";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
 import { useSearch } from "@/components/providers/search-provider";
+import { truncateText } from "@/common/string-utils";
 import { CommandLoading } from "cmdk";
 
 export default function PlayerSearch() {
@@ -120,12 +121,7 @@ export default function PlayerSearch() {
 
         {/* Results */}
         <CommandList className="select-none">
-          {isLoading ? (
-            <CommandLoading className="py-2 text-center opacity-85">Loading...</CommandLoading>
-          ) : (
-            <CommandEmpty className="py-2 text-center text-red-500">No results were found.</CommandEmpty>
-          )}
-
+          <CommandEmpty className="py-2 text-center text-red-500">No results were found.</CommandEmpty>
           {results && (
             <CommandGroup heading="Results">
               {results.map(player => {
@@ -143,7 +139,7 @@ export default function PlayerSearch() {
                       <AvatarImage src={player.profilePicture} alt={player.name} />
                     </Avatar>
                     <div className="flex flex-col">
-                      <p>{player.name}</p>
+                      <p>{truncateText(player.name, 32)}</p>
                       <p>
                         <span className="text-gray-400">#{formatNumberWithCommas(player.rank)}</span> -{" "}
                         <span className="text-pp">{formatPp(player.pp)}pp</span>
