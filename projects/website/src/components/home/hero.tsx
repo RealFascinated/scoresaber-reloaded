@@ -48,11 +48,11 @@ function Alert() {
 
 function Title() {
   return (
-    <div className="px-5 flex flex-col gap-1.5">
-      <h1 className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-ssr to-pp/85">
+    <div className="px-5 flex flex-col gap-1.5 items-center">
+      <h1 className="text-4xl xs:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-ssr to-pp/85">
         ScoreSaber Reloaded
       </h1>
-      <p className="max-w-sm md:max-w-lg opacity-85">
+      <p className="max-w-sm md:max-w-lg text-sm xs:text-base opacity-85">
         ScoreSaber Reloaded is a new way to view your scores and get more stats about you and your plays
       </p>
     </div>
@@ -63,7 +63,7 @@ function Buttons() {
   const { openSearch } = useSearch();
   return (
     <motion.div
-      className="mt-4 flex flex-col xs:flex-row gap-4 items-center"
+      className="mt-4 flex flex-col xs:flex-row gap-2 xs:gap-4 items-center"
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.35, duration: 0.7, ease: "easeOut" }}

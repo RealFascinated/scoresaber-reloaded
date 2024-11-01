@@ -85,7 +85,7 @@ export default function RootLayout({
                   <main className="flex flex-col min-h-screen text-white w-full">
                     <SearchProvider>
                       <Navbar />
-                      <div className="mt-3 z-[1] m-auto flex flex-col flex-grow items-center w-full md:max-w-[1600px] overflow-hidden">
+                      <div className="mt-3 z-[1] m-auto flex flex-col flex-grow items-center w-full md:max-w-[1600px]">
                         {children}
                       </div>
                     </SearchProvider>
