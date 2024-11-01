@@ -91,8 +91,8 @@ export class ScoreService {
         accuracy: `${formatChange(previousScore.change.accuracy, value => value.toFixed(2) + "%") || ""}`,
         pp: `${formatChange(previousScore.change.pp, undefined, true) || ""}`,
         misses: ` vs ${previousScore.misses}` || "",
-        badCuts: `${formatChange(previousScore.change.badCuts) || ""}`,
-        maxCombo: `${formatChange(previousScore.change.maxCombo) || ""}`,
+        badCuts: ` vs ${previousScore.badCuts}` || "",
+        maxCombo: ` vs ${previousScore.maxCombo}` || "",
       };
 
     const message = await logToChannel(
