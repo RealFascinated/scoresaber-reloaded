@@ -99,7 +99,7 @@ export default function PlayerSearch() {
             className="select-none"
             placeholder="Start typing to find a player..."
             value={query}
-            onValueChange={async value => setQuery(value)}
+            onValueChange={setQuery}
           />
           {isLoading && <LoaderCircle className="h-full absolute inset-y-0 right-10 size-5 animate-spin opacity-85" />}
         </div>
