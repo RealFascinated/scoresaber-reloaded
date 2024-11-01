@@ -21,7 +21,8 @@ ScoreSaber Reloaded is a new way to view your scores and get more stats about yo
 
 ## App Preview
 
-![preview](./projects/website/public/assets/home/app-preview.png)
+![landing-preview](./assets/landing-preview.png)
+![app-preview](./projects/website/public/assets/home/app-preview.png)
 
 ## Stars
 [![Star History Chart](https://api.star-history.com/svg?repos=RealFascinated/scoresaber-reloaded&type=Timeline)](https://star-history.com/#RealFascinated/scoresaber-reloaded&Timeline)
