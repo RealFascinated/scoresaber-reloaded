@@ -110,6 +110,7 @@ export default function PlayerSearch() {
                 return (
                   <CommandItem
                     key={player.id}
+                    value={player.name}
                     className="cursor-pointer flex items-center justify-start"
                     onSelect={() => {
                       setOpen(false);
