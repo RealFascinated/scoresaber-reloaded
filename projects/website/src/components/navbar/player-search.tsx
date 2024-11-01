@@ -17,24 +17,34 @@ import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { useRouter } from "next/navigation";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { useDebounce } from "@uidotdev/usehooks";
+import { useQuery } from "@tanstack/react-query";
+import { useIsMobile } from "@/hooks/use-is-mobile";
 
 export default function PlayerSearch() {
   const router: AppRouterInstance = useRouter();
+  const isMobile = useIsMobile();
 
-  const [smallScreen, setSmallScreen] = useState<boolean>(false);
   const [open, setOpen] = useState<boolean>(false);
 
-  const [loading, setLoading] = useState<boolean>(false);
+  const [query, setQuery] = useState<string>("");
   const [results, setResults] = useState<ScoreSaberPlayerToken[] | undefined>();
+  const debouncedQuery = useDebounce(query, 500);
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["playerSearch", debouncedQuery],
+    queryFn: async (): Promise<ScoreSaberPlayerToken[] | undefined> => {
+      if (debouncedQuery.length <= 3) {
+        return [];
+      }
+      return (await scoresaberService.searchPlayers(debouncedQuery))?.players || [];
+    },
+  });
 
   useEffect(() => {
-    const handleResize = (): void => {
-      setSmallScreen(window.innerWidth <= 767);
-    };
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
+    if (data) {
+      setResults(data.length > 0 ? data : undefined);
+    }
+  }, [data]);
 
   // Listen for CTRL + K keybinds to open this dialog
   useEffect(() => {
@@ -48,12 +58,6 @@ export default function PlayerSearch() {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  // Handle searching for a player
-  const searchPlayers = useDebounce(async (query: string) => {
-    setResults(!query ? undefined : (await scoresaberService.searchPlayers(query))?.players);
-    setLoading(false);
-  }, 500);
-
   // Render the contents
   return (
     <>
@@ -62,7 +66,7 @@ export default function PlayerSearch() {
         className="group flex cursor-pointer hover:opacity-85 transition-all transform-gpu select-none"
         onClick={() => setOpen(true)}
       >
-        <div className={cn("absolute top-1.5 z-10", smallScreen ? "inset-x-0 flex justify-center" : "inset-x-2.5")}>
+        <div className={cn("absolute top-1.5 z-10", isMobile ? "inset-x-0 flex justify-center" : "inset-x-2.5")}>
           <UserSearch className="size-5" />
         </div>
 
@@ -70,11 +74,11 @@ export default function PlayerSearch() {
           className="px-0 pl-9 w-10 md:w-full h-8 rounded-lg cursor-pointer group-hover:border-ssr/75 transition-all transform-gpu"
           type="search"
           name="search"
-          placeholder={smallScreen ? undefined : "Query..."}
+          placeholder={isMobile ? undefined : "Query..."}
           readOnly
         />
 
-        <div className={cn("hidden absolute top-1.5 right-3", !smallScreen && "flex")}>
+        <div className={cn("hidden absolute top-1.5 right-3", !isMobile && "flex")}>
           <kbd className="h-5 px-1.5 inline-flex gap-1 items-center bg-muted font-medium text-muted-foreground rounded select-none pointer-events-none">
             <span>⌘</span>K
           </kbd>
@@ -89,11 +93,10 @@ export default function PlayerSearch() {
             className="select-none"
             placeholder="Start typing to find a player..."
             onValueChange={async value => {
-              setLoading(true);
-              await searchPlayers(value);
+              setQuery(value);
             }}
           />
-          {loading && <LoaderCircle className="h-full absolute inset-y-0 right-10 size-5 animate-spin opacity-85" />}
+          {isLoading && <LoaderCircle className="h-full absolute inset-y-0 right-10 size-5 animate-spin opacity-85" />}
         </div>
 
         {/* Results */}
@@ -105,7 +108,7 @@ export default function PlayerSearch() {
                 return (
                   <CommandItem
                     key={player.id}
-                    className="cursor-pointer"
+                    className="cursor-pointer flex items-center justify-start"
                     onSelect={() => {
                       setOpen(false);
                       router.push(`/player/${player.id}`);
