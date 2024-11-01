@@ -122,6 +122,12 @@ export class AdditionalScoreData {
   };
 
   /**
+   * The cached score stats.
+   */
+  @prop({ required: false })
+  public cachedScoreStats?: boolean;
+
+  /**
    * The date the score was set on.
    */
   @prop({ required: true, index: true })

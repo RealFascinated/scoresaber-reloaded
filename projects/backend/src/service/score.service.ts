@@ -44,6 +44,9 @@ import { getDaysAgoDate } from "@ssr/common/utils/time-utils";
 import { PlayerService } from "./player.service";
 import { formatScoreAccuracy } from "@ssr/common/utils/score.util";
 import BeatSaverService from "./beatsaver.service";
+import { beatLeaderService } from "@ssr/common/service/impl/beatleader";
+import { MinioBucket } from "../common/minio/minio-buckets";
+import { saveFile } from "../common/minio/minio";
 
 const playerScoresCache = new SSRCache({
   ttl: 1000 * 60, // 1 minute
@@ -275,6 +278,18 @@ export class ScoreService {
       return;
     }
 
+    // Cache score stats for this score
+    const scoreStats = await beatLeaderService.lookupScoreStats(score.id);
+    let savedScoreStats = false;
+    if (scoreStats !== undefined) {
+      try {
+        await saveFile(MinioBucket.BeatLeaderScoreStats, `${score.id}.json`, Buffer.from(JSON.stringify(scoreStats)));
+        savedScoreStats = true;
+      } catch (error) {
+        console.error(`Failed to save score stats for ${score.id}: ${error}`);
+      }
+    }
+
     // The score has already been tracked, so ignore it.
     if (
       (await this.getAdditionalScoreData(
@@ -315,6 +330,7 @@ export class ScoreService {
         left: score.accLeft,
         right: score.accRight,
       },
+      cachedScoreStats: savedScoreStats,
       timestamp: new Date(Number(score.timeset) * 1000),
     } as AdditionalScoreData;
     if (rawScoreImprovement && rawScoreImprovement.score > 0) {
@@ -336,6 +352,7 @@ export class ScoreService {
     }
 
     await AdditionalScoreDataModel.create(data);
+
     console.log(
       `Tracked additional score data for "${scorePlayer.name}"(${playerId}), difficulty: ${difficultyKey}, score: ${score.baseScore}`
     );

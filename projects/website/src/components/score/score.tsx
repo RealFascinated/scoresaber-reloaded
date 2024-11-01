@@ -15,10 +15,9 @@ import { Button } from "@/components/ui/button";
 import { ScoreOverview } from "@/components/score/score-views/score-overview";
 import { ScoreHistory } from "@/components/score/score-views/score-history";
 
-import { getPageFromRank } from "@ssr/common/utils/utils";
+import { getPageFromRank, kyFetch } from "@ssr/common/utils/utils";
 import { fetchLeaderboardScores } from "@ssr/common/utils/score.util";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
-import { beatLeaderService } from "@ssr/common/service/impl/beatleader";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
@@ -27,6 +26,9 @@ import { BeatSaverMap } from "@ssr/common/model/beatsaver/map";
 import LeaderboardScoresResponse from "@ssr/common/response/leaderboard-scores-response";
 import { ScoreStatsToken } from "@ssr/common/types/token/beatleader/score-stats/score-stats";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
+import { Config } from "@ssr/common/config";
+import { beatLeaderService } from "@ssr/common/service/impl/beatleader";
+import { getMinioBucketName, MinioBucket } from "backend/src/common/minio/minio-buckets";
 
 type Props = {
   highlightedPlayer?: ScoreSaberPlayer;
@@ -73,9 +75,16 @@ export default function Score({ leaderboard, beatSaverMap, score, settings, high
         leaderboard.id.toString(),
         scoresPage
       );
-      const scoreStats = score.additionalData
-        ? await beatLeaderService.lookupScoreStats(score.additionalData.scoreId)
-        : undefined;
+      let scoreStats: ScoreStatsToken | undefined;
+      if (score.additionalData) {
+        if (score.additionalData.cachedScoreStats) {
+          scoreStats = await kyFetch(
+            `${Config.cdnUrl}/${getMinioBucketName(MinioBucket.BeatLeaderScoreStats)}/${score.additionalData.scoreId}.json`
+          );
+        } else {
+          scoreStats = await beatLeaderService.lookupScoreStats(score.additionalData.scoreId);
+        }
+      }
       return { scores, scoreStats };
     },
     staleTime: 30000,

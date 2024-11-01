@@ -31,7 +31,10 @@ export default function PlayerScoreAccuracyChart({ scoreStats, leaderboard }: Pr
     labels.push(formatTime(seconds));
     const acc = graph[seconds] * 100;
     histories["accuracy"].push(acc);
-    histories["pp"].push(scoresaberService.getPp(leaderboard.stars, acc));
+
+    if (leaderboard.ranked) {
+      histories["pp"].push(scoresaberService.getPp(leaderboard.stars, acc));
+    }
   }
 
   const datasetConfig: DatasetConfig[] = [
