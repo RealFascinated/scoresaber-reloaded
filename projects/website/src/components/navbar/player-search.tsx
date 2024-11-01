@@ -26,7 +26,7 @@ import { CommandLoading } from "cmdk";
 
 export default function PlayerSearch() {
   const router: AppRouterInstance = useRouter();
-  const isMobile = useIsMobile();
+  const isMobile = useIsMobile(768);
   const { isOpen, openSearch, closeSearch } = useSearch();
 
   const [query, setQuery] = useState<string>("");
@@ -67,7 +67,7 @@ export default function PlayerSearch() {
     };
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, []);
+  }, [isOpen, openSearch, closeSearch]);
 
   // Render the contents
   return (

@@ -20,7 +20,7 @@ export default function ProfileButton() {
   }
 
   return (
-    <Link href={`/player/${settings.playerId}`} className="pl-1 md:pl-2 flex items-center gap-4 h-full">
+    <Link href={`/player/${settings.playerId}`} className="md:pl-1 flex items-center gap-4 h-full">
       <NavbarButton>
         <Avatar className="size-6">
           <AvatarImage
