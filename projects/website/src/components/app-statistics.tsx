@@ -6,8 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { kyFetch } from "@ssr/common/utils/utils";
 import { Config } from "@ssr/common/config";
 import { useEffect, useState } from "react";
-import { Box, List, TrendingUp, User } from "lucide-react";
-import { PiSwordFill } from "react-icons/pi";
+import { Box, List, Sword, SwordIcon, TrendingUp, User } from "lucide-react";
 
 type AppStatisticsProps = {
   /**
@@ -40,7 +39,7 @@ export function AppStats({ initialStatistics }: AppStatisticsProps) {
         value={statistics.additionalScoresData}
       />
       <Statistic
-        icon={<PiSwordFill className="size-10" />}
+        icon={<SwordIcon className="size-10" />}
         title="Cached BeatSaver Maps"
         value={statistics.cachedBeatSaverMaps}
       />

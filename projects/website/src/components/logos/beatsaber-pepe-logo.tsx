@@ -1,7 +1,6 @@
-type BeatSaberPepeLogoProps = {
-  size?: number;
-};
+import { LogoProps } from "@/components/logos/logo-props";
+import LogoBase from "@/components/logos/logo-base";
 
-export default function BeatSaberPepeLogo({ size = 32 }: BeatSaberPepeLogoProps) {
-  return <img width={size} height={size} src={"/assets/bs-pepe.gif"} alt={"BeatSaber Pepe Logo"} />;
+export default function BeatSaberPepeLogo({ size = 32, className }: LogoProps) {
+  return <LogoBase size={size} href={"/assets/bs-pepe.gif"} alt={"BeatSaber Pepe Logo"} className={className} />;
 }

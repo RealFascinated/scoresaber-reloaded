@@ -4,8 +4,9 @@ import Link from "next/link";
 import { ExternalLink } from "lucide-react";
 import { cn } from "@/common/utils";
 import { ReactElement } from "react";
-import { SiGithub, SiX } from "react-icons/si";
 import { usePathname } from "next/navigation";
+import GithubLogo from "@/components/logos/logos/github-logo";
+import TwitterLogo from "@/components/logos/logos/twitter-logo";
 
 type FooterLink = {
   /**
@@ -77,7 +78,7 @@ const links: {
 const socialLinks: SocialLinkType[] = [
   {
     name: "Twitter",
-    logo: <SiX className="size-5 lg:size-6" />,
+    logo: <TwitterLogo className="size-5 lg:size-6" />,
     href: "https://x.com/ssr_reloaded",
   },
   {
@@ -87,7 +88,7 @@ const socialLinks: SocialLinkType[] = [
   },
   {
     name: "GitHub",
-    logo: <SiGithub className="size-5 lg:size-6" />,
+    logo: <GithubLogo className="size-5 lg:size-6" />,
     href: "https://github.com/RealFascinated/scoresaber-reloaded",
   },
 ];

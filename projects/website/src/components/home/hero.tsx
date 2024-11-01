@@ -1,10 +1,9 @@
 "use client";
 
 import AnimatedShinyText from "@/components/ui/animated-shiny-text";
-import { ArrowRight, UserSearch } from "lucide-react";
+import { ArrowRight, GithubIcon, UserSearch } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { SiGithub } from "react-icons/si";
 import { BorderBeam } from "@/components/ui/border-beam";
 import { Separator } from "@/components/ui/separator";
 import { motion } from "framer-motion";
@@ -38,7 +37,7 @@ function Alert() {
       draggable={false}
     >
       <AnimatedShinyText className="px-3.5 py-1 flex gap-2 text-sm items-center justify-center">
-        <SiGithub className="size-5" />
+        <GithubIcon className="size-5" />
         <span>Check out our Source Code</span>
         <ArrowRight className="size-4 group-hover:translate-x-0.5 transition-all transform-gpu" />
       </AnimatedShinyText>

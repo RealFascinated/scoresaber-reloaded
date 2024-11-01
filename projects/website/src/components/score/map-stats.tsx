@@ -4,8 +4,7 @@ import { getBeatSaverDifficulty } from "@ssr/common/utils/beatsaver.util";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { formatTime } from "@ssr/common/utils/time-utils";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
-import { BombIcon, BrickWallIcon, DrumIcon, MusicIcon, TimerIcon } from "lucide-react";
-import { BsSpeedometer } from "react-icons/bs";
+import { BombIcon, BrickWallIcon, DrumIcon, GaugeIcon, MusicIcon, TimerIcon } from "lucide-react";
 import { CubeIcon } from "@heroicons/react/24/solid";
 
 type MapAndScoreData = {
@@ -39,7 +38,7 @@ export function MapStats({ leaderboard, beatSaver }: MapAndScoreData) {
           <StatValue name="Length" icon={<TimerIcon className="w-4 h-4" />} value={formatTime(metadata.duration)} />
           <StatValue name="BPM" icon={<MusicIcon className="w-4 h-4" />} value={formatNumberWithCommas(metadata.bpm)} />
           <StatValue name="NPS" icon={<DrumIcon className="w-4 h-4" />} value={mapDiff.nps.toFixed(2)} />
-          <StatValue name="NJS" icon={<BsSpeedometer className="w-4 h-4" />} value={mapDiff.njs.toFixed(2)} />
+          <StatValue name="NJS" icon={<GaugeIcon className="w-4 h-4" />} value={mapDiff.njs.toFixed(2)} />
           <StatValue
             name="Notes"
             icon={<CubeIcon className="w-4 h-4" />}

@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import ScoreSaberLogo from "../logos/scoresaber-logo";
+import ScoreSaberLogo from "../logos/logos/scoresaber-logo";
 
 type Props = {
   reason: string | ReactNode;
