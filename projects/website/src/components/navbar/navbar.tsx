@@ -69,7 +69,9 @@ export default function Navbar() {
             href="/settings"
           />
         </div>
-        <ProfileButton />
+        <div className="pl-2">
+          <ProfileButton />
+        </div>
       </div>
     </nav>
   );
