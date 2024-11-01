@@ -15,6 +15,7 @@ import ScoreSaberScoreToken from "./types/token/scoresaber/score-saber-score-tok
 import { ScoreSaberScore } from "./model/score/impl/scoresaber-score";
 import { Modifier } from "./score/modifier";
 import { getDifficultyFromScoreSaberDifficulty } from "./utils/scoresaber.util";
+import sanitize from "sanitize-html";
 
 /**
  * Parses a {@link ScoreSaberLeaderboardToken} into a {@link ScoreSaberLeaderboard}.
@@ -124,8 +125,8 @@ export async function getScoreSaberPlayerFromToken(
   playerIdCookie?: string
 ): Promise<ScoreSaberPlayer> {
   const bio: ScoreSaberBio = {
-    lines: token.bio?.split("\n") || [],
-    linesStripped: token.bio?.replace(/<[^>]+>/g, "")?.split("\n") || [], // strips html tags
+    lines: token.bio ? sanitize(token.bio).split("\n") : [],
+    linesStripped: token.bio ? sanitize(token.bio.replace(/<[^>]+>/g, "")).split("\n") : [], // strips html tags
   };
   const badges: ScoreSaberBadge[] =
     token.badges?.map(badge => {
