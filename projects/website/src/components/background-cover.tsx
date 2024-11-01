@@ -35,7 +35,6 @@ export default function BackgroundCover() {
   }
 
   return (
-    // eslint-disable-next-line @next/next/no-img-element
     <img
       src={backgroundCover}
       alt="Background image"

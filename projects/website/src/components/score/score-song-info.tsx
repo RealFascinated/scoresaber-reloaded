@@ -1,7 +1,6 @@
 import FallbackLink from "@/components/fallback-link";
 import Tooltip from "@/components/tooltip";
 import { StarIcon } from "@heroicons/react/24/solid";
-import Image from "next/image";
 import Link from "next/link";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { BeatSaverMap } from "@ssr/common/model/beatsaver/map";
@@ -45,14 +44,12 @@ export default function ScoreSongInfo({ leaderboard, beatSaverMap }: Props) {
             )}
           </div>
         </Tooltip>
-        <Image
-          unoptimized
+        <img
           src={`https://img.fascinated.cc/upload/w_64,h_64/${leaderboard.songArt}`}
           width={64}
           height={64}
           alt="Song Artwork"
           className="rounded-md min-w-[64px]"
-          priority
         />
       </div>
       <div className="flex">

@@ -1,5 +1,4 @@
 import Card from "@/components/card";
-import Image from "next/image";
 import { LeaderboardSongStarCount } from "@/components/leaderboard/leaderboard-song-star-count";
 import ScoreButtons from "@/components/score/score-buttons";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
@@ -59,7 +58,7 @@ export function LeaderboardInfo({ leaderboard, beatSaverMap }: LeaderboardInfoPr
             </p>
           </div>
         </div>
-        <Image
+        <img
           src={leaderboard.songArt}
           alt={`${leaderboard.songName} Cover Image`}
           className="rounded-md w-[96px] h-[96px]"

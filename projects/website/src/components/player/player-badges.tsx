@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Tooltip from "@/components/tooltip";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 
@@ -13,7 +12,7 @@ export default function PlayerBadges({ player }: Props) {
         return (
           <Tooltip key={index} display={<p className="cursor-default pointer-events-none">{badge.description}</p>}>
             <div>
-              <Image src={badge.url} alt={badge.description} width={80} height={30} unoptimized />
+              <img src={badge.url} alt={badge.description} width={80} height={30} />
             </div>
           </Tooltip>
         );

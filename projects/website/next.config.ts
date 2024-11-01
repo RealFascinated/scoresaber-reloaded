@@ -6,19 +6,7 @@ import { isProduction } from "@/common/website-utils";
 
 const nextConfig: NextConfig = {
   experimental: {
-    webpackMemoryOptimizations: true,
     optimizePackageImports: ["@ssr/common", "@radix-ui/react-icons", "chart.js", "react-chartjs-2"],
-  },
-  images: {
-    unoptimized: true,
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "cdn.scoresaber.com",
-        port: "",
-        pathname: "/**",
-      },
-    ],
   },
   env: {
     HOSTNAME: "0.0.0.0",
