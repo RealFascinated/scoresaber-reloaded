@@ -93,9 +93,9 @@ export class ScoreService {
       previousScore.change && {
         accuracy: `${formatChange(previousScore.change.accuracy, value => value.toFixed(2) + "%") || ""}`,
         pp: `${formatChange(previousScore.change.pp, undefined, true) || ""}`,
-        misses: ` vs ${previousScore.misses}` || "",
-        badCuts: ` vs ${previousScore.badCuts}` || "",
-        maxCombo: ` vs ${previousScore.maxCombo}` || "",
+        misses: previousScore.misses == score.misses ? "" : ` vs ${previousScore.misses}` || "",
+        badCuts: previousScore.badCuts == score.badCuts ? "" : ` vs ${previousScore.badCuts}` || "",
+        maxCombo: previousScore.maxCombo == score.maxCombo ? "" : ` vs ${previousScore.maxCombo}` || "",
       };
 
     const message = await logToChannel(
