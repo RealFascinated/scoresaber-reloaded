@@ -40,18 +40,21 @@ export function AppStats({ initialStatistics }: AppStatisticsProps) {
       />
       <Statistic
         icon={<SwordIcon className="size-10" />}
-        title="Cached BeatSaver Maps"
+        title="BeatSaver Maps"
         value={statistics.cachedBeatSaverMaps}
+        isCache
       />
       <Statistic
         icon={<List className="size-10" />}
-        title="Cached ScoreSaber Leaderboards"
+        title="ScoreSaber Leaderboards"
         value={statistics.cachedScoreSaberLeaderboards}
+        isCache
       />
       <Statistic
         icon={<List className="size-10" />}
         title="BeatLeader Score Stats"
         value={statistics.cachedBeatLeaderScoreStats}
+        isCache
       />
     </div>
   );
