@@ -8,6 +8,7 @@ import { SiGithub } from "react-icons/si";
 import { BorderBeam } from "@/components/ui/border-beam";
 import { Separator } from "@/components/ui/separator";
 import { motion } from "framer-motion";
+import { useSearch } from "@/components/providers/search-provider";
 
 export default function HeroSection() {
   return (
@@ -59,6 +60,7 @@ function Title() {
 }
 
 function Buttons() {
+  const { openSearch } = useSearch();
   return (
     <motion.div
       className="mt-4 flex flex-col xs:flex-row gap-4 items-center"
@@ -66,12 +68,10 @@ function Buttons() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.35, duration: 0.7, ease: "easeOut" }}
     >
-      <Link href="/search">
-        <Button className="max-w-52 flex gap-2.5 bg-pp hover:bg-pp/85 text-white">
-          <UserSearch className="size-6" />
-          <span>Player Search</span>
-        </Button>
-      </Link>
+      <Button className="max-w-52 flex gap-2.5 bg-pp hover:bg-pp/85 text-white" onClick={openSearch}>
+        <UserSearch className="size-6" />
+        <span>Player Search</span>
+      </Button>
 
       <Link href="https://discord.gg/kmNfWGA4A8" target="_blank">
         <Button className="max-w-52 flex gap-2.5 bg-[#5865F2] hover:bg-[#5865F2]/85 text-white">

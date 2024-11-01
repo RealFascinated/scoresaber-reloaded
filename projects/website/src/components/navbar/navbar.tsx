@@ -8,7 +8,6 @@ import { TrendingUpIcon } from "lucide-react";
 import ProfileButton from "@/components/navbar/profile-button";
 import { CogIcon } from "@heroicons/react/24/solid";
 import PlayerSearch from "@/components/navbar/player-search";
-import Tooltip from "@/components/tooltip";
 
 const links: ReactElement[] = [
   <FriendsButton key="friends" />,
