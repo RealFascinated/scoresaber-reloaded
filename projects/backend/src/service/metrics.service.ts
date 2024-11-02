@@ -34,7 +34,7 @@ export default class MetricsService {
       const before = Date.now();
       this.writePoints(await Promise.all(this.metrics.map(metric => metric.collect())));
       const timeTaken = Date.now() - before;
-      if (timeTaken > 1000) {
+      if (timeTaken > 3000) {
         console.log(`SLOW!!! Collected and wrote metrics in ${timeTaken}ms`);
       }
     }, 1000 * 5); // 5 seconds
