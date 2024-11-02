@@ -3,7 +3,7 @@
 import Statistic from "@/components/home/statistic";
 import { AppStatistics } from "@ssr/common/types/backend/app-statistics";
 import { useQuery } from "@tanstack/react-query";
-import { kyFetch } from "@ssr/common/utils/utils";
+import { kyFetchJson } from "@ssr/common/utils/utils";
 import { Config } from "@ssr/common/config";
 import { useEffect, useState } from "react";
 import { Box, List, SwordIcon, TrendingUp, User } from "lucide-react";
@@ -20,7 +20,7 @@ export function AppStats({ initialStatistics }: AppStatisticsProps) {
 
   const { data } = useQuery({
     queryKey: ["app-statistics"],
-    queryFn: () => kyFetch<AppStatistics>(Config.apiUrl + "/statistics"),
+    queryFn: () => kyFetchJson<AppStatistics>(Config.apiUrl + "/statistics"),
   });
 
   useEffect(() => {

@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { ScoreOverview } from "@/components/score/score-views/score-overview";
 import { ScoreHistory } from "@/components/score/score-views/score-history";
 
-import { getPageFromRank, kyFetch } from "@ssr/common/utils/utils";
+import { getPageFromRank, kyFetchJson } from "@ssr/common/utils/utils";
 import { fetchLeaderboardScores } from "@ssr/common/utils/score.util";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { useIsMobile } from "@/hooks/use-is-mobile";
@@ -78,7 +78,7 @@ export default function Score({ leaderboard, beatSaverMap, score, settings, high
       let scoreStats: ScoreStatsToken | undefined;
       if (score.additionalData) {
         if (score.additionalData.cachedScoreStats) {
-          scoreStats = await kyFetch(
+          scoreStats = await kyFetchJson(
             `${Config.cdnUrl}/${getMinioBucketName(MinioBucket.BeatLeaderScoreStats)}/${score.additionalData.scoreId}.json`
           );
         } else {

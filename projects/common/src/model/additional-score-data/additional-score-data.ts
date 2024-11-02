@@ -128,6 +128,12 @@ export class AdditionalScoreData {
   public cachedScoreStats?: boolean;
 
   /**
+   * The cached replay id.
+   */
+  @prop({ required: false, index: true })
+  public cachedReplayId?: string;
+
+  /**
    * The date the score was set on.
    */
   @prop({ required: true, index: true })

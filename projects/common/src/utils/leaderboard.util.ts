@@ -1,6 +1,6 @@
 import { Config } from "../config";
 import { LeaderboardResponse } from "../response/leaderboard-response";
-import { kyFetch } from "./utils";
+import { kyFetchJson } from "./utils";
 import { Leaderboards } from "../leaderboard";
 
 /**
@@ -10,5 +10,5 @@ import { Leaderboards } from "../leaderboard";
  * @param leaderboard the leaderboard
  */
 export async function fetchLeaderboard<L>(leaderboard: Leaderboards, id: string) {
-  return kyFetch<LeaderboardResponse<L>>(`${Config.apiUrl}/leaderboard/${leaderboard}/${id}`);
+  return kyFetchJson<LeaderboardResponse<L>>(`${Config.apiUrl}/leaderboard/${leaderboard}/${id}`);
 }

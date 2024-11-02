@@ -2,6 +2,7 @@ import { isProduction } from "./utils/utils";
 
 export enum MinioBucket {
   BeatLeaderScoreStats = "beatleader-score-stats",
+  BeatLeaderReplays = "beatleader-replays",
 }
 
 /**

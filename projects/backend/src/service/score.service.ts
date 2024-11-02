@@ -1,6 +1,6 @@
 import ScoreSaberPlayerScoreToken from "@ssr/common/types/token/scoresaber/score-saber-player-score-token";
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
-import { formatChange, isProduction } from "@ssr/common/utils/utils";
+import { formatChange, isProduction, kyFetchBuffer } from "@ssr/common/utils/utils";
 import { Metadata } from "@ssr/common/types/metadata";
 import { NotFoundError } from "elysia";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
@@ -45,8 +45,8 @@ import { PlayerService } from "./player.service";
 import { formatScoreAccuracy } from "@ssr/common/utils/score.util";
 import BeatSaverService from "./beatsaver.service";
 import { beatLeaderService } from "@ssr/common/service/impl/beatleader";
-import { MinioBucket } from "../../../common/src/minio-buckets";
-import { saveFile } from "../common/minio/minio";
+import MinioService from "./minio.service";
+import { MinioBucket } from "@ssr/common/minio-buckets";
 
 const playerScoresCache = new SSRCache({
   ttl: 1000 * 60, // 1 minute
@@ -271,6 +271,7 @@ export class ScoreService {
    * @param score the score to track
    */
   public static async trackBeatLeaderScore(score: BeatLeaderScoreToken) {
+    const before = Date.now();
     const { playerId, player: scorePlayer, leaderboard } = score;
     const player: PlayerDocument | null = await PlayerModel.findById(playerId);
     // Player is not tracked, so ignore the score.
@@ -278,16 +279,41 @@ export class ScoreService {
       return;
     }
 
-    // Cache score stats for this score
-    const scoreStats = await beatLeaderService.lookupScoreStats(score.id);
     let savedScoreStats = false;
-    if (scoreStats !== undefined && isProduction()) {
-      try {
-        await saveFile(MinioBucket.BeatLeaderScoreStats, `${score.id}.json`, Buffer.from(JSON.stringify(scoreStats)));
-        savedScoreStats = true;
-      } catch (error) {
-        console.error(`Failed to save score stats for ${score.id}: ${error}`);
+    let savedReplayId: string | undefined;
+
+    // Only save score stats and replays in production
+    if (isProduction()) {
+      // Cache score stats for this score
+      const scoreStats = await beatLeaderService.lookupScoreStats(score.id);
+      if (scoreStats !== undefined) {
+        try {
+          await MinioService.saveFile(
+            MinioBucket.BeatLeaderScoreStats,
+            `${score.id}.json`,
+            Buffer.from(JSON.stringify(scoreStats))
+          );
+          savedScoreStats = true;
+        } catch (error) {
+          console.error(`Failed to save score stats for ${score.id}: ${error}`);
+        }
       }
+
+      // Cache replay for this score
+      try {
+        const replayId = `${score.id}-${playerId}-${leaderboard.difficulty.difficultyName}-${leaderboard.difficulty.modeName}-${leaderboard.song.hash.toUpperCase()}.bsor`;
+        const replayData = await kyFetchBuffer(`https://cdn.replays.beatleader.xyz/${replayId}`);
+
+        if (replayData !== undefined) {
+          await MinioService.saveFile(MinioBucket.BeatLeaderReplays, `${replayId}`, Buffer.from(replayData));
+          savedReplayId = replayId;
+        }
+      } catch (error) {
+        console.error(`Failed to save replay for ${score.id}: ${error}`);
+      }
+
+      // Remove old replays
+      await this.cleanupScoreReplays(playerId, leaderboard.id);
     }
 
     // The score has already been tracked, so ignore it.
@@ -331,6 +357,7 @@ export class ScoreService {
         right: score.accRight,
       },
       cachedScoreStats: savedScoreStats,
+      cachedReplayId: savedReplayId,
       timestamp: new Date(Number(score.timeset) * 1000),
     } as AdditionalScoreData;
     if (rawScoreImprovement && rawScoreImprovement.score > 0) {
@@ -354,7 +381,7 @@ export class ScoreService {
     await AdditionalScoreDataModel.create(data);
 
     console.log(
-      `Tracked additional score data for "${scorePlayer.name}"(${playerId}), difficulty: ${difficultyKey}, score: ${score.baseScore}`
+      `Tracked additional score data for "${scorePlayer.name}"(${playerId}), difficulty: ${difficultyKey}, score: ${score.baseScore} in ${Date.now() - before}ms`
     );
   }
 
@@ -787,5 +814,37 @@ export class ScoreService {
         maxCombo: score.maxCombo - previousScore.maxCombo,
       },
     } as ScoreSaberPreviousScore;
+  }
+
+  /**
+   * Cleans up the score replays for a player.
+   *
+   * @param playerId the player id to clean up
+   * @param leaderboardId the leaderboard to clean up for the player
+   */
+  public static async cleanupScoreReplays(playerId: string, leaderboardId: string) {
+    // todo: check premium status of the user and keep all replays.
+    const scores = await AdditionalScoreDataModel.find({ playerId: playerId, leaderboardId: leaderboardId })
+      .sort({
+        timestamp: -1,
+      })
+      .skip(3); // Store last 3 replays.
+
+    if (scores == null || scores.length == 0) {
+      return;
+    }
+
+    for (const score of scores) {
+      if (score.cachedReplayId == undefined) {
+        return;
+      }
+      try {
+        await MinioService.deleteFile(MinioBucket.BeatLeaderReplays, score.cachedReplayId);
+        score.cachedReplayId = undefined;
+        await score.save();
+      } catch (error) {
+        console.error(`Failed to delete replay for ${score.cachedReplayId}`, error);
+      }
+    }
   }
 }

@@ -1,5 +1,5 @@
 import { Leaderboards } from "../leaderboard";
-import { kyFetch } from "./utils";
+import { kyFetchJson } from "./utils";
 import PlayerScoresResponse from "../response/player-scores-response";
 import { Config } from "../config";
 import { ScoreSort } from "../score/score-sort";
@@ -18,7 +18,7 @@ import { ScoreSaberScore } from "../model/score/impl/scoresaber-score";
  * @param page the page
  */
 export async function fetchPlayerScoresHistory(playerId: string, leaderboardId: string, page: number) {
-  return kyFetch<Page<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>>(
+  return kyFetchJson<Page<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>>(
     `${Config.apiUrl}/scores/history/${playerId}/${leaderboardId}/${page}`
   );
 }
@@ -39,7 +39,7 @@ export async function fetchPlayerScores<S, L>(
   sort: ScoreSort,
   search?: string
 ) {
-  return kyFetch<PlayerScoresResponse<S, L>>(
+  return kyFetchJson<PlayerScoresResponse<S, L>>(
     `${Config.apiUrl}/scores/player/${leaderboard}/${id}/${page}/${sort}${search ? `?search=${search}` : ""}`
   );
 }
@@ -52,7 +52,9 @@ export async function fetchPlayerScores<S, L>(
  * @param page the page
  */
 export async function fetchLeaderboardScores<S, L>(leaderboard: Leaderboards, id: string, page: number) {
-  return kyFetch<LeaderboardScoresResponse<S, L>>(`${Config.apiUrl}/scores/leaderboard/${leaderboard}/${id}/${page}`);
+  return kyFetchJson<LeaderboardScoresResponse<S, L>>(
+    `${Config.apiUrl}/scores/leaderboard/${leaderboard}/${id}/${page}`
+  );
 }
 
 /**

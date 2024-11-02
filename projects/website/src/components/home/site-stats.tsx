@@ -1,11 +1,11 @@
 import { ChartNoAxesCombined } from "lucide-react";
-import { kyFetch } from "@ssr/common/utils/utils";
+import { kyFetchJson } from "@ssr/common/utils/utils";
 import { AppStatistics } from "@ssr/common/types/backend/app-statistics";
 import { Config } from "@ssr/common/config";
 import { AppStats } from "@/components/app-statistics";
 
 export default async function SiteStats() {
-  const statistics = await kyFetch<AppStatistics>(Config.apiUrl + "/statistics");
+  const statistics = await kyFetchJson<AppStatistics>(Config.apiUrl + "/statistics");
   return (
     <div id="stats" className="px-5 -mt-20 flex flex-col gap-10 select-none">
       {/* Header */}

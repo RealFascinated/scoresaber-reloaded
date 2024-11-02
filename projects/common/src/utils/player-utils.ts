@@ -1,5 +1,5 @@
 import { PlayerHistory } from "../player/player-history";
-import { kyFetch } from "./utils";
+import { kyFetchJson } from "./utils";
 import { Config } from "../config";
 import { AroundPlayer } from "../types/around-player";
 import { AroundPlayerResponse } from "../response/around-player-response";
@@ -60,7 +60,7 @@ export function sortPlayerHistory(history: Map<string, PlayerHistory>) {
  * @param id the player id
  */
 export async function trackPlayer(id: string) {
-  await kyFetch(`${Config.apiUrl}/player/history/${id}/1?createIfMissing=true`);
+  await kyFetchJson(`${Config.apiUrl}/player/history/${id}/1?createIfMissing=true`);
 }
 
 /**
@@ -70,5 +70,5 @@ export async function trackPlayer(id: string) {
  * @param type the type to get
  */
 export async function getPlayersAroundPlayer(id: string, type: AroundPlayer) {
-  return await kyFetch<AroundPlayerResponse>(`${Config.apiUrl}/player/around/${id}/${type}`);
+  return await kyFetchJson<AroundPlayerResponse>(`${Config.apiUrl}/player/around/${id}/${type}`);
 }

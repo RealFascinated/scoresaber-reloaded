@@ -40,9 +40,22 @@ export function getPageFromRank(rank: number, itemsPerPage: number) {
  *
  * @param url the url to fetch
  */
-export async function kyFetch<T>(url: string): Promise<T | undefined> {
+export async function kyFetchJson<T>(url: string): Promise<T | undefined> {
   try {
     return await ky.get<T>(url).json();
+  } catch (error) {
+    return undefined;
+  }
+}
+
+/**
+ * Fetches data from the given url.
+ *
+ * @param url the url to fetch
+ */
+export async function kyFetchBuffer(url: string): Promise<ArrayBuffer | undefined> {
+  try {
+    return await ky.get(url).arrayBuffer();
   } catch (error) {
     return undefined;
   }

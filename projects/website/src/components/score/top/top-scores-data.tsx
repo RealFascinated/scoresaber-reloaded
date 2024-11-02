@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 import { Timeframe } from "@ssr/common/timeframe";
 import { TopScoresResponse } from "@ssr/common/response/top-scores-response";
 import { Config } from "@ssr/common/config";
-import { kyFetch } from "@ssr/common/utils/utils";
+import { kyFetchJson } from "@ssr/common/utils/utils";
 import { useQuery } from "@tanstack/react-query";
 import { LoadingIcon } from "@/components/loading-icon";
 import { capitalizeFirstLetter } from "@/common/string-utils";
@@ -43,7 +43,7 @@ export function TopScoresData({ timeframe }: TopScoresDataProps) {
   const { data, isLoading } = useQuery({
     queryKey: ["top-scores", selectedTimeframe],
     queryFn: async () => {
-      return kyFetch<TopScoresResponse>(`${Config.apiUrl}/scores/top?limit=50&timeframe=${selectedTimeframe}`);
+      return kyFetchJson<TopScoresResponse>(`${Config.apiUrl}/scores/top?limit=50&timeframe=${selectedTimeframe}`);
     },
   });
 
