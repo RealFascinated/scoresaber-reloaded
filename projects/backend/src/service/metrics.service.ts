@@ -35,7 +35,7 @@ export default class MetricsService {
       console.log("Collecting metrics...");
       this.writePoints(await Promise.all(this.metrics.map(metric => metric.collect())));
       console.log(`Collected and wrote metrics in ${Date.now() - before}ms`);
-    }, 1000 * 30); // 30 seconds
+    }, 1000 * 10); // 10 seconds
   }
 
   /**
