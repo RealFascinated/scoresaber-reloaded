@@ -32,10 +32,12 @@ export default class MetricsService {
 
     setInterval(async () => {
       const before = Date.now();
-      console.log("Collecting metrics...");
       this.writePoints(await Promise.all(this.metrics.map(metric => metric.collect())));
-      console.log(`Collected and wrote metrics in ${Date.now() - before}ms`);
-    }, 1000 * 10); // 10 seconds
+      const timeTaken = Date.now() - before;
+      if (timeTaken > 1000) {
+        console.log(`SLOW!!! Collected and wrote metrics in ${timeTaken}ms`);
+      }
+    }, 1000 * 5); // 5 seconds
   }
 
   /**
