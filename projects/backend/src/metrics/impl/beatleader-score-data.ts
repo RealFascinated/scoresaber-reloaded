@@ -8,6 +8,6 @@ export default class BeatLeaderDataStatsMetric extends Metric {
   }
 
   async collect(): Promise<Point> {
-    return this.getPointBase().intField("count", await AdditionalScoreDataModel.countDocuments({}));
+    return this.getPointBase().intField("count", await AdditionalScoreDataModel.estimatedDocumentCount({}));
   }
 }

@@ -8,6 +8,6 @@ export default class TrackedPlayersMetric extends Metric {
   }
 
   async collect(): Promise<Point> {
-    return this.getPointBase().intField("count", await PlayerModel.countDocuments({}));
+    return this.getPointBase().intField("count", await PlayerModel.estimatedDocumentCount({}));
   }
 }

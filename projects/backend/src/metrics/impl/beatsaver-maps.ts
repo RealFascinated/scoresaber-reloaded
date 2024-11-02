@@ -8,6 +8,6 @@ export default class BeatSaverMapsMetric extends Metric {
   }
 
   async collect(): Promise<Point> {
-    return this.getPointBase().intField("count", await BeatSaverMapModel.countDocuments({}));
+    return this.getPointBase().intField("count", await BeatSaverMapModel.estimatedDocumentCount({}));
   }
 }
