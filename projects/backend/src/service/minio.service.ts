@@ -36,7 +36,7 @@ export default class MinioService {
    *
    * @param bucket the bucket to get the size of
    */
-  public static async getBucketSize(bucket: MinioBucket) {
+  public static async getBucketSize(bucket: MinioBucket): Promise<number> {
     const bucketName = getMinioBucketName(bucket);
     let totalSize = 0;
 

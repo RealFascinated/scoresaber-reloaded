@@ -10,8 +10,11 @@ export default class BeatLeaderReplaysMetric extends Metric {
   }
 
   async collect(): Promise<Point> {
+    const count = await AdditionalScoreDataModel.countDocuments({ cachedReplayId: { $exists: true } });
+    const size = await MinioService.getBucketSize(MinioBucket.BeatLeaderReplays);
     return this.getPointBase()
-      .intField("count", await AdditionalScoreDataModel.countDocuments({ cachedReplayId: { $exists: true } }))
-      .intField("size", await MinioService.getBucketSize(MinioBucket.BeatLeaderReplays));
+      .intField("count", count)
+      .intField("size", size)
+      .intField("average-replay-size", size / count);
   }
 }
