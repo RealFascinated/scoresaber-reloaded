@@ -10,8 +10,11 @@ export default class BeatLeaderScoreStatsMetric extends Metric {
   }
 
   async collect(): Promise<Point> {
+    const count = await AdditionalScoreDataModel.countDocuments({ cachedScoreStats: true });
+    const size = await MinioService.getBucketSize(MinioBucket.BeatLeaderScoreStats);
     return this.getPointBase()
-      .intField("count", await AdditionalScoreDataModel.countDocuments({ cachedScoreStats: true }))
-      .intField("size", await MinioService.getBucketSize(MinioBucket.BeatLeaderScoreStats));
+      .intField("count", count)
+      .intField("size", size)
+      .intField("average-score-stat-size", size / count);
   }
 }
