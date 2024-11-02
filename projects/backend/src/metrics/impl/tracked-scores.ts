@@ -8,6 +8,6 @@ export default class TrackedScoresMetric extends Metric {
   }
 
   async collect(): Promise<Point> {
-    return this.getPointBase().intField("count", await ScoreSaberScoreModel.countDocuments({}));
+    return this.getPointBase().intField("count", await ScoreSaberScoreModel.estimatedDocumentCount({}));
   }
 }
