@@ -25,6 +25,44 @@ type Props = {
   updateScore?: (score: ScoreSaberScore) => void;
 };
 
+const buttons = [
+  {
+    render: ({ beatSaverMap }: Props) => {
+      if (!beatSaverMap) {
+        return null;
+      }
+      return <ScoreBsrButton beatSaverMap={beatSaverMap} />;
+    },
+  },
+  {
+    render: ({ beatSaverMap }: Props) => {
+      if (!beatSaverMap) {
+        return null;
+      }
+      return <BeatSaverMapButton beatSaverMap={beatSaverMap} />;
+    },
+  },
+  {
+    render: ({ leaderboard }: Props) => {
+      return <SongOpenInYoutubeButton leaderboard={leaderboard} />;
+    },
+  },
+  {
+    render: () => null,
+  },
+  {
+    render: () => null,
+  },
+  {
+    render: ({ score }: Props) => {
+      if (!score?.additionalData) {
+        return null;
+      }
+      return <ScoreReplayButton additionalData={score.additionalData} />;
+    },
+  },
+];
+
 export default function ScoreButtons({
   score,
   leaderboard,
@@ -38,27 +76,28 @@ export default function ScoreButtons({
 }: Props) {
   const [leaderboardExpanded, setLeaderboardExpanded] = useState(false);
 
-  const additionalData = score?.additionalData;
   return (
     <div className={`flex justify-end gap-2 items-center mr-1`}>
       <div className={`flex lg:grid grid-cols-3 gap-1 items-center justify-center min-w-[92px]`}>
-        {beatSaverMap != undefined && (
-          <>
-            <ScoreBsrButton beatSaverMap={beatSaverMap} />
-            <BeatSaverMapButton beatSaverMap={beatSaverMap} />
-          </>
-        )}
+        {buttons.map((button, index) => {
+          const { render } = button;
 
-        <SongOpenInYoutubeButton leaderboard={leaderboard} />
-
-        <div className="hidden lg:block" />
-        <div className="hidden lg:block" />
-
-        {additionalData != undefined && (
-          <>
-            <ScoreReplayButton additionalData={additionalData} />
-          </>
-        )}
+          return (
+            <div key={index}>
+              {render({
+                score,
+                leaderboard,
+                beatSaverMap,
+                alwaysSingleLine,
+                setIsLeaderboardExpanded,
+                isLeaderboardLoading,
+                updateScore,
+                hideLeaderboardDropdown,
+                hideAccuracyChanger,
+              })}
+            </div>
+          );
+        })}
       </div>
 
       <div
