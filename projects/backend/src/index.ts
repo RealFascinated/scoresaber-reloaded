@@ -22,6 +22,7 @@ import { connectScoresaberWebsocket } from "@ssr/common/websocket/scoresaber-web
 import { connectBeatLeaderWebsocket } from "@ssr/common/websocket/beatleader-websocket";
 import { DiscordChannels, initDiscordBot, logToChannel } from "./bot/bot";
 import { EmbedBuilder } from "discord.js";
+import MetricsService from "./service/metrics.service";
 
 // Load .env file
 dotenv.config({
@@ -168,6 +169,9 @@ app.onStart(async () => {
   if (isProduction()) {
     await initDiscordBot();
   }
+
+  // Start metrics
+  new MetricsService();
 });
 
 app.listen({
