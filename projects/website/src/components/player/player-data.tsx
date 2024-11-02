@@ -56,10 +56,12 @@ export default function PlayerData({ initialPlayerData, initialScoreData, initia
     <div className="flex gap-2">
       <article className="flex flex-col gap-2">
         <PlayerHeader player={player} />
-        <Card className="gap-1">
-          <PlayerBadges player={player} />
-          {!player.inactive && <PlayerCharts player={player} />}
-        </Card>
+        {!player.inactive && player.badges.length != 0 && (
+          <Card className="gap-1">
+            <PlayerBadges player={player} />
+            {!player.inactive && <PlayerCharts player={player} />}
+          </Card>
+        )}
         <PlayerScores
           initialScoreData={initialScoreData}
           initialSearch={initialSearch}
