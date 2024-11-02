@@ -124,7 +124,7 @@ export class AdditionalScoreData {
   /**
    * The cached score stats.
    */
-  @prop({ required: false })
+  @prop({ required: false, index: true })
   public cachedScoreStats?: boolean;
 
   /**
