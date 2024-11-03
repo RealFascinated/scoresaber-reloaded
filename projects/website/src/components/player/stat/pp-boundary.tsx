@@ -19,8 +19,8 @@ export default function PpBoundaryStat({ player }: PpBoundaryProps) {
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false); // Track popover state
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: ["playerPpBoundary"],
-    queryFn: async () => (await getPlayerPpBoundary(player.id, 25))?.boundaries || [-1],
+    queryKey: ["playerPpBoundary", player.id],
+    queryFn: async () => (await getPlayerPpBoundary(player.id, 50))?.boundaries || [-1],
   });
 
   useEffect(() => {
@@ -35,19 +35,14 @@ export default function PpBoundaryStat({ player }: PpBoundaryProps) {
 
   return (
     <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-      <PopoverTrigger asChild onClick={() => setIsPopoverOpen(true)}>
-        <Tooltip
-          asChild={false}
-          display={<p className="text-center">Amount of raw pp required to increase your global pp by {boundary}pp</p>}
-        >
-          <StatValue name={`+${boundary} PP`} value={<p>{boundaries[boundary - 1].toFixed(2) || "-"}pp</p>} />
-        </Tooltip>
+      <PopoverTrigger onClick={() => setIsPopoverOpen(true)}>
+        <StatValue name={`+${boundary} PP`} value={<p>{boundaries[boundary - 1].toFixed(2) || "-"}pp</p>} />
       </PopoverTrigger>
       <PopoverContent className="flex flex-col gap-2 p-3">
         <p className="text-sm">Change the pp boundary.</p>
         <Slider
           min={1}
-          max={25}
+          max={50}
           value={[boundary]}
           onValueChange={([value]) => setBoundary(value)}
           onPointerDown={() => setIsPopoverOpen(true)} // Keep open while interacting with the slider

@@ -83,7 +83,7 @@ export default class PlayerController {
     config: {},
     params: t.Object({
       id: t.String({ required: true }),
-      boundary: t.Number({ maximum: 25, minimum: 1 }),
+      boundary: t.Number({ maximum: 50, minimum: 1 }),
     }),
   })
   public async getPpBoundary({
