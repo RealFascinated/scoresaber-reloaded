@@ -23,6 +23,14 @@ export default function PpBoundaryStat({ player }: PpBoundaryProps) {
     queryFn: async () => (await getPlayerPpBoundary(player.id, 50))?.boundaries || [-1],
   });
 
+  const handlePopoverState = (state: boolean) => {
+    setIsPopoverOpen(state);
+
+    if (!state) {
+      setBoundary(1);
+    }
+  };
+
   useEffect(() => {
     if (data) {
       setBoundaries(data);
@@ -34,7 +42,7 @@ export default function PpBoundaryStat({ player }: PpBoundaryProps) {
   }
 
   return (
-    <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
+    <Popover open={isPopoverOpen} onOpenChange={handlePopoverState}>
       <PopoverTrigger asChild>
         <div onClick={() => setIsPopoverOpen(true)}>
           <Tooltip
