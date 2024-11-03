@@ -35,7 +35,7 @@ export default function PpBoundaryStat({ player }: PpBoundaryProps) {
 
   return (
     <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-      <PopoverTrigger onClick={() => setIsPopoverOpen(true)}>
+      <PopoverTrigger asChild onClick={() => setIsPopoverOpen(true)}>
         <Tooltip
           asChild={false}
           display={<p className="text-center">Amount of raw pp required to increase your global pp by {boundary}pp</p>}
