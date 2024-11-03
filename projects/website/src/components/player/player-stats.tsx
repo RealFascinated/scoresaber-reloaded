@@ -83,7 +83,7 @@ const playerStats: Stat[] = [
       const roles = getScoreSaberRoles(player);
 
       return {
-        value: !roles ? undefined : <p>{roles.map(role => role.name).join(", ")}</p>,
+        value: roles.length === 0 ? undefined : <p>{roles.map(role => role.name).join(", ")}</p>,
       };
     },
   },

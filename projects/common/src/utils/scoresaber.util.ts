@@ -10,14 +10,9 @@ export type ScoreSaberRole = {
   name: string;
 
   /**
-   * The permissions for the role.
-   */
-  permissions?: number;
-
-  /**
    * The role for this role.
    */
-  role?: string;
+  role: string;
 
   /**
    * The color of the role.
@@ -25,56 +20,35 @@ export type ScoreSaberRole = {
   color: string;
 };
 
-const scoreSaberPermission = {
-  RT: 1,
-  QAT: 2,
-  QATHead: 4,
-  NAT: 8,
-  ADMIN: 16,
-  PANDA: 32,
-  SUPPORTER: 64,
-  PPFARMER: 128,
-};
-
 export const scoreSaberRoles: ScoreSaberRole[] = [
   {
     name: "Admin",
-    permissions:
-      scoreSaberPermission.RT |
-      scoreSaberPermission.QAT |
-      scoreSaberPermission.QATHead |
-      scoreSaberPermission.NAT |
-      scoreSaberPermission.ADMIN,
+    role: "Admin",
     color: "#bfdcf9",
   },
   {
     name: "Head of Quality Assurance",
     role: "Head of Quality Assurance",
-    permissions: scoreSaberPermission.QAT | scoreSaberPermission.QATHead,
     color: "#ff006f",
   },
   {
     name: "Nomination Assessment Team",
     role: "Nomination Assessment",
-    permissions: scoreSaberPermission.RT | scoreSaberPermission.NAT,
     color: "#0b64f0",
   },
   {
     name: "Quality Assurance Team",
     role: "Quality Assurance",
-    permissions: scoreSaberPermission.RT | scoreSaberPermission.NAT,
     color: "#f70000",
   },
   {
     name: "Ranking Team",
     role: "Ranking Team",
-    permissions: scoreSaberPermission.RT,
     color: "#1abc9c",
   },
   {
     name: "Ranking Team Recruit",
     role: "Recruit",
-    permissions: scoreSaberPermission.RT,
     color: "#11806a",
   },
   {

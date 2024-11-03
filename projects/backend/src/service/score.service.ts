@@ -277,9 +277,9 @@ export class ScoreService {
         score.score
       )) !== null
     ) {
-      console.log(
-        `ScoreSaber score already tracked for "${playerName}"(${playerId}), difficulty: ${score.difficulty}, score: ${score.score}, leaderboard: ${leaderboard.id}, ignoring...`
-      );
+      // console.log(
+      //   `ScoreSaber score already tracked for "${playerName}"(${playerId}), difficulty: ${score.difficulty}, score: ${score.score}, leaderboard: ${leaderboard.id}, ignoring...`
+      // );
       return;
     }
 
