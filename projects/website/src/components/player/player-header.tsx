@@ -105,7 +105,7 @@ export default function PlayerHeader({ player }: PlayerHeaderProps) {
               >
                 {player.name}
               </p>
-              <div className="absolute lg:relative top-0 left-0 flex flex-col lg:flex-row gap-2">
+              <div className="absolute lg:relative top-0 left-0 flex flex-col lg:flex-row gap-2 items-center">
                 <PlayerTrackedStatus player={player} />
                 <PlayerSteamProfile player={player} />
               </div>
