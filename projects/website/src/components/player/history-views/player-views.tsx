@@ -1,14 +1,14 @@
 "use client";
 
-import PlayerRankingChart from "@/components/player/chart/charts/player-ranking-chart";
 import { ReactElement, ReactNode, useState } from "react";
 import Tooltip from "@/components/tooltip";
-import PlayerAccuracyChart from "@/components/player/chart/charts/player-accuracy-chart";
 import { CalendarIcon, GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import { SwordIcon, TrendingUpIcon } from "lucide-react";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import PlayerScoresChart from "@/components/player/chart/charts/player-scores-chart";
-import ScoreHistoryCalendar from "@/components/player/score-history-calendar";
+import PlayerRankingChart from "@/components/player/history-views/views/player-ranking-chart";
+import PlayerAccuracyChart from "@/components/player/history-views/views/player-accuracy-chart";
+import PlayerScoresChart from "@/components/player/history-views/views/player-scores-chart";
+import ScoreHistoryCalendar from "@/components/player/history-views/views/score-history-calendar";
 
 type PlayerChartsProps = {
   /**
@@ -66,7 +66,7 @@ const views: SelectedView[] = [
   },
 ];
 
-export default function PlayerStatHistoryViews({ player }: PlayerChartsProps) {
+export default function PlayerViews({ player }: PlayerChartsProps) {
   const playerViews = player.isBeingTracked ? views : views.slice(1, views.length);
   const [selectedView, setSelectedView] = useState<SelectedView>(playerViews[0]);
 

@@ -9,7 +9,6 @@ import PlayerBadges from "@/components/player/player-badges";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { useIsVisible } from "@/hooks/use-is-visible";
 import { useRef } from "react";
-import PlayerStatHistoryViews from "@/components/player/chart/player-stat-history-views";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import useDatabase from "@/hooks/use-database";
 import { useLiveQuery } from "dexie-react-hooks";
@@ -19,6 +18,7 @@ import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import PlayerScoresResponse from "@ssr/common/response/player-scores-response";
 import { getScoreSaberPlayerFromToken } from "@ssr/common/token-creators";
+import PlayerViews from "@/components/player/history-views/player-views";
 
 type Props = {
   initialPlayerData: ScoreSaberPlayer;
@@ -58,7 +58,7 @@ export default function PlayerData({ initialPlayerData, initialScoreData, initia
         <PlayerHeader player={player} />
         <Card className="gap-1">
           <PlayerBadges player={player} />
-          {!player.inactive && <PlayerStatHistoryViews player={player} />}
+          {!player.inactive && <PlayerViews player={player} />}
         </Card>
         <PlayerScores
           initialScoreData={initialScoreData}

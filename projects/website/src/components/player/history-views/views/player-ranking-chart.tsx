@@ -2,10 +2,10 @@
 
 import React from "react";
 import { DatasetConfig } from "@/components/chart/generic-chart";
-import GenericPlayerChart from "@/components/player/chart/generic-player-chart";
-import { scoreBarsDataset } from "@/components/player/chart/charts/player-scores-chart";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { formatNumberWithCommas, isWholeNumber } from "@ssr/common/utils/number-utils";
+import { scoreBarsDataset } from "@/components/player/history-views/views/player-scores-chart";
+import GenericPlayerChart from "@/components/player/history-views/generic-player-chart";
 
 type Props = {
   player: ScoreSaberPlayer;
