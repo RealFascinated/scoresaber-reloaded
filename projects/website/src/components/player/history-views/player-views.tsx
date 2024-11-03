@@ -5,10 +5,12 @@ import Tooltip from "@/components/tooltip";
 import { CalendarIcon, GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import { SwordIcon, TrendingUpIcon } from "lucide-react";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
+import dynamic from "next/dynamic";
+
 import PlayerRankingChart from "@/components/player/history-views/views/player-ranking-chart";
-import PlayerAccuracyChart from "@/components/player/history-views/views/player-accuracy-chart";
-import PlayerScoresChart from "@/components/player/history-views/views/player-scores-chart";
-import ScoreHistoryCalendar from "@/components/player/history-views/views/score-history-calendar";
+const PlayerAccuracyChart = dynamic(() => import("@/components/player/history-views/views/player-accuracy-chart"));
+const PlayerScoresChart = dynamic(() => import("@/components/player/history-views/views/player-scores-chart"));
+const ScoreHistoryCalendar = dynamic(() => import("@/components/player/history-views/views/score-history-calendar"));
 
 type PlayerChartsProps = {
   /**
