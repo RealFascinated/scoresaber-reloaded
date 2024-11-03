@@ -16,7 +16,7 @@ type PpBoundaryProps = {
 export default function PpBoundaryStat({ player }: PpBoundaryProps) {
   const [boundary, setBoundary] = useState<number>(1);
   const [boundaries, setBoundaries] = useState<number[]>();
-  const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false); // Track popover state
+  const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["playerPpBoundary", player.id],

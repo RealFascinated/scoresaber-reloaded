@@ -8,6 +8,7 @@ import { ResetIcon } from "@radix-ui/react-icons";
 import Tooltip from "@/components/tooltip";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
+import { useIsMobile } from "@/hooks/use-is-mobile";
 
 type ScoreEditorButtonProps = {
   score: ScoreSaberScore;
@@ -16,6 +17,7 @@ type ScoreEditorButtonProps = {
 };
 
 export default function ScoreEditorButton({ score, leaderboard, updateScore }: ScoreEditorButtonProps) {
+  const isMobile = useIsMobile();
   const [isScoreEditMode, setIsScoreEditMode] = useState(false);
 
   const maxScore = leaderboard.maxScore || 1; // Use 1 to prevent division by zero
@@ -48,7 +50,7 @@ export default function ScoreEditorButton({ score, leaderboard, updateScore }: S
         <PopoverTrigger>
           <CogIcon className={clsx("w-6 h-6 transition-all transform-gpu p-0", isScoreEditMode ? "" : "rotate-180")} />
         </PopoverTrigger>
-        <PopoverContent className="p-0" side="left">
+        <PopoverContent className="p-0" side={isMobile ? "top" : "left"}>
           <div className="p-3 flex flex-col gap-2">
             <p className="text-sm font-medium mb-1">Accuracy Changer</p>
             {/* Accuracy Slider */}
