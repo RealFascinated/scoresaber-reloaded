@@ -1,4 +1,5 @@
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import Link from "next/link";
 
 type Props = {
   /**
@@ -12,12 +13,17 @@ type Props = {
   tooltip?: React.ReactNode;
 
   /**
+   * The link to open
+   */
+  href?: string;
+
+  /**
    * Callback for when the button is clicked.
    */
-  onClick: () => void;
+  onClick?: () => void;
 };
 
-export default function ScoreButton({ children, tooltip, onClick }: Props) {
+export default function ScoreButton({ children, tooltip, href, onClick }: Props) {
   const button = (
     <button
       className="bg-accent rounded-md flex justify-center items-center p-1 w-[28px] h-[28px] hover:brightness-75 transform-gpu transition-all cursor-pointer"
@@ -30,7 +36,15 @@ export default function ScoreButton({ children, tooltip, onClick }: Props) {
   if (tooltip) {
     return (
       <Tooltip>
-        <TooltipTrigger asChild>{button}</TooltipTrigger>
+        <TooltipTrigger asChild>
+          {href ? (
+            <Link href={href} target="_blank">
+              {button}
+            </Link>
+          ) : (
+            button
+          )}
+        </TooltipTrigger>
         <TooltipContent>{tooltip}</TooltipContent>
       </Tooltip>
     );

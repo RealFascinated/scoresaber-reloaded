@@ -11,12 +11,7 @@ type SongOpenInYoutubeButtonProps = {
 export function SongOpenInYoutubeButton({ leaderboard }: SongOpenInYoutubeButtonProps) {
   return (
     <ScoreButton
-      onClick={() => {
-        window.open(
-          songNameToYouTubeLink(leaderboard.songName, leaderboard.songSubName, leaderboard.songAuthorName),
-          "_blank"
-        );
-      }}
+      href={songNameToYouTubeLink(leaderboard.songName, leaderboard.songSubName, leaderboard.songAuthorName)}
       tooltip={<p>Click to open the song in YouTube</p>}
     >
       <YouTubeLogo />

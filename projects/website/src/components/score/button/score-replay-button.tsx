@@ -15,12 +15,7 @@ export function ScoreReplayButton({ additionalData }: ScoreReplayButton) {
     : `?scoreId=${additionalData.scoreId}`;
 
   return (
-    <ScoreButton
-      onClick={() => {
-        window.open(`https://replay.beatleader.xyz/${path}`, "_blank");
-      }}
-      tooltip={<p>Click to view the score replay!</p>}
-    >
+    <ScoreButton href={`https://replay.beatleader.xyz/${path}`} tooltip={<p>Click to view the score replay!</p>}>
       <BeatSaberPepeLogo />
     </ScoreButton>
   );
