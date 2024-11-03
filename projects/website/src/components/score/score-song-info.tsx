@@ -18,7 +18,7 @@ export default function ScoreSongInfo({ leaderboard, beatSaverMap }: Props) {
   const starCount = leaderboard.stars;
   const difficulty = leaderboard.difficulty.difficulty.replace("Plus", "+");
   return (
-    <div className="flex gap-3 items-center">
+    <div className="flex gap-3 items-center break-all">
       <div className="relative flex justify-center h-[64px]">
         <Tooltip
           display={
