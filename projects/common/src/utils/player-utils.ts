@@ -6,6 +6,7 @@ import { AroundPlayerResponse } from "../response/around-player-response";
 import ScoreSaberPlayer from "../player/impl/scoresaber-player";
 import { formatDateMinimal, getMidnightAlignedDate } from "./time-utils";
 import { PpBoundaryResponse } from "../response/pp-boundary-response";
+import { PlayedMapsCalendarResponse } from "../response/played-maps-calendar-response";
 
 /**
  * Gets the player's history for today.
@@ -82,4 +83,17 @@ export async function getPlayersAroundPlayer(playerId: string, type: AroundPlaye
  */
 export async function getPlayerPpBoundary(playerId: string, boundary: number = 1) {
   return await kyFetchJson<PpBoundaryResponse>(`${Config.apiUrl}/player/pp-boundary/${playerId}/${boundary}`);
+}
+
+/**
+ * Gets the score calendar for a player.
+ *
+ * @param playerId the player's id
+ * @param year the year to get the score calendar for
+ * @param month the month to get the score calendar for
+ */
+export async function getScoreCalendar(playerId: string, year: number, month: number) {
+  return await kyFetchJson<PlayedMapsCalendarResponse>(
+    `${Config.apiUrl}/player/history/calendar/${playerId}/${year}/${month}`
+  );
 }

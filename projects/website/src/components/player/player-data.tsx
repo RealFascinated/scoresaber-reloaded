@@ -9,7 +9,7 @@ import PlayerBadges from "@/components/player/player-badges";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { useIsVisible } from "@/hooks/use-is-visible";
 import { useRef } from "react";
-import PlayerCharts from "@/components/player/chart/player-charts";
+import PlayerStatHistoryViews from "@/components/player/chart/player-stat-history-views";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import useDatabase from "@/hooks/use-database";
 import { useLiveQuery } from "dexie-react-hooks";
@@ -58,7 +58,7 @@ export default function PlayerData({ initialPlayerData, initialScoreData, initia
         <PlayerHeader player={player} />
         <Card className="gap-1">
           <PlayerBadges player={player} />
-          {!player.inactive && <PlayerCharts player={player} />}
+          {!player.inactive && <PlayerStatHistoryViews player={player} />}
         </Card>
         <PlayerScores
           initialScoreData={initialScoreData}

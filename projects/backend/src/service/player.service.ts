@@ -166,8 +166,11 @@ export class PlayerService {
       const history = player.getStatisticHistory();
 
       const days: Record<number, PlayedMapsCalendarStat> = {};
+      const metadata: Record<number, number[]> = {};
       for (const [dateStr, stat] of Object.entries(history)) {
         const date = new Date(dateStr);
+        const statYear = date.getFullYear();
+        const statMonth = date.getMonth() + 1;
         if (
           stat === undefined ||
           stat.scores === undefined ||
@@ -176,7 +179,15 @@ export class PlayerService {
         ) {
           continue;
         }
-        if (date.getFullYear() === year && date.getMonth() === month - 1) {
+
+        if (metadata[date.getFullYear()] === undefined || !metadata[date.getFullYear()].includes(statMonth)) {
+          if (metadata[date.getFullYear()] === undefined) {
+            metadata[date.getFullYear()] = [];
+          }
+          metadata[date.getFullYear()].push(statMonth);
+        }
+
+        if (statYear === year && statMonth === month) {
           days[date.getDate()] = {
             rankedMaps: stat.scores.rankedScores,
             unrankedMaps: stat.scores.unrankedScores,
@@ -185,8 +196,14 @@ export class PlayerService {
         }
       }
 
+      // Sort the metadata months
+      for (const [year, months] of Object.entries(metadata)) {
+        metadata[Number(year)] = months.sort();
+      }
+
       return {
         days,
+        metadata,
       };
     });
   }

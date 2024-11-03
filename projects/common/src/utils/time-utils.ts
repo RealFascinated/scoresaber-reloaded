@@ -1,3 +1,54 @@
+export const Months = [
+  {
+    name: "January",
+    number: 1,
+  },
+  {
+    name: "February",
+    number: 2,
+  },
+  {
+    name: "March",
+    number: 3,
+  },
+  {
+    name: "April",
+    number: 4,
+  },
+  {
+    name: "May",
+    number: 5,
+  },
+  {
+    name: "June",
+    number: 6,
+  },
+  {
+    name: "July",
+    number: 7,
+  },
+  {
+    name: "August",
+    number: 8,
+  },
+  {
+    name: "September",
+    number: 9,
+  },
+  {
+    name: "October",
+    number: 10,
+  },
+  {
+    name: "November",
+    number: 11,
+  },
+  {
+    name: "December",
+    number: 12,
+  },
+];
+
 /**
  * This function returns the time ago of the input date
  *
@@ -150,4 +201,14 @@ export function formatTime(seconds: number): string {
   const formattedSeconds = remainingSeconds < 10 ? `0${remainingSeconds}` : `${remainingSeconds}`;
 
   return `${formattedMinutes}:${formattedSeconds}`;
+}
+
+/**
+ * Gets the amount of days in a month
+ *
+ * @param month the month
+ * @param year the year
+ */
+export function getDaysInMonth(month: number, year: number) {
+  return new Date(year, month, 0).getDate();
 }
