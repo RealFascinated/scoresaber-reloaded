@@ -37,7 +37,7 @@ export default function PpBoundaryStat({ player }: PpBoundaryProps) {
     }
   }, [data]);
 
-  if (((isLoading || isError) && !isPopoverOpen) || !boundaries) {
+  if (((isLoading || isError) && !isPopoverOpen) || !boundaries || boundaries[0] == -1) {
     return null;
   }
 
