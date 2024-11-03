@@ -12,6 +12,7 @@ import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { BeatSaverMap } from "@ssr/common/model/beatsaver/map";
 import { ScoreReplayButton } from "@/components/score/button/score-replay-button";
+import { useIsMobile } from "@/hooks/use-is-mobile";
 
 type Props = {
   score?: ScoreSaberScore;
@@ -74,6 +75,7 @@ export default function ScoreButtons({
   hideLeaderboardDropdown,
   hideAccuracyChanger,
 }: Props) {
+  const isMobile = useIsMobile();
   const [leaderboardExpanded, setLeaderboardExpanded] = useState(false);
 
   return (
@@ -82,21 +84,23 @@ export default function ScoreButtons({
         {buttons.map((button, index) => {
           const { render } = button;
 
-          return (
-            <div key={index}>
-              {render({
-                score,
-                leaderboard,
-                beatSaverMap,
-                alwaysSingleLine,
-                setIsLeaderboardExpanded,
-                isLeaderboardLoading,
-                updateScore,
-                hideLeaderboardDropdown,
-                hideAccuracyChanger,
-              })}
-            </div>
-          );
+          const buttonElement = render({
+            score,
+            leaderboard,
+            beatSaverMap,
+            alwaysSingleLine,
+            setIsLeaderboardExpanded,
+            isLeaderboardLoading,
+            updateScore,
+            hideLeaderboardDropdown,
+            hideAccuracyChanger,
+          });
+
+          if (isMobile && !buttonElement) {
+            return null;
+          }
+
+          return <div key={index}>{buttonElement}</div>;
         })}
       </div>
 
