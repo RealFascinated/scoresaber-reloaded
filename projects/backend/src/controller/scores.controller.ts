@@ -31,7 +31,7 @@ export default class ScoresController {
     };
     query: { search?: string };
   }): Promise<unknown> {
-    return await ScoreService.getPlayerScores(leaderboard, id, page, sort, search);
+    return await ScoreService.lookupPlayerScores(leaderboard, id, page, sort, search);
   }
 
   @Get("/leaderboard/:leaderboard/:id/:page", {

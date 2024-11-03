@@ -10,6 +10,7 @@ import { clamp, lerp } from "../../utils/math-utils";
 import { CurvePoint } from "../../curve-point";
 import { SSRCache } from "../../cache";
 import ScoreSaberLeaderboardPageToken from "../../types/token/scoresaber/leaderboard-page";
+import { ScoreSaberScore } from "../../model/score/impl/scoresaber-score";
 
 const API_BASE = "https://scoresaber.com/api";
 
@@ -29,6 +30,7 @@ const LOOKUP_LEADERBOARD_ENDPOINT = `${API_BASE}/leaderboard/by-id/:id/info`;
 const LOOKUP_LEADERBOARD_SCORES_ENDPOINT = `${API_BASE}/leaderboard/by-id/:id/scores?page=:page`;
 const LOOKUP_LEADERBOARDS_ENDPOINT = `${API_BASE}/leaderboards?ranked=:ranked&page=:page`;
 
+const WEIGHT_COEFFICIENT = 0.965;
 const STAR_MULTIPLIER = 42.117208413;
 
 const playerCache = new SSRCache({
@@ -314,6 +316,75 @@ class ScoreSaberService extends Service {
     }
     const pp = stars * STAR_MULTIPLIER; // Calculate base PP value
     return this.getModifier(accuracy) * pp; // Calculate and return final PP value
+  }
+
+  /**
+   * Ngl i have no idea what this does.
+   *
+   * @param bottomScores
+   * @param idx
+   * @param expected
+   * @private
+   */
+  private calcRawPpAtIdx(bottomScores: Array<any>, idx: number, expected: number) {
+    const oldBottomPp = this.getTotalWeightedPp(bottomScores, idx);
+    const newBottomPp = this.getTotalWeightedPp(bottomScores, idx + 1);
+
+    // 0.965^idx * rawPpToFind = expected + oldBottomPp - newBottomPp;
+    // rawPpToFind = (expected + oldBottomPp - newBottomPp) / 0.965^idx;
+    return (expected + oldBottomPp - newBottomPp) / Math.pow(WEIGHT_COEFFICIENT, idx);
+  }
+
+  /**
+   * Gets the total amount of weighted pp from
+   * the sorted pp array
+   *
+   * @param ppArray the sorted pp array
+   * @param startIdx the index to start from
+   * @returns the total amount of weighted pp
+   * @private
+   */
+  private getTotalWeightedPp(ppArray: Array<number>, startIdx = 0) {
+    return ppArray.reduce((cumulative, pp, idx) => cumulative + Math.pow(WEIGHT_COEFFICIENT, idx + startIdx) * pp, 0);
+  }
+
+  /**
+   * Gets the amount of raw pp you need
+   * to gain the expected pp
+   *
+   * @param scores the players scores
+   * @param expectedPp the expected pp gain
+   * @returns the amount of raw pp
+   */
+  public calcPpBoundary(scores: ScoreSaberScore[], expectedPp = 1) {
+    const rankedScorePps = scores.map(score => score.pp).sort((a, b) => b - a);
+
+    let left = 0;
+    let right = rankedScorePps.length - 1;
+    let boundaryIdx = -1;
+
+    while (left <= right) {
+      const mid = Math.floor((left + right) / 2);
+      const bottomSlice = rankedScorePps.slice(mid);
+      const bottomPp = this.getTotalWeightedPp(bottomSlice, mid);
+
+      bottomSlice.unshift(rankedScorePps[mid]);
+      const modifiedBottomPp = this.getTotalWeightedPp(bottomSlice, mid);
+      const diff = modifiedBottomPp - bottomPp;
+
+      if (diff > expectedPp) {
+        boundaryIdx = mid;
+        left = mid + 1;
+      } else {
+        right = mid - 1;
+      }
+    }
+
+    if (boundaryIdx === -1) {
+      return this.calcRawPpAtIdx(rankedScorePps, 0, expectedPp);
+    } else {
+      return this.calcRawPpAtIdx(rankedScorePps.slice(boundaryIdx + 1), boundaryIdx + 1, expectedPp);
+    }
   }
 }
 

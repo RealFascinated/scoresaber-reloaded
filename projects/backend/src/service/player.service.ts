@@ -10,9 +10,14 @@ import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
 import { ScoreService } from "./score.service";
 import { logNewTrackedPlayer } from "../common/embds";
 import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/player";
+import { SSRCache } from "@ssr/common/cache";
+import { fetchWithCache } from "../common/cache.util";
 
 const SCORESABER_REQUEST_COOLDOWN = 60_000 / 250; // 250 requests per minute
 const accountCreationLock: { [id: string]: Promise<PlayerDocument> } = {};
+const ppBoundaryCache = new SSRCache({
+  ttl: 1000 * 60 * 5, // 5 minutes
+});
 
 export class PlayerService {
   /**
@@ -117,6 +122,29 @@ export class PlayerService {
   }
 
   /**
+   * Gets the pp boundary for a player.
+   *
+   * @param playerId the player's id
+   * @param boundary the pp boundary
+   */
+  public static async getPlayerPpBoundary(playerId: string, boundary: number = 1): Promise<number> {
+    return fetchWithCache(ppBoundaryCache, playerId, async () => {
+      await PlayerService.getPlayer(playerId); // Ensure player exists
+      const scores = await ScoreService.getPlayerScores(playerId, {
+        ranked: true,
+        projection: {
+          pp: 1,
+        },
+      });
+      if (scores.length === 0) {
+        return 0;
+      }
+
+      return scoresaberService.calcPpBoundary(scores, boundary);
+    });
+  }
+
+  /**
    * Tracks a players statistics
    *
    * @param foundPlayer the player to track
@@ -204,12 +232,16 @@ export class PlayerService {
     const rank = getRank(player, type);
     const rankWithinPage = rank % itemsPerPage;
 
-    const pagesToSearch = [getPageFromRank(rank, itemsPerPage)];
+    let pagesToSearch = [getPageFromRank(rank, itemsPerPage)];
     if (rankWithinPage > 0) {
       pagesToSearch.push(getPageFromRank(rank - 1, itemsPerPage));
     } else if (rankWithinPage < itemsPerPage - 1) {
       pagesToSearch.push(getPageFromRank(rank + 1, itemsPerPage));
     }
+    // Remove duplicates
+    pagesToSearch = pagesToSearch.filter((value, index, self) => {
+      return self.indexOf(value) === index;
+    });
 
     const rankings: Map<string, ScoreSaberPlayerToken> = new Map();
     for (const page of pagesToSearch) {

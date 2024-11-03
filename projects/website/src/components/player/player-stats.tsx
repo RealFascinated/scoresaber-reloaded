@@ -5,6 +5,7 @@ import { formatDate } from "@ssr/common/utils/time-utils";
 import { ReactNode } from "react";
 import Tooltip from "@/components/tooltip";
 import { getScoreSaberRole } from "@ssr/common/utils/scoresaber.util";
+import PpBoundaryStat from "@/components/player/stat/pp-boundary";
 
 type Stat = {
   name: string;
@@ -106,7 +107,7 @@ export default function PlayerStats({ player }: Props) {
       {playerStats.map((badge, index) => {
         const toRender = badge.create(player);
         if (toRender === undefined || toRender.value === undefined) {
-          return <div key={index} />;
+          return undefined;
         }
         const { tooltip, value } = toRender;
         const stat = <StatValue color={badge.color?.(player)} name={badge.name} value={value} />;
@@ -123,6 +124,8 @@ export default function PlayerStats({ player }: Props) {
           </div>
         );
       })}
+
+      <PpBoundaryStat player={player} />
     </div>
   );
 }

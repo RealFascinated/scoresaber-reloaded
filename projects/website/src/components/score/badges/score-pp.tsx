@@ -3,7 +3,7 @@ import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber
 import Tooltip from "@/components/tooltip";
 import { ensurePositiveNumber, formatPp } from "@ssr/common/utils/number-utils";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
-import { Change } from "@/common/change";
+import { Change } from "@/components/change";
 
 type ScorePpProps = ScoreBadgeProps & {
   /**

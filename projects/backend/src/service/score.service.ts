@@ -200,6 +200,33 @@ export class ScoreService {
   }
 
   /**
+   * Gets the player scores from the database.
+   *
+   * @param playerId the id of the player
+   * @param options the fetch options
+   */
+  public static async getPlayerScores(
+    playerId: string,
+    options?: {
+      ranked?: boolean;
+      projection?: { [key: string]: 1 | 0 };
+    }
+  ): Promise<ScoreSaberScore[]> {
+    const rawScores = await ScoreSaberScoreModel.find(
+      {
+        playerId: playerId,
+        ...(options?.ranked ? { pp: { $gt: 0 } } : undefined),
+      },
+      options?.projection
+    ).sort({ pp: -1 });
+
+    if (!rawScores) {
+      return [];
+    }
+    return rawScores.map(rawScore => rawScore.toObject() as ScoreSaberScore);
+  }
+
+  /**
    * Tracks ScoreSaber score.
    *
    * @param scoreToken the score to track
@@ -534,7 +561,7 @@ export class ScoreService {
     });
   }
 
-  public static async getPlayerScores(
+  public static async lookupPlayerScores(
     leaderboardName: Leaderboards,
     playerId: string,
     page: number,

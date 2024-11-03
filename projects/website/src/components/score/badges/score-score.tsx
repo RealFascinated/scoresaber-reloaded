@@ -1,6 +1,6 @@
 import { ScoreBadgeProps } from "@/components/score/badges/badge-props";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
-import { Change } from "@/common/change";
+import { Change } from "@/components/change";
 import Tooltip from "@/components/tooltip";
 
 export function ScoreScoreBadge({ score }: ScoreBadgeProps) {

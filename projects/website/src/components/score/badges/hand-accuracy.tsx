@@ -1,5 +1,5 @@
 import Tooltip from "@/components/tooltip";
-import { Change } from "@/common/change";
+import { Change } from "@/components/change";
 import { capitalizeFirstLetter } from "@/common/string-utils";
 import { ScoreBadgeProps } from "@/components/score/badges/badge-props";
 

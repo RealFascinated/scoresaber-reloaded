@@ -4,6 +4,7 @@ import { t } from "elysia";
 import { PlayerHistory } from "@ssr/common/player/player-history";
 import { PlayerTrackedSince } from "@ssr/common/player/player-tracked-since";
 import { AroundPlayerResponse } from "@ssr/common/response/around-player-response";
+import { PpBoundaryResponse } from "@ssr/common/response/pp-boundary-response";
 
 @Controller("/player")
 export default class PlayerController {
@@ -75,6 +76,24 @@ export default class PlayerController {
   }): Promise<AroundPlayerResponse> {
     return {
       players: await PlayerService.getPlayersAroundPlayer(id, type),
+    };
+  }
+
+  @Get("/pp-boundary/:id/:boundary", {
+    config: {},
+    params: t.Object({
+      id: t.String({ required: true }),
+      boundary: t.Number({ maximum: 25, minimum: 1 }),
+    }),
+  })
+  public async getPpBoundary({
+    params: { id, boundary },
+  }: {
+    params: { id: string; boundary: number };
+  }): Promise<PpBoundaryResponse> {
+    return {
+      rawPp: await PlayerService.getPlayerPpBoundary(id, boundary),
+      boundary: boundary,
     };
   }
 }

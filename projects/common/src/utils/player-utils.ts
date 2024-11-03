@@ -5,6 +5,7 @@ import { AroundPlayer } from "../types/around-player";
 import { AroundPlayerResponse } from "../response/around-player-response";
 import ScoreSaberPlayer from "../player/impl/scoresaber-player";
 import { formatDateMinimal, getMidnightAlignedDate } from "./time-utils";
+import { PpBoundaryResponse } from "../response/pp-boundary-response";
 
 /**
  * Gets the player's history for today.
@@ -57,18 +58,28 @@ export function sortPlayerHistory(history: Map<string, PlayerHistory>) {
 /**
  * Ensure the player is being tracked.
  *
- * @param id the player id
+ * @param playerId the player id
  */
-export async function trackPlayer(id: string) {
-  await kyFetchJson(`${Config.apiUrl}/player/history/${id}/1?createIfMissing=true`);
+export async function trackPlayer(playerId: string) {
+  await kyFetchJson(`${Config.apiUrl}/player/history/${playerId}/1?createIfMissing=true`);
 }
 
 /**
  * Gets the players around a player.
  *
- * @param id the player to get around
+ * @param playerId the player to get around
  * @param type the type to get
  */
-export async function getPlayersAroundPlayer(id: string, type: AroundPlayer) {
-  return await kyFetchJson<AroundPlayerResponse>(`${Config.apiUrl}/player/around/${id}/${type}`);
+export async function getPlayersAroundPlayer(playerId: string, type: AroundPlayer) {
+  return await kyFetchJson<AroundPlayerResponse>(`${Config.apiUrl}/player/around/${playerId}/${type}`);
+}
+
+/**
+ * Gets the pp boundary for a player.
+ *
+ * @param playerId the player's id
+ * @param boundary the pp boundary
+ */
+export async function getPlayerPpBoundary(playerId: string, boundary: number = 1) {
+  return await kyFetchJson<PpBoundaryResponse>(`${Config.apiUrl}/player/pp-boundary/${playerId}/${boundary}`);
 }
