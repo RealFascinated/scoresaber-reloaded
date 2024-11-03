@@ -93,7 +93,7 @@ export default function Mini({ type, player, shouldUpdate }: MiniProps) {
               <p className="text-gray-400">#{formatNumberWithCommas(rank)}</p>
               <div className="flex gap-2 items-center">
                 <PlayerInfo
-                  className="w-[145px]"
+                  className="w-[140px]"
                   player={playerRanking}
                   highlightedPlayer={player}
                   hideCountryFlag
@@ -105,7 +105,7 @@ export default function Mini({ type, player, shouldUpdate }: MiniProps) {
                 {playerRanking.id !== player.id && (
                   <p className={`text-xs text-right ${ppDifference > 0 ? "text-green-400" : "text-red-400"}`}>
                     {ppDifference > 0 ? "+" : ""}
-                    {formatPp(ppDifference)}
+                    {formatPp(ppDifference, 2)}
                   </p>
                 )}
               </div>

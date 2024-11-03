@@ -22,10 +22,14 @@ export function formatNumberWithCommas(num: number) {
  * Formats the pp value
  *
  * @param num the pp to format
+ * @param fractionDigits the amount of fraction digits
  * @returns the formatted pp
  */
-export function formatPp(num: number) {
-  return num.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+export function formatPp(num: number, fractionDigits: number = 2) {
+  return num.toLocaleString(undefined, {
+    minimumFractionDigits: fractionDigits,
+    maximumFractionDigits: fractionDigits,
+  });
 }
 
 /**

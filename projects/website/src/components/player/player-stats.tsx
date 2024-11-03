@@ -4,7 +4,7 @@ import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { formatDate } from "@ssr/common/utils/time-utils";
 import { ReactNode } from "react";
 import Tooltip from "@/components/tooltip";
-import { getScoreSaberRole } from "@ssr/common/utils/scoresaber.util";
+import { getScoreSaberRoles } from "@ssr/common/utils/scoresaber.util";
 import PpBoundaryStat from "@/components/player/stat/pp-boundary";
 
 type Stat = {
@@ -80,18 +80,10 @@ const playerStats: Stat[] = [
   {
     name: "Role",
     create: (player: ScoreSaberPlayer) => {
-      const role = getScoreSaberRole(player);
+      const roles = getScoreSaberRoles(player);
 
       return {
-        value: !role ? undefined : (
-          <p
-            style={{
-              color: role.color,
-            }}
-          >
-            {role.name}
-          </p>
-        ),
+        value: !roles ? undefined : <p>{roles.map(role => role.name).join(", ")}</p>,
       };
     },
   },

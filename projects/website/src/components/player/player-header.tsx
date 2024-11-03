@@ -10,7 +10,7 @@ import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import Link from "next/link";
 import AddFriend from "@/components/friend/add-friend";
 import PlayerSteamProfile from "@/components/player/player-steam-profile";
-import { getScoreSaberRole } from "@ssr/common/utils/scoresaber.util";
+import { getScoreSaberRoles } from "@ssr/common/utils/scoresaber.util";
 import { DailyChange } from "@/components/statistic/daily-change";
 import { ChangeOverTime } from "@/components/statistic/change-over-time";
 import { PlayerStatChange } from "@ssr/common/player/player-stat-change";
@@ -100,7 +100,7 @@ export default function PlayerHeader({ player }: PlayerHeaderProps) {
               <p
                 className="font-bold text-2xl"
                 style={{
-                  color: getScoreSaberRole(player)?.color,
+                  color: getScoreSaberRoles(player)[0]?.color,
                 }}
               >
                 {player.name}

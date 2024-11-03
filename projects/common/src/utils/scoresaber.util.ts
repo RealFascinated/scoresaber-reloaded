@@ -90,15 +90,19 @@ export const scoreSaberRoles: ScoreSaberRole[] = [
  * @param player the player
  * @returns the role
  */
-export function getScoreSaberRole(
+export function getScoreSaberRoles(
   player: ScoreSaberPlayerToken | ScoreSaberLeaderboardPlayerInfoToken | ScoreSaberPlayer
-): ScoreSaberRole | undefined {
-  const roles = player.role?.split(", ") || [player.role];
-  for (const role of scoreSaberRoles) {
-    if (roles.includes(role.name)) {
-      return role;
+): ScoreSaberRole[] {
+  const toReturn: ScoreSaberRole[] = [];
+  const rawRoles = player.role?.split(", ") || [player.role];
+
+  for (const role of rawRoles) {
+    const found = scoreSaberRoles.find(r => r.name === role);
+    if (found) {
+      toReturn.push(found);
     }
   }
+  return toReturn;
 }
 
 /**

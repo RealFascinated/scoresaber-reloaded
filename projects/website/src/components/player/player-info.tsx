@@ -3,7 +3,7 @@ import CountryFlag from "@/components/country-flag";
 import Link from "next/link";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { clsx } from "clsx";
-import { getScoreSaberRole } from "@ssr/common/utils/scoresaber.util";
+import { getScoreSaberRoles } from "@ssr/common/utils/scoresaber.util";
 import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/leaderboard-player-info";
 import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/player";
 
@@ -56,7 +56,7 @@ export function PlayerInfo({
         className
       )}
       style={{
-        color: getScoreSaberRole(player)?.color,
+        color: getScoreSaberRoles(player)[0]?.color,
       }}
     >
       {player.name}
