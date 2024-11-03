@@ -7,6 +7,7 @@ import { getPlayerPpBoundary } from "@ssr/common/utils/player-utils";
 import StatValue from "@/components/stat-value";
 import { Slider } from "@/components/ui/slider";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import Tooltip from "@/components/tooltip";
 
 type PpBoundaryProps = {
   player: ScoreSaberPlayer;
@@ -35,7 +36,12 @@ export default function PpBoundaryStat({ player }: PpBoundaryProps) {
   return (
     <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
       <PopoverTrigger onClick={() => setIsPopoverOpen(true)}>
-        <StatValue name={`+${boundary} PP`} value={<p>{boundaries[boundary - 1].toFixed(2) || "-"}pp</p>} />
+        <Tooltip
+          asChild={false}
+          display={<p className="text-center">Amount of raw pp required to increase your global pp by {boundary}pp</p>}
+        >
+          <StatValue name={`+${boundary} PP`} value={<p>{boundaries[boundary - 1].toFixed(2) || "-"}pp</p>} />
+        </Tooltip>
       </PopoverTrigger>
       <PopoverContent className="flex flex-col gap-2 p-3">
         <p className="text-sm">Change the pp boundary.</p>
