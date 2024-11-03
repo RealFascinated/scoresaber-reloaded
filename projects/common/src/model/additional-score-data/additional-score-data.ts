@@ -116,6 +116,11 @@ export class AdditionalScoreData {
     misses: Misses;
 
     /**
+     * The change in pauses.
+     */
+    pauses?: number;
+
+    /**
      * The change in the hand accuracy.
      */
     handAccuracy: HandAccuracy;

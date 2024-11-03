@@ -6,6 +6,7 @@ type ScoreMissesTooltipProps = {
   badCuts: number;
   bombCuts?: number;
   wallsHit?: number;
+  pauses?: number;
   fullCombo?: boolean;
 
   /**
@@ -19,6 +20,7 @@ export function ScoreMissesTooltip({
   badCuts,
   bombCuts,
   wallsHit,
+  pauses,
   fullCombo,
   children,
 }: ScoreMissesTooltipProps) {
@@ -41,6 +43,7 @@ export function ScoreMissesTooltip({
           ) : (
             <p>Full Combo</p>
           )}
+          {pauses && pauses > 0 ? <p>Pauses: {formatNumberWithCommas(ensurePositiveNumber(pauses))}</p> : undefined}
         </div>
       }
     >

@@ -399,6 +399,7 @@ export class ScoreService {
           wallsHit: rawScoreImprovement.wallsHit,
         },
         accuracy: rawScoreImprovement.accuracy * 100,
+        pauses: rawScoreImprovement.pauses,
         handAccuracy: {
           left: rawScoreImprovement.accLeft,
           right: rawScoreImprovement.accRight,

@@ -38,6 +38,7 @@ export default function ScoreMissesAndPausesBadge({ score, hideXMark }: ScoreMis
             badCuts={score.badCuts}
             bombCuts={misses?.bombCuts}
             wallsHit={misses?.wallsHit}
+            pauses={additionalData?.pauses}
             fullCombo={score.fullCombo}
           >
             <p>
@@ -51,6 +52,7 @@ export default function ScoreMissesAndPausesBadge({ score, hideXMark }: ScoreMis
               badCuts={previousScoreMisses.badCuts}
               bombCuts={previousScoreMisses.bombCuts}
               wallsHit={previousScoreMisses.wallsHit}
+              pauses={scoreImprovement.pauses}
               fullCombo={previousScoreFc}
             >
               <div className="text-xs flex flex-row gap-1">
