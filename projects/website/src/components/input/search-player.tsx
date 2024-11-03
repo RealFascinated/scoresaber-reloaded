@@ -10,8 +10,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Form, FormControl, FormField, FormItem } from "../ui/form";
 import { Input } from "../ui/input";
 import { ScrollArea } from "../ui/scroll-area";
-import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/score-saber-player-token";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
+import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/player";
 
 const formSchema = z.object({
   username: z.string().min(3).max(50),

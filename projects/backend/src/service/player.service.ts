@@ -2,7 +2,6 @@ import { PlayerDocument, PlayerModel } from "@ssr/common/model/player";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import { getDaysAgoDate, getMidnightAlignedDate } from "@ssr/common/utils/time-utils";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
-import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/score-saber-player-token";
 import { InternalServerError } from "@ssr/common/error/internal-server-error";
 import { delay, getPageFromRank, isProduction } from "@ssr/common/utils/utils";
 import { AroundPlayer } from "@ssr/common/types/around-player";
@@ -10,6 +9,7 @@ import { ScoreSort } from "@ssr/common/score/score-sort";
 import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
 import { ScoreService } from "./score.service";
 import { logNewTrackedPlayer } from "../common/embds";
+import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/player";
 
 const SCORESABER_REQUEST_COOLDOWN = 60_000 / 250; // 250 requests per minute
 const accountCreationLock: { [id: string]: Promise<PlayerDocument> } = {};

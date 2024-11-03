@@ -3,10 +3,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { useCallback, useEffect, useState } from "react";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
-import { ScoreSaberPlayersPageToken } from "@ssr/common/types/token/scoresaber/score-saber-players-page-token";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import Pagination from "@/components/input/pagination";
 import { PlayerRanking } from "@/components/ranking/player-ranking";
+import { ScoreSaberPlayersPageToken } from "@ssr/common/types/token/scoresaber/players-page";
 
 type RankingDataProps = {
   initialPage: number;

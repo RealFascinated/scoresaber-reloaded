@@ -1,11 +1,11 @@
 import { Metadata } from "next";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
-import { ScoreSaberPlayersPageToken } from "@ssr/common/types/token/scoresaber/score-saber-players-page-token";
 import Card from "@/components/card";
 import RankingData from "@/components/ranking/ranking-data";
 import CountryFlag from "@/components/country-flag";
 import { normalizedRegionName } from "@ssr/common/utils/region-utils";
 import { cache } from "react";
+import { ScoreSaberPlayersPageToken } from "@ssr/common/types/token/scoresaber/players-page";
 
 const UNKNOWN_PAGE = {
   title: "ScoreSaber Reloaded - Unknown Page",

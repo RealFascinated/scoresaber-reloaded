@@ -1,14 +1,15 @@
 import Service from "../service";
-import { ScoreSaberPlayerSearchToken } from "../../types/token/scoresaber/score-saber-player-search-token";
-import ScoreSaberPlayerToken from "../../types/token/scoresaber/score-saber-player-token";
-import { ScoreSaberPlayersPageToken } from "../../types/token/scoresaber/score-saber-players-page-token";
+import { ScoreSaberPlayerSearchToken } from "../../types/token/scoresaber/player-search";
+import ScoreSaberPlayerToken from "../../types/token/scoresaber/player";
+import { ScoreSaberPlayersPageToken } from "../../types/token/scoresaber/players-page";
 import { ScoreSort } from "../../score/score-sort";
-import ScoreSaberPlayerScoresPageToken from "../../types/token/scoresaber/score-saber-player-scores-page-token";
-import ScoreSaberLeaderboardToken from "../../types/token/scoresaber/score-saber-leaderboard-token";
-import ScoreSaberLeaderboardScoresPageToken from "../../types/token/scoresaber/score-saber-leaderboard-scores-page-token";
+import ScoreSaberPlayerScoresPageToken from "../../types/token/scoresaber/player-scores-page";
+import ScoreSaberLeaderboardToken from "../../types/token/scoresaber/leaderboard";
+import ScoreSaberLeaderboardScoresPageToken from "../../types/token/scoresaber/leaderboard-scores-page";
 import { clamp, lerp } from "../../utils/math-utils";
 import { CurvePoint } from "../../curve-point";
 import { SSRCache } from "../../cache";
+import ScoreSaberLeaderboardPageToken from "../../types/token/scoresaber/leaderboard-page";
 
 const API_BASE = "https://scoresaber.com/api";
 
@@ -26,6 +27,7 @@ const LOOKUP_PLAYER_SCORES_ENDPOINT = `${API_BASE}/player/:id/scores?limit=:limi
  */
 const LOOKUP_LEADERBOARD_ENDPOINT = `${API_BASE}/leaderboard/by-id/:id/info`;
 const LOOKUP_LEADERBOARD_SCORES_ENDPOINT = `${API_BASE}/leaderboard/by-id/:id/scores?page=:page`;
+const LOOKUP_LEADERBOARDS_ENDPOINT = `${API_BASE}/leaderboards?ranked=:ranked&page=:page`;
 
 const STAR_MULTIPLIER = 42.117208413;
 
@@ -220,6 +222,25 @@ class ScoreSaberService extends Service {
       return undefined;
     }
     this.log(`Found leaderboard "${leaderboardId}" in ${(performance.now() - before).toFixed(0)}ms`);
+    return response;
+  }
+
+  /**
+   * Looks up a page of leaderboards
+   *
+   * @param page the page to look up
+   * @param ranked whether to only look up ranked leaderboards
+   */
+  public async lookupLeaderboards(page: number, ranked?: boolean): Promise<ScoreSaberLeaderboardPageToken | undefined> {
+    const before = performance.now();
+    this.log(`Looking up leaderboard page "${page}"...`);
+    const response = await this.fetch<ScoreSaberLeaderboardPageToken>(
+      LOOKUP_LEADERBOARDS_ENDPOINT.replace(":page", page.toString()).replace(":ranked", ranked ? "true" : "false")
+    );
+    if (response === undefined) {
+      return undefined;
+    }
+    this.log(`Found ${response.leaderboards.length} leaderboards in ${(performance.now() - before).toFixed(0)}ms`);
     return response;
   }
 

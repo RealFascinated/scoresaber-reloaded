@@ -1,6 +1,6 @@
 import { getModelForClass, modelOptions, plugin, Prop, ReturnModelType, Severity } from "@typegoose/typegoose";
 import Score from "../score";
-import { type ScoreSaberLeaderboardPlayerInfoToken } from "../../../types/token/scoresaber/score-saber-leaderboard-player-info-token";
+import { type ScoreSaberLeaderboardPlayerInfoToken } from "../../../types/token/scoresaber/leaderboard-player-info";
 import { Document } from "mongoose";
 import { AutoIncrementID } from "@typegoose/auto-increment";
 import { PreviousScore } from "../previous-score";
@@ -52,7 +52,7 @@ export class ScoreSaberScoreInternal extends Score {
    * @private
    */
   @Prop()
-  public readonly weight?: number;
+  public weight?: number;
 
   /**
    * The max combo of the score.

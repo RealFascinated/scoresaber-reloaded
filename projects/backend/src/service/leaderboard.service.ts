@@ -1,7 +1,6 @@
 import { Leaderboards } from "@ssr/common/leaderboard";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { LeaderboardResponse } from "@ssr/common/response/leaderboard-response";
-import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/score-saber-leaderboard-token";
 import { NotFoundError } from "elysia";
 import BeatSaverService from "./beatsaver.service";
 import { BeatSaverMap } from "@ssr/common/model/beatsaver/map";
@@ -14,7 +13,11 @@ import {
 import { getBeatSaverDifficulty } from "@ssr/common/utils/beatsaver.util";
 import { SSRCache } from "@ssr/common/cache";
 import { fetchWithCache } from "../common/cache.util";
+import { delay } from "@ssr/common/utils/utils";
+import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/score-saber-leaderboard-token";
+import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 
+const SCORESABER_REQUEST_COOLDOWN = 60_000 / 300; // 300 requests per minute
 const leaderboardCache = new SSRCache({
   ttl: 1000 * 60 * 10, // 10 minutes
 });
@@ -131,5 +134,134 @@ export default class LeaderboardService {
     }
 
     return leaderboard;
+  }
+
+  /**
+   * Refreshes the ranked status and stars of all ranked leaderboards.
+   */
+  public static async refreshRankedLeaderboards() {
+    console.log(`Refreshing ranked leaderboards...`);
+    let page = 1;
+    let hasMorePages = true;
+    const rankedIds: number[] = [];
+
+    while (hasMorePages) {
+      const leaderboardResponse = await scoresaberService.lookupLeaderboards(page, true);
+      if (!leaderboardResponse) {
+        console.warn(`Failed to fetch ranked leaderboards on page ${page}.`);
+        break;
+      }
+
+      for (const leaderboardToken of leaderboardResponse.leaderboards) {
+        const leaderboard = getScoreSaberLeaderboardFromToken(leaderboardToken);
+        const previousLeaderboard = await ScoreSaberLeaderboardModel.findById(leaderboard.id);
+        rankedIds.push(leaderboard.id);
+
+        if (previousLeaderboard !== undefined) {
+          // Leaderboard changed data
+          const rankedStatusChanged = leaderboard.ranked !== previousLeaderboard?.ranked;
+          const starCountChanged = leaderboard.stars !== previousLeaderboard?.stars;
+          if (rankedStatusChanged || starCountChanged) {
+            console.log(`Leaderboard data changed for ${leaderboard.id}.`);
+            const scores = await ScoreSaberScoreModel.find({ leaderboardId: leaderboard.id });
+            if (!scores) {
+              console.warn(`Failed to fetch scores for leaderboard "${leaderboard.id}".`);
+              continue;
+            }
+
+            if (rankedStatusChanged) {
+              console.log(
+                `Leaderboard "${leaderboard.id}" ranked status changed from ${previousLeaderboard?.ranked} to ${leaderboard.ranked}.`
+              );
+            }
+            if (starCountChanged) {
+              console.log(
+                `Leaderboard "${leaderboard.id}" star count changed from ${previousLeaderboard?.stars} to ${leaderboard.stars}.`
+              );
+            }
+
+            // Update score pp
+            if (rankedStatusChanged && !leaderboard.ranked) {
+              for (const score of scores) {
+                score.pp = 0;
+                score.weight = 0;
+              }
+            }
+
+            // Update score pp
+            if ((starCountChanged && leaderboard.ranked) || (rankedStatusChanged && leaderboard.ranked)) {
+              const before = Date.now();
+              console.log(`Recalculating scores pp for leaderboard "${leaderboard.id}".`);
+              for (const score of scores) {
+                score.pp = scoresaberService.getPp(leaderboard.stars, score.accuracy);
+              }
+              console.log(`Recalculated scores pp for leaderboard "${leaderboard.id}" in ${Date.now() - before}ms.`);
+            }
+
+            // Save scores
+            await Promise.all(scores.map(score => score.save()));
+          }
+        }
+
+        await ScoreSaberLeaderboardModel.findOneAndUpdate(
+          { _id: leaderboard.id },
+          {
+            lastRefreshed: new Date(),
+            ...leaderboard,
+          },
+          {
+            upsert: true,
+            new: true,
+            setDefaultsOnInsert: true,
+          }
+        );
+      }
+
+      if (page >= Math.ceil(leaderboardResponse.metadata.total / leaderboardResponse.metadata.itemsPerPage)) {
+        hasMorePages = false;
+      }
+
+      page++;
+      await delay(SCORESABER_REQUEST_COOLDOWN);
+    }
+
+    // Un-rank all unranked leaderboards
+    const leaderboards = await ScoreSaberLeaderboardModel.find({ ranked: true, _id: { $nin: rankedIds } });
+    console.log(`Unranking ${leaderboards.length} previously ranked leaderboards...`);
+    for (const leaderboard of leaderboards) {
+      if (rankedIds.includes(leaderboard.id)) {
+        continue;
+      }
+
+      const scores = await ScoreSaberScoreModel.find({ leaderboardId: leaderboard.id });
+      if (!scores) {
+        console.warn(`Failed to fetch scores for leaderboard "${leaderboard.id}".`);
+        continue;
+      }
+
+      for (const score of scores) {
+        score.pp = 0;
+        score.weight = 0;
+      }
+
+      await Promise.all(scores.map(score => score.save()));
+      await ScoreSaberLeaderboardModel.findOneAndUpdate(
+        { _id: leaderboard.id },
+        {
+          lastRefreshed: new Date(),
+          ranked: false,
+          stars: 0,
+        },
+        {
+          upsert: true,
+          new: true,
+          setDefaultsOnInsert: true,
+        }
+      );
+
+      console.log(`Previously ranked leaderboard "${leaderboard.id}" has been unranked.`);
+    }
+
+    console.log(`Finished refreshing leaderboards, total pages refreshed: ${page - 1}.`);
   }
 }

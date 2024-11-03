@@ -1,4 +1,4 @@
-import ScoreSaberPlayerToken from "../types/token/scoresaber/score-saber-player-token";
+import ScoreSaberPlayerToken from "../types/token/scoresaber/player";
 
 export type AroundPlayerResponse = {
   /**

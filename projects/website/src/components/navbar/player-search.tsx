@@ -12,7 +12,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { LoaderCircle, UserSearch } from "lucide-react";
 import { cn } from "@/common/utils";
-import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/score-saber-player-token";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { useRouter } from "next/navigation";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
@@ -24,6 +23,7 @@ import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils
 import { useSearch } from "@/components/providers/search-provider";
 import { truncateText } from "@/common/string-utils";
 import { CommandLoading } from "cmdk";
+import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/player";
 
 export default function PlayerSearch() {
   const router: AppRouterInstance = useRouter();

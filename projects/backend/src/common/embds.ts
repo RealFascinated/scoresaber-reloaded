@@ -1,7 +1,7 @@
-import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/score-saber-player-token";
 import { DiscordChannels, logToChannel } from "../bot/bot";
 import { EmbedBuilder } from "discord.js";
 import { formatPp } from "@ssr/common/utils/number-utils";
+import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/player";
 
 /**
  * Logs that a new player is being tracked

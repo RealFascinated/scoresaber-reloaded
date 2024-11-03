@@ -1,14 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import ScoreSaberPlayerScoreToken from "@ssr/common/types/token/scoresaber/score-saber-player-score-token";
 import { parseDate } from "@ssr/common/utils/time-utils";
 import Link from "next/link";
 import useWebSocket, { ReadyState } from "react-use-websocket";
-import { ScoreSaberWebsocketMessageToken } from "@ssr/common/types/token/scoresaber/websocket/scoresaber-websocket-message";
 import Score from "@/components/score/score";
 import { getScoreSaberLeaderboardFromToken, getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { ScoreSaberWebsocketMessageToken } from "@ssr/common/types/token/scoresaber/websocket/websocket-message";
+import ScoreSaberPlayerScoreToken from "@ssr/common/types/token/scoresaber/player-score";
 
 export default function ScoreFeed() {
   const { readyState, lastJsonMessage } = useWebSocket<ScoreSaberWebsocketMessageToken>("wss://scoresaber.com/ws");

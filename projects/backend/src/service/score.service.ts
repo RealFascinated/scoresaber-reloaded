@@ -1,4 +1,3 @@
-import ScoreSaberPlayerScoreToken from "@ssr/common/types/token/scoresaber/score-saber-player-score-token";
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
 import { formatChange, isProduction, kyFetchBuffer } from "@ssr/common/utils/utils";
 import { Metadata } from "@ssr/common/types/metadata";
@@ -30,8 +29,7 @@ import {
   ScoreSaberScore,
   ScoreSaberScoreModel,
 } from "@ssr/common/model/score/impl/scoresaber-score";
-import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score-saber-score-token";
-import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/score-saber-leaderboard-token";
+import ScoreSaberLeaderboardToken from "../../../common/src/types/token/scoresaber/leaderboard";
 import { MapDifficulty } from "@ssr/common/score/map-difficulty";
 import { MapCharacteristic } from "@ssr/common/types/map-characteristic";
 import { Page, Pagination } from "@ssr/common/pagination";
@@ -47,6 +45,8 @@ import BeatSaverService from "./beatsaver.service";
 import { beatLeaderService } from "@ssr/common/service/impl/beatleader";
 import MinioService from "./minio.service";
 import { MinioBucket } from "@ssr/common/minio-buckets";
+import ScoreSaberPlayerScoreToken from "@ssr/common/types/token/scoresaber/player-score";
+import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score";
 
 const playerScoresCache = new SSRCache({
   ttl: 1000 * 60, // 1 minute

@@ -1,5 +1,5 @@
-import { ScoreSaberBadgeToken } from "./score-saber-badge-token";
-import ScoreSaberScoreStatsToken from "./score-saber-score-stats-token";
+import { ScoreSaberBadgeToken } from "./badge";
+import ScoreSaberScoreStatsToken from "./score-stats";
 
 export default interface ScoreSaberPlayerToken {
   /**

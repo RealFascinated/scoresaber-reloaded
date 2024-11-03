@@ -23,6 +23,7 @@ import { connectBeatLeaderWebsocket } from "@ssr/common/websocket/beatleader-web
 import { DiscordChannels, initDiscordBot, logToChannel } from "./bot/bot";
 import { EmbedBuilder } from "discord.js";
 import MetricsService from "./service/metrics.service";
+import LeaderboardService from "./service/leaderboard.service";
 
 // Load .env file
 dotenv.config({
@@ -81,6 +82,17 @@ app.use(
     protect: true,
     run: async () => {
       await PlayerService.refreshPlayerScores();
+    },
+  })
+);
+app.use(
+  cron({
+    name: "refresh-ranked-leaderboards-cron",
+    pattern: "0 2 * * *", // Every day at 02:00
+    timezone: "Europe/London", // UTC time
+    protect: true,
+    run: async () => {
+      await LeaderboardService.refreshRankedLeaderboards();
     },
   })
 );

@@ -1,4 +1,3 @@
-import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/score-saber-player-token";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import Link from "next/link";
@@ -6,6 +5,7 @@ import { XIcon } from "lucide-react";
 import useDatabase from "@/hooks/use-database";
 import { useToast } from "@/hooks/use-toast";
 import Tooltip from "@/components/tooltip";
+import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/player";
 
 type FriendProps = {
   /**

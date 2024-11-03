@@ -5,10 +5,10 @@ import { useLiveQuery } from "dexie-react-hooks";
 import Link from "next/link";
 import { Avatar, AvatarImage } from "../ui/avatar";
 import NavbarButton from "./navbar-button";
-import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/score-saber-player-token";
 import Settings from "@/common/database/types/settings";
 import Database from "@/common/database/database";
 import { truncateText } from "@/common/string-utils";
+import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/player";
 
 export default function ProfileButton() {
   const database: Database = useDatabase();

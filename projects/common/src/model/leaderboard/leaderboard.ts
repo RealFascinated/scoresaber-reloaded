@@ -70,7 +70,7 @@ export default class Leaderboard {
    * @private
    */
   @Prop({ required: true })
-  readonly ranked!: boolean;
+  ranked!: boolean;
 
   /**
    * The link to the song art.
