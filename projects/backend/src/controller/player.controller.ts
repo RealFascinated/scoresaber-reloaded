@@ -5,6 +5,7 @@ import { PlayerHistory } from "@ssr/common/player/player-history";
 import { PlayerTrackedSince } from "@ssr/common/player/player-tracked-since";
 import { AroundPlayerResponse } from "@ssr/common/response/around-player-response";
 import { PpBoundaryResponse } from "@ssr/common/response/pp-boundary-response";
+import { PlayedMapsCalendarResponse } from "@ssr/common/response/played-maps-calendar-response";
 
 @Controller("/player")
 export default class PlayerController {
@@ -95,5 +96,21 @@ export default class PlayerController {
       boundaries: await PlayerService.getPlayerPpBoundary(id, boundary),
       boundary: boundary,
     };
+  }
+
+  @Get("/history/calendar/:id/:year/:month", {
+    config: {},
+    params: t.Object({
+      id: t.String({ required: true }),
+      year: t.Number({ required: true }),
+      month: t.Number({ required: true }),
+    }),
+  })
+  public async getScoreCalendar({
+    params: { id, year, month },
+  }: {
+    params: { id: string; year: number; month: number };
+  }): Promise<PlayedMapsCalendarResponse> {
+    return await PlayerService.getScoreCalendar(id, year, month);
   }
 }

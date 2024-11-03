@@ -12,10 +12,14 @@ import { logNewTrackedPlayer } from "../common/embds";
 import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/player";
 import { SSRCache } from "@ssr/common/cache";
 import { fetchWithCache } from "../common/cache.util";
+import { PlayedMapsCalendarResponse, PlayedMapsCalendarStat } from "@ssr/common/response/played-maps-calendar-response";
 
 const SCORESABER_REQUEST_COOLDOWN = 60_000 / 250; // 250 requests per minute
 const accountCreationLock: { [id: string]: Promise<PlayerDocument> } = {};
 const ppBoundaryCache = new SSRCache({
+  ttl: 1000 * 60 * 5, // 5 minutes
+});
+const scoreCalenderCache = new SSRCache({
   ttl: 1000 * 60 * 5, // 5 minutes
 });
 
@@ -142,6 +146,48 @@ export class PlayerService {
         boundaries.push(scoresaberService.calcPpBoundary(scores, i));
       }
       return boundaries;
+    });
+  }
+
+  /**
+   * Gets the score calendar for a player.
+   *
+   * @param playerId the player's id
+   * @param year the year to get the score calendar for
+   * @param month the month to get the score calendar for
+   */
+  public static async getScoreCalendar(
+    playerId: string,
+    year: number,
+    month: number
+  ): Promise<PlayedMapsCalendarResponse> {
+    return fetchWithCache(scoreCalenderCache, `${playerId}-${year}-${month}`, async () => {
+      const player = await PlayerService.getPlayer(playerId);
+      const history = player.getStatisticHistory();
+
+      const days: Record<number, PlayedMapsCalendarStat> = {};
+      for (const [dateStr, stat] of Object.entries(history)) {
+        const date = new Date(dateStr);
+        if (
+          stat === undefined ||
+          stat.scores === undefined ||
+          stat.scores.rankedScores === undefined ||
+          stat.scores.unrankedScores === undefined
+        ) {
+          continue;
+        }
+        if (date.getFullYear() === year && date.getMonth() === month - 1) {
+          days[date.getDate()] = {
+            rankedMaps: stat.scores.rankedScores,
+            unrankedMaps: stat.scores.unrankedScores,
+            totalMaps: stat.scores.rankedScores + stat.scores.unrankedScores,
+          };
+        }
+      }
+
+      return {
+        days,
+      };
     });
   }
 
