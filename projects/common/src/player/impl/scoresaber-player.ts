@@ -41,6 +41,11 @@ export default interface ScoreSaberPlayer extends Player {
   statistics: ScoreSaberPlayerStatistics;
 
   /**
+   * The best rank seen for this player.
+   */
+  peakRank?: PeakRank;
+
+  /**
    * The permissions the player has.
    */
   permissions: number;
@@ -142,4 +147,16 @@ export type ScoreSaberRankPages = {
    * Their page for their country rank position.
    */
   country: number;
+};
+
+export type PeakRank = {
+  /**
+   * The rank achieved.
+   */
+  rank: number;
+
+  /**
+   * The date of the peak.
+   */
+  date: Date;
 };

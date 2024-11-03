@@ -87,6 +87,21 @@ const playerStats: Stat[] = [
       };
     },
   },
+  {
+    name: "Peak Rank",
+    create: (player: ScoreSaberPlayer) => {
+      if (player.peakRank === undefined) {
+        return {
+          value: undefined,
+        };
+      }
+
+      return {
+        tooltip: formatDate(player.peakRank.date, "DD MMMM YYYY HH:mm"),
+        value: formatNumberWithCommas(player.peakRank.rank),
+      };
+    },
+  },
 ];
 
 type Props = {

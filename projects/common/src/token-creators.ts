@@ -5,7 +5,7 @@ import { MapCharacteristic } from "./types/map-characteristic";
 import { LeaderboardStatus } from "./model/leaderboard/leaderboard-status";
 import { formatDateMinimal, getDaysAgoDate, getMidnightAlignedDate, parseDate } from "./utils/time-utils";
 import ScoreSaberPlayerToken from "./types/token/scoresaber/player";
-import ScoreSaberPlayer, { ScoreSaberBadge, ScoreSaberBio } from "./player/impl/scoresaber-player";
+import ScoreSaberPlayer, { PeakRank, ScoreSaberBadge, ScoreSaberBio } from "./player/impl/scoresaber-player";
 import { PlayerHistory } from "./player/player-history";
 import ky from "ky";
 import { Config } from "./config";
@@ -137,6 +137,7 @@ export async function getScoreSaberPlayerFromToken(
     }) || [];
 
   let isBeingTracked = false;
+  let peakRank: PeakRank | undefined;
   const todayDate = formatDateMinimal(getMidnightAlignedDate(new Date()));
   let statisticHistory: { [key: string]: PlayerHistory } = {};
 
@@ -171,6 +172,15 @@ export async function getScoreSaberPlayerFromToken(
           totalRankedScore: token.scoreStats.totalRankedScore,
         },
       };
+
+      for (const [date, stat] of Object.entries(history)) {
+        if ((peakRank == undefined || (peakRank && stat.rank && stat.rank < peakRank.rank)) && stat.rank != undefined) {
+          peakRank = {
+            rank: stat.rank,
+            date: parseDate(date),
+          };
+        }
+      }
 
       isBeingTracked = true;
     }
@@ -324,6 +334,7 @@ export async function getScoreSaberPlayerFromToken(
       global: getPageFromRank(token.rank, 50),
       country: getPageFromRank(token.countryRank, 50),
     },
+    peakRank: peakRank,
     permissions: token.permissions,
     banned: token.banned,
     inactive: token.inactive,
