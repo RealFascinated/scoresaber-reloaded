@@ -27,8 +27,8 @@ export default function PlayerTrackedStatus({ player }: Props) {
     <div className="flex gap-2">
       <Tooltip
         display={
-          <div className="flex flex-col justify-center items-center">
-            <p>This player is having their statistics tracked!</p>
+          <div className="flex flex-col">
+            <p>This player is being tracked!</p>
             <p>Days Tracked: {formatNumberWithCommas(data.daysTracked!)}</p>
           </div>
         }
