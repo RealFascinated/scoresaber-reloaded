@@ -31,7 +31,7 @@ export function DailyChange({ type, player, change, tooltip }: DailyChangeProps)
   if (!change && player !== undefined) {
     change = type.value?.(player, "daily");
   }
-  if (change === 0 || (change && change < 0.01) || change === undefined) {
+  if (change === 0 || (change && change < 0.01 && change > -0.01) || change === undefined) {
     return null;
   }
 
