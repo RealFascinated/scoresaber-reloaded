@@ -1,8 +1,8 @@
 export type PpBoundaryResponse = {
   /**
-   * The amount of raw pp to reach the boundary.
+   * The amount of raw pp in each boundary
    */
-  rawPp: number;
+  boundaries: number[];
 
   /**
    * The boundary.

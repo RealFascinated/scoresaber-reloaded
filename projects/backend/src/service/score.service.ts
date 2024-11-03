@@ -209,21 +209,22 @@ export class ScoreService {
     playerId: string,
     options?: {
       ranked?: boolean;
-      projection?: { [key: string]: 1 | 0 };
     }
   ): Promise<ScoreSaberScore[]> {
-    const rawScores = await ScoreSaberScoreModel.find(
+    const rawScores = await ScoreSaberScoreModel.aggregate([
+      { $match: { playerId: playerId, ...(options?.ranked ? { pp: { $gt: 0 } } : undefined) } },
       {
-        playerId: playerId,
-        ...(options?.ranked ? { pp: { $gt: 0 } } : undefined),
+        $group: {
+          _id: { leaderboardId: "$leaderboardId", playerId: "$playerId" },
+          score: { $first: "$$ROOT" },
+        },
       },
-      options?.projection
-    ).sort({ pp: -1 });
-
+      { $sort: { "score.pp": -1 } },
+    ]);
     if (!rawScores) {
       return [];
     }
-    return rawScores.map(rawScore => rawScore.toObject() as ScoreSaberScore);
+    return rawScores.map(({ score }) => new ScoreSaberScoreModel(score).toObject() as ScoreSaberScore);
   }
 
   /**

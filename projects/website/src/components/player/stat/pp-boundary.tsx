@@ -1,7 +1,7 @@
 "use client";
 
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getPlayerPpBoundary } from "@ssr/common/utils/player-utils";
 import StatValue from "@/components/stat-value";
@@ -13,22 +13,29 @@ type PpBoundaryProps = {
 };
 
 export default function PpBoundaryStat({ player }: PpBoundaryProps) {
-  const [boundary, setBoundary] = useState(1);
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false); // Track popover state
+  const [boundary, setBoundary] = useState<number>(1);
+  const [boundaries, setBoundaries] = useState<number[]>();
+  const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false); // Track popover state
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: ["playerPpBoundary", player.id, boundary],
-    queryFn: async () => (await getPlayerPpBoundary(player.id, boundary))?.rawPp || -1,
+    queryKey: ["playerPpBoundary"],
+    queryFn: async () => (await getPlayerPpBoundary(player.id, 25))?.boundaries || [-1],
   });
 
-  if ((isLoading || isError || data === -1) && !isPopoverOpen) {
+  useEffect(() => {
+    if (data) {
+      setBoundaries(data);
+    }
+  }, [data]);
+
+  if (((isLoading || isError) && !isPopoverOpen) || !boundaries) {
     return null;
   }
 
   return (
     <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
       <PopoverTrigger onClick={() => setIsPopoverOpen(true)}>
-        <StatValue name={`+${boundary} PP`} value={<p>{data?.toFixed(2) || "-"}pp</p>} />
+        <StatValue name={`+${boundary} PP`} value={<p>{boundaries[boundary - 1].toFixed(2) || "-"}pp</p>} />
       </PopoverTrigger>
       <PopoverContent className="flex flex-col gap-2 p-3">
         <p className="text-sm">Change the pp boundary.</p>

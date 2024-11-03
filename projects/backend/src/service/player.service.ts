@@ -127,20 +127,21 @@ export class PlayerService {
    * @param playerId the player's id
    * @param boundary the pp boundary
    */
-  public static async getPlayerPpBoundary(playerId: string, boundary: number = 1): Promise<number> {
+  public static async getPlayerPpBoundary(playerId: string, boundary: number = 1): Promise<number[]> {
     return fetchWithCache(ppBoundaryCache, playerId, async () => {
       await PlayerService.getPlayer(playerId); // Ensure player exists
       const scores = await ScoreService.getPlayerScores(playerId, {
         ranked: true,
-        projection: {
-          pp: 1,
-        },
       });
       if (scores.length === 0) {
-        return 0;
+        return [0];
       }
 
-      return scoresaberService.calcPpBoundary(scores, boundary);
+      const boundaries: number[] = [];
+      for (let i = 1; i < boundary + 1; i++) {
+        boundaries.push(scoresaberService.calcPpBoundary(scores, i));
+      }
+      return boundaries;
     });
   }
 

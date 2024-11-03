@@ -92,7 +92,7 @@ export default class PlayerController {
     params: { id: string; boundary: number };
   }): Promise<PpBoundaryResponse> {
     return {
-      rawPp: await PlayerService.getPlayerPpBoundary(id, boundary),
+      boundaries: await PlayerService.getPlayerPpBoundary(id, boundary),
       boundary: boundary,
     };
   }
