@@ -4,7 +4,7 @@ import { StarIcon } from "@heroicons/react/24/solid";
 import Link from "next/link";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { BeatSaverMap } from "@ssr/common/model/beatsaver/map";
-import { getDifficulty } from "@/common/song-utils";
+import { getDifficulty, getDifficultyName } from "@/common/song-utils";
 
 type Props = {
   leaderboard: ScoreSaberLeaderboard;
@@ -16,7 +16,7 @@ export default function ScoreSongInfo({ leaderboard, beatSaverMap }: Props) {
     beatSaverMap != undefined ? `https://beatsaver.com/profile/${beatSaverMap.author.id}` : undefined;
 
   const starCount = leaderboard.stars;
-  const difficulty = leaderboard.difficulty.difficulty.replace("Plus", "+");
+  const difficulty = leaderboard.difficulty.difficulty;
   return (
     <div className="flex gap-3 items-center break-all">
       <div className="relative flex justify-center h-[64px]">
@@ -31,7 +31,7 @@ export default function ScoreSongInfo({ leaderboard, beatSaverMap }: Props) {
           <div
             className="absolute w-full h-[18px] bottom-0 right-0 rounded-sm flex justify-center items-center text-[0.70rem] cursor-default"
             style={{
-              backgroundColor: getDifficulty(leaderboard.difficulty.difficulty).color + "f0", // Transparency value (in hex 0-255)
+              backgroundColor: getDifficulty(difficulty).color + "f0", // Transparency value (in hex 0-255)
             }}
           >
             {starCount > 0 ? (
@@ -40,7 +40,7 @@ export default function ScoreSongInfo({ leaderboard, beatSaverMap }: Props) {
                 <StarIcon className="w-[14px] h-[14px]" />
               </div>
             ) : (
-              <p>{difficulty}</p>
+              <p>{getDifficultyName(difficulty)}</p>
             )}
           </div>
         </Tooltip>

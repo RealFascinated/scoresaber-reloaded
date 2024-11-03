@@ -7,6 +7,11 @@ export type Difficulty = {
   name: MapDifficulty;
 
   /**
+   * The alternative name of the difficulty
+   */
+  alternativeName?: string;
+
+  /**
    * The color of the difficulty
    */
   color: string;
@@ -17,7 +22,7 @@ const difficulties: Difficulty[] = [
   { name: "Normal", color: "#59b0f4" },
   { name: "Hard", color: "#FF6347" },
   { name: "Expert", color: "#bf2a42" },
-  { name: "ExpertPlus", color: "#8f48db" },
+  { name: "ExpertPlus", alternativeName: "Expert+", color: "#8f48db" },
 ];
 
 export type ScoreBadge = {
@@ -68,6 +73,16 @@ export function getScoreBadgeFromAccuracy(acc: number): ScoreBadge {
  */
 export function getRandomDifficulty(): Difficulty {
   return difficulties[Math.floor(Math.random() * (difficulties.length - 1))];
+}
+
+/**
+ * Gets the name of the difficulty
+ *
+ * @param diff the difficulty
+ */
+export function getDifficultyName(diff: Difficulty | MapDifficulty) {
+  const difficulty = getDifficulty(diff);
+  return difficulty.alternativeName ?? difficulty.name;
 }
 
 /**

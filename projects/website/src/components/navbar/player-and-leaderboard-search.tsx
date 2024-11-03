@@ -27,7 +27,7 @@ import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/player";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
 import { StarIcon } from "@heroicons/react/24/solid";
-import { getDifficulty } from "@/common/song-utils";
+import { getDifficulty, getDifficultyName } from "@/common/song-utils";
 
 export default function PlayerAndLeaderboardSearch() {
   const router: AppRouterInstance = useRouter();
@@ -204,7 +204,7 @@ export default function PlayerAndLeaderboardSearch() {
                                 color: getDifficulty(leaderboard.difficulty.difficulty).color + "f0", // Transparency value (in hex 0-255)
                               }}
                             >
-                              {leaderboard.difficulty.difficulty}
+                              {getDifficultyName(leaderboard.difficulty.difficulty)}
                             </span>{" "}
                             {leaderboard.ranked && (
                               <>

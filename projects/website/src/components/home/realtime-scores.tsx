@@ -1,7 +1,7 @@
 import { Flame } from "lucide-react";
 import { cn, getRandomInteger } from "@/common/utils";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
-import { Difficulty, getDifficulty, getRandomDifficulty } from "@/common/song-utils";
+import { Difficulty, getDifficulty, getDifficultyName, getRandomDifficulty } from "@/common/song-utils";
 import { AnimatedList } from "@/components/ui/animated-list";
 
 type ScoreProps = {
@@ -109,7 +109,7 @@ function Score({ songArt, songName, songAuthor, setBy }: ScoreProps) {
               backgroundColor: getDifficulty(difficulty).color + "f0", // Transparency value (in hex 0-255)
             }}
           >
-            {difficulty.name}
+            {getDifficultyName(difficulty)}
           </div>
         </div>
 
