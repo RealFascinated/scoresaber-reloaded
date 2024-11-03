@@ -97,7 +97,7 @@ const playerStats: Stat[] = [
       }
 
       return {
-        tooltip: formatDate(player.peakRank.date, "DD MMMM YYYY HH:mm"),
+        tooltip: formatDate(player.peakRank.date, "DD MMMM YYYY"),
         value: formatNumberWithCommas(player.peakRank.rank),
       };
     },
