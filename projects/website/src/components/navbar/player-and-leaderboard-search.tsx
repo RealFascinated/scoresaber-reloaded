@@ -61,7 +61,7 @@ export default function PlayerAndLeaderboardSearch() {
         leaderboards:
           leaderboardResults?.leaderboards
             .sort((a, b) => {
-              return a.stars - b.stars;
+              return b.stars - a.stars;
             })
             .map(leaderboard => getScoreSaberLeaderboardFromToken(leaderboard)) || [],
       };
