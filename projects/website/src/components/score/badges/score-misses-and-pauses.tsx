@@ -15,7 +15,7 @@ export default function ScoreMissesAndPausesBadge({ score, hideXMark }: ScoreMis
   const scoreImprovement = additionalData?.scoreImprovement;
 
   const misses = additionalData?.misses;
-  const previousScoreMisses: Misses | undefined = misses &&
+  const previousScore: (Misses & { pauses?: number }) | undefined = misses &&
     additionalData &&
     scoreImprovement && {
       misses: (scoreImprovement.misses.misses - misses.misses) * -1,
@@ -23,10 +23,10 @@ export default function ScoreMissesAndPausesBadge({ score, hideXMark }: ScoreMis
       badCuts: (scoreImprovement.misses.badCuts - misses.badCuts) * -1,
       bombCuts: (scoreImprovement.misses.bombCuts - misses.bombCuts) * -1,
       wallsHit: (scoreImprovement.misses.wallsHit - misses.wallsHit) * -1,
+      pauses: (scoreImprovement.pauses ? scoreImprovement.pauses - additionalData.pauses : 0) * -1,
     };
-  const previousScoreFc = previousScoreMisses?.misses == 0;
-  const isMissImprovement =
-    previousScoreMisses && scoreImprovement && previousScoreMisses.misses > scoreImprovement.misses.misses;
+  const previousScoreFc = previousScore?.misses == 0;
+  const isMissImprovement = previousScore && scoreImprovement && previousScore.misses > scoreImprovement.misses.misses;
 
   return (
     <div className="flex flex-col justify-center items-center w-full">
@@ -45,17 +45,17 @@ export default function ScoreMissesAndPausesBadge({ score, hideXMark }: ScoreMis
               {!hideXMark && !score.fullCombo && <span>x</span>}
             </p>
           </ScoreMissesTooltip>
-          {additionalData && previousScoreMisses && scoreImprovement && misses && isMissImprovement && (
+          {additionalData && previousScore && scoreImprovement && misses && isMissImprovement && (
             <ScoreMissesTooltip
-              missedNotes={previousScoreMisses.missedNotes}
-              badCuts={previousScoreMisses.badCuts}
-              bombCuts={previousScoreMisses.bombCuts}
-              wallsHit={previousScoreMisses.wallsHit}
-              pauses={scoreImprovement.pauses}
+              missedNotes={previousScore.missedNotes}
+              badCuts={previousScore.badCuts}
+              bombCuts={previousScore.bombCuts}
+              wallsHit={previousScore.wallsHit}
+              pauses={previousScore.pauses}
               fullCombo={previousScoreFc}
             >
               <div className="text-xs flex flex-row gap-1">
-                <p>(vs {previousScoreFc ? "FC" : formatNumberWithCommas(previousScoreMisses.misses)}x)</p>
+                <p>(vs {previousScoreFc ? "FC" : formatNumberWithCommas(previousScore.misses)}x)</p>
               </div>
             </ScoreMissesTooltip>
           )}
