@@ -35,8 +35,17 @@ export default function PpBoundaryStat({ player }: PpBoundaryProps) {
 
   return (
     <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-      <PopoverTrigger onClick={() => setIsPopoverOpen(true)}>
-        <StatValue name={`+${boundary} PP`} value={<p>{boundaries[boundary - 1].toFixed(2) || "-"}pp</p>} />
+      <PopoverTrigger asChild>
+        <div onClick={() => setIsPopoverOpen(true)}>
+          <Tooltip
+            asChild={false}
+            display={
+              <p className="text-center">Amount of raw pp required to increase your global pp by {boundary}pp</p>
+            }
+          >
+            <StatValue name={`+${boundary} PP`} value={<p>{boundaries[boundary - 1].toFixed(2) || "-"}pp</p>} />
+          </Tooltip>
+        </div>
       </PopoverTrigger>
       <PopoverContent className="flex flex-col gap-2 p-3">
         <p className="text-sm">Change the pp boundary.</p>
