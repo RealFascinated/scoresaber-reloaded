@@ -28,7 +28,6 @@ export default function ScoreMissesAndPausesBadge({ score, hideXMark }: ScoreMis
   const isMissImprovement =
     previousScoreMisses && scoreImprovement && previousScoreMisses.misses > scoreImprovement.misses.misses;
 
-  const pauses = additionalData?.pauses;
   return (
     <div className="flex flex-col justify-center items-center w-full">
       <div className="flex items-center gap-1">
@@ -61,55 +60,7 @@ export default function ScoreMissesAndPausesBadge({ score, hideXMark }: ScoreMis
             </ScoreMissesTooltip>
           )}
         </div>
-        {/*{additionalData && !!pauses && pauses > 0 && (*/}
-        {/*  <>*/}
-        {/*    <p>|</p>*/}
-        {/*    <Tooltip*/}
-        {/*      display={*/}
-        {/*        <p>*/}
-        {/*          {pauses}x Pause{pauses > 1 ? "s" : ""}*/}
-        {/*        </p>*/}
-        {/*      }*/}
-        {/*    >*/}
-        {/*      <div className="flex gap-1 items-center">*/}
-        {/*        <p>{pauses && pauses}</p>*/}
-        {/*        <PauseIcon className="w-4 h-4" />*/}
-        {/*      </div>*/}
-        {/*    </Tooltip>*/}
-        {/*  </>*/}
-        {/*)}*/}
       </div>
-      {/*{additionalData && previousScoreMisses && scoreImprovement && misses && isMissImprovement && (*/}
-      {/*  <div className="flex gap-2 items-center justify-center">*/}
-      {/*    <ScoreMissesTooltip*/}
-      {/*      missedNotes={previousScoreMisses.missedNotes}*/}
-      {/*      badCuts={previousScoreMisses.badCuts}*/}
-      {/*      bombCuts={previousScoreMisses.bombCuts}*/}
-      {/*      wallsHit={previousScoreMisses.wallsHit}*/}
-      {/*      fullCombo={previousScoreFc}*/}
-      {/*    >*/}
-      {/*      <div className="flex gap-1 items-center text-xs">*/}
-      {/*        {previousScoreFc ? (*/}
-      {/*          <p className="text-green-400">FC</p>*/}
-      {/*        ) : (*/}
-      {/*          formatNumberWithCommas(previousScoreMisses.misses)*/}
-      {/*        )}*/}
-      {/*      </div>*/}
-      {/*    </ScoreMissesTooltip>*/}
-      {/*    <p>-&gt;</p>*/}
-      {/*    <ScoreMissesTooltip*/}
-      {/*      missedNotes={misses.missedNotes}*/}
-      {/*      badCuts={misses.badCuts}*/}
-      {/*      bombCuts={misses.bombCuts}*/}
-      {/*      wallsHit={misses.wallsHit}*/}
-      {/*      fullCombo={additionalData.fullCombo}*/}
-      {/*    >*/}
-      {/*      <div className="flex gap-1 items-center text-xs">*/}
-      {/*        {additionalData.fullCombo ? <p className="text-green-400">FC</p> : formatNumberWithCommas(misses.misses)}*/}
-      {/*      </div>*/}
-      {/*    </ScoreMissesTooltip>*/}
-      {/*  </div>*/}
-      {/*)}*/}
     </div>
   );
 }
