@@ -60,13 +60,14 @@ export default class LeaderboardService {
 
           let foundLeaderboard: ScoreSaberLeaderboardDocument | undefined = undefined;
           const cachedLeaderboard: ScoreSaberLeaderboardDocument | null = await ScoreSaberLeaderboardModel.findById(id);
-          if (
-            cachedLeaderboard != null &&
-            (cachedLeaderboard.ranked || // Never refresh ranked leaderboards (it will get refreshed every night)
-              (cachedLeaderboard.lastRefreshed &&
-                now.getTime() - cachedLeaderboard.lastRefreshed.getTime() > 1000 * 60 * 60 * 24)) // Refresh every day
-          ) {
-            foundLeaderboard = cachedLeaderboard;
+          if (cachedLeaderboard !== null) {
+            if (cachedLeaderboard.ranked) {
+              foundLeaderboard = cachedLeaderboard;
+            } else if (cachedLeaderboard.lastRefreshed) {
+              if (now.getTime() - cachedLeaderboard.lastRefreshed.getTime() < 1000 * 60 * 60 * 12) {
+                foundLeaderboard = cachedLeaderboard;
+              }
+            }
           }
 
           if (!foundLeaderboard) {
@@ -80,7 +81,7 @@ export default class LeaderboardService {
             foundLeaderboard = await ScoreSaberLeaderboardModel.findOneAndUpdate(
               { _id: id },
               {
-                $setOnInsert: { lastRefreshed: new Date() }, // only sets if inserted
+                lastRefreshed: new Date(),
                 ...getScoreSaberLeaderboardFromToken(leaderboardToken),
               },
               {
