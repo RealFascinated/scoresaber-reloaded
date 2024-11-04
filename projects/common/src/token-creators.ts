@@ -174,10 +174,16 @@ export async function getScoreSaberPlayerFromToken(
       };
 
       for (const [date, stat] of Object.entries(history)) {
-        if ((peakRank == undefined || (peakRank && stat.rank && stat.rank < peakRank.rank)) && stat.rank != undefined) {
+        const parsedDate = parseDate(date);
+        if (
+          stat.rank !== undefined &&
+          (peakRank === undefined ||
+            stat.rank < peakRank.rank ||
+            (stat.rank === peakRank.rank && parsedDate < peakRank.date))
+        ) {
           peakRank = {
             rank: stat.rank,
-            date: parseDate(date),
+            date: parsedDate,
           };
         }
       }
