@@ -149,6 +149,14 @@ export default class Database extends Dexie {
   }
 
   /**
+   * Gets all friend ids
+   */
+  public async getFriendIds(): Promise<string[]> {
+    const friends = await this.friends.toArray();
+    return friends.map(({ id }) => id);
+  }
+
+  /**
    * Resets the settings in the database
    */
   async resetSettings() {

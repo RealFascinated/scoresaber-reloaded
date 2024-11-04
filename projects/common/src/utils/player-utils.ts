@@ -7,6 +7,8 @@ import ScoreSaberPlayer from "../player/impl/scoresaber-player";
 import { formatDateMinimal, getMidnightAlignedDate } from "./time-utils";
 import { PpBoundaryResponse } from "../response/pp-boundary-response";
 import { PlayedMapsCalendarResponse } from "../response/played-maps-calendar-response";
+import { ScoreSaberScore } from "../model/score/impl/scoresaber-score";
+import { Page } from "../pagination";
 
 /**
  * Gets the player's history for today.
@@ -96,4 +98,19 @@ export async function getScoreCalendar(playerId: string, year: number, month: nu
   return await kyFetchJson<PlayedMapsCalendarResponse>(
     `${Config.apiUrl}/player/history/calendar/${playerId}/${year}/${month}`
   );
+}
+
+/**
+ * Get the friend scores for a leaderboard
+ *
+ * @param friendIds the friends to lookup
+ * @param leaderboardId the leaderboard to lookup
+ * @param page the page
+ */
+export async function getFriendScores(friendIds: string[], leaderboardId: string, page: number) {
+  return await kyFetchJson<Page<ScoreSaberScore>>(`${Config.apiUrl}/scores/friends/${leaderboardId}/${page}`, {
+    searchParams: {
+      friendIds: friendIds.join(","),
+    },
+  });
 }

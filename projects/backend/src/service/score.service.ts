@@ -51,8 +51,10 @@ import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score";
 const playerScoresCache = new SSRCache({
   ttl: 1000 * 60, // 1 minute
 });
-
 const leaderboardScoresCache = new SSRCache({
+  ttl: 1000 * 60, // 1 minute
+});
+const friendScoresCache = new SSRCache({
   ttl: 1000 * 60, // 1 minute
 });
 
@@ -161,6 +163,57 @@ export class ScoreService {
     } catch (error) {
       console.error("Failed to cross-post number one score message", error);
     }
+  }
+
+  /**
+   * Gets friend scores for a leaderboard.
+   *
+   * @param friendIds the friend ids
+   * @param leaderboardId the leaderboard id
+   * @param page the page to fetch
+   */
+  public static async getFriendScores(
+    friendIds: string[],
+    leaderboardId: number,
+    page: number
+  ): Promise<Page<ScoreSaberScore>> {
+    const scores: ScoreSaberScore[] = await fetchWithCache(
+      friendScoresCache,
+      `${friendIds.join(",")}-${leaderboardId}`,
+      async () => {
+        const scores: ScoreSaberScore[] = [];
+        for (const friendId of friendIds) {
+          await PlayerService.getPlayer(friendId); // Ensures player exists
+
+          const friendScores = await ScoreSaberScoreModel.aggregate([
+            { $match: { playerId: friendId, leaderboardId: leaderboardId } },
+            { $sort: { timestamp: -1 } },
+            {
+              $group: {
+                _id: { leaderboardId: "$leaderboardId", playerId: "$playerId" },
+                score: { $first: "$$ROOT" },
+              },
+            },
+            { $sort: { "score.score": -1 } },
+          ]);
+          for (const friendScore of friendScores) {
+            scores.push(new ScoreSaberScoreModel(friendScore.score).toObject() as ScoreSaberScore);
+          }
+        }
+
+        return scores;
+      }
+    );
+
+    if (scores.length === 0) {
+      throw new NotFoundError(`No scores found for friends "${friendIds.join(",")}" in leaderboard "${leaderboardId}"`);
+    }
+
+    const pagination = new Pagination<ScoreSaberScore>();
+    pagination.setItems(scores);
+    pagination.setTotalItems(scores.length);
+    pagination.setItemsPerPage(8);
+    return pagination.getPage(page);
   }
 
   /**

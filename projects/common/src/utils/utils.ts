@@ -1,5 +1,6 @@
 import ky from "ky";
 import { formatNumberWithCommas, formatPp } from "./number-utils";
+import { KyOptions } from "ky/distribution/types/options";
 
 /**
  * Checks if we're in production
@@ -39,10 +40,11 @@ export function getPageFromRank(rank: number, itemsPerPage: number) {
  * Fetches data from the given url.
  *
  * @param url the url to fetch
+ * @param options the ky options to use
  */
-export async function kyFetchJson<T>(url: string): Promise<T | undefined> {
+export async function kyFetchJson<T>(url: string, options?: KyOptions): Promise<T | undefined> {
   try {
-    return await ky.get<T>(url).json();
+    return await ky.get<T>(url, options).json();
   } catch (error) {
     return undefined;
   }

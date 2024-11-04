@@ -1,5 +1,5 @@
 import { Controller, Get } from "elysia-decorators";
-import { t } from "elysia";
+import { NotFoundError, t } from "elysia";
 import { Leaderboards } from "@ssr/common/leaderboard";
 import { TopScoresResponse } from "@ssr/common/response/top-scores-response";
 import { ScoreService } from "../service/score.service";
@@ -50,7 +50,6 @@ export default class ScoresController {
       id: string;
       page: number;
     };
-    query: { search?: string };
   }): Promise<unknown> {
     return await ScoreService.getLeaderboardScores(leaderboard, id, page);
   }
@@ -71,7 +70,6 @@ export default class ScoresController {
       leaderboardId: string;
       page: number;
     };
-    query: { search?: string };
   }): Promise<unknown> {
     return (await ScoreService.getScoreHistory(playerId, leaderboardId, page)).toJSON();
   }
@@ -103,5 +101,33 @@ export default class ScoresController {
       timeframe,
       limit,
     };
+  }
+
+  @Get("/friends/:leaderboardId/:page", {
+    config: {},
+    params: t.Object({
+      leaderboardId: t.Number({ required: true }),
+      page: t.Number({ required: true }),
+    }),
+    query: t.Object({
+      friendIds: t.String({ required: true }),
+    }),
+  })
+  public async getFriendScores({
+    params: { leaderboardId, page },
+    query: { friendIds },
+  }: {
+    params: {
+      leaderboardId: number;
+      page: number;
+    };
+    query: { friendIds: string };
+  }): Promise<unknown> {
+    const ids = friendIds.split(",");
+    if (ids.length === 0) {
+      // todo: proper error
+      throw new NotFoundError("Malformed friend ids, must be a comma separated list of friend ids");
+    }
+    return (await ScoreService.getFriendScores(ids, leaderboardId, page)).toJSON();
   }
 }
