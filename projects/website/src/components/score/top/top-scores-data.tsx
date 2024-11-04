@@ -45,6 +45,7 @@ export function TopScoresData({ timeframe }: TopScoresDataProps) {
     queryFn: async () => {
       return kyFetchJson<TopScoresResponse>(`${Config.apiUrl}/scores/top?limit=50&timeframe=${selectedTimeframe}`);
     },
+    refetchInterval: false,
   });
 
   useEffect(() => {
