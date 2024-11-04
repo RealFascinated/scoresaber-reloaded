@@ -5,12 +5,11 @@ import Tooltip from "@/components/tooltip";
 import { CalendarIcon, GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import { SwordIcon, TrendingUpIcon } from "lucide-react";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import dynamic from "next/dynamic";
 
 import PlayerRankingChart from "@/components/player/history-views/views/player-ranking-chart";
-const PlayerAccuracyChart = dynamic(() => import("@/components/player/history-views/views/player-accuracy-chart"));
-const PlayerScoresChart = dynamic(() => import("@/components/player/history-views/views/player-scores-chart"));
-const ScoreHistoryCalendar = dynamic(() => import("@/components/player/history-views/views/score-history-calendar"));
+import PlayerAccuracyChart from "@/components/player/history-views/views/player-accuracy-chart";
+import PlayerScoresChart from "@/components/player/history-views/views/player-scores-chart";
+import ScoreHistoryCalendar from "@/components/player/history-views/views/score-history-calendar";
 
 type PlayerChartsProps = {
   /**
@@ -41,44 +40,48 @@ type SelectedView = {
   chart: (player: ScoreSaberPlayer) => ReactElement;
 };
 
-const views: SelectedView[] = [
-  {
-    index: 0,
-    label: "Ranking",
-    icon: <GlobeAmericasIcon className="w-5 h-5" />,
-    chart: player => <PlayerRankingChart player={player} />,
-  },
-  {
-    index: 1,
-    label: "Accuracy",
-    icon: <TrendingUpIcon className="w-[18px] h-[18px]" />,
-    chart: player => <PlayerAccuracyChart player={player} />,
-  },
-  {
-    index: 2,
-    label: "Scores",
-    icon: <SwordIcon className="w-[18px] h-[18px]" />,
-    chart: player => <PlayerScoresChart player={player} />,
-  },
-  {
-    index: 3,
-    label: "Score Calendar",
-    icon: <CalendarIcon className="w-[18px] h-[18px]" />,
-    chart: player => <ScoreHistoryCalendar player={player} />,
-  },
-];
-
 export default function PlayerViews({ player }: PlayerChartsProps) {
-  const playerViews = player.isBeingTracked ? views : views.slice(1, views.length);
-  const [selectedView, setSelectedView] = useState<SelectedView>(playerViews[0]);
+  const views: SelectedView[] = [
+    {
+      index: 0,
+      label: "Ranking",
+      icon: <GlobeAmericasIcon className="w-5 h-5" />,
+      chart: player => <PlayerRankingChart player={player} />,
+    },
+  ];
+
+  if (player.isBeingTracked) {
+    views.push(
+      {
+        index: 1,
+        label: "Accuracy",
+        icon: <TrendingUpIcon className="w-[18px] h-[18px]" />,
+        chart: player => <PlayerAccuracyChart player={player} />,
+      },
+      {
+        index: 2,
+        label: "Scores",
+        icon: <SwordIcon className="w-[18px] h-[18px]" />,
+        chart: player => <PlayerScoresChart player={player} />,
+      },
+      {
+        index: 3,
+        label: "Score Calendar",
+        icon: <CalendarIcon className="w-[18px] h-[18px]" />,
+        chart: player => <ScoreHistoryCalendar player={player} />,
+      }
+    );
+  }
+
+  const [selectedView, setSelectedView] = useState<SelectedView>(views[0]);
 
   return (
     <>
       {selectedView.chart(player)}
 
       <div className="flex items-center justify-center gap-2">
-        {playerViews.length > 1 &&
-          playerViews.map(view => {
+        {views.length > 1 &&
+          views.map(view => {
             const isSelected = view.index === selectedView.index;
 
             return (
