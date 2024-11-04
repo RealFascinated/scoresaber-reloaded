@@ -317,8 +317,6 @@ export async function getScoreSaberPlayerFromToken(
     };
   };
 
-  console.log(statisticHistory);
-
   return {
     id: token.id,
     name: token.name,
