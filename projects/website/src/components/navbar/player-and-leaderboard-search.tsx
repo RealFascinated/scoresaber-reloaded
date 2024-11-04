@@ -28,6 +28,7 @@ import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scores
 import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
 import { StarIcon } from "@heroicons/react/24/solid";
 import { getDifficulty, getDifficultyName } from "@/common/song-utils";
+import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/leaderboard";
 
 export default function PlayerAndLeaderboardSearch() {
   const router: AppRouterInstance = useRouter();
@@ -61,6 +62,17 @@ export default function PlayerAndLeaderboardSearch() {
         leaderboards:
           leaderboardResults?.leaderboards
             .sort((a, b) => {
+              const getStatusPriority = (leaderboard: ScoreSaberLeaderboardToken) => {
+                if (leaderboard.ranked) return 2; // Highest priority
+                if (leaderboard.qualified) return 1; // Medium priority
+                return 0; // Lowest priority (unranked)
+              };
+
+              const priorityDifference = getStatusPriority(b) - getStatusPriority(a);
+              if (priorityDifference !== 0) {
+                return priorityDifference;
+              }
+
               return b.stars - a.stars;
             })
             .map(leaderboard => getScoreSaberLeaderboardFromToken(leaderboard)) || [],
@@ -213,6 +225,11 @@ export default function PlayerAndLeaderboardSearch() {
                                   {leaderboard.stars.toFixed(2)}
                                   <StarIcon className="w-fit h-fit" />
                                 </div>
+                              </>
+                            )}
+                            {leaderboard.qualified && (
+                              <>
+                                - <span className="text-gray-400">Qualified</span>
                               </>
                             )}
                           </div>
