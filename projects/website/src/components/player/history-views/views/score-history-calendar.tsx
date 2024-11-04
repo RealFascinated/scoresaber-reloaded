@@ -103,7 +103,7 @@ export default function ScoreHistoryCalendar({ player }: ScoreHistoryCalendarPro
                     <div className="flex flex-col gap-2">
                       <p className="font-semibold">Scores Set</p>
 
-                      {stats ? (
+                      {stats && size > 0 ? (
                         <div>
                           <p>Total Maps: {stats.totalMaps}</p>
                           <p>Unranked: {stats.unrankedMaps}</p>
