@@ -50,7 +50,7 @@ export default class Score {
    * @private
    */
   @prop({ required: true })
-  public rank!: number | undefined;
+  public rank!: number;
 
   /**
    * The modifiers used on the score.
