@@ -36,17 +36,22 @@ export default class MinioService {
    *
    * @param bucket the bucket to get the size of
    */
-  public static async getBucketSize(bucket: MinioBucket): Promise<number> {
+  public static async getBucketSize(bucket: MinioBucket): Promise<{ size: number; items: number }> {
     const bucketName = getMinioBucketName(bucket);
     let totalSize = 0;
+    let totalItems = 0;
 
     const stream = minioClient.listObjectsV2(bucketName, "", true);
     return new Promise((resolve, reject) => {
       stream.on("data", obj => {
         totalSize += obj.size;
+        totalItems++;
       });
       stream.on("end", () => {
-        resolve(totalSize);
+        resolve({
+          size: totalSize,
+          items: totalItems,
+        });
       });
       stream.on("error", err => {
         reject(err);
