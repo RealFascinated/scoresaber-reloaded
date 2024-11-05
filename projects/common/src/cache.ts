@@ -3,6 +3,7 @@ type DebugOptions = {
   removed?: boolean;
   fetched?: boolean;
   expired?: boolean;
+  missed?: boolean;
 };
 
 export type CacheStatistics = {
@@ -112,7 +113,13 @@ export class SSRCache {
   constructor({ ttl, checkInterval, debug }: CacheOptions) {
     this.ttl = ttl;
     this.checkInterval = checkInterval || this.ttl ? 1000 * 60 : undefined; // 1 minute
-    this.debug = debug || {};
+    this.debug = debug || {
+      expired: true,
+      fetched: true,
+      added: true,
+      removed: true,
+      missed: true,
+    };
 
     if (this.ttl !== undefined && this.checkInterval !== undefined) {
       setInterval(() => {
@@ -141,14 +148,14 @@ export class SSRCache {
   public get<T>(key: string): T | undefined {
     const cachedObject = this.cache.get(key);
     if (cachedObject === undefined) {
-      if (this.debug) {
-        console.log(`Cache miss for key: ${key}`);
+      if (this.debug.missed) {
+        console.log(`Cache miss for key: ${key}, total misses: ${this.cacheMisses}`);
       }
       this.cacheMisses++;
       return undefined;
     }
     if (this.debug.fetched) {
-      console.log(`Retrieved ${key} from cache, value: ${JSON.stringify(cachedObject)}`);
+      console.log(`Retrieved ${key} from cache, total hits: ${this.cacheHits}`);
     }
     this.cacheHits++;
     return cachedObject.value as T;
@@ -167,7 +174,9 @@ export class SSRCache {
     });
 
     if (this.debug.added) {
-      console.log(`Inserted ${key} into cache, value: ${JSON.stringify(value)}`);
+      console.log(
+        `Inserted ${key} into cache, total keys: ${this.cache.size}, total hits: ${this.cacheHits}, total misses: ${this.cacheMisses}`
+      );
     }
   }
 

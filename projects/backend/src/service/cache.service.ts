@@ -76,8 +76,10 @@ export default class CacheService {
    * Gets the cache statistics for all caches
    */
   public static getCacheStatistics(): { [cache: string]: CacheStatistics } {
-    return Object.fromEntries(
-      Array.from(CacheService.caches.entries()).map(([key, value]) => [key, value.getStatistics()])
-    );
+    const statistics: { [cache: string]: CacheStatistics } = {};
+    for (const [cache, cacheService] of CacheService.caches) {
+      statistics[cache] = cacheService.getStatistics();
+    }
+    return statistics;
   }
 }

@@ -14,12 +14,12 @@ export default class CacheStatisticsMetric extends Metric {
     for (const [cacheName, statistics] of Object.entries(cacheStatistics)) {
       const point = new Point(this.id);
       point.tag("cache", cacheName);
-      point.intField("size", statistics.size);
+      point.floatField("size", statistics.size);
       point.intField("keys", statistics.keys);
       point.intField("hits", statistics.hits);
       point.intField("misses", statistics.misses);
       point.intField("expired", statistics.expired);
-      point.intField("hitPercentage", statistics.hitPercentage);
+      point.floatField("hitPercentage", statistics.hitPercentage);
 
       points.push(point);
     }
