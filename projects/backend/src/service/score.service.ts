@@ -13,7 +13,6 @@ import PlayerScoresResponse from "@ssr/common/response/player-scores-response";
 import { DiscordChannels, logToChannel } from "../bot/bot";
 import { EmbedBuilder } from "discord.js";
 import { Config } from "@ssr/common/config";
-import { SSRCache } from "@ssr/common/cache";
 import { fetchWithCache } from "../common/cache.util";
 import { PlayerDocument, PlayerModel } from "@ssr/common/model/player";
 import { BeatLeaderScoreToken } from "@ssr/common/types/token/beatleader/score/score";
@@ -47,16 +46,7 @@ import MinioService from "./minio.service";
 import { MinioBucket } from "@ssr/common/minio-buckets";
 import ScoreSaberPlayerScoreToken from "@ssr/common/types/token/scoresaber/player-score";
 import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score";
-
-const playerScoresCache = new SSRCache({
-  ttl: 1000 * 60, // 1 minute
-});
-const leaderboardScoresCache = new SSRCache({
-  ttl: 1000 * 60, // 1 minute
-});
-const friendScoresCache = new SSRCache({
-  ttl: 1000 * 60, // 1 minute
-});
+import CacheService, { ServiceCache } from "./cache.service";
 
 export class ScoreService {
   /**
@@ -178,8 +168,8 @@ export class ScoreService {
     page: number
   ): Promise<Page<ScoreSaberScore>> {
     const scores: ScoreSaberScore[] = await fetchWithCache(
-      friendScoresCache,
-      `${friendIds.join(",")}-${leaderboardId}`,
+      CacheService.getCache(ServiceCache.FriendScores),
+      `friend-scores:${friendIds.join(",")}-${leaderboardId}`,
       async () => {
         const scores: ScoreSaberScore[] = [];
         for (const friendId of friendIds) {
@@ -624,8 +614,8 @@ export class ScoreService {
     search?: string
   ): Promise<PlayerScoresResponse<unknown, unknown> | undefined> {
     return fetchWithCache(
-      playerScoresCache,
-      `player-scores-${leaderboardName}-${playerId}-${page}-${sort}-${search}`,
+      CacheService.getCache(ServiceCache.PlayerScores),
+      `player-scores:${leaderboardName}-${playerId}-${page}-${sort}-${search}`,
       async () => {
         const scores: PlayerScore<unknown, unknown>[] = [];
         let metadata: Metadata = new Metadata(0, 0, 0, 0); // Default values
@@ -723,8 +713,8 @@ export class ScoreService {
     page: number
   ): Promise<LeaderboardScoresResponse<unknown, unknown> | undefined> {
     return fetchWithCache(
-      leaderboardScoresCache,
-      `leaderboard-scores-${leaderboardName}-${leaderboardId}-${page}`,
+      CacheService.getCache(ServiceCache.LeaderboardScores),
+      `leaderboard-scores:${leaderboardName}-${leaderboardId}-${page}`,
       async () => {
         const scores: ScoreType[] = [];
         let leaderboard: Leaderboard | undefined;

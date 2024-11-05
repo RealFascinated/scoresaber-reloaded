@@ -1,0 +1,83 @@
+import { CacheStatistics, SSRCache } from "@ssr/common/cache";
+
+export enum ServiceCache {
+  BeatSaver = "beatSaver",
+  AppStatistics = "appStatistics",
+  EmbedImages = "embedImages",
+  ScoreSaberPlayer = "scoreSaberPlayer",
+  Leaderboards = "leaderboards",
+  PlayerScores = "playerScores",
+  LeaderboardScores = "leaderboardScores",
+  FriendScores = "friendScores",
+  ScoreCalendar = "scoreCalendar",
+  PPBoundary = "ppBoundary",
+}
+
+export default class CacheService {
+  /**
+   * The caches to use for the service
+   */
+  private static readonly caches = new Map<ServiceCache, SSRCache>();
+
+  constructor() {
+    const cacheInfo = {
+      [ServiceCache.BeatSaver]: {
+        ttl: 1000 * 60 * 60 * 24, // 1 day
+      },
+      [ServiceCache.AppStatistics]: {
+        ttl: 1000 * 60 * 60, // 1 hour
+      },
+      [ServiceCache.EmbedImages]: {
+        ttl: 1000 * 60 * 60, // 1 hour
+      },
+      [ServiceCache.ScoreSaberPlayer]: {
+        ttl: 1000 * 60, // 1 minute
+      },
+      [ServiceCache.Leaderboards]: {
+        ttl: 1000 * 60 * 60, // 1 hour
+      },
+      [ServiceCache.PlayerScores]: {
+        ttl: 1000 * 60, // 1 minute
+      },
+      [ServiceCache.LeaderboardScores]: {
+        ttl: 1000 * 60, // 1 minute
+      },
+      [ServiceCache.FriendScores]: {
+        ttl: 1000 * 60, // 1 minute
+      },
+      [ServiceCache.ScoreCalendar]: {
+        ttl: 1000 * 60 * 60, // 1 hour
+      },
+      [ServiceCache.PPBoundary]: {
+        ttl: 1000 * 60 * 60, // 1 hour
+      },
+    };
+
+    for (const [cache, info] of Object.entries(cacheInfo)) {
+      CacheService.caches.set(cache as ServiceCache, new SSRCache(info));
+    }
+
+    console.log(
+      `[CacheService] ${CacheService.caches.size} Caches: ${Array.from(CacheService.caches.keys()).join(", ")}`
+    );
+  }
+
+  /**
+   * Gets a cache
+   *
+   * @param cache the cache to get
+   * @returns the cache
+   */
+  public static getCache(cache: ServiceCache): SSRCache {
+    return CacheService.caches.get(cache)!;
+  }
+
+  /**
+   * Gets the cache statistics for all caches
+   */
+  public static getCacheStatistics(): { [cache: string]: CacheStatistics } {
+    return Object.fromEntries(
+      Array.from(CacheService.caches.entries()).map(([key, value]) => [key, value.getStatistics()])
+    );
+  }
+}

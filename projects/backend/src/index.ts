@@ -24,6 +24,7 @@ import { DiscordChannels, initDiscordBot, logToChannel } from "./bot/bot";
 import { EmbedBuilder } from "discord.js";
 import MetricsService from "./service/metrics.service";
 import LeaderboardService from "./service/leaderboard.service";
+import CacheService from "./service/cache.service";
 
 // Load .env file
 dotenv.config({
@@ -184,6 +185,7 @@ app.onStart(async () => {
 
   // Start metrics
   new MetricsService();
+  new CacheService();
 });
 
 app.listen({

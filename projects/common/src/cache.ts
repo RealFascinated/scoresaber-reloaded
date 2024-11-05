@@ -5,6 +5,38 @@ type DebugOptions = {
   expired?: boolean;
 };
 
+export type CacheStatistics = {
+  /**
+   * The size in bytes of the cache
+   */
+  size: number;
+
+  /**
+   * The number of objects in the cache
+   */
+  keys: number;
+
+  /**
+   * The number of cache hits
+   */
+  hits: number;
+
+  /**
+   * The number of cache misses
+   */
+  misses: number;
+
+  /**
+   * The number of expired objects
+   */
+  expired: number;
+
+  /**
+   * The percentage of cache hits
+   */
+  hitPercentage: number;
+};
+
 type CacheOptions = {
   /**
    * The time (in ms) the cached object will be valid for
@@ -54,6 +86,24 @@ export class SSRCache {
   private readonly debug: DebugOptions;
 
   /**
+   * The number of cache hits
+   * @private
+   */
+  private cacheHits: number = 0;
+
+  /**
+   * The number of cache misses
+   * @private
+   */
+  private cacheMisses: number = 0;
+
+  /**
+   * The number of expired objects
+   * @private
+   */
+  private expired: number = 0;
+
+  /**
    * The objects that have been cached
    * @private
    */
@@ -62,9 +112,7 @@ export class SSRCache {
   constructor({ ttl, checkInterval, debug }: CacheOptions) {
     this.ttl = ttl;
     this.checkInterval = checkInterval || this.ttl ? 1000 * 60 : undefined; // 1 minute
-    this.debug = debug || {
-      expired: true,
-    };
+    this.debug = debug || {};
 
     if (this.ttl !== undefined && this.checkInterval !== undefined) {
       setInterval(() => {
@@ -73,6 +121,7 @@ export class SSRCache {
           if (value.timestamp + this.ttl! > Date.now()) {
             continue;
           }
+          this.expired++;
           this.remove(key);
         }
         if (this.debug.expired) {
@@ -95,11 +144,13 @@ export class SSRCache {
       if (this.debug) {
         console.log(`Cache miss for key: ${key}`);
       }
+      this.cacheMisses++;
       return undefined;
     }
     if (this.debug.fetched) {
       console.log(`Retrieved ${key} from cache, value: ${JSON.stringify(cachedObject)}`);
     }
+    this.cacheHits++;
     return cachedObject.value as T;
   }
 
@@ -140,5 +191,19 @@ export class SSRCache {
     if (this.debug.removed) {
       console.log(`Removed ${key} from cache`);
     }
+  }
+
+  /**
+   * Gets the cache statistics
+   */
+  public getStatistics(): CacheStatistics {
+    return {
+      size: Buffer.byteLength(JSON.stringify(Array.from(this.cache.entries())), "utf-8"),
+      keys: this.cache.size,
+      hits: this.cacheHits,
+      misses: this.cacheMisses,
+      expired: this.expired,
+      hitPercentage: this.cacheHits === 0 ? 0 : (this.cacheHits / (this.cacheHits + this.cacheMisses)) * 100,
+    };
   }
 }

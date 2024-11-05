@@ -10,18 +10,12 @@ import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
 import { ScoreService } from "./score.service";
 import { logNewTrackedPlayer } from "../common/embds";
 import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/player";
-import { SSRCache } from "@ssr/common/cache";
 import { fetchWithCache } from "../common/cache.util";
 import { PlayedMapsCalendarResponse, PlayedMapsCalendarStat } from "@ssr/common/response/played-maps-calendar-response";
+import CacheService, { ServiceCache } from "./cache.service";
 
 const SCORESABER_REQUEST_COOLDOWN = 60_000 / 250; // 250 requests per minute
 const accountCreationLock: { [id: string]: Promise<PlayerDocument> } = {};
-const ppBoundaryCache = new SSRCache({
-  ttl: 1000 * 60 * 5, // 5 minutes
-});
-const scoreCalenderCache = new SSRCache({
-  ttl: 1000 * 60 * 5, // 5 minutes
-});
 
 export class PlayerService {
   /**
@@ -132,21 +126,25 @@ export class PlayerService {
    * @param boundary the pp boundary
    */
   public static async getPlayerPpBoundary(playerId: string, boundary: number = 1): Promise<number[]> {
-    return fetchWithCache(ppBoundaryCache, playerId, async () => {
-      await PlayerService.getPlayer(playerId); // Ensure player exists
-      const scores = await ScoreService.getPlayerScores(playerId, {
-        ranked: true,
-      });
-      if (scores.length === 0) {
-        return [0];
-      }
+    return fetchWithCache(
+      CacheService.getCache(ServiceCache.PPBoundary),
+      `pp-boundary:${playerId}-${boundary}`,
+      async () => {
+        await PlayerService.getPlayer(playerId); // Ensure player exists
+        const scores = await ScoreService.getPlayerScores(playerId, {
+          ranked: true,
+        });
+        if (scores.length === 0) {
+          return [0];
+        }
 
-      const boundaries: number[] = [];
-      for (let i = 1; i < boundary + 1; i++) {
-        boundaries.push(scoresaberService.calcPpBoundary(scores, i));
+        const boundaries: number[] = [];
+        for (let i = 1; i < boundary + 1; i++) {
+          boundaries.push(scoresaberService.calcPpBoundary(scores, i));
+        }
+        return boundaries;
       }
-      return boundaries;
-    });
+    );
   }
 
   /**
@@ -161,51 +159,55 @@ export class PlayerService {
     year: number,
     month: number
   ): Promise<PlayedMapsCalendarResponse> {
-    return fetchWithCache(scoreCalenderCache, `${playerId}-${year}-${month}`, async () => {
-      const player = await PlayerService.getPlayer(playerId);
-      const history = player.getStatisticHistory();
+    return fetchWithCache(
+      CacheService.getCache(ServiceCache.ScoreCalendar),
+      `score-calendar:${playerId}-${year}-${month}`,
+      async () => {
+        const player = await PlayerService.getPlayer(playerId);
+        const history = player.getStatisticHistory();
 
-      const days: Record<number, PlayedMapsCalendarStat> = {};
-      const metadata: Record<number, number[]> = {};
-      for (const [dateStr, stat] of Object.entries(history)) {
-        const date = new Date(dateStr);
-        const statYear = date.getFullYear();
-        const statMonth = date.getMonth() + 1;
-        if (
-          stat === undefined ||
-          stat.scores === undefined ||
-          stat.scores.rankedScores === undefined ||
-          stat.scores.unrankedScores === undefined
-        ) {
-          continue;
-        }
-
-        if (metadata[date.getFullYear()] === undefined || !metadata[date.getFullYear()].includes(statMonth)) {
-          if (metadata[date.getFullYear()] === undefined) {
-            metadata[date.getFullYear()] = [];
+        const days: Record<number, PlayedMapsCalendarStat> = {};
+        const metadata: Record<number, number[]> = {};
+        for (const [dateStr, stat] of Object.entries(history)) {
+          const date = new Date(dateStr);
+          const statYear = date.getFullYear();
+          const statMonth = date.getMonth() + 1;
+          if (
+            stat === undefined ||
+            stat.scores === undefined ||
+            stat.scores.rankedScores === undefined ||
+            stat.scores.unrankedScores === undefined
+          ) {
+            continue;
           }
-          metadata[date.getFullYear()].push(statMonth);
+
+          if (metadata[date.getFullYear()] === undefined || !metadata[date.getFullYear()].includes(statMonth)) {
+            if (metadata[date.getFullYear()] === undefined) {
+              metadata[date.getFullYear()] = [];
+            }
+            metadata[date.getFullYear()].push(statMonth);
+          }
+
+          if (statYear === year && statMonth === month) {
+            days[date.getDate()] = {
+              rankedMaps: stat.scores.rankedScores,
+              unrankedMaps: stat.scores.unrankedScores,
+              totalMaps: stat.scores.rankedScores + stat.scores.unrankedScores,
+            };
+          }
         }
 
-        if (statYear === year && statMonth === month) {
-          days[date.getDate()] = {
-            rankedMaps: stat.scores.rankedScores,
-            unrankedMaps: stat.scores.unrankedScores,
-            totalMaps: stat.scores.rankedScores + stat.scores.unrankedScores,
-          };
+        // Sort the metadata months
+        for (const [year, months] of Object.entries(metadata)) {
+          metadata[Number(year)] = months.sort();
         }
-      }
 
-      // Sort the metadata months
-      for (const [year, months] of Object.entries(metadata)) {
-        metadata[Number(year)] = months.sort();
+        return {
+          days,
+          metadata,
+        };
       }
-
-      return {
-        days,
-        metadata,
-      };
-    });
+    );
   }
 
   /**

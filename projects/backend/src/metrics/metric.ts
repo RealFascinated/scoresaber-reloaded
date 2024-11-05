@@ -11,9 +11,9 @@ export default abstract class Metric {
   }
 
   /**
-   * Collects the metric.
+   * Collects the metric(s).
    */
-  public abstract collect(): Promise<Point>;
+  public abstract collect(): Promise<Point | Point[]>;
 
   /**
    * Gets the base point.

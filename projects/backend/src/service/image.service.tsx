@@ -9,15 +9,12 @@ import { Jimp } from "jimp";
 import { extractColors } from "extract-colors";
 import { Config } from "@ssr/common/config";
 import { fetchWithCache } from "../common/cache.util";
-import { SSRCache } from "@ssr/common/cache";
 import { getScoreSaberPlayerFromToken } from "@ssr/common/token-creators";
 import LeaderboardService from "./leaderboard.service";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { NotFoundError } from "elysia";
+import CacheService, { ServiceCache } from "./cache.service";
 
-const cache = new SSRCache({
-  ttl: 1000 * 60 * 60, // 1 hour
-});
 const imageOptions = { width: 1200, height: 630 };
 
 export class ImageService {
@@ -31,32 +28,36 @@ export class ImageService {
   public static async getAverageImageColor(src: string): Promise<{ color: string } | undefined> {
     src = decodeURIComponent(src);
 
-    return await fetchWithCache<{ color: string }>(cache, `average_color-${src}`, async () => {
-      try {
-        const image = await Jimp.read(src); // Load image using Jimp
-        const { width, height, data } = image.bitmap; // Access image dimensions and pixel data
+    return await fetchWithCache<{ color: string }>(
+      CacheService.getCache(ServiceCache.EmbedImages),
+      `average-color:${src}`,
+      async () => {
+        try {
+          const image = await Jimp.read(src); // Load image using Jimp
+          const { width, height, data } = image.bitmap; // Access image dimensions and pixel data
 
-        // Convert the Buffer data to Uint8ClampedArray
-        const uint8ClampedArray = new Uint8ClampedArray(data);
+          // Convert the Buffer data to Uint8ClampedArray
+          const uint8ClampedArray = new Uint8ClampedArray(data);
 
-        // Extract the colors using extract-colors
-        const colors = await extractColors({ data: uint8ClampedArray, width, height });
+          // Extract the colors using extract-colors
+          const colors = await extractColors({ data: uint8ClampedArray, width, height });
 
-        // Return the most dominant color, or fallback if none found
-        if (colors && colors.length > 0) {
-          return { color: colors[2].hex }; // Returning the third most dominant color
+          // Return the most dominant color, or fallback if none found
+          if (colors && colors.length > 0) {
+            return { color: colors[2].hex }; // Returning the third most dominant color
+          }
+
+          return {
+            color: "#fff", // Fallback color in case no colors are found
+          };
+        } catch (error) {
+          console.error("Error fetching image or extracting colors:", error);
+          return {
+            color: "#fff", // Fallback color in case of an error
+          };
         }
-
-        return {
-          color: "#fff", // Fallback color in case no colors are found
-        };
-      } catch (error) {
-        console.error("Error fetching image or extracting colors:", error);
-        return {
-          color: "#fff", // Fallback color in case of an error
-        };
       }
-    });
+    );
   }
 
   /**
@@ -103,10 +104,14 @@ export class ImageService {
    * @param id the player's id
    */
   public static async generatePlayerImage(id: string) {
-    const player = await fetchWithCache<ScoreSaberPlayer | undefined>(cache, `player-${id}`, async () => {
-      const token = await scoresaberService.lookupPlayer(id);
-      return token ? await getScoreSaberPlayerFromToken(token, Config.apiUrl) : undefined;
-    });
+    const player = await fetchWithCache<ScoreSaberPlayer | undefined>(
+      CacheService.getCache(ServiceCache.ScoreSaberPlayer),
+      `player:${id}`,
+      async () => {
+        const token = await scoresaberService.lookupPlayer(id);
+        return token ? await getScoreSaberPlayerFromToken(token, Config.apiUrl) : undefined;
+      }
+    );
     if (!player) {
       throw new NotFoundError(`Player "${id}" not found`);
     }

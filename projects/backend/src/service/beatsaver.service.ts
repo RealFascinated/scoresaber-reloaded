@@ -1,11 +1,7 @@
 import { beatsaverService } from "@ssr/common/service/impl/beatsaver";
 import { BeatSaverMap, BeatSaverMapModel } from "@ssr/common/model/beatsaver/map";
-import { SSRCache } from "@ssr/common/cache";
 import { fetchWithCache } from "../common/cache.util";
-
-const mapCache = new SSRCache({
-  ttl: 1000 * 60 * 60 * 24, // 1 day
-});
+import CacheService, { ServiceCache } from "./cache.service";
 
 export default class BeatSaverService {
   /**
@@ -15,7 +11,7 @@ export default class BeatSaverService {
    * @returns the beatsaver map, or undefined if not found
    */
   public static async getMap(hash: string): Promise<BeatSaverMap | undefined> {
-    return fetchWithCache(mapCache, hash, async () => {
+    return fetchWithCache(CacheService.getCache(ServiceCache.BeatSaver), hash, async () => {
       let map = await BeatSaverMapModel.findOne({
         "versions.hash": hash.toUpperCase(),
       });
