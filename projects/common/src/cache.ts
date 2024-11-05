@@ -113,13 +113,7 @@ export class SSRCache {
   constructor({ ttl, checkInterval, debug }: CacheOptions) {
     this.ttl = ttl;
     this.checkInterval = checkInterval || this.ttl ? 1000 * 60 : undefined; // 1 minute
-    this.debug = debug || {
-      expired: true,
-      fetched: true,
-      added: true,
-      removed: true,
-      missed: true,
-    };
+    this.debug = debug || {};
 
     if (this.ttl !== undefined && this.checkInterval !== undefined) {
       setInterval(() => {
