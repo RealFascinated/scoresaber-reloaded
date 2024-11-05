@@ -1,5 +1,5 @@
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
-import { formatChange, isProduction, kyFetchBuffer } from "@ssr/common/utils/utils";
+import { formatChange, isProduction } from "@ssr/common/utils/utils";
 import { Metadata } from "@ssr/common/types/metadata";
 import { NotFoundError } from "elysia";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";

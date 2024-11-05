@@ -16,7 +16,7 @@ import LeaderboardScoresResponse from "@ssr/common/response/leaderboard-scores-r
 import LeaderboardScoresSkeleton from "@/components/leaderboard/skeleton/leaderboard-scores-skeleton";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { Metadata } from "@ssr/common/types/metadata";
-import ScoreMode, { ScoreModeEnum, scoreModes, ScoreModeType } from "@/components/score/score-mode";
+import ScoreMode, { ScoreModeEnum } from "@/components/score/score-mode";
 import { getFriendScores } from "@ssr/common/utils/player-utils";
 import useDatabase from "@/hooks/use-database";
 import { useLiveQuery } from "dexie-react-hooks";

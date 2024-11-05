@@ -5,11 +5,6 @@ import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber
 import LeaderboardScoresResponse from "@ssr/common/response/leaderboard-scores-response";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import { ReactElement, useState } from "react";
-import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
-import { PersonIcon } from "@radix-ui/react-icons";
-import { Button } from "@/components/ui/button";
-import ScoreMode, { ScoreModeEnum, scoreModes, ScoreModeType } from "@/components/score/score-mode";
 
 type ScoreOverviewProps = {
   /**
