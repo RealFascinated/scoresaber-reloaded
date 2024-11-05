@@ -7,7 +7,6 @@ import ScoresaberLeaderboardsMetric from "../metrics/impl/scoresaber-leaderboard
 import BeatLeaderScoreStatsMetric from "../metrics/impl/beatleader-score-stats";
 import BeatLeaderDataStatsMetric from "../metrics/impl/beatleader-score-data";
 import BeatLeaderReplaysMetric from "../metrics/impl/beatleader-replays";
-import MongoCollectionSizesMetric from "../metrics/impl/mongo-collection-sizes";
 import CacheStatisticsMetric from "../metrics/impl/cache-statistics";
 
 const influxClient = new InfluxDB({
@@ -31,7 +30,7 @@ export default class MetricsService {
     this.registerMetric(new BeatLeaderScoreStatsMetric());
     this.registerMetric(new BeatLeaderDataStatsMetric());
     this.registerMetric(new BeatLeaderReplaysMetric());
-    this.registerMetric(new MongoCollectionSizesMetric());
+    //this.registerMetric(new MongoCollectionSizesMetric());
     this.registerMetric(new CacheStatisticsMetric());
 
     setInterval(async () => {
