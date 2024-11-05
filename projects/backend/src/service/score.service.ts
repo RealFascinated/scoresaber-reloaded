@@ -370,31 +370,31 @@ export class ScoreService {
         }
       }
 
-      // Cache replay for this score
-      try {
-        const replayId = `${score.id}-${playerId}-${leaderboard.difficulty.difficultyName}-${leaderboard.difficulty.modeName}-${leaderboard.song.hash.toUpperCase()}.bsor`;
-        const replayData = await kyFetchBuffer(`https://cdn.replays.beatleader.xyz/${replayId}`);
-
-        if (replayData !== undefined) {
-          await MinioService.saveFile(MinioBucket.BeatLeaderReplays, `${replayId}`, Buffer.from(replayData));
-          savedReplayId = replayId;
-        }
-      } catch (error) {
-        console.error(`Failed to save replay for ${score.id}: ${error}`);
-      }
-
-      // Remove old replays
-      await this.cleanupScoreReplays(playerId, leaderboard.id);
+      // // Cache replay for this score
+      // try {
+      //   const replayId = `${score.id}-${playerId}-${leaderboard.difficulty.difficultyName}-${leaderboard.difficulty.modeName}-${leaderboard.song.hash.toUpperCase()}.bsor`;
+      //   const replayData = await kyFetchBuffer(`https://cdn.replays.beatleader.xyz/${replayId}`);
+      //
+      //   if (replayData !== undefined) {
+      //     await MinioService.saveFile(MinioBucket.BeatLeaderReplays, `${replayId}`, Buffer.from(replayData));
+      //     savedReplayId = replayId;
+      //   }
+      // } catch (error) {
+      //   console.error(`Failed to save replay for ${score.id}: ${error}`);
+      // }
+      //
+      // // Remove old replays
+      // await this.cleanupScoreReplays(playerId, leaderboard.id);
     }
 
     // The score has already been tracked, so ignore it.
     if (
-      (await this.getAdditionalScoreData(
+      await this.hasAdditionalScoreData(
         playerId,
         leaderboard.song.hash,
         leaderboard.difficulty.difficultyName,
         score.baseScore
-      )) !== undefined
+      )
     ) {
       return;
     }
@@ -579,6 +579,29 @@ export class ScoreService {
       return undefined;
     }
     return additionalData.toObject();
+  }
+
+  /**
+   * Checks if a player has additional score data for a song.
+   *
+   * @param playerId the id of the player
+   * @param songHash the hash of the map
+   * @param songDifficulty the difficulty of the map
+   * @param songScore the score of the play
+   * @private
+   */
+  private static async hasAdditionalScoreData(
+    playerId: string,
+    songHash: string,
+    songDifficulty: string,
+    songScore: number
+  ) {
+    return !!(await AdditionalScoreDataModel.exists({
+      playerId: playerId,
+      songHash: songHash.toUpperCase(),
+      songDifficulty: songDifficulty,
+      songScore: songScore,
+    }));
   }
 
   /**
