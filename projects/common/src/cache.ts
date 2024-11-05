@@ -1,3 +1,10 @@
+type DebugOptions = {
+  added?: boolean;
+  removed?: boolean;
+  fetched?: boolean;
+  expired?: boolean;
+};
+
 type CacheOptions = {
   /**
    * The time (in ms) the cached object will be valid for
@@ -12,7 +19,7 @@ type CacheOptions = {
   /**
    * Enable debug messages
    */
-  debug?: boolean;
+  debug?: DebugOptions;
 };
 
 type CachedObject = {
@@ -44,7 +51,7 @@ export class SSRCache {
    * Enable debug messages
    * @private
    */
-  private readonly debug: boolean;
+  private readonly debug: DebugOptions;
 
   /**
    * The objects that have been cached
@@ -55,15 +62,23 @@ export class SSRCache {
   constructor({ ttl, checkInterval, debug }: CacheOptions) {
     this.ttl = ttl;
     this.checkInterval = checkInterval || this.ttl ? 1000 * 60 : undefined; // 1 minute
-    this.debug = debug || false;
+    this.debug = debug || {
+      expired: true,
+    };
 
     if (this.ttl !== undefined && this.checkInterval !== undefined) {
       setInterval(() => {
+        const before = this.cache.size;
         for (const [key, value] of this.cache.entries()) {
           if (value.timestamp + this.ttl! > Date.now()) {
             continue;
           }
           this.remove(key);
+        }
+        if (this.debug.expired) {
+          console.log(
+            `Expired ${before - this.cache.size} objects from cache (before: ${before}, after: ${this.cache.size})`
+          );
         }
       }, this.checkInterval);
     }
@@ -82,7 +97,7 @@ export class SSRCache {
       }
       return undefined;
     }
-    if (this.debug) {
+    if (this.debug.fetched) {
       console.log(`Retrieved ${key} from cache, value: ${JSON.stringify(cachedObject)}`);
     }
     return cachedObject.value as T;
@@ -100,7 +115,7 @@ export class SSRCache {
       timestamp: Date.now(),
     });
 
-    if (this.debug) {
+    if (this.debug.added) {
       console.log(`Inserted ${key} into cache, value: ${JSON.stringify(value)}`);
     }
   }
@@ -122,7 +137,7 @@ export class SSRCache {
   public remove(key: string): void {
     this.cache.delete(key);
 
-    if (this.debug) {
+    if (this.debug.removed) {
       console.log(`Removed ${key} from cache`);
     }
   }

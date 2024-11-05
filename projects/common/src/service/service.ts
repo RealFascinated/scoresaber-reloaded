@@ -1,5 +1,5 @@
 import ky from "ky";
-import { isServer } from "../utils/utils";
+import { isProduction, isServer } from "../utils/utils";
 
 export default class Service {
   /**
@@ -17,7 +17,10 @@ export default class Service {
    * @param data the data to log
    */
   public log(data: unknown) {
-    console.log(`[${this.name}]: ${data}`);
+    // Only log in development
+    if (!isProduction()) {
+      console.log(`[${this.name}]: ${data}`);
+    }
   }
 
   /**
