@@ -371,23 +371,21 @@ class ScoreSaberService extends Service {
    * Gets the amount of raw pp you need
    * to gain the expected pp
    *
-   * @param scores the players scores
+   * @param scoresPps the sorted pp array
    * @param expectedPp the expected pp gain
    * @returns the amount of raw pp
    */
-  public calcPpBoundary(scores: ScoreSaberScore[], expectedPp = 1) {
-    const rankedScorePps = scores.map(score => score.pp).sort((a, b) => b - a);
-
+  public calcPpBoundary(scoresPps: number[], expectedPp = 1) {
     let left = 0;
-    let right = rankedScorePps.length - 1;
+    let right = scoresPps.length - 1;
     let boundaryIdx = -1;
 
     while (left <= right) {
       const mid = Math.floor((left + right) / 2);
-      const bottomSlice = rankedScorePps.slice(mid);
+      const bottomSlice = scoresPps.slice(mid);
       const bottomPp = this.getTotalWeightedPp(bottomSlice, mid);
 
-      bottomSlice.unshift(rankedScorePps[mid]);
+      bottomSlice.unshift(scoresPps[mid]);
       const modifiedBottomPp = this.getTotalWeightedPp(bottomSlice, mid);
       const diff = modifiedBottomPp - bottomPp;
 
@@ -399,11 +397,9 @@ class ScoreSaberService extends Service {
       }
     }
 
-    if (boundaryIdx === -1) {
-      return this.calcRawPpAtIdx(rankedScorePps, 0, expectedPp);
-    } else {
-      return this.calcRawPpAtIdx(rankedScorePps.slice(boundaryIdx + 1), boundaryIdx + 1, expectedPp);
-    }
+    return boundaryIdx === -1
+      ? this.calcRawPpAtIdx(scoresPps, 0, expectedPp)
+      : this.calcRawPpAtIdx(scoresPps.slice(boundaryIdx + 1), boundaryIdx + 1, expectedPp);
   }
 }
 

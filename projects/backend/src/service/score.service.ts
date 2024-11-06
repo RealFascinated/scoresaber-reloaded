@@ -251,22 +251,47 @@ export class ScoreService {
     playerId: string,
     options?: {
       ranked?: boolean;
+      projection?: { [field: string]: number };
     }
   ): Promise<ScoreSaberScore[]> {
     const rawScores = await ScoreSaberScoreModel.aggregate([
-      { $match: { playerId: playerId, ...(options?.ranked ? { pp: { $gt: 0 } } : undefined) } },
+      // Match stage based on playerId and optional ranked filter
+      { $match: { playerId: playerId, ...(options?.ranked ? { pp: { $gt: 0 } } : {}) } },
+
+      // Optional projection stage
+      ...(options?.projection
+        ? [
+            {
+              $project: {
+                ...options.projection,
+                _id: 0,
+                leaderboardId: 1,
+                playerId: 1,
+              },
+            },
+          ]
+        : []),
+
+      // Group by leaderboardId and playerId to get the first entry of each group
       {
         $group: {
           _id: { leaderboardId: "$leaderboardId", playerId: "$playerId" },
-          score: { $first: "$$ROOT" },
+          score: { $first: "$$ROOT" }, // Keep the whole document in "score" field
         },
       },
+
+      // Sort by pp in descending order
       { $sort: { "score.pp": -1 } },
     ]);
     if (!rawScores) {
       return [];
     }
-    return rawScores.map(({ score }) => new ScoreSaberScoreModel(score).toObject() as ScoreSaberScore);
+
+    const scores: ScoreSaberScore[] = [];
+    for (const rawScore of rawScores) {
+      scores.push(new ScoreSaberScoreModel(rawScore.score).toObject() as ScoreSaberScore);
+    }
+    return scores;
   }
 
   /**

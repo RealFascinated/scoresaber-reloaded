@@ -154,28 +154,32 @@ export class PlayerService {
    * @param boundary the pp boundary
    */
   public static async getPlayerPpBoundary(playerId: string, boundary: number = 1): Promise<number[]> {
-    const scores = await fetchWithCache(
+    const scoresPps = await fetchWithCache<number[]>(
       CacheService.getCache(ServiceCache.PPBoundary),
       `pp-boundary-scores:${playerId}`,
       async () => {
         await PlayerService.getPlayer(playerId); // Ensure player exists
-        return ScoreService.getPlayerScores(playerId, {
+        const playerScores = await ScoreService.getPlayerScores(playerId, {
           ranked: true,
+          projection: {
+            pp: 1,
+          },
         });
+        return playerScores.map(score => score.pp);
       }
     );
 
-    return fetchWithCache(
+    return fetchWithCache<number[]>(
       CacheService.getCache(ServiceCache.PPBoundary),
       `pp-boundary:${playerId}-${boundary}`,
       async () => {
-        if (scores.length === 0) {
+        if (scoresPps.length === 0) {
           return [0];
         }
 
         const boundaries: number[] = [];
         for (let i = 1; i < boundary + 1; i++) {
-          boundaries.push(scoresaberService.calcPpBoundary(scores, i));
+          boundaries.push(scoresaberService.calcPpBoundary(scoresPps, i));
         }
         return boundaries;
       }
