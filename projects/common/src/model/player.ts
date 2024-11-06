@@ -2,7 +2,6 @@ import { getModelForClass, modelOptions, prop, ReturnModelType, Severity } from 
 import { Document } from "mongoose";
 import { PlayerHistory } from "../player/player-history";
 import { formatDateMinimal, getDaysAgoDate, getMidnightAlignedDate } from "../utils/time-utils";
-import { PlayerService } from "backend/src/service/player.service";
 
 /**
  * The model for a player.
