@@ -10,6 +10,7 @@ import { PlayerService } from "./player.service";
 import { formatDateMinimal, getDaysAgoDate, getMidnightAlignedDate, parseDate } from "@ssr/common/utils/time-utils";
 import { getPageFromRank } from "@ssr/common/utils/utils";
 import { getValueFromHistory } from "@ssr/common/utils/player-utils";
+import { ImageService } from "./image.service";
 
 export default class ScoreSaberService {
   /**
@@ -112,6 +113,7 @@ export default class ScoreSaberService {
           country: playerToken.country,
           rank: playerToken.rank,
           countryRank: playerToken.countryRank,
+          avatarColor: (await ImageService.getAverageImageColor(playerToken.profilePicture))?.color,
           joinedDate: new Date(playerToken.firstSeen),
           bio: bio,
           pp: playerToken.pp,

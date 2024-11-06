@@ -2,7 +2,6 @@ import PlayerData from "@/components/player/player-data";
 import { Metadata, Viewport } from "next";
 import { redirect } from "next/navigation";
 import { Colors } from "@/common/colors";
-import { getAverageColor } from "@/common/image-utils";
 import { getCookieValue } from "@ssr/common/utils/cookie-utils";
 import { Config } from "@ssr/common/config";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
@@ -102,15 +101,13 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 
 export async function generateViewport(props: Props): Promise<Viewport> {
   const { player } = await getPlayerData(props, false);
-  if (player === undefined) {
+  if (player === undefined || player.avatarColor === undefined) {
     return {
       themeColor: Colors.primary,
     };
   }
-
-  const color = await getAverageColor(player.avatar);
   return {
-    themeColor: color.color,
+    themeColor: player.avatarColor,
   };
 }
 

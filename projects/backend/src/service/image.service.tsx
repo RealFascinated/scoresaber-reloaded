@@ -26,7 +26,7 @@ export class ImageService {
     src = decodeURIComponent(src);
 
     return await fetchWithCache<{ color: string }>(
-      CacheService.getCache(ServiceCache.EmbedImages),
+      CacheService.getCache(ServiceCache.ImageUtils),
       `average-color:${src}`,
       async () => {
         try {
