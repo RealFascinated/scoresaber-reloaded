@@ -4,7 +4,7 @@ export enum ServiceCache {
   BeatSaver = "beatSaver",
   AppStatistics = "appStatistics",
   EmbedImages = "embedImages",
-  ScoreSaber = "scoreSaber",
+  ScoreSaber = "scoresaber",
   Leaderboards = "leaderboards",
   PlayerScores = "playerScores",
   LeaderboardScores = "leaderboardScores",
