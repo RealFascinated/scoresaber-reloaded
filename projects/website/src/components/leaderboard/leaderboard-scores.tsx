@@ -203,10 +203,10 @@ export default function LeaderboardScores({
       {/* Where to scroll to when new scores are loaded */}
       <div ref={topOfScoresRef} className="absolute" />
 
-      <div className="flex gap-10 justify-center items-center flex-wrap">
+      <div className="flex gap-2 lg:gap-10 justify-center items-center flex-wrap">
         <ScoreMode onModeChange={setSelectedMode} />
 
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           {showDifficulties &&
             leaderboard.difficulties.map(({ difficulty, characteristic, leaderboardId }, index) => {
               if (characteristic !== "Standard") {
@@ -234,10 +234,13 @@ export default function LeaderboardScores({
         </div>
       </div>
 
-      <div className="text-center">
-        {isError && <p>Oopsies! Something went wrong.</p>}
-        {currentScores.scores.length === 0 && <p>No {selectedMode?.toLowerCase()} scores found.</p>}
-      </div>
+      {isError ||
+        (currentScores.scores.length === 0 && (
+          <div className="text-center">
+            {isError && <p>Oopsies! Something went wrong.</p>}
+            {currentScores.scores.length === 0 && <p>No {selectedMode?.toLowerCase()} scores found.</p>}
+          </div>
+        ))}
 
       {currentScores.scores.length > 0 && (
         <>
