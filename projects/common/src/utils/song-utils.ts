@@ -1,4 +1,4 @@
-import { MapDifficulty } from "@ssr/common/score/map-difficulty";
+import { MapDifficulty } from "../score/map-difficulty";
 
 export type Difficulty = {
   /**

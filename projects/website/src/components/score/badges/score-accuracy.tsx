@@ -1,4 +1,4 @@
-import { getScoreBadgeFromAccuracy } from "@/common/song-utils";
+import { getScoreBadgeFromAccuracy } from "@ssr/common/utils/song-utils";
 import { Modifier } from "@ssr/common/score/modifier";
 import Tooltip from "@/components/tooltip";
 import { ScoreModifiers } from "@/components/score/score-modifiers";

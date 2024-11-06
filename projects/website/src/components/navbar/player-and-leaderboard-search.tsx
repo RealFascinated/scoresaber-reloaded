@@ -27,7 +27,7 @@ import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/player";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
 import { StarIcon } from "@heroicons/react/24/solid";
-import { getDifficulty, getDifficultyName } from "@/common/song-utils";
+import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
 import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/leaderboard";
 
 export default function PlayerAndLeaderboardSearch() {

@@ -1,7 +1,7 @@
 import { Flame } from "lucide-react";
 import { cn, getRandomInteger } from "@/common/utils";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
-import { Difficulty, getDifficulty, getDifficultyName, getRandomDifficulty } from "@/common/song-utils";
+import { Difficulty, getDifficulty, getDifficultyName, getRandomDifficulty } from "@ssr/common/utils/song-utils";
 import { AnimatedList } from "@/components/ui/animated-list";
 
 type ScoreProps = {

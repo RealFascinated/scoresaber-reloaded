@@ -1,4 +1,4 @@
-import { getDifficulty } from "@/common/song-utils";
+import { getDifficulty } from "@ssr/common/utils/song-utils";
 import { StarIcon } from "@heroicons/react/24/solid";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 

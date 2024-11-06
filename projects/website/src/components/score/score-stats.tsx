@@ -1,4 +1,4 @@
-import { getScoreBadgeFromAccuracy } from "@/common/song-utils";
+import { getScoreBadgeFromAccuracy } from "@ssr/common/utils/song-utils";
 import { ScoreBadge, ScoreBadges } from "@/components/score/score-badge";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";

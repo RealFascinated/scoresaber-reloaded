@@ -45,7 +45,7 @@ import { MinioBucket } from "@ssr/common/minio-buckets";
 import ScoreSaberPlayerScoreToken from "@ssr/common/types/token/scoresaber/player-score";
 import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score";
 import CacheService, { ServiceCache } from "./cache.service";
-import { getDifficultyName } from "website/src/common/song-utils";
+import { getDifficultyName } from "@ssr/common/utils/song-utils";
 
 export class ScoreService {
   /**

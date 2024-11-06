@@ -4,7 +4,7 @@ import { StarIcon } from "@heroicons/react/24/solid";
 import Link from "next/link";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { BeatSaverMap } from "@ssr/common/model/beatsaver/map";
-import { getDifficulty, getDifficultyName } from "@/common/song-utils";
+import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
 
 type Props = {
   leaderboard: ScoreSaberLeaderboard;
