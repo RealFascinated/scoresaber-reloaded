@@ -1,7 +1,7 @@
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import StatValue from "@/components/stat-value";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import { formatDate } from "@ssr/common/utils/time-utils";
+import { formatDate, timeAgo } from "@ssr/common/utils/time-utils";
 import { ReactNode } from "react";
 import Tooltip from "@/components/tooltip";
 import { getScoreSaberRoles } from "@ssr/common/utils/scoresaber.util";
@@ -97,7 +97,11 @@ const playerStats: Stat[] = [
       }
 
       return {
-        tooltip: formatDate(player.peakRank.date, "DD MMMM YYYY"),
+        tooltip: (
+          <p>
+            {formatDate(player.peakRank.date, "DD MMMM YYYY")} ({timeAgo(player.peakRank.date)})
+          </p>
+        ),
         value: formatNumberWithCommas(player.peakRank.rank),
       };
     },
