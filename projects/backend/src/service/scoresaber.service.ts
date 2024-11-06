@@ -56,7 +56,7 @@ export default class ScoreSaberService {
             rank: playerToken.rank,
             countryRank: playerToken.countryRank,
             pp: playerToken.pp,
-            ...(account ? { plusOnePp: await account.getPlusOnePp() } : undefined),
+            ...(account ? { plusOnePp: (await PlayerService.getPlayerPpBoundary(account.id, 1))[0] } : undefined),
             replaysWatched: playerToken.scoreStats.replaysWatched,
             accuracy: {
               ...statisticHistory[todayDate]?.accuracy,

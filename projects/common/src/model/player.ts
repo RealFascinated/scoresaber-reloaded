@@ -120,16 +120,6 @@ export class Player {
   public getDaysTracked(): number {
     return Object.keys(this.getStatisticHistory()).length;
   }
-
-  /**
-   * Gets how much pp is required for
-   * this player to gain 1 global pp.
-   *
-   * @returns the pp boundary
-   */
-  public async getPlusOnePp() {
-    return (await PlayerService.getPlayerPpBoundary(this._id, 1))[0];
-  }
 }
 
 export type PlayerDocument = Player & Document;

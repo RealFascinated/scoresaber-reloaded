@@ -281,7 +281,7 @@ export class PlayerService {
 
     // Set the history data
     history.pp = player.pp;
-    history.plusOnePp = await foundPlayer.getPlusOnePp();
+    history.plusOnePp = (await PlayerService.getPlayerPpBoundary(player.id, 1))[0];
     history.countryRank = player.countryRank;
     history.rank = player.rank;
     history.accuracy = {
