@@ -1,7 +1,7 @@
 import { Controller, Get } from "elysia-decorators";
 import { t } from "elysia";
 import { GamePlatform } from "@ssr/common/model/statistics/game-platform";
-import { PlatformStatisticsResponse } from "../../../common/src/response/platform-statistics-response";
+import { PlatformStatisticsResponse } from "@ssr/common/response/platform-statistics-response";
 import StatisticsService from "../service/statistics.service";
 
 @Controller("/statistics")

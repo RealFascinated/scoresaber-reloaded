@@ -35,6 +35,9 @@ export default class StatisticsService {
    * @returns the statistics
    */
   public static async getPlatform(platform: GamePlatform) {
+    if (!(platform in GamePlatform)) {
+      throw new Error(`Platform ${platform} not found`);
+    }
     const foundPlatform = await StatisticsModel.findById(platform);
     if (!foundPlatform) {
       return this.initPlatform(platform);
