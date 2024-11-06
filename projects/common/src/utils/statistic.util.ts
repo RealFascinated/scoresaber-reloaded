@@ -1,7 +1,7 @@
 import { kyFetchJson } from "./utils";
-import { StatisticsType } from "@ssr/model/statistics";
 import { Config } from "../config";
 import { GamePlatform } from "../model/statistics/game-platform";
+import { StatisticsType } from "../model/statistics/statistic-type";
 
 /**
  * Gets statistics for a platform.
