@@ -1,7 +1,8 @@
 import { formatDateMinimal, getDaysAgoDate, getMidnightAlignedDate } from "@ssr/common/utils/time-utils";
 import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
-import { Statistic, StatisticsModel } from "@ssr/common/model/statistics";
 import { GamePlatform } from "@ssr/common/model/statistics/game-platform";
+import { Statistic } from "@ssr/common/model/statistics/statistic";
+import { StatisticsModel } from "@ssr/common/model/statistics/statistics";
 
 export default class StatisticsService {
   constructor() {
