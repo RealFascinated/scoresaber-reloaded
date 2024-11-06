@@ -8,6 +8,7 @@ import { PpBoundaryResponse } from "@ssr/common/response/pp-boundary-response";
 import { PlayedMapsCalendarResponse } from "@ssr/common/response/played-maps-calendar-response";
 import SuperJSON from "superjson";
 import ScoreSaberService from "../service/scoresaber.service";
+import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 
 @Controller("/player")
 export default class PlayerController {
@@ -18,16 +19,18 @@ export default class PlayerController {
     }),
     query: t.Object({
       createIfMissing: t.Boolean({ default: false, required: false }),
+      superJson: t.Boolean({ default: false, required: false }),
     }),
   })
   public async getPlayer({
     params: { id },
-    query: { createIfMissing },
+    query: { createIfMissing, superJson },
   }: {
     params: { id: string };
-    query: { createIfMissing: boolean };
-  }): Promise<string> {
-    return SuperJSON.stringify(await ScoreSaberService.getPlayer(id, createIfMissing));
+    query: { createIfMissing: boolean; superJson: boolean };
+  }): Promise<ScoreSaberPlayer | string> {
+    const player = await ScoreSaberService.getPlayer(id, createIfMissing);
+    return superJson ? SuperJSON.stringify(player) : player;
   }
 
   @Get("/track/:id", {

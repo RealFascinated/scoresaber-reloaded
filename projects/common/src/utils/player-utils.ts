@@ -113,7 +113,7 @@ export async function getFriendScores(friendIds: string[], leaderboardId: string
  */
 export async function getScoreSaberPlayer(playerId: string, createIfMissing?: boolean) {
   const response = await kyFetchText(
-    `${Config.apiUrl}/player/${playerId}${createIfMissing ? `?createIfMissing=${createIfMissing}` : ""}`
+    `${Config.apiUrl}/player/${playerId}?superJson=true${createIfMissing ? `&createIfMissing=${createIfMissing}` : ""}`
   );
   if (response === undefined) {
     return undefined;
