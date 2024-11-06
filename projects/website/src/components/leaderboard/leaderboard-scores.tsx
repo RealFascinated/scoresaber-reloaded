@@ -203,7 +203,7 @@ export default function LeaderboardScores({
       {/* Where to scroll to when new scores are loaded */}
       <div ref={topOfScoresRef} className="absolute" />
 
-      <div className="flex gap-2 lg:gap-10 justify-center items-center flex-wrap">
+      <div className="flex flex-col lg:flex-row justify-center lg:justify-between lg:px-10 items-center flex-wrap">
         <ScoreMode onModeChange={setSelectedMode} />
 
         <div className="flex gap-2 flex-wrap">
