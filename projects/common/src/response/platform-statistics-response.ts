@@ -1,4 +1,4 @@
-import { StatisticsType } from "@ssr/model/statistics";
+import { StatisticsType } from "../model/statistics/statistic-type";
 
 export type PlatformStatisticsResponse = {
   /**
