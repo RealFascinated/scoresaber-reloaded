@@ -26,6 +26,8 @@ import MetricsService from "./service/metrics.service";
 import LeaderboardService from "./service/leaderboard.service";
 import CacheService from "./service/cache.service";
 import { formatDuration } from "@ssr/common/utils/time-utils";
+import StatisticsService from "./service/statistics.service";
+import StatisticsController from "./controller/statistics.controller";
 
 // Load .env file
 dotenv.config({
@@ -122,6 +124,17 @@ app.use(
     },
   })
 );
+app.use(
+  cron({
+    name: "update-scoresaber-statistics",
+    pattern: "0 0 * * *", // Every day at 00:00
+    timezone: "Europe/London", // UTC time
+    protect: true,
+    run: async () => {
+      await StatisticsService.trackScoreSaberStatistics();
+    },
+  })
+);
 
 /**
  * Custom error handler
@@ -176,7 +189,14 @@ app.use(
  */
 app.use(
   decorators({
-    controllers: [AppController, PlayerController, ImageController, ScoresController, LeaderboardController],
+    controllers: [
+      AppController,
+      PlayerController,
+      ImageController,
+      ScoresController,
+      LeaderboardController,
+      StatisticsController,
+    ],
   })
 );
 
@@ -208,9 +228,9 @@ app.onStart(async () => {
     await initDiscordBot();
   }
 
-  // Start metrics
   new MetricsService();
   new CacheService();
+  new StatisticsService();
 });
 
 app.listen({

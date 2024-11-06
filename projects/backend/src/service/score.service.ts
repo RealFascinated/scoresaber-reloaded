@@ -313,19 +313,16 @@ export class ScoreService {
     }
 
     const playerName = (scoreToken.leaderboardPlayerInfo && scoreToken.leaderboardPlayerInfo.name) || "Unknown";
-
     const leaderboard = getScoreSaberLeaderboardFromToken(leaderboardToken);
     const score = getScoreSaberScoreFromToken(scoreToken, leaderboard, playerId);
-    const player: PlayerDocument | null = await PlayerModel.findById(playerId);
-    // Player is not tracked, so ignore the score.
-    if (player == undefined) {
-      return;
-    }
 
-    // Update player name
-    if (playerName !== "Unknown") {
-      player.name = playerName;
-      await player.save();
+    const player: PlayerDocument | null = await PlayerModel.findById(playerId);
+    if (player != undefined) {
+      // Update player name
+      if (playerName !== "Unknown") {
+        player.name = playerName;
+        await player.save();
+      }
     }
 
     // The score has already been tracked, so ignore it.
