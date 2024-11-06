@@ -98,15 +98,13 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 
 export async function generateViewport(props: Props): Promise<Viewport> {
   const response = await getLeaderboardData(props, false);
-  if (response === undefined) {
+  if (response === undefined || response.leaderboardResponse.leaderboard.songArtColor === undefined) {
     return {
       themeColor: Colors.primary,
     };
   }
-
-  const color = await getAverageColor(response.leaderboardResponse.leaderboard.songArt);
   return {
-    themeColor: color.color,
+    themeColor: response.leaderboardResponse.leaderboard.songArtColor,
   };
 }
 

@@ -16,6 +16,7 @@ import { delay } from "@ssr/common/utils/utils";
 import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/score-saber-leaderboard-token";
 import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import CacheService, { ServiceCache } from "./cache.service";
+import { ImageService } from "./image.service";
 
 const SCORESABER_REQUEST_COOLDOWN = 60_000 / 300; // 300 requests per minute
 
@@ -83,6 +84,7 @@ export default class LeaderboardService {
                 { _id: id },
                 {
                   lastRefreshed: new Date(),
+                  songArtColor: ImageService.getAverageImageColor(leaderboardToken.coverImage),
                   ...getScoreSaberLeaderboardFromToken(leaderboardToken),
                 },
                 {
