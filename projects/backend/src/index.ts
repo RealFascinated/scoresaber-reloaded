@@ -25,6 +25,7 @@ import { EmbedBuilder } from "discord.js";
 import MetricsService from "./service/metrics.service";
 import LeaderboardService from "./service/leaderboard.service";
 import CacheService from "./service/cache.service";
+import { formatDuration } from "@ssr/common/utils/time-utils";
 
 // Load .env file
 dotenv.config({
@@ -71,7 +72,16 @@ app.use(
     timezone: "Europe/London", // UTC time
     protect: true,
     run: async () => {
+      const before = Date.now();
+      await logToChannel(
+        DiscordChannels.backendLogs,
+        new EmbedBuilder().setDescription(`Updating player statistics...`)
+      );
       await PlayerService.updatePlayerStatistics();
+      await logToChannel(
+        DiscordChannels.backendLogs,
+        new EmbedBuilder().setDescription(`Updated player statistics in ${formatDuration(Date.now() - before)}ms`)
+      );
     },
   })
 );
@@ -82,18 +92,33 @@ app.use(
     timezone: "Europe/London", // UTC time
     protect: true,
     run: async () => {
+      const before = Date.now();
+      await logToChannel(DiscordChannels.backendLogs, new EmbedBuilder().setDescription(`Refreshing player scores...`));
       await PlayerService.refreshPlayerScores();
+      await logToChannel(
+        DiscordChannels.backendLogs,
+        new EmbedBuilder().setDescription(`Refreshed player scores in ${formatDuration(Date.now() - before)}ms`)
+      );
     },
   })
 );
 app.use(
   cron({
     name: "refresh-ranked-leaderboards-cron",
-    pattern: "0 2 * * *", // Every day at 02:00
+    pattern: "* */6 * * *", // Every 6 hours
     timezone: "Europe/London", // UTC time
     protect: true,
     run: async () => {
+      const before = Date.now();
+      await logToChannel(
+        DiscordChannels.backendLogs,
+        new EmbedBuilder().setDescription(`Refreshing ranked leaderboards...`)
+      );
       await LeaderboardService.refreshRankedLeaderboards();
+      await logToChannel(
+        DiscordChannels.backendLogs,
+        new EmbedBuilder().setDescription(`Refreshed ranked leaderboards in ${formatDuration(Date.now() - before)}ms`)
+      );
     },
   })
 );
