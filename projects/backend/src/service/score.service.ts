@@ -133,7 +133,7 @@ export class ScoreService {
           },
           {
             name: "Max Combo",
-            value: `${formatNumberWithCommas(score.maxCombo)} ${change ? change.maxCombo : ""} ${score.fullCombo ? "/ FC" : ""}`,
+            value: `${formatNumberWithCommas(score.maxCombo)} ${score.fullCombo ? "/ FC" : ""} ${change ? change.maxCombo : ""}`,
             inline: true,
           },
         ])
