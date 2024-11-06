@@ -32,9 +32,7 @@ import ScoreSaberLeaderboardToken from "../../../common/src/types/token/scoresab
 import { MapDifficulty } from "@ssr/common/score/map-difficulty";
 import { MapCharacteristic } from "@ssr/common/types/map-characteristic";
 import { Page, Pagination } from "@ssr/common/pagination";
-import ScoreSaberLeaderboard, {
-  ScoreSaberLeaderboardModel,
-} from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
+import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import Leaderboard from "@ssr/common/model/leaderboard/leaderboard";
 import { Timeframe } from "@ssr/common/timeframe";
 import { getDaysAgoDate } from "@ssr/common/utils/time-utils";
