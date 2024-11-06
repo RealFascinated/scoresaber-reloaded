@@ -6,25 +6,52 @@ import { PlayerTrackedSince } from "@ssr/common/player/player-tracked-since";
 import { AroundPlayerResponse } from "@ssr/common/response/around-player-response";
 import { PpBoundaryResponse } from "@ssr/common/response/pp-boundary-response";
 import { PlayedMapsCalendarResponse } from "@ssr/common/response/played-maps-calendar-response";
+import SuperJSON from "superjson";
+import ScoreSaberService from "../service/scoresaber.service";
 
 @Controller("/player")
 export default class PlayerController {
-  @Get("/history/:id/:days", {
+  @Get("/:id", {
     config: {},
     params: t.Object({
       id: t.String({ required: true }),
-      days: t.Number({ default: 50, required: false }),
     }),
     query: t.Object({
       createIfMissing: t.Boolean({ default: false, required: false }),
     }),
   })
   public async getPlayer({
-    params: { id, days },
+    params: { id },
     query: { createIfMissing },
   }: {
-    params: { id: string; days: number };
+    params: { id: string };
     query: { createIfMissing: boolean };
+  }): Promise<string> {
+    return SuperJSON.stringify(await ScoreSaberService.getPlayer(id, createIfMissing));
+  }
+
+  @Get("/track/:id", {
+    config: {},
+    params: t.Object({
+      id: t.String({ required: true }),
+    }),
+  })
+  public async trackPlayer({ params: { id } }: { params: { id: string } }): Promise<{ success: boolean }> {
+    const success = await PlayerService.trackPlayer(id);
+    return { success: success };
+  }
+
+  @Get("/history/:id/:days", {
+    config: {},
+    params: t.Object({
+      id: t.String({ required: true }),
+      days: t.Number({ default: 50, required: false }),
+    }),
+  })
+  public async getPlayerHistory({
+    params: { id, days },
+  }: {
+    params: { id: string; days: number };
   }): Promise<{ statistics: Record<string, PlayerHistory> }> {
     if (days < 1) {
       days = 1;
@@ -33,7 +60,7 @@ export default class PlayerController {
     if (days > 365 * 10) {
       days = 365 * 10;
     }
-    const player = await PlayerService.getPlayer(id, createIfMissing);
+    const player = await PlayerService.getPlayer(id);
     return { statistics: player.getHistoryPreviousDays(days) };
   }
 

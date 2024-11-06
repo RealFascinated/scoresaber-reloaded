@@ -1,5 +1,5 @@
 import { PlayerHistory } from "../player/player-history";
-import { kyFetchJson } from "./utils";
+import { kyFetchJson, kyFetchText } from "./utils";
 import { Config } from "../config";
 import { AroundPlayer } from "../types/around-player";
 import { AroundPlayerResponse } from "../response/around-player-response";
@@ -9,6 +9,7 @@ import { PpBoundaryResponse } from "../response/pp-boundary-response";
 import { PlayedMapsCalendarResponse } from "../response/played-maps-calendar-response";
 import { ScoreSaberScore } from "../model/score/impl/scoresaber-score";
 import { Page } from "../pagination";
+import SuperJSON from "superjson";
 
 /**
  * Gets the player's history for today.
@@ -47,24 +48,12 @@ export function getValueFromHistory(history: PlayerHistory, field: string): numb
 }
 
 /**
- * Sorts the player history based on date,
- * so the most recent date is first
- *
- * @param history the player history
- */
-export function sortPlayerHistory(history: Map<string, PlayerHistory>) {
-  return Array.from(history.entries()).sort(
-    (a, b) => Date.parse(b[0]) - Date.parse(a[0]) // Sort in descending order
-  );
-}
-
-/**
  * Ensure the player is being tracked.
  *
  * @param playerId the player id
  */
 export async function trackPlayer(playerId: string) {
-  await kyFetchJson(`${Config.apiUrl}/player/history/${playerId}/1?createIfMissing=true`);
+  await kyFetchJson(`${Config.apiUrl}/player/track/${playerId}`);
 }
 
 /**
@@ -113,4 +102,21 @@ export async function getFriendScores(friendIds: string[], leaderboardId: string
       friendIds: friendIds.join(","),
     },
   });
+}
+
+/**
+ * Looks up a ScoreSaber player
+ *
+ * @param playerId the player to lookup
+ * @param createIfMissing create the player if they are not being tracked
+ * @returns the player
+ */
+export async function getScoreSaberPlayer(playerId: string, createIfMissing?: boolean) {
+  const response = await kyFetchText(
+    `${Config.apiUrl}/player/${playerId}${createIfMissing ? `?createIfMissing=${createIfMissing}` : ""}`
+  );
+  if (response === undefined) {
+    return undefined;
+  }
+  return SuperJSON.parse<ScoreSaberPlayer>(response);
 }

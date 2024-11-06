@@ -1,19 +1,16 @@
 import { ImageResponse } from "@vercel/og";
-import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import React from "react";
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
 import { StarIcon } from "../../components/star-icon";
 import { GlobeIcon } from "../../components/globe-icon";
-import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { Jimp } from "jimp";
 import { extractColors } from "extract-colors";
-import { Config } from "@ssr/common/config";
 import { fetchWithCache } from "../common/cache.util";
-import { getScoreSaberPlayerFromToken } from "@ssr/common/token-creators";
 import LeaderboardService from "./leaderboard.service";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { NotFoundError } from "elysia";
 import CacheService, { ServiceCache } from "./cache.service";
+import ScoreSaberService from "./scoresaber.service";
 
 const imageOptions = { width: 1200, height: 630 };
 
@@ -104,14 +101,7 @@ export class ImageService {
    * @param id the player's id
    */
   public static async generatePlayerImage(id: string) {
-    const player = await fetchWithCache<ScoreSaberPlayer | undefined>(
-      CacheService.getCache(ServiceCache.ScoreSaberPlayer),
-      `player:${id}`,
-      async () => {
-        const token = await scoresaberService.lookupPlayer(id);
-        return token ? await getScoreSaberPlayerFromToken(token, Config.apiUrl) : undefined;
-      }
-    );
+    const player = await ScoreSaberService.getPlayer(id);
     if (!player) {
       throw new NotFoundError(`Player "${id}" not found`);
     }

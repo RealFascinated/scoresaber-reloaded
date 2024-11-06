@@ -4,7 +4,7 @@ export enum ServiceCache {
   BeatSaver = "beatSaver",
   AppStatistics = "appStatistics",
   EmbedImages = "embedImages",
-  ScoreSaberPlayer = "scoreSaberPlayer",
+  ScoreSaber = "scoreSaber",
   Leaderboards = "leaderboards",
   PlayerScores = "playerScores",
   LeaderboardScores = "leaderboardScores",
@@ -30,7 +30,7 @@ export default class CacheService {
       [ServiceCache.EmbedImages]: {
         ttl: 1000 * 60 * 60, // 1 hour
       },
-      [ServiceCache.ScoreSaberPlayer]: {
+      [ServiceCache.ScoreSaber]: {
         ttl: 1000 * 60, // 1 minute
       },
       [ServiceCache.Leaderboards]: {

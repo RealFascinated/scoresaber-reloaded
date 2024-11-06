@@ -9,7 +9,6 @@ import PlayerBadges from "@/components/player/player-badges";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { useIsVisible } from "@/hooks/use-is-visible";
 import { useRef } from "react";
-import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import useDatabase from "@/hooks/use-database";
 import { useLiveQuery } from "dexie-react-hooks";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
@@ -17,8 +16,8 @@ import { ScoreSort } from "@ssr/common/score/score-sort";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import PlayerScoresResponse from "@ssr/common/response/player-scores-response";
-import { getScoreSaberPlayerFromToken } from "@ssr/common/token-creators";
 import PlayerViews from "@/components/player/history-views/player-views";
+import { getScoreSaberPlayer } from "@ssr/common/utils/player-utils";
 
 type Props = {
   initialPlayerData: ScoreSaberPlayer;
@@ -39,13 +38,8 @@ export default function PlayerData({ initialPlayerData, initialScoreData, initia
   let player = initialPlayerData;
   const { data, isLoading, isError } = useQuery({
     queryKey: ["playerData", player.id, settings?.playerId, isFriend],
-    queryFn: async (): Promise<ScoreSaberPlayer | undefined> => {
-      const playerResponse = await scoresaberService.lookupPlayer(player.id);
-      if (playerResponse == undefined) {
-        return undefined;
-      }
-      return await getScoreSaberPlayerFromToken(playerResponse, settings?.playerId);
-    },
+    queryFn: async (): Promise<ScoreSaberPlayer | undefined> =>
+      getScoreSaberPlayer(player.id, settings?.playerId == player.id),
   });
 
   if (data && (!isLoading || !isError)) {

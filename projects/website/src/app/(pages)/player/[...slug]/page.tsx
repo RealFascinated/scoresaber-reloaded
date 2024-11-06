@@ -3,7 +3,6 @@ import { Metadata, Viewport } from "next";
 import { redirect } from "next/navigation";
 import { Colors } from "@/common/colors";
 import { getAverageColor } from "@/common/image-utils";
-import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { getCookieValue } from "@ssr/common/utils/cookie-utils";
 import { Config } from "@ssr/common/config";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
@@ -12,9 +11,9 @@ import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { fetchPlayerScores } from "@ssr/common/utils/score.util";
 import PlayerScoresResponse from "@ssr/common/response/player-scores-response";
-import { getScoreSaberPlayerFromToken } from "@ssr/common/token-creators";
 import { cache } from "react";
 import { randomString } from "@ssr/common/utils/string.util";
+import { getScoreSaberPlayer } from "@ssr/common/utils/player-utils";
 
 const UNKNOWN_PLAYER = {
   title: "ScoreSaber Reloaded - Unknown Player",
@@ -39,8 +38,7 @@ type PlayerData = {
 };
 
 const getPlayer = cache(async (id: string): Promise<ScoreSaberPlayer | undefined> => {
-  const playerToken = await scoresaberService.lookupPlayer(id, true);
-  return playerToken && (await getScoreSaberPlayerFromToken(playerToken, await getCookieValue("playerId")));
+  return await getScoreSaberPlayer(id);
 });
 
 /**

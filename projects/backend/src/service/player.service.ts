@@ -88,6 +88,34 @@ export class PlayerService {
   }
 
   /**
+   * Checks if a player exists.
+   *
+   * @param id the player's id
+   * @returns whether the player exists
+   */
+  public static async playerExists(id: string): Promise<boolean> {
+    const player = await PlayerModel.exists({ _id: id });
+    return player !== null;
+  }
+
+  /**
+   * Tracks a player.
+   *
+   * @param id the player's id
+   */
+  public static async trackPlayer(id: string) {
+    try {
+      if (await this.playerExists(id)) {
+        return true;
+      }
+      await this.getPlayer(id, true);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
    * Seeds the player's history using data from
    * the ScoreSaber API.
    *

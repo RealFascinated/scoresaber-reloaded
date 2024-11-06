@@ -10,7 +10,7 @@ import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber
 import { fetchLeaderboard } from "@ssr/common/utils/leaderboard.util";
 import { fetchLeaderboardScores } from "@ssr/common/utils/score.util";
 import LeaderboardScoresResponse from "@ssr/common/response/leaderboard-scores-response";
-import { SSRCache } from "@ssr/common/cache";
+import { cache } from "react";
 
 const UNKNOWN_LEADERBOARD = {
   title: "ScoreSaber Reloaded - Unknown Leaderboard",
@@ -32,8 +32,8 @@ type LeaderboardData = {
   page: number;
 };
 
-const leaderboardCache = new SSRCache({
-  ttl: 1000 * 60, // 1 minute
+const getLeaderboard = cache(async (id: string): Promise<LeaderboardResponse<ScoreSaberLeaderboard> | undefined> => {
+  return await fetchLeaderboard<ScoreSaberLeaderboard>("scoresaber", id + "");
 });
 
 /**
@@ -43,35 +43,27 @@ const leaderboardCache = new SSRCache({
  * @param fetchScores whether to fetch the scores
  * @returns the leaderboard data and scores
  */
-const getLeaderboardData = async (
-  { params }: Props,
-  fetchScores: boolean = true
-): Promise<LeaderboardData | undefined> => {
-  const { slug } = await params;
-  const id = slug[0]; // The leaderboard id
-  const page = parseInt(slug[1]) || 1; // The page number
+const getLeaderboardData = cache(
+  async ({ params }: Props, fetchScores: boolean = true): Promise<LeaderboardData | undefined> => {
+    const { slug } = await params;
+    const id = slug[0]; // The leaderboard id
+    const page = parseInt(slug[1]) || 1; // The page number
 
-  const cacheId = `${id}-${page}-${fetchScores}`;
-  if (leaderboardCache.has(cacheId)) {
-    return leaderboardCache.get(cacheId) as LeaderboardData;
+    const leaderboard = await getLeaderboard(id);
+    if (leaderboard === undefined) {
+      return undefined;
+    }
+
+    const scores = fetchScores
+      ? await fetchLeaderboardScores<ScoreSaberScore, ScoreSaberLeaderboard>("scoresaber", id + "", page)
+      : undefined;
+    return {
+      leaderboardResponse: leaderboard,
+      page: page,
+      scores: scores,
+    };
   }
-  const leaderboard = await fetchLeaderboard<ScoreSaberLeaderboard>("scoresaber", id + "");
-  if (leaderboard === undefined) {
-    return undefined;
-  }
-
-  const scores = fetchScores
-    ? await fetchLeaderboardScores<ScoreSaberScore, ScoreSaberLeaderboard>("scoresaber", id + "", page)
-    : undefined;
-  const leaderboardData: LeaderboardData = {
-    leaderboardResponse: leaderboard,
-    page: page,
-    scores: scores,
-  };
-
-  leaderboardCache.set(cacheId, leaderboardData);
-  return leaderboardData;
-};
+);
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
   const response = await getLeaderboardData(props, false);

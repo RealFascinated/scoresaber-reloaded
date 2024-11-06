@@ -54,6 +54,20 @@ export async function kyFetchJson<T>(url: string, options?: KyOptions): Promise<
  * Fetches data from the given url.
  *
  * @param url the url to fetch
+ * @param options the ky options to use
+ */
+export async function kyFetchText(url: string, options?: KyOptions): Promise<string | undefined> {
+  try {
+    return await ky.get<string>(url, options).text();
+  } catch (error) {
+    return undefined;
+  }
+}
+
+/**
+ * Fetches data from the given url.
+ *
+ * @param url the url to fetch
  */
 export async function kyFetchBuffer(url: string): Promise<ArrayBuffer | undefined> {
   try {
