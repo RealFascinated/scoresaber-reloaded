@@ -8,7 +8,7 @@ export default class BeatSaverMapVersion {
   /**
    * The hash of this map.
    */
-  @prop({ required: true })
+  @prop({ required: true, index: true })
   hash: string;
 
   /**

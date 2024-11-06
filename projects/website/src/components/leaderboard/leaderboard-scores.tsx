@@ -73,7 +73,7 @@ export default function LeaderboardScores({
   const [shouldFetch, setShouldFetch] = useState(false);
 
   const { data, isError, isLoading } = useQuery<ScoresPage>({
-    queryKey: ["leaderboardScores", selectedLeaderboardId, currentPage, selectedMode],
+    queryKey: ["leaderboardScores", selectedLeaderboardId, currentPage],
     queryFn: async () => {
       if (selectedMode == ScoreModeEnum.Global) {
         const leaderboard = await fetchLeaderboardScores<ScoreSaberScore, ScoreSaberLeaderboard>(
