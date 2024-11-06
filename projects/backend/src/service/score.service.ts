@@ -291,12 +291,6 @@ export class ScoreService {
     const playerName = (scoreToken.leaderboardPlayerInfo && scoreToken.leaderboardPlayerInfo.name) || "Unknown";
 
     const leaderboard = getScoreSaberLeaderboardFromToken(leaderboardToken);
-    await ScoreSaberLeaderboardModel.updateOne(
-      { _id: leaderboard.id },
-      { $setOnInsert: { _id: leaderboard.id, lastRefreshed: new Date(), ...leaderboard } },
-      { upsert: true }
-    );
-
     const score = getScoreSaberScoreFromToken(scoreToken, leaderboard, playerId);
     const player: PlayerDocument | null = await PlayerModel.findById(playerId);
     // Player is not tracked, so ignore the score.
