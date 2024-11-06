@@ -3,7 +3,6 @@ import { CacheStatistics, SSRCache } from "@ssr/common/cache";
 export enum ServiceCache {
   BeatSaver = "beatSaver",
   AppStatistics = "appStatistics",
-  EmbedImages = "embedImages",
   ImageUtils = "imageUtils",
   ScoreSaber = "scoresaber",
   Leaderboards = "leaderboards",
@@ -26,9 +25,6 @@ export default class CacheService {
         ttl: 1000 * 60 * 60 * 24, // 1 day
       },
       [ServiceCache.AppStatistics]: {
-        ttl: 1000 * 60 * 60, // 1 hour
-      },
-      [ServiceCache.EmbedImages]: {
         ttl: 1000 * 60 * 60, // 1 hour
       },
       [ServiceCache.ImageUtils]: {
