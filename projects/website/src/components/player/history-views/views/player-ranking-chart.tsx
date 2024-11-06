@@ -3,7 +3,7 @@
 import React from "react";
 import { DatasetConfig } from "@/components/chart/generic-chart";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import { formatNumberWithCommas, isWholeNumber } from "@ssr/common/utils/number-utils";
+import { formatNumberWithCommas, formatPp, isWholeNumber } from "@ssr/common/utils/number-utils";
 import { scoreBarsDataset } from "@/components/player/history-views/views/player-scores-chart";
 import GenericPlayerChart from "@/components/player/history-views/generic-player-chart";
 
@@ -57,7 +57,27 @@ const datasetConfig: DatasetConfig[] = [
         return value.toFixed(1);
       },
     },
-    labelFormatter: (value: number) => `PP: ${formatNumberWithCommas(value)}pp`,
+    labelFormatter: (value: number) => `PP: ${formatPp(value)}pp`,
+  },
+  {
+    title: "+1 PP",
+    field: "plusOnePp",
+    color: "#6773ff",
+    axisId: "y3",
+    axisConfig: {
+      reverse: false,
+      display: false,
+      hideOnMobile: true,
+      displayName: "+1 PP",
+      position: "right",
+      valueFormatter: value => {
+        if (isWholeNumber(value)) {
+          return value.toString();
+        }
+        return value.toFixed(1);
+      },
+    },
+    labelFormatter: (value: number) => `+1 PP: ${formatPp(value)}pp`,
   },
   ...scoreBarsDataset,
 ];

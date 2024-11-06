@@ -15,6 +15,11 @@ export interface PlayerHistory {
   pp?: number;
 
   /**
+   * The amount of pp required to gain 1 global pp.
+   */
+  plusOnePp?: number;
+
+  /**
    * How many times replays of the player scores have been watched
    */
   replaysWatched?: number;
