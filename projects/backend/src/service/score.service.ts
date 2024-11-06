@@ -45,6 +45,7 @@ import { MinioBucket } from "@ssr/common/minio-buckets";
 import ScoreSaberPlayerScoreToken from "@ssr/common/types/token/scoresaber/player-score";
 import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score";
 import CacheService, { ServiceCache } from "./cache.service";
+import { getDifficultyName } from "website/src/common/song-utils";
 
 export class ScoreService {
   /**
@@ -94,7 +95,7 @@ export class ScoreService {
         .setTitle(`${player.name} just set a #1!`)
         .setDescription(
           [
-            `${leaderboard.songName} ${leaderboard.songSubName} (${leaderboard.difficulty.difficulty} ${leaderboard.stars.toFixed(2)}★)`,
+            `${leaderboard.songName} ${leaderboard.songSubName} (${getDifficultyName(leaderboard.difficulty.difficulty)} ${leaderboard.stars.toFixed(2)}★)`,
             [
               `[[Player]](${Config.websiteUrl}/player/${player.id})`,
               `[[Leaderboard]](${Config.websiteUrl}/leaderboard/${leaderboard.id})`,
