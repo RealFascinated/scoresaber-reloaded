@@ -3,8 +3,8 @@
 import React from "react";
 import { DatasetConfig } from "@/components/chart/generic-chart";
 import { formatNumberWithCommas, isWholeNumber } from "@ssr/common/utils/number-utils";
-import { StatisticsType } from "@ssr/common/model/statistics";
 import GenericStatisticChart from "@/components/platform-statistics/generic-statistic-chart";
+import { StatisticsType } from "@ssr/common/model/statistics/statistic-type";
 
 type Props = {
   statistics: StatisticsType;
