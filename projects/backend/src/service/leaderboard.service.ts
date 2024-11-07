@@ -205,6 +205,9 @@ export default class LeaderboardService {
               const before = Date.now();
               console.log(`Recalculating scores pp for leaderboard "${leaderboard.id}".`);
               for (const score of scores) {
+                if (score.accuracy == Infinity) {
+                  score.accuracy = (score.score / leaderboard.maxScore) * 100;
+                }
                 score.pp = scoresaberService.getPp(leaderboard.stars, score.accuracy);
               }
               console.log(`Recalculated scores pp for leaderboard "${leaderboard.id}" in ${Date.now() - before}ms.`);

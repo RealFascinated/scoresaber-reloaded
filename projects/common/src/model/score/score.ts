@@ -43,7 +43,7 @@ export default class Score {
    * The accuracy of the score.
    */
   @prop({ required: true })
-  public readonly accuracy!: number;
+  public accuracy!: number;
 
   /**
    * The rank for the score.
