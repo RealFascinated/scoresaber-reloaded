@@ -17,6 +17,7 @@ import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-sc
 import CacheService, { ServiceCache } from "./cache.service";
 import { ImageService } from "./image.service";
 import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/leaderboard";
+import LeaderboardDifficulty from "@ssr/common/model/leaderboard/leaderboard-difficulty";
 
 const SCORESABER_REQUEST_COOLDOWN = 60_000 / 300; // 300 requests per minute
 
@@ -144,7 +145,8 @@ export default class LeaderboardService {
     console.log(`Refreshing ranked leaderboards...`);
     let page = 1;
     let hasMorePages = true;
-    const rankedIds: number[] = [];
+    const leaderboards: ScoreSaberLeaderboard[] = [];
+    const rankedMapDiffs: Map<string, LeaderboardDifficulty[]> = new Map();
 
     while (hasMorePages) {
       const leaderboardResponse = await scoresaberService.lookupLeaderboards(page, true);
@@ -156,7 +158,16 @@ export default class LeaderboardService {
       for (const leaderboardToken of leaderboardResponse.leaderboards) {
         const leaderboard = getScoreSaberLeaderboardFromToken(leaderboardToken);
         const previousLeaderboard = await ScoreSaberLeaderboardModel.findById(leaderboard.id);
-        rankedIds.push(leaderboard.id);
+        leaderboards.push(leaderboard);
+
+        const difficulties = rankedMapDiffs.get(leaderboard.songHash) ?? [];
+        difficulties.push({
+          leaderboardId: leaderboard.id,
+          difficulty: leaderboard.difficulty.difficulty,
+          characteristic: leaderboard.difficulty.characteristic,
+          difficultyRaw: leaderboard.difficulty.difficultyRaw,
+        });
+        rankedMapDiffs.set(leaderboard.songHash, difficulties);
 
         if (previousLeaderboard !== undefined) {
           // Leaderboard changed data
@@ -203,19 +214,6 @@ export default class LeaderboardService {
             await Promise.all(scores.map(score => score.save()));
           }
         }
-
-        await ScoreSaberLeaderboardModel.findOneAndUpdate(
-          { _id: leaderboard.id },
-          {
-            lastRefreshed: new Date(),
-            ...leaderboard,
-          },
-          {
-            upsert: true,
-            new: true,
-            setDefaultsOnInsert: true,
-          }
-        );
       }
 
       if (page >= Math.ceil(leaderboardResponse.metadata.total / leaderboardResponse.metadata.itemsPerPage)) {
@@ -226,10 +224,30 @@ export default class LeaderboardService {
       await delay(SCORESABER_REQUEST_COOLDOWN);
     }
 
-    // Un-rank all unranked leaderboards
-    const leaderboards = await ScoreSaberLeaderboardModel.find({ ranked: true, _id: { $nin: rankedIds } });
-    console.log(`Unranking ${leaderboards.length} previously ranked leaderboards...`);
+    // Update all leaderboards
+    console.log(`Saving ${leaderboards.length} ranked leaderboards...`);
     for (const leaderboard of leaderboards) {
+      await ScoreSaberLeaderboardModel.findOneAndUpdate(
+        { _id: leaderboard.id },
+        {
+          lastRefreshed: new Date(),
+          ...leaderboard,
+          difficulties: rankedMapDiffs.get(leaderboard.songHash),
+        },
+        {
+          upsert: true,
+          new: true,
+          setDefaultsOnInsert: true,
+        }
+      );
+    }
+    console.log(`Saved ${leaderboards.length} ranked leaderboards.`);
+
+    // Un-rank all unranked leaderboards
+    const rankedIds = leaderboards.map(leaderboard => leaderboard.id);
+    const rankedLeaderboards = await ScoreSaberLeaderboardModel.find({ ranked: true, _id: { $nin: rankedIds } });
+    console.log(`Unranking ${rankedLeaderboards.length} previously ranked leaderboards...`);
+    for (const leaderboard of rankedLeaderboards) {
       if (rankedIds.includes(leaderboard.id)) {
         continue;
       }
