@@ -44,6 +44,21 @@ export default class StatisticsService {
     if (!foundPlatform) {
       return this.initPlatform(platform);
     }
+
+    // Insert latest data
+    switch (platform) {
+      case GamePlatform.ScoreSaber: {
+        const date = formatDateMinimal(getMidnightAlignedDate(new Date()));
+        const { uniquePlayers, totalScores } = await this.getScoreSaberStatistics();
+
+        foundPlatform.statistics[date] = {
+          [Statistic.ActivePlayers]: uniquePlayers,
+          [Statistic.TotalScores]: totalScores,
+        };
+        break;
+      }
+    }
+
     return foundPlatform;
   }
 
@@ -71,12 +86,9 @@ export default class StatisticsService {
     console.log(`Successfully tracked ${statistic}: ${value} for ${platform} on ${date}`);
   }
 
-  /**
-   * Tracks the statistics for ScoreSaber.
-   */
-  public static async trackScoreSaberStatistics() {
+  public static async getScoreSaberStatistics() {
     const statsResponse = await ScoreSaberScoreModel.aggregate([
-      { $match: { timestamp: { $gte: getDaysAgoDate(1) } } },
+      { $match: { timestamp: { $gte: getMidnightAlignedDate(new Date()) } } },
       {
         $facet: {
           uniquePlayers: [{ $group: { _id: "$playerId" } }, { $count: "uniquePlayers" }],
@@ -84,9 +96,17 @@ export default class StatisticsService {
         },
       },
     ]);
-    const uniquePlayers = statsResponse[0]?.uniquePlayers[0]?.uniquePlayers || 0;
-    const totalScores = statsResponse[0]?.totalScores[0]?.totalScores || 0;
+    return {
+      uniquePlayers: statsResponse[0]?.uniquePlayers[0]?.uniquePlayers || 0,
+      totalScores: statsResponse[0]?.totalScores[0]?.totalScores || 0,
+    };
+  }
 
+  /**
+   * Tracks the statistics for ScoreSaber.
+   */
+  public static async trackScoreSaberStatistics() {
+    const { uniquePlayers, totalScores } = await this.getScoreSaberStatistics();
     await Promise.all([
       this.trackStatisticToday(GamePlatform.ScoreSaber, Statistic.ActivePlayers, uniquePlayers),
       this.trackStatisticToday(GamePlatform.ScoreSaber, Statistic.TotalScores, totalScores),

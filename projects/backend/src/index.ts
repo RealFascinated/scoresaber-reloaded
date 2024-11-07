@@ -107,7 +107,7 @@ app.use(
 app.use(
   cron({
     name: "refresh-ranked-leaderboards-cron",
-    pattern: "* */6 * * *", // Every 6 hours
+    pattern: "0 */6 * * *", // Every 6 hours
     timezone: "Europe/London", // UTC time
     protect: true,
     run: async () => {
@@ -127,7 +127,7 @@ app.use(
 app.use(
   cron({
     name: "update-scoresaber-statistics",
-    pattern: "0 0 * * *", // Every day at 00:00
+    pattern: "59 23 * * *", // Every day at 23:59
     timezone: "Europe/London", // UTC time
     protect: true,
     run: async () => {
