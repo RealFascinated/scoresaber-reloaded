@@ -15,10 +15,11 @@ export default class Service {
    * Logs a message to the console.
    *
    * @param data the data to log
+   * @param force log regardless of environment
    */
-  public log(data: unknown) {
+  public log(data: unknown, force: boolean = false) {
     // Only log in development
-    if (!isProduction()) {
+    if (!isProduction() || force) {
       console.log(`[${this.name}]: ${data}`);
     }
   }
@@ -44,7 +45,8 @@ export default class Service {
     try {
       const response = await ky.get<T>(this.buildRequestUrl(!isServer(), url));
       if (response.headers.has("X-RateLimit-Remaining")) {
-        this.log(`Rate limit remaining: ${response.headers.get("X-RateLimit-Remaining")}`);
+        const left = Number(response.headers.get("X-RateLimit-Remaining"));
+        this.log(`Rate limit remaining: ${left}`, left < 100);
       }
       return response.json();
     } catch (error) {
