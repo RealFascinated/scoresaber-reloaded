@@ -325,19 +325,19 @@ export class ScoreService {
       }
     }
 
-    // The score has already been tracked, so ignore it.
     if (
-      (await this.getScoreSaberScore(
-        playerId,
-        leaderboard.id + "",
-        leaderboard.difficulty.difficulty,
-        leaderboard.difficulty.characteristic,
-        score.score
-      )) !== null
+      (await ScoreSaberScoreModel.exists({
+        playerId: playerId + "",
+        leaderboardId: leaderboard.id,
+        difficulty: leaderboard.difficulty.difficulty,
+        characteristic: leaderboard.difficulty.characteristic,
+        score: score.score,
+      })) !== null
     ) {
-      // console.log(
-      //   `ScoreSaber score already tracked for "${playerName}"(${playerId}), difficulty: ${score.difficulty}, score: ${score.score}, leaderboard: ${leaderboard.id}, ignoring...`
-      // );
+      // The score has already been tracked, so ignore it.
+      console.log(
+        `ScoreSaber score already tracked for "${playerName}"(${playerId}), difficulty: ${score.difficulty}, score: ${score.score}, leaderboard: ${leaderboard.id}, ignoring...`
+      );
       return;
     }
 
