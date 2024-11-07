@@ -13,10 +13,10 @@ import {
 import { getBeatSaverDifficulty } from "@ssr/common/utils/beatsaver.util";
 import { fetchWithCache } from "../common/cache.util";
 import { delay } from "@ssr/common/utils/utils";
-import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/score-saber-leaderboard-token";
 import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import CacheService, { ServiceCache } from "./cache.service";
 import { ImageService } from "./image.service";
+import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/leaderboard";
 
 const SCORESABER_REQUEST_COOLDOWN = 60_000 / 300; // 300 requests per minute
 
@@ -43,14 +43,9 @@ export default class LeaderboardService {
    *
    * @param leaderboardName the leaderboard to get
    * @param id the players id
-   * @param creationData the data to create the leaderboard from if it does not exist in the database
    * @returns the scores
    */
-  public static async getLeaderboard<L>(
-    leaderboardName: Leaderboards,
-    id: string,
-    creationData?: unknown
-  ): Promise<LeaderboardResponse<L>> {
+  public static async getLeaderboard<L>(leaderboardName: Leaderboards, id: string): Promise<LeaderboardResponse<L>> {
     switch (leaderboardName) {
       case "scoresaber": {
         return fetchWithCache(
@@ -73,9 +68,10 @@ export default class LeaderboardService {
             }
 
             if (!foundLeaderboard) {
-              const leaderboardToken = creationData
-                ? (creationData as ScoreSaberLeaderboardToken)
-                : await LeaderboardService.getLeaderboardToken<ScoreSaberLeaderboardToken>(leaderboardName, id);
+              const leaderboardToken = await LeaderboardService.getLeaderboardToken<ScoreSaberLeaderboardToken>(
+                leaderboardName,
+                id
+              );
               if (leaderboardToken == undefined) {
                 throw new NotFoundError(`Leaderboard not found for "${id}"`);
               }
@@ -83,9 +79,9 @@ export default class LeaderboardService {
               foundLeaderboard = await ScoreSaberLeaderboardModel.findOneAndUpdate(
                 { _id: id },
                 {
+                  ...getScoreSaberLeaderboardFromToken(leaderboardToken),
                   lastRefreshed: new Date(),
                   songArtColor: (await ImageService.getAverageImageColor(leaderboardToken.coverImage))?.color,
-                  ...getScoreSaberLeaderboardFromToken(leaderboardToken),
                 },
                 {
                   upsert: true,
