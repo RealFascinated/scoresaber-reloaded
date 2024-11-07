@@ -55,5 +55,6 @@ const datasetConfig: DatasetConfig[] = [
 ];
 
 export default function ActivePlayersAndScoresSetChart({ statistics }: Props) {
+  console.log("statistics", statistics);
   return <GenericStatisticChart statistics={statistics} datasetConfig={datasetConfig} />;
 }
