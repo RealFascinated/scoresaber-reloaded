@@ -37,6 +37,7 @@ const datasetConfig: DatasetConfig[] = [
     field: "totalScores",
     color: "#00ff6f",
     axisId: "y1",
+    type: "bar",
     axisConfig: {
       reverse: false,
       display: true,
