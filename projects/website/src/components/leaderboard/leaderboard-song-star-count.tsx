@@ -22,7 +22,7 @@ export function LeaderboardSongStarCount({ leaderboard }: LeaderboardSongStarCou
       }}
     >
       <div className="flex gap-1 items-center justify-center p-1">
-        <p>{leaderboard.stars}</p>
+        <p>{leaderboard.stars.toFixed(2)}</p>
         <StarIcon className="w-4 h-4" />
       </div>
     </div>
