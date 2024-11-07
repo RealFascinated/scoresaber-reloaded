@@ -162,7 +162,7 @@ export function getMidnightAlignedDate(date: Date) {
 export function getDaysAgoDate(days: number): Date {
   const date = new Date();
   date.setUTCDate(date.getUTCDate() - days); // Use UTC methods
-  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate())); // Return a new Date in UTC
+  return forceUTC(date); // Return a new Date in UTC
 }
 
 /**
@@ -184,21 +184,7 @@ export function getDaysAgo(date: Date): number {
  * @returns {Date} A Date object representing the parsed date in UTC
  */
 export function parseDate(date: string): Date {
-  const parsedDate = new Date(date);
-
-  // If the date string didn't specify a time zone, the Date object defaults to local time.
-  // Convert to UTC to ensure consistency.
-  return new Date(
-    Date.UTC(
-      parsedDate.getUTCFullYear(),
-      parsedDate.getUTCMonth(),
-      parsedDate.getUTCDate(),
-      parsedDate.getUTCHours(),
-      parsedDate.getUTCMinutes(),
-      parsedDate.getUTCSeconds(),
-      parsedDate.getUTCMilliseconds()
-    )
-  );
+  return forceUTC(new Date(date));
 }
 
 /**
@@ -246,5 +232,25 @@ export function formatDuration(ms: number): string {
  * @param year the year
  */
 export function getDaysInMonth(month: number, year: number) {
-  return new Date(year, month, 0).getDate();
+  return forceUTC(new Date(year, month, 0)).getDate();
+}
+
+/**
+ * Forces the date to be in UTC
+ *
+ * @param date the date
+ * @returns the date in UTC
+ */
+function forceUTC(date: Date) {
+  return new Date(
+    Date.UTC(
+      date.getUTCFullYear(),
+      date.getUTCMonth(),
+      date.getUTCDate(),
+      date.getUTCHours(),
+      date.getUTCMinutes(),
+      date.getUTCSeconds(),
+      date.getUTCMilliseconds()
+    )
+  );
 }
