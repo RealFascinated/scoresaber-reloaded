@@ -1,6 +1,7 @@
 import { Client, MetadataStorage } from "discordx";
 import { ActivityType, EmbedBuilder } from "discord.js";
 import { Config } from "@ssr/common/config";
+import { isProduction } from "@ssr/common/utils/utils";
 
 export const guildId = "1295984874942894100";
 export enum DiscordChannels {
@@ -54,6 +55,9 @@ export async function initDiscordBot() {
  * @param embed the embed to log
  */
 export async function logToChannel(channelId: DiscordChannels, embed: EmbedBuilder) {
+  if (!isProduction()) {
+    return;
+  }
   try {
     const channel = await client.channels.fetch(channelId);
     if (channel != undefined && channel.isSendable()) {

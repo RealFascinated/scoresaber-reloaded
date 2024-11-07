@@ -82,7 +82,7 @@ app.use(
       await PlayerService.updatePlayerStatistics();
       await logToChannel(
         DiscordChannels.backendLogs,
-        new EmbedBuilder().setDescription(`Updated player statistics in ${formatDuration(Date.now() - before)}ms`)
+        new EmbedBuilder().setDescription(`Updated player statistics in ${formatDuration(Date.now() - before)}`)
       );
     },
   })
@@ -99,7 +99,7 @@ app.use(
       await PlayerService.refreshPlayerScores();
       await logToChannel(
         DiscordChannels.backendLogs,
-        new EmbedBuilder().setDescription(`Refreshed player scores in ${formatDuration(Date.now() - before)}ms`)
+        new EmbedBuilder().setDescription(`Refreshed player scores in ${formatDuration(Date.now() - before)}`)
       );
     },
   })
@@ -119,7 +119,7 @@ app.use(
       await LeaderboardService.refreshRankedLeaderboards();
       await logToChannel(
         DiscordChannels.backendLogs,
-        new EmbedBuilder().setDescription(`Refreshed ranked leaderboards in ${formatDuration(Date.now() - before)}ms`)
+        new EmbedBuilder().setDescription(`Refreshed ranked leaderboards in ${formatDuration(Date.now() - before)}`)
       );
     },
   })
