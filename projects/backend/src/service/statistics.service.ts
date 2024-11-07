@@ -1,4 +1,4 @@
-import { formatDateMinimal, getDaysAgoDate, getMidnightAlignedDate } from "@ssr/common/utils/time-utils";
+import { formatDateMinimal, getMidnightAlignedDate } from "@ssr/common/utils/time-utils";
 import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import { GamePlatform } from "@ssr/common/model/statistics/game-platform";
 import { Statistic } from "@ssr/common/model/statistics/statistic";
