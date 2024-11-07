@@ -154,15 +154,15 @@ export function getMidnightAlignedDate(date: Date) {
 }
 
 /**
- * Gets the date X days ago
+ * Gets the date X days ago in UTC
  *
  * @param days the number of days to go back
- * @returns {Date} A Date object representing the date X days ago
+ * @returns {Date} A Date object representing the date X days ago in UTC
  */
 export function getDaysAgoDate(days: number): Date {
   const date = new Date();
-  date.setDate(date.getDate() - days);
-  return date;
+  date.setUTCDate(date.getUTCDate() - days); // Use UTC methods
+  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate())); // Return a new Date in UTC
 }
 
 /**
@@ -178,12 +178,27 @@ export function getDaysAgo(date: Date): number {
 }
 
 /**
- * Parses a date from a string
+ * Parses a date from a string and ensures it is in UTC
  *
- * @param date the date
+ * @param date the date string in various formats
+ * @returns {Date} A Date object representing the parsed date in UTC
  */
 export function parseDate(date: string): Date {
-  return new Date(date);
+  const parsedDate = new Date(date);
+
+  // If the date string didn't specify a time zone, the Date object defaults to local time.
+  // Convert to UTC to ensure consistency.
+  return new Date(
+    Date.UTC(
+      parsedDate.getUTCFullYear(),
+      parsedDate.getUTCMonth(),
+      parsedDate.getUTCDate(),
+      parsedDate.getUTCHours(),
+      parsedDate.getUTCMinutes(),
+      parsedDate.getUTCSeconds(),
+      parsedDate.getUTCMilliseconds()
+    )
+  );
 }
 
 /**
