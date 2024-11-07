@@ -205,24 +205,35 @@ export function formatTime(seconds: number): string {
 }
 
 /**
- * Formats a duration in the format "X days, X hours, X minutes, X seconds"
+ * Formats a duration in the format "Xd, Xh, Xm, Xs"
+ * showing at most two units for simplicity.
  *
- * @param ms
- * @returns the formatted duration
+ * @param ms - Duration in milliseconds
+ * @returns The formatted duration
  */
 export function formatDuration(ms: number): string {
   if (ms < 0) ms = -ms;
-  const time = {
-    day: Math.floor(ms / 86400000),
-    hour: Math.floor(ms / 3600000) % 24,
-    minute: Math.floor(ms / 60000) % 60,
-    second: Math.floor(ms / 1000) % 60,
-    ms: Math.floor(ms) % 1000,
-  };
-  return Object.entries(time)
-    .filter(val => val[1] !== 0)
-    .map(([key, val]) => `${val} ${key}${val !== 1 ? "s" : ""}`)
-    .join(", ");
+  const timeUnits = [
+    { unit: "d", ms: 86400000 },
+    { unit: "h", ms: 3600000 },
+    { unit: "m", ms: 60000 },
+    { unit: "s", ms: 1000 },
+  ];
+
+  const result = [];
+  let remainingMs = ms;
+
+  for (const { unit, ms: unitMs } of timeUnits) {
+    const count = Math.floor(remainingMs / unitMs);
+    if (count > 0) {
+      result.push(`${count}${unit}`);
+      remainingMs -= count * unitMs;
+    }
+    // Stop after two units have been added
+    if (result.length === 2) break;
+  }
+
+  return result.join(", ") || "0s";
 }
 
 /**
