@@ -370,38 +370,36 @@ export class ScoreService {
 
     // Only save score stats and replays in production
     if (isProduction()) {
-      (async () => {
-        // Cache score stats for this score
-        const scoreStats = await beatLeaderService.lookupScoreStats(score.id);
-        if (scoreStats !== undefined) {
-          try {
-            await MinioService.saveFile(
-              MinioBucket.BeatLeaderScoreStats,
-              `${score.id}.json`,
-              Buffer.from(JSON.stringify(scoreStats))
-            );
-            savedScoreStats = true;
-          } catch (error) {
-            console.error(`Failed to save score stats for ${score.id}: ${error}`);
-          }
-        }
-
-        // // Cache replay for this score
+      // Cache score stats for this score
+      const scoreStats = await beatLeaderService.lookupScoreStats(score.id);
+      if (scoreStats !== undefined) {
         try {
-          const replayId = `${score.id}-${playerId}-${leaderboard.difficulty.difficultyName}-${leaderboard.difficulty.modeName}-${leaderboard.song.hash.toUpperCase()}.bsor`;
-          const replayData = await kyFetchBuffer(`https://cdn.replays.beatleader.xyz/${replayId}`);
-
-          if (replayData !== undefined) {
-            await MinioService.saveFile(MinioBucket.BeatLeaderReplays, `${replayId}`, Buffer.from(replayData));
-            savedReplayId = replayId;
-          }
+          await MinioService.saveFile(
+            MinioBucket.BeatLeaderScoreStats,
+            `${score.id}.json`,
+            Buffer.from(JSON.stringify(scoreStats))
+          );
+          savedScoreStats = true;
         } catch (error) {
-          console.error(`Failed to save replay for ${score.id}: ${error}`);
+          console.error(`Failed to save score stats for ${score.id}: ${error}`);
         }
+      }
 
-        // Remove old replays
-        await this.cleanupScoreReplays(playerId, leaderboard.id);
-      })().then(() => {});
+      // // Cache replay for this score
+      try {
+        const replayId = `${score.id}-${playerId}-${leaderboard.difficulty.difficultyName}-${leaderboard.difficulty.modeName}-${leaderboard.song.hash.toUpperCase()}.bsor`;
+        const replayData = await kyFetchBuffer(`https://cdn.replays.beatleader.xyz/${replayId}`);
+
+        if (replayData !== undefined) {
+          await MinioService.saveFile(MinioBucket.BeatLeaderReplays, `${replayId}`, Buffer.from(replayData));
+          savedReplayId = replayId;
+        }
+      } catch (error) {
+        console.error(`Failed to save replay for ${score.id}: ${error}`);
+      }
+
+      // Remove old replays
+      await this.cleanupScoreReplays(playerId, leaderboard.id);
     }
 
     // The score has already been tracked, so ignore it.
