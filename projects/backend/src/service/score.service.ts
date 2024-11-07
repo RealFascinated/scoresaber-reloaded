@@ -313,7 +313,10 @@ export class ScoreService {
     }
 
     const playerName = (scoreToken.leaderboardPlayerInfo && scoreToken.leaderboardPlayerInfo.name) || "Unknown";
-    const leaderboard = getScoreSaberLeaderboardFromToken(leaderboardToken);
+    const leaderboard =
+      (await LeaderboardService.getLeaderboard<ScoreSaberLeaderboard>("scoresaber", leaderboardToken.id + ""))
+        ?.leaderboard || getScoreSaberLeaderboardFromToken(leaderboardToken);
+    // const leaderboard = getScoreSaberLeaderboardFromToken(leaderboardToken);
     const score = getScoreSaberScoreFromToken(scoreToken, leaderboard, playerId);
 
     const player: PlayerDocument | null = await PlayerModel.findById(playerId);
