@@ -7,7 +7,6 @@ import PlayerScores from "./player-scores";
 import Card from "@/components/card";
 import PlayerBadges from "@/components/player/player-badges";
 import { useIsMobile } from "@/hooks/use-is-mobile";
-import { useIsVisible } from "@/hooks/use-is-visible";
 import { useRef } from "react";
 import useDatabase from "@/hooks/use-database";
 import { useLiveQuery } from "dexie-react-hooks";
@@ -30,7 +29,6 @@ type Props = {
 export default function PlayerData({ initialPlayerData, initialScoreData, initialSearch, sort, page }: Props) {
   const isMobile = useIsMobile();
   const miniRankingsRef = useRef<HTMLDivElement>(null);
-  const isMiniRankingsVisible = useIsVisible(miniRankingsRef);
   const database = useDatabase();
   const settings = useLiveQuery(() => database.getSettings());
   const isFriend = useLiveQuery(() => database.isFriend(initialPlayerData.id));
@@ -63,9 +61,9 @@ export default function PlayerData({ initialPlayerData, initialScoreData, initia
         />
       </article>
       {!isMobile && !player.inactive && !player.banned && (
-        <aside ref={miniRankingsRef} className="w-[600px] hidden 2xl:flex flex-col gap-2">
-          <Mini shouldUpdate={isMiniRankingsVisible} type="Global" player={player} />
-          <Mini shouldUpdate={isMiniRankingsVisible} type="Country" player={player} />
+        <aside className="w-[600px] hidden 2xl:flex flex-col gap-2">
+          <Mini type="Global" player={player} />
+          <Mini type="Country" player={player} />
         </aside>
       )}
     </div>

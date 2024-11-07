@@ -11,8 +11,6 @@ import { getPlayersAroundPlayer } from "@ssr/common/utils/player-utils";
 import { AroundPlayer } from "@ssr/common/types/around-player";
 import { PlayerInfo } from "@/components/player/player-info";
 
-const PLAYER_NAME_MAX_LENGTH = 18;
-
 type MiniProps = {
   /**
    * The type of ranking to display.
@@ -23,11 +21,6 @@ type MiniProps = {
    * The player on this profile.
    */
   player: ScoreSaberPlayer;
-
-  /**
-   * Whether the data should be updated
-   */
-  shouldUpdate?: boolean;
 };
 
 type Variants = {
@@ -47,11 +40,7 @@ const miniVariants: Variants = {
   },
 };
 
-export default function Mini({ type, player, shouldUpdate }: MiniProps) {
-  if (shouldUpdate == undefined) {
-    shouldUpdate = true;
-  }
-
+export default function Mini({ type, player }: MiniProps) {
   const variant = miniVariants[type];
   const icon = variant.icon(player);
 
@@ -62,7 +51,6 @@ export default function Mini({ type, player, shouldUpdate }: MiniProps) {
   } = useQuery({
     queryKey: ["mini-ranking-" + type, player.id, type],
     queryFn: () => getPlayersAroundPlayer(player.id, type.toLowerCase() as AroundPlayer),
-    enabled: shouldUpdate,
   });
 
   if (isLoading || !response) {
