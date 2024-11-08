@@ -229,21 +229,23 @@ export default class LeaderboardService {
 
     // Update all leaderboards
     console.log(`Saving ${leaderboards.length} ranked leaderboards...`);
-    for (const leaderboard of leaderboards) {
-      await ScoreSaberLeaderboardModel.findOneAndUpdate(
-        { _id: leaderboard.id },
-        {
-          lastRefreshed: new Date(),
-          ...leaderboard,
-          difficulties: rankedMapDiffs.get(leaderboard.songHash),
-        },
-        {
-          upsert: true,
-          new: true,
-          setDefaultsOnInsert: true,
-        }
-      );
-    }
+    await Promise.all(
+      leaderboards.map(async leaderboard => {
+        await ScoreSaberLeaderboardModel.findOneAndUpdate(
+          { _id: leaderboard.id },
+          {
+            lastRefreshed: new Date(),
+            ...leaderboard,
+            difficulties: rankedMapDiffs.get(leaderboard.songHash),
+          },
+          {
+            upsert: true,
+            new: true,
+            setDefaultsOnInsert: true,
+          }
+        );
+      })
+    );
     console.log(`Saved ${leaderboards.length} ranked leaderboards.`);
 
     // Un-rank all unranked leaderboards

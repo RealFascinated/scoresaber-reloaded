@@ -161,7 +161,7 @@ export function getMidnightAlignedDate(date: Date) {
  */
 export function getDaysAgoDate(days: number): Date {
   const date = new Date();
-  date.setUTCDate(date.getUTCDate() - days); // Use UTC methods
+  date.setDate(date.getDate() - days); // Use UTC methods
   return forceUTC(date); // Return a new Date in UTC
 }
 
