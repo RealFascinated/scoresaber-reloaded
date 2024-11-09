@@ -7,7 +7,6 @@ import PlayerScores from "./player-scores";
 import Card from "@/components/card";
 import PlayerBadges from "@/components/player/player-badges";
 import { useIsMobile } from "@/hooks/use-is-mobile";
-import { useRef } from "react";
 import useDatabase from "@/hooks/use-database";
 import { useLiveQuery } from "dexie-react-hooks";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
@@ -17,6 +16,7 @@ import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber
 import PlayerScoresResponse from "@ssr/common/response/player-scores-response";
 import PlayerViews from "@/components/player/history-views/player-views";
 import { getScoreSaberPlayer } from "@ssr/common/utils/player-utils";
+import useSettings from "@/hooks/use-settings";
 
 type Props = {
   initialPlayerData: ScoreSaberPlayer;
@@ -28,9 +28,8 @@ type Props = {
 
 export default function PlayerData({ initialPlayerData, initialScoreData, initialSearch, sort, page }: Props) {
   const isMobile = useIsMobile();
-  const miniRankingsRef = useRef<HTMLDivElement>(null);
   const database = useDatabase();
-  const settings = useLiveQuery(() => database.getSettings());
+  const settings = useSettings();
   const isFriend = useLiveQuery(() => database.isFriend(initialPlayerData.id));
 
   let player = initialPlayerData;

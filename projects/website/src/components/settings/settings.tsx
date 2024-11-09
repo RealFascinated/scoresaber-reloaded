@@ -6,18 +6,16 @@ import { z } from "zod";
 import { Button } from "../ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "../ui/form";
 import { Input } from "../ui/input";
-import useDatabase from "@/hooks/use-database";
-import { useLiveQuery } from "dexie-react-hooks";
 import { useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
+import useSettings from "@/hooks/use-settings";
 
 const formSchema = z.object({
   backgroundCover: z.string().min(0).max(128),
 });
 
 export default function Settings() {
-  const database = useDatabase();
-  const settings = useLiveQuery(() => database.getSettings());
+  const settings = useSettings();
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -33,10 +31,7 @@ export default function Settings() {
     if (!settings) {
       return;
     }
-
-    settings.backgroundCover = backgroundCover;
-    await database.setSettings(settings);
-
+    settings.setBackgroundImage(backgroundCover);
     toast({
       title: "Settings saved",
       description: "Your settings have been saved.",

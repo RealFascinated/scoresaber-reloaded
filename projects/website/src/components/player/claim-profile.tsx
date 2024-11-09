@@ -1,12 +1,11 @@
 "use client";
 
 import { CheckIcon } from "@heroicons/react/24/solid";
-import { useLiveQuery } from "dexie-react-hooks";
-import useDatabase from "../../hooks/use-database";
 import { useToast } from "@/hooks/use-toast";
 import Tooltip from "../tooltip";
 import { Button } from "../ui/button";
 import { setCookieValue } from "@ssr/common/utils/cookie-utils";
+import useSettings from "@/hooks/use-settings";
 
 type Props = {
   /**
@@ -16,17 +15,14 @@ type Props = {
 };
 
 export default function ClaimProfile({ playerId }: Props) {
-  const database = useDatabase();
+  const settings = useSettings();
   const { toast } = useToast();
-  const settings = useLiveQuery(() => database.getSettings());
 
   /**
    * Claims the profile.
    */
   async function claimProfile() {
-    const settings = await database.getSettings();
-
-    settings?.setPlayerId(playerId);
+    settings.setPlayerId(playerId);
     await setCookieValue("playerId", playerId);
     toast({
       title: "Profile Claimed",
@@ -35,7 +31,7 @@ export default function ClaimProfile({ playerId }: Props) {
   }
 
   // Database is not ready
-  if (settings == undefined || database == undefined) {
+  if (settings == undefined) {
     return null;
   }
 

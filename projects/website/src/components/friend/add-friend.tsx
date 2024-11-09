@@ -8,6 +8,7 @@ import { Button } from "../ui/button";
 import { PersonIcon } from "@radix-ui/react-icons";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { trackPlayer } from "@ssr/common/utils/player-utils";
+import useSettings from "@/hooks/use-settings";
 
 type Props = {
   /**
@@ -19,9 +20,9 @@ type Props = {
 export default function AddFriend({ player }: Props) {
   const { id, name } = player;
 
+  const settings = useSettings();
   const database = useDatabase();
   const isFriend = useLiveQuery(() => database.isFriend(id));
-  const settings = useLiveQuery(() => database.getSettings());
   const { toast } = useToast();
 
   /**

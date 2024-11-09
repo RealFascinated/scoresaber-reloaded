@@ -7,8 +7,7 @@ import { useIsMobile } from "@/hooks/use-is-mobile";
 import { formatDateMinimal, getDaysAgo, getDaysAgoDate, parseDate } from "@ssr/common/utils/time-utils";
 import { Axis, Dataset, DatasetConfig } from "@/common/chart/types";
 import { generateChartAxis, generateChartDataset } from "@/common/chart/chart.util";
-import useDatabase from "@/hooks/use-database";
-import { useLiveQuery } from "dexie-react-hooks";
+import useSettings from "@/hooks/use-settings";
 
 Chart.register(...registerables);
 
@@ -24,8 +23,7 @@ export type ChartProps = {
 export default function GenericChart({ options, labels, datasetConfig, histories }: ChartProps) {
   const id = options?.id;
   const isMobile = useIsMobile();
-  const database = useDatabase();
-  const settings = useLiveQuery(() => database.getSettings());
+  const settings = useSettings();
 
   const axes: Record<string, Axis> = {
     x: {
@@ -68,7 +66,7 @@ export default function GenericChart({ options, labels, datasetConfig, histories
           historyArray,
           config.color,
           config.axisId,
-          settings?.getChartLegend(id!, config.title, true),
+          settings ? settings?.getChartLegend(id!, config.title, true) : false,
           config.type || "line"
         );
       }

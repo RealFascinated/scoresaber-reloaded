@@ -5,14 +5,14 @@ import { useLiveQuery } from "dexie-react-hooks";
 import Link from "next/link";
 import { Avatar, AvatarImage } from "../ui/avatar";
 import NavbarButton from "./navbar-button";
-import Settings from "@/common/database/types/settings";
 import Database from "@/common/database/database";
 import { truncateText } from "@/common/string-utils";
 import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/player";
+import useSettings from "@/hooks/use-settings";
 
 export default function ProfileButton() {
   const database: Database = useDatabase();
-  const settings = useLiveQuery<Settings | undefined>(() => database.getSettings());
+  const settings = useSettings();
   const claimedPlayer = useLiveQuery<ScoreSaberPlayerToken | undefined>(() => database.getClaimedPlayer());
 
   if (settings == undefined || claimedPlayer == undefined) {
