@@ -6,7 +6,7 @@ export function middleware(request: NextRequest) {
 
   // Log requests in production
   if (isProduction()) {
-    console.log(` ${request.method} ${request.nextUrl.pathname} ${response.status}`);
+    console.log(` ${request.method} ${request.nextUrl.pathname}${request.nextUrl.search} ${response.status}`);
   }
   return response;
 }
