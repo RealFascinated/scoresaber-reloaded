@@ -2,7 +2,7 @@
 
 import React from "react";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import { getDaysAgoDate, getMidnightAlignedDate, parseDate } from "@ssr/common/utils/time-utils";
+import { formatDateMinimal, getDaysAgoDate, getMidnightAlignedDate, parseDate } from "@ssr/common/utils/time-utils";
 import { getValueFromHistory } from "@ssr/common/utils/player-utils";
 import { DatasetConfig } from "@/common/chart/types";
 import GenericChart from "@/components/chart/generic-chart";
@@ -34,6 +34,7 @@ export default function GenericPlayerChart({ id, player, datasetConfig }: Props)
     );
   }
 
+  const labels: Date[] = [];
   const histories: Record<string, (number | null)[]> = {};
   const historyDays = 50;
 
@@ -42,33 +43,28 @@ export default function GenericPlayerChart({ id, player, datasetConfig }: Props)
     histories[config.field] = Array(historyDays).fill(null);
   });
 
-  const labels: Date[] = [];
-
-  // Sort the statistic entries by date
-  const statisticEntries = Object.entries(player.statisticHistory).sort(
-    ([a], [b]) => parseDate(a).getTime() - parseDate(b).getTime()
-  );
-
+  const statisticEntries = Object.entries(player.statisticHistory);
   let currentHistoryIndex = 0;
-
-  for (let dayAgo = historyDays; dayAgo >= 0; dayAgo--) {
-    const targetDate = getMidnightAlignedDate(getDaysAgoDate(dayAgo));
-    labels.push(targetDate); // Add the target date to labels
-
-    if (currentHistoryIndex < statisticEntries.length) {
-      const [dateString, history] = statisticEntries[currentHistoryIndex];
-      const entryDate = parseDate(dateString);
-
-      if (entryDate.toDateString() === targetDate.toDateString()) {
-        datasetConfig.forEach(config => {
-          histories[config.field][historyDays - dayAgo] = getValueFromHistory(history, config.field) ?? null;
-        });
-        currentHistoryIndex++;
-      }
+  for (let dayAgo = 0; dayAgo <= historyDays; dayAgo++) {
+    const [dateString, history] = statisticEntries[currentHistoryIndex];
+    if (!history) {
+      continue;
     }
+
+    labels.push(parseDate(dateString)); // Add the target date to labels
+    datasetConfig.forEach(config => {
+      histories[config.field][dayAgo] = getValueFromHistory(history, config.field) ?? null;
+    });
+    currentHistoryIndex++;
   }
 
-  // Render the chart with collected data
+  // Reverse the labels and histories arrays to make the latest date and data first
+  labels.reverse();
+  Object.keys(histories).forEach(field => {
+    histories[field].reverse();
+  });
+
+  // Render the chart with reversed data
   return (
     <GenericChart
       options={{
