@@ -15,7 +15,6 @@ import { fetchWithCache } from "../common/cache.util";
 import { delay } from "@ssr/common/utils/utils";
 import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import CacheService, { ServiceCache } from "./cache.service";
-import { ImageService } from "./image.service";
 import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/leaderboard";
 import LeaderboardDifficulty from "@ssr/common/model/leaderboard/leaderboard-difficulty";
 
