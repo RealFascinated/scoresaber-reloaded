@@ -47,10 +47,9 @@ export default class ScoreSaberService {
             };
           }) || [];
 
-        const statisticHistory: Record<string, PlayerHistory> = account?.getHistoryPreviousDays(50) || {};
+        let statisticHistory: Record<string, PlayerHistory> = account?.getHistoryPreviousDays(50) || {};
         if (statisticHistory) {
           const todayDate = formatDateMinimal(getMidnightAlignedDate(new Date()));
-          console.log("todayDate", todayDate);
           const historyElement = statisticHistory[todayDate];
           statisticHistory[todayDate] = {
             ...historyElement,
@@ -81,7 +80,6 @@ export default class ScoreSaberService {
         });
         playerRankHistory.push(playerToken.rank);
 
-        let missingDays = 0;
         let daysAgo = 0; // Start from current day
         for (let i = playerRankHistory.length - 1; i >= 0; i--) {
           const rank = playerRankHistory[i];
@@ -94,7 +92,6 @@ export default class ScoreSaberService {
 
           const dateKey = formatDateMinimal(date);
           if (!statisticHistory[dateKey] || statisticHistory[dateKey].rank == undefined) {
-            missingDays += 1;
             statisticHistory[dateKey] = {
               ...statisticHistory[dateKey],
               rank: rank,
@@ -102,11 +99,10 @@ export default class ScoreSaberService {
           }
         }
 
-        if (missingDays > 0 && missingDays != playerRankHistory.length) {
-          console.log(
-            `Player has ${missingDays} missing day${missingDays > 1 ? "s" : ""}, filling in with fallback history...`
-          );
-        }
+        // sort statisticHistory by date
+        statisticHistory = Object.fromEntries(
+          Object.entries(statisticHistory).sort((a, b) => new Date(b[0]).getTime() - new Date(a[0]).getTime())
+        );
 
         return {
           id: playerToken.id,
