@@ -1,6 +1,5 @@
 import { withSentryConfig } from "@sentry/nextjs";
 import { format } from "@formkit/tempo";
-import nextBundleAnalyzer from "@next/bundle-analyzer";
 import type { NextConfig } from "next";
 import { isProduction } from "@/common/website-utils";
 
@@ -26,11 +25,11 @@ const nextConfig: NextConfig = {
   },
 };
 
-const withBundleAnalyzer = nextBundleAnalyzer({
-  enabled: process.env.ANALYZE === "true",
-});
+// const withBundleAnalyzer = nextBundleAnalyzer({
+//   enabled: process.env.ANALYZE === "true",
+// });
 
-const config = withBundleAnalyzer(nextConfig);
+const config = nextConfig; //withBundleAnalyzer(nextConfig);
 export default isProduction()
   ? withSentryConfig(config, {
       org: "fascinatedcc",
