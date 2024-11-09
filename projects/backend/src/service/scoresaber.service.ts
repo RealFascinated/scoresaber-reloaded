@@ -10,7 +10,6 @@ import { PlayerService } from "./player.service";
 import { formatDateMinimal, getDaysAgoDate, getMidnightAlignedDate, parseDate } from "@ssr/common/utils/time-utils";
 import { getPageFromRank } from "@ssr/common/utils/utils";
 import { getValueFromHistory } from "@ssr/common/utils/player-utils";
-import { ImageService } from "./image.service";
 
 export default class ScoreSaberService {
   /**
@@ -51,30 +50,32 @@ export default class ScoreSaberService {
         const statisticHistory: Record<string, PlayerHistory> = account?.getHistoryPreviousDays(50) || {};
         if (statisticHistory) {
           const todayDate = formatDateMinimal(getMidnightAlignedDate(new Date()));
+          const historyElement = statisticHistory[todayDate];
           statisticHistory[todayDate] = {
-            ...statisticHistory[todayDate],
+            ...historyElement,
             rank: playerToken.rank,
             countryRank: playerToken.countryRank,
             pp: playerToken.pp,
             ...(account ? { plusOnePp: (await PlayerService.getPlayerPpBoundary(account.id, 1))[0] } : undefined),
             replaysWatched: playerToken.scoreStats.replaysWatched,
             accuracy: {
-              ...statisticHistory[todayDate]?.accuracy,
+              ...historyElement?.accuracy,
               averageRankedAccuracy: playerToken.scoreStats.averageRankedAccuracy,
             },
             scores: {
-              ...statisticHistory[todayDate]?.scores,
+              ...historyElement?.scores,
               totalScores: playerToken.scoreStats.totalPlayCount,
               totalRankedScores: playerToken.scoreStats.rankedPlayCount,
             },
             score: {
-              ...statisticHistory[todayDate]?.score,
+              ...historyElement?.score,
               totalScore: playerToken.scoreStats.totalScore,
               totalRankedScore: playerToken.scoreStats.totalRankedScore,
             },
           };
         }
 
+        // 30ms
         const playerRankHistory = playerToken.histories.split(",").map(value => {
           return parseInt(value);
         });
@@ -114,7 +115,8 @@ export default class ScoreSaberService {
           country: playerToken.country,
           rank: playerToken.rank,
           countryRank: playerToken.countryRank,
-          avatarColor: (await ImageService.getAverageImageColor(playerToken.profilePicture))?.color,
+          avatarColor: "#fff",
+          // avatarColor: (await ImageService.getAverageImageColor(playerToken.profilePicture))?.color,
           joinedDate: new Date(playerToken.firstSeen),
           bio: bio,
           pp: playerToken.pp,

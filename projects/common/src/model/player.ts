@@ -75,13 +75,26 @@ export class Player {
     const statisticHistory = this.getStatisticHistory();
     const history: Record<string, PlayerHistory> = {};
 
-    for (let i = 0; i <= days; i++) {
-      const date = formatDateMinimal(getMidnightAlignedDate(getDaysAgoDate(i)));
-      const playerHistory = statisticHistory[date];
-      if (playerHistory !== undefined && Object.keys(playerHistory).length > 0) {
-        history[date] = playerHistory;
-      }
-    }
+    // Calculate date range in UTC to avoid timezone issues
+    const endDate = getMidnightAlignedDate(new Date()); // Today's midnight in UTC
+    const startDate = getMidnightAlignedDate(getDaysAgoDate(days + 1)); // X days ago midnight in UTC
+
+    // Convert to timestamp for easier comparison
+    const startTimestamp = startDate.getTime();
+    const endTimestamp = endDate.getTime();
+
+    // Filter statisticHistory to only include dates within the specified range
+    Object.keys(statisticHistory)
+      .filter(date => {
+        const dateTimestamp = Date.parse(date); // Assuming date is in a string format like "DD MMM YYYY"
+        return dateTimestamp >= startTimestamp && dateTimestamp <= endTimestamp;
+      })
+      .forEach(date => {
+        const playerHistory = statisticHistory[date];
+        if (playerHistory && Object.keys(playerHistory).length > 0) {
+          history[date] = playerHistory;
+        }
+      });
     return history;
   }
 

@@ -96,12 +96,11 @@ export function timeAgo(input: Date) {
  * @param date the date
  */
 export function formatDateMinimal(date: Date) {
-  return date.toLocaleString("en-US", {
-    timeZone: "Europe/London",
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
+  const day = date.getUTCDate();
+  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const month = monthNames[date.getUTCMonth()];
+  const year = date.getUTCFullYear();
+  return `${month} ${day}, ${year}`;
 }
 
 /**

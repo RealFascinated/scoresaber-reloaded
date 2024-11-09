@@ -292,7 +292,7 @@ export class ScoreService {
 
     const scores: ScoreSaberScore[] = [];
     for (const rawScore of rawScores) {
-      scores.push(new ScoreSaberScoreModel(rawScore.score).toObject() as ScoreSaberScore);
+      scores.push(rawScore.score as ScoreSaberScore);
     }
     return scores;
   }
