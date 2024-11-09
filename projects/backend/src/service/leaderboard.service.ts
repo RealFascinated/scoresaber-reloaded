@@ -84,7 +84,8 @@ export default class LeaderboardService {
                 {
                   ...getScoreSaberLeaderboardFromToken(leaderboardToken),
                   lastRefreshed: new Date(),
-                  songArtColor: (await ImageService.getAverageImageColor(leaderboardToken.coverImage))?.color,
+                  songArtColor: "#fff",
+                  // songArtColor: (await ImageService.getAverageImageColor(leaderboardToken.coverImage))?.color,
                 },
                 {
                   upsert: true,
