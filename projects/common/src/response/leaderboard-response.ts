@@ -10,4 +10,9 @@ export type LeaderboardResponse<L> = {
    * The beatsaver map.
    */
   beatsaver?: BeatSaverMap;
+
+  /**
+   * Was this leaderboard cached locally?
+   */
+  cached?: boolean;
 };

@@ -54,6 +54,7 @@ export default class LeaderboardService {
           `${leaderboardName}:${id}`,
           async () => {
             const now = new Date();
+            let cached = false;
 
             let foundLeaderboard: ScoreSaberLeaderboardDocument | undefined = undefined;
             const cachedLeaderboard: ScoreSaberLeaderboardDocument | null =
@@ -64,6 +65,7 @@ export default class LeaderboardService {
               } else if (cachedLeaderboard.lastRefreshed) {
                 if (now.getTime() - cachedLeaderboard.lastRefreshed.getTime() < 1000 * 60 * 60 * 12) {
                   foundLeaderboard = cachedLeaderboard;
+                  cached = true;
                 }
               }
             }
@@ -102,6 +104,7 @@ export default class LeaderboardService {
             return {
               leaderboard: leaderboard as L,
               beatsaver: beatSaverMap,
+              cached: cached,
             } as LeaderboardResponse<L>;
           }
         );

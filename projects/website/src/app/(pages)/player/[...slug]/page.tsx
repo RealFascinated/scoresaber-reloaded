@@ -112,10 +112,12 @@ export async function generateViewport(props: Props): Promise<Viewport> {
 }
 
 export default async function PlayerPage(props: Props) {
+  const before = performance.now();
   const { player, scores, sort, page, search } = await getPlayerData(props);
   if (player == undefined) {
     return redirect("/");
   }
+  console.log(`Loaded player in ${(performance.now() - before).toFixed(0)}ms`);
 
   return (
     <main className="w-full flex justify-center">
