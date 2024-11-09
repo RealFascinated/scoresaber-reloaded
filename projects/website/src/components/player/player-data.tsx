@@ -45,7 +45,7 @@ export default function PlayerData({ initialPlayerData, initialScoreData, initia
   }
 
   return (
-    <motion.div className="flex gap-2" initial={{ opacity: 0.6 }} animate={{ opacity: 1 }}>
+    <motion.div className="flex gap-2" initial={{ opacity: 0.4 }} animate={{ opacity: 1 }}>
       <article className="flex flex-col gap-2">
         <PlayerHeader player={player} />
         <Card className="gap-1">
