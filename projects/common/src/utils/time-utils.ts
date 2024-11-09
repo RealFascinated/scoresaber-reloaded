@@ -111,6 +111,7 @@ export function formatDateMinimal(date: Date) {
  * @returns the formatted date
  */
 export function formatDate(date: Date, format: "MMMM YYYY" | "DD MMMM YYYY" | "DD MMMM YYYY HH:mm" = "MMMM YYYY") {
+  date = forceUTC(date);
   switch (format) {
     case "MMMM YYYY": {
       return date.toLocaleString("en-US", {
@@ -171,7 +172,8 @@ export function getDaysAgoDate(days: number): Date {
  * @returns the amount of days
  */
 export function getDaysAgo(date: Date): number {
-  const now = new Date();
+  date = forceUTC(date);
+  const now = forceUTC(new Date());
   const diffTime = Math.abs(now.getTime() - date.getTime());
   return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) - 1;
 }
@@ -251,7 +253,7 @@ export function getDaysInMonth(month: number, year: number) {
  * @param date the date
  * @returns the date in UTC
  */
-function forceUTC(date: Date) {
+export function forceUTC(date: Date) {
   return new Date(
     Date.UTC(
       date.getUTCFullYear(),
