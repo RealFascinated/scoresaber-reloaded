@@ -121,7 +121,7 @@ export default function GenericChart({ options, labels, datasetConfig, histories
             } else if (differenceInDays === 1) {
               return `${formattedDate} (Yesterday)`;
             } else {
-              return formattedDate;
+              return `${formattedDate} (${differenceInDays} day${differenceInDays > 1 ? "s" : ""} ago)`;
             }
           },
           label(context: any) {
