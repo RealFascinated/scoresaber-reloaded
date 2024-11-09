@@ -1,10 +1,11 @@
 "use client";
 
 import React from "react";
-import GenericChart, { DatasetConfig } from "@/components/chart/generic-chart";
 import { getDaysAgoDate, parseDate } from "@ssr/common/utils/time-utils";
 import { StatisticsType } from "@ssr/common/model/statistics/statistic-type";
 import { Statistic } from "@ssr/common/model/statistics/statistic";
+import { DatasetConfig } from "@/common/chart/types";
+import GenericChart from "@/components/chart/generic-chart";
 
 type Props = {
   /**

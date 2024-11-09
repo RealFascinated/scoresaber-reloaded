@@ -1,11 +1,11 @@
 "use client";
 
 import React from "react";
-import { DatasetConfig } from "@/components/chart/generic-chart";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { formatNumberWithCommas, formatPp, isWholeNumber } from "@ssr/common/utils/number-utils";
 import { scoreBarsDataset } from "@/components/player/history-views/views/player-scores-chart";
 import GenericPlayerChart from "@/components/player/history-views/generic-player-chart";
+import { DatasetConfig } from "@/common/chart/types";
 
 type Props = {
   player: ScoreSaberPlayer;
@@ -83,5 +83,5 @@ const datasetConfig: DatasetConfig[] = [
 ];
 
 export default function PlayerRankingChart({ player }: Props) {
-  return <GenericPlayerChart player={player} datasetConfig={datasetConfig} />;
+  return <GenericPlayerChart id="player-ranking-chart" player={player} datasetConfig={datasetConfig} />;
 }

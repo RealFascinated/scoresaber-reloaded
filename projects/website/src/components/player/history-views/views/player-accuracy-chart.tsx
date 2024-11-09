@@ -1,10 +1,10 @@
 "use client";
 
 import React from "react";
-import { DatasetConfig } from "@/components/chart/generic-chart";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { isWholeNumber } from "@ssr/common/utils/number-utils";
 import GenericPlayerChart from "@/components/player/history-views/generic-player-chart";
+import { DatasetConfig } from "@/common/chart/types";
 
 type Props = {
   player: ScoreSaberPlayer;
@@ -35,5 +35,5 @@ const datasetConfig: DatasetConfig[] = [
 ];
 
 export default function PlayerAccuracyChart({ player }: Props) {
-  return <GenericPlayerChart player={player} datasetConfig={datasetConfig} />;
+  return <GenericPlayerChart id="player-accuracy-chart" player={player} datasetConfig={datasetConfig} />;
 }

@@ -5,110 +5,27 @@ import { Chart, registerables } from "chart.js";
 import { Line } from "react-chartjs-2";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { formatDateMinimal, getDaysAgo, getDaysAgoDate, parseDate } from "@ssr/common/utils/time-utils";
+import { Axis, Dataset, DatasetConfig } from "@/common/chart/types";
+import { generateChartAxis, generateChartDataset } from "@/common/chart/chart.util";
+import useDatabase from "@/hooks/use-database";
+import { useLiveQuery } from "dexie-react-hooks";
 
 Chart.register(...registerables);
 
-export type AxisPosition = "left" | "right";
-export type DatasetDisplayType = "line" | "bar";
-
-export type Axis = {
-  id?: string;
-  position?: AxisPosition;
-  display?: boolean;
-  grid?: { color?: string; drawOnChartArea?: boolean };
-  title?: { display: boolean; text?: string; color?: string };
-  ticks?: {
-    stepSize?: number;
-    callback?: (value: number, index: number, values: any) => string;
-    font?: (context: any) => { weight: string; color?: string } | undefined;
-    color?: (context: any) => string | undefined;
-  };
-  reverse?: boolean;
-};
-
-export type Dataset = {
-  label: string;
-  data: (number | null)[];
-  borderColor: string;
-  fill: boolean;
-  lineTension: number;
-  spanGaps: boolean;
-  yAxisID: string;
-  hidden?: boolean;
-  type?: DatasetDisplayType;
-};
-
-export type DatasetConfig = {
-  title: string;
-  field: string;
-  color: string;
-  axisId: string;
-  axisConfig: {
-    reverse: boolean;
-    display: boolean;
-    hideOnMobile?: boolean;
-    displayName?: string;
-    position: AxisPosition;
-    valueFormatter?: (value: number) => string;
-  };
-  type?: DatasetDisplayType;
-  labelFormatter: (value: number) => string;
-  showLegend?: boolean;
-};
-
 export type ChartProps = {
+  options?: {
+    id: string;
+  };
   labels: Date[] | string[];
   datasetConfig: DatasetConfig[];
   histories: Record<string, (number | null)[]>;
 };
 
-const generateAxis = (
-  id: string,
-  reverse: boolean,
-  display: boolean,
-  position: AxisPosition,
-  displayName?: string,
-  valueFormatter?: (value: number) => string
-): Axis => ({
-  id,
-  position,
-  display,
-  grid: { drawOnChartArea: id === "y", color: id === "y" ? "#252525" : "" },
-  title: { display: true, text: displayName, color: "#ffffff" },
-  ticks: {
-    stepSize: 10,
-    callback: (value: number) => {
-      // Apply precision if specified, otherwise default to no decimal places
-      return valueFormatter !== undefined ? valueFormatter(value) : value.toString();
-    },
-  },
-  reverse,
-});
-
-const generateDataset = (
-  label: string,
-  data: (number | null)[],
-  borderColor: string,
-  yAxisID: string,
-  showLegend: boolean = true,
-  type?: DatasetDisplayType
-): Dataset => ({
-  label,
-  data,
-  borderColor,
-  fill: false,
-  lineTension: 0.5,
-  spanGaps: false,
-  yAxisID,
-  hidden: !showLegend, // Use hidden to disable legend
-  type,
-  ...(type === "bar" && {
-    backgroundColor: borderColor,
-  }),
-});
-
-export default function GenericChart({ labels, datasetConfig, histories }: ChartProps) {
+export default function GenericChart({ options, labels, datasetConfig, histories }: ChartProps) {
+  const id = options?.id;
   const isMobile = useIsMobile();
+  const database = useDatabase();
+  const settings = useLiveQuery(() => database.getSettings());
 
   const axes: Record<string, Axis> = {
     x: {
@@ -137,7 +54,7 @@ export default function GenericChart({ labels, datasetConfig, histories }: Chart
       const historyArray = histories[config.field];
 
       if (historyArray && historyArray.some(value => value !== null)) {
-        axes[config.axisId] = generateAxis(
+        axes[config.axisId] = generateChartAxis(
           config.axisId,
           config.axisConfig.reverse,
           isMobile && config.axisConfig.hideOnMobile ? false : config.axisConfig.display,
@@ -146,12 +63,12 @@ export default function GenericChart({ labels, datasetConfig, histories }: Chart
           config.axisConfig.valueFormatter
         );
 
-        return generateDataset(
+        return generateChartDataset(
           config.title,
           historyArray,
           config.color,
           config.axisId,
-          config.showLegend !== false, // Respect showLegend property
+          settings?.getChartLegend(id!, config.title, true),
           config.type || "line"
         );
       }
@@ -160,7 +77,7 @@ export default function GenericChart({ labels, datasetConfig, histories }: Chart
     })
     .filter(Boolean) as Dataset[];
 
-  const options: any = {
+  const chartOptions: any = {
     maintainAspectRatio: false,
     responsive: true,
     interaction: { mode: "index", intersect: false },
@@ -175,6 +92,19 @@ export default function GenericChart({ labels, datasetConfig, histories }: Chart
             const dataset = chartData.datasets[legendItem.datasetIndex];
             return dataset.showLegend !== false;
           },
+        },
+        // Custom onClick handler for legend item clicks
+        onClick: (event: MouseEvent, legendItem: any, legend: any) => {
+          const index = legendItem.datasetIndex;
+          const chart = legend.chart;
+          if (chart.isDatasetVisible(index)) {
+            chart.hide(index);
+            legendItem.hidden = true;
+          } else {
+            chart.show(index);
+            legendItem.hidden = false;
+          }
+          id && settings?.setChartLegendState(id, legendItem.text, !legendItem.hidden);
         },
       },
       tooltip: {
@@ -228,7 +158,7 @@ export default function GenericChart({ labels, datasetConfig, histories }: Chart
     <div className="block h-[360px] w-full relative">
       <Line
         className="max-w-[100%]"
-        options={options}
+        options={chartOptions}
         data={data}
         plugins={[
           {

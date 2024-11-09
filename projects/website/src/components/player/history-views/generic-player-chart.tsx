@@ -1,12 +1,18 @@
 "use client";
 
 import React from "react";
-import GenericChart, { DatasetConfig } from "@/components/chart/generic-chart";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import { getDaysAgoDate, parseDate } from "@ssr/common/utils/time-utils";
+import { getDaysAgoDate, getMidnightAlignedDate, parseDate } from "@ssr/common/utils/time-utils";
 import { getValueFromHistory } from "@ssr/common/utils/player-utils";
+import { DatasetConfig } from "@/common/chart/types";
+import GenericChart from "@/components/chart/generic-chart";
 
 type Props = {
+  /**
+   * The id of the chart
+   */
+  id: string;
+
   /**
    * The player the chart is for
    */
@@ -18,7 +24,7 @@ type Props = {
   datasetConfig: DatasetConfig[];
 };
 
-export default function GenericPlayerChart({ player, datasetConfig }: Props) {
+export default function GenericPlayerChart({ id, player, datasetConfig }: Props) {
   // Check if player statistics are available
   if (!player.statisticHistory || Object.keys(player.statisticHistory).length === 0) {
     return (
@@ -46,7 +52,7 @@ export default function GenericPlayerChart({ player, datasetConfig }: Props) {
   let currentHistoryIndex = 0;
 
   for (let dayAgo = historyDays; dayAgo >= 0; dayAgo--) {
-    const targetDate = getDaysAgoDate(dayAgo);
+    const targetDate = getMidnightAlignedDate(getDaysAgoDate(dayAgo));
     labels.push(targetDate); // Add the target date to labels
 
     if (currentHistoryIndex < statisticEntries.length) {
@@ -63,5 +69,14 @@ export default function GenericPlayerChart({ player, datasetConfig }: Props) {
   }
 
   // Render the chart with collected data
-  return <GenericChart labels={labels} datasetConfig={datasetConfig} histories={histories} />;
+  return (
+    <GenericChart
+      options={{
+        id: id,
+      }}
+      labels={labels}
+      datasetConfig={datasetConfig}
+      histories={histories}
+    />
+  );
 }

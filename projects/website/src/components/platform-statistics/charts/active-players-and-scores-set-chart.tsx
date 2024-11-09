@@ -1,10 +1,10 @@
 "use client";
 
 import React from "react";
-import { DatasetConfig } from "@/components/chart/generic-chart";
 import { formatNumberWithCommas, isWholeNumber } from "@ssr/common/utils/number-utils";
 import GenericStatisticChart from "@/components/platform-statistics/generic-statistic-chart";
 import { StatisticsType } from "@ssr/common/model/statistics/statistic-type";
+import { DatasetConfig } from "@/common/chart/types";
 
 type Props = {
   statistics: StatisticsType;
@@ -56,6 +56,5 @@ const datasetConfig: DatasetConfig[] = [
 ];
 
 export default function ActivePlayersAndScoresSetChart({ statistics }: Props) {
-  console.log("statistics", statistics);
   return <GenericStatisticChart statistics={statistics} datasetConfig={datasetConfig} />;
 }
