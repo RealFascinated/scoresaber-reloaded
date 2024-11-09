@@ -50,6 +50,7 @@ export default class ScoreSaberService {
         const statisticHistory: Record<string, PlayerHistory> = account?.getHistoryPreviousDays(50) || {};
         if (statisticHistory) {
           const todayDate = formatDateMinimal(getMidnightAlignedDate(new Date()));
+          console.log("todayDate", todayDate);
           const historyElement = statisticHistory[todayDate];
           statisticHistory[todayDate] = {
             ...historyElement,
@@ -75,7 +76,6 @@ export default class ScoreSaberService {
           };
         }
 
-        // 30ms
         const playerRankHistory = playerToken.histories.split(",").map(value => {
           return parseInt(value);
         });
