@@ -130,7 +130,7 @@ export class PlayerService {
     playerRankHistory.push(playerToken.rank);
 
     let daysAgo = 0; // Start from today
-    for (let i = playerRankHistory.length - daysAgo - 1; i >= 0; i--) {
+    for (let i = playerRankHistory.length - daysAgo; i >= 0; i--) {
       const rank = playerRankHistory[i];
       // Skip inactive days
       if (rank == 999_999) {

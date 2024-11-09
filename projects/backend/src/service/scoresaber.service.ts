@@ -81,7 +81,7 @@ export default class ScoreSaberService {
         playerRankHistory.push(playerToken.rank);
 
         let daysAgo = 0; // Start from current day
-        for (let i = playerRankHistory.length - 1; i >= 0; i--) {
+        for (let i = playerRankHistory.length; i >= 0; i--) {
           const rank = playerRankHistory[i];
           if (rank == 999_999) {
             continue;

@@ -59,12 +59,12 @@ export default class LeaderboardService {
             const cachedLeaderboard: ScoreSaberLeaderboardDocument | null =
               await ScoreSaberLeaderboardModel.findById(id);
             if (cachedLeaderboard !== null) {
+              cached = true;
               if (cachedLeaderboard.ranked) {
                 foundLeaderboard = cachedLeaderboard;
               } else if (cachedLeaderboard.lastRefreshed) {
                 if (now.getTime() - cachedLeaderboard.lastRefreshed.getTime() < 1000 * 60 * 60 * 12) {
                   foundLeaderboard = cachedLeaderboard;
-                  cached = true;
                 }
               }
             }

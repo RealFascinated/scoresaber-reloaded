@@ -2,7 +2,7 @@
 
 import React from "react";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import { parseDate } from "@ssr/common/utils/time-utils";
+import { getDaysAgoDate, parseDate } from "@ssr/common/utils/time-utils";
 import { getValueFromHistory } from "@ssr/common/utils/player-utils";
 import { DatasetConfig } from "@/common/chart/types";
 import GenericChart from "@/components/chart/generic-chart";
@@ -46,14 +46,12 @@ export default function GenericPlayerChart({ id, player, datasetConfig }: Props)
   const statisticEntries = Object.entries(player.statisticHistory);
   let currentHistoryIndex = 0;
   for (let dayAgo = 0; dayAgo <= historyDays; dayAgo++) {
-    const [dateString, history] = statisticEntries[currentHistoryIndex];
-    if (!history) {
-      continue;
-    }
+    const [dateString, history] =
+      statisticEntries.length > currentHistoryIndex ? statisticEntries[currentHistoryIndex] : [];
 
-    labels.push(parseDate(dateString)); // Add the target date to labels
+    labels.push(dateString ? parseDate(dateString) : getDaysAgoDate(dayAgo)); // Add the target date to labels
     datasetConfig.forEach(config => {
-      histories[config.field][dayAgo] = getValueFromHistory(history, config.field) ?? null;
+      histories[config.field][dayAgo] = history ? getValueFromHistory(history, config.field) ?? null : null;
     });
     currentHistoryIndex++;
   }

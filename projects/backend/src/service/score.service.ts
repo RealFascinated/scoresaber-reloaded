@@ -330,15 +330,6 @@ export class ScoreService {
     const leaderboard = cachedLeaderboard?.leaderboard || getScoreSaberLeaderboardFromToken(leaderboardToken);
     const score = getScoreSaberScoreFromToken(scoreToken, leaderboard, playerId);
 
-    const player: PlayerDocument | null = await PlayerModel.findById(playerId);
-    if (player != undefined) {
-      // Update player name
-      if (playerName !== "Unknown") {
-        player.name = playerName;
-        await player.save();
-      }
-    }
-
     if (
       (await ScoreSaberScoreModel.exists({
         playerId: playerId + "",
@@ -365,7 +356,7 @@ export class ScoreService {
     );
 
     // Leaderboard was not cached, go to bed (zzz) to avoid rate limits
-    if (!cachedLeaderboard?.cached) {
+    if (cachedLeaderboard?.cached == false) {
       await delay(SCORESABER_REQUEST_COOLDOWN);
     }
   }
