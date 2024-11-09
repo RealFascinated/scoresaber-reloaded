@@ -8,7 +8,6 @@ export function middleware(request: NextRequest) {
   if (isProduction()) {
     console.log(` ${request.method} ${request.nextUrl.pathname} ${response.status}`);
   }
-
   return response;
 }
 
