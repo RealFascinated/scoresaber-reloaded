@@ -10,7 +10,6 @@ import { clamp, lerp } from "../../utils/math-utils";
 import { CurvePoint } from "../../curve-point";
 import { SSRCache } from "../../cache";
 import ScoreSaberLeaderboardPageToken from "../../types/token/scoresaber/leaderboard-page";
-import { ScoreSaberScore } from "../../model/score/impl/scoresaber-score";
 
 const API_BASE = "https://scoresaber.com/api";
 

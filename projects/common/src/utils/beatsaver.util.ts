@@ -1,6 +1,6 @@
-import { BeatSaverMap } from "../model/beatsaver/map";
-import { MapDifficulty } from "../score/map-difficulty";
-import { MapCharacteristic } from "../types/map-characteristic";
+import {BeatSaverMap} from "../model/beatsaver/map";
+import {MapDifficulty} from "../score/map-difficulty";
+import {MapCharacteristic} from "../types/map-characteristic";
 
 /**
  * Gets the BeatSaver mapper profile url.

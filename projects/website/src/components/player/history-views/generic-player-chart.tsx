@@ -2,7 +2,7 @@
 
 import React from "react";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import { formatDateMinimal, getDaysAgoDate, getMidnightAlignedDate, parseDate } from "@ssr/common/utils/time-utils";
+import { parseDate } from "@ssr/common/utils/time-utils";
 import { getValueFromHistory } from "@ssr/common/utils/player-utils";
 import { DatasetConfig } from "@/common/chart/types";
 import GenericChart from "@/components/chart/generic-chart";

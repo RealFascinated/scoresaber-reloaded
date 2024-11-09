@@ -1,5 +1,5 @@
-import Player, { StatisticChange } from "../player";
-import { PlayerHistory } from "../player-history";
+import Player, {StatisticChange} from "../player";
+import {PlayerHistory} from "../player-history";
 
 /**
  * A ScoreSaber player.

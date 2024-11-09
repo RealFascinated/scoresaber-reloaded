@@ -1,5 +1,5 @@
-import { getModelForClass, modelOptions, prop, ReturnModelType, Severity } from "@typegoose/typegoose";
-import { Document } from "mongoose";
+import {getModelForClass, modelOptions, prop, ReturnModelType, Severity} from "@typegoose/typegoose";
+import {Document} from "mongoose";
 import BeatSaverAuthor from "./author";
 import BeatSaverMapVersion from "./map-version";
 import BeatSaverMapMetadata from "./map-metadata";

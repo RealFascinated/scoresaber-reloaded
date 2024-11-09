@@ -1,7 +1,7 @@
-import { Config } from "../config";
-import { LeaderboardResponse } from "../response/leaderboard-response";
-import { kyFetchJson } from "./utils";
-import { Leaderboards } from "../leaderboard";
+import {Config} from "../config";
+import {LeaderboardResponse} from "../response/leaderboard-response";
+import {kyFetchJson} from "./utils";
+import {Leaderboards} from "../leaderboard";
 
 /**
  * Fetches the leaderboard
