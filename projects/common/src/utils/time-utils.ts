@@ -110,7 +110,10 @@ export function formatDateMinimal(date: Date) {
  * @param format the format to return
  * @returns the formatted date
  */
-export function formatDate(date: Date, format: "MMMM YYYY" | "DD MMMM YYYY" | "DD MMMM YYYY HH:mm" = "MMMM YYYY") {
+export function formatDate(
+  date: Date,
+  format: "MMMM YYYY" | "DD MMMM YYYY" | "dddd, DD MMM, YYYY" | "DD MMMM YYYY HH:mm" = "MMMM YYYY"
+) {
   date = forceUTC(date);
   switch (format) {
     case "MMMM YYYY": {
@@ -128,6 +131,16 @@ export function formatDate(date: Date, format: "MMMM YYYY" | "DD MMMM YYYY" | "D
         year: "numeric",
       });
     }
+    case "dddd, DD MMM, YYYY": {
+      return date.toLocaleString("en-US", {
+        timeZone: "Europe/London",
+        weekday: "long", // Full weekday name (e.g., "Monday")
+        day: "numeric",
+        month: "short", // Abbreviated month (e.g., "Nov")
+        year: "numeric",
+      });
+    }
+
     case "DD MMMM YYYY HH:mm": {
       return date.toLocaleString("en-US", {
         timeZone: "Europe/London",

@@ -4,7 +4,7 @@
 import { Chart, registerables } from "chart.js";
 import { Line } from "react-chartjs-2";
 import { useIsMobile } from "@/hooks/use-is-mobile";
-import { formatDateMinimal, getDaysAgo, getDaysAgoDate, parseDate } from "@ssr/common/utils/time-utils";
+import { formatDate, formatDateMinimal, getDaysAgo, getDaysAgoDate, parseDate } from "@ssr/common/utils/time-utils";
 import { Axis, Dataset, DatasetConfig } from "@/common/chart/types";
 import { generateChartAxis, generateChartDataset } from "@/common/chart/chart.util";
 import useSettings from "@/hooks/use-settings";
@@ -114,16 +114,15 @@ export default function GenericChart({ options, labels, datasetConfig, histories
             }
             const date = value as Date;
             const differenceInDays = getDaysAgo(date);
-            let formattedDate: string;
-            if (differenceInDays === 0) {
-              formattedDate = "Now";
-            } else if (differenceInDays === 1) {
-              formattedDate = "Yesterday";
-            } else {
-              formattedDate = formatDateMinimal(date);
-            }
+            const formattedDate = formatDate(date, "dddd, DD MMM, YYYY");
 
-            return `${formattedDate} ${differenceInDays > 0 ? `(${differenceInDays} day${differenceInDays > 1 ? "s" : ""} ago)` : ""}`;
+            if (differenceInDays === 0) {
+              return `${formattedDate} (Now)`;
+            } else if (differenceInDays === 1) {
+              return `${formattedDate} (Yesterday)`;
+            } else {
+              return formattedDate;
+            }
           },
           label(context: any) {
             const value = Number(context.parsed.y);
