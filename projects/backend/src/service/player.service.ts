@@ -13,6 +13,8 @@ import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/player";
 import { fetchWithCache } from "../common/cache.util";
 import { PlayedMapsCalendarResponse, PlayedMapsCalendarStat } from "@ssr/common/response/played-maps-calendar-response";
 import CacheService, { ServiceCache } from "./cache.service";
+import ScoreSaberService from "./scoresaber.service";
+import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 
 const SCORESABER_REQUEST_COOLDOWN = 60_000 / 250; // 250 requests per minute
 const accountCreationLock: { [id: string]: Promise<PlayerDocument> } = {};
@@ -321,7 +323,7 @@ export class PlayerService {
    * @param type the type to get around
    */
   public static async getPlayersAroundPlayer(id: string, type: AroundPlayer): Promise<ScoreSaberPlayerToken[]> {
-    const getRank = (player: ScoreSaberPlayerToken, type: AroundPlayer) => {
+    const getRank = (player: ScoreSaberPlayer | ScoreSaberPlayerToken, type: AroundPlayer) => {
       switch (type) {
         case "global":
           return player.rank;
@@ -331,7 +333,7 @@ export class PlayerService {
     };
 
     const itemsPerPage = 50;
-    const player = await scoresaberService.lookupPlayer(id);
+    const player = await ScoreSaberService.getPlayer(id);
     if (player == undefined) {
       throw new NotFoundError(`Player "${id}" not found`);
     }
