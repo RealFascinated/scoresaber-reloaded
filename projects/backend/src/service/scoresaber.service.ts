@@ -63,6 +63,8 @@ export default class ScoreSaberService {
               averageRankedAccuracy: playerToken.scoreStats.averageRankedAccuracy,
             },
             scores: {
+              rankedScores: 0,
+              unrankedScores: 0,
               ...historyElement?.scores,
               totalScores: playerToken.scoreStats.totalPlayCount,
               totalRankedScores: playerToken.scoreStats.rankedPlayCount,

@@ -17,6 +17,7 @@ import PlayerScoresResponse from "@ssr/common/response/player-scores-response";
 import PlayerViews from "@/components/player/history-views/player-views";
 import { getScoreSaberPlayer } from "@ssr/common/utils/player-utils";
 import useSettings from "@/hooks/use-settings";
+import { motion } from "framer-motion";
 
 type Props = {
   initialPlayerData: ScoreSaberPlayer;
@@ -44,7 +45,7 @@ export default function PlayerData({ initialPlayerData, initialScoreData, initia
   }
 
   return (
-    <div className="flex gap-2">
+    <motion.div className="flex gap-2" initial={{ opacity: 0.6 }} animate={{ opacity: 1 }}>
       <article className="flex flex-col gap-2">
         <PlayerHeader player={player} />
         <Card className="gap-1">
@@ -65,6 +66,6 @@ export default function PlayerData({ initialPlayerData, initialScoreData, initia
           <Mini type="Country" player={player} />
         </aside>
       )}
-    </div>
+    </motion.div>
   );
 }
