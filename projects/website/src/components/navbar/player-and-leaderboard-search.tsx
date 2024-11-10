@@ -18,7 +18,6 @@ import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.share
 import { useDebounce } from "@uidotdev/usehooks";
 import { useQuery } from "@tanstack/react-query";
 import { useIsMobile } from "@/hooks/use-is-mobile";
-import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
 import { useSearch } from "@/components/providers/search-provider";
 import { truncateText } from "@/common/string-utils";
@@ -29,6 +28,7 @@ import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
 import { StarIcon } from "@heroicons/react/24/solid";
 import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
 import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/leaderboard";
+import Avatar from "@/components/avatar";
 
 export default function PlayerAndLeaderboardSearch() {
   const router: AppRouterInstance = useRouter();
@@ -176,9 +176,11 @@ export default function PlayerAndLeaderboardSearch() {
                         router.push(`/player/${player.id}`);
                       }}
                     >
-                      <Avatar>
-                        <AvatarImage src={player.profilePicture} alt={player.name} />
-                      </Avatar>
+                      <Avatar
+                        src={player.profilePicture!}
+                        className="w-8 h-8"
+                        alt={`${player.name}'s Profile Picture`}
+                      />
                       <div className="flex flex-col">
                         <p>{truncateText(player.name, 32)}</p>
                         <p>
@@ -204,9 +206,7 @@ export default function PlayerAndLeaderboardSearch() {
                         router.push(`/leaderboard/${leaderboard.id}`);
                       }}
                     >
-                      <Avatar>
-                        <AvatarImage src={leaderboard.songArt} alt={leaderboard.songName} />
-                      </Avatar>
+                      <Avatar src={leaderboard.songArt} className="w-8 h-8" alt={leaderboard.songName} />
                       <div className="flex flex-col">
                         <p>{truncateText(`${leaderboard.songName} ${leaderboard.songSubName}`, 48)}</p>
                         <div className="text-xs">

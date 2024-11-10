@@ -2,7 +2,6 @@ import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import Card from "../card";
 import CountryFlag from "../country-flag";
-import { Avatar, AvatarImage } from "../ui/avatar";
 import ClaimProfile from "./claim-profile";
 import PlayerStats from "./player-stats";
 import PlayerTrackedStatus from "@/components/player/player-tracked-status";
@@ -14,6 +13,7 @@ import { getScoreSaberRoles } from "@ssr/common/utils/scoresaber.util";
 import { DailyChange } from "@/components/statistic/daily-change";
 import { ChangeOverTime } from "@/components/statistic/change-over-time";
 import { PlayerStatChange } from "@ssr/common/player/player-stat-change";
+import Avatar from "@/components/avatar";
 
 const playerData = [
   {
@@ -91,9 +91,11 @@ export default function PlayerHeader({ player }: PlayerHeaderProps) {
   return (
     <Card>
       <div className="flex gap-3 flex-col items-center text-center lg:flex-row lg:items-start lg:text-start relative select-none">
-        <Avatar className="w-32 h-32 pointer-events-none">
-          <AvatarImage alt="Profile Picture" src={`https://img.fascinated.cc/upload/w_128,h_128/${player.avatar}`} />
-        </Avatar>
+        <Avatar
+          src={`https://img.fascinated.cc/upload/w_128,h_128/${player.avatar}`}
+          className="w-32 h-32 pointer-events-none"
+          alt={`${player.name}'s Profile Picture`}
+        />
         <div className="w-full flex gap-2 flex-col justify-center items-center lg:justify-start lg:items-start">
           <div>
             <div className="flex gap-2 items-center justify-center lg:justify-start">

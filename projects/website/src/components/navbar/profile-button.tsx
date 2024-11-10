@@ -3,12 +3,12 @@
 import useDatabase from "@/hooks/use-database";
 import { useLiveQuery } from "dexie-react-hooks";
 import Link from "next/link";
-import { Avatar, AvatarImage } from "../ui/avatar";
 import NavbarButton from "./navbar-button";
 import Database from "@/common/database/database";
 import { truncateText } from "@/common/string-utils";
 import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/player";
 import useSettings from "@/hooks/use-settings";
+import Avatar from "@/components/avatar";
 
 export default function ProfileButton() {
   const database: Database = useDatabase();
@@ -22,12 +22,11 @@ export default function ProfileButton() {
   return (
     <Link href={`/player/${settings.playerId}`} className="pl-1 flex items-center gap-4 h-full">
       <NavbarButton className="px-0">
-        <Avatar className="size-6">
-          <AvatarImage
-            alt="Profile Picture"
-            src={`https://img.fascinated.cc/upload/w_24,h_24/${claimedPlayer.profilePicture}`}
-          />
-        </Avatar>
+        <Avatar
+          src={`https://img.fascinated.cc/upload/w_24,h_24/${claimedPlayer.profilePicture}`}
+          className="w-6 h-6"
+          alt={`${claimedPlayer.name}'s Profile Picture`}
+        />
         <p className="pl-0.5 hidden lg:block text-ssr">{truncateText(claimedPlayer.name, 20)}</p>
       </NavbarButton>
     </Link>

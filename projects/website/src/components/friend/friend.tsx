@@ -1,4 +1,3 @@
-import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import Link from "next/link";
 import { XIcon } from "lucide-react";
@@ -6,6 +5,7 @@ import useDatabase from "@/hooks/use-database";
 import { useToast } from "@/hooks/use-toast";
 import Tooltip from "@/components/tooltip";
 import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/player";
+import Avatar from "@/components/avatar";
 
 type FriendProps = {
   /**
@@ -38,9 +38,7 @@ export default function Friend({ player, onClick }: FriendProps) {
   return (
     <li className="flex items-center justify-between gap-2 hover:bg-accent transition-all transform-gpu p-2 rounded-md select-none">
       <Link href={`/player/${player.id}`} onClick={() => onClick?.()} className="flex items-center gap-2 w-full">
-        <Avatar>
-          <AvatarImage src={player.profilePicture} alt={player.name} />
-        </Avatar>
+        <Avatar src={player.profilePicture!} className="w-10 h-10" alt={`${player.name}'s Profile Picture`} />
         <div className="flex flex-col">
           <p className="text-lg font-semibold">{player.name}</p>
           <p className="text-gray-400">#{formatNumberWithCommas(player.rank)}</p>

@@ -1,4 +1,3 @@
-import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import CountryFlag from "@/components/country-flag";
 import Link from "next/link";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
@@ -6,6 +5,7 @@ import { clsx } from "clsx";
 import { getScoreSaberRoles } from "@ssr/common/utils/scoresaber.util";
 import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/leaderboard-player-info";
 import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/player";
+import Avatar from "@/components/avatar";
 
 type TablePlayerProps = {
   /**
@@ -65,12 +65,11 @@ export function PlayerInfo({
 
   return (
     <div className="flex gap-2 items-center">
-      <Avatar className="w-[24px] h-[24px] pointer-events-none">
-        <AvatarImage
-          alt="Profile Picture"
-          src={`https://img.fascinated.cc/upload/w_128,h_128/${player.profilePicture}`}
-        />
-      </Avatar>
+      <Avatar
+        src={`https://img.fascinated.cc/upload/w_128,h_128/${player.profilePicture}`}
+        className="w-[24px] h-[24px] pointer-events-none"
+        alt={`${player.name}'s Profile Picture`}
+      />
       {!hideCountryFlag && <CountryFlag code={player.country!} size={12} />}
       {useLink ? <Link href={`/player/${player.id}`}>{name}</Link> : name}
     </div>
