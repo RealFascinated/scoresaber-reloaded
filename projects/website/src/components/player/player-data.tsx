@@ -62,7 +62,7 @@ export default function PlayerData({ initialPlayerData, initialScoreData, initia
         />
       </article>
       {!isMobile && !player.inactive && !player.banned && (
-        <aside className="w-[600px] hidden 2xl:flex flex-col gap-2">
+        <aside className="w-[400px] hidden 2xl:flex flex-col gap-2">
           <Mini type="Global" player={player} />
           <Mini type="Country" player={player} />
         </aside>

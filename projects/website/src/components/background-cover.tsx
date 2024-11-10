@@ -1,7 +1,7 @@
 "use client";
 
-import { Config } from "@ssr/common/config";
 import useSettings from "@/hooks/use-settings";
+import Image from "@/components/image";
 
 export default function BackgroundCover() {
   const settings = useSettings();
@@ -9,18 +9,7 @@ export default function BackgroundCover() {
   if (settings == undefined || settings?.backgroundCover == undefined || settings?.backgroundCover == "") {
     return null; // Don't render anything if the background image is not set
   }
-
-  let backgroundCover = settings.backgroundCover;
-  let prependWebsiteUrl = false;
-
-  // Remove the prepending slash
-  if (backgroundCover.startsWith("/")) {
-    prependWebsiteUrl = true;
-    backgroundCover = backgroundCover.substring(1);
-  }
-  if (prependWebsiteUrl) {
-    backgroundCover = Config.websiteUrl + "/" + backgroundCover;
-  }
+  const backgroundCover = settings.backgroundCover;
 
   // Static background color
   if (backgroundCover.startsWith("#")) {
@@ -33,10 +22,12 @@ export default function BackgroundCover() {
   }
 
   return (
-    <img
+    <Image
       src={backgroundCover}
       alt="Background image"
       fetchPriority="high"
+      width={1920}
+      height={1080}
       className={`fixed -z-50 object-cover w-screen h-screen blur-sm brightness-[33%] pointer-events-none select-none`}
     />
   );

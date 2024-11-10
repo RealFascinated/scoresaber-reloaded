@@ -3,6 +3,7 @@ import { cn, getRandomInteger } from "@/common/utils";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import { Difficulty, getDifficulty, getDifficultyName, getRandomDifficulty } from "@ssr/common/utils/song-utils";
 import { AnimatedList } from "@/components/ui/animated-list";
+import Image from "@/components/image";
 
 type ScoreProps = {
   songArt: string;
@@ -102,7 +103,7 @@ function Score({ songArt, songName, songAuthor, setBy }: ScoreProps) {
 
         {/* Song Art & Difficulty */}
         <div className="relative">
-          <img className="size-16 rounded-md" src={songArt} alt={`Song art for ${songName} by ${songAuthor}`} />
+          <Image className="size-16 rounded-md" src={songArt} alt={`Song art for ${songName} by ${songAuthor}`} />
           <div
             className="absolute inset-x-0 bottom-0 py-px flex justify-center text-xs rounded-t-lg"
             style={{

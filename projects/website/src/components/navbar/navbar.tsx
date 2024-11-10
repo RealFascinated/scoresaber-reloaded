@@ -8,6 +8,7 @@ import { ChartBarIcon, TrendingUpIcon } from "lucide-react";
 import ProfileButton from "@/components/navbar/profile-button";
 import { CogIcon } from "@heroicons/react/24/solid";
 import PlayerAndLeaderboardSearch from "@/components/navbar/player-and-leaderboard-search";
+import Image from "@/components/image";
 
 const links: ReactElement[] = [
   <FriendsButton key="friends" />,
@@ -62,7 +63,7 @@ export default function Navbar() {
           href="/"
           draggable={false}
         >
-          <img className="size-6" src="/assets/logos/scoresaber.png" alt="ScoreSaber Logo" />
+          <Image className="size-6" src="/assets/logos/scoresaber.png" alt="ScoreSaber Logo" />
           <h1 className="hidden md:flex text-lg font-bold text-ssr">SSR</h1>
         </Link>
 

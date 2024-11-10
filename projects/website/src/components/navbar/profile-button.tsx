@@ -23,7 +23,7 @@ export default function ProfileButton() {
     <Link href={`/player/${settings.playerId}`} className="pl-1 flex items-center gap-4 h-full">
       <NavbarButton className="px-0">
         <Avatar
-          src={`https://img.fascinated.cc/upload/w_24,h_24/${claimedPlayer.profilePicture}`}
+          src={claimedPlayer.profilePicture}
           className="w-6 h-6"
           alt={`${claimedPlayer.name}'s Profile Picture`}
         />

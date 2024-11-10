@@ -1,4 +1,5 @@
 import { cn } from "@/common/utils";
+import Image from "@/components/image";
 
 type AvatarProps = {
   src: string;
@@ -9,7 +10,7 @@ type AvatarProps = {
 
 export default function Avatar({ src, size = 32, className, alt }: AvatarProps) {
   return (
-    <img
+    <Image
       src={src}
       width={size}
       height={size}

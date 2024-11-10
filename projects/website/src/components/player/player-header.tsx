@@ -92,7 +92,8 @@ export default function PlayerHeader({ player }: PlayerHeaderProps) {
     <Card>
       <div className="flex gap-3 flex-col items-center text-center lg:flex-row lg:items-start lg:text-start relative select-none">
         <Avatar
-          src={`https://img.fascinated.cc/upload/w_128,h_128/${player.avatar}`}
+          src={player.avatar}
+          size={128}
           className="w-32 h-32 pointer-events-none"
           alt={`${player.name}'s Profile Picture`}
         />
