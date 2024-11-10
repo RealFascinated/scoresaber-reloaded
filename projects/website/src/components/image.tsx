@@ -14,7 +14,16 @@ type ImageProps = DetailedHTMLProps<ImgHTMLAttributes<HTMLImageElement>, HTMLIma
   optimized?: boolean;
 };
 
-export default function Image({ src, size, width, height, className, alt, optimized = true, ...props }: ImageProps) {
+export default function Image({
+  src,
+  size = 32,
+  width,
+  height,
+  className,
+  alt,
+  optimized = true,
+  ...props
+}: ImageProps) {
   if (!src) {
     throw new Error("Image src is required");
   }
