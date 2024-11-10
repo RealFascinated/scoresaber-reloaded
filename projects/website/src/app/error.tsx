@@ -5,7 +5,7 @@ import Link from "next/link";
 
 export default function Error() {
   return (
-    <div className="flex flex-col items-center justify-center text-center w-full min-h-screen">
+    <div className="flex flex-col items-center justify-center text-center w-full">
       <GlobeAmericasIcon className="h-24 w-24 text-red-500" />
       <h1 className="text-4xl font-bold text-gray-200 mt-6">Oops! Something went wrong.</h1>
       <p className="text-lg text-gray-400 mt-2">

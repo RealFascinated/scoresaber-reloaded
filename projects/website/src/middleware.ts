@@ -1,4 +1,4 @@
-import { NextResponse, type NextRequest } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { isProduction } from "@ssr/common/utils/utils";
 
 export function middleware(request: NextRequest) {
@@ -8,6 +8,7 @@ export function middleware(request: NextRequest) {
   if (isProduction()) {
     console.log(` ${request.method} ${request.nextUrl.pathname}${request.nextUrl.search} ${response.status}`);
   }
+
   return response;
 }
 

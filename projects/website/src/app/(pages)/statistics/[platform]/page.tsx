@@ -25,7 +25,7 @@ export default async function TopScoresPage({ params }: StatisticsPageProps) {
   const statistics = await getPlatformStatistics(platform);
 
   return (
-    <main className="w-full min-h-screen flex justify-center">
+    <main className="w-full flex justify-center">
       <Card className="flex flex-col gap-2 w-full h-fit xl:w-[75%]">
         <div className="text-center">
           <p className="font-semibold'">Game Statistics</p>

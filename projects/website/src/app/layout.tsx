@@ -16,6 +16,8 @@ import Footer from "@/components/footer";
 import { getBuildInformation } from "@/common/website-utils";
 import { SearchProvider } from "@/components/providers/search-provider";
 import Navbar from "@/components/navbar/navbar";
+import { cookies } from "next/headers";
+import SSRLayout from "@/components/ssr-layout";
 
 const siteFont = localFont({
   src: "./fonts/JetBrainsMono.ttf",
@@ -63,12 +65,14 @@ export const viewport: Viewport = {
   themeColor: Colors.primary,
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   const { buildId, buildTimeShort } = getBuildInformation();
+  const path = (await cookies()).get("pathname")?.value ?? "/";
+
   return (
     <html lang="en">
       <body className={`${siteFont.className} antialiased w-full h-full`}>
@@ -85,10 +89,10 @@ export default function RootLayout({
                   <main className="flex flex-col min-h-screen text-white w-full">
                     <SearchProvider>
                       <Navbar />
-                      <div className="w-full mt-3 z-[1] flex">{children}</div>
+                      <SSRLayout>{children}</SSRLayout>
                     </SearchProvider>
-                    <Footer buildId={buildId} buildTimeShort={buildTimeShort} />
                   </main>
+                  <Footer buildId={buildId} buildTimeShort={buildTimeShort} />
                 </QueryProvider>
               </ThemeProvider>
             </OfflineNetwork>
