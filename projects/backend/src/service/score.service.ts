@@ -252,6 +252,7 @@ export class ScoreService {
   public static async getPlayerScores(
     playerId: string,
     options?: {
+      limit?: number;
       ranked?: boolean;
       projection?: { [field: string]: number };
     }
@@ -284,6 +285,9 @@ export class ScoreService {
 
       // Sort by pp in descending order
       { $sort: { "score.pp": -1 } },
+
+      // Limit results
+      ...(options?.limit ? [{ $limit: options.limit }] : []),
     ]);
     if (!rawScores) {
       return [];
@@ -352,7 +356,7 @@ export class ScoreService {
 
     await ScoreSaberScoreModel.create(score);
     console.log(
-      `Tracked ScoreSaber score for "${playerName}"(${playerId}), difficulty: ${score.difficulty}, score: ${score.score}, pp: ${score.pp.toFixed(2)}pp, leaderboard: ${leaderboard.id}`
+      `Tracked ScoreSaber score for "${playerName}"(${playerId}), difficulty: ${score.difficulty}, score: ${score.score}, pp: ${score.pp.toFixed(2)}pp, leaderboard: ${leaderboard.id}, hmd: ${score.hmd}`
     );
     return true;
   }

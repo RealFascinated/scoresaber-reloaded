@@ -1,7 +1,9 @@
-import {getModelForClass, modelOptions, prop, ReturnModelType, Severity} from "@typegoose/typegoose";
-import {Document} from "mongoose";
-import {PlayerHistory} from "../player/player-history";
-import {formatDateMinimal, getDaysAgoDate, getMidnightAlignedDate} from "../utils/time-utils";
+import { getModelForClass, modelOptions, prop, ReturnModelType, Severity } from "@typegoose/typegoose";
+import { Document } from "mongoose";
+import { PlayerHistory } from "../player/player-history";
+import { formatDateMinimal, getDaysAgoDate, getMidnightAlignedDate } from "../utils/time-utils";
+import { ScoreService } from "backend/src/service/score.service";
+import { ScoreSaberHMDs } from "../utils/scoresaber.util";
 
 /**
  * The model for a player.
@@ -131,6 +133,31 @@ export class Player {
    */
   public getDaysTracked(): number {
     return Object.keys(this.getStatisticHistory()).length;
+  }
+
+  /**
+   * Gets the most common hmd used in the last 50 scores.
+   */
+  public async getHmd(): Promise<string> {
+    const scores = await ScoreService.getPlayerScores(this._id, {
+      limit: 50,
+      projection: {
+        hmd: 1,
+      },
+    });
+
+    const hmds: Map<string, number> = new Map();
+    for (const score of scores) {
+      if (!score.hmd) {
+        continue;
+      }
+      hmds.set(ScoreSaberHMDs[score.hmd], (hmds.get(score.hmd) || 0) + 1);
+    }
+
+    if (hmds.size === 0) {
+      return ScoreSaberHMDs[0];
+    }
+    return Array.from(hmds.entries()).sort((a, b) => b[1] - a[1])[0][0];
   }
 }
 

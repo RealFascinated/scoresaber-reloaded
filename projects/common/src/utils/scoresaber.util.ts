@@ -58,6 +58,18 @@ export const scoreSaberRoles: ScoreSaberRole[] = [
   },
 ];
 
+export const ScoreSaberHMDs: Record<number, string> = {
+  0: "Unknown",
+  1: "Rift CV1",
+  2: "Vive",
+  4: "Vive Pro",
+  8: "Windows Mixed Reality",
+  16: "Rift S",
+  32: "Quest",
+  64: "Valve Index",
+  128: "Vive Cosmos",
+};
+
 /**
  * Gets the role for a player.
  *

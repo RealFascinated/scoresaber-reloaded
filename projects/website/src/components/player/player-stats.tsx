@@ -78,6 +78,14 @@ const playerStats: Stat[] = [
     },
   },
   {
+    name: "Headset",
+    create: (player: ScoreSaberPlayer) => {
+      return {
+        value: player.hmd === undefined ? undefined : <>{player.hmd}</>,
+      };
+    },
+  },
+  {
     name: "Role",
     create: (player: ScoreSaberPlayer) => {
       const roles = getScoreSaberRoles(player);

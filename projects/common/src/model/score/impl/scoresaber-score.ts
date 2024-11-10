@@ -61,6 +61,12 @@ export class ScoreSaberScoreInternal extends Score {
   public readonly maxCombo!: number;
 
   /**
+   * The hmd used to set the score.
+   */
+  @Prop({ required: true })
+  public readonly hmd!: string;
+
+  /**
    * The previous score, if any.
    */
   public previousScore?: ScoreSaberPreviousScore;

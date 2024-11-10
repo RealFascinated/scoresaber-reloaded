@@ -37,6 +37,11 @@ export default class Player {
   avatarColor?: string;
 
   /**
+   * The player's hmd.
+   */
+  hmd?: string;
+
+  /**
    * The date the player joined the playform.
    */
   joinedDate: Date;

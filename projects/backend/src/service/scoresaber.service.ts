@@ -10,6 +10,7 @@ import { PlayerService } from "./player.service";
 import { formatDateMinimal, getDaysAgoDate, getMidnightAlignedDate, parseDate } from "@ssr/common/utils/time-utils";
 import { getPageFromRank } from "@ssr/common/utils/utils";
 import { getValueFromHistory } from "@ssr/common/utils/player-utils";
+import { ScoreService } from "./score.service";
 
 export default class ScoreSaberService {
   /**
@@ -106,6 +107,21 @@ export default class ScoreSaberService {
           Object.entries(statisticHistory).sort((a, b) => new Date(b[0]).getTime() - new Date(a[0]).getTime())
         );
 
+        // Get player's most used HMD in the last 50 scores
+        const scores = await ScoreService.getPlayerScores(playerToken.id, {
+          limit: 50,
+          projection: {
+            hmd: 1,
+          },
+        });
+        const hmds: Map<string, number> = new Map();
+        for (const score of scores) {
+          if (!score.hmd) {
+            continue;
+          }
+          hmds.set(score.hmd, (hmds.get(score.hmd) || 0) + 1);
+        }
+
         return {
           id: playerToken.id,
           name: playerToken.name,
@@ -114,6 +130,7 @@ export default class ScoreSaberService {
           rank: playerToken.rank,
           countryRank: playerToken.countryRank,
           avatarColor: "#fff",
+          hmd: Array.from(hmds.entries()).sort((a, b) => b[1] - a[1])[0][0],
           // avatarColor: (await ImageService.getAverageImageColor(playerToken.profilePicture))?.color,
           joinedDate: new Date(playerToken.firstSeen),
           bio: bio,
