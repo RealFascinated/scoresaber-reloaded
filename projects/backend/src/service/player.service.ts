@@ -504,4 +504,30 @@ export class PlayerService {
     }
     console.log("Finished tracking player statistics.");
   }
+
+  /**
+   * Gets the most common HMD used by
+   * a player in the last 50 scores
+   *
+   * @param playerId the id of the player
+   * @returns the hmd
+   */
+  public static async getPlayerHMD(playerId: string) {
+    // Get player's most used HMD in the last 50 scores
+    const scores = await ScoreService.getPlayerScores(playerId, {
+      limit: 50,
+      projection: {
+        hmd: 1,
+      },
+    });
+    const hmds: Map<string, number> = new Map();
+    for (const score of scores) {
+      if (!score.hmd) {
+        continue;
+      }
+      hmds.set(score.hmd, (hmds.get(score.hmd) || 0) + 1);
+    }
+
+    return Array.from(hmds.entries()).sort((a, b) => b[1] - a[1])[0][0];
+  }
 }
