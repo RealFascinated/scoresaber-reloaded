@@ -6,6 +6,7 @@ import { isProduction } from "@/common/website-utils";
 const nextConfig: NextConfig = {
   experimental: {
     optimizePackageImports: ["@ssr/common", "@radix-ui/react-icons", "chart.js", "react-chartjs-2"],
+    webpackMemoryOptimizations: true,
   },
   env: {
     HOSTNAME: "0.0.0.0",

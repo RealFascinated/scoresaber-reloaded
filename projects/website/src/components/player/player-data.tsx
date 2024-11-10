@@ -1,7 +1,6 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import Mini from "../ranking/mini";
 import PlayerHeader from "./player-header";
 import PlayerScores from "./player-scores";
 import Card from "@/components/card";
@@ -17,6 +16,9 @@ import PlayerScoresResponse from "@ssr/common/response/player-scores-response";
 import PlayerViews from "@/components/player/history-views/player-views";
 import { getScoreSaberPlayer } from "@ssr/common/utils/player-utils";
 import useSettings from "@/hooks/use-settings";
+import dynamic from "next/dynamic";
+
+const Mini = dynamic(() => import("../ranking/mini"), { ssr: false });
 
 type Props = {
   initialPlayerData: ScoreSaberPlayer;
