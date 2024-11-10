@@ -18,9 +18,8 @@ export default function Image({ src, size, width, height, className, alt, optimi
   if (!src) {
     throw new Error("Image src is required");
   }
-
-  width = width || size;
-  height = height || size;
+  width = width ?? size;
+  height = height ?? size;
 
   if (src.startsWith("/") && optimized) {
     if (isProduction()) {
