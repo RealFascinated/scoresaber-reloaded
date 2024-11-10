@@ -14,6 +14,7 @@ import { PlayedMapsCalendarResponse, PlayedMapsCalendarStat } from "@ssr/common/
 import CacheService, { ServiceCache } from "./cache.service";
 import ScoreSaberService from "./scoresaber.service";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
+import { ScoreSaberHMDs } from "@ssr/common/utils/scoresaber.util";
 
 const SCORESABER_REQUEST_COOLDOWN = 60_000 / 250; // 250 requests per minute
 const accountCreationLock: { [id: string]: Promise<PlayerDocument> } = {};
@@ -527,7 +528,9 @@ export class PlayerService {
       }
       hmds.set(score.hmd, (hmds.get(score.hmd) || 0) + 1);
     }
-
+    if (hmds.size === 0) {
+      return ScoreSaberHMDs[0];
+    }
     return Array.from(hmds.entries()).sort((a, b) => b[1] - a[1])[0][0];
   }
 }
