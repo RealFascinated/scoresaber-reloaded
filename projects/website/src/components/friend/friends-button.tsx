@@ -51,7 +51,9 @@ export default function FriendsButton() {
         onMouseLeave={handleMouseLeave}
       >
         {friends && friends.length > 0 ? (
-          friends.map((friend, index) => <Friend player={friend} key={index} onClick={() => setOpen(false)} />)
+          friends
+            .sort((a, b) => a.rank - b.rank)
+            .map((friend, index) => <Friend player={friend} key={index} onClick={() => setOpen(false)} />)
         ) : (
           <div className="text-sm flex flex-col gap-2 justify-center items-center">
             <p className="pointer-events-none">You don&#39;t have any friends :(</p>
