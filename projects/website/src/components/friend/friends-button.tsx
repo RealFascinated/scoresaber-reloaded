@@ -2,7 +2,7 @@
 
 import useDatabase from "@/hooks/use-database";
 import { useLiveQuery } from "dexie-react-hooks";
-import NavbarButton from "./navbar-button";
+import NavbarButton from "../navbar/navbar-button";
 import { PersonIcon } from "@radix-ui/react-icons";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import Friend from "@/components/friend/friend";
@@ -46,7 +46,7 @@ export default function FriendsButton() {
         </NavbarButton>
       </PopoverTrigger>
       <PopoverContent
-        className="mt-2.5 p-2 select-none"
+        className="mt-2.5 p-2 text-sm select-none max-h-[400px] overflow-hidden overflow-y-auto w-screen md:w-[400px]"
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import React, { ReactElement, useEffect, useState } from "react";
 import { cn } from "@/common/utils";
-import FriendsButton from "@/components/navbar/friends-button";
+import FriendsButton from "@/components/friend/friends-button";
 import { ChartBarIcon, TrendingUpIcon } from "lucide-react";
 import ProfileButton from "@/components/navbar/profile-button";
 import { CogIcon } from "@heroicons/react/24/solid";

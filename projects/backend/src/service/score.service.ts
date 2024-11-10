@@ -1,5 +1,5 @@
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
-import { delay, formatChange, isProduction, kyFetchBuffer } from "@ssr/common/utils/utils";
+import { formatChange, isProduction, kyFetchBuffer } from "@ssr/common/utils/utils";
 import { Metadata } from "@ssr/common/types/metadata";
 import { NotFoundError } from "elysia";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
@@ -46,7 +46,6 @@ import ScoreSaberPlayerScoreToken from "@ssr/common/types/token/scoresaber/playe
 import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score";
 import CacheService, { ServiceCache } from "./cache.service";
 import { getDifficultyName } from "@ssr/common/utils/song-utils";
-import { LeaderboardResponse } from "@ssr/common/response/leaderboard-response";
 
 const SCORESABER_REQUEST_COOLDOWN = 60_000 / 250; // 250 requests per minute
 
@@ -298,11 +297,31 @@ export class ScoreService {
   }
 
   /**
+   * Checks if a ScoreSaber score already exists.
+   *
+   * @param playerId the id of the player
+   * @param leaderboard the leaderboard
+   * @param score the score to check
+   */
+  public static async scoreExists(playerId: string, leaderboard: ScoreSaberLeaderboard, score: ScoreSaberScore) {
+    return (
+      (await ScoreSaberScoreModel.exists({
+        playerId: playerId + "",
+        leaderboardId: leaderboard.id,
+        difficulty: leaderboard.difficulty.difficulty,
+        characteristic: leaderboard.difficulty.characteristic,
+        score: score.score,
+      })) !== null
+    );
+  }
+
+  /**
    * Tracks ScoreSaber score.
    *
    * @param scoreToken the score to track
    * @param leaderboardToken the leaderboard for the score
    * @param playerId the id of the player
+   * @returns whether the score was tracked
    */
   public static async trackScoreSaberScore(
     scoreToken: ScoreSaberScoreToken,
@@ -316,34 +335,15 @@ export class ScoreService {
     }
 
     const playerName = (scoreToken.leaderboardPlayerInfo && scoreToken.leaderboardPlayerInfo.name) || "Unknown";
-
-    let cachedLeaderboard: LeaderboardResponse<ScoreSaberLeaderboard> | undefined = undefined;
-    try {
-      cachedLeaderboard = await LeaderboardService.getLeaderboard<ScoreSaberLeaderboard>(
-        "scoresaber",
-        leaderboardToken.id + ""
-      );
-    } catch {
-      // Ignore
-    }
-
-    const leaderboard = cachedLeaderboard?.leaderboard || getScoreSaberLeaderboardFromToken(leaderboardToken);
+    const leaderboard = getScoreSaberLeaderboardFromToken(leaderboardToken);
     const score = getScoreSaberScoreFromToken(scoreToken, leaderboard, playerId);
 
-    if (
-      (await ScoreSaberScoreModel.exists({
-        playerId: playerId + "",
-        leaderboardId: leaderboard.id,
-        difficulty: leaderboard.difficulty.difficulty,
-        characteristic: leaderboard.difficulty.characteristic,
-        score: score.score,
-      })) !== null
-    ) {
+    if (await this.scoreExists(playerId, leaderboard, score)) {
       // The score has already been tracked, so ignore it.
       console.log(
         `ScoreSaber score already tracked for "${playerName}"(${playerId}), difficulty: ${score.difficulty}, score: ${score.score}, leaderboard: ${leaderboard.id}, ignoring...`
       );
-      return;
+      return false;
     }
 
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -354,11 +354,7 @@ export class ScoreService {
     console.log(
       `Tracked ScoreSaber score for "${playerName}"(${playerId}), difficulty: ${score.difficulty}, score: ${score.score}, pp: ${score.pp.toFixed(2)}pp, leaderboard: ${leaderboard.id}`
     );
-
-    // Leaderboard was not cached, go to bed (zzz) to avoid rate limits
-    if (cachedLeaderboard?.cached == false) {
-      await delay(SCORESABER_REQUEST_COOLDOWN);
-    }
+    return true;
   }
 
   /**

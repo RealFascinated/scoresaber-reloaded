@@ -6,7 +6,6 @@ import { InternalServerError } from "@ssr/common/error/internal-server-error";
 import { delay, getPageFromRank, isProduction } from "@ssr/common/utils/utils";
 import { AroundPlayer } from "@ssr/common/types/around-player";
 import { ScoreSort } from "@ssr/common/score/score-sort";
-import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
 import { ScoreService } from "./score.service";
 import { logNewTrackedPlayer } from "../common/embds";
 import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/player";
@@ -427,21 +426,13 @@ export class PlayerService {
       }
 
       let missingScores = 0;
-      for (const score of scoresPage.playerScores) {
-        const leaderboard = getScoreSaberLeaderboardFromToken(score.leaderboard);
-        const scoreSaberScore = await ScoreService.getScoreSaberScore(
-          player.id,
-          leaderboard.id + "",
-          leaderboard.difficulty.difficulty,
-          leaderboard.difficulty.characteristic,
-          score.score.baseScore
-        );
-
-        if (scoreSaberScore == null) {
-          missingScores++;
-        }
-        await ScoreService.trackScoreSaberScore(score.score, score.leaderboard, player.id);
-      }
+      await Promise.all(
+        scoresPage.playerScores.map(async score => {
+          if (await ScoreService.trackScoreSaberScore(score.score, score.leaderboard, player.id)) {
+            missingScores++;
+          }
+        })
+      );
 
       // Stop paginating if no scores are missing OR if player has seededScores marked true
       if ((missingScores === 0 && player.seededScores) || page >= Math.ceil(scoresPage.metadata.total / 100)) {
