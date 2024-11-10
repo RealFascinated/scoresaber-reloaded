@@ -529,7 +529,7 @@ export class PlayerService {
       hmds.set(score.hmd, (hmds.get(score.hmd) || 0) + 1);
     }
     if (hmds.size === 0) {
-      return ScoreSaberHMDs[0];
+      return undefined;
     }
     return Array.from(hmds.entries()).sort((a, b) => b[1] - a[1])[0][0];
   }
