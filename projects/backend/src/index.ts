@@ -28,6 +28,7 @@ import CacheService from "./service/cache.service";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import StatisticsService from "./service/statistics.service";
 import StatisticsController from "./controller/statistics.controller";
+import { serverTiming } from "@elysiajs/server-timing";
 
 // Load .env file
 dotenv.config({
@@ -153,6 +154,15 @@ app.onError({ as: "global" }, ({ code, error }) => {
     timestamp: new Date().toISOString(),
   };
 });
+
+/**
+ * Enable server timings
+ */
+app.use(
+  serverTiming({
+    enabled: true,
+  })
+);
 
 /**
  * Enable E-Tags
