@@ -17,7 +17,7 @@ const API_BASE = "https://scoresaber.com/api";
  * Player
  */
 const SEARCH_PLAYERS_ENDPOINT = `${API_BASE}/players?search=:query`;
-const LOOKUP_PLAYER_ENDPOINT = `${API_BASE}/player/:id/full`;
+const LOOKUP_PLAYER_ENDPOINT = `${API_BASE}/player/:id/:type`;
 const LOOKUP_PLAYERS_ENDPOINT = `${API_BASE}/players?page=:page`;
 const LOOKUP_PLAYERS_BY_COUNTRY_ENDPOINT = `${API_BASE}/players?page=:page&countries=:country`;
 const LOOKUP_PLAYER_SCORES_ENDPOINT = `${API_BASE}/player/:id/scores?limit=:limit&sort=:sort&page=:page`;
@@ -107,23 +107,22 @@ class ScoreSaberService extends Service {
    * Looks up a player by their ID.
    *
    * @param playerId the ID of the player to look up
-   * @param cache whether to use the local cache
+   * @param type the data type to return
    * @returns the player that matches the ID, or undefined
    */
-  public async lookupPlayer(playerId: string, cache: boolean = false): Promise<ScoreSaberPlayerToken | undefined> {
-    if (cache && playerCache.has(playerId)) {
-      return playerCache.get(playerId);
-    }
+  public async lookupPlayer(
+    playerId: string,
+    type: "full" | "basic" = "full"
+  ): Promise<ScoreSaberPlayerToken | undefined> {
     const before = performance.now();
     this.log(`Looking up player "${playerId}"...`);
-    const token = await this.fetch<ScoreSaberPlayerToken>(LOOKUP_PLAYER_ENDPOINT.replace(":id", playerId));
+    const token = await this.fetch<ScoreSaberPlayerToken>(
+      LOOKUP_PLAYER_ENDPOINT.replace(":id", playerId).replace(":type", type)
+    );
     if (token === undefined) {
       return undefined;
     }
     this.log(`Found player "${playerId}" in ${(performance.now() - before).toFixed(0)}ms`);
-    if (cache) {
-      playerCache.set(playerId, token);
-    }
     return token;
   }
 

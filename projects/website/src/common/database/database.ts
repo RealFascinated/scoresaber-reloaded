@@ -136,7 +136,7 @@ export default class Database extends Dexie {
           return playerCache.get(id);
         }
 
-        const token = await scoresaberService.lookupPlayer(id);
+        const token = await scoresaberService.lookupPlayer(id, "basic");
         if (token == undefined) {
           return undefined;
         }

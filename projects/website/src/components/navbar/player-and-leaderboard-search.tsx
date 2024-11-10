@@ -79,6 +79,7 @@ export default function PlayerAndLeaderboardSearch() {
       };
     },
     refetchInterval: false,
+    enabled: isOpen,
   });
 
   useEffect(() => {
