@@ -47,8 +47,6 @@ import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score";
 import CacheService, { ServiceCache } from "./cache.service";
 import { getDifficultyName } from "@ssr/common/utils/song-utils";
 
-const SCORESABER_REQUEST_COOLDOWN = 60_000 / 250; // 250 requests per minute
-
 export class ScoreService {
   /**
    * Notifies the number one score in Discord.

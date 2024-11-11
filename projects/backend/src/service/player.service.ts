@@ -14,7 +14,6 @@ import { PlayedMapsCalendarResponse, PlayedMapsCalendarStat } from "@ssr/common/
 import CacheService, { ServiceCache } from "./cache.service";
 import ScoreSaberService from "./scoresaber.service";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import { ScoreSaberHMDs } from "@ssr/common/utils/scoresaber.util";
 
 const SCORESABER_REQUEST_COOLDOWN = 60_000 / 250; // 250 requests per minute
 const accountCreationLock: { [id: string]: Promise<PlayerDocument> } = {};
