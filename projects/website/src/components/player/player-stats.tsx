@@ -81,6 +81,7 @@ const playerStats: Stat[] = [
     name: "Headset",
     create: (player: ScoreSaberPlayer) => {
       return {
+        tooltip: <p>The most common headset used in the last 50 scores</p>,
         value: player.hmd === undefined ? undefined : <>{player.hmd}</>,
       };
     },
