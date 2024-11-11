@@ -124,7 +124,7 @@ export default function Pagination({
   return (
     <div className="flex w-full items-center justify-between lg:justify-center relative">
       {/* Pagination Info */}
-      <div className="lg:absolute left-0">
+      <div className="lg:absolute left-0 text-sm">
         <p>
           {Math.min((currentPage - 1) * itemsPerPage + 1, totalItems)} -{" "}
           {Math.min(currentPage * itemsPerPage, totalItems)} / {totalItems}
