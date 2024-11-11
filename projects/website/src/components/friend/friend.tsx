@@ -40,7 +40,7 @@ export default function Friend({ player, onClick }: FriendProps) {
       <Link href={`/player/${player.id}`} onClick={() => onClick?.()} className="flex items-center gap-2 w-full">
         <Avatar src={player.profilePicture!} size={64} className="w-10 h-10" alt={`${player.name}'s Profile Picture`} />
         <div className="flex flex-col">
-          <p className="text-lg font-semibold">{player.name}</p>
+          <p className="font-semibold">{player.name}</p>
           <p className="text-gray-400">#{formatNumberWithCommas(player.rank)}</p>
         </div>
       </Link>
