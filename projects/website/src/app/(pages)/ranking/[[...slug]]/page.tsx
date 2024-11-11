@@ -86,8 +86,8 @@ export default async function RankingPage(props: Props) {
   const { players, page, country } = await getRankingData(props);
 
   return (
-    <main className="w-full flex justify-center">
-      <Card className="h-full w-full max-w-[1600px] gap-2">
+    <main className="flex w-full flex-col items-center text-sm">
+      <Card className="h-full w-full w-full xl:max-w-[75%] gap-2">
         <div className="flex items-center gap-2 font-semibold">
           {country && <CountryFlag code={country} size={16} />}
           <p>

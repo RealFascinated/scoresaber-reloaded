@@ -25,7 +25,7 @@ export function PlayerRanking({ player, isCountry }: PlayerRankingProps) {
         #{formatNumberWithCommas(isCountry ? player.countryRank : player.rank)}{" "}
         <span className="text-sm">{isCountry && "(#" + formatNumberWithCommas(player.rank) + ")"}</span>
       </td>
-      <td className="flex items-center gap-2 pl-3 py-2">
+      <td className="flex items-center gap-2 pl-3 py-2 min-w-[250px]">
         <PlayerInfo player={player} highlightedPlayer={claimedPlayer} useLink />
       </td>
       <td className="px-4 py-2 text-ssr text-center">{formatPp(player.pp)}pp</td>
