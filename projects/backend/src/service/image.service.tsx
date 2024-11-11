@@ -187,9 +187,7 @@ export class ImageService {
           <img src={leaderboard.songArt} width={256} height={256} alt="Leaderboard Cover" tw="rounded-full mb-3" />
 
           {/* Leaderboard Name */}
-          <p tw="font-bold text-6xl m-0">
-            {leaderboard.songName} {leaderboard.songSubName}
-          </p>
+          <p tw="font-bold text-6xl m-0">{leaderboard.fullName}</p>
 
           <div tw="flex justify-center items-center text-center">
             {/* Leaderboard Stars */}

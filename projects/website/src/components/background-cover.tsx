@@ -1,7 +1,6 @@
 "use client";
 
 import useSettings from "@/hooks/use-settings";
-import Image from "@/components/image";
 
 export default function BackgroundCover() {
   const settings = useSettings();
@@ -22,12 +21,10 @@ export default function BackgroundCover() {
   }
 
   return (
-    <Image
+    <img
       src={backgroundCover}
       alt="Background image"
       fetchPriority="high"
-      width={1920}
-      height={1080}
       className={`fixed -z-50 object-cover w-screen h-screen blur-sm brightness-[33%] pointer-events-none select-none`}
     />
   );

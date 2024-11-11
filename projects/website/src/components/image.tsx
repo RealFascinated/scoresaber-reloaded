@@ -1,6 +1,5 @@
 import { DetailedHTMLProps, ImgHTMLAttributes } from "react";
-import { Config } from "@ssr/common/config";
-import { isProduction } from "@/common/website-utils";
+import { default as NextImage } from "next/image";
 
 type ImageProps = DetailedHTMLProps<ImgHTMLAttributes<HTMLImageElement>, HTMLImageElement> & {
   /**
@@ -30,14 +29,15 @@ export default function Image({
   width = width ?? size;
   height = height ?? size;
 
-  if (src.startsWith("/") && optimized) {
-    if (isProduction()) {
-      src = `${Config.websiteUrl}${src}`;
-    } else {
-      optimized = false;
-      console.log(`Local image "${src}" is not able to be optimized`);
-    }
-  }
-  const formattedUrl = optimized ? `https://img.fascinated.cc/upload/w_${width},h_${height}/${src}` : src;
-  return <img src={formattedUrl} width={width} height={height} className={className} alt={alt} {...props} />;
+  return (
+    <NextImage
+      src={src}
+      width={Number(width)}
+      height={Number(height)}
+      className={className}
+      alt={alt!}
+      unoptimized={!optimized}
+      {...props}
+    />
+  );
 }

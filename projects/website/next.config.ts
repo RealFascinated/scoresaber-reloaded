@@ -8,6 +8,16 @@ const nextConfig: NextConfig = {
     optimizePackageImports: ["@ssr/common", "@radix-ui/react-icons", "chart.js", "react-chartjs-2"],
     webpackMemoryOptimizations: true,
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "cdn.scoresaber.com",
+        port: "",
+        pathname: "/**",
+      },
+    ],
+  },
   env: {
     HOSTNAME: "0.0.0.0",
     NEXT_PUBLIC_BUILD_ID: process.env.GIT_REV || "dev",

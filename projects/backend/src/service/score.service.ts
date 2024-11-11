@@ -97,7 +97,7 @@ export class ScoreService {
         .setTitle(`${player.name} just set a #1!`)
         .setDescription(
           [
-            `${leaderboard.songName} ${leaderboard.songSubName} (${getDifficultyName(leaderboard.difficulty.difficulty)} ${leaderboard.stars.toFixed(2)}★)`,
+            `${leaderboard.fullName} (${getDifficultyName(leaderboard.difficulty.difficulty)} ${leaderboard.stars.toFixed(2)}★)`,
             [
               `[[Player]](${Config.websiteUrl}/player/${player.id})`,
               `[[Leaderboard]](${Config.websiteUrl}/leaderboard/${leaderboard.id})`,

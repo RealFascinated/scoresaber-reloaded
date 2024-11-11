@@ -5,6 +5,7 @@ import Link from "next/link";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { BeatSaverMap } from "@ssr/common/model/beatsaver/map";
 import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
+import Image from "@/components/image";
 
 type Props = {
   leaderboard: ScoreSaberLeaderboard;
@@ -44,11 +45,11 @@ export default function ScoreSongInfo({ leaderboard, beatSaverMap }: Props) {
             )}
           </div>
         </Tooltip>
-        <img
-          src={`https://img.fascinated.cc/upload/w_64,h_64/${leaderboard.songArt}`}
+        <Image
+          src={leaderboard.songArt}
           width={64}
           height={64}
-          alt="Song Artwork"
+          alt={`${leaderboard.fullName}'s Artwork`}
           className="rounded-md min-w-[64px]"
         />
       </div>
@@ -58,7 +59,7 @@ export default function ScoreSongInfo({ leaderboard, beatSaverMap }: Props) {
             href={`/leaderboard/${leaderboard.id}`}
             className="cursor-pointer select-none hover:brightness-[66%] transform-gpu transition-all text-ssr w-fit"
           >
-            {leaderboard.songName} {leaderboard.songSubName}
+            {leaderboard.fullName}
           </Link>
           <div className="flex flex-row text-sm gap-1.5 items-end leading-none">
             <p className="text-gray-400">

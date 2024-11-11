@@ -1,7 +1,6 @@
 import { Metadata, Viewport } from "next";
 import { redirect } from "next/navigation";
 import { Colors } from "@/common/colors";
-import { getAverageColor } from "@/common/image-utils";
 import { LeaderboardData } from "@/components/leaderboard/leaderboard-data";
 import { Config } from "@ssr/common/config";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
@@ -80,9 +79,9 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 
   const { leaderboard } = response.leaderboardResponse;
   return {
-    title: `${leaderboard.songName} ${leaderboard.songSubName} by ${leaderboard.songAuthorName}`,
+    title: `${leaderboard.fullName} by ${leaderboard.songAuthorName}`,
     openGraph: {
-      title: `ScoreSaber Reloaded - ${leaderboard.songName} ${leaderboard.songSubName}`,
+      title: `ScoreSaber Reloaded - ${leaderboard.fullName}`,
       description: `View the scores for ${leaderboard.songName} by ${leaderboard.songAuthorName}!`,
       images: [
         {

@@ -31,9 +31,7 @@ export function LeaderboardInfo({ leaderboard, beatSaverMap }: LeaderboardInfoPr
               href={`https://beatsaver.com/maps/${beatSaverMap?.bsr}`}
               className="hover:brightness-[66%] transform-gpu transition-all"
             >
-              <p className="font-semibold">
-                {leaderboard.songName} {leaderboard.songSubName}
-              </p>
+              <p className="font-semibold">{leaderboard.fullName}</p>
             </FallbackLink>
             <p className="text-sm text-gray-400">
               By <span className="text-ssr">{leaderboard.songAuthorName}</span>

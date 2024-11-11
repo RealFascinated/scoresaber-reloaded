@@ -31,6 +31,11 @@ export default class Leaderboard {
   readonly songSubName!: string;
 
   /**
+   * The full name of the leaderboard. (songName + songSubName)
+   */
+  fullName!: string;
+
+  /**
    * The author of the song this leaderboard is for.
    * @private
    */

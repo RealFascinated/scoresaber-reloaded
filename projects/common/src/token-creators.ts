@@ -34,6 +34,7 @@ export function getScoreSaberLeaderboardFromToken(token: ScoreSaberLeaderboardTo
     songHash: token.songHash.toUpperCase(),
     songName: token.songName,
     songSubName: token.songSubName,
+    fullName: `${token.songName} ${token.songSubName}`,
     songAuthorName: token.songAuthorName,
     levelAuthorName: token.levelAuthorName,
     difficulty: difficulty,

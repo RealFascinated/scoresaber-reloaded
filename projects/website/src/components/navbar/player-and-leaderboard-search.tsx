@@ -209,7 +209,7 @@ export default function PlayerAndLeaderboardSearch() {
                     >
                       <Avatar src={leaderboard.songArt} className="w-8 h-8" alt={leaderboard.songName} />
                       <div className="flex flex-col">
-                        <p>{truncateText(`${leaderboard.songName} ${leaderboard.songSubName}`, 48)}</p>
+                        <p>{truncateText(leaderboard.fullName, 48)}</p>
                         <div className="text-xs">
                           <div className="flex gap-2 items-center">
                             <span
