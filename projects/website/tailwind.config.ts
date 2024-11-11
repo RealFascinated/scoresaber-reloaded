@@ -20,7 +20,7 @@ const config: Config = {
         pp: "#4858ff",
         landing: "#0f0f0f",
         ssr: {
-          DEFAULT: "#6773ff",
+          DEFAULT: "#7581fd",
         },
         hands: {
           left: "rgba(168,32,32,1)",
