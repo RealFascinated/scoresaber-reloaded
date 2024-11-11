@@ -104,6 +104,6 @@ export function getScoreSaberScoreFromToken(
     weight: token.weight,
     maxCombo: token.maxCombo,
     playerInfo: token.leaderboardPlayerInfo,
-    hmd: token.deviceHmd ?? ScoreSaberHMDs[token.hmd],
+    hmd: token.deviceHmd ?? undefined,
   };
 }
