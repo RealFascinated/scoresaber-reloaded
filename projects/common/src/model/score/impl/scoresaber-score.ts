@@ -63,8 +63,8 @@ export class ScoreSaberScoreInternal extends Score {
   /**
    * The hmd used to set the score.
    */
-  @Prop({ required: true })
-  public readonly hmd!: string;
+  @Prop({ required: false })
+  public readonly hmd?: string;
 
   /**
    * The previous score, if any.
