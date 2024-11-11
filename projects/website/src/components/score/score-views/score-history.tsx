@@ -52,7 +52,8 @@ export function ScoreHistory({ playerId, leaderboard }: ScoreHistoryProps) {
       <Pagination
         mobilePagination={isMobile}
         page={page}
-        totalPages={data.metadata.totalPages}
+        totalItems={data.metadata.totalItems}
+        itemsPerPage={data.metadata.itemsPerPage}
         loadingPage={isLoading ? page : undefined}
         onPageChange={newPage => {
           setPage(newPage);

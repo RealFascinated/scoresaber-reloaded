@@ -1,6 +1,5 @@
 "use client";
 
-import useWindowDimensions from "@/hooks/use-window-dimensions";
 import { useQuery } from "@tanstack/react-query";
 import { motion, useAnimation } from "framer-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -20,6 +19,7 @@ import ScoreMode, { ScoreModeEnum } from "@/components/score/score-mode";
 import { getFriendScores } from "@ssr/common/utils/player-utils";
 import useDatabase from "@/hooks/use-database";
 import { useLiveQuery } from "dexie-react-hooks";
+import { useIsMobile } from "@/hooks/use-is-mobile";
 
 type LeaderboardScoresProps = {
   initialPage?: number;
@@ -54,7 +54,7 @@ export default function LeaderboardScores({
   const database = useDatabase();
   const friendIds = useLiveQuery(() => database.getFriendIds());
 
-  const { width } = useWindowDimensions();
+  const isMobile = useIsMobile();
   const controls = useAnimation();
 
   const [selectedMode, setSelectedMode] = useState<ScoreModeEnum>(ScoreModeEnum.Global);
@@ -273,9 +273,10 @@ export default function LeaderboardScores({
           </div>
 
           <Pagination
-            mobilePagination={width < 768}
+            mobilePagination={isMobile}
             page={currentPage}
-            totalPages={currentScores.metadata.totalPages}
+            totalItems={currentScores.metadata.totalItems}
+            itemsPerPage={currentScores.metadata.itemsPerPage}
             loadingPage={isLoading ? currentPage : undefined}
             generatePageUrl={page => {
               return `/leaderboard/${selectedLeaderboardId}/${page}`;

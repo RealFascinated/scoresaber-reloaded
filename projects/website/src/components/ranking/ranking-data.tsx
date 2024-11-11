@@ -86,7 +86,8 @@ export default function RankingData({ initialPage, country, initialPageData }: R
       <Pagination
         mobilePagination={isMobile}
         page={currentPage}
-        totalPages={Math.ceil(metadata.total / metadata.itemsPerPage)}
+        totalItems={metadata.total}
+        itemsPerPage={metadata.itemsPerPage}
         loadingPage={isLoading ? currentPage : undefined}
         generatePageUrl={page => {
           return getUrl(page);

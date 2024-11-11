@@ -1,5 +1,4 @@
 import { capitalizeFirstLetter } from "@/common/string-utils";
-import useWindowDimensions from "@/hooks/use-window-dimensions";
 import { ClockIcon, TrophyIcon, XMarkIcon } from "@heroicons/react/24/solid";
 import { useQuery } from "@tanstack/react-query";
 import { motion, useAnimation } from "framer-motion";
@@ -19,6 +18,7 @@ import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { fetchPlayerScores } from "@ssr/common/utils/score.util";
 import PlayerScoresResponse from "@ssr/common/response/player-scores-response";
+import { useIsMobile } from "@/hooks/use-is-mobile";
 
 type Props = {
   initialScoreData?: PlayerScoresResponse<ScoreSaberScore, ScoreSaberLeaderboard>;
@@ -47,7 +47,7 @@ const scoreSort = [
 ];
 
 export default function PlayerScores({ initialScoreData, initialSearch, player, sort, page }: Props) {
-  const { width } = useWindowDimensions();
+  const isMobile = useIsMobile();
   const controls = useAnimation();
 
   const [pageState, setPageState] = useState<PageState>({ page, sort });
@@ -234,9 +234,10 @@ export default function PlayerScores({ initialScoreData, initialSearch, player, 
 
           {scores.metadata.totalPages > 1 && (
             <Pagination
-              mobilePagination={width < 768}
+              mobilePagination={isMobile}
               page={pageState.page}
-              totalPages={scores.metadata.totalPages}
+              totalItems={scores.metadata.totalItems}
+              itemsPerPage={scores.metadata.itemsPerPage}
               loadingPage={isLoading ? pageState.page : undefined}
               generatePageUrl={page => {
                 return getUrl(page);
