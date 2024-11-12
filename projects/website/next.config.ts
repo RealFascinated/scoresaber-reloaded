@@ -10,11 +10,10 @@ const nextConfig: NextConfig = {
     optimizePackageImports: ["@ssr/common", "@radix-ui/react-icons", "chart.js", "react-chartjs-2"],
     webpackMemoryOptimizations: true,
     reactCompiler: true,
+    cacheHandlers: {
+      default: isProduction() ? require.resolve("/app/projects/website/cache-handler.mjs") : undefined,
+    },
   },
-  cacheHandler: isProduction()
-    ? require.resolve("/app/projects/website/cache-handler.mjs")
-    : require.resolve("./cache-handler.mjs"),
-  cacheMaxMemorySize: 0, // disable default in-memory caching
   images: {
     remotePatterns: [
       {
