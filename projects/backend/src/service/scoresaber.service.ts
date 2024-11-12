@@ -106,6 +106,13 @@ export default class ScoreSaberService {
           Object.entries(statisticHistory).sort((a, b) => new Date(b[0]).getTime() - new Date(a[0]).getTime())
         );
 
+        for (const [date, history] of Object.entries(statisticHistory)) {
+          if (history.plusOnePp) {
+            history.plusOnePp = Math.round(history.plusOnePp * Math.pow(10, 2)) / Math.pow(10, 2);
+            statisticHistory[date] = history;
+          }
+        }
+
         return {
           id: playerToken.id,
           name: playerToken.name,
