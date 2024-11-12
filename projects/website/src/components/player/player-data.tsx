@@ -42,8 +42,6 @@ export default function PlayerData({ initialPlayerData, initialSearch, sort, pag
     player = data;
   }
 
-  console.log(dimensions);
-
   return (
     <div className="flex gap-2">
       <article className="w-full 2xl:w-[1164px] flex flex-col gap-2">
