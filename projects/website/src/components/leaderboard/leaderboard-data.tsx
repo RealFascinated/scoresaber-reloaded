@@ -33,7 +33,7 @@ export function LeaderboardData({ initialLeaderboard, initialScores, initialPage
   const [currentLeaderboardId, setCurrentLeaderboardId] = useState(initialLeaderboard.leaderboard.id);
   const [currentLeaderboard, setCurrentLeaderboard] = useState(initialLeaderboard);
 
-  const { data, isLoading, isError } = useQuery({
+  const { data } = useQuery({
     queryKey: ["leaderboard", currentLeaderboardId],
     queryFn: async (): Promise<LeaderboardResponse<ScoreSaberLeaderboard> | undefined> => {
       return fetchLeaderboard<ScoreSaberLeaderboard>("scoresaber", currentLeaderboardId + "");

@@ -19,6 +19,7 @@ import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber
 import { fetchPlayerScores } from "@ssr/common/utils/score.util";
 import PlayerScoresResponse from "@ssr/common/response/player-scores-response";
 import { useIsMobile } from "@/hooks/use-is-mobile";
+import { LoadingIcon } from "@/components/loading-icon";
 
 type Props = {
   initialScoreData?: PlayerScoresResponse<ScoreSaberScore, ScoreSaberLeaderboard>;
@@ -46,18 +47,16 @@ const scoreSort = [
   },
 ];
 
-export default function PlayerScores({ initialScoreData, initialSearch, player, sort, page }: Props) {
+export default function PlayerScores({ initialSearch, player, sort, page }: Props) {
   const isMobile = useIsMobile();
   const controls = useAnimation();
 
   const [pageState, setPageState] = useState<PageState>({ page, sort });
   const [previousPage, setPreviousPage] = useState(page);
-  const [scores, setScores] = useState<PlayerScoresResponse<ScoreSaberScore, ScoreSaberLeaderboard> | undefined>(
-    initialScoreData
-  );
+  const [scores, setScores] = useState<PlayerScoresResponse<ScoreSaberScore, ScoreSaberLeaderboard> | undefined>();
   const [searchTerm, setSearchTerm] = useState(initialSearch || "");
   const debouncedSearchTerm = useDebounce(searchTerm, 250);
-  const [shouldFetch, setShouldFetch] = useState(false);
+  const [shouldFetch, setShouldFetch] = useState(true);
   const topOfScoresRef = useRef<HTMLDivElement>(null);
 
   const isSearchActive = debouncedSearchTerm.length >= 3;
@@ -154,10 +153,10 @@ export default function PlayerScores({ initialScoreData, initialSearch, player, 
    * scores when new scores are loaded.
    */
   useEffect(() => {
-    if (topOfScoresRef.current && shouldFetch) {
+    if (topOfScoresRef.current && shouldFetch && isLoading && scores != undefined) {
       const topOfScoresPosition = topOfScoresRef.current.getBoundingClientRect().top + window.scrollY;
       window.scrollTo({
-        top: topOfScoresPosition - 55, // Navbar height (plus some padding)
+        top: topOfScoresPosition - 65, // Navbar height (plus some padding)
         behavior: "smooth",
       });
     }
@@ -207,6 +206,12 @@ export default function PlayerScores({ initialScoreData, initialSearch, player, 
           )}
         </div>
       </div>
+
+      {isLoading && scores == undefined && (
+        <div className="flex w-full justify-center">
+          <LoadingIcon />
+        </div>
+      )}
 
       {scores !== undefined && (
         <>

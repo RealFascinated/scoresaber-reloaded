@@ -179,7 +179,7 @@ export default function LeaderboardScores({
     if (topOfScoresRef.current && shouldFetch && isLeaderboardPage) {
       const topOfScoresPosition = topOfScoresRef.current.getBoundingClientRect().top + window.scrollY;
       window.scrollTo({
-        top: topOfScoresPosition - 75, // Navbar height (plus some padding)
+        top: topOfScoresPosition - 65, // Navbar height (plus some padding)
         behavior: "smooth",
       });
     }

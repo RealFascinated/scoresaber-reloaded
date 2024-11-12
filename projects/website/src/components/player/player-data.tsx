@@ -10,9 +10,6 @@ import useDatabase from "@/hooks/use-database";
 import { useLiveQuery } from "dexie-react-hooks";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { ScoreSort } from "@ssr/common/score/score-sort";
-import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
-import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import PlayerScoresResponse from "@ssr/common/response/player-scores-response";
 import PlayerViews from "@/components/player/history-views/player-views";
 import { getScoreSaberPlayer } from "@ssr/common/utils/player-utils";
 import useSettings from "@/hooks/use-settings";
@@ -22,13 +19,12 @@ const Mini = dynamic(() => import("../ranking/mini"), { ssr: false });
 
 type Props = {
   initialPlayerData: ScoreSaberPlayer;
-  initialScoreData?: PlayerScoresResponse<ScoreSaberScore, ScoreSaberLeaderboard>;
   initialSearch?: string;
   sort: ScoreSort;
   page: number;
 };
 
-export default function PlayerData({ initialPlayerData, initialScoreData, initialSearch, sort, page }: Props) {
+export default function PlayerData({ initialPlayerData, initialSearch, sort, page }: Props) {
   const isMobile = useIsMobile();
   const database = useDatabase();
   const settings = useSettings();
@@ -53,13 +49,7 @@ export default function PlayerData({ initialPlayerData, initialScoreData, initia
           <PlayerBadges player={player} />
           {!player.inactive && <PlayerViews player={player} />}
         </Card>
-        <PlayerScores
-          initialScoreData={initialScoreData}
-          initialSearch={initialSearch}
-          player={player}
-          sort={sort}
-          page={page}
-        />
+        <PlayerScores initialSearch={initialSearch} player={player} sort={sort} page={page} />
       </article>
       {!isMobile && !player.inactive && !player.banned && (
         <aside className="w-[400px] hidden 2xl:flex flex-col gap-2">

@@ -1,15 +1,10 @@
 import PlayerData from "@/components/player/player-data";
-import { Metadata, Viewport } from "next";
+import { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { Colors } from "@/common/colors";
 import { getCookieValue } from "@ssr/common/utils/cookie-utils";
 import { Config } from "@ssr/common/config";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { ScoreSort } from "@ssr/common/score/score-sort";
-import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
-import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import { fetchPlayerScores } from "@ssr/common/utils/score.util";
-import PlayerScoresResponse from "@ssr/common/response/player-scores-response";
 import { cache } from "react";
 import { randomString } from "@ssr/common/utils/string.util";
 import { getScoreSaberPlayer } from "@ssr/common/utils/player-utils";
@@ -25,7 +20,6 @@ type Props = {
 
 type PlayerData = {
   player: ScoreSaberPlayer | undefined;
-  scores: PlayerScoresResponse<ScoreSaberScore, ScoreSaberLeaderboard> | undefined;
   sort: ScoreSort;
   page: number;
   search: string;
@@ -39,10 +33,9 @@ const getPlayer = cache(async (id: string): Promise<ScoreSaberPlayer | undefined
  * Gets the player data and scores
  *
  * @param params the params
- * @param fetchScores whether to fetch the scores
  * @returns the player data and scores
  */
-const getPlayerData = cache(async ({ params }: Props, fetchScores: boolean = true): Promise<PlayerData> => {
+const getPlayerData = cache(async ({ params }: Props): Promise<PlayerData> => {
   const { slug } = await params;
   const id = slug[0]; // The players id
   const sort: ScoreSort = (slug[1] as ScoreSort) || (await getCookieValue("lastScoreSort", ScoreSort.recent)); // The sorting method
@@ -50,17 +43,11 @@ const getPlayerData = cache(async ({ params }: Props, fetchScores: boolean = tru
   const search = (slug[3] as string) || ""; // The search query
 
   const player = await getPlayer(id);
-  let scores: PlayerScoresResponse<ScoreSaberScore, ScoreSaberLeaderboard> | undefined;
-  if (fetchScores && player !== undefined) {
-    scores = await fetchPlayerScores<ScoreSaberScore, ScoreSaberLeaderboard>("scoresaber", id, page, sort, search);
-  }
-
   return {
     sort: sort,
     page: page,
     search: search,
     player: player,
-    scores: scores,
   };
 });
 
@@ -70,7 +57,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     description: "The player you were looking for could not be found.",
   };
 
-  const { player } = await getPlayerData(props, false);
+  const { player } = await getPlayerData(props);
   if (player === undefined) {
     return {
       title: UNKNOWN_PLAYER.title,
@@ -100,23 +87,15 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 }
 
 export default async function PlayerPage(props: Props) {
-  const before = performance.now();
-  const { player, scores, sort, page, search } = await getPlayerData(props);
+  const { player, sort, page, search } = await getPlayerData(props);
   if (player == undefined) {
     return redirect("/");
   }
-  console.log(`Loaded player in ${(performance.now() - before).toFixed(0)}ms`);
 
   return (
     <main className="w-full flex justify-center">
       <div className="flex flex-col h-full w-full max-w-[1600px]">
-        <PlayerData
-          initialPlayerData={player}
-          initialScoreData={scores}
-          initialSearch={search}
-          sort={sort}
-          page={page}
-        />
+        <PlayerData initialPlayerData={player} initialSearch={search} sort={sort} page={page} />
       </div>
     </main>
   );
