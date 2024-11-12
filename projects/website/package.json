@@ -29,6 +29,7 @@
     "@ssr/common": "workspace:*",
     "@tanstack/react-query": "^5.55.4",
     "@uidotdev/usehooks": "^2.4.1",
+    "babel-plugin-react-compiler": "^19.0.0-beta-a7bf2bd-20241110",
     "chart.js": "^4.4.4",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
