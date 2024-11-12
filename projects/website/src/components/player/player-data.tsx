@@ -14,6 +14,7 @@ import PlayerViews from "@/components/player/history-views/player-views";
 import { getScoreSaberPlayer } from "@ssr/common/utils/player-utils";
 import useSettings from "@/hooks/use-settings";
 import dynamic from "next/dynamic";
+import useWindowDimensions from "@/hooks/use-window-dimensions";
 
 const Mini = dynamic(() => import("../ranking/mini"), { ssr: false });
 
@@ -25,7 +26,7 @@ type Props = {
 };
 
 export default function PlayerData({ initialPlayerData, initialSearch, sort, page }: Props) {
-  const isMobile = useIsMobile();
+  const dimensions = useWindowDimensions();
   const database = useDatabase();
   const settings = useSettings();
   const isFriend = useLiveQuery(() => database.isFriend(initialPlayerData.id));
@@ -41,6 +42,8 @@ export default function PlayerData({ initialPlayerData, initialSearch, sort, pag
     player = data;
   }
 
+  console.log(dimensions);
+
   return (
     <div className="flex gap-2">
       <article className="flex flex-col gap-2">
@@ -51,7 +54,7 @@ export default function PlayerData({ initialPlayerData, initialSearch, sort, pag
         </Card>
         <PlayerScores initialSearch={initialSearch} player={player} sort={sort} page={page} />
       </article>
-      {!isMobile && !player.inactive && !player.banned && (
+      {dimensions.width > 1536 && !player.inactive && !player.banned && (
         <aside className="w-[400px] hidden 2xl:flex flex-col gap-2">
           <Mini type="Global" player={player} />
           <Mini type="Country" player={player} />
