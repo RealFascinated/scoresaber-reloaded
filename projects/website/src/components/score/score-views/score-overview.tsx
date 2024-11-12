@@ -2,8 +2,6 @@ import PlayerScoreAccuracyChart from "@/components/leaderboard/chart/player-scor
 import LeaderboardScores from "@/components/leaderboard/leaderboard-scores";
 import { ScoreStatsToken } from "@ssr/common/types/token/beatleader/score-stats/score-stats";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import LeaderboardScoresResponse from "@ssr/common/response/leaderboard-scores-response";
-import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 
 type ScoreOverviewProps = {
@@ -26,14 +24,9 @@ type ScoreOverviewProps = {
    * The leaderboard the score was set on.
    */
   leaderboard: ScoreSaberLeaderboard;
-
-  /**
-   * The scores so show.
-   */
-  scores?: LeaderboardScoresResponse<ScoreSaberScore, ScoreSaberLeaderboard>;
 };
 
-export function ScoreOverview({ highlightedPlayer, scoreStats, initialPage, leaderboard, scores }: ScoreOverviewProps) {
+export function ScoreOverview({ highlightedPlayer, scoreStats, initialPage, leaderboard }: ScoreOverviewProps) {
   return (
     <>
       {scoreStats && (
@@ -44,7 +37,6 @@ export function ScoreOverview({ highlightedPlayer, scoreStats, initialPage, lead
 
       <LeaderboardScores
         initialPage={initialPage}
-        initialScores={scores}
         leaderboard={leaderboard}
         highlightedPlayer={highlightedPlayer}
         disableUrlChanging

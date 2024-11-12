@@ -2,11 +2,9 @@ import { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { LeaderboardData } from "@/components/leaderboard/leaderboard-data";
 import { Config } from "@ssr/common/config";
-import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { LeaderboardResponse } from "@ssr/common/response/leaderboard-response";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { fetchLeaderboard } from "@ssr/common/utils/leaderboard.util";
-import LeaderboardScoresResponse from "@ssr/common/response/leaderboard-scores-response";
 import { cache } from "react";
 
 type Props = {
@@ -20,7 +18,6 @@ type Props = {
 
 type LeaderboardData = {
   leaderboardResponse: LeaderboardResponse<ScoreSaberLeaderboard>;
-  scores?: LeaderboardScoresResponse<ScoreSaberScore, ScoreSaberLeaderboard>;
   page: number;
 };
 

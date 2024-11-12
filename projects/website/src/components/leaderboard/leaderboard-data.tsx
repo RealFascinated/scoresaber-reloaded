@@ -2,13 +2,11 @@
 
 import LeaderboardScores from "@/components/leaderboard/leaderboard-scores";
 import { LeaderboardInfo } from "@/components/leaderboard/leaderboard-info";
-import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { LeaderboardResponse } from "@ssr/common/response/leaderboard-response";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { fetchLeaderboard } from "@ssr/common/utils/leaderboard.util";
-import LeaderboardScoresResponse from "@ssr/common/response/leaderboard-scores-response";
 import LeaderboardPpChart from "@/components/leaderboard/chart/leaderboard-pp-chart";
 import Card from "@/components/card";
 
@@ -19,17 +17,12 @@ type LeaderboardDataProps = {
   initialLeaderboard: LeaderboardResponse<ScoreSaberLeaderboard>;
 
   /**
-   * The initial score data.
-   */
-  initialScores?: LeaderboardScoresResponse<ScoreSaberScore, ScoreSaberLeaderboard>;
-
-  /**
    * The initial page.
    */
   initialPage?: number;
 };
 
-export function LeaderboardData({ initialLeaderboard, initialScores, initialPage }: LeaderboardDataProps) {
+export function LeaderboardData({ initialLeaderboard, initialPage }: LeaderboardDataProps) {
   const [currentLeaderboardId, setCurrentLeaderboardId] = useState(initialLeaderboard.leaderboard.id);
   const [currentLeaderboard, setCurrentLeaderboard] = useState(initialLeaderboard);
 
@@ -52,7 +45,6 @@ export function LeaderboardData({ initialLeaderboard, initialScores, initialPage
       <Card className="flex gap-2 w-full relative h-fit">
         <LeaderboardScores
           leaderboard={leaderboard}
-          initialScores={initialScores}
           initialPage={initialPage}
           leaderboardChanged={newId => setCurrentLeaderboardId(newId)}
           showDifficulties

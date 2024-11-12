@@ -11,7 +11,6 @@ import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
 import { fetchLeaderboardScores } from "@ssr/common/utils/score.util";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import LeaderboardScoresResponse from "@ssr/common/response/leaderboard-scores-response";
 import LeaderboardScoresSkeleton from "@/components/leaderboard/skeleton/leaderboard-scores-skeleton";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { Metadata } from "@ssr/common/types/metadata";
@@ -20,10 +19,10 @@ import { getFriendScores } from "@ssr/common/utils/player-utils";
 import useDatabase from "@/hooks/use-database";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useIsMobile } from "@/hooks/use-is-mobile";
+import { cn } from "@/common/utils";
 
 type LeaderboardScoresProps = {
   initialPage?: number;
-  initialScores?: LeaderboardScoresResponse<ScoreSaberScore, ScoreSaberLeaderboard>;
   leaderboard: ScoreSaberLeaderboard;
   showDifficulties?: boolean;
   isLeaderboardPage?: boolean;
@@ -39,7 +38,6 @@ type ScoresPage = {
 
 export default function LeaderboardScores({
   initialPage,
-  initialScores,
   leaderboard,
   showDifficulties,
   isLeaderboardPage,
@@ -61,16 +59,9 @@ export default function LeaderboardScores({
   const [selectedLeaderboardId, setSelectedLeaderboardId] = useState(leaderboard.id);
   const [previousPage, setPreviousPage] = useState(initialPage);
   const [currentPage, setCurrentPage] = useState(initialPage);
-  const [currentScores, setCurrentScores] = useState<ScoresPage | undefined>(
-    initialScores
-      ? {
-          scores: initialScores.scores,
-          metadata: initialScores.metadata,
-        }
-      : undefined
-  );
+  const [currentScores, setCurrentScores] = useState<ScoresPage | undefined>();
   const topOfScoresRef = useRef<HTMLDivElement>(null);
-  const [shouldFetch, setShouldFetch] = useState(false);
+  const [shouldFetch, setShouldFetch] = useState(true);
 
   const { data, isError, isLoading } = useQuery<ScoresPage>({
     queryKey: ["leaderboardScores", selectedLeaderboardId, currentPage, selectedMode],
@@ -176,7 +167,7 @@ export default function LeaderboardScores({
    * scores when new scores are loaded.
    */
   useEffect(() => {
-    if (topOfScoresRef.current && shouldFetch && isLeaderboardPage) {
+    if (topOfScoresRef.current && shouldFetch && isLeaderboardPage && isLoading && currentScores != undefined) {
       const topOfScoresPosition = topOfScoresRef.current.getBoundingClientRect().top + window.scrollY;
       window.scrollTo({
         top: topOfScoresPosition - 65, // Navbar height (plus some padding)
@@ -203,7 +194,12 @@ export default function LeaderboardScores({
       {/* Where to scroll to when new scores are loaded */}
       <div ref={topOfScoresRef} className="absolute" />
 
-      <div className="flex flex-col lg:flex-row justify-center lg:justify-between lg:px-10 items-center flex-wrap">
+      <div
+        className={cn(
+          "flex flex-col lg:flex-row justify-center lg:px-10 items-center flex-wrap",
+          isLeaderboardPage ? "lg:justify-between" : ""
+        )}
+      >
         <ScoreMode onModeChange={setSelectedMode} />
 
         <div className="flex gap-2 flex-wrap">

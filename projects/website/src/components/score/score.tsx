@@ -16,14 +16,12 @@ import { ScoreOverview } from "@/components/score/score-views/score-overview";
 import { ScoreHistory } from "@/components/score/score-views/score-history";
 
 import { getPageFromRank, kyFetchJson } from "@ssr/common/utils/utils";
-import { fetchLeaderboardScores } from "@ssr/common/utils/score.util";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { BeatSaverMap } from "@ssr/common/model/beatsaver/map";
-import LeaderboardScoresResponse from "@ssr/common/response/leaderboard-scores-response";
 import { ScoreStatsToken } from "@ssr/common/types/token/beatleader/score-stats/score-stats";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { Config } from "@ssr/common/config";
@@ -43,7 +41,6 @@ type Props = {
 };
 
 type DropdownData = {
-  scores?: LeaderboardScoresResponse<ScoreSaberScore, ScoreSaberLeaderboard>;
   scoreStats?: ScoreStatsToken;
 };
 
@@ -70,11 +67,6 @@ export default function Score({ leaderboard, beatSaverMap, score, settings, high
   const { data, isLoading } = useQuery<DropdownData>({
     queryKey: [`leaderboardDropdownData:${leaderboard.id}`, leaderboard.id, score.scoreId, isLeaderboardExpanded],
     queryFn: async () => {
-      const scores = await fetchLeaderboardScores<ScoreSaberScore, ScoreSaberLeaderboard>(
-        "scoresaber",
-        leaderboard.id.toString(),
-        scoresPage
-      );
       let scoreStats: ScoreStatsToken | undefined;
       if (score.additionalData) {
         if (score.additionalData.cachedScoreStats) {
@@ -85,7 +77,7 @@ export default function Score({ leaderboard, beatSaverMap, score, settings, high
           scoreStats = await beatLeaderService.lookupScoreStats(score.additionalData.scoreId);
         }
       }
-      return { scores, scoreStats };
+      return { scoreStats };
     },
     staleTime: 30000,
     enabled: loading,
@@ -161,7 +153,8 @@ export default function Score({ leaderboard, beatSaverMap, score, settings, high
           className="w-full mt-2"
         >
           <Card className="flex gap-4 w-full relative border border-input">
-            <div className="flex flex-col lg:flex-row w-full gap-2 justify-center">
+            <div className="flex flex-col w-full gap-2 justify-center items-center">
+              <MapStats leaderboard={leaderboard} beatSaver={beatSaverMap} />
               <div className="flex clex-col justify-center lg:justify-start gap-2">
                 {modes.map((mode, i) => (
                   <Button
@@ -175,15 +168,10 @@ export default function Score({ leaderboard, beatSaverMap, score, settings, high
                   </Button>
                 ))}
               </div>
-
-              <div>
-                <MapStats leaderboard={leaderboard} beatSaver={beatSaverMap} />
-              </div>
             </div>
 
             {selectedMode.name === "Overview" && (
               <ScoreOverview
-                scores={dropdownData.scores}
                 leaderboard={leaderboard}
                 initialPage={scoresPage}
                 scoreStats={dropdownData.scoreStats}
