@@ -1,6 +1,7 @@
-import {BeatSaverMap} from "../model/beatsaver/map";
-import {MapDifficulty} from "../score/map-difficulty";
-import {MapCharacteristic} from "../types/map-characteristic";
+import { BeatSaverMap } from "../model/beatsaver/map";
+import { MapDifficulty } from "../score/map-difficulty";
+import { MapCharacteristic } from "../types/map-characteristic";
+import BeatSaverMapDifficulty from "../model/beatsaver/map-difficulty";
 
 /**
  * Gets the BeatSaver mapper profile url.
@@ -25,7 +26,7 @@ export function getBeatSaverDifficulty(
   hash: string,
   difficulty: MapDifficulty,
   characteristic: MapCharacteristic
-) {
+): BeatSaverMapDifficulty | undefined {
   const version = map.versions.find(v => v.hash === hash);
   if (version == undefined) {
     return undefined;

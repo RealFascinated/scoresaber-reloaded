@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import { fetchLeaderboard } from "@ssr/common/utils/leaderboard.util";
 import LeaderboardPpChart from "@/components/leaderboard/chart/leaderboard-pp-chart";
 import Card from "@/components/card";
+import { LeaderboardBeatSaverInfo } from "@/components/leaderboard/beatsaver-info";
 
 type LeaderboardDataProps = {
   /**
@@ -54,6 +55,9 @@ export function LeaderboardData({ initialLeaderboard, initialPage }: Leaderboard
         </Card>
         <div className="flex flex-col gap-2 w-full xl:w-[550px]">
           <LeaderboardInfo leaderboard={leaderboard} beatSaverMap={currentLeaderboard.beatsaver} />
+          {currentLeaderboard.beatsaver && (
+            <LeaderboardBeatSaverInfo leaderboard={leaderboard} beatSaverMap={currentLeaderboard.beatsaver} />
+          )}
           {leaderboard.stars > 0 && leaderboard.maxScore > 0 && <LeaderboardPpChart leaderboard={leaderboard} />}
         </div>
       </div>
