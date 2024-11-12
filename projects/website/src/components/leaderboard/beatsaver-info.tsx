@@ -6,6 +6,7 @@ import { formatNumber } from "@ssr/common/utils/number-utils";
 import { formatTime } from "@ssr/common/utils/time-utils";
 import BeatSaverMapDifficulty from "@ssr/common/model/beatsaver/map-difficulty";
 import { MapStats } from "@/components/score/map-stats";
+import EmbedLinks from "@/components/embed-links";
 
 type LeaderboardBeatSaverInfoProps = {
   /**
@@ -69,7 +70,11 @@ export function LeaderboardBeatSaverInfo({ leaderboard, beatSaverMap }: Leaderbo
       <p className="font-bold text-md text-center">BeatSaver Information</p>
       <div className="w-full p-1 bg-border rounded-sm">
         {beatSaverMap.description.split("\n").map((line, index) => {
-          return <p key={index}>{line}</p>;
+          return (
+            <p key={index}>
+              <EmbedLinks text={line} />
+            </p>
+          );
         })}
       </div>
 
