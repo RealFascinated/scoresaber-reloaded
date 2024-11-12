@@ -1,12 +1,12 @@
 import Card from "@/components/card";
 import { LeaderboardSongStarCount } from "@/components/leaderboard/leaderboard-song-star-count";
-import ScoreButtons from "@/components/score/score-buttons";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { BeatSaverMap } from "@ssr/common/model/beatsaver/map";
 import { getBeatSaverMapperProfileUrl } from "@ssr/common/utils/beatsaver.util";
 import FallbackLink from "@/components/fallback-link";
 import { formatNumber } from "@ssr/common/utils/number-utils";
 import Image from "next/image";
+import LeaderboardButtons from "@/components/leaderboard/leaderboard-buttons";
 
 type LeaderboardInfoProps = {
   /**
@@ -69,7 +69,7 @@ export function LeaderboardInfo({ leaderboard, beatSaverMap }: LeaderboardInfoPr
         <div className="relative">
           <div className="absolute bottom-0 right-0 w-fit h-fit flex flex-col gap-2 items-end">
             <LeaderboardSongStarCount leaderboard={leaderboard} />
-            <ScoreButtons leaderboard={leaderboard} beatSaverMap={beatSaverMap} alwaysSingleLine />
+            <LeaderboardButtons leaderboard={leaderboard} beatSaverMap={beatSaverMap} />
           </div>
         </div>
       </div>
