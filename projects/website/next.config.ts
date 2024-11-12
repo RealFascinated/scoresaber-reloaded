@@ -10,8 +10,8 @@ const nextConfig: NextConfig = {
     optimizePackageImports: ["@ssr/common", "@radix-ui/react-icons", "chart.js", "react-chartjs-2"],
     webpackMemoryOptimizations: true,
     reactCompiler: true,
-    typedEnv: true,
-    typedRoutes: true,
+    // typedEnv: true,
+    // typedRoutes: true,
   },
   cacheHandler: isProduction()
     ? require.resolve("/app/projects/website/cache-handler.mjs")
