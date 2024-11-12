@@ -12,8 +12,6 @@ const nextConfig: NextConfig = {
     reactCompiler: true,
   },
   images: {
-    deviceSizes: [375, 768, 1280, 1440, 1920],
-    imageSizes: [24, 32, 64, 128, 192],
     remotePatterns: [
       {
         protocol: "https",
