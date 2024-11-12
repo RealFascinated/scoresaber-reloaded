@@ -11,7 +11,12 @@ export default function PlayerSteamProfile({ player }: Props) {
   return (
     <div className="flex gap-2">
       <Tooltip display={<p>Click to view the Steam Profile for {player.name}</p>} side="bottom">
-        <Link href={`https://steamcommunity.com/profiles/${player.id}`} target="_blank" className="cursor-pointer">
+        <Link
+          prefetch={false}
+          href={`https://steamcommunity.com/profiles/${player.id}`}
+          target="_blank"
+          className="cursor-pointer"
+        >
           <SteamLogo size={19} />
         </Link>
       </Tooltip>

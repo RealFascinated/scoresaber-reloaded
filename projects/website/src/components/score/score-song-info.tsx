@@ -56,6 +56,7 @@ export default function ScoreSongInfo({ leaderboard, beatSaverMap }: Props) {
       <div className="flex">
         <div className="overflow-y-clip flex flex-col gap-1">
           <Link
+            prefetch={false}
             href={`/leaderboard/${leaderboard.id}`}
             className="cursor-pointer select-none hover:brightness-[66%] transform-gpu transition-all text-ssr w-fit"
           >

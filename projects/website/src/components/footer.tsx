@@ -110,6 +110,7 @@ export default function Footer({ buildId, buildTimeShort }: { buildId: string; b
             {/* Branding */}
             <div className="flex flex-col gap-2 text-center items-center lg:text-left lg:items-start">
               <Link
+                prefetch={false}
                 className="flex gap-3 items-center hover:opacity-75 transition-all transform-gpu"
                 href="/"
                 draggable={false}
@@ -126,6 +127,7 @@ export default function Footer({ buildId, buildTimeShort }: { buildId: string; b
             <div className="flex gap-4 justify-center lg:justify-start items-center">
               {socialLinks.map(link => (
                 <Link
+                  prefetch={false}
                   key={link.name}
                   className="hover:opacity-75 transition-all transform-gpu"
                   href={link.href}
@@ -147,6 +149,7 @@ export default function Footer({ buildId, buildTimeShort }: { buildId: string; b
                   const external: boolean = !link.href.startsWith("/");
                   return (
                     <Link
+                      prefetch={false}
                       key={link.name}
                       className="flex gap-2 items-center text-sm hover:opacity-75 transition-all transform-gpu"
                       href={link.href}

@@ -57,7 +57,7 @@ export default function FriendsButton() {
         ) : (
           <div className="text-sm flex flex-col gap-2 justify-center items-center">
             <p className="pointer-events-none">You don&#39;t have any friends :(</p>
-            <Link href="/search">
+            <Link prefetch={false} href="/search">
               <Button size="sm" onClick={() => setOpen(false)}>
                 Search Player
               </Button>

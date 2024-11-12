@@ -71,7 +71,13 @@ export function PlayerInfo({
         alt={`${player.name}'s Profile Picture`}
       />
       {!hideCountryFlag && <CountryFlag code={player.country!} size={12} />}
-      {useLink ? <Link href={`/player/${player.id}`}>{name}</Link> : name}
+      {useLink ? (
+        <Link prefetch={false} href={`/player/${player.id}`}>
+          {name}
+        </Link>
+      ) : (
+        name
+      )}
     </div>
   );
 }

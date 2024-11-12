@@ -37,7 +37,12 @@ export default function Friend({ player, onClick }: FriendProps) {
 
   return (
     <li className="flex items-center justify-between gap-2 hover:bg-accent transition-all transform-gpu p-2 rounded-md select-none">
-      <Link href={`/player/${player.id}`} onClick={() => onClick?.()} className="flex items-center gap-2 w-full">
+      <Link
+        prefetch={false}
+        href={`/player/${player.id}`}
+        onClick={() => onClick?.()}
+        className="flex items-center gap-2 w-full"
+      >
         <Avatar src={player.profilePicture!} size={64} className="w-10 h-10" alt={`${player.name}'s Profile Picture`} />
         <div className="flex flex-col">
           <p className="font-semibold">{player.name}</p>

@@ -31,6 +31,7 @@ export default function HeroSection() {
 function Alert() {
   return (
     <Link
+      prefetch={false}
       className="group mb-1.5 bg-neutral-900 hover:opacity-85 border border-white/5 rounded-full transition-all transform-gpu"
       href="https://github.com/RealFascinated/scoresaber-reloaded"
       target="_blank"
@@ -72,7 +73,7 @@ function Buttons() {
         <span>Player Search</span>
       </Button>
 
-      <Link href="https://discord.gg/kmNfWGA4A8" target="_blank">
+      <Link prefetch={false} href="https://discord.gg/kmNfWGA4A8" target="_blank">
         <Button className="max-w-52 flex gap-2.5 bg-[#5865F2] hover:bg-[#5865F2]/85 text-white">
           <img className="size-6" src="/assets/logos/discord.svg" />
           <span>Join our Discord</span>

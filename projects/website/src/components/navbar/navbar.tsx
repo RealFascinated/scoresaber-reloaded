@@ -59,6 +59,7 @@ export default function Navbar() {
       <div className="flex gap-3 md:gap-4 items-center transition-all transform-gpu">
         {/* Branding */}
         <Link
+          prefetch={false}
           className="flex gap-2.5 items-center hover:opacity-85 transition-all transform-gpu"
           href="/"
           draggable={false}
@@ -91,6 +92,7 @@ export default function Navbar() {
 function SimpleNavLink({ content, href }: { content: ReactElement; href: string }) {
   return (
     <Link
+      prefetch={false}
       className="flex gap-3 items-center text-sm hover:opacity-80 transition-all transform-gpu"
       href={href}
       target={href.startsWith("/") ? "_self" : "_blank"}

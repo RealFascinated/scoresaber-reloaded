@@ -17,7 +17,7 @@ export default function ScoreRankAndDateInfo({ score, leaderboard }: Props) {
     <div className="flex w-full flex-row justify-between lg:w-[125px] lg:flex-col lg:justify-center items-center">
       <div className="flex gap-1 items-center">
         <GlobeAmericasIcon className="w-5 h-5" />
-        <Link href={`/leaderboard/${leaderboard.id}/${getPageFromRank(score.rank, 12)}`}>
+        <Link prefetch={false} href={`/leaderboard/${leaderboard.id}/${getPageFromRank(score.rank, 12)}`}>
           <p className="text-ssr cursor-default hover:brightness-[66%] transition-all transform-gpu cursor-pointer">
             #{formatNumberWithCommas(score.rank)}
           </p>
