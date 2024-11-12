@@ -196,7 +196,7 @@ export default function LeaderboardScores({
 
       <div
         className={cn(
-          "flex flex-col lg:flex-row justify-center lg:px-10 items-center flex-wrap",
+          "flex flex-col lg:flex-row justify-center lg:px-10 items-center flex-wrap gap-2",
           isLeaderboardPage ? "lg:justify-between" : ""
         )}
       >
