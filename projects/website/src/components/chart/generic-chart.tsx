@@ -76,6 +76,9 @@ export default function GenericChart({ options, labels, datasetConfig, histories
     .filter(Boolean) as Dataset[];
 
   const chartOptions: any = {
+    animation: {
+      duration: 0,
+    },
     maintainAspectRatio: false,
     responsive: true,
     interaction: { mode: "index", intersect: false },
