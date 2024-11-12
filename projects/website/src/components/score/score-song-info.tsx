@@ -51,6 +51,7 @@ export default function ScoreSongInfo({ leaderboard, beatSaverMap }: Props) {
           height={64}
           alt={`${leaderboard.fullName}'s Artwork`}
           className="rounded-md min-w-[64px]"
+          priority
         />
       </div>
       <div className="flex">

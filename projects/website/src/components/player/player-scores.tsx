@@ -208,7 +208,7 @@ export default function PlayerScores({ initialSearch, player, sort, page }: Prop
       </div>
 
       {isLoading && scores == undefined && (
-        <div className="flex w-full justify-center">
+        <div className="flex w-full justify-center py-2">
           <LoadingIcon />
         </div>
       )}
