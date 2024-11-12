@@ -11,11 +11,6 @@ import { fetchLeaderboardScores } from "@ssr/common/utils/score.util";
 import LeaderboardScoresResponse from "@ssr/common/response/leaderboard-scores-response";
 import { cache } from "react";
 
-const UNKNOWN_LEADERBOARD = {
-  title: "ScoreSaber Reloaded - Unknown Leaderboard",
-  description: "The leaderboard you were looking for could not be found.",
-};
-
 type Props = {
   params: Promise<{
     slug: string[];
@@ -65,6 +60,11 @@ const getLeaderboardData = cache(
 );
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
+  const UNKNOWN_LEADERBOARD = {
+    title: "ScoreSaber Reloaded - Unknown Leaderboard",
+    description: "The leaderboard you were looking for could not be found.",
+  };
+
   const response = await getLeaderboardData(props, false);
   if (response === undefined) {
     return {
@@ -92,18 +92,6 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     twitter: {
       card: "summary_large_image",
     },
-  };
-}
-
-export async function generateViewport(props: Props): Promise<Viewport> {
-  const response = await getLeaderboardData(props, false);
-  if (response === undefined || response.leaderboardResponse.leaderboard.songArtColor === undefined) {
-    return {
-      themeColor: Colors.primary,
-    };
-  }
-  return {
-    themeColor: response.leaderboardResponse.leaderboard.songArtColor,
   };
 }
 

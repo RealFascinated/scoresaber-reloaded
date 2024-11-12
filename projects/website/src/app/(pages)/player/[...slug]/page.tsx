@@ -14,11 +14,6 @@ import { cache } from "react";
 import { randomString } from "@ssr/common/utils/string.util";
 import { getScoreSaberPlayer } from "@ssr/common/utils/player-utils";
 
-const UNKNOWN_PLAYER = {
-  title: "ScoreSaber Reloaded - Unknown Player",
-  description: "The player you were looking for could not be found.",
-};
-
 type Props = {
   params: Promise<{
     slug: string[];
@@ -70,6 +65,11 @@ const getPlayerData = cache(async ({ params }: Props, fetchScores: boolean = tru
 });
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
+  const UNKNOWN_PLAYER = {
+    title: "ScoreSaber Reloaded - Unknown Player",
+    description: "The player you were looking for could not be found.",
+  };
+
   const { player } = await getPlayerData(props, false);
   if (player === undefined) {
     return {
@@ -96,18 +96,6 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     twitter: {
       card: "summary_large_image",
     },
-  };
-}
-
-export async function generateViewport(props: Props): Promise<Viewport> {
-  const { player } = await getPlayerData(props, false);
-  if (player === undefined || player.avatarColor === undefined) {
-    return {
-      themeColor: Colors.primary,
-    };
-  }
-  return {
-    themeColor: player.avatarColor,
   };
 }
 
