@@ -16,6 +16,7 @@ export default function Avatar({ src, size = 32, className, alt }: AvatarProps) 
       height={size}
       className={cn("rounded-full", className)}
       alt={alt}
+      loading={"eager"}
       fetchPriority="high"
     />
   );
