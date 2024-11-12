@@ -36,7 +36,7 @@ export default function LeaderboardScore({ score, leaderboard, highlightedPlayer
       <td className="px-4 py-2 whitespace-nowrap">{score.rank !== -1 ? `#${score.rank}` : "-"}</td>
 
       {/* Player */}
-      <td className="px-4 py-2 flex gap-2 whitespace-nowrap">
+      <td className="px-4 py-2 flex gap-2 whitespace-nowrap min-w-[250px]">
         <PlayerInfo player={scorePlayer} highlightedPlayer={highlightedPlayer} useLink />
       </td>
 
