@@ -43,22 +43,6 @@ export default class PlayerController {
     return { success: await PlayerService.trackPlayer(id) };
   }
 
-  @Get("/history/:id/:days", {
-    config: {},
-    params: t.Object({
-      id: t.String({ required: true }),
-      days: t.Number({ default: 50, required: false, minimum: 1, maximum: 365 * 10 }),
-    }),
-  })
-  public async getPlayerHistory({
-    params: { id, days },
-  }: {
-    params: { id: string; days: number };
-  }): Promise<{ statistics: Record<string, PlayerHistory> }> {
-    const player = await PlayerService.getPlayer(id);
-    return { statistics: player.getHistoryPreviousDays(days) };
-  }
-
   @Get("/tracked/:id", {
     config: {},
     params: t.Object({
