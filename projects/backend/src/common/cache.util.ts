@@ -10,10 +10,6 @@ import { isProduction } from "@ssr/common/utils/utils";
  * @param fetchFn The function to fetch data if it's not in cache.
  */
 export async function fetchWithCache<T>(cache: SSRCache, cacheKey: string, fetchFn: () => Promise<T>): Promise<T> {
-  if (!isProduction()) {
-    return fetchFn();
-  }
-
   if (cache == undefined) {
     throw new InternalServerError(`Cache is not defined`);
   }
