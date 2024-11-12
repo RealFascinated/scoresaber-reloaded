@@ -11,7 +11,10 @@ const nextConfig: NextConfig = {
     webpackMemoryOptimizations: true,
     reactCompiler: true,
   },
-  cacheHandler: isProduction() ? require.resolve("/app/projects/website/cache-handler.mjs") : undefined,
+  cacheHandler: isProduction()
+    ? require.resolve("/app/projects/website/cache-handler.mjs")
+    : require.resolve("./cache-handler.mjs"),
+  cacheMaxMemorySize: 0, // disable default in-memory caching
   images: {
     remotePatterns: [
       {
