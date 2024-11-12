@@ -4,10 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "dev-debug": "cross-env NODE_OPTIONS='--inspect' next dev --turbopack",
+    "dev:debug": "NODE_OPTIONS='--inspect' next dev --turbopack",
     "build": "next build",
     "build:analyze": "cross-env ANALYZE=true next build",
     "start": "next start",
+    "start:debug": "NODE_OPTIONS='--inspect' next start",
     "lint": "next lint"
   },
   "dependencies": {
