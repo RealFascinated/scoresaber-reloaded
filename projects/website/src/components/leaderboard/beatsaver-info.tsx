@@ -75,7 +75,7 @@ export function LeaderboardBeatSaverInfo({ leaderboard, beatSaverMap }: Leaderbo
           return (
             <div key={index} className="flex gap-2">
               <p>{stat.name}:</p>
-              {stat.render(beatSaverMap, difficulty)}
+              <p className="font-bold">{stat.render(beatSaverMap, difficulty)}</p>
             </div>
           );
         })}
