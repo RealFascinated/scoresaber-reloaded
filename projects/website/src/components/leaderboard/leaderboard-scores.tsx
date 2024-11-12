@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { motion, useAnimation } from "framer-motion";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Pagination from "../input/pagination";
 import LeaderboardScore from "./leaderboard-score";
 import { scoreAnimation } from "@/components/score/score-animation";
@@ -20,6 +20,7 @@ import useDatabase from "@/hooks/use-database";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { cn } from "@/common/utils";
+import usePageNavigation from "@/hooks/use-page-navigation";
 
 type LeaderboardScoresProps = {
   initialPage?: number;
@@ -49,6 +50,7 @@ export default function LeaderboardScores({
     initialPage = 1;
   }
 
+  const { navigateToPage } = usePageNavigation();
   const database = useDatabase();
   const friendIds = useLiveQuery(() => database.getFriendIds());
 
@@ -60,7 +62,6 @@ export default function LeaderboardScores({
   const [previousPage, setPreviousPage] = useState(initialPage);
   const [currentPage, setCurrentPage] = useState(initialPage);
   const [currentScores, setCurrentScores] = useState<ScoresPage | undefined>();
-  const topOfScoresRef = useRef<HTMLDivElement>(null);
   const [shouldFetch, setShouldFetch] = useState(true);
 
   const { data, isError, isLoading } = useQuery<ScoresPage>({
@@ -162,28 +163,13 @@ export default function LeaderboardScores({
     }
   }, [data, handleScoreAnimation]);
 
-  /**
-   * Handle scrolling to the top of the
-   * scores when new scores are loaded.
-   */
-  useEffect(() => {
-    if (topOfScoresRef.current && shouldFetch && isLeaderboardPage && isLoading && currentScores != undefined) {
-      const topOfScoresPosition = topOfScoresRef.current.getBoundingClientRect().top + window.scrollY;
-      window.scrollTo({
-        top: topOfScoresPosition - 65, // Navbar height (plus some padding)
-        behavior: "smooth",
-      });
-    }
-  }, [currentPage, topOfScoresRef, shouldFetch, isLeaderboardPage]);
-
   useEffect(() => {
     if (disableUrlChanging) {
       return;
     }
 
-    // Update the URL
-    window.history.replaceState(null, "", `/leaderboard/${selectedLeaderboardId}/${currentPage}`);
-  }, [selectedLeaderboardId, currentPage, disableUrlChanging]);
+    navigateToPage(`/leaderboard/${selectedLeaderboardId}/${currentPage}`);
+  }, [selectedLeaderboardId, currentPage, disableUrlChanging, navigateToPage]);
 
   if (currentScores === undefined) {
     return <LeaderboardScoresSkeleton />;
@@ -191,9 +177,6 @@ export default function LeaderboardScores({
 
   return (
     <>
-      {/* Where to scroll to when new scores are loaded */}
-      <div ref={topOfScoresRef} className="absolute" />
-
       <div
         className={cn(
           "flex flex-col lg:flex-row justify-center lg:px-10 items-center flex-wrap gap-2",

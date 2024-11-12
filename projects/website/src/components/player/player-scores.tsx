@@ -2,7 +2,7 @@ import { capitalizeFirstLetter } from "@/common/string-utils";
 import { ClockIcon, TrophyIcon, XMarkIcon } from "@heroicons/react/24/solid";
 import { useQuery } from "@tanstack/react-query";
 import { motion, useAnimation } from "framer-motion";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Card from "../card";
 import Pagination from "../input/pagination";
 import { Button } from "../ui/button";
@@ -20,6 +20,7 @@ import { fetchPlayerScores } from "@ssr/common/utils/score.util";
 import PlayerScoresResponse from "@ssr/common/response/player-scores-response";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { LoadingIcon } from "@/components/loading-icon";
+import usePageNavigation from "@/hooks/use-page-navigation";
 
 type Props = {
   initialScoreData?: PlayerScoresResponse<ScoreSaberScore, ScoreSaberLeaderboard>;
@@ -48,6 +49,7 @@ const scoreSort = [
 ];
 
 export default function PlayerScores({ initialSearch, player, sort, page }: Props) {
+  const { navigateToPage } = usePageNavigation();
   const isMobile = useIsMobile();
   const controls = useAnimation();
 
@@ -57,7 +59,6 @@ export default function PlayerScores({ initialSearch, player, sort, page }: Prop
   const [searchTerm, setSearchTerm] = useState(initialSearch || "");
   const debouncedSearchTerm = useDebounce(searchTerm, 250);
   const [shouldFetch, setShouldFetch] = useState(true);
-  const topOfScoresRef = useRef<HTMLDivElement>(null);
 
   const isSearchActive = debouncedSearchTerm.length >= 3;
   const { data, isError, isLoading } = useQuery({
@@ -144,31 +145,13 @@ export default function PlayerScores({ initialSearch, player, sort, page }: Prop
    * sort, or search term changes.
    */
   useEffect(() => {
-    const newUrl = getUrl(pageState.page);
-    window.history.replaceState({ ...window.history.state, as: newUrl, url: newUrl }, "", newUrl);
-  }, [pageState, debouncedSearchTerm, player.id, isSearchActive, getUrl]);
-
-  /**k
-   * Handle scrolling to the top of the
-   * scores when new scores are loaded.
-   */
-  useEffect(() => {
-    if (topOfScoresRef.current && shouldFetch && isLoading && scores != undefined) {
-      const topOfScoresPosition = topOfScoresRef.current.getBoundingClientRect().top + window.scrollY;
-      window.scrollTo({
-        top: topOfScoresPosition - 65, // Navbar height (plus some padding)
-        behavior: "smooth",
-      });
-    }
-  }, [pageState, topOfScoresRef, shouldFetch]);
+    navigateToPage(getUrl(pageState.page));
+  }, [pageState, debouncedSearchTerm, player.id, isSearchActive, getUrl, navigateToPage]);
 
   const invalidSearch = searchTerm.length >= 1 && searchTerm.length < 3;
   return (
     <Card className="flex gap-1">
       <div className="flex flex-col items-center w-full gap-2 relative">
-        {/* Where to scroll to when new scores are loaded */}
-        <div ref={topOfScoresRef} className="absolute" />
-
         <div className="flex gap-2">
           {scoreSort.map(sortOption => (
             <Button
@@ -208,7 +191,7 @@ export default function PlayerScores({ initialSearch, player, sort, page }: Prop
       </div>
 
       {isLoading && scores == undefined && (
-        <div className="flex w-full justify-center py-2">
+        <div className="flex w-full justify-center">
           <LoadingIcon />
         </div>
       )}
