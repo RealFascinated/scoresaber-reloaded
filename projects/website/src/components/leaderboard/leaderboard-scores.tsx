@@ -91,7 +91,13 @@ export default function LeaderboardScores({
 
             return {
               scores: friendScores.items.map(score => {
-                const friend = friends.find(f => f.id == score.playerId);
+                let friend = friends.find(f => f.id == score.playerId);
+                if (!friend) {
+                  if (score.playerId == claimedPlayer.id) {
+                    friend = claimedPlayer;
+                  }
+                }
+
                 if (!friend) {
                   return score;
                 }
