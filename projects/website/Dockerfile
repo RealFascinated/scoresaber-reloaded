@@ -2,10 +2,15 @@ FROM oven/bun:1.1.33-alpine AS base
 
 # Set the environment
 ENV NODE_ENV production
+
 ARG GIT_REV
 ENV GIT_REV=${GIT_REV}
+
 ARG SENTRY_AUTH_TOKEN
 ENV SENTRY_AUTH_TOKEN=${SENTRY_AUTH_TOKEN}
+
+ARG REDIS_URL
+ENV REDIS_URL=${REDIS_URL}
 
 # Install dependencies
 FROM base AS depends
