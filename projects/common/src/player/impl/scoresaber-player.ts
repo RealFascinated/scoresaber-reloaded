@@ -1,5 +1,6 @@
-import Player, {StatisticChange} from "../player";
-import {PlayerHistory} from "../player-history";
+import Player, { StatisticChange } from "../player";
+import { PlayerHistory } from "../player-history";
+import { PeakRank } from "../peak-rank";
 
 /**
  * A ScoreSaber player.
@@ -147,16 +148,4 @@ export type ScoreSaberRankPages = {
    * Their page for their country rank position.
    */
   country: number;
-};
-
-export type PeakRank = {
-  /**
-   * The rank achieved.
-   */
-  rank: number;
-
-  /**
-   * The date of the peak.
-   */
-  date: Date;
 };

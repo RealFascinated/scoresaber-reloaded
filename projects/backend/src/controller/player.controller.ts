@@ -1,7 +1,6 @@
 import { Controller, Get } from "elysia-decorators";
 import { PlayerService } from "../service/player.service";
 import { t } from "elysia";
-import { PlayerHistory } from "@ssr/common/player/player-history";
 import { PlayerTrackedSince } from "@ssr/common/player/player-tracked-since";
 import { AroundPlayerResponse } from "@ssr/common/response/around-player-response";
 import { PpBoundaryResponse } from "@ssr/common/response/pp-boundary-response";

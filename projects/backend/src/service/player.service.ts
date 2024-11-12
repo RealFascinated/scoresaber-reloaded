@@ -77,12 +77,20 @@ export class PlayerService {
 
       // Wait for the player creation to complete
       player = await accountCreationLock[id];
+    }
 
-      // Update player name
+    // Update player name
+    if (playerToken) {
       if (player.name !== playerToken.name) {
         player.name = playerToken.name;
         await player.save();
       }
+    }
+
+    // Initialize player peak rank
+    if (player.peakRank == undefined) {
+      player.peakRank = player.getPeakRankFromHistory();
+      await player.save();
     }
 
     return player as PlayerDocument;
@@ -310,6 +318,15 @@ export class PlayerService {
     foundPlayer.sortStatisticHistory();
     foundPlayer.lastTracked = new Date();
     foundPlayer.markModified("statisticHistory");
+
+    // Update players peak rank
+    if (foundPlayer.peakRank && foundPlayer.peakRank.rank < player.rank) {
+      foundPlayer.peakRank = {
+        rank: player.rank,
+        date: new Date(),
+      };
+    }
+
     await foundPlayer.save();
 
     console.log(`Tracked player "${foundPlayer.id}"!`);
@@ -472,7 +489,7 @@ export class PlayerService {
     const pages = 20; // top 1000 players
 
     let toTrack: PlayerDocument[] = await PlayerModel.find({});
-    const toRemoveIds: string[] = [];
+    const players: ScoreSaberPlayerToken[] = [];
 
     // loop through pages to fetch the top players
     console.log(`Fetching ${pages} pages of players from ScoreSaber...`);
@@ -486,16 +503,18 @@ export class PlayerService {
         continue;
       }
       for (const player of page.players) {
-        const foundPlayer = await PlayerService.getPlayer(player.id, true, player);
-        await PlayerService.trackScoreSaberPlayer(foundPlayer, player);
-        toRemoveIds.push(foundPlayer.id);
+        players.push(player);
       }
       await delay(SCORESABER_REQUEST_COOLDOWN);
     }
-    console.log(`Finished tracking player statistics for ${pages} pages, found ${toRemoveIds.length} players.`);
+
+    for (const player of players) {
+      const foundPlayer = await PlayerService.getPlayer(player.id, true, player);
+      await PlayerService.trackScoreSaberPlayer(foundPlayer, player);
+    }
 
     // remove all players that have been tracked
-    toTrack = toTrack.filter(player => !toRemoveIds.includes(player.id));
+    toTrack = toTrack.filter(player => !players.map(player => player.id).includes(player.id));
 
     console.log(`Tracking ${toTrack.length} player statistics...`);
     for (const player of toTrack) {

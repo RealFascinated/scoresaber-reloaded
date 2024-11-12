@@ -5,7 +5,6 @@ import PlayerHeader from "./player-header";
 import PlayerScores from "./player-scores";
 import Card from "@/components/card";
 import PlayerBadges from "@/components/player/player-badges";
-import { useIsMobile } from "@/hooks/use-is-mobile";
 import useDatabase from "@/hooks/use-database";
 import { useLiveQuery } from "dexie-react-hooks";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
@@ -35,7 +34,9 @@ export default function PlayerData({ initialPlayerData, initialSearch, sort, pag
   const { data, isLoading, isError } = useQuery({
     queryKey: ["playerData", player.id, settings?.playerId, isFriend],
     queryFn: async (): Promise<ScoreSaberPlayer | undefined> =>
-      getScoreSaberPlayer(player.id, settings?.playerId == player.id),
+      getScoreSaberPlayer(player.id, {
+        createIfMissing: settings?.playerId == player.id,
+      }),
   });
 
   if (data && (!isLoading || !isError)) {

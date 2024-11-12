@@ -1,14 +1,14 @@
-import {PlayerHistory} from "../player/player-history";
-import {kyFetchJson, kyFetchText} from "./utils";
-import {Config} from "../config";
-import {AroundPlayer} from "../types/around-player";
-import {AroundPlayerResponse} from "../response/around-player-response";
+import { PlayerHistory } from "../player/player-history";
+import { kyFetchJson, kyFetchText } from "./utils";
+import { Config } from "../config";
+import { AroundPlayer } from "../types/around-player";
+import { AroundPlayerResponse } from "../response/around-player-response";
 import ScoreSaberPlayer from "../player/impl/scoresaber-player";
-import {formatDateMinimal, getMidnightAlignedDate} from "./time-utils";
-import {PpBoundaryResponse} from "../response/pp-boundary-response";
-import {PlayedMapsCalendarResponse} from "../response/played-maps-calendar-response";
-import {ScoreSaberScore} from "../model/score/impl/scoresaber-score";
-import {Page} from "../pagination";
+import { formatDateMinimal, getMidnightAlignedDate } from "./time-utils";
+import { PpBoundaryResponse } from "../response/pp-boundary-response";
+import { PlayedMapsCalendarResponse } from "../response/played-maps-calendar-response";
+import { ScoreSaberScore } from "../model/score/impl/scoresaber-score";
+import { Page } from "../pagination";
 import SuperJSON from "superjson";
 
 /**
@@ -108,15 +108,25 @@ export async function getFriendScores(friendIds: string[], leaderboardId: string
  * Looks up a ScoreSaber player
  *
  * @param playerId the player to lookup
- * @param createIfMissing create the player if they are not being tracked
+ * @param options the fetch options
  * @returns the player
  */
-export async function getScoreSaberPlayer(playerId: string, createIfMissing?: boolean) {
-  const response = await kyFetchText(
-    `${Config.apiUrl}/player/${playerId}?superJson=true${createIfMissing ? `&createIfMissing=${createIfMissing}` : ""}`
-  );
+export async function getScoreSaberPlayer(
+  playerId: string,
+  options?: {
+    createIfMissing?: boolean;
+    superJson?: boolean;
+  }
+) {
+  const superJson = options?.superJson ? options.superJson : true;
+  const response = await kyFetchText(`${Config.apiUrl}/player/${playerId}`, {
+    searchParams: {
+      ...(superJson ? { superJson: superJson } : {}),
+      ...(options?.createIfMissing ? { createIfMissing: options.createIfMissing } : {}),
+    },
+  });
   if (response === undefined) {
     return undefined;
   }
-  return SuperJSON.parse<ScoreSaberPlayer>(response);
+  return superJson ? SuperJSON.parse<ScoreSaberPlayer>(response) : JSON.parse(response);
 }

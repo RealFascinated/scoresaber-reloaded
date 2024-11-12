@@ -2,12 +2,12 @@ import { fetchWithCache } from "../common/cache.util";
 import CacheService, { ServiceCache } from "./cache.service";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { NotFoundError } from "elysia";
-import ScoreSaberPlayer, { PeakRank, ScoreSaberBadge, ScoreSaberBio } from "@ssr/common/player/impl/scoresaber-player";
+import ScoreSaberPlayer, { ScoreSaberBadge, ScoreSaberBio } from "@ssr/common/player/impl/scoresaber-player";
 import sanitize from "sanitize-html";
 import { PlayerHistory } from "@ssr/common/player/player-history";
 import { PlayerDocument } from "@ssr/common/model/player";
 import { PlayerService } from "./player.service";
-import { formatDateMinimal, getDaysAgoDate, getMidnightAlignedDate, parseDate } from "@ssr/common/utils/time-utils";
+import { formatDateMinimal, getDaysAgoDate, getMidnightAlignedDate } from "@ssr/common/utils/time-utils";
 import { getPageFromRank } from "@ssr/common/utils/utils";
 import { getValueFromHistory } from "@ssr/common/utils/player-utils";
 
@@ -139,7 +139,7 @@ export default class ScoreSaberService {
             global: getPageFromRank(playerToken.rank, 50),
             country: getPageFromRank(playerToken.countryRank, 50),
           },
-          peakRank: account ? this.getPeakRank(statisticHistory) : undefined,
+          peakRank: account ? account.peakRank : undefined,
           permissions: playerToken.permissions,
           banned: playerToken.banned,
           inactive: playerToken.inactive,
@@ -147,33 +147,6 @@ export default class ScoreSaberService {
         } as ScoreSaberPlayer;
       }
     );
-  }
-
-  /**
-   * Gets the peak rank of a player.
-   *
-   * @param history
-   * @private
-   */
-  private static getPeakRank(history: Record<string, PlayerHistory>) {
-    let peakRank: PeakRank | undefined;
-
-    for (const [date, stat] of Object.entries(history)) {
-      const parsedDate = parseDate(date);
-      if (
-        stat.rank !== undefined &&
-        (peakRank === undefined ||
-          stat.rank < peakRank.rank ||
-          (stat.rank === peakRank.rank && parsedDate < peakRank.date))
-      ) {
-        peakRank = {
-          rank: stat.rank,
-          date: parsedDate,
-        };
-      }
-    }
-
-    return peakRank;
   }
 
   /**

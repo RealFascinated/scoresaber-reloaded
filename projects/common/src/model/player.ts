@@ -1,7 +1,8 @@
 import { getModelForClass, modelOptions, prop, ReturnModelType, Severity } from "@typegoose/typegoose";
 import { Document } from "mongoose";
 import { PlayerHistory } from "../player/player-history";
-import { formatDateMinimal, getDaysAgoDate, getMidnightAlignedDate } from "../utils/time-utils";
+import { formatDateMinimal, getDaysAgoDate, getMidnightAlignedDate, parseDate } from "../utils/time-utils";
+import { type PeakRank } from "../player/peak-rank";
 
 /**
  * The model for a player.
@@ -25,6 +26,12 @@ export class Player {
    */
   @prop()
   private statisticHistory?: Record<string, PlayerHistory>;
+
+  /**
+   * The peak rank of the player
+   */
+  @prop()
+  public peakRank?: PeakRank;
 
   /**
    * Whether the player has their scores seeded.
@@ -131,6 +138,32 @@ export class Player {
    */
   public getDaysTracked(): number {
     return Object.keys(this.getStatisticHistory()).length;
+  }
+
+  /**
+   * Gets the peak rank of a player.
+   *
+   * @returns the peak rank, or undefined if none
+   */
+  public getPeakRankFromHistory() {
+    let peakRank: PeakRank | undefined;
+
+    for (const [date, stat] of Object.entries(this.getStatisticHistory())) {
+      const parsedDate = parseDate(date);
+      if (
+        stat.rank !== undefined &&
+        (peakRank === undefined ||
+          stat.rank < peakRank.rank ||
+          (stat.rank === peakRank.rank && parsedDate < peakRank.date))
+      ) {
+        peakRank = {
+          rank: stat.rank,
+          date: parsedDate,
+        };
+      }
+    }
+
+    return peakRank;
   }
 }
 
