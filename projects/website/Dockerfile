@@ -37,6 +37,8 @@ COPY --from=depends /app/projects/website/public ./projects/website/public
 COPY --from=depends /app/projects/website/.next/standalone/node_modules ./projects/website/node_modules
 COPY --from=depends /app/projects/website/.next/standalone/projects/website ./projects/website
 COPY --from=depends /app/projects/website/.next/static ./projects/website/.next/static
+COPY --from=depends /app/projects/website/next.config.ts ./projects/website/next.config.ts
+COPY --from=depends /app/projects/website/cache-handler.mjs ./projects/website/cache-handler.mjs
 
 # Expose the app port
 EXPOSE 3000
