@@ -1,6 +1,5 @@
 import { SSRCache } from "@ssr/common/cache";
 import { InternalServerError } from "@ssr/common/error/internal-server-error";
-import { isProduction } from "@ssr/common/utils/utils";
 
 /**
  * Fetches data with caching.
