@@ -52,6 +52,7 @@ export default function LeaderboardScores({
 
   const { navigateToPage } = usePageNavigation();
   const database = useDatabase();
+  const claimedPlayer = useLiveQuery(() => database.getClaimedPlayer());
   const friendIds = useLiveQuery(() => database.getFriendIds());
 
   const isMobile = useIsMobile();
@@ -79,8 +80,12 @@ export default function LeaderboardScores({
           metadata: leaderboard!.metadata,
         };
       } else {
-        if (friendIds) {
-          const friendScores = await getFriendScores(friendIds, selectedLeaderboardId + "", currentPage);
+        if (friendIds && claimedPlayer) {
+          const friendScores = await getFriendScores(
+            [...friendIds, claimedPlayer.id],
+            selectedLeaderboardId + "",
+            currentPage
+          );
           if (friendScores) {
             const friends = await database.getFriends();
 
