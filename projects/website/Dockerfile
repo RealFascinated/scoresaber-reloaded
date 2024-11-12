@@ -29,9 +29,6 @@ RUN bun run  --filter website build
 FROM base AS runner
 WORKDIR /app
 
-# Build the common library
-COPY --from=depends /app/projects/common ./common
-
 # Copy the built files
 COPY --from=depends /app/projects/website/public ./public
 COPY --from=depends /app/projects/website/.next/standalone/node_modules ./node_modules
