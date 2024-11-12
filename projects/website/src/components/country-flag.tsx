@@ -1,6 +1,6 @@
 import Tooltip from "@/components/tooltip";
 import { normalizedRegionName } from "@ssr/common/utils/region-utils";
-import Image from "@/components/image";
+import Image from "next/image";
 
 type Props = {
   code: string;

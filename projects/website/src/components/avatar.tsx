@@ -1,5 +1,5 @@
 import { cn } from "@/common/utils";
-import Image from "@/components/image";
+import Image from "next/image";
 
 type AvatarProps = {
   src: string;
@@ -9,15 +9,5 @@ type AvatarProps = {
 };
 
 export default function Avatar({ src, size = 32, className, alt }: AvatarProps) {
-  return (
-    <Image
-      src={src}
-      width={size}
-      height={size}
-      className={cn("rounded-full", className)}
-      alt={alt}
-      loading={"eager"}
-      fetchPriority="high"
-    />
-  );
+  return <Image src={src} width={size} height={size} className={cn("rounded-full", className)} alt={alt} priority />;
 }

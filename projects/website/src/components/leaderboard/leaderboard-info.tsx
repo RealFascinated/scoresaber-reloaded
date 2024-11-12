@@ -6,7 +6,7 @@ import { BeatSaverMap } from "@ssr/common/model/beatsaver/map";
 import { getBeatSaverMapperProfileUrl } from "@ssr/common/utils/beatsaver.util";
 import FallbackLink from "@/components/fallback-link";
 import { formatNumber } from "@ssr/common/utils/number-utils";
-import Image from "@/components/image";
+import Image from "next/image";
 
 type LeaderboardInfoProps = {
   /**
@@ -61,7 +61,8 @@ export function LeaderboardInfo({ leaderboard, beatSaverMap }: LeaderboardInfoPr
           src={leaderboard.songArt}
           alt={`${leaderboard.songName} Cover Image`}
           className="rounded-md w-[96px] h-[96px]"
-          size={96}
+          width={96}
+          height={96}
         />
 
         <div className="relative">

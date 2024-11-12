@@ -5,7 +5,7 @@ import Link from "next/link";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { BeatSaverMap } from "@ssr/common/model/beatsaver/map";
 import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
-import Image from "@/components/image";
+import Image from "next/image";
 
 type Props = {
   leaderboard: ScoreSaberLeaderboard;

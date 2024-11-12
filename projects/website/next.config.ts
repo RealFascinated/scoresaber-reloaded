@@ -9,10 +9,11 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizePackageImports: ["@ssr/common", "@radix-ui/react-icons", "chart.js", "react-chartjs-2"],
     webpackMemoryOptimizations: true,
-    // useLightningcss: true,
     reactCompiler: true,
   },
   images: {
+    deviceSizes: [375, 768, 1280, 1440, 1920],
+    imageSizes: [24, 32, 64, 128, 192],
     remotePatterns: [
       {
         protocol: "https",
