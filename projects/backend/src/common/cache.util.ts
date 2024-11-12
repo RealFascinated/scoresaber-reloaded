@@ -1,5 +1,5 @@
-import { SSRCache } from "@ssr/common/cache";
-import { InternalServerError } from "@ssr/common/error/internal-server-error";
+import {SSRCache} from "@ssr/common/cache";
+import {InternalServerError} from "@ssr/common/error/internal-server-error";
 
 /**
  * Fetches data with caching.

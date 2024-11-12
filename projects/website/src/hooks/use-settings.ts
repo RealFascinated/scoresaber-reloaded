@@ -1,5 +1,5 @@
-import { useContext } from "react";
-import { SettingsContext } from "@/components/loaders/database-loader";
+import {useContext} from "react";
+import {SettingsContext} from "@/components/loaders/database-loader";
 
 /**
  * Gets the settings context.

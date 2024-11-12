@@ -1,10 +1,10 @@
 "use client";
 
-import { createContext, ReactNode, useEffect, useState } from "react";
-import Database, { db } from "../../common/database/database";
+import {createContext, ReactNode, useEffect, useState} from "react";
+import Database, {db} from "../../common/database/database";
 import FullscreenLoader from "./fullscreen-loader";
 import Settings from "@/common/database/types/settings";
-import { useLiveQuery } from "dexie-react-hooks";
+import {useLiveQuery} from "dexie-react-hooks";
 
 /**
  * The context for the database. This is used to access the database from within the app.

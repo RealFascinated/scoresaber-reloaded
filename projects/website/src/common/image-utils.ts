@@ -1,6 +1,6 @@
 import ky from "ky";
-import { Colors } from "@/common/colors";
-import { Config } from "@ssr/common/config";
+import {Colors} from "@/common/colors";
+import {Config} from "@ssr/common/config";
 
 /**
  * Gets the average color of an image
