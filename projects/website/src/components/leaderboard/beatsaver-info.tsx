@@ -6,6 +6,7 @@ import { formatNumber } from "@ssr/common/utils/number-utils";
 import { formatTime } from "@ssr/common/utils/time-utils";
 import BeatSaverMapDifficulty from "@ssr/common/model/beatsaver/map-difficulty";
 import StatValue from "@/components/stat-value";
+import { MapStats } from "@/components/score/map-stats";
 
 type LeaderboardBeatSaverInfoProps = {
   /**
@@ -74,13 +75,7 @@ export function LeaderboardBeatSaverInfo({ leaderboard, beatSaverMap }: Leaderbo
       </div>
 
       <div className="flex gap-1 flex-wrap justify-center">
-        {mapStats.map((stat, index) => {
-          return (
-            <div key={index}>
-              <StatValue value={stat.render(beatSaverMap, difficulty)} name={stat.name} />
-            </div>
-          );
-        })}
+        <MapStats leaderboard={leaderboard} beatSaver={beatSaverMap} />
       </div>
     </Card>
   );
