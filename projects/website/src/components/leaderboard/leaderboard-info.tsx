@@ -63,6 +63,7 @@ export function LeaderboardInfo({ leaderboard, beatSaverMap }: LeaderboardInfoPr
           className="rounded-md w-[96px] h-[96px]"
           width={96}
           height={96}
+          priority
         />
 
         <div className="relative">

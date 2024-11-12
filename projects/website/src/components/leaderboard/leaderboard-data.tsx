@@ -41,20 +41,22 @@ export function LeaderboardData({ initialLeaderboard, initialPage }: Leaderboard
 
   const leaderboard = currentLeaderboard.leaderboard;
   return (
-    <main className="flex flex-col-reverse xl:flex-row w-full gap-2 max-w-[1600px]">
-      <Card className="flex gap-2 w-full relative h-fit">
-        <LeaderboardScores
-          leaderboard={leaderboard}
-          initialPage={initialPage}
-          leaderboardChanged={newId => setCurrentLeaderboardId(newId)}
-          showDifficulties
-          isLeaderboardPage
-        />
-      </Card>
-      <div className="flex flex-col gap-2 w-full xl:w-[550px]">
-        <LeaderboardInfo leaderboard={leaderboard} beatSaverMap={currentLeaderboard.beatsaver} />
-        {leaderboard.stars > 0 && leaderboard.maxScore > 0 && <LeaderboardPpChart leaderboard={leaderboard} />}
+    <div className="w-full">
+      <div className="flex xl:flex-row flex-col-reverse w-full gap-2">
+        <Card className="flex gap-2 w-full relative h-fit">
+          <LeaderboardScores
+            leaderboard={leaderboard}
+            initialPage={initialPage}
+            leaderboardChanged={newId => setCurrentLeaderboardId(newId)}
+            showDifficulties
+            isLeaderboardPage
+          />
+        </Card>
+        <div className="flex flex-col gap-2 w-full xl:w-[550px]">
+          <LeaderboardInfo leaderboard={leaderboard} beatSaverMap={currentLeaderboard.beatsaver} />
+          {leaderboard.stars > 0 && leaderboard.maxScore > 0 && <LeaderboardPpChart leaderboard={leaderboard} />}
+        </div>
       </div>
-    </main>
+    </div>
   );
 }
