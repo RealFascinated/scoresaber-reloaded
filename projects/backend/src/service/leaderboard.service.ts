@@ -16,6 +16,8 @@ import CacheService, { ServiceCache } from "./cache.service";
 import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/leaderboard";
 import LeaderboardDifficulty from "@ssr/common/model/leaderboard/leaderboard-difficulty";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
+import { DiscordChannels, logToChannel } from "../bot/bot";
+import { EmbedBuilder } from "discord.js";
 
 const SCORESABER_REQUEST_COOLDOWN = 60_000 / 300; // 300 requests per minute
 
@@ -256,6 +258,11 @@ export default class LeaderboardService {
     // Un-rank all unranked leaderboards
     const rankedIds = leaderboards.map(leaderboard => leaderboard.id);
     const rankedLeaderboards = await ScoreSaberLeaderboardModel.find({ ranked: true, _id: { $nin: rankedIds } });
+
+    await logToChannel(
+      DiscordChannels.backendLogs,
+      new EmbedBuilder().setTitle(`Unranking ${rankedLeaderboards.length} previously ranked leaderboards...`)
+    );
     console.log(`Unranking ${rankedLeaderboards.length} previously ranked leaderboards...`);
     for (const leaderboard of rankedLeaderboards) {
       if (rankedIds.includes(leaderboard.id)) {

@@ -33,11 +33,12 @@ import ScoreSaberService from "./service/scoresaber.service";
 import BeatLeaderService from "./service/beatleader.service";
 
 // Load .env file
-dotenv.config({
-  logLevel: (await Bun.file(".env").exists()) ? "success" : "warn",
-  path: ".env",
-  override: true,
-});
+if (await Bun.file(".env").exists()) {
+  dotenv.config({
+    path: ".env",
+    override: true,
+  });
+}
 
 // Connect to Mongo
 await mongoose.connect(Config.mongoUri!); // Connect to MongoDB
