@@ -152,7 +152,9 @@ export default class LeaderboardService {
     const rankedMapDiffs: Map<string, LeaderboardDifficulty[]> = new Map();
 
     while (hasMorePages) {
-      const leaderboardResponse = await scoresaberService.lookupLeaderboards(page, true);
+      const leaderboardResponse = await scoresaberService.lookupLeaderboards(page, {
+        ranked: true,
+      });
       if (!leaderboardResponse) {
         console.warn(`Failed to fetch ranked leaderboards on page ${page}.`);
         break;
@@ -293,6 +295,54 @@ export default class LeaderboardService {
   }
 
   /**
+   * Refreshes the qualified leaderboards
+   */
+  public static async refreshQualifiedLeaderboards() {
+    console.log(`Refreshing qualified leaderboards...`);
+    let page = 1;
+    let hasMorePages = true;
+    const leaderboards: ScoreSaberLeaderboard[] = [];
+    while (hasMorePages) {
+      const leaderboardResponse = await scoresaberService.lookupLeaderboards(page, {
+        qualified: true,
+      });
+      if (!leaderboardResponse) {
+        console.warn(`Failed to fetch qualified leaderboards on page ${page}.`);
+        break;
+      }
+
+      for (const leaderboardToken of leaderboardResponse.leaderboards) {
+        const leaderboard = getScoreSaberLeaderboardFromToken(leaderboardToken);
+        leaderboards.push(leaderboard);
+      }
+      if (page >= Math.ceil(leaderboardResponse.metadata.total / leaderboardResponse.metadata.itemsPerPage)) {
+        hasMorePages = false;
+      }
+      page++;
+      await delay(SCORESABER_REQUEST_COOLDOWN);
+    }
+
+    console.log(`Saving ${leaderboards.length} qualified leaderboards...`);
+    await Promise.all(
+      leaderboards.map(async leaderboard => {
+        await ScoreSaberLeaderboardModel.findOneAndUpdate(
+          { _id: leaderboard.id },
+          {
+            lastRefreshed: new Date(),
+            ...leaderboard,
+          },
+          {
+            upsert: true,
+            new: true,
+            setDefaultsOnInsert: true,
+          }
+        );
+      })
+    );
+    console.log(`Saved ${leaderboards.length} qualified leaderboards.`);
+  }
+
+  /**
    * Gets all the ranked leaderboards
    *
    * @returns the ranked leaderboards
@@ -300,6 +350,18 @@ export default class LeaderboardService {
   public static async getRankedLeaderboards(): Promise<ScoreSaberLeaderboard[]> {
     return fetchWithCache(CacheService.getCache(ServiceCache.Leaderboards), "ranked-leaderboards", async () => {
       const leaderboards = await ScoreSaberLeaderboardModel.find({ ranked: true });
+      return leaderboards.map(leaderboard => leaderboard.toObject());
+    });
+  }
+
+  /**
+   * Gets all the qualified leaderboards
+   *
+   * @returns the qualified leaderboards
+   */
+  public static async getQualifiedLeaderboards(): Promise<ScoreSaberLeaderboard[]> {
+    return fetchWithCache(CacheService.getCache(ServiceCache.Leaderboards), "qualified-leaderboards", async () => {
+      const leaderboards = await ScoreSaberLeaderboardModel.find({ qualified: true });
       return leaderboards.map(leaderboard => leaderboard.toObject());
     });
   }

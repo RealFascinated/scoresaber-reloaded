@@ -40,7 +40,7 @@ export default class ScoreSaberLeaderboardInternal extends Leaderboard {
   /**
    * Whether this leaderboard is qualified to be ranked.
    */
-  @Prop({ required: true })
+  @Prop({ required: true, index: true })
   readonly qualified!: boolean;
 
   /**

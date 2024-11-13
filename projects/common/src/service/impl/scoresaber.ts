@@ -27,7 +27,7 @@ const LOOKUP_PLAYER_SCORES_ENDPOINT = `${API_BASE}/player/:id/scores?limit=:limi
  */
 const LOOKUP_LEADERBOARD_ENDPOINT = `${API_BASE}/leaderboard/by-id/:id/info`;
 const LOOKUP_LEADERBOARD_SCORES_ENDPOINT = `${API_BASE}/leaderboard/by-id/:id/scores?page=:page`;
-const LOOKUP_LEADERBOARDS_ENDPOINT = `${API_BASE}/leaderboards?ranked=:ranked&page=:page`;
+const LOOKUP_LEADERBOARDS_ENDPOINT = `${API_BASE}/leaderboards?page=:page`;
 const SEARCH_LEADERBOARDS_ENDPOINT = `${API_BASE}/leaderboards?search=:query`;
 
 const WEIGHT_COEFFICIENT = 0.965;
@@ -230,13 +230,25 @@ class ScoreSaberService extends Service {
    * Looks up a page of leaderboards
    *
    * @param page the page to look up
-   * @param ranked whether to only look up ranked leaderboards
+   * @param options the options to use when looking up the leaderboards
    */
-  public async lookupLeaderboards(page: number, ranked?: boolean): Promise<ScoreSaberLeaderboardPageToken | undefined> {
+  public async lookupLeaderboards(
+    page: number,
+    options?: {
+      ranked?: boolean;
+      qualified?: boolean;
+    }
+  ): Promise<ScoreSaberLeaderboardPageToken | undefined> {
     const before = performance.now();
     this.log(`Looking up leaderboard page "${page}"...`);
     const response = await this.fetch<ScoreSaberLeaderboardPageToken>(
-      LOOKUP_LEADERBOARDS_ENDPOINT.replace(":page", page.toString()).replace(":ranked", ranked ? "true" : "false")
+      LOOKUP_LEADERBOARDS_ENDPOINT.replace(":page", page.toString()),
+      {
+        searchParams: {
+          ...(options?.ranked ? { ranked: options.ranked } : {}),
+          ...(options?.qualified ? { qualified: options.qualified } : {}),
+        },
+      }
     );
     if (response === undefined) {
       return undefined;

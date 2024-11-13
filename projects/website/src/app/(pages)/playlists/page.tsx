@@ -7,6 +7,10 @@ const playlists = [
     name: "ScoreSaber Ranked Maps",
     id: "scoresaber-ranked-maps",
   },
+  {
+    name: "ScoreSaber Qualified Maps",
+    id: "scoresaber-qualified-maps",
+  },
 ];
 
 export default function PlaylistPage() {
@@ -18,7 +22,7 @@ export default function PlaylistPage() {
           <p className="text-gray-300">View our playlists we have!</p>
         </div>
 
-        <div>
+        <div className="flex flex-wrap gap-2">
           {playlists.map(playlist => (
             <div key={playlist.id}>
               <PlaylistDownloadButton name={playlist.name} url={`${Config.apiUrl}/playlist/${playlist.id}`} />

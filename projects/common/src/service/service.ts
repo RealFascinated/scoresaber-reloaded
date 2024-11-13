@@ -1,5 +1,6 @@
 import ky from "ky";
 import { isProduction, isServer } from "../utils/utils";
+import { KyOptions } from "ky/distribution/types/options";
 
 export default class Service {
   /**
@@ -39,11 +40,12 @@ export default class Service {
    * Fetches data from the given url.
    *
    * @param url the url to fetch
+   * @param options the ky options to use
    * @returns the fetched data
    */
-  public async fetch<T>(url: string): Promise<T | undefined> {
+  public async fetch<T>(url: string, options?: KyOptions): Promise<T | undefined> {
     try {
-      const response = await ky.get<T>(this.buildRequestUrl(!isServer(), url));
+      const response = await ky.get<T>(this.buildRequestUrl(!isServer(), url), options);
       if (response.headers.has("X-RateLimit-Remaining")) {
         const left = Number(response.headers.get("X-RateLimit-Remaining"));
         this.log(`Rate limit remaining: ${left}`, left < 100);
