@@ -1,8 +1,9 @@
-import {getModelForClass, modelOptions, prop, ReturnModelType, Severity} from "@typegoose/typegoose";
-import {Document} from "mongoose";
+import { getModelForClass, modelOptions, plugin, prop, ReturnModelType, Severity } from "@typegoose/typegoose";
+import { Document } from "mongoose";
 import BeatSaverAuthor from "./author";
 import BeatSaverMapVersion from "./map-version";
 import BeatSaverMapMetadata from "./map-metadata";
+import { AutoIncrementID } from "@typegoose/auto-increment";
 
 /**
  * The model for a BeatSaver map.
@@ -22,12 +23,19 @@ import BeatSaverMapMetadata from "./map-metadata";
     },
   },
 })
+@plugin(AutoIncrementID, {
+  field: "_id",
+  startAt: 1,
+  trackerModelName: "beatsaver-maps",
+  trackerCollection: "increments",
+  overwriteModelName: "beatsaver-maps",
+})
 export class BeatSaverMap {
   /**
    * The internal MongoDB ID (_id).
    */
-  @prop({ required: true })
-  private _id!: string;
+  @prop()
+  private _id!: number;
 
   /**
    * The name of the map.
@@ -76,23 +84,6 @@ export class BeatSaverMap {
    */
   @prop({ required: true })
   public lastRefreshed!: Date;
-
-  /**
-   * Exposes `id` as a virtual field mapped from `_id`.
-   */
-  public get id(): string {
-    return this._id;
-  }
-
-  /**
-   * Should the map data be refreshed?
-   *
-   * @returns true if the map data should be refreshed
-   */
-  public shouldRefresh(): boolean {
-    const now = new Date();
-    return now.getTime() - this.lastRefreshed.getTime() > 1000 * 60 * 60 * 24 * 3; // 3 days
-  }
 }
 
 export type BeatSaverMapDocument = BeatSaverMap & Document;
