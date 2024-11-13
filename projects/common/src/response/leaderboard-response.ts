@@ -1,4 +1,4 @@
-import { BeatSaverMap } from "../model/beatsaver/map";
+import { BeatSaverMapResponse } from "./beatsaver-map-response";
 
 export type LeaderboardResponse<L> = {
   /**
@@ -9,7 +9,7 @@ export type LeaderboardResponse<L> = {
   /**
    * The beatsaver map.
    */
-  beatsaver?: BeatSaverMap;
+  beatsaver?: BeatSaverMapResponse;
 
   /**
    * Was this leaderboard cached locally?

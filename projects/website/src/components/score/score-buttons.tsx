@@ -10,14 +10,14 @@ import { BeatSaverMapButton } from "@/components/score/button/beat-saver-map-but
 import { SongOpenInYoutubeButton } from "@/components/score/button/song-open-in-youtube-button";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import { BeatSaverMap } from "@ssr/common/model/beatsaver/map";
 import { ScoreReplayButton } from "@/components/score/button/score-replay-button";
 import { useIsMobile } from "@/hooks/use-is-mobile";
+import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
 
 type Props = {
   score?: ScoreSaberScore;
   leaderboard: ScoreSaberLeaderboard;
-  beatSaverMap?: BeatSaverMap;
+  beatSaverMap?: BeatSaverMapResponse;
   alwaysSingleLine?: boolean;
   hideLeaderboardDropdown?: boolean;
   hideAccuracyChanger?: boolean;

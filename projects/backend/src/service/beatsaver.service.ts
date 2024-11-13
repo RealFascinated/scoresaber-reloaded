@@ -2,6 +2,10 @@ import { beatsaverService } from "@ssr/common/service/impl/beatsaver";
 import { BeatSaverMap, BeatSaverMapModel } from "@ssr/common/model/beatsaver/map";
 import { fetchWithCache } from "../common/cache.util";
 import CacheService, { ServiceCache } from "./cache.service";
+import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
+import { getBeatSaverDifficulty } from "@ssr/common/utils/beatsaver.util";
+import { MapDifficulty } from "@ssr/common/score/map-difficulty";
+import { MapCharacteristic } from "@ssr/common/types/map-characteristic";
 
 export default class BeatSaverService {
   /**
@@ -10,7 +14,7 @@ export default class BeatSaverService {
    * @param hash the hash of the map
    * @returns the beatsaver map, or undefined if not found
    */
-  public static async getMap(hash: string): Promise<BeatSaverMap | undefined> {
+  public static async getInternalMap(hash: string): Promise<BeatSaverMap | undefined> {
     return fetchWithCache(CacheService.getCache(ServiceCache.BeatSaver), hash, async () => {
       let map = await BeatSaverMapModel.findOne({
         "versions.hash": hash.toUpperCase(),
@@ -94,5 +98,35 @@ export default class BeatSaverService {
       }
       return map.toObject() as BeatSaverMap;
     });
+  }
+
+  /**
+   * Fetches a BeatSaver map
+   *
+   * @param hash the hash of the map
+   * @param difficulty the difficulty to get
+   * @param characteristic the characteristic to get
+   * @returns the map, or undefined if not found
+   */
+  public static async getMap(
+    hash: string,
+    difficulty: MapDifficulty,
+    characteristic: MapCharacteristic
+  ): Promise<BeatSaverMapResponse | undefined> {
+    const map = await this.getInternalMap(hash);
+
+    if (!map) {
+      return undefined;
+    }
+
+    return {
+      hash,
+      bsr: map.bsr,
+      name: map.name,
+      description: map.description,
+      author: map.author,
+      metadata: map.metadata,
+      difficulty: getBeatSaverDifficulty(map, hash, difficulty, characteristic),
+    } as BeatSaverMapResponse;
   }
 }

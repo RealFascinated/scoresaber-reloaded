@@ -1,5 +1,5 @@
 import { Metadata } from "../types/metadata";
-import { BeatSaverMap } from "../model/beatsaver/map";
+import { BeatSaverMapResponse } from "./beatsaver-map-response";
 
 export default interface LeaderboardScoresResponse<S, L> {
   /**
@@ -15,7 +15,7 @@ export default interface LeaderboardScoresResponse<S, L> {
   /**
    * The beatsaver map for the song.
    */
-  readonly beatSaver?: BeatSaverMap;
+  readonly beatSaver?: BeatSaverMapResponse;
 
   /**
    * The pagination metadata.

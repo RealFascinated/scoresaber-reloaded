@@ -3,11 +3,11 @@ import { ScoreBsrButton } from "@/components/score/button/score-bsr-button";
 import { BeatSaverMapButton } from "@/components/score/button/beat-saver-map-button";
 import { SongOpenInYoutubeButton } from "@/components/score/button/song-open-in-youtube-button";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import { BeatSaverMap } from "@ssr/common/model/beatsaver/map";
+import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
 
 type Props = {
   leaderboard: ScoreSaberLeaderboard;
-  beatSaverMap?: BeatSaverMap;
+  beatSaverMap?: BeatSaverMapResponse;
 };
 
 const buttons = [

@@ -21,18 +21,18 @@ import { useIsMobile } from "@/hooks/use-is-mobile";
 
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import { BeatSaverMap } from "@ssr/common/model/beatsaver/map";
 import { ScoreStatsToken } from "@ssr/common/types/token/beatleader/score-stats/score-stats";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { Config } from "@ssr/common/config";
 import { beatLeaderService } from "@ssr/common/service/impl/beatleader";
 import { getMinioBucketName, MinioBucket } from "@ssr/common/minio-buckets";
+import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
 
 type Props = {
   highlightedPlayer?: ScoreSaberPlayer;
   score: ScoreSaberScore;
   leaderboard: ScoreSaberLeaderboard;
-  beatSaverMap?: BeatSaverMap;
+  beatSaverMap?: BeatSaverMapResponse;
   settings?: {
     noScoreButtons?: boolean;
     hideLeaderboardDropdown?: boolean;

@@ -3,13 +3,13 @@ import Tooltip from "@/components/tooltip";
 import { StarIcon } from "@heroicons/react/24/solid";
 import Link from "next/link";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import { BeatSaverMap } from "@ssr/common/model/beatsaver/map";
 import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
 import Image from "next/image";
+import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
 
 type Props = {
   leaderboard: ScoreSaberLeaderboard;
-  beatSaverMap?: BeatSaverMap;
+  beatSaverMap?: BeatSaverMapResponse;
 };
 
 export default function ScoreSongInfo({ leaderboard, beatSaverMap }: Props) {

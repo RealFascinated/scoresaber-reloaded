@@ -1,70 +1,52 @@
 import Card from "@/components/card";
-import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import { BeatSaverMap } from "@ssr/common/model/beatsaver/map";
-import { getBeatSaverDifficulty } from "@ssr/common/utils/beatsaver.util";
 import { formatNumber } from "@ssr/common/utils/number-utils";
 import { formatTime } from "@ssr/common/utils/time-utils";
 import BeatSaverMapDifficulty from "@ssr/common/model/beatsaver/map-difficulty";
 import { MapStats } from "@/components/score/map-stats";
 import EmbedLinks from "@/components/embed-links";
+import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
 
 type LeaderboardBeatSaverInfoProps = {
   /**
-   * The leaderboard to display.
-   */
-  leaderboard: ScoreSaberLeaderboard;
-
-  /**
    * The beat saver map associated with the leaderboard.
    */
-  beatSaverMap: BeatSaverMap;
+  beatSaverMap: BeatSaverMapResponse;
 };
 
 const mapStats = [
   {
     name: "BPM",
-    render: (map: BeatSaverMap, difficulty: BeatSaverMapDifficulty) => {
+    render: (map: BeatSaverMapResponse, difficulty: BeatSaverMapDifficulty) => {
       return formatNumber(map.metadata.bpm);
     },
   },
   {
     name: "Notes",
-    render: (map: BeatSaverMap, difficulty: BeatSaverMapDifficulty) => {
+    render: (map: BeatSaverMapResponse, difficulty: BeatSaverMapDifficulty) => {
       return formatNumber(difficulty.notes);
     },
   },
   {
     name: "NPS",
-    render: (map: BeatSaverMap, difficulty: BeatSaverMapDifficulty) => {
+    render: (map: BeatSaverMapResponse, difficulty: BeatSaverMapDifficulty) => {
       return difficulty.nps.toFixed(2);
     },
   },
   {
     name: "NJS",
-    render: (map: BeatSaverMap, difficulty: BeatSaverMapDifficulty) => {
+    render: (map: BeatSaverMapResponse, difficulty: BeatSaverMapDifficulty) => {
       return difficulty.njs;
     },
   },
   {
     name: "Length",
-    render: (map: BeatSaverMap, difficulty: BeatSaverMapDifficulty) => {
+    render: (map: BeatSaverMapResponse, difficulty: BeatSaverMapDifficulty) => {
       return formatTime(map.metadata.duration);
     },
   },
 ];
 
-export function LeaderboardBeatSaverInfo({ leaderboard, beatSaverMap }: LeaderboardBeatSaverInfoProps) {
-  const difficulty = getBeatSaverDifficulty(
-    beatSaverMap,
-    leaderboard.songHash,
-    leaderboard.difficulty.difficulty,
-    leaderboard.difficulty.characteristic
-  );
-  // Diff not found
-  if (!difficulty) {
-    return null;
-  }
-
+export function LeaderboardBeatSaverInfo({ beatSaverMap }: LeaderboardBeatSaverInfoProps) {
   return (
     <Card className="w-full h-fit text-sm flex gap-2">
       <p className="font-bold text-md text-center">BeatSaver Information</p>
@@ -79,7 +61,7 @@ export function LeaderboardBeatSaverInfo({ leaderboard, beatSaverMap }: Leaderbo
       </div>
 
       <div className="flex gap-1 flex-wrap justify-center">
-        <MapStats leaderboard={leaderboard} beatSaver={beatSaverMap} />
+        <MapStats beatSaver={beatSaverMap} />
       </div>
     </Card>
   );

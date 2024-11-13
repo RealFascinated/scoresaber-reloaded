@@ -1,4 +1,4 @@
-import { BeatSaverMap } from "../model/beatsaver/map";
+import { BeatSaverMapResponse } from "../response/beatsaver-map-response";
 
 export interface PlayerScore<S, L> {
   /**
@@ -14,5 +14,5 @@ export interface PlayerScore<S, L> {
   /**
    * The BeatSaver of the song.
    */
-  readonly beatSaver?: BeatSaverMap;
+  readonly beatSaver?: BeatSaverMapResponse;
 }

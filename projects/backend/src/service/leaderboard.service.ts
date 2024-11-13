@@ -3,20 +3,19 @@ import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { LeaderboardResponse } from "@ssr/common/response/leaderboard-response";
 import { NotFoundError } from "elysia";
 import BeatSaverService from "./beatsaver.service";
-import { BeatSaverMap } from "@ssr/common/model/beatsaver/map";
 import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
 import {
   ScoreSaberLeaderboard,
   ScoreSaberLeaderboardDocument,
   ScoreSaberLeaderboardModel,
 } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import { getBeatSaverDifficulty } from "@ssr/common/utils/beatsaver.util";
 import { fetchWithCache } from "../common/cache.util";
 import { delay } from "@ssr/common/utils/utils";
 import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import CacheService, { ServiceCache } from "./cache.service";
 import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/leaderboard";
 import LeaderboardDifficulty from "@ssr/common/model/leaderboard/leaderboard-difficulty";
+import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
 
 const SCORESABER_REQUEST_COOLDOWN = 60_000 / 300; // 300 requests per minute
 
@@ -96,7 +95,11 @@ export default class LeaderboardService {
             if (foundLeaderboard == undefined) {
               throw new NotFoundError(`Leaderboard not found for "${id}"`);
             }
-            const beatSaverMap = await BeatSaverService.getMap(foundLeaderboard.songHash);
+            const beatSaverMap = await BeatSaverService.getMap(
+              foundLeaderboard.songHash,
+              foundLeaderboard.difficulty.difficulty,
+              foundLeaderboard.difficulty.characteristic
+            );
             const leaderboard = (
               await LeaderboardService.fixMaxScore(foundLeaderboard, beatSaverMap)
             ).toObject() as ScoreSaberLeaderboard;
@@ -125,21 +128,14 @@ export default class LeaderboardService {
    * @param leaderboard the leaderboard
    * @param beatSaverMap the beatSaverMap
    */
-  private static async fixMaxScore(leaderboard: ScoreSaberLeaderboardDocument, beatSaverMap: BeatSaverMap | undefined) {
+  private static async fixMaxScore(
+    leaderboard: ScoreSaberLeaderboardDocument,
+    beatSaverMap: BeatSaverMapResponse | undefined
+  ) {
     // Fix max score if it's broken (ScoreSaber is annoying)
     if (leaderboard.maxScore == 0 && beatSaverMap != undefined) {
-      const difficulty = leaderboard.difficulty;
-      const beatSaverDiff = getBeatSaverDifficulty(
-        beatSaverMap,
-        leaderboard.songHash,
-        difficulty.difficulty,
-        difficulty.characteristic.includes("Standard") ? "Standard" : difficulty.characteristic
-      );
-
-      if (beatSaverDiff != undefined) {
-        leaderboard.maxScore = beatSaverDiff.maxScore;
-        await leaderboard.save();
-      }
+      leaderboard.maxScore = beatSaverMap.difficulty.maxScore;
+      await leaderboard.save();
     }
 
     return leaderboard;

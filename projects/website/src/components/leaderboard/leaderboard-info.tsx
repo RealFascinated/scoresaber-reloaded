@@ -1,12 +1,12 @@
 import Card from "@/components/card";
 import { LeaderboardSongStarCount } from "@/components/leaderboard/leaderboard-song-star-count";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import { BeatSaverMap } from "@ssr/common/model/beatsaver/map";
 import { getBeatSaverMapperProfileUrl } from "@ssr/common/utils/beatsaver.util";
 import FallbackLink from "@/components/fallback-link";
 import { formatNumber } from "@ssr/common/utils/number-utils";
 import Image from "next/image";
 import LeaderboardButtons from "@/components/leaderboard/leaderboard-buttons";
+import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
 
 type LeaderboardInfoProps = {
   /**
@@ -17,7 +17,7 @@ type LeaderboardInfoProps = {
   /**
    * The beat saver map associated with the leaderboard.
    */
-  beatSaverMap?: BeatSaverMap;
+  beatSaverMap?: BeatSaverMapResponse;
 };
 
 export function LeaderboardInfo({ leaderboard, beatSaverMap }: LeaderboardInfoProps) {

@@ -6,7 +6,6 @@ import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { ScoreSort } from "@ssr/common/score/score-sort";
 import { Leaderboards } from "@ssr/common/leaderboard";
 import LeaderboardService from "./leaderboard.service";
-import { BeatSaverMap } from "@ssr/common/model/beatsaver/map";
 import { PlayerScore } from "@ssr/common/score/player-score";
 import LeaderboardScoresResponse from "@ssr/common/response/leaderboard-scores-response";
 import PlayerScoresResponse from "@ssr/common/response/player-scores-response";
@@ -46,6 +45,7 @@ import ScoreSaberPlayerScoreToken from "@ssr/common/types/token/scoresaber/playe
 import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score";
 import CacheService, { ServiceCache } from "./cache.service";
 import { getDifficultyName } from "@ssr/common/utils/song-utils";
+import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
 
 export class ScoreService {
   /**
@@ -73,7 +73,11 @@ export class ScoreService {
       return;
     }
 
-    const beatSaver = await BeatSaverService.getMap(leaderboard.songHash);
+    const beatSaver = await BeatSaverService.getMap(
+      leaderboard.songHash,
+      leaderboard.difficulty.difficulty,
+      leaderboard.difficulty.characteristic
+    );
     const player = await scoresaberService.lookupPlayer(playerInfo.id);
     if (!player) {
       return;
@@ -765,7 +769,7 @@ export class ScoreService {
       async () => {
         const scores: ScoreType[] = [];
         let leaderboard: Leaderboard | undefined;
-        let beatSaverMap: BeatSaverMap | undefined;
+        let beatSaverMap: BeatSaverMapResponse | undefined;
         let metadata: Metadata = new Metadata(0, 0, 0, 0); // Default values
 
         switch (leaderboardName) {
