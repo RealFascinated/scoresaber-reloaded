@@ -154,7 +154,7 @@ export default function Score({ leaderboard, beatSaverMap, score, settings, high
         >
           <Card className="flex gap-4 w-full relative border border-input">
             <div className="flex flex-col w-full gap-2 justify-center items-center">
-              <MapStats leaderboard={leaderboard} beatSaver={beatSaverMap} />
+              {beatSaverMap && <MapStats beatSaver={beatSaverMap} />}
               <div className="flex clex-col justify-center lg:justify-start gap-2">
                 {modes.map((mode, i) => (
                   <Button
