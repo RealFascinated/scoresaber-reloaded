@@ -4,16 +4,6 @@ import { ImageService } from "../service/image.service";
 
 @Controller("/image")
 export default class ImageController {
-  @Get("/averagecolor/:url", {
-    config: {},
-    params: t.Object({
-      url: t.String({ required: true }),
-    }),
-  })
-  public async getImageAverageColor({ params: { url } }: { params: { url: string } }) {
-    return await ImageService.getAverageImageColor(url);
-  }
-
   @Get("/player/:id", {
     config: {},
     params: t.Object({
