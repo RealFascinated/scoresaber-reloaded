@@ -1,14 +1,14 @@
-import {Leaderboards} from "../leaderboard";
-import {kyFetchJson} from "./utils";
+import { Leaderboards } from "../leaderboard";
+import { kyFetchJson } from "./utils";
 import PlayerScoresResponse from "../response/player-scores-response";
-import {Config} from "../config";
-import {ScoreSort} from "../score/score-sort";
+import { Config } from "../config";
+import { ScoreSort } from "../score/score-sort";
 import LeaderboardScoresResponse from "../response/leaderboard-scores-response";
-import {Page} from "../pagination";
-import {PlayerScore} from "../score/player-score";
+import { Page } from "../pagination";
+import { PlayerScore } from "../score/player-score";
 import ScoreSaberLeaderboard from "../model/leaderboard/impl/scoresaber-leaderboard";
 import Score from "../model/score/score";
-import {ScoreSaberScore} from "../model/score/impl/scoresaber-score";
+import { ScoreSaberScore } from "../model/score/impl/scoresaber-score";
 
 /**
  * Fetches the player's scores
@@ -48,12 +48,23 @@ export async function fetchPlayerScores<S, L>(
  * Fetches the player's scores
  *
  * @param leaderboard the leaderboard
- * @param id the player id
- * @param page the page
+ * @param leaderboardId the id of the leaderboard
+ * @param page the page to lookup
+ * @param country the country to get scores in
  */
-export async function fetchLeaderboardScores<S, L>(leaderboard: Leaderboards, id: string, page: number) {
+export async function fetchLeaderboardScores<S, L>(
+  leaderboard: Leaderboards,
+  leaderboardId: string,
+  page: number,
+  country?: string
+) {
   return kyFetchJson<LeaderboardScoresResponse<S, L>>(
-    `${Config.apiUrl}/scores/leaderboard/${leaderboard}/${id}/${page}`
+    `${Config.apiUrl}/scores/leaderboard/${leaderboard}/${leaderboardId}/${page}`,
+    {
+      searchParams: {
+        ...(country ? { country: country } : {}),
+      },
+    }
   );
 }
 

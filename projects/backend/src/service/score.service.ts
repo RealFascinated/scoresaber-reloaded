@@ -750,16 +750,18 @@ export class ScoreService {
    * @param leaderboardName the leaderboard to get the scores from
    * @param leaderboardId the leaderboard id
    * @param page the page to get
+   * @param country the country to get scores in
    * @returns the scores
    */
   public static async getLeaderboardScores(
     leaderboardName: Leaderboards,
     leaderboardId: string,
-    page: number
+    page: number,
+    country?: string
   ): Promise<LeaderboardScoresResponse<unknown, unknown> | undefined> {
     return fetchWithCache(
       CacheService.getCache(ServiceCache.LeaderboardScores),
-      `leaderboard-scores:${leaderboardName}-${leaderboardId}-${page}`,
+      `leaderboard-scores:${leaderboardName}-${leaderboardId}-${page}-${country}`,
       async () => {
         const scores: ScoreType[] = [];
         let leaderboard: Leaderboard | undefined;
@@ -778,7 +780,7 @@ export class ScoreService {
             leaderboard = leaderboardResponse.leaderboard;
             beatSaverMap = leaderboardResponse.beatsaver;
 
-            const leaderboardScores = await scoresaberService.lookupLeaderboardScores(leaderboardId, page);
+            const leaderboardScores = await scoresaberService.lookupLeaderboardScores(leaderboardId, page, country);
             if (leaderboardScores == undefined) {
               break;
             }

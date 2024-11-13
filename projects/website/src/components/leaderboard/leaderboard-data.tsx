@@ -10,6 +10,8 @@ import { fetchLeaderboard } from "@ssr/common/utils/leaderboard.util";
 import LeaderboardPpChart from "@/components/leaderboard/chart/leaderboard-pp-chart";
 import Card from "@/components/card";
 import { LeaderboardBeatSaverInfo } from "@/components/leaderboard/beatsaver-info";
+import LeaderboardFilters from "@/components/leaderboard/leaderboard-filters";
+import { LeaderboardFilterProvider } from "@/components/providers/leaderboard/leaderboard-filter-provider";
 
 type LeaderboardDataProps = {
   /**
@@ -42,25 +44,28 @@ export function LeaderboardData({ initialLeaderboard, initialPage }: Leaderboard
 
   const leaderboard = currentLeaderboard.leaderboard;
   return (
-    <div className="w-full">
-      <div className="flex xl:flex-row flex-col-reverse w-full gap-2">
-        <Card className="flex gap-2 w-full relative h-fit">
-          <LeaderboardScores
-            leaderboard={leaderboard}
-            initialPage={initialPage}
-            leaderboardChanged={newId => setCurrentLeaderboardId(newId)}
-            showDifficulties
-            isLeaderboardPage
-          />
-        </Card>
-        <div className="flex flex-col gap-2 w-full xl:w-[550px]">
-          <LeaderboardInfo leaderboard={leaderboard} beatSaverMap={currentLeaderboard.beatsaver} />
-          {currentLeaderboard.beatsaver && (
-            <LeaderboardBeatSaverInfo leaderboard={leaderboard} beatSaverMap={currentLeaderboard.beatsaver} />
-          )}
-          {leaderboard.stars > 0 && leaderboard.maxScore > 0 && <LeaderboardPpChart leaderboard={leaderboard} />}
+    <LeaderboardFilterProvider>
+      <div className="w-full">
+        <div className="flex xl:flex-row flex-col-reverse w-full gap-2">
+          <Card className="flex gap-2 w-full relative h-fit">
+            <LeaderboardScores
+              leaderboard={leaderboard}
+              initialPage={initialPage}
+              leaderboardChanged={newId => setCurrentLeaderboardId(newId)}
+              showDifficulties
+              isLeaderboardPage
+            />
+          </Card>
+          <div className="flex flex-col gap-2 w-full xl:w-[550px]">
+            <LeaderboardInfo leaderboard={leaderboard} beatSaverMap={currentLeaderboard.beatsaver} />
+            {currentLeaderboard.beatsaver && (
+              <LeaderboardBeatSaverInfo leaderboard={leaderboard} beatSaverMap={currentLeaderboard.beatsaver} />
+            )}
+            <LeaderboardFilters />
+            {leaderboard.stars > 0 && leaderboard.maxScore > 0 && <LeaderboardPpChart leaderboard={leaderboard} />}
+          </div>
         </div>
       </div>
-    </div>
+    </LeaderboardFilterProvider>
   );
 }

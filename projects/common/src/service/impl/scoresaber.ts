@@ -268,16 +268,19 @@ class ScoreSaberService extends Service {
    *
    * @param leaderboardId the ID of the leaderboard to look up
    * @param page the page to get scores for
+   * @param country the country to get scores in
    * @returns the scores of the leaderboard, or undefined
    */
   public async lookupLeaderboardScores(
     leaderboardId: string,
-    page: number
+    page: number,
+    country?: string
   ): Promise<ScoreSaberLeaderboardScoresPageToken | undefined> {
     const before = performance.now();
     this.log(`Looking up scores for leaderboard "${leaderboardId}", page "${page}"...`);
     const response = await this.fetch<ScoreSaberLeaderboardScoresPageToken>(
-      LOOKUP_LEADERBOARD_SCORES_ENDPOINT.replace(":id", leaderboardId).replace(":page", page.toString())
+      LOOKUP_LEADERBOARD_SCORES_ENDPOINT.replace(":id", leaderboardId).replace(":page", page.toString()) +
+        (country ? `&countries=${country}` : "")
     );
     if (response === undefined) {
       return undefined;

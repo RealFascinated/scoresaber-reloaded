@@ -41,17 +41,22 @@ export default class ScoresController {
       id: t.String({ required: true }),
       page: t.Number({ required: true }),
     }),
+    query: t.Object({
+      country: t.Optional(t.String()),
+    }),
   })
   public async getLeaderboardScores({
     params: { leaderboard, id, page },
+    query: { country },
   }: {
     params: {
       leaderboard: Leaderboards;
       id: string;
       page: number;
     };
+    query: { country?: string };
   }): Promise<unknown> {
-    return await ScoreService.getLeaderboardScores(leaderboard, id, page);
+    return await ScoreService.getLeaderboardScores(leaderboard, id, page, country);
   }
 
   @Get("/history/:playerId/:leaderboardId/:page", {
