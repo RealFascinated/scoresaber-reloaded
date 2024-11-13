@@ -48,6 +48,9 @@ export default class CacheService {
       [ServiceCache.ScoreCalendar]: {
         ttl: 1000 * 60 * 60, // 1 hour
       },
+      [ServiceCache.PPBoundary]: {
+        ttl: 1000 * 60 * 30, // 30 minutes
+      },
     };
 
     for (const [cache, info] of Object.entries(cacheInfo)) {
