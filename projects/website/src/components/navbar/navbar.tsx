@@ -4,7 +4,7 @@ import Link from "next/link";
 import React, { ReactElement, useEffect, useState } from "react";
 import { cn } from "@/common/utils";
 import FriendsButton from "@/components/friend/friends-button";
-import { ChartBarIcon, TrendingUpIcon } from "lucide-react";
+import { ChartBarIcon, MusicIcon, TrendingUpIcon } from "lucide-react";
 import ProfileButton from "@/components/navbar/profile-button";
 import { CogIcon } from "@heroicons/react/24/solid";
 import PlayerAndLeaderboardSearch from "@/components/navbar/player-and-leaderboard-search";
@@ -31,6 +31,16 @@ const links: ReactElement[] = [
       </>
     }
     href="/statistics/scoresaber"
+  />,
+  <SimpleNavLink
+    key="playlists"
+    content={
+      <>
+        <MusicIcon className="size-5" />
+        <span className="hidden sm:flex">Playlists</span>
+      </>
+    }
+    href="/playlists"
   />,
 ];
 

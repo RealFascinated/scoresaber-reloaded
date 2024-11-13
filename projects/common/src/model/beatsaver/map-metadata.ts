@@ -28,8 +28,8 @@ export default class BeatSaverMapMetadata {
   /**
    * The artist(s) name.
    */
-  @prop({ required: true })
-  songAuthorName: string;
+  @prop({ required: false })
+  songAuthorName: string | undefined;
 
   /**
    * The level mapper(s) name.

@@ -291,4 +291,16 @@ export default class LeaderboardService {
 
     console.log(`Finished refreshing leaderboards, total pages refreshed: ${page - 1}.`);
   }
+
+  /**
+   * Gets all the ranked leaderboards
+   *
+   * @returns the ranked leaderboards
+   */
+  public static async getRankedLeaderboards(): Promise<ScoreSaberLeaderboard[]> {
+    return fetchWithCache(CacheService.getCache(ServiceCache.Leaderboards), "ranked-leaderboards", async () => {
+      const leaderboards = await ScoreSaberLeaderboardModel.find({ ranked: true });
+      return leaderboards.map(leaderboard => leaderboard.toObject());
+    });
+  }
 }

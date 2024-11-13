@@ -29,6 +29,7 @@ import { formatDuration } from "@ssr/common/utils/time-utils";
 import StatisticsService from "./service/statistics.service";
 import StatisticsController from "./controller/statistics.controller";
 import { serverTiming } from "@elysiajs/server-timing";
+import PlaylistController from "./controller/playlist.controller";
 
 // Load .env file
 dotenv.config({
@@ -207,6 +208,7 @@ app.use(
       ScoresController,
       LeaderboardController,
       StatisticsController,
+      PlaylistController,
     ],
   })
 );

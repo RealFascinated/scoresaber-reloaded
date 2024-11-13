@@ -6,15 +6,17 @@ import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-respons
 import { MapDifficulty } from "@ssr/common/score/map-difficulty";
 import { MapCharacteristic } from "@ssr/common/types/map-characteristic";
 import { getBeatSaverDifficulty } from "@ssr/common/utils/beatsaver.util";
+import { BeatSaverMapToken } from "@ssr/common/types/token/beatsaver/map";
 
 export default class BeatSaverService {
   /**
    * Gets a map by its hash, updates if necessary, or inserts if not found.
    *
    * @param hash the hash of the map
+   * @param token the token to use
    * @returns the beatsaver map, or undefined if not found
    */
-  public static async getInternalMap(hash: string): Promise<BeatSaverMap | undefined> {
+  public static async getInternalMap(hash: string, token?: BeatSaverMapToken): Promise<BeatSaverMap | undefined> {
     let map = await BeatSaverMapModel.findOne({
       "versions.hash": hash.toUpperCase(),
     });
@@ -32,7 +34,7 @@ export default class BeatSaverService {
     }
 
     // Map needs to be fetched or refreshed
-    const token = await beatsaverService.lookupMap(hash);
+    token = !token ? await beatsaverService.lookupMap(hash) : token;
     const uploader = token?.uploader;
     const metadata = token?.metadata;
 
@@ -105,18 +107,20 @@ export default class BeatSaverService {
    * @param hash the hash of the map
    * @param difficulty the difficulty to get
    * @param characteristic the characteristic to get
+   * @param token the token to use
    * @returns the map, or undefined if not found
    */
   public static async getMap(
     hash: string,
     difficulty: MapDifficulty,
-    characteristic: MapCharacteristic
+    characteristic: MapCharacteristic,
+    token?: BeatSaverMapToken
   ): Promise<BeatSaverMapResponse | undefined> {
     return fetchWithCache(
       CacheService.getCache(ServiceCache.BeatSaver),
       `map:${hash}-${difficulty}-${characteristic}`,
       async () => {
-        const map = await this.getInternalMap(hash);
+        const map = await this.getInternalMap(hash, token);
 
         if (!map) {
           return undefined;

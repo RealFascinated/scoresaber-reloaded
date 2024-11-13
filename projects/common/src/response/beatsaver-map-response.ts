@@ -4,6 +4,11 @@ import BeatSaverMapMetadata from "../model/beatsaver/map-metadata";
 
 export type BeatSaverMapResponse = {
   /**
+   * The hash of the map.
+   */
+  hash: string;
+
+  /**
    * The name of the map.
    */
   name: string;
