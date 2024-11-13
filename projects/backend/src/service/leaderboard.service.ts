@@ -264,39 +264,38 @@ export default class LeaderboardService {
       if (!leaderboard) {
         continue;
       }
-      if (leaderboard.ranked) {
-        continue;
-      }
+      if (!leaderboard.ranked) {
+        totalUnranked++;
 
-      totalUnranked++;
-
-      const scores = await ScoreSaberScoreModel.find({ leaderboardId: leaderboard.id });
-      if (!scores) {
-        console.warn(`Failed to fetch scores for leaderboard "${leaderboard.id}".`);
-        continue;
-      }
-
-      for (const score of scores) {
-        score.pp = 0;
-        score.weight = 0;
-      }
-
-      await Promise.all(scores.map(score => score.save()));
-      await ScoreSaberLeaderboardModel.findOneAndUpdate(
-        { _id: leaderboard.id },
-        {
-          lastRefreshed: new Date(),
-          ranked: false,
-          stars: 0,
-        },
-        {
-          upsert: true,
-          new: true,
-          setDefaultsOnInsert: true,
+        const scores = await ScoreSaberScoreModel.find({ leaderboardId: leaderboard.id });
+        if (!scores) {
+          console.warn(`Failed to fetch scores for leaderboard "${leaderboard.id}".`);
+          continue;
         }
-      );
 
-      console.log(`Previously ranked leaderboard "${leaderboard.id}" has been unranked.`);
+        for (const score of scores) {
+          score.pp = 0;
+          score.weight = 0;
+        }
+
+        await Promise.all(scores.map(score => score.save()));
+        await ScoreSaberLeaderboardModel.findOneAndUpdate(
+          { _id: leaderboard.id },
+          {
+            lastRefreshed: new Date(),
+            ranked: false,
+            stars: 0,
+          },
+          {
+            upsert: true,
+            new: true,
+            setDefaultsOnInsert: true,
+          }
+        );
+        console.log(`Previously ranked leaderboard "${leaderboard.id}" has been unranked.`);
+      }
+
+      await delay(SCORESABER_REQUEST_COOLDOWN);
     }
     console.log(`Unranked ${totalUnranked} previously ranked leaderboards.`);
     console.log(`Finished refreshing leaderboards, total pages refreshed: ${page - 1}.`);
