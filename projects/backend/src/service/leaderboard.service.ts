@@ -257,17 +257,18 @@ export default class LeaderboardService {
 
     // Un-rank all unranked leaderboards
     const rankedIds = leaderboards.map(leaderboard => leaderboard.id);
-    const rankedLeaderboards = await ScoreSaberLeaderboardModel.find({ ranked: true, _id: { $nin: rankedIds } });
+    let totalUnranked = 0;
 
-    await logToChannel(
-      DiscordChannels.backendLogs,
-      new EmbedBuilder().setTitle(`Unranking ${rankedLeaderboards.length} previously ranked leaderboards...`)
-    );
-    console.log(`Unranking ${rankedLeaderboards.length} previously ranked leaderboards...`);
-    for (const leaderboard of rankedLeaderboards) {
-      if (rankedIds.includes(leaderboard.id)) {
+    for (const leaderboardId of rankedIds) {
+      const leaderboard = await scoresaberService.lookupLeaderboard(leaderboardId + "");
+      if (!leaderboard) {
         continue;
       }
+      if (leaderboard.ranked) {
+        continue;
+      }
+
+      totalUnranked++;
 
       const scores = await ScoreSaberScoreModel.find({ leaderboardId: leaderboard.id });
       if (!scores) {
@@ -297,7 +298,7 @@ export default class LeaderboardService {
 
       console.log(`Previously ranked leaderboard "${leaderboard.id}" has been unranked.`);
     }
-
+    console.log(`Unranked ${totalUnranked} previously ranked leaderboards.`);
     console.log(`Finished refreshing leaderboards, total pages refreshed: ${page - 1}.`);
   }
 
