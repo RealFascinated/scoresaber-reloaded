@@ -83,6 +83,12 @@ export default class BeatSaverService {
           }
         : {
             notFound: true,
+            versions: [
+              {
+                hash: hash.toUpperCase(),
+              },
+            ],
+            lastRefreshed: new Date(),
           };
 
     map = await BeatSaverMapModel.create(newMapData);
