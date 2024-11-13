@@ -241,16 +241,13 @@ class ScoreSaberService extends Service {
   ): Promise<ScoreSaberLeaderboardPageToken | undefined> {
     const before = performance.now();
     this.log(`Looking up leaderboard page "${page}"...`);
-    const response = await this.fetch<ScoreSaberLeaderboardPageToken>(
-      LOOKUP_LEADERBOARDS_ENDPOINT.replace(":page", page.toString()),
-      {
-        searchParams: {
-          page: page.toString(),
-          ...(options?.ranked ? { ranked: options.ranked } : {}),
-          ...(options?.qualified ? { qualified: options.qualified } : {}),
-        },
-      }
-    );
+    const response = await this.fetch<ScoreSaberLeaderboardPageToken>(LOOKUP_LEADERBOARDS_ENDPOINT, {
+      searchParams: {
+        page: page.toString(),
+        ...(options?.ranked ? { ranked: options.ranked } : {}),
+        ...(options?.qualified ? { qualified: options.qualified } : {}),
+      },
+    });
     if (response === undefined) {
       return undefined;
     }
