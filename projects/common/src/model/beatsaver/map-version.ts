@@ -14,13 +14,13 @@ export default class BeatSaverMapVersion {
   /**
    * The date the map was created.
    */
-  @prop({ required: true })
+  @prop()
   createdAt: Date;
 
   /**
    * The difficulties of this map.
    */
-  @prop({ required: true })
+  @prop()
   difficulties: BeatSaverMapDifficulty[];
 
   constructor(hash: string, createdAt: Date, difficulties: BeatSaverMapDifficulty[]) {
