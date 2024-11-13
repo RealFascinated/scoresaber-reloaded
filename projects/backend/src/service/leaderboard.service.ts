@@ -16,8 +16,6 @@ import CacheService, { ServiceCache } from "./cache.service";
 import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/leaderboard";
 import LeaderboardDifficulty from "@ssr/common/model/leaderboard/leaderboard-difficulty";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
-import { DiscordChannels, logToChannel } from "../bot/bot";
-import { EmbedBuilder } from "discord.js";
 
 const SCORESABER_REQUEST_COOLDOWN = 60_000 / 300; // 300 requests per minute
 
