@@ -74,7 +74,7 @@ export default class Leaderboard {
    * Whether the leaderboard is ranked.
    * @private
    */
-  @Prop({ required: true })
+  @Prop({ required: true, index: true })
   ranked!: boolean;
 
   /**
