@@ -4,6 +4,8 @@ import { Leaderboards } from "@ssr/common/leaderboard";
 import { TopScoresResponse } from "@ssr/common/response/top-scores-response";
 import { ScoreService } from "../service/score.service";
 import { Timeframe } from "@ssr/common/timeframe";
+import ScoreSaberService from "../service/scoresaber.service";
+import BeatLeaderService from "../service/beatleader.service";
 
 @Controller("/scores")
 export default class ScoresController {
@@ -76,7 +78,7 @@ export default class ScoresController {
       page: number;
     };
   }): Promise<unknown> {
-    return (await ScoreService.getScoreHistory(playerId, leaderboardId, page)).toJSON();
+    return (await ScoreSaberService.getScoreHistory(playerId, leaderboardId, page)).toJSON();
   }
 
   @Get("/top", {
@@ -100,7 +102,7 @@ export default class ScoresController {
       timeframe = "daily";
     }
 
-    const scores = await ScoreService.getTopScores(limit, timeframe);
+    const scores = await ScoreSaberService.getTopScores(limit, timeframe);
     return {
       scores,
       timeframe,
@@ -133,6 +135,22 @@ export default class ScoresController {
       // todo: proper error
       throw new NotFoundError("Malformed friend ids, must be a comma separated list of friend ids");
     }
-    return (await ScoreService.getFriendScores(ids, leaderboardId, page)).toJSON();
+    return (await ScoreSaberService.getFriendScores(ids, leaderboardId, page)).toJSON();
+  }
+
+  @Get("/scorestats/:id", {
+    config: {},
+    params: t.Object({
+      id: t.Number({ required: true }),
+    }),
+  })
+  public async getScoreStats({
+    params: { id },
+  }: {
+    params: {
+      id: number;
+    };
+  }): Promise<unknown> {
+    return await BeatLeaderService.getScoreStats(id);
   }
 }

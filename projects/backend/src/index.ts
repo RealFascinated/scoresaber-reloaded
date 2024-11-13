@@ -13,7 +13,6 @@ import { PlayerService } from "./service/player.service";
 import { cron } from "@elysiajs/cron";
 import { isProduction } from "@ssr/common/utils/utils";
 import ImageController from "./controller/image.controller";
-import { ScoreService } from "./service/score.service";
 import { Config } from "@ssr/common/config";
 import ScoresController from "./controller/scores.controller";
 import LeaderboardController from "./controller/leaderboard.controller";
@@ -30,6 +29,8 @@ import StatisticsService from "./service/statistics.service";
 import StatisticsController from "./controller/statistics.controller";
 import { serverTiming } from "@elysiajs/server-timing";
 import PlaylistController from "./controller/playlist.controller";
+import ScoreSaberService from "./service/scoresaber.service";
+import BeatLeaderService from "./service/beatleader.service";
 
 // Load .env file
 dotenv.config({
@@ -44,10 +45,10 @@ await mongoose.connect(Config.mongoUri!); // Connect to MongoDB
 // Connect to websockets
 connectScoresaberWebsocket({
   onScore: async score => {
-    await ScoreService.trackScoreSaberScore(score.score, score.leaderboard);
-    await ScoreService.updatePlayerScoresSet(score);
+    await ScoreSaberService.trackScoreSaberScore(score.score, score.leaderboard);
+    await PlayerService.updatePlayerScoresSet(score);
 
-    await ScoreService.notifyNumberOne(score);
+    await ScoreSaberService.notifyNumberOne(score);
   },
   onDisconnect: async error => {
     await logToChannel(
@@ -58,7 +59,7 @@ connectScoresaberWebsocket({
 });
 connectBeatLeaderWebsocket({
   onScore: async score => {
-    await ScoreService.trackBeatLeaderScore(score);
+    await BeatLeaderService.trackBeatLeaderScore(score);
   },
   onDisconnect: async error => {
     await logToChannel(

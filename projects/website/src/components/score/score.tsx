@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { ScoreOverview } from "@/components/score/score-views/score-overview";
 import { ScoreHistory } from "@/components/score/score-views/score-history";
 
-import { getPageFromRank, kyFetchJson } from "@ssr/common/utils/utils";
+import { getPageFromRank } from "@ssr/common/utils/utils";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 
@@ -23,11 +23,9 @@ import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreStatsToken } from "@ssr/common/types/token/beatleader/score-stats/score-stats";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import { Config } from "@ssr/common/config";
-import { beatLeaderService } from "@ssr/common/service/impl/beatleader";
-import { getMinioBucketName, MinioBucket } from "@ssr/common/minio-buckets";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
 import LeaderboardScores from "@/components/leaderboard/leaderboard-scores";
+import { fetchScoreStats } from "@ssr/common/utils/score.util";
 
 type Props = {
   highlightedPlayer?: ScoreSaberPlayer;
@@ -70,17 +68,7 @@ export default function Score({ leaderboard, beatSaverMap, score, settings, high
   const { data, isLoading } = useQuery<DropdownData>({
     queryKey: [`leaderboardDropdownData:${leaderboard.id}`, leaderboard.id, score.scoreId, isLeaderboardExpanded],
     queryFn: async () => {
-      let scoreStats: ScoreStatsToken | undefined;
-      if (score.additionalData) {
-        if (score.additionalData.cachedScoreStats) {
-          scoreStats = await kyFetchJson(
-            `${Config.cdnUrl}/${getMinioBucketName(MinioBucket.BeatLeaderScoreStats)}/${score.additionalData.scoreId}.json`
-          );
-        } else {
-          scoreStats = await beatLeaderService.lookupScoreStats(score.additionalData.scoreId);
-        }
-      }
-      return { scoreStats };
+      return { scoreStats: score.additionalData ? await fetchScoreStats(score.additionalData.scoreId) : undefined };
     },
     staleTime: 30000,
     enabled: loading,

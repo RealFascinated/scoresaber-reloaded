@@ -9,6 +9,7 @@ import { PlayerScore } from "../score/player-score";
 import ScoreSaberLeaderboard from "../model/leaderboard/impl/scoresaber-leaderboard";
 import Score from "../model/score/score";
 import { ScoreSaberScore } from "../model/score/impl/scoresaber-score";
+import { ScoreStatsToken } from "../types/token/beatleader/score-stats/score-stats";
 
 /**
  * Fetches the player's scores
@@ -21,6 +22,15 @@ export async function fetchPlayerScoresHistory(playerId: string, leaderboardId: 
   return kyFetchJson<Page<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>>(
     `${Config.apiUrl}/scores/history/${playerId}/${leaderboardId}/${page}`
   );
+}
+
+/**
+ * Fetches the score stats for a score.
+ *
+ * @param scoreId the id of the score
+ */
+export async function fetchScoreStats(scoreId: number) {
+  return kyFetchJson<ScoreStatsToken>(`${Config.apiUrl}/scores/scorestats/${scoreId}`);
 }
 
 /**

@@ -8,10 +8,144 @@ import { PlayerHistory } from "@ssr/common/player/player-history";
 import { PlayerDocument } from "@ssr/common/model/player";
 import { PlayerService } from "./player.service";
 import { formatDateMinimal, getDaysAgoDate, getMidnightAlignedDate } from "@ssr/common/utils/time-utils";
-import { getPageFromRank } from "@ssr/common/utils/utils";
+import { formatChange, getPageFromRank, isProduction } from "@ssr/common/utils/utils";
 import { getValueFromHistory } from "@ssr/common/utils/player-utils";
+import { MapDifficulty } from "@ssr/common/score/map-difficulty";
+import { MapCharacteristic } from "@ssr/common/types/map-characteristic";
+import {
+  ScoreSaberPreviousScore,
+  ScoreSaberScore,
+  ScoreSaberScoreModel,
+} from "@ssr/common/model/score/impl/scoresaber-score";
+import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
+import LeaderboardService from "./leaderboard.service";
+import BeatLeaderService from "./beatleader.service";
+import { PlayerScore } from "@ssr/common/score/player-score";
+import { Page, Pagination } from "@ssr/common/pagination";
+import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
+import { Config } from "@ssr/common/config";
+import { formatScoreAccuracy } from "@ssr/common/utils/score.util";
+import { getDifficultyName } from "@ssr/common/utils/song-utils";
+import { DiscordChannels, logToChannel } from "../bot/bot";
+import { EmbedBuilder } from "discord.js";
+import BeatSaverService from "./beatsaver.service";
+import { getScoreSaberLeaderboardFromToken, getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
+import ScoreSaberPlayerScoreToken from "@ssr/common/types/token/scoresaber/player-score";
+import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score";
+import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/leaderboard";
+import { Timeframe } from "@ssr/common/timeframe";
 
 export default class ScoreSaberService {
+  /**
+   * Notifies the number one score in Discord.
+   *
+   * @param playerScore the score to notify
+   */
+  public static async notifyNumberOne(playerScore: ScoreSaberPlayerScoreToken) {
+    // Only notify in production
+    if (!isProduction()) {
+      return;
+    }
+
+    const { score: scoreToken, leaderboard: leaderboardToken } = playerScore;
+    const leaderboard = getScoreSaberLeaderboardFromToken(leaderboardToken);
+    const score = getScoreSaberScoreFromToken(scoreToken, leaderboard, scoreToken.leaderboardPlayerInfo.id);
+    const playerInfo = score.playerInfo;
+
+    // Not ranked
+    if (leaderboard.stars <= 0) {
+      return;
+    }
+    // Not #1 rank
+    if (score.rank !== 1) {
+      return;
+    }
+
+    const beatSaver = await BeatSaverService.getMap(
+      leaderboard.songHash,
+      leaderboard.difficulty.difficulty,
+      leaderboard.difficulty.characteristic
+    );
+    const player = await scoresaberService.lookupPlayer(playerInfo.id);
+    if (!player) {
+      return;
+    }
+
+    const previousScore = await ScoreSaberService.getPreviousScore(player.id, leaderboard, score.timestamp);
+    const change = previousScore &&
+      previousScore.change && {
+        accuracy: `${formatChange(previousScore.change.accuracy, value => value.toFixed(2) + "%") || ""}`,
+        pp: `${formatChange(previousScore.change.pp, undefined, true) || ""}`,
+        misses: previousScore.misses == score.misses ? "" : ` vs ${previousScore.misses}` || "",
+        badCuts: previousScore.badCuts == score.badCuts ? "" : ` vs ${previousScore.badCuts}` || "",
+        maxCombo: previousScore.maxCombo == score.maxCombo ? "" : ` vs ${previousScore.maxCombo}` || "",
+      };
+
+    const message = await logToChannel(
+      DiscordChannels.numberOneFeed,
+      new EmbedBuilder()
+        .setTitle(`${player.name} just set a #1!`)
+        .setDescription(
+          [
+            `${leaderboard.fullName} (${getDifficultyName(leaderboard.difficulty.difficulty)} ${leaderboard.stars.toFixed(2)}★)`,
+            [
+              `[[Player]](${Config.websiteUrl}/player/${player.id})`,
+              `[[Leaderboard]](${Config.websiteUrl}/leaderboard/${leaderboard.id})`,
+              beatSaver ? `[[Map]](https://beatsaver.com/maps/${beatSaver.bsr})` : undefined,
+            ].join(" "),
+          ]
+            .join("\n")
+            .trim()
+        )
+        .addFields([
+          {
+            name: "Accuracy",
+            value: `${formatScoreAccuracy(score)} ${change ? change.accuracy : ""}`,
+            inline: true,
+          },
+          {
+            name: "PP",
+            value: `${formatPp(score.pp)}pp ${change ? change.pp : ""}`,
+            inline: true,
+          },
+          {
+            name: "Player Rank",
+            value: `#${formatNumberWithCommas(player.rank)}`,
+            inline: true,
+          },
+          {
+            name: "Misses",
+            value: `${formatNumberWithCommas(score.missedNotes)} ${change ? change.misses : ""}`,
+            inline: true,
+          },
+          {
+            name: "Bad Cuts",
+            value: `${formatNumberWithCommas(score.badCuts)} ${change ? change.badCuts : ""}`,
+            inline: true,
+          },
+          {
+            name: "Max Combo",
+            value: `${formatNumberWithCommas(score.maxCombo)} ${score.fullCombo ? "/ FC" : ""} ${change ? change.maxCombo : ""}`,
+            inline: true,
+          },
+        ])
+        .setThumbnail(leaderboard.songArt)
+        .setTimestamp(score.timestamp)
+        .setFooter({
+          text: `Powered by ${Config.websiteUrl}`,
+        })
+        .setColor("#00ff00")
+    );
+
+    try {
+      if (message) {
+        await message.crosspost();
+      }
+    } catch (error) {
+      console.error("Failed to cross-post number one score message", error);
+    }
+  }
+
   /**
    * Gets a ScoreSaber player using their account id.
    *
@@ -240,5 +374,411 @@ export default class ScoreSaberService {
       countryRank: this.getStatisticChange(history, "countryRank", true, daysAgo),
       pp: this.getStatisticChange(history, "pp", false, daysAgo),
     };
+  }
+
+  /**
+   * Gets a ScoreSaber score.
+   *
+   * @param playerId the player who set the score
+   * @param leaderboardId the leaderboard id the score was set on
+   * @param difficulty the difficulty played
+   * @param characteristic the characteristic played
+   * @param score the score of the score set
+   */
+  public static async getScoreSaberScore(
+    playerId: string,
+    leaderboardId: string,
+    difficulty: MapDifficulty,
+    characteristic: MapCharacteristic,
+    score: number
+  ) {
+    return ScoreSaberScoreModel.findOne({
+      playerId: playerId,
+      leaderboardId: leaderboardId,
+      difficulty: difficulty,
+      characteristic: characteristic,
+      score: score,
+    });
+  }
+
+  /**
+   * Gets the player scores from the database.
+   *
+   * @param playerId the id of the player
+   * @param options the fetch options
+   */
+  public static async getPlayerScores(
+    playerId: string,
+    options?: {
+      limit?: number;
+      ranked?: boolean;
+      projection?: { [field: string]: number };
+    }
+  ): Promise<ScoreSaberScore[]> {
+    const rawScores = await ScoreSaberScoreModel.aggregate([
+      // Match stage based on playerId and optional ranked filter
+      { $match: { playerId: playerId, ...(options?.ranked ? { pp: { $gt: 0 } } : {}) } },
+
+      // Optional projection stage
+      ...(options?.projection
+        ? [
+            {
+              $project: {
+                ...options.projection,
+                _id: 0,
+                leaderboardId: 1,
+                playerId: 1,
+              },
+            },
+          ]
+        : []),
+
+      // Group by leaderboardId and playerId to get the first entry of each group
+      {
+        $group: {
+          _id: { leaderboardId: "$leaderboardId", playerId: "$playerId" },
+          score: { $first: "$$ROOT" }, // Keep the whole document in "score" field
+        },
+      },
+
+      // Sort by pp in descending order
+      { $sort: { "score.pp": -1 } },
+
+      // Limit results
+      ...(options?.limit ? [{ $limit: options.limit }] : []),
+    ]);
+    if (!rawScores) {
+      return [];
+    }
+
+    const scores: ScoreSaberScore[] = [];
+    for (const rawScore of rawScores) {
+      scores.push(rawScore.score as ScoreSaberScore);
+    }
+    return scores;
+  }
+
+  /**
+   * Checks if a ScoreSaber score already exists.
+   *
+   * @param playerId the id of the player
+   * @param leaderboard the leaderboard
+   * @param score the score to check
+   */
+  public static async scoreExists(playerId: string, leaderboard: ScoreSaberLeaderboard, score: ScoreSaberScore) {
+    return (
+      (await ScoreSaberScoreModel.exists({
+        playerId: playerId + "",
+        leaderboardId: leaderboard.id,
+        difficulty: leaderboard.difficulty.difficulty,
+        characteristic: leaderboard.difficulty.characteristic,
+        score: score.score,
+      })) !== null
+    );
+  }
+
+  /**
+   * Gets the player's score history for a map.
+   *
+   * @param playerId the player's id to get the previous scores for
+   * @param leaderboardId the leaderboard to get the previous scores on
+   * @param page the page to get
+   */
+  public static async getScoreHistory(
+    playerId: string,
+    leaderboardId: string,
+    page: number
+  ): Promise<Page<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>> {
+    const scores = await ScoreSaberScoreModel.find({ playerId: playerId, leaderboardId: leaderboardId })
+      .sort({ timestamp: -1 })
+      .skip(1);
+    if (scores == null || scores.length == 0) {
+      throw new NotFoundError(`No previous scores found for ${playerId} in ${leaderboardId}`);
+    }
+
+    return new Pagination<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>()
+      .setItemsPerPage(8)
+      .setTotalItems(scores.length)
+      .getPage(page, async () => {
+        const toReturn: PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>[] = [];
+        for (const score of scores) {
+          const leaderboardResponse = await LeaderboardService.getLeaderboard<ScoreSaberLeaderboard>(
+            "scoresaber",
+            leaderboardId
+          );
+          if (leaderboardResponse == undefined) {
+            throw new NotFoundError(`Leaderboard "${leaderboardId}" not found`);
+          }
+          const { leaderboard, beatsaver } = leaderboardResponse;
+
+          const additionalData = await BeatLeaderService.getAdditionalScoreData(
+            playerId,
+            leaderboard.songHash,
+            `${leaderboard.difficulty.difficulty}-${leaderboard.difficulty.characteristic}`,
+            score.score
+          );
+          if (additionalData !== undefined) {
+            score.additionalData = additionalData;
+          }
+          const previousScore = await this.getPreviousScore(playerId, leaderboard, score.timestamp);
+          if (previousScore !== undefined) {
+            score.previousScore = previousScore;
+          }
+
+          toReturn.push({
+            score: score as unknown as ScoreSaberScore,
+            leaderboard: leaderboard,
+            beatSaver: beatsaver,
+          });
+        }
+
+        return toReturn;
+      });
+  }
+
+  /**
+   * Gets the player's previous score for a map.
+   *
+   * @param playerId the player's id to get the previous score for
+   * @param leaderboard the leaderboard to get the previous score on
+   * @param timestamp the score's timestamp to get the previous score for
+   * @returns the score, or undefined if none
+   */
+  public static async getPreviousScore(
+    playerId: string,
+    leaderboard: ScoreSaberLeaderboard,
+    timestamp: Date
+  ): Promise<ScoreSaberPreviousScore | undefined> {
+    const scores = await ScoreSaberScoreModel.find({ playerId: playerId, leaderboardId: leaderboard.id }).sort({
+      timestamp: -1,
+    });
+    if (scores == null || scores.length == 0) {
+      return undefined;
+    }
+
+    const scoreIndex = scores.findIndex(score => score.timestamp.getTime() == timestamp.getTime());
+    const score = scores.find(score => score.timestamp.getTime() == timestamp.getTime());
+    if (scoreIndex == -1 || score == undefined) {
+      return undefined;
+    }
+    const previousScore = scores[scoreIndex + 1];
+    if (previousScore == undefined) {
+      return undefined;
+    }
+    return {
+      score: previousScore.score,
+      accuracy: previousScore.accuracy || (score.score / leaderboard.maxScore) * 100,
+      modifiers: previousScore.modifiers,
+      misses: previousScore.misses,
+      missedNotes: previousScore.missedNotes,
+      badCuts: previousScore.badCuts,
+      fullCombo: previousScore.fullCombo,
+      pp: previousScore.pp,
+      weight: previousScore.weight,
+      maxCombo: previousScore.maxCombo,
+      timestamp: previousScore.timestamp,
+      change: {
+        score: score.score - previousScore.score,
+        accuracy:
+          (score.accuracy || (score.score / leaderboard.maxScore) * 100) -
+          (previousScore.accuracy || (previousScore.score / leaderboard.maxScore) * 100),
+        misses: score.misses - previousScore.misses,
+        missedNotes: score.missedNotes - previousScore.missedNotes,
+        badCuts: score.badCuts - previousScore.badCuts,
+        pp: score.pp - previousScore.pp,
+        weight: score.weight && previousScore.weight && score.weight - previousScore.weight,
+        maxCombo: score.maxCombo - previousScore.maxCombo,
+      },
+    } as ScoreSaberPreviousScore;
+  }
+
+  /**
+   * Gets friend scores for a leaderboard.
+   *
+   * @param friendIds the friend ids
+   * @param leaderboardId the leaderboard id
+   * @param page the page to fetch
+   */
+  public static async getFriendScores(
+    friendIds: string[],
+    leaderboardId: number,
+    page: number
+  ): Promise<Page<ScoreSaberScore>> {
+    const scores: ScoreSaberScore[] = await fetchWithCache(
+      CacheService.getCache(ServiceCache.FriendScores),
+      `friend-scores:${friendIds.join(",")}-${leaderboardId}`,
+      async () => {
+        const scores: ScoreSaberScore[] = [];
+        for (const friendId of friendIds) {
+          await PlayerService.getPlayer(friendId); // Ensures player exists
+
+          const friendScores = await ScoreSaberScoreModel.aggregate([
+            { $match: { playerId: friendId, leaderboardId: leaderboardId } },
+            { $sort: { timestamp: -1 } },
+            {
+              $group: {
+                _id: { leaderboardId: "$leaderboardId", playerId: "$playerId" },
+                score: { $first: "$$ROOT" },
+              },
+            },
+            { $sort: { "score.score": -1 } },
+          ]);
+          for (const friendScore of friendScores) {
+            scores.push(new ScoreSaberScoreModel(friendScore.score).toObject() as ScoreSaberScore);
+          }
+        }
+
+        return scores;
+      }
+    );
+
+    if (scores.length === 0) {
+      throw new NotFoundError(`No scores found for friends "${friendIds.join(",")}" in leaderboard "${leaderboardId}"`);
+    }
+
+    const pagination = new Pagination<ScoreSaberScore>();
+    pagination.setItems(scores);
+    pagination.setTotalItems(scores.length);
+    pagination.setItemsPerPage(8);
+    return pagination.getPage(page);
+  }
+
+  /**
+   * Tracks ScoreSaber score.
+   *
+   * @param scoreToken the score to track
+   * @param leaderboardToken the leaderboard for the score
+   * @param playerId the id of the player
+   * @returns whether the score was tracked
+   */
+  public static async trackScoreSaberScore(
+    scoreToken: ScoreSaberScoreToken,
+    leaderboardToken: ScoreSaberLeaderboardToken,
+    playerId?: string
+  ) {
+    playerId = (scoreToken.leaderboardPlayerInfo && scoreToken.leaderboardPlayerInfo.id) || playerId;
+    if (!playerId) {
+      console.error(`Player ID is undefined, unable to track score: ${scoreToken.id}`);
+      return;
+    }
+
+    const playerName = (scoreToken.leaderboardPlayerInfo && scoreToken.leaderboardPlayerInfo.name) || "Unknown";
+    const leaderboard = getScoreSaberLeaderboardFromToken(leaderboardToken);
+    const score = getScoreSaberScoreFromToken(scoreToken, leaderboard, playerId);
+
+    if (await ScoreSaberService.scoreExists(playerId, leaderboard, score)) {
+      // The score has already been tracked, so ignore it.
+      console.log(
+        `ScoreSaber score already tracked for "${playerName}"(${playerId}), difficulty: ${score.difficulty}, score: ${score.score}, leaderboard: ${leaderboard.id}, ignoring...`
+      );
+      return false;
+    }
+
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
+    delete score.playerInfo;
+
+    await ScoreSaberScoreModel.create(score);
+    console.log(
+      `Tracked ScoreSaber score for "${playerName}"(${playerId}), difficulty: ${score.difficulty}, score: ${score.score}, pp: ${score.pp.toFixed(2)}pp, leaderboard: ${leaderboard.id}, hmd: ${score.hmd}`
+    );
+    return true;
+  }
+
+  /**
+   * Gets the top tracked scores.
+   *
+   * @param amount the amount of scores to get
+   * @param timeframe the timeframe to filter by
+   * @returns the top scores
+   */
+  public static async getTopScores(amount: number = 100, timeframe: Timeframe) {
+    console.log(`Getting top scores for timeframe: ${timeframe}, limit: ${amount}...`);
+    const before = Date.now();
+
+    let daysAgo = -1;
+    if (timeframe === "daily") {
+      daysAgo = 1;
+    } else if (timeframe === "weekly") {
+      daysAgo = 8;
+    } else if (timeframe === "monthly") {
+      daysAgo = 31;
+    }
+    const date: Date = daysAgo == -1 ? new Date(0) : getDaysAgoDate(daysAgo);
+    const foundScores = await ScoreSaberScoreModel.aggregate([
+      { $match: { timestamp: { $gte: date }, pp: { $gt: 0 } } },
+      {
+        $group: {
+          _id: { leaderboardId: "$leaderboardId", playerId: "$playerId" },
+          score: { $first: "$$ROOT" },
+        },
+      },
+      { $sort: { "score.pp": -1 } },
+      { $limit: amount },
+    ]);
+
+    const scores: (PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard> | null)[] = await Promise.all(
+      foundScores.map(async ({ score: scoreData }) => {
+        const score = new ScoreSaberScoreModel(scoreData).toObject() as ScoreSaberScore;
+
+        const leaderboardResponse = await LeaderboardService.getLeaderboard<ScoreSaberLeaderboard>(
+          "scoresaber",
+          score.leaderboardId + ""
+        );
+        if (!leaderboardResponse) {
+          return null; // Skip this score if no leaderboardResponse is found
+        }
+
+        const { leaderboard, beatsaver } = leaderboardResponse;
+
+        try {
+          const player = await PlayerService.getPlayer(score.playerId);
+          if (player) {
+            score.playerInfo = {
+              id: player.id,
+              name: player.name,
+            };
+          }
+        } catch {
+          score.playerInfo = {
+            id: score.playerId,
+          };
+        }
+
+        const [additionalData, previousScore] = await Promise.all([
+          BeatLeaderService.getAdditionalScoreData(
+            score.playerId,
+            leaderboard.songHash,
+            `${leaderboard.difficulty.difficulty}-${leaderboard.difficulty.characteristic}`,
+            score.score
+          ),
+          ScoreSaberService.getPreviousScore(score.playerId, leaderboard, score.timestamp),
+        ]);
+
+        if (additionalData) {
+          score.additionalData = additionalData.toObject();
+        }
+        if (previousScore) {
+          score.previousScore = previousScore;
+        }
+
+        return {
+          score: score,
+          leaderboard: leaderboard,
+          beatSaver: beatsaver,
+        };
+      })
+    );
+
+    // Filter out any null entries that might result from skipped scores
+    const filteredScores = scores.filter(score => score !== null) as PlayerScore<
+      ScoreSaberScore,
+      ScoreSaberLeaderboard
+    >[];
+
+    console.log(
+      `Got ${filteredScores.length} scores in ${Date.now() - before}ms (timeframe: ${timeframe}, limit: ${amount})`
+    );
+    return filteredScores;
   }
 }

@@ -6,7 +6,6 @@ import { InternalServerError } from "@ssr/common/error/internal-server-error";
 import { delay, getPageFromRank, isProduction } from "@ssr/common/utils/utils";
 import { AroundPlayer } from "@ssr/common/types/around-player";
 import { ScoreSort } from "@ssr/common/score/score-sort";
-import { ScoreService } from "./score.service";
 import { logNewTrackedPlayer } from "../common/embds";
 import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/player";
 import { fetchWithCache } from "../common/cache.util";
@@ -14,6 +13,8 @@ import { PlayedMapsCalendarResponse, PlayedMapsCalendarStat } from "@ssr/common/
 import CacheService, { ServiceCache } from "./cache.service";
 import ScoreSaberService from "./scoresaber.service";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
+import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
+import ScoreSaberPlayerScoreToken from "@ssr/common/types/token/scoresaber/player-score";
 
 const SCORESABER_REQUEST_COOLDOWN = 60_000 / 250; // 250 requests per minute
 const accountCreationLock: { [id: string]: Promise<PlayerDocument> } = {};
@@ -168,7 +169,7 @@ export class PlayerService {
       `pp-boundary-scores:${playerId}`,
       async () => {
         await PlayerService.getPlayer(playerId); // Ensure player exists
-        const playerScores = await ScoreService.getPlayerScores(playerId, {
+        const playerScores = await ScoreSaberService.getPlayerScores(playerId, {
           ranked: true,
           projection: {
             pp: 1,
@@ -445,7 +446,7 @@ export class PlayerService {
       let missingScores = 0;
       await Promise.all(
         scoresPage.playerScores.map(async score => {
-          if (await ScoreService.trackScoreSaberScore(score.score, score.leaderboard, player.id)) {
+          if (await ScoreSaberService.trackScoreSaberScore(score.score, score.leaderboard, player.id)) {
             missingScores++;
           }
         })
@@ -533,7 +534,7 @@ export class PlayerService {
    */
   public static async getPlayerHMD(playerId: string) {
     // Get player's most used HMD in the last 50 scores
-    const scores = await ScoreService.getPlayerScores(playerId, {
+    const scores = await ScoreSaberService.getPlayerScores(playerId, {
       limit: 50,
       projection: {
         hmd: 1,
@@ -550,5 +551,41 @@ export class PlayerService {
       return undefined;
     }
     return Array.from(hmds.entries()).sort((a, b) => b[1] - a[1])[0][0];
+  }
+
+  /**
+   * Updates the players set scores count for today.
+   *
+   * @param score the score
+   */
+  public static async updatePlayerScoresSet({
+    score: scoreToken,
+    leaderboard: leaderboardToken,
+  }: ScoreSaberPlayerScoreToken) {
+    const playerId = scoreToken.leaderboardPlayerInfo.id;
+
+    const leaderboard = getScoreSaberLeaderboardFromToken(leaderboardToken);
+    const player: PlayerDocument | null = await PlayerModel.findById(playerId);
+    // Player is not tracked, so ignore the score.
+    if (player == undefined) {
+      return;
+    }
+
+    const today = new Date();
+    const history = player.getHistoryByDate(today);
+    const scores = history.scores || {
+      rankedScores: 0,
+      unrankedScores: 0,
+    };
+    if (leaderboard.stars > 0) {
+      scores.rankedScores!++;
+    } else {
+      scores.unrankedScores!++;
+    }
+
+    history.scores = scores;
+    player.setStatisticHistory(today, history);
+    player.markModified("statisticHistory");
+    await player.save();
   }
 }
