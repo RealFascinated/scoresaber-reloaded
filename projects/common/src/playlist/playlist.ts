@@ -19,6 +19,11 @@ export class Playlist {
   author: string;
 
   /**
+   * The image of the playlist.
+   */
+  image: string;
+
+  /**
    * The songs in the playlist.
    */
   songs: PlaylistSong[];
@@ -49,13 +54,15 @@ export class Playlist {
           }),
         };
       }),
+      image: "base64," + this.image,
     };
   }
 
-  constructor(id: string, title: string, author: string, songs: PlaylistSong[]) {
+  constructor(id: string, title: string, author: string, image: string, songs: PlaylistSong[]) {
     this.id = id;
     this.title = title;
     this.author = author;
+    this.image = image;
     this.songs = songs;
   }
 }

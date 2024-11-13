@@ -6,4 +6,5 @@ export type BeatSaberPlaylist = {
   playlistAuthor: string;
   customData: BeatSaberPlaylistCustomData;
   songs: BeatSaberPlaylistSong[];
+  image: string;
 };
