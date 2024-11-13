@@ -12,7 +12,7 @@ export default class PlaylistController {
   })
   public async getPlaylist({ params: { id } }: { params: { id: string } }): Promise<Response> {
     const response = new Response(
-      JSON.stringify(await (await PlaylistService.getPlaylist(id)).generateBeatSaberPlaylist())
+      JSON.stringify(await (await PlaylistService.getPlaylist(id)).generateBeatSaberPlaylist(), null, 2)
     );
     response.headers.set("Content-Type", "application/json");
     response.headers.set("Cache-Control", "public, max-age=3600");
