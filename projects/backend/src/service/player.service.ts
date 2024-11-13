@@ -179,6 +179,8 @@ export class PlayerService {
       }
     );
 
+    console.log(scoresPps);
+
     if (scoresPps.length === 0) {
       return [0];
     }
