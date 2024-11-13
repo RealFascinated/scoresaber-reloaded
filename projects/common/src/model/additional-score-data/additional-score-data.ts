@@ -1,7 +1,7 @@
-import {getModelForClass, modelOptions, prop, ReturnModelType, Severity} from "@typegoose/typegoose";
-import {Document} from "mongoose";
-import {HandAccuracy} from "./hand-accuracy";
-import {Misses} from "./misses";
+import { getModelForClass, modelOptions, prop, ReturnModelType, Severity } from "@typegoose/typegoose";
+import { Document } from "mongoose";
+import { HandAccuracy } from "./hand-accuracy";
+import { Misses } from "./misses";
 
 /**
  * The model for additional score data.
