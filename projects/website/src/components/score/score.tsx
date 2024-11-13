@@ -63,8 +63,6 @@ export default function Score({ leaderboard, beatSaverMap, score, settings, high
   const scoresPage = getPageFromRank(score.rank, 12);
   const isMobile = useIsMobile();
 
-  console.log(score);
-
   const { data, isLoading } = useQuery<DropdownData>({
     queryKey: [`leaderboardDropdownData:${leaderboard.id}`, leaderboard.id, score.scoreId, isLeaderboardExpanded],
     queryFn: async () => {

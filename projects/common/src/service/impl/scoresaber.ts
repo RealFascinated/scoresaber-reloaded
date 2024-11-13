@@ -27,7 +27,7 @@ const LOOKUP_PLAYER_SCORES_ENDPOINT = `${API_BASE}/player/:id/scores?limit=:limi
  */
 const LOOKUP_LEADERBOARD_ENDPOINT = `${API_BASE}/leaderboard/by-id/:id/info`;
 const LOOKUP_LEADERBOARD_SCORES_ENDPOINT = `${API_BASE}/leaderboard/by-id/:id/scores?page=:page`;
-const LOOKUP_LEADERBOARDS_ENDPOINT = `${API_BASE}/leaderboards?page=:page`;
+const LOOKUP_LEADERBOARDS_ENDPOINT = `${API_BASE}/leaderboards`;
 const SEARCH_LEADERBOARDS_ENDPOINT = `${API_BASE}/leaderboards?search=:query`;
 
 const WEIGHT_COEFFICIENT = 0.965;
@@ -245,6 +245,7 @@ class ScoreSaberService extends Service {
       LOOKUP_LEADERBOARDS_ENDPOINT.replace(":page", page.toString()),
       {
         searchParams: {
+          page: page.toString(),
           ...(options?.ranked ? { ranked: options.ranked } : {}),
           ...(options?.qualified ? { qualified: options.qualified } : {}),
         },

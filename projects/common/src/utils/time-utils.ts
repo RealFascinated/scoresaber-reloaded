@@ -232,6 +232,7 @@ export function formatDuration(ms: number): string {
     { unit: "h", ms: 3600000 },
     { unit: "m", ms: 60000 },
     { unit: "s", ms: 1000 },
+    { unit: "ms", ms: 1 },
   ];
 
   const result = [];

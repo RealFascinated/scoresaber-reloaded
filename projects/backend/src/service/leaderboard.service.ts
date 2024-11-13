@@ -255,10 +255,10 @@ export default class LeaderboardService {
 
     // Un-rank all unranked leaderboards
     const rankedIds = leaderboards.map(leaderboard => leaderboard.id);
+    const rankedLeaderboards = await ScoreSaberLeaderboardModel.find({ ranked: true, _id: { $nin: rankedIds } });
     let totalUnranked = 0;
-
-    for (const leaderboardId of rankedIds) {
-      const leaderboard = await scoresaberService.lookupLeaderboard(leaderboardId + "");
+    for (const previousLeaderboard of rankedLeaderboards) {
+      const leaderboard = await scoresaberService.lookupLeaderboard(previousLeaderboard.id + "");
       if (!leaderboard) {
         continue;
       }
