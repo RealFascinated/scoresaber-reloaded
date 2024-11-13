@@ -6,16 +6,6 @@ import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 
 type ScoreOverviewProps = {
   /**
-   * The player to highlight
-   */
-  highlightedPlayer?: ScoreSaberPlayer;
-
-  /**
-   * The initial page to show
-   */
-  initialPage: number;
-
-  /**
    * The score stats for this score.
    */
   scoreStats?: ScoreStatsToken;
@@ -26,7 +16,7 @@ type ScoreOverviewProps = {
   leaderboard: ScoreSaberLeaderboard;
 };
 
-export function ScoreOverview({ highlightedPlayer, scoreStats, initialPage, leaderboard }: ScoreOverviewProps) {
+export function ScoreOverview({ scoreStats, leaderboard }: ScoreOverviewProps) {
   return (
     <>
       {scoreStats && (
@@ -34,13 +24,6 @@ export function ScoreOverview({ highlightedPlayer, scoreStats, initialPage, lead
           <PlayerScoreAccuracyChart scoreStats={scoreStats} leaderboard={leaderboard} />
         </div>
       )}
-
-      <LeaderboardScores
-        initialPage={initialPage}
-        leaderboard={leaderboard}
-        highlightedPlayer={highlightedPlayer}
-        disableUrlChanging
-      />
     </>
   );
 }

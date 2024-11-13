@@ -28,6 +28,12 @@ export const LeaderboardFilterProvider = ({ children }: { children: ReactNode })
  */
 export const useLeaderboardFilter = (): FilterContextProps => {
   const context = useContext(LeaderboardFilterContext);
-  if (!context) throw new Error("useLeaderboardFilter must be used within a LeaderboardFilterContext");
+  if (!context) {
+    return {
+      country: undefined,
+      setCountry: () => {},
+      clearFilters: () => {},
+    };
+  }
   return context;
 };

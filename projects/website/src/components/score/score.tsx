@@ -27,6 +27,7 @@ import { Config } from "@ssr/common/config";
 import { beatLeaderService } from "@ssr/common/service/impl/beatleader";
 import { getMinioBucketName, MinioBucket } from "@ssr/common/minio-buckets";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
+import LeaderboardScores from "@/components/leaderboard/leaderboard-scores";
 
 type Props = {
   highlightedPlayer?: ScoreSaberPlayer;
@@ -63,6 +64,8 @@ export default function Score({ leaderboard, beatSaverMap, score, settings, high
 
   const scoresPage = getPageFromRank(score.rank, 12);
   const isMobile = useIsMobile();
+
+  console.log(score);
 
   const { data, isLoading } = useQuery<DropdownData>({
     queryKey: [`leaderboardDropdownData:${leaderboard.id}`, leaderboard.id, score.scoreId, isLeaderboardExpanded],
@@ -171,17 +174,19 @@ export default function Score({ leaderboard, beatSaverMap, score, settings, high
             </div>
 
             {selectedMode.name === "Overview" && (
-              <ScoreOverview
-                leaderboard={leaderboard}
-                initialPage={scoresPage}
-                scoreStats={dropdownData.scoreStats}
-                highlightedPlayer={highlightedPlayer}
-              />
+              <ScoreOverview leaderboard={leaderboard} scoreStats={dropdownData.scoreStats} />
             )}
 
             {selectedMode.name === "Score History" && (
               <ScoreHistory playerId={score.playerId} leaderboard={leaderboard} />
             )}
+
+            <LeaderboardScores
+              initialPage={scoresPage}
+              leaderboard={leaderboard}
+              highlightedPlayer={highlightedPlayer}
+              disableUrlChanging
+            />
           </Card>
         </motion.div>
       )}
