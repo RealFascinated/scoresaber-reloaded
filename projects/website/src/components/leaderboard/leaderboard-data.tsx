@@ -58,9 +58,7 @@ export function LeaderboardData({ initialLeaderboard, initialPage }: Leaderboard
           </Card>
           <div className="flex flex-col gap-2 w-full xl:w-[550px]">
             <LeaderboardInfo leaderboard={leaderboard} beatSaverMap={currentLeaderboard.beatsaver} />
-            {currentLeaderboard.beatsaver && (
-              <LeaderboardBeatSaverInfo leaderboard={leaderboard} beatSaverMap={currentLeaderboard.beatsaver} />
-            )}
+            {currentLeaderboard.beatsaver && <LeaderboardBeatSaverInfo beatSaverMap={currentLeaderboard.beatsaver} />}
             <LeaderboardFilters />
             {leaderboard.stars > 0 && leaderboard.maxScore > 0 && <LeaderboardPpChart leaderboard={leaderboard} />}
           </div>
