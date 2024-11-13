@@ -7,6 +7,7 @@ import { formatNumber } from "@ssr/common/utils/number-utils";
 import Image from "next/image";
 import LeaderboardButtons from "@/components/leaderboard/leaderboard-buttons";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
+import { cn } from "@/common/utils";
 
 type LeaderboardInfoProps = {
   /**
@@ -28,7 +29,7 @@ export function LeaderboardInfo({ leaderboard, beatSaverMap }: LeaderboardInfoPr
           <div className="flex justify-between">
             <div>
               <FallbackLink
-                href={`https://beatsaver.com/maps/${beatSaverMap?.bsr}`}
+                href={beatSaverMap ? `https://beatsaver.com/maps/${beatSaverMap?.bsr}` : undefined}
                 className="hover:brightness-[66%] transform-gpu transition-all"
               >
                 <p className="font-semibold">{leaderboard.fullName}</p>
@@ -53,7 +54,12 @@ export function LeaderboardInfo({ leaderboard, beatSaverMap }: LeaderboardInfoPr
               <p>
                 Mapper:{" "}
                 <FallbackLink href={getBeatSaverMapperProfileUrl(beatSaverMap)}>
-                  <span className="text-ssr font-semibold hover:brightness-[66%] transform-gpu transition-all">
+                  <span
+                    className={cn(
+                      "font-semibold",
+                      beatSaverMap ? "text-ssr hover:brightness-[66%] transform-gpu transition-all" : ""
+                    )}
+                  >
                     {leaderboard.levelAuthorName}
                   </span>
                 </FallbackLink>
