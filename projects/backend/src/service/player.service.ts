@@ -179,21 +179,15 @@ export class PlayerService {
       }
     );
 
-    return fetchWithCache<number[]>(
-      CacheService.getCache(ServiceCache.PPBoundary),
-      `pp-boundary:${playerId}-${boundary}`,
-      async () => {
-        if (scoresPps.length === 0) {
-          return [0];
-        }
+    if (scoresPps.length === 0) {
+      return [0];
+    }
 
-        const boundaries: number[] = [];
-        for (let i = 1; i < boundary + 1; i++) {
-          boundaries.push(scoresaberService.calcPpBoundary(scoresPps, i));
-        }
-        return boundaries;
-      }
-    );
+    const boundaries: number[] = [];
+    for (let i = 1; i < boundary + 1; i++) {
+      boundaries.push(scoresaberService.calcPpBoundary(scoresPps, i));
+    }
+    return boundaries;
   }
 
   /**
