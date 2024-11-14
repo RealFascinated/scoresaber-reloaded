@@ -19,23 +19,19 @@ jobs:
 
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
+
       - name: Rust cache
         uses: swatinem/rust-cache@v2
         with:
           workspaces: './projects/desktop -> target'
-
-      - name: Get Short SHA
-        run: |
-          calculatedSha=$(git rev-parse --short ${{ github.sha }})
-          echo "COMMIT_SHORT_SHA=$calculatedSha" >> $GITHUB_ENV
 
       - name: Release App
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tagName: ssr-desktop-v__VERSION__-${{ env.COMMIT_SHORT_SHA }}
-          releaseName: 'ScoreSaber Reloaded Desktop App v__VERSION__-${{ env.COMMIT_SHORT_SHA }}'
+          tagName: ssr-desktop-v__VERSION__
+          releaseName: 'ScoreSaber Reloaded Desktop App v__VERSION__
           releaseBody: 'Download this version of the ScoreSaber Reloaded Desktop App.'
           releaseDraft: false
           prerelease: false
