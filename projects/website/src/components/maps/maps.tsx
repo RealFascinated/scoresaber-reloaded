@@ -18,6 +18,7 @@ import ScoreSaberLeaderboardPageToken from "@ssr/common/types/token/scoresaber/l
 import { useDebounce } from "@uidotdev/usehooks";
 import { motion, useAnimation } from "framer-motion";
 import { scoreAnimation } from "@/components/score/score-animation";
+import ScoreSongInfo from "@/components/score/score-song-info";
 
 export default function Maps() {
   const controls = useAnimation();
@@ -91,42 +92,7 @@ export default function Maps() {
                       href={`/leaderboard/${leaderboard.id}`}
                       className="flex gap-2 items-center bg-border p-1.5 hover:brightness-75 transition-all transform-gpu rounded-md"
                     >
-                      <Image
-                        src={leaderboard.songArt}
-                        width={54}
-                        height={54}
-                        className={"rounded-md"}
-                        alt={leaderboard.songName}
-                      />
-                      <div className="flex flex-col">
-                        <p>{truncateText(leaderboard.fullName, 96)}</p>
-                        <div className="text-xs">
-                          <div className="flex gap-2 items-center">
-                            <span
-                              style={{
-                                color: getDifficulty(leaderboard.difficulty.difficulty).color + "f0", // Transparency value (in hex 0-255)
-                              }}
-                            >
-                              {getDifficultyName(leaderboard.difficulty.difficulty)}
-                            </span>{" "}
-                            {leaderboard.ranked && (
-                              <>
-                                -{" "}
-                                <div className="flex gap-1 text-pp items-center">
-                                  <p>{leaderboard.stars.toFixed(2)}</p>
-                                  <StarIcon className="w-4 h-4" />
-                                </div>
-                              </>
-                            )}
-                            {leaderboard.qualified && (
-                              <>
-                                - <span className="text-gray-400">Qualified</span>
-                              </>
-                            )}
-                          </div>
-                          <div className="text-gray-300">Mapper: {leaderboard.levelAuthorName}</div>
-                        </div>
-                      </div>
+                      <ScoreSongInfo leaderboard={leaderboard} imageSize={58} clickableSongName={false} />
                     </Link>
                   </motion.div>
                 );

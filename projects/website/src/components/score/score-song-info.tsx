@@ -10,9 +10,11 @@ import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-respons
 type Props = {
   leaderboard: ScoreSaberLeaderboard;
   beatSaverMap?: BeatSaverMapResponse;
+  imageSize?: number;
+  clickableSongName?: boolean;
 };
 
-export default function ScoreSongInfo({ leaderboard, beatSaverMap }: Props) {
+export default function ScoreSongInfo({ leaderboard, beatSaverMap, clickableSongName = true, imageSize = 64 }: Props) {
   const mappersProfile =
     beatSaverMap != undefined ? `https://beatsaver.com/profile/${beatSaverMap.author.id}` : undefined;
 
@@ -20,7 +22,7 @@ export default function ScoreSongInfo({ leaderboard, beatSaverMap }: Props) {
   const difficulty = leaderboard.difficulty.difficulty;
   return (
     <div className="flex gap-3 items-center break-all">
-      <div className="relative flex justify-center h-[64px]">
+      <div className={`relative flex justify-center h-[${imageSize}px]`}>
         <Tooltip
           display={
             <div>
@@ -47,22 +49,26 @@ export default function ScoreSongInfo({ leaderboard, beatSaverMap }: Props) {
         </Tooltip>
         <Image
           src={leaderboard.songArt}
-          width={64}
-          height={64}
+          width={imageSize}
+          height={imageSize}
           alt={`${leaderboard.fullName}'s Artwork`}
-          className="rounded-md min-w-[64px]"
+          className={`rounded-md min-w-[${imageSize}px] min-h-[${imageSize}px]`}
           priority
         />
       </div>
       <div className="flex">
         <div className="overflow-y-clip flex flex-col gap-1">
-          <Link
-            prefetch={false}
-            href={`/leaderboard/${leaderboard.id}`}
-            className="cursor-pointer select-none hover:brightness-[66%] transform-gpu transition-all text-ssr w-fit"
-          >
-            {leaderboard.fullName}
-          </Link>
+          {clickableSongName ? (
+            <Link
+              prefetch={false}
+              href={`/leaderboard/${leaderboard.id}`}
+              className="cursor-pointer select-none hover:brightness-[66%] transform-gpu transition-all text-ssr w-fit"
+            >
+              {leaderboard.fullName}
+            </Link>
+          ) : (
+            <p className="text-ssr w-fit">{leaderboard.fullName}</p>
+          )}
           <div className="flex flex-row text-sm gap-1.5 items-end leading-none">
             <p className="text-gray-400">
               {leaderboard.songAuthorName}{" "}
