@@ -4,7 +4,7 @@ import Card from "@/components/card";
 import { useQuery } from "@tanstack/react-query";
 import { useMapFilter } from "@/components/providers/maps/map-filter-provider";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { LoadingIcon } from "@/components/loading-icon";
 import Pagination from "@/components/input/pagination";
 import { useIsMobile } from "@/hooks/use-is-mobile";
@@ -16,13 +16,17 @@ import { StarIcon } from "@heroicons/react/24/solid";
 import Link from "next/link";
 import ScoreSaberLeaderboardPageToken from "@ssr/common/types/token/scoresaber/leaderboard-page";
 import { useDebounce } from "@uidotdev/usehooks";
+import { motion, useAnimation } from "framer-motion";
+import { scoreAnimation } from "@/components/score/score-animation";
 
 export default function Maps() {
+  const controls = useAnimation();
   const isMobile = useIsMobile();
   const filter = useMapFilter();
   const filterDebounced = useDebounce(filter, 100);
 
   const [page, setPage] = useState(1);
+  const [previousPage, setPreviousPage] = useState(1);
   const [leaderboards, setLeaderboards] = useState<ScoreSaberLeaderboardPageToken | undefined>();
 
   const { data, isLoading, isError } = useQuery({
@@ -36,13 +40,22 @@ export default function Maps() {
   });
 
   /**
+   * Starts the animation for the scores, but only after the initial load.
+   */
+  const handleScoreAnimation = useCallback(async () => {
+    await controls.start(previousPage >= page ? "hiddenRight" : "hiddenLeft");
+    setLeaderboards(data);
+    await controls.start("visible");
+  }, [controls, page, previousPage, data]);
+
+  /**
    * Set the leaderboards when the data is loaded
    */
   useEffect(() => {
     if (data && !isLoading && !isError) {
-      setLeaderboards(data);
+      handleScoreAnimation();
     }
-  }, [data, isError, isLoading]);
+  }, [data, handleScoreAnimation, isError, isLoading]);
 
   /**
    * Reset the page when the filter changes
@@ -62,55 +75,63 @@ export default function Maps() {
       {leaderboards !== undefined && (
         <div>
           <div className="flex flex-col gap-1 pb-2">
-            {leaderboards.leaderboards.map((leaderboardToken, index) => {
-              const leaderboard = getScoreSaberLeaderboardFromToken(leaderboardToken);
+            <motion.div
+              initial="hidden"
+              animate={controls}
+              className="border-none flex flex-col gap-1.5"
+              variants={scoreAnimation}
+            >
+              {leaderboards.leaderboards.map((leaderboardToken, index) => {
+                const leaderboard = getScoreSaberLeaderboardFromToken(leaderboardToken);
 
-              return (
-                <Link
-                  key={index}
-                  prefetch={false}
-                  href={`/leaderboard/${leaderboard.id}`}
-                  className="flex gap-2 items-center bg-border p-1.5 hover:brightness-75 transition-all transform-gpu rounded-md"
-                >
-                  <Image
-                    src={leaderboard.songArt}
-                    width={54}
-                    height={54}
-                    className={"rounded-md"}
-                    alt={leaderboard.songName}
-                  />
-                  <div className="flex flex-col">
-                    <p>{truncateText(leaderboard.fullName, 96)}</p>
-                    <div className="text-xs">
-                      <div className="flex gap-2 items-center">
-                        <span
-                          style={{
-                            color: getDifficulty(leaderboard.difficulty.difficulty).color + "f0", // Transparency value (in hex 0-255)
-                          }}
-                        >
-                          {getDifficultyName(leaderboard.difficulty.difficulty)}
-                        </span>{" "}
-                        {leaderboard.ranked && (
-                          <>
-                            -{" "}
-                            <div className="flex gap-1 text-pp items-center">
-                              <p>{leaderboard.stars.toFixed(2)}</p>
-                              <StarIcon className="w-4 h-4" />
-                            </div>
-                          </>
-                        )}
-                        {leaderboard.qualified && (
-                          <>
-                            - <span className="text-gray-400">Qualified</span>
-                          </>
-                        )}
+                return (
+                  <motion.div key={index} variants={scoreAnimation}>
+                    <Link
+                      prefetch={false}
+                      href={`/leaderboard/${leaderboard.id}`}
+                      className="flex gap-2 items-center bg-border p-1.5 hover:brightness-75 transition-all transform-gpu rounded-md"
+                    >
+                      <Image
+                        src={leaderboard.songArt}
+                        width={54}
+                        height={54}
+                        className={"rounded-md"}
+                        alt={leaderboard.songName}
+                      />
+                      <div className="flex flex-col">
+                        <p>{truncateText(leaderboard.fullName, 96)}</p>
+                        <div className="text-xs">
+                          <div className="flex gap-2 items-center">
+                            <span
+                              style={{
+                                color: getDifficulty(leaderboard.difficulty.difficulty).color + "f0", // Transparency value (in hex 0-255)
+                              }}
+                            >
+                              {getDifficultyName(leaderboard.difficulty.difficulty)}
+                            </span>{" "}
+                            {leaderboard.ranked && (
+                              <>
+                                -{" "}
+                                <div className="flex gap-1 text-pp items-center">
+                                  <p>{leaderboard.stars.toFixed(2)}</p>
+                                  <StarIcon className="w-4 h-4" />
+                                </div>
+                              </>
+                            )}
+                            {leaderboard.qualified && (
+                              <>
+                                - <span className="text-gray-400">Qualified</span>
+                              </>
+                            )}
+                          </div>
+                          <div className="text-gray-300">Mapper: {leaderboard.levelAuthorName}</div>
+                        </div>
                       </div>
-                      <div className="text-gray-300">Mapper: {leaderboard.levelAuthorName}</div>
-                    </div>
-                  </div>
-                </Link>
-              );
-            })}
+                    </Link>
+                  </motion.div>
+                );
+              })}
+            </motion.div>
           </div>
 
           <Pagination
