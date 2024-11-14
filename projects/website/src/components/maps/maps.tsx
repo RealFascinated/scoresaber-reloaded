@@ -93,7 +93,7 @@ export default function Maps() {
                           <>
                             -{" "}
                             <div className="flex gap-1 text-pp items-center">
-                              {leaderboard.stars.toFixed(2)}
+                              <p>{leaderboard.stars.toFixed(2)}</p>
                               <StarIcon className="w-fit h-fit" />
                             </div>
                           </>
