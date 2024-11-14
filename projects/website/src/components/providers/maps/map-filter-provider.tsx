@@ -11,6 +11,7 @@ type FilterContextProps = {
   setCategory: (category: number) => void;
   setSort: (sort: number) => void;
   setStars: (stars: StarFilter | undefined) => void;
+
   clearFilters: () => void;
   hasFiltersApplied: () => boolean;
 };
