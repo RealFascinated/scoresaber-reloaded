@@ -68,6 +68,7 @@ export default function Maps() {
               return (
                 <Link
                   key={index}
+                  prefetch={false}
                   href={`/leaderboard/${leaderboard.id}`}
                   className="flex gap-2 items-center bg-border p-1.5 hover:brightness-75 transition-all transform-gpu rounded-md"
                 >
