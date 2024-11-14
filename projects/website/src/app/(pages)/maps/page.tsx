@@ -17,7 +17,7 @@ export default function MapsPage() {
     <main className="w-full">
       <MapFilterProvider>
         <div className="flex flex-col-reverse gap-2 w-full items-center xl:items-start xl:justify-center xl:flex-row">
-          <article className="w-full 2xl:w-[900px] flex flex-col gap-2">
+          <article className="w-full 2xl:w-[700px] flex flex-col gap-2">
             <Maps />
           </article>
           <div className="w-full xl:w-[400px] flex flex-col gap-2">

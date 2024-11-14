@@ -11,6 +11,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "../ui/pagination";
+import { cn } from "@/common/utils";
 
 type PaginationItemWrapperProps = {
   isLoadingPage: boolean;
@@ -33,6 +34,7 @@ type Props = {
   totalItems: number;
   itemsPerPage: number;
   loadingPage?: number;
+  statsBelow?: boolean;
   onPageChange: (page: number) => void;
   generatePageUrl?: (page: number) => string;
 };
@@ -42,6 +44,7 @@ export default function Pagination({
   page,
   totalItems,
   itemsPerPage,
+  statsBelow,
   loadingPage,
   onPageChange,
   generatePageUrl,
@@ -122,9 +125,14 @@ export default function Pagination({
   };
 
   return (
-    <div className="flex w-full items-center justify-between lg:justify-center relative">
+    <div
+      className={cn(
+        "flex w-full items-center justify-between lg:justify-center relative",
+        statsBelow && "flex-col-reverse gap-2"
+      )}
+    >
       {/* Pagination Info */}
-      <div className="lg:absolute left-0 text-sm">
+      <div className={cn("text-sm", !statsBelow && "lg:absolute left-0")}>
         <p>
           {Math.min((currentPage - 1) * itemsPerPage + 1, totalItems)} -{" "}
           {Math.min(currentPage * itemsPerPage, totalItems)} / {totalItems}

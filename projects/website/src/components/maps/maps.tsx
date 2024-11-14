@@ -144,6 +144,7 @@ export default function Maps() {
               setPreviousPage(page);
               setPage(newPage);
             }}
+            statsBelow={!isMobile}
           />
         </div>
       )}
