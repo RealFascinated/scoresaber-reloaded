@@ -2,6 +2,15 @@ import Playlists from "@/components/maps/playlist/playlists";
 import Maps from "@/components/maps/maps";
 import { MapFilterProvider } from "@/components/providers/maps/map-filter-provider";
 import MapFilters from "@/components/maps/map-filters";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Maps",
+  openGraph: {
+    title: "ScoreSaber Reloaded - Maps",
+    description: "View the maps and playlists on ScoreSaber Reloaded",
+  },
+};
 
 export default function MapsPage() {
   return (
