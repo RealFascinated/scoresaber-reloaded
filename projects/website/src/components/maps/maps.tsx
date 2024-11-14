@@ -141,6 +141,7 @@ export default function Maps() {
             itemsPerPage={leaderboards.metadata.itemsPerPage}
             loadingPage={isLoading ? page : undefined}
             onPageChange={newPage => {
+              setPreviousPage(page);
               setPage(newPage);
             }}
           />
