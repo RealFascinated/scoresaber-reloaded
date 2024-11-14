@@ -52,7 +52,10 @@ export default function ScoreSongInfo({ leaderboard, beatSaverMap, clickableSong
           width={imageSize}
           height={imageSize}
           alt={`${leaderboard.fullName}'s Artwork`}
-          className={`rounded-md min-w-[${imageSize}px] min-h-[${imageSize}px]`}
+          className={`rounded-md`}
+          style={{
+            minWidth: `${imageSize}px`,
+          }}
           priority
         />
       </div>
