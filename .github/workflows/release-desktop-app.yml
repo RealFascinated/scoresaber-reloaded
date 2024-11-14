@@ -31,7 +31,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tagName: ssr-desktop-v__VERSION__
-          releaseName: 'ScoreSaber Reloaded Desktop App v__VERSION__
+          releaseName: 'ScoreSaber Reloaded Desktop App v__VERSION__'
           releaseBody: 'Download this version of the ScoreSaber Reloaded Desktop App.'
           releaseDraft: false
           prerelease: false
