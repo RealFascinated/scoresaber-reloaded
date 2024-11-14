@@ -39,6 +39,8 @@ const TooltipTrigger = ({
   onKeyUp,
   onKeyDown,
   children,
+  asChild = true,
+  className,
 }: {
   onClick?: React.MouseEventHandler<HTMLDivElement>;
   onFocus?: React.FocusEventHandler<HTMLDivElement>;
@@ -46,6 +48,8 @@ const TooltipTrigger = ({
   onKeyUp?: React.KeyboardEventHandler<HTMLDivElement>;
   onKeyDown?: React.KeyboardEventHandler<HTMLDivElement>;
   children: React.ReactNode;
+  asChild?: boolean;
+  className?: string;
 }) => {
   const [open, setOpen] = React.useState(false);
 
@@ -58,7 +62,7 @@ const TooltipTrigger = ({
   };
 
   return (
-    <TooltipPrimitive.Trigger asChild>
+    <TooltipPrimitive.Trigger asChild={asChild} className={className}>
       <div
         tabIndex={0}
         role="button"
