@@ -1,11 +1,11 @@
 "use client";
 
-import { ScoreStatsToken } from "@ssr/common/types/token/beatleader/score-stats/score-stats";
-import { formatTime } from "@ssr/common/utils/time-utils";
-import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
-import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { DatasetConfig } from "@/common/chart/types";
 import GenericChart from "@/components/chart/generic-chart";
+import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
+import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
+import { ScoreStatsToken } from "@ssr/common/types/token/beatleader/score-stats/score-stats";
+import { formatTime } from "@ssr/common/utils/time-utils";
 
 type Props = {
   /**

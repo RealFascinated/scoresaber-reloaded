@@ -1,17 +1,17 @@
 "use client";
 
 import LeaderboardScores from "@/components/leaderboard/leaderboard-scores";
-import { LeaderboardInfo } from "@/components/leaderboard/leaderboard-info";
-import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import { LeaderboardResponse } from "@ssr/common/response/leaderboard-response";
+import { LeaderboardInfo } from "@/components/leaderboard/page/leaderboard-info";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { fetchLeaderboard } from "@ssr/common/utils/leaderboard.util";
-import LeaderboardPpChart from "@/components/leaderboard/chart/leaderboard-pp-chart";
+import LeaderboardPpChart from "@/components/leaderboard/page/chart/leaderboard-pp-chart";
 import Card from "@/components/card";
-import { LeaderboardBeatSaverInfo } from "@/components/leaderboard/beatsaver-info";
-import LeaderboardFilters from "@/components/leaderboard/leaderboard-filters";
+import { LeaderboardBeatSaverInfo } from "@/components/leaderboard/page/beatsaver-info";
+import LeaderboardFilters from "@/components/leaderboard/page/leaderboard-filters";
 import { LeaderboardFilterProvider } from "@/components/providers/leaderboard/leaderboard-filter-provider";
+import { LeaderboardResponse } from "@ssr/common/response/leaderboard-response";
+import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
+import { fetchLeaderboard } from "@ssr/common/utils/leaderboard.util";
 
 type LeaderboardDataProps = {
   /**

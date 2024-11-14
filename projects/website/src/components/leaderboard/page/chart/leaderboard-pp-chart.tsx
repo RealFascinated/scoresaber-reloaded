@@ -4,10 +4,10 @@ import React, { useState } from "react";
 import Card from "@/components/card";
 import { DualRangeSlider } from "@/components/ui/dual-range-slider";
 import { useDebounce } from "@uidotdev/usehooks";
-import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
-import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { DatasetConfig } from "@/common/chart/types";
 import GenericChart from "@/components/chart/generic-chart";
+import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
+import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 
 type Props = {
   /**

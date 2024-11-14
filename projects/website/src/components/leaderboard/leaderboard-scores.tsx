@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { motion, useAnimation } from "framer-motion";
 import { useCallback, useEffect, useState } from "react";
 import Pagination from "../input/pagination";
-import LeaderboardScore from "./leaderboard-score";
+import LeaderboardScore from "./page/leaderboard-score";
 import { scoreAnimation } from "@/components/score/score-animation";
 import { Button } from "@/components/ui/button";
 import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";

@@ -5,9 +5,10 @@ import { downloadFile } from "@/common/browser-utils";
 
 type PlaylistDownloadButtonProps = {
   name: string;
+  id: string;
   url: string;
 };
 
-export default function PlaylistDownloadButton({ name, url }: PlaylistDownloadButtonProps) {
-  return <Button onClick={() => downloadFile(url, `${name}.json`)}>{name}</Button>;
+export default function PlaylistDownloadButton({ name, id, url }: PlaylistDownloadButtonProps) {
+  return <Button onClick={() => downloadFile(url, `${id}.json`)}>{name}</Button>;
 }

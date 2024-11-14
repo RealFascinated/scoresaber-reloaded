@@ -1,13 +1,13 @@
-import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
-import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
 import { PlayerInfo } from "@/components/player/player-info";
 import { clsx } from "clsx";
 import Tooltip from "@/components/tooltip";
 import { ScoreTimeSet } from "@/components/score/score-time-set";
 import { ScoreModifiers } from "@/components/score/score-modifiers";
-import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import ScoreMissesAndPausesBadge from "@/components/score/badges/score-misses-and-pauses";
+import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
+import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
+import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
 import { formatScoreAccuracy } from "@ssr/common/utils/score.util";
 
 type Props = {

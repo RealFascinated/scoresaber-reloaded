@@ -33,14 +33,14 @@ const links: ReactElement[] = [
     href="/statistics/scoresaber"
   />,
   <SimpleNavLink
-    key="playlists"
+    key="maps"
     content={
       <>
         <MusicIcon className="size-5" />
-        <span className="hidden sm:flex">Playlists</span>
+        <span className="hidden sm:flex">Maps</span>
       </>
     }
-    href="/playlists"
+    href="/maps"
   />,
 ];
 

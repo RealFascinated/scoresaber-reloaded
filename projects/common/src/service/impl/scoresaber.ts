@@ -10,6 +10,7 @@ import { clamp, lerp } from "../../utils/math-utils";
 import { CurvePoint } from "../../curve-point";
 import { SSRCache } from "../../cache";
 import ScoreSaberLeaderboardPageToken from "../../types/token/scoresaber/leaderboard-page";
+import { StarFilter } from "../../maps/types";
 
 const API_BASE = "https://scoresaber.com/api";
 
@@ -237,15 +238,22 @@ class ScoreSaberService extends Service {
     options?: {
       ranked?: boolean;
       qualified?: boolean;
+      category?: number;
+      stars?: StarFilter;
+      sort?: number;
     }
   ): Promise<ScoreSaberLeaderboardPageToken | undefined> {
     const before = performance.now();
     this.log(`Looking up leaderboard page "${page}"...`);
+
     const response = await this.fetch<ScoreSaberLeaderboardPageToken>(LOOKUP_LEADERBOARDS_ENDPOINT, {
       searchParams: {
         page: page.toString(),
         ...(options?.ranked ? { ranked: options.ranked } : {}),
         ...(options?.qualified ? { qualified: options.qualified } : {}),
+        ...(options?.category ? { category: options.category } : {}),
+        ...(options?.stars ? { minStar: options.stars.min ?? 0, maxStar: options.stars.max } : {}),
+        ...(options?.sort ? { sort: options.sort } : {}),
       },
     });
     if (response === undefined) {

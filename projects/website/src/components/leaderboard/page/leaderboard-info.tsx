@@ -1,13 +1,13 @@
 import Card from "@/components/card";
-import { LeaderboardSongStarCount } from "@/components/leaderboard/leaderboard-song-star-count";
-import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import { getBeatSaverMapperProfileUrl } from "@ssr/common/utils/beatsaver.util";
+import { LeaderboardSongStarCount } from "@/components/leaderboard/page/leaderboard-song-star-count";
 import FallbackLink from "@/components/fallback-link";
-import { formatNumber } from "@ssr/common/utils/number-utils";
 import Image from "next/image";
-import LeaderboardButtons from "@/components/leaderboard/leaderboard-buttons";
-import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
+import LeaderboardButtons from "@/components/leaderboard/page/leaderboard-buttons";
 import { cn } from "@/common/utils";
+import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
+import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
+import { formatNumber } from "@ssr/common/utils/number-utils";
+import { getBeatSaverMapperProfileUrl } from "@ssr/common/utils/beatsaver.util";
 
 type LeaderboardInfoProps = {
   /**

@@ -4,7 +4,6 @@ type FilterContextProps = {
   country: string | undefined;
 
   setCountry: (country: string | undefined) => void;
-
   clearFilters: () => void;
 };
 const LeaderboardFilterContext = createContext<FilterContextProps | undefined>(undefined);

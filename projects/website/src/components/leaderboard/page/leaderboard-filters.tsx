@@ -2,11 +2,11 @@
 
 import Combobox from "@/components/ui/combo-box";
 import Card from "@/components/card";
-import { getCountries } from "@ssr/common/utils/country.util";
 import { useLiveQuery } from "dexie-react-hooks";
 import useDatabase from "@/hooks/use-database";
 import { useLeaderboardFilter } from "@/components/providers/leaderboard/leaderboard-filter-provider";
 import { Button } from "@/components/ui/button";
+import { getCountries } from "@ssr/common/utils/country.util";
 
 export default function LeaderboardFilters() {
   const database = useDatabase();

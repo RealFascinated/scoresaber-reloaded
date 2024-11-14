@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { LeaderboardData } from "@/components/leaderboard/leaderboard-data";
+import { LeaderboardData } from "@/components/leaderboard/page/leaderboard-data";
 import { Config } from "@ssr/common/config";
 import { LeaderboardResponse } from "@ssr/common/response/leaderboard-response";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";

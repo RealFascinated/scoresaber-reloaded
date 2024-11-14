@@ -1,4 +1,3 @@
-import * as React from "react";
 import { ScoreBsrButton } from "@/components/score/button/score-bsr-button";
 import { BeatSaverMapButton } from "@/components/score/button/beat-saver-map-button";
 import { SongOpenInYoutubeButton } from "@/components/score/button/song-open-in-youtube-button";

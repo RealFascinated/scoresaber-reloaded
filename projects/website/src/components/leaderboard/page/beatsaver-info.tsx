@@ -1,10 +1,10 @@
 import Card from "@/components/card";
-import { formatNumber } from "@ssr/common/utils/number-utils";
-import { formatTime } from "@ssr/common/utils/time-utils";
-import BeatSaverMapDifficulty from "@ssr/common/model/beatsaver/map-difficulty";
 import { MapStats } from "@/components/score/map-stats";
 import EmbedLinks from "@/components/embed-links";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
+import BeatSaverMapDifficulty from "@ssr/common/model/beatsaver/map-difficulty";
+import { formatNumber } from "@ssr/common/utils/number-utils";
+import { formatTime } from "@ssr/common/utils/time-utils";
 
 type LeaderboardBeatSaverInfoProps = {
   /**

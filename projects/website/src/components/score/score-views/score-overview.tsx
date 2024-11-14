@@ -1,8 +1,6 @@
-import PlayerScoreAccuracyChart from "@/components/leaderboard/chart/player-score-accuracy-chart";
-import LeaderboardScores from "@/components/leaderboard/leaderboard-scores";
+import PlayerScoreAccuracyChart from "@/components/leaderboard/page/chart/player-score-accuracy-chart";
 import { ScoreStatsToken } from "@ssr/common/types/token/beatleader/score-stats/score-stats";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 
 type ScoreOverviewProps = {
   /**
