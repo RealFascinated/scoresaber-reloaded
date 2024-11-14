@@ -16,7 +16,6 @@ import Footer from "@/components/footer";
 import { getBuildInformation } from "@/common/website-utils";
 import { SearchProvider } from "@/components/providers/search-provider";
 import Navbar from "@/components/navbar/navbar";
-import { cookies } from "next/headers";
 import SSRLayout from "@/components/ssr-layout";
 
 const siteFont = localFont({
@@ -71,7 +70,6 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const { buildId, buildTimeShort } = getBuildInformation();
-  const path = (await cookies()).get("pathname")?.value ?? "/";
 
   return (
     <html lang="en">
@@ -81,7 +79,7 @@ export default async function RootLayout({
           <Toaster />
           <BackgroundCover />
           <PreloadResources />
-          <TooltipProvider delayDuration={100}>
+          <TooltipProvider delayDuration={250}>
             <OfflineNetwork>
               <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
                 <QueryProvider>

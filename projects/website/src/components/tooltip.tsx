@@ -1,7 +1,6 @@
 "use client";
 
 import { Tooltip as ShadCnTooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
-import { useState } from "react";
 import { clsx } from "clsx";
 
 type Props = {
@@ -32,18 +31,9 @@ type Props = {
 };
 
 export default function Tooltip({ children, display, asChild = true, side = "top", className }: Props) {
-  const [open, setOpen] = useState(false);
-
   return (
-    <ShadCnTooltip open={open}>
-      <TooltipTrigger
-        className={clsx("cursor-default", className)}
-        asChild={asChild}
-        onMouseEnter={() => setOpen(true)}
-        onMouseLeave={() => setOpen(false)}
-        onTouchStart={() => setOpen(!open)}
-        onTouchEnd={() => setOpen(!open)}
-      >
+    <ShadCnTooltip>
+      <TooltipTrigger className={clsx("cursor-default", className)} asChild={asChild}>
         {children}
       </TooltipTrigger>
       <TooltipContent className="max-w-[350px]" side={side}>
