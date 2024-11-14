@@ -5,9 +5,6 @@ on:
 
 jobs:
   publish-tauri:
-    defaults:
-      run:
-        working-directory: ./projects/desktop
     permissions:
       contents: write
     strategy:
@@ -22,11 +19,6 @@ jobs:
 
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable # Set this to dtolnay/rust-toolchain@nightly
-
-      - name: Rust cache
-        uses: swatinem/rust-cache@v2
-        with:
-          workspaces: './ -> target'
 
       - name: Release App
         uses: tauri-apps/tauri-action@v0
