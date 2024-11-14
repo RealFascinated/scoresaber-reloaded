@@ -181,33 +181,37 @@ export default class ScoreSaberService {
             };
           }) || [];
 
-        let statisticHistory: Record<string, PlayerHistory> = account?.getHistoryPreviousDays(50) || {};
+        let statisticHistory: Record<string, PlayerHistory> = account ? account.getHistoryPreviousDays(50) : {};
         if (statisticHistory) {
           const todayDate = formatDateMinimal(getMidnightAlignedDate(new Date()));
           const historyElement = statisticHistory[todayDate];
           statisticHistory[todayDate] = {
             ...historyElement,
             rank: playerToken.rank,
-            countryRank: playerToken.countryRank,
-            pp: playerToken.pp,
-            ...(account ? { plusOnePp: (await PlayerService.getPlayerPpBoundary(account.id, 1))[0] } : undefined),
-            replaysWatched: playerToken.scoreStats.replaysWatched,
-            accuracy: {
-              ...historyElement?.accuracy,
-              averageRankedAccuracy: playerToken.scoreStats.averageRankedAccuracy,
-            },
-            scores: {
-              rankedScores: 0,
-              unrankedScores: 0,
-              ...historyElement?.scores,
-              totalScores: playerToken.scoreStats.totalPlayCount,
-              totalRankedScores: playerToken.scoreStats.rankedPlayCount,
-            },
-            score: {
-              ...historyElement?.score,
-              totalScore: playerToken.scoreStats.totalScore,
-              totalRankedScore: playerToken.scoreStats.totalRankedScore,
-            },
+            ...(account
+              ? {
+                  countryRank: playerToken.countryRank,
+                  pp: playerToken.pp,
+                  ...(account ? { plusOnePp: (await PlayerService.getPlayerPpBoundary(account.id, 1))[0] } : undefined),
+                  replaysWatched: playerToken.scoreStats.replaysWatched,
+                  accuracy: {
+                    ...historyElement?.accuracy,
+                    averageRankedAccuracy: playerToken.scoreStats.averageRankedAccuracy,
+                  },
+                  scores: {
+                    rankedScores: 0,
+                    unrankedScores: 0,
+                    ...historyElement?.scores,
+                    totalScores: playerToken.scoreStats.totalPlayCount,
+                    totalRankedScores: playerToken.scoreStats.rankedPlayCount,
+                  },
+                  score: {
+                    ...historyElement?.score,
+                    totalScore: playerToken.scoreStats.totalScore,
+                    totalRankedScore: playerToken.scoreStats.totalRankedScore,
+                  },
+                }
+              : undefined),
           };
         }
 
@@ -229,7 +233,7 @@ export default class ScoreSaberService {
           const dateKey = formatDateMinimal(date);
           if (!statisticHistory[dateKey] || statisticHistory[dateKey].rank == undefined) {
             statisticHistory[dateKey] = {
-              ...statisticHistory[dateKey],
+              ...(account ? statisticHistory[dateKey] : undefined),
               rank: rank,
             };
           }
@@ -240,10 +244,12 @@ export default class ScoreSaberService {
           Object.entries(statisticHistory).sort((a, b) => new Date(b[0]).getTime() - new Date(a[0]).getTime())
         );
 
-        for (const [date, history] of Object.entries(statisticHistory)) {
-          if (history.plusOnePp) {
-            history.plusOnePp = Math.round(history.plusOnePp * Math.pow(10, 2)) / Math.pow(10, 2);
-            statisticHistory[date] = history;
+        if (account !== undefined) {
+          for (const [date, history] of Object.entries(statisticHistory)) {
+            if (history.plusOnePp) {
+              history.plusOnePp = Math.round(history.plusOnePp * Math.pow(10, 2)) / Math.pow(10, 2);
+              statisticHistory[date] = history;
+            }
           }
         }
 
