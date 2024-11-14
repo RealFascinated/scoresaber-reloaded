@@ -6,6 +6,8 @@
   "permissions": [
     "core:default",
     "shell:allow-open",
-    "window-state:default"
-  ]
+    "window-state:default",
+    "updater:default"
+  ],
+  "capabilities": []
 }
