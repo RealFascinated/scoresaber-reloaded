@@ -19,7 +19,8 @@ export type ReplayViewer = {
 export const ReplayViewers: Record<string, ReplayViewer> = {
   beatleader: {
     name: "BeatLeader",
-    generateUrl: (id, customParams) => `https://beatleader.xyz/replay/${customParams ? customParams : id}`,
+    generateUrl: (id, customParams) =>
+      `https://replay.beatleader.xyz/${customParams ? customParams : `?scoreId=${id}`}`,
   },
   arcviewer: {
     name: "ArcViewer",
