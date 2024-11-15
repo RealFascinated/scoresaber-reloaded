@@ -22,6 +22,7 @@ type HMDInfo = {
 const HMDs: Record<HMD, HMDInfo> = {
   Unknown: {
     logo: "unknown.svg",
+    filters: "invert(100%)",
   },
 
   // SteamVR
