@@ -15,6 +15,7 @@ import ScoreSaberService from "./scoresaber.service";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
 import ScoreSaberPlayerScoreToken from "@ssr/common/types/token/scoresaber/player-score";
+import { HMD } from "@ssr/common/hmds";
 
 const SCORESABER_REQUEST_COOLDOWN = 60_000 / 250; // 250 requests per minute
 const accountCreationLock: { [id: string]: Promise<PlayerDocument> } = {};
@@ -527,24 +528,20 @@ export class PlayerService {
    * @param playerId the id of the player
    * @returns the hmd
    */
-  public static async getPlayerHMD(playerId: string) {
+  public static async getPlayerHMD(playerId: string): Promise<HMD | undefined> {
     // Get player's most used HMD in the last 50 scores
     const scores = await ScoreSaberService.getPlayerScores(playerId, {
       limit: 50,
       sort: "timestamp",
-      projection: {
-        hmd: 1,
-      },
     });
 
-    const hmds: Map<string, number> = new Map();
+    const hmds: Map<HMD, number> = new Map();
     for (const score of scores) {
       if (!score.hmd) {
         continue;
       }
-      hmds.set(score.hmd, (hmds.get(score.hmd) || 0) + 1);
+      hmds.set(score.hmd as HMD, (hmds.get(score.hmd as HMD) || 0) + 1);
     }
-    console.log(hmds);
     if (hmds.size === 0) {
       return undefined;
     }
