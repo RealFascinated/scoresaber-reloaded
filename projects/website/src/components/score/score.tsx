@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { ReactElement, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { CubeIcon } from "@heroicons/react/24/solid";
@@ -26,6 +26,7 @@ import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
 import LeaderboardScores from "@/components/leaderboard/leaderboard-scores";
 import { fetchScoreStats } from "@ssr/common/utils/score.util";
+import { Separator } from "@/components/ui/separator";
 
 type Props = {
   highlightedPlayer?: ScoreSaberPlayer;
@@ -45,7 +46,7 @@ type DropdownData = {
 
 type Mode = {
   name: string;
-  icon: React.ReactElement;
+  icon: ReactElement;
 };
 
 const modes: Mode[] = [
@@ -143,7 +144,10 @@ export default function Score({ leaderboard, beatSaverMap, score, settings, high
         >
           <Card className="flex gap-4 w-full relative border border-input">
             <div className="flex flex-col w-full gap-2 justify-center items-center">
+              {/* Map stats */}
               {beatSaverMap && <MapStats beatSaver={beatSaverMap} />}
+
+              {/* Modes */}
               <div className="flex clex-col justify-center lg:justify-start gap-2">
                 {modes.map((mode, i) => (
                   <Button
@@ -159,14 +163,17 @@ export default function Score({ leaderboard, beatSaverMap, score, settings, high
               </div>
             </div>
 
+            {/* Selected Mode */}
             {selectedMode.name === "Overview" && (
               <ScoreOverview leaderboard={leaderboard} scoreStats={dropdownData.scoreStats} />
             )}
-
             {selectedMode.name === "Score History" && (
               <ScoreHistory playerId={score.playerId} leaderboard={leaderboard} />
             )}
 
+            <Separator />
+
+            {/* Scores */}
             <LeaderboardScores
               initialPage={scoresPage}
               leaderboard={leaderboard}

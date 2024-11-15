@@ -15,6 +15,14 @@ type ScoreOverviewProps = {
 };
 
 export function ScoreOverview({ scoreStats, leaderboard }: ScoreOverviewProps) {
+  if (!scoreStats) {
+    return (
+      <div className="flex justify-center">
+        <p>No score stats found.</p>
+      </div>
+    );
+  }
+
   return (
     <>
       {scoreStats && (
