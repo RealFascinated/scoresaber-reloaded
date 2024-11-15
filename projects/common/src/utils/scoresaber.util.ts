@@ -2,6 +2,7 @@ import ScoreSaberPlayerToken from "../types/token/scoresaber/player";
 import ScoreSaberPlayer from "../player/impl/scoresaber-player";
 import { ScoreSaberLeaderboardPlayerInfoToken } from "../types/token/scoresaber/leaderboard-player-info";
 import { MapDifficulty } from "../score/map-difficulty";
+import { HMD } from "../hmds";
 
 export type ScoreSaberRole = {
   /**
@@ -58,7 +59,7 @@ export const scoreSaberRoles: ScoreSaberRole[] = [
   },
 ];
 
-export const ScoreSaberHMDs: Record<number, string> = {
+export const ScoreSaberHMDs: Record<number, HMD> = {
   0: "Unknown",
   1: "Rift CV1",
   2: "Vive",

@@ -7,7 +7,7 @@ import { CubeIcon } from "@heroicons/react/24/solid";
 import { TrendingUpIcon } from "lucide-react";
 import ScoreButtons from "./score-buttons";
 import ScoreSongInfo from "./score-song-info";
-import ScoreRankAndDateInfo from "./score-rank-and-date-info";
+import ScoreInfo from "./score-info";
 import ScoreStats from "./score-stats";
 import Card from "@/components/card";
 import { MapStats } from "@/components/score/map-stats";
@@ -117,7 +117,7 @@ export default function Score({ leaderboard, beatSaverMap, score, settings, high
   return (
     <div className="pb-2 pt-2">
       <div className={`grid w-full gap-2 lg:gap-0 ${gridColsClass}`}>
-        <ScoreRankAndDateInfo score={score} leaderboard={leaderboard} />
+        <ScoreInfo score={score} leaderboard={leaderboard} />
         <ScoreSongInfo leaderboard={leaderboard} beatSaverMap={beatSaverMap} />
         {!settings?.noScoreButtons && (
           <ScoreButtons
