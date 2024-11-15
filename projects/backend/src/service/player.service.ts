@@ -324,6 +324,7 @@ export class PlayerService {
       };
     }
 
+    foundPlayer.markModified("peakRank");
     await foundPlayer.save();
 
     console.log(`Tracked player "${foundPlayer.id}"!`);
