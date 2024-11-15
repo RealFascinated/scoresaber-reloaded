@@ -23,19 +23,11 @@ export default function Settings() {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
+    defaultValues: {
+      backgroundCover: settings?.backgroundCover || "",
+      replayViewer: settings?.getReplayViewerName() || "",
+    },
   });
-
-  /**
-   * Handle setting the default form values.
-   */
-  useEffect(() => {
-    if (!settings) {
-      return;
-    }
-
-    form.setValue("backgroundCover", settings.backgroundCover || "");
-    form.setValue("replayViewer", settings.getReplayViewerName());
-  }, [settings, form]);
 
   if (!settings) {
     return;
