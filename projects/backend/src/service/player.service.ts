@@ -171,6 +171,7 @@ export class PlayerService {
         await PlayerService.getPlayer(playerId); // Ensure player exists
         const playerScores = await ScoreSaberService.getPlayerScores(playerId, {
           ranked: true,
+          sort: "pp",
           projection: {
             pp: 1,
           },
