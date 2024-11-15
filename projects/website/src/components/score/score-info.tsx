@@ -30,7 +30,7 @@ export default function ScoreInfo({ score, leaderboard }: Props) {
           </p>
         </Link>
 
-        {/* Score HMD*/}
+        {/* Score HMD and Controllers */}
         {hmd.logo && (
           <Tooltip
             display={
