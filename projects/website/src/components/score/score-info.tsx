@@ -32,7 +32,25 @@ export default function ScoreInfo({ score, leaderboard }: Props) {
 
         {/* Score HMD*/}
         {hmd.logo && (
-          <Tooltip display={`Score was set on ${score.hmd ?? "Unknown"}`}>
+          <Tooltip
+            display={
+              <div className="flex flex-col gap-2">
+                <p>
+                  Score was set on <span className="font-semibold">{score.hmd ?? "Unknown"}</span>
+                </p>
+
+                {score.controllers && (
+                  <div>
+                    <p className="font-semibold">Controllers</p>
+                    <div>
+                      <p>Left: {score.controllers.leftController}</p>
+                      <p>Right: {score.controllers.rightController}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            }
+          >
             <Image
               src={`/assets/hmds/${hmd.logo}`}
               alt={`${hmd.logo} Logo`}

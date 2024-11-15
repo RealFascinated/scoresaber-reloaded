@@ -689,7 +689,7 @@ export default class ScoreSaberService {
 
     await ScoreSaberScoreModel.create(score);
     console.log(
-      `Tracked ScoreSaber score for "${playerName}"(${playerId}), difficulty: ${score.difficulty}, score: ${score.score}, pp: ${score.pp.toFixed(2)}pp, leaderboard: ${leaderboard.id}, hmd: ${score.hmd}`
+      `Tracked ScoreSaber score for "${playerName}"(${playerId}), difficulty: ${score.difficulty}, score: ${score.score}, pp: ${score.pp.toFixed(2)}pp, leaderboard: ${leaderboard.id}, hmd: ${score.hmd}, controller left: ${score.controllers?.leftController}, controller right: ${score.controllers?.rightController}`
     );
     return true;
   }

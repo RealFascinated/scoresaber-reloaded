@@ -8,6 +8,7 @@ import ScoreSaberScoreToken from "./types/token/scoresaber/score";
 import { ScoreSaberScore } from "./model/score/impl/scoresaber-score";
 import { Modifier } from "./score/modifier";
 import { getDifficultyFromScoreSaberDifficulty, ScoreSaberHMDs } from "./utils/scoresaber.util";
+import { Controllers } from "./model/score/controllers";
 
 /**
  * Parses a {@link ScoreSaberLeaderboardToken} into a {@link ScoreSaberLeaderboard}.
@@ -85,6 +86,14 @@ export function getScoreSaberScoreFromToken(
           return modifier;
         });
 
+  const controllers: Controllers | undefined =
+    token.deviceControllerRight && token.deviceControllerLeft
+      ? {
+          rightController: token.deviceControllerRight,
+          leftController: token.deviceControllerLeft,
+        }
+      : undefined;
+
   return {
     playerId: playerId || token.leaderboardPlayerInfo.id,
     leaderboardId: leaderboard.id,
@@ -105,5 +114,6 @@ export function getScoreSaberScoreFromToken(
     maxCombo: token.maxCombo,
     playerInfo: token.leaderboardPlayerInfo,
     hmd: token.deviceHmd ?? ScoreSaberHMDs[token.hmd] ?? undefined,
+    controllers: controllers,
   };
 }

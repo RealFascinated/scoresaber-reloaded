@@ -4,6 +4,7 @@ import { type ScoreSaberLeaderboardPlayerInfoToken } from "../../../types/token/
 import { Document } from "mongoose";
 import { AutoIncrementID } from "@typegoose/auto-increment";
 import { PreviousScore } from "../previous-score";
+import { type Controllers } from "../controllers";
 
 @modelOptions({
   options: { allowMixed: Severity.ALLOW },
@@ -65,6 +66,12 @@ export class ScoreSaberScoreInternal extends Score {
    */
   @Prop({ required: false })
   public readonly hmd?: string;
+
+  /**
+   * The hmd used to set the score.
+   */
+  @Prop({ required: false })
+  public readonly controllers?: Controllers;
 
   /**
    * The previous score, if any.
