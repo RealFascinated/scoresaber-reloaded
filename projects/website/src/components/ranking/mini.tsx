@@ -63,7 +63,7 @@ export default function Mini({ type, player }: MiniProps) {
 
   return (
     <Card className="flex gap-2 sticky select-none text-sm w-[400px]">
-      <div className="flex gap-2">
+      <div className="flex gap-1.5 items-center">
         {icon}
         <p>{type} Ranking</p>
       </div>
