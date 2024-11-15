@@ -44,7 +44,7 @@ export default function PlayerData({ initialPlayerData, initialSearch, sort, pag
   }
 
   return (
-    <div className="flex gap-2">
+    <div className="flex gap-2 justify-center w-full">
       <article className="w-full 2xl:w-[1164px] flex flex-col gap-2">
         <PlayerHeader player={player} />
         <Card className="gap-1">
@@ -53,7 +53,7 @@ export default function PlayerData({ initialPlayerData, initialSearch, sort, pag
         </Card>
         <PlayerScores initialSearch={initialSearch} player={player} sort={sort} page={page} />
       </article>
-      {dimensions.width > 1500 && !player.inactive && !player.banned && (
+      {dimensions.width > 1536 && !player.inactive && !player.banned && (
         <aside className="w-[400px] hidden 2xl:flex flex-col gap-2">
           <Mini type="Global" player={player} />
           <Mini type="Country" player={player} />
