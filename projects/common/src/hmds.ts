@@ -3,13 +3,16 @@ export type HMD =
   | "Rift CV1"
   | "Vive"
   | "Vive Pro"
+  | "Vive Pro 2"
   | "Windows Mixed Reality"
   | "Rift S"
   | "Quest"
   | "Quest 2"
+  | "Quest Pro"
   | "Quest 3"
   | "Valve Index"
-  | "Vive Cosmos";
+  | "Vive Cosmos"
+  | "Bigscreen Beyond";
 
 type HMDInfo = {
   logo: string;
@@ -34,9 +37,17 @@ const HMDs: Record<HMD, HMDInfo> = {
     logo: "vive.svg",
     filters: "invert(99%) sepia(3%) saturate(82%) hue-rotate(58deg) brightness(118%) contrast(100%)",
   },
+  "Vive Pro 2": {
+    logo: "vive.svg",
+    filters: "invert(79%) sepia(68%) saturate(5755%) hue-rotate(232deg) brightness(90%) contrast(109%)",
+  },
   "Valve Index": {
     logo: "index.svg",
     filters: "invert(81%) sepia(27%) saturate(6288%) hue-rotate(344deg) brightness(103%) contrast(103%)",
+  },
+  "Bigscreen Beyond": {
+    logo: "bigscreen.svg",
+    filters: "",
   },
 
   // Windows Mixed Reality
@@ -61,6 +72,10 @@ const HMDs: Record<HMD, HMDInfo> = {
   "Quest 2": {
     logo: "oculus.svg",
     filters: "invert(49%) sepia(26%) saturate(5619%) hue-rotate(146deg) brightness(93%) contrast(86%)",
+  },
+  "Quest Pro": {
+    logo: "oculus.svg",
+    filters: "",
   },
   "Quest 3": {
     logo: "oculus.svg",
