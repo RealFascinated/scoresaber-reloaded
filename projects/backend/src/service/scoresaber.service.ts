@@ -415,10 +415,13 @@ export default class ScoreSaberService {
    */
   public static async getPlayerScores(
     playerId: string,
-    options?: {
+    options: {
+      sort?: "pp" | "timestamp";
       limit?: number;
       ranked?: boolean;
       projection?: { [field: string]: number };
+    } = {
+      sort: "pp",
     }
   ): Promise<ScoreSaberScore[]> {
     const rawScores = await ScoreSaberScoreModel.aggregate([
@@ -448,7 +451,7 @@ export default class ScoreSaberService {
       },
 
       // Sort by pp in descending order
-      { $sort: { "score.pp": -1 } },
+      { $sort: { [`score.${options.sort}`]: -1 } },
 
       // Limit results
       ...(options?.limit ? [{ $limit: options.limit }] : []),

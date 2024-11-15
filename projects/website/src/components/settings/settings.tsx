@@ -9,9 +9,12 @@ import { Input } from "../ui/input";
 import { useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import useSettings from "@/hooks/use-settings";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ReplayViewers } from "@/common/replay-viewer";
 
 const formSchema = z.object({
   backgroundCover: z.string().min(0).max(128),
+  replayViewer: z.string().min(1).max(32),
 });
 
 export default function Settings() {
@@ -23,15 +26,30 @@ export default function Settings() {
   });
 
   /**
-   * Handles the form submission
-   *
-   * @param backgroundCover the new background cover
+   * Handle setting the default form values.
    */
-  async function onSubmit({ backgroundCover }: z.infer<typeof formSchema>) {
+  useEffect(() => {
     if (!settings) {
       return;
     }
+
+    form.setValue("backgroundCover", settings.backgroundCover || "");
+    form.setValue("replayViewer", settings.getReplayViewerName());
+  }, [settings, form]);
+
+  if (!settings) {
+    return;
+  }
+
+  /**
+   * Handles the form submission
+   *
+   * @param backgroundCover the new background cover
+   * @param replayViewer the new replay viewer
+   */
+  async function onSubmit({ backgroundCover, replayViewer }: z.infer<typeof formSchema>) {
     settings.setBackgroundImage(backgroundCover);
+    settings.setReplayViewer(replayViewer);
     toast({
       title: "Settings saved",
       description: "Your settings have been saved.",
@@ -39,15 +57,8 @@ export default function Settings() {
     });
   }
 
-  /**
-   * Handle setting the default form values.
-   */
-  useEffect(() => {
-    form.setValue("backgroundCover", settings?.backgroundCover || "");
-  }, [settings, form]);
-
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-3 text-sm">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-2">
           {/* Background Cover */}
@@ -58,7 +69,36 @@ export default function Settings() {
               <FormItem>
                 <FormLabel>Background Cover</FormLabel>
                 <FormControl>
-                  <Input className="w-full sm:w-72 text-sm" placeholder="Hex or URL..." {...field} />
+                  <Input className="w-full sm:w-72" placeholder="Hex or URL..." {...field} />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+
+          {/* Background Cover */}
+          <FormField
+            control={form.control}
+            name="replayViewer"
+            render={({ field }) => (
+              <FormItem className="w-full sm:w-72">
+                <FormLabel>Replay Viewer</FormLabel>
+                <FormControl>
+                  <Select onValueChange={field.onChange} defaultValue={settings.getReplayViewerName()}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a replay viewer to use" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {Object.entries(ReplayViewers).map(([id, viewer]) => {
+                        return (
+                          <SelectItem key={id} value={id}>
+                            {viewer.name}
+                          </SelectItem>
+                        );
+                      })}
+                    </SelectContent>
+                  </Select>
                 </FormControl>
               </FormItem>
             )}

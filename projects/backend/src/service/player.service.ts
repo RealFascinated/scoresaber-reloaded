@@ -530,10 +530,12 @@ export class PlayerService {
     // Get player's most used HMD in the last 50 scores
     const scores = await ScoreSaberService.getPlayerScores(playerId, {
       limit: 50,
+      sort: "timestamp",
       projection: {
         hmd: 1,
       },
     });
+
     const hmds: Map<string, number> = new Map();
     for (const score of scores) {
       if (!score.hmd) {
@@ -541,6 +543,7 @@ export class PlayerService {
       }
       hmds.set(score.hmd, (hmds.get(score.hmd) || 0) + 1);
     }
+    console.log(hmds);
     if (hmds.size === 0) {
       return undefined;
     }

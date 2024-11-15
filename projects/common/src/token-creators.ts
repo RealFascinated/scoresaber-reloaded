@@ -1,13 +1,13 @@
 import ScoreSaberLeaderboard from "./model/leaderboard/impl/scoresaber-leaderboard";
 import ScoreSaberLeaderboardToken from "./types/token/scoresaber/leaderboard";
 import LeaderboardDifficulty from "./model/leaderboard/leaderboard-difficulty";
-import {MapCharacteristic} from "./types/map-characteristic";
-import {LeaderboardStatus} from "./model/leaderboard/leaderboard-status";
-import {parseDate} from "./utils/time-utils";
+import { MapCharacteristic } from "./types/map-characteristic";
+import { LeaderboardStatus } from "./model/leaderboard/leaderboard-status";
+import { parseDate } from "./utils/time-utils";
 import ScoreSaberScoreToken from "./types/token/scoresaber/score";
-import {ScoreSaberScore} from "./model/score/impl/scoresaber-score";
-import {Modifier} from "./score/modifier";
-import {getDifficultyFromScoreSaberDifficulty} from "./utils/scoresaber.util";
+import { ScoreSaberScore } from "./model/score/impl/scoresaber-score";
+import { Modifier } from "./score/modifier";
+import { getDifficultyFromScoreSaberDifficulty, ScoreSaberHMDs } from "./utils/scoresaber.util";
 
 /**
  * Parses a {@link ScoreSaberLeaderboardToken} into a {@link ScoreSaberLeaderboard}.
@@ -104,6 +104,6 @@ export function getScoreSaberScoreFromToken(
     weight: token.weight,
     maxCombo: token.maxCombo,
     playerInfo: token.leaderboardPlayerInfo,
-    hmd: token.deviceHmd ?? undefined,
+    hmd: token.deviceHmd ?? ScoreSaberHMDs[token.hmd] ?? undefined,
   };
 }

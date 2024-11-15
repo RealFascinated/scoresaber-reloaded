@@ -1,5 +1,6 @@
-import {Entity} from "dexie";
+import { Entity } from "dexie";
 import Database from "../database";
+import { ReplayViewer, ReplayViewers, ReplayViewerTypes } from "@/common/replay-viewer";
 
 /**
  * The website settings.
@@ -19,6 +20,11 @@ export default class Settings extends Entity<Database> {
    * The background image or color to use
    */
   backgroundCover?: string;
+
+  /**
+   * The replay viewer to use
+   */
+  replayViewer?: ReplayViewerTypes;
 
   /**
    * The state of the chart legends for charts.
@@ -68,6 +74,34 @@ export default class Settings extends Entity<Database> {
     this.chartLegends ??= {};
     this.chartLegends[chartId] ??= {};
     this.chartLegends[chartId][legendId] = state;
+    this.db.setSettings(this);
+  }
+
+  /**
+   * Gets the replay viewer to use.
+   *
+   * @returns the replay viewer
+   */
+  public getReplayViewer(): ReplayViewer {
+    return ReplayViewers[this.getReplayViewerName()];
+  }
+
+  /**
+   * Gets the replay viewer to use.
+   *
+   * @returns the replay viewer name
+   */
+  public getReplayViewerName(): string {
+    return this.replayViewer ?? "beatleader";
+  }
+
+  /**
+   * Sets the replay viewer to use.
+   *
+   * @param viewer the replay viewer
+   */
+  public setReplayViewer(viewer: ReplayViewerTypes) {
+    this.replayViewer = viewer;
     this.db.setSettings(this);
   }
 }
