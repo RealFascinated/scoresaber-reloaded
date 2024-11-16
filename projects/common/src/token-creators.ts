@@ -59,6 +59,8 @@ export function getScoreSaberLeaderboardFromToken(token: ScoreSaberLeaderboardTo
     dailyPlays: token.dailyPlays,
     qualified: token.qualified,
     status: status,
+    dateRanked: token.rankedDate ? parseDate(token.rankedDate) : undefined,
+    dateQualified: token.qualifiedDate ? parseDate(token.qualifiedDate) : undefined,
   };
 }
 

@@ -8,6 +8,8 @@ import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-respons
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { formatNumber } from "@ssr/common/utils/number-utils";
 import { getBeatSaverMapperProfileUrl } from "@ssr/common/utils/beatsaver.util";
+import { formatDate } from "@ssr/common/utils/time-utils";
+import Tooltip from "@/components/tooltip";
 
 type LeaderboardInfoProps = {
   /**
@@ -22,6 +24,8 @@ type LeaderboardInfoProps = {
 };
 
 export function LeaderboardInfo({ leaderboard, beatSaverMap }: LeaderboardInfoProps) {
+  const statusDate = leaderboard.dateRanked || leaderboard.dateQualified;
+
   return (
     <Card className="w-full h-fit text-sm">
       <div className="flex flex-row justify-between w-full">
@@ -58,9 +62,14 @@ export function LeaderboardInfo({ leaderboard, beatSaverMap }: LeaderboardInfoPr
                   Plays: <span className="font-semibold">{formatNumber(leaderboard.plays)}</span> (
                   {formatNumber(leaderboard.dailyPlays)} today)
                 </p>
-                <p>
-                  Status: <span className="font-semibold">{leaderboard.status}</span>
-                </p>
+                <div className="flex gap-2">
+                  Status: <span className="font-semibold">{leaderboard.status}</span>{" "}
+                  {statusDate && (
+                    <Tooltip display={formatDate(statusDate, "DD MMMM YYYY HH:mm")}>
+                      <span>({formatDate(statusDate, "DD MMMM YYYY")})</span>
+                    </Tooltip>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -74,11 +83,9 @@ export function LeaderboardInfo({ leaderboard, beatSaverMap }: LeaderboardInfoPr
             />
           </div>
 
-          <div className="flex w-full justify-between">
-            <div className="flex flex-col justify-end items-end gap-1">
-              <LeaderboardSongStarCount leaderboard={leaderboard} />
-              <LeaderboardButtons leaderboard={leaderboard} beatSaverMap={beatSaverMap} />
-            </div>
+          <div className="flex justify-between gap-2 items-end">
+            <LeaderboardButtons leaderboard={leaderboard} beatSaverMap={beatSaverMap} />
+            <LeaderboardSongStarCount leaderboard={leaderboard} />
           </div>
         </div>
       </div>

@@ -48,6 +48,18 @@ export default class ScoreSaberLeaderboardInternal extends Leaderboard {
    */
   @Prop({ required: true })
   readonly status!: LeaderboardStatus;
+
+  /**
+   * The date the leaderboard was ranked.
+   */
+  @Prop({ required: false })
+  readonly dateRanked?: Date;
+
+  /**
+   * The date the leaderboard was qualified.
+   */
+  @Prop({ required: false })
+  readonly dateQualified?: Date;
 }
 
 export type ScoreSaberLeaderboard = InstanceType<typeof ScoreSaberLeaderboardInternal>;

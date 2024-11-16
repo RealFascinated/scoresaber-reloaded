@@ -1,7 +1,8 @@
-import {Config} from "../config";
-import {LeaderboardResponse} from "../response/leaderboard-response";
-import {kyFetchJson} from "./utils";
-import {Leaderboards} from "../leaderboard";
+import { Config } from "../config";
+import { LeaderboardResponse } from "../response/leaderboard-response";
+import { kyFetchJson, kyFetchText } from "./utils";
+import { Leaderboards } from "../leaderboard";
+import SuperJSON from "superjson";
 
 /**
  * Fetches the leaderboard
@@ -10,5 +11,9 @@ import {Leaderboards} from "../leaderboard";
  * @param leaderboard the leaderboard
  */
 export async function fetchLeaderboard<L>(leaderboard: Leaderboards, id: string) {
-  return kyFetchJson<LeaderboardResponse<L>>(`${Config.apiUrl}/leaderboard/${leaderboard}/${id}`);
+  const response = await kyFetchText(`${Config.apiUrl}/leaderboard/${leaderboard}/${id}`);
+  if (response === undefined) {
+    return undefined;
+  }
+  return SuperJSON.parse<LeaderboardResponse<L>>(response);
 }
