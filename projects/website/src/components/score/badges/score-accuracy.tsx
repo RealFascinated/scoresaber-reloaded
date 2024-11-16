@@ -31,6 +31,9 @@ export function ScoreAccuracyBadge({ score, leaderboard }: ScoreAccuracyProps) {
   const failed = score.modifiers.includes("No Fail" as Modifier);
   const modCount = score.modifiers.length;
 
+  const previousScoreFailed = previousScore?.modifiers?.includes("No Fail" as Modifier);
+  const previousModCount = previousScore?.modifiers?.length ?? 0;
+
   return (
     <>
       <div className="flex flex-col items-center justify-center cursor-default">
@@ -58,12 +61,34 @@ export function ScoreAccuracyBadge({ score, leaderboard }: ScoreAccuracyProps) {
           </p>
         </Tooltip>
         {previousScore && previousScore.accuracy && previousScore.change && (
-          <Tooltip display={`Previous Accuracy: ${previousScore.accuracy.toFixed(2)}%`}>
+          <Tooltip
+            className="flex gap-2 text-xs items-center"
+            display={
+              <div className="flex flex-col gap-2">
+                <div>
+                  <p className="font-semibold">Previous Accuracy</p>
+                  <p>Score: {accDetails}</p>
+                  {!score.fullCombo && fcAccuracy && <p>Full Combo: {fcAccuracy.toFixed(2)}%</p>}
+                </div>
+
+                {previousModCount > 0 && score.previousScore && (
+                  <div>
+                    <p className="font-semibold">Previous Modifiers</p>
+                    <ScoreModifiers type="full" score={score.previousScore} />
+                  </div>
+                )}
+                {previousScoreFailed && <p className="text-red-500">Failed</p>}
+              </div>
+            }
+          >
             <Change
               className="text-xs"
               change={previousScore.change.accuracy}
               formatValue={num => `${num.toFixed(2)}%`}
             />
+            {previousModCount > 0 && score.previousScore && (
+              <ScoreModifiers type="simple" limit={1} score={score.previousScore} />
+            )}
           </Tooltip>
         )}
       </div>

@@ -1,11 +1,12 @@
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { Modifier } from "@ssr/common/score/modifier";
+import { PreviousScore } from "@ssr/common/model/score/previous-score";
 
 type ScoreModifiersProps = {
   /**
    * The score to get the modifiers from
    */
-  score: ScoreSaberScore;
+  score: ScoreSaberScore | PreviousScore;
 
   /**
    * The way to display the modifiers
@@ -20,7 +21,7 @@ type ScoreModifiersProps = {
 
 export function ScoreModifiers({ score, type, limit }: ScoreModifiersProps) {
   const modifiers = score.modifiers;
-  if (modifiers.length === 0) {
+  if (modifiers == undefined || modifiers.length === 0) {
     return <span>-</span>;
   }
 
