@@ -92,6 +92,7 @@ export class PlayerService {
     // Initialize player peak rank
     if (player.peakRank == undefined) {
       player.peakRank = player.getPeakRankFromHistory();
+      player.markModified("peakRank");
       await player.save();
     }
 
