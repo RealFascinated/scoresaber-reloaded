@@ -59,7 +59,7 @@ export default function LeaderboardScore({ score, leaderboard, highlightedPlayer
           score.misses > 0 ? "text-red-500" : "text-green-500"
         )}
       >
-        <ScoreMissesAndPausesBadge score={score} hideXMark />
+        <ScoreMissesAndPausesBadge score={score} hideXMark hidePreviousScore />
       </td>
 
       {/* Score PP */}
