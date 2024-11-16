@@ -165,6 +165,10 @@ export default function LeaderboardScores({
    * Reset the page when the score mode changes
    */
   useEffect(() => {
+    if (!currentScores) {
+      return;
+    }
+
     setCurrentPage(1);
     setShouldFetch(true);
   }, [selectedMode]);
