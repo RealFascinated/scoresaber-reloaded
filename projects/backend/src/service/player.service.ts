@@ -318,7 +318,7 @@ export class PlayerService {
     foundPlayer.markModified("statisticHistory");
 
     // Update players peak rank
-    if (foundPlayer.peakRank && foundPlayer.peakRank.rank < player.rank) {
+    if (foundPlayer.peakRank && player.rank < foundPlayer.peakRank.rank) {
       foundPlayer.peakRank = {
         rank: player.rank,
         date: new Date(),
