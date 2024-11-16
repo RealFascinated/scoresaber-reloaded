@@ -2,7 +2,6 @@ import { type NextRequest, NextResponse } from "next/server";
 import { isProduction } from "@ssr/common/utils/utils";
 
 export function middleware(request: NextRequest) {
-  const response = NextResponse.next();
   const playerId = request.cookies.get("playerId");
   const isDesktopClient = request.headers.get("User-Agent")?.includes("ScoreSaber Reloaded");
 
@@ -12,6 +11,8 @@ export function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL(`/player/${playerId.value}`, request.url));
     }
   }
+
+  const response = NextResponse.next();
 
   // Log requests in production
   if (isProduction()) {
