@@ -7,9 +7,10 @@ import ScoreMissesAndPausesBadge from "@/components/score/badges/score-misses-an
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
+import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { formatScoreAccuracy } from "@ssr/common/utils/score.util";
 import { ScoreReplayButton } from "@/components/score/button/score-replay-button";
+import { ScorePpBadge } from "@/components/score/badges/score-pp";
 
 type Props = {
   /**
@@ -64,7 +65,9 @@ export default function LeaderboardScore({ score, leaderboard, highlightedPlayer
 
       {/* Score PP */}
       {leaderboard.stars > 0 && (
-        <td className="px-4 py-2 text-center text-ssr whitespace-nowrap">{formatPp(score.pp)}pp</td>
+        <td className="px-4 py-2 text-ssr whitespace-nowrap">
+          <ScorePpBadge score={score} leaderboard={leaderboard} />
+        </td>
       )}
 
       {/* Score Modifiers */}
