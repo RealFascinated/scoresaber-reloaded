@@ -3,6 +3,9 @@ import { BeatSaverMapButton } from "@/components/score/button/beat-saver-map-but
 import { SongOpenInYoutubeButton } from "@/components/score/button/song-open-in-youtube-button";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
+import { MapPreviewButton } from "@/components/leaderboard/button/map-preview-button";
+import { MapCheckButton } from "@/components/leaderboard/button/map-check-button";
+import { OneClickInstallButton } from "@/components/leaderboard/button/one-click-install-button";
 
 type Props = {
   leaderboard: ScoreSaberLeaderboard;
@@ -24,6 +27,30 @@ const buttons = [
         return null;
       }
       return <BeatSaverMapButton beatSaverMap={beatSaverMap} />;
+    },
+  },
+  {
+    render: ({ beatSaverMap }: Props) => {
+      if (!beatSaverMap) {
+        return null;
+      }
+      return <MapPreviewButton beatSaverMap={beatSaverMap} />;
+    },
+  },
+  {
+    render: ({ beatSaverMap }: Props) => {
+      if (!beatSaverMap) {
+        return null;
+      }
+      return <MapCheckButton beatSaverMap={beatSaverMap} />;
+    },
+  },
+  {
+    render: ({ beatSaverMap }: Props) => {
+      if (!beatSaverMap) {
+        return null;
+      }
+      return <OneClickInstallButton beatSaverMap={beatSaverMap} />;
     },
   },
   {

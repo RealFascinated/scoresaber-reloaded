@@ -23,20 +23,45 @@ type LeaderboardInfoProps = {
 
 export function LeaderboardInfo({ leaderboard, beatSaverMap }: LeaderboardInfoProps) {
   return (
-    <Card className="w-full h-fit">
+    <Card className="w-full h-fit text-sm">
       <div className="flex flex-row justify-between w-full">
-        <div className="flex flex-col justify-between w-full min-h-[160px]">
+        <div className="flex flex-col justify-between w-full gap-3">
           <div className="flex justify-between">
-            <div>
-              <FallbackLink
-                href={beatSaverMap ? `https://beatsaver.com/maps/${beatSaverMap?.bsr}` : undefined}
-                className="hover:brightness-[66%] transform-gpu transition-all"
-              >
-                <p className="font-semibold">{leaderboard.fullName}</p>
-              </FallbackLink>
-              <p className="text-sm text-gray-400">
-                By <span className="text-ssr">{leaderboard.songAuthorName}</span>
-              </p>
+            <div className="flex flex-col gap-1.5">
+              <div>
+                <FallbackLink
+                  href={beatSaverMap ? `https://beatsaver.com/maps/${beatSaverMap?.bsr}` : undefined}
+                  className="hover:brightness-[66%] transform-gpu transition-all"
+                >
+                  <p className="font-semibold text-md">{leaderboard.fullName}</p>
+                </FallbackLink>
+                <p className="text-sm text-gray-400">
+                  By <span className="text-ssr">{leaderboard.songAuthorName}</span>
+                </p>
+              </div>
+
+              <div className="text-[0.8rem]">
+                <p>
+                  Mapper:{" "}
+                  <FallbackLink href={getBeatSaverMapperProfileUrl(beatSaverMap)}>
+                    <span
+                      className={cn(
+                        "font-semibold",
+                        beatSaverMap ? "text-ssr hover:brightness-[66%] transform-gpu transition-all" : ""
+                      )}
+                    >
+                      {leaderboard.levelAuthorName}
+                    </span>
+                  </FallbackLink>
+                </p>
+                <p>
+                  Plays: <span className="font-semibold">{formatNumber(leaderboard.plays)}</span> (
+                  {formatNumber(leaderboard.dailyPlays)} today)
+                </p>
+                <p>
+                  Status: <span className="font-semibold">{leaderboard.status}</span>
+                </p>
+              </div>
             </div>
 
             <Image
@@ -49,30 +74,7 @@ export function LeaderboardInfo({ leaderboard, beatSaverMap }: LeaderboardInfoPr
             />
           </div>
 
-          <div className="text-sm flex w-full justify-between">
-            <div>
-              <p>
-                Mapper:{" "}
-                <FallbackLink href={getBeatSaverMapperProfileUrl(beatSaverMap)}>
-                  <span
-                    className={cn(
-                      "font-semibold",
-                      beatSaverMap ? "text-ssr hover:brightness-[66%] transform-gpu transition-all" : ""
-                    )}
-                  >
-                    {leaderboard.levelAuthorName}
-                  </span>
-                </FallbackLink>
-              </p>
-              <p>
-                Plays: <span className="font-semibold">{formatNumber(leaderboard.plays)}</span> (
-                {formatNumber(leaderboard.dailyPlays)} today)
-              </p>
-              <p>
-                Status: <span className="font-semibold">{leaderboard.status}</span>
-              </p>
-            </div>
-
+          <div className="flex w-full justify-between">
             <div className="flex flex-col justify-end items-end gap-1">
               <LeaderboardSongStarCount leaderboard={leaderboard} />
               <LeaderboardButtons leaderboard={leaderboard} beatSaverMap={beatSaverMap} />
