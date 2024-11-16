@@ -1,11 +1,11 @@
 "use client";
 
-import {ReactElement, ReactNode, useEffect, useState} from "react";
-import {Check, ChevronsUpDown} from "lucide-react";
-import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
-import {Button} from "@/components/ui/button";
-import {Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList} from "@/components/ui/command";
-import {cn} from "@/common/utils";
+import { ReactElement, ReactNode, useEffect, useState } from "react";
+import { Check, ChevronsUpDown } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { cn } from "@/common/utils";
 
 /**
  * The props for this combobox.
@@ -44,6 +44,11 @@ export type ComboboxItem<T> = {
    * The value of this item.
    */
   value: T;
+
+  /**
+   * The icon to display next to the value.
+   */
+  icon?: ReactNode;
 
   /**
    * The name of this item.
@@ -102,9 +107,13 @@ const Combobox = <T,>({
                       setOpen(false);
                       handleValueChange(current === value ? undefined : current);
                     }}
+                    className={cn("flex gap-2 items-center justify-between")}
                   >
-                    <Check className={cn("mr-2 h-4 w-4", value === item.value ? "opacity-100" : "opacity-0")} />
-                    <div className="flex gap-2 items-center">{item.name}</div>
+                    {item.icon}
+                    <div className={cn("flex gap-2 w-full items-center justify-between")}>
+                      <div className="flex gap-2 items-center">{item.name}</div>
+                      <Check className={cn("mr-2 h-4 w-4", value === item.value ? "opacity-100" : "opacity-0")} />
+                    </div>
                   </CommandItem>
                 ))}
               </CommandGroup>

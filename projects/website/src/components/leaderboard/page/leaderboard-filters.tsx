@@ -7,6 +7,7 @@ import useDatabase from "@/hooks/use-database";
 import { useLeaderboardFilter } from "@/components/providers/leaderboard/leaderboard-filter-provider";
 import { Button } from "@/components/ui/button";
 import { getCountries } from "@ssr/common/utils/country.util";
+import CountryFlag from "@/components/country-flag";
 
 export default function LeaderboardFilters() {
   const database = useDatabase();
@@ -21,7 +22,7 @@ export default function LeaderboardFilters() {
       <Combobox<string | undefined>
         name="Country"
         items={getCountries()
-          .map(({ code, name }) => ({ value: code, name: name }))
+          .map(({ code, name }) => ({ value: code, name: name, icon: <CountryFlag code={code} size={12} /> }))
           // The top country is the country of the claimed player
           .sort(country => {
             if (country.value === claimedPlayer?.country) {
