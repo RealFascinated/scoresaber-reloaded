@@ -87,7 +87,11 @@ export default function LeaderboardScore({ score, leaderboard, highlightedPlayer
       </td>
 
       {/* Score Replay */}
-      <td>{score.additionalData && <ScoreReplayButton additionalData={score.additionalData} />}</td>
+      {score.additionalData && (
+        <td>
+          <ScoreReplayButton additionalData={score.additionalData} />
+        </td>
+      )}
     </>
   );
 }

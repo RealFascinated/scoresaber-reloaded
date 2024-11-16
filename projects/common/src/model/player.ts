@@ -1,8 +1,8 @@
-import {getModelForClass, modelOptions, prop, ReturnModelType, Severity} from "@typegoose/typegoose";
-import {Document} from "mongoose";
-import {PlayerHistory} from "../player/player-history";
-import {formatDateMinimal, getDaysAgoDate, getMidnightAlignedDate, parseDate} from "../utils/time-utils";
-import {type PeakRank} from "../player/peak-rank";
+import { getModelForClass, modelOptions, prop, ReturnModelType, Severity } from "@typegoose/typegoose";
+import { Document } from "mongoose";
+import { PlayerHistory } from "../player/player-history";
+import { formatDateMinimal, getDaysAgoDate, getMidnightAlignedDate, parseDate } from "../utils/time-utils";
+import { type PeakRank } from "../player/peak-rank";
 
 /**
  * The model for a player.
@@ -38,6 +38,12 @@ export class Player {
    */
   @prop()
   public seededScores?: boolean;
+
+  /**
+   * Whether we should track replays for this player.
+   */
+  @prop()
+  public trackReplays?: boolean;
 
   /**
    * The date the player was last tracked.

@@ -95,20 +95,22 @@ export default class BeatLeaderService {
     let savedReplayId: string | undefined;
     if (isProduction()) {
       // Cache replay for this score
-      try {
-        const replayId = `${score.id}-${playerId}-${leaderboard.difficulty.difficultyName}-${leaderboard.difficulty.modeName}-${leaderboard.song.hash.toUpperCase()}.bsor`;
-        const replayData = await kyFetchBuffer(`https://cdn.replays.beatleader.xyz/${replayId}`);
+      if (player.trackReplays) {
+        try {
+          const replayId = `${score.id}-${playerId}-${leaderboard.difficulty.difficultyName}-${leaderboard.difficulty.modeName}-${leaderboard.song.hash.toUpperCase()}.bsor`;
+          const replayData = await kyFetchBuffer(`https://cdn.replays.beatleader.xyz/${replayId}`);
 
-        if (replayData !== undefined) {
-          await MinioService.saveFile(MinioBucket.BeatLeaderReplays, `${replayId}`, Buffer.from(replayData));
-          savedReplayId = replayId;
+          if (replayData !== undefined) {
+            await MinioService.saveFile(MinioBucket.BeatLeaderReplays, `${replayId}`, Buffer.from(replayData));
+            savedReplayId = replayId;
+          }
+        } catch (error) {
+          console.error(`Failed to save replay for ${score.id}: ${error}`);
         }
-      } catch (error) {
-        console.error(`Failed to save replay for ${score.id}: ${error}`);
-      }
 
-      // Remove old replays
-      await this.cleanupScoreReplays(playerId, leaderboard.id);
+        // Remove old replays
+        await this.cleanupScoreReplays(playerId, leaderboard.id);
+      }
     }
 
     // The score has already been tracked, so ignore it.
