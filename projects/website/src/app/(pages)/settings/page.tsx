@@ -3,12 +3,10 @@ import Settings from "@/components/settings/settings";
 
 export default function SettingsPage() {
   return (
-    <Card className="w-full h-fit gap-4">
-      <div>
-        <p className="font-semibold">Settings</p>
-        <p>Configure settings your ScoreSaber Reloaded settings!</p>
-      </div>
-      <Settings />
-    </Card>
+    <div className="flex w-full flex-col items-center">
+      <Card className="w-full lg:max-w-[1200px] h-fit gap-4">
+        <Settings />
+      </Card>
+    </div>
   );
 }

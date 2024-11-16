@@ -1,107 +1,90 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { Button } from "../ui/button";
-import { Form, FormControl, FormField, FormItem, FormLabel } from "../ui/form";
-import { Input } from "../ui/input";
-import { useEffect } from "react";
-import { useToast } from "@/hooks/use-toast";
-import useSettings from "@/hooks/use-settings";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ReplayViewers } from "@/common/replay-viewer";
+import WebsiteSettings from "@/components/settings/category/website";
+import ScoreSettings from "@/components/settings/category/score";
+import { ReactNode, useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { CubeIcon, GlobeAmericasIcon } from "@heroicons/react/24/solid";
+import { useSearchParams } from "next/navigation";
+import usePageNavigation from "@/hooks/use-page-navigation";
 
-const formSchema = z.object({
-  backgroundCover: z.string().min(0).max(128),
-  replayViewer: z.string().min(1).max(32),
-});
+type Category = {
+  name: string;
+  icon: () => ReactNode;
+  component: () => ReactNode;
+};
+
+const categories: Category[] = [
+  {
+    name: "Website",
+    icon: () => <GlobeAmericasIcon className="size-5" />,
+    component: () => <WebsiteSettings />,
+  },
+  {
+    name: "Scores",
+    icon: () => <CubeIcon className="size-5" />,
+    component: () => <ScoreSettings />,
+  },
+];
+
+/**
+ * Gets the category from the name.
+ *
+ * @param name the name of the category
+ * @returns the category
+ */
+function getCategoryFromName(name: string | null) {
+  if (!name) {
+    return undefined;
+  }
+  return categories.find(category => getCategoryName(category) == getCategoryName(name));
+}
+
+/**
+ * Gets the category name.
+ *
+ * @param category the category
+ * @returns the category name
+ */
+function getCategoryName(category: Category | string | null) {
+  if (!category) {
+    return undefined;
+  }
+  return (typeof category == "string" ? category : category.name).replace(" ", "").toLowerCase();
+}
 
 export default function Settings() {
-  const settings = useSettings();
-  const { toast } = useToast();
+  const params = useSearchParams();
+  const navigation = usePageNavigation();
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      backgroundCover: settings?.backgroundCover || "",
-      replayViewer: settings?.getReplayViewerName() || "",
-    },
-  });
+  const [selectedCategory, setSelectedCategory] = useState<Category>(
+    getCategoryFromName(params.get("category")) || categories[0]
+  );
 
-  if (!settings) {
-    return;
-  }
-
-  /**
-   * Handles the form submission
-   *
-   * @param backgroundCover the new background cover
-   * @param replayViewer the new replay viewer
-   */
-  async function onSubmit({ backgroundCover, replayViewer }: z.infer<typeof formSchema>) {
-    settings.setBackgroundImage(backgroundCover);
-    settings.setReplayViewer(replayViewer);
-    toast({
-      title: "Settings saved",
-      description: "Your settings have been saved.",
-      variant: "success",
-    });
-  }
+  useEffect(() => {
+    navigation.navigateToPage(`/settings/?category=${getCategoryName(selectedCategory.name)}`);
+  }, [navigation, selectedCategory.name]);
 
   return (
-    <div className="flex flex-col gap-3 text-sm">
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-2">
-          {/* Background Cover */}
-          <FormField
-            control={form.control}
-            name="backgroundCover"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Background Cover</FormLabel>
-                <FormControl>
-                  <Input className="w-full sm:w-72" placeholder="Hex or URL..." {...field} />
-                </FormControl>
-              </FormItem>
-            )}
-          />
+    <div className="flex flex-col md:flex-row gap-3 text-sm divide-y divide-muted md:divide-x md:divide-y-0">
+      <div className="flex flex-col gap-2">
+        <p className="text-sm font-semibold">Settings</p>
+        <div className="flex flex-row md:flex-col gap-1.5 w-full md:w-36">
+          {categories.map(category => (
+            <Button
+              key={category.name}
+              variant={selectedCategory.name == category.name ? "default" : "outline"}
+              className="justify-start flex gap-2 px-2 border-none"
+              onClick={() => setSelectedCategory(category)}
+            >
+              {category.icon()}
+              {category.name}
+            </Button>
+          ))}
+        </div>
+      </div>
 
-          {/* Background Cover */}
-          <FormField
-            control={form.control}
-            name="replayViewer"
-            render={({ field }) => (
-              <FormItem className="w-full sm:w-72">
-                <FormLabel>Replay Viewer</FormLabel>
-                <FormControl>
-                  <Select onValueChange={field.onChange} defaultValue={settings.getReplayViewerName()}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a replay viewer to use" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {Object.entries(ReplayViewers).map(([id, viewer]) => {
-                        return (
-                          <SelectItem key={id} value={id}>
-                            {viewer.name}
-                          </SelectItem>
-                        );
-                      })}
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-              </FormItem>
-            )}
-          />
-
-          {/* Saving Settings */}
-          <Button type="submit" className="w-fit">
-            Save
-          </Button>
-        </form>
-      </Form>
+      <div className="pt-2 md:pl-3 md:pt-0">{selectedCategory.component()}</div>
     </div>
   );
 }
