@@ -135,7 +135,7 @@ export class AdditionalScoreData {
   /**
    * The date the score was set on.
    */
-  @prop({ required: true, index: true })
+  @prop({ required: true })
   public timestamp!: Date;
 }
 
