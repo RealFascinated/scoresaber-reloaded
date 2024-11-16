@@ -636,7 +636,27 @@ export default class ScoreSaberService {
             { $sort: { "score.score": -1 } },
           ]);
           for (const friendScore of friendScores) {
-            scores.push(new ScoreSaberScoreModel(friendScore.score).toObject() as ScoreSaberScore);
+            const score = new ScoreSaberScoreModel(friendScore.score).toObject() as ScoreSaberScore;
+            const leaderboardResponse = await LeaderboardService.getLeaderboard<ScoreSaberLeaderboard>(
+              "scoresaber",
+              score.leaderboardId + ""
+            );
+
+            if (leaderboardResponse !== undefined) {
+              const { leaderboard } = leaderboardResponse;
+
+              const additionalData = await BeatLeaderService.getAdditionalScoreData(
+                score.playerId,
+                leaderboard.songHash,
+                `${leaderboard.difficulty.difficulty}-${leaderboard.difficulty.characteristic}`,
+                score.score
+              );
+              if (additionalData !== undefined) {
+                score.additionalData = additionalData;
+              }
+            }
+
+            scores.push(score);
           }
         }
 

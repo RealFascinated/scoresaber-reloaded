@@ -250,6 +250,9 @@ export default function LeaderboardScores({
                   <th className="px-2 py-1 text-center">Misses</th>
                   {leaderboard.stars > 0 && <th className="px-2 py-1 text-center">PP</th>}
                   <th className="px-2 py-1 text-center">Mods</th>
+                  {currentScores.scores.some(score => score.additionalData !== undefined) && (
+                    <th className="px-2 py-1 text-center"></th>
+                  )}
                 </tr>
               </thead>
               <motion.tbody initial="hidden" animate={controls} className="border-none" variants={scoreAnimation}>

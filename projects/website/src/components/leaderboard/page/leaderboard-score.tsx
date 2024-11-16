@@ -9,6 +9,7 @@ import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
 import { formatScoreAccuracy } from "@ssr/common/utils/score.util";
+import { ScoreReplayButton } from "@/components/score/button/score-replay-button";
 
 type Props = {
   /**
@@ -81,6 +82,9 @@ export default function LeaderboardScore({ score, leaderboard, highlightedPlayer
           </p>
         </Tooltip>
       </td>
+
+      {/* Score Replay */}
+      <td>{score.additionalData && <ScoreReplayButton additionalData={score.additionalData} />}</td>
     </>
   );
 }

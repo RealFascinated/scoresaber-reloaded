@@ -159,6 +159,17 @@ export class ScoreService {
               if (score == undefined) {
                 continue;
               }
+
+              const additionalData = await BeatLeaderService.getAdditionalScoreData(
+                score.playerId,
+                leaderboard.songHash,
+                `${leaderboard.difficulty.difficulty}-${leaderboard.difficulty.characteristic}`,
+                score.score
+              );
+              if (additionalData !== undefined) {
+                score.additionalData = additionalData;
+              }
+
               scores.push(score);
             }
 

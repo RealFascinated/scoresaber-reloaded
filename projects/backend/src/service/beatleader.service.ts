@@ -12,6 +12,8 @@ import { isProduction, kyFetchBuffer } from "@ssr/common/utils/utils";
 import { PlayerDocument, PlayerModel } from "@ssr/common/model/player";
 import { ScoreStatsToken } from "@ssr/common/types/token/beatleader/score-stats/score-stats";
 import { ScoreStatsDocument, ScoreStatsModel } from "@ssr/common/model/score-stats/score-stats";
+import { fetchWithCache } from "../common/cache.util";
+import CacheService, { ServiceCache } from "./cache.service";
 
 export default class BeatLeaderService {
   /**
@@ -29,16 +31,22 @@ export default class BeatLeaderService {
     songDifficulty: string,
     songScore: number
   ): Promise<AdditionalScoreDataDocument | undefined> {
-    const additionalData = await AdditionalScoreDataModel.findOne({
-      playerId: playerId,
-      songHash: songHash.toUpperCase(),
-      songDifficulty: songDifficulty,
-      songScore: songScore,
-    });
-    if (!additionalData) {
-      return undefined;
-    }
-    return additionalData;
+    return fetchWithCache(
+      CacheService.getCache(ServiceCache.AdditionalScoreData),
+      `additional-score-data:${playerId}-${songHash}-${songDifficulty}-${songScore}`,
+      async () => {
+        const additionalData = await AdditionalScoreDataModel.findOne({
+          playerId: playerId,
+          songHash: songHash.toUpperCase(),
+          songDifficulty: songDifficulty,
+          songScore: songScore,
+        });
+        if (!additionalData) {
+          return undefined;
+        }
+        return additionalData;
+      }
+    );
   }
 
   /**
