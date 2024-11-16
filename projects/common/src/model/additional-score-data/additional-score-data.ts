@@ -129,7 +129,7 @@ export class AdditionalScoreData {
   /**
    * The cached replay id.
    */
-  @prop({ required: false, index: true })
+  @prop({ required: false })
   public cachedReplayId?: string;
 
   /**
