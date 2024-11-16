@@ -6,6 +6,7 @@ import { BeatSaverMapModel } from "@ssr/common/model/beatsaver/map";
 import { ScoreSaberLeaderboardModel } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { fetchWithCache } from "../common/cache.util";
 import CacheService, { ServiceCache } from "./cache.service";
+import { ScoreStatsModel } from "@ssr/common/model/score-stats/score-stats";
 
 export class AppService {
   /**
@@ -13,12 +14,12 @@ export class AppService {
    */
   public static async getAppStatistics(): Promise<AppStatistics> {
     return fetchWithCache(CacheService.getCache(ServiceCache.AppStatistics), "stats", async () => {
-      const trackedPlayers = await PlayerModel.countDocuments();
-      const trackedScores = await ScoreSaberScoreModel.countDocuments();
-      const additionalScoresData = await AdditionalScoreDataModel.countDocuments();
-      const cachedBeatSaverMaps = await BeatSaverMapModel.countDocuments();
-      const cachedScoreSaberLeaderboards = await ScoreSaberLeaderboardModel.countDocuments();
-      const cachedBeatLeaderScoreStats = await AdditionalScoreDataModel.countDocuments({ cachedScoreStats: true });
+      const trackedPlayers = await PlayerModel.estimatedDocumentCount();
+      const trackedScores = await ScoreSaberScoreModel.estimatedDocumentCount();
+      const additionalScoresData = await AdditionalScoreDataModel.estimatedDocumentCount();
+      const cachedBeatSaverMaps = await BeatSaverMapModel.estimatedDocumentCount();
+      const cachedScoreSaberLeaderboards = await ScoreSaberLeaderboardModel.estimatedDocumentCount();
+      const cachedBeatLeaderScoreStats = await ScoreStatsModel.estimatedDocumentCount();
 
       return {
         trackedPlayers,
