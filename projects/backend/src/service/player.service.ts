@@ -266,6 +266,7 @@ export class PlayerService {
     foundPlayer: PlayerDocument,
     playerToken?: ScoreSaberPlayerToken
   ): Promise<void> {
+    const before = performance.now();
     const dateToday = getMidnightAlignedDate(new Date());
     const player = playerToken ? playerToken : await scoresaberService.lookupPlayer(foundPlayer.id);
     if (player == undefined) {
@@ -318,17 +319,23 @@ export class PlayerService {
     foundPlayer.markModified("statisticHistory");
 
     // Update players peak rank
-    if (foundPlayer.peakRank && player.rank < foundPlayer.peakRank.rank) {
+    await PlayerService.updatePeakRank(foundPlayer.id, player);
+
+    await foundPlayer.save();
+    console.log(`Tracked player "${foundPlayer.id}" in ${(performance.now() - before).toFixed(0)}ms`);
+  }
+
+  public static async updatePeakRank(playerId: string, playerToken: ScoreSaberPlayerToken) {
+    const foundPlayer = await PlayerService.getPlayer(playerId, true);
+    if (foundPlayer.peakRank && playerToken.rank < foundPlayer.peakRank.rank) {
       foundPlayer.peakRank = {
-        rank: player.rank,
+        rank: playerToken.rank,
         date: new Date(),
       };
+      foundPlayer.markModified("peakRank");
     }
-
-    foundPlayer.markModified("peakRank");
     await foundPlayer.save();
-
-    console.log(`Tracked player "${foundPlayer.id}"!`);
+    return foundPlayer;
   }
 
   /**

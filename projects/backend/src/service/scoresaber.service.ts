@@ -165,6 +165,9 @@ export default class ScoreSaberService {
         let account: PlayerDocument | undefined;
         try {
           account = await PlayerService.getPlayer(id, createIfMissing, playerToken);
+
+          // Update peak rank
+          account = await PlayerService.updatePeakRank(id, playerToken);
         } catch {
           // ignore
         }
