@@ -11,6 +11,10 @@ const playlists = [
     name: "All Qualified Maps",
     id: "scoresaber-qualified-maps",
   },
+  {
+    name: "Maps in Ranking Queue",
+    id: "scoresaber-ranking-queue-maps",
+  },
 ];
 
 export default function Playlists() {

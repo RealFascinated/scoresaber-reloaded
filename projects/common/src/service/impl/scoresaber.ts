@@ -8,9 +8,9 @@ import ScoreSaberLeaderboardToken from "../../types/token/scoresaber/leaderboard
 import ScoreSaberLeaderboardScoresPageToken from "../../types/token/scoresaber/leaderboard-scores-page";
 import { clamp, lerp } from "../../utils/math-utils";
 import { CurvePoint } from "../../curve-point";
-import { SSRCache } from "../../cache";
 import ScoreSaberLeaderboardPageToken from "../../types/token/scoresaber/leaderboard-page";
 import { StarFilter } from "../../maps/types";
+import RankingRequestToken from "@ssr/types/token/scoresaber/ranking-request-token";
 
 const API_BASE = "https://scoresaber.com/api";
 
@@ -31,12 +31,13 @@ const LOOKUP_LEADERBOARD_SCORES_ENDPOINT = `${API_BASE}/leaderboard/by-id/:id/sc
 const LOOKUP_LEADERBOARDS_ENDPOINT = `${API_BASE}/leaderboards`;
 const SEARCH_LEADERBOARDS_ENDPOINT = `${API_BASE}/leaderboards?search=:query`;
 
+/**
+ * Ranking Queue
+ */
+const RANKING_REQUESTS_ENDPOINT = `${API_BASE}/ranking/requests/:query`;
+
 const WEIGHT_COEFFICIENT = 0.965;
 const STAR_MULTIPLIER = 42.117208413;
-
-const playerCache = new SSRCache({
-  ttl: 60, // 1 minute
-});
 
 class ScoreSaberService extends Service {
   private curvePoints = [
@@ -306,6 +307,29 @@ class ScoreSaberService extends Service {
     this.log(
       `Found ${response.scores.length} scores for leaderboard "${leaderboardId}" in ${(performance.now() - before).toFixed(0)}ms`
     );
+    return response;
+  }
+
+  /**
+   * Gets the ranking requests.
+   *
+   * @returns the ranking requests
+   */
+  public async lookupRankingRequests(): Promise<RankingRequestToken[] | undefined> {
+    const before = performance.now();
+    this.log(`Looking up ranking requests...`);
+
+    const topResponse = await this.fetch<RankingRequestToken[]>(RANKING_REQUESTS_ENDPOINT.replace(":query", "top"));
+    const belowTopResponse = await this.fetch<RankingRequestToken[]>(
+      RANKING_REQUESTS_ENDPOINT.replace(":query", "belowTop")
+    );
+
+    const response = topResponse?.concat(belowTopResponse || []);
+    if (response === undefined) {
+      return undefined;
+    }
+
+    this.log(`Found ${response.length} ranking requests in ${(performance.now() - before).toFixed(0)}ms`);
     return response;
   }
 
