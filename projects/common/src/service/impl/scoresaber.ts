@@ -10,7 +10,7 @@ import { clamp, lerp } from "../../utils/math-utils";
 import { CurvePoint } from "../../curve-point";
 import ScoreSaberLeaderboardPageToken from "../../types/token/scoresaber/leaderboard-page";
 import { StarFilter } from "../../maps/types";
-import RankingRequestToken from "@ssr/types/token/scoresaber/ranking-request-token";
+import RankingRequestToken from "../../types/token/scoresaber/ranking-request-token";
 
 const API_BASE = "https://scoresaber.com/api";
 

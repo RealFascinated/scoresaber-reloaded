@@ -5,6 +5,8 @@ import { formatDateMinimal } from "@ssr/common/utils/time-utils";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
+import { fetchWithCache } from "../common/cache.util";
+import CacheService, { ServiceCache } from "./cache.service";
 
 export default class PlaylistService {
   /**
@@ -87,13 +89,20 @@ export default class PlaylistService {
    * @private
    */
   public static async createRankingQueueMapsPlaylist(): Promise<Playlist> {
-    const rankingQueueTokens = (await scoresaberService.lookupRankingRequests()) || [];
+    const leaderboards: ScoreSaberLeaderboard[] = await fetchWithCache(
+      CacheService.getCache(ServiceCache.Leaderboards),
+      "ranking-queue-maps",
+      async () => {
+        const rankingQueueTokens = (await scoresaberService.lookupRankingRequests()) || [];
 
-    const leaderboards: ScoreSaberLeaderboard[] = [];
-    for (const rankingQueueToken of rankingQueueTokens) {
-      const leaderboard = getScoreSaberLeaderboardFromToken(rankingQueueToken.leaderboardInfo);
-      leaderboards.push(leaderboard);
-    }
+        const leaderboards: ScoreSaberLeaderboard[] = [];
+        for (const rankingQueueToken of rankingQueueTokens) {
+          const leaderboard = getScoreSaberLeaderboardFromToken(rankingQueueToken.leaderboardInfo);
+          leaderboards.push(leaderboard);
+        }
+        return leaderboards;
+      }
+    );
 
     const highlightedIds = leaderboards.map(map => map.id);
     const maps: Map<string, ScoreSaberLeaderboard> = new Map();
