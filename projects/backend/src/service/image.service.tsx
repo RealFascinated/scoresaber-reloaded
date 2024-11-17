@@ -3,60 +3,14 @@ import React from "react";
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
 import { StarIcon } from "../../components/star-icon";
 import { GlobeIcon } from "../../components/globe-icon";
-import { Jimp } from "jimp";
-import { extractColors } from "extract-colors";
-import { fetchWithCache } from "../common/cache.util";
 import LeaderboardService from "./leaderboard.service";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { NotFoundError } from "elysia";
-import CacheService, { ServiceCache } from "./cache.service";
 import ScoreSaberService from "./scoresaber.service";
 
 const imageOptions = { width: 1200, height: 630 };
 
 export class ImageService {
-  /**
-   * Gets the average color of an image
-   *
-   * @param src the image url
-   * @returns the average color
-   * @private
-   */
-  public static async getAverageImageColor(src: string): Promise<{ color: string } | undefined> {
-    src = decodeURIComponent(src);
-
-    return await fetchWithCache<{ color: string }>(
-      CacheService.getCache(ServiceCache.ImageUtils),
-      `average-color:${src}`,
-      async () => {
-        try {
-          const image = await Jimp.read(src); // Load image using Jimp
-          const { width, height, data } = image.bitmap; // Access image dimensions and pixel data
-
-          // Convert the Buffer data to Uint8ClampedArray
-          const uint8ClampedArray = new Uint8ClampedArray(data);
-
-          // Extract the colors using extract-colors
-          const colors = await extractColors({ data: uint8ClampedArray, width, height });
-
-          // Return the most dominant color, or fallback if none found
-          if (colors && colors.length > 0) {
-            return { color: colors[2].hex }; // Returning the third most dominant color
-          }
-
-          return {
-            color: "#fff", // Fallback color in case no colors are found
-          };
-        } catch (error) {
-          console.error("Error fetching image or extracting colors:", error);
-          return {
-            color: "#fff", // Fallback color in case of an error
-          };
-        }
-      }
-    );
-  }
-
   /**
    * The base of the OpenGraph image
    *
