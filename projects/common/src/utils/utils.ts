@@ -1,6 +1,6 @@
 import ky from "ky";
-import {formatNumberWithCommas, formatPp} from "./number-utils";
-import {KyOptions} from "ky/distribution/types/options";
+import { formatNumberWithCommas, formatPp } from "./number-utils";
+import { KyOptions } from "ky/distribution/types/options";
 
 /**
  * Checks if we're in production
@@ -45,6 +45,20 @@ export function getPageFromRank(rank: number, itemsPerPage: number) {
 export async function kyFetchJson<T>(url: string, options?: KyOptions): Promise<T | undefined> {
   try {
     return await ky.get<T>(url, options).json();
+  } catch (error) {
+    return undefined;
+  }
+}
+
+/**
+ * Posts data top the given url.
+ *
+ * @param url the url to post to
+ * @param options the ky options to use
+ */
+export async function kyPostJson<T>(url: string, options?: KyOptions): Promise<T | undefined> {
+  try {
+    return await ky.post<T>(url, options).json();
   } catch (error) {
     return undefined;
   }

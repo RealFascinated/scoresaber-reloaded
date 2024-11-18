@@ -1,4 +1,4 @@
-import { Controller, Get } from "elysia-decorators";
+import { Controller, Get, Post } from "elysia-decorators";
 import { PlayerService } from "../service/player.service";
 import { t } from "elysia";
 import { PlayerTrackedSince } from "@ssr/common/player/player-tracked-since";
@@ -32,7 +32,7 @@ export default class PlayerController {
     return superJson ? SuperJSON.stringify(player) : player;
   }
 
-  @Get("/track/:id", {
+  @Post("/track/:id", {
     config: {},
     params: t.Object({
       id: t.String({ required: true }),
