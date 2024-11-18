@@ -107,8 +107,6 @@ export default class SSRImage {
       this.ctx.font = `${line.fontSize}px ${line.fontFamily ?? "Arial"}`;
       this.ctx.fillStyle = line.color; // Set the text color
 
-      console.log(this.ctx.font);
-
       // Adjust X position for alignment (e.g., right-alignment or centering)
       let adjustedX = x;
       if (placement === "top-right" || placement === "bottom-right") {
