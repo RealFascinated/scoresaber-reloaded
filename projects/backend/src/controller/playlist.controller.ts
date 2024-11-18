@@ -9,13 +9,25 @@ export default class PlaylistController {
     params: t.Object({
       id: t.String({ required: true }),
     }),
+    query: t.Object({
+      download: t.Optional(t.Boolean()),
+    }),
   })
-  public async getPlaylist({ params: { id } }: { params: { id: string } }): Promise<Response> {
+  public async getPlaylist({
+    params: { id },
+    query: { download },
+  }: {
+    params: { id: string };
+    query: { download?: boolean };
+  }) {
     const response = new Response(
       JSON.stringify(await (await PlaylistService.getPlaylist(id)).generateBeatSaberPlaylist(), null, 2)
     );
     response.headers.set("Content-Type", "application/json");
     response.headers.set("Cache-Control", "public, max-age=3600");
+    if (download) {
+      response.headers.set("Content-Disposition", `attachment; filename="${id}.json"`);
+    }
     return response;
   }
 }

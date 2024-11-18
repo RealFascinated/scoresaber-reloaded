@@ -30,8 +30,7 @@ export default function Playlists() {
           <div key={playlist.id}>
             <PlaylistDownloadButton
               name={playlist.name}
-              id={playlist.id}
-              url={`${Config.apiUrl}/playlist/${playlist.id}`}
+              url={`${Config.apiUrl}/playlist/${playlist.id}?download=true`}
             />
           </div>
         ))}
