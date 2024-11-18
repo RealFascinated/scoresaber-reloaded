@@ -183,8 +183,8 @@ export default class PlaylistService {
    */
   private static async generatePlaylistImage(author: string, title: string): Promise<string> {
     const image = new SSRImage({
-      width: 256,
-      height: 256,
+      width: 512,
+      height: 512,
     });
     await image.setBackgroundImage("https://cdn.fascinated.cc/cFkchQkc.png");
     image.drawText(
@@ -192,13 +192,13 @@ export default class PlaylistService {
         {
           text: author,
           color: "#000",
-          fontSize: 56,
+          fontSize: 100,
           fontFamily: "SSR",
         },
         {
           text: title,
           color: "#222222",
-          fontSize: 31,
+          fontSize: 62,
           fontFamily: "SSR",
         },
       ],
