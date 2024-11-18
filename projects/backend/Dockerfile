@@ -1,12 +1,20 @@
-# Install libuuid dependency for canvas package
+FROM oven/bun:1.1.33-alpine AS base
+
+# Install dependencies
+FROM base AS depends
+WORKDIR /app
+COPY . .
+RUN bun install --frozen-lockfile
+
+# Run the app
 FROM base AS runner
 WORKDIR /app
 
-# Install libuuid library required by the canvas package
+ENV NODE_ENV production
+
 RUN apk add --no-cache libuuid
 
-# Existing steps to set up the app
-ENV NODE_ENV production
+# Copy the depends
 COPY --from=depends /app/package.json* /app/bun.lockb* ./
 COPY --from=depends /app/node_modules ./node_modules
 
