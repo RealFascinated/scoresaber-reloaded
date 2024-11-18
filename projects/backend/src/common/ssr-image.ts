@@ -1,4 +1,7 @@
-import { Canvas, createCanvas, loadImage, SKRSContext2D } from "@napi-rs/canvas";
+import { Canvas, createCanvas, GlobalFonts, loadImage, SKRSContext2D } from "@napi-rs/canvas";
+import * as path from "node:path";
+
+GlobalFonts.registerFromPath(path.resolve("./src/common/font/Roboto-Medium.ttf"), "SSR");
 
 type ImageOptions = {
   /**
@@ -58,7 +61,7 @@ export default class SSRImage {
    * @param lineHeightMultiplier The line height multiplier for spacing between lines (default: 0.9).
    */
   public drawText(
-    lines: { text: string; fontSize: number; fontFamily?: "Arial"; color: string }[],
+    lines: { text: string; fontSize: number; fontFamily?: "Arial" | "SSR"; color: string }[],
     placement: TextPlacement,
     lineHeightMultiplier: number = 0.9 // Default to tighter line spacing
   ) {

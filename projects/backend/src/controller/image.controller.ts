@@ -40,11 +40,13 @@ export default class ImageController {
           text: "SSR",
           color: "#000",
           fontSize: 42,
+          fontFamily: "SSR",
         },
         {
           text: "Ranked Maps",
           color: "#222222",
           fontSize: 30,
+          fontFamily: "SSR",
         },
       ],
       "center",
