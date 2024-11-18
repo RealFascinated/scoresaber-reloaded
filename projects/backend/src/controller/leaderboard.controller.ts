@@ -19,9 +19,15 @@ export default class LeaderboardController {
     params: {
       leaderboard: Leaderboards;
       id: string;
-      page: number;
     };
   }): Promise<unknown> {
     return SuperJSON.stringify(await LeaderboardService.getLeaderboard(leaderboard, id));
+  }
+
+  @Get("/ranked", {
+    config: {},
+  })
+  public async getRankedLeaderboards(): Promise<unknown> {
+    return SuperJSON.stringify(await LeaderboardService.getRankedLeaderboards());
   }
 }
