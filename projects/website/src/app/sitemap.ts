@@ -42,7 +42,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     await fetchWithCache(cache, "player-sitemap", async () => {
       const playerLinks: MetadataRoute.Sitemap[] = [];
 
-      for (let page = 1; page <= 5; page++) {
+      for (let page = 1; page <= 25; page++) {
         const playersResponse = await scoresaberService.lookupPlayers(page);
 
         if (playersResponse !== undefined) {
