@@ -12,7 +12,14 @@ WORKDIR /app
 
 ENV NODE_ENV production
 
-RUN apk add --no-cache libuuid
+RUN apk add --no-cache \
+    cairo-dev \
+    pango-dev \
+    fontconfig-dev \
+    libjpeg-turbo-dev \
+    giflib-dev \
+    libpng-dev \
+    libuuid-dev
 
 # Copy the depends
 COPY --from=depends /app/package.json* /app/bun.lockb* ./
