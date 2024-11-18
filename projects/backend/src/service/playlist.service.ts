@@ -200,7 +200,7 @@ export default class PlaylistService {
           fontSize: 30,
         },
       ],
-      "center",
+      "top-left",
       0.8
     );
     return (await image.build()).toString("base64");
