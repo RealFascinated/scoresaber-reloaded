@@ -96,6 +96,13 @@ export class PlayerService {
       await player.save();
     }
 
+    // Reset peak rank if it's 0
+    if (player.peakRank?.rank == 0) {
+      player.peakRank = undefined;
+      player.markModified("peakRank");
+      await player.save();
+    }
+
     return player as PlayerDocument;
   }
 
@@ -325,9 +332,19 @@ export class PlayerService {
     console.log(`Tracked player "${foundPlayer.id}" in ${(performance.now() - before).toFixed(0)}ms`);
   }
 
+  /**
+   * Updates the player's peak rank.
+   *
+   * @param playerId the player's id
+   * @param playerToken the player's token
+   */
   public static async updatePeakRank(playerId: string, playerToken: ScoreSaberPlayerToken) {
     const foundPlayer = await PlayerService.getPlayer(playerId, true);
-    if (foundPlayer.peakRank && playerToken.rank < foundPlayer.peakRank.rank) {
+    if (playerToken.rank == 0) {
+      return foundPlayer;
+    }
+
+    if (!foundPlayer.peakRank || (foundPlayer.peakRank && playerToken.rank < foundPlayer.peakRank.rank)) {
       foundPlayer.peakRank = {
         rank: playerToken.rank,
         date: new Date(),
