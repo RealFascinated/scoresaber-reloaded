@@ -2,7 +2,19 @@ import PlaylistDownloadButton from "@/components/maps/playlist/playlist-download
 import { Config } from "@ssr/common/config";
 import Card from "@/components/card";
 
-const playlists = [
+type Playlist = {
+  /**
+   * The name of the playlist
+   */
+  name: string;
+
+  /**
+   * The id of the playlist
+   */
+  id: string;
+};
+
+const playlists: Playlist[] = [
   {
     name: "All Ranked Maps",
     id: "scoresaber-ranked-maps",
