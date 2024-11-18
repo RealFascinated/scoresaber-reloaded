@@ -18,9 +18,11 @@
     "@tqman/nice-logger": "^1.0.1",
     "@typegoose/auto-increment": "^4.7.0",
     "@typegoose/typegoose": "^12.8.0",
+    "@types/probe-image-size": "^7.2.5",
     "@typescript-eslint/eslint-plugin": "^8.9.0",
     "@typescript-eslint/parser": "^8.9.0",
     "@vercel/og": "^0.6.3",
+    "canvas": "^3.0.0-rc2",
     "discordx": "^11.12.1",
     "elysia": "latest",
     "elysia-autoroutes": "^0.5.0",
@@ -31,6 +33,8 @@
     "minio": "^8.0.2",
     "mongoose": "^8.7.0",
     "node-cache": "^5.1.2",
+    "node-canvas": "^2.9.0",
+    "probe-image-size": "^7.2.3",
     "react": "19.0.0-rc-1631855f-20241023"
   },
   "devDependencies": {

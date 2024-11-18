@@ -16,7 +16,7 @@ export class ImageService {
    *
    * @param children the content of the image
    */
-  public static BaseImage({ children }: { children: React.ReactNode }) {
+  public static BaseEmbedImage({ children }: { children: React.ReactNode }) {
     return (
       <div
         tw="w-full h-full flex flex-col text-white text-3xl p-3 justify-center items-center relative"
@@ -68,7 +68,7 @@ export class ImageService {
 
     return new ImageResponse(
       (
-        <ImageService.BaseImage>
+        <ImageService.BaseEmbedImage>
           {/* Player Avatar */}
           <img src={player.avatar} width={256} height={256} alt="Player's Avatar" tw="rounded-full mb-3" />
 
@@ -114,7 +114,7 @@ export class ImageService {
               })}
             </p>
           </div>
-        </ImageService.BaseImage>
+        </ImageService.BaseEmbedImage>
       ),
       imageOptions
     );
@@ -136,7 +136,7 @@ export class ImageService {
 
     return new ImageResponse(
       (
-        <ImageService.BaseImage>
+        <ImageService.BaseEmbedImage>
           {/* Leaderboard Cover Image */}
           <img src={leaderboard.songArt} width={256} height={256} alt="Leaderboard Cover" tw="rounded-full mb-3" />
 
@@ -158,7 +158,7 @@ export class ImageService {
 
           {/* Leaderboard Author */}
           <p tw="font-bold text-2xl text-gray-400 m-0 mt-2">Mapped by {leaderboard.levelAuthorName}</p>
-        </ImageService.BaseImage>
+        </ImageService.BaseEmbedImage>
       ),
       imageOptions
     );
