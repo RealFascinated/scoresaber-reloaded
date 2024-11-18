@@ -1,5 +1,14 @@
 FROM oven/bun:1.1.34-alpine AS base
 
+RUN apk add --no-cache \
+    cairo-dev \
+    pango-dev \
+    fontconfig-dev \
+    libjpeg-turbo-dev \
+    giflib-dev \
+    libpng-dev \
+    libuuid
+
 # Install dependencies
 FROM base AS depends
 WORKDIR /app
@@ -11,16 +20,6 @@ FROM base AS runner
 WORKDIR /app
 
 ENV NODE_ENV production
-
-RUN apk add --no-cache \
-    cairo-dev \
-    pango-dev \
-    fontconfig-dev \
-    libjpeg-turbo-dev \
-    giflib-dev \
-    libpng-dev \
-    libuuid
-
 
 # Copy the depends
 COPY --from=depends /app/package.json* /app/bun.lockb* ./
