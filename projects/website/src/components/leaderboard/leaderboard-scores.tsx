@@ -204,7 +204,7 @@ export default function LeaderboardScores({
       >
         <ScoreMode onModeChange={setSelectedMode} />
 
-        <div className="flex gap-2 flex-wrap">
+        <div className="flex gap-2 flex-wrap justify-center">
           {showDifficulties &&
             leaderboard.difficulties.map(({ difficulty, characteristic, leaderboardId }, index) => {
               if (characteristic !== "Standard") {

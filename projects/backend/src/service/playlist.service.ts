@@ -151,6 +151,7 @@ export default class PlaylistService {
         uniqueMaps.set(mapId, map);
       }
     }
+
     return new Playlist(
       id,
       title,
