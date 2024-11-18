@@ -1,7 +1,6 @@
 import { Controller, Get } from "elysia-decorators";
 import { t } from "elysia";
 import { ImageService } from "../service/image.service";
-import SSRImage from "../common/ssr-image";
 
 @Controller("/image")
 export default class ImageController {
