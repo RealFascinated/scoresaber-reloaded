@@ -14,7 +14,9 @@ export default class AppController {
 
   @Get("/health")
   public async getHealth() {
-    return "OK";
+    return {
+      status: "OK",
+    };
   }
 
   @Get("/statistics")
