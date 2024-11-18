@@ -33,7 +33,6 @@
     "minio": "^8.0.2",
     "mongoose": "^8.7.0",
     "node-cache": "^5.1.2",
-    "node-canvas": "^2.9.0",
     "probe-image-size": "^7.2.3",
     "react": "19.0.0-rc-1631855f-20241023"
   },
