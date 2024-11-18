@@ -13,7 +13,7 @@ RUN apk add --no-cache \
 FROM base AS depends
 WORKDIR /app
 COPY . .
-RUN bun install --frozen-lockfile
+RUN bun install --frozen-lockfile --build-from-source
 
 # Run the app
 FROM base AS runner
