@@ -19,7 +19,8 @@ RUN apk add --no-cache \
     libjpeg-turbo-dev \
     giflib-dev \
     libpng-dev \
-    libuuid-dev
+    libuuid
+
 
 # Copy the depends
 COPY --from=depends /app/package.json* /app/bun.lockb* ./
