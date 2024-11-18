@@ -89,16 +89,16 @@ export class PlayerService {
       }
     }
 
-    // Initialize player peak rank
-    if (player.peakRank == undefined) {
-      player.peakRank = player.getPeakRankFromHistory();
+    // Reset peak rank if it's 0
+    if (player.peakRank?.rank == 0) {
+      player.peakRank = undefined;
       player.markModified("peakRank");
       await player.save();
     }
 
-    // Reset peak rank if it's 0
-    if (player.peakRank?.rank == 0) {
-      player.peakRank = undefined;
+    // Initialize player peak rank
+    if (player.peakRank == undefined) {
+      player.peakRank = player.getPeakRankFromHistory();
       player.markModified("peakRank");
       await player.save();
     }

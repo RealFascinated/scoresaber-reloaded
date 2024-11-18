@@ -156,6 +156,10 @@ export class Player {
 
     for (const [date, stat] of Object.entries(this.getStatisticHistory())) {
       const parsedDate = parseDate(date);
+      if (stat.rank == 0) {
+        continue;
+      }
+
       if (
         stat.rank !== undefined &&
         (peakRank === undefined ||
