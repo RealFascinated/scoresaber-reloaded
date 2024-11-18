@@ -1,4 +1,4 @@
-import { Elysia } from "elysia";
+import { Context, Elysia } from "elysia";
 import cors from "@elysiajs/cors";
 import { decorators } from "elysia-decorators";
 import { logger } from "@tqman/nice-logger";
@@ -183,6 +183,10 @@ app.use(
  */
 app.use(etag());
 
+app.get("/healteeeh", () => {
+  return "ok";
+});
+
 /**
  * Enable CORS
  */
@@ -208,6 +212,30 @@ app.use(
     dnsPrefetchControl: true, // Enable DNS prefetch
   })
 );
+
+/**
+ * ETag middleware
+ *
+ * This is REALLY shitty, but it works.
+ */
+app.onAfterHandle({ as: "global" }, async ctx => {
+  const contextWithETag = ctx as unknown as Context & {
+    buildETagFor: (data: string) => string;
+    setETag: (etag: string) => void;
+    isNoneMatch: (etag: string) => boolean;
+  };
+
+  if (typeof contextWithETag.response === "object") {
+    const newEtag = contextWithETag.buildETagFor(JSON.stringify(ctx.response));
+    contextWithETag.setETag(newEtag);
+    if (contextWithETag.isNoneMatch(newEtag)) {
+      ctx.set.status = 304;
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-expect-error
+      ctx.response = {};
+    }
+  }
+});
 
 /**
  * Controllers
