@@ -1,14 +1,5 @@
 FROM oven/bun:1.1.34-alpine AS base
 
-RUN apk add --no-cache \
-    cairo-dev \
-    pango-dev \
-    fontconfig-dev \
-    libjpeg-turbo-dev \
-    giflib-dev \
-    libpng-dev \
-    libuuid
-
 # Install dependencies
 FROM base AS depends
 WORKDIR /app

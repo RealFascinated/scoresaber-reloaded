@@ -1,9 +1,4 @@
-import { Canvas, createCanvas, Image, registerFont } from "canvas";
-import ky from "ky";
-import * as path from "node:path";
-
-// Register external font
-registerFont(path.resolve("./src/common/font/Roboto-Medium.ttf"), { family: "SSR" });
+import { Canvas, createCanvas, loadImage, SKRSContext2D } from "@napi-rs/canvas";
 
 type ImageOptions = {
   /**
@@ -26,6 +21,11 @@ export default class SSRImage {
   private canvas: Canvas;
 
   /**
+   * The context to draw on the canvas
+   */
+  private ctx: SKRSContext2D;
+
+  /**
    * The options for the image
    */
   private options: ImageOptions;
@@ -38,13 +38,7 @@ export default class SSRImage {
   public constructor(options: ImageOptions) {
     this.options = options;
     this.canvas = createCanvas(options.width, options.height);
-  }
-
-  /**
-   * Gets the canvas context
-   */
-  public getContext() {
-    return this.canvas.getContext("2d");
+    this.ctx = this.canvas.getContext("2d")!;
   }
 
   /**
@@ -53,15 +47,7 @@ export default class SSRImage {
    * @param url the url of the image
    */
   public async setBackgroundImage(url: string) {
-    const imageBuffer = await ky.get(url).arrayBuffer();
-
-    // Create an Image instance and set its source
-    const img = new Image();
-    img.src = Buffer.from(imageBuffer);
-
-    // Draw the image on the canvas
-    const ctx = this.getContext();
-    ctx.drawImage(img, 0, 0, this.options.width, this.options.height);
+    this.ctx.drawImage(await loadImage(url), 0, 0, this.options.width, this.options.height);
   }
 
   /**
@@ -72,12 +58,10 @@ export default class SSRImage {
    * @param lineHeightMultiplier The line height multiplier for spacing between lines (default: 0.9).
    */
   public drawText(
-    lines: { text: string; fontSize: number; fontFamily: "Arial" | "SSR"; color: string }[],
+    lines: { text: string; fontSize: number; fontFamily?: "Arial"; color: string }[],
     placement: TextPlacement,
     lineHeightMultiplier: number = 0.9 // Default to tighter line spacing
   ) {
-    const ctx = this.getContext();
-
     // Calculate total height of the text block (considering line height and multiplier)
     const totalHeight = lines.reduce((height, line) => height + line.fontSize * lineHeightMultiplier, 0);
 
@@ -117,21 +101,21 @@ export default class SSRImage {
 
     // Draw each line with its own specific styles
     lines.forEach(line => {
-      ctx.font = `${line.fontSize}px ${line.fontFamily}`;
-      ctx.fillStyle = line.color; // Set the text color
+      this.ctx.font = `${line.fontSize}px ${line.fontFamily ?? "Arial"}`;
+      this.ctx.fillStyle = line.color; // Set the text color
 
-      console.log(ctx.font);
+      console.log(this.ctx.font);
 
       // Adjust X position for alignment (e.g., right-alignment or centering)
       let adjustedX = x;
       if (placement === "top-right" || placement === "bottom-right") {
-        adjustedX -= ctx.measureText(line.text).width; // Right-align the text
+        adjustedX -= this.ctx.measureText(line.text).width; // Right-align the text
       } else if (placement === "center") {
-        adjustedX = (this.options.width - ctx.measureText(line.text).width) / 2; // Center the text horizontally
+        adjustedX = (this.options.width - this.ctx.measureText(line.text).width) / 2; // Center the text horizontally
       }
 
       // Draw the current line
-      ctx.fillText(line.text, adjustedX, y);
+      this.ctx.fillText(line.text, adjustedX, y);
 
       // Move to the next line's Y position
       y += line.fontSize * lineHeightMultiplier;
@@ -142,6 +126,6 @@ export default class SSRImage {
    * Builds the image
    */
   public async build() {
-    return this.canvas.toBuffer("image/png");
+    return await this.canvas.encode("png");
   }
 }

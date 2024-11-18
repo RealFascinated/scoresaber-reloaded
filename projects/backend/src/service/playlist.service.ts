@@ -193,13 +193,11 @@ export default class PlaylistService {
           text: author,
           color: "#000",
           fontSize: 42,
-          fontFamily: "SSR",
         },
         {
           text: title,
           color: "#222222",
           fontSize: 30,
-          fontFamily: "SSR",
         },
       ],
       "center",

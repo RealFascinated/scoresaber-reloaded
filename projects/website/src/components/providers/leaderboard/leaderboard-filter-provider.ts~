@@ -1,0 +1,17 @@
+import { createContext, useContext } from "react";
+
+type FilterContextProps = {
+  country: string | undefined;
+
+  setCountry: (country: string | undefined) => void;
+};
+const LeaderboardFilterContext = createContext<FilterContextProps | undefined>(undefined);
+
+/**
+ * Use the filter context.
+ */
+export const useLeaderboardFilter = (): FilterContextProps => {
+  const context = useContext(LeaderboardFilterContext);
+  if (!context) throw new Error("useLeaderboardFilter must be used within a LeaderboardFilterContext");
+  return context;
+};

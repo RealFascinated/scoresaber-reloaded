@@ -1,0 +1,21 @@
+{
+  "name": "scoresaber-reloaded",
+  "version": "1.0.0",
+  "workspaces": [
+    "projects/*"
+  ],
+  "scripts": {
+    "dev:website": "bun --filter 'website' dev",
+    "dev:backend": "bun --filter 'backend' dev",
+    "dev:common": "bun --filter '@ssr/common' dev",
+    "dev": "concurrently \"bun run dev:common\" \"bun run dev:backend\""
+  },
+  "author": "fascinated7",
+  "license": "MIT",
+  "dependencies": {
+    "concurrently": "^9.1.0",
+    "cross-env": "^7.0.3",
+    "next": "15.0.3",
+    "superjson": "^2.2.1"
+  }
+}
