@@ -32,6 +32,11 @@ export default class Settings extends Entity<Database> {
   chartLegends?: Record<string, Record<string, boolean>>;
 
   /**
+   * The range to use for "what if?" chart
+   */
+  whatIfRange?: [number, number];
+
+  /**
    * Sets the players id
    *
    * @param id the new player id
@@ -102,6 +107,25 @@ export default class Settings extends Entity<Database> {
    */
   public setReplayViewer(viewer: ReplayViewerTypes) {
     this.replayViewer = viewer;
+    this.db.setSettings(this);
+  }
+
+  /**
+   * Gets the range to use for "what if?" chart
+   *
+   * @returns the range
+   */
+  public getWhatIfRange(): [number, number] {
+    return this.whatIfRange ?? [60, 100];
+  }
+
+  /**
+   * Sets the range to use for "what if?" chart
+   *
+   * @param range the range
+   */
+  public setWhatIfRange(range: [number, number]) {
+    this.whatIfRange = range;
     this.db.setSettings(this);
   }
 }

@@ -8,6 +8,7 @@ import { DatasetConfig } from "@/common/chart/types";
 import GenericChart from "@/components/chart/generic-chart";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
+import useSettings from "@/hooks/use-settings";
 
 type Props = {
   /**
@@ -17,7 +18,10 @@ type Props = {
 };
 
 export default function LeaderboardPpChart({ leaderboard }: Props) {
-  const [values, setValues] = useState([60, 100]);
+  const settings = useSettings();
+  const whatIfRange = settings.getWhatIfRange();
+
+  const [values, setValues] = useState([whatIfRange[0], whatIfRange[1]]);
   const debouncedValues = useDebounce(values, 100);
 
   const histories: Record<string, (number | null)[]> = {};
@@ -36,6 +40,11 @@ export default function LeaderboardPpChart({ leaderboard }: Props) {
     }
     histories["pp"].push(scoresaberService.getPp(leaderboard.stars, accuracy));
   }
+
+  const updateRange = (range: [number, number]) => {
+    setValues(range);
+    settings.setWhatIfRange(range);
+  };
 
   const datasetConfig: DatasetConfig[] = [
     {
@@ -65,7 +74,7 @@ export default function LeaderboardPpChart({ leaderboard }: Props) {
           <DualRangeSlider
             label={value => <span>{value}%</span>}
             value={values}
-            onValueChange={setValues}
+            onValueChange={updateRange}
             min={5}
             max={100}
             step={1}
