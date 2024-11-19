@@ -37,7 +37,6 @@ export function ScoreHistory({ playerId, leaderboard }: ScoreHistoryProps) {
   return (
     <>
       {data.items.map(({ score, leaderboard, beatSaver }) => {
-        console.log(score);
         return (
           <Score
             key={score.scoreId}
