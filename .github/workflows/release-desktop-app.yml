@@ -32,8 +32,8 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD}}
         with:
-          tagName: ssr-desktop-v__VERSION__
-          releaseName: 'ScoreSaber Reloaded Desktop App v__VERSION__'
+          tagName: ssr-desktop-v__VERSION__-${{ github.run_number }}
+          releaseName: 'ScoreSaber Reloaded Desktop App v__VERSION__-${{ github.run_number }}'
           releaseBody: 'Download this version of the ScoreSaber Reloaded Desktop App.'
           releaseDraft: false
           prerelease: false
