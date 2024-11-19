@@ -14,6 +14,7 @@ import { DailyChange } from "@/components/statistic/daily-change";
 import { ChangeOverTime } from "@/components/statistic/change-over-time";
 import { PlayerStatChange } from "@ssr/common/player/player-stat-change";
 import Avatar from "@/components/avatar";
+import PlayerBeatLeaderLink from "@/components/player/player-beatleader-link";
 
 const playerData = [
   {
@@ -111,6 +112,7 @@ export default function PlayerHeader({ player }: PlayerHeaderProps) {
               <div className="absolute lg:relative top-0 left-0 flex flex-col lg:flex-row gap-2 items-center">
                 <PlayerTrackedStatus player={player} />
                 <PlayerSteamProfile player={player} />
+                <PlayerBeatLeaderLink player={player} />
               </div>
             </div>
             <div className="flex flex-col">
