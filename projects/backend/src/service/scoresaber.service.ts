@@ -650,7 +650,7 @@ export default class ScoreSaberService {
                 score.score
               );
               if (additionalData !== undefined) {
-                score.additionalData = additionalData;
+                score.additionalData = additionalData.toObject();
               }
             }
 
