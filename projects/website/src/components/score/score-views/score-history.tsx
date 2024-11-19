@@ -36,18 +36,21 @@ export function ScoreHistory({ playerId, leaderboard }: ScoreHistoryProps) {
 
   return (
     <>
-      {data.items.map(({ score, leaderboard, beatSaver }) => (
-        <Score
-          key={score.scoreId}
-          score={score}
-          leaderboard={leaderboard}
-          beatSaverMap={beatSaver}
-          settings={{
-            hideLeaderboardDropdown: true,
-            hideAccuracyChanger: true,
-          }}
-        />
-      ))}
+      {data.items.map(({ score, leaderboard, beatSaver }) => {
+        console.log(score);
+        return (
+          <Score
+            key={score.scoreId}
+            score={score}
+            leaderboard={leaderboard}
+            beatSaverMap={beatSaver}
+            settings={{
+              hideLeaderboardDropdown: true,
+              hideAccuracyChanger: true,
+            }}
+          />
+        );
+      })}
 
       <Pagination
         mobilePagination={isMobile}

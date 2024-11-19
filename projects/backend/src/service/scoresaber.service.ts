@@ -513,7 +513,9 @@ export default class ScoreSaberService {
       .setTotalItems(scores.length)
       .getPage(page, async () => {
         const toReturn: PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>[] = [];
-        for (const score of scores) {
+        for (const scoreToken of scores) {
+          const score = scoreToken.toObject() as ScoreSaberScore;
+
           const leaderboardResponse = await LeaderboardService.getLeaderboard<ScoreSaberLeaderboard>(
             "scoresaber",
             leaderboardId
@@ -530,15 +532,11 @@ export default class ScoreSaberService {
             score.score
           );
           if (additionalData !== undefined) {
-            score.additionalData = additionalData;
-          }
-          const previousScore = await this.getPreviousScore(playerId, leaderboard, score.timestamp);
-          if (previousScore !== undefined) {
-            score.previousScore = previousScore;
+            score.additionalData = additionalData.toObject();
           }
 
           toReturn.push({
-            score: score as unknown as ScoreSaberScore,
+            score: score,
             leaderboard: leaderboard,
             beatSaver: beatsaver,
           });
