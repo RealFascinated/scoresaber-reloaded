@@ -1,18 +1,42 @@
 import { ensurePositiveNumber, formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import Tooltip from "@/components/tooltip";
+import { ReactNode } from "react";
 
 type ScoreMissesTooltipProps = {
+  /**
+   * The amount of missed notes.
+   */
   missedNotes: number;
+
+  /**
+   * The amount of bad cuts.
+   */
   badCuts: number;
+
+  /**
+   * The amount of bomb cuts.
+   */
   bombCuts?: number;
+
+  /**
+   * The amount of walls hit.
+   */
   wallsHit?: number;
+
+  /**
+   * The amount of pauses.
+   */
   pauses?: number;
+
+  /**
+   * Whether the play was a full combo.
+   */
   fullCombo?: boolean;
 
   /**
    * The tooltip children
    */
-  children: React.ReactNode;
+  children: ReactNode;
 };
 
 export function ScoreMissesTooltip({
@@ -43,7 +67,7 @@ export function ScoreMissesTooltip({
           ) : (
             <p>Full Combo</p>
           )}
-          {pauses && pauses > 0 ? <p>Pauses: {formatNumberWithCommas(ensurePositiveNumber(pauses))}</p> : undefined}
+          {pauses !== undefined ? <p>Pauses: {formatNumberWithCommas(ensurePositiveNumber(pauses))}</p> : undefined}
         </div>
       }
     >

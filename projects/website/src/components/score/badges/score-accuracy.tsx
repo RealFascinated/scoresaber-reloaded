@@ -4,17 +4,9 @@ import Tooltip from "@/components/tooltip";
 import { ScoreModifiers } from "@/components/score/score-modifiers";
 import { Change } from "@/components/change";
 import { ScoreBadgeProps } from "@/components/score/badges/badge-props";
-import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { formatScoreAccuracy } from "@ssr/common/utils/score.util";
 
-type ScoreAccuracyProps = ScoreBadgeProps & {
-  /**
-   * The leaderboard the score was set on.
-   */
-  leaderboard: ScoreSaberLeaderboard;
-};
-
-export function ScoreAccuracyBadge({ score, leaderboard }: ScoreAccuracyProps) {
+export function ScoreAccuracyBadge({ score }: ScoreBadgeProps) {
   const previousScore = score.previousScore;
 
   const fcAccuracy = score.additionalData?.fcAccuracy;
@@ -43,6 +35,7 @@ export function ScoreAccuracyBadge({ score, leaderboard }: ScoreAccuracyProps) {
               <div>
                 <p className="font-semibold">Accuracy</p>
                 <p>Score: {accDetails}</p>
+                <p>Accuracy: {formatScoreAccuracy(score)}</p>
                 {!score.fullCombo && fcAccuracy && <p>Full Combo: {fcAccuracy.toFixed(2)}%</p>}
               </div>
 
@@ -68,6 +61,7 @@ export function ScoreAccuracyBadge({ score, leaderboard }: ScoreAccuracyProps) {
                 <div>
                   <p className="font-semibold">Previous Accuracy</p>
                   <p>Score: {accDetails}</p>
+                  {score.previousScore && <p>Accuracy: {formatScoreAccuracy(score.previousScore)}</p>}
                   {!score.fullCombo && fcAccuracy && <p>Full Combo: {fcAccuracy.toFixed(2)}%</p>}
                 </div>
 

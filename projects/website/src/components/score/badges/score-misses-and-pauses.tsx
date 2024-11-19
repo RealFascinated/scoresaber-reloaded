@@ -19,31 +19,33 @@ export default function ScoreMissesAndPausesBadge({ score, hideXMark, hidePrevio
   const additionalData = score.additionalData;
   const previousMisses = additionalData?.misses;
 
+  const misses = score.misses + (previousMisses?.bombCuts ?? 0) + (previousMisses?.wallsHit ?? 0);
+  const previousMissCount =
+    (previousScore?.misses ?? 0) + (additionalData?.misses?.bombCuts ?? 0) + (additionalData?.misses?.wallsHit ?? 0);
+
   return (
     <div className="flex flex-row justify-center items-center w-full gap-1">
       <ScoreMissesTooltip
         missedNotes={score.missedNotes}
         badCuts={score.badCuts}
-        bombCuts={previousMisses?.bombCuts}
-        wallsHit={previousMisses?.wallsHit}
-        pauses={additionalData?.pauses}
+        bombCuts={previousMisses?.bombCuts ?? undefined}
+        wallsHit={previousMisses?.wallsHit ?? undefined}
+        pauses={additionalData?.pauses ?? undefined}
         fullCombo={score.fullCombo}
       >
-        <span>
-          {score.fullCombo ? <span className="text-green-400">FC</span> : formatNumberWithCommas(score.misses)}
-        </span>
+        <span>{score.fullCombo ? <span className="text-green-400">FC</span> : formatNumberWithCommas(misses)}</span>
         {!hideXMark && !score.fullCombo && <span>x</span>}
       </ScoreMissesTooltip>
       {previousScore && !hidePreviousScore && (
         <ScoreMissesTooltip
           missedNotes={previousScore.missedNotes}
           badCuts={previousScore.badCuts}
-          bombCuts={previousMisses?.bombCuts}
-          wallsHit={previousMisses?.wallsHit}
+          bombCuts={previousMisses?.bombCuts ?? undefined}
+          wallsHit={previousMisses?.wallsHit ?? undefined}
           pauses={
             additionalData && additionalData.scoreImprovement?.pauses
               ? additionalData.scoreImprovement.pauses - additionalData?.pauses
-              : 0
+              : undefined
           }
           fullCombo={previousScore.fullCombo}
         >
@@ -52,7 +54,7 @@ export default function ScoreMissesAndPausesBadge({ score, hideXMark, hidePrevio
             {previousScore.fullCombo ? (
               <span className="text-green-400">FC</span>
             ) : (
-              formatNumberWithCommas(previousScore.misses)
+              formatNumberWithCommas(previousMissCount)
             )}
             {!hideXMark && !previousScore.fullCombo && <span>x</span>})
           </span>

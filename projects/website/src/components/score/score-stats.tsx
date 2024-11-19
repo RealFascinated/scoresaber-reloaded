@@ -27,8 +27,8 @@ const badges: ScoreBadge[] = [
       const acc = (score.score / leaderboard.maxScore) * 100;
       return getScoreBadgeFromAccuracy(acc).color;
     },
-    create: (score: ScoreSaberScore, leaderboard: ScoreSaberLeaderboard) => {
-      return <ScoreAccuracyBadge score={score} leaderboard={leaderboard} />;
+    create: (score: ScoreSaberScore) => {
+      return <ScoreAccuracyBadge score={score} />;
     },
   },
   {

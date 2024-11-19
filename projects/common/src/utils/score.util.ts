@@ -10,6 +10,7 @@ import ScoreSaberLeaderboard from "../model/leaderboard/impl/scoresaber-leaderbo
 import Score from "../model/score/score";
 import { ScoreSaberScore } from "../model/score/impl/scoresaber-score";
 import { ScoreStatsToken } from "../types/token/beatleader/score-stats/score-stats";
+import { PreviousScore } from "../model/score/previous-score";
 
 /**
  * Fetches the player's scores
@@ -84,6 +85,6 @@ export async function fetchLeaderboardScores<S, L>(
  * @param score the score to format
  * @returns the formatted accuracy
  */
-export function formatScoreAccuracy(score: Score) {
+export function formatScoreAccuracy(score: Score | PreviousScore) {
   return (score.accuracy == null || score.accuracy == Infinity ? "-" : score.accuracy.toFixed(2)) + "%";
 }

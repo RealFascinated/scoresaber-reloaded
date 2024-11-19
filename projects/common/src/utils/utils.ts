@@ -103,7 +103,7 @@ export function formatChange(
   formatValue?: (value: number) => string,
   isPp = false
 ): string | undefined {
-  if (change === 0 || (change && change > 0 && change < 0.01) || change === undefined) {
+  if (change === 0 || change === undefined) {
     return undefined;
   }
 
