@@ -14,10 +14,10 @@ updates:
     schedule:
       interval: "daily"
   - package-ecosystem: "cargo" # See documentation for possible values
-    directory: "/" # Location of package manifests
+    directory: "/projects/desktop" # Location of package manifests
     schedule:
       interval: "daily"
   - package-ecosystem: "github-actions" # See documentation for possible values
-    directory: "/" # Location of package manifests
+    directory: "/.github" # Location of package manifests
     schedule:
       interval: "daily"
