@@ -43,8 +43,8 @@ export default function ScoreMissesAndPausesBadge({ score, hideXMark, hidePrevio
           bombCuts={previousMisses?.bombCuts ?? undefined}
           wallsHit={previousMisses?.wallsHit ?? undefined}
           pauses={
-            additionalData && additionalData.scoreImprovement?.pauses
-              ? additionalData.scoreImprovement.pauses - additionalData?.pauses
+            additionalData !== undefined && additionalData.scoreImprovement?.pauses !== undefined
+              ? additionalData?.pauses - additionalData.scoreImprovement.pauses
               : undefined
           }
           fullCombo={previousScore.fullCombo}
