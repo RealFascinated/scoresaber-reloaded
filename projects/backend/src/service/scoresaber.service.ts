@@ -658,6 +658,7 @@ export default class ScoreSaberService {
     leaderboardToken: ScoreSaberLeaderboardToken,
     playerId?: string
   ) {
+    const before = performance.now();
     playerId = (scoreToken.leaderboardPlayerInfo && scoreToken.leaderboardPlayerInfo.id) || playerId;
     if (!playerId) {
       console.error(`Player ID is undefined, unable to track score: ${scoreToken.id}`);
@@ -682,7 +683,19 @@ export default class ScoreSaberService {
 
     await ScoreSaberScoreModel.create(score);
     console.log(
-      `Tracked ScoreSaber score for "${playerName}"(${playerId}), difficulty: ${score.difficulty}, score: ${score.score}, pp: ${score.pp.toFixed(2)}pp, leaderboard: ${leaderboard.id}, hmd: ${score.hmd}, controller left: ${score.controllers?.leftController}, controller right: ${score.controllers?.rightController}`
+      [
+        `Tracked ScoreSaber score for "${playerName}"(${playerId})`,
+        `difficulty: ${score.difficulty}`,
+        `score: ${score.score}`,
+        score.pp > 0 ? `pp: ${score.pp.toFixed(2)}pp` : undefined,
+        `leaderboard: ${leaderboard.id}`,
+        `hmd: ${score.hmd}`,
+        score.controllers !== undefined ? `controller left: ${score.controllers.leftController}` : undefined,
+        score.controllers !== undefined ? `controller right: ${score.controllers.rightController}` : undefined,
+        `in ${(performance.now() - before).toFixed(0)}ms`,
+      ]
+        .filter(s => s !== undefined)
+        .join(", ")
     );
     return true;
   }
