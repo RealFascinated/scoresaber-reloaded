@@ -444,6 +444,39 @@ class ScoreSaberService extends Service {
       ? this.calcRawPpAtIdx(scoresPps, 0, expectedPp)
       : this.calcRawPpAtIdx(scoresPps.slice(boundaryIdx + 1), boundaryIdx + 1, expectedPp);
   }
+
+  /**
+   * Gets the boundary for a given raw PP value.
+   *
+   * @param scoresPps The sorted scores PP array.
+   * @param rawPp The raw PP value to evaluate.
+   * @returns The PP boundary corresponding to the given raw PP.
+   */
+  public getPpBoundaryForRawPp(scoresPps: number[], rawPp: number): number {
+    // If there are no existing scores, the boundary is just the raw PP
+    if (!scoresPps.length) {
+      return rawPp;
+    }
+
+    // Create a copy of scores and find where the new PP would fit
+    const newScores = [...scoresPps];
+    let insertIndex = newScores.findIndex(pp => rawPp > pp);
+
+    // If the new PP is smaller than all existing scores, add it to the end
+    if (insertIndex === -1) {
+      insertIndex = newScores.length;
+    }
+
+    // Insert the new PP value at the correct position
+    newScores.splice(insertIndex, 0, rawPp);
+
+    // Calculate the total weighted PP before and after insertion
+    const oldTotal = this.getTotalWeightedPp(scoresPps);
+    const newTotal = this.getTotalWeightedPp(newScores);
+
+    // The boundary is the difference between the new and old totals
+    return newTotal - oldTotal;
+  }
 }
 
 export const scoresaberService = new ScoreSaberService();

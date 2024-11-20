@@ -201,6 +201,36 @@ export class PlayerService {
   }
 
   /**
+   * Gets the pp boundary amount for a pp value.
+   *
+   * @param playerId the player's id
+   * @param boundary the pp boundary
+   */
+  public static async getPlayerPpBoundaryFromScorePp(playerId: string, boundary: number = 1): Promise<number> {
+    const scoresPps = await fetchWithCache<number[]>(
+      CacheService.getCache(ServiceCache.PPBoundary),
+      `pp-boundary-scores:${playerId}`,
+      async () => {
+        await PlayerService.getPlayer(playerId); // Ensure player exists
+        const playerScores = await ScoreSaberService.getPlayerScores(playerId, {
+          ranked: true,
+          sort: "pp",
+          projection: {
+            pp: 1,
+          },
+        });
+        return playerScores.map(score => score.pp);
+      }
+    );
+
+    if (scoresPps.length === 0) {
+      return 0;
+    }
+
+    return scoresaberService.getPpBoundaryForRawPp(scoresPps, boundary);
+  }
+
+  /**
    * Gets the score calendar for a player.
    *
    * @param playerId the player's id
