@@ -72,7 +72,7 @@ export default function RankingData({ initialPage, country, initialPageData }: R
         </div>
 
         <div className="flex items-center gap-2">
-          <p>Show relative performance points difference</p>
+          <p>Toggle relative pp difference</p>
           <Switch
             checked={showRelativePPDifference}
             onCheckedChange={checked => {
