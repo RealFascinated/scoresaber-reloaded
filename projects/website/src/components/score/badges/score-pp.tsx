@@ -43,7 +43,7 @@ export function ScorePpBadge({ score, leaderboard }: ScorePpProps) {
         >
           <p>{formatPp(pp)}pp</p>
         </Tooltip>
-        {previousScore && previousScore.change && (
+        {previousScore && previousScore.change && previousScore.pp !== score.pp && (
           <Tooltip display={<p>Previous PP: {formatPp(previousScore.pp)}pp</p>}>
             <Change className="text-xs" change={ensurePositiveNumber(previousScore.change.pp)} isPp />
           </Tooltip>
