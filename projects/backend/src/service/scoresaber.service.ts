@@ -514,7 +514,7 @@ export default class ScoreSaberService {
       .getPage(page, async () => {
         const toReturn: PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>[] = [];
         for (const scoreToken of scores) {
-          const score = scoreToken.toObject() as ScoreSaberScore;
+          let score = scoreToken.toObject() as ScoreSaberScore;
 
           const leaderboardResponse = await LeaderboardService.getLeaderboard<ScoreSaberLeaderboard>(
             "scoresaber",
@@ -525,16 +525,7 @@ export default class ScoreSaberService {
           }
           const { leaderboard, beatsaver } = leaderboardResponse;
 
-          const additionalData = await BeatLeaderService.getAdditionalScoreData(
-            playerId,
-            leaderboard.songHash,
-            `${leaderboard.difficulty.difficulty}-${leaderboard.difficulty.characteristic}`,
-            score.score
-          );
-          if (additionalData !== undefined) {
-            score.additionalData = additionalData.toObject();
-          }
-
+          score = await ScoreSaberService.insertScoreData(score, leaderboard);
           toReturn.push({
             score: score,
             leaderboard: leaderboard,
@@ -635,26 +626,7 @@ export default class ScoreSaberService {
           ]);
           for (const friendScore of friendScores) {
             const score = new ScoreSaberScoreModel(friendScore.score).toObject() as ScoreSaberScore;
-            const leaderboardResponse = await LeaderboardService.getLeaderboard<ScoreSaberLeaderboard>(
-              "scoresaber",
-              score.leaderboardId + ""
-            );
-
-            if (leaderboardResponse !== undefined) {
-              const { leaderboard } = leaderboardResponse;
-
-              const additionalData = await BeatLeaderService.getAdditionalScoreData(
-                score.playerId,
-                leaderboard.songHash,
-                `${leaderboard.difficulty.difficulty}-${leaderboard.difficulty.characteristic}`,
-                score.score
-              );
-              if (additionalData !== undefined) {
-                score.additionalData = additionalData.toObject();
-              }
-            }
-
-            scores.push(score);
+            scores.push(await ScoreSaberService.insertScoreData(score));
           }
         }
 
@@ -749,7 +721,7 @@ export default class ScoreSaberService {
 
     const scores: (PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard> | null)[] = await Promise.all(
       foundScores.map(async ({ score: scoreData }) => {
-        const score = new ScoreSaberScoreModel(scoreData).toObject() as ScoreSaberScore;
+        let score = new ScoreSaberScoreModel(scoreData).toObject() as ScoreSaberScore;
 
         const leaderboardResponse = await LeaderboardService.getLeaderboard<ScoreSaberLeaderboard>(
           "scoresaber",
@@ -775,23 +747,7 @@ export default class ScoreSaberService {
           };
         }
 
-        const [additionalData, previousScore] = await Promise.all([
-          BeatLeaderService.getAdditionalScoreData(
-            score.playerId,
-            leaderboard.songHash,
-            `${leaderboard.difficulty.difficulty}-${leaderboard.difficulty.characteristic}`,
-            score.score
-          ),
-          ScoreSaberService.getPreviousScore(score.playerId, leaderboard, score.timestamp),
-        ]);
-
-        if (additionalData) {
-          score.additionalData = additionalData.toObject();
-        }
-        if (previousScore) {
-          score.previousScore = previousScore;
-        }
-
+        score = await ScoreSaberService.insertScoreData(score, leaderboard);
         return {
           score: score,
           leaderboard: leaderboard,
@@ -810,5 +766,43 @@ export default class ScoreSaberService {
       `Got ${filteredScores.length} scores in ${Date.now() - before}ms (timeframe: ${timeframe}, limit: ${amount})`
     );
     return filteredScores;
+  }
+
+  /**
+   * Inserts the score data into the score.
+   *
+   * @param score the score to insert data into
+   * @param leaderboard the leaderboard to get the data from
+   * @returns the score with the data inserted
+   */
+  public static async insertScoreData(score: ScoreSaberScore, leaderboard?: ScoreSaberLeaderboard) {
+    leaderboard = !leaderboard
+      ? (await LeaderboardService.getLeaderboard<ScoreSaberLeaderboard>("scoresaber", score.leaderboardId + ""))
+          .leaderboard
+      : leaderboard;
+
+    // If the leaderboard is not found, return the plain score
+    if (!leaderboard) {
+      return score;
+    }
+
+    const [additionalData, previousScore] = await Promise.all([
+      BeatLeaderService.getAdditionalScoreData(
+        score.playerId,
+        leaderboard.songHash,
+        `${leaderboard.difficulty.difficulty}-${leaderboard.difficulty.characteristic}`,
+        score.score
+      ),
+      ScoreSaberService.getPreviousScore(score.playerId, leaderboard, score.timestamp),
+    ]);
+
+    if (additionalData !== undefined) {
+      score.additionalData = additionalData.toObject();
+    }
+    if (previousScore) {
+      score.previousScore = previousScore;
+    }
+
+    return score;
   }
 }

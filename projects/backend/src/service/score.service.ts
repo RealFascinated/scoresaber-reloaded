@@ -62,29 +62,12 @@ export class ScoreService {
                 return undefined;
               }
               const { leaderboard, beatsaver } = leaderboardResponse;
-              const score = getScoreSaberScoreFromToken(token.score, leaderboard, playerId);
+              let score = getScoreSaberScoreFromToken(token.score, leaderboard, playerId);
               if (!score) {
                 return undefined;
               }
 
-              // Fetch additional data, previous score, and BeatSaver map concurrently
-              const [additionalData, previousScore] = await Promise.all([
-                BeatLeaderService.getAdditionalScoreData(
-                  playerId,
-                  leaderboard.songHash,
-                  `${leaderboard.difficulty.difficulty}-${leaderboard.difficulty.characteristic}`,
-                  score.score
-                ),
-                ScoreSaberService.getPreviousScore(playerId, leaderboard, score.timestamp),
-              ]);
-
-              if (additionalData) {
-                score.additionalData = additionalData.toObject();
-              }
-              if (previousScore) {
-                score.previousScore = previousScore;
-              }
-
+              score = await ScoreSaberService.insertScoreData(score, leaderboard);
               return {
                 score: score,
                 leaderboard: leaderboard,
