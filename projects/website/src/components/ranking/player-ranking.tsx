@@ -1,8 +1,6 @@
 "use client";
 
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
-import useDatabase from "@/hooks/use-database";
-import { useLiveQuery } from "dexie-react-hooks";
 import { clsx } from "clsx";
 import { PlayerInfo } from "@/components/player/player-info";
 import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/player";
