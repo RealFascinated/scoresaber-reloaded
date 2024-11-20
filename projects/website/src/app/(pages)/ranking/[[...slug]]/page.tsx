@@ -1,9 +1,6 @@
 import { Metadata } from "next";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
-import Card from "@/components/card";
 import RankingData from "@/components/ranking/ranking-data";
-import CountryFlag from "@/components/country-flag";
-import { normalizedRegionName } from "@ssr/common/utils/region-utils";
 import { cache } from "react";
 import { ScoreSaberPlayersPageToken } from "@ssr/common/types/token/scoresaber/players-page";
 
@@ -87,16 +84,7 @@ export default async function RankingPage(props: Props) {
 
   return (
     <main className="flex w-full flex-col items-center text-sm">
-      <Card className="h-full w-full w-full xl:max-w-[75%] gap-2">
-        <div className="flex items-center gap-2 font-semibold">
-          {country && <CountryFlag code={country} size={16} />}
-          <p>
-            You are viewing {country ? "players from " + normalizedRegionName(country.toUpperCase()) : "Global players"}
-          </p>
-        </div>
-
-        <RankingData initialPage={page} initialPageData={players} country={country} />
-      </Card>
+      <RankingData initialPage={page} initialPageData={players} country={country} />
     </main>
   );
 }
