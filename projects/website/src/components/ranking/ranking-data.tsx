@@ -11,6 +11,8 @@ import CountryFlag from "@/components/country-flag";
 import { normalizedRegionName } from "@ssr/common/utils/region-utils";
 import Card from "@/components/card";
 import { Switch } from "@/components/ui/switch";
+import { useLiveQuery } from "dexie-react-hooks";
+import useDatabase from "@/hooks/use-database";
 
 type RankingDataProps = {
   initialPage: number;
@@ -20,6 +22,8 @@ type RankingDataProps = {
 
 export default function RankingData({ initialPage, country, initialPageData }: RankingDataProps) {
   const isMobile = useIsMobile();
+  const database = useDatabase();
+  const claimedPlayer = useLiveQuery(() => database.getClaimedPlayer());
 
   const [showRelativePPDifference, setShowRelativePPDifference] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState(initialPage);
@@ -71,15 +75,17 @@ export default function RankingData({ initialPage, country, initialPageData }: R
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
-          <p>Toggle relative pp difference</p>
-          <Switch
-            checked={showRelativePPDifference}
-            onCheckedChange={checked => {
-              setShowRelativePPDifference(checked);
-            }}
-          />
-        </div>
+        {claimedPlayer !== undefined && (
+          <div className="flex items-center gap-2">
+            <p>Toggle relative pp difference</p>
+            <Switch
+              checked={showRelativePPDifference}
+              onCheckedChange={checked => {
+                setShowRelativePPDifference(checked);
+              }}
+            />
+          </div>
+        )}
       </div>
       <div className="flex flex-col gap-2">
         {/* Wrapping the table in a scrollable container */}
@@ -103,6 +109,7 @@ export default function RankingData({ initialPage, country, initialPageData }: R
                     isCountry={country != undefined}
                     player={player}
                     relativePerformancePoints={showRelativePPDifference}
+                    claimedPlayer={claimedPlayer}
                   />
                 </tr>
               ))}

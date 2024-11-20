@@ -11,14 +11,12 @@ import { cn } from "@/common/utils";
 
 type PlayerRankingProps = {
   player: ScoreSaberPlayerToken;
+  claimedPlayer?: ScoreSaberPlayerToken;
   isCountry: boolean;
   relativePerformancePoints: boolean;
 };
 
-export function PlayerRanking({ player, isCountry, relativePerformancePoints }: PlayerRankingProps) {
-  const database = useDatabase();
-  const claimedPlayer = useLiveQuery(() => database.getClaimedPlayer());
-
+export function PlayerRanking({ player, claimedPlayer, isCountry, relativePerformancePoints }: PlayerRankingProps) {
   const history = player.histories.split(",").map(Number);
   const weeklyRankChange = history[history?.length - 6] - player.rank;
   const ppDifference = claimedPlayer ? player.pp - claimedPlayer.pp : 0;
