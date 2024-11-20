@@ -51,7 +51,7 @@ export function PlayerRanking({ player, isCountry, relativePerformancePoints }: 
           weeklyRankChange >= 0 ? weeklyRankChange != 0 && "text-green-500" : "text-red-500"
         )}
       >
-        {formatNumberWithCommas(weeklyRankChange)}
+        {weeklyRankChange == 0 ? 0 : formatChange(weeklyRankChange, formatNumberWithCommas)}
       </td>
     </>
   );
