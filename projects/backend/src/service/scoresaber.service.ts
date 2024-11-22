@@ -799,7 +799,7 @@ export default class ScoreSaberService {
       return score;
     }
 
-    const [additionalData, previousScore, scorePpBoundary] = await Promise.all([
+    const [additionalData, previousScore] = await Promise.all([
       BeatLeaderService.getAdditionalScoreData(
         score.playerId,
         leaderboard.songHash,
@@ -807,7 +807,7 @@ export default class ScoreSaberService {
         score.score
       ),
       ScoreSaberService.getPreviousScore(score.playerId, leaderboard, score.timestamp),
-      score.pp > 0 ? PlayerService.getPlayerPpBoundaryFromScorePp(score.playerId, score.pp) : undefined,
+      ,
     ]);
 
     if (additionalData !== undefined) {
@@ -816,8 +816,15 @@ export default class ScoreSaberService {
     if (previousScore) {
       score.previousScore = previousScore;
     }
-    if (scorePpBoundary) {
-      score.ppBoundary = scorePpBoundary;
+
+    try {
+      const scorePpBoundary =
+        score.pp > 0 ? await PlayerService.getPlayerPpBoundaryFromScorePp(score.playerId, score.pp) : undefined;
+      if (scorePpBoundary) {
+        score.ppBoundary = scorePpBoundary;
+      }
+    } catch {
+      // ignored
     }
 
     return score;
