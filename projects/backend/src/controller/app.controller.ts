@@ -4,7 +4,10 @@ import { AppService } from "../service/app.service";
 
 @Controller()
 export default class AppController {
-  @Get("/")
+  @Get("/", {
+    config: {},
+    tags: ["app"],
+  })
   public async index() {
     return {
       app: "backend",
@@ -14,6 +17,7 @@ export default class AppController {
 
   @Get("/health", {
     config: {},
+    tags: ["app"],
     detail: {
       description: "Get the health of the app.",
     },
@@ -26,6 +30,7 @@ export default class AppController {
 
   @Get("/statistics", {
     config: {},
+    tags: ["app"],
     detail: {
       description: "Get the statistics for the app.",
     },

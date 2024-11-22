@@ -7,6 +7,7 @@ import { Swagger } from "../common/swagger";
 export default class ImageController {
   @Get("/player/:id", {
     config: {},
+    tags: ["image"],
     params: t.Object({
       id: t.String({ required: true }),
     }),
@@ -29,6 +30,7 @@ export default class ImageController {
 
   @Get("/leaderboard/:id", {
     config: {},
+    tags: ["image"],
     params: t.Object({
       id: t.String({ required: true }),
     }),

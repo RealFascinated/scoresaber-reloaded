@@ -9,6 +9,7 @@ import { Swagger } from "../common/swagger";
 export default class LeaderboardController {
   @Get("/:leaderboard/:id", {
     config: {},
+    tags: ["leaderboard"],
     params: t.Object({
       id: t.String({ required: true }),
       leaderboard: t.String({ required: true }),
@@ -36,6 +37,7 @@ export default class LeaderboardController {
 
   @Get("/ranked", {
     config: {},
+    tags: ["leaderboard"],
     detail: {
       responses: {
         200: {

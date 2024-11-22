@@ -7,6 +7,7 @@ import { Swagger } from "../common/swagger";
 export default class PlaylistController {
   @Get("/:id", {
     config: {},
+    tags: ["playlist"],
     params: t.Object({
       id: t.String({ required: true }),
     }),

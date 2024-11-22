@@ -14,6 +14,7 @@ import { Swagger } from "../common/swagger";
 export default class PlayerController {
   @Get("/:id", {
     config: {},
+    tags: ["player"],
     params: t.Object({
       id: t.String({ required: true }),
     }),
@@ -44,6 +45,7 @@ export default class PlayerController {
 
   @Post("/track/:id", {
     config: {},
+    tags: ["player"],
     params: t.Object({
       id: t.String({ required: true }),
     }),
@@ -63,6 +65,7 @@ export default class PlayerController {
 
   @Get("/tracked/:id", {
     config: {},
+    tags: ["player"],
     params: t.Object({
       id: t.String({ required: true }),
     }),
@@ -98,6 +101,7 @@ export default class PlayerController {
 
   @Get("/around/:id/:type", {
     config: {},
+    tags: ["player"],
     params: t.Object({
       id: t.String({ required: true }),
       type: t.String({ required: true }),
@@ -124,6 +128,7 @@ export default class PlayerController {
 
   @Get("/pp-boundary/:id/:boundary", {
     config: {},
+    tags: ["player"],
     params: t.Object({
       id: t.String({ required: true }),
       boundary: t.Number({ maximum: 50, minimum: 1 }),
@@ -151,6 +156,7 @@ export default class PlayerController {
 
   @Get("/history/calendar/:id/:year/:month", {
     config: {},
+    tags: ["player"],
     params: t.Object({
       id: t.String({ required: true }),
       year: t.Number({ required: true }),

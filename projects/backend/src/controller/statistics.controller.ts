@@ -8,6 +8,7 @@ import StatisticsService from "../service/statistics.service";
 export default class StatisticsController {
   @Get("/:platform", {
     config: {},
+    tags: ["statistics"],
     params: t.Object({
       platform: t.String({ required: true }),
     }),

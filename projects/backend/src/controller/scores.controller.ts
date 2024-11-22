@@ -11,6 +11,7 @@ import BeatLeaderService from "../service/beatleader.service";
 export default class ScoresController {
   @Get("/player/:leaderboard/:id/:page/:sort", {
     config: {},
+    tags: ["scores"],
     params: t.Object({
       leaderboard: t.String({ required: true }),
       id: t.String({ required: true }),
@@ -49,6 +50,7 @@ export default class ScoresController {
 
   @Get("/leaderboard/:leaderboard/:id/:page", {
     config: {},
+    tags: ["scores"],
     params: t.Object({
       leaderboard: t.String({ required: true }),
       id: t.String({ required: true }),
@@ -85,6 +87,7 @@ export default class ScoresController {
 
   @Get("/history/:playerId/:leaderboardId/:page", {
     config: {},
+    tags: ["scores"],
     params: t.Object({
       playerId: t.String({ required: true }),
       leaderboardId: t.String({ required: true }),
@@ -116,6 +119,7 @@ export default class ScoresController {
 
   @Get("/top", {
     config: {},
+    tags: ["scores"],
     query: t.Object({
       limit: t.Number({ required: true }),
       timeframe: t.String({ required: true }),
@@ -153,6 +157,7 @@ export default class ScoresController {
 
   @Get("/friends/:leaderboardId/:page", {
     config: {},
+    tags: ["scores"],
     params: t.Object({
       leaderboardId: t.Number({ required: true }),
       page: t.Number({ required: true }),
@@ -192,6 +197,7 @@ export default class ScoresController {
 
   @Get("/scorestats/:id", {
     config: {},
+    tags: ["scores"],
     params: t.Object({
       id: t.Number({ required: true }),
     }),
