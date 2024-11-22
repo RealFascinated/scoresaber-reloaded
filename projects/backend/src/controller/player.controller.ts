@@ -18,8 +18,8 @@ export default class PlayerController {
       id: t.String({ required: true }),
     }),
     query: t.Object({
-      createIfMissing: t.Boolean({ default: false, required: false }),
-      superJson: t.Boolean({ default: false, required: false }),
+      createIfMissing: t.Optional(t.Boolean({ default: false })),
+      superJson: t.Optional(t.Boolean({ default: false })),
     }),
     detail: {
       responses: {
