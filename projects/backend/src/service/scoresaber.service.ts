@@ -807,7 +807,6 @@ export default class ScoreSaberService {
         score.score
       ),
       ScoreSaberService.getPreviousScore(score.playerId, leaderboard, score.timestamp),
-      ,
     ]);
 
     if (additionalData !== undefined) {
