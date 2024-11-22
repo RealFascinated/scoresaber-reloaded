@@ -3,6 +3,7 @@ import { t } from "elysia";
 import { Leaderboards } from "@ssr/common/leaderboard";
 import LeaderboardService from "../service/leaderboard.service";
 import SuperJSON from "superjson";
+import { Swagger } from "../common/swagger";
 
 @Controller("/leaderboard")
 export default class LeaderboardController {
@@ -12,6 +13,15 @@ export default class LeaderboardController {
       id: t.String({ required: true }),
       leaderboard: t.String({ required: true }),
     }),
+    detail: {
+      responses: {
+        200: {
+          description: "The leaderboard.",
+        },
+        ...Swagger.responses.leaderboardNotFound,
+      },
+      description: "Lookup a leaderboard",
+    },
   })
   public async getLeaderboard({
     params: { leaderboard, id },
@@ -26,6 +36,14 @@ export default class LeaderboardController {
 
   @Get("/ranked", {
     config: {},
+    detail: {
+      responses: {
+        200: {
+          description: "The ranked leaderboards.",
+        },
+      },
+      description: "Fetches all ranked leaderboards on ScoreSaber.",
+    },
   })
   public async getRankedLeaderboards(): Promise<unknown> {
     return SuperJSON.stringify(await LeaderboardService.getRankedLeaderboards());

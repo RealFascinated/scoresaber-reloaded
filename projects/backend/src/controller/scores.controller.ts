@@ -20,6 +20,17 @@ export default class ScoresController {
     query: t.Object({
       search: t.Optional(t.String()),
     }),
+    detail: {
+      responses: {
+        200: {
+          description: "The scores for a player.",
+        },
+        404: {
+          description: "The player or leaderboard was not found.",
+        },
+      },
+      description: "Lookup a scores for a player",
+    },
   })
   public async getScores({
     params: { leaderboard, id, page, sort },
@@ -46,6 +57,17 @@ export default class ScoresController {
     query: t.Object({
       country: t.Optional(t.String()),
     }),
+    detail: {
+      responses: {
+        200: {
+          description: "The scores for a leaderboard.",
+        },
+        404: {
+          description: "The leaderboard was not found.",
+        },
+      },
+      description: "Lookup a scores for a leaderboard",
+    },
   })
   public async getLeaderboardScores({
     params: { leaderboard, id, page },
@@ -68,6 +90,17 @@ export default class ScoresController {
       leaderboardId: t.String({ required: true }),
       page: t.Number({ required: true }),
     }),
+    detail: {
+      responses: {
+        200: {
+          description: "The score history for a player.",
+        },
+        404: {
+          description: "The player or leaderboard was not found.",
+        },
+      },
+      description: "Lookup a score history for a player",
+    },
   })
   public async getScoreHistory({
     params: { playerId, leaderboardId, page },
@@ -87,6 +120,14 @@ export default class ScoresController {
       limit: t.Number({ required: true }),
       timeframe: t.String({ required: true }),
     }),
+    detail: {
+      responses: {
+        200: {
+          description: "The top scores set based on a timeframe.",
+        },
+      },
+      description: "Lookup the top scores set based on a timeframe",
+    },
   })
   public async getTopScores({
     query: { limit, timeframe },
@@ -119,6 +160,17 @@ export default class ScoresController {
     query: t.Object({
       friendIds: t.String({ required: true }),
     }),
+    detail: {
+      responses: {
+        200: {
+          description: "The scores set on a leaderboard for the given players.",
+        },
+        404: {
+          description: "The player(s) or leaderboard was not found.",
+        },
+      },
+      description: "Lookup scores for player(s) on a leaderboard",
+    },
   })
   public async getFriendScores({
     params: { leaderboardId, page },
@@ -143,6 +195,17 @@ export default class ScoresController {
     params: t.Object({
       id: t.Number({ required: true }),
     }),
+    detail: {
+      responses: {
+        200: {
+          description: "The score stats for a score.",
+        },
+        404: {
+          description: "The score was not found.",
+        },
+      },
+      description: "Lookup score stats for a score",
+    },
   })
   public async getScoreStats({
     params: { id },

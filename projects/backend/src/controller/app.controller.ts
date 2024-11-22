@@ -12,14 +12,24 @@ export default class AppController {
     };
   }
 
-  @Get("/health")
+  @Get("/health", {
+    config: {},
+    detail: {
+      description: "Get the health of the app.",
+    },
+  })
   public async getHealth() {
     return {
       status: "OK",
     };
   }
 
-  @Get("/statistics")
+  @Get("/statistics", {
+    config: {},
+    detail: {
+      description: "Get the statistics for the app.",
+    },
+  })
   public async getStatistics() {
     return await AppService.getAppStatistics();
   }

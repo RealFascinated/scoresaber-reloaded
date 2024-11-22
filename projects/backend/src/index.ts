@@ -183,10 +183,6 @@ app.use(
  */
 app.use(etag());
 
-app.get("/healteeeh", () => {
-  return "ok";
-});
-
 /**
  * Enable CORS
  */

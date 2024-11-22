@@ -1,6 +1,7 @@
 import { Controller, Get } from "elysia-decorators";
 import { t } from "elysia";
 import PlaylistService from "../service/playlist.service";
+import { Swagger } from "../common/swagger";
 
 @Controller("/playlist")
 export default class PlaylistController {
@@ -12,6 +13,15 @@ export default class PlaylistController {
     query: t.Object({
       download: t.Optional(t.Boolean()),
     }),
+    detail: {
+      responses: {
+        200: {
+          description: "The playlist.",
+        },
+        ...Swagger.responses.playlistNotFound,
+      },
+      description: "Lookup a playlist",
+    },
   })
   public async getPlaylist({
     params: { id },

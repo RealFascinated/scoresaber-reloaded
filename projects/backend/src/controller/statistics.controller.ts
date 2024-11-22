@@ -11,6 +11,14 @@ export default class StatisticsController {
     params: t.Object({
       platform: t.String({ required: true }),
     }),
+    detail: {
+      responses: {
+        200: {
+          description: "The platform statistics.",
+        },
+      },
+      description: "Lookup platform statistics",
+    },
   })
   public async getPlatformStatistics({
     params: { platform },
