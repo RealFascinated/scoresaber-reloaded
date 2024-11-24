@@ -45,7 +45,6 @@ export class Playlist {
           songName: song.songName,
           levelAuthorName: song.songAuthor,
           hash: song.songHash,
-          levelid: `custom_level_${song.songHash}`,
           difficulties: song.difficulties.map(difficulty => {
             return {
               characteristic: difficulty.characteristic,
