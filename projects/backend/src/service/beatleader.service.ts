@@ -80,9 +80,16 @@ export default class BeatLeaderService {
   public static async trackBeatLeaderScore(score: BeatLeaderScoreToken) {
     const before = Date.now();
     const { playerId, player: scorePlayer, leaderboard } = score;
-    const player: PlayerDocument | null = await PlayerModel.findById(playerId);
-    // Player is not tracked, so ignore the score.
-    if (player == undefined) {
+
+    // The score has already been tracked, so ignore it.
+    if (
+      await BeatLeaderService.hasAdditionalScoreData(
+        playerId,
+        leaderboard.song.hash,
+        leaderboard.difficulty.difficultyName,
+        score.baseScore
+      )
+    ) {
       return;
     }
 
@@ -94,8 +101,10 @@ export default class BeatLeaderService {
     // Only save replays in production
     let savedReplayId: string | undefined;
     if (isProduction()) {
+      const player: PlayerDocument | null = await PlayerModel.findById(playerId);
+
       // Cache replay for this score
-      if (player.trackReplays) {
+      if (player && player.trackReplays) {
         try {
           const replayId = `${score.id}-${playerId}-${leaderboard.difficulty.difficultyName}-${leaderboard.difficulty.modeName}-${leaderboard.song.hash.toUpperCase()}.bsor`;
           const replayData = await kyFetchBuffer(`https://cdn.replays.beatleader.xyz/${replayId}`);
@@ -111,18 +120,6 @@ export default class BeatLeaderService {
         // Remove old replays
         await this.cleanupScoreReplays(playerId, leaderboard.id);
       }
-    }
-
-    // The score has already been tracked, so ignore it.
-    if (
-      await BeatLeaderService.hasAdditionalScoreData(
-        playerId,
-        leaderboard.song.hash,
-        leaderboard.difficulty.difficultyName,
-        score.baseScore
-      )
-    ) {
-      return;
     }
 
     const getMisses = (score: BeatLeaderScoreToken | BeatLeaderScoreImprovementToken) => {
