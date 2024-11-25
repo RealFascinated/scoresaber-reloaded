@@ -105,7 +105,7 @@ export default function Footer({ buildId, buildTimeShort }: { buildId: string; b
       {/* Top Section */}
       <div className="flex justify-center">
         {/* Branding & Social Links */}
-        <div className="w-full max-w-screen-2xl flex flex-col gap-7 lg:flex-row justify-between items-center lg:items-start">
+        <div className="w-full max-w-(--breakpoint-2xl) flex flex-col gap-7 lg:flex-row justify-between items-center lg:items-start">
           <div className="flex flex-col gap-5">
             {/* Branding */}
             <div className="flex flex-col gap-2 text-center items-center lg:text-left lg:items-start">
