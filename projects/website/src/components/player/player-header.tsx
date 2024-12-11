@@ -1,5 +1,5 @@
-import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
-import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
+import {formatNumberWithCommas, formatPp} from "@ssr/common/utils/number-utils";
+import {GlobeAmericasIcon} from "@heroicons/react/24/solid";
 import Card from "../card";
 import CountryFlag from "../country-flag";
 import ClaimProfile from "./claim-profile";
@@ -9,12 +9,13 @@ import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import Link from "next/link";
 import AddFriend from "@/components/friend/add-friend";
 import PlayerSteamProfile from "@/components/player/player-steam-profile";
-import { getScoreSaberRoles } from "@ssr/common/utils/scoresaber.util";
-import { DailyChange } from "@/components/statistic/daily-change";
-import { ChangeOverTime } from "@/components/statistic/change-over-time";
-import { PlayerStatChange } from "@ssr/common/player/player-stat-change";
+import {getScoreSaberRoles} from "@ssr/common/utils/scoresaber.util";
+import {DailyChange} from "@/components/statistic/daily-change";
+import {ChangeOverTime} from "@/components/statistic/change-over-time";
+import {PlayerStatChange} from "@ssr/common/player/player-stat-change";
 import Avatar from "@/components/avatar";
 import PlayerBeatLeaderLink from "@/components/player/player-beatleader-link";
+import SnipePlaylistDownloadButton from "@/components/player/snipe-playlist-button";
 
 const playerData = [
   {
@@ -113,6 +114,7 @@ export default function PlayerHeader({ player }: PlayerHeaderProps) {
                 <PlayerTrackedStatus player={player} />
                 <PlayerSteamProfile player={player} />
                 <PlayerBeatLeaderLink player={player} />
+                <SnipePlaylistDownloadButton toSnipe={player} />
               </div>
             </div>
             <div className="flex flex-col">

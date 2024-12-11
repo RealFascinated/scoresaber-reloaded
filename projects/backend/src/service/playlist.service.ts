@@ -1,13 +1,17 @@
-import { Playlist } from "@ssr/common/playlist/playlist";
+import {Playlist} from "@ssr/common/playlist/playlist";
 import LeaderboardService from "./leaderboard.service";
-import { NotFoundError } from "@ssr/common/error/not-found-error";
-import { formatDateMinimal } from "@ssr/common/utils/time-utils";
-import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
-import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
-import { fetchWithCache } from "../common/cache.util";
-import CacheService, { ServiceCache } from "./cache.service";
-import SSRImage from "../common/ssr-image";
+import {NotFoundError} from "@ssr/common/error/not-found-error";
+import {formatDateMinimal} from "@ssr/common/utils/time-utils";
+import {ScoreSaberLeaderboard} from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
+import {scoresaberService} from "@ssr/common/service/impl/scoresaber";
+import {getScoreSaberLeaderboardFromToken} from "@ssr/common/token-creators";
+import {fetchWithCache} from "../common/cache.util";
+import CacheService, {ServiceCache} from "./cache.service";
+import SSRImage, {ImageTextOptions} from "../common/ssr-image";
+import {PlayerService} from "./player.service";
+import ScoreSaberService from "./scoresaber.service";
+import {ScoreSaberScore} from "@ssr/common/model/score/impl/scoresaber-score";
+import {truncateText} from "website/src/common/string-utils";
 
 export default class PlaylistService {
   /**
@@ -34,6 +38,86 @@ export default class PlaylistService {
   }
 
   /**
+   * Creates a playlist for a snipe.
+   *
+   * @param user the user who is sniping
+   * @param toSnipe the user who is being sniped
+   * @returns the playlist
+   */
+  public static async getSnipePlaylist(user: string, toSnipe: string): Promise<Playlist> {
+    if (!await PlayerService.playerExists(user) || !await PlayerService.playerExists(toSnipe)) {
+      throw new NotFoundError(`Unable to create a snipe playlist for ${toSnipe} as one of the users isn't tracked.`);
+    }
+
+    const rawScores = await ScoreSaberService.getPlayerScores(toSnipe, {
+      limit: 100,
+      sort: "pp"
+    });
+    if (rawScores.length === 0) {
+      throw new NotFoundError(`Unable to create a snipe playlist for ${toSnipe} as they have no scores.`);
+    }
+
+    const scores: { score: ScoreSaberScore, leaderboard: ScoreSaberLeaderboard }[] = [];
+    for (const rawScore of rawScores) {
+      const score = rawScore as ScoreSaberScore;
+      const leaderboardResponse = await LeaderboardService.getLeaderboard<ScoreSaberLeaderboard>(
+        "scoresaber",
+        score.leaderboardId + ""
+      );
+      if (!leaderboardResponse) {
+        throw new NotFoundError(`Leaderboard "${score.leaderboardId}" not found`);
+      }
+      const { leaderboard } = leaderboardResponse;
+      scores.push({
+        score: score,
+        leaderboard: leaderboard
+      });
+    }
+
+    scores.sort((a, b) => b.score.pp - a.score.pp);
+
+    const toSnipePlayer = await ScoreSaberService.getPlayer(toSnipe);
+    return new Playlist(
+      "scoresaber-snipe-" + toSnipe,
+      `Snipe ${toSnipePlayer.name}`,
+      "ScoreSaber Reloaded",
+      await this.generatePlaylistImage("SSR", {
+        lines: [
+          {
+            text: "Snipe",
+            color: "#222222",
+            fontSize: 55,
+            fontFamily: "SSR",
+          },
+          {
+            text: truncateText(toSnipePlayer.name, 16)!,
+            color: "#222222",
+            fontSize: 45,
+            fontFamily: "SSR",
+          },
+        ],
+      }),
+      scores.map(({ score, leaderboard }) => {
+        return {
+          songName: leaderboard.songName,
+          songAuthor: leaderboard.songAuthorName,
+          songHash: leaderboard.songHash,
+          difficulties: leaderboard.difficulties
+            .filter(difficulty => difficulty.leaderboardId === score.leaderboardId)
+            .map(difficulty => {
+              return {
+                difficulty: difficulty.difficulty,
+                characteristic: difficulty.characteristic,
+              };
+            }),
+        };
+      })
+    );
+  }
+
+
+
+  /**
    * Creates a playlist with all ranked maps.
    * @private
    */
@@ -55,7 +139,9 @@ export default class PlaylistService {
       "ScoreSaber Reloaded",
       maps,
       highlightedIds,
-      await this.generatePlaylistImage("SSR", "Ranked")
+      await this.generatePlaylistImage("SSR", {
+        title: "Ranked",
+      })
     );
   }
 
@@ -81,7 +167,9 @@ export default class PlaylistService {
       "ScoreSaber Reloaded",
       maps,
       highlightedIds,
-      await this.generatePlaylistImage("SSR", "Qualified")
+      await this.generatePlaylistImage("SSR", {
+        title: "Qualified",
+      })
     );
   }
 
@@ -120,7 +208,9 @@ export default class PlaylistService {
       "ScoreSaber Reloaded",
       maps,
       highlightedIds,
-      await this.generatePlaylistImage("SSR", "Ranking Queue")
+      await this.generatePlaylistImage("SSR", {
+        title: "Ranking Queue",
+      })
     );
   }
 
@@ -179,10 +269,13 @@ export default class PlaylistService {
    * Generates a playlist image
    *
    * @param author the author of the playlist
-   * @param title the title of the playlist
+   * @param options the options for the playlist image
    * @returns the base64 encoded image
    */
-  private static async generatePlaylistImage(author: string, title: string): Promise<string> {
+  private static async generatePlaylistImage(author: string, options: {
+    title?: string,
+    lines?: ImageTextOptions[]
+  }): Promise<string> {
     const image = new SSRImage({
       width: 512,
       height: 512,
@@ -196,12 +289,16 @@ export default class PlaylistService {
           fontSize: 100,
           fontFamily: "SSR",
         },
-        {
-          text: title,
+        // Title
+        ...(options.title ? [{
+          text: options.title,
           color: "#222222",
           fontSize: 62,
           fontFamily: "SSR",
-        },
+        }] as ImageTextOptions[] : []),
+
+        // Additional lines
+        ...(options.lines || []),
       ],
       "center",
       0.8
