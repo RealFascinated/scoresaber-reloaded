@@ -5,7 +5,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import Link from "next/link";
 import NavbarButton from "./navbar-button";
 import Database from "@/common/database/database";
-import { truncateText } from "@/common/string-utils";
+import { truncateText } from "@ssr/common/string-utils";
 import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/player";
 import useSettings from "@/hooks/use-settings";
 import Avatar from "@/components/avatar";

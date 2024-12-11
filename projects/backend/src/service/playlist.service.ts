@@ -11,7 +11,7 @@ import SSRImage, {ImageTextOptions} from "../common/ssr-image";
 import {PlayerService} from "./player.service";
 import ScoreSaberService from "./scoresaber.service";
 import {ScoreSaberScore} from "@ssr/common/model/score/impl/scoresaber-score";
-import {truncateText} from "website/src/common/string-utils";
+import {truncateText} from "@ssr/common/string-utils";
 
 export default class PlaylistService {
   /**

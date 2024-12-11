@@ -1,4 +1,4 @@
-import { capitalizeFirstLetter } from "@/common/string-utils";
+import { capitalizeFirstLetter } from "../../../../common/src/string-utils";
 import { ClockIcon, TrophyIcon, XMarkIcon } from "@heroicons/react/24/solid";
 import { useQuery } from "@tanstack/react-query";
 import { motion, useAnimation } from "framer-motion";

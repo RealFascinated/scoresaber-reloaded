@@ -20,7 +20,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
 import { useSearch } from "@/components/providers/search-provider";
-import { truncateText } from "@/common/string-utils";
+import { truncateText } from "@ssr/common/string-utils";
 import { CommandLoading } from "cmdk";
 import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/player";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
