@@ -12,6 +12,7 @@ import {PlayerService} from "./player.service";
 import ScoreSaberService from "./scoresaber.service";
 import {ScoreSaberScore} from "@ssr/common/model/score/impl/scoresaber-score";
 import {truncateText} from "@ssr/common/string-utils";
+import {InternalServerError} from "@ssr/common/error/internal-server-error";
 
 export default class PlaylistService {
   /**
@@ -45,74 +46,79 @@ export default class PlaylistService {
    * @returns the playlist
    */
   public static async getSnipePlaylist(user: string, toSnipe: string): Promise<Playlist> {
-    if (!await PlayerService.playerExists(user) || !await PlayerService.playerExists(toSnipe)) {
-      throw new NotFoundError(`Unable to create a snipe playlist for ${toSnipe} as one of the users isn't tracked.`);
-    }
-
-    const rawScores = await ScoreSaberService.getPlayerScores(toSnipe, {
-      limit: 100,
-      sort: "pp"
-    });
-    if (rawScores.length === 0) {
-      throw new NotFoundError(`Unable to create a snipe playlist for ${toSnipe} as they have no scores.`);
-    }
-
-    const scores: { score: ScoreSaberScore, leaderboard: ScoreSaberLeaderboard }[] = [];
-    for (const rawScore of rawScores) {
-      const score = rawScore as ScoreSaberScore;
-      const leaderboardResponse = await LeaderboardService.getLeaderboard<ScoreSaberLeaderboard>(
-        "scoresaber",
-        score.leaderboardId + ""
-      );
-      if (!leaderboardResponse) {
-        throw new NotFoundError(`Leaderboard "${score.leaderboardId}" not found`);
+    try {
+      if (!await PlayerService.playerExists(user) || !await PlayerService.playerExists(toSnipe)) {
+        throw new NotFoundError(`Unable to create a snipe playlist for ${toSnipe} as one of the users isn't tracked.`);
       }
-      const { leaderboard } = leaderboardResponse;
-      scores.push({
-        score: score,
-        leaderboard: leaderboard
+
+      const rawScores = await ScoreSaberService.getPlayerScores(toSnipe, {
+        limit: 100,
+        sort: "pp"
       });
+      if (rawScores.length === 0) {
+        throw new NotFoundError(`Unable to create a snipe playlist for ${toSnipe} as they have no scores.`);
+      }
+
+      const scores: { score: ScoreSaberScore, leaderboard: ScoreSaberLeaderboard }[] = [];
+      for (const rawScore of rawScores) {
+        const score = rawScore as ScoreSaberScore;
+        const leaderboardResponse = await LeaderboardService.getLeaderboard<ScoreSaberLeaderboard>(
+          "scoresaber",
+          score.leaderboardId + ""
+        );
+        if (!leaderboardResponse) {
+          throw new NotFoundError(`Leaderboard "${score.leaderboardId}" not found`);
+        }
+        const { leaderboard } = leaderboardResponse;
+        scores.push({
+          score: score,
+          leaderboard: leaderboard
+        });
+      }
+
+      scores.sort((a, b) => b.score.pp - a.score.pp);
+
+      const toSnipePlayer = await ScoreSaberService.getPlayer(toSnipe);
+      return new Playlist(
+        "scoresaber-snipe-" + toSnipe,
+        `Snipe ${toSnipePlayer.name}`,
+        "ScoreSaber Reloaded",
+        await this.generatePlaylistImage("SSR", {
+          lines: [
+            {
+              text: "Snipe",
+              color: "#222222",
+              fontSize: 55,
+              fontFamily: "SSR",
+            },
+            {
+              text: truncateText(toSnipePlayer.name, 16)!,
+              color: "#222222",
+              fontSize: 45,
+              fontFamily: "SSR",
+            },
+          ],
+        }),
+        scores.map(({ score, leaderboard }) => {
+          return {
+            songName: leaderboard.songName,
+            songAuthor: leaderboard.songAuthorName,
+            songHash: leaderboard.songHash,
+            difficulties: leaderboard.difficulties
+              .filter(difficulty => difficulty.leaderboardId === score.leaderboardId)
+              .map(difficulty => {
+                return {
+                  difficulty: difficulty.difficulty,
+                  characteristic: difficulty.characteristic,
+                };
+              }),
+          };
+        })
+      );
+    } catch (error) {
+      console.error("Error creating snipe playlist", error);
+      throw new InternalServerError("An error occurred while creating the snipe playlist.");
     }
-
-    scores.sort((a, b) => b.score.pp - a.score.pp);
-
-    const toSnipePlayer = await ScoreSaberService.getPlayer(toSnipe);
-    return new Playlist(
-      "scoresaber-snipe-" + toSnipe,
-      `Snipe ${toSnipePlayer.name}`,
-      "ScoreSaber Reloaded",
-      await this.generatePlaylistImage("SSR", {
-        lines: [
-          {
-            text: "Snipe",
-            color: "#222222",
-            fontSize: 55,
-            fontFamily: "SSR",
-          },
-          {
-            text: truncateText(toSnipePlayer.name, 16)!,
-            color: "#222222",
-            fontSize: 45,
-            fontFamily: "SSR",
-          },
-        ],
-      }),
-      scores.map(({ score, leaderboard }) => {
-        return {
-          songName: leaderboard.songName,
-          songAuthor: leaderboard.songAuthorName,
-          songHash: leaderboard.songHash,
-          difficulties: leaderboard.difficulties
-            .filter(difficulty => difficulty.leaderboardId === score.leaderboardId)
-            .map(difficulty => {
-              return {
-                difficulty: difficulty.difficulty,
-                characteristic: difficulty.characteristic,
-              };
-            }),
-        };
-      })
-    );
   }
 
 

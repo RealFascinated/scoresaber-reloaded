@@ -14,7 +14,7 @@
     "@elysiajs/server-timing": "^1.1.0",
     "@elysiajs/swagger": "^1.1.6",
     "@influxdata/influxdb-client": "^1.35.0",
-    "@napi-rs/canvas": "0.1.65",
+    "@napi-rs/canvas": "0.1.59",
     "@ssr/common": "workspace:common",
     "@tqman/nice-logger": "^1.0.7",
     "@typegoose/auto-increment": "^4.8.0",
