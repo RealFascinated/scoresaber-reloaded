@@ -22,7 +22,7 @@ export default function SnipePlaylistDownloadButton({ toSnipe }: SnipePlaylistDo
 
   return (
     <Link href={`${Config.apiUrl}/playlist/snipe?user=${settings.playerId}&toSnipe=${toSnipe.id}&download=true`} >
-      <Tooltip display={<p>Download Snipe Playlist for {toSnipe.name}</p>} className="flex items-center" side="bottom">
+      <Tooltip display={<p>Download Snipe Playlist for <span className="font-semibold">{toSnipe.name}</span></p>} className="flex items-center" side="bottom">
         <button>
           <RocketLaunchIcon className="w-5 h-5" />
         </button>
