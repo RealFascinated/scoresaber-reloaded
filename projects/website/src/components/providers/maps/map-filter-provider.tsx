@@ -7,10 +7,16 @@ type FilterContextProps = {
   category: number;
   sort: number;
   stars: StarFilter | undefined;
-
   setCategory: (category: number) => void;
   setSort: (sort: number) => void;
   setStars: (stars: StarFilter | undefined) => void;
+
+  verified: boolean;
+  ranked: boolean;
+  qualified: boolean;
+  setVerified: (verified: boolean) => void;
+  setRanked: (ranked: boolean) => void;
+  setQualified: (qualified: boolean) => void;
 
   clearFilters: () => void;
   hasFiltersApplied: () => boolean;
@@ -21,6 +27,10 @@ export const MapFilterProvider = ({ children }: { children: ReactNode }) => {
   const [category, setCategory] = useState<number>(0);
   const [sort, setSort] = useState<number>(0);
   const [stars, setStars] = useState<StarFilter | undefined>(undefined);
+
+  const [verified, setVerified] = useState<boolean>(false);
+  const [ranked, setRanked] = useState<boolean>(false);
+  const [qualified, setQualified] = useState<boolean>(false);
 
   const clearFilters = () => {
     setCategory(0);
@@ -41,6 +51,12 @@ export const MapFilterProvider = ({ children }: { children: ReactNode }) => {
         setCategory,
         setSort,
         setStars,
+        verified,
+        ranked,
+        qualified,
+        setVerified,
+        setRanked,
+        setQualified,
         clearFilters,
         hasFiltersApplied,
       }}

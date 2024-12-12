@@ -33,6 +33,9 @@ export default function Maps() {
         category: filterDebounced.category,
         sort: filterDebounced.sort,
         stars: filterDebounced.stars,
+        ranked: filterDebounced.ranked,
+        qualified: filterDebounced.qualified,
+        verified: filterDebounced.verified,
       }),
   });
 

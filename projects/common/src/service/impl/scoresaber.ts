@@ -239,6 +239,7 @@ class ScoreSaberService extends Service {
     options?: {
       ranked?: boolean;
       qualified?: boolean;
+      verified?: boolean;
       category?: number;
       stars?: StarFilter;
       sort?: number;
@@ -252,6 +253,7 @@ class ScoreSaberService extends Service {
         page: page.toString(),
         ...(options?.ranked ? { ranked: options.ranked } : {}),
         ...(options?.qualified ? { qualified: options.qualified } : {}),
+        ...(options?.verified ? { verified: options.verified } : {}),
         ...(options?.category ? { category: options.category } : {}),
         ...(options?.stars ? { minStar: options.stars.min ?? 0, maxStar: options.stars.max } : {}),
         ...(options?.sort ? { sort: options.sort } : {}),
