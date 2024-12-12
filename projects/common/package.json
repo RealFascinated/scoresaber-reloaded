@@ -15,14 +15,14 @@
     }
   },
   "devDependencies": {
-    "@types/node": "^22.7.4",
-    "typescript": "^5"
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2"
   },
   "dependencies": {
-    "@typegoose/auto-increment": "^4.7.0",
-    "@typegoose/typegoose": "^12.8.0",
+    "@typegoose/auto-increment": "^4.8.0",
+    "@typegoose/typegoose": "^12.9.1",
     "@types/sanitize-html": "^2.13.0",
-    "ky": "^1.7.2",
+    "ky": "^1.7.3",
     "sanitize-html": "^2.13.1",
     "ws": "^8.18.0"
   }
