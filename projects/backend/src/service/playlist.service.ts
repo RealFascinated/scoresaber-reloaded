@@ -81,7 +81,7 @@ export default class PlaylistService {
       const toSnipePlayer = await ScoreSaberService.getPlayer(toSnipe);
       return new Playlist(
         "scoresaber-snipe-" + toSnipe,
-        `Snipe ${toSnipePlayer.name}`,
+        `Snipe - ${toSnipePlayer.name}`,
         "ScoreSaber Reloaded",
         await this.generatePlaylistImage("SSR", {
           lines: [
@@ -157,7 +157,17 @@ export default class PlaylistService {
    */
   public static async createQualifiedMapsPlaylist(): Promise<Playlist> {
     const qualifiedLeaderboards = await LeaderboardService.getQualifiedLeaderboards();
-    const highlightedIds = qualifiedLeaderboards.map(map => map.id);
+    let highlightedIds = [...qualifiedLeaderboards.map(map => map.id)];
+    for (const map of qualifiedLeaderboards) {
+      if (map.ranked) {
+        continue;
+      }
+      for (const difficulty of map.difficulties) {
+        highlightedIds.push(difficulty.leaderboardId);
+      }
+    }
+    // Remove duplicates
+    highlightedIds = [...new Set(highlightedIds)];
 
     const maps: Map<string, ScoreSaberLeaderboard> = new Map();
     for (const leaderboard of qualifiedLeaderboards) {
