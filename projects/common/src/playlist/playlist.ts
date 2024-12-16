@@ -2,6 +2,8 @@ import {PlaylistSong} from "./playlist-song";
 import {BeatSaberPlaylist} from "./beatsaber/beatsaber-playlist";
 import {Config} from "../config";
 
+type PlaylistUrlGenerator = (id: string) => string | undefined;
+
 export class Playlist {
   /**
    * The id of the playlist
@@ -27,6 +29,11 @@ export class Playlist {
    * The songs in the playlist.
    */
   songs: PlaylistSong[];
+
+  /**
+   * A function that generates a URL to sync the playlist with.
+   */
+  urlGenerator?: PlaylistUrlGenerator;
 
   /**
    * Converts the playlist to a BeatSaber playlist
@@ -61,7 +68,7 @@ export class Playlist {
       playlistTitle: this.title,
       playlistAuthor: this.author,
       customData: {
-        syncURL: `${Config.apiUrl}/playlist/${this.id}`,
+        syncURL: `${Config.apiUrl}/playlist/${this.urlGenerator?.(this.id) ?? this.id}`,
       },
       songs: Array.from(deduplicatedSongs.values()).map(song => ({
         songName: song.songName,
@@ -76,11 +83,12 @@ export class Playlist {
     };
   }
 
-  constructor(id: string, title: string, author: string, image: string, songs: PlaylistSong[]) {
+  constructor(id: string, title: string, author: string, image: string, songs: PlaylistSong[], urlGenerator?: PlaylistUrlGenerator) {
     this.id = id;
     this.title = title;
     this.author = author;
     this.image = image;
     this.songs = songs;
+    this.urlGenerator = urlGenerator;
   }
 }

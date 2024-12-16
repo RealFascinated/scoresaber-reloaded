@@ -113,7 +113,8 @@ export default class PlaylistService {
                 };
               }),
           };
-        })
+        }),
+        () => `snipe/?user=${user}&toSnipe=${toSnipe}`
       );
     } catch (error) {
       console.error("Error creating snipe playlist", error);
