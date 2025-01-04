@@ -134,7 +134,7 @@ export default class LeaderboardService {
   ) {
     // Fix max score if it's broken (ScoreSaber is annoying)
     if (leaderboard.maxScore == 0 && beatSaverMap != undefined) {
-      leaderboard.maxScore = beatSaverMap.difficulty.maxScore;
+      leaderboard.maxScore = beatSaverMap.difficulty.maxScore ?? 0;
       await leaderboard.save();
     }
 
