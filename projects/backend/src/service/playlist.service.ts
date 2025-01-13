@@ -206,7 +206,9 @@ export default class PlaylistService {
           const leaderboard = getScoreSaberLeaderboardFromToken(rankingQueueToken.leaderboardInfo);
           leaderboards.push(leaderboard);
         }
-        return leaderboards;
+
+        // Sort by date ranked (newest -> oldest)
+        return leaderboards.sort((a, b) => (b.dateRanked?.getTime() ?? -1) - (a.dateRanked?.getTime() ?? -1));
       }
     );
 
