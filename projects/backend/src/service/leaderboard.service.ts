@@ -354,7 +354,7 @@ export default class LeaderboardService {
    */
   public static async getRankedLeaderboards(): Promise<ScoreSaberLeaderboard[]> {
     return fetchWithCache(CacheService.getCache(ServiceCache.Leaderboards), "ranked-leaderboards", async () => {
-      const leaderboards = await ScoreSaberLeaderboardModel.find({ ranked: true });
+      const leaderboards = await ScoreSaberLeaderboardModel.find({ ranked: true }).sort({ dateRanked: -1 }); // Sort by date ranked (newest -> oldest)
       return leaderboards.map(leaderboard => leaderboard.toObject());
     });
   }
