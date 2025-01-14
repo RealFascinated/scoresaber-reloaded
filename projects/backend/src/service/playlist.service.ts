@@ -132,13 +132,17 @@ export default class PlaylistService {
     const rankedLeaderboards = await LeaderboardService.getRankedLeaderboards();
     const highlightedIds = rankedLeaderboards.map(map => map.id);
 
-    const maps: Map<string, ScoreSaberLeaderboard> = new Map();
+    let maps: Map<string, ScoreSaberLeaderboard> = new Map();
     for (const leaderboard of rankedLeaderboards) {
       if (maps.has(leaderboard.songHash)) {
         continue;
       }
       maps.set(leaderboard.songHash, leaderboard);
     }
+
+    // Sort by date ranked (newest -> oldest)
+    const sortedMaps = Array.from(maps.values()).sort((a, b) => (b.dateRanked?.getTime() ?? -1) - (a.dateRanked?.getTime() ?? -1));
+    maps = new Map(sortedMaps.map(map => [map.songHash, map]));
 
     return this.createScoreSaberPlaylist(
       "scoresaber-ranked-maps",
@@ -207,8 +211,7 @@ export default class PlaylistService {
           leaderboards.push(leaderboard);
         }
 
-        // Sort by date ranked (newest -> oldest)
-        return leaderboards.sort((a, b) => (b.dateRanked?.getTime() ?? -1) - (a.dateRanked?.getTime() ?? -1));
+        return leaderboards;
       }
     );
 
