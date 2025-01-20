@@ -100,6 +100,8 @@ export default function RankingData({ initialPage, country, initialPageData }: R
                 <th className="px-2 py-1 text-center">Total Ranked Plays</th>
                 <th className="px-2 py-1 text-center">Avg Ranked Accuracy</th>
                 <th className="px-2 py-1 text-center">Weekly Change</th>
+                {/* Friend Button */}
+                <th className="px-2 py-1 text-center"></th>
               </tr>
             </thead>
             <tbody className="border-none">

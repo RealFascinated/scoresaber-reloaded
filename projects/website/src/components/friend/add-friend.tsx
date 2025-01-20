@@ -9,15 +9,21 @@ import { PersonIcon } from "@radix-ui/react-icons";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { trackPlayer } from "@ssr/common/utils/player-utils";
 import useSettings from "@/hooks/use-settings";
+import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/player";
 
 type Props = {
   /**
    * The ID of the players profile to claim.
    */
-  player: ScoreSaberPlayer;
+  player: ScoreSaberPlayer | ScoreSaberPlayerToken;
+
+  /**
+   * Whether to show the icon only.
+   */
+  iconOnly?: boolean;
 };
 
-export default function AddFriend({ player }: Props) {
+export default function AddFriend({ player, iconOnly }: Props) {
   const { id, name } = player;
 
   const settings = useSettings();
@@ -49,9 +55,11 @@ export default function AddFriend({ player }: Props) {
 
   return (
     <Tooltip display={<p>Add {name} as a friend!</p>} side={"bottom"}>
-      <Button variant={"outline"} onClick={addFriend}>
-        <PersonIcon className="size-6 text-green-500" />
-      </Button>
+      <div onClick={addFriend} className="cursor-pointer">
+        {iconOnly ? <PersonIcon className="size-6 text-green-500" /> : <Button variant={"outline"}>
+          <PersonIcon className="size-6 text-green-500" />
+        </Button>}
+      </div>
     </Tooltip>
   );
 }
