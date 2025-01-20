@@ -671,9 +671,9 @@ export default class ScoreSaberService {
 
     if (await ScoreSaberService.scoreExists(playerId, leaderboard, score)) {
       // The score has already been tracked, so ignore it.
-      console.log(
-        `ScoreSaber score already tracked for "${playerName}"(${playerId}), difficulty: ${score.difficulty}, score: ${score.score}, leaderboard: ${leaderboard.id}, ignoring...`
-      );
+      // console.log(
+      //   `ScoreSaber score already tracked for "${playerName}"(${playerId}), difficulty: ${score.difficulty}, score: ${score.score}, leaderboard: ${leaderboard.id}, ignoring...`
+      // );
       return false;
     }
 
