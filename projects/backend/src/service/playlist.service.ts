@@ -60,7 +60,7 @@ export default class PlaylistService {
     const settings = settingsBase64
       ? (JSON.parse(Buffer.from(settingsBase64, "base64").toString()) as SnipeSettings)
       : undefined;
-    type = settings?.sort ?? "top";
+    type = (settings?.sort || type) ?? "top";
     const limit = (settings?.limit > 250 ? 250 : settings?.limit) ?? 100;
 
     // validate type
