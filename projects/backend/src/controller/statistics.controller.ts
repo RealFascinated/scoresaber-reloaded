@@ -27,7 +27,7 @@ export default class StatisticsController {
     params: { platform: GamePlatform };
   }): Promise<PlatformStatisticsResponse> {
     return {
-      statistics: (await StatisticsService.getPlatform(platform))?.getPrevious(60) ?? {},
+      statistics: (await StatisticsService.getPlatform(platform))?.getPrevious(365) ?? {},
     };
   }
 }
