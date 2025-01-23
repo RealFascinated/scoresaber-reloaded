@@ -8,9 +8,11 @@ import useSettings from "@/hooks/use-settings";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const formSchema = z.object({
   backgroundCover: z.string().min(0).max(128),
+  snowParticles: z.boolean(),
 });
 
 export default function WebsiteSettings() {
@@ -21,6 +23,7 @@ export default function WebsiteSettings() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       backgroundCover: settings?.backgroundCover || "",
+      snowParticles: settings?.getSnowParticles(),
     },
   });
 
@@ -34,8 +37,9 @@ export default function WebsiteSettings() {
    * @param backgroundCover the new background cover
    * @param replayViewer the new replay viewer
    */
-  async function onSubmit({ backgroundCover }: z.infer<typeof formSchema>) {
+  async function onSubmit({ backgroundCover, snowParticles }: z.infer<typeof formSchema>) {
     settings.setBackgroundImage(backgroundCover);
+    settings.setSnowParticles(snowParticles);
 
     toast({
       title: "Settings saved",
@@ -58,6 +62,20 @@ export default function WebsiteSettings() {
                 <FormControl>
                   <Input className="w-full sm:w-72" placeholder="Hex or URL..." {...field} />
                 </FormControl>
+              </FormItem>
+            )}
+          />
+
+          {/* Background Cover */}
+          <FormField
+            control={form.control}
+            name="snowParticles"
+            render={({ field }) => (
+              <FormItem className="flex items-center  space-y-0 gap-2">
+                <FormControl>
+                  <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                </FormControl>
+                <FormLabel>Show Snow Particles</FormLabel>
               </FormItem>
             )}
           />

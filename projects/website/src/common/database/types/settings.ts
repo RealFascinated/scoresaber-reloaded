@@ -37,6 +37,11 @@ export default class Settings extends Entity<Database> {
   whatIfRange?: [number, number];
 
   /**
+   * Whether to show snow particles in the background
+   */
+  snowParticles?: boolean;
+
+  /**
    * Sets the players id
    *
    * @param id the new player id
@@ -126,6 +131,25 @@ export default class Settings extends Entity<Database> {
    */
   public setWhatIfRange(range: [number, number]) {
     this.whatIfRange = range;
+    this.db.setSettings(this);
+  }
+
+  /**
+   * Gets whether to show snow particles in the background
+   *
+   * @returns whether to show snow particles
+   */
+  public getSnowParticles(): boolean {
+    return this.snowParticles ?? false;
+  }
+
+  /**
+   * Sets whether to show snow particles in the background
+   *
+   * @param state whether to show snow particles
+   */
+  public setSnowParticles(state: boolean) {
+    this.snowParticles = state;
     this.db.setSettings(this);
   }
 }

@@ -17,7 +17,7 @@ import { getBuildInformation } from "@/common/website-utils";
 import { SearchProvider } from "@/components/providers/search-provider";
 import Navbar from "@/components/navbar/navbar";
 import SSRLayout from "@/components/ssr-layout";
-import {SnowBackground} from "@/components/effects/snow-background";
+import { SnowBackground } from "@/components/effects/snow-background";
 
 const siteFont = localFont({
   src: "./fonts/JetBrainsMono.ttf",
@@ -79,8 +79,7 @@ export default async function RootLayout({
         <DatabaseLoader>
           <Toaster />
           <BackgroundCover />
-          {/* Winter Snow */}
-          {(new Date().getMonth() + 1) == 12 && <SnowBackground />}
+          <SnowBackground />
           <PreloadResources />
           <TooltipProvider delayDuration={250}>
             <OfflineNetwork>
