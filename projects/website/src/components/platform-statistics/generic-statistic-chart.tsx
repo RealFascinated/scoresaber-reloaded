@@ -30,7 +30,7 @@ export default function GenericStatisticChart({ statistics, datasetConfig }: Pro
   }
 
   const histories: Record<string, (number | null)[]> = {};
-  const historyDays = 60;
+  const historyDays = 365;
 
   // Initialize histories for each dataset with null values for all days
   datasetConfig.forEach(config => {
@@ -46,7 +46,8 @@ export default function GenericStatisticChart({ statistics, datasetConfig }: Pro
 
   let currentHistoryIndex = 0;
 
-  for (let dayAgo = historyDays; dayAgo >= 0; dayAgo--) {
+  for (let dayAgo = historyDays; dayAgo >= 1; dayAgo--) {
+    // skip the current day
     const targetDate = getDaysAgoDate(dayAgo);
     labels.push(targetDate); // Add the target date to labels
 
