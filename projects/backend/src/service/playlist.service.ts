@@ -157,7 +157,8 @@ export default class PlaylistService {
                 }),
             };
           }),
-        () => `snipe/?user=${user}&toSnipe=${toSnipe}&type=${type}&settings=${settingsBase64}`
+        () =>
+          `snipe/?user=${user}&toSnipe=${toSnipe}&type=${type}${settingsBase64 ? `&settings=${settingsBase64}` : ""}`
       );
     } catch (error) {
       console.error("Error creating snipe playlist", error);
