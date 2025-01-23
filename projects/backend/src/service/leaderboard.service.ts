@@ -53,6 +53,12 @@ export default class LeaderboardService {
       includeBeatSaver?: boolean;
     }
   ): Promise<LeaderboardResponse<L>> {
+    if (!options) {
+      options = {
+        includeBeatSaver: true,
+      };
+    }
+
     switch (leaderboardName) {
       case "scoresaber": {
         return fetchWithCache(
