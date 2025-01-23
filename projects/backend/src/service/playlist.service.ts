@@ -135,7 +135,7 @@ export default class PlaylistService {
         }),
         scores
           .sort((a, b) => {
-            if (settings?.sort === "top") {
+            if (type === "top") {
               return b.score.pp - a.score.pp;
             } else {
               return b.score.timestamp.getTime() - a.score.timestamp.getTime();
