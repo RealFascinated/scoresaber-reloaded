@@ -39,7 +39,7 @@ export default class Leaderboard {
    * The author of the song this leaderboard is for.
    * @private
    */
-  @Prop({ required: true })
+  @Prop({ required: false })
   readonly songAuthorName!: string;
 
   /**

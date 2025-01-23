@@ -1,6 +1,6 @@
-import {PlaylistSong} from "./playlist-song";
-import {BeatSaberPlaylist} from "./beatsaber/beatsaber-playlist";
-import {Config} from "../config";
+import { PlaylistSong } from "./playlist-song";
+import { BeatSaberPlaylist } from "./beatsaber/beatsaber-playlist";
+import { Config } from "../config";
 
 type PlaylistUrlGenerator = (id: string) => string | undefined;
 
@@ -48,18 +48,18 @@ export class Playlist {
       if (existingSong) {
         // Merge difficulties, avoiding duplicates
         const newDifficulties = song.difficulties.filter(
-          newDiff => !existingSong.difficulties.some(
-            existingDiff =>
-              existingDiff.characteristic === newDiff.characteristic &&
-              existingDiff.difficulty === newDiff.difficulty
-          )
+          newDiff =>
+            !existingSong.difficulties.some(
+              existingDiff =>
+                existingDiff.characteristic === newDiff.characteristic && existingDiff.difficulty === newDiff.difficulty
+            )
         );
         existingSong.difficulties.push(...newDifficulties);
       } else {
         // Create a new song entry with a copy of difficulties
         deduplicatedSongs.set(song.songHash, {
           ...song,
-          difficulties: [...song.difficulties]
+          difficulties: [...song.difficulties],
         });
       }
     }
@@ -83,7 +83,14 @@ export class Playlist {
     };
   }
 
-  constructor(id: string, title: string, author: string, image: string, songs: PlaylistSong[], urlGenerator?: PlaylistUrlGenerator) {
+  constructor(
+    id: string,
+    title: string,
+    author: string,
+    image: string,
+    songs: PlaylistSong[],
+    urlGenerator?: PlaylistUrlGenerator
+  ) {
     this.id = id;
     this.title = title;
     this.author = author;

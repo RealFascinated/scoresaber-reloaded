@@ -56,9 +56,13 @@ export default function AddFriend({ player, iconOnly }: Props) {
   return (
     <Tooltip display={<p>Add {name} as a friend!</p>} side={"bottom"}>
       <div onClick={addFriend} className="cursor-pointer">
-        {iconOnly ? <PersonIcon className="size-6 text-green-500" /> : <Button variant={"outline"}>
+        {iconOnly ? (
           <PersonIcon className="size-6 text-green-500" />
-        </Button>}
+        ) : (
+          <Button variant={"outline"}>
+            <PersonIcon className="size-6 text-green-500" />
+          </Button>
+        )}
       </div>
     </Tooltip>
   );

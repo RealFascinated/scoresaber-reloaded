@@ -1,6 +1,6 @@
-import { Entity } from "dexie";
+import {Entity} from "dexie";
 import Database from "../database";
-import { ReplayViewer, ReplayViewers, ReplayViewerTypes } from "@/common/replay-viewer";
+import {ReplayViewer, ReplayViewers, ReplayViewerTypes} from "@/common/replay-viewer";
 
 /**
  * The website settings.

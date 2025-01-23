@@ -42,9 +42,17 @@ export default class LeaderboardService {
    *
    * @param leaderboardName the leaderboard to get
    * @param id the players id
+   * @param options the fetch options
    * @returns the scores
    */
-  public static async getLeaderboard<L>(leaderboardName: Leaderboards, id: string): Promise<LeaderboardResponse<L>> {
+  public static async getLeaderboard<L>(
+    leaderboardName: Leaderboards,
+    id: string,
+    options?: {
+      cacheOnly?: boolean;
+      includeBeatSaver?: boolean;
+    }
+  ): Promise<LeaderboardResponse<L>> {
     switch (leaderboardName) {
       case "scoresaber": {
         return fetchWithCache(
@@ -59,7 +67,7 @@ export default class LeaderboardService {
               await ScoreSaberLeaderboardModel.findById(id);
             if (cachedLeaderboard !== null) {
               cached = true;
-              if (cachedLeaderboard.ranked) {
+              if (cachedLeaderboard.ranked || options?.cacheOnly) {
                 foundLeaderboard = cachedLeaderboard;
               } else if (cachedLeaderboard.lastRefreshed) {
                 if (now.getTime() - cachedLeaderboard.lastRefreshed.getTime() < 1000 * 60 * 60 * 12) {
@@ -95,11 +103,13 @@ export default class LeaderboardService {
             if (foundLeaderboard == undefined) {
               throw new NotFoundError(`Leaderboard not found for "${id}"`);
             }
-            const beatSaverMap = await BeatSaverService.getMap(
-              foundLeaderboard.songHash,
-              foundLeaderboard.difficulty.difficulty,
-              foundLeaderboard.difficulty.characteristic
-            );
+            const beatSaverMap = options?.includeBeatSaver
+              ? await BeatSaverService.getMap(
+                  foundLeaderboard.songHash,
+                  foundLeaderboard.difficulty.difficulty,
+                  foundLeaderboard.difficulty.characteristic
+                )
+              : undefined;
             const leaderboard = (
               await LeaderboardService.fixMaxScore(foundLeaderboard, beatSaverMap)
             ).toObject() as ScoreSaberLeaderboard;

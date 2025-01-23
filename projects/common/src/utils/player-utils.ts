@@ -1,14 +1,14 @@
-import { PlayerHistory } from "../player/player-history";
-import { kyFetchJson, kyFetchText, kyPostJson } from "./utils";
-import { Config } from "../config";
-import { AroundPlayer } from "../types/around-player";
-import { AroundPlayerResponse } from "../response/around-player-response";
+import {PlayerHistory} from "../player/player-history";
+import {kyFetchJson, kyFetchText, kyPostJson} from "./utils";
+import {Config} from "../config";
+import {AroundPlayer} from "../types/around-player";
+import {AroundPlayerResponse} from "../response/around-player-response";
 import ScoreSaberPlayer from "../player/impl/scoresaber-player";
-import { formatDateMinimal, getMidnightAlignedDate } from "./time-utils";
-import { PpBoundaryResponse } from "../response/pp-boundary-response";
-import { PlayedMapsCalendarResponse } from "../response/played-maps-calendar-response";
-import { ScoreSaberScore } from "../model/score/impl/scoresaber-score";
-import { Page } from "../pagination";
+import {formatDateMinimal, getMidnightAlignedDate} from "./time-utils";
+import {PpBoundaryResponse} from "../response/pp-boundary-response";
+import {PlayedMapsCalendarResponse} from "../response/played-maps-calendar-response";
+import {ScoreSaberScore} from "../model/score/impl/scoresaber-score";
+import {Page} from "../pagination";
 import SuperJSON from "superjson";
 
 /**

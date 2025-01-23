@@ -14,6 +14,7 @@ import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { capitalizeFirstLetter, truncateText } from "@ssr/common/string-utils";
 import { InternalServerError } from "@ssr/common/error/internal-server-error";
 import { BadRequestError } from "@ssr/common/error/bad-request-error";
+import { SnipeSettings } from "@ssr/common/snipe/snipe-settings-schema";
 
 export type SnipeType = "top" | "recent";
 
@@ -47,13 +48,21 @@ export default class PlaylistService {
    * @param user the user who is sniping
    * @param toSnipe the user who is being sniped
    * @param type the type of snipe
+   * @param settingsBase64 the settings to use for the playlist
    * @returns the playlist
    */
-  public static async getSnipePlaylist(user: string, toSnipe: string, type: SnipeType): Promise<Playlist> {
-    if (!type) {
-      // default to top
-      type = "top";
-    }
+  public static async getSnipePlaylist(
+    user: string,
+    toSnipe: string,
+    type: SnipeType,
+    settingsBase64?: string
+  ): Promise<Playlist> {
+    const settings = settingsBase64
+      ? (JSON.parse(Buffer.from(settingsBase64, "base64").toString()) as SnipeSettings)
+      : undefined;
+    type = settings?.sort ?? "top";
+    const limit = (settings?.limit > 250 ? 250 : settings?.limit) ?? 100;
+
     // validate type
     if (type !== "top" && type !== "recent") {
       throw new BadRequestError("Invalid snipe type");
@@ -64,10 +73,7 @@ export default class PlaylistService {
         throw new NotFoundError(`Unable to create a snipe playlist for ${toSnipe} as one of the users isn't tracked.`);
       }
 
-      const rawScores = await ScoreSaberService.getPlayerScores(toSnipe, {
-        limit: 200,
-        sort: type === "top" ? "pp" : "timestamp",
-      });
+      const rawScores = await ScoreSaberService.getPlayerScores(toSnipe);
       if (rawScores.length === 0) {
         throw new NotFoundError(`Unable to create a snipe playlist for ${toSnipe} as they have no scores.`);
       }
@@ -77,19 +83,34 @@ export default class PlaylistService {
         const score = rawScore as ScoreSaberScore;
         const leaderboardResponse = await LeaderboardService.getLeaderboard<ScoreSaberLeaderboard>(
           "scoresaber",
-          score.leaderboardId + ""
+          score.leaderboardId + "",
+          {
+            cacheOnly: true,
+            includeBeatSaver: false,
+          }
         );
         if (!leaderboardResponse) {
-          throw new NotFoundError(`Leaderboard "${score.leaderboardId}" not found`);
+          continue; // Skip this score if no leaderboardResponse is found
         }
         const { leaderboard } = leaderboardResponse;
+
+        if (settings?.starRange?.min && settings?.starRange?.max && leaderboard.ranked) {
+          if (leaderboard.stars < settings.starRange.min || leaderboard.stars > settings.starRange.max) {
+            continue; // Skip this score if it's not in the star range
+          }
+        }
+
+        if (settings?.accuracyRange?.min && settings?.accuracyRange?.max) {
+          if (score.accuracy < settings.accuracyRange.min || score.accuracy > settings.accuracyRange.max) {
+            continue; // Skip this score if it's not in the accuracy range
+          }
+        }
+
         scores.push({
           score: score,
           leaderboard: leaderboard,
         });
       }
-
-      //scores.sort((a, b) => b.score.pp - a.score.pp);
 
       const toSnipePlayer = await ScoreSaberService.getPlayer(toSnipe);
       return new Playlist(
@@ -112,22 +133,31 @@ export default class PlaylistService {
             },
           ],
         }),
-        scores.map(({ score, leaderboard }) => {
-          return {
-            songName: leaderboard.songName,
-            songAuthor: leaderboard.songAuthorName,
-            songHash: leaderboard.songHash,
-            difficulties: leaderboard.difficulties
-              .filter(difficulty => difficulty.leaderboardId === score.leaderboardId)
-              .map(difficulty => {
-                return {
-                  difficulty: difficulty.difficulty,
-                  characteristic: difficulty.characteristic,
-                };
-              }),
-          };
-        }),
-        () => `snipe/?user=${user}&toSnipe=${toSnipe}&type=${type}`
+        scores
+          .sort((a, b) => {
+            if (settings?.sort === "top") {
+              return b.score.pp - a.score.pp;
+            } else {
+              return b.score.timestamp.getTime() - a.score.timestamp.getTime();
+            }
+          })
+          .slice(0, limit)
+          .map(({ score, leaderboard }) => {
+            return {
+              songName: leaderboard.songName,
+              songAuthor: leaderboard.songAuthorName,
+              songHash: leaderboard.songHash,
+              difficulties: leaderboard.difficulties
+                .filter(difficulty => difficulty.leaderboardId === score.leaderboardId)
+                .map(difficulty => {
+                  return {
+                    difficulty: difficulty.difficulty,
+                    characteristic: difficulty.characteristic,
+                  };
+                }),
+            };
+          }),
+        () => `snipe/?user=${user}&toSnipe=${toSnipe}&type=${type}&settings=${settingsBase64}`
       );
     } catch (error) {
       console.error("Error creating snipe playlist", error);

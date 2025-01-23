@@ -1,4 +1,4 @@
-import {Canvas, createCanvas, GlobalFonts, loadImage, SKRSContext2D} from "@napi-rs/canvas";
+import { Canvas, createCanvas, GlobalFonts, loadImage, SKRSContext2D } from "@napi-rs/canvas";
 import * as path from "node:path";
 
 GlobalFonts.registerFromPath(path.resolve("./src/common/font/Roboto-Medium.ttf"), "SSR");

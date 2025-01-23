@@ -1,7 +1,7 @@
-import { Config } from "../config";
-import { LeaderboardResponse } from "../response/leaderboard-response";
-import { kyFetchJson, kyFetchText } from "./utils";
-import { Leaderboards } from "../leaderboard";
+import {Config} from "../config";
+import {LeaderboardResponse} from "../response/leaderboard-response";
+import {kyFetchText} from "./utils";
+import {Leaderboards} from "../leaderboard";
 import SuperJSON from "superjson";
 
 /**

@@ -49,7 +49,7 @@ export default class PlaylistController {
       user: t.String({ required: true }),
       toSnipe: t.String({ required: true }),
       type: t.Optional(t.String({ allowedValues: ["top", "recent"] })),
-      download: t.Optional(t.Boolean()),
+      settings: t.Optional(t.String()),
     }),
     detail: {
       responses: {
@@ -62,25 +62,19 @@ export default class PlaylistController {
     },
   })
   public async getSnipePlaylist({
-    query: { user, toSnipe, type, download },
+    query: { user, toSnipe, type, settings },
   }: {
-    query: { user: string; toSnipe: string; type: SnipeType; download?: boolean };
+    query: { user: string; toSnipe: string; type: SnipeType; settings: string };
   }) {
     const response = new Response(
       JSON.stringify(
-        await (await PlaylistService.getSnipePlaylist(user, toSnipe, type)).generateBeatSaberPlaylist(),
+        await (await PlaylistService.getSnipePlaylist(user, toSnipe, type, settings)).generateBeatSaberPlaylist(),
         null,
         2
       )
     );
     response.headers.set("Content-Type", "application/json");
     response.headers.set("Cache-Control", "public, max-age=3600");
-    if (download) {
-      response.headers.set(
-        "Content-Disposition",
-        `attachment; filename="ssr-snipe-${toSnipe}-${type}.json"`.toLowerCase()
-      );
-    }
     return response;
   }
 }

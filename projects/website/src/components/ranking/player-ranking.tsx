@@ -7,7 +7,6 @@ import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/player";
 import { formatChange } from "@ssr/common/utils/utils";
 import { cn } from "@/common/utils";
 import AddFriend from "@/components/friend/add-friend";
-import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 
 type PlayerRankingProps = {
   player: ScoreSaberPlayerToken;
@@ -51,7 +50,9 @@ export function PlayerRanking({ player, claimedPlayer, isCountry, relativePerfor
       >
         {weeklyRankChange == 0 ? 0 : formatChange(weeklyRankChange, formatNumberWithCommas)}
       </td>
-      <td><AddFriend player={player} iconOnly /></td>
+      <td>
+        <AddFriend player={player} iconOnly />
+      </td>
     </>
   );
 }

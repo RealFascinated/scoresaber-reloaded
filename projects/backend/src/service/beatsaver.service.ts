@@ -33,10 +33,20 @@ export default class BeatSaverService {
       return toObject;
     }
 
-    // Map needs to be fetched or refreshed
+    // Map needs to be fetched
     token = !token ? await beatsaverService.lookupMap(hash) : token;
     const uploader = token?.uploader;
     const metadata = token?.metadata;
+
+    // super fucking janky workaround
+    if (token) {
+      map = await BeatSaverMapModel.findOne({
+        bsr: token.id,
+      });
+      if (map) {
+        return map.toObject() as BeatSaverMap;
+      }
+    }
 
     // Create the new map object based on fetched data
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment

@@ -7,7 +7,7 @@ import { useMapFilter } from "@/components/providers/maps/map-filter-provider";
 import { MapCategory, MapSort } from "@ssr/common/maps/types";
 import { DualRangeSlider } from "@/components/ui/dual-range-slider";
 import React from "react";
-import {Checkbox} from "@/components/ui/checkbox";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export default function MapFilters() {
   const filter = useMapFilter();
@@ -20,7 +20,7 @@ export default function MapFilters() {
         <div className="flex items-center gap-2">
           <Checkbox
             checked={filter.verified}
-            onCheckedChange={(checked) => {
+            onCheckedChange={checked => {
               filter.setVerified(checked as boolean);
             }}
           />
@@ -29,7 +29,7 @@ export default function MapFilters() {
         <div className="flex items-center gap-2">
           <Checkbox
             checked={filter.qualified}
-            onCheckedChange={(checked) => {
+            onCheckedChange={checked => {
               filter.setQualified(checked as boolean);
             }}
           />
@@ -38,7 +38,7 @@ export default function MapFilters() {
         <div className="flex items-center gap-2">
           <Checkbox
             checked={filter.ranked}
-            onCheckedChange={(checked) => {
+            onCheckedChange={checked => {
               filter.setRanked(checked as boolean);
             }}
           />
@@ -51,9 +51,9 @@ export default function MapFilters() {
         <Combobox<string>
           name="Category"
           items={[
-            {value: String(MapCategory.Trending), name: "Trending"},
-            {value: String(MapCategory.DateRanked), name: "Date Ranked"},
-            {value: String(MapCategory.ScoresSet), name: "Scores Set" },
+            { value: String(MapCategory.Trending), name: "Trending" },
+            { value: String(MapCategory.DateRanked), name: "Date Ranked" },
+            { value: String(MapCategory.ScoresSet), name: "Scores Set" },
             { value: String(MapCategory.StarDifficulty), name: "Star Difficulty" },
             { value: String(MapCategory.Author), name: "Author" },
           ]}
