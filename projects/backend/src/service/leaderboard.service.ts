@@ -67,7 +67,7 @@ export default class LeaderboardService {
               await ScoreSaberLeaderboardModel.findById(id);
             if (cachedLeaderboard !== null) {
               cached = true;
-              if (cachedLeaderboard.ranked || options?.cacheOnly) {
+              if (cachedLeaderboard.ranked || (options && options.cacheOnly)) {
                 foundLeaderboard = cachedLeaderboard;
               } else if (cachedLeaderboard.lastRefreshed) {
                 if (now.getTime() - cachedLeaderboard.lastRefreshed.getTime() < 1000 * 60 * 60 * 12) {
@@ -103,13 +103,14 @@ export default class LeaderboardService {
             if (foundLeaderboard == undefined) {
               throw new NotFoundError(`Leaderboard not found for "${id}"`);
             }
-            const beatSaverMap = options?.includeBeatSaver
-              ? await BeatSaverService.getMap(
-                  foundLeaderboard.songHash,
-                  foundLeaderboard.difficulty.difficulty,
-                  foundLeaderboard.difficulty.characteristic
-                )
-              : undefined;
+            const beatSaverMap =
+              options && options.includeBeatSaver
+                ? await BeatSaverService.getMap(
+                    foundLeaderboard.songHash,
+                    foundLeaderboard.difficulty.difficulty,
+                    foundLeaderboard.difficulty.characteristic
+                  )
+                : undefined;
             const leaderboard = (
               await LeaderboardService.fixMaxScore(foundLeaderboard, beatSaverMap)
             ).toObject() as ScoreSaberLeaderboard;
