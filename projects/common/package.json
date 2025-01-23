@@ -15,15 +15,15 @@
     }
   },
   "devDependencies": {
-    "@types/node": "^22.10.2",
-    "typescript": "^5.7.2"
+    "@types/node": "^22.10.9",
+    "typescript": "^5.7.3"
   },
   "dependencies": {
-    "@typegoose/auto-increment": "^4.8.0",
-    "@typegoose/typegoose": "^12.9.1",
+    "@typegoose/auto-increment": "^4.9.0",
+    "@typegoose/typegoose": "^12.10.1",
     "@types/sanitize-html": "^2.13.0",
-    "ky": "^1.7.3",
-    "sanitize-html": "^2.13.1",
+    "ky": "^1.7.4",
+    "sanitize-html": "^2.14.0",
     "ws": "^8.18.0"
   }
 }

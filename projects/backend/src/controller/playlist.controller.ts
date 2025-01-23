@@ -1,7 +1,7 @@
-import {Controller, Get} from "elysia-decorators";
-import {t} from "elysia";
-import PlaylistService, {SnipeType} from "../service/playlist.service";
-import {Swagger} from "../common/swagger";
+import { Controller, Get } from "elysia-decorators";
+import { t } from "elysia";
+import PlaylistService, { SnipeType } from "../service/playlist.service";
+import { Swagger } from "../common/swagger";
 
 @Controller("/playlist")
 export default class PlaylistController {
@@ -62,17 +62,24 @@ export default class PlaylistController {
     },
   })
   public async getSnipePlaylist({
-                             query: { user, toSnipe, type, download },
-                           }: {
-    query: { user: string, toSnipe: string, type: SnipeType, download?: boolean };
+    query: { user, toSnipe, type, download },
+  }: {
+    query: { user: string; toSnipe: string; type: SnipeType; download?: boolean };
   }) {
     const response = new Response(
-      JSON.stringify(await (await PlaylistService.getSnipePlaylist(user, toSnipe, type)).generateBeatSaberPlaylist(), null, 2)
+      JSON.stringify(
+        await (await PlaylistService.getSnipePlaylist(user, toSnipe, type)).generateBeatSaberPlaylist(),
+        null,
+        2
+      )
     );
     response.headers.set("Content-Type", "application/json");
     response.headers.set("Cache-Control", "public, max-age=3600");
     if (download) {
-      response.headers.set("Content-Disposition", `attachment; filename="ssr-snipe-${toSnipe}.json"`);
+      response.headers.set(
+        "Content-Disposition",
+        `attachment; filename="ssr-snipe-${toSnipe}-${type}.json"`.toLowerCase()
+      );
     }
     return response;
   }
