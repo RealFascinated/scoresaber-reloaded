@@ -1,6 +1,6 @@
 import {Controller, Get} from "elysia-decorators";
 import {t} from "elysia";
-import PlaylistService from "../service/playlist.service";
+import PlaylistService, {SnipeType} from "../service/playlist.service";
 import {Swagger} from "../common/swagger";
 
 @Controller("/playlist")
@@ -48,6 +48,7 @@ export default class PlaylistController {
     query: t.Object({
       user: t.String({ required: true }),
       toSnipe: t.String({ required: true }),
+      type: t.Optional(t.String({ allowedValues: ["top", "recent"] })),
       download: t.Optional(t.Boolean()),
     }),
     detail: {
@@ -61,12 +62,12 @@ export default class PlaylistController {
     },
   })
   public async getSnipePlaylist({
-                             query: { user, toSnipe, download },
+                             query: { user, toSnipe, type, download },
                            }: {
-    query: { user: string, toSnipe: string, download?: boolean };
+    query: { user: string, toSnipe: string, type: SnipeType, download?: boolean };
   }) {
     const response = new Response(
-      JSON.stringify(await (await PlaylistService.getSnipePlaylist(user, toSnipe)).generateBeatSaberPlaylist(), null, 2)
+      JSON.stringify(await (await PlaylistService.getSnipePlaylist(user, toSnipe, type)).generateBeatSaberPlaylist(), null, 2)
     );
     response.headers.set("Content-Type", "application/json");
     response.headers.set("Cache-Control", "public, max-age=3600");

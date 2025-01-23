@@ -1,18 +1,21 @@
-import {Playlist} from "@ssr/common/playlist/playlist";
+import { Playlist } from "@ssr/common/playlist/playlist";
 import LeaderboardService from "./leaderboard.service";
-import {NotFoundError} from "@ssr/common/error/not-found-error";
-import {formatDateMinimal} from "@ssr/common/utils/time-utils";
-import {ScoreSaberLeaderboard} from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import {scoresaberService} from "@ssr/common/service/impl/scoresaber";
-import {getScoreSaberLeaderboardFromToken} from "@ssr/common/token-creators";
-import {fetchWithCache} from "../common/cache.util";
-import CacheService, {ServiceCache} from "./cache.service";
-import SSRImage, {ImageTextOptions} from "../common/ssr-image";
-import {PlayerService} from "./player.service";
+import { NotFoundError } from "@ssr/common/error/not-found-error";
+import { formatDateMinimal } from "@ssr/common/utils/time-utils";
+import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
+import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
+import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
+import { fetchWithCache } from "../common/cache.util";
+import CacheService, { ServiceCache } from "./cache.service";
+import SSRImage, { ImageTextOptions } from "../common/ssr-image";
+import { PlayerService } from "./player.service";
 import ScoreSaberService from "./scoresaber.service";
-import {ScoreSaberScore} from "@ssr/common/model/score/impl/scoresaber-score";
-import {truncateText} from "@ssr/common/string-utils";
-import {InternalServerError} from "@ssr/common/error/internal-server-error";
+import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
+import { capitalizeFirstLetter, truncateText } from "@ssr/common/string-utils";
+import { InternalServerError } from "@ssr/common/error/internal-server-error";
+import { BadRequestError } from "@ssr/common/error/bad-request-error";
+
+export type SnipeType = "top" | "recent";
 
 export default class PlaylistService {
   /**
@@ -43,23 +46,33 @@ export default class PlaylistService {
    *
    * @param user the user who is sniping
    * @param toSnipe the user who is being sniped
+   * @param type the type of snipe
    * @returns the playlist
    */
-  public static async getSnipePlaylist(user: string, toSnipe: string): Promise<Playlist> {
+  public static async getSnipePlaylist(user: string, toSnipe: string, type: SnipeType): Promise<Playlist> {
+    if (!type) {
+      // default to top
+      type = "top";
+    }
+    // validate type
+    if (type !== "top" && type !== "recent") {
+      throw new BadRequestError("Invalid snipe type");
+    }
+
     try {
-      if (!await PlayerService.playerExists(user) || !await PlayerService.playerExists(toSnipe)) {
+      if (!(await PlayerService.playerExists(user)) || !(await PlayerService.playerExists(toSnipe))) {
         throw new NotFoundError(`Unable to create a snipe playlist for ${toSnipe} as one of the users isn't tracked.`);
       }
 
       const rawScores = await ScoreSaberService.getPlayerScores(toSnipe, {
         limit: 100,
-        sort: "pp"
+        sort: type === "top" ? "pp" : "timestamp",
       });
       if (rawScores.length === 0) {
         throw new NotFoundError(`Unable to create a snipe playlist for ${toSnipe} as they have no scores.`);
       }
 
-      const scores: { score: ScoreSaberScore, leaderboard: ScoreSaberLeaderboard }[] = [];
+      const scores: { score: ScoreSaberScore; leaderboard: ScoreSaberLeaderboard }[] = [];
       for (const rawScore of rawScores) {
         const score = rawScore as ScoreSaberScore;
         const leaderboardResponse = await LeaderboardService.getLeaderboard<ScoreSaberLeaderboard>(
@@ -72,7 +85,7 @@ export default class PlaylistService {
         const { leaderboard } = leaderboardResponse;
         scores.push({
           score: score,
-          leaderboard: leaderboard
+          leaderboard: leaderboard,
         });
       }
 
@@ -81,7 +94,7 @@ export default class PlaylistService {
       const toSnipePlayer = await ScoreSaberService.getPlayer(toSnipe);
       return new Playlist(
         "scoresaber-snipe-" + toSnipe,
-        `Snipe - ${toSnipePlayer.name}`,
+        `Snipe - ${truncateText(toSnipePlayer.name, 16)} (${capitalizeFirstLetter(type)})`,
         "ScoreSaber Reloaded",
         await this.generatePlaylistImage("SSR", {
           lines: [
@@ -114,15 +127,13 @@ export default class PlaylistService {
               }),
           };
         }),
-        () => `snipe/?user=${user}&toSnipe=${toSnipe}`
+        () => `snipe/?user=${user}&toSnipe=${toSnipe}&type=${type}`
       );
     } catch (error) {
       console.error("Error creating snipe playlist", error);
-      throw new InternalServerError("An error occurred while creating the snipe playlist.");
+      throw new InternalServerError((error as Error).message);
     }
   }
-
-
 
   /**
    * Creates a playlist with all ranked maps.
@@ -290,10 +301,13 @@ export default class PlaylistService {
    * @param options the options for the playlist image
    * @returns the base64 encoded image
    */
-  private static async generatePlaylistImage(author: string, options: {
-    title?: string,
-    lines?: ImageTextOptions[]
-  }): Promise<string> {
+  private static async generatePlaylistImage(
+    author: string,
+    options: {
+      title?: string;
+      lines?: ImageTextOptions[];
+    }
+  ): Promise<string> {
     const image = new SSRImage({
       width: 512,
       height: 512,
@@ -308,12 +322,16 @@ export default class PlaylistService {
           fontFamily: "SSR",
         },
         // Title
-        ...(options.title ? [{
-          text: options.title,
-          color: "#222222",
-          fontSize: 62,
-          fontFamily: "SSR",
-        }] as ImageTextOptions[] : []),
+        ...(options.title
+          ? ([
+              {
+                text: options.title,
+                color: "#222222",
+                fontSize: 62,
+                fontFamily: "SSR",
+              },
+            ] as ImageTextOptions[])
+          : []),
 
         // Additional lines
         ...(options.lines || []),
