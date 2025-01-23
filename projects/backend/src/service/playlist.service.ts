@@ -65,7 +65,7 @@ export default class PlaylistService {
       }
 
       const rawScores = await ScoreSaberService.getPlayerScores(toSnipe, {
-        limit: 100,
+        limit: 200,
         sort: type === "top" ? "pp" : "timestamp",
       });
       if (rawScores.length === 0) {
@@ -89,7 +89,7 @@ export default class PlaylistService {
         });
       }
 
-      scores.sort((a, b) => b.score.pp - a.score.pp);
+      //scores.sort((a, b) => b.score.pp - a.score.pp);
 
       const toSnipePlayer = await ScoreSaberService.getPlayer(toSnipe);
       return new Playlist(

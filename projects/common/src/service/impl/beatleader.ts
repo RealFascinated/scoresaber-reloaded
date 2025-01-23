@@ -16,7 +16,7 @@ class BeatLeaderService extends Service {
    */
   async lookupScoreStats(scoreId: number): Promise<ScoreStatsToken | undefined> {
     const before = performance.now();
-    this.log(`Looking score stats for "${scoreId}"...`);
+    this.log(`Looking up scorestats for "${scoreId}"...`);
 
     const response = await this.fetch<ScoreStatsToken>(
       LOOKUP_MAP_STATS_BY_SCORE_ID_ENDPOINT.replace(":scoreId", scoreId + "")
