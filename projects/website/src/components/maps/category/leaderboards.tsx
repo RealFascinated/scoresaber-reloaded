@@ -3,20 +3,21 @@
 import Card from "@/components/card";
 import { useQuery } from "@tanstack/react-query";
 import { useMapFilter } from "@/components/providers/maps/map-filter-provider";
-import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { useCallback, useEffect, useState } from "react";
 import { LoadingIcon } from "@/components/loading-icon";
 import Pagination from "@/components/input/pagination";
 import { useIsMobile } from "@/hooks/use-is-mobile";
-import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
 import Link from "next/link";
-import ScoreSaberLeaderboardPageToken from "@ssr/common/types/token/scoresaber/leaderboard-page";
 import { useDebounce } from "@uidotdev/usehooks";
 import { motion, useAnimation } from "framer-motion";
 import { scoreAnimation } from "@/components/score/score-animation";
 import ScoreSongInfo from "@/components/score/score-song-info";
+import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
+import ScoreSaberLeaderboardPageToken from "@ssr/common/types/token/scoresaber/leaderboard-page";
+import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
+import { timeAgo } from "@ssr/common/utils/time-utils";
 
-export default function Maps() {
+export default function Leaderboards() {
   const controls = useAnimation();
   const isMobile = useIsMobile();
   const filter = useMapFilter();
@@ -89,9 +90,12 @@ export default function Maps() {
                     <Link
                       prefetch={false}
                       href={`/leaderboard/${leaderboard.id}`}
-                      className="flex gap-2 items-center bg-border p-1.5 hover:brightness-75 transition-all transform-gpu rounded-md"
+                      className="grid grid-cols-[1fr_0.17fr] gap-2 items-center bg-border p-1.5 hover:brightness-75 transition-all transform-gpu rounded-md"
                     >
                       <ScoreSongInfo leaderboard={leaderboard} imageSize={58} clickableSongName={false} />
+                      <div className="text-sm">
+                        <p>{timeAgo(leaderboard.timestamp)}</p>
+                      </div>
                     </Link>
                   </motion.div>
                 );

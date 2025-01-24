@@ -7,22 +7,22 @@ type ScoreTimeSetProps = {
   /**
    * The score that was set.
    */
-  score: ScoreSaberScore;
+  timestamp: Date;
 };
 
-export function ScoreTimeSet({ score }: ScoreTimeSetProps) {
+export function ScoreTimeSet({ timestamp }: ScoreTimeSetProps) {
   return (
     <Tooltip
       display={
         <p>
           {format({
-            date: new Date(score.timestamp),
+            date: new Date(timestamp),
             format: "DD MMMM YYYY HH:mm a",
           })}
         </p>
       }
     >
-      <p className="text-sm cursor-default select-none">{timeAgo(new Date(score.timestamp))}</p>
+      <p className="text-sm cursor-default select-none">{timeAgo(new Date(timestamp))}</p>
     </Tooltip>
   );
 }

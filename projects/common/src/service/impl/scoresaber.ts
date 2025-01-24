@@ -11,6 +11,7 @@ import { CurvePoint } from "../../curve-point";
 import ScoreSaberLeaderboardPageToken from "../../types/token/scoresaber/leaderboard-page";
 import { StarFilter } from "../../maps/types";
 import RankingRequestToken from "../../types/token/scoresaber/ranking-request-token";
+import ScoreSaberRankingRequestsResponse from "../../response/scoresaber-ranking-requests-response";
 
 const API_BASE = "https://scoresaber.com/api";
 
@@ -317,22 +318,28 @@ class ScoreSaberService extends Service {
    *
    * @returns the ranking requests
    */
-  public async lookupRankingRequests(): Promise<RankingRequestToken[] | undefined> {
+  public async lookupRankingRequests(): Promise<ScoreSaberRankingRequestsResponse | undefined> {
     const before = performance.now();
     this.log(`Looking up ranking requests...`);
 
-    const topResponse = await this.fetch<RankingRequestToken[]>(RANKING_REQUESTS_ENDPOINT.replace(":query", "top"));
-    const belowTopResponse = await this.fetch<RankingRequestToken[]>(
+    const nextInQueueResponse = await this.fetch<RankingRequestToken[]>(
+      RANKING_REQUESTS_ENDPOINT.replace(":query", "top")
+    );
+    const openRankUnrankResponse = await this.fetch<RankingRequestToken[]>(
       RANKING_REQUESTS_ENDPOINT.replace(":query", "belowTop")
     );
 
-    const response = topResponse?.concat(belowTopResponse || []);
+    const response = nextInQueueResponse?.concat(openRankUnrankResponse || []);
     if (response === undefined) {
       return undefined;
     }
 
     this.log(`Found ${response.length} ranking requests in ${(performance.now() - before).toFixed(0)}ms`);
-    return response;
+    return {
+      nextInQueue: nextInQueueResponse || [],
+      openRankUnrank: openRankUnrankResponse || [],
+      all: response || [],
+    };
   }
 
   /**

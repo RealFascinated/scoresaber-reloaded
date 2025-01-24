@@ -40,7 +40,7 @@ export function AppStats({ initialStatistics }: AppStatisticsProps) {
       />
       <Statistic
         icon={<SwordIcon className="size-10" />}
-        title="BeatSaver Maps"
+        title="BeatSaver Leaderboards"
         value={statistics.cachedBeatSaverMaps}
         isCache
       />
