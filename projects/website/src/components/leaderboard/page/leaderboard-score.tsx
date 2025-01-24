@@ -44,7 +44,7 @@ export default function LeaderboardScore({ score, leaderboard, highlightedPlayer
 
       {/* Time Set */}
       <td className="px-4 py-2 text-center whitespace-nowrap">
-        <ScoreTimeSet score={score} />
+        <ScoreTimeSet timestamp={score.timestamp} />
       </td>
 
       {/* Score */}

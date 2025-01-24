@@ -66,7 +66,7 @@ export default function ScoreInfo({ score, leaderboard }: Props) {
         )}
       </div>
       <div className="flex items-center gap-2 lg:flex-col lg:gap-0">
-        <ScoreTimeSet score={score} />
+        <ScoreTimeSet timestamp={score.timestamp} />
         <ScoreTimeSetVs score={score} />
       </div>
     </div>
