@@ -1,4 +1,3 @@
-import { withSentryConfig } from "@sentry/nextjs";
 import { format } from "@formkit/tempo";
 import type { NextConfig } from "next";
 import { isProduction } from "@/common/website-utils";
@@ -40,21 +39,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-// const withBundleAnalyzer = nextBundleAnalyzer({
-//   enabled: process.env.ANALYZE === "true",
-// });
-
-const config = nextConfig; //withBundleAnalyzer(nextConfig);
-export default isProduction()
-  ? withSentryConfig(config, {
-      org: "fascinatedcc",
-      project: "scoresaber-reloaded",
-      silent: !process.env.CI,
-      widenClientFileUpload: true,
-      reactComponentAnnotation: {
-        enabled: true,
-      },
-      hideSourceMaps: true,
-      disableLogger: true,
-    })
-  : config;
+export default nextConfig;

@@ -28,7 +28,6 @@
     "@radix-ui/react-switch": "^1.1.2",
     "@radix-ui/react-toast": "^1.2.5",
     "@radix-ui/react-tooltip": "^1.1.7",
-    "@sentry/nextjs": "^8.51.0",
     "@ssr/common": "workspace:*",
     "@tanstack/react-query": "^5.64.2",
     "@uidotdev/usehooks": "^2.4.1",
