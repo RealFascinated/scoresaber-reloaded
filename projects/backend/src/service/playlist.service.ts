@@ -7,14 +7,14 @@ import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
 import { fetchWithCache } from "../common/cache.util";
 import CacheService, { ServiceCache } from "./cache.service";
-import SSRImage, { ImageTextOptions } from "../common/ssr-image";
 import { PlayerService } from "./player.service";
 import ScoreSaberService from "./scoresaber.service";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { capitalizeFirstLetter, truncateText } from "@ssr/common/string-utils";
 import { InternalServerError } from "@ssr/common/error/internal-server-error";
 import { BadRequestError } from "@ssr/common/error/bad-request-error";
-import { SnipeSettings } from "@ssr/common/snipe/snipe-settings-schema";
+import { generatePlaylistImage } from "../common/playlist.util";
+import { parseSnipePlaylistSettings } from "@ssr/common/snipe/snipe-playlist-utils";
 
 export type SnipeType = "top" | "recent";
 
@@ -57,14 +57,10 @@ export default class PlaylistService {
     type: SnipeType,
     settingsBase64?: string
   ): Promise<Playlist> {
-    const settings = settingsBase64
-      ? (JSON.parse(Buffer.from(settingsBase64, "base64").toString()) as SnipeSettings)
-      : undefined;
-    type = (settings?.sort || type) ?? "top";
-    const limit = (settings?.limit > 250 ? 250 : settings?.limit) ?? 100;
+    const settings = parseSnipePlaylistSettings(settingsBase64, type);
 
-    // validate type
-    if (type !== "top" && type !== "recent") {
+    // validate legacy type
+    if (type && type !== "top" && type !== "recent") {
       throw new BadRequestError("Invalid snipe type");
     }
 
@@ -117,7 +113,7 @@ export default class PlaylistService {
         "scoresaber-snipe-" + toSnipe,
         `Snipe - ${truncateText(toSnipePlayer.name, 16)} (${capitalizeFirstLetter(type)})`,
         "ScoreSaber Reloaded",
-        await this.generatePlaylistImage("SSR", {
+        await generatePlaylistImage("SSR", {
           lines: [
             {
               text: "Snipe",
@@ -141,7 +137,7 @@ export default class PlaylistService {
               return b.score.timestamp.getTime() - a.score.timestamp.getTime();
             }
           })
-          .slice(0, limit)
+          .slice(0, settings.limit)
           .map(({ score, leaderboard }) => {
             return {
               songName: leaderboard.songName,
@@ -188,7 +184,7 @@ export default class PlaylistService {
       "ScoreSaber Reloaded",
       maps,
       highlightedIds,
-      await this.generatePlaylistImage("SSR", {
+      await generatePlaylistImage("SSR", {
         title: "Ranked",
       })
     );
@@ -226,7 +222,7 @@ export default class PlaylistService {
       "ScoreSaber Reloaded",
       maps,
       highlightedIds,
-      await this.generatePlaylistImage("SSR", {
+      await generatePlaylistImage("SSR", {
         title: "Qualified",
       })
     );
@@ -268,7 +264,7 @@ export default class PlaylistService {
       "ScoreSaber Reloaded",
       maps,
       highlightedIds,
-      await this.generatePlaylistImage("SSR", {
+      await generatePlaylistImage("SSR", {
         title: "Ranking Queue",
       })
     );
@@ -323,53 +319,5 @@ export default class PlaylistService {
         };
       })
     );
-  }
-
-  /**
-   * Generates a playlist image
-   *
-   * @param author the author of the playlist
-   * @param options the options for the playlist image
-   * @returns the base64 encoded image
-   */
-  private static async generatePlaylistImage(
-    author: string,
-    options: {
-      title?: string;
-      lines?: ImageTextOptions[];
-    }
-  ): Promise<string> {
-    const image = new SSRImage({
-      width: 512,
-      height: 512,
-    });
-    await image.setBackgroundImage("https://cdn.fascinated.cc/cFkchQkc.png");
-    image.drawText(
-      [
-        {
-          text: author,
-          color: "#000",
-          fontSize: 100,
-          fontFamily: "SSR",
-        },
-        // Title
-        ...(options.title
-          ? ([
-              {
-                text: options.title,
-                color: "#222222",
-                fontSize: 62,
-                fontFamily: "SSR",
-              },
-            ] as ImageTextOptions[])
-          : []),
-
-        // Additional lines
-        ...(options.lines || []),
-      ],
-      "center",
-      0.8
-    );
-    return (await image.build()).toString("base64");
   }
 }

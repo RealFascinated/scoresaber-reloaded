@@ -12,4 +12,5 @@ export const snipeSettingsSchema = z.object({
     max: z.number().min(0).max(100),
   }),
 });
-export const SnipeSettings = snipeSettingsSchema.shape as unknown as z.infer<typeof snipeSettingsSchema>;
+
+export type SnipeSettings = z.infer<typeof snipeSettingsSchema>;

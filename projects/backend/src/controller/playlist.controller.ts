@@ -2,6 +2,8 @@ import { Controller, Get } from "elysia-decorators";
 import { t } from "elysia";
 import PlaylistService, { SnipeType } from "../service/playlist.service";
 import { Swagger } from "../common/swagger";
+import { generateSnipePlaylistImage } from "../common/playlist.util";
+import { parseSnipePlaylistSettings } from "@ssr/common/snipe/snipe-playlist-utils";
 
 @Controller("/playlist")
 export default class PlaylistController {
@@ -74,6 +76,36 @@ export default class PlaylistController {
       )
     );
     response.headers.set("Content-Type", "application/json");
+    response.headers.set("Cache-Control", "public, max-age=3600");
+    return response;
+  }
+
+  @Get("/snipe/image", {
+    config: {},
+    tags: ["playlist"],
+    query: t.Object({
+      toSnipe: t.String({ required: true }),
+      settings: t.Optional(t.String()),
+    }),
+    detail: {
+      responses: {
+        200: {
+          description: "The snipe playlist image preview.",
+        },
+        ...Swagger.responses.playerNotFound,
+      },
+      description: "Gets the snipe playlist image preview.",
+    },
+  })
+  public async getSnipePlaylistImagePreview({
+    query: { toSnipe, settings },
+  }: {
+    query: { toSnipe: string; settings: string };
+  }) {
+    const response = new Response(
+      Buffer.from(await generateSnipePlaylistImage(parseSnipePlaylistSettings(settings), toSnipe), "base64")
+    );
+    response.headers.set("Content-Type", "image/png");
     response.headers.set("Cache-Control", "public, max-age=3600");
     return response;
   }

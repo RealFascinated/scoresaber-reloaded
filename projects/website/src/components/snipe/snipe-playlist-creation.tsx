@@ -26,6 +26,8 @@ import { Slider } from "@/components/ui/slider";
 import { Config } from "@ssr/common/config";
 import { downloadFile } from "@/common/browser-utils";
 import { LoadingIcon } from "@/components/loading-icon";
+import Link from "next/link";
+import { encodeSnipePlaylistSettings } from "@ssr/common/snipe/snipe-playlist-utils";
 
 type SnipePlaylistDownloadButtonProps = {
   /**
@@ -53,7 +55,7 @@ export default function SnipePlaylistDownloadButton({ toSnipe }: SnipePlaylistDo
   });
 
   const onSubmit = async (data: z.infer<typeof snipeSettingsSchema>) => {
-    const encodedData = Buffer.from(JSON.stringify(data)).toString("base64");
+    const encodedData = encodeSnipePlaylistSettings(data);
     setDownloading(true);
     await downloadFile(
       `${Config.apiUrl}/playlist/snipe?user=${settings.playerId}&toSnipe=${toSnipe.id}&settings=${encodedData}`,
@@ -187,10 +189,20 @@ export default function SnipePlaylistDownloadButton({ toSnipe }: SnipePlaylistDo
               )}
             />
 
-            {/* Download Playlist */}
-            <Button type="submit" className="w-fit">
-              {downloading ? <LoadingIcon /> : "Download"}
-            </Button>
+            <div className="flex gap-2 justify-between">
+              {/* Download Playlist */}
+              <Button type="submit" className="w-fit">
+                {downloading ? <LoadingIcon /> : "Download"}
+              </Button>
+
+              {/* Preview Playlist Art */}
+              <Link
+                href={`${Config.apiUrl}/playlist/snipe/image?toSnipe=${toSnipe.id}&settings=${encodeSnipePlaylistSettings(form.getValues())}`}
+                target="_blank"
+              >
+                <Button type="button">Preview Playlist Art</Button>
+              </Link>
+            </div>
           </form>
         </Form>
       </DialogContent>
