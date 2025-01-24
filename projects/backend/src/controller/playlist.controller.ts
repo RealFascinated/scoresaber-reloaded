@@ -80,7 +80,7 @@ export default class PlaylistController {
     return response;
   }
 
-  @Get("/snipe/image", {
+  @Get("/snipe/preview.png", {
     config: {},
     tags: ["playlist"],
     query: t.Object({
