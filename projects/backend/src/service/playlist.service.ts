@@ -119,13 +119,11 @@ export default class PlaylistService {
               text: "Snipe",
               color: "#222222",
               fontSize: 55,
-              fontFamily: "SSR",
             },
             {
               text: truncateText(toSnipePlayer.name, 16)!,
               color: "#222222",
               fontSize: 45,
-              fontFamily: "SSR",
             },
           ],
         }),
