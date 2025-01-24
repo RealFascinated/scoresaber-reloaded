@@ -237,10 +237,13 @@ export default class PlaylistService {
       CacheService.getCache(ServiceCache.Leaderboards),
       "ranking-queue-maps",
       async () => {
-        const rankingQueueTokens = (await scoresaberService.lookupRankingRequests()) || [];
+        const rankingQueueTokens = await scoresaberService.lookupRankingRequests();
+        if (!rankingQueueTokens) {
+          return [];
+        }
 
         const leaderboards: ScoreSaberLeaderboard[] = [];
-        for (const rankingQueueToken of rankingQueueTokens) {
+        for (const rankingQueueToken of rankingQueueTokens.all) {
           const leaderboard = getScoreSaberLeaderboardFromToken(rankingQueueToken.leaderboardInfo);
           leaderboards.push(leaderboard);
         }
