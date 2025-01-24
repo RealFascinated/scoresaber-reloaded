@@ -1,5 +1,7 @@
 import { Canvas, createCanvas, GlobalFonts, loadImage, SKRSContext2D } from "@napi-rs/canvas";
 import * as path from "node:path";
+import { SSRCache } from "@ssr/common/cache";
+import { fetchWithCache } from "./cache.util";
 
 // Register fonts once
 GlobalFonts.registerFromPath(path.resolve("./src/common/font/Roboto-Medium.ttf"), "SSR");
@@ -17,6 +19,10 @@ export interface ImageTextOptions {
   fontSize: number;
   color: string;
 }
+
+const backgroundImageCache = new SSRCache({
+  ttl: 60 * 60 * 24 * 7, // 7 days
+});
 
 export default class SSRImage {
   private canvas: Canvas;
@@ -39,7 +45,13 @@ export default class SSRImage {
       this.ctx.filter = "blur(1px)";
     }
 
-    this.ctx.drawImage(await loadImage(url), 0, 0, this.options.width, this.options.height);
+    this.ctx.drawImage(
+      await fetchWithCache(backgroundImageCache, url, () => loadImage(url)),
+      0,
+      0,
+      this.options.width,
+      this.options.height
+    );
 
     if (options?.blur) {
       this.ctx.filter = "none";
