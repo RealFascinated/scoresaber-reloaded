@@ -16,6 +16,7 @@ import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import ScoreSaberLeaderboardPageToken from "@ssr/common/types/token/scoresaber/leaderboard-page";
 import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
 import { timeAgo } from "@ssr/common/utils/time-utils";
+import Tooltip from "@/components/tooltip";
 
 export default function Leaderboards() {
   const controls = useAnimation();
@@ -84,6 +85,12 @@ export default function Leaderboards() {
             >
               {leaderboards.leaderboards.map((leaderboardToken, index) => {
                 const leaderboard = getScoreSaberLeaderboardFromToken(leaderboardToken);
+                let date: Date | undefined = leaderboard.timestamp;
+                if (leaderboard.ranked) {
+                  date = leaderboard.dateRanked;
+                } else if (leaderboard.qualified) {
+                  date = leaderboard.dateQualified;
+                }
 
                 return (
                   <motion.div key={index} variants={scoreAnimation}>
@@ -94,7 +101,17 @@ export default function Leaderboards() {
                     >
                       <ScoreSongInfo leaderboard={leaderboard} imageSize={58} clickableSongName={false} />
                       <div className="text-sm">
-                        <p>{timeAgo(leaderboard.timestamp)}</p>
+                        {date && (
+                          <Tooltip
+                            display={
+                              <p>
+                                {leaderboard.status == "Unranked" ? "Created" : leaderboard.status} {timeAgo(date)}
+                              </p>
+                            }
+                          >
+                            {timeAgo(date)}
+                          </Tooltip>
+                        )}
                       </div>
                     </Link>
                   </motion.div>
