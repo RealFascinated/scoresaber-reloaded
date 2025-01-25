@@ -15,14 +15,19 @@ export type Difficulty = {
    * The color of the difficulty
    */
   color: string;
+
+  /**
+   * The difficulty id (used for sorting)
+   */
+  id: number;
 };
 
 const difficulties: Difficulty[] = [
-  { name: "Easy", color: "#3cb371" },
-  { name: "Normal", color: "#59b0f4" },
-  { name: "Hard", color: "#FF6347" },
-  { name: "Expert", color: "#bf2a42" },
-  { name: "ExpertPlus", alternativeName: "Expert+", color: "#8f48db" },
+  { name: "Easy", color: "#3cb371", id: 1 },
+  { name: "Normal", color: "#59b0f4", id: 2 },
+  { name: "Hard", color: "#FF6347", id: 3 },
+  { name: "Expert", color: "#bf2a42", id: 4 },
+  { name: "ExpertPlus", alternativeName: "Expert+", color: "#8f48db", id: 5 },
 ];
 
 export type ScoreBadge = {
