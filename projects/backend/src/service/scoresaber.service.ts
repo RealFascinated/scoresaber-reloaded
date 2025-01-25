@@ -416,7 +416,7 @@ export default class ScoreSaberService {
    * @param playerId the id of the player
    * @param options the fetch options
    */
-  public static async getPlayerScores(
+  public static async getPlayerLatestScores(
     playerId: string,
     options: {
       sort?: "pp" | "timestamp";

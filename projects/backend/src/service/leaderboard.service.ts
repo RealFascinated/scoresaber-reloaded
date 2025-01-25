@@ -11,7 +11,7 @@ import {
 } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { fetchWithCache } from "../common/cache.util";
 import { delay } from "@ssr/common/utils/utils";
-import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
+import { ScoreSaberScoreDocument, ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import CacheService, { ServiceCache } from "./cache.service";
 import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/leaderboard";
 import LeaderboardDifficulty from "@ssr/common/model/leaderboard/leaderboard-difficulty";
@@ -211,7 +211,20 @@ export default class LeaderboardService {
           const starCountChanged = leaderboard.stars !== previousLeaderboard?.stars;
           if (rankedStatusChanged || starCountChanged) {
             console.log(`Leaderboard data changed for ${leaderboard.id}.`);
-            const scores = await ScoreSaberScoreModel.find({ leaderboardId: leaderboard.id });
+
+            // Get the latest scores for the leaderboard
+            const scores: ScoreSaberScoreDocument[] = await ScoreSaberScoreModel.aggregate([
+              // Match stage based on leaderboardId
+              { $match: { leaderboardId: leaderboard.id } },
+
+              // Group by leaderboardId and playerId to get the first entry of each group
+              {
+                $group: {
+                  _id: { leaderboardId: "$leaderboardId", playerId: "$playerId" },
+                  score: { $first: "$$ROOT" }, // Keep the whole document in "score" field
+                },
+              },
+            ]);
             if (!scores) {
               console.warn(`Failed to fetch scores for leaderboard "${leaderboard.id}".`);
               continue;
@@ -271,7 +284,10 @@ export default class LeaderboardService {
 
               // Update scores
               for (const scoreToken of scoreTokens) {
-                const score = scores.find(score => score.scoreId === scoreToken.id + "");
+                const score = scores.find(
+                  // Ensure we only get the latest score for the leaderboard and player
+                  score => score.scoreId === scoreToken.id + "" && score.score == scoreToken.baseScore
+                );
                 // Score not tracked, so ignore
                 if (!score) {
                   continue;
@@ -281,7 +297,30 @@ export default class LeaderboardService {
                 score.rank = scoreToken.rank;
                 updatedScores++;
 
-                console.log(`Updated score ${score.id} for leaderboard ${leaderboard.fullName}, new pp: ${score.pp}`);
+                console.log(
+                  `Updated score ${score.scoreId} for leaderboard ${leaderboard.fullName}, new pp: ${score.pp}`
+                );
+
+                let previousScores = await ScoreSaberScoreModel.find({
+                  playerId: score.playerId,
+                  leaderboardId: score.leaderboardId,
+                });
+
+                // Remove current score from previousScores
+                previousScores = previousScores.filter(previousScore => previousScore.scoreId !== score.scoreId);
+
+                // Update the previous scores with the new star count
+                if (previousScores.length > 0) {
+                  for (const previousScore of previousScores) {
+                    previousScore.pp = scoresaberService.getPp(leaderboard.stars, score.pp);
+                    previousScore.weight = 0;
+                    await previousScore.save();
+                  }
+
+                  console.log(
+                    `Updated previous scores pp values on leaderboard ${leaderboard.fullName} for player ${score.playerId}`
+                  );
+                }
               }
 
               // Save scores

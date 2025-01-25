@@ -178,7 +178,7 @@ export class PlayerService {
       `pp-boundary-scores:${playerId}`,
       async () => {
         await PlayerService.getPlayer(playerId); // Ensure player exists
-        const playerScores = await ScoreSaberService.getPlayerScores(playerId, {
+        const playerScores = await ScoreSaberService.getPlayerLatestScores(playerId, {
           ranked: true,
           sort: "pp",
           projection: {
@@ -212,7 +212,7 @@ export class PlayerService {
       `pp-boundary-scores:${playerId}`,
       async () => {
         await PlayerService.getPlayer(playerId); // Ensure player exists
-        const playerScores = await ScoreSaberService.getPlayerScores(playerId, {
+        const playerScores = await ScoreSaberService.getPlayerLatestScores(playerId, {
           ranked: true,
           sort: "pp",
           projection: {
@@ -586,7 +586,7 @@ export class PlayerService {
    */
   public static async getPlayerHMD(playerId: string): Promise<HMD | undefined> {
     // Get player's most used HMD in the last 50 scores
-    const scores = await ScoreSaberService.getPlayerScores(playerId, {
+    const scores = await ScoreSaberService.getPlayerLatestScores(playerId, {
       limit: 50,
       sort: "timestamp",
     });
