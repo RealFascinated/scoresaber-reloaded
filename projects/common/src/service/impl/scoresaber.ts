@@ -308,7 +308,7 @@ class ScoreSaberService extends Service {
       return undefined;
     }
     this.log(
-      `Found ${response.scores.length} scores for leaderboard "${leaderboardId}" in ${(performance.now() - before).toFixed(0)}ms`
+      `Found ${response.scores.length} scores for leaderboard "${leaderboardId}", page "${page}" in ${(performance.now() - before).toFixed(0)}ms`
     );
     return response;
   }

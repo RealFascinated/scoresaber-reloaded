@@ -16,6 +16,7 @@ import CacheService, { ServiceCache } from "./cache.service";
 import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/leaderboard";
 import LeaderboardDifficulty from "@ssr/common/model/leaderboard/leaderboard-difficulty";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
+import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score";
 
 const SCORESABER_REQUEST_COOLDOWN = 60_000 / 300; // 300 requests per minute
 
@@ -176,6 +177,10 @@ export default class LeaderboardService {
         console.warn(`Failed to fetch ranked leaderboards on page ${page}.`);
         break;
       }
+      const totalPages = Math.ceil(leaderboardResponse.metadata.total / leaderboardResponse.metadata.itemsPerPage);
+      console.log(
+        `Fetched ${leaderboardResponse.leaderboards.length} ranked leaderboards on page ${page}/${totalPages}.`
+      );
 
       for (const leaderboardToken of leaderboardResponse.leaderboards) {
         const leaderboard = getScoreSaberLeaderboardFromToken(leaderboardToken);
@@ -191,7 +196,7 @@ export default class LeaderboardService {
         });
         rankedMapDiffs.set(leaderboard.songHash, difficulties);
 
-        if (previousLeaderboard !== undefined) {
+        if (previousLeaderboard !== null) {
           // Leaderboard changed data
           const rankedStatusChanged = leaderboard.ranked !== previousLeaderboard?.ranked;
           const starCountChanged = leaderboard.stars !== previousLeaderboard?.stars;
@@ -214,7 +219,7 @@ export default class LeaderboardService {
               );
             }
 
-            // Update score pp
+            // Reset score pp values if the leaderboard is no longer ranked
             if (rankedStatusChanged && !leaderboard.ranked) {
               for (const score of scores) {
                 score.pp = 0;
@@ -222,26 +227,61 @@ export default class LeaderboardService {
               }
             }
 
-            // Update score pp
+            // Update score pp for newly ranked or changed star count leaderboards
             if ((starCountChanged && leaderboard.ranked) || (rankedStatusChanged && leaderboard.ranked)) {
-              const before = Date.now();
-              console.log(`Recalculating scores pp for leaderboard "${leaderboard.id}".`);
-              for (const score of scores) {
-                if (score.accuracy == Infinity) {
-                  score.accuracy = (score.score / leaderboard.maxScore) * 100;
-                }
-                score.pp = scoresaberService.getPp(leaderboard.stars, score.accuracy);
-              }
-              console.log(`Recalculated scores pp for leaderboard "${leaderboard.id}" in ${Date.now() - before}ms.`);
-            }
+              const scoreTokens: ScoreSaberScoreToken[] = [];
 
-            // Save scores
-            await Promise.all(scores.map(score => score.save()));
+              let currentScoresPage = 1;
+              let hasMoreScores = true;
+
+              // Fetch all scores for this leaderboard
+              while (hasMoreScores) {
+                const scoresResponse = await scoresaberService.lookupLeaderboardScores(
+                  leaderboard.id + "",
+                  currentScoresPage
+                );
+                if (!scoresResponse) {
+                  console.warn(`Failed to fetch scores for leaderboard "${leaderboard.id}".`);
+                  await delay(SCORESABER_REQUEST_COOLDOWN);
+                  continue;
+                }
+
+                for (const score of scoresResponse.scores) {
+                  scoreTokens.push(score);
+                }
+
+                if (
+                  currentScoresPage >= Math.ceil(scoresResponse.metadata.total / scoresResponse.metadata.itemsPerPage)
+                ) {
+                  hasMoreScores = false;
+                }
+
+                currentScoresPage++;
+                await delay(SCORESABER_REQUEST_COOLDOWN);
+              }
+
+              // Update scores
+              for (const scoreToken of scoreTokens) {
+                const score = scores.find(score => score.scoreId === scoreToken.id + "");
+                // Score not tracked, so ignore
+                if (!score) {
+                  continue;
+                }
+                score.pp = scoreToken.pp;
+                score.weight = scoreToken.weight;
+                score.rank = scoreToken.rank;
+
+                console.log(`Updated score ${score.id} for leaderboard ${leaderboard.fullName}, new pp: ${score.pp}`);
+              }
+
+              // Save scores
+              await Promise.all(scores.map(score => score.save()));
+            }
           }
         }
       }
 
-      if (page >= Math.ceil(leaderboardResponse.metadata.total / leaderboardResponse.metadata.itemsPerPage)) {
+      if (page >= totalPages) {
         hasMorePages = false;
       }
 
