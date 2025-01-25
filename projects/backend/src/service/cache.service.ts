@@ -50,7 +50,7 @@ export default class CacheService {
         ttl: 1000 * 60 * 60, // 1 hour
       },
       [ServiceCache.PPBoundary]: {
-        ttl: 1000 * 60 * 30, // 30 minutes
+        ttl: 1000 * 60 * 5, // 5 minutes
       },
       [ServiceCache.AdditionalScoreData]: {
         ttl: 1000 * 60 * 60, // 1 hour
