@@ -213,18 +213,9 @@ export default class LeaderboardService {
             console.log(`Leaderboard data changed for ${leaderboard.id}.`);
 
             // Get the latest scores for the leaderboard
-            const scores: ScoreSaberScoreDocument[] = await ScoreSaberScoreModel.aggregate([
-              // Match stage based on leaderboardId
-              { $match: { leaderboardId: leaderboard.id } },
-
-              // Group by leaderboardId and playerId to get the first entry of each group
-              {
-                $group: {
-                  _id: { leaderboardId: "$leaderboardId", playerId: "$playerId" },
-                  score: { $first: "$$ROOT" }, // Keep the whole document in "score" field
-                },
-              },
-            ]);
+            const scores: ScoreSaberScoreDocument[] = await ScoreSaberScoreModel.find({
+              leaderboardId: leaderboard.id,
+            }).sort({ timestamp: -1 });
             if (!scores) {
               console.warn(`Failed to fetch scores for leaderboard "${leaderboard.id}".`);
               continue;
