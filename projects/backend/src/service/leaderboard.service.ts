@@ -162,9 +162,17 @@ export default class LeaderboardService {
 
   /**
    * Refreshes the ranked status and stars of all ranked leaderboards.
+   *
+   * @returns the amount of leaderboards refreshed and the amount of scores updated
    */
-  public static async refreshRankedLeaderboards() {
+  public static async refreshRankedLeaderboards(): Promise<{
+    refreshedLeaderboards: number;
+    updatedScores: number;
+  }> {
     console.log(`Refreshing ranked leaderboards...`);
+    let refreshedLeaderboards = 0;
+    let updatedScores = 0;
+
     let page = 1;
     let hasMorePages = true;
     const leaderboards: ScoreSaberLeaderboard[] = [];
@@ -271,6 +279,7 @@ export default class LeaderboardService {
                 score.pp = scoreToken.pp;
                 score.weight = scoreToken.weight;
                 score.rank = scoreToken.rank;
+                updatedScores++;
 
                 console.log(`Updated score ${score.id} for leaderboard ${leaderboard.fullName}, new pp: ${score.pp}`);
               }
@@ -313,6 +322,7 @@ export default class LeaderboardService {
         );
       })
     );
+    refreshedLeaderboards = leaderboards.length;
     console.log(`Saved ${leaderboards.length} ranked leaderboards.`);
 
     // Un-rank all unranked leaderboards
@@ -359,6 +369,11 @@ export default class LeaderboardService {
     }
     console.log(`Unranked ${totalUnranked} previously ranked leaderboards.`);
     console.log(`Finished refreshing leaderboards, total pages refreshed: ${page - 1}.`);
+
+    return {
+      refreshedLeaderboards,
+      updatedScores,
+    };
   }
 
   /**

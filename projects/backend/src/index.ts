@@ -121,10 +121,12 @@ app.use(
         DiscordChannels.backendLogs,
         new EmbedBuilder().setDescription(`Refreshing ranked leaderboards...`)
       );
-      await LeaderboardService.refreshRankedLeaderboards();
+      const { refreshedLeaderboards, updatedScores } = await LeaderboardService.refreshRankedLeaderboards();
       await logToChannel(
         DiscordChannels.backendLogs,
-        new EmbedBuilder().setDescription(`Refreshed ranked leaderboards in ${formatDuration(Date.now() - before)}`)
+        new EmbedBuilder().setDescription(
+          `Refreshed ${refreshedLeaderboards} ranked leaderboards in ${formatDuration(Date.now() - before)}, updated ${updatedScores} scores.`
+        )
       );
 
       before = Date.now();
