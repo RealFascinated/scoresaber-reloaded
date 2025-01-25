@@ -19,7 +19,7 @@ import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-respons
 import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score";
 import { getDifficulty } from "@ssr/common/utils/song-utils";
 
-const SCORESABER_REQUEST_COOLDOWN = 60_000 / 300; // 300 requests per minute
+const SCORESABER_REQUEST_COOLDOWN = 60_000 / 200; // 200 requests per minute
 
 export default class LeaderboardService {
   /**
