@@ -7,6 +7,8 @@ import { MapDifficulty } from "@ssr/common/score/map-difficulty";
 import { MapCharacteristic } from "@ssr/common/types/map-characteristic";
 import { getBeatSaverDifficulty } from "@ssr/common/utils/beatsaver.util";
 import { BeatSaverMapToken } from "@ssr/common/types/token/beatsaver/map";
+import { DiscordChannels, logToChannel } from "../bot/bot";
+import { EmbedBuilder } from "discord.js";
 
 export default class BeatSaverService {
   /**
@@ -43,6 +45,12 @@ export default class BeatSaverService {
       map = await BeatSaverMapModel.findOne({
         bsr: token.id,
       });
+
+      await logToChannel(
+        DiscordChannels.backendLogs,
+        new EmbedBuilder().setDescription(`Found broken beatsaver map ${hash}, bsr: ${token.id}`)
+      );
+
       if (map) {
         return map.toObject() as BeatSaverMap;
       }
