@@ -11,7 +11,7 @@ import {
 } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { fetchWithCache } from "../common/cache.util";
 import { delay } from "@ssr/common/utils/utils";
-import { ScoreSaberScoreDocument, ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
+import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import CacheService, { ServiceCache } from "./cache.service";
 import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/leaderboard";
 import LeaderboardDifficulty from "@ssr/common/model/leaderboard/leaderboard-difficulty";
@@ -213,7 +213,7 @@ export default class LeaderboardService {
             console.log(`Leaderboard data changed for ${leaderboard.id}.`);
 
             // Get the latest scores for the leaderboard
-            const scores: ScoreSaberScoreDocument[] = await ScoreSaberScoreModel.find({
+            const scores = await ScoreSaberScoreModel.find({
               leaderboardId: leaderboard.id,
             }).sort({ timestamp: -1 });
             if (!scores) {
