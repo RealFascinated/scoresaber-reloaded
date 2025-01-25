@@ -324,7 +324,15 @@ export default class LeaderboardService {
               }
 
               // Save scores
-              await Promise.all(scores.map(score => score.save && score.save()));
+              await Promise.all(
+                scores.map(score => {
+                  if (!score.save) {
+                    console.warn(`ScoreSaberScoreDocument is missing save method: ${JSON.stringify(score)}`);
+                    return;
+                  }
+                  return score.save();
+                })
+              );
 
               // Update leaderboard so if the refresher crashes/stops, we don't lose progress updating the leaderboards
               await ScoreSaberLeaderboardModel.findOneAndUpdate(
