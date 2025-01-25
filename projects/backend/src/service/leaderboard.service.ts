@@ -327,21 +327,6 @@ export default class LeaderboardService {
                   return score.save();
                 })
               );
-
-              // Update leaderboard so if the refresher crashes/stops, we don't lose progress updating the leaderboards
-              await ScoreSaberLeaderboardModel.findOneAndUpdate(
-                { _id: leaderboard.id },
-                {
-                  lastRefreshed: new Date(),
-                  ...(previousLeaderboard ?? leaderboard),
-                  stars: leaderboard.stars,
-                },
-                {
-                  upsert: true,
-                  new: true,
-                  setDefaultsOnInsert: true,
-                }
-              );
             }
           }
         }
