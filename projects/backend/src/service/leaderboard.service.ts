@@ -17,6 +17,7 @@ import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/leade
 import LeaderboardDifficulty from "@ssr/common/model/leaderboard/leaderboard-difficulty";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
 import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score";
+import { getDifficulty } from "@ssr/common/utils/song-utils";
 
 const SCORESABER_REQUEST_COOLDOWN = 60_000 / 300; // 300 requests per minute
 
@@ -298,7 +299,11 @@ export default class LeaderboardService {
           {
             lastRefreshed: new Date(),
             ...leaderboard,
-            difficulties: rankedMapDiffs.get(leaderboard.songHash),
+            // Sort difficulties from Easy to ExpertPlus
+            difficulties:
+              rankedMapDiffs
+                .get(leaderboard.songHash)
+                ?.sort((a, b) => getDifficulty(a.difficulty).id - getDifficulty(b.difficulty).id) ?? [],
           },
           {
             upsert: true,
