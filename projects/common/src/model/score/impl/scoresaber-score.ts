@@ -115,6 +115,6 @@ export type ScoreSaberPreviousScore = PreviousScore & {
 };
 
 export type ScoreSaberScore = InstanceType<typeof ScoreSaberScorePublic>;
-export type ScoreSaberScoreDocument = ScoreSaberScorePublic & Document;
+export type ScoreSaberScoreDocument = ScoreSaberScore & Document;
 export const ScoreSaberScoreModel: ReturnModelType<typeof ScoreSaberScoreInternal> =
   getModelForClass(ScoreSaberScoreInternal);
