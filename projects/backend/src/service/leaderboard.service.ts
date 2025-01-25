@@ -298,7 +298,10 @@ export default class LeaderboardService {
                 });
 
                 // Remove current score from previousScores
-                previousScores = previousScores.filter(previousScore => previousScore.scoreId !== score.scoreId);
+                previousScores = previousScores.filter(
+                  previousScore =>
+                    previousScore.scoreId === scoreToken.id + "" && previousScore.score == scoreToken.baseScore
+                );
 
                 // Update the previous scores with the new star count
                 if (previousScores.length > 0) {
