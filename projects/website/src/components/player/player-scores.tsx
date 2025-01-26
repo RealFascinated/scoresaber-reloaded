@@ -111,13 +111,6 @@ export default function PlayerScores({ initialSearch, player, sort, page }: Prop
   };
 
   /**
-   * Clears the score search term.
-   */
-  const clearSearch = () => {
-    setSearchTerm("");
-  };
-
-  /**
    * Handle score animation.
    */
   useEffect(() => {
@@ -171,22 +164,10 @@ export default function PlayerScores({ initialSearch, player, sort, page }: Prop
           <Input
             type="search"
             placeholder="Search..."
-            className={clsx(
-              "pr-10", // Add padding right for the clear button
-              invalidSearch && "border-red-500"
-            )}
+            className={clsx(invalidSearch && "border-red-500")}
             value={searchTerm}
             onChange={e => handleSearchChange(e.target.value)}
           />
-          {searchTerm && ( // Show clear button only if there's a query
-            <button
-              onClick={clearSearch}
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-300 hover:brightness-[66%] transform-gpu transition-all cursor-default"
-              aria-label="Clear search"
-            >
-              <XMarkIcon className="w-5 h-5" />
-            </button>
-          )}
         </div>
       </div>
 
