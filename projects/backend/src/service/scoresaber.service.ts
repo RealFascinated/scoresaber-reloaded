@@ -703,7 +703,7 @@ export default class ScoreSaberService {
     const date: Date = daysAgo == -1 ? new Date(0) : getDaysAgoDate(daysAgo);
     const foundScores = await ScoreSaberScoreModel.aggregate([
       { $match: { timestamp: { $gte: date }, pp: { $gt: 0 } } },
-      { $sort: { "score.pp": -1 } },
+      { $sort: { pp: -1 } },
       { $limit: amount },
     ]);
 
