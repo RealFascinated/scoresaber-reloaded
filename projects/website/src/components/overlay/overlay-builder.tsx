@@ -11,6 +11,7 @@ import { Button } from "../ui/button";
 import { Input } from "@/components/ui/input";
 import { encodeOverlaySettings } from "@/common/overlay/overlay-settings";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
+import Notice from "@/components/notice";
 
 const formSchema = z.object({
   playerId: z.string().min(1).max(32),
@@ -66,8 +67,11 @@ export default function OverlayBuilder() {
       <p className="text-xl font-semibold">ScoreSaber Reloaded Overlay Builder</p>
 
       {/* Streamer Warning */}
-      <p className="text-red-500 text-sm">
-        You must use a resolution of 1920x1080 in OBS (or similar) to use this overlay.
+      <Notice>You must use a resolution of 1920x1080 in OBS (or similar) to use this overlay.</Notice>
+
+      {/* Unknown Account ID Notice */}
+      <p className="text-sm text-muted-foreground">
+        If you don&#39;t know your player id, you can link your account and it will be automatically filled in.
       </p>
 
       {/* Overlay Settings */}
