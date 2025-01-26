@@ -1,6 +1,7 @@
 import Overlay from "@/components/overlay/overlay";
 import { parseOverlaySettings } from "@/common/overlay/overlay-settings";
 import OverlayBuilder from "@/components/overlay/overlay-builder";
+import Navbar from "@/components/navbar/navbar";
 
 type OverlayPageProps = {
   /**

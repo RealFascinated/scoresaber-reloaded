@@ -259,11 +259,7 @@ export default class LeaderboardService {
                     `Failed to fetch scoresaber api scores for leaderboard "${leaderboard.id}". (current page: ${currentScoresPage}, total pages: ${totalPages})`
                   );
                   await delay(SCORESABER_REQUEST_COOLDOWN);
-
-                  if (currentScoresPage >= totalPages) {
-                    totalPages = 0;
-                    hasMoreScores = false;
-                  }
+                  currentScoresPage++; // skip this page
                   continue;
                 }
 

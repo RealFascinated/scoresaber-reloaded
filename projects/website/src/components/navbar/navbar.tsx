@@ -6,7 +6,7 @@ import { cn } from "@/common/utils";
 import FriendsButton from "@/components/friend/friends-button";
 import { ChartBarIcon, MusicIcon, TrendingUpIcon } from "lucide-react";
 import ProfileButton from "@/components/navbar/profile-button";
-import { CogIcon } from "@heroicons/react/24/solid";
+import { CogIcon, CubeIcon } from "@heroicons/react/24/solid";
 import PlayerAndLeaderboardSearch from "@/components/navbar/player-and-leaderboard-search";
 import Image from "next/image";
 
@@ -17,7 +17,7 @@ const links: ReactElement[] = [
     content={
       <>
         <TrendingUpIcon className="size-5" />
-        <span className="hidden sm:flex">Ranking</span>
+        <span className="hidden xl:flex">Ranking</span>
       </>
     }
     href="/projects/website/src/app/(pages)/(app)/ranking"
@@ -27,7 +27,7 @@ const links: ReactElement[] = [
     content={
       <>
         <ChartBarIcon className="size-5" />
-        <span className="hidden sm:flex">Statistics</span>
+        <span className="hidden xl:flex">Statistics</span>
       </>
     }
     href="/projects/website/src/app/(pages)/(app)/statistics/scoresaber"
@@ -37,10 +37,20 @@ const links: ReactElement[] = [
     content={
       <>
         <MusicIcon className="size-5" />
-        <span className="hidden sm:flex">Maps</span>
+        <span className="hidden xl:flex">Maps</span>
       </>
     }
     href="/maps"
+  />,
+  <SimpleNavLink
+    key="overlay"
+    content={
+      <>
+        <CubeIcon className="size-5" />
+        <span className="hidden xl:flex">Overlay</span>
+      </>
+    }
+    href="/overlay"
   />,
 ];
 
