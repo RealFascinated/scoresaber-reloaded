@@ -20,7 +20,11 @@ export default function ProfileButton() {
   }
 
   return (
-    <Link prefetch={false} href={`/player/${settings.playerId}`} className="pl-1 flex items-center gap-4 h-full">
+    <Link
+      prefetch={false}
+      href={`/projects/website/src/app/(pages)/(app)/player/${settings.playerId}`}
+      className="pl-1 flex items-center gap-4 h-full"
+    >
       <NavbarButton className="px-0">
         <Avatar
           src={claimedPlayer.profilePicture}

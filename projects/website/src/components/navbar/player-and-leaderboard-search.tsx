@@ -57,7 +57,7 @@ export default function PlayerAndLeaderboardSearch() {
       return {
         players:
           playerResults?.players.sort((a, b) => {
-            return b.pp - a.pp;
+            return a.rank - b.rank;
           }) || [],
         leaderboards:
           leaderboardResults?.leaderboards
@@ -170,7 +170,7 @@ export default function PlayerAndLeaderboardSearch() {
                   return (
                     <CommandItem
                       key={player.id}
-                      value={player.name}
+                      value={`${player.name}-${player.id}`}
                       className="cursor-pointer flex items-center justify-start"
                       onSelect={() => {
                         closeSearch();

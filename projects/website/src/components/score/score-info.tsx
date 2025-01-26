@@ -24,7 +24,10 @@ export default function ScoreInfo({ score, leaderboard }: Props) {
         <GlobeAmericasIcon className="w-5 h-5" />
 
         {/* Score Rank */}
-        <Link prefetch={false} href={`/leaderboard/${leaderboard.id}/${getPageFromRank(score.rank, 12)}`}>
+        <Link
+          prefetch={false}
+          href={`/projects/website/src/app/(pages)/(app)/leaderboard/${leaderboard.id}/${getPageFromRank(score.rank, 12)}`}
+        >
           <p className="text-ssr cursor-default hover:brightness-[66%] transition-all transform-gpu cursor-pointer">
             #{formatNumberWithCommas(score.rank)}
           </p>

@@ -1,8 +1,8 @@
 import { Metadata } from "next";
-import { GamePlatform } from "@ssr/common/model/statistics/game-platform";
+import { GamePlatform } from "@ssr/common/dist/model/statistics/game-platform.ts";
 import Card from "@/components/card";
 import ActivePlayersAndScoresSetChart from "@/components/platform-statistics/charts/active-players-and-scores-set-chart";
-import { getPlatformStatistics } from "@ssr/common/utils/statistic.util";
+import { getPlatformStatistics } from "@ssr/common/dist/utils/statistic.util.ts";
 
 export const metadata: Metadata = {
   title: "Statistics",

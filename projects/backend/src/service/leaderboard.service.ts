@@ -246,6 +246,7 @@ export default class LeaderboardService {
 
               let currentScoresPage = 1;
               let hasMoreScores = true;
+              let totalPages = 0;
 
               // Fetch all scores for this leaderboard
               while (hasMoreScores) {
@@ -256,17 +257,23 @@ export default class LeaderboardService {
                 if (!scoresResponse) {
                   console.warn(`Failed to fetch scores for leaderboard "${leaderboard.id}".`);
                   await delay(SCORESABER_REQUEST_COOLDOWN);
+
+                  if (currentScoresPage >= totalPages) {
+                    totalPages = 0;
+                    hasMoreScores = false;
+                  }
                   continue;
+                }
+
+                totalPages = Math.ceil(scoresResponse.metadata.total / scoresResponse.metadata.itemsPerPage);
+
+                if (currentScoresPage >= totalPages) {
+                  totalPages = 0;
+                  hasMoreScores = false;
                 }
 
                 for (const score of scoresResponse.scores) {
                   scoreTokens.push(score);
-                }
-
-                if (
-                  currentScoresPage >= Math.ceil(scoresResponse.metadata.total / scoresResponse.metadata.itemsPerPage)
-                ) {
-                  hasMoreScores = false;
                 }
 
                 currentScoresPage++;

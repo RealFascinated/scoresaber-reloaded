@@ -103,7 +103,7 @@ export function TopScoresData({ timeframe }: TopScoresDataProps) {
               <div key={index} className="flex flex-col pt-2">
                 <p className="text-sm">
                   Set by{" "}
-                  <Link prefetch={false} href={`/player/${player.id}`}>
+                  <Link prefetch={false} href={`/projects/website/src/app/(pages)/(app)/player/${player.id}`}>
                     <span className="text-ssr hover:brightness-[66%] transition-all transform-gpu">{name}</span>
                   </Link>
                 </p>

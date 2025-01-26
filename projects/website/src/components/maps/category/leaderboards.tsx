@@ -96,7 +96,7 @@ export default function Leaderboards() {
                   <motion.div key={index} variants={scoreAnimation}>
                     <Link
                       prefetch={false}
-                      href={`/leaderboard/${leaderboard.id}`}
+                      href={`/projects/website/src/app/(pages)/(app)/leaderboard/${leaderboard.id}`}
                       className="grid lg:grid-cols-[1fr_0.17fr] gap-2 items-center bg-border p-1.5 hover:brightness-75 transition-all transform-gpu rounded-md"
                     >
                       <ScoreSongInfo leaderboard={leaderboard} imageSize={58} clickableSongName={false} />

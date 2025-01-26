@@ -20,7 +20,7 @@ const links: ReactElement[] = [
         <span className="hidden sm:flex">Ranking</span>
       </>
     }
-    href="/ranking"
+    href="/projects/website/src/app/(pages)/(app)/ranking"
   />,
   <SimpleNavLink
     key="statistics"
@@ -30,7 +30,7 @@ const links: ReactElement[] = [
         <span className="hidden sm:flex">Statistics</span>
       </>
     }
-    href="/statistics/scoresaber"
+    href="/projects/website/src/app/(pages)/(app)/statistics/scoresaber"
   />,
   <SimpleNavLink
     key="maps"

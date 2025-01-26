@@ -54,7 +54,7 @@ export default function ScoreFeed() {
           <div key={score.scoreId} className="flex flex-col py-2">
             <div className="flex flex-row gap-2 items-center">
               <Avatar src={player.profilePicture!} className="w-6 h-6" alt={`${player.name}'s Profile Picture`} />
-              <Link prefetch={false} href={`/player/${player.id}`}>
+              <Link prefetch={false} href={`/projects/website/src/app/(pages)/(app)/player/${player.id}`}>
                 <span className="text-ssr hover:brightness-[66%] transition-all transform-gpu">{player.name}</span>
               </Link>
               <p className="text-gray-400 text-xs"> on {scoreToken.score.deviceHmd || "Unknown Device"}</p>

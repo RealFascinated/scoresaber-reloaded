@@ -1,10 +1,10 @@
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { LeaderboardData } from "@/components/leaderboard/page/leaderboard-data";
-import { Config } from "@ssr/common/config";
-import { LeaderboardResponse } from "@ssr/common/response/leaderboard-response";
-import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import { fetchLeaderboard } from "@ssr/common/utils/leaderboard.util";
+import { Config } from "@ssr/common/dist/config.ts";
+import { LeaderboardResponse } from "@ssr/common/dist/response/leaderboard-response.ts";
+import ScoreSaberLeaderboard from "@ssr/common/dist/model/leaderboard/impl/scoresaber-leaderboard.ts";
+import { fetchLeaderboard } from "@ssr/common/dist/utils/leaderboard.util.ts";
 import { cache } from "react";
 
 type Props = {

@@ -76,7 +76,7 @@ export default function Mini({ type, player }: MiniProps) {
             <Link
               prefetch={false}
               key={index}
-              href={`/player/${playerRanking.id}`}
+              href={`/projects/website/src/app/(pages)/(app)/player/${playerRanking.id}`}
               className="grid gap-2 grid-cols-[auto_1fr_auto] items-center bg-accent px-2 py-1.5 cursor-pointer transform-gpu transition-all hover:brightness-75 first:rounded-t last:rounded-b"
             >
               <p className="text-gray-400">#{formatNumberWithCommas(rank)}</p>

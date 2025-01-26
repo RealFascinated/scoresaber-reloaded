@@ -1,4 +1,4 @@
-import "./globals.css";
+import "../../globals.css";
 import { PreloadResources } from "@/components/preload-resources";
 import { QueryProvider } from "@/components/providers/query-provider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
@@ -6,8 +6,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
-import BackgroundCover from "../components/background-cover";
-import DatabaseLoader from "../components/loaders/database-loader";
+import BackgroundCover from "../../../components/background-cover";
+import DatabaseLoader from "../../../components/loaders/database-loader";
 import { Colors } from "@/common/colors";
 import OfflineNetwork from "@/components/offline-network";
 import Script from "next/script";
@@ -20,7 +20,7 @@ import SSRLayout from "@/components/ssr-layout";
 import { SnowBackground } from "@/components/effects/snow-background";
 
 const siteFont = localFont({
-  src: "./fonts/JetBrainsMono.ttf",
+  src: "../../fonts/JetBrainsMono.ttf",
   weight: "100 300",
 });
 
@@ -70,29 +70,22 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const { buildId, buildTimeShort } = getBuildInformation();
-
   return (
     <html lang="en">
       <body className={`${siteFont.className} antialiased w-full h-full`}>
         <Script defer data-domain="ssr.fascinated.cc" src="https://analytics.fascinated.cc/js/script.js" />
         <DatabaseLoader>
           <Toaster />
-          <BackgroundCover />
-          <SnowBackground />
           <PreloadResources />
           <TooltipProvider delayDuration={250}>
             <OfflineNetwork>
               <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
                 <QueryProvider>
-                  <ApiHealth />
                   <main className="flex flex-col min-h-screen text-white w-full">
                     <SearchProvider>
-                      <Navbar />
                       <SSRLayout>{children}</SSRLayout>
                     </SearchProvider>
                   </main>
-                  <Footer buildId={buildId} buildTimeShort={buildTimeShort} />
                 </QueryProvider>
               </ThemeProvider>
             </OfflineNetwork>

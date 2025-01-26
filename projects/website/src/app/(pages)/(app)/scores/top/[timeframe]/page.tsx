@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { Timeframe } from "@ssr/common/timeframe";
+import { Timeframe } from "@ssr/common/dist/timeframe.ts";
 import { TopScoresData } from "@/components/score/top/top-scores-data";
 
 export const metadata: Metadata = {
