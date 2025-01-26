@@ -18,6 +18,7 @@ import { SearchProvider } from "@/components/providers/search-provider";
 import Navbar from "@/components/navbar/navbar";
 import SSRLayout from "@/components/ssr-layout";
 import { SnowBackground } from "@/components/effects/snow-background";
+import { ReactNode } from "react";
 
 const siteFont = localFont({
   src: "../../fonts/JetBrainsMono.ttf",
@@ -68,7 +69,7 @@ export const viewport: Viewport = {
 export default async function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: ReactNode;
 }>) {
   const { buildId, buildTimeShort } = getBuildInformation();
 

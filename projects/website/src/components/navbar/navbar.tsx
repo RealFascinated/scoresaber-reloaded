@@ -50,7 +50,7 @@ const links: ReactElement[] = [
         <span className="hidden xl:flex">Overlay</span>
       </>
     }
-    href="/overlay"
+    href="/overlay/builder"
   />,
 ];
 

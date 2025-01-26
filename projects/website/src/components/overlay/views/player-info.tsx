@@ -1,9 +1,7 @@
 import OverlayView, { OverlayViewPosition } from "@/components/overlay/views/view";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import Image from "next/image";
-import CountryFlag from "@/components/country-flag";
-import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
-import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
+import { formatPp } from "@ssr/common/utils/number-utils";
 import OverlayPlayerCountryRank from "@/components/overlay/components/player-country-rank";
 import OverlayPlayerRank from "../components/player-rank";
 

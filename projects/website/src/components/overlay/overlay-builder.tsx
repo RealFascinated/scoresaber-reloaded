@@ -10,6 +10,7 @@ import { FormField } from "@/components/ui/form";
 import { Button } from "../ui/button";
 import { Input } from "@/components/ui/input";
 import { encodeOverlaySettings } from "@/common/overlay/overlay-settings";
+import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 
 const formSchema = z.object({
   playerId: z.string().min(1).max(32),
@@ -19,10 +20,11 @@ export default function OverlayBuilder() {
   const settings = useSettings();
   const { toast } = useToast();
 
+  const overlaySettings = settings?.getOverlaySettings();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      playerId: settings?.playerId || "",
+      playerId: overlaySettings?.playerId || "",
     },
   });
 
@@ -36,6 +38,20 @@ export default function OverlayBuilder() {
    * @param replayViewer the new replay viewer
    */
   async function onSubmit({ playerId }: z.infer<typeof formSchema>) {
+    const player = await scoresaberService.lookupPlayer(playerId);
+    if (!player) {
+      toast({
+        title: "Player not found",
+        description: "The player id you entered could not be found.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Update the settings
+    settings.setOverlaySettings({
+      playerId: playerId,
+    });
     window.open(
       `/overlay?settings=${encodeOverlaySettings({
         playerId: playerId,
@@ -46,8 +62,10 @@ export default function OverlayBuilder() {
 
   return (
     <div className="flex flex-col gap-3 text-sm w-full h-full p-2 items-center">
+      {/* Title */}
       <p className="text-xl font-semibold">ScoreSaber Reloaded Overlay Builder</p>
 
+      {/* Overlay Settings */}
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-2">
           {/* Replay Viewer */}
@@ -55,9 +73,9 @@ export default function OverlayBuilder() {
             control={form.control}
             name="playerId"
             render={({ field }) => (
-              <FormItem className="w-full sm:w-72">
+              <FormItem className="w-full">
                 <FormLabel>Player ID</FormLabel>
-                <FormDescription>The player ID of the player you want to use in the overlay.</FormDescription>
+                <FormDescription>The id for the player you want to show in the overlay.</FormDescription>
                 <FormControl>
                   <Input placeholder="Player ID" {...field} />
                 </FormControl>

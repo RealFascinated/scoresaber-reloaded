@@ -11,7 +11,6 @@ import { Config } from "@ssr/common/config";
 import { kyFetchJson } from "@ssr/common/utils/utils";
 import { useQuery } from "@tanstack/react-query";
 import { LoadingIcon } from "@/components/loading-icon";
-import { capitalizeFirstLetter } from "../../../../../common/src/string-utils";
 
 type TimeframesType = {
   timeframe: Timeframe;

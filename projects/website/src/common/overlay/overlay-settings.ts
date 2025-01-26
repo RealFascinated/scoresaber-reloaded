@@ -7,12 +7,22 @@ export type OverlaySettings = {
 };
 
 /**
+ * The default settings for the overlay.
+ */
+export const defaultOverlaySettings: OverlaySettings = {
+  playerId: "",
+};
+
+/**
  * Parses the raw settings into an overlay settings object.
  *
  * @param settingsBase64 the raw settings
  */
 export function parseOverlaySettings(settingsBase64: string) {
-  return JSON.parse(Buffer.from(settingsBase64, "base64").toString()) as OverlaySettings;
+  return {
+    ...defaultOverlaySettings, // Default values
+    ...(JSON.parse(Buffer.from(settingsBase64, "base64").toString()) as OverlaySettings), // Override defaults
+  };
 }
 
 /**

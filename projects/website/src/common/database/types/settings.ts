@@ -1,6 +1,7 @@
-import {Entity} from "dexie";
+import { Entity } from "dexie";
 import Database from "../database";
-import {ReplayViewer, ReplayViewers, ReplayViewerTypes} from "@/common/replay-viewer";
+import { ReplayViewer, ReplayViewers, ReplayViewerTypes } from "@/common/replay-viewer";
+import { defaultOverlaySettings, OverlaySettings } from "@/common/overlay/overlay-settings";
 
 /**
  * The website settings.
@@ -40,6 +41,11 @@ export default class Settings extends Entity<Database> {
    * Whether to show snow particles in the background
    */
   snowParticles?: boolean;
+
+  /**
+   * The overlay settings to use
+   */
+  overlaySettings?: OverlaySettings;
 
   /**
    * Sets the players id
@@ -150,6 +156,30 @@ export default class Settings extends Entity<Database> {
    */
   public setSnowParticles(state: boolean) {
     this.snowParticles = state;
+    this.db.setSettings(this);
+  }
+
+  /**
+   * Gets the overlay settings to use
+   *
+   * @returns the overlay settings
+   */
+  public getOverlaySettings(): OverlaySettings {
+    return (
+      this.overlaySettings ?? {
+        ...defaultOverlaySettings,
+        playerId: this.playerId ?? defaultOverlaySettings.playerId, // Use the default player id if not set
+      }
+    );
+  }
+
+  /**
+   * Sets the overlay settings to use
+   *
+   * @param settings the overlay settings
+   */
+  public setOverlaySettings(settings: OverlaySettings) {
+    this.overlaySettings = settings;
     this.db.setSettings(this);
   }
 }

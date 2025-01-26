@@ -6,7 +6,7 @@ export default function NotFound() {
     <div className="flex flex-col justify-center items-center w-full">
       <h1 className="text-4xl font-bold text-red-500 mb-5">Not Found</h1>
       <p>The page you are looking for does not exist.</p>
-      <Link prefetch={false} href="/" className="mt-2">
+      <Link prefetch={false} href="/projects/website/public" className="mt-2">
         <Button>Return Home</Button>
       </Link>
     </div>

@@ -13,7 +13,7 @@ export default function Error() {
       </p>
 
       <div className="mt-6">
-        <Link prefetch={false} href="/" className="text-blue-500 hover:underline">
+        <Link prefetch={false} href="/projects/website/public" className="text-blue-500 hover:underline">
           Go back to the homepage
         </Link>
       </div>

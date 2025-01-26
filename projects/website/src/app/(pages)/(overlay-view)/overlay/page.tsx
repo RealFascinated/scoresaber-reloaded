@@ -1,7 +1,6 @@
 import Overlay from "@/components/overlay/overlay";
 import { parseOverlaySettings } from "@/common/overlay/overlay-settings";
-import OverlayBuilder from "@/components/overlay/overlay-builder";
-import Navbar from "@/components/navbar/navbar";
+import { redirect } from "next/navigation";
 
 type OverlayPageProps = {
   /**
@@ -18,19 +17,14 @@ type OverlayPageProps = {
 export default async function OverlayPage({ searchParams }: OverlayPageProps) {
   const params = await searchParams;
 
-  // Show the overlay if settings are provided
-  if (params.settings) {
-    return (
-      <main className="w-screen h-screen">
-        <Overlay settings={parseOverlaySettings(params.settings)} />
-      </main>
-    );
+  // Redirect to the builder if no settings are provided
+  if (!params.settings) {
+    return redirect("/overlay/builder");
   }
 
-  // Show the overlay builder
   return (
     <main className="w-screen h-screen">
-      <OverlayBuilder />
+      <Overlay settings={parseOverlaySettings(params.settings)} />
     </main>
   );
 }
