@@ -708,8 +708,8 @@ export default class ScoreSaberService {
     ]);
 
     const scores: (PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard> | null)[] = await Promise.all(
-      foundScores.map(async ({ score: scoreData }) => {
-        let score = new ScoreSaberScoreModel(scoreData).toObject() as ScoreSaberScore;
+      foundScores.map(async rawScore => {
+        let score = new ScoreSaberScoreModel(rawScore).toObject() as ScoreSaberScore;
 
         const leaderboardResponse = await LeaderboardService.getLeaderboard<ScoreSaberLeaderboard>(
           "scoresaber",
