@@ -700,9 +700,8 @@ export default class ScoreSaberService {
     } else if (timeframe === "monthly") {
       daysAgo = 31;
     }
-    const date: Date = daysAgo == -1 ? new Date(0) : getDaysAgoDate(daysAgo);
     const foundScores = await ScoreSaberScoreModel.aggregate([
-      { $match: { timestamp: { $gte: date }, pp: { $gt: 0 } } },
+      { $match: { ...(timeframe === "all" ? {} : { timestamp: { $gte: getDaysAgoDate(daysAgo) } }), pp: { $gt: 0 } } },
       { $sort: { pp: -1 } },
       { $limit: amount },
     ]);
