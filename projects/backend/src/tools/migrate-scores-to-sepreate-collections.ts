@@ -65,10 +65,10 @@ async function migrate() {
         await ScoreSaberPreviousScoreModel.create(rest);
         await ScoreSaberScoreModel.deleteOne({ _id: _id });
 
-        console.log(`Migrated previous score ${fullDocument.scoreId} for ${playerId} on ${leaderboardId}`);
+        console.log(`Migrated previous score ${_id} for ${playerId} on leaderboard ${leaderboardId}`);
         totalMigrated++;
       } catch (error) {
-        console.error(`Error migrating score ${fullDocument.scoreId}:`, error);
+        console.error(`Error migrating score ${_id}:`, error);
       }
     }
   }

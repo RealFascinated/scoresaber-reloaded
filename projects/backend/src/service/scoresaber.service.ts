@@ -405,6 +405,9 @@ export default class ScoreSaberService {
       // Match stage based on playerId and optional ranked filter
       { $match: { playerId: playerId, ...(options?.ranked ? { pp: { $gt: 0 } } : {}) } },
 
+      // Sort by pp in descending order
+      { $sort: { [`${options.sort}`]: -1 } },
+
       // Optional projection stage
       ...(options?.projection
         ? [
@@ -418,9 +421,6 @@ export default class ScoreSaberService {
             },
           ]
         : []),
-
-      // Sort by pp in descending order
-      { $sort: { [`score.${options.sort}`]: -1 } },
 
       // Limit results
       ...(options?.limit ? [{ $limit: options.limit }] : []),
