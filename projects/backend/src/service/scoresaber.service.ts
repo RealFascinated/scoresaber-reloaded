@@ -649,18 +649,13 @@ export default class ScoreSaberService {
 
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { _id, ...rest } = previousScore;
+      console.log(rest);
       await ScoreSaberPreviousScoreModel.create(rest);
 
       console.log(
         [
           `Removed old score for "${playerName}"(${playerId})`,
-          `difficulty: ${score.difficulty}`,
-          `score: ${score.score}`,
-          score.pp > 0 ? `pp: ${score.pp.toFixed(2)}pp` : undefined,
           `leaderboard: ${leaderboard.id}`,
-          `hmd: ${score.hmd}`,
-          score.controllers !== undefined ? `controller left: ${score.controllers.leftController}` : undefined,
-          score.controllers !== undefined ? `controller right: ${score.controllers.rightController}` : undefined,
           `in ${(performance.now() - before).toFixed(0)}ms`,
         ]
           .filter(s => s !== undefined)
