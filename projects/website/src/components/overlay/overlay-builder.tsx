@@ -65,6 +65,11 @@ export default function OverlayBuilder() {
       {/* Title */}
       <p className="text-xl font-semibold">ScoreSaber Reloaded Overlay Builder</p>
 
+      {/* Streamer Warning */}
+      <p className="text-red-500 text-sm">
+        You must use a resolution of 1920x1080 in OBS (or similar) to use this overlay.
+      </p>
+
       {/* Overlay Settings */}
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-2">
