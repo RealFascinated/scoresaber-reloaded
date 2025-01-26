@@ -61,6 +61,11 @@ async function migrate() {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { _id, ...rest } = fullDocument;
 
+      if (!("characteristic" in fullDocument) || !("difficulty" in fullDocument) || !("playerId" in fullDocument)) {
+        console.warn(`ScoreSaberPreviousScoreModel is missing required fields: ${JSON.stringify(fullDocument)}`);
+        continue;
+      }
+
       try {
         await ScoreSaberPreviousScoreModel.create(rest);
         await ScoreSaberScoreModel.deleteOne({ _id: _id });
