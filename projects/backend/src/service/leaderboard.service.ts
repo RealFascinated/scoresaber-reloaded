@@ -301,7 +301,11 @@ export default class LeaderboardService {
                 // Update the previous scores with the new star count
                 if (previousScores.length > 0) {
                   for (const previousScore of previousScores) {
-                    previousScore.pp = scoresaberService.getPp(leaderboard.stars, score.pp);
+                    if (rankedStatusChanged && !leaderboard.ranked) {
+                      previousScore.pp = 0;
+                    } else {
+                      previousScore.pp = scoresaberService.getPp(leaderboard.stars, score.pp);
+                    }
                     previousScore.weight = 0;
                     await previousScore.save();
                   }
