@@ -46,11 +46,6 @@ export default class BeatSaverService {
         bsr: token.id,
       });
 
-      await logToChannel(
-        DiscordChannels.backendLogs,
-        new EmbedBuilder().setDescription(`Found broken beatsaver map ${hash}, bsr: ${token.id}`)
-      );
-
       if (map) {
         return map.toObject() as BeatSaverMap;
       }
