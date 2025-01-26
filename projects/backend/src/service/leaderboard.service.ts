@@ -327,6 +327,17 @@ export default class LeaderboardService {
                 })
               );
             }
+
+            if ((starCountChanged && leaderboard.ranked) || (rankedStatusChanged && leaderboard.ranked)) {
+              // Save leaderboard
+              await ScoreSaberLeaderboardModel.findOneAndUpdate(
+                { _id: leaderboard.id },
+                {
+                  lastRefreshed: new Date(),
+                  ...leaderboard,
+                }
+              );
+            }
           }
         }
       }
