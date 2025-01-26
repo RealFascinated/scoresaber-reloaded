@@ -335,6 +335,7 @@ export default class LeaderboardService {
                 {
                   lastRefreshed: new Date(),
                   ...leaderboard,
+                  difficulties: previousLeaderboard.difficulties ?? [],
                 }
               );
             }
