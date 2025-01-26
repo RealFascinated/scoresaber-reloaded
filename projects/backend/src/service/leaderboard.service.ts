@@ -171,7 +171,6 @@ export default class LeaderboardService {
     updatedScores: number;
   }> {
     console.log(`Refreshing ranked leaderboards...`);
-    let refreshedLeaderboards = 0;
     let updatedScores = 0;
 
     let page = 1;
@@ -328,8 +327,8 @@ export default class LeaderboardService {
               );
             }
 
-            if ((starCountChanged && leaderboard.ranked) || (rankedStatusChanged && leaderboard.ranked)) {
-              // Save leaderboard
+            // Save leaderboard
+            if (starCountChanged || rankedStatusChanged) {
               await ScoreSaberLeaderboardModel.findOneAndUpdate(
                 { _id: leaderboard.id },
                 {
@@ -351,31 +350,36 @@ export default class LeaderboardService {
       await delay(SCORESABER_REQUEST_COOLDOWN);
     }
 
+    let updatedLeaderboards = 0;
     // Update all leaderboards
     console.log(`Saving ${leaderboards.length} ranked leaderboards...`);
     await Promise.all(
       leaderboards.map(async leaderboard => {
-        await ScoreSaberLeaderboardModel.findOneAndUpdate(
-          { _id: leaderboard.id },
-          {
-            lastRefreshed: new Date(),
-            ...leaderboard,
-            // Sort difficulties from Easy to ExpertPlus
-            difficulties:
-              rankedMapDiffs
-                .get(leaderboard.songHash)
-                ?.sort((a, b) => getDifficulty(a.difficulty).id - getDifficulty(b.difficulty).id) ?? [],
-          },
-          {
-            upsert: true,
-            new: true,
-            setDefaultsOnInsert: true,
-          }
-        );
+        // Sort difficulties from Easy to ExpertPlus
+        const difficulties = rankedMapDiffs
+          .get(leaderboard.songHash)
+          ?.sort((a, b) => getDifficulty(a.difficulty).id - getDifficulty(b.difficulty).id);
+
+        // Only update if the difficulties have changed
+        if (leaderboard.difficulties.length !== difficulties?.length) {
+          updatedLeaderboards++;
+          await ScoreSaberLeaderboardModel.findOneAndUpdate(
+            { _id: leaderboard.id },
+            {
+              lastRefreshed: new Date(),
+              ...leaderboard,
+              difficulties: difficulties ?? [],
+            },
+            {
+              upsert: true,
+              new: true,
+              setDefaultsOnInsert: true,
+            }
+          );
+        }
       })
     );
-    refreshedLeaderboards = leaderboards.length;
-    console.log(`Saved ${leaderboards.length} ranked leaderboards.`);
+    console.log(`Updated ${updatedLeaderboards}/${leaderboards.length} ranked leaderboards.`);
 
     // Un-rank all unranked leaderboards
     const rankedIds = leaderboards.map(leaderboard => leaderboard.id);
@@ -423,7 +427,7 @@ export default class LeaderboardService {
     console.log(`Finished refreshing leaderboards, total pages refreshed: ${page - 1}.`);
 
     return {
-      refreshedLeaderboards,
+      refreshedLeaderboards: leaderboards.length,
       updatedScores,
     };
   }
