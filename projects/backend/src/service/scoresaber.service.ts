@@ -648,8 +648,7 @@ export default class ScoreSaberService {
       });
 
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { _id, ...rest } = previousScore;
-      console.log(rest);
+      const { _id, ...rest } = previousScore.toObject();
       await ScoreSaberPreviousScoreModel.create(rest);
 
       console.log(
