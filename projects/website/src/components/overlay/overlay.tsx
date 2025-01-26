@@ -7,11 +7,18 @@ import { LoadingIcon } from "@/components/loading-icon";
 import { getScoreSaberPlayer } from "@ssr/common/utils/player-utils";
 import { OverlayViewPosition } from "./views/view";
 
-export default function Overlay({ playerId }: OverlaySettings) {
+type OverlayProps = {
+  /**
+   * The settings for the overlay.
+   */
+  settings: OverlaySettings;
+};
+
+export default function Overlay({ settings }: OverlayProps) {
   const { data: player, isLoading } = useQuery({
     queryKey: ["overlay:player"],
     queryFn: async () =>
-      getScoreSaberPlayer(playerId, {
+      getScoreSaberPlayer(settings.playerId, {
         superJson: true,
       }),
     refetchInterval: 1000 * 30, // 30 seconds

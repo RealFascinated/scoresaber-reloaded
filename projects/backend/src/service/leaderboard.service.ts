@@ -217,7 +217,7 @@ export default class LeaderboardService {
               leaderboardId: leaderboard.id,
             }).sort({ timestamp: -1 });
             if (!scores) {
-              console.warn(`Failed to fetch scores for leaderboard "${leaderboard.id}".`);
+              console.warn(`Failed to fetch local scores for leaderboard "${leaderboard.id}".`);
               break;
             }
 
@@ -255,7 +255,7 @@ export default class LeaderboardService {
                   currentScoresPage
                 );
                 if (!scoresResponse) {
-                  console.warn(`Failed to fetch scores for leaderboard "${leaderboard.id}".`);
+                  console.warn(`Failed to fetch scoresaber api scores for leaderboard "${leaderboard.id}".`);
                   await delay(SCORESABER_REQUEST_COOLDOWN);
 
                   if (currentScoresPage >= totalPages) {
@@ -402,7 +402,7 @@ export default class LeaderboardService {
 
         const scores = await ScoreSaberScoreModel.find({ leaderboardId: leaderboard.id });
         if (!scores) {
-          console.warn(`Failed to fetch scores for leaderboard "${leaderboard.id}".`);
+          console.warn(`Failed to fetch local scores in unrank for leaderboard "${leaderboard.id}".`);
           continue;
         }
 

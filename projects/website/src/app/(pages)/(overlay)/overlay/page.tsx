@@ -1,9 +1,23 @@
 import Overlay from "@/components/overlay/overlay";
 
-export default async function HomePage() {
-  return (
-    <main className="w-screen h-screen">
-      <Overlay playerId={"76561198449412074"} />
-    </main>
-  );
+type OverlayPageProps = {
+  searchParams: Promise<{
+    settings: string;
+  }>;
+};
+
+export default async function OverlayPage({ searchParams }: OverlayPageProps) {
+  const params = await searchParams;
+
+  if (params.settings) {
+    const settings = JSON.parse(params.settings);
+
+    return (
+      <main className="w-screen h-screen">
+        <Overlay settings={settings} />
+      </main>
+    );
+  }
+
+  return <p>overlay builder</p>;
 }
