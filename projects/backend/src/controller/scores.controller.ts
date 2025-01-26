@@ -143,7 +143,7 @@ export default class ScoresController {
     } else if (limit > 100) {
       limit = 100;
     }
-    if (!["daily", "weekly", "monthly"].includes(timeframe)) {
+    if (!["daily", "weekly", "monthly", "all"].includes(timeframe)) {
       timeframe = "daily";
     }
 
