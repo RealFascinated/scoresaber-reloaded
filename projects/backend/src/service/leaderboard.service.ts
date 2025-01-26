@@ -18,6 +18,7 @@ import LeaderboardDifficulty from "@ssr/common/model/leaderboard/leaderboard-dif
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
 import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score";
 import { getDifficulty } from "@ssr/common/utils/song-utils";
+import { ScoreSaberPreviousScoreModel } from "@ssr/common/model/score/impl/scoresaber-previous-score";
 
 const SCORESABER_REQUEST_COOLDOWN = 60_000 / 200; // 200 requests per minute
 
@@ -276,9 +277,9 @@ export default class LeaderboardService {
               // Update scores
               for (const scoreToken of scoreTokens) {
                 const score = scores.find(
-                  // Ensure we only get the latest score for the leaderboard and player
                   score => score.scoreId === scoreToken.id + "" && score.score == scoreToken.baseScore
                 );
+
                 // Score not tracked, so ignore
                 if (!score) {
                   continue;
@@ -292,13 +293,10 @@ export default class LeaderboardService {
                   `Updated score ${score.scoreId} for leaderboard ${leaderboard.fullName}, new pp: ${score.pp}`
                 );
 
-                let previousScores = await ScoreSaberScoreModel.find({
+                const previousScores = await ScoreSaberPreviousScoreModel.find({
                   playerId: score.playerId,
                   leaderboardId: score.leaderboardId,
                 });
-
-                // Remove current score from previousScores
-                previousScores = previousScores.filter(previousScore => previousScore.scoreId !== scoreToken.id + "");
 
                 // Update the previous scores with the new star count
                 if (previousScores.length > 0) {

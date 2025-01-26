@@ -10,10 +10,8 @@ import { PlayerService } from "./player.service";
 import { formatDateMinimal, getDaysAgoDate, getMidnightAlignedDate } from "@ssr/common/utils/time-utils";
 import { formatChange, getPageFromRank, isProduction } from "@ssr/common/utils/utils";
 import { getValueFromHistory } from "@ssr/common/utils/player-utils";
-import { MapDifficulty } from "@ssr/common/score/map-difficulty";
-import { MapCharacteristic } from "@ssr/common/types/map-characteristic";
 import {
-  ScoreSaberPreviousScore,
+  ScoreSaberPreviousScoreOverview,
   ScoreSaberScore,
   ScoreSaberScoreModel,
 } from "@ssr/common/model/score/impl/scoresaber-score";
@@ -34,6 +32,7 @@ import ScoreSaberPlayerScoreToken from "@ssr/common/types/token/scoresaber/playe
 import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score";
 import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/leaderboard";
 import { Timeframe } from "@ssr/common/timeframe";
+import { ScoreSaberPreviousScoreModel } from "@ssr/common/model/score/impl/scoresaber-previous-score";
 
 export default class ScoreSaberService {
   /**
@@ -71,7 +70,7 @@ export default class ScoreSaberService {
       return;
     }
 
-    const previousScore = await ScoreSaberService.getPreviousScore(player.id, leaderboard, score.timestamp);
+    const previousScore = await ScoreSaberService.getPreviousScore(player.id, score, leaderboard, score.timestamp);
     const change = previousScore &&
       previousScore.change && {
         accuracy: `${formatChange(previousScore.change.accuracy, value => value.toFixed(2) + "%") || ""}`,
@@ -386,31 +385,6 @@ export default class ScoreSaberService {
   }
 
   /**
-   * Gets a ScoreSaber score.
-   *
-   * @param playerId the player who set the score
-   * @param leaderboardId the leaderboard id the score was set on
-   * @param difficulty the difficulty played
-   * @param characteristic the characteristic played
-   * @param score the score of the score set
-   */
-  public static async getScoreSaberScore(
-    playerId: string,
-    leaderboardId: string,
-    difficulty: MapDifficulty,
-    characteristic: MapCharacteristic,
-    score: number
-  ) {
-    return ScoreSaberScoreModel.findOne({
-      playerId: playerId,
-      leaderboardId: leaderboardId,
-      difficulty: difficulty,
-      characteristic: characteristic,
-      score: score,
-    });
-  }
-
-  /**
    * Gets the player scores from the database.
    *
    * @param playerId the id of the player
@@ -445,14 +419,6 @@ export default class ScoreSaberService {
           ]
         : []),
 
-      // Group by leaderboardId and playerId to get the first entry of each group
-      {
-        $group: {
-          _id: { leaderboardId: "$leaderboardId", playerId: "$playerId" },
-          score: { $first: "$$ROOT" }, // Keep the whole document in "score" field
-        },
-      },
-
       // Sort by pp in descending order
       { $sort: { [`score.${options.sort}`]: -1 } },
 
@@ -465,7 +431,7 @@ export default class ScoreSaberService {
 
     const scores: ScoreSaberScore[] = [];
     for (const rawScore of rawScores) {
-      scores.push(rawScore.score as ScoreSaberScore);
+      scores.push(rawScore as ScoreSaberScore);
     }
     return scores;
   }
@@ -501,9 +467,9 @@ export default class ScoreSaberService {
     leaderboardId: string,
     page: number
   ): Promise<Page<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>> {
-    const scores = await ScoreSaberScoreModel.find({ playerId: playerId, leaderboardId: leaderboardId })
-      .sort({ timestamp: -1 })
-      .skip(1);
+    const scores = await ScoreSaberPreviousScoreModel.find({ playerId: playerId, leaderboardId: leaderboardId }).sort({
+      timestamp: -1,
+    });
     if (scores == null || scores.length == 0) {
       throw new NotFoundError(`No previous scores found for ${playerId} in ${leaderboardId}`);
     }
@@ -541,31 +507,30 @@ export default class ScoreSaberService {
    * Gets the player's previous score for a map.
    *
    * @param playerId the player's id to get the previous score for
+   * @param score the score to get the previous score for
    * @param leaderboard the leaderboard to get the previous score on
    * @param timestamp the score's timestamp to get the previous score for
    * @returns the score, or undefined if none
    */
   public static async getPreviousScore(
     playerId: string,
+    score: ScoreSaberScore,
     leaderboard: ScoreSaberLeaderboard,
     timestamp: Date
-  ): Promise<ScoreSaberPreviousScore | undefined> {
-    const scores = await ScoreSaberScoreModel.find({ playerId: playerId, leaderboardId: leaderboard.id }).sort({
+  ): Promise<ScoreSaberPreviousScoreOverview | undefined> {
+    const scores = await ScoreSaberPreviousScoreModel.find({ playerId: playerId, leaderboardId: leaderboard.id }).sort({
       timestamp: -1,
     });
     if (scores == null || scores.length == 0) {
       return undefined;
     }
 
-    const scoreIndex = scores.findIndex(score => score.timestamp.getTime() == timestamp.getTime());
-    const score = scores.find(score => score.timestamp.getTime() == timestamp.getTime());
-    if (scoreIndex == -1 || score == undefined) {
-      return undefined;
-    }
-    const previousScore = scores[scoreIndex + 1];
+    // get first score before timestamp
+    const previousScore = scores.find(score => score.timestamp.getTime() < timestamp.getTime());
     if (previousScore == undefined) {
       return undefined;
     }
+
     return {
       score: previousScore.score,
       accuracy: previousScore.accuracy || (score.score / leaderboard.maxScore) * 100,
@@ -590,7 +555,7 @@ export default class ScoreSaberService {
         weight: score.weight && previousScore.weight && score.weight - previousScore.weight,
         maxCombo: score.maxCombo - previousScore.maxCombo,
       },
-    } as ScoreSaberPreviousScore;
+    } as ScoreSaberPreviousScoreOverview;
   }
 
   /**
@@ -616,12 +581,6 @@ export default class ScoreSaberService {
           const friendScores = await ScoreSaberScoreModel.aggregate([
             { $match: { playerId: friendId, leaderboardId: leaderboardId } },
             { $sort: { timestamp: -1 } },
-            {
-              $group: {
-                _id: { leaderboardId: "$leaderboardId", playerId: "$playerId" },
-                score: { $first: "$$ROOT" },
-              },
-            },
             { $sort: { "score.score": -1 } },
           ]);
           for (const friendScore of friendScores) {
@@ -670,16 +629,44 @@ export default class ScoreSaberService {
     const score = getScoreSaberScoreFromToken(scoreToken, leaderboard, playerId);
 
     if (await ScoreSaberService.scoreExists(playerId, leaderboard, score)) {
-      // The score has already been tracked, so ignore it.
-      // console.log(
-      //   `ScoreSaber score already tracked for "${playerName}"(${playerId}), difficulty: ${score.difficulty}, score: ${score.score}, leaderboard: ${leaderboard.id}, ignoring...`
-      // );
       return false;
     }
 
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
     delete score.playerInfo;
+
+    // Remove the old score and create a new previous score
+    const previousScore = await ScoreSaberScoreModel.findOne({
+      playerId: playerId,
+      leaderboardId: leaderboard.id,
+    });
+    if (previousScore) {
+      await ScoreSaberScoreModel.deleteOne({
+        playerId: playerId,
+        leaderboardId: leaderboard.id,
+      });
+
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { _id, ...rest } = previousScore;
+      await ScoreSaberPreviousScoreModel.create(rest);
+
+      console.log(
+        [
+          `Removed old score for "${playerName}"(${playerId})`,
+          `difficulty: ${score.difficulty}`,
+          `score: ${score.score}`,
+          score.pp > 0 ? `pp: ${score.pp.toFixed(2)}pp` : undefined,
+          `leaderboard: ${leaderboard.id}`,
+          `hmd: ${score.hmd}`,
+          score.controllers !== undefined ? `controller left: ${score.controllers.leftController}` : undefined,
+          score.controllers !== undefined ? `controller right: ${score.controllers.rightController}` : undefined,
+          `in ${(performance.now() - before).toFixed(0)}ms`,
+        ]
+          .filter(s => s !== undefined)
+          .join(", ")
+      );
+    }
 
     await ScoreSaberScoreModel.create(score);
     console.log(
@@ -722,12 +709,6 @@ export default class ScoreSaberService {
     const date: Date = daysAgo == -1 ? new Date(0) : getDaysAgoDate(daysAgo);
     const foundScores = await ScoreSaberScoreModel.aggregate([
       { $match: { timestamp: { $gte: date }, pp: { $gt: 0 } } },
-      {
-        $group: {
-          _id: { leaderboardId: "$leaderboardId", playerId: "$playerId" },
-          score: { $first: "$$ROOT" },
-        },
-      },
       { $sort: { "score.pp": -1 } },
       { $limit: amount },
     ]);
@@ -806,7 +787,7 @@ export default class ScoreSaberService {
         `${leaderboard.difficulty.difficulty}-${leaderboard.difficulty.characteristic}`,
         score.score
       ),
-      ScoreSaberService.getPreviousScore(score.playerId, leaderboard, score.timestamp),
+      ScoreSaberService.getPreviousScore(score.playerId, score, leaderboard, score.timestamp),
     ]);
 
     if (additionalData !== undefined) {

@@ -7,6 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import Pagination from "@/components/input/pagination";
 import { useIsMobile } from "@/hooks/use-is-mobile";
+import { randomString } from "@ssr/common/utils/string.util";
 
 type ScoreHistoryProps = {
   /**
@@ -39,7 +40,7 @@ export function ScoreHistory({ playerId, leaderboard }: ScoreHistoryProps) {
       {data.items.map(({ score, leaderboard, beatSaver }) => {
         return (
           <Score
-            key={score.scoreId}
+            key={score.scoreId + randomString(2)}
             score={score}
             leaderboard={leaderboard}
             beatSaverMap={beatSaver}
