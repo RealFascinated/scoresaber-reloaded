@@ -304,7 +304,7 @@ export default class LeaderboardService {
                     if (rankedStatusChanged && !leaderboard.ranked) {
                       previousScore.pp = 0;
                     } else {
-                      previousScore.pp = scoresaberService.getPp(leaderboard.stars, score.pp);
+                      previousScore.pp = scoresaberService.getPp(leaderboard.stars, score.accuracy);
                     }
                     previousScore.weight = 0;
                     await previousScore.save();
