@@ -255,7 +255,9 @@ export default class LeaderboardService {
                   currentScoresPage
                 );
                 if (!scoresResponse) {
-                  console.warn(`Failed to fetch scoresaber api scores for leaderboard "${leaderboard.id}".`);
+                  console.warn(
+                    `Failed to fetch scoresaber api scores for leaderboard "${leaderboard.id}". (current page: ${currentScoresPage}, total pages: ${totalPages})`
+                  );
                   await delay(SCORESABER_REQUEST_COOLDOWN);
 
                   if (currentScoresPage >= totalPages) {
