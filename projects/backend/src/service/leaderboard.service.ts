@@ -409,8 +409,7 @@ export default class LeaderboardService {
           { _id: leaderboard.id },
           {
             lastRefreshed: new Date(),
-            ranked: false,
-            stars: 0,
+            ...leaderboard,
           },
           {
             upsert: true,
