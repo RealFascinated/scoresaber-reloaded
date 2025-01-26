@@ -20,7 +20,7 @@ export class ScoreSaberScoreBase extends Score {
    * The amount of pp for the score.
    * @private
    */
-  @Prop({ required: true })
+  @Prop({ required: true, index: true })
   public pp!: number;
 
   /**
