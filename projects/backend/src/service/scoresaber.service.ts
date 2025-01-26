@@ -692,7 +692,7 @@ export default class ScoreSaberService {
     console.log(`Getting top scores for timeframe: ${timeframe}, limit: ${amount}...`);
     const before = Date.now();
 
-    let daysAgo = -1;
+    let daysAgo = timeframe === "all" ? -1 : 0;
     if (timeframe === "daily") {
       daysAgo = 1;
     } else if (timeframe === "weekly") {

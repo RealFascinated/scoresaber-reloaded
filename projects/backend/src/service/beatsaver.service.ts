@@ -1,5 +1,5 @@
 import { beatsaverService } from "@ssr/common/service/impl/beatsaver";
-import { BeatSaverMap, BeatSaverMapModel } from "@ssr/common/model/beatsaver/map";
+import { BeatSaverMap, BeatSaverMapDocument, BeatSaverMapModel } from "@ssr/common/model/beatsaver/map";
 import { fetchWithCache } from "../common/cache.util";
 import CacheService, { ServiceCache } from "./cache.service";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
@@ -7,8 +7,6 @@ import { MapDifficulty } from "@ssr/common/score/map-difficulty";
 import { MapCharacteristic } from "@ssr/common/types/map-characteristic";
 import { getBeatSaverDifficulty } from "@ssr/common/utils/beatsaver.util";
 import { BeatSaverMapToken } from "@ssr/common/types/token/beatsaver/map";
-import { DiscordChannels, logToChannel } from "../bot/bot";
-import { EmbedBuilder } from "discord.js";
 
 export default class BeatSaverService {
   /**
@@ -19,7 +17,7 @@ export default class BeatSaverService {
    * @returns the beatsaver map, or undefined if not found
    */
   public static async getInternalMap(hash: string, token?: BeatSaverMapToken): Promise<BeatSaverMap | undefined> {
-    let map = await BeatSaverMapModel.findOne({
+    let map: BeatSaverMapDocument | null = await BeatSaverMapModel.findOne({
       "versions.hash": hash.toUpperCase(),
     });
 
@@ -35,6 +33,15 @@ export default class BeatSaverService {
       return toObject;
     }
 
+    if (!map) {
+      const brokenHashMap = await BeatSaverMapModel.findOne({
+        brokenHashes: hash,
+      });
+      if (brokenHashMap) {
+        map = brokenHashMap;
+      }
+    }
+
     // Map needs to be fetched
     token = !token ? await beatsaverService.lookupMap(hash) : token;
     const uploader = token?.uploader;
@@ -42,11 +49,18 @@ export default class BeatSaverService {
 
     // super fucking janky workaround
     if (token) {
-      map = await BeatSaverMapModel.findOne({
+      const map: BeatSaverMapDocument | null = await BeatSaverMapModel.findOne({
         bsr: token.id,
       });
 
       if (map) {
+        const hashes: string[] = map.brokenHashes ?? [];
+        if (!hashes.includes(hash)) {
+          hashes.push(hash);
+          map.brokenHashes = hashes;
+          await map.save();
+        }
+
         return map.toObject() as BeatSaverMap;
       }
     }
@@ -105,6 +119,11 @@ export default class BeatSaverService {
             ],
             lastRefreshed: new Date(),
           };
+
+    // Add the broken hash if the map is missing the version hash
+    if (map && map?.versions.map(version => version.hash).includes(hash.toUpperCase())) {
+      map.brokenHashes = [map.brokenHashes, hash].flat();
+    }
 
     map = await BeatSaverMapModel.create(newMapData);
 

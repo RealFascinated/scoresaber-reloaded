@@ -2,22 +2,15 @@
 
 import Card from "@/components/card";
 import { useQuery } from "@tanstack/react-query";
-import { useMapFilter } from "@/components/providers/maps/map-filter-provider";
 import { useCallback, useEffect, useState } from "react";
 import { LoadingIcon } from "@/components/loading-icon";
-import Pagination from "@/components/input/pagination";
-import { useIsMobile } from "@/hooks/use-is-mobile";
 import Link from "next/link";
-import { useDebounce } from "@uidotdev/usehooks";
 import { motion, useAnimation } from "framer-motion";
 import { scoreAnimation } from "@/components/score/score-animation";
 import ScoreSongInfo from "@/components/score/score-song-info";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
-import ScoreSaberLeaderboardPageToken from "@ssr/common/types/token/scoresaber/leaderboard-page";
 import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
-import RankingRequestToken from "@ssr/common/types/token/scoresaber/ranking-request-token";
 import ScoreSaberRankingRequestsResponse from "@ssr/common/response/scoresaber-ranking-requests-response";
-import { ScoreTimeSet } from "@/components/score/score-time-set";
 import { timeAgo } from "@ssr/common/utils/time-utils";
 
 const queues = [

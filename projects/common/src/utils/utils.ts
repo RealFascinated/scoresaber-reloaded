@@ -1,6 +1,6 @@
 import ky from "ky";
-import {formatNumberWithCommas, formatPp} from "./number-utils";
-import {KyOptions} from "ky/distribution/types/options";
+import { formatNumberWithCommas, formatPp } from "./number-utils";
+import { KyOptions } from "ky/distribution/types/options";
 
 /**
  * Checks if we're in production

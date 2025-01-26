@@ -18,6 +18,7 @@ import {AutoIncrementID} from "@typegoose/auto-increment";
         ret.id = ret._id;
         delete ret._id;
         delete ret.__v;
+        delete ret.brokenHashes; // don't need to return this
         return ret;
       },
     },
@@ -35,7 +36,7 @@ export class BeatSaverMap {
    * The internal MongoDB ID (_id).
    */
   @prop()
-  private _id!: number;
+  public _id!: number;
 
   /**
    * The name of the map.
@@ -78,6 +79,13 @@ export class BeatSaverMap {
    */
   @prop({ required: false })
   public notFound?: boolean;
+
+  /**
+   * An array of hashes that point to this map
+   * but don't show in the versions array.
+   */
+  @prop({ required: false, _id: false, type: () => [String] })
+  public brokenHashes!: string[];
 
   /**
    * The last time the map data was refreshed.

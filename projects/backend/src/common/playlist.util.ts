@@ -1,6 +1,6 @@
-import { capitalizeFirstLetter, truncateText } from "@ssr/common/string-utils";
-import SSRImage, { ImageTextOptions } from "./ssr-image";
-import { SnipeSettings } from "@ssr/common/snipe/snipe-settings-schema";
+import {capitalizeFirstLetter, truncateText} from "@ssr/common/string-utils";
+import SSRImage, {ImageTextOptions} from "./ssr-image";
+import {SnipeSettings} from "@ssr/common/snipe/snipe-settings-schema";
 import ScoreSaberService from "../service/scoresaber.service";
 
 /**

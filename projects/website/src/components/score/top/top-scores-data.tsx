@@ -30,6 +30,10 @@ const timeframes: TimeframesType[] = [
     timeframe: "monthly",
     display: "This Month",
   },
+  {
+    timeframe: "all",
+    display: "All Time",
+  },
 ];
 
 type TopScoresDataProps = {
@@ -80,7 +84,7 @@ export function TopScoresData({ timeframe }: TopScoresDataProps) {
       </div>
 
       <div className="flex justify-center flex-col text-center">
-        <p className="font-semibold'">Top 50 ScoreSaber Scores ({capitalizeFirstLetter(selectedTimeframe)})</p>
+        <p className="font-semibold'">Top 50 ScoreSaber Scores </p>
         <p className="text-gray-400">This will only show scores that have been tracked.</p>
       </div>
 
