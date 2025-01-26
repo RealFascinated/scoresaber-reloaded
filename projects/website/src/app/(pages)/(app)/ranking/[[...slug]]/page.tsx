@@ -1,8 +1,8 @@
 import { Metadata } from "next";
-import { scoresaberService } from "@ssr/common/dist/service/impl/scoresaber.ts";
 import RankingData from "@/components/ranking/ranking-data";
 import { cache } from "react";
-import { ScoreSaberPlayersPageToken } from "@ssr/common/dist/types/token/scoresaber/players-page.ts";
+import { ScoreSaberPlayersPageToken } from "@ssr/common/types/token/scoresaber/players-page";
+import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 
 const UNKNOWN_PAGE = {
   title: "ScoreSaber Reloaded - Unknown Page",

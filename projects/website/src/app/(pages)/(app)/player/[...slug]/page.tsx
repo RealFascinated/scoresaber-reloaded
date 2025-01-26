@@ -1,13 +1,13 @@
 import PlayerData from "@/components/player/player-data";
+import { Config } from "@ssr/common/config";
+import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
+import { ScoreSort } from "@ssr/common/score/score-sort";
+import { getCookieValue } from "@ssr/common/utils/cookie-utils";
+import { getScoreSaberPlayer } from "@ssr/common/utils/player-utils";
+import { randomString } from "@ssr/common/utils/string.util";
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { getCookieValue } from "@ssr/common/dist/utils/cookie-utils.ts";
-import { Config } from "@ssr/common/dist/config.ts";
-import ScoreSaberPlayer from "@ssr/common/dist/player/impl/scoresaber-player.ts";
-import { ScoreSort } from "@ssr/common/dist/score/score-sort.ts";
 import { cache } from "react";
-import { randomString } from "@ssr/common/dist/utils/string.util.ts";
-import { getScoreSaberPlayer } from "@ssr/common/dist/utils/player-utils.ts";
 
 type Props = {
   params: Promise<{
