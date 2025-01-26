@@ -185,7 +185,7 @@ export default class LeaderboardService {
       });
       if (!leaderboardResponse) {
         console.warn(`Failed to fetch ranked leaderboards on page ${page}.`);
-        break;
+        continue;
       }
       const totalPages = Math.ceil(leaderboardResponse.metadata.total / leaderboardResponse.metadata.itemsPerPage);
       console.log(
@@ -219,7 +219,7 @@ export default class LeaderboardService {
             }).sort({ timestamp: -1 });
             if (!scores) {
               console.warn(`Failed to fetch scores for leaderboard "${leaderboard.id}".`);
-              continue;
+              break;
             }
 
             if (rankedStatusChanged) {
