@@ -40,13 +40,13 @@ export default class CacheService {
         ttl: 1000 * 60, // 1 minute
       },
       [ServiceCache.FriendScores]: {
-        ttl: 1000 * 60, // 1 minute
+        ttl: 1000 * 60 * 5, // 5 minute
       },
       [ServiceCache.ScoreCalendar]: {
         ttl: 1000 * 60 * 30, // 30 minutes
       },
       [ServiceCache.PPBoundary]: {
-        ttl: 1000 * 60 * 5, // 5 minutes
+        ttl: 1000 * 60 * 2, // 2 minutes
       },
       [ServiceCache.AdditionalScoreData]: {
         ttl: 1000 * 60 * 30, // 30 minutes
