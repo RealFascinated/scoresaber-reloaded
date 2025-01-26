@@ -3,7 +3,6 @@ import { CacheStatistics, SSRCache } from "@ssr/common/cache";
 export enum ServiceCache {
   BeatSaver = "beatSaver",
   AppStatistics = "appStatistics",
-  ImageUtils = "imageUtils",
   ScoreSaber = "scoresaber",
   Leaderboards = "leaderboards",
   PlayerScores = "playerScores",
@@ -23,19 +22,16 @@ export default class CacheService {
   constructor() {
     const cacheInfo = {
       [ServiceCache.BeatSaver]: {
-        ttl: 1000 * 60 * 60 * 24, // 1 day
+        ttl: 1000 * 60 * 60 * 12, // 12 hours
       },
       [ServiceCache.AppStatistics]: {
         ttl: 1000 * 60 * 60, // 1 hour
-      },
-      [ServiceCache.ImageUtils]: {
-        ttl: 1000 * 60 * 60 * 24, // 24 hours
       },
       [ServiceCache.ScoreSaber]: {
         ttl: 1000 * 60, // 1 minute
       },
       [ServiceCache.Leaderboards]: {
-        ttl: 1000 * 60 * 60, // 1 hour
+        ttl: 1000 * 60 * 10, // 10 minutes
       },
       [ServiceCache.PlayerScores]: {
         ttl: 1000 * 60, // 1 minute
@@ -47,13 +43,13 @@ export default class CacheService {
         ttl: 1000 * 60, // 1 minute
       },
       [ServiceCache.ScoreCalendar]: {
-        ttl: 1000 * 60 * 60, // 1 hour
+        ttl: 1000 * 60 * 30, // 30 minutes
       },
       [ServiceCache.PPBoundary]: {
         ttl: 1000 * 60 * 5, // 5 minutes
       },
       [ServiceCache.AdditionalScoreData]: {
-        ttl: 1000 * 60 * 60, // 1 hour
+        ttl: 1000 * 60 * 30, // 30 minutes
       },
     };
 
