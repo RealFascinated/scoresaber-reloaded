@@ -72,7 +72,7 @@ export function PlayerInfo({
       />
       {!hideCountryFlag && <CountryFlag code={player.country!} size={12} />}
       {useLink ? (
-        <Link prefetch={false} href={`/projects/website/src/app/(pages)/(app)/player/${player.id}`}>
+        <Link prefetch={false} href={`/player/${player.id}`}>
           {name}
         </Link>
       ) : (
