@@ -15,5 +15,10 @@ export const Swagger = {
         description: "The playlist was not found.",
       },
     },
+    beatsaverMapNotFound: {
+      404: {
+        description: "The beatsaver map was not found.",
+      },
+    },
   },
 };

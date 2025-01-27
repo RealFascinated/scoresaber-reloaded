@@ -7,5 +7,5 @@ export const useOverlayDataStore = create<OverlayData>(set => ({}));
  * Resets the overlay data.
  */
 export function resetOverlayData() {
-  useOverlayDataStore.setState({});
+  useOverlayDataStore.setState({}, true);
 }

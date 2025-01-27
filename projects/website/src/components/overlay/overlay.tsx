@@ -1,6 +1,6 @@
 "use client";
 
-import { OverlaySettings } from "@/common/overlay/overlay-settings";
+import { OverlaySettings, OverlayViews } from "@/common/overlay/overlay-settings";
 import OverlayPlayerInfoView from "@/components/overlay/views/player-info";
 import { useQuery } from "@tanstack/react-query";
 import { LoadingIcon } from "@/components/loading-icon";
@@ -11,6 +11,7 @@ import { OverlayDataClients } from "@/common/overlay/data-client";
 import HTTPSiraStatusClient from "@/common/overlay/impl/httpsirastatus";
 import OverlayScoreDataView from "@/components/overlay/views/score-data";
 import { useOverlayDataStore } from "@/common/overlay/overlay-data-store";
+import OverlayScoreInfoView from "@/components/overlay/views/score-info";
 
 type OverlayProps = {
   settings: OverlaySettings;
@@ -56,12 +57,17 @@ export default function Overlay({ settings }: OverlayProps) {
     );
   }
 
+  console.log(overlayData);
+
   return (
     <div>
       <OverlayView position={OverlayViewPosition.TOP_LEFT} className="flex gap-2 flex-col text-2xl">
-        <OverlayPlayerInfoView player={player} />
-        {overlayData && <OverlayScoreDataView overlayData={overlayData} />}
+        {settings.views[OverlayViews.PlayerInfo] && <OverlayPlayerInfoView player={player} />}
+        {overlayData && settings.views[OverlayViews.ScoreInfo] && <OverlayScoreDataView overlayData={overlayData} />}
       </OverlayView>
+      {overlayData && overlayData.map && settings.views[OverlayViews.SongInfo] && (
+        <OverlayScoreInfoView overlayData={overlayData} />
+      )}
     </div>
   );
 }

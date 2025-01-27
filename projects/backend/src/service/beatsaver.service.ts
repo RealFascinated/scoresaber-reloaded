@@ -165,6 +165,7 @@ export default class BeatSaverService {
           description: map.description,
           author: map.author,
           metadata: map.metadata,
+          songArt: `https://eu.cdn.beatsaver.com/${hash.toLowerCase()}.jpg`,
           difficulty: getBeatSaverDifficulty(map, hash, difficulty, characteristic),
         } as BeatSaverMapResponse;
       }

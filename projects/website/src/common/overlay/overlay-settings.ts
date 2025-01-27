@@ -1,5 +1,11 @@
 import { OverlayDataClients } from "@/common/overlay/data-client";
 
+export enum OverlayViews {
+  ScoreInfo = 1,
+  PlayerInfo = 2,
+  SongInfo = 3,
+}
+
 export type OverlaySettings = {
   /**
    * The id of the player that will
@@ -16,6 +22,11 @@ export type OverlaySettings = {
    * The data client to fetch game data from.
    */
   dataClient: OverlayDataClients;
+
+  /**
+   * The state of the overlay views.
+   */
+  views: Record<OverlayViews, boolean>;
 };
 
 /**
@@ -25,6 +36,11 @@ export const defaultOverlaySettings: OverlaySettings = {
   playerId: "",
   useRealTimeData: true,
   dataClient: OverlayDataClients.HTTPSiraStatus,
+  views: {
+    [OverlayViews.ScoreInfo]: true,
+    [OverlayViews.PlayerInfo]: true,
+    [OverlayViews.SongInfo]: true,
+  },
 };
 
 /**

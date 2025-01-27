@@ -9,7 +9,7 @@ import { Form, FormControl, FormDescription, FormItem, FormLabel } from "../ui/f
 import { FormField } from "@/components/ui/form";
 import { Button } from "../ui/button";
 import { Input } from "@/components/ui/input";
-import { encodeOverlaySettings } from "@/common/overlay/overlay-settings";
+import { encodeOverlaySettings, OverlayViews } from "@/common/overlay/overlay-settings";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import Notice from "@/components/notice";
 import { openInNewTab } from "@/common/browser-utils";
@@ -17,10 +17,26 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { OverlayDataClients } from "@/common/overlay/data-client";
 import { Checkbox } from "@/components/ui/checkbox";
 
+const viewToggles = [
+  {
+    name: "Player Info",
+    value: OverlayViews.PlayerInfo,
+  },
+  {
+    name: "Score Info",
+    value: OverlayViews.ScoreInfo,
+  },
+  {
+    name: "Song Info",
+    value: OverlayViews.SongInfo,
+  },
+];
+
 const formSchema = z.object({
   playerId: z.string().min(1).max(32),
   useRealTimeData: z.boolean(),
   dataClient: z.string().min(1).max(32),
+  views: z.record(z.boolean()),
 });
 
 export default function OverlayBuilder() {
@@ -31,9 +47,10 @@ export default function OverlayBuilder() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      playerId: overlaySettings?.playerId || "",
-      useRealTimeData: overlaySettings?.useRealTimeData || true,
-      dataClient: overlaySettings?.dataClient || OverlayDataClients.HTTPSiraStatus,
+      playerId: overlaySettings!.playerId,
+      useRealTimeData: overlaySettings!.useRealTimeData,
+      dataClient: overlaySettings!.dataClient,
+      views: overlaySettings!.views,
     },
   });
 
@@ -46,7 +63,7 @@ export default function OverlayBuilder() {
    *
    * @param replayViewer the new replay viewer
    */
-  async function onSubmit({ playerId, useRealTimeData, dataClient }: z.infer<typeof formSchema>) {
+  async function onSubmit({ playerId, useRealTimeData, dataClient, views }: z.infer<typeof formSchema>) {
     const player = await scoresaberService.lookupPlayer(playerId);
     if (!player) {
       toast({
@@ -62,6 +79,7 @@ export default function OverlayBuilder() {
       playerId: playerId,
       useRealTimeData: useRealTimeData,
       dataClient: dataClient as OverlayDataClients,
+      views: views as Record<OverlayViews, boolean>,
     });
     openInNewTab(`/overlay?settings=${encodeOverlaySettings(settings.getOverlaySettings())}`);
   }
@@ -143,6 +161,37 @@ export default function OverlayBuilder() {
               )}
             />
           )}
+
+          {/* View Toggles */}
+          <FormField
+            control={form.control}
+            name="views"
+            render={() => (
+              <FormItem>
+                <div className="mb-4">
+                  <FormLabel className="text-base">Views</FormLabel>
+                  <FormDescription>Toggle which views to show in the overlay.</FormDescription>
+                </div>
+                {viewToggles.map(item => (
+                  <FormField
+                    key={item.name}
+                    control={form.control}
+                    name={`views.${item.value}`}
+                    render={({ field }) => {
+                      return (
+                        <FormItem key={item.name} className="flex flex-row items-start space-x-3 space-y-0">
+                          <FormControl>
+                            <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                          </FormControl>
+                          <FormLabel className="text-sm font-normal">{item.name}</FormLabel>
+                        </FormItem>
+                      );
+                    }}
+                  />
+                ))}
+              </FormItem>
+            )}
+          />
 
           {/* Saving Settings */}
           <Button type="submit" className="w-fit">

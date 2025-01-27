@@ -1,12 +1,5 @@
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
 
-export type OverlaySongData = {
-  /**
-   * The current maps beat saver data.
-   */
-  beatSaverMap: BeatSaverMapResponse | undefined;
-};
-
 export type OverlayScoreData = {
   /**
    * The current combo.
@@ -24,6 +17,13 @@ export type OverlayScoreData = {
   accuracy: number;
 };
 
+export type OverlayMapData = {
+  /**
+   * The current beatsaver map data.
+   */
+  beatSaverMap?: BeatSaverMapResponse;
+};
+
 export type OverlayData = {
   /**
    * The current score data, undefined if not in a score.
@@ -31,9 +31,9 @@ export type OverlayData = {
   score?: OverlayScoreData;
 
   /**
-   * The current song data, undefined if not in a song.
+   * The current map data, undefined if not in a song.
    */
-  song?: OverlaySongData;
+  map?: OverlayMapData;
 
   /**
    * Whether the song is paused.

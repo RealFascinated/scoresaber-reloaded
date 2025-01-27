@@ -24,6 +24,11 @@ export type BeatSaverMapResponse = {
   bsr: string;
 
   /**
+   * The URL to the song art.
+   */
+  songArt: string;
+
+  /**
    * The author of the map.
    */
   author: BeatSaverAuthor;

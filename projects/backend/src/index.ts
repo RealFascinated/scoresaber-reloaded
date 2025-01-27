@@ -31,6 +31,7 @@ import { serverTiming } from "@elysiajs/server-timing";
 import PlaylistController from "./controller/playlist.controller";
 import ScoreSaberService from "./service/scoresaber.service";
 import BeatLeaderService from "./service/beatleader.service";
+import BeatSaverController from "./controller/beatsaver.controller";
 
 // Load .env file
 if (await Bun.file(".env").exists()) {
@@ -248,6 +249,7 @@ app.use(
       LeaderboardController,
       StatisticsController,
       PlaylistController,
+      BeatSaverController,
     ],
   })
 );
