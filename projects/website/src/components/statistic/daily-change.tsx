@@ -3,6 +3,7 @@ import Tooltip from "@/components/tooltip";
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerStatValue } from "@ssr/common/player/player-stat-change";
+import { cn } from "@/common/utils";
 
 interface DailyChangeProps {
   /**
@@ -24,9 +25,14 @@ interface DailyChangeProps {
    * The tooltip to display
    */
   tooltip?: React.ReactElement | string;
+
+  /**
+   * The class name
+   */
+  className?: string;
 }
 
-export function DailyChange({ type, player, change, tooltip }: DailyChangeProps) {
+export function DailyChange({ type, player, change, tooltip, className }: DailyChangeProps) {
   const formatValue = type.type == "Performance Points" ? formatPp : formatNumberWithCommas;
   if (!change && player !== undefined) {
     change = type.value?.(player, "daily");
@@ -36,7 +42,7 @@ export function DailyChange({ type, player, change, tooltip }: DailyChangeProps)
   }
 
   const value = (
-    <p className={`text-xs ${change > 0 ? "text-green-400" : "text-red-400"}`}>
+    <p className={cn("text-xs", change > 0 ? "text-green-400" : "text-red-400", className)}>
       {change > 0 ? "+" : ""}
       {`${formatValue(change)}${type.type == "Performance Points" ? "pp" : ""}`}
     </p>

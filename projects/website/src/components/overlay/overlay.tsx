@@ -14,6 +14,9 @@ import { useOverlayDataStore } from "@/common/overlay/overlay-data-store";
 import OverlayScoreInfoView from "@/components/overlay/views/score-info";
 
 type OverlayProps = {
+  /**
+   * The overlay settings.
+   */
   settings: OverlaySettings;
 };
 

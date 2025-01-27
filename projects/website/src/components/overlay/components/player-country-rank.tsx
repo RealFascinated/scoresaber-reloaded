@@ -1,23 +1,29 @@
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import CountryFlag from "@/components/country-flag";
+import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
+import { DailyChange } from "@/components/statistic/daily-change";
+import { PlayerStatChange } from "@ssr/common/player/player-stat-change";
 
 type OverlayPlayerRankProps = {
   /**
-   * The crank of the player in their country.
+   * The player to display information for.
    */
-  countryRank: number;
-
-  /**
-   * The country of the player.
-   */
-  country: string;
+  player: ScoreSaberPlayer;
 };
+export default function OverlayPlayerCountryRank({ player }: OverlayPlayerRankProps) {
+  const { countryRank, country } = player;
 
-export default function OverlayPlayerCountryRank({ countryRank, country }: OverlayPlayerRankProps) {
   return (
     <div className="flex gap-2 items-center">
-      <CountryFlag code={country} size={18} />
-      <p>#{formatNumberWithCommas(countryRank)}</p>
+      <div className="flex gap-2 items-center">
+        <CountryFlag code={country} size={18} />
+        <p>#{formatNumberWithCommas(countryRank)}</p>
+      </div>
+      <DailyChange
+        type={PlayerStatChange.CountryRank}
+        change={player.statisticChange?.daily?.countryRank ?? 0}
+        className="text-md"
+      />
     </div>
   );
 }

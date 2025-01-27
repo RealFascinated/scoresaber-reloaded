@@ -3,6 +3,8 @@ import Image from "next/image";
 import { formatPp } from "@ssr/common/utils/number-utils";
 import OverlayPlayerCountryRank from "@/components/overlay/components/player-country-rank";
 import OverlayPlayerRank from "../components/player-rank";
+import { DailyChange } from "@/components/statistic/daily-change";
+import { PlayerStatChange } from "@ssr/common/player/player-stat-change";
 
 type OverlayPlayerInfoProps = {
   /**
@@ -24,9 +26,16 @@ export default function OverlayPlayerInfoView({ player }: OverlayPlayerInfoProps
       />
       <div>
         <p className="text-3xl font-semibold">{player.name}</p>
-        <p className="text-ssr">{formatPp(player.pp)}pp</p>
-        <OverlayPlayerRank rank={player.rank} />
-        <OverlayPlayerCountryRank countryRank={player.countryRank} country={player.country} />
+        <p className="text-ssr">
+          {formatPp(player.pp)}pp{" "}
+          <DailyChange
+            type={PlayerStatChange.PerformancePoints}
+            change={player.statisticChange?.daily?.pp ?? 0}
+            className="text-md"
+          />
+        </p>
+        <OverlayPlayerRank player={player} />
+        <OverlayPlayerCountryRank player={player} />
       </div>
     </div>
   );
