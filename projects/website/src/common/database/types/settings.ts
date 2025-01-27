@@ -167,8 +167,8 @@ export default class Settings extends Entity<Database> {
   public getOverlaySettings(): OverlaySettings {
     return {
       ...defaultOverlaySettings,
-      ...this.overlaySettings,
       playerId: this.playerId ?? defaultOverlaySettings.playerId, // Use the default player id if not set
+      ...this.overlaySettings,
     };
   }
 
