@@ -20,7 +20,7 @@ import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score";
 import { getDifficulty } from "@ssr/common/utils/song-utils";
 import { ScoreSaberPreviousScoreModel } from "@ssr/common/model/score/impl/scoresaber-previous-score";
 
-const SCORESABER_REQUEST_COOLDOWN = 60_000 / 200; // 200 requests per minute
+const SCORESABER_REQUEST_COOLDOWN = 60_000 / 300; // 300 requests per minute
 
 export default class LeaderboardService {
   /**
