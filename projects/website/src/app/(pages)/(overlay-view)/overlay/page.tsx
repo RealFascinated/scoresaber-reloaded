@@ -8,7 +8,7 @@ type OverlayPageProps = {
    */
   searchParams: Promise<{
     /**
-     * The raw settings for the overlay.
+     * The raw settings for the overlay as base64.
      */
     settings: string;
   }>;
