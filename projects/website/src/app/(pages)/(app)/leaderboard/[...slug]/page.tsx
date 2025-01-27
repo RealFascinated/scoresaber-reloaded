@@ -22,7 +22,7 @@ type LeaderboardData = {
 };
 
 const getLeaderboard = cache(async (id: string): Promise<LeaderboardResponse<ScoreSaberLeaderboard> | undefined> => {
-  return await fetchLeaderboard<ScoreSaberLeaderboard>("scoresaber", id + "");
+  return await fetchLeaderboard(id + "");
 });
 
 /**

@@ -482,10 +482,7 @@ export default class ScoreSaberService {
         for (const scoreToken of scores) {
           let score = scoreToken.toObject() as ScoreSaberScore;
 
-          const leaderboardResponse = await LeaderboardService.getLeaderboard<ScoreSaberLeaderboard>(
-            "scoresaber",
-            leaderboardId
-          );
+          const leaderboardResponse = await LeaderboardService.getLeaderboard(leaderboardId);
           if (leaderboardResponse == undefined) {
             throw new NotFoundError(`Leaderboard "${leaderboardId}" not found`);
           }
@@ -710,10 +707,7 @@ export default class ScoreSaberService {
       foundScores.map(async rawScore => {
         let score = new ScoreSaberScoreModel(rawScore).toObject() as ScoreSaberScore;
 
-        const leaderboardResponse = await LeaderboardService.getLeaderboard<ScoreSaberLeaderboard>(
-          "scoresaber",
-          score.leaderboardId + ""
-        );
+        const leaderboardResponse = await LeaderboardService.getLeaderboard(score.leaderboardId + "");
         if (!leaderboardResponse) {
           return null; // Skip this score if no leaderboardResponse is found
         }
@@ -764,8 +758,7 @@ export default class ScoreSaberService {
    */
   public static async insertScoreData(score: ScoreSaberScore, leaderboard?: ScoreSaberLeaderboard) {
     leaderboard = !leaderboard
-      ? (await LeaderboardService.getLeaderboard<ScoreSaberLeaderboard>("scoresaber", score.leaderboardId + ""))
-          .leaderboard
+      ? (await LeaderboardService.getLeaderboard(score.leaderboardId + "")).leaderboard
       : leaderboard;
 
     // If the leaderboard is not found, return the plain score

@@ -4,7 +4,6 @@ import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils
 import { StarIcon } from "../../components/star-icon";
 import { GlobeIcon } from "../../components/globe-icon";
 import LeaderboardService from "./leaderboard.service";
-import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { NotFoundError } from "elysia";
 import ScoreSaberService from "./scoresaber.service";
 
@@ -126,7 +125,7 @@ export class ImageService {
    * @param id the leaderboard's id
    */
   public static async generateLeaderboardImage(id: string) {
-    const response = await LeaderboardService.getLeaderboard<ScoreSaberLeaderboard>("scoresaber", id);
+    const response = await LeaderboardService.getLeaderboard(id);
     if (!response) {
       return undefined;
     }

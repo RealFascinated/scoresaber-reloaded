@@ -32,7 +32,7 @@ export function LeaderboardData({ initialLeaderboard, initialPage }: Leaderboard
   const { data } = useQuery({
     queryKey: ["leaderboard", currentLeaderboardId],
     queryFn: async (): Promise<LeaderboardResponse<ScoreSaberLeaderboard> | undefined> => {
-      return fetchLeaderboard<ScoreSaberLeaderboard>("scoresaber", currentLeaderboardId + "");
+      return fetchLeaderboard(currentLeaderboardId + "");
     },
   });
 

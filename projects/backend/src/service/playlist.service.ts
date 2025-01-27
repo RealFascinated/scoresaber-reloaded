@@ -77,14 +77,10 @@ export default class PlaylistService {
       const scores: { score: ScoreSaberScore; leaderboard: ScoreSaberLeaderboard }[] = [];
       for (const rawScore of rawScores) {
         const score = rawScore as ScoreSaberScore;
-        const leaderboardResponse = await LeaderboardService.getLeaderboard<ScoreSaberLeaderboard>(
-          "scoresaber",
-          score.leaderboardId + "",
-          {
-            cacheOnly: true,
-            includeBeatSaver: false,
-          }
-        );
+        const leaderboardResponse = await LeaderboardService.getLeaderboard(score.leaderboardId + "", {
+          cacheOnly: true,
+          includeBeatSaver: false,
+        });
         if (!leaderboardResponse) {
           continue; // Skip this score if no leaderboardResponse is found
         }

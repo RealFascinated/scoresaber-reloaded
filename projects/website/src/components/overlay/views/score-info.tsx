@@ -18,6 +18,8 @@ export default function OverlayScoreInfoView({ overlayData }: OverlayScoreDataPr
   }
 
   const difficulty = getDifficulty(beatSaverMap.difficulty.difficulty);
+  const leaderboard = map?.leaderboard;
+
   return (
     <OverlayView
       position={OverlayViewPosition.BOTTOM_LEFT}
@@ -48,7 +50,8 @@ export default function OverlayScoreInfoView({ overlayData }: OverlayScoreDataPr
             <p>{difficulty.alternativeName ?? difficulty.name}</p>
           </div>
           <p>
-            !bsr {beatSaverMap.bsr} - {formatNumberWithCommas(beatSaverMap.metadata.bpm)} BPM
+            !bsr {beatSaverMap.bsr} - {formatNumberWithCommas(beatSaverMap.metadata.bpm)} BPM{" "}
+            {leaderboard && leaderboard.stars > 0 ? ` - ${leaderboard.stars} ★` : ""}
           </p>
         </div>
       </div>

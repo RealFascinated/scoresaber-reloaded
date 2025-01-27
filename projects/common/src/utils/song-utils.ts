@@ -24,10 +24,10 @@ export type Difficulty = {
 
 const difficulties: Difficulty[] = [
   { name: "Easy", color: "#3cb371", id: 1 },
-  { name: "Normal", color: "#59b0f4", id: 2 },
-  { name: "Hard", color: "#FF6347", id: 3 },
-  { name: "Expert", color: "#bf2a42", id: 4 },
-  { name: "ExpertPlus", alternativeName: "Expert+", color: "#8f48db", id: 5 },
+  { name: "Normal", color: "#59b0f4", id: 3 },
+  { name: "Hard", color: "#FF6347", id: 5 },
+  { name: "Expert", color: "#bf2a42", id: 7 },
+  { name: "ExpertPlus", alternativeName: "Expert+", color: "#8f48db", id: 9 },
 ];
 
 export type ScoreBadge = {

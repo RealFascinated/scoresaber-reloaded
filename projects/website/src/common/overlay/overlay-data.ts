@@ -1,3 +1,4 @@
+import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
 
 export type OverlayScoreData = {
@@ -19,9 +20,14 @@ export type OverlayScoreData = {
 
 export type OverlayMapData = {
   /**
-   * The current beatsaver map data.
+   * The current BeatSaver map data.
    */
   beatSaverMap?: BeatSaverMapResponse;
+
+  /**
+   * The ScoreSaber leaderboard associated with the map's hash.
+   */
+  leaderboard?: ScoreSaberLeaderboard;
 };
 
 export type OverlayData = {

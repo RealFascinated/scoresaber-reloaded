@@ -12,6 +12,8 @@ import ScoreSaberLeaderboardPageToken from "../../types/token/scoresaber/leaderb
 import { StarFilter } from "../../maps/types";
 import RankingRequestToken from "../../types/token/scoresaber/ranking-request-token";
 import ScoreSaberRankingRequestsResponse from "../../response/scoresaber-ranking-requests-response";
+import { MapDifficulty } from "../../score/map-difficulty";
+import { getDifficulty } from "../../utils/song-utils";
 
 const API_BASE = "https://scoresaber.com/api";
 
@@ -28,6 +30,7 @@ const LOOKUP_PLAYER_SCORES_ENDPOINT = `${API_BASE}/player/:id/scores?limit=:limi
  * Leaderboard
  */
 const LOOKUP_LEADERBOARD_ENDPOINT = `${API_BASE}/leaderboard/by-id/:id/info`;
+const LOOKUP_LEADERBOARD_BY_HASH_ENDPOINT = `${API_BASE}/leaderboard/by-hash/:query/info?difficulty=:difficulty&gameMode=:gameMode`;
 const LOOKUP_LEADERBOARD_SCORES_ENDPOINT = `${API_BASE}/leaderboard/by-id/:id/scores?page=:page`;
 const LOOKUP_LEADERBOARDS_ENDPOINT = `${API_BASE}/leaderboards`;
 const SEARCH_LEADERBOARDS_ENDPOINT = `${API_BASE}/leaderboards?search=:query`;
@@ -226,6 +229,34 @@ class ScoreSaberService extends Service {
       return undefined;
     }
     this.log(`Found leaderboard "${leaderboardId}" in ${(performance.now() - before).toFixed(0)}ms`);
+    return response;
+  }
+
+  /**
+   * Looks up a leaderboard by its hash
+   *
+   * @param hash the hash of the map
+   * @param difficulty the difficulty to get
+   * @param gameMode the game mode to get
+   */
+  public async lookupLeaderboardByHash(
+    hash: string,
+    difficulty: MapDifficulty,
+    gameMode: string
+  ): Promise<ScoreSaberLeaderboardToken | undefined> {
+    const before = performance.now();
+    this.log(`Looking up leaderboard by hash for "${hash}", difficulty "${difficulty}", gamemode "${gameMode}"...`);
+    const response = await this.fetch<ScoreSaberLeaderboardToken>(
+      LOOKUP_LEADERBOARD_BY_HASH_ENDPOINT.replace(":query", hash)
+        .replace(":difficulty", getDifficulty(difficulty).id + "")
+        .replace(":gameMode", gameMode)
+    );
+    if (response === undefined) {
+      return undefined;
+    }
+    this.log(
+      `Found leaderboard by hash for "${hash}", difficulty "${difficulty}", gamemode "${gameMode}" in ${(performance.now() - before).toFixed(0)}ms`
+    );
     return response;
   }
 

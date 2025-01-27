@@ -53,10 +53,7 @@ export class ScoreService {
             );
 
             const scorePromises = leaderboardScores.playerScores.map(async token => {
-              const leaderboardResponse = await LeaderboardService.getLeaderboard<ScoreSaberLeaderboard>(
-                "scoresaber",
-                token.leaderboard.id + ""
-              );
+              const leaderboardResponse = await LeaderboardService.getLeaderboard(token.leaderboard.id + "");
 
               if (!leaderboardResponse) {
                 return undefined;
@@ -118,10 +115,7 @@ export class ScoreService {
 
         switch (leaderboardName) {
           case "scoresaber": {
-            const leaderboardResponse = await LeaderboardService.getLeaderboard<ScoreSaberLeaderboard>(
-              leaderboardName,
-              leaderboardId
-            );
+            const leaderboardResponse = await LeaderboardService.getLeaderboard(leaderboardId);
             if (leaderboardResponse == undefined) {
               throw new NotFoundError(`Leaderboard "${leaderboardName}" not found`);
             }

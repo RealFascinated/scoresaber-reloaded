@@ -66,6 +66,7 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body className={`${siteFont.className} antialiased w-full h-full`}>
+        {/*<Script src="https://unpkg.com/react-scan/dist/auto.global.js" async />*/}
         <Script defer data-domain="ssr.fascinated.cc" src="https://analytics.fascinated.cc/js/script.js" />
         <DatabaseLoader>
           <Toaster />
