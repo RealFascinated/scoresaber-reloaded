@@ -19,6 +19,7 @@ import { getDifficulty } from "@ssr/common/utils/song-utils";
 import { ScoreSaberPreviousScoreModel } from "@ssr/common/model/score/impl/scoresaber-previous-score";
 import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/leaderboard";
 import { MapDifficulty } from "@ssr/common/score/map-difficulty";
+import { MapCharacteristic } from "@ssr/common/types/map-characteristic";
 
 const SCORESABER_REQUEST_COOLDOWN = 60_000 / 300; // 300 requests per minute
 const CACHE_REFRESH_TIME = 1000 * 60 * 60 * 12; // 12 hours
@@ -60,6 +61,13 @@ export default class LeaderboardService {
     return { cached: true };
   }
 
+  /**
+   * Gets a ScoreSaber leaderboard by ID.
+   *
+   * @param id the leaderboard id
+   * @param options the fetch options
+   * @returns the scores
+   */
   public static async getLeaderboard(
     id: string,
     options?: {
@@ -91,10 +99,19 @@ export default class LeaderboardService {
     });
   }
 
+  /**
+   * Gets a ScoreSaber leaderboard by hash.
+   *
+   * @param hash the leaderboard hash
+   * @param difficulty the difficulty to get
+   * @param characteristic the characteristic to get
+   * @param options the fetch options
+   * @returns the scores
+   */
   public static async getLeaderboardByHash(
     hash: string,
     difficulty: MapDifficulty,
-    gameMode: string,
+    characteristic: MapCharacteristic,
     options?: {
       cacheOnly?: boolean;
       includeBeatSaver?: boolean;
@@ -106,23 +123,23 @@ export default class LeaderboardService {
       };
     }
 
-    const cacheKey = `${hash}-${difficulty}-${gameMode}`;
+    const cacheKey = `${hash}-${difficulty}-${characteristic}`;
 
     return fetchWithCache(CacheService.getCache(ServiceCache.Leaderboards), cacheKey, async () => {
       const cachedLeaderboard = await ScoreSaberLeaderboardModel.findOne({
         songHash: hash,
         "difficulty.difficulty": difficulty,
-        "difficulty.characteristic": gameMode,
+        "difficulty.characteristic": characteristic,
       });
 
       const { cached, foundLeaderboard } = this.validateCachedLeaderboard(cachedLeaderboard, options);
 
       let leaderboard = foundLeaderboard;
       if (!leaderboard) {
-        const leaderboardToken = await scoresaberService.lookupLeaderboardByHash(hash, difficulty, gameMode);
+        const leaderboardToken = await scoresaberService.lookupLeaderboardByHash(hash, difficulty, characteristic);
         if (leaderboardToken == undefined) {
           throw new NotFoundError(
-            `Leaderboard not found for hash "${hash}", difficulty "${difficulty}", gamemode "${gameMode}"`
+            `Leaderboard not found for hash "${hash}", difficulty "${difficulty}", characteristic "${characteristic}"`
           );
         }
 
