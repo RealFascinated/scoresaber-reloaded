@@ -293,9 +293,7 @@ export default class LeaderboardService {
                 score.rank = scoreToken.rank;
                 updatedScores++;
 
-                console.log(
-                  `Updated score ${score.scoreId} for leaderboard ${leaderboard.fullName}, new pp: ${score.pp}`
-                );
+                console.log(`Updated score ${score.id} for leaderboard ${leaderboard.fullName}, new pp: ${score.pp}`);
 
                 const previousScores = await ScoreSaberPreviousScoreModel.find({
                   playerId: score.playerId,
