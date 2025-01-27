@@ -5,6 +5,7 @@ import OverlayPlayerCountryRank from "@/components/overlay/components/player-cou
 import OverlayPlayerRank from "../components/player-rank";
 import { DailyChange } from "@/components/statistic/daily-change";
 import { PlayerStatChange } from "@ssr/common/player/player-stat-change";
+import { formatDateMinimal } from "@ssr/common/utils/time-utils";
 
 type OverlayPlayerInfoProps = {
   /**
@@ -14,6 +15,7 @@ type OverlayPlayerInfoProps = {
 };
 
 export default function OverlayPlayerInfoView({ player }: OverlayPlayerInfoProps) {
+  const plusOnePp = player?.statisticHistory?.[formatDateMinimal(new Date())]?.plusOnePp;
   return (
     <div className="flex gap-2 text-2xl">
       <Image
@@ -26,13 +28,14 @@ export default function OverlayPlayerInfoView({ player }: OverlayPlayerInfoProps
       />
       <div>
         <p className="text-3xl font-semibold">{player.name}</p>
-        <p className="text-ssr">
-          {formatPp(player.pp)}pp{" "}
+        <p className="text-ssr flex gap-2">
+          {formatPp(player.pp)}pp
           <DailyChange
             type={PlayerStatChange.PerformancePoints}
             change={player.statisticChange?.daily?.pp ?? 0}
             className="text-md"
           />
+          {!!plusOnePp && <span className="text-muted-foreground">(+1 = {formatPp(plusOnePp)}pp)</span>}
         </p>
         <OverlayPlayerRank player={player} />
         <OverlayPlayerCountryRank player={player} />
