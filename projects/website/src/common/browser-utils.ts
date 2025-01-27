@@ -8,13 +8,10 @@ export function copyToClipboard(str: string) {
 }
 
 /**
- * Checks if the current context is a worker
+ * Opens a URL in a new tab
  */
-export function isRunningAsWorker() {
-  if (typeof window === "undefined") {
-    return false;
-  }
-  return navigator.constructor.name === "WorkerNavigator";
+export function openInNewTab(url: string) {
+  window.open(url, "_blank");
 }
 
 /**

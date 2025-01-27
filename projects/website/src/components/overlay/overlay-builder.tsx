@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { encodeOverlaySettings } from "@/common/overlay/overlay-settings";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import Notice from "@/components/notice";
+import { openInNewTab } from "@/common/browser-utils";
 
 const formSchema = z.object({
   playerId: z.string().min(1).max(32),
@@ -50,15 +51,10 @@ export default function OverlayBuilder() {
     }
 
     // Update the settings
-    settings.setOverlaySettings({
+    await settings.setOverlaySettings({
       playerId: playerId,
     });
-    window.open(
-      `/overlay?settings=${encodeOverlaySettings({
-        playerId: playerId,
-      })}`,
-      "_blank"
-    );
+    openInNewTab(`/overlay?settings=${encodeOverlaySettings(settings.getOverlaySettings())}`);
   }
 
   return (
@@ -77,7 +73,7 @@ export default function OverlayBuilder() {
       {/* Overlay Settings */}
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-2">
-          {/* Replay Viewer */}
+          {/* Player ID */}
           <FormField
             control={form.control}
             name="playerId"

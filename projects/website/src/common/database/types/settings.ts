@@ -176,10 +176,14 @@ export default class Settings extends Entity<Database> {
   /**
    * Sets the overlay settings to use
    *
-   * @param settings the overlay settings
+   * @param settings the overlay settings, or partial settings to update
    */
-  public setOverlaySettings(settings: OverlaySettings) {
-    this.overlaySettings = settings;
-    this.db.setSettings(this);
+  public async setOverlaySettings(settings: Partial<OverlaySettings>) {
+    this.overlaySettings = {
+      ...defaultOverlaySettings, // Default values
+      ...this.overlaySettings, // Old settings
+      ...settings, // New settings
+    };
+    await this.db.setSettings(this);
   }
 }
