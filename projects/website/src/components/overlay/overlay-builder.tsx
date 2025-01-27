@@ -93,7 +93,7 @@ export default function OverlayBuilder() {
       <Notice>You must use a resolution of 1920x1080 in OBS (or similar) to use this overlay.</Notice>
 
       {/* Unknown Account ID Notice */}
-      <p className="text-sm text-muted-foreground">
+      <p className="text-sm text-muted-foreground text-center">
         If you don&#39;t know your player id, you can link your account and it will be automatically filled in.
       </p>
 
@@ -163,35 +163,29 @@ export default function OverlayBuilder() {
           )}
 
           {/* View Toggles */}
-          <FormField
-            control={form.control}
-            name="views"
-            render={() => (
-              <FormItem>
-                <div className="mb-4">
-                  <FormLabel className="text-base">Views</FormLabel>
-                  <FormDescription>Toggle which views to show in the overlay.</FormDescription>
-                </div>
-                {viewToggles.map(item => (
+          <FormItem className="w-full">
+            <FormLabel>Views</FormLabel>
+            <FormDescription>Toggle which views to show in the overlay.</FormDescription>
+            <div className="mt-4 space-y-2">
+              {viewToggles.map(viewToggle => {
+                return (
                   <FormField
-                    key={item.name}
+                    key={viewToggle.value}
                     control={form.control}
-                    name={`views.${item.value}`}
-                    render={({ field }) => {
-                      return (
-                        <FormItem key={item.name} className="flex flex-row items-start space-x-3 space-y-0">
-                          <FormControl>
-                            <Checkbox checked={field.value} onCheckedChange={field.onChange} />
-                          </FormControl>
-                          <FormLabel className="text-sm font-normal">{item.name}</FormLabel>
-                        </FormItem>
-                      );
-                    }}
+                    name={`views.${viewToggle.value}`}
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center space-x-3 space-y-0">
+                        <FormControl>
+                          <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                        </FormControl>
+                        <FormLabel className="font-normal">{viewToggle.name}</FormLabel>
+                      </FormItem>
+                    )}
                   />
-                ))}
-              </FormItem>
-            )}
-          />
+                );
+              })}
+            </div>
+          </FormItem>
 
           {/* Saving Settings */}
           <Button type="submit" className="w-fit">
