@@ -57,8 +57,6 @@ export default function Overlay({ settings }: OverlayProps) {
     );
   }
 
-  console.log(overlayData);
-
   return (
     <div>
       <OverlayView position={OverlayViewPosition.TOP_LEFT} className="flex gap-2 flex-col text-2xl">
