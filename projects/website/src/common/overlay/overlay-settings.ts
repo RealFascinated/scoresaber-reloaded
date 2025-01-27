@@ -1,9 +1,21 @@
+import { OverlayDataClients } from "@/common/overlay/data-client";
+
 export type OverlaySettings = {
   /**
    * The id of the player that will
    * be used in the overlay.
    */
   playerId: string;
+
+  /**
+   * Whether to get real-time data from the data client.
+   */
+  useRealTimeData: boolean;
+
+  /**
+   * The data client to fetch game data from.
+   */
+  dataClient: OverlayDataClients;
 };
 
 /**
@@ -11,6 +23,8 @@ export type OverlaySettings = {
  */
 export const defaultOverlaySettings: OverlaySettings = {
   playerId: "",
+  useRealTimeData: true,
+  dataClient: OverlayDataClients.HTTPSiraStatus,
 };
 
 /**

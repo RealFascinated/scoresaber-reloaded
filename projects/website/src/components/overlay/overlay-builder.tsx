@@ -13,9 +13,14 @@ import { encodeOverlaySettings } from "@/common/overlay/overlay-settings";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import Notice from "@/components/notice";
 import { openInNewTab } from "@/common/browser-utils";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { OverlayDataClients } from "@/common/overlay/data-client";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const formSchema = z.object({
   playerId: z.string().min(1).max(32),
+  useRealTimeData: z.boolean(),
+  dataClient: z.string().min(1).max(32),
 });
 
 export default function OverlayBuilder() {
@@ -27,6 +32,8 @@ export default function OverlayBuilder() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       playerId: overlaySettings?.playerId || "",
+      useRealTimeData: overlaySettings?.useRealTimeData || true,
+      dataClient: overlaySettings?.dataClient || OverlayDataClients.HTTPSiraStatus,
     },
   });
 
@@ -39,7 +46,7 @@ export default function OverlayBuilder() {
    *
    * @param replayViewer the new replay viewer
    */
-  async function onSubmit({ playerId }: z.infer<typeof formSchema>) {
+  async function onSubmit({ playerId, useRealTimeData, dataClient }: z.infer<typeof formSchema>) {
     const player = await scoresaberService.lookupPlayer(playerId);
     if (!player) {
       toast({
@@ -53,6 +60,8 @@ export default function OverlayBuilder() {
     // Update the settings
     await settings.setOverlaySettings({
       playerId: playerId,
+      useRealTimeData: useRealTimeData,
+      dataClient: dataClient as OverlayDataClients,
     });
     openInNewTab(`/overlay?settings=${encodeOverlaySettings(settings.getOverlaySettings())}`);
   }
@@ -87,6 +96,53 @@ export default function OverlayBuilder() {
               </FormItem>
             )}
           />
+
+          {/* Use Real-Time Data */}
+          <FormField
+            control={form.control}
+            name="useRealTimeData"
+            render={({ field }) => (
+              <FormItem className="w-full">
+                <FormLabel>Use Real-Time Data</FormLabel>
+                <FormDescription>Whether to fetch real-time data from the data client.</FormDescription>
+                <FormControl>
+                  <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+
+          {/* Data Clients */}
+          {form.getValues().useRealTimeData && (
+            <FormField
+              control={form.control}
+              name="dataClient"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FormLabel>Data Client</FormLabel>
+                  <FormDescription>The data client to use for the overlay.</FormDescription>
+                  <FormControl>
+                    <Select onValueChange={field.onChange} defaultValue={form.getValues().dataClient}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a data client to use" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {Object.entries(OverlayDataClients).map(([id, clientName]) => {
+                          return (
+                            <SelectItem key={id} value={id}>
+                              {clientName}
+                            </SelectItem>
+                          );
+                        })}
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+          )}
 
           {/* Saving Settings */}
           <Button type="submit" className="w-fit">

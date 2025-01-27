@@ -30,6 +30,7 @@
     "@radix-ui/react-tooltip": "^1.1.7",
     "@ssr/common": "workspace:*",
     "@tanstack/react-query": "^5.64.2",
+    "@types/websocket": "^1.0.10",
     "@uidotdev/usehooks": "^2.4.1",
     "babel-plugin-react-compiler": "^19.0.0-beta-e552027-20250112",
     "chart.js": "^4.4.7",
@@ -55,7 +56,9 @@
     "sharp": "^0.33.5",
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
-    "zod": "^3.24.1"
+    "websocket": "^1.0.35",
+    "zod": "^3.24.1",
+    "zustand": "^5.0.3"
   },
   "devDependencies": {
     "@types/js-cookie": "^3.0.6",
