@@ -11,7 +11,7 @@ import LeaderboardFilters from "@/components/leaderboard/page/leaderboard-filter
 import { LeaderboardFilterProvider } from "@/components/providers/leaderboard/leaderboard-filter-provider";
 import { LeaderboardResponse } from "@ssr/common/response/leaderboard-response";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import { fetchLeaderboard } from "@ssr/common/utils/leaderboard.util";
+import { ssrApi } from "@ssr/common/utils/ssr-api";
 
 type LeaderboardDataProps = {
   /**
@@ -32,7 +32,7 @@ export function LeaderboardData({ initialLeaderboard, initialPage }: Leaderboard
   const { data } = useQuery({
     queryKey: ["leaderboard", currentLeaderboardId],
     queryFn: async (): Promise<LeaderboardResponse<ScoreSaberLeaderboard> | undefined> => {
-      return fetchLeaderboard(currentLeaderboardId + "");
+      return ssrApi.fetchLeaderboard(currentLeaderboardId + "");
     },
   });
 

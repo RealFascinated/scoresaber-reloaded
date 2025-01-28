@@ -4,8 +4,8 @@ import { LeaderboardData } from "@/components/leaderboard/page/leaderboard-data"
 import { cache } from "react";
 import { LeaderboardResponse } from "@ssr/common/response/leaderboard-response";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import { fetchLeaderboard } from "@ssr/common/utils/leaderboard.util";
 import { Config } from "@ssr/common/config";
+import { ssrApi } from "@ssr/common/utils/ssr-api";
 
 type Props = {
   params: Promise<{
@@ -22,7 +22,7 @@ type LeaderboardData = {
 };
 
 const getLeaderboard = cache(async (id: string): Promise<LeaderboardResponse<ScoreSaberLeaderboard> | undefined> => {
-  return await fetchLeaderboard(id + "");
+  return await ssrApi.fetchLeaderboard(id + "");
 });
 
 /**

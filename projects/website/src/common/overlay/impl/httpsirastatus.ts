@@ -4,8 +4,7 @@ import { HttpSiraStatus_Status } from "@/common/overlay/types/httpsirastatus/dat
 import { resetOverlayData, useOverlayDataStore } from "../overlay-data-store";
 import { HttpSiraStatusScoreChangedEvent } from "@/common/overlay/types/httpsirastatus/event/score-changed-event";
 import { HttpSiraStatusSongStartedEvent } from "@/common/overlay/types/httpsirastatus/event/song-started-event";
-import { getBeatSaverMap } from "@ssr/common/utils/beatsaver.util";
-import { fetchLeaderboardByHash } from "@ssr/common/utils/leaderboard.util";
+import { ssrApi } from "@ssr/common/utils/ssr-api";
 
 type EventName = keyof EventHandlers;
 type EventHandlers = {
@@ -87,13 +86,13 @@ async function loadStatusData(status: HttpSiraStatus_Status) {
   if (previousState && !previousState.map) {
     useOverlayDataStore.setState({
       map: {
-        beatSaverMap: await getBeatSaverMap(
+        beatSaverMap: await ssrApi.getBeatSaverMap(
           status.beatmap.songHash,
           status.beatmap.difficultyEnum,
           status.beatmap.characteristic
         ),
         leaderboard: (
-          await fetchLeaderboardByHash(
+          await ssrApi.fetchLeaderboardByHash(
             status.beatmap.songHash,
             status.beatmap.difficultyEnum,
             status.beatmap.characteristic
