@@ -72,5 +72,15 @@ export interface PlayerHistory {
      * The player's average ranked accuracy.
      */
     averageRankedAccuracy?: number;
+
+    /**
+     * The player's average unranked accuracy.
+     */
+    averageUnrankedAccuracy?: number;
+
+    /**
+     * The player's average accuracy.
+     */
+    averageAccuracy?: number;
   };
 }

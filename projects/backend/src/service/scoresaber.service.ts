@@ -187,6 +187,8 @@ export default class ScoreSaberService {
         if (statisticHistory) {
           const todayDate = formatDateMinimal(getMidnightAlignedDate(new Date()));
           const historyElement = statisticHistory[todayDate];
+          const accuracies = await PlayerService.getPlayerAverageAccuracies(playerToken.id);
+
           statisticHistory[todayDate] = {
             ...historyElement,
             rank: playerToken.rank,
@@ -199,6 +201,8 @@ export default class ScoreSaberService {
                   accuracy: {
                     ...historyElement?.accuracy,
                     averageRankedAccuracy: playerToken.scoreStats.averageRankedAccuracy,
+                    averageUnrankedAccuracy: accuracies.unrankedAccuracy,
+                    averageAccuracy: accuracies.averageAccuracy,
                   },
                   scores: {
                     rankedScores: 0,
@@ -390,7 +394,7 @@ export default class ScoreSaberService {
    * @param playerId the id of the player
    * @param options the fetch options
    */
-  public static async getPlayerLatestScores(
+  public static async getPlayerScores(
     playerId: string,
     options: {
       sort?: "pp" | "timestamp";

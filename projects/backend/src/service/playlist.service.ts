@@ -70,7 +70,7 @@ export default class PlaylistService {
         throw new NotFoundError(`Unable to create a snipe playlist for ${toSnipe} as one of the users isn't tracked.`);
       }
 
-      const rawScores = await ScoreSaberService.getPlayerLatestScores(toSnipe);
+      const rawScores = await ScoreSaberService.getPlayerScores(toSnipe);
       if (rawScores.length === 0) {
         throw new NotFoundError(`Unable to create a snipe playlist for ${toSnipe} as they have no scores.`);
       }

@@ -178,7 +178,7 @@ export class PlayerService {
       `pp-boundary-scores:${playerId}`,
       async () => {
         await PlayerService.getPlayer(playerId); // Ensure player exists
-        const playerScores = await ScoreSaberService.getPlayerLatestScores(playerId, {
+        const playerScores = await ScoreSaberService.getPlayerScores(playerId, {
           ranked: true,
           sort: "pp",
           projection: {
@@ -212,7 +212,7 @@ export class PlayerService {
       `pp-boundary-scores:${playerId}`,
       async () => {
         await PlayerService.getPlayer(playerId); // Ensure player exists
-        const playerScores = await ScoreSaberService.getPlayerLatestScores(playerId, {
+        const playerScores = await ScoreSaberService.getPlayerScores(playerId, {
           ranked: true,
           sort: "pp",
           projection: {
@@ -329,6 +329,7 @@ export class PlayerService {
     }
 
     const scoreStats = player.scoreStats;
+    const accuracies = await this.getPlayerAverageAccuracies(player.id);
 
     // Set the history data
     history.pp = player.pp;
@@ -338,6 +339,8 @@ export class PlayerService {
     history.accuracy = {
       ...history.accuracy,
       averageRankedAccuracy: scoreStats.averageRankedAccuracy,
+      averageUnrankedAccuracy: accuracies.unrankedAccuracy,
+      averageAccuracy: accuracies.averageAccuracy,
     };
     history.scores = {
       rankedScores: 0,
@@ -362,6 +365,60 @@ export class PlayerService {
 
     await foundPlayer.save();
     console.log(`Tracked player "${foundPlayer.id}" in ${(performance.now() - before).toFixed(0)}ms`);
+  }
+
+  /**
+   * Gets the player's average accuracies.
+   *
+   * @param playerId the player's id
+   * @returns the player's accuracy
+   */
+  public static async getPlayerAverageAccuracies(playerId: string): Promise<{
+    unrankedAccuracy: number;
+    averageAccuracy: number;
+  }> {
+    const accuracies = {
+      unrankedAccuracy: 0,
+      averageAccuracy: 0,
+    };
+
+    const scores = await ScoreSaberService.getPlayerScores(playerId, {
+      projection: {
+        accuracy: 1,
+        pp: 1,
+      },
+    });
+
+    // Filter out any scores with invalid accuracy values
+    const validScores = scores.filter(
+      score => Number.isFinite(score.accuracy) && score.accuracy >= 0 && score.accuracy <= 100
+    );
+
+    console.log(`Filtered out ${scores.length - validScores.length} invalid scores`);
+
+    if (validScores.length === 0) {
+      return accuracies;
+    }
+
+    let unrankedScores = 0;
+    let unrankedAccuracySum = 0;
+    let totalAccuracySum = 0;
+
+    for (const score of validScores) {
+      // Add to total accuracy regardless of ranked status
+      totalAccuracySum += score.accuracy;
+
+      if (score.pp === 0) {
+        unrankedAccuracySum += score.accuracy;
+        unrankedScores++;
+      }
+    }
+
+    // Calculate averages, defaulting to 0 if no scores in category
+    accuracies.unrankedAccuracy = unrankedScores > 0 ? unrankedAccuracySum / unrankedScores : 0;
+    accuracies.averageAccuracy = validScores.length > 0 ? totalAccuracySum / validScores.length : 0;
+
+    return accuracies;
   }
 
   /**
@@ -541,36 +598,36 @@ export class PlayerService {
    * Updates the player statistics for all players.
    */
   public static async updatePlayerStatistics() {
-    const pages = 20; // top 1000 players
-
+    // const pages = 20; // top 1000 players
+    //
     const trackTime = new Date();
-    let toTrack: PlayerDocument[] = await PlayerModel.find({});
-    const players: ScoreSaberPlayerToken[] = [];
-
-    // loop through pages to fetch the top players
-    console.log(`Fetching ${pages} pages of players from ScoreSaber...`);
-    for (let i = 0; i < pages; i++) {
-      const pageNumber = i + 1;
-      console.log(`Fetching page ${pageNumber}...`);
-      const page = await scoresaberService.lookupPlayers(pageNumber);
-      if (page === undefined) {
-        console.log(`Failed to fetch players on page ${pageNumber}, skipping page...`);
-        await delay(SCORESABER_REQUEST_COOLDOWN);
-        continue;
-      }
-      for (const player of page.players) {
-        players.push(player);
-      }
-      await delay(SCORESABER_REQUEST_COOLDOWN);
-    }
-
-    for (const player of players) {
-      const foundPlayer = await PlayerService.getPlayer(player.id, true, player);
-      await PlayerService.trackScoreSaberPlayer(foundPlayer, trackTime, player);
-    }
-
-    // remove all players that have been tracked
-    toTrack = toTrack.filter(player => !players.map(player => player.id).includes(player.id));
+    const toTrack: PlayerDocument[] = await PlayerModel.find({});
+    // const players: ScoreSaberPlayerToken[] = [];
+    //
+    // // loop through pages to fetch the top players
+    // console.log(`Fetching ${pages} pages of players from ScoreSaber...`);
+    // for (let i = 0; i < pages; i++) {
+    //   const pageNumber = i + 1;
+    //   console.log(`Fetching page ${pageNumber}...`);
+    //   const page = await scoresaberService.lookupPlayers(pageNumber);
+    //   if (page === undefined) {
+    //     console.log(`Failed to fetch players on page ${pageNumber}, skipping page...`);
+    //     await delay(SCORESABER_REQUEST_COOLDOWN);
+    //     continue;
+    //   }
+    //   for (const player of page.players) {
+    //     players.push(player);
+    //   }
+    //   await delay(SCORESABER_REQUEST_COOLDOWN);
+    // }
+    //
+    // for (const player of players) {
+    //   const foundPlayer = await PlayerService.getPlayer(player.id, true, player);
+    //   await PlayerService.trackScoreSaberPlayer(foundPlayer, trackTime, player);
+    // }
+    //
+    // // remove all players that have been tracked
+    // toTrack = toTrack.filter(player => !players.map(player => player.id).includes(player.id));
 
     console.log(`Tracking ${toTrack.length} player statistics...`);
     for (const player of toTrack) {
@@ -589,7 +646,7 @@ export class PlayerService {
    */
   public static async getPlayerHMD(playerId: string): Promise<HMD | undefined> {
     // Get player's most used HMD in the last 50 scores
-    const scores = await ScoreSaberService.getPlayerLatestScores(playerId, {
+    const scores = await ScoreSaberService.getPlayerScores(playerId, {
       limit: 50,
       sort: "timestamp",
     });
