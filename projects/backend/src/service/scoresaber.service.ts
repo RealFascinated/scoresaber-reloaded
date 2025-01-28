@@ -253,7 +253,7 @@ export default class ScoreSaberService {
         if (account !== undefined) {
           for (const [date, history] of Object.entries(statisticHistory)) {
             if (history.plusOnePp) {
-              history.plusOnePp = Math.round(history.plusOnePp * Math.pow(10, 2)) / Math.pow(10, 2);
+              history.plusOnePp = Math.round(history.plusOnePp * Math.pow(10, 2)) / Math.pow(10, 2); // Round to 2 decimal places
               statisticHistory[date] = history;
             }
           }

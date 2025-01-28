@@ -394,8 +394,6 @@ export class PlayerService {
       score => Number.isFinite(score.accuracy) && score.accuracy >= 0 && score.accuracy <= 100
     );
 
-    console.log(`Filtered out ${scores.length - validScores.length} invalid scores`);
-
     if (validScores.length === 0) {
       return accuracies;
     }
