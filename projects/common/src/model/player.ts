@@ -1,8 +1,8 @@
-import {getModelForClass, modelOptions, prop, ReturnModelType, Severity} from "@typegoose/typegoose";
-import {Document} from "mongoose";
-import {PlayerHistory} from "../player/player-history";
-import {formatDateMinimal, getDaysAgoDate, getMidnightAlignedDate, parseDate} from "../utils/time-utils";
-import {type PeakRank} from "../player/peak-rank";
+import { getModelForClass, modelOptions, prop, ReturnModelType, Severity } from "@typegoose/typegoose";
+import { Document } from "mongoose";
+import { PlayerHistory } from "../player/player-history";
+import { formatDateMinimal, getDaysAgoDate, getMidnightAlignedDate, parseDate } from "../utils/time-utils";
+import { type PeakRank } from "../player/peak-rank";
 
 /**
  * The model for a player.
@@ -76,7 +76,7 @@ export class Player {
     if (this.statisticHistory === undefined) {
       this.statisticHistory = {};
     }
-    return this.getStatisticHistory()[formatDateMinimal(getMidnightAlignedDate(date))] || {};
+    return this.getStatisticHistory()[formatDateMinimal(date)] || {};
   }
 
   /**
@@ -121,7 +121,7 @@ export class Player {
     if (this.statisticHistory === undefined) {
       this.statisticHistory = {};
     }
-    this.statisticHistory[formatDateMinimal(getMidnightAlignedDate(date))] = history;
+    this.statisticHistory[formatDateMinimal(date)] = history;
   }
 
   /**

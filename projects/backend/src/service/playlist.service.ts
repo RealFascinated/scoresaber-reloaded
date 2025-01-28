@@ -107,7 +107,7 @@ export default class PlaylistService {
       const toSnipePlayer = await ScoreSaberService.getPlayer(toSnipe);
       return new Playlist(
         "scoresaber-snipe-" + toSnipe,
-        `Snipe - ${truncateText(toSnipePlayer.name, 16)} (${capitalizeFirstLetter(type)})`,
+        `Snipe - ${truncateText(toSnipePlayer.name, 16)} (${capitalizeFirstLetter(settings.sort)})`,
         "ScoreSaber Reloaded",
         await generatePlaylistImage("SSR", {
           lines: [

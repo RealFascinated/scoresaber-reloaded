@@ -297,7 +297,8 @@ export class PlayerService {
    * Tracks a players statistics
    *
    * @param foundPlayer the player to track
-   * @param trackTime the time to track the player at
+   * @param trackTime the date to track the player's statistics for
+   *                  (used so all players have the same track date)
    * @param playerToken an optional player token
    */
   public static async trackScoreSaberPlayer(
@@ -542,7 +543,7 @@ export class PlayerService {
   public static async updatePlayerStatistics() {
     const pages = 20; // top 1000 players
 
-    const trackTime = getMidnightAlignedDate(new Date());
+    const trackTime = new Date();
     let toTrack: PlayerDocument[] = await PlayerModel.find({});
     const players: ScoreSaberPlayerToken[] = [];
 
