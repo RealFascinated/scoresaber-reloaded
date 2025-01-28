@@ -131,7 +131,7 @@ export default class PlayerController {
     tags: ["player"],
     params: t.Object({
       id: t.String({ required: true }),
-      boundary: t.Number({ maximum: 50, minimum: 1 }),
+      boundary: t.Number({ maximum: 100, minimum: 1 }),
     }),
     detail: {
       responses: {

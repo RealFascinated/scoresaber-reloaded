@@ -4,32 +4,25 @@ import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import StatValue from "@/components/stat-value";
-import { Slider } from "@/components/ui/slider";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import Tooltip from "@/components/tooltip";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
+import GenericChart from "@/components/chart/generic-chart";
+import { DatasetConfig } from "@/common/chart/types";
 
 type PpBoundaryProps = {
   player: ScoreSaberPlayer;
 };
 
+const boundariesCount = 100;
+
 export default function PpBoundaryStat({ player }: PpBoundaryProps) {
-  const [boundary, setBoundary] = useState<number>(1);
   const [boundaries, setBoundaries] = useState<number[]>();
-  const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["playerPpBoundary", player.id],
-    queryFn: async () => (await ssrApi.getPlayerPpBoundary(player.id, 50))?.boundaries || [-1],
+    queryFn: async () => (await ssrApi.getPlayerPpBoundary(player.id, boundariesCount))?.boundaries || [-1],
   });
-
-  const handlePopoverState = (state: boolean) => {
-    setIsPopoverOpen(state);
-
-    if (!state) {
-      setBoundary(1);
-    }
-  };
 
   useEffect(() => {
     if (data) {
@@ -37,33 +30,59 @@ export default function PpBoundaryStat({ player }: PpBoundaryProps) {
     }
   }, [data]);
 
-  if (((isLoading || isError) && !isPopoverOpen) || !boundaries || boundaries[0] == -1) {
+  if (isLoading || isError || !boundaries || boundaries[0] == -1) {
     return null;
   }
 
+  const histories: Record<string, (number | null)[]> = {};
+  const labels: string[] = [];
+
+  for (let boundary = 1; boundary <= boundariesCount + 1; boundary += 1) {
+    const label = `+${boundary}pp`;
+    labels.push(label);
+
+    const history = histories["pp"];
+    if (!history) {
+      histories["pp"] = [];
+    }
+    histories["pp"].push(boundaries[boundary - 1]);
+  }
+
+  const datasetConfig: DatasetConfig[] = [
+    {
+      title: "Global PP Gain",
+      field: "pp",
+      color: "#3EC1D3",
+      axisId: "y",
+      axisConfig: {
+        reverse: false,
+        display: true,
+        displayName: "PP",
+        position: "left",
+      },
+      labelFormatter: (value: number) => `${value.toFixed(2)}pp`,
+    },
+  ];
+
   return (
-    <Popover open={isPopoverOpen} onOpenChange={handlePopoverState}>
+    <Popover>
       <PopoverTrigger asChild>
-        <div onClick={() => setIsPopoverOpen(true)}>
+        <div>
           <Tooltip
             asChild={false}
             display={
-              <p className="text-center">Amount of raw pp required to increase your global pp by {boundary}pp</p>
+              <div className="text-center flex flex-col gap-2">
+                <p>Amount of raw pp required to increase your global pp by 1pp</p>
+                <p className="italic">Click to see the graph</p>
+              </div>
             }
           >
-            <StatValue name={`+${boundary} PP`} value={<p>{boundaries[boundary - 1].toFixed(2) || "-"}pp</p>} />
+            <StatValue name={`+1 PP`} value={<p>{boundaries[0].toFixed(2) || "-"}pp</p>} />
           </Tooltip>
         </div>
       </PopoverTrigger>
-      <PopoverContent className="flex flex-col gap-2 p-3">
-        <p className="text-sm">Change the pp boundary.</p>
-        <Slider
-          min={1}
-          max={50}
-          value={[boundary]}
-          onValueChange={([value]) => setBoundary(value)}
-          onPointerDown={() => setIsPopoverOpen(true)} // Keep open while interacting with the slider
-        />
+      <PopoverContent className="flex flex-col gap-2 p-3 w-[90vw] lg:w-[500px]">
+        <GenericChart labels={labels} datasetConfig={datasetConfig} histories={histories} />
       </PopoverContent>
     </Popover>
   );
