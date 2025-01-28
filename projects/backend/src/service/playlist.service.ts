@@ -82,7 +82,10 @@ export default class PlaylistService {
           cacheOnly: true,
           includeBeatSaver: false,
         });
-        await delay(SCORESABER_REQUEST_COOLDOWN); // Cooldown between page requests
+        // Cooldown between page requests if not cached
+        if (!leaderboardResponse.cached) {
+          await delay(SCORESABER_REQUEST_COOLDOWN);
+        }
         if (!leaderboardResponse) {
           continue; // Skip this score if no leaderboardResponse is found
         }
