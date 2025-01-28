@@ -297,14 +297,15 @@ export class PlayerService {
    * Tracks a players statistics
    *
    * @param foundPlayer the player to track
+   * @param trackTime the time to track the player at
    * @param playerToken an optional player token
    */
   public static async trackScoreSaberPlayer(
     foundPlayer: PlayerDocument,
+    trackTime: Date,
     playerToken?: ScoreSaberPlayerToken
   ): Promise<void> {
     const before = performance.now();
-    const dateToday = getMidnightAlignedDate(new Date());
     const player = playerToken ? playerToken : await scoresaberService.lookupPlayer(foundPlayer.id);
     if (player == undefined) {
       console.log(`Player "${foundPlayer.id}" not found on ScoreSaber`);
@@ -321,7 +322,7 @@ export class PlayerService {
     }
 
     // Update current day's statistics
-    let history = foundPlayer.getHistoryByDate(dateToday);
+    let history = foundPlayer.getHistoryByDate(trackTime);
     if (history == undefined) {
       history = {}; // Initialize if history is not found
     }
@@ -350,7 +351,7 @@ export class PlayerService {
       totalRankedScore: scoreStats.totalRankedScore,
     };
 
-    foundPlayer.setStatisticHistory(dateToday, history);
+    foundPlayer.setStatisticHistory(trackTime, history);
     foundPlayer.sortStatisticHistory();
     foundPlayer.lastTracked = new Date();
     foundPlayer.markModified("statisticHistory");
@@ -541,6 +542,7 @@ export class PlayerService {
   public static async updatePlayerStatistics() {
     const pages = 20; // top 1000 players
 
+    const trackTime = getMidnightAlignedDate(new Date());
     let toTrack: PlayerDocument[] = await PlayerModel.find({});
     const players: ScoreSaberPlayerToken[] = [];
 
@@ -563,7 +565,7 @@ export class PlayerService {
 
     for (const player of players) {
       const foundPlayer = await PlayerService.getPlayer(player.id, true, player);
-      await PlayerService.trackScoreSaberPlayer(foundPlayer, player);
+      await PlayerService.trackScoreSaberPlayer(foundPlayer, trackTime, player);
     }
 
     // remove all players that have been tracked
@@ -571,7 +573,7 @@ export class PlayerService {
 
     console.log(`Tracking ${toTrack.length} player statistics...`);
     for (const player of toTrack) {
-      await PlayerService.trackScoreSaberPlayer(player);
+      await PlayerService.trackScoreSaberPlayer(player, trackTime);
       await delay(SCORESABER_REQUEST_COOLDOWN);
     }
     console.log("Finished tracking player statistics.");
