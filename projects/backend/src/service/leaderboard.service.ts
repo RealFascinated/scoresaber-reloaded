@@ -21,7 +21,7 @@ import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/leade
 import { MapDifficulty } from "@ssr/common/score/map-difficulty";
 import { MapCharacteristic } from "@ssr/common/types/map-characteristic";
 
-const SCORESABER_REQUEST_COOLDOWN = 60_000 / 300; // 300 requests per minute
+export const SCORESABER_REQUEST_COOLDOWN = 60_000 / 300; // 300 requests per minute
 const CACHE_REFRESH_TIME = 1000 * 60 * 60 * 12; // 12 hours
 
 export default class LeaderboardService {

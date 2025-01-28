@@ -1,5 +1,5 @@
 import { Playlist } from "@ssr/common/playlist/playlist";
-import LeaderboardService from "./leaderboard.service";
+import LeaderboardService, { SCORESABER_REQUEST_COOLDOWN } from "./leaderboard.service";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import { formatDateMinimal } from "@ssr/common/utils/time-utils";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
@@ -15,6 +15,7 @@ import { InternalServerError } from "@ssr/common/error/internal-server-error";
 import { BadRequestError } from "@ssr/common/error/bad-request-error";
 import { generatePlaylistImage } from "../common/playlist.util";
 import { parseSnipePlaylistSettings } from "@ssr/common/snipe/snipe-playlist-utils";
+import { delay } from "@ssr/common/utils/utils";
 
 export type SnipeType = "top" | "recent";
 
@@ -81,6 +82,7 @@ export default class PlaylistService {
           cacheOnly: true,
           includeBeatSaver: false,
         });
+        await delay(SCORESABER_REQUEST_COOLDOWN); // Cooldown between page requests
         if (!leaderboardResponse) {
           continue; // Skip this score if no leaderboardResponse is found
         }

@@ -16,8 +16,8 @@ import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
 import ScoreSaberPlayerScoreToken from "@ssr/common/types/token/scoresaber/player-score";
 import { HMD } from "@ssr/common/hmds";
+import { SCORESABER_REQUEST_COOLDOWN } from "./leaderboard.service";
 
-const SCORESABER_REQUEST_COOLDOWN = 60_000 / 250; // 250 requests per minute
 const accountCreationLock: { [id: string]: Promise<PlayerDocument> } = {};
 
 export class PlayerService {
