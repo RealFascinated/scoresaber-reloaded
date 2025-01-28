@@ -1,8 +1,8 @@
 import { Metadata } from "next";
 import Card from "@/components/card";
 import ActivePlayersAndScoresSetChart from "@/components/platform-statistics/charts/active-players-and-scores-set-chart";
-import { getPlatformStatistics } from "@ssr/common/utils/statistic.util";
 import { GamePlatform } from "@ssr/common/model/statistics/game-platform";
+import { ssrApi } from "@ssr/common/utils/ssr-api";
 
 export const metadata: Metadata = {
   title: "Statistics",
@@ -22,7 +22,7 @@ const names = new Map<GamePlatform, string>([[GamePlatform.ScoreSaber, "ScoreSab
 
 export default async function TopScoresPage({ params }: StatisticsPageProps) {
   const { platform } = await params;
-  const statistics = await getPlatformStatistics(platform);
+  const statistics = await ssrApi.getPlatformStatistics(platform);
 
   return (
     <main className="w-full flex justify-center">

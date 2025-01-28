@@ -15,13 +15,13 @@ import LeaderboardScoresSkeleton from "@/components/leaderboard/skeleton/leaderb
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { Metadata } from "@ssr/common/types/metadata";
 import ScoreMode, { ScoreModeEnum } from "@/components/score/score-mode";
-import { getFriendScores } from "@ssr/common/utils/player-utils";
 import useDatabase from "@/hooks/use-database";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { cn } from "@/common/utils";
 import usePageNavigation from "@/hooks/use-page-navigation";
 import { useLeaderboardFilter } from "@/components/providers/leaderboard/leaderboard-filter-provider";
+import { ssrApi } from "@ssr/common/utils/ssr-api";
 
 type LeaderboardScoresProps = {
   initialPage?: number;
@@ -85,7 +85,7 @@ export default function LeaderboardScores({
         };
       } else {
         if (friendIds && claimedPlayer) {
-          const friendScores = await getFriendScores(
+          const friendScores = await ssrApi.getFriendScores(
             [...friendIds, claimedPlayer.id],
             selectedLeaderboardId + "",
             currentPage

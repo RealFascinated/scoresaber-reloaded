@@ -7,9 +7,9 @@ import Card from "../card";
 import CountryFlag from "../country-flag";
 import { PlayerRankingSkeleton } from "@/components/ranking/player-ranking-skeleton";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import { getPlayersAroundPlayer } from "@ssr/common/utils/player-utils";
 import { AroundPlayer } from "@ssr/common/types/around-player";
 import { PlayerInfo } from "@/components/player/player-info";
+import { ssrApi } from "@ssr/common/utils/ssr-api";
 
 type MiniProps = {
   /**
@@ -50,7 +50,7 @@ export default function Mini({ type, player }: MiniProps) {
     isError,
   } = useQuery({
     queryKey: ["mini-ranking-" + type, player.id, type],
-    queryFn: () => getPlayersAroundPlayer(player.id, type.toLowerCase() as AroundPlayer),
+    queryFn: () => ssrApi.getPlayersAroundPlayer(player.id, type.toLowerCase() as AroundPlayer),
   });
 
   if (isLoading || !response) {

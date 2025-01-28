@@ -3,11 +3,11 @@ import { Config } from "@ssr/common/config";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { ScoreSort } from "@ssr/common/score/score-sort";
 import { getCookieValue } from "@ssr/common/utils/cookie-utils";
-import { getScoreSaberPlayer } from "@ssr/common/utils/player-utils";
 import { randomString } from "@ssr/common/utils/string.util";
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { cache } from "react";
+import { ssrApi } from "@ssr/common/utils/ssr-api";
 
 type Props = {
   params: Promise<{
@@ -26,7 +26,7 @@ type PlayerData = {
 };
 
 const getPlayer = cache(async (id: string): Promise<ScoreSaberPlayer | undefined> => {
-  return await getScoreSaberPlayer(id);
+  return await ssrApi.getScoreSaberPlayer(id);
 });
 
 /**

@@ -10,10 +10,10 @@ import { useLiveQuery } from "dexie-react-hooks";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { ScoreSort } from "@ssr/common/score/score-sort";
 import PlayerViews from "@/components/player/history-views/player-views";
-import { getScoreSaberPlayer } from "@ssr/common/utils/player-utils";
 import useSettings from "@/hooks/use-settings";
 import dynamic from "next/dynamic";
 import useWindowDimensions from "@/hooks/use-window-dimensions";
+import { ssrApi } from "@ssr/common/utils/ssr-api";
 
 const Mini = dynamic(() => import("../ranking/mini"), { ssr: false });
 
@@ -34,7 +34,7 @@ export default function PlayerData({ initialPlayerData, initialSearch, sort, pag
   const { data, isLoading, isError } = useQuery({
     queryKey: ["playerData", player.id, settings?.playerId, isFriend],
     queryFn: async (): Promise<ScoreSaberPlayer | undefined> =>
-      getScoreSaberPlayer(player.id, {
+      ssrApi.getScoreSaberPlayer(player.id, {
         createIfMissing: settings?.playerId == player.id,
       }),
   });

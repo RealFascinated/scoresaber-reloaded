@@ -7,9 +7,9 @@ import Tooltip from "../tooltip";
 import { Button } from "../ui/button";
 import { PersonIcon } from "@radix-ui/react-icons";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import { trackPlayer } from "@ssr/common/utils/player-utils";
 import useSettings from "@/hooks/use-settings";
 import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/player";
+import { ssrApi } from "@ssr/common/utils/ssr-api";
 
 type Props = {
   /**
@@ -35,7 +35,7 @@ export default function AddFriend({ player, iconOnly }: Props) {
    * Adds this player as a friend
    */
   async function addFriend() {
-    await trackPlayer(id);
+    await ssrApi.trackPlayer(id);
     await database.addFriend(id);
     toast({
       title: "Friend Added",

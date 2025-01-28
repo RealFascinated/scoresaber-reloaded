@@ -3,9 +3,6 @@ import { MapDifficulty } from "../score/map-difficulty";
 import { MapCharacteristic } from "../types/map-characteristic";
 import BeatSaverMapDifficulty from "../model/beatsaver/map-difficulty";
 import { BeatSaverMapResponse } from "../response/beatsaver-map-response";
-import SuperJSON from "superjson";
-import { kyFetchText } from "./utils";
-import { Config } from "../config";
 
 /**
  * Gets the BeatSaver mapper profile url.
@@ -36,19 +33,4 @@ export function getBeatSaverDifficulty(
     return undefined;
   }
   return version.difficulties.find(d => d.difficulty === difficulty && d.characteristic === characteristic);
-}
-
-/**
- * Gets a BeatSaver map.
- *
- * @param hash the hash of the map
- * @param difficulty the difficulty to get
- * @param characteristic the characteristic to get
- */
-export async function getBeatSaverMap(hash: string, difficulty: MapDifficulty, characteristic: MapCharacteristic) {
-  const response = await kyFetchText(`${Config.apiUrl}/beatsaver/map/${hash}/${difficulty}/${characteristic}`);
-  if (response === undefined) {
-    return undefined;
-  }
-  return SuperJSON.parse<BeatSaverMapResponse>(response);
 }

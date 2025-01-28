@@ -6,9 +6,9 @@ import Tooltip from "@/components/tooltip";
 import { LoadingIcon } from "@/components/loading-icon";
 import { useEffect, useState } from "react";
 import { PlayedMapsCalendarResponse, PlayedMapsCalendarStat } from "@ssr/common/response/played-maps-calendar-response";
-import { getScoreCalendar } from "@ssr/common/utils/player-utils";
 import { getDaysInMonth, Months } from "@ssr/common/utils/time-utils";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
+import { ssrApi } from "@ssr/common/utils/ssr-api";
 
 type ScoreHistoryCalendarProps = {
   player: ScoreSaberPlayer;
@@ -24,7 +24,7 @@ export default function ScoreHistoryCalendar({ player }: ScoreHistoryCalendarPro
   const { data, isLoading } = useQuery({
     queryKey: ["scoreHistoryCalendar", player.id, year, month],
     queryFn: async () => {
-      return getScoreCalendar(player.id, year, month);
+      return ssrApi.getScoreCalendar(player.id, year, month);
     },
   });
 

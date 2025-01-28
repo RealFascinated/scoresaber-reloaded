@@ -4,7 +4,6 @@ import { OverlaySettings, OverlayViews } from "@/common/overlay/overlay-settings
 import OverlayPlayerInfoView from "@/components/overlay/views/player-info";
 import { useQuery } from "@tanstack/react-query";
 import { LoadingIcon } from "@/components/loading-icon";
-import { getScoreSaberPlayer } from "@ssr/common/utils/player-utils";
 import OverlayView, { OverlayViewPosition } from "./views/view";
 import { useEffect, useRef } from "react";
 import { OverlayDataClients } from "@/common/overlay/data-client";
@@ -12,6 +11,7 @@ import HTTPSiraStatusClient from "@/common/overlay/impl/httpsirastatus";
 import OverlayScoreDataView from "@/components/overlay/views/score-data";
 import { useOverlayDataStore } from "@/common/overlay/overlay-data-store";
 import OverlayScoreInfoView from "@/components/overlay/views/score-info";
+import { ssrApi } from "@ssr/common/utils/ssr-api";
 
 type OverlayProps = {
   /**
@@ -24,7 +24,7 @@ export default function Overlay({ settings }: OverlayProps) {
   const { data: player, isLoading } = useQuery({
     queryKey: ["overlay:player"],
     queryFn: async () =>
-      getScoreSaberPlayer(settings.playerId, {
+      ssrApi.getScoreSaberPlayer(settings.playerId, {
         superJson: true,
       }),
     refetchInterval: 1000 * 30,

@@ -3,9 +3,9 @@ import Settings from "./types/settings";
 import { Friend } from "@/common/database/types/friends";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { setCookieValue } from "@ssr/common/utils/cookie-utils";
-import { trackPlayer } from "@ssr/common/utils/player-utils";
 import { SSRCache } from "@ssr/common/cache";
 import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/player";
+import { ssrApi } from "@ssr/common/utils/ssr-api";
 
 const SETTINGS_ID = "SSR"; // DO NOT CHANGE
 
@@ -141,7 +141,7 @@ export default class Database extends Dexie {
           return undefined;
         }
         playerCache.set(id, token);
-        await trackPlayer(id); // Track the player
+        await ssrApi.trackPlayer(id); // Track the player
         return token;
       })
     );
