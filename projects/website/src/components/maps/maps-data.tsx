@@ -14,7 +14,8 @@ type Category = {
   icon: string;
   id: string;
   showFilter: boolean;
-  render: () => ReactNode;
+  preservePage?: boolean;
+  render: (page?: number) => ReactNode;
 };
 
 const categories: Category[] = [
@@ -23,7 +24,8 @@ const categories: Category[] = [
     icon: "🏆",
     id: "leaderboards",
     showFilter: true,
-    render: () => <Leaderboards />,
+    preservePage: true,
+    render: (page?: number) => <Leaderboards initialPage={page} />,
   },
   {
     name: "Ranking Queue",
@@ -39,22 +41,24 @@ type MapsDataProps = {
    * The selected category.
    */
   category?: string;
+
+  /**
+   * The selected page.
+   */
+  page?: number;
 };
 
-export function MapsData({ category }: MapsDataProps) {
+export function MapsData({ category, page }: MapsDataProps) {
   const defaultCategory = categories[0];
 
   const pageNavigation = usePageNavigation();
   const [selectedCategory, setSelectedCategory] = useState(categories.find(c => c.id === category) || categories[0]);
 
   useEffect(() => {
-    if (selectedCategory.id === defaultCategory.id) {
-      pageNavigation.navigateToPage(`/maps`);
-      return;
-    }
+    const path = `/maps?category=${selectedCategory.id}`;
 
-    pageNavigation.navigateToPage(`/maps?category=${selectedCategory.id}`);
-  }, [category, defaultCategory.id, pageNavigation, selectedCategory.id]);
+    pageNavigation.navigateToPage(`${path}${page ? (path.includes("?") ? "&" : "?") : ""}page=${page}`);
+  }, [category, defaultCategory.id, page, pageNavigation, selectedCategory.id, selectedCategory.preservePage]);
 
   return (
     <MapFilterProvider>
@@ -79,7 +83,7 @@ export function MapsData({ category }: MapsDataProps) {
           </div>
 
           {/* Category Render */}
-          {selectedCategory.render()}
+          {selectedCategory.render(page)}
         </article>
         <div className="w-full xl:w-[400px] flex flex-col gap-2">
           <Playlists />

@@ -18,14 +18,20 @@ type MapsPageProps = {
      * The selected category.
      */
     category?: string;
+
+    /**
+     * The selected page.
+     */
+    page?: number;
   }>;
 };
 
 export default async function MapsPage({ searchParams }: MapsPageProps) {
-  const { category } = await searchParams;
+  const { category, page } = await searchParams;
+
   return (
     <main className="w-full">
-      <MapsData category={category} />
+      <MapsData category={category} page={page} />
     </main>
   );
 }

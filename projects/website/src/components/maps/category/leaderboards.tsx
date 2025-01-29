@@ -17,15 +17,25 @@ import ScoreSaberLeaderboardPageToken from "@ssr/common/types/token/scoresaber/l
 import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
 import { timeAgo } from "@ssr/common/utils/time-utils";
 import Tooltip from "@/components/tooltip";
+import usePageNavigation from "@/hooks/use-page-navigation";
 
-export default function Leaderboards() {
+type LeaderboardsProps = {
+  /**
+   * The selected page.
+   */
+  initialPage?: number;
+};
+
+export default function Leaderboards({ initialPage }: LeaderboardsProps) {
   const controls = useAnimation();
   const isMobile = useIsMobile();
+  const pageNavigation = usePageNavigation();
+
   const filter = useMapFilter();
   const filterDebounced = useDebounce(filter, 100);
 
-  const [page, setPage] = useState(1);
-  const [previousPage, setPreviousPage] = useState(1);
+  const [page, setPage] = useState(initialPage || 1);
+  const [previousPage, setPreviousPage] = useState(initialPage || 1);
   const [leaderboards, setLeaderboards] = useState<ScoreSaberLeaderboardPageToken | undefined>();
 
   const { data, isLoading, isError } = useQuery({
@@ -63,8 +73,17 @@ export default function Leaderboards() {
    * Reset the page when the filter changes
    */
   useEffect(() => {
-    setPage(1);
-  }, [filter]);
+    if (!initialPage) {
+      setPage(1);
+    }
+  }, [filter, initialPage]);
+
+  /**
+   * Update the page url when the page changes
+   */
+  useEffect(() => {
+    pageNavigation.navigateToPage(`/maps?category=leaderboards&page=${page}`);
+  }, [page, pageNavigation]);
 
   return (
     <Card>
