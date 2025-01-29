@@ -9,10 +9,23 @@ export const metadata: Metadata = {
   },
 };
 
-export default function MapsPage() {
+type MapsPageProps = {
+  /**
+   * The search params.
+   */
+  searchParams: Promise<{
+    /**
+     * The selected category.
+     */
+    category?: string;
+  }>;
+};
+
+export default async function MapsPage({ searchParams }: MapsPageProps) {
+  const { category } = await searchParams;
   return (
     <main className="w-full">
-      <MapsData />
+      <MapsData category={category} />
     </main>
   );
 }

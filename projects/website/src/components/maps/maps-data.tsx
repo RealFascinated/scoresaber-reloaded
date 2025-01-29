@@ -5,13 +5,14 @@ import Leaderboards from "@/components/maps/category/leaderboards";
 import Playlists from "@/components/maps/playlist/playlists";
 import MapFilters from "@/components/maps/map-filters";
 import { MapFilterProvider } from "@/components/providers/maps/map-filter-provider";
-import { ReactNode, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import RankingQueue from "@/components/maps/category/ranking-queue";
+import usePageNavigation from "@/hooks/use-page-navigation";
 
 type Category = {
   name: string;
   icon: string;
-  link: string;
+  id: string;
   showFilter: boolean;
   render: () => ReactNode;
 };
@@ -20,21 +21,40 @@ const categories: Category[] = [
   {
     name: "Leaderboards",
     icon: "🏆",
-    link: "/leaderboards",
+    id: "leaderboards",
     showFilter: true,
     render: () => <Leaderboards />,
   },
   {
     name: "Ranking Queue",
     icon: "📈",
-    link: "/ranking-queue",
+    id: "ranking-queue",
     showFilter: false,
     render: () => <RankingQueue />,
   },
 ];
 
-export function MapsData() {
-  const [selectedCategory, setSelectedCategory] = useState(categories[0]);
+type MapsDataProps = {
+  /**
+   * The selected category.
+   */
+  category?: string;
+};
+
+export function MapsData({ category }: MapsDataProps) {
+  const defaultCategory = categories[0];
+
+  const pageNavigation = usePageNavigation();
+  const [selectedCategory, setSelectedCategory] = useState(categories.find(c => c.id === category) || categories[0]);
+
+  useEffect(() => {
+    if (selectedCategory.id === defaultCategory.id) {
+      pageNavigation.navigateToPage(`/maps`);
+      return;
+    }
+
+    pageNavigation.navigateToPage(`/maps?category=${selectedCategory.id}`);
+  }, [category, defaultCategory.id, pageNavigation, selectedCategory.id]);
 
   return (
     <MapFilterProvider>
