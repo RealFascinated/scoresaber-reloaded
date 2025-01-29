@@ -63,7 +63,6 @@ export default function LeaderboardScores({
 
   const [selectedMode, setSelectedMode] = useState<ScoreModeEnum>(initialCategory ?? ScoreModeEnum.Global);
   const [selectedLeaderboardId, setSelectedLeaderboardId] = useState(leaderboard.id);
-  const [shouldFetch, setShouldFetch] = useState(true);
   const [previousPage, setPreviousPage] = useState(initialPage);
   const [currentPage, setCurrentPage] = useState(initialPage);
   const filter = useLeaderboardFilter();
@@ -71,7 +70,15 @@ export default function LeaderboardScores({
   const [currentScores, setCurrentScores] = useState<ScoresPage | undefined>();
 
   const { data, isError, isLoading } = useQuery<ScoresPage>({
-    queryKey: ["leaderboardScores", selectedLeaderboardId, currentPage, selectedMode, filter.country],
+    queryKey: [
+      "leaderboardScores",
+      selectedLeaderboardId,
+      currentPage,
+      selectedMode,
+      filter.country,
+      friendIds,
+      claimedPlayer,
+    ],
     queryFn: async () => {
       if (selectedMode == ScoreModeEnum.Global) {
         const leaderboard = await fetchLeaderboardScores<ScoreSaberScore, ScoreSaberLeaderboard>(
@@ -134,7 +141,6 @@ export default function LeaderboardScores({
         },
       };
     },
-    enabled: shouldFetch,
   });
 
   /**
@@ -151,7 +157,6 @@ export default function LeaderboardScores({
    */
   const handleLeaderboardChange = useCallback(
     (id: number) => {
-      setShouldFetch(true);
       setSelectedLeaderboardId(id);
       setCurrentPage(1);
 
@@ -172,7 +177,6 @@ export default function LeaderboardScores({
     }
 
     setCurrentPage(1);
-    setShouldFetch(true);
   }, [selectedMode]);
 
   /**
@@ -290,7 +294,6 @@ export default function LeaderboardScores({
             onPageChange={newPage => {
               setCurrentPage(newPage);
               setPreviousPage(currentPage);
-              setShouldFetch(true);
             }}
           />
         </>
