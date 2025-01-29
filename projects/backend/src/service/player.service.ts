@@ -596,36 +596,44 @@ export class PlayerService {
    * Updates the player statistics for all players.
    */
   public static async updatePlayerStatistics() {
-    // const pages = 20; // top 1000 players
-    //
+    const pages = 50; // Pages to search for players in
+
     const trackTime = new Date();
-    const toTrack: PlayerDocument[] = await PlayerModel.find({});
-    // const players: ScoreSaberPlayerToken[] = [];
-    //
-    // // loop through pages to fetch the top players
-    // console.log(`Fetching ${pages} pages of players from ScoreSaber...`);
-    // for (let i = 0; i < pages; i++) {
-    //   const pageNumber = i + 1;
-    //   console.log(`Fetching page ${pageNumber}...`);
-    //   const page = await scoresaberService.lookupPlayers(pageNumber);
-    //   if (page === undefined) {
-    //     console.log(`Failed to fetch players on page ${pageNumber}, skipping page...`);
-    //     await delay(SCORESABER_REQUEST_COOLDOWN);
-    //     continue;
-    //   }
-    //   for (const player of page.players) {
-    //     players.push(player);
-    //   }
-    //   await delay(SCORESABER_REQUEST_COOLDOWN);
-    // }
-    //
-    // for (const player of players) {
-    //   const foundPlayer = await PlayerService.getPlayer(player.id, true, player);
-    //   await PlayerService.trackScoreSaberPlayer(foundPlayer, trackTime, player);
-    // }
-    //
-    // // remove all players that have been tracked
-    // toTrack = toTrack.filter(player => !players.map(player => player.id).includes(player.id));
+    let toTrack: PlayerDocument[] = await PlayerModel.find({});
+    const players: ScoreSaberPlayerToken[] = [];
+
+    // loop through pages to fetch the top players
+    console.log(`Fetching ${pages} pages of players from ScoreSaber...`);
+    for (let i = 0; i < pages; i++) {
+      // Check the first 50 pages
+      const pageNumber = i + 1;
+      console.log(`Fetching page ${pageNumber}...`);
+      const page = await scoresaberService.lookupPlayers(pageNumber);
+      if (page === undefined) {
+        console.log(`Failed to fetch players on page ${pageNumber}, skipping page...`);
+        await delay(SCORESABER_REQUEST_COOLDOWN);
+        continue;
+      }
+      for (const player of page.players) {
+        players.push(player);
+      }
+      await delay(SCORESABER_REQUEST_COOLDOWN);
+    }
+
+    for (const player of players) {
+      // Only force track the top 1000 players
+      const shouldTrack = player.rank <= 1000;
+      if (!shouldTrack) {
+        continue;
+      }
+
+      const foundPlayer = await PlayerService.getPlayer(player.id, true, player);
+      await PlayerService.trackScoreSaberPlayer(foundPlayer, trackTime, player);
+    }
+
+    // Only track leftover players that we are tracking and that
+    // haven't already been tracked by the loop above
+    toTrack = toTrack.filter(player => !players.map(player => player.id).includes(player.id));
 
     console.log(`Tracking ${toTrack.length} player statistics...`);
     for (const player of toTrack) {
