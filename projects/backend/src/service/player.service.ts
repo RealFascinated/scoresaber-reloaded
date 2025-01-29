@@ -594,9 +594,13 @@ export class PlayerService {
 
   /**
    * Updates the player statistics for all players.
+   *
+   * This will first get the top 2500 players and then force track the top 1000
+   * players, it will then get the leftover players (not in the top 2500) and
+   * track them individually.
    */
   public static async updatePlayerStatistics() {
-    const pages = 50; // Pages to search for players in
+    const pages = 50; // Pages to search for players in (top 2500 players)
 
     const trackTime = new Date();
     let toTrack: PlayerDocument[] = await PlayerModel.find({});
@@ -635,7 +639,7 @@ export class PlayerService {
     // haven't already been tracked by the loop above
     toTrack = toTrack.filter(player => !players.map(player => player.id).includes(player.id));
 
-    console.log(`Tracking ${toTrack.length} player statistics...`);
+    console.log(`Tracking ${toTrack.length} leftover player statistics...`);
     for (const player of toTrack) {
       await PlayerService.trackScoreSaberPlayer(player, trackTime);
       await delay(SCORESABER_REQUEST_COOLDOWN);
