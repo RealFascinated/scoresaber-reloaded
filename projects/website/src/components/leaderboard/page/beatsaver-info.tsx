@@ -47,28 +47,27 @@ const mapStats = [
   },
 ];
 
-const descriptionMaxLines = 4;
+const descriptionMaxSize = 300;
 
 export function LeaderboardBeatSaverInfo({ beatSaverMap }: LeaderboardBeatSaverInfoProps) {
-  const descriptionLines = beatSaverMap.description.split("\n");
+  const description = beatSaverMap.description;
+  const showExpandButton = description.length > descriptionMaxSize;
 
   const [expanded, setExpanded] = useState(false);
-  const showExpandButton = descriptionLines.length > descriptionMaxLines;
 
   return (
     <Card className="w-full h-fit text-sm flex gap-2">
       <p className="font-bold text-md text-center">BeatSaver Information</p>
       <div className="w-full p-1 bg-border rounded-sm">
-        {(descriptionLines.length > 8 && !expanded
-          ? descriptionLines.slice(0, descriptionMaxLines)
-          : descriptionLines
-        ).map((line, index) => {
-          return (
-            <p key={index}>
-              <EmbedLinks text={line} />
-            </p>
-          );
-        })}
+        {(showExpandButton && !expanded ? description.slice(0, descriptionMaxSize) + "..." : description)
+          .split("\n")
+          .map((line, index) => {
+            return (
+              <p key={index}>
+                <EmbedLinks text={line} />
+              </p>
+            );
+          })}
 
         {showExpandButton && (
           <button
