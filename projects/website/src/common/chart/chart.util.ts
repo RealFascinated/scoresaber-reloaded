@@ -15,7 +15,6 @@ export const generateChartAxis = (
   grid: { drawOnChartArea: id === "y", color: id === "y" ? "#252525" : "" },
   title: { display: true, text: displayName, color: "#ffffff" },
   ticks: {
-    stepSize: 8,
     callback: (value: number) => {
       // Apply precision if specified, otherwise default to no decimal places
       return valueFormatter !== undefined ? valueFormatter(value) : value.toString();

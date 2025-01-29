@@ -105,6 +105,8 @@ const GenericChart = ({ options, labels, datasetConfig, histories }: ChartProps)
           callbacks: {
             title: (context: any) => {
               const value = labels[context[0].dataIndex];
+              if (typeof value === "string") return value;
+
               const date = value instanceof Date ? value : parseDate(value);
               const differenceInDays = getDaysAgo(date);
               const formattedDate = formatDate(date, "dddd, DD MMM, YYYY");
