@@ -582,10 +582,10 @@ export default class ScoreSaberService {
           const friendScores = await ScoreSaberScoreModel.aggregate([
             { $match: { playerId: friendId, leaderboardId: leaderboardId } },
             { $sort: { timestamp: -1 } },
-            { $sort: { "score.score": -1 } },
+            { $sort: { score: -1 } },
           ]);
           for (const friendScore of friendScores) {
-            const score = new ScoreSaberScoreModel(friendScore.score).toObject() as ScoreSaberScore;
+            const score = new ScoreSaberScoreModel(friendScore).toObject() as ScoreSaberScore;
             scores.push(await ScoreSaberService.insertScoreData(score));
           }
         }
