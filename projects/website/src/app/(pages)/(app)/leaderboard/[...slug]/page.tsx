@@ -6,6 +6,7 @@ import { LeaderboardResponse } from "@ssr/common/response/leaderboard-response";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { Config } from "@ssr/common/config";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
+import { ScoreModeEnum } from "@/components/score/score-mode";
 
 type Props = {
   params: Promise<{
@@ -19,6 +20,7 @@ type Props = {
 type LeaderboardData = {
   leaderboardResponse: LeaderboardResponse<ScoreSaberLeaderboard>;
   page: number;
+  category: ScoreModeEnum;
 };
 
 const getLeaderboard = cache(async (id: string): Promise<LeaderboardResponse<ScoreSaberLeaderboard> | undefined> => {
@@ -32,10 +34,11 @@ const getLeaderboard = cache(async (id: string): Promise<LeaderboardResponse<Sco
  * @param fetchScores whether to fetch the scores
  * @returns the leaderboard data and scores
  */
-const getLeaderboardData = cache(async ({ params }: Props): Promise<LeaderboardData | undefined> => {
+const getLeaderboardData = cache(async ({ params, searchParams }: Props): Promise<LeaderboardData | undefined> => {
   const { slug } = await params;
   const id = slug[0]; // The leaderboard id
   const page = parseInt(slug[1]) || 1; // The page number
+  const category = (await searchParams).category as ScoreModeEnum;
 
   const leaderboard = await getLeaderboard(id);
   if (leaderboard === undefined) {
@@ -44,6 +47,7 @@ const getLeaderboardData = cache(async ({ params }: Props): Promise<LeaderboardD
   return {
     leaderboardResponse: leaderboard,
     page: page,
+    category: category,
   };
 });
 
@@ -90,7 +94,11 @@ export default async function LeaderboardPage(props: Props) {
   }
   return (
     <main className="w-full flex justify-center">
-      <LeaderboardData initialLeaderboard={response.leaderboardResponse} initialPage={response.page} />
+      <LeaderboardData
+        initialLeaderboard={response.leaderboardResponse}
+        initialPage={response.page}
+        initialCategory={response.category}
+      />
     </main>
   );
 }

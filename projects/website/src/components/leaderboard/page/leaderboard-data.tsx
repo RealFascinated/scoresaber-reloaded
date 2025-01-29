@@ -12,6 +12,7 @@ import { LeaderboardFilterProvider } from "@/components/providers/leaderboard/le
 import { LeaderboardResponse } from "@ssr/common/response/leaderboard-response";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
+import { ScoreModeEnum } from "@/components/score/score-mode";
 
 type LeaderboardDataProps = {
   /**
@@ -23,9 +24,14 @@ type LeaderboardDataProps = {
    * The initial page.
    */
   initialPage?: number;
+
+  /**
+   * The initial category.
+   */
+  initialCategory?: ScoreModeEnum;
 };
 
-export function LeaderboardData({ initialLeaderboard, initialPage }: LeaderboardDataProps) {
+export function LeaderboardData({ initialLeaderboard, initialPage, initialCategory }: LeaderboardDataProps) {
   const [currentLeaderboardId, setCurrentLeaderboardId] = useState(initialLeaderboard.leaderboard.id);
   const [currentLeaderboard, setCurrentLeaderboard] = useState(initialLeaderboard);
 
@@ -51,6 +57,7 @@ export function LeaderboardData({ initialLeaderboard, initialPage }: Leaderboard
             <LeaderboardScores
               leaderboard={leaderboard}
               initialPage={initialPage}
+              initialCategory={initialCategory}
               leaderboardChanged={newId => setCurrentLeaderboardId(newId)}
               showDifficulties
               isLeaderboardPage

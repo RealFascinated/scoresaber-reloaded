@@ -25,6 +25,7 @@ import { ssrApi } from "@ssr/common/utils/ssr-api";
 
 type LeaderboardScoresProps = {
   initialPage?: number;
+  initialCategory?: ScoreModeEnum;
   leaderboard: ScoreSaberLeaderboard;
   showDifficulties?: boolean;
   isLeaderboardPage?: boolean;
@@ -40,6 +41,7 @@ type ScoresPage = {
 
 export default function LeaderboardScores({
   initialPage,
+  initialCategory,
   leaderboard,
   showDifficulties,
   isLeaderboardPage,
@@ -59,7 +61,7 @@ export default function LeaderboardScores({
   const isMobile = useIsMobile();
   const controls = useAnimation();
 
-  const [selectedMode, setSelectedMode] = useState<ScoreModeEnum>(ScoreModeEnum.Global);
+  const [selectedMode, setSelectedMode] = useState<ScoreModeEnum>(initialCategory ?? ScoreModeEnum.Global);
   const [selectedLeaderboardId, setSelectedLeaderboardId] = useState(leaderboard.id);
   const [shouldFetch, setShouldFetch] = useState(true);
   const [previousPage, setPreviousPage] = useState(initialPage);
@@ -187,8 +189,10 @@ export default function LeaderboardScores({
       return;
     }
 
-    navigateToPage(`/leaderboard/${selectedLeaderboardId}/${currentPage}`);
-  }, [selectedLeaderboardId, currentPage, disableUrlChanging, navigateToPage]);
+    navigateToPage(
+      `/leaderboard/${selectedLeaderboardId}/${currentPage}${selectedMode !== ScoreModeEnum.Global ? "?category=" + selectedMode : ""}`
+    );
+  }, [selectedLeaderboardId, currentPage, disableUrlChanging, navigateToPage, selectedMode]);
 
   if (currentScores === undefined) {
     return <LeaderboardScoresSkeleton />;

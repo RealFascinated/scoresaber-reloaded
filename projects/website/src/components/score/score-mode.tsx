@@ -4,24 +4,28 @@ import { ReactElement, useState } from "react";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import { PersonIcon } from "@radix-ui/react-icons";
 import { Button } from "@/components/ui/button";
+import { capitalizeFirstLetter } from "@ssr/common/string-utils";
 
 export type ScoreModeType = {
-  name: ScoreModeEnum;
+  name: string;
+  id: ScoreModeEnum;
   icon: ReactElement;
 };
 
 export enum ScoreModeEnum {
-  Global = "Global",
-  Friends = "Friend",
+  Global = "global",
+  Friends = "friend",
 }
 
 export const scoreModes: ScoreModeType[] = [
   {
-    name: ScoreModeEnum.Global,
+    name: capitalizeFirstLetter(ScoreModeEnum.Global),
+    id: ScoreModeEnum.Global,
     icon: <GlobeAmericasIcon className="w-4 h-4" />,
   },
   {
-    name: ScoreModeEnum.Friends,
+    name: capitalizeFirstLetter(ScoreModeEnum.Friends),
+    id: ScoreModeEnum.Friends,
     icon: <PersonIcon className="w-4 h-4" />,
   },
 ];
@@ -38,11 +42,11 @@ export default function ScoreMode({ onModeChange }: ScoreModeProps) {
       {scoreModes.map(mode => (
         <Button
           key={mode.name}
-          variant={selectedMode === mode.name ? "default" : "outline"}
+          variant={selectedMode === mode.id ? "default" : "outline"}
           className="flex items-center gap-1"
           onClick={() => {
-            setSelectedMode(mode.name);
-            onModeChange && onModeChange(mode.name);
+            setSelectedMode(mode.id);
+            onModeChange && onModeChange(mode.id);
           }}
         >
           {mode.icon}
