@@ -8,167 +8,134 @@ import { formatDate, formatDateMinimal, getDaysAgo, getDaysAgoDate, parseDate } 
 import { Axis, Dataset, DatasetConfig } from "@/common/chart/types";
 import { generateChartAxis, generateChartDataset } from "@/common/chart/chart.util";
 import useSettings from "@/hooks/use-settings";
+import { useMemo } from "react";
 
 Chart.register(...registerables);
 
 export type ChartProps = {
-  options?: {
-    id: string;
-  };
+  options?: { id: string };
   labels: Date[] | string[];
   datasetConfig: DatasetConfig[];
   histories: Record<string, (number | null)[]>;
 };
 
-export default function GenericChart({ options, labels, datasetConfig, histories }: ChartProps) {
-  const id = options?.id;
+const GenericChart = ({ options, labels, datasetConfig, histories }: ChartProps) => {
+  const { id } = options || {};
   const isMobile = useIsMobile();
   const settings = useSettings();
 
-  const axes: Record<string, Axis> = {
-    x: {
-      grid: { color: "#252525" },
-      reverse: false,
-      stacked: true,
-      ticks: {
-        font: (context: any) => {
-          if (parseDate(context.tick.label).getDate() === 1) {
-            return {
-              weight: "bold",
-            };
-          }
-        },
-        color: (context: any) => {
-          if (parseDate(context.tick.label).getDate() === 1) {
-            return "#ffffff";
-          }
-          return "#717171";
-        },
-      },
-    },
-  };
+  const axes = useMemo(() => {
+    const generatedAxes: Record<string, Axis> = { x: { grid: { color: "#252525" }, reverse: false, ticks: {} } };
 
-  const datasets: Dataset[] = datasetConfig
-    .map(config => {
+    datasetConfig.forEach(config => {
       const historyArray = histories[config.field];
-
-      if (historyArray && historyArray.some(value => value !== null)) {
-        axes[config.axisId] = generateChartAxis(
+      if (historyArray?.some(value => value !== null)) {
+        generatedAxes[config.axisId] = generateChartAxis(
           config.axisId,
           config.axisConfig.reverse,
           isMobile && config.axisConfig.hideOnMobile ? false : config.axisConfig.display,
           config.axisConfig.position,
           config.axisConfig.displayName,
-          config.axisConfig.valueFormatter,
-          config.axisConfig.stack,
-          config.axisConfig.stackOrder
-        );
-
-        return generateChartDataset(
-          config.title,
-          historyArray,
-          config.color,
-          config.axisId,
-          settings ? settings?.getChartLegend(id!, config.title, true) : false,
-          config.type || "line"
+          config.axisConfig.valueFormatter
         );
       }
+    });
 
-      return null;
-    })
-    .filter(Boolean) as Dataset[];
+    return generatedAxes;
+  }, [datasetConfig, histories, isMobile]);
 
-  const chartOptions: any = {
-    animation: {
-      duration: 0,
-    },
-    maintainAspectRatio: false,
-    responsive: true,
-    interaction: { mode: "index", intersect: false },
-    scales: axes,
-    elements: { point: { radius: 0 } },
-    plugins: {
-      legend: {
-        position: "top",
-        labels: {
-          color: "white",
-          filter: (legendItem: any, chartData: any) => {
-            const dataset = chartData.datasets[legendItem.datasetIndex];
-            return dataset.showLegend !== false;
+  const datasets = useMemo(() => {
+    return datasetConfig
+      .map(config => {
+        const historyArray = histories[config.field];
+        if (historyArray?.some(value => value !== null)) {
+          return generateChartDataset(
+            config.title,
+            historyArray,
+            config.color,
+            config.axisId,
+            settings?.getChartLegend(id!, config.title, true),
+            config.axisConfig.stack,
+            config.axisConfig.stackOrder,
+            config.type || "line"
+          );
+        }
+        return null;
+      })
+      .filter(Boolean) as Dataset[];
+  }, [datasetConfig, histories, settings, id]);
+
+  const formattedLabels = useMemo(() => {
+    return labels.map(value => {
+      if (typeof value === "string") return value;
+      const formattedDate = formatDateMinimal(value);
+      if (formattedDate === formatDateMinimal(getDaysAgoDate(0))) return "Now";
+      if (formattedDate === formatDateMinimal(getDaysAgoDate(1))) return "Yesterday";
+      return formattedDate;
+    });
+  }, [labels]);
+
+  const chartOptions: any = useMemo(
+    () => ({
+      animation: { duration: 0 },
+      maintainAspectRatio: false,
+      responsive: true,
+      interaction: { mode: "index", intersect: false },
+      scales: axes,
+      elements: { point: { radius: 0 } },
+      plugins: {
+        legend: {
+          position: "top",
+          labels: {
+            color: "white",
+            filter: (legendItem: any, chartData: any) => {
+              const dataset = chartData.datasets[legendItem.datasetIndex];
+              return dataset.showLegend !== false;
+            },
+          },
+          onClick: (event: any, legendItem: any, legend: any) => {
+            const index = legendItem.datasetIndex;
+            const chart = legend.chart;
+            chart[chart.isDatasetVisible(index) ? "hide" : "show"](index);
+            legendItem.hidden = !legendItem.hidden;
+            id && settings?.setChartLegendState(id, legendItem.text, !legendItem.hidden);
           },
         },
-        // Custom onClick handler for legend item clicks
-        onClick: (event: MouseEvent, legendItem: any, legend: any) => {
-          const index = legendItem.datasetIndex;
-          const chart = legend.chart;
-          if (chart.isDatasetVisible(index)) {
-            chart.hide(index);
-            legendItem.hidden = true;
-          } else {
-            chart.show(index);
-            legendItem.hidden = false;
-          }
-          id && settings?.setChartLegendState(id, legendItem.text, !legendItem.hidden);
-        },
-      },
-      tooltip: {
-        callbacks: {
-          title(context: any) {
-            const value = labels[context[0].dataIndex];
-            if (typeof value === "string") {
-              return value;
-            }
-            const date = value as Date;
-            const differenceInDays = getDaysAgo(date);
-            const formattedDate = formatDate(date, "dddd, DD MMM, YYYY");
-
-            if (differenceInDays === 0) {
-              return `${formattedDate} (Now)`;
-            } else if (differenceInDays === 1) {
-              return `${formattedDate} (Yesterday)`;
-            } else {
+        tooltip: {
+          callbacks: {
+            title: (context: any) => {
+              const value = labels[context[0].dataIndex];
+              const date = value instanceof Date ? value : parseDate(value);
+              const differenceInDays = getDaysAgo(date);
+              const formattedDate = formatDate(date, "dddd, DD MMM, YYYY");
+              if (differenceInDays === 0) return `${formattedDate} (Now)`;
+              if (differenceInDays === 1) return `${formattedDate} (Yesterday)`;
               return `${formattedDate} (${differenceInDays} day${differenceInDays > 1 ? "s" : ""} ago)`;
-            }
-          },
-          label(context: any) {
-            const value = Number(context.parsed.y);
-            const config = datasetConfig.find(cfg => cfg.title === context.dataset.label);
-            return config?.labelFormatter(value) ?? "";
+            },
+            label: (context: any) => {
+              const value = Number(context.parsed.y);
+              const config = datasetConfig.find(cfg => cfg.title === context.dataset.label);
+              return config?.labelFormatter(value) ?? "";
+            },
           },
         },
       },
-    },
-  };
-
-  const formattedLabels = labels.map(value => {
-    if (typeof value === "string") {
-      return value;
-    }
-    const formattedDate = formatDateMinimal(value);
-    if (formatDateMinimal(getDaysAgoDate(0)) === formattedDate) {
-      return "Now";
-    }
-    if (formatDateMinimal(getDaysAgoDate(1)) === formattedDate) {
-      return "Yesterday";
-    }
-
-    return formattedDate;
-  });
-
-  const data: any = { labels: formattedLabels, datasets };
+    }),
+    [axes, labels, datasetConfig, settings, id]
+  );
 
   return (
     <div className="block h-[360px] w-full relative">
       <Line
         className="max-w-[100%]"
         options={chartOptions}
-        data={data}
+        data={{ labels: formattedLabels, datasets: datasets as any }}
         plugins={[
           {
             id: "legend-padding",
             beforeInit: (chart: any) => {
               const originalFit = chart.legend.fit;
-              chart.legend.fit = function fit() {
+              chart.legend.fit = function () {
                 originalFit.bind(chart.legend)();
                 this.height += 2;
               };
@@ -178,4 +145,6 @@ export default function GenericChart({ options, labels, datasetConfig, histories
       />
     </div>
   );
-}
+};
+
+export default GenericChart;

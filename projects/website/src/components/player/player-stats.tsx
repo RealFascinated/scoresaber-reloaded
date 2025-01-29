@@ -5,7 +5,7 @@ import { formatDate, timeAgo } from "@ssr/common/utils/time-utils";
 import { ReactNode } from "react";
 import Tooltip from "@/components/tooltip";
 import { getScoreSaberRoles } from "@ssr/common/utils/scoresaber.util";
-import PpBoundaryStat from "@/components/player/stat/pp-boundary";
+import PpBoundaryStat from "@/components/player/chart/pp-boundary";
 
 type Stat = {
   name: string;

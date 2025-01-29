@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
 export type AxisPosition = "left" | "right";
 export type DatasetDisplayType = "line" | "bar";
 
@@ -14,9 +15,6 @@ export type Axis = {
     font?: (context: any) => { weight: string; color?: string } | undefined;
     color?: (context: any) => string | undefined;
   };
-  stacked?: boolean;
-  stack?: string;
-  stackOrder?: number;
   reverse?: boolean;
 };
 
@@ -29,6 +27,8 @@ export type Dataset = {
   spanGaps: boolean;
   yAxisID: string;
   hidden?: boolean;
+  stack?: string;
+  order?: number;
   maxBarThickness?: number;
   type?: DatasetDisplayType;
 };

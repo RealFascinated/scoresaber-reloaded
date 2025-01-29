@@ -7,19 +7,15 @@ export const generateChartAxis = (
   display: boolean,
   position: AxisPosition,
   displayName?: string,
-  valueFormatter?: (value: number) => string,
-  stack?: string,
-  stackOrder?: number
+  valueFormatter?: (value: number) => string
 ): Axis => ({
   id,
   position,
   display,
   grid: { drawOnChartArea: id === "y", color: id === "y" ? "#252525" : "" },
   title: { display: true, text: displayName, color: "#ffffff" },
-  stack,
-  stackOrder,
   ticks: {
-    stepSize: 10,
+    stepSize: 8,
     callback: (value: number) => {
       // Apply precision if specified, otherwise default to no decimal places
       return valueFormatter !== undefined ? valueFormatter(value) : value.toString();
@@ -34,6 +30,8 @@ export const generateChartDataset = (
   borderColor: string,
   yAxisID: string,
   showLegend: boolean = true,
+  stack?: string,
+  stackOrder?: number,
   type?: DatasetDisplayType
 ): Dataset => ({
   label,
@@ -45,7 +43,9 @@ export const generateChartDataset = (
   yAxisID,
   hidden: !showLegend, // Use hidden to disable legend
   type,
-  maxBarThickness: 11,
+  stack,
+  order: stackOrder,
+  maxBarThickness: 12,
   ...(type === "bar" && {
     backgroundColor: borderColor,
   }),
