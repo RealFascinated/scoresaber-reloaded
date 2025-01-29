@@ -31,11 +31,12 @@ export const scoreModes: ScoreModeType[] = [
 ];
 
 type ScoreModeProps = {
+  initialMode?: ScoreModeEnum;
   onModeChange?: (mode: ScoreModeEnum) => void;
 };
 
-export default function ScoreMode({ onModeChange }: ScoreModeProps) {
-  const [selectedMode, setSelectedMode] = useState<ScoreModeEnum>(ScoreModeEnum.Global);
+export default function ScoreMode({ initialMode, onModeChange }: ScoreModeProps) {
+  const [selectedMode, setSelectedMode] = useState<ScoreModeEnum>(initialMode ?? ScoreModeEnum.Global);
 
   return (
     <div className="flex gap-2">

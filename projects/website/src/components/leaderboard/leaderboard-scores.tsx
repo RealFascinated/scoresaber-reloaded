@@ -206,7 +206,7 @@ export default function LeaderboardScores({
           isLeaderboardPage ? "lg:justify-between" : ""
         )}
       >
-        <ScoreMode onModeChange={setSelectedMode} />
+        <ScoreMode initialMode={selectedMode} onModeChange={setSelectedMode} />
 
         <div className="flex gap-2 flex-wrap justify-center">
           {showDifficulties &&
