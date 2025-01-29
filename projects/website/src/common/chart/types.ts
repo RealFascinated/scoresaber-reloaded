@@ -14,6 +14,9 @@ export type Axis = {
     font?: (context: any) => { weight: string; color?: string } | undefined;
     color?: (context: any) => string | undefined;
   };
+  stacked?: boolean;
+  stack?: string;
+  stackOrder?: number;
   reverse?: boolean;
 };
 
@@ -26,6 +29,7 @@ export type Dataset = {
   spanGaps: boolean;
   yAxisID: string;
   hidden?: boolean;
+  maxBarThickness?: number;
   type?: DatasetDisplayType;
 };
 
@@ -41,6 +45,8 @@ export type DatasetConfig = {
     displayName?: string;
     position: AxisPosition;
     valueFormatter?: (value: number) => string;
+    stack?: string;
+    stackOrder?: number;
   };
   defaultLegendState?: boolean;
   type?: DatasetDisplayType;

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import {Axis, AxisPosition, Dataset, DatasetDisplayType} from "@/common/chart/types";
+import { Axis, AxisPosition, Dataset, DatasetDisplayType } from "@/common/chart/types";
 
 export const generateChartAxis = (
   id: string,
@@ -7,13 +7,17 @@ export const generateChartAxis = (
   display: boolean,
   position: AxisPosition,
   displayName?: string,
-  valueFormatter?: (value: number) => string
+  valueFormatter?: (value: number) => string,
+  stack?: string,
+  stackOrder?: number
 ): Axis => ({
   id,
   position,
   display,
   grid: { drawOnChartArea: id === "y", color: id === "y" ? "#252525" : "" },
   title: { display: true, text: displayName, color: "#ffffff" },
+  stack,
+  stackOrder,
   ticks: {
     stepSize: 10,
     callback: (value: number) => {
@@ -41,6 +45,7 @@ export const generateChartDataset = (
   yAxisID,
   hidden: !showLegend, // Use hidden to disable legend
   type,
+  maxBarThickness: 11,
   ...(type === "bar" && {
     backgroundColor: borderColor,
   }),

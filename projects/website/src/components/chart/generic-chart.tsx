@@ -29,6 +29,7 @@ export default function GenericChart({ options, labels, datasetConfig, histories
     x: {
       grid: { color: "#252525" },
       reverse: false,
+      stacked: true,
       ticks: {
         font: (context: any) => {
           if (parseDate(context.tick.label).getDate() === 1) {
@@ -58,7 +59,9 @@ export default function GenericChart({ options, labels, datasetConfig, histories
           isMobile && config.axisConfig.hideOnMobile ? false : config.axisConfig.display,
           config.axisConfig.position,
           config.axisConfig.displayName,
-          config.axisConfig.valueFormatter
+          config.axisConfig.valueFormatter,
+          config.axisConfig.stack,
+          config.axisConfig.stackOrder
         );
 
         return generateChartDataset(
