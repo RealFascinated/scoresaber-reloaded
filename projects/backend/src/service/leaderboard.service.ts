@@ -182,11 +182,10 @@ export default class LeaderboardService {
     const savedLeaderboard = await ScoreSaberLeaderboardModel.findOneAndUpdate(
       { _id: id },
       {
-        $set: {
-          ...leaderboard,
-          lastRefreshed: new Date(),
-          songArtColor: "#fff",
-        },
+        ...leaderboard,
+        lastRefreshed: new Date(),
+        songArtColor: "#fff",
+        // songArtColor: (await ImageService.getAverageImageColor(leaderboardToken.coverImage))?.color,
       },
       {
         upsert: true,
@@ -347,7 +346,11 @@ export default class LeaderboardService {
         updatedScores += await this.handleLeaderboardUpdate(update);
       }
 
-      await this.updateLeaderboardDifficulties(leaderboard, rankedMapDiffs);
+      const updated = await this.updateLeaderboardDifficulties(leaderboard, rankedMapDiffs);
+      if (!updated) {
+        // Save the new leaderboard
+        await this.saveLeaderboard(leaderboard.id + "", leaderboard);
+      }
 
       if (checkedCount % 100 === 0) {
         console.log(`Checked ${checkedCount}/${leaderboards.length} leaderboards`);
@@ -587,7 +590,7 @@ Map: https://ssr.fascinated.cc/leaderboard/${leaderboard.id}
   private static async updateLeaderboardDifficulties(
     leaderboard: ScoreSaberLeaderboard,
     rankedMapDiffs: Map<string, LeaderboardDifficulty[]>
-  ): Promise<void> {
+  ): Promise<boolean> {
     const difficulties = rankedMapDiffs
       .get(leaderboard.songHash)
       ?.sort((a, b) => getDifficulty(a.difficulty).id - getDifficulty(b.difficulty).id);
@@ -606,7 +609,9 @@ Map: https://ssr.fascinated.cc/leaderboard/${leaderboard.id}
           setDefaultsOnInsert: true,
         }
       );
+      return true;
     }
+    return false;
   }
 
   /**
