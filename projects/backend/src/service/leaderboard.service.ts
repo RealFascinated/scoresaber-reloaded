@@ -233,6 +233,10 @@ export default class LeaderboardService {
       await LeaderboardService.fixMaxScore(foundLeaderboard, beatSaverMap)
     ).toObject() as ScoreSaberLeaderboard;
 
+    if (leaderboard.fullName == undefined) {
+      leaderboard.fullName = `${leaderboard.songName} ${leaderboard.songSubName}`;
+    }
+
     return {
       leaderboard: leaderboard as ScoreSaberLeaderboard,
       beatsaver: beatSaverMap,
