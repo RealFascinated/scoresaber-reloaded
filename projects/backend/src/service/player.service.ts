@@ -610,7 +610,7 @@ export class PlayerService {
     const pages = Math.ceil(2000 / 50);
 
     const trackTime = new Date();
-    let toTrack: PlayerDocument[] = await PlayerModel.find({});
+    const toTrack: PlayerDocument[] = await PlayerModel.find({});
     const players: ScoreSaberPlayerToken[] = [];
 
     // loop through pages to fetch the top players
