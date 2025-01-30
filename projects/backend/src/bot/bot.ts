@@ -8,6 +8,8 @@ export enum DiscordChannels {
   trackedPlayerLogs = "1295985197262569512",
   numberOneFeed = "1295988063817830430",
   backendLogs = "1296524935237468250",
+  rankedLogs = "1334376582860636220",
+  qualifiedLogs = "1334383809440776233",
 }
 
 const client = new Client({

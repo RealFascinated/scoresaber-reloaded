@@ -10,19 +10,34 @@ import {
 } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { fetchWithCache } from "../common/cache.util";
 import { delay } from "@ssr/common/utils/utils";
-import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
+import { ScoreSaberScoreDocument, ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import CacheService, { ServiceCache } from "./cache.service";
 import LeaderboardDifficulty from "@ssr/common/model/leaderboard/leaderboard-difficulty";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
 import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score";
 import { getDifficulty } from "@ssr/common/utils/song-utils";
 import { ScoreSaberPreviousScoreModel } from "@ssr/common/model/score/impl/scoresaber-previous-score";
-import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/leaderboard";
 import { MapDifficulty } from "@ssr/common/score/map-difficulty";
 import { MapCharacteristic } from "@ssr/common/types/map-characteristic";
+import { DiscordChannels, logToChannel } from "../bot/bot";
+import { EmbedBuilder } from "discord.js";
+import { formatDuration } from "@ssr/common/utils/time-utils";
 
 export const SCORESABER_REQUEST_COOLDOWN = 60_000 / 300; // 300 requests per minute
 const CACHE_REFRESH_TIME = 1000 * 60 * 60 * 12; // 12 hours
+
+type RefreshResult = {
+  refreshedLeaderboards: number;
+  updatedScores: number;
+};
+
+type LeaderboardUpdate = {
+  leaderboard: ScoreSaberLeaderboard;
+  previousLeaderboard: ScoreSaberLeaderboard;
+  rankedStatusChanged: boolean;
+  starCountChanged: boolean;
+  qualifiedStatusChanged: boolean;
+};
 
 export default class LeaderboardService {
   /**
@@ -92,7 +107,7 @@ export default class LeaderboardService {
           throw new NotFoundError(`Leaderboard not found for "${id}"`);
         }
 
-        leaderboard = await LeaderboardService.saveLeaderboard(id, leaderboardToken);
+        leaderboard = await LeaderboardService.saveLeaderboard(id, getScoreSaberLeaderboardFromToken(leaderboardToken));
       }
 
       return LeaderboardService.processLeaderboard(leaderboard, options, cached);
@@ -143,7 +158,10 @@ export default class LeaderboardService {
           );
         }
 
-        leaderboard = await LeaderboardService.saveLeaderboard(leaderboardToken.id + "", leaderboardToken);
+        leaderboard = await LeaderboardService.saveLeaderboard(
+          leaderboardToken.id + "",
+          getScoreSaberLeaderboardFromToken(leaderboardToken)
+        );
       }
 
       return LeaderboardService.processLeaderboard(leaderboard, options, cached);
@@ -154,17 +172,17 @@ export default class LeaderboardService {
    * Saves a leaderboard to the database.
    *
    * @param id the leaderboard id
-   * @param leaderboardToken the leaderboard token from ScoreSaber
+   * @param leaderboard the leaderboard from ScoreSaber
    * @returns the saved leaderboard document
    */
   private static async saveLeaderboard(
     id: string,
-    leaderboardToken: ScoreSaberLeaderboardToken
+    leaderboard: ScoreSaberLeaderboard
   ): Promise<ScoreSaberLeaderboardDocument> {
     const savedLeaderboard = await ScoreSaberLeaderboardModel.findOneAndUpdate(
       { _id: id },
       {
-        ...getScoreSaberLeaderboardFromToken(leaderboardToken),
+        ...leaderboard,
         lastRefreshed: new Date(),
         songArtColor: "#fff",
         // songArtColor: (await ImageService.getAverageImageColor(leaderboardToken.coverImage))?.color,
@@ -246,271 +264,410 @@ export default class LeaderboardService {
   }
 
   /**
-   * Refreshes the ranked status and stars of all ranked leaderboards.
-   *
-   * @returns the amount of leaderboards refreshed and the amount of scores updated
+   * Fetches all ranked leaderboards from the ScoreSaber API
    */
-  public static async refreshRankedLeaderboards(): Promise<{
-    refreshedLeaderboards: number;
-    updatedScores: number;
+  private static async fetchAllRankedLeaderboards(): Promise<{
+    leaderboards: ScoreSaberLeaderboard[];
+    rankedMapDiffs: Map<string, LeaderboardDifficulty[]>;
   }> {
-    console.log(`Refreshing ranked leaderboards...`);
-    let updatedScores = 0;
-
     let page = 1;
     let hasMorePages = true;
     const leaderboards: ScoreSaberLeaderboard[] = [];
     const rankedMapDiffs: Map<string, LeaderboardDifficulty[]> = new Map();
 
     while (hasMorePages) {
-      const leaderboardResponse = await scoresaberService.lookupLeaderboards(page, {
-        ranked: true,
-      });
-      if (!leaderboardResponse) {
+      const response = await scoresaberService.lookupLeaderboards(page, { ranked: true });
+      if (!response) {
         console.warn(`Failed to fetch ranked leaderboards on page ${page}.`);
         continue;
       }
-      const totalPages = Math.ceil(leaderboardResponse.metadata.total / leaderboardResponse.metadata.itemsPerPage);
-      console.log(
-        `Fetched ${leaderboardResponse.leaderboards.length} ranked leaderboards on page ${page}/${totalPages}.`
-      );
 
-      for (const leaderboardToken of leaderboardResponse.leaderboards) {
-        const leaderboard = getScoreSaberLeaderboardFromToken(leaderboardToken);
-        const previousLeaderboard = await ScoreSaberLeaderboardModel.findById(leaderboard.id);
+      const totalPages = Math.ceil(response.metadata.total / response.metadata.itemsPerPage);
+      console.log(`Fetched ${response.leaderboards.length} ranked leaderboards on page ${page}/${totalPages}.`);
+
+      for (const token of response.leaderboards) {
+        const leaderboard = getScoreSaberLeaderboardFromToken(token);
         leaderboards.push(leaderboard);
-
-        const difficulties = rankedMapDiffs.get(leaderboard.songHash) ?? [];
-        difficulties.push({
-          leaderboardId: leaderboard.id,
-          difficulty: leaderboard.difficulty.difficulty,
-          characteristic: leaderboard.difficulty.characteristic,
-          difficultyRaw: leaderboard.difficulty.difficultyRaw,
-        });
-        rankedMapDiffs.set(leaderboard.songHash, difficulties);
-
-        if (previousLeaderboard !== null) {
-          // Leaderboard changed data
-          const rankedStatusChanged = leaderboard.ranked !== previousLeaderboard?.ranked;
-          const starCountChanged = leaderboard.stars !== previousLeaderboard?.stars;
-          if (rankedStatusChanged || starCountChanged) {
-            console.log(`Leaderboard data changed for ${leaderboard.id}.`);
-
-            // Get the latest scores for the leaderboard
-            const scores = await ScoreSaberScoreModel.find({
-              leaderboardId: leaderboard.id,
-            }).sort({ timestamp: -1 });
-            if (!scores) {
-              console.warn(`Failed to fetch local scores for leaderboard "${leaderboard.id}".`);
-              break;
-            }
-
-            if (rankedStatusChanged) {
-              console.log(
-                `Leaderboard "${leaderboard.id}" ranked status changed from ${previousLeaderboard?.ranked} to ${leaderboard.ranked}.`
-              );
-            }
-            if (starCountChanged) {
-              console.log(
-                `Leaderboard "${leaderboard.id}" star count changed from ${previousLeaderboard?.stars} to ${leaderboard.stars}.`
-              );
-            }
-
-            // Reset score pp values if the leaderboard is no longer ranked
-            if (rankedStatusChanged && !leaderboard.ranked) {
-              for (const score of scores) {
-                score.pp = 0;
-                score.weight = 0;
-              }
-            }
-
-            // Update score pp for newly ranked or changed star count leaderboards
-            if ((starCountChanged && leaderboard.ranked) || (rankedStatusChanged && leaderboard.ranked)) {
-              const scoreTokens: ScoreSaberScoreToken[] = [];
-
-              let currentScoresPage = 1;
-              let hasMoreScores = true;
-              let totalPages = 0;
-
-              // Fetch all scores for this leaderboard
-              while (hasMoreScores) {
-                const scoresResponse = await scoresaberService.lookupLeaderboardScores(
-                  leaderboard.id + "",
-                  currentScoresPage
-                );
-                if (!scoresResponse) {
-                  console.warn(
-                    `Failed to fetch scoresaber api scores for leaderboard "${leaderboard.id}". (current page: ${currentScoresPage}, total pages: ${totalPages})`
-                  );
-                  await delay(SCORESABER_REQUEST_COOLDOWN);
-                  currentScoresPage++; // skip this page
-                  continue;
-                }
-
-                totalPages = Math.ceil(scoresResponse.metadata.total / scoresResponse.metadata.itemsPerPage);
-
-                if (currentScoresPage >= totalPages) {
-                  totalPages = 0;
-                  hasMoreScores = false;
-                }
-
-                for (const score of scoresResponse.scores) {
-                  scoreTokens.push(score);
-                }
-
-                currentScoresPage++;
-                await delay(SCORESABER_REQUEST_COOLDOWN);
-              }
-
-              // Update scores
-              for (const scoreToken of scoreTokens) {
-                const score = scores.find(
-                  score => score.scoreId === scoreToken.id + "" && score.score == scoreToken.baseScore
-                );
-
-                // Score not tracked, so ignore
-                if (!score) {
-                  continue;
-                }
-                score.pp = scoreToken.pp;
-                score.weight = scoreToken.weight;
-                score.rank = scoreToken.rank;
-                updatedScores++;
-
-                console.log(`Updated score ${score.id} for leaderboard ${leaderboard.fullName}, new pp: ${score.pp}`);
-
-                const previousScores = await ScoreSaberPreviousScoreModel.find({
-                  playerId: score.playerId,
-                  leaderboardId: score.leaderboardId,
-                });
-
-                // Update the previous scores with the new star count
-                if (previousScores.length > 0) {
-                  for (const previousScore of previousScores) {
-                    if (rankedStatusChanged && !leaderboard.ranked) {
-                      previousScore.pp = 0;
-                    } else {
-                      previousScore.pp = scoresaberService.getPp(leaderboard.stars, previousScore.accuracy);
-                    }
-                    previousScore.weight = 0;
-                    await previousScore.save();
-                  }
-
-                  console.log(
-                    `Updated previous scores pp values on leaderboard ${leaderboard.fullName} for player ${score.playerId}`
-                  );
-                }
-              }
-
-              // Save scores
-              await Promise.all(
-                scores.map(score => {
-                  if (!score.save) {
-                    console.warn(`ScoreSaberScoreDocument is missing save method: ${JSON.stringify(score)}`);
-                    return;
-                  }
-                  return score.save();
-                })
-              );
-            }
-
-            // Save leaderboard
-            if (starCountChanged || rankedStatusChanged) {
-              await ScoreSaberLeaderboardModel.findOneAndUpdate(
-                { _id: leaderboard.id },
-                {
-                  lastRefreshed: new Date(),
-                  ...leaderboard,
-                  difficulties: previousLeaderboard.difficulties ?? [],
-                }
-              );
-            }
-          }
-        }
+        this.updateRankedMapDifficulties(rankedMapDiffs, leaderboard);
       }
 
-      if (page >= totalPages) {
-        hasMorePages = false;
-      }
-
+      hasMorePages = page < totalPages;
       page++;
       await delay(SCORESABER_REQUEST_COOLDOWN);
     }
 
-    let updatedLeaderboards = 0;
-    // Update all leaderboards
-    console.log(`Saving ${leaderboards.length} ranked leaderboards...`);
-    await Promise.all(
-      leaderboards.map(async leaderboard => {
-        // Sort difficulties from Easy to ExpertPlus
-        const difficulties = rankedMapDiffs
-          .get(leaderboard.songHash)
-          ?.sort((a, b) => getDifficulty(a.difficulty).id - getDifficulty(b.difficulty).id);
+    return { leaderboards, rankedMapDiffs };
+  }
 
-        // Only update if the difficulties have changed
-        if (leaderboard.difficulties.length !== difficulties?.length) {
-          updatedLeaderboards++;
-          await ScoreSaberLeaderboardModel.findOneAndUpdate(
-            { _id: leaderboard.id },
-            {
-              lastRefreshed: new Date(),
-              ...leaderboard,
-              difficulties: difficulties ?? [],
-            },
-            {
-              upsert: true,
-              new: true,
-              setDefaultsOnInsert: true,
-            }
-          );
-        }
-      })
-    );
-    console.log(`Updated ${updatedLeaderboards}/${leaderboards.length} ranked leaderboards.`);
+  /**
+   * Updates the difficulties map for a given leaderboard
+   */
+  private static updateRankedMapDifficulties(
+    rankedMapDiffs: Map<string, LeaderboardDifficulty[]>,
+    leaderboard: ScoreSaberLeaderboard
+  ): void {
+    const difficulties = rankedMapDiffs.get(leaderboard.songHash) ?? [];
+    difficulties.push({
+      leaderboardId: leaderboard.id,
+      difficulty: leaderboard.difficulty.difficulty,
+      characteristic: leaderboard.difficulty.characteristic,
+      difficultyRaw: leaderboard.difficulty.difficultyRaw,
+    });
+    rankedMapDiffs.set(leaderboard.songHash, difficulties);
+  }
 
-    // Un-rank all unranked leaderboards
-    const rankedIds = leaderboards.map(leaderboard => leaderboard.id);
-    const rankedLeaderboards = await ScoreSaberLeaderboardModel.find({ ranked: true, _id: { $nin: rankedIds } });
-    let totalUnranked = 0;
-    for (const previousLeaderboard of rankedLeaderboards) {
-      const leaderboard = await scoresaberService.lookupLeaderboard(previousLeaderboard.id + "");
-      if (!leaderboard) {
+  /**
+   * Processes updates for all leaderboards
+   */
+  private static async processLeaderboardUpdates(
+    leaderboards: ScoreSaberLeaderboard[],
+    rankedMapDiffs: Map<string, LeaderboardDifficulty[]>
+  ): Promise<number> {
+    let updatedScores = 0;
+    console.log(`Processing ${leaderboards.length} leaderboards...`);
+
+    for (const leaderboard of leaderboards) {
+      let previousLeaderboard: ScoreSaberLeaderboardDocument | null = await ScoreSaberLeaderboardModel.findById(
+        leaderboard.id
+      );
+      if (!previousLeaderboard) {
+        previousLeaderboard = await this.saveLeaderboard(leaderboard.id + "", leaderboard);
+      }
+
+      if (!previousLeaderboard) {
+        console.warn(`Failed to find leaderboard for ${leaderboard.id}`);
         continue;
       }
-      if (!leaderboard.ranked) {
-        totalUnranked++;
 
-        const scores = await ScoreSaberScoreModel.find({ leaderboardId: leaderboard.id });
-        if (!scores) {
-          console.warn(`Failed to fetch local scores in unrank for leaderboard "${leaderboard.id}".`);
-          continue;
-        }
-
-        for (const score of scores) {
-          score.pp = 0;
-          score.weight = 0;
-        }
-
-        await Promise.all(scores.map(score => score.save()));
-        await ScoreSaberLeaderboardModel.findOneAndUpdate(
-          { _id: leaderboard.id },
-          {
-            lastRefreshed: new Date(),
-            ...leaderboard,
-          },
-          {
-            upsert: true,
-            new: true,
-            setDefaultsOnInsert: true,
-          }
-        );
-        console.log(`Previously ranked leaderboard "${leaderboard.id}" has been unranked.`);
+      const update = this.checkLeaderboardChanges(leaderboard, previousLeaderboard);
+      if (update.rankedStatusChanged || update.starCountChanged || update.qualifiedStatusChanged) {
+        updatedScores += await this.handleLeaderboardUpdate(update);
       }
 
+      await this.updateLeaderboardDifficulties(leaderboard, rankedMapDiffs);
+    }
+
+    console.log(`Finished processing ${updatedScores} leaderboard score updates.`);
+    return updatedScores;
+  }
+
+  /**
+   * Checks if a leaderboard's ranked status, qualified status, or star count has changed
+   */
+  private static checkLeaderboardChanges(
+    leaderboard: ScoreSaberLeaderboard,
+    previousLeaderboard: ScoreSaberLeaderboard
+  ): LeaderboardUpdate {
+    return {
+      leaderboard,
+      previousLeaderboard,
+      rankedStatusChanged: leaderboard.ranked !== previousLeaderboard?.ranked,
+      qualifiedStatusChanged: leaderboard.qualified !== previousLeaderboard?.qualified,
+      starCountChanged: leaderboard.stars !== previousLeaderboard?.stars,
+    };
+  }
+
+  /**
+   * Handles updates for a single leaderboard when its status changes
+   */
+  private static async handleLeaderboardUpdate(update: LeaderboardUpdate): Promise<number> {
+    const scores: ScoreSaberScoreDocument[] = (await ScoreSaberScoreModel.find({
+      leaderboardId: update.leaderboard.id,
+    }).sort({ timestamp: -1 })) as unknown as ScoreSaberScoreDocument[];
+
+    if (!scores) {
+      console.warn(`Failed to fetch local scores for leaderboard "${update.leaderboard.id}".`);
+      return 0;
+    }
+
+    await this.logLeaderboardChanges(update);
+
+    if (update.rankedStatusChanged && !update.leaderboard.ranked) {
+      await this.resetScorePP(scores);
+      return 0;
+    }
+
+    if (
+      (update.starCountChanged && update.leaderboard.ranked) ||
+      (update.rankedStatusChanged && update.leaderboard.ranked) ||
+      (update.qualifiedStatusChanged && update.leaderboard.qualified)
+    ) {
+      return await this.updateScoresFromAPI(update.leaderboard, scores);
+    }
+
+    return 0;
+  }
+
+  /**
+   * Logs changes in leaderboard status
+   */
+  private static async logLeaderboardChanges(update: LeaderboardUpdate): Promise<void> {
+    if (update.rankedStatusChanged) {
+      console.log(
+        `Leaderboard "${update.leaderboard.id}" ranked status changed from ${update.previousLeaderboard?.ranked} to ${update.leaderboard.ranked}.`
+      );
+    }
+    if (update.starCountChanged) {
+      console.log(
+        `Leaderboard "${update.leaderboard.id}" star count changed from ${update.previousLeaderboard?.stars} to ${update.leaderboard.stars}.`
+      );
+    }
+
+    //await this.notifyLeaderboardChange(update);
+  }
+
+  /**
+   * Logs the leaderboard change to Discord.
+   *
+   * @param update The leaderboard update.
+   * @private
+   */
+  private static async notifyLeaderboardChange(update: LeaderboardUpdate): Promise<void> {
+    const { leaderboard, previousLeaderboard } = update;
+
+    // Determine the type of change
+    let changeType = "";
+    if (!previousLeaderboard.ranked && leaderboard.ranked) {
+      changeType = "now ranked";
+    } else if (previousLeaderboard.ranked && !leaderboard.ranked) {
+      changeType = "no longer ranked";
+    } else if (!previousLeaderboard.qualified && leaderboard.qualified) {
+      changeType = "now qualified";
+    } else if (previousLeaderboard.qualified && !leaderboard.qualified) {
+      changeType = "no longer qualified";
+    }
+
+    // Generate a single status change message
+    const statusChangeMessage = `${leaderboard.fullName} is ${changeType}!`;
+
+    // Check if the leaderboard was reweighted (star count changed while ranked)
+    const wasReweighed = previousLeaderboard.stars !== leaderboard.stars && previousLeaderboard.ranked;
+
+    // Get difficulty name
+    const difficulty = getDifficulty(leaderboard.difficulty.difficulty);
+
+    // Determine the Discord channel to log to
+    const channel =
+      leaderboard.status === "Ranked" || leaderboard.status === "Unranked"
+        ? DiscordChannels.rankedLogs
+        : DiscordChannels.qualifiedLogs;
+
+    // Build the Discord embed
+    const embed = new EmbedBuilder()
+      .setTitle(statusChangeMessage)
+      .setDescription(
+        `
+Difficulty: **${difficulty.alternativeName ?? difficulty.name}**
+${leaderboard.ranked ? `Stars:${wasReweighed ? ` **${previousLeaderboard.stars}** ->` : ""} **${leaderboard.stars}**` : ""}
+Mapped by: **${leaderboard.levelAuthorName}**
+Map: https://ssr.fascinated.cc/leaderboard/${leaderboard.id}
+`
+      )
+      .setThumbnail(leaderboard.songArt)
+      .setColor(changeType.includes("no longer") ? "#ff0000" : "#00ff00"); // Red for negative changes, green for positive changes
+
+    // Log the message to Discord
+    await logToChannel(channel, embed);
+  }
+
+  /**
+   * Resets PP values for all scores in an unranked leaderboard
+   */
+  private static async resetScorePP(scores: ScoreSaberScoreDocument[]): Promise<void> {
+    for (const score of scores) {
+      score.pp = 0;
+      score.weight = 0;
+    }
+    await Promise.all(scores.map(score => score.save()));
+  }
+
+  /**
+   * Updates scores by fetching current data from the ScoreSaber API
+   */
+  private static async updateScoresFromAPI(
+    leaderboard: ScoreSaberLeaderboard,
+    existingScores: ScoreSaberScoreDocument[]
+  ): Promise<number> {
+    const scoreTokens = await this.fetchAllLeaderboardScores(leaderboard.id + "");
+    let updatedCount = 0;
+
+    for (const scoreToken of scoreTokens) {
+      const score = existingScores.find(
+        score => score.scoreId === scoreToken.id + "" && score.score == scoreToken.baseScore
+      );
+      if (!score) continue;
+
+      updatedCount += await this.updateScore(score, scoreToken, leaderboard);
+    }
+
+    await Promise.all(existingScores.map(score => score.save()));
+    return updatedCount;
+  }
+
+  /**
+   * Fetches all scores for a specific leaderboard
+   */
+  private static async fetchAllLeaderboardScores(leaderboardId: string): Promise<ScoreSaberScoreToken[]> {
+    const scoreTokens: ScoreSaberScoreToken[] = [];
+    let currentPage = 1;
+    let hasMoreScores = true;
+
+    while (hasMoreScores) {
+      const response = await scoresaberService.lookupLeaderboardScores(leaderboardId + "", currentPage);
+      if (!response) {
+        console.warn(`Failed to fetch scoresaber api scores for leaderboard "${leaderboardId}" on page ${currentPage}`);
+        currentPage++;
+        await delay(SCORESABER_REQUEST_COOLDOWN);
+        continue;
+      }
+
+      scoreTokens.push(...response.scores);
+      hasMoreScores = currentPage < Math.ceil(response.metadata.total / response.metadata.itemsPerPage);
+      currentPage++;
       await delay(SCORESABER_REQUEST_COOLDOWN);
     }
+
+    return scoreTokens;
+  }
+
+  /**
+   * Updates a single score with new data
+   */
+  private static async updateScore(
+    score: ScoreSaberScoreDocument,
+    scoreToken: ScoreSaberScoreToken,
+    leaderboard: ScoreSaberLeaderboard
+  ): Promise<number> {
+    score.pp = scoreToken.pp;
+    score.weight = scoreToken.weight;
+    score.rank = scoreToken.rank;
+
+    console.log(`Updated score ${score.id} for leaderboard ${leaderboard.fullName}, new pp: ${score.pp}`);
+    await this.updatePreviousScores(score, leaderboard);
+    return 1;
+  }
+
+  /**
+   * Updates previous scores for a player on a leaderboard
+   */
+  private static async updatePreviousScores(
+    score: ScoreSaberScoreDocument,
+    leaderboard: ScoreSaberLeaderboard
+  ): Promise<void> {
+    const previousScores = await ScoreSaberPreviousScoreModel.find({
+      playerId: score.playerId,
+      leaderboardId: score.leaderboardId,
+    });
+
+    if (previousScores.length === 0) return;
+
+    for (const previousScore of previousScores) {
+      previousScore.pp = leaderboard.ranked ? scoresaberService.getPp(leaderboard.stars, previousScore.accuracy) : 0;
+      previousScore.weight = 0;
+      await previousScore.save();
+    }
+
+    console.log(
+      `Updated previous scores pp values on leaderboard ${leaderboard.fullName} for player ${score.playerId}`
+    );
+  }
+
+  /**
+   * Updates the difficulties for a leaderboard
+   */
+  private static async updateLeaderboardDifficulties(
+    leaderboard: ScoreSaberLeaderboard,
+    rankedMapDiffs: Map<string, LeaderboardDifficulty[]>
+  ): Promise<void> {
+    const difficulties = rankedMapDiffs
+      .get(leaderboard.songHash)
+      ?.sort((a, b) => getDifficulty(a.difficulty).id - getDifficulty(b.difficulty).id);
+
+    if (leaderboard.difficulties.length !== difficulties?.length) {
+      await ScoreSaberLeaderboardModel.findOneAndUpdate(
+        { _id: leaderboard.id },
+        {
+          lastRefreshed: new Date(),
+          ...leaderboard,
+          difficulties: difficulties ?? [],
+        },
+        {
+          upsert: true,
+          new: true,
+          setDefaultsOnInsert: true,
+        }
+      );
+    }
+  }
+
+  /**
+   * Unranks leaderboards that are no longer in the ranked list
+   */
+  private static async unrankOldLeaderboards(currentLeaderboards: ScoreSaberLeaderboard[]): Promise<void> {
+    const rankedIds = currentLeaderboards.map(leaderboard => leaderboard.id);
+    const rankedLeaderboards = await ScoreSaberLeaderboardModel.find({ ranked: true, _id: { $nin: rankedIds } });
+    let totalUnranked = 0;
+
+    for (const previousLeaderboard of rankedLeaderboards) {
+      const leaderboard = await scoresaberService.lookupLeaderboard(previousLeaderboard.id + "");
+      if (!leaderboard || leaderboard.ranked) continue;
+
+      totalUnranked++;
+      await this.unrankLeaderboard(previousLeaderboard);
+      await delay(SCORESABER_REQUEST_COOLDOWN);
+    }
+
     console.log(`Unranked ${totalUnranked} previously ranked leaderboards.`);
-    console.log(`Finished refreshing leaderboards, total pages refreshed: ${page - 1}.`);
+  }
+
+  /**
+   * Unranks a single leaderboard and updates its scores
+   */
+  private static async unrankLeaderboard(leaderboard: ScoreSaberLeaderboard): Promise<void> {
+    const scores = await ScoreSaberScoreModel.find({ leaderboardId: leaderboard.id });
+    if (!scores) {
+      console.warn(`Failed to fetch local scores in unrank for leaderboard "${leaderboard.id}".`);
+      return;
+    }
+
+    for (const score of scores) {
+      score.pp = 0;
+      score.weight = 0;
+    }
+
+    await Promise.all(scores.map(score => score.save()));
+    await ScoreSaberLeaderboardModel.findOneAndUpdate(
+      { _id: leaderboard.id },
+      {
+        lastRefreshed: new Date(),
+        ...leaderboard,
+      },
+      {
+        upsert: true,
+        new: true,
+        setDefaultsOnInsert: true,
+      }
+    );
+    console.log(`Previously ranked leaderboard "${leaderboard.id}" has been unranked.`);
+  }
+
+  /**
+   * Refreshes the ranked status and stars of all ranked leaderboards.
+   */
+  public static async refreshRankedLeaderboards(): Promise<RefreshResult> {
+    console.log("Refreshing ranked leaderboards...");
+    const before = Date.now();
+    const { leaderboards, rankedMapDiffs } = await this.fetchAllRankedLeaderboards();
+    const updatedScores = await this.processLeaderboardUpdates(leaderboards, rankedMapDiffs);
+    await this.unrankOldLeaderboards(leaderboards);
+
+    await logToChannel(
+      DiscordChannels.backendLogs,
+      new EmbedBuilder()
+        .setTitle(`Refreshed ${leaderboards.length} ranked leaderboards.`)
+        .setDescription(`Updated ${updatedScores} scores in ${formatDuration(Date.now() - before)}`)
+        .setColor("#00ff00")
+    );
 
     return {
       refreshedLeaderboards: leaderboards.length,
@@ -521,49 +678,60 @@ export default class LeaderboardService {
   /**
    * Refreshes the qualified leaderboards
    */
-  public static async refreshQualifiedLeaderboards() {
-    console.log(`Refreshing qualified leaderboards...`);
+  public static async refreshQualifiedLeaderboards(): Promise<RefreshResult> {
+    console.log("Refreshing qualified leaderboards...");
+    const before = Date.now();
+    const { leaderboards, rankedMapDiffs } = await this.fetchAllQualifiedLeaderboards();
+    const updatedScores = await this.processLeaderboardUpdates(leaderboards, rankedMapDiffs);
+
+    await logToChannel(
+      DiscordChannels.backendLogs,
+      new EmbedBuilder()
+        .setTitle(`Refreshed ${leaderboards.length} qualified leaderboards.`)
+        .setDescription(`Updated ${updatedScores} scores in ${formatDuration(Date.now() - before)}`)
+        .setColor("#00ff00")
+    );
+
+    return {
+      refreshedLeaderboards: leaderboards.length,
+      updatedScores,
+    };
+  }
+
+  /**
+   * Fetches all qualified leaderboards from the ScoreSaber API
+   */
+  private static async fetchAllQualifiedLeaderboards(): Promise<{
+    leaderboards: ScoreSaberLeaderboard[];
+    rankedMapDiffs: Map<string, LeaderboardDifficulty[]>;
+  }> {
     let page = 1;
     let hasMorePages = true;
     const leaderboards: ScoreSaberLeaderboard[] = [];
+    const rankedMapDiffs: Map<string, LeaderboardDifficulty[]> = new Map();
+
     while (hasMorePages) {
-      const leaderboardResponse = await scoresaberService.lookupLeaderboards(page, {
-        qualified: true,
-      });
-      if (!leaderboardResponse) {
+      const response = await scoresaberService.lookupLeaderboards(page, { qualified: true });
+      if (!response) {
         console.warn(`Failed to fetch qualified leaderboards on page ${page}.`);
-        break;
+        continue;
       }
 
-      for (const leaderboardToken of leaderboardResponse.leaderboards) {
-        const leaderboard = getScoreSaberLeaderboardFromToken(leaderboardToken);
+      const totalPages = Math.ceil(response.metadata.total / response.metadata.itemsPerPage);
+      console.log(`Fetched ${response.leaderboards.length} qualified leaderboards on page ${page}/${totalPages}.`);
+
+      for (const token of response.leaderboards) {
+        const leaderboard = getScoreSaberLeaderboardFromToken(token);
         leaderboards.push(leaderboard);
+        this.updateRankedMapDifficulties(rankedMapDiffs, leaderboard);
       }
-      if (page >= Math.ceil(leaderboardResponse.metadata.total / leaderboardResponse.metadata.itemsPerPage)) {
-        hasMorePages = false;
-      }
+
+      hasMorePages = page < totalPages;
       page++;
       await delay(SCORESABER_REQUEST_COOLDOWN);
     }
 
-    console.log(`Saving ${leaderboards.length} qualified leaderboards...`);
-    await Promise.all(
-      leaderboards.map(async leaderboard => {
-        await ScoreSaberLeaderboardModel.findOneAndUpdate(
-          { _id: leaderboard.id },
-          {
-            lastRefreshed: new Date(),
-            ...leaderboard,
-          },
-          {
-            upsert: true,
-            new: true,
-            setDefaultsOnInsert: true,
-          }
-        );
-      })
-    );
-    console.log(`Saved ${leaderboards.length} qualified leaderboards.`);
+    return { leaderboards, rankedMapDiffs };
   }
 
   /**

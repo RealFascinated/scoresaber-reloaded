@@ -113,34 +113,13 @@ app.use(
 app.use(
   cron({
     name: "refresh-leaderboards-cron",
-    // pattern: "*/5 * * * *", // Every 5 minutes
+    // pattern: "*/1 * * * *", // Every 5 minutes
     pattern: "0 */2 * * *", // Every 2 hours
     timezone: "Europe/London", // UTC time
     protect: true,
     run: async () => {
-      let before = Date.now();
-      await logToChannel(
-        DiscordChannels.backendLogs,
-        new EmbedBuilder().setDescription(`Refreshing ranked leaderboards...`)
-      );
-      const { refreshedLeaderboards, updatedScores } = await LeaderboardService.refreshRankedLeaderboards();
-      await logToChannel(
-        DiscordChannels.backendLogs,
-        new EmbedBuilder().setDescription(
-          `Refreshed ${refreshedLeaderboards} ranked leaderboards in ${formatDuration(Date.now() - before)}, updated ${updatedScores} scores.`
-        )
-      );
-
-      before = Date.now();
-      await logToChannel(
-        DiscordChannels.backendLogs,
-        new EmbedBuilder().setDescription(`Refreshing qualified leaderboards...`)
-      );
+      await LeaderboardService.refreshRankedLeaderboards();
       await LeaderboardService.refreshQualifiedLeaderboards();
-      await logToChannel(
-        DiscordChannels.backendLogs,
-        new EmbedBuilder().setDescription(`Refreshed qualified leaderboards in ${formatDuration(Date.now() - before)}`)
-      );
     },
   })
 );
