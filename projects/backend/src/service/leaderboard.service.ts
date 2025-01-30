@@ -234,7 +234,7 @@ export default class LeaderboardService {
     ).toObject() as ScoreSaberLeaderboard;
 
     if (leaderboard.fullName == undefined) {
-      leaderboard.fullName = `${leaderboard.songName} ${leaderboard.songSubName}`;
+      leaderboard.fullName = `${leaderboard.songName} ${leaderboard.songSubName}`.trim();
     }
 
     return {
