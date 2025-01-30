@@ -326,7 +326,9 @@ export default class LeaderboardService {
     let updatedScores = 0;
     console.log(`Processing ${leaderboards.length} leaderboards...`);
 
+    let checkedCount = 0;
     for (const leaderboard of leaderboards) {
+      checkedCount++;
       let previousLeaderboard: ScoreSaberLeaderboardDocument | null = await ScoreSaberLeaderboardModel.findById(
         leaderboard.id
       );
@@ -345,6 +347,10 @@ export default class LeaderboardService {
       }
 
       await this.updateLeaderboardDifficulties(leaderboard, rankedMapDiffs);
+
+      if (checkedCount % 100 === 0) {
+        console.log(`Checked ${checkedCount}/${leaderboards.length} leaderboards`);
+      }
     }
 
     console.log(`Finished processing ${updatedScores} leaderboard score updates.`);
@@ -520,9 +526,11 @@ Map: https://ssr.fascinated.cc/leaderboard/${leaderboard.id}
         await delay(SCORESABER_REQUEST_COOLDOWN);
         continue;
       }
+      const totalPages = Math.ceil(response.metadata.total / response.metadata.itemsPerPage);
+      console.log(`Fetched scores for leaderboard "${leaderboardId}" on page ${currentPage}/${totalPages}`);
 
       scoreTokens.push(...response.scores);
-      hasMoreScores = currentPage < Math.ceil(response.metadata.total / response.metadata.itemsPerPage);
+      hasMoreScores = currentPage < totalPages;
       currentPage++;
       await delay(SCORESABER_REQUEST_COOLDOWN);
     }
