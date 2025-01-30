@@ -1,3 +1,5 @@
+import { MapDifficulty } from "../score/map-difficulty";
+
 export type PlayerScoresChartResponse = {
   /**
    * The player's score chart data
@@ -20,4 +22,14 @@ export type PlayerScoreChartDataPoint = {
    * The leaderboard id for this score
    */
   leaderboardId: string;
+
+  /**
+   * The leaderboard name for this score
+   */
+  leaderboardName: string;
+
+  /**
+   * The leaderboard difficulty for this score
+   */
+  leaderboardDifficulty: MapDifficulty;
 };

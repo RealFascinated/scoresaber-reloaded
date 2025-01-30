@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import React, { useCallback } from "react";
+import React from "react";
 import { Chart, ChartOptions, registerables } from "chart.js";
 import { Line } from "react-chartjs-2";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
@@ -44,7 +44,13 @@ const PlayerScoreChart = ({ player }: PlayerScoreChartProps) => {
   };
 
   const data = dataPoints?.map(dataPoint => {
-    return [dataPoint.stars, dataPoint.accuracy, Number(dataPoint.leaderboardId)];
+    return {
+      x: dataPoint.stars,
+      y: dataPoint.accuracy,
+      leaderboardId: Number(dataPoint.leaderboardId),
+      leaderboardName: dataPoint.leaderboardName,
+      leaderboardDifficulty: dataPoint.leaderboardDifficulty,
+    };
   });
 
   const datasets = {
@@ -56,15 +62,13 @@ const PlayerScoreChart = ({ player }: PlayerScoreChartProps) => {
         pointRadius: 2,
         pointBackgroundColor: "rgba(255, 255, 255, 0.5)",
         pointBorderColor: "rgba(255, 255, 255, 0.5)",
-        pointHoverRadius: 4, // Increase size on hover
-        pointHoverBackgroundColor: "rgba(255, 255, 255, 0.8)", // Brighten on hover
+        pointHoverRadius: 4,
+        pointHoverBackgroundColor: "rgba(255, 255, 255, 0.8)",
       },
     ],
   };
 
-  const highestStar = Math.ceil(
-    data ? Math.max(minimumStar, Math.max(...data.map(dataPoint => dataPoint[0]))) : minimumStar
-  );
+  const highestStar = Math.ceil(data ? Math.max(minimumStar, Math.max(...data.map(point => point.x))) : minimumStar);
 
   const options: ChartOptions = {
     responsive: true,
@@ -108,8 +112,11 @@ const PlayerScoreChart = ({ player }: PlayerScoreChartProps) => {
       tooltip: {
         callbacks: {
           label: (context: any) => {
+            const dataPoint = context.raw;
             return [
-              `Stars: ${context.parsed.x.toFixed(2)} - Accuracy: ${context.parsed.y.toFixed(2)}%`,
+              `${dataPoint.leaderboardName} [${dataPoint.leaderboardDifficulty}]`,
+              `${dataPoint.x.toFixed(2)} ⭐ - ${dataPoint.y.toFixed(2)}%`,
+              "",
               "Click to view leaderboard!",
             ];
           },
@@ -124,7 +131,7 @@ const PlayerScoreChart = ({ player }: PlayerScoreChartProps) => {
         const dataIndex = elements[0].index;
         const dataPoint = data?.[dataIndex];
         if (dataPoint) {
-          onDataPointClick(dataPoint[2]);
+          onDataPointClick(dataPoint.leaderboardId);
         }
       }
     },

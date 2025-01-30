@@ -17,7 +17,7 @@ import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
 import ScoreSaberPlayerScoreToken from "@ssr/common/types/token/scoresaber/player-score";
 import { HMD } from "@ssr/common/hmds";
 import { SCORESABER_REQUEST_COOLDOWN } from "./leaderboard.service";
-import { PlayerScoreChartDataPoint, PlayerScoresChartResponse } from "../../../common/src/response/player-scores-chart";
+import { PlayerScoreChartDataPoint, PlayerScoresChartResponse } from "@ssr/common/response/player-scores-chart";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 
@@ -745,6 +745,8 @@ export class PlayerService {
         accuracy: score.accuracy,
         stars: leaderboard.stars,
         leaderboardId: leaderboard.id + "",
+        leaderboardName: leaderboard.fullName,
+        leaderboardDifficulty: leaderboard.difficulty.difficulty,
       });
     }
 
