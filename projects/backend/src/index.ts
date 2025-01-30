@@ -75,8 +75,8 @@ export const app = new Elysia();
 app.use(
   cron({
     name: "player-statistics-tracker-cron",
-    // pattern: "*/2 * * * *", // Every 5 minutes
-    pattern: "59 23 * * *", // Every day at 23:59
+    pattern: "*/2 * * * *", // Every 5 minutes
+    // pattern: "59 23 * * *", // Every day at 23:59
     timezone: "Europe/London", // UTC time
     protect: true,
     run: async () => {
@@ -113,8 +113,8 @@ app.use(
 app.use(
   cron({
     name: "refresh-leaderboards-cron",
-    // pattern: "*/5 * * * *", // Every 5 minutes
-    pattern: "0 */2 * * *", // Every 2 hours
+    pattern: "*/5 * * * *", // Every 5 minutes
+    // pattern: "0 */2 * * *", // Every 2 hours
     timezone: "Europe/London", // UTC time
     protect: true,
     run: async () => {

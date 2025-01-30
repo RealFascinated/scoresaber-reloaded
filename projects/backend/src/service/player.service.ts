@@ -601,12 +601,13 @@ export class PlayerService {
   /**
    * Updates the player statistics for all players.
    *
-   * This will first get the top 2500 players and then force track the top 1000
+   * This will first get the top 2000 players and then force track the top 1000
    * players, it will then get the leftover players (not in the top 2500) and
    * track them individually.
    */
   public static async updatePlayerStatistics() {
-    const pages = 50; // Pages to search for players in (top 2500 players)
+    // Pages to search for players in (total players / players per page)
+    const pages = Math.ceil(2000 / 50);
 
     const trackTime = new Date();
     let toTrack: PlayerDocument[] = await PlayerModel.find({});
@@ -617,7 +618,6 @@ export class PlayerService {
     for (let i = 0; i < pages; i++) {
       // Check the first 50 pages
       const pageNumber = i + 1;
-      console.log(`Fetching page ${pageNumber}...`);
       const page = await scoresaberService.lookupPlayers(pageNumber);
       if (page === undefined) {
         console.log(`Failed to fetch players on page ${pageNumber}, skipping page...`);
@@ -631,8 +631,8 @@ export class PlayerService {
     }
 
     for (const player of players) {
-      // Only force track the top 1000 players
-      const shouldTrack = player.rank <= 1000;
+      // Only track players <= 1000 rank or if they need to be tracked
+      const shouldTrack = player.rank <= 1000 || toTrack.map(p => p.id).includes(player.id);
       if (!shouldTrack) {
         continue;
       }
@@ -643,13 +643,20 @@ export class PlayerService {
 
     // Only track leftover players that we are tracking and that
     // haven't already been tracked by the loop above
-    toTrack = toTrack.filter(player => !players.map(player => player.id).includes(player.id));
+    const leftoverPlayers: PlayerDocument[] = [];
+    for (const trackedPlayer of toTrack) {
+      const isInFetchedPlayers = players.some(p => p.id === trackedPlayer.id);
+      if (!isInFetchedPlayers) {
+        leftoverPlayers.push(trackedPlayer);
+      }
+    }
 
-    console.log(`Tracking ${toTrack.length} leftover player statistics...`);
-    for (const player of toTrack) {
+    console.log(`Tracking ${leftoverPlayers.length} leftover player statistics...`);
+    for (const player of leftoverPlayers) {
       await PlayerService.trackScoreSaberPlayer(player, trackTime);
       await delay(SCORESABER_REQUEST_COOLDOWN);
     }
+
     console.log("Finished tracking player statistics.");
   }
 
