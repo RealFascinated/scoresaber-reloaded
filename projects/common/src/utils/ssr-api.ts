@@ -15,6 +15,7 @@ import { AroundPlayerResponse } from "../response/around-player-response";
 import { ScoreSaberScore } from "../model/score/impl/scoresaber-score";
 import { Page } from "../pagination";
 import ScoreSaberPlayer from "../player/impl/scoresaber-player";
+import { PlayerStarChartResponse } from "../response/player-stars-chart";
 
 class SSRApi {
   /**
@@ -161,6 +162,20 @@ class SSRApi {
       return undefined;
     }
     return superJson ? SuperJSON.parse<ScoreSaberPlayer>(response) : JSON.parse(response);
+  }
+
+  /**
+   * Gets the player's star chart.
+   *
+   * @param playerId the player to get the star chart for
+   * @returns the star chart data
+   */
+  async getPlayerStarsChartData(playerId: string) {
+    const response = await kyFetchText(`${Config.apiUrl}/player/stars-chart/${playerId}`);
+    if (response === undefined) {
+      return undefined;
+    }
+    return SuperJSON.parse<PlayerStarChartResponse>(response);
   }
 }
 

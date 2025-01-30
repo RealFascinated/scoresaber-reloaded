@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 export type AxisPosition = "left" | "right";
-export type DatasetDisplayType = "line" | "bar";
+export type DatasetDisplayType = "line" | "bar" | "point";
 
 export type Axis = {
   id?: string;
@@ -22,6 +22,7 @@ export type Dataset = {
   label: string;
   data: (number | null)[];
   borderColor: string;
+  backgroundColor?: string;
   fill: boolean;
   lineTension: number;
   spanGaps: boolean;
@@ -31,6 +32,8 @@ export type Dataset = {
   order?: number;
   maxBarThickness?: number;
   type?: DatasetDisplayType;
+  pointRadius?: number;
+  showLine?: boolean;
 };
 
 export type DatasetConfig = {
@@ -51,4 +54,5 @@ export type DatasetConfig = {
   defaultLegendState?: boolean;
   type?: DatasetDisplayType;
   labelFormatter: (value: number) => string;
+  pointRadius?: number;
 };

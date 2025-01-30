@@ -8,7 +8,7 @@ import { PlayerHistory } from "@ssr/common/player/player-history";
 import { PlayerDocument } from "@ssr/common/model/player";
 import { PlayerService } from "./player.service";
 import { formatDateMinimal, getDaysAgoDate, getMidnightAlignedDate } from "@ssr/common/utils/time-utils";
-import { formatChange, getPageFromRank, isProduction } from "@ssr/common/utils/utils";
+import { delay, formatChange, getPageFromRank, isProduction } from "@ssr/common/utils/utils";
 import { getValueFromHistory } from "@ssr/common/utils/player-utils";
 import {
   ScoreSaberPreviousScoreOverview,
@@ -16,7 +16,7 @@ import {
   ScoreSaberScoreModel,
 } from "@ssr/common/model/score/impl/scoresaber-score";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import LeaderboardService from "./leaderboard.service";
+import LeaderboardService, { SCORESABER_REQUEST_COOLDOWN } from "./leaderboard.service";
 import BeatLeaderService from "./beatleader.service";
 import { PlayerScore } from "@ssr/common/score/player-score";
 import { Page, Pagination } from "@ssr/common/pagination";
@@ -400,11 +400,12 @@ export default class ScoreSaberService {
       sort?: "pp" | "timestamp";
       limit?: number;
       ranked?: boolean;
+      includeLeaderboard?: boolean;
       projection?: { [field: string]: number };
     } = {
       sort: "pp",
     }
-  ): Promise<ScoreSaberScore[]> {
+  ): Promise<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>[]> {
     const rawScores = await ScoreSaberScoreModel.aggregate([
       // Match stage based on playerId and optional ranked filter
       { $match: { playerId: playerId, ...(options?.ranked ? { pp: { $gt: 0 } } : {}) } },
@@ -433,9 +434,29 @@ export default class ScoreSaberService {
       return [];
     }
 
-    const scores: ScoreSaberScore[] = [];
+    const scores: PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>[] = [];
     for (const rawScore of rawScores) {
-      scores.push(rawScore as ScoreSaberScore);
+      const score = new ScoreSaberScoreModel(rawScore).toObject() as ScoreSaberScore;
+
+      if (options?.includeLeaderboard) {
+        const leaderboard = await LeaderboardService.getLeaderboard(score.leaderboardId + "", {
+          cacheOnly: true,
+          includeBeatSaver: false,
+        });
+        if (!leaderboard.cached) {
+          await delay(SCORESABER_REQUEST_COOLDOWN);
+        }
+        scores.push({
+          score: score as ScoreSaberScore,
+          leaderboard: leaderboard.leaderboard,
+        });
+      } else {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-expect-error
+        scores.push({
+          score: score as ScoreSaberScore,
+        });
+      }
     }
     return scores;
   }

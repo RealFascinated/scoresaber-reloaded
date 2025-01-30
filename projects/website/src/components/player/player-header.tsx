@@ -16,6 +16,7 @@ import { PlayerStatChange } from "@ssr/common/player/player-stat-change";
 import Avatar from "@/components/avatar";
 import PlayerBeatLeaderLink from "@/components/player/player-beatleader-link";
 import SnipePlaylistDownloadButton from "@/components/snipe/snipe-playlist-creation";
+import PlayerStarCurveButton from "@/components/player/player-star-curve-button";
 
 const playerData = [
   {
@@ -114,7 +115,8 @@ export default function PlayerHeader({ player }: PlayerHeaderProps) {
                 <PlayerTrackedStatus player={player} />
                 <PlayerSteamProfile player={player} />
                 <PlayerBeatLeaderLink player={player} />
-                <SnipePlaylistDownloadButton toSnipe={player} />
+                {player.isBeingTracked && <SnipePlaylistDownloadButton toSnipe={player} />}
+                {player.isBeingTracked && <PlayerStarCurveButton player={player} />}
               </div>
             </div>
             <div className="flex flex-col">

@@ -76,8 +76,8 @@ export default class PlaylistService {
       }
 
       const scores: { score: ScoreSaberScore; leaderboard: ScoreSaberLeaderboard }[] = [];
-      for (const rawScore of rawScores) {
-        const score = rawScore as ScoreSaberScore;
+      for (const playerScore of rawScores) {
+        const score = playerScore.score as ScoreSaberScore;
         const leaderboardResponse = await LeaderboardService.getLeaderboard(score.leaderboardId + "", {
           cacheOnly: true,
           includeBeatSaver: false,

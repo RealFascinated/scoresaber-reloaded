@@ -57,7 +57,8 @@ const GenericChart = ({ options, labels, datasetConfig, histories }: ChartProps)
             settings?.getChartLegend(id!, config.title, true),
             config.axisConfig.stack,
             config.axisConfig.stackOrder,
-            config.type || "line"
+            config.type || "line",
+            config.pointRadius
           );
         }
         return null;
@@ -82,7 +83,15 @@ const GenericChart = ({ options, labels, datasetConfig, histories }: ChartProps)
       responsive: true,
       interaction: { mode: "index", intersect: false },
       scales: axes,
-      elements: { point: { radius: 0 } },
+      elements: {
+        point: {
+          radius: 0,
+          hoverRadius: (ctx: any) => {
+            const dataset = ctx.chart.data.datasets[ctx.datasetIndex];
+            return dataset.type === "point" ? (dataset.pointRadius || 3) + 2 : 4;
+          },
+        },
+      },
       plugins: {
         legend: {
           position: "top",

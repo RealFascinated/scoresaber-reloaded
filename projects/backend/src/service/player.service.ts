@@ -17,6 +17,9 @@ import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
 import ScoreSaberPlayerScoreToken from "@ssr/common/types/token/scoresaber/player-score";
 import { HMD } from "@ssr/common/hmds";
 import { SCORESABER_REQUEST_COOLDOWN } from "./leaderboard.service";
+import { PlayerStarChartDataPoint, PlayerStarChartResponse } from "@ssr/common/response/player-stars-chart";
+import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
+import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 
 const accountCreationLock: { [id: string]: Promise<PlayerDocument> } = {};
 
@@ -185,7 +188,7 @@ export class PlayerService {
             pp: 1,
           },
         });
-        return playerScores.map(score => score.pp);
+        return playerScores.map(score => score.score.pp);
       }
     );
 
@@ -219,7 +222,7 @@ export class PlayerService {
             pp: 1,
           },
         });
-        return playerScores.map(score => score.pp);
+        return playerScores.map(score => score.score.pp);
       }
     );
 
@@ -382,7 +385,7 @@ export class PlayerService {
       averageAccuracy: 0,
     };
 
-    const scores = await ScoreSaberService.getPlayerScores(playerId, {
+    const playerScores = await ScoreSaberService.getPlayerScores(playerId, {
       projection: {
         accuracy: 1,
         pp: 1,
@@ -390,8 +393,11 @@ export class PlayerService {
     });
 
     // Filter out any scores with invalid accuracy values
-    const validScores = scores.filter(
-      score => Number.isFinite(score.accuracy) && score.accuracy >= 0 && score.accuracy <= 100
+    const validScores = playerScores.filter(
+      playerScore =>
+        Number.isFinite(playerScore.score.accuracy) &&
+        playerScore.score.accuracy >= 0 &&
+        playerScore.score.accuracy <= 100
     );
 
     if (validScores.length === 0) {
@@ -402,12 +408,12 @@ export class PlayerService {
     let unrankedAccuracySum = 0;
     let totalAccuracySum = 0;
 
-    for (const score of validScores) {
+    for (const playerScore of validScores) {
       // Add to total accuracy regardless of ranked status
-      totalAccuracySum += score.accuracy;
+      totalAccuracySum += playerScore.score.accuracy;
 
-      if (score.pp === 0) {
-        unrankedAccuracySum += score.accuracy;
+      if (playerScore.score.pp === 0) {
+        unrankedAccuracySum += playerScore.score.accuracy;
         unrankedScores++;
       }
     }
@@ -662,11 +668,11 @@ export class PlayerService {
     });
 
     const hmds: Map<HMD, number> = new Map();
-    for (const score of scores) {
-      if (!score.hmd) {
+    for (const playerScore of scores) {
+      if (!playerScore.score.hmd) {
         continue;
       }
-      hmds.set(score.hmd as HMD, (hmds.get(score.hmd as HMD) || 0) + 1);
+      hmds.set(playerScore.score.hmd as HMD, (hmds.get(playerScore.score.hmd as HMD) || 0) + 1);
     }
     if (hmds.size === 0) {
       return undefined;
@@ -708,5 +714,34 @@ export class PlayerService {
     player.setStatisticHistory(today, history);
     player.markModified("statisticHistory");
     await player.save();
+  }
+
+  /**
+   * Gets the player's star chart.
+   *
+   * @param playerId the player's id
+   */
+  public static async getPlayerStarChart(playerId: string): Promise<PlayerStarChartResponse> {
+    const playerScores = await ScoreSaberService.getPlayerScores(playerId, {
+      includeLeaderboard: true,
+      ranked: true,
+      projection: {
+        accuracy: 1,
+      },
+    });
+
+    const data: PlayerStarChartDataPoint[] = [];
+    for (const playerScore of playerScores) {
+      const leaderboard = playerScore.leaderboard as ScoreSaberLeaderboard;
+      const score = playerScore.score as ScoreSaberScore;
+      data.push({
+        accuracy: score.accuracy,
+        stars: leaderboard.stars,
+      });
+    }
+
+    return {
+      data,
+    };
   }
 }

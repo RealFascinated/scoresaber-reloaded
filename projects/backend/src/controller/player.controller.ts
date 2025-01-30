@@ -179,4 +179,30 @@ export default class PlayerController {
   }): Promise<PlayedMapsCalendarResponse> {
     return await PlayerService.getScoreCalendar(id, year, month);
   }
+
+  @Get("/stars-chart/:id", {
+    config: {},
+    tags: ["scores"],
+    params: t.Object({
+      id: t.String({ required: true }),
+    }),
+    detail: {
+      responses: {
+        200: {
+          description: "Star curve data for a player.",
+        },
+        ...Swagger.responses.playerNotFound,
+      },
+      description: "Lookup a player's star curve data",
+    },
+  })
+  public async getPlayerStarsChartData({
+    params: { id },
+  }: {
+    params: {
+      id: string;
+    };
+  }): Promise<unknown> {
+    return SuperJSON.stringify(await PlayerService.getPlayerStarChart(id));
+  }
 }

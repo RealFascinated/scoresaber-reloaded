@@ -31,21 +31,22 @@ export const generateChartDataset = (
   showLegend: boolean = true,
   stack?: string,
   stackOrder?: number,
-  type?: DatasetDisplayType
+  type?: DatasetDisplayType,
+  pointRadius?: number
 ): Dataset => ({
   label,
   data,
   borderColor,
+  backgroundColor: type === "bar" || type === "point" ? borderColor : undefined,
   fill: false,
   lineTension: 0.5,
   spanGaps: false,
   yAxisID,
-  hidden: !showLegend, // Use hidden to disable legend
+  hidden: !showLegend,
   type,
   stack,
   order: stackOrder,
   maxBarThickness: 12,
-  ...(type === "bar" && {
-    backgroundColor: borderColor,
-  }),
+  pointRadius: type === "point" ? pointRadius || 3 : 0,
+  showLine: type !== "point",
 });
