@@ -182,10 +182,11 @@ export default class LeaderboardService {
     const savedLeaderboard = await ScoreSaberLeaderboardModel.findOneAndUpdate(
       { _id: id },
       {
-        ...leaderboard,
-        lastRefreshed: new Date(),
-        songArtColor: "#fff",
-        // songArtColor: (await ImageService.getAverageImageColor(leaderboardToken.coverImage))?.color,
+        $set: {
+          ...leaderboard,
+          lastRefreshed: new Date(),
+          songArtColor: "#fff",
+        },
       },
       {
         upsert: true,

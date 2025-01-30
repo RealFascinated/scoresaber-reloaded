@@ -1,16 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import React from "react";
+import React, { useCallback } from "react";
 import { Chart, ChartOptions, registerables } from "chart.js";
 import { Line } from "react-chartjs-2";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { useQuery } from "@tanstack/react-query";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { LoadingIcon } from "@/components/loading-icon";
+import { openInNewTab } from "@/common/browser-utils";
+import { Config } from "@ssr/common/config";
 
 Chart.register(...registerables);
 
-type PlayerStarCurveProps = {
+type PlayerScoreChartProps = {
   /**
    * The player to display.
    */
@@ -19,20 +21,30 @@ type PlayerStarCurveProps = {
 
 const minimumStar = 10;
 
-const PlayerStarCurveGraph = ({ player }: PlayerStarCurveProps) => {
-  const { data } = useQuery({
-    queryKey: ["player-star-curve", player.id],
+const PlayerScoreChart = ({ player }: PlayerScoreChartProps) => {
+  const { data: dataPoints } = useQuery({
+    queryKey: ["player-score-chart", player.id],
     queryFn: async () => {
-      const starChartData = await ssrApi.getPlayerStarsChartData(player.id);
-      console.log(starChartData);
-      if (!starChartData) {
+      const scoreChartData = await ssrApi.getPlayerScoreChartData(player.id);
+      if (!scoreChartData) {
         return [];
       }
 
-      return starChartData.data.map(dataPoint => {
-        return [dataPoint.stars, dataPoint.accuracy];
-      });
+      return scoreChartData.data;
     },
+  });
+
+  /**
+   * Callback for when a data point is clicked.
+   *
+   * @param leaderboardId
+   */
+  const onDataPointClick = (leaderboardId: number) => {
+    openInNewTab(`${Config.websiteUrl}/leaderboard/${leaderboardId}`);
+  };
+
+  const data = dataPoints?.map(dataPoint => {
+    return [dataPoint.stars, dataPoint.accuracy, Number(dataPoint.leaderboardId)];
   });
 
   const datasets = {
@@ -44,6 +56,8 @@ const PlayerStarCurveGraph = ({ player }: PlayerStarCurveProps) => {
         pointRadius: 2,
         pointBackgroundColor: "rgba(255, 255, 255, 0.5)",
         pointBorderColor: "rgba(255, 255, 255, 0.5)",
+        pointHoverRadius: 4, // Increase size on hover
+        pointHoverBackgroundColor: "rgba(255, 255, 255, 0.8)", // Brighten on hover
       },
     ],
   };
@@ -94,13 +108,25 @@ const PlayerStarCurveGraph = ({ player }: PlayerStarCurveProps) => {
       tooltip: {
         callbacks: {
           label: (context: any) => {
-            return `(${context.parsed.x.toFixed(2)}, ${context.parsed.y.toFixed(2)}%)`;
+            return [
+              `Stars: ${context.parsed.x.toFixed(2)} - Accuracy: ${context.parsed.y.toFixed(2)}%`,
+              "Click to view leaderboard!",
+            ];
           },
         },
       },
       legend: {
         display: false,
       },
+    },
+    onClick: (event: any, elements: any[]) => {
+      if (elements.length > 0) {
+        const dataIndex = elements[0].index;
+        const dataPoint = data?.[dataIndex];
+        if (dataPoint) {
+          onDataPointClick(dataPoint[2]);
+        }
+      }
     },
   };
 
@@ -112,4 +138,4 @@ const PlayerStarCurveGraph = ({ player }: PlayerStarCurveProps) => {
   );
 };
 
-export default PlayerStarCurveGraph;
+export default PlayerScoreChart;

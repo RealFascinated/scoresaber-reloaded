@@ -180,7 +180,7 @@ export default class PlayerController {
     return await PlayerService.getScoreCalendar(id, year, month);
   }
 
-  @Get("/stars-chart/:id", {
+  @Get("/score-chart/:id", {
     config: {},
     tags: ["scores"],
     params: t.Object({
@@ -189,11 +189,11 @@ export default class PlayerController {
     detail: {
       responses: {
         200: {
-          description: "Star curve data for a player.",
+          description: "Score chart data for a player.",
         },
         ...Swagger.responses.playerNotFound,
       },
-      description: "Lookup a player's star curve data",
+      description: "Lookup a player's score chart data",
     },
   })
   public async getPlayerStarsChartData({
@@ -203,6 +203,6 @@ export default class PlayerController {
       id: string;
     };
   }): Promise<unknown> {
-    return SuperJSON.stringify(await PlayerService.getPlayerStarChart(id));
+    return SuperJSON.stringify(await PlayerService.getPlayerScoreChart(id));
   }
 }

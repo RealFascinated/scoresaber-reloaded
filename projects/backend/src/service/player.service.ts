@@ -17,7 +17,7 @@ import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
 import ScoreSaberPlayerScoreToken from "@ssr/common/types/token/scoresaber/player-score";
 import { HMD } from "@ssr/common/hmds";
 import { SCORESABER_REQUEST_COOLDOWN } from "./leaderboard.service";
-import { PlayerStarChartDataPoint, PlayerStarChartResponse } from "@ssr/common/response/player-stars-chart";
+import { PlayerScoreChartDataPoint, PlayerScoresChartResponse } from "../../../common/src/response/player-scores-chart";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 
@@ -724,11 +724,11 @@ export class PlayerService {
   }
 
   /**
-   * Gets the player's star chart.
+   * Gets the player's score chart data.
    *
    * @param playerId the player's id
    */
-  public static async getPlayerStarChart(playerId: string): Promise<PlayerStarChartResponse> {
+  public static async getPlayerScoreChart(playerId: string): Promise<PlayerScoresChartResponse> {
     const playerScores = await ScoreSaberService.getPlayerScores(playerId, {
       includeLeaderboard: true,
       ranked: true,
@@ -737,13 +737,14 @@ export class PlayerService {
       },
     });
 
-    const data: PlayerStarChartDataPoint[] = [];
+    const data: PlayerScoreChartDataPoint[] = [];
     for (const playerScore of playerScores) {
       const leaderboard = playerScore.leaderboard as ScoreSaberLeaderboard;
       const score = playerScore.score as ScoreSaberScore;
       data.push({
         accuracy: score.accuracy,
         stars: leaderboard.stars,
+        leaderboardId: leaderboard.id + "",
       });
     }
 
