@@ -31,5 +31,5 @@ export type PlayerScoreChartDataPoint = {
   /**
    * The leaderboard difficulty for this score
    */
-  leaderboardDifficulty: MapDifficulty;
+  leaderboardDifficulty: string;
 };
