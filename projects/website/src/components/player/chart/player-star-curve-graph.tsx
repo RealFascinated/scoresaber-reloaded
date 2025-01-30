@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import React from "react";
-import { Chart, registerables } from "chart.js";
+import { Chart, ChartOptions, registerables } from "chart.js";
 import { Line } from "react-chartjs-2";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { useQuery } from "@tanstack/react-query";
@@ -16,6 +16,8 @@ type PlayerStarCurveProps = {
    */
   player: ScoreSaberPlayer;
 };
+
+const minimumStar = 10;
 
 const PlayerStarCurveGraph = ({ player }: PlayerStarCurveProps) => {
   const { data } = useQuery({
@@ -46,7 +48,11 @@ const PlayerStarCurveGraph = ({ player }: PlayerStarCurveProps) => {
     ],
   };
 
-  const options = {
+  const highestStar = Math.ceil(
+    data ? Math.max(minimumStar, Math.max(...data.map(dataPoint => dataPoint[0]))) : minimumStar
+  );
+
+  const options: ChartOptions = {
     responsive: true,
     animation: false,
     maintainAspectRatio: false,
@@ -54,7 +60,7 @@ const PlayerStarCurveGraph = ({ player }: PlayerStarCurveProps) => {
       x: {
         type: "linear",
         min: 0,
-        max: 15,
+        max: highestStar,
         grid: {
           color: "#252525",
         },
