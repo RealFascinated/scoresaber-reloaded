@@ -346,11 +346,8 @@ export default class LeaderboardService {
         updatedScores += await this.handleLeaderboardUpdate(update);
       }
 
-      const updated = await this.updateLeaderboardDifficulties(leaderboard, rankedMapDiffs);
-      if (!updated) {
-        // Save the new leaderboard
-        await this.saveLeaderboard(leaderboard.id + "", leaderboard);
-      }
+      // Save the leaderboard
+      await this.saveLeaderboard(leaderboard.id + "", this.updateLeaderboardDifficulties(leaderboard, rankedMapDiffs));
 
       if (checkedCount % 100 === 0) {
         console.log(`Checked ${checkedCount}/${leaderboards.length} leaderboards`);
@@ -587,31 +584,18 @@ Map: https://ssr.fascinated.cc/leaderboard/${leaderboard.id}
   /**
    * Updates the difficulties for a leaderboard
    */
-  private static async updateLeaderboardDifficulties(
+  private static updateLeaderboardDifficulties(
     leaderboard: ScoreSaberLeaderboard,
     rankedMapDiffs: Map<string, LeaderboardDifficulty[]>
-  ): Promise<boolean> {
+  ): ScoreSaberLeaderboard {
     const difficulties = rankedMapDiffs
       .get(leaderboard.songHash)
       ?.sort((a, b) => getDifficulty(a.difficulty).id - getDifficulty(b.difficulty).id);
 
-    if (leaderboard.difficulties.length !== difficulties?.length) {
-      await ScoreSaberLeaderboardModel.findOneAndUpdate(
-        { _id: leaderboard.id },
-        {
-          lastRefreshed: new Date(),
-          ...leaderboard,
-          difficulties: difficulties ?? [],
-        },
-        {
-          upsert: true,
-          new: true,
-          setDefaultsOnInsert: true,
-        }
-      );
-      return true;
-    }
-    return false;
+    return {
+      ...leaderboard,
+      difficulties: difficulties ?? [],
+    } as ScoreSaberLeaderboard;
   }
 
   /**
