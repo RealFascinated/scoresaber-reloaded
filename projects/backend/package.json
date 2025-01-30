@@ -28,7 +28,7 @@
     "elysia-autoroutes": "^0.5.0",
     "elysia-decorators": "^1.0.2",
     "elysia-helmet": "^2.0.0",
-    "eslint": "^8.57.1",
+    "eslint": "^9.19.0",
     "ky": "^1.7.4",
     "minio": "^8.0.3",
     "mongoose": "^8.9.5",
