@@ -33,7 +33,7 @@ type Props = {
 export default function Tooltip({ children, display, asChild = true, side = "top", className }: Props) {
   return (
     <ShadCnTooltip>
-      <TooltipTrigger className={clsx("cursor-default", className)} asChild={asChild}>
+      <TooltipTrigger className={clsx("cursor-default w-full", className)} asChild={asChild}>
         {children}
       </TooltipTrigger>
       <TooltipContent className="max-w-[350px]" side={side}>

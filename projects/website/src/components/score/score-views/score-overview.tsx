@@ -1,6 +1,7 @@
 import PlayerScoreAccuracyChart from "@/components/leaderboard/page/chart/player-score-accuracy-chart";
 import { ScoreStatsToken } from "@ssr/common/types/token/beatleader/score-stats/score-stats";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
+import ScoreAccuracyStats from "@/components/score/score-accuracy-stats";
 
 type ScoreOverviewProps = {
   /**
@@ -26,7 +27,8 @@ export function ScoreOverview({ scoreStats, leaderboard }: ScoreOverviewProps) {
   return (
     <>
       {scoreStats && (
-        <div className="flex gap-2">
+        <div className="flex flex-col md:flex-row md:px-2 gap-3">
+          <ScoreAccuracyStats scoreStats={scoreStats} />
           <PlayerScoreAccuracyChart scoreStats={scoreStats} leaderboard={leaderboard} />
         </div>
       )}
