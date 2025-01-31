@@ -146,8 +146,6 @@ app.onError({ as: "global" }, ({ code, error }) => {
     return error.all;
   }
 
-  console.error(error);
-
   const status = "status" in error ? error.status : undefined;
   return {
     ...((status && { statusCode: status }) || { status: code }),
