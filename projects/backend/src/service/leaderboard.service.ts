@@ -177,10 +177,7 @@ export default class LeaderboardService {
    * @param leaderboard the leaderboard from ScoreSaber
    * @returns the saved leaderboard document
    */
-  private static async saveLeaderboard(
-    id: string,
-    leaderboard: ScoreSaberLeaderboard
-  ): Promise<ScoreSaberLeaderboardDocument> {
+  private static async saveLeaderboard(id: string, leaderboard: ScoreSaberLeaderboard): Promise<ScoreSaberLeaderboard> {
     const savedLeaderboard = await ScoreSaberLeaderboardModel.findOneAndUpdate(
       { _id: id },
       {
@@ -194,7 +191,7 @@ export default class LeaderboardService {
         new: true,
         setDefaultsOnInsert: true,
       }
-    );
+    ).lean();
 
     if (!savedLeaderboard) {
       throw new Error(`Failed to save leaderboard for "${id}"`);
@@ -310,9 +307,9 @@ export default class LeaderboardService {
     let checkedCount = 0;
     for (const leaderboard of leaderboards) {
       checkedCount++;
-      let previousLeaderboard: ScoreSaberLeaderboardDocument | null = await ScoreSaberLeaderboardModel.findById(
+      let previousLeaderboard: ScoreSaberLeaderboard | null = await ScoreSaberLeaderboardModel.findById(
         leaderboard.id
-      );
+      ).lean();
       if (!previousLeaderboard) {
         previousLeaderboard = await this.saveLeaderboard(leaderboard.id + "", leaderboard);
       }
