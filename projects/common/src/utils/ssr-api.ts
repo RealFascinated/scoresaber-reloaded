@@ -52,13 +52,9 @@ class SSRApi {
    * Fetches a ScoreSaber leaderboard using its id.
    *
    * @param id the id for the leaderboard
-   * @param includeBeatSaver whether to include the beatsaver map
-   * @returns the leaderboard, or undefined if not found
    */
-  async fetchLeaderboard(id: string, includeBeatSaver?: boolean) {
-    const response = await kyFetchText(
-      `${Config.apiUrl}/leaderboard/by-id/${id}${includeBeatSaver ? "?includeBeatSaver=true" : ""}`
-    );
+  async fetchLeaderboard(id: string) {
+    const response = await kyFetchText(`${Config.apiUrl}/leaderboard/by-id/${id}`);
     if (response === undefined) {
       return undefined;
     }

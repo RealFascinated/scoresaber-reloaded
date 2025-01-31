@@ -14,9 +14,6 @@ export default class LeaderboardController {
     params: t.Object({
       id: t.String({ required: true }),
     }),
-    query: t.Object({
-      includeBeatSaver: t.Optional(t.Boolean()),
-    }),
     detail: {
       responses: {
         200: {
@@ -29,20 +26,12 @@ export default class LeaderboardController {
   })
   public async getLeaderboard({
     params: { id },
-    query: { includeBeatSaver },
   }: {
     params: {
       id: string;
     };
-    query: {
-      includeBeatSaver?: boolean;
-    };
   }): Promise<unknown> {
-    return SuperJSON.stringify(
-      await LeaderboardService.getLeaderboard(id, {
-        includeBeatSaver: includeBeatSaver ?? false,
-      })
-    );
+    return SuperJSON.stringify(await LeaderboardService.getLeaderboard(id));
   }
 
   @Get("/by-hash/:id/:difficulty/:characteristic", {
@@ -52,9 +41,6 @@ export default class LeaderboardController {
       id: t.String({ required: true }),
       difficulty: t.String({ required: true }),
       characteristic: t.String({ required: true }),
-    }),
-    query: t.Object({
-      includeBeatSaver: t.Optional(t.Boolean()),
     }),
     detail: {
       responses: {
@@ -68,21 +54,13 @@ export default class LeaderboardController {
   })
   public async getLeaderboardByHash({
     params: { id, difficulty, characteristic },
-    query: { includeBeatSaver },
   }: {
     params: {
       id: string;
       difficulty: MapDifficulty;
       characteristic: MapCharacteristic;
     };
-    query: {
-      includeBeatSaver?: boolean;
-    };
   }): Promise<unknown> {
-    return SuperJSON.stringify(
-      await LeaderboardService.getLeaderboardByHash(id, difficulty, characteristic, {
-        includeBeatSaver: includeBeatSaver ?? false,
-      })
-    );
+    return SuperJSON.stringify(await LeaderboardService.getLeaderboardByHash(id, difficulty, characteristic));
   }
 }
