@@ -6,10 +6,10 @@ export async function GET(request: Request) {
   const snapshot = generateHeapSnapshot("v8");
   const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
 
-  return new Response(JSON.stringify(snapshot, null, 2), {
+  return new Response(snapshot, {
     headers: {
       "Content-Type": "application/json",
-      "Content-Disposition": `attachment; filename="heap-snapshot-${timestamp}.json"`,
+      "Content-Disposition": `attachment; filename="heap-snapshot-${timestamp}.heapsnapshot"`,
     },
   });
 }
