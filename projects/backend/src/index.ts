@@ -32,6 +32,7 @@ import PlaylistController from "./controller/playlist.controller";
 import ScoreSaberService from "./service/scoresaber.service";
 import BeatLeaderService from "./service/beatleader.service";
 import BeatSaverController from "./controller/beatsaver.controller";
+import { ScoreService } from "./service/score.service";
 
 // Load .env file
 if (await Bun.file(".env").exists()) {
@@ -47,7 +48,7 @@ await mongoose.connect(Config.mongoUri!); // Connect to MongoDB
 // Connect to websockets
 connectScoresaberWebsocket({
   onScore: async score => {
-    await ScoreSaberService.trackScoreSaberScore(score.score, score.leaderboard);
+    await ScoreService.trackScoreSaberScore(score.score, score.leaderboard);
     await PlayerService.updatePlayerScoresSet(score);
 
     await ScoreSaberService.notifyNumberOne(score);

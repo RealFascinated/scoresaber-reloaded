@@ -16,6 +16,7 @@ import { BadRequestError } from "@ssr/common/error/bad-request-error";
 import { generatePlaylistImage } from "../common/playlist.util";
 import { parseSnipePlaylistSettings } from "@ssr/common/snipe/snipe-playlist-utils";
 import { delay } from "@ssr/common/utils/utils";
+import { ScoreService } from "./score.service";
 
 export type SnipeType = "top" | "recent";
 
@@ -70,7 +71,7 @@ export default class PlaylistService {
         throw new NotFoundError(`Unable to create a snipe playlist for ${toSnipe} as one of the users isn't tracked.`);
       }
 
-      const rawScores = await ScoreSaberService.getPlayerScores(toSnipe);
+      const rawScores = await ScoreService.getPlayerScores(toSnipe);
       if (rawScores.length === 0) {
         throw new NotFoundError(`Unable to create a snipe playlist for ${toSnipe} as they have no scores.`);
       }

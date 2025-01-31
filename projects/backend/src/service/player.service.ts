@@ -21,6 +21,9 @@ import { PlayerScoreChartDataPoint, PlayerScoresChartResponse } from "@ssr/commo
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { getDifficulty } from "@ssr/common/utils/song-utils";
+import { getPlayerStatisticChange } from "@ssr/common/utils/player-utils";
+import { PlayerHistory } from "@ssr/common/player/player-history";
+import { ScoreService } from "./score.service";
 
 const accountCreationLock: { [id: string]: Promise<PlayerDocument> } = {};
 
@@ -182,7 +185,7 @@ export class PlayerService {
       `pp-boundary-scores:${playerId}`,
       async () => {
         await PlayerService.getPlayer(playerId); // Ensure player exists
-        const playerScores = await ScoreSaberService.getPlayerScores(playerId, {
+        const playerScores = await ScoreService.getPlayerScores(playerId, {
           ranked: true,
           sort: "pp",
           projection: {
@@ -216,7 +219,7 @@ export class PlayerService {
       `pp-boundary-scores:${playerId}`,
       async () => {
         await PlayerService.getPlayer(playerId); // Ensure player exists
-        const playerScores = await ScoreSaberService.getPlayerScores(playerId, {
+        const playerScores = await ScoreService.getPlayerScores(playerId, {
           ranked: true,
           sort: "pp",
           projection: {
@@ -386,7 +389,7 @@ export class PlayerService {
       averageAccuracy: 0,
     };
 
-    const playerScores = await ScoreSaberService.getPlayerScores(playerId, {
+    const playerScores = await ScoreService.getPlayerScores(playerId, {
       projection: {
         accuracy: 1,
         pp: 1,
@@ -553,7 +556,7 @@ export class PlayerService {
       let missingScores = 0;
       await Promise.all(
         scoresPage.playerScores.map(async score => {
-          if (await ScoreSaberService.trackScoreSaberScore(score.score, score.leaderboard, player.id)) {
+          if (await ScoreService.trackScoreSaberScore(score.score, score.leaderboard, player.id)) {
             missingScores++;
             totalMissingScores++;
           }
@@ -667,7 +670,7 @@ export class PlayerService {
    */
   public static async getPlayerHMD(playerId: string): Promise<HMD | undefined> {
     // Get player's most used HMD in the last 50 scores
-    const scores = await ScoreSaberService.getPlayerScores(playerId, {
+    const scores = await ScoreService.getPlayerScores(playerId, {
       limit: 50,
       sort: "timestamp",
     });
@@ -727,7 +730,7 @@ export class PlayerService {
    * @param playerId the player's id
    */
   public static async getPlayerScoreChart(playerId: string): Promise<PlayerScoresChartResponse> {
-    const playerScores = await ScoreSaberService.getPlayerScores(playerId, {
+    const playerScores = await ScoreService.getPlayerScores(playerId, {
       includeLeaderboard: true,
       ranked: true,
       projection: {
@@ -752,6 +755,25 @@ export class PlayerService {
 
     return {
       data,
+    };
+  }
+
+  /**
+   * Gets the changes in the players statistic history
+   *
+   * @param history the player's history
+   * @param daysAgo the amount of days to look back
+   * @returns the statistic changes
+   * @private
+   */
+  private static async getStatisticChanges(
+    history: Record<string, PlayerHistory>,
+    daysAgo: number = 1
+  ): Promise<PlayerHistory> {
+    return {
+      rank: getPlayerStatisticChange(history, "rank", true, daysAgo),
+      countryRank: getPlayerStatisticChange(history, "countryRank", true, daysAgo),
+      pp: getPlayerStatisticChange(history, "pp", false, daysAgo),
     };
   }
 }
