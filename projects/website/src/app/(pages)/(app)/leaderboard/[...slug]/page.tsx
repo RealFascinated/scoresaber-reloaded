@@ -23,10 +23,6 @@ type LeaderboardData = {
   category: ScoreModeEnum;
 };
 
-const getLeaderboard = cache(async (id: string): Promise<LeaderboardResponse<ScoreSaberLeaderboard> | undefined> => {
-  return await ssrApi.fetchLeaderboard(id + "");
-});
-
 /**
  * Gets the leaderboard data and scores
  *
@@ -40,7 +36,7 @@ const getLeaderboardData = cache(async ({ params, searchParams }: Props): Promis
   const page = parseInt(slug[1]) || 1; // The page number
   const category = (await searchParams).category as ScoreModeEnum;
 
-  const leaderboard = await getLeaderboard(id);
+  const leaderboard = await ssrApi.fetchLeaderboard(id + "");
   if (leaderboard === undefined) {
     return undefined;
   }
@@ -95,7 +91,7 @@ export default async function LeaderboardPage(props: Props) {
   return (
     <main className="w-full flex justify-center">
       <LeaderboardData
-        initialLeaderboard={response.leaderboardResponse}
+        leaderboardId={response.leaderboardResponse.leaderboard.id}
         initialPage={response.page}
         initialCategory={response.category}
       />

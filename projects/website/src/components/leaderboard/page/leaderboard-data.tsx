@@ -3,7 +3,7 @@
 import LeaderboardScores from "@/components/leaderboard/leaderboard-scores";
 import { LeaderboardInfo } from "@/components/leaderboard/page/leaderboard-info";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import LeaderboardPpChart from "@/components/leaderboard/page/chart/leaderboard-pp-chart";
 import Card from "@/components/card";
 import { LeaderboardBeatSaverInfo } from "@/components/leaderboard/page/beatsaver-info";
@@ -16,9 +16,9 @@ import { ScoreModeEnum } from "@/components/score/score-mode";
 
 type LeaderboardDataProps = {
   /**
-   * The initial leaderboard data.
+   * The leaderboard id.
    */
-  initialLeaderboard: LeaderboardResponse<ScoreSaberLeaderboard>;
+  leaderboardId: number;
 
   /**
    * The initial page.
@@ -31,24 +31,20 @@ type LeaderboardDataProps = {
   initialCategory?: ScoreModeEnum;
 };
 
-export function LeaderboardData({ initialLeaderboard, initialPage, initialCategory }: LeaderboardDataProps) {
-  const [currentLeaderboardId, setCurrentLeaderboardId] = useState(initialLeaderboard.leaderboard.id);
-  const [currentLeaderboard, setCurrentLeaderboard] = useState(initialLeaderboard);
+export function LeaderboardData({ leaderboardId, initialPage, initialCategory }: LeaderboardDataProps) {
+  const [currentLeaderboardId, setCurrentLeaderboardId] = useState(leaderboardId);
 
   const { data } = useQuery({
     queryKey: ["leaderboard", currentLeaderboardId],
-    queryFn: async (): Promise<LeaderboardResponse<ScoreSaberLeaderboard> | undefined> => {
-      return ssrApi.fetchLeaderboard(currentLeaderboardId + "");
-    },
+    queryFn: async (): Promise<LeaderboardResponse<ScoreSaberLeaderboard> | undefined> =>
+      ssrApi.fetchLeaderboard(currentLeaderboardId + "", true),
   });
 
-  useEffect(() => {
-    if (data) {
-      setCurrentLeaderboard(data);
-    }
-  }, [data]);
+  if (data == undefined) {
+    return null;
+  }
 
-  const leaderboard = currentLeaderboard.leaderboard;
+  const leaderboard = data.leaderboard;
   return (
     <LeaderboardFilterProvider>
       <div className="w-full">
@@ -64,8 +60,8 @@ export function LeaderboardData({ initialLeaderboard, initialPage, initialCatego
             />
           </Card>
           <div className="flex flex-col gap-2 w-full xl:w-[550px]">
-            <LeaderboardInfo leaderboard={leaderboard} beatSaverMap={currentLeaderboard.beatsaver} />
-            {currentLeaderboard.beatsaver && <LeaderboardBeatSaverInfo beatSaverMap={currentLeaderboard.beatsaver} />}
+            <LeaderboardInfo leaderboard={leaderboard} beatSaverMap={data.beatsaver} />
+            {data.beatsaver && <LeaderboardBeatSaverInfo beatSaverMap={data.beatsaver} />}
             <LeaderboardFilters />
             {leaderboard.stars > 0 && leaderboard.maxScore > 0 && <LeaderboardPpChart leaderboard={leaderboard} />}
           </div>

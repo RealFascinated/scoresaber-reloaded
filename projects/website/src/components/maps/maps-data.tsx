@@ -1,6 +1,5 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import Leaderboards from "@/components/maps/category/leaderboards";
 import Playlists from "@/components/maps/playlist/playlists";
 import MapFilters from "@/components/maps/map-filters";
@@ -71,10 +70,10 @@ export function MapsData({ category, page }: MapsDataProps) {
         <article className="w-full 2xl:w-[800px] flex flex-col gap-2">
           <div className="flex gap-2 w-full">
             {categories.map(category => (
-              <Button
+              <div
                 key={category.name}
                 className="w-full"
-                variant={category.name == selectedCategory.name ? "default" : "secondary"}
+                // variant={category.name == selectedCategory.name ? "default" : "secondary"}
                 onClick={() => {
                   setSelectedCategory(category);
                 }}
@@ -98,7 +97,7 @@ export function MapsData({ category, page }: MapsDataProps) {
                     </Tooltip>
                   )}
                 </span>
-              </Button>
+              </div>
             ))}
           </div>
 
