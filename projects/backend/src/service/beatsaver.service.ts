@@ -10,137 +10,231 @@ import { BeatSaverMapToken } from "@ssr/common/types/token/beatsaver/map";
 
 export default class BeatSaverService {
   /**
-   * Gets a map by its hash, updates if necessary, or inserts if not found.
-   *
-   * @param hash the hash of the map
-   * @param token the token to use
-   * @returns the beatsaver map, or undefined if not found
+   * Checks if a date is older than two weeks
+   * @param date - The date to check
+   * @returns True if the date is older than two weeks
    */
-  public static async getInternalMap(hash: string, token?: BeatSaverMapToken): Promise<BeatSaverMap | undefined> {
-    let map: BeatSaverMapDocument | null = await BeatSaverMapModel.findOne({
-      "versions.hash": hash.toUpperCase(),
-    });
-
-    if (map) {
-      const toObject = map.toObject() as BeatSaverMap;
-
-      // If the map is not found, return undefined
-      if (toObject.notFound == true) {
-        return undefined;
-      }
-
-      // todo: impl map refreshing
-      return toObject;
-    }
-
-    if (!map) {
-      const brokenHashMap = await BeatSaverMapModel.findOne({
-        brokenHashes: hash,
-      });
-      if (brokenHashMap) {
-        map = brokenHashMap;
-      }
-    }
-
-    // Map needs to be fetched
-    token = !token ? await beatsaverService.lookupMap(hash) : token;
-    const uploader = token?.uploader;
-    const metadata = token?.metadata;
-
-    // super fucking janky workaround
-    if (token) {
-      const map: BeatSaverMapDocument | null = await BeatSaverMapModel.findOne({
-        bsr: token.id,
-      });
-
-      if (map) {
-        const hashes: string[] = map.brokenHashes ?? [];
-        if (!hashes.includes(hash)) {
-          hashes.push(hash);
-          map.brokenHashes = hashes;
-          await map.save();
-        }
-
-        return map.toObject() as BeatSaverMap;
-      }
-    }
-
-    // Create the new map object based on fetched data
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
-    const newMapData: BeatSaverMap =
-      token && uploader && metadata
-        ? {
-            bsr: token.id,
-            name: token.name,
-            description: token.description,
-            author: {
-              id: uploader.id,
-              name: uploader.name,
-              avatar: uploader.avatar,
-            },
-            metadata: {
-              bpm: metadata.bpm,
-              duration: metadata.duration,
-              levelAuthorName: metadata.levelAuthorName,
-              songAuthorName: metadata.songAuthorName,
-              songName: metadata.songName,
-              songSubName: metadata.songSubName,
-            },
-            versions: token.versions.map(version => ({
-              hash: version.hash.toUpperCase(),
-              difficulties: version.diffs.map(diff => ({
-                njs: diff.njs,
-                offset: diff.offset,
-                notes: diff.notes,
-                bombs: diff.bombs,
-                obstacles: diff.obstacles,
-                nps: diff.nps,
-                characteristic: diff.characteristic,
-                difficulty: diff.difficulty,
-                events: diff.events,
-                chroma: diff.chroma,
-                mappingExtensions: diff.me,
-                noodleExtensions: diff.ne,
-                cinema: diff.cinema,
-                maxScore: diff.maxScore,
-                label: diff.label,
-              })),
-              createdAt: new Date(version.createdAt),
-            })),
-            lastRefreshed: new Date(),
-          }
-        : {
-            notFound: true,
-            versions: [
-              {
-                hash: hash.toUpperCase(),
-              },
-            ],
-            lastRefreshed: new Date(),
-          };
-
-    // Add the broken hash if the map is missing the version hash
-    if (map && map?.versions.map(version => version.hash).includes(hash.toUpperCase())) {
-      map.brokenHashes = [map.brokenHashes, hash].flat();
-    }
-
-    map = await BeatSaverMapModel.create(newMapData);
-
-    if (map == null || map.notFound) {
-      return undefined;
-    }
-    return map.toObject() as BeatSaverMap;
+  private static isOlderThanTwoWeeks(date: Date): boolean {
+    const twoWeeksAgo = new Date();
+    twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
+    return date < twoWeeksAgo;
   }
 
   /**
-   * Fetches a BeatSaver map
-   *
-   * @param hash the hash of the map
-   * @param difficulty the difficulty to get
-   * @param characteristic the characteristic to get
-   * @param token the token to use
-   * @returns the map, or undefined if not found
+   * Updates a map document with data from a BeatSaver token
+   * @param mapDoc - The map document to update
+   * @param token - The token containing the new data
+   */
+  private static updateMapFromToken(mapDoc: BeatSaverMapDocument, token: BeatSaverMapToken): void {
+    const { uploader, metadata, versions, id, name, description } = token;
+
+    mapDoc.bsr = id;
+    mapDoc.name = name;
+    mapDoc.description = description;
+    mapDoc.author = {
+      id: uploader.id,
+      name: uploader.name,
+      avatar: uploader.avatar,
+    };
+    mapDoc.metadata = {
+      bpm: metadata.bpm,
+      duration: metadata.duration,
+      levelAuthorName: metadata.levelAuthorName,
+      songAuthorName: metadata.songAuthorName,
+      songName: metadata.songName,
+      songSubName: metadata.songSubName,
+    };
+    mapDoc.versions = versions.map(version => ({
+      hash: version.hash.toUpperCase(),
+      difficulties: version.diffs.map(diff => ({
+        njs: diff.njs,
+        offset: diff.offset,
+        notes: diff.notes,
+        bombs: diff.bombs,
+        obstacles: diff.obstacles,
+        nps: diff.nps,
+        characteristic: diff.characteristic as MapCharacteristic,
+        difficulty: diff.difficulty as MapDifficulty,
+        events: diff.events,
+        chroma: diff.chroma,
+        mappingExtensions: diff.me,
+        noodleExtensions: diff.ne,
+        cinema: diff.cinema,
+        maxScore: diff.maxScore,
+        label: diff.label,
+      })),
+      createdAt: new Date(version.createdAt),
+    }));
+  }
+
+  /**
+   * Handles an existing map document
+   * @param map - The map document
+   * @param hash - The hash of the map
+   * @returns The map object or undefined if not found
+   */
+  private static async handleExistingMap(map: BeatSaverMapDocument, hash: string): Promise<BeatSaverMap | undefined> {
+    const currentMap = map.toObject<BeatSaverMap>();
+    if (currentMap.notFound) return undefined;
+
+    const hashUpper = hash.toUpperCase();
+    const hashInVersions = currentMap.versions.some(function (v) {
+      return v.hash === hashUpper;
+    });
+
+    if (!hashInVersions && this.isOlderThanTwoWeeks(currentMap.lastRefreshed)) {
+      await this.refreshMapData(map, hash);
+    }
+
+    return map.toObject<BeatSaverMap>();
+  }
+
+  /**
+   * Refreshes map data from BeatSaver
+   * @param mapDoc - The map document to refresh
+   * @param hash - The hash of the map
+   */
+  private static async refreshMapData(mapDoc: BeatSaverMapDocument, hash: string): Promise<void> {
+    const hashUpper = hash.toUpperCase();
+    const token = await beatsaverService.lookupMap(hash);
+
+    if (token) {
+      const hashInToken = token.versions.some(function (v) {
+        return v.hash.toUpperCase() === hashUpper;
+      });
+      this.updateBrokenHashes(mapDoc, hash, hashInToken);
+      this.updateMapFromToken(mapDoc, token);
+    } else {
+      mapDoc.notFound = true;
+    }
+
+    mapDoc.lastRefreshed = new Date();
+    await mapDoc.save();
+  }
+
+  /**
+   * Updates broken hashes in a map document
+   * @param mapDoc - The map document
+   * @param hash - The hash to update
+   * @param hashInToken - Whether the hash exists in the token
+   */
+  private static updateBrokenHashes(mapDoc: BeatSaverMapDocument, hash: string, hashInToken: boolean): void {
+    if (hashInToken) {
+      mapDoc.brokenHashes = mapDoc.brokenHashes.filter(function (h) {
+        return h !== hash;
+      });
+    } else if (!mapDoc.brokenHashes.includes(hash)) {
+      mapDoc.brokenHashes.push(hash);
+    }
+  }
+
+  /**
+   * Gets a map by its hash, updates if necessary, or inserts if not found
+   * @param hash - The hash of the map
+   * @param token - Optional token to use
+   * @returns The BeatSaver map or undefined if not found
+   */
+  public static async getInternalMap(hash: string, token?: BeatSaverMapToken): Promise<BeatSaverMap | undefined> {
+    const hashUpper = hash.toUpperCase();
+    let map = await this.findMapByVersionHash(hashUpper);
+
+    if (map) return this.handleExistingMap(map, hash);
+
+    map = await this.findMapByBrokenHash(hash);
+    if (map) return this.handleExistingMap(map, hash);
+
+    return this.createNewMap(hash, token);
+  }
+
+  /**
+   * Finds a map by version hash
+   * @param hash - The hash to search for
+   * @returns The found map document or null
+   */
+  private static async findMapByVersionHash(hash: string): Promise<BeatSaverMapDocument | null> {
+    return BeatSaverMapModel.findOne({ "versions.hash": hash });
+  }
+
+  /**
+   * Finds a map by broken hash
+   * @param hash - The hash to search for
+   * @returns The found map document or null
+   */
+  private static async findMapByBrokenHash(hash: string): Promise<BeatSaverMapDocument | null> {
+    return BeatSaverMapModel.findOne({ brokenHashes: hash });
+  }
+
+  /**
+   * Creates a new map in the database
+   * @param hash - The hash of the map
+   * @param token - Optional token to use
+   * @returns The created map or undefined if not found
+   */
+  private static async createNewMap(hash: string, token?: BeatSaverMapToken): Promise<BeatSaverMap | undefined> {
+    const resolvedToken = token || (await beatsaverService.lookupMap(hash));
+    if (!resolvedToken) {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-expect-error
+      return {
+        notFound: true,
+        versions: [{ hash: hash.toUpperCase() }] as never,
+        lastRefreshed: new Date(),
+      };
+    }
+
+    const existingMap = await this.handleDuplicateBsr(resolvedToken, hash);
+    if (existingMap) return existingMap;
+
+    return this.persistNewMap(resolvedToken, hash);
+  }
+
+  /**
+   * Handles duplicate BSR entries
+   * @param token - The token containing the BSR
+   * @param hash - The hash of the map
+   * @returns The existing map if found, otherwise undefined
+   */
+  private static async handleDuplicateBsr(token: BeatSaverMapToken, hash: string): Promise<BeatSaverMap | undefined> {
+    const existingMap = await BeatSaverMapModel.findOne({ bsr: token.id });
+    if (!existingMap) return;
+
+    if (!existingMap.brokenHashes.includes(hash)) {
+      existingMap.brokenHashes.push(hash);
+      await existingMap.save();
+    }
+    return existingMap.toObject<BeatSaverMap>();
+  }
+
+  /**
+   * Persists a new map to the database
+   * @param token - The token containing the map data
+   * @param hash - The hash of the map
+   * @returns The created map
+   */
+  private static async persistNewMap(token: BeatSaverMapToken, hash: string): Promise<BeatSaverMap> {
+    const newMap = new BeatSaverMapModel();
+    this.updateMapFromToken(newMap, token);
+    newMap.lastRefreshed = new Date();
+
+    if (
+      !newMap.versions.some(function (v) {
+        return v.hash === hash.toUpperCase();
+      })
+    ) {
+      newMap.brokenHashes.push(hash);
+    }
+
+    await newMap.save();
+    return newMap.toObject<BeatSaverMap>();
+  }
+
+  /**
+   * Fetches a BeatSaver map with caching
+   * @param hash - The hash of the map
+   * @param difficulty - The difficulty to get
+   * @param characteristic - The characteristic to get
+   * @param token - Optional token to use
+   * @returns The map response or undefined if not found
    */
   public static async getMap(
     hash: string,
@@ -148,27 +242,23 @@ export default class BeatSaverService {
     characteristic: MapCharacteristic,
     token?: BeatSaverMapToken
   ): Promise<BeatSaverMapResponse | undefined> {
-    return fetchWithCache(
-      CacheService.getCache(ServiceCache.BeatSaver),
-      `map:${hash}-${difficulty}-${characteristic}`,
-      async () => {
-        const map = await this.getInternalMap(hash, token);
+    const cacheKey = `map:${hash}-${difficulty}-${characteristic}`;
+    const cache = CacheService.getCache(ServiceCache.BeatSaver);
 
-        if (!map) {
-          return undefined;
-        }
+    return fetchWithCache(cache, cacheKey, async function () {
+      const map = await BeatSaverService.getInternalMap(hash, token);
+      if (!map) return undefined;
 
-        return {
-          hash,
-          bsr: map.bsr,
-          name: map.name,
-          description: map.description,
-          author: map.author,
-          metadata: map.metadata,
-          songArt: `https://eu.cdn.beatsaver.com/${hash.toLowerCase()}.jpg`,
-          difficulty: getBeatSaverDifficulty(map, hash, difficulty, characteristic),
-        } as BeatSaverMapResponse;
-      }
-    );
+      return {
+        hash,
+        bsr: map.bsr,
+        name: map.name,
+        description: map.description,
+        author: map.author,
+        metadata: map.metadata,
+        songArt: `https://eu.cdn.beatsaver.com/${hash.toLowerCase()}.jpg`,
+        difficulty: getBeatSaverDifficulty(map, hash, difficulty, characteristic),
+      } as BeatSaverMapResponse;
+    });
   }
 }

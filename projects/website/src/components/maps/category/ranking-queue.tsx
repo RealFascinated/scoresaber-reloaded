@@ -40,7 +40,6 @@ export default function RankingQueue() {
   const handleScoreAnimation = useCallback(async () => {
     await controls.start("hiddenRight");
     setLeaderboards(data);
-    console.log(data);
     await controls.start("visible");
   }, [controls, data]);
 

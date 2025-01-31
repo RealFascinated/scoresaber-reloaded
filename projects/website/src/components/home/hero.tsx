@@ -8,6 +8,7 @@ import { BorderBeam } from "@/components/ui/border-beam";
 import { Separator } from "@/components/ui/separator";
 import { motion } from "framer-motion";
 import { useSearch } from "@/components/providers/search-provider";
+import { DiscordButton } from "@/components/social/discord-button";
 
 export default function HeroSection() {
   return (
@@ -73,12 +74,7 @@ function Buttons() {
         <span>Player Search</span>
       </Button>
 
-      <Link prefetch={false} href="https://discord.gg/kmNfWGA4A8" target="_blank">
-        <Button className="max-w-52 flex gap-2.5 bg-[#5865F2] hover:bg-[#5865F2]/85 text-white">
-          <img className="size-6" src="/assets/logos/discord.svg" />
-          <span>Join our Discord</span>
-        </Button>
-      </Link>
+      <DiscordButton />
     </motion.div>
   );
 }

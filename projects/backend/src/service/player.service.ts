@@ -529,22 +529,13 @@ export class PlayerService {
    * Refreshes all the players scores.
    *
    * @param player the player to refresh
+   * @returns the total number of missing scores
    */
-  public static async refreshAllPlayerScores(player: PlayerDocument) {
-    await this.refreshPlayerScoreSaberScores(player);
-  }
-
-  /**
-   * Ensures that all the players scores from the
-   * ScoreSaber API are up-to-date.
-   *
-   * @param player the player to refresh
-   * @private
-   */
-  private static async refreshPlayerScoreSaberScores(player: PlayerDocument) {
+  public static async refreshAllPlayerScores(player: PlayerDocument): Promise<number> {
     console.log(`Refreshing scores for ${player.id}...`);
     let page = 1;
     let hasMorePages = true;
+    let totalMissingScores = 0;
 
     while (hasMorePages) {
       const scoresPage = await scoresaberService.lookupPlayerScores({
@@ -564,6 +555,7 @@ export class PlayerService {
         scoresPage.playerScores.map(async score => {
           if (await ScoreSaberService.trackScoreSaberScore(score.score, score.leaderboard, player.id)) {
             missingScores++;
+            totalMissingScores++;
           }
         })
       );
@@ -582,21 +574,26 @@ export class PlayerService {
     await player.save();
 
     console.log(`Finished refreshing scores for ${player.id}, total pages refreshed: ${page - 1}.`);
+    return totalMissingScores;
   }
 
   /**
    * Ensures all player scores are up-to-date.
+   *
+   * @returns the total number of missing scores
    */
-  public static async refreshPlayerScores() {
+  public static async refreshPlayerScores(): Promise<number> {
     console.log(`Refreshing player score data...`);
 
     const players = await PlayerModel.find({});
     console.log(`Found ${players.length} players to refresh.`);
 
+    let totalMissingScores = 0;
     for (const player of players) {
-      await this.refreshAllPlayerScores(player);
+      totalMissingScores += await this.refreshAllPlayerScores(player);
       await delay(SCORESABER_REQUEST_COOLDOWN); // Cooldown between players
     }
+    return totalMissingScores;
   }
 
   /**

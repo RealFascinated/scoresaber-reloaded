@@ -102,10 +102,12 @@ app.use(
     run: async () => {
       const before = Date.now();
       await logToChannel(DiscordChannels.backendLogs, new EmbedBuilder().setDescription(`Refreshing player scores...`));
-      await PlayerService.refreshPlayerScores();
+      const missingScores = await PlayerService.refreshPlayerScores();
       await logToChannel(
         DiscordChannels.backendLogs,
-        new EmbedBuilder().setDescription(`Refreshed player scores in ${formatDuration(Date.now() - before)}`)
+        new EmbedBuilder().setDescription(
+          `Refreshed player scores in ${formatDuration(Date.now() - before)}, found ${missingScores} missing scores`
+        )
       );
     },
   })

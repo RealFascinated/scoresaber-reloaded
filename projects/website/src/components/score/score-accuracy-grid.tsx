@@ -8,7 +8,6 @@ type ScoreAccuracyGridProps = {
 const MAX_ACCURACY = 115;
 
 export default function ScoreAccuracyGrid({ scoreStats }: ScoreAccuracyGridProps) {
-  console.log(scoreStats);
   return (
     <div className="grid grid-rows-3 grid-cols-4 h-fit bg-muted rounded-md overflow-hidden">
       {scoreStats.accuracyTracker.gridAcc.map((acc, i) => {

@@ -32,5 +32,6 @@ export function getBeatSaverDifficulty(
   if (version == undefined) {
     return undefined;
   }
+
   return version.difficulties.find(d => d.difficulty === difficulty && d.characteristic === characteristic);
 }
