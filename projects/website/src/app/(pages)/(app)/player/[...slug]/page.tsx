@@ -25,10 +25,6 @@ type PlayerData = {
   search: string;
 };
 
-const getPlayer = cache(async (id: string): Promise<ScoreSaberPlayer | undefined> => {
-  return await ssrApi.getScoreSaberPlayer(id);
-});
-
 /**
  * Gets the player data and scores
  *
@@ -42,7 +38,7 @@ const getPlayerData = cache(async ({ params }: Props): Promise<PlayerData> => {
   const page = parseInt(slug[2]) || 1; // The page number
   const search = (slug[3] as string) || ""; // The search query
 
-  const player = await getPlayer(id);
+  const player = await ssrApi.getScoreSaberPlayer(id);
   return {
     sort: sort,
     page: page,
