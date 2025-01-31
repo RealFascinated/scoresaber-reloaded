@@ -9,6 +9,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import Tooltip from "@/components/tooltip";
 
 const formSchema = z.object({
   backgroundCover: z.string().min(0).max(128),
@@ -60,7 +61,20 @@ export default function WebsiteSettings() {
               <FormItem>
                 <FormLabel>Background Cover</FormLabel>
                 <FormControl>
-                  <Input className="w-full sm:w-72" placeholder="Hex or URL..." {...field} />
+                  <div className="flex gap-2 items-center">
+                    <Input className="w-full sm:w-72" placeholder="Hex or URL..." {...field} />
+                    <Tooltip display={<p>Reset to default</p>}>
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          field.onChange("/assets/background.jpg");
+                          await onSubmit(form.getValues());
+                        }}
+                      >
+                        Reset
+                      </button>
+                    </Tooltip>
+                  </div>
                 </FormControl>
               </FormItem>
             )}
