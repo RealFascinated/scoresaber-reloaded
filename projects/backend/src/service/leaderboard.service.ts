@@ -110,9 +110,9 @@ export default class LeaderboardService {
         leaderboard = await LeaderboardService.saveLeaderboard(id, getScoreSaberLeaderboardFromToken(leaderboardToken));
       }
 
-      console.log(leaderboard);
-
-      return LeaderboardService.processLeaderboard(leaderboard, options, cached);
+      const promise = await LeaderboardService.processLeaderboard(leaderboard, options, cached);
+      console.log(promise);
+      return promise;
     });
   }
 
