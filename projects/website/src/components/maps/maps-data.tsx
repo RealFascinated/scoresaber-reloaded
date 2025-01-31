@@ -5,23 +5,27 @@ import Leaderboards from "@/components/maps/category/leaderboards";
 import Playlists from "@/components/maps/playlist/playlists";
 import MapFilters from "@/components/maps/map-filters";
 import { MapFilterProvider } from "@/components/providers/maps/map-filter-provider";
-import { ReactNode, useEffect, useState } from "react";
+import { ElementType, ReactNode, useEffect, useState } from "react";
 import RankingQueue from "@/components/maps/category/ranking-queue";
 import usePageNavigation from "@/hooks/use-page-navigation";
+import { TrophyIcon } from "@heroicons/react/24/solid";
+import { ExternalLinkIcon, TrendingUpIcon } from "lucide-react";
+import Tooltip from "@/components/tooltip";
 
 type Category = {
   name: string;
-  icon: string;
+  icon: ElementType;
   id: string;
   showFilter: boolean;
   preservePage?: boolean;
+  externalLink?: string;
   render: (page?: number) => ReactNode;
 };
 
 const categories: Category[] = [
   {
     name: "Leaderboards",
-    icon: "🏆",
+    icon: TrophyIcon,
     id: "leaderboards",
     showFilter: true,
     preservePage: true,
@@ -29,9 +33,10 @@ const categories: Category[] = [
   },
   {
     name: "Ranking Queue",
-    icon: "📈",
+    icon: TrendingUpIcon,
     id: "ranking-queue",
     showFilter: false,
+    externalLink: "https://scoresaber.com/ranking/requests",
     render: () => <RankingQueue />,
   },
 ];
@@ -75,8 +80,23 @@ export function MapsData({ category, page }: MapsDataProps) {
                 }}
               >
                 <span className="flex items-center gap-2">
-                  <span className="text-2xl">{category.icon}</span>
+                  <span className="text-2xl">
+                    <category.icon className="w-4 h-4" />
+                  </span>
                   <span>{category.name}</span>
+
+                  {category.externalLink && (
+                    <Tooltip display={<p>View {category.name} on ScoreSaber</p>} side="bottom">
+                      <button
+                        className="flex items-center gap-2 p-1"
+                        onClick={() => {
+                          window.open(category.externalLink, "_blank");
+                        }}
+                      >
+                        <ExternalLinkIcon className="w-4 h-4" />
+                      </button>
+                    </Tooltip>
+                  )}
                 </span>
               </Button>
             ))}
