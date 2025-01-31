@@ -5,7 +5,6 @@ import BeatSaverService from "./beatsaver.service";
 import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
 import {
   ScoreSaberLeaderboard,
-  ScoreSaberLeaderboardDocument,
   ScoreSaberLeaderboardModel,
 } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { fetchWithCache } from "../common/cache.util";
