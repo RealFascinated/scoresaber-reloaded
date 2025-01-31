@@ -34,7 +34,7 @@
     "mongoose": "^8.9.5",
     "node-cache": "^5.1.2",
     "probe-image-size": "^7.2.3",
-    "react": "19.0.0"
+    "react": "19.1.0-canary-bb9a24d9-20250130"
   },
   "devDependencies": {
     "bun-types": "^1.2.1"
