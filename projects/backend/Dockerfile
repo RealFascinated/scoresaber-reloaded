@@ -31,4 +31,4 @@ ARG PORT=8080
 ENV PORT $PORT
 EXPOSE $PORT
 
-CMD ["bun", "run", "--filter", "backend", "start"]
+CMD ["bun", "--smol", "run", "--filter", "backend", "start"]
