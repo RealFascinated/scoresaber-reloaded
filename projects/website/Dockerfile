@@ -1,4 +1,4 @@
-FROM oven/bun:1.2.0-alpine AS base
+FROM oven/bun:1.2.1-alpine AS base
 
 # Set the environment
 ENV NODE_ENV production
