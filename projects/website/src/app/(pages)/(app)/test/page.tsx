@@ -2,6 +2,8 @@
 // @ts-expect-error
 import { heapStats } from "bun:jsc";
 
+export const dynamic = "force-dynamic";
+
 export default function Test() {
   return (
     <div>
