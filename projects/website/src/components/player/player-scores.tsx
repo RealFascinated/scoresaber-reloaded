@@ -65,7 +65,6 @@ export default function PlayerScores({ initialSearch, player, sort, page }: Prop
     queryKey: ["playerScores", player.id, pageState, debouncedSearchTerm],
     queryFn: () =>
       fetchPlayerScores<ScoreSaberScore, ScoreSaberLeaderboard>(
-        "scoresaber",
         player.id,
         pageState.page,
         pageState.sort,

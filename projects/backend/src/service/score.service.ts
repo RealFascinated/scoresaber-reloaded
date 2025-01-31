@@ -35,7 +35,6 @@ import { removeObjectFields } from "@ssr/common/object.util";
 
 export class ScoreService {
   public static async lookupPlayerScores(
-    leaderboardName: Leaderboards,
     playerId: string,
     page: number,
     sort: string,
@@ -43,58 +42,50 @@ export class ScoreService {
   ): Promise<PlayerScoresResponse<unknown, unknown> | undefined> {
     return fetchWithCache(
       CacheService.getCache(ServiceCache.PlayerScores),
-      `player-scores:${leaderboardName}-${playerId}-${page}-${sort}-${search}`,
+      `player-scores:${playerId}-${page}-${sort}-${search}`,
       async () => {
         const scores: PlayerScore<unknown, unknown>[] = [];
         let metadata: Metadata = new Metadata(0, 0, 0, 0); // Default values
 
-        switch (leaderboardName) {
-          case "scoresaber": {
-            const leaderboardScores = await scoresaberService.lookupPlayerScores({
-              playerId,
-              page,
-              sort: sort as ScoreSort,
-              search,
-            });
-            if (leaderboardScores == undefined) {
-              break;
-            }
-
-            metadata = new Metadata(
-              Math.ceil(leaderboardScores.metadata.total / leaderboardScores.metadata.itemsPerPage),
-              leaderboardScores.metadata.total,
-              leaderboardScores.metadata.page,
-              leaderboardScores.metadata.itemsPerPage
-            );
-
-            const scorePromises = leaderboardScores.playerScores.map(async token => {
-              const leaderboardResponse = await LeaderboardService.getLeaderboard(token.leaderboard.id + "");
-
-              if (!leaderboardResponse) {
-                return undefined;
-              }
-              const { leaderboard, beatsaver } = leaderboardResponse;
-              let score = getScoreSaberScoreFromToken(token.score, leaderboard, playerId);
-              if (!score) {
-                return undefined;
-              }
-
-              score = await ScoreService.insertScoreData(score, leaderboard);
-              return {
-                score: score,
-                leaderboard: leaderboard,
-                beatSaver: beatsaver,
-              } as PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>;
-            });
-
-            const resolvedScores = (await Promise.all(scorePromises)).filter(s => s !== undefined);
-            scores.push(...resolvedScores);
-            break;
-          }
-          default: {
-            throw new NotFoundError(`Leaderboard "${leaderboardName}" not found`);
-          }
+        const leaderboardScores = await scoresaberService.lookupPlayerScores({
+          playerId,
+          page,
+          sort: sort as ScoreSort,
+          search,
+        });
+        if (leaderboardScores == undefined) {
+          return undefined;
         }
+
+        metadata = new Metadata(
+          Math.ceil(leaderboardScores.metadata.total / leaderboardScores.metadata.itemsPerPage),
+          leaderboardScores.metadata.total,
+          leaderboardScores.metadata.page,
+          leaderboardScores.metadata.itemsPerPage
+        );
+
+        const scorePromises = leaderboardScores.playerScores.map(async token => {
+          const leaderboardResponse = await LeaderboardService.getLeaderboard(token.leaderboard.id + "");
+
+          if (!leaderboardResponse) {
+            return undefined;
+          }
+          const { leaderboard, beatsaver } = leaderboardResponse;
+          let score = getScoreSaberScoreFromToken(token.score, leaderboard, playerId);
+          if (!score) {
+            return undefined;
+          }
+
+          score = await ScoreService.insertScoreData(score, leaderboard);
+          return {
+            score: score,
+            leaderboard: leaderboard,
+            beatSaver: beatsaver,
+          } as PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>;
+        });
+
+        const resolvedScores = (await Promise.all(scorePromises)).filter(s => s !== undefined);
+        scores.push(...resolvedScores);
 
         return {
           scores: scores,

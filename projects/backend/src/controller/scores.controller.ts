@@ -8,11 +8,10 @@ import BeatLeaderService from "../service/beatleader.service";
 
 @Controller("/scores")
 export default class ScoresController {
-  @Get("/player/:leaderboard/:id/:page/:sort", {
+  @Get("/player/:id/:page/:sort", {
     config: {},
     tags: ["scores"],
     params: t.Object({
-      leaderboard: t.String({ required: true }),
       id: t.String({ required: true }),
       page: t.Number({ required: true }),
       sort: t.String({ required: true }),
@@ -33,18 +32,17 @@ export default class ScoresController {
     },
   })
   public async getScores({
-    params: { leaderboard, id, page, sort },
+    params: { id, page, sort },
     query: { search },
   }: {
     params: {
-      leaderboard: Leaderboards;
       id: string;
       page: number;
       sort: string;
     };
     query: { search?: string };
   }): Promise<unknown> {
-    return await ScoreService.lookupPlayerScores(leaderboard, id, page, sort, search);
+    return await ScoreService.lookupPlayerScores(id, page, sort, search);
   }
 
   @Get("/leaderboard/:leaderboard/:id/:page", {

@@ -1,16 +1,16 @@
-import {Leaderboards} from "../leaderboard";
-import {kyFetchJson} from "./utils";
+import { Leaderboards } from "../leaderboard";
+import { kyFetchJson } from "./utils";
 import PlayerScoresResponse from "../response/player-scores-response";
-import {Config} from "../config";
-import {ScoreSort} from "../score/score-sort";
+import { Config } from "../config";
+import { ScoreSort } from "../score/score-sort";
 import LeaderboardScoresResponse from "../response/leaderboard-scores-response";
-import {Page} from "../pagination";
-import {PlayerScore} from "../score/player-score";
+import { Page } from "../pagination";
+import { PlayerScore } from "../score/player-score";
 import ScoreSaberLeaderboard from "../model/leaderboard/impl/scoresaber-leaderboard";
 import Score from "../model/score/score";
-import {ScoreSaberScore} from "../model/score/impl/scoresaber-score";
-import {ScoreStatsToken} from "../types/token/beatleader/score-stats/score-stats";
-import {PreviousScore} from "../model/score/previous-score";
+import { ScoreSaberScore } from "../model/score/impl/scoresaber-score";
+import { ScoreStatsToken } from "../types/token/beatleader/score-stats/score-stats";
+import { PreviousScore } from "../model/score/previous-score";
 
 /**
  * Fetches the player's scores
@@ -37,21 +37,14 @@ export async function fetchScoreStats(scoreId: number) {
 /**
  * Fetches the player's scores
  *
- * @param leaderboard the leaderboard
  * @param id the player id
  * @param page the page
  * @param sort the sort
  * @param search the search
  */
-export async function fetchPlayerScores<S, L>(
-  leaderboard: Leaderboards,
-  id: string,
-  page: number,
-  sort: ScoreSort,
-  search?: string
-) {
+export async function fetchPlayerScores<S, L>(id: string, page: number, sort: ScoreSort, search?: string) {
   return kyFetchJson<PlayerScoresResponse<S, L>>(
-    `${Config.apiUrl}/scores/player/${leaderboard}/${id}/${page}/${sort}${search ? `?search=${search}` : ""}`
+    `${Config.apiUrl}/scores/player/${id}/${page}/${sort}${search ? `?search=${search}` : ""}`
   );
 }
 

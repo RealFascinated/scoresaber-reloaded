@@ -19,16 +19,6 @@ import { PlayerScoresChartResponse } from "../response/player-scores-chart";
 
 class SSRApi {
   /**
-   * The base url of the SSR API.
-   * @private
-   */
-  private apiUrl: string;
-
-  constructor() {
-    this.apiUrl = Config.apiUrl;
-  }
-
-  /**
    * Gets a BeatSaver map.
    *
    * @param hash the hash of the map
