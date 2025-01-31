@@ -9,15 +9,6 @@ import { ScoreSaberScoreBase } from "./scoresaber-score-base";
   options: { allowMixed: Severity.ALLOW },
   schemaOptions: {
     collection: "scoresaber-scores",
-    toObject: {
-      virtuals: true,
-      transform: function (_, ret) {
-        ret.id = ret._id;
-        delete ret._id;
-        delete ret.__v;
-        return ret;
-      },
-    },
   },
 })
 @plugin(AutoIncrementID, {

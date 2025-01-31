@@ -13,7 +13,6 @@ import { delay } from "@ssr/common/utils/utils";
 import { ScoreSaberScoreDocument, ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import CacheService, { ServiceCache } from "./cache.service";
 import LeaderboardDifficulty from "@ssr/common/model/leaderboard/leaderboard-difficulty";
-import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
 import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score";
 import { getDifficulty } from "@ssr/common/utils/song-utils";
 import { ScoreSaberPreviousScoreModel } from "@ssr/common/model/score/impl/scoresaber-previous-score";
@@ -22,6 +21,7 @@ import { MapCharacteristic } from "@ssr/common/types/map-characteristic";
 import { DiscordChannels, logToChannel } from "../bot/bot";
 import { EmbedBuilder } from "discord.js";
 import { formatDuration } from "@ssr/common/utils/time-utils";
+import { removeObjectFields } from "@ssr/common/object.util";
 
 export const SCORESABER_REQUEST_COOLDOWN = 60_000 / 300; // 300 requests per minute
 const CACHE_REFRESH_TIME = 1000 * 60 * 60 * 12; // 12 hours
@@ -48,9 +48,9 @@ export default class LeaderboardService {
    * @returns object containing whether to use cache and if document was found
    */
   private static validateCachedLeaderboard(
-    cachedLeaderboard: ScoreSaberLeaderboardDocument | null,
+    cachedLeaderboard: ScoreSaberLeaderboard | null,
     options?: { cacheOnly?: boolean }
-  ): { cached: boolean; foundLeaderboard?: ScoreSaberLeaderboardDocument } {
+  ): { cached: boolean; foundLeaderboard?: ScoreSaberLeaderboard } {
     if (cachedLeaderboard === null) {
       return { cached: false };
     }
@@ -97,7 +97,7 @@ export default class LeaderboardService {
     }
 
     return fetchWithCache(CacheService.getCache(ServiceCache.Leaderboards), id, async () => {
-      const cachedLeaderboard = await ScoreSaberLeaderboardModel.findById(id);
+      const cachedLeaderboard = await ScoreSaberLeaderboardModel.findById(id).lean();
       const { cached, foundLeaderboard } = this.validateCachedLeaderboard(cachedLeaderboard, options);
 
       let leaderboard = foundLeaderboard;
@@ -210,7 +210,7 @@ export default class LeaderboardService {
    * @returns the processed leaderboard response
    */
   private static async processLeaderboard(
-    foundLeaderboard: ScoreSaberLeaderboardDocument,
+    foundLeaderboard: ScoreSaberLeaderboard,
     options: {
       cacheOnly?: boolean;
       includeBeatSaver?: boolean;
@@ -229,9 +229,7 @@ export default class LeaderboardService {
         )
       : undefined;
 
-    const leaderboard = (
-      await LeaderboardService.fixMaxScore(foundLeaderboard, beatSaverMap)
-    ).toObject() as ScoreSaberLeaderboard;
+    const leaderboard = this.leaderboardToObject(foundLeaderboard);
 
     if (leaderboard.fullName == undefined) {
       leaderboard.fullName = `${leaderboard.songName} ${leaderboard.songSubName}`.trim();
@@ -242,25 +240,6 @@ export default class LeaderboardService {
       beatsaver: beatSaverMap,
       cached: cached,
     } as LeaderboardResponse<ScoreSaberLeaderboard>;
-  }
-
-  /**
-   * Fixes the max score if it's broken.
-   *
-   * @param leaderboard the leaderboard
-   * @param beatSaverMap the beatSaverMap
-   */
-  private static async fixMaxScore(
-    leaderboard: ScoreSaberLeaderboardDocument,
-    beatSaverMap: BeatSaverMapResponse | undefined
-  ) {
-    // Fix max score if it's broken (ScoreSaber is annoying)
-    if (leaderboard.maxScore == 0 && beatSaverMap != undefined && beatSaverMap.difficulty?.maxScore != undefined) {
-      leaderboard.maxScore = beatSaverMap.difficulty.maxScore;
-      await leaderboard.save();
-    }
-
-    return leaderboard;
   }
 
   /**
@@ -735,12 +714,25 @@ Map: https://ssr.fascinated.cc/leaderboard/${leaderboard.id}
   /**
    * Gets all the ranked leaderboards
    *
+   * @param projection the projection to use
    * @returns the ranked leaderboards
    */
-  public static async getRankedLeaderboards(): Promise<ScoreSaberLeaderboard[]> {
+  public static async getRankedLeaderboards(projection?: {
+    [field: string]: number;
+  }): Promise<ScoreSaberLeaderboard[]> {
     return fetchWithCache(CacheService.getCache(ServiceCache.Leaderboards), "ranked-leaderboards", async () => {
-      const leaderboards = await ScoreSaberLeaderboardModel.find({ ranked: true }).sort({ dateRanked: -1 }); // Sort by date ranked (newest -> oldest)
-      return leaderboards.map(leaderboard => leaderboard.toObject());
+      const leaderboards: ScoreSaberLeaderboard[] = await ScoreSaberLeaderboardModel.aggregate([
+        { $match: { ranked: true } },
+        {
+          $project: {
+            ...projection,
+            dateRanked: 1,
+          },
+        },
+        { $sort: { dateRanked: -1 } },
+      ]);
+
+      return leaderboards.map(leaderboard => this.leaderboardToObject(leaderboard));
     });
   }
 
@@ -751,8 +743,22 @@ Map: https://ssr.fascinated.cc/leaderboard/${leaderboard.id}
    */
   public static async getQualifiedLeaderboards(): Promise<ScoreSaberLeaderboard[]> {
     return fetchWithCache(CacheService.getCache(ServiceCache.Leaderboards), "qualified-leaderboards", async () => {
-      const leaderboards = await ScoreSaberLeaderboardModel.find({ qualified: true });
-      return leaderboards.map(leaderboard => leaderboard.toObject());
+      const leaderboards = await ScoreSaberLeaderboardModel.find({ qualified: true }).lean();
+      return leaderboards.map(leaderboard => this.leaderboardToObject(leaderboard));
     });
+  }
+
+  /**
+   * Converts a database leaderboard to a ScoreSaberLeaderboard.
+   *
+   * @param leaderboard the leaderboard to convert
+   * @returns the converted leaderboard
+   * @private
+   */
+  private static leaderboardToObject(leaderboard: ScoreSaberLeaderboard): ScoreSaberLeaderboard {
+    return {
+      ...removeObjectFields<ScoreSaberLeaderboard>(leaderboard, ["_id", "__v"]),
+      id: leaderboard._id,
+    } as ScoreSaberLeaderboard;
   }
 }

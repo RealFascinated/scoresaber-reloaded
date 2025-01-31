@@ -31,6 +31,7 @@ import {
 import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score";
 import { Page, Pagination } from "@ssr/common/pagination";
 import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/leaderboard";
+import { removeObjectFields } from "@ssr/common/object.util";
 
 export class ScoreService {
   public static async lookupPlayerScores(
@@ -187,79 +188,6 @@ export class ScoreService {
     );
   }
 
-  // /**
-  //  * Gets the player scores from the database.
-  //  *
-  //  * @param playerId the id of the player
-  //  * @param options the fetch options
-  //  */
-  // public static async getPlayerScores(
-  //   playerId: string,
-  //   options: {
-  //     sort?: "pp" | "timestamp";
-  //     limit?: number;
-  //     ranked?: boolean;
-  //     includeLeaderboard?: boolean;
-  //     projection?: { [field: string]: number };
-  //   } = {
-  //     sort: "pp",
-  //   }
-  // ): Promise<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>[]> {
-  //   const rawScores = await ScoreSaberScoreModel.aggregate([
-  //     // Match stage based on playerId and optional ranked filter
-  //     { $match: { playerId: playerId, ...(options?.ranked ? { pp: { $gt: 0 } } : {}) } },
-  //
-  //     // Sort by pp in descending order
-  //     { $sort: { [`${options.sort}`]: -1 } },
-  //
-  //     // Optional projection stage
-  //     ...(options?.projection
-  //       ? [
-  //           {
-  //             $project: {
-  //               ...options.projection,
-  //               _id: 0,
-  //               leaderboardId: 1,
-  //               playerId: 1,
-  //             },
-  //           },
-  //         ]
-  //       : []),
-  //
-  //     // Limit results
-  //     ...(options?.limit ? [{ $limit: options.limit }] : []),
-  //   ]);
-  //   if (!rawScores) {
-  //     return [];
-  //   }
-  //
-  //   const scores: PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>[] = [];
-  //   for (const rawScore of rawScores) {
-  //     const score = new ScoreSaberScoreModel(rawScore).toObject() as ScoreSaberScore;
-  //
-  //     if (options?.includeLeaderboard) {
-  //       const leaderboard = await LeaderboardService.getLeaderboard(score.leaderboardId + "", {
-  //         cacheOnly: true,
-  //         includeBeatSaver: false,
-  //       });
-  //       if (!leaderboard.cached) {
-  //         await delay(SCORESABER_REQUEST_COOLDOWN);
-  //       }
-  //       scores.push({
-  //         score: score as ScoreSaberScore,
-  //         leaderboard: leaderboard.leaderboard,
-  //       });
-  //     } else {
-  //       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  //       // @ts-expect-error
-  //       scores.push({
-  //         score: score as ScoreSaberScore,
-  //       });
-  //     }
-  //   }
-  //   return scores;
-  // }
-
   /**
    * Gets the player scores from the database.
    *
@@ -308,7 +236,7 @@ export class ScoreService {
 
     const scores: PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>[] = [];
     for (const rawScore of rawScores) {
-      const score = new ScoreSaberScoreModel(rawScore).toObject() as ScoreSaberScore;
+      const score = this.scoreToObject(rawScore);
 
       if (options?.includeLeaderboard) {
         const leaderboard = await LeaderboardService.getLeaderboard(score.leaderboardId + "", {
@@ -481,7 +409,7 @@ export class ScoreService {
             { $sort: { score: -1 } },
           ]);
           for (const friendScore of friendScores) {
-            const score = new ScoreSaberScoreModel(friendScore).toObject() as ScoreSaberScore;
+            const score = this.scoreToObject(friendScore);
             scores.push(await ScoreService.insertScoreData(score));
           }
         }
@@ -605,7 +533,7 @@ export class ScoreService {
 
     const scores: (PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard> | null)[] = await Promise.all(
       foundScores.map(async rawScore => {
-        let score = new ScoreSaberScoreModel(rawScore).toObject() as ScoreSaberScore;
+        let score = this.scoreToObject(rawScore);
 
         const leaderboardResponse = await LeaderboardService.getLeaderboard(score.leaderboardId + "");
         if (!leaderboardResponse) {
@@ -694,5 +622,18 @@ export class ScoreService {
     }
 
     return score;
+  }
+
+  /**
+   * Converts a database score to a ScoreSaberScore.
+   *
+   * @param score the score to convert
+   * @returns the converted score
+   */
+  private static scoreToObject(score: ScoreSaberScore): ScoreSaberScore {
+    return {
+      ...removeObjectFields<ScoreSaberScore>(score, ["_id", "__v"]),
+      id: score._id,
+    } as ScoreSaberScore;
   }
 }

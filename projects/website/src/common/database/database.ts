@@ -9,10 +9,6 @@ import { ssrApi } from "@ssr/common/utils/ssr-api";
 
 const SETTINGS_ID = "SSR"; // DO NOT CHANGE
 
-const playerCache = new SSRCache({
-  ttl: 60 * 30, // 30 minutes
-});
-
 export default class Database extends Dexie {
   /**
    * The settings for the website.
@@ -24,8 +20,17 @@ export default class Database extends Dexie {
    */
   friends!: EntityTable<Friend, "id">;
 
+  /**
+   * The cache for the database
+   */
+  cache: SSRCache;
+
   constructor() {
     super("ScoreSaberReloaded");
+
+    this.cache = new SSRCache({
+      ttl: 60 * 30, // 30 minutes
+    });
 
     // Stores
     this.version(1).stores({
@@ -84,14 +89,14 @@ export default class Database extends Dexie {
     if (settings == undefined || settings.playerId == undefined) {
       return;
     }
-    if (playerCache.has(settings.playerId)) {
-      return playerCache.get(settings.playerId);
+    if (this.cache.has(settings.playerId)) {
+      return this.cache.get(settings.playerId);
     }
     const player = scoresaberService.lookupPlayer(settings.playerId);
     if (player == undefined) {
       return undefined;
     }
-    playerCache.set(settings.playerId, player);
+    this.cache.set(settings.playerId, player);
     return player;
   }
 
@@ -132,15 +137,15 @@ export default class Database extends Dexie {
     const friends = await this.friends.toArray();
     const players = await Promise.all(
       friends.map(async ({ id }) => {
-        if (playerCache.has(id)) {
-          return playerCache.get(id);
+        if (this.cache.has(id)) {
+          return this.cache.get(id);
         }
 
         const token = await scoresaberService.lookupPlayer(id, "basic");
         if (token == undefined) {
           return undefined;
         }
-        playerCache.set(id, token);
+        this.cache.set(id, token);
         await ssrApi.trackPlayer(id); // Track the player
         return token;
       })

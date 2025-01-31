@@ -1,10 +1,9 @@
-import { Context, Elysia } from "elysia";
+import { Elysia } from "elysia";
 import cors from "@elysiajs/cors";
 import { decorators } from "elysia-decorators";
 import { logger } from "@tqman/nice-logger";
 import { swagger } from "@elysiajs/swagger";
 import { helmet } from "elysia-helmet";
-import { etag } from "@bogeychan/elysia-etag";
 import AppController from "./controller/app.controller";
 import * as dotenv from "@dotenvx/dotenvx";
 import mongoose from "mongoose";
@@ -165,11 +164,6 @@ app.use(
 );
 
 /**
- * Enable E-Tags
- */
-app.use(etag());
-
-/**
  * Enable CORS
  */
 app.use(cors());
@@ -194,30 +188,6 @@ app.use(
     dnsPrefetchControl: true, // Enable DNS prefetch
   })
 );
-
-/**
- * ETag middleware
- *
- * This is REALLY shitty, but it works.
- */
-app.onAfterHandle({ as: "global" }, async ctx => {
-  const contextWithETag = ctx as unknown as Context & {
-    buildETagFor: (data: string) => string;
-    setETag: (etag: string) => void;
-    isNoneMatch: (etag: string) => boolean;
-  };
-
-  if (typeof contextWithETag.response === "object") {
-    const newEtag = contextWithETag.buildETagFor(JSON.stringify(ctx.response));
-    contextWithETag.setETag(newEtag);
-    if (contextWithETag.isNoneMatch(newEtag)) {
-      ctx.set.status = 304;
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
-      ctx.response = {};
-    }
-  }
-});
 
 /**
  * Controllers

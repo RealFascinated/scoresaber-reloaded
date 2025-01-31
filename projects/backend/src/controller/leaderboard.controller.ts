@@ -63,20 +63,4 @@ export default class LeaderboardController {
   }): Promise<unknown> {
     return SuperJSON.stringify(await LeaderboardService.getLeaderboardByHash(id, difficulty, characteristic));
   }
-
-  @Get("/ranked", {
-    config: {},
-    tags: ["leaderboard"],
-    detail: {
-      responses: {
-        200: {
-          description: "The ranked leaderboards.",
-        },
-      },
-      description: "Fetches all ranked leaderboards on ScoreSaber.",
-    },
-  })
-  public async getRankedLeaderboards(): Promise<unknown> {
-    return SuperJSON.stringify(await LeaderboardService.getRankedLeaderboards());
-  }
 }

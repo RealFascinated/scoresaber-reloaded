@@ -11,6 +11,7 @@ export enum ServiceCache {
   ScoreCalendar = "scoreCalendar",
   PPBoundary = "ppBoundary",
   AdditionalScoreData = "additionalScoreData",
+  Playlists = "playlists",
 }
 
 export default class CacheService {
@@ -50,6 +51,9 @@ export default class CacheService {
       },
       [ServiceCache.AdditionalScoreData]: {
         ttl: 1000 * 60 * 30, // 30 minutes
+      },
+      [ServiceCache.Playlists]: {
+        ttl: 1000 * 60 * 60, // 1 hour
       },
     };
 

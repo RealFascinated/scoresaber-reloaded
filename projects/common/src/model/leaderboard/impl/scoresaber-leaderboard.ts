@@ -7,15 +7,6 @@ import { Document } from "mongoose";
   options: { allowMixed: Severity.ALLOW },
   schemaOptions: {
     collection: "scoresaber-leaderboards",
-    toObject: {
-      virtuals: true,
-      transform: function (_, ret) {
-        ret.id = ret._id;
-        delete ret._id;
-        delete ret.__v;
-        return ret;
-      },
-    },
   },
 })
 export default class ScoreSaberLeaderboardInternal extends Leaderboard {
@@ -52,7 +43,7 @@ export default class ScoreSaberLeaderboardInternal extends Leaderboard {
   /**
    * The date the leaderboard was ranked.
    */
-  @Prop({ required: false })
+  @Prop({ required: false, index: true })
   readonly dateRanked?: Date;
 
   /**

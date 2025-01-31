@@ -28,20 +28,22 @@ export default class PlaylistService {
    * @returns the playlist
    */
   public static async getPlaylist(playlistId: string): Promise<Playlist> {
-    switch (playlistId) {
-      case "scoresaber-ranked-maps": {
-        return await this.createRankedMapsPlaylist();
+    return fetchWithCache(CacheService.getCache(ServiceCache.Playlists), `playlist:${playlistId}`, async () => {
+      switch (playlistId) {
+        case "scoresaber-ranked-maps": {
+          return await this.createRankedMapsPlaylist();
+        }
+        case "scoresaber-qualified-maps": {
+          return await this.createQualifiedMapsPlaylist();
+        }
+        case "scoresaber-ranking-queue-maps": {
+          return await this.createRankingQueueMapsPlaylist();
+        }
+        default: {
+          throw new NotFoundError(`Playlist with id ${playlistId} does not exist`);
+        }
       }
-      case "scoresaber-qualified-maps": {
-        return await this.createQualifiedMapsPlaylist();
-      }
-      case "scoresaber-ranking-queue-maps": {
-        return await this.createRankingQueueMapsPlaylist();
-      }
-      default: {
-        throw new NotFoundError(`Playlist with id ${playlistId} does not exist`);
-      }
-    }
+    });
   }
 
   /**
@@ -167,7 +169,12 @@ export default class PlaylistService {
    * @private
    */
   public static async createRankedMapsPlaylist(): Promise<Playlist> {
-    const rankedLeaderboards = await LeaderboardService.getRankedLeaderboards();
+    const rankedLeaderboards = await LeaderboardService.getRankedLeaderboards({
+      songAuthorName: 1,
+      songName: 1,
+      songHash: 1,
+      difficulties: 1,
+    });
     const highlightedIds = rankedLeaderboards.map(map => map.id);
 
     const maps: Map<string, ScoreSaberLeaderboard> = new Map();

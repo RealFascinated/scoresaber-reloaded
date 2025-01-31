@@ -18,7 +18,9 @@ type StatisticsPageProps = {
   }>;
 };
 
-const names = new Map<GamePlatform, string>([[GamePlatform.ScoreSaber, "ScoreSaber"]]);
+const names = {
+  [GamePlatform.ScoreSaber]: "ScoreSaber",
+};
 
 export default async function TopScoresPage({ params }: StatisticsPageProps) {
   const { platform } = await params;
@@ -29,7 +31,7 @@ export default async function TopScoresPage({ params }: StatisticsPageProps) {
       <Card className="flex flex-col gap-2 w-full h-fit xl:w-[75%]">
         <div className="text-center">
           <p className="font-semibold'">Game Statistics</p>
-          <p className="text-gray-400">View the statistics for {names.get(platform)}</p>
+          <p className="text-gray-400">View the statistics for {names[platform]}</p>
         </div>
 
         {statistics ? (
