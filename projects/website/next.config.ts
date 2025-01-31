@@ -12,6 +12,7 @@ const nextConfig: NextConfig = {
   },
   poweredByHeader: false,
   images: {
+    unoptimized: true, // Always use unoptimized images
     remotePatterns: [
       {
         protocol: "https",

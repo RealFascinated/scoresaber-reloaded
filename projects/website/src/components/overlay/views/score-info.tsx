@@ -25,14 +25,7 @@ export default function OverlayScoreInfoView({ overlayData }: OverlayScoreDataPr
       position={OverlayViewPosition.BOTTOM_LEFT}
       className={cn(paused ? "filter grayscale" : "", "flex gap-2 transform-gpu transition-all")}
     >
-      <Image
-        className="rounded-md"
-        src={beatSaverMap.songArt}
-        alt={`${beatSaverMap.name}`}
-        width={96}
-        height={96}
-        unoptimized
-      />
+      <Image className="rounded-md" src={beatSaverMap.songArt} alt={`${beatSaverMap.name}`} width={96} height={96} />
       <div className="flex flex-col gap-2 py-1 justify-between text-md">
         <div>
           <p className="font-semibold">

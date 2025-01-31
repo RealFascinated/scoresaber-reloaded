@@ -57,7 +57,6 @@ export default function ScoreInfo({ score, leaderboard }: Props) {
               width={24}
               height={24}
               className="w-5 h-5 rounded-full"
-              unoptimized
               style={{
                 filter: hmd.filters,
               }}

@@ -27,7 +27,6 @@ export default function CountryFlag({ code, size = 24 }: Props) {
         height={size * 2}
         className={`w-[${size * 2}px] min-w-[${size * 2}px] object-contain`}
         onError={handleError} // Handle error to load fallback
-        unoptimized
       />
     </Tooltip>
   );

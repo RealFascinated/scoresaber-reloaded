@@ -24,7 +24,6 @@ export default function OverlayPlayerInfoView({ player }: OverlayPlayerInfoProps
         className="rounded-md"
         width={192}
         height={192}
-        unoptimized
       />
       <div>
         <p className="text-3xl font-semibold">{player.name}</p>
