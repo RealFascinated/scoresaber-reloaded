@@ -1,7 +1,6 @@
 import { Controller, Get } from "elysia-decorators";
 import { getAppVersion } from "../common/app.util";
 import { AppService } from "../service/app.service";
-import { heapStats } from "bun:jsc";
 
 @Controller()
 export default class AppController {
@@ -38,16 +37,5 @@ export default class AppController {
   })
   public async getStatistics() {
     return await AppService.getAppStatistics();
-  }
-
-  @Get("/joe", {
-    config: {},
-    tags: ["app"],
-    detail: {
-      description: "Download a heap snapshot of the application's memory.",
-    },
-  })
-  public async joe() {
-    return JSON.stringify(heapStats(), null, 2);
   }
 }
