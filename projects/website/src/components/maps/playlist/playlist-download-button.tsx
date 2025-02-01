@@ -15,7 +15,7 @@ type PlaylistDownloadButtonProps = {
 
 export default function PlaylistDownloadButton({ name, url }: PlaylistDownloadButtonProps) {
   return (
-    <Link href={url} passHref>
+    <Link prefetch={false} href={url} passHref>
       <Button>{name}</Button>
     </Link>
   );

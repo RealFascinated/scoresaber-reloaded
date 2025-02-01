@@ -2,7 +2,6 @@ import PlayerData from "@/components/player/player-data";
 import { Config } from "@ssr/common/config";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { ScoreSort } from "@ssr/common/score/score-sort";
-import { getCookieValue } from "@ssr/common/utils/cookie-utils";
 import { randomString } from "@ssr/common/utils/string.util";
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
@@ -33,7 +32,7 @@ type PlayerData = {
 const getPlayerData = async ({ params }: Props): Promise<PlayerData> => {
   const { slug } = await params;
   const id = slug[0]; // The players id
-  const sort: ScoreSort = (slug[1] as ScoreSort) || (await getCookieValue("lastScoreSort", ScoreSort.recent)); // The sorting method
+  const sort: ScoreSort = slug[1] as ScoreSort; /*|| (await getCookieValue("lastScoreSort", ScoreSort.recent));*/ // The sorting method
   const page = parseInt(slug[2]) || 1; // The page number
   const search = (slug[3] as string) || ""; // The search query
 

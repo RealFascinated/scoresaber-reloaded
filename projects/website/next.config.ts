@@ -32,7 +32,6 @@ const nextConfig: NextConfig = {
       "@hookform/resolvers",
       "framer-motion",
     ],
-    // webpackMemoryOptimizations: true,
     reactCompiler: true,
   },
   poweredByHeader: false,

@@ -199,6 +199,7 @@ export default function SnipePlaylistDownloadButton({ toSnipe }: SnipePlaylistDo
               <Link
                 href={`${Config.apiUrl}/playlist/snipe/preview?toSnipe=${toSnipe.id}&settings=${encodeSnipePlaylistSettings(form.getValues())}`}
                 target="_blank"
+                prefetch={false}
               >
                 <Button type="button">Preview Playlist Art</Button>
               </Link>
