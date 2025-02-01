@@ -1,19 +1,22 @@
 import Dexie, { EntityTable } from "dexie";
 import Settings from "@/common/database/impl/settings";
-import { Friend } from "@/common/database/impl/friends";
 import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/player";
 import { setCookieValue } from "@ssr/common/utils/cookie-utils";
 import Logger from "@ssr/common/logger";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 
-const SETTINGS_ID = "SSR";
-
 type CacheItem = {
   id: string;
   lastUpdated: number;
   item: unknown;
 };
+
+type Friend = {
+  id: string;
+};
+
+const SETTINGS_ID = "SSR";
 
 export default class Database extends Dexie {
   settings!: EntityTable<Settings, "id">;
@@ -210,7 +213,8 @@ export default class Database extends Dexie {
    * @returns the player
    */
   public async getPlayer(id: string): Promise<ScoreSaberPlayerToken | undefined> {
-    return this.getCache<ScoreSaberPlayerToken>(`player:${id}`, 60 * 60, async () => {
+    // Cache player lookups for 24 hours
+    return this.getCache<ScoreSaberPlayerToken>(`player:${id}`, 60 * 60 * 24, async () => {
       try {
         return await scoresaberService.lookupPlayer(id);
       } catch (error) {
