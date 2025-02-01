@@ -12,5 +12,6 @@ export const ssrConfig: Config = {
     "1922350521131465": "oermergeesh", // Oermergeesh
     "2169974796454690": "bytesy_", // Bytesy
     "3225556157461414": "bizzy825", // Bizzy
+    "76561199349221122": "apssl", // APSSL
   },
 };
