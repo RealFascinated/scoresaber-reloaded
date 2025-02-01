@@ -243,11 +243,10 @@ export default class BeatLeaderService {
       return undefined;
     }
 
-    const previous = await this.getPreviousAdditionalScoreData(current.playerId, current.songHash, current.timestamp);
+    const previous = await this.getPreviousAdditionalScoreData(current.playerId, current.scoreId);
     if (previous == undefined) {
       return undefined;
     }
-
     return this.getScoreStats(previous.scoreId);
   }
 
@@ -255,31 +254,25 @@ export default class BeatLeaderService {
    * Gets the player's previous additional score data for a map.
    *
    * @param playerId the player's id to get the previous additional score data for
-   * @param songHash the hash of the map to get the previous additional score data for
-   * @param timestamp the timestamp to get the previous additional score data for
+   * @param scoreId the score id to get the previous additional score data for
    * @returns the additional score data, or undefined if none
    */
   public static async getPreviousAdditionalScoreData(
     playerId: string,
-    songHash: string,
-    timestamp: Date
+    scoreId: number
   ): Promise<AdditionalScoreData | undefined> {
     const scores: AdditionalScoreData[] = await AdditionalScoreDataModel.find({
       playerId: playerId,
-      songHash: songHash.toUpperCase(),
-    })
-      .sort({ timestamp: -1 })
-      .lean();
+      // Ensure we get scores with a lower scoreId than the given one
+      scoreId: { $lt: scoreId },
+    }).sort({ scoreId: -1 });
 
     if (scores == null || scores.length == 0) {
       return undefined;
     }
 
-    const additionalData = scores.find(score => score.timestamp.getTime() < timestamp.getTime());
-    if (additionalData == undefined) {
-      return undefined;
-    }
-    return this.additionalScoreDataToObject(additionalData);
+    // Get the first score before the given scoreId
+    return this.additionalScoreDataToObject(scores[0]);
   }
 
   /**
