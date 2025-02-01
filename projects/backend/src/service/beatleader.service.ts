@@ -220,6 +220,7 @@ export default class BeatLeaderService {
    * @param scoreId the id of the score
    */
   public static async getScoreStats(scoreId: number): Promise<ScoreStats | undefined> {
+    const before = performance.now();
     const scoreStats = await ScoreStatsModel.findOne({ _id: scoreId }).lean();
     if (scoreStats == null) {
       const scoreStats = await beatLeaderService.lookupScoreStats(scoreId);
@@ -231,6 +232,7 @@ export default class BeatLeaderService {
     if (scoreStats == null) {
       return undefined;
     }
+    Logger.info(`Retrieved score stats for score id ${scoreId} in ${(performance.now() - before).toFixed(0)}ms`);
     return this.scoreStatsToObject(scoreStats);
   }
 
