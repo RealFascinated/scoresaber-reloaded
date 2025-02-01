@@ -1,6 +1,5 @@
 import { Metadata } from "next";
 import RankingData from "@/components/ranking/ranking-data";
-import { cache } from "react";
 import { ScoreSaberPlayersPageToken } from "@ssr/common/types/token/scoresaber/players-page";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 
@@ -27,7 +26,7 @@ type RankingPageData = {
  * @param params the params
  * @returns the ranking data
  */
-const getRankingData = cache(async ({ params }: Props): Promise<RankingPageData> => {
+const getRankingData = async ({ params }: Props): Promise<RankingPageData> => {
   const { slug } = await params;
   const country = (slug && slug.length > 1 && (slug[0] as string).toUpperCase()) || undefined; // The country query
   const page = (slug && parseInt(slug[country != undefined ? 1 : 0])) || 1; // The page number
@@ -41,7 +40,7 @@ const getRankingData = cache(async ({ params }: Props): Promise<RankingPageData>
     page,
     country,
   };
-});
+};
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
   const { players, page, country } = await getRankingData(props);

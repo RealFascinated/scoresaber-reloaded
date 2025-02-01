@@ -6,7 +6,6 @@ import { getCookieValue } from "@ssr/common/utils/cookie-utils";
 import { randomString } from "@ssr/common/utils/string.util";
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { cache } from "react";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 
 type Props = {
@@ -31,7 +30,7 @@ type PlayerData = {
  * @param params the params
  * @returns the player data and scores
  */
-const getPlayerData = cache(async ({ params }: Props): Promise<PlayerData> => {
+const getPlayerData = async ({ params }: Props): Promise<PlayerData> => {
   const { slug } = await params;
   const id = slug[0]; // The players id
   const sort: ScoreSort = (slug[1] as ScoreSort) || (await getCookieValue("lastScoreSort", ScoreSort.recent)); // The sorting method
@@ -45,7 +44,7 @@ const getPlayerData = cache(async ({ params }: Props): Promise<PlayerData> => {
     search: search,
     player: player,
   };
-});
+};
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
   const UNKNOWN_PLAYER = {

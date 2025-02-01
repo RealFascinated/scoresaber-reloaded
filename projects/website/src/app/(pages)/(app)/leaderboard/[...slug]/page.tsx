@@ -1,7 +1,6 @@
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { LeaderboardData } from "@/components/leaderboard/page/leaderboard-data";
-import { cache } from "react";
 import { LeaderboardResponse } from "@ssr/common/response/leaderboard-response";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { Config } from "@ssr/common/config";
@@ -30,7 +29,7 @@ type LeaderboardData = {
  * @param fetchScores whether to fetch the scores
  * @returns the leaderboard data and scores
  */
-const getLeaderboardData = cache(async ({ params, searchParams }: Props): Promise<LeaderboardData | undefined> => {
+const getLeaderboardData = async ({ params, searchParams }: Props): Promise<LeaderboardData | undefined> => {
   const { slug } = await params;
   const id = slug[0]; // The leaderboard id
   const page = parseInt(slug[1]) || 1; // The page number
@@ -45,7 +44,7 @@ const getLeaderboardData = cache(async ({ params, searchParams }: Props): Promis
     page: page,
     category: category,
   };
-});
+};
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
   const UNKNOWN_LEADERBOARD = {
