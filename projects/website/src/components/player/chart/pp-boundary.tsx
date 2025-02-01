@@ -1,12 +1,9 @@
 "use client";
 
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import { useEffect, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import StatValue from "@/components/stat-value";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import Tooltip from "@/components/tooltip";
-import { ssrApi } from "@ssr/common/utils/ssr-api";
 import GenericChart from "@/components/chart/generic-chart";
 import { DatasetConfig } from "@/common/chart/types";
 

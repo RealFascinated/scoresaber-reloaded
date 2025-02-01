@@ -1,4 +1,4 @@
-import { DiscordUserDocument, DiscordUserModel } from "../model/discord-user";
+import {DiscordUserDocument, DiscordUserModel} from "../model/discord-user";
 
 /**
  * Gets the user for a discord id.

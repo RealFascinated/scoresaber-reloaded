@@ -1,6 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-expect-error
-import { generateHeapSnapshot } from "bun";
+import {generateHeapSnapshot} from "bun";
 
 export async function GET(request: Request) {
   const snapshot = generateHeapSnapshot("v8");

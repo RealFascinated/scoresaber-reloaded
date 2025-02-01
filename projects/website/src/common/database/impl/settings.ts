@@ -1,5 +1,5 @@
-import { ReplayViewer, ReplayViewers, ReplayViewerTypes } from "@/common/replay-viewer";
-import { defaultOverlaySettings, OverlaySettings } from "@/common/overlay/overlay-settings";
+import {ReplayViewer, ReplayViewers, ReplayViewerTypes} from "@/common/replay-viewer";
+import {defaultOverlaySettings, OverlaySettings} from "@/common/overlay/overlay-settings";
 import IdDatabaseObject from "@/common/database/id-object";
 
 /**

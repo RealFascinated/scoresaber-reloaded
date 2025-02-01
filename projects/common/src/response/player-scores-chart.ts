@@ -1,5 +1,3 @@
-import { MapDifficulty } from "../score/map-difficulty";
-
 export type PlayerScoresChartResponse = {
   /**
    * The player's score chart data

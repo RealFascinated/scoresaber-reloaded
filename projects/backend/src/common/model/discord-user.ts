@@ -1,5 +1,5 @@
-import { getModelForClass, modelOptions, prop, ReturnModelType, Severity } from "@typegoose/typegoose";
-import { Document } from "mongoose";
+import {getModelForClass, modelOptions, prop, ReturnModelType, Severity} from "@typegoose/typegoose";
+import {Document} from "mongoose";
 
 /**
  * The model for a discord user.

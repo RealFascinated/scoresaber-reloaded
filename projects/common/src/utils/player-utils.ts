@@ -1,5 +1,5 @@
-import { PlayerHistory } from "../player/player-history";
-import { formatDateMinimal, getDaysAgoDate, getMidnightAlignedDate } from "./time-utils";
+import {PlayerHistory} from "../player/player-history";
+import {formatDateMinimal, getDaysAgoDate, getMidnightAlignedDate} from "./time-utils";
 
 /**
  * Gets a value from an {@link PlayerHistory}

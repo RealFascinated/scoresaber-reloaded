@@ -1,6 +1,6 @@
-import Player, { StatisticChange } from "../player";
-import { PlayerHistory } from "../player-history";
-import { PeakRank } from "../peak-rank";
+import Player, {StatisticChange} from "../player";
+import {PlayerHistory} from "../player-history";
+import {PeakRank} from "../peak-rank";
 
 /**
  * A ScoreSaber player.

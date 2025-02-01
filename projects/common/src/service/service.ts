@@ -1,5 +1,5 @@
 import ky from "ky";
-import { isProduction, isServer } from "../utils/utils";
+import { isServer } from "../utils/utils";
 import { KyOptions } from "ky/distribution/types/options";
 import Logger from "../logger";
 
