@@ -145,7 +145,7 @@ export default function PlayerStats({ player }: Props) {
         );
       })}
 
-      <PpBoundaryStat player={player} />
+      {player.isBeingTracked && <PpBoundaryStat player={player} />}
     </div>
   );
 }
