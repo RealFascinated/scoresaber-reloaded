@@ -23,8 +23,6 @@ export default function PlayerScoreAccuracyChart({ scoreStats, leaderboard }: Pr
   const currentGraph = scoreStats.current.scoreGraphTracker.graph;
   const previousGraph = scoreStats.previous?.scoreGraphTracker.graph;
 
-  console.log(currentGraph, previousGraph);
-
   const histories: Record<string, (number | null)[]> = {
     accuracy: [],
     previousAccuracy: [],
