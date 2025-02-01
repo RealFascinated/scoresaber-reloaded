@@ -36,6 +36,8 @@ const nextConfig: NextConfig = {
   },
   modularizeImports: {
     "@radix-ui/react-icons": { transform: "@radix-ui/react-icons/dist/{{member}}" },
+    "@heroicons/react/24/solid": { transform: "@heroicons/react/24/solid/{{member}}" },
+    "@heroicons/react/24/outline": { transform: "@heroicons/react/24/outline/{{member}}" },
   },
   poweredByHeader: false,
   images: {
