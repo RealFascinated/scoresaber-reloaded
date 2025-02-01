@@ -34,6 +34,9 @@ const nextConfig: NextConfig = {
     ],
     reactCompiler: true,
   },
+  modularizeImports: {
+    "@radix-ui/react-icons": { transform: "@radix-ui/react-icons/dist/{{member}}" },
+  },
   poweredByHeader: false,
   images: {
     unoptimized: true, // Always use unoptimized images
