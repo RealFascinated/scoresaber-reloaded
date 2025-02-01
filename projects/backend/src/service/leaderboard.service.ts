@@ -396,7 +396,7 @@ export default class LeaderboardService {
       );
     }
 
-    //await this.notifyLeaderboardChange(update);
+    await this.notifyLeaderboardChange(update);
   }
 
   /**
