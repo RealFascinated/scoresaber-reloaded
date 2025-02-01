@@ -1,65 +1,56 @@
 import Dexie, { EntityTable } from "dexie";
-import Settings from "./types/settings";
-import { Friend } from "@/common/database/types/friends";
-import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
-import { setCookieValue } from "@ssr/common/utils/cookie-utils";
-import { SSRCache } from "@ssr/common/cache";
+import Settings from "@/common/database/impl/settings";
+import { Friend } from "@/common/database/impl/friends";
 import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/player";
-import { ssrApi } from "@ssr/common/utils/ssr-api";
+import { setCookieValue } from "@ssr/common/utils/cookie-utils";
+import Logger from "@ssr/common/logger";
+import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
+import { formatDuration } from "@ssr/common/utils/time-utils";
 
-const SETTINGS_ID = "SSR"; // DO NOT CHANGE
+const SETTINGS_ID = "SSR";
+
+type CacheItem = {
+  id: string;
+  lastUpdated: number;
+  item: unknown;
+};
 
 export default class Database extends Dexie {
-  /**
-   * The settings for the website.
-   */
   settings!: EntityTable<Settings, "id">;
-
-  /**
-   * The added friends
-   */
   friends!: EntityTable<Friend, "id">;
-
-  /**
-   * The cache for the database
-   */
-  cache: SSRCache;
+  cache!: EntityTable<CacheItem, "id">;
 
   constructor() {
     super("ScoreSaberReloaded");
 
-    this.cache = new SSRCache({
-      ttl: 60 * 30, // 30 minutes
-    });
-
-    // Stores
-    this.version(1).stores({
+    this.version(2).stores({
       settings: "id",
       beatSaverMaps: "hash",
       friends: "id",
+      cache: "id",
     });
 
-    // Mapped tables
     this.settings.mapToClass(Settings);
 
-    // Populate default settings if the table is empty
-    this.on("populate", () => this.populateDefaults());
-
+    this.on("populate", () => this.resetSettings());
     this.on("ready", async () => {
-      const settings = await this.getSettings();
-      // If the settings are not found, return
-      if (settings == undefined || settings.playerId == undefined) {
-        return;
-      }
-      await setCookieValue("playerId", settings.playerId);
+      await this.initializeCookie();
     });
   }
 
   /**
-   * Populates the default settings
+   * Initializes the cookie
+   * @private
    */
-  async populateDefaults() {
-    await this.resetSettings();
+  private async initializeCookie() {
+    try {
+      const settings = await this.getSettings();
+      if (settings?.playerId) {
+        await setCookieValue("playerId", settings.playerId);
+      }
+    } catch (error) {
+      console.error("Failed to initialize cookie:", error);
+    }
   }
 
   /**
@@ -82,22 +73,17 @@ export default class Database extends Dexie {
   }
 
   /**
-   * Gets the claimed player's scoresaber token
+   * Gets the claimed player's account.
+   *
+   * @returns the claimed player's account
    */
   async getClaimedPlayer(): Promise<ScoreSaberPlayerToken | undefined> {
     const settings = await this.getSettings();
-    if (settings == undefined || settings.playerId == undefined) {
-      return;
-    }
-    if (this.cache.has(settings.playerId)) {
-      return this.cache.get(settings.playerId);
-    }
-    const player = scoresaberService.lookupPlayer(settings.playerId);
-    if (player == undefined) {
+    if (!settings?.playerId) {
       return undefined;
     }
-    this.cache.set(settings.playerId, player);
-    return player;
+
+    return this.getPlayer(settings.playerId);
   }
 
   /**
@@ -105,7 +91,7 @@ export default class Database extends Dexie {
    *
    * @param id the id of the friend
    */
-  public async addFriend(id: string) {
+  async addFriend(id: string) {
     await this.friends.add({ id });
   }
 
@@ -114,62 +100,136 @@ export default class Database extends Dexie {
    *
    * @param id the id of the friend
    */
-  public async removeFriend(id: string) {
+  async removeFriend(id: string) {
     await this.friends.delete(id);
   }
 
   /**
-   * Checks if this player is a friend
+   * Checks if a player is a friend
    *
    * @param id the id of the player
+   * @returns whether the player is a friend
    */
-  public async isFriend(id: string): Promise<boolean> {
+  async isFriend(id: string): Promise<boolean> {
     const friend = await this.friends.get(id);
     return friend != undefined;
   }
 
   /**
-   * Gets all friends as {@link ScoreSaberPlayerToken}'s
+   * Gets the accounts of all friends
    *
-   * @returns the friends
+   * @returns the accounts
    */
-  public async getFriends(): Promise<ScoreSaberPlayerToken[]> {
+  async getFriends(): Promise<ScoreSaberPlayerToken[]> {
     const friends = await this.friends.toArray();
     const players = await Promise.all(
       friends.map(async ({ id }) => {
-        if (this.cache.has(id)) {
-          return this.cache.get(id);
-        }
-
-        const token = await scoresaberService.lookupPlayer(id, "basic");
-        if (token == undefined) {
-          return undefined;
-        }
-        this.cache.set(id, token);
-        await ssrApi.trackPlayer(id); // Track the player
-        return token;
+        return this.getPlayer(id);
       })
     );
-    return players.filter(player => player !== undefined) as ScoreSaberPlayerToken[];
+
+    return players.filter((player): player is ScoreSaberPlayerToken => player !== undefined);
   }
 
   /**
-   * Gets all friend ids
+   * Gets the ids of all friends
+   *
+   * @returns the ids of all friends
    */
-  public async getFriendIds(): Promise<string[]> {
+  async getFriendIds(): Promise<string[]> {
     const friends = await this.friends.toArray();
     return friends.map(({ id }) => id);
   }
 
   /**
-   * Resets the settings in the database
+   * Fetches an item from the cache or
+   * inserts it if it doesn't exist.
+   *
+   * @param key the key of the item
+   * @param ttl the time to live in seconds
+   * @param insertCallback the callback to insert the item if it doesn't exist
+   * @returns the item
+   * @private
+   */
+  private async getCache<T>(
+    key: string,
+    ttl: number = 60 * 60,
+    insertCallback?: () => Promise<T | undefined>
+  ): Promise<T | undefined> {
+    const startTime = Date.now();
+    Logger.info(`Getting ${key} from cache...`);
+
+    const logFinish = (message: string) => {
+      const timeTaken = Date.now() - startTime;
+      Logger.info(`${message} (${formatDuration(timeTaken)})`);
+    };
+
+    const item = await this.cache.get(key);
+    const ttlMs = ttl * 1000;
+
+    // Return cached item if valid
+    if (item && item.lastUpdated + ttlMs >= Date.now()) {
+      logFinish(`Retrieved ${key} from cache`);
+      return item.item as T;
+    }
+
+    // Return undefined if no insert callback
+    if (!insertCallback) {
+      logFinish(`Cache miss for ${key}, no callback provided`);
+      return undefined;
+    }
+
+    // Try to fetch and cache new item
+    try {
+      const newItem = await insertCallback();
+      if (!newItem) {
+        return undefined;
+      }
+
+      const cacheItem: CacheItem = {
+        id: key,
+        lastUpdated: Date.now(),
+        item: newItem,
+      };
+
+      await this.cache.put(cacheItem);
+      logFinish(`Fetched and cached ${key}`);
+      return newItem;
+    } catch (error) {
+      logFinish(`Failed to fetch/cache item for ${key}`);
+      Logger.error(`Cache error details:`, error);
+      return undefined;
+    }
+  }
+
+  /**
+   * Fetches a player from the cache or
+   * lookups it if it doesn't exist.
+   *
+   * @param id the player's id
+   * @returns the player
+   */
+  public async getPlayer(id: string): Promise<ScoreSaberPlayerToken | undefined> {
+    return this.getCache<ScoreSaberPlayerToken>(`player:${id}`, 60 * 60, async () => {
+      try {
+        return await scoresaberService.lookupPlayer(id);
+      } catch (error) {
+        Logger.error(`Failed to fetch player ${id}:`, error);
+        return undefined;
+      }
+    });
+  }
+
+  /**
+   * Resets the database to default values
    */
   async resetSettings() {
-    this.settings.delete(SETTINGS_ID);
-    this.settings.add({
-      id: SETTINGS_ID, // Fixed ID for the single settings object
+    await this.settings.delete(SETTINGS_ID);
+    await this.settings.add({
+      id: SETTINGS_ID,
       backgroundCover: "/assets/background.jpg",
     });
+    await this.cache.clear();
 
     return this.getSettings();
   }

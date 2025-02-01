@@ -3,7 +3,7 @@
 import { createContext, ReactNode, useEffect, useState } from "react";
 import Database, { db } from "../../common/database/database";
 import FullscreenLoader from "./fullscreen-loader";
-import Settings from "@/common/database/types/settings";
+import Settings from "@/common/database/impl/settings";
 import { useLiveQuery } from "dexie-react-hooks";
 import Logger from "@ssr/common/logger";
 

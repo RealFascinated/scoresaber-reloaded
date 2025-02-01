@@ -1,17 +1,11 @@
-import { Entity } from "dexie";
-import Database from "../database";
 import { ReplayViewer, ReplayViewers, ReplayViewerTypes } from "@/common/replay-viewer";
 import { defaultOverlaySettings, OverlaySettings } from "@/common/overlay/overlay-settings";
+import IdDatabaseObject from "@/common/database/id-object";
 
 /**
  * The website settings.
  */
-export default class Settings extends Entity<Database> {
-  /**
-   * This is just so we can fetch the settings
-   */
-  id!: string;
-
+export default class Settings extends IdDatabaseObject {
   /**
    * The ID of the tracked player
    */
