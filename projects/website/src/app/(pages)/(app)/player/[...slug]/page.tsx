@@ -32,7 +32,8 @@ type PlayerData = {
 const getPlayerData = async ({ params }: Props): Promise<PlayerData> => {
   const { slug } = await params;
   const id = slug[0]; // The players id
-  const sort: ScoreSort = slug[1] as ScoreSort; /*|| (await getCookieValue("lastScoreSort", ScoreSort.recent));*/ // The sorting method
+  const sort: ScoreSort =
+    (slug[1] as ScoreSort) || ScoreSort.recent; /*|| (await getCookieValue("lastScoreSort", ScoreSort.recent));*/ // The sorting method
   const page = parseInt(slug[2]) || 1; // The page number
   const search = (slug[3] as string) || ""; // The search query
 
@@ -87,10 +88,8 @@ export default async function PlayerPage(props: Props) {
   }
 
   return (
-    <main className="w-full flex justify-center">
-      <div className="flex flex-col h-full w-full max-w-[1600px]">
-        <PlayerData initialPlayerData={player} initialSearch={search} sort={sort} page={page} />
-      </div>
+    <main className="flex justify-center h-full w-full">
+      <PlayerData playerId={player.id} initialSearch={search} sort={sort} page={page} />
     </main>
   );
 }
