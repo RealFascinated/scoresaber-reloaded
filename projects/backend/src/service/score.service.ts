@@ -597,7 +597,7 @@ export class ScoreService {
     ]);
 
     if (additionalData !== undefined) {
-      score.additionalData = additionalData.toObject();
+      score.additionalData = additionalData;
     }
     if (previousScore) {
       score.previousScore = previousScore;
