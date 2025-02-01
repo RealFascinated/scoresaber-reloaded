@@ -270,6 +270,7 @@ export default class BeatLeaderService {
       timestamp: { $lt: timestamp },
     })
       .sort({ timestamp: -1 })
+      .limit(1)
       .lean();
 
     if (scores == null || scores.length == 0) {
