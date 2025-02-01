@@ -274,18 +274,16 @@ export default class BeatLeaderService {
     const scores: AdditionalScoreData[] = await AdditionalScoreDataModel.find({
       playerId: playerId,
       songHash: songHash.toUpperCase(),
+      leaderboardId: leaderboardId,
     })
       .sort({ timestamp: -1 })
-      .limit(1)
       .lean();
 
     if (scores == null || scores.length == 0) {
       return undefined;
     }
 
-    const additionalData = scores.find(
-      score => score.timestamp.getTime() < timestamp.getTime() && score.leaderboardId === leaderboardId
-    );
+    const additionalData = scores.find(score => score.timestamp.getTime() < timestamp.getTime());
     if (additionalData == undefined) {
       return undefined;
     }
