@@ -35,7 +35,7 @@ export default function PlayerLinks({ player }: { player: ScoreSaberPlayer }) {
   const twitchName = ssrConfig.playerTwitchAccounts[player.id];
 
   return (
-    <div className="flex gap-2 flex-wrap justify-center items-center lg:justify-start lg:items-start">
+    <div className="flex gap-2">
       {twitchName && (
         <PlayerLink
           playerName={player.name}

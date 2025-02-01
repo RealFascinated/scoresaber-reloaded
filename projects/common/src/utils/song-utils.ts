@@ -74,6 +74,16 @@ export function getScoreBadgeFromAccuracy(acc: number): ScoreBadge {
 }
 
 /**
+ * Gets a score badge from its name.
+ *
+ * @param name the name of the badge
+ * @returns the badge
+ */
+export function getScoreBadgeFromName(name: string): ScoreBadge {
+  return scoreBadges.find(badge => badge.name === name)!;
+}
+
+/**
  * Get a random difficulty, except ExpertPlus.
  */
 export function getRandomDifficulty(): Difficulty {
@@ -102,4 +112,23 @@ export function getDifficulty(diff: Difficulty | MapDifficulty) {
     throw new Error(`Unknown difficulty: ${diff}`);
   }
   return difficulty;
+}
+
+/**
+ * Gets the acc details for a badge.
+ *
+ * @param badge the badge
+ * @returns the acc details
+ */
+export function getAccDetails(badge: ScoreBadge) {
+  let accDetails = `${badge.name != "-" ? badge.name : ""}`;
+  if (badge.max == null) {
+    accDetails += ` (> ${badge.min}%)`;
+  } else if (badge.min == null) {
+    accDetails += ` (< ${badge.max}%)`;
+  } else {
+    accDetails += ` (${badge.min}% - ${badge.max}%)`;
+  }
+
+  return accDetails;
 }

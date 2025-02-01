@@ -1,6 +1,7 @@
-import Player, {StatisticChange} from "../player";
-import {PlayerHistory} from "../player-history";
-import {PeakRank} from "../peak-rank";
+import Player, { StatisticChange } from "../player";
+import { PlayerHistory } from "../player-history";
+import { PeakRank } from "../peak-rank";
+import { AccBadges } from "../acc-badges";
 
 /**
  * A ScoreSaber player.
@@ -60,6 +61,11 @@ export default interface ScoreSaberPlayer extends Player {
    * The amount of pp boundaries the player has.
    */
   ppBoundaries: number[];
+
+  /**
+   * The acc badges based on the player's scores.
+   */
+  accBadges: AccBadges;
 
   /**
    * Whether the player is banned or not.

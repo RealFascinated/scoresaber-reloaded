@@ -1,4 +1,4 @@
-import { getScoreBadgeFromAccuracy } from "@ssr/common/utils/song-utils";
+import { getAccDetails, getScoreBadgeFromAccuracy } from "@ssr/common/utils/song-utils";
 import { Modifier } from "@ssr/common/score/modifier";
 import Tooltip from "@/components/tooltip";
 import { ScoreModifiers } from "@/components/score/score-modifiers";
@@ -11,14 +11,6 @@ export function ScoreAccuracyBadge({ score }: ScoreBadgeProps) {
 
   const fcAccuracy = score.additionalData?.fcAccuracy;
   const scoreBadge = getScoreBadgeFromAccuracy(score.accuracy);
-  let accDetails = `${scoreBadge.name != "-" ? scoreBadge.name : ""}`;
-  if (scoreBadge.max == null) {
-    accDetails += ` (> ${scoreBadge.min}%)`;
-  } else if (scoreBadge.min == null) {
-    accDetails += ` (< ${scoreBadge.max}%)`;
-  } else {
-    accDetails += ` (${scoreBadge.min}% - ${scoreBadge.max}%)`;
-  }
 
   const failed = score.modifiers.includes("No Fail" as Modifier);
   const modCount = score.modifiers.length;
@@ -34,7 +26,7 @@ export function ScoreAccuracyBadge({ score }: ScoreBadgeProps) {
             <div className="flex flex-col gap-2">
               <div>
                 <p className="font-semibold">Accuracy</p>
-                <p>Score: {accDetails}</p>
+                <p>Score: {getAccDetails(scoreBadge)}</p>
                 <p>Accuracy: {formatScoreAccuracy(score)}</p>
                 {!score.fullCombo && fcAccuracy && <p>Full Combo: {fcAccuracy.toFixed(2)}%</p>}
               </div>
@@ -60,7 +52,7 @@ export function ScoreAccuracyBadge({ score }: ScoreBadgeProps) {
               <div className="flex flex-col gap-2">
                 <div>
                   <p className="font-semibold">Previous Accuracy</p>
-                  <p>Score: {accDetails}</p>
+                  <p>Score: {getAccDetails(scoreBadge)}</p>
                   {score.previousScore && <p>Accuracy: {formatScoreAccuracy(score.previousScore)}</p>}
                   {!score.fullCombo && fcAccuracy && <p>Full Combo: {fcAccuracy.toFixed(2)}%</p>}
                 </div>

@@ -20,11 +20,10 @@ import { SCORESABER_REQUEST_COOLDOWN } from "./leaderboard.service";
 import { PlayerScoreChartDataPoint, PlayerScoresChartResponse } from "@ssr/common/response/player-scores-chart";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
-import { getDifficulty } from "@ssr/common/utils/song-utils";
-import { getPlayerStatisticChange } from "@ssr/common/utils/player-utils";
-import { PlayerHistory } from "@ssr/common/player/player-history";
+import { getDifficulty, getScoreBadgeFromAccuracy } from "@ssr/common/utils/song-utils";
 import { ScoreService } from "./score.service";
 import Logger from "@ssr/common/logger";
+import { AccBadges } from "@ssr/common/player/acc-badges";
 
 const accountCreationLock: { [id: string]: Promise<PlayerDocument> } = {};
 
@@ -761,21 +760,36 @@ export class PlayerService {
   }
 
   /**
-   * Gets the changes in the players statistic history
+   * Gets the acc badges for a player.
    *
-   * @param history the player's history
-   * @param daysAgo the amount of days to look back
-   * @returns the statistic changes
-   * @private
+   * @param playerId the player's id
+   * @returns the acc badges
    */
-  private static async getStatisticChanges(
-    history: Record<string, PlayerHistory>,
-    daysAgo: number = 1
-  ): Promise<PlayerHistory> {
-    return {
-      rank: getPlayerStatisticChange(history, "rank", true, daysAgo),
-      countryRank: getPlayerStatisticChange(history, "countryRank", true, daysAgo),
-      pp: getPlayerStatisticChange(history, "pp", false, daysAgo),
+  public static async getAccBadges(playerId: string): Promise<AccBadges> {
+    const badges: AccBadges = {
+      SSPlus: 0,
+      SS: 0,
+      SPlus: 0,
+      S: 0,
+      A: 0,
     };
+
+    const playerScores = await ScoreService.getPlayerScores(playerId, {
+      sort: "timestamp",
+      ranked: true,
+      projection: {
+        accuracy: 1,
+      },
+    });
+
+    for (const playerScore of playerScores) {
+      const accuracy = playerScore.score.accuracy;
+      const scoreBadge = getScoreBadgeFromAccuracy(accuracy);
+      if (scoreBadge.name !== "-") {
+        badges[scoreBadge.name.replace("+", "Plus") as keyof AccBadges]++;
+      }
+    }
+
+    return badges;
   }
 }

@@ -15,7 +15,7 @@ import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerStatChange } from "@ssr/common/player/player-stat-change";
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
 import { getScoreSaberRoles } from "@ssr/common/utils/scoresaber.util";
-import PlayerLinks from "@/components/player/header/player-links";
+import PlayerFooter from "@/components/player/header/player-footer";
 
 const playerData = [
   {
@@ -148,8 +148,8 @@ export default function PlayerHeader({ player }: PlayerHeaderProps) {
         </div>
       </div>
 
-      {/* Player Social Links */}
-      <PlayerLinks player={player} />
+      {/* Player Footer */}
+      <PlayerFooter player={player} />
     </Card>
   );
 }
