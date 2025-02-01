@@ -17,23 +17,7 @@ type PpBoundaryProps = {
 const boundariesCount = 100;
 
 export default function PpBoundaryStat({ player }: PpBoundaryProps) {
-  const [boundaries, setBoundaries] = useState<number[]>();
-
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ["playerPpBoundary", player.id],
-    queryFn: async () => (await ssrApi.getPlayerPpBoundary(player.id, boundariesCount))?.boundaries || [-1],
-  });
-
-  useEffect(() => {
-    if (data) {
-      setBoundaries(data);
-    }
-  }, [data]);
-
-  if (isLoading || isError || !boundaries || boundaries[0] == -1) {
-    return null;
-  }
-
+  const boundaries = player.ppBoundaries;
   const histories: Record<string, (number | null)[]> = {};
   const labels: string[] = [];
 

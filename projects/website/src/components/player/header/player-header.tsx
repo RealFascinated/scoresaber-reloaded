@@ -1,22 +1,21 @@
-import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
-import Card from "../card";
-import CountryFlag from "../country-flag";
-import ClaimProfile from "./claim-profile";
-import PlayerStats from "./player-stats";
+import Card from "../../card";
+import CountryFlag from "../../country-flag";
+import ClaimProfile from "../claim-profile";
+import PlayerStats from "../player-stats";
 import PlayerTrackedStatus from "@/components/player/player-tracked-status";
-import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import Link from "next/link";
 import AddFriend from "@/components/friend/add-friend";
-import PlayerSteamProfile from "@/components/player/player-steam-profile";
-import { getScoreSaberRoles } from "@ssr/common/utils/scoresaber.util";
 import { DailyChange } from "@/components/statistic/daily-change";
 import { ChangeOverTime } from "@/components/statistic/change-over-time";
-import { PlayerStatChange } from "@ssr/common/player/player-stat-change";
 import Avatar from "@/components/avatar";
-import PlayerBeatLeaderLink from "@/components/player/player-beatleader-link";
 import SnipePlaylistDownloadButton from "@/components/snipe/snipe-playlist-creation";
 import PlayerScoreChartButton from "@/components/player/player-score-chart-button";
+import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
+import { PlayerStatChange } from "@ssr/common/player/player-stat-change";
+import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
+import { getScoreSaberRoles } from "@ssr/common/utils/scoresaber.util";
+import PlayerLinks from "@/components/player/header/player-links";
 
 const playerData = [
   {
@@ -92,7 +91,7 @@ type PlayerHeaderProps = {
 
 export default function PlayerHeader({ player }: PlayerHeaderProps) {
   return (
-    <Card>
+    <Card className="flex gap-2">
       <div className="flex gap-3 flex-col items-center text-center lg:flex-row lg:items-start lg:text-start relative select-none">
         <Avatar
           src={player.avatar}
@@ -113,8 +112,6 @@ export default function PlayerHeader({ player }: PlayerHeaderProps) {
               </p>
               <div className="absolute lg:relative top-0 left-0 flex flex-col lg:flex-row gap-2 items-center">
                 <PlayerTrackedStatus player={player} />
-                <PlayerSteamProfile player={player} />
-                <PlayerBeatLeaderLink player={player} />
                 {player.isBeingTracked && <SnipePlaylistDownloadButton toSnipe={player} />}
                 {player.isBeingTracked && <PlayerScoreChartButton player={player} />}
               </div>
@@ -150,6 +147,9 @@ export default function PlayerHeader({ player }: PlayerHeaderProps) {
           </div>
         </div>
       </div>
+
+      {/* Player Social Links */}
+      <PlayerLinks player={player} />
     </Card>
   );
 }

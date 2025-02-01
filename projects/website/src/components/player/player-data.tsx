@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import PlayerHeader from "./player-header";
+import PlayerHeader from "./header/player-header";
 import PlayerScores from "./player-scores";
 import Card from "@/components/card";
 import PlayerBadges from "@/components/player/player-badges";

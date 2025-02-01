@@ -1,6 +1,6 @@
-import Player, {StatisticChange} from "../player";
-import {PlayerHistory} from "../player-history";
-import {PeakRank} from "../peak-rank";
+import Player, { StatisticChange } from "../player";
+import { PlayerHistory } from "../player-history";
+import { PeakRank } from "../peak-rank";
 
 /**
  * A ScoreSaber player.
@@ -55,6 +55,11 @@ export default interface ScoreSaberPlayer extends Player {
    * The pages for the players positions.
    */
   rankPages: ScoreSaberRankPages;
+
+  /**
+   * The amount of pp boundaries the player has.
+   */
+  ppBoundaries: number[];
 
   /**
    * Whether the player is banned or not.

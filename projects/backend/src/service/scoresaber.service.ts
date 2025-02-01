@@ -272,6 +272,7 @@ export default class ScoreSaberService {
             global: getPageFromRank(playerToken.rank, 50),
             country: getPageFromRank(playerToken.countryRank, 50),
           },
+          ppBoundaries: account ? await PlayerService.getPlayerPpBoundary(account.id, 100) : [],
           peakRank: account ? account.peakRank : undefined,
           permissions: playerToken.permissions,
           banned: playerToken.banned,

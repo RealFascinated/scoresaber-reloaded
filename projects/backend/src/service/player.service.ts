@@ -477,16 +477,17 @@ export class PlayerService {
     const rank = getRank(player, type);
     const rankWithinPage = rank % itemsPerPage;
 
-    let pagesToSearch = [getPageFromRank(rank, itemsPerPage)];
-    if (rankWithinPage > 0) {
+    // Ensure the page is valid and greater than 0
+    let pagesToSearch: number[] = [];
+    if (rank >= itemsPerPage) {
       pagesToSearch.push(getPageFromRank(rank - 1, itemsPerPage));
-    } else if (rankWithinPage < itemsPerPage - 1) {
+    }
+    if (rankWithinPage > 0 && rankWithinPage < itemsPerPage - 1) {
       pagesToSearch.push(getPageFromRank(rank + 1, itemsPerPage));
     }
+
     // Remove duplicates
-    pagesToSearch = pagesToSearch.filter((value, index, self) => {
-      return self.indexOf(value) === index;
-    });
+    pagesToSearch = [...new Set(pagesToSearch)];
 
     const rankings: Map<string, ScoreSaberPlayerToken> = new Map();
     for (const page of pagesToSearch) {
