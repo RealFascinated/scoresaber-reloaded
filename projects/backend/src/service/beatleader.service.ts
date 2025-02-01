@@ -243,10 +243,16 @@ export default class BeatLeaderService {
       return undefined;
     }
 
-    const previous = await this.getPreviousAdditionalScoreData(current.playerId, current.scoreId);
+    const previous = await this.getPreviousAdditionalScoreData(
+      current.playerId,
+      current.songHash,
+      current.leaderboardId,
+      current.timestamp
+    );
     if (previous == undefined) {
       return undefined;
     }
+
     return this.getScoreStats(previous.scoreId);
   }
 
@@ -254,25 +260,36 @@ export default class BeatLeaderService {
    * Gets the player's previous additional score data for a map.
    *
    * @param playerId the player's id to get the previous additional score data for
-   * @param scoreId the score id to get the previous additional score data for
+   * @param songHash the hash of the map to get the previous additional score data for
+   * @param leaderboardId the leaderboard id to get the previous additional score data for
+   * @param timestamp the timestamp to get the previous additional score data for
    * @returns the additional score data, or undefined if none
    */
   public static async getPreviousAdditionalScoreData(
     playerId: string,
-    scoreId: number
+    songHash: string,
+    leaderboardId: string,
+    timestamp: Date
   ): Promise<AdditionalScoreData | undefined> {
     const scores: AdditionalScoreData[] = await AdditionalScoreDataModel.find({
       playerId: playerId,
-      // Ensure we get scores with a lower scoreId than the given one
-      scoreId: { $lt: scoreId },
-    }).sort({ scoreId: -1 });
+      songHash: songHash.toUpperCase(),
+    })
+      .sort({ timestamp: -1 })
+      .limit(1)
+      .lean();
 
     if (scores == null || scores.length == 0) {
       return undefined;
     }
 
-    // Get the first score before the given scoreId
-    return this.additionalScoreDataToObject(scores[0]);
+    const additionalData = scores.find(
+      score => score.timestamp.getTime() < timestamp.getTime() && score.leaderboardId === leaderboardId
+    );
+    if (additionalData == undefined) {
+      return undefined;
+    }
+    return this.additionalScoreDataToObject(additionalData);
   }
 
   /**
