@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import Card from "@/components/card";
-import ActivePlayersAndScoresSetChart from "@/components/platform-statistics/charts/active-players-and-scores-set-chart";
+import ScoreSaberStatisticsChart from "@/components/platform-statistics/charts/scoresaber-statistics-chart";
 import { GamePlatform } from "@ssr/common/model/statistics/game-platform";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 
@@ -35,7 +35,7 @@ export default async function TopScoresPage({ params }: StatisticsPageProps) {
         </div>
 
         {statistics ? (
-          <ActivePlayersAndScoresSetChart statistics={statistics.statistics} />
+          <ScoreSaberStatisticsChart statistics={statistics.statistics} />
         ) : (
           <div className="flex justify-center">
             <p>Missing data, nothing to display...</p>

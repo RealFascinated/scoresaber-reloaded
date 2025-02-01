@@ -129,7 +129,8 @@ app.use(
 app.use(
   cron({
     name: "update-scoresaber-statistics",
-    pattern: "30 23 * * *", // Every day at 23:30
+    pattern: "*/1 * * * *", // Every 1 minute
+    // pattern: "30 23 * * *", // Every day at 23:30
     timezone: "Europe/London", // UTC time
     protect: true,
     run: async () => {

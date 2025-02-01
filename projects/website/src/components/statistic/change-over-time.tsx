@@ -1,6 +1,6 @@
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
-import { capitalizeFirstLetter } from "../../../../common/src/string-utils";
+import { capitalizeFirstLetter } from "@ssr/common/string-utils";
 import Tooltip from "@/components/tooltip";
 import { ReactElement } from "react";
 import { PlayerStatValue } from "@ssr/common/player/player-stat-change";

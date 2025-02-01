@@ -46,20 +46,6 @@ export default class StatisticsService {
       return this.initPlatform(platform);
     }
 
-    // Insert latest data
-    switch (platform) {
-      case GamePlatform.ScoreSaber: {
-        const date = formatDateMinimal(getMidnightAlignedDate(new Date()));
-        const { uniquePlayers, totalScores } = await this.getScoreSaberStatistics();
-
-        foundPlatform.statistics[date] = {
-          [Statistic.ActivePlayers]: uniquePlayers,
-          [Statistic.TotalScores]: totalScores,
-        };
-        break;
-      }
-    }
-
     return foundPlatform;
   }
 
@@ -97,9 +83,20 @@ export default class StatisticsService {
         },
       },
     ]);
+
+    const scores = await ScoreSaberScoreModel.find({
+      timestamp: { $gte: getMidnightAlignedDate(new Date()) },
+      pp: { $gt: 0 },
+    })
+      .select({ pp: 1 }) // Use .select() instead of .projection()
+      .sort({ pp: -1 }) // Sort before limiting
+      .limit(100) // Limit the results
+      .lean(); // Convert to plain JavaScript objects
+
     return {
       uniquePlayers: statsResponse[0]?.uniquePlayers[0]?.uniquePlayers || 0,
       totalScores: statsResponse[0]?.totalScores[0]?.totalScores || 0,
+      averagePp: scores.reduce((total, score) => total + score.pp, 0) / scores.length,
     };
   }
 
@@ -107,10 +104,12 @@ export default class StatisticsService {
    * Tracks the statistics for ScoreSaber.
    */
   public static async trackScoreSaberStatistics() {
-    const { uniquePlayers, totalScores } = await this.getScoreSaberStatistics();
+    const { uniquePlayers, totalScores, averagePp } = await this.getScoreSaberStatistics();
+
     await Promise.all([
       this.trackStatisticToday(GamePlatform.ScoreSaber, Statistic.ActivePlayers, uniquePlayers),
       this.trackStatisticToday(GamePlatform.ScoreSaber, Statistic.TotalScores, totalScores),
+      this.trackStatisticToday(GamePlatform.ScoreSaber, Statistic.AveragePp, averagePp),
     ]);
   }
 }
