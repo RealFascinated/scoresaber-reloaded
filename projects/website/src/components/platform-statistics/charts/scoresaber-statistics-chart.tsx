@@ -15,7 +15,7 @@ const datasetConfig: DatasetConfig[] = [
   {
     title: "Active Players",
     field: "activePlayers",
-    color: "#8c97ff",
+    color: "#ff4f4f",
     axisId: "y",
     axisConfig: {
       reverse: false,
