@@ -17,11 +17,10 @@ export default class Service {
    * Logs a message to the console.
    *
    * @param data the data to log
-   * @param force log regardless of environment
    */
-  public log(data: unknown, force: boolean = false) {
-    // Only log in development
-    if (!isProduction() || force) {
+  public log(data: unknown) {
+    // Don't log on the backend
+    if (!isServer()) {
       Logger.info(`${data}`);
     }
   }
@@ -49,7 +48,9 @@ export default class Service {
       const response = await ky.get<T>(this.buildRequestUrl(!isServer(), url), options);
       if (response.headers.has("X-RateLimit-Remaining")) {
         const left = Number(response.headers.get("X-RateLimit-Remaining"));
-        this.log(`Rate limit remaining: ${left}`, left < 100);
+        if (left < 100) {
+          Logger.warn(`Rate limit for ${this.name} remaining: ${left}`);
+        }
       }
       return response.json();
     } catch (error) {
