@@ -1,7 +1,7 @@
-import {getModelForClass, modelOptions, prop, ReturnModelType, Severity} from "@typegoose/typegoose";
-import {Document} from "mongoose";
-import {HandAccuracy} from "./hand-accuracy";
-import {Misses} from "./misses";
+import { getModelForClass, modelOptions, prop, ReturnModelType, Severity } from "@typegoose/typegoose";
+import { Document } from "mongoose";
+import { HandAccuracy } from "./hand-accuracy";
+import { Misses } from "./misses";
 
 /**
  * The model for additional score data.
@@ -10,18 +10,6 @@ import {Misses} from "./misses";
   options: { allowMixed: Severity.ALLOW },
   schemaOptions: {
     collection: "additional-score-data",
-    toObject: {
-      virtuals: true,
-      transform: function (_, ret) {
-        delete ret._id;
-        delete ret.playerId;
-        delete ret.songHash;
-        delete ret.songDifficulty;
-        delete ret.songScore;
-        delete ret.__v;
-        return ret;
-      },
-    },
   },
 })
 export class AdditionalScoreData {

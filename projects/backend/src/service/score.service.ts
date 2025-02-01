@@ -144,7 +144,7 @@ export class ScoreService {
                 continue;
               }
 
-              const additionalData = await BeatLeaderService.getAdditionalScoreData(
+              const additionalData = await BeatLeaderService.getAdditionalScoreDataFromSong(
                 score.playerId,
                 leaderboard.songHash,
                 `${leaderboard.difficulty.difficulty}-${leaderboard.difficulty.characteristic}`,
@@ -587,7 +587,7 @@ export class ScoreService {
     }
 
     const [additionalData, previousScore] = await Promise.all([
-      BeatLeaderService.getAdditionalScoreData(
+      BeatLeaderService.getAdditionalScoreDataFromSong(
         score.playerId,
         leaderboard.songHash,
         `${leaderboard.difficulty.difficulty}-${leaderboard.difficulty.characteristic}`,

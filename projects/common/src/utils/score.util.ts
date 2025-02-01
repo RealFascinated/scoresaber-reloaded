@@ -1,16 +1,16 @@
-import {Leaderboards} from "../leaderboard";
-import {kyFetchJson} from "./utils";
+import { Leaderboards } from "../leaderboard";
+import { kyFetchJson } from "./utils";
 import PlayerScoresResponse from "../response/player-scores-response";
-import {Config} from "../config";
-import {ScoreSort} from "../score/score-sort";
+import { Config } from "../config";
+import { ScoreSort } from "../score/score-sort";
 import LeaderboardScoresResponse from "../response/leaderboard-scores-response";
-import {Page} from "../pagination";
-import {PlayerScore} from "../score/player-score";
+import { Page } from "../pagination";
+import { PlayerScore } from "../score/player-score";
 import ScoreSaberLeaderboard from "../model/leaderboard/impl/scoresaber-leaderboard";
 import Score from "../model/score/score";
-import {ScoreSaberScore} from "../model/score/impl/scoresaber-score";
-import {ScoreStatsToken} from "../types/token/beatleader/score-stats/score-stats";
-import {PreviousScore} from "../model/score/previous-score";
+import { ScoreSaberScore } from "../model/score/impl/scoresaber-score";
+import { PreviousScore } from "../model/score/previous-score";
+import { ScoreStatsResponse } from "../response/scorestats-response";
 
 /**
  * Fetches the player's scores
@@ -31,7 +31,7 @@ export async function fetchPlayerScoresHistory(playerId: string, leaderboardId: 
  * @param scoreId the id of the score
  */
 export async function fetchScoreStats(scoreId: number) {
-  return kyFetchJson<ScoreStatsToken>(`${Config.apiUrl}/scores/scorestats/${scoreId}`);
+  return kyFetchJson<ScoreStatsResponse>(`${Config.apiUrl}/scores/scorestats/${scoreId}`);
 }
 
 /**

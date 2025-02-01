@@ -217,6 +217,9 @@ export default class ScoresController {
       id: number;
     };
   }): Promise<unknown> {
-    return await BeatLeaderService.getScoreStats(id);
+    return {
+      current: await BeatLeaderService.getScoreStats(id),
+      previous: await BeatLeaderService.getPreviousScoreStats(id),
+    };
   }
 }

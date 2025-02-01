@@ -3,9 +3,10 @@ import { ScoreStatsToken } from "@ssr/common/types/token/beatleader/score-stats/
 import Tooltip from "@/components/tooltip";
 import { capitalizeFirstLetter } from "@ssr/common/string-utils";
 import ScoreAccuracyGrid from "@/components/score/score-accuracy-grid";
+import { ScoreStatsResponse } from "@ssr/common/response/scorestats-response";
 
 type ScoreAccuracyStatProps = {
-  scoreStats: ScoreStatsToken;
+  scoreStats: ScoreStatsResponse;
 };
 
 type Hand = "left" | "right";
@@ -121,10 +122,10 @@ export default function ScoreAccuracyStats({ scoreStats }: ScoreAccuracyStatProp
   return (
     <div className="flex flex-col gap-3 items-center justify-center">
       <div className="flex gap-3 items-center justify-center">
-        <HandAccuracy scoreStats={scoreStats} hand="left" />
-        <HandAccuracy scoreStats={scoreStats} hand="right" />
+        <HandAccuracy scoreStats={scoreStats.current} hand="left" />
+        <HandAccuracy scoreStats={scoreStats.current} hand="right" />
       </div>
-      <ScoreAccuracyGrid scoreStats={scoreStats} />
+      <ScoreAccuracyGrid scoreStats={scoreStats.current} />
     </div>
   );
 }

@@ -4,14 +4,14 @@ import { DatasetConfig } from "@/common/chart/types";
 import GenericChart from "@/components/chart/generic-chart";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
-import { ScoreStatsToken } from "@ssr/common/types/token/beatleader/score-stats/score-stats";
 import { formatTime } from "@ssr/common/utils/time-utils";
+import { ScoreStatsResponse } from "@ssr/common/response/scorestats-response";
 
 type Props = {
   /**
    * The score stats to use in the chart.
    */
-  scoreStats: ScoreStatsToken;
+  scoreStats: ScoreStatsResponse;
 
   /**
    * The leaderboard to the score was set on.
@@ -20,18 +20,25 @@ type Props = {
 };
 
 export default function PlayerScoreAccuracyChart({ scoreStats, leaderboard }: Props) {
-  const graph = scoreStats.scoreGraphTracker.graph;
+  const currentGraph = scoreStats.current.scoreGraphTracker.graph;
+  const previousGraph = scoreStats.previous?.scoreGraphTracker.graph;
+
+  console.log(currentGraph, previousGraph);
 
   const histories: Record<string, (number | null)[]> = {
     accuracy: [],
+    previousAccuracy: [],
     pp: [],
   };
   const labels: string[] = [];
 
-  for (let seconds = 0; seconds < graph.length; seconds++) {
+  for (let seconds = 0; seconds < currentGraph.length; seconds++) {
     labels.push(formatTime(seconds));
-    const acc = graph[seconds] * 100;
+    const acc = currentGraph[seconds] * 100;
     histories["accuracy"].push(acc);
+    if (previousGraph) {
+      histories["previousAccuracy"].push(previousGraph[seconds] * 100);
+    }
 
     if (leaderboard.ranked) {
       histories["pp"].push(scoresaberService.getPp(leaderboard.stars, acc));
@@ -51,6 +58,19 @@ export default function PlayerScoreAccuracyChart({ scoreStats, leaderboard }: Pr
         position: "left",
       },
       labelFormatter: (value: number) => `Accuracy: ${value.toFixed(2)}%`,
+    },
+    {
+      title: "Previous Accuracy",
+      field: "previousAccuracy",
+      color: "#d3a93e",
+      axisId: "y",
+      axisConfig: {
+        reverse: false,
+        display: true,
+        displayName: "Previous Accuracy",
+        position: "left",
+      },
+      labelFormatter: (value: number) => `Previous Accuracy: ${value.toFixed(2)}%`,
     },
     {
       title: "PP",

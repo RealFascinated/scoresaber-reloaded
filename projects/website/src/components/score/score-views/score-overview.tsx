@@ -1,13 +1,13 @@
 import PlayerScoreAccuracyChart from "@/components/leaderboard/page/chart/player-score-accuracy-chart";
-import { ScoreStatsToken } from "@ssr/common/types/token/beatleader/score-stats/score-stats";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import ScoreAccuracyStats from "@/components/score/score-accuracy-stats";
+import { ScoreStatsResponse } from "@ssr/common/response/scorestats-response";
 
 type ScoreOverviewProps = {
   /**
    * The score stats for this score.
    */
-  scoreStats?: ScoreStatsToken;
+  scoreStats?: ScoreStatsResponse;
 
   /**
    * The leaderboard the score was set on.

@@ -21,12 +21,12 @@ import { useIsMobile } from "@/hooks/use-is-mobile";
 
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import { ScoreStatsToken } from "@ssr/common/types/token/beatleader/score-stats/score-stats";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
 import LeaderboardScores from "@/components/leaderboard/leaderboard-scores";
 import { fetchScoreStats } from "@ssr/common/utils/score.util";
 import { Separator } from "@/components/ui/separator";
+import { ScoreStatsResponse } from "@ssr/common/response/scorestats-response";
 
 type Props = {
   highlightedPlayer?: ScoreSaberPlayer;
@@ -41,7 +41,7 @@ type Props = {
 };
 
 type DropdownData = {
-  scoreStats?: ScoreStatsToken;
+  scoreStats?: ScoreStatsResponse;
 };
 
 type Mode = {

@@ -1,6 +1,5 @@
 import {
   AdditionalScoreData,
-  AdditionalScoreDataDocument,
   AdditionalScoreDataModel,
 } from "@ssr/common/model/additional-score-data/additional-score-data";
 import { BeatLeaderScoreToken } from "@ssr/common/types/token/beatleader/score/score";
@@ -11,10 +10,11 @@ import { beatLeaderService } from "@ssr/common/service/impl/beatleader";
 import { isProduction, kyFetchBuffer } from "@ssr/common/utils/utils";
 import { PlayerDocument, PlayerModel } from "@ssr/common/model/player";
 import { ScoreStatsToken } from "@ssr/common/types/token/beatleader/score-stats/score-stats";
-import { ScoreStatsDocument, ScoreStatsModel } from "@ssr/common/model/score-stats/score-stats";
+import { ScoreStats, ScoreStatsDocument, ScoreStatsModel } from "@ssr/common/model/score-stats/score-stats";
 import { fetchWithCache } from "../common/cache.util";
 import CacheService, { ServiceCache } from "./cache.service";
 import Logger from "@ssr/common/logger";
+import { removeObjectFields } from "@ssr/common/object.util";
 
 export default class BeatLeaderService {
   /**
@@ -26,12 +26,12 @@ export default class BeatLeaderService {
    * @param songScore the score of the play
    * @private
    */
-  public static async getAdditionalScoreData(
+  public static async getAdditionalScoreDataFromSong(
     playerId: string,
     songHash: string,
     songDifficulty: string,
     songScore: number
-  ): Promise<AdditionalScoreDataDocument | undefined> {
+  ): Promise<AdditionalScoreData | undefined> {
     return fetchWithCache(
       CacheService.getCache(ServiceCache.AdditionalScoreData),
       `additional-score-data:${playerId}-${songHash}-${songDifficulty}-${songScore}`,
@@ -41,13 +41,29 @@ export default class BeatLeaderService {
           songHash: songHash.toUpperCase(),
           songDifficulty: songDifficulty,
           songScore: songScore,
-        });
+        }).lean();
         if (!additionalData) {
           return undefined;
         }
-        return additionalData;
+        return this.additionalScoreDataToObject(additionalData);
       }
     );
+  }
+
+  /**
+   * Gets the additional score data for a player's score.
+   *
+   * @param scoreId the id of the score
+   * @private
+   */
+  public static async getAdditionalScoreData(scoreId: number): Promise<AdditionalScoreData | undefined> {
+    const additionalData = await AdditionalScoreDataModel.findOne({
+      scoreId: scoreId,
+    }).lean();
+    if (!additionalData) {
+      return undefined;
+    }
+    return this.additionalScoreDataToObject(additionalData);
   }
 
   /**
@@ -117,9 +133,6 @@ export default class BeatLeaderService {
         } catch (error) {
           console.error(`Failed to save replay for ${score.id}: ${error}`);
         }
-
-        // Remove old replays
-        await this.cleanupScoreReplays(playerId, leaderboard.id);
       }
     }
 
@@ -181,38 +194,6 @@ export default class BeatLeaderService {
     );
   }
 
-  /**
-   * Cleans up the score replays for a player.
-   *
-   * @param playerId the player id to clean up
-   * @param leaderboardId the leaderboard to clean up for the player
-   */
-  public static async cleanupScoreReplays(playerId: string, leaderboardId: string) {
-    // todo: check premium status of the user and keep all replays.
-    const scores = await AdditionalScoreDataModel.find({ playerId: playerId, leaderboardId: leaderboardId })
-      .sort({
-        timestamp: -1,
-      })
-      .skip(3); // Store last 3 replays.
-
-    if (scores == null || scores.length == 0) {
-      return;
-    }
-
-    for (const score of scores) {
-      if (score.cachedReplayId == undefined) {
-        return;
-      }
-      try {
-        await MinioService.deleteFile(MinioBucket.BeatLeaderReplays, score.cachedReplayId);
-        score.cachedReplayId = undefined;
-        await score.save();
-      } catch (error) {
-        console.error(`Failed to delete replay for ${score.cachedReplayId}`, error);
-      }
-    }
-  }
-
   /*
    * Track score stats.
    *
@@ -234,18 +215,94 @@ export default class BeatLeaderService {
    *
    * @param scoreId the id of the score
    */
-  public static async getScoreStats(scoreId: number): Promise<ScoreStatsToken | undefined> {
-    const scoreStats = await ScoreStatsModel.findOne({ _id: scoreId });
+  public static async getScoreStats(scoreId: number): Promise<ScoreStats | undefined> {
+    const scoreStats = await ScoreStatsModel.findOne({ _id: scoreId }).lean();
     if (scoreStats == null) {
       const scoreStats = await beatLeaderService.lookupScoreStats(scoreId);
       if (scoreStats) {
-        return (await this.trackScoreStats(scoreId, scoreStats)).toObject();
+        return await this.trackScoreStats(scoreId, scoreStats);
       }
     }
 
     if (scoreStats == null) {
       return undefined;
     }
-    return scoreStats.toObject();
+    return this.scoreStatsToObject(scoreStats);
+  }
+
+  /**
+   * Gets the player's previous score stats for a map.
+   *
+   * @param scoreId the score id to get the previous score stats for
+   * @returns the score stats, or undefined if none
+   * @private
+   */
+  public static async getPreviousScoreStats(scoreId: number): Promise<ScoreStatsToken | undefined> {
+    const current = await this.getAdditionalScoreData(scoreId);
+    if (current == undefined) {
+      return undefined;
+    }
+
+    const previous = await this.getPreviousAdditionalScoreData(current.playerId, current.songHash, current.timestamp);
+    if (previous == undefined) {
+      return undefined;
+    }
+
+    return this.getScoreStats(previous.scoreId);
+  }
+
+  /**
+   * Gets the player's previous additional score data for a map.
+   *
+   * @param playerId the player's id to get the previous additional score data for
+   * @param songHash the hash of the map to get the previous additional score data for
+   * @param timestamp the timestamp to get the previous additional score data for
+   * @returns the additional score data, or undefined if none
+   */
+  public static async getPreviousAdditionalScoreData(
+    playerId: string,
+    songHash: string,
+    timestamp: Date
+  ): Promise<AdditionalScoreData | undefined> {
+    const scores: AdditionalScoreData[] = await AdditionalScoreDataModel.find({
+      playerId: playerId,
+      songHash: songHash.toUpperCase(),
+      timestamp: { $lt: timestamp },
+    })
+      .sort({ timestamp: -1 })
+      .lean();
+
+    if (scores == null || scores.length == 0) {
+      return undefined;
+    }
+
+    // Get the first score before the given scoreId
+    return scores[0];
+  }
+
+  /**
+   * Converts a database additional score data to a AdditionalScoreData.
+   *
+   * @param additionalData the additional score data to convert
+   * @returns the converted additional score data
+   * @private
+   */
+  private static additionalScoreDataToObject(additionalData: AdditionalScoreData): AdditionalScoreData {
+    return {
+      ...removeObjectFields<AdditionalScoreData>(additionalData, ["_id", "__v", "songDifficulty", "songScore"]),
+    } as AdditionalScoreData;
+  }
+
+  /**
+   * Converts a database score stats to a ScoreStats.
+   *
+   * @param scoreStats the score stats to convert
+   * @returns the converted score stats
+   * @private
+   */
+  private static scoreStatsToObject(scoreStats: ScoreStats): ScoreStats {
+    return {
+      ...removeObjectFields<ScoreStats>(scoreStats, ["_id", "__v"]),
+    } as ScoreStats;
   }
 }

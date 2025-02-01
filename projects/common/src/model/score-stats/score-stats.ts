@@ -1,9 +1,9 @@
-import {getModelForClass, modelOptions, prop, ReturnModelType, Severity} from "@typegoose/typegoose";
-import {Document} from "mongoose";
-import {type ScoreStatsHitTrackerToken} from "../../types/token/beatleader/score-stats/hit-tracker";
-import {type ScoreStatsAccuracyTrackerToken} from "../../types/token/beatleader/score-stats/accuracy-tracker";
-import {type ScoreStatsWinTrackerToken} from "../../types/token/beatleader/score-stats/win-tracker";
-import {type ScoreStatsGraphTrackerToken} from "../../types/token/beatleader/score-stats/score-graph-tracker";
+import { getModelForClass, modelOptions, prop, ReturnModelType, Severity } from "@typegoose/typegoose";
+import { Document } from "mongoose";
+import { type ScoreStatsHitTrackerToken } from "../../types/token/beatleader/score-stats/hit-tracker";
+import { type ScoreStatsAccuracyTrackerToken } from "../../types/token/beatleader/score-stats/accuracy-tracker";
+import { type ScoreStatsWinTrackerToken } from "../../types/token/beatleader/score-stats/win-tracker";
+import { type ScoreStatsGraphTrackerToken } from "../../types/token/beatleader/score-stats/score-graph-tracker";
 
 /**
  * The model for score stats.
@@ -12,14 +12,6 @@ import {type ScoreStatsGraphTrackerToken} from "../../types/token/beatleader/sco
   options: { allowMixed: Severity.ALLOW },
   schemaOptions: {
     collection: "beatleader-score-stats",
-    toObject: {
-      virtuals: true,
-      transform: function (_, ret) {
-        delete ret._id;
-        delete ret.__v;
-        return ret;
-      },
-    },
   },
 })
 export class ScoreStats {
