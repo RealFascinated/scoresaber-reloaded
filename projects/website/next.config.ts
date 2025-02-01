@@ -35,7 +35,7 @@ const nextConfig: NextConfig = {
     reactCompiler: true,
   },
   modularizeImports: {
-    "@radix-ui/react-icons": { transform: "@radix-ui/react-icons/dist/{{member}}" },
+    // "@radix-ui/react-icons": { transform: "@radix-ui/react-icons/dist/{{member}}" },
     "@heroicons/react/24/solid": { transform: "@heroicons/react/24/solid/{{member}}" },
     "@heroicons/react/24/outline": { transform: "@heroicons/react/24/outline/{{member}}" },
   },
