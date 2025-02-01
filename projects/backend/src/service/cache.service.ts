@@ -23,7 +23,7 @@ export default class CacheService {
   constructor() {
     const cacheInfo = {
       [ServiceCache.BeatSaver]: {
-        ttl: 1000 * 60 * 60 * 12, // 12 hours
+        ttl: 1000 * 60 * 60 * 2, // 2 hours
       },
       [ServiceCache.AppStatistics]: {
         ttl: 1000 * 60 * 60, // 1 hour
