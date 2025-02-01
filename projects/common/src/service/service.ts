@@ -1,6 +1,7 @@
 import ky from "ky";
 import { isProduction, isServer } from "../utils/utils";
 import { KyOptions } from "ky/distribution/types/options";
+import Logger from "../logger";
 
 export default class Service {
   /**
@@ -21,7 +22,7 @@ export default class Service {
   public log(data: unknown, force: boolean = false) {
     // Only log in development
     if (!isProduction() || force) {
-      console.log(`[${this.name}]: ${data}`);
+      Logger.info(`${data}`);
     }
   }
 

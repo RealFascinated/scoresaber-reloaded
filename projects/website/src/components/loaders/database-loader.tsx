@@ -5,6 +5,7 @@ import Database, { db } from "../../common/database/database";
 import FullscreenLoader from "./fullscreen-loader";
 import Settings from "@/common/database/types/settings";
 import { useLiveQuery } from "dexie-react-hooks";
+import Logger from "@ssr/common/logger";
 
 /**
  * The context for the database. This is used to access the database from within the app.
@@ -32,7 +33,7 @@ export default function DatabaseLoader({ children }: DatabaseLoaderProps) {
     loadDatabase().then(() => {
       db.on("ready", () => {
         const loadTime = (performance.now() - before).toFixed(0);
-        console.log(`Loaded database in ${loadTime}ms`);
+        Logger.info(`Loaded database in ${loadTime}ms`);
       });
     });
   }, []);

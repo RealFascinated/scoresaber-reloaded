@@ -1,3 +1,5 @@
+import Logger from "./logger";
+
 type DebugOptions = {
   added?: boolean;
   removed?: boolean;
@@ -126,7 +128,7 @@ export class SSRCache {
           this.remove(key);
         }
         if (this.debug.expired) {
-          console.log(
+          Logger.info(
             `Expired ${before - this.cache.size} objects from cache (before: ${before}, after: ${this.cache.size})`
           );
         }
@@ -143,13 +145,13 @@ export class SSRCache {
     const cachedObject = this.cache.get(key);
     if (cachedObject === undefined) {
       if (this.debug.missed) {
-        console.log(`Cache miss for key: ${key}, total misses: ${this.cacheMisses}`);
+        Logger.info(`Cache miss for key: ${key}, total misses: ${this.cacheMisses}`);
       }
       this.cacheMisses++;
       return undefined;
     }
     if (this.debug.fetched) {
-      console.log(`Retrieved ${key} from cache, total hits: ${this.cacheHits}`);
+      Logger.info(`Retrieved ${key} from cache, total hits: ${this.cacheHits}`);
     }
     this.cacheHits++;
     return cachedObject.value as T;
@@ -168,7 +170,7 @@ export class SSRCache {
     });
 
     if (this.debug.added) {
-      console.log(
+      Logger.info(
         `Inserted ${key} into cache, total keys: ${this.cache.size}, total hits: ${this.cacheHits}, total misses: ${this.cacheMisses}`
       );
     }
@@ -192,7 +194,7 @@ export class SSRCache {
     this.cache.delete(key);
 
     if (this.debug.removed) {
-      console.log(`Removed ${key} from cache`);
+      Logger.info(`Removed ${key} from cache`);
     }
   }
 

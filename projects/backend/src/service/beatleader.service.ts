@@ -14,6 +14,7 @@ import { ScoreStatsToken } from "@ssr/common/types/token/beatleader/score-stats/
 import { ScoreStatsDocument, ScoreStatsModel } from "@ssr/common/model/score-stats/score-stats";
 import { fetchWithCache } from "../common/cache.util";
 import CacheService, { ServiceCache } from "./cache.service";
+import Logger from "@ssr/common/logger";
 
 export default class BeatLeaderService {
   /**
@@ -175,7 +176,7 @@ export default class BeatLeaderService {
 
     await AdditionalScoreDataModel.create(data);
 
-    console.log(
+    Logger.info(
       `Tracked additional score data for "${scorePlayer.name}"(${playerId}), difficulty: ${difficultyKey}, score: ${score.baseScore} in ${Date.now() - before}ms`
     );
   }

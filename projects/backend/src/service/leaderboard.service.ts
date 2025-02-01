@@ -21,6 +21,7 @@ import { DiscordChannels, logToChannel } from "../bot/bot";
 import { EmbedBuilder } from "discord.js";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import { removeObjectFields } from "@ssr/common/object.util";
+import Logger from "@ssr/common/logger";
 
 export const SCORESABER_REQUEST_COOLDOWN = 60_000 / 300; // 300 requests per minute
 const CACHE_REFRESH_TIME = 1000 * 60 * 60 * 12; // 12 hours
@@ -253,12 +254,12 @@ export default class LeaderboardService {
     while (hasMorePages) {
       const response = await scoresaberService.lookupLeaderboards(page, { ranked: true });
       if (!response) {
-        console.warn(`Failed to fetch ranked leaderboards on page ${page}.`);
+        Logger.warn(`Failed to fetch ranked leaderboards on page ${page}.`);
         continue;
       }
 
       const totalPages = Math.ceil(response.metadata.total / response.metadata.itemsPerPage);
-      console.log(`Fetched ${response.leaderboards.length} ranked leaderboards on page ${page}/${totalPages}.`);
+      Logger.info(`Fetched ${response.leaderboards.length} ranked leaderboards on page ${page}/${totalPages}.`);
 
       for (const token of response.leaderboards) {
         const leaderboard = getScoreSaberLeaderboardFromToken(token);
@@ -299,7 +300,7 @@ export default class LeaderboardService {
     rankedMapDiffs: Map<string, LeaderboardDifficulty[]>
   ): Promise<number> {
     let updatedScores = 0;
-    console.log(`Processing ${leaderboards.length} leaderboards...`);
+    Logger.info(`Processing ${leaderboards.length} leaderboards...`);
 
     let checkedCount = 0;
     for (const leaderboard of leaderboards) {
@@ -312,7 +313,7 @@ export default class LeaderboardService {
       }
 
       if (!previousLeaderboard) {
-        console.warn(`Failed to find leaderboard for ${leaderboard.id}`);
+        Logger.warn(`Failed to find leaderboard for ${leaderboard.id}`);
         continue;
       }
 
@@ -325,11 +326,11 @@ export default class LeaderboardService {
       await this.saveLeaderboard(leaderboard.id + "", this.updateLeaderboardDifficulties(leaderboard, rankedMapDiffs));
 
       if (checkedCount % 100 === 0) {
-        console.log(`Checked ${checkedCount}/${leaderboards.length} leaderboards`);
+        Logger.info(`Checked ${checkedCount}/${leaderboards.length} leaderboards`);
       }
     }
 
-    console.log(`Finished processing ${updatedScores} leaderboard score updates.`);
+    Logger.info(`Finished processing ${updatedScores} leaderboard score updates.`);
     return updatedScores;
   }
 
@@ -385,12 +386,12 @@ export default class LeaderboardService {
    */
   private static async logLeaderboardChanges(update: LeaderboardUpdate): Promise<void> {
     if (update.rankedStatusChanged) {
-      console.log(
+      Logger.info(
         `Leaderboard "${update.leaderboard.id}" ranked status changed from ${update.previousLeaderboard?.ranked} to ${update.leaderboard.ranked}.`
       );
     }
     if (update.starCountChanged) {
-      console.log(
+      Logger.info(
         `Leaderboard "${update.leaderboard.id}" star count changed from ${update.previousLeaderboard?.stars} to ${update.leaderboard.stars}.`
       );
     }
@@ -497,13 +498,13 @@ Map: https://ssr.fascinated.cc/leaderboard/${leaderboard.id}
     while (hasMoreScores) {
       const response = await scoresaberService.lookupLeaderboardScores(leaderboardId + "", currentPage);
       if (!response) {
-        console.warn(`Failed to fetch scoresaber api scores for leaderboard "${leaderboardId}" on page ${currentPage}`);
+        Logger.warn(`Failed to fetch scoresaber api scores for leaderboard "${leaderboardId}" on page ${currentPage}`);
         currentPage++;
         await delay(SCORESABER_REQUEST_COOLDOWN);
         continue;
       }
       const totalPages = Math.ceil(response.metadata.total / response.metadata.itemsPerPage);
-      console.log(`Fetched scores for leaderboard "${leaderboardId}" on page ${currentPage}/${totalPages}`);
+      Logger.info(`Fetched scores for leaderboard "${leaderboardId}" on page ${currentPage}/${totalPages}`);
 
       scoreTokens.push(...response.scores);
       hasMoreScores = currentPage < totalPages;
@@ -526,7 +527,7 @@ Map: https://ssr.fascinated.cc/leaderboard/${leaderboard.id}
     score.weight = scoreToken.weight;
     score.rank = scoreToken.rank;
 
-    console.log(`Updated score ${score.id} for leaderboard ${leaderboard.fullName}, new pp: ${score.pp}`);
+    Logger.info(`Updated score ${score.id} for leaderboard ${leaderboard.fullName}, new pp: ${score.pp}`);
     await this.updatePreviousScores(score, leaderboard);
     return 1;
   }
@@ -551,7 +552,7 @@ Map: https://ssr.fascinated.cc/leaderboard/${leaderboard.id}
       await previousScore.save();
     }
 
-    console.log(
+    Logger.info(
       `Updated previous scores pp values on leaderboard ${leaderboard.fullName} for player ${score.playerId}`
     );
   }
@@ -590,7 +591,7 @@ Map: https://ssr.fascinated.cc/leaderboard/${leaderboard.id}
       await delay(SCORESABER_REQUEST_COOLDOWN);
     }
 
-    console.log(`Unranked ${totalUnranked} previously ranked leaderboards.`);
+    Logger.info(`Unranked ${totalUnranked} previously ranked leaderboards.`);
   }
 
   /**
@@ -599,7 +600,7 @@ Map: https://ssr.fascinated.cc/leaderboard/${leaderboard.id}
   private static async unrankLeaderboard(leaderboard: ScoreSaberLeaderboard): Promise<void> {
     const scores = await ScoreSaberScoreModel.find({ leaderboardId: leaderboard.id });
     if (!scores) {
-      console.warn(`Failed to fetch local scores in unrank for leaderboard "${leaderboard.id}".`);
+      Logger.warn(`Failed to fetch local scores in unrank for leaderboard "${leaderboard.id}".`);
       return;
     }
 
@@ -621,14 +622,14 @@ Map: https://ssr.fascinated.cc/leaderboard/${leaderboard.id}
         setDefaultsOnInsert: true,
       }
     );
-    console.log(`Previously ranked leaderboard "${leaderboard.id}" has been unranked.`);
+    Logger.info(`Previously ranked leaderboard "${leaderboard.id}" has been unranked.`);
   }
 
   /**
    * Refreshes the ranked status and stars of all ranked leaderboards.
    */
   public static async refreshRankedLeaderboards(): Promise<RefreshResult> {
-    console.log("Refreshing ranked leaderboards...");
+    Logger.info("Refreshing ranked leaderboards...");
     const before = Date.now();
     const { leaderboards, rankedMapDiffs } = await this.fetchAllRankedLeaderboards();
     const updatedScores = await this.processLeaderboardUpdates(leaderboards, rankedMapDiffs);
@@ -652,7 +653,7 @@ Map: https://ssr.fascinated.cc/leaderboard/${leaderboard.id}
    * Refreshes the qualified leaderboards
    */
   public static async refreshQualifiedLeaderboards(): Promise<RefreshResult> {
-    console.log("Refreshing qualified leaderboards...");
+    Logger.info("Refreshing qualified leaderboards...");
     const before = Date.now();
     const { leaderboards, rankedMapDiffs } = await this.fetchAllQualifiedLeaderboards();
     const updatedScores = await this.processLeaderboardUpdates(leaderboards, rankedMapDiffs);
@@ -686,12 +687,12 @@ Map: https://ssr.fascinated.cc/leaderboard/${leaderboard.id}
     while (hasMorePages) {
       const response = await scoresaberService.lookupLeaderboards(page, { qualified: true });
       if (!response) {
-        console.warn(`Failed to fetch qualified leaderboards on page ${page}.`);
+        Logger.warn(`Failed to fetch qualified leaderboards on page ${page}.`);
         continue;
       }
 
       const totalPages = Math.ceil(response.metadata.total / response.metadata.itemsPerPage);
-      console.log(`Fetched ${response.leaderboards.length} qualified leaderboards on page ${page}/${totalPages}.`);
+      Logger.info(`Fetched ${response.leaderboards.length} qualified leaderboards on page ${page}/${totalPages}.`);
 
       for (const token of response.leaderboards) {
         const leaderboard = getScoreSaberLeaderboardFromToken(token);

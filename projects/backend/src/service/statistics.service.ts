@@ -3,6 +3,7 @@ import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-sc
 import { GamePlatform } from "@ssr/common/model/statistics/game-platform";
 import { Statistic } from "@ssr/common/model/statistics/statistic";
 import { StatisticsModel } from "@ssr/common/model/statistics/statistics";
+import Logger from "@ssr/common/logger";
 
 export default class StatisticsService {
   constructor() {
@@ -83,7 +84,7 @@ export default class StatisticsService {
 
     foundPlatform.markModified("statistics");
     await foundPlatform.save();
-    console.log(`Successfully tracked ${statistic}: ${value} for ${platform} on ${date}`);
+    Logger.info(`Successfully tracked ${statistic}: ${value} for ${platform} on ${date}`);
   }
 
   public static async getScoreSaberStatistics() {

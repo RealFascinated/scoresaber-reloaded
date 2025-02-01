@@ -24,6 +24,7 @@ import { getDifficulty } from "@ssr/common/utils/song-utils";
 import { getPlayerStatisticChange } from "@ssr/common/utils/player-utils";
 import { PlayerHistory } from "@ssr/common/player/player-history";
 import { ScoreService } from "./score.service";
+import Logger from "@ssr/common/logger";
 
 const accountCreationLock: { [id: string]: Promise<PlayerDocument> } = {};
 
@@ -61,7 +62,7 @@ export class PlayerService {
       accountCreationLock[id] = (async () => {
         let newPlayer: PlayerDocument;
         try {
-          console.log(`Creating player "${id}"...`);
+          Logger.info(`Creating player "${id}"...`);
           newPlayer = (await PlayerModel.create({ _id: id })) as PlayerDocument;
           newPlayer.trackedSince = new Date();
           await newPlayer.save();
@@ -74,7 +75,7 @@ export class PlayerService {
             await logNewTrackedPlayer(playerToken);
           }
         } catch (err) {
-          console.log(`Failed to create player document for "${id}"`, err);
+          Logger.error(`Failed to create player document for "${id}"`, err);
           throw new InternalServerError(`Failed to create player document for "${id}"`);
         } finally {
           // Ensure the lock is always removed
@@ -316,11 +317,11 @@ export class PlayerService {
     const before = performance.now();
     const player = playerToken ? playerToken : await scoresaberService.lookupPlayer(foundPlayer.id);
     if (player == undefined) {
-      console.log(`Player "${foundPlayer.id}" not found on ScoreSaber`);
+      Logger.warn(`Player "${foundPlayer.id}" not found on ScoreSaber`);
       return;
     }
     if (player.inactive) {
-      console.log(`Player "${foundPlayer.id}" is inactive on ScoreSaber`);
+      Logger.info(`Player "${foundPlayer.id}" is inactive on ScoreSaber`);
       return;
     }
 
@@ -371,7 +372,7 @@ export class PlayerService {
     await PlayerService.updatePeakRank(foundPlayer.id, player);
 
     await foundPlayer.save();
-    console.log(`Tracked player "${foundPlayer.id}" in ${(performance.now() - before).toFixed(0)}ms`);
+    Logger.info(`Tracked player "${foundPlayer.id}" in ${(performance.now() - before).toFixed(0)}ms`);
   }
 
   /**
@@ -535,7 +536,7 @@ export class PlayerService {
    * @returns the total number of missing scores
    */
   public static async refreshAllPlayerScores(player: PlayerDocument): Promise<number> {
-    console.log(`Refreshing scores for ${player.id}...`);
+    Logger.info(`Refreshing scores for ${player.id}...`);
     let page = 1;
     let hasMorePages = true;
     let totalMissingScores = 0;
@@ -576,7 +577,7 @@ export class PlayerService {
     player.seededScores = true;
     await player.save();
 
-    console.log(`Finished refreshing scores for ${player.id}, total pages refreshed: ${page - 1}.`);
+    Logger.info(`Finished refreshing scores for ${player.id}, total pages refreshed: ${page - 1}.`);
     return totalMissingScores;
   }
 
@@ -586,10 +587,10 @@ export class PlayerService {
    * @returns the total number of missing scores
    */
   public static async refreshPlayerScores(): Promise<number> {
-    console.log(`Refreshing player score data...`);
+    Logger.info(`Refreshing player score data...`);
 
     const players = await PlayerModel.find({});
-    console.log(`Found ${players.length} players to refresh.`);
+    Logger.info(`Found ${players.length} players to refresh.`);
 
     let totalMissingScores = 0;
     for (const player of players) {
@@ -615,13 +616,13 @@ export class PlayerService {
     const players: ScoreSaberPlayerToken[] = [];
 
     // loop through pages to fetch the top players
-    console.log(`Fetching ${pages} pages of players from ScoreSaber...`);
+    Logger.info(`Fetching ${pages} pages of players from ScoreSaber...`);
     for (let i = 0; i < pages; i++) {
       // Check the first 50 pages
       const pageNumber = i + 1;
       const page = await scoresaberService.lookupPlayers(pageNumber);
       if (page === undefined) {
-        console.log(`Failed to fetch players on page ${pageNumber}, skipping page...`);
+        Logger.warn(`Failed to fetch players on page ${pageNumber}, skipping page...`);
         await delay(SCORESABER_REQUEST_COOLDOWN);
         continue;
       }
@@ -652,13 +653,13 @@ export class PlayerService {
       }
     }
 
-    console.log(`Tracking ${leftoverPlayers.length} leftover player statistics...`);
+    Logger.info(`Tracking ${leftoverPlayers.length} leftover player statistics...`);
     for (const player of leftoverPlayers) {
       await PlayerService.trackScoreSaberPlayer(player, trackTime);
       await delay(SCORESABER_REQUEST_COOLDOWN);
     }
 
-    console.log("Finished tracking player statistics.");
+    Logger.info("Finished tracking player statistics.");
   }
 
   /**

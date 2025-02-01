@@ -3,6 +3,7 @@ import { dirname, importx } from "@discordx/importer";
 import { ActivityType, EmbedBuilder } from "discord.js";
 import { Config } from "@ssr/common/config";
 import { isProduction } from "@ssr/common/utils/utils";
+import Logger from "@ssr/common/logger";
 
 export const guildId = "1295984874942894100";
 export enum DiscordChannels {
@@ -28,11 +29,11 @@ const client = new Client({
 });
 
 client.once("ready", () => {
-  console.log("Discord bot ready!");
+  Logger.info("Discord bot ready!");
 });
 
 export async function initDiscordBot() {
-  console.log("Initializing discord bot...");
+  Logger.info("Initializing discord bot...");
 
   client.once("ready", async () => {
     await client.initApplicationCommands();

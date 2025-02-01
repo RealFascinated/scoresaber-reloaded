@@ -6,6 +6,7 @@ import BeatSaverMapsMetric from "../metrics/impl/beatsaver-maps";
 import ScoresaberLeaderboardsMetric from "../metrics/impl/scoresaber-leaderboards";
 import BeatLeaderDataStatsMetric from "../metrics/impl/beatleader-score-data";
 import CacheStatisticsMetric from "../metrics/impl/cache-statistics";
+import Logger from "@ssr/common/logger";
 
 const influxClient = new InfluxDB({
   url: process.env.INFLUXDB_URL!,
@@ -33,7 +34,7 @@ export default class MetricsService {
       await this.writePoints(await Promise.all(this.metrics.map(metric => metric.collect())));
       const timeTaken = Date.now() - before;
       if (timeTaken > 3000) {
-        console.log(`SLOW!!! Collected and wrote metrics in ${timeTaken}ms`);
+        Logger.warn(`SLOW!!! Collected and wrote metrics in ${timeTaken}ms`);
       }
     }, 1000 * 5); // 5 seconds
   }
@@ -54,7 +55,7 @@ export default class MetricsService {
    */
   private async writePoints(points: (Point | Point[])[]): Promise<void> {
     if (points.length === 0) {
-      console.log("No points to write");
+      Logger.warn("No points to write");
       return;
     }
     writeApi.writePoints(points.flat());

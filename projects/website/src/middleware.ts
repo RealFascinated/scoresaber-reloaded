@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { isProduction } from "@ssr/common/utils/utils";
+import Logger from "@ssr/common/logger";
 
 export function middleware(request: NextRequest) {
   const playerId = request.cookies.get("playerId");
@@ -16,7 +17,7 @@ export function middleware(request: NextRequest) {
 
   // Log requests in production
   if (isProduction()) {
-    console.log(
+    Logger.info(
       ` ${isDesktopClient ? "[Desktop App] " : ""}${request.method} ${request.nextUrl.pathname}${request.nextUrl.search} ${response.status}`
     );
   }

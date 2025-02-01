@@ -1,4 +1,5 @@
 import { CacheStatistics, SSRCache } from "@ssr/common/cache";
+import Logger from "@ssr/common/logger";
 
 export enum ServiceCache {
   BeatSaver = "beatSaver",
@@ -61,7 +62,7 @@ export default class CacheService {
       CacheService.caches.set(cache as ServiceCache, new SSRCache(info));
     }
 
-    console.log(
+    Logger.info(
       `[CacheService] ${CacheService.caches.size} Caches: ${Array.from(CacheService.caches.keys()).join(", ")}`
     );
   }

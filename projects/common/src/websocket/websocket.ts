@@ -1,4 +1,5 @@
 import WebSocket from "ws";
+import Logger from "../logger";
 
 export type WebsocketCallbacks = {
   /**
@@ -38,11 +39,11 @@ export function connectWebSocket({ name, url, onMessage, onDisconnect }: Websock
     websocket = new WebSocket(url);
 
     websocket.onopen = () => {
-      console.log(`Connected to the ${name} WebSocket!`);
+      Logger.info(`Connected to the ${name} WebSocket!`);
     };
 
     websocket.onerror = event => {
-      console.error("WebSocket Error:", event);
+      Logger.error("WebSocket Error:", event);
       if (websocket) {
         websocket.close(); // Close the connection on error
       }
@@ -51,7 +52,7 @@ export function connectWebSocket({ name, url, onMessage, onDisconnect }: Websock
     };
 
     websocket.onclose = event => {
-      console.log(`Lost connection to the ${name} WebSocket. Attempting to reconnect...`);
+      Logger.info(`Lost connection to the ${name} WebSocket. Attempting to reconnect...`);
 
       onDisconnect && onDisconnect(event);
       setTimeout(connectWs, 5000); // Reconnect after 5 seconds
@@ -64,7 +65,7 @@ export function connectWebSocket({ name, url, onMessage, onDisconnect }: Websock
         const command = JSON.parse(messageEvent.data);
         onMessage && onMessage(command);
       } catch (err) {
-        console.warn(`Received invalid json message on ${name}:`, messageEvent.data);
+        Logger.warn(`Received invalid json message on ${name}:`, messageEvent.data);
       }
     };
   }

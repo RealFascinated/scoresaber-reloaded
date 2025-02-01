@@ -32,6 +32,7 @@ import ScoreSaberService from "./service/scoresaber.service";
 import BeatLeaderService from "./service/beatleader.service";
 import BeatSaverController from "./controller/beatsaver.controller";
 import { ScoreService } from "./service/score.service";
+import Logger from "@ssr/common/logger";
 
 // Load .env file
 if (await Bun.file(".env").exists()) {
@@ -230,7 +231,7 @@ app.use(
 );
 
 app.onStart(async () => {
-  console.log("Listening on port http://localhost:8080");
+  Logger.info("Listening on port http://localhost:8080");
   if (isProduction()) {
     await initDiscordBot();
   }

@@ -3,6 +3,7 @@ import { Config } from "@ssr/common/config";
 import * as dotenv from "@dotenvx/dotenvx";
 import { ScoreSaberPreviousScoreModel } from "@ssr/common/model/score/impl/scoresaber-previous-score";
 import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
+import Logger from "@ssr/common/logger";
 
 dotenv.config({
   path: ".env",
@@ -42,7 +43,7 @@ async function migrate() {
   ]);
 
   if (scoreGroups.length === 0) {
-    console.log("No scores to migrate");
+    Logger.info("No scores to migrate");
     return;
   }
 
@@ -65,15 +66,15 @@ async function migrate() {
         await ScoreSaberPreviousScoreModel.create(rest);
         await ScoreSaberScoreModel.deleteOne({ _id: _id });
 
-        console.log(`Migrated previous score ${_id} for ${playerId} on leaderboard ${leaderboardId}`);
+        Logger.info(`Migrated previous score ${_id} for ${playerId} on leaderboard ${leaderboardId}`);
         totalMigrated++;
       } catch (error) {
-        console.error(`Error migrating score ${_id}:`, error);
+        Logger.error(`Error migrating score ${_id}:`, error);
       }
     }
   }
 
-  console.log(`Finished migrating ${totalMigrated} scores`);
+  Logger.info(`Finished migrating ${totalMigrated} scores`);
 }
 
 await migrate();

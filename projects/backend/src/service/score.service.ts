@@ -32,6 +32,7 @@ import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score";
 import { Page, Pagination } from "@ssr/common/pagination";
 import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/leaderboard";
 import { removeObjectFields } from "@ssr/common/object.util";
+import Logger from "@ssr/common/logger";
 
 export class ScoreService {
   public static async lookupPlayerScores(
@@ -467,7 +468,7 @@ export class ScoreService {
       const { _id, ...rest } = previousScore.toObject();
       await ScoreSaberPreviousScoreModel.create(rest);
 
-      console.log(
+      Logger.info(
         [
           `Removed old score for "${playerName}"(${playerId})`,
           `leaderboard: ${leaderboard.id}`,
@@ -479,7 +480,7 @@ export class ScoreService {
     }
 
     await ScoreSaberScoreModel.create(score);
-    console.log(
+    Logger.info(
       [
         `Tracked ScoreSaber score for "${playerName}"(${playerId})`,
         `difficulty: ${score.difficulty}`,
@@ -505,7 +506,7 @@ export class ScoreService {
    * @returns the top scores
    */
   public static async getTopScores(amount: number = 100, timeframe: Timeframe) {
-    console.log(`Getting top scores for timeframe: ${timeframe}, limit: ${amount}...`);
+    Logger.info(`Getting top scores for timeframe: ${timeframe}, limit: ${amount}...`);
     const before = Date.now();
 
     let daysAgo = -1;
@@ -562,7 +563,7 @@ export class ScoreService {
       ScoreSaberLeaderboard
     >[];
 
-    console.log(
+    Logger.info(
       `Got ${filteredScores.length} scores in ${Date.now() - before}ms (timeframe: ${timeframe}, limit: ${amount})`
     );
     return filteredScores;
