@@ -64,7 +64,7 @@ export default function PlayerScoreAccuracyChart({ scoreStats, leaderboard }: Pr
       axisId: "y",
       axisConfig: {
         reverse: false,
-        display: true,
+        display: false,
         displayName: "Previous Accuracy",
         position: "left",
       },
