@@ -61,7 +61,7 @@ export default function PlayerScoreAccuracyChart({ scoreStats, leaderboard }: Pr
       title: "Previous Accuracy",
       field: "previousAccuracy",
       color: "#d3a93e",
-      axisId: "y",
+      axisId: "y1",
       axisConfig: {
         reverse: false,
         display: false,
@@ -74,7 +74,7 @@ export default function PlayerScoreAccuracyChart({ scoreStats, leaderboard }: Pr
       title: "PP",
       field: "pp",
       color: "#4858ff",
-      axisId: "y1",
+      axisId: "y2",
       axisConfig: {
         reverse: false,
         display: true,
