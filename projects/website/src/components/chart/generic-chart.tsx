@@ -1,7 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { Chart, LineElement, PointElement, LinearScale, CategoryScale, Legend, Tooltip, BarElement } from "chart.js";
+import {
+  Chart,
+  LineElement,
+  PointElement,
+  LinearScale,
+  CategoryScale,
+  Legend,
+  Tooltip,
+  BarElement,
+  BarController,
+} from "chart.js";
 import { Line } from "react-chartjs-2";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import {
@@ -18,7 +28,7 @@ import useSettings from "@/hooks/use-settings";
 import React, { useMemo } from "react";
 
 // Register only the required components
-Chart.register(LineElement, PointElement, BarElement, LinearScale, CategoryScale, Legend, Tooltip);
+Chart.register(LineElement, PointElement, BarElement, LinearScale, CategoryScale, Legend, Tooltip, BarController);
 
 export type ChartProps = {
   options?: { id: string; plugins?: any };
