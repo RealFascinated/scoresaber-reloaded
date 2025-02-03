@@ -1,13 +1,12 @@
-import { Metadata } from "next";
-import { redirect } from "next/navigation";
 import { LeaderboardData } from "@/components/leaderboard/page/leaderboard-data";
-import { LeaderboardResponse } from "@ssr/common/response/leaderboard-response";
-import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import { Config } from "@ssr/common/config";
-import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { ScoreModeEnum } from "@/components/score/score-mode";
 import { DetailType } from "@ssr/common/detail-type";
+import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
+import { LeaderboardResponse } from "@ssr/common/response/leaderboard-response";
 import { getDifficulty } from "@ssr/common/utils/song-utils";
+import { ssrApi } from "@ssr/common/utils/ssr-api";
+import { Metadata } from "next";
+import { redirect } from "next/navigation";
 
 export const revalidate = 300; // Revalidate every 5 minutes
 

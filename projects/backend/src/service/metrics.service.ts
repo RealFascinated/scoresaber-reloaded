@@ -29,14 +29,17 @@ export default class MetricsService {
     this.registerMetric(new BeatLeaderDataStatsMetric());
     this.registerMetric(new CacheStatisticsMetric());
 
-    setInterval(async () => {
-      const before = Date.now();
-      await this.writePoints(await Promise.all(this.metrics.map(metric => metric.collect())));
-      const timeTaken = Date.now() - before;
-      if (timeTaken > 3000) {
-        Logger.warn(`SLOW!!! Collected and wrote metrics in ${timeTaken}ms`);
-      }
-    }, 1000 * 5); // 5 seconds
+    setInterval(
+      async () => {
+        const before = Date.now();
+        await this.writePoints(await Promise.all(this.metrics.map(metric => metric.collect())));
+        const timeTaken = Date.now() - before;
+        if (timeTaken > 3000) {
+          Logger.warn(`SLOW!!! Collected and wrote metrics in ${timeTaken}ms`);
+        }
+      },
+      1000 * 60 * 5
+    ); // 5 minutes
   }
 
   /**
