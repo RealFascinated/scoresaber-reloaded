@@ -2,9 +2,6 @@ import Card from "@/components/card";
 import { MapStats } from "@/components/score/map-stats";
 import EmbedLinks from "@/components/embed-links";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
-import BeatSaverMapDifficulty from "@ssr/common/model/beatsaver/map-difficulty";
-import { formatNumber } from "@ssr/common/utils/number-utils";
-import { formatTime } from "@ssr/common/utils/time-utils";
 import { useState } from "react";
 
 type LeaderboardBeatSaverInfoProps = {
@@ -13,39 +10,6 @@ type LeaderboardBeatSaverInfoProps = {
    */
   beatSaverMap: BeatSaverMapResponse;
 };
-
-const mapStats = [
-  {
-    name: "BPM",
-    render: (map: BeatSaverMapResponse, difficulty: BeatSaverMapDifficulty) => {
-      return formatNumber(map.metadata.bpm);
-    },
-  },
-  {
-    name: "Notes",
-    render: (map: BeatSaverMapResponse, difficulty: BeatSaverMapDifficulty) => {
-      return formatNumber(difficulty.notes);
-    },
-  },
-  {
-    name: "NPS",
-    render: (map: BeatSaverMapResponse, difficulty: BeatSaverMapDifficulty) => {
-      return difficulty.nps.toFixed(2);
-    },
-  },
-  {
-    name: "NJS",
-    render: (map: BeatSaverMapResponse, difficulty: BeatSaverMapDifficulty) => {
-      return difficulty.njs;
-    },
-  },
-  {
-    name: "Length",
-    render: (map: BeatSaverMapResponse, difficulty: BeatSaverMapDifficulty) => {
-      return formatTime(map.metadata.duration);
-    },
-  },
-];
 
 const descriptionMaxSize = 300;
 

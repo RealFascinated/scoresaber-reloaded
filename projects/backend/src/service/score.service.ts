@@ -33,6 +33,7 @@ import { Page, Pagination } from "@ssr/common/pagination";
 import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/leaderboard";
 import { removeObjectFields } from "@ssr/common/object.util";
 import Logger from "@ssr/common/logger";
+import { DetailType } from "@ssr/common/detail-type";
 
 export class ScoreService {
   public static async lookupPlayerScores(
@@ -66,7 +67,10 @@ export class ScoreService {
         );
 
         const scorePromises = leaderboardScores.playerScores.map(async token => {
-          const leaderboardResponse = await LeaderboardService.getLeaderboard(token.leaderboard.id + "");
+          const leaderboardResponse = await LeaderboardService.getLeaderboard(token.leaderboard.id + "", {
+            includeBeatSaver: true,
+            type: DetailType.FULL,
+          });
 
           if (!leaderboardResponse) {
             return undefined;
