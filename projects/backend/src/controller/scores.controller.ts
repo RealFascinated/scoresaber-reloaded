@@ -45,11 +45,10 @@ export default class ScoresController {
     return await ScoreService.lookupPlayerScores(id, page, sort, search);
   }
 
-  @Get("/leaderboard/:leaderboard/:id/:page", {
+  @Get("/leaderboard/:id/:page", {
     config: {},
     tags: ["scores"],
     params: t.Object({
-      leaderboard: t.String({ required: true }),
       id: t.String({ required: true }),
       page: t.Number({ required: true }),
     }),
@@ -69,17 +68,16 @@ export default class ScoresController {
     },
   })
   public async getLeaderboardScores({
-    params: { leaderboard, id, page },
+    params: { id, page },
     query: { country },
   }: {
     params: {
-      leaderboard: Leaderboards;
       id: string;
       page: number;
     };
     query: { country?: string };
   }): Promise<unknown> {
-    return await ScoreService.getLeaderboardScores(leaderboard, id, page, country);
+    return await ScoreService.getLeaderboardScores(id, page, country);
   }
 
   @Get("/history/:playerId/:leaderboardId/:page", {

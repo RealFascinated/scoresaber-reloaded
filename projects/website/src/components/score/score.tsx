@@ -24,9 +24,9 @@ import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
 import LeaderboardScores from "@/components/leaderboard/leaderboard-scores";
-import { fetchScoreStats } from "@ssr/common/utils/score.util";
 import { Separator } from "@/components/ui/separator";
 import { ScoreStatsResponse } from "@ssr/common/response/scorestats-response";
+import { ssrApi } from "@ssr/common/utils/ssr-api";
 
 type Props = {
   highlightedPlayer?: ScoreSaberPlayer;
@@ -67,7 +67,7 @@ export default function Score({ leaderboard, beatSaverMap, score, settings, high
   const { data, isLoading } = useQuery<DropdownData>({
     queryKey: [`leaderboardDropdownData:${leaderboard.id}`, leaderboard.id, score.scoreId, isLeaderboardExpanded],
     queryFn: async () => {
-      return { scoreStats: score.additionalData ? await fetchScoreStats(score.additionalData.scoreId) : undefined };
+      return { scoreStats: score.additionalData ? await ssrApi.fetchScoreStats(score.additionalData.scoreId) : undefined };
     },
     staleTime: 30000,
     enabled: loading,

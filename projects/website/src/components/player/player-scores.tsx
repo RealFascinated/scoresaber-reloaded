@@ -16,11 +16,11 @@ import { ScoreSort } from "@ssr/common/score/score-sort";
 import { setCookieValue } from "@ssr/common/utils/cookie-utils";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import { fetchPlayerScores } from "@ssr/common/utils/score.util";
 import PlayerScoresResponse from "@ssr/common/response/player-scores-response";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { LoadingIcon } from "@/components/loading-icon";
 import usePageNavigation from "@/hooks/use-page-navigation";
+import { ssrApi } from "@ssr/common/utils/ssr-api";
 
 type Props = {
   initialScoreData?: PlayerScoresResponse<ScoreSaberScore, ScoreSaberLeaderboard>;
@@ -64,7 +64,7 @@ export default function PlayerScores({ initialSearch, player, sort, page }: Prop
   const { data, isError, isLoading } = useQuery({
     queryKey: ["playerScores", player.id, pageState, debouncedSearchTerm],
     queryFn: () =>
-      fetchPlayerScores<ScoreSaberScore, ScoreSaberLeaderboard>(
+      ssrApi.fetchPlayerScores<ScoreSaberScore, ScoreSaberLeaderboard>(
         player.id,
         pageState.page,
         pageState.sort,

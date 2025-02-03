@@ -8,7 +8,6 @@ import LeaderboardScore from "./page/leaderboard-score";
 import { scoreAnimation } from "@/components/score/score-animation";
 import { Button } from "@/components/ui/button";
 import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
-import { fetchLeaderboardScores } from "@ssr/common/utils/score.util";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import LeaderboardScoresSkeleton from "@/components/leaderboard/skeleton/leaderboard-scores-skeleton";
@@ -81,8 +80,7 @@ export default function LeaderboardScores({
     ],
     queryFn: async () => {
       if (selectedMode == ScoreModeEnum.Global) {
-        const leaderboard = await fetchLeaderboardScores<ScoreSaberScore, ScoreSaberLeaderboard>(
-          "scoresaber",
+        const leaderboard = await ssrApi.fetchLeaderboardScores<ScoreSaberScore, ScoreSaberLeaderboard>(
           selectedLeaderboardId + "",
           currentPage,
           filter.country

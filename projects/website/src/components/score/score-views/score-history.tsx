@@ -2,12 +2,12 @@
 
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import Score from "@/components/score/score";
-import { fetchPlayerScoresHistory } from "@ssr/common/utils/score.util";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import Pagination from "@/components/input/pagination";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { randomString } from "@ssr/common/utils/string.util";
+import { ssrApi } from "@ssr/common/utils/ssr-api";
 
 type ScoreHistoryProps = {
   /**
@@ -27,7 +27,7 @@ export function ScoreHistory({ playerId, leaderboard }: ScoreHistoryProps) {
 
   const { data, isError, isLoading } = useQuery({
     queryKey: [`scoresHistory:${leaderboard.id}`, leaderboard.id, page],
-    queryFn: async () => fetchPlayerScoresHistory(playerId, leaderboard.id + "", page),
+    queryFn: async () => ssrApi.fetchPlayerScoresHistory(playerId, leaderboard.id + "", page),
     staleTime: 30 * 1000,
   });
 

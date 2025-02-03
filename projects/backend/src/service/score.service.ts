@@ -102,76 +102,66 @@ export class ScoreService {
   /**
    * Gets scores for a leaderboard.
    *
-   * @param leaderboardName the leaderboard to get the scores from
    * @param leaderboardId the leaderboard id
    * @param page the page to get
    * @param country the country to get scores in
    * @returns the scores
    */
   public static async getLeaderboardScores(
-    leaderboardName: Leaderboards,
     leaderboardId: string,
     page: number,
     country?: string
   ): Promise<LeaderboardScoresResponse<unknown, unknown> | undefined> {
     return fetchWithCache(
       CacheService.getCache(ServiceCache.LeaderboardScores),
-      `leaderboard-scores:${leaderboardName}-${leaderboardId}-${page}-${country}`,
+      `leaderboard-scores:${leaderboardId}-${page}-${country}`,
       async () => {
         const scores: ScoreType[] = [];
         let leaderboard: Leaderboard | undefined;
         let beatSaverMap: BeatSaverMapResponse | undefined;
         let metadata: Metadata = new Metadata(0, 0, 0, 0); // Default values
 
-        switch (leaderboardName) {
-          case "scoresaber": {
-            const leaderboardResponse = await LeaderboardService.getLeaderboard(leaderboardId);
-            if (leaderboardResponse == undefined) {
-              throw new NotFoundError(`Leaderboard "${leaderboardName}" not found`);
-            }
-            leaderboard = leaderboardResponse.leaderboard;
-            beatSaverMap = leaderboardResponse.beatsaver;
-
-            const leaderboardScores = await scoresaberService.lookupLeaderboardScores(leaderboardId, page, country);
-            if (leaderboardScores == undefined) {
-              break;
-            }
-
-            for (const token of leaderboardScores.scores) {
-              const score = getScoreSaberScoreFromToken(
-                token,
-                leaderboardResponse.leaderboard,
-                token.leaderboardPlayerInfo.id
-              );
-              if (score == undefined) {
-                continue;
-              }
-
-              const additionalData = await BeatLeaderService.getAdditionalScoreDataFromSong(
-                score.playerId,
-                leaderboard.songHash,
-                `${leaderboard.difficulty.difficulty}-${leaderboard.difficulty.characteristic}`,
-                score.score
-              );
-              if (additionalData !== undefined) {
-                score.additionalData = additionalData;
-              }
-
-              scores.push(score);
-            }
-
-            metadata = new Metadata(
-              Math.ceil(leaderboardScores.metadata.total / leaderboardScores.metadata.itemsPerPage),
-              leaderboardScores.metadata.total,
-              leaderboardScores.metadata.page,
-              leaderboardScores.metadata.itemsPerPage
-            );
-            break;
-          }
-          default: {
-            throw new NotFoundError(`Leaderboard "${leaderboardName}" not found`);
-          }
+        const leaderboardResponse = await LeaderboardService.getLeaderboard(leaderboardId);
+        if (leaderboardResponse == undefined) {
+          throw new NotFoundError(`Leaderboard "${leaderboardId}" not found`);
         }
+        leaderboard = leaderboardResponse.leaderboard;
+        beatSaverMap = leaderboardResponse.beatsaver;
+
+        const leaderboardScores = await scoresaberService.lookupLeaderboardScores(leaderboardId, page, country);
+        if (leaderboardScores == undefined) {
+          return;
+        }
+
+        for (const token of leaderboardScores.scores) {
+          const score = getScoreSaberScoreFromToken(
+            token,
+            leaderboardResponse.leaderboard,
+            token.leaderboardPlayerInfo.id
+          );
+          if (score == undefined) {
+            continue;
+          }
+
+          const additionalData = await BeatLeaderService.getAdditionalScoreDataFromSong(
+            score.playerId,
+            leaderboard.songHash,
+            `${leaderboard.difficulty.difficulty}-${leaderboard.difficulty.characteristic}`,
+            score.score
+          );
+          if (additionalData !== undefined) {
+            score.additionalData = additionalData;
+          }
+
+          scores.push(score);
+        }
+
+        metadata = new Metadata(
+          Math.ceil(leaderboardScores.metadata.total / leaderboardScores.metadata.itemsPerPage),
+          leaderboardScores.metadata.total,
+          leaderboardScores.metadata.page,
+          leaderboardScores.metadata.itemsPerPage
+        );
 
         return {
           scores: scores,
