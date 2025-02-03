@@ -1,7 +1,6 @@
 import { DetailType } from "@ssr/common/detail-type";
 import Logger from "@ssr/common/logger";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import Leaderboard from "@ssr/common/model/leaderboard/leaderboard";
 import {
   ScoreSaberPreviousScoreDocument,
   ScoreSaberPreviousScoreModel,
@@ -14,7 +13,6 @@ import {
 import { ScoreType } from "@ssr/common/model/score/score";
 import { removeObjectFields } from "@ssr/common/object.util";
 import { Page, Pagination } from "@ssr/common/pagination";
-import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
 import LeaderboardScoresResponse from "@ssr/common/response/leaderboard-scores-response";
 import PlayerScoresResponse from "@ssr/common/response/player-scores-response";
 import { PlayerScore } from "@ssr/common/score/player-score";
