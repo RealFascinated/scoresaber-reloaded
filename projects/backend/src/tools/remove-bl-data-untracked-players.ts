@@ -5,11 +5,9 @@ import {
   AdditionalScoreDataDocument,
   AdditionalScoreDataModel,
 } from "@ssr/common/model/additional-score-data/additional-score-data";
-import { PlayerDocument, PlayerModel } from "@ssr/common/model/player";
+import { PlayerModel } from "@ssr/common/model/player";
 import { ScoreStatsDocument, ScoreStatsModel } from "@ssr/common/model/score-stats/score-stats";
 import mongoose from "mongoose";
-import { fetchWithCache } from "../common/cache.util";
-import CacheService, { ServiceCache } from "../service/cache.service";
 
 dotenv.config({
   path: ".env",
