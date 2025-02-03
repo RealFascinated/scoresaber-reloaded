@@ -241,7 +241,7 @@ export default class ScoreSaberService {
     }
 
     const [account, accuracies] = await Promise.all([
-      PlayerService.getPlayer(player.id, false, player),
+      PlayerService.getPlayer(player.id, false, player).catch(() => undefined),
       PlayerService.getPlayerAverageAccuracies(player.id),
     ]);
 
