@@ -4,6 +4,8 @@ import ScoreSaberStatisticsChart from "@/components/platform-statistics/charts/s
 import { GamePlatform } from "@ssr/common/model/statistics/game-platform";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 
+export const revalidate = 300; // Revalidate every 5 minutes
+
 export const metadata: Metadata = {
   title: "Statistics",
   openGraph: {

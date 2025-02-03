@@ -3,6 +3,8 @@ import RankingData from "@/components/ranking/ranking-data";
 import { ScoreSaberPlayersPageToken } from "@ssr/common/types/token/scoresaber/players-page";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 
+export const revalidate = 300; // Revalidate every 5 minutes
+
 const UNKNOWN_PAGE = {
   title: "ScoreSaber Reloaded - Unknown Page",
   description: "The page you were looking for could not be found.",

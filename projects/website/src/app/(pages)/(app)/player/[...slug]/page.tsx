@@ -2,11 +2,12 @@ import PlayerData from "@/components/player/player-data";
 import { Config } from "@ssr/common/config";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { ScoreSort } from "@ssr/common/score/score-sort";
-import { randomString } from "@ssr/common/utils/string.util";
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { getCookieValue } from "@ssr/common/utils/cookie-utils";
+
+export const revalidate = 300; // Revalidate every 5 minutes
 
 type Props = {
   params: Promise<{
@@ -64,6 +65,8 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     };
   }
 
+  const ogImageUrl = `${Config.apiUrl}/image/player/${player.id}`;
+
   return {
     title: `${player.name}`,
     openGraph: {
@@ -71,7 +74,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
       description: `Click here to view the scores for ${player.name}!`,
       images: [
         {
-          url: `${Config.apiUrl}/image/player/${player.id}?id=${randomString(8)}`,
+          url: ogImageUrl,
         },
       ],
     },

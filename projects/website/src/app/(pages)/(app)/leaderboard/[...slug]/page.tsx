@@ -7,6 +7,8 @@ import { Config } from "@ssr/common/config";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { ScoreModeEnum } from "@/components/score/score-mode";
 
+export const revalidate = 300; // Revalidate every 5 minutes
+
 type Props = {
   params: Promise<{
     slug: string[];
