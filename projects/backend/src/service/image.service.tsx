@@ -8,7 +8,11 @@ import { StarIcon } from "../../components/star-icon";
 import LeaderboardService from "./leaderboard.service";
 import ScoreSaberService from "./scoresaber.service";
 
-const imageOptions = { width: 1200, height: 630 };
+const imageOptions = {
+  width: 1200,
+  height: 630,
+  fonts: [{ name: "Roboto", data: await Bun.file("./src/common/font/Roboto-Medium.ttf").arrayBuffer() }],
+};
 
 export class ImageService {
   /**
