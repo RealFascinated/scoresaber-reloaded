@@ -11,14 +11,12 @@ type PpBoundaryProps = {
   player: ScoreSaberPlayer;
 };
 
-const boundariesCount = 100;
-
 export default function PpBoundaryStat({ player }: PpBoundaryProps) {
   const boundaries = player.ppBoundaries;
   const histories: Record<string, (number | null)[]> = {};
   const labels: string[] = [];
 
-  for (let boundary = 1; boundary <= boundariesCount + 1; boundary += 1) {
+  for (let boundary = 1; boundary <= boundaries.length + 1; boundary += 1) {
     const label = `+${boundary}pp`;
     labels.push(label);
 

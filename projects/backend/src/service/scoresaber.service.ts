@@ -185,7 +185,7 @@ export default class ScoreSaberService {
           account
             ? PlayerService.getPlayerAverageAccuracies(playerToken.id)
             : { unrankedAccuracy: 0, averageAccuracy: 0 },
-          account ? PlayerService.getPlayerPpBoundary(id, 100) : [],
+          account ? PlayerService.getPlayerPpBoundary(id, 50) : [],
           account ? PlayerService.getAccBadges(id) : {},
         ]);
 
