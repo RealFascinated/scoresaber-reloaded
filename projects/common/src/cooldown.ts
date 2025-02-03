@@ -18,19 +18,19 @@ export class Cooldown {
      * @returns true if the cooldown was ready and is now used, false if it wasn't ready
      */
     use(): boolean {
-        this.refreshBursts();
-        
-        if (this.remainingBursts > 0) {
-            this.remainingBursts--;
-            return true;
-        }
+      this.refreshBursts();
 
-        const now = Date.now();
-        if (now - this.lastUsed >= this.cooldownMs) {
-            this.lastUsed = now;
-            return true;
-        }
-        return false;
+      if (this.remainingBursts > 0) {
+        this.remainingBursts--;
+        return true;
+      }
+
+      const now = Date.now();
+      if (now - this.lastUsed >= this.cooldownMs) {
+        this.lastUsed = now;
+        return true;
+      }
+      return false;
     }
 
     private refreshBursts(): void {

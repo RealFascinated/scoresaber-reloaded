@@ -213,6 +213,9 @@ export default class PlayerController {
     params: t.Object({
       id: t.String({ required: true }),
     }),
+    query: t.Object({
+      superJson: t.Optional(t.Boolean({ default: false })),
+    }),
     detail: {
       responses: {
         200: {
@@ -225,11 +228,12 @@ export default class PlayerController {
   })
   public async getPlayerStarsChartData({
     params: { id },
+    query: { superJson },
   }: {
-    params: {
-      id: string;
-    };
+    params: { id: string };
+    query: { superJson: boolean };
   }): Promise<unknown> {
-    return SuperJSON.stringify(await PlayerService.getPlayerScoreChart(id));
+    const data = await PlayerService.getPlayerScoreChart(id);
+    return superJson ? SuperJSON.stringify(data) : data;
   }
 }

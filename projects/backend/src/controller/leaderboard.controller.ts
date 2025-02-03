@@ -17,6 +17,7 @@ export default class LeaderboardController {
     }),
     query: t.Object({
       type: t.Optional(t.Union([t.Literal("basic"), t.Literal("full")], { default: "basic" })),
+      superJson: t.Optional(t.Boolean({ default: false })),
     }),
     detail: {
       responses: {
@@ -30,14 +31,15 @@ export default class LeaderboardController {
   })
   public async getLeaderboard({
     params: { id },
-    query: { type },
+    query: { type, superJson },
   }: {
     params: {
       id: string;
     };
-    query: { type: DetailType };
+    query: { type: DetailType; superJson: boolean };
   }): Promise<unknown> {
-    return SuperJSON.stringify(await LeaderboardService.getLeaderboard(id, { type, includeBeatSaver: true }));
+    const data = await LeaderboardService.getLeaderboard(id, { type, includeBeatSaver: true });
+    return superJson ? SuperJSON.stringify(data) : data;
   }
 
   @Get("/by-hash/:id/:difficulty/:characteristic", {
@@ -50,6 +52,7 @@ export default class LeaderboardController {
     }),
     query: t.Object({
       type: t.Optional(t.Union([t.Literal("basic"), t.Literal("full")], { default: "basic" })),
+      superJson: t.Optional(t.Boolean({ default: false })),
     }),
     detail: {
       responses: {
@@ -63,17 +66,19 @@ export default class LeaderboardController {
   })
   public async getLeaderboardByHash({
     params: { id, difficulty, characteristic },
-    query: { type },
+    query: { type, superJson },
   }: {
     params: {
       id: string;
       difficulty: MapDifficulty;
       characteristic: MapCharacteristic;
-      };
-    query: { type: DetailType };
+    };
+    query: { type: DetailType; superJson: boolean };
   }): Promise<unknown> {
-    return SuperJSON.stringify(
-      await LeaderboardService.getLeaderboardByHash(id, difficulty, characteristic, { type, includeBeatSaver: true })
-    );
+    const data = await LeaderboardService.getLeaderboardByHash(id, difficulty, characteristic, {
+      type,
+      includeBeatSaver: true,
+    });
+    return superJson ? SuperJSON.stringify(data) : data;
   }
 }

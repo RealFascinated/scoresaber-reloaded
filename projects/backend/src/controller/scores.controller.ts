@@ -4,6 +4,7 @@ import { NotFoundError, t } from "elysia";
 import { Controller, Get } from "elysia-decorators";
 import BeatLeaderService from "../service/beatleader.service";
 import { ScoreService } from "../service/score.service";
+import SuperJSON from "superjson";
 
 @Controller("/scores")
 export default class ScoresController {
@@ -87,6 +88,9 @@ export default class ScoresController {
       leaderboardId: t.String({ required: true }),
       page: t.Number({ required: true }),
     }),
+    query: t.Object({
+      superJson: t.Optional(t.Boolean({ default: false })),
+    }),
     detail: {
       responses: {
         200: {
@@ -101,14 +105,17 @@ export default class ScoresController {
   })
   public async getScoreHistory({
     params: { playerId, leaderboardId, page },
+    query: { superJson },
   }: {
     params: {
       playerId: string;
       leaderboardId: string;
       page: number;
     };
+    query: { superJson: boolean };
   }): Promise<unknown> {
-    return (await ScoreService.getScoreHistory(playerId, leaderboardId, page)).toJSON();
+    const data = await ScoreService.getScoreHistory(playerId, leaderboardId, page);
+    return superJson ? SuperJSON.stringify(data) : data.toJSON();
   }
 
   @Get("/top", {
@@ -158,6 +165,7 @@ export default class ScoresController {
     }),
     query: t.Object({
       friendIds: t.String({ required: true }),
+      superJson: t.Optional(t.Boolean({ default: false })),
     }),
     detail: {
       responses: {
@@ -173,20 +181,20 @@ export default class ScoresController {
   })
   public async getFriendScores({
     params: { leaderboardId, page },
-    query: { friendIds },
+    query: { friendIds, superJson },
   }: {
     params: {
       leaderboardId: number;
       page: number;
     };
-    query: { friendIds: string };
+    query: { friendIds: string; superJson: boolean };
   }): Promise<unknown> {
     const ids = friendIds.split(",");
     if (ids.length === 0) {
-      // todo: proper error
       throw new NotFoundError("Malformed friend ids, must be a comma separated list of friend ids");
     }
-    return (await ScoreService.getFriendScores(ids, leaderboardId, page)).toJSON();
+    const data = await ScoreService.getFriendScores(ids, leaderboardId, page);
+    return superJson ? SuperJSON.stringify(data) : data.toJSON();
   }
 
   @Get("/scorestats/:id", {

@@ -48,7 +48,11 @@ class SSRApi {
    * @param characteristic the characteristic to get
    */
   async fetchLeaderboardByHash(hash: string, difficulty?: MapDifficulty, characteristic?: MapCharacteristic) {
-    const response = await kyFetchText(`${Config.apiUrl}/leaderboard/by-hash/${hash}/${difficulty}/${characteristic}`);
+    const response = await kyFetchText(`${Config.apiUrl}/leaderboard/by-hash/${hash}/${difficulty}/${characteristic}`, {
+      searchParams: {
+        superJson: true,
+      },
+    });
     if (response === undefined) {
       return undefined;
     }
@@ -64,6 +68,7 @@ class SSRApi {
     const response = await kyFetchText(`${Config.apiUrl}/leaderboard/by-id/${id}`, {
       searchParams: {
         type: type,
+        superJson: true,
       },
     });
     if (response === undefined) {
@@ -131,11 +136,16 @@ class SSRApi {
    * @param page the page
    */
   async getFriendScores(friendIds: string[], leaderboardId: string, page: number) {
-    return await kyFetchJson<Page<ScoreSaberScore>>(`${Config.apiUrl}/scores/friends/${leaderboardId}/${page}`, {
+    const response = await kyFetchText(`${Config.apiUrl}/scores/friends/${leaderboardId}/${page}`, {
       searchParams: {
         friendIds: friendIds.join(","),
+        superJson: true,
       },
     });
+    if (response === undefined) {
+      return undefined;
+    }
+    return SuperJSON.parse<Page<ScoreSaberScore>>(response);
   }
 
   /**
@@ -150,13 +160,11 @@ class SSRApi {
     options?: {
       createIfMissing?: boolean;
       type?: DetailType;
-      superJson?: boolean;
     }
   ) {
-    const superJson = options?.superJson ? options.superJson : true;
     const response = await kyFetchText(`${Config.apiUrl}/player/${playerId}`, {
       searchParams: {
-        ...(superJson ? { superJson: superJson } : {}),
+        superJson: true,
         ...(options?.createIfMissing ? { createIfMissing: options.createIfMissing } : {}),
         ...(options?.type ? { type: options.type } : {}),
       },
@@ -164,7 +172,7 @@ class SSRApi {
     if (response === undefined) {
       return undefined;
     }
-    return superJson ? SuperJSON.parse<ScoreSaberPlayer>(response) : JSON.parse(response);
+    return SuperJSON.parse<ScoreSaberPlayer>(response);
   }
 
   /**
@@ -174,7 +182,11 @@ class SSRApi {
    * @returns the score chart data
    */
   async getPlayerScoreChartData(playerId: string) {
-    const response = await kyFetchText(`${Config.apiUrl}/player/score-chart/${playerId}`);
+    const response = await kyFetchText(`${Config.apiUrl}/player/score-chart/${playerId}`, {
+      searchParams: {
+        superJson: true,
+      },
+    });
     if (response === undefined) {
       return undefined;
     }
@@ -182,16 +194,22 @@ class SSRApi {
   }
 
   /**
-   * Fetches the player's scores
+   * Fetches the player's scores history
    *
    * @param playerId the id of the player
    * @param leaderboardId the id of the leaderboard
    * @param page the page
    */
   async fetchPlayerScoresHistory(playerId: string, leaderboardId: string, page: number) {
-    return kyFetchJson<Page<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>>(
-      `${Config.apiUrl}/scores/history/${playerId}/${leaderboardId}/${page}`
-    );
+    const response = await kyFetchText(`${Config.apiUrl}/scores/history/${playerId}/${leaderboardId}/${page}`, {
+      searchParams: {
+        superJson: true,
+      },
+    });
+    if (response === undefined) {
+      return undefined;
+    }
+    return SuperJSON.parse<Page<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>>(response);
   }
 
   /**
