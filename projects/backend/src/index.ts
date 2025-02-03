@@ -1,38 +1,37 @@
-import { Elysia } from "elysia";
-import cors from "@elysiajs/cors";
-import { decorators } from "elysia-decorators";
-import { logger } from "@tqman/nice-logger";
-import { swagger } from "@elysiajs/swagger";
-import { helmet } from "elysia-helmet";
-import AppController from "./controller/app.controller";
 import * as dotenv from "@dotenvx/dotenvx";
-import mongoose from "mongoose";
-import PlayerController from "./controller/player.controller";
-import { PlayerService } from "./service/player.service";
+import cors from "@elysiajs/cors";
 import { cron } from "@elysiajs/cron";
-import { isProduction } from "@ssr/common/utils/utils";
-import ImageController from "./controller/image.controller";
-import { Config } from "@ssr/common/config";
-import ScoresController from "./controller/scores.controller";
-import LeaderboardController from "./controller/leaderboard.controller";
-import { getAppVersion } from "./common/app.util";
-import { connectScoresaberWebsocket } from "@ssr/common/websocket/scoresaber-websocket";
-import { connectBeatLeaderWebsocket } from "@ssr/common/websocket/beatleader-websocket";
-import { DiscordChannels, initDiscordBot, logToChannel } from "./bot/bot";
-import { EmbedBuilder } from "discord.js";
-import MetricsService from "./service/metrics.service";
-import LeaderboardService from "./service/leaderboard.service";
-import CacheService from "./service/cache.service";
-import { formatDuration } from "@ssr/common/utils/time-utils";
-import StatisticsService from "./service/statistics.service";
-import StatisticsController from "./controller/statistics.controller";
 import { serverTiming } from "@elysiajs/server-timing";
-import PlaylistController from "./controller/playlist.controller";
-import ScoreSaberService from "./service/scoresaber.service";
-import BeatLeaderService from "./service/beatleader.service";
-import BeatSaverController from "./controller/beatsaver.controller";
-import { ScoreService } from "./service/score.service";
+import { swagger } from "@elysiajs/swagger";
+import { Config } from "@ssr/common/config";
 import Logger from "@ssr/common/logger";
+import { formatDuration } from "@ssr/common/utils/time-utils";
+import { isProduction } from "@ssr/common/utils/utils";
+import { connectBeatLeaderWebsocket } from "@ssr/common/websocket/beatleader-websocket";
+import { connectScoresaberWebsocket } from "@ssr/common/websocket/scoresaber-websocket";
+import { logger } from "@tqman/nice-logger";
+import { EmbedBuilder } from "discord.js";
+import { Elysia } from "elysia";
+import { decorators } from "elysia-decorators";
+import { helmet } from "elysia-helmet";
+import mongoose from "mongoose";
+import { DiscordChannels, initDiscordBot, logToChannel } from "./bot/bot";
+import { getAppVersion } from "./common/app.util";
+import AppController from "./controller/app.controller";
+import BeatSaverController from "./controller/beatsaver.controller";
+import LeaderboardController from "./controller/leaderboard.controller";
+import PlayerController from "./controller/player.controller";
+import PlaylistController from "./controller/playlist.controller";
+import ScoresController from "./controller/scores.controller";
+import StatisticsController from "./controller/statistics.controller";
+import BeatLeaderService from "./service/beatleader.service";
+import CacheService from "./service/cache.service";
+import LeaderboardService from "./service/leaderboard.service";
+import MetricsService from "./service/metrics.service";
+import { PlayerService } from "./service/player.service";
+import { ScoreService } from "./service/score.service";
+import ScoreSaberService from "./service/scoresaber.service";
+import StatisticsService from "./service/statistics.service";
 
 // Load .env file
 if (await Bun.file(".env").exists()) {
@@ -189,7 +188,6 @@ app.use(
     controllers: [
       AppController,
       PlayerController,
-      ImageController,
       ScoresController,
       LeaderboardController,
       StatisticsController,
