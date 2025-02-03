@@ -13,7 +13,7 @@ import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { capitalizeFirstLetter, truncateText } from "@ssr/common/string-utils";
 import { InternalServerError } from "@ssr/common/error/internal-server-error";
 import { BadRequestError } from "@ssr/common/error/bad-request-error";
-import { generatePlaylistImage } from "../common/playlist.util";
+import { generatePlaylistImage, generateSnipePlaylistImage } from "../common/playlist.util";
 import { parseSnipePlaylistSettings } from "@ssr/common/snipe/snipe-playlist-utils";
 import { ScoreService } from "./score.service";
 
@@ -72,7 +72,14 @@ export default class PlaylistService {
         throw new NotFoundError(`Unable to create a snipe playlist for ${toSnipe} as one of the users isn't tracked.`);
       }
 
-      const rawScores = await ScoreService.getPlayerScores(toSnipe);
+      const rawScores = await ScoreService.getPlayerScores(toSnipe, {
+        includeLeaderboard: true,
+        projection: {
+          pp: 1,
+          accuracy: 1,
+          timestamp: 1,
+        },
+      });
       if (rawScores.length === 0) {
         throw new NotFoundError(`Unable to create a snipe playlist for ${toSnipe} as they have no scores.`);
       }
@@ -80,16 +87,12 @@ export default class PlaylistService {
       const scores: { score: ScoreSaberScore; leaderboard: ScoreSaberLeaderboard }[] = [];
       for (const playerScore of rawScores) {
         const score = playerScore.score as ScoreSaberScore;
-        const leaderboardResponse = await LeaderboardService.getLeaderboard(score.leaderboardId + "", {
-          cacheOnly: true,
-          includeBeatSaver: false,
-        });
-        if (!leaderboardResponse) {
-          continue; // Skip this score if no leaderboardResponse is found
+        const leaderboard = playerScore.leaderboard;
+        if (!leaderboard) {
+          continue;
         }
-        const { leaderboard } = leaderboardResponse;
 
-        if (settings?.starRange?.min && settings?.starRange?.max && leaderboard.ranked) {
+        if (settings?.starRange?.min && settings?.starRange?.max && leaderboard.stars > 0) {
           if (leaderboard.stars < settings.starRange.min || leaderboard.stars > settings.starRange.max) {
             continue; // Skip this score if it's not in the star range
           }
@@ -108,24 +111,12 @@ export default class PlaylistService {
       }
 
       const toSnipePlayer = await ScoreSaberService.getPlayer(toSnipe);
+
       return new Playlist(
         "scoresaber-snipe-" + toSnipe,
         `Snipe - ${truncateText(toSnipePlayer.name, 16)} (${capitalizeFirstLetter(settings.sort)})`,
         "ScoreSaber Reloaded",
-        await generatePlaylistImage("SSR", {
-          lines: [
-            {
-              text: "Snipe",
-              color: "#222222",
-              fontSize: 55,
-            },
-            {
-              text: truncateText(toSnipePlayer.name, 16)!,
-              color: "#222222",
-              fontSize: 45,
-            },
-          ],
-        }),
+        await generateSnipePlaylistImage(settings, toSnipePlayer),
         scores
           .sort((a, b) => {
             if (type === "top") {

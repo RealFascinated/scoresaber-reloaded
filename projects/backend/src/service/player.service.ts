@@ -175,28 +175,42 @@ export class PlayerService {
   }
 
   /**
+   * Ensures a player exists.
+   *
+   * @param playerId the player's id
+   */
+  private static async ensurePlayerExists(playerId: string): Promise<void> {
+    if (!(await PlayerService.playerExists(playerId))) {
+      throw new NotFoundError(`Player "${playerId}" not found`);
+    }
+  }
+
+  /**
+   * Gets the pp boundary scores for a player.
+   *
+   * @param playerId the player's id
+   * @returns the pp boundary scores
+   */
+  private static async getPlayerPpBoundaryScores(playerId: string): Promise<number[]> {
+    const playerScores = await ScoreService.getPlayerScores(playerId, {
+      ranked: true,
+      sort: "pp",
+      projection: { pp: 1 },
+      includeLeaderboard: false,
+    });
+
+    return playerScores.map(score => score.score.pp);
+  }
+
+  /**
    * Gets the pp boundary for a player.
    *
    * @param playerId the player's id
    * @param boundary the pp boundary
    */
   public static async getPlayerPpBoundary(playerId: string, boundary: number = 1): Promise<number[]> {
-    const scoresPps = await fetchWithCache<number[]>(
-      CacheService.getCache(ServiceCache.PPBoundary),
-      `pp-boundary-scores:${playerId}`,
-      async () => {
-        await PlayerService.getPlayer(playerId); // Ensure player exists
-        const playerScores = await ScoreService.getPlayerScores(playerId, {
-          ranked: true,
-          sort: "pp",
-          projection: {
-            pp: 1,
-          },
-        });
-        return playerScores.map(score => score.score.pp);
-      }
-    );
-
+    await this.ensurePlayerExists(playerId);
+    const scoresPps = await this.getPlayerPpBoundaryScores(playerId);
     if (scoresPps.length === 0) {
       return [0];
     }
@@ -215,22 +229,8 @@ export class PlayerService {
    * @param boundary the pp boundary
    */
   public static async getPlayerPpBoundaryFromScorePp(playerId: string, boundary: number = 1): Promise<number> {
-    const scoresPps = await fetchWithCache<number[]>(
-      CacheService.getCache(ServiceCache.PPBoundary),
-      `pp-boundary-scores:${playerId}`,
-      async () => {
-        await PlayerService.getPlayer(playerId); // Ensure player exists
-        const playerScores = await ScoreService.getPlayerScores(playerId, {
-          ranked: true,
-          sort: "pp",
-          projection: {
-            pp: 1,
-          },
-        });
-        return playerScores.map(score => score.score.pp);
-      }
-    );
-
+    await this.ensurePlayerExists(playerId);
+    const scoresPps = await this.getPlayerPpBoundaryScores(playerId);
     if (scoresPps.length === 0) {
       return 0;
     }
@@ -250,6 +250,8 @@ export class PlayerService {
     year: number,
     month: number
   ): Promise<PlayedMapsCalendarResponse> {
+    await this.ensurePlayerExists(playerId);
+
     return fetchWithCache(
       CacheService.getCache(ServiceCache.ScoreCalendar),
       `score-calendar:${playerId}-${year}-${month}`,
@@ -392,6 +394,7 @@ export class PlayerService {
         accuracy: 1,
         pp: 1,
       },
+      includeLeaderboard: false,
     });
 
     // Filter out any scores with invalid accuracy values
@@ -672,6 +675,7 @@ export class PlayerService {
     const scores = await ScoreService.getPlayerScores(playerId, {
       limit: 50,
       sort: "timestamp",
+      includeLeaderboard: false,
     });
 
     const hmds: Map<HMD, number> = new Map();
@@ -778,6 +782,7 @@ export class PlayerService {
       projection: {
         accuracy: 1,
       },
+      includeLeaderboard: false,
     });
 
     for (const playerScore of playerScores) {

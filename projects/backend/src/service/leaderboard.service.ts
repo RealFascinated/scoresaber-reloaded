@@ -90,15 +90,20 @@ export default class LeaderboardService {
       type?: DetailType;
     }
   ): Promise<LeaderboardResponse<ScoreSaberLeaderboard>> {
-    if (!options) {
-      options = {
-        includeBeatSaver: true,
-        type: DetailType.BASIC,
-      };
-    }
+    options = {
+      includeBeatSaver: true,
+      type: DetailType.BASIC,
+      ...options
+    };
+    const cacheKey = `${id}-${options.type}`;
 
-    return fetchWithCache(CacheService.getCache(ServiceCache.Leaderboards), `${id}-${options.type}`, async () => {
-      const cachedLeaderboard = await ScoreSaberLeaderboardModel.findById(id).lean();
+    return fetchWithCache(CacheService.getCache(ServiceCache.Leaderboards), cacheKey, async () => {
+      // Use index hint for faster query
+      const cachedLeaderboard = await ScoreSaberLeaderboardModel
+        .findById(id)
+        .hint({ _id: 1 })
+        .lean();
+        
       const { cached, foundLeaderboard } = this.validateCachedLeaderboard(cachedLeaderboard, options);
 
       let leaderboard = foundLeaderboard;
@@ -111,7 +116,30 @@ export default class LeaderboardService {
         leaderboard = await LeaderboardService.saveLeaderboard(id, getScoreSaberLeaderboardFromToken(leaderboardToken));
       }
 
-      return LeaderboardService.processLeaderboard(leaderboard, options, cached);
+      // Start BeatSaver fetch early in parallel if needed
+      const beatSaverPromise = options.includeBeatSaver 
+        ? BeatSaverService.getMap(
+            leaderboard.songHash,
+            leaderboard.difficulty.difficulty,
+            leaderboard.difficulty.characteristic,
+            options.type ?? DetailType.BASIC
+          )
+        : Promise.resolve(undefined);
+
+      // Process leaderboard while BeatSaver data is being fetched
+      const processedLeaderboard = this.leaderboardToObject(leaderboard);
+      if (!processedLeaderboard.fullName) {
+        processedLeaderboard.fullName = `${processedLeaderboard.songName} ${processedLeaderboard.songSubName}`.trim();
+      }
+
+      // Wait for BeatSaver data
+      const beatSaverMap = await beatSaverPromise;
+
+      return {
+        leaderboard: processedLeaderboard as ScoreSaberLeaderboard,
+        beatsaver: beatSaverMap,
+        cached: cached,
+      };
     });
   }
 
@@ -134,21 +162,25 @@ export default class LeaderboardService {
       type?: DetailType;
     }
   ): Promise<LeaderboardResponse<ScoreSaberLeaderboard>> {
-    if (!options) {
-      options = {
-        includeBeatSaver: true,
-        type: DetailType.BASIC,
-      };
-    }
+    options = {
+      includeBeatSaver: true,
+      type: DetailType.BASIC,
+      ...options
+    };
 
+    // Simplified cache key
     const cacheKey = `${hash}-${difficulty}-${characteristic}-${options.type}`;
 
     return fetchWithCache(CacheService.getCache(ServiceCache.Leaderboards), cacheKey, async () => {
-      const cachedLeaderboard = await ScoreSaberLeaderboardModel.findOne({
-        songHash: hash,
-        "difficulty.difficulty": difficulty,
-        "difficulty.characteristic": characteristic,
-      });
+      // Use compound index hint for faster query
+      const cachedLeaderboard = await ScoreSaberLeaderboardModel
+        .findOne({
+          songHash: hash,
+          "difficulty.difficulty": difficulty,
+          "difficulty.characteristic": characteristic,
+        })
+        .hint({ songHash: 1, "difficulty.difficulty": 1, "difficulty.characteristic": 1 })
+        .lean();
 
       const { cached, foundLeaderboard } = this.validateCachedLeaderboard(cachedLeaderboard, options);
 
@@ -167,7 +199,30 @@ export default class LeaderboardService {
         );
       }
 
-      return LeaderboardService.processLeaderboard(leaderboard, options, cached);
+      // Start BeatSaver fetch early in parallel if needed
+      const beatSaverPromise = options.includeBeatSaver
+        ? BeatSaverService.getMap(
+            leaderboard.songHash,
+            leaderboard.difficulty.difficulty,
+            leaderboard.difficulty.characteristic,
+            options.type ?? DetailType.BASIC
+          )
+        : Promise.resolve(undefined);
+
+      // Process leaderboard while BeatSaver data is being fetched
+      const processedLeaderboard = this.leaderboardToObject(leaderboard);
+      if (!processedLeaderboard.fullName) {
+        processedLeaderboard.fullName = `${processedLeaderboard.songName} ${processedLeaderboard.songSubName}`.trim();
+      }
+
+      // Wait for BeatSaver data
+      const beatSaverMap = await beatSaverPromise;
+
+      return {
+        leaderboard: processedLeaderboard as ScoreSaberLeaderboard,
+        beatsaver: beatSaverMap,
+        cached: cached,
+      };
     });
   }
 
@@ -627,7 +682,7 @@ Map: https://ssr.fascinated.cc/leaderboard/${leaderboard.id}
   }
 
   /**
-   * Refreshes the ranked status and stars of all ranked leaderboards.
+   * Refreshes the ranked leaderboards
    */
   public static async refreshRankedLeaderboards(): Promise<RefreshResult> {
     Logger.info("Refreshing ranked leaderboards...");

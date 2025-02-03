@@ -1,7 +1,7 @@
-import {capitalizeFirstLetter, truncateText} from "@ssr/common/string-utils";
-import SSRImage, {ImageTextOptions} from "./ssr-image";
-import {SnipeSettings} from "@ssr/common/snipe/snipe-settings-schema";
-import ScoreSaberService from "../service/scoresaber.service";
+import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
+import { SnipeSettings } from "@ssr/common/snipe/snipe-settings-schema";
+import { capitalizeFirstLetter, truncateText } from "@ssr/common/string-utils";
+import SSRImage, { ImageTextOptions } from "./ssr-image";
 
 /**
  * Generates a playlist image for a Snipe
@@ -10,8 +10,7 @@ import ScoreSaberService from "../service/scoresaber.service";
  * @param toSnipe the player to snipe
  * @returns the base64 encoded image
  */
-export async function generateSnipePlaylistImage(settings: SnipeSettings, toSnipe: string): Promise<string> {
-  const toSnipePlayer = await ScoreSaberService.getPlayer(toSnipe, "basic");
+export async function generateSnipePlaylistImage(settings: SnipeSettings, toSnipe: ScoreSaberPlayer): Promise<string> {
   const type = capitalizeFirstLetter(settings.sort);
 
   return generatePlaylistImage("SSR", {
@@ -22,7 +21,7 @@ export async function generateSnipePlaylistImage(settings: SnipeSettings, toSnip
         fontSize: 55,
       },
       {
-        text: truncateText(toSnipePlayer.name, 16)!,
+        text: truncateText(toSnipe.name, 16)!,
         color: "#222222",
         fontSize: 45,
       },
