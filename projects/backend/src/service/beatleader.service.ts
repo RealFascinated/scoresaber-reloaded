@@ -96,7 +96,20 @@ export default class BeatLeaderService {
    */
   public static async trackBeatLeaderScore(score: BeatLeaderScoreToken) {
     const before = Date.now();
+
     const { playerId, player: scorePlayer, leaderboard } = score;
+    const player: PlayerDocument | null = await fetchWithCache(
+      CacheService.getCache(ServiceCache.Players),
+      `player:${playerId}`,
+      async () => {
+        return await PlayerModel.findById(playerId);
+      }
+    );
+
+    // Only track for players that are being tracked
+    if (player == null) {
+      return;
+    }
 
     // The score has already been tracked, so ignore it.
     if (
@@ -118,8 +131,6 @@ export default class BeatLeaderService {
     // Only save replays in production
     let savedReplayId: string | undefined;
     if (isProduction()) {
-      const player: PlayerDocument | null = await PlayerModel.findById(playerId);
-
       // Cache replay for this score
       if (player && player.trackReplays) {
         try {
