@@ -7,6 +7,7 @@ import { Config } from "@ssr/common/config";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { ScoreModeEnum } from "@/components/score/score-mode";
 import { DetailType } from "@ssr/common/detail-type";
+import { getDifficulty } from "@ssr/common/utils/song-utils";
 
 export const revalidate = 300; // Revalidate every 5 minutes
 
@@ -71,19 +72,23 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   }
 
   const { leaderboard } = response.leaderboardResponse;
+  const difficulty = getDifficulty(leaderboard.difficulty.difficulty);
+
   return {
-    title: `${leaderboard.fullName} by ${leaderboard.songAuthorName}`,
+    title: `${leaderboard.fullName}`,
     openGraph: {
-      title: `ScoreSaber Reloaded - ${leaderboard.fullName}`,
-      description: `View the scores for ${leaderboard.songName} by ${leaderboard.songAuthorName}!`,
+      siteName: "ScoreSaber Reloaded",
+      title: `${leaderboard.fullName}`,
+      description: `Plays: ${leaderboard.plays} (${leaderboard.dailyPlays} Daily)
+Mapped by: ${leaderboard.songAuthorName}
+Difficulty: ${difficulty.alternativeName ?? difficulty.name}${leaderboard.stars > 0 ? ` (${leaderboard.stars}★)` : ""}
+
+Click here to view the scores for ${leaderboard.fullName}!`,
       images: [
         {
-          url: `${Config.apiUrl}/image/leaderboard/${leaderboard.id}`,
+          url: leaderboard.songArt,
         },
       ],
-    },
-    twitter: {
-      card: "summary_large_image",
     },
   };
 }

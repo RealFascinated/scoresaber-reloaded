@@ -79,12 +79,9 @@ PP: ${formatPp(player.pp)}pp
 Click here to view the scores for ${player.name}!`,
       images: [
         {
-          url: `${Config.apiUrl}/image/player/${player.id}`,
+          url: player.avatar,
         },
       ],
-    },
-    twitter: {
-      card: "summary_large_image",
     },
   };
 }
