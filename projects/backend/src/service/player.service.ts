@@ -807,6 +807,9 @@ export class PlayerService {
     startDate: Date,
     endDate: Date
   ): Promise<PlayerStatisticHistory> {
+    if (player.id == "76561198449412074") {
+      console.log(account);
+    }
     let history: PlayerStatisticHistory =
       account !== undefined ? account.getStatisticHistoryInRange(endDate, startDate) : {};
 
