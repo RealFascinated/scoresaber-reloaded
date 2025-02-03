@@ -6,7 +6,7 @@ import {type StatisticsType} from "./statistic-type";
 /**
  * The model for a Game Statistic.
  */
-@modelOptions({ options: { allowMixed: Severity.ALLOW } })
+@modelOptions({ options: { allowMixed: Severity.ALLOW }, schemaOptions: { collection: "statistics" } })
 export class Statistics {
   /**
    * The id of the statistic.
