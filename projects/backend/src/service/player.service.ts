@@ -807,7 +807,8 @@ export class PlayerService {
     startDate: Date,
     endDate: Date
   ): Promise<PlayerStatisticHistory> {
-    let history: PlayerStatisticHistory = account ? account.getStatisticHistoryInRange(startDate, endDate) : {};
+    let history: PlayerStatisticHistory =
+      account !== undefined ? account.getStatisticHistoryInRange(endDate, startDate) : {};
 
     if (history) {
       const todayDate = formatDateMinimal(getMidnightAlignedDate(new Date()));

@@ -56,8 +56,8 @@ export default class PlayerController {
       id: t.String({ required: true }),
     }),
     query: t.Object({
-      startDate: t.Optional(t.String({ default: getDaysAgoDate(50).toISOString() })),
-      endDate: t.Optional(t.String({ default: new Date().toISOString() })),
+      startDate: t.Optional(t.String({ default: new Date().toISOString() })),
+      endDate: t.Optional(t.String({ default: getDaysAgoDate(50).toISOString() })),
     }),
   })
   public async getPlayerHistory({
