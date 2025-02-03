@@ -7,7 +7,7 @@ import {type PeakRank} from "../player/peak-rank";
 /**
  * The model for a player.
  */
-@modelOptions({ options: { allowMixed: Severity.ALLOW } })
+@modelOptions({ options: { allowMixed: Severity.ALLOW }, schemaOptions: { collection: "players" } })
 export class Player {
   /**
    * The id of the player.
