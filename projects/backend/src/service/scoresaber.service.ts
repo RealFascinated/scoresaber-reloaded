@@ -2,10 +2,9 @@ import { fetchWithCache } from "../common/cache.util";
 import CacheService, { ServiceCache } from "./cache.service";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { NotFoundError } from "elysia";
-import ScoreSaberPlayer, { ScoreSaberBadge, ScoreSaberBio } from "@ssr/common/player/impl/scoresaber-player";
+import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import sanitize from "sanitize-html";
 import { PlayerHistory } from "@ssr/common/player/player-history";
-import { PlayerDocument } from "@ssr/common/model/player";
 import { PlayerService } from "./player.service";
 import { formatDateMinimal, getDaysAgoDate, getMidnightAlignedDate } from "@ssr/common/utils/time-utils";
 import { formatChange, getPageFromRank, isProduction } from "@ssr/common/utils/utils";
@@ -21,7 +20,6 @@ import ScoreSaberPlayerScoreToken from "@ssr/common/types/token/scoresaber/playe
 import { ScoreService } from "./score.service";
 import { getPlayerStatisticChanges } from "@ssr/common/utils/player-utils";
 import { DetailType } from "@ssr/common/detail-type";
-import Logger from "@ssr/common/logger";
 
 export default class ScoreSaberService {
   /**
