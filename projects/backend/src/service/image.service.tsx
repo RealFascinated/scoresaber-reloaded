@@ -1,10 +1,11 @@
-import { ImageResponse } from "@vercel/og";
-import React from "react";
+import { DetailType } from "@ssr/common/detail-type";
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
-import { StarIcon } from "../../components/star-icon";
-import { GlobeIcon } from "../../components/globe-icon";
-import LeaderboardService from "./leaderboard.service";
+import { ImageResponse } from "@vercel/og";
 import { NotFoundError } from "elysia";
+import React from "react";
+import { GlobeIcon } from "../../components/globe-icon";
+import { StarIcon } from "../../components/star-icon";
+import LeaderboardService from "./leaderboard.service";
 import ScoreSaberService from "./scoresaber.service";
 
 const imageOptions = { width: 1200, height: 630 };
@@ -30,40 +31,15 @@ export class ImageService {
   }
 
   /**
-   * Renders the change for a stat.
-   *
-   * @param change the amount of change
-   * @param format the function to format the value
-   */
-  private static renderDailyChange(change: number, format: (value: number) => string = formatNumberWithCommas) {
-    if (change === 0) {
-      return null;
-    }
-
-    return (
-      <p tw={`text-[23px] pl-1 m-0 ${change > 0 ? "text-green-400" : "text-red-400"}`}>
-        {change > 0 ? "+" : ""}
-        {format(change)}
-      </p>
-    );
-  }
-
-  /**
    * Generates the OpenGraph image for the player
    *
    * @param id the player's id
    */
   public static async generatePlayerImage(id: string) {
-    const player = await ScoreSaberService.getPlayer(id, "full");
+    const player = await ScoreSaberService.getPlayer(id, DetailType.BASIC);
     if (!player) {
       throw new NotFoundError(`Player "${id}" not found`);
     }
-
-    const { statisticChange } = player;
-    const { daily } = statisticChange ?? {};
-    const rankChange = daily?.countryRank ?? 0;
-    const countryRankChange = daily?.rank ?? 0;
-    const ppChange = daily?.pp ?? 0;
 
     return new ImageResponse(
       (
@@ -79,7 +55,6 @@ export class ImageService {
             {/* Player PP */}
             <div tw="flex justify-center items-center text-[33px]">
               <p tw="text-[#4858ff] m-0">{formatPp(player.pp)}pp</p>
-              {this.renderDailyChange(ppChange)}
             </div>
 
             {/* Player Stats */}
@@ -88,7 +63,6 @@ export class ImageService {
               <div tw="flex px-2 justify-center items-center">
                 <GlobeIcon />
                 <p tw="m-0">#{formatNumberWithCommas(player.rank)}</p>
-                {this.renderDailyChange(rankChange)}
               </div>
 
               {/* Player Country Rank */}
@@ -99,7 +73,6 @@ export class ImageService {
                   alt="Player's Country"
                 />
                 <p tw="pl-1 m-0">#{formatNumberWithCommas(player.countryRank)}</p>
-                {this.renderDailyChange(countryRankChange)}
               </div>
             </div>
 
@@ -130,7 +103,6 @@ export class ImageService {
       return undefined;
     }
     const { leaderboard } = response;
-
     const ranked = leaderboard.stars > 0;
 
     return new ImageResponse(

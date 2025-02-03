@@ -15,7 +15,8 @@ type OverlayPlayerInfoProps = {
 };
 
 export default function OverlayPlayerInfoView({ player }: OverlayPlayerInfoProps) {
-  const plusOnePp = player?.statisticHistory?.[formatDateMinimal(new Date())]?.plusOnePp;
+  const plusOnePp = player.statisticChange?.daily?.plusOnePp;
+  
   return (
     <div className="flex gap-2 text-2xl">
       <Image
