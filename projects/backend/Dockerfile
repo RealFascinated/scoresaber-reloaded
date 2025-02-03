@@ -25,10 +25,10 @@ RUN bun --filter '@ssr/common' build
 COPY --from=depends /app/projects/backend ./projects/backend
 
 # Lint before starting
-RUN bun --filter 'backend' lint
+RUN bun run --filter 'backend' lint
 
 # Build the backend
-RUN bun --filter 'backend' build
+RUN bun run --filter 'backend' build
 
 ARG PORT=8080
 ENV PORT $PORT
