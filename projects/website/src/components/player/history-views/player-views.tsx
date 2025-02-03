@@ -103,7 +103,7 @@ export default function PlayerViews({ player }: PlayerChartsProps) {
 
   const { data: statisticHistory } = useQuery({
     queryKey: ["player-statistic-history", player.id],
-    queryFn: () => ssrApi.getPlayerStatisticHistory(player.id, new Date(), getDaysAgoDate(30)),
+    queryFn: () => ssrApi.getPlayerStatisticHistory(player.id, new Date(), getDaysAgoDate(50)),
   });
 
   return (
