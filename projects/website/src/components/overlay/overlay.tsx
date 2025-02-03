@@ -26,6 +26,7 @@ export default function Overlay({ settings }: OverlayProps) {
     queryFn: async () =>
       ssrApi.getScoreSaberPlayer(settings.playerId, {
         superJson: true,
+        type: "full",
       }),
     refetchInterval: 1000 * 30,
   });

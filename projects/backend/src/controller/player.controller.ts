@@ -20,6 +20,7 @@ export default class PlayerController {
     }),
     query: t.Object({
       createIfMissing: t.Optional(t.Boolean({ default: false })),
+      type: t.Optional(t.Union([t.Literal("full"), t.Literal("basic")], { default: "full" })),
       superJson: t.Optional(t.Boolean({ default: false })),
     }),
     detail: {
@@ -34,12 +35,12 @@ export default class PlayerController {
   })
   public async getPlayer({
     params: { id },
-    query: { createIfMissing, superJson },
+    query: { createIfMissing, type, superJson },
   }: {
     params: { id: string };
-    query: { createIfMissing: boolean; superJson: boolean };
+    query: { createIfMissing: boolean; type: "full" | "basic"; superJson: boolean };
   }): Promise<ScoreSaberPlayer | string> {
-    const player = await ScoreSaberService.getPlayer(id, createIfMissing);
+    const player = await ScoreSaberService.getPlayer(id, type, createIfMissing);
     return superJson ? SuperJSON.stringify(player) : player;
   }
 

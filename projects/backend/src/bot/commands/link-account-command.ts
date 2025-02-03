@@ -24,7 +24,7 @@ export class LinkAccountCommand {
   ) {
     interaction.deferReply().then(async () => {
       try {
-        const scoreSaberUser = await ScoreSaberService.getPlayer(scoreSaberId);
+        const scoreSaberUser = await ScoreSaberService.getPlayer(scoreSaberId, "basic");
         const user = await getDiscordUser(interaction.user.id);
 
         user.scoreSaberId = scoreSaberId;

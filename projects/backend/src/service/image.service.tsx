@@ -54,7 +54,7 @@ export class ImageService {
    * @param id the player's id
    */
   public static async generatePlayerImage(id: string) {
-    const player = await ScoreSaberService.getPlayer(id);
+    const player = await ScoreSaberService.getPlayer(id, "full");
     if (!player) {
       throw new NotFoundError(`Player "${id}" not found`);
     }

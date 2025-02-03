@@ -11,7 +11,7 @@ import ScoreSaberService from "../service/scoresaber.service";
  * @returns the base64 encoded image
  */
 export async function generateSnipePlaylistImage(settings: SnipeSettings, toSnipe: string): Promise<string> {
-  const toSnipePlayer = await ScoreSaberService.getPlayer(toSnipe);
+  const toSnipePlayer = await ScoreSaberService.getPlayer(toSnipe, "basic");
   const type = capitalizeFirstLetter(settings.sort);
 
   return generatePlaylistImage("SSR", {

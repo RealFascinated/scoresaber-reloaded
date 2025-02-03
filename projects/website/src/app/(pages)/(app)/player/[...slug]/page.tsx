@@ -31,14 +31,14 @@ type PlayerData = {
  * @param params the params
  * @returns the player data and scores
  */
-const getPlayerData = async ({ params }: Props): Promise<PlayerData> => {
+const getPlayerData = async ({ params }: Props, type: "full" | "basic" = "full"): Promise<PlayerData> => {
   const { slug } = await params;
   const id = slug[0]; // The players id
   const sort: ScoreSort = (slug[1] as ScoreSort) || (await getCookieValue("lastScoreSort", ScoreSort.recent)); // The sorting method
   const page = parseInt(slug[2]) || 1; // The page number
   const search = (slug[3] as string) || ""; // The search query
 
-  const player = await ssrApi.getScoreSaberPlayer(id);
+  const player = await ssrApi.getScoreSaberPlayer(id, { type: type });
   return {
     sort: sort,
     page: page,
@@ -53,7 +53,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     description: "The player you were looking for could not be found.",
   };
 
-  const { player } = await getPlayerData(props);
+  const { player } = await getPlayerData(props, "basic");
   if (player === undefined) {
     return {
       title: UNKNOWN_PLAYER.title,
@@ -65,8 +65,6 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     };
   }
 
-  const ogImageUrl = `${Config.apiUrl}/image/player/${player.id}`;
-
   return {
     title: `${player.name}`,
     openGraph: {
@@ -74,7 +72,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
       description: `Click here to view the scores for ${player.name}!`,
       images: [
         {
-          url: ogImageUrl,
+          url: `${Config.apiUrl}/image/player/${player.id}`,
         },
       ],
     },

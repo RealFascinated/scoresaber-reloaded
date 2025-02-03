@@ -36,6 +36,7 @@ export default function PlayerData({ initialPlayerData, initialSearch, sort, pag
     queryFn: async (): Promise<ScoreSaberPlayer | undefined> =>
       ssrApi.getScoreSaberPlayer(player.id, {
         createIfMissing: settings?.playerId == player.id,
+        type: "full",
       }),
   });
 

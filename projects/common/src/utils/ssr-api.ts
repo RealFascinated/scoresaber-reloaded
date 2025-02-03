@@ -138,6 +138,7 @@ class SSRApi {
     playerId: string,
     options?: {
       createIfMissing?: boolean;
+      type?: "full" | "basic";
       superJson?: boolean;
     }
   ) {
@@ -146,6 +147,7 @@ class SSRApi {
       searchParams: {
         ...(superJson ? { superJson: superJson } : {}),
         ...(options?.createIfMissing ? { createIfMissing: options.createIfMissing } : {}),
+        ...(options?.type ? { type: options.type } : {}),
       },
     });
     if (response === undefined) {
