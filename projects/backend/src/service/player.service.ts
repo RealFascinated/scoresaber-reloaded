@@ -876,7 +876,7 @@ export class PlayerService {
       Object.entries(history).sort((a, b) => new Date(b[0]).getTime() - new Date(a[0]).getTime())
     );
 
-    if (account !== undefined && type === "full") {
+    if (account !== undefined) {
       for (const [date, statistic] of Object.entries(history)) {
         if (statistic.plusOnePp) {
           statistic.plusOnePp = Math.round(statistic.plusOnePp * Math.pow(10, 2)) / Math.pow(10, 2); // Round to 2 decimal places
