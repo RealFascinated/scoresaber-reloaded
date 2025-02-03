@@ -15,7 +15,7 @@ import {
 import { Axis, Dataset, DatasetConfig } from "@/common/chart/types";
 import { generateChartAxis, generateChartDataset } from "@/common/chart/chart.util";
 import useSettings from "@/hooks/use-settings";
-import { useMemo } from "react";
+import React, { useMemo } from "react";
 
 Chart.register(...registerables);
 
@@ -142,25 +142,46 @@ const GenericChart = ({ options, labels, datasetConfig, histories }: ChartProps)
     [axes, labels, datasetConfig, settings, id]
   );
 
+  // Memoize the no data checker logic
+  const showNoData = useMemo(() => {
+    if (datasetConfig.length === 1) {
+      for (const dataset of datasetConfig) {
+        const containsData = histories[dataset.field].some(value => value !== null);
+        if (!containsData) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }, [datasetConfig, histories]);
+
+  // Render the chart with collected data
   return (
-    <div className="block h-[360px] w-full relative">
-      <Line
-        className="max-w-[100%]"
-        options={chartOptions}
-        data={{ labels: formattedLabels, datasets: datasets as any }}
-        plugins={[
-          {
-            id: "legend-padding",
-            beforeInit: (chart: any) => {
-              const originalFit = chart.legend.fit;
-              chart.legend.fit = function () {
-                originalFit.bind(chart.legend)();
-                this.height += 2;
-              };
+    <div className="flex relative">
+      {showNoData ? (
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center z-[9999] bg-muted p-2 rounded-md">
+          <p className="text-red-500">No data available :(</p>
+        </div>
+      ) : null}
+      <div className="block h-[360px] w-full relative">
+        <Line
+          className="max-w-[100%]"
+          options={chartOptions}
+          data={{ labels: formattedLabels, datasets: datasets as any }}
+          plugins={[
+            {
+              id: "legend-padding",
+              beforeInit: (chart: any) => {
+                const originalFit = chart.legend.fit;
+                chart.legend.fit = function () {
+                  originalFit.bind(chart.legend)();
+                  this.height += 2;
+                };
+              },
             },
-          },
-        ]}
-      />
+          ]}
+        />
+      </div>
     </div>
   );
 };
