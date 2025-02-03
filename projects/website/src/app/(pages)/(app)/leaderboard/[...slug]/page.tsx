@@ -75,10 +75,10 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const difficulty = getDifficulty(leaderboard.difficulty.difficulty);
 
   return {
-    title: `${leaderboard.fullName}`,
+    title: `${leaderboard.fullName} - ${leaderboard.songAuthorName}`,
     openGraph: {
       siteName: "ScoreSaber Reloaded",
-      title: `${leaderboard.fullName}`,
+      title: `${leaderboard.fullName} - ${leaderboard.songAuthorName}`,
       description: `Plays: ${leaderboard.plays} (${leaderboard.dailyPlays} Daily)
 Mapped by: ${leaderboard.songAuthorName}
 Difficulty: ${difficulty.alternativeName ?? difficulty.name}${leaderboard.stars > 0 ? ` (${leaderboard.stars}★)` : ""}
@@ -89,6 +89,9 @@ Click here to view the scores for ${leaderboard.fullName}!`,
           url: leaderboard.songArt,
         },
       ],
+    },
+    twitter: {
+      card: "summary",
     },
   };
 }

@@ -83,6 +83,9 @@ Click here to view the scores for ${player.name}!`,
         },
       ],
     },
+    twitter: {
+      card: "summary",
+    },
   };
 }
 
