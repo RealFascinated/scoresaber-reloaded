@@ -134,10 +134,21 @@ export class Player {
     const statisticHistory = this.getStatisticHistory();
     const history: Record<string, PlayerHistory> = {};
 
+    // Align dates to midnight UTC to avoid timezone issues
+    const startTimestamp = getMidnightAlignedDate(startDate).getTime();
+    const endTimestamp = getMidnightAlignedDate(endDate).getTime();
+
     Object.keys(statisticHistory).forEach(date => {
-      const dateTimestamp = Date.parse(date);
-      if (dateTimestamp >= startDate.getTime() && dateTimestamp <= endDate.getTime()) {
-        history[date] = statisticHistory[date];
+      // Parse date and align to midnight UTC
+      const dateTimestamp = getMidnightAlignedDate(new Date(date)).getTime();
+
+      // Check if date falls within range
+      if (dateTimestamp >= startTimestamp && dateTimestamp <= endTimestamp) {
+        const playerHistory = statisticHistory[date];
+        // Only add if history exists and has data
+        if (playerHistory && Object.keys(playerHistory).length > 0) {
+          history[date] = playerHistory;
+        }
       }
     });
 

@@ -791,7 +791,6 @@ export class PlayerService {
 
     return badges;
   }
-
   /**
    * Gets the player's statistic history.
    *
@@ -854,8 +853,10 @@ export class PlayerService {
     });
     playerRankHistory.push(player.rank);
 
-    let daysAgo = 0; // Start from current day
-    for (let i = playerRankHistory.length; i >= 0; i--) {
+    const daysDiff = Math.ceil((startDate.getTime() - endDate.getTime()) / (1000 * 60 * 60 * 24));
+    let daysAgo = 0;
+
+    for (let i = playerRankHistory.length - 1; i >= Math.max(0, playerRankHistory.length - daysDiff - 1); i--) {
       const rank = playerRankHistory[i];
       if (rank == 999_999) {
         continue;
