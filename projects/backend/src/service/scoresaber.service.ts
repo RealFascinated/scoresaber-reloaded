@@ -142,7 +142,7 @@ export default class ScoreSaberService {
   public static async getPlayer(id: string, type: DetailType = DetailType.BASIC, createIfMissing?: boolean): Promise<ScoreSaberPlayer> {
     return fetchWithCache<ScoreSaberPlayer>(
       CacheService.getCache(ServiceCache.ScoreSaber),
-      `player:${id}`,
+      `player:${id}:${type}`,
       async () => {
         const playerToken = await scoresaberService.lookupPlayer(id);
         const account = await PlayerService.getPlayer(id, createIfMissing, playerToken).catch(() => undefined);
