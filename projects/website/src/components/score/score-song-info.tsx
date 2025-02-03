@@ -65,7 +65,7 @@ export default function ScoreSongInfo({ leaderboard, beatSaverMap, clickableSong
             <Link
               prefetch={false}
               href={`/leaderboard/${leaderboard.id}`}
-              className="cursor-pointer select-none hover:brightness-[66%] transform-gpu transition-all text-ssr w-fit"
+              className="cursor-pointer hover:brightness-[66%] transform-gpu transition-all text-ssr w-fit"
             >
               {leaderboard.fullName}
             </Link>

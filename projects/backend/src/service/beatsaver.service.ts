@@ -7,6 +7,7 @@ import { MapDifficulty } from "@ssr/common/score/map-difficulty";
 import { MapCharacteristic } from "@ssr/common/types/map-characteristic";
 import { getBeatSaverDifficulty } from "@ssr/common/utils/beatsaver.util";
 import { BeatSaverMapToken } from "@ssr/common/types/token/beatsaver/map";
+import { DetailType } from "@ssr/common/detail-type";
 
 export default class BeatSaverService {
   /**
@@ -240,21 +241,30 @@ export default class BeatSaverService {
     hash: string,
     difficulty: MapDifficulty,
     characteristic: MapCharacteristic,
+    type: DetailType = DetailType.BASIC,
     token?: BeatSaverMapToken
   ): Promise<BeatSaverMapResponse | undefined> {
-    const cacheKey = `map:${hash}-${difficulty}-${characteristic}`;
+    const cacheKey = `map:${hash}-${difficulty}-${characteristic}-${type}`;
     const cache = CacheService.getCache(ServiceCache.BeatSaver);
 
     return fetchWithCache(cache, cacheKey, async function () {
       const map = await BeatSaverService.getInternalMap(hash, token);
       if (!map) return undefined;
 
-      return {
+      const response = {
         hash,
         bsr: map.bsr,
         name: map.name,
-        description: map.description,
         author: map.author,
+      } as BeatSaverMapResponse;
+
+      if (type === DetailType.BASIC) {
+        return response;
+      }
+
+      return {
+        ...response,
+        description: map.description,
         metadata: map.metadata,
         songArt: `https://eu.cdn.beatsaver.com/${hash.toLowerCase()}.jpg`,
         difficulty: getBeatSaverDifficulty(map, hash, difficulty, characteristic),

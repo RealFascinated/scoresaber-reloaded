@@ -54,8 +54,12 @@ class SSRApi {
    *
    * @param id the id for the leaderboard
    */
-  async fetchLeaderboard(id: string) {
-    const response = await kyFetchText(`${Config.apiUrl}/leaderboard/by-id/${id}`);
+  async fetchLeaderboard(id: string, type: DetailType = DetailType.BASIC) {
+    const response = await kyFetchText(`${Config.apiUrl}/leaderboard/by-id/${id}`, {
+      searchParams: {
+        type: type,
+      },
+    });
     if (response === undefined) {
       return undefined;
     }

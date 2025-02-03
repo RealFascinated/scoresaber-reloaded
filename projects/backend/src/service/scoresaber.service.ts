@@ -1,25 +1,25 @@
-import { fetchWithCache } from "../common/cache.util";
-import CacheService, { ServiceCache } from "./cache.service";
-import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
-import { NotFoundError } from "elysia";
-import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import sanitize from "sanitize-html";
-import { PlayerHistory } from "@ssr/common/player/player-history";
-import { PlayerService } from "./player.service";
-import { formatDateMinimal, getDaysAgoDate, getMidnightAlignedDate } from "@ssr/common/utils/time-utils";
-import { formatChange, getPageFromRank, isProduction } from "@ssr/common/utils/utils";
-import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
 import { Config } from "@ssr/common/config";
-import { formatScoreAccuracy } from "@ssr/common/utils/score.util";
-import { getDifficultyName } from "@ssr/common/utils/song-utils";
-import { DiscordChannels, logToChannel } from "../bot/bot";
-import { EmbedBuilder } from "discord.js";
-import BeatSaverService from "./beatsaver.service";
+import { DetailType } from "@ssr/common/detail-type";
+import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
+import { PlayerHistory } from "@ssr/common/player/player-history";
+import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { getScoreSaberLeaderboardFromToken, getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 import ScoreSaberPlayerScoreToken from "@ssr/common/types/token/scoresaber/player-score";
-import { ScoreService } from "./score.service";
+import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
 import { getPlayerStatisticChanges } from "@ssr/common/utils/player-utils";
-import { DetailType } from "@ssr/common/detail-type";
+import { formatScoreAccuracy } from "@ssr/common/utils/score.util";
+import { getDifficultyName } from "@ssr/common/utils/song-utils";
+import { formatDateMinimal, getDaysAgoDate, getMidnightAlignedDate } from "@ssr/common/utils/time-utils";
+import { formatChange, getPageFromRank, isProduction } from "@ssr/common/utils/utils";
+import { EmbedBuilder } from "discord.js";
+import { NotFoundError } from "elysia";
+import sanitize from "sanitize-html";
+import { DiscordChannels, logToChannel } from "../bot/bot";
+import { fetchWithCache } from "../common/cache.util";
+import BeatSaverService from "./beatsaver.service";
+import CacheService, { ServiceCache } from "./cache.service";
+import { PlayerService } from "./player.service";
+import { ScoreService } from "./score.service";
 
 export default class ScoreSaberService {
   /**
@@ -50,7 +50,8 @@ export default class ScoreSaberService {
     const beatSaver = await BeatSaverService.getMap(
       leaderboard.songHash,
       leaderboard.difficulty.difficulty,
-      leaderboard.difficulty.characteristic
+      leaderboard.difficulty.characteristic,
+      DetailType.BASIC
     );
     const player = await scoresaberService.lookupPlayer(playerInfo.id);
     if (!player) {

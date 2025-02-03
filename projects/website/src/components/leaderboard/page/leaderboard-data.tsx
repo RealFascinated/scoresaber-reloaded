@@ -13,6 +13,7 @@ import { LeaderboardResponse } from "@ssr/common/response/leaderboard-response";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { ScoreModeEnum } from "@/components/score/score-mode";
+import { DetailType } from "@ssr/common/detail-type";
 
 type LeaderboardDataProps = {
   /**
@@ -38,7 +39,7 @@ export function LeaderboardData({ initialLeaderboard, initialPage, initialCatego
   const { data } = useQuery({
     queryKey: ["leaderboard", currentLeaderboardId],
     queryFn: async (): Promise<LeaderboardResponse<ScoreSaberLeaderboard> | undefined> => {
-      return ssrApi.fetchLeaderboard(currentLeaderboardId + "");
+      return ssrApi.fetchLeaderboard(currentLeaderboardId + "", DetailType.FULL);
     },
   });
 

@@ -5,14 +5,17 @@ import SuperJSON from "superjson";
 import { Swagger } from "../common/swagger";
 import { MapDifficulty } from "@ssr/common/score/map-difficulty";
 import { MapCharacteristic } from "@ssr/common/types/map-characteristic";
+import { DetailType } from "@ssr/common/detail-type";
 
 @Controller("/leaderboard")
 export default class LeaderboardController {
   @Get("/by-id/:id", {
     config: {},
-    tags: ["leaderboard"],
     params: t.Object({
       id: t.String({ required: true }),
+    }),
+    query: t.Object({
+      type: t.Optional(t.Union([t.Literal("basic"), t.Literal("full")], { default: "basic" })),
     }),
     detail: {
       responses: {
@@ -26,21 +29,25 @@ export default class LeaderboardController {
   })
   public async getLeaderboard({
     params: { id },
+    query: { type },
   }: {
     params: {
       id: string;
     };
+    query: { type: DetailType };
   }): Promise<unknown> {
-    return SuperJSON.stringify(await LeaderboardService.getLeaderboard(id));
+    return SuperJSON.stringify(await LeaderboardService.getLeaderboard(id, { type, includeBeatSaver: true }));
   }
 
   @Get("/by-hash/:id/:difficulty/:characteristic", {
     config: {},
-    tags: ["leaderboard"],
     params: t.Object({
       id: t.String({ required: true }),
       difficulty: t.String({ required: true }),
       characteristic: t.String({ required: true }),
+    }),
+    query: t.Object({
+      type: t.Optional(t.Union([t.Literal("basic"), t.Literal("full")], { default: "basic" })),
     }),
     detail: {
       responses: {
@@ -54,13 +61,17 @@ export default class LeaderboardController {
   })
   public async getLeaderboardByHash({
     params: { id, difficulty, characteristic },
+    query: { type },
   }: {
     params: {
       id: string;
       difficulty: MapDifficulty;
       characteristic: MapCharacteristic;
-    };
+      };
+    query: { type: DetailType };
   }): Promise<unknown> {
-    return SuperJSON.stringify(await LeaderboardService.getLeaderboardByHash(id, difficulty, characteristic));
+    return SuperJSON.stringify(
+      await LeaderboardService.getLeaderboardByHash(id, difficulty, characteristic, { type, includeBeatSaver: true })
+    );
   }
 }

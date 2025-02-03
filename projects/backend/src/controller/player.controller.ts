@@ -1,15 +1,16 @@
-import { Controller, Get, Post } from "elysia-decorators";
-import { PlayerService } from "../service/player.service";
-import { t } from "elysia";
+import { DetailType } from "@ssr/common/detail-type";
+import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerTrackedSince } from "@ssr/common/player/player-tracked-since";
 import { AroundPlayerResponse } from "@ssr/common/response/around-player-response";
-import { PpBoundaryResponse } from "@ssr/common/response/pp-boundary-response";
 import { PlayedMapsCalendarResponse } from "@ssr/common/response/played-maps-calendar-response";
+import { PpBoundaryResponse } from "@ssr/common/response/pp-boundary-response";
+import { t } from "elysia";
+import { Controller, Get, Post } from "elysia-decorators";
 import SuperJSON from "superjson";
-import ScoreSaberService from "../service/scoresaber.service";
-import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { Swagger } from "../common/swagger";
-import { DetailType } from "@ssr/common/detail-type";
+import { PlayerService } from "../service/player.service";
+import ScoreSaberService from "../service/scoresaber.service";
+
 @Controller("/player")
 export default class PlayerController {
   @Get("/:id", {

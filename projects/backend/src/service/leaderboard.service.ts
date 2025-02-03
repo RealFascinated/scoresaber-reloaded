@@ -22,6 +22,7 @@ import { EmbedBuilder } from "discord.js";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import { removeObjectFields } from "@ssr/common/object.util";
 import Logger from "@ssr/common/logger";
+import { DetailType } from "@ssr/common/detail-type";
 
 export const SCORESABER_REQUEST_COOLDOWN = 60_000 / 300; // 300 requests per minute
 const CACHE_REFRESH_TIME = 1000 * 60 * 60 * 12; // 12 hours
@@ -88,15 +89,17 @@ export default class LeaderboardService {
     options?: {
       cacheOnly?: boolean;
       includeBeatSaver?: boolean;
+      type?: DetailType;
     }
   ): Promise<LeaderboardResponse<ScoreSaberLeaderboard>> {
     if (!options) {
       options = {
         includeBeatSaver: true,
+        type: DetailType.BASIC,
       };
     }
 
-    return fetchWithCache(CacheService.getCache(ServiceCache.Leaderboards), id, async () => {
+    return fetchWithCache(CacheService.getCache(ServiceCache.Leaderboards), `${id}-${options.type}`, async () => {
       const cachedLeaderboard = await ScoreSaberLeaderboardModel.findById(id).lean();
       const { cached, foundLeaderboard } = this.validateCachedLeaderboard(cachedLeaderboard, options);
 
@@ -130,15 +133,17 @@ export default class LeaderboardService {
     options?: {
       cacheOnly?: boolean;
       includeBeatSaver?: boolean;
+      type?: DetailType;
     }
   ): Promise<LeaderboardResponse<ScoreSaberLeaderboard>> {
     if (!options) {
       options = {
         includeBeatSaver: true,
+        type: DetailType.BASIC,
       };
     }
 
-    const cacheKey = `${hash}-${difficulty}-${characteristic}`;
+    const cacheKey = `${hash}-${difficulty}-${characteristic}-${options.type}`;
 
     return fetchWithCache(CacheService.getCache(ServiceCache.Leaderboards), cacheKey, async () => {
       const cachedLeaderboard = await ScoreSaberLeaderboardModel.findOne({
@@ -211,6 +216,7 @@ export default class LeaderboardService {
     options: {
       cacheOnly?: boolean;
       includeBeatSaver?: boolean;
+      type?: DetailType;
     },
     cached: boolean
   ): Promise<LeaderboardResponse<ScoreSaberLeaderboard>> {
@@ -222,7 +228,8 @@ export default class LeaderboardService {
       ? await BeatSaverService.getMap(
           foundLeaderboard.songHash,
           foundLeaderboard.difficulty.difficulty,
-          foundLeaderboard.difficulty.characteristic
+          foundLeaderboard.difficulty.characteristic,
+          options.type ?? DetailType.BASIC
         )
       : undefined;
 

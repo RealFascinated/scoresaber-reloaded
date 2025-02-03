@@ -6,6 +6,7 @@ import { MapDifficulty } from "@ssr/common/score/map-difficulty";
 import { MapCharacteristic } from "@ssr/common/types/map-characteristic";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import SuperJSON, { SuperJSONResult } from "superjson";
+import { DetailType } from "@ssr/common/detail-type";
 
 @Controller("/beatsaver")
 export default class BeatSaverController {
@@ -16,6 +17,7 @@ export default class BeatSaverController {
       hash: t.String({ required: true }),
       difficulty: t.String({ required: true }),
       characteristic: t.String({ required: true }),
+      type: t.Optional(t.Union([t.Literal("basic"), t.Literal("full")], { default: "basic" })),
     }),
     detail: {
       responses: {
@@ -28,11 +30,11 @@ export default class BeatSaverController {
     },
   })
   public async getMap({
-    params: { hash, difficulty, characteristic },
+    params: { hash, difficulty, characteristic, type },
   }: {
-    params: { hash: string; difficulty: MapDifficulty; characteristic: MapCharacteristic };
+    params: { hash: string; difficulty: MapDifficulty; characteristic: MapCharacteristic; type: DetailType };
   }): Promise<SuperJSONResult> {
-    const map = await BeatSaverService.getMap(hash, difficulty, characteristic);
+    const map = await BeatSaverService.getMap(hash, difficulty, characteristic, type);
     if (!map) {
       throw new NotFoundError("BeatSaver map not found");
     }
