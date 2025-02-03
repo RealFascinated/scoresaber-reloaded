@@ -8,6 +8,8 @@ import {
 import { PlayerModel } from "@ssr/common/model/player";
 import { ScoreStatsDocument, ScoreStatsModel } from "@ssr/common/model/score-stats/score-stats";
 import mongoose from "mongoose";
+import { fetchWithCache } from "../common/cache.util";
+import CacheService, { ServiceCache } from "../service/cache.service";
 
 dotenv.config({
   path: ".env",
@@ -18,7 +20,7 @@ dotenv.config({
 await mongoose.connect(Config.mongoUri!); // Connect to MongoDB
 
 export async function cleanupAdditionalScoreData() {
-  const limit = 1000;
+  const limit = 2500;
   let removed = 0;
   let processed = 0;
   let lastId: number | null = null;
@@ -46,11 +48,19 @@ export async function cleanupAdditionalScoreData() {
     }
 
     for (const data of additionalScoreData) {
-      const player = await PlayerModel.findById(data.playerId);
+      const player = await fetchWithCache(
+        CacheService.getCache(ServiceCache.Players),
+        `player-ggg:${data.playerId}`,
+        async () => {
+          return await PlayerModel.exists({ _id: data.playerId });
+        }
+      );
+
       if (player == null) {
         await AdditionalScoreDataModel.deleteOne({ scoreId: data.scoreId });
         removed++;
       }
+
       processed++;
       lastId = data.scoreId;
     }
