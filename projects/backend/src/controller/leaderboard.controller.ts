@@ -11,6 +11,7 @@ import { DetailType } from "@ssr/common/detail-type";
 export default class LeaderboardController {
   @Get("/by-id/:id", {
     config: {},
+    tags: ["leaderboard"],
     params: t.Object({
       id: t.String({ required: true }),
     }),
@@ -41,6 +42,7 @@ export default class LeaderboardController {
 
   @Get("/by-hash/:id/:difficulty/:characteristic", {
     config: {},
+    tags: ["leaderboard"],
     params: t.Object({
       id: t.String({ required: true }),
       difficulty: t.String({ required: true }),

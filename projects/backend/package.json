@@ -24,20 +24,20 @@
     "@typescript-eslint/parser": "^8.22.0",
     "@vercel/og": "^0.6.5",
     "discordx": "^11.12.2",
-    "elysia": "^1.2.10",
+    "elysia": "^1.2.11",
     "elysia-autoroutes": "^0.5.0",
     "elysia-decorators": "^1.0.2",
     "elysia-helmet": "^2.0.0",
     "eslint": "^8.57.1",
     "ky": "^1.7.4",
     "minio": "^8.0.4",
-    "mongoose": "^8.9.5",
+    "mongoose": "^8.9.6",
     "node-cache": "^5.1.2",
     "probe-image-size": "^7.2.3",
     "react": "19.0.0"
   },
   "devDependencies": {
-    "bun-types": "^1.2.1"
+    "bun-types": "^1.2.2"
   },
   "module": "src/index.js"
 }
