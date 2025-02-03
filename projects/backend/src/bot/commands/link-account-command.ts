@@ -4,6 +4,7 @@ import { guildId } from "../bot";
 import { getDiscordUser } from "../../common/discord/user";
 import { createGenericEmbed } from "../../common/discord/embed";
 import ScoreSaberService from "../../service/scoresaber.service";
+import { DetailType } from "@ssr/common/detail-type";
 
 @Discord()
 export class LinkAccountCommand {
@@ -24,7 +25,7 @@ export class LinkAccountCommand {
   ) {
     interaction.deferReply().then(async () => {
       try {
-        const scoreSaberUser = await ScoreSaberService.getPlayer(scoreSaberId, "basic");
+        const scoreSaberUser = await ScoreSaberService.getPlayer(scoreSaberId, DetailType.BASIC);
         const user = await getDiscordUser(interaction.user.id);
 
         user.scoreSaberId = scoreSaberId;

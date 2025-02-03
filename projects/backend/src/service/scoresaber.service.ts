@@ -20,6 +20,8 @@ import { getScoreSaberLeaderboardFromToken, getScoreSaberScoreFromToken } from "
 import ScoreSaberPlayerScoreToken from "@ssr/common/types/token/scoresaber/player-score";
 import { ScoreService } from "./score.service";
 import { getPlayerStatisticChanges } from "@ssr/common/utils/player-utils";
+import { DetailType } from "@ssr/common/detail-type";
+import Logger from "@ssr/common/logger";
 
 export default class ScoreSaberService {
   /**
@@ -139,42 +141,60 @@ export default class ScoreSaberService {
    * @param createIfMissing creates the player if they don't have an account with us
    * @returns the player
    */
-  public static async getPlayer(id: string, type: "full" | "basic" = "basic", createIfMissing?: boolean): Promise<ScoreSaberPlayer> {
+  public static async getPlayer(id: string, type: DetailType = DetailType.BASIC, createIfMissing?: boolean): Promise<ScoreSaberPlayer> {
     return fetchWithCache<ScoreSaberPlayer>(
       CacheService.getCache(ServiceCache.ScoreSaber),
       `player:${id}`,
       async () => {
         const playerToken = await scoresaberService.lookupPlayer(id);
+        const account = await PlayerService.getPlayer(id, createIfMissing, playerToken).catch(() => undefined);
+
         if (!playerToken) {
           throw new NotFoundError(`Player "${id}" not found`);
         }
-        let account: PlayerDocument | undefined;
-        try {
-          account = await PlayerService.getPlayer(id, createIfMissing, playerToken);
 
-          // Update peak rank
-          account = await PlayerService.updatePeakRank(id, playerToken);
-        } catch {
-          // ignore
+        // For basic type, return early with minimal data
+        const basePlayer = {
+          id: playerToken.id,
+          name: playerToken.name,
+          avatar: playerToken.profilePicture,
+          country: playerToken.country,
+          rank: playerToken.rank,
+          countryRank: playerToken.countryRank,
+          pp: playerToken.pp,
+          hmd: await PlayerService.getPlayerHMD(playerToken.id),
+          joinedDate: new Date(playerToken.firstSeen),
+          role: playerToken.role ?? undefined,
+          permissions: playerToken.permissions,
+          banned: playerToken.banned,
+          inactive: playerToken.inactive,
+          isBeingTracked: account !== undefined,
+        } as ScoreSaberPlayer;
+
+        if (type === DetailType.BASIC) {
+          return basePlayer;
         }
 
-        const bio: ScoreSaberBio = {
-          lines: playerToken.bio ? sanitize(playerToken.bio).split("\n") : [],
-          linesStripped: playerToken.bio ? sanitize(playerToken.bio.replace(/<[^>]+>/g, "")).split("\n") : [], // strips html tags
-        };
-        const badges: ScoreSaberBadge[] =
-          playerToken.badges?.map(badge => {
-            return {
-              url: badge.image,
-              description: badge.description,
-            };
-          }) || [];
+        // For full type, run these operations in parallel
+        const [
+          updatedAccount,
+          accuracies,
+          ppBoundaries,
+          accBadges
+        ] = await Promise.all([
+          account ? PlayerService.updatePeakRank(id, playerToken) : undefined,
+          account ? PlayerService.getPlayerAverageAccuracies(playerToken.id) : { unrankedAccuracy: 0, averageAccuracy: 0 },
+          account ? PlayerService.getPlayerPpBoundary(id, 100) : [],
+          account ? PlayerService.getAccBadges(id) : {},
+        ]);
 
-        let statisticHistory: Record<string, PlayerHistory> = account && type === "full" ? account.getHistoryPreviousDays(50) : {};
+        // Process history data
+        let statisticHistory: Record<string, PlayerHistory> = 
+          account && type === "full" ? account.getHistoryPreviousDays(50) : {};
+        
         if (statisticHistory) {
           const todayDate = formatDateMinimal(getMidnightAlignedDate(new Date()));
           const historyElement = statisticHistory[todayDate];
-          const accuracies = await PlayerService.getPlayerAverageAccuracies(playerToken.id);
 
           statisticHistory[todayDate] = {
             ...historyElement,
@@ -246,48 +266,30 @@ export default class ScoreSaberService {
           }
         }
 
-        const response = {
-          id: playerToken.id,
-          name: playerToken.name,
-          avatar: playerToken.profilePicture,
-          country: playerToken.country,
-          rank: playerToken.rank,
-          bio: bio,
-          pp: playerToken.pp,
-          countryRank: playerToken.countryRank,
-          avatarColor: "#fff",
-          hmd: await PlayerService.getPlayerHMD(playerToken.id),
-          joinedDate: new Date(playerToken.firstSeen),
-          role: playerToken.role == null ? undefined : playerToken.role,
-          badges: badges,
-          statistics: playerToken.scoreStats,
-          rankPages: {
-            global: getPageFromRank(playerToken.rank, 50),
-            country: getPageFromRank(playerToken.countryRank, 50),
-          },
-          permissions: playerToken.permissions,
-          banned: playerToken.banned,
-          inactive: playerToken.inactive,
-          isBeingTracked: account !== undefined,
-        }  as ScoreSaberPlayer;
-
-        // Return basic player
-        if (type === "basic") {
-          return response;
-        }
-
-        // Return full player
         return {
-          ...response,
+          ...basePlayer,
+          bio: {
+            lines: playerToken.bio ? sanitize(playerToken.bio).split("\n") : [],
+            linesStripped: playerToken.bio ? sanitize(playerToken.bio.replace(/<[^>]+>/g, "")).split("\n") : [],
+          },
+          badges: playerToken.badges?.map(badge => ({
+            url: badge.image,
+            description: badge.description,
+          })) || [],
           statisticChange: {
             daily: account ? await getPlayerStatisticChanges(statisticHistory, 1) : {},
             weekly: account ? await getPlayerStatisticChanges(statisticHistory, 7) : {},
             monthly: account ? await getPlayerStatisticChanges(statisticHistory, 30) : {},
           },
-          statisticHistory: statisticHistory,
-          ppBoundaries: account ? await PlayerService.getPlayerPpBoundary(account.id, 100) : [],
-          accBadges: account ? await PlayerService.getAccBadges(account.id) : {},
-          peakRank: account ? account.peakRank : undefined,
+          statisticHistory,
+          ppBoundaries,
+          accBadges,
+          peakRank: updatedAccount?.peakRank,
+          statistics: playerToken.scoreStats,
+          rankPages: {
+            global: getPageFromRank(playerToken.rank, 50),
+            country: getPageFromRank(playerToken.countryRank, 50),
+          },
         } as ScoreSaberPlayer;
       }
     );

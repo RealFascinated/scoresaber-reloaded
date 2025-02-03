@@ -14,6 +14,7 @@ import useSettings from "@/hooks/use-settings";
 import dynamic from "next/dynamic";
 import useWindowDimensions from "@/hooks/use-window-dimensions";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
+import { DetailType } from "@ssr/common/detail-type";
 
 const Mini = dynamic(() => import("../ranking/mini"), { ssr: false });
 
@@ -36,7 +37,7 @@ export default function PlayerData({ initialPlayerData, initialSearch, sort, pag
     queryFn: async (): Promise<ScoreSaberPlayer | undefined> =>
       ssrApi.getScoreSaberPlayer(player.id, {
         createIfMissing: settings?.playerId == player.id,
-        type: "full",
+        type: DetailType.FULL,
       }),
   });
 

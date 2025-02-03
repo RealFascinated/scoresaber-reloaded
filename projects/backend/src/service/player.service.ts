@@ -468,65 +468,67 @@ export class PlayerService {
       }
     };
 
-    const itemsPerPage = 50;
     const player = await ScoreSaberService.getPlayer(id);
     if (player == undefined) {
       throw new NotFoundError(`Player "${id}" not found`);
     }
+
     const rank = getRank(player, type);
-    const rankWithinPage = rank % itemsPerPage;
+    const itemsPerPage = 50;
+    
+    // Calculate which page contains our target player
+    const targetPage = Math.ceil(rank / itemsPerPage);
+    
+    // Fetch the main page containing our player
+    const mainResponse = type === "global" 
+        ? await scoresaberService.lookupPlayers(targetPage)
+        : await scoresaberService.lookupPlayersByCountry(targetPage, player.country);
 
-    // Ensure the page is valid and greater than 0
-    let pagesToSearch: number[] = [];
-    if (rank >= itemsPerPage) {
-      pagesToSearch.push(getPageFromRank(rank - 1, itemsPerPage));
+    if (!mainResponse) {
+        return [];
     }
-    if (rankWithinPage > 0 && rankWithinPage < itemsPerPage - 1) {
-      pagesToSearch.push(getPageFromRank(rank + 1, itemsPerPage));
+
+    let allPlayers = [...mainResponse.players];
+    const playerIndex = allPlayers.findIndex(p => p.id === id);
+    
+    if (playerIndex === -1) {
+        return [];
     }
 
-    // Remove duplicates
-    pagesToSearch = [...new Set(pagesToSearch)];
+    // Check if we need more players from adjacent pages
+    const needsPlayersAbove = playerIndex < 3;
+    const needsPlayersBelow = playerIndex > allPlayers.length - 2;
 
-    const rankings: Map<string, ScoreSaberPlayerToken> = new Map();
-    for (const page of pagesToSearch) {
-      const response =
-        type == "global"
-          ? await scoresaberService.lookupPlayers(page)
-          : await scoresaberService.lookupPlayersByCountry(page, player.country);
-      if (response == undefined) {
-        continue;
-      }
-
-      for (const player of response.players) {
-        if (rankings.has(player.id)) {
-          continue;
+    // Fetch previous page if needed
+    if (needsPlayersAbove && targetPage > 1) {
+        const prevResponse = type === "global"
+            ? await scoresaberService.lookupPlayers(targetPage - 1)
+            : await scoresaberService.lookupPlayersByCountry(targetPage - 1, player.country);
+        
+        if (prevResponse) {
+            allPlayers = [...prevResponse.players, ...allPlayers];
         }
-
-        rankings.set(player.id, player);
-      }
     }
 
-    const players = rankings
-      .values()
-      .toArray()
-      .sort((a, b) => {
-        return getRank(a, type) - getRank(b, type);
-      });
-
-    // Show 3 players above and 1 below the requested player
-    const playerPosition = players.findIndex(p => p.id === player.id);
-    const start = Math.max(0, playerPosition - 3);
-    let end = Math.min(players.length, playerPosition + 2);
-
-    const playersLength = players.slice(start, end).length;
-
-    // If there is less than 5 players to return, add more players to the end
-    if (playersLength < 5) {
-      end = Math.min(end + 5 - playersLength, players.length);
+    // Fetch next page if needed
+    if (needsPlayersBelow) {
+        const nextResponse = type === "global"
+            ? await scoresaberService.lookupPlayers(targetPage + 1)
+            : await scoresaberService.lookupPlayersByCountry(targetPage + 1, player.country);
+        
+        if (nextResponse) {
+            allPlayers = [...allPlayers, ...nextResponse.players];
+        }
     }
 
-    return players.slice(start, end);
+    // Find the new index after combining pages
+    const newPlayerIndex = allPlayers.findIndex(p => p.id === id);
+    
+    // Get 3 players above and 1 below, handling edge cases
+    const start = Math.max(0, newPlayerIndex - 3);
+    const end = Math.min(allPlayers.length, newPlayerIndex + 2);
+    
+    return allPlayers.slice(start, end);
   }
 
   /**

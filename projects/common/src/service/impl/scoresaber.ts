@@ -14,6 +14,7 @@ import RankingRequestToken from "../../types/token/scoresaber/ranking-request-to
 import ScoreSaberRankingRequestsResponse from "../../response/scoresaber-ranking-requests-response";
 import { MapDifficulty } from "../../score/map-difficulty";
 import { getDifficulty } from "../../utils/song-utils";
+import { DetailType } from "../../detail-type";
 
 const API_BASE = "https://scoresaber.com/api";
 
@@ -119,7 +120,7 @@ class ScoreSaberService extends Service {
    */
   public async lookupPlayer(
     playerId: string,
-    type: "full" | "basic" = "full"
+    type: DetailType = DetailType.FULL
   ): Promise<ScoreSaberPlayerToken | undefined> {
     const before = performance.now();
     this.log(`Looking up player "${playerId}"...`);

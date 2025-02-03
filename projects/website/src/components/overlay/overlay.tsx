@@ -12,6 +12,7 @@ import OverlayScoreDataView from "@/components/overlay/views/score-data";
 import { useOverlayDataStore } from "@/common/overlay/overlay-data-store";
 import OverlayScoreInfoView from "@/components/overlay/views/score-info";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
+import { DetailType } from "@ssr/common/detail-type";
 
 type OverlayProps = {
   /**
@@ -26,7 +27,7 @@ export default function Overlay({ settings }: OverlayProps) {
     queryFn: async () =>
       ssrApi.getScoreSaberPlayer(settings.playerId, {
         superJson: true,
-        type: "full",
+        type: DetailType.FULL,
       }),
     refetchInterval: 1000 * 30,
   });

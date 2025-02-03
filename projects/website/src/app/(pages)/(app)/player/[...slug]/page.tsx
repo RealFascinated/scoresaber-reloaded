@@ -6,6 +6,7 @@ import { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { getCookieValue } from "@ssr/common/utils/cookie-utils";
+import { DetailType } from "@ssr/common/detail-type";
 
 export const revalidate = 300; // Revalidate every 5 minutes
 
@@ -31,7 +32,7 @@ type PlayerData = {
  * @param params the params
  * @returns the player data and scores
  */
-const getPlayerData = async ({ params }: Props, type: "full" | "basic" = "full"): Promise<PlayerData> => {
+const getPlayerData = async ({ params }: Props, type: DetailType = DetailType.FULL): Promise<PlayerData> => {
   const { slug } = await params;
   const id = slug[0]; // The players id
   const sort: ScoreSort = (slug[1] as ScoreSort) || (await getCookieValue("lastScoreSort", ScoreSort.recent)); // The sorting method
@@ -53,7 +54,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     description: "The player you were looking for could not be found.",
   };
 
-  const { player } = await getPlayerData(props, "basic");
+  const { player } = await getPlayerData(props, DetailType.BASIC);
   if (player === undefined) {
     return {
       title: UNKNOWN_PLAYER.title,

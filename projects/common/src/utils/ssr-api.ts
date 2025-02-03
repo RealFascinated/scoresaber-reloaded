@@ -16,6 +16,7 @@ import { ScoreSaberScore } from "../model/score/impl/scoresaber-score";
 import { Page } from "../pagination";
 import ScoreSaberPlayer from "../player/impl/scoresaber-player";
 import { PlayerScoresChartResponse } from "../response/player-scores-chart";
+import { DetailType } from "../detail-type";
 
 class SSRApi {
   /**
@@ -138,7 +139,7 @@ class SSRApi {
     playerId: string,
     options?: {
       createIfMissing?: boolean;
-      type?: "full" | "basic";
+      type?: DetailType;
       superJson?: boolean;
     }
   ) {

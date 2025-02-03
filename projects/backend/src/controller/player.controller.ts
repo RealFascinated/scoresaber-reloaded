@@ -9,7 +9,7 @@ import SuperJSON from "superjson";
 import ScoreSaberService from "../service/scoresaber.service";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { Swagger } from "../common/swagger";
-
+import { DetailType } from "@ssr/common/detail-type";
 @Controller("/player")
 export default class PlayerController {
   @Get("/:id", {
@@ -20,7 +20,7 @@ export default class PlayerController {
     }),
     query: t.Object({
       createIfMissing: t.Optional(t.Boolean({ default: false })),
-      type: t.Optional(t.Union([t.Literal("full"), t.Literal("basic")], { default: "full" })),
+      type: t.Optional(t.Union([t.Literal("full"), t.Literal("basic")], { default: "basic" })),
       superJson: t.Optional(t.Boolean({ default: false })),
     }),
     detail: {
@@ -38,7 +38,7 @@ export default class PlayerController {
     query: { createIfMissing, type, superJson },
   }: {
     params: { id: string };
-    query: { createIfMissing: boolean; type: "full" | "basic"; superJson: boolean };
+    query: { createIfMissing: boolean; type: DetailType; superJson: boolean };
   }): Promise<ScoreSaberPlayer | string> {
     const player = await ScoreSaberService.getPlayer(id, type, createIfMissing);
     return superJson ? SuperJSON.stringify(player) : player;

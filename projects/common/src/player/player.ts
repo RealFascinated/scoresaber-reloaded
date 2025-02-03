@@ -32,11 +32,6 @@ export default class Player {
   countryRank: number;
 
   /**
-   * The color of the player's avatar.
-   */
-  avatarColor?: string;
-
-  /**
    * The player's hmd.
    */
   hmd?: string;
@@ -53,7 +48,6 @@ export default class Player {
     country: string,
     rank: number,
     countryRank: number,
-    avatarColor: string | undefined,
     joinedDate: Date
   ) {
     this.id = id;
@@ -62,7 +56,6 @@ export default class Player {
     this.country = country;
     this.rank = rank;
     this.countryRank = countryRank;
-    this.avatarColor = avatarColor;
     this.joinedDate = joinedDate;
   }
 }
