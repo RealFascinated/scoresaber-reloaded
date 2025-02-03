@@ -1,13 +1,14 @@
 import Service from "../service";
 import { BeatSaverMapToken } from "../../types/token/beatsaver/map";
 import { BeatSaverMultiMapLookup } from "../../types/token/beatsaver/multi-map-lookup";
+import { Cooldown } from "../../cooldown";
 
 const API_BASE = "https://api.beatsaver.com";
 const LOOKUP_MAP_BY_HASH_ENDPOINT = `${API_BASE}/maps/hash/:query`;
 
 class BeatSaverService extends Service {
   constructor() {
-    super("BeatSaver");
+    super("BeatSaver", new Cooldown(60_000 / 300, 150));
   }
 
   /**

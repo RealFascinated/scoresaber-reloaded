@@ -3,7 +3,7 @@ import { NotFoundError } from "elysia";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { ScoreSort } from "@ssr/common/score/score-sort";
 import { Leaderboards } from "@ssr/common/leaderboard";
-import LeaderboardService, { SCORESABER_REQUEST_COOLDOWN } from "./leaderboard.service";
+import LeaderboardService from "./leaderboard.service";
 import { PlayerScore } from "@ssr/common/score/player-score";
 import LeaderboardScoresResponse from "@ssr/common/response/leaderboard-scores-response";
 import PlayerScoresResponse from "@ssr/common/response/player-scores-response";
@@ -20,7 +20,6 @@ import Leaderboard from "@ssr/common/model/leaderboard/leaderboard";
 import CacheService, { ServiceCache } from "./cache.service";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
 import BeatLeaderService from "./beatleader.service";
-import { delay } from "@ssr/common/utils/utils";
 import { PlayerService } from "./player.service";
 import { getDaysAgoDate } from "@ssr/common/utils/time-utils";
 import { Timeframe } from "@ssr/common/timeframe";
@@ -239,9 +238,6 @@ export class ScoreService {
           cacheOnly: true,
           includeBeatSaver: false,
         });
-        if (!leaderboard.cached) {
-          await delay(SCORESABER_REQUEST_COOLDOWN);
-        }
         scores.push({
           score: score as ScoreSaberScore,
           leaderboard: leaderboard.leaderboard,

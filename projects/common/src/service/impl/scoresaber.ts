@@ -15,6 +15,7 @@ import ScoreSaberRankingRequestsResponse from "../../response/scoresaber-ranking
 import { MapDifficulty } from "../../score/map-difficulty";
 import { getDifficulty } from "../../utils/song-utils";
 import { DetailType } from "../../detail-type";
+import { Cooldown } from "../../cooldown";
 
 const API_BASE = "https://scoresaber.com/api";
 
@@ -87,7 +88,7 @@ class ScoreSaberService extends Service {
   ];
 
   constructor() {
-    super("ScoreSaber");
+    super("ScoreSaber", new Cooldown(60_000 / 300, 150));
   }
 
   /**

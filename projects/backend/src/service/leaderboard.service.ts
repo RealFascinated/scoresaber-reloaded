@@ -8,7 +8,6 @@ import {
   ScoreSaberLeaderboardModel,
 } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { fetchWithCache } from "../common/cache.util";
-import { delay } from "@ssr/common/utils/utils";
 import { ScoreSaberScoreDocument, ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import CacheService, { ServiceCache } from "./cache.service";
 import LeaderboardDifficulty from "@ssr/common/model/leaderboard/leaderboard-difficulty";
@@ -24,7 +23,6 @@ import { removeObjectFields } from "@ssr/common/object.util";
 import Logger from "@ssr/common/logger";
 import { DetailType } from "@ssr/common/detail-type";
 
-export const SCORESABER_REQUEST_COOLDOWN = 60_000 / 300; // 300 requests per minute
 const CACHE_REFRESH_TIME = 1000 * 60 * 60 * 12; // 12 hours
 
 type RefreshResult = {
@@ -276,7 +274,6 @@ export default class LeaderboardService {
 
       hasMorePages = page < totalPages;
       page++;
-      await delay(SCORESABER_REQUEST_COOLDOWN);
     }
 
     return { leaderboards, rankedMapDiffs };
@@ -507,7 +504,6 @@ Map: https://ssr.fascinated.cc/leaderboard/${leaderboard.id}
       if (!response) {
         Logger.warn(`Failed to fetch scoresaber api scores for leaderboard "${leaderboardId}" on page ${currentPage}`);
         currentPage++;
-        await delay(SCORESABER_REQUEST_COOLDOWN);
         continue;
       }
       const totalPages = Math.ceil(response.metadata.total / response.metadata.itemsPerPage);
@@ -516,7 +512,6 @@ Map: https://ssr.fascinated.cc/leaderboard/${leaderboard.id}
       scoreTokens.push(...response.scores);
       hasMoreScores = currentPage < totalPages;
       currentPage++;
-      await delay(SCORESABER_REQUEST_COOLDOWN);
     }
 
     return scoreTokens;
@@ -595,7 +590,6 @@ Map: https://ssr.fascinated.cc/leaderboard/${leaderboard.id}
 
       totalUnranked++;
       await this.unrankLeaderboard(previousLeaderboard);
-      await delay(SCORESABER_REQUEST_COOLDOWN);
     }
 
     Logger.info(`Unranked ${totalUnranked} previously ranked leaderboards.`);
@@ -709,7 +703,6 @@ Map: https://ssr.fascinated.cc/leaderboard/${leaderboard.id}
 
       hasMorePages = page < totalPages;
       page++;
-      await delay(SCORESABER_REQUEST_COOLDOWN);
     }
 
     return { leaderboards, rankedMapDiffs };

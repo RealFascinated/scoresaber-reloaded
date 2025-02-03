@@ -1,11 +1,12 @@
 import Service from "../service";
 import { ScoreStatsToken } from "../../types/token/beatleader/score-stats/score-stats";
+import { Cooldown } from "../../cooldown";
 
 const LOOKUP_MAP_STATS_BY_SCORE_ID_ENDPOINT = `https://cdn.scorestats.beatleader.xyz/:scoreId.json`;
 
 class BeatLeaderService extends Service {
   constructor() {
-    super("BeatLeader");
+    super("BeatLeader", new Cooldown(60_000 / 300, 150));
   }
 
   /**

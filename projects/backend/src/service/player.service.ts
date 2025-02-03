@@ -16,7 +16,6 @@ import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
 import ScoreSaberPlayerScoreToken from "@ssr/common/types/token/scoresaber/player-score";
 import { HMD } from "@ssr/common/hmds";
-import { SCORESABER_REQUEST_COOLDOWN } from "./leaderboard.service";
 import { PlayerScoreChartDataPoint, PlayerScoresChartResponse } from "@ssr/common/response/player-scores-chart";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
@@ -572,7 +571,6 @@ export class PlayerService {
       }
 
       page++;
-      await delay(SCORESABER_REQUEST_COOLDOWN); // Cooldown between page requests
     }
 
     // Mark player as seeded
@@ -597,7 +595,6 @@ export class PlayerService {
     let totalMissingScores = 0;
     for (const player of players) {
       totalMissingScores += await this.refreshAllPlayerScores(player);
-      await delay(SCORESABER_REQUEST_COOLDOWN); // Cooldown between players
     }
     return totalMissingScores;
   }
@@ -625,13 +622,11 @@ export class PlayerService {
       const page = await scoresaberService.lookupPlayers(pageNumber);
       if (page === undefined) {
         Logger.warn(`Failed to fetch players on page ${pageNumber}, skipping page...`);
-        await delay(SCORESABER_REQUEST_COOLDOWN);
         continue;
       }
       for (const player of page.players) {
         players.push(player);
       }
-      await delay(SCORESABER_REQUEST_COOLDOWN);
     }
 
     for (const player of players) {
@@ -658,7 +653,6 @@ export class PlayerService {
     Logger.info(`Tracking ${leftoverPlayers.length} leftover player statistics...`);
     for (const player of leftoverPlayers) {
       await PlayerService.trackScoreSaberPlayer(player, trackTime);
-      await delay(SCORESABER_REQUEST_COOLDOWN);
     }
 
     Logger.info("Finished tracking player statistics.");

@@ -2,6 +2,7 @@ import ky from "ky";
 import { isServer } from "../utils/utils";
 import { KyOptions } from "ky/distribution/types/options";
 import Logger from "../logger";
+import { Cooldown } from "../cooldown";
 
 export default class Service {
   /**
@@ -9,8 +10,14 @@ export default class Service {
    */
   private readonly name: string;
 
-  constructor(name: string) {
+  /**
+   * The cooldown for the service.
+   */
+  private readonly cooldown: Cooldown;
+
+  constructor(name: string, cooldown: Cooldown) {
     this.name = name;
+    this.cooldown = cooldown;
   }
 
   /**
@@ -44,6 +51,8 @@ export default class Service {
    * @returns the fetched data
    */
   public async fetch<T>(url: string, options?: KyOptions): Promise<T | undefined> {
+    await this.cooldown.waitAndUse();
+
     try {
       const response = await ky.get<T>(this.buildRequestUrl(!isServer(), url), options);
       if (response.headers.has("X-RateLimit-Remaining")) {
