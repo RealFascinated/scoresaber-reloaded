@@ -116,16 +116,14 @@ export class ScoreService {
       `leaderboard-scores:${leaderboardId}-${page}-${country}`,
       async () => {
         const scores: ScoreType[] = [];
-        let leaderboard: Leaderboard | undefined;
-        let beatSaverMap: BeatSaverMapResponse | undefined;
         let metadata: Metadata = new Metadata(0, 0, 0, 0); // Default values
 
         const leaderboardResponse = await LeaderboardService.getLeaderboard(leaderboardId);
         if (leaderboardResponse == undefined) {
           throw new NotFoundError(`Leaderboard "${leaderboardId}" not found`);
         }
-        leaderboard = leaderboardResponse.leaderboard;
-        beatSaverMap = leaderboardResponse.beatsaver;
+        const leaderboard = leaderboardResponse.leaderboard;
+        const beatSaverMap = leaderboardResponse.beatsaver;
 
         const leaderboardScores = await scoresaberService.lookupLeaderboardScores(leaderboardId, page, country);
         if (leaderboardScores == undefined) {

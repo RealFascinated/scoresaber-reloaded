@@ -1,10 +1,9 @@
-import { Controller, Get } from "elysia-decorators";
-import { NotFoundError, t } from "elysia";
-import { Leaderboards } from "@ssr/common/leaderboard";
 import { TopScoresResponse } from "@ssr/common/response/top-scores-response";
-import { ScoreService } from "../service/score.service";
 import { Timeframe } from "@ssr/common/timeframe";
+import { NotFoundError, t } from "elysia";
+import { Controller, Get } from "elysia-decorators";
 import BeatLeaderService from "../service/beatleader.service";
+import { ScoreService } from "../service/score.service";
 
 @Controller("/scores")
 export default class ScoresController {
