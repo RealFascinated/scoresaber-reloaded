@@ -4,6 +4,8 @@ import PlaylistService, { SnipeType } from "../service/playlist.service";
 import { Swagger } from "../common/swagger";
 import { generateSnipePlaylistImage } from "../common/playlist.util";
 import { parseSnipePlaylistSettings } from "@ssr/common/snipe/snipe-playlist-utils";
+import ScoreSaberService from "../service/scoresaber.service";
+import { DetailType } from "@ssr/common/detail-type";
 
 @Controller("/playlist")
 export default class PlaylistController {
@@ -102,8 +104,9 @@ export default class PlaylistController {
   }: {
     query: { toSnipe: string; settings: string };
   }) {
+    const toSnipePlayer = await ScoreSaberService.getPlayer(toSnipe, DetailType.BASIC);
     const response = new Response(
-      Buffer.from(await generateSnipePlaylistImage(parseSnipePlaylistSettings(settings), toSnipe), "base64")
+      Buffer.from(await generateSnipePlaylistImage(parseSnipePlaylistSettings(settings), toSnipePlayer), "base64")
     );
     response.headers.set("Content-Type", "image/png");
     response.headers.set("Cache-Control", "public, max-age=3600");
