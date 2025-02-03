@@ -155,15 +155,23 @@ const GenericChart = ({ options, labels, datasetConfig, histories }: ChartProps)
     return false;
   }, [datasetConfig, histories]);
 
+  const chartStyle = useMemo(() => {
+    // If there's only one dataset and it has no display name, apply negative margin
+    if (datasetConfig.length === 1 && !datasetConfig[0].axisConfig.displayName) {
+      return { marginLeft: '-10px' };
+    }
+    return {};
+  }, [datasetConfig]);
+
   // Render the chart with collected data
   return (
-    <div className="flex relative">
+    <div className="flex relative h-[360px]">
       {showNoData ? (
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center z-[9999] bg-muted p-2 rounded-md">
           <p className="text-red-500">No data available :(</p>
         </div>
       ) : null}
-      <div className="block h-[360px] w-full relative">
+      <div className="block h-[360px] w-full relative" style={chartStyle}>
         <Line
           className="max-w-[100%]"
           options={chartOptions}

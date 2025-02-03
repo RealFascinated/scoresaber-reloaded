@@ -4,7 +4,6 @@ import LeaderboardScores from "@/components/leaderboard/leaderboard-scores";
 import { LeaderboardInfo } from "@/components/leaderboard/page/leaderboard-info";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import LeaderboardPpChart from "@/components/leaderboard/page/chart/leaderboard-pp-chart";
 import Card from "@/components/card";
 import { LeaderboardBeatSaverInfo } from "@/components/leaderboard/page/beatsaver-info";
 import LeaderboardFilters from "@/components/leaderboard/page/leaderboard-filters";
@@ -14,6 +13,12 @@ import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scores
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { ScoreModeEnum } from "@/components/score/score-mode";
 import { DetailType } from "@ssr/common/detail-type";
+import dynamic from "next/dynamic";
+
+const LeaderboardPpChart = dynamic(() => import("@/components/leaderboard/page/chart/leaderboard-pp-chart"), {
+  ssr: false,
+  loading: () => <div className="h-[360px] flex items-center justify-center">Loading...</div>,
+});
 
 type LeaderboardDataProps = {
   /**
@@ -68,7 +73,7 @@ export function LeaderboardData({ initialLeaderboard, initialPage, initialCatego
             <LeaderboardInfo leaderboard={leaderboard} beatSaverMap={currentLeaderboard.beatsaver} />
             {currentLeaderboard.beatsaver && <LeaderboardBeatSaverInfo beatSaverMap={currentLeaderboard.beatsaver} />}
             <LeaderboardFilters />
-            {leaderboard.stars > 0 && leaderboard.maxScore > 0 && <LeaderboardPpChart leaderboard={leaderboard} />}
+            {leaderboard.stars > 0 && leaderboard.maxScore > 0 && <Card><LeaderboardPpChart leaderboard={leaderboard} /></Card>}
           </div>
         </div>
       </div>

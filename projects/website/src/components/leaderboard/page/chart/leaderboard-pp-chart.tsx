@@ -55,7 +55,6 @@ export default function LeaderboardPpChart({ leaderboard }: Props) {
       axisConfig: {
         reverse: false,
         display: true,
-        displayName: "PP",
         position: "left",
       },
       labelFormatter: (value: number) => `${value.toFixed(2)}pp`,
@@ -63,8 +62,8 @@ export default function LeaderboardPpChart({ leaderboard }: Props) {
   ];
 
   return (
-    <Card className="w-full gap-7">
-      <div className="flex flex-col h-64">
+    <div className="flex flex-col gap-8">
+      <div className="flex flex-col">
         <p className="font-semibold">PP Curve</p>
         <GenericChart labels={labels} datasetConfig={datasetConfig} histories={histories} />
       </div>
@@ -81,6 +80,6 @@ export default function LeaderboardPpChart({ leaderboard }: Props) {
           />
         </div>
       </div>
-    </Card>
+    </div>
   );
 }
