@@ -1,7 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { Chart, registerables } from "chart.js";
+import {
+  Chart,
+  LineElement,
+  PointElement,
+  LinearScale,
+  CategoryScale,
+  Legend,
+  Tooltip,
+} from "chart.js";
 import { Line } from "react-chartjs-2";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import {
@@ -17,10 +25,18 @@ import { generateChartAxis, generateChartDataset } from "@/common/chart/chart.ut
 import useSettings from "@/hooks/use-settings";
 import React, { useMemo } from "react";
 
-Chart.register(...registerables);
+// Register only the required components
+Chart.register(
+  LineElement,
+  PointElement,
+  LinearScale,
+  CategoryScale,
+  Legend,
+  Tooltip
+);
 
 export type ChartProps = {
-  options?: { id: string };
+  options?: { id: string; plugins?: any };
   labels: Date[] | string[];
   datasetConfig: DatasetConfig[];
   histories: Record<string, (number | null)[]>;
@@ -158,7 +174,7 @@ const GenericChart = ({ options, labels, datasetConfig, histories }: ChartProps)
   const chartStyle = useMemo(() => {
     // If there's only one dataset and it has no display name, apply negative margin
     if (datasetConfig.length === 1 && !datasetConfig[0].axisConfig.displayName) {
-      return { marginLeft: '-10px' };
+      return { marginLeft: "-10px" };
     }
     return {};
   }, [datasetConfig]);
@@ -174,7 +190,13 @@ const GenericChart = ({ options, labels, datasetConfig, histories }: ChartProps)
       <div className="block h-[360px] w-full relative" style={chartStyle}>
         <Line
           className="max-w-[100%]"
-          options={chartOptions}
+          options={{
+            ...chartOptions,
+            plugins: {
+              ...chartOptions.plugins,
+              ...(options?.plugins || []),
+            },
+          }}
           data={{ labels: formattedLabels, datasets: datasets as any }}
           plugins={[
             {

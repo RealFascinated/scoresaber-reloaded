@@ -1,11 +1,10 @@
 "use client";
 
-import React from "react";
-import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import { getDaysAgoDate, parseDate } from "@ssr/common/utils/time-utils";
-import { getValueFromHistory } from "@ssr/common/utils/player-utils";
 import { DatasetConfig } from "@/common/chart/types";
 import GenericChart from "@/components/chart/generic-chart";
+import { PlayerStatisticHistory } from "@ssr/common/player/player-statistic-history";
+import { getValueFromHistory } from "@ssr/common/utils/player-utils";
+import { getDaysAgoDate, parseDate } from "@ssr/common/utils/time-utils";
 
 type Props = {
   /**
@@ -16,7 +15,7 @@ type Props = {
   /**
    * The player the chart is for
    */
-  player: ScoreSaberPlayer;
+  statisticHistory: PlayerStatisticHistory;
 
   /**
    * The data to render.
@@ -24,9 +23,9 @@ type Props = {
   datasetConfig: DatasetConfig[];
 };
 
-export default function GenericPlayerChart({ id, player, datasetConfig }: Props) {
+export default function GenericPlayerChart({ id, statisticHistory, datasetConfig }: Props) {
   // Check if player statistics are available
-  if (!player.statisticHistory || Object.keys(player.statisticHistory).length === 0) {
+  if (!statisticHistory || Object.keys(statisticHistory).length === 0) {
     return (
       <div className="flex justify-center">
         <p>Unable to load player rank chart, missing data...</p>
@@ -43,7 +42,7 @@ export default function GenericPlayerChart({ id, player, datasetConfig }: Props)
     histories[config.field] = Array(historyDays).fill(null);
   });
 
-  const statisticEntries = Object.entries(player.statisticHistory);
+  const statisticEntries = Object.entries(statisticHistory);
   let currentHistoryIndex = 0;
   for (let dayAgo = 0; dayAgo <= historyDays; dayAgo++) {
     const [dateString, history] =

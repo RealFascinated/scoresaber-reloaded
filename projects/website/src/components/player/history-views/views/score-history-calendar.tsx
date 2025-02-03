@@ -1,20 +1,19 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
-import Combobox from "@/components/ui/combo-box";
-import Tooltip from "@/components/tooltip";
 import { LoadingIcon } from "@/components/loading-icon";
-import { useEffect, useState } from "react";
+import Tooltip from "@/components/tooltip";
+import Combobox from "@/components/ui/combo-box";
 import { PlayedMapsCalendarResponse, PlayedMapsCalendarStat } from "@ssr/common/response/played-maps-calendar-response";
-import { getDaysInMonth, Months } from "@ssr/common/utils/time-utils";
-import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
+import { getDaysInMonth, Months } from "@ssr/common/utils/time-utils";
+import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 
 type ScoreHistoryCalendarProps = {
-  player: ScoreSaberPlayer;
+  playerId: string;
 };
 
-export default function ScoreHistoryCalendar({ player }: ScoreHistoryCalendarProps) {
+export default function ScoreHistoryCalendar({ playerId }: ScoreHistoryCalendarProps) {
   const [year, setYear] = useState<number>(new Date().getFullYear());
   const [month, setMonth] = useState<number>(new Date().getMonth() + 1);
   const [days, setDays] = useState<number[]>([]);
@@ -22,9 +21,9 @@ export default function ScoreHistoryCalendar({ player }: ScoreHistoryCalendarPro
   const [previousData, setPreviousData] = useState<PlayedMapsCalendarResponse | null>(null);
 
   const { data, isLoading } = useQuery({
-    queryKey: ["scoreHistoryCalendar", player.id, year, month],
+    queryKey: ["scoreHistoryCalendar", playerId, year, month],
     queryFn: async () => {
-      return ssrApi.getScoreCalendar(player.id, year, month);
+      return ssrApi.getScoreCalendar(playerId, year, month);
     },
   });
 

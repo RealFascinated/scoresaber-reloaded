@@ -1,6 +1,6 @@
 import { PlayerDocument, PlayerModel } from "@ssr/common/model/player";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
-import { getDaysAgoDate, getMidnightAlignedDate } from "@ssr/common/utils/time-utils";
+import { formatDateMinimal, getDaysAgoDate, getMidnightAlignedDate } from "@ssr/common/utils/time-utils";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { InternalServerError } from "@ssr/common/error/internal-server-error";
 import { isProduction } from "@ssr/common/utils/utils";
@@ -23,6 +23,9 @@ import { getDifficulty, getScoreBadgeFromAccuracy } from "@ssr/common/utils/song
 import { ScoreService } from "./score.service";
 import Logger from "@ssr/common/logger";
 import { AccBadges } from "@ssr/common/player/acc-badges";
+import { PlayerStatisticHistory } from "@ssr/common/player/player-statistic-history";
+import { DetailType } from "@ssr/common/detail-type";
+import { PlayerAccuracies } from "@ssr/common/player/player-accuracies";
 
 const accountCreationLock: { [id: string]: Promise<PlayerDocument> } = {};
 
@@ -379,10 +382,7 @@ export class PlayerService {
    * @param playerId the player's id
    * @returns the player's accuracy
    */
-  public static async getPlayerAverageAccuracies(playerId: string): Promise<{
-    unrankedAccuracy: number;
-    averageAccuracy: number;
-  }> {
+  public static async getPlayerAverageAccuracies(playerId: string): Promise<PlayerAccuracies> {
     const accuracies = {
       unrankedAccuracy: 0,
       averageAccuracy: 0,
@@ -474,24 +474,25 @@ export class PlayerService {
 
     const rank = getRank(player, type);
     const itemsPerPage = 50;
-    
+
     // Calculate which page contains our target player
     const targetPage = Math.ceil(rank / itemsPerPage);
-    
+
     // Fetch the main page containing our player
-    const mainResponse = type === "global" 
+    const mainResponse =
+      type === "global"
         ? await scoresaberService.lookupPlayers(targetPage)
         : await scoresaberService.lookupPlayersByCountry(targetPage, player.country);
 
     if (!mainResponse) {
-        return [];
+      return [];
     }
 
     let allPlayers = [...mainResponse.players];
     const playerIndex = allPlayers.findIndex(p => p.id === id);
-    
+
     if (playerIndex === -1) {
-        return [];
+      return [];
     }
 
     // Check if we need more players from adjacent pages
@@ -500,33 +501,35 @@ export class PlayerService {
 
     // Fetch previous page if needed
     if (needsPlayersAbove && targetPage > 1) {
-        const prevResponse = type === "global"
-            ? await scoresaberService.lookupPlayers(targetPage - 1)
-            : await scoresaberService.lookupPlayersByCountry(targetPage - 1, player.country);
-        
-        if (prevResponse) {
-            allPlayers = [...prevResponse.players, ...allPlayers];
-        }
+      const prevResponse =
+        type === "global"
+          ? await scoresaberService.lookupPlayers(targetPage - 1)
+          : await scoresaberService.lookupPlayersByCountry(targetPage - 1, player.country);
+
+      if (prevResponse) {
+        allPlayers = [...prevResponse.players, ...allPlayers];
+      }
     }
 
     // Fetch next page if needed
     if (needsPlayersBelow) {
-        const nextResponse = type === "global"
-            ? await scoresaberService.lookupPlayers(targetPage + 1)
-            : await scoresaberService.lookupPlayersByCountry(targetPage + 1, player.country);
-        
-        if (nextResponse) {
-            allPlayers = [...allPlayers, ...nextResponse.players];
-        }
+      const nextResponse =
+        type === "global"
+          ? await scoresaberService.lookupPlayers(targetPage + 1)
+          : await scoresaberService.lookupPlayersByCountry(targetPage + 1, player.country);
+
+      if (nextResponse) {
+        allPlayers = [...allPlayers, ...nextResponse.players];
+      }
     }
 
     // Find the new index after combining pages
     const newPlayerIndex = allPlayers.findIndex(p => p.id === id);
-    
+
     // Get 3 players above and 1 below, handling edge cases
     const start = Math.max(0, newPlayerIndex - 3);
     const end = Math.min(allPlayers.length, newPlayerIndex + 2);
-    
+
     return allPlayers.slice(start, end);
   }
 
@@ -787,5 +790,103 @@ export class PlayerService {
     }
 
     return badges;
+  }
+
+  /**
+   * Gets the player's statistic history.
+   *
+   * @param player the player
+   * @param account the account
+   * @param accuracies the accuracies
+   * @param type the type
+   * @param startDate the start date
+   * @param endDate the end date
+   */
+  public static async getPlayerStatisticHistory(
+    player: ScoreSaberPlayerToken,
+    account: PlayerDocument | undefined,
+    accuracies: PlayerAccuracies,
+    type: DetailType,
+    startDate: Date,
+    endDate: Date
+  ): Promise<PlayerStatisticHistory> {
+    let history: PlayerStatisticHistory =
+      account && type === "full" ? account.getStatisticHistoryInRange(startDate, endDate) : {};
+
+    if (history) {
+      const todayDate = formatDateMinimal(getMidnightAlignedDate(new Date()));
+      const historyElement = history[todayDate];
+
+      history[todayDate] = {
+        ...historyElement,
+        rank: player.rank,
+        ...(account
+          ? {
+              countryRank: player.countryRank,
+              pp: player.pp,
+              ...(account ? { plusOnePp: (await PlayerService.getPlayerPpBoundary(account.id, 1))[0] } : undefined),
+              replaysWatched: player.scoreStats.replaysWatched,
+              accuracy: {
+                ...historyElement?.accuracy,
+                averageRankedAccuracy: player.scoreStats.averageRankedAccuracy,
+                averageUnrankedAccuracy: accuracies.unrankedAccuracy,
+                averageAccuracy: accuracies.averageAccuracy,
+              },
+              scores: {
+                rankedScores: 0,
+                unrankedScores: 0,
+                ...historyElement?.scores,
+                totalScores: player.scoreStats.totalPlayCount,
+                totalRankedScores: player.scoreStats.rankedPlayCount,
+              },
+              score: {
+                ...historyElement?.score,
+                totalScore: player.scoreStats.totalScore,
+                totalRankedScore: player.scoreStats.totalRankedScore,
+              },
+            }
+          : undefined),
+      };
+    }
+
+    const playerRankHistory = player.histories.split(",").map(value => {
+      return parseInt(value);
+    });
+    playerRankHistory.push(player.rank);
+
+    let daysAgo = 0; // Start from current day
+    for (let i = playerRankHistory.length; i >= 0; i--) {
+      const rank = playerRankHistory[i];
+      if (rank == 999_999) {
+        continue;
+      }
+
+      const date = getMidnightAlignedDate(getDaysAgoDate(daysAgo));
+      daysAgo += 1;
+
+      const dateKey = formatDateMinimal(date);
+      if (!history[dateKey] || history[dateKey].rank == undefined) {
+        history[dateKey] = {
+          ...(account ? history[dateKey] : undefined),
+          rank: rank,
+        };
+      }
+    }
+
+    // sort statisticHistory by date
+    history = Object.fromEntries(
+      Object.entries(history).sort((a, b) => new Date(b[0]).getTime() - new Date(a[0]).getTime())
+    );
+
+    if (account !== undefined && type === "full") {
+      for (const [date, statistic] of Object.entries(history)) {
+        if (statistic.plusOnePp) {
+          statistic.plusOnePp = Math.round(statistic.plusOnePp * Math.pow(10, 2)) / Math.pow(10, 2); // Round to 2 decimal places
+          history[date] = statistic;
+        }
+      }
+    }
+
+    return history;
   }
 }

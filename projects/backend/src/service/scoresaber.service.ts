@@ -1,7 +1,6 @@
 import { Config } from "@ssr/common/config";
 import { DetailType } from "@ssr/common/detail-type";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import { PlayerHistory } from "@ssr/common/player/player-history";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { getScoreSaberLeaderboardFromToken, getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 import ScoreSaberPlayerScoreToken from "@ssr/common/types/token/scoresaber/player-score";
@@ -9,7 +8,7 @@ import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils
 import { getPlayerStatisticChanges } from "@ssr/common/utils/player-utils";
 import { formatScoreAccuracy } from "@ssr/common/utils/score.util";
 import { getDifficultyName } from "@ssr/common/utils/song-utils";
-import { formatDateMinimal, getDaysAgoDate, getMidnightAlignedDate } from "@ssr/common/utils/time-utils";
+import { getDaysAgoDate } from "@ssr/common/utils/time-utils";
 import { formatChange, getPageFromRank, isProduction } from "@ssr/common/utils/utils";
 import { EmbedBuilder } from "discord.js";
 import { NotFoundError } from "elysia";
@@ -140,7 +139,13 @@ export default class ScoreSaberService {
    * @param createIfMissing creates the player if they don't have an account with us
    * @returns the player
    */
-  public static async getPlayer(id: string, type: DetailType = DetailType.BASIC, createIfMissing?: boolean): Promise<ScoreSaberPlayer> {
+  public static async getPlayer(
+    id: string,
+    type: DetailType = DetailType.BASIC,
+    options?: { createIfMissing?: boolean }
+  ): Promise<ScoreSaberPlayer> {
+    const { createIfMissing = false } = options || {};
+
     return fetchWithCache<ScoreSaberPlayer>(
       CacheService.getCache(ServiceCache.ScoreSaber),
       `player:${id}:${type}`,
@@ -175,95 +180,23 @@ export default class ScoreSaberService {
         }
 
         // For full type, run these operations in parallel
-        const [
-          updatedAccount,
-          accuracies,
-          ppBoundaries,
-          accBadges
-        ] = await Promise.all([
+        const [updatedAccount, accuracies, ppBoundaries, accBadges] = await Promise.all([
           account ? PlayerService.updatePeakRank(id, playerToken) : undefined,
-          account ? PlayerService.getPlayerAverageAccuracies(playerToken.id) : { unrankedAccuracy: 0, averageAccuracy: 0 },
+          account
+            ? PlayerService.getPlayerAverageAccuracies(playerToken.id)
+            : { unrankedAccuracy: 0, averageAccuracy: 0 },
           account ? PlayerService.getPlayerPpBoundary(id, 100) : [],
           account ? PlayerService.getAccBadges(id) : {},
         ]);
 
-        // Process history data
-        let statisticHistory: Record<string, PlayerHistory> = 
-          account && type === "full" ? account.getHistoryPreviousDays(50) : {};
-        
-        if (statisticHistory) {
-          const todayDate = formatDateMinimal(getMidnightAlignedDate(new Date()));
-          const historyElement = statisticHistory[todayDate];
-
-          statisticHistory[todayDate] = {
-            ...historyElement,
-            rank: playerToken.rank,
-            ...(account
-              ? {
-                  countryRank: playerToken.countryRank,
-                  pp: playerToken.pp,
-                  ...(account ? { plusOnePp: (await PlayerService.getPlayerPpBoundary(account.id, 1))[0] } : undefined),
-                  replaysWatched: playerToken.scoreStats.replaysWatched,
-                  accuracy: {
-                    ...historyElement?.accuracy,
-                    averageRankedAccuracy: playerToken.scoreStats.averageRankedAccuracy,
-                    averageUnrankedAccuracy: accuracies.unrankedAccuracy,
-                    averageAccuracy: accuracies.averageAccuracy,
-                  },
-                  scores: {
-                    rankedScores: 0,
-                    unrankedScores: 0,
-                    ...historyElement?.scores,
-                    totalScores: playerToken.scoreStats.totalPlayCount,
-                    totalRankedScores: playerToken.scoreStats.rankedPlayCount,
-                  },
-                  score: {
-                    ...historyElement?.score,
-                    totalScore: playerToken.scoreStats.totalScore,
-                    totalRankedScore: playerToken.scoreStats.totalRankedScore,
-                  },
-                }
-              : undefined),
-          };
-        }
-
-        const playerRankHistory = playerToken.histories.split(",").map(value => {
-          return parseInt(value);
-        });
-        playerRankHistory.push(playerToken.rank);
-
-        let daysAgo = 0; // Start from current day
-        for (let i = playerRankHistory.length; i >= 0; i--) {
-          const rank = playerRankHistory[i];
-          if (rank == 999_999) {
-            continue;
-          }
-
-          const date = getMidnightAlignedDate(getDaysAgoDate(daysAgo));
-          daysAgo += 1;
-
-          const dateKey = formatDateMinimal(date);
-          if (!statisticHistory[dateKey] || statisticHistory[dateKey].rank == undefined) {
-            statisticHistory[dateKey] = {
-              ...(account ? statisticHistory[dateKey] : undefined),
-              rank: rank,
-            };
-          }
-        }
-
-        // sort statisticHistory by date
-        statisticHistory = Object.fromEntries(
-          Object.entries(statisticHistory).sort((a, b) => new Date(b[0]).getTime() - new Date(a[0]).getTime())
+        const statisticHistory = await PlayerService.getPlayerStatisticHistory(
+          playerToken,
+          account,
+          accuracies,
+          type,
+          new Date(),
+          getDaysAgoDate(30)
         );
-
-        if (account !== undefined && type === "full") {
-          for (const [date, history] of Object.entries(statisticHistory)) {
-            if (history.plusOnePp) {
-              history.plusOnePp = Math.round(history.plusOnePp * Math.pow(10, 2)) / Math.pow(10, 2); // Round to 2 decimal places
-              statisticHistory[date] = history;
-            }
-          }
-        }
 
         return {
           ...basePlayer,
@@ -271,16 +204,16 @@ export default class ScoreSaberService {
             lines: playerToken.bio ? sanitize(playerToken.bio).split("\n") : [],
             linesStripped: playerToken.bio ? sanitize(playerToken.bio.replace(/<[^>]+>/g, "")).split("\n") : [],
           },
-          badges: playerToken.badges?.map(badge => ({
-            url: badge.image,
-            description: badge.description,
-          })) || [],
+          badges:
+            playerToken.badges?.map(badge => ({
+              url: badge.image,
+              description: badge.description,
+            })) || [],
           statisticChange: {
             daily: account ? await getPlayerStatisticChanges(statisticHistory, 1) : {},
             weekly: account ? await getPlayerStatisticChanges(statisticHistory, 7) : {},
             monthly: account ? await getPlayerStatisticChanges(statisticHistory, 30) : {},
           },
-          statisticHistory,
           ppBoundaries,
           accBadges,
           peakRank: updatedAccount?.peakRank,
@@ -292,5 +225,27 @@ export default class ScoreSaberService {
         } as ScoreSaberPlayer;
       }
     );
+  }
+
+  /**
+   * Gets the player's statistic history.
+   *
+   * @param playerId the player's id
+   * @param startDate the start date
+   * @param endDate the end date
+   * @returns the player's statistic history
+   */
+  public static async getPlayerStatisticHistory(playerId: string, startDate: Date, endDate: Date) {
+    const player = await scoresaberService.lookupPlayer(playerId);
+    if (!player) {
+      throw new NotFoundError(`Player "${playerId}" not found`);
+    }
+
+    const [account, accuracies] = await Promise.all([
+      PlayerService.getPlayer(playerId, false),
+      PlayerService.getPlayerAverageAccuracies(player.id),
+    ]);
+
+    return PlayerService.getPlayerStatisticHistory(player, account, accuracies, DetailType.BASIC, startDate, endDate);
   }
 }

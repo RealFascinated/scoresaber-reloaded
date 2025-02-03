@@ -20,8 +20,6 @@ type Props = {
 };
 
 export default function GenericStatisticChart({ statistics, datasetConfig }: Props) {
-  console.log(datasetConfig);
-
   const histories: Record<string, (number | null)[]> = {};
   const historyDays = 365;
 

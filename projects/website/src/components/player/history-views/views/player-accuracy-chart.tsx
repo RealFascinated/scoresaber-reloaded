@@ -1,13 +1,12 @@
 "use client";
 
-import React from "react";
-import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import { isWholeNumber } from "@ssr/common/utils/number-utils";
-import GenericPlayerChart from "@/components/player/history-views/generic-player-chart";
 import { DatasetConfig } from "@/common/chart/types";
+import GenericPlayerChart from "@/components/player/history-views/generic-player-chart";
+import { PlayerStatisticHistory } from "@ssr/common/player/player-statistic-history";
+import { isWholeNumber } from "@ssr/common/utils/number-utils";
 
 type Props = {
-  player: ScoreSaberPlayer;
+  statisticHistory: PlayerStatisticHistory;
 };
 
 // Dataset configuration for the chart
@@ -74,6 +73,8 @@ const datasetConfig: DatasetConfig[] = [
   },
 ];
 
-export default function PlayerAccuracyChart({ player }: Props) {
-  return <GenericPlayerChart id="player-accuracy-chart" player={player} datasetConfig={datasetConfig} />;
+export default function PlayerAccuracyChart({ statisticHistory }: Props) {
+  return (
+    <GenericPlayerChart id="player-accuracy-chart" statisticHistory={statisticHistory} datasetConfig={datasetConfig} />
+  );
 }

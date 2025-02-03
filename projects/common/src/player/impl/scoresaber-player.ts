@@ -33,11 +33,6 @@ export default interface ScoreSaberPlayer extends Player {
   badges: ScoreSaberBadge[];
 
   /**
-   * The rank history for this player.
-   */
-  statisticHistory: { [key: string]: PlayerHistory };
-
-  /**
    * The statistics for this player.
    */
   statistics: ScoreSaberPlayerStatistics;

@@ -1,13 +1,12 @@
 "use client";
 
-import React from "react";
-import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
-import GenericPlayerChart from "@/components/player/history-views/generic-player-chart";
 import { DatasetConfig } from "@/common/chart/types";
+import GenericPlayerChart from "@/components/player/history-views/generic-player-chart";
+import { PlayerStatisticHistory } from "@ssr/common/player/player-statistic-history";
+import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 
 type Props = {
-  player: ScoreSaberPlayer;
+  statisticHistory: PlayerStatisticHistory;
 };
 
 export const scoreBarsDataset: DatasetConfig[] = [
@@ -77,6 +76,8 @@ const datasetConfig: DatasetConfig[] = [
   },
 ];
 
-export default function PlayerScoresChart({ player }: Props) {
-  return <GenericPlayerChart id="player-scores-chart" player={player} datasetConfig={datasetConfig} />;
+export default function PlayerScoresChart({ statisticHistory }: Props) {
+  return (
+    <GenericPlayerChart id="player-scores-chart" statisticHistory={statisticHistory} datasetConfig={datasetConfig} />
+  );
 }

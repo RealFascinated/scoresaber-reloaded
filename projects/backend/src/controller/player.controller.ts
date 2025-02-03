@@ -10,6 +10,8 @@ import SuperJSON from "superjson";
 import { Swagger } from "../common/swagger";
 import { PlayerService } from "../service/player.service";
 import ScoreSaberService from "../service/scoresaber.service";
+import { getDaysAgoDate } from "@ssr/common/utils/time-utils";
+import { PlayerStatisticHistory } from "@ssr/common/player/player-statistic-history";
 
 @Controller("/player")
 export default class PlayerController {
@@ -39,10 +41,33 @@ export default class PlayerController {
     query: { createIfMissing, type, superJson },
   }: {
     params: { id: string };
-    query: { createIfMissing: boolean; type: DetailType; superJson: boolean };
+    query: { createIfMissing: boolean; type: DetailType };
   }): Promise<ScoreSaberPlayer | string> {
-    const player = await ScoreSaberService.getPlayer(id, type, createIfMissing);
+    const player = await ScoreSaberService.getPlayer(id, type, {
+      createIfMissing,
+    });
     return superJson ? SuperJSON.stringify(player) : player;
+  }
+
+  @Get("/history/:id", {
+    config: {},
+    tags: ["player"],
+    params: t.Object({
+      id: t.String({ required: true }),
+    }),
+    query: t.Object({
+      startDate: t.Optional(t.String({ default: getDaysAgoDate(30).toISOString() })),
+      endDate: t.Optional(t.String({ default: new Date().toISOString() })),
+    }),
+  })
+  public async getPlayerHistory({
+    params: { id },
+    query: { startDate, endDate },
+  }: {
+    params: { id: string };
+    query: { startDate: string; endDate: string };
+  }): Promise<PlayerStatisticHistory> {
+    return await ScoreSaberService.getPlayerStatisticHistory(id, new Date(startDate), new Date(endDate));
   }
 
   @Post("/track/:id", {

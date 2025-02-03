@@ -17,11 +17,12 @@ import { Page } from "../pagination";
 import ScoreSaberPlayer from "../player/impl/scoresaber-player";
 import { PlayerScoresChartResponse } from "../response/player-scores-chart";
 import { DetailType } from "../detail-type";
-import { PlayerScore } from "../score/player-score";
+import { PlayerScore } from "src/score/player-score";
 import { ScoreStatsResponse } from "../response/scorestats-response";
 import PlayerScoresResponse from "../response/player-scores-response";
 import { ScoreSort } from "../score/score-sort";
 import LeaderboardScoresResponse from "../response/leaderboard-scores-response";
+import { PlayerStatisticHistory } from "src/player/player-statistic-history";
 
 class SSRApi {
   /**
@@ -223,11 +224,7 @@ class SSRApi {
    * @param page the page to lookup
    * @param country the country to get scores in
    */
-  async fetchLeaderboardScores<S, L>(
-    leaderboardId: string,
-    page: number,
-    country?: string
-  ) {
+  async fetchLeaderboardScores<S, L>(leaderboardId: string, page: number, country?: string) {
     return kyFetchJson<LeaderboardScoresResponse<S, L>>(
       `${Config.apiUrl}/scores/leaderboard/${leaderboardId}/${page}`,
       {
@@ -236,6 +233,22 @@ class SSRApi {
         },
       }
     );
+  }
+
+  /**
+   * Fetches the player's statistic history.
+   *
+   * @param playerId the id of the player
+   * @param startDate the start date
+   * @param endDate the end date
+   */
+  async getPlayerStatisticHistory(playerId: string, startDate: Date, endDate: Date) {
+    return kyFetchJson<PlayerStatisticHistory>(`${Config.apiUrl}/player/history/${playerId}`, {
+      searchParams: {
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString(),
+      },
+    });
   }
 }
 

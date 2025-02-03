@@ -125,6 +125,26 @@ export class Player {
   }
 
   /**
+   * Gets the player's statistic history for a specific date range.
+   *
+   * @param startDate the start date of the range.
+   * @param endDate the end date of the range.
+   */
+  public getStatisticHistoryInRange(startDate: Date, endDate: Date): Record<string, PlayerHistory> {
+    const statisticHistory = this.getStatisticHistory();
+    const history: Record<string, PlayerHistory> = {};
+
+    Object.keys(statisticHistory).forEach(date => {
+      const dateTimestamp = Date.parse(date);
+      if (dateTimestamp >= startDate.getTime() && dateTimestamp <= endDate.getTime()) {
+        history[date] = statisticHistory[date];
+      }
+    });
+
+    return history;
+  }
+
+  /**
    * Sorts the player's statistic history by
    * date in descending order. (oldest to newest)
    */
