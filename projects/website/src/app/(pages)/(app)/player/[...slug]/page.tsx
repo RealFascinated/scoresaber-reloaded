@@ -7,6 +7,7 @@ import { redirect } from "next/navigation";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { getCookieValue } from "@ssr/common/utils/cookie-utils";
 import { DetailType } from "@ssr/common/detail-type";
+import { formatPp } from "@ssr/common/utils/number-utils";
 
 export const revalidate = 300; // Revalidate every 5 minutes
 
@@ -69,8 +70,13 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   return {
     title: `${player.name}`,
     openGraph: {
-      title: `ScoreSaber Reloaded - ${player.name}`,
-      description: `Click here to view the scores for ${player.name}!`,
+      siteName: "ScoreSaber Reloaded",
+      title: `${player.name}`,
+      description: `Rank: #${player.rank}
+Country Rank: #${player.countryRank} (${player.country})
+PP: ${formatPp(player.pp)}pp
+
+Click here to view the scores for ${player.name}!`,
       images: [
         {
           url: `${Config.apiUrl}/image/player/${player.id}`,
