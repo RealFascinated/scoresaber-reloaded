@@ -41,7 +41,7 @@ export default class PlayerController {
     query: { createIfMissing, type, superJson },
   }: {
     params: { id: string };
-    query: { createIfMissing: boolean; type: DetailType };
+    query: { createIfMissing: boolean; type: DetailType; superJson: boolean };
   }): Promise<ScoreSaberPlayer | string> {
     const player = await ScoreSaberService.getPlayer(id, type, {
       createIfMissing,
@@ -56,7 +56,7 @@ export default class PlayerController {
       id: t.String({ required: true }),
     }),
     query: t.Object({
-      startDate: t.Optional(t.String({ default: getDaysAgoDate(30).toISOString() })),
+      startDate: t.Optional(t.String({ default: getDaysAgoDate(50).toISOString() })),
       endDate: t.Optional(t.String({ default: new Date().toISOString() })),
     }),
   })

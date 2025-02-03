@@ -805,12 +805,10 @@ export class PlayerService {
     player: ScoreSaberPlayerToken,
     account: PlayerDocument | undefined,
     accuracies: PlayerAccuracies,
-    type: DetailType,
     startDate: Date,
     endDate: Date
   ): Promise<PlayerStatisticHistory> {
-    let history: PlayerStatisticHistory =
-      account && type === "full" ? account.getStatisticHistoryInRange(startDate, endDate) : {};
+    let history: PlayerStatisticHistory = account ? account.getStatisticHistoryInRange(startDate, endDate) : {};
 
     if (history) {
       const todayDate = formatDateMinimal(getMidnightAlignedDate(new Date()));

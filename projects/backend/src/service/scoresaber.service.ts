@@ -193,7 +193,6 @@ export default class ScoreSaberService {
           playerToken,
           account,
           accuracies,
-          type,
           new Date(),
           getDaysAgoDate(30)
         );
@@ -246,6 +245,6 @@ export default class ScoreSaberService {
       PlayerService.getPlayerAverageAccuracies(player.id),
     ]);
 
-    return PlayerService.getPlayerStatisticHistory(player, account, accuracies, DetailType.BASIC, startDate, endDate);
+    return PlayerService.getPlayerStatisticHistory(player, account, accuracies, startDate, endDate);
   }
 }
