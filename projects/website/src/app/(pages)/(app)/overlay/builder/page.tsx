@@ -5,7 +5,8 @@ import { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Overlay Builder",
   openGraph: {
-    title: "ScoreSaber Reloaded - Overlay Builder",
+    siteName: "ScoreSaber Reloaded",
+    title: "Overlay Builder",
     description: "Create an overlay for your stream!",
   },
 };

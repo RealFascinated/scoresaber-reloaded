@@ -4,7 +4,8 @@ import { MapsData } from "@/components/maps/maps-data";
 export const metadata: Metadata = {
   title: "Maps",
   openGraph: {
-    title: "ScoreSaber Reloaded - Maps",
+    siteName: "ScoreSaber Reloaded",
+    title: "Maps",
     description: "View the maps and playlists on ScoreSaber Reloaded",
   },
 };

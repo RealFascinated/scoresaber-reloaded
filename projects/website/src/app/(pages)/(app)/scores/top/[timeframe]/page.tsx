@@ -5,7 +5,8 @@ import { Timeframe } from "@ssr/common/timeframe";
 export const metadata: Metadata = {
   title: "Top Scores",
   openGraph: {
-    title: "ScoreSaber Reloaded - Top Scores",
+    siteName: "ScoreSaber Reloaded",
+    title: "Top Scores",
     description: "View the top 50 scores set by players on ScoreSaber.",
   },
 };

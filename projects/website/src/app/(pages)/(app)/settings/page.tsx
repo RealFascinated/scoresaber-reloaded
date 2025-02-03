@@ -5,7 +5,8 @@ import { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Settings",
   openGraph: {
-    title: "ScoreSaber Reloaded - Settings",
+    siteName: "ScoreSaber Reloaded",
+    title: "Settings",
     description: "Change or view your settings for ScoreSaber Reloaded",
   },
 };

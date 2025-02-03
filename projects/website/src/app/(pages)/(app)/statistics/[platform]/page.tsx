@@ -9,7 +9,8 @@ export const revalidate = 300; // Revalidate every 5 minutes
 export const metadata: Metadata = {
   title: "Statistics",
   openGraph: {
-    title: "ScoreSaber Reloaded - Statistics",
+    siteName: "ScoreSaber Reloaded",
+    title: "Statistics",
     description: "View the game statistics!",
   },
 };
