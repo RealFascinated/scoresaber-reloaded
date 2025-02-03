@@ -4,7 +4,14 @@
 import { Chart, registerables } from "chart.js";
 import { Line } from "react-chartjs-2";
 import { useIsMobile } from "@/hooks/use-is-mobile";
-import { formatDate, formatDateMinimal, getDaysAgo, getDaysAgoDate, parseDate } from "@ssr/common/utils/time-utils";
+import {
+  formatChartDate,
+  formatDate,
+  formatDateMinimal,
+  getDaysAgo,
+  getDaysAgoDate,
+  parseDate,
+} from "@ssr/common/utils/time-utils";
 import { Axis, Dataset, DatasetConfig } from "@/common/chart/types";
 import { generateChartAxis, generateChartDataset } from "@/common/chart/chart.util";
 import useSettings from "@/hooks/use-settings";
@@ -69,7 +76,7 @@ const GenericChart = ({ options, labels, datasetConfig, histories }: ChartProps)
   const formattedLabels = useMemo(() => {
     return labels.map(value => {
       if (typeof value === "string") return value;
-      const formattedDate = formatDateMinimal(value);
+      const formattedDate = formatChartDate(value);
       if (formattedDate === formatDateMinimal(getDaysAgoDate(0))) return "Now";
       if (formattedDate === formatDateMinimal(getDaysAgoDate(1))) return "Yesterday";
       return formattedDate;

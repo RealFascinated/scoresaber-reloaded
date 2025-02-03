@@ -25,6 +25,7 @@ const LOOKUP_PLAYER_ENDPOINT = `${API_BASE}/player/:id/:type`;
 const LOOKUP_PLAYERS_ENDPOINT = `${API_BASE}/players?page=:page`;
 const LOOKUP_PLAYERS_BY_COUNTRY_ENDPOINT = `${API_BASE}/players?page=:page&countries=:country`;
 const LOOKUP_PLAYER_SCORES_ENDPOINT = `${API_BASE}/player/:id/scores?limit=:limit&sort=:sort&page=:page`;
+const LOOKUP_ACTIVE_PLAYER_COUNT = `${API_BASE}/players/count`;
 
 /**
  * Leaderboard
@@ -168,6 +169,22 @@ class ScoreSaberService extends Service {
       return undefined;
     }
     this.log(`Found ${response.players.length} players in ${(performance.now() - before).toFixed(0)}ms`);
+    return response;
+  }
+
+  /**
+   * Gets the active player count.
+   *
+   * @returns the active player count
+   */
+  public async lookupActivePlayerCount(): Promise<number | undefined> {
+    const before = performance.now();
+    this.log(`Looking up active player count...`);
+    const response = await this.fetch<number>(LOOKUP_ACTIVE_PLAYER_COUNT);
+    if (response === undefined) {
+      return undefined;
+    }
+    this.log(`Found active player count in ${(performance.now() - before).toFixed(0)}ms`);
     return response;
   }
 

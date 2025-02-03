@@ -53,22 +53,10 @@ connectScoresaberWebsocket({
 
     await ScoreSaberService.notifyNumberOne(score);
   },
-  onDisconnect: async error => {
-    await logToChannel(
-      DiscordChannels.backendLogs,
-      new EmbedBuilder().setDescription(`ScoreSaber websocket disconnected: ${JSON.stringify(error)}`)
-    );
-  },
 });
 connectBeatLeaderWebsocket({
   onScore: async score => {
     await BeatLeaderService.trackBeatLeaderScore(score);
-  },
-  onDisconnect: async error => {
-    await logToChannel(
-      DiscordChannels.backendLogs,
-      new EmbedBuilder().setDescription(`BeatLeader websocket disconnected: ${JSON.stringify(error)}`)
-    );
   },
 });
 
@@ -129,8 +117,8 @@ app.use(
 app.use(
   cron({
     name: "update-scoresaber-statistics",
-    pattern: "*/1 * * * *", // Every 1 minute
-    // pattern: "30 23 * * *", // Every day at 23:30
+    // pattern: "*/1 * * * *", // Every 1 minute
+    pattern: "59 23 * * *", // Every day at 23:59
     timezone: "Europe/London", // UTC time
     protect: true,
     run: async () => {
@@ -151,6 +139,8 @@ app.onError({ as: "global" }, ({ code, error }) => {
   const status = "status" in error ? error.status : undefined;
   return {
     ...((status && { statusCode: status }) || { status: code }),
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error - message is not in the error type
     ...(error.message != code && { message: error.message }),
     timestamp: new Date().toISOString(),
   };

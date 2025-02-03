@@ -4,6 +4,7 @@ import { GamePlatform } from "@ssr/common/model/statistics/game-platform";
 import { Statistic } from "@ssr/common/model/statistics/statistic";
 import { StatisticsModel } from "@ssr/common/model/statistics/statistics";
 import Logger from "@ssr/common/logger";
+import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 
 export default class StatisticsService {
   constructor() {
@@ -61,7 +62,7 @@ export default class StatisticsService {
     if (!foundPlatform) {
       throw new Error(`Platform ${platform} not found`);
     }
-    const date = formatDateMinimal(getMidnightAlignedDate(new Date()));
+    const date = formatDateMinimal(new Date());
 
     foundPlatform.statistics[date] = {
       ...foundPlatform.statistics[date],
@@ -93,8 +94,11 @@ export default class StatisticsService {
       .limit(100) // Limit the results
       .lean(); // Convert to plain JavaScript objects
 
+    const playerCount = await scoresaberService.lookupActivePlayerCount();
+
     return {
       uniquePlayers: statsResponse[0]?.uniquePlayers[0]?.uniquePlayers || 0,
+      playerCount: playerCount || 0,
       totalScores: statsResponse[0]?.totalScores[0]?.totalScores || 0,
       averagePp: scores.reduce((total, score) => total + score.pp, 0) / scores.length,
     };
@@ -104,10 +108,11 @@ export default class StatisticsService {
    * Tracks the statistics for ScoreSaber.
    */
   public static async trackScoreSaberStatistics() {
-    const { uniquePlayers, totalScores, averagePp } = await this.getScoreSaberStatistics();
+    const { uniquePlayers, playerCount, totalScores, averagePp } = await this.getScoreSaberStatistics();
 
     await Promise.all([
       this.trackStatisticToday(GamePlatform.ScoreSaber, Statistic.ActivePlayers, uniquePlayers),
+      this.trackStatisticToday(GamePlatform.ScoreSaber, Statistic.PlayerCount, playerCount),
       this.trackStatisticToday(GamePlatform.ScoreSaber, Statistic.TotalScores, totalScores),
       this.trackStatisticToday(GamePlatform.ScoreSaber, Statistic.AveragePp, averagePp),
     ]);

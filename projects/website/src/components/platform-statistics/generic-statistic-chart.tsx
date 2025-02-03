@@ -20,15 +20,6 @@ type Props = {
 };
 
 export default function GenericStatisticChart({ statistics, datasetConfig }: Props) {
-  // Check if player statistics are available
-  if (!statistics || Object.keys(statistics).length === 0) {
-    return (
-      <div className="flex justify-center">
-        <p>Unable to load player rank chart, missing data...</p>
-      </div>
-    );
-  }
-
   const histories: Record<string, (number | null)[]> = {};
   const historyDays = 365;
 
@@ -64,6 +55,28 @@ export default function GenericStatisticChart({ statistics, datasetConfig }: Pro
     }
   }
 
+  let showNoData = false;
+  if (datasetConfig.length === 1) {
+    for (const dataset of datasetConfig) {
+      const containsData = histories[dataset.field].some(value => value !== null);
+      if (!containsData) {
+        showNoData = true;
+        break;
+      }
+    }
+  }
+
   // Render the chart with collected data
-  return <GenericChart labels={labels} datasetConfig={datasetConfig} histories={histories} />;
+  return (
+    <div className="flex relative">
+      {showNoData ? (
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center z-[9999] bg-muted p-2 rounded-md">
+          <p className="text-red-500">No data available</p>
+        </div>
+      ) : null}
+      <div className="w-full h-full">
+        <GenericChart labels={labels} datasetConfig={datasetConfig} histories={histories} />
+      </div>
+    </div>
+  );
 }

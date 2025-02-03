@@ -52,7 +52,11 @@ export default class Service {
           Logger.warn(`Rate limit for ${this.name} remaining: ${left}`);
         }
       }
-      return response.json();
+
+      if (response.headers.get("Content-Type")?.includes("application/json")) {
+        return response.json();
+      }
+      return (await response.text()) as unknown as T;
     } catch (error) {
       return undefined;
     }

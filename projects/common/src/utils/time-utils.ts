@@ -104,6 +104,21 @@ export function formatDateMinimal(date: Date) {
 }
 
 /**
+ * Formats the date in the format "DD MMMM YYYY"
+ *
+ * @param date the date
+ */
+export function formatChartDate(date: Date) {
+  const day = date.getUTCDate();
+  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const month = monthNames[date.getUTCMonth()];
+  const year = date.getUTCFullYear();
+  const currentYear = new Date().getFullYear();
+
+  return `${month} ${day}${currentYear === year ? "" : `, ${year}`}`;
+}
+
+/**
  * Formats the date
  *
  * @param date the date to format

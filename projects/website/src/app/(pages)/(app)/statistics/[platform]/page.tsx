@@ -28,7 +28,7 @@ export default async function TopScoresPage({ params }: StatisticsPageProps) {
 
   return (
     <main className="w-full flex justify-center">
-      <Card className="flex flex-col gap-2 w-full h-fit xl:w-[75%]">
+      <Card className="flex flex-col gap-2 w-full h-fit">
         <div className="text-center">
           <p className="font-semibold'">Game Statistics</p>
           <p className="text-gray-400">View the statistics for {names[platform]}</p>

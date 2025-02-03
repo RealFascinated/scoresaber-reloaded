@@ -10,18 +10,15 @@ type Props = {
   statistics: StatisticsType;
 };
 
-// Dataset configuration for the chart
 const datasetConfig: DatasetConfig[] = [
   {
     title: "Active Players",
     field: "activePlayers",
-    color: "#ff4f4f",
+    color: "#754fff",
     axisId: "y",
     axisConfig: {
       reverse: false,
       display: true,
-      hideOnMobile: false,
-      displayName: "Active Players",
       position: "left",
       valueFormatter: value => {
         if (isWholeNumber(value)) {
@@ -33,16 +30,14 @@ const datasetConfig: DatasetConfig[] = [
     labelFormatter: (value: number) => `Active Players: ${formatNumberWithCommas(value)}`,
   },
   {
-    title: "Average PP (top 100 scores)",
-    field: "averagePp",
-    color: "#4858ff",
-    axisId: "y1",
+    title: "Active Accounts",
+    field: "playerCount",
+    color: "#754fff",
+    axisId: "y",
     axisConfig: {
       reverse: false,
-      display: false,
-      hideOnMobile: false,
-      displayName: "Average PP (top 100 scores)",
-      position: "right",
+      display: true,
+      position: "left",
       valueFormatter: value => {
         if (isWholeNumber(value)) {
           return value.toString();
@@ -50,20 +45,18 @@ const datasetConfig: DatasetConfig[] = [
         return value.toFixed(1);
       },
     },
-    labelFormatter: (value: number) => `Average PP: ${formatPp(value)}`,
+    labelFormatter: (value: number) => `Active Players: ${formatNumberWithCommas(value)}`,
   },
   {
     title: "Scores Set",
     field: "totalScores",
     color: "#00ff6f",
-    axisId: "y2",
+    axisId: "y",
     type: "bar",
     axisConfig: {
       reverse: false,
       display: true,
-      hideOnMobile: false,
-      displayName: "Scores Set",
-      position: "right",
+      position: "left",
       valueFormatter: value => {
         if (isWholeNumber(value)) {
           return value.toString();
@@ -73,8 +66,32 @@ const datasetConfig: DatasetConfig[] = [
     },
     labelFormatter: (value: number) => `Scores Set: ${formatNumberWithCommas(value)}`,
   },
+  {
+    title: "Daily Average PP (top 100 scores)",
+    field: "averagePp",
+    color: "#4858ff",
+    axisId: "y",
+    axisConfig: {
+      reverse: false,
+      display: true,
+      position: "left",
+      valueFormatter: value => {
+        if (isWholeNumber(value)) {
+          return value.toString();
+        }
+        return value.toFixed(1);
+      },
+    },
+    labelFormatter: (value: number) => `PP: ${formatPp(value)}pp`,
+  },
 ];
 
 export default function ScoreSaberStatisticsChart({ statistics }: Props) {
-  return <GenericStatisticChart statistics={statistics} datasetConfig={datasetConfig} />;
+  return (
+    <div className="flex flex-col lg:grid grid-cols-2 gap-2">
+      {datasetConfig.map(config => (
+        <GenericStatisticChart key={config.field} statistics={statistics} datasetConfig={[config]} />
+      ))}
+    </div>
+  );
 }
