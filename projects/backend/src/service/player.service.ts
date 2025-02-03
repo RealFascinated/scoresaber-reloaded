@@ -3,7 +3,7 @@ import { NotFoundError } from "@ssr/common/error/not-found-error";
 import { getDaysAgoDate, getMidnightAlignedDate } from "@ssr/common/utils/time-utils";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { InternalServerError } from "@ssr/common/error/internal-server-error";
-import { delay, isProduction } from "@ssr/common/utils/utils";
+import { isProduction } from "@ssr/common/utils/utils";
 import { AroundPlayer } from "@ssr/common/types/around-player";
 import { ScoreSort } from "@ssr/common/score/score-sort";
 import { logNewTrackedPlayer } from "../common/embds";
