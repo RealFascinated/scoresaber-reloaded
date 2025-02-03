@@ -18,24 +18,18 @@ export class Cooldown {
      * @returns true if the cooldown was ready and is now used, false if it wasn't ready
      */
     use(): boolean {
-        const beforeBursts = this.remainingBursts;
         this.refreshBursts();
-        const afterRefresh = this.remainingBursts;
         
         if (this.remainingBursts > 0) {
             this.remainingBursts--;
-            console.log(`[Cooldown] Used burst: ${beforeBursts} -> ${afterRefresh} -> ${this.remainingBursts}`);
             return true;
         }
 
         const now = Date.now();
         if (now - this.lastUsed >= this.cooldownMs) {
             this.lastUsed = now;
-            console.log(`[Cooldown] Used regular cooldown`);
             return true;
         }
-
-        console.log(`[Cooldown] Use failed: ${this.remainingBursts} bursts, ${now - this.lastUsed}ms since last use`);
         return false;
     }
 
@@ -45,7 +39,6 @@ export class Cooldown {
         
         if (timeSinceRefresh >= this.cooldownMs) {
             const newTokens = Math.floor(timeSinceRefresh / this.cooldownMs);
-            const oldBursts = this.remainingBursts;
             
             // Update the refresh timestamp to account for the tokens we're adding
             this.lastRefresh += newTokens * this.cooldownMs;
@@ -55,8 +48,6 @@ export class Cooldown {
                 this.maxBursts,
                 this.remainingBursts + newTokens
             );
-
-            console.log(`[Cooldown] Refreshed bursts: ${oldBursts} -> ${this.remainingBursts} (added ${newTokens} tokens after ${timeSinceRefresh}ms)`);
         }
     }
 
