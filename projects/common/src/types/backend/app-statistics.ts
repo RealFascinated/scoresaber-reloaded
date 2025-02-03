@@ -8,24 +8,4 @@ export type AppStatistics = {
    * The total amount of ScoreSaber scores tracked.
    */
   trackedScores: number;
-
-  /**
-   * The total amount of additional data for scores being tracked.
-   */
-  additionalScoresData: number;
-
-  /**
-   * The amount of cached BeatSaver maps.
-   */
-  cachedBeatSaverMaps: number;
-
-  /**
-   * The amount of cached ScoreSaber leaderboards.
-   */
-  cachedScoreSaberLeaderboards: number;
-
-  /**
-   * The amount of cached BeatLeader score stats.
-   */
-  cachedBeatLeaderScoreStats: number;
 };

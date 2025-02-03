@@ -33,29 +33,6 @@ export function AppStats({ initialStatistics }: AppStatisticsProps) {
     <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 sm:gap-7 md:grid-cols-4 md:gap-12 lg:grid-cols-5">
       <Statistic icon={<User className="size-10" />} title="Tracked Players" value={statistics.trackedPlayers} />
       <Statistic icon={<Box className="size-10" />} title="Tracked Scores" value={statistics.trackedScores} />
-      <Statistic
-        icon={<TrendingUp className="size-10" />}
-        title="Additional Scores Data"
-        value={statistics.additionalScoresData}
-      />
-      <Statistic
-        icon={<SwordIcon className="size-10" />}
-        title="BeatSaver Leaderboards"
-        value={statistics.cachedBeatSaverMaps}
-        isCache
-      />
-      <Statistic
-        icon={<List className="size-10" />}
-        title="ScoreSaber Leaderboards"
-        value={statistics.cachedScoreSaberLeaderboards}
-        isCache
-      />
-      <Statistic
-        icon={<List className="size-10" />}
-        title="BeatLeader Score Stats"
-        value={statistics.cachedBeatLeaderScoreStats}
-        isCache
-      />
     </div>
   );
 }
