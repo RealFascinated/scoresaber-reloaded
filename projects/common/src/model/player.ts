@@ -151,6 +151,9 @@ export class Player {
         }
       });
 
+    if (this._id == "76561198449412074") {
+      console.log(history);
+    }
     return history;
   }
 
