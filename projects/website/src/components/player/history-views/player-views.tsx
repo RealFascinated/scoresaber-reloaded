@@ -108,7 +108,7 @@ export default function PlayerViews({ player }: PlayerChartsProps) {
 
   return (
     <>
-      {selectedView.chart(player, statisticHistory)}
+      {statisticHistory ? selectedView.chart(player, statisticHistory) : <Loading />}
 
       <div className="flex items-center justify-center gap-2">
         {views.length > 1 &&
