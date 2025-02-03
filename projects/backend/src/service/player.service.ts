@@ -46,10 +46,10 @@ export class PlayerService {
       await accountCreationLock[id];
     }
 
-    let player: PlayerDocument | null = await PlayerModel.findById(id);
+    let player: PlayerDocument | null = await PlayerModel.findOne({ _id: id });
     if (player === null) {
       if (!create) {
-        throw new NotFoundError(`Player "${id}" not found`);
+        throw new NotFoundError(`Player "${id}" not found, create disabled`);
       }
 
       playerToken = playerToken || (await scoresaberService.lookupPlayer(id));
