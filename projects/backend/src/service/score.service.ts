@@ -1,38 +1,37 @@
-import { Metadata } from "@ssr/common/types/metadata";
-import { NotFoundError } from "elysia";
-import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
-import { ScoreSort } from "@ssr/common/score/score-sort";
-import { Leaderboards } from "@ssr/common/leaderboard";
-import LeaderboardService from "./leaderboard.service";
-import { PlayerScore } from "@ssr/common/score/player-score";
-import LeaderboardScoresResponse from "@ssr/common/response/leaderboard-scores-response";
-import PlayerScoresResponse from "@ssr/common/response/player-scores-response";
-import { fetchWithCache } from "../common/cache.util";
-import { ScoreType } from "@ssr/common/model/score/score";
-import { getScoreSaberLeaderboardFromToken, getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
+import { DetailType } from "@ssr/common/detail-type";
+import Logger from "@ssr/common/logger";
+import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
+import Leaderboard from "@ssr/common/model/leaderboard/leaderboard";
+import {
+  ScoreSaberPreviousScoreDocument,
+  ScoreSaberPreviousScoreModel,
+} from "@ssr/common/model/score/impl/scoresaber-previous-score";
 import {
   ScoreSaberPreviousScoreOverview,
   ScoreSaberScore,
   ScoreSaberScoreModel,
 } from "@ssr/common/model/score/impl/scoresaber-score";
-import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import Leaderboard from "@ssr/common/model/leaderboard/leaderboard";
-import CacheService, { ServiceCache } from "./cache.service";
-import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
-import BeatLeaderService from "./beatleader.service";
-import { PlayerService } from "./player.service";
-import { getDaysAgoDate } from "@ssr/common/utils/time-utils";
-import { Timeframe } from "@ssr/common/timeframe";
-import {
-  ScoreSaberPreviousScoreDocument,
-  ScoreSaberPreviousScoreModel,
-} from "@ssr/common/model/score/impl/scoresaber-previous-score";
-import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score";
-import { Page, Pagination } from "@ssr/common/pagination";
-import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/leaderboard";
+import { ScoreType } from "@ssr/common/model/score/score";
 import { removeObjectFields } from "@ssr/common/object.util";
-import Logger from "@ssr/common/logger";
-import { DetailType } from "@ssr/common/detail-type";
+import { Page, Pagination } from "@ssr/common/pagination";
+import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
+import LeaderboardScoresResponse from "@ssr/common/response/leaderboard-scores-response";
+import PlayerScoresResponse from "@ssr/common/response/player-scores-response";
+import { PlayerScore } from "@ssr/common/score/player-score";
+import { ScoreSort } from "@ssr/common/score/score-sort";
+import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
+import { Timeframe } from "@ssr/common/timeframe";
+import { getScoreSaberLeaderboardFromToken, getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
+import { Metadata } from "@ssr/common/types/metadata";
+import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/leaderboard";
+import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score";
+import { getDaysAgoDate } from "@ssr/common/utils/time-utils";
+import { NotFoundError } from "elysia";
+import { fetchWithCache } from "../common/cache.util";
+import BeatLeaderService from "./beatleader.service";
+import CacheService, { ServiceCache } from "./cache.service";
+import LeaderboardService from "./leaderboard.service";
+import { PlayerService } from "./player.service";
 
 export class ScoreService {
   public static async lookupPlayerScores(
