@@ -15,6 +15,7 @@ import { fetchWithCache } from "../common/cache.util";
 import CacheService, { ServiceCache } from "./cache.service";
 import Logger from "@ssr/common/logger";
 import { removeObjectFields } from "@ssr/common/object.util";
+import { PlayerService } from "./player.service";
 
 export default class BeatLeaderService {
   /**
@@ -57,13 +58,19 @@ export default class BeatLeaderService {
    * @private
    */
   public static async getAdditionalScoreData(scoreId: number): Promise<AdditionalScoreData | undefined> {
-    const additionalData = await AdditionalScoreDataModel.findOne({
-      scoreId: scoreId,
-    }).lean();
-    if (!additionalData) {
-      return undefined;
-    }
-    return this.additionalScoreDataToObject(additionalData);
+    return fetchWithCache(
+      CacheService.getCache(ServiceCache.AdditionalScoreData),
+      `additional-score-data:${scoreId}`,
+      async () => {
+        const additionalData = await AdditionalScoreDataModel.findOne({
+          scoreId: scoreId,
+        }).lean();
+        if (!additionalData) {
+          return undefined;
+        }
+        return this.additionalScoreDataToObject(additionalData);
+      }
+    );
   }
 
   /**
@@ -227,10 +234,13 @@ export default class BeatLeaderService {
    * @param scoreId the id of the score
    */
   public static async getScoreStats(scoreId: number): Promise<ScoreStats | undefined> {
-    const scoreStats = await ScoreStatsModel.findOne({ _id: scoreId }).lean();
+    const additionalScoreData = await this.getAdditionalScoreData(scoreId);
+
+    let scoreStats: ScoreStats | null = await ScoreStatsModel.findOne({ _id: scoreId }).lean();
     if (scoreStats == null) {
-      const scoreStats = await beatLeaderService.lookupScoreStats(scoreId);
-      if (scoreStats) {
+      scoreStats = (await beatLeaderService.lookupScoreStats(scoreId)) as ScoreStats;
+      // Only track score stats if the player exists
+      if (scoreStats && additionalScoreData && (await PlayerService.playerExists(additionalScoreData.playerId))) {
         return await this.trackScoreStats(scoreId, scoreStats);
       }
     }
