@@ -22,8 +22,9 @@ export async function cleanupAdditionalScoreData() {
   let removed = 0;
   let processed = 0;
   let lastId: number | null = null;
+  let hasMore = true;
 
-  while (true) {
+  while (hasMore) {
     const query = lastId
       ? {
           scoreId: { $gt: lastId },
@@ -40,6 +41,7 @@ export async function cleanupAdditionalScoreData() {
       .sort({ scoreId: 1 });
 
     if (additionalScoreData.length === 0) {
+      hasMore = false;
       break;
     }
 
@@ -68,13 +70,15 @@ export async function cleanupScoreStats() {
   let removed = 0;
   let processed = 0;
   let lastId: number | null = null;
+  let hasMore = true;
 
-  while (true) {
+  while (hasMore) {
     // Get next batch of unprocessed records
     const query = lastId ? { _id: { $gt: lastId } } : {};
     const scoreStats: ScoreStatsDocument[] = await ScoreStatsModel.find(query).limit(limit).sort({ _id: 1 });
 
     if (scoreStats.length === 0) {
+      hasMore = false;
       break;
     }
 
