@@ -1,5 +1,4 @@
-import { AxiosRequestConfig } from "axios";
-import { ssrGet } from "src/utils/request";
+import { RequestOptions, ssrGet } from "../utils/request";
 import { Cooldown } from "../cooldown";
 import Logger from "../logger";
 import { isServer } from "../utils/utils";
@@ -50,7 +49,7 @@ export default class Service {
    * @param options the fetch options to use
    * @returns the fetched data
    */
-  public async fetch<T>(url: string, options?: AxiosRequestConfig): Promise<T | undefined> {
+  public async fetch<T>(url: string, options?: RequestOptions): Promise<T | undefined> {
     await this.cooldown.waitAndUse();
 
     return ssrGet<T>(this.buildRequestUrl(!isServer(), url), "json", {
