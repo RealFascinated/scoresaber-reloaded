@@ -12,9 +12,10 @@ import Link from "next/link";
 type Props = {
   score: ScoreSaberScore;
   leaderboard: ScoreSaberLeaderboard;
+  hideRank?: boolean;
 };
 
-export default function ScoreInfo({ score, leaderboard }: Props) {
+export default function ScoreInfo({ score, leaderboard, hideRank }: Props) {
   const hmd = getHMDInfo(score.hmd as HMD);
 
   return (
@@ -23,11 +24,15 @@ export default function ScoreInfo({ score, leaderboard }: Props) {
         <GlobeAmericasIcon className="w-5 h-5" />
 
         {/* Score Rank */}
-        <Link prefetch={false} href={`/leaderboard/${leaderboard.id}/${getPageFromRank(score.rank, 12)}`}>
-          <p className="text-ssr hover:brightness-[66%] transition-all transform-gpu cursor-pointer">
-            #{formatNumberWithCommas(score.rank)}
-          </p>
-        </Link>
+        {!hideRank ? (
+          <Link prefetch={false} href={`/leaderboard/${leaderboard.id}/${getPageFromRank(score.rank, 12)}`}>
+            <p className="text-ssr hover:brightness-[66%] transition-all transform-gpu cursor-pointer">
+              #{formatNumberWithCommas(score.rank)}
+            </p>
+          </Link>
+        ) : (
+          <p className="text-ssr">-</p>
+        )}
 
         {/* Score HMD and Controllers */}
         {hmd.logo && (

@@ -30,6 +30,7 @@ import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/leaderboard-player-info";
 import { getScoreSaberAvatar } from "@ssr/common/utils/scoresaber.util";
 import Avatar from "../avatar";
+import Link from "next/link";
 
 type Props = {
   highlightedPlayer?: ScoreSaberPlayer;
@@ -42,6 +43,7 @@ type Props = {
     hideLeaderboardDropdown?: boolean;
     hideAccuracyChanger?: boolean;
     disablePadding?: boolean;
+    hideRank?: boolean;
   };
 };
 
@@ -126,11 +128,17 @@ export default function Score({ leaderboard, beatSaverMap, score, settings, high
       {playerAbove && (
         <div className="flex items-center gap-2 pl-2">
           <Avatar src={getScoreSaberAvatar(playerAbove)} alt={playerAbove.name ?? ""} size={20} />
-          <p className="text-sm">{playerAbove.name}</p>
+          <Link
+            href={`/player/${playerAbove.id}`}
+            className="hover:brightness-[66%] transition-all transform-gpu cursor-pointer"
+            prefetch={false}
+          >
+            <p className="text-sm">{playerAbove.name}</p>
+          </Link>
         </div>
       )}
-      <div className={`grid w-full gap-2 lg:gap-0 ${gridColsClass}`}>
-        <ScoreInfo score={score} leaderboard={leaderboard} />
+      <div className={`grid w-full gap-2 lg:gap-0 ${gridColsClass} ${settings?.hideRank ? "pt-1" : ""}`}>
+        <ScoreInfo score={score} leaderboard={leaderboard} hideRank={settings?.hideRank} />
         <ScoreSongInfo leaderboard={leaderboard} beatSaverMap={beatSaverMap} />
         {!settings?.noScoreButtons && (
           <ScoreButtons

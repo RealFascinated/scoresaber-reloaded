@@ -55,7 +55,9 @@ export function FriendScores() {
     <Card className="h-fit flex flex-col gap-2">
       <div>
         <p className="font-bold">Friend Scores</p>
-        <p className="text-sm text-gray-500">The 100 most recent scores from your friends.</p>
+        <p className="text-sm text-gray-400">
+          The 100 most recent scores from your friends. Score ranks aren't available as this is based on cached data
+        </p>
       </div>
 
       {/* Loading */}
@@ -89,6 +91,7 @@ export function FriendScores() {
                         hideLeaderboardDropdown: true,
                         hideAccuracyChanger: true,
                         noScoreButtons: true,
+                        hideRank: true,
                       }}
                     />
                   </motion.div>

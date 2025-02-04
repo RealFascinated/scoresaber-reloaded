@@ -32,6 +32,9 @@ import { PlayerService } from "./service/player.service";
 import ScoreSaberService from "./service/scoresaber.service";
 import StatisticsService from "./service/statistics.service";
 import { ScoreService } from "./service/score/score.service";
+import { opentelemetry } from "@elysiajs/opentelemetry";
+import { BatchSpanProcessor } from "@opentelemetry/sdk-trace-node";
+import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-proto";
 
 Logger.info("Starting SSR Backend...");
 
@@ -62,6 +65,20 @@ connectBeatLeaderWebsocket({
 });
 
 export const app = new Elysia();
+
+app.use(
+  opentelemetry({
+    spanProcessors: [
+      new BatchSpanProcessor(
+        new OTLPTraceExporter({
+          url: "https://signoz-injest.fascinated.cc/v1/traces",
+        })
+      ),
+    ],
+    serviceName: `ssr-backend-${isProduction() ? "prod" : "dev"}`,
+  })
+);
+
 app.use(
   cron({
     name: "player-statistics-tracker-cron",
