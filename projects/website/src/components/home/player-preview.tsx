@@ -25,7 +25,7 @@ export function PlayerPreview() {
   });
 
   return (
-    <Card className="h-[180px] flex justify-center">
+    <Card className="min-h-[180px] flex justify-center">
       {isLoading && (
         <div className="flex justify-center items-center h-full">
           <LoadingIcon />
