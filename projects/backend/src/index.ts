@@ -11,7 +11,7 @@ import { connectBeatLeaderWebsocket } from "@ssr/common/websocket/beatleader-web
 import { connectScoresaberWebsocket } from "@ssr/common/websocket/scoresaber-websocket";
 import { logger } from "@tqman/nice-logger";
 import { EmbedBuilder } from "discord.js";
-import { Elysia } from "elysia";
+import { Elysia, ValidationError } from "elysia";
 import { decorators } from "elysia-decorators";
 import { helmet } from "elysia-helmet";
 import mongoose from "mongoose";
@@ -156,7 +156,12 @@ app.use(
 app.onError({ as: "global" }, ({ code, error }) => {
   // Return default error for type validation
   if (code === "VALIDATION") {
-    return error.all;
+    return (error as ValidationError).all;
+  }
+
+  // Assume unknown error is an internal server error
+  if (code === "UNKNOWN") {
+    code = "INTERNAL_SERVER_ERROR";
   }
 
   let status = "status" in error ? error.status : undefined;
@@ -176,7 +181,6 @@ app.onError({ as: "global" }, ({ code, error }) => {
         break;
     }
   }
-
 
   return {
     ...((status && { statusCode: status }) || { status: code }),
