@@ -159,7 +159,25 @@ app.onError({ as: "global" }, ({ code, error }) => {
     return error.all;
   }
 
-  const status = "status" in error ? error.status : undefined;
+  let status = "status" in error ? error.status : undefined;
+  if (status === undefined) {
+    switch (code) {
+      case "INTERNAL_SERVER_ERROR":
+        status = 500;
+        break;
+      case "NOT_FOUND":
+        status = 404;
+        break;
+      case "PARSE":
+        status = 400;
+        break;
+      case "INVALID_COOKIE_SIGNATURE":
+        status = 401;
+        break;
+    }
+  }
+
+
   return {
     ...((status && { statusCode: status }) || { status: code }),
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
