@@ -20,7 +20,7 @@ export default function ScoreSongInfo({ leaderboard, beatSaverMap, clickableSong
   const starCount = leaderboard.stars;
   const difficulty = leaderboard.difficulty.difficulty;
   return (
-    <div className="flex gap-3 items-center break-all">
+    <div className="flex gap-3 items-center break-all w-full">
       <div className={`relative flex justify-center h-[${imageSize}px]`}>
         <Tooltip
           display={
@@ -58,17 +58,20 @@ export default function ScoreSongInfo({ leaderboard, beatSaverMap, clickableSong
         />
       </div>
       <div className="flex">
-        <div className="overflow-y-clip flex flex-col gap-1">
+        <div className="overflow-y-clip flex flex-col gap-1 min-w-0 w-full">
           {clickableSongName ? (
             <Link
               prefetch={false}
               href={`/leaderboard/${leaderboard.id}`}
-              className="cursor-pointer hover:brightness-[66%] transform-gpu transition-all text-ssr w-fit"
+              className="cursor-pointer hover:brightness-[66%] transform-gpu transition-all text-ssr"
+              style={{
+                overflowWrap: "anywhere",
+              }}
             >
               {leaderboard.fullName}
             </Link>
           ) : (
-            <p className="text-ssr w-fit">{leaderboard.fullName}</p>
+            <p className="text-ssr break-all min-w-0">{leaderboard.fullName}</p>
           )}
           <div className="flex flex-row text-sm gap-1.5 items-end leading-none">
             <p className="text-gray-400">
