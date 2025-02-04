@@ -62,7 +62,7 @@ export default class StatisticsService {
     if (!foundPlatform) {
       throw new Error(`Platform ${platform} not found`);
     }
-    const date = formatDateMinimal(new Date());
+    const date = formatDateMinimal(getMidnightAlignedDate(new Date()));
 
     foundPlatform.statistics[date] = {
       ...foundPlatform.statistics[date],
