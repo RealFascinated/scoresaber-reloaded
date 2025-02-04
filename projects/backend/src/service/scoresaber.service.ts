@@ -18,8 +18,7 @@ import { fetchWithCache } from "../common/cache.util";
 import BeatSaverService from "./beatsaver.service";
 import CacheService, { ServiceCache } from "./cache.service";
 import { PlayerService } from "./player.service";
-import { ScoreService } from "./score.service";
-
+import { ScoreService } from "./score/score.service";
 export default class ScoreSaberService {
   /**
    * Notifies the number one score in Discord.

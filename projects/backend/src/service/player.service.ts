@@ -23,8 +23,8 @@ import { isProduction } from "@ssr/common/utils/utils";
 import { fetchWithCache } from "../common/cache.util";
 import { logNewTrackedPlayer } from "../common/embds";
 import CacheService, { ServiceCache } from "./cache.service";
-import { ScoreService } from "./score.service";
 import ScoreSaberService from "./scoresaber.service";
+import { ScoreService } from "./score/score.service";
 
 const accountCreationLock: { [id: string]: Promise<PlayerDocument> } = {};
 

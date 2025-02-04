@@ -3,8 +3,9 @@ import { Timeframe } from "@ssr/common/timeframe";
 import { NotFoundError, t } from "elysia";
 import { Controller, Get } from "elysia-decorators";
 import BeatLeaderService from "../service/beatleader.service";
-import { ScoreService } from "../service/score.service";
 import SuperJSON from "superjson";
+import { ScoreService } from "../service/score/score.service";
+import { ScoreHistoryService } from "../service/score/score-history.service";
 
 @Controller("/scores")
 export default class ScoresController {
@@ -114,7 +115,7 @@ export default class ScoresController {
     };
     query: { superJson: boolean };
   }): Promise<unknown> {
-    const data = await ScoreService.getScoreHistory(playerId, leaderboardId, page);
+    const data = await ScoreHistoryService.getScoreHistory(playerId, leaderboardId, page);
     return superJson ? SuperJSON.stringify(data) : data.toJSON();
   }
 

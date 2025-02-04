@@ -15,7 +15,7 @@ import { InternalServerError } from "@ssr/common/error/internal-server-error";
 import { BadRequestError } from "@ssr/common/error/bad-request-error";
 import { generatePlaylistImage, generateSnipePlaylistImage } from "../common/playlist.util";
 import { parseSnipePlaylistSettings } from "@ssr/common/snipe/snipe-playlist-utils";
-import { ScoreService } from "./score.service";
+import { ScoreService } from "./score/score.service";
 
 export type SnipeType = "top" | "recent";
 

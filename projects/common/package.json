@@ -22,7 +22,6 @@
     "@typegoose/auto-increment": "^4.9.0",
     "@typegoose/typegoose": "^12.10.1",
     "@types/sanitize-html": "^2.13.0",
-    "ky": "^1.7.4",
     "sanitize-html": "^2.14.0",
     "ws": "^8.18.0"
   }
