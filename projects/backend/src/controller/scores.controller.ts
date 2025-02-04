@@ -6,6 +6,8 @@ import BeatLeaderService from "../service/beatleader.service";
 import SuperJSON from "superjson";
 import { ScoreService } from "../service/score/score.service";
 import { ScoreHistoryService } from "../service/score/score-history.service";
+import { FriendScoresService } from "../service/score/friend-scores.service";
+import ScoreSaberService from "../service/scoresaber.service";
 
 @Controller("/scores")
 export default class ScoresController {
@@ -43,7 +45,7 @@ export default class ScoresController {
     };
     query: { search?: string };
   }): Promise<unknown> {
-    return await ScoreService.lookupPlayerScores(id, page, sort, search);
+    return await ScoreSaberService.lookupPlayerScores(id, page, sort, search);
   }
 
   @Get("/leaderboard/:id/:page", {
@@ -194,7 +196,7 @@ export default class ScoresController {
     if (ids.length === 0) {
       throw new NotFoundError("Malformed friend ids, must be a comma separated list of friend ids");
     }
-    const data = await ScoreService.getFriendScores(ids, leaderboardId, page);
+    const data = await FriendScoresService.getFriendLeaderboardScores(ids, leaderboardId, page);
     return superJson ? SuperJSON.stringify(data) : data.toJSON();
   }
 

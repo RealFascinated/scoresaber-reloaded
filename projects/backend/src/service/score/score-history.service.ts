@@ -1,11 +1,11 @@
-import { NotFoundError } from "elysia";
-import LeaderboardService from "../leaderboard.service";
-import { ScoreService } from "./score.service";
-import { Page, Pagination } from "@ssr/common/pagination";
-import { PlayerScore } from "@ssr/common/score/player-score";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberPreviousScoreModel } from "@ssr/common/model/score/impl/scoresaber-previous-score";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
+import { Page, Pagination } from "@ssr/common/pagination";
+import { PlayerScore } from "@ssr/common/score/player-score";
+import { NotFoundError } from "elysia";
+import LeaderboardService from "../leaderboard.service";
+import { ScoreService } from "./score.service";
 
 export class ScoreHistoryService {
   /**

@@ -30,80 +30,10 @@ import CacheService, { ServiceCache } from "../cache.service";
 import LeaderboardService from "../leaderboard.service";
 import BeatLeaderService from "../beatleader.service";
 import { PlayerService } from "../player.service";
+import { scoreToObject } from "../../common/score/score.util";
+import { PreviousScoresService } from "./previous-scores.service";
 
 export class ScoreService {
-  /**
-   * Looks up player scores.
-   *
-   * @param playerId the player id
-   * @param page the page to get
-   * @param sort the sort to get
-   * @param search the search to get
-   */
-  public static async lookupPlayerScores(
-    playerId: string,
-    page: number,
-    sort: string,
-    search?: string
-  ): Promise<PlayerScoresResponse<unknown, unknown> | undefined> {
-    return fetchWithCache(
-      CacheService.getCache(ServiceCache.PlayerScores),
-      `player-scores:${playerId}-${page}-${sort}-${search}`,
-      async () => {
-        const scores: PlayerScore<unknown, unknown>[] = [];
-        let metadata: Metadata = new Metadata(0, 0, 0, 0); // Default values
-
-        const leaderboardScores = await scoresaberService.lookupPlayerScores({
-          playerId,
-          page,
-          sort: sort as ScoreSort,
-          search,
-        });
-        if (leaderboardScores == undefined) {
-          return undefined;
-        }
-
-        metadata = new Metadata(
-          Math.ceil(leaderboardScores.metadata.total / leaderboardScores.metadata.itemsPerPage),
-          leaderboardScores.metadata.total,
-          leaderboardScores.metadata.page,
-          leaderboardScores.metadata.itemsPerPage
-        );
-
-        const scorePromises = leaderboardScores.playerScores.map(async token => {
-          const leaderboardResponse = await LeaderboardService.getLeaderboard(token.leaderboard.id + "", {
-            includeBeatSaver: true,
-            type: DetailType.FULL,
-          });
-
-          if (!leaderboardResponse) {
-            return undefined;
-          }
-          const { leaderboard, beatsaver } = leaderboardResponse;
-          let score = getScoreSaberScoreFromToken(token.score, leaderboard, playerId);
-          if (!score) {
-            return undefined;
-          }
-
-          score = await ScoreService.insertScoreData(score, leaderboard);
-          return {
-            score: score,
-            leaderboard: leaderboard,
-            beatSaver: beatsaver,
-          } as PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>;
-        });
-
-        const resolvedScores = (await Promise.all(scorePromises)).filter(s => s !== undefined);
-        scores.push(...resolvedScores);
-
-        return {
-          scores: scores,
-          metadata: metadata,
-        };
-      }
-    );
-  }
-
   /**
    * Gets scores for a leaderboard.
    *
@@ -224,7 +154,7 @@ export class ScoreService {
 
     const scores: PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>[] = [];
     for (const rawScore of rawScores) {
-      const score = this.scoreToObject(rawScore);
+      const score = scoreToObject(rawScore);
 
       if (options?.includeLeaderboard) {
         const leaderboard = await LeaderboardService.getLeaderboard(score.leaderboardId + "", {
@@ -263,110 +193,6 @@ export class ScoreService {
         score: score.score,
       })) !== null
     );
-  }
-
-  /**
-   * Gets the player's previous score for a map.
-   *
-   * @param playerId the player's id to get the previous score for
-   * @param score the score to get the previous score for
-   * @param leaderboard the leaderboard to get the previous score on
-   * @param timestamp the score's timestamp to get the previous score for
-   * @returns the score, or undefined if none
-   */
-  public static async getPreviousScore(
-    playerId: string,
-    score: ScoreSaberScore,
-    leaderboard: ScoreSaberLeaderboard,
-    timestamp: Date
-  ): Promise<ScoreSaberPreviousScoreOverview | undefined> {
-    const scores: ScoreSaberPreviousScoreDocument[] = await ScoreSaberPreviousScoreModel.find({
-      playerId: playerId,
-      leaderboardId: leaderboard.id,
-    }).sort({
-      timestamp: -1,
-    });
-    if (scores == null || scores.length == 0) {
-      return undefined;
-    }
-
-    // get first score before timestamp
-    const previousScore = scores.find(score => score.timestamp.getTime() < timestamp.getTime());
-    if (previousScore == undefined) {
-      return undefined;
-    }
-
-    return {
-      score: previousScore.score,
-      accuracy: previousScore.accuracy || (score.score / leaderboard.maxScore) * 100,
-      modifiers: previousScore.modifiers,
-      misses: previousScore.misses,
-      missedNotes: previousScore.missedNotes,
-      badCuts: previousScore.badCuts,
-      fullCombo: previousScore.fullCombo,
-      pp: previousScore.pp,
-      weight: previousScore.weight,
-      maxCombo: previousScore.maxCombo,
-      timestamp: previousScore.timestamp,
-      change: {
-        score: score.score - previousScore.score,
-        accuracy:
-          (score.accuracy || (score.score / leaderboard.maxScore) * 100) -
-          (previousScore.accuracy || (previousScore.score / leaderboard.maxScore) * 100),
-        misses: score.misses - previousScore.misses,
-        missedNotes: score.missedNotes - previousScore.missedNotes,
-        badCuts: score.badCuts - previousScore.badCuts,
-        pp: score.pp - previousScore.pp,
-        weight: score.weight && previousScore.weight && score.weight - previousScore.weight,
-        maxCombo: score.maxCombo - previousScore.maxCombo,
-      },
-    } as ScoreSaberPreviousScoreOverview;
-  }
-
-  /**
-   * Gets friend scores for a leaderboard.
-   *
-   * @param friendIds the friend ids
-   * @param leaderboardId the leaderboard id
-   * @param page the page to fetch
-   */
-  public static async getFriendScores(
-    friendIds: string[],
-    leaderboardId: number,
-    page: number
-  ): Promise<Page<ScoreSaberScore>> {
-    const scores: ScoreSaberScore[] = await fetchWithCache(
-      CacheService.getCache(ServiceCache.FriendScores),
-      `friend-scores:${friendIds.join(",")}-${leaderboardId}`,
-      async () => {
-        const scores: ScoreSaberScore[] = [];
-        for (const friendId of friendIds) {
-          await PlayerService.getPlayer(friendId); // Ensures player exists
-
-          const friendScores = await ScoreSaberScoreModel.aggregate([
-            { $match: { playerId: friendId, leaderboardId: leaderboardId } },
-            { $sort: { timestamp: -1 } },
-            { $sort: { score: -1 } },
-          ]);
-          for (const friendScore of friendScores) {
-            const score = this.scoreToObject(friendScore);
-            scores.push(await ScoreService.insertScoreData(score));
-          }
-        }
-
-        return scores;
-      }
-    );
-
-    if (scores.length === 0) {
-      throw new NotFoundError(`No scores found for friends "${friendIds.join(",")}" in leaderboard "${leaderboardId}"`);
-    }
-
-    const pagination = new Pagination<ScoreSaberScore>();
-    pagination.setItems(scores);
-    pagination.setTotalItems(scores.length);
-    pagination.setItemsPerPage(8);
-    return pagination.getPage(page);
   }
 
   /**
@@ -473,7 +299,7 @@ export class ScoreService {
 
     const scores: (PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard> | null)[] = await Promise.all(
       foundScores.map(async rawScore => {
-        let score = this.scoreToObject(rawScore);
+        let score = scoreToObject(rawScore);
 
         const leaderboardResponse = await LeaderboardService.getLeaderboard(score.leaderboardId + "");
         if (!leaderboardResponse) {
@@ -541,7 +367,7 @@ export class ScoreService {
         `${leaderboard.difficulty.difficulty}-${leaderboard.difficulty.characteristic}`,
         score.score
       ),
-      ScoreService.getPreviousScore(score.playerId, score, leaderboard, score.timestamp),
+      PreviousScoresService.getPreviousScore(score.playerId, score, leaderboard, score.timestamp),
     ]);
 
     if (additionalData !== undefined) {
@@ -562,18 +388,5 @@ export class ScoreService {
     }
 
     return score;
-  }
-
-  /**
-   * Converts a database score to a ScoreSaberScore.
-   *
-   * @param score the score to convert
-   * @returns the converted score
-   */
-  private static scoreToObject(score: ScoreSaberScore): ScoreSaberScore {
-    return {
-      ...removeObjectFields<ScoreSaberScore>(score, ["_id", "__v"]),
-      id: score._id,
-    } as ScoreSaberScore;
   }
 }

@@ -18,7 +18,16 @@ import { fetchWithCache } from "../common/cache.util";
 import BeatSaverService from "./beatsaver.service";
 import CacheService, { ServiceCache } from "./cache.service";
 import { PlayerService } from "./player.service";
+import { PreviousScoresService } from "./score/previous-scores.service";
+import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
+import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
+import { PlayerScore } from "@ssr/common/score/player-score";
 import { ScoreService } from "./score/score.service";
+import LeaderboardService from "./leaderboard.service";
+import PlayerScoresResponse from "@ssr/common/response/player-scores-response";
+import { Metadata } from "@ssr/common/types/metadata";
+import { ScoreSort } from "@ssr/common/score/score-sort";
+
 export default class ScoreSaberService {
   /**
    * Notifies the number one score in Discord.
@@ -56,7 +65,7 @@ export default class ScoreSaberService {
       return;
     }
 
-    const previousScore = await ScoreService.getPreviousScore(player.id, score, leaderboard, score.timestamp);
+    const previousScore = await PreviousScoresService.getPreviousScore(player.id, score, leaderboard, score.timestamp);
     const change = previousScore &&
       previousScore.change && {
         accuracy: `${formatChange(previousScore.change.accuracy, value => value.toFixed(2) + "%") || ""}`,
@@ -245,5 +254,77 @@ export default class ScoreSaberService {
     ]);
 
     return PlayerService.getPlayerStatisticHistory(player, account, accuracies, startDate, endDate);
+  }
+
+  /**
+   * Looks up player scores.
+   *
+   * @param playerId the player id
+   * @param page the page to get
+   * @param sort the sort to get
+   * @param search the search to get
+   */
+  public static async lookupPlayerScores(
+    playerId: string,
+    page: number,
+    sort: string,
+    search?: string
+  ): Promise<PlayerScoresResponse<unknown, unknown> | undefined> {
+    return fetchWithCache(
+      CacheService.getCache(ServiceCache.PlayerScores),
+      `player-scores:${playerId}-${page}-${sort}-${search}`,
+      async () => {
+        const scores: PlayerScore<unknown, unknown>[] = [];
+        let metadata: Metadata = new Metadata(0, 0, 0, 0); // Default values
+
+        const leaderboardScores = await scoresaberService.lookupPlayerScores({
+          playerId,
+          page,
+          sort: sort as ScoreSort,
+          search,
+        });
+        if (leaderboardScores == undefined) {
+          return undefined;
+        }
+
+        metadata = new Metadata(
+          Math.ceil(leaderboardScores.metadata.total / leaderboardScores.metadata.itemsPerPage),
+          leaderboardScores.metadata.total,
+          leaderboardScores.metadata.page,
+          leaderboardScores.metadata.itemsPerPage
+        );
+
+        const scorePromises = leaderboardScores.playerScores.map(async token => {
+          const leaderboardResponse = await LeaderboardService.getLeaderboard(token.leaderboard.id + "", {
+            includeBeatSaver: true,
+            type: DetailType.FULL,
+          });
+
+          if (!leaderboardResponse) {
+            return undefined;
+          }
+          const { leaderboard, beatsaver } = leaderboardResponse;
+          let score = getScoreSaberScoreFromToken(token.score, leaderboard, playerId);
+          if (!score) {
+            return undefined;
+          }
+
+          score = await ScoreService.insertScoreData(score, leaderboard);
+          return {
+            score: score,
+            leaderboard: leaderboard,
+            beatSaver: beatsaver,
+          } as PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>;
+        });
+
+        const resolvedScores = (await Promise.all(scorePromises)).filter(s => s !== undefined);
+        scores.push(...resolvedScores);
+
+        return {
+          scores: scores,
+          metadata: metadata,
+        };
+      }
+    );
   }
 }
