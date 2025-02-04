@@ -1,4 +1,4 @@
-FROM oven/bun:1.2.2-alpine AS base
+FROM oven/bun:1.2.2-debian AS base
 
 # Set the environment
 ENV NODE_ENV production
@@ -6,8 +6,7 @@ ENV NODE_ENV production
 ARG GIT_REV
 ENV GIT_REV=${GIT_REV}
 
-ARG REDIS_URL
-ENV REDIS_URL=${REDIS_URL}
+# -----------------------------------
 
 # Install dependencies
 FROM base AS depends
@@ -25,6 +24,8 @@ RUN bun run  --filter website build
 # Run the app
 FROM base AS runner
 WORKDIR /app
+
+# -----------------------------------
 
 # Copy the built files
 COPY --from=depends /app/projects/website/public ./public

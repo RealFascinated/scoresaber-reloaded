@@ -1,8 +1,10 @@
 import * as dotenv from "@dotenvx/dotenvx";
 import cors from "@elysiajs/cors";
 import { cron } from "@elysiajs/cron";
+import { opentelemetry } from "@elysiajs/opentelemetry";
 import { serverTiming } from "@elysiajs/server-timing";
 import { swagger } from "@elysiajs/swagger";
+import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-proto";
 import { Config } from "@ssr/common/config";
 import Logger from "@ssr/common/logger";
 import { formatDuration } from "@ssr/common/utils/time-utils";
@@ -32,6 +34,9 @@ import { PlayerService } from "./service/player.service";
 import { ScoreService } from "./service/score.service";
 import ScoreSaberService from "./service/scoresaber.service";
 import StatisticsService from "./service/statistics.service";
+import { BatchSpanProcessor } from "@opentelemetry/sdk-trace-node";
+
+Logger.info("Starting SSR Backend...");
 
 // Load .env file
 if (await Bun.file(".env").exists()) {
@@ -216,6 +221,19 @@ app.use(
         },
       ],
     },
+  })
+);
+
+app.use(
+  opentelemetry({
+    spanProcessors: [
+      new BatchSpanProcessor(
+        new OTLPTraceExporter({
+          url: "https://ssr-otlp.fascinated.cc/v1/traces",
+        })
+      ),
+    ],
+    serviceName: `ssr-backend-${isProduction() ? "prod" : "dev"}`,
   })
 );
 
