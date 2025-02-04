@@ -56,7 +56,8 @@ export function FriendScores() {
       <div>
         <p className="font-bold">Friend Scores</p>
         <p className="text-sm text-gray-400">
-          The 100 most recent scores from your friends. Score ranks aren't available as this is based on cached data
+          The 100 most recent scores from your friends. Score ranks aren&apos;t available as this is based on cached
+          data
         </p>
       </div>
 
