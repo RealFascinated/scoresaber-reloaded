@@ -40,10 +40,10 @@ export default class BeatSaverService {
     mapDoc.metadata = {
       bpm: metadata.bpm,
       duration: metadata.duration,
-      levelAuthorName: metadata.levelAuthorName,
-      songAuthorName: metadata.songAuthorName,
-      songName: metadata.songName,
-      songSubName: metadata.songSubName,
+      levelAuthorName: metadata.levelAuthorName ?? "Unknown",
+      songAuthorName: metadata.songAuthorName ?? "Unknown",
+      songName: metadata.songName ?? "Unknown",
+      songSubName: metadata.songSubName ?? "Unknown",
     };
     mapDoc.versions = versions.map(version => ({
       hash: version.hash.toUpperCase(),
