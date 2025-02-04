@@ -29,9 +29,9 @@ import CacheService from "./service/cache.service";
 import LeaderboardService from "./service/leaderboard.service";
 import MetricsService from "./service/metrics.service";
 import { PlayerService } from "./service/player.service";
-import { ScoreService } from "./service/score.service";
 import ScoreSaberService from "./service/scoresaber.service";
 import StatisticsService from "./service/statistics.service";
+import { ScoreService } from "./service/score/score.service";
 
 Logger.info("Starting SSR Backend...");
 
