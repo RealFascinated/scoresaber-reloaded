@@ -1,29 +1,30 @@
 "use client";
 
-import useDatabase from "@/hooks/use-database";
-import { useLiveQuery } from "dexie-react-hooks";
-import Card from "../card";
-import { useQuery } from "@tanstack/react-query";
-import { ssrApi } from "@ssr/common/utils/ssr-api";
-import Pagination from "../input/pagination";
-import { useIsMobile } from "@/hooks/use-is-mobile";
-import { useCallback, useEffect, useState } from "react";
-import Score from "../score/score";
-import { randomString } from "@ssr/common/utils/string.util";
-import Avatar from "../avatar";
-import { getScoreSaberAvatar } from "@ssr/common/utils/scoresaber.util";
-import { motion, useAnimation } from "framer-motion";
 import { scoreAnimation } from "@/components/score/score-animation";
-import { PlayerScore } from "@ssr/common/score/player-score";
-import { Page } from "@ssr/common/pagination";
-import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
+import useDatabase from "@/hooks/use-database";
+import { useIsMobile } from "@/hooks/use-is-mobile";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
+import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
+import { Page } from "@ssr/common/pagination";
+import { PlayerScore } from "@ssr/common/score/player-score";
+import { ssrApi } from "@ssr/common/utils/ssr-api";
+import { useQuery } from "@tanstack/react-query";
+import { useLiveQuery } from "dexie-react-hooks";
+import { motion, useAnimation } from "framer-motion";
+import { useCallback, useEffect, useState } from "react";
+import Card from "../card";
+import Pagination from "../input/pagination";
 import { LoadingIcon } from "../loading-icon";
+import Score from "../score/score";
 
 export function FriendScores() {
   const isMobile = useIsMobile();
-  const settings = useDatabase();
-  const friendIds = useLiveQuery(async () => settings.getFriendIds());
+  const database = useDatabase();
+  const friendIds = useLiveQuery(async () => {
+    const friends = await database.getFriendIds();
+    const settings = await database.getSettings();
+    return [...friends, settings?.playerId].filter(Boolean) as string[];
+  });
   const controls = useAnimation();
 
   const [page, setPage] = useState(1);
@@ -56,13 +57,6 @@ export function FriendScores() {
         <p className="font-bold">Friend Scores</p>
         <p className="text-sm text-gray-500">The 100 most recent scores from your friends.</p>
       </div>
-
-      {/* No Friends */}
-      {friendIds && friendIds.length === 0 && (
-        <div className="flex w-full justify-center items-center">
-          <p>You do not have any friends added :(</p>
-        </div>
-      )}
 
       {/* Loading */}
       {isLoading && !scoreData && (

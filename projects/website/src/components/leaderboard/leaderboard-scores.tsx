@@ -92,7 +92,7 @@ export default function LeaderboardScores({
         };
       } else {
         if (friendIds && claimedPlayer) {
-          const friendScores = await ssrApi.getFriendScores(
+          const friendScores = await ssrApi.getFriendLeaderboardScores(
             [...friendIds, claimedPlayer.id],
             selectedLeaderboardId + "",
             currentPage
