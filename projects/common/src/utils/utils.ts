@@ -2,6 +2,12 @@ import ky from "ky";
 import {formatNumberWithCommas, formatPp} from "./number-utils";
 import {KyOptions} from "ky/distribution/types/options";
 
+const defaultKyOptions: KyOptions & { next?: { revalidate: number } } = {
+  next: {
+    revalidate: 120, // 2 minutes
+  },
+};
+
 /**
  * Checks if we're in production
  */
@@ -44,7 +50,7 @@ export function getPageFromRank(rank: number, itemsPerPage: number) {
  */
 export async function kyFetchJson<T>(url: string, options?: KyOptions): Promise<T | undefined> {
   try {
-    return await ky.get<T>(url, options).json();
+    return await ky.get<T>(url, { ...defaultKyOptions, ...options }).json();
   } catch (error) {
     return undefined;
   }
@@ -58,7 +64,7 @@ export async function kyFetchJson<T>(url: string, options?: KyOptions): Promise<
  */
 export async function kyPostJson<T>(url: string, options?: KyOptions): Promise<T | undefined> {
   try {
-    return await ky.post<T>(url, options).json();
+    return await ky.post<T>(url, { ...defaultKyOptions, ...options }).json();
   } catch (error) {
     return undefined;
   }
@@ -72,7 +78,7 @@ export async function kyPostJson<T>(url: string, options?: KyOptions): Promise<T
  */
 export async function kyFetchText(url: string, options?: KyOptions): Promise<string | undefined> {
   try {
-    return await ky.get<string>(url, options).text();
+    return await ky.get<string>(url, { ...defaultKyOptions, ...options }).text();
   } catch (error) {
     return undefined;
   }
