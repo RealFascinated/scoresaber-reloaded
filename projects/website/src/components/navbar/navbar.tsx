@@ -1,14 +1,13 @@
 "use client";
 
-import Link from "next/link";
-import React, { ReactElement, useEffect, useState } from "react";
 import { cn } from "@/common/utils";
 import FriendsButton from "@/components/friend/friends-button";
-import { ChartBarIcon, MusicIcon, TrendingUpIcon } from "lucide-react";
+import PlayerAndLeaderboardSearch from "@/components/navbar/player-and-leaderboard-search";
 import ProfileButton from "@/components/navbar/profile-button";
 import { CogIcon, CubeIcon } from "@heroicons/react/24/solid";
-import PlayerAndLeaderboardSearch from "@/components/navbar/player-and-leaderboard-search";
-import Image from "next/image";
+import { ChartBarIcon, MusicIcon, TrendingUpIcon } from "lucide-react";
+import Link from "next/link";
+import { ReactElement, useEffect, useState } from "react";
 
 const links: ReactElement[] = [
   <FriendsButton key="friends" />,
@@ -84,7 +83,7 @@ export default function Navbar() {
           href="/"
           draggable={false}
         >
-          <Image width={24} height={24} className="size-6" src="/assets/logos/scoresaber.png" alt="ScoreSaber Logo" />
+          <img width={24} height={24} className="size-6" src="/assets/logos/scoresaber.png" alt="ScoreSaber Logo" />
           <h1 className="hidden md:flex text-lg font-bold text-ssr">SSR</h1>
         </Link>
 

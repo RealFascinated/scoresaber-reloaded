@@ -73,13 +73,12 @@ export function LeaderboardInfo({ leaderboard, beatSaverMap }: LeaderboardInfoPr
               </div>
             </div>
 
-            <Image
+            <img
               src={leaderboard.songArt}
               alt={`${leaderboard.songName} Cover Image`}
               className="rounded-md w-[96px] h-[96px]"
               width={96}
               height={96}
-              priority
             />
           </div>
 

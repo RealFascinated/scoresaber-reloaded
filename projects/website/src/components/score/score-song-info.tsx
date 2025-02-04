@@ -1,11 +1,10 @@
 import FallbackLink from "@/components/fallback-link";
 import Tooltip from "@/components/tooltip";
 import { StarIcon } from "@heroicons/react/24/solid";
-import Link from "next/link";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
-import Image from "next/image";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
+import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
+import Link from "next/link";
 
 type Props = {
   leaderboard: ScoreSaberLeaderboard;
@@ -47,7 +46,7 @@ export default function ScoreSongInfo({ leaderboard, beatSaverMap, clickableSong
             )}
           </div>
         </Tooltip>
-        <Image
+        <img
           src={leaderboard.songArt}
           width={imageSize}
           height={imageSize}
@@ -56,7 +55,6 @@ export default function ScoreSongInfo({ leaderboard, beatSaverMap, clickableSong
           style={{
             minWidth: `${imageSize}px`,
           }}
-          priority
         />
       </div>
       <div className="flex">

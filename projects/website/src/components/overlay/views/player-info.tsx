@@ -1,11 +1,9 @@
-import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import Image from "next/image";
-import { formatPp } from "@ssr/common/utils/number-utils";
 import OverlayPlayerCountryRank from "@/components/overlay/components/player-country-rank";
-import OverlayPlayerRank from "../components/player-rank";
 import { DailyChange } from "@/components/statistic/daily-change";
+import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerStatChange } from "@ssr/common/player/player-stat-change";
-import { formatDateMinimal } from "@ssr/common/utils/time-utils";
+import { formatPp } from "@ssr/common/utils/number-utils";
+import OverlayPlayerRank from "../components/player-rank";
 
 type OverlayPlayerInfoProps = {
   /**
@@ -16,10 +14,10 @@ type OverlayPlayerInfoProps = {
 
 export default function OverlayPlayerInfoView({ player }: OverlayPlayerInfoProps) {
   const plusOnePp = player.statisticChange?.daily?.plusOnePp;
-  
+
   return (
     <div className="flex gap-2 text-2xl">
-      <Image
+      <img
         src={player.avatar}
         alt={`${player.name}'s profile picture`}
         className="rounded-md"

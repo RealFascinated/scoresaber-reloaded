@@ -1,14 +1,13 @@
-import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
-import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
-import Link from "next/link";
-import { getPageFromRank } from "@ssr/common/utils/utils";
-import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
-import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreTimeSet } from "@/components/score/score-time-set";
 import { ScoreTimeSetVs } from "@/components/score/score-time-set-vs";
-import { getHMDInfo, HMD } from "@ssr/common/hmds";
-import Image from "next/image";
 import Tooltip from "@/components/tooltip";
+import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
+import { getHMDInfo, HMD } from "@ssr/common/hmds";
+import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
+import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
+import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
+import { getPageFromRank } from "@ssr/common/utils/utils";
+import Link from "next/link";
 
 type Props = {
   score: ScoreSaberScore;
@@ -25,7 +24,7 @@ export default function ScoreInfo({ score, leaderboard }: Props) {
 
         {/* Score Rank */}
         <Link prefetch={false} href={`/leaderboard/${leaderboard.id}/${getPageFromRank(score.rank, 12)}`}>
-          <p className="text-ssr cursor-default hover:brightness-[66%] transition-all transform-gpu cursor-pointer">
+          <p className="text-ssr hover:brightness-[66%] transition-all transform-gpu cursor-pointer">
             #{formatNumberWithCommas(score.rank)}
           </p>
         </Link>
@@ -51,7 +50,7 @@ export default function ScoreInfo({ score, leaderboard }: Props) {
               </div>
             }
           >
-            <Image
+            <img
               src={`/assets/hmds/${hmd.logo}`}
               alt={`${hmd.logo} Logo`}
               width={24}

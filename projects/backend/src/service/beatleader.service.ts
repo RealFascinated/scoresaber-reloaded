@@ -74,29 +74,6 @@ export default class BeatLeaderService {
   }
 
   /**
-   * Checks if a player has additional score data for a song.
-   *
-   * @param playerId the id of the player
-   * @param songHash the hash of the map
-   * @param songDifficulty the difficulty of the map
-   * @param songScore the score of the play
-   * @private
-   */
-  public static async hasAdditionalScoreData(
-    playerId: string,
-    songHash: string,
-    songDifficulty: string,
-    songScore: number
-  ) {
-    return !!(await AdditionalScoreDataModel.exists({
-      playerId: playerId,
-      songHash: songHash.toUpperCase(),
-      songDifficulty: songDifficulty,
-      songScore: songScore,
-    }));
-  }
-
-  /**
    * Tracks BeatLeader score.
    *
    * @param score the score to track
@@ -115,18 +92,6 @@ export default class BeatLeaderService {
 
     // Only track for players that are being tracked
     if (player == null) {
-      return;
-    }
-
-    // The score has already been tracked, so ignore it.
-    if (
-      await BeatLeaderService.hasAdditionalScoreData(
-        playerId,
-        leaderboard.song.hash,
-        leaderboard.difficulty.difficultyName,
-        score.baseScore
-      )
-    ) {
       return;
     }
 

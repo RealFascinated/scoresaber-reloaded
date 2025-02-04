@@ -20,9 +20,4 @@ export type LogoBaseProps = LogoProps & {
    * The alt text of the logo
    */
   alt?: string;
-
-  /**
-   * Whether to optimize the image
-   */
-  optimized?: boolean;
 };

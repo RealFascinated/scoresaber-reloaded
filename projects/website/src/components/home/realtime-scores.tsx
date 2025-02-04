@@ -1,9 +1,8 @@
-import { Flame } from "lucide-react";
 import { cn, getRandomInteger } from "@/common/utils";
+import { AnimatedList } from "@/components/ui/animated-list";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import { Difficulty, getDifficulty, getDifficultyName, getRandomDifficulty } from "@ssr/common/utils/song-utils";
-import { AnimatedList } from "@/components/ui/animated-list";
-import Image from "next/image";
+import { Flame } from "lucide-react";
 
 type ScoreProps = {
   songArt: string;
@@ -103,7 +102,7 @@ function Score({ songArt, songName, songAuthor, setBy }: ScoreProps) {
 
         {/* Song Art & Difficulty */}
         <div className="relative">
-          <Image
+          <img
             width={64}
             height={64}
             className="size-16 rounded-md"
