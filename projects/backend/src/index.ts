@@ -35,6 +35,8 @@ import { ScoreService } from "./service/score/score.service";
 import { opentelemetry } from "@elysiajs/opentelemetry";
 import { BatchSpanProcessor } from "@opentelemetry/sdk-trace-node";
 import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-proto";
+import { SemanticResourceAttributes } from "@opentelemetry/semantic-conventions";
+import { Resource } from "@opentelemetry/resources";
 
 Logger.info("Starting SSR Backend...");
 
@@ -75,7 +77,10 @@ app.use(
         })
       ),
     ],
-    serviceName: `ssr-backend-${isProduction() ? "prod" : "dev"}`,
+    serviceName: "ssr-backend",
+    resource: new Resource({
+      ["deployment.environment"]: isProduction() ? "production" : "development",
+    }),
   })
 );
 
