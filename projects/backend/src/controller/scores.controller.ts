@@ -182,7 +182,7 @@ export default class ScoresController {
       description: "Lookup scores for player(s) on a leaderboard",
     },
   })
-  public async getFriendScores({
+  public async getFriendLeaderboardScores({
     params: { leaderboardId, page },
     query: { friendIds, superJson },
   }: {
@@ -197,6 +197,45 @@ export default class ScoresController {
       throw new NotFoundError("Malformed friend ids, must be a comma separated list of friend ids");
     }
     const data = await FriendScoresService.getFriendLeaderboardScores(ids, leaderboardId, page);
+    return superJson ? SuperJSON.stringify(data) : data.toJSON();
+  }
+
+  @Get("/friends/recent/:page", {
+    config: {},
+    tags: ["scores"],
+    params: t.Object({
+      page: t.Number({ required: true }),
+    }),
+    query: t.Object({
+      friendIds: t.String({ required: true }),
+      superJson: t.Optional(t.Boolean({ default: false })),
+    }),
+    detail: {
+      responses: {
+        200: {
+          description: "The scores set on a leaderboard for the given players.",
+        },
+        404: {
+          description: "The player(s) or leaderboard was not found.",
+        },
+      },
+      description: "Lookup scores for player(s) on a leaderboard",
+    },
+  })
+  public async getFriendScores({
+    params: { page },
+    query: { friendIds, superJson },
+  }: {
+    params: {
+      page: number;
+    };
+    query: { friendIds: string; superJson: boolean };
+  }): Promise<unknown> {
+    const ids = friendIds.split(",");
+    if (ids.length === 0) {
+      throw new NotFoundError("Malformed friend ids, must be a comma separated list of friend ids");
+    }
+    const data = await FriendScoresService.getFriendScores(ids, page);
     return superJson ? SuperJSON.stringify(data) : data.toJSON();
   }
 

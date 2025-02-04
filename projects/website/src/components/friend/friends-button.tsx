@@ -12,6 +12,8 @@ import Link from "next/link";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 
 export default function FriendsButton() {
+  const database = useDatabase();
+  const friends = useLiveQuery(() => database.getFriends());
   const isMobile: boolean = useIsMobile();
 
   const [open, setOpen] = useState<boolean>(false);
@@ -33,9 +35,6 @@ export default function FriendsButton() {
     }
     closeTimeout.current = setTimeout(() => setOpen(false), 200); // Adjust delay as needed
   };
-
-  const database = useDatabase();
-  const friends = useLiveQuery(() => database.getFriends());
 
   return (
     <Popover open={open} onOpenChange={setOpen}>

@@ -27,16 +27,21 @@ import LeaderboardScores from "@/components/leaderboard/leaderboard-scores";
 import { Separator } from "@/components/ui/separator";
 import { ScoreStatsResponse } from "@ssr/common/response/scorestats-response";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
+import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/leaderboard-player-info";
+import { getScoreSaberAvatar } from "@ssr/common/utils/scoresaber.util";
+import Avatar from "../avatar";
 
 type Props = {
   highlightedPlayer?: ScoreSaberPlayer;
   score: ScoreSaberScore;
   leaderboard: ScoreSaberLeaderboard;
   beatSaverMap?: BeatSaverMapResponse;
+  playerAbove?: ScoreSaberLeaderboardPlayerInfoToken;
   settings?: {
     noScoreButtons?: boolean;
     hideLeaderboardDropdown?: boolean;
     hideAccuracyChanger?: boolean;
+    disablePadding?: boolean;
   };
 };
 
@@ -54,7 +59,7 @@ const modes: Mode[] = [
   { name: "Score History", icon: <TrendingUpIcon className="w-4 h-4" /> },
 ];
 
-export default function Score({ leaderboard, beatSaverMap, score, settings, highlightedPlayer }: Props) {
+export default function Score({ leaderboard, beatSaverMap, score, settings, highlightedPlayer, playerAbove }: Props) {
   const [baseScore, setBaseScore] = useState(score.score);
   const [isLeaderboardExpanded, setIsLeaderboardExpanded] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -67,7 +72,9 @@ export default function Score({ leaderboard, beatSaverMap, score, settings, high
   const { data, isLoading } = useQuery<DropdownData>({
     queryKey: [`leaderboardDropdownData:${leaderboard.id}`, leaderboard.id, score.scoreId, isLeaderboardExpanded],
     queryFn: async () => {
-      return { scoreStats: score.additionalData ? await ssrApi.fetchScoreStats(score.additionalData.scoreId) : undefined };
+      return {
+        scoreStats: score.additionalData ? await ssrApi.fetchScoreStats(score.additionalData.scoreId) : undefined,
+      };
     },
     staleTime: 30000,
     enabled: loading,
@@ -115,7 +122,13 @@ export default function Score({ leaderboard, beatSaverMap, score, settings, high
     : "grid-cols-[20px 1fr_1fr] lg:grid-cols-[0.5fr_4fr_1fr_350px]"; // Original with buttons
 
   return (
-    <div className="pb-2 pt-2">
+    <div className={`${settings?.disablePadding ? "" : "pb-2 pt-2"}`}>
+      {playerAbove && (
+        <div className="flex items-center gap-2 pl-2">
+          <Avatar src={getScoreSaberAvatar(playerAbove)} alt={playerAbove.name ?? ""} size={20} />
+          <p className="text-sm">{playerAbove.name}</p>
+        </div>
+      )}
       <div className={`grid w-full gap-2 lg:gap-0 ${gridColsClass}`}>
         <ScoreInfo score={score} leaderboard={leaderboard} />
         <ScoreSongInfo leaderboard={leaderboard} beatSaverMap={beatSaverMap} />

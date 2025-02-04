@@ -13,6 +13,10 @@ export function middleware(request: NextRequest) {
     }
   }
 
+  if (request.nextUrl.pathname === "/" && !!playerId) {
+    return NextResponse.redirect(new URL("/home", request.url));
+  }
+
   const response = NextResponse.next();
 
   // Log requests in production

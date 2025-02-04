@@ -37,6 +37,7 @@ export default class Database extends Dexie {
 
     this.on("populate", () => this.resetSettings());
     this.on("ready", async () => {
+      await this.getFriends(); // Pre-fetch friends
       await this.initializeCookie();
     });
   }
@@ -159,26 +160,16 @@ export default class Database extends Dexie {
     ttl: number = 60 * 60,
     insertCallback?: () => Promise<T | undefined>
   ): Promise<T | undefined> {
-    const startTime = Date.now();
-    Logger.info(`Getting ${key} from cache...`);
-
-    const logFinish = (message: string) => {
-      const timeTaken = Date.now() - startTime;
-      Logger.info(`${message} (${formatDuration(timeTaken)})`);
-    };
-
     const item = await this.cache.get(key);
     const ttlMs = ttl * 1000;
 
     // Return cached item if valid
     if (item && item.lastUpdated + ttlMs >= Date.now()) {
-      logFinish(`Retrieved ${key} from cache`);
       return item.item as T;
     }
 
     // Return undefined if no insert callback
     if (!insertCallback) {
-      logFinish(`Cache miss for ${key}, no callback provided`);
       return undefined;
     }
 
@@ -196,10 +187,8 @@ export default class Database extends Dexie {
       };
 
       await this.cache.put(cacheItem);
-      logFinish(`Fetched and cached ${key}`);
       return newItem;
     } catch (error) {
-      logFinish(`Failed to fetch/cache item for ${key}`);
       Logger.error(`Cache error details:`, error);
       return undefined;
     }

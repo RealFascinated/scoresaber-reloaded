@@ -46,7 +46,12 @@ export class PlayerService {
       await accountCreationLock[id];
     }
 
-    let player: PlayerDocument | null = await PlayerModel.findOne({ _id: id });
+    let player: PlayerDocument | null = await fetchWithCache(
+      CacheService.getCache(ServiceCache.Players),
+      `player:${id}`,
+      async () => PlayerModel.findOne({ _id: id })
+    );
+
     if (player === null) {
       if (!create) {
         throw new NotFoundError(`Player "${id}" not found, create disabled`);
@@ -563,7 +568,7 @@ export class PlayerService {
       let missingScores = 0;
       await Promise.all(
         scoresPage.playerScores.map(async score => {
-          if (await ScoreService.trackScoreSaberScore(score.score, score.leaderboard, player.id)) {
+          if (await ScoreService.trackScoreSaberScore(score.score, score.leaderboard, player.id, false)) {
             missingScores++;
             totalMissingScores++;
           }

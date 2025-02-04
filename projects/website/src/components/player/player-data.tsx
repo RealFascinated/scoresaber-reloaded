@@ -47,7 +47,7 @@ export default function PlayerData({ initialPlayerData, initialSearch, sort, pag
 
   return (
     <div className="flex gap-2 justify-center w-full">
-      <article className="w-full 2xl:w-[1164px] flex flex-col gap-2">
+      <article className="flex flex-1 flex-col gap-2">
         <PlayerHeader player={player} />
         <Card className="gap-1">
           <PlayerBadges player={player} />

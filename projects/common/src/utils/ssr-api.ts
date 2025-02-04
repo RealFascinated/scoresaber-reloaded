@@ -139,8 +139,31 @@ class SSRApi {
    * @param leaderboardId the leaderboard to lookup
    * @param page the page
    */
-  async getFriendScores(friendIds: string[], leaderboardId: string, page: number) {
-    const response = await ssrGet<string>(`${Config.apiUrl}/scores/friends/${leaderboardId}/${page}`, "text", {
+  async getFriendLeaderboardScores(friendIds: string[], leaderboardId: string, page: number) {
+    const response = await ssrGet<string>(
+      `${Config.apiUrl}/scores/friends/leaderboard/${leaderboardId}/${page}`,
+      "text",
+      {
+        searchParams: {
+          friendIds: friendIds.join(","),
+          superJson: true,
+        },
+      }
+    );
+    if (response === undefined) {
+      return undefined;
+    }
+    return SuperJSON.parse<Page<ScoreSaberScore>>(response);
+  }
+
+  /**
+   * Get the scores for a list of friends
+   *
+   * @param friendIds the friends to lookup
+   * @param page the page
+   */
+  async getFriendScores(friendIds: string[], page: number) {
+    const response = await ssrGet<string>(`${Config.apiUrl}/scores/friends/recent/${page}`, "text", {
       searchParams: {
         friendIds: friendIds.join(","),
         superJson: true,
@@ -149,7 +172,8 @@ class SSRApi {
     if (response === undefined) {
       return undefined;
     }
-    return SuperJSON.parse<Page<ScoreSaberScore>>(response);
+
+    return SuperJSON.parse<Page<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>>(response);
   }
 
   /**

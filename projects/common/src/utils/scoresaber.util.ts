@@ -119,3 +119,15 @@ export function getDifficultyFromScoreSaberDifficulty(diff: number): MapDifficul
     }
   }
 }
+
+/**
+ * Gets the avatar for a player.
+ *
+ * @param player the player
+ * @returns the avatar
+ */
+export function getScoreSaberAvatar(
+  player: ScoreSaberPlayerToken | ScoreSaberLeaderboardPlayerInfoToken | ScoreSaberPlayer
+): string {
+  return `https://cdn.scoresaber.com/avatars/${player.id}.jpg`;
+}

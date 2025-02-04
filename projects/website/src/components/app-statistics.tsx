@@ -1,6 +1,6 @@
 "use client";
 
-import Statistic from "@/components/home/statistic";
+import Statistic from "@/components/landing/statistic";
 import { Config } from "@ssr/common/config";
 import { AppStatistics } from "@ssr/common/types/backend/app-statistics";
 import { useQuery } from "@tanstack/react-query";

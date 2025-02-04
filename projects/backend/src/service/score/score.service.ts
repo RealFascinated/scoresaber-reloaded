@@ -206,7 +206,8 @@ export class ScoreService {
   public static async trackScoreSaberScore(
     scoreToken: ScoreSaberScoreToken,
     leaderboardToken: ScoreSaberLeaderboardToken,
-    playerId?: string
+    playerId?: string,
+    log: boolean = true
   ) {
     const before = performance.now();
     playerId = (scoreToken.leaderboardPlayerInfo && scoreToken.leaderboardPlayerInfo.id) || playerId;
@@ -375,6 +376,14 @@ export class ScoreService {
     }
     if (previousScore) {
       score.previousScore = previousScore;
+    }
+
+    const player = await PlayerService.getPlayer(score.playerId).catch(() => undefined);
+    if (player) {
+      score.playerInfo = {
+        id: player.id,
+        name: player.name,
+      };
     }
 
     try {
