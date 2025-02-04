@@ -1,8 +1,8 @@
-import ky from "ky";
-import { isServer } from "../utils/utils";
-import { KyOptions } from "ky/distribution/types/options";
-import Logger from "../logger";
+import { AxiosRequestConfig } from "axios";
+import { ssrGet } from "src/utils/request";
 import { Cooldown } from "../cooldown";
+import Logger from "../logger";
+import { isServer } from "../utils/utils";
 
 export default class Service {
   /**
@@ -47,27 +47,14 @@ export default class Service {
    * Fetches data from the given url.
    *
    * @param url the url to fetch
-   * @param options the ky options to use
+   * @param options the fetch options to use
    * @returns the fetched data
    */
-  public async fetch<T>(url: string, options?: KyOptions): Promise<T | undefined> {
+  public async fetch<T>(url: string, options?: AxiosRequestConfig): Promise<T | undefined> {
     await this.cooldown.waitAndUse();
 
-    try {
-      const response = await ky.get<T>(this.buildRequestUrl(!isServer(), url), options);
-      if (response.headers.has("X-RateLimit-Remaining")) {
-        const left = Number(response.headers.get("X-RateLimit-Remaining"));
-        if (left < 100) {
-          Logger.warn(`Rate limit for ${this.name} remaining: ${left}`);
-        }
-      }
-
-      if (response.headers.get("Content-Type")?.includes("application/json")) {
-        return response.json();
-      }
-      return (await response.text()) as unknown as T;
-    } catch (error) {
-      return undefined;
-    }
+    return ssrGet<T>(this.buildRequestUrl(!isServer(), url), "json", {
+      ...options,
+    });
   }
 }

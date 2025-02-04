@@ -1,16 +1,16 @@
 "use client";
 
 import Card from "@/components/card";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import Score from "@/components/score/score";
-import { useEffect, useState } from "react";
-import { Timeframe } from "@ssr/common/timeframe";
-import { TopScoresResponse } from "@ssr/common/response/top-scores-response";
-import { Config } from "@ssr/common/config";
-import { kyFetchJson } from "@ssr/common/utils/utils";
-import { useQuery } from "@tanstack/react-query";
 import { LoadingIcon } from "@/components/loading-icon";
+import Score from "@/components/score/score";
+import { Button } from "@/components/ui/button";
+import { Config } from "@ssr/common/config";
+import { TopScoresResponse } from "@ssr/common/response/top-scores-response";
+import { Timeframe } from "@ssr/common/timeframe";
+import { ssrGet } from "@ssr/common/utils/request";
+import { useQuery } from "@tanstack/react-query";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 
 type TimeframesType = {
   timeframe: Timeframe;
@@ -46,7 +46,7 @@ export function TopScoresData({ timeframe }: TopScoresDataProps) {
   const { data, isLoading } = useQuery({
     queryKey: ["top-scores", selectedTimeframe],
     queryFn: async () => {
-      return kyFetchJson<TopScoresResponse>(`${Config.apiUrl}/scores/top?limit=50&timeframe=${selectedTimeframe}`);
+      return ssrGet<TopScoresResponse>(`${Config.apiUrl}/scores/top?limit=50&timeframe=${selectedTimeframe}`);
     },
     refetchInterval: false,
   });

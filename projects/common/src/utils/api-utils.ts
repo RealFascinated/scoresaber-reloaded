@@ -1,4 +1,4 @@
-import ky from "ky";
+import { ssrGet } from "./request";
 
 type ApiHealth = {
   online: boolean;
@@ -11,11 +11,7 @@ type ApiHealth = {
  */
 export async function getApiHealth(url: string): Promise<ApiHealth> {
   try {
-    await ky
-      .get(url, {
-        cache: "no-cache",
-      })
-      .json();
+    await ssrGet(`${url}/health`);
     return {
       online: true,
     };

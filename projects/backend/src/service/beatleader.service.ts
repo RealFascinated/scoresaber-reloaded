@@ -7,7 +7,7 @@ import { BeatLeaderScoreImprovementToken } from "@ssr/common/types/token/beatlea
 import MinioService from "./minio.service";
 import { MinioBucket } from "@ssr/common/minio-buckets";
 import { beatLeaderService } from "@ssr/common/service/impl/beatleader";
-import { isProduction, kyFetchBuffer } from "@ssr/common/utils/utils";
+import { isProduction } from "@ssr/common/utils/utils";
 import { PlayerDocument, PlayerModel } from "@ssr/common/model/player";
 import { ScoreStatsToken } from "@ssr/common/types/token/beatleader/score-stats/score-stats";
 import { ScoreStats, ScoreStatsDocument, ScoreStatsModel } from "@ssr/common/model/score-stats/score-stats";
@@ -16,6 +16,7 @@ import CacheService, { ServiceCache } from "./cache.service";
 import Logger from "@ssr/common/logger";
 import { removeObjectFields } from "@ssr/common/object.util";
 import { PlayerService } from "./player.service";
+import { ssrGet } from "@ssr/common/utils/request";
 
 export default class BeatLeaderService {
   /**
@@ -107,7 +108,7 @@ export default class BeatLeaderService {
       if (player && player.trackReplays) {
         try {
           const replayId = `${score.id}-${playerId}-${leaderboard.difficulty.difficultyName}-${leaderboard.difficulty.modeName}-${leaderboard.song.hash.toUpperCase()}.bsor`;
-          const replayData = await kyFetchBuffer(`https://cdn.replays.beatleader.xyz/${replayId}`);
+          const replayData = await ssrGet<ArrayBuffer>(`https://cdn.replays.beatleader.xyz/${replayId}`, "arraybuffer");
 
           if (replayData !== undefined) {
             await MinioService.saveFile(MinioBucket.BeatLeaderReplays, `${replayId}`, Buffer.from(replayData));

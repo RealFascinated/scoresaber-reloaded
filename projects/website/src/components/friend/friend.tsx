@@ -20,6 +20,8 @@ type FriendProps = {
 };
 
 export default function Friend({ player, onClick }: FriendProps) {
+console.log(player);
+
   const { id, name } = player;
   const database = useDatabase();
   const { toast } = useToast();
