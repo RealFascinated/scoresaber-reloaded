@@ -13,8 +13,14 @@ export function middleware(request: NextRequest) {
     }
   }
 
+  // Handle home redirect if they have claimed a player
   if (request.nextUrl.pathname === "/" && !!playerId) {
     return NextResponse.redirect(new URL("/home", request.url));
+  }
+
+  // Handle player home redirect if they don't have a player claimed
+  if (request.nextUrl.pathname.startsWith("/home") && !playerId) {
+    return NextResponse.redirect(new URL("/", request.url));
   }
 
   const response = NextResponse.next();
