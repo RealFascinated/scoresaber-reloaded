@@ -2,6 +2,7 @@ export const Config = {
   /**
    * All projects
    */
+  websiteName: "ScoreSaber Reloaded",
   websiteUrl: process.env.NEXT_PUBLIC_SITE_URL || "https://ssr.fascinated.cc",
   apiUrl: process.env.NEXT_PUBLIC_SITE_API || "https://ssr.fascinated.cc/api",
   cdnUrl: process.env.NEXT_PUBLIC_SITE_CDN || "https://ssr-cdn.fascinated.cc",

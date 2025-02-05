@@ -1,11 +1,12 @@
 import { Metadata } from "next";
 import ScoreFeed from "@/components/score/score-feed/score-feed";
 import Card from "@/components/card";
+import { Config } from "@ssr/common/config";
 
 export const metadata: Metadata = {
   title: "Score Feed",
   openGraph: {
-    siteName: "ScoreSaber Reloaded",
+    siteName: Config.websiteName,
     title: "Live Scores",
     description: "View the live scores set by players on ScoreSaber.",
   },

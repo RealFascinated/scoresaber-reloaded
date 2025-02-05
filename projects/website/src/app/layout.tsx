@@ -11,6 +11,7 @@ import { Colors } from "@/common/colors";
 import OfflineNetwork from "@/components/offline-network";
 import Script from "next/script";
 import { ReactNode } from "react";
+import { Config } from "@ssr/common/config";
 
 const siteFont = localFont({
   src: "./fonts/JetBrainsMono.ttf",
@@ -19,10 +20,10 @@ const siteFont = localFont({
 
 export const metadata: Metadata = {
   title: {
-    default: "ScoreSaber Reloaded",
+    default: Config.websiteName,
     template: "%s - ScoreSaber Reloaded",
   },
-  applicationName: "ScoreSaber Reloaded",
+  applicationName: Config.websiteName,
   authors: [
     {
       name: "Fascinated",
@@ -45,7 +46,8 @@ export const metadata: Metadata = {
     "VR gaming, Twitch stream enhancement, Customizable overlay, Real-time scores, Rankings, Leaderboard information," +
     "Stream enhancement, Professional overlay, Easy to use overlay builder.",
   openGraph: {
-    title: "Scoresaber Reloaded",
+    siteName: Config.websiteName,
+    title: Config.websiteName,
     description: "ScoreSaber Reloaded is a new way to view your scores and get more stats about you and your plays",
     url: "https://ssr.fascinated.cc",
     locale: "en_US",

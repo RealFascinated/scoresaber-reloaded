@@ -2,13 +2,13 @@ import { Metadata } from "next";
 import RankingData from "@/components/ranking/ranking-data";
 import { ScoreSaberPlayersPageToken } from "@ssr/common/types/token/scoresaber/players-page";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
+import { Config } from "@ssr/common/config";
 
 export const revalidate = 300; // Revalidate every 5 minutes
 
 const UNKNOWN_PAGE = {
-  siteName: "ScoreSaber Reloaded",
   title: "Unknown Page",
-  description: "The page you were looking for could not be found.",
+  description: "The page you were looking for could not be found",
 };
 
 type Props = {
@@ -52,6 +52,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
       title: UNKNOWN_PAGE.title,
       description: UNKNOWN_PAGE.description,
       openGraph: {
+        siteName: Config.websiteName,
         title: UNKNOWN_PAGE.title,
         description: UNKNOWN_PAGE.description,
       },
@@ -62,7 +63,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   return {
     title: title,
     openGraph: {
-      siteName: "ScoreSaber Reloaded",
+      siteName: Config.websiteName,
       title: title,
       description: `
       Page: ${page}

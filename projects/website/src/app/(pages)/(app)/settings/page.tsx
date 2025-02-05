@@ -1,11 +1,12 @@
 import Card from "@/components/card";
 import Settings from "@/components/settings/settings";
+import { Config } from "@ssr/common/config";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Settings",
   openGraph: {
-    siteName: "ScoreSaber Reloaded",
+    siteName: Config.websiteName,
     title: "Settings",
     description: "Change or view your settings for ScoreSaber Reloaded",
   },

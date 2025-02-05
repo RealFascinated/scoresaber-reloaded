@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "bun --bun run next dev --turbopack",
     "dev:debug": "NODE_OPTIONS='--inspect' next dev --turbopack",
-    "build": "next build",
+    "build": "bun --bun run next build",
     "build:analyze": "cross-env ANALYZE=true next build",
     "start": "next start",
     "start:debug": "NODE_OPTIONS='--inspect' next start",

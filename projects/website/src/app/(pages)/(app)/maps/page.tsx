@@ -1,10 +1,11 @@
 import { Metadata } from "next";
 import { MapsData } from "@/components/maps/maps-data";
+import { Config } from "@ssr/common/config";
 
 export const metadata: Metadata = {
   title: "Maps",
   openGraph: {
-    siteName: "ScoreSaber Reloaded",
+    siteName: Config.websiteName,
     title: "Maps",
     description: "View the maps and playlists on ScoreSaber Reloaded",
   },

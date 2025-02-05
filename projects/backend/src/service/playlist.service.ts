@@ -16,6 +16,7 @@ import { BadRequestError } from "@ssr/common/error/bad-request-error";
 import { generatePlaylistImage, generateSnipePlaylistImage } from "../common/playlist.util";
 import { parseSnipePlaylistSettings } from "@ssr/common/snipe/snipe-playlist-utils";
 import { ScoreService } from "./score/score.service";
+import { Config } from "@ssr/common/config";
 
 export type SnipeType = "top" | "recent";
 
@@ -115,7 +116,7 @@ export default class PlaylistService {
       return new Playlist(
         "scoresaber-snipe-" + toSnipe,
         `Snipe - ${truncateText(toSnipePlayer.name, 16)} (${capitalizeFirstLetter(settings.sort)})`,
-        "ScoreSaber Reloaded",
+        Config.websiteName,
         await generateSnipePlaylistImage(settings, toSnipePlayer),
         scores
           .sort((a, b) => {
@@ -174,7 +175,7 @@ export default class PlaylistService {
     return this.createScoreSaberPlaylist(
       "scoresaber-ranked-maps",
       `ScoreSaber Ranked Maps (${formatDateMinimal(new Date())})`,
-      "ScoreSaber Reloaded",
+      Config.websiteName,
       maps,
       highlightedIds,
       await generatePlaylistImage("SSR", {
@@ -212,7 +213,7 @@ export default class PlaylistService {
     return this.createScoreSaberPlaylist(
       "scoresaber-qualified-maps",
       `ScoreSaber Qualified Maps (${formatDateMinimal(new Date())})`,
-      "ScoreSaber Reloaded",
+      Config.websiteName,
       maps,
       highlightedIds,
       await generatePlaylistImage("SSR", {
@@ -257,7 +258,7 @@ export default class PlaylistService {
     return this.createScoreSaberPlaylist(
       "scoresaber-ranking-queue-maps",
       `ScoreSaber Ranking Queue Maps (${formatDateMinimal(new Date())})`,
-      "ScoreSaber Reloaded",
+      Config.websiteName,
       maps,
       highlightedIds,
       await generatePlaylistImage("SSR", {

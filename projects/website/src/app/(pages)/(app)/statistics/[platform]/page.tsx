@@ -6,6 +6,7 @@ import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { Statistic } from "@ssr/common/model/statistics/statistic";
 import { formatDateMinimal } from "@ssr/common/utils/time-utils";
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
+import { Config } from "@ssr/common/config";
 
 export const revalidate = 300; // Revalidate every 5 minutes
 
@@ -35,15 +36,14 @@ export async function generateMetadata({ params }: StatisticsPageProps): Promise
     `Active Players: ${formatNumberWithCommas(activePlayers)}`,
     totalScores && `Scores: ${formatNumberWithCommas(totalScores)}`,
     averagePp && `Average PP: ${formatPp(averagePp)}pp`,
-    `Click here to view the statistics for ${PLATFORM_NAMES[platform]}`,
   ].filter(Boolean);
 
   return {
     title: `${PLATFORM_NAMES[platform]} Statistics`,
     openGraph: {
-      siteName: "ScoreSaber Reloaded",
+      siteName: Config.websiteName,
       title: `${PLATFORM_NAMES[platform]} Statistics`,
-      description: descriptionParts.join("\n"),
+      description: `${descriptionParts.join("\n")}\n\nClick here to view the statistics for ${PLATFORM_NAMES[platform]}`,
     },
   };
 }

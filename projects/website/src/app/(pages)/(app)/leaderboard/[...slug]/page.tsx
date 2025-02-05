@@ -1,5 +1,6 @@
 import { LeaderboardData } from "@/components/leaderboard/page/leaderboard-data";
 import { ScoreModeEnum } from "@/components/score/score-mode";
+import { Config } from "@ssr/common/config";
 import { DetailType } from "@ssr/common/detail-type";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { LeaderboardResponse } from "@ssr/common/response/leaderboard-response";
@@ -9,6 +10,11 @@ import { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 export const revalidate = 300; // Revalidate every 5 minutes
+
+const UNKNOWN_LEADERBOARD = {
+  title: "Unknown Leaderboard",
+  description: "The leaderboard you were looking for could not be found",
+};
 
 type Props = {
   params: Promise<{
@@ -53,17 +59,13 @@ const getLeaderboardData = async (
 };
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
-  const UNKNOWN_LEADERBOARD = {
-    title: "ScoreSaber Reloaded - Unknown Leaderboard",
-    description: "The leaderboard you were looking for could not be found.",
-  };
-
   const response = await getLeaderboardData(props);
   if (response === undefined) {
     return {
       title: UNKNOWN_LEADERBOARD.title,
       description: UNKNOWN_LEADERBOARD.description,
       openGraph: {
+        siteName: Config.websiteName,
         title: UNKNOWN_LEADERBOARD.title,
         description: UNKNOWN_LEADERBOARD.description,
       },
@@ -76,13 +78,13 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   return {
     title: `${leaderboard.fullName} - ${leaderboard.songAuthorName}`,
     openGraph: {
-      siteName: "ScoreSaber Reloaded",
+      siteName: Config.websiteName,
       title: `${leaderboard.fullName} - ${leaderboard.songAuthorName}`,
       description: `Plays: ${leaderboard.plays} (${leaderboard.dailyPlays} Daily)
 Mapped by: ${leaderboard.songAuthorName}
 Difficulty: ${difficulty.alternativeName ?? difficulty.name}${leaderboard.stars > 0 ? ` (${leaderboard.stars}★)` : ""}
 
-Click here to view the scores for ${leaderboard.fullName}!`,
+Click here to view the scores for ${leaderboard.fullName}`,
       images: [
         {
           url: leaderboard.songArt,

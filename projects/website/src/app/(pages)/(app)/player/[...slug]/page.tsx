@@ -11,6 +11,11 @@ import { formatPp } from "@ssr/common/utils/number-utils";
 
 export const revalidate = 300; // Revalidate every 5 minutes
 
+const UNKNOWN_PLAYER = {
+  title: "Unknown Player",
+  description: "The player you were looking for could not be found",
+};
+
 type Props = {
   params: Promise<{
     slug: string[];
@@ -50,17 +55,13 @@ const getPlayerData = async ({ params }: Props, type: DetailType = DetailType.FU
 };
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
-  const UNKNOWN_PLAYER = {
-    title: "ScoreSaber Reloaded - Unknown Player",
-    description: "The player you were looking for could not be found.",
-  };
-
   const { player } = await getPlayerData(props, DetailType.BASIC);
   if (player === undefined) {
     return {
       title: UNKNOWN_PLAYER.title,
       description: UNKNOWN_PLAYER.description,
       openGraph: {
+        siteName: Config.websiteName,
         title: UNKNOWN_PLAYER.title,
         description: UNKNOWN_PLAYER.description,
       },
@@ -70,13 +71,13 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   return {
     title: `${player.name}`,
     openGraph: {
-      siteName: "ScoreSaber Reloaded",
+      siteName: Config.websiteName,
       title: `${player.name}`,
       description: `Rank: #${player.rank}
 Country Rank: #${player.countryRank} (${player.country})
 PP: ${formatPp(player.pp)}pp
 
-Click here to view the scores for ${player.name}!`,
+Click here to view the scores for ${player.name}`,
       images: [
         {
           url: player.avatar,
