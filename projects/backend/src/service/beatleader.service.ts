@@ -15,7 +15,7 @@ import { beatLeaderService } from "@ssr/common/service/impl/beatleader";
 import { ScoreStatsToken } from "@ssr/common/types/token/beatleader/score-stats/score-stats";
 import { BeatLeaderScoreToken } from "@ssr/common/types/token/beatleader/score/score";
 import { BeatLeaderScoreImprovementToken } from "@ssr/common/types/token/beatleader/score/score-improvement";
-import RequestManager from "@ssr/common/utils/request";
+import Request from "@ssr/common/utils/request";
 import { isProduction } from "@ssr/common/utils/utils";
 import { fetchWithCache } from "../common/cache.util";
 import CacheService, { ServiceCache } from "./cache.service";
@@ -114,7 +114,7 @@ export default class BeatLeaderService {
       if (player && player.trackReplays) {
         try {
           const replayId = `${score.id}-${playerId}-${leaderboard.difficulty.difficultyName}-${leaderboard.difficulty.modeName}-${leaderboard.song.hash.toUpperCase()}.bsor`;
-          const replayData = await RequestManager.get<ArrayBuffer>(
+          const replayData = await Request.get<ArrayBuffer>(
             `https://cdn.replays.beatleader.xyz/${replayId}`,
             {
               returns: "arraybuffer",

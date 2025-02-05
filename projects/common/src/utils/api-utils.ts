@@ -1,4 +1,4 @@
-import RequestManager from "./request";
+import Request from "./request";
 
 type ApiHealth = {
   online: boolean;
@@ -11,7 +11,7 @@ type ApiHealth = {
  */
 export async function getApiHealth(url: string): Promise<ApiHealth> {
   try {
-    await RequestManager.get(`${url}/health`);
+    await Request.get(`${url}/health`);
     return {
       online: true,
     };

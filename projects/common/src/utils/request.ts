@@ -21,7 +21,7 @@ const DEFAULT_OPTIONS: RequestOptions = {
   returns: "json",
 };
 
-class RequestManager {
+class Request {
   private static pendingRequests = new Map<string, Promise<unknown>>();
 
   private static getCacheKey(url: string, method: string, options?: RequestOptions): string {
@@ -116,7 +116,7 @@ class RequestManager {
 
 // Export the public API
 export default {
-  send: RequestManager.send.bind(RequestManager),
-  get: RequestManager.get.bind(RequestManager),
-  post: RequestManager.post.bind(RequestManager),
+  send: Request.send.bind(Request),
+  get: Request.get.bind(Request),
+  post: Request.post.bind(Request),
 };

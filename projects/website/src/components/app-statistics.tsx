@@ -3,7 +3,7 @@
 import Statistic from "@/components/landing/statistic";
 import { Config } from "@ssr/common/config";
 import { AppStatistics } from "@ssr/common/types/backend/app-statistics";
-import RequestManager from "@ssr/common/utils/request";
+import Request from "@ssr/common/utils/request";
 import { useQuery } from "@tanstack/react-query";
 import { Box, User } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -20,7 +20,7 @@ export function AppStats({ initialStatistics }: AppStatisticsProps) {
 
   const { data } = useQuery({
     queryKey: ["app-statistics"],
-    queryFn: () => RequestManager.get<AppStatistics>(Config.apiUrl + "/statistics"),
+    queryFn: () => Request.get<AppStatistics>(Config.apiUrl + "/statistics"),
   });
 
   useEffect(() => {

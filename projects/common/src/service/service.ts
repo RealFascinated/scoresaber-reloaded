@@ -1,6 +1,6 @@
 import { Cooldown } from "../cooldown";
 import Logger from "../logger";
-import RequestManager, { RequestOptions } from "../utils/request";
+import Request, { RequestOptions } from "../utils/request";
 import { isServer } from "../utils/utils";
 
 export default class Service {
@@ -46,7 +46,7 @@ export default class Service {
   public async fetch<T>(url: string, options?: RequestOptions): Promise<T | undefined> {
     await this.cooldown.waitAndUse();
 
-    return RequestManager.get<T>(this.buildRequestUrl(!isServer(), url), {
+    return Request.get<T>(this.buildRequestUrl(!isServer(), url), {
       returns: "json",
       ...options,
     });
