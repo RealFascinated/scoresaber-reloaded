@@ -1,14 +1,6 @@
 import Logger from "../logger";
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 
-// Types and Interfaces
-export enum RequestPriority {
-  BACKGROUND = 0,
-  LOW = 1,
-  NORMAL = 2,
-  HIGH = 3,
-}
-
 type RequestReturns = "text" | "json" | "arraybuffer";
 
 export type RequestOptions = AxiosRequestConfig & {
@@ -18,7 +10,6 @@ export type RequestOptions = AxiosRequestConfig & {
   searchParams?: Record<string, unknown>;
   throwOnError?: boolean;
   returns?: RequestReturns;
-  priority?: RequestPriority;
 };
 
 const DEBUG = false;
@@ -28,67 +19,13 @@ const DEFAULT_OPTIONS: RequestOptions = {
   },
   throwOnError: false,
   returns: "json",
-  priority: RequestPriority.NORMAL,
 };
 
-// Request Management
 class RequestManager {
   private static pendingRequests = new Map<string, Promise<unknown>>();
-  private static requestQueue = new Map<RequestPriority, Promise<unknown>[]>();
-
-  static {
-    // Initialize queue for each priority level
-    Object.values(RequestPriority).forEach(priority => {
-      if (typeof priority === "number") {
-        this.requestQueue.set(priority, []);
-      }
-    });
-  }
 
   private static getCacheKey(url: string, method: string, options?: RequestOptions): string {
     return JSON.stringify({ url, method, options });
-  }
-
-  private static getPriorityName(priority: RequestPriority): string {
-    const names: Record<RequestPriority, string> = {
-      [RequestPriority.BACKGROUND]: "background",
-      [RequestPriority.LOW]: "low",
-      [RequestPriority.NORMAL]: "normal",
-      [RequestPriority.HIGH]: "high",
-    };
-    return names[priority];
-  }
-
-  private static async processRequest<T>(
-    priority: RequestPriority,
-    requestFn: () => Promise<T>
-  ): Promise<T> {
-    const higherPriorityQueues = Array.from(this.requestQueue.entries())
-      .filter(([queuePriority]) => queuePriority >= priority)
-      .map(([_, queue]) => queue);
-
-    // Wait for higher priority requests
-    await new Promise<void>(resolve => {
-      if (higherPriorityQueues.every(queue => queue.length === 0)) {
-        resolve();
-      } else {
-        Promise.all(higherPriorityQueues.flat()).finally(() => resolve());
-      }
-    });
-
-    const queue = this.requestQueue.get(priority) ?? [];
-    const requestPromise = requestFn();
-    queue.push(requestPromise);
-    this.requestQueue.set(priority, queue);
-
-    try {
-      return await requestPromise;
-    } finally {
-      const index = queue.indexOf(requestPromise);
-      if (index > -1) {
-        queue.splice(index, 1);
-      }
-    }
   }
 
   private static buildUrl(baseUrl: string, searchParams?: Record<string, unknown>): string {
@@ -142,12 +79,11 @@ class RequestManager {
     options?: RequestOptions
   ): Promise<T | undefined> {
     const finalOptions = { ...DEFAULT_OPTIONS, ...options };
-    const priority = finalOptions.priority!;
     const finalUrl = this.buildUrl(url, finalOptions.searchParams);
     const cacheKey = this.getCacheKey(finalUrl, method, finalOptions);
 
     if (DEBUG) {
-      Logger.info(`Sending request: ${finalUrl} with priority ${this.getPriorityName(priority)}`);
+      Logger.info(`Sending request: ${finalUrl}`);
     }
 
     // Check for pending requests
@@ -156,19 +92,14 @@ class RequestManager {
       return pendingRequest as Promise<T | undefined>;
     }
 
-    const requestPromise = this.processRequest(priority, () =>
-      this.executeRequest<T>(finalUrl, method, finalOptions)
-    );
-
+    const requestPromise = this.executeRequest<T>(finalUrl, method, finalOptions);
     this.pendingRequests.set(cacheKey, requestPromise);
 
     try {
       return await requestPromise;
     } finally {
       if (DEBUG) {
-        Logger.info(
-          `Request completed: ${finalUrl} with priority ${this.getPriorityName(priority)}`
-        );
+        Logger.info(`Request completed: ${finalUrl}`);
       }
       this.pendingRequests.delete(cacheKey);
     }
