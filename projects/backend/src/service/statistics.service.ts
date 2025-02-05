@@ -110,11 +110,9 @@ export default class StatisticsService {
   public static async trackScoreSaberStatistics() {
     const { uniquePlayers, playerCount, totalScores, averagePp } = await this.getScoreSaberStatistics();
 
-    await Promise.all([
-      this.trackStatisticToday(GamePlatform.ScoreSaber, Statistic.ActivePlayers, uniquePlayers),
-      this.trackStatisticToday(GamePlatform.ScoreSaber, Statistic.PlayerCount, playerCount),
-      this.trackStatisticToday(GamePlatform.ScoreSaber, Statistic.TotalScores, totalScores),
-      this.trackStatisticToday(GamePlatform.ScoreSaber, Statistic.AveragePp, averagePp),
-    ]);
+    await this.trackStatisticToday(GamePlatform.ScoreSaber, Statistic.ActivePlayers, uniquePlayers);
+    await this.trackStatisticToday(GamePlatform.ScoreSaber, Statistic.PlayerCount, playerCount);
+    await this.trackStatisticToday(GamePlatform.ScoreSaber, Statistic.TotalScores, totalScores);
+    await this.trackStatisticToday(GamePlatform.ScoreSaber, Statistic.AveragePp, averagePp);
   }
 }
