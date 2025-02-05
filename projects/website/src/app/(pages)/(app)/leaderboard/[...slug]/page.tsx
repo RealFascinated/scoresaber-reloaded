@@ -59,7 +59,7 @@ const getLeaderboardData = async (
 };
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
-  const response = await getLeaderboardData(props);
+  const response = await getLeaderboardData(props, DetailType.FULL);
   if (response === undefined) {
     return {
       title: UNKNOWN_LEADERBOARD.title,

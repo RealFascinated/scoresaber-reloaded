@@ -55,7 +55,7 @@ const getPlayerData = async ({ params }: Props, type: DetailType = DetailType.FU
 };
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
-  const { player } = await getPlayerData(props, DetailType.BASIC);
+  const { player } = await getPlayerData(props, DetailType.FULL);
   if (player === undefined) {
     return {
       title: UNKNOWN_PLAYER.title,

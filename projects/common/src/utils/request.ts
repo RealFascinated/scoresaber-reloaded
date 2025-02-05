@@ -17,6 +17,13 @@ const defaultRequestOptions: RequestOptions = {
   throwOnError: false,
 };
 
+const DEBUG_DEDUPE = false;
+const pendingRequests = new Map<string, Promise<unknown>>();
+
+const getCacheKey = (url: string, method: string, options?: RequestOptions): string => {
+  return JSON.stringify({ url, method, options });
+};
+
 /**
  * Requests data from an endpoint.
  *
@@ -31,6 +38,21 @@ async function ssrRequest<T>(
   returns: RequestReturns,
   options?: RequestOptions
 ): Promise<T | undefined> {
+  const cacheKey = getCacheKey(url, method, options);
+
+  // Check if there's already a pending request
+  const pendingRequest = pendingRequests.get(cacheKey);
+  if (pendingRequest) {
+    if (DEBUG_DEDUPE) {
+      Logger.info(`Request deduped: ${url}`);
+    }
+    return pendingRequest as Promise<T | undefined>;
+  }
+
+  if (DEBUG_DEDUPE) {
+    Logger.info(`New request: ${url} (${pendingRequests.size} pending requests)`);
+  }
+
   const searchParams = options?.searchParams;
   if (searchParams) {
     const params = new URLSearchParams(
@@ -39,35 +61,46 @@ async function ssrRequest<T>(
     url = `${url}?${params.toString()}`;
   }
 
-  try {
-    const response: AxiosResponse = await axios({
-      url,
-      method,
-      ...defaultRequestOptions,
-      ...options,
-      responseType: returns,
-    });
+  // Create the request promise
+  const requestPromise = (async () => {
+    try {
+      const response: AxiosResponse = await axios({
+        url,
+        method,
+        ...defaultRequestOptions,
+        ...options,
+        responseType: returns,
+      });
 
-    // Check rate limits
-    const rateLimit = response.headers["x-ratelimit-remaining"];
-    if (rateLimit) {
-      const left = Number(rateLimit);
-      if (left < 100) {
-        Logger.warn(`Rate limit for ${url} remaining: ${left}`);
+      // Check rate limits
+      const rateLimit = response.headers["x-ratelimit-remaining"];
+      if (rateLimit) {
+        const left = Number(rateLimit);
+        if (left < 100) {
+          Logger.warn(`Rate limit for ${url} remaining: ${left}`);
+        }
       }
-    }
 
-    // Handle different response types
-    return response.data as unknown as T;
-  } catch (error) {
-    if (axios.isAxiosError(error) && error.response) {
-      if (options?.throwOnError) {
-        throw new Error(`Failed to request ${url}`, { cause: error.response });
+      // Handle different response types
+      return response.data as unknown as T;
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        if (options?.throwOnError) {
+          throw new Error(`Failed to request ${url}`, { cause: error.response });
+        }
+        return undefined;
       }
-      return undefined;
+      throw error;
+    } finally {
+      // Remove the request from the cache once it's complete
+      pendingRequests.delete(cacheKey);
     }
-    throw error;
-  }
+  })();
+
+  // Store the promise in the cache
+  pendingRequests.set(cacheKey, requestPromise);
+
+  return requestPromise;
 }
 
 /**
