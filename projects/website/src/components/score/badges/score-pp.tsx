@@ -22,7 +22,9 @@ export function ScorePpBadge({ score, leaderboard }: ScorePpProps) {
   }
   const weightedPp = pp * weight;
   const fcPp =
-    !score.fullCombo && fcAccuracy ? scoresaberService.getPp(leaderboard.stars, fcAccuracy).toFixed(0) : undefined;
+    !score.fullCombo && fcAccuracy
+      ? scoresaberService.getPp(leaderboard.stars, fcAccuracy).toFixed(0)
+      : undefined;
 
   return (
     <>
@@ -37,7 +39,9 @@ export function ScorePpBadge({ score, leaderboard }: ScorePpProps) {
                   Weighted: {formatPp(weightedPp)}pp ({(100 * weight).toFixed(2)}%)
                 </p>
                 {fcPp && <p>Full Combo: {fcPp}pp</p>}
-                {score.ppBoundary && <p>Global PP Gain: {formatPp(score.ppBoundary)}pp (if new score)</p>}
+                {score.ppBoundary && (
+                  <p>Global PP Gain: {formatPp(score.ppBoundary)}pp (if new score)</p>
+                )}
               </div>
             </div>
           }
@@ -46,7 +50,11 @@ export function ScorePpBadge({ score, leaderboard }: ScorePpProps) {
         </Tooltip>
         {previousScore && previousScore.change && previousScore.pp !== score.pp && (
           <Tooltip display={<p>Previous PP: {formatPp(previousScore.pp)}pp</p>}>
-            <Change className="text-xs" change={ensurePositiveNumber(previousScore.change.pp)} isPp />
+            <Change
+              className="text-xs"
+              change={ensurePositiveNumber(previousScore.change.pp)}
+              isPp
+            />
           </Tooltip>
         )}
       </div>

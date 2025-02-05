@@ -13,7 +13,13 @@ import { encodeOverlaySettings, OverlayViews } from "@/common/overlay/overlay-se
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import Notice from "@/components/notice";
 import { openInNewTab } from "@/common/browser-utils";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { OverlayDataClients } from "@/common/overlay/data-client";
 import { Checkbox } from "@/components/ui/checkbox";
 
@@ -63,7 +69,12 @@ export default function OverlayBuilder() {
    *
    * @param replayViewer the new replay viewer
    */
-  async function onSubmit({ playerId, useRealTimeData, dataClient, views }: z.infer<typeof formSchema>) {
+  async function onSubmit({
+    playerId,
+    useRealTimeData,
+    dataClient,
+    views,
+  }: z.infer<typeof formSchema>) {
     const player = await scoresaberService.lookupPlayer(playerId);
     if (!player) {
       toast({
@@ -90,11 +101,14 @@ export default function OverlayBuilder() {
       <p className="text-xl font-semibold">ScoreSaber Reloaded Overlay Builder</p>
 
       {/* Streamer Warning */}
-      <Notice>You must use a resolution of 1920x1080 in OBS (or similar) to use this overlay.</Notice>
+      <Notice>
+        You must use a resolution of 1920x1080 in OBS (or similar) to use this overlay.
+      </Notice>
 
       {/* Unknown Account ID Notice */}
       <p className="text-sm text-muted-foreground text-center">
-        If you don&#39;t know your player id, you can link your account and it will be automatically filled in.
+        If you don&#39;t know your player id, you can link your account and it will be automatically
+        filled in.
       </p>
 
       {/* Overlay Settings */}
@@ -107,7 +121,9 @@ export default function OverlayBuilder() {
             render={({ field }) => (
               <FormItem className="w-full">
                 <FormLabel>Player ID</FormLabel>
-                <FormDescription>The id for the player you want to show in the overlay.</FormDescription>
+                <FormDescription>
+                  The id for the player you want to show in the overlay.
+                </FormDescription>
                 <FormControl>
                   <Input placeholder="Player ID" {...field} />
                 </FormControl>
@@ -122,7 +138,9 @@ export default function OverlayBuilder() {
             render={({ field }) => (
               <FormItem className="w-full">
                 <FormLabel>Use Real-Time Data</FormLabel>
-                <FormDescription>Whether to fetch real-time data from the data client.</FormDescription>
+                <FormDescription>
+                  Whether to fetch real-time data from the data client.
+                </FormDescription>
                 <FormControl>
                   <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                 </FormControl>
@@ -140,7 +158,10 @@ export default function OverlayBuilder() {
                   <FormLabel>Data Client</FormLabel>
                   <FormDescription>The data client to use for the overlay.</FormDescription>
                   <FormControl>
-                    <Select onValueChange={field.onChange} defaultValue={form.getValues().dataClient}>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={form.getValues().dataClient}
+                    >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select a data client to use" />

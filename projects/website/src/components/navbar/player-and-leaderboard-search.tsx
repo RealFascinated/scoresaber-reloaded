@@ -112,7 +112,12 @@ export default function PlayerAndLeaderboardSearch() {
         className="group flex cursor-pointer hover:opacity-85 transition-all transform-gpu select-none"
         onClick={openSearch}
       >
-        <div className={cn("absolute top-1.5 z-10", isMobile ? "inset-x-0 flex justify-center" : "inset-x-2.5")}>
+        <div
+          className={cn(
+            "absolute top-1.5 z-10",
+            isMobile ? "inset-x-0 flex justify-center" : "inset-x-2.5"
+          )}
+        >
           <UserSearch className="size-5" />
         </div>
 
@@ -151,7 +156,9 @@ export default function PlayerAndLeaderboardSearch() {
             value={query}
             onValueChange={setQuery}
           />
-          {isLoading && <LoaderCircle className="h-full absolute inset-y-0 right-10 size-5 animate-spin opacity-85" />}
+          {isLoading && (
+            <LoaderCircle className="h-full absolute inset-y-0 right-10 size-5 animate-spin opacity-85" />
+          )}
         </div>
 
         {/* Results */}
@@ -159,7 +166,9 @@ export default function PlayerAndLeaderboardSearch() {
           {isLoading ? (
             <CommandLoading className="py-2 text-center opacity-85">Loading...</CommandLoading>
           ) : (
-            <CommandEmpty className="py-2 text-center text-red-500">No results were found.</CommandEmpty>
+            <CommandEmpty className="py-2 text-center text-red-500">
+              No results were found.
+            </CommandEmpty>
           )}
 
           {results && (
@@ -185,8 +194,10 @@ export default function PlayerAndLeaderboardSearch() {
                       <div className="flex flex-col">
                         <p>{truncateText(player.name, 32)}</p>
                         <p>
-                          <span className="text-gray-400">#{formatNumberWithCommas(player.rank)}</span> -{" "}
-                          <span className="text-pp">{formatPp(player.pp)}pp</span>
+                          <span className="text-gray-400">
+                            #{formatNumberWithCommas(player.rank)}
+                          </span>{" "}
+                          - <span className="text-pp">{formatPp(player.pp)}pp</span>
                         </p>
                       </div>
                     </CommandItem>
@@ -207,14 +218,19 @@ export default function PlayerAndLeaderboardSearch() {
                         router.push(`/leaderboard/${leaderboard.id}`);
                       }}
                     >
-                      <Avatar src={leaderboard.songArt} className="w-8 h-8" alt={leaderboard.songName} />
+                      <Avatar
+                        src={leaderboard.songArt}
+                        className="w-8 h-8"
+                        alt={leaderboard.songName}
+                      />
                       <div className="flex flex-col">
                         <p>{truncateText(leaderboard.fullName, 48)}</p>
                         <div className="text-xs">
                           <div className="flex gap-2 items-center">
                             <span
                               style={{
-                                color: getDifficulty(leaderboard.difficulty.difficulty).color + "f0", // Transparency value (in hex 0-255)
+                                color:
+                                  getDifficulty(leaderboard.difficulty.difficulty).color + "f0", // Transparency value (in hex 0-255)
                               }}
                             >
                               {getDifficultyName(leaderboard.difficulty.difficulty)}

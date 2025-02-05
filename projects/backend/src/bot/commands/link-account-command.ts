@@ -33,12 +33,21 @@ export class LinkAccountCommand {
 
         await interaction.editReply({
           embeds: [
-            createGenericEmbed("Success!", `Successfully linked ${scoreSaberUser.name} to your discord account.`),
+            createGenericEmbed(
+              "Success!",
+              `Successfully linked ${scoreSaberUser.name} to your discord account.`
+            ),
           ],
         });
       } catch {
         await interaction.editReply({
-          embeds: [createGenericEmbed("Error", `Unable to find a user with the id "${scoreSaberId}".`, "error")],
+          embeds: [
+            createGenericEmbed(
+              "Error",
+              `Unable to find a user with the id "${scoreSaberId}".`,
+              "error"
+            ),
+          ],
         });
       }
     });

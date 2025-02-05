@@ -13,14 +13,20 @@ import Avatar from "@/components/avatar";
 export default function ProfileButton() {
   const database: Database = useDatabase();
   const settings = useSettings();
-  const claimedPlayer = useLiveQuery<ScoreSaberPlayerToken | undefined>(() => database.getClaimedPlayer());
+  const claimedPlayer = useLiveQuery<ScoreSaberPlayerToken | undefined>(() =>
+    database.getClaimedPlayer()
+  );
 
   if (settings == undefined || claimedPlayer == undefined) {
     return; // Settings or player hasn't loaded yet
   }
 
   return (
-    <Link prefetch={false} href={`/player/${settings.playerId}`} className="pl-1 flex items-center gap-4 h-full">
+    <Link
+      prefetch={false}
+      href={`/player/${settings.playerId}`}
+      className="pl-1 flex items-center gap-4 h-full"
+    >
       <NavbarButton className="px-0">
         <Avatar
           src={claimedPlayer.profilePicture}

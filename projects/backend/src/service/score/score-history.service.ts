@@ -20,7 +20,10 @@ export class ScoreHistoryService {
     leaderboardId: string,
     page: number
   ): Promise<Page<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>> {
-    const scores = await ScoreSaberPreviousScoreModel.find({ playerId: playerId, leaderboardId: leaderboardId }).sort({
+    const scores = await ScoreSaberPreviousScoreModel.find({
+      playerId: playerId,
+      leaderboardId: leaderboardId,
+    }).sort({
       timestamp: -1,
     });
     if (scores == null || scores.length == 0) {

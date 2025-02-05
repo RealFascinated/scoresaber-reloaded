@@ -107,7 +107,9 @@ export function getDifficultyName(diff: Difficulty | MapDifficulty) {
  * @returns the difficulty
  */
 export function getDifficulty(diff: Difficulty | MapDifficulty) {
-  const difficulty = difficulties.find(d => d.name === (typeof diff === "string" ? diff : diff.name));
+  const difficulty = difficulties.find(
+    d => d.name === (typeof diff === "string" ? diff : diff.name)
+  );
   if (!difficulty) {
     throw new Error(`Unknown difficulty: ${diff}`);
   }

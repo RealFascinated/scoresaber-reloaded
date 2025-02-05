@@ -32,7 +32,11 @@ class SSRApi {
    * @param difficulty the difficulty to get
    * @param characteristic the characteristic to get
    */
-  async getBeatSaverMap(hash: string, difficulty: MapDifficulty, characteristic: MapCharacteristic) {
+  async getBeatSaverMap(
+    hash: string,
+    difficulty: MapDifficulty,
+    characteristic: MapCharacteristic
+  ) {
     const response = await RequestManager.get<string>(
       `${Config.apiUrl}/beatsaver/map/${hash}/${difficulty}/${characteristic}`
     );
@@ -49,7 +53,11 @@ class SSRApi {
    * @param difficulty the difficulty to get
    * @param characteristic the characteristic to get
    */
-  async fetchLeaderboardByHash(hash: string, difficulty: MapDifficulty, characteristic: MapCharacteristic) {
+  async fetchLeaderboardByHash(
+    hash: string,
+    difficulty: MapDifficulty,
+    characteristic: MapCharacteristic
+  ) {
     const response = await RequestManager.get<string>(
       `${Config.apiUrl}/leaderboard/by-hash/${hash}/${difficulty}/${characteristic}`,
       {
@@ -90,7 +98,9 @@ class SSRApi {
    * @param platform the platform to get statistics for
    */
   async getPlatformStatistics(platform: GamePlatform) {
-    return await RequestManager.get<{ statistics: StatisticsType }>(`${Config.apiUrl}/statistics/${platform}`);
+    return await RequestManager.get<{ statistics: StatisticsType }>(
+      `${Config.apiUrl}/statistics/${platform}`
+    );
   }
 
   /**
@@ -100,7 +110,9 @@ class SSRApi {
    * @param boundary the pp boundary
    */
   async getPlayerPpBoundary(playerId: string, boundary: number = 1) {
-    return await RequestManager.get<PpBoundaryResponse>(`${Config.apiUrl}/player/pp-boundary/${playerId}/${boundary}`);
+    return await RequestManager.get<PpBoundaryResponse>(
+      `${Config.apiUrl}/player/pp-boundary/${playerId}/${boundary}`
+    );
   }
 
   /**
@@ -123,7 +135,9 @@ class SSRApi {
    * @param type the type to get
    */
   async getPlayersAroundPlayer(playerId: string, type: AroundPlayer) {
-    return await RequestManager.get<AroundPlayerResponse>(`${Config.apiUrl}/player/around/${playerId}/${type}`);
+    return await RequestManager.get<AroundPlayerResponse>(
+      `${Config.apiUrl}/player/around/${playerId}/${type}`
+    );
   }
 
   /**
@@ -166,13 +180,16 @@ class SSRApi {
    * @param page the page
    */
   async getFriendScores(friendIds: string[], page: number) {
-    const response = await RequestManager.get<string>(`${Config.apiUrl}/scores/friends/recent/${page}`, {
-      returns: "text",
-      searchParams: {
-        friendIds: friendIds.join(","),
-        superJson: true,
-      },
-    });
+    const response = await RequestManager.get<string>(
+      `${Config.apiUrl}/scores/friends/recent/${page}`,
+      {
+        returns: "text",
+        searchParams: {
+          friendIds: friendIds.join(","),
+          superJson: true,
+        },
+      }
+    );
     if (response === undefined) {
       return undefined;
     }
@@ -215,12 +232,15 @@ class SSRApi {
    * @returns the score chart data
    */
   async getPlayerScoreChartData(playerId: string) {
-    const response = await RequestManager.get<string>(`${Config.apiUrl}/player/score-chart/${playerId}`, {
-      returns: "text",
-      searchParams: {
-        superJson: true,
-      },
-    });
+    const response = await RequestManager.get<string>(
+      `${Config.apiUrl}/player/score-chart/${playerId}`,
+      {
+        returns: "text",
+        searchParams: {
+          superJson: true,
+        },
+      }
+    );
     if (response === undefined) {
       return undefined;
     }
@@ -300,13 +320,16 @@ class SSRApi {
    * @param endDate the end date
    */
   async getPlayerStatisticHistory(playerId: string, startDate: Date, endDate: Date) {
-    return RequestManager.get<PlayerStatisticHistory>(`${Config.apiUrl}/player/history/${playerId}`, {
-      returns: "json",
-      searchParams: {
-        startDate: startDate.toISOString(),
-        endDate: endDate.toISOString(),
-      },
-    });
+    return RequestManager.get<PlayerStatisticHistory>(
+      `${Config.apiUrl}/player/history/${playerId}`,
+      {
+        returns: "json",
+        searchParams: {
+          startDate: startDate.toISOString(),
+          endDate: endDate.toISOString(),
+        },
+      }
+    );
   }
 }
 

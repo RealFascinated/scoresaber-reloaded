@@ -11,9 +11,10 @@ export default function Friends() {
           <h1 className="text-2xl sm:text-3xl font-bold">Friends</h1>
         </div>
         <p className="max-w-5xl opacity-85">
-          Connect with friends to share your Beat Saber experience! Add friends to your list and see their latest
-          scores, achievements, and play history in a dynamic feed. Keep up with their top plays, challenge their
-          records, and join them in competitive runs as you progress together.
+          Connect with friends to share your Beat Saber experience! Add friends to your list and see
+          their latest scores, achievements, and play history in a dynamic feed. Keep up with their
+          top plays, challenge their records, and join them in competitive runs as you progress
+          together.
         </p>
       </div>
 

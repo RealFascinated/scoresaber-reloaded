@@ -16,7 +16,11 @@ type WarningProps = {
 export function Warning({ size = 32, children }: WarningProps) {
   return (
     <div className="flex gap-2 items-center justify-center">
-      <ExclamationTriangleIcon width={size} height={size} className={`w-[${size}px] h-[${size}px]`} />
+      <ExclamationTriangleIcon
+        width={size}
+        height={size}
+        className={`w-[${size}px] h-[${size}px]`}
+      />
       {children}
     </div>
   );

@@ -19,7 +19,10 @@ import { PlayerScore } from "@ssr/common/score/player-score";
 import { ScoreSort } from "@ssr/common/score/score-sort";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { Timeframe } from "@ssr/common/timeframe";
-import { getScoreSaberLeaderboardFromToken, getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
+import {
+  getScoreSaberLeaderboardFromToken,
+  getScoreSaberScoreFromToken,
+} from "@ssr/common/token-creators";
 import { Metadata } from "@ssr/common/types/metadata";
 import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/leaderboard";
 import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score";
@@ -61,9 +64,13 @@ export class ScoreService {
         const leaderboard = leaderboardResponse.leaderboard;
         const beatSaverMap = leaderboardResponse.beatsaver;
 
-        const leaderboardScores = await scoresaberService.lookupLeaderboardScores(leaderboardId, page, {
-          country: country,
-        });
+        const leaderboardScores = await scoresaberService.lookupLeaderboardScores(
+          leaderboardId,
+          page,
+          {
+            country: country,
+          }
+        );
         if (leaderboardScores == undefined) {
           return;
         }
@@ -185,7 +192,11 @@ export class ScoreService {
    * @param leaderboard the leaderboard
    * @param score the score to check
    */
-  public static async scoreExists(playerId: string, leaderboard: ScoreSaberLeaderboard, score: ScoreSaberScore) {
+  public static async scoreExists(
+    playerId: string,
+    leaderboard: ScoreSaberLeaderboard,
+    score: ScoreSaberScore
+  ) {
     return (
       (await ScoreSaberScoreModel.exists({
         playerId: playerId + "",
@@ -212,13 +223,15 @@ export class ScoreService {
     log: boolean = true
   ) {
     const before = performance.now();
-    playerId = (scoreToken.leaderboardPlayerInfo && scoreToken.leaderboardPlayerInfo.id) || playerId;
+    playerId =
+      (scoreToken.leaderboardPlayerInfo && scoreToken.leaderboardPlayerInfo.id) || playerId;
     if (!playerId) {
       console.error(`Player ID is undefined, unable to track score: ${scoreToken.id}`);
       return;
     }
 
-    const playerName = (scoreToken.leaderboardPlayerInfo && scoreToken.leaderboardPlayerInfo.name) || "Unknown";
+    const playerName =
+      (scoreToken.leaderboardPlayerInfo && scoreToken.leaderboardPlayerInfo.name) || "Unknown";
     const leaderboard = getScoreSaberLeaderboardFromToken(leaderboardToken);
     const score = getScoreSaberScoreFromToken(scoreToken, leaderboard, playerId);
 
@@ -265,8 +278,12 @@ export class ScoreService {
         score.pp > 0 ? `pp: ${score.pp.toFixed(2)}pp` : undefined,
         `leaderboard: ${leaderboard.id}`,
         `hmd: ${score.hmd}`,
-        score.controllers !== undefined ? `controller left: ${score.controllers.leftController}` : undefined,
-        score.controllers !== undefined ? `controller right: ${score.controllers.rightController}` : undefined,
+        score.controllers !== undefined
+          ? `controller left: ${score.controllers.leftController}`
+          : undefined,
+        score.controllers !== undefined
+          ? `controller right: ${score.controllers.rightController}`
+          : undefined,
         `in ${(performance.now() - before).toFixed(0)}ms`,
       ]
         .filter(s => s !== undefined)
@@ -295,44 +312,52 @@ export class ScoreService {
       daysAgo = 31;
     }
     const foundScores = await ScoreSaberScoreModel.aggregate([
-      { $match: { ...(timeframe === "all" ? {} : { timestamp: { $gte: getDaysAgoDate(daysAgo) } }), pp: { $gt: 0 } } },
+      {
+        $match: {
+          ...(timeframe === "all" ? {} : { timestamp: { $gte: getDaysAgoDate(daysAgo) } }),
+          pp: { $gt: 0 },
+        },
+      },
       { $sort: { pp: -1 } },
       { $limit: amount },
     ]);
 
-    const scores: (PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard> | null)[] = await Promise.all(
-      foundScores.map(async rawScore => {
-        let score = scoreToObject(rawScore);
+    const scores: (PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard> | null)[] =
+      await Promise.all(
+        foundScores.map(async rawScore => {
+          let score = scoreToObject(rawScore);
 
-        const leaderboardResponse = await LeaderboardService.getLeaderboard(score.leaderboardId + "");
-        if (!leaderboardResponse) {
-          return null; // Skip this score if no leaderboardResponse is found
-        }
+          const leaderboardResponse = await LeaderboardService.getLeaderboard(
+            score.leaderboardId + ""
+          );
+          if (!leaderboardResponse) {
+            return null; // Skip this score if no leaderboardResponse is found
+          }
 
-        const { leaderboard, beatsaver } = leaderboardResponse;
+          const { leaderboard, beatsaver } = leaderboardResponse;
 
-        try {
-          const player = await PlayerService.getPlayer(score.playerId);
-          if (player) {
+          try {
+            const player = await PlayerService.getPlayer(score.playerId);
+            if (player) {
+              score.playerInfo = {
+                id: player.id,
+                name: player.name,
+              };
+            }
+          } catch {
             score.playerInfo = {
-              id: player.id,
-              name: player.name,
+              id: score.playerId,
             };
           }
-        } catch {
-          score.playerInfo = {
-            id: score.playerId,
-          };
-        }
 
-        score = await ScoreService.insertScoreData(score, leaderboard);
-        return {
-          score: score,
-          leaderboard: leaderboard,
-          beatSaver: beatsaver,
-        };
-      })
-    );
+          score = await ScoreService.insertScoreData(score, leaderboard);
+          return {
+            score: score,
+            leaderboard: leaderboard,
+            beatSaver: beatsaver,
+          };
+        })
+      );
 
     // Filter out any null entries that might result from skipped scores
     const filteredScores = scores.filter(score => score !== null) as PlayerScore<
@@ -390,7 +415,9 @@ export class ScoreService {
 
     try {
       const scorePpBoundary =
-        score.pp > 0 ? await PlayerService.getPlayerPpBoundaryFromScorePp(score.playerId, score.pp) : undefined;
+        score.pp > 0
+          ? await PlayerService.getPlayerPpBoundaryFromScorePp(score.playerId, score.pp)
+          : undefined;
       if (scorePpBoundary) {
         score.ppBoundary = scorePpBoundary;
       }

@@ -9,8 +9,14 @@ import { AccBadges } from "@ssr/common/player/acc-badges";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerAccuracies } from "@ssr/common/player/player-accuracies";
 import { PlayerStatisticHistory } from "@ssr/common/player/player-statistic-history";
-import { PlayedMapsCalendarResponse, PlayedMapsCalendarStat } from "@ssr/common/response/played-maps-calendar-response";
-import { PlayerScoreChartDataPoint, PlayerScoresChartResponse } from "@ssr/common/response/player-scores-chart";
+import {
+  PlayedMapsCalendarResponse,
+  PlayedMapsCalendarStat,
+} from "@ssr/common/response/played-maps-calendar-response";
+import {
+  PlayerScoreChartDataPoint,
+  PlayerScoresChartResponse,
+} from "@ssr/common/response/player-scores-chart";
 import { ScoreSort } from "@ssr/common/score/score-sort";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
@@ -18,7 +24,11 @@ import { AroundPlayer } from "@ssr/common/types/around-player";
 import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/player";
 import ScoreSaberPlayerScoreToken from "@ssr/common/types/token/scoresaber/player-score";
 import { getDifficulty, getScoreBadgeFromAccuracy } from "@ssr/common/utils/song-utils";
-import { formatDateMinimal, getDaysAgoDate, getMidnightAlignedDate } from "@ssr/common/utils/time-utils";
+import {
+  formatDateMinimal,
+  getDaysAgoDate,
+  getMidnightAlignedDate,
+} from "@ssr/common/utils/time-utils";
 import { isProduction } from "@ssr/common/utils/utils";
 import { fetchWithCache } from "../common/cache.util";
 import { logNewTrackedPlayer } from "../common/embds";
@@ -154,7 +164,10 @@ export class PlayerService {
    * @param player the player to seed
    * @param playerToken the SoreSaber player token
    */
-  public static async seedPlayerHistory(player: PlayerDocument, playerToken: ScoreSaberPlayerToken): Promise<void> {
+  public static async seedPlayerHistory(
+    player: PlayerDocument,
+    playerToken: ScoreSaberPlayerToken
+  ): Promise<void> {
     // Loop through rankHistory in reverse, from current day backwards
     const playerRankHistory = playerToken.histories.split(",").map((value: string) => {
       return parseInt(value);
@@ -213,7 +226,10 @@ export class PlayerService {
    * @param playerId the player's id
    * @param boundary the pp boundary
    */
-  public static async getPlayerPpBoundary(playerId: string, boundary: number = 1): Promise<number[]> {
+  public static async getPlayerPpBoundary(
+    playerId: string,
+    boundary: number = 1
+  ): Promise<number[]> {
     await this.ensurePlayerExists(playerId);
     const scoresPps = await this.getPlayerPpBoundaryScores(playerId);
     if (scoresPps.length === 0) {
@@ -233,7 +249,10 @@ export class PlayerService {
    * @param playerId the player's id
    * @param boundary the pp boundary
    */
-  public static async getPlayerPpBoundaryFromScorePp(playerId: string, boundary: number = 1): Promise<number> {
+  public static async getPlayerPpBoundaryFromScorePp(
+    playerId: string,
+    boundary: number = 1
+  ): Promise<number> {
     await this.ensurePlayerExists(playerId);
     const scoresPps = await this.getPlayerPpBoundaryScores(playerId);
     if (scoresPps.length === 0) {
@@ -279,7 +298,10 @@ export class PlayerService {
             continue;
           }
 
-          if (metadata[date.getFullYear()] === undefined || !metadata[date.getFullYear()].includes(statMonth)) {
+          if (
+            metadata[date.getFullYear()] === undefined ||
+            !metadata[date.getFullYear()].includes(statMonth)
+          ) {
             if (metadata[date.getFullYear()] === undefined) {
               metadata[date.getFullYear()] = [];
             }
@@ -379,7 +401,9 @@ export class PlayerService {
     await PlayerService.updatePeakRank(foundPlayer.id, player);
 
     await foundPlayer.save();
-    Logger.info(`Tracked player "${foundPlayer.id}" in ${(performance.now() - before).toFixed(0)}ms`);
+    Logger.info(
+      `Tracked player "${foundPlayer.id}" in ${(performance.now() - before).toFixed(0)}ms`
+    );
   }
 
   /**
@@ -447,7 +471,10 @@ export class PlayerService {
       return foundPlayer;
     }
 
-    if (!foundPlayer.peakRank || (foundPlayer.peakRank && playerToken.rank < foundPlayer.peakRank.rank)) {
+    if (
+      !foundPlayer.peakRank ||
+      (foundPlayer.peakRank && playerToken.rank < foundPlayer.peakRank.rank)
+    ) {
       foundPlayer.peakRank = {
         rank: playerToken.rank,
         date: new Date(),
@@ -464,7 +491,10 @@ export class PlayerService {
    * @param id the player to get around
    * @param type the type to get around
    */
-  public static async getPlayersAroundPlayer(id: string, type: AroundPlayer): Promise<ScoreSaberPlayerToken[]> {
+  public static async getPlayersAroundPlayer(
+    id: string,
+    type: AroundPlayer
+  ): Promise<ScoreSaberPlayerToken[]> {
     const getRank = (player: ScoreSaberPlayer | ScoreSaberPlayerToken, type: AroundPlayer) => {
       switch (type) {
         case "global":
@@ -568,7 +598,14 @@ export class PlayerService {
       let missingScores = 0;
       await Promise.all(
         scoresPage.playerScores.map(async score => {
-          if (await ScoreService.trackScoreSaberScore(score.score, score.leaderboard, player.id, false)) {
+          if (
+            await ScoreService.trackScoreSaberScore(
+              score.score,
+              score.leaderboard,
+              player.id,
+              false
+            )
+          ) {
             missingScores++;
             totalMissingScores++;
           }
@@ -576,7 +613,10 @@ export class PlayerService {
       );
 
       // Stop paginating if no scores are missing OR if player has seededScores marked true
-      if ((missingScores === 0 && player.seededScores) || page >= Math.ceil(scoresPage.metadata.total / 100)) {
+      if (
+        (missingScores === 0 && player.seededScores) ||
+        page >= Math.ceil(scoresPage.metadata.total / 100)
+      ) {
         hasMorePages = false;
       }
 
@@ -831,7 +871,9 @@ export class PlayerService {
           ? {
               countryRank: player.countryRank,
               pp: player.pp,
-              ...(account ? { plusOnePp: (await PlayerService.getPlayerPpBoundary(account.id, 1))[0] } : undefined),
+              ...(account
+                ? { plusOnePp: (await PlayerService.getPlayerPpBoundary(account.id, 1))[0] }
+                : undefined),
               replaysWatched: player.scoreStats.replaysWatched,
               accuracy: {
                 ...historyElement?.accuracy,
@@ -864,7 +906,11 @@ export class PlayerService {
     const daysDiff = Math.ceil((startDate.getTime() - endDate.getTime()) / (1000 * 60 * 60 * 24));
     let daysAgo = 0;
 
-    for (let i = playerRankHistory.length - 1; i >= Math.max(0, playerRankHistory.length - daysDiff - 1); i--) {
+    for (
+      let i = playerRankHistory.length - 1;
+      i >= Math.max(0, playerRankHistory.length - daysDiff - 1);
+      i--
+    ) {
       const rank = playerRankHistory[i];
       if (rank == 999_999) {
         continue;

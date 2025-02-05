@@ -113,24 +113,26 @@ export default function ScoreButtons({
         )}
 
         {/* View Leaderboard button */}
-        {leaderboardExpanded != undefined && setIsLeaderboardExpanded != undefined && !hideLeaderboardDropdown && (
-          <div className="flex items-center justify-center cursor-default">
-            {isLeaderboardLoading ? (
-              <ArrowPathIcon className="w-5 h-5 animate-spin" />
-            ) : (
-              <ArrowDownIcon
-                className={clsx(
-                  "w-6 h-6 transition-all transform-gpu cursor-pointer",
-                  leaderboardExpanded ? "" : "rotate-180"
-                )}
-                onClick={() => {
-                  setLeaderboardExpanded(!leaderboardExpanded);
-                  setIsLeaderboardExpanded?.(!leaderboardExpanded);
-                }}
-              />
-            )}
-          </div>
-        )}
+        {leaderboardExpanded != undefined &&
+          setIsLeaderboardExpanded != undefined &&
+          !hideLeaderboardDropdown && (
+            <div className="flex items-center justify-center cursor-default">
+              {isLeaderboardLoading ? (
+                <ArrowPathIcon className="w-5 h-5 animate-spin" />
+              ) : (
+                <ArrowDownIcon
+                  className={clsx(
+                    "w-6 h-6 transition-all transform-gpu cursor-pointer",
+                    leaderboardExpanded ? "" : "rotate-180"
+                  )}
+                  onClick={() => {
+                    setLeaderboardExpanded(!leaderboardExpanded);
+                    setIsLeaderboardExpanded?.(!leaderboardExpanded);
+                  }}
+                />
+              )}
+            </div>
+          )}
       </div>
     </div>
   );

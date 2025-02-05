@@ -1,8 +1,19 @@
-import {getModelForClass, modelOptions, prop, ReturnModelType, Severity} from "@typegoose/typegoose";
-import {Document} from "mongoose";
-import {PlayerHistory} from "../player/player-history";
-import {formatDateMinimal, getDaysAgoDate, getMidnightAlignedDate, parseDate} from "../utils/time-utils";
-import {type PeakRank} from "../player/peak-rank";
+import {
+  getModelForClass,
+  modelOptions,
+  prop,
+  ReturnModelType,
+  Severity,
+} from "@typegoose/typegoose";
+import { Document } from "mongoose";
+import { PlayerHistory } from "../player/player-history";
+import {
+  formatDateMinimal,
+  getDaysAgoDate,
+  getMidnightAlignedDate,
+  parseDate,
+} from "../utils/time-utils";
+import { type PeakRank } from "../player/peak-rank";
 
 /**
  * The model for a player.
@@ -163,7 +174,9 @@ export class Player {
       this.statisticHistory = {};
     }
     this.statisticHistory = Object.fromEntries(
-      Object.entries(this.statisticHistory).sort((a, b) => new Date(b[0]).getTime() - new Date(a[0]).getTime())
+      Object.entries(this.statisticHistory).sort(
+        (a, b) => new Date(b[0]).getTime() - new Date(a[0]).getTime()
+      )
     );
   }
 

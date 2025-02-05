@@ -23,7 +23,10 @@ export function LeaderboardBeatSaverInfo({ beatSaverMap }: LeaderboardBeatSaverI
     <Card className="w-full h-fit text-sm flex gap-2">
       <p className="font-bold text-md text-center">BeatSaver Information</p>
       <div className="w-full p-1 bg-border rounded-sm">
-        {(showExpandButton && !expanded ? description.slice(0, descriptionMaxSize) + "..." : description)
+        {(showExpandButton && !expanded
+          ? description.slice(0, descriptionMaxSize) + "..."
+          : description
+        )
           .split("\n")
           .map((line, index) => {
             return (

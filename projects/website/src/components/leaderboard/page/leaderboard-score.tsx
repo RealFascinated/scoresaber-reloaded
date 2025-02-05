@@ -48,7 +48,9 @@ export default function LeaderboardScore({ score, leaderboard, highlightedPlayer
       </td>
 
       {/* Score */}
-      <td className="px-4 py-2 text-center whitespace-nowrap">{formatNumberWithCommas(score.score)}</td>
+      <td className="px-4 py-2 text-center whitespace-nowrap">
+        {formatNumberWithCommas(score.score)}
+      </td>
 
       {/* Score Accuracy */}
       <td className="px-4 py-2 text-center whitespace-nowrap">{formatScoreAccuracy(score)}</td>

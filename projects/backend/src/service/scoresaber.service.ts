@@ -2,7 +2,10 @@ import { Config } from "@ssr/common/config";
 import { DetailType } from "@ssr/common/detail-type";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
-import { getScoreSaberLeaderboardFromToken, getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
+import {
+  getScoreSaberLeaderboardFromToken,
+  getScoreSaberScoreFromToken,
+} from "@ssr/common/token-creators";
 import ScoreSaberPlayerScoreToken from "@ssr/common/types/token/scoresaber/player-score";
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
 import { getPlayerStatisticChanges } from "@ssr/common/utils/player-utils";
@@ -42,7 +45,11 @@ export default class ScoreSaberService {
 
     const { score: scoreToken, leaderboard: leaderboardToken } = playerScore;
     const leaderboard = getScoreSaberLeaderboardFromToken(leaderboardToken);
-    const score = getScoreSaberScoreFromToken(scoreToken, leaderboard, scoreToken.leaderboardPlayerInfo.id);
+    const score = getScoreSaberScoreFromToken(
+      scoreToken,
+      leaderboard,
+      scoreToken.leaderboardPlayerInfo.id
+    );
     const playerInfo = score.playerInfo;
 
     // Not ranked
@@ -65,14 +72,20 @@ export default class ScoreSaberService {
       return;
     }
 
-    const previousScore = await PreviousScoresService.getPreviousScore(player.id, score, leaderboard, score.timestamp);
+    const previousScore = await PreviousScoresService.getPreviousScore(
+      player.id,
+      score,
+      leaderboard,
+      score.timestamp
+    );
     const change = previousScore &&
       previousScore.change && {
         accuracy: `${formatChange(previousScore.change.accuracy, value => value.toFixed(2) + "%") || ""}`,
         pp: `${formatChange(previousScore.change.pp, undefined, true) || ""}`,
         misses: previousScore.misses == score.misses ? "" : ` vs ${previousScore.misses}` || "",
         badCuts: previousScore.badCuts == score.badCuts ? "" : ` vs ${previousScore.badCuts}` || "",
-        maxCombo: previousScore.maxCombo == score.maxCombo ? "" : ` vs ${previousScore.maxCombo}` || "",
+        maxCombo:
+          previousScore.maxCombo == score.maxCombo ? "" : ` vs ${previousScore.maxCombo}` || "",
       };
 
     const message = await logToChannel(
@@ -159,7 +172,9 @@ export default class ScoreSaberService {
       `player:${id}:${type}`,
       async () => {
         const playerToken = await scoresaberService.lookupPlayer(id);
-        const account = await PlayerService.getPlayer(id, createIfMissing, playerToken).catch(() => undefined);
+        const account = await PlayerService.getPlayer(id, createIfMissing, playerToken).catch(
+          () => undefined
+        );
 
         if (!playerToken) {
           throw new NotFoundError(`Player "${id}" not found`);
@@ -209,7 +224,9 @@ export default class ScoreSaberService {
           ...basePlayer,
           bio: {
             lines: playerToken.bio ? sanitize(playerToken.bio).split("\n") : [],
-            linesStripped: playerToken.bio ? sanitize(playerToken.bio.replace(/<[^>]+>/g, "")).split("\n") : [],
+            linesStripped: playerToken.bio
+              ? sanitize(playerToken.bio.replace(/<[^>]+>/g, "")).split("\n")
+              : [],
           },
           badges:
             playerToken.badges?.map(badge => ({
@@ -295,10 +312,13 @@ export default class ScoreSaberService {
         );
 
         const scorePromises = leaderboardScores.playerScores.map(async token => {
-          const leaderboardResponse = await LeaderboardService.getLeaderboard(token.leaderboard.id + "", {
-            includeBeatSaver: true,
-            type: DetailType.FULL,
-          });
+          const leaderboardResponse = await LeaderboardService.getLeaderboard(
+            token.leaderboard.id + "",
+            {
+              includeBeatSaver: true,
+              type: DetailType.FULL,
+            }
+          );
 
           if (!leaderboardResponse) {
             return undefined;

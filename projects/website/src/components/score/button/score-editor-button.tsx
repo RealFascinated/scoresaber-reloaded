@@ -16,7 +16,11 @@ type ScoreEditorButtonProps = {
   updateScore: (score: ScoreSaberScore) => void;
 };
 
-export default function ScoreEditorButton({ score, leaderboard, updateScore }: ScoreEditorButtonProps) {
+export default function ScoreEditorButton({
+  score,
+  leaderboard,
+  updateScore,
+}: ScoreEditorButtonProps) {
   const isMobile = useIsMobile();
   const [isScoreEditMode, setIsScoreEditMode] = useState(false);
 
@@ -48,17 +52,32 @@ export default function ScoreEditorButton({ score, leaderboard, updateScore }: S
         }}
       >
         <PopoverTrigger>
-          <CogIcon className={clsx("w-6 h-6 transition-all transform-gpu p-0", isScoreEditMode ? "" : "rotate-180")} />
+          <CogIcon
+            className={clsx(
+              "w-6 h-6 transition-all transform-gpu p-0",
+              isScoreEditMode ? "" : "rotate-180"
+            )}
+          />
         </PopoverTrigger>
         <PopoverContent className="p-0" side={isMobile ? "top" : "left"}>
           <div className="p-3 flex flex-col gap-2">
             <p className="text-sm font-medium mb-1">Accuracy Changer</p>
             {/* Accuracy Slider */}
-            <Slider className="w-full" min={accuracy} max={100} step={0.01} onValueChange={handleSliderChange} />
+            <Slider
+              className="w-full"
+              min={accuracy}
+              max={100}
+              step={0.01}
+              onValueChange={handleSliderChange}
+            />
 
             <Tooltip display={<p>Set accuracy to score accuracy</p>}>
               {/* Reset Button (Changes accuracy back to the original accuracy) */}
-              <Button onClick={handleSliderReset} className="absolute top-1 right-1 p-1" variant="ghost">
+              <Button
+                onClick={handleSliderReset}
+                className="absolute top-1 right-1 p-1"
+                variant="ghost"
+              >
                 <ResetIcon className="w-4 h-4" />
               </Button>
             </Tooltip>

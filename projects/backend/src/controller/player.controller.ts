@@ -67,7 +67,11 @@ export default class PlayerController {
     params: { id: string };
     query: { startDate: string; endDate: string };
   }): Promise<PlayerStatisticHistory> {
-    return await ScoreSaberService.getPlayerStatisticHistory(id, new Date(startDate), new Date(endDate));
+    return await ScoreSaberService.getPlayerStatisticHistory(
+      id,
+      new Date(startDate),
+      new Date(endDate)
+    );
   }
 
   @Post("/track/:id", {
@@ -86,7 +90,11 @@ export default class PlayerController {
       description: "Track a new player.",
     },
   })
-  public async trackPlayer({ params: { id } }: { params: { id: string } }): Promise<{ success: boolean }> {
+  public async trackPlayer({
+    params: { id },
+  }: {
+    params: { id: string };
+  }): Promise<{ success: boolean }> {
     return { success: await PlayerService.trackPlayer(id) };
   }
 

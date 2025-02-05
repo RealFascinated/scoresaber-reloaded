@@ -49,7 +49,14 @@ function AccuracyCircle({ accuracy, averageCut, hand }: AccuracyCircleProps) {
         <AverageCutValues cuts={averageCut} hand={hand} />
         <div className="relative">
           <svg width={size} height={size} className="transform -rotate-90">
-            <circle cx={center} cy={center} r={CIRCLE_RADIUS} fill="none" stroke="#374151" strokeWidth={STROKE_WIDTH} />
+            <circle
+              cx={center}
+              cy={center}
+              r={CIRCLE_RADIUS}
+              fill="none"
+              stroke="#374151"
+              strokeWidth={STROKE_WIDTH}
+            />
             <circle
               cx={center}
               cy={center}
@@ -97,13 +104,18 @@ function useHandStats(scoreStats: ScoreStatsToken, hand: Hand) {
 }
 
 function HandAccuracy({ scoreStats, hand }: { scoreStats: ScoreStatsToken; hand: Hand }) {
-  const { accuracy, averageCut, timeDependence, preSwing, postSwing } = useHandStats(scoreStats, hand);
+  const { accuracy, averageCut, timeDependence, preSwing, postSwing } = useHandStats(
+    scoreStats,
+    hand
+  );
   const tooltipLabel = (text: string) => `${capitalizeFirstLetter(hand)} Hand ${text}`;
 
   return (
     <div className="flex flex-col gap-2">
       <AccuracyCircle accuracy={accuracy} averageCut={averageCut} hand={hand} />
-      <div className={`flex flex-col gap-1 text-sm ${hand === "right" ? "justify-end" : "justify-start"}`}>
+      <div
+        className={`flex flex-col gap-1 text-sm ${hand === "right" ? "justify-end" : "justify-start"}`}
+      >
         <Tooltip display={tooltipLabel("Time-Dependence")} className="cursor-default">
           <HandStat hand={hand} name="TD" value={`${timeDependence.toFixed(3)}`} />
         </Tooltip>

@@ -8,6 +8,9 @@ export default class ScoresaberLeaderboardsMetric extends Metric {
   }
 
   async collect(): Promise<Point> {
-    return this.getPointBase().intField("count", await ScoreSaberLeaderboardModel.estimatedDocumentCount({}));
+    return this.getPointBase().intField(
+      "count",
+      await ScoreSaberLeaderboardModel.estimatedDocumentCount({})
+    );
   }
 }

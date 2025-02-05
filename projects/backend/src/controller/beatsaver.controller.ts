@@ -32,7 +32,12 @@ export default class BeatSaverController {
   public async getMap({
     params: { hash, difficulty, characteristic, type },
   }: {
-    params: { hash: string; difficulty: MapDifficulty; characteristic: MapCharacteristic; type: DetailType };
+    params: {
+      hash: string;
+      difficulty: MapDifficulty;
+      characteristic: MapCharacteristic;
+      type: DetailType;
+    };
   }): Promise<SuperJSONResult> {
     const map = await BeatSaverService.getMap(hash, difficulty, characteristic, type);
     if (!map) {

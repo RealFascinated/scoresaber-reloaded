@@ -97,7 +97,20 @@ export function timeAgo(input: Date) {
  */
 export function formatDateMinimal(date: Date) {
   const day = date.getUTCDate();
-  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const monthNames = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
   const month = monthNames[date.getUTCMonth()];
   const year = date.getUTCFullYear();
   return `${month} ${day}, ${year}`;
@@ -110,7 +123,20 @@ export function formatDateMinimal(date: Date) {
  */
 export function formatChartDate(date: Date) {
   const day = date.getUTCDate();
-  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const monthNames = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
   const month = monthNames[date.getUTCMonth()];
   const year = date.getUTCFullYear();
   const currentYear = new Date().getFullYear();

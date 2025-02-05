@@ -22,7 +22,11 @@ export default function LeaderboardFilters() {
       <Combobox<string | undefined>
         name="Country"
         items={getCountries()
-          .map(({ code, name }) => ({ value: code, name: name, icon: <CountryFlag code={code} size={12} /> }))
+          .map(({ code, name }) => ({
+            value: code,
+            name: name,
+            icon: <CountryFlag code={code} size={12} />,
+          }))
           // The top country is the country of the claimed player
           .sort(country => {
             if (country.value === claimedPlayer?.country) {

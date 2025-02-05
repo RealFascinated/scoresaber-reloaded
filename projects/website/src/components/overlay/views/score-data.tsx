@@ -16,7 +16,9 @@ export default function OverlayScoreDataView({ overlayData }: OverlayScoreDataPr
   }
   const leaderboard = overlayData.map?.leaderboard;
   const pp =
-    leaderboard && leaderboard.stars > 0 ? scoresaberService.getPp(leaderboard.stars, scoreData.accuracy) : undefined;
+    leaderboard && leaderboard.stars > 0
+      ? scoresaberService.getPp(leaderboard.stars, scoreData.accuracy)
+      : undefined;
 
   return (
     <div className="text-xl">

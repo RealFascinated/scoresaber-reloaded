@@ -27,7 +27,9 @@ class BeatLeaderService extends Service {
       return undefined;
     }
 
-    this.log(`Found scorestats for score "${scoreId}" in ${(performance.now() - before).toFixed(0)}ms`);
+    this.log(
+      `Found scorestats for score "${scoreId}" in ${(performance.now() - before).toFixed(0)}ms`
+    );
     return response;
   }
 }

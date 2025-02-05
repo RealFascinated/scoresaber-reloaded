@@ -21,9 +21,7 @@ export type RequestOptions = AxiosRequestConfig & {
   priority?: RequestPriority;
 };
 
-// Constants
-const DEBUG = true;
-
+const DEBUG = false;
 const DEFAULT_OPTIONS: RequestOptions = {
   next: {
     revalidate: 120, // 2 minutes

@@ -8,7 +8,10 @@ import {
   ScoreSaberLeaderboardModel,
 } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { fetchWithCache } from "../common/cache.util";
-import { ScoreSaberScoreDocument, ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
+import {
+  ScoreSaberScoreDocument,
+  ScoreSaberScoreModel,
+} from "@ssr/common/model/score/impl/scoresaber-score";
 import CacheService, { ServiceCache } from "./cache.service";
 import LeaderboardDifficulty from "@ssr/common/model/leaderboard/leaderboard-difficulty";
 import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score";
@@ -100,9 +103,14 @@ export default class LeaderboardService {
 
     return fetchWithCache(CacheService.getCache(ServiceCache.Leaderboards), cacheKey, async () => {
       // Use index hint for faster query
-      const cachedLeaderboard = await ScoreSaberLeaderboardModel.findById(id).hint({ _id: 1 }).lean();
+      const cachedLeaderboard = await ScoreSaberLeaderboardModel.findById(id)
+        .hint({ _id: 1 })
+        .lean();
 
-      const { cached, foundLeaderboard } = this.validateCachedLeaderboard(cachedLeaderboard, options);
+      const { cached, foundLeaderboard } = this.validateCachedLeaderboard(
+        cachedLeaderboard,
+        options
+      );
 
       let leaderboard = foundLeaderboard;
       if (!leaderboard) {
@@ -111,7 +119,10 @@ export default class LeaderboardService {
           throw new NotFoundError(`Leaderboard not found for "${id}"`);
         }
 
-        leaderboard = await LeaderboardService.saveLeaderboard(id, getScoreSaberLeaderboardFromToken(leaderboardToken));
+        leaderboard = await LeaderboardService.saveLeaderboard(
+          id,
+          getScoreSaberLeaderboardFromToken(leaderboardToken)
+        );
       }
 
       // Start BeatSaver fetch early in parallel if needed
@@ -127,7 +138,8 @@ export default class LeaderboardService {
       // Process leaderboard while BeatSaver data is being fetched
       const processedLeaderboard = this.leaderboardToObject(leaderboard);
       if (!processedLeaderboard.fullName) {
-        processedLeaderboard.fullName = `${processedLeaderboard.songName} ${processedLeaderboard.songSubName}`.trim();
+        processedLeaderboard.fullName =
+          `${processedLeaderboard.songName} ${processedLeaderboard.songSubName}`.trim();
       }
 
       // Wait for BeatSaver data
@@ -179,11 +191,18 @@ export default class LeaderboardService {
         .hint({ songHash: 1, "difficulty.difficulty": 1, "difficulty.characteristic": 1 })
         .lean();
 
-      const { cached, foundLeaderboard } = this.validateCachedLeaderboard(cachedLeaderboard, options);
+      const { cached, foundLeaderboard } = this.validateCachedLeaderboard(
+        cachedLeaderboard,
+        options
+      );
 
       let leaderboard = foundLeaderboard;
       if (!leaderboard) {
-        const leaderboardToken = await scoresaberService.lookupLeaderboardByHash(hash, difficulty, characteristic);
+        const leaderboardToken = await scoresaberService.lookupLeaderboardByHash(
+          hash,
+          difficulty,
+          characteristic
+        );
         if (leaderboardToken == undefined) {
           throw new NotFoundError(
             `Leaderboard not found for hash "${hash}", difficulty "${difficulty}", characteristic "${characteristic}"`
@@ -209,7 +228,8 @@ export default class LeaderboardService {
       // Process leaderboard while BeatSaver data is being fetched
       const processedLeaderboard = this.leaderboardToObject(leaderboard);
       if (!processedLeaderboard.fullName) {
-        processedLeaderboard.fullName = `${processedLeaderboard.songName} ${processedLeaderboard.songSubName}`.trim();
+        processedLeaderboard.fullName =
+          `${processedLeaderboard.songName} ${processedLeaderboard.songSubName}`.trim();
       }
 
       // Wait for BeatSaver data
@@ -230,7 +250,10 @@ export default class LeaderboardService {
    * @param leaderboard the leaderboard from ScoreSaber
    * @returns the saved leaderboard document
    */
-  private static async saveLeaderboard(id: string, leaderboard: ScoreSaberLeaderboard): Promise<ScoreSaberLeaderboard> {
+  private static async saveLeaderboard(
+    id: string,
+    leaderboard: ScoreSaberLeaderboard
+  ): Promise<ScoreSaberLeaderboard> {
     const savedLeaderboard = await ScoreSaberLeaderboardModel.findOneAndUpdate(
       { _id: id },
       {
@@ -319,7 +342,9 @@ export default class LeaderboardService {
       }
 
       const totalPages = Math.ceil(response.metadata.total / response.metadata.itemsPerPage);
-      Logger.info(`Fetched ${response.leaderboards.length} ranked leaderboards on page ${page}/${totalPages}.`);
+      Logger.info(
+        `Fetched ${response.leaderboards.length} ranked leaderboards on page ${page}/${totalPages}.`
+      );
 
       for (const token of response.leaderboards) {
         const leaderboard = getScoreSaberLeaderboardFromToken(token);
@@ -364,9 +389,8 @@ export default class LeaderboardService {
     let checkedCount = 0;
     for (const leaderboard of leaderboards) {
       checkedCount++;
-      let previousLeaderboard: ScoreSaberLeaderboard | null = await ScoreSaberLeaderboardModel.findById(
-        leaderboard.id
-      ).lean();
+      let previousLeaderboard: ScoreSaberLeaderboard | null =
+        await ScoreSaberLeaderboardModel.findById(leaderboard.id).lean();
       if (!previousLeaderboard) {
         previousLeaderboard = await this.saveLeaderboard(leaderboard.id + "", leaderboard);
       }
@@ -382,7 +406,10 @@ export default class LeaderboardService {
       }
 
       // Save the leaderboard
-      await this.saveLeaderboard(leaderboard.id + "", this.updateLeaderboardDifficulties(leaderboard, rankedMapDiffs));
+      await this.saveLeaderboard(
+        leaderboard.id + "",
+        this.updateLeaderboardDifficulties(leaderboard, rankedMapDiffs)
+      );
 
       if (checkedCount % 100 === 0) {
         Logger.info(`Checked ${checkedCount}/${leaderboards.length} leaderboards`);
@@ -483,7 +510,8 @@ export default class LeaderboardService {
     const statusChangeMessage = `${leaderboard.fullName} is ${changeType}!`;
 
     // Check if the leaderboard was reweighted (star count changed while ranked)
-    const wasReweighed = previousLeaderboard.stars !== leaderboard.stars && previousLeaderboard.ranked;
+    const wasReweighed =
+      previousLeaderboard.stars !== leaderboard.stars && previousLeaderboard.ranked;
 
     // Get difficulty name
     const difficulty = getDifficulty(leaderboard.difficulty.difficulty);
@@ -549,22 +577,32 @@ Map: https://ssr.fascinated.cc/leaderboard/${leaderboard.id}
   /**
    * Fetches all scores for a specific leaderboard
    */
-  private static async fetchAllLeaderboardScores(leaderboardId: string): Promise<ScoreSaberScoreToken[]> {
+  private static async fetchAllLeaderboardScores(
+    leaderboardId: string
+  ): Promise<ScoreSaberScoreToken[]> {
     const scoreTokens: ScoreSaberScoreToken[] = [];
     let currentPage = 1;
     let hasMoreScores = true;
 
     while (hasMoreScores) {
-      const response = await scoresaberService.lookupLeaderboardScores(leaderboardId + "", currentPage, {
-        requestPriority: RequestPriority.LOW,
-      });
+      const response = await scoresaberService.lookupLeaderboardScores(
+        leaderboardId + "",
+        currentPage,
+        {
+          requestPriority: RequestPriority.LOW,
+        }
+      );
       if (!response) {
-        Logger.warn(`Failed to fetch scoresaber api scores for leaderboard "${leaderboardId}" on page ${currentPage}`);
+        Logger.warn(
+          `Failed to fetch scoresaber api scores for leaderboard "${leaderboardId}" on page ${currentPage}`
+        );
         currentPage++;
         continue;
       }
       const totalPages = Math.ceil(response.metadata.total / response.metadata.itemsPerPage);
-      Logger.info(`Fetched scores for leaderboard "${leaderboardId}" on page ${currentPage}/${totalPages}`);
+      Logger.info(
+        `Fetched scores for leaderboard "${leaderboardId}" on page ${currentPage}/${totalPages}`
+      );
 
       scoreTokens.push(...response.scores);
       hasMoreScores = currentPage < totalPages;
@@ -586,7 +624,9 @@ Map: https://ssr.fascinated.cc/leaderboard/${leaderboard.id}
     score.weight = scoreToken.weight;
     score.rank = scoreToken.rank;
 
-    Logger.info(`Updated score ${score.id} for leaderboard ${leaderboard.fullName}, new pp: ${score.pp}`);
+    Logger.info(
+      `Updated score ${score.id} for leaderboard ${leaderboard.fullName}, new pp: ${score.pp}`
+    );
     await this.updatePreviousScores(score, leaderboard);
     return 1;
   }
@@ -606,7 +646,9 @@ Map: https://ssr.fascinated.cc/leaderboard/${leaderboard.id}
     if (previousScores.length === 0) return;
 
     for (const previousScore of previousScores) {
-      previousScore.pp = leaderboard.ranked ? scoresaberService.getPp(leaderboard.stars, previousScore.accuracy) : 0;
+      previousScore.pp = leaderboard.ranked
+        ? scoresaberService.getPp(leaderboard.stars, previousScore.accuracy)
+        : 0;
       previousScore.weight = 0;
       await previousScore.save();
     }
@@ -636,9 +678,14 @@ Map: https://ssr.fascinated.cc/leaderboard/${leaderboard.id}
   /**
    * Unranks leaderboards that are no longer in the ranked list
    */
-  private static async unrankOldLeaderboards(currentLeaderboards: ScoreSaberLeaderboard[]): Promise<void> {
+  private static async unrankOldLeaderboards(
+    currentLeaderboards: ScoreSaberLeaderboard[]
+  ): Promise<void> {
     const rankedIds = currentLeaderboards.map(leaderboard => leaderboard.id);
-    const rankedLeaderboards = await ScoreSaberLeaderboardModel.find({ ranked: true, _id: { $nin: rankedIds } });
+    const rankedLeaderboards = await ScoreSaberLeaderboardModel.find({
+      ranked: true,
+      _id: { $nin: rankedIds },
+    });
     let totalUnranked = 0;
 
     for (const previousLeaderboard of rankedLeaderboards) {
@@ -755,7 +802,9 @@ Map: https://ssr.fascinated.cc/leaderboard/${leaderboard.id}
       }
 
       const totalPages = Math.ceil(response.metadata.total / response.metadata.itemsPerPage);
-      Logger.info(`Fetched ${response.leaderboards.length} qualified leaderboards on page ${page}/${totalPages}.`);
+      Logger.info(
+        `Fetched ${response.leaderboards.length} qualified leaderboards on page ${page}/${totalPages}.`
+      );
 
       for (const token of response.leaderboards) {
         const leaderboard = getScoreSaberLeaderboardFromToken(token);
@@ -779,20 +828,24 @@ Map: https://ssr.fascinated.cc/leaderboard/${leaderboard.id}
   public static async getRankedLeaderboards(projection?: {
     [field: string]: number;
   }): Promise<ScoreSaberLeaderboard[]> {
-    return fetchWithCache(CacheService.getCache(ServiceCache.Leaderboards), "ranked-leaderboards", async () => {
-      const leaderboards: ScoreSaberLeaderboard[] = await ScoreSaberLeaderboardModel.aggregate([
-        { $match: { ranked: true } },
-        {
-          $project: {
-            ...projection,
-            dateRanked: 1,
+    return fetchWithCache(
+      CacheService.getCache(ServiceCache.Leaderboards),
+      "ranked-leaderboards",
+      async () => {
+        const leaderboards: ScoreSaberLeaderboard[] = await ScoreSaberLeaderboardModel.aggregate([
+          { $match: { ranked: true } },
+          {
+            $project: {
+              ...projection,
+              dateRanked: 1,
+            },
           },
-        },
-        { $sort: { dateRanked: -1 } },
-      ]);
+          { $sort: { dateRanked: -1 } },
+        ]);
 
-      return leaderboards.map(leaderboard => this.leaderboardToObject(leaderboard));
-    });
+        return leaderboards.map(leaderboard => this.leaderboardToObject(leaderboard));
+      }
+    );
   }
 
   /**
@@ -801,10 +854,14 @@ Map: https://ssr.fascinated.cc/leaderboard/${leaderboard.id}
    * @returns the qualified leaderboards
    */
   public static async getQualifiedLeaderboards(): Promise<ScoreSaberLeaderboard[]> {
-    return fetchWithCache(CacheService.getCache(ServiceCache.Leaderboards), "qualified-leaderboards", async () => {
-      const leaderboards = await ScoreSaberLeaderboardModel.find({ qualified: true }).lean();
-      return leaderboards.map(leaderboard => this.leaderboardToObject(leaderboard));
-    });
+    return fetchWithCache(
+      CacheService.getCache(ServiceCache.Leaderboards),
+      "qualified-leaderboards",
+      async () => {
+        const leaderboards = await ScoreSaberLeaderboardModel.find({ qualified: true }).lean();
+        return leaderboards.map(leaderboard => this.leaderboardToObject(leaderboard));
+      }
+    );
   }
 
   /**

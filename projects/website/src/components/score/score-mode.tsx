@@ -36,7 +36,9 @@ type ScoreModeProps = {
 };
 
 export default function ScoreMode({ initialMode, onModeChange }: ScoreModeProps) {
-  const [selectedMode, setSelectedMode] = useState<ScoreModeEnum>(initialMode ?? ScoreModeEnum.Global);
+  const [selectedMode, setSelectedMode] = useState<ScoreModeEnum>(
+    initialMode ?? ScoreModeEnum.Global
+  );
 
   return (
     <div className="flex gap-2">

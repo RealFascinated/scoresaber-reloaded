@@ -48,7 +48,8 @@ export default function GenericStatisticChart({ statistics, datasetConfig }: Pro
 
       if (entryDate.toDateString() === targetDate.toDateString()) {
         datasetConfig.forEach(config => {
-          histories[config.field][historyDays - dayAgo] = history[config.field as Statistic] ?? null;
+          histories[config.field][historyDays - dayAgo] =
+            history[config.field as Statistic] ?? null;
         });
         currentHistoryIndex++;
       }

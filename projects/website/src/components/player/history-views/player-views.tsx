@@ -20,22 +20,34 @@ function Loading() {
   );
 }
 
-const PlayerRankingChart = dynamic(() => import("@/components/player/history-views/views/player-ranking-chart"), {
-  ssr: false,
-  loading: () => <Loading />,
-});
-const PlayerAccuracyChart = dynamic(() => import("@/components/player/history-views/views/player-accuracy-chart"), {
-  ssr: false,
-  loading: () => <Loading />,
-});
-const PlayerScoresChart = dynamic(() => import("@/components/player/history-views/views/player-scores-chart"), {
-  ssr: false,
-  loading: () => <Loading />,
-});
-const ScoreHistoryCalendar = dynamic(() => import("@/components/player/history-views/views/score-history-calendar"), {
-  ssr: false,
-  loading: () => <Loading />,
-});
+const PlayerRankingChart = dynamic(
+  () => import("@/components/player/history-views/views/player-ranking-chart"),
+  {
+    ssr: false,
+    loading: () => <Loading />,
+  }
+);
+const PlayerAccuracyChart = dynamic(
+  () => import("@/components/player/history-views/views/player-accuracy-chart"),
+  {
+    ssr: false,
+    loading: () => <Loading />,
+  }
+);
+const PlayerScoresChart = dynamic(
+  () => import("@/components/player/history-views/views/player-scores-chart"),
+  {
+    ssr: false,
+    loading: () => <Loading />,
+  }
+);
+const ScoreHistoryCalendar = dynamic(
+  () => import("@/components/player/history-views/views/score-history-calendar"),
+  {
+    ssr: false,
+    loading: () => <Loading />,
+  }
+);
 
 type PlayerChartsProps = {
   /**
@@ -72,7 +84,9 @@ export default function PlayerViews({ player }: PlayerChartsProps) {
       index: 0,
       label: "Ranking",
       icon: <GlobeAmericasIcon className="w-5 h-5" />,
-      chart: (player, statisticHistory) => <PlayerRankingChart statisticHistory={statisticHistory} />,
+      chart: (player, statisticHistory) => (
+        <PlayerRankingChart statisticHistory={statisticHistory} />
+      ),
     },
   ];
 
@@ -82,13 +96,17 @@ export default function PlayerViews({ player }: PlayerChartsProps) {
         index: 1,
         label: "Accuracy",
         icon: <TrendingUpIcon className="w-[18px] h-[18px]" />,
-        chart: (player, statisticHistory) => <PlayerAccuracyChart statisticHistory={statisticHistory} />,
+        chart: (player, statisticHistory) => (
+          <PlayerAccuracyChart statisticHistory={statisticHistory} />
+        ),
       },
       {
         index: 2,
         label: "Scores",
         icon: <SwordIcon className="w-[18px] h-[18px]" />,
-        chart: (player, statisticHistory) => <PlayerScoresChart statisticHistory={statisticHistory} />,
+        chart: (player, statisticHistory) => (
+          <PlayerScoresChart statisticHistory={statisticHistory} />
+        ),
       },
       {
         index: 3,
@@ -121,7 +139,9 @@ export default function PlayerViews({ player }: PlayerChartsProps) {
                 display={
                   <div className="flex justify-center items-center flex-col">
                     <p>{view.label}</p>
-                    <p className="text-gray-600">{isSelected ? "Currently Selected" : "Click to view"}</p>
+                    <p className="text-gray-600">
+                      {isSelected ? "Currently Selected" : "Click to view"}
+                    </p>
                   </div>
                 }
               >

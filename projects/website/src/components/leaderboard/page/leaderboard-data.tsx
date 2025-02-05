@@ -15,10 +15,13 @@ import { ScoreModeEnum } from "@/components/score/score-mode";
 import { DetailType } from "@ssr/common/detail-type";
 import dynamic from "next/dynamic";
 
-const LeaderboardPpChart = dynamic(() => import("@/components/leaderboard/page/chart/leaderboard-pp-chart"), {
-  ssr: false,
-  loading: () => <div className="h-[360px] flex items-center justify-center">Loading...</div>,
-});
+const LeaderboardPpChart = dynamic(
+  () => import("@/components/leaderboard/page/chart/leaderboard-pp-chart"),
+  {
+    ssr: false,
+    loading: () => <div className="h-[360px] flex items-center justify-center">Loading...</div>,
+  }
+);
 
 type LeaderboardDataProps = {
   /**
@@ -37,8 +40,14 @@ type LeaderboardDataProps = {
   initialCategory?: ScoreModeEnum;
 };
 
-export function LeaderboardData({ initialLeaderboard, initialPage, initialCategory }: LeaderboardDataProps) {
-  const [currentLeaderboardId, setCurrentLeaderboardId] = useState(initialLeaderboard.leaderboard.id);
+export function LeaderboardData({
+  initialLeaderboard,
+  initialPage,
+  initialCategory,
+}: LeaderboardDataProps) {
+  const [currentLeaderboardId, setCurrentLeaderboardId] = useState(
+    initialLeaderboard.leaderboard.id
+  );
   const [currentLeaderboard, setCurrentLeaderboard] = useState(initialLeaderboard);
 
   const { data } = useQuery({
@@ -70,10 +79,19 @@ export function LeaderboardData({ initialLeaderboard, initialPage, initialCatego
             />
           </Card>
           <div className="flex flex-col gap-2 w-full xl:w-[550px]">
-            <LeaderboardInfo leaderboard={leaderboard} beatSaverMap={currentLeaderboard.beatsaver} />
-            {currentLeaderboard.beatsaver && <LeaderboardBeatSaverInfo beatSaverMap={currentLeaderboard.beatsaver} />}
+            <LeaderboardInfo
+              leaderboard={leaderboard}
+              beatSaverMap={currentLeaderboard.beatsaver}
+            />
+            {currentLeaderboard.beatsaver && (
+              <LeaderboardBeatSaverInfo beatSaverMap={currentLeaderboard.beatsaver} />
+            )}
             <LeaderboardFilters />
-            {leaderboard.stars > 0 && leaderboard.maxScore > 0 && <Card><LeaderboardPpChart leaderboard={leaderboard} /></Card>}
+            {leaderboard.stars > 0 && leaderboard.maxScore > 0 && (
+              <Card>
+                <LeaderboardPpChart leaderboard={leaderboard} />
+              </Card>
+            )}
           </div>
         </div>
       </div>

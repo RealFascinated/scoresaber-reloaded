@@ -5,7 +5,10 @@ import { fetchWithCache } from "./cache.util";
 
 // Register fonts once
 GlobalFonts.registerFromPath(path.resolve("./src/common/font/Roboto-Medium.ttf"), "SSR");
-GlobalFonts.registerFromPath(path.resolve("./src/common/font/TwitterColorEmoji-SVGinOT.ttf"), "TwitterEmoji");
+GlobalFonts.registerFromPath(
+  path.resolve("./src/common/font/TwitterColorEmoji-SVGinOT.ttf"),
+  "TwitterEmoji"
+);
 
 type TextPlacement = "top-left" | "top-right" | "center" | "bottom-left" | "bottom-right";
 
@@ -58,8 +61,15 @@ export default class SSRImage {
     }
   }
 
-  drawText(lines: ImageTextOptions[], placement: TextPlacement = "top-left", lineHeightMultiplier: number = 0.9): void {
-    const totalHeight = lines.reduce((height, line) => height + line.fontSize * lineHeightMultiplier, 0);
+  drawText(
+    lines: ImageTextOptions[],
+    placement: TextPlacement = "top-left",
+    lineHeightMultiplier: number = 0.9
+  ): void {
+    const totalHeight = lines.reduce(
+      (height, line) => height + line.fontSize * lineHeightMultiplier,
+      0
+    );
     const placements = {
       "top-left": { x: 0, y: lines[0].fontSize },
       "top-right": { x: this.options.width, y: lines[0].fontSize },
@@ -68,7 +78,10 @@ export default class SSRImage {
         y: (this.options.height - totalHeight) / 2 + lines[0].fontSize / 2,
       },
       "bottom-left": { x: 0, y: this.options.height - totalHeight + lines[0].fontSize },
-      "bottom-right": { x: this.options.width, y: this.options.height - totalHeight + lines[0].fontSize },
+      "bottom-right": {
+        x: this.options.width,
+        y: this.options.height - totalHeight + lines[0].fontSize,
+      },
     };
 
     // eslint-disable-next-line prefer-const

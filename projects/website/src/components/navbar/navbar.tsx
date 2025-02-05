@@ -83,12 +83,20 @@ export default function Navbar() {
           href="/"
           draggable={false}
         >
-          <img width={24} height={24} className="size-6" src="/assets/logos/scoresaber.png" alt="ScoreSaber Logo" />
+          <img
+            width={24}
+            height={24}
+            className="size-6"
+            src="/assets/logos/scoresaber.png"
+            alt="ScoreSaber Logo"
+          />
           <h1 className="hidden md:flex text-lg font-bold text-ssr">SSR</h1>
         </Link>
 
         {/* Links */}
-        <div className="flex gap-3 md:gap-5 items-center transition-all transform-gpu">{links.map(link => link)}</div>
+        <div className="flex gap-3 md:gap-5 items-center transition-all transform-gpu">
+          {links.map(link => link)}
+        </div>
       </div>
 
       {/* Right */}

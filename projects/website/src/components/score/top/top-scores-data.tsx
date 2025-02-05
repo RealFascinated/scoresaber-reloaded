@@ -105,7 +105,9 @@ export function TopScoresData({ timeframe }: TopScoresDataProps) {
                 <p className="text-sm">
                   Set by{" "}
                   <Link prefetch={false} href={`/player/${player.id}`}>
-                    <span className="text-ssr hover:brightness-[66%] transition-all transform-gpu">{name}</span>
+                    <span className="text-ssr hover:brightness-[66%] transition-all transform-gpu">
+                      {name}
+                    </span>
                   </Link>
                 </p>
                 <Score

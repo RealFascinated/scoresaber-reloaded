@@ -67,7 +67,9 @@ export function ScoreMissesTooltip({
           ) : (
             <p>Full Combo</p>
           )}
-          {pauses !== undefined ? <p>Pauses: {formatNumberWithCommas(ensurePositiveNumber(pauses))}</p> : undefined}
+          {pauses !== undefined ? (
+            <p>Pauses: {formatNumberWithCommas(ensurePositiveNumber(pauses))}</p>
+          ) : undefined}
         </div>
       }
     >

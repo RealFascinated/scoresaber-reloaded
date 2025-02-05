@@ -65,7 +65,9 @@ export default function Overlay({ settings }: OverlayProps) {
     <div>
       <OverlayView position={OverlayViewPosition.TOP_LEFT} className="flex gap-2 flex-col text-2xl">
         {settings.views[OverlayViews.PlayerInfo] && <OverlayPlayerInfoView player={player} />}
-        {overlayData && settings.views[OverlayViews.ScoreInfo] && <OverlayScoreDataView overlayData={overlayData} />}
+        {overlayData && settings.views[OverlayViews.ScoreInfo] && (
+          <OverlayScoreDataView overlayData={overlayData} />
+        )}
       </OverlayView>
       {overlayData && overlayData.map && settings.views[OverlayViews.SongInfo] && (
         <OverlayScoreInfoView overlayData={overlayData} />

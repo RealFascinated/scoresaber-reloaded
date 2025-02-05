@@ -36,7 +36,11 @@ export default class PlaylistController {
     query: { download?: boolean };
   }) {
     const response = new Response(
-      JSON.stringify(await (await PlaylistService.getPlaylist(id)).generateBeatSaberPlaylist(), null, 2)
+      JSON.stringify(
+        await (await PlaylistService.getPlaylist(id)).generateBeatSaberPlaylist(),
+        null,
+        2
+      )
     );
     response.headers.set("Content-Type", "application/json");
     response.headers.set("Cache-Control", "public, max-age=3600");
@@ -72,7 +76,9 @@ export default class PlaylistController {
   }) {
     const response = new Response(
       JSON.stringify(
-        await (await PlaylistService.getSnipePlaylist(user, toSnipe, type, settings)).generateBeatSaberPlaylist(),
+        await (
+          await PlaylistService.getSnipePlaylist(user, toSnipe, type, settings)
+        ).generateBeatSaberPlaylist(),
         null,
         2
       )
@@ -106,7 +112,10 @@ export default class PlaylistController {
   }) {
     const toSnipePlayer = await ScoreSaberService.getPlayer(toSnipe, DetailType.BASIC);
     const response = new Response(
-      Buffer.from(await generateSnipePlaylistImage(parseSnipePlaylistSettings(settings), toSnipePlayer), "base64")
+      Buffer.from(
+        await generateSnipePlaylistImage(parseSnipePlaylistSettings(settings), toSnipePlayer),
+        "base64"
+      )
     );
     response.headers.set("Content-Type", "image/png");
     response.headers.set("Cache-Control", "public, max-age=3600");

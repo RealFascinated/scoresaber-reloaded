@@ -35,7 +35,9 @@ export function getCountries() {
  */
 function isFlagRenderable(code: string): boolean {
   // Create the flag emoji using Unicode Regional Indicator Symbols
-  const flagEmoji = code.toUpperCase().replace(/./g, char => String.fromCodePoint(127397 + char.charCodeAt(0)));
+  const flagEmoji = code
+    .toUpperCase()
+    .replace(/./g, char => String.fromCodePoint(127397 + char.charCodeAt(0)));
 
   // Check if the emoji is a valid flag by testing its length
   return flagEmoji.length === 4; // A valid flag emoji will have 4 bytes

@@ -7,7 +7,13 @@ import { Button } from "../../ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "../../ui/form";
 import { useToast } from "@/hooks/use-toast";
 import useSettings from "@/hooks/use-settings";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { ReplayViewers } from "@/common/replay-viewer";
 
 const formSchema = z.object({
@@ -55,7 +61,10 @@ export default function ScoreSettings() {
               <FormItem className="w-full sm:w-72">
                 <FormLabel>Replay Viewer</FormLabel>
                 <FormControl>
-                  <Select onValueChange={field.onChange} defaultValue={settings.getReplayViewerName()}>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={settings.getReplayViewerName()}
+                  >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select a replay viewer to use" />

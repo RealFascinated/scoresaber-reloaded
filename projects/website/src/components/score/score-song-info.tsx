@@ -13,9 +13,16 @@ type Props = {
   clickableSongName?: boolean;
 };
 
-export default function ScoreSongInfo({ leaderboard, beatSaverMap, clickableSongName = true, imageSize = 64 }: Props) {
+export default function ScoreSongInfo({
+  leaderboard,
+  beatSaverMap,
+  clickableSongName = true,
+  imageSize = 64,
+}: Props) {
   const mappersProfile =
-    beatSaverMap != undefined ? `https://beatsaver.com/profile/${beatSaverMap.author.id}` : undefined;
+    beatSaverMap != undefined
+      ? `https://beatsaver.com/profile/${beatSaverMap.author.id}`
+      : undefined;
 
   const starCount = leaderboard.stars;
   const difficulty = leaderboard.difficulty.difficulty;
@@ -80,7 +87,8 @@ export default function ScoreSongInfo({ leaderboard, beatSaverMap, clickableSong
                 <FallbackLink
                   href={mappersProfile}
                   className={
-                    mappersProfile && "hover:brightness-[66%] transform-gpu transition-all w-fit text-xs leading-none"
+                    mappersProfile &&
+                    "hover:brightness-[66%] transform-gpu transition-all w-fit text-xs leading-none"
                   }
                 >
                   {leaderboard.levelAuthorName}

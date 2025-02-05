@@ -34,7 +34,9 @@ export function LeaderboardInfo({ leaderboard, beatSaverMap }: LeaderboardInfoPr
             <div className="flex flex-col gap-1.5">
               <div>
                 <FallbackLink
-                  href={beatSaverMap ? `https://beatsaver.com/maps/${beatSaverMap?.bsr}` : undefined}
+                  href={
+                    beatSaverMap ? `https://beatsaver.com/maps/${beatSaverMap?.bsr}` : undefined
+                  }
                   className="hover:brightness-[66%] transform-gpu transition-all"
                 >
                   <p className="font-semibold text-md">{leaderboard.fullName}</p>
@@ -51,7 +53,9 @@ export function LeaderboardInfo({ leaderboard, beatSaverMap }: LeaderboardInfoPr
                     <span
                       className={cn(
                         "font-semibold",
-                        beatSaverMap ? "text-ssr hover:brightness-[66%] transform-gpu transition-all" : ""
+                        beatSaverMap
+                          ? "text-ssr hover:brightness-[66%] transform-gpu transition-all"
+                          : ""
                       )}
                     >
                       {leaderboard.levelAuthorName}

@@ -27,7 +27,9 @@ export default function RankingData({ initialPage, country, initialPageData }: R
 
   const [showRelativePPDifference, setShowRelativePPDifference] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState(initialPage);
-  const [rankingData, setRankingData] = useState<ScoreSaberPlayersPageToken | undefined>(initialPageData);
+  const [rankingData, setRankingData] = useState<ScoreSaberPlayersPageToken | undefined>(
+    initialPageData
+  );
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["rankingData", currentPage, country],
@@ -71,7 +73,10 @@ export default function RankingData({ initialPage, country, initialPageData }: R
         <div className="flex items-center gap-2 font-semibold">
           {country && <CountryFlag code={country} size={16} />}
           <p>
-            You are viewing {country ? "players from " + normalizedRegionName(country.toUpperCase()) : "Global players"}
+            You are viewing{" "}
+            {country
+              ? "players from " + normalizedRegionName(country.toUpperCase())
+              : "Global players"}
           </p>
         </div>
 

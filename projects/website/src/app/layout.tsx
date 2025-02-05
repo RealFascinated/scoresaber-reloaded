@@ -48,12 +48,14 @@ export const metadata: Metadata = {
   openGraph: {
     siteName: Config.websiteName,
     title: Config.websiteName,
-    description: "ScoreSaber Reloaded is a new way to view your scores and get more stats about you and your plays",
+    description:
+      "ScoreSaber Reloaded is a new way to view your scores and get more stats about you and your plays",
     url: "https://ssr.fascinated.cc",
     locale: "en_US",
     type: "website",
   },
-  description: "ScoreSaber Reloaded is a new way to view your scores and get more stats about you and your plays",
+  description:
+    "ScoreSaber Reloaded is a new way to view your scores and get more stats about you and your plays",
 };
 
 export const viewport: Viewport = {
@@ -69,13 +71,22 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${siteFont.className} antialiased w-full h-full`}>
         {/*<Script src="https://unpkg.com/react-scan/dist/auto.global.js" async />*/}
-        <Script defer data-domain="ssr.fascinated.cc" src="https://analytics.fascinated.cc/js/script.js" />
+        <Script
+          defer
+          data-domain="ssr.fascinated.cc"
+          src="https://analytics.fascinated.cc/js/script.js"
+        />
         <DatabaseLoader>
           <Toaster />
           <PreloadResources />
           <TooltipProvider delayDuration={250}>
             <OfflineNetwork>
-              <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
+              <ThemeProvider
+                attribute="class"
+                defaultTheme="dark"
+                enableSystem
+                disableTransitionOnChange
+              >
                 <QueryProvider>{children}</QueryProvider>
               </ThemeProvider>
             </OfflineNetwork>

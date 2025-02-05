@@ -38,10 +38,14 @@ type PlayerData = {
  * @param params the params
  * @returns the player data and scores
  */
-const getPlayerData = async ({ params }: Props, type: DetailType = DetailType.FULL): Promise<PlayerData> => {
+const getPlayerData = async (
+  { params }: Props,
+  type: DetailType = DetailType.FULL
+): Promise<PlayerData> => {
   const { slug } = await params;
   const id = slug[0]; // The players id
-  const sort: ScoreSort = (slug[1] as ScoreSort) || (await getCookieValue("lastScoreSort", ScoreSort.recent)); // The sorting method
+  const sort: ScoreSort =
+    (slug[1] as ScoreSort) || (await getCookieValue("lastScoreSort", ScoreSort.recent)); // The sorting method
   const page = parseInt(slug[2]) || 1; // The page number
   const search = (slug[3] as string) || ""; // The search query
 

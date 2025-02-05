@@ -18,7 +18,10 @@ export default function CountryFlag({ code, size = 24 }: Props) {
   };
 
   return (
-    <Tooltip display={<p>{normalizedRegionName(code)}</p>} className={`w-[${size * 2}px] min-w-[${size * 2}px]`}>
+    <Tooltip
+      display={<p>{normalizedRegionName(code)}</p>}
+      className={`w-[${size * 2}px] min-w-[${size * 2}px]`}
+    >
       <img
         alt="Country Flag"
         src={flagSrc}

@@ -18,7 +18,11 @@ type ScoresaberWebsocket = {
  * @param onScore the onScore callback
  * @param onDisconnect the onDisconnect callback
  */
-export function connectScoresaberWebsocket({ onMessage, onScore, onDisconnect }: ScoresaberWebsocket) {
+export function connectScoresaberWebsocket({
+  onMessage,
+  onScore,
+  onDisconnect,
+}: ScoresaberWebsocket) {
   return connectWebSocket({
     name: "Scoresaber",
     url: "wss://scoresaber.com/ws",

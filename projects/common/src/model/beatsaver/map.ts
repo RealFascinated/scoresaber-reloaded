@@ -1,9 +1,16 @@
-import {getModelForClass, modelOptions, plugin, prop, ReturnModelType, Severity} from "@typegoose/typegoose";
-import {Document} from "mongoose";
+import {
+  getModelForClass,
+  modelOptions,
+  plugin,
+  prop,
+  ReturnModelType,
+  Severity,
+} from "@typegoose/typegoose";
+import { Document } from "mongoose";
 import BeatSaverAuthor from "./author";
 import BeatSaverMapVersion from "./map-version";
 import BeatSaverMapMetadata from "./map-metadata";
-import {AutoIncrementID} from "@typegoose/auto-increment";
+import { AutoIncrementID } from "@typegoose/auto-increment";
 
 /**
  * The model for a BeatSaver map.
@@ -95,4 +102,5 @@ export class BeatSaverMap {
 }
 
 export type BeatSaverMapDocument = BeatSaverMap & Document;
-export const BeatSaverMapModel: ReturnModelType<typeof BeatSaverMap> = getModelForClass(BeatSaverMap);
+export const BeatSaverMapModel: ReturnModelType<typeof BeatSaverMap> =
+  getModelForClass(BeatSaverMap);

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import {Axis, AxisPosition, Dataset, DatasetDisplayType} from "@/common/chart/types";
+import { Axis, AxisPosition, Dataset, DatasetDisplayType } from "@/common/chart/types";
 
 export const generateChartAxis = (
   id: string,

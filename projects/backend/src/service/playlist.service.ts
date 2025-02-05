@@ -28,22 +28,26 @@ export default class PlaylistService {
    * @returns the playlist
    */
   public static async getPlaylist(playlistId: string): Promise<Playlist> {
-    return fetchWithCache(CacheService.getCache(ServiceCache.Playlists), `playlist:${playlistId}`, async () => {
-      switch (playlistId) {
-        case "scoresaber-ranked-maps": {
-          return await this.createRankedMapsPlaylist();
-        }
-        case "scoresaber-qualified-maps": {
-          return await this.createQualifiedMapsPlaylist();
-        }
-        case "scoresaber-ranking-queue-maps": {
-          return await this.createRankingQueueMapsPlaylist();
-        }
-        default: {
-          throw new NotFoundError(`Playlist with id ${playlistId} does not exist`);
+    return fetchWithCache(
+      CacheService.getCache(ServiceCache.Playlists),
+      `playlist:${playlistId}`,
+      async () => {
+        switch (playlistId) {
+          case "scoresaber-ranked-maps": {
+            return await this.createRankedMapsPlaylist();
+          }
+          case "scoresaber-qualified-maps": {
+            return await this.createQualifiedMapsPlaylist();
+          }
+          case "scoresaber-ranking-queue-maps": {
+            return await this.createRankingQueueMapsPlaylist();
+          }
+          default: {
+            throw new NotFoundError(`Playlist with id ${playlistId} does not exist`);
+          }
         }
       }
-    });
+    );
   }
 
   /**
@@ -69,8 +73,13 @@ export default class PlaylistService {
     }
 
     try {
-      if (!(await PlayerService.playerExists(user)) || !(await PlayerService.playerExists(toSnipe))) {
-        throw new NotFoundError(`Unable to create a snipe playlist for ${toSnipe} as one of the users isn't tracked.`);
+      if (
+        !(await PlayerService.playerExists(user)) ||
+        !(await PlayerService.playerExists(toSnipe))
+      ) {
+        throw new NotFoundError(
+          `Unable to create a snipe playlist for ${toSnipe} as one of the users isn't tracked.`
+        );
       }
 
       const rawScores = await ScoreService.getPlayerScores(toSnipe, {
@@ -82,7 +91,9 @@ export default class PlaylistService {
         },
       });
       if (rawScores.length === 0) {
-        throw new NotFoundError(`Unable to create a snipe playlist for ${toSnipe} as they have no scores.`);
+        throw new NotFoundError(
+          `Unable to create a snipe playlist for ${toSnipe} as they have no scores.`
+        );
       }
 
       const scores: { score: ScoreSaberScore; leaderboard: ScoreSaberLeaderboard }[] = [];
@@ -94,13 +105,19 @@ export default class PlaylistService {
         }
 
         if (settings?.starRange?.min && settings?.starRange?.max && leaderboard.stars > 0) {
-          if (leaderboard.stars < settings.starRange.min || leaderboard.stars > settings.starRange.max) {
+          if (
+            leaderboard.stars < settings.starRange.min ||
+            leaderboard.stars > settings.starRange.max
+          ) {
             continue; // Skip this score if it's not in the star range
           }
         }
 
         if (settings?.accuracyRange?.min && settings?.accuracyRange?.max) {
-          if (score.accuracy < settings.accuracyRange.min || score.accuracy > settings.accuracyRange.max) {
+          if (
+            score.accuracy < settings.accuracyRange.min ||
+            score.accuracy > settings.accuracyRange.max
+          ) {
             continue; // Skip this score if it's not in the accuracy range
           }
         }

@@ -42,7 +42,8 @@ export function ScoreAccuracyBadge({ score }: ScoreBadgeProps) {
           }
         >
           <p>
-            {formatScoreAccuracy(score)} {modCount > 0 && <ScoreModifiers type="simple" limit={1} score={score} />}
+            {formatScoreAccuracy(score)}{" "}
+            {modCount > 0 && <ScoreModifiers type="simple" limit={1} score={score} />}
           </p>
         </Tooltip>
         {previousScore && previousScore.accuracy && previousScore.change && (
@@ -53,7 +54,9 @@ export function ScoreAccuracyBadge({ score }: ScoreBadgeProps) {
                 <div>
                   <p className="font-semibold">Previous Accuracy</p>
                   <p>Score: {getAccDetails(scoreBadge)}</p>
-                  {score.previousScore && <p>Accuracy: {formatScoreAccuracy(score.previousScore)}</p>}
+                  {score.previousScore && (
+                    <p>Accuracy: {formatScoreAccuracy(score.previousScore)}</p>
+                  )}
                   {!score.fullCombo && fcAccuracy && <p>Full Combo: {fcAccuracy.toFixed(2)}%</p>}
                 </div>
 

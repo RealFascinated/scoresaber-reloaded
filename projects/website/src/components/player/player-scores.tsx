@@ -55,7 +55,9 @@ export default function PlayerScores({ initialSearch, player, sort, page }: Prop
 
   const [pageState, setPageState] = useState<PageState>({ page, sort });
   const [previousPage, setPreviousPage] = useState(page);
-  const [scores, setScores] = useState<PlayerScoresResponse<ScoreSaberScore, ScoreSaberLeaderboard> | undefined>();
+  const [scores, setScores] = useState<
+    PlayerScoresResponse<ScoreSaberScore, ScoreSaberLeaderboard> | undefined
+  >();
   const [searchTerm, setSearchTerm] = useState(initialSearch || "");
   const debouncedSearchTerm = useDebounce(searchTerm, 250);
   const [shouldFetch, setShouldFetch] = useState(true);
@@ -179,7 +181,8 @@ export default function PlayerScores({ initialSearch, player, sort, page }: Prop
       {scores !== undefined && (
         <>
           <div className="text-center">
-            {isError || (scores.scores.length === 0 && <p>No scores found. Invalid Page or Search?</p>)}
+            {isError ||
+              (scores.scores.length === 0 && <p>No scores found. Invalid Page or Search?</p>)}
           </div>
 
           <motion.div

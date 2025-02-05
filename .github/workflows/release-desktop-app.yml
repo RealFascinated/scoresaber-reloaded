@@ -1,4 +1,4 @@
-name: 'Release Desktop App'
+name: "Release Desktop App"
 
 on:
   workflow_dispatch:
@@ -11,8 +11,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - platform: 'windows-latest'
-            args: ''
+          - platform: "windows-latest"
+            args: ""
     runs-on: ${{ matrix.platform }}
     steps:
       - uses: actions/checkout@v4
@@ -23,7 +23,7 @@ jobs:
       - name: Rust cache
         uses: swatinem/rust-cache@v2
         with:
-          workspaces: './projects/desktop -> target'
+          workspaces: "./projects/desktop -> target"
 
       - name: Release App
         uses: tauri-apps/tauri-action@v0
@@ -33,8 +33,8 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD}}
         with:
           tagName: ssr-desktop-v__VERSION__-${{ github.run_number }}
-          releaseName: 'ScoreSaber Reloaded Desktop App v__VERSION__-${{ github.run_number }}'
-          releaseBody: 'Download this version of the ScoreSaber Reloaded Desktop App.'
+          releaseName: "ScoreSaber Reloaded Desktop App v__VERSION__-${{ github.run_number }}"
+          releaseBody: "Download this version of the ScoreSaber Reloaded Desktop App."
           releaseDraft: false
           prerelease: false
           args: ${{ matrix.args }}

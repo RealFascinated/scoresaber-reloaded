@@ -60,7 +60,9 @@ export default function LeaderboardScores({
   const isMobile = useIsMobile();
   const controls = useAnimation();
 
-  const [selectedMode, setSelectedMode] = useState<ScoreModeEnum>(initialCategory ?? ScoreModeEnum.Global);
+  const [selectedMode, setSelectedMode] = useState<ScoreModeEnum>(
+    initialCategory ?? ScoreModeEnum.Global
+  );
   const [selectedLeaderboardId, setSelectedLeaderboardId] = useState(leaderboard.id);
   const [previousPage, setPreviousPage] = useState(initialPage);
   const [currentPage, setCurrentPage] = useState(initialPage);
@@ -80,11 +82,10 @@ export default function LeaderboardScores({
     ],
     queryFn: async () => {
       if (selectedMode == ScoreModeEnum.Global) {
-        const leaderboard = await ssrApi.fetchLeaderboardScores<ScoreSaberScore, ScoreSaberLeaderboard>(
-          selectedLeaderboardId + "",
-          currentPage,
-          filter.country
-        );
+        const leaderboard = await ssrApi.fetchLeaderboardScores<
+          ScoreSaberScore,
+          ScoreSaberLeaderboard
+        >(selectedLeaderboardId + "", currentPage, filter.country);
 
         return {
           scores: leaderboard!.scores,
@@ -265,9 +266,18 @@ export default function LeaderboardScores({
                   )}
                 </tr>
               </thead>
-              <motion.tbody initial="hidden" animate={controls} className="border-none" variants={scoreAnimation}>
+              <motion.tbody
+                initial="hidden"
+                animate={controls}
+                className="border-none"
+                variants={scoreAnimation}
+              >
                 {currentScores.scores.map((playerScore, index) => (
-                  <motion.tr key={index} className="border-b border-border" variants={scoreAnimation}>
+                  <motion.tr
+                    key={index}
+                    className="border-b border-border"
+                    variants={scoreAnimation}
+                  >
                     <LeaderboardScore
                       key={playerScore.scoreId}
                       score={playerScore}

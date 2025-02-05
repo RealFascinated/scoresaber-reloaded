@@ -1,6 +1,13 @@
 import { StarIcon } from "@heroicons/react/24/solid";
 import Tooltip from "../tooltip";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../ui/dialog";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import PlayerScoreChart from "@/components/player/chart/player-score-chart";
 import { truncateText } from "@ssr/common/string-utils";
@@ -22,7 +29,8 @@ export default function PlayerScoreChartButton({ player }: PlayerStarCurveProps)
           className="cursor-pointer"
           display={
             <p>
-              View the score chart for <span className="font-semibold">{truncateText(player.name, 16)}</span>
+              View the score chart for{" "}
+              <span className="font-semibold">{truncateText(player.name, 16)}</span>
             </p>
           }
         >
@@ -32,7 +40,9 @@ export default function PlayerScoreChartButton({ player }: PlayerStarCurveProps)
       <DialogContent className="max-w-5xl h-[600px] bg-secondary">
         <DialogHeader>
           <DialogTitle>Score Chart</DialogTitle>
-          <DialogDescription>View the score chart for {truncateText(player.name, 16)}!</DialogDescription>
+          <DialogDescription>
+            View the score chart for {truncateText(player.name, 16)}!
+          </DialogDescription>
         </DialogHeader>
 
         <PlayerScoreChart player={player} />

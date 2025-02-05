@@ -75,6 +75,10 @@ const datasetConfig: DatasetConfig[] = [
 
 export default function PlayerAccuracyChart({ statisticHistory }: Props) {
   return (
-    <GenericPlayerChart id="player-accuracy-chart" statisticHistory={statisticHistory} datasetConfig={datasetConfig} />
+    <GenericPlayerChart
+      id="player-accuracy-chart"
+      statisticHistory={statisticHistory}
+      datasetConfig={datasetConfig}
+    />
   );
 }

@@ -38,7 +38,9 @@ export async function cleanupAdditionalScoreData() {
           leaderboardId: { $exists: true },
         };
 
-    const additionalScoreData: AdditionalScoreDataDocument[] = await AdditionalScoreDataModel.find(query)
+    const additionalScoreData: AdditionalScoreDataDocument[] = await AdditionalScoreDataModel.find(
+      query
+    )
       .limit(limit)
       .sort({ scoreId: 1 });
 
@@ -83,7 +85,9 @@ export async function cleanupScoreStats() {
   while (hasMore) {
     // Get next batch of unprocessed records
     const query = lastId ? { _id: { $gt: lastId } } : {};
-    const scoreStats: ScoreStatsDocument[] = await ScoreStatsModel.find(query).limit(limit).sort({ _id: 1 });
+    const scoreStats: ScoreStatsDocument[] = await ScoreStatsModel.find(query)
+      .limit(limit)
+      .sort({ _id: 1 });
 
     if (scoreStats.length === 0) {
       hasMore = false;

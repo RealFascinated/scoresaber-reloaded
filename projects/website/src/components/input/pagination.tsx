@@ -114,7 +114,10 @@ export default function Pagination({
         );
       pageNumbers.push(
         <PaginationItemWrapper key="end" isLoadingPage={isLoading}>
-          <PaginationLink href={generatePageUrl?.(totalPages) || ""} onClick={e => handleLinkClick(totalPages, e)}>
+          <PaginationLink
+            href={generatePageUrl?.(totalPages) || ""}
+            onClick={e => handleLinkClick(totalPages, e)}
+          >
             {totalPages}
           </PaginationLink>
         </PaginationItemWrapper>

@@ -1,7 +1,12 @@
 import { cn, getRandomInteger } from "@/common/utils";
 import { AnimatedList } from "@/components/ui/animated-list";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
-import { Difficulty, getDifficulty, getDifficultyName, getRandomDifficulty } from "@ssr/common/utils/song-utils";
+import {
+  Difficulty,
+  getDifficulty,
+  getDifficultyName,
+  getRandomDifficulty,
+} from "@ssr/common/utils/song-utils";
 import { Flame } from "lucide-react";
 
 type ScoreProps = {
@@ -61,10 +66,12 @@ export default function RealtimeScores() {
           <h1 className="text-2xl sm:text-3xl font-bold">Realtime Scores</h1>
         </div>
         <p className="max-w-2xl lg:max-w-5xl opacity-85">
-          <span className="text-lg font-semibold text-yellow-500">Catch the latest scores as they happen!</span> Stay
-          updated with the most recent achievements from Beat Saber players around the world. Watch in real-time as
-          players push their limits, hit personal bests, and climb the leaderboard with every score set. Dive into the
-          action and track the excitement!
+          <span className="text-lg font-semibold text-yellow-500">
+            Catch the latest scores as they happen!
+          </span>{" "}
+          Stay updated with the most recent achievements from Beat Saber players around the world.
+          Watch in real-time as players push their limits, hit personal bests, and climb the
+          leaderboard with every score set. Dive into the action and track the excitement!
         </p>
       </div>
 

@@ -61,7 +61,14 @@ const modes: Mode[] = [
   { name: "Score History", icon: <TrendingUpIcon className="w-4 h-4" /> },
 ];
 
-export default function Score({ leaderboard, beatSaverMap, score, settings, highlightedPlayer, playerAbove }: Props) {
+export default function Score({
+  leaderboard,
+  beatSaverMap,
+  score,
+  settings,
+  highlightedPlayer,
+  playerAbove,
+}: Props) {
   const [baseScore, setBaseScore] = useState(score.score);
   const [isLeaderboardExpanded, setIsLeaderboardExpanded] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -72,10 +79,17 @@ export default function Score({ leaderboard, beatSaverMap, score, settings, high
   const isMobile = useIsMobile();
 
   const { data, isLoading } = useQuery<DropdownData>({
-    queryKey: [`leaderboardDropdownData:${leaderboard.id}`, leaderboard.id, score.scoreId, isLeaderboardExpanded],
+    queryKey: [
+      `leaderboardDropdownData:${leaderboard.id}`,
+      leaderboard.id,
+      score.scoreId,
+      isLeaderboardExpanded,
+    ],
     queryFn: async () => {
       return {
-        scoreStats: score.additionalData ? await ssrApi.fetchScoreStats(score.additionalData.scoreId) : undefined,
+        scoreStats: score.additionalData
+          ? await ssrApi.fetchScoreStats(score.additionalData.scoreId)
+          : undefined,
       };
     },
     staleTime: 30000,
@@ -103,7 +117,8 @@ export default function Score({ leaderboard, beatSaverMap, score, settings, high
   }, [score]);
 
   const accuracy = (baseScore / leaderboard.maxScore) * 100;
-  const pp = baseScore === score.score ? score.pp : scoresaberService.getPp(leaderboard.stars, accuracy);
+  const pp =
+    baseScore === score.score ? score.pp : scoresaberService.getPp(leaderboard.stars, accuracy);
 
   const handleLeaderboardOpen = (isExpanded: boolean) => {
     if (!isExpanded) {
@@ -137,7 +152,9 @@ export default function Score({ leaderboard, beatSaverMap, score, settings, high
           </Link>
         </div>
       )}
-      <div className={`grid w-full gap-2 lg:gap-0 ${gridColsClass} ${settings?.hideRank ? "pt-1" : ""}`}>
+      <div
+        className={`grid w-full gap-2 lg:gap-0 ${gridColsClass} ${settings?.hideRank ? "pt-1" : ""}`}
+      >
         <ScoreInfo score={score} leaderboard={leaderboard} hideRank={settings?.hideRank} />
         <ScoreSongInfo leaderboard={leaderboard} beatSaverMap={beatSaverMap} />
         {!settings?.noScoreButtons && (

@@ -100,7 +100,9 @@ app.use(
       await PlayerService.updatePlayerStatistics();
       await logToChannel(
         DiscordChannels.backendLogs,
-        new EmbedBuilder().setDescription(`Updated player statistics in ${formatDuration(Date.now() - before)}`)
+        new EmbedBuilder().setDescription(
+          `Updated player statistics in ${formatDuration(Date.now() - before)}`
+        )
       );
     },
   })
@@ -113,7 +115,10 @@ app.use(
     protect: true,
     run: async () => {
       const before = Date.now();
-      await logToChannel(DiscordChannels.backendLogs, new EmbedBuilder().setDescription(`Refreshing player scores...`));
+      await logToChannel(
+        DiscordChannels.backendLogs,
+        new EmbedBuilder().setDescription(`Refreshing player scores...`)
+      );
       const missingScores = await PlayerService.refreshPlayerScores();
       await logToChannel(
         DiscordChannels.backendLogs,

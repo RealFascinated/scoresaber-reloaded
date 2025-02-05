@@ -29,7 +29,8 @@ export function FriendScores() {
 
   const [page, setPage] = useState(1);
   const [previousPage, setPreviousPage] = useState(1);
-  const [scoreData, setScoreData] = useState<Page<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>>();
+  const [scoreData, setScoreData] =
+    useState<Page<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>>();
 
   const { data, isLoading } = useQuery({
     queryKey: ["friend-scores", friendIds, page],
@@ -56,8 +57,8 @@ export function FriendScores() {
       <div>
         <p className="font-bold">Friend Scores</p>
         <p className="text-sm text-gray-400">
-          The 100 most recent scores from your friends. Score ranks aren&apos;t available as this is based on cached
-          data
+          The 100 most recent scores from your friends. Score ranks aren&apos;t available as this is
+          based on cached data
         </p>
       </div>
 

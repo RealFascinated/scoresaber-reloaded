@@ -1,12 +1,21 @@
-import {getModelForClass, modelOptions, prop, ReturnModelType, Severity} from "@typegoose/typegoose";
-import {Document} from "mongoose";
-import {formatDateMinimal, getDaysAgoDate, getMidnightAlignedDate} from "../../utils/time-utils";
-import {type StatisticsType} from "./statistic-type";
+import {
+  getModelForClass,
+  modelOptions,
+  prop,
+  ReturnModelType,
+  Severity,
+} from "@typegoose/typegoose";
+import { Document } from "mongoose";
+import { formatDateMinimal, getDaysAgoDate, getMidnightAlignedDate } from "../../utils/time-utils";
+import { type StatisticsType } from "./statistic-type";
 
 /**
  * The model for a Game Statistic.
  */
-@modelOptions({ options: { allowMixed: Severity.ALLOW }, schemaOptions: { collection: "statistics" } })
+@modelOptions({
+  options: { allowMixed: Severity.ALLOW },
+  schemaOptions: { collection: "statistics" },
+})
 export class Statistics {
   /**
    * The id of the statistic.

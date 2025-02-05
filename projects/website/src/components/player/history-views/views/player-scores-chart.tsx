@@ -78,6 +78,10 @@ const datasetConfig: DatasetConfig[] = [
 
 export default function PlayerScoresChart({ statisticHistory }: Props) {
   return (
-    <GenericPlayerChart id="player-scores-chart" statisticHistory={statisticHistory} datasetConfig={datasetConfig} />
+    <GenericPlayerChart
+      id="player-scores-chart"
+      statisticHistory={statisticHistory}
+      datasetConfig={datasetConfig}
+    />
   );
 }

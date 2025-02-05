@@ -1,4 +1,7 @@
-import { ScoreSaberScore, ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
+import {
+  ScoreSaberScore,
+  ScoreSaberScoreModel,
+} from "@ssr/common/model/score/impl/scoresaber-score";
 import { Page, Pagination } from "@ssr/common/pagination";
 import { NotFoundError } from "elysia";
 import { fetchWithCache } from "../../common/cache.util";
@@ -49,7 +52,9 @@ export class FriendScoresService {
     );
 
     if (scores.length === 0) {
-      throw new NotFoundError(`No scores found for friends "${friendIds.join(",")}" in leaderboard "${leaderboardId}"`);
+      throw new NotFoundError(
+        `No scores found for friends "${friendIds.join(",")}" in leaderboard "${leaderboardId}"`
+      );
     }
 
     const pagination = new Pagination<ScoreSaberScore>();
@@ -90,7 +95,9 @@ export class FriendScoresService {
         await Promise.all(
           friendScores.map(async friendScore => {
             const score = scoreToObject(friendScore);
-            const leaderboardResponse = await LeaderboardService.getLeaderboard(friendScore.leaderboardId + "");
+            const leaderboardResponse = await LeaderboardService.getLeaderboard(
+              friendScore.leaderboardId + ""
+            );
             const leaderboard = leaderboardResponse.leaderboard;
 
             scores.push({

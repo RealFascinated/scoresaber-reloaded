@@ -43,13 +43,22 @@ export default function Friend({ player, onClick }: FriendProps) {
         onClick={() => onClick?.()}
         className="flex items-center gap-2 w-full"
       >
-        <Avatar src={player.profilePicture!} size={64} className="w-10 h-10" alt={`${player.name}'s Profile Picture`} />
+        <Avatar
+          src={player.profilePicture!}
+          size={64}
+          className="w-10 h-10"
+          alt={`${player.name}'s Profile Picture`}
+        />
         <div className="flex flex-col">
           <p className="font-semibold">{player.name}</p>
           <p className="text-gray-400">#{formatNumberWithCommas(player.rank)}</p>
         </div>
       </Link>
-      <Tooltip display={<p className="cursor-default pointer-events-none">Remove {name} from your friends</p>}>
+      <Tooltip
+        display={
+          <p className="cursor-default pointer-events-none">Remove {name} from your friends</p>
+        }
+      >
         <button onClick={() => removeFriend()}>
           <XIcon className="w-5 h-5" />
         </button>

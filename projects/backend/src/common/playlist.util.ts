@@ -10,7 +10,10 @@ import SSRImage, { ImageTextOptions } from "./ssr-image";
  * @param toSnipe the player to snipe
  * @returns the base64 encoded image
  */
-export async function generateSnipePlaylistImage(settings: SnipeSettings, toSnipe: ScoreSaberPlayer): Promise<string> {
+export async function generateSnipePlaylistImage(
+  settings: SnipeSettings,
+  toSnipe: ScoreSaberPlayer
+): Promise<string> {
   const type = capitalizeFirstLetter(settings.sort);
 
   return generatePlaylistImage("SSR", {

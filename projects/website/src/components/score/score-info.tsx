@@ -25,7 +25,10 @@ export default function ScoreInfo({ score, leaderboard, hideRank }: Props) {
 
         {/* Score Rank */}
         {!hideRank ? (
-          <Link prefetch={false} href={`/leaderboard/${leaderboard.id}/${getPageFromRank(score.rank, 12)}`}>
+          <Link
+            prefetch={false}
+            href={`/leaderboard/${leaderboard.id}/${getPageFromRank(score.rank, 12)}`}
+          >
             <p className="text-ssr hover:brightness-[66%] transition-all transform-gpu cursor-pointer">
               #{formatNumberWithCommas(score.rank)}
             </p>

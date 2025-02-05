@@ -17,7 +17,11 @@ type BeatLeaderWebsocket = {
  * @param onScore the onScore callback
  * @param onDisconnect the onDisconnect callback
  */
-export function connectBeatLeaderWebsocket({ onMessage, onScore, onDisconnect }: BeatLeaderWebsocket) {
+export function connectBeatLeaderWebsocket({
+  onMessage,
+  onScore,
+  onDisconnect,
+}: BeatLeaderWebsocket) {
   return connectWebSocket({
     name: "BeatLeader",
     url: "wss://sockets.api.beatleader.xyz/scores",

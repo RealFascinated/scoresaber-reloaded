@@ -1,4 +1,4 @@
-import {Variants} from "framer-motion";
+import { Variants } from "framer-motion";
 
 /**
  * The animation values for the score slide in animation.

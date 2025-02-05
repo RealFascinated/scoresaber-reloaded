@@ -3,7 +3,10 @@
 import { LoadingIcon } from "@/components/loading-icon";
 import Tooltip from "@/components/tooltip";
 import Combobox from "@/components/ui/combo-box";
-import { PlayedMapsCalendarResponse, PlayedMapsCalendarStat } from "@ssr/common/response/played-maps-calendar-response";
+import {
+  PlayedMapsCalendarResponse,
+  PlayedMapsCalendarStat,
+} from "@ssr/common/response/played-maps-calendar-response";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { getDaysInMonth, Months } from "@ssr/common/utils/time-utils";
 import { useQuery } from "@tanstack/react-query";
@@ -93,7 +96,8 @@ export default function ScoreHistoryCalendar({ playerId }: ScoreHistoryCalendarP
               const minSize = 40;
               const maxSize = 90;
               const scorePercentage = (totalMaps / maxMaps) * 100;
-              const size = totalMaps === 0 ? 0 : Math.max(minSize, Math.min(scorePercentage, maxSize));
+              const size =
+                totalMaps === 0 ? 0 : Math.max(minSize, Math.min(scorePercentage, maxSize));
 
               return (
                 <Tooltip

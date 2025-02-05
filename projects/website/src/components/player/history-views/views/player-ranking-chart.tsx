@@ -83,6 +83,10 @@ const datasetConfig: DatasetConfig[] = [
 
 export default function PlayerRankingChart({ statisticHistory }: Props) {
   return (
-    <GenericPlayerChart id="player-ranking-chart" statisticHistory={statisticHistory} datasetConfig={datasetConfig} />
+    <GenericPlayerChart
+      id="player-ranking-chart"
+      statisticHistory={statisticHistory}
+      datasetConfig={datasetConfig}
+    />
   );
 }

@@ -8,5 +8,7 @@ type AvatarProps = {
 };
 
 export default function Avatar({ src, size = 32, className, alt }: AvatarProps) {
-  return <img src={src} width={size} height={size} className={cn("rounded-full", className)} alt={alt} />;
+  return (
+    <img src={src} width={size} height={size} className={cn("rounded-full", className)} alt={alt} />
+  );
 }

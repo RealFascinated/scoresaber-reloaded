@@ -1,4 +1,4 @@
-import {ScoreSaberScore} from "@ssr/common/model/score/impl/scoresaber-score";
+import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import clsx from "clsx";
 
@@ -8,7 +8,10 @@ import clsx from "clsx";
 export type ScoreBadge = {
   name: string;
   color?: (score: ScoreSaberScore, leaderboard: ScoreSaberLeaderboard) => string | undefined;
-  create: (score: ScoreSaberScore, leaderboard: ScoreSaberLeaderboard) => string | React.ReactNode | undefined;
+  create: (
+    score: ScoreSaberScore,
+    leaderboard: ScoreSaberLeaderboard
+  ) => string | React.ReactNode | undefined;
 };
 
 /**

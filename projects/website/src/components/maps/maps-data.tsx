@@ -57,13 +57,24 @@ export function MapsData({ category, page }: MapsDataProps) {
   const defaultCategory = categories[0];
 
   const pageNavigation = usePageNavigation();
-  const [selectedCategory, setSelectedCategory] = useState(categories.find(c => c.id === category) || categories[0]);
+  const [selectedCategory, setSelectedCategory] = useState(
+    categories.find(c => c.id === category) || categories[0]
+  );
 
   useEffect(() => {
     const path = `/maps?category=${selectedCategory.id}`;
 
-    pageNavigation.navigateToPage(`${path}${page ? (path.includes("?") ? "&" : "?") : ""}page=${page}`);
-  }, [category, defaultCategory.id, page, pageNavigation, selectedCategory.id, selectedCategory.preservePage]);
+    pageNavigation.navigateToPage(
+      `${path}${page ? (path.includes("?") ? "&" : "?") : ""}page=${page}`
+    );
+  }, [
+    category,
+    defaultCategory.id,
+    page,
+    pageNavigation,
+    selectedCategory.id,
+    selectedCategory.preservePage,
+  ]);
 
   return (
     <MapFilterProvider>

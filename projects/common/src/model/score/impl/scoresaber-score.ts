@@ -1,4 +1,10 @@
-import { getModelForClass, modelOptions, plugin, ReturnModelType, Severity } from "@typegoose/typegoose";
+import {
+  getModelForClass,
+  modelOptions,
+  plugin,
+  ReturnModelType,
+  Severity,
+} from "@typegoose/typegoose";
 import { type ScoreSaberLeaderboardPlayerInfoToken } from "../../../types/token/scoresaber/leaderboard-player-info";
 import { Document } from "mongoose";
 import { AutoIncrementID } from "@typegoose/auto-increment";

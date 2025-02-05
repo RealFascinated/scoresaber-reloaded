@@ -38,7 +38,11 @@ export default function FriendsButton() {
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger className="h-full" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+      <PopoverTrigger
+        className="h-full"
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
         <NavbarButton className="px-0">
           <PersonIcon className="size-5" />
           <span className="hidden xl:flex">Friends</span>
@@ -52,7 +56,9 @@ export default function FriendsButton() {
         {friends && friends.length > 0 ? (
           friends
             .sort((a, b) => a.rank - b.rank)
-            .map((friend, index) => <Friend player={friend} key={index} onClick={() => setOpen(false)} />)
+            .map((friend, index) => (
+              <Friend player={friend} key={index} onClick={() => setOpen(false)} />
+            ))
         ) : (
           <div className="text-sm flex flex-col gap-2 justify-center items-center">
             <p className="pointer-events-none">You don&#39;t have any friends :(</p>

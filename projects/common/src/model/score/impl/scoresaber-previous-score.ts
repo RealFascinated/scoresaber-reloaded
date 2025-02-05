@@ -1,4 +1,10 @@
-import { getModelForClass, modelOptions, plugin, ReturnModelType, Severity } from "@typegoose/typegoose";
+import {
+  getModelForClass,
+  modelOptions,
+  plugin,
+  ReturnModelType,
+  Severity,
+} from "@typegoose/typegoose";
 import { Document } from "mongoose";
 import { AutoIncrementID } from "@typegoose/auto-increment";
 import { ScoreSaberScoreBase } from "./scoresaber-score-base";
@@ -29,6 +35,5 @@ export class ScoreSaberPreviousScoreInternal extends ScoreSaberScoreBase {}
 
 export type ScoreSaberPreviousScore = InstanceType<typeof ScoreSaberPreviousScoreInternal>;
 export type ScoreSaberPreviousScoreDocument = ScoreSaberPreviousScore & Document;
-export const ScoreSaberPreviousScoreModel: ReturnModelType<typeof ScoreSaberPreviousScoreInternal> = getModelForClass(
-  ScoreSaberPreviousScoreInternal
-);
+export const ScoreSaberPreviousScoreModel: ReturnModelType<typeof ScoreSaberPreviousScoreInternal> =
+  getModelForClass(ScoreSaberPreviousScoreInternal);

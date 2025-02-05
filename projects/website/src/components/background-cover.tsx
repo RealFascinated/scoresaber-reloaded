@@ -5,7 +5,11 @@ import useSettings from "@/hooks/use-settings";
 export default function BackgroundCover() {
   const settings = useSettings();
 
-  if (settings == undefined || settings?.backgroundCover == undefined || settings?.backgroundCover == "") {
+  if (
+    settings == undefined ||
+    settings?.backgroundCover == undefined ||
+    settings?.backgroundCover == ""
+  ) {
     return null; // Don't render anything if the background image is not set
   }
   const backgroundCover = settings.backgroundCover;

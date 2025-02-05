@@ -50,7 +50,9 @@ export default function GenericPlayerChart({ id, statisticHistory, datasetConfig
 
     labels.push(dateString ? parseDate(dateString) : getDaysAgoDate(dayAgo)); // Add the target date to labels
     datasetConfig.forEach(config => {
-      histories[config.field][dayAgo] = history ? (getValueFromHistory(history, config.field) ?? null) : null;
+      histories[config.field][dayAgo] = history
+        ? (getValueFromHistory(history, config.field) ?? null)
+        : null;
     });
     currentHistoryIndex++;
   }

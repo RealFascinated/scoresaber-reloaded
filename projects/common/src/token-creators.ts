@@ -1,21 +1,23 @@
 import ScoreSaberLeaderboard from "./model/leaderboard/impl/scoresaber-leaderboard";
 import ScoreSaberLeaderboardToken from "./types/token/scoresaber/leaderboard";
 import LeaderboardDifficulty from "./model/leaderboard/leaderboard-difficulty";
-import {MapCharacteristic} from "./types/map-characteristic";
-import {LeaderboardStatus} from "./model/leaderboard/leaderboard-status";
-import {parseDate} from "./utils/time-utils";
+import { MapCharacteristic } from "./types/map-characteristic";
+import { LeaderboardStatus } from "./model/leaderboard/leaderboard-status";
+import { parseDate } from "./utils/time-utils";
 import ScoreSaberScoreToken from "./types/token/scoresaber/score";
-import {ScoreSaberScore} from "./model/score/impl/scoresaber-score";
-import {Modifier} from "./score/modifier";
-import {getDifficultyFromScoreSaberDifficulty, ScoreSaberHMDs} from "./utils/scoresaber.util";
-import {Controllers} from "./model/score/controllers";
+import { ScoreSaberScore } from "./model/score/impl/scoresaber-score";
+import { Modifier } from "./score/modifier";
+import { getDifficultyFromScoreSaberDifficulty, ScoreSaberHMDs } from "./utils/scoresaber.util";
+import { Controllers } from "./model/score/controllers";
 
 /**
  * Parses a {@link ScoreSaberLeaderboardToken} into a {@link ScoreSaberLeaderboard}.
  *
  * @param token the token to parse
  */
-export function getScoreSaberLeaderboardFromToken(token: ScoreSaberLeaderboardToken): ScoreSaberLeaderboard {
+export function getScoreSaberLeaderboardFromToken(
+  token: ScoreSaberLeaderboardToken
+): ScoreSaberLeaderboard {
   const difficulty: LeaderboardDifficulty = {
     leaderboardId: token.difficulty.leaderboardId,
     difficulty: getDifficultyFromScoreSaberDifficulty(token.difficulty.difficulty),

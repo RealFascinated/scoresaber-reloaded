@@ -20,7 +20,11 @@ export default function OverlayPlayerRank({ player }: OverlayPlayerRankProps) {
         <GlobeAmericasIcon className="w-8 h-8" />
         <p>#{formatNumberWithCommas(rank)}</p>
       </div>
-      <DailyChange type={PlayerStatChange.Rank} change={player.statisticChange?.daily?.rank ?? 0} className="text-md" />
+      <DailyChange
+        type={PlayerStatChange.Rank}
+        change={player.statisticChange?.daily?.rank ?? 0}
+        className="text-md"
+      />
     </div>
   );
 }

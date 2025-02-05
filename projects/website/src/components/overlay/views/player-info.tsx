@@ -33,7 +33,9 @@ export default function OverlayPlayerInfoView({ player }: OverlayPlayerInfoProps
             change={player.statisticChange?.daily?.pp ?? 0}
             className="text-md"
           />
-          {!!plusOnePp && <span className="text-muted-foreground">(+1 = {formatPp(plusOnePp)}pp)</span>}
+          {!!plusOnePp && (
+            <span className="text-muted-foreground">(+1 = {formatPp(plusOnePp)}pp)</span>
+          )}
         </p>
         <OverlayPlayerRank player={player} />
         <OverlayPlayerCountryRank player={player} />

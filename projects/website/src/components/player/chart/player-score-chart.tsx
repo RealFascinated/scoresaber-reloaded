@@ -68,7 +68,9 @@ const PlayerScoreChart = ({ player }: PlayerScoreChartProps) => {
     ],
   };
 
-  const highestStar = Math.ceil(data ? Math.max(minimumStar, Math.max(...data.map(point => point.x))) : minimumStar);
+  const highestStar = Math.ceil(
+    data ? Math.max(minimumStar, Math.max(...data.map(point => point.x))) : minimumStar
+  );
 
   const options: ChartOptions = {
     responsive: true,

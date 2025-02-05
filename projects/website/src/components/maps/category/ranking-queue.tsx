@@ -74,7 +74,9 @@ export default function RankingQueue() {
                   <div key={queue.name} className="flex flex-col gap-1.5">
                     <p>{queue.name}</p>
                     {queue.requests(leaderboards).map((rankingRequest, index) => {
-                      const leaderboard = getScoreSaberLeaderboardFromToken(rankingRequest.leaderboardInfo);
+                      const leaderboard = getScoreSaberLeaderboardFromToken(
+                        rankingRequest.leaderboardInfo
+                      );
                       return (
                         <motion.div key={index} variants={scoreAnimation}>
                           <Link
@@ -82,7 +84,11 @@ export default function RankingQueue() {
                             href={`/leaderboard/${leaderboard.id}`}
                             className="grid lg:grid-cols-[1fr_0.2fr] gap-2 items-center bg-border p-1.5 hover:brightness-75 transition-all transform-gpu rounded-md"
                           >
-                            <ScoreSongInfo leaderboard={leaderboard} imageSize={58} clickableSongName={false} />
+                            <ScoreSongInfo
+                              leaderboard={leaderboard}
+                              imageSize={58}
+                              clickableSongName={false}
+                            />
                             <div className="text-sm flex justify-between lg:justify-end lg:flex-col lg:gap-1">
                               <p>{rankingRequest.difficultyCount} Difficulties</p>
                               <p>{timeAgo(new Date(rankingRequest.created_at))}</p>

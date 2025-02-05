@@ -9,7 +9,10 @@ export type CookieName = "playerId" | "lastScoreSort";
  * @param defaultValue the fallback value
  * @returns the value of the cookie, or the fallback value (undefined if no fallback value is provided)
  */
-export async function getCookieValue(name: CookieName, defaultValue?: string): Promise<string | undefined> {
+export async function getCookieValue(
+  name: CookieName,
+  defaultValue?: string
+): Promise<string | undefined> {
   let value: string | undefined;
   if (isServer()) {
     const { cookies } = await import("next/headers");

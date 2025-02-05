@@ -5,7 +5,11 @@ import {
   AdditionalScoreDataModel,
 } from "@ssr/common/model/additional-score-data/additional-score-data";
 import { PlayerDocument, PlayerModel } from "@ssr/common/model/player";
-import { ScoreStats, ScoreStatsDocument, ScoreStatsModel } from "@ssr/common/model/score-stats/score-stats";
+import {
+  ScoreStats,
+  ScoreStatsDocument,
+  ScoreStatsModel,
+} from "@ssr/common/model/score-stats/score-stats";
 import { removeObjectFields } from "@ssr/common/object.util";
 import { beatLeaderService } from "@ssr/common/service/impl/beatleader";
 import { ScoreStatsToken } from "@ssr/common/types/token/beatleader/score-stats/score-stats";
@@ -58,7 +62,9 @@ export default class BeatLeaderService {
    * @param scoreId the id of the score
    * @private
    */
-  public static async getAdditionalScoreData(scoreId: number): Promise<AdditionalScoreData | undefined> {
+  public static async getAdditionalScoreData(
+    scoreId: number
+  ): Promise<AdditionalScoreData | undefined> {
     return fetchWithCache(
       CacheService.getCache(ServiceCache.AdditionalScoreData),
       `additional-score-data:${scoreId}`,
@@ -116,7 +122,11 @@ export default class BeatLeaderService {
           );
 
           if (replayData !== undefined) {
-            await MinioService.saveFile(MinioBucket.BeatLeaderReplays, `${replayId}`, Buffer.from(replayData));
+            await MinioService.saveFile(
+              MinioBucket.BeatLeaderReplays,
+              `${replayId}`,
+              Buffer.from(replayData)
+            );
             savedReplayId = replayId;
           }
         } catch (error) {
@@ -189,7 +199,10 @@ export default class BeatLeaderService {
    * @param scoreId the id of the score
    * @param scoreStats the stats to track
    */
-  private static async trackScoreStats(scoreId: number, scoreStats: ScoreStatsToken): Promise<ScoreStatsDocument> {
+  private static async trackScoreStats(
+    scoreId: number,
+    scoreStats: ScoreStatsToken
+  ): Promise<ScoreStatsDocument> {
     return await ScoreStatsModel.create({
       _id: scoreId,
       hitTracker: scoreStats.hitTracker,
@@ -211,7 +224,11 @@ export default class BeatLeaderService {
     if (scoreStats == null) {
       scoreStats = (await beatLeaderService.lookupScoreStats(scoreId)) as ScoreStats;
       // Only track score stats if the player exists
-      if (scoreStats && additionalScoreData && (await PlayerService.playerExists(additionalScoreData.playerId))) {
+      if (
+        scoreStats &&
+        additionalScoreData &&
+        (await PlayerService.playerExists(additionalScoreData.playerId))
+      ) {
         return await this.trackScoreStats(scoreId, scoreStats);
       }
     }
@@ -289,9 +306,16 @@ export default class BeatLeaderService {
    * @returns the converted additional score data
    * @private
    */
-  private static additionalScoreDataToObject(additionalData: AdditionalScoreData): AdditionalScoreData {
+  private static additionalScoreDataToObject(
+    additionalData: AdditionalScoreData
+  ): AdditionalScoreData {
     return {
-      ...removeObjectFields<AdditionalScoreData>(additionalData, ["_id", "__v", "songDifficulty", "songScore"]),
+      ...removeObjectFields<AdditionalScoreData>(additionalData, [
+        "_id",
+        "__v",
+        "songDifficulty",
+        "songScore",
+      ]),
     } as AdditionalScoreData;
   }
 

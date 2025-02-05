@@ -118,13 +118,18 @@ export default function Leaderboards({ initialPage }: LeaderboardsProps) {
                       href={`/leaderboard/${leaderboard.id}`}
                       className="grid lg:grid-cols-[1fr_0.17fr] gap-2 items-center bg-border p-1.5 hover:brightness-75 transition-all transform-gpu rounded-md"
                     >
-                      <ScoreSongInfo leaderboard={leaderboard} imageSize={58} clickableSongName={false} />
+                      <ScoreSongInfo
+                        leaderboard={leaderboard}
+                        imageSize={58}
+                        clickableSongName={false}
+                      />
                       <div className="text-sm flex justify-between lg:justify-end lg:flex-col lg:gap-1">
                         {date && (
                           <Tooltip
                             display={
                               <p>
-                                {leaderboard.status == "Unranked" ? "Created" : leaderboard.status} {timeAgo(date)}
+                                {leaderboard.status == "Unranked" ? "Created" : leaderboard.status}{" "}
+                                {timeAgo(date)}
                               </p>
                             }
                           >

@@ -57,7 +57,11 @@ export default class StatisticsService {
    * @param statistic the statistic to track
    * @param value the value to track
    */
-  public static async trackStatisticToday(platform: GamePlatform, statistic: Statistic, value: number) {
+  public static async trackStatisticToday(
+    platform: GamePlatform,
+    statistic: Statistic,
+    value: number
+  ) {
     const foundPlatform = await this.getPlatform(platform);
     if (!foundPlatform) {
       throw new Error(`Platform ${platform} not found`);
@@ -108,7 +112,8 @@ export default class StatisticsService {
    * Tracks the statistics for ScoreSaber.
    */
   public static async trackScoreSaberStatistics() {
-    const { uniquePlayers, playerCount, totalScores, averagePp } = await this.getScoreSaberStatistics();
+    const { uniquePlayers, playerCount, totalScores, averagePp } =
+      await this.getScoreSaberStatistics();
 
     await this.trackStatisticToday(GamePlatform.ScoreSaber, Statistic.ActivePlayers, uniquePlayers);
     await this.trackStatisticToday(GamePlatform.ScoreSaber, Statistic.PlayerCount, playerCount);

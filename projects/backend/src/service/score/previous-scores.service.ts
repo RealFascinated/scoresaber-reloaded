@@ -3,7 +3,10 @@ import {
   ScoreSaberPreviousScoreDocument,
   ScoreSaberPreviousScoreModel,
 } from "@ssr/common/model/score/impl/scoresaber-previous-score";
-import { ScoreSaberPreviousScoreOverview, ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
+import {
+  ScoreSaberPreviousScoreOverview,
+  ScoreSaberScore,
+} from "@ssr/common/model/score/impl/scoresaber-score";
 
 export class PreviousScoresService {
   /**

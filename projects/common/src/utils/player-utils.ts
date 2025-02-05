@@ -1,5 +1,5 @@
-import {PlayerHistory} from "../player/player-history";
-import {formatDateMinimal, getDaysAgoDate, getMidnightAlignedDate} from "./time-utils";
+import { PlayerHistory } from "../player/player-history";
+import { formatDateMinimal, getDaysAgoDate, getMidnightAlignedDate } from "./time-utils";
 
 /**
  * Gets a value from an {@link PlayerHistory}
@@ -63,7 +63,9 @@ export function getPlayerStatisticChange(
     const targetDate = getDaysAgoDate(daysAgo);
 
     // Retrieve a list of dates only once, sorted for easier access
-    const sortedDates = Object.keys(history).sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
+    const sortedDates = Object.keys(history).sort(
+      (a, b) => new Date(a).getTime() - new Date(b).getTime()
+    );
 
     // Use binary search to efficiently find the closest date to `targetDate`
     let closestDate: Date | undefined;

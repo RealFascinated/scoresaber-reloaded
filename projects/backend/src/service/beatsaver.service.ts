@@ -1,5 +1,9 @@
 import { beatsaverService } from "@ssr/common/service/impl/beatsaver";
-import { BeatSaverMap, BeatSaverMapDocument, BeatSaverMapModel } from "@ssr/common/model/beatsaver/map";
+import {
+  BeatSaverMap,
+  BeatSaverMapDocument,
+  BeatSaverMapModel,
+} from "@ssr/common/model/beatsaver/map";
 import { fetchWithCache } from "../common/cache.util";
 import CacheService, { ServiceCache } from "./cache.service";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
@@ -74,7 +78,10 @@ export default class BeatSaverService {
    * @param hash - The hash of the map
    * @returns The map object or undefined if not found
    */
-  private static async handleExistingMap(map: BeatSaverMapDocument, hash: string): Promise<BeatSaverMap | undefined> {
+  private static async handleExistingMap(
+    map: BeatSaverMapDocument,
+    hash: string
+  ): Promise<BeatSaverMap | undefined> {
     const currentMap = map.toObject<BeatSaverMap>();
     if (currentMap.notFound) return undefined;
 
@@ -119,7 +126,11 @@ export default class BeatSaverService {
    * @param hash - The hash to update
    * @param hashInToken - Whether the hash exists in the token
    */
-  private static updateBrokenHashes(mapDoc: BeatSaverMapDocument, hash: string, hashInToken: boolean): void {
+  private static updateBrokenHashes(
+    mapDoc: BeatSaverMapDocument,
+    hash: string,
+    hashInToken: boolean
+  ): void {
     if (hashInToken) {
       mapDoc.brokenHashes = mapDoc.brokenHashes.filter(function (h) {
         return h !== hash;
@@ -135,7 +146,10 @@ export default class BeatSaverService {
    * @param token - Optional token to use
    * @returns The BeatSaver map or undefined if not found
    */
-  public static async getInternalMap(hash: string, token?: BeatSaverMapToken): Promise<BeatSaverMap | undefined> {
+  public static async getInternalMap(
+    hash: string,
+    token?: BeatSaverMapToken
+  ): Promise<BeatSaverMap | undefined> {
     const hashUpper = hash.toUpperCase();
     let map = await this.findMapByVersionHash(hashUpper);
 
@@ -171,7 +185,10 @@ export default class BeatSaverService {
    * @param token - Optional token to use
    * @returns The created map or undefined if not found
    */
-  private static async createNewMap(hash: string, token?: BeatSaverMapToken): Promise<BeatSaverMap | undefined> {
+  private static async createNewMap(
+    hash: string,
+    token?: BeatSaverMapToken
+  ): Promise<BeatSaverMap | undefined> {
     const resolvedToken = token || (await beatsaverService.lookupMap(hash));
     if (!resolvedToken) {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -195,7 +212,10 @@ export default class BeatSaverService {
    * @param hash - The hash of the map
    * @returns The existing map if found, otherwise undefined
    */
-  private static async handleDuplicateBsr(token: BeatSaverMapToken, hash: string): Promise<BeatSaverMap | undefined> {
+  private static async handleDuplicateBsr(
+    token: BeatSaverMapToken,
+    hash: string
+  ): Promise<BeatSaverMap | undefined> {
     const existingMap = await BeatSaverMapModel.findOne({ bsr: token.id });
     if (!existingMap) return;
 
@@ -212,7 +232,10 @@ export default class BeatSaverService {
    * @param hash - The hash of the map
    * @returns The created map
    */
-  private static async persistNewMap(token: BeatSaverMapToken, hash: string): Promise<BeatSaverMap> {
+  private static async persistNewMap(
+    token: BeatSaverMapToken,
+    hash: string
+  ): Promise<BeatSaverMap> {
     const newMap = new BeatSaverMapModel();
     this.updateMapFromToken(newMap, token);
     newMap.lastRefreshed = new Date();

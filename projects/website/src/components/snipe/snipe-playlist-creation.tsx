@@ -16,9 +16,22 @@ import Tooltip from "@/components/tooltip";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+} from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { DualRangeSlider } from "@/components/ui/dual-range-slider";
 import React, { useState } from "react";
 import { snipeSettingsSchema } from "@ssr/common/snipe/snipe-settings-schema";
@@ -88,7 +101,9 @@ export default function SnipePlaylistDownloadButton({ toSnipe }: SnipePlaylistDo
       <DialogContent className="bg-secondary">
         <DialogHeader>
           <DialogTitle>Create Snipe Playlist</DialogTitle>
-          <DialogDescription>Generate a new snipe playlist for {truncateText(toSnipe.name, 16)}!</DialogDescription>
+          <DialogDescription>
+            Generate a new snipe playlist for {truncateText(toSnipe.name, 16)}!
+          </DialogDescription>
         </DialogHeader>
 
         {/* Form */}
@@ -124,7 +139,9 @@ export default function SnipePlaylistDownloadButton({ toSnipe }: SnipePlaylistDo
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Limit</FormLabel>
-                  <FormDescription>The amount of scores to include in the playlist.</FormDescription>
+                  <FormDescription>
+                    The amount of scores to include in the playlist.
+                  </FormDescription>
                   <div className="mb-2">{field.value}</div>
                   <FormControl>
                     <Slider
@@ -147,7 +164,9 @@ export default function SnipePlaylistDownloadButton({ toSnipe }: SnipePlaylistDo
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Star Range</FormLabel>
-                  <FormDescription>The maps in this range will be included in the playlist.</FormDescription>
+                  <FormDescription>
+                    The maps in this range will be included in the playlist.
+                  </FormDescription>
                   <FormControl>
                     <DualRangeSlider
                       min={1}
@@ -171,7 +190,9 @@ export default function SnipePlaylistDownloadButton({ toSnipe }: SnipePlaylistDo
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Accuracy Range</FormLabel>
-                  <FormDescription>The maps in this range will be included in the playlist.</FormDescription>
+                  <FormDescription>
+                    The maps in this range will be included in the playlist.
+                  </FormDescription>
                   <FormControl>
                     <DualRangeSlider
                       min={0}

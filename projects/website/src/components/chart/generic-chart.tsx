@@ -28,7 +28,16 @@ import useSettings from "@/hooks/use-settings";
 import React, { useMemo } from "react";
 
 // Register only the required components
-Chart.register(LineElement, PointElement, BarElement, LinearScale, CategoryScale, Legend, Tooltip, BarController);
+Chart.register(
+  LineElement,
+  PointElement,
+  BarElement,
+  LinearScale,
+  CategoryScale,
+  Legend,
+  Tooltip,
+  BarController
+);
 
 export type ChartProps = {
   options?: { id: string; plugins?: any };
@@ -43,7 +52,9 @@ const GenericChart = ({ options, labels, datasetConfig, histories }: ChartProps)
   const settings = useSettings();
 
   const axes = useMemo(() => {
-    const generatedAxes: Record<string, Axis> = { x: { grid: { color: "#252525" }, reverse: false, ticks: {} } };
+    const generatedAxes: Record<string, Axis> = {
+      x: { grid: { color: "#252525" }, reverse: false, ticks: {} },
+    };
 
     datasetConfig.forEach(config => {
       const historyArray = histories[config.field];

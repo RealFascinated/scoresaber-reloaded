@@ -1,4 +1,4 @@
-import {SnipeSettings} from "./snipe-settings-schema";
+import { SnipeSettings } from "./snipe-settings-schema";
 
 /**
  * Parses the raw settings into a snipe settings object.

@@ -32,4 +32,3 @@ jobs:
         with:
           git_remote_url: "ssh://dokku@51.158.63.74:22/ssr-backend"
           ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
-

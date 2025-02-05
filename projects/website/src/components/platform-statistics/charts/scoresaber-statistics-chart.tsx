@@ -90,7 +90,11 @@ export default function ScoreSaberStatisticsChart({ statistics }: Props) {
   return (
     <div className="flex flex-col lg:grid grid-cols-2 gap-2">
       {datasetConfig.map(config => (
-        <GenericStatisticChart key={config.field} statistics={statistics} datasetConfig={[config]} />
+        <GenericStatisticChart
+          key={config.field}
+          statistics={statistics}
+          datasetConfig={[config]}
+        />
       ))}
     </div>
   );

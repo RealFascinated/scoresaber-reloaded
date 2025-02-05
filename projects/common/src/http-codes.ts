@@ -72,4 +72,4 @@ export const HttpCode = {
   NETWORK_AUTHENTICATION_REQUIRED: { code: 511, message: "Network Authentication Required" },
 } as const;
 
-export type HttpCode = typeof HttpCode[keyof typeof HttpCode];
+export type HttpCode = (typeof HttpCode)[keyof typeof HttpCode];

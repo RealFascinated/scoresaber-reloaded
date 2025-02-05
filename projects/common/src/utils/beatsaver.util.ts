@@ -1,8 +1,8 @@
-import {BeatSaverMap} from "../model/beatsaver/map";
-import {MapDifficulty} from "../score/map-difficulty";
-import {MapCharacteristic} from "../types/map-characteristic";
+import { BeatSaverMap } from "../model/beatsaver/map";
+import { MapDifficulty } from "../score/map-difficulty";
+import { MapCharacteristic } from "../types/map-characteristic";
 import BeatSaverMapDifficulty from "../model/beatsaver/map-difficulty";
-import {BeatSaverMapResponse} from "../response/beatsaver-map-response";
+import { BeatSaverMapResponse } from "../response/beatsaver-map-response";
 
 /**
  * Gets the BeatSaver mapper profile url.
@@ -33,5 +33,7 @@ export function getBeatSaverDifficulty(
     return undefined;
   }
 
-  return version.difficulties.find(d => d.difficulty === difficulty && d.characteristic === characteristic);
+  return version.difficulties.find(
+    d => d.difficulty === difficulty && d.characteristic === characteristic
+  );
 }
