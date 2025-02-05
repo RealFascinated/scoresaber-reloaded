@@ -13,11 +13,13 @@ export function register() {
         [ATTR_SERVICE_NAME]: "ssr-website",
         ["deployment.environment"]: isProduction() ? "production" : "development",
       }),
-      spanProcessor: new BatchSpanProcessor(
-        new OTLPTraceExporter({
-          url: "https://signoz-injest.fascinated.cc/v1/traces",
-        })
-      ),
+      spanProcessors: [
+        new BatchSpanProcessor(
+          new OTLPTraceExporter({
+            url: "https://signoz-injest.fascinated.cc/v1/traces",
+          })
+        ),
+      ],
     });
     sdk.start();
   }
