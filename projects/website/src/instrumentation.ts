@@ -6,21 +6,22 @@ import { ATTR_SERVICE_NAME } from "@opentelemetry/semantic-conventions";
 import { isProduction } from "@ssr/common/utils/utils";
 
 export function register() {
-  console.log("NEXT_RUNTIME", process.env.NEXT_RUNTIME);
-  if (process.env.NEXT_RUNTIME === "nodejs") {
-    const sdk = new NodeSDK({
-      resource: new Resource({
-        [ATTR_SERVICE_NAME]: "ssr-website",
-        ["deployment.environment"]: isProduction() ? "production" : "development",
-      }),
-      spanProcessors: [
-        new BatchSpanProcessor(
-          new OTLPTraceExporter({
-            url: "https://signoz-injest.fascinated.cc/v1/traces",
-          })
-        ),
-      ],
-    });
-    sdk.start();
-  }
+  // Only run on server side
+  if (typeof window !== "undefined") return;
+
+  const sdk = new NodeSDK({
+    resource: new Resource({
+      [ATTR_SERVICE_NAME]: "ssr-website",
+      ["deployment.environment"]: isProduction() ? "production" : "development",
+    }),
+    spanProcessors: [
+      new BatchSpanProcessor(
+        new OTLPTraceExporter({
+          url: "https://signoz-injest.fascinated.cc/v1/traces",
+          headers: {}, // Add any required headers here
+        })
+      ),
+    ],
+  });
+  sdk.start();
 }
