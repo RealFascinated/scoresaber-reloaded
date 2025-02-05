@@ -1,133 +1,193 @@
 import Logger from "../logger";
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 
+// Types and Interfaces
+export enum RequestPriority {
+  BACKGROUND = 0,
+  LOW = 1,
+  NORMAL = 2,
+  HIGH = 3,
+}
+
 type RequestReturns = "text" | "json" | "arraybuffer";
+
 export type RequestOptions = AxiosRequestConfig & {
   next?: {
     revalidate?: number;
   };
   searchParams?: Record<string, unknown>;
   throwOnError?: boolean;
+  returns?: RequestReturns;
+  priority?: RequestPriority;
 };
 
-const defaultRequestOptions: RequestOptions = {
+// Constants
+const DEBUG = true;
+
+const DEFAULT_OPTIONS: RequestOptions = {
   next: {
     revalidate: 120, // 2 minutes
   },
   throwOnError: false,
+  returns: "json",
+  priority: RequestPriority.NORMAL,
 };
 
-const DEBUG_DEDUPE = false;
-const pendingRequests = new Map<string, Promise<unknown>>();
+// Request Management
+class RequestManager {
+  private static pendingRequests = new Map<string, Promise<unknown>>();
+  private static requestQueue = new Map<RequestPriority, Promise<unknown>[]>();
 
-const getCacheKey = (url: string, method: string, options?: RequestOptions): string => {
-  return JSON.stringify({ url, method, options });
-};
+  static {
+    // Initialize queue for each priority level
+    Object.values(RequestPriority).forEach(priority => {
+      if (typeof priority === "number") {
+        this.requestQueue.set(priority, []);
+      }
+    });
+  }
 
-/**
- * Requests data from an endpoint.
- *
- * @param url the url to send the request to
- * @param method the method to use
- * @param returns the expected return type
- * @param options the options to use
- */
-async function ssrRequest<T>(
-  url: string,
-  method: "GET" | "POST",
-  returns: RequestReturns,
-  options?: RequestOptions
-): Promise<T | undefined> {
-  const cacheKey = getCacheKey(url, method, options);
+  private static getCacheKey(url: string, method: string, options?: RequestOptions): string {
+    return JSON.stringify({ url, method, options });
+  }
 
-  // Check if there's already a pending request
-  const pendingRequest = pendingRequests.get(cacheKey);
-  if (pendingRequest) {
-    if (DEBUG_DEDUPE) {
-      Logger.info(`Request deduped: ${url}`);
+  private static getPriorityName(priority: RequestPriority): string {
+    const names: Record<RequestPriority, string> = {
+      [RequestPriority.BACKGROUND]: "background",
+      [RequestPriority.LOW]: "low",
+      [RequestPriority.NORMAL]: "normal",
+      [RequestPriority.HIGH]: "high",
+    };
+    return names[priority];
+  }
+
+  private static async processRequest<T>(
+    priority: RequestPriority,
+    requestFn: () => Promise<T>
+  ): Promise<T> {
+    const higherPriorityQueues = Array.from(this.requestQueue.entries())
+      .filter(([queuePriority]) => queuePriority >= priority)
+      .map(([_, queue]) => queue);
+
+    // Wait for higher priority requests
+    await new Promise<void>(resolve => {
+      if (higherPriorityQueues.every(queue => queue.length === 0)) {
+        resolve();
+      } else {
+        Promise.all(higherPriorityQueues.flat()).finally(() => resolve());
+      }
+    });
+
+    const queue = this.requestQueue.get(priority) ?? [];
+    const requestPromise = requestFn();
+    queue.push(requestPromise);
+    this.requestQueue.set(priority, queue);
+
+    try {
+      return await requestPromise;
+    } finally {
+      const index = queue.indexOf(requestPromise);
+      if (index > -1) {
+        queue.splice(index, 1);
+      }
     }
-    return pendingRequest as Promise<T | undefined>;
   }
 
-  if (DEBUG_DEDUPE) {
-    Logger.info(`New request: ${url} (${pendingRequests.size} pending requests)`);
-  }
+  private static buildUrl(baseUrl: string, searchParams?: Record<string, unknown>): string {
+    if (!searchParams) return baseUrl;
 
-  const searchParams = options?.searchParams;
-  if (searchParams) {
     const params = new URLSearchParams(
-      Object.fromEntries(Object.entries(searchParams).map(([key, value]) => [key, String(value)]))
+      Object.entries(searchParams).map(([key, value]) => [key, String(value)])
     );
-    url = `${url}?${params.toString()}`;
+    return `${baseUrl}?${params.toString()}`;
   }
 
-  // Create the request promise
-  const requestPromise = (async () => {
+  private static async executeRequest<T>(
+    url: string,
+    method: "GET" | "POST",
+    options: RequestOptions
+  ): Promise<T | undefined> {
     try {
       const response: AxiosResponse = await axios({
         url,
         method,
-        ...defaultRequestOptions,
         ...options,
-        responseType: returns,
+        responseType: options.returns,
       });
 
-      // Check rate limits
-      const rateLimit = response.headers["x-ratelimit-remaining"];
-      if (rateLimit) {
-        const left = Number(rateLimit);
-        if (left < 100) {
-          Logger.warn(`Rate limit for ${url} remaining: ${left}`);
-        }
-      }
-
-      // Handle different response types
-      return response.data as unknown as T;
+      this.checkRateLimit(url, response);
+      return response.data as T;
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
-        if (options?.throwOnError) {
+        if (options.throwOnError) {
           throw new Error(`Failed to request ${url}`, { cause: error.response });
         }
         return undefined;
       }
       throw error;
-    } finally {
-      // Remove the request from the cache once it's complete
-      pendingRequests.delete(cacheKey);
     }
-  })();
+  }
 
-  // Store the promise in the cache
-  pendingRequests.set(cacheKey, requestPromise);
+  private static checkRateLimit(url: string, response: AxiosResponse): void {
+    const rateLimit = response.headers["x-ratelimit-remaining"];
+    if (rateLimit) {
+      const remaining = Number(rateLimit);
+      if (remaining < 100) {
+        Logger.warn(`Rate limit for ${url} remaining: ${remaining}`);
+      }
+    }
+  }
 
-  return requestPromise;
+  static async send<T>(
+    url: string,
+    method: "GET" | "POST",
+    options?: RequestOptions
+  ): Promise<T | undefined> {
+    const finalOptions = { ...DEFAULT_OPTIONS, ...options };
+    const priority = finalOptions.priority!;
+    const finalUrl = this.buildUrl(url, finalOptions.searchParams);
+    const cacheKey = this.getCacheKey(finalUrl, method, finalOptions);
+
+    if (DEBUG) {
+      Logger.info(`Sending request: ${finalUrl} with priority ${this.getPriorityName(priority)}`);
+    }
+
+    // Check for pending requests
+    const pendingRequest = this.pendingRequests.get(cacheKey);
+    if (pendingRequest) {
+      return pendingRequest as Promise<T | undefined>;
+    }
+
+    const requestPromise = this.processRequest(priority, () =>
+      this.executeRequest<T>(finalUrl, method, finalOptions)
+    );
+
+    this.pendingRequests.set(cacheKey, requestPromise);
+
+    try {
+      return await requestPromise;
+    } finally {
+      if (DEBUG) {
+        Logger.info(
+          `Request completed: ${finalUrl} with priority ${this.getPriorityName(priority)}`
+        );
+      }
+      this.pendingRequests.delete(cacheKey);
+    }
+  }
+
+  static async get<T>(url: string, options?: RequestOptions): Promise<T | undefined> {
+    return this.send<T>(url, "GET", options);
+  }
+
+  static async post<T>(url: string, options?: RequestOptions): Promise<T | undefined> {
+    return this.send<T>(url, "POST", options);
+  }
 }
 
-/**
- * Gets data from an endpoint.
-
- *
- * @param url the url to get data from
- * @param options the options to use
- */
-export async function ssrGet<T>(
-  url: string,
-  returns: RequestReturns = "json",
-  options?: RequestOptions
-): Promise<T | undefined> {
-  return ssrRequest<T>(url, "GET", returns, options);
-}
-
-/**
- * Posts data to an endpoint.
- *
- * @param url the url to post data to
- * @param options the options to use
- */
-export async function ssrPost<T>(
-  url: string,
-  returns: RequestReturns = "json",
-  options?: RequestOptions
-): Promise<T | undefined> {
-  return ssrRequest<T>(url, "POST", returns, options);
-}
+// Export the public API
+export default {
+  send: RequestManager.send.bind(RequestManager),
+  get: RequestManager.get.bind(RequestManager),
+  post: RequestManager.post.bind(RequestManager),
+};

@@ -61,7 +61,9 @@ export class ScoreService {
         const leaderboard = leaderboardResponse.leaderboard;
         const beatSaverMap = leaderboardResponse.beatsaver;
 
-        const leaderboardScores = await scoresaberService.lookupLeaderboardScores(leaderboardId, page, country);
+        const leaderboardScores = await scoresaberService.lookupLeaderboardScores(leaderboardId, page, {
+          country: country,
+        });
         if (leaderboardScores == undefined) {
           return;
         }

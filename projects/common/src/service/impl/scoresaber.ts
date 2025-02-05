@@ -1,21 +1,22 @@
-import Service from "../service";
-import { ScoreSaberPlayerSearchToken } from "../../types/token/scoresaber/player-search";
-import ScoreSaberPlayerToken from "../../types/token/scoresaber/player";
-import { ScoreSaberPlayersPageToken } from "../../types/token/scoresaber/players-page";
-import { ScoreSort } from "../../score/score-sort";
-import ScoreSaberPlayerScoresPageToken from "../../types/token/scoresaber/player-scores-page";
-import ScoreSaberLeaderboardToken from "../../types/token/scoresaber/leaderboard";
-import ScoreSaberLeaderboardScoresPageToken from "../../types/token/scoresaber/leaderboard-scores-page";
-import { clamp, lerp } from "../../utils/math-utils";
+import { Cooldown } from "../../cooldown";
 import { CurvePoint } from "../../curve-point";
-import ScoreSaberLeaderboardPageToken from "../../types/token/scoresaber/leaderboard-page";
+import { DetailType } from "../../detail-type";
 import { StarFilter } from "../../maps/types";
-import RankingRequestToken from "../../types/token/scoresaber/ranking-request-token";
 import ScoreSaberRankingRequestsResponse from "../../response/scoresaber-ranking-requests-response";
 import { MapDifficulty } from "../../score/map-difficulty";
+import { ScoreSort } from "../../score/score-sort";
+import ScoreSaberLeaderboardToken from "../../types/token/scoresaber/leaderboard";
+import ScoreSaberLeaderboardPageToken from "../../types/token/scoresaber/leaderboard-page";
+import ScoreSaberLeaderboardScoresPageToken from "../../types/token/scoresaber/leaderboard-scores-page";
+import ScoreSaberPlayerToken from "../../types/token/scoresaber/player";
+import ScoreSaberPlayerScoresPageToken from "../../types/token/scoresaber/player-scores-page";
+import { ScoreSaberPlayerSearchToken } from "../../types/token/scoresaber/player-search";
+import { ScoreSaberPlayersPageToken } from "../../types/token/scoresaber/players-page";
+import RankingRequestToken from "../../types/token/scoresaber/ranking-request-token";
+import { clamp, lerp } from "../../utils/math-utils";
+import { RequestPriority } from "../../utils/request";
 import { getDifficulty } from "../../utils/song-utils";
-import { DetailType } from "../../detail-type";
-import { Cooldown } from "../../cooldown";
+import Service from "../service";
 
 const API_BASE = "https://scoresaber.com/api";
 
@@ -88,7 +89,7 @@ class ScoreSaberService extends Service {
   ];
 
   constructor() {
-    super("ScoreSaber", new Cooldown(60_000 / 300, 150));
+    super(new Cooldown(60_000 / 300, 150));
   }
 
   /**
@@ -238,11 +239,19 @@ class ScoreSaberService extends Service {
    *
    * @param leaderboardId the ID of the leaderboard to look up
    */
-  public async lookupLeaderboard(leaderboardId: string): Promise<ScoreSaberLeaderboardToken | undefined> {
+  public async lookupLeaderboard(
+    leaderboardId: string,
+    options?: {
+      requestPriority?: RequestPriority;
+    }
+  ): Promise<ScoreSaberLeaderboardToken | undefined> {
     const before = performance.now();
     this.log(`Looking up leaderboard "${leaderboardId}"...`);
     const response = await this.fetch<ScoreSaberLeaderboardToken>(
-      LOOKUP_LEADERBOARD_ENDPOINT.replace(":id", leaderboardId)
+      LOOKUP_LEADERBOARD_ENDPOINT.replace(":id", leaderboardId),
+      {
+        priority: options?.requestPriority,
+      }
     );
     if (response === undefined) {
       return undefined;
@@ -294,12 +303,14 @@ class ScoreSaberService extends Service {
       category?: number;
       stars?: StarFilter;
       sort?: number;
+      requestPriority?: RequestPriority;
     }
   ): Promise<ScoreSaberLeaderboardPageToken | undefined> {
     const before = performance.now();
     this.log(`Looking up leaderboard page "${page}"...`);
 
     const response = await this.fetch<ScoreSaberLeaderboardPageToken>(LOOKUP_LEADERBOARDS_ENDPOINT, {
+      priority: options?.requestPriority,
       searchParams: {
         page: page.toString(),
         ...(options?.ranked ? { ranked: options.ranked } : {}),
@@ -346,17 +357,25 @@ class ScoreSaberService extends Service {
   public async lookupLeaderboardScores(
     leaderboardId: string,
     page: number,
-    country?: string
+    options?: {
+      country?: string;
+      requestPriority?: RequestPriority;
+    }
   ): Promise<ScoreSaberLeaderboardScoresPageToken | undefined> {
     const before = performance.now();
     this.log(`Looking up scores for leaderboard "${leaderboardId}", page "${page}"...`);
     const response = await this.fetch<ScoreSaberLeaderboardScoresPageToken>(
       LOOKUP_LEADERBOARD_SCORES_ENDPOINT.replace(":id", leaderboardId).replace(":page", page.toString()) +
-        (country ? `&countries=${country}` : "")
+        (options?.country ? `&countries=${options.country}` : ""),
+      {
+        priority: options?.requestPriority,
+      }
     );
+
     if (response === undefined) {
       return undefined;
     }
+
     this.log(
       `Found ${response.scores.length} scores for leaderboard "${leaderboardId}", page "${page}" in ${(performance.now() - before).toFixed(0)}ms`
     );

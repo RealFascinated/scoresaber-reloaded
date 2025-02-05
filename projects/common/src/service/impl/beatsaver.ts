@@ -8,7 +8,7 @@ const LOOKUP_MAP_BY_HASH_ENDPOINT = `${API_BASE}/maps/hash/:query`;
 
 class BeatSaverService extends Service {
   constructor() {
-    super("BeatSaver", new Cooldown(60_000 / 300, 150));
+    super(new Cooldown(60_000 / 300, 150));
   }
 
   /**

@@ -8,7 +8,8 @@
     "dev:website": "bun --filter 'website' dev",
     "dev:backend": "bun --filter 'backend' dev",
     "dev:common": "bun --filter '@ssr/common' dev",
-    "dev": "concurrently \"bun run dev:common\" \"bun run dev:backend\""
+    "dev": "concurrently \"bun run dev:common\" \"bun run dev:backend\"",
+    "prettier": "prettier --write ."
   },
   "author": "fascinated7",
   "license": "MIT",

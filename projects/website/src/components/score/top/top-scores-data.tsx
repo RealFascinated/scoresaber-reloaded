@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Config } from "@ssr/common/config";
 import { TopScoresResponse } from "@ssr/common/response/top-scores-response";
 import { Timeframe } from "@ssr/common/timeframe";
-import { ssrGet } from "@ssr/common/utils/request";
+import RequestManager from "@ssr/common/utils/request";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -46,7 +46,9 @@ export function TopScoresData({ timeframe }: TopScoresDataProps) {
   const { data, isLoading } = useQuery({
     queryKey: ["top-scores", selectedTimeframe],
     queryFn: async () => {
-      return ssrGet<TopScoresResponse>(`${Config.apiUrl}/scores/top?limit=50&timeframe=${selectedTimeframe}`);
+      return RequestManager.get<TopScoresResponse>(
+        `${Config.apiUrl}/scores/top?limit=50&timeframe=${selectedTimeframe}`
+      );
     },
     refetchInterval: false,
   });

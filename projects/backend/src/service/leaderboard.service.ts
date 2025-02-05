@@ -22,6 +22,7 @@ import { formatDuration } from "@ssr/common/utils/time-utils";
 import { removeObjectFields } from "@ssr/common/object.util";
 import Logger from "@ssr/common/logger";
 import { DetailType } from "@ssr/common/detail-type";
+import { RequestPriority } from "@ssr/common/utils/request";
 
 const CACHE_REFRESH_TIME = 1000 * 60 * 60 * 12; // 12 hours
 
@@ -93,17 +94,14 @@ export default class LeaderboardService {
     options = {
       includeBeatSaver: true,
       type: DetailType.BASIC,
-      ...options
+      ...options,
     };
     const cacheKey = `${id}-${options.type}`;
 
     return fetchWithCache(CacheService.getCache(ServiceCache.Leaderboards), cacheKey, async () => {
       // Use index hint for faster query
-      const cachedLeaderboard = await ScoreSaberLeaderboardModel
-        .findById(id)
-        .hint({ _id: 1 })
-        .lean();
-        
+      const cachedLeaderboard = await ScoreSaberLeaderboardModel.findById(id).hint({ _id: 1 }).lean();
+
       const { cached, foundLeaderboard } = this.validateCachedLeaderboard(cachedLeaderboard, options);
 
       let leaderboard = foundLeaderboard;
@@ -117,7 +115,7 @@ export default class LeaderboardService {
       }
 
       // Start BeatSaver fetch early in parallel if needed
-      const beatSaverPromise = options.includeBeatSaver 
+      const beatSaverPromise = options.includeBeatSaver
         ? BeatSaverService.getMap(
             leaderboard.songHash,
             leaderboard.difficulty.difficulty,
@@ -165,7 +163,7 @@ export default class LeaderboardService {
     options = {
       includeBeatSaver: true,
       type: DetailType.BASIC,
-      ...options
+      ...options,
     };
 
     // Simplified cache key
@@ -173,12 +171,11 @@ export default class LeaderboardService {
 
     return fetchWithCache(CacheService.getCache(ServiceCache.Leaderboards), cacheKey, async () => {
       // Use compound index hint for faster query
-      const cachedLeaderboard = await ScoreSaberLeaderboardModel
-        .findOne({
-          songHash: hash,
-          "difficulty.difficulty": difficulty,
-          "difficulty.characteristic": characteristic,
-        })
+      const cachedLeaderboard = await ScoreSaberLeaderboardModel.findOne({
+        songHash: hash,
+        "difficulty.difficulty": difficulty,
+        "difficulty.characteristic": characteristic,
+      })
         .hint({ songHash: 1, "difficulty.difficulty": 1, "difficulty.characteristic": 1 })
         .lean();
 
@@ -312,7 +309,10 @@ export default class LeaderboardService {
     const rankedMapDiffs: Map<string, LeaderboardDifficulty[]> = new Map();
 
     while (hasMorePages) {
-      const response = await scoresaberService.lookupLeaderboards(page, { ranked: true });
+      const response = await scoresaberService.lookupLeaderboards(page, {
+        ranked: true,
+        requestPriority: RequestPriority.LOW,
+      });
       if (!response) {
         Logger.warn(`Failed to fetch ranked leaderboards on page ${page}.`);
         continue;
@@ -555,7 +555,9 @@ Map: https://ssr.fascinated.cc/leaderboard/${leaderboard.id}
     let hasMoreScores = true;
 
     while (hasMoreScores) {
-      const response = await scoresaberService.lookupLeaderboardScores(leaderboardId + "", currentPage);
+      const response = await scoresaberService.lookupLeaderboardScores(leaderboardId + "", currentPage, {
+        requestPriority: RequestPriority.LOW,
+      });
       if (!response) {
         Logger.warn(`Failed to fetch scoresaber api scores for leaderboard "${leaderboardId}" on page ${currentPage}`);
         currentPage++;
@@ -640,7 +642,9 @@ Map: https://ssr.fascinated.cc/leaderboard/${leaderboard.id}
     let totalUnranked = 0;
 
     for (const previousLeaderboard of rankedLeaderboards) {
-      const leaderboard = await scoresaberService.lookupLeaderboard(previousLeaderboard.id + "");
+      const leaderboard = await scoresaberService.lookupLeaderboard(previousLeaderboard.id + "", {
+        requestPriority: RequestPriority.LOW,
+      });
       if (!leaderboard || leaderboard.ranked) continue;
 
       totalUnranked++;
@@ -741,7 +745,10 @@ Map: https://ssr.fascinated.cc/leaderboard/${leaderboard.id}
     const rankedMapDiffs: Map<string, LeaderboardDifficulty[]> = new Map();
 
     while (hasMorePages) {
-      const response = await scoresaberService.lookupLeaderboards(page, { qualified: true });
+      const response = await scoresaberService.lookupLeaderboards(page, {
+        qualified: true,
+        requestPriority: RequestPriority.LOW,
+      });
       if (!response) {
         Logger.warn(`Failed to fetch qualified leaderboards on page ${page}.`);
         continue;

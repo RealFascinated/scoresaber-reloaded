@@ -1,21 +1,15 @@
-import { RequestOptions, ssrGet } from "../utils/request";
 import { Cooldown } from "../cooldown";
 import Logger from "../logger";
+import RequestManager, { RequestOptions } from "../utils/request";
 import { isServer } from "../utils/utils";
 
 export default class Service {
-  /**
-   * The name of the service.
-   */
-  private readonly name: string;
-
   /**
    * The cooldown for the service.
    */
   private readonly cooldown: Cooldown;
 
-  constructor(name: string, cooldown: Cooldown) {
-    this.name = name;
+  constructor(cooldown: Cooldown) {
     this.cooldown = cooldown;
   }
 
@@ -52,7 +46,8 @@ export default class Service {
   public async fetch<T>(url: string, options?: RequestOptions): Promise<T | undefined> {
     await this.cooldown.waitAndUse();
 
-    return ssrGet<T>(this.buildRequestUrl(!isServer(), url), "json", {
+    return RequestManager.get<T>(this.buildRequestUrl(!isServer(), url), {
+      returns: "json",
       ...options,
     });
   }
