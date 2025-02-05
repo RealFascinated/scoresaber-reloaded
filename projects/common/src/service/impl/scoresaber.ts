@@ -14,7 +14,6 @@ import { ScoreSaberPlayerSearchToken } from "../../types/token/scoresaber/player
 import { ScoreSaberPlayersPageToken } from "../../types/token/scoresaber/players-page";
 import RankingRequestToken from "../../types/token/scoresaber/ranking-request-token";
 import { clamp, lerp } from "../../utils/math-utils";
-import { RequestPriority } from "../../utils/request";
 import { getDifficulty } from "../../utils/song-utils";
 import Service from "../service";
 
@@ -254,18 +253,12 @@ class ScoreSaberService extends Service {
    * @param leaderboardId the ID of the leaderboard to look up
    */
   public async lookupLeaderboard(
-    leaderboardId: string,
-    options?: {
-      requestPriority?: RequestPriority;
-    }
+    leaderboardId: string
   ): Promise<ScoreSaberLeaderboardToken | undefined> {
     const before = performance.now();
     this.log(`Looking up leaderboard "${leaderboardId}"...`);
     const response = await this.fetch<ScoreSaberLeaderboardToken>(
-      LOOKUP_LEADERBOARD_ENDPOINT.replace(":id", leaderboardId),
-      {
-        priority: options?.requestPriority,
-      }
+      LOOKUP_LEADERBOARD_ENDPOINT.replace(":id", leaderboardId)
     );
     if (response === undefined) {
       return undefined;
@@ -321,7 +314,6 @@ class ScoreSaberService extends Service {
       category?: number;
       stars?: StarFilter;
       sort?: number;
-      requestPriority?: RequestPriority;
     }
   ): Promise<ScoreSaberLeaderboardPageToken | undefined> {
     const before = performance.now();
@@ -330,7 +322,6 @@ class ScoreSaberService extends Service {
     const response = await this.fetch<ScoreSaberLeaderboardPageToken>(
       LOOKUP_LEADERBOARDS_ENDPOINT,
       {
-        priority: options?.requestPriority,
         searchParams: {
           page: page.toString(),
           ...(options?.ranked ? { ranked: options.ranked } : {}),
@@ -388,7 +379,6 @@ class ScoreSaberService extends Service {
     page: number,
     options?: {
       country?: string;
-      requestPriority?: RequestPriority;
     }
   ): Promise<ScoreSaberLeaderboardScoresPageToken | undefined> {
     const before = performance.now();
@@ -397,10 +387,7 @@ class ScoreSaberService extends Service {
       LOOKUP_LEADERBOARD_SCORES_ENDPOINT.replace(":id", leaderboardId).replace(
         ":page",
         page.toString()
-      ) + (options?.country ? `&countries=${options.country}` : ""),
-      {
-        priority: options?.requestPriority,
-      }
+      ) + (options?.country ? `&countries=${options.country}` : "")
     );
 
     if (response === undefined) {

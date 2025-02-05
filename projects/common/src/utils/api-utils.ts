@@ -1,4 +1,4 @@
-import RequestManager, { RequestPriority } from "./request";
+import RequestManager from "./request";
 
 type ApiHealth = {
   online: boolean;
@@ -11,9 +11,7 @@ type ApiHealth = {
  */
 export async function getApiHealth(url: string): Promise<ApiHealth> {
   try {
-    await RequestManager.get(`${url}/health`, {
-      priority: RequestPriority.BACKGROUND,
-    });
+    await RequestManager.get(`${url}/health`);
     return {
       online: true,
     };

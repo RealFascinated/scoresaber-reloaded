@@ -1,31 +1,30 @@
-import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
-import { LeaderboardResponse } from "@ssr/common/response/leaderboard-response";
-import { NotFoundError } from "elysia";
-import BeatSaverService from "./beatsaver.service";
-import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
+import { DetailType } from "@ssr/common/detail-type";
+import Logger from "@ssr/common/logger";
 import {
   ScoreSaberLeaderboard,
   ScoreSaberLeaderboardModel,
 } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import { fetchWithCache } from "../common/cache.util";
+import LeaderboardDifficulty from "@ssr/common/model/leaderboard/leaderboard-difficulty";
+import { ScoreSaberPreviousScoreModel } from "@ssr/common/model/score/impl/scoresaber-previous-score";
 import {
   ScoreSaberScoreDocument,
   ScoreSaberScoreModel,
 } from "@ssr/common/model/score/impl/scoresaber-score";
-import CacheService, { ServiceCache } from "./cache.service";
-import LeaderboardDifficulty from "@ssr/common/model/leaderboard/leaderboard-difficulty";
+import { removeObjectFields } from "@ssr/common/object.util";
+import { LeaderboardResponse } from "@ssr/common/response/leaderboard-response";
+import { MapDifficulty } from "@ssr/common/score/map-difficulty";
+import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
+import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
+import { MapCharacteristic } from "@ssr/common/types/map-characteristic";
 import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score";
 import { getDifficulty } from "@ssr/common/utils/song-utils";
-import { ScoreSaberPreviousScoreModel } from "@ssr/common/model/score/impl/scoresaber-previous-score";
-import { MapDifficulty } from "@ssr/common/score/map-difficulty";
-import { MapCharacteristic } from "@ssr/common/types/map-characteristic";
-import { DiscordChannels, logToChannel } from "../bot/bot";
-import { EmbedBuilder } from "discord.js";
 import { formatDuration } from "@ssr/common/utils/time-utils";
-import { removeObjectFields } from "@ssr/common/object.util";
-import Logger from "@ssr/common/logger";
-import { DetailType } from "@ssr/common/detail-type";
-import { RequestPriority } from "@ssr/common/utils/request";
+import { EmbedBuilder } from "discord.js";
+import { NotFoundError } from "elysia";
+import { DiscordChannels, logToChannel } from "../bot/bot";
+import { fetchWithCache } from "../common/cache.util";
+import BeatSaverService from "./beatsaver.service";
+import CacheService, { ServiceCache } from "./cache.service";
 
 const CACHE_REFRESH_TIME = 1000 * 60 * 60 * 12; // 12 hours
 
@@ -334,7 +333,6 @@ export default class LeaderboardService {
     while (hasMorePages) {
       const response = await scoresaberService.lookupLeaderboards(page, {
         ranked: true,
-        requestPriority: RequestPriority.LOW,
       });
       if (!response) {
         Logger.warn(`Failed to fetch ranked leaderboards on page ${page}.`);
@@ -587,10 +585,7 @@ Map: https://ssr.fascinated.cc/leaderboard/${leaderboard.id}
     while (hasMoreScores) {
       const response = await scoresaberService.lookupLeaderboardScores(
         leaderboardId + "",
-        currentPage,
-        {
-          requestPriority: RequestPriority.LOW,
-        }
+        currentPage
       );
       if (!response) {
         Logger.warn(
@@ -689,9 +684,7 @@ Map: https://ssr.fascinated.cc/leaderboard/${leaderboard.id}
     let totalUnranked = 0;
 
     for (const previousLeaderboard of rankedLeaderboards) {
-      const leaderboard = await scoresaberService.lookupLeaderboard(previousLeaderboard.id + "", {
-        requestPriority: RequestPriority.LOW,
-      });
+      const leaderboard = await scoresaberService.lookupLeaderboard(previousLeaderboard.id + "");
       if (!leaderboard || leaderboard.ranked) continue;
 
       totalUnranked++;
@@ -794,7 +787,6 @@ Map: https://ssr.fascinated.cc/leaderboard/${leaderboard.id}
     while (hasMorePages) {
       const response = await scoresaberService.lookupLeaderboards(page, {
         qualified: true,
-        requestPriority: RequestPriority.LOW,
       });
       if (!response) {
         Logger.warn(`Failed to fetch qualified leaderboards on page ${page}.`);
