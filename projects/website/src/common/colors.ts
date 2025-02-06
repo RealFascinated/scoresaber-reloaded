@@ -1,6 +1,6 @@
 export const Colors = {
   primary: "#0070f3",
-  ssr: "#5060ff",
+  ssr: "#5c6bff",
   ranked: "#0070f3",
   rankedLight: "#00beff",
   hands: {
