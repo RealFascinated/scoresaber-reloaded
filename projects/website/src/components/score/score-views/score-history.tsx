@@ -47,7 +47,7 @@ export function ScoreHistory({ playerId, leaderboard }: ScoreHistoryProps) {
   });
 
   useEffect(() => {
-    if (data && !isEqual(data, scores)) {
+    if (data && !isEqual(data.items, scores?.items)) {
       setScores(data);
     }
   }, [data]);

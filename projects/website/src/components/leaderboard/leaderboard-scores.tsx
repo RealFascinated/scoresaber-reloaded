@@ -59,7 +59,9 @@ export default function LeaderboardScores({
   );
 
   const handleScoreAnimation = useCallback(async () => {
-    if (!hasMounted || isEqual(currentScores, data)) {
+    console.log(currentScores, data);
+
+    if (!hasMounted || isEqual(currentScores?.items, data?.items)) {
       return;
     }
 
