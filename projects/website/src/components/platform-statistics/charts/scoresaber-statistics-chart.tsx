@@ -12,7 +12,7 @@ type Props = {
 
 const datasetConfig: DatasetConfig[] = [
   {
-    title: "Active Players",
+    title: "Daily Unique Players",
     field: "activePlayers",
     color: "#754fff",
     axisId: "y",
@@ -27,7 +27,7 @@ const datasetConfig: DatasetConfig[] = [
         return value.toFixed(1);
       },
     },
-    labelFormatter: (value: number) => `Active Players: ${formatNumberWithCommas(value)}`,
+    labelFormatter: (value: number) => `Players: ${formatNumberWithCommas(value)}`,
   },
   {
     title: "Active Accounts",
@@ -45,7 +45,7 @@ const datasetConfig: DatasetConfig[] = [
         return value.toFixed(1);
       },
     },
-    labelFormatter: (value: number) => `Active Players: ${formatNumberWithCommas(value)}`,
+    labelFormatter: (value: number) => `Accounts: ${formatNumberWithCommas(value)}`,
   },
   {
     title: "Scores Set",
