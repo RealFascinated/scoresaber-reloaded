@@ -1,6 +1,7 @@
 "use client";
 
 import { DatasetConfig } from "@/common/chart/types";
+import { Colors } from "@/common/colors";
 import GenericPlayerChart from "@/components/player/history-views/generic-player-chart";
 import { PlayerStatisticHistory } from "@ssr/common/player/player-statistic-history";
 import { isWholeNumber } from "@ssr/common/utils/number-utils";
@@ -14,7 +15,7 @@ const datasetConfig: DatasetConfig[] = [
   {
     title: "Average Ranked Accuracy",
     field: "accuracy.averageRankedAccuracy",
-    color: "#4858ff",
+    color: Colors.ranked,
     axisId: "y",
     axisConfig: {
       reverse: false,

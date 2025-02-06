@@ -1,7 +1,7 @@
 import Tooltip from "@/components/tooltip";
 import { Change } from "@/components/change";
-import { capitalizeFirstLetter } from "../../../../../common/src/string-utils";
 import { ScoreBadgeProps } from "@/components/score/badges/badge-props";
+import { capitalizeFirstLetter } from "@ssr/common/string-utils";
 
 type HandAccuracyProps = ScoreBadgeProps & {
   /**

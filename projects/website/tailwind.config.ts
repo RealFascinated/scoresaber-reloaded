@@ -1,3 +1,4 @@
+import { Colors } from "@/common/colors";
 import type { Config } from "tailwindcss";
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -17,16 +18,19 @@ const config: Config = {
     },
     extend: {
       colors: {
-        pp: "#4858ff",
+        pp: Colors.ssr,
         landing: "#0f0f0f",
         ssr: {
-          DEFAULT: "#7581fd",
+          DEFAULT: Colors.ssr,
         },
+        ranked: Colors.ranked,
         hands: {
-          left: "rgba(168,32,32,1)",
-          right: "rgba(32,100,168,1)",
+          left: Colors.hands.left,
+          right: Colors.hands.right,
         },
-        background: "hsl(var(--background))",
+        background: {
+          DEFAULT: "hsl(var(--background))",
+        },
         foreground: "hsl(var(--foreground))",
         card: {
           DEFAULT: "hsl(var(--card))",

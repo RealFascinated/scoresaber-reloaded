@@ -6,6 +6,7 @@ import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scores
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { formatTime } from "@ssr/common/utils/time-utils";
 import { ScoreStatsResponse } from "@ssr/common/response/scorestats-response";
+import { Colors } from "@/common/colors";
 
 type Props = {
   /**
@@ -47,7 +48,7 @@ export default function PlayerScoreAccuracyChart({ scoreStats, leaderboard }: Pr
     {
       title: "Accuracy",
       field: "accuracy",
-      color: "#3EC1D3",
+      color: Colors.generic.green,
       axisId: "y",
       axisConfig: {
         reverse: false,
@@ -60,7 +61,7 @@ export default function PlayerScoreAccuracyChart({ scoreStats, leaderboard }: Pr
     {
       title: "Previous Accuracy",
       field: "previousAccuracy",
-      color: "#d3a93e",
+      color: Colors.rankedLight,
       axisId: "y1",
       axisConfig: {
         reverse: false,
@@ -73,7 +74,7 @@ export default function PlayerScoreAccuracyChart({ scoreStats, leaderboard }: Pr
     {
       title: "PP",
       field: "pp",
-      color: "#4858ff",
+      color: Colors.ranked,
       axisId: "y2",
       axisConfig: {
         reverse: false,

@@ -12,7 +12,7 @@ const badges: ScoreBadge[] = [
   {
     name: "PP",
     color: () => {
-      return "bg-pp";
+      return "bg-ranked";
     },
     create: (score: ScoreSaberScore, leaderboard: ScoreSaberLeaderboard) => {
       if (!score.pp) {

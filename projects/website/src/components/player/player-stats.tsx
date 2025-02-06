@@ -19,7 +19,7 @@ type Stat = {
 const playerStats: Stat[] = [
   {
     name: "Ranked Play Count",
-    color: () => "bg-pp",
+    color: () => "bg-ranked",
     create: (player: ScoreSaberPlayer) => {
       return {
         value: <>{formatNumberWithCommas(player.statistics.rankedPlayCount)}</>,
@@ -28,7 +28,7 @@ const playerStats: Stat[] = [
   },
   {
     name: "Total Ranked Score",
-    color: () => "bg-pp",
+    color: () => "bg-ranked",
     create: (player: ScoreSaberPlayer) => {
       return {
         value: <>{formatNumberWithCommas(player.statistics.totalRankedScore)}</>,
@@ -37,7 +37,7 @@ const playerStats: Stat[] = [
   },
   {
     name: "Average Ranked Accuracy",
-    color: () => "bg-pp",
+    color: () => "bg-ranked",
     create: (player: ScoreSaberPlayer) => {
       return {
         value: <>{player.statistics.averageRankedAccuracy.toFixed(2) + "%"}</>,

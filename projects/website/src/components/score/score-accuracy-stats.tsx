@@ -4,6 +4,7 @@ import Tooltip from "@/components/tooltip";
 import { capitalizeFirstLetter } from "@ssr/common/string-utils";
 import ScoreAccuracyGrid from "@/components/score/score-accuracy-grid";
 import { ScoreStatsResponse } from "@ssr/common/response/scorestats-response";
+import { Colors } from "@/common/colors";
 
 type ScoreAccuracyStatProps = {
   scoreStats: ScoreStatsResponse;
@@ -11,8 +12,8 @@ type ScoreAccuracyStatProps = {
 
 type Hand = "left" | "right";
 const handColors: Record<Hand, string> = {
-  left: "#a82020",
-  right: "#2064a8",
+  left: Colors.hands.left,
+  right: Colors.hands.right,
 };
 const MAX_ACCURACY = 115;
 const CIRCLE_RADIUS = 32;

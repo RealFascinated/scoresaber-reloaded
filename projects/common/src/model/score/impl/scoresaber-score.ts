@@ -5,11 +5,11 @@ import {
   ReturnModelType,
   Severity,
 } from "@typegoose/typegoose";
-import { type ScoreSaberLeaderboardPlayerInfoToken } from "../../../types/token/scoresaber/leaderboard-player-info";
 import { Document } from "mongoose";
 import { AutoIncrementID } from "@typegoose/auto-increment";
 import { PreviousScore } from "../previous-score";
 import { ScoreSaberScoreBase } from "./scoresaber-score-base";
+import { ScoreSaberLeaderboardPlayerInfoToken } from "../../../types/token/scoresaber/leaderboard-player-info";
 
 @modelOptions({
   options: { allowMixed: Severity.ALLOW },

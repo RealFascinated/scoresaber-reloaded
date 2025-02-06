@@ -1,6 +1,7 @@
 "use client";
 
 import { DatasetConfig } from "@/common/chart/types";
+import { Colors } from "@/common/colors";
 import GenericPlayerChart from "@/components/player/history-views/generic-player-chart";
 import { scoreBarsDataset } from "@/components/player/history-views/views/player-scores-chart";
 import { PlayerStatisticHistory } from "@ssr/common/player/player-statistic-history";
@@ -15,7 +16,7 @@ const datasetConfig: DatasetConfig[] = [
   {
     title: "Rank",
     field: "rank",
-    color: "#3EC1D3",
+    color: "#2ecc71",
     axisId: "y",
     axisConfig: {
       reverse: true,
@@ -41,7 +42,7 @@ const datasetConfig: DatasetConfig[] = [
   {
     title: "PP",
     field: "pp",
-    color: "#4858ff",
+    color: Colors.ranked,
     axisId: "y2",
     axisConfig: {
       reverse: false,
@@ -61,7 +62,7 @@ const datasetConfig: DatasetConfig[] = [
   {
     title: "+1 PP",
     field: "plusOnePp",
-    color: "#6773ff",
+    color: Colors.rankedLight,
     axisId: "y3",
     axisConfig: {
       reverse: false,

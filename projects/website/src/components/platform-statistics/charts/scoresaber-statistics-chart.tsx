@@ -5,6 +5,7 @@ import { formatNumberWithCommas, formatPp, isWholeNumber } from "@ssr/common/uti
 import GenericStatisticChart from "@/components/platform-statistics/generic-statistic-chart";
 import { StatisticsType } from "@ssr/common/model/statistics/statistic-type";
 import { DatasetConfig } from "@/common/chart/types";
+import { Colors } from "@/common/colors";
 
 type Props = {
   statistics: StatisticsType;
@@ -69,7 +70,7 @@ const datasetConfig: DatasetConfig[] = [
   {
     title: "Daily Average PP (top 100 scores)",
     field: "averagePp",
-    color: "#4858ff",
+    color: Colors.ranked,
     axisId: "y",
     axisConfig: {
       reverse: false,

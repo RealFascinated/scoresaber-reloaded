@@ -6,6 +6,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import Tooltip from "@/components/tooltip";
 import GenericChart from "@/components/chart/generic-chart";
 import { DatasetConfig } from "@/common/chart/types";
+import { Colors } from "@/common/colors";
 
 type PpBoundaryProps = {
   player: ScoreSaberPlayer;
@@ -31,7 +32,7 @@ export default function PpBoundaryStat({ player }: PpBoundaryProps) {
     {
       title: "Global PP Gain",
       field: "pp",
-      color: "#3EC1D3",
+      color: Colors.ranked,
       axisId: "y",
       axisConfig: {
         reverse: false,

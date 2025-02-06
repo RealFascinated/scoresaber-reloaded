@@ -71,7 +71,7 @@ function Buttons() {
       transition={{ delay: 0.35, duration: 0.7, ease: "easeOut" }}
     >
       <Button
-        className="max-w-52 flex gap-2.5 bg-pp hover:bg-pp/85 text-white"
+        className="max-w-52 flex gap-2.5 bg-ssr hover:bg-ssr/85 text-white"
         onClick={openSearch}
       >
         <UserSearch className="size-6" />
