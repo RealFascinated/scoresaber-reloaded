@@ -84,7 +84,7 @@ export default function LeaderboardScores({
     }
 
     navigateToPage(
-      `/leaderboard/${selectedLeaderboardId}/${currentPage}${selectedMode !== ScoreModeEnum.Global ? "?category=" + selectedMode : ""}`
+      `/leaderboard/${selectedLeaderboardId}${currentPage !== 1 ? `/${currentPage}` : ""}${selectedMode !== ScoreModeEnum.Global ? "?category=" + selectedMode : ""}`
     );
   }, [selectedLeaderboardId, currentPage, disableUrlChanging, navigateToPage, selectedMode]);
 
