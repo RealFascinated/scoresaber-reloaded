@@ -1,12 +1,13 @@
 "use client";
 
 import { isEqual } from "@/common/utils";
-import Pagination from "@/components/input/pagination";
+import PaginationComponent from "@/components/input/pagination";
+import { LoadingIcon } from "@/components/loading-icon";
 import Score from "@/components/score/score";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
-import { Page } from "@ssr/common/pagination";
+import { Page, Pagination } from "@ssr/common/pagination";
 import { PlayerScore } from "@ssr/common/score/player-score";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
@@ -31,7 +32,17 @@ export function ScoreHistory({ playerId, leaderboard }: ScoreHistoryProps) {
 
   const { data, isError, isLoading } = useQuery({
     queryKey: [`scoresHistory:${leaderboard.id}`, leaderboard.id, page],
-    queryFn: async () => ssrApi.fetchPlayerScoresHistory(playerId, leaderboard.id + "", page),
+    queryFn: async () => {
+      const scoreHistory = await ssrApi.fetchPlayerScoresHistory(
+        playerId,
+        leaderboard.id + "",
+        page
+      );
+      if (scoreHistory == undefined) {
+        return Pagination.empty();
+      }
+      return scoreHistory;
+    },
     staleTime: 30 * 1000,
   });
 
@@ -42,7 +53,19 @@ export function ScoreHistory({ playerId, leaderboard }: ScoreHistoryProps) {
   }, [data]);
 
   if (!scores || isError) {
-    return <p className="text-center">No score history found.</p>;
+    return (
+      <div className="flex justify-center">
+        <LoadingIcon />
+      </div>
+    );
+  }
+
+  if (scores.items.length === 0) {
+    return (
+      <div className="flex justify-center">
+        <p>This score does not have any tracked history</p>
+      </div>
+    );
   }
 
   return (
@@ -64,7 +87,7 @@ export function ScoreHistory({ playerId, leaderboard }: ScoreHistoryProps) {
         })}
       </div>
 
-      <Pagination
+      <PaginationComponent
         mobilePagination={isMobile}
         page={page}
         totalItems={scores.metadata.totalItems}

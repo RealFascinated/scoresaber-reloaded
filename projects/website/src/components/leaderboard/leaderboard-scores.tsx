@@ -49,9 +49,6 @@ export default function LeaderboardScores({
   const [previousPage, setPreviousPage] = useState(initialPage);
   const [currentPage, setCurrentPage] = useState(initialPage);
   const [currentScores, setCurrentScores] = useState<Page<ScoreSaberScore>>();
-  const [previousScores, setPreviousScores] = useState<Page<ScoreSaberScore> | undefined>(
-    undefined
-  );
   const [hasMounted, setHasMounted] = useState(false);
 
   const { data, isError, isLoading } = useLeaderboardScores(
@@ -61,19 +58,15 @@ export default function LeaderboardScores({
     filter.country
   );
 
-  useEffect(() => {
-    setHasMounted(true);
-  }, []);
-
   const handleScoreAnimation = useCallback(async () => {
-    if (!hasMounted) return;
-    if (isEqual(previousScores, data)) return;
+    if (!hasMounted || isEqual(currentScores, data)) {
+      return;
+    }
 
     await controls.start(previousPage >= currentPage ? "hiddenRight" : "hiddenLeft");
     setCurrentScores(data);
     await controls.start("visible");
-    setPreviousScores(data);
-  }, [controls, currentPage, previousPage, data, hasMounted, previousScores]);
+  }, [controls, currentPage, previousPage, data, hasMounted]);
 
   const handleLeaderboardChange = useCallback(
     (id: number) => {
@@ -83,6 +76,10 @@ export default function LeaderboardScores({
     },
     [leaderboardChanged]
   );
+
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
 
   useEffect(() => {
     if (data) {
@@ -100,7 +97,9 @@ export default function LeaderboardScores({
     );
   }, [selectedLeaderboardId, currentPage, disableUrlChanging, navigateToPage, selectedMode]);
 
-  if (!currentScores) return <LeaderboardScoresSkeleton />;
+  if (!currentScores) {
+    return <LeaderboardScoresSkeleton />;
+  }
 
   return (
     <>
@@ -130,7 +129,7 @@ export default function LeaderboardScores({
         (currentScores.items.length === 0 && (
           <div className="text-center">
             {isError && <p>Oopsies! Something went wrong.</p>}
-            {currentScores.items.length === 0 && <p>No scores found.</p>}
+            {currentScores.items.length === 0 && <p>No scores found</p>}
           </div>
         ))}
 

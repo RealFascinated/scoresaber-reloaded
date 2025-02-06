@@ -19,19 +19,15 @@ export function ScoreOverview({ scoreStats, leaderboard }: ScoreOverviewProps) {
   if (!scoreStats) {
     return (
       <div className="flex justify-center">
-        <p>No score stats found.</p>
+        <p>No BeatLeader score stats found :&#40;</p>
       </div>
     );
   }
 
   return (
-    <>
-      {scoreStats && (
-        <div className="flex flex-col md:flex-row md:px-2 gap-3">
-          <ScoreAccuracyStats scoreStats={scoreStats} />
-          <PlayerScoreAccuracyChart scoreStats={scoreStats} leaderboard={leaderboard} />
-        </div>
-      )}
-    </>
+    <div className="flex flex-col md:flex-row md:px-2 gap-3">
+      <ScoreAccuracyStats scoreStats={scoreStats} />
+      <PlayerScoreAccuracyChart scoreStats={scoreStats} leaderboard={leaderboard} />
+    </div>
   );
 }
