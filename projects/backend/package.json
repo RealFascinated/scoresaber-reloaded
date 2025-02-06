@@ -32,7 +32,7 @@
     "elysia-helmet": "^2.0.0",
     "eslint": "^8.57.1",
     "minio": "^8.0.4",
-    "mongoose": "^8.10.0",
+    "mongoose": "^8.9.7",
     "probe-image-size": "^7.2.3",
     "react": "^19.0.0"
   },
