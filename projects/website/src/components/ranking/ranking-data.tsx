@@ -93,7 +93,6 @@ export default function RankingData({ initialPage, country, initialPageData }: R
         )}
       </div>
       <div className="flex flex-col gap-2">
-        {/* Wrapping the table in a scrollable container */}
         <div className="overflow-x-auto">
           <table className="table w-full table-auto border-spacing-2 border-none text-left">
             <thead>
