@@ -5,22 +5,18 @@ import LeaderboardScoresSkeleton from "@/components/leaderboard/skeleton/leaderb
 import { useLeaderboardFilter } from "@/components/providers/leaderboard/leaderboard-filter-provider";
 import { scoreAnimation } from "@/components/score/score-animation";
 import ScoreMode, { ScoreModeEnum } from "@/components/score/score-mode";
-import { Button } from "@/components/ui/button";
-import useDatabase from "@/hooks/use-database";
+import { useLeaderboardScores } from "@/hooks/score/use-leaderboard-scores";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import usePageNavigation from "@/hooks/use-page-navigation";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
+import { Page } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import { Metadata } from "@ssr/common/types/metadata";
-import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
-import { ssrApi } from "@ssr/common/utils/ssr-api";
-import { useQuery } from "@tanstack/react-query";
-import { useLiveQuery } from "dexie-react-hooks";
 import { motion, useAnimation } from "framer-motion";
 import { useCallback, useEffect, useState } from "react";
 import Pagination from "../input/pagination";
 import LeaderboardScore from "./page/leaderboard-score";
+import { DifficultyButton } from "./button/difficulty-button";
 
 type LeaderboardScoresProps = {
   initialPage?: number;
@@ -33,14 +29,9 @@ type LeaderboardScoresProps = {
   highlightedPlayer?: ScoreSaberPlayer;
 };
 
-type ScoresPage = {
-  scores: ScoreSaberScore[];
-  metadata: Metadata;
-};
-
 export default function LeaderboardScores({
-  initialPage,
-  initialCategory,
+  initialPage = 1,
+  initialCategory = ScoreModeEnum.Global,
   leaderboard,
   showDifficulties,
   isLeaderboardPage,
@@ -48,139 +39,39 @@ export default function LeaderboardScores({
   disableUrlChanging,
   highlightedPlayer,
 }: LeaderboardScoresProps) {
-  if (!initialPage) {
-    initialPage = 1;
-  }
-
   const { navigateToPage } = usePageNavigation();
-  const database = useDatabase();
-  const claimedPlayer = useLiveQuery(() => database.getClaimedPlayer());
-  const friendIds = useLiveQuery(() => database.getFriendIds());
-
   const isMobile = useIsMobile();
   const controls = useAnimation();
+  const filter = useLeaderboardFilter();
 
-  const [selectedMode, setSelectedMode] = useState<ScoreModeEnum>(
-    initialCategory ?? ScoreModeEnum.Global
-  );
+  const [selectedMode, setSelectedMode] = useState<ScoreModeEnum>(initialCategory);
   const [selectedLeaderboardId, setSelectedLeaderboardId] = useState(leaderboard.id);
   const [previousPage, setPreviousPage] = useState(initialPage);
   const [currentPage, setCurrentPage] = useState(initialPage);
-  const filter = useLeaderboardFilter();
+  const [currentScores, setCurrentScores] = useState<Page<ScoreSaberScore>>();
 
-  const [currentScores, setCurrentScores] = useState<ScoresPage | undefined>();
+  const { data, isError, isLoading } = useLeaderboardScores(
+    selectedLeaderboardId,
+    currentPage,
+    selectedMode,
+    filter.country
+  );
 
-  const { data, isError, isLoading } = useQuery<ScoresPage>({
-    queryKey: [
-      "leaderboardScores",
-      selectedLeaderboardId,
-      currentPage,
-      selectedMode,
-      filter.country,
-      friendIds,
-      claimedPlayer,
-    ],
-    queryFn: async () => {
-      if (selectedMode == ScoreModeEnum.Global) {
-        const leaderboard = await ssrApi.fetchLeaderboardScores<
-          ScoreSaberScore,
-          ScoreSaberLeaderboard
-        >(selectedLeaderboardId + "", currentPage, filter.country);
-
-        return {
-          scores: leaderboard!.scores,
-          metadata: leaderboard!.metadata,
-        };
-      } else {
-        if (friendIds && claimedPlayer) {
-          const friendScores = await ssrApi.getFriendLeaderboardScores(
-            [...friendIds, claimedPlayer.id],
-            selectedLeaderboardId + "",
-            currentPage
-          );
-          if (friendScores) {
-            const friends = await database.getFriends();
-
-            return {
-              scores: friendScores.items.map(score => {
-                let friend = friends.find(f => f.id == score.playerId);
-                if (!friend) {
-                  if (score.playerId == claimedPlayer.id) {
-                    friend = claimedPlayer;
-                  }
-                }
-
-                if (!friend) {
-                  return score;
-                }
-
-                score.rank = -1;
-                score.playerInfo = {
-                  id: score.playerId,
-                  name: friend.name,
-                  country: friend.country,
-                  permissions: friend.permissions,
-                  profilePicture: friend.avatar,
-                };
-                return score;
-              }),
-              metadata: friendScores.metadata,
-            };
-          }
-        }
-      }
-
-      return {
-        scores: [],
-        metadata: {
-          totalPages: 0,
-          totalItems: 0,
-          page: 0,
-          itemsPerPage: 0,
-        },
-      };
-    },
-  });
-
-  /**
-   * Starts the animation for the scores, but only after the initial load.
-   */
   const handleScoreAnimation = useCallback(async () => {
     await controls.start(previousPage >= currentPage ? "hiddenRight" : "hiddenLeft");
     setCurrentScores(data);
     await controls.start("visible");
   }, [controls, currentPage, previousPage, data]);
 
-  /**
-   * Set the selected leaderboard.
-   */
   const handleLeaderboardChange = useCallback(
     (id: number) => {
       setSelectedLeaderboardId(id);
       setCurrentPage(1);
-
-      // Call the leaderboard changed callback
-      if (leaderboardChanged) {
-        leaderboardChanged(id);
-      }
+      leaderboardChanged?.(id);
     },
     [leaderboardChanged]
   );
 
-  /**
-   * Reset the page when the score mode changes
-   */
-  useEffect(() => {
-    if (!currentScores) {
-      return;
-    }
-
-    setCurrentPage(1);
-  }, [selectedMode]);
-
-  /**
-   * Set the current scores.
-   */
   useEffect(() => {
     if (data) {
       handleScoreAnimation();
@@ -197,60 +88,41 @@ export default function LeaderboardScores({
     );
   }, [selectedLeaderboardId, currentPage, disableUrlChanging, navigateToPage, selectedMode]);
 
-  if (currentScores === undefined) {
-    return <LeaderboardScoresSkeleton />;
-  }
+  if (!currentScores) return <LeaderboardScoresSkeleton />;
 
   return (
     <>
       <div
         className={cn(
           "flex flex-col lg:flex-row justify-center lg:px-10 items-center flex-wrap gap-2",
-          isLeaderboardPage ? "lg:justify-between" : ""
+          isLeaderboardPage && "lg:justify-between"
         )}
       >
         <ScoreMode initialMode={selectedMode} onModeChange={setSelectedMode} />
 
-        <div className="flex gap-2 flex-wrap justify-center">
-          {showDifficulties &&
-            leaderboard.difficulties.map(({ difficulty, characteristic, leaderboardId }, index) => {
-              if (characteristic !== "Standard") {
-                return null;
-              }
-
-              const isSelected = leaderboardId === selectedLeaderboardId;
-              const color = getDifficulty(difficulty).color;
-
-              return (
-                <Button
-                  key={index}
-                  variant={isSelected ? "default" : "outline"}
-                  onClick={() => {
-                    handleLeaderboardChange(leaderboardId);
-                  }}
-                  className={`border bg-transparent ${isSelected ? "font-extrabold" : ""}`}
-                  style={{
-                    color: isSelected ? "white" : color,
-                    borderColor: color,
-                    backgroundColor: isSelected ? color : "transparent",
-                  }}
-                >
-                  <p>{getDifficultyName(difficulty)}</p>
-                </Button>
-              );
-            })}
-        </div>
+        {showDifficulties && (
+          <div className="flex gap-2 flex-wrap justify-center">
+            {leaderboard.difficulties.map((difficultyData, index) => (
+              <DifficultyButton
+                key={index}
+                {...difficultyData}
+                selectedId={selectedLeaderboardId}
+                onSelect={handleLeaderboardChange}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       {isError ||
-        (currentScores.scores.length === 0 && (
+        (currentScores.items.length === 0 && (
           <div className="text-center">
             {isError && <p>Oopsies! Something went wrong.</p>}
-            {currentScores.scores.length === 0 && <p>No scores found.</p>}
+            {currentScores.items.length === 0 && <p>No scores found.</p>}
           </div>
         ))}
 
-      {currentScores.scores.length > 0 && (
+      {currentScores.items.length > 0 && (
         <>
           <div className="overflow-x-auto relative">
             <table className="table w-full table-auto border-spacing-2 border-none text-left text-sm">
@@ -264,7 +136,7 @@ export default function LeaderboardScores({
                   <th className="px-2 py-1 text-center">Misses</th>
                   {leaderboard.stars > 0 && <th className="px-2 py-1 text-center">PP</th>}
                   <th className="px-2 py-1 text-center">Mods</th>
-                  {currentScores.scores.some(score => score.additionalData !== undefined) && (
+                  {currentScores.items.some(score => score.additionalData !== undefined) && (
                     <th className="px-2 py-1 text-center"></th>
                   )}
                 </tr>
@@ -275,7 +147,7 @@ export default function LeaderboardScores({
                 className="border-none"
                 variants={scoreAnimation}
               >
-                {currentScores.scores.map((playerScore, index) => (
+                {currentScores.items.map((playerScore, index) => (
                   <motion.tr
                     key={index}
                     className="border-b border-border"

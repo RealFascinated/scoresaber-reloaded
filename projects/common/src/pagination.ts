@@ -73,6 +73,10 @@ export class Pagination<T> {
       new Metadata(totalPages, this.totalItems, page, this.itemsPerPage)
     );
   }
+
+  public static empty<T>(): Page<T> {
+    return new Page<T>([], new Metadata(1, 0, 1, 0));
+  }
 }
 
 class FetchItems {
