@@ -1,26 +1,26 @@
 "use client";
 
+import { cn } from "@/common/utils";
+import LeaderboardScoresSkeleton from "@/components/leaderboard/skeleton/leaderboard-scores-skeleton";
+import { useLeaderboardFilter } from "@/components/providers/leaderboard/leaderboard-filter-provider";
+import { scoreAnimation } from "@/components/score/score-animation";
+import ScoreMode, { ScoreModeEnum } from "@/components/score/score-mode";
+import { Button } from "@/components/ui/button";
+import useDatabase from "@/hooks/use-database";
+import { useIsMobile } from "@/hooks/use-is-mobile";
+import usePageNavigation from "@/hooks/use-page-navigation";
+import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
+import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
+import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
+import { Metadata } from "@ssr/common/types/metadata";
+import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
+import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
+import { useLiveQuery } from "dexie-react-hooks";
 import { motion, useAnimation } from "framer-motion";
 import { useCallback, useEffect, useState } from "react";
 import Pagination from "../input/pagination";
 import LeaderboardScore from "./page/leaderboard-score";
-import { scoreAnimation } from "@/components/score/score-animation";
-import { Button } from "@/components/ui/button";
-import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
-import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
-import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import LeaderboardScoresSkeleton from "@/components/leaderboard/skeleton/leaderboard-scores-skeleton";
-import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import { Metadata } from "@ssr/common/types/metadata";
-import ScoreMode, { ScoreModeEnum } from "@/components/score/score-mode";
-import useDatabase from "@/hooks/use-database";
-import { useLiveQuery } from "dexie-react-hooks";
-import { useIsMobile } from "@/hooks/use-is-mobile";
-import { cn } from "@/common/utils";
-import usePageNavigation from "@/hooks/use-page-navigation";
-import { useLeaderboardFilter } from "@/components/providers/leaderboard/leaderboard-filter-provider";
-import { ssrApi } from "@ssr/common/utils/ssr-api";
 
 type LeaderboardScoresProps = {
   initialPage?: number;
@@ -219,6 +219,8 @@ export default function LeaderboardScores({
               }
 
               const isSelected = leaderboardId === selectedLeaderboardId;
+              const color = getDifficulty(difficulty).color;
+
               return (
                 <Button
                   key={index}
@@ -226,13 +228,14 @@ export default function LeaderboardScores({
                   onClick={() => {
                     handleLeaderboardChange(leaderboardId);
                   }}
-                  className={`border ${isSelected ? "bg-primary/5 font-bold" : ""}`}
+                  className={`border bg-transparent ${isSelected ? "font-extrabold" : ""}`}
                   style={{
-                    color: getDifficulty(difficulty).color,
-                    borderColor: getDifficulty(difficulty).color,
+                    color: isSelected ? "white" : color,
+                    borderColor: color,
+                    backgroundColor: isSelected ? color : "transparent",
                   }}
                 >
-                  {getDifficultyName(difficulty)}
+                  <p>{getDifficultyName(difficulty)}</p>
                 </Button>
               );
             })}
