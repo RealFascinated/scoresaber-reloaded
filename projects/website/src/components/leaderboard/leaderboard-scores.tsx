@@ -120,7 +120,7 @@ export default function LeaderboardScores({
                   name: friend.name,
                   country: friend.country,
                   permissions: friend.permissions,
-                  profilePicture: friend.profilePicture,
+                  profilePicture: friend.avatar,
                 };
                 return score;
               }),
