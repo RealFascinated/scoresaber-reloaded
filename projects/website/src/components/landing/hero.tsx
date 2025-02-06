@@ -95,6 +95,7 @@ function AppPreview() {
       <img
         className="w-full h-full border-4 border-pp/20 rounded-2xl"
         src="/assets/home/app-preview.png"
+        alt="App Preview"
         draggable={false}
       />
     </motion.div>

@@ -83,7 +83,7 @@ const socialLinks: SocialLinkType[] = [
   },
   {
     name: "Discord",
-    logo: <img className="size-6 lg:size-7" src="/assets/logos/discord.svg" />,
+    logo: <img className="size-6 lg:size-7" src="/assets/logos/discord.svg" alt="Discord Logo" />,
     href: "https://discord.gg/kmNfWGA4A8",
   },
   {
