@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { motion, useAnimation } from "framer-motion";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useMemo } from "react";
 import Card from "../card";
 import Pagination from "../input/pagination";
 import { Button } from "../ui/button";
@@ -21,6 +21,7 @@ import usePageNavigation from "@/hooks/use-page-navigation";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { ClockIcon, TrophyIcon } from "@heroicons/react/24/solid";
 import { capitalizeFirstLetter } from "@ssr/common/string-utils";
+import { isEqual } from "@/common/utils";
 
 type Props = {
   initialScoreData?: PlayerScoresResponse<ScoreSaberScore, ScoreSaberLeaderboard>;
@@ -53,7 +54,7 @@ export default function PlayerScores({ initialSearch, player, sort, page }: Prop
   const [searchTerm, setSearchTerm] = useState(initialSearch || "");
   const debouncedSearchTerm = useDebounce(searchTerm, 250);
 
-  const isSearchActive = debouncedSearchTerm.length >= 3;
+  const isSearchActive = useMemo(() => debouncedSearchTerm.length >= 3, [debouncedSearchTerm]);
   const { data, isError, isLoading } = useQuery({
     queryKey: ["playerScores", player.id, pageState, debouncedSearchTerm],
     queryFn: () =>
@@ -70,22 +71,27 @@ export default function PlayerScores({ initialSearch, player, sort, page }: Prop
    * Starts the animation for the scores.
    */
   const handleScoreAnimation = useCallback(async () => {
+    if (isEqual(scores, data)) return;
+
     await controls.start(previousPage >= pageState.page ? "hiddenRight" : "hiddenLeft");
     setScores(data);
     await controls.start("visible");
-  }, [controls, previousPage, pageState.page, data]);
+  }, [controls, previousPage, pageState.page, data, scores]);
 
   /**
    * Change the score sort.
    *
    * @param newSort the new sort
    */
-  const handleSortChange = async (newSort: ScoreSort) => {
-    if (newSort !== pageState.sort) {
-      setPageState({ page: 1, sort: newSort });
-      await setCookieValue("lastScoreSort", newSort); // Set the default score sort
-    }
-  };
+  const handleSortChange = useCallback(
+    async (newSort: ScoreSort) => {
+      if (newSort !== pageState.sort) {
+        setPageState({ page: 1, sort: newSort });
+        await setCookieValue("lastScoreSort", newSort); // Set the default score sort
+      }
+    },
+    [pageState.sort]
+  );
 
   /**
    * Change the score search term.

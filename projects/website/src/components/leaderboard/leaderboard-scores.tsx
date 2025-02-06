@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@/common/utils";
+import { cn, isEqual } from "@/common/utils";
 import LeaderboardScoresSkeleton from "@/components/leaderboard/skeleton/leaderboard-scores-skeleton";
 import { useLeaderboardFilter } from "@/components/providers/leaderboard/leaderboard-filter-provider";
 import { scoreAnimation } from "@/components/score/score-animation";
@@ -49,6 +49,9 @@ export default function LeaderboardScores({
   const [previousPage, setPreviousPage] = useState(initialPage);
   const [currentPage, setCurrentPage] = useState(initialPage);
   const [currentScores, setCurrentScores] = useState<Page<ScoreSaberScore>>();
+  const [previousScores, setPreviousScores] = useState<Page<ScoreSaberScore> | undefined>(
+    undefined
+  );
   const [hasMounted, setHasMounted] = useState(false);
 
   const { data, isError, isLoading } = useLeaderboardScores(
@@ -64,10 +67,13 @@ export default function LeaderboardScores({
 
   const handleScoreAnimation = useCallback(async () => {
     if (!hasMounted) return;
+    if (isEqual(previousScores, data)) return;
+
     await controls.start(previousPage >= currentPage ? "hiddenRight" : "hiddenLeft");
     setCurrentScores(data);
     await controls.start("visible");
-  }, [controls, currentPage, previousPage, data, hasMounted]);
+    setPreviousScores(data);
+  }, [controls, currentPage, previousPage, data, hasMounted, previousScores]);
 
   const handleLeaderboardChange = useCallback(
     (id: number) => {
@@ -130,7 +136,7 @@ export default function LeaderboardScores({
 
       {currentScores.items.length > 0 && (
         <>
-          <div className="overflow-x-none relative">
+          <div className="overflow-x-auto relative">
             <table className="table w-full table-auto border-spacing-2 border-none text-left text-sm">
               <thead>
                 <tr>
