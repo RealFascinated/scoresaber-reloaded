@@ -46,55 +46,24 @@ export const isEqual = (first: any, second: any): boolean => {
   ) {
     return false;
   }
-  const firstType = first?.constructor.name;
-  const secondType = second?.constructor.name;
+  const firstType = Object.prototype.toString.call(first);
+  const secondType = Object.prototype.toString.call(second);
   if (firstType !== secondType) {
     return false;
   }
-  if (firstType === "Array") {
+  if (firstType === "[object Array]") {
     if (first.length !== second.length) {
       return false;
     }
-    let equal = true;
-    for (let i = 0; i < first.length; i++) {
-      if (!isEqual(first[i], second[i])) {
-        equal = false;
-        break;
-      }
-    }
-    return equal;
+    return first.every((item: any, index: any) => isEqual(item, second[index]));
   }
-  if (firstType === "Object") {
-    let equal = true;
+  if (firstType === "[object Object]") {
     const fKeys = Object.keys(first);
     const sKeys = Object.keys(second);
     if (fKeys.length !== sKeys.length) {
       return false;
     }
-    for (let i = 0; i < fKeys.length; i++) {
-      if (first[fKeys[i]] && second[fKeys[i]]) {
-        if (first[fKeys[i]] === second[fKeys[i]]) {
-          continue; // eslint-disable-line
-        }
-        if (
-          first[fKeys[i]] &&
-          (first[fKeys[i]].constructor.name === "Array" ||
-            first[fKeys[i]].constructor.name === "Object")
-        ) {
-          equal = isEqual(first[fKeys[i]], second[fKeys[i]]);
-          if (!equal) {
-            break;
-          }
-        } else if (first[fKeys[i]] !== second[fKeys[i]]) {
-          equal = false;
-          break;
-        }
-      } else if ((first[fKeys[i]] && !second[fKeys[i]]) || (!first[fKeys[i]] && second[fKeys[i]])) {
-        equal = false;
-        break;
-      }
-    }
-    return equal;
+    return fKeys.every(key => isEqual(first[key], second[key]));
   }
-  return first === second;
+  return false; // For primitive types, return false if not equal
 };
