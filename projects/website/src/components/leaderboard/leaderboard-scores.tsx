@@ -49,6 +49,7 @@ export default function LeaderboardScores({
   const [previousPage, setPreviousPage] = useState(initialPage);
   const [currentPage, setCurrentPage] = useState(initialPage);
   const [currentScores, setCurrentScores] = useState<Page<ScoreSaberScore>>();
+  const [hasMounted, setHasMounted] = useState(false);
 
   const { data, isError, isLoading } = useLeaderboardScores(
     selectedLeaderboardId,
@@ -57,11 +58,16 @@ export default function LeaderboardScores({
     filter.country
   );
 
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
+
   const handleScoreAnimation = useCallback(async () => {
+    if (!hasMounted) return;
     await controls.start(previousPage >= currentPage ? "hiddenRight" : "hiddenLeft");
     setCurrentScores(data);
     await controls.start("visible");
-  }, [controls, currentPage, previousPage, data]);
+  }, [controls, currentPage, previousPage, data, hasMounted]);
 
   const handleLeaderboardChange = useCallback(
     (id: number) => {
@@ -124,7 +130,7 @@ export default function LeaderboardScores({
 
       {currentScores.items.length > 0 && (
         <>
-          <div className="overflow-x-auto relative">
+          <div className="overflow-x-none relative">
             <table className="table w-full table-auto border-spacing-2 border-none text-left text-sm">
               <thead>
                 <tr>
