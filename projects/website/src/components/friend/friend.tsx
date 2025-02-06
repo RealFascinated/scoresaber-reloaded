@@ -1,17 +1,17 @@
-import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
-import Link from "next/link";
-import { XIcon } from "lucide-react";
+import Avatar from "@/components/avatar";
+import Tooltip from "@/components/tooltip";
 import useDatabase from "@/hooks/use-database";
 import { useToast } from "@/hooks/use-toast";
-import Tooltip from "@/components/tooltip";
-import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/player";
-import Avatar from "@/components/avatar";
+import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
+import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
+import { XIcon } from "lucide-react";
+import Link from "next/link";
 
 type FriendProps = {
   /**
    * The friend to display.
    */
-  player: ScoreSaberPlayerToken;
+  player: ScoreSaberPlayer;
 
   /**
    * When the friend is clicked
@@ -44,7 +44,7 @@ export default function Friend({ player, onClick }: FriendProps) {
         className="flex items-center gap-2 w-full"
       >
         <Avatar
-          src={player.profilePicture!}
+          src={player.avatar}
           size={64}
           className="w-10 h-10"
           alt={`${player.name}'s Profile Picture`}

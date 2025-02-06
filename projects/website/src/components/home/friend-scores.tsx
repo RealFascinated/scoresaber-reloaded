@@ -111,7 +111,6 @@ export function FriendScores() {
                 setPreviousPage(page);
                 setPage(newPage);
               }}
-              statsBelow={!isMobile}
             />
           </>
         </div>

@@ -1,10 +1,10 @@
-import Dexie, { EntityTable } from "dexie";
 import Settings from "@/common/database/impl/settings";
-import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/player";
-import { setCookieValue } from "@ssr/common/utils/cookie-utils";
+import { DetailType } from "@ssr/common/detail-type";
 import Logger from "@ssr/common/logger";
-import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
-import { formatDuration } from "@ssr/common/utils/time-utils";
+import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
+import { setCookieValue } from "@ssr/common/utils/cookie-utils";
+import { ssrApi } from "@ssr/common/utils/ssr-api";
+import Dexie, { EntityTable } from "dexie";
 
 type CacheItem = {
   id: string;
@@ -26,11 +26,15 @@ export default class Database extends Dexie {
   constructor() {
     super("ScoreSaberReloaded");
 
-    this.version(2).stores({
+    this.version(32).stores({
       settings: "id",
       beatSaverMaps: "hash",
       friends: "id",
       cache: "id",
+    });
+
+    this.version(32).upgrade(async transaction => {
+      await transaction.table("cache").clear();
     });
 
     this.settings.mapToClass(Settings);
@@ -81,7 +85,7 @@ export default class Database extends Dexie {
    *
    * @returns the claimed player's account
    */
-  async getClaimedPlayer(): Promise<ScoreSaberPlayerToken | undefined> {
+  async getClaimedPlayer(): Promise<ScoreSaberPlayer | undefined> {
     const settings = await this.getSettings();
     if (!settings?.playerId) {
       return undefined;
@@ -124,15 +128,24 @@ export default class Database extends Dexie {
    *
    * @returns the accounts
    */
-  async getFriends(): Promise<ScoreSaberPlayerToken[]> {
+  async getFriends(includeSelf?: boolean): Promise<ScoreSaberPlayer[]> {
     const friends = await this.friends.toArray();
+    if (includeSelf) {
+      const claimedPlayer = await this.getClaimedPlayer();
+      if (claimedPlayer) {
+        friends.push({ id: claimedPlayer.id });
+      }
+    }
+
     const players = await Promise.all(
       friends.map(async ({ id }) => {
         return this.getPlayer(id);
       })
     );
 
-    return players.filter((player): player is ScoreSaberPlayerToken => player !== undefined);
+    return players
+      .filter((player): player is ScoreSaberPlayer => player !== undefined)
+      .sort((a, b) => a.rank - b.rank);
   }
 
   /**
@@ -201,11 +214,13 @@ export default class Database extends Dexie {
    * @param id the player's id
    * @returns the player
    */
-  public async getPlayer(id: string): Promise<ScoreSaberPlayerToken | undefined> {
+  public async getPlayer(id: string): Promise<ScoreSaberPlayer | undefined> {
     // Cache player lookups for 24 hours
-    return this.getCache<ScoreSaberPlayerToken>(`player:${id}`, 60 * 60 * 24, async () => {
+    return this.getCache<ScoreSaberPlayer>(`player:${id}`, 60 * 60 * 24, async () => {
       try {
-        return await scoresaberService.lookupPlayer(id);
+        return await ssrApi.getScoreSaberPlayer(id, {
+          type: DetailType.FULL,
+        });
       } catch (error) {
         Logger.error(`Failed to fetch player ${id}:`, error);
         return undefined;
