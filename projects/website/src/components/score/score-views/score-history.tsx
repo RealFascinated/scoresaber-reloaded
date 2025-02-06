@@ -36,21 +36,23 @@ export function ScoreHistory({ playerId, leaderboard }: ScoreHistoryProps) {
   }
 
   return (
-    <>
-      {data.items.map(({ score, leaderboard, beatSaver }) => {
-        return (
-          <Score
-            key={score.scoreId + randomString(2)}
-            score={score}
-            leaderboard={leaderboard}
-            beatSaverMap={beatSaver}
-            settings={{
-              hideLeaderboardDropdown: true,
-              hideAccuracyChanger: true,
-            }}
-          />
-        );
-      })}
+    <div className="flex flex-col gap-2">
+      <div className="flex flex-col divide-y divide-border">
+        {data.items.map(({ score, leaderboard, beatSaver }) => {
+          return (
+            <Score
+              key={score.scoreId + randomString(2)}
+              score={score}
+              leaderboard={leaderboard}
+              beatSaverMap={beatSaver}
+              settings={{
+                hideLeaderboardDropdown: true,
+                hideAccuracyChanger: true,
+              }}
+            />
+          );
+        })}
+      </div>
 
       <Pagination
         mobilePagination={isMobile}
@@ -62,6 +64,6 @@ export function ScoreHistory({ playerId, leaderboard }: ScoreHistoryProps) {
           setPage(newPage);
         }}
       />
-    </>
+    </div>
   );
 }
