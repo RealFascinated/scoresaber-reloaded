@@ -40,3 +40,6 @@ export const DifficultyButton = memo(
     );
   }
 );
+
+// Add display name for the component
+DifficultyButton.displayName = "DifficultyButton";

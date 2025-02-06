@@ -1,5 +1,3 @@
-import { capitalizeFirstLetter } from "../../../../common/src/string-utils";
-import { ClockIcon, TrophyIcon } from "@heroicons/react/24/solid";
 import { useQuery } from "@tanstack/react-query";
 import { motion, useAnimation } from "framer-motion";
 import { useCallback, useEffect, useState } from "react";
@@ -21,6 +19,8 @@ import { useIsMobile } from "@/hooks/use-is-mobile";
 import { LoadingIcon } from "@/components/loading-icon";
 import usePageNavigation from "@/hooks/use-page-navigation";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
+import { ClockIcon, TrophyIcon } from "@heroicons/react/24/solid";
+import { capitalizeFirstLetter } from "@ssr/common/string-utils";
 
 type Props = {
   initialScoreData?: PlayerScoresResponse<ScoreSaberScore, ScoreSaberLeaderboard>;
@@ -36,16 +36,8 @@ type PageState = {
 };
 
 const scoreSort = [
-  {
-    name: "Top",
-    value: ScoreSort.top,
-    icon: <TrophyIcon className="w-5 h-5" />,
-  },
-  {
-    name: "Recent",
-    value: ScoreSort.recent,
-    icon: <ClockIcon className="w-5 h-5" />,
-  },
+  { name: "Top", value: ScoreSort.top, icon: <TrophyIcon className="w-5 h-5" /> },
+  { name: "Recent", value: ScoreSort.recent, icon: <ClockIcon className="w-5 h-5" /> },
 ];
 
 export default function PlayerScores({ initialSearch, player, sort, page }: Props) {
@@ -60,7 +52,6 @@ export default function PlayerScores({ initialSearch, player, sort, page }: Prop
   >();
   const [searchTerm, setSearchTerm] = useState(initialSearch || "");
   const debouncedSearchTerm = useDebounce(searchTerm, 250);
-  const [shouldFetch, setShouldFetch] = useState(true);
 
   const isSearchActive = debouncedSearchTerm.length >= 3;
   const { data, isError, isLoading } = useQuery({
@@ -72,7 +63,7 @@ export default function PlayerScores({ initialSearch, player, sort, page }: Prop
         pageState.sort,
         debouncedSearchTerm
       ),
-    enabled: shouldFetch && (debouncedSearchTerm.length >= 3 || debouncedSearchTerm.length === 0),
+    enabled: isSearchActive || debouncedSearchTerm.length === 0,
   });
 
   /**
@@ -92,7 +83,6 @@ export default function PlayerScores({ initialSearch, player, sort, page }: Prop
   const handleSortChange = async (newSort: ScoreSort) => {
     if (newSort !== pageState.sort) {
       setPageState({ page: 1, sort: newSort });
-      setShouldFetch(true); // Set to true to trigger fetch
       await setCookieValue("lastScoreSort", newSort); // Set the default score sort
     }
   };
@@ -104,11 +94,6 @@ export default function PlayerScores({ initialSearch, player, sort, page }: Prop
    */
   const handleSearchChange = (query: string) => {
     setSearchTerm(query);
-    if (query.length >= 3) {
-      setShouldFetch(true); // Set to true to trigger fetch
-    } else {
-      setShouldFetch(false); // Disable fetch if the search query is less than 3 characters
-    }
   };
 
   /**
@@ -126,10 +111,9 @@ export default function PlayerScores({ initialSearch, player, sort, page }: Prop
   const getUrl = useCallback(
     (page: number) => {
       const baseUrl = `/player/${player.id}`;
-      if (page == 1 && pageState.sort == ScoreSort.recent) {
-        return baseUrl;
-      }
-      return `${baseUrl}/${pageState.sort}/${page}${isSearchActive ? `?search=${debouncedSearchTerm}` : ""}`;
+      return page === 1 && pageState.sort === ScoreSort.recent
+        ? baseUrl
+        : `${baseUrl}/${pageState.sort}/${page}${isSearchActive ? `?search=${debouncedSearchTerm}` : ""}`;
     },
     [debouncedSearchTerm, player.id, pageState.sort, isSearchActive]
   );
@@ -172,7 +156,7 @@ export default function PlayerScores({ initialSearch, player, sort, page }: Prop
         </div>
       </div>
 
-      {isLoading && scores == undefined && (
+      {isLoading && scores === undefined && (
         <div className="flex w-full justify-center">
           <LoadingIcon />
         </div>
@@ -210,13 +194,10 @@ export default function PlayerScores({ initialSearch, player, sort, page }: Prop
               totalItems={scores.metadata.totalItems}
               itemsPerPage={scores.metadata.itemsPerPage}
               loadingPage={isLoading ? pageState.page : undefined}
-              generatePageUrl={page => {
-                return getUrl(page);
-              }}
+              generatePageUrl={page => getUrl(page)}
               onPageChange={newPage => {
                 setPreviousPage(pageState.page);
                 setPageState({ ...pageState, page: newPage });
-                setShouldFetch(true); // Set to true to trigger fetch on page change
               }}
             />
           )}
