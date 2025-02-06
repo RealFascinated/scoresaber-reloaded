@@ -1,8 +1,12 @@
 import * as dotenv from "@dotenvx/dotenvx";
 import cors from "@elysiajs/cors";
 import { cron } from "@elysiajs/cron";
+import { opentelemetry } from "@elysiajs/opentelemetry";
 import { serverTiming } from "@elysiajs/server-timing";
 import { swagger } from "@elysiajs/swagger";
+import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-proto";
+import { Resource } from "@opentelemetry/resources";
+import { BatchSpanProcessor } from "@opentelemetry/sdk-trace-node";
 import { Config } from "@ssr/common/config";
 import Logger from "@ssr/common/logger";
 import { formatDuration } from "@ssr/common/utils/time-utils";
@@ -14,7 +18,7 @@ import { EmbedBuilder } from "discord.js";
 import { Elysia, ValidationError } from "elysia";
 import { decorators } from "elysia-decorators";
 import { helmet } from "elysia-helmet";
-import mongoose from "mongoose";
+import typegoose from "@typegoose/typegoose";
 import { DiscordChannels, initDiscordBot, logToChannel } from "./bot/bot";
 import { getAppVersion } from "./common/app.util";
 import AppController from "./controller/app.controller";
@@ -29,14 +33,9 @@ import CacheService from "./service/cache.service";
 import LeaderboardService from "./service/leaderboard.service";
 import MetricsService from "./service/metrics.service";
 import { PlayerService } from "./service/player.service";
+import { ScoreService } from "./service/score/score.service";
 import ScoreSaberService from "./service/scoresaber.service";
 import StatisticsService from "./service/statistics.service";
-import { ScoreService } from "./service/score/score.service";
-import { opentelemetry } from "@elysiajs/opentelemetry";
-import { BatchSpanProcessor } from "@opentelemetry/sdk-trace-node";
-import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-proto";
-import { SemanticResourceAttributes } from "@opentelemetry/semantic-conventions";
-import { Resource } from "@opentelemetry/resources";
 
 Logger.info("Starting SSR Backend...");
 
@@ -49,7 +48,9 @@ if (await Bun.file(".env").exists()) {
 }
 
 // Connect to Mongo
-await mongoose.connect(Config.mongoUri!); // Connect to MongoDB
+Logger.info("Connecting to MongoDB...");
+await typegoose.mongoose.connect(Config.mongoUri!); // Connect to MongoDB
+Logger.info("Connected to MongoDB :)");
 
 // Connect to websockets
 connectScoresaberWebsocket({
