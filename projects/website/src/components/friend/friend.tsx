@@ -36,7 +36,7 @@ export default function Friend({ player, onClick }: FriendProps) {
   }
 
   return (
-    <li className="flex items-center justify-between gap-2 hover:bg-accent transition-all transform-gpu p-2 rounded-md select-none">
+    <div className="flex items-center justify-between gap-2 hover:bg-accent transition-all transform-gpu p-2 rounded-md select-none">
       <Link
         prefetch={false}
         href={`/player/${player.id}`}
@@ -59,10 +59,10 @@ export default function Friend({ player, onClick }: FriendProps) {
           <p className="cursor-default pointer-events-none">Remove {name} from your friends</p>
         }
       >
-        <button onClick={() => removeFriend()}>
+        <div onClick={() => removeFriend()}>
           <XIcon className="w-5 h-5" />
-        </button>
+        </div>
       </Tooltip>
-    </li>
+    </div>
   );
 }
