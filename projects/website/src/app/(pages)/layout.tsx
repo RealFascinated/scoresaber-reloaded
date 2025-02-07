@@ -9,7 +9,7 @@ import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import Script from "next/script";
 import { ReactNode } from "react";
-import DatabaseLoader from "../components/loaders/database-loader";
+import DatabaseLoader from "../../../components/loaders/database-loader";
 import "./globals.css";
 
 const siteFont = localFont({
