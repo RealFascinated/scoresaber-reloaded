@@ -25,6 +25,8 @@ RUN bun run  --filter website build
 FROM base AS runner
 WORKDIR /app
 
+RUN apk add curl wget
+
 # -----------------------------------
 
 # Copy the built files
