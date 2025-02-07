@@ -100,15 +100,15 @@ export default function Navbar() {
       </div>
 
       {/* Right */}
-      <div className="md:pl-6 flex gap-2.5 items-center divide-x divide-muted transition-all transform-gpu">
-        <div className="flex gap-2.5 items-center transition-all transform-gpu">
+      <div className="md:pl-6 flex gap-2 items-center divide-x divide-muted transition-all transform-gpu">
+        <div className="flex gap-2.5 items-center transition-all transform-gpu pr-2">
           <PlayerAndLeaderboardSearch />
           <SimpleNavLink
             content={<CogIcon className="size-6 text-zinc-200 hover:animate-spin-slow" />}
             href="/settings"
           />
         </div>
-        <div className="pl-2">
+        <div>
           <ProfileButton />
         </div>
       </div>
