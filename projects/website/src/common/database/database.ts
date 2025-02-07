@@ -209,7 +209,7 @@ export default class Database extends Dexie {
 
   /**
    * Fetches a player from the cache (cached for 6 hours) or
-   * lookups it if it doesn't exist.
+   * lookups it if it doesn't exist. j
    *
    * @param id the player's id
    * @returns the player
