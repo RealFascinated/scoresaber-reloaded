@@ -175,7 +175,7 @@ export default function MeowMeow() {
     idleTime += 1;
 
     if (idleTime > 10 && Math.floor(Math.random() * 200) === 0 && idleAnimation == null) {
-      let availableIdleAnimations = ["sleeping", "scratchSelf"];
+      const availableIdleAnimations = ["sleeping", "scratchSelf"];
       if (nekoPosX < 32) {
         availableIdleAnimations.push("scratchWallW");
       }
