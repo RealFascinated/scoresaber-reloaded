@@ -25,6 +25,7 @@ RUN bun run  --filter website build
 FROM base AS runner
 WORKDIR /app
 
+RUN apt update
 RUN apt install -y curl wget
 
 # -----------------------------------
