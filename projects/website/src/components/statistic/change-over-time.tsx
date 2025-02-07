@@ -23,44 +23,44 @@ type ChangeOverTimeProps = {
   children: ReactElement<any>;
 };
 
+// Format values based on stat type
+const formatChangeValue = (type: PlayerStatValue, value: number | undefined): string | number => {
+  if (value == -0) {
+    value = 0;
+  }
+
+  if (value === undefined) {
+    return "No Data";
+  }
+  return type.type === "Performance Points"
+    ? formatPp(value) + "pp"
+    : formatNumberWithCommas(value);
+};
+
+// Renders the change for a given time frame
+const renderChange = (type: PlayerStatValue, value: number | undefined, range: StatisticRange) => (
+  <p>
+    {capitalizeFirstLetter(range)} Change:{" "}
+    <span
+      className={
+        value === undefined
+          ? ""
+          : value >= 0
+            ? value === 0
+              ? ""
+              : "text-green-500"
+            : "text-red-500"
+      }
+    >
+      {formatChangeValue(type, value)}
+    </span>
+  </p>
+);
+
 export function ChangeOverTime({ player, type, children }: ChangeOverTimeProps) {
   const daily = type.value(player, "daily");
   const weekly = type.value(player, "weekly");
   const monthly = type.value(player, "monthly");
-
-  // Format values based on stat type
-  const formatChangeValue = (value: number | undefined): string | number => {
-    if (value == -0) {
-      value = 0;
-    }
-
-    if (value === undefined) {
-      return "No Data";
-    }
-    return type.type === "Performance Points"
-      ? formatPp(value) + "pp"
-      : formatNumberWithCommas(value);
-  };
-
-  // Renders the change for a given time frame
-  const renderChange = (value: number | undefined, range: StatisticRange) => (
-    <p>
-      {capitalizeFirstLetter(range)} Change:{" "}
-      <span
-        className={
-          value === undefined
-            ? ""
-            : value >= 0
-              ? value === 0
-                ? ""
-                : "text-green-500"
-              : "text-red-500"
-        }
-      >
-        {formatChangeValue(value)}
-      </span>
-    </p>
-  );
 
   // Return children if player is banned or inactive
   if (player.banned || player.inactive) {
@@ -72,9 +72,9 @@ export function ChangeOverTime({ player, type, children }: ChangeOverTimeProps) 
       side="bottom"
       display={
         <div>
-          {renderChange(daily, "daily")}
-          {renderChange(weekly, "weekly")}
-          {renderChange(monthly, "monthly")}
+          {renderChange(type, daily, "daily")}
+          {renderChange(type, weekly, "weekly")}
+          {renderChange(type, monthly, "monthly")}
         </div>
       }
     >
