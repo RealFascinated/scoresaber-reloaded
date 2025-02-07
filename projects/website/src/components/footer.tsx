@@ -7,6 +7,7 @@ import { ReactElement } from "react";
 import { usePathname } from "next/navigation";
 import GithubLogo from "@/components/logos/logos/github-logo";
 import TwitterLogo from "@/components/logos/logos/twitter-logo";
+import { Config } from "@ssr/common/config";
 
 type FooterLink = {
   /**
@@ -50,7 +51,7 @@ const links: {
     {
       name: "Swagger Docs",
       shortName: "Swagger",
-      href: "/swagger",
+      href: `${Config.apiUrl}/swagger`,
     },
     {
       name: "Source Code",

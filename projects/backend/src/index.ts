@@ -263,7 +263,7 @@ app.use(
     scalarConfig: {
       servers: [
         {
-          url: "https://ssr.fascinated.cc/api",
+          url: "https://ssr-api.fascinated.cc",
           description: "Production server",
         },
       ],
