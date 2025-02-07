@@ -14,6 +14,7 @@ import Tooltip from "@/components/tooltip";
 const formSchema = z.object({
   backgroundCover: z.string().min(0).max(128),
   snowParticles: z.boolean(),
+  showKitty: z.boolean(),
 });
 
 export default function WebsiteSettings() {
@@ -24,7 +25,8 @@ export default function WebsiteSettings() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       backgroundCover: settings?.backgroundCover || "",
-      snowParticles: settings?.getSnowParticles(),
+      snowParticles: settings?.getSnowParticles() ?? false,
+      showKitty: settings?.getShowKitty() ?? false,
     },
   });
 
@@ -38,9 +40,14 @@ export default function WebsiteSettings() {
    * @param backgroundCover the new background cover
    * @param replayViewer the new replay viewer
    */
-  async function onSubmit({ backgroundCover, snowParticles }: z.infer<typeof formSchema>) {
+  async function onSubmit({
+    backgroundCover,
+    snowParticles,
+    showKitty,
+  }: z.infer<typeof formSchema>) {
     settings.setBackgroundImage(backgroundCover);
     settings.setSnowParticles(snowParticles);
+    await settings.setShowKitty(showKitty);
 
     toast({
       title: "Settings saved",
@@ -90,6 +97,20 @@ export default function WebsiteSettings() {
                   <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                 </FormControl>
                 <FormLabel>Show Snow Particles</FormLabel>
+              </FormItem>
+            )}
+          />
+
+          {/* Show Kitty */}
+          <FormField
+            control={form.control}
+            name="showKitty"
+            render={({ field }) => (
+              <FormItem className="flex items-center  space-y-0 gap-2">
+                <FormControl>
+                  <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                </FormControl>
+                <FormLabel>Show Kitty</FormLabel>
               </FormItem>
             )}
           />

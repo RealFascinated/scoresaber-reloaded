@@ -42,6 +42,11 @@ export default class Settings extends IdDatabaseObject {
   overlaySettings?: OverlaySettings;
 
   /**
+   * Whether to show the kitty meow meow
+   */
+  showKitty?: boolean;
+
+  /**
    * Sets the players id
    *
    * @param id the new player id
@@ -176,6 +181,25 @@ export default class Settings extends IdDatabaseObject {
       ...this.getOverlaySettings(),
       ...settings, // New settings
     };
+    await this.db.setSettings(this);
+  }
+
+  /**
+   * Gets whether to show the kitty meow meow
+   *
+   * @returns whether to show the kitty meow meow
+   */
+  public getShowKitty(): boolean {
+    return this.showKitty ?? false;
+  }
+
+  /**
+   * Sets whether to show the kitty meow meow
+   *
+   * @param state whether to show the kitty meow meow
+   */
+  public async setShowKitty(state: boolean) {
+    this.showKitty = state;
     await this.db.setSettings(this);
   }
 }

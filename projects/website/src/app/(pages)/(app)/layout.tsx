@@ -7,12 +7,14 @@ import { SearchProvider } from "@/components/providers/search-provider";
 import SSRLayout from "@/components/ssr-layout";
 import { ReactNode } from "react";
 import { getBuildInformation } from "@/common/website-utils";
+import MeowMeow from "@/components/meow-meow";
 
 export default function Layout({ children }: { children: ReactNode }) {
   const { buildId, buildTimeShort } = getBuildInformation();
 
   return (
     <>
+      <MeowMeow />
       <BackgroundCover />
       <SnowBackground />
       <ApiHealth />
