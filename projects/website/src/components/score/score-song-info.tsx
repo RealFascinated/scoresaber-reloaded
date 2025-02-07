@@ -28,7 +28,12 @@ export default function ScoreSongInfo({
   const difficulty = leaderboard.difficulty.difficulty;
   return (
     <div className="flex gap-3 items-center break-all w-full">
-      <div className={`relative flex justify-center h-[${imageSize}px]`}>
+      <div
+        className="relative flex justify-center"
+        style={{
+          height: imageSize,
+        }}
+      >
         <Tooltip
           display={
             <div>

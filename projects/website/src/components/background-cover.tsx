@@ -29,7 +29,7 @@ export default function BackgroundCover() {
       src={backgroundCover}
       alt="Background image"
       fetchPriority="high"
-      className={`fixed -z-50 object-cover w-screen h-screen blur-sm brightness-[33%] pointer-events-none select-none`}
+      className={`fixed -z-50 object-cover w-screen h-screen blur-xs brightness-[33%] pointer-events-none select-none`}
     />
   );
 }

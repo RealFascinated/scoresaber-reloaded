@@ -53,7 +53,7 @@ type DropdownData = {
 
 type Mode = {
   name: string;
-  icon: ReactElement;
+  icon: ReactElement<any>;
 };
 
 const modes: Mode[] = [

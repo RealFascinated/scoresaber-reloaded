@@ -20,7 +20,7 @@ type ChangeOverTimeProps = {
   /**
    * The children to render
    */
-  children: ReactElement;
+  children: ReactElement<any>;
 };
 
 export function ChangeOverTime({ player, type, children }: ChangeOverTimeProps) {

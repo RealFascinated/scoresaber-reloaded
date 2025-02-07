@@ -75,7 +75,7 @@ type SelectedView = {
   /**
    * The chart to render.
    */
-  chart: (player: ScoreSaberPlayer, statisticHistory: PlayerStatisticHistory) => ReactElement;
+  chart: (player: ScoreSaberPlayer, statisticHistory: PlayerStatisticHistory) => ReactElement<any>;
 };
 
 export default function PlayerViews({ player }: PlayerChartsProps) {

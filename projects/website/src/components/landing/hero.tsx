@@ -50,7 +50,7 @@ function Alert() {
 function Title() {
   return (
     <div className="px-5 flex flex-col gap-1.5 items-center">
-      <h1 className="text-4xl xs:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-ssr to-pp/85">
+      <h1 className="text-4xl xs:text-5xl font-bold text-transparent bg-clip-text bg-linear-to-r from-ssr to-pp/85">
         ScoreSaber Reloaded
       </h1>
       <p className="max-w-sm md:max-w-lg text-sm xs:text-base opacity-85">

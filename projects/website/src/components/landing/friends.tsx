@@ -22,7 +22,7 @@ export default function Friends() {
       <div
         className={cn(
           "relative",
-          "before:absolute before:-left-36 before:-top-28 before:size-[23.5rem] before:xs:size-[32rem] before:bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] before:from-purple-600 before:rounded-full before:blur-3xl before:opacity-30 before:overflow-hidden before:z-[1]"
+          "before:absolute before:-left-36 before:-top-28 before:size-[23.5rem] xs:before:size-[32rem] before:bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] before:from-purple-600 before:rounded-full before:blur-3xl before:opacity-30 before:overflow-hidden before:z-1"
         )}
       >
         <div className={cn("relative max-w-[900px] z-20 overflow-hidden")}>

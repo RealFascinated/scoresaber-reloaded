@@ -9,7 +9,7 @@ import { ChartBarIcon, MusicIcon, TrendingUpIcon } from "lucide-react";
 import Link from "next/link";
 import { ReactElement, useEffect, useState } from "react";
 
-const links: ReactElement[] = [
+const links: ReactElement<any>[] = [
   <FriendsButton key="friends" />,
   <SimpleNavLink
     key="ranking"
@@ -116,7 +116,7 @@ export default function Navbar() {
   );
 }
 
-function SimpleNavLink({ content, href }: { content: ReactElement; href: string }) {
+function SimpleNavLink({ content, href }: { content: ReactElement<any>; href: string }) {
   return (
     <Link
       prefetch={false}

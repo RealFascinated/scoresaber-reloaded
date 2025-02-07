@@ -9,15 +9,16 @@ interface DualRangeSliderProps extends React.ComponentProps<typeof SliderPrimiti
   label?: (value: number | undefined) => React.ReactNode;
 }
 
-const DualRangeSlider = React.forwardRef<
-  React.ElementRef<typeof SliderPrimitive.Root>,
-  DualRangeSliderProps
->(({ className, label, labelPosition = "top", ...props }, ref) => {
+function DualRangeSlider({
+  className,
+  label,
+  labelPosition = "top",
+  ...props
+}: DualRangeSliderProps) {
   const initialValue = Array.isArray(props.value) ? props.value : [props.min, props.max];
 
   return (
     <SliderPrimitive.Root
-      ref={ref}
       className={cn(
         "relative flex w-full touch-none select-none items-center text-[15px]",
         className
@@ -29,7 +30,7 @@ const DualRangeSlider = React.forwardRef<
       </SliderPrimitive.Track>
       {initialValue.map((value, index) => (
         <React.Fragment key={index}>
-          <SliderPrimitive.Thumb className="block h-4 w-4 rounded-full border bg-secondary border-primary/50 bg-background shadow transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50">
+          <SliderPrimitive.Thumb className="block h-4 w-4 rounded-full border bg-secondary border-primary/50 bg-background shadow-sm transition-colors focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50">
             {label && (
               <span
                 className={cn(
@@ -46,7 +47,6 @@ const DualRangeSlider = React.forwardRef<
       ))}
     </SliderPrimitive.Root>
   );
-});
-DualRangeSlider.displayName = "DualRangeSlider";
+}
 
 export { DualRangeSlider };

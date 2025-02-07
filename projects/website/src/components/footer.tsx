@@ -35,7 +35,7 @@ type SocialLinkType = {
   /**
    * The logo for this social link.
    */
-  logo: ReactElement;
+  logo: ReactElement<any>;
 
   /**
    * The href for this social link.
@@ -105,13 +105,14 @@ export default function Footer({
     <footer
       className={cn(
         "px-10 min-h-80 py-5 flex flex-col gap-10 lg:gap-0 justify-between border-t border-muted select-none",
-        isHome ? "bg-[#121212]" : "mt-5 bg-[#121212]/60"
+        isHome ? "bg-secondary" : "mt-5 bg-secondary/60"
       )}
     >
       {/* Top Section */}
+
       <div className="flex justify-center">
         {/* Branding & Social Links */}
-        <div className="w-full max-w-screen-2xl flex flex-col gap-7 lg:flex-row justify-between items-center lg:items-start">
+        <div className="w-full max-w-(--breakpoint-2xl) flex flex-col gap-7 lg:flex-row justify-between items-center lg:items-start">
           <div className="flex flex-col gap-5">
             {/* Branding */}
             <div className="flex flex-col gap-2 text-center items-center lg:text-left lg:items-start">

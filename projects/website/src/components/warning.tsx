@@ -19,7 +19,10 @@ export function Warning({ size = 32, children }: WarningProps) {
       <ExclamationTriangleIcon
         width={size}
         height={size}
-        className={`w-[${size}px] h-[${size}px]`}
+        style={{
+          width: size,
+          height: size,
+        }}
       />
       {children}
     </div>

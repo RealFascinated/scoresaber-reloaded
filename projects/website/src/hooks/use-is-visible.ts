@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
  *
  * @param ref the ref of the element
  */
-export function useIsVisible(ref: React.RefObject<HTMLElement>) {
+export function useIsVisible(ref: React.RefObject<HTMLElement | null>) {
   const [isIntersecting, setIntersecting] = useState(false);
 
   useEffect(() => {

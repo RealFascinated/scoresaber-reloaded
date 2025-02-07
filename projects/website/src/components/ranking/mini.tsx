@@ -25,7 +25,7 @@ type MiniProps = {
 
 type Variants = {
   [key: string]: {
-    icon: (player: ScoreSaberPlayer) => ReactElement;
+    icon: (player: ScoreSaberPlayer) => ReactElement<any>;
   };
 };
 
