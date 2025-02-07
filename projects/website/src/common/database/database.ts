@@ -215,8 +215,8 @@ export default class Database extends Dexie {
    * @returns the player
    */
   public async getPlayer(id: string): Promise<ScoreSaberPlayer | undefined> {
-    // Cache player lookups for 24 hours
-    return this.getCache<ScoreSaberPlayer>(`player:${id}`, 60 * 60 * 24, async () => {
+    // Cache player lookups for 6 hours
+    return this.getCache<ScoreSaberPlayer>(`player:${id}`, 60 * 60 * 6, async () => {
       try {
         return await ssrApi.getScoreSaberPlayer(id, {
           type: DetailType.FULL,
