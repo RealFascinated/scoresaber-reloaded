@@ -9,15 +9,16 @@ interface DualRangeSliderProps extends React.ComponentProps<typeof SliderPrimiti
   label?: (value: number | undefined) => React.ReactNode;
 }
 
-const DualRangeSlider = React.forwardRef<
-  React.ElementRef<typeof SliderPrimitive.Root>,
-  DualRangeSliderProps
->(({ className, label, labelPosition = "top", ...props }, ref) => {
+function DualRangeSlider({
+  className,
+  label,
+  labelPosition = "top",
+  ...props
+}: DualRangeSliderProps) {
   const initialValue = Array.isArray(props.value) ? props.value : [props.min, props.max];
 
   return (
     <SliderPrimitive.Root
-      ref={ref}
       className={cn(
         "relative flex w-full touch-none select-none items-center text-[15px]",
         className
@@ -46,7 +47,6 @@ const DualRangeSlider = React.forwardRef<
       ))}
     </SliderPrimitive.Root>
   );
-});
-DualRangeSlider.displayName = "DualRangeSlider";
+}
 
 export { DualRangeSlider };
