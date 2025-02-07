@@ -1,17 +1,16 @@
-import "./globals.css";
-import { PreloadResources } from "@/components/preload-resources";
-import { QueryProvider } from "@/components/providers/query-provider";
-import { ThemeProvider } from "@/components/providers/theme-provider";
-import { Toaster } from "@/components/ui/toaster";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import type { Metadata, Viewport } from "next";
-import localFont from "next/font/local";
-import DatabaseLoader from "../components/loaders/database-loader";
 import { Colors } from "@/common/colors";
 import OfflineNetwork from "@/components/offline-network";
+import { PreloadResources } from "@/components/preload-resources";
+import { QueryProvider } from "@/components/providers/query-provider";
+import { Toaster } from "@/components/ui/toaster";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { Config } from "@ssr/common/config";
+import type { Metadata, Viewport } from "next";
+import localFont from "next/font/local";
 import Script from "next/script";
 import { ReactNode } from "react";
-import { Config } from "@ssr/common/config";
+import DatabaseLoader from "../components/loaders/database-loader";
+import "./globals.css";
 
 const siteFont = localFont({
   src: "./fonts/JetBrainsMono.ttf",
@@ -81,14 +80,7 @@ export default function RootLayout({
           <PreloadResources />
           <TooltipProvider delayDuration={250}>
             <OfflineNetwork>
-              <ThemeProvider
-                attribute="class"
-                defaultTheme="dark"
-                enableSystem
-                disableTransitionOnChange
-              >
-                <QueryProvider>{children}</QueryProvider>
-              </ThemeProvider>
+              <QueryProvider>{children}</QueryProvider>
             </OfflineNetwork>
           </TooltipProvider>
         </DatabaseLoader>

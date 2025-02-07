@@ -24,7 +24,7 @@ interface DailyChangeProps {
   /**
    * The tooltip to display
    */
-  tooltip?: React.ReactElement | string;
+  tooltip?: React.ReactElement<any> | string;
 
   /**
    * The class name

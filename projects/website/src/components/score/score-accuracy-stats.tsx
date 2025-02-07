@@ -86,9 +86,9 @@ function HandStat({ hand, name, value }: { hand: Hand; name: string; value: stri
       className="inline-flex justify-around items-center py-0.5 px-1 rounded-md w-full"
       style={{ backgroundColor: handColors[hand] }}
     >
-      <p className="flex-grow min-w-[38px]">{name}</p>
+      <p className="grow min-w-[38px]">{name}</p>
       <span className="opacity-60 mx-2">|</span>
-      <p className="flex-grow text-right">{value}</p>
+      <p className="grow text-right">{value}</p>
     </div>
   );
 }

@@ -43,7 +43,7 @@ const scoreBadges: ScoreBadge[] = [
   { name: "S+", min: 85, max: 90, color: getDifficulty("Hard")!.color },
   { name: "S", min: 80, max: 85, color: getDifficulty("Normal")!.color },
   { name: "A", min: 70, max: 80, color: getDifficulty("Easy")!.color },
-  { name: "-", min: null, max: 70, color: "hsl(var(--accent))" },
+  { name: "-", min: null, max: 70, color: "var(--accent)" },
 ];
 
 /**

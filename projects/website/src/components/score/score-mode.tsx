@@ -9,7 +9,7 @@ import { capitalizeFirstLetter } from "@ssr/common/string-utils";
 export type ScoreModeType = {
   name: string;
   id: ScoreModeEnum;
-  icon: ReactElement;
+  icon: ReactElement<any>;
 };
 
 export enum ScoreModeEnum {

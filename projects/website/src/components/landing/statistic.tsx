@@ -6,7 +6,7 @@ import { CircleStackIcon } from "@heroicons/react/24/outline";
 import Tooltip from "@/components/tooltip";
 
 type Statistic = {
-  icon: ReactElement;
+  icon: ReactElement<any>;
   title: string;
   value: number;
   isCache?: boolean;
