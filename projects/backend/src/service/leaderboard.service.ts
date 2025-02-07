@@ -17,7 +17,7 @@ import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
 import { MapCharacteristic } from "@ssr/common/types/map-characteristic";
 import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score";
-import { getDifficulty } from "@ssr/common/utils/song-utils";
+import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import { EmbedBuilder } from "discord.js";
 import { NotFoundError } from "elysia";
@@ -511,9 +511,6 @@ export default class LeaderboardService {
     const wasReweighed =
       previousLeaderboard.stars !== leaderboard.stars && previousLeaderboard.ranked;
 
-    // Get difficulty name
-    const difficulty = getDifficulty(leaderboard.difficulty.difficulty);
-
     // Determine the Discord channel to log to
     const channel =
       leaderboard.status === "Ranked" || leaderboard.status === "Unranked"
@@ -525,7 +522,7 @@ export default class LeaderboardService {
       .setTitle(statusChangeMessage)
       .setDescription(
         `
-Difficulty: **${difficulty.alternativeName ?? difficulty.name}**
+Difficulty: **${getDifficultyName(getDifficulty(leaderboard.difficulty.difficulty))}**
 ${leaderboard.ranked ? `Stars:${wasReweighed ? ` **${previousLeaderboard.stars}** ->` : ""} **${leaderboard.stars}**` : ""}
 Mapped by: **${leaderboard.levelAuthorName}**
 Map: https://ssr.fascinated.cc/leaderboard/${leaderboard.id}

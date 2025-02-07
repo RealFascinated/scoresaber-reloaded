@@ -1,10 +1,9 @@
 import { OverlayData } from "@/common/overlay/overlay-data";
-import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
-import OverlayView, { OverlayViewPosition } from "@/components/overlay/views/view";
-import Image from "next/image";
 import { cn } from "@/common/utils";
-import { getDifficulty } from "@ssr/common/utils/song-utils";
+import OverlayView, { OverlayViewPosition } from "@/components/overlay/views/view";
 import { truncateText } from "@ssr/common/string-utils";
+import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
+import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
 
 type OverlayScoreDataProps = {
   overlayData: OverlayData;
@@ -46,7 +45,7 @@ export default function OverlayScoreInfoView({ overlayData }: OverlayScoreDataPr
               backgroundColor: difficulty.color,
             }}
           >
-            <p>{difficulty.alternativeName ?? difficulty.name}</p>
+            <p>{getDifficultyName(difficulty)}</p>
           </div>
           <p>
             !bsr {beatSaverMap.bsr} - {formatNumberWithCommas(beatSaverMap.metadata.bpm)} BPM{" "}

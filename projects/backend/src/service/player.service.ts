@@ -23,7 +23,11 @@ import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
 import { AroundPlayer } from "@ssr/common/types/around-player";
 import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/player";
 import ScoreSaberPlayerScoreToken from "@ssr/common/types/token/scoresaber/player-score";
-import { getDifficulty, getScoreBadgeFromAccuracy } from "@ssr/common/utils/song-utils";
+import {
+  getDifficulty,
+  getDifficultyName,
+  getScoreBadgeFromAccuracy,
+} from "@ssr/common/utils/song-utils";
 import {
   formatDateMinimal,
   getDaysAgoDate,
@@ -33,8 +37,8 @@ import { isProduction } from "@ssr/common/utils/utils";
 import { fetchWithCache } from "../common/cache.util";
 import { logNewTrackedPlayer } from "../common/embds";
 import CacheService, { ServiceCache } from "./cache.service";
-import ScoreSaberService from "./scoresaber.service";
 import { ScoreService } from "./score/score.service";
+import ScoreSaberService from "./scoresaber.service";
 
 const accountCreationLock: { [id: string]: Promise<PlayerDocument> } = {};
 
@@ -790,14 +794,13 @@ export class PlayerService {
     for (const playerScore of playerScores) {
       const leaderboard = playerScore.leaderboard as ScoreSaberLeaderboard;
       const score = playerScore.score as ScoreSaberScore;
-      const difficulty = getDifficulty(leaderboard.difficulty.difficulty);
 
       data.push({
         accuracy: score.accuracy,
         stars: leaderboard.stars,
         leaderboardId: leaderboard.id + "",
         leaderboardName: leaderboard.fullName,
-        leaderboardDifficulty: difficulty.alternativeName ?? difficulty.name,
+        leaderboardDifficulty: getDifficultyName(getDifficulty(leaderboard.difficulty.difficulty)),
       });
     }
 

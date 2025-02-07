@@ -4,7 +4,7 @@ import { Config } from "@ssr/common/config";
 import { DetailType } from "@ssr/common/detail-type";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { LeaderboardResponse } from "@ssr/common/response/leaderboard-response";
-import { getDifficulty } from "@ssr/common/utils/song-utils";
+import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
@@ -73,7 +73,6 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   }
 
   const { leaderboard } = response.leaderboardResponse;
-  const difficulty = getDifficulty(leaderboard.difficulty.difficulty);
 
   return {
     title: `${leaderboard.fullName} - ${leaderboard.songAuthorName}`,
@@ -82,7 +81,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
       title: `${leaderboard.fullName} - ${leaderboard.songAuthorName}`,
       description: `Plays: ${leaderboard.plays} (${leaderboard.dailyPlays} Daily)
 Mapped by: ${leaderboard.songAuthorName}
-Difficulty: ${difficulty.alternativeName ?? difficulty.name}${leaderboard.stars > 0 ? ` (${leaderboard.stars}★)` : ""}
+Difficulty: ${getDifficultyName(leaderboard.difficulty.difficulty)}${leaderboard.stars > 0 ? ` (${leaderboard.stars}★)` : ""}
 
 Click here to view the scores for ${leaderboard.fullName}`,
       images: [

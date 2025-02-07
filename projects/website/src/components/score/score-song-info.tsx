@@ -25,7 +25,7 @@ export default function ScoreSongInfo({
       : undefined;
 
   const starCount = leaderboard.stars;
-  const difficulty = leaderboard.difficulty.difficulty;
+  const difficulty = getDifficulty(leaderboard.difficulty.difficulty);
   return (
     <div className="flex gap-3 items-center break-all w-full">
       <div
@@ -37,7 +37,7 @@ export default function ScoreSongInfo({
         <Tooltip
           display={
             <div>
-              <p>Difficulty: {difficulty}</p>
+              <p>Difficulty: {getDifficultyName(difficulty)}</p>
               {starCount > 0 && <p>Stars: {starCount.toFixed(2)}</p>}
             </div>
           }
@@ -45,7 +45,7 @@ export default function ScoreSongInfo({
           <div
             className="absolute w-full h-[18px] bottom-0 right-0 rounded-sm flex justify-center items-center text-[0.70rem] cursor-default"
             style={{
-              backgroundColor: getDifficulty(difficulty).color + "f0", // Transparency value (in hex 0-255)
+              backgroundColor: difficulty.color + "f0", // Transparency value (in hex 0-255)
             }}
           >
             {starCount > 0 ? (
