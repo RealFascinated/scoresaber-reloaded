@@ -208,14 +208,13 @@ export default class Database extends Dexie {
   }
 
   /**
-   * Fetches a player from the cache or
+   * Fetches a player from the cache (cached for 6 hours) or
    * lookups it if it doesn't exist.
    *
    * @param id the player's id
    * @returns the player
    */
   public async getPlayer(id: string): Promise<ScoreSaberPlayer | undefined> {
-    // Cache player lookups for 6 hours
     return this.getCache<ScoreSaberPlayer>(`player:${id}`, 60 * 60 * 6, async () => {
       try {
         return await ssrApi.getScoreSaberPlayer(id, {
