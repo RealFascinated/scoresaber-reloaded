@@ -1,4 +1,4 @@
-import { Colors } from "@/common/colors";
+import { Colors } from "./src/common/colors";
 import type { Config } from "tailwindcss";
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
