@@ -30,9 +30,10 @@ export function ChangeOverTime({ player, type, children }: ChangeOverTimeProps) 
 
   // Format values based on stat type
   const formatChangeValue = (value: number | undefined): string | number => {
-    if (value === 0) {
-      return 0;
+    if (value == -0) {
+      value = 0;
     }
+
     if (value === undefined) {
       return "No Data";
     }
