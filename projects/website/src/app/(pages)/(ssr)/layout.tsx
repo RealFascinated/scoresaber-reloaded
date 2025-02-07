@@ -1,4 +1,5 @@
 import { Colors } from "@/common/colors";
+import DatabaseLoader from "@/components/loaders/database-loader";
 import OfflineNetwork from "@/components/offline-network";
 import { PreloadResources } from "@/components/preload-resources";
 import { QueryProvider } from "@/components/providers/query-provider";
@@ -9,11 +10,10 @@ import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import Script from "next/script";
 import { ReactNode } from "react";
-import DatabaseLoader from "../../../components/loaders/database-loader";
-import "./globals.css";
+import "../../globals.css";
 
 const siteFont = localFont({
-  src: "./fonts/JetBrainsMono.ttf",
+  src: "../../fonts/JetBrainsMono.ttf",
   weight: "100 300",
 });
 
