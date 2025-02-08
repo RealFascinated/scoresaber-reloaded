@@ -5,9 +5,9 @@ import { ScoreSort } from "@ssr/common/score/score-sort";
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
-import { getCookieValue } from "@ssr/common/utils/cookie-utils";
 import { DetailType } from "@ssr/common/detail-type";
 import { formatPp } from "@ssr/common/utils/number-utils";
+import { getCookieValue } from "@/common/cookie.util";
 
 export const revalidate = 300; // Revalidate every 5 minutes
 

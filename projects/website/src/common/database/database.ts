@@ -2,9 +2,9 @@ import Settings from "@/common/database/impl/settings";
 import { DetailType } from "@ssr/common/detail-type";
 import Logger from "@ssr/common/logger";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import { setCookieValue } from "@ssr/common/utils/cookie-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import Dexie, { EntityTable } from "dexie";
+import { setCookieValue } from "../cookie.util";
 
 type CacheItem = {
   id: string;

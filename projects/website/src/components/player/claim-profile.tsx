@@ -4,8 +4,8 @@ import { CheckIcon } from "@heroicons/react/24/solid";
 import { useToast } from "@/hooks/use-toast";
 import Tooltip from "../tooltip";
 import { Button } from "../ui/button";
-import { setCookieValue } from "@ssr/common/utils/cookie-utils";
 import useSettings from "@/hooks/use-settings";
+import { setCookieValue } from "@/common/cookie.util";
 
 type Props = {
   /**

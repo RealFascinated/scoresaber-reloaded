@@ -1,4 +1,4 @@
-import { isServer } from "./utils";
+import { isServer } from "@ssr/common/utils/utils";
 
 export type CookieName = "playerId" | "lastScoreSort";
 
