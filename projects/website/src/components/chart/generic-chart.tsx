@@ -51,10 +51,6 @@ const GenericChart = ({ options, labels, datasetConfig, histories }: ChartProps)
   const isMobile = useIsMobile();
   const database = useDatabase();
 
-  if (!database) {
-    return null;
-  }
-
   const axes = useMemo(() => {
     const generatedAxes: Record<string, Axis> = {
       x: { grid: { color: "#252525" }, reverse: false, ticks: {} },
