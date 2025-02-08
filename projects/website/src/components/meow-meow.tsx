@@ -1,6 +1,7 @@
 "use client";
 
-import useSettings from "@/hooks/use-settings";
+import useDatabase from "@/hooks/use-database";
+import { useLiveQuery } from "dexie-react-hooks";
 import { useEffect, useRef } from "react";
 
 type SpriteName =
@@ -86,8 +87,8 @@ const spriteSets: Record<SpriteName, number[][]> = {
 };
 
 export default function MeowMeow() {
-  const settings = useSettings();
-  const showKitty = settings.getShowKitty();
+  const database = useDatabase();
+  const showKitty = useLiveQuery(async () => database.getShowKitty());
   const nekoElRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {

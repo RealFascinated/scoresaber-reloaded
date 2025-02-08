@@ -1,97 +1,109 @@
-import Settings from "@/common/database/impl/settings";
 import { DetailType } from "@ssr/common/detail-type";
 import Logger from "@ssr/common/logger";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import Dexie, { EntityTable } from "dexie";
-import { setCookieValue } from "../cookie.util";
+import { deleteCookieValue, setCookieValue } from "../cookie.util";
+import { defaultOverlaySettings, OverlaySettings } from "../overlay/overlay-settings";
+import { ReplayViewer, ReplayViewers } from "../replay-viewer";
 
 type CacheItem = {
+  /**
+   * The id of the cache item
+   */
   id: string;
+
+  /**
+   * The last updated time of the cache item
+   */
   lastUpdated: number;
+
+  /**
+   * The item of the cache
+   */
   item: unknown;
 };
 
-type Friend = {
+type Setting = {
+  /**
+   * The id of the setting
+   */
   id: string;
+
+  /**
+   * The value of the setting
+   */
+  value: unknown;
 };
 
-const SETTINGS_ID = "SSR";
+export enum SettingIds {
+  MainPlayer = "mainPlayer",
+  BackgroundCover = "backgroundCover",
+  ShowKitty = "showKitty",
+  SnowParticles = "snowParticles",
+  WhatIfRange = "whatIfRange",
+  ChartLegends = "chartLegends",
+  OverlaySettings = "overlaySettings",
+  ReplayViewer = "replayViewer",
+  Friends = "friends",
+}
 
 export default class Database extends Dexie {
-  settings!: EntityTable<Settings, "id">;
-  friends!: EntityTable<Friend, "id">;
+  settings!: EntityTable<Setting, "id">;
   cache!: EntityTable<CacheItem, "id">;
 
-  constructor() {
-    super("ScoreSaberReloaded");
+  chartLegendsCache!: Record<string, Record<string, boolean>>;
 
-    this.version(32).stores({
+  constructor(before: number) {
+    super("ssr");
+
+    this.version(1).stores({
       settings: "id",
-      beatSaverMaps: "hash",
-      friends: "id",
       cache: "id",
     });
 
-    this.version(32).upgrade(async transaction => {
-      await transaction.table("cache").clear();
-    });
-
-    this.settings.mapToClass(Settings);
-
-    this.on("populate", () => this.resetSettings());
     this.on("ready", async () => {
-      await this.getFriends(); // Pre-fetch friends
-      await this.initializeCookie();
+      Logger.info(`Database ready in ${(performance.now() - before).toFixed(0)}ms`);
+
+      this.initializeCookie(); // Initialize cookie
+      this.getFriends(true); // Pre-fetch friends
+
+      // Pre-fetch chart legends
+      this.chartLegendsCache =
+        (await this.getSetting<Record<string, Record<string, boolean>>>(SettingIds.ChartLegends)) ||
+        {};
     });
   }
 
   /**
-   * Initializes the cookie
-   * @private
+   * Gets the main player from the database
+   *
+   * @returns the main player
    */
-  private async initializeCookie() {
-    try {
-      const settings = await this.getSettings();
-      if (settings?.playerId) {
-        await setCookieValue("playerId", settings.playerId);
-      }
-    } catch (error) {
-      console.error("Failed to initialize cookie:", error);
-    }
+  async getMainPlayerId(): Promise<string | undefined> {
+    return this.getSetting<string>(SettingIds.MainPlayer);
   }
 
   /**
-   * Gets the settings from the database
+   * Gets the main player from the database
    *
-   * @returns the settings
+   * @returns the main player
    */
-  async getSettings(): Promise<Settings | undefined> {
-    return this.settings.get(SETTINGS_ID);
-  }
-
-  /**
-   * Sets the settings in the database
-   *
-   * @param settings the settings to set
-   * @returns the settings
-   */
-  async setSettings(settings: Settings) {
-    return this.settings.update(SETTINGS_ID, settings);
-  }
-
-  /**
-   * Gets the claimed player's account.
-   *
-   * @returns the claimed player's account
-   */
-  async getClaimedPlayer(): Promise<ScoreSaberPlayer | undefined> {
-    const settings = await this.getSettings();
-    if (!settings?.playerId) {
+  async getMainPlayer(): Promise<ScoreSaberPlayer | undefined> {
+    const id = await this.getMainPlayerId();
+    if (!id) {
       return undefined;
     }
+    return this.getPlayer(id);
+  }
 
-    return this.getPlayer(settings.playerId);
+  /**
+   * Sets the main player id in the database
+   *
+   * @param id the id of the main player
+   */
+  async setMainPlayerId(id: string) {
+    await this.setSetting(SettingIds.MainPlayer, id);
   }
 
   /**
@@ -100,7 +112,11 @@ export default class Database extends Dexie {
    * @param id the id of the friend
    */
   async addFriend(id: string) {
-    await this.friends.add({ id });
+    const friends = await this.getFriendIds();
+    if (!friends.includes(id)) {
+      friends.push(id);
+      await this.setSetting(SettingIds.Friends, friends);
+    }
   }
 
   /**
@@ -109,7 +125,25 @@ export default class Database extends Dexie {
    * @param id the id of the friend
    */
   async removeFriend(id: string) {
-    await this.friends.delete(id);
+    const friends = await this.getFriendIds();
+    const index = friends.indexOf(id);
+    if (index > -1) {
+      friends.splice(index, 1);
+      await this.setSetting(SettingIds.Friends, friends);
+    }
+  }
+
+  /**
+   * Initializes the cookie
+   * @private
+   */
+  private async initializeCookie() {
+    const mainPlayerId = await this.getMainPlayerId();
+    if (mainPlayerId) {
+      await setCookieValue("playerId", mainPlayerId);
+    } else {
+      await deleteCookieValue("playerId");
+    }
   }
 
   /**
@@ -119,8 +153,7 @@ export default class Database extends Dexie {
    * @returns whether the player is a friend
    */
   async isFriend(id: string): Promise<boolean> {
-    const friend = await this.friends.get(id);
-    return friend != undefined;
+    return (await this.getFriendIds()).includes(id);
   }
 
   /**
@@ -129,16 +162,13 @@ export default class Database extends Dexie {
    * @returns the accounts
    */
   async getFriends(includeSelf?: boolean): Promise<ScoreSaberPlayer[]> {
-    const friends = await this.friends.toArray();
-    if (includeSelf) {
-      const claimedPlayer = await this.getClaimedPlayer();
-      if (claimedPlayer) {
-        friends.push({ id: claimedPlayer.id });
-      }
+    const friends = await this.getFriendIds(includeSelf);
+    if (friends.length === 0) {
+      return [];
     }
 
     const players = await Promise.all(
-      friends.map(async ({ id }) => {
+      friends.map(async id => {
         return this.getPlayer(id);
       })
     );
@@ -153,9 +183,15 @@ export default class Database extends Dexie {
    *
    * @returns the ids of all friends
    */
-  async getFriendIds(): Promise<string[]> {
-    const friends = await this.friends.toArray();
-    return friends.map(({ id }) => id);
+  async getFriendIds(includeSelf?: boolean): Promise<string[]> {
+    const friends = (await this.getSetting<string[]>(SettingIds.Friends, [])) ?? [];
+    if (includeSelf) {
+      const mainPlayerId = await this.getMainPlayerId();
+      if (mainPlayerId) {
+        friends.push(mainPlayerId);
+      }
+    }
+    return friends;
   }
 
   /**
@@ -228,18 +264,190 @@ export default class Database extends Dexie {
   }
 
   /**
+   * Gets the chart legend for a given id and title
+   *
+   * @param id the id of the chart
+   * @param title the title of the chart
+   * @param defaultState the default state of the chart
+   * @returns the chart legend
+   */
+  getChartLegend(id: string, title: string, defaultState?: boolean): boolean {
+    return this.chartLegendsCache[id]?.[title] ?? defaultState ?? false;
+  }
+
+  /**
+   * Sets the chart legend for a given id and title
+   *
+   * @param id the id of the chart
+   * @param title the title of the chart
+   * @param state the state of the chart
+   */
+  async setChartLegend(id: string, title: string, state: boolean) {
+    const setting = await this.getSetting<Record<string, Record<string, boolean>>>(
+      SettingIds.ChartLegends,
+      {}
+    );
+
+    if (!setting) {
+      return;
+    }
+
+    setting[id] = setting[id] ?? {};
+    setting[id][title] = state;
+
+    this.chartLegendsCache[id] = this.chartLegendsCache[id] ?? {};
+    this.chartLegendsCache[id][title] = state;
+
+    await this.setSetting(SettingIds.ChartLegends, setting);
+  }
+
+  /**
+   * Gets the background cover from the database
+   *
+   * @returns the background cover
+   */
+  async getBackgroundCover(): Promise<string> {
+    return (await this.getSetting<string>(SettingIds.BackgroundCover, "/assets/background.jpg"))!;
+  }
+
+  /**
+   * Sets the background cover in the database
+   *
+   * @param cover the background cover
+   */
+  async setBackgroundCover(cover: string) {
+    await this.setSetting(SettingIds.BackgroundCover, cover);
+  }
+
+  /**
+   * Gets the show kitty setting from the database
+   *
+   * @returns the show kitty setting
+   */
+  async getShowKitty(): Promise<boolean> {
+    return (await this.getSetting<boolean>(SettingIds.ShowKitty, false))!;
+  }
+
+  /**
+   * Sets the show kitty setting in the database
+   *
+   * @param showKitty the show kitty setting
+   */
+  async setShowKitty(showKitty: boolean) {
+    await this.setSetting(SettingIds.ShowKitty, showKitty);
+  }
+
+  /**
+   * Gets the snow particles setting from the database
+   *
+   * @returns the snow particles setting
+   */
+  async getSnowParticles(): Promise<boolean> {
+    return (await this.getSetting<boolean>(SettingIds.SnowParticles, false))!;
+  }
+
+  /**
+   * Sets the snow particles setting in the database
+   *
+   * @param snowParticles the snow particles setting
+   */
+  async setSnowParticles(snowParticles: boolean) {
+    await this.setSetting(SettingIds.SnowParticles, snowParticles);
+  }
+
+  /**
+   * Gets the what if range setting from the database
+   *
+   * @returns the what if range setting
+   */
+  async getWhatIfRange(): Promise<[number, number]> {
+    return (await this.getSetting<[number, number]>(SettingIds.WhatIfRange, [5, 100]))!;
+  }
+
+  /**
+   * Sets the what if range setting in the database
+   *
+   * @param whatIfRange the what if range setting
+   */
+  async setWhatIfRange(whatIfRange: [number, number]) {
+    await this.setSetting(SettingIds.WhatIfRange, whatIfRange);
+  }
+
+  /**
+   * Gets the overlay settings from the database
+   *
+   * @returns the overlay settings
+   */
+  async getOverlaySettings(): Promise<OverlaySettings> {
+    return (await this.getSetting<OverlaySettings>(SettingIds.OverlaySettings, {
+      ...defaultOverlaySettings,
+      playerId: (await this.getMainPlayerId()) ?? "",
+    } as OverlaySettings))!;
+  }
+
+  /**
+   * Gets the replay viewer from the database
+   *
+   * @returns the replay viewer
+   */
+  async getReplayViewer(): Promise<ReplayViewer> {
+    return ReplayViewers[(await this.getSetting<string>(SettingIds.ReplayViewer, "beatleader"))!];
+  }
+
+  /**
+   * Sets the replay viewer in the database
+   *
+   * @param viewer the replay viewer
+   */
+  async setReplayViewer(viewer: string) {
+    await this.setSetting(SettingIds.ReplayViewer, viewer);
+  }
+
+  /**
+   * Sets the overlay settings in the database
+   *
+   * @param overlaySettings the overlay settings
+   */
+  async setOverlaySettings(overlaySettings: OverlaySettings) {
+    await this.setSetting(SettingIds.OverlaySettings, overlaySettings);
+  }
+
+  /**
+   * Gets a setting from the database
+   *
+   * @param id the id of the setting
+   * @returns the setting
+   */
+  async getSetting<T>(id: string, defaultValue?: T): Promise<T | undefined> {
+    const setting = await this.settings.get(id);
+    return (setting?.value as T | undefined) ?? defaultValue;
+  }
+
+  /**
+   * Sets a setting in the database
+   *
+   * @param id the id of the setting
+   * @param value the value of the setting
+   */
+  async setSetting<T>(id: string, value: T) {
+    await this.settings.put({ id, value });
+  }
+
+  /**
    * Resets the database to default values
    */
-  async resetSettings() {
-    await this.settings.delete(SETTINGS_ID);
-    await this.settings.add({
-      id: SETTINGS_ID,
-      backgroundCover: "/assets/background.jpg",
-    });
+  async reset() {
+    await this.settings.clear();
     await this.cache.clear();
-
-    return this.getSettings();
   }
 }
 
-export const db = new Database();
+/**
+ * Gets the database
+ *
+ * @returns the database
+ */
+export function getDatabase(): Database {
+  const before = performance.now();
+  return new Database(before);
+}

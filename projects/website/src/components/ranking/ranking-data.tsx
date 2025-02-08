@@ -23,7 +23,7 @@ type RankingDataProps = {
 export default function RankingData({ initialPage, country, initialPageData }: RankingDataProps) {
   const isMobile = useIsMobile();
   const database = useDatabase();
-  const claimedPlayer = useLiveQuery(() => database.getClaimedPlayer());
+  const mainPlayer = useLiveQuery(() => database.getMainPlayer());
 
   const [showRelativePPDifference, setShowRelativePPDifference] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState(initialPage);
@@ -80,7 +80,7 @@ export default function RankingData({ initialPage, country, initialPageData }: R
           </p>
         </div>
 
-        {claimedPlayer !== undefined && (
+        {mainPlayer !== undefined && (
           <div className="flex items-center gap-2">
             <p>Toggle relative pp difference</p>
             <Switch
@@ -115,7 +115,7 @@ export default function RankingData({ initialPage, country, initialPageData }: R
                     isCountry={country != undefined}
                     player={player}
                     relativePerformancePoints={showRelativePPDifference}
-                    claimedPlayer={claimedPlayer}
+                    mainPlayer={mainPlayer}
                   />
                 </tr>
               ))}

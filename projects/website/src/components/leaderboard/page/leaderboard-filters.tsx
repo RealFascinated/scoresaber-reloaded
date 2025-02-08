@@ -11,7 +11,7 @@ import CountryFlag from "@/components/country-flag";
 
 export default function LeaderboardFilters() {
   const database = useDatabase();
-  const claimedPlayer = useLiveQuery(() => database.getClaimedPlayer());
+  const mainPlayer = useLiveQuery(() => database.getMainPlayer());
 
   const filter = useLeaderboardFilter();
 
@@ -29,7 +29,7 @@ export default function LeaderboardFilters() {
           }))
           // The top country is the country of the claimed player
           .sort(country => {
-            if (country.value === claimedPlayer?.country) {
+            if (country.value === mainPlayer?.country) {
               return -1;
             }
             return 1;

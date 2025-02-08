@@ -1,14 +1,15 @@
 "use client";
 
-import React, { useState } from "react";
-import Card from "@/components/card";
-import { DualRangeSlider } from "@/components/ui/dual-range-slider";
-import { useDebounce } from "@uidotdev/usehooks";
 import { DatasetConfig } from "@/common/chart/types";
+import { SettingIds } from "@/common/database/database";
 import GenericChart from "@/components/chart/generic-chart";
+import { DualRangeSlider } from "@/components/ui/dual-range-slider";
+import useDatabase from "@/hooks/use-database";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
-import useSettings from "@/hooks/use-settings";
+import { useDebounce } from "@uidotdev/usehooks";
+import { useLiveQuery } from "dexie-react-hooks";
+import { useEffect, useState } from "react";
 
 type Props = {
   /**
@@ -18,11 +19,17 @@ type Props = {
 };
 
 export default function LeaderboardPpChart({ leaderboard }: Props) {
-  const settings = useSettings();
-  const whatIfRange = settings.getWhatIfRange();
+  const database = useDatabase();
+  const whatIfRange = useLiveQuery(() => database.getWhatIfRange());
 
-  const [values, setValues] = useState([whatIfRange[0], whatIfRange[1]]);
+  const [values, setValues] = useState([5, 100]);
   const debouncedValues = useDebounce(values, 100);
+
+  useEffect(() => {
+    if (whatIfRange) {
+      setValues(whatIfRange);
+    }
+  }, [whatIfRange]);
 
   const histories: Record<string, (number | null)[]> = {};
   const labels: string[] = [];
@@ -43,7 +50,7 @@ export default function LeaderboardPpChart({ leaderboard }: Props) {
 
   const updateRange = (range: [number, number]) => {
     setValues(range);
-    settings.setWhatIfRange(range);
+    database.setSetting(SettingIds.WhatIfRange, range);
   };
 
   const datasetConfig: DatasetConfig[] = [

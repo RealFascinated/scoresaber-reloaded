@@ -1,6 +1,5 @@
 import { Colors } from "@/common/colors";
 import DatabaseLoader from "@/components/loaders/database-loader";
-import OfflineNetwork from "@/components/offline-network";
 import { PreloadResources } from "@/components/preload-resources";
 import { QueryProvider } from "@/components/providers/query-provider";
 import { Toaster } from "@/components/ui/toaster";
@@ -79,9 +78,7 @@ export default function RootLayout({
           <Toaster />
           <PreloadResources />
           <TooltipProvider delayDuration={250}>
-            <OfflineNetwork>
-              <QueryProvider>{children}</QueryProvider>
-            </OfflineNetwork>
+            <QueryProvider>{children}</QueryProvider>
           </TooltipProvider>
         </DatabaseLoader>
       </body>

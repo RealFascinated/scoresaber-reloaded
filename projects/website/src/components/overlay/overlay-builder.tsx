@@ -1,18 +1,17 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { useToast } from "@/hooks/use-toast";
-import useSettings from "@/hooks/use-settings";
-import { Form, FormControl, FormDescription, FormItem, FormLabel } from "../ui/form";
-import { FormField } from "@/components/ui/form";
-import { Button } from "../ui/button";
-import { Input } from "@/components/ui/input";
-import { encodeOverlaySettings, OverlayViews } from "@/common/overlay/overlay-settings";
-import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
-import Notice from "@/components/notice";
 import { openInNewTab } from "@/common/browser-utils";
+import { SettingIds } from "@/common/database/database";
+import { OverlayDataClients } from "@/common/overlay/data-client";
+import {
+  defaultOverlaySettings,
+  encodeOverlaySettings,
+  OverlayViews,
+} from "@/common/overlay/overlay-settings";
+import Notice from "@/components/notice";
+import { Checkbox } from "@/components/ui/checkbox";
+import { FormField } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -20,8 +19,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { OverlayDataClients } from "@/common/overlay/data-client";
-import { Checkbox } from "@/components/ui/checkbox";
+import useDatabase from "@/hooks/use-database";
+import { useToast } from "@/hooks/use-toast";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
+import { useLiveQuery } from "dexie-react-hooks";
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { Button } from "../ui/button";
+import { Form, FormControl, FormDescription, FormItem, FormLabel } from "../ui/form";
 
 const viewToggles = [
   {
@@ -46,23 +53,25 @@ const formSchema = z.object({
 });
 
 export default function OverlayBuilder() {
-  const settings = useSettings();
+  const database = useDatabase();
+  const overlaySettings = useLiveQuery(async () => database.getOverlaySettings());
   const { toast } = useToast();
 
-  const overlaySettings = settings?.getOverlaySettings();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      playerId: overlaySettings!.playerId,
-      useRealTimeData: overlaySettings!.useRealTimeData,
-      dataClient: overlaySettings!.dataClient,
-      views: overlaySettings!.views,
-    },
+    defaultValues: defaultOverlaySettings,
   });
 
-  if (!settings) {
-    return;
-  }
+  useEffect(() => {
+    if (!overlaySettings) {
+      return;
+    }
+
+    form.setValue("playerId", overlaySettings.playerId || "");
+    form.setValue("useRealTimeData", overlaySettings.useRealTimeData);
+    form.setValue("dataClient", overlaySettings.dataClient || "");
+    form.setValue("views", overlaySettings.views);
+  }, [overlaySettings]);
 
   /**
    * Handles the form submission
@@ -86,13 +95,14 @@ export default function OverlayBuilder() {
     }
 
     // Update the settings
-    await settings.setOverlaySettings({
+    const overlaySettings = {
       playerId: playerId,
       useRealTimeData: useRealTimeData,
       dataClient: dataClient as OverlayDataClients,
       views: views as Record<OverlayViews, boolean>,
-    });
-    openInNewTab(`/overlay?settings=${encodeOverlaySettings(settings.getOverlaySettings())}`);
+    };
+    await database.setSetting(SettingIds.OverlaySettings, overlaySettings);
+    openInNewTab(`/overlay?settings=${encodeOverlaySettings(overlaySettings)}`);
   }
 
   return (

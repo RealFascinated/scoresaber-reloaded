@@ -8,7 +8,7 @@
     "dev:website": "bun --filter 'website' dev",
     "dev:backend": "bun --filter 'backend' dev",
     "dev:common": "bun --filter '@ssr/common' dev",
-    "dev": "concurrently \"bun run dev:common\" \"bun run dev:backend\"",
+    "dev": "bun --filter 'website' --filter 'backend' --filter '@ssr/common' dev",
     "prettier": "prettier --write ."
   },
   "author": "fascinated7",

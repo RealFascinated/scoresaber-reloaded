@@ -4,8 +4,10 @@ import { CheckIcon } from "@heroicons/react/24/solid";
 import { useToast } from "@/hooks/use-toast";
 import Tooltip from "../tooltip";
 import { Button } from "../ui/button";
-import useSettings from "@/hooks/use-settings";
+import useDatabase from "@/hooks/use-database";
 import { setCookieValue } from "@/common/cookie.util";
+import { SettingIds } from "@/common/database/database";
+import { useLiveQuery } from "dexie-react-hooks";
 
 type Props = {
   /**
@@ -15,14 +17,16 @@ type Props = {
 };
 
 export default function ClaimProfile({ playerId }: Props) {
-  const settings = useSettings();
+  const database = useDatabase();
+  const mainPlayerId = useLiveQuery(() => database.getMainPlayerId());
   const { toast } = useToast();
 
   /**
    * Claims the profile.
    */
   async function claimProfile() {
-    settings.setPlayerId(playerId);
+    await database.setSetting(SettingIds.MainPlayer, playerId);
+
     await setCookieValue("playerId", playerId);
     toast({
       title: "Profile Claimed",
@@ -30,12 +34,7 @@ export default function ClaimProfile({ playerId }: Props) {
     });
   }
 
-  // Database is not ready
-  if (settings == undefined) {
-    return null;
-  }
-
-  if (settings?.playerId == playerId) {
+  if (mainPlayerId == playerId) {
     return null; // Don't show the claim button if it's the same user.
   }
 

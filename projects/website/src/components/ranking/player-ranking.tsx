@@ -11,20 +11,20 @@ import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 
 type PlayerRankingProps = {
   player: ScoreSaberPlayerToken;
-  claimedPlayer?: ScoreSaberPlayer;
+  mainPlayer?: ScoreSaberPlayer;
   isCountry: boolean;
   relativePerformancePoints: boolean;
 };
 
 export function PlayerRanking({
   player,
-  claimedPlayer,
+  mainPlayer,
   isCountry,
   relativePerformancePoints,
 }: PlayerRankingProps) {
   const history = player.histories.split(",").map(Number);
   const weeklyRankChange = history[history?.length - 6] - player.rank;
-  const ppDifference = claimedPlayer ? player.pp - claimedPlayer.pp : 0;
+  const ppDifference = mainPlayer ? player.pp - mainPlayer.pp : 0;
 
   return (
     <>
@@ -35,11 +35,11 @@ export function PlayerRanking({
         )}
       </td>
       <td className="flex items-center gap-2 pl-3 py-1.5 min-w-[250px]">
-        <PlayerInfo player={player} highlightedPlayer={claimedPlayer} useLink />
+        <PlayerInfo player={player} highlightedPlayer={mainPlayer} useLink />
       </td>
       <td className="px-1 py-1.5 text-center">
         <span className="text-ssr">{formatPp(player.pp)}pp</span>{" "}
-        {relativePerformancePoints && claimedPlayer && (
+        {relativePerformancePoints && mainPlayer && (
           <span
             className={cn(
               "text-sm",

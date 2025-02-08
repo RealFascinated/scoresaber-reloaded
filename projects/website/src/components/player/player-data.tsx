@@ -4,7 +4,6 @@ import Card from "@/components/card";
 import PlayerViews from "@/components/player/history-views/player-views";
 import PlayerBadges from "@/components/player/player-badges";
 import useDatabase from "@/hooks/use-database";
-import useSettings from "@/hooks/use-settings";
 import useWindowDimensions from "@/hooks/use-window-dimensions";
 import { DetailType } from "@ssr/common/detail-type";
 import type ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
@@ -34,14 +33,15 @@ export default function PlayerData({
 }: PlayerDataProps) {
   const { width } = useWindowDimensions();
   const database = useDatabase();
-  const settings = useSettings();
+
+  const mainPlayerId = useLiveQuery(() => database.getMainPlayerId());
   const isFriend = useLiveQuery(() => database.isFriend(initialPlayerData.id));
 
   const { data: playerData } = useQuery({
-    queryKey: ["playerData", initialPlayerData.id, settings?.playerId, isFriend],
+    queryKey: ["playerData", initialPlayerData.id, mainPlayerId, isFriend],
     queryFn: () =>
       ssrApi.getScoreSaberPlayer(initialPlayerData.id, {
-        createIfMissing: settings?.playerId === initialPlayerData.id,
+        createIfMissing: mainPlayerId === initialPlayerData.id,
         type: DetailType.FULL,
       }),
     initialData: initialPlayerData,

@@ -1,12 +1,6 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { Button } from "../../ui/button";
-import { Form, FormControl, FormField, FormItem, FormLabel } from "../../ui/form";
-import { useToast } from "@/hooks/use-toast";
-import useSettings from "@/hooks/use-settings";
+import { ReplayViewers } from "@/common/replay-viewer";
 import {
   Select,
   SelectContent,
@@ -14,26 +8,42 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ReplayViewers } from "@/common/replay-viewer";
+import useDatabase from "@/hooks/use-database";
+import { useToast } from "@/hooks/use-toast";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useLiveQuery } from "dexie-react-hooks";
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { Button } from "../../ui/button";
+import { Form, FormControl, FormField, FormItem, FormLabel } from "../../ui/form";
 
 const formSchema = z.object({
   replayViewer: z.string().min(1).max(32),
 });
 
 export default function ScoreSettings() {
-  const settings = useSettings();
+  const database = useDatabase();
+  const replayViewer = useLiveQuery(async () =>
+    (await database.getReplayViewer()).name.toLowerCase()
+  );
+
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      replayViewer: settings?.getReplayViewerName() || "",
+      replayViewer: "",
     },
   });
 
-  if (!settings) {
-    return;
-  }
+  useEffect(() => {
+    if (replayViewer === undefined) {
+      return;
+    }
+
+    form.setValue("replayViewer", replayViewer);
+  }, [replayViewer, form]);
 
   /**
    * Handles the form submission
@@ -41,7 +51,8 @@ export default function ScoreSettings() {
    * @param replayViewer the new replay viewer
    */
   async function onSubmit({ replayViewer }: z.infer<typeof formSchema>) {
-    settings.setReplayViewer(replayViewer);
+    await database.setReplayViewer(replayViewer);
+
     toast({
       title: "Settings saved",
       description: "Your settings have been saved.",
@@ -50,40 +61,44 @@ export default function ScoreSettings() {
   }
 
   return (
-    <div className="flex flex-col gap-3 text-sm">
+    <div className="flex flex-col gap-3 text-sm h-full">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-2">
-          {/* Replay Viewer */}
-          <FormField
-            control={form.control}
-            name="replayViewer"
-            render={({ field }) => (
-              <FormItem className="w-full sm:w-72">
-                <FormLabel>Replay Viewer</FormLabel>
-                <FormControl>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={settings.getReplayViewerName()}
-                  >
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="flex flex-col justify-between gap-2 h-full"
+        >
+          <div className="flex flex-col gap-2">
+            {/* Replay Viewer */}
+            {replayViewer && (
+              <FormField
+                control={form.control}
+                name="replayViewer"
+                render={({ field }) => (
+                  <FormItem className="w-full sm:w-72">
+                    <FormLabel>Replay Viewer</FormLabel>
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a replay viewer to use" />
-                      </SelectTrigger>
+                      <Select onValueChange={field.onChange} defaultValue={replayViewer}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a replay viewer to use" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {Object.entries(ReplayViewers).map(([id, viewer]) => {
+                            return (
+                              <SelectItem key={id} value={id}>
+                                {viewer.name}
+                              </SelectItem>
+                            );
+                          })}
+                        </SelectContent>
+                      </Select>
                     </FormControl>
-                    <SelectContent>
-                      {Object.entries(ReplayViewers).map(([id, viewer]) => {
-                        return (
-                          <SelectItem key={id} value={id}>
-                            {viewer.name}
-                          </SelectItem>
-                        );
-                      })}
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-              </FormItem>
+                  </FormItem>
+                )}
+              />
             )}
-          />
+          </div>
 
           {/* Saving Settings */}
           <Button type="submit" className="w-fit">

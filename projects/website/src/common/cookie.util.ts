@@ -48,3 +48,19 @@ export async function setCookieValue(name: CookieName, value: string) {
     path: "/",
   });
 }
+
+/**
+ * Deletes a cookie
+ *
+ * @param name the name of the cookie
+ */
+export async function deleteCookieValue(name: CookieName) {
+  if (isServer()) {
+
+    const { cookies } = await import("next/headers");
+    const cookieStore = await cookies();
+    cookieStore.delete(name);
+  }
+  const { remove } = (await import("js-cookie")).default;
+  remove(name);
+}

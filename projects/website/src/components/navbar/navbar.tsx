@@ -4,10 +4,11 @@ import { cn } from "@/common/utils";
 import FriendsButton from "@/components/friend/friends-button";
 import PlayerAndLeaderboardSearch from "@/components/navbar/player-and-leaderboard-search";
 import ProfileButton from "@/components/navbar/profile-button";
-import { CogIcon, CubeIcon } from "@heroicons/react/24/solid";
+import { CubeIcon } from "@heroicons/react/24/solid";
 import { ChartBarIcon, MusicIcon, TrendingUpIcon } from "lucide-react";
 import Link from "next/link";
 import { ReactElement, useEffect, useState } from "react";
+import Settings from "../settings/settings";
 
 const links: ReactElement<any>[] = [
   <FriendsButton key="friends" />,
@@ -103,10 +104,7 @@ export default function Navbar() {
       <div className="md:pl-6 flex gap-2 items-center divide-x divide-muted transition-all transform-gpu">
         <div className="flex gap-2.5 items-center transition-all transform-gpu pr-2">
           <PlayerAndLeaderboardSearch />
-          <SimpleNavLink
-            content={<CogIcon className="size-6 text-zinc-200 hover:animate-spin-slow" />}
-            href="/settings"
-          />
+          <Settings />
         </div>
         <div>
           <ProfileButton />

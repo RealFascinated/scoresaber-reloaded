@@ -1,15 +1,19 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { useToast } from "@/hooks/use-toast";
-import useSettings from "@/hooks/use-settings";
-import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { SettingIds } from "@/common/database/database";
+import Tooltip from "@/components/tooltip";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import Tooltip from "@/components/tooltip";
+import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import useDatabase from "@/hooks/use-database";
+import { useToast } from "@/hooks/use-toast";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useLiveQuery } from "dexie-react-hooks";
+import { useForm } from "react-hook-form";
+import { FaUndo } from "react-icons/fa";
+import { z } from "zod";
+import { useEffect } from "react";
 
 const formSchema = z.object({
   backgroundCover: z.string().min(0).max(128),
@@ -18,21 +22,31 @@ const formSchema = z.object({
 });
 
 export default function WebsiteSettings() {
-  const settings = useSettings();
+  const database = useDatabase();
+  const backgroundCover = useLiveQuery(async () => await database.getBackgroundCover());
+  const snowParticles = useLiveQuery(async () => await database.getSnowParticles());
+  const showKitty = useLiveQuery(async () => await database.getShowKitty());
+
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      backgroundCover: settings?.backgroundCover || "",
-      snowParticles: settings?.getSnowParticles() ?? false,
-      showKitty: settings?.getShowKitty() ?? false,
+      backgroundCover: backgroundCover || "",
+      snowParticles: snowParticles ?? false,
+      showKitty: showKitty ?? false,
     },
   });
 
-  if (!settings) {
-    return;
-  }
+  useEffect(() => {
+    if (backgroundCover === undefined || snowParticles === undefined || showKitty === undefined) {
+      return;
+    }
+
+    form.setValue("backgroundCover", backgroundCover);
+    form.setValue("snowParticles", snowParticles);
+    form.setValue("showKitty", showKitty);
+  }, [backgroundCover, snowParticles, showKitty, form]);
 
   /**
    * Handles the form submission
@@ -45,9 +59,9 @@ export default function WebsiteSettings() {
     snowParticles,
     showKitty,
   }: z.infer<typeof formSchema>) {
-    settings.setBackgroundImage(backgroundCover);
-    settings.setSnowParticles(snowParticles);
-    await settings.setShowKitty(showKitty);
+    await database.setSetting(SettingIds.BackgroundCover, backgroundCover);
+    await database.setSetting(SettingIds.SnowParticles, snowParticles);
+    await database.setSetting(SettingIds.ShowKitty, showKitty);
 
     toast({
       title: "Settings saved",
@@ -57,63 +71,75 @@ export default function WebsiteSettings() {
   }
 
   return (
-    <div className="flex flex-col gap-3 text-sm">
+    <div className="flex flex-col gap-3 text-sm h-full">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-2">
-          {/* Background Cover */}
-          <FormField
-            control={form.control}
-            name="backgroundCover"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Background Cover</FormLabel>
-                <FormControl>
-                  <div className="flex gap-2 items-center">
-                    <Input className="w-full sm:w-72" placeholder="Hex or URL..." {...field} />
-                    <Tooltip display={<p>Reset to default</p>}>
-                      <button
-                        type="button"
-                        onClick={async () => {
-                          field.onChange("/assets/background.jpg");
-                          await onSubmit(form.getValues());
-                        }}
-                      >
-                        Reset
-                      </button>
-                    </Tooltip>
-                  </div>
-                </FormControl>
-              </FormItem>
-            )}
-          />
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="flex flex-col justify-between gap-2 h-full"
+        >
+          <div className="flex flex-col gap-2">
+            {/* Background Cover */}
+            <FormField
+              control={form.control}
+              name="backgroundCover"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Background Cover</FormLabel>
+                  <FormControl>
+                    <div className="flex gap-2 items-center">
+                      <Input className="w-full sm:w-72" placeholder="Hex or URL..." {...field} />
+                      <Tooltip display={<p>Reset to default</p>}>
+                        <button
+                          type="button"
+                          className="cursor-pointer"
+                          onClick={async () => {
+                            field.onChange("/assets/background.jpg");
+                            await onSubmit(form.getValues());
+                          }}
+                        >
+                          <FaUndo className="size-4" />
+                        </button>
+                      </Tooltip>
+                    </div>
+                  </FormControl>
+                </FormItem>
+              )}
+            />
 
-          {/* Background Cover */}
-          <FormField
-            control={form.control}
-            name="snowParticles"
-            render={({ field }) => (
-              <FormItem className="flex items-center  space-y-0 gap-2">
-                <FormControl>
-                  <Checkbox checked={field.value} onCheckedChange={field.onChange} />
-                </FormControl>
-                <FormLabel>Show Snow Particles</FormLabel>
-              </FormItem>
-            )}
-          />
+            {/* Snow Particles */}
+            <FormField
+              control={form.control}
+              name="snowParticles"
+              render={({ field }) => (
+                <FormItem className="flex items-center space-y-0 gap-2">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={checked => field.onChange(checked)}
+                    />
+                  </FormControl>
+                  <FormLabel>Show Snow Particles</FormLabel>
+                </FormItem>
+              )}
+            />
 
-          {/* Show Kitty */}
-          <FormField
-            control={form.control}
-            name="showKitty"
-            render={({ field }) => (
-              <FormItem className="flex items-center  space-y-0 gap-2">
-                <FormControl>
-                  <Checkbox checked={field.value} onCheckedChange={field.onChange} />
-                </FormControl>
-                <FormLabel>Show Kitty</FormLabel>
-              </FormItem>
-            )}
-          />
+            {/* Show Kitty */}
+            <FormField
+              control={form.control}
+              name="showKitty"
+              render={({ field }) => (
+                <FormItem className="flex items-center space-y-0 gap-2">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={checked => field.onChange(checked)}
+                    />
+                  </FormControl>
+                  <FormLabel>Show Kitty</FormLabel>
+                </FormItem>
+              )}
+            />
+          </div>
 
           {/* Saving Settings */}
           <Button type="submit" className="w-fit">

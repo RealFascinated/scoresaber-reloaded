@@ -24,8 +24,8 @@ import {
 } from "@ssr/common/utils/time-utils";
 import { Axis, Dataset, DatasetConfig } from "@/common/chart/types";
 import { generateChartAxis, generateChartDataset } from "@/common/chart/chart.util";
-import useSettings from "@/hooks/use-settings";
 import React, { useMemo } from "react";
+import useDatabase from "@/hooks/use-database";
 
 // Register only the required components
 Chart.register(
@@ -49,7 +49,11 @@ export type ChartProps = {
 const GenericChart = ({ options, labels, datasetConfig, histories }: ChartProps) => {
   const { id } = options || {};
   const isMobile = useIsMobile();
-  const settings = useSettings();
+  const database = useDatabase();
+
+  if (!database) {
+    return null;
+  }
 
   const axes = useMemo(() => {
     const generatedAxes: Record<string, Axis> = {
@@ -77,13 +81,14 @@ const GenericChart = ({ options, labels, datasetConfig, histories }: ChartProps)
     return datasetConfig
       .map(config => {
         const historyArray = histories[config.field];
+
         if (historyArray?.some(value => value !== null)) {
           return generateChartDataset(
             config.title,
             historyArray,
             config.color,
             config.axisId,
-            settings?.getChartLegend(id!, config.title, true),
+            database.getChartLegend(id!, config.title, true),
             config.axisConfig.stack,
             config.axisConfig.stackOrder,
             config.type || "line",
@@ -92,8 +97,8 @@ const GenericChart = ({ options, labels, datasetConfig, histories }: ChartProps)
         }
         return null;
       })
-      .filter(Boolean) as Dataset[];
-  }, [datasetConfig, histories, settings, id]);
+      .filter(Boolean) as Dataset | null[];
+  }, [datasetConfig, histories, database, id]);
 
   const formattedLabels = useMemo(() => {
     return labels.map(value => {
@@ -136,9 +141,10 @@ const GenericChart = ({ options, labels, datasetConfig, histories }: ChartProps)
             const chart = legend.chart;
             chart[chart.isDatasetVisible(index) ? "hide" : "show"](index);
             legendItem.hidden = !legendItem.hidden;
-            id && settings?.setChartLegendState(id, legendItem.text, !legendItem.hidden);
+            id && database.setChartLegend(id, legendItem.text, !legendItem.hidden);
           },
         },
+
         tooltip: {
           callbacks: {
             title: (context: any) => {
@@ -161,7 +167,7 @@ const GenericChart = ({ options, labels, datasetConfig, histories }: ChartProps)
         },
       },
     }),
-    [axes, labels, datasetConfig, settings, id]
+    [axes, labels, datasetConfig, database, id]
   );
 
   // Memoize the no data checker logic

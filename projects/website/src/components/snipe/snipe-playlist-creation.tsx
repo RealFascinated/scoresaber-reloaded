@@ -1,6 +1,5 @@
 "use client";
 
-import useSettings from "@/hooks/use-settings";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import {
   Dialog,
@@ -41,6 +40,8 @@ import { downloadFile } from "@/common/browser-utils";
 import { LoadingIcon } from "@/components/loading-icon";
 import Link from "next/link";
 import { encodeSnipePlaylistSettings } from "@ssr/common/snipe/snipe-playlist-utils";
+import useDatabase from "@/hooks/use-database";
+import { useLiveQuery } from "dexie-react-hooks";
 
 type SnipePlaylistDownloadButtonProps = {
   /**
@@ -50,6 +51,9 @@ type SnipePlaylistDownloadButtonProps = {
 };
 
 export default function SnipePlaylistDownloadButton({ toSnipe }: SnipePlaylistDownloadButtonProps) {
+  const database = useDatabase();
+  const playerId = useLiveQuery(() => database.getMainPlayerId());
+
   const [downloading, setDownloading] = useState(false);
   const form = useForm<z.infer<typeof snipeSettingsSchema>>({
     resolver: zodResolver(snipeSettingsSchema),
@@ -71,15 +75,14 @@ export default function SnipePlaylistDownloadButton({ toSnipe }: SnipePlaylistDo
     const encodedData = encodeSnipePlaylistSettings(data);
     setDownloading(true);
     await downloadFile(
-      `${Config.apiUrl}/playlist/snipe?user=${settings.playerId}&toSnipe=${toSnipe.id}&settings=${encodedData}`,
+      `${Config.apiUrl}/playlist/snipe?user=${playerId}&toSnipe=${toSnipe.id}&settings=${encodedData}`,
       `ssr-snipe-${toSnipe.id}-${data.sort}.json`
     );
     setDownloading(false);
   };
 
-  const settings = useSettings();
-  if (!settings?.playerId) {
-    return undefined;
+  if (!playerId) {
+    return null;
   }
 
   return (

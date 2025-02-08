@@ -1,18 +1,15 @@
 "use client";
 
-import useSettings from "@/hooks/use-settings";
+import useDatabase from "@/hooks/use-database";
+import { useLiveQuery } from "dexie-react-hooks";
 
 export default function BackgroundCover() {
-  const settings = useSettings();
+  const database = useDatabase();
+  const backgroundCover = useLiveQuery(async () => database.getBackgroundCover());
 
-  if (
-    settings == undefined ||
-    settings?.backgroundCover == undefined ||
-    settings?.backgroundCover == ""
-  ) {
+  if (backgroundCover == undefined || backgroundCover == "") {
     return null; // Don't render anything if the background image is not set
   }
-  const backgroundCover = settings.backgroundCover;
 
   // Static background color
   if (backgroundCover.startsWith("#")) {

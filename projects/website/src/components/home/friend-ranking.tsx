@@ -4,23 +4,22 @@ import { scoreAnimation } from "@/components/score/score-animation";
 import useDatabase from "@/hooks/use-database";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { Page, Pagination } from "@ssr/common/pagination";
-import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/player";
+import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { useLiveQuery } from "dexie-react-hooks";
 import { motion, useAnimation } from "framer-motion";
-import { useCallback, useEffect, useState, memo } from "react";
+import { memo, useCallback, useEffect, useState } from "react";
 import Card from "../card";
 import PaginationComponent from "../input/pagination";
 import { LoadingIcon } from "../loading-icon";
-import { PlayerRanking } from "../ranking/player-ranking";
 import { PlayerListItem } from "../player/player-list-item";
-import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 
 const MemoizedPagination = memo(PaginationComponent);
 
 export function FriendRanking() {
-  const isMobile = useIsMobile();
   const database = useDatabase();
   const friends = useLiveQuery(async () => database.getFriends(true));
+
+  const isMobile = useIsMobile();
   const controls = useAnimation();
 
   const [page, setPage] = useState(1);

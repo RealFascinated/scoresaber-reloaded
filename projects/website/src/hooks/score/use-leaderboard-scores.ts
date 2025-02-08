@@ -22,10 +22,10 @@ export const useLeaderboardScores = (
 ) => {
   const database = useDatabase();
   const friendIds = useLiveQuery(() => database.getFriendIds());
-  const claimedPlayer = useLiveQuery(() => database.getClaimedPlayer());
+  const mainPlayer = useLiveQuery(() => database.getMainPlayer());
 
   return useQuery<Page<ScoreSaberScore> | undefined>({
-    queryKey: ["leaderboardScores", leaderboardId, page, mode, country, friendIds, claimedPlayer],
+    queryKey: ["leaderboardScores", leaderboardId, page, mode, country, friendIds, mainPlayer],
     queryFn: async () => {
       if (mode === ScoreModeEnum.Global) {
         const leaderboard = await ssrApi.fetchLeaderboardScores<
@@ -35,9 +35,9 @@ export const useLeaderboardScores = (
         return createPage(leaderboard!.scores, leaderboard!.metadata);
       }
 
-      if (friendIds && claimedPlayer) {
+      if (friendIds && mainPlayer) {
         const friendScores = await ssrApi.getFriendLeaderboardScores(
-          [...friendIds, claimedPlayer.id],
+          [...friendIds, mainPlayer.id],
           leaderboardId.toString(),
           page
         );
@@ -48,7 +48,7 @@ export const useLeaderboardScores = (
             friendScores.items.map(score => ({
               ...score,
               rank: -1,
-              playerInfo: friends.find(f => f.id === score.playerId) || claimedPlayer || undefined,
+              playerInfo: friends.find(f => f.id === score.playerId) || mainPlayer || undefined,
             })),
             friendScores.metadata
           );

@@ -20,11 +20,7 @@ import Score from "../score/score";
 export function FriendScores() {
   const isMobile = useIsMobile();
   const database = useDatabase();
-  const friendIds = useLiveQuery(async () => {
-    const friends = await database.getFriendIds();
-    const settings = await database.getSettings();
-    return [...friends, settings?.playerId].filter(Boolean) as string[];
-  });
+  const friendIds = useLiveQuery(async () => database.getFriendIds(true));
   const controls = useAnimation();
 
   const [page, setPage] = useState(1);

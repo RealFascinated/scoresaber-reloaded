@@ -1,27 +1,26 @@
 "use client";
 
 import useDatabase from "@/hooks/use-database";
-import Card from "../card";
-import useSettings from "@/hooks/use-settings";
-import { useLiveQuery } from "dexie-react-hooks";
-import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { DetailType } from "@ssr/common/detail-type";
+import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
+import { useLiveQuery } from "dexie-react-hooks";
+import Card from "../card";
 import { LoadingIcon } from "../loading-icon";
 import PlayerPreviewHeader from "../player/header/player-preview-header";
 
 export function PlayerPreview() {
-  const settings = useSettings();
-  const claimedPlayer = useLiveQuery(() => settings.playerId);
+  const database = useDatabase();
+  const mainPlayerId = useLiveQuery(() => database.getMainPlayerId());
 
   const { data: player, isLoading } = useQuery({
-    queryKey: ["player-preview", claimedPlayer],
+    queryKey: ["player-preview", mainPlayerId],
     queryFn: () =>
-      ssrApi.getScoreSaberPlayer(claimedPlayer!, {
+      ssrApi.getScoreSaberPlayer(mainPlayerId!, {
         createIfMissing: true,
         type: DetailType.FULL,
       }),
-    enabled: !!claimedPlayer,
+    enabled: !!mainPlayerId,
   });
 
   return (
