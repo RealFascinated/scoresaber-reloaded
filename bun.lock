@@ -54,6 +54,7 @@
         "@types/sanitize-html": "^2.13.0",
         "sanitize-html": "^2.14.0",
         "ws": "^8.18.0",
+        "zod": "^3.24.1",
       },
       "devDependencies": {
         "@types/node": "^22.13.1",
