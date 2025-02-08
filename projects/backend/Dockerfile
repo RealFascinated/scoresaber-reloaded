@@ -4,7 +4,7 @@ FROM oven/bun:1.2.2-alpine AS base
 FROM base AS depends
 WORKDIR /app
 COPY . .
-RUN bun install --frozen-lockfile --filter '@ssr/common' --filter 'backend'
+RUN bun install --frozen-lockfile --filter '@ssr/common' --filter 'backend' --filter './'
 
 # Run the app
 FROM base AS runner

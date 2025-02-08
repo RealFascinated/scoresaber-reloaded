@@ -12,7 +12,7 @@ ENV GIT_REV=${GIT_REV}
 FROM base AS depends
 WORKDIR /app
 COPY . .
-RUN bun install --frozen-lockfile --filter '@ssr/common' --filter 'website'
+RUN bun install --frozen-lockfile --filter '@ssr/common' --filter 'website' --filter './'
 
 # Build the common library
 RUN bun i -g typescript
