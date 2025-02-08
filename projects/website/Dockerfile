@@ -1,5 +1,9 @@
 FROM oven/bun:1.2.2-debian AS base
 
+# Used for health checks
+RUN apt update
+RUN apt install -y wget
+
 # Set the environment
 ENV NODE_ENV production
 
@@ -19,20 +23,18 @@ RUN bun i -g typescript
 RUN bun --filter '@ssr/common' build
 
 # Build the website
-RUN bun run  --filter website build
+RUN bun run --filter website build
 
 # Run the app
 FROM base AS runner
 WORKDIR /app
 
-RUN apt update
-RUN apt install -y curl wget
-
 # -----------------------------------
+
+COPY --from=depends /app/node_modules ./node_modules
 
 # Copy the built files
 COPY --from=depends /app/projects/website/public ./public
-COPY --from=depends /app/projects/website/.next/standalone/node_modules ./node_modules
 COPY --from=depends /app/projects/website/.next/standalone/projects/website ./
 COPY --from=depends /app/projects/website/.next/static ./.next/static
 
