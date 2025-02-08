@@ -5,7 +5,7 @@ import { isProduction } from "@/common/website-utils";
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   output: isProduction() ? "standalone" : undefined,
-  cacheMaxMemorySize: 25,
+  cacheMaxMemorySize: 0,
   experimental: {
     optimizePackageImports: [
       "@ssr/common",
