@@ -9,7 +9,7 @@ on:
       - projects/backend/**
       - projects/common/**
       - .gitea/workflows/deploy-backend.yml
-      - bun.lockb
+      - bun.lock
 
 jobs:
   docker:

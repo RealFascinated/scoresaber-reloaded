@@ -4,7 +4,7 @@ FROM oven/bun:1.2.2-alpine AS base
 FROM base AS depends
 WORKDIR /app
 COPY . .
-RUN bun install --frozen-lockfile --build-from-source
+RUN bun install --frozen-lockfile --filter '@ssr/common' --filter 'backend'
 
 # Run the app
 FROM base AS runner
@@ -13,7 +13,7 @@ WORKDIR /app
 ENV NODE_ENV production
 
 # Copy the depends
-COPY --from=depends /app/package.json* /app/bun.lockb* ./
+COPY --from=depends /app/package.json* /app/bun.lock* ./
 COPY --from=depends /app/node_modules ./node_modules
 
 # Build the common library

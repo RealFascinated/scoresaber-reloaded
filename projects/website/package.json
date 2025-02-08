@@ -63,7 +63,8 @@
     "tailwindcss-animate": "^1.0.7",
     "websocket": "^1.0.35",
     "zod": "^3.24.1",
-    "zustand": "^5.0.3"
+    "zustand": "^5.0.3",
+    "react-snowfall": "^2.2.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.0.4",
