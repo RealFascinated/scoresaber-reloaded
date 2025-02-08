@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, ReactNode, useState } from "react";
+import { createContext, ReactNode, useEffect, useState } from "react";
 import Database, { getDatabase } from "../../common/database/database";
 import FullscreenLoader from "./fullscreen-loader";
 import { isServer } from "@ssr/common/utils/utils";
@@ -18,15 +18,18 @@ type DatabaseLoaderProps = {
 };
 
 export default function DatabaseLoader({ children }: DatabaseLoaderProps) {
-  const [database] = useState<Database | undefined>(isServer() ? undefined : getDatabase());
+  const [database, setDatabase] = useState<Database | undefined>();
+
+  useEffect(() => {
+    if (isServer()) {
+      return;
+    }
+    setDatabase(getDatabase());
+  }, []);
 
   return (
     <DatabaseContext.Provider value={database}>
-      {database == undefined && !isServer() ? (
-        <FullscreenLoader reason="Loading database..." />
-      ) : (
-        children
-      )}
+      {database == undefined ? <FullscreenLoader reason="Loading database..." /> : children}
     </DatabaseContext.Provider>
   );
 }
