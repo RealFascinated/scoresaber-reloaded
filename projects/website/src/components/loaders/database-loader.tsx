@@ -24,7 +24,12 @@ export default function DatabaseLoader({ children }: DatabaseLoaderProps) {
     if (isServer()) {
       return;
     }
-    setDatabase(getDatabase());
+    const db = getDatabase();
+    if (db) {
+      db.initializeChartLegends().then(() => {
+        setDatabase(db);
+      });
+    }
   }, []);
 
   return (

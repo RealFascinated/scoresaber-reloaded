@@ -67,11 +67,6 @@ export default class Database extends Dexie {
 
       this.initializeCookie(); // Initialize cookie
       this.getFriends(true); // Pre-fetch friends
-
-      // Pre-fetch chart legends
-      this.chartLegendsCache =
-        (await this.getSetting<Record<string, Record<string, boolean>>>(SettingIds.ChartLegends)) ||
-        {};
     });
   }
 
@@ -261,6 +256,15 @@ export default class Database extends Dexie {
         return undefined;
       }
     });
+  }
+
+  /**
+   * Initializes the chart legends cache
+   */
+  async initializeChartLegends() {
+    this.chartLegendsCache =
+      (await this.getSetting<Record<string, Record<string, boolean>>>(SettingIds.ChartLegends)) ||
+      {};
   }
 
   /**
