@@ -2,7 +2,7 @@ FROM oven/bun:1.2.2-debian AS base
 
 # Used for health checks
 RUN apt update
-RUN apt install -y wget
+RUN apt install -y curl
 
 # Set the environment
 ENV NODE_ENV production
