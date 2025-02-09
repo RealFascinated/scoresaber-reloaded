@@ -9,8 +9,6 @@ type NotFoundProps = {
 };
 
 export default function NotFound({ title, description }: NotFoundProps) {
-  const previousUrl = window.history.state?.previous;
-
   return (
     <div className="flex flex-col items-center gap-8">
       <div className="flex flex-col items-center gap-2">
@@ -18,12 +16,9 @@ export default function NotFound({ title, description }: NotFoundProps) {
         <p className="text-lg">{description ?? "The page you are looking for does not exist."}</p>
       </div>
 
-      <div>
-        <Link href="/">
-          <Button>Return Home</Button>
-        </Link>
-        {previousUrl && <Link href={previousUrl}>Go Back</Link>}
-      </div>
+      <Link href="/">
+        <Button>Return Home</Button>
+      </Link>
     </div>
   );
 }
