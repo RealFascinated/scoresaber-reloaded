@@ -18,7 +18,7 @@ export function MapStats({ beatSaver }: MapAndScoreData) {
   return (
     <div className="flex flex-col gap-2">
       {/* Map Stats */}
-      {beatSaver && (
+      {beatSaver && beatSaver.difficulty && (
         <div className="flex flex-wrap gap-2 justify-center">
           <StatValue
             name="Length"

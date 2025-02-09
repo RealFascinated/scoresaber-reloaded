@@ -34,7 +34,11 @@ export default function DatabaseLoader({ children }: DatabaseLoaderProps) {
 
   return (
     <DatabaseContext.Provider value={database}>
-      {database == undefined ? <FullscreenLoader reason="Loading database..." /> : children}
+      {database == undefined && !isServer() ? (
+        <FullscreenLoader reason="Loading database..." />
+      ) : (
+        children
+      )}
     </DatabaseContext.Provider>
   );
 }

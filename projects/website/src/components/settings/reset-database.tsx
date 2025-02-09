@@ -11,8 +11,10 @@ export default function ResetDatabase() {
     }
 
     await database.reset();
+    // Refresh the page
     window.location.reload();
   }
+
 
   return (
     <Tooltip display="This will reset the database to its default values.">

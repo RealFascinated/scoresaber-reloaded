@@ -9,6 +9,10 @@ type MapPreviewButtonProps = {
 
 export function MapPreviewButton({ beatSaverMap }: MapPreviewButtonProps) {
   const difficulty = beatSaverMap.difficulty;
+  if (!difficulty) {
+    return null;
+  } 
+
   return (
     <ScoreButton
       href={`https://allpoland.github.io/ArcViewer/?id=${beatSaverMap.bsr}&difficulty=${difficulty.difficulty}&mode=${difficulty.characteristic}`}
