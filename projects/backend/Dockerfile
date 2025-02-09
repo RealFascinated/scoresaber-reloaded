@@ -11,6 +11,7 @@ FROM base AS runner
 WORKDIR /app
 
 ENV NODE_ENV production
+ENV APP_ENV backend
 
 # Copy the depends
 COPY --from=depends /app/package.json* /app/bun.lock* ./
