@@ -188,6 +188,9 @@ export default function PlayerScores({ initialSearch, player, sort, page }: Prop
                   leaderboard={score.leaderboard}
                   beatSaverMap={score.beatSaver}
                   highlightedPlayer={player}
+                  settings={{
+                    allowLeaderboardPreview: true,
+                  }}
                 />
               </motion.div>
             ))}

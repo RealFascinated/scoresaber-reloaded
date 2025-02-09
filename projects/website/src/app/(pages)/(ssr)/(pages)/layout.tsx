@@ -8,12 +8,13 @@ import SSRLayout from "@/components/ssr-layout";
 import { ReactNode } from "react";
 import { getBuildInformation } from "@/common/website-utils";
 import MeowMeow from "@/components/meow-meow";
+import DatabaseLoader from "@/components/loaders/database-loader";
 
 export default function Layout({ children }: { children: ReactNode }) {
   const { buildId, buildTimeShort } = getBuildInformation();
 
   return (
-    <>
+    <DatabaseLoader>
       <MeowMeow />
       <BackgroundCover />
       <SnowBackground />
@@ -25,6 +26,6 @@ export default function Layout({ children }: { children: ReactNode }) {
         </SearchProvider>
       </main>
       <Footer buildId={buildId} buildTimeShort={buildTimeShort} />
-    </>
+    </DatabaseLoader>
   );
 }

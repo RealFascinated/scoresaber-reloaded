@@ -4,13 +4,15 @@ import { StarIcon } from "@heroicons/react/24/solid";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
 import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
-import Link from "next/link";
+import LeaderboardPreview from "../leaderboard/leaderboard-preview";
+import SongName from "./song-name";
 
 type Props = {
   leaderboard: ScoreSaberLeaderboard;
   beatSaverMap?: BeatSaverMapResponse;
   imageSize?: number;
   clickableSongName?: boolean;
+  allowLeaderboardPreview?: boolean;
 };
 
 export default function ScoreSongInfo({
@@ -18,6 +20,7 @@ export default function ScoreSongInfo({
   beatSaverMap,
   clickableSongName = true,
   imageSize = 64,
+  allowLeaderboardPreview = false,
 }: Props) {
   const mappersProfile =
     beatSaverMap != undefined
@@ -71,20 +74,14 @@ export default function ScoreSongInfo({
       </div>
       <div className="flex">
         <div className="overflow-y-clip flex flex-col gap-1 min-w-0 w-full">
-          {clickableSongName ? (
-            <Link
-              prefetch={false}
-              href={`/leaderboard/${leaderboard.id}`}
-              className="cursor-pointer hover:brightness-[66%] transform-gpu transition-all text-ssr"
-              style={{
-                overflowWrap: "anywhere",
-              }}
-            >
-              {leaderboard.fullName}
-            </Link>
+          {allowLeaderboardPreview ? (
+            <LeaderboardPreview leaderboard={leaderboard} beatSaverMap={beatSaverMap}>
+              <SongName leaderboard={leaderboard} clickableSongName={clickableSongName} />
+            </LeaderboardPreview>
           ) : (
-            <p className="text-ssr break-all min-w-0">{leaderboard.fullName}</p>
+            <SongName leaderboard={leaderboard} clickableSongName={clickableSongName} />
           )}
+
           <div className="flex flex-row text-sm gap-1.5 items-end leading-none">
             <p className="text-gray-400">
               {leaderboard.songAuthorName}{" "}

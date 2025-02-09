@@ -7,85 +7,21 @@ import * as ReactDOM from "react-dom";
 import { useEffect, useState } from "react";
 
 const TooltipProvider = TooltipPrimitive.Provider;
+const TooltipTrigger = TooltipPrimitive.Trigger;
 
-const Tooltip = ({ alwaysOpen, children }: { alwaysOpen?: boolean; children: React.ReactNode }) => {
+const Tooltip = ({ children }: { children: React.ReactNode }) => {
   const [open, setOpen] = React.useState(false);
 
   return (
-    <TooltipPrimitive.Root open={alwaysOpen || open} onOpenChange={setOpen}>
+    <TooltipPrimitive.Root open={open} onOpenChange={setOpen} delayDuration={250}>
       <div
-        onClick={e => {
+        onClick={() => {
           setOpen(true);
-        }}
-        onKeyUp={e => {
-          if (e.key === "Enter" || e.key === " ") {
-            setOpen(true);
-          }
-        }}
-        onKeyDown={e => {
-          if (e.key === "Enter" || e.key === " ") {
-            setOpen(true);
-          }
         }}
       >
         {children}
       </div>
     </TooltipPrimitive.Root>
-  );
-};
-
-const TooltipTrigger = ({
-  onClick,
-  onFocus,
-  onBlur,
-  onKeyUp,
-  onKeyDown,
-  children,
-  asChild = true,
-  className,
-}: {
-  onClick?: React.MouseEventHandler<HTMLDivElement>;
-  onFocus?: React.FocusEventHandler<HTMLDivElement>;
-  onBlur?: React.FocusEventHandler<HTMLDivElement>;
-  onKeyUp?: React.KeyboardEventHandler<HTMLDivElement>;
-  onKeyDown?: React.KeyboardEventHandler<HTMLDivElement>;
-  children: React.ReactNode;
-  asChild?: boolean;
-  className?: string;
-}) => {
-  const [open, setOpen] = React.useState(false);
-
-  const handleKeyEvents = (event: React.KeyboardEvent<HTMLDivElement>) => {
-    if (onKeyUp) onKeyUp(event);
-    if (onKeyDown) onKeyDown(event);
-    if (event.key === "Enter" || event.key === " ") {
-      setOpen(prevOpen => !prevOpen);
-    }
-  };
-
-  return (
-    <TooltipPrimitive.Trigger asChild={asChild} className={className}>
-      <div
-        tabIndex={0}
-        role="button"
-        onClick={e => {
-          setOpen(prevOpen => !prevOpen);
-          if (onClick) onClick(e);
-        }}
-        onFocus={e => {
-          setTimeout(() => setOpen(true), 0);
-          if (onFocus) onFocus(e);
-        }}
-        onBlur={e => {
-          setOpen(false);
-          if (onBlur) onBlur(e);
-        }}
-        onKeyUp={handleKeyEvents}
-        onKeyDown={handleKeyEvents}
-      >
-        {children}
-      </div>
-    </TooltipPrimitive.Trigger>
   );
 };
 

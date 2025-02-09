@@ -44,6 +44,7 @@ type Props = {
     hideAccuracyChanger?: boolean;
     disablePadding?: boolean;
     hideRank?: boolean;
+    allowLeaderboardPreview?: boolean;
   };
 };
 
@@ -71,6 +72,7 @@ export default function Score({
 }: Props) {
   const [baseScore, setBaseScore] = useState(score.score);
   const [isLeaderboardExpanded, setIsLeaderboardExpanded] = useState(false);
+
   const [loading, setLoading] = useState(false);
   const [dropdownData, setDropdownData] = useState<DropdownData | undefined>();
   const [selectedMode, setSelectedMode] = useState<Mode>(modes[0]);
@@ -155,8 +157,17 @@ export default function Score({
       <div
         className={`grid w-full gap-2 lg:gap-0 ${gridColsClass} ${settings?.hideRank ? "pt-1" : ""}`}
       >
+        {/* Score Info */}
         <ScoreInfo score={score} leaderboard={leaderboard} hideRank={settings?.hideRank} />
-        <ScoreSongInfo leaderboard={leaderboard} beatSaverMap={beatSaverMap} />
+
+        {/* Song Info */}
+        <ScoreSongInfo
+          leaderboard={leaderboard}
+          beatSaverMap={beatSaverMap}
+          allowLeaderboardPreview={settings?.allowLeaderboardPreview && !isMobile}
+        />
+
+        {/* Score Buttons */}
         {!settings?.noScoreButtons && (
           <ScoreButtons
             leaderboard={leaderboard}
@@ -170,6 +181,8 @@ export default function Score({
             updateScore={updatedScore => setBaseScore(updatedScore.score)}
           />
         )}
+
+        {/* Score Stats */}
         <ScoreStats score={{ ...score, accuracy, pp }} leaderboard={leaderboard} />
       </div>
 

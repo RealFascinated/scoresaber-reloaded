@@ -1,13 +1,13 @@
 import { LeaderboardData } from "@/components/leaderboard/page/leaderboard-data";
+import NotFound from "@/components/not-found";
 import { ScoreModeEnum } from "@/components/score/score-mode";
 import { Config } from "@ssr/common/config";
 import { DetailType } from "@ssr/common/detail-type";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { LeaderboardResponse } from "@ssr/common/response/leaderboard-response";
-import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
+import { getDifficultyName } from "@ssr/common/utils/song-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { Metadata } from "next";
-import { redirect } from "next/navigation";
 
 export const revalidate = 300; // Revalidate every 5 minutes
 
@@ -99,7 +99,14 @@ Click here to view the scores for ${leaderboard.fullName}`,
 export default async function LeaderboardPage(props: Props) {
   const response = await getLeaderboardData(props, DetailType.FULL);
   if (response == undefined) {
-    return redirect("/");
+    return (
+      <main className="w-full flex justify-center mt-8">
+        <NotFound
+          title="Leaderboard Not Found"
+          description="The leaderboard you were looking for could not be found"
+        />
+      </main>
+    );
   }
   return (
     <main className="w-full flex justify-center">

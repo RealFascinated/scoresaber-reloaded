@@ -1,15 +1,14 @@
-import Card from "@/components/card";
-import { LeaderboardSongStarCount } from "@/components/leaderboard/page/leaderboard-song-star-count";
-import FallbackLink from "@/components/fallback-link";
-import Image from "next/image";
-import LeaderboardButtons from "@/components/leaderboard/leaderboard-buttons";
 import { cn } from "@/common/utils";
-import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
-import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import { formatNumber } from "@ssr/common/utils/number-utils";
-import { getBeatSaverMapperProfileUrl } from "@ssr/common/utils/beatsaver.util";
-import { formatDate } from "@ssr/common/utils/time-utils";
+import Card from "@/components/card";
+import FallbackLink from "@/components/fallback-link";
+import LeaderboardButtons from "@/components/leaderboard/leaderboard-buttons";
+import { LeaderboardSongStarCount } from "@/components/leaderboard/page/leaderboard-song-star-count";
 import Tooltip from "@/components/tooltip";
+import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
+import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
+import { getBeatSaverMapperProfileUrl } from "@ssr/common/utils/beatsaver.util";
+import { formatNumber } from "@ssr/common/utils/number-utils";
+import { formatDate } from "@ssr/common/utils/time-utils";
 
 type LeaderboardInfoProps = {
   /**
@@ -24,7 +23,10 @@ type LeaderboardInfoProps = {
 };
 
 export function LeaderboardInfo({ leaderboard, beatSaverMap }: LeaderboardInfoProps) {
-  const statusDate = leaderboard.dateRanked || leaderboard.dateQualified;
+  let statusDate = leaderboard.dateRanked || leaderboard.dateQualified;
+  if (statusDate) {
+    statusDate = new Date(statusDate);
+  }
 
   return (
     <Card className="w-full h-fit text-sm">

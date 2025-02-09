@@ -1,13 +1,13 @@
+import { getCookieValue } from "@/common/cookie.util";
+import NotFound from "@/components/not-found";
 import PlayerData from "@/components/player/player-data";
 import { Config } from "@ssr/common/config";
+import { DetailType } from "@ssr/common/detail-type";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { ScoreSort } from "@ssr/common/score/score-sort";
-import { Metadata } from "next";
-import { redirect } from "next/navigation";
-import { ssrApi } from "@ssr/common/utils/ssr-api";
-import { DetailType } from "@ssr/common/detail-type";
 import { formatPp } from "@ssr/common/utils/number-utils";
-import { getCookieValue } from "@/common/cookie.util";
+import { ssrApi } from "@ssr/common/utils/ssr-api";
+import { Metadata } from "next";
 
 export const revalidate = 300; // Revalidate every 5 minutes
 
@@ -97,7 +97,14 @@ Click here to view the scores for ${player.name}`,
 export default async function PlayerPage(props: Props) {
   const { player, sort, page, search } = await getPlayerData(props);
   if (player == undefined) {
-    return redirect("/");
+    return (
+      <main className="w-full flex justify-center mt-8">
+        <NotFound
+          title="Player Not Found"
+          description="The player you were looking for could not be found"
+        />
+      </main>
+    );
   }
 
   return (

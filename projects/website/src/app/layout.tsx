@@ -8,11 +8,11 @@ import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import Script from "next/script";
 import { ReactNode } from "react";
-import "../../globals.css";
+import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 
 const siteFont = localFont({
-  src: "../../fonts/JetBrainsMono.ttf",
+  src: "./fonts/JetBrainsMono.ttf",
   weight: "100 300",
 });
 
@@ -74,13 +74,11 @@ export default function RootLayout({
           data-domain="ssr.fascinated.cc"
           src="https://analytics.fascinated.cc/js/script.js"
         />
-        <DatabaseLoader>
-          <Toaster />
-          <PreloadResources />
-          <TooltipProvider delayDuration={250}>
-            <QueryProvider>{children}</QueryProvider>
-          </TooltipProvider>
-        </DatabaseLoader>
+        <Toaster />
+        <PreloadResources />
+        <TooltipProvider delayDuration={250}>
+          <QueryProvider>{children}</QueryProvider>
+        </TooltipProvider>
       </body>
     </html>
   );

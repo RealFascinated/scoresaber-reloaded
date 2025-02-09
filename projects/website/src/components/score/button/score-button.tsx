@@ -1,4 +1,4 @@
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import Tooltip from "@/components/tooltip";
 import Link from "next/link";
 
 type Props = {
@@ -35,17 +35,14 @@ export default function ScoreButton({ children, tooltip, href, onClick }: Props)
 
   if (tooltip) {
     return (
-      <Tooltip>
-        <TooltipTrigger asChild>
-          {href ? (
-            <Link prefetch={false} href={href} target="_blank">
-              {button}
-            </Link>
-          ) : (
-            button
-          )}
-        </TooltipTrigger>
-        <TooltipContent>{tooltip}</TooltipContent>
+      <Tooltip display={tooltip}>
+        {href ? (
+          <Link prefetch={false} href={href} target="_blank">
+            {button}
+          </Link>
+        ) : (
+          button
+        )}
       </Tooltip>
     );
   }
