@@ -81,6 +81,7 @@ export default class BeatSaverService {
       })),
       createdAt: new Date(version.createdAt),
     }));
+    mapDoc.notFound = false;
   }
 
   /**
