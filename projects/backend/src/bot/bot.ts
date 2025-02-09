@@ -1,9 +1,9 @@
-import { Client } from "discordx";
 import { dirname, importx } from "@discordx/importer";
-import { ActivityType, EmbedBuilder } from "discord.js";
 import { Config } from "@ssr/common/config";
-import { isProduction } from "@ssr/common/utils/utils";
 import Logger from "@ssr/common/logger";
+import { isProduction } from "@ssr/common/utils/utils";
+import { ActivityType, AttachmentBuilder, EmbedBuilder } from "discord.js";
+import { Client } from "discordx";
 
 export const guildId = "1295984874942894100";
 export enum DiscordChannels {
@@ -67,4 +67,38 @@ export async function logToChannel(channelId: DiscordChannels, embed: EmbedBuild
     /* empty */
   }
   return undefined;
+}
+
+/**
+ * Sends a file to a discord channel.
+ *
+ * @param channelId the channel id to send the file to
+ * @param filename the filename of the file
+ * @param file the file to send
+ */
+export async function sendFile(
+  channelId: DiscordChannels,
+  filename: string,
+  content: string,
+  message?: string
+) {
+  if (!isProduction()) {
+    return;
+  }
+
+  try {
+    const channel = await client.channels.fetch(channelId);
+    if (channel != undefined && channel.isSendable()) {
+      return await channel.send({
+        content: message,
+        files: [
+          new AttachmentBuilder(Buffer.from(content), {
+            name: filename,
+          }),
+        ],
+      });
+    }
+  } catch (error) {
+    Logger.error(`Error sending file to channel ${channelId}: ${error}`);
+  }
 }

@@ -1,12 +1,8 @@
 import * as dotenv from "@dotenvx/dotenvx";
 import cors from "@elysiajs/cors";
 import { cron } from "@elysiajs/cron";
-import { opentelemetry } from "@elysiajs/opentelemetry";
 import { serverTiming } from "@elysiajs/server-timing";
 import { swagger } from "@elysiajs/swagger";
-import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-proto";
-import { Resource } from "@opentelemetry/resources";
-import { BatchSpanProcessor } from "@opentelemetry/sdk-trace-node";
 import { Config } from "@ssr/common/config";
 import Logger from "@ssr/common/logger";
 import { formatDuration } from "@ssr/common/utils/time-utils";
@@ -14,11 +10,11 @@ import { isProduction } from "@ssr/common/utils/utils";
 import { connectBeatLeaderWebsocket } from "@ssr/common/websocket/beatleader-websocket";
 import { connectScoresaberWebsocket } from "@ssr/common/websocket/scoresaber-websocket";
 import { logger } from "@tqman/nice-logger";
+import typegoose from "@typegoose/typegoose";
 import { EmbedBuilder } from "discord.js";
 import { Elysia, ValidationError } from "elysia";
 import { decorators } from "elysia-decorators";
 import { helmet } from "elysia-helmet";
-import typegoose from "@typegoose/typegoose";
 import { DiscordChannels, initDiscordBot, logToChannel } from "./bot/bot";
 import { getAppVersion } from "./common/app.util";
 import AppController from "./controller/app.controller";
@@ -68,22 +64,6 @@ connectBeatLeaderWebsocket({
 });
 
 export const app = new Elysia();
-
-app.use(
-  opentelemetry({
-    spanProcessors: [
-      new BatchSpanProcessor(
-        new OTLPTraceExporter({
-          url: "https://signoz-injest.fascinated.cc/v1/traces",
-        })
-      ),
-    ],
-    serviceName: "ssr-backend",
-    resource: new Resource({
-      ["deployment.environment"]: isProduction() ? "production" : "development",
-    }),
-  })
-);
 
 app.use(
   cron({

@@ -21,7 +21,7 @@ import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import { EmbedBuilder } from "discord.js";
 import { NotFoundError } from "elysia";
-import { DiscordChannels, logToChannel } from "../bot/bot";
+import { DiscordChannels, logToChannel, sendFile } from "../bot/bot";
 import { fetchWithCache } from "../common/cache.util";
 import BeatSaverService from "./beatsaver.service";
 import CacheService, { ServiceCache } from "./cache.service";
@@ -30,7 +30,8 @@ const CACHE_REFRESH_TIME = 1000 * 60 * 60 * 12; // 12 hours
 
 type RefreshResult = {
   refreshedLeaderboards: number;
-  updatedScores: number;
+  updatedScoresCount: number;
+  updatedLeaderboardsCount: number;
 };
 
 type LeaderboardUpdate = {
@@ -39,6 +40,15 @@ type LeaderboardUpdate = {
   rankedStatusChanged: boolean;
   starCountChanged: boolean;
   qualifiedStatusChanged: boolean;
+};
+
+type LeaderboardUpdates = {
+  updatedScoresCount: number;
+  updatedLeaderboardsCount: number;
+  updatedLeaderboards: {
+    leaderboard: ScoreSaberLeaderboard;
+    update: LeaderboardUpdate;
+  }[];
 };
 
 export default class LeaderboardService {
@@ -380,8 +390,13 @@ export default class LeaderboardService {
   private static async processLeaderboardUpdates(
     leaderboards: ScoreSaberLeaderboard[],
     rankedMapDiffs: Map<string, LeaderboardDifficulty[]>
-  ): Promise<number> {
-    let updatedScores = 0;
+  ): Promise<LeaderboardUpdates> {
+    const leaderboardUpdates: LeaderboardUpdates = {
+      updatedScoresCount: 0,
+      updatedLeaderboardsCount: 0,
+      updatedLeaderboards: [],
+    };
+
     Logger.info(`Processing ${leaderboards.length} leaderboards...`);
 
     let checkedCount = 0;
@@ -400,7 +415,9 @@ export default class LeaderboardService {
 
       const update = this.checkLeaderboardChanges(leaderboard, previousLeaderboard);
       if (update.rankedStatusChanged || update.starCountChanged || update.qualifiedStatusChanged) {
-        updatedScores += await this.handleLeaderboardUpdate(update);
+        leaderboardUpdates.updatedScoresCount += await this.handleLeaderboardUpdate(update);
+        leaderboardUpdates.updatedLeaderboardsCount++;
+        leaderboardUpdates.updatedLeaderboards.push({ leaderboard, update });
       }
 
       // Save the leaderboard
@@ -414,8 +431,10 @@ export default class LeaderboardService {
       }
     }
 
-    Logger.info(`Finished processing ${updatedScores} leaderboard score updates.`);
-    return updatedScores;
+    Logger.info(
+      `Finished processing ${leaderboardUpdates.updatedScoresCount} leaderboard score updates and ${leaderboardUpdates.updatedLeaderboardsCount} leaderboard updates.`
+    );
+    return leaderboardUpdates;
   }
 
   /**
@@ -479,61 +498,59 @@ export default class LeaderboardService {
         `Leaderboard "${update.leaderboard.id}" star count changed from ${update.previousLeaderboard?.stars} to ${update.leaderboard.stars}.`
       );
     }
-
-    await this.notifyLeaderboardChange(update);
   }
 
-  /**
-   * Logs the leaderboard change to Discord.
-   *
-   * @param update The leaderboard update.
-   * @private
-   */
-  private static async notifyLeaderboardChange(update: LeaderboardUpdate): Promise<void> {
-    const { leaderboard, previousLeaderboard } = update;
+  //   /**
+  //    * Logs the leaderboard change to Discord.
+  //    *
+  //    * @param update The leaderboard update.
+  //    * @private
+  //    */
+  //   private static async notifyLeaderboardChange(update: LeaderboardUpdate): Promise<void> {
+  //     const { leaderboard, previousLeaderboard } = update;
 
-    // Determine the type of change
-    let changeType = "";
-    if (!previousLeaderboard.ranked && leaderboard.ranked) {
-      changeType = "now ranked";
-    } else if (previousLeaderboard.ranked && !leaderboard.ranked) {
-      changeType = "no longer ranked";
-    } else if (!previousLeaderboard.qualified && leaderboard.qualified) {
-      changeType = "now qualified";
-    } else if (previousLeaderboard.qualified && !leaderboard.qualified) {
-      changeType = "no longer qualified";
-    }
+  //     // Determine the type of change
+  //     let changeType = "";
+  //     if (!previousLeaderboard.ranked && leaderboard.ranked) {
+  //       changeType = "now ranked";
+  //     } else if (previousLeaderboard.ranked && !leaderboard.ranked) {
+  //       changeType = "no longer ranked";
+  //     } else if (!previousLeaderboard.qualified && leaderboard.qualified) {
+  //       changeType = "now qualified";
+  //     } else if (previousLeaderboard.qualified && !leaderboard.qualified) {
+  //       changeType = "no longer qualified";
+  //     }
 
-    // Generate a single status change message
-    const statusChangeMessage = `${leaderboard.fullName} is ${changeType}!`;
+  //     // Generate a single status change message
+  //     const statusChangeMessage = `${leaderboard.fullName} is ${changeType}!`;
 
-    // Check if the leaderboard was reweighted (star count changed while ranked)
-    const wasReweighed =
-      previousLeaderboard.stars !== leaderboard.stars && previousLeaderboard.ranked;
+  //     // Check if the leaderboard was reweighted (star count changed while ranked)
+  //     const wasReweighed =
+  //       previousLeaderboard.stars !== leaderboard.stars && previousLeaderboard.ranked;
 
-    // Determine the Discord channel to log to
-    const channel =
-      leaderboard.status === "Ranked" || leaderboard.status === "Unranked"
-        ? DiscordChannels.rankedLogs
-        : DiscordChannels.qualifiedLogs;
+  //     // Determine the Discord channel to log to
+  //     const channel =
+  //       leaderboard.status === "Ranked" || leaderboard.status === "Unranked"
+  //         ? DiscordChannels.rankedLogs
+  //         : DiscordChannels.qualifiedLogs;
 
-    // Build the Discord embed
-    const embed = new EmbedBuilder()
-      .setTitle(statusChangeMessage)
-      .setDescription(
-        `
-Difficulty: **${getDifficultyName(getDifficulty(leaderboard.difficulty.difficulty))}**
-${leaderboard.ranked ? `Stars:${wasReweighed ? ` **${previousLeaderboard.stars}** ->` : ""} **${leaderboard.stars}**` : ""}
-Mapped by: **${leaderboard.levelAuthorName}**
-Map: https://ssr.fascinated.cc/leaderboard/${leaderboard.id}
-`
-      )
-      .setThumbnail(leaderboard.songArt)
-      .setColor(changeType.includes("no longer") ? "#ff0000" : "#00ff00"); // Red for negative changes, green for positive changes
+  //     // Build the Discord embed
+  //     const embed = new EmbedBuilder()
+  //       .setTitle(statusChangeMessage)
+  //       .setDescription(
+  //         `
+  // Difficulty: **${getDifficultyName(getDifficulty(leaderboard.difficulty.difficulty))}**
+  // ${leaderboard.ranked ? `Stars:${wasReweighed ? ` **${previousLeaderboard.stars}** ->` : ""} **${leaderboard.stars}**` : ""}
+  // Mapped by: **${leaderboard.levelAuthorName}**
+  // Map: https://ssr.fascinated.cc/leaderboard/${leaderboard.id}
+  // `
+  //       )
+  //       .setThumbnail(leaderboard.songArt)
+  //       .setColor(changeType.includes("no longer") ? "#ff0000" : "#00ff00"); // Red for negative changes, green for positive changes
 
-    // Log the message to Discord
-    await logToChannel(channel, embed);
-  }
+  //     // Log the message to Discord
+  //     await logToChannel(channel, embed);
+  //   }
 
   /**
    * Resets PP values for all scores in an unranked leaderboard
@@ -672,7 +689,9 @@ Map: https://ssr.fascinated.cc/leaderboard/${leaderboard.id}
    */
   private static async unrankOldLeaderboards(
     currentLeaderboards: ScoreSaberLeaderboard[]
-  ): Promise<void> {
+  ): Promise<ScoreSaberLeaderboard[]> {
+    const unrankedLeaderboards: ScoreSaberLeaderboard[] = [];
+
     const rankedIds = currentLeaderboards.map(leaderboard => leaderboard.id);
     const rankedLeaderboards = await ScoreSaberLeaderboardModel.find({
       ranked: true,
@@ -686,9 +705,11 @@ Map: https://ssr.fascinated.cc/leaderboard/${leaderboard.id}
 
       totalUnranked++;
       await this.unrankLeaderboard(previousLeaderboard);
+      unrankedLeaderboards.push(previousLeaderboard);
     }
 
     Logger.info(`Unranked ${totalUnranked} previously ranked leaderboards.`);
+    return unrankedLeaderboards;
   }
 
   /**
@@ -730,19 +751,24 @@ Map: https://ssr.fascinated.cc/leaderboard/${leaderboard.id}
     const before = Date.now();
     const { leaderboards, rankedMapDiffs } = await this.fetchAllRankedLeaderboards();
     const updatedScores = await this.processLeaderboardUpdates(leaderboards, rankedMapDiffs);
-    await this.unrankOldLeaderboards(leaderboards);
+    const unrankedLeaderboards = await this.unrankOldLeaderboards(leaderboards);
 
     await logToChannel(
       DiscordChannels.backendLogs,
       new EmbedBuilder()
         .setTitle(`Refreshed ${leaderboards.length} ranked leaderboards.`)
-        .setDescription(`Updated ${updatedScores} scores in ${formatDuration(Date.now() - before)}`)
+        .setDescription(
+          `Updated ${updatedScores.updatedScoresCount} scores in ${formatDuration(Date.now() - before)}`
+        )
         .setColor("#00ff00")
     );
 
+    await this.logLeaderboardUpdates(updatedScores, unrankedLeaderboards);
+
     return {
       refreshedLeaderboards: leaderboards.length,
-      updatedScores,
+      updatedScoresCount: updatedScores.updatedScoresCount,
+      updatedLeaderboardsCount: updatedScores.updatedLeaderboardsCount,
     };
   }
 
@@ -759,14 +785,85 @@ Map: https://ssr.fascinated.cc/leaderboard/${leaderboard.id}
       DiscordChannels.backendLogs,
       new EmbedBuilder()
         .setTitle(`Refreshed ${leaderboards.length} qualified leaderboards.`)
-        .setDescription(`Updated ${updatedScores} scores in ${formatDuration(Date.now() - before)}`)
+        .setDescription(
+          `Updated ${updatedScores.updatedScoresCount} scores in ${formatDuration(
+            Date.now() - before
+          )}`
+        )
         .setColor("#00ff00")
     );
 
     return {
       refreshedLeaderboards: leaderboards.length,
-      updatedScores,
+      updatedScoresCount: updatedScores.updatedScoresCount,
+      updatedLeaderboardsCount: updatedScores.updatedLeaderboardsCount,
     };
+  }
+
+  /**
+   * Logs the leaderboard updates to Discord.
+   */
+  private static async logLeaderboardUpdates(
+    updates: LeaderboardUpdates,
+    unrankedLeaderboards: ScoreSaberLeaderboard[]
+  ): Promise<void> {
+    let file = "";
+
+    const newlyRankedMaps = updates.updatedLeaderboards.filter(
+      update => update.update.rankedStatusChanged && update.leaderboard.ranked
+    );
+
+    const starRatingChangedMaps = updates.updatedLeaderboards.filter(
+      update => update.update.starCountChanged
+    );
+    const nerfedMaps = starRatingChangedMaps.filter(
+      update => update.leaderboard.stars < update.update.previousLeaderboard?.stars
+    );
+    const buffedMaps = starRatingChangedMaps.filter(
+      update => update.leaderboard.stars > update.update.previousLeaderboard?.stars
+    );
+
+    // Newly ranked maps
+    for (const change of newlyRankedMaps) {
+      const difficulty = getDifficultyName(getDifficulty(change.leaderboard.difficulty.difficulty));
+
+      file += `now ranked ${change.leaderboard.fullName} (${difficulty}) mapped by ${change.leaderboard.levelAuthorName} at ${change.leaderboard.stars} stars\n`;
+    }
+
+    file += "\n";
+
+    // Buffed maps
+    for (const change of buffedMaps) {
+      const difficulty = getDifficultyName(getDifficulty(change.leaderboard.difficulty.difficulty));
+
+      file += `changed (buffed) ${change.leaderboard.fullName} (${difficulty}) mapped by ${change.leaderboard.levelAuthorName} from ${change.update.previousLeaderboard?.stars} to ${change.leaderboard.stars} stars\n`;
+    }
+
+    file += "\n";
+
+    // Nerfed maps
+    for (const change of nerfedMaps) {
+      const difficulty = getDifficultyName(getDifficulty(change.leaderboard.difficulty.difficulty));
+
+      file += `nerfed (nerf) ${change.leaderboard.fullName} (${difficulty}) mapped by ${change.leaderboard.levelAuthorName} from ${change.update.previousLeaderboard?.stars} to ${change.leaderboard.stars} stars\n`;
+    }
+
+    file += "\n";
+
+    // Unranked maps
+    for (const leaderboard of unrankedLeaderboards) {
+      const difficulty = getDifficultyName(getDifficulty(leaderboard.difficulty.difficulty));
+
+      file += `unranked ${leaderboard.fullName} (${difficulty}) mapped by ${leaderboard.levelAuthorName}\n`;
+    }
+
+    await sendFile(
+      DiscordChannels.rankedLogs,
+      `leaderboard-changes-${new Date().toISOString()}.txt`,
+      file.trim(),
+      "<@&1338261690952978442>"
+    );
+    Logger.info("Logged leaderboard changes to Discord.");
   }
 
   /**
