@@ -13,6 +13,8 @@ import { getBeatSaverDifficulty } from "@ssr/common/utils/beatsaver.util";
 import { BeatSaverMapToken } from "@ssr/common/types/token/beatsaver/map";
 import { DetailType } from "@ssr/common/detail-type";
 
+const mapDeduplication: { [key: string]: Promise<BeatSaverMapResponse | undefined> } = {};
+
 export default class BeatSaverService {
   /**
    * Checks if a date is older than two weeks
@@ -282,7 +284,11 @@ export default class BeatSaverService {
     const cacheKey = `map:${hash}-${difficulty}-${characteristic}-${type}`;
     const cache = CacheService.getCache(ServiceCache.BeatSaver);
 
-    return fetchWithCache(cache, cacheKey, async function () {
+    if (cacheKey in mapDeduplication) {
+      return await mapDeduplication[cacheKey];
+    }
+
+    mapDeduplication[cacheKey] = fetchWithCache(cache, cacheKey, async function () {
       const map = await BeatSaverService.getInternalMap(hash, token);
       if (!map) return undefined;
 
@@ -305,5 +311,9 @@ export default class BeatSaverService {
         difficulty: getBeatSaverDifficulty(map, hash, difficulty, characteristic),
       } as BeatSaverMapResponse;
     });
+
+    const result = await mapDeduplication[cacheKey];
+    delete mapDeduplication[cacheKey];
+    return result;
   }
 }
