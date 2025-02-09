@@ -189,7 +189,7 @@ export default class BeatLeaderService {
     await AdditionalScoreDataModel.create(data);
 
     Logger.info(
-      `Tracked additional score data for "${scorePlayer.name}"(${playerId}), difficulty: ${difficultyKey}, score: ${score.baseScore} in ${Date.now() - before}ms`
+      `Tracked additional score data for "${scorePlayer.name}"(${playerId}) in ${Date.now() - before}ms`
     );
   }
 

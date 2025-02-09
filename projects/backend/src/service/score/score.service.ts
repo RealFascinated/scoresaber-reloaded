@@ -259,35 +259,13 @@ export class ScoreService {
       await ScoreSaberPreviousScoreModel.create(rest);
 
       Logger.info(
-        [
-          `Removed old score for "${playerName}"(${playerId})`,
-          `leaderboard: ${leaderboard.id}`,
-          `in ${(performance.now() - before).toFixed(0)}ms`,
-        ]
-          .filter(s => s !== undefined)
-          .join(", ")
+        `Moved old score "${previousScore.scoreId}" to previous-scores for "${playerName}"(${playerId}) in ${(performance.now() - before).toFixed(0)}ms`
       );
     }
 
     await ScoreSaberScoreModel.create(score);
     Logger.info(
-      [
-        `Tracked ScoreSaber score for "${playerName}"(${playerId})`,
-        `difficulty: ${score.difficulty}`,
-        `score: ${score.score}`,
-        score.pp > 0 ? `pp: ${score.pp.toFixed(2)}pp` : undefined,
-        `leaderboard: ${leaderboard.id}`,
-        `hmd: ${score.hmd}`,
-        score.controllers !== undefined
-          ? `controller left: ${score.controllers.leftController}`
-          : undefined,
-        score.controllers !== undefined
-          ? `controller right: ${score.controllers.rightController}`
-          : undefined,
-        `in ${(performance.now() - before).toFixed(0)}ms`,
-      ]
-        .filter(s => s !== undefined)
-        .join(", ")
+      `Tracked ScoreSaber score "${score.scoreId}" for "${playerName}"(${playerId}) in ${(performance.now() - before).toFixed(0)}ms`
     );
     return true;
   }

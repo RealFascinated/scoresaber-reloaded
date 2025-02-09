@@ -282,35 +282,38 @@ export default class BeatSaverService {
     token?: BeatSaverMapToken
   ): Promise<BeatSaverMapResponse | undefined> {
     const cacheKey = `map:${hash}-${difficulty}-${characteristic}-${type}`;
-    const cache = CacheService.getCache(ServiceCache.BeatSaver);
 
     if (cacheKey in mapDeduplication) {
       return await mapDeduplication[cacheKey];
     }
 
-    mapDeduplication[cacheKey] = fetchWithCache(cache, cacheKey, async function () {
-      const map = await BeatSaverService.getInternalMap(hash, token);
-      if (!map) return undefined;
+    mapDeduplication[cacheKey] = fetchWithCache(
+      CacheService.getCache(ServiceCache.BeatSaver),
+      cacheKey,
+      async function () {
+        const map = await BeatSaverService.getInternalMap(hash, token);
+        if (!map) return undefined;
 
-      const response = {
-        hash,
-        bsr: map.bsr,
-        name: map.name,
-        author: map.author,
-      } as BeatSaverMapResponse;
+        const response = {
+          hash,
+          bsr: map.bsr,
+          name: map.name,
+          author: map.author,
+        } as BeatSaverMapResponse;
 
-      if (type === DetailType.BASIC) {
-        return response;
+        if (type === DetailType.BASIC) {
+          return response;
+        }
+
+        return {
+          ...response,
+          description: map.description,
+          metadata: map.metadata,
+          songArt: `https://eu.cdn.beatsaver.com/${hash.toLowerCase()}.jpg`,
+          difficulty: getBeatSaverDifficulty(map, hash, difficulty, characteristic),
+        } as BeatSaverMapResponse;
       }
-
-      return {
-        ...response,
-        description: map.description,
-        metadata: map.metadata,
-        songArt: `https://eu.cdn.beatsaver.com/${hash.toLowerCase()}.jpg`,
-        difficulty: getBeatSaverDifficulty(map, hash, difficulty, characteristic),
-      } as BeatSaverMapResponse;
-    });
+    );
 
     const result = await mapDeduplication[cacheKey];
     delete mapDeduplication[cacheKey];
