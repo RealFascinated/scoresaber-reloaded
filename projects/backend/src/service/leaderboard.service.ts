@@ -763,7 +763,9 @@ export default class LeaderboardService {
         .setColor("#00ff00")
     );
 
-    await this.logLeaderboardUpdates(updatedScores, unrankedLeaderboards);
+    if (updatedScores.updatedLeaderboardsCount > 0) {
+      await this.logLeaderboardUpdates(updatedScores, unrankedLeaderboards);
+    }
 
     return {
       refreshedLeaderboards: leaderboards.length,
