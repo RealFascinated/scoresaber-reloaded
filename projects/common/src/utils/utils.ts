@@ -13,7 +13,7 @@ export function isProduction() {
  * Checks if we're running on the server
  */
 export function isServer() {
-  return !("window" in globalThis) && window === undefined;
+  return !("window" in globalThis) && typeof window == undefined;
 }
 
 /**
