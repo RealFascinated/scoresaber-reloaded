@@ -20,7 +20,8 @@ const formSchema = z.object({
   showKitty: z.boolean(),
 });
 
-export default forwardRef<{ submit: () => void }, { onSave: () => void }>(({ onSave }, formRef) => {
+// Create a separate component variable
+const WebsiteSettings = forwardRef<{ submit: () => void }, { onSave: () => void }>(({ onSave }, formRef) => {
   const database = useDatabase();
   const backgroundCover = useLiveQuery(async () => await database.getBackgroundCover());
   const snowParticles = useLiveQuery(async () => await database.getSnowParticles());
@@ -147,3 +148,7 @@ export default forwardRef<{ submit: () => void }, { onSave: () => void }>(({ onS
     </div>
   );
 });
+
+WebsiteSettings.displayName = "WebsiteSettings";
+
+export default WebsiteSettings;
