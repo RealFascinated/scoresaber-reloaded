@@ -1,11 +1,11 @@
 import Avatar from "@/components/avatar";
 import Tooltip from "@/components/tooltip";
 import useDatabase from "@/hooks/use-database";
-import { useToast } from "@/hooks/use-toast";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { XIcon } from "lucide-react";
 import Link from "next/link";
+import { toast } from "sonner";
 
 type FriendProps = {
   /**
@@ -22,17 +22,13 @@ type FriendProps = {
 export default function Friend({ player, onClick }: FriendProps) {
   const { id, name } = player;
   const database = useDatabase();
-  const { toast } = useToast();
 
   /**
    * Adds this player as a friend
    */
   async function removeFriend() {
     await database.removeFriend(id);
-    toast({
-      title: "Friend Removed",
-      description: `You have removed ${name} as a friend.`,
-    });
+    toast(`You have removed ${name} as a friend.`);
   }
 
   return (

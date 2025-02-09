@@ -2,18 +2,17 @@
 
 import { SettingIds } from "@/common/database/database";
 import Tooltip from "@/components/tooltip";
-import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import useDatabase from "@/hooks/use-database";
-import { useToast } from "@/hooks/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useLiveQuery } from "dexie-react-hooks";
+import { forwardRef, useEffect, useImperativeHandle } from "react";
 import { useForm } from "react-hook-form";
 import { FaUndo } from "react-icons/fa";
+import { toast } from "sonner";
 import { z } from "zod";
-import { useEffect } from "react";
 
 const formSchema = z.object({
   backgroundCover: z.string().min(0).max(128),
@@ -21,13 +20,11 @@ const formSchema = z.object({
   showKitty: z.boolean(),
 });
 
-export default function WebsiteSettings() {
+export default forwardRef<{ submit: () => void }, { onSave: () => void }>(({ onSave }, formRef) => {
   const database = useDatabase();
   const backgroundCover = useLiveQuery(async () => await database.getBackgroundCover());
   const snowParticles = useLiveQuery(async () => await database.getSnowParticles());
   const showKitty = useLiveQuery(async () => await database.getShowKitty());
-
-  const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -63,12 +60,17 @@ export default function WebsiteSettings() {
     await database.setSetting(SettingIds.SnowParticles, snowParticles);
     await database.setSetting(SettingIds.ShowKitty, showKitty);
 
-    toast({
-      title: "Settings saved",
+    toast("Settings saved", {
       description: "Your settings have been saved.",
-      variant: "success",
     });
   }
+
+  // Expose a submit method
+  useImperativeHandle(formRef, () => ({
+    submit: () => {
+      form.handleSubmit(onSubmit)(); // Call the form submission
+    },
+  }));
 
   return (
     <div className="flex flex-col gap-3 text-sm h-full">
@@ -140,13 +142,8 @@ export default function WebsiteSettings() {
               )}
             />
           </div>
-
-          {/* Saving Settings */}
-          <Button type="submit" className="w-fit">
-            Save
-          </Button>
         </form>
       </Form>
     </div>
   );
-}
+});

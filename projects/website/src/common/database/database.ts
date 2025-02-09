@@ -417,6 +417,34 @@ export default class Database extends Dexie {
   }
 
   /**
+   * Exports the settings from the database
+   *
+   * @returns the settings
+   */
+  async exportSettings(): Promise<string> {
+    return JSON.stringify({
+      version: this.verno,
+      settings: await this.settings.toArray(),
+    });
+  }
+
+  /**
+   * Imports the settings from the database
+   *
+   * @param settings the settings
+   */
+  async importSettings(settings: string) {
+    const parsed = JSON.parse(settings);
+    if (parsed.version !== this.verno) {
+      throw new Error("Invalid settings version");
+    }
+
+    for (const setting of parsed.settings) {
+      await this.setSetting(setting.id, setting.value);
+    }
+  }
+
+  /**
    * Gets a setting from the database
    *
    * @param id the id of the setting

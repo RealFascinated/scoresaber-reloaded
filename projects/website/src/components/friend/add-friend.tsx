@@ -2,13 +2,13 @@
 
 import { useLiveQuery } from "dexie-react-hooks";
 import useDatabase from "../../hooks/use-database";
-import { useToast } from "@/hooks/use-toast";
 import Tooltip from "../tooltip";
 import { Button } from "../ui/button";
 import { PersonIcon } from "@radix-ui/react-icons";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/player";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
+import { toast } from "sonner";
 
 type Props = {
   /**
@@ -28,7 +28,6 @@ export default function AddFriend({ player, iconOnly }: Props) {
   const database = useDatabase();
   const isFriend = useLiveQuery(() => database.isFriend(id));
   const playerId = useLiveQuery(() => database.getMainPlayerId());
-  const { toast } = useToast();
 
   /**
    * Adds this player as a friend
@@ -36,10 +35,7 @@ export default function AddFriend({ player, iconOnly }: Props) {
   async function addFriend() {
     await ssrApi.trackPlayer(id);
     await database.addFriend(id);
-    toast({
-      title: "Friend Added",
-      description: `You have added ${name} as a friend.`,
-    });
+    toast(`You have added ${name} as a friend.`);
   }
 
   if (playerId == undefined) {

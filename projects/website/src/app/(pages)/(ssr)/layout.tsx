@@ -2,7 +2,6 @@ import { Colors } from "@/common/colors";
 import DatabaseLoader from "@/components/loaders/database-loader";
 import { PreloadResources } from "@/components/preload-resources";
 import { QueryProvider } from "@/components/providers/query-provider";
-import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Config } from "@ssr/common/config";
 import type { Metadata, Viewport } from "next";
@@ -10,6 +9,7 @@ import localFont from "next/font/local";
 import Script from "next/script";
 import { ReactNode } from "react";
 import "../../globals.css";
+import { Toaster } from "@/components/ui/sonner";
 
 const siteFont = localFont({
   src: "../../fonts/JetBrainsMono.ttf",

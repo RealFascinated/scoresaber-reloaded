@@ -36,7 +36,7 @@ export default function Tooltip({ children, display, asChild = true, side, class
       <TooltipTrigger className={clsx("cursor-default w-full", className)} asChild={asChild}>
         {children}
       </TooltipTrigger>
-      <TooltipContent className="max-w-[350px]" side={side}>
+      <TooltipContent className="max-w-[500px]" side={side}>
         {display}
       </TooltipContent>
     </ShadCnTooltip>

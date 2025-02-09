@@ -20,7 +20,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import useDatabase from "@/hooks/use-database";
-import { useToast } from "@/hooks/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { useLiveQuery } from "dexie-react-hooks";
@@ -29,6 +28,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "../ui/button";
 import { Form, FormControl, FormDescription, FormItem, FormLabel } from "../ui/form";
+import { toast } from "sonner";
 
 const viewToggles = [
   {
@@ -55,7 +55,6 @@ const formSchema = z.object({
 export default function OverlayBuilder() {
   const database = useDatabase();
   const overlaySettings = useLiveQuery(async () => database.getOverlaySettings());
-  const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -86,11 +85,7 @@ export default function OverlayBuilder() {
   }: z.infer<typeof formSchema>) {
     const player = await scoresaberService.lookupPlayer(playerId);
     if (!player) {
-      toast({
-        title: "Player not found",
-        description: "The player id you entered could not be found.",
-        variant: "destructive",
-      });
+      toast("The player id you entered could not be found.");
       return;
     }
 
