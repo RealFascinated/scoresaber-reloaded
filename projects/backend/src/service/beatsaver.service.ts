@@ -26,6 +26,17 @@ export default class BeatSaverService {
   }
 
   /**
+   * Gets a fallback name if the name is empty or null
+   *
+   * @param name - The name to get
+   * @returns The fallback name
+   */
+  private static getFallbackName(name: string | null): string {
+    if (!name) return "Unknown";
+    return name.trim() === "" ? "Unknown" : name;
+  }
+
+  /**
    * Updates a map document with data from a BeatSaver token
    * @param mapDoc - The map document to update
    * @param token - The token containing the new data
@@ -44,10 +55,10 @@ export default class BeatSaverService {
     mapDoc.metadata = {
       bpm: metadata.bpm,
       duration: metadata.duration,
-      levelAuthorName: metadata.levelAuthorName ?? "Unknown",
-      songAuthorName: metadata.songAuthorName ?? "Unknown",
-      songName: metadata.songName ?? "Unknown",
-      songSubName: metadata.songSubName ?? "Unknown",
+      levelAuthorName: this.getFallbackName(metadata.levelAuthorName),
+      songAuthorName: this.getFallbackName(metadata.songAuthorName),
+      songName: this.getFallbackName(metadata.songName),
+      songSubName: this.getFallbackName(metadata.songSubName),
     };
     mapDoc.versions = versions.map(version => ({
       hash: version.hash.toUpperCase(),

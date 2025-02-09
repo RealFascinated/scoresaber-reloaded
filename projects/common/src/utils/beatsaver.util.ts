@@ -33,7 +33,8 @@ export function getBeatSaverDifficulty(
     return undefined;
   }
 
-  return version.difficulties.find(
-    d => d.difficulty === difficulty && d.characteristic === characteristic
-  );
+  // Fallback to the latest version if the version is undefined
+  return (
+    version ?? map.versions.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0]
+  ).difficulties.find(d => d.difficulty === difficulty && d.characteristic === characteristic);
 }
