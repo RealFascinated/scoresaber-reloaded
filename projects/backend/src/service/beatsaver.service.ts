@@ -205,13 +205,7 @@ export default class BeatSaverService {
   ): Promise<BeatSaverMap | undefined> {
     const resolvedToken = token || (await beatsaverService.lookupMap(hash));
     if (!resolvedToken) {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
-      return {
-        notFound: true,
-        versions: [{ hash: hash.toUpperCase() }] as never,
-        lastRefreshed: new Date(),
-      };
+      return await this.persistUnknownMap(hash);
     }
 
     const existingMap = await this.handleDuplicateBsr(resolvedToken, hash);
@@ -262,6 +256,21 @@ export default class BeatSaverService {
       newMap.brokenHashes.push(hash);
     }
 
+    await newMap.save();
+    return newMap.toObject<BeatSaverMap>();
+  }
+
+  /**
+   * Persists an unknown map to the database
+   *
+   * @param hash - The hash of the map
+   * @returns The created map
+   */
+  private static async persistUnknownMap(hash: string): Promise<BeatSaverMap> {
+    const newMap = new BeatSaverMapModel();
+    newMap.notFound = true;
+    newMap.versions = [{ hash: hash.toUpperCase() }] as never;
+    newMap.lastRefreshed = new Date();
     await newMap.save();
     return newMap.toObject<BeatSaverMap>();
   }
