@@ -50,7 +50,7 @@
     "framer-motion": "^12.4.1",
     "js-cookie": "^3.0.5",
     "ky": "^1.7.4",
-    "lucide-react": "^0.474.0",
+    "lucide-react": "^0.475.0",
     "next": "^15.1.6",
     "next-build-id": "^3.0.0",
     "react": "^19.0.0",
