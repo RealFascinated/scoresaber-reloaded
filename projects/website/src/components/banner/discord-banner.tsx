@@ -1,7 +1,17 @@
+"use client";
+
 import Link from "next/link";
 import { FaDiscord } from "react-icons/fa";
+import { usePathname } from "next/navigation";
 
 export default function DiscordBanner() {
+  const pathName = usePathname();
+
+  // Don't show the banner on the home page
+  if (pathName === "/") {
+    return null;
+  }
+
   return (
     <Link
       href="https://discord.gg/kmNfWGA4A8"
