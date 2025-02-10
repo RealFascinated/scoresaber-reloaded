@@ -2,6 +2,7 @@ import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { SnipeSettings } from "@ssr/common/snipe/snipe-settings-schema";
 import { capitalizeFirstLetter, truncateText } from "@ssr/common/string-utils";
 import SSRImage, { ImageTextOptions } from "./ssr-image";
+import { CustomRankedPlaylist } from "@ssr/common/playlist/ranked/custom-ranked-playlist";
 
 /**
  * Generates a playlist image for a Snipe
@@ -42,6 +43,43 @@ export async function generateSnipePlaylistImage(
         text: `${settings.accuracyRange.min}% - ${settings.accuracyRange.max}%`,
         color: "#2d2d2d",
         fontSize: 50,
+      },
+    ],
+  });
+}
+
+/**
+ * Generates a playlist image for a custom ranked playlist
+ *
+ * @param settings the custom ranked playlist settings
+ * @returns the base64 encoded image
+ */
+export async function generateCustomRankedPlaylistImage(
+  settings: CustomRankedPlaylist
+): Promise<string> {
+  const type = capitalizeFirstLetter(settings.sort);
+
+  return generatePlaylistImage("SSR", {
+    lines: [
+      {
+        text: `ScoreSaber Ranked`,
+        color: "#222222",
+        fontSize: 45,
+      },
+      {
+        text: `Sort: ${type == "dateRanked" ? "Timestamp" : "Stars"}`,
+        color: "#313131",
+        fontSize: 40,
+      },
+      {
+        text: ``,
+        color: "#222222",
+        fontSize: 45,
+      },
+      {
+        text: `${settings.stars.min}⭐ - ${settings.stars.max}⭐`,
+        color: "#2d2d2d",
+        fontSize: 45,
       },
     ],
   });

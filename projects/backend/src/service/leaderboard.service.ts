@@ -856,26 +856,32 @@ export default class LeaderboardService {
   }
 
   /**
-   * Gets all the ranked leaderboards
+   * Gets the ranked leaderboards based on the options
    *
-   * @param projection the projection to use
+   * @param options the options for the query
    * @returns the ranked leaderboards
    */
-  public static async getRankedLeaderboards(projection?: {
-    [field: string]: number;
+  public static async getRankedLeaderboards(options?: {
+    projection?: { [field: string]: number };
+    sort?: "dateRanked" | "stars";
+    match?: { [field: string]: any };
   }): Promise<ScoreSaberLeaderboard[]> {
     return fetchWithCache(
       CacheService.getCache(ServiceCache.Leaderboards),
-      "ranked-leaderboards",
+      `ranked-leaderboards-${JSON.stringify(options)}`,
       async () => {
         const leaderboards: ScoreSaberLeaderboard[] = await ScoreSaberLeaderboardModel.aggregate([
-          { $match: { ranked: true } },
-          {
-            $project: {
-              ...projection,
-              dateRanked: 1,
-            },
-          },
+          { $match: { ranked: true, ...(options?.match ?? {}) } },
+          ...(options?.projection
+            ? [
+                {
+                  $project: {
+                    ...options.projection,
+                    dateRanked: 1,
+                  },
+                },
+              ]
+            : []),
           { $sort: { dateRanked: -1 } },
         ]);
 

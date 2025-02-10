@@ -1,6 +1,7 @@
 import PlaylistDownloadButton from "@/components/maps/playlist/playlist-download-button";
 import { Config } from "@ssr/common/config";
 import Card from "@/components/card";
+import CustomPlaylistCreator from "./custom-playlist-creator";
 
 type Playlist = {
   /**
@@ -16,15 +17,15 @@ type Playlist = {
 
 const playlists: Playlist[] = [
   {
-    name: "All Ranked Maps",
+    name: "Ranked Maps",
     id: "scoresaber-ranked-maps",
   },
   {
-    name: "All Qualified Maps",
+    name: "Qualified Maps",
     id: "scoresaber-qualified-maps",
   },
   {
-    name: "Maps in Ranking Queue",
+    name: "Ranking Queue",
     id: "scoresaber-ranking-queue-maps",
   },
 ];
@@ -46,6 +47,7 @@ export default function Playlists() {
             />
           </div>
         ))}
+        <CustomPlaylistCreator />
       </div>
     </Card>
   );

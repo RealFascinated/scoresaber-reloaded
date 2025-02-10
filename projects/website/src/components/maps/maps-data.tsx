@@ -65,7 +65,7 @@ export function MapsData({ category, page }: MapsDataProps) {
     const path = `/maps?category=${selectedCategory.id}`;
 
     pageNavigation.navigateToPage(
-      `${path}${page ? (path.includes("?") ? "&" : "?") : ""}page=${page}`
+      `${path}${page && page !== 1 ? (path.includes("?") ? "&" : "?") + `page=${page}` : ""}`
     );
   }, [
     category,
@@ -98,14 +98,14 @@ export function MapsData({ category, page }: MapsDataProps) {
 
                   {category.externalLink && (
                     <Tooltip display={<p>View {category.name} on ScoreSaber</p>} side="bottom">
-                      <button
-                        className="flex items-center gap-2 p-1"
+                      <div
+                        className="flex items-center gap-2 p-1 cursor-pointer"
                         onClick={() => {
                           window.open(category.externalLink, "_blank");
                         }}
                       >
                         <ExternalLinkIcon className="w-4 h-4" />
-                      </button>
+                      </div>
                     </Tooltip>
                   )}
                 </span>

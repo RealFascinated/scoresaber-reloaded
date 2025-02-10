@@ -2,10 +2,14 @@ import { Controller, Get } from "elysia-decorators";
 import { t } from "elysia";
 import PlaylistService, { SnipeType } from "../service/playlist.service";
 import { Swagger } from "../common/swagger";
-import { generateSnipePlaylistImage } from "../common/playlist.util";
+import {
+  generateCustomRankedPlaylistImage,
+  generateSnipePlaylistImage,
+} from "../common/playlist.util";
 import { parseSnipePlaylistSettings } from "@ssr/common/snipe/snipe-playlist-utils";
 import ScoreSaberService from "../service/scoresaber.service";
 import { DetailType } from "@ssr/common/detail-type";
+import { parseCustomRankedPlaylistSettings } from "@ssr/common/playlist/ranked/custom-ranked-playlist";
 
 @Controller("/playlist")
 export default class PlaylistController {
@@ -16,6 +20,7 @@ export default class PlaylistController {
       id: t.String({ required: true }),
     }),
     query: t.Object({
+      config: t.Optional(t.String()),
       download: t.Optional(t.Boolean()),
     }),
     detail: {
@@ -30,14 +35,14 @@ export default class PlaylistController {
   })
   public async getPlaylist({
     params: { id },
-    query: { download },
+    query: { config, download },
   }: {
     params: { id: string };
-    query: { download?: boolean };
+    query: { config?: string; download?: boolean };
   }) {
     const response = new Response(
       JSON.stringify(
-        await (await PlaylistService.getPlaylist(id)).generateBeatSaberPlaylist(),
+        await (await PlaylistService.getPlaylist(id, config)).generateBeatSaberPlaylist(),
         null,
         2
       )
@@ -114,6 +119,38 @@ export default class PlaylistController {
     const response = new Response(
       Buffer.from(
         await generateSnipePlaylistImage(parseSnipePlaylistSettings(settings), toSnipePlayer),
+        "base64"
+      )
+    );
+    response.headers.set("Content-Type", "image/png");
+    response.headers.set("Cache-Control", "public, max-age=3600");
+    return response;
+  }
+
+  @Get("/custom-ranked/preview", {
+    config: {},
+    tags: ["playlist"],
+    query: t.Object({
+      settings: t.Optional(t.String()),
+    }),
+    detail: {
+      responses: {
+        200: {
+          description: "The custom ranked playlist image preview.",
+        },
+        ...Swagger.responses.playerNotFound,
+      },
+      description: "Gets the custom ranked playlist image preview.",
+    },
+  })
+  public async getCustomRankedPlaylistImagePreview({
+    query: { settings },
+  }: {
+    query: { settings: string };
+  }) {
+    const response = new Response(
+      Buffer.from(
+        await generateCustomRankedPlaylistImage(parseCustomRankedPlaylistSettings(settings)),
         "base64"
       )
     );

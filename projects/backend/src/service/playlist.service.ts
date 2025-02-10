@@ -13,10 +13,15 @@ import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { capitalizeFirstLetter, truncateText } from "@ssr/common/string-utils";
 import { InternalServerError } from "@ssr/common/error/internal-server-error";
 import { BadRequestError } from "@ssr/common/error/bad-request-error";
-import { generatePlaylistImage, generateSnipePlaylistImage } from "../common/playlist.util";
+import {
+  generateCustomRankedPlaylistImage,
+  generatePlaylistImage,
+  generateSnipePlaylistImage,
+} from "../common/playlist.util";
 import { parseSnipePlaylistSettings } from "@ssr/common/snipe/snipe-playlist-utils";
 import { ScoreService } from "./score/score.service";
 import { Config } from "@ssr/common/config";
+import { parseCustomRankedPlaylistSettings } from "@ssr/common/playlist/ranked/custom-ranked-playlist";
 
 export type SnipeType = "top" | "recent";
 
@@ -24,10 +29,11 @@ export default class PlaylistService {
   /**
    * Gets a playlist
    *
-   * @param playlistId
+   * @param playlistId the id of the playlist
+   * @param config the config for the playlist
    * @returns the playlist
    */
-  public static async getPlaylist(playlistId: string): Promise<Playlist> {
+  public static async getPlaylist(playlistId: string, config?: string): Promise<Playlist> {
     return fetchWithCache(
       CacheService.getCache(ServiceCache.Playlists),
       `playlist:${playlistId}`,
@@ -41,6 +47,9 @@ export default class PlaylistService {
           }
           case "scoresaber-ranking-queue-maps": {
             return await this.createRankingQueueMapsPlaylist();
+          }
+          case "scoresaber-custom-ranked-maps": {
+            return await this.createCustomRankedMapsPlaylist(config);
           }
           default: {
             throw new NotFoundError(`Playlist with id ${playlistId} does not exist`);
@@ -174,10 +183,12 @@ export default class PlaylistService {
    */
   public static async createRankedMapsPlaylist(): Promise<Playlist> {
     const rankedLeaderboards = await LeaderboardService.getRankedLeaderboards({
-      songAuthorName: 1,
-      songName: 1,
-      songHash: 1,
-      difficulties: 1,
+      projection: {
+        songAuthorName: 1,
+        songName: 1,
+        songHash: 1,
+        difficulties: 1,
+      },
     });
     const highlightedIds = rankedLeaderboards.map(map => map.id);
 
@@ -285,16 +296,44 @@ export default class PlaylistService {
   }
 
   /**
+   * Creates a playlist with all the maps in the custom ranked playlist.
+   * @private
+   */
+  public static async createCustomRankedMapsPlaylist(rawConfig?: string): Promise<Playlist> {
+    const config = parseCustomRankedPlaylistSettings(rawConfig);
+
+    const leaderboards = await LeaderboardService.getRankedLeaderboards({
+      sort: config.sort,
+      match: {
+        stars: {
+          $gte: config.stars.min,
+          $lte: config.stars.max,
+        },
+      },
+    });
+
+    const maps: Map<string, ScoreSaberLeaderboard> = new Map();
+    for (const leaderboard of leaderboards) {
+      maps.set(leaderboard.songHash, leaderboard);
+    }
+    const highlightedIds = leaderboards.map(map => map.id);
+
+    return this.createScoreSaberPlaylist(
+      "scoresaber-custom-ranked-maps",
+      `Custom Ranked Maps (${formatDateMinimal(new Date())})`,
+      Config.websiteName,
+      maps,
+      highlightedIds,
+      await generateCustomRankedPlaylistImage(config)
+    );
+  }
+
+  /**
    * Creates a ScoreSaber playlist
    *
    * @param id the id of the playlist
    * @param title the title of the playlist
    * @param author the author of the playlist
-   * @param maps the maps in the playlist
-   * @param selectedDifficulties the leaderboard ids to highlight
-   * @param image the image for the playlist
-   * @returns the playlist
-   * @private
    */
   private static createScoreSaberPlaylist(
     id: string,

@@ -34,8 +34,8 @@ function DualRangeSlider({
             {label && (
               <span
                 className={cn(
-                  "absolute flex w-full justify-center",
-                  labelPosition === "top" && "-top-7",
+                  "absolute flex w-fit justify-center items-center",
+                  labelPosition === "top" && "-top-6",
                   labelPosition === "bottom" && "top-4"
                 )}
               >
