@@ -92,20 +92,18 @@ export class FriendScoresService {
           { $limit: FRIEND_SCORES_LIMIT },
         ]);
 
-        await Promise.all(
-          friendScores.map(async friendScore => {
-            const score = scoreToObject(friendScore);
-            const leaderboardResponse = await LeaderboardService.getLeaderboard(
-              friendScore.leaderboardId + ""
-            );
-            const leaderboard = leaderboardResponse.leaderboard;
+        for (const friendScore of friendScores) {
+          const score = scoreToObject(friendScore);
+          const leaderboardResponse = await LeaderboardService.getLeaderboard(
+            friendScore.leaderboardId + ""
+          );
+          const leaderboard = leaderboardResponse.leaderboard;
 
-            scores.push({
-              score: await ScoreService.insertScoreData(score),
-              leaderboard: leaderboard,
-            });
-          })
-        );
+          scores.push({
+            score: await ScoreService.insertScoreData(score),
+            leaderboard: leaderboard,
+          });
+        }
 
         return scores;
       }

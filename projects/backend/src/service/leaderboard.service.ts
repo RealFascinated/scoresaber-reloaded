@@ -500,58 +500,6 @@ export default class LeaderboardService {
     }
   }
 
-  //   /**
-  //    * Logs the leaderboard change to Discord.
-  //    *
-  //    * @param update The leaderboard update.
-  //    * @private
-  //    */
-  //   private static async notifyLeaderboardChange(update: LeaderboardUpdate): Promise<void> {
-  //     const { leaderboard, previousLeaderboard } = update;
-
-  //     // Determine the type of change
-  //     let changeType = "";
-  //     if (!previousLeaderboard.ranked && leaderboard.ranked) {
-  //       changeType = "now ranked";
-  //     } else if (previousLeaderboard.ranked && !leaderboard.ranked) {
-  //       changeType = "no longer ranked";
-  //     } else if (!previousLeaderboard.qualified && leaderboard.qualified) {
-  //       changeType = "now qualified";
-  //     } else if (previousLeaderboard.qualified && !leaderboard.qualified) {
-  //       changeType = "no longer qualified";
-  //     }
-
-  //     // Generate a single status change message
-  //     const statusChangeMessage = `${leaderboard.fullName} is ${changeType}!`;
-
-  //     // Check if the leaderboard was reweighted (star count changed while ranked)
-  //     const wasReweighed =
-  //       previousLeaderboard.stars !== leaderboard.stars && previousLeaderboard.ranked;
-
-  //     // Determine the Discord channel to log to
-  //     const channel =
-  //       leaderboard.status === "Ranked" || leaderboard.status === "Unranked"
-  //         ? DiscordChannels.rankedLogs
-  //         : DiscordChannels.qualifiedLogs;
-
-  //     // Build the Discord embed
-  //     const embed = new EmbedBuilder()
-  //       .setTitle(statusChangeMessage)
-  //       .setDescription(
-  //         `
-  // Difficulty: **${getDifficultyName(getDifficulty(leaderboard.difficulty.difficulty))}**
-  // ${leaderboard.ranked ? `Stars:${wasReweighed ? ` **${previousLeaderboard.stars}** ->` : ""} **${leaderboard.stars}**` : ""}
-  // Mapped by: **${leaderboard.levelAuthorName}**
-  // Map: https://ssr.fascinated.cc/leaderboard/${leaderboard.id}
-  // `
-  //       )
-  //       .setThumbnail(leaderboard.songArt)
-  //       .setColor(changeType.includes("no longer") ? "#ff0000" : "#00ff00"); // Red for negative changes, green for positive changes
-
-  //     // Log the message to Discord
-  //     await logToChannel(channel, embed);
-  //   }
-
   /**
    * Resets PP values for all scores in an unranked leaderboard
    */

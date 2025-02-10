@@ -300,42 +300,37 @@ export class ScoreService {
       { $limit: amount },
     ]);
 
-    const scores: (PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard> | null)[] =
-      await Promise.all(
-        foundScores.map(async rawScore => {
-          let score = scoreToObject(rawScore);
+    const scores: (PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard> | null)[] = [];
+    for (const rawScore of foundScores) {
+      const score = scoreToObject(rawScore);
 
-          const leaderboardResponse = await LeaderboardService.getLeaderboard(
-            score.leaderboardId + ""
-          );
-          if (!leaderboardResponse) {
-            return null; // Skip this score if no leaderboardResponse is found
-          }
+      const leaderboardResponse = await LeaderboardService.getLeaderboard(score.leaderboardId + "");
+      if (!leaderboardResponse) {
+        continue; // Skip this score if no leaderboardResponse is found
+      }
 
-          const { leaderboard, beatsaver } = leaderboardResponse;
+      const { leaderboard, beatsaver } = leaderboardResponse;
 
-          try {
-            const player = await PlayerService.getPlayer(score.playerId);
-            if (player) {
-              score.playerInfo = {
-                id: player.id,
-                name: player.name,
-              };
-            }
-          } catch {
-            score.playerInfo = {
-              id: score.playerId,
-            };
-          }
-
-          score = await ScoreService.insertScoreData(score, leaderboard);
-          return {
-            score: score,
-            leaderboard: leaderboard,
-            beatSaver: beatsaver,
+      try {
+        const player = await PlayerService.getPlayer(score.playerId);
+        if (player) {
+          score.playerInfo = {
+            id: player.id,
+            name: player.name,
           };
-        })
-      );
+        }
+      } catch {
+        score.playerInfo = {
+          id: score.playerId,
+        };
+      }
+
+      scores.push({
+        score: await ScoreService.insertScoreData(score, leaderboard),
+        leaderboard: leaderboard,
+        beatSaver: beatsaver,
+      });
+    }
 
     // Filter out any null entries that might result from skipped scores
     const filteredScores = scores.filter(score => score !== null) as PlayerScore<

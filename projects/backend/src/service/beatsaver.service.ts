@@ -292,7 +292,9 @@ export default class BeatSaverService {
       cacheKey,
       async function () {
         const map = await BeatSaverService.getInternalMap(hash, token);
-        if (!map) return undefined;
+        if (!map || map.versions.length === 0 || map.notFound) {
+          return undefined;
+        }
 
         const response = {
           hash,

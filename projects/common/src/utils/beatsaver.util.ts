@@ -28,10 +28,7 @@ export function getBeatSaverDifficulty(
   difficulty: MapDifficulty,
   characteristic: MapCharacteristic
 ): BeatSaverMapDifficulty | undefined {
-  let version = map.versions.find(v => v.hash === hash);
-  if (version == undefined) {
-    return undefined;
-  }
+  const version = map.versions.find(v => v.hash === hash);
 
   // Fallback to the latest version if the version is undefined
   return (
