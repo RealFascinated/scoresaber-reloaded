@@ -9,6 +9,7 @@ import { ReactNode } from "react";
 import { getBuildInformation } from "@/common/website-utils";
 import MeowMeow from "@/components/meow-meow";
 import DatabaseLoader from "@/components/loaders/database-loader";
+import DiscordBanner from "@/components/banner/discord-banner";
 
 export default function Layout({ children }: { children: ReactNode }) {
   const { buildId, buildTimeShort } = getBuildInformation();
@@ -22,7 +23,10 @@ export default function Layout({ children }: { children: ReactNode }) {
       <main className="flex flex-col min-h-screen text-white w-full">
         <SearchProvider>
           <Navbar />
-          <SSRLayout className="pt-2">{children}</SSRLayout>
+          <SSRLayout className="pt-2 flex flex-col gap-2">
+            <DiscordBanner />
+            {children}
+          </SSRLayout>
         </SearchProvider>
       </main>
       <Footer buildId={buildId} buildTimeShort={buildTimeShort} />
