@@ -36,7 +36,7 @@ export default function CustomPlaylistCreator() {
     defaultValues: {
       stars: {
         min: 0,
-        max: 15,
+        max: 20,
       },
       sort: "stars",
     },
@@ -75,7 +75,7 @@ export default function CustomPlaylistCreator() {
                 render={({ field }) => (
                   <DualRangeSlider
                     min={0}
-                    max={15}
+                    max={20}
                     value={[field.value.min, field.value.max]}
                     label={value => value}
                     onValueChange={value => {

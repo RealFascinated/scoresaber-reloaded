@@ -3,7 +3,7 @@ import { z } from "zod";
 export const customRankedPlaylistSchema = z.object({
   stars: z.object({
     min: z.number().min(0),
-    max: z.number().max(15),
+    max: z.number().max(20),
   }),
   sort: z.enum(["stars", "dateRanked"]),
 });
@@ -24,7 +24,7 @@ export function parseCustomRankedPlaylistSettings(settingsBase64?: string) {
       {
         stars: {
           min: 0,
-          max: 15,
+          max: 20,
         },
         sort: "stars",
       };
@@ -33,7 +33,7 @@ export function parseCustomRankedPlaylistSettings(settingsBase64?: string) {
   settings.sort = settings.sort ?? "stars";
   settings.stars = {
     min: settings.stars.min < 0 ? 0 : settings.stars.min,
-    max: settings.stars.max > 15 ? 15 : settings.stars.max,
+    max: settings.stars.max > 20 ? 20 : settings.stars.max,
   };
 
   return settings;
