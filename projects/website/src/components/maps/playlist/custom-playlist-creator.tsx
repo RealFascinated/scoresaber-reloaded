@@ -1,6 +1,6 @@
 "use client";
 
-import { openInNewTab } from "@/common/browser-utils";
+import { downloadFile } from "@/common/browser-utils";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -42,9 +42,10 @@ export default function CustomPlaylistCreator() {
     },
   });
 
-  function onSubmit(data: z.infer<typeof customRankedPlaylistSchema>) {
-    openInNewTab(
-      `${Config.apiUrl}/playlist/scoresaber-custom-ranked-maps?config=${encodeCustomRankedPlaylistSettings(data)}`
+  async function onSubmit(data: z.infer<typeof customRankedPlaylistSchema>) {
+    await downloadFile(
+      `${Config.apiUrl}/playlist/scoresaber-custom-ranked-maps?config=${encodeCustomRankedPlaylistSettings(data)}`,
+      `ssr-custom-ranked-${data.sort}-${data.stars.min}-${data.stars.max}-stars.json`
     );
   }
 
@@ -106,7 +107,7 @@ export default function CustomPlaylistCreator() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="stars">Stars</SelectItem>
-                      <SelectItem value="dateRanked">Timestamp</SelectItem>
+                      <SelectItem value="dateRanked">Date Ranked</SelectItem>
                     </SelectContent>
                   </Select>
                 )}

@@ -74,6 +74,9 @@ export default function SnipePlaylistDownloadButton({ toSnipe }: SnipePlaylistDo
   const onSubmit = async (data: z.infer<typeof snipeSettingsSchema>) => {
     const encodedData = encodeSnipePlaylistSettings(data);
     setDownloading(true);
+    console.log(
+      `${Config.apiUrl}/playlist/snipe?user=${playerId}&toSnipe=${toSnipe.id}&settings=${encodedData}`
+    );
     await downloadFile(
       `${Config.apiUrl}/playlist/snipe?user=${playerId}&toSnipe=${toSnipe.id}&settings=${encodedData}`,
       `ssr-snipe-${toSnipe.id}-${data.sort}.json`

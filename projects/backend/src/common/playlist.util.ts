@@ -67,7 +67,7 @@ export async function generateCustomRankedPlaylistImage(
         fontSize: 45,
       },
       {
-        text: `Sort: ${type == "dateRanked" ? "Timestamp" : "Stars"}`,
+        text: `Sort: ${type == "dateRanked" ? "Date Ranked" : "Stars"}`,
         color: "#313131",
         fontSize: 40,
       },

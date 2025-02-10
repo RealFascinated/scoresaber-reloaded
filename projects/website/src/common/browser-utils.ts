@@ -23,10 +23,14 @@ export function openInNewTab(url: string) {
 export async function downloadFile(url: string, fileName: string) {
   try {
     const response = await fetch(url, {
-      method: "get",
-      mode: "no-cors",
+      method: "GET",
       referrerPolicy: "no-referrer",
     });
+
+    // Check if the response is OK
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
 
     const blob = await response.blob();
 
