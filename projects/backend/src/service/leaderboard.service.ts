@@ -864,6 +864,7 @@ export default class LeaderboardService {
   public static async getRankedLeaderboards(options?: {
     projection?: { [field: string]: number };
     sort?: "dateRanked" | "stars";
+    /* eslint-disable @typescript-eslint/no-explicit-any */
     match?: { [field: string]: any };
   }): Promise<ScoreSaberLeaderboard[]> {
     return fetchWithCache(
