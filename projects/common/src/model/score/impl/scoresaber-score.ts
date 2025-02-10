@@ -31,12 +31,6 @@ class ScoreSaberScorePublic extends ScoreSaberScoreInternal {
    * The player who set the score.
    */
   public playerInfo!: ScoreSaberLeaderboardPlayerInfoToken;
-
-  /**
-   * The amount of pp this score will give
-   * if a new one worth the same is set.
-   */
-  public ppBoundary?: number;
 }
 
 export type ScoreSaberPreviousScoreOverview = PreviousScore & {

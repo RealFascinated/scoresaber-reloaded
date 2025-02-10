@@ -39,9 +39,6 @@ export function ScorePpBadge({ score, leaderboard }: ScorePpProps) {
                   Weighted: {formatPp(weightedPp)}pp ({(100 * weight).toFixed(2)}%)
                 </p>
                 {fcPp && <p>Full Combo: {fcPp}pp</p>}
-                {score.ppBoundary && (
-                  <p>Global PP Gain: {formatPp(score.ppBoundary)}pp (if new score)</p>
-                )}
               </div>
             </div>
           }

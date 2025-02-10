@@ -1,22 +1,13 @@
-import { DetailType } from "@ssr/common/detail-type";
 import Logger from "@ssr/common/logger";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
+import { ScoreSaberPreviousScoreModel } from "@ssr/common/model/score/impl/scoresaber-previous-score";
 import {
-  ScoreSaberPreviousScoreDocument,
-  ScoreSaberPreviousScoreModel,
-} from "@ssr/common/model/score/impl/scoresaber-previous-score";
-import {
-  ScoreSaberPreviousScoreOverview,
   ScoreSaberScore,
   ScoreSaberScoreModel,
 } from "@ssr/common/model/score/impl/scoresaber-score";
 import { ScoreType } from "@ssr/common/model/score/score";
-import { removeObjectFields } from "@ssr/common/object.util";
-import { Page, Pagination } from "@ssr/common/pagination";
 import LeaderboardScoresResponse from "@ssr/common/response/leaderboard-scores-response";
-import PlayerScoresResponse from "@ssr/common/response/player-scores-response";
 import { PlayerScore } from "@ssr/common/score/player-score";
-import { ScoreSort } from "@ssr/common/score/score-sort";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { Timeframe } from "@ssr/common/timeframe";
 import {
@@ -29,11 +20,11 @@ import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score";
 import { getDaysAgoDate } from "@ssr/common/utils/time-utils";
 import { NotFoundError } from "elysia";
 import { fetchWithCache } from "../../common/cache.util";
+import { scoreToObject } from "../../common/score/score.util";
+import BeatLeaderService from "../beatleader.service";
 import CacheService, { ServiceCache } from "../cache.service";
 import LeaderboardService from "../leaderboard.service";
-import BeatLeaderService from "../beatleader.service";
 import { PlayerService } from "../player.service";
-import { scoreToObject } from "../../common/score/score.util";
 import { PreviousScoresService } from "./previous-scores.service";
 
 export class ScoreService {
@@ -278,9 +269,6 @@ export class ScoreService {
    * @returns the top scores
    */
   public static async getTopScores(amount: number = 100, timeframe: Timeframe) {
-    Logger.info(`Getting top scores for timeframe: ${timeframe}, limit: ${amount}...`);
-    const before = Date.now();
-
     let daysAgo = -1;
     if (timeframe === "daily") {
       daysAgo = 1;
@@ -304,7 +292,13 @@ export class ScoreService {
     for (const rawScore of foundScores) {
       const score = scoreToObject(rawScore);
 
-      const leaderboardResponse = await LeaderboardService.getLeaderboard(score.leaderboardId + "");
+      const leaderboardResponse = await LeaderboardService.getLeaderboard(
+        score.leaderboardId + "",
+        {
+          includeBeatSaver: false,
+          cacheOnly: true,
+        }
+      );
       if (!leaderboardResponse) {
         continue; // Skip this score if no leaderboardResponse is found
       }
@@ -337,10 +331,6 @@ export class ScoreService {
       ScoreSaberScore,
       ScoreSaberLeaderboard
     >[];
-
-    Logger.info(
-      `Got ${filteredScores.length} scores in ${Date.now() - before}ms (timeframe: ${timeframe}, limit: ${amount})`
-    );
     return filteredScores;
   }
 
@@ -384,18 +374,6 @@ export class ScoreService {
         id: player.id,
         name: player.name,
       };
-    }
-
-    try {
-      const scorePpBoundary =
-        score.pp > 0
-          ? await PlayerService.getPlayerPpBoundaryFromScorePp(score.playerId, score.pp)
-          : undefined;
-      if (scorePpBoundary) {
-        score.ppBoundary = scorePpBoundary;
-      }
-    } catch {
-      // ignored
     }
 
     return score;

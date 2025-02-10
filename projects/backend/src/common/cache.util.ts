@@ -14,9 +14,9 @@ export async function fetchWithCache<T>(
   cacheKey: string,
   fetchFn: () => Promise<T>
 ): Promise<T> {
-  if (!isProduction()) {
-    return fetchFn();
-  }
+  // if (!isProduction()) {
+  //   return fetchFn();
+  // }
 
   if (cache == undefined) {
     throw new InternalServerError(`Cache is not defined`);

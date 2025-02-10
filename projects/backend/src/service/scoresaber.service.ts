@@ -1,43 +1,41 @@
-import { Config } from "@ssr/common/config";
 import { DetailType } from "@ssr/common/detail-type";
+import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
+import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
+import PlayerScoresResponse from "@ssr/common/response/player-scores-response";
+import { PlayerScore } from "@ssr/common/score/player-score";
+import { ScoreSort } from "@ssr/common/score/score-sort";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import {
   getScoreSaberLeaderboardFromToken,
   getScoreSaberScoreFromToken,
 } from "@ssr/common/token-creators";
+import { Metadata } from "@ssr/common/types/metadata";
 import ScoreSaberPlayerScoreToken from "@ssr/common/types/token/scoresaber/player-score";
-import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
 import { getPlayerStatisticChanges } from "@ssr/common/utils/player-utils";
-import { formatScoreAccuracy } from "@ssr/common/utils/score.util";
-import { getDifficultyName } from "@ssr/common/utils/song-utils";
 import { getDaysAgoDate } from "@ssr/common/utils/time-utils";
-import { formatChange, getPageFromRank, isProduction } from "@ssr/common/utils/utils";
-import { EmbedBuilder } from "discord.js";
+import { getPageFromRank, isProduction } from "@ssr/common/utils/utils";
 import { NotFoundError } from "elysia";
 import sanitize from "sanitize-html";
-import { DiscordChannels, logToChannel } from "../bot/bot";
 import { fetchWithCache } from "../common/cache.util";
-import BeatSaverService from "./beatsaver.service";
 import CacheService, { ServiceCache } from "./cache.service";
-import { PlayerService } from "./player.service";
-import { PreviousScoresService } from "./score/previous-scores.service";
-import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
-import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import { PlayerScore } from "@ssr/common/score/player-score";
-import { ScoreService } from "./score/score.service";
 import LeaderboardService from "./leaderboard.service";
-import PlayerScoresResponse from "@ssr/common/response/player-scores-response";
-import { Metadata } from "@ssr/common/types/metadata";
-import { ScoreSort } from "@ssr/common/score/score-sort";
+import { PlayerService } from "./player.service";
+import { ScoreService } from "./score/score.service";
+import { sendScoreNotification } from "../common/score/score.util";
+import { DiscordChannels } from "../bot/bot";
 
 export default class ScoreSaberService {
   /**
    * Notifies the number one score in Discord.
    *
    * @param playerScore the score to notify
+   * @param mode the mode to notify in
    */
-  public static async notifyNumberOne(playerScore: ScoreSaberPlayerScoreToken) {
+  public static async notifyScore(
+    playerScore: ScoreSaberPlayerScoreToken,
+    mode: "numberOne" | "top50AllTime"
+  ) {
     // Only notify in production
     if (!isProduction()) {
       return;
@@ -56,100 +54,26 @@ export default class ScoreSaberService {
     if (leaderboard.stars <= 0) {
       return;
     }
-    // Not #1 rank
-    if (score.rank !== 1) {
-      return;
-    }
 
-    const beatSaver = await BeatSaverService.getMap(
-      leaderboard.songHash,
-      leaderboard.difficulty.difficulty,
-      leaderboard.difficulty.characteristic,
-      DetailType.BASIC
-    );
-    const player = await scoresaberService.lookupPlayer(playerInfo.id);
-    if (!player) {
-      return;
-    }
-
-    const previousScore = await PreviousScoresService.getPreviousScore(
-      player.id,
-      score,
-      leaderboard,
-      score.timestamp
-    );
-    const change = previousScore &&
-      previousScore.change && {
-        accuracy: `${formatChange(previousScore.change.accuracy, value => value.toFixed(2) + "%") || ""}`,
-        pp: `${formatChange(previousScore.change.pp, undefined, true) || ""}`,
-        misses: previousScore.misses == score.misses ? "" : ` vs ${previousScore.misses}` || "",
-        badCuts: previousScore.badCuts == score.badCuts ? "" : ` vs ${previousScore.badCuts}` || "",
-        maxCombo:
-          previousScore.maxCombo == score.maxCombo ? "" : ` vs ${previousScore.maxCombo}` || "",
-      };
-
-    const message = await logToChannel(
-      DiscordChannels.numberOneFeed,
-      new EmbedBuilder()
-        .setTitle(`${player.name} just set a #1!`)
-        .setDescription(
-          [
-            `${leaderboard.fullName} (${getDifficultyName(leaderboard.difficulty.difficulty)} ${leaderboard.stars.toFixed(2)}★)`,
-            [
-              `[[Player]](${Config.websiteUrl}/player/${player.id})`,
-              `[[Leaderboard]](${Config.websiteUrl}/leaderboard/${leaderboard.id})`,
-              beatSaver ? `[[Map]](https://beatsaver.com/maps/${beatSaver.bsr})` : undefined,
-            ].join(" "),
-          ]
-            .join("\n")
-            .trim()
-        )
-        .addFields([
-          {
-            name: "Accuracy",
-            value: `${formatScoreAccuracy(score)} ${change ? change.accuracy : ""}`,
-            inline: true,
-          },
-          {
-            name: "PP",
-            value: `${formatPp(score.pp)}pp ${change ? change.pp : ""}`,
-            inline: true,
-          },
-          {
-            name: "Player Rank",
-            value: `#${formatNumberWithCommas(player.rank)}`,
-            inline: true,
-          },
-          {
-            name: "Misses",
-            value: `${formatNumberWithCommas(score.missedNotes)} ${change ? change.misses : ""}`,
-            inline: true,
-          },
-          {
-            name: "Bad Cuts",
-            value: `${formatNumberWithCommas(score.badCuts)} ${change ? change.badCuts : ""}`,
-            inline: true,
-          },
-          {
-            name: "Max Combo",
-            value: `${formatNumberWithCommas(score.maxCombo)} ${score.fullCombo ? "/ FC" : ""} ${change ? change.maxCombo : ""}`,
-            inline: true,
-          },
-        ])
-        .setThumbnail(leaderboard.songArt)
-        .setTimestamp(score.timestamp)
-        .setFooter({
-          text: `Powered by ${Config.websiteUrl}`,
-        })
-        .setColor("#00ff00")
-    );
-
-    try {
-      if (message) {
-        await message.crosspost();
+    if (mode === "numberOne" && score.rank === 1) {
+      await sendScoreNotification(
+        DiscordChannels.numberOneFeed,
+        score,
+        leaderboard,
+        `${playerInfo.name} just set a #1!`
+      );
+      // No need to check this for all scores, so we only check if the score is top 50
+    } else if (mode === "top50AllTime" && score.rank <= 50) {
+      const top50Scores = await ScoreService.getTopScores(50, "all");
+      const lowestPp = top50Scores.reduce((min, score) => Math.min(min, score.score.pp), Infinity);
+      if (score.pp > lowestPp) {
+        await sendScoreNotification(
+          DiscordChannels.top50Feed,
+          score,
+          leaderboard,
+          `${playerInfo.name} just set a new top 50 score!`
+        );
       }
-    } catch (error) {
-      console.error("Failed to cross-post number one score message", error);
     }
   }
 
