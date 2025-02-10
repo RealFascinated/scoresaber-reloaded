@@ -38,7 +38,10 @@ export default class LeaderboardController {
     };
     query: { type: DetailType; superJson: boolean };
   }): Promise<unknown> {
-    const data = await LeaderboardService.getLeaderboard(id, { type, includeBeatSaver: true });
+    const data = await LeaderboardService.getLeaderboard(id, {
+      beatSaverType: type,
+      includeBeatSaver: true,
+    });
     return superJson ? SuperJSON.stringify(data) : data;
   }
 

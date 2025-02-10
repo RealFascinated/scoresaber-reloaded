@@ -78,18 +78,20 @@ export function FriendScores() {
               {scoreData.items.map((playerScore, index) => {
                 const score = playerScore.score;
                 const leaderboard = playerScore.leaderboard;
-
+                const beatSaverMap = playerScore.beatSaver;
                 return (
                   <motion.div key={index} variants={scoreAnimation}>
                     <Score
                       score={score}
                       leaderboard={leaderboard}
+                      beatSaverMap={beatSaverMap}
                       playerAbove={score.playerInfo}
                       settings={{
                         hideLeaderboardDropdown: true,
                         hideAccuracyChanger: true,
                         noScoreButtons: true,
                         hideRank: true,
+                        allowLeaderboardPreview: true,
                       }}
                     />
                   </motion.div>

@@ -12,6 +12,7 @@ import { ScoreService } from "./score.service";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import LeaderboardService from "../leaderboard.service";
 import { PlayerScore } from "@ssr/common/score/player-score";
+import { DetailType } from "@ssr/common/detail-type";
 
 const FRIEND_SCORES_LIMIT = 100;
 
@@ -95,13 +96,18 @@ export class FriendScoresService {
         for (const friendScore of friendScores) {
           const score = scoreToObject(friendScore);
           const leaderboardResponse = await LeaderboardService.getLeaderboard(
-            friendScore.leaderboardId + ""
+            friendScore.leaderboardId + "",
+            {
+              includeBeatSaver: true,
+              beatSaverType: DetailType.FULL,
+            }
           );
           const leaderboard = leaderboardResponse.leaderboard;
 
           scores.push({
             score: await ScoreService.insertScoreData(score),
             leaderboard: leaderboard,
+            beatSaver: leaderboardResponse.beatsaver,
           });
         }
 

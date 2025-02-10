@@ -316,7 +316,7 @@ export default class ScoreSaberService {
             token.leaderboard.id + "",
             {
               includeBeatSaver: true,
-              type: DetailType.FULL,
+              beatSaverType: DetailType.FULL,
             }
           );
 

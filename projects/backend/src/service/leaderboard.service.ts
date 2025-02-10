@@ -100,15 +100,15 @@ export default class LeaderboardService {
     options?: {
       cacheOnly?: boolean;
       includeBeatSaver?: boolean;
-      type?: DetailType;
+      beatSaverType?: DetailType;
     }
   ): Promise<LeaderboardResponse<ScoreSaberLeaderboard>> {
     options = {
       includeBeatSaver: true,
-      type: DetailType.BASIC,
+      beatSaverType: DetailType.BASIC,
       ...options,
     };
-    const cacheKey = `${id}-${options.type}`;
+    const cacheKey = `${id}-${options.beatSaverType}`;
 
     return fetchWithCache(CacheService.getCache(ServiceCache.Leaderboards), cacheKey, async () => {
       // Use index hint for faster query
@@ -140,7 +140,7 @@ export default class LeaderboardService {
             leaderboard.songHash,
             leaderboard.difficulty.difficulty,
             leaderboard.difficulty.characteristic,
-            options.type ?? DetailType.BASIC
+            options.beatSaverType ?? DetailType.BASIC
           )
         : Promise.resolve(undefined);
 
