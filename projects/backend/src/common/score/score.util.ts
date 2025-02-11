@@ -83,7 +83,7 @@ export async function sendScoreNotification(
       .setTitle(title)
       .setDescription(
         [
-          `${leaderboard.fullName} (${getDifficultyName(leaderboard.difficulty.difficulty)} ${leaderboard.stars.toFixed(2)}★)`,
+          `${leaderboard.fullName} (${getDifficultyName(leaderboard.difficulty.difficulty)} ${leaderboard.stars > 0 ? `${leaderboard.stars.toFixed(2)}★` : ""})`,
           [
             `[[Player]](${Config.websiteUrl}/player/${player.id})`,
             `[[Leaderboard]](${Config.websiteUrl}/leaderboard/${leaderboard.id})`,
@@ -101,7 +101,7 @@ export async function sendScoreNotification(
         },
         {
           name: "PP",
-          value: `${formatPp(score.pp)}pp ${change ? change.pp : ""}`,
+          value: score.pp > 0 ? `${formatPp(score.pp)}pp ${change ? change.pp : ""}` : "N/A",
           inline: true,
         },
         {
@@ -130,7 +130,7 @@ export async function sendScoreNotification(
       .setFooter({
         text: `Powered by ${Config.websiteUrl}`,
       })
-      .setColor("#00ff00")
+      .setColor(score.pp > 0 ? "#d4af37" : "#808080")
   );
 
   return message;
