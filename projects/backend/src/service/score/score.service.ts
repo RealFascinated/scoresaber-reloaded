@@ -350,6 +350,13 @@ export class ScoreService {
       insertPlayerInfo?: boolean;
     }
   ) {
+    options = {
+      insertAdditionalData: true,
+      insertPreviousScore: true,
+      insertPlayerInfo: true,
+      ...options,
+    };
+
     leaderboard = !leaderboard
       ? (await LeaderboardService.getLeaderboard(score.leaderboardId + "")).leaderboard
       : leaderboard;
