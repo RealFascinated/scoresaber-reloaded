@@ -10,7 +10,6 @@ import { isProduction } from "@ssr/common/utils/utils";
 import { connectBeatLeaderWebsocket } from "@ssr/common/websocket/beatleader-websocket";
 import { connectScoresaberWebsocket } from "@ssr/common/websocket/scoresaber-websocket";
 import { logger } from "@tqman/nice-logger";
-import typegoose from "@typegoose/typegoose";
 import { EmbedBuilder } from "discord.js";
 import { Elysia, ValidationError } from "elysia";
 import { decorators } from "elysia-decorators";
@@ -32,6 +31,7 @@ import { PlayerService } from "./service/player.service";
 import { ScoreService } from "./service/score/score.service";
 import ScoreSaberService from "./service/scoresaber.service";
 import StatisticsService from "./service/statistics.service";
+import mongoose from "mongoose";
 
 Logger.info("Starting SSR Backend...");
 
@@ -45,7 +45,7 @@ if (await Bun.file(".env").exists()) {
 
 // Connect to Mongo
 Logger.info("Connecting to MongoDB...");
-await typegoose.mongoose.connect(Config.mongoUri!); // Connect to MongoDB
+await mongoose.connect(Config.mongoUri!); // Connect to MongoDB
 Logger.info("Connected to MongoDB :)");
 
 // Connect to websockets

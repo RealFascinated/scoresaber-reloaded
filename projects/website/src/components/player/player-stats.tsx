@@ -72,7 +72,11 @@ const playerStats: Stat[] = [
     name: "Joined Date",
     create: (player: ScoreSaberPlayer) => {
       return {
-        tooltip: formatDate(player.joinedDate, "DD MMMM YYYY HH:mm"),
+        tooltip: (
+          <p>
+            {formatDate(player.joinedDate, "DD MMMM YYYY HH:mm")} ({timeAgo(player.joinedDate)})
+          </p>
+        ),
         value: formatDate(player.joinedDate),
       };
     },

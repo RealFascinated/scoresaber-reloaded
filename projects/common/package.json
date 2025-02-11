@@ -19,8 +19,8 @@
     "typescript": "^5.7.3"
   },
   "dependencies": {
-    "@typegoose/auto-increment": "^4.9.0",
-    "@typegoose/typegoose": "^12.10.1",
+    "@typegoose/auto-increment": "^4.10.0",
+    "@typegoose/typegoose": "^12.11.0",
     "@types/sanitize-html": "^2.13.0",
     "sanitize-html": "^2.14.0",
     "ws": "^8.18.0",
