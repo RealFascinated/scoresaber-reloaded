@@ -1,16 +1,10 @@
-import Metric from "../metric";
-import { Point } from "@influxdata/influxdb-client";
-import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
+import { MetricType } from "../../service/metrics.service";
+import NumberMetric from "../number-metric";
 
-export default class TrackedScoresMetric extends Metric {
+export default class TrackedScoresMetric extends NumberMetric {
   constructor() {
-    super("tracked-scores");
-  }
-
-  async collect(): Promise<Point> {
-    return this.getPointBase().intField(
-      "count",
-      await ScoreSaberScoreModel.estimatedDocumentCount({})
-    );
+    super(MetricType.TRACKED_SCORES, 0, {
+      fetchAfterRegister: true,
+    });
   }
 }

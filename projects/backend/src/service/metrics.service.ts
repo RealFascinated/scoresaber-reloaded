@@ -1,12 +1,9 @@
 import { InfluxDB, Point } from "@influxdata/influxdb-client";
+import Logger from "@ssr/common/logger";
 import Metric from "../metrics/metric";
 import TrackedPlayersMetric from "../metrics/impl/tracked-players";
 import TrackedScoresMetric from "../metrics/impl/tracked-scores";
-import BeatSaverMapsMetric from "../metrics/impl/beatsaver-maps";
-import ScoresaberLeaderboardsMetric from "../metrics/impl/scoresaber-leaderboards";
-import BeatLeaderDataStatsMetric from "../metrics/impl/beatleader-score-data";
-import CacheStatisticsMetric from "../metrics/impl/cache-statistics";
-import Logger from "@ssr/common/logger";
+import { MetricValueModel } from "../common/model/metric";
 
 const influxClient = new InfluxDB({
   url: process.env.INFLUXDB_URL!,
@@ -14,32 +11,60 @@ const influxClient = new InfluxDB({
 });
 const writeApi = influxClient.getWriteApi(process.env.INFLUXDB_ORG!, process.env.INFLUXDB_BUCKET!);
 
+export enum MetricType {
+  TRACKED_SCORES = "tracked-scores",
+  TRACKED_PLAYERS = "tracked-players",
+}
+
 export default class MetricsService {
   /**
    * The registered metrics.
    * @private
    */
-  private metrics: Metric[] = [];
+  private static metrics: Metric<unknown>[] = [];
 
   constructor() {
-    this.registerMetric(new TrackedPlayersMetric());
     this.registerMetric(new TrackedScoresMetric());
-    this.registerMetric(new BeatSaverMapsMetric());
-    this.registerMetric(new ScoresaberLeaderboardsMetric());
-    this.registerMetric(new BeatLeaderDataStatsMetric());
-    this.registerMetric(new CacheStatisticsMetric());
+    this.registerMetric(new TrackedPlayersMetric());
+    this.initMetrics();
+  }
 
-    setInterval(
-      async () => {
-        const before = Date.now();
-        await this.writePoints(await Promise.all(this.metrics.map(metric => metric.collect())));
-        const timeTaken = Date.now() - before;
-        if (timeTaken > 3000) {
-          Logger.warn(`SLOW!!! Collected and wrote metrics in ${timeTaken}ms`);
+  private async initMetrics() {
+    for (const metric of MetricsService.metrics) {
+      // If the metric does not need to be fetched after registration, skip
+      if (!metric.options.fetchAfterRegister) {
+        continue;
+      }
+
+      // Fetch the metric value from the database
+      const metricValue = await MetricValueModel.findOne({ _id: metric.id });
+      if (metricValue) {
+        metric.value = metricValue.value;
+      }
+    }
+
+    setInterval(async () => {
+      const before = Date.now();
+
+      for (const metric of MetricsService.metrics) {
+        // Collect the metric
+        await this.writePoints(await metric.collect());
+
+        // Update the metric value
+        if (metric.options.fetchAfterRegister) {
+          await MetricValueModel.findOneAndUpdate(
+            { _id: metric.id },
+            { value: metric.value },
+            { upsert: true, setDefaultsOnInsert: true }
+          );
         }
-      },
-      1000 * 60 * 5
-    ); // 5 minutes
+      }
+
+      const timeTaken = Date.now() - before;
+      if (timeTaken > 3000) {
+        Logger.warn(`Collected and wrote metrics in ${timeTaken}ms`);
+      }
+    }, 1000 * 5); // every 5 seconds
   }
 
   /**
@@ -47,8 +72,22 @@ export default class MetricsService {
    *
    * @param metric the metric to register
    */
-  private registerMetric(metric: Metric) {
-    this.metrics.push(metric);
+  private registerMetric(metric: Metric<unknown>) {
+    MetricsService.metrics.push(metric);
+  }
+
+  /**
+   * Gets a metric.
+   *
+   * @param type the type of metric
+   * @returns the metric
+   */
+  public static async getMetric(type: MetricType): Promise<Metric<unknown>> {
+    const metric = MetricsService.metrics.find(metric => metric.id === type);
+    if (!metric) {
+      throw new Error(`Metric "${type}" not found`);
+    }
+    return metric;
   }
 
   /**
@@ -56,11 +95,7 @@ export default class MetricsService {
    *
    * @param points the points to write
    */
-  private async writePoints(points: (Point | Point[])[]): Promise<void> {
-    if (points.length === 0) {
-      Logger.warn("No points to write");
-      return;
-    }
-    writeApi.writePoints(points.flat());
+  private async writePoints(points: Point): Promise<void> {
+    writeApi.writePoint(points);
   }
 }

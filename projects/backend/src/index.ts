@@ -26,12 +26,13 @@ import StatisticsController from "./controller/statistics.controller";
 import BeatLeaderService from "./service/beatleader.service";
 import CacheService from "./service/cache.service";
 import LeaderboardService from "./service/leaderboard.service";
-import MetricsService from "./service/metrics.service";
+import MetricsService, { MetricType } from "./service/metrics.service";
 import { PlayerService } from "./service/player.service";
 import { ScoreService } from "./service/score/score.service";
 import ScoreSaberService from "./service/scoresaber.service";
 import StatisticsService from "./service/statistics.service";
 import mongoose from "mongoose";
+import TrackedScoresMetric from "./metrics/impl/tracked-scores";
 
 Logger.info("Starting SSR Backend...");
 
@@ -62,6 +63,12 @@ connectScoresaberWebsocket({
     await ScoreSaberService.notifyScore(score, player, "scoreFloodGate");
     await ScoreSaberService.notifyScore(score, player, "numberOne");
     await ScoreSaberService.notifyScore(score, player, "top50AllTime");
+
+    // Update metric
+    const trackedScoresMetric = (await MetricsService.getMetric(
+      MetricType.TRACKED_SCORES
+    )) as TrackedScoresMetric;
+    trackedScoresMetric.increment();
   },
 });
 connectBeatLeaderWebsocket({
