@@ -11,14 +11,14 @@ export default function SongName({ leaderboard, clickableSongName }: Props) {
     <Link
       prefetch={false}
       href={`/leaderboard/${leaderboard.id}`}
-      className="cursor-pointer hover:brightness-[66%] transform-gpu transition-all text-ssr"
+      className="cursor-pointer hover:brightness-[66%] transform-gpu transition-all text-ssr break-all min-w-0 w-fit text-left"
       style={{
         overflowWrap: "anywhere",
       }}
     >
-      {leaderboard.fullName}
+      <p>{leaderboard.fullName}</p>
     </Link>
   ) : (
-    <p className="text-ssr break-all min-w-0">{leaderboard.fullName}</p>
+    <p>{leaderboard.fullName}</p>
   );
 }
