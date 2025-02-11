@@ -83,7 +83,7 @@ export async function sendScoreNotification(
       .setTitle(title)
       .setDescription(
         [
-          `${leaderboard.fullName} (${getDifficultyName(leaderboard.difficulty.difficulty)} ${leaderboard.stars > 0 ? `${leaderboard.stars.toFixed(2)}★` : ""})`,
+          `${leaderboard.fullName} (${getDifficultyName(leaderboard.difficulty.difficulty)}${leaderboard.stars > 0 ? ` ${leaderboard.stars.toFixed(2)}★` : ""})`,
           [
             `[[Player]](${Config.websiteUrl}/player/${player.id})`,
             `[[Leaderboard]](${Config.websiteUrl}/leaderboard/${leaderboard.id})`,

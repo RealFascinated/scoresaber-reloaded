@@ -55,7 +55,7 @@ export default class ScoreSaberService {
         DiscordChannels.scoreFloodGateFeed,
         score,
         leaderboard,
-        `${playerInfo.name} just set a #${score.rank}!`
+        `${playerInfo.name} just set a rank #${score.rank}!`
       );
     }
 
