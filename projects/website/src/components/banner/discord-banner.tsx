@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 
 export default function DiscordBanner() {
   const pathName = usePathname();
+  console.log(pathName);
 
   // Don't show the banner on the home page
   if (pathName === "/") {
