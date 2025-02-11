@@ -341,7 +341,15 @@ export class ScoreService {
    * @param leaderboard the leaderboard to get the data from
    * @returns the score with the data inserted
    */
-  public static async insertScoreData(score: ScoreSaberScore, leaderboard?: ScoreSaberLeaderboard) {
+  public static async insertScoreData(
+    score: ScoreSaberScore,
+    leaderboard?: ScoreSaberLeaderboard,
+    options?: {
+      insertAdditionalData?: boolean;
+      insertPreviousScore?: boolean;
+      insertPlayerInfo?: boolean;
+    }
+  ) {
     leaderboard = !leaderboard
       ? (await LeaderboardService.getLeaderboard(score.leaderboardId + "")).leaderboard
       : leaderboard;
@@ -352,28 +360,39 @@ export class ScoreService {
     }
 
     const [additionalData, previousScore] = await Promise.all([
-      BeatLeaderService.getAdditionalScoreDataFromSong(
-        score.playerId,
-        leaderboard.songHash,
-        `${leaderboard.difficulty.difficulty}-${leaderboard.difficulty.characteristic}`,
-        score.score
-      ),
-      PreviousScoresService.getPreviousScore(score.playerId, score, leaderboard, score.timestamp),
+      options?.insertAdditionalData
+        ? BeatLeaderService.getAdditionalScoreDataFromSong(
+            score.playerId,
+            leaderboard.songHash,
+            `${leaderboard.difficulty.difficulty}-${leaderboard.difficulty.characteristic}`,
+            score.score
+          )
+        : undefined,
+      options?.insertPreviousScore
+        ? PreviousScoresService.getPreviousScore(
+            score.playerId,
+            score,
+            leaderboard,
+            score.timestamp
+          )
+        : undefined,
     ]);
 
     if (additionalData !== undefined) {
       score.additionalData = additionalData;
     }
-    if (previousScore) {
+    if (previousScore !== undefined) {
       score.previousScore = previousScore;
     }
 
-    const player = await PlayerService.getPlayer(score.playerId).catch(() => undefined);
-    if (player) {
-      score.playerInfo = {
-        id: player.id,
-        name: player.name,
-      };
+    if (options?.insertPlayerInfo) {
+      const player = await PlayerService.getPlayer(score.playerId).catch(() => undefined);
+      if (player) {
+        score.playerInfo = {
+          id: player.id,
+          name: player.name,
+        };
+      }
     }
 
     return score;

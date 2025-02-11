@@ -525,7 +525,9 @@ export default class LeaderboardService {
       const score = existingScores.find(
         score => score.scoreId === scoreToken.id + "" && score.score == scoreToken.baseScore
       );
-      if (!score) continue;
+      if (!score) {
+        continue;
+      }
 
       updatedCount += await this.updateScore(score, scoreToken, leaderboard);
     }

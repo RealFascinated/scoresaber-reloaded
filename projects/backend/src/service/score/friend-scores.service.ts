@@ -33,6 +33,14 @@ export class FriendScoresService {
       CacheService.getCache(ServiceCache.FriendScores),
       `friend-scores-leaderboard:${friendIds.join(",")}-${leaderboardId}`,
       async () => {
+        const leaderboard = await LeaderboardService.getLeaderboard(leaderboardId + "", {
+          includeBeatSaver: false,
+          cacheOnly: true,
+        });
+        if (!leaderboard) {
+          throw new NotFoundError(`Leaderboard "${leaderboardId}" not found`);
+        }
+
         const scores: ScoreSaberScore[] = [];
         for (const friendId of friendIds) {
           await PlayerService.getPlayer(friendId); // Ensures player exists
@@ -43,8 +51,17 @@ export class FriendScoresService {
             { $sort: { score: -1 } },
           ]);
           for (const friendScore of friendScores) {
-            const score = scoreToObject(friendScore);
-            scores.push(await ScoreService.insertScoreData(score));
+            scores.push(
+              await ScoreService.insertScoreData(
+                scoreToObject(friendScore),
+                leaderboard.leaderboard,
+                {
+                  insertAdditionalData: true,
+                  insertPreviousScore: false,
+                  insertPlayerInfo: true,
+                }
+              )
+            );
           }
         }
 

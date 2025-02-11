@@ -2,7 +2,7 @@ import CountryFlag from "@/components/country-flag";
 import Link from "next/link";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { clsx } from "clsx";
-import { getScoreSaberRoles } from "@ssr/common/utils/scoresaber.util";
+import { getScoreSaberAvatar, getScoreSaberRoles } from "@ssr/common/utils/scoresaber.util";
 import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/leaderboard-player-info";
 import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/player";
 import Avatar from "@/components/avatar";
@@ -66,7 +66,7 @@ export function PlayerInfo({
   return (
     <div className="flex gap-2 items-center">
       <Avatar
-        src={player.profilePicture!}
+        src={player.profilePicture ?? getScoreSaberAvatar(player)}
         className="w-[24px] h-[24px] pointer-events-none"
         alt={`${player.name}'s Profile Picture`}
       />
