@@ -1,22 +1,17 @@
+import { Config } from "@ssr/common/config";
+import { DetailType } from "@ssr/common/detail-type";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { removeObjectFields } from "@ssr/common/object.util";
-import BeatSaverService from "../../service/beatsaver.service";
-import { DetailType } from "@ssr/common/detail-type";
-import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
-import { PreviousScoresService } from "../../service/score/previous-scores.service";
-import { formatChange } from "@ssr/common/utils/utils";
-import { DiscordChannels } from "../../bot/bot";
-import { Config } from "@ssr/common/config";
-import { logToChannel } from "../../bot/bot";
-import { getDifficultyName } from "@ssr/common/utils/song-utils";
-import { EmbedBuilder } from "discord.js";
-import { formatPp } from "@ssr/common/utils/number-utils";
-import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
+import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
+import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
 import { formatScoreAccuracy } from "@ssr/common/utils/score.util";
-import { fetchWithCache } from "../cache.util";
-import CacheService from "../../service/cache.service";
-import { ServiceCache } from "../../service/cache.service";
+import { getDifficultyName } from "@ssr/common/utils/song-utils";
+import { formatChange } from "@ssr/common/utils/utils";
+import { EmbedBuilder } from "discord.js";
+import { DiscordChannels, logToChannel } from "../../bot/bot";
+import BeatSaverService from "../../service/beatsaver.service";
+import { PreviousScoresService } from "../../service/score/previous-scores.service";
 
 /**
  * Converts a database score to a ScoreSaberScore.
@@ -42,6 +37,7 @@ export async function sendScoreNotification(
   channel: DiscordChannels,
   score: ScoreSaberScore,
   leaderboard: ScoreSaberLeaderboard,
+  player: ScoreSaberPlayerToken,
   title: string
 ) {
   const beatSaver = await BeatSaverService.getMap(
@@ -50,16 +46,6 @@ export async function sendScoreNotification(
     leaderboard.difficulty.characteristic,
     DetailType.BASIC
   );
-  const player = await fetchWithCache(
-    CacheService.getCache(ServiceCache.Players),
-    `scoresaber-player:${score.playerId}`,
-    async () => {
-      return await scoresaberService.lookupPlayer(score.playerId);
-    }
-  );
-  if (!player) {
-    return;
-  }
 
   const previousScore = await PreviousScoresService.getPreviousScore(
     player.id,
@@ -105,8 +91,8 @@ export async function sendScoreNotification(
           inline: true,
         },
         {
-          name: "Player Rank",
-          value: `#${formatNumberWithCommas(player.rank)}`,
+          name: "Modifiers",
+          value: `${score.modifiers.join(", ") ?? "None"}`,
           inline: true,
         },
         {

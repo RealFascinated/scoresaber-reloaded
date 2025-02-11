@@ -8,7 +8,7 @@ import { ScoreSort } from "../../score/score-sort";
 import ScoreSaberLeaderboardToken from "../../types/token/scoresaber/leaderboard";
 import ScoreSaberLeaderboardPageToken from "../../types/token/scoresaber/leaderboard-page";
 import ScoreSaberLeaderboardScoresPageToken from "../../types/token/scoresaber/leaderboard-scores-page";
-import ScoreSaberPlayerToken from "../../types/token/scoresaber/player";
+import { ScoreSaberPlayerToken } from "../../types/token/scoresaber/player";
 import ScoreSaberPlayerScoresPageToken from "../../types/token/scoresaber/player-scores-page";
 import { ScoreSaberPlayerSearchToken } from "../../types/token/scoresaber/player-search";
 import { ScoreSaberPlayersPageToken } from "../../types/token/scoresaber/players-page";

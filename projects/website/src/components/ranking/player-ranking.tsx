@@ -3,7 +3,7 @@
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
 import { clsx } from "clsx";
 import { PlayerInfo } from "@/components/player/player-info";
-import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/player";
+import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import { formatChange } from "@ssr/common/utils/utils";
 import { cn } from "@/common/utils";
 import AddFriend from "@/components/friend/add-friend";

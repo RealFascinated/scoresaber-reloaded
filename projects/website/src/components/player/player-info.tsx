@@ -4,7 +4,7 @@ import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { clsx } from "clsx";
 import { getScoreSaberAvatar, getScoreSaberRoles } from "@ssr/common/utils/scoresaber.util";
 import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/leaderboard-player-info";
-import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/player";
+import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import Avatar from "@/components/avatar";
 
 type TablePlayerProps = {

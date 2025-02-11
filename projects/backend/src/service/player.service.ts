@@ -21,7 +21,7 @@ import { ScoreSort } from "@ssr/common/score/score-sort";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
 import { AroundPlayer } from "@ssr/common/types/around-player";
-import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/player";
+import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import ScoreSaberPlayerScoreToken from "@ssr/common/types/token/scoresaber/player-score";
 import {
   getDifficulty,
@@ -106,14 +106,6 @@ export class PlayerService {
 
       // Wait for the player creation to complete
       player = await accountCreationLock[id];
-    }
-
-    // Update player name
-    if (playerToken) {
-      if (player.name !== playerToken.name) {
-        player.name = playerToken.name;
-        await player.save();
-      }
     }
 
     // Reset peak rank if it's 0
@@ -586,6 +578,8 @@ export class PlayerService {
     let hasMorePages = true;
     let totalMissingScores = 0;
 
+    const playerToken = await ScoreSaberService.getCachedPlayer(player.id, true);
+
     while (hasMorePages) {
       const scoresPage = await scoresaberService.lookupPlayerScores({
         playerId: player.id,
@@ -606,7 +600,7 @@ export class PlayerService {
             await ScoreService.trackScoreSaberScore(
               score.score,
               score.leaderboard,
-              player.id,
+              playerToken,
               false
             )
           ) {

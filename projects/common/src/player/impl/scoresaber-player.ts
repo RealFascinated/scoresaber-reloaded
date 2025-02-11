@@ -5,31 +5,11 @@ import Player, { StatisticChange } from "../player";
 /**
  * A ScoreSaber player.
  */
-export default interface ScoreSaberPlayer extends Player {
-  /**
-   * The bio of the player.
-   */
-  bio: ScoreSaberBio;
-
-  /**
-   * The amount of pp the player has.
-   */
-  pp: number;
-
+export default interface ScoreSaberPlayer extends ScoreSaberPlayerBase {
   /**
    * The change in pp compared to yesterday.
    */
   statisticChange: StatisticChange | undefined;
-
-  /**
-   * The role the player has.
-   */
-  role: string | undefined;
-
-  /**
-   * The badges the player has.
-   */
-  badges: ScoreSaberBadge[];
 
   /**
    * The statistics for this player.
@@ -40,11 +20,6 @@ export default interface ScoreSaberPlayer extends Player {
    * The best rank seen for this player.
    */
   peakRank?: PeakRank;
-
-  /**
-   * The permissions the player has.
-   */
-  permissions: number;
 
   /**
    * The pages for the players positions.
@@ -62,6 +37,39 @@ export default interface ScoreSaberPlayer extends Player {
   accBadges: AccBadges;
 
   /**
+   * Whether the player is having their
+   * statistics being tracked or not.
+   */
+  isBeingTracked?: boolean;
+}
+
+export interface ScoreSaberPlayerBase extends Player {
+  /**
+   * The bio of the player.
+   */
+  bio: ScoreSaberBio;
+
+  /**
+   * The amount of pp the player has.
+   */
+  pp: number;
+
+  /**
+   * The role the player has.
+   */
+  role: string | undefined;
+
+  /**
+   * The badges the player has.
+   */
+  badges: ScoreSaberBadge[];
+
+  /**
+   * The permissions the player has.
+   */
+  permissions: number;
+
+  /**
    * Whether the player is banned or not.
    */
   banned: boolean;
@@ -70,13 +78,7 @@ export default interface ScoreSaberPlayer extends Player {
    * Whether the player is inactive or not.
    */
   inactive: boolean;
-
-  /**
-   * Whether the player is having their
-   * statistics being tracked or not.
-   */
-  isBeingTracked?: boolean;
-}
+};
 
 /**
  * A bio of a player.

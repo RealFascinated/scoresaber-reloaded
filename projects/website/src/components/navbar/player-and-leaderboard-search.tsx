@@ -22,7 +22,7 @@ import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils
 import { useSearch } from "@/components/providers/search-provider";
 import { truncateText } from "@ssr/common/string-utils";
 import { CommandLoading } from "cmdk";
-import ScoreSaberPlayerToken from "@ssr/common/types/token/scoresaber/player";
+import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
 import { StarIcon } from "@heroicons/react/24/solid";

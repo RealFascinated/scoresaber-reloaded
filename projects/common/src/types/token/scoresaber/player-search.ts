@@ -1,4 +1,4 @@
-import ScoreSaberPlayerToken from "./player";
+import { ScoreSaberPlayerToken } from "./player";
 
 export interface ScoreSaberPlayerSearchToken {
   /**

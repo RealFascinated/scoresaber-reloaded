@@ -1,5 +1,5 @@
 import ScoreSaberMetadataToken from "./metadata";
-import ScoreSaberPlayerToken from "./player";
+import { ScoreSaberPlayerToken } from "./player";
 
 export interface ScoreSaberPlayersPageToken {
   /**

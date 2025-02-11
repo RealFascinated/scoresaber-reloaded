@@ -16,6 +16,7 @@ import {
 } from "@ssr/common/token-creators";
 import { Metadata } from "@ssr/common/types/metadata";
 import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/leaderboard";
+import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score";
 import { getDaysAgoDate } from "@ssr/common/utils/time-utils";
 import { NotFoundError } from "elysia";
@@ -24,7 +25,7 @@ import { scoreToObject } from "../../common/score/score.util";
 import BeatLeaderService from "../beatleader.service";
 import CacheService, { ServiceCache } from "../cache.service";
 import LeaderboardService from "../leaderboard.service";
-import { PlayerService } from "../player.service";
+import ScoreSaberService from "../scoresaber.service";
 import { PreviousScoresService } from "./previous-scores.service";
 
 export class ScoreService {
@@ -210,23 +211,17 @@ export class ScoreService {
   public static async trackScoreSaberScore(
     scoreToken: ScoreSaberScoreToken,
     leaderboardToken: ScoreSaberLeaderboardToken,
-    playerId?: string,
+    player: ScoreSaberPlayerToken,
     log: boolean = true
   ) {
     const before = performance.now();
-    playerId =
-      (scoreToken.leaderboardPlayerInfo && scoreToken.leaderboardPlayerInfo.id) || playerId;
-    if (!playerId) {
-      console.error(`Player ID is undefined, unable to track score: ${scoreToken.id}`);
-      return;
-    }
-
-    const playerName =
-      (scoreToken.leaderboardPlayerInfo && scoreToken.leaderboardPlayerInfo.name) || "Unknown";
     const leaderboard = getScoreSaberLeaderboardFromToken(leaderboardToken);
-    const score = getScoreSaberScoreFromToken(scoreToken, leaderboard, playerId);
+    const score = getScoreSaberScoreFromToken(scoreToken, leaderboard, player.id);
 
-    if (await ScoreService.scoreExists(playerId, leaderboard, score)) {
+    if (await ScoreService.scoreExists(player.id, leaderboard, score)) {
+      Logger.info(
+        `Score "${score.scoreId}" for "${player.name}"(${player.id}) already exists, skipping`
+      );
       return false;
     }
 
@@ -236,12 +231,12 @@ export class ScoreService {
 
     // Remove the old score and create a new previous score
     const previousScore = await ScoreSaberScoreModel.findOne({
-      playerId: playerId,
+      playerId: player.id,
       leaderboardId: leaderboard.id,
     });
     if (previousScore) {
       await ScoreSaberScoreModel.deleteOne({
-        playerId: playerId,
+        playerId: player.id,
         leaderboardId: leaderboard.id,
       });
 
@@ -249,15 +244,19 @@ export class ScoreService {
       const { _id, ...rest } = previousScore.toObject();
       await ScoreSaberPreviousScoreModel.create(rest);
 
-      Logger.info(
-        `Moved old score "${previousScore.scoreId}" to previous-scores for "${playerName}"(${playerId}) in ${(performance.now() - before).toFixed(0)}ms`
-      );
+      if (log) {
+        Logger.info(
+          `Moved old score "${previousScore.scoreId}" to previous-scores for "${player.name}"(${player.id}) in ${(performance.now() - before).toFixed(0)}ms`
+        );
+      }
     }
 
     await ScoreSaberScoreModel.create(score);
-    Logger.info(
-      `Tracked ScoreSaber score "${score.scoreId}" for "${playerName}"(${playerId}) in ${(performance.now() - before).toFixed(0)}ms`
-    );
+    if (log) {
+      Logger.info(
+        `Tracked ScoreSaber score "${score.scoreId}" for "${player.name}"(${player.id}) in ${(performance.now() - before).toFixed(0)}ms`
+      );
+    }
     return true;
   }
 
@@ -306,7 +305,7 @@ export class ScoreService {
       const { leaderboard, beatsaver } = leaderboardResponse;
 
       try {
-        const player = await PlayerService.getPlayer(score.playerId);
+        const player = await ScoreSaberService.getCachedPlayer(score.playerId, true);
         if (player) {
           score.playerInfo = {
             id: player.id,
@@ -393,7 +392,9 @@ export class ScoreService {
     }
 
     if (options?.insertPlayerInfo) {
-      const player = await PlayerService.getPlayer(score.playerId).catch(() => undefined);
+      const player = await ScoreSaberService.getCachedPlayer(score.playerId, true).catch(
+        () => undefined
+      );
       if (player) {
         score.playerInfo = {
           id: player.id,

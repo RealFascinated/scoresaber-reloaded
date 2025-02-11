@@ -1,7 +1,7 @@
 import { ScoreSaberBadgeToken } from "./badge";
 import ScoreSaberScoreStatsToken from "./score-stats";
 
-export default interface ScoreSaberPlayerToken {
+export type ScoreSaberPlayerToken = {
   /**
    * The ID of the player.
    */
@@ -81,4 +81,4 @@ export default interface ScoreSaberPlayerToken {
    * The date the player joined ScoreSaber.
    */
   firstSeen: string;
-}
+};

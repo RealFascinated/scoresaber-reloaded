@@ -24,7 +24,13 @@ import { PlayerService } from "./player.service";
 import { ScoreService } from "./score/score.service";
 import { sendScoreNotification } from "../common/score/score.util";
 import { DiscordChannels } from "../bot/bot";
-
+import {
+  scoreSaberCachedPlayerToObject,
+  ScoreSaberPlayerCacheDocument,
+  ScoreSaberPlayerCacheModel,
+} from "@ssr/common/model/scoresaber-player-cache";
+import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
+import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/leaderboard-player-info";
 export default class ScoreSaberService {
   /**
    * Notifies the number one score in Discord.
@@ -34,6 +40,7 @@ export default class ScoreSaberService {
    */
   public static async notifyScore(
     playerScore: ScoreSaberPlayerScoreToken,
+    player: ScoreSaberPlayerToken,
     mode: "numberOne" | "top50AllTime" | "scoreFloodGate"
   ) {
     // Only notify in production
@@ -55,6 +62,7 @@ export default class ScoreSaberService {
         DiscordChannels.scoreFloodGateFeed,
         score,
         leaderboard,
+        player,
         `${playerInfo.name} just set a rank #${score.rank}!`
       );
     }
@@ -69,6 +77,7 @@ export default class ScoreSaberService {
         DiscordChannels.numberOneFeed,
         score,
         leaderboard,
+        player,
         `${playerInfo.name} just set a #1!`
       );
       // No need to check this for all scores, so we only check if the score is top 50
@@ -80,6 +89,7 @@ export default class ScoreSaberService {
           DiscordChannels.top50Feed,
           score,
           leaderboard,
+          player,
           `${playerInfo.name} just set a new top 50 score!`
         );
       }
@@ -185,6 +195,90 @@ export default class ScoreSaberService {
   }
 
   /**
+   * Gets a cached ScoreSaber player token.
+   *
+   * @param id the player's id
+   * @param cacheOnly whether to only check the cache
+   * @returns the player token
+   */
+  public static async getCachedPlayer(
+    id: string,
+    cacheOnly: boolean = false
+  ): Promise<ScoreSaberPlayerToken> {
+    if (await ScoreSaberPlayerCacheModel.exists({ _id: id })) {
+      const player = await ScoreSaberPlayerCacheModel.findOne({ _id: id }).lean();
+
+      // Check the cache status of the player
+      if (
+        player &&
+        ((player.lastUpdated &&
+          // If the player was updated less than 6 hours ago, return the cached player
+          new Date().getTime() - player.lastUpdated.getTime() < 6 * 60 * 60 * 1000) ||
+          // If the player was last updated more than 3 days ago, update the player reguardless of the cache only flag
+          (cacheOnly &&
+            new Date().getTime() - player.lastUpdated.getTime() < 3 * 24 * 60 * 60 * 1000))
+      ) {
+        return scoreSaberCachedPlayerToObject(player as unknown as ScoreSaberPlayerCacheDocument);
+      }
+    }
+
+    // Fetch the player from the API
+    const player = await scoresaberService.lookupPlayer(id);
+    if (!player) {
+      throw new NotFoundError(`Player "${id}" not found`);
+    }
+
+    // Update the player in the cache
+    return scoreSaberCachedPlayerToObject(
+      (await ScoreSaberPlayerCacheModel.findOneAndUpdate(
+        { _id: id },
+        {
+          ...player,
+          lastUpdated: new Date(),
+        },
+        {
+          upsert: true,
+          new: true,
+          setDefaultsOnInsert: true,
+        }
+      ).lean()) as unknown as ScoreSaberPlayerCacheDocument
+    );
+  }
+
+  /**
+   * Updates the player token inside the player cache.
+   *
+   * @param player the player to update
+   */
+  public static async updatePlayerCache(
+    playerToken: ScoreSaberPlayerToken | ScoreSaberLeaderboardPlayerInfoToken
+  ): Promise<ScoreSaberPlayerToken> {
+    const player = await this.getCachedPlayer(playerToken.id, true);
+
+    // Check if the player has changed
+    if (playerToken.name !== player.name || playerToken.country !== player.country) {
+      return scoreSaberCachedPlayerToObject(
+        (await ScoreSaberPlayerCacheModel.findOneAndUpdate(
+          { _id: player.id },
+          {
+            $set: {
+              name: playerToken.name,
+              country: playerToken.country,
+            },
+          },
+          {
+            upsert: true,
+            new: true,
+            setDefaultsOnInsert: true,
+          }
+        ).lean()) as unknown as ScoreSaberPlayerCacheDocument
+      );
+    }
+
+    return player;
+  }
+
+  /**
    * Gets the player's statistic history.
    *
    * @param playerId the player's id
@@ -244,9 +338,9 @@ export default class ScoreSaberService {
           leaderboardScores.metadata.itemsPerPage
         );
 
-        const scorePromises = leaderboardScores.playerScores.map(async token => {
+        for (const playerScore of leaderboardScores.playerScores) {
           const leaderboardResponse = await LeaderboardService.getLeaderboard(
-            token.leaderboard.id + "",
+            playerScore.leaderboard.id + "",
             {
               includeBeatSaver: true,
               beatSaverType: DetailType.FULL,
@@ -257,21 +351,18 @@ export default class ScoreSaberService {
             return undefined;
           }
           const { leaderboard, beatsaver } = leaderboardResponse;
-          let score = getScoreSaberScoreFromToken(token.score, leaderboard, playerId);
+          let score = getScoreSaberScoreFromToken(playerScore.score, leaderboard, playerId);
           if (!score) {
             return undefined;
           }
 
           score = await ScoreService.insertScoreData(score, leaderboard);
-          return {
+          scores.push({
             score: score,
             leaderboard: leaderboard,
             beatSaver: beatsaver,
-          } as PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>;
-        });
-
-        const resolvedScores = (await Promise.all(scorePromises)).filter(s => s !== undefined);
-        scores.push(...resolvedScores);
+          } as PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>);
+        }
 
         return {
           scores: scores,

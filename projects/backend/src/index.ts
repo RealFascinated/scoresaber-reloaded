@@ -51,12 +51,17 @@ Logger.info("Connected to MongoDB :)");
 // Connect to websockets
 connectScoresaberWebsocket({
   onScore: async score => {
-    await ScoreService.trackScoreSaberScore(score.score, score.leaderboard);
+    // Fetch player info
+    const player = await ScoreSaberService.updatePlayerCache(score.score.leaderboardPlayerInfo);
+
+    // Track score
+    await ScoreService.trackScoreSaberScore(score.score, score.leaderboard, player);
     await PlayerService.updatePlayerScoresSet(score);
 
-    await ScoreSaberService.notifyScore(score, "scoreFloodGate");
-    await ScoreSaberService.notifyScore(score, "numberOne");
-    await ScoreSaberService.notifyScore(score, "top50AllTime");
+    // Notify
+    await ScoreSaberService.notifyScore(score, player, "scoreFloodGate");
+    await ScoreSaberService.notifyScore(score, player, "numberOne");
+    await ScoreSaberService.notifyScore(score, player, "top50AllTime");
   },
 });
 connectBeatLeaderWebsocket({

@@ -27,12 +27,6 @@ export class Player {
   public _id!: string;
 
   /**
-   * The player's name.
-   */
-  @prop()
-  public name?: string;
-
-  /**
    * The player's statistic history.
    */
   @prop()
