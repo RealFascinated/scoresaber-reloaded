@@ -92,7 +92,7 @@ export async function sendScoreNotification(
         },
         {
           name: "Modifiers",
-          value: `${score.modifiers.join(", ") ?? "None"}`,
+          value: `${score.modifiers.length > 0 ? score.modifiers.join(", ") : "None"}`,
           inline: true,
         },
         {
