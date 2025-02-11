@@ -159,7 +159,7 @@ export default class ScoresController {
     };
   }
 
-  @Get("/friends/:leaderboardId/:page", {
+  @Get("/friends/leaderboard/:leaderboardId/:page", {
     config: {},
     tags: ["scores"],
     params: t.Object({
