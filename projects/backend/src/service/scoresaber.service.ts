@@ -34,7 +34,7 @@ export default class ScoreSaberService {
    */
   public static async notifyScore(
     playerScore: ScoreSaberPlayerScoreToken,
-    mode: "numberOne" | "top50AllTime"
+    mode: "numberOne" | "top50AllTime" | "scoreFloodGate"
   ) {
     // Only notify in production
     if (!isProduction()) {
@@ -49,6 +49,15 @@ export default class ScoreSaberService {
       scoreToken.leaderboardPlayerInfo.id
     );
     const playerInfo = score.playerInfo;
+
+    if (mode === "scoreFloodGate") {
+      await sendScoreNotification(
+        DiscordChannels.scoreFloodGateFeed,
+        score,
+        leaderboard,
+        `${playerInfo.name} just set a #${score.rank}!`
+      );
+    }
 
     // Not ranked
     if (leaderboard.stars <= 0) {

@@ -14,6 +14,9 @@ import { EmbedBuilder } from "discord.js";
 import { formatPp } from "@ssr/common/utils/number-utils";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { formatScoreAccuracy } from "@ssr/common/utils/score.util";
+import { fetchWithCache } from "../cache.util";
+import CacheService from "../../service/cache.service";
+import { ServiceCache } from "../../service/cache.service";
 
 /**
  * Converts a database score to a ScoreSaberScore.
@@ -47,7 +50,13 @@ export async function sendScoreNotification(
     leaderboard.difficulty.characteristic,
     DetailType.BASIC
   );
-  const player = await scoresaberService.lookupPlayer(score.playerId);
+  const player = await fetchWithCache(
+    CacheService.getCache(ServiceCache.Players),
+    `scoresaber-player:${score.playerId}`,
+    async () => {
+      return await scoresaberService.lookupPlayer(score.playerId);
+    }
+  );
   if (!player) {
     return;
   }

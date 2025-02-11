@@ -54,6 +54,7 @@ connectScoresaberWebsocket({
     await ScoreService.trackScoreSaberScore(score.score, score.leaderboard);
     await PlayerService.updatePlayerScoresSet(score);
 
+    await ScoreSaberService.notifyScore(score, "scoreFloodGate");
     await ScoreSaberService.notifyScore(score, "numberOne");
     await ScoreSaberService.notifyScore(score, "top50AllTime");
   },
