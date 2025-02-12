@@ -78,5 +78,10 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withSentryConfig(nextConfig);
+export default withSentryConfig(nextConfig, {
+  sourcemaps: {
+    disable: true,
+  },
+  telemetry: false,
+});
 
