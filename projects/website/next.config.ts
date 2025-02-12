@@ -8,7 +8,7 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   output: isProduction() ? "standalone" : undefined,
   cacheMaxMemorySize: 0,
-  outputFileTracingRoot: path.join(__dirname, "../../"),
+  outputFileTracingRoot: !isProduction() ? path.join(__dirname, "../../") : undefined,
   experimental: {
     turbo: {},
     optimizePackageImports: [
