@@ -1,6 +1,7 @@
 import { format } from "@formkit/tempo";
 import type { NextConfig } from "next";
 import { isProduction } from "@/common/website-utils";
+import { withSentryConfig } from "@sentry/nextjs";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
@@ -77,4 +78,5 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withSentryConfig(nextConfig);
+
