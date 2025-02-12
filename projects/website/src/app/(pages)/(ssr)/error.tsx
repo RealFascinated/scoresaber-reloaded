@@ -3,15 +3,8 @@
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import Link from "next/link";
 import { DiscordButton } from "@/components/social/discord-button";
-import { useEffect } from "react";
-import * as Sentry from "@sentry/nextjs";
 
-export default function Error({ error }: { error: Error & { digest?: string } }) {
-  useEffect(() => {
-    // Log the error to Sentry
-    Sentry.captureException(error);
-  }, [error]);
-
+export default function Error() {
   return (
     <div className="flex flex-col items-center mt-10 text-center w-full">
       <GlobeAmericasIcon className="h-24 w-24 text-red-500" />
