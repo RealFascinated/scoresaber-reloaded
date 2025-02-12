@@ -31,7 +31,8 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     "tailwind.config.ts",
-    "src/components/ui/toaster.tsx.d"
+    "src/components/ui/toaster.tsx.d",
+    "../../sentry.client.config.ts"
   ],
   "exclude": ["node_modules"]
 }
