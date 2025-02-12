@@ -4,6 +4,7 @@ import Metric from "../metrics/metric";
 import TrackedPlayersMetric from "../metrics/impl/tracked-players";
 import TrackedScoresMetric from "../metrics/impl/tracked-scores";
 import { MetricValueModel } from "../common/model/metric";
+import UniqueDailyPlayersMetric from "../metrics/impl/unique-daily-players";
 
 const influxClient = new InfluxDB({
   url: process.env.INFLUXDB_URL!,
@@ -14,6 +15,7 @@ const writeApi = influxClient.getWriteApi(process.env.INFLUXDB_ORG!, process.env
 export enum MetricType {
   TRACKED_SCORES = "tracked-scores",
   TRACKED_PLAYERS = "tracked-players",
+  UNIQUE_DAILY_PLAYERS = "unique-daily-players",
 }
 
 export default class MetricsService {
@@ -26,6 +28,7 @@ export default class MetricsService {
   constructor() {
     this.registerMetric(new TrackedScoresMetric());
     this.registerMetric(new TrackedPlayersMetric());
+    this.registerMetric(new UniqueDailyPlayersMetric());
     this.initMetrics();
   }
 

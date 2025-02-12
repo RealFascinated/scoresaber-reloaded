@@ -36,7 +36,7 @@ export class ScoreHistoryService {
       .getPage(page, async () => {
         const toReturn: PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>[] = [];
         for (const scoreToken of scores) {
-          let score = scoreToken.toObject() as ScoreSaberScore;
+          let score = scoreToken.toObject() as unknown as ScoreSaberScore;
 
           const leaderboardResponse = await LeaderboardService.getLeaderboard(leaderboardId);
           if (leaderboardResponse == undefined) {

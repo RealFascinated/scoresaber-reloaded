@@ -14,3 +14,4 @@ export default class TrackedPlayersMetric extends NumberMetric {
     return this.getPointBase().intField("value", await PlayerModel.estimatedDocumentCount());
   }
 }
+
