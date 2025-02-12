@@ -5,7 +5,7 @@ RUN apt update
 RUN apt install -y curl
 
 # Set the environment
-ENV NODE_ENV production
+ENV NEXT_PUBLIC_APP_ENV production
 
 ARG GIT_REV
 ENV GIT_REV=${GIT_REV}
