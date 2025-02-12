@@ -98,7 +98,7 @@ export default async function PlayerPage(props: Props) {
   const { player, sort, page, search } = await getPlayerData(props);
   if (player == undefined) {
     return (
-      <main className="w-full flex justify-center mt-8">
+      <main className="w-full flex justify-center mt-2">
         <NotFound
           title="Player Not Found"
           description="The player you were looking for could not be found"
