@@ -1,3 +1,4 @@
+import { AutoIncrementID } from "@typegoose/auto-increment";
 import {
   getModelForClass,
   modelOptions,
@@ -8,9 +9,8 @@ import {
 } from "@typegoose/typegoose";
 import { Document } from "mongoose";
 import BeatSaverAuthor from "./author";
-import BeatSaverMapVersion from "./map-version";
 import BeatSaverMapMetadata from "./map-metadata";
-import { AutoIncrementID } from "@typegoose/auto-increment";
+import BeatSaverMapVersion from "./map-version";
 
 /**
  * The model for a BeatSaver map.

@@ -1,12 +1,12 @@
 import { ScoreModeEnum } from "@/components/score/score-mode";
-import useDatabase from "../use-database";
-import { useLiveQuery } from "dexie-react-hooks";
-import { useQuery } from "@tanstack/react-query";
-import { Page, Pagination } from "@ssr/common/pagination";
-import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import { ssrApi } from "@ssr/common/utils/ssr-api";
+import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
+import { Page, Pagination } from "@ssr/common/pagination";
 import { Metadata } from "@ssr/common/types/metadata";
+import { ssrApi } from "@ssr/common/utils/ssr-api";
+import { useQuery } from "@tanstack/react-query";
+import { useLiveQuery } from "dexie-react-hooks";
+import useDatabase from "../use-database";
 
 const createPage = (items: ScoreSaberScore[], metadata: Metadata): Page<ScoreSaberScore> => ({
   items,

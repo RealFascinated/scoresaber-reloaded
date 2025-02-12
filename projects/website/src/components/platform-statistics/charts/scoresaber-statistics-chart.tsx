@@ -1,13 +1,12 @@
 "use client";
 
-import React from "react";
-import { formatNumberWithCommas, formatPp, isWholeNumber } from "@ssr/common/utils/number-utils";
-import GenericStatisticChart from "@/components/platform-statistics/generic-statistic-chart";
-import { StatisticsType } from "@ssr/common/model/statistics/statistic-type";
 import { DatasetConfig } from "@/common/chart/types";
 import { Colors } from "@/common/colors";
-import Link from "next/link";
+import GenericStatisticChart from "@/components/platform-statistics/generic-statistic-chart";
 import { Button } from "@/components/ui/button";
+import { StatisticsType } from "@ssr/common/model/statistics/statistic-type";
+import { formatNumberWithCommas, formatPp, isWholeNumber } from "@ssr/common/utils/number-utils";
+import Link from "next/link";
 
 type Props = {
   statistics: StatisticsType;

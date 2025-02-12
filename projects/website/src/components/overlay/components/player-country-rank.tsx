@@ -1,8 +1,8 @@
-import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import CountryFlag from "@/components/country-flag";
-import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { DailyChange } from "@/components/statistic/daily-change";
+import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerStatChange } from "@ssr/common/player/player-stat-change";
+import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 
 type OverlayPlayerRankProps = {
   /**

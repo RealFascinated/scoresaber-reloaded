@@ -2,11 +2,11 @@ import { TopScoresResponse } from "@ssr/common/response/top-scores-response";
 import { Timeframe } from "@ssr/common/timeframe";
 import { NotFoundError, t } from "elysia";
 import { Controller, Get } from "elysia-decorators";
-import BeatLeaderService from "../service/beatleader.service";
 import SuperJSON from "superjson";
-import { ScoreService } from "../service/score/score.service";
-import { ScoreHistoryService } from "../service/score/score-history.service";
+import BeatLeaderService from "../service/beatleader.service";
 import { FriendScoresService } from "../service/score/friend-scores.service";
+import { ScoreHistoryService } from "../service/score/score-history.service";
+import { ScoreService } from "../service/score/score.service";
 import ScoreSaberService from "../service/scoresaber.service";
 
 @Controller("/scores")

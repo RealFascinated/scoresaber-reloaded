@@ -1,5 +1,5 @@
-import NextLink from "next/link";
 import { clsx } from "clsx";
+import NextLink from "next/link";
 
 type Props = {
   /**

@@ -1,9 +1,9 @@
 "use client";
 
+import { isServer } from "@ssr/common/utils/utils";
 import { createContext, ReactNode, useEffect, useState } from "react";
 import Database, { getDatabase } from "../../common/database/database";
 import FullscreenLoader from "./fullscreen-loader";
-import { isServer } from "@ssr/common/utils/utils";
 
 /**
  * The context for the database. This is used to access the database from within the app.

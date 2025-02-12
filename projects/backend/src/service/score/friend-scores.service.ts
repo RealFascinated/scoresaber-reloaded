@@ -1,18 +1,18 @@
+import { DetailType } from "@ssr/common/detail-type";
+import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import {
   ScoreSaberScore,
   ScoreSaberScoreModel,
 } from "@ssr/common/model/score/impl/scoresaber-score";
 import { Page, Pagination } from "@ssr/common/pagination";
+import { PlayerScore } from "@ssr/common/score/player-score";
 import { NotFoundError } from "elysia";
 import { fetchWithCache } from "../../common/cache.util";
 import { scoreToObject } from "../../common/score/score.util";
 import CacheService, { ServiceCache } from "../cache.service";
+import LeaderboardService from "../leaderboard.service";
 import { PlayerService } from "../player.service";
 import { ScoreService } from "./score.service";
-import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import LeaderboardService from "../leaderboard.service";
-import { PlayerScore } from "@ssr/common/score/player-score";
-import { DetailType } from "@ssr/common/detail-type";
 
 const FRIEND_SCORES_LIMIT = 100;
 

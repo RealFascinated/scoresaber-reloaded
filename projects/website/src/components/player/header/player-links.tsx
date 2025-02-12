@@ -1,11 +1,11 @@
-import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import { ReactNode } from "react";
-import Link from "next/link";
-import { FaTwitch } from "react-icons/fa";
-import Tooltip from "@/components/tooltip";
 import BeatLeaderLogo from "@/components/logos/beatleader-logo";
 import SteamLogo from "@/components/logos/logos/steam-logo";
+import Tooltip from "@/components/tooltip";
+import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { ssrConfig } from "config";
+import Link from "next/link";
+import { ReactNode } from "react";
+import { FaTwitch } from "react-icons/fa";
 
 type PlayerLinksProps = {
   url: string;

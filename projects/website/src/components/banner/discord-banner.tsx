@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { FaDiscord } from "react-icons/fa";
 import { usePathname } from "next/navigation";
+import { FaDiscord } from "react-icons/fa";
 
 export default function DiscordBanner() {
   const pathName = usePathname();

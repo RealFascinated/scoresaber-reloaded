@@ -1,27 +1,28 @@
-import { Playlist } from "@ssr/common/playlist/playlist";
-import LeaderboardService from "./leaderboard.service";
-import { NotFoundError } from "@ssr/common/error/not-found-error";
-import { formatDateMinimal } from "@ssr/common/utils/time-utils";
-import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
-import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
-import { fetchWithCache } from "../common/cache.util";
-import CacheService, { ServiceCache } from "./cache.service";
-import { PlayerService } from "./player.service";
-import ScoreSaberService from "./scoresaber.service";
-import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
-import { capitalizeFirstLetter, truncateText } from "@ssr/common/string-utils";
-import { InternalServerError } from "@ssr/common/error/internal-server-error";
+import { Config } from "@ssr/common/config";
+import { env } from "@ssr/common/env";
 import { BadRequestError } from "@ssr/common/error/bad-request-error";
+import { InternalServerError } from "@ssr/common/error/internal-server-error";
+import { NotFoundError } from "@ssr/common/error/not-found-error";
+import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
+import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
+import { Playlist } from "@ssr/common/playlist/playlist";
+import { parseCustomRankedPlaylistSettings } from "@ssr/common/playlist/ranked/custom-ranked-playlist";
+import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
+import { parseSnipePlaylistSettings } from "@ssr/common/snipe/snipe-playlist-utils";
+import { capitalizeFirstLetter, truncateText } from "@ssr/common/string-utils";
+import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
+import { formatDateMinimal } from "@ssr/common/utils/time-utils";
+import { fetchWithCache } from "../common/cache.util";
 import {
   generateCustomRankedPlaylistImage,
   generatePlaylistImage,
   generateSnipePlaylistImage,
 } from "../common/playlist.util";
-import { parseSnipePlaylistSettings } from "@ssr/common/snipe/snipe-playlist-utils";
+import CacheService, { ServiceCache } from "./cache.service";
+import LeaderboardService from "./leaderboard.service";
+import { PlayerService } from "./player.service";
 import { ScoreService } from "./score/score.service";
-import { Config } from "@ssr/common/config";
-import { parseCustomRankedPlaylistSettings } from "@ssr/common/playlist/ranked/custom-ranked-playlist";
+import ScoreSaberService from "./scoresaber.service";
 
 export type SnipeType = "top" | "recent";
 
@@ -142,7 +143,7 @@ export default class PlaylistService {
       return new Playlist(
         "scoresaber-snipe-" + toSnipe,
         `Snipe - ${truncateText(toSnipePlayer.name, 16)} (${capitalizeFirstLetter(settings.sort)})`,
-        Config.websiteName,
+        env.NEXT_PUBLIC_WEBSITE_NAME,
         await generateSnipePlaylistImage(settings, toSnipePlayer),
         scores
           .sort((a, b) => {
@@ -203,7 +204,7 @@ export default class PlaylistService {
     return this.createScoreSaberPlaylist(
       "scoresaber-ranked-maps",
       `ScoreSaber Ranked Maps (${formatDateMinimal(new Date())})`,
-      Config.websiteName,
+      env.NEXT_PUBLIC_WEBSITE_NAME,
       maps,
       highlightedIds,
       await generatePlaylistImage("SSR", {
@@ -241,7 +242,7 @@ export default class PlaylistService {
     return this.createScoreSaberPlaylist(
       "scoresaber-qualified-maps",
       `ScoreSaber Qualified Maps (${formatDateMinimal(new Date())})`,
-      Config.websiteName,
+      env.NEXT_PUBLIC_WEBSITE_NAME,
       maps,
       highlightedIds,
       await generatePlaylistImage("SSR", {
@@ -286,7 +287,7 @@ export default class PlaylistService {
     return this.createScoreSaberPlaylist(
       "scoresaber-ranking-queue-maps",
       `ScoreSaber Ranking Queue Maps (${formatDateMinimal(new Date())})`,
-      Config.websiteName,
+      env.NEXT_PUBLIC_WEBSITE_NAME,
       maps,
       highlightedIds,
       await generatePlaylistImage("SSR", {

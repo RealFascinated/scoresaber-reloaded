@@ -1,8 +1,8 @@
-import { Metadata } from "next";
 import RankingData from "@/components/ranking/ranking-data";
-import { ScoreSaberPlayersPageToken } from "@ssr/common/types/token/scoresaber/players-page";
+import { env } from "@ssr/common/env";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
-import { Config } from "@ssr/common/config";
+import { ScoreSaberPlayersPageToken } from "@ssr/common/types/token/scoresaber/players-page";
+import { Metadata } from "next";
 
 export const revalidate = 300; // Revalidate every 5 minutes
 
@@ -52,7 +52,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
       title: UNKNOWN_PAGE.title,
       description: UNKNOWN_PAGE.description,
       openGraph: {
-        siteName: Config.websiteName,
+        siteName: env.NEXT_PUBLIC_WEBSITE_NAME,
         title: UNKNOWN_PAGE.title,
         description: UNKNOWN_PAGE.description,
       },
@@ -63,7 +63,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   return {
     title: title,
     openGraph: {
-      siteName: Config.websiteName,
+      siteName: env.NEXT_PUBLIC_WEBSITE_NAME,
       title: title,
       description: `
       Page: ${page}

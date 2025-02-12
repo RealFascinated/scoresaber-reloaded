@@ -1,8 +1,10 @@
+import { env } from "@ssr/common/env";
+
 /**
  * Gets if we're in production
  */
 export function isProduction() {
-  return process.env.NODE_ENV === "production";
+  return env.NEXT_PUBLIC_APP_ENV === "production";
 }
 
 /**

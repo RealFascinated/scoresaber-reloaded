@@ -1,8 +1,8 @@
 import { PlayerStatisticHistory } from "src/player/player-statistic-history";
 import { PlayerScore } from "src/score/player-score";
 import SuperJSON from "superjson";
-import { Config } from "../config";
 import { DetailType } from "../detail-type";
+import { env } from "../env";
 import { ScoreSaberLeaderboard } from "../model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "../model/score/impl/scoresaber-score";
 import { GamePlatform } from "../model/statistics/game-platform";
@@ -38,7 +38,7 @@ class SSRApi {
     characteristic: MapCharacteristic
   ) {
     const response = await Request.get<string>(
-      `${Config.apiUrl}/beatsaver/map/${hash}/${difficulty}/${characteristic}`
+      `${env.NEXT_PUBLIC_API_URL}/beatsaver/map/${hash}/${difficulty}/${characteristic}`
     );
     if (response === undefined) {
       return undefined;
@@ -59,7 +59,7 @@ class SSRApi {
     characteristic: MapCharacteristic
   ) {
     const response = await Request.get<string>(
-      `${Config.apiUrl}/leaderboard/by-hash/${hash}/${difficulty}/${characteristic}`,
+      `${env.NEXT_PUBLIC_API_URL}/leaderboard/by-hash/${hash}/${difficulty}/${characteristic}`,
       {
         returns: "text",
         searchParams: {
@@ -79,13 +79,16 @@ class SSRApi {
    * @param id the id for the leaderboard
    */
   async fetchLeaderboard(id: string, type: DetailType = DetailType.BASIC) {
-    const response = await Request.get<string>(`${Config.apiUrl}/leaderboard/by-id/${id}`, {
-      returns: "text",
-      searchParams: {
-        type: type,
-        superJson: true,
-      },
-    });
+    const response = await Request.get<string>(
+      `${env.NEXT_PUBLIC_API_URL}/leaderboard/by-id/${id}`,
+      {
+        returns: "text",
+        searchParams: {
+          type: type,
+          superJson: true,
+        },
+      }
+    );
     if (response === undefined) {
       return undefined;
     }
@@ -99,7 +102,7 @@ class SSRApi {
    */
   async getPlatformStatistics(platform: GamePlatform) {
     return await Request.get<{ statistics: StatisticsType }>(
-      `${Config.apiUrl}/statistics/${platform}`
+      `${env.NEXT_PUBLIC_API_URL}/statistics/${platform}`
     );
   }
 
@@ -111,7 +114,7 @@ class SSRApi {
    */
   async getPlayerPpBoundary(playerId: string, boundary: number = 1) {
     return await Request.get<PpBoundaryResponse>(
-      `${Config.apiUrl}/player/pp-boundary/${playerId}/${boundary}`
+      `${env.NEXT_PUBLIC_API_URL}/player/pp-boundary/${playerId}/${boundary}`
     );
   }
 
@@ -124,7 +127,7 @@ class SSRApi {
    */
   async getScoreCalendar(playerId: string, year: number, month: number) {
     return await Request.get<PlayedMapsCalendarResponse>(
-      `${Config.apiUrl}/player/history/calendar/${playerId}/${year}/${month}`
+      `${env.NEXT_PUBLIC_API_URL}/player/history/calendar/${playerId}/${year}/${month}`
     );
   }
 
@@ -136,7 +139,7 @@ class SSRApi {
    */
   async getPlayersAroundPlayer(playerId: string, type: AroundPlayer) {
     return await Request.get<AroundPlayerResponse>(
-      `${Config.apiUrl}/player/around/${playerId}/${type}`
+      `${env.NEXT_PUBLIC_API_URL}/player/around/${playerId}/${type}`
     );
   }
 
@@ -146,7 +149,7 @@ class SSRApi {
    * @param playerId the player id
    */
   async trackPlayer(playerId: string) {
-    await Request.post(`${Config.apiUrl}/player/track/${playerId}`);
+    await Request.post(`${env.NEXT_PUBLIC_API_URL}/player/track/${playerId}`);
   }
 
   /**
@@ -158,7 +161,7 @@ class SSRApi {
    */
   async getFriendLeaderboardScores(friendIds: string[], leaderboardId: string, page: number) {
     const response = await Request.get<string>(
-      `${Config.apiUrl}/scores/friends/leaderboard/${leaderboardId}/${page}`,
+      `${env.NEXT_PUBLIC_API_URL}/scores/friends/leaderboard/${leaderboardId}/${page}`,
       {
         returns: "text",
         searchParams: {
@@ -180,13 +183,16 @@ class SSRApi {
    * @param page the page
    */
   async getFriendScores(friendIds: string[], page: number) {
-    const response = await Request.get<string>(`${Config.apiUrl}/scores/friends/recent/${page}`, {
-      returns: "text",
-      searchParams: {
-        friendIds: friendIds.join(","),
-        superJson: true,
-      },
-    });
+    const response = await Request.get<string>(
+      `${env.NEXT_PUBLIC_API_URL}/scores/friends/recent/${page}`,
+      {
+        returns: "text",
+        searchParams: {
+          friendIds: friendIds.join(","),
+          superJson: true,
+        },
+      }
+    );
     if (response === undefined) {
       return undefined;
     }
@@ -208,7 +214,7 @@ class SSRApi {
       type?: DetailType;
     }
   ) {
-    const response = await Request.get<string>(`${Config.apiUrl}/player/${playerId}`, {
+    const response = await Request.get<string>(`${env.NEXT_PUBLIC_API_URL}/player/${playerId}`, {
       returns: "text",
       searchParams: {
         superJson: true,
@@ -229,12 +235,15 @@ class SSRApi {
    * @returns the score chart data
    */
   async getPlayerScoreChartData(playerId: string) {
-    const response = await Request.get<string>(`${Config.apiUrl}/player/score-chart/${playerId}`, {
-      returns: "text",
-      searchParams: {
-        superJson: true,
-      },
-    });
+    const response = await Request.get<string>(
+      `${env.NEXT_PUBLIC_API_URL}/player/score-chart/${playerId}`,
+      {
+        returns: "text",
+        searchParams: {
+          superJson: true,
+        },
+      }
+    );
     if (response === undefined) {
       return undefined;
     }
@@ -250,7 +259,7 @@ class SSRApi {
    */
   async fetchPlayerScoresHistory(playerId: string, leaderboardId: string, page: number) {
     const response = await Request.get<string>(
-      `${Config.apiUrl}/scores/history/${playerId}/${leaderboardId}/${page}`,
+      `${env.NEXT_PUBLIC_API_URL}/scores/history/${playerId}/${leaderboardId}/${page}`,
       {
         returns: "text",
         searchParams: {
@@ -270,7 +279,9 @@ class SSRApi {
    * @param scoreId the id of the score
    */
   async fetchScoreStats(scoreId: number) {
-    return Request.get<ScoreStatsResponse>(`${Config.apiUrl}/scores/scorestats/${scoreId}`);
+    return Request.get<ScoreStatsResponse>(
+      `${env.NEXT_PUBLIC_API_URL}/scores/scorestats/${scoreId}`
+    );
   }
 
   /**
@@ -283,7 +294,7 @@ class SSRApi {
    */
   async fetchPlayerScores<S, L>(id: string, page: number, sort: ScoreSort, search?: string) {
     return Request.get<PlayerScoresResponse<S, L>>(
-      `${Config.apiUrl}/scores/player/${id}/${page}/${sort}${search ? `?search=${search}` : ""}`
+      `${env.NEXT_PUBLIC_API_URL}/scores/player/${id}/${page}/${sort}${search ? `?search=${search}` : ""}`
     );
   }
 
@@ -296,7 +307,7 @@ class SSRApi {
    */
   async fetchLeaderboardScores<S, L>(leaderboardId: string, page: number, country?: string) {
     return Request.get<LeaderboardScoresResponse<S, L>>(
-      `${Config.apiUrl}/scores/leaderboard/${leaderboardId}/${page}`,
+      `${env.NEXT_PUBLIC_API_URL}/scores/leaderboard/${leaderboardId}/${page}`,
       {
         returns: "json",
         searchParams: {
@@ -314,13 +325,16 @@ class SSRApi {
    * @param endDate the end date
    */
   async getPlayerStatisticHistory(playerId: string, startDate: Date, endDate: Date) {
-    return Request.get<PlayerStatisticHistory>(`${Config.apiUrl}/player/history/${playerId}`, {
-      returns: "json",
-      searchParams: {
-        startDate: startDate.toISOString(),
-        endDate: endDate.toISOString(),
-      },
-    });
+    return Request.get<PlayerStatisticHistory>(
+      `${env.NEXT_PUBLIC_API_URL}/player/history/${playerId}`,
+      {
+        returns: "json",
+        searchParams: {
+          startDate: startDate.toISOString(),
+          endDate: endDate.toISOString(),
+        },
+      }
+    );
   }
 }
 

@@ -1,13 +1,16 @@
-import { format } from "@formkit/tempo";
-import type { NextConfig } from "next";
 import { isProduction } from "@/common/website-utils";
+import { format } from "@formkit/tempo";
 import { withSentryConfig } from "@sentry/nextjs";
+import type { NextConfig } from "next";
+import path from "path";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   output: isProduction() ? "standalone" : undefined,
   cacheMaxMemorySize: 0,
+  outputFileTracingRoot: path.join(__dirname, "../../"),
   experimental: {
+    turbo: {},
     optimizePackageImports: [
       "@ssr/common",
       "@radix-ui/react-checkbox",
@@ -84,4 +87,3 @@ export default withSentryConfig(nextConfig, {
   },
   telemetry: false,
 });
-

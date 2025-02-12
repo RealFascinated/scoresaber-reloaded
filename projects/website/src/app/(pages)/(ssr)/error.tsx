@@ -1,10 +1,10 @@
 "use client"; // Error components must be Client Components
 
-import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
-import Link from "next/link";
 import { DiscordButton } from "@/components/social/discord-button";
-import { useEffect } from "react";
+import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import * as Sentry from "@sentry/nextjs";
+import Link from "next/link";
+import { useEffect } from "react";
 
 export default function Error({ error }: { error: Error & { digest?: string } }) {
   useEffect(() => {

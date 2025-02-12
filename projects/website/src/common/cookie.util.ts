@@ -56,7 +56,6 @@ export async function setCookieValue(name: CookieName, value: string) {
  */
 export async function deleteCookieValue(name: CookieName) {
   if (isServer()) {
-
     const { cookies } = await import("next/headers");
     const cookieStore = await cookies();
     cookieStore.delete(name);

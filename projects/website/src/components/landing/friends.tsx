@@ -1,5 +1,5 @@
-import { UsersRound } from "lucide-react";
 import { cn } from "@/common/utils";
+import { UsersRound } from "lucide-react";
 
 export default function Friends() {
   return (

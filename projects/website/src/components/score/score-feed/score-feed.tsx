@@ -1,17 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { parseDate } from "@ssr/common/utils/time-utils";
-import Link from "next/link";
-import useWebSocket, { ReadyState } from "react-use-websocket";
+import Avatar from "@/components/avatar";
 import Score from "@/components/score/score";
 import {
   getScoreSaberLeaderboardFromToken,
   getScoreSaberScoreFromToken,
 } from "@ssr/common/token-creators";
-import { ScoreSaberWebsocketMessageToken } from "@ssr/common/types/token/scoresaber/websocket/websocket-message";
 import ScoreSaberPlayerScoreToken from "@ssr/common/types/token/scoresaber/player-score";
-import Avatar from "@/components/avatar";
+import { ScoreSaberWebsocketMessageToken } from "@ssr/common/types/token/scoresaber/websocket/websocket-message";
+import { parseDate } from "@ssr/common/utils/time-utils";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import useWebSocket, { ReadyState } from "react-use-websocket";
 
 export default function ScoreFeed() {
   const { readyState, lastJsonMessage } =

@@ -1,13 +1,13 @@
 "use client";
 
-import Link from "next/link";
-import { ExternalLink } from "lucide-react";
 import { cn } from "@/common/utils";
-import { ReactElement } from "react";
-import { usePathname } from "next/navigation";
 import GithubLogo from "@/components/logos/logos/github-logo";
 import TwitterLogo from "@/components/logos/logos/twitter-logo";
-import { Config } from "@ssr/common/config";
+import { env } from "@ssr/common/env";
+import { ExternalLink } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { ReactElement } from "react";
 
 type FooterLink = {
   /**
@@ -51,7 +51,7 @@ const links: {
     {
       name: "Swagger Docs",
       shortName: "Swagger",
-      href: `${Config.apiUrl}/swagger`,
+      href: `${env.NEXT_PUBLIC_API_URL}/swagger`,
     },
     {
       name: "Source Code",

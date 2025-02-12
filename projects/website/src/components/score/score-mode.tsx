@@ -1,10 +1,10 @@
 "use client";
 
-import { ReactElement, useState } from "react";
+import { Button } from "@/components/ui/button";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import { PersonIcon } from "@radix-ui/react-icons";
-import { Button } from "@/components/ui/button";
 import { capitalizeFirstLetter } from "@ssr/common/string-utils";
+import { ReactElement, useState } from "react";
 
 export type ScoreModeType = {
   name: string;

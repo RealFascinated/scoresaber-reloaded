@@ -1,6 +1,6 @@
 import Card from "@/components/card";
-import { MapStats } from "@/components/score/map-stats";
 import EmbedLinks from "@/components/embed-links";
+import { MapStats } from "@/components/score/map-stats";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
 import { useState } from "react";
 

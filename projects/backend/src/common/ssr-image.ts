@@ -1,6 +1,6 @@
 import { Canvas, createCanvas, GlobalFonts, loadImage, SKRSContext2D } from "@napi-rs/canvas";
-import * as path from "node:path";
 import { SSRCache } from "@ssr/common/cache";
+import * as path from "node:path";
 import { fetchWithCache } from "./cache.util";
 
 // Register fonts once

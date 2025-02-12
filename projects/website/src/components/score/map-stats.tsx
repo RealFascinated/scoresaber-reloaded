@@ -1,9 +1,9 @@
 import StatValue from "@/components/stat-value";
-import { formatTime } from "@ssr/common/utils/time-utils";
-import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
-import { BombIcon, BrickWallIcon, DrumIcon, GaugeIcon, MusicIcon, TimerIcon } from "lucide-react";
 import { CubeIcon } from "@heroicons/react/24/solid";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
+import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
+import { formatTime } from "@ssr/common/utils/time-utils";
+import { BombIcon, BrickWallIcon, DrumIcon, GaugeIcon, MusicIcon, TimerIcon } from "lucide-react";
 
 type MapAndScoreData = {
   /**

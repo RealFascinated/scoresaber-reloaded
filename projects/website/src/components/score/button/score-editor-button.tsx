@@ -1,14 +1,14 @@
-import { Button } from "@/components/ui/button";
-import { CogIcon } from "@heroicons/react/24/solid";
-import clsx from "clsx";
-import { useState } from "react";
-import { Slider } from "@/components/ui/slider";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { ResetIcon } from "@radix-ui/react-icons";
 import Tooltip from "@/components/tooltip";
+import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Slider } from "@/components/ui/slider";
+import { useIsMobile } from "@/hooks/use-is-mobile";
+import { CogIcon } from "@heroicons/react/24/solid";
+import { ResetIcon } from "@radix-ui/react-icons";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
-import { useIsMobile } from "@/hooks/use-is-mobile";
+import clsx from "clsx";
+import { useState } from "react";
 
 type ScoreEditorButtonProps = {
   score: ScoreSaberScore;

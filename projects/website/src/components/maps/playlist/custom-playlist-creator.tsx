@@ -19,7 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Config } from "@ssr/common/config";
+import { env } from "@ssr/common/env";
 import {
   customRankedPlaylistSchema,
   encodeCustomRankedPlaylistSettings,
@@ -44,7 +44,7 @@ export default function CustomPlaylistCreator() {
 
   async function onSubmit(data: z.infer<typeof customRankedPlaylistSchema>) {
     await downloadFile(
-      `${Config.apiUrl}/playlist/scoresaber-custom-ranked-maps?config=${encodeCustomRankedPlaylistSettings(data)}`,
+      `${env.NEXT_PUBLIC_API_URL}/playlist/scoresaber-custom-ranked-maps?config=${encodeCustomRankedPlaylistSettings(data)}`,
       `ssr-custom-ranked-${data.sort}-${data.stars.min}-${data.stars.max}-stars.json`
     );
   }
@@ -118,7 +118,7 @@ export default function CustomPlaylistCreator() {
           {/* Create Playlist Button */}
           <DialogFooter>
             <Link
-              href={`${Config.apiUrl}/playlist/custom-ranked/preview?settings=${encodeCustomRankedPlaylistSettings(watch())}`}
+              href={`${env.NEXT_PUBLIC_API_URL}/playlist/custom-ranked/preview?settings=${encodeCustomRankedPlaylistSettings(watch())}`}
             >
               <Button variant="outline" type="button">
                 Preview Art

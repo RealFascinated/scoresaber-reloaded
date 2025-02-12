@@ -15,8 +15,8 @@ import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { motion, useAnimation } from "framer-motion";
 import { useCallback, useEffect, useState } from "react";
 import Pagination from "../input/pagination";
-import LeaderboardScore from "./page/leaderboard-score";
 import { DifficultyButton } from "./button/difficulty-button";
+import LeaderboardScore from "./page/leaderboard-score";
 
 type LeaderboardScoresProps = {
   initialPage?: number;

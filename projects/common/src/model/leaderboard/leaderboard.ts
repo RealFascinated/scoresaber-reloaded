@@ -1,5 +1,5 @@
-import LeaderboardDifficulty from "./leaderboard-difficulty";
 import { Prop } from "@typegoose/typegoose";
+import LeaderboardDifficulty from "./leaderboard-difficulty";
 
 export default class Leaderboard {
   /**

@@ -1,6 +1,6 @@
 import PlayerScoreAccuracyChart from "@/components/leaderboard/page/chart/player-score-accuracy-chart";
-import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import ScoreAccuracyStats from "@/components/score/score-accuracy-stats";
+import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreStatsResponse } from "@ssr/common/response/scorestats-response";
 
 type ScoreOverviewProps = {

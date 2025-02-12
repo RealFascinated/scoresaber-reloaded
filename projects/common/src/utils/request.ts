@@ -1,5 +1,5 @@
-import Logger from "../logger";
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
+import Logger from "../logger";
 
 type RequestReturns = "text" | "json" | "arraybuffer";
 

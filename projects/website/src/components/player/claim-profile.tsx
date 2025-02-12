@@ -1,13 +1,13 @@
 "use client";
 
-import { CheckIcon } from "@heroicons/react/24/solid";
-import Tooltip from "../tooltip";
-import { Button } from "../ui/button";
-import useDatabase from "@/hooks/use-database";
 import { setCookieValue } from "@/common/cookie.util";
 import { SettingIds } from "@/common/database/database";
+import useDatabase from "@/hooks/use-database";
+import { CheckIcon } from "@heroicons/react/24/solid";
 import { useLiveQuery } from "dexie-react-hooks";
 import { toast } from "sonner";
+import Tooltip from "../tooltip";
+import { Button } from "../ui/button";
 
 type Props = {
   /**

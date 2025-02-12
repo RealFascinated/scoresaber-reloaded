@@ -1,5 +1,5 @@
-import { connectWebSocket, WebsocketCallbacks } from "./websocket";
 import { BeatLeaderScoreToken } from "../types/token/beatleader/score/score";
+import { connectWebSocket, WebsocketCallbacks } from "./websocket";
 
 type BeatLeaderWebsocket = {
   /**

@@ -1,8 +1,8 @@
-import { Modifier } from "../../score/modifier";
-import { AdditionalScoreData } from "../additional-score-data/additional-score-data";
 import { prop } from "@typegoose/typegoose";
 import { type MapDifficulty } from "../../score/map-difficulty";
+import { Modifier } from "../../score/modifier";
 import { type MapCharacteristic } from "../../types/map-characteristic";
+import { AdditionalScoreData } from "../additional-score-data/additional-score-data";
 
 /**
  * The model for a score.

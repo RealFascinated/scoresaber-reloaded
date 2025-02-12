@@ -1,6 +1,6 @@
 import { Prop } from "@typegoose/typegoose";
-import Score from "../score";
 import { type Controllers } from "../controllers";
+import Score from "../score";
 import { ScoreSaberPreviousScoreOverview } from "./scoresaber-score";
 
 export class ScoreSaberScoreBase extends Score {

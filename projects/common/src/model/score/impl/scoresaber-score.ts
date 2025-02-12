@@ -1,3 +1,4 @@
+import { AutoIncrementID } from "@typegoose/auto-increment";
 import {
   getModelForClass,
   modelOptions,
@@ -6,10 +7,9 @@ import {
   Severity,
 } from "@typegoose/typegoose";
 import { Document } from "mongoose";
-import { AutoIncrementID } from "@typegoose/auto-increment";
+import { ScoreSaberLeaderboardPlayerInfoToken } from "../../../types/token/scoresaber/leaderboard-player-info";
 import { PreviousScore } from "../previous-score";
 import { ScoreSaberScoreBase } from "./scoresaber-score-base";
-import { ScoreSaberLeaderboardPlayerInfoToken } from "../../../types/token/scoresaber/leaderboard-player-info";
 
 @modelOptions({
   options: { allowMixed: Severity.ALLOW },

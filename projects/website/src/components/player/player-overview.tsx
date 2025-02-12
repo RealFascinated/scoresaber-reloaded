@@ -1,11 +1,11 @@
+import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerStatChange } from "@ssr/common/player/player-stat-change";
+import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
+import Link from "next/link";
+import CountryFlag from "../country-flag";
 import { ChangeOverTime } from "../statistic/change-over-time";
 import { DailyChange } from "../statistic/daily-change";
-import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
-import CountryFlag from "../country-flag";
-import Link from "next/link";
-import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 
 const playerData = [
   {

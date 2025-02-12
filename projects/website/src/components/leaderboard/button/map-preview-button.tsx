@@ -1,7 +1,6 @@
 import ScoreButton from "@/components/score/button/score-button";
-import * as React from "react";
-import { PlayCircleIcon } from "lucide-react";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
+import { PlayCircleIcon } from "lucide-react";
 
 type MapPreviewButtonProps = {
   beatSaverMap: BeatSaverMapResponse;
@@ -11,7 +10,7 @@ export function MapPreviewButton({ beatSaverMap }: MapPreviewButtonProps) {
   const difficulty = beatSaverMap.difficulty;
   if (!difficulty) {
     return null;
-  } 
+  }
 
   return (
     <ScoreButton

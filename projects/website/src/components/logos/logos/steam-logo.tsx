@@ -1,6 +1,6 @@
-import { LogoProps } from "@/components/logos/logo-props";
-import LogoBase from "@/components/logos/logo-base";
 import { cn } from "@/common/utils";
+import LogoBase from "@/components/logos/logo-base";
+import { LogoProps } from "@/components/logos/logo-props";
 
 export default function SteamLogo({ size = 32, className }: LogoProps) {
   return (

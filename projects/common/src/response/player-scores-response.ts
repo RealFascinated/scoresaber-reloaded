@@ -1,5 +1,5 @@
-import { Metadata } from "../types/metadata";
 import { PlayerScore } from "../score/player-score";
+import { Metadata } from "../types/metadata";
 
 export default interface PlayerScoresResponse<S, L> {
   /**

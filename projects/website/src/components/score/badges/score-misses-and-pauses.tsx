@@ -1,6 +1,6 @@
-import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { ScoreBadgeProps } from "@/components/score/badges/badge-props";
 import { ScoreMissesTooltip } from "@/components/score/score-misses-tooltip";
+import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 
 type ScoreMissesBadgeProps = ScoreBadgeProps & {
   /**

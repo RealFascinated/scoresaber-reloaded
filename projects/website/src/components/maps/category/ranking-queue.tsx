@@ -1,17 +1,17 @@
 "use client";
 
 import Card from "@/components/card";
-import { useQuery } from "@tanstack/react-query";
-import { useCallback, useEffect, useState } from "react";
 import { LoadingIcon } from "@/components/loading-icon";
-import Link from "next/link";
-import { motion, useAnimation } from "framer-motion";
 import { scoreAnimation } from "@/components/score/score-animation";
 import ScoreSongInfo from "@/components/score/score-song-info";
+import ScoreSaberRankingRequestsResponse from "@ssr/common/response/scoresaber-ranking-requests-response";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
-import ScoreSaberRankingRequestsResponse from "@ssr/common/response/scoresaber-ranking-requests-response";
 import { timeAgo } from "@ssr/common/utils/time-utils";
+import { useQuery } from "@tanstack/react-query";
+import { motion, useAnimation } from "framer-motion";
+import Link from "next/link";
+import { useCallback, useEffect, useState } from "react";
 
 const queues = [
   {

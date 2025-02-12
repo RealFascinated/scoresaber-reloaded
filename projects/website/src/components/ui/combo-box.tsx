@@ -1,8 +1,6 @@
 "use client";
 
-import { ReactElement, ReactNode, useEffect, useState } from "react";
-import { Check, ChevronsUpDown } from "lucide-react";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/common/utils";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -12,7 +10,9 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { cn } from "@/common/utils";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Check, ChevronsUpDown } from "lucide-react";
+import { ReactElement, ReactNode, useEffect, useState } from "react";
 
 /**
  * The props for this combobox.

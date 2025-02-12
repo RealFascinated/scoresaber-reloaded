@@ -1,14 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import React from "react";
+import { openInNewTab } from "@/common/browser-utils";
+import { LoadingIcon } from "@/components/loading-icon";
+import { env } from "@ssr/common/env";
+import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
+import { ssrApi } from "@ssr/common/utils/ssr-api";
+import { useQuery } from "@tanstack/react-query";
 import { Chart, ChartOptions, registerables } from "chart.js";
 import { Line } from "react-chartjs-2";
-import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import { useQuery } from "@tanstack/react-query";
-import { ssrApi } from "@ssr/common/utils/ssr-api";
-import { LoadingIcon } from "@/components/loading-icon";
-import { openInNewTab } from "@/common/browser-utils";
-import { Config } from "@ssr/common/config";
 
 Chart.register(...registerables);
 
@@ -40,7 +39,7 @@ const PlayerScoreChart = ({ player }: PlayerScoreChartProps) => {
    * @param leaderboardId
    */
   const onDataPointClick = (leaderboardId: number) => {
-    openInNewTab(`${Config.websiteUrl}/leaderboard/${leaderboardId}`);
+    openInNewTab(`${env.NEXT_PUBLIC_WEBSITE_NAME}/leaderboard/${leaderboardId}`);
   };
 
   const data = dataPoints?.map(dataPoint => {

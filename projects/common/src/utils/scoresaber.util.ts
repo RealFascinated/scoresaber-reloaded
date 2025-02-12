@@ -1,8 +1,8 @@
-import { ScoreSaberPlayerToken } from "../types/token/scoresaber/player";
-import ScoreSaberPlayer from "../player/impl/scoresaber-player";
-import { ScoreSaberLeaderboardPlayerInfoToken } from "../types/token/scoresaber/leaderboard-player-info";
-import { MapDifficulty } from "../score/map-difficulty";
 import { HMD } from "../hmds";
+import ScoreSaberPlayer from "../player/impl/scoresaber-player";
+import { MapDifficulty } from "../score/map-difficulty";
+import { ScoreSaberLeaderboardPlayerInfoToken } from "../types/token/scoresaber/leaderboard-player-info";
+import { ScoreSaberPlayerToken } from "../types/token/scoresaber/player";
 
 export type ScoreSaberRole = {
   /**

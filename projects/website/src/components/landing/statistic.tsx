@@ -1,9 +1,9 @@
 "use client";
 
-import CountUp from "react-countup";
-import { ReactElement } from "react";
-import { CircleStackIcon } from "@heroicons/react/24/outline";
 import Tooltip from "@/components/tooltip";
+import { CircleStackIcon } from "@heroicons/react/24/outline";
+import { ReactElement } from "react";
+import CountUp from "react-countup";
 
 type Statistic = {
   icon: ReactElement<any>;

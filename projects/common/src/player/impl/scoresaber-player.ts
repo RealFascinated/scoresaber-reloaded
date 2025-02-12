@@ -78,7 +78,7 @@ export interface ScoreSaberPlayerBase extends Player {
    * Whether the player is inactive or not.
    */
   inactive: boolean;
-};
+}
 
 /**
  * A bio of a player.

@@ -1,5 +1,5 @@
-import Overlay from "@/components/overlay/overlay";
 import { parseOverlaySettings } from "@/common/overlay/overlay-settings";
+import Overlay from "@/components/overlay/overlay";
 import { redirect } from "next/navigation";
 
 type OverlayPageProps = {

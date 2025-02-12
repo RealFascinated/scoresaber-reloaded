@@ -1,7 +1,7 @@
 "use client";
 
 import Statistic from "@/components/landing/statistic";
-import { Config } from "@ssr/common/config";
+import { env } from "@ssr/common/env";
 import { AppStatistics } from "@ssr/common/types/backend/app-statistics";
 import Request from "@ssr/common/utils/request";
 import { useQuery } from "@tanstack/react-query";
@@ -20,7 +20,7 @@ export function AppStats({ initialStatistics }: AppStatisticsProps) {
 
   const { data } = useQuery({
     queryKey: ["app-statistics"],
-    queryFn: () => Request.get<AppStatistics>(Config.apiUrl + "/statistics"),
+    queryFn: () => Request.get<AppStatistics>(env.NEXT_PUBLIC_WEBSITE_NAME + "/statistics"),
   });
 
   useEffect(() => {

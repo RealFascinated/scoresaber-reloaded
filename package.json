@@ -1,23 +1,29 @@
 {
   "name": "scoresaber-reloaded",
   "version": "1.0.0",
-  "workspaces": [
-    "projects/*"
-  ],
+  "workspaces": {
+    "nohoist": [
+      "**/projects/website/**",
+      "**/projects/website"
+    ],
+    "packages": [
+      "projects/*"
+    ]
+  },
   "scripts": {
     "dev:website": "bun --filter 'website' dev",
     "dev:backend": "bun --filter 'backend' dev",
     "dev:common": "bun --filter '@ssr/common' dev",
-    "dev": "bun --filter 'website' --filter 'backend' --filter '@ssr/common' dev",
     "prettier": "prettier --write ."
   },
   "author": "fascinated7",
   "license": "MIT",
   "dependencies": {
+    "axios": "^1.7.9",
     "concurrently": "^9.1.2",
     "cross-env": "^7.0.3",
     "prettier": "^3.5.0",
-    "superjson": "^2.2.2",
-    "axios": "^1.7.9"
+    "prettier-plugin-organize-imports": "^4.1.0",
+    "superjson": "^2.2.2"
   }
 }

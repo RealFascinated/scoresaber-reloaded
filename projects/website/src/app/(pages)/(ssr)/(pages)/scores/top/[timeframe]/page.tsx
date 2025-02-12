@@ -1,12 +1,12 @@
-import { Metadata } from "next";
 import { TopScoresData } from "@/components/score/top/top-scores-data";
+import { env } from "@ssr/common/env";
 import { Timeframe } from "@ssr/common/timeframe";
-import { Config } from "@ssr/common/config";
+import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Top Scores",
   openGraph: {
-    siteName: Config.websiteName,
+    siteName: env.NEXT_PUBLIC_WEBSITE_NAME,
     title: "Top Scores",
     description: "View the top 50 scores set by players on ScoreSaber.",
   },

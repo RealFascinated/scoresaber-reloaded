@@ -1,18 +1,18 @@
 "use client";
 
-import { OverlaySettings, OverlayViews } from "@/common/overlay/overlay-settings";
-import OverlayPlayerInfoView from "@/components/overlay/views/player-info";
-import { useQuery } from "@tanstack/react-query";
-import { LoadingIcon } from "@/components/loading-icon";
-import OverlayView, { OverlayViewPosition } from "./views/view";
-import { useEffect, useRef } from "react";
 import { OverlayDataClients } from "@/common/overlay/data-client";
 import HTTPSiraStatusClient from "@/common/overlay/impl/httpsirastatus";
-import OverlayScoreDataView from "@/components/overlay/views/score-data";
 import { useOverlayDataStore } from "@/common/overlay/overlay-data-store";
+import { OverlaySettings, OverlayViews } from "@/common/overlay/overlay-settings";
+import { LoadingIcon } from "@/components/loading-icon";
+import OverlayPlayerInfoView from "@/components/overlay/views/player-info";
+import OverlayScoreDataView from "@/components/overlay/views/score-data";
 import OverlayScoreInfoView from "@/components/overlay/views/score-info";
-import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { DetailType } from "@ssr/common/detail-type";
+import { ssrApi } from "@ssr/common/utils/ssr-api";
+import { useQuery } from "@tanstack/react-query";
+import { useEffect, useRef } from "react";
+import OverlayView, { OverlayViewPosition } from "./views/view";
 
 type OverlayProps = {
   /**

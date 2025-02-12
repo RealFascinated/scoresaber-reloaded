@@ -1,8 +1,8 @@
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
+import { CustomRankedPlaylist } from "@ssr/common/playlist/ranked/custom-ranked-playlist";
 import { SnipeSettings } from "@ssr/common/snipe/snipe-settings-schema";
 import { capitalizeFirstLetter, truncateText } from "@ssr/common/string-utils";
 import SSRImage, { ImageTextOptions } from "./ssr-image";
-import { CustomRankedPlaylist } from "@ssr/common/playlist/ranked/custom-ranked-playlist";
 
 /**
  * Generates a playlist image for a Snipe

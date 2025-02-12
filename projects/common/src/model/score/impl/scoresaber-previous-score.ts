@@ -1,3 +1,4 @@
+import { AutoIncrementID } from "@typegoose/auto-increment";
 import {
   getModelForClass,
   modelOptions,
@@ -6,7 +7,6 @@ import {
   Severity,
 } from "@typegoose/typegoose";
 import { Document } from "mongoose";
-import { AutoIncrementID } from "@typegoose/auto-increment";
 import { ScoreSaberScoreBase } from "./scoresaber-score-base";
 
 @modelOptions({

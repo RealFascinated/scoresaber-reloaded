@@ -1,10 +1,10 @@
-import { Discord, Guild, Slash, SlashOption } from "discordx";
-import { ApplicationCommandOptionType, CommandInteraction } from "discord.js";
-import { guildId } from "../bot";
-import { getDiscordUser } from "../../common/discord/user";
-import { createGenericEmbed } from "../../common/discord/embed";
-import ScoreSaberService from "../../service/scoresaber.service";
 import { DetailType } from "@ssr/common/detail-type";
+import { ApplicationCommandOptionType, CommandInteraction } from "discord.js";
+import { Discord, Guild, Slash, SlashOption } from "discordx";
+import { createGenericEmbed } from "../../common/discord/embed";
+import { getDiscordUser } from "../../common/discord/user";
+import ScoreSaberService from "../../service/scoresaber.service";
+import { guildId } from "../bot";
 
 @Discord()
 export class LinkAccountCommand {

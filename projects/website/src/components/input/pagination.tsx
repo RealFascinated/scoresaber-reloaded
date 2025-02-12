@@ -1,17 +1,17 @@
-import { ArrowPathIcon } from "@heroicons/react/24/solid";
+import { cn } from "@/common/utils";
 import { ChevronDoubleLeftIcon, ChevronDoubleRightIcon } from "@heroicons/react/16/solid";
+import { ArrowPathIcon } from "@heroicons/react/24/solid";
 import clsx from "clsx";
 import React, { useEffect, useState } from "react";
 import {
-  Pagination as ShadCnPagination,
   PaginationContent,
   PaginationEllipsis,
   PaginationItem,
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
+  Pagination as ShadCnPagination,
 } from "../ui/pagination";
-import { cn } from "@/common/utils";
 
 type PaginationItemWrapperProps = {
   isLoadingPage: boolean;

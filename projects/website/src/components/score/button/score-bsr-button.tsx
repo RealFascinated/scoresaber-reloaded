@@ -2,7 +2,6 @@
 
 import { copyToClipboard } from "@/common/browser-utils";
 import ScoreButton from "@/components/score/button/score-button";
-import * as React from "react";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
 import { toast } from "sonner";
 type ScoreBsrButtonProps = {

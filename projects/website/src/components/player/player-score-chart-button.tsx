@@ -1,4 +1,7 @@
+import PlayerScoreChart from "@/components/player/chart/player-score-chart";
 import { StarIcon } from "@heroicons/react/24/solid";
+import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
+import { truncateText } from "@ssr/common/string-utils";
 import Tooltip from "../tooltip";
 import {
   Dialog,
@@ -8,10 +11,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "../ui/dialog";
-import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import PlayerScoreChart from "@/components/player/chart/player-score-chart";
-import { truncateText } from "@ssr/common/string-utils";
-import React from "react";
 
 type PlayerStarCurveProps = {
   /**

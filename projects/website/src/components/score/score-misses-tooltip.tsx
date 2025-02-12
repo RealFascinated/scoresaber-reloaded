@@ -1,5 +1,5 @@
-import { ensurePositiveNumber, formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import Tooltip from "@/components/tooltip";
+import { ensurePositiveNumber, formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { ReactNode } from "react";
 
 type ScoreMissesTooltipProps = {

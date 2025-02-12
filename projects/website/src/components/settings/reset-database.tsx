@@ -15,7 +15,6 @@ export default function ResetDatabase() {
     window.location.reload();
   }
 
-
   return (
     <Tooltip display="This will reset the database to its default values.">
       <Button variant="destructive" onClick={reset}>

@@ -1,10 +1,10 @@
 "use client";
 
 import useDatabase from "@/hooks/use-database";
-import { Button } from "../ui/button";
 import { useRef } from "react";
-import Tooltip from "../tooltip";
 import { toast } from "sonner";
+import Tooltip from "../tooltip";
+import { Button } from "../ui/button";
 export default function ImportSettings() {
   const database = useDatabase();
   const fileInputRef = useRef<HTMLInputElement | null>(null);

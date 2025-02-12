@@ -1,6 +1,6 @@
-import PlaylistDownloadButton from "@/components/maps/playlist/playlist-download-button";
-import { Config } from "@ssr/common/config";
 import Card from "@/components/card";
+import PlaylistDownloadButton from "@/components/maps/playlist/playlist-download-button";
+import { env } from "@ssr/common/env";
 import CustomPlaylistCreator from "./custom-playlist-creator";
 
 type Playlist = {
@@ -43,7 +43,7 @@ export default function Playlists() {
           <div key={playlist.id}>
             <PlaylistDownloadButton
               name={playlist.name}
-              url={`${Config.apiUrl}/playlist/${playlist.id}?download=true`}
+              url={`${env.NEXT_PUBLIC_API_URL}/playlist/${playlist.id}?download=true`}
             />
           </div>
         ))}

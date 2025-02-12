@@ -1,6 +1,6 @@
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
-import { Modifier } from "@ssr/common/score/modifier";
 import { PreviousScore } from "@ssr/common/model/score/previous-score";
+import { Modifier } from "@ssr/common/score/modifier";
 
 type ScoreModifiersProps = {
   /**

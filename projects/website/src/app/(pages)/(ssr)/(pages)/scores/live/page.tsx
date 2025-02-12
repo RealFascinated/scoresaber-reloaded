@@ -1,12 +1,12 @@
-import { Metadata } from "next";
-import ScoreFeed from "@/components/score/score-feed/score-feed";
 import Card from "@/components/card";
-import { Config } from "@ssr/common/config";
+import ScoreFeed from "@/components/score/score-feed/score-feed";
+import { env } from "@ssr/common/env";
+import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Score Feed",
   openGraph: {
-    siteName: Config.websiteName,
+    siteName: env.NEXT_PUBLIC_WEBSITE_NAME,
     title: "Live Scores",
     description: "View the live scores set by players on ScoreSaber.",
   },

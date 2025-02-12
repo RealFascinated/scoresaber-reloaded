@@ -1,14 +1,14 @@
 "use client";
 
-import AnimatedShinyText from "@/components/ui/animated-shiny-text";
-import { ArrowRight, GithubIcon, UserSearch } from "lucide-react";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { BorderBeam } from "@/components/ui/border-beam";
-import { Separator } from "@/components/ui/separator";
-import { motion } from "framer-motion";
 import { useSearch } from "@/components/providers/search-provider";
 import { DiscordButton } from "@/components/social/discord-button";
+import AnimatedShinyText from "@/components/ui/animated-shiny-text";
+import { BorderBeam } from "@/components/ui/border-beam";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { motion } from "framer-motion";
+import { ArrowRight, GithubIcon, UserSearch } from "lucide-react";
+import Link from "next/link";
 
 export default function HeroSection() {
   return (

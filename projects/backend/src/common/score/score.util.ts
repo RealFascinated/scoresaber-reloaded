@@ -1,5 +1,5 @@
-import { Config } from "@ssr/common/config";
 import { DetailType } from "@ssr/common/detail-type";
+import { env } from "@ssr/common/env";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { removeObjectFields } from "@ssr/common/object.util";
@@ -71,8 +71,8 @@ export async function sendScoreNotification(
         [
           `${leaderboard.fullName} (${getDifficultyName(leaderboard.difficulty.difficulty)}${leaderboard.stars > 0 ? ` ${leaderboard.stars.toFixed(2)}★` : ""})`,
           [
-            `[[Player]](${Config.websiteUrl}/player/${player.id})`,
-            `[[Leaderboard]](${Config.websiteUrl}/leaderboard/${leaderboard.id})`,
+            `[[Player]](${env.NEXT_PUBLIC_WEBSITE_URL}/player/${player.id})`,
+            `[[Leaderboard]](${env.NEXT_PUBLIC_WEBSITE_URL}/leaderboard/${leaderboard.id})`,
             beatSaver ? `[[Map]](https://beatsaver.com/maps/${beatSaver.bsr})` : undefined,
           ].join(" "),
         ]
@@ -114,7 +114,7 @@ export async function sendScoreNotification(
       .setThumbnail(leaderboard.songArt)
       .setTimestamp(score.timestamp)
       .setFooter({
-        text: `Powered by ${Config.websiteUrl}`,
+        text: `Powered by ${env.NEXT_PUBLIC_WEBSITE_URL}`,
       })
       .setColor(score.pp > 0 ? "#d4af37" : "#808080")
   );

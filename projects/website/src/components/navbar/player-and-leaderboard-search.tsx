@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { cn } from "@/common/utils";
+import Avatar from "@/components/avatar";
+import { useSearch } from "@/components/providers/search-provider";
 import {
   CommandDialog,
   CommandEmpty,
@@ -10,25 +12,23 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { Input } from "@/components/ui/input";
-import { LoaderCircle, UserSearch } from "lucide-react";
-import { cn } from "@/common/utils";
-import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
-import { useRouter } from "next/navigation";
-import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
-import { useDebounce } from "@uidotdev/usehooks";
-import { useQuery } from "@tanstack/react-query";
 import { useIsMobile } from "@/hooks/use-is-mobile";
-import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
-import { useSearch } from "@/components/providers/search-provider";
-import { truncateText } from "@ssr/common/string-utils";
-import { CommandLoading } from "cmdk";
-import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
-import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
 import { StarIcon } from "@heroicons/react/24/solid";
-import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
+import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
+import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
+import { truncateText } from "@ssr/common/string-utils";
+import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
 import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/leaderboard";
-import Avatar from "@/components/avatar";
+import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
+import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
+import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
+import { useQuery } from "@tanstack/react-query";
+import { useDebounce } from "@uidotdev/usehooks";
+import { CommandLoading } from "cmdk";
+import { LoaderCircle, UserSearch } from "lucide-react";
+import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function PlayerAndLeaderboardSearch() {
   const router: AppRouterInstance = useRouter();

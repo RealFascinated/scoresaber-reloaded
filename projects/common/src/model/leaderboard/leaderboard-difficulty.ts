@@ -1,6 +1,6 @@
+import { Prop } from "@typegoose/typegoose";
 import { type MapDifficulty } from "../../score/map-difficulty";
 import { type MapCharacteristic } from "../../types/map-characteristic";
-import { Prop } from "@typegoose/typegoose";
 
 export default class LeaderboardDifficulty {
   /**

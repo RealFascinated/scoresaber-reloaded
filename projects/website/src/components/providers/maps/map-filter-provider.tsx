@@ -1,7 +1,7 @@
 "use client";
 
-import { createContext, ReactNode, useContext, useState } from "react";
 import { StarFilter } from "@ssr/common/maps/types";
+import { createContext, ReactNode, useContext, useState } from "react";
 
 type FilterContextProps = {
   category: number;

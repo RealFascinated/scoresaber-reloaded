@@ -1,8 +1,8 @@
 import { Point } from "@influxdata/influxdb-client";
-import { MetricType } from "../../service/metrics.service";
-import NumberMetric from "../number-metric";
 import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import { getMidnightAlignedDate } from "@ssr/common/utils/time-utils";
+import { MetricType } from "../../service/metrics.service";
+import NumberMetric from "../number-metric";
 
 export default class UniqueDailyPlayersMetric extends NumberMetric {
   constructor() {

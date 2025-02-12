@@ -1,5 +1,5 @@
-import { HttpSiraStatusBaseEvent } from "@/common/overlay/types/httpsirastatus/event/base-event";
 import { HttpSiraStatus_Status } from "@/common/overlay/types/httpsirastatus/data/status";
+import { HttpSiraStatusBaseEvent } from "@/common/overlay/types/httpsirastatus/event/base-event";
 
 export interface HttpSiraStatusSongStartedEvent extends HttpSiraStatusBaseEvent {
   /**

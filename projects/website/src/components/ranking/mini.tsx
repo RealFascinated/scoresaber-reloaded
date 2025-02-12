@@ -1,15 +1,15 @@
-import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
+import { PlayerInfo } from "@/components/player/player-info";
+import { PlayerRankingSkeleton } from "@/components/ranking/player-ranking-skeleton";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
+import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
+import { AroundPlayer } from "@ssr/common/types/around-player";
+import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
+import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { ReactElement } from "react";
 import Card from "../card";
 import CountryFlag from "../country-flag";
-import { PlayerRankingSkeleton } from "@/components/ranking/player-ranking-skeleton";
-import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import { AroundPlayer } from "@ssr/common/types/around-player";
-import { PlayerInfo } from "@/components/player/player-info";
-import { ssrApi } from "@ssr/common/utils/ssr-api";
 
 type MiniProps = {
   /**

@@ -1,6 +1,6 @@
-import { connectWebSocket, WebsocketCallbacks } from "./websocket";
 import ScoreSaberPlayerScoreToken from "../types/token/scoresaber/player-score";
 import { ScoreSaberWebsocketMessageToken } from "../types/token/scoresaber/websocket/websocket-message";
+import { connectWebSocket, WebsocketCallbacks } from "./websocket";
 
 type ScoresaberWebsocket = {
   /**

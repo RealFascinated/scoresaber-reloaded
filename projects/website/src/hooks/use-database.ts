@@ -1,5 +1,5 @@
-import { useContext } from "react";
 import { DatabaseContext } from "@/components/loaders/database-loader";
+import { useContext } from "react";
 
 /**
  * Gets the database context.

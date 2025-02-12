@@ -1,12 +1,12 @@
 "use client";
 
 import { DatasetConfig } from "@/common/chart/types";
+import { Colors } from "@/common/colors";
 import GenericChart from "@/components/chart/generic-chart";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
+import { ScoreStatsResponse } from "@ssr/common/response/scorestats-response";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { formatTime } from "@ssr/common/utils/time-utils";
-import { ScoreStatsResponse } from "@ssr/common/response/scorestats-response";
-import { Colors } from "@/common/colors";
 
 type Props = {
   /**

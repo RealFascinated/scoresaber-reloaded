@@ -1,7 +1,7 @@
-import { AccBadges } from "@ssr/common/player/acc-badges";
-import { getAccDetails, getScoreBadgeFromName } from "@ssr/common/utils/song-utils";
 import StatValue from "@/components/stat-value";
 import Tooltip from "@/components/tooltip";
+import { AccBadges } from "@ssr/common/player/acc-badges";
+import { getAccDetails, getScoreBadgeFromName } from "@ssr/common/utils/song-utils";
 
 export default function PlayerAccBadges({ badges }: { badges: AccBadges }) {
   return (

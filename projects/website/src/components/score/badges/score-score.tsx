@@ -1,7 +1,7 @@
-import { ScoreBadgeProps } from "@/components/score/badges/badge-props";
-import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { Change } from "@/components/change";
+import { ScoreBadgeProps } from "@/components/score/badges/badge-props";
 import Tooltip from "@/components/tooltip";
+import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 
 export function ScoreScoreBadge({ score }: ScoreBadgeProps) {
   const previousScore = score.previousScore;

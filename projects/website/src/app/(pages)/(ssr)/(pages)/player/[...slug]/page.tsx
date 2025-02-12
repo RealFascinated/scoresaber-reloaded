@@ -1,8 +1,8 @@
 import { getCookieValue } from "@/common/cookie.util";
 import NotFound from "@/components/not-found";
 import PlayerData from "@/components/player/player-data";
-import { Config } from "@ssr/common/config";
 import { DetailType } from "@ssr/common/detail-type";
+import { env } from "@ssr/common/env";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { ScoreSort } from "@ssr/common/score/score-sort";
 import { formatPp } from "@ssr/common/utils/number-utils";
@@ -65,7 +65,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
       title: UNKNOWN_PLAYER.title,
       description: UNKNOWN_PLAYER.description,
       openGraph: {
-        siteName: Config.websiteName,
+        siteName: env.NEXT_PUBLIC_WEBSITE_NAME,
         title: UNKNOWN_PLAYER.title,
         description: UNKNOWN_PLAYER.description,
       },
@@ -75,7 +75,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   return {
     title: `${player.name}`,
     openGraph: {
-      siteName: Config.websiteName,
+      siteName: env.NEXT_PUBLIC_WEBSITE_NAME,
       title: `${player.name}`,
       description: `Rank: #${player.rank}
 Country Rank: #${player.countryRank} (${player.country})

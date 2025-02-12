@@ -1,6 +1,6 @@
-import { PlaylistSong } from "./playlist-song";
+import { env } from "process";
 import { BeatSaberPlaylist } from "./beatsaber/beatsaber-playlist";
-import { Config } from "../config";
+import { PlaylistSong } from "./playlist-song";
 
 type PlaylistUrlGenerator = (id: string) => string | undefined;
 
@@ -69,7 +69,7 @@ export class Playlist {
       playlistTitle: this.title,
       playlistAuthor: this.author,
       customData: {
-        syncURL: `${Config.apiUrl}/playlist/${this.urlGenerator?.(this.id) ?? this.id}`,
+        syncURL: `${env.NEXT_PUBLIC_API_URL}/playlist/${this.urlGenerator?.(this.id) ?? this.id}`,
       },
       songs: Array.from(deduplicatedSongs.values()).map(song => ({
         songName: song.songName,

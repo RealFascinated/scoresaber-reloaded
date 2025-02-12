@@ -1,10 +1,9 @@
-import React from "react";
-import { ScoreStatsToken } from "@ssr/common/types/token/beatleader/score-stats/score-stats";
-import Tooltip from "@/components/tooltip";
-import { capitalizeFirstLetter } from "@ssr/common/string-utils";
-import ScoreAccuracyGrid from "@/components/score/score-accuracy-grid";
-import { ScoreStatsResponse } from "@ssr/common/response/scorestats-response";
 import { Colors } from "@/common/colors";
+import ScoreAccuracyGrid from "@/components/score/score-accuracy-grid";
+import Tooltip from "@/components/tooltip";
+import { ScoreStatsResponse } from "@ssr/common/response/scorestats-response";
+import { capitalizeFirstLetter } from "@ssr/common/string-utils";
+import { ScoreStatsToken } from "@ssr/common/types/token/beatleader/score-stats/score-stats";
 
 type ScoreAccuracyStatProps = {
   scoreStats: ScoreStatsResponse;

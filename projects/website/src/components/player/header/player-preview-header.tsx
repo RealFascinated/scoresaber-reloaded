@@ -1,9 +1,8 @@
 import Avatar from "@/components/avatar";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { getScoreSaberRoles } from "@ssr/common/utils/scoresaber.util";
-import Card from "../../card";
-import PlayerOverview from "../player-overview";
 import Link from "next/link";
+import PlayerOverview from "../player-overview";
 
 type PlayerPreviewHeaderProps = {
   /**

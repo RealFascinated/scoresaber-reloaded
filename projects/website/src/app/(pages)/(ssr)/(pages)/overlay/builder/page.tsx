@@ -1,12 +1,12 @@
-import OverlayBuilder from "@/components/overlay/overlay-builder";
 import Card from "@/components/card";
+import OverlayBuilder from "@/components/overlay/overlay-builder";
+import { env } from "@ssr/common/env";
 import { Metadata } from "next";
-import { Config } from "@ssr/common/config";
 
 export const metadata: Metadata = {
   title: "Overlay Builder",
   openGraph: {
-    siteName: Config.websiteName,
+    siteName: env.NEXT_PUBLIC_WEBSITE_NAME,
     title: "Overlay Builder",
     description: "Create an overlay for your stream!",
   },

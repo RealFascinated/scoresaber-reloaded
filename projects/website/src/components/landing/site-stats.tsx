@@ -1,11 +1,11 @@
 import { AppStats } from "@/components/app-statistics";
-import { Config } from "@ssr/common/config";
+import { env } from "@ssr/common/env";
 import { AppStatistics } from "@ssr/common/types/backend/app-statistics";
 import Request from "@ssr/common/utils/request";
 import { ChartNoAxesCombined } from "lucide-react";
 
 export default async function SiteStats() {
-  const statistics = await Request.get<AppStatistics>(Config.apiUrl + "/statistics");
+  const statistics = await Request.get<AppStatistics>(env.NEXT_PUBLIC_API_URL + "/statistics");
 
   return (
     <div id="stats" className="px-5 -mt-20 flex flex-col gap-10 select-none">

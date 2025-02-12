@@ -1,5 +1,3 @@
-import Leaderboard from "../leaderboard";
-import { type LeaderboardStatus } from "../leaderboard-status";
 import {
   getModelForClass,
   modelOptions,
@@ -8,6 +6,8 @@ import {
   Severity,
 } from "@typegoose/typegoose";
 import { Document } from "mongoose";
+import Leaderboard from "../leaderboard";
+import { type LeaderboardStatus } from "../leaderboard-status";
 
 @modelOptions({
   options: { allowMixed: Severity.ALLOW },

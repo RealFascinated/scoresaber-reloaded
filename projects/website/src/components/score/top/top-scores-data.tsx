@@ -4,7 +4,7 @@ import Card from "@/components/card";
 import { LoadingIcon } from "@/components/loading-icon";
 import Score from "@/components/score/score";
 import { Button } from "@/components/ui/button";
-import { Config } from "@ssr/common/config";
+import { env } from "@ssr/common/env";
 import { TopScoresResponse } from "@ssr/common/response/top-scores-response";
 import { Timeframe } from "@ssr/common/timeframe";
 import Request from "@ssr/common/utils/request";
@@ -47,7 +47,7 @@ export function TopScoresData({ timeframe }: TopScoresDataProps) {
     queryKey: ["top-scores", selectedTimeframe],
     queryFn: async () => {
       return Request.get<TopScoresResponse>(
-        `${Config.apiUrl}/scores/top?limit=50&timeframe=${selectedTimeframe}`
+        `${env.NEXT_PUBLIC_API_URL}/scores/top?limit=50&timeframe=${selectedTimeframe}`
       );
     },
     refetchInterval: false,

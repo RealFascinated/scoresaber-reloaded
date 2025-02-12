@@ -6,6 +6,7 @@ import {
   Severity,
 } from "@typegoose/typegoose";
 import { Document } from "mongoose";
+import { type PeakRank } from "../player/peak-rank";
 import { PlayerHistory } from "../player/player-history";
 import {
   formatDateMinimal,
@@ -13,7 +14,6 @@ import {
   getMidnightAlignedDate,
   parseDate,
 } from "../utils/time-utils";
-import { type PeakRank } from "../player/peak-rank";
 
 /**
  * The model for a player.

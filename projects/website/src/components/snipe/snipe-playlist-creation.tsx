@@ -1,6 +1,9 @@
 "use client";
 
-import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
+import { downloadFile } from "@/common/browser-utils";
+import { LoadingIcon } from "@/components/loading-icon";
+import Tooltip from "@/components/tooltip";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -9,12 +12,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { truncateText } from "@ssr/common/string-utils";
-import { RocketLaunchIcon } from "@heroicons/react/16/solid";
-import Tooltip from "@/components/tooltip";
-import { z } from "zod";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { DualRangeSlider } from "@/components/ui/dual-range-slider";
 import {
   Form,
   FormControl,
@@ -23,7 +21,6 @@ import {
   FormItem,
   FormLabel,
 } from "@/components/ui/form";
-import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -31,17 +28,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { DualRangeSlider } from "@/components/ui/dual-range-slider";
-import React, { useState } from "react";
-import { snipeSettingsSchema } from "@ssr/common/snipe/snipe-settings-schema";
 import { Slider } from "@/components/ui/slider";
-import { Config } from "@ssr/common/config";
-import { downloadFile } from "@/common/browser-utils";
-import { LoadingIcon } from "@/components/loading-icon";
-import Link from "next/link";
-import { encodeSnipePlaylistSettings } from "@ssr/common/snipe/snipe-playlist-utils";
 import useDatabase from "@/hooks/use-database";
+import { RocketLaunchIcon } from "@heroicons/react/16/solid";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { env } from "@ssr/common/env";
+import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
+import { encodeSnipePlaylistSettings } from "@ssr/common/snipe/snipe-playlist-utils";
+import { snipeSettingsSchema } from "@ssr/common/snipe/snipe-settings-schema";
+import { truncateText } from "@ssr/common/string-utils";
 import { useLiveQuery } from "dexie-react-hooks";
+import Link from "next/link";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 
 type SnipePlaylistDownloadButtonProps = {
   /**
@@ -74,11 +74,8 @@ export default function SnipePlaylistDownloadButton({ toSnipe }: SnipePlaylistDo
   const onSubmit = async (data: z.infer<typeof snipeSettingsSchema>) => {
     const encodedData = encodeSnipePlaylistSettings(data);
     setDownloading(true);
-    console.log(
-      `${Config.apiUrl}/playlist/snipe?user=${playerId}&toSnipe=${toSnipe.id}&settings=${encodedData}`
-    );
     await downloadFile(
-      `${Config.apiUrl}/playlist/snipe?user=${playerId}&toSnipe=${toSnipe.id}&settings=${encodedData}`,
+      `${env.NEXT_PUBLIC_API_URL}/playlist/snipe?user=${playerId}&toSnipe=${toSnipe.id}&settings=${encodedData}`,
       `ssr-snipe-${toSnipe.id}-${data.sort}.json`
     );
     setDownloading(false);
@@ -224,7 +221,7 @@ export default function SnipePlaylistDownloadButton({ toSnipe }: SnipePlaylistDo
 
               {/* Preview Playlist Art */}
               <Link
-                href={`${Config.apiUrl}/playlist/snipe/preview?toSnipe=${toSnipe.id}&settings=${encodeSnipePlaylistSettings(form.getValues())}`}
+                href={`${env.NEXT_PUBLIC_API_URL}/playlist/snipe/preview?toSnipe=${toSnipe.id}&settings=${encodeSnipePlaylistSettings(form.getValues())}`}
                 target="_blank"
                 prefetch={false}
               >

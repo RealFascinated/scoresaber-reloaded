@@ -1,10 +1,10 @@
-import { getAccDetails, getScoreBadgeFromAccuracy } from "@ssr/common/utils/song-utils";
-import { Modifier } from "@ssr/common/score/modifier";
-import Tooltip from "@/components/tooltip";
-import { ScoreModifiers } from "@/components/score/score-modifiers";
 import { Change } from "@/components/change";
 import { ScoreBadgeProps } from "@/components/score/badges/badge-props";
+import { ScoreModifiers } from "@/components/score/score-modifiers";
+import Tooltip from "@/components/tooltip";
+import { Modifier } from "@ssr/common/score/modifier";
 import { formatScoreAccuracy } from "@ssr/common/utils/score.util";
+import { getAccDetails, getScoreBadgeFromAccuracy } from "@ssr/common/utils/song-utils";
 
 export function ScoreAccuracyBadge({ score }: ScoreBadgeProps) {
   const previousScore = score.previousScore;

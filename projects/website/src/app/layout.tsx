@@ -1,15 +1,14 @@
 import { Colors } from "@/common/colors";
-import DatabaseLoader from "@/components/loaders/database-loader";
 import { PreloadResources } from "@/components/preload-resources";
 import { QueryProvider } from "@/components/providers/query-provider";
+import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { Config } from "@ssr/common/config";
+import { env } from "@ssr/common/env";
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import Script from "next/script";
 import { ReactNode } from "react";
 import "./globals.css";
-import { Toaster } from "@/components/ui/sonner";
 
 const siteFont = localFont({
   src: "./fonts/JetBrainsMono.ttf",
@@ -18,10 +17,10 @@ const siteFont = localFont({
 
 export const metadata: Metadata = {
   title: {
-    default: Config.websiteName,
+    default: env.NEXT_PUBLIC_WEBSITE_NAME,
     template: "%s - ScoreSaber Reloaded",
   },
-  applicationName: Config.websiteName,
+  applicationName: env.NEXT_PUBLIC_WEBSITE_NAME,
   authors: [
     {
       name: "Fascinated",
@@ -44,8 +43,8 @@ export const metadata: Metadata = {
     "VR gaming, Twitch stream enhancement, Customizable overlay, Real-time scores, Rankings, Leaderboard information," +
     "Stream enhancement, Professional overlay, Easy to use overlay builder.",
   openGraph: {
-    siteName: Config.websiteName,
-    title: Config.websiteName,
+    siteName: env.NEXT_PUBLIC_WEBSITE_NAME,
+    title: env.NEXT_PUBLIC_WEBSITE_NAME,
     description:
       "ScoreSaber Reloaded is a new way to view your scores and get more stats about you and your plays",
     url: "https://ssr.fascinated.cc",

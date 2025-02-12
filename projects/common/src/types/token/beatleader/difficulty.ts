@@ -1,5 +1,5 @@
-import { BeatLeaderModifierToken } from "./modifier/modifiers";
 import { BeatLeaderModifierRatingToken } from "./modifier/modifier-rating";
+import { BeatLeaderModifierToken } from "./modifier/modifiers";
 
 export type BeatLeaderDifficultyToken = {
   id: number;

@@ -25,10 +25,10 @@ import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 import { Button } from "../ui/button";
 import { Form, FormControl, FormDescription, FormItem, FormLabel } from "../ui/form";
-import { toast } from "sonner";
 
 const viewToggles = [
   {

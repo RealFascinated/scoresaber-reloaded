@@ -1,7 +1,7 @@
-import { ScoreStatsHitTrackerToken } from "./hit-tracker";
 import { ScoreStatsAccuracyTrackerToken } from "./accuracy-tracker";
-import { ScoreStatsWinTrackerToken } from "./win-tracker";
+import { ScoreStatsHitTrackerToken } from "./hit-tracker";
 import { ScoreStatsGraphTrackerToken } from "./score-graph-tracker";
+import { ScoreStatsWinTrackerToken } from "./win-tracker";
 
 export type ScoreStatsToken = {
   /**

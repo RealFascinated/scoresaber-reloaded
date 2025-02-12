@@ -1,18 +1,17 @@
 "use client";
 
-import * as React from "react";
-import { useState } from "react";
-import { ArrowDownIcon, ArrowPathIcon } from "@heroicons/react/24/solid";
-import clsx from "clsx";
-import ScoreEditorButton from "@/components/score/button/score-editor-button";
-import { ScoreBsrButton } from "@/components/score/button/score-bsr-button";
 import { BeatSaverMapButton } from "@/components/score/button/beat-saver-map-button";
-import { SongOpenInYoutubeButton } from "@/components/score/button/song-open-in-youtube-button";
-import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
-import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
+import { ScoreBsrButton } from "@/components/score/button/score-bsr-button";
+import ScoreEditorButton from "@/components/score/button/score-editor-button";
 import { ScoreReplayButton } from "@/components/score/button/score-replay-button";
+import { SongOpenInYoutubeButton } from "@/components/score/button/song-open-in-youtube-button";
 import { useIsMobile } from "@/hooks/use-is-mobile";
+import { ArrowDownIcon, ArrowPathIcon } from "@heroicons/react/24/solid";
+import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
+import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
+import clsx from "clsx";
+import { useState } from "react";
 
 type Props = {
   score?: ScoreSaberScore;

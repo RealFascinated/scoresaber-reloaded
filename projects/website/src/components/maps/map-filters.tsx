@@ -1,13 +1,12 @@
 "use client";
 
-import Combobox from "@/components/ui/combo-box";
 import Card from "@/components/card";
-import { Button } from "@/components/ui/button";
 import { useMapFilter } from "@/components/providers/maps/map-filter-provider";
-import { MapCategory, MapSort } from "@ssr/common/maps/types";
-import { DualRangeSlider } from "@/components/ui/dual-range-slider";
-import React from "react";
+import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import Combobox from "@/components/ui/combo-box";
+import { DualRangeSlider } from "@/components/ui/dual-range-slider";
+import { MapCategory, MapSort } from "@ssr/common/maps/types";
 
 export default function MapFilters() {
   const filter = useMapFilter();

@@ -1,11 +1,11 @@
-import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
+import PpBoundaryStat from "@/components/player/chart/pp-boundary";
 import StatValue from "@/components/stat-value";
+import Tooltip from "@/components/tooltip";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
+import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
+import { getScoreSaberRoles } from "@ssr/common/utils/scoresaber.util";
 import { formatDate, timeAgo } from "@ssr/common/utils/time-utils";
 import { ReactNode } from "react";
-import Tooltip from "@/components/tooltip";
-import { getScoreSaberRoles } from "@ssr/common/utils/scoresaber.util";
-import PpBoundaryStat from "@/components/player/chart/pp-boundary";
 
 type Stat = {
   name: string;

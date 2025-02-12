@@ -4,13 +4,14 @@
     "target": "ES2022",
     "outDir": "./dist",
     "declaration": true,
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "skipLibCheck": true,
     "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "isolatedModules": true,
     "strict": true,
+    "incremental": true,
     "baseUrl": "./",
     "paths": {
       "@ssr/*": ["dist/*"] // This is crucial for resolving the imports correctly

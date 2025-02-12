@@ -1,16 +1,17 @@
 import { InfluxDB, Point } from "@influxdata/influxdb-client";
 import Logger from "@ssr/common/logger";
-import Metric from "../metrics/metric";
+import { MetricValueModel } from "../common/model/metric";
 import TrackedPlayersMetric from "../metrics/impl/tracked-players";
 import TrackedScoresMetric from "../metrics/impl/tracked-scores";
-import { MetricValueModel } from "../common/model/metric";
 import UniqueDailyPlayersMetric from "../metrics/impl/unique-daily-players";
+import Metric from "../metrics/metric";
+import { env } from "@ssr/common/env";
 
 const influxClient = new InfluxDB({
-  url: process.env.INFLUXDB_URL!,
-  token: process.env.INFLUXDB_TOKEN!,
+  url: env.INFLUXDB_URL,
+  token: env.INFLUXDB_TOKEN,
 });
-const writeApi = influxClient.getWriteApi(process.env.INFLUXDB_ORG!, process.env.INFLUXDB_BUCKET!);
+const writeApi = influxClient.getWriteApi(env.INFLUXDB_ORG, env.INFLUXDB_BUCKET);
 
 export enum MetricType {
   TRACKED_SCORES = "tracked-scores",

@@ -1,15 +1,15 @@
 "use client";
 
-import useDatabase from "@/hooks/use-database";
-import { useLiveQuery } from "dexie-react-hooks";
-import NavbarButton from "../navbar/navbar-button";
-import { PersonIcon } from "@radix-ui/react-icons";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import Friend from "@/components/friend/friend";
-import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import useDatabase from "@/hooks/use-database";
 import { useIsMobile } from "@/hooks/use-is-mobile";
+import { PersonIcon } from "@radix-ui/react-icons";
+import { useLiveQuery } from "dexie-react-hooks";
+import Link from "next/link";
+import { useRef, useState } from "react";
+import NavbarButton from "../navbar/navbar-button";
 
 export default function FriendsButton() {
   const database = useDatabase();

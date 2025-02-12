@@ -1,16 +1,16 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import Leaderboards from "@/components/maps/category/leaderboards";
-import Playlists from "@/components/maps/playlist/playlists";
-import MapFilters from "@/components/maps/map-filters";
-import { MapFilterProvider } from "@/components/providers/maps/map-filter-provider";
-import { ElementType, ReactNode, useEffect, useState } from "react";
 import RankingQueue from "@/components/maps/category/ranking-queue";
+import MapFilters from "@/components/maps/map-filters";
+import Playlists from "@/components/maps/playlist/playlists";
+import { MapFilterProvider } from "@/components/providers/maps/map-filter-provider";
+import Tooltip from "@/components/tooltip";
+import { Button } from "@/components/ui/button";
 import usePageNavigation from "@/hooks/use-page-navigation";
 import { TrophyIcon } from "@heroicons/react/24/solid";
 import { ExternalLinkIcon, TrendingUpIcon } from "lucide-react";
-import Tooltip from "@/components/tooltip";
+import { ElementType, ReactNode, useEffect, useState } from "react";
 
 type Category = {
   name: string;

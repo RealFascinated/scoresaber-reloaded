@@ -1,14 +1,14 @@
 import ScoreSaberLeaderboard from "./model/leaderboard/impl/scoresaber-leaderboard";
-import ScoreSaberLeaderboardToken from "./types/token/scoresaber/leaderboard";
 import LeaderboardDifficulty from "./model/leaderboard/leaderboard-difficulty";
-import { MapCharacteristic } from "./types/map-characteristic";
 import { LeaderboardStatus } from "./model/leaderboard/leaderboard-status";
-import { parseDate } from "./utils/time-utils";
-import ScoreSaberScoreToken from "./types/token/scoresaber/score";
+import { Controllers } from "./model/score/controllers";
 import { ScoreSaberScore } from "./model/score/impl/scoresaber-score";
 import { Modifier } from "./score/modifier";
+import { MapCharacteristic } from "./types/map-characteristic";
+import ScoreSaberLeaderboardToken from "./types/token/scoresaber/leaderboard";
+import ScoreSaberScoreToken from "./types/token/scoresaber/score";
 import { getDifficultyFromScoreSaberDifficulty, ScoreSaberHMDs } from "./utils/scoresaber.util";
-import { Controllers } from "./model/score/controllers";
+import { parseDate } from "./utils/time-utils";
 
 /**
  * Parses a {@link ScoreSaberLeaderboardToken} into a {@link ScoreSaberLeaderboard}.

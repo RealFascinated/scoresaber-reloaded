@@ -1,5 +1,5 @@
-import clsx from "clsx";
 import { formatChange } from "@ssr/common/utils/utils";
+import clsx from "clsx";
 
 type ChangeProps = {
   /**

@@ -1,11 +1,11 @@
-import { Controller, Get } from "elysia-decorators";
-import { t } from "elysia";
-import LeaderboardService from "../service/leaderboard.service";
-import SuperJSON from "superjson";
-import { Swagger } from "../common/swagger";
+import { DetailType } from "@ssr/common/detail-type";
 import { MapDifficulty } from "@ssr/common/score/map-difficulty";
 import { MapCharacteristic } from "@ssr/common/types/map-characteristic";
-import { DetailType } from "@ssr/common/detail-type";
+import { t } from "elysia";
+import { Controller, Get } from "elysia-decorators";
+import SuperJSON from "superjson";
+import { Swagger } from "../common/swagger";
+import LeaderboardService from "../service/leaderboard.service";
 
 @Controller("/leaderboard")
 export default class LeaderboardController {

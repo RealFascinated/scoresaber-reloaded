@@ -1,11 +1,11 @@
+import Avatar from "@/components/avatar";
 import CountryFlag from "@/components/country-flag";
-import Link from "next/link";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import { clsx } from "clsx";
-import { getScoreSaberAvatar, getScoreSaberRoles } from "@ssr/common/utils/scoresaber.util";
 import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/leaderboard-player-info";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
-import Avatar from "@/components/avatar";
+import { getScoreSaberAvatar, getScoreSaberRoles } from "@ssr/common/utils/scoresaber.util";
+import { clsx } from "clsx";
+import Link from "next/link";
 
 type TablePlayerProps = {
   /**

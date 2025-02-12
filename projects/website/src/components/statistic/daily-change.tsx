@@ -1,9 +1,9 @@
-import React from "react";
+import { cn } from "@/common/utils";
 import Tooltip from "@/components/tooltip";
-import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerStatValue } from "@ssr/common/player/player-stat-change";
-import { cn } from "@/common/utils";
+import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
+import React from "react";
 
 interface DailyChangeProps {
   /**

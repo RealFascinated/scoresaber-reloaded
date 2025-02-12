@@ -1,19 +1,19 @@
 "use client";
 
-import LeaderboardScores from "@/components/leaderboard/leaderboard-scores";
-import { LeaderboardInfo } from "@/components/leaderboard/page/leaderboard-info";
-import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
 import Card from "@/components/card";
+import LeaderboardScores from "@/components/leaderboard/leaderboard-scores";
 import { LeaderboardBeatSaverInfo } from "@/components/leaderboard/page/beatsaver-info";
 import LeaderboardFilters from "@/components/leaderboard/page/leaderboard-filters";
+import { LeaderboardInfo } from "@/components/leaderboard/page/leaderboard-info";
 import { LeaderboardFilterProvider } from "@/components/providers/leaderboard/leaderboard-filter-provider";
-import { LeaderboardResponse } from "@ssr/common/response/leaderboard-response";
-import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { ScoreModeEnum } from "@/components/score/score-mode";
 import { DetailType } from "@ssr/common/detail-type";
+import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
+import { LeaderboardResponse } from "@ssr/common/response/leaderboard-response";
+import { ssrApi } from "@ssr/common/utils/ssr-api";
+import { useQuery } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
+import { useEffect, useState } from "react";
 
 const LeaderboardPpChart = dynamic(
   () => import("@/components/leaderboard/page/chart/leaderboard-pp-chart"),

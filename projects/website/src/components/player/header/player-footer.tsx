@@ -1,6 +1,6 @@
-import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import PlayerLinks from "@/components/player/header/player-links";
 import PlayerAccBadges from "@/components/player/header/acc-badges";
+import PlayerLinks from "@/components/player/header/player-links";
+import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 
 export default function PlayerFooter({ player }: { player: ScoreSaberPlayer }) {
   return (

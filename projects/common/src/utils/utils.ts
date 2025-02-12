@@ -1,12 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import { env } from "../env";
 import { formatNumberWithCommas, formatPp } from "./number-utils";
 
 /**
  * Checks if we're in production
  */
 export function isProduction() {
-  return process.env.NODE_ENV === "production";
+  return env.NEXT_PUBLIC_APP_ENV === "production";
 }
 
 /**
@@ -14,7 +15,8 @@ export function isProduction() {
  */
 export function isServer() {
   return (
-    process.env.APP_ENV === "backend" || (!("window" in globalThis) && typeof window == undefined)
+    env.NEXT_PUBLIC_APPLICATION_NAME === "backend" ||
+    (!("window" in globalThis) && typeof window == undefined)
   );
 }
 

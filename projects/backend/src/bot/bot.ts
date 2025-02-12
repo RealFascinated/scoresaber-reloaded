@@ -1,5 +1,5 @@
 import { dirname, importx } from "@discordx/importer";
-import { Config } from "@ssr/common/config";
+import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
 import { isProduction } from "@ssr/common/utils/utils";
 import { ActivityType, AttachmentBuilder, EmbedBuilder } from "discord.js";
@@ -47,7 +47,7 @@ export async function initDiscordBot() {
   await importx(`${dirname(import.meta.url)}/commands/**/*.{js,ts}`);
 
   // Login
-  await client.login(Config.discordBotToken!);
+  await client.login(env.DISCORD_BOT_TOKEN);
 }
 
 /**

@@ -1,13 +1,13 @@
 "use client";
 
-import Combobox from "@/components/ui/combo-box";
 import Card from "@/components/card";
-import { useLiveQuery } from "dexie-react-hooks";
-import useDatabase from "@/hooks/use-database";
+import CountryFlag from "@/components/country-flag";
 import { useLeaderboardFilter } from "@/components/providers/leaderboard/leaderboard-filter-provider";
 import { Button } from "@/components/ui/button";
+import Combobox from "@/components/ui/combo-box";
+import useDatabase from "@/hooks/use-database";
 import { getCountries } from "@ssr/common/utils/country.util";
-import CountryFlag from "@/components/country-flag";
+import { useLiveQuery } from "dexie-react-hooks";
 
 export default function LeaderboardFilters() {
   const database = useDatabase();

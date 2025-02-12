@@ -1,4 +1,4 @@
-import { Config } from "@ssr/common/config";
+import { env } from "@ssr/common/env";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import type { MetadataRoute } from "next";
 
@@ -14,7 +14,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       links.push(
         players.map(player => {
           return {
-            url: `${Config.websiteUrl}/player/${player.id}`,
+            url: `${env.NEXT_PUBLIC_WEBSITE_NAME}/player/${player.id}`,
             images: [player.profilePicture],
             changeFrequency: "daily",
             priority: 0.5,

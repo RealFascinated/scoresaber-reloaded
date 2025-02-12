@@ -1,7 +1,7 @@
 "use client";
 
-import { Tooltip as ShadCnTooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 import { clsx } from "clsx";
+import { Tooltip as ShadCnTooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
 type Props = {
   /**

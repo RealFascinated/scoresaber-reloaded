@@ -1,12 +1,12 @@
 "use client";
 
-import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import StatValue from "@/components/stat-value";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import Tooltip from "@/components/tooltip";
-import GenericChart from "@/components/chart/generic-chart";
 import { DatasetConfig } from "@/common/chart/types";
 import { Colors } from "@/common/colors";
+import GenericChart from "@/components/chart/generic-chart";
+import StatValue from "@/components/stat-value";
+import Tooltip from "@/components/tooltip";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 
 type PpBoundaryProps = {
   player: ScoreSaberPlayer;

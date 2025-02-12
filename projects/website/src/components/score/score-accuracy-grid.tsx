@@ -1,5 +1,5 @@
-import { ScoreStatsToken } from "@ssr/common/types/token/beatleader/score-stats/score-stats";
 import Tooltip from "@/components/tooltip";
+import { ScoreStatsToken } from "@ssr/common/types/token/beatleader/score-stats/score-stats";
 
 type ScoreAccuracyGridProps = {
   scoreStats: ScoreStatsToken;

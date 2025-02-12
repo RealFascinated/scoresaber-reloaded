@@ -1,6 +1,11 @@
 import { DetailType } from "@ssr/common/detail-type";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
+import {
+  scoreSaberCachedPlayerToObject,
+  ScoreSaberPlayerCacheDocument,
+  ScoreSaberPlayerCacheModel,
+} from "@ssr/common/model/scoresaber-player-cache";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import PlayerScoresResponse from "@ssr/common/response/player-scores-response";
 import { PlayerScore } from "@ssr/common/score/player-score";
@@ -11,26 +16,21 @@ import {
   getScoreSaberScoreFromToken,
 } from "@ssr/common/token-creators";
 import { Metadata } from "@ssr/common/types/metadata";
+import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/leaderboard-player-info";
+import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import ScoreSaberPlayerScoreToken from "@ssr/common/types/token/scoresaber/player-score";
 import { getPlayerStatisticChanges } from "@ssr/common/utils/player-utils";
 import { getDaysAgoDate } from "@ssr/common/utils/time-utils";
 import { getPageFromRank, isProduction } from "@ssr/common/utils/utils";
 import { NotFoundError } from "elysia";
 import sanitize from "sanitize-html";
+import { DiscordChannels } from "../bot/bot";
 import { fetchWithCache } from "../common/cache.util";
+import { sendScoreNotification } from "../common/score/score.util";
 import CacheService, { ServiceCache } from "./cache.service";
 import LeaderboardService from "./leaderboard.service";
 import { PlayerService } from "./player.service";
 import { ScoreService } from "./score/score.service";
-import { sendScoreNotification } from "../common/score/score.util";
-import { DiscordChannels } from "../bot/bot";
-import {
-  scoreSaberCachedPlayerToObject,
-  ScoreSaberPlayerCacheDocument,
-  ScoreSaberPlayerCacheModel,
-} from "@ssr/common/model/scoresaber-player-cache";
-import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
-import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/leaderboard-player-info";
 export default class ScoreSaberService {
   /**
    * Notifies the number one score in Discord.

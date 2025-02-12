@@ -1,18 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import {
-  Chart,
-  LineElement,
-  PointElement,
-  LinearScale,
-  CategoryScale,
-  Legend,
-  Tooltip,
-  BarElement,
-  BarController,
-} from "chart.js";
-import { Line } from "react-chartjs-2";
+import { generateChartAxis, generateChartDataset } from "@/common/chart/chart.util";
+import { Axis, Dataset, DatasetConfig } from "@/common/chart/types";
+import useDatabase from "@/hooks/use-database";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import {
   formatChartDate,
@@ -22,10 +13,19 @@ import {
   getDaysAgoDate,
   parseDate,
 } from "@ssr/common/utils/time-utils";
-import { Axis, Dataset, DatasetConfig } from "@/common/chart/types";
-import { generateChartAxis, generateChartDataset } from "@/common/chart/chart.util";
-import React, { useMemo } from "react";
-import useDatabase from "@/hooks/use-database";
+import {
+  BarController,
+  BarElement,
+  CategoryScale,
+  Chart,
+  Legend,
+  LinearScale,
+  LineElement,
+  PointElement,
+  Tooltip,
+} from "chart.js";
+import { useMemo } from "react";
+import { Line } from "react-chartjs-2";
 
 // Register only the required components
 Chart.register(

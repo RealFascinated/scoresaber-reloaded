@@ -1,18 +1,18 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
-import { useCallback, useEffect, useState } from "react";
-import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
-import { useIsMobile } from "@/hooks/use-is-mobile";
+import Card from "@/components/card";
+import CountryFlag from "@/components/country-flag";
 import Pagination from "@/components/input/pagination";
 import { PlayerRanking } from "@/components/ranking/player-ranking";
-import { ScoreSaberPlayersPageToken } from "@ssr/common/types/token/scoresaber/players-page";
-import CountryFlag from "@/components/country-flag";
-import { normalizedRegionName } from "@ssr/common/utils/region-utils";
-import Card from "@/components/card";
 import { Switch } from "@/components/ui/switch";
-import { useLiveQuery } from "dexie-react-hooks";
 import useDatabase from "@/hooks/use-database";
+import { useIsMobile } from "@/hooks/use-is-mobile";
+import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
+import { ScoreSaberPlayersPageToken } from "@ssr/common/types/token/scoresaber/players-page";
+import { normalizedRegionName } from "@ssr/common/utils/region-utils";
+import { useQuery } from "@tanstack/react-query";
+import { useLiveQuery } from "dexie-react-hooks";
+import { useCallback, useEffect, useState } from "react";
 
 type RankingDataProps = {
   initialPage: number;

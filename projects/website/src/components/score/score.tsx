@@ -1,36 +1,36 @@
 "use client";
 
-import { ReactElement, useEffect, useState } from "react";
-import { motion } from "framer-motion";
-import { useQuery } from "@tanstack/react-query";
-import { CubeIcon } from "@heroicons/react/24/solid";
-import { TrendingUpIcon } from "lucide-react";
-import ScoreButtons from "./score-buttons";
-import ScoreSongInfo from "./score-song-info";
-import ScoreInfo from "./score-info";
-import ScoreStats from "./score-stats";
 import Card from "@/components/card";
 import { MapStats } from "@/components/score/map-stats";
-import { Button } from "@/components/ui/button";
-import { ScoreOverview } from "@/components/score/score-views/score-overview";
 import { ScoreHistory } from "@/components/score/score-views/score-history";
+import { ScoreOverview } from "@/components/score/score-views/score-overview";
+import { Button } from "@/components/ui/button";
+import { CubeIcon } from "@heroicons/react/24/solid";
+import { useQuery } from "@tanstack/react-query";
+import { motion } from "framer-motion";
+import { TrendingUpIcon } from "lucide-react";
+import { ReactElement, useEffect, useState } from "react";
+import ScoreButtons from "./score-buttons";
+import ScoreInfo from "./score-info";
+import ScoreSongInfo from "./score-song-info";
+import ScoreStats from "./score-stats";
 
-import { getPageFromRank } from "@ssr/common/utils/utils";
-import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { useIsMobile } from "@/hooks/use-is-mobile";
+import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
+import { getPageFromRank } from "@ssr/common/utils/utils";
 
-import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
-import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
 import LeaderboardScores from "@/components/leaderboard/leaderboard-scores";
 import { Separator } from "@/components/ui/separator";
+import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
+import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
+import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
+import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
 import { ScoreStatsResponse } from "@ssr/common/response/scorestats-response";
-import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/leaderboard-player-info";
 import { getScoreSaberAvatar } from "@ssr/common/utils/scoresaber.util";
-import Avatar from "../avatar";
+import { ssrApi } from "@ssr/common/utils/ssr-api";
 import Link from "next/link";
+import Avatar from "../avatar";
 
 type Props = {
   highlightedPlayer?: ScoreSaberPlayer;

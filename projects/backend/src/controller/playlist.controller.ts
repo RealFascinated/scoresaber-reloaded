@@ -1,15 +1,15 @@
-import { Controller, Get } from "elysia-decorators";
+import { DetailType } from "@ssr/common/detail-type";
+import { parseCustomRankedPlaylistSettings } from "@ssr/common/playlist/ranked/custom-ranked-playlist";
+import { parseSnipePlaylistSettings } from "@ssr/common/snipe/snipe-playlist-utils";
 import { t } from "elysia";
-import PlaylistService, { SnipeType } from "../service/playlist.service";
-import { Swagger } from "../common/swagger";
+import { Controller, Get } from "elysia-decorators";
 import {
   generateCustomRankedPlaylistImage,
   generateSnipePlaylistImage,
 } from "../common/playlist.util";
-import { parseSnipePlaylistSettings } from "@ssr/common/snipe/snipe-playlist-utils";
+import { Swagger } from "../common/swagger";
+import PlaylistService, { SnipeType } from "../service/playlist.service";
 import ScoreSaberService from "../service/scoresaber.service";
-import { DetailType } from "@ssr/common/detail-type";
-import { parseCustomRankedPlaylistSettings } from "@ssr/common/playlist/ranked/custom-ranked-playlist";
 
 @Controller("/playlist")
 export default class PlaylistController {

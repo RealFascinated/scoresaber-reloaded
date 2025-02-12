@@ -6,10 +6,10 @@ import {
   Severity,
 } from "@typegoose/typegoose";
 import { Document } from "mongoose";
-import type { ScoreSaberBio } from "../player/impl/scoresaber-player";
-import { ScoreSaberPlayerToken } from "src/types/token/scoresaber/player";
-import { ScoreSaberBadge, ScoreSaberPlayerBase } from "../player/impl/scoresaber-player";
 import { removeObjectFields } from "src/object.util";
+import { ScoreSaberPlayerToken } from "src/types/token/scoresaber/player";
+import type { ScoreSaberBio } from "../player/impl/scoresaber-player";
+import { ScoreSaberBadge, ScoreSaberPlayerBase } from "../player/impl/scoresaber-player";
 
 @modelOptions({
   options: { allowMixed: Severity.ALLOW },

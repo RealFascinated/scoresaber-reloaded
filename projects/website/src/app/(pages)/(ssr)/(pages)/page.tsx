@@ -1,8 +1,8 @@
-import HeroSection from "@/components/landing/hero";
 import DataCollection from "@/components/landing/data-collection";
 import Friends from "@/components/landing/friends";
-import SiteStats from "@/components/landing/site-stats";
+import HeroSection from "@/components/landing/hero";
 import RealtimeScores from "@/components/landing/realtime-scores";
+import SiteStats from "@/components/landing/site-stats";
 
 export default async function LandingPage() {
   return (

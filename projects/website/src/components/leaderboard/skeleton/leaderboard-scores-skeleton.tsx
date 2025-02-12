@@ -1,5 +1,5 @@
-import { Skeleton } from "@/components/ui/skeleton";
 import { LeaderboardScoreSkeleton } from "@/components/leaderboard/skeleton/leaderboard-score-skeleton";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function LeaderboardScoresSkeleton() {
   return (

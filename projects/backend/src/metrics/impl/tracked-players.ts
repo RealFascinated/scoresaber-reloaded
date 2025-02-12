@@ -1,7 +1,7 @@
 import { Point } from "@influxdata/influxdb-client";
+import { PlayerModel } from "@ssr/common/model/player";
 import { MetricType } from "../../service/metrics.service";
 import NumberMetric from "../number-metric";
-import { PlayerModel } from "@ssr/common/model/player";
 
 export default class TrackedPlayersMetric extends NumberMetric {
   constructor() {
@@ -14,4 +14,3 @@ export default class TrackedPlayersMetric extends NumberMetric {
     return this.getPointBase().intField("value", await PlayerModel.estimatedDocumentCount());
   }
 }
-

@@ -1,12 +1,12 @@
-import { Metadata } from "next";
 import Card from "@/components/card";
 import ScoreSaberStatisticsChart from "@/components/platform-statistics/charts/scoresaber-statistics-chart";
+import { env } from "@ssr/common/env";
 import { GamePlatform } from "@ssr/common/model/statistics/game-platform";
-import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { Statistic } from "@ssr/common/model/statistics/statistic";
-import { formatDateMinimal } from "@ssr/common/utils/time-utils";
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
-import { Config } from "@ssr/common/config";
+import { ssrApi } from "@ssr/common/utils/ssr-api";
+import { formatDateMinimal } from "@ssr/common/utils/time-utils";
+import { Metadata } from "next";
 
 export const revalidate = 300; // Revalidate every 5 minutes
 
@@ -41,7 +41,7 @@ export async function generateMetadata({ params }: StatisticsPageProps): Promise
   return {
     title: `${PLATFORM_NAMES[platform]} Statistics`,
     openGraph: {
-      siteName: Config.websiteName,
+      siteName: env.NEXT_PUBLIC_WEBSITE_NAME,
       title: `${PLATFORM_NAMES[platform]} Statistics`,
       description: `${descriptionParts.join("\n")}\n\nClick here to view the statistics for ${PLATFORM_NAMES[platform]}`,
     },

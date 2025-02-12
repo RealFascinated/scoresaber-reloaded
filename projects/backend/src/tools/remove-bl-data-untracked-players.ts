@@ -1,5 +1,5 @@
 import * as dotenv from "@dotenvx/dotenvx";
-import { Config } from "@ssr/common/config";
+import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
 import {
   AdditionalScoreDataDocument,
@@ -15,7 +15,7 @@ dotenv.config({
 });
 
 // Connect to Mongo
-await mongoose.connect(Config.mongoUri!); // Connect to MongoDB
+await mongoose.connect(env.MONGO_CONNECTION_STRING); // Connect to MongoDB
 
 const playerCache = new Map<string, boolean>();
 
@@ -118,7 +118,7 @@ export async function cleanupScoreStats() {
 if (require.main === module) {
   (async () => {
     try {
-      await mongoose.connect(Config.mongoUri!);
+      await mongoose.connect(env.MONGO_CONNECTION_STRING);
       Logger.info("Starting cleanup process...");
 
       await cleanupAdditionalScoreData();

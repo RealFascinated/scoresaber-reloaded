@@ -1,23 +1,23 @@
 "use client";
 
 import Card from "@/components/card";
-import { useQuery } from "@tanstack/react-query";
-import { useMapFilter } from "@/components/providers/maps/map-filter-provider";
-import { useCallback, useEffect, useState } from "react";
-import { LoadingIcon } from "@/components/loading-icon";
 import Pagination from "@/components/input/pagination";
-import { useIsMobile } from "@/hooks/use-is-mobile";
-import Link from "next/link";
-import { useDebounce } from "@uidotdev/usehooks";
-import { motion, useAnimation } from "framer-motion";
+import { LoadingIcon } from "@/components/loading-icon";
+import { useMapFilter } from "@/components/providers/maps/map-filter-provider";
 import { scoreAnimation } from "@/components/score/score-animation";
 import ScoreSongInfo from "@/components/score/score-song-info";
-import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
-import ScoreSaberLeaderboardPageToken from "@ssr/common/types/token/scoresaber/leaderboard-page";
-import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
-import { timeAgo } from "@ssr/common/utils/time-utils";
 import Tooltip from "@/components/tooltip";
+import { useIsMobile } from "@/hooks/use-is-mobile";
 import usePageNavigation from "@/hooks/use-page-navigation";
+import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
+import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
+import ScoreSaberLeaderboardPageToken from "@ssr/common/types/token/scoresaber/leaderboard-page";
+import { timeAgo } from "@ssr/common/utils/time-utils";
+import { useQuery } from "@tanstack/react-query";
+import { useDebounce } from "@uidotdev/usehooks";
+import { motion, useAnimation } from "framer-motion";
+import Link from "next/link";
+import { useCallback, useEffect, useState } from "react";
 
 type LeaderboardsProps = {
   /**

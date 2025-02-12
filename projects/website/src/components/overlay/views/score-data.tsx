@@ -1,6 +1,6 @@
 import { OverlayData } from "@/common/overlay/overlay-data";
-import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
+import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
 
 type OverlayScoreDataProps = {
   /**

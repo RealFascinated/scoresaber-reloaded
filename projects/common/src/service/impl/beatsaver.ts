@@ -1,7 +1,7 @@
-import Service from "../service";
+import { Cooldown } from "../../cooldown";
 import { BeatSaverMapToken } from "../../types/token/beatsaver/map";
 import { BeatSaverMultiMapLookup } from "../../types/token/beatsaver/multi-map-lookup";
-import { Cooldown } from "../../cooldown";
+import Service from "../service";
 
 const API_BASE = "https://api.beatsaver.com";
 const LOOKUP_MAP_BY_HASH_ENDPOINT = `${API_BASE}/maps/hash/:query`;

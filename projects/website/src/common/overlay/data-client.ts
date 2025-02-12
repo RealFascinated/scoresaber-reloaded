@@ -1,5 +1,5 @@
-import { IMessageEvent, w3cwebsocket as WebSocket } from "websocket";
 import Logger from "@ssr/common/logger";
+import { IMessageEvent, w3cwebsocket as WebSocket } from "websocket";
 
 export enum OverlayDataClients {
   HTTPSiraStatus = "HTTPSiraStatus",

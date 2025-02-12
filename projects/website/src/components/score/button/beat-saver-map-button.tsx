@@ -1,8 +1,7 @@
 import BeatSaverLogo from "@/components/logos/beatsaver-logo";
 import ScoreButton from "@/components/score/button/score-button";
-import * as React from "react";
-import Link from "next/link";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
+import Link from "next/link";
 
 type BeatSaverMapProps = {
   beatSaverMap: BeatSaverMapResponse;

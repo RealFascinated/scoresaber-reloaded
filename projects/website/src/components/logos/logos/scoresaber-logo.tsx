@@ -1,5 +1,5 @@
-import { LogoProps } from "@/components/logos/logo-props";
 import LogoBase from "@/components/logos/logo-base";
+import { LogoProps } from "@/components/logos/logo-props";
 
 export default function ScoresaberLogo({ size = 32, className }: LogoProps) {
   return (

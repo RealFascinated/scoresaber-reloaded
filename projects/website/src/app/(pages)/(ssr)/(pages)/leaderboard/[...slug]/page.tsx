@@ -1,8 +1,8 @@
 import { LeaderboardData } from "@/components/leaderboard/page/leaderboard-data";
 import NotFound from "@/components/not-found";
 import { ScoreModeEnum } from "@/components/score/score-mode";
-import { Config } from "@ssr/common/config";
 import { DetailType } from "@ssr/common/detail-type";
+import { env } from "@ssr/common/env";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { LeaderboardResponse } from "@ssr/common/response/leaderboard-response";
 import { getDifficultyName } from "@ssr/common/utils/song-utils";
@@ -65,7 +65,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
       title: UNKNOWN_LEADERBOARD.title,
       description: UNKNOWN_LEADERBOARD.description,
       openGraph: {
-        siteName: Config.websiteName,
+        siteName: env.NEXT_PUBLIC_WEBSITE_NAME,
         title: UNKNOWN_LEADERBOARD.title,
         description: UNKNOWN_LEADERBOARD.description,
       },
@@ -77,7 +77,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   return {
     title: `${leaderboard.fullName} - ${leaderboard.songAuthorName}`,
     openGraph: {
-      siteName: Config.websiteName,
+      siteName: env.NEXT_PUBLIC_WEBSITE_NAME,
       title: `${leaderboard.fullName} - ${leaderboard.songAuthorName}`,
       description: `Plays: ${leaderboard.plays} (${leaderboard.dailyPlays} Daily)
 Mapped by: ${leaderboard.songAuthorName}

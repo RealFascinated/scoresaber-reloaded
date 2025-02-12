@@ -1,6 +1,6 @@
-import { type NextRequest, NextResponse } from "next/server";
-import { isProduction } from "@ssr/common/utils/utils";
 import Logger from "@ssr/common/logger";
+import { isProduction } from "@ssr/common/utils/utils";
+import { type NextRequest, NextResponse } from "next/server";
 
 export function middleware(request: NextRequest) {
   const playerId = request.cookies.get("playerId");

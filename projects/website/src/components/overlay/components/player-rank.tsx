@@ -1,8 +1,8 @@
-import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
-import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
-import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { DailyChange } from "@/components/statistic/daily-change";
+import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
+import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerStatChange } from "@ssr/common/player/player-stat-change";
+import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 
 type OverlayPlayerRankProps = {
   /**

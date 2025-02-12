@@ -1,12 +1,12 @@
-import { getScoreBadgeFromAccuracy } from "@ssr/common/utils/song-utils";
-import { ScoreBadge, ScoreBadges } from "@/components/score/score-badge";
-import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
-import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import ScoreMissesAndPausesBadge from "@/components/score/badges/score-misses-and-pauses";
 import { HandAccuracyBadge } from "@/components/score/badges/hand-accuracy";
 import { ScoreAccuracyBadge } from "@/components/score/badges/score-accuracy";
+import ScoreMissesAndPausesBadge from "@/components/score/badges/score-misses-and-pauses";
 import { ScorePpBadge } from "@/components/score/badges/score-pp";
 import { ScoreScoreBadge } from "@/components/score/badges/score-score";
+import { ScoreBadge, ScoreBadges } from "@/components/score/score-badge";
+import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
+import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
+import { getScoreBadgeFromAccuracy } from "@ssr/common/utils/song-utils";
 
 const badges: ScoreBadge[] = [
   {

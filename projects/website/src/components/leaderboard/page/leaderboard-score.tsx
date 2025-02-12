@@ -1,16 +1,16 @@
 import { PlayerInfo } from "@/components/player/player-info";
-import { clsx } from "clsx";
-import Tooltip from "@/components/tooltip";
-import { ScoreTimeSet } from "@/components/score/score-time-set";
-import { ScoreModifiers } from "@/components/score/score-modifiers";
 import ScoreMissesAndPausesBadge from "@/components/score/badges/score-misses-and-pauses";
+import { ScorePpBadge } from "@/components/score/badges/score-pp";
+import { ScoreReplayButton } from "@/components/score/button/score-replay-button";
+import { ScoreModifiers } from "@/components/score/score-modifiers";
+import { ScoreTimeSet } from "@/components/score/score-time-set";
+import Tooltip from "@/components/tooltip";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { formatScoreAccuracy } from "@ssr/common/utils/score.util";
-import { ScoreReplayButton } from "@/components/score/button/score-replay-button";
-import { ScorePpBadge } from "@/components/score/badges/score-pp";
+import { clsx } from "clsx";
 
 type Props = {
   /**

@@ -1,9 +1,9 @@
-import mongoose from "mongoose";
-import { Config } from "@ssr/common/config";
 import * as dotenv from "@dotenvx/dotenvx";
+import { env } from "@ssr/common/env";
+import Logger from "@ssr/common/logger";
 import { ScoreSaberPreviousScoreModel } from "@ssr/common/model/score/impl/scoresaber-previous-score";
 import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
-import Logger from "@ssr/common/logger";
+import mongoose from "mongoose";
 
 dotenv.config({
   path: ".env",
@@ -11,7 +11,7 @@ dotenv.config({
 });
 
 // Connect to Mongo
-await mongoose.connect(Config.mongoUri!); // Connect to MongoDB
+await mongoose.connect(env.MONGO_CONNECTION_STRING); // Connect to MongoDB
 
 async function migrate() {
   // Adjusted aggregation pipeline

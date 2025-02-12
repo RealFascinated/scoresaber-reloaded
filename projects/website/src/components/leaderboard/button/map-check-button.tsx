@@ -1,7 +1,6 @@
 import ScoreButton from "@/components/score/button/score-button";
-import * as React from "react";
-import { EyeIcon } from "lucide-react";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
+import { EyeIcon } from "lucide-react";
 
 type MapCheckButtonProps = {
   beatSaverMap: BeatSaverMapResponse;

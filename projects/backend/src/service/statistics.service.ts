@@ -1,10 +1,10 @@
-import { formatDateMinimal, getMidnightAlignedDate } from "@ssr/common/utils/time-utils";
+import Logger from "@ssr/common/logger";
 import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import { GamePlatform } from "@ssr/common/model/statistics/game-platform";
 import { Statistic } from "@ssr/common/model/statistics/statistic";
 import { StatisticsModel } from "@ssr/common/model/statistics/statistics";
-import Logger from "@ssr/common/logger";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
+import { formatDateMinimal, getMidnightAlignedDate } from "@ssr/common/utils/time-utils";
 
 export default class StatisticsService {
   constructor() {

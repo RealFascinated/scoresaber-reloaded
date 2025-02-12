@@ -1,12 +1,12 @@
-import { Controller, Get } from "elysia-decorators";
-import { t } from "elysia";
-import { Swagger } from "../common/swagger";
-import BeatSaverService from "../service/beatsaver.service";
+import { DetailType } from "@ssr/common/detail-type";
+import { NotFoundError } from "@ssr/common/error/not-found-error";
 import { MapDifficulty } from "@ssr/common/score/map-difficulty";
 import { MapCharacteristic } from "@ssr/common/types/map-characteristic";
-import { NotFoundError } from "@ssr/common/error/not-found-error";
+import { t } from "elysia";
+import { Controller, Get } from "elysia-decorators";
 import SuperJSON, { SuperJSONResult } from "superjson";
-import { DetailType } from "@ssr/common/detail-type";
+import { Swagger } from "../common/swagger";
+import BeatSaverService from "../service/beatsaver.service";
 
 @Controller("/beatsaver")
 export default class BeatSaverController {

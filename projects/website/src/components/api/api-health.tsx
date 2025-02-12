@@ -1,10 +1,10 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
-import { useEffect, useRef, useState } from "react";
+import { env } from "@ssr/common/env";
 import { getApiHealth } from "@ssr/common/utils/api-utils";
+import { useQuery } from "@tanstack/react-query";
 import { useIsFirstRender } from "@uidotdev/usehooks";
-import { Config } from "@ssr/common/config";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 export function ApiHealth() {
@@ -15,7 +15,7 @@ export function ApiHealth() {
   useQuery({
     queryKey: ["api-health"],
     queryFn: async () => {
-      const status = (await getApiHealth(Config.apiUrl)).online;
+      const status = (await getApiHealth(env.NEXT_PUBLIC_API_URL)).online;
       setOnline(status);
       return status;
     },

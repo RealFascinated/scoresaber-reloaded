@@ -3,7 +3,7 @@ import cors from "@elysiajs/cors";
 import { cron } from "@elysiajs/cron";
 import { serverTiming } from "@elysiajs/server-timing";
 import { swagger } from "@elysiajs/swagger";
-import { Config } from "@ssr/common/config";
+import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import { isProduction } from "@ssr/common/utils/utils";
@@ -14,6 +14,7 @@ import { EmbedBuilder } from "discord.js";
 import { Elysia, ValidationError } from "elysia";
 import { decorators } from "elysia-decorators";
 import { helmet } from "elysia-helmet";
+import mongoose from "mongoose";
 import { DiscordChannels, initDiscordBot, logToChannel } from "./bot/bot";
 import { getAppVersion } from "./common/app.util";
 import AppController from "./controller/app.controller";
@@ -23,6 +24,7 @@ import PlayerController from "./controller/player.controller";
 import PlaylistController from "./controller/playlist.controller";
 import ScoresController from "./controller/scores.controller";
 import StatisticsController from "./controller/statistics.controller";
+import TrackedScoresMetric from "./metrics/impl/tracked-scores";
 import BeatLeaderService from "./service/beatleader.service";
 import CacheService from "./service/cache.service";
 import LeaderboardService from "./service/leaderboard.service";
@@ -31,8 +33,6 @@ import { PlayerService } from "./service/player.service";
 import { ScoreService } from "./service/score/score.service";
 import ScoreSaberService from "./service/scoresaber.service";
 import StatisticsService from "./service/statistics.service";
-import mongoose from "mongoose";
-import TrackedScoresMetric from "./metrics/impl/tracked-scores";
 
 Logger.info("Starting SSR Backend...");
 
@@ -46,7 +46,7 @@ if (await Bun.file(".env").exists()) {
 
 // Connect to Mongo
 Logger.info("Connecting to MongoDB...");
-await mongoose.connect(Config.mongoUri!); // Connect to MongoDB
+await mongoose.connect(env.MONGO_CONNECTION_STRING); // Connect to MongoDB
 Logger.info("Connected to MongoDB :)");
 
 // Connect to websockets

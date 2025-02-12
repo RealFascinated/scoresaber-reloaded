@@ -1,11 +1,11 @@
 "use client";
 
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-import { useState } from "react";
-import { LeaderboardInfo } from "./page/leaderboard-info";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
 import { useDebounce } from "@uidotdev/usehooks";
+import { useState } from "react";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { LeaderboardInfo } from "./page/leaderboard-info";
 
 type LeaderboardPreviewProps = {
   leaderboard: ScoreSaberLeaderboard;

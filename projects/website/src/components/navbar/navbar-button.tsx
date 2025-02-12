@@ -1,5 +1,5 @@
-import { HTMLAttributes, ReactNode } from "react";
 import { cn } from "@/common/utils";
+import { HTMLAttributes, ReactNode } from "react";
 
 type Props = {
   className?: string;

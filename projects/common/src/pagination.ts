@@ -1,5 +1,5 @@
-import { Metadata } from "./types/metadata";
 import { NotFoundError } from "./error/not-found-error";
+import { Metadata } from "./types/metadata";
 
 type FetchItemsFunction<T> = (fetchItems: FetchItems) => Promise<T[]>;
 

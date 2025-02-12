@@ -1,14 +1,14 @@
 "use client";
 
-import { useLiveQuery } from "dexie-react-hooks";
-import useDatabase from "../../hooks/use-database";
-import Tooltip from "../tooltip";
-import { Button } from "../ui/button";
 import { PersonIcon } from "@radix-ui/react-icons";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
+import { useLiveQuery } from "dexie-react-hooks";
 import { toast } from "sonner";
+import useDatabase from "../../hooks/use-database";
+import Tooltip from "../tooltip";
+import { Button } from "../ui/button";
 
 type Props = {
   /**
