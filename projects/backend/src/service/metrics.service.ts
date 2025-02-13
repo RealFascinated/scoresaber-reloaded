@@ -6,6 +6,7 @@ import TrackedScoresMetric from "../metrics/impl/tracked-scores";
 import UniqueDailyPlayersMetric from "../metrics/impl/unique-daily-players";
 import Metric from "../metrics/metric";
 import { env } from "@ssr/common/env";
+import ActiveAccountsMetric from "../metrics/impl/active-accounts";
 
 const influxClient = new InfluxDB({
   url: env.INFLUXDB_URL,
@@ -17,6 +18,7 @@ export enum MetricType {
   TRACKED_SCORES = "tracked-scores",
   TRACKED_PLAYERS = "tracked-players",
   UNIQUE_DAILY_PLAYERS = "unique-daily-players",
+  ACTIVE_ACCOUNTS = "active-accounts",
 }
 
 export default class MetricsService {
@@ -30,6 +32,8 @@ export default class MetricsService {
     this.registerMetric(new TrackedScoresMetric());
     this.registerMetric(new TrackedPlayersMetric());
     this.registerMetric(new UniqueDailyPlayersMetric());
+    this.registerMetric(new ActiveAccountsMetric());
+
     this.initMetrics();
   }
 

@@ -5,6 +5,8 @@ import { Statistic } from "@ssr/common/model/statistics/statistic";
 import { StatisticsModel } from "@ssr/common/model/statistics/statistics";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { formatDateMinimal, getMidnightAlignedDate } from "@ssr/common/utils/time-utils";
+import MetricsService, { MetricType } from "./metrics.service";
+import NumberMetric from "../metrics/number-metric";
 
 export default class StatisticsService {
   constructor() {
@@ -79,31 +81,25 @@ export default class StatisticsService {
   }
 
   public static async getScoreSaberStatistics() {
-    const statsResponse = await ScoreSaberScoreModel.aggregate([
-      { $match: { timestamp: { $gte: getMidnightAlignedDate(new Date()) } } },
-      {
-        $facet: {
-          uniquePlayers: [{ $group: { _id: "$playerId" } }, { $count: "uniquePlayers" }],
-          totalScores: [{ $count: "totalScores" }],
-        },
-      },
-    ]);
-
     const scores = await ScoreSaberScoreModel.find({
       timestamp: { $gte: getMidnightAlignedDate(new Date()) },
       pp: { $gt: 0 },
     })
-      .select({ pp: 1 }) // Use .select() instead of .projection()
-      .sort({ pp: -1 }) // Sort before limiting
-      .limit(100) // Limit the results
+      .select({ pp: 1 }) // Only get the pp field
+      .sort({ pp: -1 }) // Sort by pp in descending order
+      .limit(100) // Limit the results to 100
       .lean(); // Convert to plain JavaScript objects
 
-    const playerCount = await scoresaberService.lookupActivePlayerCount();
+    const activePlayerCount = await scoresaberService.lookupActivePlayerCount();
+    const uniquePlayers = (await MetricsService.getMetric(
+      MetricType.UNIQUE_DAILY_PLAYERS
+    )) as NumberMetric;
+    const totalScores = (await MetricsService.getMetric(MetricType.TRACKED_SCORES)) as NumberMetric;
 
     return {
-      uniquePlayers: statsResponse[0]?.uniquePlayers[0]?.uniquePlayers || 0,
-      playerCount: playerCount || 0,
-      totalScores: statsResponse[0]?.totalScores[0]?.totalScores || 0,
+      uniquePlayers: uniquePlayers.value || 0,
+      playerCount: activePlayerCount || 0,
+      totalScores: totalScores.value || 0,
       averagePp: scores.reduce((total, score) => total + score.pp, 0) / scores.length,
     };
   }

@@ -153,7 +153,12 @@ export function formatChartDate(date: Date) {
  */
 export function formatDate(
   date: Date,
-  format: "MMMM YYYY" | "DD MMMM YYYY" | "dddd, DD MMM, YYYY" | "DD MMMM YYYY HH:mm" = "MMMM YYYY"
+  format:
+    | "MMMM YYYY"
+    | "DD MMMM YYYY"
+    | "dddd, DD MMM, YYYY"
+    | "DD MMMM YYYY HH:mm"
+    | "DD/MM/YYYY, HH:mm:ss" = "MMMM YYYY"
 ) {
   date = forceUTC(date);
   switch (format) {
@@ -190,6 +195,18 @@ export function formatDate(
         year: "numeric",
         hour: "numeric",
         minute: "numeric",
+      });
+    }
+
+    case "DD/MM/YYYY, HH:mm:ss": {
+      return date.toLocaleString("en-US", {
+        timeZone: "Europe/London",
+        day: "numeric",
+        month: "numeric",
+        year: "numeric",
+        hour: "numeric",
+        minute: "numeric",
+        second: "numeric",
       });
     }
     default: {

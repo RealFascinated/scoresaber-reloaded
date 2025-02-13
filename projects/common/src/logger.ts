@@ -1,3 +1,5 @@
+import { formatDate } from "./utils/time-utils";
+
 export default class Logger {
   private static readonly LogLevel = {
     debug: 0,
@@ -14,7 +16,7 @@ export default class Logger {
    * @param args the arguments to log
    */
   public static log(level: keyof typeof Logger.LogLevel, message: string, ...args: unknown[]) {
-    const prefix = `[SSR / ${level.toUpperCase()}]`;
+    const prefix = `${formatDate(new Date(), "DD/MM/YYYY, HH:mm:ss")} [SSR / ${level.toUpperCase()}]`;
     const formattedMessage = `${prefix}: ${message}`;
 
     switch (level) {
