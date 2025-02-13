@@ -5,6 +5,7 @@ import { HttpSiraStatusSongStartedEvent } from "@/common/overlay/types/httpsiras
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import OverlayDataClient from "../data-client";
 import { resetOverlayData, useOverlayDataStore } from "../overlay-data-store";
+import { DetailType } from "@ssr/common/detail-type";
 
 type EventName = keyof EventHandlers;
 type EventHandlers = {
@@ -89,7 +90,8 @@ async function loadStatusData(status: HttpSiraStatus_Status) {
         beatSaverMap: await ssrApi.getBeatSaverMap(
           status.beatmap.songHash,
           status.beatmap.difficultyEnum,
-          status.beatmap.characteristic
+          status.beatmap.characteristic,
+          DetailType.FULL
         ),
         leaderboard: (
           await ssrApi.fetchLeaderboardByHash(

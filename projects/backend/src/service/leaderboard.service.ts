@@ -191,14 +191,11 @@ export default class LeaderboardService {
     const cacheKey = `${hash}-${difficulty}-${characteristic}-${options.type}`;
 
     return fetchWithCache(CacheService.getCache(ServiceCache.Leaderboards), cacheKey, async () => {
-      // Use compound index hint for faster query
       const cachedLeaderboard = await ScoreSaberLeaderboardModel.findOne({
         songHash: hash,
         "difficulty.difficulty": difficulty,
         "difficulty.characteristic": characteristic,
-      })
-        .hint({ songHash: 1, "difficulty.difficulty": 1, "difficulty.characteristic": 1 })
-        .lean();
+      }).lean();
 
       const { cached, foundLeaderboard } = this.validateCachedLeaderboard(
         cachedLeaderboard,

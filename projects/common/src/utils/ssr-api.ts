@@ -35,10 +35,18 @@ class SSRApi {
   async getBeatSaverMap(
     hash: string,
     difficulty: MapDifficulty,
-    characteristic: MapCharacteristic
+    characteristic: MapCharacteristic,
+    type: DetailType = DetailType.BASIC
   ) {
     const response = await Request.get<string>(
-      `${env.NEXT_PUBLIC_API_URL}/beatsaver/map/${hash}/${difficulty}/${characteristic}`
+      `${env.NEXT_PUBLIC_API_URL}/beatsaver/map/${hash}/${difficulty}/${characteristic}`,
+      {
+        returns: "text",
+        searchParams: {
+          type: type,
+          superJson: true,
+        },
+      }
     );
     if (response === undefined) {
       return undefined;

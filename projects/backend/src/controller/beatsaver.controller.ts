@@ -7,6 +7,7 @@ import { Controller, Get } from "elysia-decorators";
 import SuperJSON, { SuperJSONResult } from "superjson";
 import { Swagger } from "../common/swagger";
 import BeatSaverService from "../service/beatsaver.service";
+import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
 
 @Controller("/beatsaver")
 export default class BeatSaverController {
@@ -18,6 +19,7 @@ export default class BeatSaverController {
       difficulty: t.String({ required: true }),
       characteristic: t.String({ required: true }),
       type: t.Optional(t.Union([t.Literal("basic"), t.Literal("full")], { default: "basic" })),
+      superJson: t.Optional(t.Boolean()),
     }),
     detail: {
       responses: {
@@ -30,19 +32,20 @@ export default class BeatSaverController {
     },
   })
   public async getMap({
-    params: { hash, difficulty, characteristic, type },
+    params: { hash, difficulty, characteristic, type, superJson },
   }: {
     params: {
       hash: string;
       difficulty: MapDifficulty;
       characteristic: MapCharacteristic;
       type: DetailType;
+      superJson: boolean;
     };
-  }): Promise<SuperJSONResult> {
+  }): Promise<SuperJSONResult | BeatSaverMapResponse> {
     const map = await BeatSaverService.getMap(hash, difficulty, characteristic, type);
     if (!map) {
       throw new NotFoundError("BeatSaver map not found");
     }
-    return SuperJSON.serialize(map);
+    return superJson ? SuperJSON.serialize(map) : map;
   }
 }
