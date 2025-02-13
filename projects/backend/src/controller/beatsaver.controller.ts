@@ -18,6 +18,8 @@ export default class BeatSaverController {
       hash: t.String({ required: true }),
       difficulty: t.String({ required: true }),
       characteristic: t.String({ required: true }),
+    }),
+    query: t.Object({
       type: t.Optional(t.Union([t.Literal("basic"), t.Literal("full")], { default: "basic" })),
       superJson: t.Optional(t.Boolean()),
     }),
@@ -32,15 +34,15 @@ export default class BeatSaverController {
     },
   })
   public async getMap({
-    params: { hash, difficulty, characteristic, type, superJson },
+    params: { hash, difficulty, characteristic },
+    query: { type, superJson },
   }: {
     params: {
       hash: string;
       difficulty: MapDifficulty;
       characteristic: MapCharacteristic;
-      type: DetailType;
-      superJson: boolean;
     };
+    query: { type: DetailType; superJson: boolean };
   }): Promise<SuperJSONResult | BeatSaverMapResponse> {
     const map = await BeatSaverService.getMap(hash, difficulty, characteristic, type);
     if (!map) {
