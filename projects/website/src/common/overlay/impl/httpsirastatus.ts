@@ -85,19 +85,24 @@ async function loadStatusData(status: HttpSiraStatus_Status) {
 
   // Initialize the map data if it's not set
   if (previousState && !previousState.map) {
+    const beatmap = status.beatmap;
+    if (!beatmap || !beatmap.songHash || !beatmap.difficultyEnum || !beatmap.characteristic) {
+      return;
+    }
+
     useOverlayDataStore.setState({
       map: {
         beatSaverMap: await ssrApi.getBeatSaverMap(
-          status.beatmap.songHash,
-          status.beatmap.difficultyEnum,
-          status.beatmap.characteristic,
+          beatmap.songHash,
+          beatmap.difficultyEnum,
+          beatmap.characteristic,
           DetailType.FULL
         ),
         leaderboard: (
           await ssrApi.fetchLeaderboardByHash(
-            status.beatmap.songHash,
-            status.beatmap.difficultyEnum,
-            status.beatmap.characteristic
+            beatmap.songHash,
+            beatmap.difficultyEnum,
+            beatmap.characteristic
           )
         )?.leaderboard,
       },
