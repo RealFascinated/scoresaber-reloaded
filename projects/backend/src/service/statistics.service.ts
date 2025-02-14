@@ -91,13 +91,19 @@ export default class StatisticsService {
       .lean(); // Convert to plain JavaScript objects
 
     const activePlayerCount = await scoresaberService.lookupActivePlayerCount();
-    const uniquePlayers = (await MetricsService.getMetric(
-      MetricType.UNIQUE_DAILY_PLAYERS
-    )) as NumberMetric;
     const totalScores = (await MetricsService.getMetric(MetricType.TRACKED_SCORES)) as NumberMetric;
 
+    const statsResponse = await ScoreSaberScoreModel.aggregate([
+      { $match: { timestamp: { $gte: getMidnightAlignedDate(new Date()) } } },
+      {
+        $facet: {
+          uniquePlayers: [{ $group: { _id: "$playerId" } }, { $count: "uniquePlayers" }],
+        },
+      },
+    ]);
+
     return {
-      uniquePlayers: uniquePlayers.value || 0,
+      uniquePlayers: statsResponse[0]?.uniquePlayers[0]?.uniquePlayers || 0,
       playerCount: activePlayerCount || 0,
       totalScores: totalScores.value || 0,
       averagePp: scores.reduce((total, score) => total + score.pp, 0) / scores.length,
