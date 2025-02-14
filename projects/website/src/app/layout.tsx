@@ -67,11 +67,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${siteFont.className} antialiased w-full h-full`}>
-        <Script
-          defer
-          src={env.NEXT_PUBLIC_ANALYTICS_SCRIPT_URL}
-          data-website-id={env.NEXT_PUBLIC_ANALYTICS_WEBSITE_ID}
-        />
+        {env.NEXT_PUBLIC_ANALYTICS_WEBSITE_ID && env.NEXT_PUBLIC_ANALYTICS_SCRIPT_URL && (
+          <Script
+            defer
+            src={env.NEXT_PUBLIC_ANALYTICS_SCRIPT_URL}
+            data-website-id={env.NEXT_PUBLIC_ANALYTICS_WEBSITE_ID}
+          />
+        )}
         <Toaster />
         <PreloadResources />
         <TooltipProvider delayDuration={250}>
