@@ -67,11 +67,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${siteFont.className} antialiased w-full h-full`}>
-        {/*<Script src="https://unpkg.com/react-scan/dist/auto.global.js" async />*/}
         <Script
           defer
-          data-domain="ssr.fascinated.cc"
-          src="https://analytics.fascinated.cc/js/script.js"
+          src={env.NEXT_PUBLIC_ANALYTICS_SCRIPT_URL}
+          data-website-id={env.NEXT_PUBLIC_ANALYTICS_WEBSITE_ID}
         />
         <Toaster />
         <PreloadResources />

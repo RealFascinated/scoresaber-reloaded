@@ -26,6 +26,9 @@ export const env = createEnv({
     NEXT_PUBLIC_WEBSITE_URL: z.string(),
     NEXT_PUBLIC_API_URL: z.string(),
     NEXT_PUBLIC_CDN_URL: z.string(),
+
+    NEXT_PUBLIC_ANALYTICS_WEBSITE_ID: z.string(),
+    NEXT_PUBLIC_ANALYTICS_SCRIPT_URL: z.string(),
   },
 
   /**
@@ -59,6 +62,10 @@ export const env = createEnv({
     NEXT_PUBLIC_WEBSITE_URL: process.env.NEXT_PUBLIC_WEBSITE_URL ?? "https://ssr.fascinated.cc",
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL ?? "https://ssr-api.fascinated.cc",
     NEXT_PUBLIC_CDN_URL: process.env.NEXT_PUBLIC_CDN_URL ?? "https://ssr-cdn.fascinated.cc",
+
+    // Analytics
+    NEXT_PUBLIC_ANALYTICS_WEBSITE_ID: process.env.NEXT_PUBLIC_ANALYTICS_WEBSITE_ID,
+    NEXT_PUBLIC_ANALYTICS_SCRIPT_URL: process.env.NEXT_PUBLIC_ANALYTICS_SCRIPT_URL,
   },
 
   /**
