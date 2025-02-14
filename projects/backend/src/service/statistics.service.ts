@@ -1,12 +1,11 @@
 import Logger from "@ssr/common/logger";
+import { ScoreSaberPreviousScoreModel } from "@ssr/common/model/score/impl/scoresaber-previous-score";
 import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import { GamePlatform } from "@ssr/common/model/statistics/game-platform";
 import { Statistic } from "@ssr/common/model/statistics/statistic";
 import { StatisticsModel } from "@ssr/common/model/statistics/statistics";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { formatDateMinimal, getMidnightAlignedDate } from "@ssr/common/utils/time-utils";
-import MetricsService, { MetricType } from "./metrics.service";
-import NumberMetric from "../metrics/number-metric";
 
 export default class StatisticsService {
   constructor() {
@@ -91,7 +90,15 @@ export default class StatisticsService {
       .lean(); // Convert to plain JavaScript objects
 
     const activePlayerCount = await scoresaberService.lookupActivePlayerCount();
-    const totalScores = (await MetricsService.getMetric(MetricType.TRACKED_SCORES)) as NumberMetric;
+
+    const [totalScores, totalPreviousScores] = await Promise.all([
+      ScoreSaberScoreModel.countDocuments({
+        timestamp: { $gte: getMidnightAlignedDate(new Date()) },
+      }),
+      ScoreSaberPreviousScoreModel.countDocuments({
+        timestamp: { $gte: getMidnightAlignedDate(new Date()) },
+      }),
+    ]);
 
     const statsResponse = await ScoreSaberScoreModel.aggregate([
       { $match: { timestamp: { $gte: getMidnightAlignedDate(new Date()) } } },
@@ -105,7 +112,7 @@ export default class StatisticsService {
     return {
       uniquePlayers: statsResponse[0]?.uniquePlayers[0]?.uniquePlayers || 0,
       playerCount: activePlayerCount || 0,
-      totalScores: totalScores.value || 0,
+      totalScores: totalScores + totalPreviousScores,
       averagePp: scores.reduce((total, score) => total + score.pp, 0) / scores.length,
     };
   }
