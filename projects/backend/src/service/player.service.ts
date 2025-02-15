@@ -658,7 +658,7 @@ export class PlayerService {
    */
   public static async updatePlayerStatistics() {
     // Pages to search for players in (total players / players per page)
-    const pages = Math.ceil(2000 / 50);
+    const pages = Math.ceil(5000 / 50);
 
     const trackTime = new Date();
     const toTrack: PlayerDocument[] = await PlayerModel.find({});
