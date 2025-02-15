@@ -38,6 +38,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.0.4",
+    "critters": "^0.0.25",
     "cross-env": "^7.0.3",
     "dexie": "^4.0.11",
     "dexie-react-hooks": "^1.1.7",
