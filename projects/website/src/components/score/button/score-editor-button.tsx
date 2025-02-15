@@ -3,15 +3,13 @@ import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Slider } from "@/components/ui/slider";
 import { useIsMobile } from "@/hooks/use-is-mobile";
-import { CogIcon } from "@heroicons/react/24/solid";
-import { ResetIcon } from "@radix-ui/react-icons";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
-import clsx from "clsx";
 import { useState } from "react";
+import { FaCog, FaUndo } from "react-icons/fa";
 
 type ScoreEditorButtonProps = {
   score: ScoreSaberScore;
@@ -69,35 +67,34 @@ export default function ScoreEditorButton({
         }}
       >
         <PopoverTrigger>
-          <CogIcon
-            className={clsx(
-              "w-6 h-6 transition-all transform-gpu p-0",
-              isScoreEditMode ? "" : "rotate-180"
-            )}
-          />
+          <Tooltip display={<p>Edit Score Accuracy</p>}>
+            <FaCog className="size-6 p-0.5 cursor-pointer hover:animate-spin-slow" />
+          </Tooltip>
         </PopoverTrigger>
         <PopoverContent className="p-0" side={isMobile ? "top" : "left"}>
-          <div className="p-3 flex flex-col gap-2">
-            <p className="text-sm font-medium mb-1">Accuracy Changer</p>
-            {/* Accuracy Slider */}
-            <Slider
-              className="w-full"
-              min={accuracy}
-              max={100}
-              step={0.01}
-              onValueChange={handleSliderChange}
-            />
+          <div className="p-3 flex flex-col gap-4">
+            {/* Accuracy Changer */}
+            <div className="flex flex-col w-full gap-2">
+              <div className="flex justify-between items-center">
+                <p className="text-sm font-medium mb-1">Accuracy Changer</p>
 
-            {/* Reset Button */}
-            <Tooltip display={<p>Set accuracy to score accuracy</p>}>
-              <Button
-                onClick={handleSliderReset}
-                className="absolute top-1 right-1 p-1"
-                variant="ghost"
-              >
-                <ResetIcon className="w-4 h-4" />
-              </Button>
-            </Tooltip>
+                {/* Reset Button */}
+                <Tooltip display={<p>Set accuracy to score accuracy</p>}>
+                  <Button onClick={handleSliderReset} className="p-1 h-fit" variant="ghost">
+                    <FaUndo className="size-3.5" />
+                  </Button>
+                </Tooltip>
+              </div>
+
+              {/* Accuracy Slider */}
+              <Slider
+                className="w-full"
+                min={accuracy}
+                max={100}
+                step={0.01}
+                onValueChange={handleSliderChange}
+              />
+            </div>
 
             <div>
               {/* Current Accuracy */}
