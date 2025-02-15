@@ -24,7 +24,7 @@ function PlayerLink({ url, name, playerName, icon }: PlayerLinksProps) {
         </p>
       }
     >
-      <Link href={url} target="_blank" rel="noreferrer">
+      <Link href={url} target="_blank" rel="noreferrer" prefetch={false}>
         {icon}
       </Link>
     </Tooltip>

@@ -15,16 +15,10 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 
-  const response = NextResponse.next();
-
   // Log requests in production
   if (isProduction()) {
-    Logger.info(
-      `${request.method} ${request.nextUrl.pathname}${request.nextUrl.search} ${response.status}`
-    );
+    Logger.info(`${request.method} ${request.nextUrl.pathname}${request.nextUrl.search}`);
   }
-
-  return response;
 }
 
 export const config = {

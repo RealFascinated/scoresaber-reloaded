@@ -20,7 +20,7 @@ export function AppStats({ initialStatistics }: AppStatisticsProps) {
 
   const { data } = useQuery({
     queryKey: ["app-statistics"],
-    queryFn: () => Request.get<AppStatistics>(env.NEXT_PUBLIC_WEBSITE_NAME + "/statistics"),
+    queryFn: () => Request.get<AppStatistics>(env.NEXT_PUBLIC_API_URL + "/statistics"),
   });
 
   useEffect(() => {

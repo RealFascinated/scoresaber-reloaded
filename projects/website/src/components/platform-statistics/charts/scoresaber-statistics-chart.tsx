@@ -93,6 +93,7 @@ export default function ScoreSaberStatisticsChart({ statistics }: Props) {
     <div className="flex flex-col gap-2">
       <div className="flex flex-col gap-2 items-center">
         <Link
+          prefetch={false}
           href="https://ssr-grafana.fascinated.cc/public-dashboards/19a90072026f442fafa6c371192dddff"
           target="_blank"
         >

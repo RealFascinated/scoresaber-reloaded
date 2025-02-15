@@ -16,6 +16,7 @@ export function PlayerListItem({ player }: PlayerListItemProps) {
         <div className="flex items-center gap-3">
           {/* Global Rank */}
           <Link
+            prefetch={false}
             href={`/ranking/${player.rankPages.global}`}
             className="flex items-center gap-1 w-14"
           >
@@ -24,6 +25,7 @@ export function PlayerListItem({ player }: PlayerListItemProps) {
 
           {/* Country Rank */}
           <Link
+            prefetch={false}
             href={`/ranking/${player.country}/${player.rankPages.country}`}
             className="flex items-center gap-2 min-w-20"
           >
