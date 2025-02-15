@@ -25,7 +25,7 @@ const handlers: EventHandlers = {
   songStart: (data: HttpSiraStatusSongStartedEvent) => {
     loadStatusData(data.status);
   },
-  scoreChanged: (data: HttpSiraStatusHelloEvent) => {
+  scoreChanged: (data: HttpSiraStatusScoreChangedEvent) => {
     loadStatusData(data.status);
   },
   finished: () => {

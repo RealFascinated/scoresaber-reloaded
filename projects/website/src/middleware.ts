@@ -4,14 +4,6 @@ import { type NextRequest, NextResponse } from "next/server";
 
 export function middleware(request: NextRequest) {
   const playerId = request.cookies.get("playerId");
-  const isDesktopClient = request.headers.get("User-Agent")?.includes("ScoreSaber Reloaded");
-
-  // Handle desktop client redirect
-  if (isDesktopClient) {
-    if (request.nextUrl.pathname === "/" && playerId !== undefined) {
-      return NextResponse.redirect(new URL(`/player/${playerId.value}`, request.url));
-    }
-  }
 
   // Handle home redirect if they have claimed a player
   if (request.nextUrl.pathname === "/" && !!playerId) {
@@ -28,7 +20,7 @@ export function middleware(request: NextRequest) {
   // Log requests in production
   if (isProduction()) {
     Logger.info(
-      ` ${isDesktopClient ? "[Desktop App] " : ""}${request.method} ${request.nextUrl.pathname}${request.nextUrl.search} ${response.status}`
+      `${request.method} ${request.nextUrl.pathname}${request.nextUrl.search} ${response.status}`
     );
   }
 

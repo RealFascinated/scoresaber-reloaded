@@ -10,6 +10,7 @@ const nextConfig: NextConfig = {
   cacheMaxMemorySize: 0,
   outputFileTracingRoot: !isProduction() ? path.join(__dirname, "../../") : undefined,
   experimental: {
+    optimizeCss: true,
     turbo: {},
     optimizePackageImports: [
       "@ssr/common",
@@ -81,9 +82,15 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withSentryConfig(nextConfig, {
-  sourcemaps: {
-    disable: true,
-  },
-  telemetry: false,
+const withBundleAnalyzer = require("@next/bundle-analyzer")({
+  enabled: process.env.ANALYZE === "true",
 });
+
+export default withBundleAnalyzer(
+  withSentryConfig(nextConfig, {
+    sourcemaps: {
+      disable: true,
+    },
+    telemetry: false,
+  })
+);
