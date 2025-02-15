@@ -1,6 +1,6 @@
 "use client";
 
-import { scoreAnimation } from "@/components/score/score-animation";
+import { staggerAnimation } from "@/common/animations";
 import useDatabase from "@/hooks/use-database";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { Page, Pagination } from "@ssr/common/pagination";
@@ -71,7 +71,7 @@ export function FriendRanking() {
             <motion.div
               initial="hidden"
               animate={controls}
-              variants={scoreAnimation}
+              variants={staggerAnimation}
               className="divide-y divide-border"
             >
               {friendsPage.items.map((player, index) => (

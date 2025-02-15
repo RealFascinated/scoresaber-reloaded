@@ -3,7 +3,7 @@
 import { cn, isEqual } from "@/common/utils";
 import LeaderboardScoresSkeleton from "@/components/leaderboard/skeleton/leaderboard-scores-skeleton";
 import { useLeaderboardFilter } from "@/components/providers/leaderboard/leaderboard-filter-provider";
-import { scoreAnimation } from "@/components/score/score-animation";
+import { staggerAnimation } from "@/common/animations";
 import ScoreMode, { ScoreModeEnum } from "@/components/score/score-mode";
 import { useLeaderboardScores } from "@/hooks/score/use-leaderboard-scores";
 import { useIsMobile } from "@/hooks/use-is-mobile";
@@ -162,13 +162,13 @@ export default function LeaderboardScores({
                 initial="hidden"
                 animate={controls}
                 className="border-none"
-                variants={scoreAnimation}
+                variants={staggerAnimation}
               >
                 {currentScores.items.map((playerScore, index) => (
                   <motion.tr
                     key={index}
                     className="border-b border-border"
-                    variants={scoreAnimation}
+                    variants={staggerAnimation}
                   >
                     <LeaderboardScore
                       key={playerScore.scoreId}

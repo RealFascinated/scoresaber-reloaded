@@ -28,6 +28,17 @@ export function getCountries() {
 }
 
 /**
+ * Gets the full country name for a given country code.
+ *
+ * @param code - The ISO 3166-1 alpha-2 country code
+ * @returns the full country name
+ */
+export function getFullCountryName(code: string): string {
+  const countryName = new Intl.DisplayNames(["en"], { type: "region" });
+  return countryName.of(code) ?? "Unknown";
+}
+
+/**
  * Checks if a flag is renderable for a given country code.
  *
  * @param code - The ISO 3166-1 alpha-2 country code

@@ -2,7 +2,7 @@ import { setCookieValue } from "@/common/cookie.util";
 import { isEqual } from "@/common/utils";
 import { LoadingIcon } from "@/components/loading-icon";
 import Score from "@/components/score/score";
-import { scoreAnimation } from "@/components/score/score-animation";
+import { staggerAnimation } from "@/common/animations";
 import { Input } from "@/components/ui/input";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import usePageNavigation from "@/hooks/use-page-navigation";
@@ -178,11 +178,11 @@ export default function PlayerScores({ initialSearch, player, sort, page }: Prop
           <motion.div
             initial="hidden"
             animate={controls}
-            variants={scoreAnimation}
+            variants={staggerAnimation}
             className="grid min-w-full grid-cols-1 divide-y divide-border"
           >
             {scores.scores.map((score, index) => (
-              <motion.div key={index} variants={scoreAnimation}>
+              <motion.div key={index} variants={staggerAnimation}>
                 <Score
                   score={score.score}
                   leaderboard={score.leaderboard}

@@ -27,7 +27,11 @@ export default function CountryFlag({ code, size = 24 }: Props) {
         src={flagSrc}
         width={size * 2}
         height={size * 2}
-        className={`w-[${size * 2}px] min-w-[${size * 2}px] object-contain`}
+        className="object-contain"
+        style={{
+          width: size * 2,
+          minWidth: size * 2,
+        }}
         onError={handleError} // Handle error to load fallback
       />
     </Tooltip>

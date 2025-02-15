@@ -2,7 +2,7 @@
 
 import Card from "@/components/card";
 import { LoadingIcon } from "@/components/loading-icon";
-import { scoreAnimation } from "@/components/score/score-animation";
+import { staggerAnimation } from "@/common/animations";
 import ScoreSongInfo from "@/components/score/score-song-info";
 import ScoreSaberRankingRequestsResponse from "@ssr/common/response/scoresaber-ranking-requests-response";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
@@ -67,7 +67,7 @@ export default function RankingQueue() {
               initial="hidden"
               animate={controls}
               className="border-none flex flex-col gap-1.5"
-              variants={scoreAnimation}
+              variants={staggerAnimation}
             >
               {queues.map(queue => {
                 return (
@@ -78,7 +78,7 @@ export default function RankingQueue() {
                         rankingRequest.leaderboardInfo
                       );
                       return (
-                        <motion.div key={index} variants={scoreAnimation}>
+                        <motion.div key={index} variants={staggerAnimation}>
                           <Link
                             prefetch={false}
                             href={`/leaderboard/${leaderboard.id}`}

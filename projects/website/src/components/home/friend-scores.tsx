@@ -1,6 +1,6 @@
 "use client";
 
-import { scoreAnimation } from "@/components/score/score-animation";
+import { staggerAnimation } from "@/common/animations";
 import useDatabase from "@/hooks/use-database";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
@@ -72,7 +72,7 @@ export function FriendScores() {
             <motion.div
               initial="hidden"
               animate={controls}
-              variants={scoreAnimation}
+              variants={staggerAnimation}
               className="divide-y divide-border"
             >
               {scoreData.items.map((playerScore, index) => {
@@ -80,7 +80,7 @@ export function FriendScores() {
                 const leaderboard = playerScore.leaderboard;
                 const beatSaverMap = playerScore.beatSaver;
                 return (
-                  <motion.div key={index} variants={scoreAnimation}>
+                  <motion.div key={index} variants={staggerAnimation}>
                     <Score
                       score={score}
                       leaderboard={leaderboard}

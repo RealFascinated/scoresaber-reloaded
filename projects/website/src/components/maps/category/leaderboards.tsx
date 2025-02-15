@@ -4,7 +4,7 @@ import Card from "@/components/card";
 import Pagination from "@/components/input/pagination";
 import { LoadingIcon } from "@/components/loading-icon";
 import { useMapFilter } from "@/components/providers/maps/map-filter-provider";
-import { scoreAnimation } from "@/components/score/score-animation";
+import { staggerAnimation } from "@/common/animations";
 import ScoreSongInfo from "@/components/score/score-song-info";
 import Tooltip from "@/components/tooltip";
 import { useIsMobile } from "@/hooks/use-is-mobile";
@@ -100,7 +100,7 @@ export default function Leaderboards({ initialPage }: LeaderboardsProps) {
               initial="hidden"
               animate={controls}
               className="border-none flex flex-col gap-1.5"
-              variants={scoreAnimation}
+              variants={staggerAnimation}
             >
               {leaderboards.leaderboards.map((leaderboardToken, index) => {
                 const leaderboard = getScoreSaberLeaderboardFromToken(leaderboardToken);
@@ -112,7 +112,7 @@ export default function Leaderboards({ initialPage }: LeaderboardsProps) {
                 }
 
                 return (
-                  <motion.div key={index} variants={scoreAnimation}>
+                  <motion.div key={index} variants={staggerAnimation}>
                     <Link
                       prefetch={false}
                       href={`/leaderboard/${leaderboard.id}`}
