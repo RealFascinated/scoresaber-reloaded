@@ -58,7 +58,7 @@ export default function Settings() {
   return (
     <Dialog>
       <DialogTrigger>
-        <FaCog className="size-6 text-zinc-200 hover:animate-spin-slow" />
+        <FaCog className="size-5 text-zinc-200 hover:animate-spin-slow" />
       </DialogTrigger>
       <DialogContent className="max-w-[800px] max-h-[400px] h-full w-full flex flex-col">
         {/* Header */}
