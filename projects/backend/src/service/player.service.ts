@@ -200,12 +200,14 @@ export class PlayerService {
   }
 
   /**
-   * Gets the pp boundary scores for a player.
+   * Gets the ranked pp scores for a player.
    *
    * @param playerId the player's id
-   * @returns the pp boundary scores
+   * @returns the ranked pp scores
    */
-  private static async getPlayerPpBoundaryScores(playerId: string): Promise<number[]> {
+  public static async getPlayerRankedPps(playerId: string): Promise<number[]> {
+    await this.ensurePlayerExists(playerId);
+
     const playerScores = await ScoreService.getPlayerScores(playerId, {
       ranked: true,
       sort: "pp",
@@ -227,7 +229,7 @@ export class PlayerService {
     boundary: number = 1
   ): Promise<number[]> {
     await this.ensurePlayerExists(playerId);
-    const scoresPps = await this.getPlayerPpBoundaryScores(playerId);
+    const scoresPps = await this.getPlayerRankedPps(playerId);
     if (scoresPps.length === 0) {
       return [0];
     }
@@ -250,7 +252,7 @@ export class PlayerService {
     boundary: number = 1
   ): Promise<number> {
     await this.ensurePlayerExists(playerId);
-    const scoresPps = await this.getPlayerPpBoundaryScores(playerId);
+    const scoresPps = await this.getPlayerRankedPps(playerId);
     if (scoresPps.length === 0) {
       return 0;
     }

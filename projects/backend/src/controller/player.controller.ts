@@ -12,6 +12,7 @@ import SuperJSON from "superjson";
 import { Swagger } from "../common/swagger";
 import { PlayerService } from "../service/player.service";
 import ScoreSaberService from "../service/scoresaber.service";
+import { PlayerRankedPpsResponse } from "@ssr/common/response/player-ranked-pps-response";
 
 @Controller("/player")
 export default class PlayerController {
@@ -243,5 +244,31 @@ export default class PlayerController {
   }): Promise<unknown> {
     const data = await PlayerService.getPlayerScoreChart(id);
     return superJson ? SuperJSON.stringify(data) : data;
+  }
+
+  @Get("/ranked-pps/:id", {
+    config: {},
+    tags: ["player"],
+    params: t.Object({
+      id: t.String({ required: true }),
+    }),
+    detail: {
+      responses: {
+        200: {
+          description: "The player's ranked pps.",
+        },
+        ...Swagger.responses.playerNotFound,
+      },
+      description: "Lookup a player's ranked pps",
+    },
+  })
+  public async getPlayerRankedPps({
+    params: { id },
+  }: {
+    params: { id: string };
+  }): Promise<PlayerRankedPpsResponse> {
+    return {
+      pps: await PlayerService.getPlayerRankedPps(id),
+    };
   }
 }

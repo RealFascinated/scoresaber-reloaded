@@ -23,6 +23,7 @@ import { ScoreSort } from "../score/score-sort";
 import { AroundPlayer } from "../types/around-player";
 import { MapCharacteristic } from "../types/map-characteristic";
 import Request from "./request";
+import { PlayerRankedPpsResponse } from "../response/player-ranked-pps-response";
 
 class SSRApi {
   /**
@@ -342,6 +343,17 @@ class SSRApi {
           endDate: endDate.toISOString(),
         },
       }
+    );
+  }
+
+  /**
+   * Gets the ranked pp scores for a player.
+   *
+   * @param playerId the player id
+   */
+  async getPlayerRankedPps(playerId: string) {
+    return Request.get<PlayerRankedPpsResponse>(
+      `${env.NEXT_PUBLIC_API_URL}/player/ranked-pps/${playerId}`
     );
   }
 }
