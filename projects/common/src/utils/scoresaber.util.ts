@@ -1,5 +1,5 @@
 import { ScoreSaberScore } from "src/model/score/impl/scoresaber-score";
-import { scoresaberService } from "src/service/impl/scoresaber";
+import { scoresaberService } from "../service/impl/scoresaber";
 import { HMD } from "../hmds";
 import ScoreSaberPlayer from "../player/impl/scoresaber-player";
 import { MapDifficulty } from "../score/map-difficulty";
