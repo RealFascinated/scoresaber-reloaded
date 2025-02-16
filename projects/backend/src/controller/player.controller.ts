@@ -267,8 +267,6 @@ export default class PlayerController {
   }: {
     params: { id: string };
   }): Promise<PlayerRankedPpsResponse> {
-    return {
-      pps: await PlayerService.getPlayerRankedPps(id),
-    };
+    return await PlayerService.getPlayerRankedPps(id);
   }
 }

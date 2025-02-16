@@ -39,6 +39,8 @@ import { logNewTrackedPlayer } from "../common/embds";
 import CacheService, { ServiceCache } from "./cache.service";
 import { ScoreService } from "./score/score.service";
 import ScoreSaberService from "./scoresaber.service";
+import { PlayerRankedPpsResponse } from "@ssr/common/response/player-ranked-pps-response";
+import { updateScoreWeights } from "@ssr/common/utils/scoresaber.util";
 
 const accountCreationLock: { [id: string]: Promise<PlayerDocument> } = {};
 
@@ -205,17 +207,32 @@ export class PlayerService {
    * @param playerId the player's id
    * @returns the ranked pp scores
    */
-  public static async getPlayerRankedPps(playerId: string): Promise<number[]> {
+  public static async getPlayerRankedPps(playerId: string): Promise<PlayerRankedPpsResponse> {
     await this.ensurePlayerExists(playerId);
 
     const playerScores = await ScoreService.getPlayerScores(playerId, {
       ranked: true,
       sort: "pp",
-      projection: { pp: 1 },
+      projection: { pp: 1, weight: 1, scoreId: 1 },
       includeLeaderboard: false,
     });
 
-    return playerScores.map(score => score.score.pp);
+    if (playerScores.length === 0) {
+      return {
+        scores: [],
+      };
+    }
+
+    const scores = playerScores.map(score => ({
+      pp: score.score.pp,
+      weight: score.score.weight,
+      scoreId: score.score.scoreId,
+    }));
+    updateScoreWeights(scores);
+
+    return {
+      scores,
+    };
   }
 
   /**
@@ -230,13 +247,18 @@ export class PlayerService {
   ): Promise<number[]> {
     await this.ensurePlayerExists(playerId);
     const scoresPps = await this.getPlayerRankedPps(playerId);
-    if (scoresPps.length === 0) {
+    if (scoresPps.scores.length === 0) {
       return [0];
     }
 
     const boundaries: number[] = [];
     for (let i = 1; i < boundary + 1; i++) {
-      boundaries.push(scoresaberService.calcPpBoundary(scoresPps, i));
+      boundaries.push(
+        scoresaberService.calcPpBoundary(
+          scoresPps.scores.map(score => score.pp),
+          i
+        )
+      );
     }
     return boundaries;
   }
@@ -253,11 +275,14 @@ export class PlayerService {
   ): Promise<number> {
     await this.ensurePlayerExists(playerId);
     const scoresPps = await this.getPlayerRankedPps(playerId);
-    if (scoresPps.length === 0) {
+    if (scoresPps.scores.length === 0) {
       return 0;
     }
 
-    return scoresaberService.getPpBoundaryForRawPp(scoresPps, boundary);
+    return scoresaberService.getPpBoundaryForRawPp(
+      scoresPps.scores.map(score => score.pp),
+      boundary
+    );
   }
 
   /**

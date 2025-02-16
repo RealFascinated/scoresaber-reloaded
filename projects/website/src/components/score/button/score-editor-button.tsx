@@ -6,9 +6,10 @@ import { useIsMobile } from "@/hooks/use-is-mobile";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
+import { updateScoreWeights } from "@ssr/common/utils/scoresaber.util";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { FaCog, FaUndo } from "react-icons/fa";
 
 type ScoreEditorButtonProps = {
@@ -33,6 +34,9 @@ export default function ScoreEditorButton({
     queryFn: () => ssrApi.getPlayerRankedPps(score.playerId),
   });
 
+  const [modifiedScores, setModifiedScores] =
+    useState<Pick<ScoreSaberScore, "pp" | "weight" | "scoreId">[]>();
+
   const handleSliderChange = (value: number[]) => {
     const newAccuracy = Math.max(0, Math.min(value[0], 100)); // Ensure the accuracy stays within 0-100
     const newBaseScore = (newAccuracy / 100) * maxScore;
@@ -41,6 +45,23 @@ export default function ScoreEditorButton({
       score: newBaseScore,
     });
     setNewAccuracy(newAccuracy);
+
+    if (rankedPps) {
+      let newModifiedScores = [...rankedPps.scores];
+      for (let i = 0; i < newModifiedScores.length; i++) {
+        const modifiedScore = newModifiedScores[i];
+        if (score.scoreId == modifiedScore.scoreId) {
+          newModifiedScores[i] = {
+            ...modifiedScore,
+            pp: scoresaberService.getPp(leaderboard.stars, newAccuracy),
+          };
+        }
+      }
+      newModifiedScores = newModifiedScores.sort((a, b) => b.pp - a.pp);
+      updateScoreWeights(newModifiedScores);
+
+      setModifiedScores(newModifiedScores);
+    }
   };
 
   const handleSliderReset = () => {
@@ -51,20 +72,20 @@ export default function ScoreEditorButton({
     setNewAccuracy(accuracy);
   };
 
-  const ppGain = rankedPps
-    ? scoresaberService.getPpBoundaryForRawPp(
-        rankedPps.pps,
-        scoresaberService.getPp(leaderboard.stars, newAccuracy)
-      )
-    : 0;
+  const ppGain = useMemo(() => {
+    if (!rankedPps || !modifiedScores) {
+      return 0;
+    }
+
+    return (
+      scoresaberService.getTotalWeightedPp(modifiedScores.map(score => score.pp)) -
+      scoresaberService.getTotalWeightedPp(rankedPps.scores.map(score => score.pp))
+    );
+  }, [modifiedScores, rankedPps]);
 
   return (
     <div className="flex items-center justify-center cursor-default relative">
-      <Popover
-        onOpenChange={open => {
-          handleSliderReset();
-        }}
-      >
+      <Popover onOpenChange={() => handleSliderReset()}>
         <PopoverTrigger>
           <Tooltip display={<p>Edit Score Accuracy</p>}>
             <FaCog className="size-6 p-0.5 cursor-pointer hover:animate-spin-slow" />

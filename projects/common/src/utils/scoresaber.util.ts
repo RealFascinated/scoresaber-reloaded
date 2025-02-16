@@ -1,3 +1,5 @@
+import { ScoreSaberScore } from "src/model/score/impl/scoresaber-score";
+import { scoresaberService } from "src/service/impl/scoresaber";
 import { HMD } from "../hmds";
 import ScoreSaberPlayer from "../player/impl/scoresaber-player";
 import { MapDifficulty } from "../score/map-difficulty";
@@ -130,4 +132,15 @@ export function getScoreSaberAvatar(
   player: ScoreSaberPlayerToken | ScoreSaberLeaderboardPlayerInfoToken | ScoreSaberPlayer
 ): string {
   return `https://cdn.scoresaber.com/avatars/${player.id}.jpg`;
+}
+
+/**
+ * Updates the weights of the scores
+ *
+ * @param scores the scores
+ */
+export function updateScoreWeights(scores: Pick<ScoreSaberScore, "pp" | "weight" | "scoreId">[]) {
+  for (let i = 0; i < scores.length; i++) {
+    scores[i].weight = Math.pow(scoresaberService.WEIGHT_COEFFICIENT, i);
+  }
 }

@@ -43,10 +43,10 @@ const SEARCH_LEADERBOARDS_ENDPOINT = `${API_BASE}/leaderboards?search=:query`;
  */
 const RANKING_REQUESTS_ENDPOINT = `${API_BASE}/ranking/requests/:query`;
 
-const WEIGHT_COEFFICIENT = 0.965;
-const STAR_MULTIPLIER = 42.117208413;
-
 class ScoreSaberService extends Service {
+  readonly WEIGHT_COEFFICIENT = 0.965;
+  readonly STAR_MULTIPLIER = 42.117208413;
+
   private curvePoints = [
     new CurvePoint(0, 0),
     new CurvePoint(0.6, 0.18223233667439062),
@@ -474,7 +474,7 @@ class ScoreSaberService extends Service {
     if (accuracy <= 1) {
       accuracy *= 100; // Convert the accuracy to a percentage
     }
-    const pp = stars * STAR_MULTIPLIER; // Calculate base PP value
+    const pp = stars * this.STAR_MULTIPLIER; // Calculate base PP value
     return this.getModifier(accuracy) * pp; // Calculate and return final PP value
   }
 
@@ -492,7 +492,7 @@ class ScoreSaberService extends Service {
 
     // 0.965^idx * rawPpToFind = expected + oldBottomPp - newBottomPp;
     // rawPpToFind = (expected + oldBottomPp - newBottomPp) / 0.965^idx;
-    return (expected + oldBottomPp - newBottomPp) / Math.pow(WEIGHT_COEFFICIENT, idx);
+    return (expected + oldBottomPp - newBottomPp) / Math.pow(this.WEIGHT_COEFFICIENT, idx);
   }
 
   /**
@@ -504,9 +504,9 @@ class ScoreSaberService extends Service {
    * @returns the total amount of weighted pp
    * @private
    */
-  private getTotalWeightedPp(ppArray: Array<number>, startIdx = 0) {
+  public getTotalWeightedPp(ppArray: Array<number>, startIdx = 0) {
     return ppArray.reduce(
-      (cumulative, pp, idx) => cumulative + Math.pow(WEIGHT_COEFFICIENT, idx + startIdx) * pp,
+      (cumulative, pp, idx) => cumulative + Math.pow(this.WEIGHT_COEFFICIENT, idx + startIdx) * pp,
       0
     );
   }
