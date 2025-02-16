@@ -46,6 +46,7 @@ export default function LeaderboardScores({
     data: scores,
     isError,
     isLoading,
+    isRefetching,
   } = useLeaderboardScores(leaderboardId, page, mode, filter.country);
 
   const handleLeaderboardChange = useCallback(
@@ -148,7 +149,7 @@ export default function LeaderboardScores({
             page={page}
             totalItems={scores.metadata.totalItems}
             itemsPerPage={scores.metadata.itemsPerPage}
-            loadingPage={isLoading ? page : undefined}
+            loadingPage={isLoading || isRefetching ? page : undefined}
             generatePageUrl={page => {
               return `/leaderboard/${leaderboardId}/${page}`;
             }}
