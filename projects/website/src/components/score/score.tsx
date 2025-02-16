@@ -71,7 +71,6 @@ export default function Score({
   const [baseScore, setBaseScore] = useState(score.score);
   const [isLeaderboardExpanded, setIsLeaderboardExpanded] = useState(false);
 
-  const [loading, setLoading] = useState(false);
   const [selectedMode, setSelectedMode] = useState<Mode>(modes[0]);
 
   const scoresPage = getPageFromRank(score.rank, 12);
@@ -92,8 +91,6 @@ export default function Score({
       };
     },
     staleTime: 30000,
-    enabled: loading,
-    placeholderData: data => data,
   });
 
   useEffect(() => {
@@ -115,8 +112,6 @@ export default function Score({
   const handleLeaderboardOpen = (isExpanded: boolean) => {
     if (!isExpanded) {
       setSelectedMode(modes[0]);
-    } else {
-      setLoading(true);
     }
     setIsLeaderboardExpanded(isExpanded);
   };
@@ -175,7 +170,7 @@ export default function Score({
         <ScoreStats score={{ ...score, accuracy, pp }} leaderboard={leaderboard} />
       </div>
 
-      {isLeaderboardExpanded && dropdownData && !loading && (
+      {isLeaderboardExpanded && dropdownData && !isLoading && (
         <div className="w-full mt-2">
           <Card className="flex gap-4 w-full relative border border-input">
             <div className="flex flex-col w-full gap-2 justify-center items-center">
