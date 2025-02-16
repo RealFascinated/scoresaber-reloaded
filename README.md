@@ -16,11 +16,19 @@ ScoreSaber Reloaded is a new way to view your scores and get more stats about yo
 
 ## Features ✨
 
-- [Score Data Collection](https://ssr.fascinated.cc/#data-collection)
-- [Friends](https://ssr.fascinated.cc/#friends)
-- [Statistics](https://ssr.fascinated.cc/#statistics)
-- [Realtime Scores](https://ssr.fascinated.cc/scores/live)
-- More to come...
+See [contributing](#contributing-) for more information about contributing to this project.
+
+- BeatLeader Integration
+- Friends
+- Additional Statistics
+- PP Utilities
+- Open API
+- User Profiles
+- Leaderboard Comparisons
+- Score History Tracking
+- Custom Playlists
+- Leaderboard Statistics Dashboard
+- OBS Overlay
 
 ## App Preview 📸
 
