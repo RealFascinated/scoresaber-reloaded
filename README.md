@@ -32,8 +32,8 @@ See [contributing](#contributing-) for more information about contributing to th
 
 ## App Preview 📸
 
-![landing-preview](./assets/landing-preview.png)
-![app-preview](./projects/website/public/assets/home/app-preview.png)
+![landing-preview](https://preview.fascinated.cc/?url=https://ssr.fascinated.cc)
+![app-preview](https://preview.fascinated.cc/?url=https://ssr.fascinated.cc/player/3225556157461414)
 
 ## Stars ⭐
 
