@@ -35,7 +35,6 @@ const getRankingData = async ({ params }: Props): Promise<RankingPageData> => {
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
   const { country } = await getRankingData(props);
-  console.log(country);
 
   const fullCountry = country === undefined ? "Global" : `${getFullCountryName(country)}`;
   const title = `${fullCountry} / Ranking`;
