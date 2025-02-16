@@ -1,5 +1,3 @@
-<img src="./assets/logo.webp" alt="ScoreSaber Reloaded" width="165" align="right">
-
 # ScoreSaber Reloaded 🎮
 
 > [!IMPORTANT]
