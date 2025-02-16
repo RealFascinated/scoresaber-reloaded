@@ -14,6 +14,9 @@ import { useQuery } from "@tanstack/react-query";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useEffect, useState } from "react";
 import { LoadingIcon } from "../loading-icon";
+import { Button } from "../ui/button";
+import { LinkIcon } from "lucide-react";
+import Link from "next/link";
 
 type RankingDataProps = {
   initialPage: number;
@@ -37,6 +40,7 @@ export default function RankingData({ initialPage, country }: RankingDataProps) 
     data: rankingData,
     isLoading,
     isRefetching,
+    isError,
   } = useQuery({
     queryKey: ["rankingData", currentPage, country],
     queryFn: async () => {
@@ -81,9 +85,21 @@ export default function RankingData({ initialPage, country }: RankingDataProps) 
         )}
       </div>
 
-      {!rankingData && (
-        <div className="flex flex-col items-center justify-center h-full">
+      {!rankingData && !isError && (
+        <div className="flex flex-col items-center justify-center h-full mt-2">
           <LoadingIcon />
+        </div>
+      )}
+
+      {isError && (
+        <div className="flex flex-col items-center justify-center h-full mt-2 gap-2">
+          <p>No players were found for this country or page.</p>
+          <Link href="/ranking">
+            <Button variant="outline">
+              Back to Global
+              <LinkIcon className="size-3.5 ml-2" />
+            </Button>
+          </Link>
         </div>
       )}
 
