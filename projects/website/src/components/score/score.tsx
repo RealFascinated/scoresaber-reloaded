@@ -72,13 +72,12 @@ export default function Score({
   const [isLeaderboardExpanded, setIsLeaderboardExpanded] = useState(false);
 
   const [loading, setLoading] = useState(false);
-  const [dropdownData, setDropdownData] = useState<DropdownData | undefined>();
   const [selectedMode, setSelectedMode] = useState<Mode>(modes[0]);
 
   const scoresPage = getPageFromRank(score.rank, 12);
   const isMobile = useIsMobile();
 
-  const { data, isLoading } = useQuery<DropdownData>({
+  const { data: dropdownData, isLoading } = useQuery<DropdownData>({
     queryKey: [
       `leaderboardDropdownData:${leaderboard.id}`,
       leaderboard.id,
@@ -94,21 +93,14 @@ export default function Score({
     },
     staleTime: 30000,
     enabled: loading,
+    placeholderData: data => data,
   });
-
-  useEffect(() => {
-    if (data) {
-      setDropdownData(data);
-      setLoading(false);
-    }
-  }, [data]);
 
   useEffect(() => {
     /**
      * Reset the leaderboard dropdown when the score changes
      */
     setIsLeaderboardExpanded(false);
-    setDropdownData(undefined);
     setSelectedMode(modes[0]);
   }, [score.scoreId]);
 
@@ -123,7 +115,6 @@ export default function Score({
   const handleLeaderboardOpen = (isExpanded: boolean) => {
     if (!isExpanded) {
       setSelectedMode(modes[0]);
-      setDropdownData(undefined);
     } else {
       setLoading(true);
     }

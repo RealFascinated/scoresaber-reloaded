@@ -13,7 +13,7 @@ import { LeaderboardResponse } from "@ssr/common/response/leaderboard-response";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 const LeaderboardPpChart = dynamic(
   () => import("@/components/leaderboard/page/chart/leaderboard-pp-chart"),
@@ -48,22 +48,18 @@ export function LeaderboardData({
   const [currentLeaderboardId, setCurrentLeaderboardId] = useState(
     initialLeaderboard.leaderboard.id
   );
-  const [currentLeaderboard, setCurrentLeaderboard] = useState(initialLeaderboard);
 
   const { data } = useQuery({
     queryKey: ["leaderboard", currentLeaderboardId],
     queryFn: async (): Promise<LeaderboardResponse<ScoreSaberLeaderboard> | undefined> => {
       return ssrApi.fetchLeaderboard(currentLeaderboardId + "", DetailType.FULL);
     },
+    placeholderData: data => data ?? initialLeaderboard,
   });
 
-  useEffect(() => {
-    if (data) {
-      setCurrentLeaderboard(data);
-    }
-  }, [data]);
+  const leaderboardResponse = data ?? initialLeaderboard;
+  const { leaderboard, beatsaver } = leaderboardResponse;
 
-  const leaderboard = currentLeaderboard.leaderboard;
   return (
     <LeaderboardFilterProvider>
       <div className="w-full">
@@ -79,13 +75,8 @@ export function LeaderboardData({
             />
           </Card>
           <div className="flex flex-col gap-2 w-full xl:w-[550px]">
-            <LeaderboardInfo
-              leaderboard={leaderboard}
-              beatSaverMap={currentLeaderboard.beatsaver}
-            />
-            {currentLeaderboard.beatsaver && (
-              <LeaderboardBeatSaverInfo beatSaverMap={currentLeaderboard.beatsaver} />
-            )}
+            <LeaderboardInfo leaderboard={leaderboard} beatSaverMap={beatsaver} />
+            {beatsaver && <LeaderboardBeatSaverInfo beatSaverMap={beatsaver} />}
             <LeaderboardFilters />
             {leaderboard.stars > 0 && leaderboard.maxScore > 0 && (
               <Card>

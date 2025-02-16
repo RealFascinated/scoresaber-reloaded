@@ -36,13 +36,9 @@ export default function PlayerAndLeaderboardSearch() {
   const { isOpen, openSearch, closeSearch } = useSearch();
 
   const [query, setQuery] = useState<string>("");
-  const [results, setResults] = useState<{
-    players: ScoreSaberPlayerToken[];
-    leaderboards: ScoreSaberLeaderboard[];
-  }>();
   const debouncedQuery = useDebounce(query, 500);
 
-  const { data, isLoading } = useQuery({
+  const { data: results, isLoading } = useQuery({
     queryKey: ["playerAndLeaderboardSearch", debouncedQuery],
     queryFn: async (): Promise<{
       players: ScoreSaberPlayerToken[];
@@ -81,12 +77,6 @@ export default function PlayerAndLeaderboardSearch() {
     refetchInterval: false,
     enabled: isOpen,
   });
-
-  useEffect(() => {
-    if (data) {
-      setResults(data);
-    }
-  }, [data]);
 
   // Listen for CTRL + K keybinds to open this dialog
   useEffect(() => {

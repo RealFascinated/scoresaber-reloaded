@@ -10,12 +10,11 @@ import { useIsMobile } from "@/hooks/use-is-mobile";
 import usePageNavigation from "@/hooks/use-page-navigation";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
-import ScoreSaberLeaderboardPageToken from "@ssr/common/types/token/scoresaber/leaderboard-page";
 import { timeAgo } from "@ssr/common/utils/time-utils";
 import { useQuery } from "@tanstack/react-query";
 import { useDebounce } from "@uidotdev/usehooks";
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 type LeaderboardsProps = {
   /**
@@ -30,12 +29,9 @@ export default function Leaderboards({ initialPage }: LeaderboardsProps) {
 
   const filter = useMapFilter();
   const filterDebounced = useDebounce(filter, 100);
-
   const [page, setPage] = useState(initialPage || 1);
-  const [previousPage, setPreviousPage] = useState(initialPage || 1);
-  const [leaderboards, setLeaderboards] = useState<ScoreSaberLeaderboardPageToken | undefined>();
 
-  const { data, isLoading } = useQuery({
+  const { data: leaderboards, isLoading } = useQuery({
     queryKey: ["maps", filterDebounced, page],
     queryFn: async () =>
       scoresaberService.lookupLeaderboards(page, {
@@ -46,6 +42,7 @@ export default function Leaderboards({ initialPage }: LeaderboardsProps) {
         qualified: filterDebounced.qualified,
         verified: filterDebounced.verified,
       }),
+    placeholderData: data => data,
   });
 
   /**
@@ -124,10 +121,7 @@ export default function Leaderboards({ initialPage }: LeaderboardsProps) {
             totalItems={leaderboards.metadata.total}
             itemsPerPage={leaderboards.metadata.itemsPerPage}
             loadingPage={isLoading ? page : undefined}
-            onPageChange={newPage => {
-              setPreviousPage(page);
-              setPage(newPage);
-            }}
+            onPageChange={newPage => setPage(newPage)}
             statsBelow={!isMobile}
           />
         </div>

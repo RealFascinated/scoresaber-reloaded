@@ -26,7 +26,6 @@ export default function ScoreEditorButton({
   const accuracy = (score.score / maxScore) * 100;
 
   const isMobile = useIsMobile();
-  const [isScoreEditMode, setIsScoreEditMode] = useState(false);
   const [newAccuracy, setNewAccuracy] = useState(accuracy);
 
   const { data: rankedPps } = useQuery({
@@ -49,6 +48,7 @@ export default function ScoreEditorButton({
       ...score,
       score: (accuracy / 100) * maxScore,
     });
+    setNewAccuracy(accuracy);
   };
 
   const ppGain = rankedPps
@@ -62,7 +62,6 @@ export default function ScoreEditorButton({
     <div className="flex items-center justify-center cursor-default relative">
       <Popover
         onOpenChange={open => {
-          setIsScoreEditMode(open);
           handleSliderReset();
         }}
       >

@@ -1,17 +1,14 @@
 "use client";
 
-import { isEqual } from "@/common/utils";
 import PaginationComponent from "@/components/input/pagination";
 import { LoadingIcon } from "@/components/loading-icon";
 import Score from "@/components/score/score";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
-import { Page, Pagination } from "@ssr/common/pagination";
-import { PlayerScore } from "@ssr/common/score/player-score";
+import { Pagination } from "@ssr/common/pagination";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 type ScoreHistoryProps = {
   /**
@@ -28,9 +25,12 @@ type ScoreHistoryProps = {
 export function ScoreHistory({ playerId, leaderboard }: ScoreHistoryProps) {
   const isMobile = useIsMobile();
   const [page, setPage] = useState(1);
-  const [scores, setScores] = useState<Page<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>>();
 
-  const { data, isError, isLoading } = useQuery({
+  const {
+    data: scores,
+    isError,
+    isLoading,
+  } = useQuery({
     queryKey: [`scoresHistory:${leaderboard.id}`, leaderboard.id, page],
     queryFn: async () => {
       const scoreHistory = await ssrApi.fetchPlayerScoresHistory(
@@ -44,13 +44,8 @@ export function ScoreHistory({ playerId, leaderboard }: ScoreHistoryProps) {
       return scoreHistory;
     },
     staleTime: 30 * 1000,
+    placeholderData: data => data,
   });
-
-  useEffect(() => {
-    if (data && !isEqual(data.items, scores?.items)) {
-      setScores(data);
-    }
-  }, [data]);
 
   if (!scores || isError) {
     return (
@@ -74,7 +69,7 @@ export function ScoreHistory({ playerId, leaderboard }: ScoreHistoryProps) {
         {scores.items.map(({ score, leaderboard, beatSaver }, index) => {
           return (
             <Score
-              key={index}
+              key={score.scoreId}
               score={score}
               leaderboard={leaderboard}
               beatSaverMap={beatSaver}

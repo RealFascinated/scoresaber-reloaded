@@ -2,14 +2,10 @@
 
 import useDatabase from "@/hooks/use-database";
 import { useIsMobile } from "@/hooks/use-is-mobile";
-import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
-import { Page } from "@ssr/common/pagination";
-import { PlayerScore } from "@ssr/common/score/player-score";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { useLiveQuery } from "dexie-react-hooks";
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
 import Card from "../card";
 import Pagination from "../input/pagination";
 import { LoadingIcon } from "../loading-icon";
@@ -55,6 +51,7 @@ export function FriendScores() {
                 return (
                   <div key={index}>
                     <Score
+                      key={score.scoreId}
                       score={score}
                       leaderboard={leaderboard}
                       beatSaverMap={beatSaverMap}

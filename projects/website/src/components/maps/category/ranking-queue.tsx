@@ -9,7 +9,6 @@ import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
 import { timeAgo } from "@ssr/common/utils/time-utils";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
 
 const queues = [
   {
@@ -23,9 +22,11 @@ const queues = [
 ];
 
 export default function RankingQueue() {
-  const [leaderboards, setLeaderboards] = useState<ScoreSaberRankingRequestsResponse | undefined>();
-
-  const { data, isLoading, isError } = useQuery({
+  const {
+    data: leaderboards,
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ["maps"],
     queryFn: async () => scoresaberService.lookupRankingRequests(),
   });

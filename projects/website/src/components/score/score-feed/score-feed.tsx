@@ -73,6 +73,7 @@ export default function ScoreFeed() {
               </p>
             </div>
             <Score
+              key={score.scoreId}
               score={score}
               leaderboard={leaderboard}
               settings={{

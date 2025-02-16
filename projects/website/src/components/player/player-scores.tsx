@@ -150,6 +150,7 @@ export default function PlayerScores({ initialSearch, player, sort, page }: Prop
             {scores.scores.map((score, index) => (
               <div key={index}>
                 <Score
+                  key={score.score.scoreId}
                   score={score.score}
                   leaderboard={score.leaderboard}
                   beatSaverMap={score.beatSaver}

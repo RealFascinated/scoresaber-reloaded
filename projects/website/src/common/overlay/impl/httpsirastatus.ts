@@ -2,10 +2,10 @@ import { HttpSiraStatus_Status } from "@/common/overlay/types/httpsirastatus/dat
 import { HttpSiraStatusHelloEvent } from "@/common/overlay/types/httpsirastatus/event/hello-event";
 import { HttpSiraStatusScoreChangedEvent } from "@/common/overlay/types/httpsirastatus/event/score-changed-event";
 import { HttpSiraStatusSongStartedEvent } from "@/common/overlay/types/httpsirastatus/event/song-started-event";
+import { DetailType } from "@ssr/common/detail-type";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import OverlayDataClient from "../data-client";
 import { resetOverlayData, useOverlayDataStore } from "../overlay-data-store";
-import { DetailType } from "@ssr/common/detail-type";
 
 type EventName = keyof EventHandlers;
 type EventHandlers = {

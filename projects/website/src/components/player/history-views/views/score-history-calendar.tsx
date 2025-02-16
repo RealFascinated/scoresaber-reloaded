@@ -3,10 +3,7 @@
 import { LoadingIcon } from "@/components/loading-icon";
 import Tooltip from "@/components/tooltip";
 import Combobox from "@/components/ui/combo-box";
-import {
-  PlayedMapsCalendarResponse,
-  PlayedMapsCalendarStat,
-} from "@ssr/common/response/played-maps-calendar-response";
+import { PlayedMapsCalendarStat } from "@ssr/common/response/played-maps-calendar-response";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { getDaysInMonth, Months } from "@ssr/common/utils/time-utils";
 import { useQuery } from "@tanstack/react-query";
@@ -20,22 +17,14 @@ export default function ScoreHistoryCalendar({ playerId }: ScoreHistoryCalendarP
   const [year, setYear] = useState<number>(new Date().getFullYear());
   const [month, setMonth] = useState<number>(new Date().getMonth() + 1);
   const [days, setDays] = useState<number[]>([]);
-  const [calendar, setCalendar] = useState<PlayedMapsCalendarResponse | null>(null);
-  const [previousData, setPreviousData] = useState<PlayedMapsCalendarResponse | null>(null);
 
-  const { data, isLoading } = useQuery({
+  const { data: calendar, isLoading } = useQuery({
     queryKey: ["scoreHistoryCalendar", playerId, year, month],
     queryFn: async () => {
       return ssrApi.getScoreCalendar(playerId, year, month);
     },
+    placeholderData: data => data,
   });
-
-  useEffect(() => {
-    if (data) {
-      setCalendar(data); // Set new calendar data when it loads
-      setPreviousData(data); // Store it in previousData to avoid flashes
-    }
-  }, [data]);
 
   // Update days only when calendar data changes
   useEffect(() => {
@@ -48,11 +37,9 @@ export default function ScoreHistoryCalendar({ playerId }: ScoreHistoryCalendarP
     return Math.max(...Object.values(days).map(day => day.totalMaps));
   };
 
-  const displayedCalendar = calendar || previousData; // Show previous data until new data loads
-
   return (
     <div className="flex flex-col gap-3 justify-center items-center select-none py-2">
-      {isLoading && !previousData ? (
+      {isLoading ? (
         <LoadingIcon /> // Only show LoadingIcon for initial load
       ) : (
         <>
@@ -60,7 +47,7 @@ export default function ScoreHistoryCalendar({ playerId }: ScoreHistoryCalendarP
             {/* Year Selection Combobox */}
             <Combobox<string>
               name="Year"
-              items={Object.keys(displayedCalendar?.metadata || {})
+              items={Object.keys(calendar?.metadata || {})
                 .sort((a, b) => Number(a) - Number(b))
                 .map(year => ({
                   value: year,
@@ -76,7 +63,7 @@ export default function ScoreHistoryCalendar({ playerId }: ScoreHistoryCalendarP
             <Combobox<string>
               name="Month"
               items={
-                displayedCalendar?.metadata[year]?.map(monthValue => ({
+                calendar?.metadata[year]?.map(monthValue => ({
                   value: String(monthValue),
                   name: <p>{Months.find(m => m.number === monthValue)?.name}</p>,
                 })) || []
@@ -90,9 +77,9 @@ export default function ScoreHistoryCalendar({ playerId }: ScoreHistoryCalendarP
 
           <div className="grid grid-cols-7 gap-1 justify-center items-center">
             {days.map(day => {
-              const stats = displayedCalendar?.days[day];
+              const stats = calendar?.days[day];
               const totalMaps = stats ? stats.totalMaps : 0;
-              const maxMaps = displayedCalendar ? getMaxMaps(displayedCalendar.days) : 1;
+              const maxMaps = calendar ? getMaxMaps(calendar.days) : 1;
               const minSize = 40;
               const maxSize = 90;
               const scorePercentage = (totalMaps / maxMaps) * 100;

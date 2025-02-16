@@ -41,9 +41,8 @@ type TopScoresDataProps = {
 
 export function TopScoresData({ timeframe }: TopScoresDataProps) {
   const [selectedTimeframe, setSelectedTimeframe] = useState<Timeframe>(timeframe);
-  const [scores, setScores] = useState<TopScoresResponse | null>(null);
 
-  const { data, isLoading } = useQuery({
+  const { data: scores, isLoading } = useQuery({
     queryKey: ["top-scores", selectedTimeframe],
     queryFn: async () => {
       return Request.get<TopScoresResponse>(
@@ -51,18 +50,13 @@ export function TopScoresData({ timeframe }: TopScoresDataProps) {
       );
     },
     refetchInterval: false,
+    placeholderData: data => data,
   });
 
   useEffect(() => {
     // Update the URL
     window.history.replaceState(null, "", `/scores/top/${selectedTimeframe}`);
   }, [selectedTimeframe]);
-
-  useEffect(() => {
-    if (data) {
-      setScores(data);
-    }
-  }, [data]);
 
   return (
     <Card className="flex flex-col gap-2 w-full xl:w-[75%] justify-center h-fit">
@@ -74,7 +68,6 @@ export function TopScoresData({ timeframe }: TopScoresDataProps) {
               className="w-32"
               variant={selectedTimeframe === timeframe.timeframe ? "default" : "outline"}
               onClick={() => {
-                setScores(null);
                 setSelectedTimeframe(timeframe.timeframe);
               }}
             >
@@ -111,6 +104,7 @@ export function TopScoresData({ timeframe }: TopScoresDataProps) {
                   </Link>
                 </p>
                 <Score
+                  key={score.scoreId}
                   score={score}
                   leaderboard={leaderboard}
                   beatSaverMap={beatSaver}
