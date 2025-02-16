@@ -39,7 +39,7 @@ export function FriendScores() {
           <LoadingIcon />
         </div>
       )}
-      {/* Scores */}s
+      {/* Scores */}
       {scoreData && (
         <div className="flex flex-col gap-2">
           <>
