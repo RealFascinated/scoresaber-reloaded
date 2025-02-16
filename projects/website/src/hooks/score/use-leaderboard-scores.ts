@@ -58,5 +58,6 @@ export const useLeaderboardScores = (
       // If no scores are found, return an empty page
       return Pagination.empty<ScoreSaberScore>();
     },
+    placeholderData: data => data,
   });
 };
