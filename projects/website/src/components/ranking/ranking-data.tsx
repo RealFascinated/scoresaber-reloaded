@@ -33,7 +33,11 @@ export default function RankingData({ initialPage, country }: RankingDataProps) 
   const [showRelativePPDifference, setShowRelativePPDifference] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState(initialPage);
 
-  const { data: rankingData, isLoading } = useQuery({
+  const {
+    data: rankingData,
+    isLoading,
+    isRefetching,
+  } = useQuery({
     queryKey: ["rankingData", currentPage, country],
     queryFn: async () => {
       const players =
@@ -124,7 +128,7 @@ export default function RankingData({ initialPage, country }: RankingDataProps) 
             page={currentPage}
             totalItems={rankingData.metadata.total}
             itemsPerPage={rankingData.metadata.itemsPerPage}
-            loadingPage={isLoading ? currentPage : undefined}
+            loadingPage={isLoading || isRefetching ? currentPage : undefined}
             generatePageUrl={page => buildPageUrl(country, page)}
             onPageChange={newPage => setCurrentPage(newPage)}
           />
