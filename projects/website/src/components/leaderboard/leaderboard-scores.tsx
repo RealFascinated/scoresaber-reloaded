@@ -1,6 +1,6 @@
 "use client";
 
-import { cn, isEqual } from "@/common/utils";
+import { cn } from "@/common/utils";
 import LeaderboardScoresSkeleton from "@/components/leaderboard/skeleton/leaderboard-scores-skeleton";
 import { useLeaderboardFilter } from "@/components/providers/leaderboard/leaderboard-filter-provider";
 import ScoreMode, { ScoreModeEnum } from "@/components/score/score-mode";
@@ -8,8 +8,6 @@ import { useLeaderboardScores } from "@/hooks/score/use-leaderboard-scores";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import usePageNavigation from "@/hooks/use-page-navigation";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
-import { Page } from "@ssr/common/pagination";
 import { useCallback, useEffect, useState } from "react";
 import Pagination from "../input/pagination";
 import { DifficultyButton } from "./button/difficulty-button";
@@ -40,32 +38,24 @@ export default function LeaderboardScores({
   const isMobile = useIsMobile();
   const filter = useLeaderboardFilter();
 
-  const [selectedMode, setSelectedMode] = useState<ScoreModeEnum>(initialCategory);
-  const [selectedLeaderboardId, setSelectedLeaderboardId] = useState(leaderboard.id);
-  const [previousPage, setPreviousPage] = useState(initialPage);
-  const [currentPage, setCurrentPage] = useState(initialPage);
-  const [currentScores, setCurrentScores] = useState<Page<ScoreSaberScore>>();
-  const [hasMounted, setHasMounted] = useState(false);
+  const [mode, setMode] = useState<ScoreModeEnum>(initialCategory);
+  const [leaderboardId, setLeaderboardId] = useState(leaderboard.id);
+  const [page, setPage] = useState(initialPage);
 
-  const { data, isError, isLoading } = useLeaderboardScores(
-    selectedLeaderboardId,
-    currentPage,
-    selectedMode,
-    filter.country
-  );
+  const {
+    data: scores,
+    isError,
+    isLoading,
+  } = useLeaderboardScores(leaderboardId, page, mode, filter.country);
 
   const handleLeaderboardChange = useCallback(
     (id: number) => {
-      setSelectedLeaderboardId(id);
-      setCurrentPage(1);
+      setLeaderboardId(id);
+      setPage(1);
       leaderboardChanged?.(id);
     },
     [leaderboardChanged]
   );
-
-  useEffect(() => {
-    setHasMounted(true);
-  }, []);
 
   useEffect(() => {
     if (disableUrlChanging) {
@@ -73,11 +63,11 @@ export default function LeaderboardScores({
     }
 
     changePageUrl(
-      `/leaderboard/${selectedLeaderboardId}${currentPage !== 1 ? `/${currentPage}` : ""}${selectedMode !== ScoreModeEnum.Global ? "?category=" + selectedMode : ""}`
+      `/leaderboard/${leaderboardId}${page !== 1 ? `/${page}` : ""}${mode !== ScoreModeEnum.Global ? "?category=" + mode : ""}`
     );
-  }, [selectedLeaderboardId, currentPage, disableUrlChanging, changePageUrl, selectedMode]);
+  }, [leaderboardId, page, disableUrlChanging, changePageUrl, mode]);
 
-  if (!currentScores) {
+  if (!scores) {
     return <LeaderboardScoresSkeleton />;
   }
 
@@ -90,10 +80,10 @@ export default function LeaderboardScores({
         )}
       >
         <ScoreMode
-          initialMode={selectedMode}
+          initialMode={mode}
           onModeChange={mode => {
-            setSelectedMode(mode);
-            setCurrentPage(1);
+            setMode(mode);
+            setPage(1);
           }}
         />
 
@@ -103,7 +93,7 @@ export default function LeaderboardScores({
               <DifficultyButton
                 key={index}
                 {...difficultyData}
-                selectedId={selectedLeaderboardId}
+                selectedId={leaderboardId}
                 onSelect={handleLeaderboardChange}
               />
             ))}
@@ -112,14 +102,14 @@ export default function LeaderboardScores({
       </div>
 
       {isError ||
-        (currentScores.items.length === 0 && (
+        (scores.items.length === 0 && (
           <div className="text-center">
             {isError && <p>Oopsies! Something went wrong.</p>}
-            {currentScores.items.length === 0 && <p>No scores found</p>}
+            {scores.items.length === 0 && <p>No scores found</p>}
           </div>
         ))}
 
-      {currentScores.items.length > 0 && (
+      {scores.items.length > 0 && (
         <>
           <div className="overflow-x-auto relative">
             <table className="table w-full table-auto border-spacing-2 border-none text-left text-sm">
@@ -133,13 +123,13 @@ export default function LeaderboardScores({
                   <th className="px-2 py-1 text-center">Misses</th>
                   {leaderboard.stars > 0 && <th className="px-2 py-1 text-center">PP</th>}
                   <th className="px-2 py-1 text-center">Mods</th>
-                  {currentScores.items.some(score => score.additionalData !== undefined) && (
+                  {scores.items.some(score => score.additionalData !== undefined) && (
                     <th className="px-2 py-1 text-center"></th>
                   )}
                 </tr>
               </thead>
               <tbody className="border-none">
-                {currentScores.items.map((playerScore, index) => (
+                {scores.items.map((playerScore, index) => (
                   <tr key={index} className="border-b border-border">
                     <LeaderboardScore
                       key={playerScore.scoreId}
@@ -155,17 +145,14 @@ export default function LeaderboardScores({
 
           <Pagination
             mobilePagination={isMobile}
-            page={currentPage}
-            totalItems={currentScores.metadata.totalItems}
-            itemsPerPage={currentScores.metadata.itemsPerPage}
-            loadingPage={isLoading ? currentPage : undefined}
+            page={page}
+            totalItems={scores.metadata.totalItems}
+            itemsPerPage={scores.metadata.itemsPerPage}
+            loadingPage={isLoading ? page : undefined}
             generatePageUrl={page => {
-              return `/leaderboard/${selectedLeaderboardId}/${page}`;
+              return `/leaderboard/${leaderboardId}/${page}`;
             }}
-            onPageChange={newPage => {
-              setCurrentPage(newPage);
-              setPreviousPage(currentPage);
-            }}
+            onPageChange={newPage => setPage(newPage)}
           />
         </>
       )}
