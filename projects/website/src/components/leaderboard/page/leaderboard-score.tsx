@@ -26,10 +26,10 @@ type Props = {
   /**
    * The claimed player.
    */
-  highlightedPlayer?: ScoreSaberPlayer;
+  highlightedPlayerId?: string;
 };
 
-export default function LeaderboardScore({ score, leaderboard, highlightedPlayer }: Props) {
+export default function LeaderboardScore({ score, leaderboard, highlightedPlayerId }: Props) {
   const scorePlayer = score.playerInfo;
 
   return (
@@ -39,7 +39,7 @@ export default function LeaderboardScore({ score, leaderboard, highlightedPlayer
 
       {/* Player */}
       <td className="px-4 py-2 flex gap-2 whitespace-nowrap min-w-[250px]">
-        <PlayerInfo player={scorePlayer} highlightedPlayer={highlightedPlayer} useLink />
+        <PlayerInfo player={scorePlayer} highlightedPlayerId={highlightedPlayerId} useLink />
       </td>
 
       {/* Time Set */}

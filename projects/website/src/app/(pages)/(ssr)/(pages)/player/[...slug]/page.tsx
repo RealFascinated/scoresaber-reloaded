@@ -39,21 +39,22 @@ type PlayerData = {
  * @returns the player data and scores
  */
 const getPlayerData = async (
-  { params }: Props,
+  { params, searchParams }: Props,
   type: DetailType = DetailType.FULL
 ): Promise<PlayerData> => {
   const { slug } = await params;
+  const { search } = await searchParams;
+
   const id = slug[0]; // The players id
   const sort: ScoreSort =
     (slug[1] as ScoreSort) || (await getCookieValue("lastScoreSort", ScoreSort.recent)); // The sorting method
   const page = parseInt(slug[2]) || 1; // The page number
-  const search = (slug[3] as string) || ""; // The search query
 
   const player = await ssrApi.getScoreSaberPlayer(id, { type: type });
   return {
     sort: sort,
     page: page,
-    search: search,
+    search: search || "",
     player: player,
   };
 };

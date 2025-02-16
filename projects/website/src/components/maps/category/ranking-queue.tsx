@@ -2,14 +2,12 @@
 
 import Card from "@/components/card";
 import { LoadingIcon } from "@/components/loading-icon";
-import { staggerAnimation } from "@/common/animations";
 import ScoreSongInfo from "@/components/score/score-song-info";
 import ScoreSaberRankingRequestsResponse from "@ssr/common/response/scoresaber-ranking-requests-response";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
 import { timeAgo } from "@ssr/common/utils/time-utils";
 import { useQuery } from "@tanstack/react-query";
-import { motion, useAnimation } from "framer-motion";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 
@@ -25,32 +23,12 @@ const queues = [
 ];
 
 export default function RankingQueue() {
-  const controls = useAnimation();
-
   const [leaderboards, setLeaderboards] = useState<ScoreSaberRankingRequestsResponse | undefined>();
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["maps"],
     queryFn: async () => scoresaberService.lookupRankingRequests(),
   });
-
-  /**
-   * Starts the animation for the scores, but only after the initial load.
-   */
-  const handleScoreAnimation = useCallback(async () => {
-    await controls.start("hiddenRight");
-    setLeaderboards(data);
-    await controls.start("visible");
-  }, [controls, data]);
-
-  /**
-   * Set the leaderboards when the data is loaded
-   */
-  useEffect(() => {
-    if (data && !isLoading && !isError) {
-      handleScoreAnimation();
-    }
-  }, [data, handleScoreAnimation, isError, isLoading]);
 
   return (
     <Card>
@@ -63,12 +41,7 @@ export default function RankingQueue() {
       {leaderboards !== undefined && (
         <div>
           <div className="flex flex-col gap-1 pb-2">
-            <motion.div
-              initial="hidden"
-              animate={controls}
-              className="border-none flex flex-col gap-1.5"
-              variants={staggerAnimation}
-            >
+            <div className="border-none flex flex-col gap-1.5">
               {queues.map(queue => {
                 return (
                   <div key={queue.name} className="flex flex-col gap-1.5">
@@ -78,7 +51,7 @@ export default function RankingQueue() {
                         rankingRequest.leaderboardInfo
                       );
                       return (
-                        <motion.div key={index} variants={staggerAnimation}>
+                        <div key={index}>
                           <Link
                             prefetch={false}
                             href={`/leaderboard/${leaderboard.id}`}
@@ -94,13 +67,13 @@ export default function RankingQueue() {
                               <p>{timeAgo(new Date(rankingRequest.created_at))}</p>
                             </div>
                           </Link>
-                        </motion.div>
+                        </div>
                       );
                     })}
                   </div>
                 );
               })}
-            </motion.div>
+            </div>
           </div>
         </div>
       )}

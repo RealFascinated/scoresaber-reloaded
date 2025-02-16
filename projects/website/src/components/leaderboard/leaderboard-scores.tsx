@@ -3,7 +3,6 @@
 import { cn, isEqual } from "@/common/utils";
 import LeaderboardScoresSkeleton from "@/components/leaderboard/skeleton/leaderboard-scores-skeleton";
 import { useLeaderboardFilter } from "@/components/providers/leaderboard/leaderboard-filter-provider";
-import { staggerAnimation } from "@/common/animations";
 import ScoreMode, { ScoreModeEnum } from "@/components/score/score-mode";
 import { useLeaderboardScores } from "@/hooks/score/use-leaderboard-scores";
 import { useIsMobile } from "@/hooks/use-is-mobile";
@@ -11,8 +10,6 @@ import usePageNavigation from "@/hooks/use-page-navigation";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { Page } from "@ssr/common/pagination";
-import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import { motion, useAnimation } from "framer-motion";
 import { useCallback, useEffect, useState } from "react";
 import Pagination from "../input/pagination";
 import { DifficultyButton } from "./button/difficulty-button";
@@ -26,7 +23,7 @@ type LeaderboardScoresProps = {
   isLeaderboardPage?: boolean;
   leaderboardChanged?: (id: number) => void;
   disableUrlChanging?: boolean;
-  highlightedPlayer?: ScoreSaberPlayer;
+  highlightedPlayerId?: string;
 };
 
 export default function LeaderboardScores({
@@ -37,11 +34,10 @@ export default function LeaderboardScores({
   isLeaderboardPage,
   leaderboardChanged,
   disableUrlChanging,
-  highlightedPlayer,
+  highlightedPlayerId,
 }: LeaderboardScoresProps) {
-  const { navigateToPage } = usePageNavigation();
+  const { changePageUrl } = usePageNavigation();
   const isMobile = useIsMobile();
-  const controls = useAnimation();
   const filter = useLeaderboardFilter();
 
   const [selectedMode, setSelectedMode] = useState<ScoreModeEnum>(initialCategory);
@@ -58,16 +54,6 @@ export default function LeaderboardScores({
     filter.country
   );
 
-  const handleScoreAnimation = useCallback(async () => {
-    if (!hasMounted || isEqual(currentScores?.items, data?.items)) {
-      return;
-    }
-
-    await controls.start(previousPage >= currentPage ? "hiddenRight" : "hiddenLeft");
-    setCurrentScores(data);
-    await controls.start("visible");
-  }, [controls, currentPage, previousPage, data, hasMounted]);
-
   const handleLeaderboardChange = useCallback(
     (id: number) => {
       setSelectedLeaderboardId(id);
@@ -82,20 +68,14 @@ export default function LeaderboardScores({
   }, []);
 
   useEffect(() => {
-    if (data) {
-      handleScoreAnimation();
-    }
-  }, [data, handleScoreAnimation]);
-
-  useEffect(() => {
     if (disableUrlChanging) {
       return;
     }
 
-    navigateToPage(
+    changePageUrl(
       `/leaderboard/${selectedLeaderboardId}${currentPage !== 1 ? `/${currentPage}` : ""}${selectedMode !== ScoreModeEnum.Global ? "?category=" + selectedMode : ""}`
     );
-  }, [selectedLeaderboardId, currentPage, disableUrlChanging, navigateToPage, selectedMode]);
+  }, [selectedLeaderboardId, currentPage, disableUrlChanging, changePageUrl, selectedMode]);
 
   if (!currentScores) {
     return <LeaderboardScoresSkeleton />;
@@ -158,27 +138,18 @@ export default function LeaderboardScores({
                   )}
                 </tr>
               </thead>
-              <motion.tbody
-                initial="hidden"
-                animate={controls}
-                className="border-none"
-                variants={staggerAnimation}
-              >
+              <tbody className="border-none">
                 {currentScores.items.map((playerScore, index) => (
-                  <motion.tr
-                    key={index}
-                    className="border-b border-border"
-                    variants={staggerAnimation}
-                  >
+                  <tr key={index} className="border-b border-border">
                     <LeaderboardScore
                       key={playerScore.scoreId}
                       score={playerScore}
                       leaderboard={leaderboard}
-                      highlightedPlayer={highlightedPlayer}
+                      highlightedPlayerId={highlightedPlayerId}
                     />
-                  </motion.tr>
+                  </tr>
                 ))}
-              </motion.tbody>
+              </tbody>
             </table>
           </div>
 

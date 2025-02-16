@@ -51,7 +51,7 @@ const getRankingData = async (
 };
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
-  const { players, page, country } = await getRankingData(props);
+  const { players, country } = await getRankingData(props);
   if (players === undefined) {
     return {
       title: UNKNOWN_PAGE.title,

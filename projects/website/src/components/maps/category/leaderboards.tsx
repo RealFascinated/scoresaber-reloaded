@@ -4,7 +4,6 @@ import Card from "@/components/card";
 import Pagination from "@/components/input/pagination";
 import { LoadingIcon } from "@/components/loading-icon";
 import { useMapFilter } from "@/components/providers/maps/map-filter-provider";
-import { staggerAnimation } from "@/common/animations";
 import ScoreSongInfo from "@/components/score/score-song-info";
 import Tooltip from "@/components/tooltip";
 import { useIsMobile } from "@/hooks/use-is-mobile";
@@ -15,7 +14,6 @@ import ScoreSaberLeaderboardPageToken from "@ssr/common/types/token/scoresaber/l
 import { timeAgo } from "@ssr/common/utils/time-utils";
 import { useQuery } from "@tanstack/react-query";
 import { useDebounce } from "@uidotdev/usehooks";
-import { motion, useAnimation } from "framer-motion";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 
@@ -27,7 +25,6 @@ type LeaderboardsProps = {
 };
 
 export default function Leaderboards({ initialPage }: LeaderboardsProps) {
-  const controls = useAnimation();
   const isMobile = useIsMobile();
   const pageNavigation = usePageNavigation();
 
@@ -38,7 +35,7 @@ export default function Leaderboards({ initialPage }: LeaderboardsProps) {
   const [previousPage, setPreviousPage] = useState(initialPage || 1);
   const [leaderboards, setLeaderboards] = useState<ScoreSaberLeaderboardPageToken | undefined>();
 
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ["maps", filterDebounced, page],
     queryFn: async () =>
       scoresaberService.lookupLeaderboards(page, {
@@ -50,24 +47,6 @@ export default function Leaderboards({ initialPage }: LeaderboardsProps) {
         verified: filterDebounced.verified,
       }),
   });
-
-  /**
-   * Starts the animation for the scores, but only after the initial load.
-   */
-  const handleScoreAnimation = useCallback(async () => {
-    await controls.start(previousPage >= page ? "hiddenRight" : "hiddenLeft");
-    setLeaderboards(data);
-    await controls.start("visible");
-  }, [controls, page, previousPage, data]);
-
-  /**
-   * Set the leaderboards when the data is loaded
-   */
-  useEffect(() => {
-    if (data && !isLoading && !isError) {
-      handleScoreAnimation();
-    }
-  }, [data, handleScoreAnimation, isError, isLoading]);
 
   /**
    * Reset the page when the filter changes
@@ -82,7 +61,7 @@ export default function Leaderboards({ initialPage }: LeaderboardsProps) {
    * Update the page url when the page changes
    */
   useEffect(() => {
-    pageNavigation.navigateToPage(`/maps?category=leaderboards&page=${page}`);
+    pageNavigation.changePageUrl(`/maps?category=leaderboards&page=${page}`);
   }, [page, pageNavigation]);
 
   return (
@@ -96,12 +75,7 @@ export default function Leaderboards({ initialPage }: LeaderboardsProps) {
       {leaderboards !== undefined && (
         <div>
           <div className="flex flex-col gap-1 pb-2">
-            <motion.div
-              initial="hidden"
-              animate={controls}
-              className="border-none flex flex-col gap-1.5"
-              variants={staggerAnimation}
-            >
+            <div className="border-none flex flex-col gap-1.5">
               {leaderboards.leaderboards.map((leaderboardToken, index) => {
                 const leaderboard = getScoreSaberLeaderboardFromToken(leaderboardToken);
                 let date: Date | undefined = leaderboard.timestamp;
@@ -112,7 +86,7 @@ export default function Leaderboards({ initialPage }: LeaderboardsProps) {
                 }
 
                 return (
-                  <motion.div key={index} variants={staggerAnimation}>
+                  <div key={index}>
                     <Link
                       prefetch={false}
                       href={`/leaderboard/${leaderboard.id}`}
@@ -138,10 +112,10 @@ export default function Leaderboards({ initialPage }: LeaderboardsProps) {
                         )}
                       </div>
                     </Link>
-                  </motion.div>
+                  </div>
                 );
               })}
-            </motion.div>
+            </div>
           </div>
 
           <Pagination

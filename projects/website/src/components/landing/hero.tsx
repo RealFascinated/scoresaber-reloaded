@@ -6,22 +6,16 @@ import AnimatedShinyText from "@/components/ui/animated-shiny-text";
 import { BorderBeam } from "@/components/ui/border-beam";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { motion } from "framer-motion";
 import { ArrowRight, GithubIcon, UserSearch } from "lucide-react";
 import Link from "next/link";
 
 export default function HeroSection() {
   return (
     <div className="flex flex-col gap-2 text-center items-center select-none">
-      <motion.div
-        className="flex flex-col gap-2.5 text-center items-center"
-        initial={{ opacity: 0, y: -40 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
-      >
+      <div className="flex flex-col gap-2.5 text-center items-center">
         <Alert />
         <Title />
-      </motion.div>
+      </div>
       <Buttons />
       <AppPreview />
       <Separator className="my-12 w-full" />
@@ -64,12 +58,7 @@ function Title() {
 function Buttons() {
   const { openSearch } = useSearch();
   return (
-    <motion.div
-      className="mt-4 flex flex-col xs:flex-row gap-2 xs:gap-4 items-center"
-      initial={{ opacity: 0, y: -20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.35, duration: 0.7, ease: "easeOut" }}
-    >
+    <div className="mt-4 flex flex-col xs:flex-row gap-2 xs:gap-4 items-center">
       <Button
         className="max-w-52 flex gap-2.5 bg-ssr hover:bg-ssr/85 text-white"
         onClick={openSearch}
@@ -79,18 +68,13 @@ function Buttons() {
       </Button>
 
       <DiscordButton />
-    </motion.div>
+    </div>
   );
 }
 
 function AppPreview() {
   return (
-    <motion.div
-      className="mx-5 my-20 relative max-w-[1190px] shadow-[0_3rem_20rem_-15px_rgba(15,15,15,0.6)] shadow-pp/50 rounded-2xl overflow-hidden"
-      initial={{ opacity: 0, y: -35 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.45, duration: 0.7, ease: "easeOut" }}
-    >
+    <div className="mx-5 my-20 relative max-w-[1190px] shadow-[0_3rem_20rem_-15px_rgba(15,15,15,0.6)] shadow-pp/50 rounded-2xl overflow-hidden">
       <BorderBeam colorFrom="#6773ff" colorTo="#4858ff" />
       <img
         className="w-full h-full border-4 border-pp/20 rounded-2xl"
@@ -98,6 +82,6 @@ function AppPreview() {
         alt="App Preview"
         draggable={false}
       />
-    </motion.div>
+    </div>
   );
 }

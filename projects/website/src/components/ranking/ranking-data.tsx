@@ -12,9 +12,7 @@ import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { normalizedRegionName } from "@ssr/common/utils/region-utils";
 import { useQuery } from "@tanstack/react-query";
 import { useLiveQuery } from "dexie-react-hooks";
-import { motion, useAnimation } from "framer-motion";
 import { useEffect, useState } from "react";
-import { staggerFastAnimation } from "../../common/animations";
 import { LoadingIcon } from "../loading-icon";
 
 type RankingDataProps = {
@@ -29,13 +27,10 @@ function buildPageUrl(country: string | undefined, page: number) {
 export default function RankingData({ initialPage, country }: RankingDataProps) {
   const isMobile = useIsMobile();
   const navigation = usePageNavigation();
-  const controls = useAnimation();
-
   const database = useDatabase();
   const mainPlayer = useLiveQuery(() => database.getMainPlayer());
 
   const [showRelativePPDifference, setShowRelativePPDifference] = useState<boolean>(false);
-  const [previousPage, setPreviousPage] = useState(initialPage);
   const [currentPage, setCurrentPage] = useState(initialPage);
 
   const { data: rankingData, isLoading } = useQuery({
@@ -50,17 +45,10 @@ export default function RankingData({ initialPage, country }: RankingDataProps) 
     refetchIntervalInBackground: false,
     placeholderData: prev => prev,
   });
-  useEffect(() => {
-    navigation.navigateToPage(buildPageUrl(country, currentPage));
-  }, [currentPage, country]);
 
   useEffect(() => {
-    if (rankingData) {
-      controls
-        .start(currentPage < previousPage ? "hiddenLeft" : "hiddenRight")
-        .then(() => controls.start("visible"));
-    }
-  }, [rankingData]);
+    navigation.changePageUrl(buildPageUrl(country, currentPage));
+  }, [currentPage, country]);
 
   return (
     <Card className="h-full w-full xl:max-w-[85%] gap-2">
@@ -115,22 +103,18 @@ export default function RankingData({ initialPage, country }: RankingDataProps) 
               </thead>
 
               {/* Players */}
-              <motion.tbody initial="hidden" animate={controls} variants={staggerFastAnimation}>
+              <tbody>
                 {rankingData.players.map((player, index) => (
-                  <motion.tr
-                    key={index}
-                    className="border-b border-border"
-                    variants={staggerFastAnimation}
-                  >
+                  <tr key={index} className="border-b border-border">
                     <PlayerRanking
                       isCountry={country != undefined}
                       player={player}
                       relativePerformancePoints={showRelativePPDifference}
                       mainPlayer={mainPlayer}
                     />
-                  </motion.tr>
+                  </tr>
                 ))}
-              </motion.tbody>
+              </tbody>
             </table>
           </div>
 
@@ -141,11 +125,8 @@ export default function RankingData({ initialPage, country }: RankingDataProps) 
             totalItems={rankingData.metadata.total}
             itemsPerPage={rankingData.metadata.itemsPerPage}
             loadingPage={isLoading ? currentPage : undefined}
-            generatePageUrl={() => buildPageUrl(country, currentPage)}
-            onPageChange={newPage => {
-              setPreviousPage(currentPage);
-              setCurrentPage(newPage);
-            }}
+            generatePageUrl={page => buildPageUrl(country, page)}
+            onPageChange={newPage => setCurrentPage(newPage)}
           />
         </div>
       )}

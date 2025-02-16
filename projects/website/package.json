@@ -42,7 +42,6 @@
     "cross-env": "^7.0.3",
     "dexie": "^4.0.11",
     "dexie-react-hooks": "^1.1.7",
-    "framer-motion": "^12.4.2",
     "js-cookie": "^3.0.5",
     "lucide-react": "^0.475.0",
     "next": "^15.1.7",

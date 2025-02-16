@@ -1,8 +1,6 @@
 import { setCookieValue } from "@/common/cookie.util";
-import { isEqual } from "@/common/utils";
 import { LoadingIcon } from "@/components/loading-icon";
 import Score from "@/components/score/score";
-import { staggerAnimation } from "@/common/animations";
 import { Input } from "@/components/ui/input";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import usePageNavigation from "@/hooks/use-page-navigation";
@@ -17,7 +15,6 @@ import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { useDebounce } from "@uidotdev/usehooks";
 import { clsx } from "clsx";
-import { motion, useAnimation } from "framer-motion";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Card from "../card";
 import Pagination from "../input/pagination";
@@ -31,52 +28,42 @@ type Props = {
   page: number;
 };
 
-type PageState = {
-  page: number;
-  sort: ScoreSort;
-};
-
 const scoreSort = [
   { name: "Top", value: ScoreSort.top, icon: <TrophyIcon className="w-5 h-5" /> },
   { name: "Recent", value: ScoreSort.recent, icon: <ClockIcon className="w-5 h-5" /> },
 ];
 
 export default function PlayerScores({ initialSearch, player, sort, page }: Props) {
-  const { navigateToPage } = usePageNavigation();
+  const { changePageUrl } = usePageNavigation();
   const isMobile = useIsMobile();
-  const controls = useAnimation();
 
-  const [pageState, setPageState] = useState<PageState>({ page, sort });
-  const [previousPage, setPreviousPage] = useState(page);
-  const [scores, setScores] = useState<
-    PlayerScoresResponse<ScoreSaberScore, ScoreSaberLeaderboard> | undefined
-  >();
+  const [currentPage, setCurrentPage] = useState(page);
+  const [currentSort, setCurrentSort] = useState(sort);
   const [searchTerm, setSearchTerm] = useState(initialSearch || "");
-  const debouncedSearchTerm = useDebounce(searchTerm, 250);
 
+  const debouncedSearchTerm = useDebounce(searchTerm, 250);
   const isSearchActive = useMemo(() => debouncedSearchTerm.length >= 3, [debouncedSearchTerm]);
-  const { data, isError, isLoading } = useQuery({
-    queryKey: ["playerScores", player.id, pageState, debouncedSearchTerm],
+  const invalidSearch = useMemo(
+    () => searchTerm.length >= 1 && searchTerm.length < 3,
+    [searchTerm]
+  );
+
+  const {
+    data: scores,
+    isError,
+    isLoading,
+    isRefetching,
+  } = useQuery({
+    queryKey: ["playerScores", player.id, currentPage, currentSort, debouncedSearchTerm],
     queryFn: () =>
       ssrApi.fetchPlayerScores<ScoreSaberScore, ScoreSaberLeaderboard>(
         player.id,
-        pageState.page,
-        pageState.sort,
+        currentPage,
+        currentSort,
         debouncedSearchTerm
       ),
-    enabled: isSearchActive || debouncedSearchTerm.length === 0,
+    placeholderData: prev => prev,
   });
-
-  /**
-   * Starts the animation for the scores.
-   */
-  const handleScoreAnimation = useCallback(async () => {
-    if (isEqual(scores, data)) return;
-
-    await controls.start(previousPage >= pageState.page ? "hiddenRight" : "hiddenLeft");
-    setScores(data);
-    await controls.start("visible");
-  }, [controls, previousPage, pageState.page, data, scores]);
 
   /**
    * Change the score sort.
@@ -85,31 +72,13 @@ export default function PlayerScores({ initialSearch, player, sort, page }: Prop
    */
   const handleSortChange = useCallback(
     async (newSort: ScoreSort) => {
-      if (newSort !== pageState.sort) {
-        setPageState({ page: 1, sort: newSort });
+      if (newSort !== currentSort) {
+        setCurrentSort(newSort);
         await setCookieValue("lastScoreSort", newSort); // Set the default score sort
       }
     },
-    [pageState.sort]
+    [currentSort]
   );
-
-  /**
-   * Change the score search term.
-   *
-   * @param query the new search term
-   */
-  const handleSearchChange = (query: string) => {
-    setSearchTerm(query);
-  };
-
-  /**
-   * Handle score animation.
-   */
-  useEffect(() => {
-    if (data) {
-      handleScoreAnimation();
-    }
-  }, [data, handleScoreAnimation]);
 
   /**
    * Gets the URL to the page.
@@ -117,11 +86,11 @@ export default function PlayerScores({ initialSearch, player, sort, page }: Prop
   const getUrl = useCallback(
     (page: number) => {
       const baseUrl = `/player/${player.id}`;
-      return page === 1 && pageState.sort === ScoreSort.recent
-        ? baseUrl
-        : `${baseUrl}/${pageState.sort}/${page}${isSearchActive ? `?search=${debouncedSearchTerm}` : ""}`;
+      return page === 1 && currentSort === ScoreSort.recent
+        ? `${baseUrl}${isSearchActive ? `?search=${searchTerm}` : ""}`
+        : `${baseUrl}/${currentSort}/${page}${isSearchActive ? `?search=${searchTerm}` : ""}`;
     },
-    [debouncedSearchTerm, player.id, pageState.sort, isSearchActive]
+    [searchTerm, player.id, currentSort, isSearchActive]
   );
 
   /**
@@ -129,10 +98,9 @@ export default function PlayerScores({ initialSearch, player, sort, page }: Prop
    * sort, or search term changes.
    */
   useEffect(() => {
-    navigateToPage(getUrl(pageState.page));
-  }, [pageState, debouncedSearchTerm, player.id, isSearchActive, getUrl, navigateToPage]);
+    changePageUrl(getUrl(currentPage));
+  }, [currentPage, debouncedSearchTerm, player.id, isSearchActive]);
 
-  const invalidSearch = searchTerm.length >= 1 && searchTerm.length < 3;
   return (
     <Card className="flex gap-1">
       <div className="flex flex-col items-center w-full gap-2 relative">
@@ -140,7 +108,7 @@ export default function PlayerScores({ initialSearch, player, sort, page }: Prop
           {scoreSort.map(sortOption => (
             <Button
               key={sortOption.value}
-              variant={sortOption.value === pageState.sort ? "default" : "outline"}
+              variant={sortOption.value === currentSort ? "default" : "outline"}
               onClick={() => handleSortChange(sortOption.value)}
               size="sm"
               className="flex items-center gap-1"
@@ -157,7 +125,10 @@ export default function PlayerScores({ initialSearch, player, sort, page }: Prop
             placeholder="Search..."
             className={clsx(invalidSearch && "border-red-500")}
             value={searchTerm}
-            onChange={e => handleSearchChange(e.target.value)}
+            onChange={e => {
+              setCurrentPage(1);
+              setSearchTerm(e.target.value);
+            }}
           />
         </div>
       </div>
@@ -175,39 +146,31 @@ export default function PlayerScores({ initialSearch, player, sort, page }: Prop
               (scores.scores.length === 0 && <p>No scores found. Invalid Page or Search?</p>)}
           </div>
 
-          <motion.div
-            initial="hidden"
-            animate={controls}
-            variants={staggerAnimation}
-            className="grid min-w-full grid-cols-1 divide-y divide-border"
-          >
+          <div className="grid min-w-full grid-cols-1 divide-y divide-border">
             {scores.scores.map((score, index) => (
-              <motion.div key={index} variants={staggerAnimation}>
+              <div key={index}>
                 <Score
                   score={score.score}
                   leaderboard={score.leaderboard}
                   beatSaverMap={score.beatSaver}
-                  highlightedPlayer={player}
+                  highlightedPlayerId={player.id}
                   settings={{
                     allowLeaderboardPreview: true,
                   }}
                 />
-              </motion.div>
+              </div>
             ))}
-          </motion.div>
+          </div>
 
           {scores.metadata.totalPages > 1 && (
             <Pagination
               mobilePagination={isMobile}
-              page={pageState.page}
+              page={currentPage}
               totalItems={scores.metadata.totalItems}
               itemsPerPage={scores.metadata.itemsPerPage}
-              loadingPage={isLoading ? pageState.page : undefined}
+              loadingPage={isLoading || isRefetching ? currentPage : undefined}
               generatePageUrl={page => getUrl(page)}
-              onPageChange={newPage => {
-                setPreviousPage(pageState.page);
-                setPageState({ ...pageState, page: newPage });
-              }}
+              onPageChange={newPage => setCurrentPage(newPage)}
             />
           )}
         </>

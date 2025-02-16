@@ -16,7 +16,7 @@ type TablePlayerProps = {
   /**
    * The player to highlight.
    */
-  highlightedPlayer?: ScoreSaberPlayerToken | ScoreSaberPlayer;
+  highlightedPlayerId?: string;
 
   /**
    * The additional class names
@@ -41,7 +41,7 @@ type TablePlayerProps = {
 
 export function PlayerInfo({
   player,
-  highlightedPlayer,
+  highlightedPlayerId,
   className,
   hideCountryFlag,
   useLink,
@@ -51,7 +51,7 @@ export function PlayerInfo({
     <p
       className={clsx(
         hoverBrightness ? "transform-gpu transition-all hover:brightness-[66%]" : "",
-        player.id == highlightedPlayer?.id ? "font-bold" : "",
+        player.id == highlightedPlayerId ? "font-bold" : "",
         `text-ellipsis max-w-[250px] overflow-hidden whitespace-nowrap break-all`,
         className
       )}

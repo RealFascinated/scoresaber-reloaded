@@ -84,7 +84,7 @@ export default function Mini({ type, player }: MiniProps) {
                 <PlayerInfo
                   className="w-[170px]"
                   player={playerRanking}
-                  highlightedPlayer={player}
+                  highlightedPlayerId={player.id}
                   hideCountryFlag
                   hoverBrightness={false}
                 />

@@ -314,7 +314,7 @@ export default class ScoreSaberService {
     sort: string,
     search?: string
   ): Promise<PlayerScoresResponse<unknown, unknown> | undefined> {
-    return fetchWithCache(
+    return await fetchWithCache(
       CacheService.getCache(ServiceCache.PlayerScores),
       `player-scores:${playerId}-${page}-${sort}-${search}`,
       async () => {
@@ -328,7 +328,10 @@ export default class ScoreSaberService {
           search,
         });
         if (leaderboardScores == undefined) {
-          return undefined;
+          return {
+            scores: scores,
+            metadata: metadata,
+          };
         }
 
         metadata = new Metadata(

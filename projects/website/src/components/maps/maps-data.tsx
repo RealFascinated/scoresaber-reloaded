@@ -64,7 +64,7 @@ export function MapsData({ category, page }: MapsDataProps) {
   useEffect(() => {
     const path = `/maps?category=${selectedCategory.id}`;
 
-    pageNavigation.navigateToPage(
+    pageNavigation.changePageUrl(
       `${path}${page && page !== 1 ? (path.includes("?") ? "&" : "?") + `page=${page}` : ""}`
     );
   }, [

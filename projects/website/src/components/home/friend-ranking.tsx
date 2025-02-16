@@ -1,12 +1,10 @@
 "use client";
 
-import { staggerAnimation } from "@/common/animations";
 import useDatabase from "@/hooks/use-database";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { Page, Pagination } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { useLiveQuery } from "dexie-react-hooks";
-import { motion, useAnimation } from "framer-motion";
 import { memo, useCallback, useEffect, useState } from "react";
 import Card from "../card";
 import PaginationComponent from "../input/pagination";
@@ -16,14 +14,11 @@ import { PlayerListItem } from "../player/player-list-item";
 const MemoizedPagination = memo(PaginationComponent);
 
 export function FriendRanking() {
+  const isMobile = useIsMobile();
   const database = useDatabase();
   const friends = useLiveQuery(async () => database.getFriends(true));
 
-  const isMobile = useIsMobile();
-  const controls = useAnimation();
-
   const [page, setPage] = useState(1);
-  const [previousPage, setPreviousPage] = useState(1);
   const [friendsPage, setFriendsPage] = useState<Page<ScoreSaberPlayer>>();
 
   const getFriendsPage = useCallback(async () => {
@@ -36,19 +31,9 @@ export function FriendRanking() {
     return pagination.getPage(page);
   }, [friends, page]);
 
-  // Handle score animation
-  const handleScoreAnimation = useCallback(async () => {
-    await controls.start(previousPage >= page ? "hiddenRight" : "hiddenLeft");
-    setFriendsPage(await getFriendsPage());
-    await controls.start("visible");
-  }, [controls, previousPage, page, getFriendsPage]);
-
-  // Trigger animation when data changes
   useEffect(() => {
-    if (friends) {
-      handleScoreAnimation();
-    }
-  }, [friends, handleScoreAnimation]);
+    getFriendsPage().then(setFriendsPage);
+  }, [getFriendsPage]);
 
   return (
     <Card className="h-fit flex flex-col gap-2">
@@ -68,26 +53,18 @@ export function FriendRanking() {
       {friendsPage && (
         <div className="flex flex-col gap-2">
           <>
-            <motion.div
-              initial="hidden"
-              animate={controls}
-              variants={staggerAnimation}
-              className="divide-y divide-border"
-            >
+            <div className="divide-y divide-border">
               {friendsPage.items.map((player, index) => (
                 <PlayerListItem key={index} player={player} />
               ))}
-            </motion.div>
+            </div>
 
             <MemoizedPagination
               mobilePagination={isMobile}
               page={page}
               totalItems={friendsPage.metadata.totalItems}
               itemsPerPage={friendsPage.metadata.itemsPerPage}
-              onPageChange={newPage => {
-                setPreviousPage(page);
-                setPage(newPage);
-              }}
+              onPageChange={newPage => setPage(newPage)}
             />
           </>
         </div>

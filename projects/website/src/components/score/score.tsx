@@ -7,7 +7,6 @@ import { ScoreOverview } from "@/components/score/score-views/score-overview";
 import { Button } from "@/components/ui/button";
 import { CubeIcon } from "@heroicons/react/24/solid";
 import { useQuery } from "@tanstack/react-query";
-import { motion } from "framer-motion";
 import { TrendingUpIcon } from "lucide-react";
 import { ReactElement, useEffect, useState } from "react";
 import ScoreButtons from "./score-buttons";
@@ -23,7 +22,6 @@ import LeaderboardScores from "@/components/leaderboard/leaderboard-scores";
 import { Separator } from "@/components/ui/separator";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
-import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
 import { ScoreStatsResponse } from "@ssr/common/response/scorestats-response";
 import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/leaderboard-player-info";
@@ -33,7 +31,7 @@ import Link from "next/link";
 import Avatar from "../avatar";
 
 type Props = {
-  highlightedPlayer?: ScoreSaberPlayer;
+  highlightedPlayerId?: string;
   score: ScoreSaberScore;
   leaderboard: ScoreSaberLeaderboard;
   beatSaverMap?: BeatSaverMapResponse;
@@ -67,7 +65,7 @@ export default function Score({
   beatSaverMap,
   score,
   settings,
-  highlightedPlayer,
+  highlightedPlayerId,
   playerAbove,
 }: Props) {
   const [baseScore, setBaseScore] = useState(score.score);
@@ -187,12 +185,7 @@ export default function Score({
       </div>
 
       {isLeaderboardExpanded && dropdownData && !loading && (
-        <motion.div
-          initial={{ opacity: 0, y: -50 }}
-          exit={{ opacity: 0, y: -50 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="w-full mt-2"
-        >
+        <div className="w-full mt-2">
           <Card className="flex gap-4 w-full relative border border-input">
             <div className="flex flex-col w-full gap-2 justify-center items-center">
               {/* Modes */}
@@ -228,11 +221,11 @@ export default function Score({
             <LeaderboardScores
               initialPage={scoresPage}
               leaderboard={leaderboard}
-              highlightedPlayer={highlightedPlayer}
+              highlightedPlayerId={highlightedPlayerId}
               disableUrlChanging
             />
           </Card>
-        </motion.div>
+        </div>
       )}
     </div>
   );

@@ -35,7 +35,7 @@ export function PlayerRanking({
         )}
       </td>
       <td className="flex items-center gap-2 pl-3 py-1.5 min-w-[250px]">
-        <PlayerInfo player={player} highlightedPlayer={mainPlayer} useLink />
+        <PlayerInfo player={player} highlightedPlayerId={mainPlayer?.id} useLink />
       </td>
       <td className="px-1 py-1.5 text-center">
         <span className="text-ssr">{formatPp(player.pp)}pp</span>{" "}

@@ -1,6 +1,5 @@
 "use client";
 
-import { staggerAnimation } from "@/common/animations";
 import useDatabase from "@/hooks/use-database";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
@@ -10,7 +9,6 @@ import { PlayerScore } from "@ssr/common/score/player-score";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { useLiveQuery } from "dexie-react-hooks";
-import { motion, useAnimation } from "framer-motion";
 import { useCallback, useEffect, useState } from "react";
 import Card from "../card";
 import Pagination from "../input/pagination";
@@ -21,32 +19,14 @@ export function FriendScores() {
   const isMobile = useIsMobile();
   const database = useDatabase();
   const friendIds = useLiveQuery(async () => database.getFriendIds(true));
-  const controls = useAnimation();
 
   const [page, setPage] = useState(1);
-  const [previousPage, setPreviousPage] = useState(1);
-  const [scoreData, setScoreData] =
-    useState<Page<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>>();
 
-  const { data, isLoading } = useQuery({
+  const { data: scoreData, isLoading } = useQuery({
     queryKey: ["friend-scores", friendIds, page],
     queryFn: async () => ssrApi.getFriendScores(friendIds!, page),
     enabled: friendIds !== undefined && friendIds.length > 0,
   });
-
-  // Handle score animation
-  const handleScoreAnimation = useCallback(async () => {
-    await controls.start(previousPage >= page ? "hiddenRight" : "hiddenLeft");
-    setScoreData(data);
-    await controls.start("visible");
-  }, [controls, previousPage, page, data]);
-
-  // Trigger animation when data changes
-  useEffect(() => {
-    if (data) {
-      handleScoreAnimation();
-    }
-  }, [data, handleScoreAnimation]);
 
   return (
     <Card className="h-fit flex flex-col gap-2">
@@ -57,30 +37,23 @@ export function FriendScores() {
           based on cached data
         </p>
       </div>
-
       {/* Loading */}
       {isLoading && !scoreData && (
         <div className="flex w-full justify-center items-center">
           <LoadingIcon />
         </div>
       )}
-
-      {/* Scores */}
+      {/* Scores */}s
       {scoreData && (
         <div className="flex flex-col gap-2">
           <>
-            <motion.div
-              initial="hidden"
-              animate={controls}
-              variants={staggerAnimation}
-              className="divide-y divide-border"
-            >
+            <div className="divide-y divide-border">
               {scoreData.items.map((playerScore, index) => {
                 const score = playerScore.score;
                 const leaderboard = playerScore.leaderboard;
                 const beatSaverMap = playerScore.beatSaver;
                 return (
-                  <motion.div key={index} variants={staggerAnimation}>
+                  <div key={index}>
                     <Score
                       score={score}
                       leaderboard={leaderboard}
@@ -94,10 +67,10 @@ export function FriendScores() {
                         allowLeaderboardPreview: true,
                       }}
                     />
-                  </motion.div>
+                  </div>
                 );
               })}
-            </motion.div>
+            </div>
 
             <Pagination
               mobilePagination={isMobile}
@@ -105,10 +78,7 @@ export function FriendScores() {
               totalItems={scoreData.metadata.totalItems}
               itemsPerPage={scoreData.metadata.itemsPerPage}
               loadingPage={isLoading ? page : undefined}
-              onPageChange={newPage => {
-                setPreviousPage(page);
-                setPage(newPage);
-              }}
+              onPageChange={newPage => setPage(newPage)}
             />
           </>
         </div>
