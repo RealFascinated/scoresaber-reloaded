@@ -51,6 +51,12 @@ export class Player {
   public trackReplays?: boolean;
 
   /**
+   * Whether this player is inactive or not.
+   */
+  @prop()
+  public inactive?: boolean;
+
+  /**
    * The date the player was last tracked.
    */
   @prop()

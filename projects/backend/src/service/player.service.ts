@@ -124,6 +124,11 @@ export class PlayerService {
       await player.save();
     }
 
+    if (playerToken && player.inactive !== playerToken.inactive) {
+      player.inactive = playerToken.inactive;
+      await player.save();
+    }
+
     return player as PlayerDocument;
   }
 
@@ -372,6 +377,12 @@ export class PlayerService {
       Logger.warn(`Player "${foundPlayer.id}" not found on ScoreSaber`);
       return;
     }
+
+    if (playerToken && foundPlayer.inactive !== playerToken.inactive) {
+      foundPlayer.inactive = playerToken.inactive;
+      await foundPlayer.save();
+    }
+    
     if (player.inactive) {
       Logger.info(`Player "${foundPlayer.id}" is inactive on ScoreSaber`);
       return;
@@ -727,6 +738,10 @@ export class PlayerService {
 
     Logger.info(`Tracking ${leftoverPlayers.length} leftover player statistics...`);
     for (const player of leftoverPlayers) {
+      if (player.inactive) {
+        Logger.info(`Skipping inactive player, ${player.id}`);
+        continue;
+      }
       await PlayerService.trackScoreSaberPlayer(player, trackTime);
     }
 
