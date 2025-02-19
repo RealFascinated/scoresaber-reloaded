@@ -3,7 +3,7 @@
 import ScoreSettings from "@/components/settings/category/score";
 import WebsiteSettings from "@/components/settings/category/website";
 import { Button } from "@/components/ui/button";
-import { CubeIcon, GlobeAmericasIcon } from "@heroicons/react/24/solid";
+import { CubeIcon, GlobeAmericasIcon, UserIcon } from "@heroicons/react/24/solid";
 import { ReactNode, useRef, useState } from "react";
 import { FaCog } from "react-icons/fa";
 import Tooltip from "../tooltip";
@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "../ui/dialog"
 import ExportSettings from "./export-settings";
 import ImportSettings from "./import-settings";
 import ResetDatabase from "./reset-database";
+import AccountSettings from "./category/account";
 
 type Category = {
   name: string;
@@ -23,6 +24,15 @@ type Category = {
 };
 
 const categories: Category[] = [
+  {
+    name: "Account",
+    icon: () => <UserIcon className="size-5" />,
+    component: (
+      onSave: () => void,
+      websiteFormRef: React.RefObject<{ submit: () => void }>,
+      scoreFormRef: React.RefObject<{ submit: () => void }>
+    ) => <AccountSettings onSave={onSave} ref={websiteFormRef} />,
+  },
   {
     name: "Website",
     icon: () => <GlobeAmericasIcon className="size-5" />,
@@ -58,7 +68,7 @@ export default function Settings() {
   return (
     <Dialog>
       <DialogTrigger>
-        <FaCog className="size-5 text-zinc-200 hover:animate-spin-slow" />
+        <FaCog className="size-5 text-zinc-200 hover:animate-spin-slow cursor-pointer" />
       </DialogTrigger>
       <DialogContent className="max-w-[800px] max-h-[400px] h-full w-full flex flex-col">
         {/* Header */}

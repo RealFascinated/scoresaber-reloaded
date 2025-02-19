@@ -16,6 +16,10 @@ export const env = createEnv({
     INFLUXDB_BUCKET: z.string(),
     INFLUXDB_ORG: z.string(),
     INFLUXDB_TOKEN: z.string(),
+
+    BETTER_AUTH_SECRET: z.string(),
+
+    OPENID_AUTH_KEY: z.string(),
   },
 
   client: {
@@ -66,6 +70,12 @@ export const env = createEnv({
     // Analytics
     NEXT_PUBLIC_ANALYTICS_WEBSITE_ID: process.env.NEXT_PUBLIC_ANALYTICS_WEBSITE_ID,
     NEXT_PUBLIC_ANALYTICS_SCRIPT_URL: process.env.NEXT_PUBLIC_ANALYTICS_SCRIPT_URL,
+
+    // Authentication
+    BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
+
+    // Steam OpenID
+    OPENID_AUTH_KEY: process.env.OPENID_AUTH_KEY,
   },
 
   /**

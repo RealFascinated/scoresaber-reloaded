@@ -9,6 +9,8 @@ import { ChartBarIcon, MusicIcon, TrendingUpIcon } from "lucide-react";
 import Link from "next/link";
 import { ReactElement, useEffect, useState } from "react";
 import Settings from "../settings/settings";
+import { AuthButton } from "../auth/auth-button";
+import { authClient } from "@/common/auth/auth-client";
 
 const links: ReactElement<any>[] = [
   <FriendsButton key="friends" />,
@@ -55,6 +57,7 @@ const links: ReactElement<any>[] = [
 ];
 
 export default function Navbar() {
+  const { data: session } = authClient.useSession();
   const [hasScrolled, setHasScrolled] = useState<boolean>(false);
 
   useEffect(() => {
@@ -107,7 +110,8 @@ export default function Navbar() {
           <Settings />
         </div>
         <div>
-          <ProfileButton />
+          {/* <ProfileButton /> */}
+          <AuthButton key={session?.session.id} />
         </div>
       </div>
     </nav>

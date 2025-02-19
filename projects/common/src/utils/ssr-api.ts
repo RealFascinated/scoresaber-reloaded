@@ -24,6 +24,7 @@ import { AroundPlayer } from "../types/around-player";
 import { MapCharacteristic } from "../types/map-characteristic";
 import Request from "./request";
 import { PlayerRankedPpsResponse } from "../response/player-ranked-pps-response";
+import { Session } from "../auth/auth";
 
 class SSRApi {
   /**
@@ -355,6 +356,15 @@ class SSRApi {
     return Request.get<PlayerRankedPpsResponse>(
       `${env.NEXT_PUBLIC_API_URL}/player/ranked-pps/${playerId}`
     );
+  }
+
+  /**
+   * Unlinks the user's Steam account.
+   */
+  async unlinkSteamAccount() {
+    return Request.post(`${env.NEXT_PUBLIC_API_URL}/user/unlink/steam`, {
+      withCredentials: true,
+    });
   }
 }
 

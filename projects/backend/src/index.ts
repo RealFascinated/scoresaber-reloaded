@@ -3,7 +3,6 @@ import cors from "@elysiajs/cors";
 import { cron } from "@elysiajs/cron";
 import { serverTiming } from "@elysiajs/server-timing";
 import { swagger } from "@elysiajs/swagger";
-import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import { isProduction } from "@ssr/common/utils/utils";
@@ -11,10 +10,9 @@ import { connectBeatLeaderWebsocket } from "@ssr/common/websocket/beatleader-web
 import { connectScoresaberWebsocket } from "@ssr/common/websocket/scoresaber-websocket";
 import { logger } from "@tqman/nice-logger";
 import { EmbedBuilder } from "discord.js";
-import { Elysia, ValidationError } from "elysia";
+import { Context, Elysia, ValidationError } from "elysia";
 import { decorators } from "elysia-decorators";
 import { helmet } from "elysia-helmet";
-import mongoose from "mongoose";
 import { DiscordChannels, initDiscordBot, logToChannel } from "./bot/bot";
 import { getAppVersion } from "./common/app.util";
 import AppController from "./controller/app.controller";
@@ -33,6 +31,11 @@ import { PlayerService } from "./service/player.service";
 import { ScoreService } from "./service/score/score.service";
 import ScoreSaberService from "./service/scoresaber.service";
 import StatisticsService from "./service/statistics.service";
+import { auth } from "@ssr/common/auth/auth";
+import { connectMongoose } from "@ssr/common/mongoose";
+import { userMiddleware } from "./common/auth";
+import UserController from "./controller/user.controller";
+import SteamService from "./service/user/steam.service";
 
 Logger.info("Starting SSR Backend...");
 
@@ -46,7 +49,7 @@ if (await Bun.file(".env").exists()) {
 
 // Connect to Mongo
 Logger.info("Connecting to MongoDB...");
-await mongoose.connect(env.MONGO_CONNECTION_STRING); // Connect to MongoDB
+await connectMongoose();
 Logger.info("Connected to MongoDB :)");
 
 // Connect to websockets
@@ -82,8 +85,8 @@ export const app = new Elysia();
 app.use(
   cron({
     name: "player-statistics-tracker-cron",
-    // pattern: "*/2 * * * *", // Every 5 minutes
-    pattern: "59 23 * * *", // Every day at 23:59
+    pattern: "*/2 * * * *", // Every 5 minutes
+    // pattern: "59 23 * * *", // Every day at 23:59
     timezone: "Europe/London", // UTC time
     protect: true,
     run: async () => {
@@ -169,6 +172,11 @@ app.onError({ as: "global" }, ({ code, error }) => {
     switch (code) {
       case "INTERNAL_SERVER_ERROR":
         status = 500;
+
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-expect-error - message is not in the error type
+        Logger.warn(`An internal server error occured: ${error.message}`);
+
         break;
       case "NOT_FOUND":
         status = 404;
@@ -227,12 +235,28 @@ app.use(
 );
 
 /**
+ * Authentication
+ */
+const betterAuthView = (context: Context) => {
+  const BETTER_AUTH_ACCEPT_METHODS = ["POST", "GET"];
+  // validate request method
+  if (BETTER_AUTH_ACCEPT_METHODS.includes(context.request.method)) {
+    return auth.handler(context.request);
+  } else {
+    context.error(405);
+  }
+};
+app.all("/api/auth/*", betterAuthView);
+app.derive(request => userMiddleware(request));
+
+/**
  * Controllers
  */
 app.use(
   decorators({
     controllers: [
       AppController,
+      UserController,
       PlayerController,
       ScoresController,
       LeaderboardController,
@@ -265,15 +289,15 @@ app.use(
   })
 );
 
+new MetricsService();
+new CacheService();
+new StatisticsService();
+
 app.onStart(async () => {
   Logger.info("Listening on port http://localhost:8080");
   if (isProduction()) {
     await initDiscordBot();
   }
-
-  new MetricsService();
-  new CacheService();
-  new StatisticsService();
 });
 
 app.listen({

@@ -22,15 +22,18 @@
     "@typegoose/typegoose": "^12.11.0",
     "@typescript-eslint/eslint-plugin": "^8.24.0",
     "@typescript-eslint/parser": "^8.24.0",
+    "better-auth": "^1.1.18",
     "discordx": "^11.12.2",
     "elysia": "^1.2.12",
     "elysia-decorators": "^1.0.2",
     "elysia-helmet": "^2.0.0",
     "eslint": "^8.57.1",
     "minio": "^8.0.4",
-    "mongoose": "^8.10.0"
+    "mongoose": "^8.10.0",
+    "node-steam-openid": "^2.0.0"
   },
   "devDependencies": {
+    "@types/node-steam-openid": "^1.0.3",
     "bun-types": "^1.2.2"
   },
   "module": "src/index.js"
