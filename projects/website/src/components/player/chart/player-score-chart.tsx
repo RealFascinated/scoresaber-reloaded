@@ -39,7 +39,7 @@ const PlayerScoreChart = ({ player }: PlayerScoreChartProps) => {
    * @param leaderboardId
    */
   const onDataPointClick = (leaderboardId: number) => {
-    openInNewTab(`${env.NEXT_PUBLIC_WEBSITE_NAME}/leaderboard/${leaderboardId}`);
+    openInNewTab(`${env.NEXT_PUBLIC_WEBSITE_URL}/leaderboard/${leaderboardId}`);
   };
 
   const data = dataPoints?.map(dataPoint => {

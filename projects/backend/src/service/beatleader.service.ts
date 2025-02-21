@@ -21,6 +21,8 @@ import { fetchWithCache } from "../common/cache.util";
 import CacheService, { ServiceCache } from "./cache.service";
 import MinioService from "./minio.service";
 import { PlayerService } from "./player.service";
+import { DiscordChannels, logToChannel } from "../bot/bot";
+import { createGenericEmbed } from "../common/discord/embed";
 
 export default class BeatLeaderService {
   /**
@@ -130,6 +132,13 @@ export default class BeatLeaderService {
             savedReplayId = replayId;
           }
         } catch (error) {
+          logToChannel(
+            DiscordChannels.backendLogs,
+            createGenericEmbed(
+              "BeatLeader Replays",
+              `Failed to save replay for ${score.id}: ${error}`
+            )
+          );
           console.error(`Failed to save replay for ${score.id}: ${error}`);
         }
       }
