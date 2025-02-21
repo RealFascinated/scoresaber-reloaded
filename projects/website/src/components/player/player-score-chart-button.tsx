@@ -36,7 +36,7 @@ export default function PlayerScoreChartButton({ player }: PlayerStarCurveProps)
           <StarIcon className="h-5 w-5" />
         </Tooltip>
       </DialogTrigger>
-      <DialogContent className="max-w-5xl h-[600px] bg-secondary">
+      <DialogContent className="max-w-5xl h-[630px] bg-secondary">
         <DialogHeader>
           <DialogTitle>Score Chart</DialogTitle>
           <DialogDescription>

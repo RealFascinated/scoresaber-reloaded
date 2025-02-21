@@ -2,11 +2,13 @@
 
 import { openInNewTab } from "@/common/browser-utils";
 import { LoadingIcon } from "@/components/loading-icon";
+import { DualRangeSlider } from "@/components/ui/dual-range-slider";
 import { env } from "@ssr/common/env";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { Chart, ChartOptions, registerables } from "chart.js";
+import { useState } from "react";
 import { Line } from "react-chartjs-2";
 
 Chart.register(...registerables);
@@ -21,6 +23,8 @@ type PlayerScoreChartProps = {
 const minimumStar = 10;
 
 const PlayerScoreChart = ({ player }: PlayerScoreChartProps) => {
+  const [accuracyRange, setAccuracyRange] = useState<number[]>([0, 100]);
+
   const { data: dataPoints } = useQuery({
     queryKey: ["player-score-chart", player.id],
     queryFn: async () => {
@@ -94,8 +98,8 @@ const PlayerScoreChart = ({ player }: PlayerScoreChartProps) => {
       },
       y: {
         type: "linear",
-        min: 0,
-        max: 100,
+        min: accuracyRange[0],
+        max: accuracyRange[1],
         grid: {
           color: "#252525",
         },
@@ -139,8 +143,24 @@ const PlayerScoreChart = ({ player }: PlayerScoreChartProps) => {
   };
 
   return (
-    <div className="flex justify-center">
-      {data && <Line className="max-w-[100%]" data={datasets as any} options={options as any} />}
+    <div className="flex justify-center flex-col gap-6">
+      {data && (
+        <>
+          <div>
+            <Line className="max-w-[100%]" data={datasets as any} options={options as any} />
+          </div>
+          <DualRangeSlider
+            min={0}
+            max={100}
+            value={[accuracyRange[0], accuracyRange[1]]}
+            label={value => value}
+            onValueChange={value => {
+              setAccuracyRange([value[0], value[1]]);
+            }}
+            step={1}
+          />
+        </>
+      )}
       {!data && <LoadingIcon />}
     </div>
   );
