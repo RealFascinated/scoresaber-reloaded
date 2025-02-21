@@ -146,7 +146,7 @@ const PlayerScoreChart = ({ player }: PlayerScoreChartProps) => {
     <div className="flex justify-center flex-col gap-6">
       {data && (
         <>
-          <div>
+          <div className="h-[500px]">
             <Line className="max-w-[100%]" data={datasets as any} options={options as any} />
           </div>
           <DualRangeSlider
