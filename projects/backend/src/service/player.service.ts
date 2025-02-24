@@ -378,11 +378,11 @@ export class PlayerService {
       return;
     }
 
-    if (playerToken && foundPlayer.inactive !== playerToken.inactive) {
-      foundPlayer.inactive = playerToken.inactive;
+    if (player && foundPlayer.inactive !== player.inactive) {
+      foundPlayer.inactive = player.inactive;
       await foundPlayer.save();
     }
-    
+
     if (player.inactive) {
       Logger.info(`Player "${foundPlayer.id}" is inactive on ScoreSaber`);
       return;
@@ -687,27 +687,23 @@ export class PlayerService {
 
   /**
    * Updates the player statistics for all players.
-   *
-   * This will first get the top 2000 players and then force track the top 1000
-   * players, it will then get the leftover players (not in the top 2500) and
-   * track them individually.
    */
   public static async updatePlayerStatistics() {
-    // Pages to search for players in (total players / players per page)
-    const pages = Math.ceil(5000 / 50);
+    const pages = 20; // top 1000 players
 
-    const trackTime = new Date();
-    const toTrack: PlayerDocument[] = await PlayerModel.find({});
+    let toTrack: PlayerDocument[] = await PlayerModel.find({});
     const players: ScoreSaberPlayerToken[] = [];
 
+    const dateNow = new Date();
+
     // loop through pages to fetch the top players
-    Logger.info(`Fetching ${pages} pages of players from ScoreSaber...`);
+    console.log(`Fetching ${pages} pages of players from ScoreSaber...`);
     for (let i = 0; i < pages; i++) {
-      // Check the first 50 pages
       const pageNumber = i + 1;
+      console.log(`Fetching page ${pageNumber}...`);
       const page = await scoresaberService.lookupPlayers(pageNumber);
       if (page === undefined) {
-        Logger.warn(`Failed to fetch players on page ${pageNumber}, skipping page...`);
+        console.log(`Failed to fetch players on page ${pageNumber}, skipping page...`);
         continue;
       }
       for (const player of page.players) {
@@ -716,36 +712,22 @@ export class PlayerService {
     }
 
     for (const player of players) {
-      // Only track players <= 1000 rank or if they need to be tracked
-      const shouldTrack = player.rank <= 1000 || toTrack.map(p => p.id).includes(player.id);
-      if (!shouldTrack) {
-        continue;
-      }
-
       const foundPlayer = await PlayerService.getPlayer(player.id, true, player);
-      await PlayerService.trackScoreSaberPlayer(foundPlayer, trackTime, player);
+      await PlayerService.trackScoreSaberPlayer(foundPlayer, dateNow, player);
     }
 
-    // Only track leftover players that we are tracking and that
-    // haven't already been tracked by the loop above
-    const leftoverPlayers: PlayerDocument[] = [];
-    for (const trackedPlayer of toTrack) {
-      const isInFetchedPlayers = players.some(p => p.id === trackedPlayer.id);
-      if (!isInFetchedPlayers) {
-        leftoverPlayers.push(trackedPlayer);
-      }
-    }
+    // remove all players that have been tracked
+    toTrack = toTrack.filter(player => !players.map(player => player.id).includes(player.id));
 
-    Logger.info(`Tracking ${leftoverPlayers.length} leftover player statistics...`);
-    for (const player of leftoverPlayers) {
+    console.log(`Tracking ${toTrack.length} player statistics...`);
+    for (const player of toTrack) {
       if (player.inactive) {
         Logger.info(`Skipping inactive player, ${player.id}`);
         continue;
       }
-      await PlayerService.trackScoreSaberPlayer(player, trackTime);
+      await PlayerService.trackScoreSaberPlayer(player, dateNow);
     }
-
-    Logger.info("Finished tracking player statistics.");
+    console.log("Finished tracking player statistics.");
   }
 
   /**

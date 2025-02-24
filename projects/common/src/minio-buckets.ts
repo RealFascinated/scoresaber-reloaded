@@ -1,7 +1,7 @@
 import { isProduction } from "./utils/utils";
 
 export enum MinioBucket {
-  BeatLeaderReplays = "beatleader-replays",
+  BeatLeaderReplays = "ssr-beatleader-replays",
 }
 
 /**
