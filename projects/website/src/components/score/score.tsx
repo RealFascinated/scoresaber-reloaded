@@ -91,6 +91,7 @@ export default function Score({
       };
     },
     staleTime: 30000,
+    enabled: isLeaderboardExpanded,
   });
 
   useEffect(() => {
