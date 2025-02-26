@@ -61,7 +61,7 @@ export const env = createEnv({
     NEXT_PUBLIC_WEBSITE_NAME: process.env.NEXT_PUBLIC_WEBSITE_NAME ?? "ScoreSaber Reloaded",
     NEXT_PUBLIC_WEBSITE_URL: process.env.NEXT_PUBLIC_WEBSITE_URL ?? "https://ssr.fascinated.cc",
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL ?? "https://ssr-api.fascinated.cc",
-    NEXT_PUBLIC_CDN_URL: process.env.NEXT_PUBLIC_CDN_URL ?? "https://ssr-cdn.fascinated.cc",
+    NEXT_PUBLIC_CDN_URL: process.env.NEXT_PUBLIC_CDN_URL ?? "https://s3-api.fascinated.cc",
 
     // Analytics
     NEXT_PUBLIC_ANALYTICS_WEBSITE_ID: process.env.NEXT_PUBLIC_ANALYTICS_WEBSITE_ID,
