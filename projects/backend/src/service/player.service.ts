@@ -700,20 +700,28 @@ export class PlayerService {
     console.log(`Fetching ${pages} pages of players from ScoreSaber...`);
     for (let i = 0; i < pages; i++) {
       const pageNumber = i + 1;
-      console.log(`Fetching page ${pageNumber}...`);
-      const page = await scoresaberService.lookupPlayers(pageNumber);
-      if (page === undefined) {
-        console.log(`Failed to fetch players on page ${pageNumber}, skipping page...`);
-        continue;
-      }
-      for (const player of page.players) {
-        players.push(player);
+      try {
+        console.log(`Fetching page ${pageNumber}...`);
+        const page = await scoresaberService.lookupPlayers(pageNumber);
+        if (page === undefined) {
+          console.log(`Failed to fetch players on page ${pageNumber}, skipping page...`);
+          continue;
+        }
+        for (const player of page.players) {
+          players.push(player);
+        }
+      } catch (error) {
+        Logger.error(`Error fetching page ${pageNumber}: ${error}`);
       }
     }
 
     for (const player of players) {
-      const foundPlayer = await PlayerService.getPlayer(player.id, true, player);
-      await PlayerService.trackScoreSaberPlayer(foundPlayer, dateNow, player);
+      try {
+        const foundPlayer = await PlayerService.getPlayer(player.id, true, player);
+        await PlayerService.trackScoreSaberPlayer(foundPlayer, dateNow, player);
+      } catch (error) {
+        Logger.error(`Error tracking player ${player.id}: ${error}`);
+      }
     }
 
     // remove all players that have been tracked
@@ -725,7 +733,11 @@ export class PlayerService {
         Logger.info(`Skipping inactive player, ${player.id}`);
         continue;
       }
-      await PlayerService.trackScoreSaberPlayer(player, dateNow);
+      try {
+        await PlayerService.trackScoreSaberPlayer(player, dateNow);
+      } catch (error) {
+        Logger.error(`Error tracking player ${player.id}: ${error}`);
+      }
     }
     console.log("Finished tracking player statistics.");
   }
