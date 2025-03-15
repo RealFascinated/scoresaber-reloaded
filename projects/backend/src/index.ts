@@ -128,7 +128,7 @@ app.use(
   cron({
     name: "refresh-leaderboards-cron",
     // pattern: "*/1 * * * *", // Every 5 minutes
-    pattern: "0 */2 * * *", // Every 2 hours
+    pattern: "30 */2 * * *", // Every 2 hours at 30 minutes ex: 00:30, 02:30, 04:30, etc
     timezone: "Europe/London", // UTC time
     protect: true,
     run: async () => {
