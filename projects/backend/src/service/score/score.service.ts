@@ -219,9 +219,9 @@ export class ScoreService {
     const score = getScoreSaberScoreFromToken(scoreToken, leaderboard, player.id);
 
     if (await ScoreService.scoreExists(player.id, leaderboard, score)) {
-      Logger.info(
-        `Score "${score.scoreId}" for "${player.name}"(${player.id}) already exists, skipping`
-      );
+      // Logger.info(
+      //   `Score "${score.scoreId}" for "${player.name}"(${player.id}) already exists, skipping`
+      // );
       return false;
     }
 

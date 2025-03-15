@@ -21,9 +21,7 @@ export default class UniqueDailyPlayersMetric extends NumberMetric {
       },
     ]);
 
-    return this.getPointBase().intField(
-      "value",
-      statsResponse[0].uniquePlayers[0].uniquePlayers ?? 0
-    );
+    const uniquePlayersCount = statsResponse[0]?.uniquePlayers?.[0]?.uniquePlayers ?? 0;
+    return this.getPointBase().intField("value", uniquePlayersCount);
   }
 }
