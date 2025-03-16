@@ -7,7 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useState } from "react";
 import Card from "../card";
-import Pagination from "../input/pagination";
+import SimplePagination from "../simple-pagination";
 import { LoadingIcon } from "../loading-icon";
 import Score from "../score/score";
 
@@ -18,10 +18,15 @@ export function FriendScores() {
 
   const [page, setPage] = useState(1);
 
-  const { data: scoreData, isLoading } = useQuery({
+  const {
+    data: scoreData,
+    isLoading,
+    isFetching,
+  } = useQuery({
     queryKey: ["friend-scores", friendIds, page],
     queryFn: async () => ssrApi.getFriendScores(friendIds!, page),
     enabled: friendIds !== undefined && friendIds.length > 0,
+    placeholderData: prev => prev,
   });
 
   return (
@@ -69,12 +74,12 @@ export function FriendScores() {
               })}
             </div>
 
-            <Pagination
+            <SimplePagination
               mobilePagination={isMobile}
               page={page}
               totalItems={scoreData.metadata.totalItems}
               itemsPerPage={scoreData.metadata.itemsPerPage}
-              loadingPage={isLoading ? page : undefined}
+              loadingPage={isLoading || isFetching ? page : undefined}
               onPageChange={newPage => setPage(newPage)}
             />
           </>

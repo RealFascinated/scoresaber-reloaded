@@ -1,7 +1,7 @@
 "use client";
 
 import Card from "@/components/card";
-import Pagination from "@/components/input/pagination";
+import SimplePagination from "@/components/simple-pagination";
 import { LoadingIcon } from "@/components/loading-icon";
 import { useMapFilter } from "@/components/providers/maps/map-filter-provider";
 import ScoreSongInfo from "@/components/score/score-song-info";
@@ -115,7 +115,7 @@ export default function Leaderboards({ initialPage }: LeaderboardsProps) {
             </div>
           </div>
 
-          <Pagination
+          <SimplePagination
             mobilePagination={isMobile}
             page={page}
             totalItems={leaderboards.metadata.total}

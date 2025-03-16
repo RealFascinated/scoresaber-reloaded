@@ -9,7 +9,7 @@ import { useIsMobile } from "@/hooks/use-is-mobile";
 import usePageNavigation from "@/hooks/use-page-navigation";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { useCallback, useEffect, useState } from "react";
-import Pagination from "../input/pagination";
+import SimplePagination from "../simple-pagination";
 import { DifficultyButton } from "./button/difficulty-button";
 import LeaderboardScore from "./page/leaderboard-score";
 
@@ -144,7 +144,7 @@ export default function LeaderboardScores({
             </table>
           </div>
 
-          <Pagination
+          <SimplePagination
             mobilePagination={isMobile}
             page={page}
             totalItems={scores.metadata.totalItems}

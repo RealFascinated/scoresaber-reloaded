@@ -7,7 +7,7 @@ import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { useLiveQuery } from "dexie-react-hooks";
 import { memo, useCallback, useEffect, useState } from "react";
 import Card from "../card";
-import PaginationComponent from "../input/pagination";
+import PaginationComponent from "../simple-pagination";
 import { LoadingIcon } from "../loading-icon";
 import { PlayerListItem } from "../player/player-list-item";
 

@@ -2,7 +2,7 @@
 
 import Card from "@/components/card";
 import CountryFlag from "@/components/country-flag";
-import Pagination from "@/components/input/pagination";
+import SimplePagination from "@/components/simple-pagination";
 import { PlayerRanking } from "@/components/ranking/player-ranking";
 import { Switch } from "@/components/ui/switch";
 import useDatabase from "@/hooks/use-database";
@@ -139,7 +139,7 @@ export default function RankingData({ initialPage, country }: RankingDataProps) 
           </div>
 
           {/* Pagination */}
-          <Pagination
+          <SimplePagination
             mobilePagination={isMobile}
             page={currentPage}
             totalItems={rankingData.metadata.total}

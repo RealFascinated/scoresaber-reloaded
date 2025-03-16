@@ -17,7 +17,7 @@ import { useDebounce } from "@uidotdev/usehooks";
 import { clsx } from "clsx";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Card from "../card";
-import Pagination from "../input/pagination";
+import SimplePagination from "../simple-pagination";
 import { Button } from "../ui/button";
 
 type Props = {
@@ -164,7 +164,7 @@ export default function PlayerScores({ initialSearch, player, sort, page }: Prop
           </div>
 
           {scores.metadata.totalPages > 1 && (
-            <Pagination
+            <SimplePagination
               mobilePagination={isMobile}
               page={currentPage}
               totalItems={scores.metadata.totalItems}

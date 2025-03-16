@@ -1,6 +1,6 @@
 "use client";
 
-import PaginationComponent from "@/components/input/pagination";
+import PaginationComponent from "@/components/simple-pagination";
 import { LoadingIcon } from "@/components/loading-icon";
 import Score from "@/components/score/score";
 import { useIsMobile } from "@/hooks/use-is-mobile";
