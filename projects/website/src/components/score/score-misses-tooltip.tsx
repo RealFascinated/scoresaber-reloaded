@@ -1,4 +1,4 @@
-import Tooltip from "@/components/tooltip";
+import SimpleTooltip from "@/components/simple-tooltip";
 import { ensurePositiveNumber, formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { ReactNode } from "react";
 
@@ -49,7 +49,7 @@ export function ScoreMissesTooltip({
   children,
 }: ScoreMissesTooltipProps) {
   return (
-    <Tooltip
+    <SimpleTooltip
       display={
         <div className="flex flex-col w-full">
           {!fullCombo ? (
@@ -74,6 +74,6 @@ export function ScoreMissesTooltip({
       }
     >
       {children}
-    </Tooltip>
+    </SimpleTooltip>
   );
 }

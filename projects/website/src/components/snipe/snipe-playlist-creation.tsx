@@ -2,7 +2,7 @@
 
 import { downloadFile } from "@/common/browser-utils";
 import { LoadingIcon } from "@/components/loading-icon";
-import Tooltip from "@/components/tooltip";
+import SimpleTooltip from "@/components/simple-tooltip";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -88,7 +88,7 @@ export default function SnipePlaylistDownloadButton({ toSnipe }: SnipePlaylistDo
   return (
     <Dialog>
       <DialogTrigger>
-        <Tooltip
+        <SimpleTooltip
           side="bottom"
           className="cursor-pointer"
           display={
@@ -98,7 +98,7 @@ export default function SnipePlaylistDownloadButton({ toSnipe }: SnipePlaylistDo
           }
         >
           <RocketLaunchIcon className="h-5 w-5" />
-        </Tooltip>
+        </SimpleTooltip>
       </DialogTrigger>
 
       <DialogContent className="bg-secondary">

@@ -1,6 +1,6 @@
 "use client";
 
-import Tooltip from "@/components/tooltip";
+import SimpleTooltip from "@/components/simple-tooltip";
 import { normalizedRegionName } from "@ssr/common/utils/region-utils";
 import { useState } from "react";
 
@@ -18,7 +18,7 @@ export default function CountryFlag({ code, size = 24 }: Props) {
   };
 
   return (
-    <Tooltip
+    <SimpleTooltip
       display={<p>{normalizedRegionName(code)}</p>}
       className={`w-[${size * 2}px] min-w-[${size * 2}px]`}
     >
@@ -34,6 +34,6 @@ export default function CountryFlag({ code, size = 24 }: Props) {
         }}
         onError={handleError} // Handle error to load fallback
       />
-    </Tooltip>
+    </SimpleTooltip>
   );
 }

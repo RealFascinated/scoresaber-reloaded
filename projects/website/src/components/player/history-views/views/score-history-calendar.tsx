@@ -1,7 +1,7 @@
 "use client";
 
 import { LoadingIcon } from "@/components/loading-icon";
-import Tooltip from "@/components/tooltip";
+import SimpleTooltip from "@/components/simple-tooltip";
 import Combobox from "@/components/ui/combo-box";
 import { PlayedMapsCalendarStat } from "@ssr/common/response/played-maps-calendar-response";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
@@ -87,7 +87,7 @@ export default function ScoreHistoryCalendar({ playerId }: ScoreHistoryCalendarP
                 totalMaps === 0 ? 0 : Math.max(minSize, Math.min(scorePercentage, maxSize));
 
               return (
-                <Tooltip
+                <SimpleTooltip
                   key={day}
                   display={
                     <div className="flex flex-col gap-2">
@@ -116,7 +116,7 @@ export default function ScoreHistoryCalendar({ playerId }: ScoreHistoryCalendarP
                     />
                     <p className="z-10">{day}</p>
                   </div>
-                </Tooltip>
+                </SimpleTooltip>
               );
             })}
           </div>

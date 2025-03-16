@@ -1,6 +1,6 @@
 import { Change } from "@/components/change";
 import { ScoreBadgeProps } from "@/components/score/badges/badge-props";
-import Tooltip from "@/components/tooltip";
+import SimpleTooltip from "@/components/simple-tooltip";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { ensurePositiveNumber, formatPp } from "@ssr/common/utils/number-utils";
@@ -29,7 +29,7 @@ export function ScorePpBadge({ score, leaderboard }: ScorePpProps) {
   return (
     <>
       <div className="flex flex-col items-center justify-center cursor-default">
-        <Tooltip
+        <SimpleTooltip
           display={
             <div className="flex flex-col gap-2">
               <div>
@@ -44,15 +44,15 @@ export function ScorePpBadge({ score, leaderboard }: ScorePpProps) {
           }
         >
           <p>{formatPp(pp)}pp</p>
-        </Tooltip>
+        </SimpleTooltip>
         {previousScore && previousScore.change && previousScore.pp !== score.pp && (
-          <Tooltip display={<p>Previous PP: {formatPp(previousScore.pp)}pp</p>}>
+          <SimpleTooltip display={<p>Previous PP: {formatPp(previousScore.pp)}pp</p>}>
             <Change
               className="text-xs"
               change={ensurePositiveNumber(previousScore.change.pp)}
               isPp
             />
-          </Tooltip>
+          </SimpleTooltip>
         )}
       </div>
     </>

@@ -1,7 +1,7 @@
 "use client";
 
 import { LoadingIcon } from "@/components/loading-icon";
-import Tooltip from "@/components/tooltip";
+import SimpleTooltip from "@/components/simple-tooltip";
 import { CalendarIcon, GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerStatisticHistory } from "@ssr/common/player/player-statistic-history";
@@ -134,7 +134,7 @@ export default function PlayerViews({ player }: PlayerChartsProps) {
             const isSelected = view.index === selectedView.index;
 
             return (
-              <Tooltip
+              <SimpleTooltip
                 key={view.index}
                 display={
                   <div className="flex justify-center items-center flex-col">
@@ -151,7 +151,7 @@ export default function PlayerViews({ player }: PlayerChartsProps) {
                 >
                   {view.icon}
                 </button>
-              </Tooltip>
+              </SimpleTooltip>
             );
           })}
       </div>

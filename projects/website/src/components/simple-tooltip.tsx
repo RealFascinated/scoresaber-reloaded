@@ -1,5 +1,6 @@
 "use client";
 
+import { type SIDE_OPTIONS } from "@radix-ui/react-popper";
 import { clsx } from "clsx";
 import { Tooltip as ShadCnTooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
@@ -27,16 +28,25 @@ type Props = {
   /**
    * Where the tooltip will be displayed
    */
-  side?: "top" | "bottom" | "left" | "right";
+  side?: (typeof SIDE_OPTIONS)[number];
 };
 
-export default function Tooltip({ children, display, asChild = true, side, className }: Props) {
+export default function SimpleTooltip({
+  children,
+  display,
+  asChild = true,
+  side,
+  className,
+}: Props) {
   return (
     <ShadCnTooltip>
       <TooltipTrigger className={clsx("cursor-default w-full", className)} asChild={asChild}>
         <div>{children}</div>
       </TooltipTrigger>
-      <TooltipContent className="max-w-[500px]" side={side}>
+      <TooltipContent
+        className="max-w-[500px] bg-muted text-white border border-muted/50"
+        side={side}
+      >
         {display}
       </TooltipContent>
     </ShadCnTooltip>

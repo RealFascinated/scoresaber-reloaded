@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { CubeIcon, GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import { ReactNode, useRef, useState } from "react";
 import { FaCog } from "react-icons/fa";
-import Tooltip from "../tooltip";
+import SimpleTooltip from "../simple-tooltip";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "../ui/dialog";
 import ExportSettings from "./export-settings";
 import ImportSettings from "./import-settings";
@@ -92,11 +92,11 @@ export default function Settings() {
                 <ImportSettings />
               </div>
 
-              <Tooltip display="Save your settings">
+              <SimpleTooltip display="Save your settings">
                 <Button className="w-fit" onClick={save}>
                   Save
                 </Button>
-              </Tooltip>
+              </SimpleTooltip>
             </div>
           </div>
         </div>

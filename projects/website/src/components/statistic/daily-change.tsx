@@ -1,5 +1,5 @@
 import { cn } from "@/common/utils";
-import Tooltip from "@/components/tooltip";
+import SimpleTooltip from "@/components/simple-tooltip";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerStatValue } from "@ssr/common/player/player-stat-change";
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
@@ -53,8 +53,8 @@ export function DailyChange({ type, player, change, tooltip, className }: DailyC
   }
 
   return (
-    <Tooltip display={tooltip} side="bottom">
+    <SimpleTooltip display={tooltip} side="bottom">
       {value}
-    </Tooltip>
+    </SimpleTooltip>
   );
 }

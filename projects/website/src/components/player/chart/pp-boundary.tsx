@@ -4,7 +4,7 @@ import { DatasetConfig } from "@/common/chart/types";
 import { Colors } from "@/common/colors";
 import GenericChart from "@/components/chart/generic-chart";
 import StatValue from "@/components/stat-value";
-import Tooltip from "@/components/tooltip";
+import SimpleTooltip from "@/components/simple-tooltip";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 
@@ -48,7 +48,7 @@ export default function PpBoundaryStat({ player }: PpBoundaryProps) {
     <Popover>
       <PopoverTrigger asChild>
         <div>
-          <Tooltip
+          <SimpleTooltip
             asChild={false}
             display={
               <div className="text-center flex flex-col gap-2">
@@ -58,7 +58,7 @@ export default function PpBoundaryStat({ player }: PpBoundaryProps) {
             }
           >
             <StatValue name={`+1 PP`} value={<p>{boundaries[0].toFixed(2) || "-"}pp</p>} />
-          </Tooltip>
+          </SimpleTooltip>
         </div>
       </PopoverTrigger>
       <PopoverContent className="flex flex-col gap-2 p-3 w-[90vw] lg:w-[500px]">

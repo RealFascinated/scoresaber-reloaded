@@ -1,5 +1,5 @@
 import useDatabase from "@/hooks/use-database";
-import Tooltip from "../tooltip";
+import SimpleTooltip from "../simple-tooltip";
 import { Button } from "../ui/button";
 
 export default function ResetDatabase() {
@@ -16,10 +16,10 @@ export default function ResetDatabase() {
   }
 
   return (
-    <Tooltip display="This will reset the database to its default values.">
+    <SimpleTooltip display="This will reset the database to its default values.">
       <Button variant="destructive" onClick={reset}>
         Reset
       </Button>
-    </Tooltip>
+    </SimpleTooltip>
   );
 }

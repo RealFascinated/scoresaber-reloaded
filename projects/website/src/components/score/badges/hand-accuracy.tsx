@@ -1,6 +1,6 @@
 import { Change } from "@/components/change";
 import { ScoreBadgeProps } from "@/components/score/badges/badge-props";
-import Tooltip from "@/components/tooltip";
+import SimpleTooltip from "@/components/simple-tooltip";
 import { capitalizeFirstLetter } from "@ssr/common/string-utils";
 
 type HandAccuracyProps = ScoreBadgeProps & {
@@ -24,7 +24,7 @@ export function HandAccuracyBadge({ score, hand }: HandAccuracyProps) {
 
   return (
     <div className="flex gap-1 items-center justify-center">
-      <Tooltip
+      <SimpleTooltip
         display={
           <>
             <p className="font-semibold">{formattedHand} Hand Accuracy</p>
@@ -34,9 +34,9 @@ export function HandAccuracyBadge({ score, hand }: HandAccuracyProps) {
         }
       >
         <p>{currentHandAccuracy.toFixed(2)}</p>
-      </Tooltip>
+      </SimpleTooltip>
       {scoreImprovement && previousHandAccuracy && (
-        <Tooltip
+        <SimpleTooltip
           display={
             <>
               <p className="font-semibold">{formattedHand} Hand Accuracy</p>
@@ -50,7 +50,7 @@ export function HandAccuracyBadge({ score, hand }: HandAccuracyProps) {
             change={scoreImprovement.handAccuracy[hand]}
             formatValue={num => num.toFixed(2)}
           />
-        </Tooltip>
+        </SimpleTooltip>
       )}
     </div>
   );

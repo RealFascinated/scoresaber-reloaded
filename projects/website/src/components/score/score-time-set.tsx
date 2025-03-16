@@ -1,4 +1,4 @@
-import Tooltip from "@/components/tooltip";
+import SimpleTooltip from "@/components/simple-tooltip";
 import { format } from "@formkit/tempo";
 import { timeAgo } from "@ssr/common/utils/time-utils";
 
@@ -11,7 +11,7 @@ type ScoreTimeSetProps = {
 
 export function ScoreTimeSet({ timestamp }: ScoreTimeSetProps) {
   return (
-    <Tooltip
+    <SimpleTooltip
       display={
         <p>
           {format({
@@ -22,6 +22,6 @@ export function ScoreTimeSet({ timestamp }: ScoreTimeSetProps) {
       }
     >
       <p className="text-sm cursor-default select-none">{timeAgo(new Date(timestamp))}</p>
-    </Tooltip>
+    </SimpleTooltip>
   );
 }

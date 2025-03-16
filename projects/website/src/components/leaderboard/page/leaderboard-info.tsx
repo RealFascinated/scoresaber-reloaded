@@ -3,7 +3,7 @@ import Card from "@/components/card";
 import FallbackLink from "@/components/fallback-link";
 import LeaderboardButtons from "@/components/leaderboard/leaderboard-buttons";
 import { LeaderboardSongStarCount } from "@/components/leaderboard/page/leaderboard-song-star-count";
-import Tooltip from "@/components/tooltip";
+import SimpleTooltip from "@/components/simple-tooltip";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
 import { getBeatSaverMapperProfileUrl } from "@ssr/common/utils/beatsaver.util";
@@ -71,9 +71,9 @@ export function LeaderboardInfo({ leaderboard, beatSaverMap }: LeaderboardInfoPr
                 <div className="flex gap-2">
                   Status: <span className="font-semibold">{leaderboard.status}</span>{" "}
                   {statusDate && (
-                    <Tooltip display={formatDate(statusDate, "DD MMMM YYYY HH:mm")}>
+                    <SimpleTooltip display={formatDate(statusDate, "DD MMMM YYYY HH:mm")}>
                       <span>({formatDate(statusDate, "DD MMMM YYYY")})</span>
-                    </Tooltip>
+                    </SimpleTooltip>
                   )}
                 </div>
               </div>

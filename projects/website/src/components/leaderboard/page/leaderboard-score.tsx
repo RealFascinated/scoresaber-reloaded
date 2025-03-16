@@ -4,7 +4,7 @@ import { ScorePpBadge } from "@/components/score/badges/score-pp";
 import { ScoreReplayButton } from "@/components/score/button/score-replay-button";
 import { ScoreModifiers } from "@/components/score/score-modifiers";
 import { ScoreTimeSet } from "@/components/score/score-time-set";
-import Tooltip from "@/components/tooltip";
+import SimpleTooltip from "@/components/simple-tooltip";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
@@ -73,7 +73,7 @@ export default function LeaderboardScore({ score, leaderboard, highlightedPlayer
 
       {/* Score Modifiers */}
       <td className="px-4 py-2 text-center whitespace-nowrap">
-        <Tooltip
+        <SimpleTooltip
           display={
             <div>
               <p className="font-semibold">Modifiers</p>
@@ -84,7 +84,7 @@ export default function LeaderboardScore({ score, leaderboard, highlightedPlayer
           <p className="cursor-default">
             <ScoreModifiers type="simple" score={score} />
           </p>
-        </Tooltip>
+        </SimpleTooltip>
       </td>
 
       {/* Score Replay */}

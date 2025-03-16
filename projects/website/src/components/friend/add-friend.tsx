@@ -7,7 +7,7 @@ import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useLiveQuery } from "dexie-react-hooks";
 import { toast } from "sonner";
 import useDatabase from "../../hooks/use-database";
-import Tooltip from "../tooltip";
+import SimpleTooltip from "../simple-tooltip";
 import { Button } from "../ui/button";
 
 type Props = {
@@ -48,7 +48,7 @@ export default function AddFriend({ player, iconOnly }: Props) {
   }
 
   return (
-    <Tooltip display={<p>Add {name} as a friend!</p>} side={"bottom"}>
+    <SimpleTooltip display={<p>Add {name} as a friend!</p>} side={"bottom"}>
       <div onClick={addFriend} className="cursor-pointer">
         {iconOnly ? (
           <PersonIcon className="size-6 text-green-500" />
@@ -58,6 +58,6 @@ export default function AddFriend({ player, iconOnly }: Props) {
           </Button>
         )}
       </div>
-    </Tooltip>
+    </SimpleTooltip>
   );
 }

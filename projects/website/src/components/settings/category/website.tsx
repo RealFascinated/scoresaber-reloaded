@@ -1,7 +1,7 @@
 "use client";
 
 import { SettingIds } from "@/common/database/database";
-import Tooltip from "@/components/tooltip";
+import SimpleTooltip from "@/components/simple-tooltip";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -92,7 +92,7 @@ const WebsiteSettings = forwardRef<{ submit: () => void }, { onSave: () => void 
                     <FormControl>
                       <div className="flex gap-2 items-center">
                         <Input className="w-full sm:w-72" placeholder="Hex or URL..." {...field} />
-                        <Tooltip display={<p>Reset to default</p>}>
+                        <SimpleTooltip display={<p>Reset to default</p>}>
                           <button
                             type="button"
                             className="cursor-pointer"
@@ -103,7 +103,7 @@ const WebsiteSettings = forwardRef<{ submit: () => void }, { onSave: () => void 
                           >
                             <FaUndo className="size-4" />
                           </button>
-                        </Tooltip>
+                        </SimpleTooltip>
                       </div>
                     </FormControl>
                   </FormItem>

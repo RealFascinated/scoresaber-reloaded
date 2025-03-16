@@ -1,5 +1,5 @@
 import FallbackLink from "@/components/fallback-link";
-import Tooltip from "@/components/tooltip";
+import SimpleTooltip from "@/components/simple-tooltip";
 import { StarIcon } from "@heroicons/react/24/solid";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
@@ -37,7 +37,7 @@ export default function ScoreSongInfo({
           height: imageSize,
         }}
       >
-        <Tooltip
+        <SimpleTooltip
           display={
             <div>
               <p>Difficulty: {getDifficultyName(difficulty)}</p>
@@ -60,7 +60,7 @@ export default function ScoreSongInfo({
               <p>{getDifficultyName(difficulty)}</p>
             )}
           </div>
-        </Tooltip>
+        </SimpleTooltip>
         <img
           src={leaderboard.songArt}
           width={imageSize}

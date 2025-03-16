@@ -1,6 +1,6 @@
 import { ScoreTimeSet } from "@/components/score/score-time-set";
 import { ScoreTimeSetVs } from "@/components/score/score-time-set-vs";
-import Tooltip from "@/components/tooltip";
+import SimpleTooltip from "@/components/simple-tooltip";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import { getHMDInfo, HMD } from "@ssr/common/hmds";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
@@ -39,7 +39,7 @@ export default function ScoreInfo({ score, leaderboard, hideRank }: Props) {
 
         {/* Score HMD and Controllers */}
         {hmd.logo && (
-          <Tooltip
+          <SimpleTooltip
             display={
               <div className="flex flex-col gap-2">
                 <p>
@@ -68,7 +68,7 @@ export default function ScoreInfo({ score, leaderboard, hideRank }: Props) {
                 filter: hmd.filters,
               }}
             />
-          </Tooltip>
+          </SimpleTooltip>
         )}
       </div>
       <div className="flex items-center gap-2 lg:flex-col lg:gap-0">

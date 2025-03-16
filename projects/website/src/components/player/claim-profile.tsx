@@ -6,7 +6,7 @@ import useDatabase from "@/hooks/use-database";
 import { CheckIcon } from "@heroicons/react/24/solid";
 import { useLiveQuery } from "dexie-react-hooks";
 import { toast } from "sonner";
-import Tooltip from "../tooltip";
+import SimpleTooltip from "../simple-tooltip";
 import { Button } from "../ui/button";
 
 type Props = {
@@ -35,7 +35,7 @@ export default function ClaimProfile({ playerId }: Props) {
   }
 
   return (
-    <Tooltip
+    <SimpleTooltip
       display={
         <div className="flex flex-col gap-2">
           <div>
@@ -50,6 +50,6 @@ export default function ClaimProfile({ playerId }: Props) {
       <Button variant={"outline"} onClick={claimProfile}>
         <CheckIcon className="size-6 text-green-500" />
       </Button>
-    </Tooltip>
+    </SimpleTooltip>
   );
 }

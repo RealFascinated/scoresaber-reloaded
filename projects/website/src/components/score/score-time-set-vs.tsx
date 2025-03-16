@@ -1,4 +1,4 @@
-import Tooltip from "@/components/tooltip";
+import SimpleTooltip from "@/components/simple-tooltip";
 import { format } from "@formkit/tempo";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { timeAgo } from "@ssr/common/utils/time-utils";
@@ -16,7 +16,7 @@ export function ScoreTimeSetVs({ score }: ScoreTimeSetProps) {
   }
 
   return (
-    <Tooltip
+    <SimpleTooltip
       display={
         <p>
           {format({
@@ -32,6 +32,6 @@ export function ScoreTimeSetVs({ score }: ScoreTimeSetProps) {
           <p>{timeAgo(new Date(score.previousScore.timestamp))}</p>
         </div>
       </div>
-    </Tooltip>
+    </SimpleTooltip>
   );
 }

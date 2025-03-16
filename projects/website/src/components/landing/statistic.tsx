@@ -1,6 +1,6 @@
 "use client";
 
-import Tooltip from "@/components/tooltip";
+import SimpleTooltip from "@/components/simple-tooltip";
 import { CircleStackIcon } from "@heroicons/react/24/outline";
 import { ReactElement } from "react";
 import CountUp from "react-countup";
@@ -20,9 +20,9 @@ export default function Statistic({ icon, title, value, isCache }: Statistic) {
         {title}{" "}
         {isCache && (
           <span>
-            <Tooltip display="This is data we cache locally">
+            <SimpleTooltip display="This is data we cache locally">
               <CircleStackIcon className="w-4 h-4 inline" />
-            </Tooltip>
+            </SimpleTooltip>
           </span>
         )}
       </h1>

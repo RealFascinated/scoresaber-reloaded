@@ -3,7 +3,7 @@
 import useDatabase from "@/hooks/use-database";
 import { useRef } from "react";
 import { toast } from "sonner";
-import Tooltip from "../tooltip";
+import SimpleTooltip from "../simple-tooltip";
 import { Button } from "../ui/button";
 export default function ImportSettings() {
   const database = useDatabase();
@@ -45,7 +45,7 @@ export default function ImportSettings() {
         }}
         ref={fileInputRef}
       />
-      <Tooltip display="This will import your settings from a file.">
+      <SimpleTooltip display="This will import your settings from a file.">
         <Button
           variant="outline"
           type="button"
@@ -55,7 +55,7 @@ export default function ImportSettings() {
         >
           Import
         </Button>
-      </Tooltip>
+      </SimpleTooltip>
     </form>
   );
 }

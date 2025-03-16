@@ -1,6 +1,6 @@
 "use client";
 
-import Tooltip from "@/components/tooltip";
+import SimpleTooltip from "@/components/simple-tooltip";
 import { InformationCircleIcon } from "@heroicons/react/16/solid";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 
@@ -15,7 +15,7 @@ export default function PlayerTrackedStatus({ player }: Props) {
 
   return (
     <div className="flex gap-2">
-      <Tooltip
+      <SimpleTooltip
         display={
           <div className="flex flex-col">
             <p>This player is being tracked!</p>
@@ -24,7 +24,7 @@ export default function PlayerTrackedStatus({ player }: Props) {
         side="bottom"
       >
         <InformationCircleIcon className="w-[22px] h-[22px] text-neutral-200" />
-      </Tooltip>
+      </SimpleTooltip>
     </div>
   );
 }

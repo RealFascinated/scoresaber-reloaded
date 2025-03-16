@@ -1,4 +1,4 @@
-import Tooltip from "@/components/tooltip";
+import SimpleTooltip from "@/components/simple-tooltip";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Slider } from "@/components/ui/slider";
@@ -87,9 +87,9 @@ export default function ScoreEditorButton({
     <div className="flex items-center justify-center cursor-default relative">
       <Popover onOpenChange={() => handleSliderReset()}>
         <PopoverTrigger>
-          <Tooltip display={<p>Edit Score Accuracy</p>}>
+          <SimpleTooltip display={<p>Edit Score Accuracy</p>}>
             <FaCog className="size-6 p-0.5 cursor-pointer hover:animate-spin-slow" />
-          </Tooltip>
+          </SimpleTooltip>
         </PopoverTrigger>
         <PopoverContent className="p-0" side={isMobile ? "top" : "left"}>
           <div className="p-3 flex flex-col gap-4">
@@ -99,11 +99,11 @@ export default function ScoreEditorButton({
                 <p className="text-sm font-medium mb-1">Accuracy Changer</p>
 
                 {/* Reset Button */}
-                <Tooltip display={<p>Set accuracy to score accuracy</p>}>
+                <SimpleTooltip display={<p>Set accuracy to score accuracy</p>}>
                   <Button onClick={handleSliderReset} className="p-1 h-fit" variant="ghost">
                     <FaUndo className="size-3.5" />
                   </Button>
-                </Tooltip>
+                </SimpleTooltip>
               </div>
 
               {/* Accuracy Slider */}

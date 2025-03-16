@@ -5,7 +5,7 @@ import Pagination from "@/components/input/pagination";
 import { LoadingIcon } from "@/components/loading-icon";
 import { useMapFilter } from "@/components/providers/maps/map-filter-provider";
 import ScoreSongInfo from "@/components/score/score-song-info";
-import Tooltip from "@/components/tooltip";
+import SimpleTooltip from "@/components/simple-tooltip";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import usePageNavigation from "@/hooks/use-page-navigation";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
@@ -96,7 +96,7 @@ export default function Leaderboards({ initialPage }: LeaderboardsProps) {
                       />
                       <div className="text-sm flex justify-between lg:justify-end lg:flex-col lg:gap-1">
                         {date && (
-                          <Tooltip
+                          <SimpleTooltip
                             display={
                               <p>
                                 {leaderboard.status == "Unranked" ? "Created" : leaderboard.status}{" "}
@@ -105,7 +105,7 @@ export default function Leaderboards({ initialPage }: LeaderboardsProps) {
                             }
                           >
                             {timeAgo(date)}
-                          </Tooltip>
+                          </SimpleTooltip>
                         )}
                       </div>
                     </Link>

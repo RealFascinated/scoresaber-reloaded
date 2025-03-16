@@ -1,6 +1,6 @@
 import { Colors } from "@/common/colors";
 import ScoreAccuracyGrid from "@/components/score/score-accuracy-grid";
-import Tooltip from "@/components/tooltip";
+import SimpleTooltip from "@/components/simple-tooltip";
 import { ScoreStatsResponse } from "@ssr/common/response/scorestats-response";
 import { capitalizeFirstLetter } from "@ssr/common/string-utils";
 import { ScoreStatsToken } from "@ssr/common/types/token/beatleader/score-stats/score-stats";
@@ -69,9 +69,12 @@ function AccuracyCircle({ accuracy, averageCut, hand }: AccuracyCircleProps) {
             />
           </svg>
           <div className="absolute inset-0 flex items-center justify-center">
-            <Tooltip display={<p>{(percent * 100).toFixed(2)}%</p>} className="cursor-default">
+            <SimpleTooltip
+              display={<p>{(percent * 100).toFixed(2)}%</p>}
+              className="cursor-default"
+            >
               <p className="text-[14px]">{accuracy.toFixed(2)}</p>
-            </Tooltip>
+            </SimpleTooltip>
           </div>
         </div>
       </div>
@@ -116,15 +119,15 @@ function HandAccuracy({ scoreStats, hand }: { scoreStats: ScoreStatsToken; hand:
       <div
         className={`flex flex-col gap-1 text-sm ${hand === "right" ? "justify-end" : "justify-start"}`}
       >
-        <Tooltip display={tooltipLabel("Time-Dependence")} className="cursor-default">
+        <SimpleTooltip display={tooltipLabel("Time-Dependence")} className="cursor-default">
           <HandStat hand={hand} name="TD" value={`${timeDependence.toFixed(3)}`} />
-        </Tooltip>
-        <Tooltip display={tooltipLabel("Pre-Swing")} className="cursor-default">
+        </SimpleTooltip>
+        <SimpleTooltip display={tooltipLabel("Pre-Swing")} className="cursor-default">
           <HandStat hand={hand} name="Pre" value={`${preSwing.toFixed(2)}%`} />
-        </Tooltip>
-        <Tooltip display={tooltipLabel("Post-Swing")} className="cursor-default">
+        </SimpleTooltip>
+        <SimpleTooltip display={tooltipLabel("Post-Swing")} className="cursor-default">
           <HandStat hand={hand} name="Post" value={`${postSwing.toFixed(2)}%`} />
-        </Tooltip>
+        </SimpleTooltip>
       </div>
     </div>
   );

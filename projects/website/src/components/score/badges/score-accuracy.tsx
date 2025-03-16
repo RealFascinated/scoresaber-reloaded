@@ -1,7 +1,7 @@
 import { Change } from "@/components/change";
 import { ScoreBadgeProps } from "@/components/score/badges/badge-props";
 import { ScoreModifiers } from "@/components/score/score-modifiers";
-import Tooltip from "@/components/tooltip";
+import SimpleTooltip from "@/components/simple-tooltip";
 import { Modifier } from "@ssr/common/score/modifier";
 import { formatScoreAccuracy } from "@ssr/common/utils/score.util";
 import { getAccDetails, getScoreBadgeFromAccuracy } from "@ssr/common/utils/song-utils";
@@ -21,7 +21,7 @@ export function ScoreAccuracyBadge({ score }: ScoreBadgeProps) {
   return (
     <>
       <div className="flex flex-col items-center justify-center cursor-default">
-        <Tooltip
+        <SimpleTooltip
           display={
             <div className="flex flex-col gap-2">
               <div>
@@ -45,9 +45,9 @@ export function ScoreAccuracyBadge({ score }: ScoreBadgeProps) {
             {formatScoreAccuracy(score)}{" "}
             {modCount > 0 && <ScoreModifiers type="simple" limit={1} score={score} />}
           </p>
-        </Tooltip>
+        </SimpleTooltip>
         {previousScore && previousScore.accuracy && previousScore.change && (
-          <Tooltip
+          <SimpleTooltip
             className="flex gap-2 text-xs items-center"
             display={
               <div className="flex flex-col gap-2">
@@ -78,7 +78,7 @@ export function ScoreAccuracyBadge({ score }: ScoreBadgeProps) {
             {previousModCount > 0 && score.previousScore && (
               <ScoreModifiers type="simple" limit={1} score={score.previousScore} />
             )}
-          </Tooltip>
+          </SimpleTooltip>
         )}
       </div>
     </>

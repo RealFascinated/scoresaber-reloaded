@@ -1,4 +1,4 @@
-import Tooltip from "@/components/tooltip";
+import SimpleTooltip from "@/components/simple-tooltip";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { StatisticRange } from "@ssr/common/player/player";
 import { PlayerStatValue } from "@ssr/common/player/player-stat-change";
@@ -68,7 +68,7 @@ export function ChangeOverTime({ player, type, children }: ChangeOverTimeProps) 
   }
 
   return (
-    <Tooltip
+    <SimpleTooltip
       side="bottom"
       display={
         <div>
@@ -79,6 +79,6 @@ export function ChangeOverTime({ player, type, children }: ChangeOverTimeProps) 
       }
     >
       {children}
-    </Tooltip>
+    </SimpleTooltip>
   );
 }

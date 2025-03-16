@@ -2,7 +2,7 @@
 
 import { downloadTextFile } from "@/common/browser-utils";
 import useDatabase from "@/hooks/use-database";
-import Tooltip from "../tooltip";
+import SimpleTooltip from "../simple-tooltip";
 import { Button } from "../ui/button";
 
 export default function ExportSettings() {
@@ -14,10 +14,10 @@ export default function ExportSettings() {
   }
 
   return (
-    <Tooltip display="This will export your settings to a file.">
+    <SimpleTooltip display="This will export your settings to a file.">
       <Button variant="outline" onClick={exportSettings}>
         Export
       </Button>
-    </Tooltip>
+    </SimpleTooltip>
   );
 }

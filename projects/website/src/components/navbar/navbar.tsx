@@ -71,7 +71,7 @@ export default function Navbar() {
   return (
     <nav
       className={cn(
-        "sticky inset-x-0 top-0 w-full px-2 xs:px-5 py-1 flex justify-between lg:justify-around h-12 items-center backdrop-blur-md border-b border-muted select-none z-50",
+        "sticky inset-x-0 top-0 w-full px-2 xs:px-5 py-1 flex justify-between lg:justify-around h-12 items-center backdrop-blur-md border-b border-muted/50 select-none z-50",
         hasScrolled ? "bg-landing/75" : "bg-landing"
       )}
     >

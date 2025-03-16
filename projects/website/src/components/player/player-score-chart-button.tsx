@@ -2,7 +2,7 @@ import PlayerScoreChart from "@/components/player/chart/player-score-chart";
 import { StarIcon } from "@heroicons/react/24/solid";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { truncateText } from "@ssr/common/string-utils";
-import Tooltip from "../tooltip";
+import SimpleTooltip from "../simple-tooltip";
 import {
   Dialog,
   DialogContent,
@@ -23,7 +23,7 @@ export default function PlayerScoreChartButton({ player }: PlayerStarCurveProps)
   return (
     <Dialog>
       <DialogTrigger>
-        <Tooltip
+        <SimpleTooltip
           side="bottom"
           className="cursor-pointer"
           display={
@@ -34,7 +34,7 @@ export default function PlayerScoreChartButton({ player }: PlayerStarCurveProps)
           }
         >
           <StarIcon className="h-5 w-5" />
-        </Tooltip>
+        </SimpleTooltip>
       </DialogTrigger>
       <DialogContent className="max-w-5xl min-h-[640px] bg-secondary">
         <DialogHeader>

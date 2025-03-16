@@ -1,6 +1,6 @@
 import PpBoundaryStat from "@/components/player/chart/pp-boundary";
 import StatValue from "@/components/stat-value";
-import Tooltip from "@/components/tooltip";
+import SimpleTooltip from "@/components/simple-tooltip";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { getScoreSaberRoles } from "@ssr/common/utils/scoresaber.util";
@@ -139,9 +139,9 @@ export default function PlayerStats({ player }: Props) {
         return (
           <div key={index}>
             {tooltip ? (
-              <Tooltip asChild={false} display={tooltip}>
+              <SimpleTooltip asChild={false} display={tooltip}>
                 {stat}
-              </Tooltip>
+              </SimpleTooltip>
             ) : (
               stat
             )}

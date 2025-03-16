@@ -1,6 +1,6 @@
 import BeatLeaderLogo from "@/components/logos/beatleader-logo";
 import SteamLogo from "@/components/logos/logos/steam-logo";
-import Tooltip from "@/components/tooltip";
+import SimpleTooltip from "@/components/simple-tooltip";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { ssrConfig } from "config";
 import Link from "next/link";
@@ -16,7 +16,7 @@ type PlayerLinksProps = {
 
 function PlayerLink({ url, name, playerName, icon }: PlayerLinksProps) {
   return (
-    <Tooltip
+    <SimpleTooltip
       className="p-2 bg-accent rounded-md"
       display={
         <p>
@@ -27,7 +27,7 @@ function PlayerLink({ url, name, playerName, icon }: PlayerLinksProps) {
       <Link href={url} target="_blank" rel="noreferrer" prefetch={false}>
         {icon}
       </Link>
-    </Tooltip>
+    </SimpleTooltip>
   );
 }
 

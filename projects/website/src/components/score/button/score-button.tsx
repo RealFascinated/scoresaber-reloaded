@@ -1,4 +1,4 @@
-import Tooltip from "@/components/tooltip";
+import SimpleTooltip from "@/components/simple-tooltip";
 import Link from "next/link";
 
 type Props = {
@@ -35,7 +35,7 @@ export default function ScoreButton({ children, tooltip, href, onClick }: Props)
 
   if (tooltip) {
     return (
-      <Tooltip display={tooltip}>
+      <SimpleTooltip display={tooltip}>
         {href ? (
           <Link prefetch={false} href={href} target="_blank">
             {button}
@@ -43,7 +43,7 @@ export default function ScoreButton({ children, tooltip, href, onClick }: Props)
         ) : (
           button
         )}
-      </Tooltip>
+      </SimpleTooltip>
     );
   }
 

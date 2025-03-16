@@ -1,5 +1,5 @@
 import Avatar from "@/components/avatar";
-import Tooltip from "@/components/tooltip";
+import SimpleTooltip from "@/components/simple-tooltip";
 import useDatabase from "@/hooks/use-database";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
@@ -50,7 +50,7 @@ export default function Friend({ player, onClick }: FriendProps) {
           <p className="text-gray-400">#{formatNumberWithCommas(player.rank)}</p>
         </div>
       </Link>
-      <Tooltip
+      <SimpleTooltip
         display={
           <p className="cursor-default pointer-events-none">Remove {name} from your friends</p>
         }
@@ -58,7 +58,7 @@ export default function Friend({ player, onClick }: FriendProps) {
         <div onClick={() => removeFriend()}>
           <XIcon className="w-5 h-5" />
         </div>
-      </Tooltip>
+      </SimpleTooltip>
     </div>
   );
 }

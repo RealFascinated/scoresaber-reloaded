@@ -5,7 +5,7 @@ import RankingQueue from "@/components/maps/category/ranking-queue";
 import MapFilters from "@/components/maps/map-filters";
 import Playlists from "@/components/maps/playlist/playlists";
 import { MapFilterProvider } from "@/components/providers/maps/map-filter-provider";
-import Tooltip from "@/components/tooltip";
+import SimpleTooltip from "@/components/simple-tooltip";
 import { Button } from "@/components/ui/button";
 import usePageNavigation from "@/hooks/use-page-navigation";
 import { TrophyIcon } from "@heroicons/react/24/solid";
@@ -97,7 +97,10 @@ export function MapsData({ category, page }: MapsDataProps) {
                   <span>{category.name}</span>
 
                   {category.externalLink && (
-                    <Tooltip display={<p>View {category.name} on ScoreSaber</p>} side="bottom">
+                    <SimpleTooltip
+                      display={<p>View {category.name} on ScoreSaber</p>}
+                      side="bottom"
+                    >
                       <div
                         className="flex items-center gap-2 p-1 cursor-pointer"
                         onClick={() => {
@@ -106,7 +109,7 @@ export function MapsData({ category, page }: MapsDataProps) {
                       >
                         <ExternalLinkIcon className="w-4 h-4" />
                       </div>
-                    </Tooltip>
+                    </SimpleTooltip>
                   )}
                 </span>
               </Button>
