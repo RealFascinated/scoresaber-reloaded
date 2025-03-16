@@ -23,7 +23,7 @@ export default function Layout({ children }: { children: ReactNode }) {
       <main className="flex flex-col min-h-screen text-white w-full">
         <SearchProvider>
           <Navbar />
-          <SSRLayout className="pt-2 flex flex-col gap-2">
+          <SSRLayout className="pt-2 flex flex-col gap-2 px-2">
             <DiscordBanner />
             {children}
           </SSRLayout>

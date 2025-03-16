@@ -13,7 +13,7 @@ type PlayerPreviewHeaderProps = {
 
 export default function PlayerPreviewHeader({ player }: PlayerPreviewHeaderProps) {
   return (
-    <div className="flex gap-6 flex-col items-center text-center lg:flex-row relative select-none">
+    <div className="flex gap-4 flex-col items-center text-center lg:flex-row relative select-none">
       <Avatar
         src={player.avatar}
         size={128}
