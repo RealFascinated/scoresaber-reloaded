@@ -769,7 +769,9 @@ export default class LeaderboardService {
       update => update.leaderboard.stars < update.update.previousLeaderboard?.stars
     );
     const buffedMaps = starRatingChangedMaps.filter(
-      update => update.leaderboard.stars > update.update.previousLeaderboard?.stars
+      update =>
+        update.leaderboard.stars > update.update.previousLeaderboard?.stars &&
+        update.update.previousLeaderboard?.stars > 0
     );
 
     // Newly ranked maps
