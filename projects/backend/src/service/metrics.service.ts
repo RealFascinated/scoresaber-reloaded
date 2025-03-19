@@ -104,6 +104,19 @@ export default class MetricsService {
    * @param points the points to write
    */
   private async writePoints(points: Point): Promise<void> {
-    writeApi.writePoint(points);
+    try {
+      // Validate that the point has valid values before writing
+      const fields = points.fields;
+      for (const [key, value] of Object.entries(fields)) {
+        if (value === undefined || value === null) {
+          Logger.warn(`Skipping write to InfluxDB - invalid value for field '${key}': ${value}`);
+          return;
+        }
+      }
+
+      writeApi.writePoint(points);
+    } catch (error) {
+      Logger.error("Failed to write points to InfluxDB:", error);
+    }
   }
 }
