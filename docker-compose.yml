@@ -1,5 +1,4 @@
 version: '3.8'
-
 services:
   backend:
     build:
@@ -15,7 +14,6 @@ services:
     sysctls:
       - net.ipv6.conf.all.disable_ipv6=0
       - net.ipv6.conf.default.disable_ipv6=0
-
 networks:
   default:
     driver: bridge
@@ -25,5 +23,5 @@ networks:
     ipam:
       driver: default
       config:
-        - subnet: 2001:bc8:1201:420::/64
-          gateway: 2001:bc8:1201:420::1
+        - subnet: 2001:bc8:1201:430::/64
+          gateway: 2001:bc8:1201:430::1
