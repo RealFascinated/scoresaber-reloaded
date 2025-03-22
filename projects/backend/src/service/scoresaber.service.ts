@@ -31,6 +31,7 @@ import CacheService, { ServiceCache } from "./cache.service";
 import LeaderboardService from "./leaderboard.service";
 import { PlayerService } from "./player.service";
 import { ScoreService } from "./score/score.service";
+import Logger from "@ssr/common/logger";
 export default class ScoreSaberService {
   /**
    * Notifies the number one score in Discord.
@@ -252,8 +253,14 @@ export default class ScoreSaberService {
    */
   public static async updatePlayerCache(
     playerToken: ScoreSaberPlayerToken | ScoreSaberLeaderboardPlayerInfoToken
-  ): Promise<ScoreSaberPlayerToken> {
-    const player = await this.getCachedPlayer(playerToken.id, true);
+  ): Promise<ScoreSaberPlayerToken | undefined> {
+    const player = await this.getCachedPlayer(playerToken.id, true).catch(
+      () => undefined
+    );
+    if (player == undefined) {
+      Logger.warn(`Player "${playerToken.id}" not found on ScoreSaber`);
+      return undefined;
+    }
 
     // Check if the player has changed
     if (playerToken.name !== player.name || playerToken.country !== player.country) {

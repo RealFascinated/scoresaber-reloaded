@@ -54,6 +54,9 @@ connectScoresaberWebsocket({
   onScore: async score => {
     // Fetch player info
     const player = await ScoreSaberService.updatePlayerCache(score.score.leaderboardPlayerInfo);
+    if (player == undefined) {
+      return;
+    }
 
     // Track score
     await ScoreService.trackScoreSaberScore(score.score, score.leaderboard, player);
