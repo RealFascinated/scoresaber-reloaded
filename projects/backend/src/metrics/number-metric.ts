@@ -13,7 +13,9 @@ export default class NumberMetric extends Metric<number> {
    * @returns the metric
    */
   public collect(): Promise<Point> {
-    return Promise.resolve(this.getPointBase().intField("value", this.value));
+    // Ensure we never send undefined values
+    const value = this.value ?? 0;
+    return Promise.resolve(this.getPointBase().intField("value", value));
   }
 
   /**
