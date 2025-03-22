@@ -15,6 +15,7 @@ services:
       - traefik.enable=true
       - "traefik.http.routers.backend.rule=Host(`ssr-api.fascinated.cc`) && PathPrefix(`/`)"
       - traefik.http.routers.backend.entryPoints=http
+      - traefik.http.services.backend.loadbalancer.server.port=8080
     sysctls:
       - net.ipv6.conf.all.disable_ipv6=0
       - net.ipv6.conf.default.disable_ipv6=0
