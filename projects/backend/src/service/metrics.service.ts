@@ -34,7 +34,7 @@ export default class MetricsService {
     this.registerMetric(new UniqueDailyPlayersMetric());
     this.registerMetric(new ActiveAccountsMetric());
 
-    this.initMetrics();
+    // this.initMetrics();
   }
 
   private async initMetrics() {

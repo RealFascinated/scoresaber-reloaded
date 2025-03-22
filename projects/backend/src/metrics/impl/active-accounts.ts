@@ -11,6 +11,7 @@ export default class ActiveAccountsMetric extends NumberMetric {
   }
 
   public async collect(): Promise<Point> {
-    return this.getPointBase().intField("value", await scoresaberService.lookupActivePlayerCount());
+    const count = await scoresaberService.lookupActivePlayerCount();
+    return this.getPointBase().intField("value", count ?? 0);
   }
 }
