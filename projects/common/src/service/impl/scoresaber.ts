@@ -101,7 +101,10 @@ class ScoreSaberService extends Service {
     const before = performance.now();
     this.log(`Searching for players matching "${query}"...`);
     const results = await this.fetch<ScoreSaberPlayerSearchToken>(
-      SEARCH_PLAYERS_ENDPOINT.replace(":query", query)
+      SEARCH_PLAYERS_ENDPOINT.replace(":query", query),
+      {
+        useProxy: true,
+      }
     );
     if (results === undefined) {
       return undefined;
@@ -130,7 +133,10 @@ class ScoreSaberService extends Service {
     const before = performance.now();
     this.log(`Looking up player "${playerId}"...`);
     const token = await this.fetch<ScoreSaberPlayerToken>(
-      LOOKUP_PLAYER_ENDPOINT.replace(":id", playerId).replace(":type", type)
+      LOOKUP_PLAYER_ENDPOINT.replace(":id", playerId).replace(":type", type),
+      {
+        useProxy: true,
+      }
     );
     if (token === undefined) {
       return undefined;
@@ -149,7 +155,10 @@ class ScoreSaberService extends Service {
     const before = performance.now();
     this.log(`Looking up players on page "${page}"...`);
     const response = await this.fetch<ScoreSaberPlayersPageToken>(
-      LOOKUP_PLAYERS_ENDPOINT.replace(":page", page.toString())
+      LOOKUP_PLAYERS_ENDPOINT.replace(":page", page.toString()),
+      {
+        useProxy: true,
+      }
     );
     if (response === undefined) {
       return undefined;
@@ -177,7 +186,10 @@ class ScoreSaberService extends Service {
       LOOKUP_PLAYERS_BY_COUNTRY_ENDPOINT.replace(":page", page.toString()).replace(
         ":country",
         country
-      )
+      ),
+      {
+        useProxy: true,
+      }
     );
     if (response === undefined) {
       return undefined;
@@ -196,7 +208,9 @@ class ScoreSaberService extends Service {
   public async lookupActivePlayerCount(): Promise<number | undefined> {
     const before = performance.now();
     this.log(`Looking up active player count...`);
-    const response = await this.fetch<number>(LOOKUP_ACTIVE_PLAYER_COUNT);
+    const response = await this.fetch<number>(LOOKUP_ACTIVE_PLAYER_COUNT, {
+      useProxy: true,
+    });
     if (response === undefined) {
       return undefined;
     }
@@ -236,7 +250,10 @@ class ScoreSaberService extends Service {
       LOOKUP_PLAYER_SCORES_ENDPOINT.replace(":id", playerId)
         .replace(":limit", limit + "")
         .replace(":sort", sort)
-        .replace(":page", page + "") + (search ? `&search=${search}` : "")
+        .replace(":page", page + "") + (search ? `&search=${search}` : ""),
+      {
+        useProxy: true,
+      }
     );
     if (response === undefined) {
       return undefined;
@@ -258,7 +275,10 @@ class ScoreSaberService extends Service {
     const before = performance.now();
     this.log(`Looking up leaderboard "${leaderboardId}"...`);
     const response = await this.fetch<ScoreSaberLeaderboardToken>(
-      LOOKUP_LEADERBOARD_ENDPOINT.replace(":id", leaderboardId)
+      LOOKUP_LEADERBOARD_ENDPOINT.replace(":id", leaderboardId),
+      {
+        useProxy: true,
+      }
     );
     if (response === undefined) {
       return undefined;
@@ -288,7 +308,10 @@ class ScoreSaberService extends Service {
     const response = await this.fetch<ScoreSaberLeaderboardToken>(
       LOOKUP_LEADERBOARD_BY_HASH_ENDPOINT.replace(":query", hash)
         .replace(":difficulty", getDifficulty(difficulty).id + "")
-        .replace(":gameMode", gameMode)
+        .replace(":gameMode", gameMode),
+      {
+        useProxy: true,
+      }
     );
     if (response === undefined) {
       return undefined;
@@ -333,6 +356,7 @@ class ScoreSaberService extends Service {
             : {}),
           ...(options?.sort ? { sort: options.sort } : {}),
         },
+        useProxy: true,
       }
     );
     if (response === undefined) {
@@ -355,7 +379,10 @@ class ScoreSaberService extends Service {
     const before = performance.now();
     this.log(`Searching for leaderboards matching "${query}"...`);
     const response = await this.fetch<ScoreSaberLeaderboardPageToken>(
-      SEARCH_LEADERBOARDS_ENDPOINT.replace(":query", query)
+      SEARCH_LEADERBOARDS_ENDPOINT.replace(":query", query),
+      {
+        useProxy: true,
+      }
     );
     if (response === undefined) {
       return undefined;
@@ -387,7 +414,10 @@ class ScoreSaberService extends Service {
       LOOKUP_LEADERBOARD_SCORES_ENDPOINT.replace(":id", leaderboardId).replace(
         ":page",
         page.toString()
-      ) + (options?.country ? `&countries=${options.country}` : "")
+      ) + (options?.country ? `&countries=${options.country}` : ""),
+      {
+        useProxy: true,
+      }
     );
 
     if (response === undefined) {
@@ -410,10 +440,16 @@ class ScoreSaberService extends Service {
     this.log(`Looking up ranking requests...`);
 
     const nextInQueueResponse = await this.fetch<RankingRequestToken[]>(
-      RANKING_REQUESTS_ENDPOINT.replace(":query", "top")
+      RANKING_REQUESTS_ENDPOINT.replace(":query", "top"),
+      {
+        useProxy: true,
+      }
     );
     const openRankUnrankResponse = await this.fetch<RankingRequestToken[]>(
-      RANKING_REQUESTS_ENDPOINT.replace(":query", "belowTop")
+      RANKING_REQUESTS_ENDPOINT.replace(":query", "belowTop"),
+      {
+        useProxy: true,
+      }
     );
 
     const response = nextInQueueResponse?.concat(openRankUnrankResponse || []);
