@@ -5,8 +5,8 @@ services:
       context: .
       dockerfile: ./projects/backend/Dockerfile
     container_name: backend-service
-    ports:
-      - "8080:3000"  # This maps IPv4 port for incoming connections
+    # ports:
+      # - "8080:3000"  # This maps IPv4 port for incoming connections
     networks:
       - default      # For IPv4 connectivity to the container
       - ipv6-network # For outbound IPv6 connectivity
@@ -15,7 +15,7 @@ services:
       - traefik.enable=true
       - "traefik.http.routers.backend.rule=Host(`ssr-api.fascinated.cc`) && PathPrefix(`/`)"
       - traefik.http.routers.backend.entryPoints=http
-      - traefik.http.services.backend.loadbalancer.server.port=8080
+      - traefik.http.services.backend.loadbalancer.server.port=3000
     sysctls:
       - net.ipv6.conf.all.disable_ipv6=0
       - net.ipv6.conf.default.disable_ipv6=0
