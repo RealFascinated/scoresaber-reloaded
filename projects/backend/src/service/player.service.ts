@@ -616,7 +616,13 @@ export class PlayerService {
     let hasMorePages = true;
     let totalMissingScores = 0;
 
-    const playerToken = await ScoreSaberService.getCachedPlayer(player.id, true);
+    const playerToken = await ScoreSaberService.getCachedPlayer(player.id, true).catch(
+      () => undefined
+    );
+    if (playerToken == undefined) {
+      Logger.warn(`Player "${player.id}" not found on ScoreSaber`);
+      return 0;
+    }
 
     while (hasMorePages) {
       const scoresPage = await scoresaberService.lookupPlayerScores({

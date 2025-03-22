@@ -305,7 +305,9 @@ export class ScoreService {
       const { leaderboard, beatsaver } = leaderboardResponse;
 
       try {
-        const player = await ScoreSaberService.getCachedPlayer(score.playerId, true);
+        const player = await ScoreSaberService.getCachedPlayer(score.playerId, true).catch(
+          () => undefined
+        );
         if (player) {
           score.playerInfo = {
             id: player.id,
