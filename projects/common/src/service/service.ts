@@ -20,9 +20,9 @@ export default class Service {
    */
   public log(data: unknown) {
     // Don't log on the backend
-    if (!isServer()) {
-      Logger.info(`${data}`);
-    }
+    // if (!isServer()) {
+    Logger.info(`${data}`);
+    // }
   }
 
   /**
