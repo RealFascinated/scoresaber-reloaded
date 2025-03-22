@@ -6,7 +6,7 @@ services:
       dockerfile: ./projects/backend/Dockerfile
     container_name: backend-service
     ports:
-      - "7775:3000"  # This maps IPv4 port for incoming connections
+      - "127.17.0.1:7775:3000"  # This maps IPv4 port for incoming connections
     networks:
       - default      # For IPv4 connectivity to the container
       - ipv6-network # For outbound IPv6 connectivity
