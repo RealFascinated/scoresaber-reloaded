@@ -7,18 +7,23 @@ services:
       dockerfile: /projects/backend/Dockerfile
     container_name: backend-service
     ports:
-      - "3000:3000"
+      - "8174:3000"  # This maps IPv4 port for incoming connections
     networks:
-      ipv6-network:
-        ipv6_address: 2001:bc8:1201:420::10
+      - default      # For IPv4 connectivity to the container
+      - ipv6-network # For outbound IPv6 connectivity
     restart: unless-stopped
+    sysctls:
+      - net.ipv6.conf.all.disable_ipv6=0
+      - net.ipv6.conf.default.disable_ipv6=0
 
 networks:
+  default:
+    driver: bridge
   ipv6-network:
     driver: bridge
     enable_ipv6: true
     ipam:
       driver: default
       config:
-        - subnet: fd00:bc8:1201:419::/64
-          gateway: fd00:bc8:1201:419::1
+        - subnet: 2001:bc8:1201:420::/64
+          gateway: 2001:bc8:1201:420::1
