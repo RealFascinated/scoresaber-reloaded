@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: /projects/backend/Dockerfile
+    container_name: backend-service
+    ports:
+      - "3000:3000"
+    networks:
+      ipv6-network:
+        ipv6_address: 2001:bc8:1201:420::10
+    restart: unless-stopped
+
+networks:
+  ipv6-network:
+    driver: bridge
+    enable_ipv6: true
+    ipam:
+      driver: default
+      config:
+        - subnet: fd00:bc8:1201:419::/64
+          gateway: fd00:bc8:1201:419::1
