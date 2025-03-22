@@ -11,6 +11,10 @@ services:
       - default      # For IPv4 connectivity to the container
       - ipv6-network # For outbound IPv6 connectivity
     restart: unless-stopped
+    labels:
+      - traefik.enable=true
+      - "traefik.http.routers.backend.rule=Host(`ssr-api.fascinated.cc`) && PathPrefix(`/`)"
+      - traefik.http.routers.backend.entryPoints=http
     sysctls:
       - net.ipv6.conf.all.disable_ipv6=0
       - net.ipv6.conf.default.disable_ipv6=0
