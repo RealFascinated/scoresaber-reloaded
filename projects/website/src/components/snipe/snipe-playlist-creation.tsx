@@ -76,7 +76,7 @@ export default function SnipePlaylistDownloadButton({ toSnipe }: SnipePlaylistDo
     setDownloading(true);
     await downloadFile(
       `${env.NEXT_PUBLIC_API_URL}/playlist/snipe?user=${playerId}&toSnipe=${toSnipe.id}&settings=${encodedData}`,
-      `ssr-snipe-${toSnipe.id}-${data.sort}.json`
+      `ssr-snipe-${toSnipe.id}-${data.sort}.bplist`
     );
     setDownloading(false);
   };

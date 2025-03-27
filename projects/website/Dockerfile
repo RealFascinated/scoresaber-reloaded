@@ -1,4 +1,4 @@
-FROM oven/bun:1.2.2-debian AS base
+FROM oven/bun:1.2.7-debian AS base
 
 # Used for health checks
 RUN apt update

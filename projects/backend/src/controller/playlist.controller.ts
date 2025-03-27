@@ -17,7 +17,7 @@ export default class PlaylistController {
     config: {},
     tags: ["playlist"],
     params: t.Object({
-      id: t.String({ required: true }),
+      id: t.String({ required: true, pattern: "^[^/]+(?:\\.[a-zA-Z0-9]+)?$" }),
     }),
     query: t.Object({
       config: t.Optional(t.String()),
@@ -40,6 +40,9 @@ export default class PlaylistController {
     params: { id: string };
     query: { config?: string; download?: boolean };
   }) {
+    id = id.includes(".") ? id.split(".")[0] : id;
+    const extension = id.includes(".") ? id.split(".")[1] : "bplist";
+
     const response = new Response(
       JSON.stringify(
         await (await PlaylistService.getPlaylist(id, config)).generateBeatSaberPlaylist(),
@@ -50,7 +53,7 @@ export default class PlaylistController {
     response.headers.set("Content-Type", "application/json");
     response.headers.set("Cache-Control", "public, max-age=3600");
     if (download) {
-      response.headers.set("Content-Disposition", `attachment; filename="ssr-${id}.json"`);
+      response.headers.set("Content-Disposition", `attachment; filename="ssr-${id}.${extension}"`);
     }
     return response;
   }
