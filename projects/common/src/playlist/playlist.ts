@@ -69,7 +69,7 @@ export class Playlist {
       playlistTitle: this.title,
       playlistAuthor: this.author,
       customData: {
-        syncURL: `${env.NEXT_PUBLIC_API_URL}/playlist/${this.urlGenerator?.(this.id) ?? this.id}`,
+        syncURL: `${env.NEXT_PUBLIC_API_URL}/playlist/${this.urlGenerator?.(this.id) ?? this.id}.bplist`,
       },
       songs: Array.from(deduplicatedSongs.values()).map(song => ({
         songName: song.songName,
