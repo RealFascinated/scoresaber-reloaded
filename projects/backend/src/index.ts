@@ -33,6 +33,7 @@ import { PlayerService } from "./service/player.service";
 import { ScoreService } from "./service/score/score.service";
 import ScoreSaberService from "./service/scoresaber.service";
 import StatisticsService from "./service/statistics.service";
+import { compression } from "./plugins/compression";
 
 Logger.info("Starting SSR Backend...");
 
@@ -81,6 +82,8 @@ connectBeatLeaderWebsocket({
 });
 
 export const app = new Elysia();
+
+app.use(compression());
 
 app.use(
   cron({
