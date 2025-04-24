@@ -21,7 +21,7 @@
     "typescript": "^5.8.2"
   },
   "dependencies": {
-    "@t3-oss/env-core": "^0.12.0",
+    "@t3-oss/env-core": "^0.13.0",
     "@typegoose/auto-increment": "^4.13.0",
     "@typegoose/typegoose": "^12.14.0",
     "sanitize-html": "^2.15.0",
