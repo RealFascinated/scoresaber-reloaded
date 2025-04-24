@@ -38,6 +38,8 @@ COPY --from=depends /app/projects/website/public ./public
 COPY --from=depends /app/projects/website/.next/standalone ./
 COPY --from=depends /app/projects/website/.next/static ./.next/static
 
+RUN ls -la
+
 # Expose the app port
 EXPOSE 3000
 ENV HOSTNAME="0.0.0.0"
