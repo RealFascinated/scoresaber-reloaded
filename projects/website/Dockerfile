@@ -35,7 +35,7 @@ COPY --from=depends /app/node_modules ./node_modules
 
 # Copy the built files
 COPY --from=depends /app/projects/website/public ./public
-COPY --from=depends /app/projects/website/.next ./
+COPY --from=depends /app/projects/website/.next/standalone/projects/website/ ./
 COPY --from=depends /app/projects/website/.next/static ./.next/static
 
 # Verify the build output
