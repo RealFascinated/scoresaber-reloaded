@@ -5,7 +5,7 @@ RUN apt update
 RUN apt install -y curl
 
 # Set the environment
-ENV NEXT_PUBLIC_APP_ENV production
+ENV NEXT_PUBLIC_APP_ENV=production
 
 ARG GIT_REV
 ENV GIT_REV=${GIT_REV}
@@ -35,11 +35,11 @@ COPY --from=depends /app/node_modules ./node_modules
 
 # Copy the built files
 COPY --from=depends /app/projects/website/public ./public
-COPY --from=depends /app/projects/website/.next/standalone ./
+COPY --from=depends /app/projects/website/.next ./
 COPY --from=depends /app/projects/website/.next/static ./.next/static
 
-# Verify the server.js file exists
-RUN ls -la .next/standalone/
+# Verify the build output
+RUN ls -la
 
 # Expose the app port
 EXPOSE 3000
