@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "cross-env SENTRY_SUPPRESS_TURBOPACK_WARNING=1 next dev --turbopack",
+    "dev": "next dev --turbopack",
     "dev:debug": "NODE_OPTIONS='--inspect' next dev --turbopack",
     "build": "bun --bun run next build",
     "build:analyze": "cross-env ANALYZE=true next build",
@@ -30,7 +30,6 @@
     "@radix-ui/react-slot": "^1.2.0",
     "@radix-ui/react-switch": "^1.2.2",
     "@radix-ui/react-tooltip": "^1.2.4",
-    "@sentry/nextjs": "^9.14.0",
     "@ssr/common": "workspace:*",
     "@tanstack/react-query": "^5.74.4",
     "@types/websocket": "^1.0.10",

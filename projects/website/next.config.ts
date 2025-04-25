@@ -1,9 +1,7 @@
-import { isProduction } from "@/common/website-utils";
 import { format } from "@formkit/tempo";
-import { withSentryConfig } from "@sentry/nextjs";
+import withBundleAnalyzer from "@next/bundle-analyzer";
 import type { NextConfig } from "next";
 import path from "path";
-import withBundleAnalyzer from "@next/bundle-analyzer";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
@@ -85,11 +83,4 @@ const nextConfig: NextConfig = {
 
 export default withBundleAnalyzer({
   enabled: process.env.ANALYZE === "true",
-})(
-  withSentryConfig(nextConfig, {
-    sourcemaps: {
-      disable: true,
-    },
-    telemetry: false,
-  })
-);
+})(nextConfig);
