@@ -45,4 +45,4 @@ EXPOSE 3000
 ENV HOSTNAME="0.0.0.0"
 ENV PORT=3000
 
-CMD ["bun", "--bun", "--smol" ,"run", "server.js"]
+CMD ["bun", "--bun", "--smol", ".next/standalone/server.js"]
