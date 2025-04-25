@@ -6,9 +6,9 @@ import path from "path";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
-  output: isProduction() ? "standalone" : undefined,
+  output: "standalone",
   cacheMaxMemorySize: 0,
-  outputFileTracingRoot: !isProduction() ? path.join(__dirname, "../../") : undefined,
+  outputFileTracingRoot: path.join(__dirname, "../../"),
   experimental: {
     optimizeCss: true,
     turbo: {},

@@ -38,11 +38,13 @@ COPY --from=depends /app/projects/website/public ./public
 COPY --from=depends /app/projects/website/.next/standalone ./
 COPY --from=depends /app/projects/website/.next/static ./.next/static
 
-RUN ls -la
+# Verify the server.js file exists
+RUN ls -la .next/standalone/
 
 # Expose the app port
 EXPOSE 3000
 ENV HOSTNAME="0.0.0.0"
 ENV PORT=3000
 
-CMD ["bun", "--bun", "--smol", ".next/standalone/server.js"]
+# Use the correct path to server.js
+CMD ["bun", "--bun", "--smol", "server.js"]
