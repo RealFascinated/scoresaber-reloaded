@@ -16,6 +16,8 @@ export type Axis = {
     color?: (context: any) => string | undefined;
   };
   reverse?: boolean;
+  min?: number;
+  max?: number;
 };
 
 export type Dataset = {
