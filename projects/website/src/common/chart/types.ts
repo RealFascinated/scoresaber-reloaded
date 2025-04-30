@@ -50,6 +50,8 @@ export type DatasetConfig = {
     valueFormatter?: (value: number) => string;
     stack?: string;
     stackOrder?: number;
+    min?: number;
+    max?: number;
   };
   defaultLegendState?: boolean;
   type?: DatasetDisplayType;

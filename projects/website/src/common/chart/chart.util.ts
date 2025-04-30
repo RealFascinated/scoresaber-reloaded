@@ -7,7 +7,9 @@ export const generateChartAxis = (
   display: boolean,
   position: AxisPosition,
   displayName?: string,
-  valueFormatter?: (value: number) => string
+  valueFormatter?: (value: number) => string,
+  min?: number,
+  max?: number
 ): Axis => ({
   id,
   position,
@@ -21,6 +23,8 @@ export const generateChartAxis = (
     },
   },
   reverse,
+  min,
+  max
 });
 
 export const generateChartDataset = (

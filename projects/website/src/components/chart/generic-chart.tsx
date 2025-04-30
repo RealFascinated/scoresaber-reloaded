@@ -44,6 +44,10 @@ export type ChartProps = {
   labels: Date[] | string[];
   datasetConfig: DatasetConfig[];
   histories: Record<string, (number | null)[]>;
+  axisConfig?: {
+    min?: number;
+    max?: number;
+  };
 };
 
 const GenericChart = ({ options, labels, datasetConfig, histories }: ChartProps) => {
@@ -147,12 +151,20 @@ const GenericChart = ({ options, labels, datasetConfig, histories }: ChartProps)
               
               // For large date ranges, show month and year
               if (labels.length > 90) {
-                return formatDate(date, "MMMM YYYY");
+                const currentYear = new Date().getUTCFullYear();
+                const dateYear = date.getUTCFullYear();
+                return dateYear === currentYear 
+                  ? date.toLocaleString("en-US", { timeZone: "Europe/London", month: "long" })
+                  : formatDate(date, "MMMM YYYY");
               }
               
               // For medium date ranges, show day and month
               if (labels.length > 30) {
-                return formatDate(date, "DD MMMM YYYY");
+                const currentYear = new Date().getUTCFullYear();
+                const dateYear = date.getUTCFullYear();
+                return dateYear === currentYear
+                  ? date.toLocaleString("en-US", { timeZone: "Europe/London", day: "numeric", month: "long" })
+                  : formatDate(date, "DD MMMM YYYY");
               }
               
               // For small date ranges, show relative dates
