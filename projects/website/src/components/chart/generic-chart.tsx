@@ -70,6 +70,11 @@ const GenericChart = ({ options, labels, datasetConfig, histories }: ChartProps)
             const customFormatted = config.axisConfig.valueFormatter?.(value);
             if (customFormatted !== undefined) return customFormatted;
             
+            // Check if the number is a whole number
+            if (Number.isInteger(value)) {
+              return value.toString();
+            }
+            
             // Otherwise round to 2 decimal places and convert to string
             return value.toFixed(2);
           }
