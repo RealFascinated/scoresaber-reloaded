@@ -8,6 +8,7 @@ import { isWholeNumber } from "@ssr/common/utils/number-utils";
 
 type Props = {
   statisticHistory: PlayerStatisticHistory;
+  daysAmount: number;
 };
 
 // Dataset configuration for the chart
@@ -74,12 +75,13 @@ const datasetConfig: DatasetConfig[] = [
   },
 ];
 
-export default function PlayerAccuracyChart({ statisticHistory }: Props) {
+export default function PlayerAccuracyChart({ statisticHistory, daysAmount }: Props) {
   return (
     <GenericPlayerChart
       id="player-accuracy-chart"
       statisticHistory={statisticHistory}
       datasetConfig={datasetConfig}
+      daysAmount={daysAmount}
     />
   );
 }

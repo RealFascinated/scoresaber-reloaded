@@ -9,6 +9,7 @@ import { formatNumberWithCommas, formatPp, isWholeNumber } from "@ssr/common/uti
 
 type Props = {
   statisticHistory: PlayerStatisticHistory;
+  daysAmount: number;
 };
 
 // Dataset configuration for the chart
@@ -82,12 +83,13 @@ const datasetConfig: DatasetConfig[] = [
   ...scoreBarsDataset,
 ];
 
-export default function PlayerRankingChart({ statisticHistory }: Props) {
+export default function PlayerRankingChart({ statisticHistory, daysAmount }: Props) {
   return (
     <GenericPlayerChart
       id="player-ranking-chart"
       statisticHistory={statisticHistory}
       datasetConfig={datasetConfig}
+      daysAmount={daysAmount}
     />
   );
 }

@@ -7,6 +7,7 @@ import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 
 type Props = {
   statisticHistory: PlayerStatisticHistory;
+  daysAmount: number;
 };
 
 export const scoreBarsDataset: DatasetConfig[] = [
@@ -76,12 +77,13 @@ const datasetConfig: DatasetConfig[] = [
   },
 ];
 
-export default function PlayerScoresChart({ statisticHistory }: Props) {
+export default function PlayerScoresChart({ statisticHistory, daysAmount }: Props) {
   return (
     <GenericPlayerChart
       id="player-scores-chart"
       statisticHistory={statisticHistory}
       datasetConfig={datasetConfig}
+      daysAmount={daysAmount}
     />
   );
 }

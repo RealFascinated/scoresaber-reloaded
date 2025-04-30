@@ -65,7 +65,14 @@ const GenericChart = ({ options, labels, datasetConfig, histories }: ChartProps)
           isMobile && config.axisConfig.hideOnMobile ? false : config.axisConfig.display,
           config.axisConfig.position,
           config.axisConfig.displayName,
-          config.axisConfig.valueFormatter
+          (value: number) => {
+            // First apply the custom formatter if it exists
+            const customFormatted = config.axisConfig.valueFormatter?.(value);
+            if (customFormatted !== undefined) return customFormatted;
+            
+            // Otherwise round to 2 decimal places and convert to string
+            return value.toFixed(2);
+          }
         );
       }
     });
@@ -112,21 +119,67 @@ const GenericChart = ({ options, labels, datasetConfig, histories }: ChartProps)
       maintainAspectRatio: false,
       responsive: true,
       interaction: { mode: "index", intersect: false },
-      scales: axes,
+      scales: {
+        ...axes,
+        x: {
+          ...axes.x,
+          ticks: {
+            ...axes.x.ticks,
+            maxRotation: 45,
+            minRotation: 45,
+            maxTicksLimit: (context: any) => {
+              // For ranges less than 3 months, show all days
+              if (labels.length <= 90) {
+                return labels.length;
+              }
+              // For larger ranges, limit to 10 ticks
+              return 10;
+            },
+            callback: (value: any, index: number) => {
+              if (typeof labels[index] === "string") return value;
+              const date = labels[index] instanceof Date ? labels[index] : parseDate(labels[index]);
+              const daysAgo = getDaysAgo(date);
+              
+              // For large date ranges, show month and year
+              if (labels.length > 90) {
+                return formatDate(date, "MMMM YYYY");
+              }
+              
+              // For medium date ranges, show day and month
+              if (labels.length > 30) {
+                return formatDate(date, "DD MMMM YYYY");
+              }
+              
+              // For small date ranges, show relative dates
+              if (daysAgo === 0) return "Now";
+              if (daysAgo === 1) return "Yesterday";
+              return `${daysAgo}d ago`;
+            }
+          }
+        }
+      },
       elements: {
         point: {
-          radius: 0,
+          radius: (ctx: any) => {
+            const dataset = ctx.chart.data.datasets[ctx.datasetIndex];
+            // For large date ranges, only show points on hover
+            return labels.length > 90 ? 0 : (dataset.type === "point" ? dataset.pointRadius || 3 : 3);
+          },
           hoverRadius: (ctx: any) => {
             const dataset = ctx.chart.data.datasets[ctx.datasetIndex];
             return dataset.type === "point" ? (dataset.pointRadius || 3) + 2 : 4;
           },
         },
+        line: {
+          tension: 0.4, // Add slight curve to lines for better appearance
+        }
       },
       plugins: {
         legend: {
           position: "top",
           labels: {
             color: "white",
+            padding: 20, // Add more padding between legend items
             filter: (legendItem: any, chartData: any) => {
               const dataset = chartData.datasets[legendItem.datasetIndex];
               return dataset.showLegend !== false;
@@ -140,7 +193,6 @@ const GenericChart = ({ options, labels, datasetConfig, histories }: ChartProps)
             id && database.setChartLegend(id, legendItem.text, !legendItem.hidden);
           },
         },
-
         tooltip: {
           callbacks: {
             title: (context: any) => {

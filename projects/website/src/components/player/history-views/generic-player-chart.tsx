@@ -21,9 +21,14 @@ type Props = {
    * The data to render.
    */
   datasetConfig: DatasetConfig[];
+
+  /**
+   * The number of days to show in the chart.
+   */
+  daysAmount?: number;
 };
 
-export default function GenericPlayerChart({ id, statisticHistory, datasetConfig }: Props) {
+export default function GenericPlayerChart({ id, statisticHistory, datasetConfig, daysAmount = 50 }: Props) {
   // Check if player statistics are available
   if (!statisticHistory || Object.keys(statisticHistory).length === 0) {
     return (
@@ -35,7 +40,7 @@ export default function GenericPlayerChart({ id, statisticHistory, datasetConfig
 
   const labels: Date[] = [];
   const histories: Record<string, (number | null)[]> = {};
-  const historyDays = 50;
+  const historyDays = daysAmount;
 
   // Initialize histories for each dataset with null values for all days
   datasetConfig.forEach(config => {
