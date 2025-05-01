@@ -7,8 +7,8 @@ RUN apt install -y curl
 # Set the environment
 ENV NEXT_PUBLIC_APP_ENV=production
 
-ARG GIT_REV
-ENV GIT_REV=${GIT_REV}
+ARG SOURCE_COMMIT
+ENV SOURCE_COMMIT=${SOURCE_COMMIT}
 
 # -----------------------------------
 
