@@ -1,3 +1,6 @@
+"use client";
+
+import { downloadFile } from "@/common/browser-utils";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
@@ -15,8 +18,12 @@ type PlaylistDownloadButtonProps = {
 
 export default function PlaylistDownloadButton({ name, url }: PlaylistDownloadButtonProps) {
   return (
-    <Link prefetch={false} href={url} passHref>
-      <Button>{name}</Button>
-    </Link>
+    <Button
+      onClick={() => {
+        downloadFile(url, `${name}.bplist`);
+      }}
+    >
+      {name}
+    </Button>
   );
 }

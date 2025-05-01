@@ -43,7 +43,7 @@ export default function Playlists() {
           <div key={playlist.id}>
             <PlaylistDownloadButton
               name={playlist.name}
-              url={`${env.NEXT_PUBLIC_API_URL}/playlist/${playlist.id}?download=true`}
+              url={`${env.NEXT_PUBLIC_API_URL}/playlist/${playlist.id}.bplist?download=true`}
             />
           </div>
         ))}
