@@ -97,7 +97,7 @@ export default function ScoreSaberStatisticsChart({ statistics }: Props) {
           href="https://ssr-grafana.fascinated.cc/public-dashboards/19a90072026f442fafa6c371192dddff"
           target="_blank"
         >
-          <Button>View In Grafana - More Detailed Statistics</Button>
+          <Button>View In Grafana (More Detailed Statistics)</Button>
         </Link>
       </div>
 
