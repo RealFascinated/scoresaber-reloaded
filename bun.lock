@@ -111,7 +111,7 @@
         "dexie-react-hooks": "^1.1.7",
         "globals": "^16.0.0",
         "js-cookie": "^3.0.5",
-        "lucide-react": "^0.503.0",
+        "lucide-react": "^0.509.0",
         "next": "^15.3.1",
         "react": "^19.1.0",
         "react-chartjs-2": "^5.3.0",
@@ -1080,7 +1080,7 @@
 
     "lru-cache": ["lru-cache@10.4.3", "", {}, "sha512-JNAzZcXrCt42VGLuYz0zfAzDfAvJWW6AfYlDBQyDV5DClI2m5sAmK+OIO7s59XfsRsWHp02jAJrRadPRGTt6SQ=="],
 
-    "lucide-react": ["lucide-react@0.503.0", "", { "peerDependencies": { "react": "^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0" } }, "sha512-HGGkdlPWQ0vTF8jJ5TdIqhQXZi6uh3LnNgfZ8MHiuxFfX3RZeA79r2MW2tHAZKlAVfoNE8esm3p+O6VkIvpj6w=="],
+    "lucide-react": ["lucide-react@0.509.0", "", { "peerDependencies": { "react": "^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0" } }, "sha512-xCJHn6Uh5qF6PGml25vveCTrHJZcqS1G1MVzWZK54ZQsOiCVJk4fwY3oyo5EXS2S+aqvTpWYIfJN+PesJ0quxg=="],
 
     "magic-bytes.js": ["magic-bytes.js@1.10.0", "", {}, "sha512-/k20Lg2q8LE5xiaaSkMXk4sfvI+9EGEykFS4b0CHHGWqDYU0bGUFSwchNOMA56D7TCs9GwVTkqe9als1/ns8UQ=="],
 
