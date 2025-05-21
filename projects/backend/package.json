@@ -27,7 +27,7 @@
     "discordx": "^11.12.2",
     "elysia": "^1.2.25",
     "elysia-decorators": "^1.0.2",
-    "elysia-helmet": "^2.0.0",
+    "elysia-helmet": "^3.0.0",
     "eslint": "^9.25.1",
     "globals": "^16.0.0",
     "minio": "^8.0.5",
