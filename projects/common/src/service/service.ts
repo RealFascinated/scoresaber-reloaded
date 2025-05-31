@@ -43,10 +43,10 @@ export default class Service {
    * @param options the fetch options to use
    * @returns the fetched data
    */
-  public async fetch<T>(url: string, options?: RequestOptions & { useProxy?: boolean }): Promise<T | undefined> {
+  public async fetch<T>(url: string, options?: RequestOptions): Promise<T | undefined> {
     await this.cooldown.waitAndUse();
 
-    return Request.get<T>(this.buildRequestUrl(options?.useProxy == true ? true : !isServer(), url), {
+    return Request.get<T>(this.buildRequestUrl(!isServer(), url), {
       returns: "json",
       ...options,
     });
