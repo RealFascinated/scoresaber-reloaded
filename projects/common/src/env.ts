@@ -29,6 +29,9 @@ export const env = createEnv({
 
     NEXT_PUBLIC_ANALYTICS_WEBSITE_ID: z.string().optional(),
     NEXT_PUBLIC_ANALYTICS_SCRIPT_URL: z.string().optional(),
+
+    NEXT_PUBLIC_POSTHOG_KEY: z.string(),
+    NEXT_PUBLIC_POSTHOG_HOST: z.string(),
   },
 
   /**
@@ -66,6 +69,10 @@ export const env = createEnv({
     // Analytics
     NEXT_PUBLIC_ANALYTICS_WEBSITE_ID: process.env.NEXT_PUBLIC_ANALYTICS_WEBSITE_ID,
     NEXT_PUBLIC_ANALYTICS_SCRIPT_URL: process.env.NEXT_PUBLIC_ANALYTICS_SCRIPT_URL,
+
+    // PostHog
+    NEXT_PUBLIC_POSTHOG_KEY: process.env.NEXT_PUBLIC_POSTHOG_KEY,
+    NEXT_PUBLIC_POSTHOG_HOST: process.env.NEXT_PUBLIC_POSTHOG_HOST,
   },
 
   /**

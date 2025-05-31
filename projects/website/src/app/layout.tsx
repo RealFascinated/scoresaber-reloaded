@@ -3,6 +3,7 @@ import { PreloadResources } from "@/components/preload-resources";
 import { QueryProvider } from "@/components/providers/query-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { PostHogProvider } from "@/components/providers/posthog-provider";
 import { env } from "@ssr/common/env";
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
@@ -67,18 +68,20 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${siteFont.className} antialiased w-full h-full`}>
-        {env.NEXT_PUBLIC_ANALYTICS_WEBSITE_ID && env.NEXT_PUBLIC_ANALYTICS_SCRIPT_URL && (
-          <Script
-            defer
-            src={env.NEXT_PUBLIC_ANALYTICS_SCRIPT_URL}
-            data-website-id={env.NEXT_PUBLIC_ANALYTICS_WEBSITE_ID}
-          />
-        )}
-        <Toaster />
-        <PreloadResources />
-        <TooltipProvider delayDuration={250}>
-          <QueryProvider>{children}</QueryProvider>
-        </TooltipProvider>
+        <PostHogProvider>
+          {env.NEXT_PUBLIC_ANALYTICS_WEBSITE_ID && env.NEXT_PUBLIC_ANALYTICS_SCRIPT_URL && (
+            <Script
+              defer
+              src={env.NEXT_PUBLIC_ANALYTICS_SCRIPT_URL}
+              data-website-id={env.NEXT_PUBLIC_ANALYTICS_WEBSITE_ID}
+            />
+          )}
+          <Toaster />
+          <PreloadResources />
+          <TooltipProvider delayDuration={250}>
+            <QueryProvider>{children}</QueryProvider>
+          </TooltipProvider>
+        </PostHogProvider>
       </body>
     </html>
   );
