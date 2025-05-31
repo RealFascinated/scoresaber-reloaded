@@ -30,8 +30,8 @@ export const env = createEnv({
     NEXT_PUBLIC_ANALYTICS_WEBSITE_ID: z.string().optional(),
     NEXT_PUBLIC_ANALYTICS_SCRIPT_URL: z.string().optional(),
 
-    NEXT_PUBLIC_POSTHOG_KEY: z.string(),
-    NEXT_PUBLIC_POSTHOG_HOST: z.string(),
+    NEXT_PUBLIC_POSTHOG_KEY: z.string().optional(),
+    NEXT_PUBLIC_POSTHOG_HOST: z.string().optional(),
   },
 
   /**
