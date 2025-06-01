@@ -3,6 +3,7 @@ import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
 import { MetricValueModel } from "../common/model/metric";
 import ActiveAccountsMetric from "../metrics/impl/active-accounts";
+import MongoDbSizeMetric from "../metrics/impl/mongo-db-size";
 import TrackedPlayersMetric from "../metrics/impl/tracked-players";
 import TrackedScoresMetric from "../metrics/impl/tracked-scores";
 import UniqueDailyPlayersMetric from "../metrics/impl/unique-daily-players";
@@ -45,6 +46,7 @@ export default class MetricsService {
     this.registerMetric(new TrackedPlayersMetric());
     this.registerMetric(new UniqueDailyPlayersMetric());
     this.registerMetric(new ActiveAccountsMetric());
+    this.registerMetric(new MongoDbSizeMetric());
 
     this.initMetrics();
     this.setupFlushTimer();
