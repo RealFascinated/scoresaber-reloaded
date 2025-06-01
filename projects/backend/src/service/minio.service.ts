@@ -31,4 +31,27 @@ export default class MinioService {
   public static async deleteFile(bucket: MinioBucket, filename: string) {
     await minioClient.removeObject(getMinioBucketName(bucket), filename);
   }
+
+  /**
+   * Gets the stats of a bucket.
+   *
+   * @param bucket the bucket to get the stats of
+   * @returns the stats of the bucket
+   */
+  public static async getBucketStats(bucket: MinioBucket): Promise<{
+    totalSize: number;
+    totalObjects: number;
+  }> {
+    const objects = await minioClient.listObjects(getMinioBucketName(bucket), "", true);
+    let totalSize = 0;
+    let totalObjects = 0;
+    for await (const object of objects) {
+      totalSize += object.size;
+      totalObjects++;
+    }
+    return {
+      totalSize,
+      totalObjects,
+    };
+  }
 }
