@@ -544,64 +544,77 @@ export class PlayerService {
     }
 
     const rank = getRank(player, type);
-    const itemsPerPage = 50;
+    if (rank <= 0) {
+      return []; // Return empty array for invalid ranks
+    }
 
-    // Calculate which page contains our target player
+    const itemsPerPage = 50;
     const targetPage = Math.ceil(rank / itemsPerPage);
 
-    // Fetch the main page containing our player
-    const mainResponse =
-      type === "global"
-        ? await scoresaberService.lookupPlayers(targetPage)
-        : await scoresaberService.lookupPlayersByCountry(targetPage, player.country);
+    // Calculate which pages we need to fetch
+    // We need pages that might contain players 2 ranks above and 2 ranks below
+    const pagesToFetch: number[] = [];
 
-    if (!mainResponse) {
-      return [];
+    // Always fetch the target page
+    pagesToFetch.push(targetPage);
+
+    // If player is near the start of their page, we need the previous page
+    if (rank % itemsPerPage <= 2) {
+      pagesToFetch.push(targetPage - 1);
     }
 
-    let allPlayers = [...mainResponse.players];
+    // If player is near the end of their page, we need the next page
+    if (rank % itemsPerPage >= itemsPerPage - 2) {
+      pagesToFetch.push(targetPage + 1);
+    }
+
+    // Filter out invalid page numbers
+    const validPages = pagesToFetch.filter(page => page > 0);
+
+    Logger.info(`Fetching pages ${validPages.join(", ")} for player ${id} (${type} rank ${rank})`);
+
+    // Fetch all pages in parallel
+    const pageResponses = await Promise.all(
+      validPages.map(page =>
+        type === "global"
+          ? scoresaberService.lookupPlayers(page)
+          : scoresaberService.lookupPlayersByCountry(page, player.country)
+      )
+    );
+
+    // Combine and sort all players
+    const allPlayers = pageResponses
+      .filter((response): response is NonNullable<typeof response> => response !== undefined)
+      .flatMap(response => response.players)
+      .sort((a, b) => getRank(a, type) - getRank(b, type));
+
+    // Find the target player
     const playerIndex = allPlayers.findIndex(p => p.id === id);
-
     if (playerIndex === -1) {
+      Logger.warn(`Player ${id} not found in any of the fetched pages (${type} rank ${rank})`);
       return [];
     }
 
-    // Check if we need more players from adjacent pages
-    const needsPlayersAbove = playerIndex < 3;
-    const needsPlayersBelow = playerIndex > allPlayers.length - 2;
+    // Get exactly 5 players: 2 above, the player, and 2 below
+    const start = Math.max(0, playerIndex - 2);
+    const end = Math.min(allPlayers.length, playerIndex + 3);
+    const result = allPlayers.slice(start, end);
 
-    // Fetch previous page if needed
-    if (needsPlayersAbove && targetPage > 1) {
-      const prevResponse =
-        type === "global"
-          ? await scoresaberService.lookupPlayers(targetPage - 1)
-          : await scoresaberService.lookupPlayersByCountry(targetPage - 1, player.country);
-
-      if (prevResponse) {
-        allPlayers = [...prevResponse.players, ...allPlayers];
-      }
+    // If we don't have enough players above, try to get more from below
+    if (start === 0 && result.length < 5) {
+      const extraNeeded = 5 - result.length;
+      const extraPlayers = allPlayers.slice(end, end + extraNeeded);
+      result.push(...extraPlayers);
+    }
+    // If we don't have enough players below, try to get more from above
+    else if (end === allPlayers.length && result.length < 5) {
+      const extraNeeded = 5 - result.length;
+      const extraPlayers = allPlayers.slice(Math.max(0, start - extraNeeded), start);
+      result.unshift(...extraPlayers);
     }
 
-    // Fetch next page if needed
-    if (needsPlayersBelow) {
-      const nextResponse =
-        type === "global"
-          ? await scoresaberService.lookupPlayers(targetPage + 1)
-          : await scoresaberService.lookupPlayersByCountry(targetPage + 1, player.country);
-
-      if (nextResponse) {
-        allPlayers = [...allPlayers, ...nextResponse.players];
-      }
-    }
-
-    // Find the new index after combining pages
-    const newPlayerIndex = allPlayers.findIndex(p => p.id === id);
-
-    // Get 3 players above and 1 below, handling edge cases
-    const start = Math.max(0, newPlayerIndex - 3);
-    const end = Math.min(allPlayers.length, newPlayerIndex + 2);
-
-    return allPlayers.slice(start, end);
+    Logger.info(`Found ${result.length} players around player ${id} (${type} rank ${rank})`);
+    return result.slice(0, 5); // Ensure we return exactly 5 players
   }
 
   /**
