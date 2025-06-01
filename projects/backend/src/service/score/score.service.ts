@@ -44,7 +44,7 @@ interface PendingScore {
 
 export class ScoreService {
   private static pendingScores = new Map<string, PendingScore>();
-  private static readonly SCORE_MATCH_TIMEOUT = 30000; // 30 seconds in milliseconds
+  private static readonly SCORE_MATCH_TIMEOUT = 10000; // 10 seconds in milliseconds
 
   constructor() {
     // Connect to websockets
@@ -56,8 +56,10 @@ export class ScoreService {
           return;
         }
 
+        const leaderboard = getScoreSaberLeaderboardFromToken(score.leaderboard);
+
         // Create a unique key for this score
-        const key = `${player.id}-${score.leaderboard.songHash}-${score.leaderboard.difficulty.difficulty}-${score.leaderboard.difficulty.gameMode}`;
+        const key = `${player.id}-${leaderboard.songHash.toUpperCase()}-${leaderboard.difficulty.difficulty}-${leaderboard.difficulty.characteristic}`;
 
         const pendingScore = ScoreService.pendingScores.get(key);
         if (pendingScore?.beatLeaderScore) {
@@ -101,7 +103,7 @@ export class ScoreService {
     connectBeatLeaderWebsocket({
       onScore: async beatLeaderScore => {
         // Try to find matching ScoreSaber score
-        const key = `${beatLeaderScore.playerId}-${beatLeaderScore.leaderboard.song.hash}-${beatLeaderScore.leaderboard.difficulty.value}-${beatLeaderScore.leaderboard.difficulty.mode}`;
+        const key = `${beatLeaderScore.playerId}-${beatLeaderScore.leaderboard.song.hash.toUpperCase()}-${beatLeaderScore.leaderboard.difficulty.difficultyName}-${beatLeaderScore.leaderboard.difficulty.modeName}`;
         const pendingScore = ScoreService.pendingScores.get(key);
 
         if (pendingScore?.scoreSaberToken && pendingScore.leaderboardToken && pendingScore.player) {
