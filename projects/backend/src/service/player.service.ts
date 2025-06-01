@@ -571,8 +571,6 @@ export class PlayerService {
     // Filter out invalid page numbers
     const validPages = pagesToFetch.filter(page => page > 0);
 
-    Logger.info(`Fetching pages ${validPages.join(", ")} for player ${id} (${type} rank ${rank})`);
-
     // Fetch all pages in parallel
     const pageResponses = await Promise.all(
       validPages.map(page =>
@@ -591,7 +589,6 @@ export class PlayerService {
     // Find the target player
     const playerIndex = allPlayers.findIndex(p => p.id === id);
     if (playerIndex === -1) {
-      Logger.warn(`Player ${id} not found in any of the fetched pages (${type} rank ${rank})`);
       return [];
     }
 
@@ -613,7 +610,6 @@ export class PlayerService {
       result.unshift(...extraPlayers);
     }
 
-    Logger.info(`Found ${result.length} players around player ${id} (${type} rank ${rank})`);
     return result.slice(0, 5); // Ensure we return exactly 5 players
   }
 
