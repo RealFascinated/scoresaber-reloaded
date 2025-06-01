@@ -3,6 +3,7 @@ import { env } from "@ssr/common/env";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { removeObjectFields } from "@ssr/common/object.util";
+import { BeatLeaderScoreToken } from "@ssr/common/types/token/beatleader/score/score";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
 import { formatScoreAccuracy } from "@ssr/common/utils/score.util";
@@ -38,6 +39,7 @@ export async function sendScoreNotification(
   score: ScoreSaberScore,
   leaderboard: ScoreSaberLeaderboard,
   player: ScoreSaberPlayerToken,
+  beatLeaderScore: BeatLeaderScoreToken | undefined,
   title: string
 ) {
   const beatSaver = await BeatSaverService.getMap(
@@ -57,10 +59,9 @@ export async function sendScoreNotification(
     previousScore.change && {
       accuracy: `${formatChange(previousScore.change.accuracy, value => value.toFixed(2) + "%") || ""}`,
       pp: `${formatChange(previousScore.change.pp, undefined, true) || ""}`,
-      misses: previousScore.misses == score.misses ? "" : ` vs ${previousScore.misses}` || "",
-      badCuts: previousScore.badCuts == score.badCuts ? "" : ` vs ${previousScore.badCuts}` || "",
-      maxCombo:
-        previousScore.maxCombo == score.maxCombo ? "" : ` vs ${previousScore.maxCombo}` || "",
+      misses: previousScore.misses == score.misses ? "" : ` vs ${previousScore.misses}`,
+      badCuts: previousScore.badCuts == score.badCuts ? "" : ` vs ${previousScore.badCuts}`,
+      maxCombo: previousScore.maxCombo == score.maxCombo ? "" : ` vs ${previousScore.maxCombo}`,
     };
 
   const message = await logToChannel(
@@ -74,6 +75,9 @@ export async function sendScoreNotification(
             `[[Player]](${env.NEXT_PUBLIC_WEBSITE_URL}/player/${player.id})`,
             `[[Leaderboard]](${env.NEXT_PUBLIC_WEBSITE_URL}/leaderboard/${leaderboard.id})`,
             beatSaver ? `[[Map]](https://beatsaver.com/maps/${beatSaver.bsr})` : undefined,
+            beatLeaderScore
+              ? `[[Replay]](https://replay.beatleader.xyz/?scoreId=${beatLeaderScore.id})`
+              : undefined,
           ].join(" "),
         ]
           .join("\n")

@@ -1,4 +1,5 @@
 import { DetailType } from "@ssr/common/detail-type";
+import Logger from "@ssr/common/logger";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import {
@@ -16,6 +17,7 @@ import {
   getScoreSaberScoreFromToken,
 } from "@ssr/common/token-creators";
 import { Metadata } from "@ssr/common/types/metadata";
+import { BeatLeaderScoreToken } from "@ssr/common/types/token/beatleader/score/score";
 import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/leaderboard-player-info";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import ScoreSaberPlayerScoreToken from "@ssr/common/types/token/scoresaber/player-score";
@@ -31,7 +33,6 @@ import CacheService, { ServiceCache } from "./cache.service";
 import LeaderboardService from "./leaderboard.service";
 import { PlayerService } from "./player.service";
 import { ScoreService } from "./score/score.service";
-import Logger from "@ssr/common/logger";
 export default class ScoreSaberService {
   /**
    * Notifies the number one score in Discord.
@@ -42,7 +43,8 @@ export default class ScoreSaberService {
   public static async notifyScore(
     playerScore: ScoreSaberPlayerScoreToken,
     player: ScoreSaberPlayerToken,
-    mode: "numberOne" | "top50AllTime" | "scoreFloodGate"
+    mode: "numberOne" | "top50AllTime" | "scoreFloodGate",
+    beatLeaderScore?: BeatLeaderScoreToken
   ) {
     // Only notify in production
     if (!isProduction()) {
@@ -64,6 +66,7 @@ export default class ScoreSaberService {
         score,
         leaderboard,
         player,
+        beatLeaderScore,
         `${playerInfo.name} just set a rank #${score.rank}!`
       );
     }
@@ -79,6 +82,7 @@ export default class ScoreSaberService {
         score,
         leaderboard,
         player,
+        beatLeaderScore,
         `${playerInfo.name} just set a #1!`
       );
       // No need to check this for all scores, so we only check if the score is top 50
@@ -91,6 +95,7 @@ export default class ScoreSaberService {
           score,
           leaderboard,
           player,
+          beatLeaderScore,
           `${playerInfo.name} just set a new top 50 score!`
         );
       }
@@ -254,9 +259,7 @@ export default class ScoreSaberService {
   public static async updatePlayerCache(
     playerToken: ScoreSaberPlayerToken | ScoreSaberLeaderboardPlayerInfoToken
   ): Promise<ScoreSaberPlayerToken | undefined> {
-    const player = await this.getCachedPlayer(playerToken.id, true).catch(
-      () => undefined
-    );
+    const player = await this.getCachedPlayer(playerToken.id, true).catch(() => undefined);
     if (player == undefined) {
       Logger.warn(`Player "${playerToken.id}" not found on ScoreSaber`);
       return undefined;

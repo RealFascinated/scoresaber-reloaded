@@ -5,8 +5,6 @@ import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import { isProduction } from "@ssr/common/utils/utils";
-import { connectBeatLeaderWebsocket } from "@ssr/common/websocket/beatleader-websocket";
-import { connectScoresaberWebsocket } from "@ssr/common/websocket/scoresaber-websocket";
 import { logger } from "@tqman/nice-logger";
 import { EmbedBuilder } from "discord.js";
 import { Elysia, ValidationError } from "elysia";
@@ -21,14 +19,11 @@ import PlayerController from "./controller/player.controller";
 import PlaylistController from "./controller/playlist.controller";
 import ScoresController from "./controller/scores.controller";
 import StatisticsController from "./controller/statistics.controller";
-import TrackedScoresMetric from "./metrics/impl/tracked-scores";
-import BeatLeaderService from "./service/beatleader.service";
 import CacheService from "./service/cache.service";
 import LeaderboardService from "./service/leaderboard.service";
-import MetricsService, { MetricType } from "./service/metrics.service";
+import MetricsService from "./service/metrics.service";
 import { PlayerService } from "./service/player.service";
 import { ScoreService } from "./service/score/score.service";
-import ScoreSaberService from "./service/scoresaber.service";
 import StatisticsService from "./service/statistics.service";
 
 Logger.info("Starting SSR Backend...");
@@ -45,37 +40,6 @@ if (await Bun.file(".env").exists()) {
 Logger.info("Connecting to MongoDB...");
 await mongoose.connect(env.MONGO_CONNECTION_STRING); // Connect to MongoDB
 Logger.info("Connected to MongoDB :)");
-
-// Connect to websockets
-connectScoresaberWebsocket({
-  onScore: async score => {
-    // Fetch player info
-    const player = await ScoreSaberService.updatePlayerCache(score.score.leaderboardPlayerInfo);
-    if (player == undefined) {
-      return;
-    }
-
-    // Track score
-    await ScoreService.trackScoreSaberScore(score.score, score.leaderboard, player);
-    await PlayerService.updatePlayerScoresSet(score);
-
-    // Notify
-    await ScoreSaberService.notifyScore(score, player, "scoreFloodGate");
-    await ScoreSaberService.notifyScore(score, player, "numberOne");
-    await ScoreSaberService.notifyScore(score, player, "top50AllTime");
-
-    // Update metric
-    const trackedScoresMetric = (await MetricsService.getMetric(
-      MetricType.TRACKED_SCORES
-    )) as TrackedScoresMetric;
-    trackedScoresMetric.increment();
-  },
-});
-connectBeatLeaderWebsocket({
-  onScore: async score => {
-    await BeatLeaderService.trackBeatLeaderScore(score);
-  },
-});
 
 export const app = new Elysia();
 
@@ -221,6 +185,7 @@ app.onStart(async () => {
   new MetricsService();
   new CacheService();
   new StatisticsService();
+  new ScoreService();
 });
 
 app.listen({

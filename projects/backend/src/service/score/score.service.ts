@@ -15,20 +15,191 @@ import {
   getScoreSaberScoreFromToken,
 } from "@ssr/common/token-creators";
 import { Metadata } from "@ssr/common/types/metadata";
+import { BeatLeaderScoreToken } from "@ssr/common/types/token/beatleader/score/score";
 import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/leaderboard";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score";
 import { getDaysAgoDate } from "@ssr/common/utils/time-utils";
+import { connectBeatLeaderWebsocket } from "@ssr/common/websocket/beatleader-websocket";
+import { connectScoresaberWebsocket } from "@ssr/common/websocket/scoresaber-websocket";
 import { NotFoundError } from "elysia";
 import { fetchWithCache } from "../../common/cache.util";
 import { scoreToObject } from "../../common/score/score.util";
+import TrackedScoresMetric from "../../metrics/impl/tracked-scores";
 import BeatLeaderService from "../beatleader.service";
 import CacheService, { ServiceCache } from "../cache.service";
 import LeaderboardService from "../leaderboard.service";
+import MetricsService, { MetricType } from "../metrics.service";
+import { PlayerService } from "../player.service";
 import ScoreSaberService from "../scoresaber.service";
 import { PreviousScoresService } from "./previous-scores.service";
 
+interface PendingScore {
+  scoreToken: ScoreSaberScoreToken;
+  leaderboardToken: ScoreSaberLeaderboardToken;
+  player: ScoreSaberPlayerToken;
+  timestamp: number;
+}
+
 export class ScoreService {
+  private static pendingScores = new Map<string, PendingScore>();
+
+  constructor() {
+    // Connect to websockets
+    connectScoresaberWebsocket({
+      onScore: async score => {
+        // Fetch player info
+        const player = await ScoreSaberService.updatePlayerCache(score.score.leaderboardPlayerInfo);
+        if (player == undefined) {
+          return;
+        }
+
+        // Create a unique key for this score
+        const key = `${player.id}-${score.leaderboard.songHash.toUpperCase()}-${score.leaderboard.difficulty.difficulty}-${score.leaderboard.difficulty.gameMode.replace("Solo", "")}`;
+
+        // Add to pending scores with timestamp
+        ScoreService.pendingScores.set(key, {
+          scoreToken: score.score,
+          leaderboardToken: score.leaderboard,
+          player,
+          timestamp: Date.now(),
+        });
+
+        // Set timeout to process score if no BeatLeader match is found
+        setTimeout(() => {
+          const pendingScore = ScoreService.pendingScores.get(key);
+          if (pendingScore) {
+            ScoreService.pendingScores.delete(key);
+            this.processScoreSaberScore(
+              pendingScore.scoreToken,
+              pendingScore.leaderboardToken,
+              pendingScore.player
+            );
+          }
+        }, 10000); // 10 seconds timeout
+      },
+    });
+
+    connectBeatLeaderWebsocket({
+      onScore: async beatLeaderScore => {
+        // Try to find matching ScoreSaber score
+        const key = `${beatLeaderScore.playerId}-${beatLeaderScore.leaderboard.song.hash.toUpperCase()}-${beatLeaderScore.leaderboard.difficulty.value}-${beatLeaderScore.leaderboard.difficulty.modeName.replace("Solo", "")}`;
+        const pendingScore = ScoreService.pendingScores.get(key);
+
+        if (pendingScore) {
+          // Found a match, remove from pending and process both scores
+          ScoreService.pendingScores.delete(key);
+          await this.processMatchingScores(
+            pendingScore.scoreToken,
+            pendingScore.leaderboardToken,
+            pendingScore.player,
+            beatLeaderScore
+          );
+        } else {
+          // No match found, process BeatLeader score normally
+          await BeatLeaderService.trackBeatLeaderScore(beatLeaderScore);
+        }
+      },
+    });
+  }
+
+  /**
+   * Processes a ScoreSaber score and its matching BeatLeader score if available.
+   *
+   * @param scoreSaberToken the ScoreSaber score to process
+   * @param leaderboardToken the leaderboard for the score
+   * @param player the player for the score
+   * @param beatLeaderScore optional matching BeatLeader score
+   */
+  private async processMatchingScores(
+    scoreSaberToken: ScoreSaberScoreToken,
+    leaderboardToken: ScoreSaberLeaderboardToken,
+    player: ScoreSaberPlayerToken,
+    beatLeaderScore?: BeatLeaderScoreToken
+  ) {
+    // Track ScoreSaber score
+    await ScoreService.trackScoreSaberScore(scoreSaberToken, leaderboardToken, player);
+    await PlayerService.updatePlayerScoresSet({
+      score: scoreSaberToken,
+      leaderboard: leaderboardToken,
+    });
+
+    // Track BeatLeader score if available
+    if (beatLeaderScore) {
+      await BeatLeaderService.trackBeatLeaderScore(beatLeaderScore);
+    }
+
+    // Notify
+    await ScoreSaberService.notifyScore(
+      { score: scoreSaberToken, leaderboard: leaderboardToken },
+      player,
+      "scoreFloodGate",
+      beatLeaderScore
+    );
+    await ScoreSaberService.notifyScore(
+      { score: scoreSaberToken, leaderboard: leaderboardToken },
+      player,
+      "numberOne",
+      beatLeaderScore
+    );
+    await ScoreSaberService.notifyScore(
+      { score: scoreSaberToken, leaderboard: leaderboardToken },
+      player,
+      "top50AllTime",
+      beatLeaderScore
+    );
+
+    // Update metric
+    const trackedScoresMetric = (await MetricsService.getMetric(
+      MetricType.TRACKED_SCORES
+    )) as TrackedScoresMetric;
+    trackedScoresMetric.increment();
+
+    Logger.info(
+      `Processed score for ${player.name}. ScoreSaber: ${scoreSaberToken != undefined ? true : false}, BeatLeader: ${beatLeaderScore != undefined ? true : false}`
+    );
+  }
+
+  /**
+   * Processes a ScoreSaber score.
+   *
+   * @param scoreToken the score to process
+   * @param leaderboardToken the leaderboard for the score
+   * @param player the player for the score
+   */
+  private async processScoreSaberScore(
+    scoreToken: ScoreSaberScoreToken,
+    leaderboardToken: ScoreSaberLeaderboardToken,
+    player: ScoreSaberPlayerToken
+  ) {
+    // Track score
+    await ScoreService.trackScoreSaberScore(scoreToken, leaderboardToken, player);
+    await PlayerService.updatePlayerScoresSet({ score: scoreToken, leaderboard: leaderboardToken });
+
+    // Notify
+    await ScoreSaberService.notifyScore(
+      { score: scoreToken, leaderboard: leaderboardToken },
+      player,
+      "scoreFloodGate"
+    );
+    await ScoreSaberService.notifyScore(
+      { score: scoreToken, leaderboard: leaderboardToken },
+      player,
+      "numberOne"
+    );
+    await ScoreSaberService.notifyScore(
+      { score: scoreToken, leaderboard: leaderboardToken },
+      player,
+      "top50AllTime"
+    );
+
+    // Update metric
+    const trackedScoresMetric = (await MetricsService.getMetric(
+      MetricType.TRACKED_SCORES
+    )) as TrackedScoresMetric;
+    trackedScoresMetric.increment();
+  }
+
   /**
    * Gets scores for a leaderboard.
    *
