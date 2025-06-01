@@ -175,6 +175,9 @@ export default class MetricsService {
         }
       }
 
+      // Add timestamp when the point was collected
+      points.timestamp(new Date());
+
       // Add point to cache instead of writing immediately
       this.pointCache.push(points);
     } catch (error) {
