@@ -44,6 +44,7 @@ interface PendingScore {
 
 export class ScoreService {
   private static pendingScores = new Map<string, PendingScore>();
+  private static readonly SCORE_MATCH_TIMEOUT = 30000; // 30 seconds in milliseconds
 
   constructor() {
     // Connect to websockets
@@ -92,7 +93,7 @@ export class ScoreService {
                 pendingScore.player
               );
             }
-          }, 10000); // 10 seconds timeout
+          }, ScoreService.SCORE_MATCH_TIMEOUT);
         }
       },
     });
@@ -126,7 +127,7 @@ export class ScoreService {
               ScoreService.pendingScores.delete(key);
               BeatLeaderService.trackBeatLeaderScore(pendingScore.beatLeaderScore);
             }
-          }, 10000); // 10 seconds timeout
+          }, ScoreService.SCORE_MATCH_TIMEOUT);
         }
       },
     });
