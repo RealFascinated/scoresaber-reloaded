@@ -104,7 +104,13 @@ export default class MetricsService {
    *
    * @param metric the metric to set up a timer for
    */
-  private setupMetricTimer(metric: Metric<unknown>) {
+  private async setupMetricTimer(metric: Metric<unknown>) {
+    // Collect first value immediately
+    const point = await metric.collect();
+    if (point) {
+      await this.writePoints(point);
+    }
+
     // Clear existing timer if any
     const existingTimer = this.metricTimers.get(metric.id);
     if (existingTimer) {
