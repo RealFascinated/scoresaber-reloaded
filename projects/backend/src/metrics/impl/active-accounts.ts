@@ -11,8 +11,11 @@ export default class ActiveAccountsMetric extends NumberMetric {
     });
   }
 
-  public async collect(): Promise<Point> {
+  public async collect(): Promise<Point | undefined> {
     const count = await scoresaberService.lookupActivePlayerCount();
+    if (count === undefined) {
+      return undefined;
+    }
     return this.getPointBase().intField("value", count ?? 0);
   }
 }

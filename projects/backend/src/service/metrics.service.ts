@@ -114,7 +114,10 @@ export default class MetricsService {
       const before = Date.now();
 
       // Collect the metric
-      await this.writePoints(await metric.collect());
+      const point = await metric.collect();
+      if (point) {
+        await this.writePoints(point);
+      }
 
       // Update the metric value
       if (metric.options.fetchAfterRegister) {

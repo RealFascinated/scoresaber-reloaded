@@ -42,7 +42,7 @@ export default abstract class Metric<T> {
   /**
    * Collects the metric(s).
    */
-  public abstract collect(): Promise<Point>;
+  public abstract collect(): Promise<Point | undefined>;
 
   /**
    * Gets the base point.

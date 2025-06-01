@@ -12,7 +12,7 @@ export default class UniqueDailyPlayersMetric extends NumberMetric {
     });
   }
 
-  public async collect(): Promise<Point> {
+  public async collect(): Promise<Point | undefined> {
     const statsResponse = await ScoreSaberScoreModel.aggregate([
       { $match: { timestamp: { $gte: getMidnightAlignedDate(new Date()) } } },
       {

@@ -11,7 +11,7 @@ export default class TrackedPlayersMetric extends NumberMetric {
     });
   }
 
-  public async collect(): Promise<Point> {
+  public async collect(): Promise<Point | undefined> {
     const count = await PlayerModel.estimatedDocumentCount();
     return this.getPointBase().intField("value", count ?? 0);
   }
