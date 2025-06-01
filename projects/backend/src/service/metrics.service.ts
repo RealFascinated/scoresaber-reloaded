@@ -19,6 +19,7 @@ export enum MetricType {
   TRACKED_PLAYERS = "tracked-players",
   UNIQUE_DAILY_PLAYERS = "unique-daily-players",
   ACTIVE_ACCOUNTS = "active-accounts",
+  MONGO_DB_SIZE = "mongo-db-size",
 }
 
 export default class MetricsService {
