@@ -1,8 +1,6 @@
 import * as dotenv from "@dotenvx/dotenvx";
 import cors from "@elysiajs/cors";
 import { cron } from "@elysiajs/cron";
-import { serverTiming } from "@elysiajs/server-timing";
-import { swagger } from "@elysiajs/swagger";
 import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
 import { formatDuration } from "@ssr/common/utils/time-utils";
@@ -16,7 +14,6 @@ import { decorators } from "elysia-decorators";
 import { helmet } from "elysia-helmet";
 import mongoose from "mongoose";
 import { DiscordChannels, initDiscordBot, logToChannel } from "./bot/bot";
-import { getAppVersion } from "./common/app.util";
 import AppController from "./controller/app.controller";
 import BeatSaverController from "./controller/beatsaver.controller";
 import LeaderboardController from "./controller/leaderboard.controller";
@@ -25,6 +22,7 @@ import PlaylistController from "./controller/playlist.controller";
 import ScoresController from "./controller/scores.controller";
 import StatisticsController from "./controller/statistics.controller";
 import TrackedScoresMetric from "./metrics/impl/tracked-scores";
+import { compression } from "./plugins/compression";
 import BeatLeaderService from "./service/beatleader.service";
 import CacheService from "./service/cache.service";
 import LeaderboardService from "./service/leaderboard.service";
@@ -33,7 +31,6 @@ import { PlayerService } from "./service/player.service";
 import { ScoreService } from "./service/score/score.service";
 import ScoreSaberService from "./service/scoresaber.service";
 import StatisticsService from "./service/statistics.service";
-import { compression } from "./plugins/compression";
 
 Logger.info("Starting SSR Backend...");
 
@@ -198,15 +195,6 @@ app.onError({ as: "global" }, ({ code, error }) => {
 });
 
 /**
- * Enable server timings
- */
-app.use(
-  serverTiming({
-    enabled: true,
-  })
-);
-
-/**
  * Enable CORS
  */
 app.use(cors());
@@ -246,28 +234,6 @@ app.use(
       PlaylistController,
       BeatSaverController,
     ],
-  })
-);
-
-/**
- * Swagger Documentation
- */
-app.use(
-  swagger({
-    documentation: {
-      info: {
-        title: "ScoreSaber Reloaded Documentation",
-        version: await getAppVersion(),
-      },
-    },
-    scalarConfig: {
-      servers: [
-        {
-          url: "https://ssr-api.fascinated.cc",
-          description: "Production server",
-        },
-      ],
-    },
   })
 );
 
