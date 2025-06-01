@@ -1,12 +1,12 @@
 import { InfluxDB, Point } from "@influxdata/influxdb-client";
+import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
 import { MetricValueModel } from "../common/model/metric";
+import ActiveAccountsMetric from "../metrics/impl/active-accounts";
 import TrackedPlayersMetric from "../metrics/impl/tracked-players";
 import TrackedScoresMetric from "../metrics/impl/tracked-scores";
 import UniqueDailyPlayersMetric from "../metrics/impl/unique-daily-players";
 import Metric from "../metrics/metric";
-import { env } from "@ssr/common/env";
-import ActiveAccountsMetric from "../metrics/impl/active-accounts";
 
 const influxClient = new InfluxDB({
   url: env.INFLUXDB_URL,
@@ -27,6 +27,7 @@ export default class MetricsService {
    * @private
    */
   private static metrics: Metric<unknown>[] = [];
+  private metricTimers: Map<string, NodeJS.Timeout> = new Map();
 
   constructor() {
     this.registerMetric(new TrackedScoresMetric());
@@ -49,30 +50,41 @@ export default class MetricsService {
       if (metricValue) {
         metric.value = metricValue.value;
       }
+
+      // Set up individual timer for each metric
+      this.setupMetricTimer(metric);
+    }
+  }
+
+  private setupMetricTimer(metric: Metric<unknown>) {
+    // Clear existing timer if any
+    const existingTimer = this.metricTimers.get(metric.id);
+    if (existingTimer) {
+      clearInterval(existingTimer);
     }
 
-    setInterval(async () => {
+    const timer = setInterval(async () => {
       const before = Date.now();
 
-      for (const metric of MetricsService.metrics) {
-        // Collect the metric
-        await this.writePoints(await metric.collect());
+      // Collect the metric
+      await this.writePoints(await metric.collect());
 
-        // Update the metric value
-        if (metric.options.fetchAfterRegister) {
-          await MetricValueModel.findOneAndUpdate(
-            { _id: metric.id },
-            { value: metric.value },
-            { upsert: true, setDefaultsOnInsert: true }
-          );
-        }
+      // Update the metric value
+      if (metric.options.fetchAfterRegister) {
+        await MetricValueModel.findOneAndUpdate(
+          { _id: metric.id },
+          { value: metric.value },
+          { upsert: true, setDefaultsOnInsert: true }
+        );
       }
 
       const timeTaken = Date.now() - before;
       if (timeTaken > 3000) {
-        Logger.warn(`Collected and wrote metrics in ${timeTaken}ms`);
+        Logger.warn(`Collected and wrote metric ${metric.id} in ${timeTaken}ms`);
       }
-    }, 1000 * 5); // every 5 seconds
+    }, metric.options.interval);
+
+    this.metricTimers.set(metric.id, timer);
   }
 
   /**

@@ -13,6 +13,7 @@ import {
   PlayedMapsCalendarResponse,
   PlayedMapsCalendarStat,
 } from "@ssr/common/response/played-maps-calendar-response";
+import { PlayerRankedPpsResponse } from "@ssr/common/response/player-ranked-pps-response";
 import {
   PlayerScoreChartDataPoint,
   PlayerScoresChartResponse,
@@ -23,6 +24,7 @@ import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
 import { AroundPlayer } from "@ssr/common/types/around-player";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import ScoreSaberPlayerScoreToken from "@ssr/common/types/token/scoresaber/player-score";
+import { updateScoreWeights } from "@ssr/common/utils/scoresaber.util";
 import {
   getDifficulty,
   getDifficultyName,
@@ -39,8 +41,6 @@ import { logNewTrackedPlayer } from "../common/embds";
 import CacheService, { ServiceCache } from "./cache.service";
 import { ScoreService } from "./score/score.service";
 import ScoreSaberService from "./scoresaber.service";
-import { PlayerRankedPpsResponse } from "@ssr/common/response/player-ranked-pps-response";
-import { updateScoreWeights } from "@ssr/common/utils/scoresaber.util";
 
 const accountCreationLock: { [id: string]: Promise<PlayerDocument> } = {};
 
@@ -674,78 +674,53 @@ export class PlayerService {
   }
 
   /**
-   * Ensures all player scores are up-to-date.
-   *
-   * @returns the total number of missing scores
-   */
-  public static async refreshPlayerScores(): Promise<number> {
-    Logger.info(`Refreshing player score data...`);
-
-    const players = await PlayerModel.find({});
-    Logger.info(`Found ${players.length} players to refresh.`);
-
-    let totalMissingScores = 0;
-    for (const player of players) {
-      totalMissingScores += await this.refreshAllPlayerScores(player);
-    }
-    return totalMissingScores;
-  }
-
-  /**
    * Updates the player statistics for all players.
    */
   public static async updatePlayerStatistics() {
-    const pages = 20; // top 1000 players
+    const now = new Date();
+    const firstPage = await scoresaberService.lookupPlayers(1);
+    const pages = Math.ceil(firstPage?.metadata.total ?? 0 / 100);
 
-    let toTrack: PlayerDocument[] = await PlayerModel.find({});
-    const players: ScoreSaberPlayerToken[] = [];
+    Logger.info(`Fetching ${pages} pages of players from ScoreSaber...`);
 
-    const dateNow = new Date();
+    // Process pages in batches to avoid overwhelming the system
+    const BATCH_SIZE = 5; // Number of pages to process in parallel
+    const CONCURRENT_PLAYERS = 20; // Number of players to process in parallel within each page
 
-    // loop through pages to fetch the top players
-    console.log(`Fetching ${pages} pages of players from ScoreSaber...`);
-    for (let i = 0; i < pages; i++) {
-      const pageNumber = i + 1;
-      try {
-        console.log(`Fetching page ${pageNumber}...`);
-        const page = await scoresaberService.lookupPlayers(pageNumber);
-        if (page === undefined) {
-          console.log(`Failed to fetch players on page ${pageNumber}, skipping page...`);
+    for (let i = 1; i <= pages; i += BATCH_SIZE) {
+      const pagePromises = [];
+      for (let j = 0; j < BATCH_SIZE && i + j <= pages; j++) {
+        pagePromises.push(scoresaberService.lookupPlayers(i + j));
+      }
+
+      const pageResults = await Promise.all(pagePromises);
+
+      for (const page of pageResults) {
+        if (page == undefined) {
+          Logger.error(`Failed to fetch players on page ${i}, skipping page...`);
           continue;
         }
-        for (const player of page.players) {
-          players.push(player);
+
+        // Process players in parallel batches
+        for (let k = 0; k < page.players.length; k += CONCURRENT_PLAYERS) {
+          const playerBatch = page.players.slice(k, k + CONCURRENT_PLAYERS);
+          const playerPromises = playerBatch.map(async player => {
+            try {
+              const foundPlayer = await PlayerService.getPlayer(player.id, true, player);
+              await PlayerService.trackScoreSaberPlayer(foundPlayer, now, player);
+            } catch (error) {
+              Logger.error(`Failed to track player ${player.id}: ${error}`);
+            }
+          });
+
+          await Promise.all(playerPromises);
         }
-      } catch (error) {
-        Logger.error(`Error fetching page ${pageNumber}: ${error}`);
       }
     }
 
-    for (const player of players) {
-      try {
-        const foundPlayer = await PlayerService.getPlayer(player.id, true, player);
-        await PlayerService.trackScoreSaberPlayer(foundPlayer, dateNow, player);
-      } catch (error) {
-        Logger.error(`Error tracking player ${player.id}: ${error}`);
-      }
-    }
-
-    // remove all players that have been tracked
-    toTrack = toTrack.filter(player => !players.map(player => player.id).includes(player.id));
-
-    console.log(`Tracking ${toTrack.length} player statistics...`);
-    for (const player of toTrack) {
-      if (player.inactive) {
-        Logger.info(`Skipping inactive player, ${player.id}`);
-        continue;
-      }
-      try {
-        await PlayerService.trackScoreSaberPlayer(player, dateNow);
-      } catch (error) {
-        Logger.error(`Error tracking player ${player.id}: ${error}`);
-      }
-    }
-    console.log("Finished tracking player statistics.");
+    Logger.info(
+      `Finished tracking player statistics in ${(performance.now() - now.getTime()).toFixed(0)}ms`
+    );
   }
 
   /**

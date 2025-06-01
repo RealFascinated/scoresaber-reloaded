@@ -7,6 +7,7 @@ export default class TrackedPlayersMetric extends NumberMetric {
   constructor() {
     super(MetricType.TRACKED_PLAYERS, 0, {
       fetchAfterRegister: false,
+      interval: 1000 * 60 * 5, // 5 minutes
     });
   }
 

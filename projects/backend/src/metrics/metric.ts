@@ -6,6 +6,11 @@ export interface MetricOptions {
    * Whether to fetch the metric from the database after registration.
    */
   fetchAfterRegister?: boolean;
+
+  /**
+   * The interval in milliseconds at which to collect this metric.
+   */
+  interval: number;
 }
 
 export default abstract class Metric<T> {
@@ -24,11 +29,13 @@ export default abstract class Metric<T> {
    */
   public options: MetricOptions;
 
-  protected constructor(id: MetricType, defaultValue: T, options?: MetricOptions) {
+  protected constructor(id: MetricType, defaultValue: T, options?: Partial<MetricOptions>) {
     this.id = id;
     this.value = defaultValue;
-    this.options = options ?? {
+    this.options = {
       fetchAfterRegister: false,
+      interval: 5 * 60 * 1000, // 5 minutes default
+      ...options,
     };
   }
 

@@ -1,9 +1,9 @@
 import { Colors } from "@/common/colors";
 import { PreloadResources } from "@/components/preload-resources";
+import { PostHogProvider } from "@/components/providers/posthog-provider";
 import { QueryProvider } from "@/components/providers/query-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { PostHogProvider } from "@/components/providers/posthog-provider";
 import { env } from "@ssr/common/env";
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";

@@ -8,6 +8,7 @@ export default class UniqueDailyPlayersMetric extends NumberMetric {
   constructor() {
     super(MetricType.UNIQUE_DAILY_PLAYERS, 0, {
       fetchAfterRegister: false,
+      interval: 1000 * 60 * 5, // 5 minutes
     });
   }
 

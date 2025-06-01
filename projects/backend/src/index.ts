@@ -22,7 +22,6 @@ import PlaylistController from "./controller/playlist.controller";
 import ScoresController from "./controller/scores.controller";
 import StatisticsController from "./controller/statistics.controller";
 import TrackedScoresMetric from "./metrics/impl/tracked-scores";
-import { compression } from "./plugins/compression";
 import BeatLeaderService from "./service/beatleader.service";
 import CacheService from "./service/cache.service";
 import LeaderboardService from "./service/leaderboard.service";
@@ -80,13 +79,11 @@ connectBeatLeaderWebsocket({
 
 export const app = new Elysia();
 
-app.use(compression());
-
 app.use(
   cron({
     name: "player-statistics-tracker-cron",
-    // pattern: "*/1 * * * *", // Every 5 minutes
-    pattern: "59 23 * * *", // Every day at 23:59
+    pattern: "*/1 * * * *", // Every 5 minutes
+    // pattern: "59 23 * * *", // Every day at 23:59
     timezone: "Europe/London", // UTC time
     protect: true,
     run: async () => {
@@ -100,28 +97,6 @@ app.use(
         DiscordChannels.backendLogs,
         new EmbedBuilder().setDescription(
           `Updated player statistics in ${formatDuration(Date.now() - before)}`
-        )
-      );
-    },
-  })
-);
-app.use(
-  cron({
-    name: "player-scores-tracker-cron",
-    pattern: "0 4 * * *", // Every day at 04:00
-    timezone: "Europe/London", // UTC time
-    protect: true,
-    run: async () => {
-      const before = Date.now();
-      await logToChannel(
-        DiscordChannels.backendLogs,
-        new EmbedBuilder().setDescription(`Refreshing player scores...`)
-      );
-      const missingScores = await PlayerService.refreshPlayerScores();
-      await logToChannel(
-        DiscordChannels.backendLogs,
-        new EmbedBuilder().setDescription(
-          `Refreshed player scores in ${formatDuration(Date.now() - before)}, found ${missingScores} missing scores`
         )
       );
     },
