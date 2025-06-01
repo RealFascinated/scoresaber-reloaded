@@ -28,6 +28,16 @@ export default class MetricsService {
    */
   private static metrics: Metric<unknown>[] = [];
   private metricTimers: Map<string, NodeJS.Timeout> = new Map();
+  /**
+   * Cache for storing metric points before sending them to InfluxDB.
+   * Points are stored here for 1 minute before being flushed in a batch.
+   */
+  private pointCache: Point[] = [];
+  /**
+   * Timer that triggers the flushing of cached points every minute.
+   * Null when the service is not running.
+   */
+  private flushTimer: NodeJS.Timeout | null = null;
 
   constructor() {
     this.registerMetric(new TrackedScoresMetric());
@@ -36,19 +46,51 @@ export default class MetricsService {
     this.registerMetric(new ActiveAccountsMetric());
 
     this.initMetrics();
+    this.setupFlushTimer();
+  }
+
+  /**
+   * Sets up a timer to flush cached points every minute.
+   * This helps reduce the number of writes to InfluxDB by batching points together.
+   */
+  private setupFlushTimer() {
+    // Flush cache every minute
+    this.flushTimer = setInterval(() => {
+      this.flushPoints();
+    }, 60000); // 1 minute
+  }
+
+  /**
+   * Flushes all cached points to InfluxDB.
+   * This method is called every minute by the flush timer.
+   * It writes all points in the cache and then clears the cache.
+   */
+  private async flushPoints() {
+    if (this.pointCache.length === 0) return;
+
+    try {
+      // Write all cached points to InfluxDB
+      for (const point of this.pointCache) {
+        writeApi.writePoint(point);
+      }
+      // Ensure all points are written to the database
+      await writeApi.flush();
+      Logger.info(`Flushed ${this.pointCache.length} points to InfluxDB`);
+      // Clear the cache after successful write
+      this.pointCache = [];
+    } catch (error) {
+      Logger.error("Failed to flush points to InfluxDB:", error);
+    }
   }
 
   private async initMetrics() {
     for (const metric of MetricsService.metrics) {
-      // If the metric does not need to be fetched after registration, skip
-      if (!metric.options.fetchAfterRegister) {
-        continue;
-      }
-
-      // Fetch the metric value from the database
-      const metricValue = await MetricValueModel.findOne({ _id: metric.id });
-      if (metricValue) {
-        metric.value = metricValue.value;
+      // If the metric needs to be fetched after registration, fetch the value from the database
+      if (metric.options.fetchAfterRegister) {
+        const metricValue = await MetricValueModel.findOne({ _id: metric.id });
+        if (metricValue) {
+          metric.value = metricValue.value;
+        }
       }
 
       // Set up individual timer for each metric
@@ -56,6 +98,11 @@ export default class MetricsService {
     }
   }
 
+  /**
+   * Sets up a timer for a metric.
+   *
+   * @param metric the metric to set up a timer for
+   */
   private setupMetricTimer(metric: Metric<unknown>) {
     // Clear existing timer if any
     const existingTimer = this.metricTimers.get(metric.id);
@@ -111,13 +158,15 @@ export default class MetricsService {
   }
 
   /**
-   * Writes a point to Influx.
+   * Writes a point to the cache instead of directly to InfluxDB.
+   * Points are validated before being added to the cache.
+   * They will be flushed to InfluxDB after 1 minute.
    *
-   * @param points the points to write
+   * @param points the points to cache
    */
   private async writePoints(points: Point): Promise<void> {
     try {
-      // Validate that the point has valid values before writing
+      // Validate that the point has valid values before caching
       const fields = points.fields;
       for (const [key, value] of Object.entries(fields)) {
         if (value === undefined || value === null) {
@@ -126,9 +175,21 @@ export default class MetricsService {
         }
       }
 
-      writeApi.writePoint(points);
+      // Add point to cache instead of writing immediately
+      this.pointCache.push(points);
     } catch (error) {
-      Logger.error("Failed to write points to InfluxDB:", error);
+      Logger.error("Failed to cache point for InfluxDB:", error);
     }
+  }
+
+  /**
+   * Cleans up the service by stopping the flush timer and flushing any remaining points.
+   * This should be called when the service is being shut down to ensure no data is lost.
+   */
+  public async cleanup() {
+    if (this.flushTimer) {
+      clearInterval(this.flushTimer);
+    }
+    await this.flushPoints();
   }
 }
