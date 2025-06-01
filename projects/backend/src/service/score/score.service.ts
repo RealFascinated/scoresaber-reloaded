@@ -70,7 +70,7 @@ export class ScoreService {
           const pendingScore = ScoreService.pendingScores.get(key);
           if (pendingScore) {
             ScoreService.pendingScores.delete(key);
-            this.processScoreSaberScore(
+            this.processScore(
               pendingScore.scoreToken,
               pendingScore.leaderboardToken,
               pendingScore.player
@@ -83,13 +83,15 @@ export class ScoreService {
     connectBeatLeaderWebsocket({
       onScore: async beatLeaderScore => {
         // Try to find matching ScoreSaber score
-        const key = `${beatLeaderScore.playerId}-${beatLeaderScore.leaderboard.song.hash.toUpperCase()}-${beatLeaderScore.leaderboard.difficulty.value}-${beatLeaderScore.leaderboard.difficulty.modeName.replace("Solo", "")}`;
+        const key = `${beatLeaderScore.playerId}-${beatLeaderScore.leaderboard.song.hash}-${beatLeaderScore.leaderboard.difficulty.value}-${beatLeaderScore.leaderboard.difficulty.mode}`;
         const pendingScore = ScoreService.pendingScores.get(key);
 
         if (pendingScore) {
           // Found a match, remove from pending and process both scores
           ScoreService.pendingScores.delete(key);
-          await this.processMatchingScores(
+
+          // Process both scores together
+          await this.processScore(
             pendingScore.scoreToken,
             pendingScore.leaderboardToken,
             pendingScore.player,
@@ -111,7 +113,7 @@ export class ScoreService {
    * @param player the player for the score
    * @param beatLeaderScore optional matching BeatLeader score
    */
-  private async processMatchingScores(
+  private async processScore(
     scoreSaberToken: ScoreSaberScoreToken,
     leaderboardToken: ScoreSaberLeaderboardToken,
     player: ScoreSaberPlayerToken,
@@ -158,46 +160,6 @@ export class ScoreService {
     Logger.info(
       `Processed score for ${player.name}. ScoreSaber: ${scoreSaberToken != undefined ? true : false}, BeatLeader: ${beatLeaderScore != undefined ? true : false}`
     );
-  }
-
-  /**
-   * Processes a ScoreSaber score.
-   *
-   * @param scoreToken the score to process
-   * @param leaderboardToken the leaderboard for the score
-   * @param player the player for the score
-   */
-  private async processScoreSaberScore(
-    scoreToken: ScoreSaberScoreToken,
-    leaderboardToken: ScoreSaberLeaderboardToken,
-    player: ScoreSaberPlayerToken
-  ) {
-    // Track score
-    await ScoreService.trackScoreSaberScore(scoreToken, leaderboardToken, player);
-    await PlayerService.updatePlayerScoresSet({ score: scoreToken, leaderboard: leaderboardToken });
-
-    // Notify
-    await ScoreSaberService.notifyScore(
-      { score: scoreToken, leaderboard: leaderboardToken },
-      player,
-      "scoreFloodGate"
-    );
-    await ScoreSaberService.notifyScore(
-      { score: scoreToken, leaderboard: leaderboardToken },
-      player,
-      "numberOne"
-    );
-    await ScoreSaberService.notifyScore(
-      { score: scoreToken, leaderboard: leaderboardToken },
-      player,
-      "top50AllTime"
-    );
-
-    // Update metric
-    const trackedScoresMetric = (await MetricsService.getMetric(
-      MetricType.TRACKED_SCORES
-    )) as TrackedScoresMetric;
-    trackedScoresMetric.increment();
   }
 
   /**
