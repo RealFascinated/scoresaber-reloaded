@@ -35,9 +35,10 @@ import ScoreSaberService from "../scoresaber.service";
 import { PreviousScoresService } from "./previous-scores.service";
 
 interface PendingScore {
-  scoreToken: ScoreSaberScoreToken;
-  leaderboardToken: ScoreSaberLeaderboardToken;
-  player: ScoreSaberPlayerToken;
+  scoreSaberToken?: ScoreSaberScoreToken;
+  leaderboardToken?: ScoreSaberLeaderboardToken;
+  player?: ScoreSaberPlayerToken;
+  beatLeaderScore?: BeatLeaderScoreToken;
   timestamp: number;
 }
 
@@ -55,28 +56,44 @@ export class ScoreService {
         }
 
         // Create a unique key for this score
-        const key = `${player.id}-${score.leaderboard.songHash.toUpperCase()}-${score.leaderboard.difficulty.difficulty}-${score.leaderboard.difficulty.gameMode.replace("Solo", "")}`;
+        const key = `${player.id}-${score.leaderboard.songHash}-${score.leaderboard.difficulty.difficulty}-${score.leaderboard.difficulty.gameMode}`;
 
-        // Add to pending scores with timestamp
-        ScoreService.pendingScores.set(key, {
-          scoreToken: score.score,
-          leaderboardToken: score.leaderboard,
-          player,
-          timestamp: Date.now(),
-        });
+        const pendingScore = ScoreService.pendingScores.get(key);
+        if (pendingScore?.beatLeaderScore) {
+          // Found a matching BeatLeader score, process both
+          ScoreService.pendingScores.delete(key);
+          await this.processScore(
+            score.score,
+            score.leaderboard,
+            player,
+            pendingScore.beatLeaderScore
+          );
+        } else {
+          // No matching BeatLeader score yet, store this one
+          ScoreService.pendingScores.set(key, {
+            scoreSaberToken: score.score,
+            leaderboardToken: score.leaderboard,
+            player,
+            timestamp: Date.now(),
+          });
 
-        // Set timeout to process score if no BeatLeader match is found
-        setTimeout(() => {
-          const pendingScore = ScoreService.pendingScores.get(key);
-          if (pendingScore) {
-            ScoreService.pendingScores.delete(key);
-            this.processScore(
-              pendingScore.scoreToken,
-              pendingScore.leaderboardToken,
+          // Set timeout to process score if no BeatLeader match is found
+          setTimeout(() => {
+            const pendingScore = ScoreService.pendingScores.get(key);
+            if (
+              pendingScore?.scoreSaberToken &&
+              pendingScore.leaderboardToken &&
               pendingScore.player
-            );
-          }
-        }, 10000); // 10 seconds timeout
+            ) {
+              ScoreService.pendingScores.delete(key);
+              this.processScore(
+                pendingScore.scoreSaberToken,
+                pendingScore.leaderboardToken,
+                pendingScore.player
+              );
+            }
+          }, 10000); // 10 seconds timeout
+        }
       },
     });
 
@@ -86,20 +103,30 @@ export class ScoreService {
         const key = `${beatLeaderScore.playerId}-${beatLeaderScore.leaderboard.song.hash}-${beatLeaderScore.leaderboard.difficulty.value}-${beatLeaderScore.leaderboard.difficulty.mode}`;
         const pendingScore = ScoreService.pendingScores.get(key);
 
-        if (pendingScore) {
-          // Found a match, remove from pending and process both scores
+        if (pendingScore?.scoreSaberToken && pendingScore.leaderboardToken && pendingScore.player) {
+          // Found a matching ScoreSaber score, process both
           ScoreService.pendingScores.delete(key);
-
-          // Process both scores together
           await this.processScore(
-            pendingScore.scoreToken,
+            pendingScore.scoreSaberToken,
             pendingScore.leaderboardToken,
             pendingScore.player,
             beatLeaderScore
           );
         } else {
-          // No match found, process BeatLeader score normally
-          await BeatLeaderService.trackBeatLeaderScore(beatLeaderScore);
+          // No matching ScoreSaber score yet, store this one
+          ScoreService.pendingScores.set(key, {
+            beatLeaderScore,
+            timestamp: Date.now(),
+          });
+
+          // Set timeout to process score if no ScoreSaber match is found
+          setTimeout(() => {
+            const pendingScore = ScoreService.pendingScores.get(key);
+            if (pendingScore?.beatLeaderScore) {
+              ScoreService.pendingScores.delete(key);
+              BeatLeaderService.trackBeatLeaderScore(pendingScore.beatLeaderScore);
+            }
+          }, 10000); // 10 seconds timeout
         }
       },
     });
