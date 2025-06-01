@@ -1,4 +1,5 @@
 import { Point } from "@influxdata/influxdb-client";
+import Logger from "@ssr/common/logger";
 import { MinioBucket } from "@ssr/common/minio-buckets";
 import { MetricType } from "../../service/metrics.service";
 import MinioService from "../../service/minio.service";
@@ -13,9 +14,14 @@ export default class ReplayStatsMetric extends NumberMetric {
   }
 
   public async collect(): Promise<Point | undefined> {
-    const stats = await MinioService.getBucketStats(MinioBucket.BeatLeaderReplays);
-    return this.getPointBase()
-      .intField("total-size", stats.totalSize)
-      .intField("replays", stats.totalObjects);
+    try {
+      const stats = await MinioService.getBucketStats(MinioBucket.BeatLeaderReplays);
+      return this.getPointBase()
+        .intField("total-size", stats.totalSize)
+        .intField("replays", stats.totalObjects);
+    } catch (error) {
+      Logger.error("Failed to collect replay stats metric:", error);
+      return undefined;
+    }
   }
 }
