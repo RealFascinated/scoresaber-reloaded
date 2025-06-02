@@ -1,4 +1,4 @@
-import { dirname, importx } from "@discordx/importer";
+import { dirname } from "@discordx/importer";
 import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
 import { isProduction } from "@ssr/common/utils/utils";
@@ -46,7 +46,18 @@ export async function initDiscordBot() {
     client.executeInteraction(interaction);
   });
 
-  await importx(`${dirname(import.meta.url)}/commands/**/*.{js,ts}`);
+  // Import all command files using Bun's glob
+  const glob = new Bun.Glob("**/*.{js,ts}");
+  const commandFiles = await Array.fromAsync(
+    glob.scan({
+      cwd: `${dirname(import.meta.url)}/commands`,
+      absolute: true,
+    })
+  );
+
+  for (const file of commandFiles) {
+    await import(file);
+  }
 
   // Login
   await client.login(env.DISCORD_BOT_TOKEN);
