@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "scripts": {
     "dev": "bun run --watch src/index.ts",
-    "build": "bun build ./src/**/*.ts --sourcemap --target bun --outdir ./dist",
+    "build": "bun build src/index.ts --sourcemap --target bun --outdir ./dist && bun build ./src/**/*.ts --sourcemap --target bun --outdir ./dist",
     "start": "NODE_ENV=production bun dist/index.js",
     "lint": "eslint src/**/*.ts"
   },

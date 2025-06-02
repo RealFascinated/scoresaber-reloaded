@@ -35,5 +35,6 @@ ARG PORT=8080
 ENV PORT $PORT
 EXPOSE $PORT
 
-CMD ["bun", "--smol", "run", "--filter", "backend", "start"]
+WORKDIR /app/projects/backend
+CMD ["bun", "--smol", "dist/index.js"]
 
