@@ -186,10 +186,6 @@ export class ScoreService {
       MetricType.TRACKED_SCORES
     )) as TrackedScoresMetric;
     trackedScoresMetric.increment();
-
-    Logger.info(
-      `Processed score for ${player.name}. ScoreSaber: ${scoreSaberToken != undefined ? true : false}, BeatLeader: ${beatLeaderScore != undefined ? true : false}`
-    );
   }
 
   /**
