@@ -1,4 +1,3 @@
-import { dirname } from "@discordx/importer";
 import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
 import { isProduction } from "@ssr/common/utils/utils";
@@ -47,7 +46,9 @@ export async function initDiscordBot() {
   });
 
   // Import commands
-  await import(`${dirname(import.meta.url)}/commands`);
+  const commandsPath = isProduction() ? "./dist/bot/commands" : "./src/bot/commands";
+
+  await import(commandsPath);
 
   // Login
   await client.login(env.DISCORD_BOT_TOKEN);
