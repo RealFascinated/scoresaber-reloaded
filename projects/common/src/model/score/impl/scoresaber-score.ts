@@ -1,6 +1,7 @@
 import { AutoIncrementID } from "@typegoose/auto-increment";
 import {
   getModelForClass,
+  index,
   modelOptions,
   plugin,
   ReturnModelType,
@@ -24,6 +25,11 @@ import { ScoreSaberScoreBase } from "./scoresaber-score-base";
   trackerCollection: "increments",
   overwriteModelName: "scoresaber-scores",
 })
+@index({ playerId: 1, leaderboardId: 1, score: 1 })
+@index({ playerId: 1 })
+@index({ leaderboardId: 1 })
+@index({ timestamp: -1 })
+@index({ pp: -1 })
 export class ScoreSaberScoreInternal extends ScoreSaberScoreBase {}
 
 class ScoreSaberScorePublic extends ScoreSaberScoreInternal {

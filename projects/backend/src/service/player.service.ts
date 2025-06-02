@@ -688,8 +688,12 @@ export class PlayerService {
   public static async updatePlayerStatistics() {
     const now = new Date();
     const firstPage = await scoresaberService.lookupPlayers(1);
-    const pages = Math.ceil(firstPage?.metadata.total ?? 0 / 100);
+    if (firstPage == undefined) {
+      Logger.error("Failed to fetch players on page 1, skipping player statistics update...");
+      return;
+    }
 
+    const pages = Math.ceil(firstPage.metadata.total / (firstPage.metadata.itemsPerPage ?? 100));
     Logger.info(`Fetching ${pages} pages of players from ScoreSaber...`);
 
     // Process pages in batches to avoid overwhelming the system
