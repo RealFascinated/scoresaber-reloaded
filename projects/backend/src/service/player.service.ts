@@ -707,70 +707,50 @@ export class PlayerService {
     const pages = Math.ceil(firstPage.metadata.total / (firstPage.metadata.itemsPerPage ?? 100));
     Logger.info(`Fetching ${pages} pages of players from ScoreSaber...`);
 
-    // Process pages in batches to avoid overwhelming the system
-    const BATCH_SIZE = 5; // Number of pages to process in parallel
-    const CONCURRENT_PLAYERS = 20; // Number of players to process in parallel within each page
     const PLAYER_TIMEOUT = 30000;
-
     let successCount = 0;
     let errorCount = 0;
 
-    for (let i = 1; i <= pages; i += BATCH_SIZE) {
-      Logger.info(`Processing batch starting at page ${i}...`);
-      const pagePromises = [];
-      for (let j = 0; j < BATCH_SIZE && i + j <= pages; j++) {
-        Logger.debug(`Fetching page ${i + j}...`);
-        pagePromises.push(scoresaberService.lookupPlayers(i + j));
+    for (let i = 1; i <= pages; i++) {
+      Logger.info(`Fetching page ${i}...`);
+      const page = await scoresaberService.lookupPlayers(i);
+
+      if (page == undefined) {
+        Logger.error(`Failed to fetch players on page ${i}, skipping page...`);
+        errorCount++;
+        continue;
       }
 
-      const pageResults = await Promise.all(pagePromises);
-      Logger.info(`Fetched ${pageResults.length} pages in current batch`);
+      callback?.(i, pages, successCount, errorCount);
+      Logger.info(`Processing page ${i} with ${page.players.length} players...`);
 
-      for (const page of pageResults) {
-        if (page == undefined) {
-          Logger.error(`Failed to fetch players on page ${i}, skipping page...`);
-          errorCount++;
-          continue;
-        }
-
-        callback?.(i, pages, successCount, errorCount);
-        Logger.info(`Processing page ${i} with ${page.players.length} players...`);
-
-        // Process players in parallel batches
-        for (let k = 0; k < page.players.length; k += CONCURRENT_PLAYERS) {
-          const playerBatch = page.players.slice(k, k + CONCURRENT_PLAYERS);
-          Logger.info(`Processing batch of ${playerBatch.length} players...`);
-
-          const playerPromises = playerBatch.map(async player => {
-            try {
-              // Add timeout to player processing
-              const timeoutPromise = new Promise((_, reject) => {
-                setTimeout(
-                  () => reject(new Error(`Timeout processing player ${player.id}`)),
-                  PLAYER_TIMEOUT
-                );
-              });
-
-              const processPromise = (async () => {
-                Logger.debug(`Processing player ${player.id} (${player.name})...`);
-                const foundPlayer = await PlayerService.getPlayer(player.id, true, player);
-                await PlayerService.trackScoreSaberPlayer(foundPlayer, now, player);
-                Logger.debug(`Successfully processed player ${player.id} (${player.name})`);
-                successCount++;
-              })();
-
-              await Promise.race([processPromise, timeoutPromise]);
-            } catch (error) {
-              Logger.error(`Failed to track player ${player.id} (${player.name}): ${error}`);
-              errorCount++;
-              // Continue processing other players even if one fails
-            }
+      for (const player of page.players) {
+        try {
+          // Add timeout to player processing
+          const timeoutPromise = new Promise((_, reject) => {
+            setTimeout(
+              () => reject(new Error(`Timeout processing player ${player.id}`)),
+              PLAYER_TIMEOUT
+            );
           });
 
-          await Promise.all(playerPromises);
-          Logger.info(`Completed batch of ${playerBatch.length} players`);
+          const processPromise = (async () => {
+            Logger.debug(`Processing player ${player.id} (${player.name})...`);
+            const foundPlayer = await PlayerService.getPlayer(player.id, true, player);
+            await PlayerService.trackScoreSaberPlayer(foundPlayer, now, player);
+            Logger.debug(`Successfully processed player ${player.id} (${player.name})`);
+            successCount++;
+          })();
+
+          await Promise.race([processPromise, timeoutPromise]);
+        } catch (error) {
+          Logger.error(`Failed to track player ${player.id} (${player.name}): ${error}`);
+          errorCount++;
+          // Continue processing other players even if one fails
         }
       }
+
+      Logger.info(`Completed page ${i}`);
     }
 
     Logger.info(
