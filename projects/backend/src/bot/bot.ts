@@ -4,6 +4,9 @@ import { isProduction } from "@ssr/common/utils/utils";
 import { ActivityType, AttachmentBuilder, EmbedBuilder } from "discord.js";
 import { Client } from "discordx";
 
+// Import all commands
+import "./commands/update-player-statistics";
+
 export const guildId = "1295984874942894100";
 export enum DiscordChannels {
   trackedPlayerLogs = "1295985197262569512",
@@ -44,11 +47,6 @@ export async function initDiscordBot() {
   client.on("interactionCreate", interaction => {
     client.executeInteraction(interaction);
   });
-
-  // Import commands
-  const commandsPath = isProduction() ? "./dist/bot/commands" : "./src/bot/commands";
-
-  await import(commandsPath);
 
   // Login
   await client.login(env.DISCORD_BOT_TOKEN);
