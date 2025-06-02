@@ -35,7 +35,6 @@ const client = new Client({
       },
     ],
   },
-  botGuilds: [client => client.guilds.cache.map(guild => guild.id)],
   silent: false,
 });
 
