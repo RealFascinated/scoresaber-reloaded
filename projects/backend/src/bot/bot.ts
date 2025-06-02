@@ -1,7 +1,7 @@
 import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
 import { isProduction } from "@ssr/common/utils/utils";
-import { ActivityType, AttachmentBuilder, EmbedBuilder } from "discord.js";
+import { ActivityType, AttachmentBuilder, EmbedBuilder, GatewayIntentBits } from "discord.js";
 import { Client } from "discordx";
 
 // Import all commands
@@ -19,7 +19,12 @@ export enum DiscordChannels {
 }
 
 const client = new Client({
-  intents: ["Guilds", "GuildMessages"],
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent,
+    GatewayIntentBits.GuildMembers,
+  ],
   presence: {
     status: "online",
     activities: [
@@ -38,18 +43,56 @@ client.once("ready", () => {
   Logger.info("Discord bot ready!");
 });
 
+// Add error handling for the client
+client.on("error", error => {
+  Logger.error("Discord client error:", error);
+});
+
+client.on("warn", warning => {
+  Logger.warn("Discord client warning:", warning);
+});
+
+client.on("debug", info => {
+  Logger.debug("Discord client debug:", info);
+});
+
 export async function initDiscordBot() {
   Logger.info("Initializing discord bot...");
 
   client.once("ready", async () => {
-    await client.initApplicationCommands();
+    try {
+      await client.initApplicationCommands();
+      Logger.info("Application commands initialized");
+    } catch (error) {
+      Logger.error("Failed to initialize application commands:", error);
+    }
   });
-  client.on("interactionCreate", interaction => {
-    client.executeInteraction(interaction);
+
+  client.on("interactionCreate", async interaction => {
+    try {
+      await client.executeInteraction(interaction);
+    } catch (error) {
+      Logger.error("Failed to execute interaction:", error);
+      try {
+        if (interaction.isRepliable()) {
+          await interaction.reply({
+            content: "An error occurred while processing your command. Please try again later.",
+            ephemeral: true,
+          });
+        }
+      } catch (replyError) {
+        Logger.error("Failed to send error reply:", replyError);
+      }
+    }
   });
 
   // Login
-  await client.login(env.DISCORD_BOT_TOKEN);
+  try {
+    await client.login(env.DISCORD_BOT_TOKEN);
+  } catch (error) {
+    Logger.error("Failed to login to Discord:", error);
+    throw error; // Re-throw to handle it in the application
+  }
 }
 
 /**
@@ -67,8 +110,8 @@ export async function logToChannel(channelId: DiscordChannels, embed: EmbedBuild
     if (channel != undefined && channel.isSendable()) {
       return await channel.send({ embeds: [embed] });
     }
-  } catch {
-    /* empty */
+  } catch (error) {
+    Logger.error(`Failed to send message to channel ${channelId}:`, error);
   }
   return undefined;
 }
@@ -103,6 +146,6 @@ export async function sendFile(
       });
     }
   } catch (error) {
-    Logger.error(`Error sending file to channel ${channelId}: ${error}`);
+    Logger.error(`Error sending file to channel ${channelId}:`, error);
   }
 }
