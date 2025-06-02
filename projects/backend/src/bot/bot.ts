@@ -28,6 +28,7 @@ const client = new Client({
       },
     ],
   },
+  silent: false,
 });
 
 client.once("ready", () => {
