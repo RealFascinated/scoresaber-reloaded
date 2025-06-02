@@ -684,8 +684,12 @@ export class PlayerService {
 
   /**
    * Updates the player statistics for all players.
+   *
+   * @param callback the callback that gets called when a page is fetched
    */
-  public static async updatePlayerStatistics() {
+  public static async updatePlayerStatistics(
+    callback?: (currentPage: number, totalPages: number) => void
+  ) {
     const now = new Date();
     const firstPage = await scoresaberService.lookupPlayers(1);
     if (firstPage == undefined) {
@@ -713,6 +717,8 @@ export class PlayerService {
           Logger.error(`Failed to fetch players on page ${i}, skipping page...`);
           continue;
         }
+
+        callback?.(i, pages);
 
         // Process players in parallel batches
         for (let k = 0; k < page.players.length; k += CONCURRENT_PLAYERS) {

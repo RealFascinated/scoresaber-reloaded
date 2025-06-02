@@ -1,3 +1,4 @@
+import { dirname, importx } from "@discordx/importer";
 import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
 import { isProduction } from "@ssr/common/utils/utils";
@@ -35,6 +36,15 @@ client.once("ready", () => {
 
 export async function initDiscordBot() {
   Logger.info("Initializing discord bot...");
+
+  client.once("ready", async () => {
+    await client.initApplicationCommands();
+  });
+  client.on("interactionCreate", interaction => {
+    client.executeInteraction(interaction);
+  });
+
+  await importx(`${dirname(import.meta.url)}/commands/**/*.{js,ts}`);
 
   // Login
   await client.login(env.DISCORD_BOT_TOKEN);
