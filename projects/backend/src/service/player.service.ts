@@ -688,7 +688,12 @@ export class PlayerService {
    * @param callback the callback that gets called when a page is fetched
    */
   public static async updatePlayerStatistics(
-    callback?: (currentPage: number, totalPages: number) => void
+    callback?: (
+      currentPage: number,
+      totalPages: number,
+      successCount: number,
+      errorCount: number
+    ) => void
   ) {
     const now = new Date();
     const firstPage = await scoresaberService.lookupPlayers(1);
@@ -703,6 +708,10 @@ export class PlayerService {
     // Process pages in batches to avoid overwhelming the system
     const BATCH_SIZE = 5; // Number of pages to process in parallel
     const CONCURRENT_PLAYERS = 20; // Number of players to process in parallel within each page
+    const PLAYER_TIMEOUT = 30000;
+
+    let successCount = 0;
+    let errorCount = 0;
 
     for (let i = 1; i <= pages; i += BATCH_SIZE) {
       const pagePromises = [];
@@ -715,30 +724,51 @@ export class PlayerService {
       for (const page of pageResults) {
         if (page == undefined) {
           Logger.error(`Failed to fetch players on page ${i}, skipping page...`);
+          errorCount++;
           continue;
         }
 
-        callback?.(i, pages);
+        callback?.(i, pages, successCount, errorCount);
+        Logger.info(`Processing page ${i} with ${page.players.length} players...`);
 
         // Process players in parallel batches
         for (let k = 0; k < page.players.length; k += CONCURRENT_PLAYERS) {
           const playerBatch = page.players.slice(k, k + CONCURRENT_PLAYERS);
           const playerPromises = playerBatch.map(async player => {
             try {
-              const foundPlayer = await PlayerService.getPlayer(player.id, true, player);
-              await PlayerService.trackScoreSaberPlayer(foundPlayer, now, player);
+              // Add timeout to player processing
+              const timeoutPromise = new Promise((_, reject) => {
+                setTimeout(
+                  () => reject(new Error(`Timeout processing player ${player.id}`)),
+                  PLAYER_TIMEOUT
+                );
+              });
+
+              const processPromise = (async () => {
+                const foundPlayer = await PlayerService.getPlayer(player.id, true, player);
+                await PlayerService.trackScoreSaberPlayer(foundPlayer, now, player);
+                Logger.debug(`Successfully processed player ${player.id}`);
+                successCount++;
+              })();
+
+              await Promise.race([processPromise, timeoutPromise]);
             } catch (error) {
               Logger.error(`Failed to track player ${player.id}: ${error}`);
+              errorCount++;
+              // Continue processing other players even if one fails
             }
           });
 
           await Promise.all(playerPromises);
+          Logger.info(`Completed batch of ${playerBatch.length} players`);
         }
       }
     }
 
     Logger.info(
-      `Finished tracking player statistics in ${(performance.now() - now.getTime()).toFixed(0)}ms`
+      `Finished tracking player statistics in ${(performance.now() - now.getTime()).toFixed(0)}ms\n` +
+        `Successfully processed: ${successCount} players\n` +
+        `Failed to process: ${errorCount} players`
     );
   }
 
