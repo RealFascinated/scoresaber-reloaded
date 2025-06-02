@@ -46,22 +46,8 @@ export async function initDiscordBot() {
     client.executeInteraction(interaction);
   });
 
-  // Import all command files using Bun's glob
-  const glob = new Bun.Glob("**/*.{js,ts}");
-  const commandsDir = isProduction()
-    ? `${dirname(import.meta.url)}/bot/commands`
-    : `${dirname(import.meta.url)}/commands`;
-
-  const commandFiles = await Array.fromAsync(
-    glob.scan({
-      cwd: commandsDir,
-      absolute: true,
-    })
-  );
-
-  for (const file of commandFiles) {
-    await import(file);
-  }
+  // Import commands
+  await import(`${dirname(import.meta.url)}/commands`);
 
   // Login
   await client.login(env.DISCORD_BOT_TOKEN);
