@@ -14,6 +14,7 @@ export enum ServiceCache {
   AdditionalScoreData = "additionalScoreData",
   Playlists = "playlists",
   Players = "players",
+  ScoreStats = "scoreStats",
 }
 
 export default class CacheService {

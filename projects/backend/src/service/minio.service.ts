@@ -12,6 +12,22 @@ const minioClient = new Client({
 
 export default class MinioService {
   /**
+   * Gets a file from Minio.
+   *
+   * @param bucket the bucket to get the file from
+   * @param filename the filename to get
+   * @returns the file
+   */
+  public static async getFile(bucket: MinioBucket, filename: string): Promise<Buffer> {
+    const data = await minioClient.getObject(getMinioBucketName(bucket), filename);
+    const chunks: Buffer[] = [];
+    for await (const chunk of data) {
+      chunks.push(chunk);
+    }
+    return Buffer.concat(chunks);
+  }
+
+  /**
    * Saves a file to Minio.
    *
    * @param bucket the bucket to save to

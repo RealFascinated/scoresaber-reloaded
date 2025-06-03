@@ -5,11 +5,6 @@ import {
   AdditionalScoreDataModel,
 } from "@ssr/common/model/additional-score-data/additional-score-data";
 import { PlayerDocument, PlayerModel } from "@ssr/common/model/player";
-import {
-  ScoreStats,
-  ScoreStatsDocument,
-  ScoreStatsModel,
-} from "@ssr/common/model/score-stats/score-stats";
 import { removeObjectFields } from "@ssr/common/object.util";
 import { beatLeaderService } from "@ssr/common/service/impl/beatleader";
 import { ScoreStatsToken } from "@ssr/common/types/token/beatleader/score-stats/score-stats";
@@ -17,12 +12,12 @@ import { BeatLeaderScoreToken } from "@ssr/common/types/token/beatleader/score/s
 import { BeatLeaderScoreImprovementToken } from "@ssr/common/types/token/beatleader/score/score-improvement";
 import Request from "@ssr/common/utils/request";
 import { isProduction } from "@ssr/common/utils/utils";
+import { DiscordChannels, logToChannel } from "../bot/bot";
 import { fetchWithCache } from "../common/cache.util";
+import { createGenericEmbed } from "../common/discord/embed";
 import CacheService, { ServiceCache } from "./cache.service";
 import MinioService from "./minio.service";
 import { PlayerService } from "./player.service";
-import { DiscordChannels, logToChannel } from "../bot/bot";
-import { createGenericEmbed } from "../common/discord/embed";
 
 export default class BeatLeaderService {
   /**
@@ -211,14 +206,13 @@ export default class BeatLeaderService {
   private static async trackScoreStats(
     scoreId: number,
     scoreStats: ScoreStatsToken
-  ): Promise<ScoreStatsDocument> {
-    return await ScoreStatsModel.create({
-      _id: scoreId,
-      hitTracker: scoreStats.hitTracker,
-      accuracyTracker: scoreStats.accuracyTracker,
-      winTracker: scoreStats.winTracker,
-      scoreGraphTracker: scoreStats.scoreGraphTracker,
-    });
+  ): Promise<ScoreStatsToken> {
+    await MinioService.saveFile(
+      MinioBucket.BeatLeaderScoreStats,
+      `${scoreId}.json`,
+      Buffer.from(JSON.stringify(scoreStats))
+    );
+    return scoreStats;
   }
 
   /**
@@ -226,12 +220,22 @@ export default class BeatLeaderService {
    *
    * @param scoreId the id of the score
    */
-  public static async getScoreStats(scoreId: number): Promise<ScoreStats | undefined> {
+  public static async getScoreStats(scoreId: number): Promise<ScoreStatsToken | undefined> {
     const additionalScoreData = await this.getAdditionalScoreData(scoreId);
 
-    let scoreStats: ScoreStats | null = await ScoreStatsModel.findOne({ _id: scoreId }).lean();
+    let scoreStats: ScoreStatsToken | null = await fetchWithCache(
+      CacheService.getCache(ServiceCache.ScoreStats),
+      `score-stats:${scoreId}`,
+      async () => {
+        const file = await MinioService.getFile(
+          MinioBucket.BeatLeaderScoreStats,
+          `${scoreId}.json`
+        );
+        return JSON.parse(file.toString()) as ScoreStatsToken;
+      }
+    );
     if (scoreStats == null) {
-      scoreStats = (await beatLeaderService.lookupScoreStats(scoreId)) as ScoreStats;
+      scoreStats = (await beatLeaderService.lookupScoreStats(scoreId)) as ScoreStatsToken;
       // Only track score stats if the player exists
       if (
         scoreStats &&
@@ -245,7 +249,7 @@ export default class BeatLeaderService {
     if (scoreStats == null) {
       return undefined;
     }
-    return this.scoreStatsToObject(scoreStats);
+    return scoreStats;
   }
 
   /**
@@ -326,18 +330,5 @@ export default class BeatLeaderService {
         "songScore",
       ]),
     } as AdditionalScoreData;
-  }
-
-  /**
-   * Converts a database score stats to a ScoreStats.
-   *
-   * @param scoreStats the score stats to convert
-   * @returns the converted score stats
-   * @private
-   */
-  private static scoreStatsToObject(scoreStats: ScoreStats): ScoreStats {
-    return {
-      ...removeObjectFields<ScoreStats>(scoreStats, ["_id", "__v"]),
-    } as ScoreStats;
   }
 }
