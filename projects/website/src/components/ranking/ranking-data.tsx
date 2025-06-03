@@ -2,8 +2,8 @@
 
 import Card from "@/components/card";
 import CountryFlag from "@/components/country-flag";
-import SimplePagination from "@/components/simple-pagination";
 import { PlayerRanking } from "@/components/ranking/player-ranking";
+import SimplePagination from "@/components/simple-pagination";
 import { Switch } from "@/components/ui/switch";
 import useDatabase from "@/hooks/use-database";
 import { useIsMobile } from "@/hooks/use-is-mobile";
@@ -12,11 +12,11 @@ import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { normalizedRegionName } from "@ssr/common/utils/region-utils";
 import { useQuery } from "@tanstack/react-query";
 import { useLiveQuery } from "dexie-react-hooks";
+import { LinkIcon } from "lucide-react";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { LoadingIcon } from "../loading-icon";
 import { Button } from "../ui/button";
-import { LinkIcon } from "lucide-react";
-import Link from "next/link";
 
 type RankingDataProps = {
   initialPage: number;

@@ -1,13 +1,12 @@
 import { DetailType } from "@ssr/common/detail-type";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
+import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
 import { MapDifficulty } from "@ssr/common/score/map-difficulty";
 import { MapCharacteristic } from "@ssr/common/types/map-characteristic";
 import { t } from "elysia";
 import { Controller, Get } from "elysia-decorators";
 import SuperJSON, { SuperJSONResult } from "superjson";
-import { Swagger } from "../common/swagger";
 import BeatSaverService from "../service/beatsaver.service";
-import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
 
 @Controller("/beatsaver")
 export default class BeatSaverController {
@@ -23,15 +22,6 @@ export default class BeatSaverController {
       type: t.Optional(t.Union([t.Literal("basic"), t.Literal("full")], { default: "basic" })),
       superJson: t.Optional(t.Boolean()),
     }),
-    detail: {
-      responses: {
-        200: {
-          description: "The beatsaver map.",
-        },
-        ...Swagger.responses.beatsaverMapNotFound,
-      },
-      description: "Lookup a beatsaver map",
-    },
   })
   public async getMap({
     params: { hash, difficulty, characteristic },

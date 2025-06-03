@@ -3,8 +3,8 @@
 import { DatasetConfig } from "@/common/chart/types";
 import { Colors } from "@/common/colors";
 import GenericChart from "@/components/chart/generic-chart";
-import StatValue from "@/components/stat-value";
 import SimpleTooltip from "@/components/simple-tooltip";
+import StatValue from "@/components/stat-value";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 

@@ -1,5 +1,5 @@
-import StatValue from "@/components/stat-value";
 import SimpleTooltip from "@/components/simple-tooltip";
+import StatValue from "@/components/stat-value";
 import { AccBadges } from "@ssr/common/player/acc-badges";
 import { getAccDetails, getScoreBadgeFromName } from "@ssr/common/utils/song-utils";
 

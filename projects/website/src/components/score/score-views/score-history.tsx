@@ -1,8 +1,8 @@
 "use client";
 
-import PaginationComponent from "@/components/simple-pagination";
 import { LoadingIcon } from "@/components/loading-icon";
 import Score from "@/components/score/score";
+import PaginationComponent from "@/components/simple-pagination";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { Pagination } from "@ssr/common/pagination";

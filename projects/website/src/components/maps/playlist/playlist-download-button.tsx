@@ -2,7 +2,6 @@
 
 import { downloadFile } from "@/common/browser-utils";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
 
 type PlaylistDownloadButtonProps = {
   /**

@@ -24,7 +24,7 @@ export const generateChartAxis = (
   },
   reverse,
   min,
-  max
+  max,
 });
 
 export const generateChartDataset = (

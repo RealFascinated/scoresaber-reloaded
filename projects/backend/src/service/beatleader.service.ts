@@ -82,7 +82,10 @@ export default class BeatLeaderService {
    *
    * @param score the score to track
    */
-  public static async trackBeatLeaderScore(score: BeatLeaderScoreToken) {
+  public static async trackBeatLeaderScore(
+    score: BeatLeaderScoreToken,
+    isTop50GlobalScore?: boolean
+  ) {
     const before = Date.now();
 
     const { playerId, player: scorePlayer, leaderboard } = score;
@@ -107,8 +110,8 @@ export default class BeatLeaderService {
     // Only save replays in production
     let savedReplayId: string | undefined;
     if (isProduction()) {
-      // Cache replay for this score
-      if (player && player.trackReplays) {
+      // Cache replay for this score if the player is allowed to track replays or if the score is a top 50 global score
+      if (player && (player.trackReplays || isTop50GlobalScore)) {
         try {
           const replayId = `${score.id}-${playerId}-${leaderboard.difficulty.difficultyName}-${leaderboard.difficulty.modeName}-${leaderboard.song.hash.toUpperCase()}.bsor`;
           const replayData = await Request.get<ArrayBuffer>(

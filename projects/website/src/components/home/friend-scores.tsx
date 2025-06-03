@@ -7,9 +7,9 @@ import { useQuery } from "@tanstack/react-query";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useState } from "react";
 import Card from "../card";
-import SimplePagination from "../simple-pagination";
 import { LoadingIcon } from "../loading-icon";
 import Score from "../score/score";
+import SimplePagination from "../simple-pagination";
 
 export function FriendScores() {
   const isMobile = useIsMobile();

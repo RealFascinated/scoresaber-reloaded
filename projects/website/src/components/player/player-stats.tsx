@@ -1,6 +1,6 @@
 import PpBoundaryStat from "@/components/player/chart/pp-boundary";
-import StatValue from "@/components/stat-value";
 import SimpleTooltip from "@/components/simple-tooltip";
+import StatValue from "@/components/stat-value";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { getScoreSaberRoles } from "@ssr/common/utils/scoresaber.util";

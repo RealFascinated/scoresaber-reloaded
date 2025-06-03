@@ -149,6 +149,10 @@ export class ScoreService {
     player: ScoreSaberPlayerToken,
     beatLeaderScore?: BeatLeaderScoreToken
   ) {
+    const top50Scores = await ScoreService.getTopScores(50, "all");
+    const lowestPp = top50Scores.reduce((min, score) => Math.min(min, score.score.pp), Infinity);
+    const isTop50GlobalScore = scoreSaberToken.pp > lowestPp;
+
     // Track ScoreSaber score
     await ScoreService.trackScoreSaberScore(scoreSaberToken, leaderboardToken, player);
     await PlayerService.updatePlayerScoresSet({
@@ -158,7 +162,7 @@ export class ScoreService {
 
     // Track BeatLeader score if available
     if (beatLeaderScore) {
-      await BeatLeaderService.trackBeatLeaderScore(beatLeaderScore);
+      await BeatLeaderService.trackBeatLeaderScore(beatLeaderScore, isTop50GlobalScore);
     }
 
     // Notify
@@ -166,19 +170,22 @@ export class ScoreService {
       { score: scoreSaberToken, leaderboard: leaderboardToken },
       player,
       "scoreFloodGate",
-      beatLeaderScore
+      beatLeaderScore,
+      isTop50GlobalScore
     );
     await ScoreSaberService.notifyScore(
       { score: scoreSaberToken, leaderboard: leaderboardToken },
       player,
       "numberOne",
-      beatLeaderScore
+      beatLeaderScore,
+      isTop50GlobalScore
     );
     await ScoreSaberService.notifyScore(
       { score: scoreSaberToken, leaderboard: leaderboardToken },
       player,
       "top50AllTime",
-      beatLeaderScore
+      beatLeaderScore,
+      isTop50GlobalScore
     );
 
     // Update metric

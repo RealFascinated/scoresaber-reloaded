@@ -4,7 +4,6 @@ import { MapCharacteristic } from "@ssr/common/types/map-characteristic";
 import { t } from "elysia";
 import { Controller, Get } from "elysia-decorators";
 import SuperJSON from "superjson";
-import { Swagger } from "../common/swagger";
 import LeaderboardService from "../service/leaderboard.service";
 
 @Controller("/leaderboard")
@@ -19,15 +18,6 @@ export default class LeaderboardController {
       type: t.Optional(t.Union([t.Literal("basic"), t.Literal("full")], { default: "basic" })),
       superJson: t.Optional(t.Boolean({ default: false })),
     }),
-    detail: {
-      responses: {
-        200: {
-          description: "The leaderboard.",
-        },
-        ...Swagger.responses.leaderboardNotFound,
-      },
-      description: "Lookup a leaderboard",
-    },
   })
   public async getLeaderboard({
     params: { id },
@@ -57,15 +47,6 @@ export default class LeaderboardController {
       type: t.Optional(t.Union([t.Literal("basic"), t.Literal("full")], { default: "basic" })),
       superJson: t.Optional(t.Boolean({ default: false })),
     }),
-    detail: {
-      responses: {
-        200: {
-          description: "The leaderboard.",
-        },
-        ...Swagger.responses.leaderboardNotFound,
-      },
-      description: "Lookup a leaderboard",
-    },
   })
   public async getLeaderboardByHash({
     params: { id, difficulty, characteristic },

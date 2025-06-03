@@ -4,15 +4,14 @@ import { PlayerStatisticHistory } from "@ssr/common/player/player-statistic-hist
 import { PlayerTrackedSince } from "@ssr/common/player/player-tracked-since";
 import { AroundPlayerResponse } from "@ssr/common/response/around-player-response";
 import { PlayedMapsCalendarResponse } from "@ssr/common/response/played-maps-calendar-response";
+import { PlayerRankedPpsResponse } from "@ssr/common/response/player-ranked-pps-response";
 import { PpBoundaryResponse } from "@ssr/common/response/pp-boundary-response";
 import { getDaysAgoDate } from "@ssr/common/utils/time-utils";
 import { t } from "elysia";
 import { Controller, Get, Post } from "elysia-decorators";
 import SuperJSON from "superjson";
-import { Swagger } from "../common/swagger";
 import { PlayerService } from "../service/player.service";
 import ScoreSaberService from "../service/scoresaber.service";
-import { PlayerRankedPpsResponse } from "@ssr/common/response/player-ranked-pps-response";
 
 @Controller("/player")
 export default class PlayerController {
@@ -27,15 +26,6 @@ export default class PlayerController {
       type: t.Optional(t.Union([t.Literal("full"), t.Literal("basic")], { default: "basic" })),
       superJson: t.Optional(t.Boolean({ default: false })),
     }),
-    detail: {
-      responses: {
-        200: {
-          description: "The player.",
-        },
-        ...Swagger.responses.playerNotFound,
-      },
-      description: "Lookup a player",
-    },
   })
   public async getPlayer({
     params: { id },
@@ -81,15 +71,6 @@ export default class PlayerController {
     params: t.Object({
       id: t.String({ required: true }),
     }),
-    detail: {
-      responses: {
-        200: {
-          description: "Player successfully tracked.",
-        },
-        ...Swagger.responses.playerNotFound,
-      },
-      description: "Track a new player.",
-    },
   })
   public async trackPlayer({
     params: { id },
@@ -105,15 +86,6 @@ export default class PlayerController {
     params: t.Object({
       id: t.String({ required: true }),
     }),
-    detail: {
-      responses: {
-        200: {
-          description: "The tracked status of the player.",
-        },
-        ...Swagger.responses.playerNotFound,
-      },
-      description: "Lookup a player's tracked status.",
-    },
   })
   public async getTrackedStatus({
     params: { id },
@@ -142,15 +114,6 @@ export default class PlayerController {
       id: t.String({ required: true }),
       type: t.String({ required: true }),
     }),
-    detail: {
-      responses: {
-        200: {
-          description: "The player's around another player.",
-        },
-        ...Swagger.responses.playerNotFound,
-      },
-      description: "Lookup player's around another player.",
-    },
   })
   public async getPlayersAround({
     params: { id, type },
@@ -169,15 +132,6 @@ export default class PlayerController {
       id: t.String({ required: true }),
       boundary: t.Number({ maximum: 100, minimum: 1 }),
     }),
-    detail: {
-      responses: {
-        200: {
-          description: "PP boundaries for a player.",
-        },
-        ...Swagger.responses.playerNotFound,
-      },
-      description: "Lookup a player's pp boundaries",
-    },
   })
   public async getPpBoundary({
     params: { id, boundary },
@@ -198,15 +152,6 @@ export default class PlayerController {
       year: t.Number({ required: true }),
       month: t.Number({ required: true }),
     }),
-    detail: {
-      responses: {
-        200: {
-          description: "The player's scores set calendar.",
-        },
-        ...Swagger.responses.playerNotFound,
-      },
-      description: "Lookup a player's calender",
-    },
   })
   public async getScoreCalendar({
     params: { id, year, month },
@@ -225,15 +170,6 @@ export default class PlayerController {
     query: t.Object({
       superJson: t.Optional(t.Boolean({ default: false })),
     }),
-    detail: {
-      responses: {
-        200: {
-          description: "Score chart data for a player.",
-        },
-        ...Swagger.responses.playerNotFound,
-      },
-      description: "Lookup a player's score chart data",
-    },
   })
   public async getPlayerStarsChartData({
     params: { id },
@@ -252,15 +188,6 @@ export default class PlayerController {
     params: t.Object({
       id: t.String({ required: true }),
     }),
-    detail: {
-      responses: {
-        200: {
-          description: "The player's ranked pps.",
-        },
-        ...Swagger.responses.playerNotFound,
-      },
-      description: "Lookup a player's ranked pps",
-    },
   })
   public async getPlayerRankedPps({
     params: { id },

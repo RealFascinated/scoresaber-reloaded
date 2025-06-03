@@ -1,8 +1,8 @@
 import { ScoreSaberScore } from "src/model/score/impl/scoresaber-score";
-import { scoresaberService } from "../service/impl/scoresaber";
 import { HMD } from "../hmds";
 import ScoreSaberPlayer from "../player/impl/scoresaber-player";
 import { MapDifficulty } from "../score/map-difficulty";
+import { scoresaberService } from "../service/impl/scoresaber";
 import { ScoreSaberLeaderboardPlayerInfoToken } from "../types/token/scoresaber/leaderboard-player-info";
 import { ScoreSaberPlayerToken } from "../types/token/scoresaber/player";
 

@@ -33,6 +33,7 @@ import CacheService, { ServiceCache } from "./cache.service";
 import LeaderboardService from "./leaderboard.service";
 import { PlayerService } from "./player.service";
 import { ScoreService } from "./score/score.service";
+
 export default class ScoreSaberService {
   /**
    * Notifies the number one score in Discord.
@@ -44,7 +45,8 @@ export default class ScoreSaberService {
     playerScore: ScoreSaberPlayerScoreToken,
     player: ScoreSaberPlayerToken,
     mode: "numberOne" | "top50AllTime" | "scoreFloodGate",
-    beatLeaderScore?: BeatLeaderScoreToken
+    beatLeaderScore?: BeatLeaderScoreToken,
+    isTop50GlobalScore?: boolean
   ) {
     // Only notify in production
     if (!isProduction()) {
@@ -86,19 +88,15 @@ export default class ScoreSaberService {
         `${playerInfo.name} just set a #1!`
       );
       // No need to check this for all scores, so we only check if the score is top 50
-    } else if (mode === "top50AllTime" && score.rank <= 50) {
-      const top50Scores = await ScoreService.getTopScores(50, "all");
-      const lowestPp = top50Scores.reduce((min, score) => Math.min(min, score.score.pp), Infinity);
-      if (score.pp > lowestPp) {
-        await sendScoreNotification(
-          DiscordChannels.top50Feed,
-          score,
-          leaderboard,
-          player,
-          beatLeaderScore,
-          `${playerInfo.name} just set a new top 50 score!`
-        );
-      }
+    } else if (mode === "top50AllTime" && isTop50GlobalScore) {
+      await sendScoreNotification(
+        DiscordChannels.top50Feed,
+        score,
+        leaderboard,
+        player,
+        beatLeaderScore,
+        `${playerInfo.name} just set a new top 50 score!`
+      );
     }
   }
 

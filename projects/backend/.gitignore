@@ -32,7 +32,6 @@ yarn-error.log*
 
 # vercel
 .vercel
-
 **/*.trace
 **/*.zip
 **/*.tar.gz

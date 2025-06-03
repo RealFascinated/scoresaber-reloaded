@@ -18,9 +18,6 @@ export default class AppController {
   @Get("/health", {
     config: {},
     tags: ["app"],
-    detail: {
-      description: "Get the health of the app.",
-    },
   })
   public async getHealth() {
     return {
@@ -31,9 +28,6 @@ export default class AppController {
   @Get("/statistics", {
     config: {},
     tags: ["app"],
-    detail: {
-      description: "Get the statistics for the app.",
-    },
   })
   public async getStatistics() {
     return await AppService.getAppStatistics();

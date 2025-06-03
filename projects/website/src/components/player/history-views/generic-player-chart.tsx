@@ -28,7 +28,12 @@ type Props = {
   daysAmount?: number;
 };
 
-export default function GenericPlayerChart({ id, statisticHistory, datasetConfig, daysAmount = 50 }: Props) {
+export default function GenericPlayerChart({
+  id,
+  statisticHistory,
+  datasetConfig,
+  daysAmount = 50,
+}: Props) {
   // Check if player statistics are available
   if (!statisticHistory || Object.keys(statisticHistory).length === 0) {
     return (

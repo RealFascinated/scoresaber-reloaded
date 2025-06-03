@@ -6,18 +6,24 @@ import SimpleTooltip from "@/components/simple-tooltip";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { CalendarIcon, GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerStatisticHistory } from "@ssr/common/player/player-statistic-history";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { formatDate, getDaysAgoDate } from "@ssr/common/utils/time-utils";
 import { useQuery } from "@tanstack/react-query";
-import { differenceInDays, addMonths, subMonths, subYears } from "date-fns";
+import { differenceInDays, subMonths, subYears } from "date-fns";
 import { SwordIcon, TrendingUpIcon } from "lucide-react";
 import dynamic from "next/dynamic";
 import { ReactElement, ReactNode, useState } from "react";
 import { DateRange } from "react-day-picker";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 function Loading() {
   return (
@@ -219,7 +225,7 @@ export default function PlayerViews({ player }: PlayerChartsProps) {
                 <PopoverContent className="w-auto p-0" align="end">
                   <div className="flex flex-col space-y-2 p-2">
                     <Select
-                      onValueChange={(value) => {
+                      onValueChange={value => {
                         const preset = datePresets.find(p => p.label === value);
                         if (preset) {
                           setDateRange(preset.value());
@@ -230,7 +236,7 @@ export default function PlayerViews({ player }: PlayerChartsProps) {
                         <SelectValue placeholder="Quick Select" />
                       </SelectTrigger>
                       <SelectContent position="popper">
-                        {datePresets.map((preset) => (
+                        {datePresets.map(preset => (
                           <SelectItem key={preset.label} value={preset.label}>
                             {preset.label}
                           </SelectItem>

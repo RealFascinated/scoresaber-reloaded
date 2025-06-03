@@ -14,6 +14,7 @@ import { BeatSaverMapResponse } from "../response/beatsaver-map-response";
 import { LeaderboardResponse } from "../response/leaderboard-response";
 import LeaderboardScoresResponse from "../response/leaderboard-scores-response";
 import { PlayedMapsCalendarResponse } from "../response/played-maps-calendar-response";
+import { PlayerRankedPpsResponse } from "../response/player-ranked-pps-response";
 import { PlayerScoresChartResponse } from "../response/player-scores-chart";
 import PlayerScoresResponse from "../response/player-scores-response";
 import { PpBoundaryResponse } from "../response/pp-boundary-response";
@@ -23,7 +24,6 @@ import { ScoreSort } from "../score/score-sort";
 import { AroundPlayer } from "../types/around-player";
 import { MapCharacteristic } from "../types/map-characteristic";
 import Request from "./request";
-import { PlayerRankedPpsResponse } from "../response/player-ranked-pps-response";
 
 class SSRApi {
   /**

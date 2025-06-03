@@ -1,10 +1,10 @@
 "use client";
 
 import Card from "@/components/card";
-import SimplePagination from "@/components/simple-pagination";
 import { LoadingIcon } from "@/components/loading-icon";
 import { useMapFilter } from "@/components/providers/maps/map-filter-provider";
 import ScoreSongInfo from "@/components/score/score-song-info";
+import SimplePagination from "@/components/simple-pagination";
 import SimpleTooltip from "@/components/simple-tooltip";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import usePageNavigation from "@/hooks/use-page-navigation";

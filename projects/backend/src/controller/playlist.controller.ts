@@ -7,7 +7,6 @@ import {
   generateCustomRankedPlaylistImage,
   generateSnipePlaylistImage,
 } from "../common/playlist.util";
-import { Swagger } from "../common/swagger";
 import PlaylistService, { SnipeType } from "../service/playlist.service";
 import ScoreSaberService from "../service/scoresaber.service";
 
@@ -23,15 +22,6 @@ export default class PlaylistController {
       config: t.Optional(t.String()),
       download: t.Optional(t.Boolean()),
     }),
-    detail: {
-      responses: {
-        200: {
-          description: "The playlist.",
-        },
-        ...Swagger.responses.playlistNotFound,
-      },
-      description: "Lookup a playlist",
-    },
   })
   public async getPlaylist({
     params: { id },
@@ -67,15 +57,6 @@ export default class PlaylistController {
       type: t.Optional(t.String({ allowedValues: ["top", "recent"] })),
       settings: t.Optional(t.String()),
     }),
-    detail: {
-      responses: {
-        200: {
-          description: "The snipe playlist.",
-        },
-        ...Swagger.responses.playerNotFound,
-      },
-      description: "Creates a snipe playlist",
-    },
   })
   public async getSnipePlaylist({
     query: { user, toSnipe, type, settings },
@@ -103,15 +84,6 @@ export default class PlaylistController {
       toSnipe: t.String({ required: true }),
       settings: t.Optional(t.String()),
     }),
-    detail: {
-      responses: {
-        200: {
-          description: "The snipe playlist image preview.",
-        },
-        ...Swagger.responses.playerNotFound,
-      },
-      description: "Gets the snipe playlist image preview.",
-    },
   })
   public async getSnipePlaylistImagePreview({
     query: { toSnipe, settings },
@@ -136,15 +108,6 @@ export default class PlaylistController {
     query: t.Object({
       settings: t.Optional(t.String()),
     }),
-    detail: {
-      responses: {
-        200: {
-          description: "The custom ranked playlist image preview.",
-        },
-        ...Swagger.responses.playerNotFound,
-      },
-      description: "Gets the custom ranked playlist image preview.",
-    },
   })
   public async getCustomRankedPlaylistImagePreview({
     query: { settings },

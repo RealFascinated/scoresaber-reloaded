@@ -937,6 +937,7 @@ export class PlayerService {
 
     return badges;
   }
+
   /**
    * Gets the player's statistic history.
    *
