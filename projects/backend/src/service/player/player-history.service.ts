@@ -87,42 +87,46 @@ export class PlayerHistoryService {
       await this.seedPlayerHistory(foundPlayer, player);
     }
 
-    // Update current day's statistics
-    let history = foundPlayer.getHistoryByDate(trackTime);
-    if (history == undefined) {
-      history = {}; // Initialize if history is not found
+    // Only update the history if the player has seeded scores
+    if (foundPlayer.seededScores) {
+      // Update current day's statistics
+      let history = foundPlayer.getHistoryByDate(trackTime);
+      if (history == undefined) {
+        history = {}; // Initialize if history is not found
+      }
+
+      const scoreStats = player.scoreStats;
+      const accuracies = await PlayerAccuracyService.getPlayerAverageAccuracies(foundPlayer.id);
+
+      // Set the history data
+      history.pp = player.pp;
+      history.countryRank = player.countryRank;
+      history.rank = player.rank;
+      history.accuracy = {
+        ...history.accuracy,
+        averageRankedAccuracy: scoreStats.averageRankedAccuracy,
+        averageUnrankedAccuracy: accuracies.unrankedAccuracy,
+        averageAccuracy: accuracies.averageAccuracy,
+      };
+      history.scores = {
+        rankedScores: 0,
+        unrankedScores: 0,
+        ...history.scores,
+        totalScores: scoreStats.totalPlayCount,
+        totalRankedScores: scoreStats.rankedPlayCount,
+      };
+      history.score = {
+        ...history.score,
+        totalScore: scoreStats.totalScore,
+        totalRankedScore: scoreStats.totalRankedScore,
+      };
+
+      foundPlayer.setStatisticHistory(trackTime, history);
+      foundPlayer.sortStatisticHistory();
+      foundPlayer.markModified("statisticHistory");
     }
 
-    const scoreStats = player.scoreStats;
-    const accuracies = await PlayerAccuracyService.getPlayerAverageAccuracies(foundPlayer.id);
-
-    // Set the history data
-    history.pp = player.pp;
-    history.countryRank = player.countryRank;
-    history.rank = player.rank;
-    history.accuracy = {
-      ...history.accuracy,
-      averageRankedAccuracy: scoreStats.averageRankedAccuracy,
-      averageUnrankedAccuracy: accuracies.unrankedAccuracy,
-      averageAccuracy: accuracies.averageAccuracy,
-    };
-    history.scores = {
-      rankedScores: 0,
-      unrankedScores: 0,
-      ...history.scores,
-      totalScores: scoreStats.totalPlayCount,
-      totalRankedScores: scoreStats.rankedPlayCount,
-    };
-    history.score = {
-      ...history.score,
-      totalScore: scoreStats.totalScore,
-      totalRankedScore: scoreStats.totalRankedScore,
-    };
-
-    foundPlayer.setStatisticHistory(trackTime, history);
-    foundPlayer.sortStatisticHistory();
     foundPlayer.lastTracked = new Date();
-    foundPlayer.markModified("statisticHistory");
 
     await foundPlayer.save();
     Logger.info(
