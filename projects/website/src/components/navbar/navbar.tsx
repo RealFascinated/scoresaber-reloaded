@@ -88,7 +88,7 @@ export default function Navbar() {
             width={24}
             height={24}
             className="size-6"
-            src="/assets/logos/scoresaber.png"
+            src="https://cdn.fascinated.cc/assets/logos/scoresaber.png"
             alt="ScoreSaber Logo"
           />
           <h1 className="hidden md:flex text-lg font-bold text-ssr">SSR</h1>

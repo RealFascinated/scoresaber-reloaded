@@ -84,7 +84,13 @@ const socialLinks: SocialLinkType[] = [
   },
   {
     name: "Discord",
-    logo: <img className="size-6 lg:size-7" src="/assets/logos/discord.svg" alt="Discord Logo" />,
+    logo: (
+      <img
+        className="size-6 lg:size-7"
+        src="https://cdn.fascinated.cc/assets/logos/discord.svg"
+        alt="Discord Logo"
+      />
+    ),
     href: "https://discord.gg/kmNfWGA4A8",
   },
   {
@@ -123,7 +129,11 @@ export default function Footer({
                 href="/"
                 draggable={false}
               >
-                <img className="size-9" src="/assets/logos/scoresaber.png" alt="Scoresaber Logo" />
+                <img
+                  className="size-9"
+                  src="https://cdn.fascinated.cc/assets/logos/scoresaber.png"
+                  alt="Scoresaber Logo"
+                />
                 <h1 className="text-xl font-bold text-pp">ScoreSaber Reloaded</h1>
               </Link>
               <p className="max-w-md text-sm opacity-85">

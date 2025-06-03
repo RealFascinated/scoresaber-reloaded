@@ -78,7 +78,7 @@ function AppPreview() {
       <BorderBeam colorFrom="#6773ff" colorTo="#4858ff" />
       <img
         className="w-full h-full border-4 border-pp/20 rounded-2xl"
-        src="/assets/home/app-preview.png"
+        src="https://cdn.fascinated.cc/assets/home/app-preview.png"
         alt="App Preview"
         draggable={false}
       />

@@ -11,7 +11,11 @@ type NotFoundProps = {
 export default function NotFound({ title, description }: NotFoundProps) {
   return (
     <div className="flex flex-col items-center gap-6">
-      <img src="/assets/get-real-beat-saber.gif" alt="404" className="h-[250px]" />
+      <img
+        src="https://cdn.fascinated.cc/assets/get-real-beat-saber.gif"
+        alt="404"
+        className="h-[250px]"
+      />
 
       <div className="flex flex-col items-center gap-2 text-center">
         <h1 className="text-3xl font-bold text-red-400">{title ?? "Not Found"}</h1>

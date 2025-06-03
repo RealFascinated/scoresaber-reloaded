@@ -20,7 +20,7 @@ export default function DataCollection() {
       <div className="max-w-[900px]">
         <img
           className="w-full h-full rounded-2xl border border-ssr/20"
-          src="/assets/home/data-collection.png"
+          src="https://cdn.fascinated.cc/assets/home/data-collection.png"
           alt="Data Collection"
           draggable={false}
         />

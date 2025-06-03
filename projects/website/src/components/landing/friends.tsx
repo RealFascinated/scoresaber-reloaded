@@ -28,7 +28,7 @@ export default function Friends() {
         <div className={cn("relative max-w-[900px] z-20 overflow-hidden")}>
           <img
             className="w-full h-full rounded-2xl border border-purple-600/20"
-            src="/assets/home/friends.png"
+            src="https://cdn.fascinated.cc/assets/home/friends.png"
             alt="Friends"
             draggable={false}
           />
