@@ -1,4 +1,4 @@
-import { prop } from "@typegoose/typegoose";
+import { modelOptions, prop, Severity } from "@typegoose/typegoose";
 import { type MapDifficulty } from "../../score/map-difficulty";
 import { Modifier } from "../../score/modifier";
 import { type MapCharacteristic } from "../../types/map-characteristic";
@@ -7,6 +7,9 @@ import { AdditionalScoreData } from "../additional-score-data/additional-score-d
 /**
  * The model for a score.
  */
+@modelOptions({
+  options: { allowMixed: Severity.ALLOW },
+})
 export default class Score {
   /**
    * The internal score id.

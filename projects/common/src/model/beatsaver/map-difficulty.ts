@@ -1,6 +1,9 @@
-import { prop } from "@typegoose/typegoose";
+import { modelOptions, prop, Severity } from "@typegoose/typegoose";
 import { type MapDifficulty } from "../../score/map-difficulty";
 
+@modelOptions({
+  options: { allowMixed: Severity.ALLOW },
+})
 export default class BeatSaverMapDifficulty {
   /**
    * The NJS of this difficulty.

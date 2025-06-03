@@ -1,8 +1,11 @@
-import { Prop } from "@typegoose/typegoose";
+import { modelOptions, Prop, Severity } from "@typegoose/typegoose";
 import { type Controllers } from "../controllers";
 import Score from "../score";
 import { ScoreSaberPreviousScoreOverview } from "./scoresaber-score";
 
+@modelOptions({
+  options: { allowMixed: Severity.ALLOW },
+})
 export class ScoreSaberScoreBase extends Score {
   /**
    * The score's id.

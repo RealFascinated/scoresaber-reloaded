@@ -1,5 +1,8 @@
-import { prop } from "@typegoose/typegoose";
+import { modelOptions, prop, Severity } from "@typegoose/typegoose";
 
+@modelOptions({
+  options: { allowMixed: Severity.ALLOW },
+})
 export default class BeatSaverMapMetadata {
   /**
    * The bpm of the song.

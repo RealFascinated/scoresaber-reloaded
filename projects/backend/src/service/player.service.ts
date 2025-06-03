@@ -724,29 +724,75 @@ export class PlayerService {
       callback?.(i, pages, successCount, errorCount);
       Logger.info(`Processing page ${i} with ${page.players.length} players...`);
 
+      // Separate players into seeded and unseeded
+      const seededPlayers: typeof page.players = [];
+      const unseededPlayers: typeof page.players = [];
+
+      // Check each player's seeding status
       for (const player of page.players) {
-        try {
-          // Add timeout to player processing
-          const timeoutPromise = new Promise((_, reject) => {
-            setTimeout(
-              () => reject(new Error(`Timeout processing player ${player.id}`)),
-              PLAYER_TIMEOUT
-            );
-          });
+        const foundPlayer = await PlayerModel.findById(player.id);
+        if (foundPlayer?.seededScores) {
+          seededPlayers.push(player);
+        } else {
+          unseededPlayers.push(player);
+        }
+      }
 
-          const processPromise = (async () => {
-            Logger.debug(`Processing player ${player.id} (${player.name})...`);
-            const foundPlayer = await PlayerService.getPlayer(player.id, true, player);
-            await PlayerService.trackScoreSaberPlayer(foundPlayer, now, player);
-            Logger.debug(`Successfully processed player ${player.id} (${player.name})`);
-            successCount++;
-          })();
+      // Process seeded players in parallel
+      if (seededPlayers.length > 0) {
+        Logger.info(`Processing ${seededPlayers.length} seeded players in parallel...`);
+        await Promise.all(
+          seededPlayers.map(async player => {
+            try {
+              const timeoutPromise = new Promise((_, reject) => {
+                setTimeout(
+                  () => reject(new Error(`Timeout processing player ${player.id}`)),
+                  PLAYER_TIMEOUT
+                );
+              });
 
-          await Promise.race([processPromise, timeoutPromise]);
-        } catch (error) {
-          Logger.error(`Failed to track player ${player.id} (${player.name}): ${error}`);
-          errorCount++;
-          // Continue processing other players even if one fails
+              const processPromise = (async () => {
+                Logger.debug(`Processing seeded player ${player.id} (${player.name})...`);
+                const foundPlayer = await PlayerService.getPlayer(player.id, true, player);
+                await PlayerService.trackScoreSaberPlayer(foundPlayer, now, player);
+                Logger.debug(`Successfully processed seeded player ${player.id} (${player.name})`);
+                successCount++;
+              })();
+
+              await Promise.race([processPromise, timeoutPromise]);
+            } catch (error) {
+              Logger.error(`Failed to track seeded player ${player.id} (${player.name}): ${error}`);
+              errorCount++;
+            }
+          })
+        );
+      }
+
+      // Process unseeded players sequentially
+      if (unseededPlayers.length > 0) {
+        Logger.info(`Processing ${unseededPlayers.length} unseeded players sequentially...`);
+        for (const player of unseededPlayers) {
+          try {
+            const timeoutPromise = new Promise((_, reject) => {
+              setTimeout(
+                () => reject(new Error(`Timeout processing player ${player.id}`)),
+                PLAYER_TIMEOUT
+              );
+            });
+
+            const processPromise = (async () => {
+              Logger.debug(`Processing unseeded player ${player.id} (${player.name})...`);
+              const foundPlayer = await PlayerService.getPlayer(player.id, true, player);
+              await PlayerService.trackScoreSaberPlayer(foundPlayer, now, player);
+              Logger.debug(`Successfully processed unseeded player ${player.id} (${player.name})`);
+              successCount++;
+            })();
+
+            await Promise.race([processPromise, timeoutPromise]);
+          } catch (error) {
+            Logger.error(`Failed to track unseeded player ${player.id} (${player.name}): ${error}`);
+            errorCount++;
+          }
         }
       }
 
