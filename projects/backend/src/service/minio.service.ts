@@ -33,9 +33,17 @@ export default class MinioService {
    * @param bucket the bucket to save to
    * @param filename the filename to save as
    * @param data the data to save
+   * @param contentType the content type of the file
    */
-  public static async saveFile(bucket: MinioBucket, filename: string, data: Buffer) {
-    await minioClient.putObject(getMinioBucketName(bucket), filename, data);
+  public static async saveFile(
+    bucket: MinioBucket,
+    filename: string,
+    data: Buffer,
+    contentType?: string
+  ) {
+    await minioClient.putObject(getMinioBucketName(bucket), filename, data, data.length, {
+      "Content-Type": contentType,
+    });
   }
 
   /**
