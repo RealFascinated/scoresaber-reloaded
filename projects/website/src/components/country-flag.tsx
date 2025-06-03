@@ -10,11 +10,13 @@ type Props = {
 };
 
 export default function CountryFlag({ code, size = 24 }: Props) {
-  const [flagSrc, setFlagSrc] = useState(`/assets/flags/${code.toLowerCase()}.png`);
+  const [flagSrc, setFlagSrc] = useState(
+    `https://cdn.fascinated.cc/assets/flags/${code.toLowerCase()}.png`
+  );
 
   const handleError = () => {
     // Set fallback flag source if the main flag fails to load
-    setFlagSrc(`/assets/flags/unknown.png`);
+    setFlagSrc(`https://cdn.fascinated.cc/assets/flags/unknown.png`);
   };
 
   return (

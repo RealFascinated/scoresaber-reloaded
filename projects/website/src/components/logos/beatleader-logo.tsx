@@ -9,7 +9,7 @@ export default function BeatLeaderLogo({ size = 32, className }: BeatLeaderLogoP
   return (
     <LogoBase
       size={size}
-      href={"/assets/logos/beatleader.png"}
+      href={"https://cdn.fascinated.cc/assets/logos/beatleader.png"}
       alt={"BeatLeader Logo"}
       className={className}
     />

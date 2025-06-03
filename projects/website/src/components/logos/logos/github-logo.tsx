@@ -6,7 +6,7 @@ export default function GithubLogo({ size = 32, className }: LogoProps) {
   return (
     <LogoBase
       size={size}
-      href={"/assets/logos/github.png"}
+      href={"https://cdn.fascinated.cc/assets/logos/github.png"}
       alt={"Github Logo"}
       className={cn("invert", className)}
     />

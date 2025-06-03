@@ -59,7 +59,7 @@ export default function ScoreInfo({ score, leaderboard, hideRank }: Props) {
             }
           >
             <img
-              src={`/assets/hmds/${hmd.logo}`}
+              src={`https://cdn.fascinated.cc/assets/hmds/${hmd.logo}`}
               alt={`${hmd.logo} Logo`}
               width={24}
               height={24}

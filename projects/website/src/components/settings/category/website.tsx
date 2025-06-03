@@ -97,7 +97,7 @@ const WebsiteSettings = forwardRef<{ submit: () => void }, { onSave: () => void 
                             type="button"
                             className="cursor-pointer"
                             onClick={async () => {
-                              field.onChange("/assets/background.jpg");
+                              field.onChange("https://cdn.fascinated.cc/assets/background.jpg");
                               await onSubmit(form.getValues());
                             }}
                           >

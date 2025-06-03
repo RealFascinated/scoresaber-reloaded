@@ -6,7 +6,7 @@ export default function SteamLogo({ size = 32, className }: LogoProps) {
   return (
     <LogoBase
       size={size}
-      href={"/assets/logos/steam.svg"}
+      href={"https://cdn.fascinated.cc/assets/logos/steam.svg"}
       alt={"Steam Logo"}
       className={cn("invert", className)}
     />

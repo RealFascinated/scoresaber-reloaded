@@ -311,7 +311,10 @@ export default class Database extends Dexie {
    * @returns the background cover
    */
   async getBackgroundCover(): Promise<string> {
-    return (await this.getSetting<string>(SettingIds.BackgroundCover, "/assets/background.jpg"))!;
+    return (await this.getSetting<string>(
+      SettingIds.BackgroundCover,
+      "https://cdn.fascinated.cc/assets/background.jpg"
+    ))!;
   }
 
   /**
