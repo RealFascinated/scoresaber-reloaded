@@ -18,13 +18,13 @@ export default class MinioService {
    * @param filename the filename to get
    * @returns the file
    */
-  public static async getFile(bucket: MinioBucket, filename: string): Promise<Buffer> {
+  public static async getFile(bucket: MinioBucket, filename: string): Promise<Buffer | null> {
     const data = await minioClient.getObject(getMinioBucketName(bucket), filename);
     const chunks: Buffer[] = [];
     for await (const chunk of data) {
       chunks.push(chunk);
     }
-    return Buffer.concat(chunks);
+    return chunks.length > 0 ? Buffer.concat(chunks) : null;
   }
 
   /**

@@ -232,7 +232,7 @@ export default class BeatLeaderService {
           MinioBucket.BeatLeaderScoreStats,
           `${scoreId}.json`
         );
-        return JSON.parse(file.toString()) as ScoreStatsToken;
+        return file ? (JSON.parse(file.toString()) as ScoreStatsToken) : null;
       }
     );
     if (scoreStats == null) {
