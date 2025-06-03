@@ -61,6 +61,9 @@ export default class CacheService {
       [ServiceCache.Players]: {
         ttl: 1000 * 60 * 5, // 5 minutes
       },
+      [ServiceCache.ScoreStats]: {
+        ttl: 1000 * 60 * 60 * 3, // 3 hours
+      },
     };
 
     for (const [cache, info] of Object.entries(cacheInfo)) {
