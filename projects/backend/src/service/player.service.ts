@@ -752,10 +752,10 @@ export class PlayerService {
               });
 
               const processPromise = (async () => {
-                Logger.debug(`Processing seeded player ${player.id} (${player.name})...`);
+                //Logger.debug(`Processing seeded player ${player.id} (${player.name})...`);
                 const foundPlayer = await PlayerService.getPlayer(player.id, true, player);
                 await PlayerService.trackScoreSaberPlayer(foundPlayer, now, player);
-                Logger.debug(`Successfully processed seeded player ${player.id} (${player.name})`);
+                //Logger.debug(`Successfully processed seeded player ${player.id} (${player.name})`);
                 successCount++;
               })();
 
@@ -781,10 +781,10 @@ export class PlayerService {
             });
 
             const processPromise = (async () => {
-              Logger.debug(`Processing unseeded player ${player.id} (${player.name})...`);
+              //Logger.debug(`Processing unseeded player ${player.id} (${player.name})...`);
               const foundPlayer = await PlayerService.getPlayer(player.id, true, player);
               await PlayerService.trackScoreSaberPlayer(foundPlayer, now, player);
-              Logger.debug(`Successfully processed unseeded player ${player.id} (${player.name})`);
+              //Logger.debug(`Successfully processed unseeded player ${player.id} (${player.name})`);
               successCount++;
             })();
 
