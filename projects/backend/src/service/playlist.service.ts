@@ -19,10 +19,10 @@ import {
   generateSnipePlaylistImage,
 } from "../common/playlist.util";
 import CacheService, { ServiceCache } from "./cache.service";
-import LeaderboardService from "./leaderboard.service";
-import { PlayerService } from "./player.service";
+import { PlayerCoreService } from "./player/player-core.service";
 import { ScoreService } from "./score/score.service";
-import ScoreSaberService from "./scoresaber.service";
+import LeaderboardService from "./scoresaber/leaderboard.service";
+import ScoreSaberService from "./scoresaber/scoresaber.service";
 
 export type SnipeType = "top" | "recent";
 
@@ -84,8 +84,8 @@ export default class PlaylistService {
 
     try {
       if (
-        !(await PlayerService.playerExists(user)) ||
-        !(await PlayerService.playerExists(toSnipe))
+        !(await PlayerCoreService.playerExists(user)) ||
+        !(await PlayerCoreService.playerExists(toSnipe))
       ) {
         throw new NotFoundError(
           `Unable to create a snipe playlist for ${toSnipe} as one of the users isn't tracked.`

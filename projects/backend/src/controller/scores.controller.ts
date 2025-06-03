@@ -7,7 +7,7 @@ import BeatLeaderService from "../service/beatleader.service";
 import { FriendScoresService } from "../service/score/friend-scores.service";
 import { ScoreHistoryService } from "../service/score/score-history.service";
 import { ScoreService } from "../service/score/score.service";
-import ScoreSaberService from "../service/scoresaber.service";
+import ScoreSaberService from "../service/scoresaber/scoresaber.service";
 
 @Controller("/scores")
 export default class ScoresController {

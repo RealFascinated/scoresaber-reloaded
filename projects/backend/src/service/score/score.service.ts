@@ -28,10 +28,10 @@ import { scoreToObject } from "../../common/score/score.util";
 import TrackedScoresMetric from "../../metrics/impl/tracked-scores";
 import BeatLeaderService from "../beatleader.service";
 import CacheService, { ServiceCache } from "../cache.service";
-import LeaderboardService from "../leaderboard.service";
 import MetricsService, { MetricType } from "../metrics.service";
-import { PlayerService } from "../player.service";
-import ScoreSaberService from "../scoresaber.service";
+import { PlayerHistoryService } from "../player/player-history.service";
+import LeaderboardService from "../scoresaber/leaderboard.service";
+import ScoreSaberService from "../scoresaber/scoresaber.service";
 import { PreviousScoresService } from "./previous-scores.service";
 
 interface PendingScore {
@@ -155,7 +155,7 @@ export class ScoreService {
 
     // Track ScoreSaber score
     await ScoreService.trackScoreSaberScore(scoreSaberToken, leaderboardToken, player);
-    await PlayerService.updatePlayerScoresSet({
+    await PlayerHistoryService.updatePlayerScoresSet({
       score: scoreSaberToken,
       leaderboard: leaderboardToken,
     });

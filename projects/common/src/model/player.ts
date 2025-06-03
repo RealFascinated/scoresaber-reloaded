@@ -63,6 +63,12 @@ export class Player {
   public lastTracked?: Date;
 
   /**
+   * The player's HMD (Head Mounted Display).
+   */
+  @prop()
+  public hmd?: string;
+
+  /**
    * The date the player was first tracked.
    */
   @prop()

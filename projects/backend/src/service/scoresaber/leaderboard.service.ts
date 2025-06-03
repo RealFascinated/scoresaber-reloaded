@@ -21,10 +21,10 @@ import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import { EmbedBuilder } from "discord.js";
 import { NotFoundError } from "elysia";
-import { DiscordChannels, logToChannel, sendFile } from "../bot/bot";
-import { fetchWithCache } from "../common/cache.util";
-import BeatSaverService from "./beatsaver.service";
-import CacheService, { ServiceCache } from "./cache.service";
+import { DiscordChannels, logToChannel, sendFile } from "../../bot/bot";
+import { fetchWithCache } from "../../common/cache.util";
+import BeatSaverService from "../beatsaver.service";
+import CacheService, { ServiceCache } from "../cache.service";
 
 const CACHE_REFRESH_TIME = 1000 * 60 * 60 * 12; // 12 hours
 
@@ -280,49 +280,6 @@ export default class LeaderboardService {
     }
 
     return savedLeaderboard;
-  }
-
-  /**
-   * Processes a leaderboard document and returns the response.
-   *
-   * @param foundLeaderboard the found leaderboard document
-   * @param options the processing options
-   * @param cached whether the leaderboard was cached
-   * @returns the processed leaderboard response
-   */
-  private static async processLeaderboard(
-    foundLeaderboard: ScoreSaberLeaderboard,
-    options: {
-      cacheOnly?: boolean;
-      includeBeatSaver?: boolean;
-      type?: DetailType;
-    },
-    cached: boolean
-  ): Promise<LeaderboardResponse<ScoreSaberLeaderboard>> {
-    if (foundLeaderboard == undefined) {
-      throw new NotFoundError(`Leaderboard not found`);
-    }
-
-    const beatSaverMap = options.includeBeatSaver
-      ? await BeatSaverService.getMap(
-          foundLeaderboard.songHash,
-          foundLeaderboard.difficulty.difficulty,
-          foundLeaderboard.difficulty.characteristic,
-          options.type ?? DetailType.BASIC
-        )
-      : undefined;
-
-    const leaderboard = this.leaderboardToObject(foundLeaderboard);
-
-    if (leaderboard.fullName == undefined) {
-      leaderboard.fullName = `${leaderboard.songName} ${leaderboard.songSubName}`.trim();
-    }
-
-    return {
-      leaderboard: leaderboard as ScoreSaberLeaderboard,
-      beatsaver: beatSaverMap,
-      cached: cached,
-    } as LeaderboardResponse<ScoreSaberLeaderboard>;
   }
 
   /**

@@ -26,13 +26,16 @@ import { getDaysAgoDate } from "@ssr/common/utils/time-utils";
 import { getPageFromRank, isProduction } from "@ssr/common/utils/utils";
 import { NotFoundError } from "elysia";
 import sanitize from "sanitize-html";
-import { DiscordChannels } from "../bot/bot";
-import { fetchWithCache } from "../common/cache.util";
-import { sendScoreNotification } from "../common/score/score.util";
-import CacheService, { ServiceCache } from "./cache.service";
+import { DiscordChannels } from "../../bot/bot";
+import { fetchWithCache } from "../../common/cache.util";
+import { sendScoreNotification } from "../../common/score/score.util";
+import CacheService, { ServiceCache } from "../cache.service";
+import { PlayerAccuracyService } from "../player/player-accuracy.service";
+import { PlayerCoreService } from "../player/player-core.service";
+import { PlayerHistoryService } from "../player/player-history.service";
+import { PlayerRankingService } from "../player/player-ranking.service";
+import { ScoreService } from "../score/score.service";
 import LeaderboardService from "./leaderboard.service";
-import { PlayerService } from "./player.service";
-import { ScoreService } from "./score/score.service";
 
 export default class ScoreSaberService {
   /**
@@ -119,7 +122,7 @@ export default class ScoreSaberService {
       `player:${id}:${type}`,
       async () => {
         const playerToken = await scoresaberService.lookupPlayer(id);
-        const account = await PlayerService.getPlayer(id, createIfMissing, playerToken).catch(
+        const account = await PlayerCoreService.getPlayer(id, createIfMissing, playerToken).catch(
           () => undefined
         );
 
@@ -136,7 +139,7 @@ export default class ScoreSaberService {
           rank: playerToken.rank,
           countryRank: playerToken.countryRank,
           pp: playerToken.pp,
-          hmd: await PlayerService.getPlayerHMD(playerToken.id),
+          hmd: await PlayerCoreService.getPlayerHMD(playerToken.id),
           joinedDate: new Date(playerToken.firstSeen),
           role: playerToken.role ?? undefined,
           permissions: playerToken.permissions,
@@ -151,15 +154,15 @@ export default class ScoreSaberService {
 
         // For full type, run these operations in parallel
         const [updatedAccount, accuracies, ppBoundaries, accBadges] = await Promise.all([
-          account ? PlayerService.updatePeakRank(id, playerToken) : undefined,
+          account ? PlayerRankingService.updatePeakRank(id, playerToken) : undefined,
           account
-            ? PlayerService.getPlayerAverageAccuracies(playerToken.id)
+            ? PlayerAccuracyService.getPlayerAverageAccuracies(playerToken.id)
             : { unrankedAccuracy: 0, averageAccuracy: 0 },
-          account ? PlayerService.getPlayerPpBoundary(id, 50) : [],
-          account ? PlayerService.getAccBadges(id) : {},
+          account ? PlayerRankingService.getPlayerPpBoundary(id, 50) : [],
+          account ? PlayerAccuracyService.getAccBadges(id) : {},
         ]);
 
-        const statisticHistory = await PlayerService.getPlayerStatisticHistory(
+        const statisticHistory = await PlayerHistoryService.getPlayerStatisticHistory(
           playerToken,
           account,
           accuracies,
@@ -301,11 +304,17 @@ export default class ScoreSaberService {
     }
 
     const [account, accuracies] = await Promise.all([
-      PlayerService.getPlayer(player.id, false, player).catch(() => undefined),
-      PlayerService.getPlayerAverageAccuracies(player.id),
+      PlayerCoreService.getPlayer(player.id, false, player).catch(() => undefined),
+      PlayerAccuracyService.getPlayerAverageAccuracies(player.id),
     ]);
 
-    return PlayerService.getPlayerStatisticHistory(player, account, accuracies, startDate, endDate);
+    return PlayerHistoryService.getPlayerStatisticHistory(
+      player,
+      account,
+      accuracies,
+      startDate,
+      endDate
+    );
   }
 
   /**

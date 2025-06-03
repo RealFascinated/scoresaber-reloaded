@@ -17,7 +17,7 @@ import { fetchWithCache } from "../common/cache.util";
 import { createGenericEmbed } from "../common/discord/embed";
 import CacheService, { ServiceCache } from "./cache.service";
 import MinioService from "./minio.service";
-import { PlayerService } from "./player.service";
+import { PlayerCoreService } from "./player/player-core.service";
 
 export default class BeatLeaderService {
   /**
@@ -244,7 +244,7 @@ export default class BeatLeaderService {
       if (
         scoreStats &&
         additionalScoreData &&
-        (await PlayerService.playerExists(additionalScoreData.playerId))
+        (await PlayerCoreService.playerExists(additionalScoreData.playerId))
       ) {
         return await this.trackScoreStats(scoreId, scoreStats);
       }

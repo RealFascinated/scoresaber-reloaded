@@ -10,8 +10,8 @@ import { NotFoundError } from "elysia";
 import { fetchWithCache } from "../../common/cache.util";
 import { scoreToObject } from "../../common/score/score.util";
 import CacheService, { ServiceCache } from "../cache.service";
-import LeaderboardService from "../leaderboard.service";
-import { PlayerService } from "../player.service";
+import { PlayerCoreService } from "../player/player-core.service";
+import LeaderboardService from "../scoresaber/leaderboard.service";
 import { ScoreService } from "./score.service";
 
 const FRIEND_SCORES_LIMIT = 100;
@@ -43,7 +43,7 @@ export class FriendScoresService {
 
         const scores: ScoreSaberScore[] = [];
         for (const friendId of friendIds) {
-          await PlayerService.getPlayer(friendId); // Ensures player exists
+          await PlayerCoreService.getPlayer(friendId); // Ensures player exists
 
           const friendScores = await ScoreSaberScoreModel.aggregate([
             { $match: { playerId: friendId, leaderboardId: leaderboardId } },
@@ -94,7 +94,7 @@ export class FriendScoresService {
     page: number
   ): Promise<Page<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>> {
     for (const friendId of friendIds) {
-      if (!(await PlayerService.playerExists(friendId))) {
+      if (!(await PlayerCoreService.playerExists(friendId))) {
         throw new NotFoundError(`Friend "${friendId}" not found`);
       }
     }

@@ -20,10 +20,10 @@ import PlaylistController from "./controller/playlist.controller";
 import ScoresController from "./controller/scores.controller";
 import StatisticsController from "./controller/statistics.controller";
 import CacheService from "./service/cache.service";
-import LeaderboardService from "./service/leaderboard.service";
 import MetricsService from "./service/metrics.service";
-import { PlayerService } from "./service/player.service";
+import { PlayerRefreshService } from "./service/player/player-refresh.service";
 import { ScoreService } from "./service/score/score.service";
+import LeaderboardService from "./service/scoresaber/leaderboard.service";
 import StatisticsService from "./service/statistics.service";
 
 Logger.info("Starting SSR Backend...");
@@ -56,7 +56,7 @@ app.use(
         DiscordChannels.backendLogs,
         new EmbedBuilder().setDescription(`Updating player statistics...`)
       );
-      await PlayerService.updatePlayerStatistics();
+      await PlayerRefreshService.updatePlayerStatistics();
       await logToChannel(
         DiscordChannels.backendLogs,
         new EmbedBuilder().setDescription(
@@ -180,6 +180,11 @@ app.onStart(async () => {
   Logger.info("Listening on port http://localhost:8080");
   if (isProduction()) {
     await initDiscordBot();
+
+    logToChannel(
+      DiscordChannels.backendLogs,
+      new EmbedBuilder().setDescription("Backend started!")
+    );
   }
 
   new MetricsService();

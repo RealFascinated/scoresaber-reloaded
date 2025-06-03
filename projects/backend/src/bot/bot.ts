@@ -4,9 +4,6 @@ import { isProduction } from "@ssr/common/utils/utils";
 import { ActivityType, AttachmentBuilder, EmbedBuilder, GatewayIntentBits } from "discord.js";
 import { Client } from "discordx";
 
-// Import all commands
-import "./commands/update-player-statistics";
-
 export const guildId = "1295984874942894100";
 export enum DiscordChannels {
   trackedPlayerLogs = "1295985197262569512",

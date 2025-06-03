@@ -4,7 +4,7 @@ import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { Page, Pagination } from "@ssr/common/pagination";
 import { PlayerScore } from "@ssr/common/score/player-score";
 import { NotFoundError } from "elysia";
-import LeaderboardService from "../leaderboard.service";
+import LeaderboardService from "../scoresaber/leaderboard.service";
 import { ScoreService } from "./score.service";
 
 export class ScoreHistoryService {

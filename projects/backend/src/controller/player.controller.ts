@@ -10,8 +10,11 @@ import { getDaysAgoDate } from "@ssr/common/utils/time-utils";
 import { t } from "elysia";
 import { Controller, Get, Post } from "elysia-decorators";
 import SuperJSON from "superjson";
-import { PlayerService } from "../service/player.service";
-import ScoreSaberService from "../service/scoresaber.service";
+import { PlayerAccuracyService } from "../service/player/player-accuracy.service";
+import { PlayerCoreService } from "../service/player/player-core.service";
+import { PlayerHistoryService } from "../service/player/player-history.service";
+import { PlayerRankingService } from "../service/player/player-ranking.service";
+import ScoreSaberService from "../service/scoresaber/scoresaber.service";
 
 @Controller("/player")
 export default class PlayerController {
@@ -77,7 +80,7 @@ export default class PlayerController {
   }: {
     params: { id: string };
   }): Promise<{ success: boolean }> {
-    return { success: await PlayerService.trackPlayer(id) };
+    return { success: await PlayerCoreService.trackPlayer(id) };
   }
 
   @Get("/tracked/:id", {
@@ -95,7 +98,7 @@ export default class PlayerController {
     query: { createIfMissing: boolean };
   }): Promise<PlayerTrackedSince> {
     try {
-      const player = await PlayerService.getPlayer(id, createIfMissing);
+      const player = await PlayerCoreService.getPlayer(id, createIfMissing);
       return {
         tracked: true,
         daysTracked: player.getDaysTracked(),
@@ -121,7 +124,7 @@ export default class PlayerController {
     params: { id: string; type: "global" | "country" };
   }): Promise<AroundPlayerResponse> {
     return {
-      players: await PlayerService.getPlayersAroundPlayer(id, type),
+      players: await PlayerRankingService.getPlayersAroundPlayer(id, type),
     };
   }
 
@@ -139,7 +142,7 @@ export default class PlayerController {
     params: { id: string; boundary: number };
   }): Promise<PpBoundaryResponse> {
     return {
-      boundaries: await PlayerService.getPlayerPpBoundary(id, boundary),
+      boundaries: await PlayerRankingService.getPlayerPpBoundary(id, boundary),
       boundary: boundary,
     };
   }
@@ -158,7 +161,7 @@ export default class PlayerController {
   }: {
     params: { id: string; year: number; month: number };
   }): Promise<PlayedMapsCalendarResponse> {
-    return await PlayerService.getScoreCalendar(id, year, month);
+    return await PlayerHistoryService.getScoreCalendar(id, year, month);
   }
 
   @Get("/score-chart/:id", {
@@ -178,7 +181,7 @@ export default class PlayerController {
     params: { id: string };
     query: { superJson: boolean };
   }): Promise<unknown> {
-    const data = await PlayerService.getPlayerScoreChart(id);
+    const data = await PlayerAccuracyService.getPlayerScoreChart(id);
     return superJson ? SuperJSON.stringify(data) : data;
   }
 
@@ -194,6 +197,6 @@ export default class PlayerController {
   }: {
     params: { id: string };
   }): Promise<PlayerRankedPpsResponse> {
-    return await PlayerService.getPlayerRankedPps(id);
+    return await PlayerRankingService.getPlayerRankedPps(id);
   }
 }
