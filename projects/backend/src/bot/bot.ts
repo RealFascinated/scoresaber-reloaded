@@ -55,33 +55,6 @@ client.on("debug", info => {
 export async function initDiscordBot() {
   Logger.info("Initializing discord bot...");
 
-  client.once("ready", async () => {
-    try {
-      await client.initApplicationCommands();
-      Logger.info("Application commands initialized");
-    } catch (error) {
-      Logger.error("Failed to initialize application commands:", error);
-    }
-  });
-
-  client.on("interactionCreate", async interaction => {
-    try {
-      await client.executeInteraction(interaction);
-    } catch (error) {
-      Logger.error("Failed to execute interaction:", error);
-      try {
-        if (interaction.isRepliable()) {
-          await interaction.reply({
-            content: "An error occurred while processing your command. Please try again later.",
-            ephemeral: true,
-          });
-        }
-      } catch (replyError) {
-        Logger.error("Failed to send error reply:", replyError);
-      }
-    }
-  });
-
   // Login
   try {
     await client.login(env.DISCORD_BOT_TOKEN);

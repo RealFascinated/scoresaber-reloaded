@@ -4,7 +4,6 @@ import { PlayerRankedPpsResponse } from "@ssr/common/response/player-ranked-pps-
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { AroundPlayer } from "@ssr/common/types/around-player";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
-import { updateScoreWeights } from "@ssr/common/utils/scoresaber.util";
 import { ScoreService } from "../score/score.service";
 import ScoreSaberService from "../scoresaber/scoresaber.service";
 import { PlayerCoreService } from "./player-core.service";
@@ -22,7 +21,7 @@ export class PlayerRankingService {
     const playerScores = await ScoreService.getPlayerScores(playerId, {
       ranked: true,
       sort: "pp",
-      projection: { pp: 1, weight: 1, scoreId: 1 },
+      projection: { pp: 1, scoreId: 1 },
       includeLeaderboard: false,
     });
 
@@ -34,10 +33,8 @@ export class PlayerRankingService {
 
     const scores = playerScores.map(score => ({
       pp: score.score.pp,
-      weight: score.score.weight,
       scoreId: score.score.scoreId,
     }));
-    updateScoreWeights(scores);
 
     return {
       scores,
@@ -55,20 +52,25 @@ export class PlayerRankingService {
     boundary: number = 1
   ): Promise<number[]> {
     await PlayerCoreService.ensurePlayerExists(playerId);
-    const scoresPps = await this.getPlayerRankedPps(playerId);
-    if (scoresPps.scores.length === 0) {
+
+    // Use aggregation to get sorted PPs directly from database
+    const sortedPps = await ScoreService.getPlayerScores(playerId, {
+      ranked: true,
+      sort: "pp",
+      projection: { pp: 1 },
+      includeLeaderboard: false,
+    }).then(scores => scores.map(score => score.score.pp));
+
+    if (sortedPps.length === 0) {
       return [0];
     }
 
+    // Calculate all boundaries in a single pass
     const boundaries: number[] = [];
-    for (let i = 1; i < boundary + 1; i++) {
-      boundaries.push(
-        scoresaberService.calcPpBoundary(
-          scoresPps.scores.map(score => score.pp),
-          i
-        )
-      );
+    for (let i = 1; i <= boundary; i++) {
+      boundaries.push(scoresaberService.calcPpBoundary(sortedPps, i));
     }
+
     return boundaries;
   }
 

@@ -23,6 +23,7 @@ import { getDaysAgoDate } from "@ssr/common/utils/time-utils";
 import { connectBeatLeaderWebsocket } from "@ssr/common/websocket/beatleader-websocket";
 import { connectScoresaberWebsocket } from "@ssr/common/websocket/scoresaber-websocket";
 import { NotFoundError } from "elysia";
+import mongoose from "mongoose";
 import { fetchWithCache } from "../../common/cache.util";
 import { scoreToObject } from "../../common/score/score.util";
 import TrackedScoresMetric from "../../metrics/impl/tracked-scores";
@@ -291,56 +292,72 @@ export class ScoreService {
       sort: "pp",
     }
   ): Promise<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>[]> {
-    const rawScores = await ScoreSaberScoreModel.aggregate([
+    // Build the aggregation pipeline
+    const pipeline: mongoose.PipelineStage[] = [
       // Match stage based on playerId and optional ranked filter
-      { $match: { playerId: playerId, ...(options?.ranked ? { pp: { $gt: 0 } } : {}) } },
+      {
+        $match: {
+          playerId: playerId,
+          ...(options?.ranked ? { pp: { $gt: 0 } } : {}),
+        },
+      },
+    ];
 
-      // Sort by pp in descending order
-      { $sort: { [`${options.sort}`]: -1 } },
+    // Add projection if specified
+    if (options?.projection) {
+      pipeline.push({
+        $project: {
+          ...options.projection,
+          _id: 0,
+          leaderboardId: 1,
+          playerId: 1,
+        },
+      });
+    }
 
-      // Optional projection stage
-      ...(options?.projection
-        ? [
-            {
-              $project: {
-                ...options.projection,
-                _id: 0,
-                leaderboardId: 1,
-                playerId: 1,
-              },
-            },
-          ]
-        : []),
+    // Add sort stage only if specified
+    if (options?.sort) {
+      pipeline.push({ $sort: { [`${options.sort}`]: -1 } });
+    }
 
-      // Limit results
-      ...(options?.limit ? [{ $limit: options.limit }] : []),
-    ]);
-    if (!rawScores) {
+    // Add limit if specified
+    if (options?.limit) {
+      pipeline.push({ $limit: options.limit });
+    }
+
+    // Execute aggregation
+    const rawScores = await ScoreSaberScoreModel.aggregate(pipeline);
+    if (!rawScores?.length) {
       return [];
     }
 
-    const scores: PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>[] = [];
-    for (const rawScore of rawScores) {
-      const score = scoreToObject(rawScore);
-
-      if (options?.includeLeaderboard) {
-        const leaderboard = await LeaderboardService.getLeaderboard(score.leaderboardId + "", {
-          cacheOnly: true,
-          includeBeatSaver: false,
-        });
-        scores.push({
-          score: score as ScoreSaberScore,
-          leaderboard: leaderboard.leaderboard,
-        });
-      } else {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-expect-error
-        scores.push({
-          score: score as ScoreSaberScore,
-        });
-      }
+    // If we don't need leaderboards, return early with minimal processing
+    if (!options?.includeLeaderboard) {
+      return rawScores.map(rawScore => ({
+        score: scoreToObject(rawScore) as ScoreSaberScore,
+        leaderboard: null as unknown as ScoreSaberLeaderboard, // Type assertion to satisfy the interface
+      }));
     }
-    return scores;
+
+    // Get all leaderboard IDs at once
+    const leaderboardIds = rawScores.map(score => score.leaderboardId + "");
+
+    // Fetch all leaderboards in parallel
+    const leaderboardPromises = leaderboardIds.map(id =>
+      LeaderboardService.getLeaderboard(id, {
+        cacheOnly: true,
+        includeBeatSaver: false,
+      })
+    );
+
+    const leaderboardResults = await Promise.all(leaderboardPromises);
+
+    // Map scores with their leaderboards
+    return rawScores.map((rawScore, index) => ({
+      score: scoreToObject(rawScore) as ScoreSaberScore,
+      leaderboard:
+        leaderboardResults[index]?.leaderboard || (null as unknown as ScoreSaberLeaderboard),
+    }));
   }
 
   /**

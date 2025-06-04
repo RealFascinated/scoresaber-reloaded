@@ -6,11 +6,7 @@ import {
   PlayerScoreChartDataPoint,
   PlayerScoresChartResponse,
 } from "@ssr/common/response/player-scores-chart";
-import {
-  getDifficulty,
-  getDifficultyName,
-  getScoreBadgeFromAccuracy,
-} from "@ssr/common/utils/song-utils";
+import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
 import { ScoreService } from "../score/score.service";
 
 export class PlayerAccuracyService {
@@ -26,7 +22,8 @@ export class PlayerAccuracyService {
       averageAccuracy: 0,
     };
 
-    const playerScores = await ScoreService.getPlayerScores(playerId, {
+    // Use aggregation to calculate averages in the database
+    const result = await ScoreService.getPlayerScores(playerId, {
       projection: {
         accuracy: 1,
         pp: 1,
@@ -35,7 +32,7 @@ export class PlayerAccuracyService {
     });
 
     // Filter out any scores with invalid accuracy values
-    const validScores = playerScores.filter(
+    const validScores = result.filter(
       playerScore =>
         Number.isFinite(playerScore.score.accuracy) &&
         playerScore.score.accuracy >= 0 &&
@@ -46,16 +43,17 @@ export class PlayerAccuracyService {
       return accuracies;
     }
 
+    // Calculate averages in a single pass
     let unrankedScores = 0;
     let unrankedAccuracySum = 0;
     let totalAccuracySum = 0;
 
     for (const playerScore of validScores) {
-      // Add to total accuracy regardless of ranked status
-      totalAccuracySum += playerScore.score.accuracy;
+      const accuracy = playerScore.score.accuracy;
+      totalAccuracySum += accuracy;
 
       if (playerScore.score.pp === 0) {
-        unrankedAccuracySum += playerScore.score.accuracy;
+        unrankedAccuracySum += accuracy;
         unrankedScores++;
       }
     }
@@ -82,8 +80,8 @@ export class PlayerAccuracyService {
       A: 0,
     };
 
+    // Use aggregation to get only ranked scores with accuracy
     const playerScores = await ScoreService.getPlayerScores(playerId, {
-      sort: "timestamp",
       ranked: true,
       projection: {
         accuracy: 1,
@@ -91,11 +89,19 @@ export class PlayerAccuracyService {
       includeLeaderboard: false,
     });
 
+    // Process scores in a single pass
     for (const playerScore of playerScores) {
       const accuracy = playerScore.score.accuracy;
-      const scoreBadge = getScoreBadgeFromAccuracy(accuracy);
-      if (scoreBadge.name !== "-") {
-        badges[scoreBadge.name.replace("+", "Plus") as keyof AccBadges]++;
+      if (accuracy >= 95) {
+        badges.SSPlus++;
+      } else if (accuracy >= 90) {
+        badges.SS++;
+      } else if (accuracy >= 85) {
+        badges.SPlus++;
+      } else if (accuracy >= 80) {
+        badges.S++;
+      } else if (accuracy >= 70) {
+        badges.A++;
       }
     }
 

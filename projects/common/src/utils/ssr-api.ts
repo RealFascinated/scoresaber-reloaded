@@ -24,6 +24,7 @@ import { ScoreSort } from "../score/score-sort";
 import { AroundPlayer } from "../types/around-player";
 import { MapCharacteristic } from "../types/map-characteristic";
 import Request from "./request";
+import { updateScoreWeights } from "./scoresaber.util";
 
 class SSRApi {
   /**
@@ -352,9 +353,14 @@ class SSRApi {
    * @param playerId the player id
    */
   async getPlayerRankedPps(playerId: string) {
-    return Request.get<PlayerRankedPpsResponse>(
+    const response = await Request.get<PlayerRankedPpsResponse>(
       `${env.NEXT_PUBLIC_API_URL}/player/ranked-pps/${playerId}`
     );
+    if (response === undefined) {
+      return undefined;
+    }
+    updateScoreWeights(response.scores);
+    return response;
   }
 }
 
