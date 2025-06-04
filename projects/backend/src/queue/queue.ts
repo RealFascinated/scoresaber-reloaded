@@ -11,7 +11,7 @@ export abstract class Queue<T> {
 
   constructor(name: QueueName, interval: number = 30_000) {
     this.name = name;
-    setInterval(this.processQueue, interval);
+    setInterval(() => this.processQueue(), interval);
   }
 
   /**

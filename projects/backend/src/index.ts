@@ -19,6 +19,7 @@ import PlayerController from "./controller/player.controller";
 import PlaylistController from "./controller/playlist.controller";
 import ScoresController from "./controller/scores.controller";
 import StatisticsController from "./controller/statistics.controller";
+import { QueueManager } from "./queue/queue-manager";
 import CacheService from "./service/cache.service";
 import MetricsService from "./service/metrics.service";
 import { PlayerRefreshService } from "./service/player/player-refresh.service";
@@ -191,6 +192,7 @@ app.onStart(async () => {
   new CacheService();
   new StatisticsService();
   new ScoreService();
+  new QueueManager();
 });
 
 app.listen({
