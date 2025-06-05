@@ -45,9 +45,15 @@ export default class MinioService {
     data: Buffer,
     contentType?: string
   ) {
-    await minioClient.putObject(getMinioBucketName(bucket), filename, data, data.length, {
-      "Content-Type": contentType,
-    });
+    await minioClient.putObject(
+      getMinioBucketName(bucket),
+      filename,
+      data,
+      Buffer.byteLength(data),
+      {
+        "Content-Type": contentType,
+      }
+    );
   }
 
   /**
