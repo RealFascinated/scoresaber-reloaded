@@ -213,8 +213,7 @@ export default class BeatLeaderService {
     await MinioService.saveFile(
       MinioBucket.BeatLeaderScoreStats,
       `${scoreId}.json`,
-      Buffer.from(JSON.stringify(scoreStats)),
-      "application/json"
+      Buffer.from(JSON.stringify(scoreStats))
     );
     return scoreStats;
   }
