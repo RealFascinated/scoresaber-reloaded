@@ -23,6 +23,7 @@ import { QueueManager } from "./queue/queue-manager";
 import CacheService from "./service/cache.service";
 import MetricsService from "./service/metrics.service";
 import { PlayerRefreshService } from "./service/player/player-refresh.service";
+import PlaylistService from "./service/playlist.service";
 import { ScoreService } from "./service/score/score.service";
 import LeaderboardService from "./service/scoresaber/leaderboard.service";
 import StatisticsService from "./service/statistics.service";
@@ -125,9 +126,10 @@ app.onError({ as: "global" }, ({ code, error }) => {
     }
   }
 
+  // console.log(error);
+
   return {
     ...((status && { statusCode: status }) || { status: code }),
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error - message is not in the error type
     ...(error.message != code && { message: error.message }),
     timestamp: new Date().toISOString(),
@@ -193,6 +195,7 @@ app.onStart(async () => {
   new StatisticsService();
   new ScoreService();
   new QueueManager();
+  new PlaylistService();
 });
 
 app.listen({

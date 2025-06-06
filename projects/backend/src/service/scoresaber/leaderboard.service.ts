@@ -1,4 +1,5 @@
 import { DetailType } from "@ssr/common/detail-type";
+import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
 import {
   ScoreSaberLeaderboard,
@@ -18,13 +19,15 @@ import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
 import { MapCharacteristic } from "@ssr/common/types/map-characteristic";
 import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score";
 import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
-import { formatDuration } from "@ssr/common/utils/time-utils";
+import { formatDate, formatDateMinimal, formatDuration } from "@ssr/common/utils/time-utils";
 import { EmbedBuilder } from "discord.js";
 import { NotFoundError } from "elysia";
 import { DiscordChannels, logToChannel, sendFile } from "../../bot/bot";
 import { fetchWithCache } from "../../common/cache.util";
+import { generatePlaylistImage } from "../../common/playlist.util";
 import BeatSaverService from "../beatsaver.service";
 import CacheService, { ServiceCache } from "../cache.service";
+import PlaylistService from "../playlist.service";
 
 const CACHE_REFRESH_TIME = 1000 * 60 * 60 * 12; // 12 hours
 
@@ -657,6 +660,14 @@ export default class LeaderboardService {
     const updatedScores = await this.processLeaderboardUpdates(leaderboards, rankedMapDiffs);
     const unrankedLeaderboards = await this.unrankOldLeaderboards(leaderboards);
 
+    // Update the ranked maps playlist
+    const rankedPlaylist = await PlaylistService.createPlaylistByType("scoresaber-ranked-maps");
+    await PlaylistService.updatePlaylist("scoresaber-ranked-maps", {
+      title: rankedPlaylist.title,
+      image: rankedPlaylist.image,
+      songs: rankedPlaylist.songs,
+    });
+
     await logToChannel(
       DiscordChannels.backendLogs,
       new EmbedBuilder()
@@ -686,6 +697,16 @@ export default class LeaderboardService {
     const before = Date.now();
     const { leaderboards, rankedMapDiffs } = await this.fetchAllQualifiedLeaderboards();
     const updatedScores = await this.processLeaderboardUpdates(leaderboards, rankedMapDiffs);
+
+    // Update the qualified maps playlist
+    const qualifiedPlaylist = await PlaylistService.createPlaylistByType(
+      "scoresaber-qualified-maps"
+    );
+    await PlaylistService.updatePlaylist("scoresaber-qualified-maps", {
+      title: qualifiedPlaylist.title,
+      image: qualifiedPlaylist.image,
+      songs: qualifiedPlaylist.songs,
+    });
 
     await logToChannel(
       DiscordChannels.backendLogs,
@@ -765,10 +786,36 @@ export default class LeaderboardService {
       file += `unranked ${leaderboard.fullName} (${difficulty}) mapped by ${leaderboard.levelAuthorName}\n`;
     }
 
+    const date = formatDate(new Date(), "DD-MM-YYYY");
+
     await sendFile(
       DiscordChannels.rankedLogs,
-      `leaderboard-changes-${new Date().toISOString()}.txt`,
+      `ranked-batch-${date}.txt`,
       file.trim(),
+      "<@&1338261690952978442>"
+    );
+
+    const leaderboards = PlaylistService.processLeaderboards(
+      [...newlyRankedMaps, ...buffedMaps].map(update => update.leaderboard)
+    );
+
+    // Create a playlist of the changes
+    const playlist = PlaylistService.createScoreSaberPlaylist(
+      `scoresaber-ranked-batch-${date}`,
+      `ScoreSaber Ranked Batch (${date})`,
+      env.NEXT_PUBLIC_WEBSITE_NAME,
+      leaderboards.maps,
+      [...newlyRankedMaps, ...buffedMaps].map(update => update.leaderboard.id),
+      await generatePlaylistImage("SSR", {
+        title: `Ranked Batch (${formatDateMinimal(new Date())})`,
+      }),
+      "ranked-batch"
+    );
+    await PlaylistService.createPlaylist(playlist);
+    await sendFile(
+      DiscordChannels.rankedLogs,
+      `ranked-batch-${date}.bplist`,
+      JSON.stringify(playlist, null, 2),
       "<@&1338261690952978442>"
     );
     Logger.info("Logged leaderboard changes to Discord.");

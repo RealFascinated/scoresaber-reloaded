@@ -1,4 +1,5 @@
 import { DetailType } from "@ssr/common/detail-type";
+import { generateBeatSaberPlaylist } from "@ssr/common/playlist/playlist-utils";
 import { parseCustomRankedPlaylistSettings } from "@ssr/common/playlist/ranked/custom-ranked-playlist";
 import { parseSnipePlaylistSettings } from "@ssr/common/snipe/snipe-playlist-utils";
 import { t } from "elysia";
@@ -7,7 +8,7 @@ import {
   generateCustomRankedPlaylistImage,
   generateSnipePlaylistImage,
 } from "../common/playlist.util";
-import PlaylistService, { SnipeType } from "../service/playlist.service";
+import PlaylistService, { PlaylistId, SnipeType } from "../service/playlist.service";
 import ScoreSaberService from "../service/scoresaber/scoresaber.service";
 
 @Controller("/playlist")
@@ -27,15 +28,15 @@ export default class PlaylistController {
     params: { id },
     query: { config, download },
   }: {
-    params: { id: string };
+    params: { id: PlaylistId };
     query: { config?: string; download?: boolean };
   }) {
-    id = id.includes(".") ? id.split(".")[0] : id;
+    id = (id.includes(".") ? id.split(".")[0] : id) as PlaylistId;
     const extension = id.includes(".") ? id.split(".")[1] : "bplist";
 
     const response = new Response(
       JSON.stringify(
-        await (await PlaylistService.getPlaylist(id, config)).generateBeatSaberPlaylist(),
+        await generateBeatSaberPlaylist(await PlaylistService.getPlaylist(id, config)),
         null,
         2
       )
@@ -65,9 +66,9 @@ export default class PlaylistController {
   }) {
     const response = new Response(
       JSON.stringify(
-        await (
+        await generateBeatSaberPlaylist(
           await PlaylistService.getSnipePlaylist(user, toSnipe, type, settings)
-        ).generateBeatSaberPlaylist(),
+        ),
         null,
         2
       )

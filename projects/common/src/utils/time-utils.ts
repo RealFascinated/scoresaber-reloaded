@@ -1,3 +1,12 @@
+import dayjs from "dayjs";
+import duration from "dayjs/plugin/duration";
+import relativeTime from "dayjs/plugin/relativeTime";
+import utc from "dayjs/plugin/utc";
+
+dayjs.extend(utc);
+dayjs.extend(relativeTime);
+dayjs.extend(duration);
+
 export const Months = [
   {
     name: "January",
@@ -96,24 +105,7 @@ export function timeAgo(input: Date) {
  * @param date the date
  */
 export function formatDateMinimal(date: Date) {
-  const day = date.getUTCDate();
-  const monthNames = [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec",
-  ];
-  const month = monthNames[date.getUTCMonth()];
-  const year = date.getUTCFullYear();
-  return `${month} ${day}, ${year}`;
+  return dayjs(date).format("MMM D, YYYY");
 }
 
 /**
@@ -122,26 +114,9 @@ export function formatDateMinimal(date: Date) {
  * @param date the date
  */
 export function formatChartDate(date: Date) {
-  const day = date.getUTCDate();
-  const monthNames = [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec",
-  ];
-  const month = monthNames[date.getUTCMonth()];
-  const year = date.getUTCFullYear();
-  const currentYear = new Date().getFullYear();
-
-  return `${month} ${day}${currentYear === year ? "" : `, ${year}`}`;
+  const currentYear = dayjs().year();
+  const year = dayjs(date).year();
+  return dayjs(date).format(`MMM D${currentYear === year ? "" : ", YYYY"}`);
 }
 
 /**
@@ -156,63 +131,21 @@ export function formatDate(
   format:
     | "MMMM YYYY"
     | "DD MMMM YYYY"
+    | "DD-MM-YYYY"
     | "dddd, DD MMM, YYYY"
     | "DD MMMM YYYY HH:mm"
     | "DD/MM/YYYY, HH:mm:ss" = "MMMM YYYY"
 ) {
-  date = forceUTC(date);
-  switch (format) {
-    case "MMMM YYYY": {
-      return date.toLocaleString("en-US", {
-        timeZone: "Europe/London",
-        month: "long",
-        year: "numeric",
-      });
-    }
-    case "DD MMMM YYYY": {
-      return date.toLocaleString("en-US", {
-        timeZone: "Europe/London",
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-      });
-    }
-    case "dddd, DD MMM, YYYY": {
-      return date.toLocaleString("en-US", {
-        timeZone: "Europe/London",
-        weekday: "long", // Full weekday name (e.g., "Monday")
-        day: "numeric",
-        month: "short", // Abbreviated month (e.g., "Nov")
-        year: "numeric",
-      });
-    }
+  const formatMap = {
+    "MMMM YYYY": "MMMM YYYY",
+    "DD MMMM YYYY": "D MMMM YYYY",
+    "DD-MM-YYYY": "DD-MM-YYYY",
+    "dddd, DD MMM, YYYY": "dddd, D MMM, YYYY",
+    "DD MMMM YYYY HH:mm": "D MMMM YYYY HH:mm",
+    "DD/MM/YYYY, HH:mm:ss": "DD/MM/YYYY, HH:mm:ss",
+  };
 
-    case "DD MMMM YYYY HH:mm": {
-      return date.toLocaleString("en-US", {
-        timeZone: "Europe/London",
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-        hour: "numeric",
-        minute: "numeric",
-      });
-    }
-
-    case "DD/MM/YYYY, HH:mm:ss": {
-      return date.toLocaleString("en-US", {
-        timeZone: "Europe/London",
-        day: "numeric",
-        month: "numeric",
-        year: "numeric",
-        hour: "numeric",
-        minute: "numeric",
-        second: "numeric",
-      });
-    }
-    default: {
-      return formatDateMinimal(date);
-    }
-  }
+  return dayjs(date).format(formatMap[format] || "MMM D, YYYY");
 }
 
 /**
@@ -221,7 +154,7 @@ export function formatDate(
  * @param date the date
  */
 export function getMidnightAlignedDate(date: Date) {
-  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+  return dayjs(date).startOf("day").toDate();
 }
 
 /**
@@ -231,9 +164,7 @@ export function getMidnightAlignedDate(date: Date) {
  * @returns {Date} A Date object representing the date X days ago in UTC
  */
 export function getDaysAgoDate(days: number): Date {
-  const date = new Date();
-  date.setDate(date.getDate() - days); // Use UTC methods
-  return forceUTC(date); // Return a new Date in UTC
+  return dayjs().subtract(days, "day").toDate();
 }
 
 /**
@@ -243,10 +174,7 @@ export function getDaysAgoDate(days: number): Date {
  * @returns the amount of days
  */
 export function getDaysAgo(date: Date): number {
-  date = forceUTC(date);
-  const now = forceUTC(new Date());
-  const diffTime = Math.abs(now.getTime() - date.getTime());
-  return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) - 1;
+  return dayjs().diff(dayjs(date), "day");
 }
 
 /**
@@ -256,7 +184,7 @@ export function getDaysAgo(date: Date): number {
  * @returns {Date} A Date object representing the parsed date in UTC
  */
 export function parseDate(date: string): Date {
-  return forceUTC(new Date(date));
+  return dayjs(date).toDate();
 }
 
 /**
@@ -266,14 +194,7 @@ export function parseDate(date: string): Date {
  * @returns the formatted time in "MM:SS" format
  */
 export function formatTime(seconds: number): string {
-  const minutes = Math.floor(seconds / 60);
-  const remainingSeconds = seconds % 60;
-
-  // Zero pad minutes and seconds to ensure two digits
-  const formattedMinutes = minutes < 10 ? `0${minutes}` : `${minutes}`;
-  const formattedSeconds = remainingSeconds < 10 ? `0${remainingSeconds}` : `${remainingSeconds}`;
-
-  return `${formattedMinutes}:${formattedSeconds}`;
+  return dayjs.utc(seconds * 1000).format("mm:ss");
 }
 
 /**
@@ -285,26 +206,20 @@ export function formatTime(seconds: number): string {
  */
 export function formatDuration(ms: number): string {
   if (ms < 0) ms = -ms;
-  const timeUnits = [
-    { unit: "d", ms: 86400000 },
-    { unit: "h", ms: 3600000 },
-    { unit: "m", ms: 60000 },
-    { unit: "s", ms: 1000 },
-    { unit: "ms", ms: 1 },
+
+  const duration = dayjs.duration(ms);
+  const units = [
+    { value: duration.days(), unit: "d" },
+    { value: duration.hours(), unit: "h" },
+    { value: duration.minutes(), unit: "m" },
+    { value: duration.seconds(), unit: "s" },
+    { value: duration.milliseconds(), unit: "ms" },
   ];
 
-  const result = [];
-  let remainingMs = ms;
-
-  for (const { unit, ms: unitMs } of timeUnits) {
-    const count = Math.floor(remainingMs / unitMs);
-    if (count > 0) {
-      result.push(`${count}${unit}`);
-      remainingMs -= count * unitMs;
-    }
-    // Stop after two units have been added
-    if (result.length === 2) break;
-  }
+  const result = units
+    .filter(u => u.value > 0)
+    .slice(0, 2)
+    .map(u => `${u.value}${u.unit}`);
 
   return result.join(", ") || "0s";
 }
@@ -316,7 +231,7 @@ export function formatDuration(ms: number): string {
  * @param year the year
  */
 export function getDaysInMonth(month: number, year: number) {
-  return forceUTC(new Date(year, month, 0)).getDate();
+  return dayjs(`${year}-${month}-01`).daysInMonth();
 }
 
 /**
@@ -326,15 +241,5 @@ export function getDaysInMonth(month: number, year: number) {
  * @returns the date in UTC
  */
 export function forceUTC(date: Date) {
-  return new Date(
-    Date.UTC(
-      date.getUTCFullYear(),
-      date.getUTCMonth(),
-      date.getUTCDate(),
-      date.getUTCHours(),
-      date.getUTCMinutes(),
-      date.getUTCSeconds(),
-      date.getUTCMilliseconds()
-    )
-  );
+  return dayjs(date).utc().toDate();
 }

@@ -22,6 +22,7 @@
   "dependencies": {
     "axios": "^1.9.0",
     "cross-env": "^7.0.3",
+    "dayjs": "^1.11.13",
     "prettier": "^3.5.3",
     "prettier-plugin-organize-imports": "^4.1.0",
     "superjson": "^2.2.2"
