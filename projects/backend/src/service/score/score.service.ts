@@ -392,6 +392,14 @@ export class ScoreService {
     const leaderboard = getScoreSaberLeaderboardFromToken(leaderboardToken);
     const score = getScoreSaberScoreFromToken(scoreToken, leaderboard, player.id);
 
+    // Skip saving the score if characteristic is missing
+    if (!score.characteristic) {
+      Logger.warn(
+        `Skipping ScoreSaber score "${score.scoreId}" for "${player.name}"(${player.id}) due to missing characteristic: "${score.characteristic}"`
+      );
+      return { score: undefined, tracked: false };
+    }
+
     if (await ScoreService.scoreExists(player.id, leaderboard, score)) {
       // Logger.info(
       //   `Score "${score.scoreId}" for "${player.name}"(${player.id}) already exists, skipping`
