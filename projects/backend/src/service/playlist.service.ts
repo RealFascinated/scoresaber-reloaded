@@ -45,9 +45,7 @@ export default class PlaylistService {
         timezone: "Europe/London",
         protect: true,
         run: async () => {
-          const playlist = await PlaylistService.createPlaylistByType(
-            "scoresaber-ranking-queue-maps"
-          );
+          const playlist = await PlaylistService.createRankingQueuePlaylist();
           await PlaylistService.updatePlaylist("scoresaber-ranking-queue-maps", {
             title: playlist.title,
             image: playlist.image,
@@ -59,59 +57,138 @@ export default class PlaylistService {
 
     this.initializeDefaultPlaylists();
   }
+
   /**
    * Initializes the default playlists if they don't exist
    * @private
    */
   private async initializeDefaultPlaylists() {
-    try {
-      const defaultPlaylists: PlaylistId[] = [
-        "scoresaber-ranked-maps",
-        "scoresaber-qualified-maps",
-        "scoresaber-ranking-queue-maps",
-      ];
+    const defaultPlaylists = {
+      "scoresaber-ranked-maps": PlaylistService.createRankedPlaylist,
+      "scoresaber-qualified-maps": PlaylistService.createQualifiedPlaylist,
+      "scoresaber-ranking-queue-maps": PlaylistService.createRankingQueuePlaylist,
+    } as const;
 
-      for (const playlistId of defaultPlaylists) {
-        const playlist = await PlaylistModel.findOne({ id: playlistId });
-        if (!playlist) {
+    const results = await Promise.allSettled(
+      Object.entries(defaultPlaylists).map(async ([playlistId, createFn]) => {
+        try {
+          const existingPlaylist = await PlaylistModel.findOne({ id: playlistId });
+          if (existingPlaylist) {
+            return;
+          }
+
           Logger.info(`[PlaylistService] Creating default playlist: ${playlistId}`);
-          const createdPlaylist = await PlaylistService.createPlaylistByType(playlistId);
+          const createdPlaylist = await createFn();
           await PlaylistService.createPlaylist(createdPlaylist);
+          Logger.info(`[PlaylistService] Successfully created playlist: ${playlistId}`);
+        } catch (error) {
+          Logger.error(`[PlaylistService] Failed to create playlist ${playlistId}:`, error);
+          throw error; // Re-throw to be caught by Promise.allSettled
         }
+      })
+    );
+
+    // Log any failures
+    results.forEach((result, index) => {
+      if (result.status === "rejected") {
+        const playlistId = Object.keys(defaultPlaylists)[index];
+        Logger.error(
+          `[PlaylistService] Failed to initialize playlist ${playlistId}:`,
+          result.reason
+        );
       }
-    } catch (error) {
-      Logger.error(`[PlaylistService] Failed to initialize default playlists: ${error}`);
-    }
+    });
   }
 
   /**
-   * Creates a playlist based on the provided type and configuration
+   * Gets a playlist by ID
+   *
+   * @param playlistId the ID of the playlist to get
+   * @param config optional configuration for custom playlists
+   * @returns the requested playlist
+   */
+  public static async getPlaylist(playlistId: PlaylistId, config?: string): Promise<Playlist> {
+    if (playlistId === "scoresaber-custom-ranked-maps") {
+      return await this.createCustomRankedPlaylist(config);
+    }
+
+    const playlist = await PlaylistModel.findOne({ id: playlistId });
+    if (!playlist) {
+      throw new NotFoundError(`Playlist with id ${playlistId} does not exist`);
+    }
+    return playlist;
+  }
+
+  /**
+   * Updates a playlist with new data
+   *
+   * @param playlistId the ID of the playlist to update
+   * @param options the new data for the playlist
+   */
+  public static async updatePlaylist(
+    playlistId: PlaylistId,
+    options: {
+      title?: string;
+      author?: string;
+      image?: string;
+      songs?: PlaylistSong[];
+    }
+  ) {
+    const playlist = await PlaylistModel.findOne({ id: playlistId });
+    if (!playlist) {
+      throw new BadRequestError(`Playlist with id ${playlistId} does not exist`);
+    }
+
+    Object.assign(playlist, options);
+    await playlist.save();
+  }
+
+  /**
+   * Creates a playlist
+   *
+   * @param playlist the playlist to create
+   */
+  public static async createPlaylist(playlist: Playlist) {
+    const existingPlaylist = await PlaylistModel.findOne({ id: playlist.id });
+    if (existingPlaylist) {
+      throw new BadRequestError(`Playlist with id ${playlist.id} already exists`);
+    }
+
+    await PlaylistModel.create(playlist);
+    return playlist;
+  }
+
+  /**
+   * Processes leaderboards into maps and highlighted IDs
    * @private
    */
-  public static async createPlaylistByType(type: PlaylistId, config?: string): Promise<Playlist> {
-    switch (type) {
-      case "scoresaber-ranked-maps": {
-        const leaderboards = await LeaderboardService.getRankedLeaderboards();
-        return await this.createRankedPlaylist(leaderboards);
+  public static processLeaderboards(leaderboards: ScoreSaberLeaderboard[]) {
+    const maps = new Map<string, ScoreSaberLeaderboard>();
+    for (const leaderboard of leaderboards) {
+      if (!maps.has(leaderboard.songHash)) {
+        maps.set(leaderboard.songHash, leaderboard);
       }
-      case "scoresaber-qualified-maps":
-        return await this.createQualifiedPlaylist();
-      case "scoresaber-ranking-queue-maps":
-        return await this.createRankingQueuePlaylist();
-      case "scoresaber-custom-ranked-maps":
-        return await this.createCustomRankedPlaylist(config);
-      default:
-        throw new BadRequestError(`Invalid playlist type: ${type}`);
     }
+
+    return {
+      maps,
+      highlightedIds: leaderboards.map(map => map.id),
+    };
   }
 
   /**
    * Creates a playlist for ranked maps
-   * @private
+   *
+   * @param leaderboards the leaderboards to use, if not provided, all ranked leaderboards will be used
+   * @returns the created playlist
    */
   public static async createRankedPlaylist(
-    leaderboards: ScoreSaberLeaderboard[]
+    leaderboards?: ScoreSaberLeaderboard[]
   ): Promise<Playlist> {
+    if (!leaderboards) {
+      leaderboards = await LeaderboardService.getRankedLeaderboards();
+    }
+
     const title = `ScoreSaber Ranked Maps (${formatDateMinimal(new Date())})`;
     const imageTitle = "Ranked";
     const highlightedIds = leaderboards.map(map => map.id);
@@ -133,8 +210,13 @@ export default class PlaylistService {
    * Creates a playlist for qualified maps
    * @private
    */
-  private static async createQualifiedPlaylist(): Promise<Playlist> {
-    const leaderboards = await LeaderboardService.getQualifiedLeaderboards();
+  public static async createQualifiedPlaylist(
+    leaderboards?: ScoreSaberLeaderboard[]
+  ): Promise<Playlist> {
+    if (!leaderboards) {
+      leaderboards = await LeaderboardService.getQualifiedLeaderboards();
+    }
+
     const title = `ScoreSaber Qualified Maps (${formatDateMinimal(new Date())})`;
     const imageTitle = "Qualified";
 
@@ -163,9 +245,8 @@ export default class PlaylistService {
 
   /**
    * Creates a playlist for ranking queue maps
-   * @private
    */
-  private static async createRankingQueuePlaylist(): Promise<Playlist> {
+  public static async createRankingQueuePlaylist(): Promise<Playlist> {
     const leaderboards = await fetchWithCache(
       CacheService.getCache(ServiceCache.Leaderboards),
       "ranking-queue-maps",
@@ -230,64 +311,6 @@ export default class PlaylistService {
       highlightedIds,
       image
     );
-  }
-
-  /**
-   * Gets a playlist by ID
-   *
-   * @param playlistId the ID of the playlist to get
-   * @param config optional configuration for custom playlists
-   * @returns the requested playlist
-   */
-  public static async getPlaylist(playlistId: PlaylistId, config?: string): Promise<Playlist> {
-    if (playlistId === "scoresaber-custom-ranked-maps") {
-      return await this.createPlaylistByType("scoresaber-custom-ranked-maps", config);
-    }
-
-    const playlist = await PlaylistModel.findOne({ id: playlistId });
-    if (!playlist) {
-      throw new NotFoundError(`Playlist with id ${playlistId} does not exist`);
-    }
-    return playlist;
-  }
-
-  /**
-   * Updates a playlist with new data
-   *
-   * @param playlistId the ID of the playlist to update
-   * @param options the new data for the playlist
-   */
-  public static async updatePlaylist(
-    playlistId: PlaylistId,
-    options: {
-      title?: string;
-      author?: string;
-      image?: string;
-      songs?: PlaylistSong[];
-    }
-  ) {
-    const playlist = await PlaylistModel.findOne({ id: playlistId });
-    if (!playlist) {
-      throw new BadRequestError(`Playlist with id ${playlistId} does not exist`);
-    }
-
-    Object.assign(playlist, options);
-    await playlist.save();
-  }
-
-  /**
-   * Creates a playlist
-   *
-   * @param playlist the playlist to create
-   */
-  public static async createPlaylist(playlist: Playlist) {
-    const existingPlaylist = await PlaylistModel.findOne({ id: playlist.id });
-    if (existingPlaylist) {
-      throw new BadRequestError(`Playlist with id ${playlist.id} already exists`);
-    }
-
-    await PlaylistModel.create(playlist);
-    return playlist;
   }
 
   /**
@@ -402,24 +425,6 @@ export default class PlaylistService {
       Logger.error("Error creating snipe playlist", error);
       throw new InternalServerError((error as Error).message);
     }
-  }
-
-  /**
-   * Processes leaderboards into maps and highlighted IDs
-   * @private
-   */
-  public static processLeaderboards(leaderboards: ScoreSaberLeaderboard[]) {
-    const maps = new Map<string, ScoreSaberLeaderboard>();
-    for (const leaderboard of leaderboards) {
-      if (!maps.has(leaderboard.songHash)) {
-        maps.set(leaderboard.songHash, leaderboard);
-      }
-    }
-
-    return {
-      maps,
-      highlightedIds: leaderboards.map(map => map.id),
-    };
   }
 
   /**

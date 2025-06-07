@@ -699,9 +699,7 @@ export default class LeaderboardService {
     const updatedScores = await this.processLeaderboardUpdates(leaderboards, rankedMapDiffs);
 
     // Update the qualified maps playlist
-    const qualifiedPlaylist = await PlaylistService.createPlaylistByType(
-      "scoresaber-qualified-maps"
-    );
+    const qualifiedPlaylist = await PlaylistService.createQualifiedPlaylist();
     await PlaylistService.updatePlaylist("scoresaber-qualified-maps", {
       title: qualifiedPlaylist.title,
       image: qualifiedPlaylist.image,
