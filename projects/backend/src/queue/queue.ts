@@ -1,3 +1,4 @@
+import Logger from "@ssr/common/logger";
 import { QueueName } from "./queue-manager";
 
 export abstract class Queue<T> {
@@ -62,15 +63,20 @@ export abstract class Queue<T> {
     }
 
     this.lock = true;
-    const item = this.queue.shift() as T;
-    if (!item) {
-      this.lock = false;
-      return;
-    }
+    try {
+      const item = this.queue.shift();
+      if (!item) {
+        return;
+      }
 
-    const startTime = this.itemTimestamps.get(item);
-    if (startTime) {
+      const startTime = this.itemTimestamps.get(item);
+      if (!startTime) {
+        Logger.warn(`No timestamp found for item in queue ${this.name}`);
+        return;
+      }
+
       const processingTime = Date.now() - startTime;
+      this.itemTimestamps.delete(item);
 
       // Add new processing time to the array
       this.processingTimes.push(processingTime);
@@ -80,11 +86,12 @@ export abstract class Queue<T> {
         this.processingTimes.shift();
       }
 
-      this.itemTimestamps.delete(item);
+      await this.processItem(item);
+    } catch (error) {
+      Logger.error(`Error processing queue ${this.name}:`, error);
+    } finally {
+      this.lock = false;
     }
-
-    await this.processItem(item);
-    this.lock = false;
   }
 
   /**
