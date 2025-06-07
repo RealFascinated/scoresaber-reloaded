@@ -41,6 +41,7 @@ interface PendingScore {
   player?: ScoreSaberPlayerToken;
   beatLeaderScore?: BeatLeaderScoreToken;
   timestamp: number;
+  timeoutId?: NodeJS.Timeout; // Add timeout tracking
 }
 
 export class ScoreService {
@@ -65,7 +66,7 @@ export class ScoreService {
         const pendingScore = ScoreService.pendingScores.get(key);
         if (pendingScore?.beatLeaderScore) {
           // Found a matching BeatLeader score, process both
-          ScoreService.pendingScores.delete(key);
+          ScoreService.clearPendingScore(key);
           await this.processScore(
             score.score,
             score.leaderboard,
@@ -74,22 +75,14 @@ export class ScoreService {
           );
         } else {
           // No matching BeatLeader score yet, store this one
-          ScoreService.pendingScores.set(key, {
-            scoreSaberToken: score.score,
-            leaderboardToken: score.leaderboard,
-            player,
-            timestamp: Date.now(),
-          });
-
-          // Set timeout to process score if no BeatLeader match is found
-          setTimeout(() => {
+          const timeoutId = setTimeout(() => {
             const pendingScore = ScoreService.pendingScores.get(key);
             if (
               pendingScore?.scoreSaberToken &&
               pendingScore.leaderboardToken &&
               pendingScore.player
             ) {
-              ScoreService.pendingScores.delete(key);
+              ScoreService.clearPendingScore(key);
               this.processScore(
                 pendingScore.scoreSaberToken,
                 pendingScore.leaderboardToken,
@@ -97,6 +90,14 @@ export class ScoreService {
               );
             }
           }, ScoreService.SCORE_MATCH_TIMEOUT);
+
+          ScoreService.pendingScores.set(key, {
+            scoreSaberToken: score.score,
+            leaderboardToken: score.leaderboard,
+            player,
+            timestamp: Date.now(),
+            timeoutId,
+          });
         }
       },
     });
@@ -109,7 +110,7 @@ export class ScoreService {
 
         if (pendingScore?.scoreSaberToken && pendingScore.leaderboardToken && pendingScore.player) {
           // Found a matching ScoreSaber score, process both
-          ScoreService.pendingScores.delete(key);
+          ScoreService.clearPendingScore(key);
           await this.processScore(
             pendingScore.scoreSaberToken,
             pendingScore.leaderboardToken,
@@ -118,19 +119,19 @@ export class ScoreService {
           );
         } else {
           // No matching ScoreSaber score yet, store this one
-          ScoreService.pendingScores.set(key, {
-            beatLeaderScore,
-            timestamp: Date.now(),
-          });
-
-          // Set timeout to process score if no ScoreSaber match is found
-          setTimeout(() => {
+          const timeoutId = setTimeout(() => {
             const pendingScore = ScoreService.pendingScores.get(key);
             if (pendingScore?.beatLeaderScore) {
-              ScoreService.pendingScores.delete(key);
+              ScoreService.clearPendingScore(key);
               BeatLeaderService.trackBeatLeaderScore(pendingScore.beatLeaderScore);
             }
           }, ScoreService.SCORE_MATCH_TIMEOUT);
+
+          ScoreService.pendingScores.set(key, {
+            beatLeaderScore,
+            timestamp: Date.now(),
+            timeoutId,
+          });
         }
       },
     });
@@ -605,5 +606,14 @@ export class ScoreService {
     const top50Scores = await ScoreService.getTopScores(50, "all");
     const lowestPp = top50Scores.reduce((min, score) => Math.min(min, score.score.pp), Infinity);
     return score.pp > lowestPp;
+  }
+
+  // Add cleanup method
+  private static clearPendingScore(key: string) {
+    const pendingScore = this.pendingScores.get(key);
+    if (pendingScore?.timeoutId) {
+      clearTimeout(pendingScore.timeoutId);
+    }
+    this.pendingScores.delete(key);
   }
 }
