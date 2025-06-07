@@ -8,7 +8,7 @@ export default class CpuUsageMetric extends NumberMetric {
   constructor() {
     super(MetricType.CPU_USAGE, 0, {
       fetchAfterRegister: false,
-      interval: 1000 * 30, // 30 seconds
+      interval: 1000 * 10, // 10 seconds
     });
   }
 

@@ -7,7 +7,7 @@ export default class MemoryUsageMetric extends NumberMetric {
   constructor() {
     super(MetricType.MEMORY_USAGE, 0, {
       fetchAfterRegister: false,
-      interval: 1000 * 30, // 30 seconds
+      interval: 1000 * 10, // 10 seconds
     });
   }
 
