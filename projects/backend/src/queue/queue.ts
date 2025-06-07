@@ -75,8 +75,12 @@ export abstract class Queue<T> {
         return;
       }
 
-      const processingTime = Date.now() - startTime;
       this.itemTimestamps.delete(item);
+
+      // Process the item and measure its processing time
+      const processStartTime = Date.now();
+      await this.processItem(item);
+      const processingTime = Date.now() - processStartTime;
 
       // Add new processing time to the array
       this.processingTimes.push(processingTime);
@@ -85,8 +89,6 @@ export abstract class Queue<T> {
       if (this.processingTimes.length > this.MAX_SAMPLES) {
         this.processingTimes.shift();
       }
-
-      await this.processItem(item);
     } catch (error) {
       Logger.error(`Error processing queue ${this.name}:`, error);
     } finally {
