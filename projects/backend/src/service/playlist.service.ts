@@ -75,7 +75,8 @@ export default class PlaylistService {
         const playlist = await PlaylistModel.findOne({ id: playlistId });
         if (!playlist) {
           Logger.info(`[PlaylistService] Creating default playlist: ${playlistId}`);
-          await PlaylistService.createPlaylistByType(playlistId);
+          const createdPlaylist = await PlaylistService.createPlaylistByType(playlistId);
+          await PlaylistService.createPlaylist(createdPlaylist);
         }
       }
     } catch (error) {
@@ -89,8 +90,10 @@ export default class PlaylistService {
    */
   public static async createPlaylistByType(type: PlaylistId, config?: string): Promise<Playlist> {
     switch (type) {
-      case "scoresaber-ranked-maps":
-        return await this.createRankedPlaylist();
+      case "scoresaber-ranked-maps": {
+        const leaderboards = await LeaderboardService.getRankedLeaderboards();
+        return await this.createRankedPlaylist(leaderboards);
+      }
       case "scoresaber-qualified-maps":
         return await this.createQualifiedPlaylist();
       case "scoresaber-ranking-queue-maps":
@@ -106,8 +109,9 @@ export default class PlaylistService {
    * Creates a playlist for ranked maps
    * @private
    */
-  private static async createRankedPlaylist(): Promise<Playlist> {
-    const leaderboards = await LeaderboardService.getRankedLeaderboards();
+  public static async createRankedPlaylist(
+    leaderboards: ScoreSaberLeaderboard[]
+  ): Promise<Playlist> {
     const title = `ScoreSaber Ranked Maps (${formatDateMinimal(new Date())})`;
     const imageTitle = "Ranked";
     const highlightedIds = leaderboards.map(map => map.id);

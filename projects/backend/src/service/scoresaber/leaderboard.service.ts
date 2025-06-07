@@ -661,7 +661,7 @@ export default class LeaderboardService {
     const unrankedLeaderboards = await this.unrankOldLeaderboards(leaderboards);
 
     // Update the ranked maps playlist
-    const rankedPlaylist = await PlaylistService.createPlaylistByType("scoresaber-ranked-maps");
+    const rankedPlaylist = await PlaylistService.createRankedPlaylist(leaderboards);
     await PlaylistService.updatePlaylist("scoresaber-ranked-maps", {
       title: rankedPlaylist.title,
       image: rankedPlaylist.image,
