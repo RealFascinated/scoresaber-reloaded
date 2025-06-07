@@ -1,4 +1,5 @@
 import { PlayerHistory } from "../player/player-history";
+import { ScoreSaberPlayerToken } from "../types/token/scoresaber/player";
 import { formatDateMinimal, getDaysAgoDate, getMidnightAlignedDate } from "./time-utils";
 
 /**
@@ -119,4 +120,14 @@ export async function getPlayerStatisticChanges(
     countryRank: getPlayerStatisticChange(history, "countryRank", true, daysAgo),
     pp: getPlayerStatisticChange(history, "pp", false, daysAgo),
   };
+}
+
+/**
+ * Parses a player's rank history from their ScoreSaber token.
+ *
+ * @param playerToken - The ScoreSaber player token
+ * @returns Array of rank numbers
+ */
+export function parseRankHistory(playerToken: ScoreSaberPlayerToken): number[] {
+  return [...playerToken.histories.split(",").map(Number), playerToken.rank];
 }

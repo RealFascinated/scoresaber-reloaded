@@ -6,6 +6,7 @@ import {
 } from "@ssr/common/model/score/impl/scoresaber-score";
 import { Page, Pagination } from "@ssr/common/pagination";
 import { PlayerScore } from "@ssr/common/score/player-score";
+import { Metadata } from "@ssr/common/types/metadata";
 import { NotFoundError } from "elysia";
 import { fetchWithCache } from "../../common/cache.util";
 import { scoreToObject } from "../../common/score/score.util";
@@ -14,7 +15,8 @@ import { PlayerCoreService } from "../player/player-core.service";
 import LeaderboardService from "../scoresaber/leaderboard.service";
 import { ScoreService } from "./score.service";
 
-const FRIEND_SCORES_LIMIT = 100;
+const ITEMS_PER_PAGE = 8;
+const MAX_TOTAL_SCORES = 100;
 
 export class FriendScoresService {
   /**
@@ -99,15 +101,33 @@ export class FriendScoresService {
       }
     }
 
+    const pagination = new Pagination<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>();
+    pagination.setItemsPerPage(ITEMS_PER_PAGE);
+
+    // Get total count for pagination, limited to MAX_TOTAL_SCORES
+    const totalCount = Math.min(
+      await ScoreSaberScoreModel.countDocuments({
+        playerId: { $in: friendIds },
+      }),
+      MAX_TOTAL_SCORES
+    );
+    pagination.setTotalItems(totalCount);
+
+    // Calculate skip and limit for MongoDB pagination
+    const skip = (page - 1) * ITEMS_PER_PAGE;
+    const limit = ITEMS_PER_PAGE;
+
     const scores: PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>[] = await fetchWithCache(
       CacheService.getCache(ServiceCache.FriendScores),
-      `friend-scores:${friendIds.join(",")}`,
+      `friend-scores:${friendIds.join(",")}:${page}`,
       async () => {
         const scores: PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>[] = [];
         const friendScores = await ScoreSaberScoreModel.aggregate([
           { $match: { playerId: { $in: friendIds } } },
           { $sort: { timestamp: -1 } },
-          { $limit: FRIEND_SCORES_LIMIT },
+          { $limit: MAX_TOTAL_SCORES }, // First limit to most recent 100 scores
+          { $skip: skip }, // Then apply pagination
+          { $limit: limit },
         ]);
 
         for (const friendScore of friendScores) {
@@ -136,14 +156,9 @@ export class FriendScoresService {
       throw new NotFoundError(`No scores found!`);
     }
 
-    // Sort scores by timestamp
-    scores.sort((a, b) => b.score.timestamp.getTime() - a.score.timestamp.getTime());
-
-    const pagination = new Pagination<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>();
-    pagination.setItems(scores);
-    pagination.setTotalItems(scores.length);
-    pagination.setItemsPerPage(8);
-
-    return pagination.getPage(page);
+    return new Page(
+      scores,
+      new Metadata(Math.ceil(totalCount / ITEMS_PER_PAGE), totalCount, page, ITEMS_PER_PAGE)
+    );
   }
 }

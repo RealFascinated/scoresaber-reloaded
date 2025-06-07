@@ -3,6 +3,7 @@ export interface PlayerStatistic {
   pp?: number;
   plusOnePp?: number;
   countryRank?: number;
+  replaysWatched?: number;
   accuracy?: {
     averageRankedAccuracy?: number;
     averageUnrankedAccuracy?: number;
