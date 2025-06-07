@@ -19,6 +19,7 @@ import PlayerController from "./controller/player.controller";
 import PlaylistController from "./controller/playlist.controller";
 import ScoresController from "./controller/scores.controller";
 import StatisticsController from "./controller/statistics.controller";
+import { metricsPlugin } from "./plugins/metrics.plugin";
 import { QueueManager } from "./queue/queue-manager";
 import CacheService from "./service/cache.service";
 import MetricsService from "./service/metrics.service";
@@ -40,68 +41,66 @@ if (await Bun.file(".env").exists()) {
 
 // Connect to Mongo
 Logger.info("Connecting to MongoDB...");
-await mongoose.connect(env.MONGO_CONNECTION_STRING, {
-  maxPoolSize: 30, // Increased from 10 to handle more concurrent requests
-  minPoolSize: 5, // Minimum number of connections in the pool
-  socketTimeoutMS: 45000, // Close sockets after 45 seconds of inactivity
-  connectTimeoutMS: 10000, // Give up initial connection after 10 seconds
-  serverSelectionTimeoutMS: 10000, // Keep trying to send operations for 10 seconds
-  heartbeatFrequencyMS: 10000, // Check server status every 10 seconds
-  retryWrites: true, // Retry write operations if they fail
-  retryReads: true, // Retry read operations if they fail
-});
+
+try {
+  await mongoose.connect(env.MONGO_CONNECTION_STRING);
+} catch (error) {
+  Logger.error("Failed to connect to MongoDB:", error);
+  process.exit(1);
+}
+
 Logger.info("Connected to MongoDB :)");
 
-export const app = new Elysia();
-
-app.use(
-  cron({
-    name: "player-statistics-tracker-cron",
-    // pattern: "*/5 * * * *", // Every 5 minutes
-    pattern: "59 23 * * *", // Every day at 23:59
-    timezone: "Europe/London", // UTC time
-    protect: true,
-    run: async () => {
-      const before = Date.now();
-      await logToChannel(
-        DiscordChannels.backendLogs,
-        new EmbedBuilder().setDescription(`Updating player statistics...`)
-      );
-      await PlayerRefreshService.updatePlayerStatistics();
-      await logToChannel(
-        DiscordChannels.backendLogs,
-        new EmbedBuilder().setDescription(
-          `Updated player statistics in ${formatDuration(Date.now() - before)}`
-        )
-      );
-    },
-  })
-);
-app.use(
-  cron({
-    name: "refresh-leaderboards-cron",
-    // pattern: "*/1 * * * *", // Every 5 minutes
-    pattern: "30 */2 * * *", // Every 2 hours at 30 minutes ex: 00:30, 02:30, 04:30, etc
-    timezone: "Europe/London", // UTC time
-    protect: true,
-    run: async () => {
-      await LeaderboardService.refreshRankedLeaderboards();
-      await LeaderboardService.refreshQualifiedLeaderboards();
-    },
-  })
-);
-app.use(
-  cron({
-    name: "update-scoresaber-statistics",
-    // pattern: "*/1 * * * *", // Every 1 minute
-    pattern: "50 23 * * *", // Every day at 23:50
-    timezone: "Europe/London", // UTC time
-    protect: true,
-    run: async () => {
-      await StatisticsService.trackScoreSaberStatistics();
-    },
-  })
-);
+export const app = new Elysia()
+  .use(metricsPlugin())
+  .use(
+    cron({
+      name: "player-statistics-tracker-cron",
+      // pattern: "*/5 * * * *", // Every 5 minutes
+      pattern: "59 23 * * *", // Every day at 23:59
+      timezone: "Europe/London", // UTC time
+      protect: true,
+      run: async () => {
+        const before = Date.now();
+        await logToChannel(
+          DiscordChannels.backendLogs,
+          new EmbedBuilder().setDescription(`Updating player statistics...`)
+        );
+        await PlayerRefreshService.updatePlayerStatistics();
+        await logToChannel(
+          DiscordChannels.backendLogs,
+          new EmbedBuilder().setDescription(
+            `Updated player statistics in ${formatDuration(Date.now() - before)}`
+          )
+        );
+      },
+    })
+  )
+  .use(
+    cron({
+      name: "refresh-leaderboards-cron",
+      // pattern: "*/1 * * * *", // Every 5 minutes
+      pattern: "30 */2 * * *", // Every 2 hours at 30 minutes ex: 00:30, 02:30, 04:30, etc
+      timezone: "Europe/London", // UTC time
+      protect: true,
+      run: async () => {
+        await LeaderboardService.refreshRankedLeaderboards();
+        await LeaderboardService.refreshQualifiedLeaderboards();
+      },
+    })
+  )
+  .use(
+    cron({
+      name: "update-scoresaber-statistics",
+      // pattern: "*/1 * * * *", // Every 1 minute
+      pattern: "50 23 * * *", // Every day at 23:50
+      timezone: "Europe/London", // UTC time
+      protect: true,
+      run: async () => {
+        await StatisticsService.trackScoreSaberStatistics();
+      },
+    })
+  );
 
 /**
  * Custom error handler
@@ -197,6 +196,12 @@ app.onStart(async () => {
       DiscordChannels.backendLogs,
       new EmbedBuilder().setDescription("Backend started!")
     );
+  }
+
+  // Log all registered routes
+  Logger.info("Registered routes:");
+  for (const route of app.routes) {
+    Logger.info(`${route.method} ${route.path}`);
   }
 
   new MetricsService();

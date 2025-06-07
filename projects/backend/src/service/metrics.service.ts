@@ -6,6 +6,8 @@ import ActiveAccountsMetric from "../metrics/impl/active-accounts";
 import CpuUsageMetric from "../metrics/impl/backend/cpu-usage";
 import EventLoopLagMetric from "../metrics/impl/backend/event-loop-lag";
 import MemoryUsageMetric from "../metrics/impl/backend/memory-usage";
+import RequestsPerSecondMetric from "../metrics/impl/backend/requests-per-second";
+import RouteLatencyMetric from "../metrics/impl/backend/route-latency";
 import HmdStatisticMetric from "../metrics/impl/hmd-statistic";
 import MongoDbSizeMetric from "../metrics/impl/mongo-db-size";
 import TrackedPlayersMetric from "../metrics/impl/tracked-players";
@@ -32,13 +34,12 @@ export enum MetricType {
   CPU_USAGE = "cpu-usage",
   MEMORY_USAGE = "memory-usage",
   EVENT_LOOP_LAG = "event-loop-lag",
+  REQUESTS_PER_SECOND = "requests-per-second",
+  ROUTE_LATENCY = "route-latency",
 }
 
 export default class MetricsService {
-  /**
-   * The registered metrics.
-   * @private
-   */
+  private static instance: MetricsService;
   private static metrics: Metric<unknown>[] = [];
   private metricTimers: Map<string, NodeJS.Timeout> = new Map();
   /**
@@ -53,6 +54,11 @@ export default class MetricsService {
   private flushTimer: NodeJS.Timeout | null = null;
 
   constructor() {
+    if (MetricsService.instance) {
+      return MetricsService.instance;
+    }
+    MetricsService.instance = this;
+
     this.registerMetric(new TrackedScoresMetric());
     this.registerMetric(new TrackedPlayersMetric());
     this.registerMetric(new UniqueDailyPlayersMetric());
@@ -64,6 +70,8 @@ export default class MetricsService {
     this.registerMetric(new CpuUsageMetric());
     this.registerMetric(new MemoryUsageMetric());
     this.registerMetric(new EventLoopLagMetric());
+    this.registerMetric(new RequestsPerSecondMetric());
+    this.registerMetric(new RouteLatencyMetric());
 
     this.initMetrics();
     this.setupFlushTimer();
