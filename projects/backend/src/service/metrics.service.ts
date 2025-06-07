@@ -2,17 +2,19 @@ import { InfluxDB, Point } from "@influxdata/influxdb-client";
 import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
 import { MetricValueModel } from "../common/model/metric";
-import ActiveAccountsMetric from "../metrics/impl/active-accounts";
+import ActiveTimeoutsMetric from "../metrics/impl/backend/active-timeouts";
 import CpuUsageMetric from "../metrics/impl/backend/cpu-usage";
 import EventLoopLagMetric from "../metrics/impl/backend/event-loop-lag";
 import MemoryUsageMetric from "../metrics/impl/backend/memory-usage";
 import RequestsPerSecondMetric from "../metrics/impl/backend/requests-per-second";
 import RouteLatencyMetric from "../metrics/impl/backend/route-latency";
-import HmdStatisticMetric from "../metrics/impl/hmd-statistic";
-import MongoDbSizeMetric from "../metrics/impl/mongo-db-size";
-import TrackedPlayersMetric from "../metrics/impl/tracked-players";
-import TrackedScoresMetric from "../metrics/impl/tracked-scores";
-import UniqueDailyPlayersMetric from "../metrics/impl/unique-daily-players";
+import MongoDbSizeMetric from "../metrics/impl/database/mongo-db-size";
+import ActiveAccountsMetric from "../metrics/impl/player/active-accounts";
+import HmdStatisticMetric from "../metrics/impl/player/hmd-statistic";
+import TrackedPlayersMetric from "../metrics/impl/player/tracked-players";
+import TrackedScoresMetric from "../metrics/impl/player/tracked-scores";
+import UniqueDailyPlayersMetric from "../metrics/impl/player/unique-daily-players";
+import QueueSizesMetric from "../metrics/impl/queue/queue-sizes";
 import Metric from "../metrics/metric";
 
 const influxClient = new InfluxDB({
@@ -22,11 +24,11 @@ const influxClient = new InfluxDB({
 const writeApi = influxClient.getWriteApi(env.INFLUXDB_ORG, env.INFLUXDB_BUCKET);
 
 export enum MetricType {
+  // Player metrics
   TRACKED_SCORES = "tracked-scores",
   TRACKED_PLAYERS = "tracked-players",
   UNIQUE_DAILY_PLAYERS = "unique-daily-players",
   ACTIVE_ACCOUNTS = "active-accounts",
-  MONGO_DB_SIZE = "mongo-db-size",
   REPLAY_STATS = "replay-stats",
   HMD_STATISTIC = "hmd-statistic",
 
@@ -36,6 +38,13 @@ export enum MetricType {
   EVENT_LOOP_LAG = "event-loop-lag",
   REQUESTS_PER_SECOND = "requests-per-second",
   ROUTE_LATENCY = "route-latency",
+  ACTIVE_TIMEOUTS = "active-timeouts",
+
+  // Queue metrics
+  QUEUE_SIZES = "queue-sizes",
+
+  // Database metrics
+  MONGO_DB_SIZE = "mongo-db-size",
 }
 
 export default class MetricsService {
@@ -63,7 +72,6 @@ export default class MetricsService {
     this.registerMetric(new TrackedPlayersMetric());
     this.registerMetric(new UniqueDailyPlayersMetric());
     this.registerMetric(new ActiveAccountsMetric());
-    this.registerMetric(new MongoDbSizeMetric());
     this.registerMetric(new HmdStatisticMetric());
 
     // Backend metrics
@@ -72,6 +80,13 @@ export default class MetricsService {
     this.registerMetric(new EventLoopLagMetric());
     this.registerMetric(new RequestsPerSecondMetric());
     this.registerMetric(new RouteLatencyMetric());
+    this.registerMetric(new ActiveTimeoutsMetric());
+
+    // Queue metrics
+    this.registerMetric(new QueueSizesMetric());
+
+    // Database metrics
+    this.registerMetric(new MongoDbSizeMetric());
 
     this.initMetrics();
     this.setupFlushTimer();

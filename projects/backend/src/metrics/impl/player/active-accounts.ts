@@ -1,7 +1,7 @@
 import { Point } from "@influxdata/influxdb-client";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
-import { MetricType } from "../../service/metrics.service";
-import NumberMetric from "../number-metric";
+import { MetricType } from "../../../service/metrics.service";
+import NumberMetric from "../../number-metric";
 
 export default class ActiveAccountsMetric extends NumberMetric {
   constructor() {

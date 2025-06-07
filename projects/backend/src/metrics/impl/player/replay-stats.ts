@@ -1,9 +1,9 @@
 import { Point } from "@influxdata/influxdb-client";
 import Logger from "@ssr/common/logger";
 import { MinioBucket } from "@ssr/common/minio-buckets";
-import { MetricType } from "../../service/metrics.service";
-import MinioService from "../../service/minio.service";
-import NumberMetric from "../number-metric";
+import { MetricType } from "../../../service/metrics.service";
+import MinioService from "../../../service/minio.service";
+import NumberMetric from "../../number-metric";
 
 export default class ReplayStatsMetric extends NumberMetric {
   constructor() {

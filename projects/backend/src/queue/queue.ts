@@ -42,6 +42,15 @@ export abstract class Queue<T> {
   }
 
   /**
+   * Gets the size of the queue
+   *
+   * @returns the size of the queue
+   */
+  public getSize(): number {
+    return this.queue.length;
+  }
+
+  /**
    * Processes an item in the queue
    *
    * @param item the item to process

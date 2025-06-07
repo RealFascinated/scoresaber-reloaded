@@ -26,7 +26,7 @@ import { NotFoundError } from "elysia";
 import mongoose from "mongoose";
 import { fetchWithCache } from "../../common/cache.util";
 import { scoreToObject } from "../../common/score/score.util";
-import TrackedScoresMetric from "../../metrics/impl/tracked-scores";
+import TrackedScoresMetric from "../../metrics/impl/player/tracked-scores";
 import BeatLeaderService from "../beatleader.service";
 import CacheService, { ServiceCache } from "../cache.service";
 import MetricsService, { MetricType } from "../metrics.service";

@@ -15,7 +15,7 @@ import { isProduction } from "@ssr/common/utils/utils";
 import { DiscordChannels, logToChannel } from "../bot/bot";
 import { fetchWithCache } from "../common/cache.util";
 import { createGenericEmbed } from "../common/discord/embed";
-import TrackedScoresMetric from "../metrics/impl/tracked-scores";
+import TrackedScoresMetric from "../metrics/impl/player/tracked-scores";
 import CacheService, { ServiceCache } from "./cache.service";
 import MetricsService, { MetricType } from "./metrics.service";
 import MinioService from "./minio.service";
