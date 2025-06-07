@@ -3,6 +3,9 @@ import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
 import { MetricValueModel } from "../common/model/metric";
 import ActiveAccountsMetric from "../metrics/impl/active-accounts";
+import CpuUsageMetric from "../metrics/impl/backend/cpu-usage";
+import EventLoopLagMetric from "../metrics/impl/backend/event-loop-lag";
+import MemoryUsageMetric from "../metrics/impl/backend/memory-usage";
 import HmdStatisticMetric from "../metrics/impl/hmd-statistic";
 import MongoDbSizeMetric from "../metrics/impl/mongo-db-size";
 import TrackedPlayersMetric from "../metrics/impl/tracked-players";
@@ -24,6 +27,11 @@ export enum MetricType {
   MONGO_DB_SIZE = "mongo-db-size",
   REPLAY_STATS = "replay-stats",
   HMD_STATISTIC = "hmd-statistic",
+
+  // Backend metrics
+  CPU_USAGE = "cpu-usage",
+  MEMORY_USAGE = "memory-usage",
+  EVENT_LOOP_LAG = "event-loop-lag",
 }
 
 export default class MetricsService {
@@ -51,6 +59,11 @@ export default class MetricsService {
     this.registerMetric(new ActiveAccountsMetric());
     this.registerMetric(new MongoDbSizeMetric());
     this.registerMetric(new HmdStatisticMetric());
+
+    // Backend metrics
+    this.registerMetric(new CpuUsageMetric());
+    this.registerMetric(new MemoryUsageMetric());
+    this.registerMetric(new EventLoopLagMetric());
 
     this.initMetrics();
     this.setupFlushTimer();
@@ -150,21 +163,10 @@ export default class MetricsService {
     this.metricTimers.set(metric.id, timer);
   }
 
-  /**
-   * Registers a new metric.
-   *
-   * @param metric the metric to register
-   */
   private registerMetric(metric: Metric<unknown>) {
     MetricsService.metrics.push(metric);
   }
 
-  /**
-   * Gets a metric.
-   *
-   * @param type the type of metric
-   * @returns the metric
-   */
   public static async getMetric(type: MetricType): Promise<Metric<unknown>> {
     const metric = MetricsService.metrics.find(metric => metric.id === type);
     if (!metric) {
@@ -173,16 +175,8 @@ export default class MetricsService {
     return metric;
   }
 
-  /**
-   * Writes a point to the cache instead of directly to InfluxDB.
-   * Points are validated before being added to the cache.
-   * They will be flushed to InfluxDB after 1 minute.
-   *
-   * @param points the points to cache
-   */
   private async writePoints(points: Point): Promise<void> {
     try {
-      // Validate that the point has valid values before caching
       const fields = points.fields;
       for (const [key, value] of Object.entries(fields)) {
         if (value === undefined || value === null) {
@@ -191,20 +185,13 @@ export default class MetricsService {
         }
       }
 
-      // Add timestamp when the point was collected
       points.timestamp(new Date());
-
-      // Add point to cache instead of writing immediately
       this.pointCache.push(points);
     } catch (error) {
       Logger.error("Failed to cache point for InfluxDB:", error);
     }
   }
 
-  /**
-   * Cleans up the service by stopping the flush timer and flushing any remaining points.
-   * This should be called when the service is being shut down to ensure no data is lost.
-   */
   public async cleanup() {
     if (this.flushTimer) {
       clearInterval(this.flushTimer);

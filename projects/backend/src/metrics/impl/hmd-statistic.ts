@@ -27,7 +27,6 @@ export default class HmdStatisticMetric extends NumberMetric {
     for (const [hmd, count] of hmds) {
       point.intField(`${hmd}`, count);
     }
-    console.log(point.toString());
     return point;
   }
 }

@@ -143,9 +143,7 @@ export class FriendScoresService {
           {
             $limit: limit,
           },
-        ])
-          .hint({ playerId: 1, timestamp: -1 })
-          .allowDiskUse(true);
+        ]).allowDiskUse(true);
 
         // Get all leaderboard IDs at once
         const leaderboardIds = friendScores.map(score => score.leaderboardId + "");
