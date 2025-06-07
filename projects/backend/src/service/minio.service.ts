@@ -1,7 +1,6 @@
 import { env } from "@ssr/common/env";
 import { getMinioBucketName, MinioBucket } from "@ssr/common/minio-buckets";
 import { Client } from "minio";
-import { Readable } from "stream";
 
 const minioClient = new Client({
   endPoint: env.MINIO_ENDPOINT,
@@ -41,8 +40,7 @@ export default class MinioService {
    * @param contentType the content type of the file
    */
   public static async saveFile(bucket: MinioBucket, filename: string, data: Buffer) {
-    const stream = Readable.from(data);
-    await minioClient.putObject(getMinioBucketName(bucket), filename, stream);
+    await minioClient.putObject(getMinioBucketName(bucket), filename, data);
   }
 
   /**
