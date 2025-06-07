@@ -1,10 +1,10 @@
 import { Point } from "@influxdata/influxdb-client";
-import { monitorEventLoopDelay } from "perf_hooks";
 import { MetricType } from "../../../service/metrics.service";
-import NumberMetric from "../../number-metric";
+import Metric from "../../metric";
 
-export default class EventLoopLagMetric extends NumberMetric {
-  private histogram: ReturnType<typeof monitorEventLoopDelay>;
+export default class EventLoopLagMetric extends Metric<number> {
+  private lastCheck: number;
+  private lag: number;
 
   constructor() {
     super(MetricType.EVENT_LOOP_LAG, 0, {
@@ -12,19 +12,31 @@ export default class EventLoopLagMetric extends NumberMetric {
       interval: 1000,
     });
 
-    this.histogram = monitorEventLoopDelay({ resolution: 20 });
-    this.histogram.enable();
+    this.lastCheck = Date.now();
+    this.lag = 0;
+    this.startMeasuring();
   }
 
-  public async collect(): Promise<Point | undefined> {
-    const point = this.getPointBase();
+  private startMeasuring() {
+    const measure = () => {
+      const now = Date.now();
+      const expected = this.lastCheck + 1000; // We expect 1 second between measurements
+      this.lag = Math.max(0, now - expected);
+      this.lastCheck = now;
 
-    // Convert from nanoseconds to milliseconds
-    point.floatField("lag_ms", this.histogram.mean / 1000000);
+      // Schedule next measurement
+      setTimeout(measure, 1000);
+    };
 
-    // Reset the histogram for the next measurement
-    this.histogram.reset();
+    // Start measuring
+    measure();
+  }
 
-    return point;
+  async collect(): Promise<Point> {
+    // Update the metric value
+    this.value = this.lag;
+
+    // Create a point for InfluxDB using the base point
+    return this.getPointBase().floatField("lag_ms", this.lag);
   }
 }
