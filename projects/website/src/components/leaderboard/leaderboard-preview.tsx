@@ -9,6 +9,7 @@ import { getDifficultyName } from "@ssr/common/utils/song-utils";
 import { formatDate } from "@ssr/common/utils/time-utils";
 import { useDebounce } from "@uidotdev/usehooks";
 import { StarIcon } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
@@ -51,7 +52,7 @@ export default function LeaderboardPreview({
             <div className="mb-3">
               <div className="flex items-center gap-3">
                 {beatSaverMap?.songArt && (
-                  <img
+                  <Image
                     src={beatSaverMap.songArt}
                     alt={`${leaderboard.songName} Cover Art`}
                     className="w-16 h-16 rounded-lg object-cover pointer-events-none"

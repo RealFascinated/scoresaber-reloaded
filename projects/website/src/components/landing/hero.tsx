@@ -7,6 +7,7 @@ import { BorderBeam } from "@/components/ui/border-beam";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { ArrowRight, GithubIcon, UserSearch } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 
 export default function HeroSection() {
@@ -76,11 +77,13 @@ function AppPreview() {
   return (
     <div className="mx-5 my-20 relative max-w-[1190px] shadow-[0_3rem_20rem_-15px_rgba(15,15,15,0.6)] shadow-pp/50 rounded-2xl overflow-hidden">
       <BorderBeam colorFrom="#6773ff" colorTo="#4858ff" />
-      <img
+      <Image
         className="w-full h-full border-4 border-pp/20 rounded-2xl"
         src="https://cdn.fascinated.cc/assets/home/app-preview.png"
         alt="App Preview"
         draggable={false}
+        width={1190}
+        height={670}
       />
     </div>
   );

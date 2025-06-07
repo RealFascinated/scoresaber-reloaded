@@ -7,6 +7,7 @@ import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { getPageFromRank } from "@ssr/common/utils/utils";
+import Image from "next/image";
 import Link from "next/link";
 
 type Props = {
@@ -58,7 +59,7 @@ export default function ScoreInfo({ score, leaderboard, hideRank }: Props) {
               </div>
             }
           >
-            <img
+            <Image
               src={`https://cdn.fascinated.cc/assets/hmds/${hmd.logo}`}
               alt={`${hmd.logo} Logo`}
               width={24}

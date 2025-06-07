@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { Button } from "./ui/button";
 
@@ -11,10 +12,12 @@ type NotFoundProps = {
 export default function NotFound({ title, description }: NotFoundProps) {
   return (
     <div className="flex flex-col items-center gap-6">
-      <img
+      <Image
         src="https://cdn.fascinated.cc/assets/get-real-beat-saber.gif"
         alt="404"
         className="h-[250px]"
+        width={400}
+        height={250}
       />
 
       <div className="flex flex-col items-center gap-2 text-center">

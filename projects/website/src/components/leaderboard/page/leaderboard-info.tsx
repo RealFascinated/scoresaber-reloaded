@@ -9,6 +9,7 @@ import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-respons
 import { getBeatSaverMapperProfileUrl } from "@ssr/common/utils/beatsaver.util";
 import { formatNumber } from "@ssr/common/utils/number-utils";
 import { formatDate } from "@ssr/common/utils/time-utils";
+import Image from "next/image";
 
 type LeaderboardInfoProps = {
   /**
@@ -79,7 +80,7 @@ export function LeaderboardInfo({ leaderboard, beatSaverMap }: LeaderboardInfoPr
               </div>
             </div>
 
-            <img
+            <Image
               src={leaderboard.songArt}
               alt={`${leaderboard.songName} Cover Image`}
               className="rounded-md w-[96px] h-[96px]"

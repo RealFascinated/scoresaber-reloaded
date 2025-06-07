@@ -4,6 +4,7 @@ import { StarIcon } from "@heroicons/react/24/solid";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
 import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
+import Image from "next/image";
 import LeaderboardPreview from "../leaderboard/leaderboard-preview";
 import SongName from "./song-name";
 
@@ -61,7 +62,7 @@ export default function ScoreSongInfo({
             )}
           </div>
         </SimpleTooltip>
-        <img
+        <Image
           src={leaderboard.songArt}
           width={imageSize}
           height={imageSize}

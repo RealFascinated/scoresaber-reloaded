@@ -2,6 +2,7 @@
 
 import SimpleTooltip from "@/components/simple-tooltip";
 import { normalizedRegionName } from "@ssr/common/utils/region-utils";
+import Image from "next/image";
 import { useState } from "react";
 
 type Props = {
@@ -24,7 +25,7 @@ export default function CountryFlag({ code, size = 24 }: Props) {
       display={<p>{normalizedRegionName(code)}</p>}
       className={`w-[${size * 2}px] min-w-[${size * 2}px]`}
     >
-      <img
+      <Image
         alt="Country Flag"
         src={flagSrc}
         width={size * 2}

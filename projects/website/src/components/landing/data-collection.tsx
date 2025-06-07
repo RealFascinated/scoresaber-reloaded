@@ -1,4 +1,5 @@
 import { Database } from "lucide-react";
+import Image from "next/image";
 
 export default function DataCollection() {
   return (
@@ -18,11 +19,13 @@ export default function DataCollection() {
 
       {/* Content */}
       <div className="max-w-[900px]">
-        <img
+        <Image
           className="w-full h-full rounded-2xl border border-ssr/20"
           src="https://cdn.fascinated.cc/assets/home/data-collection.png"
           alt="Data Collection"
           draggable={false}
+          width={900}
+          height={500}
         />
       </div>
     </div>

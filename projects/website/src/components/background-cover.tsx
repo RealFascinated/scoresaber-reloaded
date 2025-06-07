@@ -2,6 +2,7 @@
 
 import useDatabase from "@/hooks/use-database";
 import { useLiveQuery } from "dexie-react-hooks";
+import Image from "next/image";
 
 export default function BackgroundCover() {
   const database = useDatabase();
@@ -22,11 +23,13 @@ export default function BackgroundCover() {
   }
 
   return (
-    <img
+    <Image
       src={backgroundCover}
       alt="Background image"
       fetchPriority="high"
       className={`fixed -z-50 object-cover w-screen h-screen blur-xs brightness-[33%] pointer-events-none select-none`}
+      width={1920}
+      height={1080}
     />
   );
 }

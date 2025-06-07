@@ -4,6 +4,7 @@ import OverlayView, { OverlayViewPosition } from "@/components/overlay/views/vie
 import { truncateText } from "@ssr/common/string-utils";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
+import Image from "next/image";
 
 type OverlayScoreDataProps = {
   overlayData: OverlayData;
@@ -24,7 +25,7 @@ export default function OverlayScoreInfoView({ overlayData }: OverlayScoreDataPr
       position={OverlayViewPosition.BOTTOM_LEFT}
       className={cn(paused ? "filter grayscale" : "", "flex gap-2 transform-gpu transition-all")}
     >
-      <img
+      <Image
         className="rounded-md"
         src={beatSaverMap.songArt}
         alt={`${beatSaverMap.name}`}

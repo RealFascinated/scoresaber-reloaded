@@ -1,5 +1,6 @@
 import { cn } from "@/common/utils";
 import { UsersRound } from "lucide-react";
+import Image from "next/image";
 
 export default function Friends() {
   return (
@@ -26,11 +27,13 @@ export default function Friends() {
         )}
       >
         <div className={cn("relative max-w-[900px] z-20 overflow-hidden")}>
-          <img
+          <Image
             className="w-full h-full rounded-2xl border border-purple-600/20"
             src="https://cdn.fascinated.cc/assets/home/friends.png"
             alt="Friends"
             draggable={false}
+            width={900}
+            height={500}
           />
         </div>
       </div>

@@ -5,6 +5,7 @@ import GithubLogo from "@/components/logos/logos/github-logo";
 import TwitterLogo from "@/components/logos/logos/twitter-logo";
 import { env } from "@ssr/common/env";
 import { ExternalLink } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ReactElement } from "react";
@@ -85,10 +86,12 @@ const socialLinks: SocialLinkType[] = [
   {
     name: "Discord",
     logo: (
-      <img
+      <Image
         className="size-6 lg:size-7"
         src="https://cdn.fascinated.cc/assets/logos/discord.svg"
         alt="Discord Logo"
+        width={24}
+        height={24}
       />
     ),
     href: "https://discord.gg/kmNfWGA4A8",
@@ -129,10 +132,11 @@ export default function Footer({
                 href="/"
                 draggable={false}
               >
-                <img
-                  className="size-9"
+                <Image
                   src="https://cdn.fascinated.cc/assets/logos/scoresaber.png"
                   alt="Scoresaber Logo"
+                  width={36}
+                  height={36}
                 />
                 <h1 className="text-xl font-bold text-pp">ScoreSaber Reloaded</h1>
               </Link>

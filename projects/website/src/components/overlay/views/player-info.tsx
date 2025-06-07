@@ -3,6 +3,7 @@ import { DailyChange } from "@/components/statistic/daily-change";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerStatChange } from "@ssr/common/player/player-stat-change";
 import { formatPp } from "@ssr/common/utils/number-utils";
+import Image from "next/image";
 import OverlayPlayerRank from "../components/player-rank";
 
 type OverlayPlayerInfoProps = {
@@ -17,7 +18,7 @@ export default function OverlayPlayerInfoView({ player }: OverlayPlayerInfoProps
 
   return (
     <div className="flex gap-2 text-2xl">
-      <img
+      <Image
         src={player.avatar}
         alt={`${player.name}'s profile picture`}
         className="rounded-md"

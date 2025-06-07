@@ -6,6 +6,7 @@ import PlayerAndLeaderboardSearch from "@/components/navbar/player-and-leaderboa
 import ProfileButton from "@/components/navbar/profile-button";
 import { CubeIcon } from "@heroicons/react/24/solid";
 import { ChartBarIcon, MusicIcon, TrendingUpIcon } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { ReactElement, useEffect, useState } from "react";
 import Settings from "../settings/settings";
@@ -84,7 +85,7 @@ export default function Navbar() {
           href="/"
           draggable={false}
         >
-          <img
+          <Image
             width={24}
             height={24}
             className="size-6"
