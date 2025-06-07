@@ -1,3 +1,4 @@
+import type { HMD } from "./hmds";
 import ScoreSaberLeaderboard from "./model/leaderboard/impl/scoresaber-leaderboard";
 import LeaderboardDifficulty from "./model/leaderboard/leaderboard-difficulty";
 import { LeaderboardStatus } from "./model/leaderboard/leaderboard-status";
@@ -117,7 +118,7 @@ export function getScoreSaberScoreFromToken(
     weight: token.weight,
     maxCombo: token.maxCombo,
     playerInfo: token.leaderboardPlayerInfo,
-    hmd: token.deviceHmd ?? ScoreSaberHMDs[token.hmd] ?? undefined,
+    hmd: (token.deviceHmd as HMD) ?? (ScoreSaberHMDs[token.hmd] as HMD | undefined),
     controllers: controllers,
   };
 }
