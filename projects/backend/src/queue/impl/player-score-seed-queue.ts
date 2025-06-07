@@ -9,7 +9,7 @@ export class PlayerScoreSeedQueue extends Queue<string> {
     super(QueueName.PlayerScoreSeed);
 
     (async () => {
-      const players = await PlayerModel.find({ seededScores: false }).select("_id");
+      const players = await PlayerModel.find({ seededScores: null }).select("_id");
       for (const player of players) {
         this.add(player._id);
       }
