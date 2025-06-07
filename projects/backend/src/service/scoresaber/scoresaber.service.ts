@@ -39,15 +39,16 @@ import LeaderboardService from "./leaderboard.service";
 
 export default class ScoreSaberService {
   /**
-   * Notifies the number one score in Discord.
+   * Notifies score achievements in Discord.
    *
    * @param playerScore the score to notify
-   * @param mode the mode to notify in
+   * @param player the player who set the score
+   * @param beatLeaderScore optional BeatLeader score data
+   * @param isTop50GlobalScore whether this is a top 50 global score
    */
   public static async notifyScore(
     playerScore: ScoreSaberPlayerScoreToken,
     player: ScoreSaberPlayerToken,
-    mode: "numberOne" | "top50AllTime" | "scoreFloodGate",
     beatLeaderScore?: BeatLeaderScoreToken,
     isTop50GlobalScore?: boolean
   ) {
@@ -65,42 +66,54 @@ export default class ScoreSaberService {
     );
     const playerInfo = score.playerInfo;
 
-    if (mode === "scoreFloodGate") {
-      await sendScoreNotification(
+    // Prepare notifications to send
+    const notifications = [];
+
+    // Always send score flood gate notification
+    notifications.push(
+      sendScoreNotification(
         DiscordChannels.scoreFloodGateFeed,
         score,
         leaderboard,
         player,
         beatLeaderScore,
         `${playerInfo.name} just set a rank #${score.rank}!`
-      );
+      )
+    );
+
+    // Only send ranked notifications if the map is ranked
+    if (leaderboard.stars > 0) {
+      // Send #1 notification if applicable
+      if (score.rank === 1) {
+        notifications.push(
+          sendScoreNotification(
+            DiscordChannels.numberOneFeed,
+            score,
+            leaderboard,
+            player,
+            beatLeaderScore,
+            `${playerInfo.name} just set a #1!`
+          )
+        );
+      }
+
+      // Send top 50 notification if applicable
+      if (isTop50GlobalScore) {
+        notifications.push(
+          sendScoreNotification(
+            DiscordChannels.top50Feed,
+            score,
+            leaderboard,
+            player,
+            beatLeaderScore,
+            `${playerInfo.name} just set a new top 50 score!`
+          )
+        );
+      }
     }
 
-    // Not ranked
-    if (leaderboard.stars <= 0) {
-      return;
-    }
-
-    if (mode === "numberOne" && score.rank === 1) {
-      await sendScoreNotification(
-        DiscordChannels.numberOneFeed,
-        score,
-        leaderboard,
-        player,
-        beatLeaderScore,
-        `${playerInfo.name} just set a #1!`
-      );
-      // No need to check this for all scores, so we only check if the score is top 50
-    } else if (mode === "top50AllTime" && isTop50GlobalScore) {
-      await sendScoreNotification(
-        DiscordChannels.top50Feed,
-        score,
-        leaderboard,
-        player,
-        beatLeaderScore,
-        `${playerInfo.name} just set a new top 50 score!`
-      );
-    }
+    // Send all notifications in parallel
+    await Promise.all(notifications);
   }
 
   /**
@@ -358,7 +371,8 @@ export default class ScoreSaberService {
           leaderboardScores.metadata.itemsPerPage
         );
 
-        for (const playerScore of leaderboardScores.playerScores) {
+        // Process all scores in parallel
+        const scorePromises = leaderboardScores.playerScores.map(async playerScore => {
           const leaderboardResponse = await LeaderboardService.getLeaderboard(
             playerScore.leaderboard.id + "",
             {
@@ -370,6 +384,7 @@ export default class ScoreSaberService {
           if (!leaderboardResponse) {
             return undefined;
           }
+
           const { leaderboard, beatsaver } = leaderboardResponse;
           let score = getScoreSaberScoreFromToken(playerScore.score, leaderboard, playerId);
           if (!score) {
@@ -377,15 +392,21 @@ export default class ScoreSaberService {
           }
 
           score = await ScoreService.insertScoreData(score, leaderboard);
-          scores.push({
+          return {
             score: score,
             leaderboard: leaderboard,
             beatSaver: beatsaver,
-          } as PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>);
-        }
+          } as PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>;
+        });
+
+        // Wait for all score processing to complete and filter out any undefined results
+        const processedScores = (await Promise.all(scorePromises)).filter(Boolean) as PlayerScore<
+          ScoreSaberScore,
+          ScoreSaberLeaderboard
+        >[];
 
         return {
-          scores: scores,
+          scores: processedScores,
           metadata: metadata,
         };
       }

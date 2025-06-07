@@ -150,16 +150,22 @@ export class ScoreService {
     player: ScoreSaberPlayerToken,
     beatLeaderScore?: BeatLeaderScoreToken
   ) {
-    const top50Scores = await ScoreService.getTopScores(50, "all");
-    const lowestPp = top50Scores.reduce((min, score) => Math.min(min, score.score.pp), Infinity);
-    const isTop50GlobalScore = scoreSaberToken.pp > lowestPp;
-
     // Track ScoreSaber score
-    await ScoreService.trackScoreSaberScore(scoreSaberToken, leaderboardToken, player);
+    const tracked = await ScoreService.trackScoreSaberScore(
+      scoreSaberToken,
+      leaderboardToken,
+      player
+    );
+    if (tracked.score == undefined) {
+      return;
+    }
+
     await PlayerHistoryService.updatePlayerScoresSet({
       score: scoreSaberToken,
       leaderboard: leaderboardToken,
     });
+
+    const isTop50GlobalScore = await ScoreService.isTop50GlobalScore(tracked.score);
 
     // Track BeatLeader score if available
     if (beatLeaderScore) {
@@ -170,21 +176,6 @@ export class ScoreService {
     await ScoreSaberService.notifyScore(
       { score: scoreSaberToken, leaderboard: leaderboardToken },
       player,
-      "scoreFloodGate",
-      beatLeaderScore,
-      isTop50GlobalScore
-    );
-    await ScoreSaberService.notifyScore(
-      { score: scoreSaberToken, leaderboard: leaderboardToken },
-      player,
-      "numberOne",
-      beatLeaderScore,
-      isTop50GlobalScore
-    );
-    await ScoreSaberService.notifyScore(
-      { score: scoreSaberToken, leaderboard: leaderboardToken },
-      player,
-      "top50AllTime",
       beatLeaderScore,
       isTop50GlobalScore
     );
@@ -396,7 +387,7 @@ export class ScoreService {
     leaderboardToken: ScoreSaberLeaderboardToken,
     player: ScoreSaberPlayerToken,
     log: boolean = true
-  ) {
+  ): Promise<{ score: ScoreSaberScore | undefined; tracked: boolean }> {
     const before = performance.now();
     const leaderboard = getScoreSaberLeaderboardFromToken(leaderboardToken);
     const score = getScoreSaberScoreFromToken(scoreToken, leaderboard, player.id);
@@ -405,7 +396,7 @@ export class ScoreService {
       // Logger.info(
       //   `Score "${score.scoreId}" for "${player.name}"(${player.id}) already exists, skipping`
       // );
-      return false;
+      return { score: undefined, tracked: false };
     }
 
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -440,7 +431,7 @@ export class ScoreService {
         `Tracked ScoreSaber score "${score.scoreId}" for "${player.name}"(${player.id}) in ${(performance.now() - before).toFixed(0)}ms`
       );
     }
-    return true;
+    return { score: score, tracked: true };
   }
 
   /**
@@ -589,5 +580,22 @@ export class ScoreService {
     }
 
     return score;
+  }
+
+  /**
+   * Checks if a score is in the top 50 global scores.
+   *
+   * @param score the score to check
+   * @returns whether the score is in the top 50 global scores
+   */
+  private static async isTop50GlobalScore(score: ScoreSaberScore) {
+    // No need to do a db call if the score is bad
+    if (score.pp <= 0 || score.rank < 10) {
+      return false;
+    }
+
+    const top50Scores = await ScoreService.getTopScores(50, "all");
+    const lowestPp = top50Scores.reduce((min, score) => Math.min(min, score.score.pp), Infinity);
+    return score.pp > lowestPp;
   }
 }

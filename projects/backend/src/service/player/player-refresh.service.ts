@@ -44,14 +44,13 @@ export class PlayerRefreshService {
       let missingScores = 0;
       await Promise.all(
         scoresPage.playerScores.map(async score => {
-          if (
-            await ScoreService.trackScoreSaberScore(
-              score.score,
-              score.leaderboard,
-              playerToken,
-              false
-            )
-          ) {
+          const tracked = await ScoreService.trackScoreSaberScore(
+            score.score,
+            score.leaderboard,
+            playerToken,
+            false
+          );
+          if (tracked.tracked) {
             missingScores++;
             totalMissingScores++;
           }

@@ -40,7 +40,16 @@ if (await Bun.file(".env").exists()) {
 
 // Connect to Mongo
 Logger.info("Connecting to MongoDB...");
-await mongoose.connect(env.MONGO_CONNECTION_STRING); // Connect to MongoDB
+await mongoose.connect(env.MONGO_CONNECTION_STRING, {
+  maxPoolSize: 30, // Increased from 10 to handle more concurrent requests
+  minPoolSize: 5, // Minimum number of connections in the pool
+  socketTimeoutMS: 45000, // Close sockets after 45 seconds of inactivity
+  connectTimeoutMS: 10000, // Give up initial connection after 10 seconds
+  serverSelectionTimeoutMS: 10000, // Keep trying to send operations for 10 seconds
+  heartbeatFrequencyMS: 10000, // Check server status every 10 seconds
+  retryWrites: true, // Retry write operations if they fail
+  retryReads: true, // Retry read operations if they fail
+});
 Logger.info("Connected to MongoDB :)");
 
 export const app = new Elysia();
