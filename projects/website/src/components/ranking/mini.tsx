@@ -10,6 +10,7 @@ import Link from "next/link";
 import { ReactElement } from "react";
 import Card from "../card";
 import CountryFlag from "../country-flag";
+import PlayerPreview from "../player/player-preview";
 
 type MiniProps = {
   /**
@@ -80,14 +81,20 @@ export default function Mini({ type, player }: MiniProps) {
               className="grid gap-2 grid-cols-[auto_1fr_auto] items-center bg-accent px-2 py-1.5 cursor-pointer transform-gpu transition-all hover:brightness-75 first:rounded-t last:rounded-b"
             >
               <p className="text-gray-400">#{formatNumberWithCommas(rank)}</p>
-              <div className="flex gap-2 items-center">
-                <PlayerInfo
-                  className="w-[170px]"
-                  player={playerRanking}
-                  highlightedPlayerId={player.id}
-                  hideCountryFlag
-                  hoverBrightness={false}
-                />
+              <div className="flex gap-2 items-start">
+                <div className="flex flex-col items-start">
+                  <PlayerPreview playerId={playerRanking.id}>
+                    <div className="flex flex-col items-start">
+                      <PlayerInfo
+                        className="w-[170px] !flex !items-start"
+                        player={playerRanking}
+                        highlightedPlayerId={player.id}
+                        hideCountryFlag
+                        hoverBrightness={false}
+                      />
+                    </div>
+                  </PlayerPreview>
+                </div>
               </div>
               <div className="inline-flex min-w-[12.5em] items-center gap-1">
                 <p className="text-ssr text-right">{formatPp(playerRanking.pp)}pp</p>

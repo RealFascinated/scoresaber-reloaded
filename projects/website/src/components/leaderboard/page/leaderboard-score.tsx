@@ -1,4 +1,5 @@
 import { PlayerInfo } from "@/components/player/player-info";
+import PlayerPreview from "@/components/player/player-preview";
 import ScoreMissesAndPausesBadge from "@/components/score/badges/score-misses-and-pauses";
 import { ScorePpBadge } from "@/components/score/badges/score-pp";
 import { ScoreReplayButton } from "@/components/score/button/score-replay-button";
@@ -38,7 +39,9 @@ export default function LeaderboardScore({ score, leaderboard, highlightedPlayer
 
       {/* Player */}
       <td className="px-4 py-2 flex gap-2 whitespace-nowrap min-w-[250px]">
-        <PlayerInfo player={scorePlayer} highlightedPlayerId={highlightedPlayerId} useLink />
+        <PlayerPreview playerId={scorePlayer.id}>
+          <PlayerInfo player={scorePlayer} highlightedPlayerId={highlightedPlayerId} useLink />
+        </PlayerPreview>
       </td>
 
       {/* Time Set */}

@@ -61,9 +61,9 @@ const playerData = [
       const ppChange = statisticChange?.daily?.pp ?? 0;
 
       return (
-        <div className="text-gray-300 flex gap-1 items-center">
+        <div className="text-gray-300 flex gap-1 items-center min-w-0">
           <ChangeOverTime player={player} type={PlayerStatChange.PerformancePoints}>
-            <p className="hover:brightness-[66%] transition-all transform-gpu text-pp">
+            <p className="hover:brightness-[66%] transition-all transform-gpu text-pp truncate">
               {formatPp(player.pp)}pp
             </p>
           </ChangeOverTime>
