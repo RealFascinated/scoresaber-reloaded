@@ -3,6 +3,7 @@ import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
 import { MetricValueModel } from "../common/model/metric";
 import ActiveAccountsMetric from "../metrics/impl/active-accounts";
+import HmdStatisticMetric from "../metrics/impl/hmd-statistic";
 import MongoDbSizeMetric from "../metrics/impl/mongo-db-size";
 import TrackedPlayersMetric from "../metrics/impl/tracked-players";
 import TrackedScoresMetric from "../metrics/impl/tracked-scores";
@@ -22,6 +23,7 @@ export enum MetricType {
   ACTIVE_ACCOUNTS = "active-accounts",
   MONGO_DB_SIZE = "mongo-db-size",
   REPLAY_STATS = "replay-stats",
+  HMD_STATISTIC = "hmd-statistic",
 }
 
 export default class MetricsService {
@@ -48,6 +50,7 @@ export default class MetricsService {
     this.registerMetric(new UniqueDailyPlayersMetric());
     this.registerMetric(new ActiveAccountsMetric());
     this.registerMetric(new MongoDbSizeMetric());
+    this.registerMetric(new HmdStatisticMetric());
 
     this.initMetrics();
     this.setupFlushTimer();

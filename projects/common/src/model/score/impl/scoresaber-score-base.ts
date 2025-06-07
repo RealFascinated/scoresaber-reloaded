@@ -1,4 +1,5 @@
 import { modelOptions, Prop, Severity } from "@typegoose/typegoose";
+import type { HMD } from "src/hmds";
 import { type Controllers } from "../controllers";
 import Score from "../score";
 import { ScoreSaberPreviousScoreOverview } from "./scoresaber-score";
@@ -43,7 +44,7 @@ export class ScoreSaberScoreBase extends Score {
    * The hmd used to set the score.
    */
   @Prop({ required: false })
-  public readonly hmd?: string;
+  public readonly hmd?: HMD;
 
   /**
    * The hmd used to set the score.
