@@ -39,8 +39,7 @@ export default class EventLoopTimersMetric extends Metric<TimerCleanupValue> {
       totalIntervals: activeIntervals,
     };
 
-    // Create a point for InfluxDB
-    return new Point("event_loop_timers")
+    return this.getPointBase()
       .floatField("active_timers", activeTimers)
       .floatField("active_intervals", activeIntervals)
       .floatField("total_timers", activeTimers + activeIntervals)
