@@ -47,7 +47,8 @@ const nextConfig: NextConfig = {
   },
   poweredByHeader: false,
   images: {
-    unoptimized: true, // Always use unoptimized images
+    loader: "custom",
+    loaderFile: "./src/common/image-loader.ts",
     remotePatterns: [
       {
         protocol: "https",
