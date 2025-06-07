@@ -14,6 +14,7 @@ import HmdStatisticMetric from "../metrics/impl/player/hmd-statistic";
 import TrackedPlayersMetric from "../metrics/impl/player/tracked-players";
 import TrackedScoresMetric from "../metrics/impl/player/tracked-scores";
 import UniqueDailyPlayersMetric from "../metrics/impl/player/unique-daily-players";
+import QueueAverageTimeMetric from "../metrics/impl/queue/queue-average-time";
 import QueueSizesMetric from "../metrics/impl/queue/queue-sizes";
 import Metric from "../metrics/metric";
 
@@ -42,6 +43,7 @@ export enum MetricType {
 
   // Queue metrics
   QUEUE_SIZES = "queue-sizes",
+  QUEUE_AVERAGE_TIME = "queue-average-time",
 
   // Database metrics
   MONGO_DB_SIZE = "mongo-db-size",
@@ -84,6 +86,7 @@ export default class MetricsService {
 
     // Queue metrics
     this.registerMetric(new QueueSizesMetric());
+    this.registerMetric(new QueueAverageTimeMetric());
 
     // Database metrics
     this.registerMetric(new MongoDbSizeMetric());

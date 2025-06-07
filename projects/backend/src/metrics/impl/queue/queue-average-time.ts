@@ -1,0 +1,23 @@
+import { Point } from "@influxdata/influxdb-client";
+import { QueueManager } from "../../../queue/queue-manager";
+import { MetricType } from "../../../service/metrics.service";
+import NumberMetric from "../../number-metric";
+
+export default class QueueAverageTimeMetric extends NumberMetric {
+  constructor() {
+    super(MetricType.QUEUE_AVERAGE_TIME, 0, {
+      fetchAfterRegister: false,
+      interval: 1000,
+    });
+  }
+
+  public async collect(): Promise<Point | undefined> {
+    const point = this.getPointBase();
+
+    for (const queue of QueueManager.getQueues()) {
+      point.floatField(queue.name, queue.getAverageTimeInQueue());
+    }
+
+    return point;
+  }
+}
