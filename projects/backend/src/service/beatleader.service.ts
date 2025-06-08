@@ -1,3 +1,4 @@
+import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import Logger from "@ssr/common/logger";
 import { MinioBucket } from "@ssr/common/minio-buckets";
 import {
@@ -6,7 +7,6 @@ import {
 } from "@ssr/common/model/additional-score-data/additional-score-data";
 import { PlayerDocument, PlayerModel } from "@ssr/common/model/player";
 import { removeObjectFields } from "@ssr/common/object.util";
-import { beatLeaderService } from "@ssr/common/service/impl/beatleader";
 import { ScoreStatsToken } from "@ssr/common/types/token/beatleader/score-stats/score-stats";
 import { BeatLeaderScoreToken } from "@ssr/common/types/token/beatleader/score/score";
 import { BeatLeaderScoreImprovementToken } from "@ssr/common/types/token/beatleader/score/score-improvement";
@@ -104,7 +104,7 @@ export default class BeatLeaderService {
       return;
     }
 
-    const scoreStats = await beatLeaderService.lookupScoreStats(score.id);
+    const scoreStats = await ApiServiceRegistry.getBeatLeaderService().lookupScoreStats(score.id);
     if (scoreStats) {
       await this.trackScoreStats(score.id, scoreStats);
     }
@@ -172,7 +172,9 @@ export default class BeatLeaderService {
         left: score.accLeft,
         right: score.accRight,
       },
-      scoreStats: isProduction() ? await beatLeaderService.lookupScoreStats(score.id) : undefined,
+      scoreStats: isProduction()
+        ? await ApiServiceRegistry.getBeatLeaderService().lookupScoreStats(score.id)
+        : undefined,
       cachedReplayId: savedReplayId,
       timestamp: new Date(Number(score.timeset) * 1000),
     } as AdditionalScoreData;
@@ -246,7 +248,9 @@ export default class BeatLeaderService {
       }
     );
     if (scoreStats == null) {
-      scoreStats = (await beatLeaderService.lookupScoreStats(scoreId)) as ScoreStatsToken;
+      scoreStats = (await ApiServiceRegistry.getBeatLeaderService().lookupScoreStats(
+        scoreId
+      )) as ScoreStatsToken;
       // Only track score stats if the player exists
       if (
         scoreStats &&
