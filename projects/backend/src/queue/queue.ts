@@ -32,7 +32,19 @@ export abstract class Queue<T> {
 
   constructor(name: QueueName, interval: number = 30_000) {
     this.name = name;
-    this.processInterval = setInterval(() => this.processQueue(), interval);
+    this.processInterval = setInterval(() => {
+      this.processQueue();
+      // Clean up old timestamps and processing times
+      const now = Date.now();
+      for (const [item, timestamp] of this.itemTimestamps.entries()) {
+        if (now - timestamp > interval * 2) {
+          this.itemTimestamps.delete(item);
+        }
+      }
+      if (this.processingTimes.length > this.MAX_SAMPLES) {
+        this.processingTimes = this.processingTimes.slice(-this.MAX_SAMPLES);
+      }
+    }, interval);
   }
 
   public cleanup() {

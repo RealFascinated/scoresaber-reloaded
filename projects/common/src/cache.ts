@@ -122,11 +122,10 @@ export class SSRCache {
       this.cleanupInterval = setInterval(() => {
         const before = this.cache.size;
         for (const [key, value] of this.cache.entries()) {
-          if (value.timestamp + this.ttl! > Date.now()) {
-            continue;
+          if (value.timestamp + this.ttl! < Date.now()) {
+            this.expired++;
+            this.remove(key);
           }
-          this.expired++;
-          this.remove(key);
         }
         if (this.debug.expired) {
           Logger.info(
