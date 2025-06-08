@@ -6,7 +6,7 @@ import { QueueName } from "../queue-manager";
 
 export class PlayerScoreSeedQueue extends Queue<string> {
   constructor() {
-    super(QueueName.PlayerScoreSeed);
+    super(QueueName.PlayerScoreSeed, 10_000);
 
     (async () => {
       const players = await PlayerModel.find({ seededScores: null }).select("_id");
