@@ -10,6 +10,9 @@ interface TimerCleanupValue {
 }
 
 export default class EventLoopTimersMetric extends Metric<TimerCleanupValue> {
+  private activeTimers: Set<NodeJS.Timer> = new Set();
+  private activeIntervals: Set<NodeJS.Timer> = new Set();
+
   constructor() {
     super(
       MetricType.EVENT_LOOP_TIMERS,
@@ -20,16 +23,56 @@ export default class EventLoopTimersMetric extends Metric<TimerCleanupValue> {
         totalIntervals: 0,
       },
       {
-        interval: 60000, // Collect every minute
+        interval: 1000, // Collect every second
         fetchAfterRegister: false,
       }
     );
+
+    // Override setTimeout
+    const originalSetTimeout = global.setTimeout;
+    global.setTimeout = ((
+      callback: (...args: unknown[]) => void,
+      ms: number,
+      ...args: unknown[]
+    ) => {
+      const timer = originalSetTimeout(callback, ms, ...args);
+      this.activeTimers.add(timer);
+
+      // Remove timer when it's cleared
+      const originalClearTimeout = global.clearTimeout;
+      global.clearTimeout = ((id: NodeJS.Timeout) => {
+        this.activeTimers.delete(id);
+        originalClearTimeout(id);
+      }) as typeof clearTimeout;
+
+      return timer;
+    }) as typeof setTimeout;
+
+    // Override setInterval
+    const originalSetInterval = global.setInterval;
+    global.setInterval = ((
+      callback: (...args: unknown[]) => void,
+      ms: number,
+      ...args: unknown[]
+    ) => {
+      const timer = originalSetInterval(callback, ms, ...args);
+      this.activeIntervals.add(timer);
+
+      // Remove interval when it's cleared
+      const originalClearInterval = global.clearInterval;
+      global.clearInterval = ((id: NodeJS.Timeout) => {
+        this.activeIntervals.delete(id);
+        originalClearInterval(id);
+      }) as typeof clearInterval;
+
+      return timer;
+    }) as typeof setInterval;
   }
 
   async collect(): Promise<Point> {
-    // Get all active timers and intervals
-    const activeTimers = this.getActiveTimers();
-    const activeIntervals = this.getActiveIntervals();
+    // Get counts from our tracking sets
+    const activeTimers = this.activeTimers.size;
+    const activeIntervals = this.activeIntervals.size;
 
     // Update the metric value
     this.value = {
@@ -39,22 +82,12 @@ export default class EventLoopTimersMetric extends Metric<TimerCleanupValue> {
       totalIntervals: activeIntervals,
     };
 
+    console.log(this.value);
+
     return this.getPointBase()
       .floatField("active_timers", activeTimers)
       .floatField("active_intervals", activeIntervals)
       .floatField("total_timers", activeTimers + activeIntervals)
       .floatField("total_intervals", activeIntervals);
-  }
-
-  private getActiveTimers(): number {
-    // Get all active timers from the process
-    const resources = process.getActiveResourcesInfo();
-    return resources.filter(resource => resource === "Timeout").length;
-  }
-
-  private getActiveIntervals(): number {
-    // Get all active intervals from the process
-    const resources = process.getActiveResourcesInfo();
-    return resources.filter(resource => resource === "Interval").length;
   }
 }

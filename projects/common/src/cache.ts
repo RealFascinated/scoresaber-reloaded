@@ -111,6 +111,7 @@ export class SSRCache {
    * @private
    */
   private cache = new Map<string, CachedObject>();
+  private cleanupInterval: NodeJS.Timeout | null = null;
 
   constructor({ ttl, checkInterval, debug }: CacheOptions) {
     this.ttl = ttl;
@@ -118,7 +119,7 @@ export class SSRCache {
     this.debug = debug || {};
 
     if (this.ttl !== undefined && this.checkInterval !== undefined) {
-      setInterval(() => {
+      this.cleanupInterval = setInterval(() => {
         const before = this.cache.size;
         for (const [key, value] of this.cache.entries()) {
           if (value.timestamp + this.ttl! > Date.now()) {
@@ -133,6 +134,13 @@ export class SSRCache {
           );
         }
       }, this.checkInterval);
+    }
+  }
+
+  public cleanup() {
+    if (this.cleanupInterval) {
+      clearInterval(this.cleanupInterval);
+      this.cleanupInterval = null;
     }
   }
 

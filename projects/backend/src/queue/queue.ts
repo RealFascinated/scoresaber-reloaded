@@ -3,6 +3,7 @@ import { QueueName } from "./queue-manager";
 
 export abstract class Queue<T> {
   private readonly MAX_SAMPLES = 10;
+  private processInterval: NodeJS.Timeout | null = null;
 
   /**
    * The name of the queue
@@ -31,7 +32,14 @@ export abstract class Queue<T> {
 
   constructor(name: QueueName, interval: number = 30_000) {
     this.name = name;
-    setInterval(() => this.processQueue(), interval);
+    this.processInterval = setInterval(() => this.processQueue(), interval);
+  }
+
+  public cleanup() {
+    if (this.processInterval) {
+      clearInterval(this.processInterval);
+      this.processInterval = null;
+    }
   }
 
   /**

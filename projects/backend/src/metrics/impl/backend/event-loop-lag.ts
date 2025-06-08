@@ -5,6 +5,7 @@ import Metric from "../../metric";
 export default class EventLoopLagMetric extends Metric<number> {
   private lastCheck: number;
   private lag: number;
+  private measureInterval: NodeJS.Timeout | null = null;
 
   constructor() {
     super(MetricType.EVENT_LOOP_LAG, 0, {
@@ -18,18 +19,12 @@ export default class EventLoopLagMetric extends Metric<number> {
   }
 
   private startMeasuring() {
-    const measure = () => {
+    this.measureInterval = setInterval(() => {
       const now = Date.now();
       const expected = this.lastCheck + 1000; // We expect 1 second between measurements
       this.lag = Math.max(0, now - expected);
       this.lastCheck = now;
-
-      // Schedule next measurement
-      setTimeout(measure, 1000);
-    };
-
-    // Start measuring
-    measure();
+    }, 1000);
   }
 
   async collect(): Promise<Point> {
@@ -38,5 +33,12 @@ export default class EventLoopLagMetric extends Metric<number> {
 
     // Create a point for InfluxDB using the base point
     return this.getPointBase().floatField("lag_ms", this.lag);
+  }
+
+  public cleanup() {
+    if (this.measureInterval) {
+      clearInterval(this.measureInterval);
+      this.measureInterval = null;
+    }
   }
 }

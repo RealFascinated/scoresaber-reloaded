@@ -222,6 +222,23 @@ export default class MetricsService {
     if (this.flushTimer) {
       clearInterval(this.flushTimer);
     }
+
+    // Clean up all metric timers
+    for (const timer of this.metricTimers.values()) {
+      clearInterval(timer);
+    }
+    this.metricTimers.clear();
+
+    // Clean up individual metrics
+    for (const metric of MetricsService.metrics) {
+      if (
+        "cleanup" in metric &&
+        typeof (metric as { cleanup: () => void }).cleanup === "function"
+      ) {
+        (metric as { cleanup: () => void }).cleanup();
+      }
+    }
+
     await this.flushPoints();
   }
 }
