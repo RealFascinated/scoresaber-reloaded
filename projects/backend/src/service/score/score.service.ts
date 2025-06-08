@@ -10,184 +10,22 @@ import LeaderboardScoresResponse from "@ssr/common/response/leaderboard-scores-r
 import { PlayerScore } from "@ssr/common/score/player-score";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { Timeframe } from "@ssr/common/timeframe";
-import {
-  getScoreSaberLeaderboardFromToken,
-  getScoreSaberScoreFromToken,
-} from "@ssr/common/token-creators";
+import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 import { Metadata } from "@ssr/common/types/metadata";
-import { BeatLeaderScoreToken } from "@ssr/common/types/token/beatleader/score/score";
-import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/leaderboard";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score";
 import { getDaysAgoDate } from "@ssr/common/utils/time-utils";
-import { connectBeatLeaderWebsocket } from "@ssr/common/websocket/beatleader-websocket";
-import { connectScoresaberWebsocket } from "@ssr/common/websocket/scoresaber-websocket";
 import { NotFoundError } from "elysia";
 import mongoose from "mongoose";
 import { fetchWithCache } from "../../common/cache.util";
 import { scoreToObject } from "../../common/score/score.util";
-import TrackedScoresMetric from "../../metrics/impl/player/tracked-scores";
 import BeatLeaderService from "../beatleader.service";
 import CacheService, { ServiceCache } from "../cache.service";
-import MetricsService, { MetricType } from "../metrics.service";
-import { PlayerHistoryService } from "../player/player-history.service";
 import LeaderboardService from "../scoresaber/leaderboard.service";
 import ScoreSaberService from "../scoresaber/scoresaber.service";
 import { PreviousScoresService } from "./previous-scores.service";
 
-interface PendingScore {
-  scoreSaberToken?: ScoreSaberScoreToken;
-  leaderboardToken?: ScoreSaberLeaderboardToken;
-  player?: ScoreSaberPlayerToken;
-  beatLeaderScore?: BeatLeaderScoreToken;
-  timestamp: number;
-  timeoutId?: NodeJS.Timeout; // Add timeout tracking
-}
-
 export class ScoreService {
-  private static pendingScores = new Map<string, PendingScore>();
-  private static readonly SCORE_MATCH_TIMEOUT = 10000; // 10 seconds in milliseconds
-
-  constructor() {
-    // Connect to websockets
-    connectScoresaberWebsocket({
-      onScore: async score => {
-        // Fetch player info
-        const player = await ScoreSaberService.updatePlayerCache(score.score.leaderboardPlayerInfo);
-        if (player == undefined) {
-          return;
-        }
-
-        const leaderboard = getScoreSaberLeaderboardFromToken(score.leaderboard);
-
-        // Create a unique key for this score
-        const key = `${player.id}-${leaderboard.songHash.toUpperCase()}-${leaderboard.difficulty.difficulty}-${leaderboard.difficulty.characteristic}`;
-
-        const pendingScore = ScoreService.pendingScores.get(key);
-        if (pendingScore?.beatLeaderScore) {
-          // Found a matching BeatLeader score, process both
-          ScoreService.clearPendingScore(key);
-          await this.processScore(
-            score.score,
-            score.leaderboard,
-            player,
-            pendingScore.beatLeaderScore
-          );
-        } else {
-          // No matching BeatLeader score yet, store this one
-          const timeoutId = setTimeout(() => {
-            const pendingScore = ScoreService.pendingScores.get(key);
-            if (
-              pendingScore?.scoreSaberToken &&
-              pendingScore.leaderboardToken &&
-              pendingScore.player
-            ) {
-              ScoreService.clearPendingScore(key);
-              this.processScore(
-                pendingScore.scoreSaberToken,
-                pendingScore.leaderboardToken,
-                pendingScore.player
-              );
-            }
-          }, ScoreService.SCORE_MATCH_TIMEOUT);
-
-          ScoreService.pendingScores.set(key, {
-            scoreSaberToken: score.score,
-            leaderboardToken: score.leaderboard,
-            player,
-            timestamp: Date.now(),
-            timeoutId,
-          });
-        }
-      },
-    });
-
-    connectBeatLeaderWebsocket({
-      onScore: async beatLeaderScore => {
-        // Try to find matching ScoreSaber score
-        const key = `${beatLeaderScore.playerId}-${beatLeaderScore.leaderboard.song.hash.toUpperCase()}-${beatLeaderScore.leaderboard.difficulty.difficultyName}-${beatLeaderScore.leaderboard.difficulty.modeName}`;
-        const pendingScore = ScoreService.pendingScores.get(key);
-
-        if (pendingScore?.scoreSaberToken && pendingScore.leaderboardToken && pendingScore.player) {
-          // Found a matching ScoreSaber score, process both
-          ScoreService.clearPendingScore(key);
-          await this.processScore(
-            pendingScore.scoreSaberToken,
-            pendingScore.leaderboardToken,
-            pendingScore.player,
-            beatLeaderScore
-          );
-        } else {
-          // No matching ScoreSaber score yet, store this one
-          const timeoutId = setTimeout(() => {
-            const pendingScore = ScoreService.pendingScores.get(key);
-            if (pendingScore?.beatLeaderScore) {
-              ScoreService.clearPendingScore(key);
-              BeatLeaderService.trackBeatLeaderScore(pendingScore.beatLeaderScore);
-            }
-          }, ScoreService.SCORE_MATCH_TIMEOUT);
-
-          ScoreService.pendingScores.set(key, {
-            beatLeaderScore,
-            timestamp: Date.now(),
-            timeoutId,
-          });
-        }
-      },
-    });
-  }
-
-  /**
-   * Processes a ScoreSaber score and its matching BeatLeader score if available.
-   *
-   * @param scoreSaberToken the ScoreSaber score to process
-   * @param leaderboardToken the leaderboard for the score
-   * @param player the player for the score
-   * @param beatLeaderScore optional matching BeatLeader score
-   */
-  private async processScore(
-    scoreSaberToken: ScoreSaberScoreToken,
-    leaderboardToken: ScoreSaberLeaderboardToken,
-    player: ScoreSaberPlayerToken,
-    beatLeaderScore?: BeatLeaderScoreToken
-  ) {
-    // Track ScoreSaber score
-    const tracked = await ScoreService.trackScoreSaberScore(
-      scoreSaberToken,
-      leaderboardToken,
-      player
-    );
-    if (tracked.score == undefined) {
-      return;
-    }
-
-    await PlayerHistoryService.updatePlayerScoresSet({
-      score: scoreSaberToken,
-      leaderboard: leaderboardToken,
-    });
-
-    const isTop50GlobalScore = await ScoreService.isTop50GlobalScore(tracked.score);
-
-    // Track BeatLeader score if available
-    if (beatLeaderScore) {
-      await BeatLeaderService.trackBeatLeaderScore(beatLeaderScore, isTop50GlobalScore);
-    }
-
-    // Notify
-    await ScoreSaberService.notifyScore(
-      { score: scoreSaberToken, leaderboard: leaderboardToken },
-      player,
-      beatLeaderScore,
-      isTop50GlobalScore
-    );
-
-    // Update metric
-    const trackedScoresMetric = (await MetricsService.getMetric(
-      MetricType.TRACKED_SCORES
-    )) as TrackedScoresMetric;
-    trackedScoresMetric.increment();
-  }
-
   /**
    * Gets scores for a leaderboard.
    *
@@ -378,20 +216,19 @@ export class ScoreService {
   /**
    * Tracks ScoreSaber score.
    *
-   * @param scoreToken the score to track
-   * @param leaderboardToken the leaderboard for the score
-   * @param playerId the id of the player
+   * @param score the score to track
+   * @param leaderboard the leaderboard for the score
+   * @param player the player for the score
+   * @param log whether to log the score
    * @returns whether the score was tracked
    */
   public static async trackScoreSaberScore(
-    scoreToken: ScoreSaberScoreToken,
-    leaderboardToken: ScoreSaberLeaderboardToken,
+    score: ScoreSaberScore,
+    leaderboard: ScoreSaberLeaderboard,
     player: ScoreSaberPlayerToken,
     log: boolean = true
   ): Promise<{ score: ScoreSaberScore | undefined; tracked: boolean }> {
     const before = performance.now();
-    const leaderboard = getScoreSaberLeaderboardFromToken(leaderboardToken);
-    const score = getScoreSaberScoreFromToken(scoreToken, leaderboard, player.id);
 
     // Skip saving the score if characteristic is missing
     if (!score.characteristic) {
@@ -597,7 +434,7 @@ export class ScoreService {
    * @param score the score to check
    * @returns whether the score is in the top 50 global scores
    */
-  private static async isTop50GlobalScore(score: ScoreSaberScore) {
+  public static async isTop50GlobalScore(score: ScoreSaberScore | ScoreSaberScoreToken) {
     // No need to do a db call if the score is bad
     if (score.pp <= 0 || score.rank < 10) {
       return false;
@@ -606,14 +443,5 @@ export class ScoreService {
     const top50Scores = await ScoreService.getTopScores(50, "all");
     const lowestPp = top50Scores.reduce((min, score) => Math.min(min, score.score.pp), Infinity);
     return score.pp > lowestPp;
-  }
-
-  // Add cleanup method
-  private static clearPendingScore(key: string) {
-    const pendingScore = this.pendingScores.get(key);
-    if (pendingScore?.timeoutId) {
-      clearTimeout(pendingScore.timeoutId);
-    }
-    this.pendingScores.delete(key);
   }
 }

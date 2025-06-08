@@ -19,6 +19,7 @@ import PlayerController from "./controller/player.controller";
 import PlaylistController from "./controller/playlist.controller";
 import ScoresController from "./controller/scores.controller";
 import StatisticsController from "./controller/statistics.controller";
+import { EventsManager } from "./event/events-manager";
 import { metricsPlugin } from "./plugins/metrics.plugin";
 import { QueueManager } from "./queue/queue-manager";
 import CacheService from "./service/cache.service";
@@ -28,6 +29,7 @@ import PlaylistService from "./service/playlist.service";
 import { ScoreService } from "./service/score/score.service";
 import LeaderboardService from "./service/scoresaber/leaderboard.service";
 import StatisticsService from "./service/statistics.service";
+import { ScoreWebsockets } from "./websocket/score-websockets";
 
 Logger.info("Starting SSR Backend...");
 
@@ -38,6 +40,8 @@ if (await Bun.file(".env").exists()) {
     override: true,
   });
 }
+
+new EventsManager();
 
 // Connect to Mongo
 Logger.info("Connecting to MongoDB...");
@@ -188,6 +192,10 @@ app.use(
 );
 
 app.onStart(async () => {
+  EventsManager.getListeners().forEach(listener => {
+    listener.onStart?.();
+  });
+
   Logger.info("Listening on port http://localhost:8080");
   if (isProduction()) {
     await initDiscordBot();
@@ -204,12 +212,22 @@ app.onStart(async () => {
     Logger.info(`${route.method} ${route.path}`);
   }
 
+  // Must be registered first
+  new ScoreWebsockets();
+
   new MetricsService();
   new CacheService();
   new StatisticsService();
   new ScoreService();
   new QueueManager();
   new PlaylistService();
+});
+
+app.onStop(async () => {
+  Logger.info("Stopping SSR Backend...");
+  EventsManager.getListeners().forEach(listener => {
+    listener.onStop?.();
+  });
 });
 
 app.listen({

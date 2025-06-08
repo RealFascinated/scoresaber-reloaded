@@ -12,23 +12,16 @@ import PlayerScoresResponse from "@ssr/common/response/player-scores-response";
 import { PlayerScore } from "@ssr/common/score/player-score";
 import { ScoreSort } from "@ssr/common/score/score-sort";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
-import {
-  getScoreSaberLeaderboardFromToken,
-  getScoreSaberScoreFromToken,
-} from "@ssr/common/token-creators";
+import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 import { Metadata } from "@ssr/common/types/metadata";
-import { BeatLeaderScoreToken } from "@ssr/common/types/token/beatleader/score/score";
 import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/leaderboard-player-info";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
-import ScoreSaberPlayerScoreToken from "@ssr/common/types/token/scoresaber/player-score";
 import { getPlayerStatisticChanges } from "@ssr/common/utils/player-utils";
 import { getDaysAgoDate } from "@ssr/common/utils/time-utils";
-import { getPageFromRank, isProduction } from "@ssr/common/utils/utils";
+import { getPageFromRank } from "@ssr/common/utils/utils";
 import { NotFoundError } from "elysia";
 import sanitize from "sanitize-html";
-import { DiscordChannels } from "../../bot/bot";
 import { fetchWithCache } from "../../common/cache.util";
-import { sendScoreNotification } from "../../common/score/score.util";
 import CacheService, { ServiceCache } from "../cache.service";
 import { PlayerAccuracyService } from "../player/player-accuracy.service";
 import { PlayerCoreService } from "../player/player-core.service";
@@ -38,84 +31,6 @@ import { ScoreService } from "../score/score.service";
 import LeaderboardService from "./leaderboard.service";
 
 export default class ScoreSaberService {
-  /**
-   * Notifies score achievements in Discord.
-   *
-   * @param playerScore the score to notify
-   * @param player the player who set the score
-   * @param beatLeaderScore optional BeatLeader score data
-   * @param isTop50GlobalScore whether this is a top 50 global score
-   */
-  public static async notifyScore(
-    playerScore: ScoreSaberPlayerScoreToken,
-    player: ScoreSaberPlayerToken,
-    beatLeaderScore?: BeatLeaderScoreToken,
-    isTop50GlobalScore?: boolean
-  ) {
-    // Only notify in production
-    if (!isProduction()) {
-      return;
-    }
-
-    const { score: scoreToken, leaderboard: leaderboardToken } = playerScore;
-    const leaderboard = getScoreSaberLeaderboardFromToken(leaderboardToken);
-    const score = getScoreSaberScoreFromToken(
-      scoreToken,
-      leaderboard,
-      scoreToken.leaderboardPlayerInfo.id
-    );
-    const playerInfo = score.playerInfo;
-
-    // Prepare notifications to send
-    const notifications = [];
-
-    // Always send score flood gate notification
-    notifications.push(
-      sendScoreNotification(
-        DiscordChannels.scoreFloodGateFeed,
-        score,
-        leaderboard,
-        player,
-        beatLeaderScore,
-        `${playerInfo.name} just set a rank #${score.rank}!`
-      )
-    );
-
-    // Only send ranked notifications if the map is ranked
-    if (leaderboard.stars > 0) {
-      // Send #1 notification if applicable
-      if (score.rank === 1) {
-        notifications.push(
-          sendScoreNotification(
-            DiscordChannels.numberOneFeed,
-            score,
-            leaderboard,
-            player,
-            beatLeaderScore,
-            `${playerInfo.name} just set a #1!`
-          )
-        );
-      }
-
-      // Send top 50 notification if applicable
-      if (isTop50GlobalScore) {
-        notifications.push(
-          sendScoreNotification(
-            DiscordChannels.top50Feed,
-            score,
-            leaderboard,
-            player,
-            beatLeaderScore,
-            `${playerInfo.name} just set a new top 50 score!`
-          )
-        );
-      }
-    }
-
-    // Send all notifications in parallel
-    await Promise.all(notifications);
-  }
-
   /**
    * Gets a ScoreSaber player using their account id.
    *
@@ -166,19 +81,15 @@ export default class ScoreSaberService {
         }
 
         // For full type, run these operations in parallel
-        const [updatedAccount, accuracies, ppBoundaries, accBadges] = await Promise.all([
+        const [updatedAccount, ppBoundaries, accBadges] = await Promise.all([
           account ? PlayerRankingService.updatePeakRank(id, playerToken) : undefined,
-          account
-            ? PlayerAccuracyService.getPlayerAverageAccuracies(playerToken.id)
-            : { unrankedAccuracy: 0, averageAccuracy: 0 },
           account ? PlayerRankingService.getPlayerPpBoundary(id, 50) : [],
           account ? PlayerAccuracyService.getAccBadges(id) : {},
         ]);
 
         const statisticHistory = await PlayerHistoryService.getPlayerStatisticHistory(
           playerToken,
-          account,
-          accuracies,
+
           new Date(),
           getDaysAgoDate(30)
         );
@@ -300,34 +211,6 @@ export default class ScoreSaberService {
     }
 
     return player;
-  }
-
-  /**
-   * Gets the player's statistic history.
-   *
-   * @param playerId the player's id
-   * @param startDate the start date
-   * @param endDate the end date
-   * @returns the player's statistic history
-   */
-  public static async getPlayerStatisticHistory(playerId: string, startDate: Date, endDate: Date) {
-    const player = await scoresaberService.lookupPlayer(playerId);
-    if (!player) {
-      throw new NotFoundError(`Player "${playerId}" not found`);
-    }
-
-    const [account, accuracies] = await Promise.all([
-      PlayerCoreService.getPlayer(player.id, false, player).catch(() => undefined),
-      PlayerAccuracyService.getPlayerAverageAccuracies(player.id),
-    ]);
-
-    return PlayerHistoryService.getPlayerStatisticHistory(
-      player,
-      account,
-      accuracies,
-      startDate,
-      endDate
-    );
   }
 
   /**

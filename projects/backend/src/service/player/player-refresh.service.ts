@@ -2,6 +2,10 @@ import Logger from "@ssr/common/logger";
 import { PlayerDocument, PlayerModel } from "@ssr/common/model/player";
 import { ScoreSort } from "@ssr/common/score/score-sort";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
+import {
+  getScoreSaberLeaderboardFromToken,
+  getScoreSaberScoreFromToken,
+} from "@ssr/common/token-creators";
 import { ScoreService } from "../score/score.service";
 import ScoreSaberService from "../scoresaber/scoresaber.service";
 import { PlayerCoreService } from "./player-core.service";
@@ -45,8 +49,12 @@ export class PlayerRefreshService {
       await Promise.all(
         scoresPage.playerScores.map(async score => {
           const tracked = await ScoreService.trackScoreSaberScore(
-            score.score,
-            score.leaderboard,
+            getScoreSaberScoreFromToken(
+              score.score,
+              getScoreSaberLeaderboardFromToken(score.leaderboard),
+              player.id
+            ),
+            getScoreSaberLeaderboardFromToken(score.leaderboard),
             playerToken,
             false
           );

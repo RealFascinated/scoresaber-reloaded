@@ -1,13 +1,13 @@
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger from "@ssr/common/logger";
+import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { PlayerDocument, PlayerModel } from "@ssr/common/model/player";
+import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { PlayerAccuracies } from "@ssr/common/player/player-accuracies";
 import { PlayerStatisticHistory } from "@ssr/common/player/player-statistic-history";
 import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
-import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
 import { PlayerStatistic, ScoreCalendarData } from "@ssr/common/types/player/player-statistic";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
-import ScoreSaberPlayerScoreToken from "@ssr/common/types/token/scoresaber/player-score";
 import { parseRankHistory } from "@ssr/common/utils/player-utils";
 import {
   formatDateMinimal,
@@ -17,6 +17,7 @@ import {
 import { fetchWithCache } from "../../common/cache.util";
 import CacheService, { ServiceCache } from "../cache.service";
 import { PlayerAccuracyService } from "./player-accuracy.service";
+import { PlayerCoreService } from "./player-core.service";
 import { PlayerRankingService } from "./player-ranking.service";
 
 export class PlayerHistoryService {
@@ -84,11 +85,14 @@ export class PlayerHistoryService {
    */
   public static async getPlayerStatisticHistory(
     player: ScoreSaberPlayerToken,
-    account: PlayerDocument | undefined,
-    accuracies: PlayerAccuracies,
     startDate: Date,
     endDate: Date
   ): Promise<PlayerStatisticHistory> {
+    const [account, accuracies] = await Promise.all([
+      PlayerCoreService.getPlayer(player.id, false, player).catch(() => undefined),
+      PlayerAccuracyService.getPlayerAverageAccuracies(player.id),
+    ]);
+
     const history = account?.getStatisticHistoryInRange(endDate, startDate) ?? {};
 
     // Update current day's history
@@ -173,15 +177,16 @@ export class PlayerHistoryService {
    * Increments either ranked or unranked score count based on the leaderboard stars.
    */
   public static async updatePlayerScoresSet({
-    score: scoreToken,
-    leaderboard: leaderboardToken,
-  }: ScoreSaberPlayerScoreToken): Promise<void> {
-    const playerId = scoreToken.leaderboardPlayerInfo.id;
-    const player = await PlayerModel.findById(playerId);
+    score,
+    leaderboard,
+  }: {
+    score: ScoreSaberScore;
+    leaderboard: ScoreSaberLeaderboard;
+  }): Promise<void> {
+    const player = await PlayerModel.findById(score.playerId);
 
     if (!player) return;
 
-    const leaderboard = getScoreSaberLeaderboardFromToken(leaderboardToken);
     const today = new Date();
     const history = player.getHistoryByDate(today);
     const scores = history.scores ?? { rankedScores: 0, unrankedScores: 0 };

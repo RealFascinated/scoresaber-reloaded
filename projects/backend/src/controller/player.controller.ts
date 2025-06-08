@@ -6,8 +6,9 @@ import { AroundPlayerResponse } from "@ssr/common/response/around-player-respons
 import { PlayedMapsCalendarResponse } from "@ssr/common/response/played-maps-calendar-response";
 import { PlayerRankedPpsResponse } from "@ssr/common/response/player-ranked-pps-response";
 import { PpBoundaryResponse } from "@ssr/common/response/pp-boundary-response";
+import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { getDaysAgoDate } from "@ssr/common/utils/time-utils";
-import { t } from "elysia";
+import { NotFoundError, t } from "elysia";
 import { Controller, Get, Post } from "elysia-decorators";
 import SuperJSON from "superjson";
 import { PlayerAccuracyService } from "../service/player/player-accuracy.service";
@@ -61,8 +62,12 @@ export default class PlayerController {
     params: { id: string };
     query: { startDate: string; endDate: string };
   }): Promise<PlayerStatisticHistory> {
-    return await ScoreSaberService.getPlayerStatisticHistory(
-      id,
+    const player = await scoresaberService.lookupPlayer(id);
+    if (!player) {
+      throw new NotFoundError(`Player "${id}" not found`);
+    }
+    return await PlayerHistoryService.getPlayerStatisticHistory(
+      player,
       new Date(startDate),
       new Date(endDate)
     );
