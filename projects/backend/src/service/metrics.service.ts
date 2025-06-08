@@ -7,8 +7,8 @@ import CpuUsageMetric from "../metrics/impl/backend/cpu-usage";
 import EventLoopLagMetric from "../metrics/impl/backend/event-loop-lag";
 import EventLoopTimersMetric from "../metrics/impl/backend/event-loop-timers";
 import MemoryUsageMetric from "../metrics/impl/backend/memory-usage";
-import RequestsPerSecondMetric from "../metrics/impl/backend/requests-per-second";
 import RouteLatencyMetric from "../metrics/impl/backend/route-latency";
+import RequestsPerSecondMetric from "../metrics/impl/backend/total-requests";
 import MongoDbSizeMetric from "../metrics/impl/database/mongo-db-size";
 import ActiveAccountsMetric from "../metrics/impl/player/active-accounts";
 import HmdStatisticMetric from "../metrics/impl/player/hmd-statistic";
@@ -38,7 +38,7 @@ export enum MetricType {
   CPU_USAGE = "cpu-usage",
   MEMORY_USAGE = "memory-usage",
   EVENT_LOOP_LAG = "event-loop-lag",
-  REQUESTS_PER_SECOND = "requests-per-second",
+  TOTAL_REQUESTS = "total-requests",
   ROUTE_LATENCY = "route-latency",
   EVENT_LOOP_TIMERS = "event-loop-timers",
   API_SERVICES = "api-services",

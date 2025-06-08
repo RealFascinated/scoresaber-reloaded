@@ -1,7 +1,7 @@
 import Logger from "@ssr/common/logger";
 import { Elysia } from "elysia";
-import RequestsPerSecondMetric from "../metrics/impl/backend/requests-per-second";
 import RouteLatencyMetric from "../metrics/impl/backend/route-latency";
+import RequestsPerSecondMetric from "../metrics/impl/backend/total-requests";
 import MetricsService, { MetricType } from "../service/metrics.service";
 
 interface RequestStore {
@@ -13,7 +13,7 @@ export const metricsPlugin = () => {
     .onRequest(async ({ store }) => {
       try {
         const rpsMetric = (await MetricsService.getMetric(
-          MetricType.REQUESTS_PER_SECOND
+          MetricType.TOTAL_REQUESTS
         )) as RequestsPerSecondMetric;
         rpsMetric.increment();
         (store as RequestStore).startTime = process.hrtime.bigint();
