@@ -153,9 +153,10 @@ export class PlayerRefreshService {
         Logger.info(`Processing ${seededPlayers.length} seeded players in parallel...`);
         await Promise.all(
           seededPlayers.map(async player => {
+            let timeoutId: NodeJS.Timeout | undefined;
             try {
               const timeoutPromise = new Promise((_, reject) => {
-                setTimeout(
+                timeoutId = setTimeout(
                   () => reject(new Error(`Timeout processing player ${player.id}`)),
                   PLAYER_TIMEOUT
                 );
@@ -171,6 +172,10 @@ export class PlayerRefreshService {
             } catch (error) {
               Logger.error(`Failed to track seeded player ${player.id} (${player.name}): ${error}`);
               errorCount++;
+            } finally {
+              if (timeoutId) {
+                clearTimeout(timeoutId);
+              }
             }
           })
         );
@@ -180,9 +185,10 @@ export class PlayerRefreshService {
       if (unseededPlayers.length > 0) {
         Logger.info(`Processing ${unseededPlayers.length} unseeded players sequentially...`);
         for (const player of unseededPlayers) {
+          let timeoutId: NodeJS.Timeout | undefined;
           try {
             const timeoutPromise = new Promise((_, reject) => {
-              setTimeout(
+              timeoutId = setTimeout(
                 () => reject(new Error(`Timeout processing player ${player.id}`)),
                 PLAYER_TIMEOUT
               );
@@ -198,6 +204,10 @@ export class PlayerRefreshService {
           } catch (error) {
             Logger.error(`Failed to track unseeded player ${player.id} (${player.name}): ${error}`);
             errorCount++;
+          } finally {
+            if (timeoutId) {
+              clearTimeout(timeoutId);
+            }
           }
         }
       }

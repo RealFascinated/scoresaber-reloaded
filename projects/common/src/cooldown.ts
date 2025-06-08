@@ -84,7 +84,16 @@ export class Cooldown {
   async awaitCooldown(): Promise<void> {
     const remainingTime = this.getRemainingTime();
     if (remainingTime > 0) {
-      await new Promise(resolve => setTimeout(resolve, remainingTime));
+      let timeoutId: NodeJS.Timeout | undefined;
+      try {
+        await new Promise<void>(resolve => {
+          timeoutId = setTimeout(resolve, remainingTime);
+        });
+      } finally {
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+        }
+      }
     }
   }
 

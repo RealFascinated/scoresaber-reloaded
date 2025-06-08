@@ -21,15 +21,6 @@ export function isServer() {
 }
 
 /**
- * Delays a promise
- *
- * @param ms the number of milliseconds to delay
- */
-export function delay(ms: number) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-/**
  * Gets the page from a rank.
  *
  * @param rank the rank

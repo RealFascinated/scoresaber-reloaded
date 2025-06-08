@@ -34,6 +34,7 @@ type Websocket = {
  */
 export function connectWebSocket({ name, url, onMessage, onDisconnect }: Websocket) {
   let websocket: WebSocket | null = null;
+  let reconnectTimer: NodeJS.Timeout | undefined;
 
   function connectWs() {
     websocket = new WebSocket(url);
@@ -55,7 +56,12 @@ export function connectWebSocket({ name, url, onMessage, onDisconnect }: Websock
       Logger.info(`Lost connection to the ${name} WebSocket. Attempting to reconnect...`);
 
       onDisconnect && onDisconnect(event);
-      setTimeout(connectWs, 5000); // Reconnect after 5 seconds
+
+      // Clear any existing reconnection timer
+      if (reconnectTimer) {
+        clearTimeout(reconnectTimer);
+      }
+      reconnectTimer = setTimeout(connectWs, 5000); // Reconnect after 5 seconds
     };
 
     websocket.onmessage = messageEvent => {
