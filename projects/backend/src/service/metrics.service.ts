@@ -2,7 +2,7 @@ import { InfluxDB, Point } from "@influxdata/influxdb-client";
 import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
 import { MetricValueModel } from "../common/model/metric";
-import { ApiServiceCallRateMetric } from "../metrics/impl/backend/api-service-call-rate";
+import { ApiServicesMetric } from "../metrics/impl/backend/api-services";
 import CpuUsageMetric from "../metrics/impl/backend/cpu-usage";
 import EventLoopLagMetric from "../metrics/impl/backend/event-loop-lag";
 import EventLoopTimersMetric from "../metrics/impl/backend/event-loop-timers";
@@ -41,7 +41,7 @@ export enum MetricType {
   REQUESTS_PER_SECOND = "requests-per-second",
   ROUTE_LATENCY = "route-latency",
   EVENT_LOOP_TIMERS = "event-loop-timers",
-  SERVICE_CALL_RATE = "service-call-rate",
+  API_SERVICES = "api-services",
 
   // Queue metrics
   QUEUE_SIZES = "queue-sizes",
@@ -87,7 +87,7 @@ export default class MetricsService {
     this.registerMetric(new RequestsPerSecondMetric());
     this.registerMetric(new RouteLatencyMetric());
     this.registerMetric(new EventLoopTimersMetric());
-    this.registerMetric(new ApiServiceCallRateMetric());
+    this.registerMetric(new ApiServicesMetric());
 
     // Queue metrics
     this.registerMetric(new QueueSizesMetric());

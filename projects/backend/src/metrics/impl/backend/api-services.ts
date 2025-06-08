@@ -3,9 +3,9 @@ import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { MetricType } from "../../../service/metrics.service";
 import NumberMetric from "../../number-metric";
 
-export class ApiServiceCallRateMetric extends NumberMetric {
+export class ApiServicesMetric extends NumberMetric {
   constructor() {
-    super(MetricType.SERVICE_CALL_RATE, 0, {
+    super(MetricType.API_SERVICES, 0, {
       interval: 1000, // Collect every second
       fetchAfterRegister: false,
     });
