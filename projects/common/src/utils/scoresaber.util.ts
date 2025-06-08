@@ -1,8 +1,8 @@
-import { ScoreSaberScore } from "src/model/score/impl/scoresaber-score";
+import ApiServiceRegistry from "../../src/api-service/api-service-registry";
+import { ScoreSaberScore } from "../../src/model/score/impl/scoresaber-score";
 import { HMD } from "../hmds";
 import ScoreSaberPlayer from "../player/impl/scoresaber-player";
 import { MapDifficulty } from "../score/map-difficulty";
-import { scoresaberService } from "../service/impl/scoresaber";
 import { ScoreSaberLeaderboardPlayerInfoToken } from "../types/token/scoresaber/leaderboard-player-info";
 import { ScoreSaberPlayerToken } from "../types/token/scoresaber/player";
 
@@ -141,6 +141,6 @@ export function getScoreSaberAvatar(
  */
 export function updateScoreWeights(scores: Pick<ScoreSaberScore, "pp" | "weight" | "scoreId">[]) {
   for (let i = 0; i < scores.length; i++) {
-    scores[i].weight = Math.pow(scoresaberService.WEIGHT_COEFFICIENT, i);
+    scores[i].weight = Math.pow(ApiServiceRegistry.getScoreSaberService().WEIGHT_COEFFICIENT, i);
   }
 }

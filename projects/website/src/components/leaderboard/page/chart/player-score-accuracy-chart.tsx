@@ -3,9 +3,9 @@
 import { DatasetConfig } from "@/common/chart/types";
 import { Colors } from "@/common/colors";
 import GenericChart from "@/components/chart/generic-chart";
+import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreStatsResponse } from "@ssr/common/response/scorestats-response";
-import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { formatTime } from "@ssr/common/utils/time-utils";
 
 type Props = {
@@ -40,7 +40,7 @@ export default function PlayerScoreAccuracyChart({ scoreStats, leaderboard }: Pr
     }
 
     if (leaderboard.ranked) {
-      histories["pp"].push(scoresaberService.getPp(leaderboard.stars, acc));
+      histories["pp"].push(ApiServiceRegistry.getScoreSaberService().getPp(leaderboard.stars, acc));
     }
   }
 

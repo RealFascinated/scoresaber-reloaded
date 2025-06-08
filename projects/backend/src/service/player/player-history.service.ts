@@ -1,3 +1,4 @@
+import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger from "@ssr/common/logger";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
@@ -5,7 +6,6 @@ import { PlayerDocument, PlayerModel } from "@ssr/common/model/player";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { PlayerAccuracies } from "@ssr/common/player/player-accuracies";
 import { PlayerStatisticHistory } from "@ssr/common/player/player-statistic-history";
-import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { PlayerStatistic, ScoreCalendarData } from "@ssr/common/types/player/player-statistic";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import { parseRankHistory } from "@ssr/common/utils/player-utils";
@@ -34,7 +34,8 @@ export class PlayerHistoryService {
     playerToken?: ScoreSaberPlayerToken
   ): Promise<void> {
     const before = performance.now();
-    const player = playerToken ?? (await scoresaberService.lookupPlayer(foundPlayer.id));
+    const player =
+      playerToken ?? (await ApiServiceRegistry.getScoreSaberService().lookupPlayer(foundPlayer.id));
 
     if (!player) {
       Logger.warn(`Player "${foundPlayer.id}" not found on ScoreSaber`);

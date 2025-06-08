@@ -30,7 +30,8 @@
     "globals": "^16.2.0",
     "minio": "^8.0.5",
     "mongoose": "^8.15.1",
-    "pidusage": "^4.0.1"
+    "pidusage": "^4.0.1",
+    "systeminformation": "^5.27.1"
   },
   "devDependencies": {
     "bun-types": "^1.2.15"

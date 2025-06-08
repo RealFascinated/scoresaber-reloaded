@@ -1,7 +1,7 @@
+import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import Logger from "@ssr/common/logger";
 import { PlayerDocument, PlayerModel } from "@ssr/common/model/player";
 import { ScoreSort } from "@ssr/common/score/score-sort";
-import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import {
   getScoreSaberLeaderboardFromToken,
   getScoreSaberScoreFromToken,
@@ -33,7 +33,7 @@ export class PlayerRefreshService {
     }
 
     while (hasMorePages) {
-      const scoresPage = await scoresaberService.lookupPlayerScores({
+      const scoresPage = await ApiServiceRegistry.getScoreSaberService().lookupPlayerScores({
         playerId: player.id,
         page: page,
         limit: 100,
@@ -100,7 +100,7 @@ export class PlayerRefreshService {
     const now = new Date();
     Logger.info("Starting player statistics update...");
 
-    const firstPage = await scoresaberService.lookupPlayers(1);
+    const firstPage = await ApiServiceRegistry.getScoreSaberService().lookupPlayers(1);
     if (firstPage == undefined) {
       Logger.error("Failed to fetch players on page 1, skipping player statistics update...");
       return;
@@ -119,7 +119,7 @@ export class PlayerRefreshService {
       }
 
       Logger.info(`Fetching page ${i}...`);
-      const page = await scoresaberService.lookupPlayers(i);
+      const page = await ApiServiceRegistry.getScoreSaberService().lookupPlayers(i);
 
       if (page == undefined) {
         Logger.error(`Failed to fetch players on page ${i}, skipping page...`);

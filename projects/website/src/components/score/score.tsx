@@ -15,11 +15,11 @@ import ScoreSongInfo from "./score-song-info";
 import ScoreStats from "./score-stats";
 
 import { useIsMobile } from "@/hooks/use-is-mobile";
-import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { getPageFromRank } from "@ssr/common/utils/utils";
 
 import LeaderboardScores from "@/components/leaderboard/leaderboard-scores";
 import { Separator } from "@/components/ui/separator";
+import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
@@ -108,7 +108,9 @@ export default function Score({
 
   const accuracy = (baseScore / leaderboard.maxScore) * 100;
   const pp =
-    baseScore === score.score ? score.pp : scoresaberService.getPp(leaderboard.stars, accuracy);
+    baseScore === score.score
+      ? score.pp
+      : ApiServiceRegistry.getScoreSaberService().getPp(leaderboard.stars, accuracy);
 
   const handleLeaderboardOpen = (isExpanded: boolean) => {
     if (!isExpanded) {

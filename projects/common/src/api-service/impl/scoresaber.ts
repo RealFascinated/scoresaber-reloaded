@@ -15,7 +15,8 @@ import { ScoreSaberPlayersPageToken } from "../../types/token/scoresaber/players
 import RankingRequestToken from "../../types/token/scoresaber/ranking-request-token";
 import { clamp, lerp } from "../../utils/math-utils";
 import { getDifficulty } from "../../utils/song-utils";
-import Service from "../service";
+import ApiService from "../api-service";
+import { ApiServiceName } from "../api-service-registry";
 
 const API_BASE = "https://scoresaber.com/api";
 
@@ -43,7 +44,7 @@ const SEARCH_LEADERBOARDS_ENDPOINT = `${API_BASE}/leaderboards?search=:query`;
  */
 const RANKING_REQUESTS_ENDPOINT = `${API_BASE}/ranking/requests/:query`;
 
-class ScoreSaberService extends Service {
+export class ScoreSaberService extends ApiService {
   readonly WEIGHT_COEFFICIENT = 0.965;
   readonly STAR_MULTIPLIER = 42.117208413;
 
@@ -88,7 +89,7 @@ class ScoreSaberService extends Service {
   ];
 
   constructor() {
-    super(new Cooldown(60_000 / 300, 150));
+    super(new Cooldown(60_000 / 300, 150), ApiServiceName.SCORE_SABER);
   }
 
   /**
@@ -578,5 +579,3 @@ class ScoreSaberService extends Service {
     return newTotal - oldTotal;
   }
 }
-
-export const scoresaberService = new ScoreSaberService();

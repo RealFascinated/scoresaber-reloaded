@@ -1,4 +1,5 @@
 import cron from "@elysiajs/cron";
+import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { env } from "@ssr/common/env";
 import { BadRequestError } from "@ssr/common/error/bad-request-error";
 import { InternalServerError } from "@ssr/common/error/internal-server-error";
@@ -10,7 +11,6 @@ import { Playlist, PlaylistModel } from "@ssr/common/playlist/playlist";
 import { PlaylistSong } from "@ssr/common/playlist/playlist-song";
 import { parseCustomRankedPlaylistSettings } from "@ssr/common/playlist/ranked/custom-ranked-playlist";
 import { SnipePlaylist } from "@ssr/common/playlist/snipe/snipe-playlist";
-import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { parseSnipePlaylistSettings } from "@ssr/common/snipe/snipe-playlist-utils";
 import { capitalizeFirstLetter, truncateText } from "@ssr/common/string-utils";
 import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
@@ -251,7 +251,8 @@ export default class PlaylistService {
       CacheService.getCache(ServiceCache.Leaderboards),
       "ranking-queue-maps",
       async () => {
-        const rankingQueueTokens = await scoresaberService.lookupRankingRequests();
+        const rankingQueueTokens =
+          await ApiServiceRegistry.getScoreSaberService().lookupRankingRequests();
         if (!rankingQueueTokens) {
           return [];
         }

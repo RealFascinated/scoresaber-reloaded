@@ -1,7 +1,7 @@
+import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerRankedPpsResponse } from "@ssr/common/response/player-ranked-pps-response";
-import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { AroundPlayer } from "@ssr/common/types/around-player";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import { ScoreService } from "../score/score.service";
@@ -68,7 +68,7 @@ export class PlayerRankingService {
     // Calculate all boundaries in a single pass
     const boundaries: number[] = [];
     for (let i = 1; i <= boundary; i++) {
-      boundaries.push(scoresaberService.calcPpBoundary(sortedPps, i));
+      boundaries.push(ApiServiceRegistry.getScoreSaberService().calcPpBoundary(sortedPps, i));
     }
 
     return boundaries;
@@ -90,7 +90,7 @@ export class PlayerRankingService {
       return 0;
     }
 
-    return scoresaberService.getPpBoundaryForRawPp(
+    return ApiServiceRegistry.getScoreSaberService().getPpBoundaryForRawPp(
       scoresPps.scores.map(score => score.pp),
       boundary
     );
@@ -178,8 +178,8 @@ export class PlayerRankingService {
     const pageResponses = await Promise.all(
       validPages.map(page =>
         type === "global"
-          ? scoresaberService.lookupPlayers(page)
-          : scoresaberService.lookupPlayersByCountry(page, player.country)
+          ? ApiServiceRegistry.getScoreSaberService().lookupPlayers(page)
+          : ApiServiceRegistry.getScoreSaberService().lookupPlayersByCountry(page, player.country)
       )
     );
 

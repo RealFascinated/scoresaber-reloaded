@@ -1,8 +1,8 @@
+import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { InternalServerError } from "@ssr/common/error/internal-server-error";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger from "@ssr/common/logger";
 import { PlayerDocument, PlayerModel } from "@ssr/common/model/player";
-import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import { isProduction } from "@ssr/common/utils/utils";
 import { fetchWithCache } from "../../common/cache.util";
@@ -40,7 +40,8 @@ export class PlayerCoreService {
         throw new NotFoundError(`Player "${id}" not found, create disabled`);
       }
 
-      playerToken = playerToken || (await scoresaberService.lookupPlayer(id));
+      playerToken =
+        playerToken || (await ApiServiceRegistry.getScoreSaberService().lookupPlayer(id));
 
       if (!playerToken) {
         throw new NotFoundError(`Player "${id}" not found`);

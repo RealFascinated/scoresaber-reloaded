@@ -1,3 +1,4 @@
+import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { DetailType } from "@ssr/common/detail-type";
 import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
@@ -14,7 +15,6 @@ import {
 import { removeObjectFields } from "@ssr/common/object.util";
 import { LeaderboardResponse } from "@ssr/common/response/leaderboard-response";
 import { MapDifficulty } from "@ssr/common/score/map-difficulty";
-import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
 import { MapCharacteristic } from "@ssr/common/types/map-characteristic";
 import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score";
@@ -126,7 +126,8 @@ export default class LeaderboardService {
 
       let leaderboard = foundLeaderboard;
       if (!leaderboard) {
-        const leaderboardToken = await scoresaberService.lookupLeaderboard(id);
+        const leaderboardToken =
+          await ApiServiceRegistry.getScoreSaberService().lookupLeaderboard(id);
         if (leaderboardToken == undefined) {
           throw new NotFoundError(`Leaderboard not found for "${id}"`);
         }
@@ -207,11 +208,12 @@ export default class LeaderboardService {
 
       let leaderboard = foundLeaderboard;
       if (!leaderboard) {
-        const leaderboardToken = await scoresaberService.lookupLeaderboardByHash(
-          hash,
-          difficulty,
-          characteristic
-        );
+        const leaderboardToken =
+          await ApiServiceRegistry.getScoreSaberService().lookupLeaderboardByHash(
+            hash,
+            difficulty,
+            characteristic
+          );
         if (leaderboardToken == undefined) {
           throw new NotFoundError(
             `Leaderboard not found for hash "${hash}", difficulty "${difficulty}", characteristic "${characteristic}"`
@@ -298,7 +300,7 @@ export default class LeaderboardService {
     const rankedMapDiffs: Map<string, LeaderboardDifficulty[]> = new Map();
 
     while (hasMorePages) {
-      const response = await scoresaberService.lookupLeaderboards(page, {
+      const response = await ApiServiceRegistry.getScoreSaberService().lookupLeaderboards(page, {
         ranked: true,
       });
       if (!response) {
@@ -504,7 +506,7 @@ export default class LeaderboardService {
     let hasMoreScores = true;
 
     while (hasMoreScores) {
-      const response = await scoresaberService.lookupLeaderboardScores(
+      const response = await ApiServiceRegistry.getScoreSaberService().lookupLeaderboardScores(
         leaderboardId + "",
         currentPage
       );
@@ -563,7 +565,7 @@ export default class LeaderboardService {
 
     for (const previousScore of previousScores) {
       previousScore.pp = leaderboard.ranked
-        ? scoresaberService.getPp(leaderboard.stars, previousScore.accuracy)
+        ? ApiServiceRegistry.getScoreSaberService().getPp(leaderboard.stars, previousScore.accuracy)
         : 0;
       previousScore.weight = 0;
       await previousScore.save();
@@ -607,7 +609,9 @@ export default class LeaderboardService {
     let totalUnranked = 0;
 
     for (const previousLeaderboard of rankedLeaderboards) {
-      const leaderboard = await scoresaberService.lookupLeaderboard(previousLeaderboard.id + "");
+      const leaderboard = await ApiServiceRegistry.getScoreSaberService().lookupLeaderboard(
+        previousLeaderboard.id + ""
+      );
       if (!leaderboard || leaderboard.ranked) continue;
 
       totalUnranked++;
@@ -832,7 +836,7 @@ export default class LeaderboardService {
     const rankedMapDiffs: Map<string, LeaderboardDifficulty[]> = new Map();
 
     while (hasMorePages) {
-      const response = await scoresaberService.lookupLeaderboards(page, {
+      const response = await ApiServiceRegistry.getScoreSaberService().lookupLeaderboards(page, {
         qualified: true,
       });
       if (!response) {

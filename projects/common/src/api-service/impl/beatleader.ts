@@ -1,12 +1,13 @@
 import { Cooldown } from "../../cooldown";
 import { ScoreStatsToken } from "../../types/token/beatleader/score-stats/score-stats";
-import Service from "../service";
+import ApiService from "../api-service";
+import { ApiServiceName } from "../api-service-registry";
 
 const LOOKUP_MAP_STATS_BY_SCORE_ID_ENDPOINT = `https://cdn.scorestats.beatleader.xyz/:scoreId.json`;
 
-class BeatLeaderService extends Service {
+export class BeatLeaderService extends ApiService {
   constructor() {
-    super(new Cooldown(60_000 / 300, 150));
+    super(new Cooldown(60_000 / 300, 150), ApiServiceName.BEAT_LEADER);
   }
 
   /**
@@ -33,5 +34,3 @@ class BeatLeaderService extends Service {
     return response;
   }
 }
-
-export const beatLeaderService = new BeatLeaderService();

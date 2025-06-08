@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/select";
 import useDatabase from "@/hooks/use-database";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
+import { scoresaberService } from "@ssr/common/api-service/impl/scoresaber";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";

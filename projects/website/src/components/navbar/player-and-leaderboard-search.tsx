@@ -14,8 +14,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { StarIcon } from "@heroicons/react/24/solid";
+import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { truncateText } from "@ssr/common/string-utils";
 import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
 import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/leaderboard";
@@ -47,8 +47,10 @@ export default function PlayerAndLeaderboardSearch() {
       if (debouncedQuery.length <= 3 && debouncedQuery.length !== 0) {
         return { players: [], leaderboards: [] };
       }
-      const playerResults = await scoresaberService.searchPlayers(debouncedQuery);
-      const leaderboardResults = await scoresaberService.searchLeaderboards(query);
+      const playerResults =
+        await ApiServiceRegistry.getScoreSaberService().searchPlayers(debouncedQuery);
+      const leaderboardResults =
+        await ApiServiceRegistry.getScoreSaberService().searchLeaderboards(query);
 
       return {
         players:

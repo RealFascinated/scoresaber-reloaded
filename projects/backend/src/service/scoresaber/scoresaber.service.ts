@@ -1,3 +1,4 @@
+import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { DetailType } from "@ssr/common/detail-type";
 import Logger from "@ssr/common/logger";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
@@ -11,7 +12,6 @@ import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import PlayerScoresResponse from "@ssr/common/response/player-scores-response";
 import { PlayerScore } from "@ssr/common/score/player-score";
 import { ScoreSort } from "@ssr/common/score/score-sort";
-import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 import { Metadata } from "@ssr/common/types/metadata";
 import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/leaderboard-player-info";
@@ -49,7 +49,7 @@ export default class ScoreSaberService {
       CacheService.getCache(ServiceCache.ScoreSaber),
       `player:${id}:${type}`,
       async () => {
-        const playerToken = await scoresaberService.lookupPlayer(id);
+        const playerToken = await ApiServiceRegistry.getScoreSaberService().lookupPlayer(id);
         const account = await PlayerCoreService.getPlayer(id, createIfMissing, playerToken).catch(
           () => undefined
         );
@@ -154,7 +154,7 @@ export default class ScoreSaberService {
     }
 
     // Fetch the player from the API
-    const player = await scoresaberService.lookupPlayer(id);
+    const player = await ApiServiceRegistry.getScoreSaberService().lookupPlayer(id);
     if (!player) {
       throw new NotFoundError(`Player "${id}" not found`);
     }
@@ -234,12 +234,13 @@ export default class ScoreSaberService {
         const scores: PlayerScore<unknown, unknown>[] = [];
         let metadata: Metadata = new Metadata(0, 0, 0, 0); // Default values
 
-        const leaderboardScores = await scoresaberService.lookupPlayerScores({
-          playerId,
-          page,
-          sort: sort as ScoreSort,
-          search,
-        });
+        const leaderboardScores =
+          await ApiServiceRegistry.getScoreSaberService().lookupPlayerScores({
+            playerId,
+            page,
+            sort: sort as ScoreSort,
+            search,
+          });
         if (leaderboardScores == undefined) {
           return {
             scores: scores,

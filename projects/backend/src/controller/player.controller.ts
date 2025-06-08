@@ -1,3 +1,4 @@
+import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { DetailType } from "@ssr/common/detail-type";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerStatisticHistory } from "@ssr/common/player/player-statistic-history";
@@ -6,7 +7,6 @@ import { AroundPlayerResponse } from "@ssr/common/response/around-player-respons
 import { PlayedMapsCalendarResponse } from "@ssr/common/response/played-maps-calendar-response";
 import { PlayerRankedPpsResponse } from "@ssr/common/response/player-ranked-pps-response";
 import { PpBoundaryResponse } from "@ssr/common/response/pp-boundary-response";
-import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { getDaysAgoDate } from "@ssr/common/utils/time-utils";
 import { NotFoundError, t } from "elysia";
 import { Controller, Get, Post } from "elysia-decorators";
@@ -62,7 +62,7 @@ export default class PlayerController {
     params: { id: string };
     query: { startDate: string; endDate: string };
   }): Promise<PlayerStatisticHistory> {
-    const player = await scoresaberService.lookupPlayer(id);
+    const player = await ApiServiceRegistry.getScoreSaberService().lookupPlayer(id);
     if (!player) {
       throw new NotFoundError(`Player "${id}" not found`);
     }

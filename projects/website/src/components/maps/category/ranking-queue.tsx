@@ -3,8 +3,8 @@
 import Card from "@/components/card";
 import { LoadingIcon } from "@/components/loading-icon";
 import ScoreSongInfo from "@/components/score/score-song-info";
+import { scoresaberService } from "@ssr/common/api-service/impl/scoresaber";
 import ScoreSaberRankingRequestsResponse from "@ssr/common/response/scoresaber-ranking-requests-response";
-import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
 import { timeAgo } from "@ssr/common/utils/time-utils";
 import { useQuery } from "@tanstack/react-query";

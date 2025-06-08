@@ -1,3 +1,4 @@
+import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import Logger from "@ssr/common/logger";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberPreviousScoreModel } from "@ssr/common/model/score/impl/scoresaber-previous-score";
@@ -8,7 +9,6 @@ import {
 import { ScoreType } from "@ssr/common/model/score/score";
 import LeaderboardScoresResponse from "@ssr/common/response/leaderboard-scores-response";
 import { PlayerScore } from "@ssr/common/score/player-score";
-import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { Timeframe } from "@ssr/common/timeframe";
 import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 import { Metadata } from "@ssr/common/types/metadata";
@@ -53,13 +53,14 @@ export class ScoreService {
         const leaderboard = leaderboardResponse.leaderboard;
         const beatSaverMap = leaderboardResponse.beatsaver;
 
-        const leaderboardScores = await scoresaberService.lookupLeaderboardScores(
-          leaderboardId,
-          page,
-          {
-            country: country,
-          }
-        );
+        const leaderboardScores =
+          await ApiServiceRegistry.getScoreSaberService().lookupLeaderboardScores(
+            leaderboardId,
+            page,
+            {
+              country: country,
+            }
+          );
         if (leaderboardScores == undefined) {
           return;
         }

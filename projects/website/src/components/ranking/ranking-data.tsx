@@ -8,7 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import useDatabase from "@/hooks/use-database";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import usePageNavigation from "@/hooks/use-page-navigation";
-import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
+import { scoresaberService } from "@ssr/common/api-service/impl/scoresaber";
 import { normalizedRegionName } from "@ssr/common/utils/region-utils";
 import { useQuery } from "@tanstack/react-query";
 import { useLiveQuery } from "dexie-react-hooks";

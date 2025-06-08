@@ -1,14 +1,15 @@
 import { Cooldown } from "../../cooldown";
 import { BeatSaverMapToken } from "../../types/token/beatsaver/map";
 import { BeatSaverMultiMapLookup } from "../../types/token/beatsaver/multi-map-lookup";
-import Service from "../service";
+import ApiService from "../api-service";
+import { ApiServiceName } from "../api-service-registry";
 
 const API_BASE = "https://api.beatsaver.com";
 const LOOKUP_MAP_BY_HASH_ENDPOINT = `${API_BASE}/maps/hash/:query`;
 
-class BeatSaverService extends Service {
+export class BeatSaverService extends ApiService {
   constructor() {
-    super(new Cooldown(60_000 / 300, 150));
+    super(new Cooldown(60_000 / 300, 150), ApiServiceName.BEAT_SAVER);
   }
 
   /**
@@ -61,5 +62,3 @@ class BeatSaverService extends Service {
     return response;
   }
 }
-
-export const beatsaverService = new BeatSaverService();

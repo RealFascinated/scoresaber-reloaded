@@ -1,5 +1,5 @@
+import { scoresaberService } from "@ssr/common/api-service/impl/scoresaber";
 import { env } from "@ssr/common/env";
-import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import type { MetadataRoute } from "next";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {

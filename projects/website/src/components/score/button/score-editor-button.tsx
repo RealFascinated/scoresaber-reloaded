@@ -3,9 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Slider } from "@/components/ui/slider";
 import { useIsMobile } from "@/hooks/use-is-mobile";
+import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
-import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { updateScoreWeights } from "@ssr/common/utils/scoresaber.util";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
@@ -53,7 +53,7 @@ export default function ScoreEditorButton({
         if (score.scoreId == modifiedScore.scoreId) {
           newModifiedScores[i] = {
             ...modifiedScore,
-            pp: scoresaberService.getPp(leaderboard.stars, newAccuracy),
+            pp: ApiServiceRegistry.getScoreSaberService().getPp(leaderboard.stars, newAccuracy),
           };
         }
       }
@@ -78,8 +78,12 @@ export default function ScoreEditorButton({
     }
 
     return (
-      scoresaberService.getTotalWeightedPp(modifiedScores.map(score => score.pp)) -
-      scoresaberService.getTotalWeightedPp(rankedPps.scores.map(score => score.pp))
+      ApiServiceRegistry.getScoreSaberService().getTotalWeightedPp(
+        modifiedScores.map(score => score.pp)
+      ) -
+      ApiServiceRegistry.getScoreSaberService().getTotalWeightedPp(
+        rankedPps.scores.map(score => score.pp)
+      )
     );
   }, [modifiedScores, rankedPps]);
 

@@ -2,15 +2,44 @@ import { Cooldown } from "../cooldown";
 import Logger from "../logger";
 import Request, { RequestOptions } from "../utils/request";
 import { isServer } from "../utils/utils";
+import { ApiServiceName } from "./api-service-registry";
 
-export default class Service {
+export default class ApiService {
   /**
    * The cooldown for the service.
    */
   private readonly cooldown: Cooldown;
 
-  constructor(cooldown: Cooldown) {
+  /**
+   * The name of the service.
+   */
+  private readonly name: ApiServiceName;
+
+  /**
+   * The number of times this service has been called.
+   * Only tracked on the server.
+   */
+  private callCount: number = 0;
+
+  constructor(cooldown: Cooldown, name: ApiServiceName) {
     this.cooldown = cooldown;
+    this.name = name;
+  }
+
+  /**
+   * Gets the name of the service.
+   *
+   * @returns the name of the service
+   */
+  public getName(): ApiServiceName {
+    return this.name;
+  }
+
+  /**
+   * Gets the current call count.
+   */
+  public getCallCount(): number {
+    return this.callCount;
   }
 
   /**
@@ -44,6 +73,11 @@ export default class Service {
    * @returns the fetched data
    */
   public async fetch<T>(url: string, options?: RequestOptions): Promise<T | undefined> {
+    // Increment the call count if we're on the server
+    if (isServer()) {
+      this.callCount++;
+    }
+
     await this.cooldown.waitAndUse();
 
     return Request.get<T>(this.buildRequestUrl(!isServer(), url), {

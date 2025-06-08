@@ -1,10 +1,10 @@
+import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import Logger from "@ssr/common/logger";
 import { ScoreSaberPreviousScoreModel } from "@ssr/common/model/score/impl/scoresaber-previous-score";
 import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import { GamePlatform } from "@ssr/common/model/statistics/game-platform";
 import { Statistic } from "@ssr/common/model/statistics/statistic";
 import { StatisticsModel } from "@ssr/common/model/statistics/statistics";
-import { scoresaberService } from "@ssr/common/service/impl/scoresaber";
 import { formatDateMinimal, getMidnightAlignedDate } from "@ssr/common/utils/time-utils";
 
 export default class StatisticsService {
@@ -89,7 +89,8 @@ export default class StatisticsService {
       .limit(100) // Limit the results to 100
       .lean(); // Convert to plain JavaScript objects
 
-    const activePlayerCount = await scoresaberService.lookupActivePlayerCount();
+    const activePlayerCount =
+      await ApiServiceRegistry.getScoreSaberService().lookupActivePlayerCount();
 
     const [totalScores, totalPreviousScores] = await Promise.all([
       ScoreSaberScoreModel.countDocuments({
