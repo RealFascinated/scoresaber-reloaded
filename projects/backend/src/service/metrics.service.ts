@@ -101,19 +101,17 @@ export default class MetricsService {
   }
 
   /**
-   * Sets up a timer to flush cached points every minute.
-   * This helps reduce the number of writes to InfluxDB by batching points together.
+   * Creates a timer to flush cached points every 30 seconds.
    */
   private setupFlushTimer() {
     // Flush cache every minute
     this.flushTimer = setInterval(() => {
       this.flushPoints();
-    }, 60000); // 1 minute
+    }, 30_000); // 30 seconds
   }
 
   /**
    * Flushes all cached points to InfluxDB.
-   * This method is called every minute by the flush timer.
    * It writes all points in the cache and then clears the cache.
    */
   private async flushPoints() {
