@@ -10,8 +10,8 @@ interface TimerCleanupValue {
 }
 
 export default class EventLoopTimersMetric extends Metric<TimerCleanupValue> {
-  private activeTimers: Set<NodeJS.Timer> = new Set();
-  private activeIntervals: Set<NodeJS.Timer> = new Set();
+  private activeTimers: Set<NodeJS.Timeout> = new Set();
+  private activeIntervals: Set<NodeJS.Timeout> = new Set();
 
   constructor() {
     super(
@@ -23,7 +23,7 @@ export default class EventLoopTimersMetric extends Metric<TimerCleanupValue> {
         totalIntervals: 0,
       },
       {
-        interval: 1000, // Collect every second
+        interval: 1000 * 10, // Collect every 10 seconds
         fetchAfterRegister: false,
       }
     );
