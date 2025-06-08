@@ -35,16 +35,11 @@ export default class EventLoopTimersMetric extends Metric<TimerCleanupValue> {
       ms: number,
       ...args: unknown[]
     ) => {
-      const timer = originalSetTimeout(callback, ms, ...args);
+      const timer = originalSetTimeout(() => {
+        this.activeTimers.delete(timer);
+        callback(...args);
+      }, ms);
       this.activeTimers.add(timer);
-
-      // Remove timer when it's cleared
-      const originalClearTimeout = global.clearTimeout;
-      global.clearTimeout = ((id: NodeJS.Timeout) => {
-        this.activeTimers.delete(id);
-        originalClearTimeout(id);
-      }) as typeof clearTimeout;
-
       return timer;
     }) as typeof setTimeout;
 
@@ -55,18 +50,26 @@ export default class EventLoopTimersMetric extends Metric<TimerCleanupValue> {
       ms: number,
       ...args: unknown[]
     ) => {
-      const timer = originalSetInterval(callback, ms, ...args);
+      const timer = originalSetInterval(() => {
+        callback(...args);
+      }, ms);
       this.activeIntervals.add(timer);
-
-      // Remove interval when it's cleared
-      const originalClearInterval = global.clearInterval;
-      global.clearInterval = ((id: NodeJS.Timeout) => {
-        this.activeIntervals.delete(id);
-        originalClearInterval(id);
-      }) as typeof clearInterval;
-
       return timer;
     }) as typeof setInterval;
+
+    // Override clearTimeout
+    const originalClearTimeout = global.clearTimeout;
+    global.clearTimeout = ((id: NodeJS.Timeout) => {
+      this.activeTimers.delete(id);
+      originalClearTimeout(id);
+    }) as typeof clearTimeout;
+
+    // Override clearInterval
+    const originalClearInterval = global.clearInterval;
+    global.clearInterval = ((id: NodeJS.Timeout) => {
+      this.activeIntervals.delete(id);
+      originalClearInterval(id);
+    }) as typeof clearInterval;
   }
 
   async collect(): Promise<Point> {

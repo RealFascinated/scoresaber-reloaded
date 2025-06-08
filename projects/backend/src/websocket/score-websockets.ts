@@ -26,15 +26,23 @@ export class ScoreWebsockets implements EventListener {
   private static readonly pendingScores = new Map<string, PendingScore>();
 
   onStop?: () => void = () => {
-    // Save all pending scores to the database
-    ScoreWebsockets.pendingScores.forEach(pendingScore => {
+    // Process all pending scores and clear their timeouts
+    for (const [key, pendingScore] of ScoreWebsockets.pendingScores.entries()) {
+      if (pendingScore.timeoutId) {
+        clearTimeout(pendingScore.timeoutId);
+        pendingScore.timeoutId = undefined;
+      }
+
+      // Process the score
       this.processScore(
         pendingScore.scoreSaberToken,
         pendingScore.leaderboardToken,
         pendingScore.player,
         pendingScore.beatLeaderScore
       );
-    });
+
+      ScoreWebsockets.pendingScores.delete(key);
+    }
   };
 
   constructor() {
@@ -131,6 +139,7 @@ export class ScoreWebsockets implements EventListener {
     const pendingScore = this.pendingScores.get(key);
     if (pendingScore?.timeoutId) {
       clearTimeout(pendingScore.timeoutId);
+      pendingScore.timeoutId = undefined;
     }
     this.pendingScores.delete(key);
   }
