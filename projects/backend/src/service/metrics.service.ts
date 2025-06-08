@@ -7,7 +7,6 @@ import CpuUsageMetric from "../metrics/impl/backend/cpu-usage";
 import EventLoopLagMetric from "../metrics/impl/backend/event-loop-lag";
 import EventLoopTimersMetric from "../metrics/impl/backend/event-loop-timers";
 import MemoryUsageMetric from "../metrics/impl/backend/memory-usage";
-import NetworkBandwidthMetric from "../metrics/impl/backend/network-bandwidth";
 import RequestsPerSecondMetric from "../metrics/impl/backend/requests-per-second";
 import RouteLatencyMetric from "../metrics/impl/backend/route-latency";
 import MongoDbSizeMetric from "../metrics/impl/database/mongo-db-size";
@@ -42,7 +41,6 @@ export enum MetricType {
   REQUESTS_PER_SECOND = "requests-per-second",
   ROUTE_LATENCY = "route-latency",
   EVENT_LOOP_TIMERS = "event-loop-timers",
-  NETWORK_BANDWIDTH = "network-bandwidth",
   SERVICE_CALL_RATE = "service-call-rate",
 
   // Queue metrics
@@ -87,7 +85,6 @@ export default class MetricsService {
     this.registerMetric(new RequestsPerSecondMetric());
     this.registerMetric(new RouteLatencyMetric());
     this.registerMetric(new EventLoopTimersMetric());
-    this.registerMetric(new NetworkBandwidthMetric());
     this.registerMetric(new ApiServiceCallRateMetric());
 
     // Queue metrics
