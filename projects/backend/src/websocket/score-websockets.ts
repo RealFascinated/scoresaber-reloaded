@@ -41,7 +41,10 @@ export class ScoreWebsockets implements EventListener {
     // Connect to websockets
     connectScoresaberWebsocket({
       onScore: async score => {
-        const key = `${score.score.leaderboardPlayerInfo.id}-${score.leaderboard.songHash.toUpperCase()}-${score.leaderboard.difficulty.difficulty}-${score.leaderboard.difficulty.gameMode}`;
+        const player = score.score.leaderboardPlayerInfo as unknown as ScoreSaberPlayerToken;
+        const leaderboard = getScoreSaberLeaderboardFromToken(score.leaderboard);
+
+        const key = `${player.id}-${leaderboard.songHash.toUpperCase()}-${leaderboard.difficulty.difficulty}-${leaderboard.difficulty.characteristic}`;
         const pendingScore = ScoreWebsockets.pendingScores.get(key);
 
         if (pendingScore?.beatLeaderScore) {
@@ -84,7 +87,10 @@ export class ScoreWebsockets implements EventListener {
 
     connectBeatLeaderWebsocket({
       onScore: async beatLeaderScore => {
-        const key = `${beatLeaderScore.playerId}-${beatLeaderScore.leaderboard.song.hash.toUpperCase()}-${beatLeaderScore.leaderboard.difficulty.difficultyName}-${beatLeaderScore.leaderboard.difficulty.modeName}`;
+        const player = beatLeaderScore.player;
+        const leaderboard = beatLeaderScore.leaderboard;
+
+        const key = `${player.id}-${leaderboard.song.hash.toUpperCase()}-${leaderboard.difficulty.difficultyName}-${leaderboard.difficulty.modeName}`;
         const pendingScore = ScoreWebsockets.pendingScores.get(key);
 
         if (pendingScore?.scoreSaberToken && pendingScore.leaderboardToken && pendingScore.player) {

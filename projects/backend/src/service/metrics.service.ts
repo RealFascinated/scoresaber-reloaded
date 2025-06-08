@@ -55,11 +55,13 @@ export default class MetricsService {
   private static instance: MetricsService;
   private static metrics: Metric<unknown>[] = [];
   private metricTimers: Map<string, NodeJS.Timeout> = new Map();
+
   /**
    * Cache for storing metric points before sending them to InfluxDB.
    * Points are stored here for 1 minute before being flushed in a batch.
    */
   private pointCache: Point[] = [];
+
   /**
    * Timer that triggers the flushing of cached points every minute.
    * Null when the service is not running.
