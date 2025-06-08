@@ -8,6 +8,7 @@ import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player
 import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score";
 import { connectBeatLeaderWebsocket } from "@ssr/common/websocket/beatleader-websocket";
 import { connectScoresaberWebsocket } from "@ssr/common/websocket/scoresaber-websocket";
+import { EventListener } from "../event/event-listener";
 import { EventsManager } from "../event/events-manager";
 import { ScoreService } from "../service/score/score.service";
 
@@ -20,9 +21,21 @@ interface PendingScore {
   timeoutId?: NodeJS.Timeout;
 }
 
-export class ScoreWebsockets {
+export class ScoreWebsockets implements EventListener {
   private static readonly SCORE_MATCH_TIMEOUT = 10000; // 10 seconds in milliseconds
   private static readonly pendingScores = new Map<string, PendingScore>();
+
+  onStop?: () => void = () => {
+    // Save all pending scores to the database
+    ScoreWebsockets.pendingScores.forEach(pendingScore => {
+      this.processScore(
+        pendingScore.scoreSaberToken,
+        pendingScore.leaderboardToken,
+        pendingScore.player,
+        pendingScore.beatLeaderScore
+      );
+    });
+  };
 
   constructor() {
     // Connect to websockets
