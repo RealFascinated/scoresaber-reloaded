@@ -7,7 +7,7 @@ import NumberMetric from "../../number-metric";
 export default class CpuUsageMetric extends NumberMetric {
   constructor() {
     super(MetricType.CPU_USAGE, 0, {
-      fetchAfterRegister: false,
+      fetchAndStore: false,
       interval: 1000 * 10, // 10 seconds
     });
   }

@@ -137,7 +137,7 @@ export default class MetricsService {
   private async initMetrics() {
     for (const metric of MetricsService.metrics) {
       // If the metric needs to be fetched after registration, fetch the value from the database
-      if (metric.options.fetchAfterRegister) {
+      if (metric.options.fetchAndStore) {
         const metricValue = await MetricValueModel.findOne({ _id: metric.id });
         if (metricValue) {
           metric.value = metricValue.value;
@@ -177,7 +177,7 @@ export default class MetricsService {
       }
 
       // Update the metric value
-      if (metric.options.fetchAfterRegister) {
+      if (metric.options.fetchAndStore) {
         await MetricValueModel.findOneAndUpdate(
           { _id: metric.id },
           { value: metric.value },

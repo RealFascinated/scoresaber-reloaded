@@ -4,7 +4,7 @@ import NumberMetric from "../../number-metric";
 export default class TrackedScoresMetric extends NumberMetric {
   constructor() {
     super(MetricType.TRACKED_SCORES, 0, {
-      fetchAfterRegister: true,
+      fetchAndStore: true,
       interval: 1000, // 1 second
     });
   }

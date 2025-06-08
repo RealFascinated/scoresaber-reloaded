@@ -6,8 +6,8 @@ import NumberMetric from "../../number-metric";
 export class ApiServicesMetric extends NumberMetric {
   constructor() {
     super(MetricType.API_SERVICES, 0, {
+      fetchAndStore: true,
       interval: 1000, // Collect every second
-      fetchAfterRegister: false,
     });
   }
 

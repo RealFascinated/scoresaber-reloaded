@@ -6,7 +6,7 @@ import NumberMetric from "../../number-metric";
 export default class QueueSizesMetric extends NumberMetric {
   constructor() {
     super(MetricType.QUEUE_SIZES, 0, {
-      fetchAfterRegister: false,
+      fetchAndStore: false,
       interval: 1000,
     });
   }

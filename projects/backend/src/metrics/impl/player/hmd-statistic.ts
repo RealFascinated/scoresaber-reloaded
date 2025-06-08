@@ -6,7 +6,7 @@ import NumberMetric from "../../number-metric";
 export default class HmdStatisticMetric extends NumberMetric {
   constructor() {
     super(MetricType.HMD_STATISTIC, 0, {
-      fetchAfterRegister: false,
+      fetchAndStore: false,
       interval: 1000 * 60 * 5, // 5 minutes
     });
   }

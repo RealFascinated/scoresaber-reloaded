@@ -8,7 +8,7 @@ import NumberMetric from "../../number-metric";
 export default class ReplayStatsMetric extends NumberMetric {
   constructor() {
     super(MetricType.REPLAY_STATS, 0, {
-      fetchAfterRegister: false,
+      fetchAndStore: false,
       interval: 1000 * 60 * 30, // 30 minutes
     });
   }

@@ -24,7 +24,7 @@ export default class EventLoopTimersMetric extends Metric<TimerCleanupValue> {
       },
       {
         interval: 1000 * 10, // Collect every 10 seconds
-        fetchAfterRegister: false,
+        fetchAndStore: false,
       }
     );
 

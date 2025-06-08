@@ -6,7 +6,7 @@ import NumberMetric from "../../number-metric";
 export default class QueueAverageTimeMetric extends NumberMetric {
   constructor() {
     super(MetricType.QUEUE_AVERAGE_PROCESSING_TIME, 0, {
-      fetchAfterRegister: false,
+      fetchAndStore: false,
       interval: 1000 * 30, // 30 seconds
     });
   }

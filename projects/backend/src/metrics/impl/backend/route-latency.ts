@@ -13,7 +13,7 @@ export default class RouteLatencyMetric extends NumberMetric {
 
   constructor() {
     super(MetricType.ROUTE_LATENCY, 0, {
-      fetchAfterRegister: false,
+      fetchAndStore: false,
       interval: 1000, // Check every second
     });
 

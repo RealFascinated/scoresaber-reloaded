@@ -6,7 +6,7 @@ import NumberMetric from "../../number-metric";
 export default class MongoDbSizeMetric extends NumberMetric {
   constructor() {
     super(MetricType.MONGO_DB_SIZE, 0, {
-      fetchAfterRegister: false,
+      fetchAndStore: false,
       interval: 1000 * 60 * 5, // 5 minutes
     });
   }

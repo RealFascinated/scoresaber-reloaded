@@ -9,7 +9,7 @@ export default class EventLoopLagMetric extends Metric<number> {
 
   constructor() {
     super(MetricType.EVENT_LOOP_LAG, 0, {
-      fetchAfterRegister: false,
+      fetchAndStore: false,
       interval: 1000,
     });
 

@@ -6,7 +6,7 @@ import NumberMetric from "../../number-metric";
 export default class MemoryUsageMetric extends NumberMetric {
   constructor() {
     super(MetricType.MEMORY_USAGE, 0, {
-      fetchAfterRegister: false,
+      fetchAndStore: false,
       interval: 1000 * 10, // 10 seconds
     });
   }

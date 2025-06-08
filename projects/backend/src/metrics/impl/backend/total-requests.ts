@@ -5,7 +5,7 @@ import NumberMetric from "../../number-metric";
 export default class RequestsPerSecondMetric extends NumberMetric {
   constructor() {
     super(MetricType.TOTAL_REQUESTS, 0, {
-      fetchAfterRegister: false,
+      fetchAndStore: true,
       interval: 1000, // Check every second
     });
   }

@@ -3,9 +3,9 @@ import { MetricType } from "../service/metrics.service";
 
 export interface MetricOptions {
   /**
-   * Whether to fetch the metric from the database after registration.
+   * Whether to fetch the metric from the database and store it.
    */
-  fetchAfterRegister?: boolean;
+  fetchAndStore?: boolean;
 
   /**
    * The interval in milliseconds at which to collect this metric.
@@ -33,7 +33,7 @@ export default abstract class Metric<T> {
     this.id = id;
     this.value = defaultValue;
     this.options = {
-      fetchAfterRegister: false,
+      fetchAndStore: false,
       interval: 5 * 60 * 1000, // 5 minutes default
       ...options,
     };
