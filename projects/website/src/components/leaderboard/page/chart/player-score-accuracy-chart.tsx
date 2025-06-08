@@ -40,7 +40,9 @@ export default function PlayerScoreAccuracyChart({ scoreStats, leaderboard }: Pr
     }
 
     if (leaderboard.ranked) {
-      histories["pp"].push(ApiServiceRegistry.getScoreSaberService().getPp(leaderboard.stars, acc));
+      histories["pp"].push(
+        ApiServiceRegistry.getInstance().getScoreSaberService().getPp(leaderboard.stars, acc)
+      );
     }
   }
 

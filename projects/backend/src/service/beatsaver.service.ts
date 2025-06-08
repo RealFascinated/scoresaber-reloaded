@@ -118,7 +118,7 @@ export default class BeatSaverService {
    */
   private static async refreshMapData(mapDoc: BeatSaverMapDocument, hash: string): Promise<void> {
     const hashUpper = hash.toUpperCase();
-    const token = await ApiServiceRegistry.getBeatSaverService().lookupMap(hash);
+    const token = await ApiServiceRegistry.getInstance().getBeatSaverService().lookupMap(hash);
 
     if (token) {
       const hashInToken = token.versions.some(function (v) {
@@ -203,7 +203,8 @@ export default class BeatSaverService {
     hash: string,
     token?: BeatSaverMapToken
   ): Promise<BeatSaverMap | undefined> {
-    const resolvedToken = token || (await ApiServiceRegistry.getBeatSaverService().lookupMap(hash));
+    const resolvedToken =
+      token || (await ApiServiceRegistry.getInstance().getBeatSaverService().lookupMap(hash));
     if (!resolvedToken) {
       return await this.persistUnknownMap(hash);
     }

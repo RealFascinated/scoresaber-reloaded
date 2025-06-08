@@ -10,12 +10,20 @@ export enum ApiServiceName {
 }
 
 export default class ApiServiceRegistry {
+  private static instance: ApiServiceRegistry;
   private static services: Map<ApiServiceName, ApiService> = new Map();
 
   public constructor() {
     this.registerService(new BeatLeaderService());
     this.registerService(new ScoreSaberService());
     this.registerService(new BeatSaverService());
+  }
+
+  public static getInstance(): ApiServiceRegistry {
+    if (!ApiServiceRegistry.instance) {
+      ApiServiceRegistry.instance = new ApiServiceRegistry();
+    }
+    return ApiServiceRegistry.instance;
   }
 
   /**
@@ -33,19 +41,19 @@ export default class ApiServiceRegistry {
    *
    * @returns all registered services
    */
-  public static getAllServices(): Map<ApiServiceName, ApiService> {
+  public getAllServices(): Map<ApiServiceName, ApiService> {
     return ApiServiceRegistry.services;
   }
 
-  public static getScoreSaberService(): ScoreSaberService {
+  public getScoreSaberService(): ScoreSaberService {
     return ApiServiceRegistry.services.get(ApiServiceName.SCORE_SABER) as ScoreSaberService;
   }
 
-  public static getBeatLeaderService(): BeatLeaderService {
+  public getBeatLeaderService(): BeatLeaderService {
     return ApiServiceRegistry.services.get(ApiServiceName.BEAT_LEADER) as BeatLeaderService;
   }
 
-  public static getBeatSaverService(): BeatSaverService {
+  public getBeatSaverService(): BeatSaverService {
     return ApiServiceRegistry.services.get(ApiServiceName.BEAT_SAVER) as BeatSaverService;
   }
 }

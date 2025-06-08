@@ -33,12 +33,14 @@ export class PlayerRefreshService {
     }
 
     while (hasMorePages) {
-      const scoresPage = await ApiServiceRegistry.getScoreSaberService().lookupPlayerScores({
-        playerId: player.id,
-        page: page,
-        limit: 100,
-        sort: ScoreSort.recent,
-      });
+      const scoresPage = await ApiServiceRegistry.getInstance()
+        .getScoreSaberService()
+        .lookupPlayerScores({
+          playerId: player.id,
+          page: page,
+          limit: 100,
+          sort: ScoreSort.recent,
+        });
 
       if (!scoresPage) {
         console.warn(`Failed to fetch scores for ${player.id} on page ${page}.`);
@@ -100,7 +102,9 @@ export class PlayerRefreshService {
     const now = new Date();
     Logger.info("Starting player statistics update...");
 
-    const firstPage = await ApiServiceRegistry.getScoreSaberService().lookupPlayers(1);
+    const firstPage = await ApiServiceRegistry.getInstance()
+      .getScoreSaberService()
+      .lookupPlayers(1);
     if (firstPage == undefined) {
       Logger.error("Failed to fetch players on page 1, skipping player statistics update...");
       return;
@@ -119,7 +123,7 @@ export class PlayerRefreshService {
       }
 
       Logger.info(`Fetching page ${i}...`);
-      const page = await ApiServiceRegistry.getScoreSaberService().lookupPlayers(i);
+      const page = await ApiServiceRegistry.getInstance().getScoreSaberService().lookupPlayers(i);
 
       if (page == undefined) {
         Logger.error(`Failed to fetch players on page ${i}, skipping page...`);

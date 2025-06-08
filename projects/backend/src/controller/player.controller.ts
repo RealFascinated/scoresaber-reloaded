@@ -62,7 +62,7 @@ export default class PlayerController {
     params: { id: string };
     query: { startDate: string; endDate: string };
   }): Promise<PlayerStatisticHistory> {
-    const player = await ApiServiceRegistry.getScoreSaberService().lookupPlayer(id);
+    const player = await ApiServiceRegistry.getInstance().getScoreSaberService().lookupPlayer(id);
     if (!player) {
       throw new NotFoundError(`Player "${id}" not found`);
     }

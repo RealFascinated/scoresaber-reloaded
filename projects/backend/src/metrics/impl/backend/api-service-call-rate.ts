@@ -27,7 +27,7 @@ export class ApiServiceCallRateMetric extends Metric<{ [serviceName: string]: nu
     const point = this.getPointBase();
     const rates: { [key: string]: number } = {};
 
-    for (const [name, service] of ApiServiceRegistry.getAllServices()) {
+    for (const [name, service] of ApiServiceRegistry.getInstance().getAllServices()) {
       const currentCount = service.getCallCount();
       const stats = this.serviceStats.get(name) || { lastCount: currentCount, lastTime: now };
       const timeDiff = (now - stats.lastTime) / 1000; // Convert to seconds

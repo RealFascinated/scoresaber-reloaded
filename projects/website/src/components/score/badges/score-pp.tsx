@@ -23,7 +23,10 @@ export function ScorePpBadge({ score, leaderboard }: ScorePpProps) {
   const weightedPp = pp * weight;
   const fcPp =
     !score.fullCombo && fcAccuracy
-      ? ApiServiceRegistry.getScoreSaberService().getPp(leaderboard.stars, fcAccuracy).toFixed(0)
+      ? ApiServiceRegistry.getInstance()
+          .getScoreSaberService()
+          .getPp(leaderboard.stars, fcAccuracy)
+          .toFixed(0)
       : undefined;
 
   return (

@@ -104,7 +104,9 @@ export default class BeatLeaderService {
       return;
     }
 
-    const scoreStats = await ApiServiceRegistry.getBeatLeaderService().lookupScoreStats(score.id);
+    const scoreStats = await ApiServiceRegistry.getInstance()
+      .getBeatLeaderService()
+      .lookupScoreStats(score.id);
     if (scoreStats) {
       await this.trackScoreStats(score.id, scoreStats);
     }
@@ -173,7 +175,7 @@ export default class BeatLeaderService {
         right: score.accRight,
       },
       scoreStats: isProduction()
-        ? await ApiServiceRegistry.getBeatLeaderService().lookupScoreStats(score.id)
+        ? await ApiServiceRegistry.getInstance().getBeatLeaderService().lookupScoreStats(score.id)
         : undefined,
       cachedReplayId: savedReplayId,
       timestamp: new Date(Number(score.timeset) * 1000),
@@ -248,9 +250,9 @@ export default class BeatLeaderService {
       }
     );
     if (scoreStats == null) {
-      scoreStats = (await ApiServiceRegistry.getBeatLeaderService().lookupScoreStats(
-        scoreId
-      )) as ScoreStatsToken;
+      scoreStats = (await ApiServiceRegistry.getInstance()
+        .getBeatLeaderService()
+        .lookupScoreStats(scoreId)) as ScoreStatsToken;
       // Only track score stats if the player exists
       if (
         scoreStats &&

@@ -110,7 +110,7 @@ export default function Score({
   const pp =
     baseScore === score.score
       ? score.pp
-      : ApiServiceRegistry.getScoreSaberService().getPp(leaderboard.stars, accuracy);
+      : ApiServiceRegistry.getInstance().getScoreSaberService().getPp(leaderboard.stars, accuracy);
 
   const handleLeaderboardOpen = (isExpanded: boolean) => {
     if (!isExpanded) {

@@ -89,8 +89,9 @@ export default class StatisticsService {
       .limit(100) // Limit the results to 100
       .lean(); // Convert to plain JavaScript objects
 
-    const activePlayerCount =
-      await ApiServiceRegistry.getScoreSaberService().lookupActivePlayerCount();
+    const activePlayerCount = await ApiServiceRegistry.getInstance()
+      .getScoreSaberService()
+      .lookupActivePlayerCount();
 
     const [totalScores, totalPreviousScores] = await Promise.all([
       ScoreSaberScoreModel.countDocuments({

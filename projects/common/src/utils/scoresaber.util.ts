@@ -141,6 +141,9 @@ export function getScoreSaberAvatar(
  */
 export function updateScoreWeights(scores: Pick<ScoreSaberScore, "pp" | "weight" | "scoreId">[]) {
   for (let i = 0; i < scores.length; i++) {
-    scores[i].weight = Math.pow(ApiServiceRegistry.getScoreSaberService().WEIGHT_COEFFICIENT, i);
+    scores[i].weight = Math.pow(
+      ApiServiceRegistry.getInstance().getScoreSaberService().WEIGHT_COEFFICIENT,
+      i
+    );
   }
 }

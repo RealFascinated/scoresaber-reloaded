@@ -126,8 +126,9 @@ export default class LeaderboardService {
 
       let leaderboard = foundLeaderboard;
       if (!leaderboard) {
-        const leaderboardToken =
-          await ApiServiceRegistry.getScoreSaberService().lookupLeaderboard(id);
+        const leaderboardToken = await ApiServiceRegistry.getInstance()
+          .getScoreSaberService()
+          .lookupLeaderboard(id);
         if (leaderboardToken == undefined) {
           throw new NotFoundError(`Leaderboard not found for "${id}"`);
         }
@@ -208,12 +209,9 @@ export default class LeaderboardService {
 
       let leaderboard = foundLeaderboard;
       if (!leaderboard) {
-        const leaderboardToken =
-          await ApiServiceRegistry.getScoreSaberService().lookupLeaderboardByHash(
-            hash,
-            difficulty,
-            characteristic
-          );
+        const leaderboardToken = await ApiServiceRegistry.getInstance()
+          .getScoreSaberService()
+          .lookupLeaderboardByHash(hash, difficulty, characteristic);
         if (leaderboardToken == undefined) {
           throw new NotFoundError(
             `Leaderboard not found for hash "${hash}", difficulty "${difficulty}", characteristic "${characteristic}"`
@@ -300,9 +298,11 @@ export default class LeaderboardService {
     const rankedMapDiffs: Map<string, LeaderboardDifficulty[]> = new Map();
 
     while (hasMorePages) {
-      const response = await ApiServiceRegistry.getScoreSaberService().lookupLeaderboards(page, {
-        ranked: true,
-      });
+      const response = await ApiServiceRegistry.getInstance()
+        .getScoreSaberService()
+        .lookupLeaderboards(page, {
+          ranked: true,
+        });
       if (!response) {
         Logger.warn(`Failed to fetch ranked leaderboards on page ${page}.`);
         continue;
@@ -506,10 +506,9 @@ export default class LeaderboardService {
     let hasMoreScores = true;
 
     while (hasMoreScores) {
-      const response = await ApiServiceRegistry.getScoreSaberService().lookupLeaderboardScores(
-        leaderboardId + "",
-        currentPage
-      );
+      const response = await ApiServiceRegistry.getInstance()
+        .getScoreSaberService()
+        .lookupLeaderboardScores(leaderboardId + "", currentPage);
       if (!response) {
         Logger.warn(
           `Failed to fetch scoresaber api scores for leaderboard "${leaderboardId}" on page ${currentPage}`
@@ -565,7 +564,9 @@ export default class LeaderboardService {
 
     for (const previousScore of previousScores) {
       previousScore.pp = leaderboard.ranked
-        ? ApiServiceRegistry.getScoreSaberService().getPp(leaderboard.stars, previousScore.accuracy)
+        ? ApiServiceRegistry.getInstance()
+            .getScoreSaberService()
+            .getPp(leaderboard.stars, previousScore.accuracy)
         : 0;
       previousScore.weight = 0;
       await previousScore.save();
@@ -609,9 +610,9 @@ export default class LeaderboardService {
     let totalUnranked = 0;
 
     for (const previousLeaderboard of rankedLeaderboards) {
-      const leaderboard = await ApiServiceRegistry.getScoreSaberService().lookupLeaderboard(
-        previousLeaderboard.id + ""
-      );
+      const leaderboard = await ApiServiceRegistry.getInstance()
+        .getScoreSaberService()
+        .lookupLeaderboard(previousLeaderboard.id + "");
       if (!leaderboard || leaderboard.ranked) continue;
 
       totalUnranked++;
@@ -836,9 +837,11 @@ export default class LeaderboardService {
     const rankedMapDiffs: Map<string, LeaderboardDifficulty[]> = new Map();
 
     while (hasMorePages) {
-      const response = await ApiServiceRegistry.getScoreSaberService().lookupLeaderboards(page, {
-        qualified: true,
-      });
+      const response = await ApiServiceRegistry.getInstance()
+        .getScoreSaberService()
+        .lookupLeaderboards(page, {
+          qualified: true,
+        });
       if (!response) {
         Logger.warn(`Failed to fetch qualified leaderboards on page ${page}.`);
         continue;

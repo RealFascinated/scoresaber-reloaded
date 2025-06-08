@@ -53,14 +53,11 @@ export class ScoreService {
         const leaderboard = leaderboardResponse.leaderboard;
         const beatSaverMap = leaderboardResponse.beatsaver;
 
-        const leaderboardScores =
-          await ApiServiceRegistry.getScoreSaberService().lookupLeaderboardScores(
-            leaderboardId,
-            page,
-            {
-              country: country,
-            }
-          );
+        const leaderboardScores = await ApiServiceRegistry.getInstance()
+          .getScoreSaberService()
+          .lookupLeaderboardScores(leaderboardId, page, {
+            country: country,
+          });
         if (leaderboardScores == undefined) {
           return;
         }

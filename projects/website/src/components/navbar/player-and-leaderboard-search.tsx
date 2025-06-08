@@ -47,10 +47,12 @@ export default function PlayerAndLeaderboardSearch() {
       if (debouncedQuery.length <= 3 && debouncedQuery.length !== 0) {
         return { players: [], leaderboards: [] };
       }
-      const playerResults =
-        await ApiServiceRegistry.getScoreSaberService().searchPlayers(debouncedQuery);
-      const leaderboardResults =
-        await ApiServiceRegistry.getScoreSaberService().searchLeaderboards(query);
+      const playerResults = await ApiServiceRegistry.getInstance()
+        .getScoreSaberService()
+        .searchPlayers(debouncedQuery);
+      const leaderboardResults = await ApiServiceRegistry.getInstance()
+        .getScoreSaberService()
+        .searchLeaderboards(query);
 
       return {
         players:

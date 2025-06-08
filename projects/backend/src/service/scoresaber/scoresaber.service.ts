@@ -49,7 +49,9 @@ export default class ScoreSaberService {
       CacheService.getCache(ServiceCache.ScoreSaber),
       `player:${id}:${type}`,
       async () => {
-        const playerToken = await ApiServiceRegistry.getScoreSaberService().lookupPlayer(id);
+        const playerToken = await ApiServiceRegistry.getInstance()
+          .getScoreSaberService()
+          .lookupPlayer(id);
         const account = await PlayerCoreService.getPlayer(id, createIfMissing, playerToken).catch(
           () => undefined
         );
@@ -154,7 +156,7 @@ export default class ScoreSaberService {
     }
 
     // Fetch the player from the API
-    const player = await ApiServiceRegistry.getScoreSaberService().lookupPlayer(id);
+    const player = await ApiServiceRegistry.getInstance().getScoreSaberService().lookupPlayer(id);
     if (!player) {
       throw new NotFoundError(`Player "${id}" not found`);
     }
@@ -234,8 +236,9 @@ export default class ScoreSaberService {
         const scores: PlayerScore<unknown, unknown>[] = [];
         let metadata: Metadata = new Metadata(0, 0, 0, 0); // Default values
 
-        const leaderboardScores =
-          await ApiServiceRegistry.getScoreSaberService().lookupPlayerScores({
+        const leaderboardScores = await ApiServiceRegistry.getInstance()
+          .getScoreSaberService()
+          .lookupPlayerScores({
             playerId,
             page,
             sort: sort as ScoreSort,

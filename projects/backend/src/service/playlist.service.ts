@@ -251,8 +251,9 @@ export default class PlaylistService {
       CacheService.getCache(ServiceCache.Leaderboards),
       "ranking-queue-maps",
       async () => {
-        const rankingQueueTokens =
-          await ApiServiceRegistry.getScoreSaberService().lookupRankingRequests();
+        const rankingQueueTokens = await ApiServiceRegistry.getInstance()
+          .getScoreSaberService()
+          .lookupRankingRequests();
         if (!rankingQueueTokens) {
           return [];
         }

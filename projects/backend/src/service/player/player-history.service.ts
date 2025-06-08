@@ -35,7 +35,8 @@ export class PlayerHistoryService {
   ): Promise<void> {
     const before = performance.now();
     const player =
-      playerToken ?? (await ApiServiceRegistry.getScoreSaberService().lookupPlayer(foundPlayer.id));
+      playerToken ??
+      (await ApiServiceRegistry.getInstance().getScoreSaberService().lookupPlayer(foundPlayer.id));
 
     if (!player) {
       Logger.warn(`Player "${foundPlayer.id}" not found on ScoreSaber`);

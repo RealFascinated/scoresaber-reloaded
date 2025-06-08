@@ -68,7 +68,9 @@ export class PlayerRankingService {
     // Calculate all boundaries in a single pass
     const boundaries: number[] = [];
     for (let i = 1; i <= boundary; i++) {
-      boundaries.push(ApiServiceRegistry.getScoreSaberService().calcPpBoundary(sortedPps, i));
+      boundaries.push(
+        ApiServiceRegistry.getInstance().getScoreSaberService().calcPpBoundary(sortedPps, i)
+      );
     }
 
     return boundaries;
@@ -90,10 +92,12 @@ export class PlayerRankingService {
       return 0;
     }
 
-    return ApiServiceRegistry.getScoreSaberService().getPpBoundaryForRawPp(
-      scoresPps.scores.map(score => score.pp),
-      boundary
-    );
+    return ApiServiceRegistry.getInstance()
+      .getScoreSaberService()
+      .getPpBoundaryForRawPp(
+        scoresPps.scores.map(score => score.pp),
+        boundary
+      );
   }
 
   /**
@@ -178,8 +182,10 @@ export class PlayerRankingService {
     const pageResponses = await Promise.all(
       validPages.map(page =>
         type === "global"
-          ? ApiServiceRegistry.getScoreSaberService().lookupPlayers(page)
-          : ApiServiceRegistry.getScoreSaberService().lookupPlayersByCountry(page, player.country)
+          ? ApiServiceRegistry.getInstance().getScoreSaberService().lookupPlayers(page)
+          : ApiServiceRegistry.getInstance()
+              .getScoreSaberService()
+              .lookupPlayersByCountry(page, player.country)
       )
     );
 

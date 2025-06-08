@@ -41,7 +41,8 @@ export class PlayerCoreService {
       }
 
       playerToken =
-        playerToken || (await ApiServiceRegistry.getScoreSaberService().lookupPlayer(id));
+        playerToken ||
+        (await ApiServiceRegistry.getInstance().getScoreSaberService().lookupPlayer(id));
 
       if (!playerToken) {
         throw new NotFoundError(`Player "${id}" not found`);

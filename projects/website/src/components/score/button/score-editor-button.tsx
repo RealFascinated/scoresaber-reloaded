@@ -53,7 +53,9 @@ export default function ScoreEditorButton({
         if (score.scoreId == modifiedScore.scoreId) {
           newModifiedScores[i] = {
             ...modifiedScore,
-            pp: ApiServiceRegistry.getScoreSaberService().getPp(leaderboard.stars, newAccuracy),
+            pp: ApiServiceRegistry.getInstance()
+              .getScoreSaberService()
+              .getPp(leaderboard.stars, newAccuracy),
           };
         }
       }
@@ -78,12 +80,12 @@ export default function ScoreEditorButton({
     }
 
     return (
-      ApiServiceRegistry.getScoreSaberService().getTotalWeightedPp(
-        modifiedScores.map(score => score.pp)
-      ) -
-      ApiServiceRegistry.getScoreSaberService().getTotalWeightedPp(
-        rankedPps.scores.map(score => score.pp)
-      )
+      ApiServiceRegistry.getInstance()
+        .getScoreSaberService()
+        .getTotalWeightedPp(modifiedScores.map(score => score.pp)) -
+      ApiServiceRegistry.getInstance()
+        .getScoreSaberService()
+        .getTotalWeightedPp(rankedPps.scores.map(score => score.pp))
     );
   }, [modifiedScores, rankedPps]);
 
