@@ -82,8 +82,6 @@ export default class EventLoopTimersMetric extends Metric<TimerCleanupValue> {
       totalIntervals: activeIntervals,
     };
 
-    console.log(this.value);
-
     return this.getPointBase()
       .floatField("active_timers", activeTimers)
       .floatField("active_intervals", activeIntervals)
