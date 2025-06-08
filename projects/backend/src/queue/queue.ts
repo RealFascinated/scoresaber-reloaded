@@ -91,7 +91,6 @@ export abstract class Queue<T> {
 
       const startTime = this.itemTimestamps.get(item);
       if (!startTime) {
-        Logger.warn(`No timestamp found for item in queue ${this.name}`);
         return;
       }
 
