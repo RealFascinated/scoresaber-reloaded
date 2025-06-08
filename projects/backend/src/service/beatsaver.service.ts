@@ -1,3 +1,4 @@
+import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { DetailType } from "@ssr/common/detail-type";
 import {
   BeatSaverMap,
@@ -6,7 +7,6 @@ import {
 } from "@ssr/common/model/beatsaver/map";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
 import { MapDifficulty } from "@ssr/common/score/map-difficulty";
-import { beatsaverService } from "@ssr/common/service/impl/beatsaver";
 import { MapCharacteristic } from "@ssr/common/types/map-characteristic";
 import { BeatSaverMapToken } from "@ssr/common/types/token/beatsaver/map";
 import { getBeatSaverDifficulty } from "@ssr/common/utils/beatsaver.util";
@@ -118,7 +118,7 @@ export default class BeatSaverService {
    */
   private static async refreshMapData(mapDoc: BeatSaverMapDocument, hash: string): Promise<void> {
     const hashUpper = hash.toUpperCase();
-    const token = await beatsaverService.lookupMap(hash);
+    const token = await ApiServiceRegistry.getBeatSaverService().lookupMap(hash);
 
     if (token) {
       const hashInToken = token.versions.some(function (v) {
@@ -203,7 +203,7 @@ export default class BeatSaverService {
     hash: string,
     token?: BeatSaverMapToken
   ): Promise<BeatSaverMap | undefined> {
-    const resolvedToken = token || (await beatsaverService.lookupMap(hash));
+    const resolvedToken = token || (await ApiServiceRegistry.getBeatSaverService().lookupMap(hash));
     if (!resolvedToken) {
       return await this.persistUnknownMap(hash);
     }
