@@ -40,7 +40,11 @@ export default class MinioService {
    * @param contentType the content type of the file
    */
   public static async saveFile(bucket: MinioBucket, filename: string, data: Buffer) {
-    await minioClient.putObject(getMinioBucketName(bucket), filename, data);
+    try {
+      await minioClient.putObject(getMinioBucketName(bucket), filename, data);
+    } catch (error) {
+      console.error(`Failed to save file to Minio: ${error}`);
+    }
   }
 
   /**
@@ -50,7 +54,11 @@ export default class MinioService {
    * @param filename the filename to remove
    */
   public static async deleteFile(bucket: MinioBucket, filename: string) {
-    await minioClient.removeObject(getMinioBucketName(bucket), filename);
+    try {
+      await minioClient.removeObject(getMinioBucketName(bucket), filename);
+    } catch (error) {
+      console.error(`Failed to delete file from Minio: ${error}`);
+    }
   }
 
   /**
@@ -63,16 +71,24 @@ export default class MinioService {
     totalSize: number;
     totalObjects: number;
   }> {
-    const objects = await minioClient.listObjects(getMinioBucketName(bucket), "", true);
-    let totalSize = 0;
-    let totalObjects = 0;
-    for await (const object of objects) {
-      totalSize += object.size;
-      totalObjects++;
+    try {
+      const objects = await minioClient.listObjects(getMinioBucketName(bucket), "", true);
+      let totalSize = 0;
+      let totalObjects = 0;
+      for await (const object of objects) {
+        totalSize += object.size;
+        totalObjects++;
+      }
+      return {
+        totalSize,
+        totalObjects,
+      };
+    } catch (error) {
+      console.error(`Failed to get bucket stats from Minio: ${error}`);
+      return {
+        totalSize: 0,
+        totalObjects: 0,
+      };
     }
-    return {
-      totalSize,
-      totalObjects,
-    };
   }
 }
