@@ -1,11 +1,21 @@
 import dayjs from "dayjs";
-import duration from "dayjs/plugin/duration";
-import relativeTime from "dayjs/plugin/relativeTime";
-import utc from "dayjs/plugin/utc";
+import duration from "dayjs/plugin/duration.js";
+import localeData from "dayjs/plugin/localeData.js";
+import relativeTime from "dayjs/plugin/relativeTime.js";
+import utc from "dayjs/plugin/utc.js";
 
 dayjs.extend(utc);
 dayjs.extend(relativeTime);
 dayjs.extend(duration);
+dayjs.extend(localeData);
+
+// Configure ordinal numbers
+const locale = dayjs.localeData();
+locale.ordinal = (n: number) => {
+  const s = ["th", "st", "nd", "rd"];
+  const v = n % 100;
+  return n + (s[(v - 20) % 10] || s[v] || s[0]);
+};
 
 export const Months = [
   {
@@ -119,6 +129,20 @@ export function formatChartDate(date: Date) {
   return dayjs(date).format(`MMM D${currentYear === year ? "" : ", YYYY"}`);
 }
 
+function getOrdinalSuffix(day: number): string {
+  if (day > 3 && day < 21) return "th";
+  switch (day % 10) {
+    case 1:
+      return "st";
+    case 2:
+      return "nd";
+    case 3:
+      return "rd";
+    default:
+      return "th";
+  }
+}
+
 /**
  * Formats the date
  *
@@ -134,7 +158,8 @@ export function formatDate(
     | "DD-MM-YYYY"
     | "dddd, DD MMM, YYYY"
     | "DD MMMM YYYY HH:mm"
-    | "DD/MM/YYYY, HH:mm:ss" = "MMMM YYYY"
+    | "DD/MM/YYYY, HH:mm:ss"
+    | "Do MMMM, YYYY" = "MMMM YYYY"
 ) {
   const formatMap = {
     "MMMM YYYY": "MMMM YYYY",
@@ -143,9 +168,18 @@ export function formatDate(
     "dddd, DD MMM, YYYY": "dddd, D MMM, YYYY",
     "DD MMMM YYYY HH:mm": "D MMMM YYYY HH:mm",
     "DD/MM/YYYY, HH:mm:ss": "DD/MM/YYYY, HH:mm:ss",
+    "Do MMMM, YYYY": "D MMMM, YYYY",
   };
 
-  return dayjs(date).format(formatMap[format] || "MMM D, YYYY");
+  const formatted = dayjs(date).format(formatMap[format] || "MMM D, YYYY");
+
+  if (format === "Do MMMM, YYYY") {
+    const day = dayjs(date).date();
+    const suffix = getOrdinalSuffix(day);
+    return formatted.replace(day.toString(), day + suffix);
+  }
+
+  return formatted;
 }
 
 /**

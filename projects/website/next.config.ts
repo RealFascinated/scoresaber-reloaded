@@ -1,5 +1,5 @@
-import { format } from "@formkit/tempo";
 import withBundleAnalyzer from "@next/bundle-analyzer";
+import { formatDate } from "@ssr/common/utils/time-utils";
 import type { NextConfig } from "next";
 import path from "path";
 
@@ -10,7 +10,7 @@ const nextConfig: NextConfig = {
   outputFileTracingRoot: path.join(__dirname, "../../"),
   experimental: {
     optimizeCss: true,
-    turbo: {},
+    reactCompiler: true,
     optimizePackageImports: [
       "@ssr/common",
       "@radix-ui/react-checkbox",
@@ -38,10 +38,8 @@ const nextConfig: NextConfig = {
       "framer-motion",
       "react-icons",
     ],
-    reactCompiler: true,
   },
   modularizeImports: {
-    // "@radix-ui/react-icons": { transform: "@radix-ui/react-icons/dist/{{member}}" },
     "@heroicons/react/24/solid": { transform: "@heroicons/react/24/solid/{{member}}" },
     "@heroicons/react/24/outline": { transform: "@heroicons/react/24/outline/{{member}}" },
   },
@@ -67,18 +65,8 @@ const nextConfig: NextConfig = {
   env: {
     HOSTNAME: "0.0.0.0",
     NEXT_PUBLIC_BUILD_ID: process.env.SOURCE_COMMIT || "dev",
-    NEXT_PUBLIC_BUILD_TIME: new Date().toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "numeric",
-      minute: "numeric",
-      timeZoneName: "short",
-    }),
-    NEXT_PUBLIC_BUILD_TIME_SHORT: format(new Date(), {
-      date: "short",
-      time: "short",
-    }),
+    NEXT_PUBLIC_BUILD_TIME: formatDate(new Date(), "DD MMMM YYYY HH:mm"),
+    NEXT_PUBLIC_BUILD_TIME_SHORT: formatDate(new Date(), "Do MMMM, YYYY"),
   },
   async rewrites() {
     return [
