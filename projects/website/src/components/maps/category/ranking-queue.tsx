@@ -3,7 +3,7 @@
 import Card from "@/components/card";
 import { LoadingIcon } from "@/components/loading-icon";
 import ScoreSongInfo from "@/components/score/score-song-info";
-import { scoresaberService } from "@ssr/common/api-service/impl/scoresaber";
+import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import ScoreSaberRankingRequestsResponse from "@ssr/common/response/scoresaber-ranking-requests-response";
 import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
 import { timeAgo } from "@ssr/common/utils/time-utils";
@@ -22,13 +22,10 @@ const queues = [
 ];
 
 export default function RankingQueue() {
-  const {
-    data: leaderboards,
-    isLoading,
-    isError,
-  } = useQuery({
+  const { data: leaderboards, isLoading } = useQuery({
     queryKey: ["maps"],
-    queryFn: async () => scoresaberService.lookupRankingRequests(),
+    queryFn: async () =>
+      ApiServiceRegistry.getInstance().getScoreSaberService().lookupRankingRequests(),
   });
 
   return (

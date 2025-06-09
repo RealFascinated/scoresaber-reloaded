@@ -4,6 +4,7 @@ import { cn } from "@/common/utils";
 import LeaderboardScoresSkeleton from "@/components/leaderboard/skeleton/leaderboard-scores-skeleton";
 import { useLeaderboardFilter } from "@/components/providers/leaderboard/leaderboard-filter-provider";
 import ScoreMode, { ScoreModeEnum } from "@/components/score/score-mode";
+import { EmptyState } from "@/components/ui/empty-state";
 import { useLeaderboardScores } from "@/hooks/score/use-leaderboard-scores";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import usePageNavigation from "@/hooks/use-page-navigation";
@@ -72,6 +73,8 @@ export default function LeaderboardScores({
     return <LeaderboardScoresSkeleton />;
   }
 
+  const isFriends = mode === ScoreModeEnum.Friends;
+
   return (
     <>
       <div
@@ -104,10 +107,14 @@ export default function LeaderboardScores({
 
       {isError ||
         (scores.items.length === 0 && (
-          <div className="text-center">
-            {isError && <p>Oopsies! Something went wrong.</p>}
-            {scores.items.length === 0 && <p>No scores found</p>}
-          </div>
+          <EmptyState
+            title="No Scores Found"
+            description={
+              isFriends
+                ? "You or your friends haven't played this map yet"
+                : "No score were found on this leaderboard or page"
+            }
+          />
         ))}
 
       {scores.items.length > 0 && (

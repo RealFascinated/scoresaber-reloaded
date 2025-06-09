@@ -8,7 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import useDatabase from "@/hooks/use-database";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import usePageNavigation from "@/hooks/use-page-navigation";
-import { scoresaberService } from "@ssr/common/api-service/impl/scoresaber";
+import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { normalizedRegionName } from "@ssr/common/utils/region-utils";
 import { useQuery } from "@tanstack/react-query";
 import { useLiveQuery } from "dexie-react-hooks";
@@ -46,8 +46,10 @@ export default function RankingData({ initialPage, country }: RankingDataProps) 
     queryFn: async () => {
       const players =
         country == undefined
-          ? await scoresaberService.lookupPlayers(currentPage)
-          : await scoresaberService.lookupPlayersByCountry(currentPage, country);
+          ? await ApiServiceRegistry.getInstance().getScoreSaberService().lookupPlayers(currentPage)
+          : await ApiServiceRegistry.getInstance()
+              .getScoreSaberService()
+              .lookupPlayersByCountry(currentPage, country);
       return players && players.players.length > 0 ? players : undefined;
     },
     refetchIntervalInBackground: false,

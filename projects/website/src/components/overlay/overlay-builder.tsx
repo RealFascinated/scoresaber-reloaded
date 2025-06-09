@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/select";
 import useDatabase from "@/hooks/use-database";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { scoresaberService } from "@ssr/common/api-service/impl/scoresaber";
+import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -83,7 +83,9 @@ export default function OverlayBuilder() {
     dataClient,
     views,
   }: z.infer<typeof formSchema>) {
-    const player = await scoresaberService.lookupPlayer(playerId);
+    const player = await ApiServiceRegistry.getInstance()
+      .getScoreSaberService()
+      .lookupPlayer(playerId);
     if (!player) {
       toast("The player id you entered could not be found.");
       return;

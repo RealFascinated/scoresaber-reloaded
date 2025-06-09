@@ -3,7 +3,9 @@
 import { LoadingIcon } from "@/components/loading-icon";
 import Score from "@/components/score/score";
 import PaginationComponent from "@/components/simple-pagination";
+import { EmptyState } from "@/components/ui/empty-state";
 import { useIsMobile } from "@/hooks/use-is-mobile";
+import { ClockIcon } from "@heroicons/react/24/outline";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { Pagination } from "@ssr/common/pagination";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
@@ -49,17 +51,25 @@ export function ScoreHistory({ playerId, leaderboard }: ScoreHistoryProps) {
 
   if (!scores || isError) {
     return (
-      <div className="flex justify-center">
-        <LoadingIcon />
-      </div>
+      <EmptyState
+        icon={
+          <div className="w-10 h-10">
+            <LoadingIcon />
+          </div>
+        }
+        title="Loading Score History"
+        description="Please wait while we fetch your score history..."
+      />
     );
   }
 
   if (scores.items.length === 0) {
     return (
-      <div className="flex justify-center">
-        <p>This score does not have any tracked history</p>
-      </div>
+      <EmptyState
+        icon={<ClockIcon className="w-10 h-10 text-gray-400 dark:text-gray-500" />}
+        title="No Score History"
+        description="This score does not have any tracked history"
+      />
     );
   }
 

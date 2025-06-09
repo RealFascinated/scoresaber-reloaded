@@ -1,4 +1,4 @@
-import { scoresaberService } from "@ssr/common/api-service/impl/scoresaber";
+import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { env } from "@ssr/common/env";
 import type { MetadataRoute } from "next";
 
@@ -6,7 +6,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const links: MetadataRoute.Sitemap[] = [];
 
   for (let page = 1; page <= 25; page++) {
-    const playersResponse = await scoresaberService.lookupPlayers(page);
+    const playersResponse = await ApiServiceRegistry.getInstance()
+      .getScoreSaberService()
+      .lookupPlayers(page);
 
     if (playersResponse !== undefined) {
       const players = playersResponse.players;

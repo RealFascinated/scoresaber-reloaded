@@ -5,7 +5,7 @@ import { SettingIds } from "@/common/database/database";
 import GenericChart from "@/components/chart/generic-chart";
 import { DualRangeSlider } from "@/components/ui/dual-range-slider";
 import useDatabase from "@/hooks/use-database";
-import { scoresaberService } from "@ssr/common/api-service/impl/scoresaber";
+import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { useDebounce } from "@uidotdev/usehooks";
 import { useLiveQuery } from "dexie-react-hooks";
@@ -45,7 +45,9 @@ export default function LeaderboardPpChart({ leaderboard }: Props) {
     if (!history) {
       histories["pp"] = [];
     }
-    histories["pp"].push(scoresaberService.getPp(leaderboard.stars, accuracy));
+    histories["pp"].push(
+      ApiServiceRegistry.getInstance().getScoreSaberService().getPp(leaderboard.stars, accuracy)
+    );
   }
 
   const updateRange = (range: [number, number]) => {

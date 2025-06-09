@@ -15,10 +15,12 @@ import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { useDebounce } from "@uidotdev/usehooks";
 import { clsx } from "clsx";
+import { SearchIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Card from "../card";
 import SimplePagination from "../simple-pagination";
 import { Button } from "../ui/button";
+import { EmptyState } from "../ui/empty-state";
 
 type Props = {
   initialScoreData?: PlayerScoresResponse<ScoreSaberScore, ScoreSaberLeaderboard>;
@@ -141,9 +143,15 @@ export default function PlayerScores({ initialSearch, player, sort, page }: Prop
 
       {scores !== undefined && (
         <>
-          <div className="text-center">
+          <div className="text-center pt-2">
             {isError ||
-              (scores.scores.length === 0 && <p>No scores found. Invalid Page or Search?</p>)}
+              (scores.scores.length === 0 && (
+                <EmptyState
+                  title="No Results"
+                  description="No score were found on this page"
+                  icon={<SearchIcon />}
+                />
+              ))}
           </div>
 
           <div className="grid min-w-full grid-cols-1 divide-y divide-border">

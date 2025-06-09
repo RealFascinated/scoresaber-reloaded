@@ -1,13 +1,13 @@
 "use client";
 
 import Friend from "@/components/friend/friend";
+import { useSearch } from "@/components/providers/search-provider";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import useDatabase from "@/hooks/use-database";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { PersonIcon } from "@radix-ui/react-icons";
 import { useLiveQuery } from "dexie-react-hooks";
-import Link from "next/link";
 import { useRef, useState } from "react";
 import NavbarButton from "../navbar/navbar-button";
 
@@ -15,6 +15,7 @@ export default function FriendsButton() {
   const database = useDatabase();
   const friends = useLiveQuery(() => database.getFriends());
   const isMobile: boolean = useIsMobile();
+  const { openSearch } = useSearch();
 
   const [open, setOpen] = useState<boolean>(false);
   const closeTimeout = useRef<NodeJS.Timeout | null>(null);
@@ -64,11 +65,15 @@ export default function FriendsButton() {
         ) : (
           <div className="text-sm flex flex-col gap-2 justify-center items-center">
             <p className="pointer-events-none">You don&#39;t have any friends :(</p>
-            <Link prefetch={false} href="/search">
-              <Button size="sm" onClick={() => setOpen(false)}>
-                Search Player
-              </Button>
-            </Link>
+            <Button
+              size="sm"
+              onClick={() => {
+                setOpen(false);
+                openSearch();
+              }}
+            >
+              Search Player
+            </Button>
           </div>
         )}
       </PopoverContent>

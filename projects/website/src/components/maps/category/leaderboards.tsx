@@ -6,13 +6,15 @@ import { useMapFilter } from "@/components/providers/maps/map-filter-provider";
 import ScoreSongInfo from "@/components/score/score-song-info";
 import SimplePagination from "@/components/simple-pagination";
 import SimpleTooltip from "@/components/simple-tooltip";
+import { EmptyState } from "@/components/ui/empty-state";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import usePageNavigation from "@/hooks/use-page-navigation";
-import { scoresaberService } from "@ssr/common/api-service/impl/scoresaber";
+import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
 import { timeAgo } from "@ssr/common/utils/time-utils";
 import { useQuery } from "@tanstack/react-query";
 import { useDebounce } from "@uidotdev/usehooks";
+import { ChartBarIcon } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -31,10 +33,10 @@ export default function Leaderboards({ initialPage }: LeaderboardsProps) {
   const filterDebounced = useDebounce(filter, 100);
   const [page, setPage] = useState(initialPage || 1);
 
-  const { data: leaderboards, isLoading } = useQuery({
+  const { data: leaderboardResponse, isLoading } = useQuery({
     queryKey: ["maps", filterDebounced, page],
     queryFn: async () =>
-      scoresaberService.lookupLeaderboards(page, {
+      ApiServiceRegistry.getInstance().getScoreSaberService().lookupLeaderboards(page, {
         category: filterDebounced.category,
         sort: filterDebounced.sort,
         stars: filterDebounced.stars,
@@ -61,19 +63,31 @@ export default function Leaderboards({ initialPage }: LeaderboardsProps) {
     pageNavigation.changePageUrl(`/maps?category=leaderboards&page=${page}`);
   }, [page, pageNavigation]);
 
+  const leaderboards = leaderboardResponse?.leaderboards;
+
   return (
     <Card>
-      {isLoading && leaderboards == undefined && (
+      {isLoading && leaderboardResponse == undefined && (
         <div className="flex w-full justify-center">
           <LoadingIcon />
         </div>
       )}
 
-      {leaderboards !== undefined && (
-        <div>
+      <div>
+        {leaderboards?.length === 0 && (
+          <div className="mb-2">
+            <EmptyState
+              title="No Leaderboards Found"
+              description="No leaderboards were found on this page"
+              icon={<ChartBarIcon className="w-10 h-10 text-gray-400 dark:text-gray-500" />}
+            />
+          </div>
+        )}
+
+        {leaderboards && leaderboards.length > 0 && (
           <div className="flex flex-col gap-1 pb-2">
             <div className="border-none flex flex-col gap-1.5">
-              {leaderboards.leaderboards.map((leaderboardToken, index) => {
+              {leaderboards.map((leaderboardToken, index) => {
                 const leaderboard = getScoreSaberLeaderboardFromToken(leaderboardToken);
                 let date: Date | undefined = leaderboard.timestamp;
                 if (leaderboard.ranked) {
@@ -114,18 +128,20 @@ export default function Leaderboards({ initialPage }: LeaderboardsProps) {
               })}
             </div>
           </div>
+        )}
 
+        {leaderboardResponse && (
           <SimplePagination
             mobilePagination={isMobile}
             page={page}
-            totalItems={leaderboards.metadata.total}
-            itemsPerPage={leaderboards.metadata.itemsPerPage}
+            totalItems={leaderboardResponse.metadata.total}
+            itemsPerPage={leaderboardResponse.metadata.itemsPerPage}
             loadingPage={isLoading ? page : undefined}
             onPageChange={newPage => setPage(newPage)}
             statsBelow={!isMobile}
           />
-        </div>
-      )}
+        )}
+      </div>
     </Card>
   );
 }
