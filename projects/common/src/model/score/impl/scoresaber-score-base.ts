@@ -1,5 +1,5 @@
 import { modelOptions, Prop, Severity } from "@typegoose/typegoose";
-import type { HMD } from "src/hmds";
+import type { HMD } from "../../../hmds";
 import { type Controllers } from "../controllers";
 import Score from "../score";
 import { ScoreSaberPreviousScoreOverview } from "./scoresaber-score";
