@@ -129,7 +129,7 @@ export function TopScoresData({ timeframe }: TopScoresDataProps) {
       </div>
 
       <div className="flex justify-center flex-col text-center">
-        <p className="font-semibold'">Top ScoreSaber Scores </p>
+        <p className="font-semibold'">Top ScoreSaber Scores</p>
         <p className="text-gray-400">This will only show scores that have been tracked.</p>
       </div>
 

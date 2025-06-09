@@ -1,5 +1,5 @@
 import { ArrowPathIcon } from "@heroicons/react/24/solid";
 
 export function LoadingIcon() {
-  return <ArrowPathIcon className="w-5 h-5 animate-spin" />;
+  return <ArrowPathIcon className="w-4.5 h-4.5 animate-spin" />;
 }
