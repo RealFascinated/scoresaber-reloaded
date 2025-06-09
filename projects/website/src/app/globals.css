@@ -135,21 +135,3 @@ body {
     border-color: var(--color-gray-200, currentColor);
   }
 }
-
-@keyframes dash {
-  from {
-    stroke-dashoffset: var(--circumference);
-  }
-  to {
-    stroke-dashoffset: calc(var(--circumference) * (1 - var(--percent)));
-  }
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
