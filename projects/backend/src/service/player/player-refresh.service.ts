@@ -80,6 +80,7 @@ export class PlayerRefreshService {
 
     // Mark player as seeded
     player.seededScores = true;
+    player.markModified("seededScores");
     await player.save();
 
     Logger.info(`Finished refreshing scores for ${player.id}, total pages refreshed: ${page - 1}.`);
