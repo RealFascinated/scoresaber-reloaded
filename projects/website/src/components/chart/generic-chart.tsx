@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { generateChartAxis, generateChartDataset } from "@/common/chart/chart.util";

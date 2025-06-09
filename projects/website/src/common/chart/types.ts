@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 export type AxisPosition = "left" | "right";
 export type DatasetDisplayType = "line" | "bar" | "point";
 

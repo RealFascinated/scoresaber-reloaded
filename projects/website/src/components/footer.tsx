@@ -3,7 +3,6 @@
 import { cn } from "@/common/utils";
 import GithubLogo from "@/components/logos/logos/github-logo";
 import TwitterLogo from "@/components/logos/logos/twitter-logo";
-import { env } from "@ssr/common/env";
 import { ExternalLink } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -49,11 +48,6 @@ const links: {
   [category: string]: FooterLink[];
 } = {
   Resources: [
-    {
-      name: "Swagger Docs",
-      shortName: "Swagger",
-      href: `${env.NEXT_PUBLIC_API_URL}/swagger`,
-    },
     {
       name: "Source Code",
       shortName: "Source",

@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { openInNewTab } from "@/common/browser-utils";
 import { LoadingIcon } from "@/components/loading-icon";
 import { DualRangeSlider } from "@/components/ui/dual-range-slider";
