@@ -11,7 +11,7 @@ import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scores
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
 import clsx from "clsx";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 type Props = {
   score?: ScoreSaberScore;
@@ -25,7 +25,11 @@ type Props = {
   updateScore?: (score: ScoreSaberScore) => void;
 };
 
-const buttons = [
+type ButtonConfig = {
+  render: (props: Props) => React.ReactNode;
+};
+
+const buttons: ButtonConfig[] = [
   {
     render: ({ beatSaverMap }: Props) => {
       if (!beatSaverMap) {
@@ -77,10 +81,12 @@ export default function ScoreButtons({
   const isMobile = useIsMobile();
   const [leaderboardExpanded, setLeaderboardExpanded] = useState(false);
 
+  const memoizedButtons = useMemo(() => buttons, []);
+
   return (
     <div className={`flex justify-end gap-2 items-center mr-1`}>
       <div className={`flex lg:grid grid-cols-3 gap-1 items-center justify-center min-w-[92px]`}>
-        {buttons.map((button, index) => {
+        {memoizedButtons.map((button, index) => {
           const { render } = button;
 
           const buttonElement = render({

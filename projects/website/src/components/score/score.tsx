@@ -183,10 +183,10 @@ export default function Score({
         <div className="w-full mt-2">
           <Card className="flex gap-4 w-full relative border border-input">
             <div className="flex flex-col w-full gap-2 justify-center items-center">
-              <div className="flex clex-col justify-center lg:justify-start gap-2">
-                {modes.map((mode, i) => (
+              <div className="flex flex-wrap justify-center lg:justify-start gap-2">
+                {modes.map(mode => (
                   <Button
-                    key={i}
+                    key={mode.name}
                     variant={mode.name === selectedMode.name ? "default" : "outline"}
                     onClick={() => handleModeChange(mode)}
                     className="flex gap-2"
@@ -200,10 +200,9 @@ export default function Score({
               {beatSaverMap && <MapStats beatSaver={beatSaverMap} />}
             </div>
 
-            {selectedMode.name === "Overview" && (
+            {selectedMode.name === "Overview" ? (
               <ScoreOverview leaderboard={leaderboard} scoreStats={dropdownData.scoreStats} />
-            )}
-            {selectedMode.name === "Score History" && (
+            ) : (
               <ScoreHistory playerId={score.playerId} leaderboard={leaderboard} />
             )}
 

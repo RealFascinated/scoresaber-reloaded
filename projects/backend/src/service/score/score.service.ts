@@ -365,7 +365,7 @@ export class ScoreService {
             return null;
           }
 
-          const { leaderboard } = leaderboardResponse;
+          const { leaderboard, beatsaver } = leaderboardResponse;
           const player = playerMap.get(score.playerId);
 
           if (player) {
@@ -383,6 +383,7 @@ export class ScoreService {
           return {
             score: processedScore,
             leaderboard: leaderboard,
+            beatSaver: beatsaver,
           } as PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>;
         })
       );

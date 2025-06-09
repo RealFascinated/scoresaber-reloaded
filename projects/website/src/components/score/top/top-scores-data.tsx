@@ -85,7 +85,7 @@ export function TopScoresData({ timeframe }: TopScoresDataProps) {
       const name = score.playerInfo ? player.name || player.id : score.playerId;
 
       return (
-        <div key={index} className="flex flex-col pt-2">
+        <div key={score.scoreId} className="flex flex-col pt-2">
           <p className="text-sm">
             Set by{" "}
             <Link prefetch={false} href={`/player/${player.id}`}>
@@ -95,7 +95,6 @@ export function TopScoresData({ timeframe }: TopScoresDataProps) {
             </Link>
           </p>
           <Score
-            key={score.scoreId}
             score={score}
             leaderboard={leaderboard}
             beatSaverMap={beatSaver}
@@ -113,9 +112,9 @@ export function TopScoresData({ timeframe }: TopScoresDataProps) {
   return (
     <Card className="flex flex-col gap-2 w-full xl:w-[75%] justify-center h-fit">
       <div className="flex flex-row flex-wrap gap-2 justify-center">
-        {memoizedTimeframes.map((timeframe, index) => (
+        {memoizedTimeframes.map(timeframe => (
           <Button
-            key={index}
+            key={timeframe.timeframe}
             className="w-36 flex items-center gap-2"
             variant={selectedTimeframe === timeframe.timeframe ? "default" : "outline"}
             onClick={() => handleTimeframeChange(timeframe.timeframe)}
@@ -129,19 +128,17 @@ export function TopScoresData({ timeframe }: TopScoresDataProps) {
       </div>
 
       <div className="flex justify-center flex-col text-center">
-        <p className="font-semibold'">Top ScoreSaber Scores</p>
+        <p className="font-semibold">Top ScoreSaber Scores</p>
         <p className="text-gray-400">This will only show scores that have been tracked.</p>
       </div>
 
-      {(isLoading || !scores) && (
+      {isLoading || !scores ? (
         <div className="flex justify-center items-center">
           <LoadingIcon />
         </div>
-      )}
-      {scores && !isLoading && (
+      ) : (
         <div className="flex flex-col gap-2 divide-y divide-border">
           {scores.items.map(renderScore)}
-
           <SimplePagination
             page={page}
             totalItems={scores.metadata.totalItems}

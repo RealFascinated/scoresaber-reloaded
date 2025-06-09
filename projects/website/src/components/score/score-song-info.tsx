@@ -4,6 +4,7 @@ import { StarIcon } from "@heroicons/react/24/solid";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
 import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
+import clsx from "clsx";
 import Image from "next/image";
 import { useMemo } from "react";
 import LeaderboardPreview from "../leaderboard/leaderboard-preview";
@@ -38,6 +39,54 @@ export default function ScoreSongInfo({
     [leaderboard.difficulty.difficulty]
   );
 
+  const songNameElement = useMemo(
+    () => <SongName leaderboard={leaderboard} clickableSongName={clickableSongName} />,
+    [leaderboard, clickableSongName]
+  );
+
+  const difficultyInfo = useMemo(
+    () => (
+      <div
+        className="absolute w-full h-[18px] bottom-0 right-0 rounded-sm flex justify-center items-center text-[0.70rem] cursor-default"
+        style={{
+          backgroundColor: difficulty.color + "f0",
+        }}
+      >
+        {starCount > 0 ? (
+          <div className="flex gap-1 items-center justify-center">
+            <p>{starCount.toFixed(2)}</p>
+            <StarIcon className="w-[14px] h-[14px]" />
+          </div>
+        ) : (
+          <p>{getDifficultyName(difficulty)}</p>
+        )}
+      </div>
+    ),
+    [difficulty, starCount]
+  );
+
+  const authorInfo = useMemo(
+    () => (
+      <div className="flex flex-row text-sm gap-1.5 items-end leading-none">
+        <p className="text-gray-400">
+          {leaderboard.songAuthorName}{" "}
+          <span className="text-primary">
+            <FallbackLink
+              href={mappersProfile}
+              className={clsx(
+                mappersProfile &&
+                  "hover:brightness-[66%] transform-gpu transition-all w-fit text-xs leading-none"
+              )}
+            >
+              {leaderboard.levelAuthorName}
+            </FallbackLink>
+          </span>
+        </p>
+      </div>
+    ),
+    [leaderboard.songAuthorName, leaderboard.levelAuthorName, mappersProfile]
+  );
+
   return (
     <div className="flex gap-3 items-center break-all w-full">
       <div
@@ -54,28 +103,14 @@ export default function ScoreSongInfo({
             </div>
           }
         >
-          <div
-            className="absolute w-full h-[18px] bottom-0 right-0 rounded-sm flex justify-center items-center text-[0.70rem] cursor-default"
-            style={{
-              backgroundColor: difficulty.color + "f0",
-            }}
-          >
-            {starCount > 0 ? (
-              <div className="flex gap-1 items-center justify-center">
-                <p>{starCount.toFixed(2)}</p>
-                <StarIcon className="w-[14px] h-[14px]" />
-              </div>
-            ) : (
-              <p>{getDifficultyName(difficulty)}</p>
-            )}
-          </div>
+          {difficultyInfo}
         </SimpleTooltip>
         <Image
           src={leaderboard.songArt}
           width={imageSize}
           height={imageSize}
           alt={`${leaderboard.fullName}'s Artwork`}
-          className={`rounded-md`}
+          className="rounded-md"
           style={{
             minWidth: `${imageSize}px`,
           }}
@@ -85,28 +120,12 @@ export default function ScoreSongInfo({
         <div className="overflow-y-clip flex flex-col gap-1 min-w-0 w-full">
           {allowLeaderboardPreview ? (
             <LeaderboardPreview leaderboard={leaderboard} beatSaverMap={beatSaverMap}>
-              <SongName leaderboard={leaderboard} clickableSongName={clickableSongName} />
+              {songNameElement}
             </LeaderboardPreview>
           ) : (
-            <SongName leaderboard={leaderboard} clickableSongName={clickableSongName} />
+            songNameElement
           )}
-
-          <div className="flex flex-row text-sm gap-1.5 items-end leading-none">
-            <p className="text-gray-400">
-              {leaderboard.songAuthorName}{" "}
-              <span className="text-primary">
-                <FallbackLink
-                  href={mappersProfile}
-                  className={
-                    mappersProfile &&
-                    "hover:brightness-[66%] transform-gpu transition-all w-fit text-xs leading-none"
-                  }
-                >
-                  {leaderboard.levelAuthorName}
-                </FallbackLink>
-              </span>
-            </p>
-          </div>
+          {authorInfo}
         </div>
       </div>
     </div>
