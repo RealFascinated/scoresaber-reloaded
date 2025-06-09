@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   openGraph: {
     siteName: env.NEXT_PUBLIC_WEBSITE_NAME,
     title: "Top Scores",
-    description: "View the top 50 scores set by players on ScoreSaber.",
+    description: "View the top scores set by players on ScoreSaber.",
   },
 };
 

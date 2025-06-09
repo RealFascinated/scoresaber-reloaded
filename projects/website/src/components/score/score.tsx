@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { CubeIcon } from "@heroicons/react/24/solid";
 import { useQuery } from "@tanstack/react-query";
 import { TrendingUpIcon } from "lucide-react";
-import { ReactElement, useEffect, useState } from "react";
+import { ReactElement, useCallback, useEffect, useMemo, useState } from "react";
 import ScoreButtons from "./score-buttons";
 import ScoreInfo from "./score-info";
 import ScoreSongInfo from "./score-song-info";
@@ -70,10 +70,9 @@ export default function Score({
 }: Props) {
   const [baseScore, setBaseScore] = useState(score.score);
   const [isLeaderboardExpanded, setIsLeaderboardExpanded] = useState(false);
-
   const [selectedMode, setSelectedMode] = useState<Mode>(modes[0]);
 
-  const scoresPage = getPageFromRank(score.rank, 12);
+  const scoresPage = useMemo(() => getPageFromRank(score.rank, 12), [score.rank]);
   const isMobile = useIsMobile();
 
   const { data: dropdownData, isLoading } = useQuery<DropdownData>({
@@ -95,9 +94,6 @@ export default function Score({
   });
 
   useEffect(() => {
-    /**
-     * Reset the leaderboard dropdown when the score changes
-     */
     setIsLeaderboardExpanded(false);
     setSelectedMode(modes[0]);
   }, [score.scoreId]);
@@ -106,26 +102,40 @@ export default function Score({
     setBaseScore(score.score);
   }, [score]);
 
-  const accuracy = (baseScore / leaderboard.maxScore) * 100;
-  const pp =
-    baseScore === score.score
-      ? score.pp
-      : ApiServiceRegistry.getInstance().getScoreSaberService().getPp(leaderboard.stars, accuracy);
+  const accuracy = useMemo(
+    () => (baseScore / leaderboard.maxScore) * 100,
+    [baseScore, leaderboard.maxScore]
+  );
+  const pp = useMemo(
+    () =>
+      baseScore === score.score
+        ? score.pp
+        : ApiServiceRegistry.getInstance()
+            .getScoreSaberService()
+            .getPp(leaderboard.stars, accuracy),
+    [baseScore, score.score, score.pp, leaderboard.stars, accuracy]
+  );
 
-  const handleLeaderboardOpen = (isExpanded: boolean) => {
+  const handleLeaderboardOpen = useCallback((isExpanded: boolean) => {
     if (!isExpanded) {
       setSelectedMode(modes[0]);
     }
     setIsLeaderboardExpanded(isExpanded);
-  };
+  }, []);
 
-  const handleModeChange = (mode: Mode) => {
+  const handleModeChange = useCallback((mode: Mode) => {
     setSelectedMode(mode);
-  };
+  }, []);
 
-  const gridColsClass = settings?.noScoreButtons
-    ? "grid-cols-[20px 1fr_1fr] lg:grid-cols-[0.5fr_4fr_350px]" // Fewer columns if no buttons
-    : "grid-cols-[20px 1fr_1fr] lg:grid-cols-[0.5fr_4fr_1fr_350px]"; // Original with buttons
+  const gridColsClass = useMemo(
+    () =>
+      settings?.noScoreButtons
+        ? "grid-cols-[20px 1fr_1fr] lg:grid-cols-[0.5fr_4fr_350px]"
+        : "grid-cols-[20px 1fr_1fr] lg:grid-cols-[0.5fr_4fr_1fr_350px]",
+    [settings?.noScoreButtons]
+  );
+
+  const memoizedScore = useMemo(() => ({ ...score, accuracy, pp }), [score, accuracy, pp]);
 
   return (
     <div className={`${settings?.disablePadding ? "" : "pb-2 pt-2"}`}>
@@ -144,17 +154,14 @@ export default function Score({
       <div
         className={`grid w-full gap-2 lg:gap-0 ${gridColsClass} ${settings?.hideRank ? "pt-1" : ""}`}
       >
-        {/* Score Info */}
         <ScoreInfo score={score} leaderboard={leaderboard} hideRank={settings?.hideRank} />
 
-        {/* Song Info */}
         <ScoreSongInfo
           leaderboard={leaderboard}
           beatSaverMap={beatSaverMap}
           allowLeaderboardPreview={settings?.allowLeaderboardPreview && !isMobile}
         />
 
-        {/* Score Buttons */}
         {!settings?.noScoreButtons && (
           <ScoreButtons
             leaderboard={leaderboard}
@@ -169,15 +176,13 @@ export default function Score({
           />
         )}
 
-        {/* Score Stats */}
-        <ScoreStats score={{ ...score, accuracy, pp }} leaderboard={leaderboard} />
+        <ScoreStats score={memoizedScore} leaderboard={leaderboard} />
       </div>
 
       {isLeaderboardExpanded && dropdownData && !isLoading && (
         <div className="w-full mt-2">
           <Card className="flex gap-4 w-full relative border border-input">
             <div className="flex flex-col w-full gap-2 justify-center items-center">
-              {/* Modes */}
               <div className="flex clex-col justify-center lg:justify-start gap-2">
                 {modes.map((mode, i) => (
                   <Button
@@ -192,11 +197,9 @@ export default function Score({
                 ))}
               </div>
 
-              {/* Map stats */}
               {beatSaverMap && <MapStats beatSaver={beatSaverMap} />}
             </div>
 
-            {/* Selected Mode */}
             {selectedMode.name === "Overview" && (
               <ScoreOverview leaderboard={leaderboard} scoreStats={dropdownData.scoreStats} />
             )}
@@ -206,7 +209,6 @@ export default function Score({
 
             <Separator />
 
-            {/* Scores */}
             <LeaderboardScores
               initialPage={scoresPage}
               leaderboard={leaderboard}

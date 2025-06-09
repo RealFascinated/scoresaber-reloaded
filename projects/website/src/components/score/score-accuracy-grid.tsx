@@ -9,14 +9,20 @@ const MAX_ACCURACY = 115;
 
 export default function ScoreAccuracyGrid({ scoreStats }: ScoreAccuracyGridProps) {
   return (
-    <div className="grid grid-rows-3 grid-cols-4 h-fit bg-muted rounded-md overflow-hidden">
+    <div className="grid grid-rows-3 grid-cols-4 gap-1 p-1">
       {scoreStats.accuracyTracker.gridAcc.map((acc, i) => {
         const percent = Math.min(Math.max(acc, 0), MAX_ACCURACY) / MAX_ACCURACY;
-
         return (
-          <SimpleTooltip display={<p>{(percent * 100).toFixed(2)}%</p>} key={i}>
-            <div className="flex flex-col gap-1 items-center justify-center p-2.5 border-secondary border text-sm">
-              <p>{acc.toFixed(1)}</p>
+          <SimpleTooltip
+            display={
+              <div className="flex items-center gap-2">
+                <p className="font-medium">{(percent * 100).toFixed(1)}%</p>
+              </div>
+            }
+            key={i}
+          >
+            <div className="flex items-center justify-center p-2 rounded-md bg-muted hover:bg-accent transition-colors">
+              <p className="text-sm font-medium text-gray-200">{acc.toFixed(1)}</p>
             </div>
           </SimpleTooltip>
         );

@@ -89,5 +89,9 @@ export default function PlayerScoreAccuracyChart({ scoreStats, leaderboard }: Pr
     },
   ];
 
-  return <GenericChart labels={labels} datasetConfig={datasetConfig} histories={histories} />;
+  return (
+    <div className="flex flex-col items-center justify-center w-full p-4 rounded-xl bg-accent-deep border border-border backdrop-blur-sm">
+      <GenericChart labels={labels} datasetConfig={datasetConfig} histories={histories} />
+    </div>
+  );
 }

@@ -1,4 +1,3 @@
-import { TopScoresResponse } from "@ssr/common/response/top-scores-response";
 import { Timeframe } from "@ssr/common/timeframe";
 import { NotFoundError, t } from "elysia";
 import { Controller, Get } from "elysia-decorators";
@@ -88,34 +87,24 @@ export default class ScoresController {
     return superJson ? SuperJSON.stringify(data) : data.toJSON();
   }
 
-  @Get("/top", {
+  @Get("/top/:timeframe/:page", {
     config: {},
     tags: ["scores"],
-    query: t.Object({
-      limit: t.Number({ required: true }),
-      timeframe: t.String({ required: true }),
+    params: t.Object({
+      timeframe: t.String({ required: true, default: "daily" }),
+      page: t.Number({ required: true, default: 1 }),
     }),
   })
   public async getTopScores({
-    query: { limit, timeframe },
+    params: { timeframe, page },
   }: {
-    query: { limit: number; timeframe: Timeframe };
-  }): Promise<TopScoresResponse> {
-    if (limit <= 0) {
-      limit = 1;
-    } else if (limit > 100) {
-      limit = 100;
-    }
+    params: { timeframe: Timeframe; page: number };
+  }): Promise<unknown> {
     if (!["daily", "weekly", "monthly", "all"].includes(timeframe)) {
       timeframe = "daily";
     }
 
-    const scores = await ScoreService.getTopScores(limit, timeframe);
-    return {
-      scores,
-      timeframe,
-      limit,
-    };
+    return (await ScoreService.getTopScores(timeframe, page)).toJSON();
   }
 
   @Get("/friends/leaderboard/:leaderboardId/:page", {

@@ -5,6 +5,7 @@ import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
 import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
 import Image from "next/image";
+import { useMemo } from "react";
 import LeaderboardPreview from "../leaderboard/leaderboard-preview";
 import SongName from "./song-name";
 
@@ -23,13 +24,20 @@ export default function ScoreSongInfo({
   imageSize = 64,
   allowLeaderboardPreview = false,
 }: Props) {
-  const mappersProfile =
-    beatSaverMap != undefined
-      ? `https://beatsaver.com/profile/${beatSaverMap.author.id}`
-      : undefined;
+  const mappersProfile = useMemo(
+    () =>
+      beatSaverMap != undefined
+        ? `https://beatsaver.com/profile/${beatSaverMap.author.id}`
+        : undefined,
+    [beatSaverMap]
+  );
 
-  const starCount = leaderboard.stars;
-  const difficulty = getDifficulty(leaderboard.difficulty.difficulty);
+  const starCount = useMemo(() => leaderboard.stars, [leaderboard.stars]);
+  const difficulty = useMemo(
+    () => getDifficulty(leaderboard.difficulty.difficulty),
+    [leaderboard.difficulty.difficulty]
+  );
+
   return (
     <div className="flex gap-3 items-center break-all w-full">
       <div
@@ -49,7 +57,7 @@ export default function ScoreSongInfo({
           <div
             className="absolute w-full h-[18px] bottom-0 right-0 rounded-sm flex justify-center items-center text-[0.70rem] cursor-default"
             style={{
-              backgroundColor: difficulty.color + "f0", // Transparency value (in hex 0-255)
+              backgroundColor: difficulty.color + "f0",
             }}
           >
             {starCount > 0 ? (
@@ -73,7 +81,7 @@ export default function ScoreSongInfo({
           }}
         />
       </div>
-      <div className="flex">
+      <div className="flex flex-col gap-1 w-full">
         <div className="overflow-y-clip flex flex-col gap-1 min-w-0 w-full">
           {allowLeaderboardPreview ? (
             <LeaderboardPreview leaderboard={leaderboard} beatSaverMap={beatSaverMap}>

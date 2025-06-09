@@ -16,6 +16,8 @@
   --muted-foreground: hsl(24 5.4% 63.9%);
   --accent: hsl(12 4% 16%);
   --accent-foreground: hsl(60 9.1% 97.8%);
+  --accent-deep: hsl(12 4% 12%);
+  --accent-deep-foreground: hsl(60 9.1% 97.8%);
   --destructive: hsl(0 62.8% 30.6%);
   --destructive-foreground: hsl(60 9.1% 97.8%);
   --border: hsl(12 6.5% 15.1%);
@@ -71,9 +73,9 @@
 
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
-
+  --color-accent-deep: var(--accent-deep);
+  --color-accent-deep-foreground: var(--accent-deep-foreground);
   --color-destructive: var(--destructive);
-  --color-destructive-foreground: var(--destructive-foreground);
 
   --color-border: var(--border);
   --color-input: var(--input);
@@ -131,5 +133,23 @@ body {
   ::backdrop,
   ::file-selector-button {
     border-color: var(--color-gray-200, currentColor);
+  }
+}
+
+@keyframes dash {
+  from {
+    stroke-dashoffset: var(--circumference);
+  }
+  to {
+    stroke-dashoffset: calc(var(--circumference) * (1 - var(--percent)));
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }

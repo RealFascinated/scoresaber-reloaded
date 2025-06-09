@@ -7,6 +7,7 @@ import {
   ScoreSaberScoreModel,
 } from "@ssr/common/model/score/impl/scoresaber-score";
 import { ScoreType } from "@ssr/common/model/score/score";
+import { Page, Pagination } from "@ssr/common/pagination";
 import LeaderboardScoresResponse from "@ssr/common/response/leaderboard-scores-response";
 import { PlayerScore } from "@ssr/common/score/player-score";
 import { Timeframe } from "@ssr/common/timeframe";
@@ -281,11 +282,14 @@ export class ScoreService {
   /**
    * Gets the top tracked scores.
    *
-   * @param amount the amount of scores to get
    * @param timeframe the timeframe to filter by
-   * @returns the top scores
+   * @param page the page number (1-based)
+   * @returns the top scores with pagination metadata
    */
-  public static async getTopScores(amount: number = 100, timeframe: Timeframe) {
+  public static async getTopScores(
+    timeframe: Timeframe,
+    page: number = 1
+  ): Promise<Page<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>> {
     let daysAgo = -1;
     if (timeframe === "daily") {
       daysAgo = 1;
@@ -294,7 +298,13 @@ export class ScoreService {
     } else if (timeframe === "monthly") {
       daysAgo = 31;
     }
-    const foundScores = await ScoreSaberScoreModel.aggregate([
+
+    const pagination = new Pagination<
+      PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>
+    >().setItemsPerPage(50);
+
+    // First get total count, limited to 1000
+    const countResult = await ScoreSaberScoreModel.aggregate([
       {
         $match: {
           ...(timeframe === "all" ? {} : { timestamp: { $gte: getDaysAgoDate(daysAgo) } }),
@@ -302,55 +312,75 @@ export class ScoreService {
         },
       },
       { $sort: { pp: -1 } },
-      { $limit: amount },
+      { $limit: 1000 },
+      {
+        $count: "total",
+      },
     ]);
 
-    const scores: (PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard> | null)[] = [];
-    for (const rawScore of foundScores) {
-      const score = scoreToObject(rawScore);
+    const total = countResult[0]?.total || 0;
+    pagination.setTotalItems(total);
 
-      const leaderboardResponse = await LeaderboardService.getLeaderboard(
-        score.leaderboardId + "",
+    return pagination.getPage(page, async fetchItems => {
+      const foundScores = await ScoreSaberScoreModel.aggregate([
         {
-          includeBeatSaver: false,
-          cacheOnly: true,
-        }
-      );
-      if (!leaderboardResponse) {
-        continue; // Skip this score if no leaderboardResponse is found
-      }
+          $match: {
+            ...(timeframe === "all" ? {} : { timestamp: { $gte: getDaysAgoDate(daysAgo) } }),
+            pp: { $gt: 0 },
+          },
+        },
+        { $sort: { pp: -1 } },
+        { $limit: 1000 }, // Limit to top 1000 scores before pagination
+        { $skip: fetchItems.start },
+        { $limit: fetchItems.end - fetchItems.start },
+      ]);
 
-      const { leaderboard, beatsaver } = leaderboardResponse;
+      const scores: (PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard> | null)[] = [];
+      for (const rawScore of foundScores) {
+        const score = scoreToObject(rawScore);
 
-      try {
-        const player = await ScoreSaberService.getCachedPlayer(score.playerId, true).catch(
-          () => undefined
+        const leaderboardResponse = await LeaderboardService.getLeaderboard(
+          score.leaderboardId + "",
+          {
+            includeBeatSaver: true,
+            cacheOnly: true,
+          }
         );
-        if (player) {
+        if (!leaderboardResponse) {
+          continue; // Skip this score if no leaderboardResponse is found
+        }
+
+        const { leaderboard, beatsaver } = leaderboardResponse;
+
+        try {
+          const player = await ScoreSaberService.getCachedPlayer(score.playerId, true).catch(
+            () => undefined
+          );
+          if (player) {
+            score.playerInfo = {
+              id: player.id,
+              name: player.name,
+            };
+          }
+        } catch {
           score.playerInfo = {
-            id: player.id,
-            name: player.name,
+            id: score.playerId,
           };
         }
-      } catch {
-        score.playerInfo = {
-          id: score.playerId,
-        };
+
+        scores.push({
+          score: await ScoreService.insertScoreData(score, leaderboard),
+          leaderboard: leaderboard,
+          beatSaver: beatsaver,
+        });
       }
 
-      scores.push({
-        score: await ScoreService.insertScoreData(score, leaderboard),
-        leaderboard: leaderboard,
-        beatSaver: beatsaver,
-      });
-    }
-
-    // Filter out any null entries that might result from skipped scores
-    const filteredScores = scores.filter(score => score !== null) as PlayerScore<
-      ScoreSaberScore,
-      ScoreSaberLeaderboard
-    >[];
-    return filteredScores;
+      // Filter out any null entries that might result from skipped scores
+      return scores.filter(score => score !== null) as PlayerScore<
+        ScoreSaberScore,
+        ScoreSaberLeaderboard
+      >[];
+    });
   }
 
   /**
@@ -438,7 +468,7 @@ export class ScoreService {
       return false;
     }
 
-    const top50Scores = await ScoreService.getTopScores(50, "all");
+    const { items: top50Scores } = await ScoreService.getTopScores("all", 1);
     const lowestPp = top50Scores.reduce((min, score) => Math.min(min, score.score.pp), Infinity);
     return score.pp > lowestPp;
   }
