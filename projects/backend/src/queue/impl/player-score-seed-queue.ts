@@ -1,3 +1,5 @@
+import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
+import Logger from "@ssr/common/logger";
 import { PlayerModel } from "@ssr/common/model/player";
 import { PlayerCoreService } from "../../service/player/player-core.service";
 import { PlayerRefreshService } from "../../service/player/player-refresh.service";
@@ -17,7 +19,16 @@ export class PlayerScoreSeedQueue extends Queue<string> {
   }
 
   protected async processItem(playerId: string): Promise<void> {
-    const player = await PlayerCoreService.getPlayer(playerId, true);
-    await PlayerRefreshService.refreshAllPlayerScores(player);
+    const playerToken = await ApiServiceRegistry.getInstance()
+      .getScoreSaberService()
+      .lookupPlayer(playerId);
+
+    if (!playerToken) {
+      Logger.warn(`Player "${playerId}" not found on ScoreSaber`);
+      return;
+    }
+
+    const player = await PlayerCoreService.getPlayer(playerId, true, playerToken);
+    await PlayerRefreshService.refreshAllPlayerScores(player, playerToken);
   }
 }

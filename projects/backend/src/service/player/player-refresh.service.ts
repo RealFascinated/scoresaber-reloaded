@@ -6,8 +6,8 @@ import {
   getScoreSaberLeaderboardFromToken,
   getScoreSaberScoreFromToken,
 } from "@ssr/common/token-creators";
+import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import { ScoreService } from "../score/score.service";
-import ScoreSaberService from "../scoresaber/scoresaber.service";
 import { PlayerCoreService } from "./player-core.service";
 import { PlayerHistoryService } from "./player-history.service";
 
@@ -18,19 +18,14 @@ export class PlayerRefreshService {
    * @param player the player to refresh
    * @returns the total number of missing scores
    */
-  public static async refreshAllPlayerScores(player: PlayerDocument): Promise<number> {
+  public static async refreshAllPlayerScores(
+    player: PlayerDocument,
+    playerToken: ScoreSaberPlayerToken
+  ): Promise<number> {
     Logger.info(`Refreshing scores for ${player.id}...`);
     let page = 1;
     let hasMorePages = true;
     let totalMissingScores = 0;
-
-    const playerToken = await ScoreSaberService.getCachedPlayer(player.id, true).catch(
-      () => undefined
-    );
-    if (playerToken == undefined) {
-      Logger.warn(`Player "${player.id}" not found on ScoreSaber`);
-      return 0;
-    }
 
     while (hasMorePages) {
       const scoresPage = await ApiServiceRegistry.getInstance()
@@ -50,7 +45,7 @@ export class PlayerRefreshService {
       let missingScores = 0;
       await Promise.all(
         scoresPage.playerScores.map(async score => {
-          const tracked = await ScoreService.trackScoreSaberScore(
+          const { tracked } = await ScoreService.trackScoreSaberScore(
             getScoreSaberScoreFromToken(
               score.score,
               getScoreSaberLeaderboardFromToken(score.leaderboard),
@@ -60,7 +55,7 @@ export class PlayerRefreshService {
             playerToken,
             false
           );
-          if (tracked.tracked) {
+          if (tracked) {
             missingScores++;
             totalMissingScores++;
           }
