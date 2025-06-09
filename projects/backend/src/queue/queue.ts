@@ -33,7 +33,6 @@ export abstract class Queue<T> {
   constructor(name: QueueName, interval: number = 30_000) {
     this.name = name;
     this.processInterval = setInterval(() => {
-      this.processQueue();
       // Clean up timestamps for items that are no longer in the queue
       for (const [item] of this.itemTimestamps.entries()) {
         if (!this.queue.includes(item)) {
@@ -61,6 +60,7 @@ export abstract class Queue<T> {
   public add(item: T) {
     this.queue.push(item);
     this.itemTimestamps.set(item, Date.now());
+    this.processQueue(); // Start processing immediately
   }
 
   /**
@@ -111,6 +111,10 @@ export abstract class Queue<T> {
       Logger.error(`Error processing queue ${this.name}:`, error);
     } finally {
       this.lock = false;
+      // If there are more items in the queue, process the next one
+      if (this.queue.length > 0) {
+        this.processQueue();
+      }
     }
   }
 
