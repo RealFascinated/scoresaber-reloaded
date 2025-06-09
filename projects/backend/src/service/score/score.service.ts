@@ -335,51 +335,62 @@ export class ScoreService {
         { $limit: fetchItems.end - fetchItems.start },
       ]);
 
-      const scores: (PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard> | null)[] = [];
-      for (const rawScore of foundScores) {
-        const score = scoreToObject(rawScore);
+      // Convert raw scores to ScoreSaberScore objects
+      const scores = foundScores.map(scoreToObject);
 
-        const leaderboardResponse = await LeaderboardService.getLeaderboard(
-          score.leaderboardId + "",
-          {
-            includeBeatSaver: true,
-            cacheOnly: true,
+      // Batch fetch leaderboards
+      const leaderboardPromises = scores.map(score =>
+        LeaderboardService.getLeaderboard(score.leaderboardId + "", {
+          includeBeatSaver: true,
+          cacheOnly: true,
+        })
+      );
+      const leaderboardResponses = await Promise.all(leaderboardPromises);
+
+      // Batch fetch player info
+      const uniquePlayerIds = [...new Set(scores.map(score => score.playerId))];
+      const playerPromises = uniquePlayerIds.map(playerId =>
+        ScoreSaberService.getCachedPlayer(playerId, true).catch(() => undefined)
+      );
+      const players = await Promise.all(playerPromises);
+      const playerMap = new Map(
+        players.filter((p): p is NonNullable<typeof p> => p !== undefined).map(p => [p.id, p])
+      );
+
+      // Process scores in parallel
+      const processedScores = await Promise.all(
+        scores.map(async (score, index) => {
+          const leaderboardResponse = leaderboardResponses[index];
+          if (!leaderboardResponse) {
+            return null;
           }
-        );
-        if (!leaderboardResponse) {
-          continue; // Skip this score if no leaderboardResponse is found
-        }
 
-        const { leaderboard, beatsaver } = leaderboardResponse;
+          const { leaderboard } = leaderboardResponse;
+          const player = playerMap.get(score.playerId);
 
-        try {
-          const player = await ScoreSaberService.getCachedPlayer(score.playerId, true).catch(
-            () => undefined
-          );
           if (player) {
             score.playerInfo = {
               id: player.id,
               name: player.name,
             };
+          } else {
+            score.playerInfo = {
+              id: score.playerId,
+            };
           }
-        } catch {
-          score.playerInfo = {
-            id: score.playerId,
-          };
-        }
 
-        scores.push({
-          score: await ScoreService.insertScoreData(score, leaderboard),
-          leaderboard: leaderboard,
-          beatSaver: beatsaver,
-        });
-      }
+          const processedScore = await ScoreService.insertScoreData(score, leaderboard);
+          return {
+            score: processedScore,
+            leaderboard: leaderboard,
+          } as PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>;
+        })
+      );
 
       // Filter out any null entries that might result from skipped scores
-      return scores.filter(score => score !== null) as PlayerScore<
-        ScoreSaberScore,
-        ScoreSaberLeaderboard
-      >[];
+      return processedScores.filter(
+        (score): score is PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard> => score !== null
+      );
     });
   }
 

@@ -3,7 +3,7 @@ import { QueueName } from "./queue-manager";
 
 export abstract class Queue<T> {
   private readonly MAX_SAMPLES = 10;
-  private processInterval: NodeJS.Timeout | null = null;
+  private cleanupInterval: NodeJS.Timeout | null = null;
 
   /**
    * The name of the queue
@@ -30,9 +30,10 @@ export abstract class Queue<T> {
    */
   private processingTimes: number[] = [];
 
-  constructor(name: QueueName, interval: number = 30_000) {
+  constructor(name: QueueName) {
     this.name = name;
-    this.processInterval = setInterval(() => {
+
+    this.cleanupInterval = setInterval(() => {
       // Clean up timestamps for items that are no longer in the queue
       for (const [item] of this.itemTimestamps.entries()) {
         if (!this.queue.includes(item)) {
@@ -42,13 +43,13 @@ export abstract class Queue<T> {
       if (this.processingTimes.length > this.MAX_SAMPLES) {
         this.processingTimes = this.processingTimes.slice(-this.MAX_SAMPLES);
       }
-    }, interval);
+    }, 30_000); // Clean up every 30 seconds
   }
 
   public cleanup() {
-    if (this.processInterval) {
-      clearInterval(this.processInterval);
-      this.processInterval = null;
+    if (this.cleanupInterval) {
+      clearInterval(this.cleanupInterval);
+      this.cleanupInterval = null;
     }
   }
 
