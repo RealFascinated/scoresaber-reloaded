@@ -34,10 +34,9 @@ export abstract class Queue<T> {
     this.name = name;
     this.processInterval = setInterval(() => {
       this.processQueue();
-      // Clean up old timestamps and processing times
-      const now = Date.now();
-      for (const [item, timestamp] of this.itemTimestamps.entries()) {
-        if (now - timestamp > interval * 2) {
+      // Clean up timestamps for items that are no longer in the queue
+      for (const [item] of this.itemTimestamps.entries()) {
+        if (!this.queue.includes(item)) {
           this.itemTimestamps.delete(item);
         }
       }
