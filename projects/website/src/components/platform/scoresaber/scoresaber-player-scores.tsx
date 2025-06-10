@@ -1,6 +1,5 @@
 "use client";
 
-import { setCookieValue } from "@/common/cookie.util";
 import { PlatformRepository } from "@/common/platform/platform-repository";
 import { LoadingIcon } from "@/components/loading-icon";
 import Score from "@/components/score/score";
@@ -20,10 +19,10 @@ import { useDebounce } from "@uidotdev/usehooks";
 import { clsx } from "clsx";
 import { SearchIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import SimplePagination from "../../../simple-pagination";
-import { Button } from "../../../ui/button";
-import { EmptyState } from "../../../ui/empty-state";
-import ScoresCard from "../scores-card";
+import ScoresCard from "../../score/scores-card";
+import SimplePagination from "../../simple-pagination";
+import { Button } from "../../ui/button";
+import { EmptyState } from "../../ui/empty-state";
 
 type Props = {
   initialSearch?: string;
@@ -33,8 +32,8 @@ type Props = {
 };
 
 const scoreSort = [
-  { name: "Top", value: ScoreSaberScoreSort.top, icon: <TrophyIcon className="w-5 h-5" /> },
-  { name: "Recent", value: ScoreSaberScoreSort.recent, icon: <ClockIcon className="w-5 h-5" /> },
+  { name: "Top", value: "top", icon: <TrophyIcon className="w-5 h-5" /> },
+  { name: "Recent", value: "recent", icon: <ClockIcon className="w-5 h-5" /> },
 ];
 
 export default function ScoreSaberPlayerScores({ initialSearch, player, sort, page }: Props) {
@@ -77,7 +76,6 @@ export default function ScoreSaberPlayerScores({ initialSearch, player, sort, pa
     async (newSort: ScoreSaberScoreSort) => {
       if (newSort !== currentSort) {
         setCurrentSort(newSort);
-        await setCookieValue("lastScoreSort", newSort); // Set the default score sort
       }
     },
     [currentSort]
@@ -88,10 +86,7 @@ export default function ScoreSaberPlayerScores({ initialSearch, player, sort, pa
    */
   const getUrl = useCallback(
     (page: number) => {
-      const baseUrl = `/player/${player.id}/scoresaber`;
-      return page === 1 && currentSort === ScoreSaberScoreSort.recent
-        ? `${baseUrl}${isSearchActive ? `?search=${searchTerm}` : ""}`
-        : `${baseUrl}/${currentSort}/${page}${isSearchActive ? `?search=${searchTerm}` : ""}`;
+      return `/player/${player.id}/scoresaber/${currentSort}/${page}${isSearchActive ? `?search=${searchTerm}` : ""}`;
     },
     [searchTerm, player.id, currentSort, isSearchActive]
   );
@@ -112,7 +107,7 @@ export default function ScoreSaberPlayerScores({ initialSearch, player, sort, pa
             <Button
               key={sortOption.value}
               variant={sortOption.value === currentSort ? "default" : "outline"}
-              onClick={() => handleSortChange(sortOption.value)}
+              onClick={() => handleSortChange(sortOption.value as ScoreSaberScoreSort)}
               size="sm"
               className="flex items-center gap-1"
             >

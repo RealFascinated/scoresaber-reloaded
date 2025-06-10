@@ -1,5 +1,4 @@
 import ScoresaberLogo from "@/components/logos/logos/scoresaber-logo";
-import ScoreSaberPlayerScores from "@/components/player/platform/scoresaber/player-scores";
 import { DetailType } from "@ssr/common/detail-type";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
@@ -9,8 +8,7 @@ import PlayerScoresResponse from "@ssr/common/response/player-scores-response";
 import { PlayerScore } from "@ssr/common/score/player-score";
 import { ScoreSaberScoreSort } from "@ssr/common/score/score-sort";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
-import { ReactNode } from "react";
-import { Platform, PlatformRenderProps } from "../platform";
+import { Platform } from "../platform";
 import { PlatformType } from "../platform-repository";
 
 export type ScoreSaberScoreLookupOptions = {
@@ -22,10 +20,11 @@ export class ScoreSaberPlatform extends Platform<
   ScoreSaberPlayer,
   PlayerScoresResponse<ScoreSaberScore, ScoreSaberLeaderboard>,
   ScoreSaberLeaderboard,
-  ScoreSaberScoreLookupOptions
+  ScoreSaberScoreLookupOptions,
+  ScoreSaberScoreSort
 > {
   constructor() {
-    super(PlatformType.ScoreSaber, "ScoreSaber", {
+    super(PlatformType.ScoreSaber, "ScoreSaber", "recent", {
       logo: <ScoresaberLogo className="w-4.5 h-4.5" />,
     });
   }
@@ -52,14 +51,5 @@ export class ScoreSaberPlatform extends Platform<
       return Pagination.empty();
     }
     return response;
-  }
-
-  render(props: PlatformRenderProps<ScoreSaberPlayer, ScoreSaberScoreLookupOptions>): ReactNode {
-    return ScoreSaberPlayerScores({
-      player: props.player,
-      sort: props.sort.sort,
-      page: props.page,
-      initialSearch: props.initialSearch,
-    });
   }
 }

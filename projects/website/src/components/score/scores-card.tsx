@@ -1,6 +1,6 @@
 "use client";
 
-import Card from "../../card";
+import Card from "../card";
 
 type Props = {
   children: React.ReactNode;

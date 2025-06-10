@@ -22,7 +22,7 @@ import { useQuery } from "@tanstack/react-query";
 import { differenceInDays, subMonths, subYears } from "date-fns";
 import { SwordIcon, TrendingUpIcon } from "lucide-react";
 import dynamic from "next/dynamic";
-import { ReactElement, ReactNode, useState } from "react";
+import { ReactElement, ReactNode, useMemo, useState } from "react";
 import { DateRange } from "react-day-picker";
 
 function Loading() {
@@ -95,45 +95,47 @@ type SelectedView = {
   ) => ReactElement<any>;
 };
 
-export default function PlayerViews({ player }: PlayerChartsProps) {
-  const views: SelectedView[] = [
-    {
-      index: 0,
-      label: "Ranking",
-      icon: <GlobeAmericasIcon className="w-5 h-5" />,
-      chart: (player, statisticHistory, daysAmount) => (
-        <PlayerRankingChart statisticHistory={statisticHistory} daysAmount={daysAmount} />
+const views: SelectedView[] = [
+  {
+    index: 0,
+    label: "Ranking",
+    icon: <GlobeAmericasIcon className="w-5 h-5" />,
+    chart: (player, statisticHistory, daysAmount) => (
+      <PlayerRankingChart statisticHistory={statisticHistory} daysAmount={daysAmount} />
+    ),
+  },
+  {
+    index: 1,
+    label: "Accuracy",
+    icon: <TrendingUpIcon className="w-[18px] h-[18px]" />,
+    chart: (player, statisticHistory, daysAmount) =>
+      player.isBeingTracked ? (
+        <PlayerAccuracyChart statisticHistory={statisticHistory} daysAmount={daysAmount} />
+      ) : (
+        <div />
       ),
-    },
-  ];
+  },
+  {
+    index: 2,
+    label: "Scores",
+    icon: <SwordIcon className="w-[18px] h-[18px]" />,
+    chart: (player, statisticHistory, daysAmount) =>
+      player.isBeingTracked ? (
+        <PlayerScoresChart statisticHistory={statisticHistory} daysAmount={daysAmount} />
+      ) : (
+        <div />
+      ),
+  },
+  {
+    index: 3,
+    label: "Score Calendar",
+    icon: <CalendarIcon className="w-[18px] h-[18px]" />,
+    chart: (player, statisticHistory) =>
+      player.isBeingTracked ? <ScoreHistoryCalendar playerId={player.id} /> : <div />,
+  },
+];
 
-  if (player.isBeingTracked) {
-    views.push(
-      {
-        index: 1,
-        label: "Accuracy",
-        icon: <TrendingUpIcon className="w-[18px] h-[18px]" />,
-        chart: (player, statisticHistory, daysAmount) => (
-          <PlayerAccuracyChart statisticHistory={statisticHistory} daysAmount={daysAmount} />
-        ),
-      },
-      {
-        index: 2,
-        label: "Scores",
-        icon: <SwordIcon className="w-[18px] h-[18px]" />,
-        chart: (player, statisticHistory, daysAmount) => (
-          <PlayerScoresChart statisticHistory={statisticHistory} daysAmount={daysAmount} />
-        ),
-      },
-      {
-        index: 3,
-        label: "Score Calendar",
-        icon: <CalendarIcon className="w-[18px] h-[18px]" />,
-        chart: (player, statisticHistory) => <ScoreHistoryCalendar playerId={player.id} />,
-      }
-    );
-  }
-
+export default function PlayerViews({ player }: PlayerChartsProps) {
   const [dateRange, setDateRange] = useState<DateRange>({
     from: getDaysAgoDate(50),
     to: new Date(),
@@ -157,6 +159,11 @@ export default function PlayerViews({ player }: PlayerChartsProps) {
     { label: "Last 2 Years", value: () => ({ from: subYears(new Date(), 2), to: new Date() }) },
   ];
 
+  const availableViews = useMemo(
+    () => views.filter(view => view.index === 0 || player.isBeingTracked),
+    [player.isBeingTracked]
+  );
+
   return (
     <>
       {statisticHistory ? selectedView.chart(player, statisticHistory, daysAmount) : <Loading />}
@@ -165,31 +172,30 @@ export default function PlayerViews({ player }: PlayerChartsProps) {
         <div className="flex items-center justify-between gap-2 relative flex-col md:flex-row">
           {/* View Selector */}
           <div className="md:absolute md:left-1/2 md:-translate-x-1/2 flex items-center justify-center gap-2">
-            {views.length > 1 &&
-              views.map(view => {
-                const isSelected = view.index === selectedView.index;
+            {availableViews.map(view => {
+              const isSelected = view.index === selectedView.index;
 
-                return (
-                  <SimpleTooltip
-                    key={view.index}
-                    display={
-                      <div className="flex justify-center items-center flex-col">
-                        <p>{view.label}</p>
-                        <p className="text-gray-400">
-                          {isSelected ? "Currently Selected" : "Click to view"}
-                        </p>
-                      </div>
-                    }
+              return (
+                <SimpleTooltip
+                  key={view.index}
+                  display={
+                    <div className="flex justify-center items-center flex-col">
+                      <p>{view.label}</p>
+                      <p className="text-gray-400">
+                        {isSelected ? "Currently Selected" : "Click to view"}
+                      </p>
+                    </div>
+                  }
+                >
+                  <button
+                    onClick={() => setSelectedView(view)}
+                    className={`border ${isSelected ? "border-1" : "border-input"} flex items-center justify-center p-[2px] w-[26px] h-[26px] rounded-full hover:brightness-[66%] transition-all`}
                   >
-                    <button
-                      onClick={() => setSelectedView(view)}
-                      className={`border ${isSelected ? "border-1" : "border-input"} flex items-center justify-center p-[2px] w-[26px] h-[26px] rounded-full hover:brightness-[66%] transition-all`}
-                    >
-                      {view.icon}
-                    </button>
-                  </SimpleTooltip>
-                );
-              })}
+                    {view.icon}
+                  </button>
+                </SimpleTooltip>
+              );
+            })}
           </div>
 
           {/* Date Selector */}

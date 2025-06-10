@@ -1,16 +1,19 @@
+import { AccSaberPlatform } from "./impl/accsaber";
 import { ScoreSaberPlatform } from "./impl/scoresaber";
 import { Platform } from "./platform";
 
 export enum PlatformType {
   ScoreSaber = "scoresaber",
+  AccSaber = "accsaber",
 }
 
 export class PlatformRepository {
   private static instance: PlatformRepository;
-  private platforms: Platform<any, any, any, any>[] = [];
+  private platforms: Platform<any, any, any, any, any>[] = [];
 
   private constructor() {
-    this.initialize();
+    this.platforms.push(new ScoreSaberPlatform());
+    this.platforms.push(new AccSaberPlatform());
   }
 
   /**
@@ -24,22 +27,14 @@ export class PlatformRepository {
   }
 
   /**
-   * Initialize the platforms
-   */
-  private initialize() {
-    if (this.platforms.length === 0) {
-      this.platforms.push(new ScoreSaberPlatform());
-    }
-  }
-
-  /**
    * Get a platform by type
    *
    * @param type the type of the platform
    * @returns the platform
    */
-  public getPlatform(type: PlatformType): Platform<any, any, any, any> {
+  public getPlatform(type: PlatformType): Platform<any, any, any, any, any> {
     return this.platforms.find(platform => platform.getType() === type) as Platform<
+      any,
       any,
       any,
       any,
@@ -52,7 +47,7 @@ export class PlatformRepository {
    *
    * @returns all platforms
    */
-  public getPlatforms(): Platform<any, any, any, any>[] {
+  public getPlatforms(): Platform<any, any, any, any, any>[] {
     return this.platforms;
   }
 

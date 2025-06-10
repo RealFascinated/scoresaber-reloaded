@@ -85,4 +85,38 @@ export default class ApiService {
       ...options,
     });
   }
+
+  /**
+   * Fetches data from the given url.
+   *
+   * @param url the url to fetch
+   * @param options the fetch options to use
+   * @returns the fetched data
+   */
+  public async fetchGQL<T>(
+    url: string,
+    query: string,
+    variables: Record<string, any>,
+    options?: RequestOptions
+  ): Promise<T | undefined> {
+    if (isServer()) {
+      this.callCount++;
+    }
+
+    await this.cooldown.waitAndUse();
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...((options?.headers as Record<string, string>) || {}),
+      },
+      body: JSON.stringify({
+        query: query.trim(),
+        variables: variables || {},
+      }),
+    });
+
+    return response.json() as Promise<T>;
+  }
 }

@@ -6,14 +6,7 @@ export type PlatformOptions = {
   logo?: ReactNode;
 };
 
-export type PlatformRenderProps<Player, ScoreLookupOptions> = {
-  player: Player;
-  sort: ScoreLookupOptions;
-  page: number;
-  initialSearch?: string;
-};
-
-export abstract class Platform<Player, ScoreResponse, Leaderboard, ScoreLookupOptions> {
+export abstract class Platform<Player, ScoreResponse, Leaderboard, ScoreLookupOptions, ScoreSort> {
   /**
    * The id of this platform
    */
@@ -25,13 +18,24 @@ export abstract class Platform<Player, ScoreResponse, Leaderboard, ScoreLookupOp
   private readonly displayName: string;
 
   /**
+   * The default score sort for this platform
+   */
+  private readonly defaultScoreSort: ScoreSort;
+
+  /**
    * The options for this platform
    */
   private readonly options: PlatformOptions;
 
-  constructor(type: PlatformType, displayName: string, options: PlatformOptions) {
+  constructor(
+    type: PlatformType,
+    displayName: string,
+    defaultScoreSort: ScoreSort,
+    options: PlatformOptions
+  ) {
     this.type = type;
     this.displayName = displayName;
+    this.defaultScoreSort = defaultScoreSort;
     this.options = options;
   }
 
@@ -58,14 +62,6 @@ export abstract class Platform<Player, ScoreResponse, Leaderboard, ScoreLookupOp
   ): Promise<Page<ScoreResponse> | unknown>;
 
   /**
-   * Render the platform-specific score component
-   *
-   * @param props the props for rendering the score component
-   * @returns the rendered component
-   */
-  abstract render(props: PlatformRenderProps<Player, ScoreLookupOptions>): ReactNode;
-
-  /**
    * Get the type of this platform
    *
    * @returns the type of this platform
@@ -81,6 +77,15 @@ export abstract class Platform<Player, ScoreResponse, Leaderboard, ScoreLookupOp
    */
   public getDisplayName(): string {
     return this.displayName;
+  }
+
+  /**
+   * Get the default score sort for this platform
+   *
+   * @returns the default score sort for this platform
+   */
+  public getDefaultScoreSort(): ScoreSort {
+    return this.defaultScoreSort;
   }
 
   /**

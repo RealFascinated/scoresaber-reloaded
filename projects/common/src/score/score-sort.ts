@@ -1,4 +1,1 @@
-export enum ScoreSaberScoreSort {
-  top = "top",
-  recent = "recent",
-}
+export type ScoreSaberScoreSort = "top" | "recent";

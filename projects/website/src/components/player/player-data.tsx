@@ -1,43 +1,112 @@
 "use client";
 
 import { PlatformRepository, PlatformType } from "@/common/platform/platform-repository";
-import { assert } from "@/common/utils/assert";
 import Card from "@/components/card";
 import PlayerViews from "@/components/player/history-views/player-views";
 import PlayerBadges from "@/components/player/player-badges";
 import useDatabase from "@/hooks/use-database";
 import useWindowDimensions from "@/hooks/use-window-dimensions";
+import {
+  AccSaberScoreOrder,
+  AccSaberScoreSort,
+  AccSaberScoreType,
+} from "@ssr/common/api-service/impl/accsaber";
 import type ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import type { ScoreSaberScoreSort } from "@ssr/common/score/score-sort";
 import { useQuery } from "@tanstack/react-query";
 import { useLiveQuery } from "dexie-react-hooks";
 import dynamic from "next/dynamic";
+import { useRouter } from "next/navigation";
+import AccSaberPlayerScores from "../platform/accsaber/accsaber-player-scores";
+import ScoreSaberPlayerScores from "../platform/scoresaber/scoresaber-player-scores";
 import { Button } from "../ui/button";
 import PlayerHeader from "./header/player-header";
 
 const PlayerRankingMini = dynamic(() => import("./player-mini-ranking"), { ssr: false });
 
-interface PlayerDataProps {
-  initialPlayerData: ScoreSaberPlayer;
-  initialSearch?: string;
-  sort: ScoreSaberScoreSort;
-  page: number;
-  platformType: PlatformType;
-}
-
 const platformRepository = PlatformRepository.getInstance();
 const scoresaberPlatform = platformRepository.getScoreSaberPlatform();
+
+function PlatformSelector({
+  player,
+  currentPlatform,
+}: {
+  currentPlatform: PlatformType;
+  player: ScoreSaberPlayer;
+}) {
+  const router = useRouter();
+
+  return (
+    <div className="flex">
+      {platformRepository.getPlatforms().map(platform => (
+        <Button
+          key={platform.getDisplayName()}
+          variant={currentPlatform === platform.getType() ? "default" : "secondary"}
+          className="flex items-center gap-2 rounded-b-none"
+          onClick={() =>
+            router.push(`/player/${player.id}/${platform.getType()}`, {
+              scroll: false,
+            })
+          }
+        >
+          {platform.getLogo()}
+          {platform.getDisplayName()}
+        </Button>
+      ))}
+    </div>
+  );
+}
+
+function ScoreComponent({
+  platformType,
+  player,
+  searchParams,
+  pageParams,
+}: {
+  platformType: PlatformType;
+  player: ScoreSaberPlayer;
+  searchParams: {
+    [key: string]: string | undefined;
+  };
+  pageParams: string[];
+}) {
+  return (
+    <div className="[&>div]:rounded-tl-none">
+      {platformType === PlatformType.ScoreSaber ? (
+        <ScoreSaberPlayerScores
+          player={player}
+          sort={(pageParams[2] as ScoreSaberScoreSort) ?? ("recent" as ScoreSaberScoreSort)}
+          page={parseInt(pageParams[3]) || 1}
+          initialSearch={searchParams.search}
+        />
+      ) : (
+        <AccSaberPlayerScores
+          player={player}
+          sort={(pageParams[2] as AccSaberScoreSort) ?? ("date" as AccSaberScoreSort)}
+          page={parseInt(pageParams[3]) || 1}
+          type={(pageParams[4] as AccSaberScoreType) ?? ("overall" as AccSaberScoreType)}
+          order={(pageParams[5] as AccSaberScoreOrder) ?? ("desc" as AccSaberScoreOrder)}
+        />
+      )}
+    </div>
+  );
+}
+
+interface PlayerDataProps {
+  initialPlayerData: ScoreSaberPlayer;
+  platformType: PlatformType;
+  searchParams: {
+    [key: string]: string | undefined;
+  };
+  pageParams: string[];
+}
 
 export default function PlayerData({
   platformType,
   initialPlayerData,
-  initialSearch,
-  sort,
-  page,
+  pageParams,
+  searchParams,
 }: PlayerDataProps) {
-  const platform = PlatformRepository.getInstance().getPlatform(platformType);
-  assert(platform, "Platform not found");
-
   const { width } = useWindowDimensions();
   const database = useDatabase();
 
@@ -62,35 +131,15 @@ export default function PlayerData({
           {!player.inactive && <PlayerViews player={player} />}
         </Card>
 
-        {/* Score Platform */}
         <div className="flex flex-col">
-          {/* Score Component */}
           <div className="flex flex-col">
-            {/* Platform Selector */}
-            <div className="flex">
-              {PlatformRepository.getInstance()
-                .getPlatforms()
-                .map((platform, index) => (
-                  <Button
-                    key={platform.getDisplayName()}
-                    variant={platformType === platform.getType() ? "default" : "secondary"}
-                    className="flex items-center gap-2 rounded-b-none"
-                  >
-                    {platform.getLogo()}
-                    {platform.getDisplayName()}
-                  </Button>
-                ))}
-            </div>
-
-            {/* Score Component */}
-            <div className="[&>div]:rounded-tl-none">
-              {platform.render({
-                player,
-                sort: { sort },
-                page,
-                initialSearch,
-              })}
-            </div>
+            <PlatformSelector currentPlatform={platformType} player={player} />
+            <ScoreComponent
+              platformType={platformType}
+              player={player}
+              searchParams={searchParams}
+              pageParams={pageParams}
+            />
           </div>
         </div>
       </article>

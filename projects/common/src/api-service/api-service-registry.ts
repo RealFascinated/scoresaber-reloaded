@@ -1,4 +1,5 @@
 import ApiService from "./api-service";
+import { AccSaberService } from "./impl/accsaber";
 import { BeatLeaderService } from "./impl/beatleader";
 import { BeatSaverService } from "./impl/beatsaver";
 import { ScoreSaberService } from "./impl/scoresaber";
@@ -7,6 +8,7 @@ export enum ApiServiceName {
   BEAT_LEADER = "beatleader",
   SCORE_SABER = "scoresaber",
   BEAT_SAVER = "beatsaver",
+  ACCSABER = "accsaber",
 }
 
 export default class ApiServiceRegistry {
@@ -17,6 +19,7 @@ export default class ApiServiceRegistry {
     this.registerService(new BeatLeaderService());
     this.registerService(new ScoreSaberService());
     this.registerService(new BeatSaverService());
+    this.registerService(new AccSaberService());
   }
 
   public static getInstance(): ApiServiceRegistry {
@@ -55,6 +58,10 @@ export default class ApiServiceRegistry {
 
   public getBeatSaverService(): BeatSaverService {
     return ApiServiceRegistry.services.get(ApiServiceName.BEAT_SAVER) as BeatSaverService;
+  }
+
+  public getAccSaberService(): AccSaberService {
+    return ApiServiceRegistry.services.get(ApiServiceName.ACCSABER) as AccSaberService;
   }
 }
 

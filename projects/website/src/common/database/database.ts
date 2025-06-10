@@ -135,9 +135,9 @@ export default class Database extends Dexie {
   private async initializeCookie() {
     const mainPlayerId = await this.getMainPlayerId();
     if (mainPlayerId) {
-      await setCookieValue("playerId", mainPlayerId);
+      setCookieValue("playerId", mainPlayerId);
     } else {
-      await deleteCookieValue("playerId");
+      deleteCookieValue("playerId");
     }
   }
 
