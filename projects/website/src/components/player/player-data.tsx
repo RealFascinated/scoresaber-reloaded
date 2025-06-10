@@ -16,7 +16,7 @@ import type { ScoreSaberScoreSort } from "@ssr/common/score/score-sort";
 import { useQuery } from "@tanstack/react-query";
 import { useLiveQuery } from "dexie-react-hooks";
 import dynamic from "next/dynamic";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import AccSaberPlayerScores from "../platform/accsaber/accsaber-player-scores";
 import ScoreSaberPlayerScores from "../platform/scoresaber/scoresaber-player-scores";
 import { Button } from "../ui/button";
@@ -34,8 +34,6 @@ function PlatformSelector({
   currentPlatform: PlatformType;
   player: ScoreSaberPlayer;
 }) {
-  const router = useRouter();
-
   const { data: availablePlatforms = [] } = useQuery({
     queryKey: ["available-platforms", player.id],
     queryFn: async () => {
@@ -54,19 +52,16 @@ function PlatformSelector({
   return (
     <div className="flex">
       {availablePlatforms.map(platform => (
-        <Button
-          key={platform.getDisplayName()}
-          variant={currentPlatform === platform.getType() ? "default" : "secondary"}
-          className="flex items-center gap-2 rounded-b-none"
-          onClick={() =>
-            router.push(`/player/${player.id}/${platform.getType()}`, {
-              scroll: false,
-            })
-          }
-        >
-          {platform.getLogo()}
-          {platform.getDisplayName()}
-        </Button>
+        <Link href={`/player/${player.id}/${platform.getType()}`} key={platform.getDisplayName()}>
+          <Button
+            key={platform.getDisplayName()}
+            variant={currentPlatform === platform.getType() ? "default" : "secondary"}
+            className="flex items-center gap-2 rounded-b-none"
+          >
+            {platform.getLogo()}
+            {platform.getDisplayName()}
+          </Button>
+        </Link>
       ))}
     </div>
   );
@@ -95,7 +90,6 @@ function ScoreComponent({
           initialSearch={searchParams.search}
         />
       ) : (
-        // return `/player/${player.id}/accsaber/${currentSort}/${currentType}/${currentOrder}/${page}`;
         <AccSaberPlayerScores
           player={player}
           sort={(pageParams[2] as AccSaberScoreSort) ?? ("date" as AccSaberScoreSort)}
