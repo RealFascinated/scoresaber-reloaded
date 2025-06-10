@@ -14,7 +14,7 @@ import { Page } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { capitalizeFirstLetter } from "@ssr/common/string-utils";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowDown, ArrowUp, SearchIcon } from "lucide-react";
+import { ArrowDown, ArrowUp, ClockIcon, SearchIcon, Target, Trophy } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import ScoresCard from "../../score/scores-card";
 import SimplePagination from "../../simple-pagination";
@@ -23,9 +23,10 @@ import { EmptyState } from "../../ui/empty-state";
 import AccSaberScoreComponent from "./score/accsaber-score";
 
 const scoreSort = [
-  { name: "AP", value: "ap" },
-  { name: "Date", value: "date" },
-  { name: "Acc", value: "acc" },
+  { name: "AP", value: "ap", icon: <Trophy className="w-4 h-4" /> },
+  { name: "Date", value: "date", icon: <ClockIcon className="w-4 h-4" /> },
+  { name: "Acc", value: "acc", icon: <Target className="w-4 h-4" /> },
+  { name: "Rank", value: "ranking", icon: <Trophy className="w-4 h-4" />, defaultOrder: "asc" },
 ];
 
 const scoreTypes = [
@@ -78,10 +79,11 @@ export default function AccSaberPlayerScores({ player, sort, page, type, order }
   });
 
   const handleSortChange = useCallback(
-    async (newSort: typeof sort) => {
+    async (newSort: typeof sort, defaultOrder: AccSaberScoreOrder) => {
       if (newSort !== currentSort) {
         setCurrentSort(newSort);
         setCurrentPage(1);
+        setCurrentOrder(defaultOrder);
       } else {
         setCurrentOrder(currentOrder === "desc" ? "asc" : "desc");
       }
@@ -125,17 +127,26 @@ export default function AccSaberPlayerScores({ player, sort, page, type, order }
               <Button
                 key={sortOption.value}
                 variant={sortOption.value === currentSort ? "default" : "outline"}
-                onClick={() => handleSortChange(sortOption.value as AccSaberScoreSort)}
+                onClick={() =>
+                  handleSortChange(
+                    sortOption.value as AccSaberScoreSort,
+                    (sortOption.defaultOrder ?? "desc") as AccSaberScoreOrder
+                  )
+                }
                 size="sm"
                 className="flex items-center gap-1"
               >
                 {`${capitalizeFirstLetter(sortOption.name)}`}
 
-                {/* Order */}
-                {currentOrder === "desc" && sortOption.value === currentSort ? (
-                  <ArrowDown className="w-4 h-4" />
+                {/* Order / Icon */}
+                {sortOption.value === currentSort ? (
+                  currentOrder === "desc" ? (
+                    <ArrowDown className="w-4 h-4" />
+                  ) : (
+                    <ArrowUp className="w-4 h-4" />
+                  )
                 ) : (
-                  <ArrowUp className="w-4 h-4" />
+                  sortOption.icon
                 )}
               </Button>
             ))}

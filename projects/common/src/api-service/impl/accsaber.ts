@@ -45,7 +45,7 @@ export type AccSaberScore = {
   lastUpdated: Date;
 };
 
-export type AccSaberScoreSort = "date" | "ap" | "acc" | "complexity";
+export type AccSaberScoreSort = "date" | "ap" | "acc" | "complexity" | "ranking";
 export type AccSaberScoreOrder = "asc" | "desc";
 export type AccSaberScoreType = "overall" | "true" | "tech" | "speed";
 
@@ -93,24 +93,18 @@ export class AccSaberService extends ApiService {
     const { sort = "date", order = "desc", type = "overall" } = options;
     if (page < 1) page = 1;
 
-    // Map our sort options to AccSaber's enum values
-    const sortMap: Record<AccSaberScoreSort, Record<AccSaberScoreOrder, string>> = {
-      date: {
-        asc: "TIME_SET_ASC",
-        desc: "TIME_SET_DESC",
-      },
-      ap: {
-        asc: "AP_ASC",
-        desc: "AP_DESC",
-      },
-      acc: {
-        asc: "ACCURACY_ASC",
-        desc: "ACCURACY_DESC",
-      },
-      complexity: {
-        asc: "COMPLEXITY_ASC",
-        desc: "COMPLEXITY_DESC",
-      },
+    // Automatically generate sort options based on consistent naming pattern
+    const generateSortOption = (sort: AccSaberScoreSort, order: AccSaberScoreOrder): string => {
+      const sortMapping: Record<AccSaberScoreSort, string> = {
+        date: "TIME_SET",
+        acc: "ACCURACY",
+        ap: "AP",
+        complexity: "COMPLEXITY",
+        ranking: "RANKING",
+      };
+      const base = sortMapping[sort];
+      const direction = order.toUpperCase();
+      return `${base}_${direction}`;
     };
 
     const query = `
@@ -183,7 +177,7 @@ export class AccSaberService extends ApiService {
         ...(type !== "overall" ? { category: type } : {}),
         count: SCORES_PER_PAGE,
         offset: SCORES_PER_PAGE * (page - 1),
-        order: [sortMap[sort][order]],
+        order: [generateSortOption(sort, order)],
       });
 
       console.log(result);
