@@ -62,7 +62,7 @@ const links: ReactElement<any>[] = [
         <span className="hidden xl:flex">Top Scores</span>
       </>
     }
-    href="/scores/top/weekly"
+    href="/scores/top/all"
   />,
 ];
 

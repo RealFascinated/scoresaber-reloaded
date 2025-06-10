@@ -64,10 +64,6 @@ const links: {
       name: "Score Feed",
       href: "/scores/live",
     },
-    {
-      name: "Top Scores",
-      href: "/scores/top/weekly",
-    },
   ],
 };
 
