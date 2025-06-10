@@ -113,6 +113,7 @@ app.use(
       if (typeof response === "object") {
         return JSON.stringify(response);
       }
+      return String(response);
     },
   })
 );
