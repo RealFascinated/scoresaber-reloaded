@@ -1,3 +1,4 @@
+import { getRankColor } from "@/common/color-utils";
 import { PlayerInfo } from "@/components/player/player-info";
 import PlayerPreview from "@/components/player/player-preview";
 import ScoreMissesAndPausesBadge from "@/components/score/badges/score-misses-and-pauses";
@@ -35,7 +36,11 @@ export default function LeaderboardScore({ score, leaderboard, highlightedPlayer
   return (
     <>
       {/* Score Rank */}
-      <td className="px-4 py-2 whitespace-nowrap">{score.rank !== -1 ? `#${score.rank}` : "-"}</td>
+      <td className="px-4 py-2 whitespace-nowrap">
+        <p className={`${getRankColor(score.rank)}`}>
+          {score.rank !== -1 ? `#${score.rank}` : "-"}
+        </p>
+      </td>
 
       {/* Player */}
       <td className="px-4 py-2 flex gap-2 whitespace-nowrap min-w-[250px]">

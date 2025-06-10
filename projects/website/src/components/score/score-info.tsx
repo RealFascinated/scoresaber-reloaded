@@ -1,3 +1,4 @@
+import { getRankColor } from "@/common/color-utils";
 import { ScoreTimeSet } from "@/components/score/score-time-set";
 import { ScoreTimeSetVs } from "@/components/score/score-time-set-vs";
 import SimpleTooltip from "@/components/simple-tooltip";
@@ -29,7 +30,9 @@ export default function ScoreInfo({ score, leaderboard, hideRank }: Props) {
         prefetch={false}
         href={`/leaderboard/${leaderboard.id}/${getPageFromRank(score.rank, 12)}`}
       >
-        <p className="text-ssr hover:brightness-[66%] transition-all cursor-pointer">
+        <p
+          className={`${getRankColor(score.rank)} hover:brightness-[66%] transition-all cursor-pointer`}
+        >
           #{formatNumberWithCommas(score.rank)}
         </p>
       </Link>
