@@ -5,6 +5,7 @@ import { LoadingIcon } from "@/components/loading-icon";
 import Score from "@/components/score/score";
 import SimplePagination from "@/components/simple-pagination";
 import { Button } from "@/components/ui/button";
+import { useIsMobile } from "@/hooks/use-is-mobile";
 import { env } from "@ssr/common/env";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
@@ -44,6 +45,8 @@ type TopScoresDataProps = {
 };
 
 export function TopScoresData({ timeframe }: TopScoresDataProps) {
+  const isMobile = useIsMobile();
+
   const [selectedTimeframe, setSelectedTimeframe] = useState<Timeframe>(timeframe);
   const [page, setPage] = useState(1);
 
@@ -77,10 +80,7 @@ export function TopScoresData({ timeframe }: TopScoresDataProps) {
   const memoizedTimeframes = useMemo(() => timeframes, []);
 
   const renderScore = useCallback(
-    (
-      { score, leaderboard, beatSaver }: PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>,
-      index: number
-    ) => {
+    ({ score, leaderboard, beatSaver }: PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>) => {
       const player = score.playerInfo;
       const name = score.playerInfo ? player.name || player.id : score.playerId;
 
@@ -144,6 +144,7 @@ export function TopScoresData({ timeframe }: TopScoresDataProps) {
             itemsPerPage={scores.metadata.itemsPerPage}
             loadingPage={isLoading || isRefetching ? page : undefined}
             onPageChange={handlePageChange}
+            mobilePagination={isMobile}
           />
         </div>
       )}
