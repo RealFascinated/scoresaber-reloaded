@@ -150,7 +150,9 @@ app.onError({ as: "global" }, ({ code, error }) => {
     }
   }
 
-  console.log(error);
+  if (code === "INTERNAL_SERVER_ERROR") {
+    console.log(error);
+  }
 
   return {
     ...((status && { statusCode: status }) || { status: code }),

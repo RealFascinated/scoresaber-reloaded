@@ -5,8 +5,6 @@ import { ScoreTimeSet } from "@/components/score/score-time-set";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import { AccSaberScore } from "@ssr/common/api-service/impl/accsaber";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
-import { getPageFromRank } from "@ssr/common/utils/utils";
-import Link from "next/link";
 import { useMemo } from "react";
 
 type AccSaberRankTimeProps = {
@@ -16,18 +14,13 @@ type AccSaberRankTimeProps = {
 export function AccSaberRankTime({ score }: AccSaberRankTimeProps) {
   const rankElement = useMemo(() => {
     return (
-      <Link
-        prefetch={false}
-        href={`/leaderboard/${score.leaderboardId}/${getPageFromRank(score.score.rank, 12)}`}
+      <p
+        className={`${getRankColor(score.score.rank)} hover:brightness-[66%] transition-all cursor-pointer`}
       >
-        <p
-          className={`${getRankColor(score.score.rank)} hover:brightness-[66%] transition-all cursor-pointer`}
-        >
-          #{formatNumberWithCommas(score.score.rank)}
-        </p>
-      </Link>
+        #{formatNumberWithCommas(score.score.rank)}
+      </p>
     );
-  }, [score.score.rank, score.leaderboardId]);
+  }, [score.score.rank]);
 
   const timeInfo = useMemo(
     () => (
