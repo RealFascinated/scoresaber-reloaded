@@ -8,6 +8,7 @@ import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
 import { formatChange } from "@ssr/common/utils/utils";
 import { clsx } from "clsx";
+import PlayerPreview from "../player/player-preview";
 
 type PlayerRankingProps = {
   player: ScoreSaberPlayerToken;
@@ -35,7 +36,9 @@ export function PlayerRanking({
         )}
       </td>
       <td className="flex items-center gap-2 pl-3 py-1.5 min-w-[250px]">
-        <PlayerInfo player={player} highlightedPlayerId={mainPlayer?.id} useLink />
+        <PlayerPreview playerId={player.id}>
+          <PlayerInfo player={player} highlightedPlayerId={mainPlayer?.id} useLink />
+        </PlayerPreview>
       </td>
       <td className="px-1 py-1.5 text-center">
         <span className="text-ssr">{formatPp(player.pp)}pp</span>{" "}
