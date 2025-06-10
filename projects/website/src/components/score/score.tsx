@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { CubeIcon } from "@heroicons/react/24/solid";
 import { useQuery } from "@tanstack/react-query";
 import { TrendingUpIcon } from "lucide-react";
-import { ReactElement, useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import ScoreButtons from "./score-buttons";
 import ScoreInfo from "./score-info";
 import ScoreSongInfo from "./score-song-info";
@@ -30,7 +30,7 @@ import { ssrApi } from "@ssr/common/utils/ssr-api";
 import Link from "next/link";
 import Avatar from "../avatar";
 
-type Props = {
+type ScoreProps = {
   highlightedPlayerId?: string;
   score: ScoreSaberScore;
   leaderboard: ScoreSaberLeaderboard;
@@ -39,26 +39,35 @@ type Props = {
   settings?: {
     noScoreButtons?: boolean;
     hideLeaderboardDropdown?: boolean;
+    defaultLeaderboardDropdown?: ScoreMode;
     hideAccuracyChanger?: boolean;
     disablePadding?: boolean;
     hideRank?: boolean;
     allowLeaderboardPreview?: boolean;
   };
+  defaultMode?: ScoreMode;
 };
 
 type DropdownData = {
   scoreStats?: ScoreStatsResponse;
 };
 
+export enum ScoreMode {
+  Overview = "Overview",
+  ScoreHistory = "Score History",
+}
+
 type Mode = {
-  name: string;
-  icon: ReactElement<any>;
+  name: ScoreMode;
+  icon: React.ReactNode;
 };
 
 const modes: Mode[] = [
-  { name: "Overview", icon: <CubeIcon className="w-4 h-4" /> },
-  { name: "Score History", icon: <TrendingUpIcon className="w-4 h-4" /> },
+  { name: ScoreMode.Overview, icon: <CubeIcon className="w-4 h-4" /> },
+  { name: ScoreMode.ScoreHistory, icon: <TrendingUpIcon className="w-4 h-4" /> },
 ];
+
+const defaultMode = ScoreMode.Overview;
 
 export default function Score({
   leaderboard,
@@ -67,10 +76,10 @@ export default function Score({
   settings,
   highlightedPlayerId,
   playerAbove,
-}: Props) {
+}: ScoreProps) {
   const [baseScore, setBaseScore] = useState(score.score);
   const [isLeaderboardExpanded, setIsLeaderboardExpanded] = useState(false);
-  const [selectedMode, setSelectedMode] = useState<Mode>(modes[0]);
+  const [mode, setMode] = useState<ScoreMode>(settings?.defaultLeaderboardDropdown ?? defaultMode);
 
   const scoresPage = useMemo(() => getPageFromRank(score.rank, 12), [score.rank]);
   const isMobile = useIsMobile();
@@ -95,8 +104,8 @@ export default function Score({
 
   useEffect(() => {
     setIsLeaderboardExpanded(false);
-    setSelectedMode(modes[0]);
-  }, [score.scoreId]);
+    setMode(settings?.defaultLeaderboardDropdown ?? defaultMode);
+  }, [score.scoreId, settings?.defaultLeaderboardDropdown]);
 
   useEffect(() => {
     setBaseScore(score.score);
@@ -116,15 +125,18 @@ export default function Score({
     [baseScore, score.score, score.pp, leaderboard.stars, accuracy]
   );
 
-  const handleLeaderboardOpen = useCallback((isExpanded: boolean) => {
-    if (!isExpanded) {
-      setSelectedMode(modes[0]);
-    }
-    setIsLeaderboardExpanded(isExpanded);
-  }, []);
+  const handleLeaderboardOpen = useCallback(
+    (isExpanded: boolean) => {
+      if (!isExpanded) {
+        setMode(settings?.defaultLeaderboardDropdown ?? defaultMode);
+      }
+      setIsLeaderboardExpanded(isExpanded);
+    },
+    [settings?.defaultLeaderboardDropdown]
+  );
 
-  const handleModeChange = useCallback((mode: Mode) => {
-    setSelectedMode(mode);
+  const handleModeChange = useCallback((mode: ScoreMode) => {
+    setMode(mode);
   }, []);
 
   const gridColsClass = useMemo(
@@ -184,15 +196,15 @@ export default function Score({
           <Card className="flex gap-4 w-full relative border border-input">
             <div className="flex flex-col w-full gap-2 justify-center items-center">
               <div className="flex flex-wrap justify-center lg:justify-start gap-2">
-                {modes.map(mode => (
+                {modes.map(modeItem => (
                   <Button
-                    key={mode.name}
-                    variant={mode.name === selectedMode.name ? "default" : "outline"}
-                    onClick={() => handleModeChange(mode)}
+                    key={modeItem.name}
+                    variant={modeItem.name === mode ? "default" : "outline"}
+                    onClick={() => handleModeChange(modeItem.name)}
                     className="flex gap-2"
                   >
-                    {mode.icon}
-                    <p>{mode.name}</p>
+                    {modeItem.icon}
+                    <p>{modeItem.name}</p>
                   </Button>
                 ))}
               </div>
@@ -200,7 +212,7 @@ export default function Score({
               {beatSaverMap && <MapStats beatSaver={beatSaverMap} />}
             </div>
 
-            {selectedMode.name === "Overview" ? (
+            {mode === ScoreMode.Overview ? (
               <ScoreOverview leaderboard={leaderboard} scoreStats={dropdownData.scoreStats} />
             ) : (
               <ScoreHistory playerId={score.playerId} leaderboard={leaderboard} />

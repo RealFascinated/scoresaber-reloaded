@@ -2,7 +2,7 @@
 
 import Card from "@/components/card";
 import { LoadingIcon } from "@/components/loading-icon";
-import Score from "@/components/score/score";
+import Score, { ScoreMode } from "@/components/score/score";
 import SimplePagination from "@/components/simple-pagination";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-is-mobile";
@@ -86,12 +86,14 @@ export function TopScoresData({ timeframe }: TopScoresDataProps) {
 
       return (
         <div key={score.scoreId} className="flex flex-col pt-2">
-          <p className="text-sm">
-            Set by{" "}
+          <div className="flex items-center gap-2 text-sm bg-accent-deep-foreground/10 px-2 py-1 sm:px-3 sm:py-1.5 rounded-lg w-fit">
+            <span className="text-gray-500 dark:text-gray-400 text-xs sm:text-sm">Set by</span>
             <Link prefetch={false} href={`/player/${player.id}`}>
-              <span className="text-ssr hover:brightness-[66%] transition-all ">{name}</span>
+              <span className="text-ssr hover:text-ssr/80 transition-colors font-semibold text-xs sm:text-sm">
+                {name}
+              </span>
             </Link>
-          </p>
+          </div>
           <Score
             score={score}
             leaderboard={leaderboard}
@@ -100,6 +102,7 @@ export function TopScoresData({ timeframe }: TopScoresDataProps) {
               hideAccuracyChanger: true,
               hideRank: true,
               allowLeaderboardPreview: true,
+              defaultLeaderboardDropdown: ScoreMode.ScoreHistory,
             }}
           />
         </div>

@@ -9,7 +9,7 @@ import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import Script from "next/script";
 import { ReactNode } from "react";
-import "./globals.css";
+import "./styles/globals.css";
 
 const siteFont = localFont({
   src: "./fonts/JetBrainsMono.ttf",

@@ -123,7 +123,7 @@ export default function ScoreButtons({
         {leaderboardExpanded != undefined &&
           setIsLeaderboardExpanded != undefined &&
           !hideLeaderboardDropdown && (
-            <div className="flex items-center justify-center cursor-default">
+            <div className="flex items-center justify-center cursor-default ml-2 lg:ml-0">
               {isLeaderboardLoading ? (
                 <ArrowPathIcon className="w-5 h-5 animate-spin" />
               ) : (
