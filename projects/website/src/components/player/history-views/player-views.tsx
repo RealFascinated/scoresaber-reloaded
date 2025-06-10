@@ -175,7 +175,7 @@ export default function PlayerViews({ player }: PlayerChartsProps) {
                     display={
                       <div className="flex justify-center items-center flex-col">
                         <p>{view.label}</p>
-                        <p className="text-gray-600">
+                        <p className="text-gray-400">
                           {isSelected ? "Currently Selected" : "Click to view"}
                         </p>
                       </div>
