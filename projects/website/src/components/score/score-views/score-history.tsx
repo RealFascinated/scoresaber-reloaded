@@ -79,7 +79,7 @@ export function ScoreHistory({ playerId, leaderboard }: ScoreHistoryProps) {
         {scores.items.map(({ score, leaderboard, beatSaver }, index) => {
           return (
             <Score
-              key={score.scoreId}
+              key={`${score.scoreId}-${index}`}
               score={score}
               leaderboard={leaderboard}
               beatSaverMap={beatSaver}
