@@ -94,16 +94,6 @@ export default function ScoreSongInfo({
           height: imageSize,
         }}
       >
-        <SimpleTooltip
-          display={
-            <div>
-              <p>Difficulty: {getDifficultyName(difficulty)}</p>
-              {starCount > 0 && <p>Stars: {starCount.toFixed(2)}</p>}
-            </div>
-          }
-        >
-          {difficultyInfo}
-        </SimpleTooltip>
         <Image
           src={leaderboard.songArt}
           width={imageSize}
@@ -114,6 +104,19 @@ export default function ScoreSongInfo({
             minWidth: `${imageSize}px`,
           }}
         />
+        <div className="absolute w-full h-full flex items-end justify-center">
+          <SimpleTooltip
+            side="bottom"
+            display={
+              <div>
+                <p>Difficulty: {getDifficultyName(difficulty)}</p>
+                {starCount > 0 && <p>Stars: {starCount.toFixed(2)}</p>}
+              </div>
+            }
+          >
+            {difficultyInfo}
+          </SimpleTooltip>
+        </div>
       </div>
       <div className="flex flex-col gap-1 w-full">
         <div className="overflow-y-clip flex flex-col gap-1 min-w-0 w-full">
