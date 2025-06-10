@@ -5,7 +5,7 @@ import FriendsButton from "@/components/friend/friends-button";
 import PlayerAndLeaderboardSearch from "@/components/navbar/player-and-leaderboard-search";
 import ProfileButton from "@/components/navbar/profile-button";
 import { CubeIcon } from "@heroicons/react/24/solid";
-import { ChartBarIcon, MusicIcon, TrendingUpIcon } from "lucide-react";
+import { ChartBarIcon, MusicIcon, TrendingUpIcon, TrophyIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { ReactElement, useEffect, useState } from "react";
@@ -53,6 +53,16 @@ const links: ReactElement<any>[] = [
       </>
     }
     href="/overlay/builder"
+  />,
+  <SimpleNavLink
+    key="top-scores"
+    content={
+      <>
+        <TrophyIcon className="size-5" />
+        <span className="hidden xl:flex">Top Scores</span>
+      </>
+    }
+    href="/scores/top/weekly"
   />,
 ];
 
