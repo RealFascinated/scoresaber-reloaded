@@ -112,7 +112,7 @@ export default function ScoreButtons({
       </div>
 
       <div
-        className={`flex gap-1 ${alwaysSingleLine ? "flex-row" : "flex-row lg:flex-col"} items-center justify-center lg:pr-1`}
+        className={`flex gap-1 ${alwaysSingleLine ? "flex-row" : "flex-row lg:flex-col"} items-center justify-center`}
       >
         {/* Edit score button */}
         {score && leaderboard && updateScore && !hideAccuracyChanger && (
@@ -123,7 +123,7 @@ export default function ScoreButtons({
         {leaderboardExpanded != undefined &&
           setIsLeaderboardExpanded != undefined &&
           !hideLeaderboardDropdown && (
-            <div className="flex items-center justify-center cursor-default ml-2 lg:ml-0">
+            <div className="flex items-center justify-center cursor-default">
               {isLeaderboardLoading ? (
                 <ArrowPathIcon className="w-5 h-5 animate-spin" />
               ) : (
