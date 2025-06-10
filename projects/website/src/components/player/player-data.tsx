@@ -95,12 +95,13 @@ function ScoreComponent({
           initialSearch={searchParams.search}
         />
       ) : (
+        // return `/player/${player.id}/accsaber/${currentSort}/${currentType}/${currentOrder}/${page}`;
         <AccSaberPlayerScores
           player={player}
           sort={(pageParams[2] as AccSaberScoreSort) ?? ("date" as AccSaberScoreSort)}
-          page={parseInt(pageParams[3]) || 1}
-          type={(pageParams[4] as AccSaberScoreType) ?? ("overall" as AccSaberScoreType)}
-          order={(pageParams[5] as AccSaberScoreOrder) ?? ("desc" as AccSaberScoreOrder)}
+          type={(pageParams[3] as AccSaberScoreType) ?? ("overall" as AccSaberScoreType)}
+          order={(pageParams[4] as AccSaberScoreOrder) ?? ("desc" as AccSaberScoreOrder)}
+          page={parseInt(pageParams[5]) || 1}
         />
       )}
     </div>
