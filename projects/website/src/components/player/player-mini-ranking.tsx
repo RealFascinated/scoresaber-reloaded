@@ -10,9 +10,9 @@ import Link from "next/link";
 import { ReactElement } from "react";
 import Card from "../card";
 import CountryFlag from "../country-flag";
-import PlayerPreview from "../player/player-preview";
+import PlayerPreview from "./player-preview";
 
-type MiniProps = {
+type PlayerMiniRankingProps = {
   /**
    * The type of ranking to display.
    */
@@ -26,7 +26,7 @@ type MiniProps = {
 
 type Variants = {
   [key: string]: {
-    icon: (player: ScoreSaberPlayer) => ReactElement<any>;
+    icon: (player: ScoreSaberPlayer) => ReactElement<unknown>;
   };
 };
 
@@ -41,7 +41,7 @@ const miniVariants: Variants = {
   },
 };
 
-export default function Mini({ type, player }: MiniProps) {
+export default function PlayerMiniRanking({ type, player }: PlayerMiniRankingProps) {
   const variant = miniVariants[type];
   const icon = variant.icon(player);
 

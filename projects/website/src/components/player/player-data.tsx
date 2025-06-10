@@ -15,8 +15,7 @@ import dynamic from "next/dynamic";
 import PlayerHeader from "./header/player-header";
 import PlayerScores from "./player-scores";
 
-// Dynamically import Mini component only on client-side
-const Mini = dynamic(() => import("../ranking/mini"), { ssr: false });
+const PlayerRankingMini = dynamic(() => import("./player-mini-ranking"), { ssr: false });
 
 interface PlayerDataProps {
   initialPlayerData: ScoreSaberPlayer;
@@ -63,8 +62,8 @@ export default function PlayerData({
 
       {showRankings && (
         <aside className="w-[400px] hidden 2xl:flex flex-col gap-2">
-          <Mini type="Global" player={player} />
-          <Mini type="Country" player={player} />
+          <PlayerRankingMini type="Global" player={player} />
+          <PlayerRankingMini type="Country" player={player} />
         </aside>
       )}
     </div>
