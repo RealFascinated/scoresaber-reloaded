@@ -100,6 +100,7 @@ export function TopScoresData({ timeframe }: TopScoresDataProps) {
               hideLeaderboardDropdown: true,
               hideAccuracyChanger: true,
               hideRank: true,
+              allowLeaderboardPreview: true,
             }}
           />
         </div>
