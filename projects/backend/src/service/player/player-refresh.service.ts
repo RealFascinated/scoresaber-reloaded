@@ -1,7 +1,7 @@
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import Logger from "@ssr/common/logger";
 import { PlayerDocument, PlayerModel } from "@ssr/common/model/player";
-import { ScoreSort } from "@ssr/common/score/score-sort";
+import { ScoreSaberScoreSort } from "@ssr/common/score/score-sort";
 import {
   getScoreSaberLeaderboardFromToken,
   getScoreSaberScoreFromToken,
@@ -34,7 +34,7 @@ export class PlayerRefreshService {
           playerId: player.id,
           page: page,
           limit: 100,
-          sort: ScoreSort.recent,
+          sort: ScoreSaberScoreSort.recent,
         });
 
       if (!scoresPage) {

@@ -4,7 +4,7 @@ import { DetailType } from "../../detail-type";
 import { StarFilter } from "../../maps/types";
 import ScoreSaberRankingRequestsResponse from "../../response/scoresaber-ranking-requests-response";
 import { MapDifficulty } from "../../score/map-difficulty";
-import { ScoreSort } from "../../score/score-sort";
+import { ScoreSaberScoreSort } from "../../score/score-sort";
 import ScoreSaberLeaderboardToken from "../../types/token/scoresaber/leaderboard";
 import ScoreSaberLeaderboardPageToken from "../../types/token/scoresaber/leaderboard-page";
 import ScoreSaberLeaderboardScoresPageToken from "../../types/token/scoresaber/leaderboard-scores-page";
@@ -223,7 +223,7 @@ export class ScoreSaberService extends ApiService {
     search,
   }: {
     playerId: string;
-    sort: ScoreSort;
+    sort: ScoreSaberScoreSort;
     limit?: number;
     page: number;
     search?: string;

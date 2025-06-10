@@ -33,7 +33,7 @@ export default class ScoresController {
     };
     query: { search?: string };
   }): Promise<unknown> {
-    return await ScoreSaberService.lookupPlayerScores(id, page, sort, search);
+    return (await ScoreSaberService.lookupPlayerScores(id, page, sort, search)).toJSON();
   }
 
   @Get("/leaderboard/:id/:page", {

@@ -1,10 +1,12 @@
 import { getCookieValue } from "@/common/cookie.util";
+import { PlatformRepository, PlatformType } from "@/common/platform/platform-repository";
+import { assert } from "@/common/utils/assert";
 import NotFound from "@/components/not-found";
 import PlayerData from "@/components/player/player-data";
 import { DetailType } from "@ssr/common/detail-type";
 import { env } from "@ssr/common/env";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import { ScoreSort } from "@ssr/common/score/score-sort";
+import { ScoreSaberScoreSort } from "@ssr/common/score/score-sort";
 import { formatPp } from "@ssr/common/utils/number-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { Metadata } from "next";
@@ -27,7 +29,8 @@ type Props = {
 
 type PlayerData = {
   player: ScoreSaberPlayer | undefined;
-  sort: ScoreSort;
+  platformType: PlatformType;
+  sort: ScoreSaberScoreSort;
   page: number;
   search: string;
 };
@@ -46,9 +49,11 @@ const getPlayerData = async (
   const { search } = await searchParams;
 
   const id = slug[0]; // The players id
-  const sort: ScoreSort =
-    (slug[1] as ScoreSort) || (await getCookieValue("lastScoreSort", ScoreSort.recent)); // The sorting method
-  const page = parseInt(slug[2]) || 1; // The page number
+  const platformType = (slug[1] as PlatformType) ?? PlatformType.ScoreSaber;
+  const sort: ScoreSaberScoreSort =
+    (slug[2] as ScoreSaberScoreSort) ||
+    (await getCookieValue("lastScoreSort", ScoreSaberScoreSort.recent)); // The sorting method
+  const page = parseInt(slug[3]) || 1; // The page number
 
   const player = await ssrApi.getScoreSaberPlayer(id, { type: type });
   return {
@@ -56,6 +61,7 @@ const getPlayerData = async (
     page: page,
     search: search || "",
     player: player,
+    platformType: platformType,
   };
 };
 
@@ -96,7 +102,7 @@ Click here to view the scores for ${player.name}`,
 }
 
 export default async function PlayerPage(props: Props) {
-  const { player, sort, page, search } = await getPlayerData(props);
+  const { player, sort, page, search, platformType } = await getPlayerData(props);
   if (player == undefined) {
     return (
       <main className="w-full flex justify-center mt-2">
@@ -107,10 +113,18 @@ export default async function PlayerPage(props: Props) {
       </main>
     );
   }
+  const platform = PlatformRepository.getInstance().getPlatform(platformType);
+  assert(platform, "Platform not found");
 
   return (
     <main className="w-full flex justify-center">
-      <PlayerData initialPlayerData={player} initialSearch={search} sort={sort} page={page} />
+      <PlayerData
+        initialPlayerData={player}
+        initialSearch={search}
+        sort={sort}
+        page={page}
+        platformType={platformType}
+      />
     </main>
   );
 }

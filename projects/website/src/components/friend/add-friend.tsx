@@ -38,6 +38,10 @@ export default function AddFriend({ player, iconOnly }: Props) {
     toast(`You have added ${name} as a friend.`);
   }
 
+  if (!database) {
+    return null;
+  }
+
   if (playerId == undefined) {
     return null;
   }

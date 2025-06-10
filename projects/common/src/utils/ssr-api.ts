@@ -16,11 +16,10 @@ import LeaderboardScoresResponse from "../response/leaderboard-scores-response";
 import { PlayedMapsCalendarResponse } from "../response/played-maps-calendar-response";
 import { PlayerRankedPpsResponse } from "../response/player-ranked-pps-response";
 import { PlayerScoresChartResponse } from "../response/player-scores-chart";
-import PlayerScoresResponse from "../response/player-scores-response";
 import { PpBoundaryResponse } from "../response/pp-boundary-response";
 import { ScoreStatsResponse } from "../response/scorestats-response";
 import { MapDifficulty } from "../score/map-difficulty";
-import { ScoreSort } from "../score/score-sort";
+import { ScoreSaberScoreSort } from "../score/score-sort";
 import { AroundPlayer } from "../types/around-player";
 import { MapCharacteristic } from "../types/map-characteristic";
 import Request from "./request";
@@ -302,8 +301,13 @@ class SSRApi {
    * @param sort the sort
    * @param search the search
    */
-  async fetchPlayerScores<S, L>(id: string, page: number, sort: ScoreSort, search?: string) {
-    return Request.get<PlayerScoresResponse<S, L>>(
+  async fetchScoreSaberPlayerScores(
+    id: string,
+    page: number,
+    sort: ScoreSaberScoreSort,
+    search?: string
+  ) {
+    return Request.get<Page<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>>(
       `${env.NEXT_PUBLIC_API_URL}/scores/player/${id}/${page}/${sort}${search ? `?search=${search}` : ""}`
     );
   }

@@ -8,12 +8,11 @@ import {
   ScoreSaberPlayerCacheDocument,
   ScoreSaberPlayerCacheModel,
 } from "@ssr/common/model/scoresaber-player-cache";
+import { Page, Pagination } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import PlayerScoresResponse from "@ssr/common/response/player-scores-response";
 import { PlayerScore } from "@ssr/common/score/player-score";
-import { ScoreSort } from "@ssr/common/score/score-sort";
+import { ScoreSaberScoreSort } from "@ssr/common/score/score-sort";
 import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
-import { Metadata } from "@ssr/common/types/metadata";
 import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/leaderboard-player-info";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import { getPlayerStatisticChanges } from "@ssr/common/utils/player-utils";
@@ -219,83 +218,87 @@ export default class ScoreSaberService {
    * Looks up player scores.
    *
    * @param playerId the player id
-   * @param page the page to get
+   * @param pageNumber the page to get
    * @param sort the sort to get
    * @param search the search to get
    */
   public static async lookupPlayerScores(
     playerId: string,
-    page: number,
+    pageNumber: number,
     sort: string,
     search?: string
-  ): Promise<PlayerScoresResponse<unknown, unknown> | undefined> {
+  ): Promise<Page<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>> {
     return await fetchWithCache(
       CacheService.getCache(ServiceCache.PlayerScores),
-      `player-scores:${playerId}-${page}-${sort}-${search}`,
+      `player-scores:${playerId}-${pageNumber}-${sort}-${search}`,
       async () => {
-        const scores: PlayerScore<unknown, unknown>[] = [];
-        let metadata: Metadata = new Metadata(0, 0, 0, 0); // Default values
-
-        const leaderboardScores = await ApiServiceRegistry.getInstance()
+        // Get first page to determine total items
+        const firstPage = await ApiServiceRegistry.getInstance()
           .getScoreSaberService()
           .lookupPlayerScores({
             playerId,
-            page,
-            sort: sort as ScoreSort,
+            page: 1,
+            sort: sort as ScoreSaberScoreSort,
             search,
           });
-        if (leaderboardScores == undefined) {
-          return {
-            scores: scores,
-            metadata: metadata,
-          };
+
+        if (firstPage == undefined) {
+          return Pagination.empty<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>();
         }
 
-        metadata = new Metadata(
-          Math.ceil(leaderboardScores.metadata.total / leaderboardScores.metadata.itemsPerPage),
-          leaderboardScores.metadata.total,
-          leaderboardScores.metadata.page,
-          leaderboardScores.metadata.itemsPerPage
-        );
+        const pagination = new Pagination<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>()
+          .setItemsPerPage(firstPage.metadata.itemsPerPage)
+          .setTotalItems(firstPage.metadata.total);
 
-        // Process all scores in parallel
-        const scorePromises = leaderboardScores.playerScores.map(async playerScore => {
-          const leaderboardResponse = await LeaderboardService.getLeaderboard(
-            playerScore.leaderboard.id + "",
-            {
-              includeBeatSaver: true,
-              beatSaverType: DetailType.FULL,
+        // Get the requested page
+        const requestedPage = await ApiServiceRegistry.getInstance()
+          .getScoreSaberService()
+          .lookupPlayerScores({
+            playerId,
+            page: pageNumber,
+            sort: sort as ScoreSaberScoreSort,
+            search,
+          });
+
+        if (!requestedPage) {
+          return Pagination.empty<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>();
+        }
+
+        return await pagination.getPage(pageNumber, async () => {
+          // Process all scores in parallel
+          const scorePromises = requestedPage.playerScores.map(async playerScore => {
+            const leaderboardResponse = await LeaderboardService.getLeaderboard(
+              playerScore.leaderboard.id + "",
+              {
+                includeBeatSaver: true,
+                beatSaverType: DetailType.FULL,
+              }
+            );
+
+            if (!leaderboardResponse) {
+              return undefined;
             }
-          );
 
-          if (!leaderboardResponse) {
-            return undefined;
-          }
+            const { leaderboard, beatsaver } = leaderboardResponse;
+            let score = getScoreSaberScoreFromToken(playerScore.score, leaderboard, playerId);
+            if (!score) {
+              return undefined;
+            }
 
-          const { leaderboard, beatsaver } = leaderboardResponse;
-          let score = getScoreSaberScoreFromToken(playerScore.score, leaderboard, playerId);
-          if (!score) {
-            return undefined;
-          }
+            score = await ScoreService.insertScoreData(score, leaderboard);
+            return {
+              score: score,
+              leaderboard: leaderboard,
+              beatSaver: beatsaver,
+            } as PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>;
+          });
 
-          score = await ScoreService.insertScoreData(score, leaderboard);
-          return {
-            score: score,
-            leaderboard: leaderboard,
-            beatSaver: beatsaver,
-          } as PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>;
+          // Wait for all score processing to complete and filter out any undefined results
+          return (await Promise.all(scorePromises)).filter(Boolean) as PlayerScore<
+            ScoreSaberScore,
+            ScoreSaberLeaderboard
+          >[];
         });
-
-        // Wait for all score processing to complete and filter out any undefined results
-        const processedScores = (await Promise.all(scorePromises)).filter(Boolean) as PlayerScore<
-          ScoreSaberScore,
-          ScoreSaberLeaderboard
-        >[];
-
-        return {
-          scores: processedScores,
-          metadata: metadata,
-        };
       }
     );
   }

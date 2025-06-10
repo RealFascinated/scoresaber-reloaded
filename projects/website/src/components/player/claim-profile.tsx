@@ -30,6 +30,10 @@ export default function ClaimProfile({ playerId }: Props) {
     toast("You have claimed this profile.");
   }
 
+  if (!database) {
+    return null;
+  }
+
   if (mainPlayerId == playerId) {
     return null; // Don't show the claim button if it's the same user.
   }

@@ -1,4 +1,7 @@
+"use client";
+
 import { setCookieValue } from "@/common/cookie.util";
+import { PlatformRepository } from "@/common/platform/platform-repository";
 import { LoadingIcon } from "@/components/loading-icon";
 import Score from "@/components/score/score";
 import { Input } from "@/components/ui/input";
@@ -7,37 +10,37 @@ import usePageNavigation from "@/hooks/use-page-navigation";
 import { ClockIcon, TrophyIcon } from "@heroicons/react/24/solid";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
+import { Page } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import PlayerScoresResponse from "@ssr/common/response/player-scores-response";
-import { ScoreSort } from "@ssr/common/score/score-sort";
+import { PlayerScore } from "@ssr/common/score/player-score";
+import { ScoreSaberScoreSort } from "@ssr/common/score/score-sort";
 import { capitalizeFirstLetter } from "@ssr/common/string-utils";
-import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { useDebounce } from "@uidotdev/usehooks";
 import { clsx } from "clsx";
 import { SearchIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import Card from "../card";
-import SimplePagination from "../simple-pagination";
-import { Button } from "../ui/button";
-import { EmptyState } from "../ui/empty-state";
+import SimplePagination from "../../../simple-pagination";
+import { Button } from "../../../ui/button";
+import { EmptyState } from "../../../ui/empty-state";
+import ScoresCard from "../scores-card";
 
 type Props = {
-  initialScoreData?: PlayerScoresResponse<ScoreSaberScore, ScoreSaberLeaderboard>;
   initialSearch?: string;
   player: ScoreSaberPlayer;
-  sort: ScoreSort;
+  sort: ScoreSaberScoreSort;
   page: number;
 };
 
 const scoreSort = [
-  { name: "Top", value: ScoreSort.top, icon: <TrophyIcon className="w-5 h-5" /> },
-  { name: "Recent", value: ScoreSort.recent, icon: <ClockIcon className="w-5 h-5" /> },
+  { name: "Top", value: ScoreSaberScoreSort.top, icon: <TrophyIcon className="w-5 h-5" /> },
+  { name: "Recent", value: ScoreSaberScoreSort.recent, icon: <ClockIcon className="w-5 h-5" /> },
 ];
 
-export default function PlayerScores({ initialSearch, player, sort, page }: Props) {
+export default function ScoreSaberPlayerScores({ initialSearch, player, sort, page }: Props) {
   const { changePageUrl } = usePageNavigation();
   const isMobile = useIsMobile();
+  const platform = PlatformRepository.getInstance().getScoreSaberPlatform();
 
   const [currentPage, setCurrentPage] = useState(page);
   const [currentSort, setCurrentSort] = useState(sort);
@@ -55,15 +58,13 @@ export default function PlayerScores({ initialSearch, player, sort, page }: Prop
     isError,
     isLoading,
     isRefetching,
-  } = useQuery({
+  } = useQuery<Page<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>>({
     queryKey: ["playerScores", player.id, currentPage, currentSort, debouncedSearchTerm],
     queryFn: () =>
-      ssrApi.fetchPlayerScores<ScoreSaberScore, ScoreSaberLeaderboard>(
-        player.id,
-        currentPage,
-        currentSort,
-        debouncedSearchTerm
-      ),
+      platform.getPlayerScores(player.id, currentPage, {
+        sort: currentSort,
+        search: debouncedSearchTerm,
+      }),
     placeholderData: prev => prev,
   });
 
@@ -73,7 +74,7 @@ export default function PlayerScores({ initialSearch, player, sort, page }: Prop
    * @param newSort the new sort
    */
   const handleSortChange = useCallback(
-    async (newSort: ScoreSort) => {
+    async (newSort: ScoreSaberScoreSort) => {
       if (newSort !== currentSort) {
         setCurrentSort(newSort);
         await setCookieValue("lastScoreSort", newSort); // Set the default score sort
@@ -87,8 +88,8 @@ export default function PlayerScores({ initialSearch, player, sort, page }: Prop
    */
   const getUrl = useCallback(
     (page: number) => {
-      const baseUrl = `/player/${player.id}`;
-      return page === 1 && currentSort === ScoreSort.recent
+      const baseUrl = `/player/${player.id}/scoresaber`;
+      return page === 1 && currentSort === ScoreSaberScoreSort.recent
         ? `${baseUrl}${isSearchActive ? `?search=${searchTerm}` : ""}`
         : `${baseUrl}/${currentSort}/${page}${isSearchActive ? `?search=${searchTerm}` : ""}`;
     },
@@ -104,7 +105,7 @@ export default function PlayerScores({ initialSearch, player, sort, page }: Prop
   }, [currentPage, debouncedSearchTerm, player.id, isSearchActive]);
 
   return (
-    <Card className="flex gap-1">
+    <ScoresCard>
       <div className="flex flex-col items-center w-full gap-2 relative">
         <div className="flex gap-2">
           {scoreSort.map(sortOption => (
@@ -145,7 +146,7 @@ export default function PlayerScores({ initialSearch, player, sort, page }: Prop
         <>
           <div className="text-center pt-2">
             {isError ||
-              (scores.scores.length === 0 && (
+              (scores.items.length === 0 && (
                 <EmptyState
                   title="No Results"
                   description="No score were found on this page"
@@ -155,7 +156,7 @@ export default function PlayerScores({ initialSearch, player, sort, page }: Prop
           </div>
 
           <div className="grid min-w-full grid-cols-1 divide-y divide-border">
-            {scores.scores.map((score, index) => (
+            {scores.items.map((score, index) => (
               <div key={index}>
                 <Score
                   key={score.score.scoreId}
@@ -184,6 +185,6 @@ export default function PlayerScores({ initialSearch, player, sort, page }: Prop
           )}
         </>
       )}
-    </Card>
+    </ScoresCard>
   );
 }

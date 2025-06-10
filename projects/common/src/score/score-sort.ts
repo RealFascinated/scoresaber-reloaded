@@ -1,4 +1,4 @@
-export enum ScoreSort {
+export enum ScoreSaberScoreSort {
   top = "top",
   recent = "recent",
 }
