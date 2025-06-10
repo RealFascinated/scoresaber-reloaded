@@ -103,27 +103,29 @@ export default function PlayerAndLeaderboardSearch() {
     <>
       {/* Button to open */}
       <div
-        className="group flex cursor-pointer hover:opacity-85 transition-all select-none"
+        className="group flex cursor-pointer hover:opacity-85 transition-all select-none relative"
         onClick={openSearch}
       >
         <div
           className={cn(
-            "absolute top-1.5 z-10",
-            isMobile ? "inset-x-0 flex justify-center" : "inset-x-2.5"
+            "absolute top-1/2 -translate-y-1/2 z-10",
+            isMobile ? "inset-x-0 flex justify-center" : "left-2.5"
           )}
         >
           <UserSearch className="size-5" />
         </div>
 
         <Input
-          className="px-0 pl-9 w-10 md:w-full h-8 rounded-lg cursor-pointer group-hover:border-ssr/75 transition-all "
+          className="px-0 pl-9 w-10 md:w-full h-8 rounded-lg cursor-pointer group-hover:border-ssr/75 transition-all"
           type="search"
           name="search"
           placeholder={isMobile ? undefined : "Query..."}
           readOnly
         />
 
-        <div className={cn("hidden absolute top-1.5 right-3", !isMobile && "flex")}>
+        <div
+          className={cn("hidden absolute top-1/2 -translate-y-1/2 right-3", !isMobile && "flex")}
+        >
           <kbd className="h-5 px-1.5 inline-flex gap-1 items-center bg-muted font-medium text-muted-foreground rounded select-none pointer-events-none">
             <span>⌘</span>K
           </kbd>
