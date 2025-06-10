@@ -27,6 +27,7 @@ interface TooltipProps {
   content: React.ReactNode;
   side?: "top" | "right" | "bottom" | "left";
   className?: string;
+  delayDuration?: number;
 }
 
 export const Tooltip = React.memo(function Tooltip({
@@ -34,6 +35,7 @@ export const Tooltip = React.memo(function Tooltip({
   content,
   side = "top",
   className,
+  delayDuration = 0,
 }: TooltipProps) {
   const [isOpen, setIsOpen] = useState(false);
   const triggerRef = useRef<HTMLDivElement>(null);
@@ -169,6 +171,7 @@ export const Tooltip = React.memo(function Tooltip({
               pointerEvents: "auto",
               zIndex: 9999,
               border: "1px solid hsl(12 6.5% 25.1%)",
+              transition: `opacity ${delayDuration}ms ease-in-out`,
             }}
             className={cn(
               "z-50 overflow-hidden rounded-md bg-accent px-2.5 py-1 text-[13px] text-secondary-foreground shadow-md animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95",
@@ -194,8 +197,10 @@ export const Tooltip = React.memo(function Tooltip({
 // For backward compatibility
 export const TooltipProvider = React.memo(function TooltipProvider({
   children,
+  delayDuration = 0,
 }: {
   children: React.ReactNode;
+  delayDuration?: number;
 }) {
   return <>{children}</>;
 });
