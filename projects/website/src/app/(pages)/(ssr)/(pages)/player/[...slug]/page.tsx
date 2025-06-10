@@ -1,5 +1,4 @@
 import { PlatformRepository, PlatformType } from "@/common/platform/platform-repository";
-import { assert } from "@/common/utils/assert";
 import NotFound from "@/components/not-found";
 import PlayerData from "@/components/player/player-data";
 import { DetailType } from "@ssr/common/detail-type";
@@ -8,6 +7,7 @@ import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { formatPp } from "@ssr/common/utils/number-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { Metadata } from "next";
+import { redirect } from "next/navigation";
 
 export const revalidate = 300; // Revalidate every 5 minutes
 
@@ -108,7 +108,9 @@ export default async function PlayerPage(props: Props) {
     );
   }
   const platform = PlatformRepository.getInstance().getPlatform(platformType);
-  assert(platform, "Platform not found");
+  if (platform == undefined) {
+    return redirect(`/player/${player.id}/scoresaber`);
+  }
 
   return (
     <main className="w-full flex justify-center">
