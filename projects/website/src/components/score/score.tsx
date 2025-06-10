@@ -46,7 +46,6 @@ type ScoreProps = {
     hideRank?: boolean;
     allowLeaderboardPreview?: boolean;
   };
-  defaultMode?: ScoreMode;
 };
 
 type DropdownData = {

@@ -1,3 +1,4 @@
+import { etag } from "@bogeychan/elysia-etag";
 import * as dotenv from "@dotenvx/dotenvx";
 import cors from "@elysiajs/cors";
 import { cron } from "@elysiajs/cron";
@@ -105,6 +106,16 @@ export const app = new Elysia()
       },
     })
   );
+
+app.use(
+  etag({
+    serialize(response) {
+      if (typeof response === "object") {
+        return JSON.stringify(response);
+      }
+    },
+  })
+);
 
 /**
  * Custom error handler
