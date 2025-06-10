@@ -52,7 +52,11 @@ function PlatformSelector({
   return (
     <div className="flex">
       {availablePlatforms.map(platform => (
-        <Link href={`/player/${player.id}/${platform.getType()}`} key={platform.getDisplayName()}>
+        <Link
+          href={`/player/${player.id}/${platform.getType()}`}
+          key={platform.getDisplayName()}
+          scroll={false}
+        >
           <Button
             key={platform.getDisplayName()}
             variant={currentPlatform === platform.getType() ? "default" : "secondary"}
