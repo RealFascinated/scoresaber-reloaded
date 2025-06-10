@@ -111,7 +111,7 @@ export function TopScoresData({ timeframe }: TopScoresDataProps) {
   );
 
   return (
-    <Card className="flex flex-col gap-2 w-full xl:w-[75%] justify-center h-fit">
+    <Card className="flex flex-col gap-2 w-full 2xl:w-[75%] justify-center h-fit">
       <div className="flex flex-row flex-wrap gap-2 justify-center">
         {memoizedTimeframes.map(timeframe => (
           <Button
