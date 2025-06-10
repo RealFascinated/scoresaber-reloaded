@@ -97,7 +97,6 @@ export function TopScoresData({ timeframe }: TopScoresDataProps) {
             leaderboard={leaderboard}
             beatSaverMap={beatSaver}
             settings={{
-              hideLeaderboardDropdown: true,
               hideAccuracyChanger: true,
               hideRank: true,
               allowLeaderboardPreview: true,
