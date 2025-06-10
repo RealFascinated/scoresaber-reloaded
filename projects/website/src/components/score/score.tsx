@@ -130,8 +130,8 @@ export default function Score({
   const gridColsClass = useMemo(
     () =>
       settings?.noScoreButtons
-        ? "grid-cols-[20px_1fr_1fr] lg:grid-cols-[0.5fr_4fr_350px]"
-        : "grid-cols-[20px_1fr_1fr] lg:grid-cols-[0.5fr_4fr_1fr_350px]",
+        ? "grid-cols-[20px 1fr_1fr] lg:grid-cols-[0.5fr_4fr_350px]"
+        : "grid-cols-[20px 1fr_1fr] lg:grid-cols-[0.5fr_4fr_1fr_350px]",
     [settings?.noScoreButtons]
   );
 
