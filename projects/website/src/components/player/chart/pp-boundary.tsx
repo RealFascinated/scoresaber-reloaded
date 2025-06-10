@@ -49,7 +49,6 @@ export default function PpBoundaryStat({ player }: PpBoundaryProps) {
       <PopoverTrigger asChild>
         <div>
           <SimpleTooltip
-            asChild={false}
             display={
               <div className="text-center flex flex-col gap-2">
                 <p>Amount of raw pp required to increase your global pp by 1pp</p>

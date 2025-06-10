@@ -138,13 +138,7 @@ export default function PlayerStats({ player }: Props) {
 
         return (
           <div key={index}>
-            {tooltip ? (
-              <SimpleTooltip asChild={false} display={tooltip}>
-                {stat}
-              </SimpleTooltip>
-            ) : (
-              stat
-            )}
+            {tooltip ? <SimpleTooltip display={tooltip}>{stat}</SimpleTooltip> : stat}
           </div>
         );
       })}
