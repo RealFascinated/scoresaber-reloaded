@@ -61,7 +61,7 @@ export default function PlayerPreview({ playerId, children }: PlayerPreviewProps
                 <Link
                   prefetch={false}
                   href={`/player/${player.id}`}
-                  className="block font-bold text-lg hover:brightness-[66%] transition-all transform-gpu truncate"
+                  className="block font-bold text-lg hover:brightness-[66%] transition-all truncate"
                   style={{
                     color: getScoreSaberRoles(player)[0]?.color,
                   }}

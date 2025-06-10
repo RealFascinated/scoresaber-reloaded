@@ -2,7 +2,8 @@
 
 import { type SIDE_OPTIONS } from "@radix-ui/react-popper";
 import { clsx } from "clsx";
-import { Tooltip as ShadCnTooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
+import React from "react";
+import { Tooltip as ShadCnTooltip } from "./ui/tooltip";
 
 type Props = {
   /**
@@ -16,11 +17,6 @@ type Props = {
   display: React.ReactNode;
 
   /**
-   * Display the trigger as a child element.
-   */
-  asChild?: boolean;
-
-  /**
    * The additional class names
    */
   className?: string;
@@ -31,24 +27,10 @@ type Props = {
   side?: (typeof SIDE_OPTIONS)[number];
 };
 
-export default function SimpleTooltip({
-  children,
-  display,
-  asChild = true,
-  side,
-  className,
-}: Props) {
+export default function SimpleTooltip({ children, display, side, className }: Props) {
   return (
-    <ShadCnTooltip>
-      <TooltipTrigger className={clsx("cursor-default w-full", className)} asChild={asChild}>
-        <div>{children}</div>
-      </TooltipTrigger>
-      <TooltipContent
-        className="max-w-[500px] bg-muted text-white border border-muted/50"
-        side={side}
-      >
-        {display}
-      </TooltipContent>
+    <ShadCnTooltip content={display} side={side}>
+      <div className={clsx("cursor-default w-full", className)}>{children}</div>
     </ShadCnTooltip>
   );
 }

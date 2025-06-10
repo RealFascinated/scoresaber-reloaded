@@ -127,7 +127,7 @@ export default function ScoreButtons({
               ) : (
                 <ArrowDownIcon
                   className={clsx(
-                    "w-6 h-6 transition-all transform-gpu cursor-pointer",
+                    "w-6 h-6 transition-all cursor-pointer",
                     leaderboardExpanded ? "" : "rotate-180"
                   )}
                   onClick={() => {

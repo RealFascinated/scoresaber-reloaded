@@ -3,7 +3,7 @@ import { ArrowPathIcon } from "@heroicons/react/24/solid";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import clsx from "clsx";
 import { ChevronsLeft, ChevronsRight } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { useCallback } from "react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
@@ -13,15 +13,18 @@ type PaginationItemWrapperProps = {
   children: React.ReactNode;
 };
 
-const PaginationItemWrapper = ({ isLoadingPage, children }: PaginationItemWrapperProps) => (
-  <div
-    className={clsx("relative", isLoadingPage ? "cursor-not-allowed" : "cursor-pointer")}
-    aria-disabled={isLoadingPage}
-    tabIndex={isLoadingPage ? -1 : undefined}
-  >
-    {children}
-  </div>
+const PaginationItemWrapper = React.memo(
+  ({ isLoadingPage, children }: PaginationItemWrapperProps) => (
+    <div
+      className={clsx("relative", isLoadingPage ? "cursor-not-allowed" : "cursor-pointer")}
+      aria-disabled={isLoadingPage}
+      tabIndex={isLoadingPage ? -1 : undefined}
+    >
+      {children}
+    </div>
+  )
 );
+PaginationItemWrapper.displayName = "PaginationItemWrapper";
 
 type Props = {
   mobilePagination?: boolean;
@@ -47,35 +50,40 @@ export default function SimplePagination({
   page = page == 0 ? 1 : page;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
   const isLoading = loadingPage !== undefined;
-  const [currentPage, setCurrentPage] = useState(page);
 
-  useEffect(() => setCurrentPage(page), [page]);
+  const handlePageChange = useCallback(
+    (newPage: number) => {
+      if (newPage >= 1 && newPage <= totalPages && newPage !== page && !isLoading) {
+        onPageChange(newPage);
+      }
+    },
+    [page, totalPages, isLoading, onPageChange]
+  );
 
-  const handlePageChange = (newPage: number) => {
-    if (newPage >= 1 && newPage <= totalPages && newPage !== currentPage && !isLoading) {
-      setCurrentPage(newPage);
-      onPageChange(newPage);
-    }
-  };
-
-  const handleLinkClick = (newPage: number, event: React.MouseEvent) => {
-    event.preventDefault();
-    handlePageChange(newPage);
-  };
+  const handleLinkClick = useCallback(
+    (newPage: number, event: React.MouseEvent) => {
+      event.preventDefault();
+      handlePageChange(newPage);
+    },
+    [handlePageChange]
+  );
 
   const PageSelector = React.memo(() => {
-    const [isOpen, setIsOpen] = useState(false);
-    const [inputValue, setInputValue] = useState("");
+    const [isOpen, setIsOpen] = React.useState(false);
+    const [inputValue, setInputValue] = React.useState("");
 
-    const handleSubmit = (e: React.FormEvent) => {
-      e.preventDefault();
-      const pageNum = parseInt(inputValue);
-      if (!isNaN(pageNum) && pageNum >= 1 && pageNum <= totalPages) {
-        handlePageChange(pageNum);
-        setIsOpen(false);
-        setInputValue("");
-      }
-    };
+    const handleSubmit = useCallback(
+      (e: React.FormEvent) => {
+        e.preventDefault();
+        const pageNum = parseInt(inputValue);
+        if (!isNaN(pageNum) && pageNum >= 1 && pageNum <= totalPages) {
+          handlePageChange(pageNum);
+          setIsOpen(false);
+          setInputValue("");
+        }
+      },
+      [inputValue, totalPages, handlePageChange]
+    );
 
     return (
       <Popover open={isOpen} onOpenChange={setIsOpen}>
@@ -120,57 +128,63 @@ export default function SimplePagination({
   });
   PageSelector.displayName = "PageSelector";
 
-  const PageButton = ({
-    page,
-    isActive,
-    children,
-  }: {
-    page: number;
-    isActive?: boolean;
-    children: React.ReactNode;
-  }) => (
-    <button
-      onClick={e => handleLinkClick(page, e)}
-      disabled={isLoading || page === currentPage}
-      className={cn(
-        "relative h-8 min-w-[2rem] px-2 flex items-center justify-center rounded-md text-sm transition-all cursor-pointer",
-        isActive
-          ? "bg-primary text-primary-foreground font-medium shadow-sm"
-          : "hover:bg-accent hover:text-accent-foreground",
-        isLoading && "cursor-not-allowed opacity-50"
-      )}
-    >
-      {loadingPage === page ? <ArrowPathIcon className="w-4 h-4 animate-spin" /> : children}
-    </button>
+  const PageButton = React.memo(
+    ({
+      page: buttonPage,
+      isActive,
+      children,
+    }: {
+      page: number;
+      isActive?: boolean;
+      children: React.ReactNode;
+    }) => (
+      <button
+        onClick={e => handleLinkClick(buttonPage, e)}
+        disabled={isLoading || buttonPage === page}
+        className={cn(
+          "relative h-8 min-w-[2rem] px-2 flex items-center justify-center rounded-md text-sm transition-all cursor-pointer",
+          isActive
+            ? "bg-primary text-primary-foreground font-medium shadow-sm"
+            : "hover:bg-accent hover:text-accent-foreground",
+          isLoading && "cursor-not-allowed opacity-50"
+        )}
+      >
+        {loadingPage === buttonPage ? <ArrowPathIcon className="w-4 h-4 animate-spin" /> : children}
+      </button>
+    )
   );
+  PageButton.displayName = "PageButton";
 
-  const NavigationButton = ({
-    page,
-    disabled,
-    children,
-  }: {
-    page: number;
-    disabled: boolean;
-    children: React.ReactNode;
-  }) => (
-    <button
-      onClick={e => handleLinkClick(page, e)}
-      disabled={disabled || isLoading}
-      className={cn(
-        "relative flex h-8 w-8 items-center justify-center rounded-md transition-all cursor-pointer",
-        !disabled && "hover:bg-accent hover:text-accent-foreground",
-        (disabled || isLoading) && "cursor-not-allowed opacity-50"
-      )}
-    >
-      {children}
-    </button>
+  const NavigationButton = React.memo(
+    ({
+      page: buttonPage,
+      disabled,
+      children,
+    }: {
+      page: number;
+      disabled: boolean;
+      children: React.ReactNode;
+    }) => (
+      <button
+        onClick={e => handleLinkClick(buttonPage, e)}
+        disabled={disabled || isLoading}
+        className={cn(
+          "relative flex h-8 w-8 items-center justify-center rounded-md transition-all cursor-pointer",
+          !disabled && "hover:bg-accent hover:text-accent-foreground",
+          (disabled || isLoading) && "cursor-not-allowed opacity-50"
+        )}
+      >
+        {children}
+      </button>
+    )
   );
+  NavigationButton.displayName = "NavigationButton";
 
-  const renderPageNumbers = () => {
+  const renderPageNumbers = useCallback(() => {
     if (mobilePagination) return [];
 
     const maxPagesToShow = 3;
-    const startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
+    const startPage = Math.max(1, page - Math.floor(maxPagesToShow / 2));
     const endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
     const pageNumbers = [];
 
@@ -190,7 +204,7 @@ export default function SimplePagination({
 
     for (let i = startPage; i <= endPage; i++) {
       pageNumbers.push(
-        <PageButton key={`page-${i}`} page={i} isActive={i === currentPage}>
+        <PageButton key={`page-${i}`} page={i} isActive={i === page}>
           {formatNumberWithCommas(i)}
         </PageButton>
       );
@@ -211,7 +225,7 @@ export default function SimplePagination({
     }
 
     return pageNumbers;
-  };
+  }, [mobilePagination, page, totalPages, isLoading]);
 
   return (
     <div
@@ -228,8 +242,8 @@ export default function SimplePagination({
         )}
       >
         <p>
-          {formatNumberWithCommas(Math.min((currentPage - 1) * itemsPerPage + 1, totalItems))} -{" "}
-          {formatNumberWithCommas(Math.min(currentPage * itemsPerPage, totalItems))} /{" "}
+          {formatNumberWithCommas(Math.min((page - 1) * itemsPerPage + 1, totalItems))} -{" "}
+          {formatNumberWithCommas(Math.min(page * itemsPerPage, totalItems))} /{" "}
           {formatNumberWithCommas(totalItems)}
         </p>
       </div>
@@ -237,11 +251,11 @@ export default function SimplePagination({
       {/* Pagination Buttons */}
       <div className="flex items-center gap-1 p-1 rounded-lg bg-muted/50">
         {mobilePagination && (
-          <NavigationButton page={1} disabled={currentPage === 1}>
+          <NavigationButton page={1} disabled={page === 1}>
             <ChevronsLeft className="h-4 w-4" />
           </NavigationButton>
         )}
-        <NavigationButton page={currentPage - 1} disabled={currentPage === 1}>
+        <NavigationButton page={page - 1} disabled={page === 1}>
           <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               strokeLinecap="round"
@@ -252,13 +266,13 @@ export default function SimplePagination({
           </svg>
         </NavigationButton>
         {renderPageNumbers()}
-        <NavigationButton page={currentPage + 1} disabled={currentPage === totalPages}>
+        <NavigationButton page={page + 1} disabled={page === totalPages}>
           <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
         </NavigationButton>
         {mobilePagination && (
-          <NavigationButton page={totalPages} disabled={currentPage === totalPages}>
+          <NavigationButton page={totalPages} disabled={page === totalPages}>
             <ChevronsRight className="h-4 w-4" />
           </NavigationButton>
         )}

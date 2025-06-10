@@ -77,11 +77,11 @@ export default function Navbar() {
       )}
     >
       {/* Left */}
-      <div className="flex gap-3 md:gap-4 items-center transition-all transform-gpu">
+      <div className="flex gap-3 md:gap-4 items-center transition-all ">
         {/* Branding */}
         <Link
           prefetch={false}
-          className="flex gap-2.5 items-center hover:opacity-85 transition-all transform-gpu"
+          className="flex gap-2.5 items-center hover:opacity-85 transition-all "
           href="/"
           draggable={false}
         >
@@ -96,14 +96,14 @@ export default function Navbar() {
         </Link>
 
         {/* Links */}
-        <div className="flex gap-3 md:gap-5 items-center transition-all transform-gpu">
+        <div className="flex gap-3 md:gap-5 items-center transition-all ">
           {links.map(link => link)}
         </div>
       </div>
 
       {/* Right */}
-      <div className="md:pl-6 flex gap-2 items-center divide-x divide-muted transition-all transform-gpu">
-        <div className="flex gap-2.5 items-center transition-all transform-gpu pr-2">
+      <div className="md:pl-6 flex gap-2 items-center divide-x divide-muted transition-all ">
+        <div className="flex gap-2.5 items-center transition-all pr-2">
           <PlayerAndLeaderboardSearch />
           <Settings />
         </div>
@@ -119,7 +119,7 @@ function SimpleNavLink({ content, href }: { content: ReactElement<any>; href: st
   return (
     <Link
       prefetch={false}
-      className="flex gap-3 items-center text-sm hover:opacity-80 transition-all transform-gpu"
+      className="flex gap-3 items-center text-sm hover:opacity-80 transition-all "
       href={href}
       target={href.startsWith("/") ? "_self" : "_blank"}
       draggable={false}

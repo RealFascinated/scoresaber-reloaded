@@ -40,7 +40,7 @@ export function LeaderboardInfo({ leaderboard, beatSaverMap }: LeaderboardInfoPr
                   href={
                     beatSaverMap ? `https://beatsaver.com/maps/${beatSaverMap?.bsr}` : undefined
                   }
-                  className="hover:brightness-[66%] transform-gpu transition-all"
+                  className="hover:brightness-[66%] transition-all"
                 >
                   <p className="font-semibold text-md">{leaderboard.fullName}</p>
                 </FallbackLink>
@@ -56,9 +56,7 @@ export function LeaderboardInfo({ leaderboard, beatSaverMap }: LeaderboardInfoPr
                     <span
                       className={cn(
                         "font-semibold",
-                        beatSaverMap
-                          ? "text-ssr hover:brightness-[66%] transform-gpu transition-all"
-                          : ""
+                        beatSaverMap ? "text-ssr hover:brightness-[66%] transition-all" : ""
                       )}
                     >
                       {leaderboard.levelAuthorName}

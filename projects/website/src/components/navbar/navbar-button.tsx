@@ -14,7 +14,7 @@ export default function NavbarButton({
   return (
     <div
       className={cn(
-        "px-2 gap-2 rounded-md text-sm hover:opacity-80 transform-gpu transition-all h-full flex items-center cursor-pointer",
+        "px-2 gap-2 rounded-md text-sm hover:opacity-80 transition-all h-full flex items-center cursor-pointer",
         className
       )}
       {...props}

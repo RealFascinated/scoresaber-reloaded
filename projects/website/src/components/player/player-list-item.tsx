@@ -43,7 +43,7 @@ export function PlayerListItem({ player }: PlayerListItemProps) {
         <Avatar src={player.avatar} alt={player.name} size={22} />
         <Link
           href={`/player/${player.id}`}
-          className="hover:brightness-[66%] transition-all transform-gpu overflow-hidden"
+          className="hover:brightness-[66%] transition-all overflow-hidden"
         >
           <p className="truncate max-w-[160px] md:max-w-[250px]">{player.name}</p>
         </Link>

@@ -49,7 +49,7 @@ export function PlayerInfo({
   const name = (
     <p
       className={clsx(
-        hoverBrightness ? "transform-gpu transition-all hover:brightness-[66%]" : "",
+        hoverBrightness ? "transition-all hover:brightness-[66%]" : "",
         player.id == highlightedPlayerId ? "font-bold" : "",
         `text-ellipsis max-w-[250px] overflow-hidden whitespace-nowrap break-all`,
         className

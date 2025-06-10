@@ -103,7 +103,7 @@ export default function PlayerAndLeaderboardSearch() {
     <>
       {/* Button to open */}
       <div
-        className="group flex cursor-pointer hover:opacity-85 transition-all transform-gpu select-none"
+        className="group flex cursor-pointer hover:opacity-85 transition-all select-none"
         onClick={openSearch}
       >
         <div
@@ -116,7 +116,7 @@ export default function PlayerAndLeaderboardSearch() {
         </div>
 
         <Input
-          className="px-0 pl-9 w-10 md:w-full h-8 rounded-lg cursor-pointer group-hover:border-ssr/75 transition-all transform-gpu"
+          className="px-0 pl-9 w-10 md:w-full h-8 rounded-lg cursor-pointer group-hover:border-ssr/75 transition-all "
           type="search"
           name="search"
           placeholder={isMobile ? undefined : "Query..."}

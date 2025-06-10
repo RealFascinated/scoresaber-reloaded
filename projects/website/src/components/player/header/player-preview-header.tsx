@@ -26,7 +26,7 @@ export default function PlayerPreviewHeader({ player }: PlayerPreviewHeaderProps
             <Link
               prefetch={false}
               href={`/player/${player.id}`}
-              className="font-bold text-2xl hover:brightness-[66%] transition-all transform-gpu"
+              className="font-bold text-2xl hover:brightness-[66%] transition-all "
               style={{
                 color: getScoreSaberRoles(player)[0]?.color,
               }}

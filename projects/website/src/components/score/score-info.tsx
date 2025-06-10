@@ -29,7 +29,7 @@ export default function ScoreInfo({ score, leaderboard, hideRank }: Props) {
         prefetch={false}
         href={`/leaderboard/${leaderboard.id}/${getPageFromRank(score.rank, 12)}`}
       >
-        <p className="text-ssr hover:brightness-[66%] transition-all transform-gpu cursor-pointer">
+        <p className="text-ssr hover:brightness-[66%] transition-all cursor-pointer">
           #{formatNumberWithCommas(score.rank)}
         </p>
       </Link>

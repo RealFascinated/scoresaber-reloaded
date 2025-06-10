@@ -74,8 +74,7 @@ export default function ScoreSongInfo({
             <FallbackLink
               href={mappersProfile}
               className={clsx(
-                mappersProfile &&
-                  "hover:brightness-[66%] transform-gpu transition-all w-fit text-xs leading-none"
+                mappersProfile && "hover:brightness-[66%] transition-all w-fit text-xs leading-none"
               )}
             >
               {leaderboard.levelAuthorName}

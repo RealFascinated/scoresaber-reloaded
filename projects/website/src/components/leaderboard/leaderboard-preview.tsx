@@ -64,7 +64,7 @@ export default function LeaderboardPreview({
                   <Link
                     prefetch={false}
                     href={`/leaderboard/${leaderboard.id}`}
-                    className="block font-bold text-lg hover:brightness-[66%] transition-all transform-gpu truncate"
+                    className="block font-bold text-lg hover:brightness-[66%] transition-all truncate"
                   >
                     {leaderboard.songName}
                   </Link>

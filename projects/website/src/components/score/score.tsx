@@ -130,8 +130,8 @@ export default function Score({
   const gridColsClass = useMemo(
     () =>
       settings?.noScoreButtons
-        ? "grid-cols-[20px 1fr_1fr] lg:grid-cols-[0.5fr_4fr_350px]"
-        : "grid-cols-[20px 1fr_1fr] lg:grid-cols-[0.5fr_4fr_1fr_350px]",
+        ? "grid-cols-[20px_1fr_1fr] lg:grid-cols-[0.5fr_4fr_350px]"
+        : "grid-cols-[20px_1fr_1fr] lg:grid-cols-[0.5fr_4fr_1fr_350px]",
     [settings?.noScoreButtons]
   );
 
@@ -144,7 +144,7 @@ export default function Score({
           <Avatar src={getScoreSaberAvatar(playerAbove)} alt={playerAbove.name ?? ""} size={20} />
           <Link
             href={`/player/${playerAbove.id}`}
-            className="hover:brightness-[66%] transition-all transform-gpu cursor-pointer"
+            className="hover:brightness-[66%] transition-all cursor-pointer"
             prefetch={false}
           >
             <p className="text-sm">{playerAbove.name}</p>

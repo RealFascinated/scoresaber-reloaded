@@ -301,7 +301,7 @@ export class ScoreService {
 
     const pagination = new Pagination<
       PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>
-    >().setItemsPerPage(50);
+    >().setItemsPerPage(25);
 
     // First get total count, limited to 1000
     const countResult = await ScoreSaberScoreModel.aggregate([

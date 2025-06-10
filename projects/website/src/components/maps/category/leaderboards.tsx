@@ -101,7 +101,7 @@ export default function Leaderboards({ initialPage }: LeaderboardsProps) {
                     <Link
                       prefetch={false}
                       href={`/leaderboard/${leaderboard.id}`}
-                      className="grid lg:grid-cols-[1fr_0.17fr] gap-2 items-center bg-border p-1.5 hover:brightness-75 transition-all transform-gpu rounded-md"
+                      className="grid lg:grid-cols-[1fr_0.17fr] gap-2 items-center bg-border p-1.5 hover:brightness-75 transition-all rounded-md"
                     >
                       <ScoreSongInfo
                         leaderboard={leaderboard}

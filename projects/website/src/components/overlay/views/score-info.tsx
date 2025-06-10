@@ -23,7 +23,7 @@ export default function OverlayScoreInfoView({ overlayData }: OverlayScoreDataPr
   return (
     <OverlayView
       position={OverlayViewPosition.BOTTOM_LEFT}
-      className={cn(paused ? "filter grayscale" : "", "flex gap-2 transform-gpu transition-all")}
+      className={cn(paused ? "filter grayscale" : "", "flex gap-2 transition-all")}
     >
       <Image
         className="rounded-md"

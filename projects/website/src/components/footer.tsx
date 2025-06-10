@@ -122,7 +122,7 @@ export default function Footer({
             <div className="flex flex-col gap-2 text-center items-center lg:text-left lg:items-start">
               <Link
                 prefetch={false}
-                className="flex gap-3 items-center hover:opacity-75 transition-all transform-gpu"
+                className="flex gap-3 items-center hover:opacity-75 transition-all "
                 href="/"
                 draggable={false}
               >
@@ -146,7 +146,7 @@ export default function Footer({
                 <Link
                   prefetch={false}
                   key={link.name}
-                  className="hover:opacity-75 transition-all transform-gpu"
+                  className="hover:opacity-75 transition-all "
                   href={link.href}
                   target="_blank"
                   draggable={false}
@@ -158,7 +158,7 @@ export default function Footer({
           </div>
 
           {/* Links */}
-          <div className="flex gap-20 md:gap-32 transition-all transform-gpu">
+          <div className="flex gap-20 md:gap-32 transition-all ">
             {Object.entries(links).map(([title, links]) => (
               <div key={title} className="flex flex-col gap-0.5">
                 <h1 className="pb-0.5 text-lg font-semibold text-ssr">{title}</h1>
@@ -168,7 +168,7 @@ export default function Footer({
                     <Link
                       prefetch={false}
                       key={link.name}
-                      className="flex gap-2 items-center text-sm hover:opacity-75 transition-all transform-gpu"
+                      className="flex gap-2 items-center text-sm hover:opacity-75 transition-all "
                       href={link.href}
                       target={external ? "_blank" : undefined}
                       draggable={false}

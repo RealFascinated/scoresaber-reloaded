@@ -28,7 +28,7 @@ function Alert() {
   return (
     <Link
       prefetch={false}
-      className="group mb-1.5 bg-neutral-900 hover:opacity-85 border border-white/5 rounded-full transition-all transform-gpu"
+      className="group mb-1.5 bg-neutral-900 hover:opacity-85 border border-white/5 rounded-full transition-all "
       href="https://github.com/RealFascinated/scoresaber-reloaded"
       target="_blank"
       draggable={false}
@@ -36,7 +36,7 @@ function Alert() {
       <AnimatedShinyText className="px-3.5 py-1 flex gap-2 text-sm items-center justify-center">
         <GithubIcon className="size-5" />
         <span>Check out our Source Code</span>
-        <ArrowRight className="size-4 group-hover:translate-x-0.5 transition-all transform-gpu" />
+        <ArrowRight className="size-4 group-hover:translate-x-0.5 transition-all " />
       </AnimatedShinyText>
     </Link>
   );

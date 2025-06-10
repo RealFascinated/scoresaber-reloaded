@@ -21,7 +21,7 @@ const playerData = [
         <div className="text-gray-300 flex gap-1 items-center">
           <ChangeOverTime player={player} type={PlayerStatChange.Rank}>
             <Link prefetch={false} href={`/ranking/${player.rankPages.global}`}>
-              <p className="hover:brightness-[66%] transition-all transform-gpu">
+              <p className="hover:brightness-[66%] transition-all ">
                 #{formatNumberWithCommas(player.rank)}
               </p>
             </Link>
@@ -44,7 +44,7 @@ const playerData = [
         <div className="text-gray-300 flex gap-1 items-center">
           <ChangeOverTime player={player} type={PlayerStatChange.CountryRank}>
             <Link prefetch={false} href={`/ranking/${player.country}/${player.rankPages.country}`}>
-              <p className="hover:brightness-[66%] transition-all transform-gpu">
+              <p className="hover:brightness-[66%] transition-all ">
                 #{formatNumberWithCommas(player.countryRank)}
               </p>
             </Link>
@@ -63,7 +63,7 @@ const playerData = [
       return (
         <div className="text-gray-300 flex gap-1 items-center min-w-0">
           <ChangeOverTime player={player} type={PlayerStatChange.PerformancePoints}>
-            <p className="hover:brightness-[66%] transition-all transform-gpu text-pp truncate">
+            <p className="hover:brightness-[66%] transition-all text-pp truncate">
               {formatPp(player.pp)}pp
             </p>
           </ChangeOverTime>

@@ -15,7 +15,7 @@ export function PlayerRankingSkeleton() {
         {skeletonArray.map((_, index) => (
           <div
             key={index}
-            className="grid gap-2 grid-cols-[auto_1fr_auto] items-center bg-accent px-2 py-1.5 cursor-pointer transform-gpu transition-all first:rounded-t last:rounded-b"
+            className="grid gap-2 grid-cols-[auto_1fr_auto] items-center bg-accent px-2 py-1.5 cursor-pointer transition-all first:rounded-t last:rounded-b"
           >
             <Skeleton className="w-12 h-6" /> {/* Rank Skeleton */}
             <div className="flex gap-2 items-center">

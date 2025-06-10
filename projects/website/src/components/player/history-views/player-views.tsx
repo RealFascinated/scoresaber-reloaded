@@ -183,7 +183,7 @@ export default function PlayerViews({ player }: PlayerChartsProps) {
                   >
                     <button
                       onClick={() => setSelectedView(view)}
-                      className={`border ${isSelected ? "border-1" : "border-input"} flex items-center justify-center p-[2px] w-[26px] h-[26px] rounded-full hover:brightness-[66%] transform-gpu transition-all`}
+                      className={`border ${isSelected ? "border-1" : "border-input"} flex items-center justify-center p-[2px] w-[26px] h-[26px] rounded-full hover:brightness-[66%] transition-all`}
                     >
                       {view.icon}
                     </button>
