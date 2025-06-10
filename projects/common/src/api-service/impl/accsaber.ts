@@ -56,18 +56,29 @@ export class AccSaberService extends ApiService {
 
   public async checkPlayerExists(playerId: string): Promise<boolean> {
     const query = `
-      query FindPlayer($playerId: String!) {
-        player(id: $playerId) {
-          id
+      query FindPlayer($playerId: BigInt!) {
+        playerDatum(playerId: $playerId) {
+          playerId
         }
       }
     `;
 
-    const result = await this.fetchGQL<{ data?: { player?: { id: string } } }>(GQL_BASE, query, {
-      playerId,
-    });
+    try {
+      const result = await this.fetchGQL<{ data?: { playerDatum?: { playerId: string } } }>(
+        GQL_BASE,
+        query,
+        {
+          playerId: playerId,
+        }
+      );
 
-    return !!result?.data?.player?.id;
+      console.log("AccSaber checkPlayerExists result:", result);
+
+      return !!result?.data?.playerDatum?.playerId;
+    } catch (error) {
+      console.error("AccSaber checkPlayerExists error:", error);
+      return false;
+    }
   }
 
   public async getPlayerScores(

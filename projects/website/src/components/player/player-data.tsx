@@ -36,9 +36,24 @@ function PlatformSelector({
 }) {
   const router = useRouter();
 
+  const { data: availablePlatforms = [] } = useQuery({
+    queryKey: ["available-platforms", player.id],
+    queryFn: async () => {
+      const platforms = platformRepository.getPlatforms();
+      const available = await Promise.all(
+        platforms.map(async p => ({
+          platform: p,
+          available: await p.getOptions().displayPredicate(player.id),
+        }))
+      );
+      return available.filter(p => p.available).map(p => p.platform);
+    },
+    enabled: true,
+  });
+
   return (
     <div className="flex">
-      {platformRepository.getPlatforms().map(platform => (
+      {availablePlatforms.map(platform => (
         <Button
           key={platform.getDisplayName()}
           variant={currentPlatform === platform.getType() ? "default" : "secondary"}

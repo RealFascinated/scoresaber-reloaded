@@ -26,6 +26,9 @@ export class ScoreSaberPlatform extends Platform<
   constructor() {
     super(PlatformType.ScoreSaber, "ScoreSaber", "recent", {
       logo: <ScoresaberLogo className="w-4.5 h-4.5" />,
+      displayPredicate: async (playerId: string) => {
+        return true;
+      },
     });
   }
 

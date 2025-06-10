@@ -4,6 +4,14 @@ import { PlatformType } from "./platform-repository";
 
 export type PlatformOptions = {
   logo?: ReactNode;
+
+  /**
+   * A predicate to determine if this platform is available for a player
+   *
+   * @param playerId the id of the player
+   * @returns true if the platform is available for the player, false otherwise
+   */
+  displayPredicate: (playerId: string) => Promise<boolean>;
 };
 
 export abstract class Platform<Player, ScoreResponse, Leaderboard, ScoreLookupOptions, ScoreSort> {
@@ -70,7 +78,7 @@ export abstract class Platform<Player, ScoreResponse, Leaderboard, ScoreLookupOp
     return this.type;
   }
 
-  /**
+  /**n
    * Get the display name of this platform
    *
    * @returns the display name of this platform
