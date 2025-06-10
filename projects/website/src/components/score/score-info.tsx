@@ -22,7 +22,7 @@ export default function ScoreInfo({ score, leaderboard, hideRank }: Props) {
 
   const rankElement = useMemo(() => {
     if (hideRank) {
-      return <p className="text-ssr">-</p>;
+      return <p className="text-ssr">#-</p>;
     }
     return (
       <Link
