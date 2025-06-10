@@ -42,9 +42,13 @@ export default function ScoreInfo({ score, leaderboard, hideRank }: Props) {
       <SimpleTooltip
         display={
           <div className="flex flex-col gap-2">
-            <p>
-              Score was set on <span className="font-semibold">{score.hmd ?? "Unknown"}</span>
-            </p>
+            {score.hmd ? (
+              <p>
+                Score was set on <span className="font-semibold">{score.hmd}</span>
+              </p>
+            ) : (
+              <p>An unknown HMD was used (mod did not submit hmd data)</p>
+            )}
 
             {score.controllers && (
               <div>

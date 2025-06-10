@@ -49,11 +49,6 @@ export default function LeaderboardScore({ score, leaderboard, highlightedPlayer
         <ScoreTimeSet timestamp={score.timestamp} />
       </td>
 
-      {/* Score */}
-      <td className="px-4 py-2 text-center whitespace-nowrap">
-        {formatNumberWithCommas(score.score)}
-      </td>
-
       {/* Score Accuracy */}
       <td className="px-4 py-2 text-center whitespace-nowrap">{formatScoreAccuracy(score)}</td>
 
@@ -67,16 +62,26 @@ export default function LeaderboardScore({ score, leaderboard, highlightedPlayer
         <ScoreMissesAndPausesBadge score={score} hideXMark hidePreviousScore />
       </td>
 
-      {/* Score PP */}
-      {leaderboard.stars > 0 && (
+      {/* PP / Score */}
+      {leaderboard.stars > 0 ? (
         <td className="px-4 py-2 text-ssr whitespace-nowrap">
           <ScorePpBadge score={score} leaderboard={leaderboard} />
         </td>
+      ) : (
+        <td className="px-4 py-2 text-center whitespace-nowrap">
+          <p>{formatNumberWithCommas(score.score)}</p>
+        </td>
       )}
+
+      {/* HMD */}
+      <td className="px-4 py-2 text-center whitespace-nowrap">
+        <p>{score.hmd ?? "Unknown"}</p>
+      </td>
 
       {/* Score Modifiers */}
       <td className="px-4 py-2 text-center whitespace-nowrap">
         <SimpleTooltip
+          side="bottom"
           display={
             <div>
               <p className="font-semibold">Modifiers</p>

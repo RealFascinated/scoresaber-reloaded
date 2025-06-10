@@ -126,10 +126,14 @@ export default function LeaderboardScores({
                   <th className="px-2 py-1">Rank</th>
                   <th className="px-2 py-1">Player</th>
                   <th className="px-2 py-1 text-center">Time Set</th>
-                  <th className="px-2 py-1 text-center">Score</th>
                   <th className="px-2 py-1 text-center">Accuracy</th>
                   <th className="px-2 py-1 text-center">Misses</th>
-                  {leaderboard.stars > 0 && <th className="px-2 py-1 text-center">PP</th>}
+                  {leaderboard.stars > 0 ? (
+                    <th className="px-2 py-1 text-center">PP</th>
+                  ) : (
+                    <th className="px-2 py-1 text-center">Score</th>
+                  )}
+                  <th className="px-2 py-1 text-center">HMD</th>
                   <th className="px-2 py-1 text-center">Mods</th>
                   {scores.items.some(score => score.additionalData !== undefined) && (
                     <th className="px-2 py-1 text-center"></th>
