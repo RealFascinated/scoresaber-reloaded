@@ -84,7 +84,7 @@ export default function ScoreButtons({
   const memoizedButtons = useMemo(() => buttons, []);
 
   return (
-    <div className={`flex justify-end items-center lg:gap-2 lg:mr-1`}>
+    <div className={`flex justify-end items-center gap-2 lg:gap-2 lg:mr-1`}>
       <div
         className={`flex flex-row lg:grid lg:grid-cols-3 gap-1 items-center justify-end lg:justify-center min-w-0 lg:min-w-[92px]`}
       >
@@ -112,7 +112,7 @@ export default function ScoreButtons({
       </div>
 
       <div
-        className={`flex gap-2 ${alwaysSingleLine ? "flex-row" : "flex-row lg:flex-col"} items-center justify-center lg:pr-1`}
+        className={`flex gap-1 ${alwaysSingleLine ? "flex-row" : "flex-row lg:flex-col"} items-center justify-center lg:pr-1`}
       >
         {/* Edit score button */}
         {score && leaderboard && updateScore && !hideAccuracyChanger && (

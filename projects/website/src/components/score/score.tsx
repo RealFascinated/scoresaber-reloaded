@@ -27,6 +27,7 @@ import { ScoreStatsResponse } from "@ssr/common/response/scorestats-response";
 import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/leaderboard-player-info";
 import { getScoreSaberAvatar } from "@ssr/common/utils/scoresaber.util";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
+import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
 import Avatar from "../avatar";
 
@@ -150,7 +151,7 @@ export default function Score({
   const memoizedScore = useMemo(() => ({ ...score, accuracy, pp }), [score, accuracy, pp]);
 
   return (
-    <div className={`${settings?.disablePadding ? "" : "pb-2 pt-2"}`}>
+    <div className={`${settings?.disablePadding ? "" : "pb-2 pt-2"} relative`}>
       {playerAbove && (
         <div className="flex items-center gap-2 pl-2">
           <Avatar src={getScoreSaberAvatar(playerAbove)} alt={playerAbove.name ?? ""} size={20} />
@@ -191,44 +192,71 @@ export default function Score({
         <ScoreStats score={memoizedScore} leaderboard={leaderboard} />
       </div>
 
-      {isLeaderboardExpanded && dropdownData && !isLoading && (
-        <div className="w-full mt-2">
-          <Card className="flex gap-4 w-full relative border border-input">
-            <div className="flex flex-col w-full gap-2 justify-center items-center">
-              <div className="flex flex-wrap justify-center lg:justify-start gap-2">
-                {modes.map(modeItem => (
-                  <Button
-                    key={modeItem.name}
-                    variant={modeItem.name === mode ? "default" : "outline"}
-                    onClick={() => handleModeChange(modeItem.name)}
-                    className="flex gap-2"
-                  >
-                    {modeItem.icon}
-                    <p>{modeItem.name}</p>
-                  </Button>
-                ))}
+      <AnimatePresence>
+        {isLeaderboardExpanded && dropdownData && !isLoading && (
+          <motion.div
+            initial={{ opacity: 0, height: 0, scale: 0.95 }}
+            animate={{ opacity: 1, height: "auto", scale: 1 }}
+            exit={{ opacity: 0, height: 0, scale: 0.95 }}
+            transition={{
+              duration: 0.3,
+              ease: [0.4, 0, 0.2, 1],
+              height: { duration: 0.3 },
+              opacity: { duration: 0.2 },
+            }}
+            className="w-full mt-2 origin-top"
+          >
+            <Card className="flex gap-4 w-full relative border border-input">
+              <div className="flex flex-col w-full gap-2 justify-center items-center">
+                <div className="flex flex-wrap justify-center lg:justify-start gap-2">
+                  {modes.map(modeItem => (
+                    <Button
+                      key={modeItem.name}
+                      variant={modeItem.name === mode ? "default" : "outline"}
+                      onClick={() => handleModeChange(modeItem.name)}
+                      className="flex gap-2"
+                    >
+                      {modeItem.icon}
+                      <p>{modeItem.name}</p>
+                    </Button>
+                  ))}
+                </div>
+
+                {beatSaverMap && <MapStats beatSaver={beatSaverMap} />}
               </div>
 
-              {beatSaverMap && <MapStats beatSaver={beatSaverMap} />}
-            </div>
+              <AnimatePresence initial={false} mode="wait">
+                <motion.div
+                  key={mode}
+                  initial={{ opacity: 0, y: 10, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -10, scale: 0.98 }}
+                  transition={{
+                    duration: 0.2,
+                    ease: [0.4, 0, 0.2, 1],
+                  }}
+                  className="w-full"
+                >
+                  {mode === ScoreMode.Overview ? (
+                    <ScoreOverview leaderboard={leaderboard} scoreStats={dropdownData.scoreStats} />
+                  ) : (
+                    <ScoreHistory playerId={score.playerId} leaderboard={leaderboard} />
+                  )}
+                </motion.div>
+              </AnimatePresence>
 
-            {mode === ScoreMode.Overview ? (
-              <ScoreOverview leaderboard={leaderboard} scoreStats={dropdownData.scoreStats} />
-            ) : (
-              <ScoreHistory playerId={score.playerId} leaderboard={leaderboard} />
-            )}
+              <Separator />
 
-            <Separator />
-
-            <LeaderboardScores
-              initialPage={scoresPage}
-              leaderboard={leaderboard}
-              highlightedPlayerId={highlightedPlayerId}
-              disableUrlChanging
-            />
-          </Card>
-        </div>
-      )}
+              <LeaderboardScores
+                initialPage={scoresPage}
+                leaderboard={leaderboard}
+                highlightedPlayerId={highlightedPlayerId}
+                disableUrlChanging
+              />
+            </Card>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
