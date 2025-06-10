@@ -51,9 +51,9 @@ export default function LeaderboardPreview({
             {/* Header with song info */}
             <div className="mb-3">
               <div className="flex items-center gap-3">
-                {beatSaverMap?.songArt && (
+                {leaderboard.songArt && (
                   <Image
-                    src={beatSaverMap.songArt}
+                    src={leaderboard.songArt}
                     alt={`${leaderboard.songName} Cover Art`}
                     width={64}
                     height={64}
