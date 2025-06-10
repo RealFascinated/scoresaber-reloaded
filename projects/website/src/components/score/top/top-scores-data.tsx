@@ -2,7 +2,7 @@
 
 import Card from "@/components/card";
 import { LoadingIcon } from "@/components/loading-icon";
-import Score, { ScoreMode } from "@/components/score/score";
+import Score from "@/components/score/score";
 import SimplePagination from "@/components/simple-pagination";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-is-mobile";
@@ -102,7 +102,6 @@ export function TopScoresData({ timeframe }: TopScoresDataProps) {
               hideAccuracyChanger: true,
               hideRank: true,
               allowLeaderboardPreview: true,
-              defaultLeaderboardDropdown: ScoreMode.ScoreHistory,
             }}
           />
         </div>
