@@ -97,7 +97,7 @@ export default function ScoreSaberPlayerScores({ initialSearch, player, sort, pa
    */
   useEffect(() => {
     changePageUrl(getUrl(currentPage));
-  }, [currentPage, debouncedSearchTerm, player.id, isSearchActive]);
+  }, [currentPage, debouncedSearchTerm, player.id, isSearchActive, currentSort]);
 
   return (
     <ScoresCard>
