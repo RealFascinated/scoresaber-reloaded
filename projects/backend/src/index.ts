@@ -150,7 +150,7 @@ app.onError({ as: "global" }, ({ code, error }) => {
     }
   }
 
-  // console.log(error);
+  console.log(error);
 
   return {
     ...((status && { statusCode: status }) || { status: code }),
