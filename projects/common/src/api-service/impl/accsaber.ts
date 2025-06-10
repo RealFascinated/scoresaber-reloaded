@@ -72,11 +72,8 @@ export class AccSaberService extends ApiService {
         }
       );
 
-      console.log("AccSaber checkPlayerExists result:", result);
-
       return !!result?.data?.playerDatum?.playerId;
     } catch (error) {
-      console.error("AccSaber checkPlayerExists error:", error);
       return false;
     }
   }
@@ -179,8 +176,6 @@ export class AccSaberService extends ApiService {
         offset: SCORES_PER_PAGE * (page - 1),
         order: [generateSortOption(sort, order)],
       });
-
-      console.log(result);
 
       if (!result?.data?.accSaberScores?.nodes?.length) {
         return Pagination.empty<AccSaberScore>();

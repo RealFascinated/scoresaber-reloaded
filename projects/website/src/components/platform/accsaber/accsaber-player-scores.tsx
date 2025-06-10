@@ -31,9 +31,9 @@ const scoreSort = [
 
 const scoreTypes = [
   { name: "Overall", value: "overall" },
-  { name: "Tech", value: "tech" },
-  { name: "Standard", value: "standard" },
-  { name: "True", value: "true" },
+  { name: "Tech Acc", value: "tech" },
+  { name: "Standard Acc", value: "standard" },
+  { name: "True Acc", value: "true" },
 ];
 
 type Props = {
