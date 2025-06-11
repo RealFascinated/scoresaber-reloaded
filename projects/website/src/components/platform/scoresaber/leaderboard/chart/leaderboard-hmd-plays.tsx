@@ -71,6 +71,7 @@ export default function LeaderboardHmdPlays({ leaderboard }: Props) {
         },
         ticks: {
           precision: 0,
+          maxTicksLimit: 5,
         },
       },
       x: {
@@ -80,13 +81,16 @@ export default function LeaderboardHmdPlays({ leaderboard }: Props) {
         ticks: {
           maxRotation: 45,
           minRotation: 45,
+          font: {
+            size: 11,
+          },
         },
       },
     },
     layout: {
       padding: {
         top: 20,
-        right: 20,
+        right: 10,
         bottom: 20,
         left: 0,
       },
@@ -98,7 +102,7 @@ export default function LeaderboardHmdPlays({ leaderboard }: Props) {
       <div className="flex flex-col">
         <p className="font-semibold">Headset Distribution (Top 10)</p>
         <p className="text-sm text-gray-400">Only includes tracked scores.</p>
-        <div className="h-[400px]">
+        <div className="h-[300px] sm:h-[400px]">
           <Bar data={data} options={options} />
         </div>
       </div>

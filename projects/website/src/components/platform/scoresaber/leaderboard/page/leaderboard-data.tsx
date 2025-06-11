@@ -7,6 +7,7 @@ import { LeaderboardInfo } from "@/components/platform/scoresaber/leaderboard/le
 import LeaderboardScores from "@/components/platform/scoresaber/leaderboard/leaderboard-scores";
 import { LeaderboardFilterProvider } from "@/components/providers/leaderboard/leaderboard-filter-provider";
 import { ScoreModeEnum } from "@/components/score/score-mode";
+import { useIsMobile } from "@/hooks/use-is-mobile";
 import { DetailType } from "@ssr/common/detail-type";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { LeaderboardResponse } from "@ssr/common/response/leaderboard-response";
@@ -38,6 +39,7 @@ export function ScoreSaberLeaderboardData({
   initialPage,
   initialCategory,
 }: LeaderboardDataProps) {
+  const isMobile = useIsMobile();
   const [currentLeaderboardId, setCurrentLeaderboardId] = useState(
     initialLeaderboard.leaderboard.id
   );
@@ -57,6 +59,17 @@ export function ScoreSaberLeaderboardData({
     <LeaderboardFilterProvider>
       <div className="w-full">
         <div className="flex xl:flex-row flex-col-reverse w-full gap-2">
+          {/* Mobile Only */}
+          {isMobile && (
+            <>
+              {/* Headset Distribution */}
+              <LeaderboardHmdPlays leaderboard={leaderboard} />
+
+              {/* BeatSaver Info */}
+              {beatsaver && <LeaderboardBeatSaverInfo beatSaverMap={beatsaver} />}
+            </>
+          )}
+
           {/* Leaderboard Scores */}
           <Card className="flex gap-2 w-full relative h-fit">
             <LeaderboardScores
@@ -77,10 +90,16 @@ export function ScoreSaberLeaderboardData({
             {/* Filters */}
             <ScoreSaberLeaderboardFilters />
 
-            {/* BeatSaver Info */}
-            {beatsaver && <LeaderboardBeatSaverInfo beatSaverMap={beatsaver} />}
+            {/* Mobile Only */}
+            {!isMobile && (
+              <>
+                {/* BeatSaver Info */}
+                {beatsaver && <LeaderboardBeatSaverInfo beatSaverMap={beatsaver} />}
 
-            <LeaderboardHmdPlays leaderboard={leaderboard} />
+                {/* Headset Distribution */}
+                <LeaderboardHmdPlays leaderboard={leaderboard} />
+              </>
+            )}
 
             {/* PP Chart */}
             {leaderboard.stars > 0 && leaderboard.maxScore > 0 && (
