@@ -70,9 +70,7 @@ export function ScoreSaberLeaderboardData({
 
               {/* PP Chart */}
               {leaderboard.stars > 0 && leaderboard.maxScore > 0 && (
-                <Card>
-                  <LeaderboardPpChart leaderboard={leaderboard} />
-                </Card>
+                <LeaderboardPpChart leaderboard={leaderboard} />
               )}
 
               {/* Headset Distribution */}
@@ -102,9 +100,7 @@ export function ScoreSaberLeaderboardData({
 
                   {/* PP Chart */}
                   {leaderboard.stars > 0 && leaderboard.maxScore > 0 && (
-                    <Card>
-                      <LeaderboardPpChart leaderboard={leaderboard} />
-                    </Card>
+                    <LeaderboardPpChart leaderboard={leaderboard} />
                   )}
                 </>
               )}

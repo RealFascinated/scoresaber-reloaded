@@ -68,10 +68,12 @@ export default function LeaderboardHmdPlays({ leaderboard }: Props) {
         title: {
           display: true,
           text: "Plays",
+          color: "white",
         },
         ticks: {
           precision: 0,
           maxTicksLimit: 5,
+          color: "white",
         },
       },
       x: {
@@ -84,6 +86,7 @@ export default function LeaderboardHmdPlays({ leaderboard }: Props) {
           font: {
             size: 11,
           },
+          color: "white",
         },
       },
     },
