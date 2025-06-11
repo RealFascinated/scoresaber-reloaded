@@ -7,6 +7,7 @@ import { env } from "@ssr/common/env";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { formatPp } from "@ssr/common/utils/number-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
+import { formatDate } from "@ssr/common/utils/time-utils";
 import { useQuery } from "@tanstack/react-query";
 import { Chart, ChartOptions, registerables } from "chart.js";
 import { X } from "lucide-react";
@@ -30,6 +31,7 @@ type DataPoint = {
   leaderboardName: string;
   leaderboardDifficulty: string;
   pp: number;
+  timestamp: Date;
 };
 
 const minimumStar = 10;
@@ -103,6 +105,7 @@ const PlayerScoreChart = ({ player }: PlayerScoreChartProps) => {
     leaderboardName: dataPoint.leaderboardName,
     leaderboardDifficulty: dataPoint.leaderboardDifficulty,
     pp: dataPoint.pp,
+    timestamp: dataPoint.timestamp,
   });
 
   const filterTop100 = (points: any[]): DataPoint[] => {
@@ -203,6 +206,7 @@ const PlayerScoreChart = ({ player }: PlayerScoreChartProps) => {
               `${dataPoint.leaderboardName} [${dataPoint.leaderboardDifficulty}]`,
               `${dataPoint.x.toFixed(2)} ⭐ - ${dataPoint.y.toFixed(2)}%`,
               `PP: ${formatPp(dataPoint.pp)}pp`,
+              `Played on ${formatDate(dataPoint.timestamp, "Do MMMM, YYYY HH:mm")}`,
               "",
               "Click to view leaderboard!",
             ];

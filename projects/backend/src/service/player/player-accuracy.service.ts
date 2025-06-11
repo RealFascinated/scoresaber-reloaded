@@ -120,6 +120,7 @@ export class PlayerAccuracyService {
       projection: {
         accuracy: 1,
         pp: 1,
+        timestamp: 1,
       },
     });
 
@@ -132,6 +133,7 @@ export class PlayerAccuracyService {
         accuracy: score.accuracy,
         stars: leaderboard.stars,
         pp: score.pp,
+        timestamp: score.timestamp,
         leaderboardId: leaderboard.id + "",
         leaderboardName: leaderboard.fullName,
         leaderboardDifficulty: getDifficultyName(getDifficulty(leaderboard.difficulty.difficulty)),

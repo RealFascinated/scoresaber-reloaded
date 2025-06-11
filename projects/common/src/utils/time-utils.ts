@@ -159,7 +159,8 @@ export function formatDate(
     | "dddd, DD MMM, YYYY"
     | "DD MMMM YYYY HH:mm"
     | "DD/MM/YYYY, HH:mm:ss"
-    | "Do MMMM, YYYY" = "MMMM YYYY"
+    | "Do MMMM, YYYY"
+    | "Do MMMM, YYYY HH:mm" = "MMMM YYYY"
 ) {
   const formatMap = {
     "MMMM YYYY": "MMMM YYYY",
@@ -169,11 +170,12 @@ export function formatDate(
     "DD MMMM YYYY HH:mm": "D MMMM YYYY HH:mm",
     "DD/MM/YYYY, HH:mm:ss": "DD/MM/YYYY, HH:mm:ss",
     "Do MMMM, YYYY": "D MMMM, YYYY",
+    "Do MMMM, YYYY HH:mm": "D MMMM, YYYY HH:mm",
   };
 
   const formatted = dayjs(date).format(formatMap[format] || "MMM D, YYYY");
 
-  if (format === "Do MMMM, YYYY") {
+  if (format === "Do MMMM, YYYY" || format === "Do MMMM, YYYY HH:mm") {
     const day = dayjs(date).date();
     const suffix = getOrdinalSuffix(day);
     return formatted.replace(day.toString(), day + suffix);
