@@ -92,6 +92,7 @@ export default function MapFilters() {
           min={0}
           max={15}
           step={0.1}
+          className="pt-10 pb-2"
         />
       </div>
 

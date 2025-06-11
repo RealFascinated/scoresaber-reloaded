@@ -15,7 +15,7 @@
     "dev:backend": "bun --filter 'backend' dev",
     "dev:common": "bun --filter '@ssr/common' dev",
     "prettier": "prettier --write .",
-    "count-lines": "find projects -type f -not -path '*/dist/*' -not -path '*/.next/*' -name '*.ts' -o -name '*.tsx' | xargs wc -l"
+    "count-lines": "find projects -type f -not -path '*/dist/*' -not -path '*/.next/*' -not -path '*/node_modules/*' -name '*.ts' -o -name '*.tsx' | xargs wc -l"
   },
   "author": "fascinated7",
   "license": "MIT",
