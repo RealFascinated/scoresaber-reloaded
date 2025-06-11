@@ -8,7 +8,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { useState } from "react";
 import Card from "../card";
 import { LoadingIcon } from "../loading-icon";
-import Score from "../score/score";
+import ScoreSaberScoreDisplay from "../platform/scoresaber/score/score";
 import SimplePagination from "../simple-pagination";
 
 export function FriendScores() {
@@ -55,7 +55,7 @@ export function FriendScores() {
                 const beatSaverMap = playerScore.beatSaver;
                 return (
                   <div key={index}>
-                    <Score
+                    <ScoreSaberScoreDisplay
                       key={score.scoreId}
                       score={score}
                       leaderboard={leaderboard}
