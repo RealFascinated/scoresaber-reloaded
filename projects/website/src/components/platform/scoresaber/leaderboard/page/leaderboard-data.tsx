@@ -61,55 +61,63 @@ export function ScoreSaberLeaderboardData({
         <div className="flex xl:flex-row flex-col-reverse w-full gap-2">
           {/* Mobile Only */}
           {isMobile && (
-            <>
-              {/* Headset Distribution */}
-              <LeaderboardHmdPlays leaderboard={leaderboard} />
+            <div className="flex flex-col gap-2">
+              {/* Filters */}
+              <ScoreSaberLeaderboardFilters />
 
               {/* BeatSaver Info */}
               {beatsaver && <LeaderboardBeatSaverInfo beatSaverMap={beatsaver} />}
 
-              {/* Filters */}
-              <ScoreSaberLeaderboardFilters />
-            </>
+              {/* PP Chart */}
+              {leaderboard.stars > 0 && leaderboard.maxScore > 0 && (
+                <Card>
+                  <LeaderboardPpChart leaderboard={leaderboard} />
+                </Card>
+              )}
+
+              {/* Headset Distribution */}
+              <LeaderboardHmdPlays leaderboard={leaderboard} />
+            </div>
           )}
 
-          {/* Leaderboard Scores */}
-          <Card className="flex gap-2 w-full relative h-fit">
-            <LeaderboardScores
-              leaderboard={leaderboard}
-              initialPage={initialPage}
-              initialCategory={initialCategory}
-              leaderboardChanged={newId => setCurrentLeaderboardId(newId)}
-              showDifficulties
-              isLeaderboardPage
-            />
-          </Card>
+          <div className="flex flex-col gap-2 w-full">
+            {/* Leaderboard Scores */}
+            <Card className="flex gap-2 w-full relative h-fit">
+              <LeaderboardScores
+                leaderboard={leaderboard}
+                initialPage={initialPage}
+                initialCategory={initialCategory}
+                leaderboardChanged={newId => setCurrentLeaderboardId(newId)}
+                showDifficulties
+                isLeaderboardPage
+              />
+            </Card>
+
+            <div className="grid grid-cols-2 gap-2">
+              {/* Mobile Only */}
+              {!isMobile && (
+                <>
+                  {/* Headset Distribution */}
+                  <LeaderboardHmdPlays leaderboard={leaderboard} />
+
+                  {/* PP Chart */}
+                  {leaderboard.stars > 0 && leaderboard.maxScore > 0 && (
+                    <Card>
+                      <LeaderboardPpChart leaderboard={leaderboard} />
+                    </Card>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
 
           {/* Leaderboard Data */}
           <div className="flex flex-col gap-2 w-full xl:w-[550px]">
             {/* Leaderboard Info */}
             <LeaderboardInfo leaderboard={leaderboard} beatSaverMap={beatsaver} />
 
-            {/* Mobile Only */}
-            {!isMobile && (
-              <>
-                {/* Filters */}
-                <ScoreSaberLeaderboardFilters />
-
-                {/* BeatSaver Info */}
-                {beatsaver && <LeaderboardBeatSaverInfo beatSaverMap={beatsaver} />}
-
-                {/* Headset Distribution */}
-                <LeaderboardHmdPlays leaderboard={leaderboard} />
-              </>
-            )}
-
-            {/* PP Chart */}
-            {leaderboard.stars > 0 && leaderboard.maxScore > 0 && (
-              <Card>
-                <LeaderboardPpChart leaderboard={leaderboard} />
-              </Card>
-            )}
+            {/* Leaderboard Filters */}
+            {!isMobile && <ScoreSaberLeaderboardFilters />}
           </div>
         </div>
       </div>
