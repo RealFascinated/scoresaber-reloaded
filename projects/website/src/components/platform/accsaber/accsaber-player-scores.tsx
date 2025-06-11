@@ -155,8 +155,8 @@ export default function AccSaberPlayerScores({ player, sort, page, type, order }
       </div>
 
       {isLoading && scores === undefined && (
-        <div className="flex w-full justify-center">
-          <LoadingIcon />
+        <div className="flex w-full justify-center py-8">
+          <LoadingIcon size="md" className="text-primary" />
         </div>
       )}
 
