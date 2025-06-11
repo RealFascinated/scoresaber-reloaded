@@ -8,13 +8,22 @@ import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { useDebounce } from "@uidotdev/usehooks";
 import type { ChartOptions } from "chart.js";
-import { Chart, registerables } from "chart.js";
+import {
+  Chart,
+  Legend,
+  LineController,
+  LineElement,
+  LinearScale,
+  PointElement,
+  Title,
+  Tooltip,
+} from "chart.js";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useEffect, useState } from "react";
 import { Line } from "react-chartjs-2";
 
 // Register Chart.js components
-Chart.register(...registerables);
+Chart.register(LineController, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 type Props = {
   /**
