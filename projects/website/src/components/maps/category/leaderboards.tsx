@@ -1,11 +1,11 @@
 "use client";
 
 import Card from "@/components/card";
-import { LoadingIcon } from "@/components/loading-icon";
 import ScoreSaberScoreSongInfo from "@/components/platform/scoresaber/score/score-song-info";
 import { useMapFilter } from "@/components/providers/maps/map-filter-provider";
 import SimplePagination from "@/components/simple-pagination";
 import SimpleTooltip from "@/components/simple-tooltip";
+import { Spinner } from "@/components/spinner";
 import { EmptyState } from "@/components/ui/empty-state";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import usePageNavigation from "@/hooks/use-page-navigation";
@@ -69,7 +69,7 @@ export default function Leaderboards({ initialPage }: LeaderboardsProps) {
     <Card>
       {isLoading && leaderboardResponse == undefined && (
         <div className="flex w-full justify-center">
-          <LoadingIcon />
+          <Spinner />
         </div>
       )}
 

@@ -1,5 +1,5 @@
 import { openInNewTab } from "@/common/browser-utils";
-import { LoadingIcon } from "@/components/loading-icon";
+import { Spinner } from "@/components/spinner";
 import { Button } from "@/components/ui/button";
 import { DualRangeSlider } from "@/components/ui/dual-range-slider";
 import { Switch } from "@/components/ui/switch";
@@ -297,7 +297,7 @@ const PlayerScoreChart = ({ player }: PlayerScoreChartProps) => {
       )}
       {(!dataPoints || isComparisonLoading) && (
         <div className="h-[500px] flex items-center justify-center">
-          <LoadingIcon />
+          <Spinner />
         </div>
       )}
     </div>

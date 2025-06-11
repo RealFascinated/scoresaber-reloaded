@@ -7,9 +7,9 @@ import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { useLiveQuery } from "dexie-react-hooks";
 import { memo, useCallback, useEffect, useState } from "react";
 import Card from "../card";
-import { LoadingIcon } from "../loading-icon";
 import { PlayerListItem } from "../player/player-list-item";
 import PaginationComponent from "../simple-pagination";
+import { Spinner } from "../spinner";
 
 const MemoizedPagination = memo(PaginationComponent);
 
@@ -45,7 +45,7 @@ export function FriendRanking() {
       {/* Loading */}
       {!friendsPage && (
         <div className="flex w-full justify-center items-center">
-          <LoadingIcon />
+          <Spinner />
         </div>
       )}
 

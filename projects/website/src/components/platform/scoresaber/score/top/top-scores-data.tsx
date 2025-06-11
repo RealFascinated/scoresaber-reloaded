@@ -1,8 +1,8 @@
 "use client";
 
 import Card from "@/components/card";
-import { LoadingIcon } from "@/components/loading-icon";
 import SimplePagination from "@/components/simple-pagination";
+import { Spinner } from "@/components/spinner";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { env } from "@ssr/common/env";
@@ -122,7 +122,7 @@ export function TopScoresData({ timeframe }: TopScoresDataProps) {
           >
             {timeframe.display}
             {(isLoading || isRefetching) && selectedTimeframe === timeframe.timeframe && (
-              <LoadingIcon />
+              <Spinner />
             )}
           </Button>
         ))}
@@ -135,7 +135,7 @@ export function TopScoresData({ timeframe }: TopScoresDataProps) {
 
       {isLoading || !scores ? (
         <div className="flex justify-center items-center">
-          <LoadingIcon />
+          <Spinner />
         </div>
       ) : (
         <div className="flex flex-col gap-2 divide-y divide-border">

@@ -6,8 +6,8 @@ import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { useLiveQuery } from "dexie-react-hooks";
 import Card from "../card";
-import { LoadingIcon } from "../loading-icon";
 import PlayerPreviewHeader from "../player/header/player-preview-header";
+import { Spinner } from "../spinner";
 
 export function PlayerPreview() {
   const database = useDatabase();
@@ -27,7 +27,7 @@ export function PlayerPreview() {
     <Card className="min-h-[180px] flex justify-center">
       {isLoading && (
         <div className="flex justify-center items-center h-full">
-          <LoadingIcon />
+          <Spinner />
         </div>
       )}
       {player && <PlayerPreviewHeader player={player} />}

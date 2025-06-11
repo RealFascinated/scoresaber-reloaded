@@ -1,12 +1,12 @@
 import { cn } from "@/common/utils";
 import { ArrowPathIcon } from "@heroicons/react/24/solid";
 
-interface LoadingIconProps {
+interface SpinnerProps {
   size?: "sm" | "md" | "lg";
   className?: string;
 }
 
-export function LoadingIcon({ size = "md", className }: LoadingIconProps) {
+export function Spinner({ size = "md", className }: SpinnerProps) {
   const sizeClasses = {
     sm: "w-4 h-4",
     md: "w-6 h-6",

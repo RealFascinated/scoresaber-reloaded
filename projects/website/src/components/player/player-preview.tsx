@@ -1,6 +1,6 @@
 "use client";
 
-import { LoadingIcon } from "@/components/loading-icon";
+import { Spinner } from "@/components/spinner";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import { DetailType } from "@ssr/common/detail-type";
 import { formatPp } from "@ssr/common/utils/number-utils";
@@ -45,7 +45,7 @@ export default function PlayerPreview({ playerId, children }: PlayerPreviewProps
       >
         {isLoading || !player ? (
           <div className="flex justify-center items-center p-4">
-            <LoadingIcon />
+            <Spinner />
           </div>
         ) : (
           <div className="p-3">

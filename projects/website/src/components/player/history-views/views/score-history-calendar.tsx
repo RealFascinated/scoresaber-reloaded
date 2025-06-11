@@ -1,7 +1,7 @@
 "use client";
 
-import { LoadingIcon } from "@/components/loading-icon";
 import SimpleTooltip from "@/components/simple-tooltip";
+import { Spinner } from "@/components/spinner";
 import Combobox from "@/components/ui/combo-box";
 import { PlayedMapsCalendarStat } from "@ssr/common/response/played-maps-calendar-response";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
@@ -40,7 +40,7 @@ export default function ScoreHistoryCalendar({ playerId }: ScoreHistoryCalendarP
   return (
     <div className="flex flex-col gap-3 justify-center items-center select-none py-2">
       {isLoading ? (
-        <LoadingIcon /> // Only show LoadingIcon for initial load
+        <Spinner /> // Only show Spinner for initial load
       ) : (
         <>
           <div className="flex gap-1 justify-center items-center">

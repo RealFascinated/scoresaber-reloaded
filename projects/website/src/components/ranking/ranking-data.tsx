@@ -15,7 +15,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { LinkIcon } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { LoadingIcon } from "../loading-icon";
+import { Spinner } from "../spinner";
 import { Button } from "../ui/button";
 
 type RankingDataProps = {
@@ -89,7 +89,7 @@ export default function RankingData({ initialPage, country }: RankingDataProps) 
 
       {!rankingData && !isError && (
         <div className="flex flex-col items-center justify-center h-full mt-2">
-          <LoadingIcon />
+          <Spinner />
         </div>
       )}
 

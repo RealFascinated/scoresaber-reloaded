@@ -36,6 +36,7 @@ export function LeaderboardInfo({ leaderboard, beatSaverMap }: LeaderboardInfoPr
           <div className="flex justify-between">
             <div className="flex flex-col gap-1.5">
               <div>
+                {/* Song Name */}
                 <FallbackLink
                   href={
                     beatSaverMap ? `https://beatsaver.com/maps/${beatSaverMap?.bsr}` : undefined
@@ -44,12 +45,15 @@ export function LeaderboardInfo({ leaderboard, beatSaverMap }: LeaderboardInfoPr
                 >
                   <p className="font-semibold text-md">{leaderboard.fullName}</p>
                 </FallbackLink>
+
+                {/* Song Author */}
                 <p className="text-sm text-gray-400">
                   By <span className="text-ssr">{leaderboard.songAuthorName}</span>
                 </p>
               </div>
 
               <div className="text-[0.8rem]">
+                {/* Mapper */}
                 <p>
                   Mapper:{" "}
                   <FallbackLink href={getBeatSaverMapperProfileUrl(beatSaverMap)}>
@@ -63,21 +67,34 @@ export function LeaderboardInfo({ leaderboard, beatSaverMap }: LeaderboardInfoPr
                     </span>
                   </FallbackLink>
                 </p>
+
+                {/* Play Count */}
                 <p>
                   Plays: <span className="font-semibold">{formatNumber(leaderboard.plays)}</span> (
                   {formatNumber(leaderboard.dailyPlays)} today)
                 </p>
+
+                {/* Map Status (Ranked, Qualified, etc) */}
                 <div className="flex gap-2">
                   Status: <span className="font-semibold">{leaderboard.status}</span>{" "}
                   {statusDate && (
-                    <SimpleTooltip display={formatDate(statusDate, "DD MMMM YYYY HH:mm")}>
-                      <span>({formatDate(statusDate, "DD MMMM YYYY")})</span>
+                    <SimpleTooltip display={formatDate(statusDate, "Do MMMM, YYYY")}>
+                      <span>({formatDate(statusDate, "Do MMMM, YYYY")})</span>
                     </SimpleTooltip>
                   )}
                 </div>
+
+                {/* Leaderboard Creation Date */}
+                <p>
+                  Created:{" "}
+                  <span className="font-semibold">
+                    {formatDate(leaderboard.timestamp, "Do MMMM, YYYY")}
+                  </span>
+                </p>
               </div>
             </div>
 
+            {/* Song Art */}
             <Image
               src={leaderboard.songArt}
               alt={`${leaderboard.songName} Cover Image`}

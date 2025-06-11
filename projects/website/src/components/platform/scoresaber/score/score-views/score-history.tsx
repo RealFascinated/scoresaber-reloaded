@@ -1,8 +1,8 @@
 "use client";
 
-import { LoadingIcon } from "@/components/loading-icon";
 import ScoreSaberScoreDisplay from "@/components/platform/scoresaber/score/score";
 import PaginationComponent from "@/components/simple-pagination";
+import { Spinner } from "@/components/spinner";
 import { EmptyState } from "@/components/ui/empty-state";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { ClockIcon } from "@heroicons/react/24/outline";
@@ -54,7 +54,7 @@ export function ScoreHistory({ playerId, leaderboard }: ScoreHistoryProps) {
       <EmptyState
         icon={
           <div className="w-10 h-10">
-            <LoadingIcon />
+            <Spinner />
           </div>
         }
         title="Loading Score History"

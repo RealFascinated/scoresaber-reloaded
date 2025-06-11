@@ -7,9 +7,9 @@ import { useQuery } from "@tanstack/react-query";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useState } from "react";
 import Card from "../card";
-import { LoadingIcon } from "../loading-icon";
 import ScoreSaberScoreDisplay from "../platform/scoresaber/score/score";
 import SimplePagination from "../simple-pagination";
+import { Spinner } from "../spinner";
 
 export function FriendScores() {
   const isMobile = useIsMobile();
@@ -41,7 +41,7 @@ export function FriendScores() {
       {/* Loading */}
       {isLoading && !scoreData && (
         <div className="flex w-full justify-center items-center">
-          <LoadingIcon />
+          <Spinner />
         </div>
       )}
       {/* Scores */}

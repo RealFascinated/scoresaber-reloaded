@@ -1,6 +1,6 @@
 "use client";
 
-import { LoadingIcon } from "@/components/loading-icon";
+import { Spinner } from "@/components/spinner";
 import { ChartBarIcon, ClockIcon } from "@heroicons/react/24/solid";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
@@ -44,7 +44,7 @@ export default function LeaderboardPreview({
       >
         {!leaderboard ? (
           <div className="flex justify-center items-center p-4">
-            <LoadingIcon />
+            <Spinner />
           </div>
         ) : (
           <div className="p-3">

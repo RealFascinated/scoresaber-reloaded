@@ -1,8 +1,8 @@
 "use client";
 
 import { cn } from "@/common/utils";
-import { LoadingIcon } from "@/components/loading-icon";
 import SimpleTooltip from "@/components/simple-tooltip";
+import { Spinner } from "@/components/spinner";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -28,7 +28,7 @@ import { DateRange } from "react-day-picker";
 function Loading() {
   return (
     <div className="flex items-center justify-center h-[360px]">
-      <LoadingIcon />
+      <Spinner />
     </div>
   );
 }

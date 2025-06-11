@@ -1,6 +1,6 @@
 "use client";
 
-import { LoadingIcon } from "@/components/loading-icon";
+import { Spinner } from "@/components/spinner";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import usePageNavigation from "@/hooks/use-page-navigation";
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
@@ -156,7 +156,7 @@ export default function AccSaberPlayerScores({ player, sort, page, type, order }
 
       {isLoading && scores === undefined && (
         <div className="flex w-full justify-center py-8">
-          <LoadingIcon size="md" className="text-primary" />
+          <Spinner size="md" className="text-primary" />
         </div>
       )}
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { PlatformRepository } from "@/common/platform/platform-repository";
-import { LoadingIcon } from "@/components/loading-icon";
+import { Spinner } from "@/components/spinner";
 import { Input } from "@/components/ui/input";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import usePageNavigation from "@/hooks/use-page-navigation";
@@ -133,7 +133,7 @@ export default function ScoreSaberPlayerScores({ initialSearch, player, sort, pa
 
       {isLoading && scores === undefined && (
         <div className="flex w-full justify-center py-8">
-          <LoadingIcon size="md" className="text-primary" />
+          <Spinner size="md" className="text-primary" />
         </div>
       )}
 

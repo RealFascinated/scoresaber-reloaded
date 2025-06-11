@@ -1,8 +1,8 @@
 "use client";
 
 import Card from "@/components/card";
-import { LoadingIcon } from "@/components/loading-icon";
 import ScoreSaberScoreSongInfo from "@/components/platform/scoresaber/score/score-song-info";
+import { Spinner } from "@/components/spinner";
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import ScoreSaberRankingRequestsResponse from "@ssr/common/response/scoresaber-ranking-requests-response";
 import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
@@ -32,7 +32,7 @@ export default function RankingQueue() {
     <Card>
       {isLoading && leaderboards == undefined && (
         <div className="flex w-full justify-center">
-          <LoadingIcon />
+          <Spinner />
         </div>
       )}
 

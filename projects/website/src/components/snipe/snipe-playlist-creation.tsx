@@ -1,8 +1,8 @@
 "use client";
 
 import { downloadFile } from "@/common/browser-utils";
-import { LoadingIcon } from "@/components/loading-icon";
 import SimpleTooltip from "@/components/simple-tooltip";
+import { Spinner } from "@/components/spinner";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -215,7 +215,7 @@ export default function SnipePlaylistDownloadButton({ toSnipe }: SnipePlaylistDo
             <div className="flex gap-2 justify-between">
               {/* Download Playlist */}
               <Button type="submit" className="w-fit">
-                {downloading ? <LoadingIcon /> : "Download"}
+                {downloading ? <Spinner /> : "Download"}
               </Button>
 
               {/* Preview Playlist Art */}

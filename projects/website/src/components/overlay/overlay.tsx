@@ -4,10 +4,10 @@ import { OverlayDataClients } from "@/common/overlay/data-client";
 import HTTPSiraStatusClient from "@/common/overlay/impl/httpsirastatus";
 import { useOverlayDataStore } from "@/common/overlay/overlay-data-store";
 import { OverlaySettings, OverlayViews } from "@/common/overlay/overlay-settings";
-import { LoadingIcon } from "@/components/loading-icon";
 import OverlayPlayerInfoView from "@/components/overlay/views/player-info";
 import OverlayScoreDataView from "@/components/overlay/views/score-data";
 import OverlayScoreInfoView from "@/components/overlay/views/score-info";
+import { Spinner } from "@/components/spinner";
 import { DetailType } from "@ssr/common/detail-type";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
@@ -56,7 +56,7 @@ export default function Overlay({ settings }: OverlayProps) {
   if (isLoading || !player) {
     return (
       <div className="flex w-full h-full items-center justify-center">
-        <LoadingIcon />
+        <Spinner />
       </div>
     );
   }
