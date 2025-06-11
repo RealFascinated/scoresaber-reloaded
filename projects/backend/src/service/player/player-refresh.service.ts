@@ -113,10 +113,6 @@ export class PlayerRefreshService {
     let errorCount = 0;
 
     for (let i = 1; i <= pages; i++) {
-      if (i > 400) {
-        break;
-      }
-
       Logger.info(`Fetching page ${i}...`);
       const page = await ApiServiceRegistry.getInstance().getScoreSaberService().lookupPlayers(i);
 
