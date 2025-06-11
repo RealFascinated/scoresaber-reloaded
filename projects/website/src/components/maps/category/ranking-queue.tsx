@@ -2,7 +2,7 @@
 
 import Card from "@/components/card";
 import { LoadingIcon } from "@/components/loading-icon";
-import ScoreSongInfo from "@/components/score/score-song-info";
+import ScoreSaberScoreSongInfo from "@/components/platform/scoresaber/score/score-song-info";
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import ScoreSaberRankingRequestsResponse from "@ssr/common/response/scoresaber-ranking-requests-response";
 import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
@@ -55,7 +55,7 @@ export default function RankingQueue() {
                             href={`/leaderboard/${leaderboard.id}`}
                             className="grid lg:grid-cols-[1fr_0.2fr] gap-2 items-center bg-border p-1.5 hover:brightness-75 transition-all rounded-md"
                           >
-                            <ScoreSongInfo
+                            <ScoreSaberScoreSongInfo
                               leaderboard={leaderboard}
                               imageSize={58}
                               clickableSongName={false}

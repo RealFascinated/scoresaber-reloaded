@@ -1,5 +1,5 @@
 import Card from "@/components/card";
-import ScoreFeed from "@/components/score/score-feed/score-feed";
+import ScoreFeed from "@/components/platform/scoresaber/score/score-feed/score-feed";
 import { env } from "@ssr/common/env";
 import { Metadata } from "next";
 

@@ -1,9 +1,8 @@
-import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import Logger from "../logger";
 
 type RequestReturns = "text" | "json" | "arraybuffer";
 
-export type RequestOptions = AxiosRequestConfig & {
+export type RequestOptions = RequestInit & {
   next?: {
     revalidate?: number;
   };
@@ -43,28 +42,39 @@ class Request {
     options: RequestOptions
   ): Promise<T | undefined> {
     try {
-      const response: AxiosResponse = await axios({
-        url,
+      const response = await fetch(url, {
         method,
         ...options,
-        responseType: options.returns,
       });
 
       this.checkRateLimit(url, response);
-      return response.data as T;
-    } catch (error) {
-      if (axios.isAxiosError(error) && error.response) {
+
+      if (!response.ok) {
         if (options.throwOnError) {
-          throw new Error(`Failed to request ${url}`, { cause: error.response });
+          throw new Error(`Failed to request ${url}`, { cause: response });
         }
         return undefined;
       }
-      throw error;
+
+      switch (options.returns) {
+        case "text":
+          return (await response.text()) as T;
+        case "arraybuffer":
+          return (await response.arrayBuffer()) as T;
+        case "json":
+        default:
+          return (await response.json()) as T;
+      }
+    } catch (error) {
+      if (options.throwOnError) {
+        throw error;
+      }
+      return undefined;
     }
   }
 
-  private static checkRateLimit(url: string, response: AxiosResponse): void {
-    const rateLimit = response.headers["x-ratelimit-remaining"];
+  private static checkRateLimit(url: string, response: Response): void {
+    const rateLimit = response.headers.get("x-ratelimit-remaining");
     if (rateLimit) {
       const remaining = Number(rateLimit);
       if (remaining < 100) {

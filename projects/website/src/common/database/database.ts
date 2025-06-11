@@ -48,6 +48,8 @@ export enum SettingIds {
   Friends = "friends",
 }
 
+export const DEFAULT_WHAT_IF_RANGE: [number, number] = [70, 98.5];
+
 export default class Database extends Dexie {
   settings!: EntityTable<Setting, "id">;
   cache!: EntityTable<CacheItem, "id">;
@@ -368,7 +370,10 @@ export default class Database extends Dexie {
    * @returns the what if range setting
    */
   async getWhatIfRange(): Promise<[number, number]> {
-    return (await this.getSetting<[number, number]>(SettingIds.WhatIfRange, [5, 100]))!;
+    return (await this.getSetting<[number, number]>(
+      SettingIds.WhatIfRange,
+      DEFAULT_WHAT_IF_RANGE
+    ))!;
   }
 
   /**

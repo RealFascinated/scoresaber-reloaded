@@ -1,4 +1,4 @@
-import { TopScoresData } from "@/components/score/top/top-scores-data";
+import { TopScoresData } from "@/components/platform/scoresaber/score/top/top-scores-data";
 import { env } from "@ssr/common/env";
 import { Timeframe } from "@ssr/common/timeframe";
 import { Metadata } from "next";

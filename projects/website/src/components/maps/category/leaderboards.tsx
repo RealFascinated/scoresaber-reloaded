@@ -2,8 +2,8 @@
 
 import Card from "@/components/card";
 import { LoadingIcon } from "@/components/loading-icon";
+import ScoreSaberScoreSongInfo from "@/components/platform/scoresaber/score/score-song-info";
 import { useMapFilter } from "@/components/providers/maps/map-filter-provider";
-import ScoreSongInfo from "@/components/score/score-song-info";
 import SimplePagination from "@/components/simple-pagination";
 import SimpleTooltip from "@/components/simple-tooltip";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -103,7 +103,7 @@ export default function Leaderboards({ initialPage }: LeaderboardsProps) {
                       href={`/leaderboard/${leaderboard.id}`}
                       className="grid lg:grid-cols-[1fr_0.17fr] gap-2 items-center bg-border p-1.5 hover:brightness-75 transition-all rounded-md"
                     >
-                      <ScoreSongInfo
+                      <ScoreSaberScoreSongInfo
                         leaderboard={leaderboard}
                         imageSize={58}
                         clickableSongName={false}

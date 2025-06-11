@@ -2,7 +2,6 @@
 
 import { PlatformRepository } from "@/common/platform/platform-repository";
 import { LoadingIcon } from "@/components/loading-icon";
-import Score from "@/components/score/score";
 import { Input } from "@/components/ui/input";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import usePageNavigation from "@/hooks/use-page-navigation";
@@ -23,6 +22,7 @@ import ScoresCard from "../../score/scores-card";
 import SimplePagination from "../../simple-pagination";
 import { Button } from "../../ui/button";
 import { EmptyState } from "../../ui/empty-state";
+import ScoreSaberScoreDisplay from "./score/score";
 
 type Props = {
   initialSearch?: string;
@@ -153,7 +153,7 @@ export default function ScoreSaberPlayerScores({ initialSearch, player, sort, pa
           <div className="grid min-w-full grid-cols-1 divide-y divide-border">
             {scores.items.map((score, index) => (
               <div key={index}>
-                <Score
+                <ScoreSaberScoreDisplay
                   key={score.score.scoreId}
                   score={score.score}
                   leaderboard={score.leaderboard}

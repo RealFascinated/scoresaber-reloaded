@@ -206,7 +206,6 @@ export default function SnipePlaylistDownloadButton({ toSnipe }: SnipePlaylistDo
                       onValueChange={value => {
                         field.onChange({ min: value[0], max: value[1] });
                       }}
-                      className="pt-7 pb-2"
                     />
                   </FormControl>
                 </FormItem>

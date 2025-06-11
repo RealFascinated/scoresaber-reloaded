@@ -83,18 +83,16 @@ export default function MapFilters() {
       {/* Min/Max Stars */}
       <div>
         <h1 className="text-sm font-bold">Stars</h1>
-        <div className="pt-9 pb-2">
-          <DualRangeSlider
-            label={value => <span>{value}</span>}
-            value={[filter.stars?.min ?? 0, filter.stars?.max ?? 15]}
-            onValueChange={value => {
-              filter.setStars({ min: value[0], max: value[1] });
-            }}
-            min={0}
-            max={15}
-            step={0.1}
-          />
-        </div>
+        <DualRangeSlider
+          label={value => <span>{value}</span>}
+          value={[filter.stars?.min ?? 0, filter.stars?.max ?? 15]}
+          onValueChange={value => {
+            filter.setStars({ min: value[0], max: value[1] });
+          }}
+          min={0}
+          max={15}
+          step={0.1}
+        />
       </div>
 
       {/* Clear filters */}

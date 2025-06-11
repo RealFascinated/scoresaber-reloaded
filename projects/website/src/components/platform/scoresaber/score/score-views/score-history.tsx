@@ -1,0 +1,107 @@
+"use client";
+
+import { LoadingIcon } from "@/components/loading-icon";
+import ScoreSaberScoreDisplay from "@/components/platform/scoresaber/score/score";
+import PaginationComponent from "@/components/simple-pagination";
+import { EmptyState } from "@/components/ui/empty-state";
+import { useIsMobile } from "@/hooks/use-is-mobile";
+import { ClockIcon } from "@heroicons/react/24/outline";
+import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
+import { Pagination } from "@ssr/common/pagination";
+import { ssrApi } from "@ssr/common/utils/ssr-api";
+import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+
+type ScoreHistoryProps = {
+  /**
+   * The player who set this score.
+   */
+  playerId: string;
+
+  /**
+   * The leaderboard the score was set on.
+   */
+  leaderboard: ScoreSaberLeaderboard;
+};
+
+export function ScoreHistory({ playerId, leaderboard }: ScoreHistoryProps) {
+  const isMobile = useIsMobile();
+  const [page, setPage] = useState(1);
+
+  const {
+    data: scores,
+    isError,
+    isLoading,
+  } = useQuery({
+    queryKey: [`scoresHistory:${leaderboard.id}`, leaderboard.id, page],
+    queryFn: async () => {
+      const scoreHistory = await ssrApi.fetchPlayerScoresHistory(
+        playerId,
+        leaderboard.id + "",
+        page
+      );
+      if (scoreHistory == undefined) {
+        return Pagination.empty();
+      }
+      return scoreHistory;
+    },
+    staleTime: 30 * 1000,
+    placeholderData: data => data,
+  });
+
+  if (!scores || isError) {
+    return (
+      <EmptyState
+        icon={
+          <div className="w-10 h-10">
+            <LoadingIcon />
+          </div>
+        }
+        title="Loading Score History"
+        description="Please wait while we fetch your score history..."
+      />
+    );
+  }
+
+  if (scores.items.length === 0) {
+    return (
+      <EmptyState
+        icon={<ClockIcon className="w-10 h-10 text-gray-400 dark:text-gray-500" />}
+        title="No Score History"
+        description="This score does not have any tracked history"
+      />
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="flex flex-col divide-y divide-border">
+        {scores.items.map(({ score, leaderboard, beatSaver }, index) => {
+          return (
+            <ScoreSaberScoreDisplay
+              key={`${score.scoreId}-${index}`}
+              score={score}
+              leaderboard={leaderboard}
+              beatSaverMap={beatSaver}
+              settings={{
+                hideLeaderboardDropdown: true,
+                hideAccuracyChanger: true,
+              }}
+            />
+          );
+        })}
+      </div>
+
+      <PaginationComponent
+        mobilePagination={isMobile}
+        page={page}
+        totalItems={scores.metadata.totalItems}
+        itemsPerPage={scores.metadata.itemsPerPage}
+        loadingPage={isLoading ? page : undefined}
+        onPageChange={newPage => {
+          setPage(newPage);
+        }}
+      />
+    </div>
+  );
+}

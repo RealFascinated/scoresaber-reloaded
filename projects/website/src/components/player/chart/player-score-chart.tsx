@@ -1,13 +1,16 @@
 import { openInNewTab } from "@/common/browser-utils";
 import { LoadingIcon } from "@/components/loading-icon";
+import { Button } from "@/components/ui/button";
 import { DualRangeSlider } from "@/components/ui/dual-range-slider";
 import { env } from "@ssr/common/env";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { Chart, ChartOptions, registerables } from "chart.js";
+import { X } from "lucide-react";
 import { useState } from "react";
 import { Line } from "react-chartjs-2";
+import PlayerSearch from "../player-search";
 
 Chart.register(...registerables);
 
@@ -19,9 +22,36 @@ type PlayerScoreChartProps = {
 };
 
 const minimumStar = 10;
+const maxComparisonPlayers = 3;
+
+// Custom hook for comparison data queries
+function useComparisonDataQueries(comparisonPlayers: ScoreSaberPlayer[]) {
+  const playerIds = comparisonPlayers.map(player => player.id);
+
+  const queries = useQuery({
+    queryKey: ["player-score-chart-comparison", playerIds],
+    queryFn: async () => {
+      const results = await Promise.all(
+        playerIds.map(async id => {
+          const scoreChartData = await ssrApi.getPlayerScoreChartData(id);
+          return {
+            id,
+            data: scoreChartData?.data || [],
+          };
+        })
+      );
+      return results;
+    },
+    enabled: playerIds.length > 0,
+  });
+
+  return queries;
+}
 
 const PlayerScoreChart = ({ player }: PlayerScoreChartProps) => {
   const [accuracyRange, setAccuracyRange] = useState<number[]>([0, 100]);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [comparisonPlayers, setComparisonPlayers] = useState<ScoreSaberPlayer[]>([]);
 
   const { data: dataPoints } = useQuery({
     queryKey: ["player-score-chart", player.id],
@@ -30,10 +60,25 @@ const PlayerScoreChart = ({ player }: PlayerScoreChartProps) => {
       if (!scoreChartData) {
         return [];
       }
-
       return scoreChartData.data;
     },
   });
+
+  const { data: comparisonData, isLoading: isComparisonLoading } =
+    useComparisonDataQueries(comparisonPlayers);
+
+  const addComparisonPlayer = (player: ScoreSaberPlayer) => {
+    if (
+      !comparisonPlayers.find(p => p.id === player.id) &&
+      comparisonPlayers.length < maxComparisonPlayers
+    ) {
+      setComparisonPlayers([...comparisonPlayers, player]);
+    }
+  };
+
+  const removeComparisonPlayer = (playerId: string) => {
+    setComparisonPlayers(comparisonPlayers.filter(p => p.id !== playerId));
+  };
 
   /**
    * Callback for when a data point is clicked.
@@ -44,33 +89,56 @@ const PlayerScoreChart = ({ player }: PlayerScoreChartProps) => {
     openInNewTab(`${env.NEXT_PUBLIC_WEBSITE_URL}/leaderboard/${leaderboardId}`);
   };
 
-  const data = dataPoints?.map(dataPoint => {
-    return {
-      x: dataPoint.stars,
-      y: dataPoint.accuracy,
-      leaderboardId: Number(dataPoint.leaderboardId),
-      leaderboardName: dataPoint.leaderboardName,
-      leaderboardDifficulty: dataPoint.leaderboardDifficulty,
-    };
-  });
-
   const datasets = {
     datasets: [
       {
         type: "scatter",
-        label: "Data Points",
-        data: data,
+        label: player.name,
+        data:
+          dataPoints?.map(dataPoint => ({
+            x: dataPoint.stars,
+            y: dataPoint.accuracy,
+            leaderboardId: Number(dataPoint.leaderboardId),
+            leaderboardName: dataPoint.leaderboardName,
+            leaderboardDifficulty: dataPoint.leaderboardDifficulty,
+          })) || [],
         pointRadius: 2,
         pointBackgroundColor: "rgba(255, 255, 255, 0.5)",
         pointBorderColor: "rgba(255, 255, 255, 0.5)",
         pointHoverRadius: 4,
         pointHoverBackgroundColor: "rgba(255, 255, 255, 0.8)",
       },
+      ...comparisonPlayers.map((comparisonPlayer, index) => {
+        const playerData = comparisonData?.find(d => d.id === comparisonPlayer.id)?.data;
+        // Generate distinct colors using HSL color space
+        const hue = (index * 137.5) % 360; // Golden angle approximation for even distribution
+        return {
+          type: "scatter",
+          label: comparisonPlayer.name,
+          data:
+            playerData?.map(dataPoint => ({
+              x: dataPoint.stars,
+              y: dataPoint.accuracy,
+              leaderboardId: Number(dataPoint.leaderboardId),
+              leaderboardName: dataPoint.leaderboardName,
+              leaderboardDifficulty: dataPoint.leaderboardDifficulty,
+            })) || [],
+          pointRadius: 2,
+          pointBackgroundColor: `hsla(${hue}, 85%, 60%, 0.5)`,
+          pointBorderColor: `hsla(${hue}, 85%, 60%, 0.5)`,
+          pointHoverRadius: 4,
+          pointHoverBackgroundColor: `hsla(${hue}, 85%, 60%, 0.8)`,
+        };
+      }),
     ],
   };
 
+  const allDataPoints = [...(dataPoints || []), ...(comparisonData || []).flatMap(d => d.data)];
+
   const highestStar = Math.ceil(
-    data ? Math.max(minimumStar, Math.max(...data.map(point => point.x))) : minimumStar
+    allDataPoints.length > 0
+      ? Math.max(minimumStar, Math.max(...allDataPoints.map(point => point.stars)))
+      : minimumStar
   );
 
   const options: ChartOptions = {
@@ -126,13 +194,18 @@ const PlayerScoreChart = ({ player }: PlayerScoreChartProps) => {
         },
       },
       legend: {
-        display: false,
+        display: true,
+        position: "top",
+        labels: {
+          color: "white",
+        },
       },
     },
     onClick: (event: any, elements: any[]) => {
       if (elements.length > 0) {
         const dataIndex = elements[0].index;
-        const dataPoint = data?.[dataIndex];
+        const datasetIndex = elements[0].datasetIndex;
+        const dataPoint = datasets.datasets[datasetIndex].data[dataIndex];
         if (dataPoint) {
           onDataPointClick(dataPoint.leaderboardId);
         }
@@ -142,7 +215,43 @@ const PlayerScoreChart = ({ player }: PlayerScoreChartProps) => {
 
   return (
     <div className="flex justify-center flex-col gap-6">
-      {data && (
+      <div className="flex flex-wrap gap-2 items-center">
+        <Button
+          variant="outline"
+          onClick={() => setIsSearchOpen(true)}
+          className="text-sm"
+          disabled={comparisonPlayers.length >= maxComparisonPlayers}
+        >
+          Add Player to Compare{" "}
+          {comparisonPlayers.length > 0 && `(${comparisonPlayers.length}/${maxComparisonPlayers})`}
+        </Button>
+        {comparisonPlayers.map(comparisonPlayer => (
+          <div
+            key={comparisonPlayer.id}
+            className="flex items-center gap-2 bg-accent px-3 py-1 rounded-md"
+          >
+            <span className="text-sm">{comparisonPlayer.name}</span>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-4 w-4"
+              onClick={() => removeComparisonPlayer(comparisonPlayer.id)}
+            >
+              <X className="h-3 w-3" />
+            </Button>
+          </div>
+        ))}
+      </div>
+
+      <PlayerSearch
+        isOpen={isSearchOpen}
+        onOpenChange={setIsSearchOpen}
+        onPlayerSelect={addComparisonPlayer}
+        placeholder="Search for a player to compare..."
+        excludePlayerIds={[player.id, ...comparisonPlayers.map(p => p.id)]}
+      />
+
+      {dataPoints && !isComparisonLoading && (
         <>
           <div className="h-[500px]">
             <Line className="max-w-[100%]" data={datasets as any} options={options as any} />
@@ -159,7 +268,11 @@ const PlayerScoreChart = ({ player }: PlayerScoreChartProps) => {
           />
         </>
       )}
-      {!data && <LoadingIcon />}
+      {(!dataPoints || isComparisonLoading) && (
+        <div className="h-[500px] flex items-center justify-center">
+          <LoadingIcon />
+        </div>
+      )}
     </div>
   );
 };
