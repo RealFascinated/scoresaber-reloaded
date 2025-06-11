@@ -119,6 +119,7 @@ export class PlayerAccuracyService {
       ranked: true,
       projection: {
         accuracy: 1,
+        pp: 1,
       },
     });
 
@@ -130,6 +131,7 @@ export class PlayerAccuracyService {
       data.push({
         accuracy: score.accuracy,
         stars: leaderboard.stars,
+        pp: score.pp,
         leaderboardId: leaderboard.id + "",
         leaderboardName: leaderboard.fullName,
         leaderboardDifficulty: getDifficultyName(getDifficulty(leaderboard.difficulty.difficulty)),

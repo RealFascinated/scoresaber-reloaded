@@ -17,6 +17,11 @@ export type PlayerScoreChartDataPoint = {
   stars: number;
 
   /**
+   * The pp for this score
+   */
+  pp: number;
+
+  /**
    * The leaderboard id for this score
    */
   leaderboardId: string;
