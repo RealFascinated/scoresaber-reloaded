@@ -1,4 +1,5 @@
 import { PlayerStatisticHistory } from "src/player/player-statistic-history";
+import { PlaysByHmdResponse } from "src/response/plays-by-hmd-response";
 import { PlayerScore } from "src/score/player-score";
 import SuperJSON from "superjson";
 import { DetailType } from "../detail-type";
@@ -365,6 +366,18 @@ class SSRApi {
     }
     updateScoreWeights(response.scores);
     return response;
+  }
+
+  /**
+   * Gets the plays by HMD for a leaderboard
+   *
+   * @param leaderboardId the leaderboard id
+   * @returns the plays by HMD
+   */
+  async getPlaysByHmdForLeaderboard(leaderboardId: string) {
+    return Request.get<PlaysByHmdResponse>(
+      `${env.NEXT_PUBLIC_API_URL}/leaderboard/plays-by-hmd/${leaderboardId}`
+    );
   }
 }
 

@@ -14,6 +14,7 @@ import {
 } from "@ssr/common/model/score/impl/scoresaber-score";
 import { removeObjectFields } from "@ssr/common/object.util";
 import { LeaderboardResponse } from "@ssr/common/response/leaderboard-response";
+import { PlaysByHmdResponse } from "@ssr/common/response/plays-by-hmd-response";
 import { MapDifficulty } from "@ssr/common/score/map-difficulty";
 import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
 import { MapCharacteristic } from "@ssr/common/types/map-characteristic";
@@ -915,6 +916,45 @@ export default class LeaderboardService {
         return leaderboards.map(leaderboard => this.leaderboardToObject(leaderboard));
       }
     );
+  }
+
+  /**
+   * Gets the plays by HMD for a leaderboard
+   *
+   * @param leaderboardId the leaderboard id
+   * @returns the plays by HMD
+   */
+  public static async getPlaysByHmd(leaderboardId: string): Promise<PlaysByHmdResponse> {
+    const result = await ScoreSaberScoreModel.aggregate([
+      {
+        $match: {
+          leaderboardId: Number(leaderboardId),
+          hmd: { $exists: true, $nin: [null, "Unknown"] },
+        },
+      },
+      {
+        $group: {
+          _id: "$hmd",
+          count: { $sum: 1 },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          hmd: "$_id",
+          count: 1,
+        },
+      },
+      {
+        $sort: { count: -1 },
+      },
+    ]).exec();
+
+    // Convert array of {hmd: string, count: number} to {hmd: count}
+    return result.reduce((acc, curr) => {
+      acc[curr.hmd] = curr.count;
+      return acc;
+    }, {} as PlaysByHmdResponse);
   }
 
   /**

@@ -13,6 +13,7 @@ import { LeaderboardResponse } from "@ssr/common/response/leaderboard-response";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
+import LeaderboardHmdPlays from "../chart/leaderboard-hmd-plays";
 import LeaderboardPpChart from "../chart/leaderboard-pp-chart";
 
 type LeaderboardDataProps = {
@@ -73,11 +74,13 @@ export function ScoreSaberLeaderboardData({
             {/* Leaderboard Info */}
             <LeaderboardInfo leaderboard={leaderboard} beatSaverMap={beatsaver} />
 
+            {/* Filters */}
+            <ScoreSaberLeaderboardFilters />
+
             {/* BeatSaver Info */}
             {beatsaver && <LeaderboardBeatSaverInfo beatSaverMap={beatsaver} />}
 
-            {/* Filters */}
-            <ScoreSaberLeaderboardFilters />
+            <LeaderboardHmdPlays leaderboard={leaderboard} />
 
             {/* PP Chart */}
             {leaderboard.stars > 0 && leaderboard.maxScore > 0 && (

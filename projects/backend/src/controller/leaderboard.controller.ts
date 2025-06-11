@@ -1,4 +1,5 @@
 import { DetailType } from "@ssr/common/detail-type";
+import { PlaysByHmdResponse } from "@ssr/common/response/plays-by-hmd-response";
 import { MapDifficulty } from "@ssr/common/score/map-difficulty";
 import { MapCharacteristic } from "@ssr/common/types/map-characteristic";
 import { t } from "elysia";
@@ -64,5 +65,20 @@ export default class LeaderboardController {
       includeBeatSaver: true,
     });
     return superJson ? SuperJSON.stringify(data) : data;
+  }
+
+  @Get("/plays-by-hmd/:id", {
+    config: {},
+    tags: ["leaderboard"],
+    params: t.Object({
+      id: t.String({ required: true }),
+    }),
+  })
+  public async getPlaysByHmd({
+    params: { id },
+  }: {
+    params: { id: string };
+  }): Promise<PlaysByHmdResponse> {
+    return LeaderboardService.getPlaysByHmd(id);
   }
 }

@@ -17,8 +17,6 @@ export default function ScoreSaberLeaderboardFilters() {
 
   return (
     <Card className="w-full h-fit text-sm flex gap-2">
-      <p className="text-md font-bold text-center">Search Filters</p>
-
       <Combobox<string | undefined>
         name="Country"
         items={getCountries()

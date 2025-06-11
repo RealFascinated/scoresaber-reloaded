@@ -57,3 +57,21 @@ export function formatChange(
 
   return (change > 0 ? "+" : "") + formatValue(change) + (isPp ? "pp" : "");
 }
+
+/**
+ * Generates a consistent color based on a string input.
+ * Uses HSL color space for better color distribution.
+ *
+ * @param str the string to generate a color from
+ * @returns a color in HSL format
+ */
+export function stringToColor(str: string): string {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  }
+
+  // Convert to HSL for better color distribution
+  const h = hash % 360;
+  return `hsl(${h}, 70%, 60%)`;
+}
