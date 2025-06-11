@@ -67,6 +67,9 @@ export function ScoreSaberLeaderboardData({
 
               {/* BeatSaver Info */}
               {beatsaver && <LeaderboardBeatSaverInfo beatSaverMap={beatsaver} />}
+
+              {/* Filters */}
+              <ScoreSaberLeaderboardFilters />
             </>
           )}
 
@@ -87,12 +90,12 @@ export function ScoreSaberLeaderboardData({
             {/* Leaderboard Info */}
             <LeaderboardInfo leaderboard={leaderboard} beatSaverMap={beatsaver} />
 
-            {/* Filters */}
-            <ScoreSaberLeaderboardFilters />
-
             {/* Mobile Only */}
             {!isMobile && (
               <>
+                {/* Filters */}
+                <ScoreSaberLeaderboardFilters />
+
                 {/* BeatSaver Info */}
                 {beatsaver && <LeaderboardBeatSaverInfo beatSaverMap={beatsaver} />}
 
