@@ -6,6 +6,7 @@ import { PlaysByHmdResponse } from "@ssr/common/response/plays-by-hmd-response";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { stringToColor } from "@ssr/common/utils/utils";
 import { useQuery } from "@tanstack/react-query";
+import type { ChartOptions } from "chart.js";
 import {
   BarElement,
   CategoryScale,
@@ -48,12 +49,13 @@ export default function LeaderboardHmdPlays({ leaderboard }: Props) {
     ],
   };
 
-  const options = {
+  const options: ChartOptions<"bar"> = {
     responsive: true,
     maintainAspectRatio: false,
     animation: {
       duration: 0,
     },
+    interaction: { mode: "index" as const, intersect: false },
     plugins: {
       legend: {
         display: false,

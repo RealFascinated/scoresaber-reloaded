@@ -73,6 +73,7 @@ export default function LeaderboardPpChart({ leaderboard }: Props) {
     animation: {
       duration: 0,
     },
+    interaction: { mode: "index", intersect: false },
     scales: {
       x: {
         type: "linear",
