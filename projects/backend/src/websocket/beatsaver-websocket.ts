@@ -14,7 +14,7 @@ export class BeatSaverWebsocket {
 
         (
           (await MetricsService.getMetric(
-            MetricType.BEATSAVER_WEBSOCKET_MAP_UPDATES
+            MetricType.BEATSAVER_WEBSOCKET_MAP_METRICS
           )) as BeatSaverWebsocketMetric
         ).incrementMapUpdates();
       },
