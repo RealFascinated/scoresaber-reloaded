@@ -30,6 +30,7 @@ import PlaylistService from "./service/playlist.service";
 import { ScoreService } from "./service/score/score.service";
 import LeaderboardService from "./service/scoresaber/leaderboard.service";
 import StatisticsService from "./service/statistics.service";
+import { BeatSaverWebsocket } from "./websocket/beatsaver-websocket";
 import { ScoreWebsockets } from "./websocket/score-websockets";
 
 Logger.info("Starting SSR Backend...");
@@ -228,6 +229,7 @@ app.onStart(async () => {
 
   // Must be registered first
   new ScoreWebsockets();
+  new BeatSaverWebsocket();
 
   new MetricsService();
   new CacheService();
