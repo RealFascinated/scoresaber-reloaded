@@ -18,6 +18,6 @@ export default class TrackedScoresMetric extends NumberMetric {
 
     return this.getPointBase()
       .floatField("totalScores", total)
-      .floatField("previousTotalScores", previousTotal);
+      .floatField("totalPreviousScores", previousTotal);
   }
 }
