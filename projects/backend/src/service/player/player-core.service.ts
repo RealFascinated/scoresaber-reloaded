@@ -19,6 +19,8 @@ export class PlayerCoreService {
    * @param id the player's id
    * @param create whether to create the player if it doesn't exist
    * @param playerToken an optional player token
+   * @returns the player document if found
+   * @throws NotFoundError if the player doesn't exist and create is false
    */
   public static async getPlayer(
     id: string,
@@ -27,7 +29,7 @@ export class PlayerCoreService {
   ): Promise<PlayerDocument> {
     // Wait for the existing lock if it's in progress
     if (accountCreationLock[id] !== undefined) {
-      await accountCreationLock[id];
+      return await accountCreationLock[id];
     }
 
     let player: PlayerDocument | null = await fetchWithCache(
@@ -41,51 +43,18 @@ export class PlayerCoreService {
         throw new NotFoundError(`Player "${id}" not found, create disabled`);
       }
 
-      playerToken =
-        playerToken ||
-        (await ApiServiceRegistry.getInstance().getScoreSaberService().lookupPlayer(id));
-
-      if (!playerToken) {
+      const success = await this.trackPlayer(id, playerToken);
+      if (!success) {
         throw new NotFoundError(`Player "${id}" not found`);
       }
 
-      // Create a new lock promise and assign it
-      accountCreationLock[id] = (async () => {
-        let newPlayer: PlayerDocument;
-        try {
-          Logger.info(`Creating player "${id}"...`);
-          newPlayer = (await PlayerModel.create({ _id: id })) as PlayerDocument;
-          newPlayer.trackedSince = new Date();
-          await newPlayer.save();
-
-          // Add to the seed queue
-          QueueManager.getQueue(QueueId.PlayerScoreSeed).add(id);
-
-          // Notify in production
-          if (isProduction()) {
-            await logNewTrackedPlayer(playerToken);
-          }
-        } catch (err) {
-          Logger.error(`Failed to create player document for "${id}"`, err);
-          throw new InternalServerError(`Failed to create player document for "${id}"`);
-        } finally {
-          // Ensure the lock is always removed
-          delete accountCreationLock[id];
-        }
-
-        return newPlayer;
-      })();
-
-      // Wait for the player creation to complete
-      player = await accountCreationLock[id];
+      player = await PlayerModel.findOne({ _id: id });
+      if (!player) {
+        throw new NotFoundError(`Player "${id}" not found after creation`);
+      }
     }
 
-    if (playerToken && player.inactive !== playerToken.inactive) {
-      player.inactive = playerToken.inactive;
-      await player.save();
-    }
-
-    return player as PlayerDocument;
+    return player;
   }
 
   /**
@@ -102,13 +71,52 @@ export class PlayerCoreService {
    * Tracks a player.
    *
    * @param id the player's id
+   * @param playerToken an optional player token
+   * @returns whether the player was successfully tracked
    */
-  public static async trackPlayer(id: string) {
+  public static async trackPlayer(
+    id: string,
+    playerToken?: ScoreSaberPlayerToken
+  ): Promise<boolean> {
     try {
       if (await this.playerExists(id)) {
         return true;
       }
-      await this.getPlayer(id, true);
+
+      playerToken =
+        playerToken ||
+        (await ApiServiceRegistry.getInstance().getScoreSaberService().lookupPlayer(id));
+      if (!playerToken) {
+        return false;
+      }
+
+      // Create a new lock promise and assign it
+      accountCreationLock[id] = (async () => {
+        try {
+          Logger.info(`Creating player "${id}"...`);
+          const newPlayer = await PlayerModel.create({ _id: id });
+          newPlayer.trackedSince = new Date();
+          await newPlayer.save();
+
+          // Add to the seed queue
+          QueueManager.getQueue(QueueId.PlayerScoreSeed).add(id);
+
+          // Notify in production
+          if (isProduction()) {
+            await logNewTrackedPlayer(playerToken);
+          }
+          return newPlayer;
+        } catch (err) {
+          Logger.error(`Failed to create player document for "${id}"`, err);
+          throw new InternalServerError(`Failed to create player document for "${id}"`);
+        } finally {
+          // Ensure the lock is always removed
+          delete accountCreationLock[id];
+        }
+      })();
+
+      // Wait for the player creation to complete
+      await accountCreationLock[id];
       return true;
     } catch {
       return false;

@@ -14,10 +14,10 @@ export default class TrackedScoresMetric extends NumberMetric {
 
   public async collect(): Promise<Point | undefined> {
     const total = await ScoreSaberScoreModel.estimatedDocumentCount();
-    const previousTotal = await ScoreSaberPreviousScoreModel.estimatedDocumentCount();
+    const totalPrevious = await ScoreSaberPreviousScoreModel.estimatedDocumentCount();
 
     return this.getPointBase()
       .floatField("totalScores", total)
-      .floatField("totalPreviousScores", previousTotal);
+      .floatField("totalPreviousScores", totalPrevious);
   }
 }
