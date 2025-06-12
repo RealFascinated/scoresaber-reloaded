@@ -1,8 +1,5 @@
 import PlayerScoreChart from "@/components/player/chart/player-score-chart";
-import { StarIcon } from "@heroicons/react/24/solid";
-import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import { truncateText } from "@ssr/common/string-utils";
-import SimpleTooltip from "../simple-tooltip";
+import SimpleTooltip from "@/components/simple-tooltip";
 import {
   Dialog,
   DialogContent,
@@ -10,7 +7,11 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "../ui/dialog";
+} from "@/components/ui/dialog";
+import { StarIcon } from "@heroicons/react/24/solid";
+import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
+import { truncateText } from "@ssr/common/string-utils";
+import PlayerActionButtonWrapper from "./player-action-button-wrapper";
 
 type PlayerStarCurveProps = {
   /**
@@ -24,16 +25,17 @@ export default function PlayerScoreChartButton({ player }: PlayerStarCurveProps)
     <Dialog>
       <DialogTrigger>
         <SimpleTooltip
-          side="bottom"
+          side="top"
           className="cursor-pointer"
           display={
             <p>
-              View the score chart for{" "}
-              <span className="font-semibold">{truncateText(player.name, 16)}</span>
+              View the score chart for <b>{player.name}</b>
             </p>
           }
         >
-          <StarIcon className="h-5 w-5" />
+          <PlayerActionButtonWrapper>
+            <StarIcon className="h-5 w-5" />
+          </PlayerActionButtonWrapper>
         </SimpleTooltip>
       </DialogTrigger>
       <DialogContent className="max-w-5xl min-h-[640px] bg-secondary">

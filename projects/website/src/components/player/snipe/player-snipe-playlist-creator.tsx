@@ -42,15 +42,16 @@ import Link from "next/link";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import PlayerActionButtonWrapper from "../buttons/player-action-button-wrapper";
 
-type SnipePlaylistDownloadButtonProps = {
+type SnipePlaylistCreatorProps = {
   /**
    * The user who is being sniped
    */
   toSnipe: ScoreSaberPlayer;
 };
 
-export default function SnipePlaylistDownloadButton({ toSnipe }: SnipePlaylistDownloadButtonProps) {
+export default function SnipePlaylistCreator({ toSnipe }: SnipePlaylistCreatorProps) {
   const database = useDatabase();
   const playerId = useLiveQuery(() => database.getMainPlayerId());
 
@@ -89,15 +90,17 @@ export default function SnipePlaylistDownloadButton({ toSnipe }: SnipePlaylistDo
     <Dialog>
       <DialogTrigger>
         <SimpleTooltip
-          side="bottom"
+          side="top"
           className="cursor-pointer"
           display={
             <p>
-              Snipe Playlists for <span className="font-semibold">{toSnipe.name}</span>
+              Create a snipe playlist for <b>{toSnipe.name}</b>
             </p>
           }
         >
-          <RocketLaunchIcon className="h-5 w-5" />
+          <PlayerActionButtonWrapper>
+            <RocketLaunchIcon className="h-5 w-5" />
+          </PlayerActionButtonWrapper>
         </SimpleTooltip>
       </DialogTrigger>
 
@@ -180,7 +183,7 @@ export default function SnipePlaylistDownloadButton({ toSnipe }: SnipePlaylistDo
                       onValueChange={value => {
                         field.onChange({ min: value[0], max: value[1] });
                       }}
-                      className="pt-7 pb-2"
+                      className="pt-8 pb-2"
                     />
                   </FormControl>
                 </FormItem>
@@ -206,6 +209,7 @@ export default function SnipePlaylistDownloadButton({ toSnipe }: SnipePlaylistDo
                       onValueChange={value => {
                         field.onChange({ min: value[0], max: value[1] });
                       }}
+                      className="pt-8 pb-2"
                     />
                   </FormControl>
                 </FormItem>
