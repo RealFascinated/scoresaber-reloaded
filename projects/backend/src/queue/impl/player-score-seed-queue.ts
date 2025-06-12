@@ -1,5 +1,6 @@
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import Logger from "@ssr/common/logger";
+import { PlayerModel } from "@ssr/common/model/player";
 import { PlayerCoreService } from "../../service/player/player-core.service";
 import { PlayerRefreshService } from "../../service/player/player-refresh.service";
 import { Queue } from "../queue";
@@ -9,12 +10,12 @@ export class PlayerScoreSeedQueue extends Queue<string> {
   constructor() {
     super(QueueId.PlayerScoreSeed);
 
-    // (async () => {
-    //   const players = await PlayerModel.find({ seededScores: null }).select("_id");
-    //   for (const player of players) {
-    //     this.add(player._id);
-    //   }
-    // })();
+    (async () => {
+      const players = await PlayerModel.find({ seededScores: null }).select("_id");
+      for (const player of players) {
+        this.add(player._id);
+      }
+    })();
   }
 
   protected async processItem(playerId: string): Promise<void> {
