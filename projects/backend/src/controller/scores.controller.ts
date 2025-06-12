@@ -184,4 +184,26 @@ export default class ScoresController {
       previous: await BeatLeaderService.getPreviousScoreStats(id),
     };
   }
+
+  @Get("/history-graph/:playerId/:leaderboardId", {
+    config: {},
+    tags: ["scores"],
+    params: t.Object({
+      playerId: t.String({ required: true }),
+      leaderboardId: t.String({ required: true }),
+    }),
+    query: t.Object({
+      superJson: t.Optional(t.Boolean({ default: false })),
+    }),
+  })
+  public async getScoreHistoryGraph({
+    params: { playerId, leaderboardId },
+    query: { superJson },
+  }: {
+    params: { playerId: string; leaderboardId: string };
+    query: { superJson: boolean };
+  }): Promise<unknown> {
+    const data = await ScoreHistoryService.getScoreHistoryGraph(playerId, leaderboardId);
+    return superJson ? SuperJSON.stringify(data) : data;
+  }
 }

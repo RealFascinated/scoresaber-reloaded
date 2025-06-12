@@ -7,7 +7,7 @@ import { MapStats } from "@/components/score/map-stats";
 import { Button } from "@/components/ui/button";
 import { CubeIcon } from "@heroicons/react/24/solid";
 import { useQuery } from "@tanstack/react-query";
-import { TrendingUpIcon } from "lucide-react";
+import { ChartBarIcon, TrendingUpIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { useIsMobile } from "@/hooks/use-is-mobile";
@@ -30,6 +30,7 @@ import { getScoreSaberAvatar } from "@ssr/common/utils/scoresaber.util";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
+import { ScoreHistoryGraph } from "./score-views/score-history-graph";
 
 type ScoreProps = {
   highlightedPlayerId?: string;
@@ -55,6 +56,7 @@ type DropdownData = {
 export enum ScoreMode {
   Overview = "Overview",
   ScoreHistory = "Score History",
+  ScoreHistoryGraph = "Score History Graph",
 }
 
 type Mode = {
@@ -65,6 +67,7 @@ type Mode = {
 const modes: Mode[] = [
   { name: ScoreMode.Overview, icon: <CubeIcon className="w-4 h-4" /> },
   { name: ScoreMode.ScoreHistory, icon: <TrendingUpIcon className="w-4 h-4" /> },
+  { name: ScoreMode.ScoreHistoryGraph, icon: <ChartBarIcon className="w-4 h-4" /> },
 ];
 
 const defaultMode = ScoreMode.Overview;
@@ -242,8 +245,13 @@ export default function ScoreSaberScoreDisplay({
                 >
                   {mode === ScoreMode.Overview ? (
                     <ScoreOverview leaderboard={leaderboard} scoreStats={dropdownData.scoreStats} />
-                  ) : (
+                  ) : mode === ScoreMode.ScoreHistory ? (
                     <ScoreHistory playerId={score.playerId} leaderboard={leaderboard} />
+                  ) : (
+                    <ScoreHistoryGraph
+                      playerId={score.playerId}
+                      leaderboardId={leaderboard.id.toString()}
+                    />
                   )}
                 </motion.div>
               </AnimatePresence>

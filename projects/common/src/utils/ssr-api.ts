@@ -379,6 +379,28 @@ class SSRApi {
       `${env.NEXT_PUBLIC_API_URL}/leaderboard/plays-by-hmd/${leaderboardId}`
     );
   }
+
+  /**
+   * Gets the score history graph for a player on a map.
+   *
+   * @param playerId the player's id to get the previous scores for
+   * @param leaderboardId the leaderboard to get the previous scores on
+   */
+  async getScoreHistoryGraph(playerId: string, leaderboardId: string) {
+    const response = await Request.get<string>(
+      `${env.NEXT_PUBLIC_API_URL}/scores/history-graph/${playerId}/${leaderboardId}`,
+      {
+        returns: "text",
+        searchParams: {
+          superJson: true,
+        },
+      }
+    );
+    if (response === undefined) {
+      return undefined;
+    }
+    return SuperJSON.parse<ScoreHistoryGraphResponse>(response);
+  }
 }
 
 export const ssrApi = new SSRApi();
