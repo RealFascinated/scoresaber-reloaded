@@ -122,7 +122,7 @@ export class PlayerHistoryService {
       i--
     ) {
       const rank = playerRankHistory[i];
-      if (rank === this.INACTIVE_RANK) continue;
+      if (rank === this.INACTIVE_RANK || rank === 0) continue;
 
       const date = getMidnightAlignedDate(getDaysAgoDate(daysAgo));
       daysAgo += 1;
@@ -163,7 +163,7 @@ export class PlayerHistoryService {
 
     for (let i = playerRankHistory.length - daysAgo; i >= 0; i--) {
       const rank = playerRankHistory[i];
-      if (rank === this.INACTIVE_RANK) continue;
+      if (rank === this.INACTIVE_RANK || rank === 0) continue;
 
       const date = getMidnightAlignedDate(getDaysAgoDate(daysAgo));
       player.setStatisticHistory(date, { rank });
