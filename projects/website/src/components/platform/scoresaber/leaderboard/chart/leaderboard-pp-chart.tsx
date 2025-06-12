@@ -45,18 +45,21 @@ export default function LeaderboardPpChart({ leaderboard }: Props) {
     }
   }, [whatIfRange]);
 
-  // Generate data points for the selected range
-  const min = debouncedValues[0];
-  const max = debouncedValues[1];
-  const precision = 0.5; // Use a smaller step size for smoother curve
+  const generateDataPoints = (min: number, max: number) => {
+    const precision = 0.5; // Use a smaller step size for smoother curve
+    const dataPoints = [];
 
-  const dataPoints = [];
-  for (let accuracy = min; accuracy <= max; accuracy += precision) {
-    dataPoints.push({
-      x: accuracy,
-      y: ApiServiceRegistry.getInstance().getScoreSaberService().getPp(leaderboard.stars, accuracy),
-    });
-  }
+    for (let accuracy = min; accuracy <= max; accuracy += precision) {
+      dataPoints.push({
+        x: accuracy,
+        y: ApiServiceRegistry.getInstance()
+          .getScoreSaberService()
+          .getPp(leaderboard.stars, accuracy),
+      });
+    }
+
+    return dataPoints;
+  };
 
   const updateRange = (range: [number, number]) => {
     setValues(range);
@@ -67,7 +70,7 @@ export default function LeaderboardPpChart({ leaderboard }: Props) {
     datasets: [
       {
         label: "PP",
-        data: dataPoints,
+        data: generateDataPoints(debouncedValues[0], debouncedValues[1]),
         borderColor: "#3EC1D3",
         backgroundColor: "#3EC1D3",
         tension: 0.4,
@@ -86,8 +89,8 @@ export default function LeaderboardPpChart({ leaderboard }: Props) {
     scales: {
       x: {
         type: "linear",
-        min: min,
-        max: max,
+        min: debouncedValues[0],
+        max: debouncedValues[1],
         title: {
           display: false,
         },
