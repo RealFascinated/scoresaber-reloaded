@@ -38,7 +38,7 @@ export function ScoreHistoryGraph({ playerId, leaderboardId }: ScoreHistoryProps
   }
 
   const datasetConfig: DatasetConfig[] = [
-    ...(scoreHistory.isRanked
+    ...(!scoreHistory.isRanked
       ? [
           {
             title: "Score",
@@ -49,6 +49,7 @@ export function ScoreHistoryGraph({ playerId, leaderboardId }: ScoreHistoryProps
               reverse: false,
               display: true,
               position: "right" as const,
+              displayName: "Score",
               valueFormatter: formatNumberWithCommas,
             },
             labelFormatter: (value: number) => `Score: ${formatNumberWithCommas(value)}`,
@@ -59,7 +60,7 @@ export function ScoreHistoryGraph({ playerId, leaderboardId }: ScoreHistoryProps
             title: "PP",
             field: "pp",
             color: Colors.ssr,
-            axisId: "y1",
+            axisId: "y",
             axisConfig: {
               reverse: false,
               display: true,
@@ -79,6 +80,7 @@ export function ScoreHistoryGraph({ playerId, leaderboardId }: ScoreHistoryProps
         reverse: false,
         display: true,
         position: "left" as const,
+        displayName: "Accuracy",
         valueFormatter: (value: number) => `${value.toFixed(2)}%`,
       },
       labelFormatter: (value: number) => `Accuracy: ${value.toFixed(2)}%`,
