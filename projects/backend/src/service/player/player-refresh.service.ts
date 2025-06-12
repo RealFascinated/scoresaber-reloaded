@@ -1,6 +1,6 @@
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import Logger from "@ssr/common/logger";
-import { PlayerDocument, PlayerModel } from "@ssr/common/model/player";
+import { PlayerDocument } from "@ssr/common/model/player";
 import {
   getScoreSaberLeaderboardFromToken,
   getScoreSaberScoreFromToken,
@@ -124,58 +124,8 @@ export class PlayerRefreshService {
 
       callback?.(i, pages, successCount, errorCount);
       Logger.info(`Processing page ${i} with ${page.players.length} players...`);
-
-      // Separate players into seeded and unseeded
-      const seededPlayers: typeof page.players = [];
-      const unseededPlayers: typeof page.players = [];
-
-      // Check each player's seeding status
-      for (const player of page.players) {
-        const foundPlayer = await PlayerModel.findById(player.id);
-        if (foundPlayer?.seededScores) {
-          seededPlayers.push(player);
-        } else {
-          unseededPlayers.push(player);
-        }
-      }
-
-      // Process seeded players in parallel
-      if (seededPlayers.length > 0) {
-        Logger.info(`Processing ${seededPlayers.length} seeded players in parallel...`);
-        await Promise.all(
-          seededPlayers.map(async player => {
-            let timeoutId: NodeJS.Timeout | undefined;
-            try {
-              const timeoutPromise = new Promise((_, reject) => {
-                timeoutId = setTimeout(
-                  () => reject(new Error(`Timeout processing player ${player.id}`)),
-                  PLAYER_TIMEOUT
-                );
-              });
-
-              const processPromise = (async () => {
-                const foundPlayer = await PlayerCoreService.getPlayer(player.id, true, player);
-                await PlayerHistoryService.trackScoreSaberPlayer(foundPlayer, now, player);
-                successCount++;
-              })();
-
-              await Promise.race([processPromise, timeoutPromise]);
-            } catch (error) {
-              Logger.error(`Failed to track seeded player ${player.id} (${player.name}): ${error}`);
-              errorCount++;
-            } finally {
-              if (timeoutId) {
-                clearTimeout(timeoutId);
-              }
-            }
-          })
-        );
-      }
-
-      // Process unseeded players sequentially
-      if (unseededPlayers.length > 0) {
-        Logger.info(`Processing ${unseededPlayers.length} unseeded players sequentially...`);
-        for (const player of unseededPlayers) {
+      await Promise.all(
+        page.players.map(async player => {
           let timeoutId: NodeJS.Timeout | undefined;
           try {
             const timeoutPromise = new Promise((_, reject) => {
@@ -193,15 +143,15 @@ export class PlayerRefreshService {
 
             await Promise.race([processPromise, timeoutPromise]);
           } catch (error) {
-            Logger.error(`Failed to track unseeded player ${player.id} (${player.name}): ${error}`);
+            Logger.error(`Failed to track seeded player ${player.id} (${player.name}): ${error}`);
             errorCount++;
           } finally {
             if (timeoutId) {
               clearTimeout(timeoutId);
             }
           }
-        }
-      }
+        })
+      );
 
       Logger.info(`Completed page ${i}`);
     }

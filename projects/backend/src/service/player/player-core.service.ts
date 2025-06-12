@@ -7,6 +7,7 @@ import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player
 import { isProduction } from "@ssr/common/utils/utils";
 import { fetchWithCache } from "../../common/cache.util";
 import { logNewTrackedPlayer } from "../../common/embds";
+import { QueueManager, QueueName } from "../../queue/queue-manager";
 import CacheService, { ServiceCache } from "../cache.service";
 
 const accountCreationLock: { [id: string]: Promise<PlayerDocument> } = {};
@@ -56,6 +57,9 @@ export class PlayerCoreService {
           newPlayer = (await PlayerModel.create({ _id: id })) as PlayerDocument;
           newPlayer.trackedSince = new Date();
           await newPlayer.save();
+
+          // Add to the seed queue
+          QueueManager.getQueue(QueueName.PlayerScoreSeed).add(id);
 
           // Notify in production
           if (isProduction()) {
