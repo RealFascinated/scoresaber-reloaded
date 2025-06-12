@@ -69,47 +69,51 @@ export default function PlayerMiniRanking({ type, player }: PlayerMiniRankingPro
         <p>{type} Ranking</p>
       </div>
       <div className="flex flex-col text-xs">
-        {response.players.map((playerRanking, index) => {
-          const rank = type == "Global" ? playerRanking.rank : playerRanking.countryRank;
-          const ppDifference = playerRanking.pp - player.pp;
+        {response.players.length > 0 ? (
+          response.players.map((playerRanking, index) => {
+            const rank = type == "Global" ? playerRanking.rank : playerRanking.countryRank;
+            const ppDifference = playerRanking.pp - player.pp;
 
-          return (
-            <Link
-              prefetch={false}
-              key={index}
-              href={`/player/${playerRanking.id}`}
-              className="grid gap-2 grid-cols-[auto_1fr_auto] items-center bg-accent px-2 py-1.5 cursor-pointer transition-all hover:brightness-75 first:rounded-t last:rounded-b"
-            >
-              <p className="text-gray-400">#{formatNumberWithCommas(rank)}</p>
-              <div className="flex gap-2 items-start">
-                <div className="flex flex-col items-start">
-                  <PlayerPreview playerId={playerRanking.id}>
-                    <div className="flex flex-col items-start">
-                      <PlayerInfo
-                        className="w-[170px] !flex !items-start"
-                        player={playerRanking}
-                        highlightedPlayerId={player.id}
-                        hideCountryFlag
-                        hoverBrightness={false}
-                      />
-                    </div>
-                  </PlayerPreview>
+            return (
+              <Link
+                prefetch={false}
+                key={index}
+                href={`/player/${playerRanking.id}`}
+                className="grid gap-2 grid-cols-[auto_1fr_auto] items-center bg-accent px-2 py-1.5 cursor-pointer transition-all hover:brightness-75 first:rounded-t last:rounded-b"
+              >
+                <p className="text-gray-400">#{formatNumberWithCommas(rank)}</p>
+                <div className="flex gap-2 items-start">
+                  <div className="flex flex-col items-start">
+                    <PlayerPreview playerId={playerRanking.id}>
+                      <div className="flex flex-col items-start">
+                        <PlayerInfo
+                          className="w-[170px] !flex !items-start"
+                          player={playerRanking}
+                          highlightedPlayerId={player.id}
+                          hideCountryFlag
+                          hoverBrightness={false}
+                        />
+                      </div>
+                    </PlayerPreview>
+                  </div>
                 </div>
-              </div>
-              <div className="inline-flex min-w-[12.5em] items-center gap-1">
-                <p className="text-ssr text-right">{formatPp(playerRanking.pp)}pp</p>
-                {playerRanking.id !== player.id && (
-                  <p
-                    className={`text-xs text-right ${ppDifference > 0 ? "text-green-400" : "text-red-400"}`}
-                  >
-                    {ppDifference > 0 ? "+" : ""}
-                    {formatPp(ppDifference, 2)}
-                  </p>
-                )}
-              </div>
-            </Link>
-          );
-        })}
+                <div className="inline-flex min-w-[12.5em] items-center gap-1">
+                  <p className="text-ssr text-right">{formatPp(playerRanking.pp)}pp</p>
+                  {playerRanking.id !== player.id && (
+                    <p
+                      className={`text-xs text-right ${ppDifference > 0 ? "text-green-400" : "text-red-400"}`}
+                    >
+                      {ppDifference > 0 ? "+" : ""}
+                      {formatPp(ppDifference, 2)}
+                    </p>
+                  )}
+                </div>
+              </Link>
+            );
+          })
+        ) : (
+          <p className="text-gray-400">No players found</p>
+        )}
       </div>
     </Card>
   );
