@@ -58,47 +58,42 @@ export default function Settings() {
   return (
     <Dialog>
       <DialogTrigger>
-        <FaCog className="size-5 text-zinc-200 hover:animate-spin-slow" />
+        <SimpleTooltip display="Settings">
+          <FaCog className="size-5 text-zinc-200 hover:animate-spin-slow transition-colors hover:text-primary cursor-pointer" />
+        </SimpleTooltip>
       </DialogTrigger>
-      <DialogContent className="max-w-[800px] max-h-[400px] h-full w-full flex flex-col">
-        {/* Header */}
-        <DialogTitle>Settings</DialogTitle>
+      <DialogContent className="max-w-[800px] h-[600px] flex flex-col">
+        <DialogTitle className="text-xl font-semibold mb-4">Settings</DialogTitle>
 
-        {/* Categories */}
-        <div className="flex flex-col md:flex-row text-sm divide-y divide-muted md:divide-x md:divide-y-0 h-full w-full">
-          <div className="flex flex-col gap-2 pb-3 md:pb-0 md:pr-3">
-            <div className="flex flex-row md:flex-col gap-1.5 w-full md:w-36">
-              {categories.map(category => (
-                <Button
-                  key={category.name}
-                  variant={selectedCategory.name == category.name ? "default" : "outline"}
-                  className="justify-start flex gap-2 px-2 border-none"
-                  onClick={() => setSelectedCategory(category)}
-                >
-                  {category.icon()}
-                  {category.name}
-                </Button>
-              ))}
-            </div>
+        <div className="flex gap-6 h-full">
+          {/* Sidebar */}
+          <div className="w-32 space-y-1">
+            {categories.map(category => (
+              <Button
+                key={category.name}
+                variant={selectedCategory.name === category.name ? "default" : "ghost"}
+                className="w-full justify-start"
+                onClick={() => setSelectedCategory(category)}
+              >
+                {category.icon()}
+                <span className="ml-2">{category.name}</span>
+              </Button>
+            ))}
           </div>
 
-          {/* Selected Category */}
-          <div className="pt-2 md:pl-3 md:pt-0 h-full flex flex-col gap-2 w-full">
+          {/* Content */}
+          <div className="flex-1 overflow-auto">
             {selectedCategory.component(save, websiteFormRef!, scoreFormRef!)}
-            <div className="flex justify-between gap-2">
-              <div className="flex gap-2">
-                <ResetDatabase />
-                <ExportSettings />
-                <ImportSettings />
-              </div>
-
-              <SimpleTooltip display="Save your settings">
-                <Button className="w-fit" onClick={save}>
-                  Save
-                </Button>
-              </SimpleTooltip>
-            </div>
           </div>
+        </div>
+
+        <div className="flex justify-between items-center mt-4 pt-4 border-t">
+          <div className="flex gap-2">
+            <ResetDatabase />
+            <ExportSettings />
+            <ImportSettings />
+          </div>
+          <Button onClick={save}>Save Changes</Button>
         </div>
       </DialogContent>
     </Dialog>
