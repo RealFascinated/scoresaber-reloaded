@@ -7,7 +7,7 @@ export default class BeatSaverWebsocketMetric extends Metric<{
 }> {
   constructor() {
     super(
-      MetricType.BEATSAVER_WEBSOCKET_MAP_UPDATES,
+      MetricType.BEATSAVER_WEBSOCKET_MAP_METRICS,
       {
         mapUpdates: 0,
       },

@@ -54,7 +54,7 @@ export enum MetricType {
   MONGO_DB_SIZE = "mongo-db-size",
 
   // Beatsaver metrics
-  BEATSAVER_WEBSOCKET_MAP_UPDATES = "beatsaver-websocket-map-updates",
+  BEATSAVER_WEBSOCKET_MAP_METRICS = "beatsaver-websocket-map-metrics",
 }
 
 export default class MetricsService {
