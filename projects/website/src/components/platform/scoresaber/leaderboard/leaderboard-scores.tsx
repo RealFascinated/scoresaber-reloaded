@@ -186,9 +186,14 @@ export default function LeaderboardScores({
                   <th className="px-2 py-2 font-medium text-center text-foreground/80">Time Set</th>
                   <th className="px-2 py-2 font-medium text-center text-foreground/80">Accuracy</th>
                   <th className="px-2 py-2 font-medium text-center text-foreground/80">Misses</th>
-                  <th className="px-2 py-2 font-medium text-center text-foreground/80">PP</th>
+                  <th className="px-2 py-2 font-medium text-center text-foreground/80">
+                    {leaderboard.stars > 0 ? "PP" : "Score"}
+                  </th>
                   <th className="px-2 py-2 font-medium text-center text-foreground/80">HMD</th>
                   <th className="px-2 py-2 font-medium text-center text-foreground/80">Mods</th>
+                  <th className="px-2 py-2 font-medium text-center text-foreground/80 w-[28px]">
+                    Replay
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/30">
