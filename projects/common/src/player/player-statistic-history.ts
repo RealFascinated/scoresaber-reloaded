@@ -1,3 +1,4 @@
-import { PlayerHistory } from "./player-history";
+import { PlayerHistoryEntry } from "../model/player/player-history-entry";
 
-export type PlayerStatisticHistory = Record<string, PlayerHistory>;
+export type FlattenedPlayerHistory = Omit<PlayerHistoryEntry, "_id" | "__v" | "playerId" | "date">;
+export type PlayerStatisticHistory = Record<string, FlattenedPlayerHistory>;

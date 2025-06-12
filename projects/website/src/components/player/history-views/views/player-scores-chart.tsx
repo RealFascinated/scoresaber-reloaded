@@ -13,7 +13,7 @@ type Props = {
 export const scoreBarsDataset: DatasetConfig[] = [
   {
     title: "Ranked Scores",
-    field: "scores.rankedScores",
+    field: "rankedScores",
     color: "#ffae4d",
     axisId: "y100",
     axisConfig: {
@@ -29,7 +29,7 @@ export const scoreBarsDataset: DatasetConfig[] = [
   },
   {
     title: "Unranked Scores",
-    field: "scores.unrankedScores",
+    field: "unrankedScores",
     color: "#616161",
     axisId: "y100",
     axisConfig: {
@@ -50,7 +50,7 @@ const datasetConfig: DatasetConfig[] = [
   ...scoreBarsDataset,
   {
     title: "Total Scores",
-    field: "scores.totalScores",
+    field: "totalScores",
     color: "#616161",
     axisId: "y1",
     axisConfig: {
@@ -63,7 +63,7 @@ const datasetConfig: DatasetConfig[] = [
   },
   {
     title: "Total Ranked Scores",
-    field: "scores.totalRankedScores",
+    field: "totalRankedScores",
     color: "#6773ff",
     axisId: "y2",
     axisConfig: {

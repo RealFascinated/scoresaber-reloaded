@@ -3,10 +3,15 @@ import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger from "@ssr/common/logger";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { PlayerDocument, PlayerModel } from "@ssr/common/model/player";
+import {
+  PlayerHistoryEntry,
+  PlayerHistoryEntryModel,
+} from "@ssr/common/model/player/player-history-entry";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
+import { removeObjectFields } from "@ssr/common/object.util";
 import { PlayerAccuracies } from "@ssr/common/player/player-accuracies";
 import { PlayerStatisticHistory } from "@ssr/common/player/player-statistic-history";
-import { PlayerStatistic, ScoreCalendarData } from "@ssr/common/types/player/player-statistic";
+import { ScoreCalendarData } from "@ssr/common/types/player/player-statistic";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import { parseRankHistory } from "@ssr/common/utils/player-utils";
 import {
@@ -17,7 +22,6 @@ import {
 import { fetchWithCache } from "../../common/cache.util";
 import CacheService, { ServiceCache } from "../cache.service";
 import { PlayerAccuracyService } from "./player-accuracy.service";
-import { PlayerCoreService } from "./player-core.service";
 import { PlayerRankingService } from "./player-ranking.service";
 
 export class PlayerHistoryService {
@@ -53,24 +57,30 @@ export class PlayerHistoryService {
       return;
     }
 
-    if (foundPlayer.getDaysTracked() === 0) {
+    const daysTracked = await foundPlayer.getDaysTracked();
+    if (daysTracked === 0) {
       await this.seedPlayerHistory(foundPlayer, player);
     }
 
     if (foundPlayer.seededScores) {
-      const history = foundPlayer.getHistoryByDate(trackTime) ?? {};
-      const accuracies = await PlayerAccuracyService.getPlayerAverageAccuracies(foundPlayer.id);
+      const existingEntry = await PlayerHistoryEntryModel.findOne({
+        playerId: foundPlayer.id,
+        date: getMidnightAlignedDate(trackTime),
+      }).lean();
 
+      const accuracies = await PlayerAccuracyService.getPlayerAverageAccuracies(foundPlayer.id);
       const updatedHistory = await this.createPlayerStatistic(
         player,
         accuracies,
-        history,
+        existingEntry ?? undefined,
         foundPlayer.id
       );
 
-      foundPlayer.setStatisticHistory(trackTime, updatedHistory);
-      foundPlayer.sortStatisticHistory();
-      foundPlayer.markModified("statisticHistory");
+      await PlayerHistoryEntryModel.findOneAndUpdate(
+        { playerId: foundPlayer.id, date: getMidnightAlignedDate(trackTime) },
+        updatedHistory,
+        { upsert: true }
+      );
     }
 
     foundPlayer.lastTracked = new Date();
@@ -82,34 +92,39 @@ export class PlayerHistoryService {
   }
 
   /**
-   * Retrieves a player's statistic history within a specified date range.
-   * Combines data from both local storage and ScoreSaber API.
+   * Gets a player's statistic history for a specific date range.
    */
   public static async getPlayerStatisticHistory(
     player: ScoreSaberPlayerToken,
     startDate: Date,
     endDate: Date
   ): Promise<PlayerStatisticHistory> {
-    const [account, accuracies] = await Promise.all([
-      PlayerCoreService.getPlayer(player.id, false, player).catch(() => undefined),
-      PlayerAccuracyService.getPlayerAverageAccuracies(player.id),
-    ]);
+    const startTimestamp = getMidnightAlignedDate(startDate).getTime();
+    const endTimestamp = getMidnightAlignedDate(endDate).getTime();
 
-    const history = account?.getStatisticHistoryInRange(endDate, startDate) ?? {};
+    // Ensure start date is before end date
+    const [queryStart, queryEnd] =
+      startTimestamp > endTimestamp
+        ? [endTimestamp, startTimestamp]
+        : [startTimestamp, endTimestamp];
 
-    // Update current day's history
-    const todayDate = formatDateMinimal(getMidnightAlignedDate(new Date()));
-    const historyElement = history[todayDate];
-    const updatedStatistic = await this.createPlayerStatistic(
-      player,
-      accuracies,
-      historyElement,
-      account?.id
-    );
-    if (account) {
-      updatedStatistic.replaysWatched = player.scoreStats.replaysWatched;
+    const entries = await PlayerHistoryEntryModel.find({
+      playerId: player.id,
+      date: {
+        $gte: new Date(queryStart),
+        $lte: new Date(queryEnd),
+      },
+    })
+      .sort({ date: -1 })
+      .lean();
+
+    Logger.debug(`Found ${entries.length} history entries for player ${player.id}`);
+
+    const history: PlayerStatisticHistory = {};
+    for (const entry of entries) {
+      const date = formatDateMinimal(entry.date);
+      history[date] = this.playerHistoryToObject(entry);
     }
-    history[todayDate] = updatedStatistic;
 
     // Merge rank history
     const playerRankHistory = parseRankHistory(player);
@@ -133,21 +148,24 @@ export class PlayerHistoryService {
       }
     }
 
-    // Sort and round history
-    const sortedHistory = Object.fromEntries(
-      Object.entries(history).sort((a, b) => new Date(b[0]).getTime() - new Date(a[0]).getTime())
-    );
-
+    const account = await PlayerModel.findById(player.id);
     if (account) {
-      for (const [date, statistic] of Object.entries(sortedHistory)) {
+      for (const [date, statistic] of Object.entries(history)) {
         if (statistic.plusOnePp) {
           statistic.plusOnePp = Math.round(statistic.plusOnePp * 100) / 100;
-          sortedHistory[date] = statistic;
+          history[date] = statistic;
         }
       }
     }
 
-    return sortedHistory;
+    // Sort history by date
+    return Object.fromEntries(
+      Object.entries(history).sort((a, b) => {
+        const dateA = new Date(a[0]);
+        const dateB = new Date(b[0]);
+        return dateB.getTime() - dateA.getTime();
+      })
+    );
   }
 
   /**
@@ -166,12 +184,13 @@ export class PlayerHistoryService {
       if (rank === this.INACTIVE_RANK || rank === 0) continue;
 
       const date = getMidnightAlignedDate(getDaysAgoDate(daysAgo));
-      player.setStatisticHistory(date, { rank });
+      await PlayerHistoryEntryModel.findOneAndUpdate(
+        { playerId: player.id, date },
+        { rank },
+        { upsert: true }
+      );
       daysAgo += 1;
     }
-
-    player.markModified("statisticHistory");
-    await player.save();
   }
 
   /**
@@ -186,23 +205,26 @@ export class PlayerHistoryService {
     leaderboard: ScoreSaberLeaderboard;
   }): Promise<void> {
     const player = await PlayerModel.findById(score.playerId);
-
     if (!player) return;
 
-    const today = new Date();
-    const history = player.getHistoryByDate(today);
-    const scores = history.scores ?? { rankedScores: 0, unrankedScores: 0 };
+    const today = getMidnightAlignedDate(new Date());
+    const existingEntry = await PlayerHistoryEntryModel.findOne({
+      playerId: score.playerId,
+      date: today,
+    }).lean();
 
+    const update: Partial<PlayerHistoryEntry> = {};
     if (leaderboard.stars > 0) {
-      scores.rankedScores!++;
+      update.rankedScores = (existingEntry?.rankedScores ?? 0) + 1;
     } else {
-      scores.unrankedScores!++;
+      update.unrankedScores = (existingEntry?.unrankedScores ?? 0) + 1;
     }
 
-    history.scores = scores;
-    player.setStatisticHistory(today, history);
-    player.markModified("statisticHistory");
-    await player.save();
+    await PlayerHistoryEntryModel.findOneAndUpdate(
+      { playerId: score.playerId, date: today },
+      update,
+      { upsert: true }
+    );
   }
 
   /**
@@ -232,31 +254,22 @@ export class PlayerHistoryService {
   private static async createPlayerStatistic(
     playerToken: ScoreSaberPlayerToken,
     accuracies: PlayerAccuracies,
-    existingHistory?: PlayerStatistic,
+    existingEntry?: PlayerHistoryEntry,
     playerId?: string
-  ): Promise<PlayerStatistic> {
-    const baseStatistic: PlayerStatistic = {
+  ): Promise<Partial<PlayerHistoryEntry>> {
+    const baseStatistic: Partial<PlayerHistoryEntry> = {
       pp: playerToken.pp,
       countryRank: playerToken.countryRank,
       rank: playerToken.rank,
-      accuracy: {
-        ...existingHistory?.accuracy,
-        averageRankedAccuracy: playerToken.scoreStats.averageRankedAccuracy,
-        averageUnrankedAccuracy: accuracies.unrankedAccuracy,
-        averageAccuracy: accuracies.averageAccuracy,
-      },
-      scores: {
-        rankedScores: 0,
-        unrankedScores: 0,
-        ...existingHistory?.scores,
-        totalScores: playerToken.scoreStats.totalPlayCount,
-        totalRankedScores: playerToken.scoreStats.rankedPlayCount,
-      },
-      score: {
-        ...existingHistory?.score,
-        totalScore: playerToken.scoreStats.totalScore,
-        totalRankedScore: playerToken.scoreStats.totalRankedScore,
-      },
+      averageRankedAccuracy: playerToken.scoreStats.averageRankedAccuracy,
+      averageUnrankedAccuracy: accuracies.unrankedAccuracy,
+      averageAccuracy: accuracies.averageAccuracy,
+      rankedScores: existingEntry?.rankedScores ?? 0,
+      unrankedScores: existingEntry?.unrankedScores ?? 0,
+      totalScores: playerToken.scoreStats.totalPlayCount,
+      totalRankedScores: playerToken.scoreStats.rankedPlayCount,
+      totalScore: playerToken.scoreStats.totalScore,
+      totalRankedScore: playerToken.scoreStats.totalRankedScore,
     };
 
     if (playerId) {
@@ -274,21 +287,31 @@ export class PlayerHistoryService {
     year: number,
     month: number
   ): Promise<ScoreCalendarData> {
-    const history = player.getStatisticHistory();
+    const startDate = new Date(year, month - 1, 1);
+    const endDate = new Date(year, month, 0);
+
+    const entries = await PlayerHistoryEntryModel.find({
+      playerId: player.id,
+      date: {
+        $gte: startDate,
+        $lte: endDate,
+      },
+    });
+
     const days: Record<number, { rankedMaps: number; unrankedMaps: number; totalMaps: number }> =
       {};
     const metadata: Record<number, number[]> = {};
 
-    for (const [dateStr, stat] of Object.entries(history)) {
-      const date = new Date(dateStr);
+    for (const entry of entries) {
+      const date = entry.date;
       const statYear = date.getFullYear();
       const statMonth = date.getMonth() + 1;
 
       if (
-        !stat?.scores?.rankedScores ||
-        !stat?.scores?.unrankedScores ||
-        typeof stat.scores.rankedScores !== "number" ||
-        typeof stat.scores.unrankedScores !== "number"
+        !entry.rankedScores ||
+        !entry.unrankedScores ||
+        typeof entry.rankedScores !== "number" ||
+        typeof entry.unrankedScores !== "number"
       ) {
         continue;
       }
@@ -300,9 +323,9 @@ export class PlayerHistoryService {
         metadata[statYear].push(statMonth);
       }
 
-      if (statYear === year && statMonth === month && stat.scores) {
-        const rankedScores = stat.scores.rankedScores ?? 0;
-        const unrankedScores = stat.scores.unrankedScores ?? 0;
+      if (statYear === year && statMonth === month) {
+        const rankedScores = entry.rankedScores ?? 0;
+        const unrankedScores = entry.unrankedScores ?? 0;
 
         days[date.getDate()] = {
           rankedMaps: rankedScores,
@@ -318,5 +341,18 @@ export class PlayerHistoryService {
     }
 
     return { days, metadata };
+  }
+
+  /**
+   * Converts a database additional score data to a AdditionalScoreData.
+   *
+   * @param additionalData the additional score data to convert
+   * @returns the converted additional score data
+   * @private
+   */
+  private static playerHistoryToObject(history: PlayerHistoryEntry): PlayerHistoryEntry {
+    return {
+      ...removeObjectFields<PlayerHistoryEntry>(history, ["_id", "__v", "playerId", "date"]),
+    } as PlayerHistoryEntry;
   }
 }

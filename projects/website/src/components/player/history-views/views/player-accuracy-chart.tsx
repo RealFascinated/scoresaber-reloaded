@@ -15,7 +15,7 @@ type Props = {
 const datasetConfig: DatasetConfig[] = [
   {
     title: "Average Ranked Accuracy",
-    field: "accuracy.averageRankedAccuracy",
+    field: "averageRankedAccuracy",
     color: Colors.ranked,
     axisId: "y",
     axisConfig: {
@@ -35,7 +35,7 @@ const datasetConfig: DatasetConfig[] = [
   },
   {
     title: "Average Unranked Accuracy",
-    field: "accuracy.averageUnrankedAccuracy",
+    field: "averageUnrankedAccuracy",
     color: "#ff4848", // Changed to red
     axisId: "y1",
     axisConfig: {
@@ -55,7 +55,7 @@ const datasetConfig: DatasetConfig[] = [
   },
   {
     title: "Average Accuracy",
-    field: "accuracy.averageAccuracy",
+    field: "averageAccuracy",
     color: "#48ff58", // Changed to green
     axisId: "y2",
     axisConfig: {
