@@ -8,8 +8,9 @@ import {
   ScoreSaberPlayerCacheDocument,
   ScoreSaberPlayerCacheModel,
 } from "@ssr/common/model/scoresaber-player-cache";
-import { Page, Pagination } from "@ssr/common/pagination";
+import { Pagination } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
+import { PlayerScoresResponse } from "@ssr/common/response/player-scores-response";
 import { PlayerScore } from "@ssr/common/score/player-score";
 import { ScoreSaberScoreSort } from "@ssr/common/score/score-sort";
 import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
@@ -226,8 +227,9 @@ export default class ScoreSaberService {
     playerId: string,
     pageNumber: number,
     sort: string,
-    search?: string
-  ): Promise<Page<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>> {
+    search?: string,
+    comparisonPlayerId?: string
+  ): Promise<PlayerScoresResponse> {
     return await fetchWithCache(
       CacheService.getCache(ServiceCache.PlayerScores),
       `player-scores:${playerId}-${pageNumber}-${sort}-${search}`,
@@ -264,6 +266,12 @@ export default class ScoreSaberService {
           return Pagination.empty<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>();
         }
 
+        // Fetch the comparison player if it's not the same as the player
+        const comparisonPlayer =
+          comparisonPlayerId !== playerId && comparisonPlayerId !== undefined
+            ? await ScoreSaberService.getPlayer(comparisonPlayerId, DetailType.BASIC)
+            : undefined;
+
         return await pagination.getPage(pageNumber, async () => {
           // Process all scores in parallel
           const scorePromises = requestedPage.playerScores.map(async playerScore => {
@@ -285,7 +293,7 @@ export default class ScoreSaberService {
               return undefined;
             }
 
-            score = await ScoreService.insertScoreData(score, leaderboard);
+            score = await ScoreService.insertScoreData(score, leaderboard, comparisonPlayer);
             return {
               score: score,
               leaderboard: leaderboard,

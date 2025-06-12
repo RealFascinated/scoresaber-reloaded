@@ -35,6 +35,11 @@ class ScoreSaberScorePublic extends ScoreSaberScoreInternal {
    * The player who set the score.
    */
   public playerInfo!: ScoreSaberLeaderboardPlayerInfoToken;
+
+  /**
+   * The score of the player who set the score.
+   */
+  public comparisonScore?: ScoreSaberScore;
 }
 
 export type ScoreSaberPreviousScoreOverview = PreviousScore & {
@@ -53,7 +58,7 @@ export type ScoreSaberPreviousScoreOverview = PreviousScore & {
    */
   maxCombo: number;
 
-  /**
+  /**src
    * The change between the previous score and the current score.
    */
   change?: ScoreSaberPreviousScoreOverview;

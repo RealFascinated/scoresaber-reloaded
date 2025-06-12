@@ -20,20 +20,23 @@ export default class ScoresController {
     }),
     query: t.Object({
       search: t.Optional(t.String()),
+      comparisonPlayerId: t.Optional(t.String()),
     }),
   })
   public async getScores({
     params: { id, page, sort },
-    query: { search },
+    query: { search, comparisonPlayerId },
   }: {
     params: {
       id: string;
       page: number;
       sort: string;
     };
-    query: { search?: string };
+    query: { search?: string; comparisonPlayerId?: string };
   }): Promise<unknown> {
-    return (await ScoreSaberService.lookupPlayerScores(id, page, sort, search)).toJSON();
+    return (
+      await ScoreSaberService.lookupPlayerScores(id, page, sort, search, comparisonPlayerId)
+    ).toJSON();
   }
 
   @Get("/leaderboard/:id/:page", {

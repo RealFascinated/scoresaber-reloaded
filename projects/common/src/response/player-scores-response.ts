@@ -1,14 +1,6 @@
+import { ScoreSaberLeaderboard } from "../model/leaderboard/impl/scoresaber-leaderboard";
+import { ScoreSaberScore } from "../model/score/impl/scoresaber-score";
+import { Page } from "../pagination";
 import { PlayerScore } from "../score/player-score";
-import { Metadata } from "../types/metadata";
 
-export default interface PlayerScoresResponse<S, L> {
-  /**
-   * The scores that were set.
-   */
-  readonly scores: PlayerScore<S, L>[];
-
-  /**
-   * The pagination metadata.
-   */
-  readonly metadata: Metadata;
-}
+export type PlayerScoresResponse = Page<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>;

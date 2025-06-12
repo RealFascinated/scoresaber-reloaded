@@ -7,7 +7,14 @@ import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { formatScoreAccuracy } from "@ssr/common/utils/score.util";
 import { getAccDetails, getScoreBadgeFromAccuracy } from "@ssr/common/utils/song-utils";
 
-export function ScoreAccuracyBadge({ score }: ScoreBadgeProps) {
+type ScoreAccuracyBadgeProps = ScoreBadgeProps & {
+  /**
+   * Whether to show the difference between the score and the previous score.
+   */
+  showDifference?: boolean;
+};
+
+export function ScoreAccuracyBadge({ score, showDifference = true }: ScoreAccuracyBadgeProps) {
   const previousScore = score.previousScore;
 
   const fcAccuracy = score.additionalData?.fcAccuracy;
@@ -52,7 +59,7 @@ export function ScoreAccuracyBadge({ score }: ScoreBadgeProps) {
             {modCount > 0 && <ScoreSaberScoreModifiers type="simple" limit={1} score={score} />}
           </p>
         </SimpleTooltip>
-        {previousScore && previousScore.accuracy && previousScore.change && (
+        {previousScore && previousScore.accuracy && previousScore.change && showDifference && (
           <SimpleTooltip
             className="flex gap-2 text-xs items-center"
             display={

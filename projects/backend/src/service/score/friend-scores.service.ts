@@ -75,11 +75,16 @@ export class FriendScoresService {
         const processedBatches = await Promise.all(
           scoreBatches.map(async batch => {
             const batchPromises = batch.map(async friendScore =>
-              ScoreService.insertScoreData(scoreToObject(friendScore), leaderboard.leaderboard, {
-                insertAdditionalData: true,
-                insertPreviousScore: false,
-                insertPlayerInfo: true,
-              })
+              ScoreService.insertScoreData(
+                scoreToObject(friendScore),
+                leaderboard.leaderboard,
+                undefined,
+                {
+                  insertAdditionalData: true,
+                  insertPreviousScore: false,
+                  insertPlayerInfo: true,
+                }
+              )
             );
             return Promise.all(batchPromises);
           })

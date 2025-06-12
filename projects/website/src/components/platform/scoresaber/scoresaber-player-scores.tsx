@@ -3,19 +3,18 @@
 import { PlatformRepository } from "@/common/platform/platform-repository";
 import { Spinner } from "@/components/spinner";
 import { Input } from "@/components/ui/input";
+import useDatabase from "@/hooks/use-database";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import usePageNavigation from "@/hooks/use-page-navigation";
 import { ClockIcon, TrophyIcon } from "@heroicons/react/24/solid";
-import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
-import { Page } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import { PlayerScore } from "@ssr/common/score/player-score";
+import { PlayerScoresResponse } from "@ssr/common/response/player-scores-response";
 import { ScoreSaberScoreSort } from "@ssr/common/score/score-sort";
 import { capitalizeFirstLetter } from "@ssr/common/string-utils";
 import { useQuery } from "@tanstack/react-query";
 import { useDebounce } from "@uidotdev/usehooks";
 import { clsx } from "clsx";
+import { useLiveQuery } from "dexie-react-hooks";
 import { SearchIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import ScoresCard from "../../score/scores-card";
@@ -39,6 +38,8 @@ const scoreSort = [
 export default function ScoreSaberPlayerScores({ initialSearch, player, sort, page }: Props) {
   const { changePageUrl } = usePageNavigation();
   const isMobile = useIsMobile();
+  const database = useDatabase();
+  const mainPlayerId = useLiveQuery(() => database.getMainPlayerId());
   const platform = PlatformRepository.getInstance().getScoreSaberPlatform();
 
   const [currentPage, setCurrentPage] = useState(page);
@@ -57,12 +58,20 @@ export default function ScoreSaberPlayerScores({ initialSearch, player, sort, pa
     isError,
     isLoading,
     isRefetching,
-  } = useQuery<Page<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>>({
-    queryKey: ["playerScores", player.id, currentPage, currentSort, debouncedSearchTerm],
+  } = useQuery<PlayerScoresResponse>({
+    queryKey: [
+      "playerScores",
+      player.id,
+      currentPage,
+      currentSort,
+      debouncedSearchTerm,
+      mainPlayerId,
+    ],
     queryFn: () =>
       platform.getPlayerScores(player.id, currentPage, {
         sort: currentSort,
         search: debouncedSearchTerm,
+        comparisonPlayerId: mainPlayerId,
       }),
     placeholderData: prev => prev,
   });

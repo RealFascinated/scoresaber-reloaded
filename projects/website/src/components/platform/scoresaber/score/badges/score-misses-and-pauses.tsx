@@ -12,12 +12,18 @@ type ScoreMissesBadgeProps = ScoreBadgeProps & {
    * Hide the "vs" text for previous score.
    */
   hidePreviousScore?: boolean;
+
+  /**
+   * Whether to show the difference between the score and the previous score.
+   */
+  showDifference?: boolean;
 };
 
 export default function ScoreMissesAndPausesBadge({
   score,
   hideXMark,
   hidePreviousScore,
+  showDifference = true,
 }: ScoreMissesBadgeProps) {
   const previousScore = score.previousScore;
   const additionalData = score.additionalData;
@@ -48,7 +54,7 @@ export default function ScoreMissesAndPausesBadge({
         </span>
         {!hideXMark && !score.fullCombo && <span>x</span>}
       </ScoreMissesTooltip>
-      {previousScore && !hidePreviousScore && (
+      {previousScore && !hidePreviousScore && showDifference && (
         <ScoreMissesTooltip
           missedNotes={previousScore.missedNotes}
           badCuts={previousScore.badCuts}

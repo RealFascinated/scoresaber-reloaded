@@ -10,9 +10,14 @@ type ScorePpProps = ScoreBadgeProps & {
    * The leaderboard the score was set on.
    */
   leaderboard: ScoreSaberLeaderboard;
+
+  /**
+   * Whether to show the difference between the score and the previous score.
+   */
+  showDifference?: boolean;
 };
 
-export function ScorePpBadge({ score, leaderboard }: ScorePpProps) {
+export function ScorePpBadge({ score, leaderboard, showDifference = true }: ScorePpProps) {
   const previousScore = score.previousScore;
   const fcAccuracy = score.additionalData?.fcAccuracy;
   const pp = score.pp;
@@ -48,15 +53,18 @@ export function ScorePpBadge({ score, leaderboard }: ScorePpProps) {
         >
           <p>{formatPp(pp)}pp</p>
         </SimpleTooltip>
-        {previousScore && previousScore.change && previousScore.pp !== score.pp && (
-          <SimpleTooltip display={<p>Previous PP: {formatPp(previousScore.pp)}pp</p>}>
-            <Change
-              className="text-xs"
-              change={ensurePositiveNumber(previousScore.change.pp)}
-              isPp
-            />
-          </SimpleTooltip>
-        )}
+        {previousScore &&
+          previousScore.change &&
+          previousScore.pp !== score.pp &&
+          showDifference && (
+            <SimpleTooltip display={<p>Previous PP: {formatPp(previousScore.pp)}pp</p>}>
+              <Change
+                className="text-xs"
+                change={ensurePositiveNumber(previousScore.change.pp)}
+                isPp
+              />
+            </SimpleTooltip>
+          )}
       </div>
     </>
   );

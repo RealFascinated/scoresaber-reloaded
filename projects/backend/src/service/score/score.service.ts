@@ -8,6 +8,7 @@ import {
 } from "@ssr/common/model/score/impl/scoresaber-score";
 import { ScoreType } from "@ssr/common/model/score/score";
 import { Page, Pagination } from "@ssr/common/pagination";
+import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import LeaderboardScoresResponse from "@ssr/common/response/leaderboard-scores-response";
 import { PlayerScore } from "@ssr/common/score/player-score";
 import { Timeframe } from "@ssr/common/timeframe";
@@ -405,16 +406,19 @@ export class ScoreService {
   public static async insertScoreData(
     score: ScoreSaberScore,
     leaderboard?: ScoreSaberLeaderboard,
+    comparisonPlayer?: ScoreSaberPlayer,
     options?: {
       insertAdditionalData?: boolean;
       insertPreviousScore?: boolean;
       insertPlayerInfo?: boolean;
+      isComparisonPlayerScore?: boolean;
     }
   ) {
     options = {
       insertAdditionalData: true,
       insertPreviousScore: true,
       insertPlayerInfo: true,
+      isComparisonPlayerScore: false,
       ...options,
     };
 
@@ -462,6 +466,27 @@ export class ScoreService {
           id: player.id,
           name: player.name,
         };
+      }
+
+      if (comparisonPlayer && !options.isComparisonPlayerScore) {
+        const comparisonScore = await ScoreSaberScoreModel.findOne({
+          playerId: comparisonPlayer.id,
+          leaderboardId: leaderboard.id,
+        }).lean();
+        if (comparisonScore) {
+          const rawComparisonScore = scoreToObject(comparisonScore as unknown as ScoreSaberScore);
+          score.comparisonScore = await ScoreService.insertScoreData(
+            rawComparisonScore,
+            leaderboard,
+            comparisonPlayer,
+            {
+              insertAdditionalData: options.insertAdditionalData,
+              insertPreviousScore: options.insertPreviousScore,
+              insertPlayerInfo: options.insertPlayerInfo,
+              isComparisonPlayerScore: true,
+            }
+          );
+        }
       }
     }
 

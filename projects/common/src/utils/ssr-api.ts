@@ -306,10 +306,18 @@ class SSRApi {
     id: string,
     page: number,
     sort: ScoreSaberScoreSort,
-    search?: string
+    search?: string,
+    comparisonPlayerId?: string
   ) {
     return Request.get<Page<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>>(
-      `${env.NEXT_PUBLIC_API_URL}/scores/player/${id}/${page}/${sort}${search ? `?search=${search}` : ""}`
+      `${env.NEXT_PUBLIC_API_URL}/scores/player/${id}/${page}/${sort}`,
+      {
+        returns: "json",
+        searchParams: {
+          ...(search ? { search: search } : {}),
+          ...(comparisonPlayerId ? { comparisonPlayerId: comparisonPlayerId } : {}),
+        },
+      }
     );
   }
 

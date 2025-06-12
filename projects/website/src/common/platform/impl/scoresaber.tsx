@@ -1,11 +1,9 @@
 import ScoresaberLogo from "@/components/logos/logos/scoresaber-logo";
 import { DetailType } from "@ssr/common/detail-type";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
-import { Page, Pagination } from "@ssr/common/pagination";
+import { Pagination } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import PlayerScoresResponse from "@ssr/common/response/player-scores-response";
-import { PlayerScore } from "@ssr/common/score/player-score";
+import { PlayerScoresResponse } from "@ssr/common/response/player-scores-response";
 import { ScoreSaberScoreSort } from "@ssr/common/score/score-sort";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { Platform } from "../platform";
@@ -14,11 +12,12 @@ import { PlatformType } from "../platform-repository";
 export type ScoreSaberScoreLookupOptions = {
   sort: ScoreSaberScoreSort;
   search?: string;
+  comparisonPlayerId?: string;
 };
 
 export class ScoreSaberPlatform extends Platform<
   ScoreSaberPlayer,
-  PlayerScoresResponse<ScoreSaberScore, ScoreSaberLeaderboard>,
+  PlayerScoresResponse,
   ScoreSaberLeaderboard,
   ScoreSaberScoreLookupOptions,
   ScoreSaberScoreSort
@@ -43,12 +42,13 @@ export class ScoreSaberPlatform extends Platform<
     playerId: string,
     page: number,
     options: ScoreSaberScoreLookupOptions
-  ): Promise<Page<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>> {
+  ): Promise<PlayerScoresResponse> {
     const response = await ssrApi.fetchScoreSaberPlayerScores(
       playerId,
       page,
       options.sort,
-      options.search
+      options.search,
+      options.comparisonPlayerId
     );
     if (!response) {
       return Pagination.empty();

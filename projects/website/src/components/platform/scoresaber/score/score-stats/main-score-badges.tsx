@@ -8,7 +8,7 @@ import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { getScoreBadgeFromAccuracy } from "@ssr/common/utils/song-utils";
 
-const badges: ScoreBadge<ScoreSaberScore, ScoreSaberLeaderboard>[] = [
+const mainBadges: ScoreBadge<ScoreSaberScore, ScoreSaberLeaderboard>[] = [
   {
     name: "PP",
     color: () => {
@@ -65,17 +65,15 @@ const badges: ScoreBadge<ScoreSaberScore, ScoreSaberLeaderboard>[] = [
   },
 ];
 
-type Props = {
+type MainScoreBadgesProps = {
   score: ScoreSaberScore;
   leaderboard: ScoreSaberLeaderboard;
 };
 
-export default function ScoreSaberScoreStats({ score, leaderboard }: Props) {
+export function MainScoreBadges({ score, leaderboard }: MainScoreBadgesProps) {
   return (
-    <div className="flex flex-col justify-center h-full">
-      <div className="grid grid-cols-3 gap-1 justify-center">
-        <ScoreBadges badges={badges} score={score} leaderboard={leaderboard} />
-      </div>
+    <div className="grid grid-cols-3 gap-1 justify-center w-full">
+      <ScoreBadges badges={mainBadges} score={score} leaderboard={leaderboard} />
     </div>
   );
 }
