@@ -8,9 +8,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { StarIcon } from "@heroicons/react/24/solid";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { truncateText } from "@ssr/common/string-utils";
+import { ChartLineIcon } from "lucide-react";
 import PlayerActionButtonWrapper from "./player-action-button-wrapper";
 
 type PlayerStarCurveProps = {
@@ -34,7 +34,7 @@ export default function PlayerScoreChartButton({ player }: PlayerStarCurveProps)
           }
         >
           <PlayerActionButtonWrapper>
-            <StarIcon className="h-5 w-5" />
+            <ChartLineIcon className="h-5 w-5" />
           </PlayerActionButtonWrapper>
         </SimpleTooltip>
       </DialogTrigger>

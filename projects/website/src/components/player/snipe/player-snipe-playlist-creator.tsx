@@ -30,7 +30,6 @@ import {
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import useDatabase from "@/hooks/use-database";
-import { RocketLaunchIcon } from "@heroicons/react/16/solid";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { env } from "@ssr/common/env";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
@@ -38,6 +37,7 @@ import { encodeSnipePlaylistSettings } from "@ssr/common/snipe/snipe-playlist-ut
 import { snipeSettingsSchema } from "@ssr/common/snipe/snipe-settings-schema";
 import { truncateText } from "@ssr/common/string-utils";
 import { useLiveQuery } from "dexie-react-hooks";
+import { Crosshair } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -99,7 +99,7 @@ export default function SnipePlaylistCreator({ toSnipe }: SnipePlaylistCreatorPr
           }
         >
           <PlayerActionButtonWrapper>
-            <RocketLaunchIcon className="h-5 w-5" />
+            <Crosshair className="h-5 w-5" />
           </PlayerActionButtonWrapper>
         </SimpleTooltip>
       </DialogTrigger>
