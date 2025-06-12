@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "@/common/utils";
 import Card from "@/components/card";
 import CountryFlag from "@/components/country-flag";
 import { PlayerRanking } from "@/components/ranking/player-ranking";
@@ -61,22 +62,21 @@ export default function RankingData({ initialPage, country }: RankingDataProps) 
   }, [currentPage, country]);
 
   return (
-    <Card className="h-full w-full xl:max-w-[85%] gap-2">
-      <div className="flex items-center justify-between gap-2 flex-col lg:flex-row">
-        <div className="flex items-center gap-2 font-semibold">
-          {country && <CountryFlag code={country} size={16} />}
-          <p>
-            Viewing{" "}
+    <Card className="h-full w-full xl:max-w-[85%] gap-4">
+      <div className="flex items-center justify-between gap-4 flex-col lg:flex-row bg-background/80 p-3 rounded-lg border border-border/50 shadow-sm">
+        <div className="flex items-center gap-3 font-medium">
+          {country && <CountryFlag code={country} size={20} />}
+          <p className="text-lg">
             {country
-              ? "players from " + normalizedRegionName(country.toUpperCase())
-              : "Global players"}
+              ? "Players from " + normalizedRegionName(country.toUpperCase())
+              : "Global Players"}
           </p>
         </div>
 
         {/* Relative PP Difference */}
         {mainPlayer !== undefined && (
-          <div className="flex items-center gap-2">
-            <p>Toggle relative pp difference</p>
+          <div className="flex items-center gap-3 bg-accent/50 px-4 py-2 rounded-md">
+            <p className="text-sm">Show relative PP difference</p>
             <Switch
               checked={showRelativePPDifference}
               onCheckedChange={checked => {
@@ -95,40 +95,53 @@ export default function RankingData({ initialPage, country }: RankingDataProps) 
       )}
 
       {isError && (
-        <div className="flex flex-col items-center justify-center h-full mt-2 gap-2">
-          <p>No players were found for this country or page.</p>
+        <div className="flex flex-col items-center justify-center h-full mt-2 gap-3">
+          <p className="text-lg">No players were found for this country or page.</p>
           <Link href="/ranking">
-            <Button variant="outline">
+            <Button variant="outline" className="gap-2">
               Back to Global
-              <LinkIcon className="size-3.5 ml-2" />
+              <LinkIcon className="size-4" />
             </Button>
           </Link>
         </div>
       )}
 
       {rankingData && (
-        <div className="flex flex-col gap-2">
-          <div className="overflow-x-scroll lg:overflow-x-hidden">
-            <table className="table w-full table-auto border-spacing-2 border-none text-left">
+        <div className="flex flex-col gap-4">
+          <div className="overflow-x-auto relative rounded-lg border border-border/30 bg-background/50">
+            <table className="table w-full table-auto border-spacing-0 text-left text-sm">
               <thead>
-                <tr>
-                  <th className="px-2 py-1 min-w-fit">Rank</th>
-                  <th className="px-2 py-1">Player</th>
-                  <th className="px-2 py-1 text-center">Performance Points</th>
-                  <th className="px-2 py-1 text-center">Total Plays</th>
-                  <th className="px-2 py-1 text-center">Total Ranked Plays</th>
-                  <th className="px-2 py-1 text-center">Avg Ranked Accuracy</th>
-                  <th className="px-2 py-1 text-center">Weekly Change</th>
-
-                  {/* Friend Button */}
-                  <th className="px-2 py-1 text-center"></th>
+                <tr className="border-b border-border/30 bg-background/80">
+                  <th className="px-4 py-3 font-medium text-foreground/80">Rank</th>
+                  <th className="px-4 py-3 font-medium text-foreground/80">Player</th>
+                  <th className="px-4 py-3 font-medium text-center text-foreground/80">
+                    Performance Points
+                  </th>
+                  <th className="px-4 py-3 font-medium text-center text-foreground/80">
+                    Total Plays
+                  </th>
+                  <th className="px-4 py-3 font-medium text-center text-foreground/80">
+                    Total Ranked Plays
+                  </th>
+                  <th className="px-4 py-3 font-medium text-center text-foreground/80">
+                    Avg Ranked Accuracy
+                  </th>
+                  <th className="px-4 py-3 font-medium text-center text-foreground/80">
+                    Weekly Change
+                  </th>
+                  <th className="px-4 py-3 font-medium text-center text-foreground/80"></th>
                 </tr>
               </thead>
 
-              {/* Players */}
-              <tbody>
+              <tbody className="divide-y divide-border/30">
                 {rankingData.players.map((player, index) => (
-                  <tr key={index} className="border-b border-border">
+                  <tr
+                    key={index}
+                    className={cn(
+                      "transition-colors hover:bg-primary/5",
+                      mainPlayer?.id === player.id && "bg-primary/10"
+                    )}
+                  >
                     <PlayerRanking
                       isCountry={country != undefined}
                       player={player}
@@ -141,7 +154,6 @@ export default function RankingData({ initialPage, country }: RankingDataProps) 
             </table>
           </div>
 
-          {/* Pagination */}
           <SimplePagination
             mobilePagination={isMobile}
             page={currentPage}

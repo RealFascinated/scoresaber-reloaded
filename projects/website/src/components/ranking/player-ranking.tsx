@@ -29,51 +29,67 @@ export function PlayerRanking({
 
   return (
     <>
-      <td className="px-2 py-1.5">
-        #{formatNumberWithCommas(isCountry ? player.countryRank : player.rank)}{" "}
-        {isCountry && (
-          <span className="text-xs text-gray-300">(#{formatNumberWithCommas(player.rank)})</span>
-        )}
-      </td>
-      <td className="flex items-center gap-2 pl-3 py-1.5 min-w-[250px]">
-        <PlayerPreview playerId={player.id}>
-          <PlayerInfo player={player} highlightedPlayerId={mainPlayer?.id} useLink />
-        </PlayerPreview>
-      </td>
-      <td className="px-1 py-1.5 text-center">
-        <span className="text-ssr">{formatPp(player.pp)}pp</span>{" "}
-        {relativePerformancePoints && mainPlayer && (
-          <span
-            className={cn(
-              "text-sm",
-              ppDifference >= 0 ? ppDifference != 0 && "text-green-500" : "text-red-500"
-            )}
-          >
-            {formatChange(ppDifference, num => {
-              return formatPp(num) + "pp";
-            })}
+      <td className="px-4 py-2 font-medium">
+        <div className="flex items-center gap-1.5">
+          <span className="text-foreground/90">
+            #{formatNumberWithCommas(isCountry ? player.countryRank : player.rank)}
           </span>
-        )}
+          {isCountry && (
+            <span className="text-xs text-muted-foreground/70">
+              (#{formatNumberWithCommas(player.rank)})
+            </span>
+          )}
+        </div>
       </td>
-      <td className="px-1 py-1.5 text-center">
+      <td className="px-4 py-2 min-w-[280px]">
+        <div className="flex items-center gap-3">
+          <PlayerPreview playerId={player.id}>
+            <PlayerInfo player={player} highlightedPlayerId={mainPlayer?.id} useLink />
+          </PlayerPreview>
+        </div>
+      </td>
+      <td className="px-4 py-2">
+        <div className="flex flex-col items-center gap-0.5">
+          <span className="text-ssr font-medium">{formatPp(player.pp)}pp</span>
+          {relativePerformancePoints && mainPlayer && (
+            <span
+              className={cn(
+                "text-sm font-medium",
+                ppDifference >= 0 ? ppDifference != 0 && "text-green-500" : "text-red-500"
+              )}
+            >
+              {formatChange(ppDifference, num => {
+                return formatPp(num) + "pp";
+              })}
+            </span>
+          )}
+        </div>
+      </td>
+      <td className="px-4 py-2 text-center font-medium">
         {formatNumberWithCommas(player.scoreStats.totalPlayCount)}
       </td>
-      <td className="px-1 py-1.5 text-center">
+      <td className="px-4 py-2 text-center font-medium">
         {formatNumberWithCommas(player.scoreStats.rankedPlayCount)}
       </td>
-      <td className="px-1 py-1.5 text-center">
-        {player.scoreStats.averageRankedAccuracy.toFixed(2) + "%"}
+      <td className="px-4 py-2 text-center font-medium">
+        {player.scoreStats.averageRankedAccuracy.toFixed(2)}%
       </td>
-      <td
-        className={clsx(
-          "px-1 py-1.5 text-center",
-          weeklyRankChange >= 0 ? weeklyRankChange != 0 && "text-green-500" : "text-red-500"
-        )}
-      >
-        {weeklyRankChange == 0 ? 0 : formatChange(weeklyRankChange, formatNumberWithCommas)}
+      <td className="px-4 py-2">
+        <div className="flex justify-center">
+          <span
+            className={clsx(
+              "font-medium",
+              weeklyRankChange >= 0 ? weeklyRankChange != 0 && "text-green-500" : "text-red-500"
+            )}
+          >
+            {weeklyRankChange == 0 ? 0 : formatChange(weeklyRankChange, formatNumberWithCommas)}
+          </span>
+        </div>
       </td>
-      <td>
-        <AddFriend player={player} iconOnly />
+      <td className="px-4 py-2">
+        <div className="flex justify-center">
+          <AddFriend player={player} iconOnly />
+        </div>
       </td>
     </>
   );
