@@ -15,7 +15,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { LinkIcon } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Spinner } from "../spinner";
+import { FancyLoader } from "../fancy-loader";
 import { Button } from "../ui/button";
 
 type RankingDataProps = {
@@ -88,9 +88,10 @@ export default function RankingData({ initialPage, country }: RankingDataProps) 
       </div>
 
       {!rankingData && !isError && (
-        <div className="flex flex-col items-center justify-center h-full mt-2">
-          <Spinner />
-        </div>
+        <FancyLoader
+          title="Loading Players"
+          description="Please wait while we fetch the players..."
+        />
       )}
 
       {isError && (

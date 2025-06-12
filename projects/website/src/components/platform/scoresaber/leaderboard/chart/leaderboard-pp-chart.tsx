@@ -1,5 +1,6 @@
 "use client";
 
+import { Colors } from "@/common/colors";
 import { DEFAULT_WHAT_IF_RANGE, SettingIds } from "@/common/database/database";
 import Card from "@/components/card";
 import { DualRangeSlider } from "@/components/ui/dual-range-slider";
@@ -71,8 +72,8 @@ export default function LeaderboardPpChart({ leaderboard }: Props) {
       {
         label: "PP",
         data: generateDataPoints(debouncedValues[0], debouncedValues[1]),
-        borderColor: "#3EC1D3",
-        backgroundColor: "#3EC1D3",
+        borderColor: Colors.ranked,
+        backgroundColor: Colors.rankedLight,
         tension: 0.4,
         pointRadius: 0,
       },

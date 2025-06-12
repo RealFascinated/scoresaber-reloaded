@@ -1,10 +1,10 @@
 "use client";
 
 import { cn } from "@/common/utils";
-import LeaderboardScoresSkeleton from "@/components/platform/scoresaber/leaderboard/skeleton/leaderboard-scores-skeleton";
 import { useLeaderboardFilter } from "@/components/providers/leaderboard/leaderboard-filter-provider";
 import ScoreMode, { ScoreModeEnum } from "@/components/score/score-mode";
 import { EmptyState } from "@/components/ui/empty-state";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useLeaderboardScores } from "@/hooks/score/use-leaderboard-scores";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import usePageNavigation from "@/hooks/use-page-navigation";
@@ -24,6 +24,64 @@ type LeaderboardScoresProps = {
   disableUrlChanging?: boolean;
   highlightedPlayerId?: string;
 };
+
+function LeaderboardScoresSkeleton() {
+  const skeletonRows = new Array(10).fill(0);
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="overflow-x-auto relative rounded-lg border border-border/30 bg-background/50">
+        <table className="table w-full table-auto border-spacing-0 text-left text-sm">
+          <thead>
+            <tr className="border-b border-border/30 bg-background/80">
+              <th className="px-2 py-2 font-medium text-foreground/80">Rank</th>
+              <th className="px-2 py-2 font-medium text-foreground/80">Player</th>
+              <th className="px-2 py-2 font-medium text-center text-foreground/80">Time Set</th>
+              <th className="px-2 py-2 font-medium text-center text-foreground/80">Accuracy</th>
+              <th className="px-2 py-2 font-medium text-center text-foreground/80">Misses</th>
+              <th className="px-2 py-2 font-medium text-center text-foreground/80">PP</th>
+              <th className="px-2 py-2 font-medium text-center text-foreground/80">HMD</th>
+              <th className="px-2 py-2 font-medium text-center text-foreground/80">Mods</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-border/30">
+            {skeletonRows.map((_, index) => (
+              <tr key={index} className="transition-colors hover:bg-primary/5">
+                <td className="px-2 py-1">
+                  <Skeleton className="w-8 h-6 rounded-md" />
+                </td>
+                <td className="px-2 py-1">
+                  <div className="flex items-center gap-3">
+                    <Skeleton className="w-8 h-8 rounded-full" />
+                    <Skeleton className="w-32 h-6 rounded-md" />
+                  </div>
+                </td>
+                <td className="px-2 py-1 text-center">
+                  <Skeleton className="w-24 h-6 rounded-md mx-auto" />
+                </td>
+                <td className="px-2 py-1 text-center">
+                  <Skeleton className="w-16 h-6 rounded-md mx-auto" />
+                </td>
+                <td className="px-2 py-1 text-center">
+                  <Skeleton className="w-8 h-6 rounded-md mx-auto" />
+                </td>
+                <td className="px-2 py-1 text-center">
+                  <Skeleton className="w-20 h-6 rounded-md mx-auto" />
+                </td>
+                <td className="px-2 py-1 text-center">
+                  <Skeleton className="w-16 h-6 rounded-md mx-auto" />
+                </td>
+                <td className="px-2 py-1 text-center">
+                  <Skeleton className="w-8 h-6 rounded-md mx-auto" />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
 
 export default function LeaderboardScores({
   initialPage = 1,
@@ -69,7 +127,7 @@ export default function LeaderboardScores({
     );
   }, [leaderboardId, page, disableUrlChanging, changePageUrl, mode]);
 
-  if (!scores) {
+  if (!scores || isLoading) {
     return <LeaderboardScoresSkeleton />;
   }
 
@@ -79,7 +137,7 @@ export default function LeaderboardScores({
     <>
       <div
         className={cn(
-          "flex flex-col lg:flex-row justify-center lg:px-10 items-center flex-wrap gap-2",
+          "flex flex-col lg:flex-row justify-center items-center flex-wrap gap-4",
           isLeaderboardPage && "lg:justify-between"
         )}
       >
@@ -92,7 +150,7 @@ export default function LeaderboardScores({
         />
 
         {showDifficulties && (
-          <div className="flex gap-2 flex-wrap justify-center">
+          <div className="flex gap-3 flex-wrap justify-center bg-background/80 p-1.5 rounded-lg border border-border/50 shadow-sm">
             {leaderboard.difficulties.map((difficultyData, index) => (
               <DifficultyButton
                 key={index}
@@ -112,37 +170,36 @@ export default function LeaderboardScores({
             description={
               isFriends
                 ? "You or your friends haven't played this map yet"
-                : "No score were found on this leaderboard or page"
+                : "No scores were found on this leaderboard or page"
             }
           />
         ))}
 
       {scores.items.length > 0 && (
         <>
-          <div className="overflow-x-auto relative">
-            <table className="table w-full table-auto border-spacing-2 border-none text-left text-sm">
+          <div className="overflow-x-auto relative rounded-lg border border-border/30 bg-background/50">
+            <table className="table w-full table-auto border-spacing-0 text-left text-sm">
               <thead>
-                <tr>
-                  <th className="px-2 py-1">Rank</th>
-                  <th className="px-2 py-1">Player</th>
-                  <th className="px-2 py-1 text-center">Time Set</th>
-                  <th className="px-2 py-1 text-center">Accuracy</th>
-                  <th className="px-2 py-1 text-center">Misses</th>
-                  {leaderboard.stars > 0 ? (
-                    <th className="px-2 py-1 text-center">PP</th>
-                  ) : (
-                    <th className="px-2 py-1 text-center">Score</th>
-                  )}
-                  <th className="px-2 py-1 text-center">HMD</th>
-                  <th className="px-2 py-1 text-center">Mods</th>
-                  {scores.items.some(score => score.additionalData !== undefined) && (
-                    <th className="px-2 py-1 text-center"></th>
-                  )}
+                <tr className="border-b border-border/30 bg-background/80">
+                  <th className="px-2 py-2 font-medium text-foreground/80">Rank</th>
+                  <th className="px-2 py-2 font-medium text-foreground/80">Player</th>
+                  <th className="px-2 py-2 font-medium text-center text-foreground/80">Time Set</th>
+                  <th className="px-2 py-2 font-medium text-center text-foreground/80">Accuracy</th>
+                  <th className="px-2 py-2 font-medium text-center text-foreground/80">Misses</th>
+                  <th className="px-2 py-2 font-medium text-center text-foreground/80">PP</th>
+                  <th className="px-2 py-2 font-medium text-center text-foreground/80">HMD</th>
+                  <th className="px-2 py-2 font-medium text-center text-foreground/80">Mods</th>
                 </tr>
               </thead>
-              <tbody className="border-none">
+              <tbody className="divide-y divide-border/30">
                 {scores.items.map((playerScore, index) => (
-                  <tr key={index} className="border-b border-border">
+                  <tr
+                    key={index}
+                    className={cn(
+                      "transition-colors hover:bg-primary/5",
+                      highlightedPlayerId === playerScore.playerId && "bg-primary/10"
+                    )}
+                  >
                     <ScoreSaberLeaderboardScore
                       key={playerScore.scoreId}
                       score={playerScore}

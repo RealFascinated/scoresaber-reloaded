@@ -23,7 +23,7 @@ export function ScoreOverview({ scoreStats, leaderboard }: ScoreOverviewProps) {
       <EmptyState
         icon={<ChartBarIcon className="w-10 h-10 text-gray-400 dark:text-gray-500" />}
         title="No Performance Data"
-        description="Try playing the map again to generate stats"
+        description="No BeatLeader data found for this score"
       />
     );
   }

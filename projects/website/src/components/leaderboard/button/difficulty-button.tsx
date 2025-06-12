@@ -26,16 +26,24 @@ export const DifficultyButton = memo(
 
     return (
       <Button
-        variant={isSelected ? "default" : "outline"}
+        variant="ghost"
         onClick={() => onSelect(leaderboardId)}
-        className={cn("border bg-transparent", isSelected && "font-extrabold")}
+        className={cn(
+          "relative px-4 py-2 transition-all duration-200",
+          "hover:bg-accent/50",
+          isSelected ? "font-semibold" : "font-medium"
+        )}
         style={{
-          color: isSelected ? "white" : difficultyData.color,
-          borderColor: difficultyData.color,
-          backgroundColor: isSelected ? difficultyData.color : "transparent",
+          backgroundColor: isSelected ? `${difficultyData.color}15` : "transparent",
         }}
       >
-        <p>{getDifficultyName(difficulty)}</p>
+        <span style={{ color: difficultyData.color }}>{getDifficultyName(difficulty)}</span>
+        {isSelected && (
+          <div
+            className="absolute bottom-0 left-0 right-0 h-0.5"
+            style={{ backgroundColor: difficultyData.color }}
+          />
+        )}
       </Button>
     );
   }
