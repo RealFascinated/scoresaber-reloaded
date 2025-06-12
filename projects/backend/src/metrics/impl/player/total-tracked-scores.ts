@@ -4,7 +4,7 @@ import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-sc
 import { MetricType } from "../../../service/metrics.service";
 import NumberMetric from "../../number-metric";
 
-export default class TrackedScoresMetric extends NumberMetric {
+export default class TotalTrackedScoresMetric extends NumberMetric {
   constructor() {
     super(MetricType.TOTAL_TRACKED_SCORES, 0, {
       fetchAndStore: false,

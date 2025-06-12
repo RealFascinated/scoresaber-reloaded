@@ -12,6 +12,7 @@ import RequestsPerSecondMetric from "../metrics/impl/backend/total-requests";
 import MongoDbSizeMetric from "../metrics/impl/database/mongo-db-size";
 import ActiveAccountsMetric from "../metrics/impl/player/active-accounts";
 import HmdStatisticMetric from "../metrics/impl/player/hmd-statistic";
+import TotalTrackedScoresMetric from "../metrics/impl/player/total-tracked-scores";
 import TrackedPlayersMetric from "../metrics/impl/player/tracked-players";
 import TrackedScoresMetric from "../metrics/impl/player/tracked-scores";
 import UniqueDailyPlayersMetric from "../metrics/impl/player/unique-daily-players";
@@ -80,6 +81,7 @@ export default class MetricsService {
     this.registerMetric(new UniqueDailyPlayersMetric());
     this.registerMetric(new ActiveAccountsMetric());
     this.registerMetric(new HmdStatisticMetric());
+    this.registerMetric(new TotalTrackedScoresMetric());
 
     // Backend metrics
     this.registerMetric(new CpuUsageMetric());
