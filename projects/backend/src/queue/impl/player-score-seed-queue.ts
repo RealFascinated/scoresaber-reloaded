@@ -4,11 +4,11 @@ import { PlayerModel } from "@ssr/common/model/player";
 import { PlayerCoreService } from "../../service/player/player-core.service";
 import { PlayerRefreshService } from "../../service/player/player-refresh.service";
 import { Queue } from "../queue";
-import { QueueName } from "../queue-manager";
+import { QueueId } from "../queue-manager";
 
 export class PlayerScoreSeedQueue extends Queue<string> {
   constructor() {
-    super(QueueName.PlayerScoreSeed);
+    super(QueueId.PlayerScoreSeed);
 
     (async () => {
       const players = await PlayerModel.find({ seededScores: null }).select("_id");

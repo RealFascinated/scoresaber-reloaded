@@ -3,6 +3,7 @@ import { ScoreBadgeProps } from "@/components/platform/scoresaber/score/badges/b
 import { ScoreSaberScoreModifiers } from "@/components/platform/scoresaber/score/score-modifiers";
 import SimpleTooltip from "@/components/simple-tooltip";
 import { Modifier } from "@ssr/common/score/modifier";
+import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { formatScoreAccuracy } from "@ssr/common/utils/score.util";
 import { getAccDetails, getScoreBadgeFromAccuracy } from "@ssr/common/utils/song-utils";
 
@@ -27,8 +28,13 @@ export function ScoreAccuracyBadge({ score }: ScoreBadgeProps) {
               <div>
                 <p className="font-semibold">Accuracy</p>
                 <p>Score: {getAccDetails(scoreBadge)}</p>
-                <p>Accuracy: {formatScoreAccuracy(score)}</p>
-                {!score.fullCombo && fcAccuracy && <p>Full Combo: {fcAccuracy.toFixed(2)}%</p>}
+                <p>
+                  Accuracy: {formatScoreAccuracy(score)}
+                  {!score.fullCombo && fcAccuracy && (
+                    <span className="text-green-500"> (FC: {fcAccuracy.toFixed(2)}%)</span>
+                  )}
+                </p>
+                <p>Max Combo: {formatNumberWithCommas(score.maxCombo)}x</p>
               </div>
 
               {modCount > 0 && (

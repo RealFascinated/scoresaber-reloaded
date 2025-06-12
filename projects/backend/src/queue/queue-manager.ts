@@ -1,12 +1,12 @@
 import { PlayerScoreSeedQueue } from "./impl/player-score-seed-queue";
 import { Queue } from "./queue";
 
-export enum QueueName {
+export enum QueueId {
   PlayerScoreSeed = "player-score-seed-queue",
 }
 
 export class QueueManager {
-  private static queues: Map<QueueName, Queue<unknown>> = new Map();
+  private static queues: Map<QueueId, Queue<unknown>> = new Map();
 
   constructor() {
     QueueManager.addQueue(new PlayerScoreSeedQueue());
@@ -27,7 +27,7 @@ export class QueueManager {
    * @param name the name of the queue
    * @returns the queue
    */
-  public static getQueue<T>(name: QueueName): Queue<T> {
+  public static getQueue<T>(name: QueueId): Queue<T> {
     return QueueManager.queues.get(name) as Queue<T>;
   }
 

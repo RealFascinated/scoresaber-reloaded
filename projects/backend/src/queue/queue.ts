@@ -1,5 +1,5 @@
 import Logger from "@ssr/common/logger";
-import { QueueName } from "./queue-manager";
+import { QueueId } from "./queue-manager";
 
 export abstract class Queue<T> {
   private readonly MAX_SAMPLES = 10;
@@ -8,7 +8,7 @@ export abstract class Queue<T> {
   /**
    * The name of the queue
    */
-  public readonly name: QueueName;
+  public readonly name: QueueId;
 
   /**
    * The queue of items
@@ -30,7 +30,7 @@ export abstract class Queue<T> {
    */
   private processingTimes: number[] = [];
 
-  constructor(name: QueueName) {
+  constructor(name: QueueId) {
     this.name = name;
 
     this.cleanupInterval = setInterval(() => {
