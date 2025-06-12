@@ -3,8 +3,8 @@
 import { setCookieValue } from "@/common/cookie.util";
 import { SettingIds } from "@/common/database/database";
 import useDatabase from "@/hooks/use-database";
-import { CheckIcon } from "@heroicons/react/24/solid";
 import { useLiveQuery } from "dexie-react-hooks";
+import { BadgeCheckIcon } from "lucide-react";
 import { toast } from "sonner";
 import SimpleTooltip from "../simple-tooltip";
 import { Button } from "../ui/button";
@@ -18,7 +18,7 @@ type Props = {
 
 export default function ClaimProfile({ playerId }: Props) {
   const database = useDatabase();
-  const mainPlayerId = useLiveQuery(() => database.getMainPlayerId());
+  const mainPlayer = useLiveQuery(() => database.getMainPlayer());
 
   /**
    * Claims the profile.
@@ -34,7 +34,7 @@ export default function ClaimProfile({ playerId }: Props) {
     return null;
   }
 
-  if (mainPlayerId == playerId) {
+  if (mainPlayer?.id == playerId) {
     return null; // Don't show the claim button if it's the same user.
   }
 
@@ -42,17 +42,18 @@ export default function ClaimProfile({ playerId }: Props) {
     <SimpleTooltip
       display={
         <div className="flex flex-col gap-2">
-          <div>
-            <p>Set as your profile!</p>
-            <p>Claiming a profile will also initialize it for data tracking.</p>
-          </div>
-          <p className="text-red-600">This will overwrite your currently set profile (if any)</p>
+          <p>Set as your profile!</p>
+          {mainPlayer && (
+            <p className="text-red-400">
+              This will overwrite your current profile ({mainPlayer.name})
+            </p>
+          )}
         </div>
       }
       side={"bottom"}
     >
       <Button variant={"outline"} onClick={claimProfile}>
-        <CheckIcon className="size-6 text-green-500" />
+        <BadgeCheckIcon className="size-5 text-green-500" />
       </Button>
     </SimpleTooltip>
   );

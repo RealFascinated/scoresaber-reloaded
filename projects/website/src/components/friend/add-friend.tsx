@@ -1,10 +1,10 @@
 "use client";
 
-import { PersonIcon } from "@radix-ui/react-icons";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useLiveQuery } from "dexie-react-hooks";
+import { UserPlus } from "lucide-react";
 import { toast } from "sonner";
 import useDatabase from "../../hooks/use-database";
 import SimpleTooltip from "../simple-tooltip";
@@ -55,10 +55,10 @@ export default function AddFriend({ player, iconOnly }: Props) {
     <SimpleTooltip display={<p>Add {name} as a friend!</p>} side={"bottom"}>
       <div onClick={addFriend} className="cursor-pointer">
         {iconOnly ? (
-          <PersonIcon className="size-6 text-green-500" />
+          <UserPlus className="size-5 text-primary hover:text-primary/80 transition-colors" />
         ) : (
           <Button variant={"outline"}>
-            <PersonIcon className="size-6 text-green-500" />
+            <UserPlus className="size-5 text-primary" />
           </Button>
         )}
       </div>
