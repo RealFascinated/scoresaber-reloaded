@@ -33,6 +33,7 @@ export enum MetricType {
   ACTIVE_ACCOUNTS = "active-accounts",
   REPLAY_STATS = "replay-stats",
   HMD_STATISTIC = "hmd-statistic",
+  TOTAL_TRACKED_SCORES = "total-tracked-scores",
 
   // Backend metrics
   CPU_USAGE = "cpu-usage",
