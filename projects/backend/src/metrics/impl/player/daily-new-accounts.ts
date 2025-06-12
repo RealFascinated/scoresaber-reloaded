@@ -16,7 +16,6 @@ export default class DailyNewAccountsMetric extends NumberMetric {
     const count = await PlayerModel.countDocuments({
       joinedDate: { $gte: getMidnightAlignedDate(new Date()) }, // Today
     });
-    console.log(`[DailyNewAccountsMetric] Collecting metric for today: ${count}`);
     return this.getPointBase().intField("value", count);
   }
 }
