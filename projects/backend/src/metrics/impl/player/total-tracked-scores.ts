@@ -1,4 +1,5 @@
 import { Point } from "@influxdata/influxdb-client";
+import { ScoreSaberPreviousScoreModel } from "@ssr/common/model/score/impl/scoresaber-previous-score";
 import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import { MetricType } from "../../../service/metrics.service";
 import NumberMetric from "../../number-metric";
@@ -13,7 +14,10 @@ export default class TrackedScoresMetric extends NumberMetric {
 
   public async collect(): Promise<Point | undefined> {
     const total = await ScoreSaberScoreModel.estimatedDocumentCount();
+    const previousTotal = await ScoreSaberPreviousScoreModel.estimatedDocumentCount();
 
-    return this.getPointBase().floatField("value", total);
+    return this.getPointBase()
+      .floatField("totalScores", total)
+      .floatField("previousTotalScores", previousTotal);
   }
 }
