@@ -1,6 +1,7 @@
 "use client";
 
 import { ReplayViewers } from "@/common/replay-viewer";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -19,6 +20,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel } from "../../ui/form
 
 const formSchema = z.object({
   replayViewer: z.string().min(1).max(32),
+  showScoreComparison: z.boolean(),
 });
 
 const ScoreSettings = forwardRef<{ submit: () => void }, { onSave: () => void }>(
@@ -27,29 +29,33 @@ const ScoreSettings = forwardRef<{ submit: () => void }, { onSave: () => void }>
     const replayViewer = useLiveQuery(async () =>
       (await database.getReplayViewer()).name.toLowerCase()
     );
+    const showScoreComparison = useLiveQuery(() => database.getShowScoreComparison());
 
     const form = useForm<z.infer<typeof formSchema>>({
       resolver: zodResolver(formSchema),
       defaultValues: {
         replayViewer: "",
+        showScoreComparison: true,
       },
     });
 
     useEffect(() => {
-      if (replayViewer === undefined) {
+      if (replayViewer === undefined || showScoreComparison === undefined) {
         return;
       }
 
       form.setValue("replayViewer", replayViewer);
-    }, [replayViewer, form]);
+      form.setValue("showScoreComparison", showScoreComparison);
+    }, [replayViewer, form, showScoreComparison]);
 
     /**
      * Handles the form submission
      *
      * @param replayViewer the new replay viewer
      */
-    async function onSubmit({ replayViewer }: z.infer<typeof formSchema>) {
+    async function onSubmit({ replayViewer, showScoreComparison }: z.infer<typeof formSchema>) {
       await database.setReplayViewer(replayViewer);
+      await database.setShowScoreComparison(showScoreComparison);
 
       toast("Settings saved", {
         description: "Your settings have been saved.",
@@ -101,6 +107,23 @@ const ScoreSettings = forwardRef<{ submit: () => void }, { onSave: () => void }>
                   )}
                 />
               )}
+
+              {/* Show Score Comparison Toggle */}
+              <FormField
+                control={form.control}
+                name="showScoreComparison"
+                render={({ field }) => (
+                  <FormItem className="flex items-center space-y-0 gap-2">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={checked => field.onChange(checked)}
+                      />
+                    </FormControl>
+                    <FormLabel>Show Score Comparison</FormLabel>
+                  </FormItem>
+                )}
+              />
             </div>
           </form>
         </Form>

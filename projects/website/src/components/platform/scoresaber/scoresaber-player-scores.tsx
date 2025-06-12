@@ -39,8 +39,11 @@ export default function ScoreSaberPlayerScores({ initialSearch, player, sort, pa
   const { changePageUrl } = usePageNavigation();
   const isMobile = useIsMobile();
   const database = useDatabase();
-  const mainPlayerId = useLiveQuery(() => database.getMainPlayerId());
+
   const platform = PlatformRepository.getInstance().getScoreSaberPlatform();
+
+  const mainPlayerId = useLiveQuery(() => database.getMainPlayerId());
+  const showScoreComparison = useLiveQuery(() => database.getShowScoreComparison());
 
   const [currentPage, setCurrentPage] = useState(page);
   const [currentSort, setCurrentSort] = useState(sort);
@@ -66,12 +69,13 @@ export default function ScoreSaberPlayerScores({ initialSearch, player, sort, pa
       currentSort,
       debouncedSearchTerm,
       mainPlayerId,
+      showScoreComparison,
     ],
     queryFn: () =>
       platform.getPlayerScores(player.id, currentPage, {
         sort: currentSort,
         search: debouncedSearchTerm,
-        comparisonPlayerId: mainPlayerId,
+        comparisonPlayerId: showScoreComparison && mainPlayerId ? mainPlayerId : undefined,
       }),
     placeholderData: prev => prev,
   });

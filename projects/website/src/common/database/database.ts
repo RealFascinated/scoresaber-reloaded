@@ -46,6 +46,7 @@ export enum SettingIds {
   OverlaySettings = "overlaySettings",
   ReplayViewer = "replayViewer",
   Friends = "friends",
+  ShowScoreComparison = "showScoreComparison",
 }
 
 export const DEFAULT_WHAT_IF_RANGE: [number, number] = [70, 98.5];
@@ -422,6 +423,24 @@ export default class Database extends Dexie {
    */
   async setOverlaySettings(overlaySettings: OverlaySettings) {
     await this.setSetting(SettingIds.OverlaySettings, overlaySettings);
+  }
+
+  /**
+   * Gets the show score comparison setting from the database
+   *
+   * @returns the show score comparison setting
+   */
+  async getShowScoreComparison(): Promise<boolean> {
+    return (await this.getSetting<boolean>(SettingIds.ShowScoreComparison, true))!;
+  }
+
+  /**
+   * Sets the show score comparison setting in the database
+   *
+   * @param showScoreComparison the show score comparison setting
+   */
+  async setShowScoreComparison(showScoreComparison: boolean) {
+    await this.setSetting(SettingIds.ShowScoreComparison, showScoreComparison);
   }
 
   /**
