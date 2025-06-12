@@ -4,8 +4,9 @@ import PlayerData from "@/components/player/player-data";
 import { DetailType } from "@ssr/common/detail-type";
 import { env } from "@ssr/common/env";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import { formatPp } from "@ssr/common/utils/number-utils";
+import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
+import { formatDate } from "@ssr/common/utils/time-utils";
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
 
@@ -78,9 +79,10 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     openGraph: {
       siteName: env.NEXT_PUBLIC_WEBSITE_NAME,
       title: `${player.name}`,
-      description: `Rank: #${player.rank}
-Country Rank: #${player.countryRank} (${player.country})
+      description: `Rank: #${formatNumberWithCommas(player.rank)}
+Country Rank: #${formatNumberWithCommas(player.countryRank)} (${player.country})
 PP: ${formatPp(player.pp)}pp
+Joined: ${formatDate(player.joinedDate, "Do MMMM, YYYY")}
 
 Click here to view the scores for ${player.name}`,
       images: [
