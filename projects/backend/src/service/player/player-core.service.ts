@@ -94,8 +94,11 @@ export class PlayerCoreService {
       accountCreationLock[id] = (async () => {
         try {
           Logger.info(`Creating player "${id}"...`);
-          const newPlayer = await PlayerModel.create({ _id: id });
-          newPlayer.trackedSince = new Date();
+          const newPlayer = await PlayerModel.create({
+            _id: id,
+            joinedDate: new Date(playerToken.firstSeen),
+            trackedSince: new Date(),
+          });
           await newPlayer.save();
 
           // Add to the seed queue

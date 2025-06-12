@@ -7,12 +7,13 @@ ScoreSaber Reloaded is a new way to view your scores and get more stats about yo
 
 ## Table of Contents 📚
 
-- [Features](#features)
-- [App Preview](#app-preview)
-- [Stars](#stars)
-- [Support](#support)
-- [Contributing](#contributing)
-- [License](#license)
+- [ScoreSaber Reloaded 🎮](#scoresaber-reloaded-)
+  - [Table of Contents 📚](#table-of-contents-)
+  - [Features ✨](#features-)
+  - [Stars ⭐](#stars-)
+  - [Support 🤝](#support-)
+  - [Contributing 🤗](#contributing-)
+  - [License 📄](#license-)
 
 ## Features ✨
 
@@ -29,11 +30,6 @@ See [contributing](#contributing-) for more information about contributing to th
 - Custom Playlists
 - Leaderboard Statistics Dashboard
 - OBS Overlay
-
-## App Preview 📸
-
-![landing-preview](https://preview.fascinated.cc/?url=https://ssr.fascinated.cc)
-![app-preview](https://preview.fascinated.cc/?url=https://ssr.fascinated.cc/player/3225556157461414)
 
 ## Stars ⭐
 

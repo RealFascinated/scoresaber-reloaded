@@ -12,6 +12,7 @@ import RequestsPerSecondMetric from "../metrics/impl/backend/total-requests";
 import BeatSaverWebsocketMetric from "../metrics/impl/beatsaver/beatsaver-websocket-metrics";
 import MongoDbSizeMetric from "../metrics/impl/database/mongo-db-size";
 import ActiveAccountsMetric from "../metrics/impl/player/active-accounts";
+import DailyNewAccountsMetric from "../metrics/impl/player/daily-new-accounts";
 import HmdStatisticMetric from "../metrics/impl/player/hmd-statistic";
 import TotalTrackedScoresMetric from "../metrics/impl/player/total-tracked-scores";
 import TrackedPlayersMetric from "../metrics/impl/player/tracked-players";
@@ -36,6 +37,7 @@ export enum MetricType {
   REPLAY_STATS = "replay-stats",
   HMD_STATISTIC = "hmd-statistic",
   TOTAL_TRACKED_SCORES = "total-tracked-scores",
+  DAILY_NEW_ACCOUNTS = "daily-new-accounts",
 
   // Backend metrics
   CPU_USAGE = "cpu-usage",
@@ -86,6 +88,7 @@ export default class MetricsService {
     this.registerMetric(new ActiveAccountsMetric());
     this.registerMetric(new HmdStatisticMetric());
     this.registerMetric(new TotalTrackedScoresMetric());
+    this.registerMetric(new DailyNewAccountsMetric());
 
     // Backend metrics
     this.registerMetric(new CpuUsageMetric());

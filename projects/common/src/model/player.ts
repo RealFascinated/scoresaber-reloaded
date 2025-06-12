@@ -75,6 +75,12 @@ export class Player {
   public trackedSince?: Date;
 
   /**
+   * The date the player's ScoreSaber account was created.
+   */
+  @prop({ index: true })
+  public joinedDate?: Date;
+
+  /**
    * Gets the player's statistic history.
    */
   public getStatisticHistory(): Record<string, PlayerHistory> {
