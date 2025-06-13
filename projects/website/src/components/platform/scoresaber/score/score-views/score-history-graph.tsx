@@ -20,6 +20,18 @@ import { Line } from "react-chartjs-2";
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
+function generateDateRange(startDate: Date, endDate: Date): Date[] {
+  const dates: Date[] = [];
+  const currentDate = new Date(startDate);
+
+  while (currentDate <= endDate) {
+    dates.push(new Date(currentDate));
+    currentDate.setDate(currentDate.getDate() + 1);
+  }
+
+  return dates;
+}
+
 type ScoreHistoryGraphScore = {
   score: number;
   accuracy: number;
@@ -54,42 +66,124 @@ export function ScoreHistoryGraph({ playerId, leaderboardId }: ScoreHistoryProps
     );
   }
 
-  const labels = scoreHistory.scores.map((score: ScoreHistoryGraphScore) => score.timestamp);
+  console.log(
+    "Score History Details:",
+    scoreHistory.scores.map((s: ScoreHistoryGraphScore) => ({
+      score: s.score,
+      pp: s.pp,
+      accuracy: s.accuracy,
+      date: new Date(s.timestamp).toISOString(),
+      dateString: new Date(s.timestamp).toDateString(),
+    }))
+  );
+
+  const scoreDates = scoreHistory.scores.map(
+    (score: ScoreHistoryGraphScore) => new Date(score.timestamp)
+  );
+
+  // Sort dates to ensure we get the correct min/max
+  scoreDates.sort((a: Date, b: Date) => a.getTime() - b.getTime());
+  const firstDate = new Date(scoreDates[0]);
+  const lastDate = new Date(scoreDates[scoreDates.length - 1]);
+
+  // Add a small buffer to the date range to ensure we capture all scores
+  firstDate.setHours(0, 0, 0, 0);
+  lastDate.setHours(23, 59, 59, 999);
+
+  const allDates = generateDateRange(firstDate, lastDate);
+
+  console.log("Date Range:", {
+    first: firstDate.toISOString(),
+    last: lastDate.toISOString(),
+    totalDays: allDates.length,
+    scores: scoreHistory.scores.map((s: ScoreHistoryGraphScore) => ({
+      date: new Date(s.timestamp).toISOString(),
+      score: s.score,
+    })),
+  });
 
   const datasets = [
     ...(!scoreHistory.isRanked
       ? [
           {
             label: "Score",
-            data: scoreHistory.scores.map((score: ScoreHistoryGraphScore) => score.score),
+            data: allDates.map((date: Date) => {
+              // Find all scores for this date
+              const scoresForDate = scoreHistory.scores.filter((s: ScoreHistoryGraphScore) => {
+                const scoreDate = new Date(s.timestamp);
+                return scoreDate.toDateString() === date.toDateString();
+              });
+
+              // If we have multiple scores, take the highest one
+              if (scoresForDate.length > 0) {
+                const highestScore = scoresForDate.reduce(
+                  (prev: ScoreHistoryGraphScore, current: ScoreHistoryGraphScore) =>
+                    current.score > prev.score ? current : prev
+                );
+                return highestScore.score;
+              }
+              return null;
+            }),
             borderColor: Colors.primary,
             backgroundColor: Colors.primary,
             yAxisID: "y",
             tension: 0.4,
-            pointRadius: labels.length > 90 ? 0 : 3,
+            pointRadius: allDates.length > 90 ? 0 : 3,
             hoverRadius: 4,
           },
         ]
       : [
           {
             label: "PP",
-            data: scoreHistory.scores.map((score: ScoreHistoryGraphScore) => score.pp),
+            data: allDates.map((date: Date) => {
+              // Find all scores for this date
+              const scoresForDate = scoreHistory.scores.filter((s: ScoreHistoryGraphScore) => {
+                const scoreDate = new Date(s.timestamp);
+                return scoreDate.toDateString() === date.toDateString();
+              });
+
+              // If we have multiple scores, take the highest one
+              if (scoresForDate.length > 0) {
+                const highestScore = scoresForDate.reduce(
+                  (prev: ScoreHistoryGraphScore, current: ScoreHistoryGraphScore) =>
+                    current.pp > prev.pp ? current : prev
+                );
+                return highestScore.pp;
+              }
+              return null;
+            }),
             borderColor: Colors.ssr,
             backgroundColor: Colors.ssr,
             yAxisID: "y",
             tension: 0.4,
-            pointRadius: labels.length > 90 ? 0 : 3,
+            pointRadius: allDates.length > 90 ? 0 : 3,
             hoverRadius: 4,
           },
         ]),
     {
       label: "Accuracy",
-      data: scoreHistory.scores.map((score: ScoreHistoryGraphScore) => score.accuracy),
+      data: allDates.map((date: Date) => {
+        // Find all scores for this date
+        const scoresForDate = scoreHistory.scores.filter((s: ScoreHistoryGraphScore) => {
+          const scoreDate = new Date(s.timestamp);
+          return scoreDate.toDateString() === date.toDateString();
+        });
+
+        // If we have multiple scores, take the highest one
+        if (scoresForDate.length > 0) {
+          const highestScore = scoresForDate.reduce(
+            (prev: ScoreHistoryGraphScore, current: ScoreHistoryGraphScore) =>
+              current.accuracy > prev.accuracy ? current : prev
+          );
+          return highestScore.accuracy;
+        }
+        return null;
+      }),
       borderColor: Colors.generic.green,
       backgroundColor: Colors.generic.green,
       yAxisID: "y1",
       tension: 0.4,
-      pointRadius: labels.length > 90 ? 0 : 3,
+      pointRadius: allDates.length > 90 ? 0 : 3,
       hoverRadius: 4,
     },
   ];
@@ -99,6 +193,11 @@ export function ScoreHistoryGraph({ playerId, leaderboardId }: ScoreHistoryProps
     maintainAspectRatio: false,
     animation: { duration: 0 },
     interaction: { mode: "index", intersect: false },
+    elements: {
+      line: {
+        spanGaps: true,
+      },
+    },
     scales: {
       x: {
         grid: { color: "#252525" },
@@ -108,7 +207,7 @@ export function ScoreHistoryGraph({ playerId, leaderboardId }: ScoreHistoryProps
           minRotation: 45,
           maxTicksLimit: 10,
           callback: (value: any, index: number) => {
-            const date = labels[index];
+            const date = allDates[index];
             return formatDateMinimal(date);
           },
         },
@@ -175,7 +274,7 @@ export function ScoreHistoryGraph({ playerId, leaderboardId }: ScoreHistoryProps
       tooltip: {
         callbacks: {
           title: (context: any) => {
-            const value = labels[context[0].dataIndex];
+            const value = allDates[context[0].dataIndex];
             const daysAgo = getDaysAgo(value);
             const formattedDate = formatDate(value, "Do MMMM, YYYY");
             if (daysAgo === 0) return `${formattedDate} (Now)`;
@@ -198,7 +297,7 @@ export function ScoreHistoryGraph({ playerId, leaderboardId }: ScoreHistoryProps
   return (
     <div className="flex relative h-[380px] w-full">
       <div className="block h-[380px] w-full relative">
-        <Line options={options} data={{ labels, datasets }} />
+        <Line options={options} data={{ labels: allDates, datasets }} />
       </div>
     </div>
   );
