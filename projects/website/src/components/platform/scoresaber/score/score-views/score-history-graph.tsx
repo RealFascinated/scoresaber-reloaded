@@ -107,8 +107,11 @@ export function ScoreHistoryGraph({ playerId, leaderboardId }: ScoreHistoryProps
             backgroundColor: Colors.primary,
             yAxisID: "y",
             tension: 0.4,
-            pointRadius: allDates.length > 90 ? 0 : 3,
-            hoverRadius: 4,
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            pointBorderWidth: 1,
+            pointBorderColor: Colors.primary,
+            pointBackgroundColor: Colors.primary,
           },
         ]
       : [
@@ -135,8 +138,11 @@ export function ScoreHistoryGraph({ playerId, leaderboardId }: ScoreHistoryProps
             backgroundColor: Colors.ssr,
             yAxisID: "y",
             tension: 0.4,
-            pointRadius: allDates.length > 90 ? 0 : 3,
-            hoverRadius: 4,
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            pointBorderWidth: 1,
+            pointBorderColor: Colors.ssr,
+            pointBackgroundColor: Colors.ssr,
           },
         ]),
     {
@@ -162,8 +168,11 @@ export function ScoreHistoryGraph({ playerId, leaderboardId }: ScoreHistoryProps
       backgroundColor: Colors.generic.green,
       yAxisID: "y1",
       tension: 0.4,
-      pointRadius: allDates.length > 90 ? 0 : 3,
-      hoverRadius: 4,
+      pointRadius: 4,
+      pointHoverRadius: 6,
+      pointBorderWidth: 1,
+      pointBorderColor: Colors.generic.green,
+      pointBackgroundColor: Colors.generic.green,
     },
   ];
 
