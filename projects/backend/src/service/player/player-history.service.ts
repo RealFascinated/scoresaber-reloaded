@@ -9,7 +9,6 @@ import {
 } from "@ssr/common/model/player/player-history-entry";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { removeObjectFields } from "@ssr/common/object.util";
-import { PlayerAccuracies } from "@ssr/common/player/player-accuracies";
 import { PlayerStatisticHistory } from "@ssr/common/player/player-statistic-history";
 import { ScoreCalendarData } from "@ssr/common/types/player/player-statistic";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
@@ -68,13 +67,7 @@ export class PlayerHistoryService {
         date: getMidnightAlignedDate(trackTime),
       }).lean();
 
-      const accuracies = await PlayerAccuracyService.getPlayerAverageAccuracies(foundPlayer.id);
-      const updatedHistory = await this.createPlayerStatistic(
-        player,
-        accuracies,
-        existingEntry ?? undefined,
-        foundPlayer.id
-      );
+      const updatedHistory = await this.createPlayerStatistic(player, existingEntry ?? undefined);
 
       await PlayerHistoryEntryModel.findOneAndUpdate(
         { playerId: foundPlayer.id, date: getMidnightAlignedDate(trackTime) },
@@ -108,17 +101,19 @@ export class PlayerHistoryService {
         ? [endTimestamp, startTimestamp]
         : [startTimestamp, endTimestamp];
 
-    const entries = await PlayerHistoryEntryModel.find({
-      playerId: player.id,
-      date: {
-        $gte: new Date(queryStart),
-        $lte: new Date(queryEnd),
-      },
-    })
-      .sort({ date: -1 })
-      .lean();
-
-    Logger.debug(`Found ${entries.length} history entries for player ${player.id}`);
+    // Run queries in parallel
+    const [entries, playerRankHistory] = await Promise.all([
+      PlayerHistoryEntryModel.find({
+        playerId: player.id,
+        date: {
+          $gte: new Date(queryStart),
+          $lte: new Date(queryEnd),
+        },
+      })
+        .sort({ date: -1 })
+        .lean(),
+      parseRankHistory(player),
+    ]);
 
     const history: PlayerStatisticHistory = {};
     for (const entry of entries) {
@@ -127,7 +122,6 @@ export class PlayerHistoryService {
     }
 
     // Merge rank history
-    const playerRankHistory = parseRankHistory(player);
     const daysDiff = Math.ceil((startDate.getTime() - endDate.getTime()) / (1000 * 60 * 60 * 24));
     let daysAgo = 0;
 
@@ -148,15 +142,10 @@ export class PlayerHistoryService {
       }
     }
 
-    const account = await PlayerModel.findById(player.id);
-    if (account) {
-      for (const [date, statistic] of Object.entries(history)) {
-        if (statistic.plusOnePp) {
-          statistic.plusOnePp = Math.round(statistic.plusOnePp * 100) / 100;
-          history[date] = statistic;
-        }
-      }
-    }
+    // Add todays data
+    const today = getMidnightAlignedDate(new Date());
+    const todayKey = formatDateMinimal(today);
+    history[todayKey] = await this.createPlayerStatistic(player, history[todayKey]);
 
     // Sort history by date
     return Object.fromEntries(
@@ -253,11 +242,14 @@ export class PlayerHistoryService {
    */
   private static async createPlayerStatistic(
     playerToken: ScoreSaberPlayerToken,
-    accuracies: PlayerAccuracies,
-    existingEntry?: PlayerHistoryEntry,
-    playerId?: string
+    existingEntry?: Partial<PlayerHistoryEntry>
   ): Promise<Partial<PlayerHistoryEntry>> {
-    const baseStatistic: Partial<PlayerHistoryEntry> = {
+    const [accuracies, plusOnePp] = await Promise.all([
+      PlayerAccuracyService.getPlayerAverageAccuracies(playerToken.id),
+      PlayerRankingService.getPlayerPpBoundary(playerToken.id, 1),
+    ]);
+
+    return {
       pp: playerToken.pp,
       countryRank: playerToken.countryRank,
       rank: playerToken.rank,
@@ -270,13 +262,8 @@ export class PlayerHistoryService {
       totalRankedScores: playerToken.scoreStats.rankedPlayCount,
       totalScore: playerToken.scoreStats.totalScore,
       totalRankedScore: playerToken.scoreStats.totalRankedScore,
+      plusOnePp: plusOnePp[0],
     };
-
-    if (playerId) {
-      baseStatistic.plusOnePp = (await PlayerRankingService.getPlayerPpBoundary(playerId, 1))[0];
-    }
-
-    return baseStatistic;
   }
 
   /**
