@@ -1,6 +1,7 @@
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { DetailType } from "@ssr/common/detail-type";
 import { env } from "@ssr/common/env";
+import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger from "@ssr/common/logger";
 import {
   ScoreSaberLeaderboard,
@@ -22,7 +23,6 @@ import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score";
 import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
 import { formatDate, formatDateMinimal, formatDuration } from "@ssr/common/utils/time-utils";
 import { EmbedBuilder } from "discord.js";
-import { NotFoundError } from "elysia";
 import { DiscordChannels, logToChannel, sendFile } from "../../bot/bot";
 import { fetchWithCache } from "../../common/cache.util";
 import { generatePlaylistImage } from "../../common/playlist.util";

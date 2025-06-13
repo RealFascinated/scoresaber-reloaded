@@ -1,5 +1,6 @@
+import { NotFoundError } from "@ssr/common/error/not-found-error";
 import { Timeframe } from "@ssr/common/timeframe";
-import { NotFoundError, t } from "elysia";
+import { t } from "elysia";
 import { Controller, Get } from "elysia-decorators";
 import SuperJSON from "superjson";
 import BeatLeaderService from "../service/beatleader.service";

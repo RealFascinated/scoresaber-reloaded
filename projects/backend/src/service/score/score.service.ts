@@ -1,4 +1,5 @@
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
+import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger from "@ssr/common/logger";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberPreviousScoreModel } from "@ssr/common/model/score/impl/scoresaber-previous-score";
@@ -17,7 +18,6 @@ import { Metadata } from "@ssr/common/types/metadata";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score";
 import { getDaysAgoDate } from "@ssr/common/utils/time-utils";
-import { NotFoundError } from "elysia";
 import mongoose from "mongoose";
 import { scoreToObject } from "../../common/score/score.util";
 import BeatLeaderService from "../beatleader.service";

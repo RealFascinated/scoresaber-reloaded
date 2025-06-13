@@ -1,5 +1,6 @@
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { DetailType } from "@ssr/common/detail-type";
+import { NotFoundError } from "@ssr/common/error/not-found-error";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerStatisticHistory } from "@ssr/common/player/player-statistic-history";
 import { PlayerTrackedSince } from "@ssr/common/player/player-tracked-since";
@@ -8,7 +9,7 @@ import { PlayedMapsCalendarResponse } from "@ssr/common/response/played-maps-cal
 import { PlayerRankedPpsResponse } from "@ssr/common/response/player-ranked-pps-response";
 import { PpBoundaryResponse } from "@ssr/common/response/pp-boundary-response";
 import { getDaysAgoDate } from "@ssr/common/utils/time-utils";
-import { NotFoundError, t } from "elysia";
+import { t } from "elysia";
 import { Controller, Get, Post } from "elysia-decorators";
 import SuperJSON from "superjson";
 import { PlayerAccuracyService } from "../service/player/player-accuracy.service";

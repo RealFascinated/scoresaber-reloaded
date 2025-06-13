@@ -1,3 +1,4 @@
+import { NotFoundError } from "@ssr/common/error/not-found-error";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberPreviousScoreModel } from "@ssr/common/model/score/impl/scoresaber-previous-score";
 import {
@@ -7,7 +8,6 @@ import {
 import { Page, Pagination } from "@ssr/common/pagination";
 import { ScoreHistoryGraphResponse } from "@ssr/common/response/score-history-graph-response";
 import { PlayerScore } from "@ssr/common/score/player-score";
-import { NotFoundError } from "elysia";
 import LeaderboardService from "../scoresaber/leaderboard.service";
 import { ScoreService } from "./score.service";
 

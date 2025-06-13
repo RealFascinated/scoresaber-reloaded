@@ -1,5 +1,6 @@
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { DetailType } from "@ssr/common/detail-type";
+import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger from "@ssr/common/logger";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
@@ -19,7 +20,6 @@ import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player
 import { getPlayerStatisticChanges } from "@ssr/common/utils/player-utils";
 import { getDaysAgoDate } from "@ssr/common/utils/time-utils";
 import { getPageFromRank } from "@ssr/common/utils/utils";
-import { NotFoundError } from "elysia";
 import sanitize from "sanitize-html";
 import { fetchWithCache } from "../../common/cache.util";
 import CacheService, { ServiceCache } from "../cache.service";
