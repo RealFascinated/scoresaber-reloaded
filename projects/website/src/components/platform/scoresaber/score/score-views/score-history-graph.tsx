@@ -66,17 +66,6 @@ export function ScoreHistoryGraph({ playerId, leaderboardId }: ScoreHistoryProps
     );
   }
 
-  console.log(
-    "Score History Details:",
-    scoreHistory.scores.map((s: ScoreHistoryGraphScore) => ({
-      score: s.score,
-      pp: s.pp,
-      accuracy: s.accuracy,
-      date: new Date(s.timestamp).toISOString(),
-      dateString: new Date(s.timestamp).toDateString(),
-    }))
-  );
-
   const scoreDates = scoreHistory.scores.map(
     (score: ScoreHistoryGraphScore) => new Date(score.timestamp)
   );
@@ -91,16 +80,6 @@ export function ScoreHistoryGraph({ playerId, leaderboardId }: ScoreHistoryProps
   lastDate.setHours(23, 59, 59, 999);
 
   const allDates = generateDateRange(firstDate, lastDate);
-
-  console.log("Date Range:", {
-    first: firstDate.toISOString(),
-    last: lastDate.toISOString(),
-    totalDays: allDates.length,
-    scores: scoreHistory.scores.map((s: ScoreHistoryGraphScore) => ({
-      date: new Date(s.timestamp).toISOString(),
-      score: s.score,
-    })),
-  });
 
   const datasets = [
     ...(!scoreHistory.isRanked
