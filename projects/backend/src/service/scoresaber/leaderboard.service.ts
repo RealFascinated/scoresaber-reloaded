@@ -426,7 +426,17 @@ export default class LeaderboardService {
       return 0;
     }
 
-    await this.logLeaderboardChanges(update);
+    // Log changes
+    if (update.rankedStatusChanged) {
+      Logger.info(
+        `Leaderboard "${update.leaderboard.id}" ranked status changed from ${update.previousLeaderboard?.ranked} to ${update.leaderboard.ranked}.`
+      );
+    }
+    if (update.starCountChanged) {
+      Logger.info(
+        `Leaderboard "${update.leaderboard.id}" star count changed from ${update.previousLeaderboard?.stars} to ${update.leaderboard.stars}.`
+      );
+    }
 
     if (update.rankedStatusChanged && !update.leaderboard.ranked) {
       await this.resetScorePP(scores);
@@ -442,22 +452,6 @@ export default class LeaderboardService {
     }
 
     return 0;
-  }
-
-  /**
-   * Logs changes in leaderboard status
-   */
-  private static async logLeaderboardChanges(update: LeaderboardUpdate): Promise<void> {
-    if (update.rankedStatusChanged) {
-      Logger.info(
-        `Leaderboard "${update.leaderboard.id}" ranked status changed from ${update.previousLeaderboard?.ranked} to ${update.leaderboard.ranked}.`
-      );
-    }
-    if (update.starCountChanged) {
-      Logger.info(
-        `Leaderboard "${update.leaderboard.id}" star count changed from ${update.previousLeaderboard?.stars} to ${update.leaderboard.stars}.`
-      );
-    }
   }
 
   /**

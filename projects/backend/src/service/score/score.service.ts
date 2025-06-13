@@ -19,10 +19,8 @@ import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score";
 import { getDaysAgoDate } from "@ssr/common/utils/time-utils";
 import { NotFoundError } from "elysia";
 import mongoose from "mongoose";
-import { fetchWithCache } from "../../common/cache.util";
 import { scoreToObject } from "../../common/score/score.util";
 import BeatLeaderService from "../beatleader.service";
-import CacheService, { ServiceCache } from "../cache.service";
 import LeaderboardService from "../scoresaber/leaderboard.service";
 import ScoreSaberService from "../scoresaber/scoresaber.service";
 import { PreviousScoresService } from "./previous-scores.service";
@@ -41,67 +39,61 @@ export class ScoreService {
     page: number,
     country?: string
   ): Promise<LeaderboardScoresResponse<unknown, unknown> | undefined> {
-    return fetchWithCache(
-      CacheService.getCache(ServiceCache.LeaderboardScores),
-      `leaderboard-scores:${leaderboardId}-${page}-${country}`,
-      async () => {
-        const scores: ScoreType[] = [];
-        let metadata: Metadata = new Metadata(0, 0, 0, 0); // Default values
+    const scores: ScoreType[] = [];
+    let metadata: Metadata = new Metadata(0, 0, 0, 0); // Default values
 
-        const leaderboardResponse = await LeaderboardService.getLeaderboard(leaderboardId);
-        if (leaderboardResponse == undefined) {
-          throw new NotFoundError(`Leaderboard "${leaderboardId}" not found`);
-        }
-        const leaderboard = leaderboardResponse.leaderboard;
-        const beatSaverMap = leaderboardResponse.beatsaver;
+    const leaderboardResponse = await LeaderboardService.getLeaderboard(leaderboardId);
+    if (leaderboardResponse == undefined) {
+      throw new NotFoundError(`Leaderboard "${leaderboardId}" not found`);
+    }
+    const leaderboard = leaderboardResponse.leaderboard;
+    const beatSaverMap = leaderboardResponse.beatsaver;
 
-        const leaderboardScores = await ApiServiceRegistry.getInstance()
-          .getScoreSaberService()
-          .lookupLeaderboardScores(leaderboardId, page, {
-            country: country,
-          });
-        if (leaderboardScores == undefined) {
-          return;
-        }
+    const leaderboardScores = await ApiServiceRegistry.getInstance()
+      .getScoreSaberService()
+      .lookupLeaderboardScores(leaderboardId, page, {
+        country: country,
+      });
+    if (leaderboardScores == undefined) {
+      return;
+    }
 
-        for (const token of leaderboardScores.scores) {
-          const score = getScoreSaberScoreFromToken(
-            token,
-            leaderboardResponse.leaderboard,
-            token.leaderboardPlayerInfo.id
-          );
-          if (score == undefined) {
-            continue;
-          }
-
-          const additionalData = await BeatLeaderService.getAdditionalScoreDataFromSong(
-            score.playerId,
-            leaderboard.songHash,
-            `${leaderboard.difficulty.difficulty}-${leaderboard.difficulty.characteristic}`,
-            score.score
-          );
-          if (additionalData !== undefined) {
-            score.additionalData = additionalData;
-          }
-
-          scores.push(score);
-        }
-
-        metadata = new Metadata(
-          Math.ceil(leaderboardScores.metadata.total / leaderboardScores.metadata.itemsPerPage),
-          leaderboardScores.metadata.total,
-          leaderboardScores.metadata.page,
-          leaderboardScores.metadata.itemsPerPage
-        );
-
-        return {
-          scores: scores,
-          leaderboard: leaderboard,
-          beatSaver: beatSaverMap,
-          metadata: metadata,
-        };
+    for (const token of leaderboardScores.scores) {
+      const score = getScoreSaberScoreFromToken(
+        token,
+        leaderboardResponse.leaderboard,
+        token.leaderboardPlayerInfo.id
+      );
+      if (score == undefined) {
+        continue;
       }
+
+      const additionalData = await BeatLeaderService.getAdditionalScoreDataFromSong(
+        score.playerId,
+        leaderboard.songHash,
+        `${leaderboard.difficulty.difficulty}-${leaderboard.difficulty.characteristic}`,
+        score.score
+      );
+      if (additionalData !== undefined) {
+        score.additionalData = additionalData;
+      }
+
+      scores.push(score);
+    }
+
+    metadata = new Metadata(
+      Math.ceil(leaderboardScores.metadata.total / leaderboardScores.metadata.itemsPerPage),
+      leaderboardScores.metadata.total,
+      leaderboardScores.metadata.page,
+      leaderboardScores.metadata.itemsPerPage
     );
+
+    return {
+      scores: scores,
+      leaderboard: leaderboard,
+      beatSaver: beatSaverMap,
+      metadata: metadata,
+    };
   }
 
   /**

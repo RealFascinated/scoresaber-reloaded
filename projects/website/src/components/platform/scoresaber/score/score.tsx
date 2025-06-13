@@ -19,6 +19,7 @@ import ScoreSaberScoreButtons from "@/components/platform/scoresaber/score/butto
 import ScoreSaberScoreInfo from "@/components/platform/scoresaber/score/score-info";
 import ScoreSaberScoreSongInfo from "@/components/platform/scoresaber/score/score-song-info";
 import ScoreSaberScoreStats from "@/components/platform/scoresaber/score/score-stats";
+import PlayerPreview from "@/components/player/player-preview";
 import { Separator } from "@/components/ui/separator";
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
@@ -155,16 +156,18 @@ export default function ScoreSaberScoreDisplay({
   return (
     <div className={`${settings?.disablePadding ? "" : "pb-2 pt-2"} relative`}>
       {playerAbove && (
-        <div className="flex items-center gap-2 pl-2">
-          <Avatar src={getScoreSaberAvatar(playerAbove)} alt={playerAbove.name ?? ""} size={20} />
-          <Link
-            href={`/player/${playerAbove.id}`}
-            className="hover:brightness-[66%] transition-all cursor-pointer"
-            prefetch={false}
-          >
-            <p className="text-sm">{playerAbove.name}</p>
-          </Link>
-        </div>
+        <PlayerPreview playerId={playerAbove.id}>
+          <div className="flex items-center gap-2 pl-2">
+            <Avatar src={getScoreSaberAvatar(playerAbove)} alt={playerAbove.name ?? ""} size={20} />
+            <Link
+              href={`/player/${playerAbove.id}`}
+              className="hover:brightness-[66%] transition-all cursor-pointer"
+              prefetch={false}
+            >
+              <p className="text-sm">{playerAbove.name}</p>
+            </Link>
+          </div>
+        </PlayerPreview>
       )}
       <div
         className={`grid w-full gap-2 lg:gap-0 ${gridColsClass} ${settings?.hideRank ? "pt-1" : ""}`}

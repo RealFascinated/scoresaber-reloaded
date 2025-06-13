@@ -1,16 +1,13 @@
 import { CacheStatistics, SSRCache } from "@ssr/common/cache";
 import Logger from "@ssr/common/logger";
+import { TimeUnit } from "@ssr/common/utils/time-utils";
 
 export enum ServiceCache {
   BeatSaver = "beatSaver",
   AppStatistics = "appStatistics",
   ScoreSaber = "scoresaber",
   Leaderboards = "leaderboards",
-  PlayerScores = "playerScores",
-  LeaderboardScores = "leaderboardScores",
-  FriendScores = "friendScores",
   ScoreCalendar = "scoreCalendar",
-  PPBoundary = "ppBoundary",
   AdditionalScoreData = "additionalScoreData",
   Playlists = "playlists",
   Players = "players",
@@ -26,43 +23,31 @@ export default class CacheService {
   constructor() {
     const cacheInfo = {
       [ServiceCache.BeatSaver]: {
-        ttl: 1000 * 60 * 60 * 2, // 2 hours
+        ttl: TimeUnit.toMillis(TimeUnit.Hour, 2), // 2 hours
       },
       [ServiceCache.AppStatistics]: {
-        ttl: 1000 * 60 * 60, // 1 hour
+        ttl: TimeUnit.toMillis(TimeUnit.Hour, 1), // 1 hour
       },
       [ServiceCache.ScoreSaber]: {
-        ttl: 1000 * 60, // 1 minute
+        ttl: TimeUnit.toMillis(TimeUnit.Minute, 1),
       },
       [ServiceCache.Leaderboards]: {
-        ttl: 1000 * 60 * 10, // 10 minutes
-      },
-      [ServiceCache.PlayerScores]: {
-        ttl: 1000 * 60, // 1 minute
-      },
-      [ServiceCache.LeaderboardScores]: {
-        ttl: 1000 * 60, // 1 minute
-      },
-      [ServiceCache.FriendScores]: {
-        ttl: 1000 * 60 * 5, // 5 minute
+        ttl: TimeUnit.toMillis(TimeUnit.Hour, 2),
       },
       [ServiceCache.ScoreCalendar]: {
-        ttl: 1000 * 60 * 30, // 30 minutes
-      },
-      [ServiceCache.PPBoundary]: {
-        ttl: 1000 * 60 * 2, // 2 minutes
+        ttl: TimeUnit.toMillis(TimeUnit.Minute, 30),
       },
       [ServiceCache.AdditionalScoreData]: {
-        ttl: 1000 * 60 * 30, // 30 minutes
+        ttl: TimeUnit.toMillis(TimeUnit.Minute, 30),
       },
       [ServiceCache.Playlists]: {
-        ttl: 1000 * 60 * 60, // 1 hour
+        ttl: TimeUnit.toMillis(TimeUnit.Hour, 1),
       },
       [ServiceCache.Players]: {
-        ttl: 1000 * 60 * 5, // 5 minutes
+        ttl: TimeUnit.toMillis(TimeUnit.Minute, 5),
       },
       [ServiceCache.ScoreStats]: {
-        ttl: 1000 * 60 * 60 * 3, // 3 hours
+        ttl: TimeUnit.toMillis(TimeUnit.Hour, 3),
       },
     };
 

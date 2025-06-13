@@ -1,13 +1,14 @@
+import PlayerPreview from "@/components/player/player-preview";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import Link from "next/link";
-import Avatar from "../avatar";
-import CountryFlag from "../country-flag";
+import Avatar from "../../avatar";
+import CountryFlag from "../../country-flag";
 
-interface PlayerListItemProps {
+interface FriendRankingPlayerProps {
   player: ScoreSaberPlayer;
 }
 
-export function PlayerListItem({ player }: PlayerListItemProps) {
+export function FriendRankingPlayer({ player }: FriendRankingPlayerProps) {
   return (
     <div className="flex flex-col md:grid md:grid-cols-[auto_1fr_auto] items-center gap-2 py-2 px-4 text-sm">
       {/* Top row (mobile) / Left column (desktop) */}
@@ -39,15 +40,17 @@ export function PlayerListItem({ player }: PlayerListItemProps) {
       </div>
 
       {/* Player's Avatar and Name */}
-      <div className="w-full md:w-auto flex items-center gap-2">
-        <Avatar src={player.avatar} alt={player.name} size={22} />
-        <Link
-          href={`/player/${player.id}`}
-          className="hover:brightness-[66%] transition-all overflow-hidden"
-        >
-          <p className="truncate max-w-[160px] md:max-w-[250px]">{player.name}</p>
-        </Link>
-      </div>
+      <PlayerPreview playerId={player.id}>
+        <div className="w-full md:w-auto flex items-center gap-2">
+          <Avatar src={player.avatar} alt={player.name} size={22} />
+          <Link
+            href={`/player/${player.id}`}
+            className="hover:brightness-[66%] transition-all overflow-hidden"
+          >
+            <p className="truncate max-w-[160px] md:max-w-[250px]">{player.name}</p>
+          </Link>
+        </div>
+      </PlayerPreview>
 
       {/* Desktop PP */}
       <p className="hidden md:block text-pp text-right text-sm">{player.pp.toLocaleString()}pp</p>

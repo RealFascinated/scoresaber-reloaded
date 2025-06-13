@@ -6,10 +6,10 @@ import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useState } from "react";
-import Card from "../card";
-import ScoreSaberScoreDisplay from "../platform/scoresaber/score/score";
-import SimplePagination from "../simple-pagination";
-import { Spinner } from "../spinner";
+import Card from "../../card";
+import ScoreSaberScoreDisplay from "../../platform/scoresaber/score/score";
+import SimplePagination from "../../simple-pagination";
+import { Spinner } from "../../spinner";
 
 export function FriendScores() {
   const isMobile = useIsMobile();
@@ -38,12 +38,14 @@ export function FriendScores() {
           based on cached data
         </p>
       </div>
+
       {/* Loading */}
       {isLoading && !scoreData && (
-        <div className="flex w-full justify-center items-center">
-          <Spinner />
+        <div className="flex w-full justify-center py-8">
+          <Spinner size="md" className="text-primary" />
         </div>
       )}
+
       {/* Scores */}
       {scoreData && (
         <div className="flex flex-col gap-2">

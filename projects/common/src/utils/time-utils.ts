@@ -279,3 +279,45 @@ export function getDaysInMonth(month: number, year: number) {
 export function forceUTC(date: Date) {
   return dayjs(date).utc().toDate();
 }
+
+export type TimeUnitValue = {
+  unit: TimeUnit;
+  value: number;
+};
+
+type TimeUnitWithMethods = {
+  toMillis: (value: number) => number;
+};
+
+/**
+ * Enum representing different time units
+ */
+export enum TimeUnit {
+  Millisecond = "millisecond",
+  Second = "second",
+  Minute = "minute",
+  Hour = "hour",
+  Day = "day",
+  Week = "week",
+  Month = "month",
+  Year = "year",
+}
+
+/**
+ * Namespace for TimeUnit methods
+ */
+export namespace TimeUnit {
+  export function toMillis(unit: TimeUnit, value: number): number {
+    const multipliers: Record<TimeUnit, number> = {
+      [TimeUnit.Millisecond]: 1,
+      [TimeUnit.Second]: 1000,
+      [TimeUnit.Minute]: 60 * 1000,
+      [TimeUnit.Hour]: 60 * 60 * 1000,
+      [TimeUnit.Day]: 24 * 60 * 60 * 1000,
+      [TimeUnit.Week]: 7 * 24 * 60 * 60 * 1000,
+      [TimeUnit.Month]: 30 * 24 * 60 * 60 * 1000,
+      [TimeUnit.Year]: 365 * 24 * 60 * 60 * 1000,
+    };
+    return value * multipliers[unit];
+  }
+}

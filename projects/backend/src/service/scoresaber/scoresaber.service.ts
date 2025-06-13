@@ -230,84 +230,74 @@ export default class ScoreSaberService {
     search?: string,
     comparisonPlayerId?: string
   ): Promise<PlayerScoresResponse> {
-    return await fetchWithCache(
-      CacheService.getCache(ServiceCache.PlayerScores),
-      `player-scores:${playerId}-${pageNumber}-${sort}-${search}`,
-      async () => {
-        // Get first page to determine total items
-        const firstPage = await ApiServiceRegistry.getInstance()
-          .getScoreSaberService()
-          .lookupPlayerScores({
-            playerId,
-            page: 1,
-            sort: sort as ScoreSaberScoreSort,
-            search,
-          });
+    // Get the requested page directly
+    const requestedPage = await ApiServiceRegistry.getInstance()
+      .getScoreSaberService()
+      .lookupPlayerScores({
+        playerId,
+        page: pageNumber,
+        sort: sort as ScoreSaberScoreSort,
+        search,
+      });
 
-        if (firstPage == undefined) {
-          return Pagination.empty<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>();
+    if (!requestedPage) {
+      return Pagination.empty<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>();
+    }
+
+    const pagination = new Pagination<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>()
+      .setItemsPerPage(requestedPage.metadata.itemsPerPage)
+      .setTotalItems(requestedPage.metadata.total);
+
+    // Fetch the comparison player if it's not the same as the player
+    const comparisonPlayer =
+      comparisonPlayerId !== playerId && comparisonPlayerId !== undefined
+        ? await ScoreSaberService.getPlayer(comparisonPlayerId, DetailType.BASIC)
+        : undefined;
+
+    return await pagination.getPage(pageNumber, async () => {
+      // Get all leaderboard IDs at once
+      const leaderboardIds = requestedPage.playerScores.map(score => score.leaderboard.id + "");
+
+      // Fetch all leaderboards in parallel
+      const leaderboardPromises = leaderboardIds.map(id =>
+        LeaderboardService.getLeaderboard(id, {
+          includeBeatSaver: true,
+          beatSaverType: DetailType.FULL,
+        })
+      );
+      const leaderboardResponses = await Promise.all(leaderboardPromises);
+
+      // Create a map for quick leaderboard lookup
+      const leaderboardMap = new Map(
+        leaderboardResponses.filter(Boolean).map(result => [result!.leaderboard.id, result!])
+      );
+
+      // Process all scores in parallel
+      const scorePromises = requestedPage.playerScores.map(async playerScore => {
+        const leaderboardResponse = leaderboardMap.get(playerScore.leaderboard.id);
+        if (!leaderboardResponse) {
+          return undefined;
         }
 
-        const pagination = new Pagination<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>()
-          .setItemsPerPage(firstPage.metadata.itemsPerPage)
-          .setTotalItems(firstPage.metadata.total);
-
-        // Get the requested page
-        const requestedPage = await ApiServiceRegistry.getInstance()
-          .getScoreSaberService()
-          .lookupPlayerScores({
-            playerId,
-            page: pageNumber,
-            sort: sort as ScoreSaberScoreSort,
-            search,
-          });
-
-        if (!requestedPage) {
-          return Pagination.empty<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>();
+        const { leaderboard, beatsaver } = leaderboardResponse;
+        let score = getScoreSaberScoreFromToken(playerScore.score, leaderboard, playerId);
+        if (!score) {
+          return undefined;
         }
 
-        // Fetch the comparison player if it's not the same as the player
-        const comparisonPlayer =
-          comparisonPlayerId !== playerId && comparisonPlayerId !== undefined
-            ? await ScoreSaberService.getPlayer(comparisonPlayerId, DetailType.BASIC)
-            : undefined;
+        score = await ScoreService.insertScoreData(score, leaderboard, comparisonPlayer);
+        return {
+          score: score,
+          leaderboard: leaderboard,
+          beatSaver: beatsaver,
+        } as PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>;
+      });
 
-        return await pagination.getPage(pageNumber, async () => {
-          // Process all scores in parallel
-          const scorePromises = requestedPage.playerScores.map(async playerScore => {
-            const leaderboardResponse = await LeaderboardService.getLeaderboard(
-              playerScore.leaderboard.id + "",
-              {
-                includeBeatSaver: true,
-                beatSaverType: DetailType.FULL,
-              }
-            );
-
-            if (!leaderboardResponse) {
-              return undefined;
-            }
-
-            const { leaderboard, beatsaver } = leaderboardResponse;
-            let score = getScoreSaberScoreFromToken(playerScore.score, leaderboard, playerId);
-            if (!score) {
-              return undefined;
-            }
-
-            score = await ScoreService.insertScoreData(score, leaderboard, comparisonPlayer);
-            return {
-              score: score,
-              leaderboard: leaderboard,
-              beatSaver: beatsaver,
-            } as PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>;
-          });
-
-          // Wait for all score processing to complete and filter out any undefined results
-          return (await Promise.all(scorePromises)).filter(Boolean) as PlayerScore<
-            ScoreSaberScore,
-            ScoreSaberLeaderboard
-          >[];
-        });
-      }
-    );
+      // Wait for all score processing to complete and filter out any undefined results
+      return (await Promise.all(scorePromises)).filter(Boolean) as PlayerScore<
+        ScoreSaberScore,
+        ScoreSaberLeaderboard
+      >[];
+    });
   }
 }

@@ -6,10 +6,10 @@ import { Page, Pagination } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { useLiveQuery } from "dexie-react-hooks";
 import { memo, useCallback, useEffect, useState } from "react";
-import Card from "../card";
-import { PlayerListItem } from "../player/player-list-item";
-import PaginationComponent from "../simple-pagination";
-import { Spinner } from "../spinner";
+import Card from "../../card";
+import PaginationComponent from "../../simple-pagination";
+import { Spinner } from "../../spinner";
+import { FriendRankingPlayer } from "./friend-ranking-player";
 
 const MemoizedPagination = memo(PaginationComponent);
 
@@ -55,7 +55,7 @@ export function FriendRanking() {
           <>
             <div className="divide-y divide-border">
               {friendsPage.items.map((player, index) => (
-                <PlayerListItem key={index} player={player} />
+                <FriendRankingPlayer key={index} player={player} />
               ))}
             </div>
 
