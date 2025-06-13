@@ -423,7 +423,7 @@ export class ScoreService {
       return score;
     }
 
-    const [additionalData, previousScore] = await Promise.all([
+    const [additionalData, previousScore, playerInfo, comparisonScore] = await Promise.all([
       options?.insertAdditionalData
         ? BeatLeaderService.getAdditionalScoreDataFromSong(
             score.playerId,
@@ -440,46 +440,45 @@ export class ScoreService {
             score.timestamp
           )
         : undefined,
+      options?.insertPlayerInfo
+        ? ScoreSaberService.getCachedPlayer(score.playerId, true).catch(() => undefined)
+        : undefined,
+      options?.isComparisonPlayerScore && comparisonPlayer
+        ? ScoreSaberScoreModel.findOne({
+            playerId: comparisonPlayer.id,
+            leaderboardId: leaderboard.id,
+          }).lean()
+        : undefined,
     ]);
 
     if (additionalData !== undefined) {
       score.additionalData = additionalData;
     }
+
     if (previousScore !== undefined) {
       score.previousScore = previousScore;
     }
 
-    if (options?.insertPlayerInfo) {
-      const player = await ScoreSaberService.getCachedPlayer(score.playerId, true).catch(
-        () => undefined
-      );
-      if (player) {
-        score.playerInfo = {
-          id: player.id,
-          name: player.name,
-        };
-      }
+    if (playerInfo !== undefined) {
+      score.playerInfo = {
+        id: playerInfo.id,
+        name: playerInfo.name,
+      };
+    }
 
-      if (comparisonPlayer && !options.isComparisonPlayerScore) {
-        const comparisonScore = await ScoreSaberScoreModel.findOne({
-          playerId: comparisonPlayer.id,
-          leaderboardId: leaderboard.id,
-        }).lean();
-        if (comparisonScore) {
-          const rawComparisonScore = scoreToObject(comparisonScore as unknown as ScoreSaberScore);
-          score.comparisonScore = await ScoreService.insertScoreData(
-            rawComparisonScore,
-            leaderboard,
-            comparisonPlayer,
-            {
-              insertAdditionalData: options.insertAdditionalData,
-              insertPreviousScore: options.insertPreviousScore,
-              insertPlayerInfo: options.insertPlayerInfo,
-              isComparisonPlayerScore: true,
-            }
-          );
+    if (comparisonScore) {
+      const rawComparisonScore = scoreToObject(comparisonScore as unknown as ScoreSaberScore);
+      score.comparisonScore = await ScoreService.insertScoreData(
+        rawComparisonScore,
+        leaderboard,
+        comparisonPlayer,
+        {
+          insertAdditionalData: options.insertAdditionalData,
+          insertPreviousScore: options.insertPreviousScore,
+          insertPlayerInfo: options.insertPlayerInfo,
+          isComparisonPlayerScore: true,
         }
-      }
+      );
     }
 
     return score;
