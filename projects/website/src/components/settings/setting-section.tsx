@@ -24,8 +24,6 @@ export interface Field<TFormValues extends Record<string, any>, TName extends Pa
     field: {
       value: TFormValues[TName];
       onChange: (value: TFormValues[TName]) => void;
-      onBlur?: () => void;
-      name?: string;
     };
   }) => ReactElement;
 }
@@ -45,8 +43,6 @@ interface FormFieldComponentProps<
   formField: {
     value: TFormValues[TName];
     onChange: (value: TFormValues[TName]) => void;
-    onBlur?: () => void;
-    name?: string;
   };
   form: UseFormReturn<TFormValues>;
 }
