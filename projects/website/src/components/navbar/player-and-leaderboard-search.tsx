@@ -32,7 +32,7 @@ import { useEffect, useState } from "react";
 
 export default function PlayerAndLeaderboardSearch() {
   const router: AppRouterInstance = useRouter();
-  const isMobile = useIsMobile(768);
+  const isMobile = useIsMobile();
   const { isOpen, openSearch, closeSearch } = useSearch();
 
   const [query, setQuery] = useState<string>("");
