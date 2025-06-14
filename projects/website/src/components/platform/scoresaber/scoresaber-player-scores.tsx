@@ -6,7 +6,6 @@ import { Input } from "@/components/ui/input";
 import useDatabase from "@/hooks/use-database";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import usePageNavigation from "@/hooks/use-page-navigation";
-import { ClockIcon, TrophyIcon } from "@heroicons/react/24/solid";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerScoresResponse } from "@ssr/common/response/player-scores-response";
 import { ScoreSaberScoreSort } from "@ssr/common/score/score-sort";
@@ -15,7 +14,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useDebounce } from "@uidotdev/usehooks";
 import { clsx } from "clsx";
 import { useLiveQuery } from "dexie-react-hooks";
-import { SearchIcon } from "lucide-react";
+import { ClockIcon, SearchIcon, TrendingUpIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import ScoresCard from "../../score/scores-card";
 import SimplePagination from "../../simple-pagination";
@@ -23,19 +22,22 @@ import { Button } from "../../ui/button";
 import { EmptyState } from "../../ui/empty-state";
 import ScoreSaberScoreDisplay from "./score/score";
 
-type Props = {
+const scoreSort = [
+  { name: "Top", value: "top", icon: <TrendingUpIcon className="w-4 h-4" /> },
+  { name: "Recent", value: "recent", icon: <ClockIcon className="w-4 h-4" /> },
+];
+
+export default function ScoreSaberPlayerScores({
+  initialSearch,
+  player,
+  sort,
+  page,
+}: {
   initialSearch?: string;
   player: ScoreSaberPlayer;
   sort: ScoreSaberScoreSort;
   page: number;
-};
-
-const scoreSort = [
-  { name: "Top", value: "top", icon: <TrophyIcon className="w-5 h-5" /> },
-  { name: "Recent", value: "recent", icon: <ClockIcon className="w-5 h-5" /> },
-];
-
-export default function ScoreSaberPlayerScores({ initialSearch, player, sort, page }: Props) {
+}) {
   const { changePageUrl } = usePageNavigation();
   const isMobile = useIsMobile();
   const database = useDatabase();
@@ -122,7 +124,7 @@ export default function ScoreSaberPlayerScores({ initialSearch, player, sort, pa
               variant={sortOption.value === currentSort ? "default" : "outline"}
               onClick={() => handleSortChange(sortOption.value as ScoreSaberScoreSort)}
               size="sm"
-              className="flex items-center gap-1"
+              className="flex items-center gap-1.5"
             >
               {sortOption.icon}
               {`${capitalizeFirstLetter(sortOption.name)} Scores`}

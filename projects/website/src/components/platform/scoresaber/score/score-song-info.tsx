@@ -10,21 +10,19 @@ import { useMemo } from "react";
 import LeaderboardPreview from "../leaderboard/leaderboard-preview";
 import ScoreSaberSongName from "./song-name";
 
-type Props = {
-  leaderboard: ScoreSaberLeaderboard;
-  beatSaverMap?: BeatSaverMapResponse;
-  imageSize?: number;
-  clickableSongName?: boolean;
-  allowLeaderboardPreview?: boolean;
-};
-
 export default function ScoreSaberScoreSongInfo({
   leaderboard,
   beatSaverMap,
   clickableSongName = true,
   imageSize = 64,
   allowLeaderboardPreview = false,
-}: Props) {
+}: {
+  leaderboard: ScoreSaberLeaderboard;
+  beatSaverMap?: BeatSaverMapResponse;
+  imageSize?: number;
+  clickableSongName?: boolean;
+  allowLeaderboardPreview?: boolean;
+}) {
   const mappersProfile = useMemo(
     () =>
       beatSaverMap != undefined

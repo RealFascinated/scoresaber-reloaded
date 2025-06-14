@@ -12,13 +12,15 @@ import Image from "next/image";
 import Link from "next/link";
 import { useMemo } from "react";
 
-type Props = {
+export default function ScoreSaberScoreInfo({
+  score,
+  leaderboard,
+  hideRank,
+}: {
   score: ScoreSaberScore;
   leaderboard: ScoreSaberLeaderboard;
   hideRank?: boolean;
-};
-
-export default function ScoreSaberScoreInfo({ score, leaderboard, hideRank }: Props) {
+}) {
   const hmd = getHMDInfo(score.hmd as HMD);
 
   const rankElement = useMemo(() => {

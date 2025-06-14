@@ -1,12 +1,13 @@
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import Link from "next/link";
 
-type Props = {
+export default function ScoreSaberSongName({
+  leaderboard,
+  clickableSongName,
+}: {
   leaderboard: ScoreSaberLeaderboard;
   clickableSongName: boolean;
-};
-
-export default function ScoreSaberSongName({ leaderboard, clickableSongName }: Props) {
+}) {
   return clickableSongName ? (
     <Link
       prefetch={false}

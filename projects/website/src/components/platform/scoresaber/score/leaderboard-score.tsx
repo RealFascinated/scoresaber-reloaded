@@ -13,28 +13,15 @@ import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { formatScoreAccuracy } from "@ssr/common/utils/score.util";
 import { clsx } from "clsx";
 
-type Props = {
-  /**
-   * The score to display.
-   */
-  score: ScoreSaberScore;
-
-  /**
-   * The leaderboard for the score.
-   */
-  leaderboard: ScoreSaberLeaderboard;
-
-  /**
-   * The claimed player.
-   */
-  highlightedPlayerId?: string;
-};
-
 export default function ScoreSaberLeaderboardScore({
   score,
   leaderboard,
   highlightedPlayerId,
-}: Props) {
+}: {
+  score: ScoreSaberScore;
+  leaderboard: ScoreSaberLeaderboard;
+  highlightedPlayerId?: string;
+}) {
   const scorePlayer = score.playerInfo;
 
   return (

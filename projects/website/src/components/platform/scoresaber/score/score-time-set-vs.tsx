@@ -3,14 +3,7 @@ import { format } from "@formkit/tempo";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { timeAgo } from "@ssr/common/utils/time-utils";
 
-type ScoreTimeSetProps = {
-  /**
-   * The score that was set.
-   */
-  score: ScoreSaberScore;
-};
-
-export function ScoreSaberScoreTimeSetVs({ score }: ScoreTimeSetProps) {
+export function ScoreSaberScoreTimeSetVs({ score }: { score: ScoreSaberScore }) {
   if (!score.previousScore) {
     return undefined;
   }

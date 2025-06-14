@@ -114,7 +114,7 @@ export default function AccSaberPlayerScores({ player, sort, page, type, order }
                 variant={type.value === currentType ? "default" : "outline"}
                 onClick={() => setCurrentType(type.value as AccSaberScoreType)}
                 size="sm"
-                className="flex items-center gap-1"
+                className="flex items-center"
               >
                 {type.name}
               </Button>
@@ -134,10 +134,8 @@ export default function AccSaberPlayerScores({ player, sort, page, type, order }
                   )
                 }
                 size="sm"
-                className="flex items-center gap-1"
+                className="flex items-center gap-1.5"
               >
-                {`${capitalizeFirstLetter(sortOption.name)}`}
-
                 {/* Order / Icon */}
                 {sortOption.value === currentSort ? (
                   currentOrder === "desc" ? (
@@ -148,6 +146,8 @@ export default function AccSaberPlayerScores({ player, sort, page, type, order }
                 ) : (
                   sortOption.icon
                 )}
+
+                {`${capitalizeFirstLetter(sortOption.name)}`}
               </Button>
             ))}
           </div>

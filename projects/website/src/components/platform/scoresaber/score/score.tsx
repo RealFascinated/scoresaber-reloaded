@@ -33,23 +33,6 @@ import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
 import { ScoreHistoryGraph } from "./score-views/score-history-graph";
 
-type ScoreProps = {
-  highlightedPlayerId?: string;
-  score: ScoreSaberScore;
-  leaderboard: ScoreSaberLeaderboard;
-  beatSaverMap?: BeatSaverMapResponse;
-  playerAbove?: ScoreSaberLeaderboardPlayerInfoToken;
-  settings?: {
-    noScoreButtons?: boolean;
-    hideLeaderboardDropdown?: boolean;
-    defaultLeaderboardDropdown?: ScoreMode;
-    hideAccuracyChanger?: boolean;
-    disablePadding?: boolean;
-    hideRank?: boolean;
-    allowLeaderboardPreview?: boolean;
-  };
-};
-
 type DropdownData = {
   scoreStats?: ScoreStatsResponse;
 };
@@ -80,7 +63,22 @@ export default function ScoreSaberScoreDisplay({
   settings,
   highlightedPlayerId,
   playerAbove,
-}: ScoreProps) {
+}: {
+  highlightedPlayerId?: string;
+  score: ScoreSaberScore;
+  leaderboard: ScoreSaberLeaderboard;
+  beatSaverMap?: BeatSaverMapResponse;
+  playerAbove?: ScoreSaberLeaderboardPlayerInfoToken;
+  settings?: {
+    noScoreButtons?: boolean;
+    hideLeaderboardDropdown?: boolean;
+    defaultLeaderboardDropdown?: ScoreMode;
+    hideAccuracyChanger?: boolean;
+    disablePadding?: boolean;
+    hideRank?: boolean;
+    allowLeaderboardPreview?: boolean;
+  };
+}) {
   const [baseScore, setBaseScore] = useState(score.score);
   const [isLeaderboardExpanded, setIsLeaderboardExpanded] = useState(false);
   const [mode, setMode] = useState<ScoreMode>(settings?.defaultLeaderboardDropdown ?? defaultMode);
