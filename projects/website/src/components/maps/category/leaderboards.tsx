@@ -11,7 +11,7 @@ import { useIsMobile } from "@/hooks/use-is-mobile";
 import usePageNavigation from "@/hooks/use-page-navigation";
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
-import { timeAgo } from "@ssr/common/utils/time-utils";
+import { formatDate, timeAgo } from "@ssr/common/utils/time-utils";
 import { useQuery } from "@tanstack/react-query";
 import { useDebounce } from "@uidotdev/usehooks";
 import { ChartBarIcon } from "lucide-react";
@@ -114,7 +114,7 @@ export default function Leaderboards({ initialPage }: LeaderboardsProps) {
                             display={
                               <p>
                                 {leaderboard.status == "Unranked" ? "Created" : leaderboard.status}{" "}
-                                {timeAgo(date)}
+                                {timeAgo(date)} ({formatDate(date, "Do MMMM, YYYY HH:mm a")})
                               </p>
                             }
                           >
