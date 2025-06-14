@@ -342,12 +342,7 @@ export default class BeatLeaderService {
     additionalData: AdditionalScoreData
   ): AdditionalScoreData {
     return {
-      ...removeObjectFields<AdditionalScoreData>(additionalData, [
-        "_id",
-        "__v",
-        "songDifficulty",
-        "songScore",
-      ]),
+      ...removeObjectFields<AdditionalScoreData>(additionalData, ["_id", "__v"]),
     } as AdditionalScoreData;
   }
 }
