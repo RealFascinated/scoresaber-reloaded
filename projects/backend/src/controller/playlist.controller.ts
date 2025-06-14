@@ -99,7 +99,6 @@ export default class PlaylistController {
       )
     );
     response.headers.set("Content-Type", "image/png");
-    response.headers.set("Cache-Control", "public, max-age=3600");
     return response;
   }
 

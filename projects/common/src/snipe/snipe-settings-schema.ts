@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 export const snipeSettingsSchema = z.object({
+  name: z.string().min(1).max(32).optional(),
   sort: z.enum(["top", "recent"]),
   limit: z.number().min(25).max(250),
   starRange: z.object({

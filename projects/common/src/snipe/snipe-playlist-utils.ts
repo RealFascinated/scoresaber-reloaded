@@ -11,6 +11,7 @@ export function parseSnipePlaylistSettings(settingsBase64?: string, type?: strin
     ? (JSON.parse(Buffer.from(settingsBase64, "base64").toString()) as SnipeSettings)
     : // Default values
       {
+        name: "Snipe Playlist",
         limit: 100,
         sort: "top",
         starRange: {

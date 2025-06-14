@@ -21,6 +21,7 @@ import {
   FormItem,
   FormLabel,
 } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -59,6 +60,7 @@ export default function SnipePlaylistCreator({ toSnipe }: SnipePlaylistCreatorPr
   const form = useForm<z.infer<typeof snipeSettingsSchema>>({
     resolver: zodResolver(snipeSettingsSchema),
     defaultValues: {
+      name: `Snipe ${toSnipe.name}`,
       sort: "top",
       limit: 100,
       starRange: {
@@ -71,6 +73,9 @@ export default function SnipePlaylistCreator({ toSnipe }: SnipePlaylistCreatorPr
       },
     },
   });
+
+  // Watch form values to update preview link
+  const formValues = form.watch();
 
   const onSubmit = async (data: z.infer<typeof snipeSettingsSchema>) => {
     const encodedData = encodeSnipePlaylistSettings(data);
@@ -104,7 +109,7 @@ export default function SnipePlaylistCreator({ toSnipe }: SnipePlaylistCreatorPr
         </SimpleTooltip>
       </DialogTrigger>
 
-      <DialogContent className="bg-secondary">
+      <DialogContent className="bg-secondary sm:max-w-[625px] sm:h-auto max-w-screen h-screen">
         <DialogHeader>
           <DialogTitle>Create Snipe Playlist</DialogTitle>
           <DialogDescription>
@@ -115,6 +120,20 @@ export default function SnipePlaylistCreator({ toSnipe }: SnipePlaylistCreatorPr
         {/* Form */}
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-2">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Name</FormLabel>
+                  <FormDescription>The name of the playlist.</FormDescription>
+                  <FormControl>
+                    <Input placeholder="Snipe Playlist" {...field} />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
             <FormField
               control={form.control}
               name="sort"
@@ -224,7 +243,7 @@ export default function SnipePlaylistCreator({ toSnipe }: SnipePlaylistCreatorPr
 
               {/* Preview Playlist Art */}
               <Link
-                href={`${env.NEXT_PUBLIC_API_URL}/playlist/snipe/preview?toSnipe=${toSnipe.id}&settings=${encodeSnipePlaylistSettings(form.getValues())}`}
+                href={`${env.NEXT_PUBLIC_API_URL}/playlist/snipe/preview?toSnipe=${toSnipe.id}&settings=${encodeSnipePlaylistSettings(formValues)}`}
                 target="_blank"
                 prefetch={false}
               >

@@ -19,30 +19,42 @@ export async function generateSnipePlaylistImage(
 
   return generatePlaylistImage("SSR", {
     lines: [
-      {
-        text: `Snipe (${type})`,
-        color: "#222222",
-        fontSize: 55,
-      },
-      {
-        text: truncateText(toSnipe.name, 16)!,
-        color: "#222222",
-        fontSize: 45,
-      },
+      ...(settings.name
+        ? [
+            {
+              text: settings.name,
+              color: "#222222",
+              fontSize: 45,
+              wrap: true,
+            },
+          ]
+        : [
+            {
+              text: truncateText(toSnipe.name, 16)!,
+              color: "#222222",
+              fontSize: 45,
+            },
+          ]),
+
       {
         text: ``,
+        color: "#222222",
+        fontSize: 25,
+      },
+      {
+        text: `${type} Scores`,
         color: "#222222",
         fontSize: 45,
       },
       {
         text: `${settings.starRange.min}⭐ - ${settings.starRange.max}⭐`,
         color: "#2d2d2d",
-        fontSize: 50,
+        fontSize: 45,
       },
       {
         text: `${settings.accuracyRange.min}% - ${settings.accuracyRange.max}%`,
         color: "#2d2d2d",
-        fontSize: 50,
+        fontSize: 45,
       },
     ],
   });
@@ -111,7 +123,7 @@ export async function generatePlaylistImage(
       {
         text: author,
         color: "#000",
-        fontSize: 100,
+        fontSize: 60,
       },
       // Title
       ...(options.title
@@ -128,7 +140,7 @@ export async function generatePlaylistImage(
       ...(options.lines || []),
     ],
     "center",
-    0.8
+    1
   );
   return (await image.build()).toString("base64");
 }

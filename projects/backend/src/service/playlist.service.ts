@@ -419,7 +419,8 @@ export default class PlaylistService {
         user,
         type,
         settings,
-        `Snipe - ${truncateText(toSnipePlayer.name, 16)} (${capitalizeFirstLetter(settings.sort)})`,
+        settings.name ||
+          `Snipe - ${truncateText(toSnipePlayer.name, 16)} (${capitalizeFirstLetter(settings.sort)})`,
         formattedScores,
         await generateSnipePlaylistImage(settings, toSnipePlayer)
       );
