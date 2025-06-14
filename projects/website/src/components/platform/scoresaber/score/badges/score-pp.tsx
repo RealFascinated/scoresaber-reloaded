@@ -50,6 +50,7 @@ export function ScorePpBadge({ score, leaderboard, showDifference = true }: Scor
               </div>
             </div>
           }
+          showOnMobile
         >
           <p>{formatPp(pp)}pp</p>
         </SimpleTooltip>

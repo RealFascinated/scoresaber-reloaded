@@ -62,17 +62,17 @@ export default function Settings() {
           <FaCog className="size-5 text-zinc-200 hover:animate-spin-slow transition-colors hover:text-primary cursor-pointer" />
         </SimpleTooltip>
       </DialogTrigger>
-      <DialogContent className="max-w-[800px] h-[600px] flex flex-col">
+      <DialogContent className="max-w-[800px] w-[95vw] h-[600px] max-h-[90vh] flex flex-col">
         <DialogTitle className="text-xl font-semibold mb-4">Settings</DialogTitle>
 
-        <div className="flex gap-6 h-full">
+        <div className="flex flex-col md:flex-row gap-6 h-full">
           {/* Sidebar */}
-          <div className="w-32 space-y-1">
+          <div className="flex md:flex-col md:w-32 gap-2 md:gap-1 overflow-x-auto md:overflow-x-visible">
             {categories.map(category => (
               <Button
                 key={category.name}
                 variant={selectedCategory.name === category.name ? "default" : "ghost"}
-                className="w-full justify-start"
+                className="whitespace-nowrap md:w-full justify-start"
                 onClick={() => setSelectedCategory(category)}
               >
                 {category.icon()}
@@ -87,13 +87,15 @@ export default function Settings() {
           </div>
         </div>
 
-        <div className="flex justify-between items-center mt-4 pt-4 border-t">
-          <div className="flex gap-2">
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4 mt-4 pt-4 border-t">
+          <div className="flex flex-wrap gap-2 justify-center md:justify-start">
             <ResetDatabase />
             <ExportSettings />
             <ImportSettings />
           </div>
-          <Button onClick={save}>Save Changes</Button>
+          <Button onClick={save} className="w-full md:w-auto">
+            Save Changes
+          </Button>
         </div>
       </DialogContent>
     </Dialog>

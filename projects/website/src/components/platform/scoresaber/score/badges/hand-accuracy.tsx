@@ -32,6 +32,7 @@ export function HandAccuracyBadge({ score, hand }: HandAccuracyProps) {
             <p>Accuracy: {((currentHandAccuracy / 115) * 100).toFixed(2)}%</p>
           </>
         }
+        showOnMobile
       >
         <p>{currentHandAccuracy.toFixed(2)}</p>
       </SimpleTooltip>
@@ -44,6 +45,7 @@ export function HandAccuracyBadge({ score, hand }: HandAccuracyProps) {
               <p>Accuracy: {((previousHandAccuracy / 115) * 100).toFixed(2)}%</p>
             </>
           }
+          showOnMobile
         >
           <Change
             className="text-xs"

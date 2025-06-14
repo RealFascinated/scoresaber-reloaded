@@ -53,6 +53,7 @@ export function ScoreAccuracyBadge({ score, showDifference = true }: ScoreAccura
               {failed && <p className="text-red-500">Failed</p>}
             </div>
           }
+          showOnMobile
         >
           <p>
             {formatScoreAccuracy(score)}{" "}

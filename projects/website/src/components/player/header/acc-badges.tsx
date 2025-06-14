@@ -18,6 +18,7 @@ export default function PlayerAccBadges({ badges }: { badges: AccBadges }) {
               </div>
             }
             key={name}
+            showOnMobile
           >
             <StatValue name={badge.name} color={badge.color} value={count} className="h-full" />
           </SimpleTooltip>

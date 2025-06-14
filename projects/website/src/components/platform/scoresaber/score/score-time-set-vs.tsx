@@ -18,6 +18,7 @@ export function ScoreSaberScoreTimeSetVs({ score }: { score: ScoreSaberScore }) 
           })}
         </p>
       }
+      showOnMobile
     >
       <div>
         <div className="text-xs text-gray-400 flex flex-row gap-2 items-center">

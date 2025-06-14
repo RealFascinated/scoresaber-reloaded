@@ -66,6 +66,7 @@ export default function ScoreSaberScoreInfo({
             )}
           </div>
         }
+        showOnMobile
       >
         <Image
           src={`https://cdn.fascinated.cc/assets/hmds/${hmd.logo}`}

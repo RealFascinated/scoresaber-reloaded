@@ -14,6 +14,7 @@ export default function PlayerBadges({ player }: Props) {
           <SimpleTooltip
             key={index}
             display={<p className="cursor-default pointer-events-none">{badge.description}</p>}
+            showOnMobile
           >
             <div>
               <Image src={badge.url} alt={badge.description} width={80} height={30} />

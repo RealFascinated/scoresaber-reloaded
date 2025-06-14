@@ -72,6 +72,7 @@ export function ScoreMissesTooltip({
           ) : undefined}
         </div>
       }
+      showOnMobile
     >
       {children}
     </SimpleTooltip>

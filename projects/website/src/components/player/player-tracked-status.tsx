@@ -21,7 +21,7 @@ export default function PlayerTrackedStatus({ player }: Props) {
             <p>This player is being tracked!</p>
           </div>
         }
-        side="bottom"
+        showOnMobile
       >
         <InformationCircleIcon className="w-[22px] h-[22px] text-neutral-200" />
       </SimpleTooltip>

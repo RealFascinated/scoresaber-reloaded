@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "@/common/utils";
+import { useIsMobile } from "@/hooks/use-is-mobile";
 import * as React from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
@@ -22,26 +23,27 @@ const createPortalContainer = () => {
 // Singleton portal container
 let portalContainer: HTMLDivElement | null = null;
 
-interface TooltipProps {
-  children: React.ReactNode;
-  content: React.ReactNode;
-  side?: "top" | "right" | "bottom" | "left";
-  className?: string;
-  delayDuration?: number;
-}
-
 export const Tooltip = React.memo(function Tooltip({
   children,
   content,
   side = "top",
   className,
   delayDuration = 0,
-}: TooltipProps) {
+  showOnMobile = false,
+}: {
+  children: React.ReactNode;
+  content: React.ReactNode;
+  side?: "top" | "right" | "bottom" | "left";
+  className?: string;
+  delayDuration?: number;
+  showOnMobile?: boolean;
+}) {
+  const isMobile = useIsMobile();
+
   const [isOpen, setIsOpen] = useState(false);
+  const [isPositioned, setIsPositioned] = useState(false);
   const triggerRef = useRef<HTMLDivElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
-  const rafRef = useRef<number | undefined>(undefined);
-  const lastPositionRef = useRef<{ top: number; left: number } | null>(null);
 
   // Initialize shared portal container
   useEffect(() => {
@@ -49,115 +51,137 @@ export const Tooltip = React.memo(function Tooltip({
       portalContainer = createPortalContainer();
     }
     return () => {
-      if (rafRef.current) {
-        cancelAnimationFrame(rafRef.current);
+      if (portalContainer && portalContainer.parentNode) {
+        portalContainer.parentNode.removeChild(portalContainer);
+        portalContainer = null;
       }
     };
   }, []);
+
+  const handleClick = useCallback(() => {
+    if (isMobile) {
+      console.log("Click handler called");
+      setIsPositioned(false);
+      setIsOpen(prev => !prev);
+    }
+  }, [isMobile]);
+
+  // Add click outside handler
+  useEffect(() => {
+    if (!isMobile || !isOpen) return;
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        triggerRef.current &&
+        !triggerRef.current.contains(event.target as Node) &&
+        tooltipRef.current &&
+        !tooltipRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    };
+
+    const handleScroll = () => {
+      setIsOpen(false);
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("scroll", handleScroll);
+    };
+  }, [isMobile, isOpen]);
 
   const updatePosition = useCallback(() => {
     if (!isOpen || !triggerRef.current || !tooltipRef.current) return;
 
-    if (rafRef.current) {
-      cancelAnimationFrame(rafRef.current);
+    const trigger = triggerRef.current;
+    const tooltip = tooltipRef.current;
+    if (!trigger || !tooltip) return;
+
+    const triggerRect = trigger.getBoundingClientRect();
+    const tooltipRect = tooltip.getBoundingClientRect();
+
+    let top = 0;
+    let left = 0;
+
+    switch (side) {
+      case "top":
+        top = triggerRect.top - tooltipRect.height - 4;
+        left = triggerRect.left + (triggerRect.width - tooltipRect.width) / 2;
+        break;
+      case "bottom":
+        top = triggerRect.bottom + 4;
+        left = triggerRect.left + (triggerRect.width - tooltipRect.width) / 2;
+        break;
+      case "left":
+        top = triggerRect.top + (triggerRect.height - tooltipRect.height) / 2;
+        left = triggerRect.left - tooltipRect.width - 4;
+        break;
+      case "right":
+        top = triggerRect.top + (triggerRect.height - tooltipRect.height) / 2;
+        left = triggerRect.right + 4;
+        break;
     }
 
-    rafRef.current = requestAnimationFrame(() => {
-      const trigger = triggerRef.current;
-      const tooltip = tooltipRef.current;
-      if (!trigger || !tooltip) return;
+    // Ensure tooltip stays within viewport
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
 
-      const triggerRect = trigger.getBoundingClientRect();
-      const tooltipRect = tooltip.getBoundingClientRect();
+    if (left < 0) left = 0;
+    if (top < 0) top = 0;
+    if (left + tooltipRect.width > viewportWidth) {
+      left = viewportWidth - tooltipRect.width;
+    }
+    if (top + tooltipRect.height > viewportHeight) {
+      top = viewportHeight - tooltipRect.height;
+    }
 
-      let top = 0;
-      let left = 0;
-
-      switch (side) {
-        case "top":
-          top = triggerRect.top - tooltipRect.height - 4;
-          left = triggerRect.left + (triggerRect.width - tooltipRect.width) / 2;
-          break;
-        case "bottom":
-          top = triggerRect.bottom + 4;
-          left = triggerRect.left + (triggerRect.width - tooltipRect.width) / 2;
-          break;
-        case "left":
-          top = triggerRect.top + (triggerRect.height - tooltipRect.height) / 2;
-          left = triggerRect.left - tooltipRect.width - 4;
-          break;
-        case "right":
-          top = triggerRect.top + (triggerRect.height - tooltipRect.height) / 2;
-          left = triggerRect.right + 4;
-          break;
-      }
-
-      // Ensure tooltip stays within viewport
-      const viewportWidth = window.innerWidth;
-      const viewportHeight = window.innerHeight;
-
-      if (left < 0) left = 0;
-      if (top < 0) top = 0;
-      if (left + tooltipRect.width > viewportWidth) {
-        left = viewportWidth - tooltipRect.width;
-      }
-      if (top + tooltipRect.height > viewportHeight) {
-        top = viewportHeight - tooltipRect.height;
-      }
-
-      // Only update if position changed
-      if (
-        !lastPositionRef.current ||
-        lastPositionRef.current.top !== top ||
-        lastPositionRef.current.left !== left
-      ) {
-        tooltip.style.top = `${top}px`;
-        tooltip.style.left = `${left}px`;
-        lastPositionRef.current = { top, left };
-      }
-    });
+    tooltip.style.top = `${top}px`;
+    tooltip.style.left = `${left}px`;
+    setIsPositioned(true);
   }, [isOpen, side]);
 
-  useEffect(() => {
-    if (!isOpen) return;
-
-    updatePosition();
-    const handleScroll = () => requestAnimationFrame(updatePosition);
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    window.addEventListener("resize", handleScroll, { passive: true });
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("resize", handleScroll);
-    };
-  }, [isOpen, updatePosition]);
-
-  const handleMouseEnter = useCallback(() => {
-    setIsOpen(true);
-  }, []);
-
-  const handleMouseLeave = useCallback(() => {
-    setIsOpen(false);
-  }, []);
-
-  const handleClick = useCallback(() => {
-    setIsOpen(true);
-  }, []);
-
-  // Update position after mount and when content changes
+  // Update position when tooltip opens or content changes
   useEffect(() => {
     if (isOpen) {
-      requestAnimationFrame(updatePosition);
+      // Small delay to ensure the tooltip is mounted
+      const timeoutId = setTimeout(updatePosition, 0);
+      return () => clearTimeout(timeoutId);
     }
   }, [isOpen, content, updatePosition]);
+
+  const handleMouseEnter = useCallback(() => {
+    if (!isMobile) {
+      setIsOpen(true);
+    }
+  }, [isMobile]);
+
+  const handleMouseLeave = useCallback(() => {
+    if (!isMobile) {
+      setIsOpen(false);
+    }
+  }, [isMobile]);
+
+  console.log({
+    isMobile,
+    showOnMobile,
+  });
+
+  if (isMobile && !showOnMobile) {
+    return <div>{children}</div>;
+  }
 
   return (
     <>
       <div
         ref={triggerRef}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-        onClick={handleClick}
+        onMouseEnter={!isMobile ? handleMouseEnter : undefined}
+        onMouseLeave={!isMobile ? handleMouseLeave : undefined}
+        onClick={isMobile ? handleClick : undefined}
+        style={{ cursor: isMobile ? "pointer" : "default" }}
       >
         {children}
       </div>
@@ -171,11 +195,14 @@ export const Tooltip = React.memo(function Tooltip({
               pointerEvents: "auto",
               zIndex: 9999,
               border: "1px solid hsl(12 6.5% 25.1%)",
-              transition: `opacity ${delayDuration}ms ease-in-out`,
+              opacity: isPositioned ? 1 : 0,
+              transition: isMobile ? "none" : `opacity ${delayDuration}ms ease-in-out`,
             }}
             className={cn(
-              "z-50 overflow-hidden rounded-md bg-accent px-2.5 py-1 text-[13px] text-secondary-foreground shadow-md animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95",
-              {
+              "z-50 overflow-hidden rounded-md bg-accent px-2.5 py-1 text-[13px] text-secondary-foreground shadow-md",
+              !isMobile &&
+                "animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95",
+              !isMobile && {
                 "data-[side=bottom]:slide-in-from-top-2": side === "bottom",
                 "data-[side=left]:slide-in-from-right-2": side === "left",
                 "data-[side=right]:slide-in-from-left-2": side === "right",
@@ -183,8 +210,8 @@ export const Tooltip = React.memo(function Tooltip({
               },
               className
             )}
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
+            onMouseEnter={!isMobile ? handleMouseEnter : undefined}
+            onMouseLeave={!isMobile ? handleMouseLeave : undefined}
           >
             {content}
           </div>,

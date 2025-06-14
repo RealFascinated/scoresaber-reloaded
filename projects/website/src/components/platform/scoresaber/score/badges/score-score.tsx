@@ -12,6 +12,7 @@ export function ScoreScoreBadge({ score }: ScoreBadgeProps) {
       {previousScore && previousScore.change && (
         <SimpleTooltip
           display={<p>Previous Score: {formatNumberWithCommas(previousScore.score)}</p>}
+          showOnMobile
         >
           <Change className="text-xs" change={previousScore.change.score} />
         </SimpleTooltip>

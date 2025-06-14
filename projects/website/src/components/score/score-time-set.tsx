@@ -20,6 +20,7 @@ export function ScoreTimeSet({ timestamp }: ScoreTimeSetProps) {
           })}
         </p>
       }
+      showOnMobile
     >
       <p className="text-sm cursor-default select-none">{timeAgo(new Date(timestamp))}</p>
     </SimpleTooltip>

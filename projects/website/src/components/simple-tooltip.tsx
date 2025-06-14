@@ -5,31 +5,21 @@ import { clsx } from "clsx";
 import React from "react";
 import { Tooltip as ShadCnTooltip } from "./ui/tooltip";
 
-type Props = {
-  /**
-   * What will trigger the tooltip
-   */
+export default function SimpleTooltip({
+  children,
+  display,
+  side,
+  className,
+  showOnMobile,
+}: {
   children: React.ReactNode;
-
-  /**
-   * What will be displayed in the tooltip
-   */
   display: React.ReactNode;
-
-  /**
-   * The additional class names
-   */
-  className?: string;
-
-  /**
-   * Where the tooltip will be displayed
-   */
   side?: (typeof SIDE_OPTIONS)[number];
-};
-
-export default function SimpleTooltip({ children, display, side, className }: Props) {
+  className?: string;
+  showOnMobile?: boolean;
+}) {
   return (
-    <ShadCnTooltip content={display} side={side}>
+    <ShadCnTooltip content={display} side={side} showOnMobile={showOnMobile}>
       <div className={clsx("cursor-default w-full", className)}>{children}</div>
     </ShadCnTooltip>
   );
