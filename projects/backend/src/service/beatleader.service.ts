@@ -10,6 +10,7 @@ import { removeObjectFields } from "@ssr/common/object.util";
 import { ScoreStatsToken } from "@ssr/common/types/token/beatleader/score-stats/score-stats";
 import { BeatLeaderScoreToken } from "@ssr/common/types/token/beatleader/score/score";
 import { BeatLeaderScoreImprovementToken } from "@ssr/common/types/token/beatleader/score/score-improvement";
+import { getBeatLeaderReplayId } from "@ssr/common/utils/beatleader-utils";
 import Request from "@ssr/common/utils/request";
 import { isProduction } from "@ssr/common/utils/utils";
 import { DiscordChannels, logToChannel } from "../bot/bot";
@@ -35,6 +36,7 @@ export default class BeatLeaderService {
     playerId: string,
     songHash: string,
     songDifficulty: string,
+    songCharacteristic: string,
     songScore: number
   ): Promise<AdditionalScoreData | undefined> {
     return fetchWithCache(
@@ -45,6 +47,7 @@ export default class BeatLeaderService {
           playerId: playerId,
           songHash: songHash.toUpperCase(),
           songDifficulty: songDifficulty,
+          songCharacteristic: songCharacteristic,
           songScore: songScore,
         }).lean();
         if (!additionalData) {
@@ -104,59 +107,17 @@ export default class BeatLeaderService {
       return;
     }
 
-    const scoreStats = await ApiServiceRegistry.getInstance()
-      .getBeatLeaderService()
-      .lookupScoreStats(score.id);
-    if (scoreStats) {
-      await this.trackScoreStats(score.id, scoreStats);
-    }
-
-    // Only save replays in production
-    let savedReplayId: string | undefined;
-    if (isProduction()) {
-      // Cache replay for this score if the player is allowed to track replays or if the score is a top 50 global score
-      if (player && (player.trackReplays || isTop50GlobalScore)) {
-        try {
-          const replayId = `${score.id}-${playerId}-${leaderboard.difficulty.difficultyName}-${leaderboard.difficulty.modeName}-${leaderboard.song.hash.toUpperCase()}.bsor`;
-          const replayData = await Request.get<ArrayBuffer>(
-            `https://cdn.replays.beatleader.xyz/${replayId}`,
-            {
-              returns: "arraybuffer",
-            }
-          );
-
-          if (replayData !== undefined) {
-            await MinioService.saveFile(
-              MinioBucket.BeatLeaderReplays,
-              `${replayId}`,
-              Buffer.from(replayData)
-            );
-            savedReplayId = replayId;
-          }
-        } catch (error) {
-          logToChannel(
-            DiscordChannels.backendLogs,
-            createGenericEmbed(
-              "BeatLeader Replays",
-              `Failed to save replay for ${score.id}: ${error}`
-            )
-          );
-          console.error(`Failed to save replay for ${score.id}: ${error}`);
-        }
-      }
-    }
-
     const getMisses = (score: BeatLeaderScoreToken | BeatLeaderScoreImprovementToken) => {
       return score.missedNotes + score.badCuts + score.bombCuts;
     };
 
     const difficulty = leaderboard.difficulty;
-    const difficultyKey = `${difficulty.difficultyName}-${difficulty.modeName}`;
     const rawScoreImprovement = score.scoreImprovement;
     const data = {
       playerId: playerId,
       songHash: leaderboard.song.hash.toUpperCase(),
-      songDifficulty: difficultyKey,
+      songDifficulty: difficulty.difficultyName,
+      songCharacteristic: difficulty.modeName,
       songScore: score.baseScore,
       scoreId: score.id,
       leaderboardId: leaderboard.id,
@@ -177,7 +138,6 @@ export default class BeatLeaderService {
       scoreStats: isProduction()
         ? await ApiServiceRegistry.getInstance().getBeatLeaderService().lookupScoreStats(score.id)
         : undefined,
-      cachedReplayId: savedReplayId,
       timestamp: new Date(Number(score.timeset) * 1000),
     } as AdditionalScoreData;
     if (rawScoreImprovement && rawScoreImprovement.score > 0) {
@@ -197,6 +157,48 @@ export default class BeatLeaderService {
           right: rawScoreImprovement.accRight,
         },
       };
+    }
+
+    const scoreStats = await ApiServiceRegistry.getInstance()
+      .getBeatLeaderService()
+      .lookupScoreStats(score.id);
+    if (scoreStats) {
+      await this.trackScoreStats(score.id, scoreStats);
+    }
+
+    // Only save replays in production
+    if (isProduction()) {
+      // Cache replay for this score if the player is allowed to track replays or if the score is a top 50 global score
+      if (player && (player.trackReplays || isTop50GlobalScore)) {
+        try {
+          const replayId = getBeatLeaderReplayId(data);
+          const replayData = await Request.get<ArrayBuffer>(
+            `https://cdn.replays.beatleader.xyz/${replayId}`,
+            {
+              returns: "arraybuffer",
+            }
+          );
+
+          if (replayData !== undefined) {
+            await MinioService.saveFile(
+              MinioBucket.BeatLeaderReplays,
+              `${replayId}`,
+              Buffer.from(replayData)
+            );
+
+            data.savedReplay = true;
+          }
+        } catch (error) {
+          logToChannel(
+            DiscordChannels.backendLogs,
+            createGenericEmbed(
+              "BeatLeader Replays",
+              `Failed to save replay for ${score.id}: ${error}`
+            )
+          );
+          console.error(`Failed to save replay for ${score.id}: ${error}`);
+        }
+      }
     }
 
     await AdditionalScoreDataModel.create(data);

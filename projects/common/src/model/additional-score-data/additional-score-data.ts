@@ -6,6 +6,8 @@ import {
   Severity,
 } from "@typegoose/typegoose";
 import { Document } from "mongoose";
+import type { MapDifficulty } from "src/score/map-difficulty";
+import type { MapCharacteristic } from "src/types/map-characteristic";
 import { HandAccuracy } from "./hand-accuracy";
 import { Misses } from "./misses";
 
@@ -35,7 +37,13 @@ export class AdditionalScoreData {
    * The difficulty the score was set on.
    */
   @prop({ required: true, index: true })
-  public songDifficulty!: string;
+  public songDifficulty!: MapDifficulty;
+
+  /**
+   * The characteristic of the song.
+   */
+  @prop({ required: true, index: true })
+  public songCharacteristic!: MapCharacteristic;
 
   /**
    * The score of the play.
@@ -121,10 +129,10 @@ export class AdditionalScoreData {
   };
 
   /**
-   * The cached replay id.
+   * Whether the replay was saved to storage.
    */
   @prop({ required: false })
-  public cachedReplayId?: string;
+  public savedReplay?: boolean;
 
   /**
    * The date the score was set on.

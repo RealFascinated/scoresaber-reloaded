@@ -71,7 +71,8 @@ export class ScoreService {
       const additionalData = await BeatLeaderService.getAdditionalScoreDataFromSong(
         score.playerId,
         leaderboard.songHash,
-        `${leaderboard.difficulty.difficulty}-${leaderboard.difficulty.characteristic}`,
+        leaderboard.difficulty.difficulty,
+        leaderboard.difficulty.characteristic,
         score.score
       );
       if (additionalData !== undefined) {
@@ -428,7 +429,8 @@ export class ScoreService {
         ? BeatLeaderService.getAdditionalScoreDataFromSong(
             score.playerId,
             leaderboard.songHash,
-            `${leaderboard.difficulty.difficulty}-${leaderboard.difficulty.characteristic}`,
+            leaderboard.difficulty.difficulty,
+            leaderboard.difficulty.characteristic,
             score.score
           )
         : undefined,

@@ -3,9 +3,8 @@
 import BeatSaberPepeLogo from "@/components/logos/beatsaber-pepe-logo";
 import ScoreButton from "@/components/score/button/score-button";
 import useDatabase from "@/hooks/use-database";
-import { env } from "@ssr/common/env";
-import { getMinioBucketName, MinioBucket } from "@ssr/common/minio-buckets";
 import { AdditionalScoreData } from "@ssr/common/model/additional-score-data/additional-score-data";
+import { getBeatLeaderReplayUrl } from "@ssr/common/utils/beatleader-utils";
 import { useLiveQuery } from "dexie-react-hooks";
 
 type ScoreReplayButton = {
@@ -22,12 +21,7 @@ export function ScoreReplayButton({ additionalData }: ScoreReplayButton) {
 
   return (
     <ScoreButton
-      href={viewer.generateUrl(
-        additionalData.scoreId,
-        additionalData.cachedReplayId
-          ? `${env.NEXT_PUBLIC_CDN_URL}/${getMinioBucketName(MinioBucket.BeatLeaderReplays)}/${additionalData.cachedReplayId}`
-          : undefined
-      )}
+      href={viewer.generateUrl(additionalData.scoreId, getBeatLeaderReplayUrl(additionalData))}
       tooltip={<p>Click to view the score replay!</p>}
     >
       <BeatSaberPepeLogo />
