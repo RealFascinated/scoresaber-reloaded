@@ -1,103 +1,185 @@
 "use client";
 
-import ScoreSettings from "@/components/settings/category/score";
-import WebsiteSettings from "@/components/settings/category/website";
+import ScoreSettings from "@/components/settings/category/score-settings";
+import WebsiteSettings from "@/components/settings/category/website-settings";
 import { Button } from "@/components/ui/button";
-import { CubeIcon, GlobeAmericasIcon } from "@heroicons/react/24/solid";
-import { ReactNode, useRef, useState } from "react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { CubeIcon, GlobeAmericasIcon, XMarkIcon } from "@heroicons/react/24/solid";
+import { ReactNode, useEffect, useState } from "react";
+import { createPortal } from "react-dom";
+import { IconType } from "react-icons";
 import { FaCog } from "react-icons/fa";
 import SimpleTooltip from "../simple-tooltip";
-import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "../ui/dialog";
-import ExportSettings from "./export-settings";
-import ImportSettings from "./import-settings";
-import ResetDatabase from "./reset-database";
+import ExportSettings from "./buttons/export-settings";
+import ImportSettings from "./buttons/import-settings";
+import ResetDatabase from "./buttons/reset-database";
 
 type Category = {
   name: string;
-  icon: () => ReactNode;
-  component: (
-    onSave: () => void,
-    websiteFormRef: React.RefObject<{ submit: () => void }>,
-    scoreFormRef: React.RefObject<{ submit: () => void }>
-  ) => ReactNode;
+  icon: IconType;
+  component: ReactNode;
 };
 
 const categories: Category[] = [
   {
     name: "Website",
-    icon: () => <GlobeAmericasIcon className="size-5" />,
-    component: (
-      onSave: () => void,
-      websiteFormRef: React.RefObject<{ submit: () => void }>,
-      scoreFormRef: React.RefObject<{ submit: () => void }>
-    ) => <WebsiteSettings onSave={onSave} ref={websiteFormRef} />,
+    icon: GlobeAmericasIcon,
+    component: <WebsiteSettings />,
   },
   {
     name: "Scores",
-    icon: () => <CubeIcon className="size-5" />,
-    component: (
-      onSave: () => void,
-      websiteFormRef: React.RefObject<{ submit: () => void }>,
-      scoreFormRef: React.RefObject<{ submit: () => void }>
-    ) => <ScoreSettings onSave={onSave} ref={scoreFormRef} />,
+    icon: CubeIcon,
+    component: <ScoreSettings />,
   },
 ];
 
 export default function Settings() {
   const [selectedCategory, setSelectedCategory] = useState<Category>(categories[0]);
+  const [isOpen, setIsOpen] = useState(false);
 
-  // Create refs for the forms
-  const websiteFormRef = useRef<{ submit: () => void }>({ submit: () => {} });
-  const scoreFormRef = useRef<{ submit: () => void }>({ submit: () => {} });
+  // Handle body scroll lock
+  useEffect(() => {
+    document.body.style.overflow = isOpen ? "hidden" : "unset";
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [isOpen]);
 
-  function save() {
-    websiteFormRef.current?.submit();
-    scoreFormRef.current?.submit();
-  }
-
-  return (
-    <Dialog>
-      <DialogTrigger>
-        <SimpleTooltip display="Settings">
-          <FaCog className="size-5 text-zinc-200 hover:animate-spin-slow transition-colors hover:text-primary cursor-pointer" />
-        </SimpleTooltip>
-      </DialogTrigger>
-      <DialogContent className="max-w-[800px] w-[95vw] h-[600px] max-h-[90vh] flex flex-col">
-        <DialogTitle className="text-xl font-semibold mb-4">Settings</DialogTitle>
-
-        <div className="flex flex-col md:flex-row gap-6 h-full">
-          {/* Sidebar */}
-          <div className="flex md:flex-col md:w-32 gap-2 md:gap-1 overflow-x-auto md:overflow-x-visible">
-            {categories.map(category => (
-              <Button
-                key={category.name}
-                variant={selectedCategory.name === category.name ? "default" : "ghost"}
-                className="whitespace-nowrap md:w-full justify-start"
-                onClick={() => setSelectedCategory(category)}
+  const settingsContent = isOpen ? (
+    <div className="fixed inset-0 w-screen h-screen bg-background overflow-hidden z-50">
+      <div className="flex flex-col h-full">
+        {/* Header */}
+        <div className="flex items-center justify-between px-4 md:px-6 py-4 border-b border-border/50">
+          <div className="flex items-center gap-4">
+            <h1 className="text-xl font-semibold text-foreground">Settings</h1>
+            {/* Mobile Category Selector */}
+            <div className="md:hidden">
+              <Select
+                value={selectedCategory.name}
+                onValueChange={value => {
+                  const category = categories.find(c => c.name === value);
+                  if (category) setSelectedCategory(category);
+                }}
               >
-                {category.icon()}
-                <span className="ml-2">{category.name}</span>
-              </Button>
-            ))}
+                <SelectTrigger className="w-[200px]">
+                  <SelectValue>
+                    <div className="flex items-center gap-2">
+                      <selectedCategory.icon className="size-5" />
+                      <span>{selectedCategory.name}</span>
+                    </div>
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map(category => (
+                    <SelectItem key={category.name} value={category.name}>
+                      <div className="flex items-center gap-2">
+                        <category.icon className="size-5" />
+                        <span>{category.name}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-muted-foreground hover:text-foreground"
+            onClick={() => setIsOpen(false)}
+          >
+            <XMarkIcon className="size-5" />
+          </Button>
+        </div>
+
+        <div className="flex flex-1 min-h-0">
+          {/* Sidebar - Hidden on mobile */}
+          <div className="hidden md:block w-72 border-r border-border/50">
+            <div className="h-full flex flex-col">
+              <div className="p-6 pb-2">
+                <h2 className="text-sm font-medium text-muted-foreground tracking-wide">
+                  Settings
+                </h2>
+              </div>
+              <div className="flex-1 px-3 py-2">
+                {categories.map(category => (
+                  <div
+                    key={category.name}
+                    className={`mb-2 rounded-lg transition-all duration-200 ${
+                      selectedCategory.name === category.name
+                        ? "bg-primary/10"
+                        : "hover:bg-secondary/50"
+                    }`}
+                  >
+                    <Button
+                      variant="ghost"
+                      className={`w-full h-14 justify-start transition-all duration-200 ${
+                        selectedCategory.name === category.name
+                          ? "text-primary"
+                          : "text-muted-foreground hover:text-foreground"
+                      }`}
+                      onClick={() => setSelectedCategory(category)}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div
+                          className={`p-2 rounded-lg ${
+                            selectedCategory.name === category.name
+                              ? "bg-primary/20"
+                              : "bg-secondary/50"
+                          }`}
+                        >
+                          <category.icon className="size-5" />
+                        </div>
+                        <div className="flex flex-col items-start">
+                          <span className="font-medium">{category.name}</span>
+                          <span className="text-xs text-muted-foreground">
+                            {category.name === "Website"
+                              ? "Customize your experience"
+                              : "Manage your scores"}
+                          </span>
+                        </div>
+                      </div>
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
 
           {/* Content */}
-          <div className="flex-1 overflow-auto">
-            {selectedCategory.component(save, websiteFormRef!, scoreFormRef!)}
+          <div className="flex-1 overflow-y-auto">
+            <div className="max-w-3xl mx-auto p-4 md:p-6">{selectedCategory.component}</div>
           </div>
         </div>
 
-        <div className="flex flex-col md:flex-row justify-between items-center gap-4 mt-4 pt-4 border-t">
-          <div className="flex flex-wrap gap-2 justify-center md:justify-start">
+        {/* Footer */}
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4 px-4 md:px-6 py-4 border-t border-border/50">
+          <div className="flex items-center gap-3 w-full md:w-auto justify-center md:justify-start">
             <ResetDatabase />
+            <div className="h-5 w-px bg-border/50" />
             <ExportSettings />
             <ImportSettings />
           </div>
-          <Button onClick={save} className="w-full md:w-auto">
-            Save Changes
-          </Button>
         </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </div>
+  ) : null;
+
+  return (
+    <>
+      <SimpleTooltip display="Settings">
+        <FaCog
+          className="size-5 text-muted-foreground hover:animate-spin-slow transition-colors hover:text-primary cursor-pointer"
+          onClick={() => setIsOpen(true)}
+        />
+      </SimpleTooltip>
+      {isOpen && createPortal(settingsContent, document.body)}
+    </>
   );
 }

@@ -3,8 +3,8 @@
 import useDatabase from "@/hooks/use-database";
 import { useRef } from "react";
 import { toast } from "sonner";
-import SimpleTooltip from "../simple-tooltip";
-import { Button } from "../ui/button";
+import SimpleTooltip from "../../simple-tooltip";
+import { Button } from "../../ui/button";
 export default function ImportSettings() {
   const database = useDatabase();
   const fileInputRef = useRef<HTMLInputElement | null>(null);

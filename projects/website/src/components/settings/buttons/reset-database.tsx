@@ -1,6 +1,6 @@
 import useDatabase from "@/hooks/use-database";
-import SimpleTooltip from "../simple-tooltip";
-import { Button } from "../ui/button";
+import SimpleTooltip from "../../simple-tooltip";
+import { Button } from "../../ui/button";
 
 export default function ResetDatabase() {
   const database = useDatabase();

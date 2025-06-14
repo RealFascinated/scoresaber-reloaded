@@ -2,8 +2,8 @@
 
 import { downloadTextFile } from "@/common/browser-utils";
 import useDatabase from "@/hooks/use-database";
-import SimpleTooltip from "../simple-tooltip";
-import { Button } from "../ui/button";
+import SimpleTooltip from "../../simple-tooltip";
+import { Button } from "../../ui/button";
 
 export default function ExportSettings() {
   const database = useDatabase();
