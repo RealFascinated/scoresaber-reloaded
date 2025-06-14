@@ -813,8 +813,7 @@ export default class LeaderboardService {
     await sendFile(
       DiscordChannels.rankedLogs,
       `ranked-batch-${date}.bplist`,
-      JSON.stringify(playlist, null, 2),
-      "<@&1338261690952978442>"
+      JSON.stringify(playlist, null, 2)
     );
     Logger.info("Logged leaderboard changes to Discord.");
   }
