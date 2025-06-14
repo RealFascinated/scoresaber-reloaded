@@ -25,7 +25,7 @@ export function ScoreReplayButton({ additionalData }: ScoreReplayButton) {
       href={viewer.generateUrl(
         additionalData.scoreId,
         additionalData.cachedReplayId
-          ? `?link=${env.NEXT_PUBLIC_CDN_URL}/${getMinioBucketName(MinioBucket.BeatLeaderReplays)}/${additionalData.cachedReplayId}`
+          ? `${env.NEXT_PUBLIC_CDN_URL}/${getMinioBucketName(MinioBucket.BeatLeaderReplays)}/${additionalData.cachedReplayId}`
           : undefined
       )}
       tooltip={<p>Click to view the score replay!</p>}
