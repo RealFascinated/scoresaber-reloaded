@@ -6,8 +6,8 @@ import {
   Severity,
 } from "@typegoose/typegoose";
 import { Document } from "mongoose";
-import type { MapDifficulty } from "src/score/map-difficulty";
-import type { MapCharacteristic } from "src/types/map-characteristic";
+import type { MapDifficulty } from "../../score/map-difficulty";
+import type { MapCharacteristic } from "../../types/map-characteristic";
 import { HandAccuracy } from "./hand-accuracy";
 import { Misses } from "./misses";
 
