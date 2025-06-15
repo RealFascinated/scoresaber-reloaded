@@ -158,21 +158,22 @@ export default class BeatLeaderService {
       };
     }
 
-    // Parallelize independent operations
-    const [, replayData] = await Promise.all([
-      // Save score stats (15 second delay to ensure the score stats are available on beatleader)
-      sleep(15_000).then(async () => {
-        await ApiServiceRegistry.getInstance()
-          .getBeatLeaderService()
-          .lookupScoreStats(score.id)
-          .then(async stats => {
-            if (stats) {
-              await this.trackScoreStats(score.id, stats);
-            }
-            return stats;
-          });
-      }),
+    // Save score stats (15 second delay to ensure the score stats are available on beatleader)
+    // run in background
+    sleep(30_000).then(async () => {
+      await ApiServiceRegistry.getInstance()
+        .getBeatLeaderService()
+        .lookupScoreStats(score.id)
+        .then(async stats => {
+          if (stats) {
+            await this.trackScoreStats(score.id, stats);
+          }
+          return stats;
+        });
+    });
 
+    // Parallelize independent operations
+    const [replayData] = await Promise.all([
       // Save replay data if needed
       (async () => {
         if (isProduction() && player && (player.trackReplays || isTop50GlobalScore)) {
