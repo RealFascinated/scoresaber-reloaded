@@ -1,25 +1,16 @@
-import { GamePlatform } from "@ssr/common/model/statistics/game-platform";
-import { PlatformStatisticsResponse } from "@ssr/common/response/platform-statistics-response";
-import { t } from "elysia";
+import { StatisticsResponse } from "@ssr/common/response/platform-statistics-response";
 import { Controller, Get } from "elysia-decorators";
 import StatisticsService from "../service/statistics.service";
 
 @Controller("/statistics")
 export default class StatisticsController {
-  @Get("/:platform", {
+  @Get("/scoresaber", {
     config: {},
     tags: ["statistics"],
-    params: t.Object({
-      platform: t.String({ required: true }),
-    }),
   })
-  public async getPlatformStatistics({
-    params: { platform },
-  }: {
-    params: { platform: GamePlatform };
-  }): Promise<PlatformStatisticsResponse> {
+  public async getPlatformStatistics(): Promise<StatisticsResponse> {
     return {
-      statistics: (await StatisticsService.getPlatform(platform))?.getPrevious(365) ?? {},
+      statistics: await StatisticsService.getScoreSaberStatistics(180),
     };
   }
 }

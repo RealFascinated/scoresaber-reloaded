@@ -7,7 +7,6 @@ import { DetailType } from "../detail-type";
 import { env } from "../env";
 import { ScoreSaberLeaderboard } from "../model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "../model/score/impl/scoresaber-score";
-import { GamePlatform } from "../model/statistics/game-platform";
 import { StatisticsType } from "../model/statistics/statistic-type";
 import { Page } from "../pagination";
 import ScoreSaberPlayer from "../player/impl/scoresaber-player";
@@ -106,13 +105,13 @@ class SSRApi {
   }
 
   /**
-   * Gets statistics for a platform.
+   * Gets statistics for ScoreSaber.
    *
-   * @param platform the platform to get statistics for
+   * @returns the statistics
    */
-  async getPlatformStatistics(platform: GamePlatform) {
+  async getScoreSaberPlatformStatistics() {
     return await Request.get<{ statistics: StatisticsType }>(
-      `${env.NEXT_PUBLIC_API_URL}/statistics/${platform}`
+      `${env.NEXT_PUBLIC_API_URL}/statistics/scoresaber`
     );
   }
 

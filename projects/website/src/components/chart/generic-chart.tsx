@@ -157,7 +157,9 @@ const GenericChart = ({ config, labels }: Props) => {
           title: { display: true, text: axis.displayName, color: "#ffffff" },
           ticks: {
             callback: (value: number) => {
-              return axis.valueFormatter?.(value) ?? value.toString();
+              // Format the value to avoid excessive decimal places
+              const formattedValue = Number(Number(value).toFixed(4));
+              return axis.valueFormatter?.(formattedValue) ?? formattedValue.toString();
             },
           },
           min: axis.min,

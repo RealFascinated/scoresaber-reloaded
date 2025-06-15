@@ -1,11 +1,10 @@
 "use client";
 
 import { DatasetConfig } from "@/common/chart/types";
-import { Colors } from "@/common/colors";
 import GenericStatisticChart from "@/components/platform-statistics/generic-statistic-chart";
 import { Button } from "@/components/ui/button";
 import { StatisticsType } from "@ssr/common/model/statistics/statistic-type";
-import { formatNumberWithCommas, formatPp, isWholeNumber } from "@ssr/common/utils/number-utils";
+import { formatNumberWithCommas, isWholeNumber } from "@ssr/common/utils/number-utils";
 import Link from "next/link";
 
 type Props = {
@@ -48,43 +47,6 @@ const datasetConfig: DatasetConfig[] = [
       },
     },
     labelFormatter: (value: number) => `Accounts: ${formatNumberWithCommas(value)}`,
-  },
-  {
-    title: "Scores Set",
-    field: "totalScores",
-    color: "#00ff6f",
-    axisId: "y",
-    type: "bar",
-    axisConfig: {
-      reverse: false,
-      display: true,
-      position: "left",
-      valueFormatter: value => {
-        if (isWholeNumber(value)) {
-          return value.toString();
-        }
-        return value.toFixed(1);
-      },
-    },
-    labelFormatter: (value: number) => `Scores Set: ${formatNumberWithCommas(value)}`,
-  },
-  {
-    title: "Daily Average PP (top 100 scores)",
-    field: "averagePp",
-    color: Colors.ranked,
-    axisId: "y",
-    axisConfig: {
-      reverse: false,
-      display: true,
-      position: "left",
-      valueFormatter: value => {
-        if (isWholeNumber(value)) {
-          return value.toString();
-        }
-        return value.toFixed(1);
-      },
-    },
-    labelFormatter: (value: number) => `PP: ${formatPp(value)}pp`,
   },
 ];
 

@@ -1,6 +1,6 @@
 import { StatisticsType } from "../model/statistics/statistic-type";
 
-export type PlatformStatisticsResponse = {
+export type StatisticsResponse = {
   /**
    * The statistics for this platform.
    */

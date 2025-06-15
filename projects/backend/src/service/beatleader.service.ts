@@ -17,9 +17,7 @@ import { sleep } from "bun";
 import { DiscordChannels, logToChannel } from "../bot/bot";
 import { fetchWithCache } from "../common/cache.util";
 import { createGenericEmbed } from "../common/discord/embed";
-import TrackedScoresMetric from "../metrics/impl/player/tracked-scores";
 import CacheService, { ServiceCache } from "./cache.service";
-import MetricsService, { MetricType } from "./metrics.service";
 import MinioService from "./minio.service";
 import { PlayerService } from "./player/player.service";
 
@@ -212,13 +210,6 @@ export default class BeatLeaderService {
     }
 
     await AdditionalScoreDataModel.create(data);
-
-    // Update metric
-    const trackedScoresMetric = (await MetricsService.getMetric(
-      MetricType.TRACKED_SCORES
-    )) as TrackedScoresMetric;
-    trackedScoresMetric.increment();
-
     Logger.info(
       `Tracked additional score data for "${scorePlayer.name}"(${playerId}) in ${Date.now() - before}ms`
     );

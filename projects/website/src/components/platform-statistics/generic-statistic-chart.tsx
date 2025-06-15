@@ -4,7 +4,7 @@ import { ChartConfig, DatasetConfig } from "@/common/chart/types";
 import GenericChart from "@/components/chart/generic-chart";
 import { Statistic } from "@ssr/common/model/statistics/statistic";
 import { StatisticsType } from "@ssr/common/model/statistics/statistic-type";
-import { getDaysAgoDate, parseDate } from "@ssr/common/utils/time-utils";
+import { getMidnightAlignedDate, parseDate } from "@ssr/common/utils/time-utils";
 
 type Props = {
   /**
@@ -20,40 +20,47 @@ type Props = {
 
 export default function GenericStatisticChart({ statistics, datasetConfig }: Props) {
   const histories: Record<string, (number | null)[]> = {};
-  const historyDays = 365;
+  const historyDays = 180; // 6 months
 
   // Initialize histories for each dataset with null values for all days
   datasetConfig.forEach(config => {
     histories[config.field] = Array(historyDays).fill(null);
   });
 
+  // Create a continuous array of dates for the last 365 days
   const labels: Date[] = [];
+  const today = getMidnightAlignedDate(new Date());
+  for (let i = 0; i < historyDays; i++) {
+    const date = new Date(today);
+    date.setDate(date.getDate() - i);
+    labels.unshift(date);
+  }
 
   // Sort the statistic entries by date
   const statisticEntries = Object.entries(statistics).sort(
     ([a], [b]) => parseDate(a).getTime() - parseDate(b).getTime()
   );
 
-  let currentHistoryIndex = 0;
+  // Create a map of dates to their index in the labels array
+  const dateToIndex = new Map(
+    labels.map((date, index) => [date.toISOString().split("T")[0], index])
+  );
 
-  for (let dayAgo = historyDays; dayAgo >= 1; dayAgo--) {
-    // skip the current day
-    const targetDate = getDaysAgoDate(dayAgo);
-    labels.push(targetDate); // Add the target date to labels
+  // Process each day's data
+  statisticEntries.forEach(([dateString, history]) => {
+    const date = parseDate(dateString);
+    const dateKey = date.toISOString().split("T")[0];
+    const index = dateToIndex.get(dateKey);
 
-    if (currentHistoryIndex < statisticEntries.length) {
-      const [dateString, history] = statisticEntries[currentHistoryIndex];
-      const entryDate = parseDate(dateString);
-
-      if (entryDate.toDateString() === targetDate.toDateString()) {
-        datasetConfig.forEach(config => {
-          histories[config.field][historyDays - dayAgo] =
-            history[config.field as Statistic] ?? null;
-        });
-        currentHistoryIndex++;
-      }
+    if (index !== undefined) {
+      datasetConfig.forEach(config => {
+        const value = history[config.field as Statistic];
+        if (value !== undefined) {
+          histories[config.field][index] = value;
+        }
+      });
     }
-  }
+  });
 
   const config: ChartConfig = {
     id: "statistic-chart",

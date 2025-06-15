@@ -1,134 +1,89 @@
-import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
+import { InfluxDB } from "@influxdata/influxdb-client";
+import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
-import { ScoreSaberPreviousScoreModel } from "@ssr/common/model/score/impl/scoresaber-previous-score";
-import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
-import { GamePlatform } from "@ssr/common/model/statistics/game-platform";
 import { Statistic } from "@ssr/common/model/statistics/statistic";
-import { StatisticsModel } from "@ssr/common/model/statistics/statistics";
-import { formatDateMinimal, getMidnightAlignedDate } from "@ssr/common/utils/time-utils";
+import { formatDateMinimal } from "@ssr/common/utils/time-utils";
+
+interface InfluxRow {
+  _time: string;
+  _value: number;
+}
+
+interface StatisticsData {
+  [date: string]: Record<Statistic, number>;
+}
+
+const influxClient = new InfluxDB({
+  url: env.INFLUXDB_URL,
+  token: env.INFLUXDB_TOKEN,
+});
+
+const queryApi = influxClient.getQueryApi(env.INFLUXDB_ORG);
+
+const createQuery = (measurement: string, aggregation: string, days: number) => `
+  from(bucket: "${env.INFLUXDB_BUCKET}")
+    |> range(start: -${days}d)
+    |> filter(fn: (r) => r["_measurement"] == "${measurement}")
+    |> filter(fn: (r) => r["_field"] == "value")
+    |> aggregateWindow(every: 1d, fn: ${aggregation}, createEmpty: false)
+    |> fill(usePrevious: true)
+    |> yield(name: "${aggregation}")
+`;
+
+const QUERIES = {
+  [Statistic.ActivePlayers]: {
+    measurement: "unique-daily-players",
+    aggregation: "max",
+  },
+  [Statistic.PlayerCount]: {
+    measurement: "active-accounts",
+    aggregation: "mean",
+  },
+  [Statistic.TotalScores]: {
+    measurement: "tracked-scores",
+    aggregation: "count",
+  },
+} as const;
 
 export default class StatisticsService {
-  constructor() {
-    for (const platform of Object.values(GamePlatform)) {
-      StatisticsService.initPlatform(platform);
+  public static async getScoreSaberStatistics(previousDays: number): Promise<StatisticsData> {
+    try {
+      const queryResults = await Promise.all(
+        Object.entries(QUERIES).map(async ([statistic, { measurement, aggregation }]) => {
+          const query = createQuery(measurement, aggregation, previousDays);
+          const result = await queryApi.collectRows(query);
+          return { statistic: statistic as Statistic, data: result as InfluxRow[] };
+        })
+      );
+
+      const result: StatisticsData = {};
+
+      // Initialize all dates with default values
+      const allDates = new Set<string>();
+      queryResults.forEach(({ data }) => {
+        data.forEach(row => allDates.add(formatDateMinimal(new Date(row._time))));
+      });
+
+      allDates.forEach(date => {
+        result[date] = {
+          [Statistic.ActivePlayers]: 0,
+          [Statistic.PlayerCount]: 0,
+          [Statistic.TotalScores]: 0,
+        };
+      });
+
+      // Process all results
+      queryResults.forEach(({ statistic, data }) => {
+        data.forEach(row => {
+          const date = formatDateMinimal(new Date(row._time));
+          result[date][statistic] = Math.round(row._value) || 0;
+        });
+      });
+
+      return result;
+    } catch (error) {
+      Logger.error("Failed to get ScoreSaber statistics from InfluxDB:", error);
+      throw error;
     }
-  }
-
-  /**
-   * Initializes the platform and returns it.
-   *
-   * @param platform the platform to initialize
-   * @returns the initialized platform, or undefined if it already exists
-   */
-  public static async initPlatform(platform: GamePlatform) {
-    if (await StatisticsModel.exists({ _id: platform })) {
-      return;
-    }
-    const statistics = new StatisticsModel({
-      _id: platform,
-      statistics: new Map(),
-    });
-    await statistics.save();
-    return statistics;
-  }
-
-  /**
-   * Gets the statistics for a platform.
-   *
-   * @param platform the platform to get the statistics for
-   * @returns the statistics
-   */
-  public static async getPlatform(platform: GamePlatform) {
-    if (!Object.values(GamePlatform).includes(platform)) {
-      throw new Error(`Invalid platform: ${platform}`);
-    }
-
-    const foundPlatform = await StatisticsModel.findById(platform);
-    if (!foundPlatform) {
-      return this.initPlatform(platform);
-    }
-
-    return foundPlatform;
-  }
-
-  /**
-   * Tracks a statistic for a platform.
-   *
-   * @param platform the platform to track on
-   * @param statistic the statistic to track
-   * @param value the value to track
-   */
-  public static async trackStatisticToday(
-    platform: GamePlatform,
-    statistic: Statistic,
-    value: number
-  ) {
-    const foundPlatform = await this.getPlatform(platform);
-    if (!foundPlatform) {
-      throw new Error(`Platform ${platform} not found`);
-    }
-    const date = formatDateMinimal(getMidnightAlignedDate(new Date()));
-
-    foundPlatform.statistics[date] = {
-      ...foundPlatform.statistics[date],
-      [statistic]: value,
-    };
-
-    foundPlatform.markModified("statistics");
-    await foundPlatform.save();
-    Logger.info(`Successfully tracked ${statistic}: ${value} for ${platform} on ${date}`);
-  }
-
-  public static async getScoreSaberStatistics() {
-    const scores = await ScoreSaberScoreModel.find({
-      timestamp: { $gte: getMidnightAlignedDate(new Date()) },
-      pp: { $gt: 0 },
-    })
-      .select({ pp: 1 }) // Only get the pp field
-      .sort({ pp: -1 }) // Sort by pp in descending order
-      .limit(100) // Limit the results to 100
-      .lean(); // Convert to plain JavaScript objects
-
-    const activePlayerCount = await ApiServiceRegistry.getInstance()
-      .getScoreSaberService()
-      .lookupActivePlayerCount();
-
-    const [totalScores, totalPreviousScores] = await Promise.all([
-      ScoreSaberScoreModel.countDocuments({
-        timestamp: { $gte: getMidnightAlignedDate(new Date()) },
-      }),
-      ScoreSaberPreviousScoreModel.countDocuments({
-        timestamp: { $gte: getMidnightAlignedDate(new Date()) },
-      }),
-    ]);
-
-    const statsResponse = await ScoreSaberScoreModel.aggregate([
-      { $match: { timestamp: { $gte: getMidnightAlignedDate(new Date()) } } },
-      {
-        $facet: {
-          uniquePlayers: [{ $group: { _id: "$playerId" } }, { $count: "uniquePlayers" }],
-        },
-      },
-    ]);
-
-    return {
-      uniquePlayers: statsResponse[0]?.uniquePlayers[0]?.uniquePlayers || 0,
-      playerCount: activePlayerCount || 0,
-      totalScores: totalScores + totalPreviousScores,
-      averagePp: scores.reduce((total, score) => total + score.pp, 0) / scores.length,
-    };
-  }
-
-  /**
-   * Tracks the statistics for ScoreSaber.
-   */
-  public static async trackScoreSaberStatistics() {
-    const { uniquePlayers, playerCount, totalScores, averagePp } =
-      await this.getScoreSaberStatistics();
-
-    await this.trackStatisticToday(GamePlatform.ScoreSaber, Statistic.ActivePlayers, uniquePlayers);
-    await this.trackStatisticToday(GamePlatform.ScoreSaber, Statistic.PlayerCount, playerCount);
-    await this.trackStatisticToday(GamePlatform.ScoreSaber, Statistic.TotalScores, totalScores);
-    await this.trackStatisticToday(GamePlatform.ScoreSaber, Statistic.AveragePp, averagePp);
   }
 }
