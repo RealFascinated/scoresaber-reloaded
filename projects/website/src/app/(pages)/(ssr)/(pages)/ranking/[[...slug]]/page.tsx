@@ -37,7 +37,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const { country } = await getRankingData(props);
 
   const fullCountry = country === undefined ? "Global" : `${getFullCountryName(country)}`;
-  const title = `${fullCountry} / Ranking`;
+  const title = `Ranking / ${fullCountry}`;
   return {
     title: title,
     openGraph: {
