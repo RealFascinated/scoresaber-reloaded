@@ -160,7 +160,6 @@ export default function ScoreSaberScoreDisplay({
             <Link
               href={`/player/${playerAbove.id}`}
               className="hover:brightness-[66%] transition-all cursor-pointer"
-              prefetch={false}
             >
               <p className="text-sm">{playerAbove.name}</p>
             </Link>

@@ -76,7 +76,6 @@ export default function PlayerMiniRanking({ type, player }: PlayerMiniRankingPro
 
             return (
               <Link
-                prefetch={false}
                 key={index}
                 href={`/player/${playerRanking.id}`}
                 className="grid gap-2 grid-cols-[auto_1fr_auto] items-center bg-accent px-2 py-1.5 cursor-pointer transition-all hover:brightness-75 first:rounded-t last:rounded-b"

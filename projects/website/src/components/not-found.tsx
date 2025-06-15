@@ -25,7 +25,7 @@ export default function NotFound({ title, description }: NotFoundProps) {
         <p className="text-lg">{description ?? "The page you are looking for does not exist."}</p>
       </div>
 
-      <Link href="/" prefetch={false}>
+      <Link href="/">
         <Button>Return Home</Button>
       </Link>
     </div>

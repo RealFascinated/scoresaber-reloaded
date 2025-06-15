@@ -4,7 +4,7 @@ import Link from "next/link";
 
 export function DiscordButton() {
   return (
-    <Link prefetch={false} href="https://discord.gg/kmNfWGA4A8" target="_blank">
+    <Link href="https://discord.gg/kmNfWGA4A8" target="_blank">
       <Button className="max-w-52 flex gap-2.5 bg-[#5865F2] hover:bg-[#5865F2]/85 text-white">
         <Image
           className="size-6"

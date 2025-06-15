@@ -17,7 +17,6 @@ export function FriendRankingPlayer({ player }: FriendRankingPlayerProps) {
         <div className="flex items-center gap-3">
           {/* Global Rank */}
           <Link
-            prefetch={false}
             href={`/ranking/${player.rankPages.global}`}
             className="flex items-center gap-1 w-14"
           >
@@ -26,7 +25,6 @@ export function FriendRankingPlayer({ player }: FriendRankingPlayerProps) {
 
           {/* Country Rank */}
           <Link
-            prefetch={false}
             href={`/ranking/${player.country}/${player.rankPages.country}`}
             className="flex items-center gap-2 min-w-20"
           >

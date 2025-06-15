@@ -24,7 +24,6 @@ export default function PlayerPreviewHeader({ player }: PlayerPreviewHeaderProps
         <div>
           <div className="flex gap-2 items-center justify-center lg:justify-start">
             <Link
-              prefetch={false}
               href={`/player/${player.id}`}
               className="font-bold text-2xl hover:brightness-[66%] transition-all "
               style={{

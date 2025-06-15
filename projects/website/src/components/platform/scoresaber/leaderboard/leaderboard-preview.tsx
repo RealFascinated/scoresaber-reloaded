@@ -62,7 +62,6 @@ export default function LeaderboardPreview({
                 )}
                 <div className="min-w-0 flex-1">
                   <Link
-                    prefetch={false}
                     href={`/leaderboard/${leaderboard.id}`}
                     className="block font-bold text-lg hover:brightness-[66%] transition-all truncate"
                   >

@@ -84,7 +84,6 @@ export default function Navbar() {
     <div className="flex flex-col">
       {/* Discord Ad */}
       <Link
-        prefetch={false}
         href="https://discord.gg/kmNfWGA4A8"
         target="_blank"
         className="hover:opacity-80 transition-all bg-discord-blue text-white px-4 py-1 flex items-center gap-2 justify-center"
@@ -104,7 +103,6 @@ export default function Navbar() {
         <div className="flex gap-3 md:gap-4 items-center transition-all ">
           {/* Branding */}
           <Link
-            prefetch={false}
             className="flex gap-2.5 items-center hover:opacity-85 transition-all "
             href="/"
             draggable={false}
@@ -143,7 +141,6 @@ export default function Navbar() {
 function SimpleNavLink({ content, href }: { content: ReactElement<any>; href: string }) {
   return (
     <Link
-      prefetch={false}
       className="flex gap-3 items-center text-sm hover:opacity-80 transition-all "
       href={href}
       target={href.startsWith("/") ? "_self" : "_blank"}

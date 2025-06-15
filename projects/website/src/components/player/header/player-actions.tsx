@@ -34,7 +34,7 @@ export function PlayerLink({ url, name, playerName, icon, children }: PlayerLink
 
   if (url) {
     return (
-      <Link href={url} target="_blank" rel="noreferrer" prefetch={false}>
+      <Link href={url} target="_blank" rel="noreferrer">
         {tooltipContent}
       </Link>
     );

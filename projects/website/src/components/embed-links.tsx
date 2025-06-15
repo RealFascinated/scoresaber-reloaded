@@ -15,7 +15,6 @@ export default function EmbedLinks({ text }: EmbedLinksProps) {
     if (urlRegex.test(part)) {
       return (
         <Link
-          prefetch={false}
           key={index}
           href={part}
           target="_blank"

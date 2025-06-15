@@ -62,7 +62,7 @@ export default function ScoreFeed() {
                 className="w-6 h-6"
                 alt={`${player.name}'s Profile Picture`}
               />
-              <Link prefetch={false} href={`/player/${player.id}`}>
+              <Link href={`/player/${player.id}`}>
                 <span className="text-ssr hover:brightness-[66%] transition-all ">
                   {player.name}
                 </span>

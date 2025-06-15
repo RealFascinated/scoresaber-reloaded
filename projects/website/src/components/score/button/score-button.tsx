@@ -37,7 +37,7 @@ export default function ScoreButton({ children, tooltip, href, onClick }: Props)
     return (
       <SimpleTooltip display={tooltip}>
         {href ? (
-          <Link prefetch={false} href={href} target="_blank">
+          <Link href={href} target="_blank">
             {button}
           </Link>
         ) : (

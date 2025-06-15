@@ -88,7 +88,7 @@ export function TopScoresData({ timeframe }: TopScoresDataProps) {
         <div key={score.scoreId} className="flex flex-col pt-2">
           <div className="flex items-center gap-2 text-sm bg-accent-deep-foreground/10 px-2 py-1 sm:px-3 sm:py-1.5 rounded-lg w-fit">
             <span className="text-gray-500 dark:text-gray-400 text-xs sm:text-sm">Set by</span>
-            <Link prefetch={false} href={`/player/${player.id}`}>
+            <Link href={`/player/${player.id}`}>
               <span className="text-ssr hover:text-ssr/80 transition-colors font-semibold text-xs sm:text-sm">
                 {name}
               </span>

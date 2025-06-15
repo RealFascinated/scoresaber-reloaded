@@ -14,7 +14,7 @@ export default function Error() {
       </p>
 
       <div className="flex flex-col gap-2 mt-6 items-center">
-        <Link prefetch={false} href="/" className="text-blue-500 hover:underline">
+        <Link href="/" className="text-blue-500 hover:underline">
           Go back to the homepage
         </Link>
 

@@ -11,7 +11,7 @@ export function BeatSaverMapButton({ beatSaverMap }: BeatSaverMapProps) {
   const url = `https://beatsaver.com/maps/${beatSaverMap.bsr}`;
 
   return (
-    <Link prefetch={false} href={url} target="_blank">
+    <Link href={url} target="_blank">
       <ScoreButton tooltip={<p>Click to open the map</p>}>
         <BeatSaverLogo />
       </ScoreButton>

@@ -59,7 +59,6 @@ export default function PlayerPreview({ playerId, children }: PlayerPreviewProps
               />
               <div className="min-w-0 flex-1">
                 <Link
-                  prefetch={false}
                   href={`/player/${player.id}`}
                   className="block font-bold text-lg hover:brightness-[66%] transition-all truncate"
                   style={{

@@ -34,7 +34,6 @@ export default function Friend({ player, onClick }: FriendProps) {
   return (
     <div className="flex items-center justify-between gap-2 hover:bg-accent transition-all p-2 rounded-md select-none">
       <Link
-        prefetch={false}
         href={`/player/${player.id}`}
         onClick={() => onClick?.()}
         className="flex items-center gap-2 w-full"

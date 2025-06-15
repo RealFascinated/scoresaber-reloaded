@@ -118,7 +118,6 @@ export default function CustomPlaylistCreator() {
           {/* Create Playlist Button */}
           <DialogFooter>
             <Link
-              prefetch={false}
               href={`${env.NEXT_PUBLIC_API_URL}/playlist/custom-ranked/preview?settings=${encodeCustomRankedPlaylistSettings(watch())}`}
             >
               <Button variant="outline" type="button">

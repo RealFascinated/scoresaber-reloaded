@@ -28,10 +28,7 @@ export default function ScoreSaberScoreInfo({
       return <p className="text-ssr">#-</p>;
     }
     return (
-      <Link
-        prefetch={false}
-        href={`/leaderboard/${leaderboard.id}/${getPageFromRank(score.rank, 12)}`}
-      >
+      <Link href={`/leaderboard/${leaderboard.id}/${getPageFromRank(score.rank, 12)}`}>
         <p
           className={`${getRankColor(score.rank)} hover:brightness-[66%] transition-all cursor-pointer`}
         >

@@ -245,7 +245,6 @@ export default function SnipePlaylistCreator({ toSnipe }: SnipePlaylistCreatorPr
               <Link
                 href={`${env.NEXT_PUBLIC_API_URL}/playlist/snipe/preview?toSnipe=${toSnipe.id}&settings=${encodeSnipePlaylistSettings(formValues)}`}
                 target="_blank"
-                prefetch={false}
               >
                 <Button type="button">Preview Playlist Art</Button>
               </Link>
