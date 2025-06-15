@@ -9,7 +9,6 @@ export enum ServiceCache {
   Leaderboards = "leaderboards",
   ScoreCalendar = "scoreCalendar",
   AdditionalScoreData = "additionalScoreData",
-  Playlists = "playlists",
   Players = "players",
   ScoreStats = "scoreStats",
 }
@@ -39,9 +38,6 @@ export default class CacheService {
       },
       [ServiceCache.AdditionalScoreData]: {
         ttl: TimeUnit.toMillis(TimeUnit.Minute, 30),
-      },
-      [ServiceCache.Playlists]: {
-        ttl: TimeUnit.toMillis(TimeUnit.Hour, 1),
       },
       [ServiceCache.Players]: {
         ttl: TimeUnit.toMillis(TimeUnit.Minute, 5),
