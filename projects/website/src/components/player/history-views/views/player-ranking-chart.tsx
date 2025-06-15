@@ -48,7 +48,6 @@ const datasetConfig: DatasetConfig[] = [
     axisConfig: {
       reverse: false,
       display: true,
-      hideOnMobile: true,
       displayName: "PP",
       position: "right",
       valueFormatter: value => {
@@ -68,7 +67,6 @@ const datasetConfig: DatasetConfig[] = [
     axisConfig: {
       reverse: false,
       display: false,
-      hideOnMobile: true,
       displayName: "+1 PP",
       position: "right",
       valueFormatter: value => {
