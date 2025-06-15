@@ -21,6 +21,7 @@ import { getDaysAgoDate } from "@ssr/common/utils/time-utils";
 import mongoose from "mongoose";
 import { scoreToObject } from "../../common/score/score.util";
 import BeatLeaderService from "../beatleader.service";
+import { PlayerService } from "../player/player.service";
 import LeaderboardService from "../scoresaber/leaderboard.service";
 import ScoreSaberService from "../scoresaber/scoresaber.service";
 import { PreviousScoresService } from "./previous-scores.service";
@@ -265,6 +266,12 @@ export class ScoreService {
     }
 
     await ScoreSaberScoreModel.create(score);
+
+    const hmd = await PlayerService.getPlayerMostCommonRecentHmd(player.id);
+    if (hmd) {
+      await PlayerService.updatePlayerHmd(player.id, hmd);
+    }
+
     if (log) {
       Logger.info(
         `Tracked ScoreSaber score "${score.scoreId}" for "${player.name}"(${player.id}) in ${(performance.now() - before).toFixed(0)}ms`
