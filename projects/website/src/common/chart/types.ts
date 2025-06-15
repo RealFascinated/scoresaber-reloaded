@@ -1,39 +1,37 @@
-export type AxisPosition = "left" | "right";
-export type DatasetDisplayType = "line" | "bar" | "point";
+export type ChartType = "line" | "bar" | "point";
 
-export type Axis = {
-  id?: string;
-  position?: AxisPosition;
-  display?: boolean;
-  grid?: { color?: string; drawOnChartArea?: boolean };
-  title?: { display: boolean; text?: string; color?: string };
-  ticks?: {
-    stepSize?: number;
-    callback?: (value: number, index: number, values: any) => string;
-    font?: (context: any) => { weight: string; color?: string } | undefined;
-    color?: (context: any) => string | undefined;
-  };
+export type AxisPosition = "left" | "right";
+
+export type ChartAxis = {
+  display: boolean;
+  hideOnMobile?: boolean;
+  position?: "left" | "right";
   reverse?: boolean;
+  displayName?: string;
+  valueFormatter?: (value: number) => string;
   min?: number;
   max?: number;
 };
 
-export type Dataset = {
+export type ChartDataset = {
   label: string;
   data: (number | null)[];
-  borderColor: string;
-  backgroundColor?: string;
-  fill: boolean;
-  lineTension: number;
-  spanGaps: boolean;
-  yAxisID: string;
-  hidden?: boolean;
-  stack?: string;
-  order?: number;
-  maxBarThickness?: number;
-  type?: DatasetDisplayType;
+  color: string;
+  axisId: string;
+  type?: ChartType;
   pointRadius?: number;
-  showLine?: boolean;
+  showLegend?: boolean;
+  stack?: string;
+  stackOrder?: number;
+  labelFormatter?: (value: number) => string;
+  field?: string; // Field name in the history object
+};
+
+export type ChartConfig = {
+  id?: string;
+  datasets: ChartDataset[];
+  axes: Record<string, ChartAxis>;
+  options?: any; // Allow custom options to be passed through
 };
 
 export type DatasetConfig = {
@@ -41,20 +39,11 @@ export type DatasetConfig = {
   field: string;
   color: string;
   axisId: string;
-  axisConfig: {
-    reverse: boolean;
-    display: boolean;
-    hideOnMobile?: boolean;
-    displayName?: string;
-    position: AxisPosition;
-    valueFormatter?: (value: number) => string;
-    stack?: string;
-    stackOrder?: number;
-    min?: number;
-    max?: number;
-  };
-  defaultLegendState?: boolean;
-  type?: DatasetDisplayType;
-  labelFormatter: (value: number) => string;
+  type?: "line" | "bar" | "point";
   pointRadius?: number;
+  showLegend?: boolean;
+  stack?: string;
+  stackOrder?: number;
+  labelFormatter?: (value: number) => string;
+  axisConfig: ChartAxis;
 };

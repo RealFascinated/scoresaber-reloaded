@@ -1,55 +1,49 @@
-import { Axis, AxisPosition, Dataset, DatasetDisplayType } from "@/common/chart/types";
+import { ChartAxis, ChartDataset } from "./types";
 
-export const generateChartAxis = (
-  id: string,
-  reverse: boolean,
+export const createChartAxis = (
   display: boolean,
-  position: AxisPosition,
+  hideOnMobile?: boolean,
+  position?: "left" | "right",
+  reverse?: boolean,
   displayName?: string,
   valueFormatter?: (value: number) => string,
   min?: number,
   max?: number
-): Axis => ({
-  id,
-  position,
-  display,
-  grid: { drawOnChartArea: id === "y", color: id === "y" ? "#252525" : "" },
-  title: { display: true, text: displayName, color: "#ffffff" },
-  ticks: {
-    callback: (value: number) => {
-      // Apply precision if specified, otherwise default to no decimal places
-      return valueFormatter !== undefined ? valueFormatter(value) : value.toString();
-    },
-  },
-  reverse,
-  min,
-  max,
-});
+): ChartAxis => {
+  return {
+    display,
+    hideOnMobile,
+    position,
+    reverse,
+    displayName,
+    valueFormatter,
+    min,
+    max,
+  };
+};
 
-export const generateChartDataset = (
+export const createChartDataset = (
   label: string,
   data: (number | null)[],
-  borderColor: string,
-  yAxisID: string,
-  showLegend: boolean = true,
+  color: string,
+  axisId: string,
+  type?: "line" | "bar" | "point",
+  pointRadius?: number,
+  showLegend?: boolean,
   stack?: string,
   stackOrder?: number,
-  type?: DatasetDisplayType,
-  pointRadius?: number
-): Dataset => ({
-  label,
-  data,
-  borderColor,
-  backgroundColor: type === "bar" || type === "point" ? borderColor : undefined,
-  fill: false,
-  lineTension: 0.5,
-  spanGaps: false,
-  yAxisID,
-  hidden: !showLegend,
-  type,
-  stack,
-  order: stackOrder,
-  maxBarThickness: 12,
-  pointRadius: type === "point" ? pointRadius || 3 : 0,
-  showLine: type !== "point",
-});
+  labelFormatter?: (value: number) => string
+): ChartDataset => {
+  return {
+    label,
+    data,
+    color,
+    axisId,
+    type,
+    pointRadius,
+    showLegend,
+    stack,
+    stackOrder,
+    labelFormatter,
+  };
+};

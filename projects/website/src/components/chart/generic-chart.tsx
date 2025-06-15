@@ -1,7 +1,6 @@
 "use client";
 
-import { generateChartAxis, generateChartDataset } from "@/common/chart/chart.util";
-import { Axis, Dataset, DatasetConfig } from "@/common/chart/types";
+import { ChartConfig } from "@/common/chart/types";
 import useDatabase from "@/hooks/use-database";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import {
@@ -38,78 +37,150 @@ Chart.register(
   BarController
 );
 
-export type ChartProps = {
-  options?: { id: string; plugins?: any };
+// Extend Chart.js types to support mixed chart types
+declare module "chart.js" {
+  interface ChartTypeRegistry {
+    mixed: {
+      chartOptions: any;
+      datasetOptions: any;
+      defaultDataPoint: number | null;
+    };
+  }
+}
+
+type Props = {
+  config: ChartConfig;
   labels: Date[] | string[];
-  datasetConfig: DatasetConfig[];
-  histories: Record<string, (number | null)[]>;
-  axisConfig?: {
-    min?: number;
-    max?: number;
-  };
 };
 
-const GenericChart = ({ options, labels, datasetConfig, histories }: ChartProps) => {
-  const { id } = options || {};
+const GenericChart = ({ config, labels }: Props) => {
+  const { id, datasets, axes, options: customOptions } = config;
   const isMobile = useIsMobile();
   const database = useDatabase();
 
-  const axes = useMemo(() => {
-    const generatedAxes: Record<string, Axis> = {
-      x: { grid: { color: "#252525" }, reverse: false, ticks: {} },
-    };
+  const chartDatasets = useMemo(() => {
+    return datasets.map(dataset => {
+      const baseConfig = {
+        label: dataset.label,
+        data: dataset.data,
+        borderColor: dataset.color,
+        backgroundColor:
+          dataset.type === "bar" || dataset.type === "point" ? dataset.color : undefined,
+        fill: false,
+        lineTension: 0.4,
+        spanGaps: true, // Allow lines to connect across null values
+        yAxisID: dataset.axisId,
+        hidden:
+          id && dataset.label
+            ? !database.getChartLegend(id, dataset.label, true)
+            : !dataset.showLegend,
+        stack: dataset.stack,
+        order: dataset.stackOrder,
+        maxBarThickness: 12,
+        pointRadius: dataset.type === "point" ? dataset.pointRadius || 3 : 0,
+        showLine: dataset.type !== "point",
+        segment: {
+          borderDash: (ctx: any) => {
+            const data = dataset.data;
+            const index = ctx.p1DataIndex;
+            const nextIndex = index + 1;
 
-    datasetConfig.forEach(config => {
-      const historyArray = histories[config.field];
-      if (historyArray?.some(value => value !== null)) {
-        generatedAxes[config.axisId] = generateChartAxis(
-          config.axisId,
-          config.axisConfig.reverse,
-          isMobile && config.axisConfig.hideOnMobile ? false : config.axisConfig.display,
-          config.axisConfig.position,
-          config.axisConfig.displayName,
-          (value: number) => {
-            // First apply the custom formatter if it exists
-            const customFormatted = config.axisConfig.valueFormatter?.(value);
-            if (customFormatted !== undefined) return customFormatted;
+            // If either the current or next point is null, make the line dotted
+            if (data[index] === null || (nextIndex < data.length && data[nextIndex] === null)) {
+              return [5, 5];
+            }
+            return [];
+          },
+        },
+      };
 
-            // Check if the number is a whole number
-            if (Number.isInteger(value)) {
-              return value.toString();
+      // Add type-specific configuration
+      if (dataset.type === "bar") {
+        return {
+          ...baseConfig,
+          type: "bar" as const,
+        };
+      }
+
+      return {
+        ...baseConfig,
+        type: "line" as const,
+      };
+    });
+  }, [datasets, database, id]);
+
+  const chartAxes = useMemo(() => {
+    const generatedAxes: Record<string, any> = {
+      x: {
+        grid: { color: "#252525" },
+        ticks: {
+          maxRotation: 45,
+          minRotation: 45,
+          maxTicksLimit: (context: any) => {
+            // For ranges less than 3 months, show all days
+            if (labels.length <= 90) {
+              return labels.length;
+            }
+            // For larger ranges, limit to 10 ticks
+            return 10;
+          },
+          callback: (value: any, index: number) => {
+            if (typeof labels[index] === "string") return value;
+            const date = labels[index] instanceof Date ? labels[index] : parseDate(labels[index]);
+            const daysAgo = getDaysAgo(date);
+
+            // For large date ranges, show month and year
+            if (labels.length > 90) {
+              const currentYear = new Date().getUTCFullYear();
+              const dateYear = date.getUTCFullYear();
+              return dateYear === currentYear
+                ? date.toLocaleString("en-US", { timeZone: "Europe/London", month: "long" })
+                : formatDate(date, "MMMM YYYY");
             }
 
-            // Otherwise round to 2 decimal places and convert to string
-            return value.toFixed(2);
-          }
-        );
+            // For medium date ranges, show day and month
+            if (labels.length > 30) {
+              const currentYear = new Date().getUTCFullYear();
+              const dateYear = date.getUTCFullYear();
+              return dateYear === currentYear
+                ? date.toLocaleString("en-US", {
+                    timeZone: "Europe/London",
+                    day: "numeric",
+                    month: "long",
+                  })
+                : formatDate(date, "DD MMMM YYYY");
+            }
+
+            // For small date ranges, show relative dates
+            if (daysAgo === 0) return "Now";
+            if (daysAgo === 1) return "Yesterday";
+            return `${daysAgo}d ago`;
+          },
+        },
+      },
+    };
+
+    Object.entries(axes).forEach(([axisId, axis]) => {
+      if (!axis.hideOnMobile || !isMobile) {
+        generatedAxes[axisId] = {
+          position: axis.position,
+          reverse: axis.reverse,
+          display: axis.display,
+          grid: { drawOnChartArea: axisId === "y", color: axisId === "y" ? "#252525" : "" },
+          title: { display: true, text: axis.displayName, color: "#ffffff" },
+          ticks: {
+            callback: (value: number) => {
+              return axis.valueFormatter?.(value) ?? value.toString();
+            },
+          },
+          min: axis.min,
+          max: axis.max,
+        };
       }
     });
 
     return generatedAxes;
-  }, [datasetConfig, histories, isMobile]);
-
-  const datasets = useMemo(() => {
-    return datasetConfig
-      .map(config => {
-        const historyArray = histories[config.field];
-
-        if (historyArray?.some(value => value !== null)) {
-          return generateChartDataset(
-            config.title,
-            historyArray,
-            config.color,
-            config.axisId,
-            database.getChartLegend(id!, config.title, true),
-            config.axisConfig.stack,
-            config.axisConfig.stackOrder,
-            config.type || "line",
-            config.pointRadius
-          );
-        }
-        return null;
-      })
-      .filter(Boolean) as Dataset | null[];
-  }, [datasetConfig, histories, database, id]);
+  }, [axes, isMobile, labels]);
 
   const formattedLabels = useMemo(() => {
     return labels.map(value => {
@@ -121,68 +192,20 @@ const GenericChart = ({ options, labels, datasetConfig, histories }: ChartProps)
     });
   }, [labels]);
 
-  const chartOptions: any = useMemo(
+  const chartOptions = useMemo(
     () => ({
       animation: { duration: 0 },
       maintainAspectRatio: false,
       responsive: true,
-      interaction: { mode: "index", intersect: false },
-      scales: {
-        ...axes,
-        x: {
-          ...axes.x,
-          ticks: {
-            ...axes.x.ticks,
-            maxRotation: 45,
-            minRotation: 45,
-            maxTicksLimit: (context: any) => {
-              // For ranges less than 3 months, show all days
-              if (labels.length <= 90) {
-                return labels.length;
-              }
-              // For larger ranges, limit to 10 ticks
-              return 10;
-            },
-            callback: (value: any, index: number) => {
-              if (typeof labels[index] === "string") return value;
-              const date = labels[index] instanceof Date ? labels[index] : parseDate(labels[index]);
-              const daysAgo = getDaysAgo(date);
-
-              // For large date ranges, show month and year
-              if (labels.length > 90) {
-                const currentYear = new Date().getUTCFullYear();
-                const dateYear = date.getUTCFullYear();
-                return dateYear === currentYear
-                  ? date.toLocaleString("en-US", { timeZone: "Europe/London", month: "long" })
-                  : formatDate(date, "MMMM YYYY");
-              }
-
-              // For medium date ranges, show day and month
-              if (labels.length > 30) {
-                const currentYear = new Date().getUTCFullYear();
-                const dateYear = date.getUTCFullYear();
-                return dateYear === currentYear
-                  ? date.toLocaleString("en-US", {
-                      timeZone: "Europe/London",
-                      day: "numeric",
-                      month: "long",
-                    })
-                  : formatDate(date, "DD MMMM YYYY");
-              }
-
-              // For small date ranges, show relative dates
-              if (daysAgo === 0) return "Now";
-              if (daysAgo === 1) return "Yesterday";
-              return `${daysAgo}d ago`;
-            },
-          },
-        },
-      },
+      interaction: { mode: "index" as const, intersect: false },
+      scales: chartAxes,
       elements: {
+        line: {
+          tension: 0.4,
+        },
         point: {
           radius: (ctx: any) => {
             const dataset = ctx.chart.data.datasets[ctx.datasetIndex];
-            // For large date ranges, only show points on hover
             return labels.length > 90 ? 0 : dataset.type === "point" ? dataset.pointRadius || 3 : 3;
           },
           hoverRadius: (ctx: any) => {
@@ -190,16 +213,13 @@ const GenericChart = ({ options, labels, datasetConfig, histories }: ChartProps)
             return dataset.type === "point" ? (dataset.pointRadius || 3) + 2 : 4;
           },
         },
-        line: {
-          tension: 0.4, // Add slight curve to lines for better appearance
-        },
       },
       plugins: {
         legend: {
-          position: "top",
+          position: "top" as const,
           labels: {
             color: "white",
-            padding: 20, // Add more padding between legend items
+            padding: 20,
             filter: (legendItem: any, chartData: any) => {
               const dataset = chartData.datasets[legendItem.datasetIndex];
               return dataset.showLegend !== false;
@@ -228,38 +248,22 @@ const GenericChart = ({ options, labels, datasetConfig, histories }: ChartProps)
             },
             label: (context: any) => {
               const value = Number(context.parsed.y);
-              const config = datasetConfig.find(cfg => cfg.title === context.dataset.label);
-              return config?.labelFormatter(value) ?? "";
+              const dataset = datasets[context.datasetIndex];
+              return dataset.labelFormatter?.(value) ?? "";
             },
           },
         },
       },
+      ...customOptions,
     }),
-    [axes, labels, datasetConfig, database, id]
+    [chartAxes, labels, datasets, database, id, customOptions]
   );
 
-  // Memoize the no data checker logic
+  // Check if any dataset has data
   const showNoData = useMemo(() => {
-    if (datasetConfig.length === 1) {
-      for (const dataset of datasetConfig) {
-        const containsData = histories[dataset.field].some(value => value !== null);
-        if (!containsData) {
-          return true;
-        }
-      }
-    }
-    return false;
-  }, [datasetConfig, histories]);
+    return !datasets.some(dataset => dataset.data.some(value => value !== null));
+  }, [datasets]);
 
-  const chartStyle = useMemo(() => {
-    // If there's only one dataset and it has no display name, apply negative margin
-    if (datasetConfig.length === 1 && !datasetConfig[0].axisConfig.displayName) {
-      return { marginLeft: "-10px" };
-    }
-    return {};
-  }, [datasetConfig]);
-
-  // Render the chart with collected data
   return (
     <div className="flex relative h-[360px] w-full">
       {showNoData ? (
@@ -267,29 +271,11 @@ const GenericChart = ({ options, labels, datasetConfig, histories }: ChartProps)
           <p className="text-red-500">No data available :(</p>
         </div>
       ) : null}
-      <div className="block h-[360px] w-full relative" style={chartStyle}>
+      <div className="block h-[360px] w-full relative">
         <Line
           className="max-w-[100%]"
-          options={{
-            ...chartOptions,
-            plugins: {
-              ...chartOptions.plugins,
-              ...(options?.plugins || []),
-            },
-          }}
-          data={{ labels: formattedLabels, datasets: datasets as any }}
-          plugins={[
-            {
-              id: "legend-padding",
-              beforeInit: (chart: any) => {
-                const originalFit = chart.legend.fit;
-                chart.legend.fit = function () {
-                  originalFit.bind(chart.legend)();
-                  this.height += 2;
-                };
-              },
-            },
-          ]}
+          options={chartOptions}
+          data={{ labels: formattedLabels, datasets: chartDatasets as any }}
         />
       </div>
     </div>

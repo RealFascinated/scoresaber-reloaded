@@ -75,10 +75,23 @@ export default function GenericPlayerChart({
   return (
     <div className="flex justify-center">
       <GenericChart
-        options={{ id }}
+        config={{
+          id,
+          datasets: datasetConfig.map(config => ({
+            label: config.title,
+            data: histories[config.field],
+            color: config.color,
+            axisId: config.axisId,
+            type: config.type,
+            pointRadius: config.pointRadius,
+            showLegend: config.showLegend,
+            stack: config.stack,
+            stackOrder: config.stackOrder,
+            labelFormatter: config.labelFormatter,
+          })),
+          axes: Object.fromEntries(datasetConfig.map(config => [config.axisId, config.axisConfig])),
+        }}
         labels={labels}
-        histories={histories}
-        datasetConfig={datasetConfig}
       />
     </div>
   );
