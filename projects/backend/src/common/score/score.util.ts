@@ -68,7 +68,7 @@ export async function sendScoreNotification(
 
   const accuracy =
     leaderboard.maxScore > 0
-      ? `${formatScoreAccuracy(score.accuracy)} ${change ? change.accuracy : ""}${beatLeaderScore ? ` (FC: ${formatScoreAccuracy(beatLeaderScore.fcAccuracy)})` : ""}`
+      ? `${formatScoreAccuracy(score.accuracy)} ${change ? change.accuracy : ""}${beatLeaderScore && !score.fullCombo ? ` (FC: ${formatScoreAccuracy(beatLeaderScore.fcAccuracy)})` : ""}`
       : "N/A%";
 
   const message = await logToChannel(
@@ -101,8 +101,8 @@ export async function sendScoreNotification(
             `**Max Combo:** ${formatNumberWithCommas(score.maxCombo)} ${score.fullCombo ? " (FC)" : ""} ${change ? change.maxCombo : ""}`,
             ...(beatLeaderScore
               ? [
-                  `**Bomb Cuts** ${formatScoreAccuracy(beatLeaderScore.misses.bombCuts)}`,
-                  `**Wall Hits** ${formatScoreAccuracy(beatLeaderScore.misses.wallsHit)}`,
+                  `**Bomb Cuts** ${beatLeaderScore.misses.bombCuts}`,
+                  `**Wall Hits** ${beatLeaderScore.misses.wallsHit}`,
                 ]
               : []),
           ].join("\n"),
