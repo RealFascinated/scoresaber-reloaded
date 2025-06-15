@@ -13,6 +13,7 @@ import { BeatLeaderScoreImprovementToken } from "@ssr/common/types/token/beatlea
 import { getBeatLeaderReplayId } from "@ssr/common/utils/beatleader-utils";
 import Request from "@ssr/common/utils/request";
 import { isProduction } from "@ssr/common/utils/utils";
+import { sleep } from "bun";
 import { DiscordChannels, logToChannel } from "../bot/bot";
 import { fetchWithCache } from "../common/cache.util";
 import { createGenericEmbed } from "../common/discord/embed";
@@ -159,16 +160,18 @@ export default class BeatLeaderService {
 
     // Parallelize independent operations
     const [, replayData] = await Promise.all([
-      // Save score stats
-      ApiServiceRegistry.getInstance()
-        .getBeatLeaderService()
-        .lookupScoreStats(score.id)
-        .then(async stats => {
-          if (stats) {
-            await this.trackScoreStats(score.id, stats);
-          }
-          return stats;
-        }),
+      // Save score stats (15 second delay to ensure the score stats are available on beatleader)
+      sleep(15_000).then(async () => {
+        await ApiServiceRegistry.getInstance()
+          .getBeatLeaderService()
+          .lookupScoreStats(score.id)
+          .then(async stats => {
+            if (stats) {
+              await this.trackScoreStats(score.id, stats);
+            }
+            return stats;
+          });
+      }),
 
       // Save replay data if needed
       (async () => {
@@ -232,11 +235,13 @@ export default class BeatLeaderService {
     scoreId: number,
     scoreStats: ScoreStatsToken
   ): Promise<ScoreStatsToken> {
+    const before = Date.now();
     await MinioService.saveFile(
       MinioBucket.BeatLeaderScoreStats,
       `${scoreId}.json`,
       Buffer.from(JSON.stringify(scoreStats))
     );
+    Logger.info(`Tracked score stats for ${scoreId} in ${Date.now() - before}ms`);
     return scoreStats;
   }
 
