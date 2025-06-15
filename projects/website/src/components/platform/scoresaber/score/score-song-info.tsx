@@ -108,6 +108,7 @@ export default function ScoreSaberScoreSongInfo({
             display={
               <div>
                 <p>Difficulty: {getDifficultyName(difficulty)}</p>
+                <p>Characteristic: {leaderboard.difficulty.characteristic}</p>
                 {starCount > 0 && <p>Stars: {starCount.toFixed(2)}</p>}
               </div>
             }
