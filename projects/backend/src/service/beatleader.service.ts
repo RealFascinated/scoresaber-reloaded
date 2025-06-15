@@ -203,7 +203,9 @@ export default class BeatLeaderService {
       })(),
     ]);
 
-    data.savedReplay = replayData;
+    if (replayData) {
+      data.savedReplay = replayData;
+    }
 
     await AdditionalScoreDataModel.create(data);
 
