@@ -36,9 +36,12 @@ export function ScoreAccuracyBadge({ score, showDifference = true }: ScoreAccura
                 <p className="font-semibold">Accuracy</p>
                 <p>Score: {getAccDetails(scoreBadge)}</p>
                 <p>
-                  Accuracy: {formatScoreAccuracy(score)}
+                  Accuracy: {formatScoreAccuracy(score.accuracy)}
                   {!score.fullCombo && fcAccuracy && (
-                    <span className="text-green-500"> (FC: {fcAccuracy.toFixed(2)}%)</span>
+                    <span className="text-green-500">
+                      {" "}
+                      (FC: {formatScoreAccuracy(fcAccuracy)}%)
+                    </span>
                   )}
                 </p>
                 <p>Max Combo: {formatNumberWithCommas(score.maxCombo)}x</p>
@@ -56,7 +59,7 @@ export function ScoreAccuracyBadge({ score, showDifference = true }: ScoreAccura
           showOnMobile
         >
           <p>
-            {formatScoreAccuracy(score)}{" "}
+            {formatScoreAccuracy(score.accuracy)}{" "}
             {modCount > 0 && <ScoreSaberScoreModifiers type="simple" limit={1} score={score} />}
           </p>
         </SimpleTooltip>
@@ -69,9 +72,11 @@ export function ScoreAccuracyBadge({ score, showDifference = true }: ScoreAccura
                   <p className="font-semibold">Previous Accuracy</p>
                   <p>Score: {getAccDetails(scoreBadge)}</p>
                   {score.previousScore && (
-                    <p>Accuracy: {formatScoreAccuracy(score.previousScore)}</p>
+                    <p>Accuracy: {formatScoreAccuracy(score.previousScore.accuracy)}</p>
                   )}
-                  {!score.fullCombo && fcAccuracy && <p>Full Combo: {fcAccuracy.toFixed(2)}%</p>}
+                  {!score.fullCombo && fcAccuracy && (
+                    <p>Full Combo: {formatScoreAccuracy(fcAccuracy)}</p>
+                  )}
                 </div>
 
                 {previousModCount > 0 && score.previousScore && (

@@ -66,6 +66,11 @@ export async function sendScoreNotification(
       maxCombo: previousScore.maxCombo == score.maxCombo ? "" : ` vs ${previousScore.maxCombo}`,
     };
 
+  const accuracy =
+    leaderboard.maxScore > 0
+      ? `${formatScoreAccuracy(score.accuracy)} ${change ? change.accuracy : ""}${beatLeaderScore ? ` (FC: ${formatScoreAccuracy(beatLeaderScore.fcAccuracy)})` : ""}`
+      : "N/A%";
+
   const message = await logToChannel(
     channel,
     new EmbedBuilder()
@@ -73,7 +78,7 @@ export async function sendScoreNotification(
       .setDescription(
         [
           `🎵 **${leaderboard.fullName}**`,
-          `⚡ ${getDifficultyName(leaderboard.difficulty.difficulty)}${leaderboard.stars > 0 ? ` • ${leaderboard.stars.toFixed(2)}★` : ""}`,
+          `⚡ ${getDifficultyName(leaderboard.difficulty.difficulty)} / ${leaderboard.difficulty.characteristic}${leaderboard.stars > 0 ? ` • ${leaderboard.stars.toFixed(2)}★` : ""}`,
         ]
           .join("\n")
           .trim()
@@ -82,8 +87,8 @@ export async function sendScoreNotification(
         {
           name: "🎯 Performance",
           value: [
-            `**Accuracy:** ${formatScoreAccuracy(score)} ${change ? change.accuracy : ""}`,
-            `**PP:** ${score.pp > 0 ? `${formatPp(score.pp)}pp ${change ? change.pp : ""}` : "N/A"}`,
+            `**Accuracy:** ${accuracy}`,
+            ...(score.pp > 0 ? [`**PP:** ${formatPp(score.pp)}pp ${change ? change.pp : ""}`] : []),
             `**Modifiers:** ${score.modifiers.length > 0 ? score.modifiers.join(", ") : "None"}`,
           ].join("\n"),
           inline: false,
@@ -93,7 +98,13 @@ export async function sendScoreNotification(
           value: [
             `**Misses:** ${formatNumberWithCommas(score.missedNotes)} ${change ? change.misses : ""}`,
             `**Bad Cuts:** ${formatNumberWithCommas(score.badCuts)} ${change ? change.badCuts : ""}`,
-            `**Max Combo:** ${formatNumberWithCommas(score.maxCombo)} ${score.fullCombo ? "• FC" : ""} ${change ? change.maxCombo : ""}`,
+            `**Max Combo:** ${formatNumberWithCommas(score.maxCombo)} ${score.fullCombo ? " (FC)" : ""} ${change ? change.maxCombo : ""}`,
+            ...(beatLeaderScore
+              ? [
+                  `**Bomb Cuts** ${formatScoreAccuracy(beatLeaderScore.misses.bombCuts)}`,
+                  `**Wall Hits** ${formatScoreAccuracy(beatLeaderScore.misses.wallsHit)}`,
+                ]
+              : []),
           ].join("\n"),
           inline: false,
         },
