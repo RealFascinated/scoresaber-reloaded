@@ -1,6 +1,6 @@
 "use client";
 
-import { DatasetConfig } from "@/common/chart/types";
+import { ChartConfig, DatasetConfig } from "@/common/chart/types";
 import { Colors } from "@/common/colors";
 import GenericChart from "@/components/chart/generic-chart";
 import SimpleTooltip from "@/components/simple-tooltip";
@@ -44,6 +44,37 @@ export default function PpBoundaryStat({ player }: PpBoundaryProps) {
     },
   ];
 
+  const config: ChartConfig = {
+    id: "pp-boundary-chart",
+    datasets: datasetConfig.map(config => ({
+      label: config.title,
+      data: histories[config.field],
+      color: config.color,
+      axisId: config.axisId,
+      type: config.type,
+      pointRadius: config.pointRadius,
+      showLegend: config.showLegend,
+      stack: config.stack,
+      stackOrder: config.stackOrder,
+      labelFormatter: config.labelFormatter,
+    })),
+    axes: Object.fromEntries(
+      datasetConfig.map(config => [
+        config.axisId,
+        {
+          display: config.axisConfig?.display ?? true,
+          position: config.axisConfig?.position ?? "left",
+          reverse: config.axisConfig?.reverse ?? false,
+          displayName: config.axisConfig?.displayName ?? config.title,
+          valueFormatter: config.axisConfig?.valueFormatter,
+          min: config.axisConfig?.min,
+          max: config.axisConfig?.max,
+          hideOnMobile: config.axisConfig?.hideOnMobile,
+        },
+      ])
+    ),
+  };
+
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -61,7 +92,7 @@ export default function PpBoundaryStat({ player }: PpBoundaryProps) {
         </div>
       </PopoverTrigger>
       <PopoverContent className="flex flex-col gap-2 p-3 w-[90vw] lg:w-[500px]">
-        <GenericChart labels={labels} datasetConfig={datasetConfig} histories={histories} />
+        <GenericChart labels={labels} config={config} />
       </PopoverContent>
     </Popover>
   );

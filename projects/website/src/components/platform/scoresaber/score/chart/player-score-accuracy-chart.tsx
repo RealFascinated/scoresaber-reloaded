@@ -1,6 +1,6 @@
 "use client";
 
-import { DatasetConfig } from "@/common/chart/types";
+import { ChartConfig, DatasetConfig } from "@/common/chart/types";
 import { Colors } from "@/common/colors";
 import GenericChart from "@/components/chart/generic-chart";
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
@@ -89,9 +89,40 @@ export default function PlayerScoreAccuracyChart({ scoreStats, leaderboard }: Pr
     },
   ];
 
+  const config: ChartConfig = {
+    id: "player-score-accuracy-chart",
+    datasets: datasetConfig.map(config => ({
+      label: config.title,
+      data: histories[config.field],
+      color: config.color,
+      axisId: config.axisId,
+      type: config.type,
+      pointRadius: config.pointRadius,
+      showLegend: config.showLegend,
+      stack: config.stack,
+      stackOrder: config.stackOrder,
+      labelFormatter: config.labelFormatter,
+    })),
+    axes: Object.fromEntries(
+      datasetConfig.map(config => [
+        config.axisId,
+        {
+          display: config.axisConfig?.display ?? true,
+          position: config.axisConfig?.position ?? "left",
+          reverse: config.axisConfig?.reverse ?? false,
+          displayName: config.axisConfig?.displayName ?? config.title,
+          valueFormatter: config.axisConfig?.valueFormatter,
+          min: config.axisConfig?.min,
+          max: config.axisConfig?.max,
+          hideOnMobile: config.axisConfig?.hideOnMobile,
+        },
+      ])
+    ),
+  };
+
   return (
     <div className="flex flex-col items-center justify-center w-full p-4 rounded-xl bg-accent-deep border border-border backdrop-blur-sm">
-      <GenericChart labels={labels} datasetConfig={datasetConfig} histories={histories} />
+      <GenericChart labels={labels} config={config} />
     </div>
   );
 }
