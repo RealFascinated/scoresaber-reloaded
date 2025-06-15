@@ -12,8 +12,8 @@ import RequestsPerSecondMetric from "../metrics/impl/backend/total-requests";
 import BeatSaverWebsocketMetric from "../metrics/impl/beatsaver/beatsaver-websocket-metrics";
 import MongoDbSizeMetric from "../metrics/impl/database/mongo-db-size";
 import ActiveAccountsMetric from "../metrics/impl/player/active-accounts";
+import HmdStatisticMetric from "../metrics/impl/player/daily-hmd-statistic";
 import DailyNewAccountsMetric from "../metrics/impl/player/daily-new-accounts";
-import HmdStatisticMetric from "../metrics/impl/player/hmd-statistic";
 import TotalTrackedScoresMetric from "../metrics/impl/player/total-tracked-scores";
 import TrackedPlayersMetric from "../metrics/impl/player/tracked-players";
 import TrackedScoresMetric from "../metrics/impl/player/tracked-scores";
@@ -35,7 +35,8 @@ export enum MetricType {
   UNIQUE_DAILY_PLAYERS = "unique-daily-players",
   ACTIVE_ACCOUNTS = "active-accounts",
   REPLAY_STATS = "replay-stats",
-  HMD_STATISTIC = "hmd-statistic",
+  DAILY_HMD_STATISTIC = "daily-hmd-statistic",
+  ACTIVE_PLAYERS_HMD_STATISTIC = "active-players-hmd-statistic",
   TOTAL_TRACKED_SCORES = "total-tracked-scores",
   DAILY_NEW_ACCOUNTS = "daily-new-accounts",
 
