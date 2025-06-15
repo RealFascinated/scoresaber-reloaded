@@ -20,7 +20,7 @@ export const ReplayViewers: Record<string, ReplayViewer> = {
   beatleader: {
     name: "BeatLeader",
     generateUrl: (id, replayUrl) =>
-      `https://replay.beatleader.xyz/${replayUrl ? `?url=${replayUrl}` : `?scoreId=${id}`}`,
+      `https://replay.beatleader.xyz/${replayUrl ? `?link=${replayUrl}` : `?scoreId=${id}`}`,
   },
   arcviewer: {
     name: "ArcViewer",
