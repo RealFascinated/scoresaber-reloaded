@@ -70,49 +70,39 @@ export async function sendScoreNotification(
       .setTitle(title)
       .setDescription(
         [
-          `${leaderboard.fullName} (${getDifficultyName(leaderboard.difficulty.difficulty)}${leaderboard.stars > 0 ? ` ${leaderboard.stars.toFixed(2)}★` : ""})`,
+          `🎵 **${leaderboard.fullName}**`,
+          `📊 ${getDifficultyName(leaderboard.difficulty.difficulty)}${leaderboard.stars > 0 ? ` • ${leaderboard.stars.toFixed(2)}★` : ""}`,
+          "",
           [
-            `[[Player]](${env.NEXT_PUBLIC_WEBSITE_URL}/player/${player.id})`,
-            `[[Leaderboard]](${env.NEXT_PUBLIC_WEBSITE_URL}/leaderboard/${leaderboard.id})`,
-            beatSaver ? `[[Map]](https://beatsaver.com/maps/${beatSaver.bsr})` : undefined,
+            `👤 [[Player]](${env.NEXT_PUBLIC_WEBSITE_URL}/player/${player.id})`,
+            `🏆 [[Leaderboard]](${env.NEXT_PUBLIC_WEBSITE_URL}/leaderboard/${leaderboard.id})`,
+            beatSaver ? `🗺️ [[Map]](https://beatsaver.com/maps/${beatSaver.bsr})` : undefined,
             beatLeaderScore
-              ? `[[Replay]](https://replay.beatleader.xyz/?scoreId=${beatLeaderScore.id})`
+              ? `🎥 [[Replay]](https://replay.beatleader.xyz/?scoreId=${beatLeaderScore.id})`
               : undefined,
-          ].join(" "),
+          ].join(" • "),
         ]
           .join("\n")
           .trim()
       )
       .addFields([
         {
-          name: "Accuracy",
-          value: `${formatScoreAccuracy(score)} ${change ? change.accuracy : ""}`,
-          inline: true,
+          name: "🎯 Performance",
+          value: [
+            `**Accuracy:** ${formatScoreAccuracy(score)} ${change ? change.accuracy : ""}`,
+            `**PP:** ${score.pp > 0 ? `${formatPp(score.pp)}pp ${change ? change.pp : ""}` : "N/A"}`,
+            `**Modifiers:** ${score.modifiers.length > 0 ? score.modifiers.join(", ") : "None"}`,
+          ].join("\n"),
+          inline: false,
         },
         {
-          name: "PP",
-          value: score.pp > 0 ? `${formatPp(score.pp)}pp ${change ? change.pp : ""}` : "N/A",
-          inline: true,
-        },
-        {
-          name: "Modifiers",
-          value: `${score.modifiers.length > 0 ? score.modifiers.join(", ") : "None"}`,
-          inline: true,
-        },
-        {
-          name: "Misses",
-          value: `${formatNumberWithCommas(score.missedNotes)} ${change ? change.misses : ""}`,
-          inline: true,
-        },
-        {
-          name: "Bad Cuts",
-          value: `${formatNumberWithCommas(score.badCuts)} ${change ? change.badCuts : ""}`,
-          inline: true,
-        },
-        {
-          name: "Max Combo",
-          value: `${formatNumberWithCommas(score.maxCombo)} ${score.fullCombo ? "/ FC" : ""} ${change ? change.maxCombo : ""}`,
-          inline: true,
+          name: "📊 Statistics",
+          value: [
+            `**Misses:** ${formatNumberWithCommas(score.missedNotes)} ${change ? change.misses : ""}`,
+            `**Bad Cuts:** ${formatNumberWithCommas(score.badCuts)} ${change ? change.badCuts : ""}`,
+            `**Max Combo:** ${formatNumberWithCommas(score.maxCombo)} ${score.fullCombo ? "• FC" : ""} ${change ? change.maxCombo : ""}`,
+          ].join("\n"),
+          inline: false,
         },
       ])
       .setThumbnail(leaderboard.songArt)
