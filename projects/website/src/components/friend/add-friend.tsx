@@ -2,7 +2,6 @@
 
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
-import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useLiveQuery } from "dexie-react-hooks";
 import { UserPlus } from "lucide-react";
 import { toast } from "sonner";
@@ -33,7 +32,6 @@ export default function AddFriend({ player, iconOnly }: Props) {
    * Adds this player as a friend
    */
   async function addFriend() {
-    await ssrApi.trackPlayer(id);
     await database.addFriend(id);
     toast(`You have added ${name} as a friend.`);
   }
