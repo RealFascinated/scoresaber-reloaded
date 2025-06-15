@@ -1,6 +1,7 @@
 import { PlayerStatisticHistory } from "src/player/player-statistic-history";
 import { PlaysByHmdResponse } from "src/response/plays-by-hmd-response";
 import { PlayerScore } from "src/score/player-score";
+import { ScoreCalendarData } from "src/types/player/player-statistic";
 import SuperJSON from "superjson";
 import { DetailType } from "../detail-type";
 import { env } from "../env";
@@ -14,7 +15,6 @@ import { AroundPlayerResponse } from "../response/around-player-response";
 import { BeatSaverMapResponse } from "../response/beatsaver-map-response";
 import { LeaderboardResponse } from "../response/leaderboard-response";
 import LeaderboardScoresResponse from "../response/leaderboard-scores-response";
-import { PlayedMapsCalendarResponse } from "../response/played-maps-calendar-response";
 import { PlayerRankedPpsResponse } from "../response/player-ranked-pps-response";
 import { PlayerScoresChartResponse } from "../response/player-scores-chart";
 import { PpBoundaryResponse } from "../response/pp-boundary-response";
@@ -136,7 +136,7 @@ class SSRApi {
    * @param month the month to get the score calendar for
    */
   async getScoreCalendar(playerId: string, year: number, month: number) {
-    return await Request.get<PlayedMapsCalendarResponse>(
+    return await Request.get<ScoreCalendarData>(
       `${env.NEXT_PUBLIC_API_URL}/player/history/calendar/${playerId}/${year}/${month}`
     );
   }

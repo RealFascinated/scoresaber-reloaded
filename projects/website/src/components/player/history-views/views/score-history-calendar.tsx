@@ -63,7 +63,7 @@ export default function ScoreHistoryCalendar({ playerId }: ScoreHistoryCalendarP
             <Combobox<string>
               name="Month"
               items={
-                calendar?.metadata[year]?.map(monthValue => ({
+                calendar?.metadata[year]?.map((monthValue: number) => ({
                   value: String(monthValue),
                   name: <p>{Months.find(m => m.number === monthValue)?.name}</p>,
                 })) || []
