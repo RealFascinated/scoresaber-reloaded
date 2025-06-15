@@ -1,7 +1,6 @@
 "use client";
 
 import { DatasetConfig } from "@/common/chart/types";
-import { Colors } from "@/common/colors";
 import GenericPlayerChart from "@/components/player/history-views/generic-player-chart";
 import { PlayerStatisticHistory } from "@ssr/common/player/player-statistic-history";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
@@ -15,8 +14,8 @@ export const scoreBarsDataset: DatasetConfig[] = [
   {
     title: "Ranked Scores",
     field: "rankedScores",
-    color: Colors.ranked,
-    axisId: "y",
+    color: "#ffae4d",
+    axisId: "y100",
     axisConfig: {
       reverse: false,
       display: true,
