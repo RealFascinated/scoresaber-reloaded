@@ -4,6 +4,7 @@ export type HMD =
   | "Vive"
   | "Vive Pro"
   | "Vive Pro 2"
+  | "HTC Vive Elite"
   | "Windows Mixed Reality"
   | "Rift S"
   | "Quest"
@@ -42,6 +43,11 @@ const HMDs: Record<HMD, HMDInfo> = {
       "invert(99%) sepia(3%) saturate(82%) hue-rotate(58deg) brightness(118%) contrast(100%)",
   },
   "Vive Pro 2": {
+    logo: "vive.svg",
+    filters:
+      "invert(79%) sepia(68%) saturate(5755%) hue-rotate(232deg) brightness(90%) contrast(109%)",
+  },
+  "HTC Vive Elite": {
     logo: "vive.svg",
     filters:
       "invert(79%) sepia(68%) saturate(5755%) hue-rotate(232deg) brightness(90%) contrast(109%)",
