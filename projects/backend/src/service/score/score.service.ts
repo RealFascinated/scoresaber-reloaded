@@ -22,6 +22,7 @@ import mongoose from "mongoose";
 import { scoreToObject } from "../../common/score/score.util";
 import BeatLeaderService from "../beatleader.service";
 import { PlayerHmdService } from "../player/player-hmd.service";
+import { PlayerService } from "../player/player.service";
 import LeaderboardService from "../scoresaber/leaderboard.service";
 import ScoreSaberService from "../scoresaber/scoresaber.service";
 import { PreviousScoresService } from "./previous-scores.service";
@@ -57,6 +58,11 @@ export class ScoreService {
       });
     if (leaderboardScores == undefined) {
       return;
+    }
+
+    // ensure player is tracked (ran async to avoid blocking)
+    for (const score of leaderboardScores.scores) {
+      PlayerService.trackPlayer(score.leaderboardPlayerInfo.id);
     }
 
     // Process scores in parallel
