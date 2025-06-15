@@ -25,7 +25,7 @@ export const scoreBarsDataset: DatasetConfig[] = [
     type: "bar",
     stack: "daily-scores",
     stackOrder: 0,
-    labelFormatter: (value: number) => `${value.toFixed(0)}`,
+    labelFormatter: (value: number) => `Ranked Scores: ${value.toFixed(0)}`,
   },
   {
     title: "Unranked Scores",
