@@ -1,22 +1,39 @@
-import { createContext, ReactNode, useContext, useState } from "react";
+import { SettingIds } from "@/common/database/database";
+import useDatabase from "@/hooks/use-database";
+import { useLiveQuery } from "dexie-react-hooks";
+import { createContext, ReactNode, useContext, useEffect, useState } from "react";
 
 type FilterContextProps = {
   country: string | undefined;
 
   setCountry: (country: string | undefined) => void;
   clearFilters: () => void;
+  resetFilters: () => void;
 };
 const LeaderboardFilterContext = createContext<FilterContextProps | undefined>(undefined);
 
 export const LeaderboardFilterProvider = ({ children }: { children: ReactNode }) => {
-  const [country, setCountry] = useState<string | undefined>(undefined);
+  const database = useDatabase();
+  const defaultCountry = useLiveQuery(() =>
+    database.getSetting<string>(SettingIds.DefaultLeaderboardCountry)
+  );
+  const [country, setCountry] = useState<string | undefined>();
+
+  useEffect(() => {
+    setCountry(defaultCountry ?? undefined);
+  }, [defaultCountry]);
 
   const clearFilters = () => {
     setCountry(undefined);
   };
 
+  const resetFilters = () => {
+    setCountry(undefined);
+    database.setSetting(SettingIds.DefaultLeaderboardCountry, undefined);
+  };
+
   return (
-    <LeaderboardFilterContext.Provider value={{ country, setCountry, clearFilters }}>
+    <LeaderboardFilterContext.Provider value={{ country, setCountry, clearFilters, resetFilters }}>
       {children}
     </LeaderboardFilterContext.Provider>
   );
@@ -32,6 +49,7 @@ export const useLeaderboardFilter = (): FilterContextProps => {
       country: undefined,
       setCountry: () => {},
       clearFilters: () => {},
+      resetFilters: () => {},
     };
   }
   return context;

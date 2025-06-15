@@ -60,7 +60,6 @@ export const Tooltip = React.memo(function Tooltip({
 
   const handleClick = useCallback(() => {
     if (isMobile) {
-      console.log("Click handler called");
       setIsPositioned(false);
       setIsOpen(prev => !prev);
     }
@@ -164,11 +163,6 @@ export const Tooltip = React.memo(function Tooltip({
       setIsOpen(false);
     }
   }, [isMobile]);
-
-  console.log({
-    isMobile,
-    showOnMobile,
-  });
 
   if (isMobile && !showOnMobile) {
     return <div>{children}</div>;

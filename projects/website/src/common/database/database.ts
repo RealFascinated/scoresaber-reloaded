@@ -47,6 +47,7 @@ export enum SettingIds {
   ReplayViewer = "replayViewer",
   Friends = "friends",
   ShowScoreComparison = "showScoreComparison",
+  DefaultLeaderboardCountry = "defaultLeaderboardCountry",
 }
 
 export const DEFAULT_WHAT_IF_RANGE: [number, number] = [70, 98.5];

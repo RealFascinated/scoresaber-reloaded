@@ -44,6 +44,11 @@ type ComboboxProps<T> = {
    * @param value the new value
    */
   onValueChange?: (value: T | undefined) => void;
+
+  /**
+   * The class name of this combobox.
+   */
+  className?: string;
 };
 
 export type ComboboxItem<T> = {
@@ -61,6 +66,11 @@ export type ComboboxItem<T> = {
    * The name of this item.
    */
   name: string | ReactNode;
+
+  /**
+   * The class name of this item.
+   */
+  className?: string;
 };
 
 const Combobox = <T,>({
@@ -69,6 +79,7 @@ const Combobox = <T,>({
   items,
   value: controlledValue,
   onValueChange,
+  className,
 }: ComboboxProps<T>): ReactElement<any> => {
   const [open, setOpen] = useState<boolean>(false);
   const [internalValue, setInternalValue] = useState<T | undefined>(controlledValue);
@@ -87,7 +98,7 @@ const Combobox = <T,>({
   };
 
   return (
-    <div className="flex flex-col gap-1.5">
+    <div className={cn("flex flex-col gap-1.5", className)}>
       {/* Name */}
       <h1 className="text-sm font-bold">{name}</h1>
 
@@ -119,7 +130,7 @@ const Combobox = <T,>({
                       setOpen(false);
                       handleValueChange(current === value ? undefined : current);
                     }}
-                    className={cn("flex gap-2 items-center justify-between")}
+                    className={cn("flex gap-2 items-center justify-between", item.className)}
                   >
                     {item.icon}
                     <div className={cn("flex gap-2 w-full items-center justify-between")}>
