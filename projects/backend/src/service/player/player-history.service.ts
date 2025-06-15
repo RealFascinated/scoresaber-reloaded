@@ -97,7 +97,7 @@ export class PlayerHistoryService {
         : [startTimestamp, endTimestamp];
 
     // Run queries in parallel
-    const [entries, playerRankHistory] = await Promise.all([
+    const [entries, playerRankHistory, todayData] = await Promise.all([
       PlayerHistoryEntryModel.find({
         playerId: player.id,
         date: {
@@ -108,6 +108,7 @@ export class PlayerHistoryService {
         .sort({ date: -1 })
         .lean(),
       parseRankHistory(player),
+      this.createPlayerStatistic(player, undefined),
     ]);
 
     const history: PlayerStatisticHistory = {};
@@ -116,7 +117,7 @@ export class PlayerHistoryService {
       history[date] = this.playerHistoryToObject(entry);
     }
 
-    // Merge rank history
+    // Process rank history in parallel chunks
     const daysDiff = Math.ceil((startDate.getTime() - endDate.getTime()) / (1000 * 60 * 60 * 24));
     let daysAgo = 0;
 
@@ -137,10 +138,10 @@ export class PlayerHistoryService {
       }
     }
 
-    // Add todays data
+    // Add today's data
     const today = getMidnightAlignedDate(new Date());
     const todayKey = formatDateMinimal(today);
-    history[todayKey] = await this.createPlayerStatistic(player, history[todayKey]);
+    history[todayKey] = todayData;
 
     // Sort history by date
     return Object.fromEntries(

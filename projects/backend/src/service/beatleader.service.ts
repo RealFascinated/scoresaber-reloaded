@@ -135,11 +135,9 @@ export default class BeatLeaderService {
         left: score.accLeft,
         right: score.accRight,
       },
-      scoreStats: isProduction()
-        ? await ApiServiceRegistry.getInstance().getBeatLeaderService().lookupScoreStats(score.id)
-        : undefined,
       timestamp: new Date(Number(score.timeset) * 1000),
     } as AdditionalScoreData;
+
     if (rawScoreImprovement && rawScoreImprovement.score > 0) {
       data.scoreImprovement = {
         score: rawScoreImprovement.score,
@@ -159,47 +157,53 @@ export default class BeatLeaderService {
       };
     }
 
-    const scoreStats = await ApiServiceRegistry.getInstance()
-      .getBeatLeaderService()
-      .lookupScoreStats(score.id);
-    if (scoreStats) {
-      await this.trackScoreStats(score.id, scoreStats);
-    }
+    // Parallelize independent operations
+    const [, replayData] = await Promise.all([
+      // Save score stats
+      ApiServiceRegistry.getInstance()
+        .getBeatLeaderService()
+        .lookupScoreStats(score.id)
+        .then(async stats => {
+          if (stats) {
+            await this.trackScoreStats(score.id, stats);
+          }
+          return stats;
+        }),
 
-    // Only save replays in production
-    if (isProduction()) {
-      // Cache replay for this score if the player is allowed to track replays or if the score is a top 50 global score
-      if (player && (player.trackReplays || isTop50GlobalScore)) {
-        try {
-          const replayId = getBeatLeaderReplayId(data);
-          const replayData = await Request.get<ArrayBuffer>(
-            `https://cdn.replays.beatleader.xyz/${replayId}`,
-            {
-              returns: "arraybuffer",
-            }
-          );
-
-          if (replayData !== undefined) {
-            await MinioService.saveFile(
-              MinioBucket.BeatLeaderReplays,
-              `${replayId}`,
-              Buffer.from(replayData)
+      // Save replay data if needed
+      (async () => {
+        if (isProduction() && player && (player.trackReplays || isTop50GlobalScore)) {
+          try {
+            const replayId = getBeatLeaderReplayId(data);
+            const replay = await Request.get<ArrayBuffer>(
+              `https://cdn.replays.beatleader.xyz/${replayId}`,
+              { returns: "arraybuffer" }
             );
 
-            data.savedReplay = true;
+            if (replay !== undefined) {
+              await MinioService.saveFile(
+                MinioBucket.BeatLeaderReplays,
+                `${replayId}`,
+                Buffer.from(replay)
+              );
+              return true;
+            }
+          } catch (error) {
+            logToChannel(
+              DiscordChannels.backendLogs,
+              createGenericEmbed(
+                "BeatLeader Replays",
+                `Failed to save replay for ${score.id}: ${error}`
+              )
+            );
+            console.error(`Failed to save replay for ${score.id}: ${error}`);
           }
-        } catch (error) {
-          logToChannel(
-            DiscordChannels.backendLogs,
-            createGenericEmbed(
-              "BeatLeader Replays",
-              `Failed to save replay for ${score.id}: ${error}`
-            )
-          );
-          console.error(`Failed to save replay for ${score.id}: ${error}`);
         }
-      }
-    }
+        return false;
+      })(),
+    ]);
+
+    data.savedReplay = replayData;
 
     await AdditionalScoreDataModel.create(data);
 

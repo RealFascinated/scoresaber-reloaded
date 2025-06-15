@@ -48,12 +48,11 @@ export default class ScoreSaberService {
       CacheService.getCache(ServiceCache.ScoreSaber),
       `player:${id}:${type}`,
       async () => {
-        const playerToken = await ApiServiceRegistry.getInstance()
-          .getScoreSaberService()
-          .lookupPlayer(id);
-        const account = await PlayerService.getPlayer(id, createIfMissing, playerToken).catch(
-          () => undefined
-        );
+        // Start fetching player token and account in parallel
+        const [playerToken, account] = await Promise.all([
+          ApiServiceRegistry.getInstance().getScoreSaberService().lookupPlayer(id),
+          PlayerService.getPlayer(id, createIfMissing).catch(() => undefined),
+        ]);
 
         if (!playerToken) {
           throw new NotFoundError(`Player "${id}" not found`);
@@ -81,22 +80,30 @@ export default class ScoreSaberService {
           return basePlayer;
         }
 
-        // For full type, run these operations in parallel
-        const [updatedAccount, ppBoundaries, accBadges] = await Promise.all([
-          account ? PlayerService.updatePeakRank(id, playerToken) : undefined,
-          account ? PlayerService.getPlayerPpBoundary(id, 50) : [],
-          account ? PlayerService.getAccBadges(id) : {},
+        // For full type, run all operations in parallel
+        const [updatedAccount, ppBoundaries, accBadges, statisticHistory, playerHMD] =
+          await Promise.all([
+            account ? PlayerService.updatePeakRank(id, playerToken) : undefined,
+            account ? PlayerService.getPlayerPpBoundary(id, 50) : [],
+            account ? PlayerService.getAccBadges(id) : {},
+            PlayerHistoryService.getPlayerStatisticHistory(
+              playerToken,
+              new Date(),
+              getDaysAgoDate(30)
+            ),
+            PlayerService.getPlayerHMD(playerToken.id),
+          ]);
+
+        // Calculate all statistic changes in parallel
+        const [dailyChanges, weeklyChanges, monthlyChanges] = await Promise.all([
+          account ? getPlayerStatisticChanges(statisticHistory, 1) : {},
+          account ? getPlayerStatisticChanges(statisticHistory, 7) : {},
+          account ? getPlayerStatisticChanges(statisticHistory, 30) : {},
         ]);
-
-        const statisticHistory = await PlayerHistoryService.getPlayerStatisticHistory(
-          playerToken,
-
-          new Date(),
-          getDaysAgoDate(30)
-        );
 
         return {
           ...basePlayer,
+          hmd: playerHMD,
           bio: {
             lines: playerToken.bio ? sanitize(playerToken.bio).split("\n") : [],
             linesStripped: playerToken.bio
@@ -109,9 +116,9 @@ export default class ScoreSaberService {
               description: badge.description,
             })) || [],
           statisticChange: {
-            daily: account ? await getPlayerStatisticChanges(statisticHistory, 1) : {},
-            weekly: account ? await getPlayerStatisticChanges(statisticHistory, 7) : {},
-            monthly: account ? await getPlayerStatisticChanges(statisticHistory, 30) : {},
+            daily: dailyChanges,
+            weekly: weeklyChanges,
+            monthly: monthlyChanges,
           },
           ppBoundaries,
           accBadges,
@@ -247,31 +254,31 @@ export default class ScoreSaberService {
       .setItemsPerPage(requestedPage.metadata.itemsPerPage)
       .setTotalItems(requestedPage.metadata.total);
 
-    // Fetch the comparison player if it's not the same as the player
-    const comparisonPlayer =
+    // Start fetching comparison player and leaderboard IDs in parallel
+    const [comparisonPlayer, leaderboardIds] = await Promise.all([
       comparisonPlayerId !== playerId && comparisonPlayerId !== undefined
-        ? await ScoreSaberService.getPlayer(comparisonPlayerId, DetailType.BASIC)
-        : undefined;
+        ? ScoreSaberService.getPlayer(comparisonPlayerId, DetailType.BASIC)
+        : undefined,
+      requestedPage.playerScores.map(score => score.leaderboard.id + ""),
+    ]);
 
     return await pagination.getPage(pageNumber, async () => {
-      // Get all leaderboard IDs at once
-      const leaderboardIds = requestedPage.playerScores.map(score => score.leaderboard.id + "");
-
-      // Fetch all leaderboards in parallel
-      const leaderboardPromises = leaderboardIds.map(id =>
-        LeaderboardService.getLeaderboard(id, {
-          includeBeatSaver: true,
-          beatSaverType: DetailType.FULL,
-        })
+      // Fetch all leaderboards in parallel with a concurrency limit
+      const leaderboardResponses = await Promise.all(
+        leaderboardIds.map(id =>
+          LeaderboardService.getLeaderboard(id, {
+            includeBeatSaver: true,
+            beatSaverType: DetailType.FULL,
+          })
+        )
       );
-      const leaderboardResponses = await Promise.all(leaderboardPromises);
 
       // Create a map for quick leaderboard lookup
       const leaderboardMap = new Map(
         leaderboardResponses.filter(Boolean).map(result => [result!.leaderboard.id, result!])
       );
 
-      // Process all scores in parallel
+      // Process all scores in parallel with a concurrency limit
       const scorePromises = requestedPage.playerScores.map(async playerScore => {
         const leaderboardResponse = leaderboardMap.get(playerScore.leaderboard.id);
         if (!leaderboardResponse) {
@@ -319,7 +326,8 @@ export default class ScoreSaberService {
       }
     };
 
-    const player = await ScoreSaberService.getPlayer(id);
+    // Get player directly since getPlayer already uses caching
+    const player = await ScoreSaberService.getPlayer(id, DetailType.BASIC);
     if (player == undefined) {
       throw new NotFoundError(`Player "${id}" not found`);
     }
@@ -329,37 +337,32 @@ export default class ScoreSaberService {
       return []; // Return empty array for invalid ranks
     }
 
+    // Calculate the range of ranks we need to fetch
+    const startRank = Math.max(1, rank - 2);
+    const endRank = rank + 2;
+
+    // Calculate the pages we need to fetch
     const itemsPerPage = 50;
-    const targetPage = Math.ceil(rank / itemsPerPage);
+    const startPage = Math.ceil(startRank / itemsPerPage);
+    const endPage = Math.ceil(endRank / itemsPerPage);
 
-    // Calculate which pages we need to fetch
-    // We need pages that might contain players 2 ranks above and 2 ranks below
-    const pagesToFetch: number[] = [];
+    // If we're near the top ranks, we need to fetch more pages below to ensure we have 5 players
+    const extraPagesNeeded = rank <= 3 ? Math.ceil(5 / itemsPerPage) : 0;
+    const finalEndPage = endPage + extraPagesNeeded;
 
-    // Always fetch the target page
-    pagesToFetch.push(targetPage);
-
-    // If player is near the start of their page, we need the previous page
-    if (rank % itemsPerPage <= 2) {
-      pagesToFetch.push(targetPage - 1);
-    }
-
-    // If player is near the end of their page, we need the next page
-    if (rank % itemsPerPage >= itemsPerPage - 2) {
-      pagesToFetch.push(targetPage + 1);
-    }
-
-    // Filter out invalid page numbers
-    const validPages = pagesToFetch.filter(page => page > 0);
-
-    // Fetch all pages in parallel
+    // Fetch all required pages in parallel with caching
     const pageResponses = await Promise.all(
-      validPages.map(page =>
-        type === "global"
-          ? ApiServiceRegistry.getInstance().getScoreSaberService().lookupPlayers(page)
-          : ApiServiceRegistry.getInstance()
-              .getScoreSaberService()
-              .lookupPlayersByCountry(page, player.country)
+      Array.from({ length: finalEndPage - startPage + 1 }, (_, i) => startPage + i).map(page =>
+        fetchWithCache(
+          CacheService.getCache(ServiceCache.ScoreSaber),
+          `players:${type}:${page}`,
+          async () =>
+            type === "global"
+              ? ApiServiceRegistry.getInstance().getScoreSaberService().lookupPlayers(page)
+              : ApiServiceRegistry.getInstance()
+                  .getScoreSaberService()
+                  .lookupPlayersByCountry(page, player.country)
+        )
       )
     );
 
@@ -380,17 +383,11 @@ export default class ScoreSaberService {
     const end = Math.min(allPlayers.length, playerIndex + 3);
     const result = allPlayers.slice(start, end);
 
-    // If we don't have enough players above, try to get more from below
-    if (start === 0 && result.length < 5) {
+    // If we don't have enough players (e.g., for rank 1-3), get more from below
+    if (result.length < 5 && end < allPlayers.length) {
       const extraNeeded = 5 - result.length;
       const extraPlayers = allPlayers.slice(end, end + extraNeeded);
       result.push(...extraPlayers);
-    }
-    // If we don't have enough players below, try to get more from above
-    else if (end === allPlayers.length && result.length < 5) {
-      const extraNeeded = 5 - result.length;
-      const extraPlayers = allPlayers.slice(Math.max(0, start - extraNeeded), start);
-      result.unshift(...extraPlayers);
     }
 
     return result.slice(0, 5); // Ensure we return exactly 5 players

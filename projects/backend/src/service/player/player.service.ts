@@ -9,10 +9,7 @@ import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { AccBadges } from "@ssr/common/player/acc-badges";
 import { PlayerAccuracies } from "@ssr/common/player/player-accuracies";
 import { PlayerRankedPpsResponse } from "@ssr/common/response/player-ranked-pps-response";
-import {
-  PlayerScoreChartDataPoint,
-  PlayerScoresChartResponse,
-} from "@ssr/common/response/player-scores-chart";
+import { PlayerScoresChartResponse } from "@ssr/common/response/player-scores-chart";
 import { ScoreCalendarData } from "@ssr/common/types/player/player-statistic";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
@@ -381,24 +378,34 @@ export class PlayerService {
       return accuracies;
     }
 
-    // Calculate averages in a single pass
-    let unrankedScores = 0;
-    let unrankedAccuracySum = 0;
-    let totalAccuracySum = 0;
+    // Process scores in parallel using Promise.all
+    const [unrankedStats, totalStats] = await Promise.all([
+      // Process unranked scores
+      Promise.all(
+        validScores
+          .filter(score => score.score.pp === 0)
+          .map(async score => ({
+            accuracy: score.score.accuracy,
+            count: 1,
+          }))
+      ),
+      // Process all scores
+      Promise.all(
+        validScores.map(async score => ({
+          accuracy: score.score.accuracy,
+          count: 1,
+        }))
+      ),
+    ]);
 
-    for (const playerScore of validScores) {
-      const accuracy = playerScore.score.accuracy;
-      totalAccuracySum += accuracy;
+    // Calculate averages
+    const unrankedSum = unrankedStats.reduce((sum, stat) => sum + stat.accuracy, 0);
+    const unrankedCount = unrankedStats.reduce((sum, stat) => sum + stat.count, 0);
+    const totalSum = totalStats.reduce((sum, stat) => sum + stat.accuracy, 0);
+    const totalCount = totalStats.reduce((sum, stat) => sum + stat.count, 0);
 
-      if (playerScore.score.pp === 0) {
-        unrankedAccuracySum += accuracy;
-        unrankedScores++;
-      }
-    }
-
-    // Calculate averages, defaulting to 0 if no scores in category
-    accuracies.unrankedAccuracy = unrankedScores > 0 ? unrankedAccuracySum / unrankedScores : 0;
-    accuracies.averageAccuracy = validScores.length > 0 ? totalAccuracySum / validScores.length : 0;
+    accuracies.unrankedAccuracy = unrankedCount > 0 ? unrankedSum / unrankedCount : 0;
+    accuracies.averageAccuracy = totalCount > 0 ? totalSum / totalCount : 0;
 
     return accuracies;
   }
@@ -427,21 +434,27 @@ export class PlayerService {
       includeLeaderboard: false,
     });
 
-    // Process scores in a single pass
-    for (const playerScore of playerScores) {
-      const accuracy = playerScore.score.accuracy;
-      if (accuracy >= 95) {
-        badges.SSPlus++;
-      } else if (accuracy >= 90) {
-        badges.SS++;
-      } else if (accuracy >= 85) {
-        badges.SPlus++;
-      } else if (accuracy >= 80) {
-        badges.S++;
-      } else if (accuracy >= 70) {
-        badges.A++;
-      }
-    }
+    // Process scores in parallel using Promise.all
+    const badgeCounts = await Promise.all(
+      playerScores.map(async playerScore => {
+        const accuracy = playerScore.score.accuracy;
+        if (accuracy >= 95) return { SSPlus: 1, SS: 0, SPlus: 0, S: 0, A: 0 };
+        if (accuracy >= 90) return { SSPlus: 0, SS: 1, SPlus: 0, S: 0, A: 0 };
+        if (accuracy >= 85) return { SSPlus: 0, SS: 0, SPlus: 1, S: 0, A: 0 };
+        if (accuracy >= 80) return { SSPlus: 0, SS: 0, SPlus: 0, S: 1, A: 0 };
+        if (accuracy >= 70) return { SSPlus: 0, SS: 0, SPlus: 0, S: 0, A: 1 };
+        return { SSPlus: 0, SS: 0, SPlus: 0, S: 0, A: 0 };
+      })
+    );
+
+    // Aggregate results
+    badgeCounts.forEach(count => {
+      badges.SSPlus += count.SSPlus;
+      badges.SS += count.SS;
+      badges.SPlus += count.SPlus;
+      badges.S += count.S;
+      badges.A += count.A;
+    });
 
     return badges;
   }
@@ -462,21 +475,25 @@ export class PlayerService {
       },
     });
 
-    const data: PlayerScoreChartDataPoint[] = [];
-    for (const playerScore of playerScores) {
-      const leaderboard = playerScore.leaderboard as ScoreSaberLeaderboard;
-      const score = playerScore.score as ScoreSaberScore;
+    // Process data points in parallel using Promise.all
+    const data = await Promise.all(
+      playerScores.map(async playerScore => {
+        const leaderboard = playerScore.leaderboard as ScoreSaberLeaderboard;
+        const score = playerScore.score as ScoreSaberScore;
 
-      data.push({
-        accuracy: score.accuracy,
-        stars: leaderboard.stars,
-        pp: score.pp,
-        timestamp: score.timestamp,
-        leaderboardId: leaderboard.id + "",
-        leaderboardName: leaderboard.fullName,
-        leaderboardDifficulty: getDifficultyName(getDifficulty(leaderboard.difficulty.difficulty)),
-      });
-    }
+        return {
+          accuracy: score.accuracy,
+          stars: leaderboard.stars,
+          pp: score.pp,
+          timestamp: score.timestamp,
+          leaderboardId: leaderboard.id + "",
+          leaderboardName: leaderboard.fullName,
+          leaderboardDifficulty: getDifficultyName(
+            getDifficulty(leaderboard.difficulty.difficulty)
+          ),
+        };
+      })
+    );
 
     return {
       data,

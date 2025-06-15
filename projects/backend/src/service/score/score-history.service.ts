@@ -38,23 +38,25 @@ export class ScoreHistoryService {
       .setItemsPerPage(8)
       .setTotalItems(scores.length)
       .getPage(page, async () => {
-        const toReturn: PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>[] = [];
-        for (const scoreToken of scores) {
-          let score = scoreToken.toObject() as unknown as ScoreSaberScore;
-
-          const leaderboardResponse = await LeaderboardService.getLeaderboard(leaderboardId);
-          if (leaderboardResponse == undefined) {
-            throw new NotFoundError(`Leaderboard "${leaderboardId}" not found`);
-          }
-          const { leaderboard, beatsaver } = leaderboardResponse;
-
-          score = await ScoreService.insertScoreData(score, leaderboard);
-          toReturn.push({
-            score: score,
-            leaderboard: leaderboard,
-            beatSaver: beatsaver,
-          });
+        // Get leaderboard data once for all scores
+        const leaderboardResponse = await LeaderboardService.getLeaderboard(leaderboardId);
+        if (leaderboardResponse == undefined) {
+          throw new NotFoundError(`Leaderboard "${leaderboardId}" not found`);
         }
+        const { leaderboard, beatsaver } = leaderboardResponse;
+
+        // Process all scores in parallel
+        const toReturn = await Promise.all(
+          scores.map(async scoreToken => {
+            let score = scoreToken.toObject() as unknown as ScoreSaberScore;
+            score = await ScoreService.insertScoreData(score, leaderboard);
+            return {
+              score: score,
+              leaderboard: leaderboard,
+              beatSaver: beatsaver,
+            };
+          })
+        );
 
         return toReturn;
       });
@@ -70,38 +72,45 @@ export class ScoreHistoryService {
     playerId: string,
     leaderboardId: string
   ): Promise<ScoreHistoryGraphResponse> {
-    const { leaderboard } = await LeaderboardService.getLeaderboard(leaderboardId, {
-      cacheOnly: true,
-      includeBeatSaver: false,
-    });
-
-    const select = {
-      score: 1,
-      accuracy: 1,
-      misses: 1,
-      pp: 1,
-      timestamp: 1,
-    };
-
-    const scores = await ScoreSaberScoreModel.find({
-      playerId: playerId,
-      leaderboardId: leaderboardId,
-    })
-      .select(select)
-      .sort({
-        timestamp: -1,
+    // Run leaderboard fetch and score queries in parallel
+    const [leaderboardResponse, scores, previousScores] = await Promise.all([
+      LeaderboardService.getLeaderboard(leaderboardId, {
+        cacheOnly: true,
+        includeBeatSaver: false,
+      }),
+      ScoreSaberScoreModel.find({
+        playerId: playerId,
+        leaderboardId: leaderboardId,
       })
-      .lean();
-
-    const previousScores = await ScoreSaberPreviousScoreModel.find({
-      playerId: playerId,
-      leaderboardId: leaderboardId,
-    })
-      .select(select)
-      .sort({
-        timestamp: -1,
+        .select({
+          score: 1,
+          accuracy: 1,
+          misses: 1,
+          pp: 1,
+          timestamp: 1,
+        })
+        .sort({
+          timestamp: -1,
+        })
+        .lean(),
+      ScoreSaberPreviousScoreModel.find({
+        playerId: playerId,
+        leaderboardId: leaderboardId,
       })
-      .lean();
+        .select({
+          score: 1,
+          accuracy: 1,
+          misses: 1,
+          pp: 1,
+          timestamp: 1,
+        })
+        .sort({
+          timestamp: -1,
+        })
+        .lean(),
+    ]);
+
+    const { leaderboard } = leaderboardResponse;
 
     return {
       isRanked: leaderboard.ranked,

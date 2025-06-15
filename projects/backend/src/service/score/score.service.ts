@@ -59,14 +59,15 @@ export class ScoreService {
       return;
     }
 
-    for (const token of leaderboardScores.scores) {
+    // Process scores in parallel
+    const scorePromises = leaderboardScores.scores.map(async token => {
       const score = getScoreSaberScoreFromToken(
         token,
         leaderboardResponse.leaderboard,
         token.leaderboardPlayerInfo.id
       );
       if (score == undefined) {
-        continue;
+        return undefined;
       }
 
       const additionalData = await BeatLeaderService.getAdditionalScoreDataFromSong(
@@ -80,8 +81,13 @@ export class ScoreService {
         score.additionalData = additionalData;
       }
 
-      scores.push(score);
-    }
+      return score;
+    });
+
+    const processedScores = await Promise.all(scorePromises);
+    scores.push(
+      ...processedScores.filter((score): score is ScoreSaberScore => score !== undefined)
+    );
 
     metadata = new Metadata(
       Math.ceil(leaderboardScores.metadata.total / leaderboardScores.metadata.itemsPerPage),
@@ -232,10 +238,16 @@ export class ScoreService {
       return { score: undefined, tracked: false };
     }
 
-    if (await ScoreService.scoreExists(player.id, leaderboard, score)) {
-      // Logger.info(
-      //   `Score "${score.scoreId}" for "${player.name}"(${player.id}) already exists, skipping`
-      // );
+    // Check if score exists and get previous score in parallel
+    const [scoreExists, previousScore] = await Promise.all([
+      ScoreService.scoreExists(player.id, leaderboard, score),
+      ScoreSaberScoreModel.findOne({
+        playerId: player.id,
+        leaderboardId: leaderboard.id,
+      }),
+    ]);
+
+    if (scoreExists) {
       return { score: undefined, tracked: false };
     }
 
@@ -243,20 +255,19 @@ export class ScoreService {
     // @ts-expect-error
     delete score.playerInfo;
 
-    // Remove the old score and create a new previous score
-    const previousScore = await ScoreSaberScoreModel.findOne({
-      playerId: player.id,
-      leaderboardId: leaderboard.id,
-    });
+    // Handle previous score if it exists
     if (previousScore) {
-      await ScoreSaberScoreModel.deleteOne({
-        playerId: player.id,
-        leaderboardId: leaderboard.id,
-      });
-
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { _id, ...rest } = previousScore.toObject();
-      await ScoreSaberPreviousScoreModel.create(rest);
+      await Promise.all([
+        ScoreSaberScoreModel.deleteOne({
+          playerId: player.id,
+          leaderboardId: leaderboard.id,
+        }),
+        (async () => {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { _id, ...rest } = previousScore.toObject();
+          await ScoreSaberPreviousScoreModel.create(rest);
+        })(),
+      ]);
 
       if (log) {
         Logger.info(
@@ -265,12 +276,15 @@ export class ScoreService {
       }
     }
 
-    await ScoreSaberScoreModel.create(score);
-
-    const hmd = await PlayerHmdService.getPlayerMostCommonRecentHmd(player.id);
-    if (hmd) {
-      await PlayerHmdService.updatePlayerHmd(player.id, hmd);
-    }
+    // Create new score and update HMD in parallel
+    await Promise.all([
+      ScoreSaberScoreModel.create(score),
+      PlayerHmdService.getPlayerMostCommonRecentHmd(player.id).then(hmd => {
+        if (hmd) {
+          return PlayerHmdService.updatePlayerHmd(player.id, hmd);
+        }
+      }),
+    ]);
 
     if (log) {
       Logger.info(

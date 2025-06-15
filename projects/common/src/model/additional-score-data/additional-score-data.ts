@@ -8,6 +8,7 @@ import {
 import { Document } from "mongoose";
 import type { MapDifficulty } from "../../score/map-difficulty";
 import type { MapCharacteristic } from "../../types/map-characteristic";
+import type { ScoreStatsToken } from "../../types/token/beatleader/score-stats/score-stats";
 import { HandAccuracy } from "./hand-accuracy";
 import { Misses } from "./misses";
 
@@ -139,6 +140,12 @@ export class AdditionalScoreData {
    */
   @prop({ required: true, index: true })
   public timestamp!: Date;
+
+  /**
+   * The score stats for this score.
+   */
+  @prop({ required: false })
+  public scoreStats?: ScoreStatsToken;
 }
 
 export type AdditionalScoreDataDocument = AdditionalScoreData & Document;

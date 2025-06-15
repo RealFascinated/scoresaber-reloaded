@@ -1,11 +1,13 @@
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import Logger from "@ssr/common/logger";
-import { PlayerDocument } from "@ssr/common/model/player";
+import { PlayerDocument, PlayerModel } from "@ssr/common/model/player";
 import {
   getScoreSaberLeaderboardFromToken,
   getScoreSaberScoreFromToken,
 } from "@ssr/common/token-creators";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
+import { EmbedBuilder } from "discord.js";
+import { DiscordChannels, logToChannel } from "../../bot/bot";
 import { ScoreService } from "../score/score.service";
 import { PlayerHistoryService } from "./player-history.service";
 import { PlayerService } from "./player.service";
@@ -112,6 +114,8 @@ export class PlayerRefreshService {
     let successCount = 0;
     let errorCount = 0;
 
+    const playerIds = new Set<string>();
+
     for (let i = 1; i <= pages; i++) {
       Logger.info(`Fetching page ${i}...`);
       const page = await ApiServiceRegistry.getInstance().getScoreSaberService().lookupPlayers(i);
@@ -126,6 +130,12 @@ export class PlayerRefreshService {
       Logger.info(`Processing page ${i} with ${page.players.length} players...`);
       await Promise.all(
         page.players.map(async player => {
+          // Add player ids to the list
+          if (playerIds.has(player.id)) {
+            return;
+          }
+          playerIds.add(player.id);
+
           let timeoutId: NodeJS.Timeout | undefined;
           try {
             const timeoutPromise = new Promise((_, reject) => {
@@ -156,10 +166,30 @@ export class PlayerRefreshService {
       Logger.info(`Completed page ${i}`);
     }
 
+    // Set all players in the database but not in the list as inactive
+    await PlayerModel.updateMany(
+      { id: { $nin: Array.from(playerIds) } },
+      { $set: { inactive: true } }
+    );
+    const inactivePlayers = await PlayerModel.countDocuments({ inactive: true });
+
     Logger.info(
       `Finished tracking player statistics in ${(performance.now() - now.getTime()).toFixed(0)}ms\n` +
         `Successfully processed: ${successCount} players\n` +
         `Failed to process: ${errorCount} players`
+    );
+    logToChannel(
+      DiscordChannels.backendLogs,
+      new EmbedBuilder()
+        .setTitle(`Refreshed ${successCount} players.`)
+        .setDescription(
+          [
+            `Successfully processed: ${successCount} players`,
+            `Failed to process: ${errorCount} players`,
+            `Inactive players (in db): ${inactivePlayers}`,
+          ].join("\n")
+        )
+        .setColor("#00ff00")
     );
   }
 }
