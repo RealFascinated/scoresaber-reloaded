@@ -12,6 +12,7 @@ import RequestsPerSecondMetric from "../metrics/impl/backend/total-requests";
 import BeatSaverWebsocketMetric from "../metrics/impl/beatsaver/beatsaver-websocket-metrics";
 import MongoDbSizeMetric from "../metrics/impl/database/mongo-db-size";
 import ActiveAccountsMetric from "../metrics/impl/player/active-accounts";
+import ActivePlayerHmdStatisticMetric from "../metrics/impl/player/active-player-hmd-statistic";
 import HmdStatisticMetric from "../metrics/impl/player/daily-hmd-statistic";
 import DailyNewAccountsMetric from "../metrics/impl/player/daily-new-accounts";
 import TotalTrackedScoresMetric from "../metrics/impl/player/total-tracked-scores";
@@ -88,6 +89,7 @@ export default class MetricsService {
     this.registerMetric(new UniqueDailyPlayersMetric());
     this.registerMetric(new ActiveAccountsMetric());
     this.registerMetric(new HmdStatisticMetric());
+    this.registerMetric(new ActivePlayerHmdStatisticMetric());
     this.registerMetric(new TotalTrackedScoresMetric());
     this.registerMetric(new DailyNewAccountsMetric());
 

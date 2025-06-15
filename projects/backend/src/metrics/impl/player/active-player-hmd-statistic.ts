@@ -3,7 +3,7 @@ import { PlayerModel } from "@ssr/common/model/player";
 import { MetricType } from "../../../service/metrics.service";
 import NumberMetric from "../../number-metric";
 
-export default class HmdStatisticMetric extends NumberMetric {
+export default class ActivePlayerHmdStatisticMetric extends NumberMetric {
   constructor() {
     super(MetricType.ACTIVE_PLAYERS_HMD_STATISTIC, 0, {
       fetchAndStore: false,
