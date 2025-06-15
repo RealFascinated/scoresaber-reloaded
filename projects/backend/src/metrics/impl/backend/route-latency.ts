@@ -4,12 +4,17 @@ import { MetricType } from "../../../service/metrics.service";
 import NumberMetric from "../../number-metric";
 
 interface LatencyData {
-  sum: number;
-  count: number;
+  recentLatencies: Array<{ value: number; timestamp: number }>;
+  readonly windowSize: number;
+  readonly maxAge: number; // Maximum age in milliseconds
 }
 
 export default class RouteLatencyMetric extends NumberMetric {
   private routeLatencies: Map<string, LatencyData> = new Map();
+  private recentLatencies: number[] = [];
+  private readonly windowSize = 100; // Store last 100 latencies for overall rolling average
+  private readonly routeWindowSize = 50; // Store last 50 latencies per route
+  private readonly maxAge = 5 * 60 * 1000; // Clear data older than 5 minutes
 
   constructor() {
     super(MetricType.ROUTE_LATENCY, 0, {
@@ -20,24 +25,47 @@ export default class RouteLatencyMetric extends NumberMetric {
     // Initialize all routes from the app
     for (const route of app.routes) {
       const key = `${route.method} ${route.path}`;
-      this.routeLatencies.set(key, { sum: 0, count: 0 });
+      this.routeLatencies.set(key, {
+        recentLatencies: [],
+        windowSize: this.routeWindowSize,
+        maxAge: this.maxAge,
+      });
     }
+  }
+
+  private calculateRollingAverage(
+    latencies: Array<{ value: number; timestamp: number }>,
+    maxAge: number
+  ): number {
+    const now = Date.now();
+    const validLatencies = latencies.filter(l => now - l.timestamp <= maxAge);
+
+    if (validLatencies.length === 0) return 0;
+    return validLatencies.reduce((sum, l) => sum + l.value, 0) / validLatencies.length;
   }
 
   public async collect(): Promise<Point | undefined> {
     const point = this.getPointBase();
+    const now = Date.now();
 
     // Record metrics for each route
     for (const [route, data] of this.routeLatencies.entries()) {
-      if (data.count === 0) continue;
+      // Clean up old data
+      data.recentLatencies = data.recentLatencies.filter(l => now - l.timestamp <= data.maxAge);
 
-      // Calculate and record average
-      const avgLatency = data.sum / data.count;
+      if (data.recentLatencies.length === 0) continue;
+
+      // Calculate and record rolling average for the route
+      const avgLatency = this.calculateRollingAverage(data.recentLatencies, data.maxAge);
       point.floatField(`${route}`, avgLatency);
-
-      // Reset for next interval
-      this.routeLatencies.set(route, { sum: 0, count: 0 });
     }
+
+    // Calculate and record overall rolling average
+    const rollingAvg =
+      this.recentLatencies.length > 0
+        ? this.recentLatencies.reduce((a, b) => a + b, 0) / this.recentLatencies.length
+        : 0;
+    point.floatField("overall_rolling_avg", rollingAvg);
 
     return point;
   }
@@ -45,14 +73,27 @@ export default class RouteLatencyMetric extends NumberMetric {
   public recordLatency(route: string, method: string, latency: number) {
     const key = `${method} ${route}`;
     let data = this.routeLatencies.get(key);
+    const now = Date.now();
 
     if (!data) {
-      data = { sum: 0, count: 0 };
+      data = {
+        recentLatencies: [],
+        windowSize: this.routeWindowSize,
+        maxAge: this.maxAge,
+      };
       this.routeLatencies.set(key, data);
     }
 
-    // Update sum and count
-    data.sum += latency;
-    data.count += 1;
+    // Update route's rolling window
+    data.recentLatencies.push({ value: latency, timestamp: now });
+    if (data.recentLatencies.length > data.windowSize) {
+      data.recentLatencies.shift(); // Remove oldest latency
+    }
+
+    // Update overall rolling window
+    this.recentLatencies.push(latency);
+    if (this.recentLatencies.length > this.windowSize) {
+      this.recentLatencies.shift(); // Remove oldest latency
+    }
   }
 }
