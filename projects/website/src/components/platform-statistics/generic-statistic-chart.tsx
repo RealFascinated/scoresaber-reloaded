@@ -1,6 +1,6 @@
 "use client";
 
-import { DatasetConfig } from "@/common/chart/types";
+import { ChartConfig, DatasetConfig } from "@/common/chart/types";
 import GenericChart from "@/components/chart/generic-chart";
 import { Statistic } from "@ssr/common/model/statistics/statistic";
 import { StatisticsType } from "@ssr/common/model/statistics/statistic-type";
@@ -55,6 +55,37 @@ export default function GenericStatisticChart({ statistics, datasetConfig }: Pro
     }
   }
 
+  const config: ChartConfig = {
+    id: "statistic-chart",
+    datasets: datasetConfig.map(config => ({
+      label: config.title,
+      data: histories[config.field],
+      color: config.color,
+      axisId: config.axisId,
+      type: config.type,
+      pointRadius: config.pointRadius,
+      showLegend: config.showLegend,
+      stack: config.stack,
+      stackOrder: config.stackOrder,
+      labelFormatter: config.labelFormatter,
+    })),
+    axes: Object.fromEntries(
+      datasetConfig.map(config => [
+        config.axisId,
+        {
+          display: config.axisConfig?.display ?? true,
+          position: config.axisConfig?.position ?? "left",
+          reverse: config.axisConfig?.reverse ?? false,
+          displayName: config.axisConfig?.displayName ?? config.title,
+          valueFormatter: config.axisConfig?.valueFormatter,
+          min: config.axisConfig?.min,
+          max: config.axisConfig?.max,
+          hideOnMobile: config.axisConfig?.hideOnMobile,
+        },
+      ])
+    ),
+  };
+
   // Render the chart with collected data
-  return <GenericChart labels={labels} datasetConfig={datasetConfig} histories={histories} />;
+  return <GenericChart labels={labels} config={config} />;
 }
