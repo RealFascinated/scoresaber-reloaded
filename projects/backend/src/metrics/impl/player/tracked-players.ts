@@ -13,6 +13,10 @@ export default class TrackedPlayersMetric extends NumberMetric {
 
   public async collect(): Promise<Point | undefined> {
     const count = await PlayerModel.estimatedDocumentCount();
-    return this.getPointBase().intField("value", count ?? 0);
+    const inactiveCount = await PlayerModel.countDocuments({ inactive: true });
+
+    return this.getPointBase()
+      .intField("value", count ?? 0)
+      .intField("inactive", inactiveCount ?? 0);
   }
 }

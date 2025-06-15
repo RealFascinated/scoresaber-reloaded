@@ -34,7 +34,7 @@ export class Player {
   /**
    * Whether this player is inactive or not.
    */
-  @prop()
+  @prop({ index: true })
   public inactive?: boolean;
 
   /**
