@@ -46,7 +46,9 @@ export default function ScoreSaberLeaderboardScore({
       </td>
 
       {/* Score Accuracy */}
-      <td className="px-4 py-2 text-center whitespace-nowrap">{formatScoreAccuracy(score)}</td>
+      <td className="px-4 py-2 text-center whitespace-nowrap">
+        {formatScoreAccuracy(score.accuracy)}
+      </td>
 
       {/* Score Misses */}
       <td

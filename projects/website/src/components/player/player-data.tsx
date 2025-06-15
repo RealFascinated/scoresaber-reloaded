@@ -140,10 +140,12 @@ export default function PlayerData({
     <div className="flex gap-2 justify-center w-full">
       <article className="flex flex-1 flex-col gap-2">
         <PlayerHeader player={player} />
-        <Card className="gap-1">
-          <PlayerBadges player={player} />
-          {!player.inactive && <PlayerViews player={player} />}
-        </Card>
+        {(!player.inactive || player.badges.length > 0) && (
+          <Card className="gap-1">
+            <PlayerBadges player={player} />
+            {!player.inactive && <PlayerViews player={player} />}
+          </Card>
+        )}
 
         <div className="flex flex-col">
           <div className="flex flex-col">

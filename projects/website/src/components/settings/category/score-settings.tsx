@@ -1,8 +1,8 @@
 "use client";
 
-import { ReplayViewers } from "@/common/replay-viewer";
 import useDatabase from "@/hooks/use-database";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { ReplayViewers } from "@ssr/common/replay-viewer";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
