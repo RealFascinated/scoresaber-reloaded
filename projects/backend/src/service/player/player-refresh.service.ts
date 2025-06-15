@@ -146,7 +146,7 @@ export class PlayerRefreshService {
             });
 
             const processPromise = (async () => {
-              const foundPlayer = await PlayerService.getPlayer(player.id, true, player);
+              const foundPlayer = await PlayerService.getPlayer(player.id, player);
               await PlayerHistoryService.trackPlayerHistory(foundPlayer, now, player);
               successCount++;
             })();

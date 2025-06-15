@@ -154,15 +154,6 @@ class SSRApi {
   }
 
   /**
-   * Ensure the player is being tracked.
-   *
-   * @param playerId the player id
-   */
-  async trackPlayer(playerId: string) {
-    await Request.post(`${env.NEXT_PUBLIC_API_URL}/player/track/${playerId}`);
-  }
-
-  /**
    * Get the friend scores for a leaderboard
    *
    * @param friendIds the friends to lookup

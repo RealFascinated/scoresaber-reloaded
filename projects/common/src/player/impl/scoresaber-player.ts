@@ -37,10 +37,9 @@ export default interface ScoreSaberPlayer extends ScoreSaberPlayerBase {
   accBadges: AccBadges;
 
   /**
-   * Whether the player is having their
-   * statistics being tracked or not.
+   * The date the player was first tracked.
    */
-  isBeingTracked?: boolean;
+  trackedSince: Date;
 }
 
 export interface ScoreSaberPlayerBase extends Player {

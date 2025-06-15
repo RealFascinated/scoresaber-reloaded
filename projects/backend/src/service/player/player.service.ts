@@ -34,7 +34,6 @@ export class PlayerService {
    */
   public static async getPlayer(
     id: string,
-    create: boolean = false,
     playerToken?: ScoreSaberPlayerToken
   ): Promise<PlayerDocument> {
     // Wait for the existing lock if it's in progress
@@ -49,10 +48,6 @@ export class PlayerService {
     );
 
     if (player === null) {
-      if (!create) {
-        throw new NotFoundError(`Player "${id}" not found, create disabled`);
-      }
-
       const success = await this.trackPlayer(id, playerToken);
       if (!success) {
         throw new NotFoundError(`Player "${id}" not found`);
@@ -328,7 +323,7 @@ export class PlayerService {
    * @param playerToken the player's token
    */
   public static async updatePeakRank(playerId: string, playerToken: ScoreSaberPlayerToken) {
-    const foundPlayer = await PlayerService.getPlayer(playerId, true);
+    const foundPlayer = await PlayerService.getPlayer(playerId);
     if (playerToken.rank == 0) {
       return foundPlayer;
     }

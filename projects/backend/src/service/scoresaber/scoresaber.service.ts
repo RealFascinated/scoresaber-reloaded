@@ -39,11 +39,8 @@ export default class ScoreSaberService {
    */
   public static async getPlayer(
     id: string,
-    type: DetailType = DetailType.BASIC,
-    options?: { createIfMissing?: boolean }
+    type: DetailType = DetailType.BASIC
   ): Promise<ScoreSaberPlayer> {
-    const { createIfMissing = false } = options || {};
-
     return fetchWithCache<ScoreSaberPlayer>(
       CacheService.getCache(ServiceCache.ScoreSaber),
       `player:${id}:${type}`,
@@ -51,7 +48,7 @@ export default class ScoreSaberService {
         // Start fetching player token and account in parallel
         const [playerToken, account] = await Promise.all([
           ApiServiceRegistry.getInstance().getScoreSaberService().lookupPlayer(id),
-          PlayerService.getPlayer(id, createIfMissing).catch(() => undefined),
+          PlayerService.getPlayer(id).catch(() => undefined),
         ]);
 
         if (!playerToken) {
@@ -73,7 +70,7 @@ export default class ScoreSaberService {
           permissions: playerToken.permissions,
           banned: playerToken.banned,
           inactive: playerToken.inactive,
-          isBeingTracked: account !== undefined,
+          trackedSince: account?.trackedSince ?? new Date(),
         } as ScoreSaberPlayer;
 
         if (type === DetailType.BASIC) {

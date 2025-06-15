@@ -3,14 +3,13 @@ import { DetailType } from "@ssr/common/detail-type";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerStatisticHistory } from "@ssr/common/player/player-statistic-history";
-import { PlayerTrackedSince } from "@ssr/common/player/player-tracked-since";
 import { AroundPlayerResponse } from "@ssr/common/response/around-player-response";
 import { PlayerRankedPpsResponse } from "@ssr/common/response/player-ranked-pps-response";
 import { PpBoundaryResponse } from "@ssr/common/response/pp-boundary-response";
 import { ScoreCalendarData } from "@ssr/common/types/player/player-statistic";
 import { getDaysAgoDate } from "@ssr/common/utils/time-utils";
 import { t } from "elysia";
-import { Controller, Get, Post } from "elysia-decorators";
+import { Controller, Get } from "elysia-decorators";
 import SuperJSON from "superjson";
 import { PlayerHistoryService } from "../service/player/player-history.service";
 import { PlayerService } from "../service/player/player.service";
@@ -25,21 +24,18 @@ export default class PlayerController {
       id: t.String({ required: true }),
     }),
     query: t.Object({
-      createIfMissing: t.Optional(t.Boolean({ default: false })),
       type: t.Optional(t.Union([t.Literal("full"), t.Literal("basic")], { default: "basic" })),
       superJson: t.Optional(t.Boolean({ default: false })),
     }),
   })
   public async getPlayer({
     params: { id },
-    query: { createIfMissing, type, superJson },
+    query: { type, superJson },
   }: {
     params: { id: string };
-    query: { createIfMissing: boolean; type: DetailType; superJson: boolean };
+    query: { type: DetailType; superJson: boolean };
   }): Promise<ScoreSaberPlayer | string> {
-    const player = await ScoreSaberService.getPlayer(id, type, {
-      createIfMissing,
-    });
+    const player = await ScoreSaberService.getPlayer(id, type);
     return superJson ? SuperJSON.stringify(player) : player;
   }
 
@@ -70,48 +66,6 @@ export default class PlayerController {
       new Date(startDate),
       new Date(endDate)
     );
-  }
-
-  @Post("/track/:id", {
-    config: {},
-    tags: ["player"],
-    params: t.Object({
-      id: t.String({ required: true }),
-    }),
-  })
-  public async trackPlayer({
-    params: { id },
-  }: {
-    params: { id: string };
-  }): Promise<{ success: boolean }> {
-    return { success: await PlayerService.trackPlayer(id) };
-  }
-
-  @Get("/tracked/:id", {
-    config: {},
-    tags: ["player"],
-    params: t.Object({
-      id: t.String({ required: true }),
-    }),
-  })
-  public async getTrackedStatus({
-    params: { id },
-    query: { createIfMissing },
-  }: {
-    params: { id: string };
-    query: { createIfMissing: boolean };
-  }): Promise<PlayerTrackedSince> {
-    try {
-      const player = await PlayerService.getPlayer(id, createIfMissing);
-      return {
-        tracked: true,
-        daysTracked: await player.getDaysTracked(),
-      };
-    } catch {
-      return {
-        tracked: false,
-      };
-    }
   }
 
   @Get("/around/:id/:type", {

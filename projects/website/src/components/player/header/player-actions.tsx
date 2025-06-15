@@ -85,12 +85,10 @@ export default function PlayerActions({ player }: { player: ScoreSaberPlayer }) 
       </div>
 
       {/* Actions */}
-      {player.isBeingTracked && (
-        <>
-          <PlayerScoreChartButton player={player} />
-          <SnipePlaylistCreator toSnipe={player} />
-        </>
-      )}
+      <>
+        <PlayerScoreChartButton player={player} />
+        <SnipePlaylistCreator toSnipe={player} />
+      </>
     </div>
   );
 }
