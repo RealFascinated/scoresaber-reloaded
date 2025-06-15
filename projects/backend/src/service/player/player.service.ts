@@ -111,6 +111,8 @@ export class PlayerService {
           const newPlayer = await PlayerModel.create({
             _id: id,
             joinedDate: new Date(playerToken.firstSeen),
+            inactive: playerToken.inactive,
+            name: playerToken.name,
             trackedSince: new Date(),
           });
           await newPlayer.save();
