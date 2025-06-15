@@ -10,7 +10,7 @@ import { connectBeatLeaderWebsocket } from "@ssr/common/websocket/beatleader-web
 import { connectScoresaberWebsocket } from "@ssr/common/websocket/scoresaber-websocket";
 import { EventListener } from "../event/event-listener";
 import { EventsManager } from "../event/events-manager";
-import { PlayerCoreService } from "../service/player/player-core.service";
+import { PlayerService } from "../service/player/player.service";
 import { ScoreService } from "../service/score/score.service";
 
 interface PendingScore {
@@ -164,7 +164,7 @@ export class ScoreWebsockets implements EventListener {
       const score = getScoreSaberScoreFromToken(scoreSaberToken, leaderboard, player.id);
       const isTop50GlobalScore = await ScoreService.isTop50GlobalScore(score);
 
-      PlayerCoreService.trackPlayer(player.id);
+      PlayerService.trackPlayer(player.id);
 
       EventsManager.getListeners().forEach(listener => {
         listener.onScoreReceived?.(score, leaderboard, player, beatLeaderScore, isTop50GlobalScore);

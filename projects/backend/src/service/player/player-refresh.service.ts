@@ -7,8 +7,8 @@ import {
 } from "@ssr/common/token-creators";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import { ScoreService } from "../score/score.service";
-import { PlayerCoreService } from "./player-core.service";
 import { PlayerHistoryService } from "./player-history.service";
+import { PlayerService } from "./player.service";
 
 export class PlayerRefreshService {
   /**
@@ -136,8 +136,8 @@ export class PlayerRefreshService {
             });
 
             const processPromise = (async () => {
-              const foundPlayer = await PlayerCoreService.getPlayer(player.id, true, player);
-              await PlayerHistoryService.trackScoreSaberPlayer(foundPlayer, now, player);
+              const foundPlayer = await PlayerService.getPlayer(player.id, true, player);
+              await PlayerHistoryService.trackPlayerHistory(foundPlayer, now, player);
               successCount++;
             })();
 

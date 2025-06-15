@@ -1,8 +1,8 @@
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import Logger from "@ssr/common/logger";
 import { PlayerModel } from "@ssr/common/model/player";
-import { PlayerCoreService } from "../../service/player/player-core.service";
 import { PlayerRefreshService } from "../../service/player/player-refresh.service";
+import { PlayerService } from "../../service/player/player.service";
 import { Queue } from "../queue";
 import { QueueId } from "../queue-manager";
 
@@ -28,7 +28,7 @@ export class PlayerScoreSeedQueue extends Queue<string> {
       return;
     }
 
-    const player = await PlayerCoreService.getPlayer(playerId, true, playerToken);
+    const player = await PlayerService.getPlayer(playerId, true, playerToken);
     await PlayerRefreshService.refreshAllPlayerScores(player, playerToken);
   }
 }

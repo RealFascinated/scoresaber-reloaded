@@ -23,7 +23,7 @@ import {
   generateSnipePlaylistImage,
 } from "../common/playlist.util";
 import CacheService, { ServiceCache } from "./cache.service";
-import { PlayerCoreService } from "./player/player-core.service";
+import { PlayerService } from "./player/player.service";
 import { ScoreService } from "./score/score.service";
 import LeaderboardService from "./scoresaber/leaderboard.service";
 import ScoreSaberService from "./scoresaber/scoresaber.service";
@@ -340,8 +340,8 @@ export default class PlaylistService {
     try {
       // Validate users exist
       if (
-        !(await PlayerCoreService.playerExists(user)) ||
-        !(await PlayerCoreService.playerExists(toSnipe))
+        !(await PlayerService.playerExists(user)) ||
+        !(await PlayerService.playerExists(toSnipe))
       ) {
         throw new NotFoundError(
           `Unable to create a snipe playlist for ${toSnipe} as one of the users isn't tracked.`

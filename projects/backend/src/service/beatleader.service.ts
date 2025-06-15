@@ -20,7 +20,7 @@ import TrackedScoresMetric from "../metrics/impl/player/tracked-scores";
 import CacheService, { ServiceCache } from "./cache.service";
 import MetricsService, { MetricType } from "./metrics.service";
 import MinioService from "./minio.service";
-import { PlayerCoreService } from "./player/player-core.service";
+import { PlayerService } from "./player/player.service";
 
 export default class BeatLeaderService {
   /**
@@ -259,7 +259,7 @@ export default class BeatLeaderService {
       if (
         scoreStats &&
         additionalScoreData &&
-        (await PlayerCoreService.playerExists(additionalScoreData.playerId))
+        (await PlayerService.playerExists(additionalScoreData.playerId))
       ) {
         return await this.trackScoreStats(scoreId, scoreStats);
       }

@@ -15,6 +15,7 @@ import { PlayerScoresResponse } from "@ssr/common/response/player-scores-respons
 import { PlayerScore } from "@ssr/common/score/player-score";
 import { ScoreSaberScoreSort } from "@ssr/common/score/score-sort";
 import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
+import { AroundPlayer } from "@ssr/common/types/around-player";
 import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/leaderboard-player-info";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import { getPlayerStatisticChanges } from "@ssr/common/utils/player-utils";
@@ -23,10 +24,8 @@ import { getPageFromRank } from "@ssr/common/utils/utils";
 import sanitize from "sanitize-html";
 import { fetchWithCache } from "../../common/cache.util";
 import CacheService, { ServiceCache } from "../cache.service";
-import { PlayerAccuracyService } from "../player/player-accuracy.service";
-import { PlayerCoreService } from "../player/player-core.service";
 import { PlayerHistoryService } from "../player/player-history.service";
-import { PlayerRankingService } from "../player/player-ranking.service";
+import { PlayerService } from "../player/player.service";
 import { ScoreService } from "../score/score.service";
 import LeaderboardService from "./leaderboard.service";
 
@@ -52,7 +51,7 @@ export default class ScoreSaberService {
         const playerToken = await ApiServiceRegistry.getInstance()
           .getScoreSaberService()
           .lookupPlayer(id);
-        const account = await PlayerCoreService.getPlayer(id, createIfMissing, playerToken).catch(
+        const account = await PlayerService.getPlayer(id, createIfMissing, playerToken).catch(
           () => undefined
         );
 
@@ -69,7 +68,7 @@ export default class ScoreSaberService {
           rank: playerToken.rank,
           countryRank: playerToken.countryRank,
           pp: playerToken.pp,
-          hmd: await PlayerCoreService.getPlayerHMD(playerToken.id),
+          hmd: await PlayerService.getPlayerHMD(playerToken.id),
           joinedDate: new Date(playerToken.firstSeen),
           role: playerToken.role ?? undefined,
           permissions: playerToken.permissions,
@@ -84,9 +83,9 @@ export default class ScoreSaberService {
 
         // For full type, run these operations in parallel
         const [updatedAccount, ppBoundaries, accBadges] = await Promise.all([
-          account ? PlayerRankingService.updatePeakRank(id, playerToken) : undefined,
-          account ? PlayerRankingService.getPlayerPpBoundary(id, 50) : [],
-          account ? PlayerAccuracyService.getAccBadges(id) : {},
+          account ? PlayerService.updatePeakRank(id, playerToken) : undefined,
+          account ? PlayerService.getPlayerPpBoundary(id, 50) : [],
+          account ? PlayerService.getAccBadges(id) : {},
         ]);
 
         const statisticHistory = await PlayerHistoryService.getPlayerStatisticHistory(
@@ -299,5 +298,101 @@ export default class ScoreSaberService {
         ScoreSaberLeaderboard
       >[];
     });
+  }
+
+  /**
+   * Gets the players around a player.
+   *
+   * @param id the player to get around
+   * @param type the type to get around
+   */
+  public static async getPlayersAroundPlayer(
+    id: string,
+    type: AroundPlayer
+  ): Promise<ScoreSaberPlayerToken[]> {
+    const getRank = (player: ScoreSaberPlayer | ScoreSaberPlayerToken, type: AroundPlayer) => {
+      switch (type) {
+        case "global":
+          return player.rank;
+        case "country":
+          return player.countryRank;
+      }
+    };
+
+    const player = await ScoreSaberService.getPlayer(id);
+    if (player == undefined) {
+      throw new NotFoundError(`Player "${id}" not found`);
+    }
+
+    const rank = getRank(player, type);
+    if (rank <= 0) {
+      return []; // Return empty array for invalid ranks
+    }
+
+    const itemsPerPage = 50;
+    const targetPage = Math.ceil(rank / itemsPerPage);
+
+    // Calculate which pages we need to fetch
+    // We need pages that might contain players 2 ranks above and 2 ranks below
+    const pagesToFetch: number[] = [];
+
+    // Always fetch the target page
+    pagesToFetch.push(targetPage);
+
+    // If player is near the start of their page, we need the previous page
+    if (rank % itemsPerPage <= 2) {
+      pagesToFetch.push(targetPage - 1);
+    }
+
+    // If player is near the end of their page, we need the next page
+    if (rank % itemsPerPage >= itemsPerPage - 2) {
+      pagesToFetch.push(targetPage + 1);
+    }
+
+    // Filter out invalid page numbers
+    const validPages = pagesToFetch.filter(page => page > 0);
+
+    // Fetch all pages in parallel
+    const pageResponses = await Promise.all(
+      validPages.map(page =>
+        type === "global"
+          ? ApiServiceRegistry.getInstance().getScoreSaberService().lookupPlayers(page)
+          : ApiServiceRegistry.getInstance()
+              .getScoreSaberService()
+              .lookupPlayersByCountry(page, player.country)
+      )
+    );
+
+    // Combine and sort all players
+    const allPlayers = pageResponses
+      .filter((response): response is NonNullable<typeof response> => response !== undefined)
+      .flatMap(response => response.players)
+      .sort((a, b) => getRank(a, type) - getRank(b, type));
+
+    // Find the target player
+    const playerIndex = allPlayers.findIndex(p => p.id === id);
+    if (playerIndex === -1) {
+      return [];
+    }
+
+    // Get exactly 5 players: 2 above, the player, and 2 below
+    const start = Math.max(0, playerIndex - 2);
+    const end = Math.min(allPlayers.length, playerIndex + 3);
+    const result = allPlayers.slice(start, end);
+
+    // If we don't have enough players above, try to get more from below
+    if (start === 0 && result.length < 5) {
+      const extraNeeded = 5 - result.length;
+      const extraPlayers = allPlayers.slice(end, end + extraNeeded);
+      result.push(...extraPlayers);
+    }
+    // If we don't have enough players below, try to get more from above
+    else if (end === allPlayers.length && result.length < 5) {
+      const extraNeeded = 5 - result.length;
+      const extraPlayers = allPlayers.slice(Math.max(0, start - extraNeeded), start);
+      result.unshift(...extraPlayers);
+    }
+
+    return result.slice(0, 5); // Ensure we return exactly 5 players
   }
 }

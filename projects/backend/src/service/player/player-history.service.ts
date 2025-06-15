@@ -1,5 +1,4 @@
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
-import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger from "@ssr/common/logger";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { PlayerDocument, PlayerModel } from "@ssr/common/model/player";
@@ -10,7 +9,6 @@ import {
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { removeObjectFields } from "@ssr/common/object.util";
 import { PlayerStatisticHistory } from "@ssr/common/player/player-statistic-history";
-import { ScoreCalendarData } from "@ssr/common/types/player/player-statistic";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import { parseRankHistory } from "@ssr/common/utils/player-utils";
 import {
@@ -18,10 +16,7 @@ import {
   getDaysAgoDate,
   getMidnightAlignedDate,
 } from "@ssr/common/utils/time-utils";
-import { fetchWithCache } from "../../common/cache.util";
-import CacheService, { ServiceCache } from "../cache.service";
-import { PlayerAccuracyService } from "./player-accuracy.service";
-import { PlayerRankingService } from "./player-ranking.service";
+import { PlayerService } from "./player.service";
 
 export class PlayerHistoryService {
   private static readonly INACTIVE_RANK = 999_999;
@@ -31,7 +26,7 @@ export class PlayerHistoryService {
    * This method handles both new and existing players, updating their statistics
    * and handling inactive status.
    */
-  public static async trackScoreSaberPlayer(
+  public static async trackPlayerHistory(
     foundPlayer: PlayerDocument,
     trackTime: Date,
     playerToken?: ScoreSaberPlayerToken
@@ -221,27 +216,6 @@ export class PlayerHistoryService {
   }
 
   /**
-   * Retrieves a player's score calendar for a specific year and month.
-   * Returns daily score statistics and metadata about available months.
-   */
-  public static async getScoreCalendar(
-    id: string,
-    year: number,
-    month: number
-  ): Promise<ScoreCalendarData> {
-    const player = await PlayerModel.findById(id);
-    if (!player) {
-      throw new NotFoundError(`Player "${id}" not found`);
-    }
-
-    return fetchWithCache(
-      CacheService.getCache(ServiceCache.ScoreCalendar),
-      `score-calendar:${id}-${year}-${month}`,
-      () => this.generateScoreCalendar(player, year, month)
-    );
-  }
-
-  /**
    * Creates a new player statistic object from ScoreSaber data and existing history.
    */
   private static async createPlayerStatistic(
@@ -249,8 +223,8 @@ export class PlayerHistoryService {
     existingEntry?: Partial<PlayerHistoryEntry>
   ): Promise<Partial<PlayerHistoryEntry>> {
     const [accuracies, plusOnePp] = await Promise.all([
-      PlayerAccuracyService.getPlayerAverageAccuracies(playerToken.id),
-      PlayerRankingService.getPlayerPpBoundary(playerToken.id, 1),
+      PlayerService.getPlayerAverageAccuracies(playerToken.id),
+      PlayerService.getPlayerPpBoundary(playerToken.id, 1),
     ]);
 
     return {
@@ -271,74 +245,10 @@ export class PlayerHistoryService {
   }
 
   /**
-   * Generates score calendar data for a specific year and month.
-   */
-  private static async generateScoreCalendar(
-    player: PlayerDocument,
-    year: number,
-    month: number
-  ): Promise<ScoreCalendarData> {
-    const startDate = new Date(year, month - 1, 1);
-    const endDate = new Date(year, month, 0);
-
-    const entries = await PlayerHistoryEntryModel.find({
-      playerId: player.id,
-      date: {
-        $gte: startDate,
-        $lte: endDate,
-      },
-    });
-
-    const days: Record<number, { rankedMaps: number; unrankedMaps: number; totalMaps: number }> =
-      {};
-    const metadata: Record<number, number[]> = {};
-
-    for (const entry of entries) {
-      const date = entry.date;
-      const statYear = date.getFullYear();
-      const statMonth = date.getMonth() + 1;
-
-      if (
-        !entry.rankedScores ||
-        !entry.unrankedScores ||
-        typeof entry.rankedScores !== "number" ||
-        typeof entry.unrankedScores !== "number"
-      ) {
-        continue;
-      }
-
-      if (!metadata[statYear]) {
-        metadata[statYear] = [];
-      }
-      if (!metadata[statYear].includes(statMonth)) {
-        metadata[statYear].push(statMonth);
-      }
-
-      if (statYear === year && statMonth === month) {
-        const rankedScores = entry.rankedScores ?? 0;
-        const unrankedScores = entry.unrankedScores ?? 0;
-
-        days[date.getDate()] = {
-          rankedMaps: rankedScores,
-          unrankedMaps: unrankedScores,
-          totalMaps: rankedScores + unrankedScores,
-        };
-      }
-    }
-
-    // Sort months in metadata
-    for (const [year, months] of Object.entries(metadata)) {
-      metadata[Number(year)] = months.sort();
-    }
-
-    return { days, metadata };
-  }
-
-  /**
-   * Converts a database additional score data to a AdditionalScoreData.
+   * Converts a database player history entry to a PlayerHistoryEntry.
    *
-   * @param additionalData the additional score data to convert
-   * @returns the converted additional score data
+   * @param history the player history entry to convert
+   * @returns the converted player history entry
    * @private
    */
   private static playerHistoryToObject(history: PlayerHistoryEntry): PlayerHistoryEntry {
