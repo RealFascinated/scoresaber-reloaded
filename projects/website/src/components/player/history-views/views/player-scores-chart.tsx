@@ -1,6 +1,7 @@
 "use client";
 
 import { DatasetConfig } from "@/common/chart/types";
+import { Colors } from "@/common/colors";
 import GenericPlayerChart from "@/components/player/history-views/generic-player-chart";
 import { PlayerStatisticHistory } from "@ssr/common/player/player-statistic-history";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
@@ -14,18 +15,18 @@ export const scoreBarsDataset: DatasetConfig[] = [
   {
     title: "Ranked Scores",
     field: "rankedScores",
-    color: "#ffae4d",
-    axisId: "y100",
+    color: Colors.ranked,
+    axisId: "y",
     axisConfig: {
       reverse: false,
-      display: false,
+      display: true,
       displayName: "Ranked Scores",
       position: "left",
-      stackOrder: 0,
-      stack: "daily-scores",
     },
     type: "bar",
-    labelFormatter: (value: number) => `Ranked Scores: ${formatNumberWithCommas(value)}`,
+    stack: "daily-scores",
+    stackOrder: 0,
+    labelFormatter: (value: number) => `${value.toFixed(0)}`,
   },
   {
     title: "Unranked Scores",
@@ -37,10 +38,10 @@ export const scoreBarsDataset: DatasetConfig[] = [
       display: false,
       displayName: "Unranked Scores",
       position: "left",
-      stackOrder: 1,
-      stack: "daily-scores",
     },
     type: "bar",
+    stack: "daily-scores",
+    stackOrder: 1,
     labelFormatter: (value: number) => `Unranked Scores: ${formatNumberWithCommas(value)}`,
   },
 ];
