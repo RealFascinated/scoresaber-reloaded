@@ -98,8 +98,8 @@ export const app = new Elysia()
   .use(
     cron({
       name: "update-scoresaber-statistics",
-      pattern: "*/1 * * * *", // Every 1 minute
-      // pattern: "50 23 * * *", // Every day at 23:50
+      // pattern: "*/1 * * * *", // Every 1 minute
+      pattern: "50 23 * * *", // Every day at 23:50
       timezone: "Europe/London", // UTC time
       protect: true,
       run: async () => {
