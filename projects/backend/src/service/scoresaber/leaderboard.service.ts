@@ -360,32 +360,71 @@ export default class LeaderboardService {
 
     Logger.info(`Processing ${leaderboards.length} leaderboards...`);
 
+    // Process leaderboards in batches of 100
+    const BATCH_SIZE = 100;
+    const batches = [];
+    for (let i = 0; i < leaderboards.length; i += BATCH_SIZE) {
+      batches.push(leaderboards.slice(i, i + BATCH_SIZE));
+    }
+
     let checkedCount = 0;
-    for (const leaderboard of leaderboards) {
-      checkedCount++;
-      let previousLeaderboard: ScoreSaberLeaderboard | null =
-        await ScoreSaberLeaderboardModel.findById(leaderboard.id).lean();
-      if (!previousLeaderboard) {
-        previousLeaderboard = await this.saveLeaderboard(leaderboard.id + "", leaderboard);
-      }
+    for (const batch of batches) {
+      // Fetch all previous leaderboards for this batch in one query
+      const previousLeaderboards = await ScoreSaberLeaderboardModel.find({
+        _id: { $in: batch.map(l => l.id) },
+      }).lean();
 
-      if (!previousLeaderboard) {
-        Logger.warn(`Failed to find leaderboard for ${leaderboard.id}`);
-        continue;
-      }
+      // Create a map for quick lookup
+      const previousLeaderboardMap = new Map(previousLeaderboards.map(l => [l.id, l]));
 
-      const update = this.checkLeaderboardChanges(leaderboard, previousLeaderboard);
-      if (update.rankedStatusChanged || update.starCountChanged || update.qualifiedStatusChanged) {
-        leaderboardUpdates.updatedScoresCount += await this.handleLeaderboardUpdate(update);
-        leaderboardUpdates.updatedLeaderboardsCount++;
-        leaderboardUpdates.updatedLeaderboards.push({ leaderboard, update });
-      }
+      // Process batch in parallel
+      const batchResults = await Promise.all(
+        batch.map(async leaderboard => {
+          checkedCount++;
+          const previousLeaderboard =
+            previousLeaderboardMap.get(leaderboard.id) ||
+            (await this.saveLeaderboard(leaderboard.id + "", leaderboard));
 
-      // Save the leaderboard
-      await this.saveLeaderboard(
-        leaderboard.id + "",
-        this.updateLeaderboardDifficulties(leaderboard, rankedMapDiffs)
+          if (!previousLeaderboard) {
+            Logger.warn(`Failed to find leaderboard for ${leaderboard.id}`);
+            return null;
+          }
+
+          const update = this.checkLeaderboardChanges(leaderboard, previousLeaderboard);
+          if (
+            update.rankedStatusChanged ||
+            update.starCountChanged ||
+            update.qualifiedStatusChanged
+          ) {
+            const updatedScores = await this.handleLeaderboardUpdate(update);
+            return {
+              leaderboard,
+              update,
+              updatedScores,
+            };
+          }
+
+          // Save the leaderboard
+          await this.saveLeaderboard(
+            leaderboard.id + "",
+            this.updateLeaderboardDifficulties(leaderboard, rankedMapDiffs)
+          );
+
+          return null;
+        })
       );
+
+      // Process results
+      for (const result of batchResults) {
+        if (result) {
+          leaderboardUpdates.updatedScoresCount += result.updatedScores;
+          leaderboardUpdates.updatedLeaderboardsCount++;
+          leaderboardUpdates.updatedLeaderboards.push({
+            leaderboard: result.leaderboard,
+            update: result.update,
+          });
+        }
+      }
 
       if (checkedCount % 100 === 0) {
         Logger.info(`Checked ${checkedCount}/${leaderboards.length} leaderboards`);
@@ -440,7 +479,11 @@ export default class LeaderboardService {
     }
 
     if (update.rankedStatusChanged && !update.leaderboard.ranked) {
-      await this.resetScorePP(scores);
+      // Bulk update to reset PP values
+      await ScoreSaberScoreModel.updateMany(
+        { leaderboardId: update.leaderboard.id },
+        { $set: { pp: 0, weight: 0 } }
+      );
       return 0;
     }
 
@@ -449,46 +492,66 @@ export default class LeaderboardService {
       (update.rankedStatusChanged && update.leaderboard.ranked) ||
       (update.qualifiedStatusChanged && update.leaderboard.qualified)
     ) {
-      return await this.updateScoresFromAPI(update.leaderboard, scores);
+      const scoreTokens = await this.fetchAllLeaderboardScores(update.leaderboard.id + "");
+
+      // Create a map of scores for quick lookup
+      const scoreMap = new Map(scores.map(score => [`${score.scoreId}-${score.score}`, score]));
+
+      // Prepare bulk operations
+      const bulkOps = [];
+      const previousScoreBulkOps = [];
+
+      for (const scoreToken of scoreTokens) {
+        const score = scoreMap.get(`${scoreToken.id}-${scoreToken.baseScore}`);
+        if (!score) continue;
+
+        // Update score
+        bulkOps.push({
+          updateOne: {
+            filter: { _id: score._id },
+            update: {
+              $set: {
+                pp: scoreToken.pp,
+                weight: scoreToken.weight,
+                rank: scoreToken.rank,
+              },
+            },
+          },
+        });
+
+        // Update previous scores
+        previousScoreBulkOps.push({
+          updateMany: {
+            filter: {
+              playerId: score.playerId,
+              leaderboardId: score.leaderboardId,
+            },
+            update: {
+              $set: {
+                pp: update.leaderboard.ranked
+                  ? ApiServiceRegistry.getInstance()
+                      .getScoreSaberService()
+                      .getPp(update.leaderboard.stars, score.accuracy)
+                  : 0,
+                weight: 0,
+              },
+            },
+          },
+        });
+      }
+
+      // Execute bulk operations
+      if (bulkOps.length > 0) {
+        await ScoreSaberScoreModel.bulkWrite(bulkOps);
+      }
+      if (previousScoreBulkOps.length > 0) {
+        await ScoreSaberPreviousScoreModel.bulkWrite(previousScoreBulkOps);
+      }
+
+      return bulkOps.length;
     }
 
     return 0;
-  }
-
-  /**
-   * Resets PP values for all scores in an unranked leaderboard
-   */
-  private static async resetScorePP(scores: ScoreSaberScoreDocument[]): Promise<void> {
-    for (const score of scores) {
-      score.pp = 0;
-      score.weight = 0;
-    }
-    await Promise.all(scores.map(score => score.save()));
-  }
-
-  /**
-   * Updates scores by fetching current data from the ScoreSaber API
-   */
-  private static async updateScoresFromAPI(
-    leaderboard: ScoreSaberLeaderboard,
-    existingScores: ScoreSaberScoreDocument[]
-  ): Promise<number> {
-    const scoreTokens = await this.fetchAllLeaderboardScores(leaderboard.id + "");
-    let updatedCount = 0;
-
-    for (const scoreToken of scoreTokens) {
-      const score = existingScores.find(
-        score => score.scoreId === scoreToken.id + "" && score.score == scoreToken.baseScore
-      );
-      if (!score) {
-        continue;
-      }
-
-      updatedCount += await this.updateScore(score, scoreToken, leaderboard);
-    }
-
-    await Promise.all(existingScores.map(score => score.save()));
-    return updatedCount;
   }
 
   /**
@@ -523,54 +586,6 @@ export default class LeaderboardService {
     }
 
     return scoreTokens;
-  }
-
-  /**
-   * Updates a single score with new data
-   */
-  private static async updateScore(
-    score: ScoreSaberScoreDocument,
-    scoreToken: ScoreSaberScoreToken,
-    leaderboard: ScoreSaberLeaderboard
-  ): Promise<number> {
-    score.pp = scoreToken.pp;
-    score.weight = scoreToken.weight;
-    score.rank = scoreToken.rank;
-
-    Logger.info(
-      `Updated score ${score.id} for leaderboard ${leaderboard.fullName}, new pp: ${score.pp}`
-    );
-    await this.updatePreviousScores(score, leaderboard);
-    return 1;
-  }
-
-  /**
-   * Updates previous scores for a player on a leaderboard
-   */
-  private static async updatePreviousScores(
-    score: ScoreSaberScoreDocument,
-    leaderboard: ScoreSaberLeaderboard
-  ): Promise<void> {
-    const previousScores = await ScoreSaberPreviousScoreModel.find({
-      playerId: score.playerId,
-      leaderboardId: score.leaderboardId,
-    });
-
-    if (previousScores.length === 0) return;
-
-    for (const previousScore of previousScores) {
-      previousScore.pp = leaderboard.ranked
-        ? ApiServiceRegistry.getInstance()
-            .getScoreSaberService()
-            .getPp(leaderboard.stars, previousScore.accuracy)
-        : 0;
-      previousScore.weight = 0;
-      await previousScore.save();
-    }
-
-    Logger.info(
-      `Updated previous scores pp values on leaderboard ${leaderboard.fullName} for player ${score.playerId}`
-    );
   }
 
   /**
