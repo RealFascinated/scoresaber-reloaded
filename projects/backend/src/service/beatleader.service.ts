@@ -90,7 +90,7 @@ export default class BeatLeaderService {
   public static async trackBeatLeaderScore(
     score: BeatLeaderScoreToken,
     isTop50GlobalScore?: boolean
-  ) {
+  ): Promise<AdditionalScoreData | undefined> {
     const before = Date.now();
 
     const { playerId, player: scorePlayer, leaderboard } = score;
@@ -104,7 +104,7 @@ export default class BeatLeaderService {
 
     // Only track for players that are being tracked
     if (player == null) {
-      return;
+      return undefined;
     }
 
     const getMisses = (score: BeatLeaderScoreToken | BeatLeaderScoreImprovementToken) => {
@@ -216,6 +216,8 @@ export default class BeatLeaderService {
     Logger.info(
       `Tracked additional score data for "${scorePlayer.name}"(${playerId}) in ${Date.now() - before}ms`
     );
+
+    return data;
   }
 
   /*

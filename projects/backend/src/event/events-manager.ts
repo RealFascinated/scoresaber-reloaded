@@ -1,5 +1,4 @@
 import { EventListener } from "./event-listener";
-import { ScoreNotificationListener } from "./impl/score-notification-listener";
 import { TrackScoreListener } from "./impl/track-score-listener";
 
 export class EventsManager {
@@ -10,7 +9,6 @@ export class EventsManager {
 
   constructor() {
     this.addEvent(new TrackScoreListener());
-    this.addEvent(new ScoreNotificationListener());
   }
 
   /**

@@ -1,7 +1,16 @@
 import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
 import { isProduction } from "@ssr/common/utils/utils";
-import { ActivityType, AttachmentBuilder, EmbedBuilder, GatewayIntentBits } from "discord.js";
+import {
+  ActionRowData,
+  ActivityType,
+  APIActionRowComponent,
+  APIMessageActionRowComponent,
+  AttachmentBuilder,
+  EmbedBuilder,
+  GatewayIntentBits,
+  MessageActionRowComponentBuilder,
+} from "discord.js";
 import { Client } from "discordx";
 
 export const guildId = "1295984874942894100";
@@ -70,14 +79,21 @@ export async function initDiscordBot() {
  * @param channelId the channel id to log to
  * @param embed the embed to log
  */
-export async function logToChannel(channelId: DiscordChannels, embed: EmbedBuilder) {
+export async function logToChannel(
+  channelId: DiscordChannels,
+  embed: EmbedBuilder,
+  components: (
+    | APIActionRowComponent<APIMessageActionRowComponent>
+    | ActionRowData<MessageActionRowComponentBuilder>
+  )[] = []
+) {
   if (!isProduction()) {
     return;
   }
   try {
     const channel = await client.channels.fetch(channelId);
     if (channel != undefined && channel.isSendable()) {
-      return await channel.send({ embeds: [embed] });
+      return await channel.send({ embeds: [embed], components });
     }
   } catch (error) {
     Logger.error(`Failed to send message to channel ${channelId}:`, error);

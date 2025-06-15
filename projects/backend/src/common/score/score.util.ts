@@ -1,15 +1,17 @@
 import { DetailType } from "@ssr/common/detail-type";
 import { env } from "@ssr/common/env";
+import { AdditionalScoreData } from "@ssr/common/model/additional-score-data/additional-score-data";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { removeObjectFields } from "@ssr/common/object.util";
-import { BeatLeaderScoreToken } from "@ssr/common/types/token/beatleader/score/score";
+import { ReplayViewers } from "@ssr/common/replay-viewer";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
+import { getBeatLeaderReplayUrl } from "@ssr/common/utils/beatleader-utils";
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
 import { formatScoreAccuracy } from "@ssr/common/utils/score.util";
 import { getDifficultyName } from "@ssr/common/utils/song-utils";
 import { formatChange } from "@ssr/common/utils/utils";
-import { EmbedBuilder } from "discord.js";
+import { ButtonBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
 import { DiscordChannels, logToChannel } from "../../bot/bot";
 import BeatSaverService from "../../service/beatsaver.service";
 import { PreviousScoresService } from "../../service/score/previous-scores.service";
@@ -39,7 +41,7 @@ export async function sendScoreNotification(
   score: ScoreSaberScore,
   leaderboard: ScoreSaberLeaderboard,
   player: ScoreSaberPlayerToken,
-  beatLeaderScore: BeatLeaderScoreToken | undefined,
+  beatLeaderScore: AdditionalScoreData | undefined,
   title: string
 ) {
   const beatSaver = await BeatSaverService.getMap(
@@ -71,16 +73,7 @@ export async function sendScoreNotification(
       .setDescription(
         [
           `🎵 **${leaderboard.fullName}**`,
-          `📊 ${getDifficultyName(leaderboard.difficulty.difficulty)}${leaderboard.stars > 0 ? ` • ${leaderboard.stars.toFixed(2)}★` : ""}`,
-          "",
-          [
-            `👤 [[Player]](${env.NEXT_PUBLIC_WEBSITE_URL}/player/${player.id})`,
-            `🏆 [[Leaderboard]](${env.NEXT_PUBLIC_WEBSITE_URL}/leaderboard/${leaderboard.id})`,
-            beatSaver ? `🗺️ [[Map]](https://beatsaver.com/maps/${beatSaver.bsr})` : undefined,
-            beatLeaderScore
-              ? `🎥 [[Replay]](https://replay.beatleader.xyz/?scoreId=${beatLeaderScore.id})`
-              : undefined,
-          ].join(" • "),
+          `⚡ ${getDifficultyName(leaderboard.difficulty.difficulty)}${leaderboard.stars > 0 ? ` • ${leaderboard.stars.toFixed(2)}★` : ""}`,
         ]
           .join("\n")
           .trim()
@@ -110,7 +103,47 @@ export async function sendScoreNotification(
       .setFooter({
         text: `Powered by ${env.NEXT_PUBLIC_WEBSITE_URL}`,
       })
-      .setColor(score.pp > 0 ? "#d4af37" : "#808080")
+      .setColor(score.pp > 0 ? "#d4af37" : "#808080"),
+    [
+      {
+        type: 1,
+        components: [
+          new ButtonBuilder()
+            .setLabel("Player")
+            .setEmoji("👤")
+            .setStyle(ButtonStyle.Link)
+            .setURL(`${env.NEXT_PUBLIC_WEBSITE_URL}/player/${player.id}`),
+          new ButtonBuilder()
+            .setLabel("Leaderboard")
+            .setEmoji("🏆")
+            .setStyle(ButtonStyle.Link)
+            .setURL(`${env.NEXT_PUBLIC_WEBSITE_URL}/leaderboard/${leaderboard.id}`),
+          ...(beatSaver
+            ? [
+                new ButtonBuilder()
+                  .setLabel("Map")
+                  .setEmoji("🗺️")
+                  .setStyle(ButtonStyle.Link)
+                  .setURL(`https://beatsaver.com/maps/${beatSaver.bsr}`),
+              ]
+            : []),
+          ...(beatLeaderScore
+            ? [
+                new ButtonBuilder()
+                  .setLabel("Replay")
+                  .setEmoji("🎥")
+                  .setStyle(ButtonStyle.Link)
+                  .setURL(
+                    ReplayViewers.beatleader.generateUrl(
+                      beatLeaderScore.scoreId,
+                      getBeatLeaderReplayUrl(beatLeaderScore)
+                    )
+                  ),
+              ]
+            : []),
+        ],
+      },
+    ]
   );
 
   return message;
