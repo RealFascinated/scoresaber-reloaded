@@ -2,6 +2,7 @@ import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { CustomRankedPlaylist } from "@ssr/common/playlist/ranked/custom-ranked-playlist";
 import { SnipeSettings } from "@ssr/common/snipe/snipe-settings-schema";
 import { capitalizeFirstLetter, truncateText } from "@ssr/common/string-utils";
+import { formatDateMinimal } from "@ssr/common/utils/time-utils";
 import SSRImage, { ImageTextOptions } from "./ssr-image";
 
 /**
@@ -131,7 +132,8 @@ export async function generatePlaylistImage(
             {
               text: options.title,
               color: "#222222",
-              fontSize: 62,
+              fontSize: 55,
+              wrap: true,
             },
           ] as ImageTextOptions[])
         : []),
@@ -143,4 +145,22 @@ export async function generatePlaylistImage(
     1
   );
   return (await image.build()).toString("base64");
+}
+
+/**
+ * Generates a playlist image for a ranked batch
+ *
+ * @returns the base64 encoded image
+ */
+export async function generateRankedBatchPlaylistImage(): Promise<string> {
+  return generatePlaylistImage("SSR", {
+    title: `Ranked Batch`,
+    lines: [
+      {
+        text: `${formatDateMinimal(new Date())}`,
+        color: "#222222",
+        fontSize: 45,
+      },
+    ],
+  });
 }

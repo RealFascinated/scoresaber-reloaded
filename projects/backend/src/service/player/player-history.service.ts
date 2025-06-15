@@ -202,7 +202,11 @@ export class PlayerHistoryService {
       date: today,
     }).lean();
 
-    const update: Partial<PlayerHistoryEntry> = {};
+    const update: Partial<PlayerHistoryEntry> = {
+      playerId: score.playerId,
+      date: today,
+    };
+
     if (leaderboard.stars > 0) {
       update.rankedScores = (existingEntry?.rankedScores ?? 0) + 1;
     } else {
@@ -212,7 +216,7 @@ export class PlayerHistoryService {
     await PlayerHistoryEntryModel.findOneAndUpdate(
       { playerId: score.playerId, date: today },
       update,
-      { upsert: true }
+      { upsert: true, new: true }
     );
   }
 

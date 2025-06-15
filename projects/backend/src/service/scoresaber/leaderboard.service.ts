@@ -14,6 +14,7 @@ import {
   ScoreSaberScoreModel,
 } from "@ssr/common/model/score/impl/scoresaber-score";
 import { removeObjectFields } from "@ssr/common/object.util";
+import { generateBeatSaberPlaylist } from "@ssr/common/playlist/playlist-utils";
 import { LeaderboardResponse } from "@ssr/common/response/leaderboard-response";
 import { PlaysByHmdResponse } from "@ssr/common/response/plays-by-hmd-response";
 import { MapDifficulty } from "@ssr/common/score/map-difficulty";
@@ -21,11 +22,11 @@ import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
 import { MapCharacteristic } from "@ssr/common/types/map-characteristic";
 import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score";
 import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
-import { formatDate, formatDateMinimal, formatDuration } from "@ssr/common/utils/time-utils";
+import { formatDate, formatDuration } from "@ssr/common/utils/time-utils";
 import { EmbedBuilder } from "discord.js";
 import { DiscordChannels, logToChannel, sendFile } from "../../bot/bot";
 import { fetchWithCache } from "../../common/cache.util";
-import { generatePlaylistImage } from "../../common/playlist.util";
+import { generateRankedBatchPlaylistImage } from "../../common/playlist.util";
 import BeatSaverService from "../beatsaver.service";
 import CacheService, { ServiceCache } from "../cache.service";
 import PlaylistService from "../playlist.service";
@@ -804,16 +805,14 @@ export default class LeaderboardService {
       env.NEXT_PUBLIC_WEBSITE_NAME,
       leaderboards.maps,
       [...newlyRankedMaps, ...buffedMaps].map(update => update.leaderboard.id),
-      await generatePlaylistImage("SSR", {
-        title: `Ranked Batch (${formatDateMinimal(new Date())})`,
-      }),
+      await generateRankedBatchPlaylistImage(),
       "ranked-batch"
     );
     await PlaylistService.createPlaylist(playlist);
     await sendFile(
       DiscordChannels.rankedLogs,
-      `ranked-batch-${date}.bplist`,
-      JSON.stringify(playlist, null, 2)
+      `scoresaber-ranked-batch-${date}.bplist`,
+      JSON.stringify(generateBeatSaberPlaylist(playlist), null, 2)
     );
     Logger.info("Logged leaderboard changes to Discord.");
   }

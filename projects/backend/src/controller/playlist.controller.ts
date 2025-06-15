@@ -6,6 +6,7 @@ import { t } from "elysia";
 import { Controller, Get } from "elysia-decorators";
 import {
   generateCustomRankedPlaylistImage,
+  generateRankedBatchPlaylistImage,
   generateSnipePlaylistImage,
 } from "../common/playlist.util";
 import PlaylistService, { PlaylistId, SnipeType } from "../service/playlist.service";
@@ -42,7 +43,6 @@ export default class PlaylistController {
       )
     );
     response.headers.set("Content-Type", "application/json");
-    response.headers.set("Cache-Control", "public, max-age=3600");
     if (download) {
       response.headers.set("Content-Disposition", `attachment; filename="ssr-${id}.${extension}"`);
     }
@@ -74,7 +74,6 @@ export default class PlaylistController {
       )
     );
     response.headers.set("Content-Type", "application/json");
-    response.headers.set("Cache-Control", "public, max-age=3600");
     return response;
   }
 
@@ -121,7 +120,17 @@ export default class PlaylistController {
       )
     );
     response.headers.set("Content-Type", "image/png");
-    response.headers.set("Cache-Control", "public, max-age=3600");
+    return response;
+  }
+
+  @Get("/ranked-batch/preview", {
+    config: {},
+    tags: ["playlist"],
+  })
+  public async getRankedBatchPlaylistImagePreview() {
+    console.log(await generateRankedBatchPlaylistImage());
+    const response = new Response(Buffer.from(await generateRankedBatchPlaylistImage(), "base64"));
+    response.headers.set("Content-Type", "image/png");
     return response;
   }
 }
