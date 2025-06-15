@@ -46,7 +46,11 @@ export default function Friend({ player, onClick }: FriendProps) {
         />
         <div className="flex flex-col">
           <p className="font-semibold">{player.name}</p>
-          <p className="text-gray-400">#{formatNumberWithCommas(player.rank)}</p>
+          {player.inactive ? (
+            <p className="text-gray-400">Inactive Account</p>
+          ) : (
+            <p className="text-gray-400">#{formatNumberWithCommas(player.rank)}</p>
+          )}
         </div>
       </Link>
       <SimpleTooltip

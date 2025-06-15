@@ -57,7 +57,14 @@ export default function FriendsButton() {
         {friends && friends.length > 0 ? (
           <div className="flex flex-col gap-0.5">
             {friends
-              .sort((a, b) => a.rank - b.rank)
+              .sort((a, b) => {
+                // Sort inactive friends to the bottom
+                if (a.inactive && !b.inactive) return 1;
+                if (!a.inactive && b.inactive) return -1;
+
+                // Sort by rank
+                return a.rank - b.rank;
+              })
               .map((friend, index) => (
                 <Friend player={friend} key={index} onClick={() => setOpen(false)} />
               ))}
