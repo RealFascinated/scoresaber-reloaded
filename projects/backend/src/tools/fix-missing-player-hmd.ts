@@ -3,7 +3,7 @@ import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
 import { PlayerModel } from "@ssr/common/model/player";
 import mongoose from "mongoose";
-import { PlayerService } from "../service/player/player.service";
+import { PlayerHmdService } from "../service/player/player-hmd.service";
 
 dotenv.config({
   path: ".env",
@@ -24,9 +24,9 @@ async function migrate() {
       Logger.info(`Processed ${current}/${players.length} players...`);
     }
 
-    const hmd = await PlayerService.getPlayerMostCommonRecentHmd(player.id);
+    const hmd = await PlayerHmdService.getPlayerMostCommonRecentHmd(player.id);
     if (hmd) {
-      await PlayerService.updatePlayerHmd(player.id, hmd);
+      await PlayerHmdService.updatePlayerHmd(player.id, hmd);
     }
   }
 
