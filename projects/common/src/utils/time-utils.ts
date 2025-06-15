@@ -110,12 +110,12 @@ export function timeAgo(input: Date) {
 }
 
 /**
- * Formats the date in the format "DD MMMM YYYY"
+ * Formats the date in the format "MMM D, YYYY"
  *
  * @param date the date
  */
 export function formatDateMinimal(date: Date) {
-  return dayjs(date).format("MMM D, YYYY");
+  return dayjs(date).utc().format("MMM D, YYYY");
 }
 
 /**
@@ -124,8 +124,8 @@ export function formatDateMinimal(date: Date) {
  * @param date the date
  */
 export function formatChartDate(date: Date) {
-  const currentYear = dayjs().year();
-  const year = dayjs(date).year();
+  const currentYear = dayjs().utc().year();
+  const year = dayjs(date).utc().year();
   return dayjs(date).format(`MMM D${currentYear === year ? "" : ", YYYY"}`);
 }
 
@@ -175,7 +175,9 @@ export function formatDate(
     "Do MMMM, YYYY HH:mm a": "D MMMM, YYYY HH:mm a",
   };
 
-  const formatted = dayjs(date).format(formatMap[format] || "MMM D, YYYY");
+  const formatted = dayjs(date)
+    .utc()
+    .format(formatMap[format] || "MMM D, YYYY");
 
   if (
     format === "Do MMMM, YYYY" ||
@@ -196,7 +198,7 @@ export function formatDate(
  * @param date the date
  */
 export function getMidnightAlignedDate(date: Date) {
-  return dayjs(date).startOf("day").toDate();
+  return dayjs(date).utc().startOf("day").toDate();
 }
 
 /**
@@ -206,7 +208,7 @@ export function getMidnightAlignedDate(date: Date) {
  * @returns {Date} A Date object representing the date X days ago in UTC
  */
 export function getDaysAgoDate(days: number): Date {
-  return dayjs().subtract(days, "day").toDate();
+  return dayjs().utc().subtract(days, "day").toDate();
 }
 
 /**
@@ -216,7 +218,7 @@ export function getDaysAgoDate(days: number): Date {
  * @returns the amount of days
  */
 export function getDaysAgo(date: Date): number {
-  return dayjs().diff(dayjs(date), "day");
+  return dayjs().diff(dayjs(date).utc(), "day");
 }
 
 /**
@@ -226,7 +228,7 @@ export function getDaysAgo(date: Date): number {
  * @returns {Date} A Date object representing the parsed date in UTC
  */
 export function parseDate(date: string): Date {
-  return dayjs(date).toDate();
+  return dayjs(date).utc().toDate();
 }
 
 /**
@@ -273,7 +275,7 @@ export function formatDuration(ms: number): string {
  * @param year the year
  */
 export function getDaysInMonth(month: number, year: number) {
-  return dayjs(`${year}-${month}-01`).daysInMonth();
+  return dayjs(`${year}-${month}-01`).utc().daysInMonth();
 }
 
 /**
@@ -289,10 +291,6 @@ export function forceUTC(date: Date) {
 export type TimeUnitValue = {
   unit: TimeUnit;
   value: number;
-};
-
-type TimeUnitWithMethods = {
-  toMillis: (value: number) => number;
 };
 
 /**
@@ -326,4 +324,14 @@ export namespace TimeUnit {
     };
     return value * multipliers[unit];
   }
+}
+
+/**
+ * Checks if a date is today
+ *
+ * @param date the date
+ * @returns true if the date is today, false otherwise
+ */
+export function isToday(date: Date) {
+  return dayjs(date).isSame(dayjs().utc(), "day");
 }

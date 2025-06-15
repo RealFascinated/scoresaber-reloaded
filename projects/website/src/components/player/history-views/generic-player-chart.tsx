@@ -4,7 +4,7 @@ import { DatasetConfig } from "@/common/chart/types";
 import GenericChart from "@/components/chart/generic-chart";
 import { PlayerStatisticHistory } from "@ssr/common/player/player-statistic-history";
 import { getValueFromHistory } from "@ssr/common/utils/player-utils";
-import { getDaysAgoDate, parseDate } from "@ssr/common/utils/time-utils";
+import { getMidnightAlignedDate, parseDate } from "@ssr/common/utils/time-utils";
 
 type Props = {
   /**
@@ -47,41 +47,39 @@ export default function GenericPlayerChart({
   const histories: Record<string, (number | null)[]> = {};
   const historyDays = daysAmount;
 
-  // Initialize histories for each dataset with null values for all days
+  // Initialize histories for each dataset with null values
   datasetConfig.forEach(config => {
-    histories[config.field] = Array(historyDays).fill(null);
+    histories[config.field] = [];
   });
 
   const statisticEntries = Object.entries(statisticHistory);
-  let currentHistoryIndex = 0;
-  for (let dayAgo = 0; dayAgo <= historyDays; dayAgo++) {
-    const [dateString, history] =
-      statisticEntries.length > currentHistoryIndex ? statisticEntries[currentHistoryIndex] : [];
 
-    labels.push(dateString ? parseDate(dateString) : getDaysAgoDate(dayAgo)); // Add the target date to labels
-    datasetConfig.forEach(config => {
-      histories[config.field][dayAgo] = history
-        ? (getValueFromHistory(history, config.field) ?? null)
-        : null;
-    });
-    currentHistoryIndex++;
-  }
-
-  // Reverse the labels and histories arrays to make the latest date and data first
-  labels.reverse();
-  Object.keys(histories).forEach(field => {
-    histories[field].reverse();
+  // Sort entries by date
+  const sortedEntries = statisticEntries.sort(([dateA], [dateB]) => {
+    const timeA = getMidnightAlignedDate(parseDate(dateA)).getTime();
+    const timeB = getMidnightAlignedDate(parseDate(dateB)).getTime();
+    return timeA - timeB;
   });
 
-  // Render the chart with reversed data
+  // Use the actual data points we have
+  sortedEntries.forEach(([dateString, history]) => {
+    const date = parseDate(dateString);
+    labels.push(date);
+
+    datasetConfig.forEach(config => {
+      const value = getValueFromHistory(history, config.field);
+      histories[config.field].push(value ?? null);
+    });
+  });
+
   return (
-    <GenericChart
-      options={{
-        id: id,
-      }}
-      labels={labels}
-      datasetConfig={datasetConfig}
-      histories={histories}
-    />
+    <div className="flex justify-center">
+      <GenericChart
+        options={{ id }}
+        labels={labels}
+        histories={histories}
+        datasetConfig={datasetConfig}
+      />
+    </div>
   );
 }

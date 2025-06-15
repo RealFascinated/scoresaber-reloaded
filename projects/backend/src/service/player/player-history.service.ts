@@ -15,6 +15,7 @@ import {
   formatDateMinimal,
   getDaysAgoDate,
   getMidnightAlignedDate,
+  isToday,
 } from "@ssr/common/utils/time-utils";
 import { PlayerService } from "./player.service";
 
@@ -90,6 +91,8 @@ export class PlayerHistoryService {
     const startTimestamp = getMidnightAlignedDate(startDate).getTime();
     const endTimestamp = getMidnightAlignedDate(endDate).getTime();
 
+    const isRangeIncludesToday = isToday(startDate) || isToday(endDate);
+
     // Ensure start date is before end date
     const [queryStart, queryEnd] =
       startTimestamp > endTimestamp
@@ -108,7 +111,7 @@ export class PlayerHistoryService {
         .sort({ date: -1 })
         .lean(),
       parseRankHistory(player),
-      this.createPlayerStatistic(player, undefined),
+      isRangeIncludesToday ? this.createPlayerStatistic(player, undefined) : undefined,
     ]);
 
     const history: PlayerStatisticHistory = {};
@@ -118,7 +121,8 @@ export class PlayerHistoryService {
     }
 
     // Process rank history in parallel chunks
-    const daysDiff = Math.ceil((startDate.getTime() - endDate.getTime()) / (1000 * 60 * 60 * 24));
+    const daysDiff =
+      Math.abs(Math.ceil((endTimestamp - startTimestamp) / (1000 * 60 * 60 * 24))) + 1;
     let daysAgo = 0;
 
     for (
@@ -138,10 +142,12 @@ export class PlayerHistoryService {
       }
     }
 
-    // Add today's data
+    // Add today's data if the range includes today
     const today = getMidnightAlignedDate(new Date());
     const todayKey = formatDateMinimal(today);
-    history[todayKey] = todayData;
+    if (todayData && isRangeIncludesToday) {
+      history[todayKey] = todayData;
+    }
 
     // Sort history by date
     return Object.fromEntries(

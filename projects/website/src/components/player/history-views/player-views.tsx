@@ -1,11 +1,8 @@
 "use client";
 
-import { cn } from "@/common/utils";
 import SimpleTooltip from "@/components/simple-tooltip";
 import { Spinner } from "@/components/spinner";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -17,13 +14,11 @@ import { CalendarIcon, GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerStatisticHistory } from "@ssr/common/player/player-statistic-history";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
-import { formatDate, getDaysAgoDate } from "@ssr/common/utils/time-utils";
+import { getDaysAgoDate, getMidnightAlignedDate } from "@ssr/common/utils/time-utils";
 import { useQuery } from "@tanstack/react-query";
-import { differenceInDays, subMonths, subYears } from "date-fns";
-import { SwordIcon, TrendingUpIcon } from "lucide-react";
+import { RefreshCcwIcon, SwordIcon, TrendingUpIcon } from "lucide-react";
 import dynamic from "next/dynamic";
 import { ReactElement, ReactNode, useState } from "react";
-import { DateRange } from "react-day-picker";
 
 function Loading() {
   return (
@@ -88,80 +83,87 @@ type SelectedView = {
   /**
    * The chart to render.
    */
-  chart: (
-    player: ScoreSaberPlayer,
-    statisticHistory: PlayerStatisticHistory,
-    daysAmount: number
-  ) => ReactElement<any>;
+  chart: (player: ScoreSaberPlayer, statisticHistory: PlayerStatisticHistory) => ReactElement<any>;
 };
 
-const views: SelectedView[] = [
-  {
-    index: 0,
-    label: "Ranking",
-    icon: <GlobeAmericasIcon className="w-5 h-5" />,
-    chart: (player, statisticHistory, daysAmount) => (
-      <PlayerRankingChart statisticHistory={statisticHistory} daysAmount={daysAmount} />
-    ),
-  },
-  {
-    index: 1,
-    label: "Accuracy",
-    icon: <TrendingUpIcon className="w-[18px] h-[18px]" />,
-    chart: (player, statisticHistory, daysAmount) => (
-      <PlayerAccuracyChart statisticHistory={statisticHistory} daysAmount={daysAmount} />
-    ),
-  },
-  {
-    index: 2,
-    label: "Scores",
-    icon: <SwordIcon className="w-[18px] h-[18px]" />,
-    chart: (player, statisticHistory, daysAmount) => (
-      <PlayerScoresChart statisticHistory={statisticHistory} daysAmount={daysAmount} />
-    ),
-  },
-  {
-    index: 3,
-    label: "Score Calendar",
-    icon: <CalendarIcon className="w-[18px] h-[18px]" />,
-    chart: (player, statisticHistory) => <ScoreHistoryCalendar playerId={player.id} />,
-  },
-];
-
 export default function PlayerViews({ player }: PlayerChartsProps) {
-  const [dateRange, setDateRange] = useState<DateRange>({
-    from: getDaysAgoDate(50),
-    to: new Date(),
-  });
-
-  const [selectedView, setSelectedView] = useState<SelectedView>(views[0]);
+  const [selectedView, setSelectedView] = useState<SelectedView | null>(null);
+  const [daysAgo, setDaysAgo] = useState(50);
 
   const { data: statisticHistory } = useQuery({
-    queryKey: ["player-statistic-history", player.id, dateRange.to, dateRange.from],
-    queryFn: () => ssrApi.getPlayerStatisticHistory(player.id, dateRange.to!, dateRange.from!),
+    queryKey: ["player-statistic-history", player.id, daysAgo],
+    queryFn: () => {
+      return ssrApi.getPlayerStatisticHistory(
+        player.id,
+        getMidnightAlignedDate(getDaysAgoDate(daysAgo)),
+        getMidnightAlignedDate(new Date())
+      );
+    },
   });
 
-  // get the number of days between the date range
-  const daysAmount = differenceInDays(dateRange.to!, dateRange.from!);
-
   const datePresets = [
-    { label: "Last Month", value: () => ({ from: subMonths(new Date(), 1), to: new Date() }) },
-    { label: "Last 3 Months", value: () => ({ from: subMonths(new Date(), 3), to: new Date() }) },
-    { label: "Last 6 Months", value: () => ({ from: subMonths(new Date(), 6), to: new Date() }) },
-    { label: "Last Year", value: () => ({ from: subYears(new Date(), 1), to: new Date() }) },
-    { label: "Last 2 Years", value: () => ({ from: subYears(new Date(), 2), to: new Date() }) },
+    { label: "Last 7 Days", value: 7 },
+    { label: "Last 30 Days", value: 30 },
+    { label: "Last 50 Days", value: 50 },
+    { label: "Last 90 Days", value: 90 },
+    { label: "Last 180 Days", value: 180 },
+    { label: "Last 365 Days", value: 365 },
+    { label: "Last 2 Years", value: 365 * 2 },
+    { label: "Last 5 Years", value: 365 * 5 },
   ];
+
+  const views: SelectedView[] = [
+    {
+      index: 0,
+      label: "Ranking",
+      icon: <GlobeAmericasIcon className="w-5 h-5" />,
+      chart: (player, statisticHistory) => (
+        <PlayerRankingChart statisticHistory={statisticHistory} daysAmount={daysAgo} />
+      ),
+    },
+    {
+      index: 1,
+      label: "Accuracy",
+      icon: <TrendingUpIcon className="w-[18px] h-[18px]" />,
+      chart: (player, statisticHistory) => (
+        <PlayerAccuracyChart statisticHistory={statisticHistory} daysAmount={daysAgo} />
+      ),
+    },
+    {
+      index: 2,
+      label: "Scores",
+      icon: <SwordIcon className="w-[18px] h-[18px]" />,
+      chart: (player, statisticHistory) => (
+        <PlayerScoresChart statisticHistory={statisticHistory} daysAmount={daysAgo} />
+      ),
+    },
+    {
+      index: 3,
+      label: "Score Calendar",
+      icon: <CalendarIcon className="w-[18px] h-[18px]" />,
+      chart: (player, statisticHistory) => <ScoreHistoryCalendar playerId={player.id} />,
+    },
+  ];
+
+  // Initialize selectedView if it's null
+  if (!selectedView) {
+    setSelectedView(views[0]);
+  }
 
   return (
     <>
-      {statisticHistory ? selectedView.chart(player, statisticHistory, daysAmount) : <Loading />}
+      {statisticHistory && selectedView ? (
+        selectedView.chart(player, statisticHistory)
+      ) : (
+        <Loading />
+      )}
 
       <div className="flex flex-col gap-6">
         <div className="flex items-center justify-between gap-2 relative flex-col md:flex-row">
           {/* View Selector */}
           <div className="md:absolute md:left-1/2 md:-translate-x-1/2 flex items-center justify-center gap-2">
             {views.map(view => {
-              const isSelected = view.index === selectedView.index;
+              const isSelected = view.index === selectedView?.index;
 
               return (
                 <SimpleTooltip
@@ -186,68 +188,26 @@ export default function PlayerViews({ player }: PlayerChartsProps) {
             })}
           </div>
 
-          {/* Date Selector */}
-          <div className="flex items-center">
-            <div className={cn("grid gap-2")}>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <div className="flex items-center">
-                    <Button
-                      id="date"
-                      variant={"outline"}
-                      className={cn(
-                        "w-fit justify-start text-left font-normal",
-                        !dateRange.from && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="w-[18px] h-[18px] mr-2" />
-                      {dateRange.from ? (
-                        dateRange.to ? (
-                          <>
-                            {formatDate(dateRange.from, "MMMM YYYY")} -{" "}
-                            {formatDate(dateRange.to, "MMMM YYYY")}
-                          </>
-                        ) : (
-                          formatDate(dateRange.from, "MMMM YYYY")
-                        )
-                      ) : (
-                        <span>Pick a date</span>
-                      )}
-                    </Button>
-                  </div>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="end">
-                  <div className="flex flex-col space-y-2 p-2">
-                    <Select
-                      onValueChange={value => {
-                        const preset = datePresets.find(p => p.label === value);
-                        if (preset) {
-                          setDateRange(preset.value());
-                        }
-                      }}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Quick Select" />
-                      </SelectTrigger>
-                      <SelectContent position="popper">
-                        {datePresets.map(preset => (
-                          <SelectItem key={preset.label} value={preset.label}>
-                            {preset.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <Calendar
-                      mode="range"
-                      defaultMonth={dateRange.from}
-                      selected={dateRange}
-                      onSelect={range => range && setDateRange(range)}
-                      numberOfMonths={2}
-                    />
-                  </div>
-                </PopoverContent>
-              </Popover>
-            </div>
+          {/* Date Preset Selector and Reset Button */}
+          <div className="flex items-center gap-2">
+            <SimpleTooltip display={<p>Reset to Last 50 Days</p>}>
+              <Button variant={"outline"} size={"icon"} onClick={() => setDaysAgo(50)}>
+                <RefreshCcwIcon className="w-4 h-4" />
+              </Button>
+            </SimpleTooltip>
+
+            <Select value={daysAgo.toString()} onValueChange={value => setDaysAgo(parseInt(value))}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Select time range" />
+              </SelectTrigger>
+              <SelectContent>
+                {datePresets.map(preset => (
+                  <SelectItem key={preset.value} value={preset.value.toString()}>
+                    {preset.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
       </div>

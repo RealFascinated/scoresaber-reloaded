@@ -128,7 +128,6 @@ export default class PlaylistController {
     tags: ["playlist"],
   })
   public async getRankedBatchPlaylistImagePreview() {
-    console.log(await generateRankedBatchPlaylistImage());
     const response = new Response(Buffer.from(await generateRankedBatchPlaylistImage(), "base64"));
     response.headers.set("Content-Type", "image/png");
     return response;
