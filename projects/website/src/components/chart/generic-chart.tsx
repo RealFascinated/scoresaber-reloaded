@@ -68,7 +68,7 @@ const GenericChart = ({ config, labels }: Props) => {
           dataset.type === "bar" || dataset.type === "point" ? dataset.color : undefined,
         fill: false,
         lineTension: 0.4,
-        spanGaps: true, // Allow lines to connect across null values
+        spanGaps: true,
         yAxisID: dataset.axisId,
         hidden:
           id && dataset.label
@@ -79,19 +79,6 @@ const GenericChart = ({ config, labels }: Props) => {
         maxBarThickness: 12,
         pointRadius: dataset.type === "point" ? dataset.pointRadius || 3 : 0,
         showLine: dataset.type !== "point",
-        segment: {
-          borderDash: (ctx: any) => {
-            const data = dataset.data;
-            const index = ctx.p1DataIndex;
-            const nextIndex = index + 1;
-
-            // If either the current or next point is null, make the line dotted
-            if (data[index] === null || (nextIndex < data.length && data[nextIndex] === null)) {
-              return [5, 5];
-            }
-            return [];
-          },
-        },
       };
 
       // Add type-specific configuration
