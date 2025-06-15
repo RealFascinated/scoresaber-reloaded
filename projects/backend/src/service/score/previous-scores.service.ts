@@ -1,8 +1,5 @@
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import {
-  ScoreSaberPreviousScoreDocument,
-  ScoreSaberPreviousScoreModel,
-} from "@ssr/common/model/score/impl/scoresaber-previous-score";
+import { ScoreSaberPreviousScoreModel } from "@ssr/common/model/score/impl/scoresaber-previous-score";
 import {
   ScoreSaberPreviousScoreOverview,
   ScoreSaberScore,
@@ -24,19 +21,15 @@ export class PreviousScoresService {
     leaderboard: ScoreSaberLeaderboard,
     timestamp: Date
   ): Promise<ScoreSaberPreviousScoreOverview | undefined> {
-    const scores: ScoreSaberPreviousScoreDocument[] = await ScoreSaberPreviousScoreModel.find({
+    const previousScore = await ScoreSaberPreviousScoreModel.findOne({
       playerId: playerId,
       leaderboardId: leaderboard.id,
-    }).sort({
-      timestamp: -1,
-    });
-    if (scores == null || scores.length == 0) {
-      return undefined;
-    }
+      timestamp: { $lt: timestamp },
+    })
+      .sort({ timestamp: -1 })
+      .lean();
 
-    // get first score before timestamp
-    const previousScore = scores.find(score => score.timestamp.getTime() < timestamp.getTime());
-    if (previousScore == undefined) {
+    if (!previousScore) {
       return undefined;
     }
 
