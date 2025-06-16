@@ -3,6 +3,7 @@ import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
 import { Statistic } from "@ssr/common/model/statistics/statistic";
 import { formatDateMinimal } from "@ssr/common/utils/time-utils";
+import { PlayerService } from "./player/player.service";
 
 interface InfluxRow {
   _time: string;
@@ -60,10 +61,6 @@ const QUERIES = {
     measurement: "active-accounts",
     aggregation: "mean",
   },
-  [Statistic.ActivePlayerHmdUsage]: {
-    measurement: "active-players-hmd-statistic",
-    aggregation: "last",
-  },
 } as const;
 
 export default class StatisticsService {
@@ -118,6 +115,9 @@ export default class StatisticsService {
           });
         }
       });
+
+      // Get hmd usage
+      result.hmdUsage = await PlayerService.getActiveHmdUsage();
 
       return result;
     } catch (error) {

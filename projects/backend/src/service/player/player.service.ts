@@ -496,4 +496,24 @@ export class PlayerService {
       data,
     };
   }
+
+  /**
+   * Gets the hmd usage from the current day.
+   *
+   * @returns the hmd usage
+   */
+  public static async getActiveHmdUsage(): Promise<Record<string, number>> {
+    const hmdUsage = await PlayerModel.aggregate([
+      {
+        $match: {
+          hmd: { $nin: ["Unknown", null] },
+          inactive: false,
+        },
+      },
+      { $group: { _id: "$hmd", count: { $sum: 1 } } },
+      { $project: { _id: 0, hmd: "$_id", count: 1 } },
+    ]).then(results => Object.fromEntries(results.map(r => [r.hmd, r.count])));
+
+    return hmdUsage;
+  }
 }
