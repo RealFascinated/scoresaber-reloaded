@@ -6,7 +6,6 @@ import { Spinner } from "@/components/spinner";
 import { ClockIcon, MusicalNoteIcon } from "@heroicons/react/24/solid";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
-import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { getDifficultyName } from "@ssr/common/utils/song-utils";
 import { formatDate } from "@ssr/common/utils/time-utils";
 import { useDebounce } from "@uidotdev/usehooks";
@@ -14,6 +13,7 @@ import { StarIcon, TrendingUpIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import CountUp from "react-countup";
 import { Popover, PopoverContent, PopoverTrigger } from "../../../ui/popover";
 
 type LeaderboardPreviewProps = {
@@ -93,7 +93,11 @@ export default function LeaderboardPreview({
                 {/* Stars */}
                 <SimpleTooltip display="Star Rating">
                   <div className="flex items-center gap-2">
-                    <p>{leaderboard.ranked ? leaderboard.stars.toFixed(2) : "Unranked"}</p>
+                    {leaderboard.ranked ? (
+                      <CountUp end={leaderboard.stars} decimals={2} duration={1} />
+                    ) : (
+                      <p className="text-red-400">Unranked</p>
+                    )}
                     <StarIcon className="size-5 text-yellow-400 min-w-5" />
                   </div>
                 </SimpleTooltip>
@@ -106,7 +110,7 @@ export default function LeaderboardPreview({
                     <div className="flex items-center justify-center">
                       <TrendingUpIcon className="size-5 text-muted-foreground min-w-5" />
                     </div>
-                    <p>{formatNumberWithCommas(leaderboard.plays)}</p>
+                    <CountUp end={leaderboard.plays} duration={1} />
                   </div>
                 </SimpleTooltip>
 

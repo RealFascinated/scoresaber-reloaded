@@ -12,6 +12,7 @@ import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import CountUp from "react-countup";
 import Avatar from "../avatar";
 import Card from "../card";
 import CountryFlag from "../country-flag";
@@ -33,7 +34,14 @@ function PlayerHeader({ player }: { player: ScoreSaberPlayer }) {
         </p>
 
         {/* PP */}
-        <p className="text-pp">{formatPp(player.pp)}pp</p>
+        <div className="text-pp">
+          <CountUp
+            end={player.pp}
+            duration={1}
+            decimals={2}
+            formattingFn={value => `${formatPp(value)}pp`}
+          />
+        </div>
       </div>
     </div>
   );
@@ -48,7 +56,11 @@ function PlayerStats({ player }: { player: ScoreSaberPlayer }) {
           <div className="flex items-center justify-center">
             <GlobeAmericasIcon className="size-5 text-muted-foreground min-w-5" />
           </div>
-          <p>#{formatNumberWithCommas(player.rank)}</p>
+          <CountUp
+            end={player.rank}
+            duration={1}
+            formattingFn={value => `#${formatNumberWithCommas(value)}`}
+          />
         </div>
 
         {/* HMD */}
@@ -66,7 +78,11 @@ function PlayerStats({ player }: { player: ScoreSaberPlayer }) {
       <div className="flex items-center justify-between">
         <div className="grid grid-cols-[24px_1fr] gap-2 items-center">
           <CountryFlag code={player.country} size={12} className="min-w-5" />
-          <p>#{formatNumberWithCommas(player.countryRank)}</p>
+          <CountUp
+            end={player.countryRank}
+            duration={1}
+            formattingFn={value => `#${formatNumberWithCommas(value)}`}
+          />
         </div>
       </div>
     </Card>
