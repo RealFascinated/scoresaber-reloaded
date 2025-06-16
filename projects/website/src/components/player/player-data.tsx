@@ -22,7 +22,9 @@ import ScoreSaberPlayerScores from "../platform/scoresaber/scoresaber-player-sco
 import { Button } from "../ui/button";
 import PlayerHeader from "./header/player-header";
 
-const PlayerRankingMini = dynamic(() => import("./player-mini-ranking"), { ssr: false });
+const PlayerRankingMini = dynamic(() => import("./mini-ranking/player-mini-ranking"), {
+  ssr: false,
+});
 
 const platformRepository = PlatformRepository.getInstance();
 const scoresaberPlatform = platformRepository.getScoreSaberPlatform();

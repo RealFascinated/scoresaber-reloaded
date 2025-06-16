@@ -7,12 +7,31 @@
 export function getRankColor(rank: number) {
   switch (rank) {
     case 1:
-      return "text-yellow-500"; // Gold
+      return "text-[#B8860B]"; // Gold
     case 2:
-      return "text-zinc-300"; // Silver
+      return "text-[#888888]"; // Silver
     case 3:
-      return "text-orange-500"; // Lighter bronze
+      return "text-[#8B4513]"; // Lighter bronze
     default:
-      return "text-slate-400"; // Muted slate
+      return "text-white"; // Default
+  }
+}
+
+/**
+ * Gets the color of the country rank.
+ *
+ * @param rank the rank of the country
+ * @returns the color of the country rank
+ */
+export function getRankBgColor(rank: number) {
+  switch (rank) {
+    case 1:
+      return "bg-[#B8860B]"; // Gold
+    case 2:
+      return "bg-[#888888]"; // Silver
+    case 3:
+      return "bg-[#8B4513]"; // Lighter bronze
+    default:
+      return "bg-[#2d2d2d]"; // Default
   }
 }

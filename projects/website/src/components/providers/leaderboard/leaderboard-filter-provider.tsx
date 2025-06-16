@@ -2,6 +2,7 @@ import { SettingIds } from "@/common/database/database";
 import useDatabase from "@/hooks/use-database";
 import { useLiveQuery } from "dexie-react-hooks";
 import { createContext, ReactNode, useContext, useEffect, useState } from "react";
+import { toast } from "sonner";
 
 type FilterContextProps = {
   country: string | undefined;
@@ -30,6 +31,8 @@ export const LeaderboardFilterProvider = ({ children }: { children: ReactNode })
   const resetFilters = () => {
     setCountry(undefined);
     database.setSetting(SettingIds.DefaultLeaderboardCountry, undefined);
+
+    toast.success("Reset your filters");
   };
 
   return (

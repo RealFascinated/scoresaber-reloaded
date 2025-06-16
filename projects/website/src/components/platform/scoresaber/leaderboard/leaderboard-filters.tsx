@@ -8,9 +8,11 @@ import SimpleTooltip from "@/components/simple-tooltip";
 import { Button } from "@/components/ui/button";
 import Combobox from "@/components/ui/combo-box";
 import useDatabase from "@/hooks/use-database";
-import { getCountries } from "@ssr/common/utils/country.util";
+import { FilterItem } from "@ssr/common/filter-item";
+import { countryFilter } from "@ssr/common/utils/country.util";
 import { useLiveQuery } from "dexie-react-hooks";
 import { FaCheck } from "react-icons/fa";
+import { toast } from "sonner";
 
 export default function ScoreSaberLeaderboardFilters() {
   const database = useDatabase();
@@ -18,20 +20,24 @@ export default function ScoreSaberLeaderboardFilters() {
 
   const filter = useLeaderboardFilter();
 
+  async function resetDefault() {
+    filter.setCountry(undefined);
+  }
+
   return (
     <Card className="w-full h-fit text-sm flex flex-col gap-2">
       <div className="flex gap-2 flex-row items-end">
         <Combobox<string | undefined>
           name="Country"
           className="w-full"
-          items={getCountries()
-            .map(({ code, name }) => ({
-              value: code,
-              name: name,
-              icon: <CountryFlag code={code} size={12} />,
+          items={countryFilter
+            .map(({ key, friendlyName }: FilterItem) => ({
+              value: key,
+              name: friendlyName,
+              icon: <CountryFlag code={key} size={12} />,
             }))
             // The top country is the country of the claimed player
-            .sort(country => {
+            .sort((country: { value: string }) => {
               if (country.value === mainPlayer?.country) {
                 return -1;
               }
@@ -50,9 +56,14 @@ export default function ScoreSaberLeaderboardFilters() {
             variant="outline"
             size="icon"
             onClick={() => {
-              if (mainPlayer) {
-                database.setSetting(SettingIds.DefaultLeaderboardCountry, mainPlayer.country);
+              if (!filter.country) {
+                toast.error("Please select a country");
+                return;
               }
+              database.setSetting(SettingIds.DefaultLeaderboardCountry, filter.country);
+              toast.success(
+                `Set ${countryFilter.find(c => c.key === filter.country)?.friendlyName} as default`
+              );
             }}
           >
             <FaCheck />

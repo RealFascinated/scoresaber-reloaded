@@ -1,6 +1,6 @@
 import RankingData from "@/components/ranking/ranking-data";
 import { env } from "@ssr/common/env";
-import { getFullCountryName } from "@ssr/common/utils/country.util";
+import { countryFilter } from "@ssr/common/utils/country.util";
 import { Metadata } from "next";
 
 export const revalidate = 300; // Revalidate every 5 minutes
@@ -36,7 +36,10 @@ const getRankingData = async ({ params }: Props): Promise<RankingPageData> => {
 export async function generateMetadata(props: Props): Promise<Metadata> {
   const { country } = await getRankingData(props);
 
-  const fullCountry = country === undefined ? "Global" : `${getFullCountryName(country)}`;
+  const fullCountry =
+    country === undefined
+      ? "Global"
+      : `${countryFilter.find(c => c.key === country)?.friendlyName}`;
   const title = `Ranking / ${fullCountry}`;
   return {
     title: title,
@@ -53,7 +56,7 @@ export default async function RankingPage(props: Props) {
 
   return (
     <main className="flex w-full flex-col items-center text-sm">
-      <RankingData initialPage={page} country={country} />
+      <RankingData initialPage={page} initialCountry={country} />
     </main>
   );
 }

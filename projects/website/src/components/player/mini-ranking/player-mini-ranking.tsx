@@ -1,5 +1,5 @@
+import { PlayerMiniRankingSkeleton } from "@/components/player/mini-ranking/player-mini-ranking-skeleton";
 import { PlayerInfo } from "@/components/player/player-info";
-import { PlayerRankingSkeleton } from "@/components/ranking/player-ranking-skeleton";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { AroundPlayer } from "@ssr/common/types/around-player";
@@ -8,9 +8,9 @@ import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { ReactElement } from "react";
-import Card from "../card";
-import CountryFlag from "../country-flag";
-import PlayerPreview from "./player-preview";
+import Card from "../../card";
+import CountryFlag from "../../country-flag";
+import PlayerPreview from "../player-preview";
 
 type PlayerMiniRankingProps = {
   /**
@@ -55,7 +55,7 @@ export default function PlayerMiniRanking({ type, player }: PlayerMiniRankingPro
   });
 
   if (isLoading || !response) {
-    return <PlayerRankingSkeleton />;
+    return <PlayerMiniRankingSkeleton />;
   }
 
   if (isError) {

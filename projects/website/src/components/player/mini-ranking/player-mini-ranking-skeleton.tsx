@@ -1,7 +1,7 @@
 import Card from "@/components/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
-export function PlayerRankingSkeleton() {
+export function PlayerMiniRankingSkeleton() {
   const skeletonArray = new Array(5).fill(0);
 
   return (

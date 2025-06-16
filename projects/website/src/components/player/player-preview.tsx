@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "@/common/utils";
 import { Spinner } from "@/components/spinner";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import { DetailType } from "@ssr/common/detail-type";
@@ -7,9 +8,8 @@ import { formatPp } from "@ssr/common/utils/number-utils";
 import { getScoreSaberRoles } from "@ssr/common/utils/scoresaber.util";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
-import { useDebounce } from "@uidotdev/usehooks";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Avatar from "../avatar";
 import CountryFlag from "../country-flag";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
@@ -17,11 +17,32 @@ import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 type PlayerPreviewProps = {
   playerId: string;
   children: React.ReactNode;
+  className?: string;
+  delay?: number;
+  useLink?: boolean;
 };
 
-export default function PlayerPreview({ playerId, children }: PlayerPreviewProps) {
+export default function PlayerPreview({
+  playerId,
+  children,
+  className,
+  delay = 100,
+  useLink = true,
+}: PlayerPreviewProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const state = useDebounce(isOpen, 100);
+  const [debouncedIsOpen, setDebouncedIsOpen] = useState(false);
+
+  // Only delay showing, not hiding
+  useEffect(() => {
+    if (isOpen) {
+      const timer = setTimeout(() => {
+        setDebouncedIsOpen(true);
+      }, delay);
+      return () => clearTimeout(timer);
+    } else {
+      setDebouncedIsOpen(false);
+    }
+  }, [isOpen, delay]);
 
   const { data: player, isLoading } = useQuery({
     queryKey: ["player-preview", playerId],
@@ -30,11 +51,11 @@ export default function PlayerPreview({ playerId, children }: PlayerPreviewProps
   });
 
   return (
-    <Popover open={state} onOpenChange={setIsOpen}>
+    <Popover open={debouncedIsOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger
         onMouseEnter={() => setIsOpen(true)}
         onMouseLeave={() => setIsOpen(false)}
-        className="block w-fit leading-none"
+        className={cn("block w-fit leading-none", className)}
       >
         {children}
       </PopoverTrigger>
@@ -58,15 +79,21 @@ export default function PlayerPreview({ playerId, children }: PlayerPreviewProps
                 alt={`${player.name}'s Profile Picture`}
               />
               <div className="min-w-0 flex-1">
-                <Link
-                  href={`/player/${player.id}`}
-                  className="block font-bold text-lg hover:brightness-[66%] transition-all truncate"
-                  style={{
-                    color: getScoreSaberRoles(player)[0]?.color,
-                  }}
-                >
-                  {player.name}
-                </Link>
+                {useLink ? (
+                  <Link
+                    href={`/player/${player.id}`}
+                    className="block font-bold text-lg hover:brightness-[66%] transition-all truncate"
+                    style={{
+                      color: getScoreSaberRoles(player)[0]?.color,
+                    }}
+                  >
+                    {player.name}
+                  </Link>
+                ) : (
+                  <p className="block font-bold text-lg hover:brightness-[66%] transition-all truncate">
+                    {player.name}
+                  </p>
+                )}
                 {(player.inactive || player.banned) && (
                   <p className={`text-sm ${player.banned ? "text-red-500" : "text-gray-400"}`}>
                     {player.banned ? "Banned Account" : "Inactive Account"}
