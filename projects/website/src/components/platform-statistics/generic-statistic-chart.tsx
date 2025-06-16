@@ -3,7 +3,7 @@
 import { ChartConfig, DatasetConfig } from "@/common/chart/types";
 import GenericChart from "@/components/chart/generic-chart";
 import { StatisticsType } from "@ssr/common/model/statistics/statistic-type";
-import { getMidnightAlignedDate, parseDate } from "@ssr/common/utils/time-utils";
+import { formatDateMinimal, parseDate } from "@ssr/common/utils/time-utils";
 
 type Props = {
   /**
@@ -28,7 +28,8 @@ export default function GenericStatisticChart({ statistics, datasetConfig }: Pro
 
   // Create a continuous array of dates for the last 365 days
   const labels: Date[] = [];
-  const today = getMidnightAlignedDate(new Date());
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
   for (let i = 0; i < historyDays; i++) {
     const date = new Date(today);
     date.setDate(date.getDate() - i);
@@ -41,14 +42,12 @@ export default function GenericStatisticChart({ statistics, datasetConfig }: Pro
   );
 
   // Create a map of dates to their index in the labels array
-  const dateToIndex = new Map(
-    labels.map((date, index) => [date.toISOString().split("T")[0], index])
-  );
+  const dateToIndex = new Map(labels.map((date, index) => [formatDateMinimal(date), index]));
 
   // Process each day's data
   statisticEntries.forEach(([dateString, history]) => {
     const date = parseDate(dateString);
-    const dateKey = date.toISOString().split("T")[0];
+    const dateKey = formatDateMinimal(date);
     const index = dateToIndex.get(dateKey);
 
     if (index !== undefined) {

@@ -80,7 +80,7 @@ export default async function StatisticsPage() {
                   <div className="flex flex-col">
                     <span className="font-medium">HMD Usage</span>
                     <span className="text-sm text-muted-foreground">
-                      Distribution of HMDs used by players
+                      Distribution of HMDs used by active players
                     </span>
                   </div>
                 </div>
