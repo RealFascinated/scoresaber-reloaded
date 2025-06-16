@@ -24,10 +24,108 @@ import { PlayerRankingMobile } from "./player-ranking-mobile";
 
 type RankingDataProps = {
   initialPage: number;
-  initialCountry?: string | undefined;
+  initialCountry?: string;
 };
 
-function buildPageUrl(country: string | undefined, page: number) {
+type RankingFiltersProps = {
+  currentCountry: string | undefined;
+  setCurrentCountry: (country: string | undefined) => void;
+  setCurrentPage: (page: number) => void;
+  mainPlayerCountry?: string;
+};
+
+type RankingHeaderProps = {
+  currentCountry: string | undefined;
+  showRelativePPDifference: boolean;
+  setShowRelativePPDifference: (show: boolean) => void;
+  mainPlayer: any | undefined;
+};
+
+function RankingFilters({
+  currentCountry,
+  setCurrentCountry,
+  setCurrentPage,
+  mainPlayerCountry,
+}: RankingFiltersProps) {
+  return (
+    <Card className="h-full w-full lg:w-[25%] gap-4 order-1 lg:order-2 mb-2 lg:mb-0">
+      <p className="text-lg">Filters</p>
+      <div className="flex flex-col gap-4">
+        <Combobox<string | undefined>
+          name="Country"
+          className="w-full"
+          items={countryFilter
+            .map(({ key, friendlyName }: FilterItem) => ({
+              value: key,
+              name: friendlyName,
+              icon: <CountryFlag code={key} size={12} />,
+            }))
+            .sort((country: { value: string }) => {
+              if (country.value === mainPlayerCountry) return -1;
+              return 1;
+            })}
+          value={currentCountry}
+          onValueChange={(newCountry: string | undefined) => {
+            setCurrentCountry(newCountry);
+            setCurrentPage(1);
+          }}
+        />
+        <div className="flex gap-2">
+          <div className="w-full">
+            <SimpleTooltip display="Clear all current filters">
+              <Button
+                onClick={() => {
+                  setCurrentCountry(undefined);
+                  setCurrentPage(1);
+                }}
+                className="w-full"
+              >
+                Clear Filters
+              </Button>
+            </SimpleTooltip>
+          </div>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+function RankingHeader({
+  currentCountry,
+  showRelativePPDifference,
+  setShowRelativePPDifference,
+  mainPlayer,
+}: RankingHeaderProps) {
+  return (
+    <div className="flex items-center justify-between gap-4 flex-col lg:flex-row">
+      <div className="flex items-center gap-3 font-medium">
+        {currentCountry && (
+          <div className="flex items-center gap-2">
+            <CountryFlag code={currentCountry} size={20} />
+            <p className="text-lg">
+              Players from {countryFilter.find(c => c.key === currentCountry)?.friendlyName}
+            </p>
+          </div>
+        )}
+        {!currentCountry && <p className="text-lg">Global Players</p>}
+      </div>
+
+      {mainPlayer !== undefined && (
+        <div className="flex items-center gap-3 bg-accent/50 px-4 py-2 rounded-md">
+          <SimpleTooltip display="The amount of pp between you and each player" showOnMobile>
+            <p className="text-sm">Relative PP</p>
+          </SimpleTooltip>
+          <Switch
+            checked={showRelativePPDifference}
+            onCheckedChange={checked => setShowRelativePPDifference(checked)}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
+function buildPageUrl(country: string | undefined, page: number): string {
   return `/ranking/${country != undefined ? `${country}/` : ""}${page}`;
 }
 
@@ -49,12 +147,11 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
   } = useQuery({
     queryKey: ["rankingData", currentPage, currentCountry],
     queryFn: async () => {
+      const scoreSaberService = ApiServiceRegistry.getInstance().getScoreSaberService();
       const players =
         currentCountry == undefined
-          ? await ApiServiceRegistry.getInstance().getScoreSaberService().lookupPlayers(currentPage)
-          : await ApiServiceRegistry.getInstance()
-              .getScoreSaberService()
-              .lookupPlayersByCountry(currentPage, currentCountry);
+          ? await scoreSaberService.lookupPlayers(currentPage)
+          : await scoreSaberService.lookupPlayersByCountry(currentPage, currentCountry);
       return players && players.players.length > 0 ? players : undefined;
     },
     refetchIntervalInBackground: false,
@@ -63,85 +160,24 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
 
   useEffect(() => {
     navigation.changePageUrl(buildPageUrl(currentCountry, currentPage));
-  }, [currentPage, currentCountry]);
+  }, [currentPage, currentCountry, navigation]);
 
   return (
     <div className="flex flex-col lg:flex-row lg:gap-2 w-full justify-center">
-      {/* Filters (mobile first) */}
-      <Card className="h-full w-full lg:w-[25%] gap-4 order-1 lg:order-2 mb-2 lg:mb-0">
-        <p className="text-lg">Filters</p>
+      <RankingFilters
+        currentCountry={currentCountry}
+        setCurrentCountry={setCurrentCountry}
+        setCurrentPage={setCurrentPage}
+        mainPlayerCountry={mainPlayer?.country}
+      />
 
-        <div className="flex flex-col gap-4">
-          <Combobox<string | undefined>
-            name="Country"
-            className="w-full"
-            items={countryFilter
-              .map(({ key, friendlyName }: FilterItem) => ({
-                value: key,
-                name: friendlyName,
-                icon: <CountryFlag code={key} size={12} />,
-              }))
-              .sort((country: { value: string }) => {
-                if (country.value === mainPlayer?.country) {
-                  return -1;
-                }
-                return 1;
-              })}
-            value={currentCountry}
-            onValueChange={(newCountry: string | undefined) => {
-              setCurrentCountry(newCountry);
-              setCurrentPage(1); // Reset to first page when changing country
-            }}
-          />
-
-          <div className="flex gap-2">
-            <div className="w-full">
-              <SimpleTooltip display="Clear all current filters">
-                <Button
-                  onClick={() => {
-                    setCurrentCountry(undefined);
-                    setCurrentPage(1);
-                  }}
-                  className="w-full"
-                >
-                  Clear Filters
-                </Button>
-              </SimpleTooltip>
-            </div>
-          </div>
-        </div>
-      </Card>
-
-      {/* Ranking */}
       <Card className="h-full w-full lg:w-[50%] gap-4 order-2 lg:order-1">
-        <div className="flex items-center justify-between gap-4 flex-col lg:flex-row">
-          <div className="flex items-center gap-3 font-medium">
-            {currentCountry && (
-              <div className="flex items-center gap-2">
-                <CountryFlag code={currentCountry} size={20} />
-                <p className="text-lg">
-                  Players from {countryFilter.find(c => c.key === currentCountry)?.friendlyName}
-                </p>
-              </div>
-            )}
-            {!currentCountry && <p className="text-lg">Global Players</p>}
-          </div>
-
-          {/* Relative PP Difference */}
-          {mainPlayer !== undefined && (
-            <div className="flex items-center gap-3 bg-accent/50 px-4 py-2 rounded-md">
-              <SimpleTooltip display="The amount of pp between you and each player">
-                <p className="text-sm">Relative PP</p>
-              </SimpleTooltip>
-              <Switch
-                checked={showRelativePPDifference}
-                onCheckedChange={checked => {
-                  setShowRelativePPDifference(checked);
-                }}
-              />
-            </div>
-          )}
-        </div>
+        <RankingHeader
+          currentCountry={currentCountry}
+          showRelativePPDifference={showRelativePPDifference}
+          setShowRelativePPDifference={setShowRelativePPDifference}
+          mainPlayer={mainPlayer}
+        />
 
         {!rankingData && !isError && (
           <FancyLoader
@@ -165,9 +201,14 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
         {rankingData && (
           <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-2">
-              {rankingData.players.map((player, index) =>
+              {rankingData.players.map(player =>
                 isMobile ? (
-                  <PlayerRankingMobile key={player.id} player={player} />
+                  <PlayerRankingMobile
+                    key={player.id}
+                    player={player}
+                    relativePerformancePoints={showRelativePPDifference}
+                    mainPlayer={mainPlayer}
+                  />
                 ) : (
                   <PlayerRanking
                     key={player.id}
@@ -186,7 +227,7 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
               itemsPerPage={rankingData.metadata.itemsPerPage}
               loadingPage={isLoading || isRefetching ? currentPage : undefined}
               generatePageUrl={page => buildPageUrl(currentCountry, page)}
-              onPageChange={newPage => setCurrentPage(newPage)}
+              onPageChange={setCurrentPage}
               statsBelow={true}
             />
           </div>
