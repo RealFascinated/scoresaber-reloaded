@@ -14,7 +14,6 @@ export const revalidate = 300; // Revalidate every 5 minutes
 export async function generateMetadata(): Promise<Metadata> {
   const statistics = await ssrApi.getScoreSaberPlatformStatistics();
   const yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
   const date = formatDateMinimal(yesterday);
   const statisticsData = statistics?.statistics.daily[date];
 
