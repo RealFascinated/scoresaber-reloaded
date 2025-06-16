@@ -46,7 +46,7 @@ export class FriendScoresService {
           score: -1,
         },
       },
-    ]).hint({ playerId: 1, leaderboardId: 1, timestamp: -1 });
+    ]);
 
     if (!friendScores.length) {
       throw new NotFoundError(
@@ -131,7 +131,7 @@ export class FriendScoresService {
           {
             $limit: limit,
           },
-        ]).allowDiskUse(true);
+        ]);
 
         if (!friendScores.length) {
           return [];
