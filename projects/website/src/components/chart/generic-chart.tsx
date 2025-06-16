@@ -78,10 +78,9 @@ const GenericChart = ({ config, labels }: Props) => {
         spanGaps: true,
         yAxisID: dataset.axisId,
         hidden:
-          isAxisHidden ||
-          (id && dataset.label
+          id && dataset.label
             ? !database.getChartLegend(id, dataset.label, true)
-            : !dataset.showLegend),
+            : !dataset.showLegend,
         stack: dataset.stack,
         order: dataset.stackOrder,
         maxBarThickness: 12,
