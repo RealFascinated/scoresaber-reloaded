@@ -86,7 +86,8 @@ export class PlayerHistoryService {
   public static async getPlayerStatisticHistory(
     player: ScoreSaberPlayerToken,
     startDate: Date,
-    endDate: Date
+    endDate: Date,
+    projection?: Record<string, string | number | boolean | object>
   ): Promise<PlayerStatisticHistory> {
     const startTimestamp = getMidnightAlignedDate(startDate).getTime();
     const endTimestamp = getMidnightAlignedDate(endDate).getTime();
@@ -108,6 +109,7 @@ export class PlayerHistoryService {
           $lte: new Date(queryEnd),
         },
       })
+        .select(projection ? { date: 1, ...projection } : {})
         .sort({ date: -1 })
         .lean(),
       parseRankHistory(player),
@@ -146,7 +148,10 @@ export class PlayerHistoryService {
     const today = getMidnightAlignedDate(new Date());
     const todayKey = formatDateMinimal(today);
     if (todayData && isRangeIncludesToday) {
-      history[todayKey] = todayData;
+      history[todayKey] =
+        projection && Object.keys(projection).length > 0
+          ? Object.fromEntries(Object.entries(todayData).filter(([key]) => key in projection))
+          : todayData;
     }
 
     // Sort history by date

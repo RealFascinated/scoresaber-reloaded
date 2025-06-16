@@ -337,7 +337,12 @@ class SSRApi {
    * @param startDate the start date
    * @param endDate the end date
    */
-  async getPlayerStatisticHistory(playerId: string, startDate: Date, endDate: Date) {
+  async getPlayerStatisticHistory(
+    playerId: string,
+    startDate: Date,
+    endDate: Date,
+    includedFields?: (keyof PlayerStatisticHistory)[]
+  ) {
     return Request.get<PlayerStatisticHistory>(
       `${env.NEXT_PUBLIC_API_URL}/player/history/${playerId}`,
       {
@@ -345,6 +350,7 @@ class SSRApi {
         searchParams: {
           startDate: startDate.toISOString(),
           endDate: endDate.toISOString(),
+          ...(includedFields ? { includedFields: includedFields.join(",") } : {}),
         },
       }
     );

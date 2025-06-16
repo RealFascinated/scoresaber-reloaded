@@ -208,7 +208,6 @@ const GenericChart = ({ config, labels }: Props) => {
           position: "top" as const,
           labels: {
             color: "white",
-            padding: 20,
             filter: (legendItem: any, chartData: any) => {
               const dataset = chartData.datasets[legendItem.datasetIndex];
               return dataset.showLegend !== false;
