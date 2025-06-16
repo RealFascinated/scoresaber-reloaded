@@ -1,14 +1,16 @@
 "use client";
 
+import Card from "@/components/card";
+import SimpleTooltip from "@/components/simple-tooltip";
 import { Spinner } from "@/components/spinner";
-import { ChartBarIcon, ClockIcon } from "@heroicons/react/24/solid";
+import { ClockIcon, MusicalNoteIcon } from "@heroicons/react/24/solid";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { getDifficultyName } from "@ssr/common/utils/song-utils";
 import { formatDate } from "@ssr/common/utils/time-utils";
 import { useDebounce } from "@uidotdev/usehooks";
-import { StarIcon } from "lucide-react";
+import { StarIcon, TrendingUpIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
@@ -38,7 +40,7 @@ export default function LeaderboardPreview({
         {children}
       </PopoverTrigger>
       <PopoverContent
-        className="w-[380px] p-0"
+        className="w-[400px] p-0"
         onMouseEnter={() => setIsOpen(true)}
         onMouseLeave={() => setIsOpen(false)}
       >
@@ -49,71 +51,74 @@ export default function LeaderboardPreview({
         ) : (
           <div className="p-3">
             {/* Header with song info */}
-            <div className="mb-3">
-              <div className="flex items-center gap-3">
-                {leaderboard.songArt && (
-                  <Image
-                    src={leaderboard.songArt}
-                    alt={`${leaderboard.songName} Cover Art`}
-                    width={64}
-                    height={64}
-                    className="w-16 h-16 rounded-lg object-cover pointer-events-none"
-                  />
-                )}
-                <div className="min-w-0 flex-1">
-                  <Link
-                    href={`/leaderboard/${leaderboard.id}`}
-                    className="block font-bold text-lg hover:brightness-[66%] transition-all truncate"
-                  >
-                    {leaderboard.songName}
-                  </Link>
-                  <p className="text-sm text-gray-400 truncate">{leaderboard.songAuthorName}</p>
-                  <p className="text-sm text-gray-400 truncate">
-                    Mapped by {leaderboard.levelAuthorName}
-                  </p>
-                </div>
+            <div className="flex items-center gap-3 mb-3">
+              {leaderboard.songArt && (
+                <Image
+                  src={leaderboard.songArt}
+                  alt={`${leaderboard.songName} Cover Art`}
+                  width={96}
+                  height={96}
+                  className="size-24 rounded-lg object-cover pointer-events-none"
+                />
+              )}
+              <div className="min-w-0 flex-1">
+                <Link
+                  href={`/leaderboard/${leaderboard.id}`}
+                  className="block font-bold text-2xl hover:brightness-[66%] transition-all truncate"
+                >
+                  {leaderboard.songName}
+                </Link>
+                <p className="text-sm text-muted-foreground truncate">
+                  {leaderboard.songAuthorName}
+                </p>
+                <p className="text-sm text-muted-foreground truncate">
+                  Mapped by {leaderboard.levelAuthorName}
+                </p>
               </div>
             </div>
 
-            {/* Stats grid */}
-            <div className="grid grid-cols-2 gap-2 text-sm">
-              {/* Difficulty */}
-              <div className="flex items-center gap-2 bg-accent/50 p-2 rounded">
-                <ChartBarIcon className="h-5 w-5 text-gray-400" />
-                <div className="min-w-0">
-                  <p className="text-gray-400 text-xs">Difficulty</p>
-                  <p className="truncate">{getDifficultyName(leaderboard.difficulty.difficulty)}</p>
-                </div>
+            {/* Stats card */}
+            <Card className="flex flex-col gap-2 text-sm">
+              <div className="flex items-center justify-between">
+                {/* Difficulty */}
+                <SimpleTooltip display="Song Difficulty">
+                  <div className="grid grid-cols-[24px_1fr] gap-2 items-center">
+                    <div className="flex items-center justify-center">
+                      <MusicalNoteIcon className="size-5 text-muted-foreground min-w-5" />
+                    </div>
+                    <p>{getDifficultyName(leaderboard.difficulty.difficulty)}</p>
+                  </div>
+                </SimpleTooltip>
+
+                {/* Stars */}
+                <SimpleTooltip display="Star Rating">
+                  <div className="flex items-center gap-2">
+                    <p>{leaderboard.ranked ? leaderboard.stars.toFixed(2) : "Unranked"}</p>
+                    <StarIcon className="size-5 text-yellow-400 min-w-5" />
+                  </div>
+                </SimpleTooltip>
               </div>
 
-              {/* Stars */}
-              <div className="flex items-center gap-2 bg-accent/50 p-2 rounded">
-                <StarIcon className="h-5 w-5 text-yellow-400" />
-                <div className="min-w-0">
-                  <p className="text-gray-400 text-xs">Stars</p>
-                  <p className="truncate">
-                    {leaderboard.ranked ? leaderboard.stars.toFixed(2) : "Unranked"}
-                  </p>
-                </div>
-              </div>
+              <div className="flex items-center justify-between">
+                {/* Plays */}
+                <SimpleTooltip display="Total Plays">
+                  <div className="grid grid-cols-[24px_1fr] gap-2 items-center">
+                    <div className="flex items-center justify-center">
+                      <TrendingUpIcon className="size-5 text-muted-foreground min-w-5" />
+                    </div>
+                    <p>{formatNumberWithCommas(leaderboard.plays)}</p>
+                  </div>
+                </SimpleTooltip>
 
-              {/* Max Score */}
-              <div className="flex items-center gap-2 bg-accent/50 p-2 rounded">
-                <div className="min-w-0 flex-1">
-                  <p className="text-gray-400 text-xs">Max Score</p>
-                  <p className="truncate">{formatNumberWithCommas(leaderboard.maxScore)}</p>
-                </div>
+                {/* Created Date */}
+                <SimpleTooltip display="Created Date">
+                  <div className="flex items-center gap-2">
+                    <p>{formatDate(leaderboard.timestamp)}</p>
+                    <ClockIcon className="size-5 text-muted-foreground min-w-5" />
+                  </div>
+                </SimpleTooltip>
               </div>
-
-              {/* Created Date */}
-              <div className="flex items-center gap-2 bg-accent/50 p-2 rounded">
-                <ClockIcon className="h-5 w-5 text-gray-400" />
-                <div className="min-w-0">
-                  <p className="text-gray-400 text-xs">Created</p>
-                  <p className="truncate">{formatDate(leaderboard.timestamp)}</p>
-                </div>
-              </div>
-            </div>
+            </Card>
           </div>
         )}
       </PopoverContent>

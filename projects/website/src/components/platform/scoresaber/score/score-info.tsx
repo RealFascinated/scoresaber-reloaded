@@ -1,4 +1,5 @@
 import { getRankColor } from "@/common/color-utils";
+import HMDIcon from "@/components/hmd";
 import { ScoreSaberScoreTimeSetVs } from "@/components/platform/scoresaber/score/score-time-set-vs";
 import { ScoreTimeSet } from "@/components/score/score-time-set";
 import SimpleTooltip from "@/components/simple-tooltip";
@@ -8,7 +9,6 @@ import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { getPageFromRank } from "@ssr/common/utils/utils";
-import Image from "next/image";
 import Link from "next/link";
 import { useMemo } from "react";
 
@@ -65,16 +65,7 @@ export default function ScoreSaberScoreInfo({
         }
         showOnMobile
       >
-        <Image
-          src={`https://cdn.fascinated.cc/assets/hmds/${hmd.logo}`}
-          alt={`${hmd.logo} Logo`}
-          width={24}
-          height={24}
-          className="w-5 h-5 rounded-full"
-          style={{
-            filter: hmd.filters,
-          }}
-        />
+        <HMDIcon hmd={hmd} />
       </SimpleTooltip>
     );
   }, [hmd, score.hmd, score.controllers]);

@@ -4,23 +4,74 @@ import { cn } from "@/common/utils";
 import { Spinner } from "@/components/spinner";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import { DetailType } from "@ssr/common/detail-type";
-import { formatPp } from "@ssr/common/utils/number-utils";
+import { getHMDInfo, HMD } from "@ssr/common/hmds";
+import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
+import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
 import { getScoreSaberRoles } from "@ssr/common/utils/scoresaber.util";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import Avatar from "../avatar";
+import Card from "../card";
 import CountryFlag from "../country-flag";
+import HMDIcon from "../hmd";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 
-type PlayerPreviewProps = {
-  playerId: string;
-  children: React.ReactNode;
-  className?: string;
-  delay?: number;
-  useLink?: boolean;
-};
+function PlayerHeader({ player }: { player: ScoreSaberPlayer }) {
+  return (
+    <div className="flex items-center gap-3 mb-3">
+      <Avatar
+        src={player.avatar}
+        size={96}
+        className="size-24 pointer-events-none rounded-lg"
+        alt={`${player.name}'s Profile Picture`}
+      />
+      <div className="min-w-0 flex-1">
+        <p className="block font-bold text-2xl hover:brightness-[66%] transition-all truncate">
+          {player.name}
+        </p>
+
+        {/* PP */}
+        <p className="text-pp">{formatPp(player.pp)}pp</p>
+      </div>
+    </div>
+  );
+}
+
+function PlayerStats({ player }: { player: ScoreSaberPlayer }) {
+  return (
+    <Card className="flex flex-col gap-2 text-sm">
+      <div className="flex items-center justify-between">
+        {/* Global Rank */}
+        <div className="grid grid-cols-[24px_1fr] gap-2 items-center">
+          <div className="flex items-center justify-center">
+            <GlobeAmericasIcon className="size-5 text-muted-foreground min-w-5" />
+          </div>
+          <p>#{formatNumberWithCommas(player.rank)}</p>
+        </div>
+
+        {/* HMD */}
+        {player.hmd ? (
+          <div className="flex items-center gap-2 ">
+            <p>{player.hmd}</p>
+            <HMDIcon hmd={getHMDInfo(player.hmd as HMD)} />
+          </div>
+        ) : (
+          <p className="text-red-400">Unknown HMD</p>
+        )}
+      </div>
+
+      {/* Country Rank */}
+      <div className="flex items-center justify-between">
+        <div className="grid grid-cols-[24px_1fr] gap-2 items-center">
+          <CountryFlag code={player.country} size={12} className="min-w-5" />
+          <p>#{formatNumberWithCommas(player.countryRank)}</p>
+        </div>
+      </div>
+    </Card>
+  );
+}
 
 export default function PlayerPreview({
   playerId,
@@ -28,7 +79,13 @@ export default function PlayerPreview({
   className,
   delay = 100,
   useLink = true,
-}: PlayerPreviewProps) {
+}: {
+  playerId: string;
+  children: React.ReactNode;
+  className?: string;
+  delay?: number;
+  useLink?: boolean;
+}) {
   const [isOpen, setIsOpen] = useState(false);
   const [debouncedIsOpen, setDebouncedIsOpen] = useState(false);
 
@@ -60,7 +117,7 @@ export default function PlayerPreview({
         {children}
       </PopoverTrigger>
       <PopoverContent
-        className="w-[320px] p-0"
+        className="w-[400px] p-0"
         onMouseEnter={() => setIsOpen(true)}
         onMouseLeave={() => setIsOpen(false)}
       >
@@ -70,66 +127,22 @@ export default function PlayerPreview({
           </div>
         ) : (
           <div className="p-3">
-            {/* Header with avatar and name */}
-            <div className="flex items-center gap-3 mb-3">
-              <Avatar
-                src={player.avatar}
-                size={64}
-                className="w-16 h-16 pointer-events-none rounded-lg"
-                alt={`${player.name}'s Profile Picture`}
-              />
-              <div className="min-w-0 flex-1">
-                {useLink ? (
-                  <Link
-                    href={`/player/${player.id}`}
-                    className="block font-bold text-lg hover:brightness-[66%] transition-all truncate"
-                    style={{
-                      color: getScoreSaberRoles(player)[0]?.color,
-                    }}
-                  >
-                    {player.name}
-                  </Link>
-                ) : (
-                  <p className="block font-bold text-lg hover:brightness-[66%] transition-all truncate">
-                    {player.name}
-                  </p>
-                )}
-                {(player.inactive || player.banned) && (
-                  <p className={`text-sm ${player.banned ? "text-red-500" : "text-gray-400"}`}>
-                    {player.banned ? "Banned Account" : "Inactive Account"}
-                  </p>
-                )}
-              </div>
-            </div>
+            {/* Player header */}
+            {useLink ? (
+              <Link
+                href={`/player/${player.id}`}
+                style={{
+                  color: getScoreSaberRoles(player)[0]?.color,
+                }}
+              >
+                <PlayerHeader player={player} />
+              </Link>
+            ) : (
+              <PlayerHeader player={player} />
+            )}
 
-            {/* Stats grid */}
-            <div className="grid grid-cols-2 gap-2 text-sm">
-              {/* Global Rank */}
-              <div className="flex items-center gap-2 bg-accent/50 p-2 rounded">
-                <GlobeAmericasIcon className="h-5 w-5 text-gray-400" />
-                <div className="min-w-0">
-                  <p className="text-gray-400 text-xs">Global Rank</p>
-                  <p className="truncate">#{player.rank.toLocaleString()}</p>
-                </div>
-              </div>
-
-              {/* Country Rank */}
-              <div className="flex items-center gap-2 bg-accent/50 p-2 rounded">
-                <CountryFlag code={player.country} size={13} />
-                <div className="min-w-0">
-                  <p className="text-gray-400 text-xs">Country Rank</p>
-                  <p className="truncate">#{player.countryRank.toLocaleString()}</p>
-                </div>
-              </div>
-
-              {/* PP */}
-              <div className="flex items-center gap-2 bg-accent/50 p-2 rounded col-span-2">
-                <div className="min-w-0 flex-1">
-                  <p className="text-gray-400 text-xs">Performance Points</p>
-                  <p className="text-pp truncate">{formatPp(player.pp)}pp</p>
-                </div>
-              </div>
-            </div>
+            {/* Player stats */}
+            <PlayerStats player={player} />
           </div>
         )}
       </PopoverContent>

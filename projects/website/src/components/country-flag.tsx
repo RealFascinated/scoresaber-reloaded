@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "@/common/utils";
 import SimpleTooltip from "@/components/simple-tooltip";
 import { normalizedRegionName } from "@ssr/common/utils/region-utils";
 import Image from "next/image";
@@ -8,9 +9,10 @@ import { useState } from "react";
 type Props = {
   code: string;
   size?: number;
+  className?: string;
 };
 
-export default function CountryFlag({ code, size = 24 }: Props) {
+export default function CountryFlag({ code, size = 24, className }: Props) {
   const [flagSrc, setFlagSrc] = useState(
     `https://cdn.fascinated.cc/assets/flags/${code.toLowerCase()}.png`
   );
@@ -23,7 +25,7 @@ export default function CountryFlag({ code, size = 24 }: Props) {
   return (
     <SimpleTooltip
       display={<p>{normalizedRegionName(code)}</p>}
-      className={`w-[${size * 2}px] min-w-[${size * 2}px]`}
+      className={cn(`w-[${size * 2}px] min-w-[${size * 2}px]`, className)}
     >
       <Image
         alt="Country Flag"

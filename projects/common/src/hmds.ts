@@ -16,7 +16,7 @@ export type HMD =
   | "Vive Cosmos"
   | "Bigscreen Beyond";
 
-type HMDInfo = {
+export type HMDInfo = {
   logo: string;
   filters?: string;
 };
