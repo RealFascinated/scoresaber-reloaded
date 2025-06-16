@@ -81,7 +81,7 @@ export class FriendScoresService {
 
     const scores = processedBatches.flat() as ScoreSaberScore[];
     return new Pagination<ScoreSaberScore>()
-      .setItems(scores)
+      .setItems(scores.sort((a, b) => b.score - a.score))
       .setTotalItems(scores.length)
       .setItemsPerPage(8)
       .getPage(page);

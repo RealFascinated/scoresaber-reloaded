@@ -131,6 +131,13 @@ export function getDifficultyFromScoreSaberDifficulty(diff: number): MapDifficul
 export function getScoreSaberAvatar(
   player: ScoreSaberPlayerToken | ScoreSaberLeaderboardPlayerInfoToken | ScoreSaberPlayer
 ): string {
+  if ("profilePicture" in player) {
+    return player.profilePicture ?? `https://cdn.scoresaber.com/avatars/${player.id}.jpg`;
+  }
+  if ("avatar" in player) {
+    return player.avatar ?? `https://cdn.scoresaber.com/avatars/${player.id}.jpg`;
+  }
+
   return `https://cdn.scoresaber.com/avatars/${player.id}.jpg`;
 }
 
