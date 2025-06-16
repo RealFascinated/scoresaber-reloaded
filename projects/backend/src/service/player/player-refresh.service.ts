@@ -166,12 +166,35 @@ export class PlayerRefreshService {
       Logger.info(`Completed page ${i}`);
     }
 
-    // Set all players in the database but not in the list as inactive
-    await PlayerModel.updateMany(
-      { id: { $nin: Array.from(playerIds) } },
-      { $set: { inactive: true } }
-    );
+    // Log the number of active players found
+    Logger.info(`Found ${playerIds.size} active players from ScoreSaber API`);
+
+    // Get all player IDs from database
+    const allPlayerIds = await PlayerModel.find({}, { id: 1 });
+    Logger.info(`Total players in database: ${allPlayerIds.length}`);
+
+    // Check each player's status directly
+    for (const { id } of allPlayerIds) {
+      if (!playerIds.has(id)) {
+        try {
+          // Try to fetch player directly from ScoreSaber
+          const playerResponse = await ApiServiceRegistry.getInstance()
+            .getScoreSaberService()
+            .lookupPlayer(id);
+
+          // If we can't find the player, mark them as inactive
+          if (!playerResponse) {
+            await PlayerModel.updateOne({ id }, { $set: { inactive: true } });
+            Logger.info(`Marked player ${id} as inactive - not found on ScoreSaber`);
+          }
+        } catch (error) {
+          Logger.error(`Error checking player ${id}: ${error}`);
+        }
+      }
+    }
+
     const inactivePlayers = await PlayerModel.countDocuments({ inactive: true });
+    Logger.info(`Total inactive players after update: ${inactivePlayers}`);
 
     Logger.info(
       `Finished tracking player statistics in ${(performance.now() - now.getTime()).toFixed(0)}ms\n` +
