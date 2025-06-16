@@ -46,7 +46,7 @@ export class Player {
   /**
    * The player's HMD (Head Mounted Display).
    */
-  @prop()
+  @prop({ index: true })
   public hmd?: string;
 
   /**
