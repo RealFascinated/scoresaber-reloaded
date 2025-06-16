@@ -32,13 +32,13 @@ export function PlayerRanking({
     <Link href={`/player/${player.id}`}>
       <PlayerPreview
         playerId={player.id}
-        className="grid grid-cols-[48px_50px_60px_32px_1fr_90px_40px] items-center w-full bg-[#232323] rounded-lg px-2 py-1 mb-1 gap-3 shadow-sm min-h-[40px] hover:bg-[#2d2d2d] transition-all cursor-pointer"
+        className="grid grid-cols-[48px_45px_60px_32px_1fr_90px_30px] items-center w-full bg-[#232323] rounded-lg px-2 py-1 mb-1 gap-3 shadow-sm min-h-[40px] hover:bg-[#2d2d2d] transition-all cursor-pointer"
         delay={750}
         useLink={false}
       >
         {/* Rank */}
         <div className="flex flex-col items-center">
-          <span className={cn("font-bold text-base", getRankColor(player.rank))}>
+          <span className={cn("text-base", getRankColor(player.rank))}>
             #{formatNumberWithCommas(player.rank)}
           </span>
         </div>
@@ -71,7 +71,7 @@ export function PlayerRanking({
               getRankBgColor(player.countryRank)
             )}
           >
-            <CountryFlag code={player.country} size={12} />#
+            <CountryFlag code={player.country} size={14} />#
             {formatNumberWithCommas(player.countryRank)}
           </span>
         </div>

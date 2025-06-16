@@ -22,8 +22,8 @@ export function PlayerRankingMobile({ player }: PlayerRankingProps) {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             {/* Rank */}
-            <div className="flex flex-col items-start min-w-[40px]">
-              <span className={cn("font-bold text-base", getRankColor(player.rank))}>
+            <div className="flex flex-col items-center min-w-[40px]">
+              <span className={cn("text-base", getRankColor(player.rank))}>
                 #{formatNumberWithCommas(player.rank)}
               </span>
             </div>
