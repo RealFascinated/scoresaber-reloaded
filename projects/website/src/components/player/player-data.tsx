@@ -143,7 +143,7 @@ export default function PlayerData({
       <article className="flex flex-1 flex-col gap-2">
         <PlayerHeader player={player} />
         {(!player.inactive || player.badges.length > 0) && (
-          <Card className="gap-1">
+          <Card className="gap-2 flex flex-col">
             <PlayerBadges player={player} />
             {!player.inactive && <PlayerViews player={player} />}
           </Card>

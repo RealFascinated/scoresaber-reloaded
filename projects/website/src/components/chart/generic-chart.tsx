@@ -58,8 +58,15 @@ const GenericChart = ({ config, labels }: Props) => {
   const isMobile = useIsMobile();
   const database = useDatabase();
 
+  const hiddenAxes = useMemo(() => {
+    return Object.entries(axes)
+      .filter(([_, axis]) => axis.hideOnMobile && isMobile)
+      .map(([axisId]) => axisId);
+  }, [axes, isMobile]);
+
   const chartDatasets = useMemo(() => {
     return datasets.map(dataset => {
+      const isAxisHidden = hiddenAxes.includes(dataset.axisId);
       const baseConfig = {
         label: dataset.label,
         data: dataset.data,
@@ -71,9 +78,10 @@ const GenericChart = ({ config, labels }: Props) => {
         spanGaps: true,
         yAxisID: dataset.axisId,
         hidden:
-          id && dataset.label
+          isAxisHidden ||
+          (id && dataset.label
             ? !database.getChartLegend(id, dataset.label, true)
-            : !dataset.showLegend,
+            : !dataset.showLegend),
         stack: dataset.stack,
         order: dataset.stackOrder,
         maxBarThickness: 12,
@@ -94,7 +102,7 @@ const GenericChart = ({ config, labels }: Props) => {
         type: "line" as const,
       };
     });
-  }, [datasets, database, id]);
+  }, [datasets, database, id, hiddenAxes]);
 
   const chartAxes = useMemo(() => {
     const generatedAxes: Record<string, any> = {
@@ -148,24 +156,22 @@ const GenericChart = ({ config, labels }: Props) => {
     };
 
     Object.entries(axes).forEach(([axisId, axis]) => {
-      if (!axis.hideOnMobile || !isMobile) {
-        generatedAxes[axisId] = {
-          position: axis.position,
-          reverse: axis.reverse,
-          display: axis.display,
-          grid: { drawOnChartArea: axisId === "y", color: axisId === "y" ? "#252525" : "" },
-          title: { display: true, text: axis.displayName, color: "#ffffff" },
-          ticks: {
-            callback: (value: number) => {
-              // Format the value to avoid excessive decimal places
-              const formattedValue = Number(Number(value).toFixed(4));
-              return axis.valueFormatter?.(formattedValue) ?? formattedValue.toString();
-            },
+      generatedAxes[axisId] = {
+        position: axis.position,
+        reverse: axis.reverse,
+        display: axis.hideOnMobile && isMobile ? false : axis.display,
+        grid: { drawOnChartArea: axisId === "y", color: axisId === "y" ? "#252525" : "" },
+        title: { display: true, text: axis.displayName, color: "#ffffff" },
+        ticks: {
+          callback: (value: number) => {
+            // Format the value to avoid excessive decimal places
+            const formattedValue = Number(Number(value).toFixed(4));
+            return axis.valueFormatter?.(formattedValue) ?? formattedValue.toString();
           },
-          min: axis.min,
-          max: axis.max,
-        };
-      }
+        },
+        min: axis.min,
+        max: axis.max,
+      };
     });
 
     return generatedAxes;

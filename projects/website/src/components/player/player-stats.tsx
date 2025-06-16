@@ -138,7 +138,13 @@ export default function PlayerStats({ player }: Props) {
 
         return (
           <div key={index}>
-            {tooltip ? <SimpleTooltip display={tooltip}>{stat}</SimpleTooltip> : stat}
+            {tooltip ? (
+              <SimpleTooltip display={tooltip} showOnMobile>
+                {stat}
+              </SimpleTooltip>
+            ) : (
+              stat
+            )}
           </div>
         );
       })}

@@ -50,6 +50,7 @@ const datasetConfig: DatasetConfig[] = [
       display: true,
       displayName: "PP",
       position: "right",
+      hideOnMobile: true,
       valueFormatter: value => {
         if (isWholeNumber(value)) {
           return value.toString();
