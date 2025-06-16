@@ -11,6 +11,7 @@ export type HMD =
   | "Quest 2"
   | "Quest Pro"
   | "Quest 3"
+  | "Quest 3S"
   | "Valve Index"
   | "Vive Cosmos"
   | "Bigscreen Beyond";
@@ -95,9 +96,14 @@ const HMDs: Record<HMD, HMDInfo> = {
     filters: "",
   },
   "Quest 3": {
-    logo: "oculus.svg",
+    logo: "meta.svg",
     filters:
       "invert(49%) sepia(26%) saturate(5619%) hue-rotate(260deg) brightness(93%) contrast(86%)",
+  },
+  "Quest 3S": {
+    logo: "meta.svg",
+    filters:
+      "invert(49%) sepia(26%) saturate(5619%) hue-rotate(125deg) brightness(93%) contrast(86%)",
   },
 };
 
