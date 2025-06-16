@@ -17,12 +17,12 @@ export function PlayerRankingMobile({ player }: PlayerRankingProps) {
 
   return (
     <Link href={`/player/${player.id}`}>
-      <div className="flex flex-col w-full bg-[#232323] rounded-lg px-2 py-1 mb-1 gap-1 shadow-sm min-h-[40px] hover:bg-[#2d2d2d] transition-all cursor-pointer">
+      <div className="flex flex-col w-full bg-[#232323] rounded-lg px-2 py-1 mb-1 gap-1 shadow-sm min-h-[67px] justify-center hover:bg-[#2d2d2d] transition-all cursor-pointer">
         {/* Top row: Rank, Country Rank, and Weekly Change */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             {/* Rank */}
-            <div className="flex flex-col items-center min-w-[36px]">
+            <div className="flex flex-col items-start min-w-[40px]">
               <span className={cn("font-bold text-base", getRankColor(player.rank))}>
                 #{formatNumberWithCommas(player.rank)}
               </span>
@@ -32,11 +32,11 @@ export function PlayerRankingMobile({ player }: PlayerRankingProps) {
             <div className="flex items-center min-w-[48px]">
               <span
                 className={cn(
-                  "text-xs rounded px-1 py-1 flex items-center gap-1 font-semibold min-h-[22px]",
+                  "text-xs rounded px-1 py-0.5 flex items-center gap-1 font-semibold min-h-[22px]",
                   getRankBgColor(player.countryRank)
                 )}
               >
-                <CountryFlag code={player.country} size={14} />#
+                <CountryFlag code={player.country} size={10} />#
                 {formatNumberWithCommas(player.countryRank)}
               </span>
             </div>

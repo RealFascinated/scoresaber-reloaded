@@ -71,7 +71,7 @@ export function PlayerRanking({
               getRankBgColor(player.countryRank)
             )}
           >
-            <CountryFlag code={player.country} size={14} />#
+            <CountryFlag code={player.country} size={12} />#
             {formatNumberWithCommas(player.countryRank)}
           </span>
         </div>
