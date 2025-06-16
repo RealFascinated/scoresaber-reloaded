@@ -66,7 +66,6 @@ const GenericChart = ({ config, labels }: Props) => {
 
   const chartDatasets = useMemo(() => {
     return datasets.map(dataset => {
-      const isAxisHidden = hiddenAxes.includes(dataset.axisId);
       const baseConfig = {
         label: dataset.label,
         data: dataset.data,
@@ -75,7 +74,7 @@ const GenericChart = ({ config, labels }: Props) => {
           dataset.type === "bar" || dataset.type === "point" ? dataset.color : undefined,
         fill: false,
         lineTension: 0.4,
-        spanGaps: true,
+        spanGaps: false,
         yAxisID: dataset.axisId,
         hidden:
           id && dataset.label
