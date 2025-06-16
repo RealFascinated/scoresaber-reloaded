@@ -1,17 +1,15 @@
 "use client";
 
+import SimplePagination from "@/components/simple-pagination";
 import useDatabase from "@/hooks/use-database";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { Page, Pagination } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { useLiveQuery } from "dexie-react-hooks";
-import { memo, useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Card from "../../card";
-import PaginationComponent from "../../simple-pagination";
 import { Spinner } from "../../spinner";
 import { FriendRankingPlayer } from "./friend-ranking-player";
-
-const MemoizedPagination = memo(PaginationComponent);
 
 export function FriendRanking() {
   const isMobile = useIsMobile();
@@ -25,7 +23,13 @@ export function FriendRanking() {
     if (!friends) return;
 
     const pagination = new Pagination<ScoreSaberPlayer>();
-    pagination.setItems(friends);
+    pagination.setItems(
+      friends.sort((a, b) => {
+        if (a.inactive && !b.inactive) return 1;
+        if (!a.inactive && b.inactive) return -1;
+        return b.pp - a.pp;
+      })
+    );
     pagination.setItemsPerPage(8);
 
     return pagination.getPage(page);
@@ -59,7 +63,7 @@ export function FriendRanking() {
               ))}
             </div>
 
-            <MemoizedPagination
+            <SimplePagination
               mobilePagination={isMobile}
               page={page}
               totalItems={friendsPage.metadata.totalItems}

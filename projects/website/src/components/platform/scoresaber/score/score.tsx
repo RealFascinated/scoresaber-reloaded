@@ -156,7 +156,11 @@ export default function ScoreSaberScoreDisplay({
       {playerAbove && (
         <PlayerPreview playerId={playerAbove.id}>
           <div className="flex items-center gap-2 pl-2">
-            <Avatar src={getScoreSaberAvatar(playerAbove)} alt={playerAbove.name ?? ""} size={20} />
+            <Avatar
+              src={playerAbove.profilePicture ?? getScoreSaberAvatar(playerAbove)}
+              alt={playerAbove.name ?? ""}
+              size={20}
+            />
             <Link
               href={`/player/${playerAbove.id}`}
               className="hover:brightness-[66%] transition-all cursor-pointer"

@@ -33,6 +33,9 @@ export class ScoreSaberPlayerCache implements ScoreSaberPlayerBase {
   public name!: string;
 
   @prop()
+  public profilePicture!: string;
+
+  @prop()
   public avatar!: string;
 
   @prop()

@@ -22,10 +22,10 @@ export function ScorePpBadge({ score, leaderboard, showDifference = true }: Scor
   const fcAccuracy = score.additionalData?.fcAccuracy;
   const pp = score.pp;
   const weight = score.weight;
-  if (pp === 0 || pp === undefined || weight === undefined) {
+  if (pp === 0 || pp === undefined) {
     return undefined;
   }
-  const weightedPp = pp * weight;
+  const weightedPp = weight ? pp * weight : undefined;
   const fcPp =
     !score.fullCombo && fcAccuracy
       ? ApiServiceRegistry.getInstance()
@@ -43,9 +43,11 @@ export function ScorePpBadge({ score, leaderboard, showDifference = true }: Scor
               <div>
                 <p className="font-semibold">Performance Points</p>
                 <p>Raw: {formatPp(pp)}pp</p>
-                <p>
-                  Weighted: {formatPp(weightedPp)}pp ({(100 * weight).toFixed(2)}%)
-                </p>
+                {weight && weightedPp && (
+                  <p>
+                    Weighted: {formatPp(weightedPp)}pp ({(100 * weight).toFixed(2)}%)
+                  </p>
+                )}
                 {fcPp && <p>Full Combo: {fcPp}pp</p>}
               </div>
             </div>

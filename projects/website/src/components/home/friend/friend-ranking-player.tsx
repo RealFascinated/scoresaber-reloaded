@@ -20,7 +20,9 @@ export function FriendRankingPlayer({ player }: FriendRankingPlayerProps) {
             href={`/ranking/${player.rankPages.global}`}
             className="flex items-center gap-1 w-14"
           >
-            <p className="font-medium text-xs md:text-sm tabular-nums">#{player.rank}</p>
+            <p className="font-medium text-xs md:text-sm tabular-nums">
+              #{player.rank == 0 ? "-" : player.rank}
+            </p>
           </Link>
 
           {/* Country Rank */}
@@ -29,7 +31,9 @@ export function FriendRankingPlayer({ player }: FriendRankingPlayerProps) {
             className="flex items-center gap-2 min-w-20"
           >
             <CountryFlag code={player.country} size={12} />
-            <p className="font-medium text-xs md:text-sm tabular-nums">#{player.countryRank}</p>
+            <p className="font-medium text-xs md:text-sm tabular-nums">
+              #{player.countryRank == 0 ? "-" : player.countryRank}
+            </p>
           </Link>
         </div>
 

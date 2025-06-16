@@ -63,8 +63,8 @@ export class FriendScoresService {
 
     const processedBatches = await Promise.all(
       scoreBatches.map(async batch => {
-        const batchPromises = batch.map(async friendScore =>
-          ScoreService.insertScoreData(
+        const batchPromises = batch.map(async friendScore => {
+          return ScoreService.insertScoreData(
             scoreToObject(friendScore),
             leaderboard.leaderboard,
             undefined,
@@ -72,9 +72,10 @@ export class FriendScoresService {
               insertAdditionalData: true,
               insertPreviousScore: false,
               insertPlayerInfo: true,
+              removeScoreWeight: true,
             }
-          )
-        );
+          );
+        });
         return Promise.all(batchPromises);
       })
     );
@@ -160,10 +161,20 @@ export class FriendScoresService {
           friendScores.map(async friendScore => {
             const score = scoreToObject(friendScore);
             const leaderboardResponse = leaderboardMap.get(Number(friendScore.leaderboardId));
-            if (!leaderboardResponse) return null;
+            if (!leaderboardResponse) {
+              return null;
+            }
 
             return {
-              score: await ScoreService.insertScoreData(score),
+              score: await ScoreService.insertScoreData(
+                score,
+                leaderboardResponse.leaderboard,
+                undefined,
+                {
+                  insertPlayerInfo: true,
+                  removeScoreWeight: true,
+                }
+              ),
               leaderboard: leaderboardResponse.leaderboard,
               beatSaver: leaderboardResponse.beatsaver,
             };

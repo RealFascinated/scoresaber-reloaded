@@ -400,7 +400,9 @@ export class ScoreService {
             };
           }
 
-          const processedScore = await ScoreService.insertScoreData(score, leaderboard);
+          const processedScore = await ScoreService.insertScoreData(score, leaderboard, undefined, {
+            removeScoreWeight: true,
+          });
           return {
             score: processedScore,
             leaderboard: leaderboard,
@@ -432,6 +434,7 @@ export class ScoreService {
       insertPreviousScore?: boolean;
       insertPlayerInfo?: boolean;
       isComparisonPlayerScore?: boolean;
+      removeScoreWeight?: boolean;
     }
   ) {
     options = {
@@ -439,6 +442,7 @@ export class ScoreService {
       insertPreviousScore: true,
       insertPlayerInfo: true,
       isComparisonPlayerScore: false,
+      removeScoreWeight: false,
       ...options,
     };
 
@@ -492,6 +496,8 @@ export class ScoreService {
       score.playerInfo = {
         id: playerInfo.id,
         name: playerInfo.name,
+        profilePicture: playerInfo.profilePicture,
+        country: playerInfo.country,
       };
     }
 
@@ -508,6 +514,10 @@ export class ScoreService {
           isComparisonPlayerScore: true,
         }
       );
+    }
+
+    if (options?.removeScoreWeight) {
+      score.weight = undefined;
     }
 
     return score;
