@@ -1,3 +1,13 @@
 import { Statistic } from "./statistic";
 
-export type StatisticsType = Record<string, Record<Statistic, number>>;
+interface DailyStatistics {
+  [Statistic.DailyUniquePlayers]: number;
+  [Statistic.ActiveAccounts]: number;
+}
+
+export type StatisticsType = {
+  daily: {
+    [date: string]: DailyStatistics;
+  };
+  hmdUsage: Record<string, number>;
+};

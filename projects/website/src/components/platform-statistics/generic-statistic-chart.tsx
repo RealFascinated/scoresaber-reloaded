@@ -2,7 +2,6 @@
 
 import { ChartConfig, DatasetConfig } from "@/common/chart/types";
 import GenericChart from "@/components/chart/generic-chart";
-import { Statistic } from "@ssr/common/model/statistics/statistic";
 import { StatisticsType } from "@ssr/common/model/statistics/statistic-type";
 import { getMidnightAlignedDate, parseDate } from "@ssr/common/utils/time-utils";
 
@@ -37,7 +36,7 @@ export default function GenericStatisticChart({ statistics, datasetConfig }: Pro
   }
 
   // Sort the statistic entries by date
-  const statisticEntries = Object.entries(statistics).sort(
+  const statisticEntries = Object.entries(statistics.daily).sort(
     ([a], [b]) => parseDate(a).getTime() - parseDate(b).getTime()
   );
 
@@ -54,7 +53,7 @@ export default function GenericStatisticChart({ statistics, datasetConfig }: Pro
 
     if (index !== undefined) {
       datasetConfig.forEach(config => {
-        const value = history[config.field as Statistic];
+        const value = history[config.field as keyof typeof history];
         if (value !== undefined) {
           histories[config.field][index] = value;
         }

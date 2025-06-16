@@ -3,6 +3,7 @@
 import { DatasetConfig } from "@/common/chart/types";
 import GenericStatisticChart from "@/components/platform-statistics/generic-statistic-chart";
 import { Button } from "@/components/ui/button";
+import { Statistic } from "@ssr/common/model/statistics/statistic";
 import { StatisticsType } from "@ssr/common/model/statistics/statistic-type";
 import { formatNumberWithCommas, isWholeNumber } from "@ssr/common/utils/number-utils";
 import Link from "next/link";
@@ -14,7 +15,7 @@ type Props = {
 const datasetConfig: DatasetConfig[] = [
   {
     title: "Daily Unique Players",
-    field: "activePlayers",
+    field: Statistic.DailyUniquePlayers,
     color: "#754fff",
     axisId: "y",
     axisConfig: {
@@ -32,7 +33,7 @@ const datasetConfig: DatasetConfig[] = [
   },
   {
     title: "Active Accounts",
-    field: "playerCount",
+    field: Statistic.ActiveAccounts,
     color: "#754fff",
     axisId: "y",
     axisConfig: {
@@ -57,19 +58,15 @@ export default function ScoreSaberStatisticsChart({ statistics }: Props) {
         <Link
           href="https://ssr-grafana.fascinated.cc/public-dashboards/19a90072026f442fafa6c371192dddff"
           target="_blank"
+          className="w-fit"
         >
-          <Button>View In Grafana (More Detailed Statistics)</Button>
+          <Button>View in Grafana</Button>
         </Link>
       </div>
 
       <div className="flex-col lg:grid grid-cols-2 gap-2">
-        {datasetConfig.map(config => (
-          <GenericStatisticChart
-            key={config.field}
-            statistics={statistics}
-            datasetConfig={[config]}
-          />
-        ))}
+        <GenericStatisticChart statistics={statistics} datasetConfig={[datasetConfig[0]]} />
+        <GenericStatisticChart statistics={statistics} datasetConfig={[datasetConfig[1]]} />
       </div>
     </div>
   );

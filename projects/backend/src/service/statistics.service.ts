@@ -7,10 +7,19 @@ import { formatDateMinimal } from "@ssr/common/utils/time-utils";
 interface InfluxRow {
   _time: string;
   _value: number;
+  _field: string;
+}
+
+interface DailyStatistics {
+  [Statistic.DailyUniquePlayers]: number;
+  [Statistic.ActiveAccounts]: number;
 }
 
 interface StatisticsData {
-  [date: string]: Record<Statistic, number>;
+  daily: {
+    [date: string]: DailyStatistics;
+  };
+  hmdUsage: Record<string, number>;
 }
 
 const influxClient = new InfluxDB({
@@ -20,28 +29,40 @@ const influxClient = new InfluxDB({
 
 const queryApi = influxClient.getQueryApi(env.INFLUXDB_ORG);
 
-const createQuery = (measurement: string, aggregation: string, days: number) => `
-  from(bucket: "${env.INFLUXDB_BUCKET}")
-    |> range(start: -${days}d)
-    |> filter(fn: (r) => r["_measurement"] == "${measurement}")
-    |> filter(fn: (r) => r["_field"] == "value")
-    |> aggregateWindow(every: 1d, fn: ${aggregation}, createEmpty: false)
-    |> fill(usePrevious: true)
-    |> yield(name: "${aggregation}")
-`;
+const createQuery = (measurement: string, aggregation: string, days: number) => {
+  if (measurement === "active-players-hmd-statistic") {
+    return `
+      from(bucket: "${env.INFLUXDB_BUCKET}")
+        |> range(start: -${days}d)
+        |> filter(fn: (r) => r["_measurement"] == "${measurement}")
+        |> last()
+        |> yield(name: "latest")
+    `;
+  }
+
+  return `
+    from(bucket: "${env.INFLUXDB_BUCKET}")
+      |> range(start: -${days}d)
+      |> filter(fn: (r) => r["_measurement"] == "${measurement}")
+      |> filter(fn: (r) => r["_field"] == "value")
+      |> aggregateWindow(every: 1d, fn: ${aggregation}, createEmpty: false)
+      |> fill(usePrevious: true)
+      |> yield(name: "${aggregation}")
+  `;
+};
 
 const QUERIES = {
-  [Statistic.ActivePlayers]: {
+  [Statistic.DailyUniquePlayers]: {
     measurement: "unique-daily-players",
     aggregation: "max",
   },
-  [Statistic.PlayerCount]: {
+  [Statistic.ActiveAccounts]: {
     measurement: "active-accounts",
     aggregation: "mean",
   },
-  [Statistic.TotalScores]: {
-    measurement: "tracked-scores",
-    aggregation: "count",
+  [Statistic.ActivePlayerHmdUsage]: {
+    measurement: "active-players-hmd-statistic",
+    aggregation: "last",
   },
 } as const;
 
@@ -56,7 +77,10 @@ export default class StatisticsService {
         })
       );
 
-      const result: StatisticsData = {};
+      const result: StatisticsData = {
+        daily: {},
+        hmdUsage: {},
+      };
 
       // Initialize all dates with default values
       const allDates = new Set<string>();
@@ -65,19 +89,34 @@ export default class StatisticsService {
       });
 
       allDates.forEach(date => {
-        result[date] = {
-          [Statistic.ActivePlayers]: 0,
-          [Statistic.PlayerCount]: 0,
-          [Statistic.TotalScores]: 0,
+        result.daily[date] = {
+          [Statistic.DailyUniquePlayers]: 0,
+          [Statistic.ActiveAccounts]: 0,
         };
       });
 
       // Process all results
       queryResults.forEach(({ statistic, data }) => {
-        data.forEach(row => {
-          const date = formatDateMinimal(new Date(row._time));
-          result[date][statistic] = Math.round(row._value) || 0;
-        });
+        if (statistic === Statistic.ActivePlayerHmdUsage) {
+          try {
+            // Each row represents a single HMD type with its count
+            result.hmdUsage = data.reduce(
+              (acc, row) => {
+                acc[row._field] = row._value;
+                return acc;
+              },
+              {} as Record<string, number>
+            );
+          } catch (error) {
+            Logger.error("Failed to process HMD usage data:", error);
+            result.hmdUsage = {};
+          }
+        } else {
+          data.forEach(row => {
+            const date = formatDateMinimal(new Date(row._time));
+            result.daily[date][statistic] = Math.round(row._value) || 0;
+          });
+        }
       });
 
       return result;

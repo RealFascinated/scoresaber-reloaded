@@ -228,6 +228,10 @@ export function getDaysAgo(date: Date): number {
  * @returns {Date} A Date object representing the parsed date in UTC
  */
 export function parseDate(date: string): Date {
+  // Handle the format returned by formatDateMinimal (e.g., "Jan 1, 2024")
+  if (date.match(/^[A-Za-z]{3} \d{1,2}, \d{4}$/)) {
+    return dayjs(date, "MMM D, YYYY").utc().toDate();
+  }
   return dayjs(date).utc().toDate();
 }
 
