@@ -71,6 +71,10 @@ export default class ScoreSaberService {
           banned: playerToken.banned,
           inactive: playerToken.inactive,
           trackedSince: account?.trackedSince ?? new Date(),
+          rankPages: {
+            global: getPageFromRank(playerToken.rank, 50),
+            country: getPageFromRank(playerToken.countryRank, 50),
+          },
         } as ScoreSaberPlayer;
 
         if (type === DetailType.BASIC) {
