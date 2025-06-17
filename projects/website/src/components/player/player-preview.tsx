@@ -21,15 +21,15 @@ import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 
 function PlayerHeader({ player }: { player: ScoreSaberPlayer }) {
   return (
-    <div className="flex items-center gap-3 mb-3">
+    <div className="mb-3 flex items-center gap-3">
       <Avatar
         src={player.avatar}
         size={96}
-        className="size-24 pointer-events-none rounded-lg"
+        className="pointer-events-none size-24 rounded-lg"
         alt={`${player.name}'s Profile Picture`}
       />
       <div className="min-w-0 flex-1">
-        <p className="block font-bold text-2xl hover:brightness-[66%] transition-all truncate">
+        <p className="block truncate text-2xl font-bold transition-all hover:brightness-[66%]">
           {player.name}
         </p>
 
@@ -52,9 +52,9 @@ function PlayerStats({ player }: { player: ScoreSaberPlayer }) {
     <Card className="flex flex-col gap-2 text-sm">
       <div className="flex items-center justify-between">
         {/* Global Rank */}
-        <div className="grid grid-cols-[24px_1fr] gap-2 items-center">
+        <div className="grid grid-cols-[24px_1fr] items-center gap-2">
           <div className="flex items-center justify-center">
-            <GlobeAmericasIcon className="size-5 text-muted-foreground min-w-5" />
+            <GlobeAmericasIcon className="text-muted-foreground size-5 min-w-5" />
           </div>
           <CountUp
             end={player.rank}
@@ -65,7 +65,7 @@ function PlayerStats({ player }: { player: ScoreSaberPlayer }) {
 
         {/* HMD */}
         {player.hmd ? (
-          <div className="flex items-center gap-2 ">
+          <div className="flex items-center gap-2">
             <p>{player.hmd}</p>
             <HMDIcon hmd={getHMDInfo(player.hmd as HMD)} />
           </div>
@@ -76,7 +76,7 @@ function PlayerStats({ player }: { player: ScoreSaberPlayer }) {
 
       {/* Country Rank */}
       <div className="flex items-center justify-between">
-        <div className="grid grid-cols-[24px_1fr] gap-2 items-center">
+        <div className="grid grid-cols-[24px_1fr] items-center gap-2">
           <CountryFlag code={player.country} size={12} className="min-w-5" />
           <CountUp
             end={player.countryRank}
@@ -138,7 +138,7 @@ export default function PlayerPreview({
         onMouseLeave={() => setIsOpen(false)}
       >
         {isLoading || !player ? (
-          <div className="flex justify-center items-center p-4">
+          <div className="flex items-center justify-center p-4">
             <Spinner />
           </div>
         ) : (

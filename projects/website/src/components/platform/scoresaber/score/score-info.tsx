@@ -30,7 +30,7 @@ export default function ScoreSaberScoreInfo({
     return (
       <Link href={`/leaderboard/${leaderboard.id}/${getPageFromRank(score.rank, 12)}`}>
         <p
-          className={`${getRankColor(score.rank)} hover:brightness-[66%] transition-all cursor-pointer`}
+          className={`${getRankColor(score.rank)} cursor-pointer transition-all hover:brightness-[66%]`}
         >
           #{formatNumberWithCommas(score.rank)}
         </p>
@@ -81,9 +81,9 @@ export default function ScoreSaberScoreInfo({
   );
 
   return (
-    <div className="flex w-full flex-row justify-between lg:w-[125px] lg:flex-col lg:justify-center items-center">
-      <div className="flex gap-1 items-center">
-        <GlobeAmericasIcon className="w-5 h-5" />
+    <div className="flex w-full flex-row items-center justify-between lg:w-[125px] lg:flex-col lg:justify-center">
+      <div className="flex items-center gap-1">
+        <GlobeAmericasIcon className="h-5 w-5" />
         {rankElement}
         {hmdElement}
       </div>

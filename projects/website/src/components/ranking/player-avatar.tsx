@@ -10,7 +10,7 @@ export function PlayerAvatar({ profilePicture, name, className }: PlayerAvatarPr
       <img
         src={profilePicture}
         alt={name}
-        className="w-7 h-7 rounded-full border border-[#333] object-cover"
+        className="h-7 w-7 rounded-full border border-[#333] object-cover"
       />
     </div>
   );

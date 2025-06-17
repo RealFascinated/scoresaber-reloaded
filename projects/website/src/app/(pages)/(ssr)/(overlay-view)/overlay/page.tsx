@@ -23,7 +23,7 @@ export default async function OverlayPage({ searchParams }: OverlayPageProps) {
   }
 
   return (
-    <main className="w-screen h-screen">
+    <main className="h-screen w-screen">
       <Overlay settings={parseOverlaySettings(params.settings)} />
     </main>
   );

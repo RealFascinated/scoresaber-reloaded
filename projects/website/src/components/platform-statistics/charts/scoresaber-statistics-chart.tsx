@@ -54,7 +54,7 @@ const datasetConfig: DatasetConfig[] = [
 export default function ScoreSaberStatisticsChart({ statistics }: Props) {
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex flex-col gap-2 items-center">
+      <div className="flex flex-col items-center gap-2">
         <Link
           href="https://ssr-grafana.fascinated.cc/public-dashboards/19a90072026f442fafa6c371192dddff"
           target="_blank"
@@ -64,7 +64,7 @@ export default function ScoreSaberStatisticsChart({ statistics }: Props) {
         </Link>
       </div>
 
-      <div className="flex-col lg:grid grid-cols-2 gap-2">
+      <div className="grid-cols-2 flex-col gap-2 lg:grid">
         <GenericStatisticChart statistics={statistics} datasetConfig={[datasetConfig[0]]} />
         <GenericStatisticChart statistics={statistics} datasetConfig={[datasetConfig[1]]} />
       </div>

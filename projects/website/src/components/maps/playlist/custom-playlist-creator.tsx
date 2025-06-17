@@ -65,7 +65,7 @@ export default function CustomPlaylistCreator() {
             <div className="flex flex-col gap-8">
               <div>
                 <p>Stars</p>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-muted-foreground text-sm">
                   The star range of maps in the playlist.
                 </p>
               </div>
@@ -93,7 +93,7 @@ export default function CustomPlaylistCreator() {
             <div className="flex flex-col gap-2">
               <div>
                 <p>Sort</p>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-muted-foreground text-sm">
                   The sort order of the maps in the playlist.
                 </p>
               </div>

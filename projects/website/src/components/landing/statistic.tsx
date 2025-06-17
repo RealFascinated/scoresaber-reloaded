@@ -14,14 +14,14 @@ type Statistic = {
 
 export default function Statistic({ icon, title, value, isCache }: Statistic) {
   return (
-    <div className="flex flex-col gap-2 text-center items-center text-md">
+    <div className="text-md flex flex-col items-center gap-2 text-center">
       {icon}
       <h1 className="font-semibold text-orange-400/85">
         {title}{" "}
         {isCache && (
           <span>
             <SimpleTooltip display="This is data we cache locally">
-              <CircleStackIcon className="w-4 h-4 inline" />
+              <CircleStackIcon className="inline h-4 w-4" />
             </SimpleTooltip>
           </span>
         )}

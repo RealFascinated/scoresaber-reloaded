@@ -8,12 +8,12 @@ export default async function SiteStats() {
   const statistics = await Request.get<AppStatistics>(env.NEXT_PUBLIC_API_URL + "/statistics");
 
   return (
-    <div id="stats" className="px-5 -mt-20 flex flex-col gap-10 select-none">
+    <div id="stats" className="-mt-20 flex flex-col gap-10 px-5 select-none">
       {/* Header */}
       <div className="flex flex-col gap-2.5">
-        <div className="flex gap-3 items-center text-orange-600">
-          <ChartNoAxesCombined className="p-2 size-10 bg-orange-800/15 rounded-lg" />
-          <h1 className="text-2xl sm:text-3xl font-bold">Site Statistics</h1>
+        <div className="flex items-center gap-3 text-orange-600">
+          <ChartNoAxesCombined className="size-10 rounded-lg bg-orange-800/15 p-2" />
+          <h1 className="text-2xl font-bold sm:text-3xl">Site Statistics</h1>
         </div>
         <p className="max-w-5xl opacity-85">
           Discover insights into our community’s activity with real-time site statistics, showcasing

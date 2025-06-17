@@ -34,7 +34,7 @@ export default function ScoreSaberLeaderboardScore({
       </td>
 
       {/* Player */}
-      <td className="px-4 py-2 flex gap-2 whitespace-nowrap min-w-[250px]">
+      <td className="flex min-w-[250px] gap-2 px-4 py-2 whitespace-nowrap">
         <PlayerPreview playerId={scorePlayer.id}>
           <PlayerInfo player={scorePlayer} highlightedPlayerId={highlightedPlayerId} useLink />
         </PlayerPreview>
@@ -53,7 +53,7 @@ export default function ScoreSaberLeaderboardScore({
       {/* Score Misses */}
       <td
         className={clsx(
-          "px-4 py-2 whitespace-nowrap cursor-default",
+          "cursor-default px-4 py-2 whitespace-nowrap",
           score.misses > 0 ? "text-red-500" : "text-green-500"
         )}
       >
@@ -62,7 +62,7 @@ export default function ScoreSaberLeaderboardScore({
 
       {/* PP / Score */}
       {leaderboard.stars > 0 ? (
-        <td className="px-4 py-2 text-ssr whitespace-nowrap">
+        <td className="text-ssr px-4 py-2 whitespace-nowrap">
           <ScorePpBadge score={score} leaderboard={leaderboard} />
         </td>
       ) : (
@@ -95,7 +95,7 @@ export default function ScoreSaberLeaderboardScore({
 
       {/* Score Replay */}
       {score.additionalData && (
-        <td className="px-4 py-2 w-[28px]">
+        <td className="w-[28px] px-4 py-2">
           <ScoreReplayButton additionalData={score.additionalData} />
         </td>
       )}

@@ -18,15 +18,15 @@ export default function ProfileButton() {
   }
 
   return (
-    <Link href={`/player/${mainPlayer.id}`} className="pl-1 flex items-center gap-4 h-full">
+    <Link href={`/player/${mainPlayer.id}`} className="flex h-full items-center gap-4 pl-1">
       <SimpleTooltip display="Click to view your profile">
         <NavbarButton className="px-0">
           <Avatar
             src={mainPlayer.avatar}
-            className="w-6 h-6"
+            className="h-6 w-6"
             alt={`${mainPlayer.name}'s Profile Picture`}
           />
-          <p className="pl-0.5 hidden lg:block text-ssr">{truncateText(mainPlayer.name, 20)}</p>
+          <p className="text-ssr hidden pl-0.5 lg:block">{truncateText(mainPlayer.name, 20)}</p>
         </NavbarButton>
       </SimpleTooltip>
     </Link>

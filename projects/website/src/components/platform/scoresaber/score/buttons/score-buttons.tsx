@@ -90,9 +90,9 @@ export default function ScoreSaberScoreButtons({
   const memoizedButtons = useMemo(() => buttons, []);
 
   return (
-    <div className={`flex justify-end items-center gap-2 lg:gap-2 lg:mr-1`}>
+    <div className={`flex items-center justify-end gap-2 lg:mr-1 lg:gap-2`}>
       <div
-        className={`flex flex-row lg:grid lg:grid-cols-3 gap-1 items-center justify-end lg:justify-center min-w-0 lg:min-w-[92px]`}
+        className={`flex min-w-0 flex-row items-center justify-end gap-1 lg:grid lg:min-w-[92px] lg:grid-cols-3 lg:justify-center`}
       >
         {memoizedButtons.map((button, index) => {
           const { render } = button;
@@ -133,13 +133,13 @@ export default function ScoreSaberScoreButtons({
         {leaderboardExpanded != undefined &&
           setIsLeaderboardExpanded != undefined &&
           !hideLeaderboardDropdown && (
-            <div className="flex items-center justify-center cursor-default">
+            <div className="flex cursor-default items-center justify-center">
               {isLeaderboardLoading ? (
-                <ArrowPathIcon className="w-5 h-5 animate-spin" />
+                <ArrowPathIcon className="h-5 w-5 animate-spin" />
               ) : (
                 <ArrowDownIcon
                   className={clsx(
-                    "w-6 h-6 transition-all cursor-pointer",
+                    "h-6 w-6 cursor-pointer transition-all",
                     leaderboardExpanded ? "" : "rotate-180"
                   )}
                   onClick={() => {

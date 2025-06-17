@@ -68,7 +68,7 @@ const buttons = [
 
 export default function LeaderboardButtons({ leaderboard, beatSaverMap }: Props) {
   return (
-    <div className={`flex gap-1 items-center justify-center`}>
+    <div className={`flex items-center justify-center gap-1`}>
       {buttons.map((button, index) => {
         const { render } = button;
 

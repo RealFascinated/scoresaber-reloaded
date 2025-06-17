@@ -21,12 +21,12 @@ export const scoreModes: ScoreModeType[] = [
   {
     name: "Global",
     id: ScoreModeEnum.Global,
-    icon: <GlobeAmericasIcon className="w-4 h-4" />,
+    icon: <GlobeAmericasIcon className="h-4 w-4" />,
   },
   {
     name: "Friends",
     id: ScoreModeEnum.Friends,
-    icon: <PersonIcon className="w-4 h-4" />,
+    icon: <PersonIcon className="h-4 w-4" />,
   },
 ];
 
@@ -41,13 +41,13 @@ export default function ScoreMode({ initialMode, onModeChange }: ScoreModeProps)
   );
 
   return (
-    <div className="flex gap-2 bg-background/80 p-1.5 rounded-lg border border-border/50 shadow-sm">
+    <div className="bg-background/80 border-border/50 flex gap-2 rounded-lg border p-1.5 shadow-sm">
       {scoreModes.map(mode => (
         <Button
           key={mode.name}
           variant={selectedMode === mode.id ? "default" : "ghost"}
           className={cn(
-            "flex items-center gap-2 w-28 h-9 transition-all duration-200",
+            "flex h-9 w-28 items-center gap-2 transition-all duration-200",
             selectedMode === mode.id
               ? "bg-primary text-primary-foreground shadow-sm"
               : "hover:bg-accent/80"

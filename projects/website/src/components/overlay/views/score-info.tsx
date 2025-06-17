@@ -23,7 +23,7 @@ export default function OverlayScoreInfoView({ overlayData }: OverlayScoreDataPr
   return (
     <OverlayView
       position={OverlayViewPosition.BOTTOM_LEFT}
-      className={cn(paused ? "filter grayscale" : "", "flex gap-2 transition-all")}
+      className={cn(paused ? "grayscale filter" : "", "flex gap-2 transition-all")}
     >
       <Image
         className="rounded-md"
@@ -32,16 +32,16 @@ export default function OverlayScoreInfoView({ overlayData }: OverlayScoreDataPr
         width={96}
         height={96}
       />
-      <div className="flex flex-col gap-2 py-1 justify-between text-md">
+      <div className="text-md flex flex-col justify-between gap-2 py-1">
         <div>
           <p className="font-semibold">
             {beatSaverMap.metadata.songAuthorName} - {beatSaverMap.metadata.songName}
           </p>
           <p>Mapped by {truncateText(beatSaverMap.metadata.levelAuthorName, 48)}</p>
         </div>
-        <div className="flex gap-2 items-center">
+        <div className="flex items-center gap-2">
           <div
-            className="w-fit px-1 py-0.5 rounded-md"
+            className="w-fit rounded-md px-1 py-0.5"
             style={{
               backgroundColor: difficulty.color,
             }}

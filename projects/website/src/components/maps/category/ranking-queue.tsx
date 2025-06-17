@@ -39,7 +39,7 @@ export default function RankingQueue() {
       {leaderboards !== undefined && (
         <div>
           <div className="flex flex-col gap-1 pb-2">
-            <div className="border-none flex flex-col gap-1.5">
+            <div className="flex flex-col gap-1.5 border-none">
               {queues.map(queue => {
                 return (
                   <div key={queue.name} className="flex flex-col gap-1.5">
@@ -52,14 +52,14 @@ export default function RankingQueue() {
                         <div key={index}>
                           <Link
                             href={`/leaderboard/${leaderboard.id}`}
-                            className="grid lg:grid-cols-[1fr_0.2fr] gap-2 items-center bg-border p-1.5 hover:brightness-75 transition-all rounded-md"
+                            className="bg-border grid items-center gap-2 rounded-md p-1.5 transition-all hover:brightness-75 lg:grid-cols-[1fr_0.2fr]"
                           >
                             <ScoreSaberScoreSongInfo
                               leaderboard={leaderboard}
                               imageSize={58}
                               clickableSongName={false}
                             />
-                            <div className="text-sm flex justify-between lg:justify-end lg:flex-col lg:gap-1">
+                            <div className="flex justify-between text-sm lg:flex-col lg:justify-end lg:gap-1">
                               <p>{rankingRequest.difficultyCount} Difficulties</p>
                               <p>{timeAgo(new Date(rankingRequest.created_at))}</p>
                             </div>

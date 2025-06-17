@@ -20,7 +20,7 @@ export default function SimpleTooltip({
 }) {
   return (
     <ShadCnTooltip content={display} side={side} showOnMobile={showOnMobile}>
-      <div className={clsx("cursor-default w-full", className)}>{children}</div>
+      <div className={clsx("w-full cursor-default", className)}>{children}</div>
     </ShadCnTooltip>
   );
 }

@@ -48,7 +48,7 @@ function RankingFilters({
   mainPlayerCountry,
 }: RankingFiltersProps) {
   return (
-    <Card className="h-full w-full lg:w-[25%] gap-4 order-1 lg:order-2 mb-2 lg:mb-0">
+    <Card className="order-1 mb-2 h-full w-full gap-4 lg:order-2 lg:mb-0 lg:w-[25%]">
       <p className="text-lg">Filters</p>
       <div className="flex flex-col gap-4">
         <Combobox<string | undefined>
@@ -97,7 +97,7 @@ function RankingHeader({
   mainPlayer,
 }: RankingHeaderProps) {
   return (
-    <div className="flex items-center justify-between gap-4 flex-col lg:flex-row">
+    <div className="flex flex-col items-center justify-between gap-4 lg:flex-row">
       <div className="flex items-center gap-3 font-medium">
         {currentCountry && (
           <div className="flex items-center gap-2">
@@ -111,7 +111,7 @@ function RankingHeader({
       </div>
 
       {mainPlayer !== undefined && (
-        <div className="flex items-center gap-3 bg-accent/50 px-4 py-2 rounded-md">
+        <div className="bg-accent/50 flex items-center gap-3 rounded-md px-4 py-2">
           <SimpleTooltip display="The amount of pp between you and each player" showOnMobile>
             <p className="text-sm">Relative PP</p>
           </SimpleTooltip>
@@ -163,7 +163,7 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
   }, [currentPage, currentCountry, navigation]);
 
   return (
-    <div className="flex flex-col lg:flex-row lg:gap-2 w-full justify-center">
+    <div className="flex w-full flex-col justify-center lg:flex-row lg:gap-2">
       <RankingFilters
         currentCountry={currentCountry}
         setCurrentCountry={setCurrentCountry}
@@ -171,7 +171,7 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
         mainPlayerCountry={mainPlayer?.country}
       />
 
-      <Card className="h-full w-full lg:w-[50%] gap-4 order-2 lg:order-1">
+      <Card className="order-2 h-full w-full gap-4 lg:order-1 lg:w-[50%]">
         <RankingHeader
           currentCountry={currentCountry}
           showRelativePPDifference={showRelativePPDifference}
@@ -187,7 +187,7 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
         )}
 
         {isError && (
-          <div className="flex flex-col items-center justify-center h-full mt-2 gap-3">
+          <div className="mt-2 flex h-full flex-col items-center justify-center gap-3">
             <p className="text-lg">No players were found for this country or page.</p>
             <Link href="/ranking">
               <Button variant="outline" className="gap-2">

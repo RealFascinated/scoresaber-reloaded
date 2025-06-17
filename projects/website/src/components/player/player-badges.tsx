@@ -8,12 +8,12 @@ type Props = {
 
 export default function PlayerBadges({ player }: Props) {
   return (
-    <div className="flex flex-wrap gap-2 w-full items-center justify-center">
+    <div className="flex w-full flex-wrap items-center justify-center gap-2">
       {player.badges?.map((badge, index) => {
         return (
           <SimpleTooltip
             key={index}
-            display={<p className="cursor-default pointer-events-none">{badge.description}</p>}
+            display={<p className="pointer-events-none cursor-default">{badge.description}</p>}
             showOnMobile
           >
             <div>

@@ -20,11 +20,11 @@ export function PlayerPpDisplay({
 
   return (
     <div className={cn("flex items-center", className)}>
-      <span className="text-ssr font-medium text-sm">{formatPp(pp)}pp</span>
+      <span className="text-ssr text-sm font-medium">{formatPp(pp)}pp</span>
       {relativePerformancePoints && mainPlayer && (
         <span
           className={cn(
-            "text-xs font-medium ml-2",
+            "ml-2 text-xs font-medium",
             ppDifference >= 0 ? ppDifference !== 0 && "text-green-500" : "text-red-500"
           )}
         >

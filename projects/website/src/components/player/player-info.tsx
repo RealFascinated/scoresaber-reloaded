@@ -51,7 +51,7 @@ export function PlayerInfo({
       className={clsx(
         hoverBrightness ? "transition-all hover:brightness-[66%]" : "",
         player.id == highlightedPlayerId ? "font-bold" : "",
-        `text-ellipsis max-w-[250px] overflow-hidden whitespace-nowrap break-all`,
+        `max-w-[250px] overflow-hidden break-all text-ellipsis whitespace-nowrap`,
         className
       )}
       style={{
@@ -63,10 +63,10 @@ export function PlayerInfo({
   );
 
   return (
-    <div className="flex gap-2 items-center">
+    <div className="flex items-center gap-2">
       <Avatar
         src={player.profilePicture ?? getScoreSaberAvatar(player)}
-        className="w-[24px] h-[24px] pointer-events-none"
+        className="pointer-events-none h-[24px] w-[24px]"
         alt={`${player.name}'s Profile Picture`}
       />
       {!hideCountryFlag && <CountryFlag code={player.country!} size={12} />}

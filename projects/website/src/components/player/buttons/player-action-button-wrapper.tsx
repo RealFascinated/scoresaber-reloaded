@@ -1,6 +1,6 @@
 export default function PlayerActionButtonWrapper({ children }: { children: React.ReactNode }) {
   return (
-    <div className="p-2 bg-accent rounded-md cursor-pointer hover:brightness-75 transition-all">
+    <div className="bg-accent cursor-pointer rounded-md p-2 transition-all hover:brightness-75">
       {children}
     </div>
   );

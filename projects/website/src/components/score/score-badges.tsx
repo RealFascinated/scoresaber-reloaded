@@ -34,7 +34,7 @@ export function ScoreBadges<TScore, TLeaderboard>({
       <div
         key={index}
         className={clsx(
-          "flex h-fit p-1 items-center justify-center rounded-md text-sm cursor-default",
+          "flex h-fit cursor-default items-center justify-center rounded-md p-1 text-sm",
           color ? color : "bg-accent"
         )}
         style={{

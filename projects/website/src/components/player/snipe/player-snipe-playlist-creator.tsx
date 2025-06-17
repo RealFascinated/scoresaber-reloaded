@@ -109,7 +109,7 @@ export default function SnipePlaylistCreator({ toSnipe }: SnipePlaylistCreatorPr
         </SimpleTooltip>
       </DialogTrigger>
 
-      <DialogContent className="bg-secondary sm:max-w-[625px] sm:h-auto max-w-screen h-screen">
+      <DialogContent className="bg-secondary h-screen max-w-screen sm:h-auto sm:max-w-[625px]">
         <DialogHeader>
           <DialogTitle>Create Snipe Playlist</DialogTitle>
           <DialogDescription>
@@ -235,7 +235,7 @@ export default function SnipePlaylistCreator({ toSnipe }: SnipePlaylistCreatorPr
               )}
             />
 
-            <div className="flex gap-2 justify-between">
+            <div className="flex justify-between gap-2">
               {/* Download Playlist */}
               <Button type="submit" className="w-fit">
                 {downloading ? <Spinner /> : "Download"}

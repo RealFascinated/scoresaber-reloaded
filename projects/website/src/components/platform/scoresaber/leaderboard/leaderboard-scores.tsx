@@ -30,49 +30,49 @@ function LeaderboardScoresSkeleton() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="overflow-x-auto relative rounded-lg border border-border/30 bg-background/50">
+      <div className="border-border/30 bg-background/50 relative overflow-x-auto rounded-lg border">
         <table className="table w-full table-auto border-spacing-0 text-left text-sm">
           <thead>
-            <tr className="border-b border-border/30 bg-background/80">
-              <th className="px-2 py-2 font-medium text-foreground/80">Rank</th>
-              <th className="px-2 py-2 font-medium text-foreground/80">Player</th>
-              <th className="px-2 py-2 font-medium text-center text-foreground/80">Time Set</th>
-              <th className="px-2 py-2 font-medium text-center text-foreground/80">Accuracy</th>
-              <th className="px-2 py-2 font-medium text-center text-foreground/80">Misses</th>
-              <th className="px-2 py-2 font-medium text-center text-foreground/80">PP</th>
-              <th className="px-2 py-2 font-medium text-center text-foreground/80">HMD</th>
-              <th className="px-2 py-2 font-medium text-center text-foreground/80">Mods</th>
+            <tr className="border-border/30 bg-background/80 border-b">
+              <th className="text-foreground/80 px-2 py-2 font-medium">Rank</th>
+              <th className="text-foreground/80 px-2 py-2 font-medium">Player</th>
+              <th className="text-foreground/80 px-2 py-2 text-center font-medium">Time Set</th>
+              <th className="text-foreground/80 px-2 py-2 text-center font-medium">Accuracy</th>
+              <th className="text-foreground/80 px-2 py-2 text-center font-medium">Misses</th>
+              <th className="text-foreground/80 px-2 py-2 text-center font-medium">PP</th>
+              <th className="text-foreground/80 px-2 py-2 text-center font-medium">HMD</th>
+              <th className="text-foreground/80 px-2 py-2 text-center font-medium">Mods</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-border/30">
+          <tbody className="divide-border/30 divide-y">
             {skeletonRows.map((_, index) => (
-              <tr key={index} className="transition-colors hover:bg-primary/5">
+              <tr key={index} className="hover:bg-primary/5 transition-colors">
                 <td className="px-2 py-1">
-                  <Skeleton className="w-8 h-6 rounded-md" />
+                  <Skeleton className="h-6 w-8 rounded-md" />
                 </td>
                 <td className="px-2 py-1">
                   <div className="flex items-center gap-3">
-                    <Skeleton className="w-8 h-8 rounded-full" />
-                    <Skeleton className="w-32 h-6 rounded-md" />
+                    <Skeleton className="h-8 w-8 rounded-full" />
+                    <Skeleton className="h-6 w-32 rounded-md" />
                   </div>
                 </td>
                 <td className="px-2 py-1 text-center">
-                  <Skeleton className="w-24 h-6 rounded-md mx-auto" />
+                  <Skeleton className="mx-auto h-6 w-24 rounded-md" />
                 </td>
                 <td className="px-2 py-1 text-center">
-                  <Skeleton className="w-16 h-6 rounded-md mx-auto" />
+                  <Skeleton className="mx-auto h-6 w-16 rounded-md" />
                 </td>
                 <td className="px-2 py-1 text-center">
-                  <Skeleton className="w-8 h-6 rounded-md mx-auto" />
+                  <Skeleton className="mx-auto h-6 w-8 rounded-md" />
                 </td>
                 <td className="px-2 py-1 text-center">
-                  <Skeleton className="w-20 h-6 rounded-md mx-auto" />
+                  <Skeleton className="mx-auto h-6 w-20 rounded-md" />
                 </td>
                 <td className="px-2 py-1 text-center">
-                  <Skeleton className="w-16 h-6 rounded-md mx-auto" />
+                  <Skeleton className="mx-auto h-6 w-16 rounded-md" />
                 </td>
                 <td className="px-2 py-1 text-center">
-                  <Skeleton className="w-8 h-6 rounded-md mx-auto" />
+                  <Skeleton className="mx-auto h-6 w-8 rounded-md" />
                 </td>
               </tr>
             ))}
@@ -137,7 +137,7 @@ export default function LeaderboardScores({
     <>
       <div
         className={cn(
-          "flex flex-col lg:flex-row justify-center items-center flex-wrap gap-4",
+          "flex flex-col flex-wrap items-center justify-center gap-4 lg:flex-row",
           isLeaderboardPage && "lg:justify-between"
         )}
       >
@@ -150,7 +150,7 @@ export default function LeaderboardScores({
         />
 
         {showDifficulties && (
-          <div className="flex gap-3 flex-wrap justify-center bg-background/80 p-1.5 rounded-lg border border-border/50 shadow-sm">
+          <div className="bg-background/80 border-border/50 flex flex-wrap justify-center gap-3 rounded-lg border p-1.5 shadow-sm">
             {leaderboard.difficulties.map((difficultyData, index) => (
               <DifficultyButton
                 key={index}
@@ -177,31 +177,31 @@ export default function LeaderboardScores({
 
       {scores.items.length > 0 && (
         <>
-          <div className="overflow-x-auto relative rounded-lg border border-border/30 bg-background/50">
+          <div className="border-border/30 bg-background/50 relative overflow-x-auto rounded-lg border">
             <table className="table w-full table-auto border-spacing-0 text-left text-sm">
               <thead>
-                <tr className="border-b border-border/30 bg-background/80">
-                  <th className="px-2 py-2 font-medium text-foreground/80">Rank</th>
-                  <th className="px-2 py-2 font-medium text-foreground/80">Player</th>
-                  <th className="px-2 py-2 font-medium text-center text-foreground/80">Time Set</th>
-                  <th className="px-2 py-2 font-medium text-center text-foreground/80">Accuracy</th>
-                  <th className="px-2 py-2 font-medium text-center text-foreground/80">Misses</th>
-                  <th className="px-2 py-2 font-medium text-center text-foreground/80">
+                <tr className="border-border/30 bg-background/80 border-b">
+                  <th className="text-foreground/80 px-2 py-2 font-medium">Rank</th>
+                  <th className="text-foreground/80 px-2 py-2 font-medium">Player</th>
+                  <th className="text-foreground/80 px-2 py-2 text-center font-medium">Time Set</th>
+                  <th className="text-foreground/80 px-2 py-2 text-center font-medium">Accuracy</th>
+                  <th className="text-foreground/80 px-2 py-2 text-center font-medium">Misses</th>
+                  <th className="text-foreground/80 px-2 py-2 text-center font-medium">
                     {leaderboard.stars > 0 ? "PP" : "Score"}
                   </th>
-                  <th className="px-2 py-2 font-medium text-center text-foreground/80">HMD</th>
-                  <th className="px-2 py-2 font-medium text-center text-foreground/80">Mods</th>
-                  <th className="px-2 py-2 font-medium text-center text-foreground/80 w-[28px]">
+                  <th className="text-foreground/80 px-2 py-2 text-center font-medium">HMD</th>
+                  <th className="text-foreground/80 px-2 py-2 text-center font-medium">Mods</th>
+                  <th className="text-foreground/80 w-[28px] px-2 py-2 text-center font-medium">
                     Replay
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border/30">
+              <tbody className="divide-border/30 divide-y">
                 {scores.items.map((playerScore, index) => (
                   <tr
                     key={index}
                     className={cn(
-                      "transition-colors hover:bg-primary/5",
+                      "hover:bg-primary/5 transition-colors",
                       highlightedPlayerId === playerScore.playerId && "bg-primary/10"
                     )}
                   >

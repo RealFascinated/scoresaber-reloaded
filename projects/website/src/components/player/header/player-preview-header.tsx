@@ -13,19 +13,19 @@ type PlayerPreviewHeaderProps = {
 
 export default function PlayerPreviewHeader({ player }: PlayerPreviewHeaderProps) {
   return (
-    <div className="flex gap-4 flex-col items-center text-center lg:flex-row relative select-none">
+    <div className="relative flex flex-col items-center gap-4 text-center select-none lg:flex-row">
       <Avatar
         src={player.avatar}
         size={128}
-        className="w-32 h-32 pointer-events-none"
+        className="pointer-events-none h-32 w-32"
         alt={`${player.name}'s Profile Picture`}
       />
-      <div className="w-full flex gap-2 flex-col justify-center items-center lg:items-start">
+      <div className="flex w-full flex-col items-center justify-center gap-2 lg:items-start">
         <div>
-          <div className="flex gap-2 items-center justify-center lg:justify-start">
+          <div className="flex items-center justify-center gap-2 lg:justify-start">
             <Link
               href={`/player/${player.id}`}
-              className="font-bold text-2xl hover:brightness-[66%] transition-all "
+              className="text-2xl font-bold transition-all hover:brightness-[66%]"
               style={{
                 color: getScoreSaberRoles(player)[0]?.color,
               }}

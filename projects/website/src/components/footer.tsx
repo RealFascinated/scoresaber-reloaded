@@ -104,20 +104,20 @@ export default function Footer({
   return (
     <footer
       className={cn(
-        "px-10 min-h-80 py-5 flex flex-col gap-10 lg:gap-0 justify-between border-t border-muted/50 select-none",
-        isHome ? "bg-secondary" : "mt-5 bg-secondary/60"
+        "border-muted/50 flex min-h-80 flex-col justify-between gap-10 border-t px-10 py-5 select-none lg:gap-0",
+        isHome ? "bg-secondary" : "bg-secondary/60 mt-5"
       )}
     >
       {/* Top Section */}
 
       <div className="flex justify-center">
         {/* Branding & Social Links */}
-        <div className="w-full max-w-(--breakpoint-2xl) flex flex-col gap-7 lg:flex-row justify-between items-center lg:items-start">
+        <div className="flex w-full max-w-(--breakpoint-2xl) flex-col items-center justify-between gap-7 lg:flex-row lg:items-start">
           <div className="flex flex-col gap-5">
             {/* Branding */}
-            <div className="flex flex-col gap-2 text-center items-center lg:text-left lg:items-start">
+            <div className="flex flex-col items-center gap-2 text-center lg:items-start lg:text-left">
               <Link
-                className="flex gap-3 items-center hover:opacity-75 transition-all "
+                className="flex items-center gap-3 transition-all hover:opacity-75"
                 href="/"
                 draggable={false}
               >
@@ -127,7 +127,7 @@ export default function Footer({
                   width={36}
                   height={36}
                 />
-                <h1 className="text-xl font-bold text-pp">ScoreSaber Reloaded</h1>
+                <h1 className="text-pp text-xl font-bold">ScoreSaber Reloaded</h1>
               </Link>
               <p className="max-w-md text-sm opacity-85">
                 ScoreSaber Reloaded is a new way to view your scores and get more stats about you
@@ -136,11 +136,11 @@ export default function Footer({
             </div>
 
             {/* Social Links */}
-            <div className="flex gap-4 justify-center lg:justify-start items-center">
+            <div className="flex items-center justify-center gap-4 lg:justify-start">
               {socialLinks.map(link => (
                 <Link
                   key={link.name}
-                  className="hover:opacity-75 transition-all "
+                  className="transition-all hover:opacity-75"
                   href={link.href}
                   target="_blank"
                   draggable={false}
@@ -152,16 +152,16 @@ export default function Footer({
           </div>
 
           {/* Links */}
-          <div className="flex gap-20 md:gap-32 transition-all ">
+          <div className="flex gap-20 transition-all md:gap-32">
             {Object.entries(links).map(([title, links]) => (
               <div key={title} className="flex flex-col gap-0.5">
-                <h1 className="pb-0.5 text-lg font-semibold text-ssr">{title}</h1>
+                <h1 className="text-ssr pb-0.5 text-lg font-semibold">{title}</h1>
                 {links.map(link => {
                   const external: boolean = !link.href.startsWith("/");
                   return (
                     <Link
                       key={link.name}
-                      className="flex gap-2 items-center text-sm hover:opacity-75 transition-all "
+                      className="flex items-center gap-2 text-sm transition-all hover:opacity-75"
                       href={link.href}
                       target={external ? "_blank" : undefined}
                       draggable={false}
@@ -170,7 +170,7 @@ export default function Footer({
                         {link.name}
                       </span>
                       {link.shortName && <span className="flex sm:hidden">{link.shortName}</span>}
-                      {external && <ExternalLink className="w-3.5 h-3.5" />}
+                      {external && <ExternalLink className="h-3.5 w-3.5" />}
                     </Link>
                   );
                 })}

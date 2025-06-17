@@ -20,25 +20,25 @@ type PlayerHeaderProps = {
 export default function PlayerHeader({ player }: PlayerHeaderProps) {
   return (
     <Card className="flex gap-2">
-      <div className="flex gap-3 flex-col items-center text-center lg:flex-row lg:items-start lg:text-start relative select-none">
+      <div className="relative flex flex-col items-center gap-3 text-center select-none lg:flex-row lg:items-start lg:text-start">
         <Avatar
           src={player.avatar}
           size={128}
-          className="w-32 h-32 pointer-events-none"
+          className="pointer-events-none h-32 w-32"
           alt={`${player.name}'s Profile Picture`}
         />
-        <div className="w-full flex gap-2 flex-col justify-center items-center lg:justify-start lg:items-start">
+        <div className="flex w-full flex-col items-center justify-center gap-2 lg:items-start lg:justify-start">
           <div>
-            <div className="flex gap-2 items-center justify-center lg:justify-start">
+            <div className="flex items-center justify-center gap-2 lg:justify-start">
               <p
-                className="font-bold text-2xl"
+                className="text-2xl font-bold"
                 style={{
                   color: getScoreSaberRoles(player)[0]?.color,
                 }}
               >
                 {player.name}
               </p>
-              <div className="absolute lg:relative top-0 left-0 flex flex-col lg:flex-row gap-2 items-center">
+              <div className="absolute top-0 left-0 flex flex-col items-center gap-2 lg:relative lg:flex-row">
                 <PlayerTrackedStatus player={player} />
               </div>
             </div>
@@ -53,7 +53,7 @@ export default function PlayerHeader({ player }: PlayerHeaderProps) {
 
           <PlayerStats player={player} />
 
-          <div className="absolute top-0 right-0 gap-2 flex flex-col lg:flex-row">
+          <div className="absolute top-0 right-0 flex flex-col gap-2 lg:flex-row">
             <AddFriend player={player} />
             <ClaimProfile playerId={player.id} />
           </div>
@@ -61,7 +61,7 @@ export default function PlayerHeader({ player }: PlayerHeaderProps) {
       </div>
 
       {/* Player Footer */}
-      <div className="flex flex-col-reverse items-center md:flex-row gap-2 md:justify-between">
+      <div className="flex flex-col-reverse items-center gap-2 md:flex-row md:justify-between">
         <PlayerActions player={player} />
         <PlayerAccBadges badges={player.accBadges} />
       </div>

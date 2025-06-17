@@ -30,7 +30,7 @@ export function PlayerRanking({
     <Link href={`/player/${player.id}`}>
       <PlayerPreview
         playerId={player.id}
-        className="grid grid-cols-[48px_45px_60px_32px_1fr_90px_30px] items-center w-full bg-[#232323] rounded-lg px-2 py-1 mb-1 gap-3 shadow-sm min-h-[40px] hover:bg-[#2d2d2d] transition-all cursor-pointer"
+        className="mb-1 grid min-h-[40px] w-full cursor-pointer grid-cols-[48px_45px_60px_32px_1fr_90px_30px] items-center gap-3 rounded-lg bg-[#232323] px-2 py-1 shadow-sm transition-all hover:bg-[#2d2d2d]"
         delay={750}
         useLink={false}
       >
@@ -58,7 +58,7 @@ export function PlayerRanking({
         />
 
         {/* Add Friend */}
-        <div className="size-7 flex items-center justify-center">
+        <div className="flex size-7 items-center justify-center">
           <AddFriend player={player} iconOnly />
         </div>
       </PlayerPreview>

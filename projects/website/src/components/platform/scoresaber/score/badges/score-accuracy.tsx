@@ -28,7 +28,7 @@ export function ScoreAccuracyBadge({ score, showDifference = true }: ScoreAccura
 
   return (
     <>
-      <div className="flex flex-col items-center justify-center cursor-default">
+      <div className="flex cursor-default flex-col items-center justify-center">
         <SimpleTooltip
           display={
             <div className="flex flex-col gap-2">
@@ -65,7 +65,7 @@ export function ScoreAccuracyBadge({ score, showDifference = true }: ScoreAccura
         </SimpleTooltip>
         {previousScore && previousScore.accuracy && previousScore.change && showDifference && (
           <SimpleTooltip
-            className="flex gap-2 text-xs items-center"
+            className="flex items-center gap-2 text-xs"
             display={
               <div className="flex flex-col gap-2">
                 <div>

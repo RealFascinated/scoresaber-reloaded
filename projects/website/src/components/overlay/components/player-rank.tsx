@@ -15,9 +15,9 @@ export default function OverlayPlayerRank({ player }: OverlayPlayerRankProps) {
   const rank = player.rank;
 
   return (
-    <div className="flex gap-2 items-center">
-      <div className="flex gap-2 items-center">
-        <GlobeAmericasIcon className="w-8 h-8" />
+    <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2">
+        <GlobeAmericasIcon className="h-8 w-8" />
         <p>#{formatNumberWithCommas(rank)}</p>
       </div>
       <DailyChange

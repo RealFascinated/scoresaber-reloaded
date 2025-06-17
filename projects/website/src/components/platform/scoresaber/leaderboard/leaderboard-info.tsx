@@ -30,9 +30,9 @@ export function LeaderboardInfo({ leaderboard, beatSaverMap }: LeaderboardInfoPr
   }
 
   return (
-    <Card className="w-full h-fit text-sm">
-      <div className="flex flex-row justify-between w-full">
-        <div className="flex flex-col justify-between w-full gap-3">
+    <Card className="h-fit w-full text-sm">
+      <div className="flex w-full flex-row justify-between">
+        <div className="flex w-full flex-col justify-between gap-3">
           <div className="flex justify-between">
             <div className="flex flex-col gap-1.5">
               <div>
@@ -41,9 +41,9 @@ export function LeaderboardInfo({ leaderboard, beatSaverMap }: LeaderboardInfoPr
                   href={
                     beatSaverMap ? `https://beatsaver.com/maps/${beatSaverMap?.bsr}` : undefined
                   }
-                  className="hover:brightness-[66%] transition-all"
+                  className="transition-all hover:brightness-[66%]"
                 >
-                  <p className="font-semibold text-md">{leaderboard.fullName}</p>
+                  <p className="text-md font-semibold">{leaderboard.fullName}</p>
                 </FallbackLink>
 
                 {/* Song Author */}
@@ -60,7 +60,7 @@ export function LeaderboardInfo({ leaderboard, beatSaverMap }: LeaderboardInfoPr
                     <span
                       className={cn(
                         "font-semibold",
-                        beatSaverMap ? "text-ssr hover:brightness-[66%] transition-all" : ""
+                        beatSaverMap ? "text-ssr transition-all hover:brightness-[66%]" : ""
                       )}
                     >
                       {leaderboard.levelAuthorName}
@@ -98,13 +98,13 @@ export function LeaderboardInfo({ leaderboard, beatSaverMap }: LeaderboardInfoPr
             <Image
               src={leaderboard.songArt}
               alt={`${leaderboard.songName} Cover Image`}
-              className="rounded-md w-[96px] h-[96px]"
+              className="h-[96px] w-[96px] rounded-md"
               width={96}
               height={96}
             />
           </div>
 
-          <div className="flex justify-between gap-2 items-end">
+          <div className="flex items-end justify-between gap-2">
             <LeaderboardButtons leaderboard={leaderboard} beatSaverMap={beatSaverMap} />
             <LeaderboardSongStarCount leaderboard={leaderboard} />
           </div>

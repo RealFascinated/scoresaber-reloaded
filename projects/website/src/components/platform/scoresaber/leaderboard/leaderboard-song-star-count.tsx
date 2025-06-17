@@ -16,14 +16,14 @@ export function LeaderboardSongStarCount({ leaderboard }: LeaderboardSongStarCou
 
   return (
     <div
-      className="w-fit h-[20px] rounded-sm flex justify-center items-center text-xs cursor-default"
+      className="flex h-[20px] w-fit cursor-default items-center justify-center rounded-sm text-xs"
       style={{
         backgroundColor: getDifficulty(leaderboard.difficulty.difficulty).color + "f0", // Transparency value (in hex 0-255)
       }}
     >
-      <div className="flex gap-1 items-center justify-center p-1">
+      <div className="flex items-center justify-center gap-1 p-1">
         <p>{leaderboard.stars.toFixed(2)}</p>
-        <StarIcon className="w-4 h-4" />
+        <StarIcon className="h-4 w-4" />
       </div>
     </div>
   );

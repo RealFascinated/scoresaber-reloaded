@@ -40,7 +40,7 @@ export const DifficultyButton = memo(
         <span style={{ color: difficultyData.color }}>{getDifficultyName(difficulty)}</span>
         {isSelected && (
           <div
-            className="absolute bottom-0 left-0 right-0 h-0.5"
+            className="absolute right-0 bottom-0 left-0 h-0.5"
             style={{ backgroundColor: difficultyData.color }}
           />
         )}

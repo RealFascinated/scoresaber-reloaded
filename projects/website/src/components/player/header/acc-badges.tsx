@@ -6,7 +6,7 @@ import { getAccDetails, getScoreBadgeFromName } from "@ssr/common/utils/song-uti
 
 export default function PlayerAccBadges({ badges }: { badges: AccBadges }) {
   return (
-    <div className="flex gap-2 items-center flex-wrap justify-center">
+    <div className="flex flex-wrap items-center justify-center gap-2">
       {Object.entries(badges).map(([name, count]) => {
         const badge = getScoreBadgeFromName(name.replace("Plus", "+"));
 

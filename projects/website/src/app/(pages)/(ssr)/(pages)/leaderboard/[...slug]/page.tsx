@@ -100,7 +100,7 @@ export default async function LeaderboardPage(props: Props) {
   const response = await getLeaderboardData(props, DetailType.FULL);
   if (response == undefined) {
     return (
-      <main className="w-full flex justify-center mt-2">
+      <main className="mt-2 flex w-full justify-center">
         <NotFound
           title="Leaderboard Not Found"
           description="The leaderboard you were looking for could not be found"
@@ -109,7 +109,7 @@ export default async function LeaderboardPage(props: Props) {
     );
   }
   return (
-    <main className="w-full flex justify-center">
+    <main className="flex w-full justify-center">
       <ScoreSaberLeaderboardData
         initialLeaderboard={response.leaderboardResponse}
         initialPage={response.page}

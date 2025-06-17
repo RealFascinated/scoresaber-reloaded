@@ -49,9 +49,9 @@ type Mode = {
 };
 
 const modes: Mode[] = [
-  { name: ScoreMode.Overview, icon: <CubeIcon className="w-4 h-4" /> },
-  { name: ScoreMode.ScoreHistory, icon: <TrendingUpIcon className="w-4 h-4" /> },
-  { name: ScoreMode.ScoreHistoryGraph, icon: <ChartBarIcon className="w-4 h-4" /> },
+  { name: ScoreMode.Overview, icon: <CubeIcon className="h-4 w-4" /> },
+  { name: ScoreMode.ScoreHistory, icon: <TrendingUpIcon className="h-4 w-4" /> },
+  { name: ScoreMode.ScoreHistoryGraph, icon: <ChartBarIcon className="h-4 w-4" /> },
 ];
 
 const defaultMode = ScoreMode.Overview;
@@ -152,7 +152,7 @@ export default function ScoreSaberScoreDisplay({
   const memoizedScore = useMemo(() => ({ ...score, accuracy, pp }), [score, accuracy, pp]);
 
   return (
-    <div className={`${settings?.disablePadding ? "" : "pb-2 pt-2"} relative`}>
+    <div className={`${settings?.disablePadding ? "" : "pt-2 pb-2"} relative`}>
       {playerAbove && (
         <PlayerPreview playerId={playerAbove.id}>
           <div className="flex items-center gap-2 pl-2">
@@ -163,7 +163,7 @@ export default function ScoreSaberScoreDisplay({
             />
             <Link
               href={`/player/${playerAbove.id}`}
-              className="hover:brightness-[66%] transition-all cursor-pointer"
+              className="cursor-pointer transition-all hover:brightness-[66%]"
             >
               <p className="text-sm">{playerAbove.name}</p>
             </Link>
@@ -214,11 +214,11 @@ export default function ScoreSaberScoreDisplay({
               height: { duration: 0.3 },
               opacity: { duration: 0.2 },
             }}
-            className="w-full mt-2 origin-top"
+            className="mt-2 w-full origin-top"
           >
-            <Card className="flex gap-4 w-full relative border border-input">
-              <div className="flex flex-col w-full gap-2 justify-center items-center">
-                <div className="flex flex-wrap justify-center lg:justify-start gap-2">
+            <Card className="border-input relative flex w-full gap-4 border">
+              <div className="flex w-full flex-col items-center justify-center gap-2">
+                <div className="flex flex-wrap justify-center gap-2 lg:justify-start">
                   {modes.map(modeItem => (
                     <Button
                       key={modeItem.name}

@@ -22,7 +22,7 @@ import { ReactElement, ReactNode, useState } from "react";
 
 function Loading() {
   return (
-    <div className="flex items-center justify-center h-[360px]">
+    <div className="flex h-[360px] items-center justify-center">
       <Spinner />
     </div>
   );
@@ -116,7 +116,7 @@ export default function PlayerViews({ player }: PlayerChartsProps) {
     {
       index: 0,
       label: "Ranking",
-      icon: <GlobeAmericasIcon className="w-5 h-5" />,
+      icon: <GlobeAmericasIcon className="h-5 w-5" />,
       chart: (player, statisticHistory) => (
         <PlayerRankingChart statisticHistory={statisticHistory} daysAmount={daysAgo} />
       ),
@@ -124,7 +124,7 @@ export default function PlayerViews({ player }: PlayerChartsProps) {
     {
       index: 1,
       label: "Accuracy",
-      icon: <TrendingUpIcon className="w-[18px] h-[18px]" />,
+      icon: <TrendingUpIcon className="h-[18px] w-[18px]" />,
       chart: (player, statisticHistory) => (
         <PlayerAccuracyChart statisticHistory={statisticHistory} daysAmount={daysAgo} />
       ),
@@ -132,7 +132,7 @@ export default function PlayerViews({ player }: PlayerChartsProps) {
     {
       index: 2,
       label: "Scores",
-      icon: <SwordIcon className="w-[18px] h-[18px]" />,
+      icon: <SwordIcon className="h-[18px] w-[18px]" />,
       chart: (player, statisticHistory) => (
         <PlayerScoresChart statisticHistory={statisticHistory} daysAmount={daysAgo} />
       ),
@@ -140,7 +140,7 @@ export default function PlayerViews({ player }: PlayerChartsProps) {
     {
       index: 3,
       label: "Score Calendar",
-      icon: <CalendarIcon className="w-[18px] h-[18px]" />,
+      icon: <CalendarIcon className="h-[18px] w-[18px]" />,
       chart: (player, statisticHistory) => <ScoreHistoryCalendar playerId={player.id} />,
     },
   ];
@@ -159,9 +159,9 @@ export default function PlayerViews({ player }: PlayerChartsProps) {
       )}
 
       <div className="flex flex-col gap-6">
-        <div className="flex items-center justify-between gap-2 relative flex-col md:flex-row">
+        <div className="relative flex flex-col items-center justify-between gap-2 md:flex-row">
           {/* View Selector */}
-          <div className="md:absolute md:left-1/2 md:-translate-x-1/2 flex items-center justify-center gap-2">
+          <div className="flex items-center justify-center gap-2 md:absolute md:left-1/2 md:-translate-x-1/2">
             {views.map(view => {
               const isSelected = view.index === selectedView?.index;
 
@@ -169,7 +169,7 @@ export default function PlayerViews({ player }: PlayerChartsProps) {
                 <SimpleTooltip
                   key={view.index}
                   display={
-                    <div className="flex justify-center items-center flex-col">
+                    <div className="flex flex-col items-center justify-center">
                       <p>{view.label}</p>
                       <p className="text-gray-400">
                         {isSelected ? "Currently Selected" : "Click to view"}
@@ -179,7 +179,7 @@ export default function PlayerViews({ player }: PlayerChartsProps) {
                 >
                   <button
                     onClick={() => setSelectedView(view)}
-                    className={`border ${isSelected ? "border-1" : "border-input"} flex items-center justify-center p-[2px] w-[26px] h-[26px] rounded-full hover:brightness-[66%] transition-all`}
+                    className={`border ${isSelected ? "border-1" : "border-input"} flex h-[26px] w-[26px] items-center justify-center rounded-full p-[2px] transition-all hover:brightness-[66%]`}
                   >
                     {view.icon}
                   </button>
@@ -192,7 +192,7 @@ export default function PlayerViews({ player }: PlayerChartsProps) {
           <div className="flex items-center gap-2">
             <SimpleTooltip display={<p>Reset to Last 50 Days</p>}>
               <Button variant={"outline"} size={"icon"} onClick={() => setDaysAgo(50)}>
-                <RefreshCcwIcon className="w-4 h-4" />
+                <RefreshCcwIcon className="h-4 w-4" />
               </Button>
             </SimpleTooltip>
 

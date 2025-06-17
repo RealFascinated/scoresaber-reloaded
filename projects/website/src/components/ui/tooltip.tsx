@@ -256,7 +256,7 @@ export const Tooltip = React.memo(function Tooltip({
                   whiteSpace: "nowrap",
                 }}
                 className={cn(
-                  "z-50 overflow-hidden rounded-md bg-accent px-2.5 py-1 text-[13px] text-secondary-foreground shadow-md",
+                  "bg-accent text-secondary-foreground z-50 overflow-hidden rounded-md px-2.5 py-1 text-[13px] shadow-md",
                   !isMobile &&
                     "animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95",
                   !isMobile && {

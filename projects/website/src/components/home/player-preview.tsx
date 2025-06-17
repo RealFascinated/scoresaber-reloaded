@@ -24,9 +24,9 @@ export function PlayerPreview() {
   });
 
   return (
-    <Card className="min-h-[180px] flex justify-center">
+    <Card className="flex min-h-[180px] justify-center">
       {isLoading && (
-        <div className="flex justify-center items-center h-full">
+        <div className="flex h-full items-center justify-center">
           <Spinner />
         </div>
       )}

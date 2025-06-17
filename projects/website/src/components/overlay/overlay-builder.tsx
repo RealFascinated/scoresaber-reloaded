@@ -103,7 +103,7 @@ export default function OverlayBuilder() {
   }
 
   return (
-    <div className="flex flex-col gap-3 text-sm w-full h-full p-2 items-center">
+    <div className="flex h-full w-full flex-col items-center gap-3 p-2 text-sm">
       {/* Title */}
       <p className="text-xl font-semibold">ScoreSaber Reloaded Overlay Builder</p>
 
@@ -113,7 +113,7 @@ export default function OverlayBuilder() {
       </Notice>
 
       {/* Unknown Account ID Notice */}
-      <p className="text-sm text-muted-foreground text-center">
+      <p className="text-muted-foreground text-center text-sm">
         If you don&#39;t know your player id, you can link your account and it will be automatically
         filled in.
       </p>
@@ -202,7 +202,7 @@ export default function OverlayBuilder() {
                     control={form.control}
                     name={`views.${viewToggle.value}`}
                     render={({ field }) => (
-                      <FormItem className="flex flex-row items-center space-x-3 space-y-0">
+                      <FormItem className="flex flex-row items-center space-y-0 space-x-3">
                         <FormControl>
                           <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                         </FormControl>

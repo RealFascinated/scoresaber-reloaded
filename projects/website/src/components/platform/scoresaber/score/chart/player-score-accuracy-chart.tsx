@@ -121,7 +121,7 @@ export default function PlayerScoreAccuracyChart({ scoreStats, leaderboard }: Pr
   };
 
   return (
-    <div className="flex flex-col items-center justify-center w-full p-4 rounded-xl bg-accent-deep border border-border backdrop-blur-sm">
+    <div className="bg-accent-deep border-border flex w-full flex-col items-center justify-center rounded-xl border p-4 backdrop-blur-sm">
       <GenericChart labels={labels} config={config} />
     </div>
   );

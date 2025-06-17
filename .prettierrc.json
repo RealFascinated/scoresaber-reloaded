@@ -9,5 +9,5 @@
   "arrowParens": "avoid",
   "jsxSingleQuote": false,
   "jsxBracketSameLine": false,
-  "plugins": ["prettier-plugin-organize-imports"]
+  "plugins": ["prettier-plugin-organize-imports", "prettier-plugin-tailwindcss"]
 }

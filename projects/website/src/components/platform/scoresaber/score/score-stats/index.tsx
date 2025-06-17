@@ -10,7 +10,7 @@ type Props = {
 
 export default function ScoreSaberScoreStats({ score, leaderboard }: Props) {
   return (
-    <div className="flex flex-col justify-center h-full w-full gap-2">
+    <div className="flex h-full w-full flex-col justify-center gap-2">
       <MainScoreBadges score={score} leaderboard={leaderboard} />
       {score.comparisonScore && (
         <ComparisonScoreBadges score={score.comparisonScore} leaderboard={leaderboard} />

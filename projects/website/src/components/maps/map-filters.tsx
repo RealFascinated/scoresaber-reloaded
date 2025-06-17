@@ -12,8 +12,8 @@ export default function MapFilters() {
   const filter = useMapFilter();
 
   return (
-    <Card className="w-full h-fit text-sm flex gap-2">
-      <p className="text-md font-bold text-center">Search Filters</p>
+    <Card className="flex h-fit w-full gap-2 text-sm">
+      <p className="text-md text-center font-bold">Search Filters</p>
 
       <div>
         <div className="flex items-center gap-2">

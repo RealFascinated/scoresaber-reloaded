@@ -41,12 +41,12 @@ export default async function StatisticsPage() {
   const statistics = await ssrApi.getScoreSaberPlatformStatistics();
 
   return (
-    <div className="flex gap-2 justify-center w-full">
+    <div className="flex w-full justify-center gap-2">
       <article className="flex flex-1 flex-col gap-2">
         {/* Header */}
-        <div className="flex items-center justify-between px-4 md:px-6 py-4 border-b border-border/50">
+        <div className="border-border/50 flex items-center justify-between border-b px-4 py-4 md:px-6">
           <div className="flex items-center gap-4">
-            <h1 className="text-xl font-semibold text-foreground">ScoreSaber Statistics</h1>
+            <h1 className="text-foreground text-xl font-semibold">ScoreSaber Statistics</h1>
           </div>
         </div>
 
@@ -55,12 +55,12 @@ export default async function StatisticsPage() {
             {/* Game Statistics Section */}
             <Card className="gap-1">
               <div className="flex items-center gap-3 p-4">
-                <div className="p-2 rounded-lg bg-primary/20">
-                  <ChartBarIcon className="size-5 text-primary" />
+                <div className="bg-primary/20 rounded-lg p-2">
+                  <ChartBarIcon className="text-primary size-5" />
                 </div>
                 <div className="flex flex-col">
                   <span className="font-medium">Game Statistics</span>
-                  <span className="text-sm text-muted-foreground">
+                  <span className="text-muted-foreground text-sm">
                     Daily player activity and account growth
                   </span>
                 </div>
@@ -74,12 +74,12 @@ export default async function StatisticsPage() {
             {statistics.statistics.hmdUsage && (
               <Card className="gap-1">
                 <div className="flex items-center gap-3 p-4">
-                  <div className="p-2 rounded-lg bg-primary/20">
-                    <DevicePhoneMobileIcon className="size-5 text-primary" />
+                  <div className="bg-primary/20 rounded-lg p-2">
+                    <DevicePhoneMobileIcon className="text-primary size-5" />
                   </div>
                   <div className="flex flex-col">
                     <span className="font-medium">HMD Usage</span>
-                    <span className="text-sm text-muted-foreground">
+                    <span className="text-muted-foreground text-sm">
                       Distribution of HMDs used by active players
                     </span>
                   </div>
@@ -92,7 +92,7 @@ export default async function StatisticsPage() {
           </div>
         ) : (
           <Card className="p-6">
-            <div className="flex justify-center items-center h-32">
+            <div className="flex h-32 items-center justify-center">
               <p className="text-muted-foreground">Unable to load statistics, missing data...</p>
             </div>
           </Card>

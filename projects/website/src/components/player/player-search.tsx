@@ -89,7 +89,7 @@ const PlayerSearch = ({
           onValueChange={setQuery}
         />
         {isLoading && (
-          <LoaderCircle className="h-full absolute inset-y-0 right-10 size-5 animate-spin opacity-85" />
+          <LoaderCircle className="absolute inset-y-0 right-10 size-5 h-full animate-spin opacity-85" />
         )}
       </div>
 
@@ -112,12 +112,12 @@ const PlayerSearch = ({
                 <CommandItem
                   key={player.id}
                   value={`${player.name}-${player.id}`}
-                  className="cursor-pointer flex items-center justify-start"
+                  className="flex cursor-pointer items-center justify-start"
                   onSelect={() => handlePlayerSelect(player)}
                 >
                   <Avatar
                     src={player.profilePicture!}
-                    className="w-8 h-8"
+                    className="h-8 w-8"
                     alt={`${player.name}'s Profile Picture`}
                   />
                   <div className="flex flex-col">

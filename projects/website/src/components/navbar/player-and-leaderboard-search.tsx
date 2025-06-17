@@ -103,12 +103,12 @@ export default function PlayerAndLeaderboardSearch() {
     <>
       {/* Button to open */}
       <div
-        className="group flex cursor-pointer hover:opacity-85 transition-all select-none relative"
+        className="group relative flex cursor-pointer transition-all select-none hover:opacity-85"
         onClick={openSearch}
       >
         <div
           className={cn(
-            "absolute top-1/2 -translate-y-1/2 z-10",
+            "absolute top-1/2 z-10 -translate-y-1/2",
             isMobile ? "inset-x-0 flex justify-center" : "left-2.5"
           )}
         >
@@ -116,7 +116,7 @@ export default function PlayerAndLeaderboardSearch() {
         </div>
 
         <Input
-          className="px-0 pl-9 w-10 md:w-full h-8 rounded-lg cursor-pointer group-hover:border-ssr/75 transition-all"
+          className="group-hover:border-ssr/75 h-8 w-10 cursor-pointer rounded-lg px-0 pl-9 transition-all md:w-full"
           type="search"
           name="search"
           placeholder={isMobile ? undefined : "Query..."}
@@ -124,9 +124,9 @@ export default function PlayerAndLeaderboardSearch() {
         />
 
         <div
-          className={cn("hidden absolute top-1/2 -translate-y-1/2 right-3", !isMobile && "flex")}
+          className={cn("absolute top-1/2 right-3 hidden -translate-y-1/2", !isMobile && "flex")}
         >
-          <kbd className="h-5 px-1.5 inline-flex gap-1 items-center bg-muted font-medium text-muted-foreground rounded select-none pointer-events-none">
+          <kbd className="bg-muted text-muted-foreground pointer-events-none inline-flex h-5 items-center gap-1 rounded px-1.5 font-medium select-none">
             <span>⌘</span>K
           </kbd>
         </div>
@@ -153,7 +153,7 @@ export default function PlayerAndLeaderboardSearch() {
             onValueChange={setQuery}
           />
           {isLoading && (
-            <LoaderCircle className="h-full absolute inset-y-0 right-10 size-5 animate-spin opacity-85" />
+            <LoaderCircle className="absolute inset-y-0 right-10 size-5 h-full animate-spin opacity-85" />
           )}
         </div>
 
@@ -176,7 +176,7 @@ export default function PlayerAndLeaderboardSearch() {
                     <CommandItem
                       key={player.id}
                       value={`${player.name}-${player.id}`}
-                      className="cursor-pointer flex items-center justify-start"
+                      className="flex cursor-pointer items-center justify-start"
                       onSelect={() => {
                         closeSearch();
                         router.push(`/player/${player.id}`);
@@ -184,7 +184,7 @@ export default function PlayerAndLeaderboardSearch() {
                     >
                       <Avatar
                         src={player.profilePicture!}
-                        className="w-8 h-8"
+                        className="h-8 w-8"
                         alt={`${player.name}'s Profile Picture`}
                       />
                       <div className="flex flex-col">
@@ -208,7 +208,7 @@ export default function PlayerAndLeaderboardSearch() {
                     <CommandItem
                       key={leaderboard.id}
                       value={`${leaderboard.songName}-${leaderboard.difficulty.difficulty}-${leaderboard.songHash}`}
-                      className="cursor-pointer flex items-center justify-start"
+                      className="flex cursor-pointer items-center justify-start"
                       onSelect={() => {
                         closeSearch();
                         router.push(`/leaderboard/${leaderboard.id}`);
@@ -216,13 +216,13 @@ export default function PlayerAndLeaderboardSearch() {
                     >
                       <Avatar
                         src={leaderboard.songArt}
-                        className="w-8 h-8"
+                        className="h-8 w-8"
                         alt={leaderboard.songName}
                       />
                       <div className="flex flex-col">
                         <p>{truncateText(leaderboard.fullName, 48)}</p>
                         <div className="text-xs">
-                          <div className="flex gap-2 items-center">
+                          <div className="flex items-center gap-2">
                             <span
                               style={{
                                 color:
@@ -234,9 +234,9 @@ export default function PlayerAndLeaderboardSearch() {
                             {leaderboard.ranked && (
                               <>
                                 -{" "}
-                                <div className="flex gap-1 text-pp items-center">
+                                <div className="text-pp flex items-center gap-1">
                                   {leaderboard.stars.toFixed(2)}
-                                  <StarIcon className="w-fit h-fit" />
+                                  <StarIcon className="h-fit w-fit" />
                                 </div>
                               </>
                             )}

@@ -20,8 +20,8 @@ export function LeaderboardBeatSaverInfo({ beatSaverMap }: LeaderboardBeatSaverI
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <Card className="w-full h-fit text-sm flex gap-2">
-      <div className="w-full p-1 bg-border rounded-sm break-all">
+    <Card className="flex h-fit w-full gap-2 text-sm">
+      <div className="bg-border w-full rounded-sm p-1 break-all">
         {(showExpandButton && !expanded
           ? description.slice(0, descriptionMaxSize) + "..."
           : description
@@ -37,7 +37,7 @@ export function LeaderboardBeatSaverInfo({ beatSaverMap }: LeaderboardBeatSaverI
 
         {showExpandButton && (
           <button
-            className="text-xs text-center text-gray-400 hover:brightness-75 transition-all"
+            className="text-center text-xs text-gray-400 transition-all hover:brightness-75"
             onClick={() => setExpanded(!expanded)}
           >
             {expanded ? "Show Less" : "Show More"}
@@ -45,7 +45,7 @@ export function LeaderboardBeatSaverInfo({ beatSaverMap }: LeaderboardBeatSaverI
         )}
       </div>
 
-      <div className="flex gap-1 flex-wrap justify-center">
+      <div className="flex flex-wrap justify-center gap-1">
         <MapStats beatSaver={beatSaverMap} />
       </div>
     </Card>

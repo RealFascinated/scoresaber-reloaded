@@ -283,8 +283,8 @@ export function ScoreHistoryGraph({ playerId, leaderboardId }: ScoreHistoryProps
   };
 
   return (
-    <div className="flex relative h-[380px] w-full">
-      <div className="block h-[380px] w-full relative">
+    <div className="relative flex h-[380px] w-full">
+      <div className="relative block h-[380px] w-full">
         <Line options={options} data={{ labels: allDates, datasets }} />
       </div>
     </div>

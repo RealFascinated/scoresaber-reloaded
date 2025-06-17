@@ -36,7 +36,7 @@ export default function ScoreMissesAndPausesBadge({
     (additionalData?.misses?.wallsHit ?? 0);
 
   return (
-    <div className="flex flex-row justify-center items-center w-full gap-1">
+    <div className="flex w-full flex-row items-center justify-center gap-1">
       <ScoreMissesTooltip
         missedNotes={score.missedNotes}
         badCuts={score.badCuts}

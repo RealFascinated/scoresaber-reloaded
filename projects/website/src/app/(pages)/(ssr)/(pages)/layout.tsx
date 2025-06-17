@@ -19,10 +19,10 @@ export default function Layout({ children }: { children: ReactNode }) {
       <BackgroundCover />
       <SnowBackground />
       <ApiHealth />
-      <main className="flex flex-col min-h-screen text-white w-full">
+      <main className="flex min-h-screen w-full flex-col text-white">
         <SearchProvider>
           <Navbar />
-          <SSRLayout className="pt-2 flex flex-col gap-2 px-2">{children}</SSRLayout>
+          <SSRLayout className="flex flex-col gap-2 px-2 pt-2">{children}</SSRLayout>
         </SearchProvider>
       </main>
       <Footer buildId={buildId} buildTimeShort={buildTimeShort} />

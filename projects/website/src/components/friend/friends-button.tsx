@@ -50,7 +50,7 @@ export default function FriendsButton() {
         </NavbarButton>
       </PopoverTrigger>
       <PopoverContent
-        className="mt-2.5 p-2 text-sm select-none max-h-[400px] overflow-hidden overflow-y-auto w-screen md:w-[350px]"
+        className="mt-2.5 max-h-[400px] w-screen overflow-hidden overflow-y-auto p-2 text-sm select-none md:w-[350px]"
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
@@ -70,7 +70,7 @@ export default function FriendsButton() {
               ))}
           </div>
         ) : (
-          <div className="text-sm flex flex-col gap-2 justify-center items-center">
+          <div className="flex flex-col items-center justify-center gap-2 text-sm">
             <p className="pointer-events-none">You don&#39;t have any friends :(</p>
             <Button
               size="sm"

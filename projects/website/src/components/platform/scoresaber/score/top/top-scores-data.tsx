@@ -86,10 +86,10 @@ export function TopScoresData({ timeframe }: TopScoresDataProps) {
 
       return (
         <div key={score.scoreId} className="flex flex-col pt-2">
-          <div className="flex items-center gap-2 text-sm bg-accent-deep-foreground/10 px-2 py-1 sm:px-3 sm:py-1.5 rounded-lg w-fit">
-            <span className="text-gray-500 dark:text-gray-400 text-xs sm:text-sm">Set by</span>
+          <div className="bg-accent-deep-foreground/10 flex w-fit items-center gap-2 rounded-lg px-2 py-1 text-sm sm:px-3 sm:py-1.5">
+            <span className="text-xs text-gray-500 sm:text-sm dark:text-gray-400">Set by</span>
             <Link href={`/player/${player.id}`}>
-              <span className="text-ssr hover:text-ssr/80 transition-colors font-semibold text-xs sm:text-sm">
+              <span className="text-ssr hover:text-ssr/80 text-xs font-semibold transition-colors sm:text-sm">
                 {name}
               </span>
             </Link>
@@ -111,12 +111,12 @@ export function TopScoresData({ timeframe }: TopScoresDataProps) {
   );
 
   return (
-    <Card className="flex flex-col gap-2 w-full 2xl:w-[75%] justify-center h-fit">
-      <div className="flex flex-row flex-wrap gap-2 justify-center">
+    <Card className="flex h-fit w-full flex-col justify-center gap-2 2xl:w-[75%]">
+      <div className="flex flex-row flex-wrap justify-center gap-2">
         {memoizedTimeframes.map(timeframe => (
           <Button
             key={timeframe.timeframe}
-            className="w-36 flex items-center gap-2"
+            className="flex w-36 items-center gap-2"
             variant={selectedTimeframe === timeframe.timeframe ? "default" : "outline"}
             onClick={() => handleTimeframeChange(timeframe.timeframe)}
           >
@@ -128,17 +128,17 @@ export function TopScoresData({ timeframe }: TopScoresDataProps) {
         ))}
       </div>
 
-      <div className="flex justify-center flex-col text-center">
+      <div className="flex flex-col justify-center text-center">
         <p className="font-semibold">Top ScoreSaber Scores</p>
         <p className="text-gray-400">This will only show scores that have been tracked.</p>
       </div>
 
       {isLoading || !scores ? (
-        <div className="flex justify-center items-center">
+        <div className="flex items-center justify-center">
           <Spinner />
         </div>
       ) : (
-        <div className="flex flex-col gap-2 divide-y divide-border">
+        <div className="divide-border flex flex-col gap-2 divide-y">
           {scores.items.map(renderScore)}
           <SimplePagination
             page={page}

@@ -45,33 +45,33 @@ export default function LeaderboardPreview({
         onMouseLeave={() => setIsOpen(false)}
       >
         {!leaderboard ? (
-          <div className="flex justify-center items-center p-4">
+          <div className="flex items-center justify-center p-4">
             <Spinner />
           </div>
         ) : (
           <div className="p-3">
             {/* Header with song info */}
-            <div className="flex items-center gap-3 mb-3">
+            <div className="mb-3 flex items-center gap-3">
               {leaderboard.songArt && (
                 <Image
                   src={leaderboard.songArt}
                   alt={`${leaderboard.songName} Cover Art`}
                   width={96}
                   height={96}
-                  className="size-24 rounded-lg object-cover pointer-events-none"
+                  className="pointer-events-none size-24 rounded-lg object-cover"
                 />
               )}
               <div className="min-w-0 flex-1">
                 <Link
                   href={`/leaderboard/${leaderboard.id}`}
-                  className="block font-bold text-2xl hover:brightness-[66%] transition-all truncate"
+                  className="block truncate text-2xl font-bold transition-all hover:brightness-[66%]"
                 >
                   {leaderboard.songName}
                 </Link>
-                <p className="text-sm text-muted-foreground truncate">
+                <p className="text-muted-foreground truncate text-sm">
                   {leaderboard.songAuthorName}
                 </p>
-                <p className="text-sm text-muted-foreground truncate">
+                <p className="text-muted-foreground truncate text-sm">
                   Mapped by {leaderboard.levelAuthorName}
                 </p>
               </div>
@@ -82,9 +82,9 @@ export default function LeaderboardPreview({
               <div className="flex items-center justify-between">
                 {/* Difficulty */}
                 <SimpleTooltip display="Song Difficulty">
-                  <div className="grid grid-cols-[24px_1fr] gap-2 items-center">
+                  <div className="grid grid-cols-[24px_1fr] items-center gap-2">
                     <div className="flex items-center justify-center">
-                      <MusicalNoteIcon className="size-5 text-muted-foreground min-w-5" />
+                      <MusicalNoteIcon className="text-muted-foreground size-5 min-w-5" />
                     </div>
                     <p>{getDifficultyName(leaderboard.difficulty.difficulty)}</p>
                   </div>
@@ -98,7 +98,7 @@ export default function LeaderboardPreview({
                     ) : (
                       <p className="text-red-400">Unranked</p>
                     )}
-                    <StarIcon className="size-5 text-yellow-400 min-w-5" />
+                    <StarIcon className="size-5 min-w-5 text-yellow-400" />
                   </div>
                 </SimpleTooltip>
               </div>
@@ -106,9 +106,9 @@ export default function LeaderboardPreview({
               <div className="flex items-center justify-between">
                 {/* Plays */}
                 <SimpleTooltip display="Total Plays">
-                  <div className="grid grid-cols-[24px_1fr] gap-2 items-center">
+                  <div className="grid grid-cols-[24px_1fr] items-center gap-2">
                     <div className="flex items-center justify-center">
-                      <TrendingUpIcon className="size-5 text-muted-foreground min-w-5" />
+                      <TrendingUpIcon className="text-muted-foreground size-5 min-w-5" />
                     </div>
                     <CountUp end={leaderboard.plays} duration={1} />
                   </div>
@@ -118,7 +118,7 @@ export default function LeaderboardPreview({
                 <SimpleTooltip display="Created Date">
                   <div className="flex items-center gap-2">
                     <p>{formatDate(leaderboard.timestamp)}</p>
-                    <ClockIcon className="size-5 text-muted-foreground min-w-5" />
+                    <ClockIcon className="text-muted-foreground size-5 min-w-5" />
                   </div>
                 </SimpleTooltip>
               </div>

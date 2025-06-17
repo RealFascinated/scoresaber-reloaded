@@ -20,7 +20,7 @@ export function CountryRankDisplay({
     <div className={cn("flex items-center", className)}>
       <span
         className={cn(
-          "text-xs rounded px-1 py-1 flex items-center gap-1 font-semibold min-h-[22px]",
+          "flex min-h-[22px] items-center gap-1 rounded px-1 py-1 text-xs font-semibold",
           getRankBgColor(countryRank)
         )}
       >

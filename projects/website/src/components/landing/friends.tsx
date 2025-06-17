@@ -4,12 +4,12 @@ import Image from "next/image";
 
 export default function Friends() {
   return (
-    <div id="friends" className="px-5 -mt-20 flex flex-col gap-10 items-end select-none">
+    <div id="friends" className="-mt-20 flex flex-col items-end gap-10 px-5 select-none">
       {/* Header */}
-      <div className="flex flex-col gap-2.5 text-right items-end">
-        <div className="flex flex-row-reverse gap-3 items-center text-purple-600">
-          <UsersRound className="p-2 size-10 bg-purple-800/15 rounded-lg" />
-          <h1 className="text-2xl sm:text-3xl font-bold">Friends</h1>
+      <div className="flex flex-col items-end gap-2.5 text-right">
+        <div className="flex flex-row-reverse items-center gap-3 text-purple-600">
+          <UsersRound className="size-10 rounded-lg bg-purple-800/15 p-2" />
+          <h1 className="text-2xl font-bold sm:text-3xl">Friends</h1>
         </div>
         <p className="max-w-5xl opacity-85">
           Connect with friends to share your Beat Saber experience! Add friends to your list and see
@@ -23,12 +23,12 @@ export default function Friends() {
       <div
         className={cn(
           "relative",
-          "before:absolute before:-left-36 before:-top-28 before:size-[23.5rem] xs:before:size-[32rem] before:bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] before:from-purple-600 before:rounded-full before:blur-3xl before:opacity-30 before:overflow-hidden before:z-1"
+          "xs:before:size-[32rem] before:absolute before:-top-28 before:-left-36 before:z-1 before:size-[23.5rem] before:overflow-hidden before:rounded-full before:bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] before:from-purple-600 before:opacity-30 before:blur-3xl"
         )}
       >
-        <div className={cn("relative max-w-[900px] z-20 overflow-hidden")}>
+        <div className={cn("relative z-20 max-w-[900px] overflow-hidden")}>
           <Image
-            className="w-full h-full rounded-2xl border border-purple-600/20"
+            className="h-full w-full rounded-2xl border border-purple-600/20"
             src="https://cdn.fascinated.cc/assets/home/friends.png"
             alt="Friends"
             draggable={false}

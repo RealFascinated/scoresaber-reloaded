@@ -8,7 +8,7 @@ type PlayerNameProps = {
 export function PlayerName({ name, className }: PlayerNameProps) {
   return (
     <div className={cn("flex items-center justify-start", className)}>
-      <span className="truncate text-white font-medium text-sm">{name}</span>
+      <span className="truncate text-sm font-medium text-white">{name}</span>
     </div>
   );
 }

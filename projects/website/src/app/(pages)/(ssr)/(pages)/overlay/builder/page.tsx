@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 
 export default async function OverlayPage() {
   return (
-    <main className="w-full h-full flex justify-center">
+    <main className="flex h-full w-full justify-center">
       <Card className="flex h-fit w-full md:w-3/4">
         <OverlayBuilder />
       </Card>

@@ -30,7 +30,7 @@ export function FriendScores() {
   });
 
   return (
-    <Card className="h-fit flex flex-col gap-2">
+    <Card className="flex h-fit flex-col gap-2">
       <div>
         <p className="font-bold">Friend Scores</p>
         <p className="text-sm text-gray-400">
@@ -50,7 +50,7 @@ export function FriendScores() {
       {scoreData && (
         <div className="flex flex-col gap-2">
           <>
-            <div className="divide-y divide-border">
+            <div className="divide-border divide-y">
               {scoreData.items.map((playerScore, index) => {
                 const score = playerScore.score;
                 const leaderboard = playerScore.leaderboard;

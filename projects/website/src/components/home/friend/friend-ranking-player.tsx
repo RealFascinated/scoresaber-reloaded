@@ -10,17 +10,17 @@ interface FriendRankingPlayerProps {
 
 export function FriendRankingPlayer({ player }: FriendRankingPlayerProps) {
   return (
-    <div className="flex flex-col md:grid md:grid-cols-[auto_1fr_auto] items-center gap-2 py-2 px-4 text-sm">
+    <div className="flex flex-col items-center gap-2 px-4 py-2 text-sm md:grid md:grid-cols-[auto_1fr_auto]">
       {/* Top row (mobile) / Left column (desktop) */}
-      <div className="w-full md:w-auto flex items-center justify-between md:justify-start gap-3">
+      <div className="flex w-full items-center justify-between gap-3 md:w-auto md:justify-start">
         {/* Ranks Container */}
         <div className="flex items-center gap-3">
           {/* Global Rank */}
           <Link
             href={`/ranking/${player.rankPages.global}`}
-            className="flex items-center gap-1 w-14"
+            className="flex w-14 items-center gap-1"
           >
-            <p className="font-medium text-xs md:text-sm tabular-nums">
+            <p className="text-xs font-medium tabular-nums md:text-sm">
               #{player.rank == 0 ? "-" : player.rank}
             </p>
           </Link>
@@ -28,10 +28,10 @@ export function FriendRankingPlayer({ player }: FriendRankingPlayerProps) {
           {/* Country Rank */}
           <Link
             href={`/ranking/${player.country}/${player.rankPages.country}`}
-            className="flex items-center gap-2 min-w-20"
+            className="flex min-w-20 items-center gap-2"
           >
             <CountryFlag code={player.country} size={12} />
-            <p className="font-medium text-xs md:text-sm tabular-nums">
+            <p className="text-xs font-medium tabular-nums md:text-sm">
               #{player.countryRank == 0 ? "-" : player.countryRank}
             </p>
           </Link>
@@ -43,19 +43,19 @@ export function FriendRankingPlayer({ player }: FriendRankingPlayerProps) {
 
       {/* Player's Avatar and Name */}
       <PlayerPreview playerId={player.id}>
-        <div className="w-full md:w-auto flex items-center gap-2">
+        <div className="flex w-full items-center gap-2 md:w-auto">
           <Avatar src={player.avatar} alt={player.name} size={22} />
           <Link
             href={`/player/${player.id}`}
-            className="hover:brightness-[66%] transition-all overflow-hidden"
+            className="overflow-hidden transition-all hover:brightness-[66%]"
           >
-            <p className="truncate max-w-[160px] md:max-w-[250px]">{player.name}</p>
+            <p className="max-w-[160px] truncate md:max-w-[250px]">{player.name}</p>
           </Link>
         </div>
       </PlayerPreview>
 
       {/* Desktop PP */}
-      <p className="hidden md:block text-pp text-right text-sm">{player.pp.toLocaleString()}pp</p>
+      <p className="text-pp hidden text-right text-sm md:block">{player.pp.toLocaleString()}pp</p>
     </div>
   );
 }

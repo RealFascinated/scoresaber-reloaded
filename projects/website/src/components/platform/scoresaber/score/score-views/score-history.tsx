@@ -53,7 +53,7 @@ export function ScoreHistory({ playerId, leaderboard }: ScoreHistoryProps) {
     return (
       <EmptyState
         icon={
-          <div className="w-10 h-10">
+          <div className="h-10 w-10">
             <Spinner />
           </div>
         }
@@ -66,7 +66,7 @@ export function ScoreHistory({ playerId, leaderboard }: ScoreHistoryProps) {
   if (scores.items.length === 0) {
     return (
       <EmptyState
-        icon={<ClockIcon className="w-10 h-10 text-gray-400 dark:text-gray-500" />}
+        icon={<ClockIcon className="h-10 w-10 text-gray-400 dark:text-gray-500" />}
         title="No Score History"
         description="This score does not have any tracked history"
       />
@@ -75,7 +75,7 @@ export function ScoreHistory({ playerId, leaderboard }: ScoreHistoryProps) {
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex flex-col divide-y divide-border">
+      <div className="divide-border flex flex-col divide-y">
         {scores.items.map(({ score, leaderboard, beatSaver }, index) => {
           return (
             <ScoreSaberScoreDisplay

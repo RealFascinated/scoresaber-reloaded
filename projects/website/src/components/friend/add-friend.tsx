@@ -53,10 +53,10 @@ export default function AddFriend({ player, iconOnly }: Props) {
     <SimpleTooltip display={<p>Add {name} as a friend!</p>} side={"bottom"}>
       <div onClick={addFriend} className="cursor-pointer">
         {iconOnly ? (
-          <UserPlus className="size-5 text-primary hover:text-primary/80 transition-colors" />
+          <UserPlus className="text-primary hover:text-primary/80 size-5 transition-colors" />
         ) : (
           <Button variant={"outline"}>
-            <UserPlus className="size-5 text-primary" />
+            <UserPlus className="text-primary size-5" />
           </Button>
         )}
       </div>

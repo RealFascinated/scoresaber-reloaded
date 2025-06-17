@@ -58,7 +58,7 @@ export function ScoreSaberLeaderboardData({
   return (
     <LeaderboardFilterProvider>
       <div className="w-full">
-        <div className="flex xl:flex-row flex-col-reverse w-full gap-2">
+        <div className="flex w-full flex-col-reverse gap-2 xl:flex-row">
           {/* Mobile Only */}
           {isMobile && (
             <div className="flex flex-col gap-2">
@@ -78,9 +78,9 @@ export function ScoreSaberLeaderboardData({
             </div>
           )}
 
-          <div className="flex flex-col gap-2 w-full">
+          <div className="flex w-full flex-col gap-2">
             {/* Leaderboard Scores */}
-            <Card className="flex gap-2 w-full relative h-fit">
+            <Card className="relative flex h-fit w-full gap-2">
               <LeaderboardScores
                 leaderboard={leaderboard}
                 initialPage={initialPage}
@@ -108,7 +108,7 @@ export function ScoreSaberLeaderboardData({
           </div>
 
           {/* Leaderboard Data */}
-          <div className="flex flex-col gap-2 w-full xl:w-[550px]">
+          <div className="flex w-full flex-col gap-2 xl:w-[550px]">
             {/* Leaderboard Info */}
             <LeaderboardInfo leaderboard={leaderboard} beatSaverMap={beatsaver} />
 

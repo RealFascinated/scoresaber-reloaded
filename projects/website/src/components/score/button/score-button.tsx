@@ -26,7 +26,7 @@ type Props = {
 export default function ScoreButton({ children, tooltip, href, onClick }: Props) {
   const button = (
     <button
-      className="bg-accent rounded-md flex justify-center items-center p-1 w-[28px] h-[28px] hover:brightness-75 transition-all cursor-pointer"
+      className="bg-accent flex h-[28px] w-[28px] cursor-pointer items-center justify-center rounded-md p-1 transition-all hover:brightness-75"
       onClick={onClick}
     >
       {children}

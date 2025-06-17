@@ -67,7 +67,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${siteFont.className} antialiased w-full h-full`}>
+      <body className={`${siteFont.className} h-full w-full antialiased`}>
         <PostHogProvider>
           {env.NEXT_PUBLIC_ANALYTICS_WEBSITE_ID && env.NEXT_PUBLIC_ANALYTICS_SCRIPT_URL && (
             <Script

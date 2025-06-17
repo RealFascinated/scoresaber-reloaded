@@ -59,13 +59,13 @@ export function ComparisonScoreBadges({ score, leaderboard }: ComparisonScoreBad
   ];
 
   return (
-    <div className="flex flex-col justify-center h-full w-full">
-      <div className="flex items-center justify-center gap-2 text-sm text-gray-300 mb-2 w-full">
+    <div className="flex h-full w-full flex-col justify-center">
+      <div className="mb-2 flex w-full items-center justify-center gap-2 text-sm text-gray-300">
         <div className="h-[1px] flex-1 bg-gray-200"></div>
         <span>vs me ({timeAgo(score.timestamp)})</span>
         <div className="h-[1px] flex-1 bg-gray-200"></div>
       </div>
-      <div className="grid grid-cols-3 gap-1 justify-center w-full">
+      <div className="grid w-full grid-cols-3 justify-center gap-1">
         <ScoreBadges badges={comparisonBadges} score={score} leaderboard={leaderboard} />
       </div>
     </div>

@@ -23,7 +23,7 @@ export function HandAccuracyBadge({ score, hand }: HandAccuracyProps) {
   const formattedHand = capitalizeFirstLetter(hand);
 
   return (
-    <div className="flex gap-1 items-center justify-center">
+    <div className="flex items-center justify-center gap-1">
       <SimpleTooltip
         display={
           <>

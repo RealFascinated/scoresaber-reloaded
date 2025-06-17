@@ -8,7 +8,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="antialiased w-full h-full">{children}</body>
+      <body className="h-full w-full antialiased">{children}</body>
     </html>
   );
 }

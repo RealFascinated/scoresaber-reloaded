@@ -38,12 +38,12 @@ export default function ScoreHistoryCalendar({ playerId }: ScoreHistoryCalendarP
   };
 
   return (
-    <div className="flex flex-col gap-3 justify-center items-center select-none py-2">
+    <div className="flex flex-col items-center justify-center gap-3 py-2 select-none">
       {isLoading ? (
         <Spinner /> // Only show Spinner for initial load
       ) : (
         <>
-          <div className="flex gap-1 justify-center items-center">
+          <div className="flex items-center justify-center gap-1">
             {/* Year Selection Combobox */}
             <Combobox<string>
               name="Year"
@@ -75,7 +75,7 @@ export default function ScoreHistoryCalendar({ playerId }: ScoreHistoryCalendarP
             />
           </div>
 
-          <div className="grid grid-cols-7 gap-1 justify-center items-center">
+          <div className="grid grid-cols-7 items-center justify-center gap-1">
             {days.map(day => {
               const stats = calendar?.days[day];
               const totalMaps = stats ? stats.totalMaps : 0;
@@ -105,14 +105,14 @@ export default function ScoreHistoryCalendar({ playerId }: ScoreHistoryCalendarP
                     </div>
                   }
                 >
-                  <div className="relative bg-accent h-[45px] w-[45px] lg:h-[60px] lg:w-[60px] flex justify-center items-center cursor-default rounded-md">
+                  <div className="bg-accent relative flex h-[45px] w-[45px] cursor-default items-center justify-center rounded-md lg:h-[60px] lg:w-[60px]">
                     <div
                       style={{
                         width: `${size}%`,
                         height: `${size}%`,
                         backgroundColor: "rgba(255, 255, 255, 0.1)",
                       }}
-                      className="absolute rounded-full flex justify-center items-center"
+                      className="absolute flex items-center justify-center rounded-full"
                     />
                     <p className="z-10">{day}</p>
                   </div>

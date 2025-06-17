@@ -12,8 +12,8 @@ import Link from "next/link";
 
 export default function HeroSection() {
   return (
-    <div className="flex flex-col gap-2 text-center items-center select-none">
-      <div className="flex flex-col gap-2.5 text-center items-center">
+    <div className="flex flex-col items-center gap-2 text-center select-none">
+      <div className="flex flex-col items-center gap-2.5 text-center">
         <Alert />
         <Title />
       </div>
@@ -27,15 +27,15 @@ export default function HeroSection() {
 function Alert() {
   return (
     <Link
-      className="group mb-1.5 bg-neutral-900 hover:opacity-85 border border-white/5 rounded-full transition-all "
+      className="group mb-1.5 rounded-full border border-white/5 bg-neutral-900 transition-all hover:opacity-85"
       href="https://github.com/RealFascinated/scoresaber-reloaded"
       target="_blank"
       draggable={false}
     >
-      <AnimatedShinyText className="px-3.5 py-1 flex gap-2 text-sm items-center justify-center">
+      <AnimatedShinyText className="flex items-center justify-center gap-2 px-3.5 py-1 text-sm">
         <GithubIcon className="size-5" />
         <span>Check out our Source Code</span>
-        <ArrowRight className="size-4 group-hover:translate-x-0.5 transition-all " />
+        <ArrowRight className="size-4 transition-all group-hover:translate-x-0.5" />
       </AnimatedShinyText>
     </Link>
   );
@@ -43,11 +43,11 @@ function Alert() {
 
 function Title() {
   return (
-    <div className="px-5 flex flex-col gap-1.5 items-center">
-      <h1 className="text-4xl xs:text-5xl font-bold text-transparent bg-clip-text bg-linear-to-r from-ssr to-pp/85">
+    <div className="flex flex-col items-center gap-1.5 px-5">
+      <h1 className="xs:text-5xl from-ssr to-pp/85 bg-linear-to-r bg-clip-text text-4xl font-bold text-transparent">
         ScoreSaber Reloaded
       </h1>
-      <p className="max-w-sm md:max-w-lg text-sm xs:text-base opacity-85">
+      <p className="xs:text-base max-w-sm text-sm opacity-85 md:max-w-lg">
         ScoreSaber Reloaded is a new way to view your scores and get more stats about you and your
         plays
       </p>
@@ -58,9 +58,9 @@ function Title() {
 function Buttons() {
   const { openSearch } = useSearch();
   return (
-    <div className="mt-4 flex flex-col xs:flex-row gap-2 xs:gap-4 items-center">
+    <div className="xs:flex-row xs:gap-4 mt-4 flex flex-col items-center gap-2">
       <Button
-        className="max-w-52 flex gap-2.5 bg-ssr hover:bg-ssr/85 text-white"
+        className="bg-ssr hover:bg-ssr/85 flex max-w-52 gap-2.5 text-white"
         onClick={openSearch}
       >
         <UserSearch className="size-6" />
@@ -74,10 +74,10 @@ function Buttons() {
 
 function AppPreview() {
   return (
-    <div className="mx-5 my-20 relative max-w-[1190px] shadow-[0_3rem_20rem_-15px_rgba(15,15,15,0.6)] shadow-pp/50 rounded-2xl overflow-hidden">
+    <div className="shadow-pp/50 relative mx-5 my-20 max-w-[1190px] overflow-hidden rounded-2xl shadow-[0_3rem_20rem_-15px_rgba(15,15,15,0.6)]">
       <BorderBeam colorFrom="#6773ff" colorTo="#4858ff" />
       <Image
-        className="w-full h-full border-4 border-pp/20 rounded-2xl"
+        className="border-pp/20 h-full w-full rounded-2xl border-4"
         src="https://cdn.fascinated.cc/assets/home/app-preview.png"
         alt="App Preview"
         draggable={false}

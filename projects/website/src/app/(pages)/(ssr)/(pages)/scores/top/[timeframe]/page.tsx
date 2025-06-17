@@ -22,7 +22,7 @@ export default async function TopScoresPage({ params }: TopScoresPageProps) {
   const { timeframe } = await params;
 
   return (
-    <main className="w-full flex justify-center">
+    <main className="flex w-full justify-center">
       <TopScoresData timeframe={timeframe} />
     </main>
   );

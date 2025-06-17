@@ -55,7 +55,7 @@ export default function Overlay({ settings }: OverlayProps) {
 
   if (isLoading || !player) {
     return (
-      <div className="flex w-full h-full items-center justify-center">
+      <div className="flex h-full w-full items-center justify-center">
         <Spinner />
       </div>
     );
@@ -63,7 +63,7 @@ export default function Overlay({ settings }: OverlayProps) {
 
   return (
     <div>
-      <OverlayView position={OverlayViewPosition.TOP_LEFT} className="flex gap-2 flex-col text-2xl">
+      <OverlayView position={OverlayViewPosition.TOP_LEFT} className="flex flex-col gap-2 text-2xl">
         {settings.views[OverlayViews.PlayerInfo] && <OverlayPlayerInfoView player={player} />}
         {overlayData && settings.views[OverlayViews.ScoreInfo] && (
           <OverlayScoreDataView overlayData={overlayData} />

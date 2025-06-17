@@ -14,8 +14,8 @@ export default function OverlayPlayerCountryRank({ player }: OverlayPlayerRankPr
   const { countryRank, country } = player;
 
   return (
-    <div className="flex gap-2 items-center">
-      <div className="flex gap-2 items-center">
+    <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2">
         <CountryFlag code={country} size={18} />
         <p>#{formatNumberWithCommas(countryRank)}</p>
       </div>

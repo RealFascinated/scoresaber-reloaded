@@ -13,7 +13,7 @@ export function SnowBackground() {
   }
 
   return (
-    <div className="fixed -z-40 w-full h-full pointer-events-none select-none">
+    <div className="pointer-events-none fixed -z-40 h-full w-full select-none">
       <Snowfall />
     </div>
   );

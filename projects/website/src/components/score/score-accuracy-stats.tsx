@@ -87,11 +87,11 @@ function AccuracyCircle({ accuracy, averageCut, hand }: AccuracyCircleProps) {
 function HandStat({ hand, name, value }: { hand: Hand; name: string; value: string }) {
   return (
     <div
-      className="inline-flex justify-around items-center py-1 px-2 rounded-md w-full backdrop-blur-sm bg-opacity-20"
+      className="bg-opacity-20 inline-flex w-full items-center justify-around rounded-md px-2 py-1 backdrop-blur-sm"
       style={{ backgroundColor: `${handColors[hand]}40` }}
     >
-      <p className="grow min-w-[38px] font-medium">{name}</p>
-      <span className="opacity-40 mx-2">|</span>
+      <p className="min-w-[38px] grow font-medium">{name}</p>
+      <span className="mx-2 opacity-40">|</span>
       <p className="grow text-right font-medium">{value}</p>
     </div>
   );
@@ -137,8 +137,8 @@ function HandAccuracy({ scoreStats, hand }: { scoreStats: ScoreStatsToken; hand:
 
 export default function ScoreAccuracyStats({ scoreStats }: ScoreAccuracyStatProps) {
   return (
-    <div className="flex flex-col gap-6 items-center justify-center p-4 rounded-xl bg-accent-deep border border-border backdrop-blur-sm">
-      <div className="flex gap-8 items-center justify-center">
+    <div className="bg-accent-deep border-border flex flex-col items-center justify-center gap-6 rounded-xl border p-4 backdrop-blur-sm">
+      <div className="flex items-center justify-center gap-8">
         <HandAccuracy scoreStats={scoreStats.current} hand="left" />
         <HandAccuracy scoreStats={scoreStats.current} hand="right" />
       </div>

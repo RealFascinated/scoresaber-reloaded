@@ -43,7 +43,7 @@ export default function ScoreFeed() {
   }
 
   return (
-    <div className="flex flex-col divide-y divide-border">
+    <div className="divide-border flex flex-col divide-y">
       {scores.map(scoreToken => {
         if (!scoreToken.leaderboard || !scoreToken.score) {
           console.error("Invalid leaderboard or score data:", scoreToken);
@@ -56,18 +56,18 @@ export default function ScoreFeed() {
 
         return (
           <div key={score.scoreId} className="flex flex-col py-2">
-            <div className="flex flex-row gap-2 items-center">
+            <div className="flex flex-row items-center gap-2">
               <Avatar
                 src={player.profilePicture!}
-                className="w-6 h-6"
+                className="h-6 w-6"
                 alt={`${player.name}'s Profile Picture`}
               />
               <Link href={`/player/${player.id}`}>
-                <span className="text-ssr hover:brightness-[66%] transition-all ">
+                <span className="text-ssr transition-all hover:brightness-[66%]">
                   {player.name}
                 </span>
               </Link>
-              <p className="text-gray-400 text-xs">
+              <p className="text-xs text-gray-400">
                 {" "}
                 on {scoreToken.score.deviceHmd || "Unknown Device"}
               </p>

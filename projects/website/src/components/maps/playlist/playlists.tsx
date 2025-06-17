@@ -38,7 +38,7 @@ export default function Playlists() {
         <p className="text-sm text-gray-300">Easily download maps from ScoreSaber.</p>
       </div>
 
-      <div className="flex flex-wrap gap-2 justify-center">
+      <div className="flex flex-wrap justify-center gap-2">
         {playlists.map(playlist => (
           <div key={playlist.id}>
             <PlaylistDownloadButton

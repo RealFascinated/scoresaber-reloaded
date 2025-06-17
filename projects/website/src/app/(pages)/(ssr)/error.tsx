@@ -6,14 +6,14 @@ import Link from "next/link";
 
 export default function Error() {
   return (
-    <div className="flex flex-col items-center mt-10 text-center w-full">
+    <div className="mt-10 flex w-full flex-col items-center text-center">
       <GlobeAmericasIcon className="h-24 w-24 text-red-500" />
-      <h1 className="text-4xl font-bold text-gray-200 mt-6">Oops! Something went wrong.</h1>
-      <p className="text-lg text-gray-400 mt-2">
+      <h1 className="mt-6 text-4xl font-bold text-gray-200">Oops! Something went wrong.</h1>
+      <p className="mt-2 text-lg text-gray-400">
         The error has been logged to your console. Please report this to a developer in our Discord.
       </p>
 
-      <div className="flex flex-col gap-2 mt-6 items-center">
+      <div className="mt-6 flex flex-col items-center gap-2">
         <Link href="/" className="text-blue-500 hover:underline">
           Go back to the homepage
         </Link>

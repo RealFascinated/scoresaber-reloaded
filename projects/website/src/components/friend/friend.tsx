@@ -32,16 +32,16 @@ export default function Friend({ player, onClick }: FriendProps) {
   }
 
   return (
-    <div className="flex items-center justify-between gap-2 hover:bg-accent transition-all p-2 rounded-md select-none">
+    <div className="hover:bg-accent flex items-center justify-between gap-2 rounded-md p-2 transition-all select-none">
       <Link
         href={`/player/${player.id}`}
         onClick={() => onClick?.()}
-        className="flex items-center gap-2 w-full"
+        className="flex w-full items-center gap-2"
       >
         <Avatar
           src={player.avatar}
           size={64}
-          className="w-10 h-10"
+          className="h-10 w-10"
           alt={`${player.name}'s Profile Picture`}
         />
         <div className="flex flex-col">
@@ -55,11 +55,11 @@ export default function Friend({ player, onClick }: FriendProps) {
       </Link>
       <SimpleTooltip
         display={
-          <p className="cursor-default pointer-events-none">Remove {name} from your friends</p>
+          <p className="pointer-events-none cursor-default">Remove {name} from your friends</p>
         }
       >
         <div onClick={() => removeFriend()}>
-          <XIcon className="w-5 h-5" />
+          <XIcon className="h-5 w-5" />
         </div>
       </SimpleTooltip>
     </div>

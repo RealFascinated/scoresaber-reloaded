@@ -32,7 +32,7 @@ type Variants = {
 
 const miniVariants: Variants = {
   Global: {
-    icon: () => <GlobeAmericasIcon className="w-5 h-5" />,
+    icon: () => <GlobeAmericasIcon className="h-5 w-5" />,
   },
   Country: {
     icon: (player: ScoreSaberPlayer) => {
@@ -63,8 +63,8 @@ export default function PlayerMiniRanking({ type, player }: PlayerMiniRankingPro
   }
 
   return (
-    <Card className="flex gap-2 sticky select-none text-sm w-[400px]">
-      <div className="flex gap-1.5 items-center">
+    <Card className="sticky flex w-[400px] gap-2 text-sm select-none">
+      <div className="flex items-center gap-1.5">
         {icon}
         <p>{type} Ranking</p>
       </div>
@@ -78,15 +78,15 @@ export default function PlayerMiniRanking({ type, player }: PlayerMiniRankingPro
               <Link
                 key={index}
                 href={`/player/${playerRanking.id}`}
-                className="grid gap-2 grid-cols-[auto_1fr_auto] items-center bg-accent px-2 py-1.5 cursor-pointer transition-all hover:brightness-75 first:rounded-t last:rounded-b"
+                className="bg-accent grid cursor-pointer grid-cols-[auto_1fr_auto] items-center gap-2 px-2 py-1.5 transition-all first:rounded-t last:rounded-b hover:brightness-75"
               >
                 <p className="text-gray-400">#{formatNumberWithCommas(rank)}</p>
-                <div className="flex gap-2 items-start">
+                <div className="flex items-start gap-2">
                   <div className="flex flex-col items-start">
                     <PlayerPreview playerId={playerRanking.id}>
                       <div className="flex flex-col items-start">
                         <PlayerInfo
-                          className="w-[170px] !flex !items-start"
+                          className="!flex w-[170px] !items-start"
                           player={playerRanking}
                           highlightedPlayerId={player.id}
                           hideCountryFlag
@@ -100,7 +100,7 @@ export default function PlayerMiniRanking({ type, player }: PlayerMiniRankingPro
                   <p className="text-ssr text-right">{formatPp(playerRanking.pp)}pp</p>
                   {playerRanking.id !== player.id && (
                     <p
-                      className={`text-xs text-right ${ppDifference > 0 ? "text-green-400" : "text-red-400"}`}
+                      className={`text-right text-xs ${ppDifference > 0 ? "text-green-400" : "text-red-400"}`}
                     >
                       {ppDifference > 0 ? "+" : ""}
                       {formatPp(ppDifference, 2)}

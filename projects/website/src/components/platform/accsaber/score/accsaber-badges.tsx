@@ -44,8 +44,8 @@ type AccSaberBadgesProps = {
 
 export function AccSaberBadges({ score }: AccSaberBadgesProps) {
   return (
-    <div className="flex flex-col justify-center h-full">
-      <div className="grid grid-cols-3 gap-1 justify-center">
+    <div className="flex h-full flex-col justify-center">
+      <div className="grid grid-cols-3 justify-center gap-1">
         <ScoreBadges badges={badges} score={score} leaderboard={score.leaderboard} />
       </div>
     </div>

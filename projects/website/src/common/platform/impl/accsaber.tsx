@@ -16,7 +16,7 @@ export class AccSaberPlatform extends Platform<
 > {
   constructor() {
     super(PlatformType.AccSaber, "AccSaber", "date", {
-      logo: <AccSaberLogo className="w-4.5 h-4.5" />,
+      logo: <AccSaberLogo className="h-4.5 w-4.5" />,
       displayPredicate: async (playerId: string) => {
         return await ApiServiceRegistry.getInstance()
           .getAccSaberService()

@@ -45,15 +45,15 @@ export default function ScoreSaberScoreSongInfo({
   const difficultyInfo = useMemo(
     () => (
       <div
-        className="absolute w-full h-[18px] bottom-0 right-0 rounded-sm flex justify-center items-center text-[0.70rem] cursor-default"
+        className="absolute right-0 bottom-0 flex h-[18px] w-full cursor-default items-center justify-center rounded-sm text-[0.70rem]"
         style={{
           backgroundColor: difficulty.color + "f0",
         }}
       >
         {starCount > 0 ? (
-          <div className="flex gap-1 items-center justify-center">
+          <div className="flex items-center justify-center gap-1">
             <p>{starCount.toFixed(2)}</p>
-            <StarIcon className="w-[14px] h-[14px]" />
+            <StarIcon className="h-[14px] w-[14px]" />
           </div>
         ) : (
           <p>{getDifficultyName(difficulty)}</p>
@@ -65,14 +65,14 @@ export default function ScoreSaberScoreSongInfo({
 
   const authorInfo = useMemo(
     () => (
-      <div className="flex flex-row text-sm gap-1.5 items-end leading-none">
+      <div className="flex flex-row items-end gap-1.5 text-sm leading-none">
         <p className="text-gray-400">
           {leaderboard.songAuthorName}{" "}
           <span className="text-primary">
             <FallbackLink
               href={mappersProfile}
               className={clsx(
-                mappersProfile && "hover:brightness-[66%] transition-all w-fit text-xs leading-none"
+                mappersProfile && "w-fit text-xs leading-none transition-all hover:brightness-[66%]"
               )}
             >
               {leaderboard.levelAuthorName}
@@ -85,7 +85,7 @@ export default function ScoreSaberScoreSongInfo({
   );
 
   return (
-    <div className="flex gap-3 items-center break-all w-full">
+    <div className="flex w-full items-center gap-3 break-all">
       <div
         className="relative flex justify-center"
         style={{
@@ -102,7 +102,7 @@ export default function ScoreSaberScoreSongInfo({
             minWidth: `${imageSize}px`,
           }}
         />
-        <div className="absolute w-full h-full flex items-end justify-center">
+        <div className="absolute flex h-full w-full items-end justify-center">
           <SimpleTooltip
             side="bottom"
             display={
@@ -117,8 +117,8 @@ export default function ScoreSaberScoreSongInfo({
           </SimpleTooltip>
         </div>
       </div>
-      <div className="flex flex-col gap-1 w-full">
-        <div className="overflow-y-clip flex flex-col gap-1 min-w-0 w-full">
+      <div className="flex w-full flex-col gap-1">
+        <div className="flex w-full min-w-0 flex-col gap-1 overflow-y-clip">
           {allowLeaderboardPreview ? (
             <LeaderboardPreview leaderboard={leaderboard} beatSaverMap={beatSaverMap}>
               {songNameElement}

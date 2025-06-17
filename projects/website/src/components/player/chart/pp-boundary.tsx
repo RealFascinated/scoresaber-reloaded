@@ -81,7 +81,7 @@ export default function PpBoundaryStat({ player }: PpBoundaryProps) {
         <div>
           <SimpleTooltip
             display={
-              <div className="text-center flex flex-col gap-2">
+              <div className="flex flex-col gap-2 text-center">
                 <p>Amount of raw pp required to increase your global pp by 1pp</p>
                 <p className="italic">Click to see the graph</p>
               </div>
@@ -91,7 +91,7 @@ export default function PpBoundaryStat({ player }: PpBoundaryProps) {
           </SimpleTooltip>
         </div>
       </PopoverTrigger>
-      <PopoverContent className="flex flex-col gap-2 p-3 w-[90vw] lg:w-[500px]">
+      <PopoverContent className="flex w-[90vw] flex-col gap-2 p-3 lg:w-[500px]">
         <GenericChart labels={labels} config={config} />
       </PopoverContent>
     </Popover>

@@ -13,7 +13,7 @@ export default function AccSaberScoreComponent({ score }: AccSaberScoreProps) {
   return (
     <div className={`relative`}>
       <div
-        className={`grid w-full gap-2 lg:gap-0 grid-cols-[20px 1fr_1fr] lg:grid-cols-[0.5fr_4fr_350px] py-2`}
+        className={`grid-cols-[20px 1fr_1fr] grid w-full gap-2 py-2 lg:grid-cols-[0.5fr_4fr_350px] lg:gap-0`}
       >
         <AccSaberRankTime score={score} />
         <AccSaberSongInfo score={score} />

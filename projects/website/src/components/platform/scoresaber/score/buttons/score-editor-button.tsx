@@ -90,23 +90,23 @@ export default function ScoreSaberScoreEditorButton({
   }, [modifiedScores, rankedPps]);
 
   return (
-    <div className="flex items-center justify-center cursor-default relative">
+    <div className="relative flex cursor-default items-center justify-center">
       <Popover onOpenChange={() => handleSliderReset()}>
         <PopoverTrigger>
           <SimpleTooltip display={<p>Edit Score Accuracy</p>}>
-            <FaCog className="size-6 p-0.5 cursor-pointer hover:animate-spin-slow" />
+            <FaCog className="hover:animate-spin-slow size-6 cursor-pointer p-0.5" />
           </SimpleTooltip>
         </PopoverTrigger>
         <PopoverContent className="p-0" side={isMobile ? "top" : "left"}>
-          <div className="p-3 flex flex-col gap-4">
+          <div className="flex flex-col gap-4 p-3">
             {/* Accuracy Changer */}
-            <div className="flex flex-col w-full gap-2">
-              <div className="flex justify-between items-center">
-                <p className="text-sm font-medium mb-1">Accuracy Changer</p>
+            <div className="flex w-full flex-col gap-2">
+              <div className="flex items-center justify-between">
+                <p className="mb-1 text-sm font-medium">Accuracy Changer</p>
 
                 {/* Reset Button */}
                 <SimpleTooltip display={<p>Set accuracy to score accuracy</p>}>
-                  <Button onClick={handleSliderReset} className="p-1 h-fit" variant="ghost">
+                  <Button onClick={handleSliderReset} className="h-fit p-1" variant="ghost">
                     <FaUndo className="size-3.5" />
                   </Button>
                 </SimpleTooltip>
@@ -124,7 +124,7 @@ export default function ScoreSaberScoreEditorButton({
 
             <div>
               {/* Current Accuracy */}
-              <p className="text-sm font-medium ">Accuracy - {newAccuracy.toFixed(2)}%</p>
+              <p className="text-sm font-medium">Accuracy - {newAccuracy.toFixed(2)}%</p>
 
               {/* PP Gain */}
               {rankedPps && leaderboard.ranked && (

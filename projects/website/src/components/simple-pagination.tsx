@@ -89,13 +89,13 @@ export default function SimplePagination({
       <Popover open={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger asChild>
           <button
-            className="flex h-8 w-8 items-center justify-center rounded-md hover:bg-accent hover:text-accent-foreground transition-all cursor-pointer"
+            className="hover:bg-accent hover:text-accent-foreground flex h-8 w-8 cursor-pointer items-center justify-center rounded-md transition-all"
             aria-label="Select page"
           >
             <div className="flex gap-0.5">
-              <div className="w-1 h-1 rounded-full bg-current" />
-              <div className="w-1 h-1 rounded-full bg-current" />
-              <div className="w-1 h-1 rounded-full bg-current" />
+              <div className="h-1 w-1 rounded-full bg-current" />
+              <div className="h-1 w-1 rounded-full bg-current" />
+              <div className="h-1 w-1 rounded-full bg-current" />
             </div>
           </button>
         </PopoverTrigger>
@@ -142,14 +142,14 @@ export default function SimplePagination({
         onClick={e => handleLinkClick(buttonPage, e)}
         disabled={isLoading || buttonPage === page}
         className={cn(
-          "relative h-8 min-w-[2rem] px-2 flex items-center justify-center rounded-md text-sm transition-all cursor-pointer",
+          "relative flex h-8 min-w-[2rem] cursor-pointer items-center justify-center rounded-md px-2 text-sm transition-all",
           isActive
             ? "bg-primary text-primary-foreground font-medium shadow-sm"
             : "hover:bg-accent hover:text-accent-foreground",
           isLoading && "cursor-not-allowed opacity-50"
         )}
       >
-        {loadingPage === buttonPage ? <ArrowPathIcon className="w-4 h-4 animate-spin" /> : children}
+        {loadingPage === buttonPage ? <ArrowPathIcon className="h-4 w-4 animate-spin" /> : children}
       </button>
     )
   );
@@ -169,7 +169,7 @@ export default function SimplePagination({
         onClick={e => handleLinkClick(buttonPage, e)}
         disabled={disabled || isLoading}
         className={cn(
-          "relative flex h-8 w-8 items-center justify-center rounded-md transition-all cursor-pointer",
+          "relative flex h-8 w-8 cursor-pointer items-center justify-center rounded-md transition-all",
           !disabled && "hover:bg-accent hover:text-accent-foreground",
           (disabled || isLoading) && "cursor-not-allowed opacity-50"
         )}
@@ -230,15 +230,15 @@ export default function SimplePagination({
   return (
     <div
       className={cn(
-        "flex w-full items-center justify-between lg:justify-center relative",
+        "relative flex w-full items-center justify-between lg:justify-center",
         statsBelow && "flex-col-reverse gap-2"
       )}
     >
       {/* Pagination Info */}
       <div
         className={cn(
-          "text-sm select-none text-muted-foreground",
-          !statsBelow && "lg:absolute left-0"
+          "text-muted-foreground text-sm select-none",
+          !statsBelow && "left-0 lg:absolute"
         )}
       >
         <p>
@@ -249,7 +249,7 @@ export default function SimplePagination({
       </div>
 
       {/* Pagination Buttons */}
-      <div className="flex items-center gap-1 p-1 rounded-lg bg-muted/50">
+      <div className="bg-muted/50 flex items-center gap-1 rounded-lg p-1">
         {mobilePagination && (
           <NavigationButton page={1} disabled={page === 1}>
             <ChevronsLeft className="h-4 w-4" />

@@ -106,7 +106,7 @@ const Combobox = <T,>({
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
-            className="px-2 gap-3 justify-between"
+            className="justify-between gap-3 px-2"
             variant="outline"
             role="combobox"
             aria-expanded={open}
@@ -130,11 +130,11 @@ const Combobox = <T,>({
                       setOpen(false);
                       handleValueChange(current === value ? undefined : current);
                     }}
-                    className={cn("flex gap-2 items-center justify-between", item.className)}
+                    className={cn("flex items-center justify-between gap-2", item.className)}
                   >
                     {item.icon}
-                    <div className={cn("flex gap-2 w-full items-center justify-between")}>
-                      <div className="flex gap-2 items-center">{item.name}</div>
+                    <div className={cn("flex w-full items-center justify-between gap-2")}>
+                      <div className="flex items-center gap-2">{item.name}</div>
                       <Check
                         className={cn(
                           "mr-2 h-4 w-4",

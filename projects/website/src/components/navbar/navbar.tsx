@@ -86,7 +86,7 @@ export default function Navbar() {
       <Link
         href="https://discord.gg/kmNfWGA4A8"
         target="_blank"
-        className="hover:opacity-80 transition-all bg-discord-blue text-white px-4 py-1 flex items-center gap-2 justify-center"
+        className="bg-discord-blue flex items-center justify-center gap-2 px-4 py-1 text-white transition-all hover:opacity-80"
       >
         <FaDiscord />
         <span>Join our Discord server</span>
@@ -95,15 +95,15 @@ export default function Navbar() {
       {/* Navbar */}
       <nav
         className={cn(
-          "sticky inset-x-0 top-0 w-full px-2 xs:px-5 py-1 flex justify-between lg:justify-around h-12 items-center backdrop-blur-md border-b border-muted/50 select-none z-50",
+          "xs:px-5 border-muted/50 sticky inset-x-0 top-0 z-50 flex h-12 w-full items-center justify-between border-b px-2 py-1 backdrop-blur-md select-none lg:justify-around",
           hasScrolled ? "bg-landing/75" : "bg-landing"
         )}
       >
         {/* Left */}
-        <div className="flex gap-3 md:gap-4 items-center transition-all ">
+        <div className="flex items-center gap-3 transition-all md:gap-4">
           {/* Branding */}
           <Link
-            className="flex gap-2.5 items-center hover:opacity-85 transition-all "
+            className="flex items-center gap-2.5 transition-all hover:opacity-85"
             href="/"
             draggable={false}
           >
@@ -114,18 +114,18 @@ export default function Navbar() {
               src="https://cdn.fascinated.cc/assets/logos/scoresaber.png"
               alt="ScoreSaber Logo"
             />
-            <h1 className="hidden md:flex text-lg font-bold text-ssr">SSR</h1>
+            <h1 className="text-ssr hidden text-lg font-bold md:flex">SSR</h1>
           </Link>
 
           {/* Links */}
-          <div className="flex gap-3 md:gap-5 items-center transition-all ">
+          <div className="flex items-center gap-3 transition-all md:gap-5">
             {links.map(link => link)}
           </div>
         </div>
 
         {/* Right */}
-        <div className="md:pl-6 flex gap-2 items-center divide-x divide-muted transition-all ">
-          <div className="flex gap-2.5 items-center transition-all pr-2">
+        <div className="divide-muted flex items-center gap-2 divide-x transition-all md:pl-6">
+          <div className="flex items-center gap-2.5 pr-2 transition-all">
             <PlayerAndLeaderboardSearch />
             <Settings />
           </div>
@@ -141,7 +141,7 @@ export default function Navbar() {
 function SimpleNavLink({ content, href }: { content: ReactElement<any>; href: string }) {
   return (
     <Link
-      className="flex gap-3 items-center text-sm hover:opacity-80 transition-all "
+      className="flex items-center gap-3 text-sm transition-all hover:opacity-80"
       href={href}
       target={href.startsWith("/") ? "_self" : "_blank"}
       draggable={false}

@@ -23,10 +23,10 @@ import { EmptyState } from "../../ui/empty-state";
 import AccSaberScoreComponent from "./score/accsaber-score";
 
 const scoreSort = [
-  { name: "AP", value: "ap", icon: <Trophy className="w-4 h-4" /> },
-  { name: "Date", value: "date", icon: <ClockIcon className="w-4 h-4" /> },
-  { name: "Acc", value: "acc", icon: <Target className="w-4 h-4" /> },
-  { name: "Rank", value: "ranking", icon: <Trophy className="w-4 h-4" />, defaultOrder: "asc" },
+  { name: "AP", value: "ap", icon: <Trophy className="h-4 w-4" /> },
+  { name: "Date", value: "date", icon: <ClockIcon className="h-4 w-4" /> },
+  { name: "Acc", value: "acc", icon: <Target className="h-4 w-4" /> },
+  { name: "Rank", value: "ranking", icon: <Trophy className="h-4 w-4" />, defaultOrder: "asc" },
 ];
 
 const scoreTypes = [
@@ -104,10 +104,10 @@ export default function AccSaberPlayerScores({ player, sort, page, type, order }
 
   return (
     <ScoresCard>
-      <div className="w-full flex justify-center">
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 w-full sm:w-[70%] px-4 sm:px-0">
+      <div className="flex w-full justify-center">
+        <div className="flex w-full flex-col items-center justify-between gap-4 px-4 sm:w-[70%] sm:flex-row sm:px-0">
           {/* Type */}
-          <div className="flex flex-wrap justify-center sm:justify-start gap-2 w-full sm:w-auto">
+          <div className="flex w-full flex-wrap justify-center gap-2 sm:w-auto sm:justify-start">
             {scoreTypes.map(type => (
               <Button
                 key={type.value}
@@ -122,7 +122,7 @@ export default function AccSaberPlayerScores({ player, sort, page, type, order }
           </div>
 
           {/* Sort */}
-          <div className="flex flex-wrap justify-center sm:justify-start gap-2 w-full sm:w-auto">
+          <div className="flex w-full flex-wrap justify-center gap-2 sm:w-auto sm:justify-start">
             {scoreSort.map(sortOption => (
               <Button
                 key={sortOption.value}
@@ -139,9 +139,9 @@ export default function AccSaberPlayerScores({ player, sort, page, type, order }
                 {/* Order / Icon */}
                 {sortOption.value === currentSort ? (
                   currentOrder === "desc" ? (
-                    <ArrowDown className="w-4 h-4" />
+                    <ArrowDown className="h-4 w-4" />
                   ) : (
-                    <ArrowUp className="w-4 h-4" />
+                    <ArrowUp className="h-4 w-4" />
                   )
                 ) : (
                   sortOption.icon
@@ -162,7 +162,7 @@ export default function AccSaberPlayerScores({ player, sort, page, type, order }
 
       {scores !== undefined && (
         <>
-          <div className="text-center pt-2">
+          <div className="pt-2 text-center">
             {isError ||
               (scores.items.length === 0 && (
                 <EmptyState
@@ -173,7 +173,7 @@ export default function AccSaberPlayerScores({ player, sort, page, type, order }
               ))}
           </div>
 
-          <div className="grid min-w-full grid-cols-1 divide-y divide-border">
+          <div className="divide-border grid min-w-full grid-cols-1 divide-y">
             {scores.items.map((score: AccSaberScore, index: number) => (
               <div key={index}>
                 <AccSaberScoreComponent key={score.id} score={score} />

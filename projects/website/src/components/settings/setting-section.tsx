@@ -84,7 +84,7 @@ function FormFieldComponent<
 
   return (
     <FormItem
-      className={field.type === "checkbox" ? "flex flex-row items-center space-x-2 space-y-0" : ""}
+      className={field.type === "checkbox" ? "flex flex-row items-center space-y-0 space-x-2" : ""}
     >
       {field.type === "checkbox" ? (
         <>
@@ -92,13 +92,13 @@ function FormFieldComponent<
             <Checkbox checked={formField.value as boolean} onCheckedChange={wrappedOnChange} />
           </FormControl>
           <div className="leading-none">
-            <FormLabel className="block mb-1">{field.label}</FormLabel>
+            <FormLabel className="mb-1 block">{field.label}</FormLabel>
             {field.description && <FormDescription>{field.description}</FormDescription>}
           </div>
         </>
       ) : (
         <>
-          <FormLabel className="block mb-1">{field.label}</FormLabel>
+          <FormLabel className="mb-1 block">{field.label}</FormLabel>
           <FormControl>
             {field.customControl ? (
               field.customControl({
@@ -140,7 +140,7 @@ export function SettingSection<TFormValues extends Record<string, any>>({
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
-        <Icon className="size-5 text-muted-foreground" />
+        <Icon className="text-muted-foreground size-5" />
         <h3 className="text-lg font-medium">{title}</h3>
       </div>
       <div className="space-y-4">

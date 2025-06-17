@@ -78,9 +78,9 @@ export function MapsData({ category, page }: MapsDataProps) {
 
   return (
     <MapFilterProvider>
-      <div className="flex flex-col-reverse gap-2 w-full items-center xl:items-start xl:justify-center xl:flex-row">
-        <article className="w-full 2xl:w-[800px] flex flex-col gap-2">
-          <div className="flex gap-2 w-full">
+      <div className="flex w-full flex-col-reverse items-center gap-2 xl:flex-row xl:items-start xl:justify-center">
+        <article className="flex w-full flex-col gap-2 2xl:w-[800px]">
+          <div className="flex w-full gap-2">
             {categories.map(category => (
               <Button
                 key={category.name}
@@ -92,7 +92,7 @@ export function MapsData({ category, page }: MapsDataProps) {
               >
                 <span className="flex items-center gap-2">
                   <span className="text-2xl">
-                    <category.icon className="w-4 h-4" />
+                    <category.icon className="h-4 w-4" />
                   </span>
                   <span>{category.name}</span>
 
@@ -102,12 +102,12 @@ export function MapsData({ category, page }: MapsDataProps) {
                       side="bottom"
                     >
                       <div
-                        className="flex items-center gap-2 p-1 cursor-pointer"
+                        className="flex cursor-pointer items-center gap-2 p-1"
                         onClick={() => {
                           window.open(category.externalLink, "_blank");
                         }}
                       >
-                        <ExternalLinkIcon className="w-4 h-4" />
+                        <ExternalLinkIcon className="h-4 w-4" />
                       </div>
                     </SimpleTooltip>
                   )}
@@ -119,7 +119,7 @@ export function MapsData({ category, page }: MapsDataProps) {
           {/* Category Render */}
           {selectedCategory.render(page)}
         </article>
-        <div className="w-full xl:w-[400px] flex flex-col gap-2">
+        <div className="flex w-full flex-col gap-2 xl:w-[400px]">
           <Playlists />
           {selectedCategory.showFilter && <MapFilters />}
         </div>

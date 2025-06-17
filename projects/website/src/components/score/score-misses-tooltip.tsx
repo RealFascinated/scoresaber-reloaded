@@ -51,7 +51,7 @@ export function ScoreMissesTooltip({
   return (
     <SimpleTooltip
       display={
-        <div className="flex flex-col w-full">
+        <div className="flex w-full flex-col">
           {!fullCombo ? (
             <>
               <p className="font-semibold">Misses</p>

@@ -25,7 +25,7 @@ export function PlayerRankingMobile({
 
   return (
     <Link href={`/player/${player.id}`}>
-      <div className="flex flex-col w-full bg-[#232323] rounded-lg px-2 py-1 mb-1 gap-1 shadow-sm min-h-[67px] justify-center hover:bg-[#2d2d2d] transition-all cursor-pointer">
+      <div className="mb-1 flex min-h-[67px] w-full cursor-pointer flex-col justify-center gap-1 rounded-lg bg-[#232323] px-2 py-1 shadow-sm transition-all hover:bg-[#2d2d2d]">
         {/* Top row: Rank, Country Rank, and Weekly Change */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -51,13 +51,13 @@ export function PlayerRankingMobile({
           <PlayerAvatar
             profilePicture={player.profilePicture}
             name={player.name}
-            className="flex items-center min-w-[28px]"
+            className="flex min-w-[28px] items-center"
           />
 
           {/* Name */}
           <PlayerName
             name={player.name}
-            className="flex items-center min-w-[90px] max-w-[140px] overflow-hidden flex-1"
+            className="flex max-w-[140px] min-w-[90px] flex-1 items-center overflow-hidden"
           />
 
           {/* PP */}
@@ -65,11 +65,11 @@ export function PlayerRankingMobile({
             pp={player.pp}
             mainPlayer={mainPlayer}
             relativePerformancePoints={relativePerformancePoints}
-            className="min-w-[70px] ml-auto"
+            className="ml-auto min-w-[70px]"
           />
 
           {/* Add Friend */}
-          <div className="size-7 flex items-center justify-center">
+          <div className="flex size-7 items-center justify-center">
             <AddFriend player={player} iconOnly />
           </div>
         </div>

@@ -232,8 +232,8 @@ const PlayerScoreChart = ({ player }: PlayerScoreChartProps) => {
   };
 
   return (
-    <div className="flex justify-center flex-col gap-6">
-      <div className="flex flex-wrap gap-2 items-center">
+    <div className="flex flex-col justify-center gap-6">
+      <div className="flex flex-wrap items-center gap-2">
         <Button
           variant="outline"
           onClick={() => setIsSearchOpen(true)}
@@ -246,7 +246,7 @@ const PlayerScoreChart = ({ player }: PlayerScoreChartProps) => {
         {comparisonPlayers.map(comparisonPlayer => (
           <div
             key={comparisonPlayer.id}
-            className="flex items-center gap-2 bg-accent px-3 py-1 rounded-md"
+            className="bg-accent flex items-center gap-2 rounded-md px-3 py-1"
           >
             <span className="text-sm">{comparisonPlayer.name}</span>
             <Button
@@ -263,7 +263,7 @@ const PlayerScoreChart = ({ player }: PlayerScoreChartProps) => {
 
       <div className="flex items-center gap-2">
         <Switch checked={showTop100} onCheckedChange={setShowTop100} id="top100-mode" />
-        <label htmlFor="top100-mode" className="text-sm text-muted-foreground">
+        <label htmlFor="top100-mode" className="text-muted-foreground text-sm">
           Only Top 100 Scores
         </label>
       </div>
@@ -296,7 +296,7 @@ const PlayerScoreChart = ({ player }: PlayerScoreChartProps) => {
         </>
       )}
       {(!dataPoints || isComparisonLoading) && (
-        <div className="h-[500px] flex items-center justify-center">
+        <div className="flex h-[500px] items-center justify-center">
           <Spinner />
         </div>
       )}

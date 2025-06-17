@@ -32,7 +32,7 @@ export default function OverlayScoreDataView({ overlayData }: OverlayScoreDataPr
       {!!leaderboard && pp && <p>{formatPp(pp)}pp</p>}
 
       {/* Paused */}
-      {overlayData.paused && <p className="text-red-500 italic text-md">Currently Paused</p>}
+      {overlayData.paused && <p className="text-md text-red-500 italic">Currently Paused</p>}
     </div>
   );
 }

@@ -36,7 +36,7 @@ export function ScorePpBadge({ score, leaderboard, showDifference = true }: Scor
 
   return (
     <>
-      <div className="flex flex-col items-center justify-center cursor-default">
+      <div className="flex cursor-default flex-col items-center justify-center">
         <SimpleTooltip
           display={
             <div className="flex flex-col gap-2">

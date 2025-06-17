@@ -16,7 +16,7 @@ export default function BackgroundCover() {
   if (backgroundCover.startsWith("#")) {
     return (
       <div
-        className={`fixed -z-50 object-cover w-screen h-screen pointer-events-none select-none`}
+        className={`pointer-events-none fixed -z-50 h-screen w-screen object-cover select-none`}
         style={{ backgroundColor: backgroundCover }}
       />
     );
@@ -27,7 +27,7 @@ export default function BackgroundCover() {
       src={backgroundCover}
       alt="Background image"
       fetchPriority="high"
-      className={`fixed -z-50 object-cover w-screen h-screen blur-xs brightness-[33%] pointer-events-none select-none`}
+      className={`pointer-events-none fixed -z-50 h-screen w-screen object-cover blur-xs brightness-[33%] select-none`}
       width={1920}
       height={1080}
     />

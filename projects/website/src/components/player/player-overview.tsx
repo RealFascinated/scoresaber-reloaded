@@ -18,10 +18,10 @@ const playerData = [
       const rankChange = statisticChange?.daily?.rank ?? 0;
 
       return (
-        <div className="text-gray-300 flex gap-1 items-center">
+        <div className="flex items-center gap-1 text-gray-300">
           <ChangeOverTime player={player} type={PlayerStatChange.Rank}>
             <Link href={`/ranking/${player.rankPages.global}`}>
-              <p className="hover:brightness-[66%] transition-all ">
+              <p className="transition-all hover:brightness-[66%]">
                 #{formatNumberWithCommas(player.rank)}
               </p>
             </Link>
@@ -41,10 +41,10 @@ const playerData = [
       const rankChange = statisticChange?.daily?.countryRank ?? 0;
 
       return (
-        <div className="text-gray-300 flex gap-1 items-center">
+        <div className="flex items-center gap-1 text-gray-300">
           <ChangeOverTime player={player} type={PlayerStatChange.CountryRank}>
             <Link href={`/ranking/${player.country}/${player.rankPages.country}`}>
-              <p className="hover:brightness-[66%] transition-all ">
+              <p className="transition-all hover:brightness-[66%]">
                 #{formatNumberWithCommas(player.countryRank)}
               </p>
             </Link>
@@ -61,9 +61,9 @@ const playerData = [
       const ppChange = statisticChange?.daily?.pp ?? 0;
 
       return (
-        <div className="text-gray-300 flex gap-1 items-center min-w-0">
+        <div className="flex min-w-0 items-center gap-1 text-gray-300">
           <ChangeOverTime player={player} type={PlayerStatChange.PerformancePoints}>
-            <p className="hover:brightness-[66%] transition-all text-pp truncate">
+            <p className="text-pp truncate transition-all hover:brightness-[66%]">
               {formatPp(player.pp)}pp
             </p>
           </ChangeOverTime>
@@ -80,7 +80,7 @@ type PlayerOverviewProps = {
 
 export default function PlayerOverview({ player }: PlayerOverviewProps) {
   return (
-    <div className="flex gap-2 flex-wrap justify-center items-center lg:justify-start lg:items-start">
+    <div className="flex flex-wrap items-center justify-center gap-2 lg:items-start lg:justify-start">
       {playerData.map((subName, index) => {
         // Check if the player is inactive or banned and if the data should be shown
         if (!subName.showWhenInactiveOrBanned && (player.inactive || player.banned)) {
@@ -88,7 +88,7 @@ export default function PlayerOverview({ player }: PlayerOverviewProps) {
         }
 
         return (
-          <div key={index} className="flex gap-1 items-center">
+          <div key={index} className="flex items-center gap-1">
             {subName.icon && subName.icon(player)}
             {subName.render && subName.render(player)}
           </div>

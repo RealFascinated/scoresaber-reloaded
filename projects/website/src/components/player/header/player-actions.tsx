@@ -81,7 +81,7 @@ export default function PlayerActions({ player }: { player: ScoreSaberPlayer }) 
 
       {/* Divider */}
       <div className="flex items-center">
-        <div className="h-7 w-[1px] bg-border" />
+        <div className="bg-border h-7 w-[1px]" />
       </div>
 
       {/* Actions */}

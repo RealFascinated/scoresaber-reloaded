@@ -57,7 +57,7 @@ const settings: {
             <SimpleTooltip display="Reset to default background">
               <button
                 type="button"
-                className="rounded-md p-2 hover:bg-secondary/50 transition-colors"
+                className="hover:bg-secondary/50 rounded-md p-2 transition-colors"
                 onClick={async () => {
                   props.field.onChange("https://cdn.fascinated.cc/assets/background.jpg");
                   toast("Background cover reset to default");

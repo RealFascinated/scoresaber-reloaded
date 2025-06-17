@@ -40,7 +40,7 @@ export function FriendRanking() {
   }, [getFriendsPage]);
 
   return (
-    <Card className="h-fit flex flex-col gap-2">
+    <Card className="flex h-fit flex-col gap-2">
       <div>
         <p className="font-bold">Friend Ranking</p>
         <p className="text-sm text-gray-400">See how your friends rank compared to each other.</p>
@@ -48,7 +48,7 @@ export function FriendRanking() {
 
       {/* Loading */}
       {!friendsPage && (
-        <div className="flex w-full justify-center items-center">
+        <div className="flex w-full items-center justify-center">
           <Spinner />
         </div>
       )}
@@ -57,7 +57,7 @@ export function FriendRanking() {
       {friendsPage && (
         <div className="flex flex-col gap-2">
           <>
-            <div className="divide-y divide-border">
+            <div className="divide-border divide-y">
               {friendsPage.items.map((player, index) => (
                 <FriendRankingPlayer key={index} player={player} />
               ))}

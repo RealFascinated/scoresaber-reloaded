@@ -19,40 +19,40 @@ export function MapStats({ beatSaver }: MapAndScoreData) {
     <div className="flex flex-col gap-2">
       {/* Map Stats */}
       {beatSaver && beatSaver.difficulty && (
-        <div className="flex flex-wrap gap-2 justify-center">
+        <div className="flex flex-wrap justify-center gap-2">
           <StatValue
             name="Length"
-            icon={<TimerIcon className="w-4 h-4" />}
+            icon={<TimerIcon className="h-4 w-4" />}
             value={formatTime(metadata.duration)}
           />
           <StatValue
             name="BPM"
-            icon={<MusicIcon className="w-4 h-4" />}
+            icon={<MusicIcon className="h-4 w-4" />}
             value={formatNumberWithCommas(metadata.bpm)}
           />
           <StatValue
             name="NPS"
-            icon={<DrumIcon className="w-4 h-4" />}
+            icon={<DrumIcon className="h-4 w-4" />}
             value={beatSaver.difficulty.nps.toFixed(2)}
           />
           <StatValue
             name="NJS"
-            icon={<GaugeIcon className="w-4 h-4" />}
+            icon={<GaugeIcon className="h-4 w-4" />}
             value={beatSaver.difficulty.njs.toFixed(2)}
           />
           <StatValue
             name="Notes"
-            icon={<CubeIcon className="w-4 h-4" />}
+            icon={<CubeIcon className="h-4 w-4" />}
             value={formatNumberWithCommas(beatSaver.difficulty.notes)}
           />
           <StatValue
             name="Bombs"
-            icon={<BombIcon className="w-4 h-4" />}
+            icon={<BombIcon className="h-4 w-4" />}
             value={formatNumberWithCommas(beatSaver.difficulty.bombs)}
           />
           <StatValue
             name="Obstacles"
-            icon={<BrickWallIcon className="w-4 h-4" />}
+            icon={<BrickWallIcon className="h-4 w-4" />}
             value={formatNumberWithCommas(beatSaver.difficulty.obstacles)}
           />
         </div>

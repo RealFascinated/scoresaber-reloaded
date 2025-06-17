@@ -23,8 +23,8 @@ import { EmptyState } from "../../ui/empty-state";
 import ScoreSaberScoreDisplay from "./score/score";
 
 const scoreSort = [
-  { name: "Top", value: "top", icon: <TrendingUpIcon className="w-4 h-4" /> },
-  { name: "Recent", value: "recent", icon: <ClockIcon className="w-4 h-4" /> },
+  { name: "Top", value: "top", icon: <TrendingUpIcon className="h-4 w-4" /> },
+  { name: "Recent", value: "recent", icon: <ClockIcon className="h-4 w-4" /> },
 ];
 
 export default function ScoreSaberPlayerScores({
@@ -116,7 +116,7 @@ export default function ScoreSaberPlayerScores({
 
   return (
     <ScoresCard>
-      <div className="flex flex-col items-center w-full gap-2 relative">
+      <div className="relative flex w-full flex-col items-center gap-2">
         <div className="flex gap-2">
           {scoreSort.map(sortOption => (
             <Button
@@ -132,7 +132,7 @@ export default function ScoreSaberPlayerScores({
           ))}
         </div>
 
-        <div className="relative w-72 lg:absolute right-0 top-0">
+        <div className="relative top-0 right-0 w-72 lg:absolute">
           <Input
             type="search"
             placeholder="Search..."
@@ -154,7 +154,7 @@ export default function ScoreSaberPlayerScores({
 
       {scores !== undefined && (
         <>
-          <div className="text-center pt-2">
+          <div className="pt-2 text-center">
             {isError ||
               (scores.items.length === 0 && (
                 <EmptyState
@@ -165,7 +165,7 @@ export default function ScoreSaberPlayerScores({
               ))}
           </div>
 
-          <div className="grid min-w-full grid-cols-1 divide-y divide-border">
+          <div className="divide-border grid min-w-full grid-cols-1 divide-y">
             {scores.items.map((score, index) => (
               <div key={index}>
                 <ScoreSaberScoreDisplay

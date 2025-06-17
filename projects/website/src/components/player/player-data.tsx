@@ -139,11 +139,11 @@ export default function PlayerData({
   const showRankings = width > 1536 && !player.inactive && !player.banned;
 
   return (
-    <div className="flex gap-2 justify-center w-full">
+    <div className="flex w-full justify-center gap-2">
       <article className="flex flex-1 flex-col gap-2">
         <PlayerHeader player={player} />
         {(!player.inactive || player.badges.length > 0) && (
-          <Card className="gap-2 flex flex-col">
+          <Card className="flex flex-col gap-2">
             <PlayerBadges player={player} />
             {!player.inactive && <PlayerViews player={player} />}
           </Card>
@@ -163,7 +163,7 @@ export default function PlayerData({
       </article>
 
       {showRankings && (
-        <aside className="w-[400px] hidden 2xl:flex flex-col gap-2">
+        <aside className="hidden w-[400px] flex-col gap-2 2xl:flex">
           <PlayerRankingMini type="Global" player={player} />
           <PlayerRankingMini type="Country" player={player} />
         </aside>

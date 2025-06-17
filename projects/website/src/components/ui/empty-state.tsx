@@ -29,16 +29,16 @@ export function EmptyState({ icon, title, description, className }: EmptyStatePr
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center min-h-[200px] p-8 rounded-xl",
-        "bg-accent-deep/50 border border-border/50 backdrop-blur-sm",
+        "flex min-h-[200px] flex-col items-center justify-center rounded-xl p-8",
+        "bg-accent-deep/50 border-border/50 border backdrop-blur-sm",
         className
       )}
     >
       <div className="mb-6">
-        {icon || <ChartBarIcon className="w-10 h-10 text-gray-400 dark:text-gray-500" />}
+        {icon || <ChartBarIcon className="h-10 w-10 text-gray-400 dark:text-gray-500" />}
       </div>
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">{title}</h3>
-      <p className="text-sm text-gray-500 dark:text-gray-400 text-center max-w-[400px] leading-relaxed">
+      <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-gray-100">{title}</h3>
+      <p className="max-w-[400px] text-center text-sm leading-relaxed text-gray-500 dark:text-gray-400">
         {description}
       </p>
     </div>
