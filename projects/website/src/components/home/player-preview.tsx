@@ -14,7 +14,7 @@ export function PlayerPreview() {
   const mainPlayerId = useLiveQuery(() => database.getMainPlayerId());
 
   const { data: player, isLoading } = useQuery({
-    queryKey: ["player-preview", mainPlayerId],
+    queryKey: ["player-preview-home", mainPlayerId],
     queryFn: () =>
       ssrApi.getScoreSaberPlayer(mainPlayerId!, {
         createIfMissing: true,

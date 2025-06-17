@@ -14,7 +14,7 @@ export function CountryRankDisplay({
   countryRank,
   country,
   className,
-  flagSize = 14,
+  flagSize = 10,
 }: CountryRankDisplayProps) {
   return (
     <div className={cn("flex items-center", className)}>

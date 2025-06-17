@@ -1,15 +1,16 @@
 "use client";
 
+import { getPlayerRankingColumnWidth } from "@/common/utils";
+import { PlayerRanking } from "@/components/ranking/player-ranking";
 import SimplePagination from "@/components/simple-pagination";
 import useDatabase from "@/hooks/use-database";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { Page, Pagination } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { useLiveQuery } from "dexie-react-hooks";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Card from "../../card";
 import { Spinner } from "../../spinner";
-import { FriendRankingPlayer } from "./friend-ranking-player";
 
 export function FriendRanking() {
   const isMobile = useIsMobile();
@@ -39,6 +40,10 @@ export function FriendRanking() {
     getFriendsPage().then(setFriendsPage);
   }, [getFriendsPage]);
 
+  const firstColumnWidth = useMemo(() => {
+    return getPlayerRankingColumnWidth(friendsPage?.items ?? []);
+  }, [friendsPage]);
+
   return (
     <Card className="flex h-fit flex-col gap-2">
       <div>
@@ -59,7 +64,13 @@ export function FriendRanking() {
           <>
             <div className="divide-border divide-y">
               {friendsPage.items.map((player, index) => (
-                <FriendRankingPlayer key={index} player={player} />
+                <PlayerRanking
+                  key={player.id}
+                  player={player}
+                  relativePerformancePoints={false}
+                  mainPlayer={friendsPage.items[0]}
+                  firstColumnWidth={firstColumnWidth}
+                />
               ))}
             </div>
 

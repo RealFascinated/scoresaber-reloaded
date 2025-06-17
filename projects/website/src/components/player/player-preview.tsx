@@ -93,12 +93,14 @@ export default function PlayerPreview({
   playerId,
   children,
   className,
+  style,
   delay = 100,
   useLink = true,
 }: {
   playerId: string;
   children: React.ReactNode;
   className?: string;
+  style?: React.CSSProperties;
   delay?: number;
   useLink?: boolean;
 }) {
@@ -129,6 +131,7 @@ export default function PlayerPreview({
         onMouseEnter={() => setIsOpen(true)}
         onMouseLeave={() => setIsOpen(false)}
         className={cn("block w-fit leading-none", className)}
+        style={style}
       >
         {children}
       </PopoverTrigger>

@@ -1,15 +1,20 @@
 "use client";
 
+import { cn } from "@/common/utils";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import { useLiveQuery } from "dexie-react-hooks";
-import { UserPlus } from "lucide-react";
+import { UserMinus, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 import useDatabase from "../../hooks/use-database";
 import SimpleTooltip from "../simple-tooltip";
 import { Button } from "../ui/button";
 
-type Props = {
+export default function FriendAction({
+  player,
+  iconOnly,
+  className,
+}: {
   /**
    * The ID of the players profile to claim.
    */
@@ -19,9 +24,12 @@ type Props = {
    * Whether to show the icon only.
    */
   iconOnly?: boolean;
-};
 
-export default function AddFriend({ player, iconOnly }: Props) {
+  /**
+   * The class name to apply to the button.
+   */
+  className?: string;
+}) {
   const { id, name } = player;
 
   const database = useDatabase();
@@ -33,7 +41,23 @@ export default function AddFriend({ player, iconOnly }: Props) {
    */
   async function addFriend() {
     await database.addFriend(id);
-    toast(`You have added ${name} as a friend.`);
+    toast.success(
+      <p>
+        You have added <b>{name}</b> as a friend.
+      </p>
+    );
+  }
+
+  /**
+   * Removes this player as a friend
+   */
+  async function removeFriend() {
+    await database.removeFriend(id);
+    toast.success(
+      <p>
+        You have removed <b>{name}</b> as a friend.
+      </p>
+    );
   }
 
   if (!database) {
@@ -44,21 +68,34 @@ export default function AddFriend({ player, iconOnly }: Props) {
     return null;
   }
 
-  // If the player is already a friend, don't show the button
-  if (isFriend || playerId == id) {
+  // Don't show the button for the current user
+  if (playerId == id) {
     return null;
   }
 
+  const icon = isFriend ? (
+    <UserMinus className="size-5 text-red-300" />
+  ) : (
+    <UserPlus className="size-5 text-white" />
+  );
+
+  const tooltipText = isFriend ? (
+    <p>
+      Remove <b>{name}</b> as a friend.
+    </p>
+  ) : (
+    <p>
+      Add <b>{name}</b> as a friend!
+    </p>
+  );
+
   return (
-    <SimpleTooltip display={<p>Add {name} as a friend!</p>} side={"bottom"}>
-      <div onClick={addFriend} className="cursor-pointer">
-        {iconOnly ? (
-          <UserPlus className="text-primary hover:text-primary/80 size-5 transition-colors" />
-        ) : (
-          <Button variant={"outline"}>
-            <UserPlus className="text-primary size-5" />
-          </Button>
-        )}
+    <SimpleTooltip display={tooltipText} side={"bottom"}>
+      <div
+        onClick={isFriend ? removeFriend : addFriend}
+        className={cn("w-fit cursor-pointer", className)}
+      >
+        {iconOnly ? icon : <Button variant={"outline"}>{icon}</Button>}
       </div>
     </SimpleTooltip>
   );

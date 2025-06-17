@@ -1,5 +1,6 @@
 "use client";
 
+import { getPlayerRankingColumnWidth } from "@/common/utils";
 import Card from "@/components/card";
 import CountryFlag from "@/components/country-flag";
 import SimplePagination from "@/components/simple-pagination";
@@ -14,13 +15,13 @@ import { useQuery } from "@tanstack/react-query";
 import { useLiveQuery } from "dexie-react-hooks";
 import { LinkIcon } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { FancyLoader } from "../fancy-loader";
+import AddFriend from "../friend/add-friend";
 import SimpleTooltip from "../simple-tooltip";
 import { Button } from "../ui/button";
 import Combobox from "../ui/combo-box";
 import { PlayerRanking } from "./player-ranking";
-import { PlayerRankingMobile } from "./player-ranking-mobile";
 
 type RankingDataProps = {
   initialPage: number;
@@ -48,7 +49,7 @@ function RankingFilters({
   mainPlayerCountry,
 }: RankingFiltersProps) {
   return (
-    <Card className="order-1 mb-2 h-full w-full gap-4 lg:order-2 lg:mb-0 lg:w-[25%]">
+    <Card className="order-1 mb-2 h-full w-full gap-4 xl:order-2 xl:mb-0 xl:w-[25%]">
       <p className="text-lg">Filters</p>
       <div className="flex flex-col gap-4">
         <Combobox<string | undefined>
@@ -162,8 +163,12 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
     navigation.changePageUrl(buildPageUrl(currentCountry, currentPage));
   }, [currentPage, currentCountry, navigation]);
 
+  const firstColumnWidth = useMemo(() => {
+    return getPlayerRankingColumnWidth(rankingData?.players ?? []);
+  }, [rankingData]);
+
   return (
-    <div className="flex w-full flex-col justify-center lg:flex-row lg:gap-2">
+    <div className="flex w-full flex-col justify-center xl:flex-row xl:gap-2">
       <RankingFilters
         currentCountry={currentCountry}
         setCurrentCountry={setCurrentCountry}
@@ -171,7 +176,7 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
         mainPlayerCountry={mainPlayer?.country}
       />
 
-      <Card className="order-2 h-full w-full gap-4 lg:order-1 lg:w-[50%]">
+      <Card className="order-2 h-full w-full gap-4 xl:order-1 xl:w-[50%]">
         <RankingHeader
           currentCountry={currentCountry}
           showRelativePPDifference={showRelativePPDifference}
@@ -201,23 +206,22 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
         {rankingData && (
           <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-2">
-              {rankingData.players.map(player =>
-                isMobile ? (
-                  <PlayerRankingMobile
-                    key={player.id}
-                    player={player}
-                    relativePerformancePoints={showRelativePPDifference}
-                    mainPlayer={mainPlayer}
-                  />
-                ) : (
-                  <PlayerRanking
-                    key={player.id}
-                    player={player}
-                    relativePerformancePoints={showRelativePPDifference}
-                    mainPlayer={mainPlayer}
-                  />
-                )
-              )}
+              {rankingData.players.map(player => (
+                <div key={player.id} className="grid grid-cols-[1fr_25px] gap-3">
+                  <div className="flex-grow">
+                    <PlayerRanking
+                      player={player}
+                      relativePerformancePoints={showRelativePPDifference}
+                      mainPlayer={mainPlayer}
+                      firstColumnWidth={firstColumnWidth}
+                    />
+                  </div>
+
+                  <div className="flex h-full w-full items-center justify-center">
+                    <AddFriend player={player} className="bg-ssr rounded-full p-1.5" iconOnly />
+                  </div>
+                </div>
+              ))}
             </div>
 
             <SimplePagination
