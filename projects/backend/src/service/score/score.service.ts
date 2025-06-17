@@ -324,8 +324,8 @@ export class ScoreService {
       PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>
     >().setItemsPerPage(25);
 
-    // First get total count, limited to 1000
-    const countResult = await ScoreSaberScoreModel.aggregate([
+    // Get both count and scores in a single aggregation
+    const [result] = await ScoreSaberScoreModel.aggregate([
       {
         $match: {
           ...(timeframe === "all" ? {} : { timestamp: { $gte: getDaysAgoDate(daysAgo) } }),
@@ -335,33 +335,22 @@ export class ScoreService {
       { $sort: { pp: -1 } },
       { $limit: 1000 },
       {
-        $count: "total",
+        $facet: {
+          total: [{ $count: "count" }],
+          scores: [{ $skip: (page - 1) * 25 }, { $limit: 25 }],
+        },
       },
     ]);
 
-    const total = countResult[0]?.total || 0;
+    const total = result.total[0]?.count || 0;
     pagination.setTotalItems(total);
 
-    return pagination.getPage(page, async fetchItems => {
-      const foundScores = await ScoreSaberScoreModel.aggregate([
-        {
-          $match: {
-            ...(timeframe === "all" ? {} : { timestamp: { $gte: getDaysAgoDate(daysAgo) } }),
-            pp: { $gt: 0 },
-          },
-        },
-        { $sort: { pp: -1 } },
-        { $limit: 1000 }, // Limit to top 1000 scores before pagination
-        { $skip: fetchItems.start },
-        { $limit: fetchItems.end - fetchItems.start },
-      ]);
-
-      // Convert raw scores to ScoreSaberScore objects
-      const scores = foundScores.map(scoreToObject);
+    return pagination.getPage(page, async () => {
+      const scores = result.scores.map(scoreToObject);
 
       // Batch fetch leaderboards
-      const leaderboardPromises = scores.map(score =>
-        LeaderboardService.getLeaderboard(score.leaderboardId + "", {
+      const leaderboardPromises = scores.map((score: ScoreSaberScore) =>
+        LeaderboardService.getLeaderboard(score.leaderboardId.toString(), {
           includeBeatSaver: true,
           cacheOnly: true,
         })
@@ -369,7 +358,9 @@ export class ScoreService {
       const leaderboardResponses = await Promise.all(leaderboardPromises);
 
       // Batch fetch player info
-      const uniquePlayerIds = [...new Set(scores.map(score => score.playerId))];
+      const uniquePlayerIds = [
+        ...new Set(scores.map((score: ScoreSaberScore) => score.playerId.toString())),
+      ] as string[];
       const playerPromises = uniquePlayerIds.map(playerId =>
         ScoreSaberService.getCachedPlayer(playerId, true).catch(() => undefined)
       );
@@ -380,14 +371,14 @@ export class ScoreService {
 
       // Process scores in parallel
       const processedScores = await Promise.all(
-        scores.map(async (score, index) => {
+        scores.map(async (score: ScoreSaberScore, index: number) => {
           const leaderboardResponse = leaderboardResponses[index];
           if (!leaderboardResponse) {
             return null;
           }
 
           const { leaderboard, beatsaver } = leaderboardResponse;
-          const player = playerMap.get(score.playerId);
+          const player = playerMap.get(score.playerId.toString());
 
           if (player) {
             score.playerInfo = {
@@ -396,7 +387,7 @@ export class ScoreService {
             };
           } else {
             score.playerInfo = {
-              id: score.playerId,
+              id: score.playerId.toString(),
             };
           }
 
@@ -530,13 +521,13 @@ export class ScoreService {
    * @returns whether the score is in the top 50 global scores
    */
   public static async isTop50GlobalScore(score: ScoreSaberScore | ScoreSaberScoreToken) {
-    // No need to do a db call if the score is bad
-    if (score.pp <= 0 || score.rank < 10) {
+    // Only check top 50 if score is in top 10 and has positive PP
+    if (score.pp <= 0 || score.rank >= 10) {
       return false;
     }
 
     const { items: top50Scores } = await ScoreService.getTopScores("all", 1);
     const lowestPp = top50Scores.reduce((min, score) => Math.min(min, score.score.pp), Infinity);
-    return score.pp > lowestPp;
+    return score.pp >= lowestPp;
   }
 }
