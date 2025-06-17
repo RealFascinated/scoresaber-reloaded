@@ -234,6 +234,23 @@ app.onStop(async () => {
   });
 });
 
+// Add signal handlers for graceful shutdown
+const signals = ["SIGTERM", "SIGINT"] as const;
+for (const signal of signals) {
+  process.on(signal, async () => {
+    Logger.info(`Received ${signal}, starting graceful shutdown...`);
+
+    // Stop the Elysia server
+    await app.stop();
+
+    // Close MongoDB connection
+    await mongoose.disconnect();
+
+    // Exit process
+    process.exit(0);
+  });
+}
+
 app.listen({
   port: 8080,
   idleTimeout: 120, // 2 minutes

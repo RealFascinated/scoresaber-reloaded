@@ -35,6 +35,10 @@ ARG PORT=8080
 ENV PORT $PORT
 EXPOSE $PORT
 
+# Add healthcheck
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:${PORT}/health || exit 1
+
 WORKDIR /app/projects/backend
 CMD ["bun", "dist/index.js"]
 
