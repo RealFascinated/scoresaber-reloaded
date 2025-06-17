@@ -36,5 +36,5 @@ ENV PORT $PORT
 EXPOSE $PORT
 
 WORKDIR /app/projects/backend
-CMD ["bun", "--smol", "dist/index.js"]
+CMD ["bun", "dist/index.js"]
 

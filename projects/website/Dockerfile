@@ -47,4 +47,4 @@ ENV HOSTNAME="0.0.0.0"
 ENV PORT=3000
 
 # Use the correct path to server.js
-CMD ["bun", "--bun", "--smol", "server.js"]
+CMD ["bun", "--bun", "server.js"]
