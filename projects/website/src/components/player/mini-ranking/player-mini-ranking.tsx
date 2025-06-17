@@ -83,7 +83,11 @@ export default function PlayerMiniRanking({ type, player }: PlayerMiniRankingPro
                 <p className="text-gray-400">#{formatNumberWithCommas(rank)}</p>
                 <div className="flex items-start gap-2">
                   <div className="flex flex-col items-start">
-                    <PlayerPreview playerId={playerRanking.id}>
+                    <PlayerPreview
+                      playerId={playerRanking.id}
+                      delay={750}
+                      className="cursor-pointer"
+                    >
                       <div className="flex flex-col items-start">
                         <PlayerInfo
                           className="!flex w-[170px] !items-start"
