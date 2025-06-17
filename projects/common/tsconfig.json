@@ -12,6 +12,8 @@
     "isolatedModules": true,
     "strict": true,
     "incremental": true,
+    "sourceMap": true,
+    "declarationMap": true,
     "baseUrl": "./",
     "paths": {
       "@ssr/*": ["dist/*"] // This is crucial for resolving the imports correctly

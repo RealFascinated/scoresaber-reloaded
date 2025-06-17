@@ -5,7 +5,10 @@ import Logger from "@ssr/common/logger";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { PlayerDocument, PlayerModel } from "@ssr/common/model/player";
 import { PlayerHistoryEntryModel } from "@ssr/common/model/player/player-history-entry";
-import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
+import {
+  ScoreSaberScore,
+  ScoreSaberScoreModel,
+} from "@ssr/common/model/score/impl/scoresaber-score";
 import { AccBadges } from "@ssr/common/player/acc-badges";
 import { PlayerAccuracies } from "@ssr/common/player/player-accuracies";
 import { PlayerRankedPpsResponse } from "@ssr/common/response/player-ranked-pps-response";
@@ -267,17 +270,29 @@ export class PlayerService {
     playerId: string,
     boundary: number = 1
   ): Promise<number[]> {
-    await PlayerService.ensurePlayerExists(playerId);
+    // Use aggregation to calculate boundaries directly in database
+    const result = await ScoreSaberScoreModel.aggregate([
+      // Match ranked scores for the player
+      {
+        $match: {
+          playerId: playerId,
+          pp: { $gt: 0 },
+        },
+      },
+      // Sort by pp in descending order
+      {
+        $sort: { pp: -1 },
+      },
+      // Group to get the array of PPs
+      {
+        $group: {
+          _id: null,
+          pps: { $push: "$pp" },
+        },
+      },
+    ]);
 
-    // Use aggregation to get sorted PPs directly from database
-    const sortedPps = await ScoreService.getPlayerScores(playerId, {
-      ranked: true,
-      sort: "pp",
-      projection: { pp: 1 },
-      includeLeaderboard: false,
-    }).then(scores => scores.map(score => score.score.pp));
-
-    if (sortedPps.length === 0) {
+    if (!result.length || !result[0].pps.length) {
       return [0];
     }
 
@@ -285,7 +300,7 @@ export class PlayerService {
     const boundaries: number[] = [];
     for (let i = 1; i <= boundary; i++) {
       boundaries.push(
-        ApiServiceRegistry.getInstance().getScoreSaberService().calcPpBoundary(sortedPps, i)
+        ApiServiceRegistry.getInstance().getScoreSaberService().calcPpBoundary(result[0].pps, i)
       );
     }
 
@@ -355,54 +370,57 @@ export class PlayerService {
     };
 
     // Use aggregation to calculate averages in the database
-    const result = await ScoreService.getPlayerScores(playerId, {
-      projection: {
-        accuracy: 1,
-        pp: 1,
+    const result = await ScoreSaberScoreModel.aggregate([
+      // Match scores for the player with valid accuracy values
+      {
+        $match: {
+          playerId: playerId,
+          accuracy: { $gte: 0, $lte: 100 },
+        },
       },
-      includeLeaderboard: false,
-    });
-
-    // Filter out any scores with invalid accuracy values
-    const validScores = result.filter(
-      playerScore =>
-        Number.isFinite(playerScore.score.accuracy) &&
-        playerScore.score.accuracy >= 0 &&
-        playerScore.score.accuracy <= 100
-    );
-
-    if (validScores.length === 0) {
-      return accuracies;
-    }
-
-    // Process scores in parallel using Promise.all
-    const [unrankedStats, totalStats] = await Promise.all([
-      // Process unranked scores
-      Promise.all(
-        validScores
-          .filter(score => score.score.pp === 0)
-          .map(async score => ({
-            accuracy: score.score.accuracy,
-            count: 1,
-          }))
-      ),
-      // Process all scores
-      Promise.all(
-        validScores.map(async score => ({
-          accuracy: score.score.accuracy,
-          count: 1,
-        }))
-      ),
+      // Group and calculate averages
+      {
+        $facet: {
+          // Calculate average for all scores
+          totalStats: [
+            {
+              $group: {
+                _id: null,
+                totalAccuracy: { $sum: "$accuracy" },
+                count: { $sum: 1 },
+              },
+            },
+          ],
+          // Calculate average for unranked scores (pp = 0)
+          unrankedStats: [
+            {
+              $match: { pp: 0 },
+            },
+            {
+              $group: {
+                _id: null,
+                totalAccuracy: { $sum: "$accuracy" },
+                count: { $sum: 1 },
+              },
+            },
+          ],
+        },
+      },
     ]);
 
-    // Calculate averages
-    const unrankedSum = unrankedStats.reduce((sum, stat) => sum + stat.accuracy, 0);
-    const unrankedCount = unrankedStats.reduce((sum, stat) => sum + stat.count, 0);
-    const totalSum = totalStats.reduce((sum, stat) => sum + stat.accuracy, 0);
-    const totalCount = totalStats.reduce((sum, stat) => sum + stat.count, 0);
+    if (result.length > 0) {
+      const { totalStats, unrankedStats } = result[0];
 
-    accuracies.unrankedAccuracy = unrankedCount > 0 ? unrankedSum / unrankedCount : 0;
-    accuracies.averageAccuracy = totalCount > 0 ? totalSum / totalCount : 0;
+      // Calculate total average accuracy
+      if (totalStats.length > 0) {
+        accuracies.averageAccuracy = totalStats[0].totalAccuracy / totalStats[0].count;
+      }
+
+      // Calculate unranked average accuracy
+      if (unrankedStats.length > 0) {
+        accuracies.unrankedAccuracy = unrankedStats[0].totalAccuracy / unrankedStats[0].count;
+      }
+    }
 
     return accuracies;
   }

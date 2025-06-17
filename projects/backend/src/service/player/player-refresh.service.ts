@@ -170,37 +170,21 @@ export class PlayerRefreshService {
     Logger.info(`Found ${playerIds.size} active players from ScoreSaber API`);
 
     // Get all player IDs from database
-    const allPlayerIds = await PlayerModel.find({}, { id: 1 });
+    const allPlayerIds = await PlayerModel.find({}, { _id: 1 });
     Logger.info(`Total players in database: ${allPlayerIds.length}`);
 
-    // Check each player's status directly
-    for (const { id } of allPlayerIds) {
-      if (!playerIds.has(id)) {
-        try {
-          // Try to fetch player directly from ScoreSaber
-          const playerResponse = await ApiServiceRegistry.getInstance()
-            .getScoreSaberService()
-            .lookupPlayer(id);
-
-          // If we can't find the player, mark them as inactive
-          if (!playerResponse) {
-            await PlayerModel.updateOne({ id }, { $set: { inactive: true } });
-            Logger.info(`Marked player ${id} as inactive - not found on ScoreSaber`);
-          }
-        } catch (error) {
-          Logger.error(`Error checking player ${id}: ${error}`);
-        }
+    let newInactivePlayers = 0;
+    // Mark players not in the active list as inactive
+    for (const { _id } of allPlayerIds) {
+      if (!playerIds.has(_id)) {
+        await PlayerModel.updateOne({ _id }, { $set: { inactive: true } });
+        Logger.info(`Marked player ${_id} as inactive`);
+        newInactivePlayers++;
       }
     }
 
     const inactivePlayers = await PlayerModel.countDocuments({ inactive: true });
-    Logger.info(`Total inactive players after update: ${inactivePlayers}`);
 
-    Logger.info(
-      `Finished tracking player statistics in ${(performance.now() - now.getTime()).toFixed(0)}ms\n` +
-        `Successfully processed: ${successCount} players\n` +
-        `Failed to process: ${errorCount} players`
-    );
     logToChannel(
       DiscordChannels.backendLogs,
       new EmbedBuilder()
@@ -210,9 +194,16 @@ export class PlayerRefreshService {
             `Successfully processed: ${successCount} players`,
             `Failed to process: ${errorCount} players`,
             `Inactive players (in db): ${inactivePlayers}`,
+            `New inactive players: ${newInactivePlayers}`,
           ].join("\n")
         )
         .setColor("#00ff00")
+    );
+    Logger.info(
+      `Finished tracking player statistics in ${(performance.now() - now.getTime()).toFixed(0)}ms\n` +
+        `Successfully processed: ${successCount} players\n` +
+        `Failed to process: ${errorCount} players\n` +
+        `New inactive players: ${newInactivePlayers} (total inactive players: ${inactivePlayers})`
     );
   }
 }
