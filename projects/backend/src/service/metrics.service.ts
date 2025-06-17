@@ -9,7 +9,6 @@ import EventLoopTimersMetric from "../metrics/impl/backend/event-loop-timers";
 import MemoryUsageMetric from "../metrics/impl/backend/memory-usage";
 import RouteLatencyMetric from "../metrics/impl/backend/route-latency";
 import RequestsPerSecondMetric from "../metrics/impl/backend/total-requests";
-import BeatSaverWebsocketMetric from "../metrics/impl/beatsaver/beatsaver-websocket-metrics";
 import MongoDbSizeMetric from "../metrics/impl/database/mongo-db-size";
 import ActiveAccountsMetric from "../metrics/impl/player/active-accounts";
 import ActivePlayerHmdStatisticMetric from "../metrics/impl/player/active-player-hmd-statistic";
@@ -54,9 +53,6 @@ export enum MetricType {
 
   // Database metrics
   MONGO_DB_SIZE = "mongo-db-size",
-
-  // Beatsaver metrics
-  BEATSAVER_WEBSOCKET_MAP_METRICS = "beatsaver-websocket-map-metrics",
 }
 
 export default class MetricsService {
@@ -105,9 +101,6 @@ export default class MetricsService {
 
     // Database metrics
     this.registerMetric(new MongoDbSizeMetric());
-
-    // Beatsaver metrics
-    this.registerMetric(new BeatSaverWebsocketMetric());
 
     this.initMetrics();
     this.setupFlushTimer();
