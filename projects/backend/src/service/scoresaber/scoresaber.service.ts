@@ -3,6 +3,7 @@ import { DetailType } from "@ssr/common/detail-type";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger from "@ssr/common/logger";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
+import { PlayerModel } from "@ssr/common/model/player";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import {
   scoreSaberCachedPlayerToObject,
@@ -93,6 +94,7 @@ export default class ScoreSaberService {
               getDaysAgoDate(30)
             ),
             PlayerService.getPlayerHMD(playerToken.id),
+            PlayerService.updatePlayerName(playerToken.id, playerToken.name),
           ]);
 
         // Calculate all statistic changes in parallel
@@ -392,5 +394,43 @@ export default class ScoreSaberService {
     }
 
     return result.slice(0, 5); // Ensure we return exactly 5 players
+  }
+
+  /**
+   * Searches for players by name.
+   *
+   * @param query the query to search for
+   * @returns the players that match the query
+   */
+  public static async searchPlayers(query: string): Promise<ScoreSaberPlayer[]> {
+    // Run ScoreSaber API call and database query in parallel
+    const [scoreSaberResponse, foundPlayers] = await Promise.all([
+      ApiServiceRegistry.getInstance().getScoreSaberService().searchPlayers(query),
+      query.length > 0
+        ? PlayerModel.find({
+            name: { $regex: query, $options: "i" },
+          }).select(["_id", "name"])
+        : [],
+    ]);
+
+    const scoreSaberPlayerTokens = scoreSaberResponse?.players;
+
+    // Merge their ids
+    const playerIds = foundPlayers.map(player => player._id);
+    playerIds.push(...(scoreSaberPlayerTokens?.map(token => token.id) ?? []));
+
+    // Deduplicate the player ids
+    const uniquePlayerIds = [...new Set(playerIds)];
+
+    // Get players from ScoreSaber
+    return (
+      await Promise.all(
+        uniquePlayerIds.map(id => ScoreSaberService.getPlayer(id, DetailType.BASIC))
+      )
+    ).sort((a, b) => {
+      if (a.inactive && !b.inactive) return 1;
+      if (!a.inactive && b.inactive) return -1;
+      return a.rank - b.rank;
+    });
   }
 }

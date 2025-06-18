@@ -109,17 +109,17 @@ export default function SnipePlaylistCreator({ toSnipe }: SnipePlaylistCreatorPr
         </SimpleTooltip>
       </DialogTrigger>
 
-      <DialogContent className="bg-secondary h-screen max-w-screen sm:h-auto sm:max-w-[625px]">
+      <DialogContent className="bg-secondary p-4 sm:h-auto sm:max-w-[625px] sm:rounded-lg sm:p-6">
         <DialogHeader>
           <DialogTitle>Create Snipe Playlist</DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="mb-0 pb-0">
             Generate a new snipe playlist for {truncateText(toSnipe.name, 16)}!
           </DialogDescription>
         </DialogHeader>
 
         {/* Form */}
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-2">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-3">
             <FormField
               control={form.control}
               name="name"
@@ -235,9 +235,9 @@ export default function SnipePlaylistCreator({ toSnipe }: SnipePlaylistCreatorPr
               )}
             />
 
-            <div className="flex justify-between gap-2">
+            <div className="mt-4 flex flex-row gap-2">
               {/* Download Playlist */}
-              <Button type="submit" className="w-fit">
+              <Button type="submit" className="flex-1">
                 {downloading ? <Spinner /> : "Download"}
               </Button>
 
@@ -245,8 +245,11 @@ export default function SnipePlaylistCreator({ toSnipe }: SnipePlaylistCreatorPr
               <Link
                 href={`${env.NEXT_PUBLIC_API_URL}/playlist/snipe/preview?toSnipe=${toSnipe.id}&settings=${encodeSnipePlaylistSettings(formValues)}`}
                 target="_blank"
+                className="flex-1"
               >
-                <Button type="button">Preview Playlist Art</Button>
+                <Button type="button" className="w-full">
+                  Preview Playlist Art
+                </Button>
               </Link>
             </div>
           </form>

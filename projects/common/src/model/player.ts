@@ -14,6 +14,12 @@ export class Player {
   public _id!: string;
 
   /**
+   * The name of the player.
+   */
+  @prop()
+  public name?: string;
+
+  /**
    * The peak rank of the player
    */
   @prop()

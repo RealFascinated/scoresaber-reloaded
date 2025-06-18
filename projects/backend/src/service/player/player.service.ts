@@ -534,4 +534,14 @@ export class PlayerService {
 
     return hmdUsage;
   }
+
+  /**
+   * Updates the player's name.
+   *
+   * @param playerId the player's id
+   * @param name the new name
+   */
+  public static async updatePlayerName(playerId: string, name: string) {
+    await PlayerModel.updateOne({ _id: playerId }, { $set: { name } });
+  }
 }

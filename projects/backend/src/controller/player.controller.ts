@@ -5,6 +5,7 @@ import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerStatisticHistory } from "@ssr/common/player/player-statistic-history";
 import { AroundPlayerResponse } from "@ssr/common/response/around-player-response";
 import { PlayerRankedPpsResponse } from "@ssr/common/response/player-ranked-pps-response";
+import { PlayerSearchResponse } from "@ssr/common/response/player-search-response";
 import { PpBoundaryResponse } from "@ssr/common/response/pp-boundary-response";
 import { ScoreCalendarData } from "@ssr/common/types/player/player-statistic";
 import { getDaysAgoDate } from "@ssr/common/utils/time-utils";
@@ -170,5 +171,24 @@ export default class PlayerController {
     params: { id: string };
   }): Promise<PlayerRankedPpsResponse> {
     return await PlayerService.getPlayerRankedPps(id);
+  }
+
+  @Get("/search", {
+    config: {},
+    tags: ["player"],
+    query: t.Object({
+      superJson: t.Optional(t.Boolean({ default: false })),
+      query: t.Optional(t.String({ default: "" })),
+    }),
+  })
+  public async searchPlayers({
+    query: { superJson, query },
+  }: {
+    query: { superJson: boolean; query: string };
+  }): Promise<PlayerSearchResponse | unknown> {
+    const players = {
+      players: await ScoreSaberService.searchPlayers(query),
+    };
+    return superJson ? SuperJSON.stringify(players) : players;
   }
 }

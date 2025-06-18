@@ -3,35 +3,27 @@
 import { cn } from "@/common/utils";
 import Avatar from "@/components/avatar";
 import { useSearch } from "@/components/providers/search-provider";
-import {
-  CommandDialog,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { StarIcon } from "@heroicons/react/24/solid";
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
+import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { truncateText } from "@ssr/common/string-utils";
 import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
 import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/leaderboard";
-import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
 import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
+import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { useDebounce } from "@uidotdev/usehooks";
-import { CommandLoading } from "cmdk";
-import { LoaderCircle, UserSearch } from "lucide-react";
-import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
+import { LoaderCircle, Search, UserSearch } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function PlayerAndLeaderboardSearch() {
-  const router: AppRouterInstance = useRouter();
+  const router = useRouter();
   const isMobile = useIsMobile();
   const { isOpen, openSearch, closeSearch } = useSearch();
 
@@ -41,31 +33,26 @@ export default function PlayerAndLeaderboardSearch() {
   const { data: results, isLoading } = useQuery({
     queryKey: ["playerAndLeaderboardSearch", debouncedQuery],
     queryFn: async (): Promise<{
-      players: ScoreSaberPlayerToken[];
+      players: ScoreSaberPlayer[];
       leaderboards: ScoreSaberLeaderboard[];
     }> => {
       if (debouncedQuery.length <= 3 && debouncedQuery.length !== 0) {
         return { players: [], leaderboards: [] };
       }
-      const playerResults = await ApiServiceRegistry.getInstance()
-        .getScoreSaberService()
-        .searchPlayers(debouncedQuery);
+      const playerResults = await ssrApi.searchPlayers(debouncedQuery);
       const leaderboardResults = await ApiServiceRegistry.getInstance()
         .getScoreSaberService()
         .searchLeaderboards(query);
 
       return {
-        players:
-          playerResults?.players.sort((a, b) => {
-            return a.rank - b.rank;
-          }) || [],
+        players: playerResults?.players || [],
         leaderboards:
           leaderboardResults?.leaderboards
             .sort((a, b) => {
               const getStatusPriority = (leaderboard: ScoreSaberLeaderboardToken) => {
-                if (leaderboard.ranked) return 2; // Highest priority
-                if (leaderboard.qualified) return 1; // Medium priority
-                return 0; // Lowest priority (unranked)
+                if (leaderboard.ranked) return 2;
+                if (leaderboard.qualified) return 1;
+                return 0;
               };
 
               const priorityDifference = getStatusPriority(b) - getStatusPriority(a);
@@ -82,7 +69,6 @@ export default function PlayerAndLeaderboardSearch() {
     enabled: isOpen,
   });
 
-  // Listen for CTRL + K keybinds to open this dialog
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent): void => {
       if ((event.ctrlKey || event.metaKey) && event.key === "k") {
@@ -98,10 +84,8 @@ export default function PlayerAndLeaderboardSearch() {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, openSearch, closeSearch]);
 
-  // Render the contents
   return (
     <>
-      {/* Button to open */}
       <div
         className="group relative flex cursor-pointer transition-all select-none hover:opacity-85"
         onClick={openSearch}
@@ -132,131 +116,133 @@ export default function PlayerAndLeaderboardSearch() {
         </div>
       </div>
 
-      {/* Dialog */}
-      <CommandDialog
-        open={isOpen}
-        onOpenChange={state => {
-          if (state) {
-            openSearch();
-          } else {
-            closeSearch();
-          }
-        }}
-      >
-        {/* Input */}
-        <div className="relative">
-          <CommandInput
-            className="select-none"
-            placeholder="Enter a player or leaderboard name..."
-            maxLength={26}
-            value={query}
-            onValueChange={setQuery}
-          />
-          {isLoading && (
-            <LoaderCircle className="absolute inset-y-0 right-10 size-5 h-full animate-spin opacity-85" />
-          )}
-        </div>
+      <Dialog open={isOpen} onOpenChange={closeSearch}>
+        <DialogContent className="overflow-hidden p-0">
+          <DialogTitle className="sr-only">Search Players and Leaderboards</DialogTitle>
+          <div className="relative">
+            <div className="border-border/50 flex h-12 items-center gap-2 border-b px-4">
+              <Search className="size-4 shrink-0 opacity-50" />
+              <input
+                className="placeholder:text-muted-foreground flex h-10 w-full rounded-md bg-transparent py-3 text-sm outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                placeholder="Enter a player or leaderboard name..."
+                maxLength={26}
+                value={query}
+                onChange={e => setQuery(e.target.value)}
+              />
+              {isLoading && (
+                <LoaderCircle className="absolute inset-y-0 right-12 size-5 h-full animate-spin opacity-85" />
+              )}
+            </div>
+          </div>
 
-        {/* Results */}
-        <CommandList className="select-none">
-          {isLoading ? (
-            <CommandLoading className="py-2 text-center opacity-85">Loading...</CommandLoading>
-          ) : (
-            <CommandEmpty className="py-2 text-center text-red-500">
-              No results were found.
-            </CommandEmpty>
-          )}
-
-          {results && (
-            <>
-              {/* Player Results */}
-              <CommandGroup heading="Player Results">
-                {results.players.map(player => {
-                  return (
-                    <CommandItem
-                      key={player.id}
-                      value={`${player.name}-${player.id}`}
-                      className="flex cursor-pointer items-center justify-start"
-                      onSelect={() => {
-                        closeSearch();
-                        router.push(`/player/${player.id}`);
-                      }}
-                    >
-                      <Avatar
-                        src={player.profilePicture!}
-                        className="h-8 w-8"
-                        alt={`${player.name}'s Profile Picture`}
-                      />
-                      <div className="flex flex-col">
-                        <p>{truncateText(player.name, 32)}</p>
-                        <p>
-                          <span className="text-gray-400">
-                            #{formatNumberWithCommas(player.rank)}
-                          </span>{" "}
-                          - <span className="text-pp">{formatPp(player.pp)}pp</span>
-                        </p>
-                      </div>
-                    </CommandItem>
-                  );
-                })}
-              </CommandGroup>
-
-              {/* Leaderboard Results */}
-              <CommandGroup heading="Leaderboard Results">
-                {results.leaderboards.map(leaderboard => {
-                  return (
-                    <CommandItem
-                      key={leaderboard.id}
-                      value={`${leaderboard.songName}-${leaderboard.difficulty.difficulty}-${leaderboard.songHash}`}
-                      className="flex cursor-pointer items-center justify-start"
-                      onSelect={() => {
-                        closeSearch();
-                        router.push(`/leaderboard/${leaderboard.id}`);
-                      }}
-                    >
-                      <Avatar
-                        src={leaderboard.songArt}
-                        className="h-8 w-8"
-                        alt={leaderboard.songName}
-                      />
-                      <div className="flex flex-col">
-                        <p>{truncateText(leaderboard.fullName, 48)}</p>
-                        <div className="text-xs">
-                          <div className="flex items-center gap-2">
-                            <span
-                              style={{
-                                color:
-                                  getDifficulty(leaderboard.difficulty.difficulty).color + "f0", // Transparency value (in hex 0-255)
-                              }}
-                            >
-                              {getDifficultyName(leaderboard.difficulty.difficulty)}
-                            </span>{" "}
-                            {leaderboard.ranked && (
-                              <>
-                                -{" "}
-                                <div className="text-pp flex items-center gap-1">
-                                  {leaderboard.stars.toFixed(2)}
-                                  <StarIcon className="h-fit w-fit" />
-                                </div>
-                              </>
-                            )}
-                            {leaderboard.qualified && (
-                              <>
-                                - <span className="text-gray-400">Qualified</span>
-                              </>
-                            )}
+          <div className="[&::-webkit-scrollbar-thumb]:bg-muted max-h-[400px] overflow-x-hidden overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-transparent">
+            {isLoading ? (
+              <div className="text-muted-foreground py-6 text-center text-sm">Loading...</div>
+            ) : !results?.players.length && !results?.leaderboards.length ? (
+              <div className="py-6 text-center text-sm text-red-500">No results were found.</div>
+            ) : (
+              <>
+                {results.players.length > 0 && (
+                  <div className="p-2">
+                    <div className="text-muted-foreground px-2 py-1.5 text-xs font-medium">
+                      Player Results
+                    </div>
+                    <div className="mt-1 space-y-1">
+                      {results.players.map((player, index) => (
+                        <div
+                          key={player.id}
+                          className="hover:bg-accent hover:text-accent-foreground flex cursor-pointer items-center gap-3 rounded-md px-2 py-2 text-sm transition-colors"
+                          onClick={() => {
+                            closeSearch();
+                            router.push(`/player/${player.id}`);
+                          }}
+                        >
+                          <Avatar
+                            src={player.avatar}
+                            className="h-8 w-8"
+                            alt={`${player.name}'s Profile Picture`}
+                          />
+                          <div className="flex flex-col">
+                            <p className="font-medium">{truncateText(player.name, 32)}</p>
+                            <p className="text-muted-foreground text-xs">
+                              {player.inactive ? (
+                                <span className="text-red-400">Inactive Account</span>
+                              ) : (
+                                <span className="text-gray-400">
+                                  #{formatNumberWithCommas(player.rank)}
+                                </span>
+                              )}{" "}
+                              - <span className="text-pp">{formatPp(player.pp)}pp</span>
+                            </p>
                           </div>
-                          <div className="text-gray-300">Mapper: {leaderboard.levelAuthorName}</div>
                         </div>
-                      </div>
-                    </CommandItem>
-                  );
-                })}
-              </CommandGroup>
-            </>
-          )}
-        </CommandList>
-      </CommandDialog>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {results.leaderboards.length > 0 && (
+                  <div className="p-2">
+                    <div className="text-muted-foreground px-2 py-1.5 text-xs font-medium">
+                      Leaderboard Results
+                    </div>
+                    <div className="mt-1 space-y-1">
+                      {results.leaderboards.map(leaderboard => (
+                        <div
+                          key={leaderboard.id}
+                          className="hover:bg-accent hover:text-accent-foreground flex cursor-pointer items-center gap-3 rounded-md px-2 py-2 text-sm transition-colors"
+                          onClick={() => {
+                            closeSearch();
+                            router.push(`/leaderboard/${leaderboard.id}`);
+                          }}
+                        >
+                          <Avatar
+                            src={leaderboard.songArt}
+                            className="h-8 w-8"
+                            alt={leaderboard.songName}
+                          />
+                          <div className="flex flex-col">
+                            <p className="font-medium">{truncateText(leaderboard.fullName, 48)}</p>
+                            <div className="text-muted-foreground text-xs">
+                              <div className="flex items-center gap-2">
+                                <span
+                                  style={{
+                                    color:
+                                      getDifficulty(leaderboard.difficulty.difficulty).color + "f0",
+                                  }}
+                                >
+                                  {getDifficultyName(leaderboard.difficulty.difficulty)}
+                                </span>{" "}
+                                {leaderboard.ranked && (
+                                  <>
+                                    -{" "}
+                                    <div className="text-pp flex items-center gap-1">
+                                      {leaderboard.stars.toFixed(2)}
+                                      <StarIcon className="h-fit w-fit" />
+                                    </div>
+                                  </>
+                                )}
+                                {leaderboard.qualified && (
+                                  <>
+                                    - <span className="text-gray-400">Qualified</span>
+                                  </>
+                                )}
+                              </div>
+                              <div className="text-gray-300">
+                                Mapper: {leaderboard.levelAuthorName}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

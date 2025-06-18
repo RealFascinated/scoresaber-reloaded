@@ -165,6 +165,7 @@ export class ScoreWebsockets implements EventListener {
       const isTop50GlobalScore = await ScoreService.isTop50GlobalScore(score);
 
       PlayerService.trackPlayer(player.id);
+      PlayerService.updatePlayerName(player.id, player.name);
 
       EventsManager.getListeners().forEach(listener => {
         listener.onScoreReceived?.(score, leaderboard, player, beatLeaderScore, isTop50GlobalScore);

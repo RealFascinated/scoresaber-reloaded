@@ -1,4 +1,5 @@
 import { PlayerStatisticHistory } from "src/player/player-statistic-history";
+import { PlayerSearchResponse } from "src/response/player-search-response";
 import { PlaysByHmdResponse } from "src/response/plays-by-hmd-response";
 import { PlayerScore } from "src/score/player-score";
 import { ScoreCalendarData } from "src/types/player/player-statistic";
@@ -404,6 +405,27 @@ class SSRApi {
       return undefined;
     }
     return SuperJSON.parse<ScoreHistoryGraphResponse>(response);
+  }
+
+  /**
+   * Searches for players by name.
+   *
+   * @param query the query to search for
+   * @returns the players that match the query
+   */
+  async searchPlayers(query: string): Promise<PlayerSearchResponse | undefined> {
+    const response = await Request.get<string>(`${env.NEXT_PUBLIC_API_URL}/player/search`, {
+      returns: "text",
+      searchParams: {
+        superJson: true,
+        query: query,
+      },
+    });
+    if (response === undefined) {
+      return undefined;
+    }
+
+    return SuperJSON.parse<PlayerSearchResponse>(response);
   }
 }
 
