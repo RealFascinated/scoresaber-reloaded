@@ -22,6 +22,7 @@ import ResetDatabase from "./buttons/reset-database";
 
 type Category = {
   name: string;
+  description: string;
   icon: IconType;
   component: ReactNode;
 };
@@ -29,11 +30,13 @@ type Category = {
 const categories: Category[] = [
   {
     name: "Website",
+    description: "Customize your experience",
     icon: GlobeAmericasIcon,
     component: <WebsiteSettings />,
   },
   {
     name: "Scores",
+    description: "Manage your scores",
     icon: CubeIcon,
     component: <ScoreSettings />,
   },
@@ -139,9 +142,7 @@ export default function Settings() {
                         <div className="flex flex-col items-start">
                           <span className="font-medium">{category.name}</span>
                           <span className="text-muted-foreground text-xs">
-                            {category.name === "Website"
-                              ? "Customize your experience"
-                              : "Manage your scores"}
+                            {category.description}
                           </span>
                         </div>
                       </div>

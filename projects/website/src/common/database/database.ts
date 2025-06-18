@@ -48,9 +48,15 @@ export enum SettingIds {
   Friends = "friends",
   ShowScoreComparison = "showScoreComparison",
   DefaultLeaderboardCountry = "defaultLeaderboardCountry",
+  WebsiteLanding = "websiteLanding",
 }
 
 export const DEFAULT_WHAT_IF_RANGE: [number, number] = [70, 98.5];
+
+export enum WebsiteLanding {
+  PLAYER_HOME = "playerHome",
+  LANDING = "landing",
+}
 
 export default class Database extends Dexie {
   settings!: EntityTable<Setting, "id">;
@@ -442,6 +448,28 @@ export default class Database extends Dexie {
    */
   async setShowScoreComparison(showScoreComparison: boolean) {
     await this.setSetting(SettingIds.ShowScoreComparison, showScoreComparison);
+  }
+
+  /**
+   * Gets the website landing setting from the database
+   *
+   * @returns the website landing setting
+   */
+  async getWebsiteLanding(): Promise<WebsiteLanding> {
+    return (await this.getSetting<WebsiteLanding>(
+      SettingIds.WebsiteLanding,
+      WebsiteLanding.PLAYER_HOME
+    ))!;
+  }
+
+  /**
+   * Sets the website landing setting in the database
+   *
+   * @param websiteLanding the website landing setting
+   */
+  async setWebsiteLanding(websiteLanding: WebsiteLanding) {
+    setCookieValue("websiteLanding", websiteLanding);
+    await this.setSetting(SettingIds.WebsiteLanding, websiteLanding);
   }
 
   /**

@@ -1,6 +1,6 @@
 "use client";
 
-import { SettingIds } from "@/common/database/database";
+import { SettingIds, WebsiteLanding } from "@/common/database/database";
 import SimpleTooltip from "@/components/simple-tooltip";
 import { Form } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -10,7 +10,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { useEffect } from "react";
 import { Path, useForm } from "react-hook-form";
 import { IconType } from "react-icons";
-import { FaImage, FaSnowflake, FaUndo } from "react-icons/fa";
+import { FaGlobe, FaImage, FaSnowflake, FaUndo } from "react-icons/fa";
 import { toast } from "sonner";
 import { z } from "zod";
 import { SettingCard } from "../setting-card";
@@ -20,6 +20,7 @@ const formSchema = z.object({
   backgroundCover: z.string().min(0).max(128),
   snowParticles: z.boolean(),
   showKitty: z.boolean(),
+  websiteLanding: z.nativeEnum(WebsiteLanding),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -44,7 +45,6 @@ const settings: {
           field: {
             value: string | boolean;
             onChange: (value: string | boolean) => void;
-            onBlur?: () => void;
             name?: string;
           };
         }) => (
@@ -90,6 +90,23 @@ const settings: {
       },
     ],
   },
+  {
+    id: "navigation",
+    title: "Navigation",
+    icon: FaGlobe,
+    fields: [
+      {
+        name: "websiteLanding" as Path<FormValues>,
+        label: "Default Landing Page",
+        type: "select" as const,
+        description: "Choose which page to show when first visiting the website",
+        options: [
+          { value: WebsiteLanding.PLAYER_HOME, label: "Player Home" },
+          { value: WebsiteLanding.LANDING, label: "Website Landing" },
+        ],
+      },
+    ],
+  },
 ];
 
 const WebsiteSettings = () => {
@@ -97,6 +114,7 @@ const WebsiteSettings = () => {
   const backgroundCover = useLiveQuery(async () => await database.getBackgroundCover());
   const snowParticles = useLiveQuery(async () => await database.getSnowParticles());
   const showKitty = useLiveQuery(async () => await database.getShowKitty());
+  const websiteLanding = useLiveQuery(async () => await database.getWebsiteLanding());
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -104,6 +122,7 @@ const WebsiteSettings = () => {
       backgroundCover: "",
       snowParticles: false,
       showKitty: false,
+      websiteLanding: WebsiteLanding.PLAYER_HOME,
     },
   });
 
@@ -112,8 +131,9 @@ const WebsiteSettings = () => {
     await database.setSetting(SettingIds.BackgroundCover, values.backgroundCover);
     await database.setSetting(SettingIds.SnowParticles, values.snowParticles);
     await database.setSetting(SettingIds.ShowKitty, values.showKitty);
-    const after = performance.now();
+    await database.setWebsiteLanding(values.websiteLanding);
 
+    const after = performance.now();
     toast("Settings saved", {
       description: `Your settings have been saved in ${(after - before).toFixed(0)}ms`,
     });
@@ -123,7 +143,12 @@ const WebsiteSettings = () => {
   (form as any).onSubmit = onSubmit;
 
   useEffect(() => {
-    if (backgroundCover === undefined || snowParticles === undefined || showKitty === undefined) {
+    if (
+      backgroundCover === undefined ||
+      snowParticles === undefined ||
+      showKitty === undefined ||
+      websiteLanding === undefined
+    ) {
       return;
     }
 
@@ -138,7 +163,10 @@ const WebsiteSettings = () => {
     if (currentValues.showKitty !== showKitty) {
       form.setValue("showKitty", showKitty);
     }
-  }, [backgroundCover, snowParticles, showKitty, form]);
+    if (currentValues.websiteLanding !== websiteLanding) {
+      form.setValue("websiteLanding", websiteLanding);
+    }
+  }, [backgroundCover, snowParticles, showKitty, websiteLanding, form]);
 
   return (
     <div className="grid gap-6">

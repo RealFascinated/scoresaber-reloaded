@@ -4,9 +4,15 @@ import { type NextRequest, NextResponse } from "next/server";
 
 export function middleware(request: NextRequest) {
   const playerId = request.cookies.get("playerId");
+  const websiteLanding = request.cookies.get("websiteLanding");
 
   // Handle home redirect if they have claimed a player
   if (request.nextUrl.pathname === "/" && !!playerId) {
+    // If they have a player and prefer the landing page, stay on landing
+    if (websiteLanding?.value === "landing") {
+      return NextResponse.next();
+    }
+    // Otherwise redirect to player home
     return NextResponse.redirect(new URL("/home", request.url));
   }
 
