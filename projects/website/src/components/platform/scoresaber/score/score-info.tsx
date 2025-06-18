@@ -2,7 +2,6 @@ import { getRankColor } from "@/common/color-utils";
 import HMDIcon from "@/components/hmd";
 import { ScoreSaberScoreTimeSetVs } from "@/components/platform/scoresaber/score/score-time-set-vs";
 import { ScoreTimeSet } from "@/components/score/score-time-set";
-import SimpleTooltip from "@/components/simple-tooltip";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import { getHMDInfo, HMD } from "@ssr/common/hmds";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
@@ -11,6 +10,7 @@ import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { getPageFromRank } from "@ssr/common/utils/utils";
 import Link from "next/link";
 import { useMemo } from "react";
+import { ScoreSaberScoreHMD } from "./score-hmd";
 
 export default function ScoreSaberScoreInfo({
   score,
@@ -41,32 +41,9 @@ export default function ScoreSaberScoreInfo({
   const hmdElement = useMemo(() => {
     if (!hmd.logo) return null;
     return (
-      <SimpleTooltip
-        display={
-          <div className="flex flex-col gap-2">
-            {score.hmd ? (
-              <p>
-                Score was set on <span className="font-semibold">{score.hmd}</span>
-              </p>
-            ) : (
-              <p>An unknown HMD was used (mod did not submit hmd data)</p>
-            )}
-
-            {score.controllers && (
-              <div>
-                <p className="font-semibold">Controllers</p>
-                <div>
-                  <p>Left: {score.controllers.leftController}</p>
-                  <p>Right: {score.controllers.rightController}</p>
-                </div>
-              </div>
-            )}
-          </div>
-        }
-        showOnMobile
-      >
+      <ScoreSaberScoreHMD score={score}>
         <HMDIcon hmd={hmd} />
-      </SimpleTooltip>
+      </ScoreSaberScoreHMD>
     );
   }, [hmd, score.hmd, score.controllers]);
 

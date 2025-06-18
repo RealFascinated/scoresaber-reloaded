@@ -12,6 +12,7 @@ import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { formatScoreAccuracy } from "@ssr/common/utils/score.util";
 import { clsx } from "clsx";
+import { ScoreSaberScoreHMD } from "./score-hmd";
 
 export default function ScoreSaberLeaderboardScore({
   score,
@@ -73,7 +74,9 @@ export default function ScoreSaberLeaderboardScore({
 
       {/* HMD */}
       <td className="px-4 py-2 text-center whitespace-nowrap">
-        <p>{score.hmd ?? "Unknown"}</p>
+        <ScoreSaberScoreHMD score={score}>
+          <p>{score.hmd ?? "Unknown"}</p>
+        </ScoreSaberScoreHMD>
       </td>
 
       {/* Score Modifiers */}
@@ -94,13 +97,13 @@ export default function ScoreSaberLeaderboardScore({
       </td>
 
       {/* Score Replay */}
-      {score.additionalData && (
-        <td className="w-[32px]">
+      <td className="w-[32px]">
+        {score.additionalData && (
           <div className="flex justify-center">
             <ScoreReplayButton additionalData={score.additionalData} />
           </div>
-        </td>
-      )}
+        )}
+      </td>
     </>
   );
 }
