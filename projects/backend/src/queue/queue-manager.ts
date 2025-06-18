@@ -1,3 +1,4 @@
+import { EventListener } from "../event/event-listener";
 import { PlayerScoreSeedQueue } from "./impl/player-score-seed-queue";
 import { Queue } from "./queue";
 
@@ -5,7 +6,7 @@ export enum QueueId {
   PlayerScoreSeed = "player-score-seed-queue",
 }
 
-export class QueueManager {
+export class QueueManager implements EventListener {
   private static queues: Map<QueueId, Queue<unknown>> = new Map();
 
   constructor() {
@@ -38,5 +39,11 @@ export class QueueManager {
    */
   public static getQueues(): Queue<unknown>[] {
     return Array.from(QueueManager.queues.values());
+  }
+
+  onStop() {
+    for (const queue of QueueManager.queues.values()) {
+      queue.cleanup();
+    }
   }
 }

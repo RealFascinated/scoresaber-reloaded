@@ -225,35 +225,90 @@ app.onStart(async () => {
   new CacheService();
   new StatisticsService();
   new ScoreService();
-  new QueueManager();
   new PlaylistService();
+
+  EventsManager.registerListener(new QueueManager());
 });
-
-app.onStop(async () => {
-  Logger.info("Stopping SSR Backend...");
-  EventsManager.getListeners().forEach(listener => {
-    listener.onStop?.();
-  });
-});
-
-// Add signal handlers for graceful shutdown
-const signals = ["SIGTERM", "SIGINT"] as const;
-for (const signal of signals) {
-  process.on(signal, async () => {
-    Logger.info(`Received ${signal}, starting graceful shutdown...`);
-
-    // Stop the Elysia server
-    await app.stop();
-
-    // Close MongoDB connection
-    await mongoose.disconnect();
-
-    // Exit process
-    process.exit(0);
-  });
-}
 
 app.listen({
   port: 8080,
   idleTimeout: 120, // 2 minutes
 });
+
+// Add signal handlers for graceful shutdown
+const setupSignalHandlers = () => {
+  let isShuttingDown = false;
+  let forceExitTimeout: NodeJS.Timeout | null = null;
+
+  const shutdown = async () => {
+    if (isShuttingDown) {
+      Logger.info("Shutdown already in progress, ignoring signal");
+      return;
+    }
+    isShuttingDown = true;
+
+    Logger.info("Starting graceful shutdown...");
+
+    try {
+      // Stop accepting new requests
+      await app.stop();
+      Logger.info("Server stopped accepting new requests");
+
+      // Stop all event listeners (this will also stop queues through QueueManager)
+      Logger.info("Stopping all services...");
+      EventsManager.getListeners().forEach(listener => {
+        listener.onStop?.();
+      });
+      Logger.info("All services stopped");
+
+      // Close MongoDB connection
+      try {
+        await mongoose.disconnect();
+        Logger.info("MongoDB connection closed");
+      } catch (error) {
+        Logger.error("Error closing MongoDB connection:", error);
+      }
+
+      // Clear the force exit timeout if it exists
+      if (forceExitTimeout) {
+        clearTimeout(forceExitTimeout);
+      }
+
+      Logger.info("Shutdown complete");
+      process.exit(0);
+    } catch (error) {
+      Logger.error("Error during shutdown:", error);
+      process.exit(1);
+    }
+  };
+
+  // Handle both SIGTERM and SIGINT with a single handler
+  const handleSignal = (signal: string) => {
+    if (isShuttingDown) {
+      Logger.info(`Received ${signal} but shutdown already in progress, ignoring`);
+      return;
+    }
+
+    Logger.info(`Received ${signal}`);
+    shutdown();
+
+    // Set up force exit timeout only once
+    if (!forceExitTimeout) {
+      forceExitTimeout = setTimeout(() => {
+        Logger.error("Forced shutdown after timeout");
+        process.exit(1);
+      }, 10000);
+    }
+  };
+
+  // Remove any existing handlers first
+  process.removeAllListeners("SIGTERM");
+  process.removeAllListeners("SIGINT");
+
+  // Add our handlers
+  process.on("SIGTERM", () => handleSignal("SIGTERM"));
+  process.on("SIGINT", () => handleSignal("SIGINT"));
+};
+
+// Setup signal handlers after server starts
+setupSignalHandlers();

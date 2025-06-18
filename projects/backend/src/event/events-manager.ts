@@ -1,3 +1,4 @@
+import Logger from "@ssr/common/logger";
 import { EventListener } from "./event-listener";
 import { TrackScoreListener } from "./impl/track-score-listener";
 
@@ -8,7 +9,7 @@ export class EventsManager {
   private static events: EventListener[] = [];
 
   constructor() {
-    this.addEvent(new TrackScoreListener());
+    EventsManager.registerListener(new TrackScoreListener());
   }
 
   /**
@@ -16,7 +17,11 @@ export class EventsManager {
    *
    * @param eventListener the event listener to add.
    */
-  addEvent(eventListener: EventListener) {
+  public static registerListener(eventListener: EventListener) {
+    if (EventsManager.events.includes(eventListener)) {
+      Logger.warn(`Event listener ${eventListener.constructor.name} already registered`);
+      return;
+    }
     EventsManager.events.push(eventListener);
   }
 

@@ -4,6 +4,7 @@ import { QueueId } from "./queue-manager";
 export abstract class Queue<T> {
   private readonly MAX_SAMPLES = 10;
   private cleanupInterval: NodeJS.Timeout | null = null;
+  private isStopped = false;
 
   /**
    * The name of the queue
@@ -47,10 +48,13 @@ export abstract class Queue<T> {
   }
 
   public cleanup() {
+    Logger.info(`Cleaning up queue ${this.name}...`);
     if (this.cleanupInterval) {
       clearInterval(this.cleanupInterval);
       this.cleanupInterval = null;
     }
+    this.isStopped = true;
+    Logger.info(`Queue ${this.name} stopped`);
   }
 
   /**
@@ -59,6 +63,9 @@ export abstract class Queue<T> {
    * @param item the item to add
    */
   public add(item: T) {
+    if (this.isStopped) {
+      return;
+    }
     this.queue.push(item);
     this.itemTimestamps.set(item, Date.now());
     this.processQueue(); // Start processing immediately
@@ -78,7 +85,7 @@ export abstract class Queue<T> {
    * Processes the queue
    */
   private async processQueue() {
-    if (this.lock) {
+    if (this.lock || this.isStopped) {
       return;
     }
 
@@ -112,8 +119,8 @@ export abstract class Queue<T> {
       Logger.error(`Error processing queue ${this.name}:`, error);
     } finally {
       this.lock = false;
-      // If there are more items in the queue, process the next one
-      if (this.queue.length > 0) {
+      // If there are more items in the queue and we're not stopped, process the next one
+      if (this.queue.length > 0 && !this.isStopped) {
         this.processQueue();
       }
     }
