@@ -7,7 +7,9 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { ClockIcon } from "@heroicons/react/24/outline";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
+import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { Pagination } from "@ssr/common/pagination";
+import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
@@ -41,7 +43,11 @@ export function ScoreHistory({ playerId, leaderboard }: ScoreHistoryProps) {
         page
       );
       if (scoreHistory == undefined) {
-        return Pagination.empty();
+        return Pagination.empty<{
+          score: ScoreSaberScore;
+          leaderboard: ScoreSaberLeaderboard;
+          beatSaver: BeatSaverMapResponse;
+        }>();
       }
       return scoreHistory;
     },
