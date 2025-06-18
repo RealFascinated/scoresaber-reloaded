@@ -11,6 +11,7 @@ import { useIsMobile } from "@/hooks/use-is-mobile";
 import usePageNavigation from "@/hooks/use-page-navigation";
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
+import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { formatDate, timeAgo } from "@ssr/common/utils/time-utils";
 import { useQuery } from "@tanstack/react-query";
 import { useDebounce } from "@uidotdev/usehooks";
@@ -100,14 +101,14 @@ export default function Leaderboards({ initialPage }: LeaderboardsProps) {
                   <div key={index}>
                     <Link
                       href={`/leaderboard/${leaderboard.id}`}
-                      className="bg-border grid items-center gap-2 rounded-md p-1.5 transition-all hover:brightness-75 lg:grid-cols-[1fr_0.17fr]"
+                      className="bg-border grid items-center gap-2 rounded-md p-1.5 transition-all hover:brightness-75 lg:grid-cols-[1fr_0.19fr]"
                     >
                       <ScoreSaberScoreSongInfo
                         leaderboard={leaderboard}
                         imageSize={58}
                         clickableSongName={false}
                       />
-                      <div className="flex justify-between text-sm lg:flex-col lg:justify-end lg:gap-1">
+                      <div className="flex items-center text-sm lg:flex-col lg:justify-end lg:gap-1">
                         {date && (
                           <SimpleTooltip
                             display={
@@ -120,6 +121,13 @@ export default function Leaderboards({ initialPage }: LeaderboardsProps) {
                             {timeAgo(date)}
                           </SimpleTooltip>
                         )}
+
+                        {/* Plays */}
+                        <SimpleTooltip display="The total number of plays on this leaderboard">
+                          <p className="text-gray-400">
+                            {formatNumberWithCommas(leaderboard.plays)} Plays
+                          </p>
+                        </SimpleTooltip>
                       </div>
                     </Link>
                   </div>
