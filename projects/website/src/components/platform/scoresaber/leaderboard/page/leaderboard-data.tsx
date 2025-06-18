@@ -83,6 +83,7 @@ export function ScoreSaberLeaderboardData({
             <Card className="relative flex h-fit w-full gap-2">
               <LeaderboardScores
                 leaderboard={leaderboard}
+                beatSaver={beatsaver}
                 initialPage={initialPage}
                 initialCategory={initialCategory}
                 leaderboardChanged={newId => setCurrentLeaderboardId(newId)}

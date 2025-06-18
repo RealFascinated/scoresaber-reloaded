@@ -1,6 +1,7 @@
 import BeatSaverAuthor from "../model/beatsaver/author";
 import BeatSaverMapDifficulty from "../model/beatsaver/map-difficulty";
 import BeatSaverMapMetadata from "../model/beatsaver/map-metadata";
+import { MapDifficulty } from "../score/map-difficulty";
 
 export type BeatSaverMapResponse = {
   /**
@@ -37,6 +38,11 @@ export type BeatSaverMapResponse = {
    * The versions of the map.
    */
   difficulty: BeatSaverMapDifficulty;
+
+  /**
+   * The difficulty labels of the map.
+   */
+  difficultyLabels: Record<MapDifficulty, string>;
 
   /**
    * The metadata of the map.

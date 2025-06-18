@@ -1,5 +1,5 @@
-import { NotFoundError } from "src/error/not-found-error";
 import { env } from "../env";
+import { NotFoundError } from "../error/not-found-error";
 import { getMinioBucketName, MinioBucket } from "../minio-buckets";
 import { AdditionalScoreData } from "../model/additional-score-data/additional-score-data";
 

@@ -84,6 +84,11 @@ export default function ScoreSaberScoreSongInfo({
     [leaderboard.songAuthorName, leaderboard.levelAuthorName, mappersProfile]
   );
 
+  const difficultyLabel = useMemo(
+    () => beatSaverMap?.difficultyLabels[leaderboard.difficulty.difficulty]?.trim(),
+    [beatSaverMap, leaderboard.difficulty.difficulty]
+  );
+
   return (
     <div className="flex w-full items-center gap-3 break-all">
       <div
@@ -107,7 +112,12 @@ export default function ScoreSaberScoreSongInfo({
             side="bottom"
             display={
               <div>
-                <p>Difficulty: {getDifficultyName(difficulty)}</p>
+                <p>
+                  Difficulty: {getDifficultyName(difficulty)}{" "}
+                  {difficultyLabel && (
+                    <span className="text-xs text-gray-300">({difficultyLabel})</span>
+                  )}
+                </p>
                 <p>Characteristic: {leaderboard.difficulty.characteristic}</p>
                 {starCount > 0 && <p>Stars: {starCount.toFixed(2)}</p>}
               </div>

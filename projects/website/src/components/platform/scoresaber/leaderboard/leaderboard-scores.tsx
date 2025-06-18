@@ -9,21 +9,11 @@ import { useLeaderboardScores } from "@/hooks/score/use-leaderboard-scores";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import usePageNavigation from "@/hooks/use-page-navigation";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
+import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
 import { useCallback, useEffect, useState } from "react";
 import { DifficultyButton } from "../../../leaderboard/button/difficulty-button";
 import SimplePagination from "../../../simple-pagination";
 import ScoreSaberLeaderboardScore from "../score/leaderboard-score";
-
-type LeaderboardScoresProps = {
-  initialPage?: number;
-  initialCategory?: ScoreModeEnum;
-  leaderboard: ScoreSaberLeaderboard;
-  showDifficulties?: boolean;
-  isLeaderboardPage?: boolean;
-  leaderboardChanged?: (id: number) => void;
-  disableUrlChanging?: boolean;
-  highlightedPlayerId?: string;
-};
 
 function LeaderboardScoresSkeleton() {
   const skeletonRows = new Array(10).fill(0);
@@ -87,12 +77,23 @@ export default function LeaderboardScores({
   initialPage = 1,
   initialCategory = ScoreModeEnum.Global,
   leaderboard,
+  beatSaver,
   showDifficulties,
   isLeaderboardPage,
   leaderboardChanged,
   disableUrlChanging,
   highlightedPlayerId,
-}: LeaderboardScoresProps) {
+}: {
+  initialPage?: number;
+  initialCategory?: ScoreModeEnum;
+  leaderboard: ScoreSaberLeaderboard;
+  beatSaver?: BeatSaverMapResponse;
+  showDifficulties?: boolean;
+  isLeaderboardPage?: boolean;
+  leaderboardChanged?: (id: number) => void;
+  disableUrlChanging?: boolean;
+  highlightedPlayerId?: string;
+}) {
   const { changePageUrl } = usePageNavigation();
   const isMobile = useIsMobile();
   const filter = useLeaderboardFilter();
@@ -150,13 +151,14 @@ export default function LeaderboardScores({
         />
 
         {showDifficulties && (
-          <div className="bg-background/80 border-border/50 flex flex-wrap justify-center gap-3 rounded-lg border p-1.5 shadow-sm">
+          <div className="bg-background/80 border-border/50 flex flex-wrap justify-center gap-1.5 rounded-lg border p-1.5 shadow-sm">
             {leaderboard.difficulties.map((difficultyData, index) => (
               <DifficultyButton
                 key={index}
                 {...difficultyData}
                 selectedId={leaderboardId}
                 onSelect={handleLeaderboardChange}
+                inGameDifficulty={beatSaver?.difficultyLabels[difficultyData.difficulty]}
               />
             ))}
           </div>

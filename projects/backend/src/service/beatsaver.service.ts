@@ -207,6 +207,15 @@ export default class BeatSaverService {
           metadata: map.metadata,
           songArt: `https://eu.cdn.beatsaver.com/${hash.toLowerCase()}.jpg`,
           difficulty: getBeatSaverDifficulty(map, hash, difficulty, characteristic),
+          difficultyLabels: map.versions.reduce(
+            (acc, version) => {
+              version.difficulties.forEach(diff => {
+                acc[diff.difficulty] = diff.label;
+              });
+              return acc;
+            },
+            {} as Record<MapDifficulty, string>
+          ),
         } as BeatSaverMapResponse;
       }
     );

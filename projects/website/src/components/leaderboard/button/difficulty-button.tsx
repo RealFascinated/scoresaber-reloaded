@@ -1,4 +1,5 @@
 import { cn } from "@/common/utils";
+import SimpleTooltip from "@/components/simple-tooltip";
 import { Button } from "@/components/ui/button";
 import { MapDifficulty } from "@ssr/common/score/map-difficulty";
 import { MapCharacteristic } from "@ssr/common/types/map-characteristic";
@@ -11,12 +12,14 @@ export const DifficultyButton = memo(
     characteristic,
     leaderboardId,
     selectedId,
+    inGameDifficulty,
     onSelect,
   }: {
     difficulty: MapDifficulty;
     characteristic: MapCharacteristic;
     leaderboardId: number;
     selectedId: number;
+    inGameDifficulty?: string;
     onSelect: (id: number) => void;
   }) => {
     if (characteristic !== "Standard") return null;
@@ -24,7 +27,7 @@ export const DifficultyButton = memo(
     const isSelected = leaderboardId === selectedId;
     const difficultyData = getDifficulty(difficulty);
 
-    return (
+    const button = (
       <Button
         variant="ghost"
         onClick={() => onSelect(leaderboardId)}
@@ -34,7 +37,7 @@ export const DifficultyButton = memo(
           isSelected ? "font-semibold" : "font-medium"
         )}
         style={{
-          backgroundColor: isSelected ? `${difficultyData.color}15` : "transparent",
+          backgroundColor: isSelected ? `${difficultyData.color}15` : "",
         }}
       >
         <span style={{ color: difficultyData.color }}>{getDifficultyName(difficulty)}</span>
@@ -45,6 +48,12 @@ export const DifficultyButton = memo(
           />
         )}
       </Button>
+    );
+
+    return inGameDifficulty ? (
+      <SimpleTooltip display={inGameDifficulty}>{button}</SimpleTooltip>
+    ) : (
+      button
     );
   }
 );
