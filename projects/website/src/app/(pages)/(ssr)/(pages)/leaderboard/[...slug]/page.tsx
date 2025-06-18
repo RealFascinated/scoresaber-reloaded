@@ -3,7 +3,6 @@ import { ScoreSaberLeaderboardData } from "@/components/platform/scoresaber/lead
 import { ScoreModeEnum } from "@/components/score/score-mode";
 import { DetailType } from "@ssr/common/detail-type";
 import { env } from "@ssr/common/env";
-import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { LeaderboardResponse } from "@ssr/common/response/leaderboard-response";
 import { getDifficultyName } from "@ssr/common/utils/song-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
@@ -26,7 +25,7 @@ type Props = {
 };
 
 type LeaderboardData = {
-  leaderboardResponse: LeaderboardResponse<ScoreSaberLeaderboard>;
+  leaderboardResponse: LeaderboardResponse;
   page: number;
   category: ScoreModeEnum;
 };
