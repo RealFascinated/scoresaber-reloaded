@@ -254,6 +254,11 @@ const setupSignalHandlers = () => {
       await app.stop();
       Logger.info("Server stopped accepting new requests");
 
+      logToChannel(
+        DiscordChannels.backendLogs,
+        new EmbedBuilder().setDescription("Backend shutting down...")
+      );
+
       // Stop all event listeners (this will also stop queues through QueueManager)
       Logger.info("Stopping all services...");
       EventsManager.getListeners().forEach(listener => {
