@@ -1,6 +1,6 @@
 "use client";
 
-import { ArcElement, Chart as ChartJS, Legend, Tooltip } from "chart.js";
+import { ArcElement, Chart as ChartJS, ChartOptions, Legend, Tooltip } from "chart.js";
 import { Pie } from "react-chartjs-2";
 
 // Register ChartJS components
@@ -52,9 +52,12 @@ export default function HmdUsageChart({ hmdUsage }: Props) {
     ],
   };
 
-  const options = {
+  const options: ChartOptions<"pie"> = {
     responsive: true,
     maintainAspectRatio: false,
+    animation: {
+      duration: 0,
+    },
     plugins: {
       legend: {
         position: "right" as const,
