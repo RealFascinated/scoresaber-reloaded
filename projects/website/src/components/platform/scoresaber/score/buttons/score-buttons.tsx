@@ -139,7 +139,7 @@ export default function ScoreSaberScoreButtons({
               ) : (
                 <ArrowDownIcon
                   className={clsx(
-                    "h-6 w-6 cursor-pointer transition-all",
+                    "h-6 w-6 cursor-pointer transition-transform duration-350",
                     leaderboardExpanded ? "" : "rotate-180"
                   )}
                   onClick={() => {
