@@ -19,11 +19,14 @@ import BeatSaverController from "./controller/beatsaver.controller";
 import FriendsController from "./controller/friends.controller";
 import LeaderboardController from "./controller/leaderboard.controller";
 import MiniRankingController from "./controller/mini-ranking.controller";
+import PlayerHistoryController from "./controller/player-history.controller";
+import PlayerScoreHistoryController from "./controller/player-score-history.controller";
 import PlayerController from "./controller/player.controller";
 import PlaylistController from "./controller/playlist.controller";
 import ReplayController from "./controller/replay.controller";
 import ScoresController from "./controller/scores.controller";
 import StatisticsController from "./controller/statistics.controller";
+import TopScoresController from "./controller/top-scores.controller";
 import { EventsManager } from "./event/events-manager";
 import { metricsPlugin } from "./plugins/metrics.plugin";
 import { QueueManager } from "./queue/queue-manager";
@@ -198,6 +201,9 @@ app.use(
       BeatLeaderController,
       FriendsController,
       MiniRankingController,
+      PlayerHistoryController,
+      PlayerScoreHistoryController,
+      TopScoresController,
     ],
   })
 );

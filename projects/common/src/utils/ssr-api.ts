@@ -149,7 +149,7 @@ class SSRApi {
    */
   async getPlayerMiniRanking(playerId: string, type: MiniRankingType) {
     return await Request.get<MiniRankingResponse>(
-      `${env.NEXT_PUBLIC_API_URL}/mini-ranking/${playerId}/${type}`
+      `${env.NEXT_PUBLIC_API_URL}/player/mini-ranking/${playerId}/${type}`
     );
   }
 
@@ -162,7 +162,7 @@ class SSRApi {
    */
   async getFriendLeaderboardScores(friendIds: string[], leaderboardId: string, page: number) {
     const response = await Request.get<string>(
-      `${env.NEXT_PUBLIC_API_URL}/friend/leaderboard-scores/${leaderboardId}/${page}`,
+      `${env.NEXT_PUBLIC_API_URL}/scores/friends/leaderboard/${leaderboardId}/${page}`,
       {
         returns: "text",
         searchParams: {
@@ -185,7 +185,7 @@ class SSRApi {
    */
   async getFriendScores(friendIds: string[], page: number) {
     const response = await Request.get<string>(
-      `${env.NEXT_PUBLIC_API_URL}/friend/recent-scores/${page}`,
+      `${env.NEXT_PUBLIC_API_URL}/scores/friends/${page}`,
       {
         returns: "text",
         searchParams: {
@@ -260,7 +260,7 @@ class SSRApi {
    */
   async fetchPlayerScoresHistory(playerId: string, leaderboardId: string, page: number) {
     const response = await Request.get<string>(
-      `${env.NEXT_PUBLIC_API_URL}/scores/history/${playerId}/${leaderboardId}/${page}`,
+      `${env.NEXT_PUBLIC_API_URL}/player/score-history/${playerId}/${leaderboardId}/${page}`,
       {
         returns: "text",
         searchParams: {
@@ -393,7 +393,7 @@ class SSRApi {
    */
   async getScoreHistoryGraph(playerId: string, leaderboardId: string) {
     const response = await Request.get<string>(
-      `${env.NEXT_PUBLIC_API_URL}/scores/history-graph/${playerId}/${leaderboardId}`,
+      `${env.NEXT_PUBLIC_API_URL}/player/score-history-graph/${playerId}/${leaderboardId}`,
       {
         returns: "text",
         searchParams: {

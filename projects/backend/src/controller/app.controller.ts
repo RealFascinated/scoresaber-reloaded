@@ -1,4 +1,3 @@
-import { heapStats } from "bun:jsc";
 import { Controller, Get } from "elysia-decorators";
 import { getAppVersion } from "../common/app.util";
 import { AppService } from "../service/app.service";
@@ -29,12 +28,5 @@ export default class AppController {
   })
   public async getStatistics() {
     return await AppService.getAppStatistics();
-  }
-
-  @Get("/heap-stats", {
-    config: {},
-  })
-  public async getHeapStats() {
-    return heapStats();
   }
 }

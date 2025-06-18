@@ -15,11 +15,10 @@ export default class ReplayController {
     }),
   })
   public async redirectReplay({ params: { scoreId } }: { params: { scoreId: string } }) {
-    const numericId = parseInt(scoreId.replace(".bsor", ""));
-    const beatleaderScore = await BeatLeaderService.getAdditionalScoreData(numericId, true);
-    console.log(beatleaderScore);
-    const redirectUrl = getBeatLeaderReplayCdnUrl(beatleaderScore!)!;
-    console.log(redirectUrl);
-    return redirect(redirectUrl);
+    const beatleaderScore = await BeatLeaderService.getAdditionalScoreData(
+      parseInt(scoreId.replace(".bsor", "")),
+      true
+    );
+    return redirect(getBeatLeaderReplayCdnUrl(beatleaderScore!)!);
   }
 }

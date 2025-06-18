@@ -4,9 +4,9 @@ import { Controller, Get } from "elysia-decorators";
 import SuperJSON from "superjson";
 import { FriendScoresService } from "../service/score/friend-scores.service";
 
-@Controller("/friend")
+@Controller("")
 export default class FriendsController {
-  @Get("/leaderboard-scores/:leaderboardId/:page", {
+  @Get("/scores/friends/leaderboard/:leaderboardId/:page", {
     config: {},
     params: t.Object({
       leaderboardId: t.Number({ required: true }),
@@ -35,7 +35,7 @@ export default class FriendsController {
     return superJson ? SuperJSON.stringify(data) : data.toJSON();
   }
 
-  @Get("/recent-scores/:page", {
+  @Get("/scores/friends/:page", {
     config: {},
     params: t.Object({
       page: t.Number({ required: true }),

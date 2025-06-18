@@ -4,9 +4,9 @@ import { t } from "elysia";
 import { Controller, Get } from "elysia-decorators";
 import MiniRankingService from "../service/scoresaber/mini-ranking.service";
 
-@Controller("/mini-ranking")
+@Controller("")
 export default class MiniRankingController {
-  @Get("/:playerId/:type", {
+  @Get("/player/mini-ranking/:playerId/:type", {
     config: {},
     params: t.Object({
       playerId: t.String({ required: true }),
