@@ -138,19 +138,20 @@ export default function SimplePagination({
       isActive?: boolean;
       children: React.ReactNode;
     }) => (
-      <button
+      <a
+        href={generatePageUrl ? generatePageUrl(buttonPage) : "#"}
         onClick={e => handleLinkClick(buttonPage, e)}
-        disabled={isLoading || buttonPage === page}
+        aria-disabled={isLoading || buttonPage === page}
         className={cn(
           "relative flex h-8 min-w-[2rem] cursor-pointer items-center justify-center rounded-md px-2 text-sm transition-all",
           isActive
             ? "bg-primary text-primary-foreground font-medium shadow-sm"
             : "hover:bg-accent hover:text-accent-foreground",
-          isLoading && "cursor-not-allowed opacity-50"
+          (isLoading || buttonPage === page) && "cursor-not-allowed opacity-50"
         )}
       >
         {loadingPage === buttonPage ? <ArrowPathIcon className="h-4 w-4 animate-spin" /> : children}
-      </button>
+      </a>
     )
   );
   PageButton.displayName = "PageButton";
@@ -165,9 +166,10 @@ export default function SimplePagination({
       disabled: boolean;
       children: React.ReactNode;
     }) => (
-      <button
+      <a
+        href={generatePageUrl ? generatePageUrl(buttonPage) : "#"}
         onClick={e => handleLinkClick(buttonPage, e)}
-        disabled={disabled || isLoading}
+        aria-disabled={disabled || isLoading}
         className={cn(
           "relative flex h-8 w-8 cursor-pointer items-center justify-center rounded-md transition-all",
           !disabled && "hover:bg-accent hover:text-accent-foreground",
@@ -175,7 +177,7 @@ export default function SimplePagination({
         )}
       >
         {children}
-      </button>
+      </a>
     )
   );
   NavigationButton.displayName = "NavigationButton";
