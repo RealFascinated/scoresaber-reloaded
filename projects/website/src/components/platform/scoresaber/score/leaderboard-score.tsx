@@ -95,8 +95,10 @@ export default function ScoreSaberLeaderboardScore({
 
       {/* Score Replay */}
       {score.additionalData && (
-        <td className="w-[28px] px-4 py-2">
-          <ScoreReplayButton additionalData={score.additionalData} />
+        <td className="w-[32px]">
+          <div className="flex justify-center">
+            <ScoreReplayButton additionalData={score.additionalData} />
+          </div>
         </td>
       )}
     </>

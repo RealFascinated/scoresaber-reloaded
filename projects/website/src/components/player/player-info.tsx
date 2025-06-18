@@ -69,7 +69,7 @@ export function PlayerInfo({
         className="pointer-events-none h-[24px] w-[24px]"
         alt={`${player.name}'s Profile Picture`}
       />
-      {!hideCountryFlag && <CountryFlag code={player.country!} size={12} />}
+      {!hideCountryFlag && <CountryFlag code={player.country!} size={10} />}
       {useLink ? <Link href={`/player/${player.id}`}>{name}</Link> : name}
     </div>
   );

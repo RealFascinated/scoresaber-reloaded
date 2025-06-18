@@ -7,11 +7,7 @@ import { AdditionalScoreData } from "@ssr/common/model/additional-score-data/add
 import { getBeatLeaderReplayRedirectUrl } from "@ssr/common/utils/beatleader-utils";
 import { useLiveQuery } from "dexie-react-hooks";
 
-type ScoreReplayButton = {
-  additionalData: AdditionalScoreData;
-};
-
-export function ScoreReplayButton({ additionalData }: ScoreReplayButton) {
+export function ScoreReplayButton({ additionalData }: { additionalData: AdditionalScoreData }) {
   const database = useDatabase();
   const viewer = useLiveQuery(async () => database.getReplayViewer());
 
