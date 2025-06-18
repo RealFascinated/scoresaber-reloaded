@@ -23,7 +23,7 @@ export default class BeatSaverController {
       superJson: t.Optional(t.Boolean()),
     }),
   })
-  public async getMap({
+  public async getMapByHash({
     params: { hash, difficulty, characteristic },
     query: { type, superJson },
   }: {
