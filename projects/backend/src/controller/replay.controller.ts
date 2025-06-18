@@ -8,12 +8,18 @@ export default class ReplayController {
   @Get("/:scoreId", {
     config: {},
     params: t.Object({
-      scoreId: t.Number({ required: true }),
+      scoreId: t.String({
+        required: true,
+        pattern: "^\\d+\\.bsor$",
+      }),
     }),
   })
-  public async redirectReplay({ params: { scoreId } }: { params: { scoreId: number } }) {
-    const beatleaderScore = await BeatLeaderService.getAdditionalScoreData(scoreId, true);
+  public async redirectReplay({ params: { scoreId } }: { params: { scoreId: string } }) {
+    const numericId = parseInt(scoreId.replace(".bsor", ""));
+    const beatleaderScore = await BeatLeaderService.getAdditionalScoreData(numericId, true);
+    console.log(beatleaderScore);
     const redirectUrl = getBeatLeaderReplayCdnUrl(beatleaderScore!)!;
+    console.log(redirectUrl);
     return redirect(redirectUrl);
   }
 }

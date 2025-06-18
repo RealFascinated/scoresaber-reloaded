@@ -1,3 +1,4 @@
+import { NotFoundError } from "src/error/not-found-error";
 import { env } from "../env";
 import { getMinioBucketName, MinioBucket } from "../minio-buckets";
 import { AdditionalScoreData } from "../model/additional-score-data/additional-score-data";
@@ -12,7 +13,7 @@ export function getBeatLeaderReplayRedirectUrl(
   additionalData: AdditionalScoreData
 ): string | undefined {
   if (additionalData.savedReplay) {
-    return `${env.NEXT_PUBLIC_API_URL}/replay/${additionalData.scoreId}`;
+    return `${env.NEXT_PUBLIC_API_URL}/replay/${additionalData.scoreId}.bsor`;
   }
   return undefined;
 }
@@ -33,9 +34,9 @@ export function getBeatLeaderReplayId(score: AdditionalScoreData): string {
  * @param additionalData the additional score data
  * @returns the CDN URL of the replay
  */
-export function getBeatLeaderReplayCdnUrl(additionalData: AdditionalScoreData): string | undefined {
+export function getBeatLeaderReplayCdnUrl(additionalData: AdditionalScoreData): string {
   if (additionalData.savedReplay) {
     return `${env.NEXT_PUBLIC_CDN_URL}/${getMinioBucketName(MinioBucket.BeatLeaderReplays)}/${getBeatLeaderReplayId(additionalData)}`;
   }
-  return undefined;
+  throw new NotFoundError(`No saved replay found for ${additionalData.scoreId}`);
 }
