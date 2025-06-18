@@ -20,6 +20,8 @@ import ScoresCard from "../../score/scores-card";
 import SimplePagination from "../../simple-pagination";
 import { Button } from "../../ui/button";
 import { EmptyState } from "../../ui/empty-state";
+import PageTransition from "../../ui/page-transition";
+import { usePageTransition } from "../../ui/page-transition-context";
 import AccSaberScoreComponent from "./score/accsaber-score";
 
 const scoreSort = [
@@ -47,8 +49,9 @@ type Props = {
 export default function AccSaberPlayerScores({ player, sort, page, type, order }: Props) {
   const { changePageUrl } = usePageNavigation();
   const isMobile = useIsMobile();
-
+  const { animateLeft, animateRight } = usePageTransition();
   const [currentPage, setCurrentPage] = useState(page);
+
   const [currentSort, setCurrentSort] = useState<AccSaberScoreSort>(sort);
   const [currentType, setCurrentType] = useState<AccSaberScoreType>(type);
   const [currentOrder, setCurrentOrder] = useState<AccSaberScoreOrder>(order);
@@ -82,13 +85,26 @@ export default function AccSaberPlayerScores({ player, sort, page, type, order }
     async (newSort: typeof sort, defaultOrder: AccSaberScoreOrder) => {
       if (newSort !== currentSort) {
         setCurrentSort(newSort);
-        setCurrentPage(1);
         setCurrentOrder(defaultOrder);
+        setCurrentPage(1);
+        animateLeft();
       } else {
         setCurrentOrder(currentOrder === "desc" ? "asc" : "desc");
+        animateLeft();
       }
     },
-    [currentSort, currentOrder, currentType]
+    [currentSort, currentOrder, currentType, animateLeft]
+  );
+
+  const handleTypeChange = useCallback(
+    (newType: AccSaberScoreType) => {
+      if (newType !== currentType) {
+        setCurrentType(newType);
+        setCurrentPage(1);
+        animateLeft();
+      }
+    },
+    [currentType, animateLeft]
   );
 
   const getUrl = useCallback(
@@ -97,6 +113,15 @@ export default function AccSaberPlayerScores({ player, sort, page, type, order }
     },
     [player.id, currentSort, currentType, currentOrder]
   );
+
+  const handlePageChange = (newPage: number) => {
+    if (newPage > currentPage) {
+      animateLeft();
+    } else {
+      animateRight();
+    }
+    setCurrentPage(newPage);
+  };
 
   useEffect(() => {
     changePageUrl(getUrl(currentPage));
@@ -112,7 +137,7 @@ export default function AccSaberPlayerScores({ player, sort, page, type, order }
               <Button
                 key={type.value}
                 variant={type.value === currentType ? "default" : "outline"}
-                onClick={() => setCurrentType(type.value as AccSaberScoreType)}
+                onClick={() => handleTypeChange(type.value as AccSaberScoreType)}
                 size="sm"
                 className="flex items-center"
               >
@@ -173,13 +198,11 @@ export default function AccSaberPlayerScores({ player, sort, page, type, order }
               ))}
           </div>
 
-          <div className="divide-border grid min-w-full grid-cols-1 divide-y">
+          <PageTransition className="divide-border grid min-w-full grid-cols-1 divide-y">
             {scores.items.map((score: AccSaberScore, index: number) => (
-              <div key={index}>
-                <AccSaberScoreComponent key={score.id} score={score} />
-              </div>
+              <AccSaberScoreComponent key={score.id} score={score} />
             ))}
-          </div>
+          </PageTransition>
 
           {scores.metadata.totalPages > 1 && (
             <SimplePagination
@@ -189,7 +212,7 @@ export default function AccSaberPlayerScores({ player, sort, page, type, order }
               itemsPerPage={scores.metadata.itemsPerPage}
               loadingPage={isLoading || isRefetching ? currentPage : undefined}
               generatePageUrl={page => getUrl(page)}
-              onPageChange={newPage => setCurrentPage(newPage)}
+              onPageChange={handlePageChange}
             />
           )}
         </>

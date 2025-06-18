@@ -40,41 +40,42 @@ export default class ScoreSaberService {
    */
   public static async getPlayer(
     id: string,
-    type: DetailType = DetailType.BASIC
+    type: DetailType = DetailType.BASIC,
+    playerToken?: ScoreSaberPlayerToken
   ): Promise<ScoreSaberPlayer> {
     return fetchWithCache<ScoreSaberPlayer>(
       CacheService.getCache(ServiceCache.ScoreSaber),
       `player:${id}:${type}`,
       async () => {
         // Start fetching player token and account in parallel
-        const [playerToken, account] = await Promise.all([
-          ApiServiceRegistry.getInstance().getScoreSaberService().lookupPlayer(id),
+        const [player, account] = await Promise.all([
+          playerToken ?? ApiServiceRegistry.getInstance().getScoreSaberService().lookupPlayer(id),
           PlayerService.getPlayer(id).catch(() => undefined),
         ]);
 
-        if (!playerToken) {
+        if (!player) {
           throw new NotFoundError(`Player "${id}" not found`);
         }
 
         // For basic type, return early with minimal data
         const basePlayer = {
-          id: playerToken.id,
-          name: playerToken.name,
-          avatar: playerToken.profilePicture,
-          country: playerToken.country,
-          rank: playerToken.rank,
-          countryRank: playerToken.countryRank,
-          pp: playerToken.pp,
-          hmd: await PlayerService.getPlayerHMD(playerToken.id),
-          joinedDate: new Date(playerToken.firstSeen),
-          role: playerToken.role ?? undefined,
-          permissions: playerToken.permissions,
-          banned: playerToken.banned,
-          inactive: playerToken.inactive,
+          id: player.id,
+          name: player.name,
+          avatar: player.profilePicture,
+          country: player.country,
+          rank: player.rank,
+          countryRank: player.countryRank,
+          pp: player.pp,
+          hmd: await PlayerService.getPlayerHMD(player.id),
+          joinedDate: new Date(player.firstSeen),
+          role: player.role ?? undefined,
+          permissions: player.permissions,
+          banned: player.banned,
+          inactive: player.inactive,
           trackedSince: account?.trackedSince ?? new Date(),
           rankPages: {
-            global: getPageFromRank(playerToken.rank, 50),
-            country: getPageFromRank(playerToken.countryRank, 50),
+            global: getPageFromRank(player.rank, 50),
+            country: getPageFromRank(player.countryRank, 50),
           },
         } as ScoreSaberPlayer;
 
@@ -85,16 +86,12 @@ export default class ScoreSaberService {
         // For full type, run all operations in parallel
         const [updatedAccount, ppBoundaries, accBadges, statisticHistory, playerHMD] =
           await Promise.all([
-            account ? PlayerService.updatePeakRank(id, playerToken) : undefined,
+            account ? PlayerService.updatePeakRank(id, player) : undefined,
             account ? PlayerService.getPlayerPpBoundary(id, 50) : [],
             account ? PlayerService.getAccBadges(id) : {},
-            PlayerHistoryService.getPlayerStatisticHistory(
-              playerToken,
-              new Date(),
-              getDaysAgoDate(30)
-            ),
-            PlayerService.getPlayerHMD(playerToken.id),
-            PlayerService.updatePlayerName(playerToken.id, playerToken.name),
+            PlayerHistoryService.getPlayerStatisticHistory(player, new Date(), getDaysAgoDate(30)),
+            PlayerService.getPlayerHMD(player.id),
+            PlayerService.updatePlayerName(player.id, player.name),
           ]);
 
         // Calculate all statistic changes in parallel
@@ -108,13 +105,13 @@ export default class ScoreSaberService {
           ...basePlayer,
           hmd: playerHMD,
           bio: {
-            lines: playerToken.bio ? sanitize(playerToken.bio).split("\n") : [],
-            linesStripped: playerToken.bio
-              ? sanitize(playerToken.bio.replace(/<[^>]+>/g, "")).split("\n")
+            lines: player.bio ? sanitize(player.bio).split("\n") : [],
+            linesStripped: player.bio
+              ? sanitize(player.bio.replace(/<[^>]+>/g, "")).split("\n")
               : [],
           },
           badges:
-            playerToken.badges?.map(badge => ({
+            player.badges?.map(badge => ({
               url: badge.image,
               description: badge.description,
             })) || [],
@@ -126,10 +123,10 @@ export default class ScoreSaberService {
           ppBoundaries,
           accBadges,
           peakRank: updatedAccount?.peakRank,
-          statistics: playerToken.scoreStats,
+          statistics: player.scoreStats,
           rankPages: {
-            global: getPageFromRank(playerToken.rank, 50),
-            country: getPageFromRank(playerToken.countryRank, 50),
+            global: getPageFromRank(player.rank, 50),
+            country: getPageFromRank(player.countryRank, 50),
           },
         } as ScoreSaberPlayer;
       }
@@ -425,7 +422,13 @@ export default class ScoreSaberService {
     // Get players from ScoreSaber
     return (
       await Promise.all(
-        uniquePlayerIds.map(id => ScoreSaberService.getPlayer(id, DetailType.BASIC))
+        uniquePlayerIds.map(id =>
+          ScoreSaberService.getPlayer(
+            id,
+            DetailType.BASIC,
+            scoreSaberPlayerTokens?.find(token => token.id === id)
+          )
+        )
       )
     ).sort((a, b) => {
       if (a.inactive && !b.inactive) return 1;

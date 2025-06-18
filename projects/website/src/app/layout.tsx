@@ -2,6 +2,7 @@ import { Colors } from "@/common/colors";
 import { PreloadResources } from "@/components/preload-resources";
 import { PostHogProvider } from "@/components/providers/posthog-provider";
 import { QueryProvider } from "@/components/providers/query-provider";
+import { PageTransitionProvider } from "@/components/ui/page-transition-context";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { env } from "@ssr/common/env";
@@ -79,7 +80,9 @@ export default function RootLayout({
           <Toaster />
           <PreloadResources />
           <TooltipProvider delayDuration={250}>
-            <QueryProvider>{children}</QueryProvider>
+            <PageTransitionProvider>
+              <QueryProvider>{children}</QueryProvider>
+            </PageTransitionProvider>
           </TooltipProvider>
         </PostHogProvider>
       </body>

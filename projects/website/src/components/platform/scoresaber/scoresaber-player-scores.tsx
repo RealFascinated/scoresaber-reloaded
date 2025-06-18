@@ -3,6 +3,8 @@
 import { PlatformRepository } from "@/common/platform/platform-repository";
 import { Spinner } from "@/components/spinner";
 import { Input } from "@/components/ui/input";
+import PageTransition from "@/components/ui/page-transition";
+import { usePageTransition } from "@/components/ui/page-transition-context";
 import useDatabase from "@/hooks/use-database";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import usePageNavigation from "@/hooks/use-page-navigation";
@@ -27,6 +29,36 @@ const scoreSort = [
   { name: "Recent", value: "recent", icon: <ClockIcon className="h-4 w-4" /> },
 ];
 
+const containerVariants = {
+  enter: (direction: number) => ({
+    x: direction > 0 ? 20 : -20,
+    opacity: 0,
+  }),
+  center: {
+    x: 0,
+    opacity: 1,
+  },
+  exit: (direction: number) => ({
+    x: direction < 0 ? 20 : -20,
+    opacity: 0,
+  }),
+};
+
+const itemVariants = {
+  enter: (direction: number) => ({
+    x: direction > 0 ? 20 : -20,
+    opacity: 0,
+  }),
+  center: {
+    x: 0,
+    opacity: 1,
+  },
+  exit: (direction: number) => ({
+    x: direction < 0 ? 20 : -20,
+    opacity: 0,
+  }),
+};
+
 export default function ScoreSaberPlayerScores({
   initialSearch,
   player,
@@ -41,13 +73,14 @@ export default function ScoreSaberPlayerScores({
   const { changePageUrl } = usePageNavigation();
   const isMobile = useIsMobile();
   const database = useDatabase();
+  const { animateLeft, animateRight } = usePageTransition();
+  const [currentPage, setCurrentPage] = useState(page);
 
   const platform = PlatformRepository.getInstance().getScoreSaberPlatform();
 
   const mainPlayerId = useLiveQuery(() => database.getMainPlayerId());
   const showScoreComparison = useLiveQuery(() => database.getShowScoreComparison());
 
-  const [currentPage, setCurrentPage] = useState(page);
   const [currentSort, setCurrentSort] = useState(sort);
   const [searchTerm, setSearchTerm] = useState(initialSearch || "");
 
@@ -91,9 +124,11 @@ export default function ScoreSaberPlayerScores({
     async (newSort: ScoreSaberScoreSort) => {
       if (newSort !== currentSort) {
         setCurrentSort(newSort);
+        setCurrentPage(1);
+        animateLeft();
       }
     },
-    [currentSort]
+    [currentSort, animateLeft]
   );
 
   /**
@@ -113,6 +148,15 @@ export default function ScoreSaberPlayerScores({
   useEffect(() => {
     changePageUrl(getUrl(currentPage));
   }, [currentPage, debouncedSearchTerm, player.id, isSearchActive, currentSort]);
+
+  const handlePageChange = (newPage: number) => {
+    if (newPage > currentPage) {
+      animateLeft();
+    } else {
+      animateRight();
+    }
+    setCurrentPage(newPage);
+  };
 
   return (
     <ScoresCard>
@@ -139,7 +183,6 @@ export default function ScoreSaberPlayerScores({
             className={clsx(invalidSearch && "border-red-500")}
             value={searchTerm}
             onChange={e => {
-              setCurrentPage(1);
               setSearchTerm(e.target.value);
             }}
           />
@@ -165,22 +208,20 @@ export default function ScoreSaberPlayerScores({
               ))}
           </div>
 
-          <div className="divide-border grid min-w-full grid-cols-1 divide-y">
+          <PageTransition className="divide-border grid min-w-full grid-cols-1 divide-y">
             {scores.items.map((score, index) => (
-              <div key={index}>
-                <ScoreSaberScoreDisplay
-                  key={score.score.scoreId}
-                  score={score.score}
-                  leaderboard={score.leaderboard}
-                  beatSaverMap={score.beatSaver}
-                  highlightedPlayerId={player.id}
-                  settings={{
-                    allowLeaderboardPreview: true,
-                  }}
-                />
-              </div>
+              <ScoreSaberScoreDisplay
+                key={score.score.scoreId}
+                score={score.score}
+                leaderboard={score.leaderboard}
+                beatSaverMap={score.beatSaver}
+                highlightedPlayerId={player.id}
+                settings={{
+                  allowLeaderboardPreview: true,
+                }}
+              />
             ))}
-          </div>
+          </PageTransition>
 
           {scores.metadata.totalPages > 1 && (
             <SimplePagination
@@ -190,7 +231,7 @@ export default function ScoreSaberPlayerScores({
               itemsPerPage={scores.metadata.itemsPerPage}
               loadingPage={isLoading || isRefetching ? currentPage : undefined}
               generatePageUrl={page => getUrl(page)}
-              onPageChange={newPage => setCurrentPage(newPage)}
+              onPageChange={handlePageChange}
             />
           )}
         </>

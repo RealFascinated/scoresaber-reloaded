@@ -1,7 +1,7 @@
 import { Cooldown } from "../cooldown";
 import Logger from "../logger";
 import Request, { RequestOptions } from "../utils/request";
-import { isServer } from "../utils/utils";
+import { isProduction, isServer } from "../utils/utils";
 import { ApiServiceName } from "./api-service-registry";
 
 export default class ApiService {
@@ -48,8 +48,8 @@ export default class ApiService {
    * @param data the data to log
    */
   public log(data: unknown) {
-    // Don't log on the backend
-    if (!isServer()) {
+    // Don't log on the backend, but always log in development
+    if (!isServer() || !isProduction()) {
       Logger.info(`${data}`);
     }
   }
