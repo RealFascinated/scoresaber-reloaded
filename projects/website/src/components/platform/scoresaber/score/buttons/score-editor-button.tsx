@@ -6,11 +6,13 @@ import { useIsMobile } from "@/hooks/use-is-mobile";
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
+import { Modifier } from "@ssr/common/score/modifier";
+import { formatScoreAccuracy } from "@ssr/common/utils/score.util";
 import { updateScoreWeights } from "@ssr/common/utils/scoresaber.util";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
-import { FaCog, FaUndo } from "react-icons/fa";
+import { FaCheck, FaCog, FaUndo } from "react-icons/fa";
 
 type ScoreEditorButtonProps = {
   score: ScoreSaberScore;
@@ -24,7 +26,8 @@ export default function ScoreSaberScoreEditorButton({
   updateScore,
 }: ScoreEditorButtonProps) {
   const maxScore = leaderboard.maxScore || 1; // Use 1 to prevent division by zero
-  const accuracy = (score.score / maxScore) * 100;
+  const accuracy =
+    (score.score / maxScore) * 100 * (score.modifiers.includes(Modifier.NF) ? 0.5 : 1);
 
   const isMobile = useIsMobile();
   const [newAccuracy, setNewAccuracy] = useState(accuracy);
@@ -104,12 +107,34 @@ export default function ScoreSaberScoreEditorButton({
               <div className="flex items-center justify-between">
                 <p className="mb-1 text-sm font-medium">Accuracy Changer</p>
 
-                {/* Reset Button */}
-                <SimpleTooltip display={<p>Set accuracy to score accuracy</p>}>
-                  <Button onClick={handleSliderReset} className="h-fit p-1" variant="ghost">
-                    <FaUndo className="size-3.5" />
-                  </Button>
-                </SimpleTooltip>
+                <div className="flex items-center gap-2">
+                  {/* Set to FC Button */}
+                  {score.additionalData !== undefined && !score.fullCombo && (
+                    <SimpleTooltip
+                      display={
+                        <p>
+                          Set accuracy to FC Accuracy (
+                          {formatScoreAccuracy(score.additionalData!.fcAccuracy!)})
+                        </p>
+                      }
+                    >
+                      <Button
+                        onClick={() => handleSliderChange([score.additionalData!.fcAccuracy!])}
+                        className="h-fit p-1"
+                        variant="ghost"
+                      >
+                        <FaCheck className="size-3.5" />
+                      </Button>
+                    </SimpleTooltip>
+                  )}
+
+                  {/* Reset Button */}
+                  <SimpleTooltip display={<p>Set accuracy to score accuracy</p>}>
+                    <Button onClick={handleSliderReset} className="h-fit p-1" variant="ghost">
+                      <FaUndo className="size-3.5" />
+                    </Button>
+                  </SimpleTooltip>
+                </div>
               </div>
 
               {/* Accuracy Slider */}
