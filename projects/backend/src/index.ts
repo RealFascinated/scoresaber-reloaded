@@ -18,6 +18,7 @@ import BeatSaverController from "./controller/beatsaver.controller";
 import LeaderboardController from "./controller/leaderboard.controller";
 import PlayerController from "./controller/player.controller";
 import PlaylistController from "./controller/playlist.controller";
+import ReplayController from "./controller/replay.controller";
 import ScoresController from "./controller/scores.controller";
 import StatisticsController from "./controller/statistics.controller";
 import { EventsManager } from "./event/events-manager";
@@ -190,6 +191,7 @@ app.use(
       StatisticsController,
       PlaylistController,
       BeatSaverController,
+      ReplayController,
     ],
   })
 );

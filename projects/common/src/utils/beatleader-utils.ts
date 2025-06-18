@@ -12,7 +12,7 @@ export function getBeatLeaderReplayRedirectUrl(
   additionalData: AdditionalScoreData
 ): string | undefined {
   if (additionalData.savedReplay) {
-    return `${env.NEXT_PUBLIC_WEBSITE_URL}/replay/${additionalData.scoreId}`;
+    return `${env.NEXT_PUBLIC_API_URL}/replay/${additionalData.scoreId}`;
   }
   return undefined;
 }
