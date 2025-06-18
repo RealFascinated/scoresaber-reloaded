@@ -13,13 +13,23 @@ export default function SimpleTooltip({
   showOnMobile,
 }: {
   children: React.ReactNode;
-  display: React.ReactNode;
+  display: React.ReactNode | string;
   side?: (typeof SIDE_OPTIONS)[number];
   className?: string;
   showOnMobile?: boolean;
 }) {
   return (
-    <ShadCnTooltip content={display} side={side} showOnMobile={showOnMobile}>
+    <ShadCnTooltip
+      content={
+        typeof display === "string" ? (
+          <p className="max-w-[350px] text-center text-wrap">{display}</p>
+        ) : (
+          display
+        )
+      }
+      side={side}
+      showOnMobile={showOnMobile}
+    >
       <div className={clsx("w-full cursor-default", className)}>{children}</div>
     </ShadCnTooltip>
   );

@@ -9,7 +9,6 @@ import { LeaderboardFilterProvider } from "@/components/providers/leaderboard/le
 import { ScoreModeEnum } from "@/components/score/score-mode";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { DetailType } from "@ssr/common/detail-type";
-import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { LeaderboardResponse } from "@ssr/common/response/leaderboard-response";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
@@ -21,7 +20,7 @@ type LeaderboardDataProps = {
   /**
    * The initial leaderboard data.
    */
-  initialLeaderboard: LeaderboardResponse<ScoreSaberLeaderboard>;
+  initialLeaderboard: LeaderboardResponse;
 
   /**
    * The initial page.
@@ -46,7 +45,7 @@ export function ScoreSaberLeaderboardData({
 
   const { data } = useQuery({
     queryKey: ["leaderboard", currentLeaderboardId],
-    queryFn: async (): Promise<LeaderboardResponse<ScoreSaberLeaderboard> | undefined> => {
+    queryFn: async (): Promise<LeaderboardResponse | undefined> => {
       return ssrApi.fetchLeaderboard(currentLeaderboardId + "", DetailType.FULL);
     },
     placeholderData: data => data ?? initialLeaderboard,
@@ -111,7 +110,7 @@ export function ScoreSaberLeaderboardData({
           {/* Leaderboard Data */}
           <div className="flex w-full flex-col gap-2 xl:w-[550px]">
             {/* Leaderboard Info */}
-            <LeaderboardInfo leaderboard={leaderboard} beatSaverMap={beatsaver} />
+            <LeaderboardInfo leaderboard={leaderboardResponse} />
 
             {/* Leaderboard Filters */}
             {!isMobile && <ScoreSaberLeaderboardFilters />}

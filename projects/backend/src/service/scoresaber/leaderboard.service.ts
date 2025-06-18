@@ -107,7 +107,7 @@ export default class LeaderboardService {
       includeBeatSaver?: boolean;
       beatSaverType?: DetailType;
     }
-  ): Promise<LeaderboardResponse<ScoreSaberLeaderboard>> {
+  ): Promise<LeaderboardResponse> {
     options = {
       includeBeatSaver: true,
       beatSaverType: DetailType.BASIC,
@@ -165,6 +165,7 @@ export default class LeaderboardService {
         leaderboard: processedLeaderboard as ScoreSaberLeaderboard,
         beatsaver: beatSaverMap,
         cached: cached,
+        trackedScores: await this.getTrackedScores(id),
       };
     });
   }
@@ -187,7 +188,7 @@ export default class LeaderboardService {
       includeBeatSaver?: boolean;
       type?: DetailType;
     }
-  ): Promise<LeaderboardResponse<ScoreSaberLeaderboard>> {
+  ): Promise<LeaderboardResponse> {
     options = {
       includeBeatSaver: true,
       type: DetailType.BASIC,
@@ -250,6 +251,7 @@ export default class LeaderboardService {
         leaderboard: processedLeaderboard as ScoreSaberLeaderboard,
         beatsaver: beatSaverMap,
         cached: cached,
+        trackedScores: await this.getTrackedScores(leaderboard.id),
       };
     });
   }
@@ -962,6 +964,20 @@ export default class LeaderboardService {
       acc[curr.hmd] = curr.count;
       return acc;
     }, {} as PlaysByHmdResponse);
+  }
+
+  /**
+   * Gets the amount of tracked scores for a leaderboard
+   *
+   * @param leaderboardId the leaderboard id
+   * @returns the amount of tracked scores
+   */
+  public static async getTrackedScores(leaderboardId: number | string): Promise<number> {
+    const id = Number(leaderboardId);
+    if (isNaN(id)) {
+      throw new Error(`Invalid leaderboardId: ${leaderboardId}`);
+    }
+    return ScoreSaberScoreModel.countDocuments({ leaderboardId: id });
   }
 
   /**

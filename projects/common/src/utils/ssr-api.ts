@@ -80,7 +80,7 @@ class SSRApi {
     if (response === undefined) {
       return undefined;
     }
-    return SuperJSON.parse<LeaderboardResponse<ScoreSaberLeaderboard>>(response);
+    return SuperJSON.parse<LeaderboardResponse>(response);
   }
 
   /**
@@ -102,7 +102,7 @@ class SSRApi {
     if (response === undefined) {
       return undefined;
     }
-    return SuperJSON.parse<LeaderboardResponse<ScoreSaberLeaderboard>>(response);
+    return SuperJSON.parse<LeaderboardResponse>(response);
   }
 
   /**

@@ -3,8 +3,7 @@ import Card from "@/components/card";
 import FallbackLink from "@/components/fallback-link";
 import LeaderboardButtons from "@/components/platform/scoresaber/leaderboard/leaderboard-buttons";
 import SimpleTooltip from "@/components/simple-tooltip";
-import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
+import { LeaderboardResponse } from "@ssr/common/response/leaderboard-response";
 import { getBeatSaverMapperProfileUrl } from "@ssr/common/utils/beatsaver.util";
 import { formatNumber } from "@ssr/common/utils/number-utils";
 import { formatDate } from "@ssr/common/utils/time-utils";
@@ -12,19 +11,12 @@ import Image from "next/image";
 import { LeaderboardSongStarCount } from "./leaderboard-song-star-count";
 
 type LeaderboardInfoProps = {
-  /**
-   * The leaderboard to display.
-   */
-  leaderboard: ScoreSaberLeaderboard;
-
-  /**
-   * The beat saver map associated with the leaderboard.
-   */
-  beatSaverMap?: BeatSaverMapResponse;
+  leaderboard: LeaderboardResponse;
 };
 
-export function LeaderboardInfo({ leaderboard, beatSaverMap }: LeaderboardInfoProps) {
-  let statusDate = leaderboard.dateRanked || leaderboard.dateQualified;
+export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
+  const { leaderboard: leaderboardData, beatsaver: beatSaverMap, trackedScores } = leaderboard;
+  let statusDate = leaderboardData.dateRanked || leaderboardData.dateQualified;
   if (statusDate) {
     statusDate = new Date(statusDate);
   }
@@ -43,12 +35,12 @@ export function LeaderboardInfo({ leaderboard, beatSaverMap }: LeaderboardInfoPr
                   }
                   className="transition-all hover:brightness-[66%]"
                 >
-                  <p className="text-md font-semibold">{leaderboard.fullName}</p>
+                  <p className="text-md font-semibold">{leaderboardData.fullName}</p>
                 </FallbackLink>
 
                 {/* Song Author */}
                 <p className="text-sm text-gray-400">
-                  By <span className="text-ssr">{leaderboard.songAuthorName}</span>
+                  By <span className="text-ssr">{leaderboardData.songAuthorName}</span>
                 </p>
               </div>
 
@@ -63,20 +55,32 @@ export function LeaderboardInfo({ leaderboard, beatSaverMap }: LeaderboardInfoPr
                         beatSaverMap ? "text-ssr transition-all hover:brightness-[66%]" : ""
                       )}
                     >
-                      {leaderboard.levelAuthorName}
+                      {leaderboardData.levelAuthorName}
                     </span>
                   </FallbackLink>
                 </p>
 
                 {/* Play Count */}
                 <p>
-                  Plays: <span className="font-semibold">{formatNumber(leaderboard.plays)}</span> (
-                  {formatNumber(leaderboard.dailyPlays)} today)
+                  Plays:{" "}
+                  <span className="font-semibold">{formatNumber(leaderboardData.plays)}</span> (
+                  {formatNumber(leaderboardData.dailyPlays)} today)
                 </p>
+
+                {/* Tracked Scores */}
+                <SimpleTooltip
+                  display="The amount of scores that ScoreSaber Reloaded has tracked for this leaderboard."
+                  side="bottom"
+                >
+                  <p>
+                    Tracked Scores:{" "}
+                    <span className="font-semibold">{formatNumber(trackedScores)}</span>
+                  </p>
+                </SimpleTooltip>
 
                 {/* Map Status (Ranked, Qualified, etc) */}
                 <div className="flex gap-2">
-                  Status: <span className="font-semibold">{leaderboard.status}</span>{" "}
+                  Status: <span className="font-semibold">{leaderboardData.status}</span>{" "}
                   {statusDate && (
                     <SimpleTooltip display={formatDate(statusDate, "Do MMMM, YYYY")}>
                       <span>({formatDate(statusDate, "Do MMMM, YYYY")})</span>
@@ -88,7 +92,7 @@ export function LeaderboardInfo({ leaderboard, beatSaverMap }: LeaderboardInfoPr
                 <p>
                   Created:{" "}
                   <span className="font-semibold">
-                    {formatDate(leaderboard.timestamp, "Do MMMM, YYYY")}
+                    {formatDate(leaderboardData.timestamp, "Do MMMM, YYYY")}
                   </span>
                 </p>
               </div>
@@ -96,8 +100,8 @@ export function LeaderboardInfo({ leaderboard, beatSaverMap }: LeaderboardInfoPr
 
             {/* Song Art */}
             <Image
-              src={leaderboard.songArt}
-              alt={`${leaderboard.songName} Cover Image`}
+              src={leaderboardData.songArt}
+              alt={`${leaderboardData.songName} Cover Image`}
               className="h-[96px] w-[96px] rounded-md"
               width={96}
               height={96}
@@ -105,8 +109,8 @@ export function LeaderboardInfo({ leaderboard, beatSaverMap }: LeaderboardInfoPr
           </div>
 
           <div className="flex items-end justify-between gap-2">
-            <LeaderboardButtons leaderboard={leaderboard} beatSaverMap={beatSaverMap} />
-            <LeaderboardSongStarCount leaderboard={leaderboard} />
+            <LeaderboardButtons leaderboard={leaderboardData} beatSaverMap={beatSaverMap} />
+            <LeaderboardSongStarCount leaderboard={leaderboardData} />
           </div>
         </div>
       </div>

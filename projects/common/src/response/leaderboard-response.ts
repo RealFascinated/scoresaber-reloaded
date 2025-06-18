@@ -1,13 +1,20 @@
+import { ScoreSaberLeaderboard } from "src/model/leaderboard/impl/scoresaber-leaderboard";
 import { BeatSaverMapResponse } from "./beatsaver-map-response";
 
-export type LeaderboardResponse<L> = {
+export type LeaderboardResponse = {
   /**
-   * The leaderboard.
+   * The scoresaber leaderboard.
    */
-  leaderboard: L;
+  leaderboard: ScoreSaberLeaderboard;
 
   /**
-   * The beatsaver map.
+   * The amount of scores that we have
+   * tracked for this leaderboard.
+   */
+  trackedScores: number;
+
+  /**
+   * The beatsaver map associated with this leaderboard.
    */
   beatsaver?: BeatSaverMapResponse;
 
