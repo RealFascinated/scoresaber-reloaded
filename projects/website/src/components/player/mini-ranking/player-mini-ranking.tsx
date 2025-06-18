@@ -12,18 +12,6 @@ import Card from "../../card";
 import CountryFlag from "../../country-flag";
 import PlayerPreview from "../player-preview";
 
-type PlayerMiniRankingProps = {
-  /**
-   * The type of ranking to display.
-   */
-  type: "Global" | "Country";
-
-  /**
-   * The player on this profile.
-   */
-  player: ScoreSaberPlayer;
-};
-
 type Variants = {
   [key: string]: {
     icon: (player: ScoreSaberPlayer) => ReactElement<unknown>;
@@ -41,7 +29,13 @@ const miniVariants: Variants = {
   },
 };
 
-export default function PlayerMiniRanking({ type, player }: PlayerMiniRankingProps) {
+export default function PlayerMiniRanking({
+  type,
+  player,
+}: {
+  type: "Global" | "Country";
+  player: ScoreSaberPlayer;
+}) {
   const variant = miniVariants[type];
   const icon = variant.icon(player);
 
@@ -63,8 +57,8 @@ export default function PlayerMiniRanking({ type, player }: PlayerMiniRankingPro
   }
 
   return (
-    <Card className="sticky flex w-[400px] gap-2 text-sm select-none">
-      <div className="flex items-center gap-1.5">
+    <Card className="sticky flex w-[400px] flex-col gap-2 text-sm select-none">
+      <div className="flex items-center gap-1.5 px-2">
         {icon}
         <p>{type} Ranking</p>
       </div>
@@ -75,43 +69,49 @@ export default function PlayerMiniRanking({ type, player }: PlayerMiniRankingPro
             const ppDifference = playerRanking.pp - player.pp;
 
             return (
-              <Link
-                key={index}
-                href={`/player/${playerRanking.id}`}
-                className="bg-accent grid cursor-pointer grid-cols-[auto_1fr_auto] items-center gap-2 px-2 py-1.5 transition-all first:rounded-t last:rounded-b hover:brightness-75"
+              <PlayerPreview
+                playerId={playerRanking.id}
+                delay={750}
+                className="bg-accent w-full transition-all first:rounded-t last:rounded-b hover:brightness-75"
+                key={playerRanking.id}
+                useLink={false}
               >
-                <p className="text-gray-400">#{formatNumberWithCommas(rank)}</p>
-                <div className="flex items-start gap-2">
-                  <div className="flex flex-col items-start">
-                    <PlayerPreview
-                      playerId={playerRanking.id}
-                      delay={750}
-                      className="cursor-pointer"
-                    >
-                      <div className="flex flex-col items-start">
-                        <PlayerInfo
-                          className="!flex w-[170px] !items-start"
-                          player={playerRanking}
-                          highlightedPlayerId={player.id}
-                          hideCountryFlag
-                          hoverBrightness={false}
-                        />
-                      </div>
-                    </PlayerPreview>
+                <Link
+                  href={`/player/${playerRanking.id}`}
+                  className="grid cursor-pointer items-center gap-2.5 px-2 py-1.5"
+                  style={{
+                    gridTemplateColumns: `auto 48px 0.9fr 1fr`,
+                  }}
+                >
+                  {/* Rank */}
+                  <p className="font-mono text-gray-400">#{formatNumberWithCommas(rank)}</p>
+
+                  {/* Player */}
+                  <div className="flex items-center">
+                    <PlayerInfo
+                      player={playerRanking}
+                      highlightedPlayerId={player.id}
+                      hideCountryFlag
+                      hoverBrightness={false}
+                    />
                   </div>
-                </div>
-                <div className="inline-flex min-w-[12.5em] items-center gap-1">
-                  <p className="text-ssr text-right">{formatPp(playerRanking.pp)}pp</p>
-                  {playerRanking.id !== player.id && (
-                    <p
-                      className={`text-right text-xs ${ppDifference > 0 ? "text-green-400" : "text-red-400"}`}
-                    >
-                      {ppDifference > 0 ? "+" : ""}
-                      {formatPp(ppDifference, 2)}
-                    </p>
-                  )}
-                </div>
-              </Link>
+
+                  <div className="m-auto" />
+
+                  {/* PP */}
+                  <div className="grid w-[100px] grid-cols-[1fr_0.3fr] items-center gap-2">
+                    <p className="text-ssr font-mono">{formatPp(playerRanking.pp)}pp</p>
+                    {playerRanking.id !== player.id && (
+                      <p
+                        className={`font-mono ${ppDifference > 0 ? "text-green-400" : "text-red-400"}`}
+                      >
+                        {ppDifference > 0 ? "+" : ""}
+                        {formatPp(ppDifference, 2)}
+                      </p>
+                    )}
+                  </div>
+                </Link>
+              </PlayerPreview>
             );
           })
         ) : (

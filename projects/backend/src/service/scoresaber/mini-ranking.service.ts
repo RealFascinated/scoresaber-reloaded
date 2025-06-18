@@ -93,7 +93,7 @@ export default class MiniRankingService {
     }
 
     return await Promise.all(
-      result.map(player => ScoreSaberService.getPlayer(player.id, DetailType.BASIC, player))
+      result.map(player => ScoreSaberService.getPlayer(player.id, DetailType.FULL, player))
     );
   }
 }
