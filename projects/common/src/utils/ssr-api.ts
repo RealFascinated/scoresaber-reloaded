@@ -162,7 +162,7 @@ class SSRApi {
    */
   async getFriendLeaderboardScores(friendIds: string[], leaderboardId: string, page: number) {
     const response = await Request.get<string>(
-      `${env.NEXT_PUBLIC_API_URL}/scores/friends/leaderboard/${leaderboardId}/${page}`,
+      `${env.NEXT_PUBLIC_API_URL}/friend/leaderboard-scores/${leaderboardId}/${page}`,
       {
         returns: "text",
         searchParams: {
@@ -185,7 +185,7 @@ class SSRApi {
    */
   async getFriendScores(friendIds: string[], page: number) {
     const response = await Request.get<string>(
-      `${env.NEXT_PUBLIC_API_URL}/scores/friends/recent/${page}`,
+      `${env.NEXT_PUBLIC_API_URL}/friend/recent-scores/${page}`,
       {
         returns: "text",
         searchParams: {
@@ -281,7 +281,7 @@ class SSRApi {
    */
   async fetchScoreStats(scoreId: number) {
     return Request.get<ScoreStatsResponse>(
-      `${env.NEXT_PUBLIC_API_URL}/scores/scorestats/${scoreId}`
+      `${env.NEXT_PUBLIC_API_URL}/beatleader/scorestats/${scoreId}`
     );
   }
 

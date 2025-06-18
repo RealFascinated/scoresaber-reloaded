@@ -14,7 +14,9 @@ import { decorators } from "elysia-decorators";
 import { helmet } from "elysia-helmet";
 import { DiscordChannels, initDiscordBot, logToChannel } from "./bot/bot";
 import AppController from "./controller/app.controller";
+import BeatLeaderController from "./controller/beatleader.controller";
 import BeatSaverController from "./controller/beatsaver.controller";
+import FriendsController from "./controller/friends.controller";
 import LeaderboardController from "./controller/leaderboard.controller";
 import PlayerController from "./controller/player.controller";
 import PlaylistController from "./controller/playlist.controller";
@@ -192,6 +194,8 @@ app.use(
       PlaylistController,
       BeatSaverController,
       ReplayController,
+      BeatLeaderController,
+      FriendsController,
     ],
   })
 );

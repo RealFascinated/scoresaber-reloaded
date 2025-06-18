@@ -1,10 +1,7 @@
-import { NotFoundError } from "@ssr/common/error/not-found-error";
 import { Timeframe } from "@ssr/common/timeframe";
 import { t } from "elysia";
 import { Controller, Get } from "elysia-decorators";
 import SuperJSON from "superjson";
-import BeatLeaderService from "../service/beatleader.service";
-import { FriendScoresService } from "../service/score/friend-scores.service";
 import { ScoreHistoryService } from "../service/score/score-history.service";
 import { ScoreService } from "../service/score/score.service";
 import ScoreSaberService from "../service/scoresaber/scoresaber.service";
@@ -109,84 +106,6 @@ export default class ScoresController {
     }
 
     return (await ScoreService.getTopScores(timeframe, page)).toJSON();
-  }
-
-  @Get("/friends/leaderboard/:leaderboardId/:page", {
-    config: {},
-    tags: ["scores"],
-    params: t.Object({
-      leaderboardId: t.Number({ required: true }),
-      page: t.Number({ required: true }),
-    }),
-    query: t.Object({
-      friendIds: t.String({ required: true }),
-      superJson: t.Optional(t.Boolean({ default: false })),
-    }),
-  })
-  public async getFriendLeaderboardScores({
-    params: { leaderboardId, page },
-    query: { friendIds, superJson },
-  }: {
-    params: {
-      leaderboardId: number;
-      page: number;
-    };
-    query: { friendIds: string; superJson: boolean };
-  }): Promise<unknown> {
-    const ids = friendIds.split(",");
-    if (ids.length === 0) {
-      throw new NotFoundError("Malformed friend ids, must be a comma separated list of friend ids");
-    }
-    const data = await FriendScoresService.getFriendLeaderboardScores(ids, leaderboardId, page);
-    return superJson ? SuperJSON.stringify(data) : data.toJSON();
-  }
-
-  @Get("/friends/recent/:page", {
-    config: {},
-    tags: ["scores"],
-    params: t.Object({
-      page: t.Number({ required: true }),
-    }),
-    query: t.Object({
-      friendIds: t.String({ required: true }),
-      superJson: t.Optional(t.Boolean({ default: false })),
-    }),
-  })
-  public async getFriendScores({
-    params: { page },
-    query: { friendIds, superJson },
-  }: {
-    params: {
-      page: number;
-    };
-    query: { friendIds: string; superJson: boolean };
-  }): Promise<unknown> {
-    const ids = friendIds.split(",");
-    if (ids.length === 0) {
-      throw new NotFoundError("Malformed friend ids, must be a comma separated list of friend ids");
-    }
-    const data = await FriendScoresService.getFriendScores(ids, page);
-    return superJson ? SuperJSON.stringify(data) : data.toJSON();
-  }
-
-  @Get("/scorestats/:id", {
-    config: {},
-    tags: ["scores"],
-    params: t.Object({
-      id: t.Number({ required: true }),
-    }),
-  })
-  public async getScoreStats({
-    params: { id },
-  }: {
-    params: {
-      id: number;
-    };
-  }): Promise<unknown> {
-    return {
-      current: await BeatLeaderService.getScoreStats(id),
-      previous: await BeatLeaderService.getPreviousScoreStats(id),
-    };
   }
 
   @Get("/history-graph/:playerId/:leaderboardId", {
