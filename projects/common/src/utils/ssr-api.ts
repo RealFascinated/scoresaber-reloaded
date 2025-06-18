@@ -380,9 +380,12 @@ class SSRApi {
    * @returns the plays by HMD
    */
   async getPlaysByHmdForLeaderboard(leaderboardId: string) {
-    return Request.get<PlaysByHmdResponse>(
-      `${env.NEXT_PUBLIC_API_URL}/leaderboard/plays-by-hmd/${leaderboardId}`
-    );
+    return (await Request.get<PlaysByHmdResponse>(
+      `${env.NEXT_PUBLIC_API_URL}/leaderboard/plays-by-hmd/${leaderboardId}`,
+      {
+        throwOnError: true,
+      }
+    ))!;
   }
 
   /**
