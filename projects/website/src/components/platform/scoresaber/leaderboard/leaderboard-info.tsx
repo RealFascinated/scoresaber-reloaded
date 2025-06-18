@@ -80,11 +80,14 @@ export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
 
                 {/* Map Status (Ranked, Qualified, etc) */}
                 <div className="flex gap-2">
-                  Status: <span className="font-semibold">{leaderboardData.status}</span>{" "}
-                  {statusDate && (
+                  {statusDate ? (
                     <SimpleTooltip display={formatDate(statusDate, "Do MMMM, YYYY")}>
-                      <span>({formatDate(statusDate, "Do MMMM, YYYY")})</span>
+                      Status: <span className="font-semibold">{leaderboardData.status}</span>
                     </SimpleTooltip>
+                  ) : (
+                    <p>
+                      Status: <span className="font-semibold">{leaderboardData.status}</span>
+                    </p>
                   )}
                 </div>
 
