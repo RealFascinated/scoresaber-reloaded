@@ -1,5 +1,5 @@
 import { Point } from "@influxdata/influxdb-client";
-import mongoose from "mongoose";
+import { mongoose } from "@typegoose/typegoose";
 import { MetricType } from "../../../service/metrics.service";
 import NumberMetric from "../../number-metric";
 
