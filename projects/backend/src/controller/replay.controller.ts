@@ -1,4 +1,4 @@
-import { getBeatLeaderReplayRedirectUrl } from "@ssr/common/utils/beatleader-utils";
+import { getBeatLeaderReplayCdnUrl } from "@ssr/common/utils/beatleader-utils";
 import { redirect, t } from "elysia";
 import { Controller, Get } from "elysia-decorators";
 import BeatLeaderService from "../service/beatleader.service";
@@ -13,7 +13,7 @@ export default class ReplayController {
   })
   public async redirectReplay({ params: { scoreId } }: { params: { scoreId: number } }) {
     const beatleaderScore = await BeatLeaderService.getAdditionalScoreData(scoreId, true);
-    const redirectUrl = getBeatLeaderReplayRedirectUrl(beatleaderScore!)!;
+    const redirectUrl = getBeatLeaderReplayCdnUrl(beatleaderScore!)!;
     return redirect(redirectUrl);
   }
 }
