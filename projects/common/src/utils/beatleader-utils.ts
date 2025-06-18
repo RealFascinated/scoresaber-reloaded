@@ -3,14 +3,16 @@ import { getMinioBucketName, MinioBucket } from "../minio-buckets";
 import { AdditionalScoreData } from "../model/additional-score-data/additional-score-data";
 
 /**
- * Get the URL of a BeatLeader replay.
+ * Get the redirect URL of a BeatLeader replay.
  *
  * @param additionalData the additional score data
  * @returns the URL of the replay
  */
-export function getBeatLeaderReplayUrl(additionalData: AdditionalScoreData): string | undefined {
+export function getBeatLeaderReplayRedirectUrl(
+  additionalData: AdditionalScoreData
+): string | undefined {
   if (additionalData.savedReplay) {
-    return `${env.NEXT_PUBLIC_CDN_URL}/${getMinioBucketName(MinioBucket.BeatLeaderReplays)}/${getBeatLeaderReplayId(additionalData)}`;
+    return `${env.NEXT_PUBLIC_WEBSITE_URL}/replay/${additionalData.scoreId}`;
   }
   return undefined;
 }
@@ -23,4 +25,17 @@ export function getBeatLeaderReplayUrl(additionalData: AdditionalScoreData): str
  */
 export function getBeatLeaderReplayId(score: AdditionalScoreData): string {
   return `${score.scoreId}-${score.playerId}-${score.songDifficulty}-${score.songCharacteristic}-${score.songHash.toUpperCase()}.bsor`;
+}
+
+/**
+ * Get the CDN URL of a BeatLeader replay.
+ *
+ * @param additionalData the additional score data
+ * @returns the CDN URL of the replay
+ */
+export function getBeatLeaderReplayCdnUrl(additionalData: AdditionalScoreData): string | undefined {
+  if (additionalData.savedReplay) {
+    return `${env.NEXT_PUBLIC_CDN_URL}/${getMinioBucketName(MinioBucket.BeatLeaderReplays)}/${getBeatLeaderReplayId(additionalData)}`;
+  }
+  return undefined;
 }

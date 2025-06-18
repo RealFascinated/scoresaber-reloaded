@@ -6,7 +6,7 @@ import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { removeObjectFields } from "@ssr/common/object.util";
 import { ReplayViewers } from "@ssr/common/replay-viewer";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
-import { getBeatLeaderReplayUrl } from "@ssr/common/utils/beatleader-utils";
+import { getBeatLeaderReplayRedirectUrl } from "@ssr/common/utils/beatleader-utils";
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
 import { formatScoreAccuracy } from "@ssr/common/utils/score.util";
 import { getDifficultyName } from "@ssr/common/utils/song-utils";
@@ -147,7 +147,7 @@ export async function sendScoreNotification(
                   .setURL(
                     ReplayViewers.beatleader.generateUrl(
                       beatLeaderScore.scoreId,
-                      getBeatLeaderReplayUrl(beatLeaderScore)
+                      getBeatLeaderReplayRedirectUrl(beatLeaderScore)
                     )
                   ),
               ]

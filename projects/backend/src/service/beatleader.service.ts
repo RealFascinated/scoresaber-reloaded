@@ -1,4 +1,5 @@
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
+import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger from "@ssr/common/logger";
 import { MinioBucket } from "@ssr/common/minio-buckets";
 import {
@@ -64,7 +65,8 @@ export default class BeatLeaderService {
    * @private
    */
   public static async getAdditionalScoreData(
-    scoreId: number
+    scoreId: number,
+    throwIfNotFound: boolean = false
   ): Promise<AdditionalScoreData | undefined> {
     return fetchWithCache(
       CacheService.getCache(ServiceCache.AdditionalScoreData),
@@ -74,6 +76,9 @@ export default class BeatLeaderService {
           scoreId: scoreId,
         }).lean();
         if (!additionalData) {
+          if (throwIfNotFound) {
+            throw new NotFoundError(`BeatLeader Score ${scoreId} not found`);
+          }
           return undefined;
         }
         return this.additionalScoreDataToObject(additionalData);
