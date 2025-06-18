@@ -25,7 +25,7 @@ export default function ScoreSaberLeaderboardFilters() {
   }
 
   return (
-    <Card className="flex h-fit w-full flex-col gap-2 text-sm">
+    <Card className="flex h-fit w-full flex-col gap-2 text-sm 2xl:w-[405px]">
       <div className="flex flex-row items-end gap-2">
         <Combobox<string | undefined>
           name="Country"

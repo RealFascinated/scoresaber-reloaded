@@ -1,1 +1,1 @@
-export type AroundPlayer = "global" | "country";
+export type MiniRankingType = "global" | "country";

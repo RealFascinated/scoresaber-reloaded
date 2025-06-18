@@ -63,7 +63,7 @@ export function ScoreSaberLeaderboardData({
   return (
     <LeaderboardFilterProvider>
       <div className="w-full">
-        <div className="flex w-full flex-col-reverse gap-2 xl:flex-row">
+        <div className="flex w-full flex-col-reverse gap-2 2xl:flex-row">
           {/* Mobile Only */}
           {isMobile && (
             <div className="flex flex-col gap-2">
@@ -114,7 +114,7 @@ export function ScoreSaberLeaderboardData({
           </div>
 
           {/* Leaderboard Data */}
-          <div className="flex w-full flex-col gap-2 xl:w-[550px]">
+          <div className="flex w-full flex-col gap-2 2xl:w-[550px]">
             {/* Leaderboard Info */}
             <LeaderboardInfo leaderboard={leaderboardResponse} />
 
@@ -136,7 +136,7 @@ function LeaderboardHmdPlays({ hmdUsage }: { hmdUsage: PlaysByHmdResponse }) {
           Shows the distribution of headsets used on this leaderboard.
         </p>
       </div>
-      <div className="mt-0 flex w-full items-center justify-center lg:mt-6">
+      <div className="mt-0 flex w-full items-center justify-center 2xl:mt-6">
         <HmdUsageChart hmdUsage={hmdUsage} />
       </div>
     </Card>

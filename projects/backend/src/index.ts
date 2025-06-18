@@ -18,6 +18,7 @@ import BeatLeaderController from "./controller/beatleader.controller";
 import BeatSaverController from "./controller/beatsaver.controller";
 import FriendsController from "./controller/friends.controller";
 import LeaderboardController from "./controller/leaderboard.controller";
+import MiniRankingController from "./controller/mini-ranking.controller";
 import PlayerController from "./controller/player.controller";
 import PlaylistController from "./controller/playlist.controller";
 import ReplayController from "./controller/replay.controller";
@@ -196,6 +197,7 @@ app.use(
       ReplayController,
       BeatLeaderController,
       FriendsController,
+      MiniRankingController,
     ],
   })
 );

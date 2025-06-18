@@ -11,7 +11,7 @@ import { ScoreSaberScore } from "../model/score/impl/scoresaber-score";
 import { StatisticsType } from "../model/statistics/statistic-type";
 import { Page } from "../pagination";
 import ScoreSaberPlayer from "../player/impl/scoresaber-player";
-import { AroundPlayerResponse } from "../response/around-player-response";
+import { MiniRankingResponse } from "../response/around-player-response";
 import { BeatSaverMapResponse } from "../response/beatsaver-map-response";
 import { LeaderboardResponse } from "../response/leaderboard-response";
 import LeaderboardScoresResponse from "../response/leaderboard-scores-response";
@@ -21,7 +21,7 @@ import { PpBoundaryResponse } from "../response/pp-boundary-response";
 import { ScoreStatsResponse } from "../response/scorestats-response";
 import { MapDifficulty } from "../score/map-difficulty";
 import { ScoreSaberScoreSort } from "../score/score-sort";
-import { AroundPlayer } from "../types/around-player";
+import { MiniRankingType } from "../types/around-player";
 import { MapCharacteristic } from "../types/map-characteristic";
 import Request from "./request";
 import { updateScoreWeights } from "./scoresaber.util";
@@ -147,9 +147,9 @@ class SSRApi {
    * @param playerId the player to get around
    * @param type the type to get
    */
-  async getPlayersAroundPlayer(playerId: string, type: AroundPlayer) {
-    return await Request.get<AroundPlayerResponse>(
-      `${env.NEXT_PUBLIC_API_URL}/player/around/${playerId}/${type}`
+  async getPlayerMiniRanking(playerId: string, type: MiniRankingType) {
+    return await Request.get<MiniRankingResponse>(
+      `${env.NEXT_PUBLIC_API_URL}/mini-ranking/${playerId}/${type}`
     );
   }
 

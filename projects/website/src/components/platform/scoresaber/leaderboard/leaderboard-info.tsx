@@ -22,7 +22,7 @@ export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
   }
 
   return (
-    <Card className="h-fit w-full text-sm">
+    <Card className="h-fit w-full text-sm 2xl:w-[405px]">
       <div className="flex w-full flex-row justify-between">
         <div className="flex w-full flex-col justify-between gap-3">
           <div className="flex justify-between">

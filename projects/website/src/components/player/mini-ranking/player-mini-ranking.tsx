@@ -2,7 +2,7 @@ import { PlayerMiniRankingSkeleton } from "@/components/player/mini-ranking/play
 import { PlayerInfo } from "@/components/player/player-info";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import { AroundPlayer } from "@ssr/common/types/around-player";
+import { MiniRankingType } from "@ssr/common/types/around-player";
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
@@ -51,7 +51,7 @@ export default function PlayerMiniRanking({ type, player }: PlayerMiniRankingPro
     isError,
   } = useQuery({
     queryKey: ["mini-ranking-" + type, player.id, type],
-    queryFn: () => ssrApi.getPlayersAroundPlayer(player.id, type.toLowerCase() as AroundPlayer),
+    queryFn: () => ssrApi.getPlayerMiniRanking(player.id, type.toLowerCase() as MiniRankingType),
   });
 
   if (isLoading || !response) {

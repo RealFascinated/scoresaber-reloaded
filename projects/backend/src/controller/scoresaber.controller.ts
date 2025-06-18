@@ -15,11 +15,10 @@ import { PlayerHistoryService } from "../service/player/player-history.service";
 import { PlayerService } from "../service/player/player.service";
 import ScoreSaberService from "../service/scoresaber/scoresaber.service";
 
-@Controller("/player")
-export default class PlayerController {
+@Controller("/scoresaber")
+export default class ScoreSaberController {
   @Get("/:id", {
     config: {},
-    tags: ["player"],
     params: t.Object({
       id: t.String({ required: true }),
     }),
@@ -41,7 +40,6 @@ export default class PlayerController {
 
   @Get("/history/:id", {
     config: {},
-    tags: ["player"],
     params: t.Object({
       id: t.String({ required: true }),
     }),
@@ -84,7 +82,6 @@ export default class PlayerController {
 
   @Get("/pp-boundary/:id/:boundary", {
     config: {},
-    tags: ["player"],
     params: t.Object({
       id: t.String({ required: true }),
       boundary: t.Number({ maximum: 100, minimum: 1 }),
@@ -103,7 +100,6 @@ export default class PlayerController {
 
   @Get("/history/calendar/:id/:year/:month", {
     config: {},
-    tags: ["player"],
     params: t.Object({
       id: t.String({ required: true }),
       year: t.Number({ required: true }),
@@ -120,7 +116,6 @@ export default class PlayerController {
 
   @Get("/score-chart/:id", {
     config: {},
-    tags: ["scores"],
     params: t.Object({
       id: t.String({ required: true }),
     }),
@@ -141,7 +136,6 @@ export default class PlayerController {
 
   @Get("/ranked-pps/:id", {
     config: {},
-    tags: ["player"],
     params: t.Object({
       id: t.String({ required: true }),
     }),
@@ -156,7 +150,6 @@ export default class PlayerController {
 
   @Get("/search", {
     config: {},
-    tags: ["player"],
     query: t.Object({
       superJson: t.Optional(t.Boolean({ default: false })),
       query: t.Optional(t.String({ default: "" })),

@@ -1,8 +1,8 @@
-import { ScoreSaberPlayerToken } from "../types/token/scoresaber/player";
+import ScoreSaberPlayer from "src/player/impl/scoresaber-player";
 
-export type AroundPlayerResponse = {
+export type MiniRankingResponse = {
   /**
    * The players around the player.
    */
-  players: ScoreSaberPlayerToken[];
+  players: ScoreSaberPlayer[];
 };
