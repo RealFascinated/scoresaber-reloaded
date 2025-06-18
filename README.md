@@ -3,7 +3,8 @@
 > [!IMPORTANT]
 > This project is a work-in-progress. If you have an issue, please create one [here](https://github.com/RealFascinated/scoresaber-reloaded/issues/new).
 
-ScoreSaber Reloaded is a new way to view your scores and get more stats about you and your plays. 🌟 Users, go to [ssr.fascinated.cc](https://ssr.fascinated.cc) to view the app.
+ScoreSaber Reloaded is a new way to view your scores and get more stats about you and your plays.
+🌟 Users, go to [ssr.fascinated.cc](https://ssr.fascinated.cc) to view the app.
 
 ## Community 🤝
 
