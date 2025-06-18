@@ -64,6 +64,9 @@ export default function HmdUsageChart({ hmdUsage }: Props) {
         labels: {
           color: "white",
           padding: 20,
+          filter: (legendItem, data) => {
+            return legendItem.text !== "Others";
+          },
         },
       },
       tooltip: {
