@@ -40,17 +40,15 @@
   --breakpoint-xl: 1280px;
   --breakpoint-2xl: 1536px;
 
-  --color-pp: #5c6bff;
   --color-landing: #0f0f0f;
-
+  --color-pp: #5c6bff;
   --color-ssr: #5c6bff;
-
   --color-ranked: #0070f3;
+  --color-discord-blue: #5865f2;
+  --color-inactive-account: #ff6467;
 
   --color-hands-left: #a82020;
   --color-hands-right: #2064a8;
-
-  --color-discord-blue: #5865f2;
 
   --color-background: var(--background);
 

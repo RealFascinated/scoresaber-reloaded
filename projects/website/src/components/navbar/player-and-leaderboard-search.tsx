@@ -152,7 +152,7 @@ export default function PlayerAndLeaderboardSearch() {
                         <p className="font-medium">{truncateText(player.name, 32)}</p>
                         <p className="text-muted-foreground text-xs">
                           {player.inactive ? (
-                            <span className="text-red-400">Inactive Account</span>
+                            <span className="text-inactive-account">Inactive Account</span>
                           ) : (
                             <span className="text-gray-400">
                               #{formatNumberWithCommas(player.rank)}

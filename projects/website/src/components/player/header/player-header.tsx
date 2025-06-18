@@ -44,7 +44,7 @@ export default function PlayerHeader({ player }: PlayerHeaderProps) {
             </div>
             <div className="flex flex-col">
               <div>
-                {player.inactive && <p className="text-gray-400">Inactive Account</p>}
+                {player.inactive && <p className="text-inactive-account">Inactive Account</p>}
                 {player.banned && <p className="text-red-500">Banned Account</p>}
               </div>
               <PlayerOverview player={player} />
