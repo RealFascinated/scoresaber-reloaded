@@ -1,4 +1,4 @@
-import { Cooldown } from "../cooldown";
+import { Cooldown, CooldownPriority } from "../cooldown";
 import Logger from "../logger";
 import Request, { RequestOptions } from "../utils/request";
 import { isProduction, isServer } from "../utils/utils";
@@ -72,13 +72,19 @@ export default class ApiService {
    * @param options the fetch options to use
    * @returns the fetched data
    */
-  public async fetch<T>(url: string, options?: RequestOptions): Promise<T | undefined> {
+  public async fetch<T>(
+    url: string,
+    options?: RequestOptions & { priority?: CooldownPriority }
+  ): Promise<T | undefined> {
     // Increment the call count if we're on the server
     if (isServer()) {
       this.callCount++;
     }
 
-    await this.cooldown.waitAndUse();
+    // Adjust cooldown based on priority
+    const priority = options?.priority || "normal";
+    const cooldownMultiplier = priority === "high" ? 0.5 : 2;
+    await this.cooldown.waitAndUse(cooldownMultiplier);
 
     return Request.get<T>(this.buildRequestUrl(!isServer(), url), {
       returns: "json",

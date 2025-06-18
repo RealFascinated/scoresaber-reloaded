@@ -28,7 +28,7 @@ export class PlayerScoreSeedQueue extends Queue<string> {
       return;
     }
 
-    const player = await PlayerService.getPlayer(playerId, true, playerToken);
+    const player = await PlayerService.getPlayer(playerId, playerToken);
     await PlayerRefreshService.refreshAllPlayerScores(player, playerToken);
   }
 }

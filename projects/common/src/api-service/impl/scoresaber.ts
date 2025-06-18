@@ -1,4 +1,4 @@
-import { Cooldown } from "../../cooldown";
+import { Cooldown, CooldownPriority } from "../../cooldown";
 import { CurvePoint } from "../../curve-point";
 import { DetailType } from "../../detail-type";
 import { StarFilter } from "../../maps/types";
@@ -221,12 +221,14 @@ export class ScoreSaberService extends ApiService {
     limit = 8,
     page,
     search,
+    priority = CooldownPriority.Normal,
   }: {
     playerId: string;
     sort: ScoreSaberScoreSort;
     limit?: number;
     page: number;
     search?: string;
+    priority?: CooldownPriority;
   }): Promise<ScoreSaberPlayerScoresPageToken | undefined> {
     const before = performance.now();
     this.log(
@@ -236,7 +238,10 @@ export class ScoreSaberService extends ApiService {
       LOOKUP_PLAYER_SCORES_ENDPOINT.replace(":id", playerId)
         .replace(":limit", limit + "")
         .replace(":sort", sort)
-        .replace(":page", page + "") + (search ? `&search=${search}` : "")
+        .replace(":page", page + "") + (search ? `&search=${search}` : ""),
+      {
+        priority,
+      }
     );
     if (response === undefined) {
       return undefined;

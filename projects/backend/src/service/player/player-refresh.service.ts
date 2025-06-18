@@ -1,4 +1,5 @@
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
+import { CooldownPriority } from "@ssr/common/cooldown";
 import Logger from "@ssr/common/logger";
 import { PlayerDocument, PlayerModel } from "@ssr/common/model/player";
 import {
@@ -36,6 +37,7 @@ export class PlayerRefreshService {
           page: page,
           limit: 100,
           sort: "recent",
+          priority: CooldownPriority.Low,
         });
 
       if (!scoresPage) {

@@ -1,27 +1,38 @@
+import { CooldownPriority } from "../cooldown";
 import Logger from "../logger";
 
 type RequestReturns = "text" | "json" | "arraybuffer";
 
-export type RequestOptions = RequestInit & {
+type BaseRequestOptions = {
   next?: {
     revalidate?: number;
   };
   searchParams?: Record<string, unknown>;
   throwOnError?: boolean;
   returns?: RequestReturns;
+  priority?: CooldownPriority;
 };
 
+export type RequestOptions = Omit<RequestInit, "priority"> & BaseRequestOptions;
+
 const DEBUG = false;
-const DEFAULT_OPTIONS: RequestOptions = {
+const DEFAULT_OPTIONS: BaseRequestOptions = {
   next: {
     revalidate: 120, // 2 minutes
   },
   throwOnError: false,
   returns: "json",
+  priority: CooldownPriority.Normal,
 };
 
 class Request {
   private static pendingRequests = new Map<string, Promise<unknown>>();
+  private static rateLimitThresholds = {
+    [CooldownPriority.High]: 50, // Warn at 50 remaining
+    [CooldownPriority.Normal]: 100, // Warn at 100 remaining
+    [CooldownPriority.Low]: 200, // Warn at 200 remaining
+  };
+  private static rateLimitInfo = new Map<string, { remaining: number; resetTime: number }>();
 
   private static getCacheKey(url: string, method: string, options?: RequestOptions): string {
     return JSON.stringify({ url, method, options });
@@ -36,97 +47,110 @@ class Request {
     return `${baseUrl}?${params.toString()}`;
   }
 
-  private static async executeRequest<T>(
+  private static async handleRateLimit(
     url: string,
-    method: "GET" | "POST",
-    options: RequestOptions
-  ): Promise<T | undefined> {
-    try {
-      const response = await fetch(url, {
-        method,
-        ...options,
-      });
-
-      this.checkRateLimit(url, response);
-
-      if (!response.ok) {
-        if (options.throwOnError) {
-          throw new Error(`Failed to request ${url}`, { cause: response });
-        }
-        return undefined;
-      }
-
-      switch (options.returns) {
-        case "text":
-          return (await response.text()) as T;
-        case "arraybuffer":
-          return (await response.arrayBuffer()) as T;
-        case "json":
-        default:
-          return (await response.json()) as T;
-      }
-    } catch (error) {
-      if (options.throwOnError) {
-        throw error;
-      }
-      return undefined;
-    }
-  }
-
-  private static checkRateLimit(url: string, response: Response): void {
+    response: Response,
+    priority: CooldownPriority
+  ): Promise<void> {
     const rateLimit = response.headers.get("x-ratelimit-remaining");
+    const resetTime = response.headers.get("x-ratelimit-reset");
+
     if (rateLimit) {
       const remaining = Number(rateLimit);
-      if (remaining < 100) {
-        Logger.warn(`Rate limit for ${url} remaining: ${remaining}`);
+      const threshold = this.rateLimitThresholds[priority];
+
+      // Update rate limit info
+      this.rateLimitInfo.set(url, {
+        remaining,
+        resetTime: resetTime ? Number(resetTime) : Date.now() + 60_000,
+      });
+
+      // Log warning if below threshold
+      if (remaining < threshold) {
+        Logger.warn(`Rate limit for ${url} is low (${remaining} remaining). Priority: ${priority}`);
       }
     }
   }
 
-  static async send<T>(
+  private static async executeRequest<T>(
     url: string,
-    method: "GET" | "POST",
+    method: string,
     options?: RequestOptions
   ): Promise<T | undefined> {
-    const finalOptions = { ...DEFAULT_OPTIONS, ...options };
-    const finalUrl = this.buildUrl(url, finalOptions.searchParams);
-    const cacheKey = this.getCacheKey(finalUrl, method, finalOptions);
+    const {
+      searchParams,
+      returns = "json",
+      throwOnError = false,
+      priority = CooldownPriority.Normal,
+      ...fetchOptions
+    } = options || {};
+    const fullUrl = this.buildUrl(url, searchParams);
+    const cacheKey = this.getCacheKey(fullUrl, method, options);
 
-    if (DEBUG) {
-      Logger.info(`Sending request: ${finalUrl}`);
-    }
-
-    // Check for pending requests
+    // Check if there's a pending request for this URL
     const pendingRequest = this.pendingRequests.get(cacheKey);
     if (pendingRequest) {
       return pendingRequest as Promise<T | undefined>;
     }
 
-    const requestPromise = this.executeRequest<T>(finalUrl, method, finalOptions);
-    this.pendingRequests.set(cacheKey, requestPromise);
+    // Create new request
+    const requestPromise = (async () => {
+      try {
+        const response = await fetch(fullUrl, {
+          method,
+          ...fetchOptions,
+        });
 
-    try {
-      return await requestPromise;
-    } finally {
-      if (DEBUG) {
-        Logger.info(`Request completed: ${finalUrl}`);
+        // Handle rate limits
+        await this.handleRateLimit(url, response, priority);
+
+        if (!response.ok) {
+          if (throwOnError) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          return undefined;
+        }
+
+        switch (returns) {
+          case "text":
+            return response.text() as Promise<T>;
+          case "json":
+            return response.json() as Promise<T>;
+          case "arraybuffer":
+            return response.arrayBuffer() as Promise<T>;
+          default:
+            return response.json() as Promise<T>;
+        }
+      } finally {
+        this.pendingRequests.delete(cacheKey);
       }
-      this.pendingRequests.delete(cacheKey);
-    }
+    })();
+
+    this.pendingRequests.set(cacheKey, requestPromise);
+    return requestPromise;
   }
 
-  static async get<T>(url: string, options?: RequestOptions): Promise<T | undefined> {
-    return this.send<T>(url, "GET", options);
+  public static async get<T>(url: string, options?: RequestOptions): Promise<T | undefined> {
+    return this.executeRequest<T>(url, "GET", options);
   }
 
-  static async post<T>(url: string, options?: RequestOptions): Promise<T | undefined> {
-    return this.send<T>(url, "POST", options);
+  public static async post<T>(url: string, options?: RequestOptions): Promise<T | undefined> {
+    return this.executeRequest<T>(url, "POST", options);
+  }
+
+  public static async put<T>(url: string, options?: RequestOptions): Promise<T | undefined> {
+    return this.executeRequest<T>(url, "PUT", options);
+  }
+
+  public static async delete<T>(url: string, options?: RequestOptions): Promise<T | undefined> {
+    return this.executeRequest<T>(url, "DELETE", options);
   }
 }
 
 // Export the public API
 export default {
-  send: Request.send.bind(Request),
   get: Request.get.bind(Request),
   post: Request.post.bind(Request),
+  put: Request.put.bind(Request),
+  delete: Request.delete.bind(Request),
 };

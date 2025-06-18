@@ -1,3 +1,9 @@
+export enum CooldownPriority {
+  High = "high",
+  Normal = "normal",
+  Low = "low",
+}
+
 export class Cooldown {
   private lastUsed: number;
   private lastRefresh: number;
@@ -70,19 +76,21 @@ export class Cooldown {
 
   /**
    * Wait for the cooldown to be ready and consume it
+   * @param multiplier Optional multiplier to adjust the cooldown time (e.g. 0.5 for half time, 2 for double time)
    */
-  async waitAndUse(): Promise<void> {
+  async waitAndUse(multiplier: number = 1): Promise<void> {
     while (!this.use()) {
-      await this.awaitCooldown();
+      await this.awaitCooldown(multiplier);
     }
   }
 
   /**
    * Wait for the cooldown to be ready
+   * @param multiplier Optional multiplier to adjust the cooldown time
    * @returns Promise that resolves when the cooldown is ready
    */
-  async awaitCooldown(): Promise<void> {
-    const remainingTime = this.getRemainingTime();
+  async awaitCooldown(multiplier: number = 1): Promise<void> {
+    const remainingTime = this.getRemainingTime() * multiplier;
     if (remainingTime > 0) {
       let timeoutId: NodeJS.Timeout | undefined;
       try {
