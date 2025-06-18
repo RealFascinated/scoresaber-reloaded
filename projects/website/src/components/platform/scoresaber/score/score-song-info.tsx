@@ -85,7 +85,7 @@ export default function ScoreSaberScoreSongInfo({
   );
 
   const difficultyLabel = useMemo(
-    () => beatSaverMap?.difficultyLabels[leaderboard.difficulty.difficulty]?.trim(),
+    () => beatSaverMap?.difficultyLabels?.[leaderboard.difficulty.difficulty]?.trim() ?? "",
     [beatSaverMap, leaderboard.difficulty.difficulty]
   );
 
