@@ -19,7 +19,7 @@ export default function ProfileButton() {
 
   return (
     <Link href={`/player/${mainPlayer.id}`} className="flex h-full items-center gap-4 pl-1">
-      <SimpleTooltip display="Click to view your profile">
+      <SimpleTooltip display="Click to view your profile" side="bottom">
         <NavbarButton className="px-0">
           <Avatar
             src={mainPlayer.avatar}
