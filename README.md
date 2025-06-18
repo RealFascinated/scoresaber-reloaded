@@ -1,4 +1,4 @@
-b# ScoreSaber Reloaded 🎮
+# ScoreSaber Reloaded 🎮
 
 > [!IMPORTANT]
 > This project is a work-in-progress. If you have an issue, please create one [here](https://github.com/RealFascinated/scoresaber-reloaded/issues/new).
