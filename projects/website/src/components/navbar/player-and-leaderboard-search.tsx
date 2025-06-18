@@ -131,7 +131,7 @@ export default function PlayerAndLeaderboardSearch() {
         ) : (
           <>
             {results.players.length > 0 && (
-              <div className="px-2 pt-0.5">
+              <div className="px-2 pt-2.5">
                 <div className="text-muted-foreground text-xs font-medium">Player Results</div>
                 <div className="mt-1 space-y-1">
                   {results.players.map((player, index) => (
@@ -168,7 +168,7 @@ export default function PlayerAndLeaderboardSearch() {
             )}
 
             {results.leaderboards.length > 0 && (
-              <div className="px-2 pt-0.5">
+              <div className="px-2 pt-2.5">
                 <div className="text-muted-foreground text-xs font-medium">Leaderboard Results</div>
                 <div className="mt-1 space-y-1">
                   {results.leaderboards.map(leaderboard => (

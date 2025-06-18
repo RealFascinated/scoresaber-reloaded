@@ -49,13 +49,13 @@ const SearchDialog = ({
 }: SearchDialogProps) => {
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="gap-0 overflow-hidden p-0 pt-2">
+      <DialogContent className="gap-0 overflow-hidden p-0">
         <DialogTitle className="sr-only">Search</DialogTitle>
         <div className="relative">
           <div className="border-border/50 flex h-12 items-center gap-2 border-b px-4">
             <Search className="size-4 shrink-0 opacity-50" />
             <input
-              className="placeholder:text-muted-foreground flex h-10 w-full rounded-md bg-transparent py-3 text-sm outline-none disabled:cursor-not-allowed disabled:opacity-50"
+              className="placeholder:text-muted-foreground flex h-2 w-full rounded-md bg-transparent py-3 text-sm outline-none disabled:cursor-not-allowed disabled:opacity-50"
               placeholder={placeholder}
               maxLength={maxLength}
               value={query}
