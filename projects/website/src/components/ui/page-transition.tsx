@@ -4,11 +4,6 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ReactNode } from "react";
 import { usePageTransition } from "./page-transition-context";
 
-interface PageTransitionProps {
-  children: ReactNode;
-  className?: string;
-}
-
 const containerVariants = {
   enter: (direction: number) => ({
     x: direction > 0 ? -20 : 20,
@@ -39,7 +34,13 @@ const itemVariants = {
   }),
 };
 
-export default function PageTransition({ children, className }: PageTransitionProps) {
+export default function PageTransition({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
   const { currentPage, direction } = usePageTransition();
 
   return (
@@ -54,7 +55,7 @@ export default function PageTransition({ children, className }: PageTransitionPr
         exit="exit"
         transition={{
           type: "tween",
-          duration: 0.12,
+          duration: 0.13,
           ease: "easeOut",
         }}
       >
@@ -66,7 +67,7 @@ export default function PageTransition({ children, className }: PageTransitionPr
               variants={itemVariants}
               transition={{
                 type: "tween",
-                duration: 0.12,
+                duration: 0.13,
                 ease: "easeOut",
                 delay: index * 0.008,
               }}
@@ -80,7 +81,7 @@ export default function PageTransition({ children, className }: PageTransitionPr
             variants={itemVariants}
             transition={{
               type: "tween",
-              duration: 0.12,
+              duration: 0.13,
               ease: "easeOut",
             }}
           >

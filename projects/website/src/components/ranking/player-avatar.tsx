@@ -1,10 +1,12 @@
-type PlayerAvatarProps = {
+export function PlayerAvatar({
+  profilePicture,
+  name,
+  className,
+}: {
   profilePicture: string;
   name: string;
   className?: string;
-};
-
-export function PlayerAvatar({ profilePicture, name, className }: PlayerAvatarProps) {
+}) {
   return (
     <div className={className}>
       <img
