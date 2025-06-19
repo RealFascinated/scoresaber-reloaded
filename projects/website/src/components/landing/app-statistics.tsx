@@ -6,28 +6,16 @@ import { AppStatistics } from "@ssr/common/types/backend/app-statistics";
 import Request from "@ssr/common/utils/request";
 import { useQuery } from "@tanstack/react-query";
 import { Box, Play, User, UserX } from "lucide-react";
-import { useEffect, useState } from "react";
 
-type AppStatisticsProps = {
-  /**
-   * The app statistics.
-   */
-  initialStatistics: AppStatistics;
-};
-
-export function AppStats({ initialStatistics }: AppStatisticsProps) {
-  const [statistics, setStatistics] = useState(initialStatistics);
-
-  const { data } = useQuery({
+export function AppStats() {
+  const { data: statistics } = useQuery({
     queryKey: ["app-statistics"],
     queryFn: () => Request.get<AppStatistics>(env.NEXT_PUBLIC_API_URL + "/statistics"),
   });
 
-  useEffect(() => {
-    if (data) {
-      setStatistics(data);
-    }
-  }, [data]);
+  if (!statistics) {
+    return null;
+  }
 
   return (
     <div className="flex items-center justify-center gap-8 md:gap-12">

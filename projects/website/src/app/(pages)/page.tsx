@@ -1,15 +1,10 @@
 import { AppStats } from "@/components/landing/app-statistics";
 import { SearchButton } from "@/components/landing/search-button";
 import { Button } from "@/components/ui/button";
-import { AppStatistics } from "@ssr/common/types/backend/app-statistics";
 import { ArrowRight, BarChart3, Database, Globe, Heart, Monitor, Star, Users } from "lucide-react";
 import Link from "next/link";
 
 export default async function LandingPage() {
-  const initialStatistics = (await fetch(`${process.env.NEXT_PUBLIC_API_URL}/statistics`).then(
-    res => res.json()
-  )) as AppStatistics;
-
   return (
     <div className="from-background via-background to-accent-deep/20 min-h-screen w-full bg-gradient-to-br">
       <div className="from-primary/10 absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] via-transparent to-transparent" />
@@ -119,7 +114,7 @@ export default async function LandingPage() {
               </p>
             </div>
             <div className="flex justify-center">
-              <AppStats initialStatistics={initialStatistics} />
+              <AppStats />
             </div>
           </div>
         </section>
