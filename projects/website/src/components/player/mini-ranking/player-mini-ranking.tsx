@@ -83,9 +83,9 @@ export default function PlayerMiniRanking({
               >
                 <Link
                   href={`/player/${playerRanking.id}`}
-                  className="grid cursor-pointer items-center gap-2.5 py-1.5 sm:px-2"
+                  className="grid cursor-pointer items-center gap-2.5 px-1 py-1.5 sm:px-2"
                   style={{
-                    gridTemplateColumns: `auto 48px 0.73fr 1fr`,
+                    gridTemplateColumns: isMobile ? "auto 48px 1fr auto" : "auto 48px 0.73fr 1fr",
                   }}
                 >
                   {/* Rank */}
@@ -105,7 +105,7 @@ export default function PlayerMiniRanking({
 
                   {/* PP */}
                   <div
-                    className="grid w-[100px] items-center gap-2"
+                    className="grid w-fit items-center gap-2 md:w-[100px]"
                     style={{
                       gridTemplateColumns: isMobile ? "1fr" : "1fr 0.3fr",
                     }}
