@@ -1,4 +1,4 @@
-import { PlayerHistory } from "./player-history";
+import { PlayerHistoryEntry } from "../model/player/player-history-entry";
 
 export default class Player {
   /**
@@ -62,5 +62,5 @@ export default class Player {
 
 export type StatisticRange = "daily" | "weekly" | "monthly";
 export type StatisticChange = {
-  [key in StatisticRange]: PlayerHistory;
+  [key in StatisticRange]: PlayerHistoryEntry;
 };

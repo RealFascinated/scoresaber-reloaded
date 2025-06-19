@@ -12,9 +12,25 @@ type Props = {
 
 export const scoreBarsDataset: DatasetConfig[] = [
   {
+    title: "Unranked Scores",
+    field: "unrankedScores",
+    color: "#6b7280",
+    axisId: "y100",
+    axisConfig: {
+      reverse: false,
+      display: false,
+      displayName: "Unranked Scores",
+      position: "left",
+    },
+    type: "bar",
+    stack: "daily-scores",
+    stackOrder: 1,
+    labelFormatter: (value: number) => `Unranked Scores: ${formatNumberWithCommas(value)}`,
+  },
+  {
     title: "Ranked Scores",
     field: "rankedScores",
-    color: "#ffae4d",
+    color: "#8b5cf6",
     axisId: "y100",
     axisConfig: {
       reverse: false,
@@ -28,30 +44,45 @@ export const scoreBarsDataset: DatasetConfig[] = [
     labelFormatter: (value: number) => `Ranked Scores: ${value.toFixed(0)}`,
   },
   {
-    title: "Unranked Scores",
-    field: "unrankedScores",
-    color: "#616161",
+    title: "Unranked Improved",
+    field: "unrankedScoresImproved",
+    color: "#ec4899",
     axisId: "y100",
     axisConfig: {
       reverse: false,
       display: false,
-      displayName: "Unranked Scores",
+      displayName: "Unranked Improved",
       position: "left",
     },
     type: "bar",
     stack: "daily-scores",
-    stackOrder: 1,
-    labelFormatter: (value: number) => `Unranked Scores: ${formatNumberWithCommas(value)}`,
+    stackOrder: 0,
+    labelFormatter: (value: number) => `Unranked Improved: ${formatNumberWithCommas(value)}`,
+  },
+  {
+    title: "Ranked Improved",
+    field: "rankedScoresImproved",
+    color: "#ef4444",
+    axisId: "y100",
+    axisConfig: {
+      reverse: false,
+      display: false,
+      displayName: "Ranked Improved",
+      position: "left",
+    },
+    type: "bar",
+    stack: "daily-scores",
+    stackOrder: 0,
+    labelFormatter: (value: number) => `Ranked Improved: ${formatNumberWithCommas(value)}`,
   },
 ];
 
 // Dataset configuration for the chart
 const datasetConfig: DatasetConfig[] = [
-  ...scoreBarsDataset,
   {
     title: "Total Scores",
     field: "totalScores",
-    color: "#616161",
+    color: "#f97316",
     axisId: "y1",
     axisConfig: {
       reverse: false,
@@ -64,7 +95,7 @@ const datasetConfig: DatasetConfig[] = [
   {
     title: "Total Ranked Scores",
     field: "totalRankedScores",
-    color: "#6773ff",
+    color: "#06b6d4",
     axisId: "y2",
     axisConfig: {
       reverse: false,
@@ -75,6 +106,7 @@ const datasetConfig: DatasetConfig[] = [
     },
     labelFormatter: (value: number) => `Total Ranked Scores: ${formatNumberWithCommas(value)}`,
   },
+  ...scoreBarsDataset,
 ];
 
 export default function PlayerScoresChart({ statisticHistory, daysAmount }: Props) {

@@ -82,6 +82,18 @@ export class PlayerHistoryEntry {
   public unrankedScores?: number;
 
   /**
+   * The amount of ranked score that were improved.
+   */
+  @prop()
+  public rankedScoresImproved?: number;
+
+  /**
+   * The amount of unranked score that were improved.
+   */
+  @prop()
+  public unrankedScoresImproved?: number;
+
+  /**
    * The total amount of ranked scores
    */
   @prop()

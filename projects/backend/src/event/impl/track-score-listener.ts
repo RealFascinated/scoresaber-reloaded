@@ -8,7 +8,6 @@ import { sendScoreNotification } from "../../common/score/score.util";
 import TrackedScoresMetric from "../../metrics/impl/player/tracked-scores";
 import BeatLeaderService from "../../service/beatleader.service";
 import MetricsService, { MetricType } from "../../service/metrics.service";
-import { PlayerHistoryService } from "../../service/player/player-history.service";
 import { ScoreService } from "../../service/score/score.service";
 import { EventListener } from "../event-listener";
 
@@ -27,11 +26,6 @@ export class TrackScoreListener implements EventListener {
     if (tracked.score == undefined) {
       return;
     }
-
-    await PlayerHistoryService.updatePlayerScoresSet({
-      score: score,
-      leaderboard: leaderboard,
-    });
 
     // Track BeatLeader score if available
     let beatLeaderScore: AdditionalScoreData | undefined;

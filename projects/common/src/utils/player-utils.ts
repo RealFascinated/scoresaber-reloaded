@@ -1,15 +1,18 @@
-import { PlayerHistory } from "../player/player-history";
+import { FlattenedPlayerHistory } from "../player/player-statistic-history";
 import { ScoreSaberPlayerToken } from "../types/token/scoresaber/player";
 import { formatDateMinimal, getDaysAgoDate, getMidnightAlignedDate } from "./time-utils";
 
 /**
- * Gets a value from an {@link PlayerHistory}
+ * Gets a value from an {@link FlattenedPlayerHistory}
  * based on the field
  *
  * @param history the history to get the value from
  * @param field the field to get
  */
-export function getValueFromHistory(history: PlayerHistory, field: string): number | undefined {
+export function getValueFromHistory(
+  history: FlattenedPlayerHistory,
+  field: string
+): number | undefined {
   const keys = field.split(".");
   /* eslint-disable @typescript-eslint/no-explicit-any */
   let value: any = history;
@@ -38,7 +41,7 @@ export function getValueFromHistory(history: PlayerHistory, field: string): numb
  * @private
  */
 export function getPlayerStatisticChange(
-  history: Record<string, PlayerHistory>,
+  history: Record<string, FlattenedPlayerHistory>,
   statType: string,
   isNegativeChange: boolean,
   daysAgo: number = 1
@@ -112,9 +115,9 @@ export function getPlayerStatisticChange(
  * @private
  */
 export async function getPlayerStatisticChanges(
-  history: Record<string, PlayerHistory>,
+  history: Record<string, FlattenedPlayerHistory>,
   daysAgo: number = 1
-): Promise<PlayerHistory> {
+): Promise<FlattenedPlayerHistory> {
   return {
     rank: getPlayerStatisticChange(history, "rank", true, daysAgo),
     countryRank: getPlayerStatisticChange(history, "countryRank", true, daysAgo),

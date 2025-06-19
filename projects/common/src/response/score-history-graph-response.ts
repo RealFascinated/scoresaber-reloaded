@@ -1,4 +1,4 @@
-type ScoreHistoryGraphScore = {
+export type ScoreHistoryGraphScore = {
   score: number;
   accuracy: number;
   misses: number;
@@ -6,7 +6,7 @@ type ScoreHistoryGraphScore = {
   timestamp: Date;
 };
 
-type ScoreHistoryGraphResponse = {
+export type ScoreHistoryGraphResponse = {
   scores: ScoreHistoryGraphScore[];
   isRanked: boolean;
 };

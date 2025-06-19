@@ -2,6 +2,10 @@ import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger from "@ssr/common/logger";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
+import {
+  PlayerHistoryEntry,
+  PlayerHistoryEntryModel,
+} from "@ssr/common/model/player/player-history-entry";
 import { ScoreSaberPreviousScoreModel } from "@ssr/common/model/score/impl/scoresaber-previous-score";
 import {
   ScoreSaberScore,
@@ -17,7 +21,7 @@ import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 import { Metadata } from "@ssr/common/types/metadata";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score";
-import { getDaysAgoDate } from "@ssr/common/utils/time-utils";
+import { getDaysAgoDate, getMidnightAlignedDate } from "@ssr/common/utils/time-utils";
 import mongoose from "mongoose";
 import { scoreToObject } from "../../common/score/score.util";
 import BeatLeaderService from "../beatleader.service";
@@ -253,6 +257,8 @@ export class ScoreService {
       }),
     ]);
 
+    const isImprovement = previousScore !== null;
+
     if (scoreExists) {
       return { score: undefined, tracked: false };
     }
@@ -262,7 +268,7 @@ export class ScoreService {
     delete score.playerInfo;
 
     // Handle previous score if it exists
-    if (previousScore) {
+    if (isImprovement) {
       await Promise.all([
         ScoreSaberScoreModel.deleteOne({
           playerId: player.id,
@@ -277,12 +283,11 @@ export class ScoreService {
 
       if (log) {
         Logger.info(
-          `Moved old score "${previousScore.scoreId}" to previous-scores for "${player.name}"(${player.id}) in ${(performance.now() - before).toFixed(0)}ms`
+          `Archived previous score to history "${previousScore.scoreId}" for "${player.name}"(${player.id}) in ${(performance.now() - before).toFixed(0)}ms`
         );
       }
     }
 
-    // Create new score and update HMD in parallel
     await Promise.all([
       ScoreSaberScoreModel.create(score),
       PlayerHmdService.getPlayerMostCommonRecentHmd(player.id).then(hmd => {
@@ -290,14 +295,61 @@ export class ScoreService {
           return PlayerHmdService.updatePlayerHmd(player.id, hmd);
         }
       }),
+      ScoreService.updatePlayerDailyScoreStats(
+        score.playerId,
+        leaderboard.stars > 0,
+        previousScore !== null
+      ),
     ]);
 
     if (log) {
       Logger.info(
-        `Tracked ScoreSaber score "${score.scoreId}" for "${player.name}"(${player.id}) in ${(performance.now() - before).toFixed(0)}ms`
+        `Tracked ScoreSaber score "${score.scoreId}" for "${player.name}"(${player.id})${isImprovement ? " (improvement)" : ""} in ${(performance.now() - before).toFixed(0)}ms`
       );
     }
     return { score: score, tracked: true };
+  }
+
+  /**
+   * Updates the player's daily score statistics.
+   *
+   * @param playerId the player id
+   * @param isRanked whether the score is ranked
+   * @param isImprovement whether this is an improvement over a previous score
+   */
+  private static async updatePlayerDailyScoreStats(
+    playerId: string,
+    isRanked: boolean,
+    isImprovement: boolean
+  ): Promise<void> {
+    const today = getMidnightAlignedDate(new Date());
+
+    const getCounterToIncrement = (
+      isRanked: boolean,
+      isImprovement: boolean
+    ): keyof PlayerHistoryEntry => {
+      if (isRanked) {
+        return isImprovement ? "rankedScoresImproved" : "rankedScores";
+      }
+      return isImprovement ? "unrankedScoresImproved" : "unrankedScores";
+    };
+
+    await PlayerHistoryEntryModel.findOneAndUpdate(
+      { playerId, date: today },
+      {
+        $inc: {
+          [getCounterToIncrement(isRanked, isImprovement)]: 1,
+        },
+        $setOnInsert: {
+          playerId,
+          date: today,
+        },
+      },
+      {
+        upsert: true, // Create new entry if it doesn't exist
+        new: true,
+      }
+    );
   }
 
   /**

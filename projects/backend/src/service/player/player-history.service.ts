@@ -1,12 +1,10 @@
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import Logger from "@ssr/common/logger";
-import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import { PlayerDocument, PlayerModel } from "@ssr/common/model/player";
+import { PlayerDocument } from "@ssr/common/model/player";
 import {
   PlayerHistoryEntry,
   PlayerHistoryEntryModel,
 } from "@ssr/common/model/player/player-history-entry";
-import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { removeObjectFields } from "@ssr/common/object.util";
 import { PlayerStatisticHistory } from "@ssr/common/player/player-statistic-history";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
@@ -101,7 +99,7 @@ export class PlayerHistoryService {
         : [startTimestamp, endTimestamp];
 
     // Run queries in parallel
-    const [entries, playerRankHistory, todayData] = await Promise.all([
+    const [entries, playerRankHistory] = await Promise.all([
       PlayerHistoryEntryModel.find({
         playerId: player.id,
         date: {
@@ -113,7 +111,6 @@ export class PlayerHistoryService {
         .sort({ date: -1 })
         .lean(),
       parseRankHistory(player),
-      isRangeIncludesToday ? this.createPlayerStatistic(player, undefined) : undefined,
     ]);
 
     const history: PlayerStatisticHistory = {};
@@ -144,14 +141,16 @@ export class PlayerHistoryService {
       }
     }
 
-    // Add today's data if the range includes today
-    const today = getMidnightAlignedDate(new Date());
-    const todayKey = formatDateMinimal(today);
-    if (todayData && isRangeIncludesToday) {
-      history[todayKey] =
-        projection && Object.keys(projection).length > 0
-          ? Object.fromEntries(Object.entries(todayData).filter(([key]) => key in projection))
-          : todayData;
+    // Handle today's data if the range includes today
+    if (isRangeIncludesToday) {
+      const today = getMidnightAlignedDate(new Date());
+      const todayKey = formatDateMinimal(today);
+
+      // Get today's data from database or generate fresh
+      const todayData = await this.getTodayPlayerStatistic(player, todayKey, projection);
+      if (todayData) {
+        history[todayKey] = todayData;
+      }
     }
 
     // Sort history by date
@@ -162,6 +161,30 @@ export class PlayerHistoryService {
         return dateB.getTime() - dateA.getTime();
       })
     );
+  }
+
+  /**
+   * Gets today's player statistics, either from database or generates fresh data.
+   */
+  private static async getTodayPlayerStatistic(
+    player: ScoreSaberPlayerToken,
+    todayKey: string,
+    projection?: Record<string, string | number | boolean | object>
+  ): Promise<Partial<PlayerHistoryEntry> | undefined> {
+    const today = getMidnightAlignedDate(new Date());
+
+    // Try to get existing data from database
+    const existingEntry = await PlayerHistoryEntryModel.findOne({
+      playerId: player.id,
+      date: today,
+    }).lean();
+
+    // Generate fresh data, merging with existing if available
+    const todayData = await this.createPlayerStatistic(player, existingEntry ?? undefined);
+
+    return projection && Object.keys(projection).length > 0
+      ? Object.fromEntries(Object.entries(todayData).filter(([key]) => key in projection))
+      : todayData;
   }
 
   /**
@@ -190,44 +213,6 @@ export class PlayerHistoryService {
   }
 
   /**
-   * Updates a player's score count for the current day.
-   * Increments either ranked or unranked score count based on the leaderboard stars.
-   */
-  public static async updatePlayerScoresSet({
-    score,
-    leaderboard,
-  }: {
-    score: ScoreSaberScore;
-    leaderboard: ScoreSaberLeaderboard;
-  }): Promise<void> {
-    const player = await PlayerModel.findById(score.playerId);
-    if (!player) return;
-
-    const today = getMidnightAlignedDate(new Date());
-    const existingEntry = await PlayerHistoryEntryModel.findOne({
-      playerId: score.playerId,
-      date: today,
-    }).lean();
-
-    const update: Partial<PlayerHistoryEntry> = {
-      playerId: score.playerId,
-      date: today,
-    };
-
-    if (leaderboard.stars > 0) {
-      update.rankedScores = (existingEntry?.rankedScores ?? 0) + 1;
-    } else {
-      update.unrankedScores = (existingEntry?.unrankedScores ?? 0) + 1;
-    }
-
-    await PlayerHistoryEntryModel.findOneAndUpdate(
-      { playerId: score.playerId, date: today },
-      update,
-      { upsert: true, new: true }
-    );
-  }
-
-  /**
    * Creates a new player statistic object from ScoreSaber data and existing history.
    */
   private static async createPlayerStatistic(
@@ -248,6 +233,8 @@ export class PlayerHistoryService {
       averageAccuracy: accuracies.averageAccuracy,
       rankedScores: existingEntry?.rankedScores ?? 0,
       unrankedScores: existingEntry?.unrankedScores ?? 0,
+      rankedScoresImproved: existingEntry?.rankedScoresImproved ?? 0,
+      unrankedScoresImproved: existingEntry?.unrankedScoresImproved ?? 0,
       totalScores: playerToken.scoreStats.totalPlayCount,
       totalRankedScores: playerToken.scoreStats.rankedPlayCount,
       totalScore: playerToken.scoreStats.totalScore,
