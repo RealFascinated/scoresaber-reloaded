@@ -2,6 +2,7 @@ import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { DetailType } from "@ssr/common/detail-type";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
+import { MiniRankingResponse } from "@ssr/common/response/around-player-response";
 import { MiniRankingType } from "@ssr/common/types/around-player";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import { fetchWithCache } from "../../common/cache.util";
@@ -10,13 +11,35 @@ import ScoreSaberService from "./scoresaber.service";
 
 export default class MiniRankingService {
   /**
-   * Gets the players around a player.
+   * Gets the players around a player for both global and country rankings.
    *
    * @param id the player to get around
+   */
+  public static async getPlayerMiniRankings(id: string): Promise<MiniRankingResponse> {
+    const player = await ScoreSaberService.getPlayer(id, DetailType.BASIC);
+    if (player == undefined) {
+      throw new NotFoundError(`Player "${id}" not found`);
+    }
+
+    const [globalRankings, countryRankings] = await Promise.all([
+      this.getPlayerMiniRanking(player, "global"),
+      this.getPlayerMiniRanking(player, "country"),
+    ]);
+
+    return {
+      globalRankings,
+      countryRankings,
+    };
+  }
+
+  /**
+   * Gets the mini rankings for a player.
+   *
+   * @param player the player to get around
    * @param type the type to get around
    */
-  public static async getPlayerMiniRanking(
-    id: string,
+  private static async getPlayerMiniRanking(
+    player: ScoreSaberPlayer,
     type: MiniRankingType
   ): Promise<ScoreSaberPlayer[]> {
     const getRank = (player: ScoreSaberPlayer | ScoreSaberPlayerToken, type: MiniRankingType) => {
@@ -27,12 +50,6 @@ export default class MiniRankingService {
           return player.countryRank;
       }
     };
-
-    // Get player directly since getPlayer already uses caching
-    const player = await ScoreSaberService.getPlayer(id, DetailType.BASIC);
-    if (player == undefined) {
-      throw new NotFoundError(`Player "${id}" not found`);
-    }
 
     const rank = getRank(player, type);
     if (rank <= 0) {
@@ -75,7 +92,7 @@ export default class MiniRankingService {
       .sort((a, b) => getRank(a, type) - getRank(b, type));
 
     // Find the target player
-    const playerIndex = allPlayers.findIndex(p => p.id === id);
+    const playerIndex = allPlayers.findIndex(p => p.id === player.id);
     if (playerIndex === -1) {
       return [];
     }
@@ -93,7 +110,7 @@ export default class MiniRankingService {
     }
 
     return await Promise.all(
-      result.map(player => ScoreSaberService.getPlayer(player.id, DetailType.FULL, player))
+      result.map(player => ScoreSaberService.getPlayer(player.id, DetailType.BASIC, player))
     );
   }
 }

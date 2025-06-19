@@ -21,7 +21,6 @@ import { ScoreStatsResponse } from "../response/scorestats-response";
 import { MapDifficulty } from "../score/map-difficulty";
 import { PlayerScore } from "../score/player-score";
 import { ScoreSaberScoreSort } from "../score/score-sort";
-import { MiniRankingType } from "../types/around-player";
 import { MapCharacteristic } from "../types/map-characteristic";
 import { ScoreCalendarData } from "../types/player/player-statistic";
 import Request from "./request";
@@ -146,11 +145,10 @@ class SSRApi {
    * Gets the players around a player.
    *
    * @param playerId the player to get around
-   * @param type the type to get
    */
-  async getPlayerMiniRanking(playerId: string, type: MiniRankingType) {
+  async getPlayerMiniRanking(playerId: string) {
     return await Request.get<MiniRankingResponse>(
-      `${env.NEXT_PUBLIC_API_URL}/player/mini-ranking/${playerId}/${type}`
+      `${env.NEXT_PUBLIC_API_URL}/player/mini-ranking/${playerId}`
     );
   }
 

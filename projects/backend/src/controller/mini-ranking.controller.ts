@@ -6,11 +6,10 @@ import MiniRankingService from "../service/scoresaber/mini-ranking.service";
 
 @Controller("")
 export default class MiniRankingController {
-  @Get("/player/mini-ranking/:playerId/:type", {
+  @Get("/player/mini-ranking/:playerId", {
     config: {},
     params: t.Object({
       playerId: t.String({ required: true }),
-      type: t.String({ required: true }),
     }),
   })
   public async getPlayerMiniRanking({
@@ -18,8 +17,6 @@ export default class MiniRankingController {
   }: {
     params: { playerId: string; type: MiniRankingType };
   }): Promise<MiniRankingResponse> {
-    return {
-      players: await MiniRankingService.getPlayerMiniRanking(playerId, type),
-    };
+    return await MiniRankingService.getPlayerMiniRankings(playerId);
   }
 }

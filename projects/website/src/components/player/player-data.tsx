@@ -21,6 +21,7 @@ import AccSaberPlayerScores from "../platform/accsaber/accsaber-player-scores";
 import ScoreSaberPlayerScores from "../platform/scoresaber/scoresaber-player-scores";
 import { Button } from "../ui/button";
 import PlayerHeader from "./header/player-header";
+import PlayerMiniRankings from "./mini-ranking/player-mini-ranking";
 
 const PlayerRankingMini = dynamic(() => import("./mini-ranking/player-mini-ranking"), {
   ssr: false,
@@ -174,8 +175,7 @@ export default function PlayerData({
       {/* Mini Rankings */}
       {showRankings && (
         <aside className="hidden w-[400px] flex-col gap-2 2xl:flex">
-          <PlayerRankingMini type="Global" player={player} />
-          <PlayerRankingMini type="Country" player={player} />
+          <PlayerMiniRankings player={player} />
         </aside>
       )}
     </div>

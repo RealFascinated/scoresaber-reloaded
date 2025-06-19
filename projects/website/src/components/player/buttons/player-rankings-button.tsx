@@ -10,7 +10,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import PlayerMiniRanking from "../mini-ranking/player-mini-ranking";
+import PlayerMiniRankings from "../mini-ranking/player-mini-ranking";
 
 interface PlayerRankingsButtonProps {
   player: ScoreSaberPlayer;
@@ -42,8 +42,7 @@ export default function PlayerRankingsButton({ player }: PlayerRankingsButtonPro
           <DialogTitle>Player Rankings</DialogTitle>
         </DialogHeader>
         <div className="flex flex-col gap-4">
-          <PlayerMiniRanking type="Global" player={player} />
-          <PlayerMiniRanking type="Country" player={player} />
+          <PlayerMiniRankings player={player} />
         </div>
       </DialogContent>
     </Dialog>

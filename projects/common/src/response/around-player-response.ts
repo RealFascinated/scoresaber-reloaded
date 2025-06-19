@@ -2,7 +2,12 @@ import ScoreSaberPlayer from "src/player/impl/scoresaber-player";
 
 export type MiniRankingResponse = {
   /**
-   * The players around the player.
+   * The global rankings of the player.
    */
-  players: ScoreSaberPlayer[];
+  globalRankings: ScoreSaberPlayer[];
+
+  /**
+   * The country rankings of the player.
+   */
+  countryRankings: ScoreSaberPlayer[];
 };

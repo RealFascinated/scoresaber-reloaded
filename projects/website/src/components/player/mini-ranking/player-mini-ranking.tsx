@@ -3,7 +3,6 @@ import { PlayerInfo } from "@/components/player/player-info";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import { MiniRankingType } from "@ssr/common/types/around-player";
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
@@ -30,33 +29,53 @@ const miniVariants: Variants = {
   },
 };
 
-export default function PlayerMiniRanking({
+export default function PlayerMiniRankings({ player }: { player: ScoreSaberPlayer }) {
+  const {
+    data: miniRankingResponse,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["mini-ranking", player.id],
+    queryFn: () => ssrApi.getPlayerMiniRanking(player.id),
+  });
+
+  if (isLoading || !miniRankingResponse) {
+    return (
+      <>
+        <PlayerMiniRankingSkeleton />
+        <PlayerMiniRankingSkeleton />
+      </>
+    );
+  }
+
+  return (
+    <>
+      <PlayerMiniRanking
+        type="Global"
+        player={player}
+        players={miniRankingResponse.globalRankings}
+      />
+      <PlayerMiniRanking
+        type="Country"
+        player={player}
+        players={miniRankingResponse.countryRankings}
+      />
+    </>
+  );
+}
+
+function PlayerMiniRanking({
   type,
   player,
+  players,
 }: {
   type: "Global" | "Country";
   player: ScoreSaberPlayer;
+  players: ScoreSaberPlayer[];
 }) {
   const isMobile = useIsMobile();
   const variant = miniVariants[type];
   const icon = variant.icon(player);
-
-  const {
-    data: response,
-    isLoading,
-    isError,
-  } = useQuery({
-    queryKey: ["mini-ranking-" + type, player.id, type],
-    queryFn: () => ssrApi.getPlayerMiniRanking(player.id, type.toLowerCase() as MiniRankingType),
-  });
-
-  if (isLoading || !response) {
-    return <PlayerMiniRankingSkeleton />;
-  }
-
-  if (isError) {
-    return <p className="text-red-500">Error loading ranking</p>;
-  }
 
   return (
     <Card className="sticky flex w-full flex-col gap-2 text-xs select-none sm:w-[400px] sm:text-sm">
@@ -68,8 +87,8 @@ export default function PlayerMiniRanking({
 
       {/* Players List */}
       <div className="divide-border divide-y">
-        {response.players.length > 0 ? (
-          response.players.map((playerRanking, index) => {
+        {players.length > 0 ? (
+          players.map((playerRanking, index) => {
             const rank = type == "Global" ? playerRanking.rank : playerRanking.countryRank;
             const ppDifference = playerRanking.pp - player.pp;
 
