@@ -27,9 +27,9 @@ export default interface ScoreSaberPlayer extends ScoreSaberPlayerBase {
   rankPages: ScoreSaberRankPages;
 
   /**
-   * The amount of pp boundaries the player has.
+   * The amount of pp to gain 1 global pp.
    */
-  ppBoundaries: number[];
+  plusOnePP: number;
 
   /**
    * The acc badges based on the player's scores.

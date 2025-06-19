@@ -86,7 +86,7 @@ export default class ScoreSaberService {
         const [updatedAccount, ppBoundaries, accBadges, statisticHistory, playerHMD] =
           await Promise.all([
             account ? PlayerService.updatePeakRank(id, player) : undefined,
-            account ? PlayerService.getPlayerPpBoundary(id, 50) : [],
+            account ? PlayerService.getPlayerPpBoundary(id, 1) : [],
             account ? PlayerService.getAccBadges(id) : {},
             PlayerHistoryService.getPlayerStatisticHistory(player, new Date(), getDaysAgoDate(30)),
             PlayerService.getPlayerHMD(player.id),
@@ -119,7 +119,7 @@ export default class ScoreSaberService {
             weekly: weeklyChanges,
             monthly: monthlyChanges,
           },
-          ppBoundaries,
+          plusOnePP: ppBoundaries[0],
           accBadges,
           peakRank: updatedAccount?.peakRank,
           statistics: player.scoreStats,

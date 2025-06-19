@@ -15,7 +15,7 @@ import { PlayerStatisticHistory } from "@ssr/common/player/player-statistic-hist
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { getDaysAgoDate, getMidnightAlignedDate } from "@ssr/common/utils/time-utils";
 import { useQuery } from "@tanstack/react-query";
-import { ChartBarIcon, SwordIcon, TrendingUpIcon } from "lucide-react";
+import { CalculatorIcon, ChartBarIcon, SwordIcon, TrendingUpIcon } from "lucide-react";
 import dynamic from "next/dynamic";
 import { ReactElement, useState } from "react";
 
@@ -56,6 +56,11 @@ const ScoreHistoryCalendar = dynamic(
 
 const MapsGraphChart = dynamic(
   () => import("@/components/player/history-views/views/maps-graph-chart"),
+  { ssr: false, loading: () => <Loading /> }
+);
+
+const PlusPpCalculator = dynamic(
+  () => import("@/components/player/history-views/views/plus-pp-calculator"),
   { ssr: false, loading: () => <Loading /> }
 );
 
@@ -182,6 +187,13 @@ export default function PlayerViews({ player }: { player: ScoreSaberPlayer }) {
       icon: ChartBarIcon,
       showDateRangeSelector: false,
       chart: (player, statisticHistory) => <MapsGraphChart player={player} />,
+    },
+    {
+      index: 5,
+      label: "+1 PP Calculator",
+      icon: CalculatorIcon,
+      showDateRangeSelector: false,
+      chart: (player, statisticHistory) => <PlusPpCalculator player={player} />,
     },
   ];
 

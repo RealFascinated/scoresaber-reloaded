@@ -1,8 +1,7 @@
-import PpBoundaryStat from "@/components/player/chart/pp-boundary";
 import SimpleTooltip from "@/components/simple-tooltip";
 import StatValue from "@/components/stat-value";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
+import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
 import { getScoreSaberRoles } from "@ssr/common/utils/scoresaber.util";
 import { formatDate, timeAgo } from "@ssr/common/utils/time-utils";
 import { ReactNode } from "react";
@@ -119,6 +118,15 @@ const playerStats: Stat[] = [
       };
     },
   },
+  {
+    name: "+1 PP",
+    create: (player: ScoreSaberPlayer) => {
+      return {
+        tooltip: <p>Amount of raw PP required to increase your global pp by 1pp</p>,
+        value: <>{formatPp(player.plusOnePP)}pp</>,
+      };
+    },
+  },
 ];
 
 type Props = {
@@ -148,8 +156,6 @@ export default function PlayerStats({ player }: Props) {
           </div>
         );
       })}
-
-      <PpBoundaryStat player={player} />
     </div>
   );
 }
