@@ -1,3 +1,4 @@
+import { AdditionalScoreDataModel } from "@ssr/common/model/additional-score-data/additional-score-data";
 import { PlayerModel } from "@ssr/common/model/player";
 import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import { AppStatistics } from "@ssr/common/types/backend/app-statistics";
@@ -13,9 +14,21 @@ export class AppService {
       const trackedPlayers = await PlayerModel.estimatedDocumentCount();
       const trackedScores = await ScoreSaberScoreModel.estimatedDocumentCount();
 
+      // Count stored replays from AdditionalScoreData collection
+      const storedReplays = await AdditionalScoreDataModel.countDocuments({
+        savedReplay: true,
+      });
+
+      // Count inactive players
+      const inactivePlayers = await PlayerModel.countDocuments({
+        inactive: true,
+      });
+
       return {
         trackedPlayers,
         trackedScores,
+        storedReplays,
+        inactivePlayers,
       } as AppStatistics;
     });
   }
