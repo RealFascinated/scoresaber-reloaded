@@ -4,11 +4,16 @@ import SimpleTooltip from "@/components/simple-tooltip";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { ssrConfig } from "config";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { ReactNode } from "react";
 import { FaTwitch } from "react-icons/fa";
 import PlayerActionButtonWrapper from "../buttons/player-action-button-wrapper";
 import SnipePlaylistCreator from "../snipe/player-snipe-playlist-creator";
+
+const PlayerRankingMini = dynamic(() => import("../mini-ranking/player-mini-ranking"), {
+  ssr: false,
+});
 
 type PlayerLinkProps = {
   url?: string;

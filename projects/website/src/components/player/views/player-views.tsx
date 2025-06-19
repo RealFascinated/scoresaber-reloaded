@@ -9,6 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useIsMobile } from "@/hooks/use-is-mobile";
 import { CalendarIcon, GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerStatisticHistory } from "@ssr/common/player/player-statistic-history";
@@ -18,6 +19,7 @@ import { useQuery } from "@tanstack/react-query";
 import { CalculatorIcon, ChartBarIcon, SwordIcon, TrendingUpIcon } from "lucide-react";
 import dynamic from "next/dynamic";
 import { ReactElement, useState } from "react";
+import PlayerRankingsButton from "../buttons/player-rankings-button";
 
 // Constants
 const DATE_PRESETS = [
@@ -116,12 +118,12 @@ function DateRangeSelector({
 }) {
   return (
     <Select value={daysAgo.toString()} onValueChange={value => onDaysChange(parseInt(value))}>
-      <SelectTrigger className="w-[180px]">
+      <SelectTrigger className="w-[180px] cursor-pointer">
         <SelectValue placeholder="Select time range" />
       </SelectTrigger>
       <SelectContent>
         {DATE_PRESETS.map(preset => (
-          <SelectItem key={preset.value} value={preset.value.toString()}>
+          <SelectItem key={preset.value} value={preset.value.toString()} className="cursor-pointer">
             {preset.label}
           </SelectItem>
         ))}
@@ -132,6 +134,7 @@ function DateRangeSelector({
 
 // Main component
 export default function PlayerViews({ player }: { player: ScoreSaberPlayer }) {
+  const isMobile = useIsMobile();
   const [selectedViewIndex, setSelectedViewIndex] = useState(0);
   const [daysAgo, setDaysAgo] = useState(DEFAULT_DAYS_AGO);
 
@@ -212,7 +215,10 @@ export default function PlayerViews({ player }: { player: ScoreSaberPlayer }) {
       <ViewSelector views={views} selectedView={selectedView} onViewSelect={handleViewSelect} />
       {statisticHistory ? selectedView.chart(player, statisticHistory) : <Loading />}
       {selectedView.showDateRangeSelector && (
-        <DateRangeSelector daysAgo={daysAgo} onDaysChange={handleDaysChange} />
+        <div className="flex items-center justify-between gap-2">
+          <DateRangeSelector daysAgo={daysAgo} onDaysChange={handleDaysChange} />
+          {isMobile && <PlayerRankingsButton player={player} />}
+        </div>
       )}
     </div>
   );
