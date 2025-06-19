@@ -12,22 +12,6 @@ type Props = {
 
 export const scoreBarsDataset: DatasetConfig[] = [
   {
-    title: "Unranked Scores",
-    field: "unrankedScores",
-    color: "#6b7280",
-    axisId: "y100",
-    axisConfig: {
-      reverse: false,
-      display: false,
-      displayName: "Unranked Scores",
-      position: "left",
-    },
-    type: "bar",
-    stack: "daily-scores",
-    stackOrder: 1,
-    labelFormatter: (value: number) => `Unranked Scores: ${formatNumberWithCommas(value)}`,
-  },
-  {
     title: "Ranked Scores",
     field: "rankedScores",
     color: "#8b5cf6",
@@ -44,22 +28,6 @@ export const scoreBarsDataset: DatasetConfig[] = [
     labelFormatter: (value: number) => `Ranked Scores: ${value.toFixed(0)}`,
   },
   {
-    title: "Unranked Improved",
-    field: "unrankedScoresImproved",
-    color: "#ec4899",
-    axisId: "y100",
-    axisConfig: {
-      reverse: false,
-      display: false,
-      displayName: "Unranked Improved",
-      position: "left",
-    },
-    type: "bar",
-    stack: "daily-scores",
-    stackOrder: 0,
-    labelFormatter: (value: number) => `Unranked Improved: ${formatNumberWithCommas(value)}`,
-  },
-  {
     title: "Ranked Improved",
     field: "rankedScoresImproved",
     color: "#ef4444",
@@ -72,8 +40,40 @@ export const scoreBarsDataset: DatasetConfig[] = [
     },
     type: "bar",
     stack: "daily-scores",
-    stackOrder: 0,
+    stackOrder: 1,
     labelFormatter: (value: number) => `Ranked Improved: ${formatNumberWithCommas(value)}`,
+  },
+  {
+    title: "Unranked Improved",
+    field: "unrankedScoresImproved",
+    color: "#ec4899",
+    axisId: "y100",
+    axisConfig: {
+      reverse: false,
+      display: false,
+      displayName: "Unranked Improved",
+      position: "left",
+    },
+    type: "bar",
+    stack: "daily-scores",
+    stackOrder: 1,
+    labelFormatter: (value: number) => `Unranked Improved: ${formatNumberWithCommas(value)}`,
+  },
+  {
+    title: "Unranked Scores",
+    field: "unrankedScores",
+    color: "#6b7280",
+    axisId: "y100",
+    axisConfig: {
+      reverse: false,
+      display: false,
+      displayName: "Unranked Scores",
+      position: "left",
+    },
+    type: "bar",
+    stack: "daily-scores",
+    stackOrder: 0,
+    labelFormatter: (value: number) => `Unranked Scores: ${formatNumberWithCommas(value)}`,
   },
 ];
 
