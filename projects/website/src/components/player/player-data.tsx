@@ -144,9 +144,11 @@ export default function PlayerData({
         <PlayerHeader player={player} />
 
         {/* Player Badges */}
-        <Card>
-          <PlayerBadges player={player} />
-        </Card>
+        {player.badges.length > 0 && (
+          <Card>
+            <PlayerBadges player={player} />
+          </Card>
+        )}
 
         {/* Player Views */}
         {!player.inactive && (
