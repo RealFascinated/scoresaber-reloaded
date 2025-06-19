@@ -23,7 +23,7 @@
   "dependencies": {
     "@t3-oss/env-core": "^0.13.8",
     "@typegoose/auto-increment": "^4.13.0",
-    "@typegoose/typegoose": "^12.16.0",
+    "@typegoose/typegoose": "^12.17.0",
     "sanitize-html": "^2.17.0",
     "ws": "^8.18.2",
     "zod": "^3.25.67"

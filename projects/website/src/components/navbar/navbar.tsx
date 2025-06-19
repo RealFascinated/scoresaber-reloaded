@@ -141,7 +141,7 @@ function SimpleNavLink({
   className?: string;
 }) {
   const pathname = usePathname();
-  const isActive = pathname === href || (href !== "/" && pathname.startsWith(href));
+  const isActive = pathname && (pathname === href || (href !== "/" && pathname.startsWith(href)));
 
   return (
     <Link
