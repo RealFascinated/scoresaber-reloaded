@@ -39,23 +39,23 @@ export const PlayerStatChange: Record<PlayerStatChangeType, PlayerStatValue> = {
   },
   TotalPlayCount: {
     type: "Total Play Count",
-    value: (player, range) => player.statisticChange?.[range].scores?.totalScores,
+    value: (player, range) => player.statisticChange?.[range]?.totalScores,
   },
   RankedPlayCount: {
     type: "Ranked Play Count",
-    value: (player, range) => player.statisticChange?.[range].scores?.totalRankedScores,
+    value: (player, range) => player.statisticChange?.[range]?.totalRankedScores,
   },
   TotalScore: {
     type: "Total Score",
-    value: (player, range) => player.statisticChange?.[range].score?.totalScore,
+    value: (player, range) => player.statisticChange?.[range]?.totalScore,
   },
   TotalRankedScore: {
     type: "Total Ranked Score",
-    value: (player, range) => player.statisticChange?.[range].score?.totalRankedScore,
+    value: (player, range) => player.statisticChange?.[range]?.totalRankedScore,
   },
   AverageRankedAccuracy: {
     type: "Average Ranked Accuracy",
-    value: (player, range) => player.statisticChange?.[range].accuracy?.averageRankedAccuracy,
+    value: (player, range) => player.statisticChange?.[range]?.averageRankedAccuracy,
   },
   TotalReplaysWatched: {
     type: "Total Replays Watched",
