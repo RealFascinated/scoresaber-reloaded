@@ -8,6 +8,7 @@ import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { formatPp } from "@ssr/common/utils/number-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
+import { RotateCcw } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 const ACC_THRESHOLDS = [92, 93, 94, 95, 96, 97, 98, 99];
@@ -131,6 +132,27 @@ export default function PlusPpCalculator({ player }: { player: ScoreSaberPlayer 
     }
   }, [calculatedPpGain, isPpUserInput]);
 
+  // Update accuracy and stars when PP value changes (when user manually adjusts PP)
+  useEffect(() => {
+    if (isPpUserInput && rawPp > 0 && hasInitialized.current) {
+      // First try to maintain current accuracy and adjust stars
+      const starsForCurrentAcc = getStarsForAcc(rawPp, accuracy);
+
+      if (starsForCurrentAcc <= MAX_STARS) {
+        // We can achieve the desired PP with current accuracy, just adjust stars
+        setStars(starsForCurrentAcc);
+      } else {
+        // Need to increase accuracy to keep stars under max
+        const { stars: newStars, accuracy: newAccuracy } = getStarsAndAccuracyForPp(
+          rawPp,
+          accuracy
+        );
+        setStars(newStars);
+        setAccuracy(newAccuracy);
+      }
+    }
+  }, [rawPp, isPpUserInput, accuracy, getStarsForAcc, getStarsAndAccuracyForPp]);
+
   // Handlers
   const handlePpChange = useCallback((newPp: number) => {
     setPpValue(newPp);
@@ -145,6 +167,14 @@ export default function PlusPpCalculator({ player }: { player: ScoreSaberPlayer 
   const handleStarsChange = useCallback((newStars: number) => {
     setStars(newStars);
     setIsPpUserInput(false);
+  }, []);
+
+  const handleReset = useCallback(() => {
+    setPpValue(1);
+    setAccuracy(DEFAULT_ACC);
+    setStars(10);
+    setIsPpUserInput(false);
+    hasInitialized.current = false;
   }, []);
 
   return (
@@ -165,8 +195,15 @@ export default function PlusPpCalculator({ player }: { player: ScoreSaberPlayer 
 
       {/* Controls Card */}
       <div className="border-border/50 bg-background/50 rounded-lg border p-4">
-        <div className="mb-4">
+        <div className="mb-4 flex items-center justify-between">
           <h3 className="text-lg font-semibold">Calculator</h3>
+          <button
+            onClick={handleReset}
+            className="text-muted-foreground hover:text-foreground flex items-center text-sm transition-colors"
+          >
+            <RotateCcw className="mr-2 h-4 w-4" />
+            Reset
+          </button>
         </div>
         <div className="space-y-4">
           {/* PP Slider */}
