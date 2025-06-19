@@ -7,7 +7,6 @@ import { truncateText } from "@ssr/common/string-utils";
 import { useLiveQuery } from "dexie-react-hooks";
 import Link from "next/link";
 import SimpleTooltip from "../simple-tooltip";
-import NavbarButton from "./navbar-button";
 
 export default function ProfileButton() {
   const database: Database = useDatabase();
@@ -18,16 +17,18 @@ export default function ProfileButton() {
   }
 
   return (
-    <Link href={`/player/${mainPlayer.id}`} className="flex h-full items-center gap-4 pl-1">
+    <Link href={`/player/${mainPlayer.id}`} className="flex h-full items-center">
       <SimpleTooltip display="Click to view your profile" side="bottom">
-        <NavbarButton className="px-0">
+        <div className="flex h-full cursor-pointer items-center gap-2">
           <Avatar
             src={mainPlayer.avatar}
-            className="h-6 w-6"
+            className="ring-border/50 h-6 w-6 rounded-full ring-1"
             alt={`${mainPlayer.name}'s Profile Picture`}
           />
-          <p className="text-ssr hidden pl-0.5 lg:block">{truncateText(mainPlayer.name, 20)}</p>
-        </NavbarButton>
+          <p className="text-foreground hidden pl-2 text-sm font-medium lg:block">
+            {truncateText(mainPlayer.name, 20)}
+          </p>
+        </div>
       </SimpleTooltip>
     </Link>
   );

@@ -92,6 +92,8 @@
   --animate-shiny-text: shiny-text 8s infinite;
   --animate-border-beam: border-beam calc(var(--duration) * 1s) infinite linear;
   --animate-spin-slow: spin 2s linear infinite;
+  --animate-gradient: gradient 6s ease-in-out infinite;
+  --animate-gradient-slow: gradient-slow 8s ease-in-out infinite;
 
   @keyframes shiny-text {
     0%,
@@ -107,6 +109,25 @@
   @keyframes border-beam {
     100% {
       offset-distance: 100%;
+    }
+  }
+  @keyframes gradient {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
+  @keyframes gradient-slow {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
     }
   }
 }

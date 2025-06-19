@@ -8,8 +8,8 @@ import { CubeIcon } from "@heroicons/react/24/solid";
 import { ChartBarIcon, MusicIcon, TrendingUpIcon, TrophyIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { ReactElement, useEffect, useState } from "react";
-import { FaDiscord } from "react-icons/fa";
 import Settings from "../settings/settings";
 
 const links: ReactElement<any>[] = [
@@ -81,67 +81,65 @@ export default function Navbar() {
   }, [hasScrolled]);
 
   return (
-    <div className="flex flex-col">
-      {/* Discord Ad */}
-      <Link
-        href="https://discord.gg/kmNfWGA4A8"
-        target="_blank"
-        className="bg-discord-blue flex items-center justify-center gap-2 px-4 py-1 text-white transition-all hover:opacity-80"
-      >
-        <FaDiscord />
-        <span>Join our Discord server</span>
-      </Link>
+    <nav
+      className={cn(
+        "border-border bg-background sticky inset-x-0 top-0 z-50 flex h-12 w-full items-center justify-between border-b px-2 py-1 backdrop-blur-md select-none lg:justify-around lg:px-8",
+        hasScrolled && "shadow-sm"
+      )}
+    >
+      {/* Left */}
+      <div className="flex items-center gap-1 transition-all md:gap-3">
+        {/* Branding */}
+        <Link
+          className="flex items-center gap-1 transition-all hover:opacity-80 md:gap-2"
+          href="/"
+          draggable={false}
+        >
+          <Image
+            width={24}
+            height={24}
+            className="size-5 md:size-6"
+            src="https://cdn.fascinated.cc/assets/logos/scoresaber.png"
+            alt="ScoreSaber Logo"
+          />
+          <h1 className="text-primary hidden text-base font-bold md:flex md:text-lg">SSR</h1>
+        </Link>
 
-      {/* Navbar */}
-      <nav
-        className={cn(
-          "xs:px-5 border-muted/50 sticky inset-x-0 top-0 z-50 flex h-12 w-full items-center justify-between border-b px-2 py-1 backdrop-blur-md select-none lg:justify-around",
-          hasScrolled ? "bg-landing/75" : "bg-landing"
-        )}
-      >
-        {/* Left */}
-        <div className="flex items-center gap-3 transition-all md:gap-4">
-          {/* Branding */}
-          <Link
-            className="flex items-center gap-2.5 transition-all hover:opacity-85"
-            href="/"
-            draggable={false}
-          >
-            <Image
-              width={24}
-              height={24}
-              className="size-6"
-              src="https://cdn.fascinated.cc/assets/logos/scoresaber.png"
-              alt="ScoreSaber Logo"
-            />
-            <h1 className="text-ssr hidden text-lg font-bold md:flex">SSR</h1>
-          </Link>
-
-          {/* Links */}
-          <div className="flex items-center gap-3 transition-all md:gap-5">
-            {links.map(link => link)}
-          </div>
+        {/* Links */}
+        <div className="ml-2 flex items-center gap-0.5 transition-all md:ml-4 md:gap-1">
+          {links.map(link => link)}
         </div>
+      </div>
 
-        {/* Right */}
-        <div className="divide-muted flex items-center gap-2 divide-x transition-all md:pl-6">
-          <div className="flex items-center gap-2.5 pr-2 transition-all">
+      {/* Right */}
+      <div className="flex items-center gap-2 transition-all md:gap-4">
+        {/* Settings and Search */}
+        <div className="flex items-center gap-2 md:gap-3">
+          <Settings />
+          <div className="w-12 md:w-64">
             <PlayerAndLeaderboardSearch />
-            <Settings />
-          </div>
-          <div>
-            <ProfileButton />
           </div>
         </div>
-      </nav>
-    </div>
+
+        {/* Profile Section */}
+        <div className="flex items-center gap-2 md:gap-3">
+          <ProfileButton />
+        </div>
+      </div>
+    </nav>
   );
 }
 
 function SimpleNavLink({ content, href }: { content: ReactElement<any>; href: string }) {
+  const pathname = usePathname();
+  const isActive = pathname === href || (href !== "/" && pathname.startsWith(href));
+
   return (
     <Link
-      className="flex items-center gap-3 text-sm transition-all hover:opacity-80"
+      className={cn(
+        "flex items-center gap-2 px-2 py-1 text-sm transition-colors",
+        isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+      )}
       href={href}
       target={href.startsWith("/") ? "_self" : "_blank"}
       draggable={false}

@@ -100,7 +100,7 @@ export default function PlayerAndLeaderboardSearch() {
         </div>
 
         <Input
-          className="group-hover:border-ssr/75 h-8 w-10 cursor-pointer rounded-lg px-0 pl-9 transition-all md:w-full"
+          className="group-hover:border-ssr/75 h-8 w-full cursor-pointer rounded-lg px-0 pl-9 transition-all"
           type="search"
           name="search"
           placeholder={isMobile ? undefined : "Query..."}

@@ -45,8 +45,8 @@ export default function FriendsButton() {
         onMouseLeave={handleMouseLeave}
       >
         <NavbarButton className="px-0">
-          <PersonIcon className="size-5" />
-          <span className="hidden xl:flex">Friends</span>
+          <PersonIcon className="text-muted-foreground size-5" />
+          <span className="text-muted-foreground hidden xl:flex">Friends</span>
         </NavbarButton>
       </PopoverTrigger>
       <PopoverContent
