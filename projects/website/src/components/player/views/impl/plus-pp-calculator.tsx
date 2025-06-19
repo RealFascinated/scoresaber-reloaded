@@ -1,5 +1,6 @@
 "use client";
 
+import SimpleTooltip from "@/components/simple-tooltip";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Slider } from "@/components/ui/slider";
@@ -197,13 +198,15 @@ export default function PlusPpCalculator({ player }: { player: ScoreSaberPlayer 
       <div className="border-border/50 bg-background/50 rounded-lg border p-4">
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-lg font-semibold">Calculator</h3>
-          <button
-            onClick={handleReset}
-            className="text-muted-foreground hover:text-foreground flex items-center text-sm transition-colors"
-          >
-            <RotateCcw className="mr-2 h-4 w-4" />
-            Reset
-          </button>
+          <SimpleTooltip display={<p>Reset back to the default values</p>}>
+            <button
+              onClick={handleReset}
+              className="text-muted-foreground hover:text-foreground flex items-center text-sm transition-colors"
+            >
+              <RotateCcw className="mr-2 h-4 w-4" />
+              Reset
+            </button>
+          </SimpleTooltip>
         </div>
         <div className="space-y-4">
           {/* PP Slider */}
