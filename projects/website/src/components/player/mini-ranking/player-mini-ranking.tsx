@@ -58,11 +58,14 @@ export default function PlayerMiniRanking({
 
   return (
     <Card className="sticky flex w-[400px] flex-col gap-2 text-sm select-none">
-      <div className="flex items-center gap-1.5 px-2">
+      {/* Header */}
+      <div className="flex items-center gap-2">
         {icon}
-        <p>{type} Ranking</p>
+        <p className="font-medium">{type} Ranking</p>
       </div>
-      <div className="flex flex-col text-xs">
+
+      {/* Players List */}
+      <div className="divide-border divide-y">
         {response.players.length > 0 ? (
           response.players.map((playerRanking, index) => {
             const rank = type == "Global" ? playerRanking.rank : playerRanking.countryRank;
@@ -72,7 +75,7 @@ export default function PlayerMiniRanking({
               <PlayerPreview
                 playerId={playerRanking.id}
                 delay={750}
-                className="bg-accent w-full transition-all first:rounded-t last:rounded-b hover:brightness-75"
+                className="w-full transition-all hover:bg-[#2d2d2d]"
                 key={playerRanking.id}
                 useLink={false}
               >
@@ -80,7 +83,7 @@ export default function PlayerMiniRanking({
                   href={`/player/${playerRanking.id}`}
                   className="grid cursor-pointer items-center gap-2.5 px-2 py-1.5"
                   style={{
-                    gridTemplateColumns: `auto 48px 0.9fr 1fr`,
+                    gridTemplateColumns: `auto 48px 0.73fr 1fr`,
                   }}
                 >
                   {/* Rank */}
