@@ -1,5 +1,6 @@
 import { PlayerMiniRankingSkeleton } from "@/components/player/mini-ranking/player-mini-ranking-skeleton";
 import { PlayerInfo } from "@/components/player/player-info";
+import { useIsMobile } from "@/hooks/use-is-mobile";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { MiniRankingType } from "@ssr/common/types/around-player";
@@ -36,6 +37,7 @@ export default function PlayerMiniRanking({
   type: "Global" | "Country";
   player: ScoreSaberPlayer;
 }) {
+  const isMobile = useIsMobile();
   const variant = miniVariants[type];
   const icon = variant.icon(player);
 
@@ -57,7 +59,7 @@ export default function PlayerMiniRanking({
   }
 
   return (
-    <Card className="sticky flex w-[400px] flex-col gap-2 text-sm select-none">
+    <Card className="sticky flex w-full flex-col gap-2 text-xs select-none sm:w-[400px] sm:text-sm">
       {/* Header */}
       <div className="flex items-center gap-2">
         {icon}
@@ -81,7 +83,7 @@ export default function PlayerMiniRanking({
               >
                 <Link
                   href={`/player/${playerRanking.id}`}
-                  className="grid cursor-pointer items-center gap-2.5 px-2 py-1.5"
+                  className="grid cursor-pointer items-center gap-2.5 py-1.5 sm:px-2"
                   style={{
                     gridTemplateColumns: `auto 48px 0.73fr 1fr`,
                   }}
@@ -102,9 +104,16 @@ export default function PlayerMiniRanking({
                   <div className="m-auto" />
 
                   {/* PP */}
-                  <div className="grid w-[100px] grid-cols-[1fr_0.3fr] items-center gap-2">
-                    <p className="text-ssr font-mono">{formatPp(playerRanking.pp)}pp</p>
-                    {playerRanking.id !== player.id && (
+                  <div
+                    className="grid w-[100px] items-center gap-2"
+                    style={{
+                      gridTemplateColumns: isMobile ? "1fr" : "1fr 0.3fr",
+                    }}
+                  >
+                    <p className="text-ssr text-right font-mono sm:text-left">
+                      {formatPp(playerRanking.pp)}pp
+                    </p>
+                    {playerRanking.id !== player.id && !isMobile && (
                       <p
                         className={`font-mono ${ppDifference > 0 ? "text-green-400" : "text-red-400"}`}
                       >
