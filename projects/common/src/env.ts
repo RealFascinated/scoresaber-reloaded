@@ -16,6 +16,8 @@ export const env = createEnv({
     INFLUXDB_BUCKET: z.string(),
     INFLUXDB_ORG: z.string(),
     INFLUXDB_TOKEN: z.string(),
+
+    SITEMAP_DATA_TOKEN: z.string(),
   },
 
   client: {
@@ -73,6 +75,9 @@ export const env = createEnv({
     // PostHog
     NEXT_PUBLIC_POSTHOG_KEY: process.env.NEXT_PUBLIC_POSTHOG_KEY,
     NEXT_PUBLIC_POSTHOG_HOST: process.env.NEXT_PUBLIC_POSTHOG_HOST,
+
+    // Sitemap Data Token
+    SITEMAP_DATA_TOKEN: process.env.SITEMAP_DATA_TOKEN,
   },
 
   /**

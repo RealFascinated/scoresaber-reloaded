@@ -13,7 +13,6 @@ import ScoreSaberService from "../service/scoresaber/scoresaber.service";
 export default class PlayerController {
   @Get("/:id", {
     config: {},
-    tags: ["player"],
     params: t.Object({
       id: t.String({ required: true }),
     }),
@@ -35,7 +34,6 @@ export default class PlayerController {
 
   @Get("/pp-boundary/:id/:boundary", {
     config: {},
-    tags: ["player"],
     params: t.Object({
       id: t.String({ required: true }),
       boundary: t.Number({ maximum: 100, minimum: 1 }),
@@ -54,7 +52,6 @@ export default class PlayerController {
 
   @Get("/maps-graph/:id", {
     config: {},
-    tags: ["scores"],
     params: t.Object({
       id: t.String({ required: true }),
     }),
@@ -75,7 +72,6 @@ export default class PlayerController {
 
   @Get("/ranked-pps/:id", {
     config: {},
-    tags: ["player"],
     params: t.Object({
       id: t.String({ required: true }),
     }),
@@ -90,7 +86,6 @@ export default class PlayerController {
 
   @Get("/search", {
     config: {},
-    tags: ["player"],
     query: t.Object({
       superJson: t.Optional(t.Boolean({ default: false })),
       query: t.Optional(t.String({ default: "" })),
