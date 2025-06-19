@@ -91,12 +91,12 @@ export function TopScoresData({ timeframe }: TopScoresDataProps) {
     setPage(newPage);
   }, []);
 
-  // Reset the changing timeframe flag when data loads
+  // Reset the changing timeframe flag when data loads or when timeframe changes
   useEffect(() => {
     if (!isLoading && !isRefetching) {
       setIsChangingTimeframe(false);
     }
-  }, [isLoading, isRefetching]);
+  }, [isLoading, isRefetching, selectedTimeframe]);
 
   const memoizedTimeframes = useMemo(() => timeframes, []);
 
