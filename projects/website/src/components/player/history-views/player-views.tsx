@@ -1,6 +1,5 @@
 "use client";
 
-import SimpleTooltip from "@/components/simple-tooltip";
 import { Spinner } from "@/components/spinner";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,9 +15,9 @@ import { PlayerStatisticHistory } from "@ssr/common/player/player-statistic-hist
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { getDaysAgoDate, getMidnightAlignedDate } from "@ssr/common/utils/time-utils";
 import { useQuery } from "@tanstack/react-query";
-import { RefreshCcwIcon, SwordIcon, TrendingUpIcon } from "lucide-react";
+import { SwordIcon, TrendingUpIcon } from "lucide-react";
 import dynamic from "next/dynamic";
-import { ReactElement, ReactNode, useState } from "react";
+import { ReactElement, useState } from "react";
 
 function Loading() {
   return (
@@ -78,7 +77,7 @@ type SelectedView = {
   /**
    * The icon of the selected chart.
    */
-  icon: ReactNode;
+  icon: React.ElementType;
 
   /**
    * The chart to render.
@@ -115,8 +114,8 @@ export default function PlayerViews({ player }: PlayerChartsProps) {
   const views: SelectedView[] = [
     {
       index: 0,
-      label: "Ranking",
-      icon: <GlobeAmericasIcon className="h-5 w-5" />,
+      label: "Rank & PP",
+      icon: GlobeAmericasIcon,
       chart: (player, statisticHistory) => (
         <PlayerRankingChart statisticHistory={statisticHistory} daysAmount={daysAgo} />
       ),
@@ -124,7 +123,7 @@ export default function PlayerViews({ player }: PlayerChartsProps) {
     {
       index: 1,
       label: "Accuracy",
-      icon: <TrendingUpIcon className="h-[18px] w-[18px]" />,
+      icon: TrendingUpIcon,
       chart: (player, statisticHistory) => (
         <PlayerAccuracyChart statisticHistory={statisticHistory} daysAmount={daysAgo} />
       ),
@@ -132,7 +131,7 @@ export default function PlayerViews({ player }: PlayerChartsProps) {
     {
       index: 2,
       label: "Scores",
-      icon: <SwordIcon className="h-[18px] w-[18px]" />,
+      icon: SwordIcon,
       chart: (player, statisticHistory) => (
         <PlayerScoresChart statisticHistory={statisticHistory} daysAmount={daysAgo} />
       ),
@@ -140,7 +139,7 @@ export default function PlayerViews({ player }: PlayerChartsProps) {
     {
       index: 3,
       label: "Score Calendar",
-      icon: <CalendarIcon className="h-[18px] w-[18px]" />,
+      icon: CalendarIcon,
       chart: (player, statisticHistory) => <ScoreHistoryCalendar playerId={player.id} />,
     },
   ];
@@ -161,41 +160,23 @@ export default function PlayerViews({ player }: PlayerChartsProps) {
       <div className="flex flex-col gap-6">
         <div className="relative flex flex-col items-center justify-between gap-2 md:flex-row">
           {/* View Selector */}
-          <div className="flex items-center justify-center gap-2 md:absolute md:left-1/2 md:-translate-x-1/2">
-            {views.map(view => {
-              const isSelected = view.index === selectedView?.index;
-
-              return (
-                <SimpleTooltip
-                  key={view.index}
-                  display={
-                    <div className="flex flex-col items-center justify-center">
-                      <p>{view.label}</p>
-                      <p className="text-gray-400">
-                        {isSelected ? "Currently Selected" : "Click to view"}
-                      </p>
-                    </div>
-                  }
-                >
-                  <button
-                    onClick={() => setSelectedView(view)}
-                    className={`border ${isSelected ? "border-1" : "border-input"} flex h-[26px] w-[26px] items-center justify-center rounded-full p-[2px] transition-all hover:brightness-[66%]`}
-                  >
-                    {view.icon}
-                  </button>
-                </SimpleTooltip>
-              );
-            })}
+          <div className="flex items-center justify-center gap-1 md:absolute md:left-1/2 md:-translate-x-1/2 md:gap-2">
+            {views.map(view => (
+              <Button
+                key={view.index}
+                onClick={() => setSelectedView(view)}
+                variant={view.index === selectedView?.index ? "default" : "outline"}
+                size="sm"
+                className="flex items-center gap-2"
+              >
+                <view.icon className="size-5 md:size-4" />
+                <span className="hidden sm:inline">{view.label}</span>
+              </Button>
+            ))}
           </div>
 
-          {/* Date Preset Selector and Reset Button */}
+          {/* Date Range Selector */}
           <div className="flex items-center gap-2">
-            <SimpleTooltip display={<p>Reset to Last 50 Days</p>}>
-              <Button variant={"outline"} size={"icon"} onClick={() => setDaysAgo(50)}>
-                <RefreshCcwIcon className="h-4 w-4" />
-              </Button>
-            </SimpleTooltip>
-
             <Select value={daysAgo.toString()} onValueChange={value => setDaysAgo(parseInt(value))}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Select time range" />
