@@ -35,32 +35,32 @@ const DEFAULT_DAYS_AGO = 50;
 
 // Dynamic imports
 const PlayerRankingChart = dynamic(
-  () => import("@/components/player/history-views/views/player-ranking-chart"),
+  () => import("@/components/player/views/impl/player-ranking-chart"),
   { ssr: false, loading: () => <Loading /> }
 );
 
 const PlayerAccuracyChart = dynamic(
-  () => import("@/components/player/history-views/views/player-accuracy-chart"),
+  () => import("@/components/player/views/impl/player-accuracy-chart"),
   { ssr: false, loading: () => <Loading /> }
 );
 
 const PlayerScoresChart = dynamic(
-  () => import("@/components/player/history-views/views/player-scores-chart"),
+  () => import("@/components/player/views/impl/player-scores-chart"),
   { ssr: false, loading: () => <Loading /> }
 );
 
 const ScoreHistoryCalendar = dynamic(
-  () => import("@/components/player/history-views/views/score-history-calendar"),
+  () => import("@/components/player/views/impl/score-history-calendar"),
   { ssr: false, loading: () => <Loading /> }
 );
 
-const MapsGraphChart = dynamic(
-  () => import("@/components/player/history-views/views/maps-graph-chart"),
-  { ssr: false, loading: () => <Loading /> }
-);
+const MapsGraphChart = dynamic(() => import("@/components/player/views/impl/maps-graph-chart"), {
+  ssr: false,
+  loading: () => <Loading />,
+});
 
 const PlusPpCalculator = dynamic(
-  () => import("@/components/player/history-views/views/plus-pp-calculator"),
+  () => import("@/components/player/views/impl/plus-pp-calculator"),
   { ssr: false, loading: () => <Loading /> }
 );
 

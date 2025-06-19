@@ -1,7 +1,7 @@
 "use client";
 
 import { DatasetConfig } from "@/common/chart/types";
-import GenericPlayerChart from "@/components/player/history-views/generic-player-chart";
+import GenericPlayerChart from "@/components/player/views/generic-player-chart";
 import { PlayerStatisticHistory } from "@ssr/common/player/player-statistic-history";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 

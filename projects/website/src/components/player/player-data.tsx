@@ -2,8 +2,8 @@
 
 import { PlatformRepository, PlatformType } from "@/common/platform/platform-repository";
 import Card from "@/components/card";
-import PlayerViews from "@/components/player/history-views/player-views";
 import PlayerBadges from "@/components/player/player-badges";
+import PlayerViews from "@/components/player/views/player-views";
 import useDatabase from "@/hooks/use-database";
 import useWindowDimensions from "@/hooks/use-window-dimensions";
 import {

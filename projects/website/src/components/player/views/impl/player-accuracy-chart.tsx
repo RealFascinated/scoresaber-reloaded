@@ -2,7 +2,7 @@
 
 import { DatasetConfig } from "@/common/chart/types";
 import { Colors } from "@/common/colors";
-import GenericPlayerChart from "@/components/player/history-views/generic-player-chart";
+import GenericPlayerChart from "@/components/player/views/generic-player-chart";
 import { PlayerStatisticHistory } from "@ssr/common/player/player-statistic-history";
 import { isWholeNumber } from "@ssr/common/utils/number-utils";
 
