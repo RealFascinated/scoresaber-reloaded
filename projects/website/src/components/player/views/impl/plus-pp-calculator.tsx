@@ -150,15 +150,15 @@ export default function PlusPpCalculator({ player }: { player: ScoreSaberPlayer 
   return (
     <div className="flex flex-col gap-4">
       {/* Main PP Display Card */}
-      <div className="rounded-lg border border-blue-500/20 bg-gradient-to-br from-blue-500/10 to-purple-500/10 p-4">
+      <div className="rounded-lg border border-blue-500/20 bg-slate-800 p-4">
         <div className="flex items-center justify-between">
           <div className="flex flex-col gap-1">
             <span className="text-xl font-semibold text-blue-400">+{formatPp(ppValue)}pp</span>
             <span className="text-muted-foreground text-sm">{formatPp(rawPp)}pp Raw</span>
           </div>
           <div className="text-muted-foreground flex flex-col items-end gap-1 text-sm">
-            <span>{accuracy.toFixed(1)}% accuracy</span>
-            <span>{stars.toFixed(2)}★ difficulty</span>
+            <span className="text-green-400">{accuracy.toFixed(1)}% accuracy</span>
+            <span className="text-yellow-400">{stars.toFixed(2)}★ difficulty</span>
           </div>
         </div>
       </div>
