@@ -1,6 +1,7 @@
 import { env } from "@ssr/common/env";
 import { getMinioBucketName, MinioBucket } from "@ssr/common/minio-buckets";
 import { Client } from "minio";
+import { Readable } from "node:stream";
 
 const minioClient = new Client({
   endPoint: env.MINIO_ENDPOINT,
@@ -29,6 +30,17 @@ export default class MinioService {
     } catch {
       return null;
     }
+  }
+
+  /**
+   * Gets a file stream from Minio.
+   *
+   * @param bucket the bucket to get the file from
+   * @param filename the filename to get
+   * @returns the file stream
+   */
+  public static async getFileStream(bucket: MinioBucket, filename: string): Promise<Readable> {
+    return minioClient.getObject(getMinioBucketName(bucket), filename);
   }
 
   /**

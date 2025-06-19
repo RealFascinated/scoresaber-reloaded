@@ -26,8 +26,6 @@ import { ScoreSaberScoreBase } from "./scoresaber-score-base";
   overwriteModelName: "scoresaber-scores",
 })
 @index({ playerId: 1, leaderboardId: 1, score: 1 })
-@index({ timestamp: -1 })
-@index({ pp: -1 })
 export class ScoreSaberScoreInternal extends ScoreSaberScoreBase {}
 
 class ScoreSaberScorePublic extends ScoreSaberScoreInternal {
