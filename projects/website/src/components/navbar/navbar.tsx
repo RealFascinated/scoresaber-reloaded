@@ -53,6 +53,7 @@ const links: ReactElement<any>[] = [
       </>
     }
     href="/overlay/builder"
+    className="hidden md:flex"
   />,
   <SimpleNavLink
     key="top-scores"
@@ -130,7 +131,15 @@ export default function Navbar() {
   );
 }
 
-function SimpleNavLink({ content, href }: { content: ReactElement<any>; href: string }) {
+function SimpleNavLink({
+  content,
+  href,
+  className,
+}: {
+  content: ReactElement<any>;
+  href: string;
+  className?: string;
+}) {
   const pathname = usePathname();
   const isActive = pathname === href || (href !== "/" && pathname.startsWith(href));
 
@@ -138,7 +147,8 @@ function SimpleNavLink({ content, href }: { content: ReactElement<any>; href: st
     <Link
       className={cn(
         "flex items-center gap-2 px-2 py-1 text-sm transition-colors",
-        isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+        isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground",
+        className
       )}
       href={href}
       target={href.startsWith("/") ? "_self" : "_blank"}

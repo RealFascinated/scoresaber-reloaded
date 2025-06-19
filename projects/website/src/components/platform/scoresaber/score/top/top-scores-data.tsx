@@ -5,6 +5,7 @@ import SimplePagination from "@/components/simple-pagination";
 import { Spinner } from "@/components/spinner";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-is-mobile";
+import { CalendarDaysIcon, CalendarIcon, ClockIcon, TrophyIcon } from "@heroicons/react/24/outline";
 import { env } from "@ssr/common/env";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
@@ -20,23 +21,28 @@ import ScoreSaberScoreDisplay from "../score";
 type TimeframesType = {
   timeframe: Timeframe;
   display: string;
+  icon: React.ReactNode;
 };
 const timeframes: TimeframesType[] = [
   {
     timeframe: "daily",
     display: "Today",
+    icon: <CalendarDaysIcon className="h-4 w-4" />,
   },
   {
     timeframe: "weekly",
     display: "This Week",
+    icon: <ClockIcon className="h-4 w-4" />,
   },
   {
     timeframe: "monthly",
     display: "This Month",
+    icon: <CalendarIcon className="h-4 w-4" />,
   },
   {
     timeframe: "all",
     display: "All Time",
+    icon: <TrophyIcon className="h-4 w-4" />,
   },
 ];
 
@@ -49,6 +55,7 @@ export function TopScoresData({ timeframe }: TopScoresDataProps) {
 
   const [selectedTimeframe, setSelectedTimeframe] = useState<Timeframe>(timeframe);
   const [page, setPage] = useState(1);
+  const [isChangingTimeframe, setIsChangingTimeframe] = useState(false);
 
   const {
     data: scores,
@@ -69,13 +76,27 @@ export function TopScoresData({ timeframe }: TopScoresDataProps) {
     window.history.replaceState(null, "", `/scores/top/${selectedTimeframe}`);
   }, [selectedTimeframe]);
 
-  const handleTimeframeChange = useCallback((newTimeframe: Timeframe) => {
-    setSelectedTimeframe(newTimeframe);
-  }, []);
+  const handleTimeframeChange = useCallback(
+    (newTimeframe: Timeframe) => {
+      if (newTimeframe !== selectedTimeframe) {
+        setIsChangingTimeframe(true);
+        setSelectedTimeframe(newTimeframe);
+        setPage(1); // Reset to first page when changing timeframe
+      }
+    },
+    [selectedTimeframe]
+  );
 
   const handlePageChange = useCallback((newPage: number) => {
     setPage(newPage);
   }, []);
+
+  // Reset the changing timeframe flag when data loads
+  useEffect(() => {
+    if (!isLoading && !isRefetching) {
+      setIsChangingTimeframe(false);
+    }
+  }, [isLoading, isRefetching]);
 
   const memoizedTimeframes = useMemo(() => timeframes, []);
 
@@ -111,30 +132,41 @@ export function TopScoresData({ timeframe }: TopScoresDataProps) {
   );
 
   return (
-    <Card className="flex h-fit w-full flex-col justify-center gap-2 2xl:w-[75%]">
-      <div className="flex flex-row flex-wrap justify-center gap-2">
-        {memoizedTimeframes.map(timeframe => (
-          <Button
-            key={timeframe.timeframe}
-            className="flex w-36 items-center gap-2"
-            variant={selectedTimeframe === timeframe.timeframe ? "default" : "outline"}
-            onClick={() => handleTimeframeChange(timeframe.timeframe)}
-          >
-            {timeframe.display}
-            {(isLoading || isRefetching) && selectedTimeframe === timeframe.timeframe && (
-              <Spinner />
-            )}
-          </Button>
-        ))}
+    <Card className="flex h-fit w-full flex-col justify-center gap-6 2xl:w-[75%]">
+      {/* Header Section */}
+      <div className="flex flex-col items-center gap-3 text-center">
+        <div className="flex flex-col gap-1">
+          <h1 className="text-2xl font-bold tracking-tight">Top ScoreSaber Scores</h1>
+          <p className="text-muted-foreground text-sm">
+            Discover the highest scores tracked across ScoreSaber
+          </p>
+        </div>
       </div>
 
-      <div className="flex flex-col justify-center text-center">
-        <p className="font-semibold">Top ScoreSaber Scores</p>
-        <p className="text-gray-400">This will only show scores that have been tracked.</p>
+      {/* Timeframe Selector */}
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-row flex-wrap justify-center gap-3">
+          {memoizedTimeframes.map(timeframe => (
+            <Button
+              key={timeframe.timeframe}
+              className="relative min-w-[120px] transition-all duration-200"
+              variant={selectedTimeframe === timeframe.timeframe ? "default" : "outline"}
+              onClick={() => handleTimeframeChange(timeframe.timeframe)}
+            >
+              <span className="flex items-center gap-2">
+                {timeframe.icon}
+                {timeframe.display}
+                {isChangingTimeframe && selectedTimeframe === timeframe.timeframe && (
+                  <Spinner className="text-foreground h-3 w-3" />
+                )}
+              </span>
+            </Button>
+          ))}
+        </div>
       </div>
 
       {isLoading || !scores ? (
-        <div className="flex items-center justify-center">
+        <div className="flex items-center justify-center py-8">
           <Spinner />
         </div>
       ) : (
