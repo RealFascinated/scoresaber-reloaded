@@ -25,7 +25,6 @@ import PlayerController from "./controller/player.controller";
 import PlaylistController from "./controller/playlist.controller";
 import ReplayController from "./controller/replay.controller";
 import ScoresController from "./controller/scores.controller";
-import { SitemapDataController } from "./controller/sitemap-data.controller";
 import StatisticsController from "./controller/statistics.controller";
 import TopScoresController from "./controller/top-scores.controller";
 import { EventsManager } from "./event/events-manager";
@@ -205,7 +204,6 @@ app.use(
       PlayerHistoryController,
       PlayerScoreHistoryController,
       TopScoresController,
-      SitemapDataController,
     ],
   })
 );
