@@ -1,5 +1,4 @@
 import { MiniRankingResponse } from "@ssr/common/response/around-player-response";
-import { MiniRankingType } from "@ssr/common/types/around-player";
 import { t } from "elysia";
 import { Controller, Get } from "elysia-decorators";
 import MiniRankingService from "../service/scoresaber/mini-ranking.service";
@@ -13,9 +12,9 @@ export default class MiniRankingController {
     }),
   })
   public async getPlayerMiniRanking({
-    params: { playerId, type },
+    params: { playerId },
   }: {
-    params: { playerId: string; type: MiniRankingType };
+    params: { playerId: string };
   }): Promise<MiniRankingResponse> {
     return await MiniRankingService.getPlayerMiniRankings(playerId);
   }
