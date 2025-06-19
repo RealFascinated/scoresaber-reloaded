@@ -16,7 +16,9 @@ export const env = createEnv({
     INFLUXDB_BUCKET: z.string(),
     INFLUXDB_ORG: z.string(),
     INFLUXDB_TOKEN: z.string(),
+  },
 
+  shared: {
     SITEMAP_DATA_TOKEN: z.string(),
   },
 
