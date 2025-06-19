@@ -142,13 +142,20 @@ export default function PlayerData({
     <div className="flex w-full justify-center gap-2">
       <article className="flex flex-1 flex-col gap-2">
         <PlayerHeader player={player} />
-        {(!player.inactive || player.badges.length > 0) && (
+
+        {/* Player Badges */}
+        <Card>
+          <PlayerBadges player={player} />
+        </Card>
+
+        {/* Player Views */}
+        {!player.inactive && (
           <Card className="flex flex-col gap-2">
-            <PlayerBadges player={player} />
-            {!player.inactive && <PlayerViews player={player} />}
+            <PlayerViews player={player} />
           </Card>
         )}
 
+        {/* Platform Selector and Score Component */}
         <div className="flex flex-col">
           <div className="flex flex-col">
             <PlatformSelector currentPlatform={platformType} player={player} />
@@ -162,6 +169,7 @@ export default function PlayerData({
         </div>
       </article>
 
+      {/* Mini Rankings */}
       {showRankings && (
         <aside className="hidden w-[400px] flex-col gap-2 2xl:flex">
           <PlayerRankingMini type="Global" player={player} />

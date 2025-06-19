@@ -235,9 +235,9 @@ class SSRApi {
    * @param playerId the player to get the score chart data for
    * @returns the score chart data
    */
-  async getPlayerScoreChartData(playerId: string) {
+  async getPlayerMapsGraphData(playerId: string) {
     const response = await Request.get<string>(
-      `${env.NEXT_PUBLIC_API_URL}/player/score-chart/${playerId}`,
+      `${env.NEXT_PUBLIC_API_URL}/player/maps-graph/${playerId}`,
       {
         returns: "text",
         searchParams: {
@@ -407,7 +407,7 @@ class SSRApi {
     if (response === undefined) {
       return undefined;
     }
-    return SuperJSON.parse<ScoreHistoryGraphResponse>(response);
+    return SuperJSON.parse<PlayerScoresChartResponse>(response);
   }
 
   /**

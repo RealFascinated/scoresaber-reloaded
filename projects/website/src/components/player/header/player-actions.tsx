@@ -8,7 +8,6 @@ import Link from "next/link";
 import { ReactNode } from "react";
 import { FaTwitch } from "react-icons/fa";
 import PlayerActionButtonWrapper from "../buttons/player-action-button-wrapper";
-import PlayerScoreChartButton from "../buttons/player-score-chart-button";
 import SnipePlaylistCreator from "../snipe/player-snipe-playlist-creator";
 
 type PlayerLinkProps = {
@@ -86,7 +85,6 @@ export default function PlayerActions({ player }: { player: ScoreSaberPlayer }) 
 
       {/* Actions */}
       <>
-        <PlayerScoreChartButton player={player} />
         <SnipePlaylistCreator toSnipe={player} />
       </>
     </div>

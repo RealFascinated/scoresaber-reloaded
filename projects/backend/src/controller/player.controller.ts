@@ -52,7 +52,7 @@ export default class PlayerController {
     };
   }
 
-  @Get("/score-chart/:id", {
+  @Get("/maps-graph/:id", {
     config: {},
     tags: ["scores"],
     params: t.Object({
