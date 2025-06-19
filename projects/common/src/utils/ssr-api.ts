@@ -16,6 +16,7 @@ import { PlayerScoresChartResponse } from "../response/player-scores-chart";
 import { PlayerSearchResponse } from "../response/player-search-response";
 import { PlaysByHmdResponse } from "../response/plays-by-hmd-response";
 import { PpBoundaryResponse } from "../response/pp-boundary-response";
+import { ScoreHistoryGraphResponse } from "../response/score-history-graph-response";
 import { ScoreStatsResponse } from "../response/scorestats-response";
 import { MapDifficulty } from "../score/map-difficulty";
 import { PlayerScore } from "../score/player-score";
@@ -407,7 +408,7 @@ class SSRApi {
     if (response === undefined) {
       return undefined;
     }
-    return SuperJSON.parse<PlayerScoresChartResponse>(response);
+    return SuperJSON.parse<ScoreHistoryGraphResponse>(response);
   }
 
   /**
