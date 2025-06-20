@@ -10,6 +10,7 @@ import MemoryUsageMetric from "../metrics/impl/backend/memory-usage";
 import ProcessCpuUsageMetric from "../metrics/impl/backend/process-cpu-usage";
 import RouteLatencyMetric from "../metrics/impl/backend/route-latency";
 import RequestsPerSecondMetric from "../metrics/impl/backend/total-requests";
+import ProcessUptimeMetric from "../metrics/impl/backend/uptime";
 import MongoDbSizeMetric from "../metrics/impl/database/mongo-db-size";
 import PointsPerSecondMetric from "../metrics/impl/general/points-per-second";
 import ActiveAccountsMetric from "../metrics/impl/player/active-accounts";
@@ -54,6 +55,7 @@ export enum MetricType {
   EVENT_LOOP_TIMERS = "event-loop-timers",
   API_SERVICES = "api-services",
   HTTP_STATUS_CODES = "http-status-codes",
+  PROCESS_UPTIME = "process-uptime",
 
   // System metrics
   SYSTEM_CPU_USAGE = "system-cpu-usage",
@@ -108,6 +110,7 @@ export default class MetricsService {
     this.registerMetric(new EventLoopTimersMetric());
     this.registerMetric(new ApiServicesMetric());
     this.registerMetric(new HttpStatusCodesMetric());
+    this.registerMetric(new ProcessUptimeMetric());
 
     // System metrics
     this.registerMetric(new SystemCpuUsageMetric());
