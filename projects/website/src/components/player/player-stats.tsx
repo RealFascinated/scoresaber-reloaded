@@ -1,10 +1,12 @@
 import SimpleTooltip from "@/components/simple-tooltip";
 import StatValue from "@/components/stat-value";
+import { getHMDInfo, HMD } from "@ssr/common/hmds";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
 import { getScoreSaberRoles } from "@ssr/common/utils/scoresaber.util";
 import { formatDate, timeAgo } from "@ssr/common/utils/time-utils";
 import { ReactNode } from "react";
+import HMDIcon from "../hmd";
 
 type Stat = {
   name: string;
@@ -83,9 +85,17 @@ const playerStats: Stat[] = [
   {
     name: "Headset",
     create: (player: ScoreSaberPlayer) => {
+      const hmd = getHMDInfo(player.hmd as HMD);
+
       return {
         tooltip: <p>The most common headset used in the last 50 scores</p>,
-        value: player.hmd === undefined ? undefined : <>{player.hmd}</>,
+        value:
+          player.hmd === undefined ? undefined : (
+            <div className="flex items-center gap-1.5">
+              <HMDIcon hmd={hmd} />
+              <span>{player.hmd}</span>
+            </div>
+          ),
       };
     },
   },
