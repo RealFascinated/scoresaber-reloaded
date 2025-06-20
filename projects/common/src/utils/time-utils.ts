@@ -267,7 +267,7 @@ export function formatDuration(ms: number, long: boolean = false): string {
   const result = units
     .filter(u => u.value > 0)
     .slice(0, 2)
-    .map(u => `${u.value}${u.unit}`);
+    .map(u => `${u.value.toFixed(0)}${u.unit}`);
 
   return result.join(", ") || (long ? "0 Seconds" : "0s");
 }
