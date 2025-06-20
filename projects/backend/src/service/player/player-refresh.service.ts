@@ -78,11 +78,8 @@ export class PlayerRefreshService {
         })
       );
 
-      // Stop paginating if no scores are missing OR if player has seededScores marked true
-      if (
-        (result.missingScores === 0 && player.seededScores) ||
-        page >= Math.ceil(scoresPage.metadata.total / 100)
-      ) {
+      // Stop if we've reached the last page
+      if (page >= Math.ceil(scoresPage.metadata.total / 100)) {
         hasMorePages = false;
       }
 

@@ -1,7 +1,8 @@
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
+import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
 import { PlayerModel } from "@ssr/common/model/player";
-import { EmbedBuilder } from "discord.js";
+import { ButtonBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
 import { DiscordChannels, logToChannel } from "../../bot/bot";
 import { PlayerRefreshService } from "../../service/player/player-refresh.service";
 import { PlayerService } from "../../service/player/player.service";
@@ -36,14 +37,38 @@ export class PlayerScoreSeedQueue extends Queue<string> {
       playerToken
     );
 
-    logToChannel(
+    await logToChannel(
       DiscordChannels.playerScoreRefreshLogs,
       new EmbedBuilder()
-        .setDescription(`Refreshed ${player.name}'s scores`)
-        .addFields(
-          { name: "Total scores", value: totalScores.toString() },
-          { name: "Missing scores", value: missingScores.toString() }
-        )
+        .setTitle("Player Score Refresh Complete")
+        .setDescription(`🎯 **${player.name}**'s scores have been refreshed`)
+        .addFields([
+          {
+            name: "📊 Statistics",
+            value: [
+              `**Total Scores:** ${totalScores.toLocaleString()}`,
+              `**Missing Scores:** ${missingScores.toLocaleString()}`,
+            ].join("\n"),
+            inline: false,
+          },
+        ])
+        .setTimestamp()
+        .setFooter({
+          text: `Powered by ${env.NEXT_PUBLIC_WEBSITE_URL}`,
+        })
+        .setColor("#00ff00"),
+      [
+        {
+          type: 1,
+          components: [
+            new ButtonBuilder()
+              .setLabel("Player Profile")
+              .setEmoji("👤")
+              .setStyle(ButtonStyle.Link)
+              .setURL(`${env.NEXT_PUBLIC_WEBSITE_URL}/player/${player.id}`),
+          ],
+        },
+      ]
     );
   }
 }
