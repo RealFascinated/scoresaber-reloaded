@@ -1,6 +1,5 @@
 import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
-import { isProduction } from "@ssr/common/utils/utils";
 import {
   ActionRowData,
   ActivityType,
@@ -16,17 +15,15 @@ import { Client } from "discordx";
 import "./command/force-refresh-player-scores";
 import "./command/force-track-player-statistics";
 
-export const guildId = "1295984874942894100";
-export enum DiscordChannels {
-  trackedPlayerLogs = "1295985197262569512",
-  numberOneFeed = "1295988063817830430",
-  top50Feed = "1338558217042788402",
-  backendLogs = "1296524935237468250",
-  rankedLogs = "1334376582860636220",
-  qualifiedLogs = "1334383809440776233",
-  scoreFloodGateFeed = "1338895176034418699",
-  playerScoreRefreshLogs = "1385426757750100018",
-}
+export const DiscordChannels = {
+  TRACKED_PLAYER_LOGS: env.DISCORD_CHANNEL_TRACKED_PLAYER_LOGS,
+  SCORE_REFRESH_LOGS: env.DISCORD_CHANNEL_SCORE_REFRESH_LOGS,
+  RANKED_BATCH_LOGS: env.DISCORD_CHANNEL_RANKED_BATCH_LOGS,
+  NUMBER_ONE_FEED: env.DISCORD_CHANNEL_NUMBER_ONE_FEED,
+  TOP_50_SCORES_FEED: env.DISCORD_CHANNEL_TOP_50_SCORES_FEED,
+  SCORE_FLOODGATE_FEED: env.DISCORD_CHANNEL_SCORE_FLOODGATE_FEED,
+  BACKEND_LOGS: env.DISCORD_CHANNEL_BACKEND_LOGS,
+};
 
 const client = new Client({
   intents: [
@@ -72,9 +69,12 @@ client.on("interactionCreate", interaction => {
 });
 
 export async function initDiscordBot() {
-  Logger.info("Initializing discord bot...");
+  if (!env.DISCORD_BOT_TOKEN) {
+    Logger.warn("Discord bot token not found, skipping initialization");
+    return;
+  }
 
-  // Login
+  Logger.info("Initializing discord bot...");
   try {
     await client.login(env.DISCORD_BOT_TOKEN);
   } catch (error) {
@@ -90,14 +90,14 @@ export async function initDiscordBot() {
  * @param embed the embed to log
  */
 export async function logToChannel(
-  channelId: DiscordChannels,
+  channelId: (typeof DiscordChannels)[keyof typeof DiscordChannels],
   embed: EmbedBuilder,
   components: (
     | APIActionRowComponent<APIMessageActionRowComponent>
     | ActionRowData<MessageActionRowComponentBuilder>
   )[] = []
 ) {
-  if (!isProduction()) {
+  if (!channelId) {
     return;
   }
   try {
@@ -119,12 +119,12 @@ export async function logToChannel(
  * @param file the file to send
  */
 export async function sendFile(
-  channelId: DiscordChannels,
+  channelId: (typeof DiscordChannels)[keyof typeof DiscordChannels],
   filename: string,
   content: string,
   message?: string
 ) {
-  if (!isProduction()) {
+  if (!channelId) {
     return;
   }
 

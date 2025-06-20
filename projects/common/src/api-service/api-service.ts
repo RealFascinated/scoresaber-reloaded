@@ -82,11 +82,11 @@ export default class ApiService {
     }
 
     // Adjust cooldown based on priority
-    const priority = options?.priority || CooldownPriority.Normal;
+    const priority = options?.priority || CooldownPriority.NORMAL;
     let cooldownMultiplier = 1;
-    if (priority === CooldownPriority.High) {
+    if (priority === CooldownPriority.HIGH) {
       cooldownMultiplier = 0.5;
-    } else if (priority === CooldownPriority.Low) {
+    } else if (priority === CooldownPriority.LOW) {
       cooldownMultiplier = 2;
     }
 

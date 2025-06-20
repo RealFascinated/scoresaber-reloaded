@@ -22,10 +22,21 @@ export class TrackScoreListener implements EventListener {
     const playerInfo = score.playerInfo;
 
     // Track ScoreSaber score
-    const tracked = await ScoreService.trackScoreSaberScore(score, leaderboard, player);
-    if (tracked.score == undefined) {
+    const { score: trackedScore, hasPreviousScore } = await ScoreService.trackScoreSaberScore(
+      score,
+      leaderboard,
+      player
+    );
+    if (trackedScore == undefined) {
       return;
     }
+
+    // Update player daily score stats
+    ScoreService.updatePlayerDailyScoreStats(
+      score.playerId,
+      leaderboard.stars > 0,
+      hasPreviousScore
+    );
 
     // Track BeatLeader score if available
     let beatLeaderScore: AdditionalScoreData | undefined;
@@ -42,7 +53,7 @@ export class TrackScoreListener implements EventListener {
     // Always send score flood gate notifications
     notifications.push(
       sendScoreNotification(
-        DiscordChannels.scoreFloodGateFeed,
+        DiscordChannels.SCORE_FLOODGATE_FEED,
         score,
         leaderboard,
         player,
@@ -57,7 +68,7 @@ export class TrackScoreListener implements EventListener {
       if (score.rank === 1) {
         notifications.push(
           sendScoreNotification(
-            DiscordChannels.numberOneFeed,
+            DiscordChannels.NUMBER_ONE_FEED,
             score,
             leaderboard,
             player,
@@ -71,7 +82,7 @@ export class TrackScoreListener implements EventListener {
       if (isTop50GlobalScore) {
         notifications.push(
           sendScoreNotification(
-            DiscordChannels.top50Feed,
+            DiscordChannels.TOP_50_SCORES_FEED,
             score,
             leaderboard,
             player,

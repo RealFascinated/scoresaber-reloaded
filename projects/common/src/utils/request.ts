@@ -15,22 +15,12 @@ type BaseRequestOptions = {
 
 export type RequestOptions = Omit<RequestInit, "priority"> & BaseRequestOptions;
 
-const DEBUG = false;
-const DEFAULT_OPTIONS: BaseRequestOptions = {
-  next: {
-    revalidate: 120, // 2 minutes
-  },
-  throwOnError: false,
-  returns: "json",
-  priority: CooldownPriority.Normal,
-};
-
 class Request {
   private static pendingRequests = new Map<string, Promise<unknown>>();
   private static rateLimitThresholds = {
-    [CooldownPriority.High]: 50, // Warn at 50 remaining
-    [CooldownPriority.Normal]: 100, // Warn at 100 remaining
-    [CooldownPriority.Low]: 200, // Warn at 200 remaining
+    [CooldownPriority.HIGH]: 50, // Warn at 50 remaining
+    [CooldownPriority.NORMAL]: 100, // Warn at 100 remaining
+    [CooldownPriority.LOW]: 200, // Warn at 200 remaining
   };
   private static rateLimitInfo = new Map<string, { remaining: number; resetTime: number }>();
 
@@ -81,7 +71,7 @@ class Request {
       searchParams,
       returns = "json",
       throwOnError = false,
-      priority = CooldownPriority.Normal,
+      priority = CooldownPriority.NORMAL,
       ...fetchOptions
     } = options || {};
     const fullUrl = this.buildUrl(url, searchParams);

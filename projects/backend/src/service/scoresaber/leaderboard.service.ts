@@ -687,7 +687,7 @@ export default class LeaderboardService {
     });
 
     await logToChannel(
-      DiscordChannels.backendLogs,
+      DiscordChannels.BACKEND_LOGS,
       new EmbedBuilder()
         .setTitle(`Refreshed ${leaderboards.length} ranked leaderboards.`)
         .setDescription(
@@ -725,7 +725,7 @@ export default class LeaderboardService {
     });
 
     await logToChannel(
-      DiscordChannels.backendLogs,
+      DiscordChannels.BACKEND_LOGS,
       new EmbedBuilder()
         .setTitle(`Refreshed ${leaderboards.length} qualified leaderboards.`)
         .setDescription(
@@ -805,7 +805,7 @@ export default class LeaderboardService {
     const date = formatDate(new Date(), "DD-MM-YYYY");
 
     await sendFile(
-      DiscordChannels.rankedLogs,
+      DiscordChannels.RANKED_BATCH_LOGS,
       `ranked-batch-${date}.txt`,
       file.trim(),
       "<@&1338261690952978442>"
@@ -827,7 +827,7 @@ export default class LeaderboardService {
     );
     await PlaylistService.createPlaylist(playlist);
     await sendFile(
-      DiscordChannels.rankedLogs,
+      DiscordChannels.RANKED_BATCH_LOGS,
       `scoresaber-ranked-batch-${date}.bplist`,
       JSON.stringify(generateBeatSaberPlaylist(playlist), null, 2)
     );

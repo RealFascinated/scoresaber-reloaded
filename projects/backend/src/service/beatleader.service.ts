@@ -197,7 +197,7 @@ export default class BeatLeaderService {
             }
           } catch (error) {
             logToChannel(
-              DiscordChannels.backendLogs,
+              DiscordChannels.BACKEND_LOGS,
               createGenericEmbed(
                 "BeatLeader Replays",
                 `Failed to save replay for ${score.id}: ${error}`

@@ -38,7 +38,7 @@ export class PlayerScoreSeedQueue extends Queue<string> {
       await PlayerRefreshService.refreshAllPlayerScores(player, playerToken);
 
     await logToChannel(
-      DiscordChannels.playerScoreRefreshLogs,
+      DiscordChannels.PLAYER_SCORE_REFRESH_LOGS,
       new EmbedBuilder()
         .setTitle("Player Score Refresh Complete")
         .setDescription(`🎯 **${player.name}**'s scores have been refreshed`)

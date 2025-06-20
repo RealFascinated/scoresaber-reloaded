@@ -1,7 +1,7 @@
 export enum CooldownPriority {
-  High = "high",
-  Normal = "normal",
-  Low = "low",
+  HIGH = "high",
+  NORMAL = "normal",
+  LOW = "low",
 }
 
 export class Cooldown {

@@ -229,6 +229,7 @@ export class ScoreService {
    * @param score the score to track
    * @param leaderboard the leaderboard for the score
    * @param player the player for the score
+   * @param fastCreate skips some checks to speed up score insertion
    * @param log whether to log the score
    * @returns whether the score was tracked
    */
@@ -236,8 +237,13 @@ export class ScoreService {
     score: ScoreSaberScore,
     leaderboard: ScoreSaberLeaderboard,
     player: ScoreSaberPlayerToken,
+    fastCreate: boolean = false,
     log: boolean = true
-  ): Promise<{ score: ScoreSaberScore | undefined; tracked: boolean }> {
+  ): Promise<{
+    score: ScoreSaberScore | undefined;
+    hasPreviousScore: boolean;
+    tracked: boolean;
+  }> {
     const before = performance.now();
 
     // Skip saving the score if characteristic is missing
@@ -245,16 +251,18 @@ export class ScoreService {
       Logger.warn(
         `Skipping ScoreSaber score "${score.scoreId}" for "${player.name}"(${player.id}) due to missing characteristic: "${score.characteristic}"`
       );
-      return { score: undefined, tracked: false };
+      return { score: undefined, hasPreviousScore: false, tracked: false };
     }
 
     // Check if score exists and get previous score in parallel
     const [scoreExists, previousScore] = await Promise.all([
       ScoreService.scoreExists(player.id, leaderboard, score),
-      ScoreSaberScoreModel.findOne({
-        playerId: player.id,
-        leaderboardId: leaderboard.id,
-      }),
+      !fastCreate
+        ? ScoreSaberScoreModel.findOne({
+            playerId: player.id,
+            leaderboardId: leaderboard.id,
+          })
+        : undefined,
     ]);
 
     const isImprovement = previousScore !== null;
@@ -269,7 +277,7 @@ export class ScoreService {
         { $set: score }
       );
 
-      return { score: undefined, tracked: false };
+      return { score: undefined, hasPreviousScore: false, tracked: false };
     }
 
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -277,7 +285,7 @@ export class ScoreService {
     delete score.playerInfo;
 
     // Handle previous score if it exists
-    if (isImprovement) {
+    if (isImprovement && previousScore !== undefined) {
       await Promise.all([
         ScoreSaberScoreModel.deleteOne({
           playerId: player.id,
@@ -299,16 +307,13 @@ export class ScoreService {
 
     await Promise.all([
       ScoreSaberScoreModel.create(score),
-      PlayerHmdService.getPlayerMostCommonRecentHmd(player.id).then(hmd => {
-        if (hmd) {
-          return PlayerHmdService.updatePlayerHmd(player.id, hmd);
-        }
-      }),
-      ScoreService.updatePlayerDailyScoreStats(
-        score.playerId,
-        leaderboard.stars > 0,
-        previousScore !== null
-      ),
+      !fastCreate
+        ? PlayerHmdService.getPlayerMostCommonRecentHmd(player.id).then(hmd => {
+            if (hmd) {
+              return PlayerHmdService.updatePlayerHmd(player.id, hmd);
+            }
+          })
+        : undefined,
     ]);
 
     if (log) {
@@ -316,7 +321,7 @@ export class ScoreService {
         `Tracked ScoreSaber score "${score.scoreId}" for "${player.name}"(${player.id})${isImprovement ? " (improvement)" : ""} in ${(performance.now() - before).toFixed(0)}ms`
       );
     }
-    return { score: score, tracked: true };
+    return { score: score, hasPreviousScore: isImprovement, tracked: true };
   }
 
   /**
@@ -326,7 +331,7 @@ export class ScoreService {
    * @param isRanked whether the score is ranked
    * @param isImprovement whether this is an improvement over a previous score
    */
-  private static async updatePlayerDailyScoreStats(
+  public static async updatePlayerDailyScoreStats(
     playerId: string,
     isRanked: boolean,
     isImprovement: boolean

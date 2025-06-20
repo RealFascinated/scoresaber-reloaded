@@ -34,8 +34,6 @@ export class PlayerRefreshService {
     playerToken: ScoreSaberPlayerToken
   ): Promise<PlayerRefreshResult> {
     Logger.info(`Refreshing scores for ${player.id}...`);
-    let page = 1;
-    let hasMorePages = true;
     const startTime = performance.now();
 
     const result: PlayerRefreshResult = {
@@ -45,48 +43,98 @@ export class PlayerRefreshService {
       timeTaken: 0,
     };
 
-    while (hasMorePages) {
-      const scoresPage = await ApiServiceRegistry.getInstance()
-        .getScoreSaberService()
-        .lookupPlayerScores({
-          playerId: player.id,
-          page: page,
-          limit: 100,
-          sort: "recent",
-          priority: CooldownPriority.Low,
-        });
+    // First, get the first page to determine total pages
+    const firstPage = await ApiServiceRegistry.getInstance()
+      .getScoreSaberService()
+      .lookupPlayerScores({
+        playerId: player.id,
+        page: 1,
+        limit: 100,
+        sort: "recent",
+        priority: CooldownPriority.LOW,
+      });
 
-      if (!scoresPage) {
-        console.warn(`Failed to fetch scores for ${player.id} on page ${page}.`);
-        break;
-      }
+    if (!firstPage) {
+      console.warn(`Failed to fetch scores for ${player.id} on page 1.`);
+      result.timeTaken = performance.now() - startTime;
+      return result;
+    }
 
-      await Promise.all(
-        scoresPage.playerScores.map(async score => {
-          const { tracked } = await ScoreService.trackScoreSaberScore(
-            getScoreSaberScoreFromToken(
-              score.score,
-              getScoreSaberLeaderboardFromToken(score.leaderboard),
-              player.id
-            ),
+    const totalPages = Math.ceil(firstPage.metadata.total / 100);
+    Logger.info(`Found ${totalPages} total pages for ${player.id}`);
+
+    // Process the first page
+    await Promise.all(
+      firstPage.playerScores.map(async score => {
+        const { tracked } = await ScoreService.trackScoreSaberScore(
+          getScoreSaberScoreFromToken(
+            score.score,
             getScoreSaberLeaderboardFromToken(score.leaderboard),
-            playerToken,
-            false
-          );
-          if (tracked) {
-            result.missingScores++;
-          }
-          result.totalScores++;
-        })
-      );
+            player.id
+          ),
+          getScoreSaberLeaderboardFromToken(score.leaderboard),
+          playerToken,
+          true,
+          false
+        );
+        if (tracked) {
+          result.missingScores++;
+        }
+        result.totalScores++;
+      })
+    );
 
-      // Stop if we've reached the last page
-      if (page >= Math.ceil(scoresPage.metadata.total / 100)) {
-        result.totalPages = page;
-        hasMorePages = false;
+    // Process remaining pages in batches of 5
+    const CONCURRENT_PAGES = 5;
+    for (let batchStart = 2; batchStart <= totalPages; batchStart += CONCURRENT_PAGES) {
+      const batchEnd = Math.min(batchStart + CONCURRENT_PAGES - 1, totalPages);
+      Logger.info(`Processing pages ${batchStart} to ${batchEnd} concurrently for ${player.id}...`);
+
+      const batchPromises = [];
+      for (let page = batchStart; page <= batchEnd; page++) {
+        batchPromises.push(
+          (async () => {
+            const scoresPage = await ApiServiceRegistry.getInstance()
+              .getScoreSaberService()
+              .lookupPlayerScores({
+                playerId: player.id,
+                page: page,
+                limit: 100,
+                sort: "recent",
+                priority: CooldownPriority.LOW,
+              });
+
+            if (!scoresPage) {
+              console.warn(`Failed to fetch scores for ${player.id} on page ${page}.`);
+              return;
+            }
+
+            await Promise.all(
+              scoresPage.playerScores.map(async score => {
+                const { tracked } = await ScoreService.trackScoreSaberScore(
+                  getScoreSaberScoreFromToken(
+                    score.score,
+                    getScoreSaberLeaderboardFromToken(score.leaderboard),
+                    player.id
+                  ),
+                  getScoreSaberLeaderboardFromToken(score.leaderboard),
+                  playerToken,
+                  true,
+                  false
+                );
+                if (tracked) {
+                  result.missingScores++;
+                }
+                result.totalScores++;
+              })
+            );
+          })()
+        );
       }
 
-      page++;
+      // Wait for all pages in the current batch to complete
+      await Promise.all(batchPromises);
+      Logger.info(`Completed batch ${batchStart} to ${batchEnd} for ${player.id}`);
     }
 
     // Mark player as seeded
@@ -94,7 +142,10 @@ export class PlayerRefreshService {
     player.markModified("seededScores");
     await player.save();
 
-    Logger.info(`Finished refreshing scores for ${player.id}, total pages refreshed: ${page - 1}.`);
+    Logger.info(
+      `Finished refreshing scores for ${player.id}, total pages refreshed: ${totalPages}.`
+    );
+    result.totalPages = totalPages;
     result.timeTaken = performance.now() - startTime;
     return result;
   }
@@ -127,74 +178,95 @@ export class PlayerRefreshService {
     Logger.info(`Fetching ${pages} pages of players from ScoreSaber...`);
 
     const PLAYER_TIMEOUT = 30000;
+    const CONCURRENT_PAGES = 5;
     let successCount = 0;
     let errorCount = 0;
 
     const playerIds = new Set<string>();
 
-    for (let i = 1; i <= pages; i++) {
-      Logger.info(`Fetching page ${i}...`);
-      const page = await ApiServiceRegistry.getInstance().getScoreSaberService().lookupPlayers(i);
+    // Process pages in batches of CONCURRENT_PAGES
+    for (let batchStart = 1; batchStart <= pages; batchStart += CONCURRENT_PAGES) {
+      const batchEnd = Math.min(batchStart + CONCURRENT_PAGES - 1, pages);
+      Logger.info(`Processing pages ${batchStart} to ${batchEnd} concurrently...`);
 
-      if (page == undefined) {
-        Logger.error(`Failed to fetch players on page ${i}, skipping page...`);
-        errorCount++;
-        continue;
+      const batchPromises = [];
+      for (let i = batchStart; i <= batchEnd; i++) {
+        batchPromises.push(
+          (async () => {
+            Logger.info(`Fetching page ${i}...`);
+            const page = await ApiServiceRegistry.getInstance()
+              .getScoreSaberService()
+              .lookupPlayers(i);
+
+            if (page == undefined) {
+              Logger.error(`Failed to fetch players on page ${i}, skipping page...`);
+              errorCount++;
+              return;
+            }
+
+            callback?.(i, pages, successCount, errorCount);
+            Logger.info(`Processing page ${i} with ${page.players.length} players...`);
+
+            await Promise.all(
+              page.players.map(async player => {
+                // Add player ids to the list
+                if (playerIds.has(player.id)) {
+                  return;
+                }
+                playerIds.add(player.id);
+
+                let timeoutId: NodeJS.Timeout | undefined;
+                try {
+                  const timeoutPromise = new Promise((_, reject) => {
+                    timeoutId = setTimeout(
+                      () => reject(new Error(`Timeout processing player ${player.id}`)),
+                      PLAYER_TIMEOUT
+                    );
+                  });
+
+                  const processPromise = (async () => {
+                    const foundPlayer = await PlayerService.getPlayer(player.id, player);
+                    await PlayerHistoryService.trackPlayerHistory(foundPlayer, now, player);
+
+                    // Get the total amount of scores tracked for this player
+                    const trackedScores = await ScoreSaberScoreModel.countDocuments({
+                      playerId: player.id,
+                    });
+
+                    // If the player has less scores tracked than the total play count, add them to the refresh queue
+                    if (trackedScores < player.scoreStats.totalPlayCount) {
+                      Logger.info(
+                        `Player ${player.id} has missing scores. Adding them to the refresh queue...`
+                      );
+                      // Add the player to the refresh queue
+                      QueueManager.getQueue(QueueId.PlayerScoreRefreshQueue).add(player.id);
+                    }
+
+                    successCount++;
+                  })();
+
+                  await Promise.race([processPromise, timeoutPromise]);
+                } catch (error) {
+                  Logger.error(
+                    `Failed to track seeded player ${player.id} (${player.name}): ${error}`
+                  );
+                  errorCount++;
+                } finally {
+                  if (timeoutId) {
+                    clearTimeout(timeoutId);
+                  }
+                }
+              })
+            );
+
+            Logger.info(`Completed page ${i}`);
+          })()
+        );
       }
 
-      callback?.(i, pages, successCount, errorCount);
-      Logger.info(`Processing page ${i} with ${page.players.length} players...`);
-      await Promise.all(
-        page.players.map(async player => {
-          // Add player ids to the list
-          if (playerIds.has(player.id)) {
-            return;
-          }
-          playerIds.add(player.id);
-
-          let timeoutId: NodeJS.Timeout | undefined;
-          try {
-            const timeoutPromise = new Promise((_, reject) => {
-              timeoutId = setTimeout(
-                () => reject(new Error(`Timeout processing player ${player.id}`)),
-                PLAYER_TIMEOUT
-              );
-            });
-
-            const processPromise = (async () => {
-              const foundPlayer = await PlayerService.getPlayer(player.id, player);
-              await PlayerHistoryService.trackPlayerHistory(foundPlayer, now, player);
-
-              // Get the total amount of scores tracked for this player
-              const trackedScores = await ScoreSaberScoreModel.countDocuments({
-                playerId: player.id,
-              });
-
-              // If the player has less scores tracked than the total play count, add them to the refresh queue
-              if (trackedScores < player.scoreStats.totalPlayCount) {
-                Logger.info(
-                  `Player ${player.id} has missing scores. Adding them to the refresh queue...`
-                );
-                // Add the player to the refresh queue
-                QueueManager.getQueue(QueueId.PlayerScoreRefreshQueue).add(player.id);
-              }
-
-              successCount++;
-            })();
-
-            await Promise.race([processPromise, timeoutPromise]);
-          } catch (error) {
-            Logger.error(`Failed to track seeded player ${player.id} (${player.name}): ${error}`);
-            errorCount++;
-          } finally {
-            if (timeoutId) {
-              clearTimeout(timeoutId);
-            }
-          }
-        })
-      );
-
-      Logger.info(`Completed page ${i}`);
+      // Wait for all pages in the current batch to complete
+      await Promise.all(batchPromises);
+      Logger.info(`Completed batch ${batchStart} to ${batchEnd}`);
     }
 
     // Log the number of active players found
@@ -215,7 +287,7 @@ export class PlayerRefreshService {
     const inactivePlayers = await PlayerModel.countDocuments({ inactive: true });
 
     logToChannel(
-      DiscordChannels.backendLogs,
+      DiscordChannels.BACKEND_LOGS,
       new EmbedBuilder()
         .setTitle(`Refreshed ${successCount} players.`)
         .setDescription(

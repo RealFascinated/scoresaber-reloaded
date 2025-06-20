@@ -26,7 +26,7 @@ export class ScoreWebsockets implements EventListener {
   private static readonly SCORE_MATCH_TIMEOUT = 10000; // 10 seconds in milliseconds
   private static readonly pendingScores = new Map<string, PendingScore>();
 
-  onStop?: () => void = () => {
+  onStop?: () => Promise<void> = async () => {
     // Process all pending scores and clear their timeouts
     for (const [key, pendingScore] of ScoreWebsockets.pendingScores.entries()) {
       if (pendingScore.timeoutId) {

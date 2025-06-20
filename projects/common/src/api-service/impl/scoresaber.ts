@@ -221,7 +221,7 @@ export class ScoreSaberService extends ApiService {
     limit = 8,
     page,
     search,
-    priority = CooldownPriority.Normal,
+    priority = CooldownPriority.NORMAL,
   }: {
     playerId: string;
     sort: ScoreSaberScoreSort;

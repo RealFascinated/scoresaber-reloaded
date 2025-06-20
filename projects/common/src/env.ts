@@ -4,7 +4,6 @@ import { z } from "zod";
 export const env = createEnv({
   server: {
     MONGO_CONNECTION_STRING: z.string(),
-    DISCORD_BOT_TOKEN: z.string(),
 
     MINIO_ENDPOINT: z.string(),
     MINIO_USE_SSL: z.boolean(),
@@ -16,6 +15,16 @@ export const env = createEnv({
     INFLUXDB_BUCKET: z.string(),
     INFLUXDB_ORG: z.string(),
     INFLUXDB_TOKEN: z.string(),
+
+    DISCORD_BOT_TOKEN: z.string().optional(),
+
+    DISCORD_CHANNEL_TRACKED_PLAYER_LOGS: z.string().optional(),
+    DISCORD_CHANNEL_SCORE_REFRESH_LOGS: z.string().optional(),
+    DISCORD_CHANNEL_RANKED_BATCH_LOGS: z.string().optional(),
+    DISCORD_CHANNEL_NUMBER_ONE_FEED: z.string().optional(),
+    DISCORD_CHANNEL_TOP_50_SCORES_FEED: z.string().optional(),
+    DISCORD_CHANNEL_SCORE_FLOODGATE_FEED: z.string().optional(),
+    DISCORD_CHANNEL_BACKEND_LOGS: z.string().optional(),
   },
 
   client: {
@@ -38,14 +47,24 @@ export const env = createEnv({
    * This is the environment variables that are available on the server.
    */
   runtimeEnv: {
+    LOG_LEVEL: process.env.LOG_LEVEL,
+
     NEXT_PUBLIC_APP_ENV: process.env.NEXT_PUBLIC_APP_ENV ?? "development",
     NEXT_PUBLIC_APPLICATION_NAME: process.env.NEXT_PUBLIC_APPLICATION_NAME,
 
     // Mongo
     MONGO_CONNECTION_STRING: process.env.MONGO_CONNECTION_STRING,
 
-    // Discord Bot Token
+    // Discord Bot
     DISCORD_BOT_TOKEN: process.env.DISCORD_BOT_TOKEN,
+
+    DISCORD_CHANNEL_TRACKED_PLAYER_LOGS: process.env.DISCORD_CHANNEL_TRACKED_PLAYER_LOGS,
+    DISCORD_CHANNEL_SCORE_REFRESH_LOGS: process.env.DISCORD_CHANNEL_SCORE_REFRESH_LOGS,
+    DISCORD_CHANNEL_RANKED_BATCH_LOGS: process.env.DISCORD_CHANNEL_RANKED_BATCH_LOGS,
+    DISCORD_CHANNEL_NUMBER_ONE_FEED: process.env.DISCORD_CHANNEL_NUMBER_ONE_FEED,
+    DISCORD_CHANNEL_TOP_50_SCORES_FEED: process.env.DISCORD_CHANNEL_TOP_50_SCORES_FEED,
+    DISCORD_CHANNEL_SCORE_FLOODGATE_FEED: process.env.DISCORD_CHANNEL_SCORE_FLOODGATE_FEED,
+    DISCORD_CHANNEL_BACKEND_LOGS: process.env.DISCORD_CHANNEL_BACKEND_LOGS,
 
     // Minio
     MINIO_ENDPOINT: process.env.MINIO_ENDPOINT,

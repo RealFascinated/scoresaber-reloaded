@@ -5,7 +5,6 @@ import { cron } from "@elysiajs/cron";
 import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
 import { formatDuration } from "@ssr/common/utils/time-utils";
-import { isProduction } from "@ssr/common/utils/utils";
 import { logger } from "@tqman/nice-logger";
 import { mongoose } from "@typegoose/typegoose";
 import { EmbedBuilder } from "discord.js";
@@ -76,12 +75,12 @@ export const app = new Elysia()
       run: async () => {
         const before = Date.now();
         await logToChannel(
-          DiscordChannels.backendLogs,
+          DiscordChannels.BACKEND_LOGS,
           new EmbedBuilder().setDescription(`Updating player statistics...`)
         );
         await PlayerRefreshService.updatePlayerStatistics();
         await logToChannel(
-          DiscordChannels.backendLogs,
+          DiscordChannels.BACKEND_LOGS,
           new EmbedBuilder().setDescription(
             `Updated player statistics in ${formatDuration(Date.now() - before)}`
           )
@@ -214,14 +213,8 @@ app.onStart(async () => {
   });
 
   Logger.info("Listening on port http://localhost:8080");
-  if (isProduction()) {
-    await initDiscordBot();
-
-    logToChannel(
-      DiscordChannels.backendLogs,
-      new EmbedBuilder().setDescription("Backend started!")
-    );
-  }
+  await initDiscordBot();
+  logToChannel(DiscordChannels.BACKEND_LOGS, new EmbedBuilder().setDescription("Backend started!"));
 
   // Log all registered routes
   Logger.info("Registered routes:");
@@ -267,7 +260,7 @@ const setupSignalHandlers = () => {
       Logger.info("Server stopped accepting new requests");
 
       logToChannel(
-        DiscordChannels.backendLogs,
+        DiscordChannels.BACKEND_LOGS,
         new EmbedBuilder().setDescription("Backend shutting down...")
       );
 

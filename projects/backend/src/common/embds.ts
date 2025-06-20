@@ -10,7 +10,7 @@ import { DiscordChannels, logToChannel } from "../bot/bot";
  */
 export async function logNewTrackedPlayer(player: ScoreSaberPlayerToken) {
   await logToChannel(
-    DiscordChannels.trackedPlayerLogs,
+    DiscordChannels.TRACKED_PLAYER_LOGS,
     new EmbedBuilder()
       .setTitle("New Player Tracked")
       .setDescription(`https://ssr.fascinated.cc/player/${player.id}`)
