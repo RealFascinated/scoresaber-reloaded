@@ -10,11 +10,7 @@ import { MapDifficulty } from "@ssr/common/score/map-difficulty";
 import { MapCharacteristic } from "@ssr/common/types/map-characteristic";
 import { BeatSaverMapToken } from "@ssr/common/types/token/beatsaver/map";
 import { getBeatSaverDifficulty } from "@ssr/common/utils/beatsaver.util";
-import { fetchWithCache } from "../common/cache.util";
-import CacheService, { ServiceCache } from "./cache.service";
-
-const mapDeduplication: { [key: string]: Promise<BeatSaverMapResponse | undefined> } = {};
-const mapUpdateDeduplication: { [key: string]: Promise<BeatSaverMap | undefined> } = {};
+import CacheService, { CacheId } from "./cache.service";
 
 export default class BeatSaverService {
   /**
@@ -101,12 +97,7 @@ export default class BeatSaverService {
   ): Promise<BeatSaverMap | undefined> {
     const hashUpper = hash.toUpperCase();
 
-    // Deduplicate map updates
-    if (hashUpper in mapUpdateDeduplication) {
-      return await mapUpdateDeduplication[hashUpper];
-    }
-
-    mapUpdateDeduplication[hashUpper] = (async () => {
+    return CacheService.fetchWithCache(CacheId.BeatSaver, `beatsaver:${hashUpper}`, async () => {
       const existingMap = await this.findMapByVersionHash(hashUpper);
 
       // If map exists, return it without updating
@@ -122,11 +113,7 @@ export default class BeatSaverService {
       }
 
       return this.createNewMap(resolvedToken);
-    })();
-
-    const result = await mapUpdateDeduplication[hashUpper];
-    delete mapUpdateDeduplication[hashUpper];
-    return result;
+    });
   }
 
   /**
@@ -175,53 +162,44 @@ export default class BeatSaverService {
     type: DetailType = DetailType.BASIC,
     token?: BeatSaverMapToken
   ): Promise<BeatSaverMapResponse | undefined> {
-    const cacheKey = `map:${hash}-${difficulty}-${characteristic}-${type}`;
-
-    if (cacheKey in mapDeduplication) {
-      return await mapDeduplication[cacheKey];
-    }
-
-    mapDeduplication[cacheKey] = fetchWithCache(
-      CacheService.getCache(ServiceCache.BeatSaver),
-      cacheKey,
+    const map = await CacheService.fetchWithCache(
+      CacheId.BeatSaver,
+      `beatsaver:${hash}`,
       async () => {
-        const map = await this.createOrUpdateMap(hash, token);
-        if (!map || map.versions.length === 0 || map.notFound) {
-          return undefined;
-        }
-
-        const response = {
-          hash,
-          bsr: map.bsr,
-          name: map.name,
-          author: map.author,
-        } as BeatSaverMapResponse;
-
-        if (type === DetailType.BASIC) {
-          return response;
-        }
-
-        return {
-          ...response,
-          description: map.description,
-          metadata: map.metadata,
-          songArt: `https://eu.cdn.beatsaver.com/${hash.toLowerCase()}.jpg`,
-          difficulty: getBeatSaverDifficulty(map, hash, difficulty, characteristic),
-          difficultyLabels: map.versions.reduce(
-            (acc, version) => {
-              version.difficulties.forEach(diff => {
-                acc[diff.difficulty] = diff.label;
-              });
-              return acc;
-            },
-            {} as Record<MapDifficulty, string>
-          ),
-        } as BeatSaverMapResponse;
+        return await this.createOrUpdateMap(hash, token);
       }
     );
 
-    const result = await mapDeduplication[cacheKey];
-    delete mapDeduplication[cacheKey];
-    return result;
+    if (!map || map.versions.length === 0 || map.notFound) {
+      return undefined;
+    }
+
+    const response = {
+      hash,
+      bsr: map.bsr,
+      name: map.name,
+      author: map.author,
+    } as BeatSaverMapResponse;
+
+    if (type === DetailType.BASIC) {
+      return response;
+    }
+
+    return {
+      ...response,
+      description: map.description,
+      metadata: map.metadata,
+      songArt: `https://eu.cdn.beatsaver.com/${hash.toLowerCase()}.jpg`,
+      difficulty: getBeatSaverDifficulty(map, hash, difficulty, characteristic),
+      difficultyLabels: map.versions.reduce(
+        (acc, version) => {
+          version.difficulties.forEach(diff => {
+            acc[diff.difficulty] = diff.label;
+          });
+          return acc;
+        },
+        {} as Record<MapDifficulty, string>
+      ),
+    } as BeatSaverMapResponse;
   }
 }

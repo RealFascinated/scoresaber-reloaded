@@ -3,7 +3,7 @@ import { InternalServerError } from "@ssr/common/error/internal-server-error";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger from "@ssr/common/logger";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import { PlayerDocument, PlayerModel } from "@ssr/common/model/player";
+import { Player, PlayerModel } from "@ssr/common/model/player";
 import { PlayerHistoryEntryModel } from "@ssr/common/model/player/player-history-entry";
 import {
   ScoreSaberScore,
@@ -17,13 +17,12 @@ import { ScoreCalendarData } from "@ssr/common/types/player/player-statistic";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
 import { isProduction } from "@ssr/common/utils/utils";
-import { fetchWithCache } from "../../common/cache.util";
 import { logNewTrackedPlayer } from "../../common/embds";
 import { QueueId, QueueManager } from "../../queue/queue-manager";
-import CacheService, { ServiceCache } from "../cache.service";
+import CacheService, { CacheId } from "../cache.service";
 import { ScoreService } from "../score/score.service";
 
-const accountCreationLock: { [id: string]: Promise<PlayerDocument> } = {};
+const accountCreationLock: { [id: string]: Promise<Player> } = {};
 
 export class PlayerService {
   /**
@@ -35,19 +34,16 @@ export class PlayerService {
    * @returns the player document if found
    * @throws NotFoundError if the player doesn't exist and create is false
    */
-  public static async getPlayer(
-    id: string,
-    playerToken?: ScoreSaberPlayerToken
-  ): Promise<PlayerDocument> {
+  public static async getPlayer(id: string, playerToken?: ScoreSaberPlayerToken): Promise<Player> {
     // Wait for the existing lock if it's in progress
     if (accountCreationLock[id] !== undefined) {
       return await accountCreationLock[id];
     }
 
-    let player: PlayerDocument | null = await fetchWithCache(
-      CacheService.getCache(ServiceCache.Players),
+    let player: Player | null = await CacheService.fetchWithCache(
+      CacheId.Players,
       `player:${id}`,
-      async () => PlayerModel.findOne({ _id: id })
+      async () => PlayerModel.findOne({ _id: id }).lean()
     );
 
     if (player === null) {
@@ -56,30 +52,33 @@ export class PlayerService {
         throw new NotFoundError(`Player "${id}" not found`);
       }
 
-      player = await PlayerModel.findOne({ _id: id });
+      player = await PlayerModel.findOne({ _id: id }).lean();
       if (!player) {
         throw new NotFoundError(`Player "${id}" not found after creation`);
       }
     }
 
     let shouldSave = false; // Whether to save the player
+    const updates: Partial<Player> = {};
 
     if (playerToken) {
       // Update the player's name if it's different from the token
       if (playerToken.name !== player.name) {
-        player.name = playerToken.name;
+        updates.name = playerToken.name;
         shouldSave = true;
       }
 
       // Update the players pp if it's different from the token
       if (playerToken.pp !== player.pp) {
-        player.pp = playerToken.pp;
+        updates.pp = playerToken.pp;
         shouldSave = true;
       }
     }
 
     if (shouldSave) {
-      await player.save();
+      await PlayerModel.updateOne({ _id: id }, { $set: updates });
+      // Update the local player object with the new values
+      Object.assign(player, updates);
     }
 
     return player;
@@ -133,7 +132,6 @@ export class PlayerService {
             name: playerToken.name,
             trackedSince: new Date(),
           });
-          await newPlayer.save();
 
           // Add to the seed queue
           QueueManager.getQueue(QueueId.PlayerScoreRefreshQueue).add(id);
@@ -142,7 +140,7 @@ export class PlayerService {
           if (isProduction()) {
             await logNewTrackedPlayer(playerToken);
           }
-          return newPlayer;
+          return newPlayer.toObject();
         } catch (err) {
           Logger.error(`Failed to create player document for "${id}"`, err);
           throw new InternalServerError(`Failed to create player document for "${id}"`);
@@ -367,13 +365,17 @@ export class PlayerService {
       !foundPlayer.peakRank ||
       (foundPlayer.peakRank && playerToken.rank < foundPlayer.peakRank.rank)
     ) {
-      foundPlayer.peakRank = {
+      const newPeakRank = {
         rank: playerToken.rank,
         date: new Date(),
       };
-      foundPlayer.markModified("peakRank");
+
+      await PlayerModel.updateOne({ _id: playerId }, { $set: { peakRank: newPeakRank } });
+
+      // Update the local player object
+      foundPlayer.peakRank = newPeakRank;
     }
-    await foundPlayer.save();
+
     return foundPlayer;
   }
 

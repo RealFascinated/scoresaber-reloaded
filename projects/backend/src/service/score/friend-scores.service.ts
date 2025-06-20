@@ -141,19 +141,15 @@ export class FriendScoresService {
         // Get all leaderboard IDs for the current page
         const leaderboardIds = friendScores.map(score => score.leaderboardId + "");
 
-        // Fetch all leaderboards in parallel
-        const leaderboardResults = await Promise.all(
-          leaderboardIds.map(id =>
-            LeaderboardService.getLeaderboard(id, {
-              includeBeatSaver: true,
-              beatSaverType: DetailType.FULL,
-            })
-          )
-        );
+        // Fetch all leaderboards in parallel using getLeaderboards
+        const leaderboardResults = await LeaderboardService.getLeaderboards(leaderboardIds, {
+          includeBeatSaver: true,
+          beatSaverType: DetailType.FULL,
+        });
 
         // Create a map for quick leaderboard lookup
         const leaderboardMap = new Map(
-          leaderboardResults.filter(Boolean).map(result => [result!.leaderboard.id, result!])
+          leaderboardResults.map(result => [result.leaderboard.id, result])
         );
 
         // Process scores

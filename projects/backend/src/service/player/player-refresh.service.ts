@@ -1,7 +1,7 @@
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { CooldownPriority } from "@ssr/common/cooldown";
 import Logger from "@ssr/common/logger";
-import { PlayerDocument, PlayerModel } from "@ssr/common/model/player";
+import { Player, PlayerModel } from "@ssr/common/model/player";
 import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import {
   getScoreSaberLeaderboardFromToken,
@@ -22,20 +22,21 @@ type PlayerRefreshResult = {
   timeTaken: number;
 };
 
-const CONCURRENT_PAGES = 3;
+const CONCURRENT_PAGES = 5;
 
 export class PlayerRefreshService {
   /**
-   * Refreshes all the players scores.
+   * Refreshes all scores for a player.
    *
-   * @param player the player to refresh
-   * @returns the total number of missing scores
+   * @param player the player to refresh scores for
+   * @param playerToken the player's token
+   * @returns the result of the refresh
    */
   public static async refreshAllPlayerScores(
-    player: PlayerDocument,
+    player: Player,
     playerToken: ScoreSaberPlayerToken
   ): Promise<PlayerRefreshResult> {
-    Logger.info(`Refreshing scores for ${player.id}...`);
+    Logger.info(`Refreshing scores for ${player._id}...`);
     const startTime = performance.now();
 
     const result: PlayerRefreshResult = {
@@ -49,7 +50,7 @@ export class PlayerRefreshService {
     const firstPage = await ApiServiceRegistry.getInstance()
       .getScoreSaberService()
       .lookupPlayerScores({
-        playerId: player.id,
+        playerId: player._id,
         page: 1,
         limit: 100,
         sort: "recent",
@@ -57,13 +58,13 @@ export class PlayerRefreshService {
       });
 
     if (!firstPage) {
-      console.warn(`Failed to fetch scores for ${player.id} on page 1.`);
+      console.warn(`Failed to fetch scores for ${player._id} on page 1.`);
       result.timeTaken = performance.now() - startTime;
       return result;
     }
 
     const totalPages = Math.ceil(firstPage.metadata.total / 100);
-    Logger.info(`Found ${totalPages} total pages for ${player.id}`);
+    Logger.info(`Found ${totalPages} total pages for ${player._id}`);
 
     // Process the first page
     await Promise.all(
@@ -72,7 +73,7 @@ export class PlayerRefreshService {
           getScoreSaberScoreFromToken(
             score.score,
             getScoreSaberLeaderboardFromToken(score.leaderboard),
-            player.id
+            player._id
           ),
           getScoreSaberLeaderboardFromToken(score.leaderboard),
           playerToken,
@@ -89,7 +90,9 @@ export class PlayerRefreshService {
     // Process remaining pages in batches
     for (let batchStart = 2; batchStart <= totalPages; batchStart += CONCURRENT_PAGES) {
       const batchEnd = Math.min(batchStart + CONCURRENT_PAGES - 1, totalPages);
-      Logger.info(`Processing pages ${batchStart} to ${batchEnd} concurrently for ${player.id}...`);
+      Logger.info(
+        `Processing pages ${batchStart} to ${batchEnd} concurrently for ${player._id}...`
+      );
 
       const batchPromises = [];
       for (let page = batchStart; page <= batchEnd; page++) {
@@ -98,7 +101,7 @@ export class PlayerRefreshService {
             const scoresPage = await ApiServiceRegistry.getInstance()
               .getScoreSaberService()
               .lookupPlayerScores({
-                playerId: player.id,
+                playerId: player._id,
                 page: page,
                 limit: 100,
                 sort: "recent",
@@ -106,7 +109,7 @@ export class PlayerRefreshService {
               });
 
             if (!scoresPage) {
-              console.warn(`Failed to fetch scores for ${player.id} on page ${page}.`);
+              console.warn(`Failed to fetch scores for ${player._id} on page ${page}.`);
               return;
             }
 
@@ -116,7 +119,7 @@ export class PlayerRefreshService {
                   getScoreSaberScoreFromToken(
                     score.score,
                     getScoreSaberLeaderboardFromToken(score.leaderboard),
-                    player.id
+                    player._id
                   ),
                   getScoreSaberLeaderboardFromToken(score.leaderboard),
                   playerToken,
@@ -135,16 +138,15 @@ export class PlayerRefreshService {
 
       // Wait for all pages in the current batch to complete
       await Promise.all(batchPromises);
-      Logger.info(`Completed batch ${batchStart} to ${batchEnd} for ${player.id}`);
+      Logger.info(`Completed batch ${batchStart} to ${batchEnd} for ${player._id}`);
     }
 
     // Mark player as seeded
+    await PlayerModel.updateOne({ _id: player._id }, { $set: { seededScores: true } });
     player.seededScores = true;
-    player.markModified("seededScores");
-    await player.save();
 
     Logger.info(
-      `Finished refreshing scores for ${player.id}, total pages refreshed: ${totalPages}.`
+      `Finished refreshing scores for ${player._id}, total pages refreshed: ${totalPages}.`
     );
     result.totalPages = totalPages;
     result.timeTaken = performance.now() - startTime;

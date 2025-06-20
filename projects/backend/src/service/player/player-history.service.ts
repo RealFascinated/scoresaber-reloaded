@@ -1,6 +1,6 @@
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import Logger from "@ssr/common/logger";
-import { PlayerDocument } from "@ssr/common/model/player";
+import { Player, PlayerModel } from "@ssr/common/model/player";
 import {
   PlayerHistoryEntry,
   PlayerHistoryEntryModel,
@@ -26,55 +26,58 @@ export class PlayerHistoryService {
    * and handling inactive status.
    */
   public static async trackPlayerHistory(
-    foundPlayer: PlayerDocument,
+    foundPlayer: Player,
     trackTime: Date,
     playerToken?: ScoreSaberPlayerToken
   ): Promise<void> {
     const before = performance.now();
     const player =
       playerToken ??
-      (await ApiServiceRegistry.getInstance().getScoreSaberService().lookupPlayer(foundPlayer.id));
+      (await ApiServiceRegistry.getInstance().getScoreSaberService().lookupPlayer(foundPlayer._id));
 
     if (!player) {
-      Logger.warn(`Player "${foundPlayer.id}" not found on ScoreSaber`);
+      Logger.warn(`Player "${foundPlayer._id}" not found on ScoreSaber`);
       return;
     }
 
     if (foundPlayer.inactive !== player.inactive) {
+      await PlayerModel.updateOne(
+        { _id: foundPlayer._id },
+        { $set: { inactive: player.inactive } }
+      );
       foundPlayer.inactive = player.inactive;
-      await foundPlayer.save();
     }
 
     if (player.inactive) {
-      Logger.info(`Player "${foundPlayer.id}" is inactive on ScoreSaber`);
+      Logger.info(`Player "${foundPlayer._id}" is inactive on ScoreSaber`);
       return;
     }
 
-    const daysTracked = await foundPlayer.getDaysTracked();
+    const daysTracked = await this.getDaysTracked(foundPlayer._id);
     if (daysTracked === 0) {
       await this.seedPlayerHistory(foundPlayer, player);
     }
 
     if (foundPlayer.seededScores) {
       const existingEntry = await PlayerHistoryEntryModel.findOne({
-        playerId: foundPlayer.id,
+        playerId: foundPlayer._id,
         date: getMidnightAlignedDate(trackTime),
       }).lean();
 
       const updatedHistory = await this.createPlayerStatistic(player, existingEntry ?? undefined);
 
       await PlayerHistoryEntryModel.findOneAndUpdate(
-        { playerId: foundPlayer.id, date: getMidnightAlignedDate(trackTime) },
+        { playerId: foundPlayer._id, date: getMidnightAlignedDate(trackTime) },
         updatedHistory,
         { upsert: true }
       );
     }
 
+    await PlayerModel.updateOne({ _id: foundPlayer._id }, { $set: { lastTracked: new Date() } });
     foundPlayer.lastTracked = new Date();
-    await foundPlayer.save();
 
     Logger.info(
-      `Tracked player "${foundPlayer.id}" in ${(performance.now() - before).toFixed(0)}ms`
+      `Tracked player "${foundPlayer._id}" in ${(performance.now() - before).toFixed(0)}ms`
     );
   }
 
@@ -192,7 +195,7 @@ export class PlayerHistoryService {
    * This method populates the player's rank history from their ScoreSaber profile.
    */
   public static async seedPlayerHistory(
-    player: PlayerDocument,
+    player: Player,
     playerToken: ScoreSaberPlayerToken
   ): Promise<void> {
     const playerRankHistory = parseRankHistory(playerToken);
@@ -204,7 +207,7 @@ export class PlayerHistoryService {
 
       const date = getMidnightAlignedDate(getDaysAgoDate(daysAgo));
       await PlayerHistoryEntryModel.findOneAndUpdate(
-        { playerId: player.id, date },
+        { playerId: player._id, date },
         { rank },
         { upsert: true }
       );
@@ -254,5 +257,12 @@ export class PlayerHistoryService {
     return {
       ...removeObjectFields<PlayerHistoryEntry>(history, ["_id", "__v", "playerId", "date"]),
     } as PlayerHistoryEntry;
+  }
+
+  /**
+   * Gets the number of days tracked for a player.
+   */
+  private static async getDaysTracked(playerId: string): Promise<number> {
+    return await PlayerHistoryEntryModel.countDocuments({ playerId });
   }
 }

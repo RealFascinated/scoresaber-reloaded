@@ -1,8 +1,11 @@
-import { CacheStatistics, SSRCache } from "@ssr/common/cache";
+import { env } from "@ssr/common/env";
+import { InternalServerError } from "@ssr/common/error/internal-server-error";
 import Logger from "@ssr/common/logger";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
+import { RedisClient } from "bun";
+import SuperJSON from "superjson";
 
-export enum ServiceCache {
+export enum CacheId {
   BeatSaver = "beatSaver",
   AppStatistics = "appStatistics",
   ScoreSaber = "scoresaber",
@@ -13,63 +16,60 @@ export enum ServiceCache {
 }
 
 export default class CacheService {
-  /**
-   * The caches to use for the service
-   */
-  private static readonly caches = new Map<ServiceCache, SSRCache>();
+  private static readonly cacheInfo = {
+    [CacheId.BeatSaver]: TimeUnit.toSeconds(TimeUnit.Hour, 12),
+    [CacheId.AppStatistics]: TimeUnit.toSeconds(TimeUnit.Hour, 1),
+    [CacheId.ScoreSaber]: TimeUnit.toSeconds(TimeUnit.Minute, 1),
+    [CacheId.Leaderboards]: TimeUnit.toSeconds(TimeUnit.Hour, 2),
+    [CacheId.AdditionalScoreData]: TimeUnit.toSeconds(TimeUnit.Minute, 60),
+    [CacheId.Players]: TimeUnit.toSeconds(TimeUnit.Minute, 5),
+    [CacheId.ScoreStats]: TimeUnit.toSeconds(TimeUnit.Hour, 12),
+  };
 
-  constructor() {
-    const cacheInfo = {
-      [ServiceCache.BeatSaver]: {
-        ttl: TimeUnit.toMillis(TimeUnit.Hour, 2), // 2 hours
-      },
-      [ServiceCache.AppStatistics]: {
-        ttl: TimeUnit.toMillis(TimeUnit.Hour, 1), // 1 hour
-      },
-      [ServiceCache.ScoreSaber]: {
-        ttl: TimeUnit.toMillis(TimeUnit.Minute, 1),
-      },
-      [ServiceCache.Leaderboards]: {
-        ttl: TimeUnit.toMillis(TimeUnit.Hour, 2),
-      },
-      [ServiceCache.AdditionalScoreData]: {
-        ttl: TimeUnit.toMillis(TimeUnit.Minute, 30),
-      },
-      [ServiceCache.Players]: {
-        ttl: TimeUnit.toMillis(TimeUnit.Minute, 5),
-      },
-      [ServiceCache.ScoreStats]: {
-        ttl: TimeUnit.toMillis(TimeUnit.Hour, 3),
-      },
-    };
-
-    for (const [cache, info] of Object.entries(cacheInfo)) {
-      CacheService.caches.set(cache as ServiceCache, new SSRCache(info));
-    }
-
-    Logger.info(
-      `[CacheService] ${CacheService.caches.size} Caches: ${Array.from(CacheService.caches.keys()).join(", ")}`
-    );
-  }
+  private static readonly redisClient = new RedisClient(env.REDIS_URL);
 
   /**
-   * Gets a cache
+   * Fetches data with caching. If the data is not in cache, the fetchFn is called and the data is cached.
+   * If the data is in cache, it is returned immediately.
    *
-   * @param cache the cache to get
-   * @returns the cache
+   * @param cache the cache to fetch from
+   * @param cacheKey the key used for caching.
+   * @param fetchFn the function to fetch data if it's not in cache.
    */
-  public static getCache(cache: ServiceCache): SSRCache {
-    return CacheService.caches.get(cache)!;
-  }
-
-  /**
-   * Gets the cache statistics for all caches
-   */
-  public static getCacheStatistics(): { [cache: string]: CacheStatistics } {
-    const statistics: { [cache: string]: CacheStatistics } = {};
-    for (const [cache, cacheService] of CacheService.caches) {
-      statistics[cache] = cacheService.getStatistics();
+  public static async fetchWithCache<T>(
+    cache: CacheId,
+    cacheKey: string,
+    fetchFn: () => Promise<T>
+  ): Promise<T> {
+    if (cache == undefined) {
+      throw new InternalServerError(`Cache is not defined`);
     }
-    return statistics;
+
+    // const before = performance.now();
+    const cachedData = await this.redisClient.get(cacheKey);
+    if (cachedData) {
+      try {
+        // Logger.debug(`[REDIS] Found ${cacheKey} in ${formatDuration(performance.now() - before)}`);
+        return SuperJSON.parse(cachedData) as T;
+      } catch {
+        Logger.warn(`Failed to parse cached data for ${cacheKey}, removing from cache`);
+        await this.redisClient.del(cacheKey);
+      }
+    }
+
+    const data = await fetchFn();
+    if (data) {
+      const result = await this.redisClient.set(
+        cacheKey,
+        SuperJSON.stringify(data),
+        "EX", // EX is used to set the TTL for the item
+        this.cacheInfo[cache] // The TTL of the item
+      );
+      if (result !== "OK") {
+        throw new InternalServerError(`Failed to set cache for ${cacheKey}`);
+      }
+    }
+
+    return data;
   }
 }

@@ -5,8 +5,7 @@ import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { MiniRankingResponse } from "@ssr/common/response/around-player-response";
 import { MiniRankingType } from "@ssr/common/types/around-player";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
-import { fetchWithCache } from "../../common/cache.util";
-import CacheService, { ServiceCache } from "../cache.service";
+import CacheService, { CacheId } from "../cache.service";
 import ScoreSaberService from "./scoresaber.service";
 
 export default class MiniRankingService {
@@ -72,11 +71,9 @@ export default class MiniRankingService {
     // Fetch all required pages in parallel with caching
     const pageResponses = await Promise.all(
       Array.from({ length: finalEndPage - startPage + 1 }, (_, i) => startPage + i).map(page =>
-        fetchWithCache(
-          CacheService.getCache(ServiceCache.ScoreSaber),
-          type === "global"
-            ? `players:global:${page}`
-            : `players:country:${player.country}:${page}`,
+        CacheService.fetchWithCache(
+          CacheId.ScoreSaber,
+          `scoresaber:mini-ranking:${type}:${page}${type === "country" ? `:${player.country}` : ""}`,
           async () =>
             type === "global"
               ? ApiServiceRegistry.getInstance().getScoreSaberService().lookupPlayers(page)

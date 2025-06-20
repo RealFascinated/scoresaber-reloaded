@@ -4,6 +4,7 @@ import { z } from "zod";
 export const env = createEnv({
   server: {
     MONGO_CONNECTION_STRING: z.string(),
+    REDIS_URL: z.string(),
 
     MINIO_ENDPOINT: z.string(),
     MINIO_USE_SSL: z.boolean(),
@@ -54,6 +55,9 @@ export const env = createEnv({
 
     // Mongo
     MONGO_CONNECTION_STRING: process.env.MONGO_CONNECTION_STRING,
+
+    // Redis
+    REDIS_URL: process.env.REDIS_URL,
 
     // Discord Bot
     DISCORD_BOT_TOKEN: process.env.DISCORD_BOT_TOKEN,

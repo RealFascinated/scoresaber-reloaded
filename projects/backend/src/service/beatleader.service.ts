@@ -16,9 +16,8 @@ import Request from "@ssr/common/utils/request";
 import { isProduction } from "@ssr/common/utils/utils";
 import { sleep } from "bun";
 import { DiscordChannels, logToChannel } from "../bot/bot";
-import { fetchWithCache } from "../common/cache.util";
 import { createGenericEmbed } from "../common/discord/embed";
-import CacheService, { ServiceCache } from "./cache.service";
+import CacheService, { CacheId } from "./cache.service";
 import MinioService from "./minio.service";
 import { PlayerService } from "./player/player.service";
 
@@ -39,8 +38,8 @@ export default class BeatLeaderService {
     songCharacteristic: string,
     songScore: number
   ): Promise<AdditionalScoreData | undefined> {
-    return fetchWithCache(
-      CacheService.getCache(ServiceCache.AdditionalScoreData),
+    return CacheService.fetchWithCache(
+      CacheId.AdditionalScoreData,
       `additional-score-data:${playerId}-${songHash}-${songDifficulty}-${songScore}`,
       async () => {
         const additionalData = await AdditionalScoreDataModel.findOne({
@@ -68,8 +67,8 @@ export default class BeatLeaderService {
     scoreId: number,
     throwIfNotFound: boolean = false
   ): Promise<AdditionalScoreData | undefined> {
-    return fetchWithCache(
-      CacheService.getCache(ServiceCache.AdditionalScoreData),
+    return CacheService.fetchWithCache(
+      CacheId.AdditionalScoreData,
       `additional-score-data:${scoreId}`,
       async () => {
         const additionalData = await AdditionalScoreDataModel.findOne({
@@ -98,8 +97,8 @@ export default class BeatLeaderService {
     const before = Date.now();
 
     const { playerId, player: scorePlayer, leaderboard } = score;
-    const player: PlayerDocument | null = await fetchWithCache(
-      CacheService.getCache(ServiceCache.Players),
+    const player: PlayerDocument | null = await CacheService.fetchWithCache(
+      CacheId.Players,
       `player:${playerId}`,
       async () => {
         return await PlayerModel.findById(playerId);
@@ -250,8 +249,8 @@ export default class BeatLeaderService {
   public static async getScoreStats(scoreId: number): Promise<ScoreStatsToken | undefined> {
     const additionalScoreData = await this.getAdditionalScoreData(scoreId);
 
-    let scoreStats: ScoreStatsToken | null = await fetchWithCache(
-      CacheService.getCache(ServiceCache.ScoreStats),
+    let scoreStats: ScoreStatsToken | null = await CacheService.fetchWithCache(
+      CacheId.ScoreStats,
       `score-stats:${scoreId}`,
       async () => {
         const file = await MinioService.getFile(

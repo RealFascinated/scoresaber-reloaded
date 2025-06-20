@@ -22,8 +22,7 @@ import { getPlayerStatisticChanges } from "@ssr/common/utils/player-utils";
 import { getDaysAgoDate } from "@ssr/common/utils/time-utils";
 import { getPageFromRank } from "@ssr/common/utils/utils";
 import sanitize from "sanitize-html";
-import { fetchWithCache } from "../../common/cache.util";
-import CacheService, { ServiceCache } from "../cache.service";
+import CacheService, { CacheId } from "../cache.service";
 import { PlayerHistoryService } from "../player/player-history.service";
 import { PlayerService } from "../player/player.service";
 import { ScoreService } from "../score/score.service";
@@ -42,9 +41,9 @@ export default class ScoreSaberService {
     type: DetailType = DetailType.BASIC,
     playerToken?: ScoreSaberPlayerToken
   ): Promise<ScoreSaberPlayer> {
-    return fetchWithCache<ScoreSaberPlayer>(
-      CacheService.getCache(ServiceCache.ScoreSaber),
-      `player:${id}:${type}`,
+    return CacheService.fetchWithCache(
+      CacheId.ScoreSaber,
+      `scoresaber:player:${id}:${type}`,
       async () => {
         // Start fetching player token and account in parallel
         const [player, account] = await Promise.all([
@@ -262,19 +261,15 @@ export default class ScoreSaberService {
     ]);
 
     return await pagination.getPage(pageNumber, async () => {
-      // Fetch all leaderboards in parallel with a concurrency limit
-      const leaderboardResponses = await Promise.all(
-        leaderboardIds.map(id =>
-          LeaderboardService.getLeaderboard(id, {
-            includeBeatSaver: true,
-            beatSaverType: DetailType.FULL,
-          })
-        )
-      );
+      // Fetch all leaderboards in parallel using getLeaderboards
+      const leaderboardResponses = await LeaderboardService.getLeaderboards(leaderboardIds, {
+        includeBeatSaver: true,
+        beatSaverType: DetailType.FULL,
+      });
 
       // Create a map for quick leaderboard lookup
       const leaderboardMap = new Map(
-        leaderboardResponses.filter(Boolean).map(result => [result!.leaderboard.id, result!])
+        leaderboardResponses.map(result => [result.leaderboard.id, result])
       );
 
       // Process all scores in parallel with a concurrency limit

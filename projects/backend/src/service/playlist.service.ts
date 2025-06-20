@@ -16,13 +16,12 @@ import { capitalizeFirstLetter, truncateText } from "@ssr/common/string-utils";
 import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
 import { formatDateMinimal } from "@ssr/common/utils/time-utils";
 import { app } from "..";
-import { fetchWithCache } from "../common/cache.util";
 import {
   generateCustomRankedPlaylistImage,
   generatePlaylistImage,
   generateSnipePlaylistImage,
 } from "../common/playlist.util";
-import CacheService, { ServiceCache } from "./cache.service";
+import CacheService, { CacheId } from "./cache.service";
 import { PlayerService } from "./player/player.service";
 import { ScoreService } from "./score/score.service";
 import LeaderboardService from "./scoresaber/leaderboard.service";
@@ -247,8 +246,8 @@ export default class PlaylistService {
    * Creates a playlist for ranking queue maps
    */
   public static async createRankingQueuePlaylist(): Promise<Playlist> {
-    const leaderboards = await fetchWithCache(
-      CacheService.getCache(ServiceCache.Leaderboards),
+    const leaderboards = await CacheService.fetchWithCache(
+      CacheId.Leaderboards,
       "ranking-queue-maps",
       async () => {
         const rankingQueueTokens = await ApiServiceRegistry.getInstance()

@@ -179,24 +179,18 @@ export class ScoreService {
       }));
     }
 
-    // Get all leaderboard IDs at once
-    const leaderboardIds = rawScores.map(score => score.leaderboardId + "");
-
-    // Fetch all leaderboards in parallel
-    const leaderboardPromises = leaderboardIds.map(id =>
-      LeaderboardService.getLeaderboard(id, {
+    const leaderboards = await LeaderboardService.getLeaderboards(
+      rawScores.map(score => score.leaderboardId + ""),
+      {
         cacheOnly: true,
         includeBeatSaver: false,
-      })
+      }
     );
-
-    const leaderboardResults = await Promise.all(leaderboardPromises);
 
     // Map scores with their leaderboards
     return rawScores.map((rawScore, index) => ({
       score: scoreToObject(rawScore) as ScoreSaberScore,
-      leaderboard:
-        leaderboardResults[index]?.leaderboard || (null as unknown as ScoreSaberLeaderboard),
+      leaderboard: leaderboards[index]?.leaderboard || (null as unknown as ScoreSaberLeaderboard),
     }));
   }
 
@@ -414,14 +408,12 @@ export class ScoreService {
     return pagination.getPage(page, async () => {
       const scores = result.scores.map(scoreToObject);
 
-      // Batch fetch leaderboards
-      const leaderboardPromises = scores.map((score: ScoreSaberScore) =>
-        LeaderboardService.getLeaderboard(score.leaderboardId.toString(), {
-          includeBeatSaver: true,
-          cacheOnly: true,
-        })
-      );
-      const leaderboardResponses = await Promise.all(leaderboardPromises);
+      // Batch fetch leaderboards using getLeaderboards
+      const leaderboardIds = scores.map((score: ScoreSaberScore) => score.leaderboardId.toString());
+      const leaderboardResponses = await LeaderboardService.getLeaderboards(leaderboardIds, {
+        includeBeatSaver: true,
+        cacheOnly: true,
+      });
 
       // Batch fetch player info
       const uniquePlayerIds = [
@@ -435,10 +427,15 @@ export class ScoreService {
         players.filter((p): p is NonNullable<typeof p> => p !== undefined).map(p => [p.id, p])
       );
 
+      // Create a map for quick leaderboard lookup
+      const leaderboardMap = new Map(
+        leaderboardResponses.map(response => [response.leaderboard.id, response])
+      );
+
       // Process scores in parallel
       const processedScores = await Promise.all(
-        scores.map(async (score: ScoreSaberScore, index: number) => {
-          const leaderboardResponse = leaderboardResponses[index];
+        scores.map(async (score: ScoreSaberScore) => {
+          const leaderboardResponse = leaderboardMap.get(score.leaderboardId);
           if (!leaderboardResponse) {
             return null;
           }

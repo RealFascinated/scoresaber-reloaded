@@ -328,6 +328,10 @@ export namespace TimeUnit {
     };
     return value * multipliers[unit];
   }
+
+  export function toSeconds(unit: TimeUnit, value: number): number {
+    return toMillis(unit, value) / 1000;
+  }
 }
 
 /**
