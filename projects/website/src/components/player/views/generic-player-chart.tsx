@@ -73,13 +73,6 @@ export default function GenericPlayerChart({
   const todayString = formatDateMinimal(today);
   const hasTodayData = dataMap.has(todayString);
 
-  console.log("Debug dates:");
-  console.log("Today (midnight aligned):", today);
-  console.log("Today string:", todayString);
-  console.log("Has today data:", hasTodayData);
-  console.log("Available data keys:", Array.from(dataMap.keys()));
-  console.log("Latest data date:", latestDataDate);
-
   // Use today as end date if today's data exists, otherwise use latest data date
   const endDate = hasTodayData ? new Date(today) : new Date(latestDataDate);
   const startDate = new Date(endDate);
@@ -87,10 +80,6 @@ export default function GenericPlayerChart({
 
   // Generate all dates in the range
   const currentDate = new Date(startDate);
-  console.log("Chart date range:");
-  console.log("Start date:", startDate);
-  console.log("End date:", endDate);
-  console.log("Days amount:", daysAmount);
 
   // Use a more reliable approach: generate exactly the number of days we need
   for (let i = 0; i < daysAmount; i++) {
@@ -104,19 +93,11 @@ export default function GenericPlayerChart({
 
     const history = dataMap.get(currentDateString);
 
-    // Debug: Log when we process today's date
-    if (currentDateString === "Jun 20, 2025") {
-      console.log("Processing today:", currentDateString, "Data found:", !!history);
-    }
-
     datasetConfig.forEach(config => {
       const value = history ? getValueFromHistory(history, config.field) : null;
       histories[config.field].push(value ?? null);
     });
   }
-
-  console.log("Total labels generated:", labels.length);
-  console.log("Last label:", labels[labels.length - 1]);
 
   return (
     <div className="flex justify-center">
