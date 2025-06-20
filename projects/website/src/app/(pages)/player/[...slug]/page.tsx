@@ -82,6 +82,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
       description: `Rank: #${formatNumberWithCommas(player.rank)}
 Country Rank: #${formatNumberWithCommas(player.countryRank)} (${player.country})
 PP: ${formatPp(player.pp)}pp
+HMD: ${player.hmd ?? "Unknown"}
 Joined: ${formatDate(player.joinedDate, "Do MMMM, YYYY")}
 
 Click here to view the scores for ${player.name}`,
