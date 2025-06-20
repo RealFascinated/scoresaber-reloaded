@@ -10,10 +10,12 @@ import { useIsMobile } from "@/hooks/use-is-mobile";
 import usePageNavigation from "@/hooks/use-page-navigation";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
+import { AnimatePresence, motion } from "framer-motion";
 import { useCallback, useEffect, useState } from "react";
 import { DifficultyButton } from "../../../leaderboard/button/difficulty-button";
 import SimplePagination from "../../../simple-pagination";
 import ScoreSaberLeaderboardScore from "../score/leaderboard-score";
+import ScoreDropdown from "../score/score-dropdown";
 
 function LeaderboardScoresSkeleton() {
   const skeletonRows = new Array(10).fill(0);
@@ -32,6 +34,12 @@ function LeaderboardScoresSkeleton() {
               <th className="text-foreground/80 px-2 py-2 text-center font-medium">PP</th>
               <th className="text-foreground/80 px-2 py-2 text-center font-medium">HMD</th>
               <th className="text-foreground/80 px-2 py-2 text-center font-medium">Mods</th>
+              <th className="text-foreground/80 w-[28px] px-2 py-2 text-center font-medium">
+                Replay
+              </th>
+              <th className="text-foreground/80 w-[32px] px-2 py-2 text-center font-medium">
+                Details
+              </th>
             </tr>
           </thead>
           <tbody className="divide-border/30 divide-y">
@@ -63,6 +71,12 @@ function LeaderboardScoresSkeleton() {
                 </td>
                 <td className="px-2 py-1 text-center">
                   <Skeleton className="mx-auto h-6 w-8 rounded-md" />
+                </td>
+                <td className="px-2 py-1 text-center">
+                  <Skeleton className="mx-auto h-6 w-6 rounded-md" />
+                </td>
+                <td className="px-2 py-1 text-center">
+                  <Skeleton className="mx-auto h-6 w-6 rounded-md" />
                 </td>
               </tr>
             ))}
@@ -101,6 +115,8 @@ export default function LeaderboardScores({
   const [mode, setMode] = useState<ScoreModeEnum>(initialCategory);
   const [leaderboardId, setLeaderboardId] = useState(leaderboard.id);
   const [page, setPage] = useState(initialPage);
+  const [expandedScoreId, setExpandedScoreId] = useState<string | null>(null);
+  const [loadingScoreId, setLoadingScoreId] = useState<string | null>(null);
 
   const {
     data: scores,
@@ -117,6 +133,17 @@ export default function LeaderboardScores({
     },
     [leaderboardChanged]
   );
+
+  const handleDropdownToggle = useCallback(
+    (scoreId: string) => {
+      setExpandedScoreId(expandedScoreId === scoreId ? null : scoreId);
+    },
+    [expandedScoreId]
+  );
+
+  const handleLoadingChange = useCallback((scoreId: string, isLoading: boolean) => {
+    setLoadingScoreId(isLoading ? scoreId : null);
+  }, []);
 
   useEffect(() => {
     if (disableUrlChanging) {
@@ -135,7 +162,7 @@ export default function LeaderboardScores({
   const isFriends = mode === ScoreModeEnum.Friends;
 
   return (
-    <>
+    <div className="flex flex-col gap-4">
       <div
         className={cn(
           "flex flex-col flex-wrap items-center justify-center gap-4 lg:flex-row",
@@ -191,29 +218,72 @@ export default function LeaderboardScores({
                   <th className="text-foreground/80 px-2 py-2 text-center font-medium">
                     {leaderboard.stars > 0 ? "PP" : "Score"}
                   </th>
-                  <th className="text-foreground/80 px-2 py-2 text-center font-medium">HMD</th>
                   <th className="text-foreground/80 px-2 py-2 text-center font-medium">Mods</th>
                   <th className="text-foreground/80 w-[28px] px-2 py-2 text-center font-medium">
                     Replay
+                  </th>
+                  <th className="text-foreground/80 w-[32px] px-2 py-2 text-center font-medium">
+                    Details
                   </th>
                 </tr>
               </thead>
               <tbody className="divide-border/30 divide-y">
                 {scores.items.map((playerScore, index) => (
-                  <tr
-                    key={index}
-                    className={cn(
-                      "hover:bg-primary/5 transition-colors",
-                      highlightedPlayerId === playerScore.playerId && "bg-primary/10"
-                    )}
-                  >
-                    <ScoreSaberLeaderboardScore
-                      key={playerScore.scoreId}
-                      score={playerScore}
-                      leaderboard={leaderboard}
-                      highlightedPlayerId={highlightedPlayerId}
-                    />
-                  </tr>
+                  <>
+                    <tr
+                      key={`row-${playerScore.scoreId}`}
+                      className={cn(
+                        "hover:bg-primary/5 transition-colors",
+                        highlightedPlayerId === playerScore.playerId && "bg-primary/10"
+                      )}
+                    >
+                      <ScoreSaberLeaderboardScore
+                        key={playerScore.scoreId}
+                        score={playerScore}
+                        leaderboard={leaderboard}
+                        highlightedPlayerId={highlightedPlayerId}
+                        showDropdown
+                        onDropdownToggle={() => handleDropdownToggle(playerScore.scoreId)}
+                        isDropdownExpanded={expandedScoreId === playerScore.scoreId}
+                        isLoading={loadingScoreId === playerScore.scoreId}
+                      />
+                    </tr>
+
+                    {/* Dropdown row - appears directly below the clicked row */}
+                    <AnimatePresence>
+                      {expandedScoreId === playerScore.scoreId && (
+                        <motion.tr
+                          key={`dropdown-${playerScore.scoreId}`}
+                          className="origin-top border-none"
+                          initial={{ opacity: 0, height: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, height: "auto", scale: 1 }}
+                          exit={{ opacity: 0, height: 0, scale: 0.95 }}
+                          transition={{
+                            duration: 0.3,
+                            ease: [0.4, 0, 0.2, 1],
+                            height: { duration: 0.3 },
+                            opacity: { duration: 0.2 },
+                          }}
+                        >
+                          <td colSpan={10} className="p-0">
+                            <div className="px-4 py-2">
+                              <ScoreDropdown
+                                score={playerScore}
+                                leaderboard={leaderboard}
+                                beatSaverMap={beatSaver}
+                                highlightedPlayerId={highlightedPlayerId}
+                                isExpanded={true}
+                                showLeaderboardScores={false}
+                                onLoadingChange={loading =>
+                                  handleLoadingChange(playerScore.scoreId, loading)
+                                }
+                              />
+                            </div>
+                          </td>
+                        </motion.tr>
+                      )}
+                    </AnimatePresence>
+                  </>
                 ))}
               </tbody>
             </table>
@@ -232,6 +302,6 @@ export default function LeaderboardScores({
           />
         </>
       )}
-    </>
+    </div>
   );
 }

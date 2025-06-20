@@ -1,60 +1,24 @@
 "use client";
 
-import Card from "@/components/card";
-import { ScoreHistory } from "@/components/platform/scoresaber/score/score-views/score-history";
-import { ScoreOverview } from "@/components/platform/scoresaber/score/score-views/score-overview";
-import { MapStats } from "@/components/score/map-stats";
-import { Button } from "@/components/ui/button";
-import { CubeIcon } from "@heroicons/react/24/solid";
-import { useQuery } from "@tanstack/react-query";
-import { ChartBarIcon, TrendingUpIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { getPageFromRank } from "@ssr/common/utils/utils";
 
 import Avatar from "@/components/avatar";
-import LeaderboardScores from "@/components/platform/scoresaber/leaderboard/leaderboard-scores";
 import ScoreSaberScoreButtons from "@/components/platform/scoresaber/score/buttons/score-buttons";
 import ScoreSaberScoreInfo from "@/components/platform/scoresaber/score/score-info";
 import ScoreSaberScoreSongInfo from "@/components/platform/scoresaber/score/score-song-info";
 import ScoreSaberScoreStats from "@/components/platform/scoresaber/score/score-stats";
 import PlayerPreview from "@/components/player/player-preview";
-import { Separator } from "@/components/ui/separator";
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
-import { ScoreStatsResponse } from "@ssr/common/response/scorestats-response";
 import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/leaderboard-player-info";
 import { getScoreSaberAvatar } from "@ssr/common/utils/scoresaber.util";
-import { ssrApi } from "@ssr/common/utils/ssr-api";
-import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
-import { ScoreHistoryGraph } from "./score-views/score-history-graph";
-
-type DropdownData = {
-  scoreStats?: ScoreStatsResponse;
-};
-
-export enum ScoreMode {
-  Overview = "Overview",
-  ScoreHistory = "Score History",
-  ScoreHistoryGraph = "Score History Graph",
-}
-
-type Mode = {
-  name: ScoreMode;
-  icon: React.ReactNode;
-};
-
-const modes: Mode[] = [
-  { name: ScoreMode.Overview, icon: <CubeIcon className="h-4 w-4" /> },
-  { name: ScoreMode.ScoreHistory, icon: <TrendingUpIcon className="h-4 w-4" /> },
-  { name: ScoreMode.ScoreHistoryGraph, icon: <ChartBarIcon className="h-4 w-4" /> },
-];
-
-const defaultMode = ScoreMode.Overview;
+import ScoreDropdown, { ScoreMode } from "./score-dropdown";
 
 export default function ScoreSaberScoreDisplay({
   leaderboard,
@@ -81,32 +45,17 @@ export default function ScoreSaberScoreDisplay({
 }) {
   const [baseScore, setBaseScore] = useState(score.score);
   const [isLeaderboardExpanded, setIsLeaderboardExpanded] = useState(false);
-  const [mode, setMode] = useState<ScoreMode>(settings?.defaultLeaderboardDropdown ?? defaultMode);
+  const [mode, setMode] = useState<ScoreMode>(
+    settings?.defaultLeaderboardDropdown ?? ScoreMode.Overview
+  );
+  const [isLeaderboardLoading, setIsLeaderboardLoading] = useState(false);
 
   const scoresPage = useMemo(() => getPageFromRank(score.rank, 12), [score.rank]);
   const isMobile = useIsMobile();
 
-  const { data: dropdownData, isLoading } = useQuery<DropdownData>({
-    queryKey: [
-      `leaderboardDropdownData:${leaderboard.id}`,
-      leaderboard.id,
-      score.scoreId,
-      isLeaderboardExpanded,
-    ],
-    queryFn: async () => {
-      return {
-        scoreStats: score.additionalData
-          ? await ssrApi.fetchScoreStats(score.additionalData.scoreId)
-          : undefined,
-      };
-    },
-    staleTime: 30000,
-    enabled: isLeaderboardExpanded,
-  });
-
   useEffect(() => {
     setIsLeaderboardExpanded(false);
-    setMode(settings?.defaultLeaderboardDropdown ?? defaultMode);
+    setMode(settings?.defaultLeaderboardDropdown ?? ScoreMode.Overview);
   }, [score.scoreId, settings?.defaultLeaderboardDropdown]);
 
   useEffect(() => {
@@ -130,15 +79,19 @@ export default function ScoreSaberScoreDisplay({
   const handleLeaderboardOpen = useCallback(
     (isExpanded: boolean) => {
       if (!isExpanded) {
-        setMode(settings?.defaultLeaderboardDropdown ?? defaultMode);
+        setMode(settings?.defaultLeaderboardDropdown ?? ScoreMode.Overview);
       }
       setIsLeaderboardExpanded(isExpanded);
     },
     [settings?.defaultLeaderboardDropdown]
   );
 
-  const handleModeChange = useCallback((mode: ScoreMode) => {
-    setMode(mode);
+  const handleModeChange = useCallback((newMode: ScoreMode) => {
+    setMode(newMode);
+  }, []);
+
+  const handleLoadingChange = useCallback((isLoading: boolean) => {
+    setIsLeaderboardLoading(isLoading);
   }, []);
 
   const gridColsClass = useMemo(
@@ -194,7 +147,7 @@ export default function ScoreSaberScoreDisplay({
             hideLeaderboardDropdown={settings?.hideLeaderboardDropdown}
             hideAccuracyChanger={settings?.hideAccuracyChanger}
             setIsLeaderboardExpanded={handleLeaderboardOpen}
-            isLeaderboardLoading={isLoading}
+            isLeaderboardLoading={isLeaderboardLoading}
             updateScore={updatedScore => setBaseScore(updatedScore.score)}
           />
         )}
@@ -202,76 +155,16 @@ export default function ScoreSaberScoreDisplay({
         <ScoreSaberScoreStats score={memoizedScore} leaderboard={leaderboard} />
       </div>
 
-      <AnimatePresence>
-        {isLeaderboardExpanded && dropdownData && !isLoading && (
-          <motion.div
-            initial={{ opacity: 0, height: 0, scale: 0.95 }}
-            animate={{ opacity: 1, height: "auto", scale: 1 }}
-            exit={{ opacity: 0, height: 0, scale: 0.95 }}
-            transition={{
-              duration: 0.3,
-              ease: [0.4, 0, 0.2, 1],
-              height: { duration: 0.3 },
-              opacity: { duration: 0.2 },
-            }}
-            className="mt-2 w-full origin-top"
-          >
-            <Card className="border-input relative flex w-full gap-4 border">
-              <div className="flex w-full flex-col items-center justify-center gap-2">
-                <div className="flex flex-wrap justify-center gap-2 lg:justify-start">
-                  {modes.map(modeItem => (
-                    <Button
-                      key={modeItem.name}
-                      variant={modeItem.name === mode ? "default" : "outline"}
-                      onClick={() => handleModeChange(modeItem.name)}
-                      className="flex gap-2"
-                    >
-                      {modeItem.icon}
-                      <p>{modeItem.name}</p>
-                    </Button>
-                  ))}
-                </div>
-
-                {beatSaverMap && <MapStats beatSaver={beatSaverMap} />}
-              </div>
-
-              <AnimatePresence initial={false} mode="wait">
-                <motion.div
-                  key={mode}
-                  initial={{ opacity: 0, y: 10, scale: 0.98 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -10, scale: 0.98 }}
-                  transition={{
-                    duration: 0.2,
-                    ease: [0.4, 0, 0.2, 1],
-                  }}
-                  className="w-full"
-                >
-                  {mode === ScoreMode.Overview ? (
-                    <ScoreOverview leaderboard={leaderboard} scoreStats={dropdownData.scoreStats} />
-                  ) : mode === ScoreMode.ScoreHistory ? (
-                    <ScoreHistory playerId={score.playerId} leaderboard={leaderboard} />
-                  ) : (
-                    <ScoreHistoryGraph
-                      playerId={score.playerId}
-                      leaderboardId={leaderboard.id.toString()}
-                    />
-                  )}
-                </motion.div>
-              </AnimatePresence>
-
-              <Separator />
-
-              <LeaderboardScores
-                initialPage={scoresPage}
-                leaderboard={leaderboard}
-                highlightedPlayerId={highlightedPlayerId}
-                disableUrlChanging
-              />
-            </Card>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <ScoreDropdown
+        score={score}
+        leaderboard={leaderboard}
+        beatSaverMap={beatSaverMap}
+        highlightedPlayerId={highlightedPlayerId}
+        isExpanded={isLeaderboardExpanded}
+        defaultMode={mode}
+        onModeChange={handleModeChange}
+        onLoadingChange={handleLoadingChange}
+      />
     </div>
   );
 }

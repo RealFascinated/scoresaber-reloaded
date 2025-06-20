@@ -7,21 +7,32 @@ import PlayerPreview from "@/components/player/player-preview";
 import { ScoreReplayButton } from "@/components/score/button/score-replay-button";
 import { ScoreTimeSet } from "@/components/score/score-time-set";
 import SimpleTooltip from "@/components/simple-tooltip";
+import { ArrowDownIcon, ArrowPathIcon } from "@heroicons/react/24/outline";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
+import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { formatScoreAccuracy } from "@ssr/common/utils/score.util";
 import { clsx } from "clsx";
-import { ScoreSaberScoreHMD } from "./score-hmd";
 
 export default function ScoreSaberLeaderboardScore({
   score,
   leaderboard,
   highlightedPlayerId,
+  beatSaverMap,
+  showDropdown = false,
+  onDropdownToggle,
+  isDropdownExpanded,
+  isLoading,
 }: {
   score: ScoreSaberScore;
   leaderboard: ScoreSaberLeaderboard;
   highlightedPlayerId?: string;
+  beatSaverMap?: BeatSaverMapResponse;
+  showDropdown?: boolean;
+  onDropdownToggle?: () => void;
+  isDropdownExpanded?: boolean;
+  isLoading?: boolean;
 }) {
   const scorePlayer = score.playerInfo;
 
@@ -72,13 +83,6 @@ export default function ScoreSaberLeaderboardScore({
         </td>
       )}
 
-      {/* HMD */}
-      <td className="px-4 py-2 text-center whitespace-nowrap">
-        <ScoreSaberScoreHMD score={score}>
-          <p>{score.hmd ?? "Unknown"}</p>
-        </ScoreSaberScoreHMD>
-      </td>
-
       {/* Score Modifiers */}
       <td className="px-4 py-2 text-center whitespace-nowrap">
         <SimpleTooltip
@@ -104,6 +108,25 @@ export default function ScoreSaberLeaderboardScore({
           </div>
         )}
       </td>
+
+      {showDropdown && (
+        <td className="w-[32px]">
+          {/* View Leaderboard button */}
+          <div className="flex cursor-default items-center justify-center">
+            {isLoading ? (
+              <ArrowPathIcon className="size-5 animate-spin" />
+            ) : (
+              <ArrowDownIcon
+                className={clsx(
+                  "size-5 cursor-pointer transition-transform duration-350",
+                  isDropdownExpanded ? "" : "rotate-180"
+                )}
+                onClick={onDropdownToggle}
+              />
+            )}
+          </div>
+        </td>
+      )}
     </>
   );
 }
