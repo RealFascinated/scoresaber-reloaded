@@ -62,9 +62,23 @@ export class PlayerService {
       }
     }
 
-    // Update the player's name if it's different from the token
-    if (playerToken && playerToken.name !== player.name) {
-      player.name = playerToken.name;
+    let shouldSave = false; // Whether to save the player
+
+    if (playerToken) {
+      // Update the player's name if it's different from the token
+      if (playerToken.name !== player.name) {
+        player.name = playerToken.name;
+        shouldSave = true;
+      }
+
+      // Update the players pp if it's different from the token
+      if (playerToken.pp !== player.pp) {
+        player.pp = playerToken.pp;
+        shouldSave = true;
+      }
+    }
+
+    if (shouldSave) {
       await player.save();
     }
 

@@ -56,6 +56,12 @@ export class Player {
   public hmd?: string;
 
   /**
+   * The player's pp.
+   */
+  @prop()
+  public pp?: number;
+
+  /**
    * The date the player was first tracked.
    */
   @prop()

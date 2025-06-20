@@ -63,8 +63,6 @@ export default class MetricsService {
   private static instance: MetricsService;
   private static metrics: Metric<unknown>[] = [];
   private metricTimers: Map<string, NodeJS.Timeout> = new Map();
-  private pointsPerSecondMetric: PointsPerSecondMetric | null = null;
-  private isInitialized = false;
 
   /**
    * Cache for storing metric points before sending them to InfluxDB.
@@ -83,11 +81,6 @@ export default class MetricsService {
       return MetricsService.instance;
     }
     MetricsService.instance = this;
-
-    // Generic metrics
-    this.pointsPerSecondMetric = new PointsPerSecondMetric();
-    this.registerMetric(this.pointsPerSecondMetric);
-
     // Player metrics
     this.registerMetric(new TrackedScoresMetric());
     this.registerMetric(new TrackedPlayersMetric());
@@ -112,6 +105,9 @@ export default class MetricsService {
 
     // Database metrics
     this.registerMetric(new MongoDbSizeMetric());
+
+    // Generic metrics
+    this.registerMetric(new PointsPerSecondMetric());
 
     this.initMetrics();
     this.setupFlushTimer();
@@ -162,9 +158,6 @@ export default class MetricsService {
       // Set up individual timer for each metric
       await this.setupMetricTimer(metric);
     }
-
-    // Mark as initialized after all metrics are set up
-    this.isInitialized = true;
   }
 
   /**
@@ -237,9 +230,12 @@ export default class MetricsService {
       points.timestamp(new Date());
       this.pointCache.push(points);
 
-      // Only track points per second after initialization is complete
-      if (this.isInitialized && this.pointsPerSecondMetric) {
-        this.pointsPerSecondMetric.incrementPointCount();
+      // Increment the points per second metric counter
+      const pointsPerSecondMetric = MetricsService.metrics.find(
+        metric => metric.id === MetricType.POINTS_PER_SECOND
+      ) as PointsPerSecondMetric;
+      if (pointsPerSecondMetric) {
+        pointsPerSecondMetric.incrementPointCount();
       }
     } catch (error) {
       Logger.error("Failed to cache point for InfluxDB:", error);

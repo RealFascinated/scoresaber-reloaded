@@ -13,6 +13,15 @@ const minioClient = new Client({
 
 export default class MinioService {
   /**
+   * Gets the Minio client.
+   *
+   * @returns the Minio client
+   */
+  public static getMinioClient() {
+    return minioClient;
+  }
+
+  /**
    * Gets a file from Minio.
    *
    * @param bucket the bucket to get the file from
