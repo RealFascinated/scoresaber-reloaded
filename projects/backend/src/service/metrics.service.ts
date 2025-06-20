@@ -6,6 +6,7 @@ import { ApiServicesMetric } from "../metrics/impl/backend/api-services";
 import CpuUsageMetric from "../metrics/impl/backend/cpu-usage";
 import EventLoopLagMetric from "../metrics/impl/backend/event-loop-lag";
 import EventLoopTimersMetric from "../metrics/impl/backend/event-loop-timers";
+import HttpStatusCodesMetric from "../metrics/impl/backend/http-status-codes";
 import MemoryUsageMetric from "../metrics/impl/backend/memory-usage";
 import RouteLatencyMetric from "../metrics/impl/backend/route-latency";
 import RequestsPerSecondMetric from "../metrics/impl/backend/total-requests";
@@ -51,6 +52,7 @@ export enum MetricType {
   ROUTE_LATENCY = "route-latency",
   EVENT_LOOP_TIMERS = "event-loop-timers",
   API_SERVICES = "api-services",
+  HTTP_STATUS_CODES = "http-status-codes",
 
   // Queue metrics
   QUEUE_SIZES = "queue-sizes",
@@ -63,19 +65,8 @@ export default class MetricsService {
   private static instance: MetricsService;
   private static metrics: Metric<unknown>[] = [];
   private metricTimers: Map<string, NodeJS.Timeout> = new Map();
-
-  /**
-   * Cache for storing metric points before sending them to InfluxDB.
-   * Points are stored here for 1 minute before being flushed in a batch.
-   */
   private pointCache: Point[] = [];
-
-  /**
-   * Timer that triggers the flushing of cached points every minute.
-   * Null when the service is not running.
-   */
   private flushTimer: NodeJS.Timeout | null = null;
-
   private isInitialized = false;
 
   constructor() {
@@ -84,8 +75,15 @@ export default class MetricsService {
     }
     MetricsService.instance = this;
 
-    this.isInitialized = false;
+    this.registerAllMetrics();
+    this.initMetrics();
+    this.setupFlushTimer();
+  }
 
+  /**
+   * Registers all available metrics with the service
+   */
+  private registerAllMetrics(): void {
     // Player metrics
     this.registerMetric(new TrackedScoresMetric());
     this.registerMetric(new TrackedPlayersMetric());
@@ -104,6 +102,7 @@ export default class MetricsService {
     this.registerMetric(new RouteLatencyMetric());
     this.registerMetric(new EventLoopTimersMetric());
     this.registerMetric(new ApiServicesMetric());
+    this.registerMetric(new HttpStatusCodesMetric());
 
     // Queue metrics
     this.registerMetric(new QueueSizesMetric());
@@ -113,74 +112,62 @@ export default class MetricsService {
 
     // General metrics
     this.registerMetric(new PointsPerSecondMetric());
-
-    this.initMetrics();
-    this.setupFlushTimer();
   }
 
   /**
-   * Creates a timer to flush cached points every 30 seconds.
+   * Sets up a timer to flush cached points every 30 seconds
    */
-  private setupFlushTimer() {
-    // Flush cache every minute
+  private setupFlushTimer(): void {
     this.flushTimer = setInterval(() => {
       this.flushPoints();
-    }, 30_000); // 30 seconds
+    }, 30_000);
   }
 
   /**
-   * Flushes all cached points to InfluxDB.
-   * It writes all points in the cache and then clears the cache.
+   * Flushes all cached points to InfluxDB and clears the cache
    */
-  private async flushPoints() {
+  private async flushPoints(): Promise<void> {
     if (this.pointCache.length === 0) return;
 
     try {
-      // Write all cached points to InfluxDB
       for (const point of this.pointCache) {
         writeApi.writePoint(point);
       }
-      // Ensure all points are written to the database
       await writeApi.flush();
       Logger.info(`Flushed ${this.pointCache.length} points to InfluxDB`);
-      // Clear the cache after successful write
       this.pointCache = [];
     } catch (error) {
       Logger.error("Failed to flush points to InfluxDB:", error);
     }
   }
 
-  private async initMetrics() {
+  /**
+   * Initializes all registered metrics and sets up their timers
+   */
+  private async initMetrics(): Promise<void> {
     for (const metric of MetricsService.metrics) {
-      // If the metric needs to be fetched after registration, fetch the value from the database
       if (metric.options.fetchAndStore) {
         const metricValue = await MetricValueModel.findOne({ _id: metric.id });
         if (metricValue) {
           metric.value = metricValue.value;
         }
       }
-
-      // Set up individual timer for each metric
       await this.setupMetricTimer(metric);
     }
-
-    // Mark as initialized after all metrics are set up
     this.isInitialized = true;
   }
 
   /**
-   * Sets up a timer for a metric.
+   * Sets up a timer for a specific metric to collect data at regular intervals
    *
    * @param metric the metric to set up a timer for
    */
-  private async setupMetricTimer(metric: Metric<unknown>) {
-    // Collect first value immediately
+  private async setupMetricTimer(metric: Metric<unknown>): Promise<void> {
     const point = await metric.collect();
     if (point) {
       await this.writePoints(point);
     }
 
-    // Clear existing timer if any
     const existingTimer = this.metricTimers.get(metric.id);
     if (existingTimer) {
       clearInterval(existingTimer);
@@ -189,13 +176,11 @@ export default class MetricsService {
     const timer = setInterval(async () => {
       const before = Date.now();
 
-      // Collect the metric
       const point = await metric.collect();
       if (point) {
         await this.writePoints(point);
       }
 
-      // Update the metric value
       if (metric.options.fetchAndStore) {
         await MetricValueModel.findOneAndUpdate(
           { _id: metric.id },
@@ -213,10 +198,22 @@ export default class MetricsService {
     this.metricTimers.set(metric.id, timer);
   }
 
-  private registerMetric(metric: Metric<unknown>) {
+  /**
+   * Registers a metric with the service
+   *
+   * @param metric the metric to register
+   */
+  private registerMetric(metric: Metric<unknown>): void {
     MetricsService.metrics.push(metric);
   }
 
+  /**
+   * Retrieves a metric by its type
+   *
+   * @param type the type of metric to retrieve
+   * @returns the metric instance
+   * @throws error if the metric is not found
+   */
   public static async getMetric(type: MetricType): Promise<Metric<unknown>> {
     const metric = MetricsService.metrics.find(metric => metric.id === type);
     if (!metric) {
@@ -225,6 +222,11 @@ export default class MetricsService {
     return metric;
   }
 
+  /**
+   * Writes a point to the cache and increments the points per second counter
+   *
+   * @param points the point to write
+   */
   private async writePoints(points: Point): Promise<void> {
     try {
       const fields = points.fields;
@@ -238,7 +240,6 @@ export default class MetricsService {
       points.timestamp(new Date());
       this.pointCache.push(points);
 
-      // Increment the points per second metric counter
       const pointsPerSecondMetric = MetricsService.metrics.find(
         metric => metric.id === MetricType.POINTS_PER_SECOND
       ) as PointsPerSecondMetric;
@@ -250,18 +251,19 @@ export default class MetricsService {
     }
   }
 
-  public async cleanup() {
+  /**
+   * Cleans up all timers and flushes remaining points
+   */
+  public async cleanup(): Promise<void> {
     if (this.flushTimer) {
       clearInterval(this.flushTimer);
     }
 
-    // Clean up all metric timers
     for (const timer of this.metricTimers.values()) {
       clearInterval(timer);
     }
     this.metricTimers.clear();
 
-    // Clean up individual metrics
     for (const metric of MetricsService.metrics) {
       if (
         "cleanup" in metric &&
