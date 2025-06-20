@@ -83,11 +83,13 @@ export default class ApiService {
 
     // Adjust cooldown based on priority
     const priority = options?.priority || CooldownPriority.NORMAL;
-    let cooldownMultiplier = 1;
+    let cooldownMultiplier = 1; // normal speed
     if (priority === CooldownPriority.HIGH) {
-      cooldownMultiplier = 0.5;
+      cooldownMultiplier = 0.5; // 2x faster than normal
     } else if (priority === CooldownPriority.LOW) {
-      cooldownMultiplier = 2;
+      cooldownMultiplier = 2; // 2x slower than normal
+    } else if (priority === CooldownPriority.BACKGROUND) {
+      cooldownMultiplier = 6; // 6x slower than normal
     }
 
     await this.cooldown.waitAndUse(cooldownMultiplier);

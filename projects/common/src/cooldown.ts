@@ -2,6 +2,7 @@ export enum CooldownPriority {
   HIGH = "high",
   NORMAL = "normal",
   LOW = "low",
+  BACKGROUND = "background",
 }
 
 export class Cooldown {

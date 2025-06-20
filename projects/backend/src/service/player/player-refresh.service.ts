@@ -22,6 +22,8 @@ type PlayerRefreshResult = {
   timeTaken: number;
 };
 
+const CONCURRENT_PAGES = 3;
+
 export class PlayerRefreshService {
   /**
    * Refreshes all the players scores.
@@ -84,8 +86,7 @@ export class PlayerRefreshService {
       })
     );
 
-    // Process remaining pages in batches of 5
-    const CONCURRENT_PAGES = 5;
+    // Process remaining pages in batches
     for (let batchStart = 2; batchStart <= totalPages; batchStart += CONCURRENT_PAGES) {
       const batchEnd = Math.min(batchStart + CONCURRENT_PAGES - 1, totalPages);
       Logger.info(`Processing pages ${batchStart} to ${batchEnd} concurrently for ${player.id}...`);
@@ -178,13 +179,12 @@ export class PlayerRefreshService {
     Logger.info(`Fetching ${pages} pages of players from ScoreSaber...`);
 
     const PLAYER_TIMEOUT = 30000;
-    const CONCURRENT_PAGES = 5;
     let successCount = 0;
     let errorCount = 0;
 
     const playerIds = new Set<string>();
 
-    // Process pages in batches of CONCURRENT_PAGES
+    // Process pages in batches
     for (let batchStart = 1; batchStart <= pages; batchStart += CONCURRENT_PAGES) {
       const batchEnd = Math.min(batchStart + CONCURRENT_PAGES - 1, pages);
       Logger.info(`Processing pages ${batchStart} to ${batchEnd} concurrently...`);
