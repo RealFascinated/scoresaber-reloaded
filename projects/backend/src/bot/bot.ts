@@ -13,6 +13,8 @@ import {
 } from "discord.js";
 import { Client } from "discordx";
 
+import "./command/force-refresh-player-scores";
+
 export const guildId = "1295984874942894100";
 export enum DiscordChannels {
   trackedPlayerLogs = "1295985197262569512",
@@ -22,6 +24,7 @@ export enum DiscordChannels {
   rankedLogs = "1334376582860636220",
   qualifiedLogs = "1334383809440776233",
   scoreFloodGateFeed = "1338895176034418699",
+  playerScoreRefreshLogs = "1385426757750100018",
 }
 
 const client = new Client({
@@ -44,7 +47,9 @@ const client = new Client({
   silent: false,
 });
 
-client.once("ready", () => {
+client.once("ready", async () => {
+  await client.initApplicationCommands();
+
   Logger.info("Discord bot ready!");
 });
 
@@ -59,6 +64,10 @@ client.on("warn", warning => {
 
 client.on("debug", info => {
   Logger.debug("Discord client debug:", info);
+});
+
+client.on("interactionCreate", interaction => {
+  client.executeInteraction(interaction);
 });
 
 export async function initDiscordBot() {

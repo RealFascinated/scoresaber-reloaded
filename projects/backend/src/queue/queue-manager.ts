@@ -3,7 +3,7 @@ import { PlayerScoreSeedQueue } from "./impl/player-score-seed-queue";
 import { Queue } from "./queue";
 
 export enum QueueId {
-  PlayerScoreSeed = "player-score-seed-queue",
+  PlayerScoreRefreshQueue = "player-score-refresh-queue",
 }
 
 export class QueueManager implements EventListener {

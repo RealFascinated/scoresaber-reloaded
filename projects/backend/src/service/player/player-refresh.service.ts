@@ -2,6 +2,7 @@ import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { CooldownPriority } from "@ssr/common/cooldown";
 import Logger from "@ssr/common/logger";
 import { PlayerDocument, PlayerModel } from "@ssr/common/model/player";
+import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import {
   getScoreSaberLeaderboardFromToken,
   getScoreSaberScoreFromToken,
@@ -9,9 +10,16 @@ import {
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import { EmbedBuilder } from "discord.js";
 import { DiscordChannels, logToChannel } from "../../bot/bot";
+import { QueueId, QueueManager } from "../../queue/queue-manager";
 import { ScoreService } from "../score/score.service";
 import { PlayerHistoryService } from "./player-history.service";
 import { PlayerService } from "./player.service";
+
+type PlayerRefreshResult = {
+  missingScores: number;
+  totalScores: number;
+  timeTaken: number;
+};
 
 export class PlayerRefreshService {
   /**
@@ -23,11 +31,17 @@ export class PlayerRefreshService {
   public static async refreshAllPlayerScores(
     player: PlayerDocument,
     playerToken: ScoreSaberPlayerToken
-  ): Promise<number> {
+  ): Promise<PlayerRefreshResult> {
     Logger.info(`Refreshing scores for ${player.id}...`);
     let page = 1;
     let hasMorePages = true;
-    let totalMissingScores = 0;
+    const startTime = performance.now();
+
+    const result: PlayerRefreshResult = {
+      missingScores: 0,
+      totalScores: 0,
+      timeTaken: 0,
+    };
 
     while (hasMorePages) {
       const scoresPage = await ApiServiceRegistry.getInstance()
@@ -45,7 +59,6 @@ export class PlayerRefreshService {
         break;
       }
 
-      let missingScores = 0;
       await Promise.all(
         scoresPage.playerScores.map(async score => {
           const { tracked } = await ScoreService.trackScoreSaberScore(
@@ -59,15 +72,15 @@ export class PlayerRefreshService {
             false
           );
           if (tracked) {
-            missingScores++;
-            totalMissingScores++;
+            result.missingScores++;
           }
+          result.totalScores++;
         })
       );
 
       // Stop paginating if no scores are missing OR if player has seededScores marked true
       if (
-        (missingScores === 0 && player.seededScores) ||
+        (result.missingScores === 0 && player.seededScores) ||
         page >= Math.ceil(scoresPage.metadata.total / 100)
       ) {
         hasMorePages = false;
@@ -82,7 +95,8 @@ export class PlayerRefreshService {
     await player.save();
 
     Logger.info(`Finished refreshing scores for ${player.id}, total pages refreshed: ${page - 1}.`);
-    return totalMissingScores;
+    result.timeTaken = performance.now() - startTime;
+    return result;
   }
 
   /**
@@ -150,6 +164,19 @@ export class PlayerRefreshService {
             const processPromise = (async () => {
               const foundPlayer = await PlayerService.getPlayer(player.id, player);
               await PlayerHistoryService.trackPlayerHistory(foundPlayer, now, player);
+
+              // Get the total amount of scores tracked for this player
+              const trackedScores = await ScoreSaberScoreModel.countDocuments({
+                playerId: player.id,
+              });
+              if (trackedScores !== player.scoreStats.totalPlayCount) {
+                Logger.info(
+                  `Player ${player.id} has missing scores. Adding them to the refresh queue...`
+                );
+                // Add the player to the refresh queue
+                QueueManager.getQueue(QueueId.PlayerScoreRefreshQueue).add(player.id);
+              }
+
               successCount++;
             })();
 

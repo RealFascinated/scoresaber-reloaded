@@ -260,6 +260,15 @@ export class ScoreService {
     const isImprovement = previousScore !== null;
 
     if (scoreExists) {
+      // If the score already exits, update the score stats. eg: pp, rank, etc.
+      await ScoreSaberScoreModel.updateOne(
+        {
+          playerId: player.id,
+          leaderboardId: leaderboard.id,
+        },
+        { $set: score }
+      );
+
       return { score: undefined, tracked: false };
     }
 

@@ -9,6 +9,10 @@ import { Suspense, useEffect } from "react";
 
 export function PostHogProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
+    if (!env.NEXT_PUBLIC_POSTHOG_KEY) {
+      return;
+    }
+
     posthog.init(env.NEXT_PUBLIC_POSTHOG_KEY!, {
       api_host: "https://us.i.posthog.com",
       ui_host: "https://us.posthog.com",
@@ -18,6 +22,10 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
       debug: isProduction(),
     });
   }, []);
+
+  if (!env.NEXT_PUBLIC_POSTHOG_KEY) {
+    return children;
+  }
 
   return (
     <PHProvider client={posthog}>

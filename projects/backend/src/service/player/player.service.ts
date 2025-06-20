@@ -116,7 +116,7 @@ export class PlayerService {
           await newPlayer.save();
 
           // Add to the seed queue
-          QueueManager.getQueue(QueueId.PlayerScoreSeed).add(id);
+          QueueManager.getQueue(QueueId.PlayerScoreRefreshQueue).add(id);
 
           // Notify in production
           if (isProduction()) {

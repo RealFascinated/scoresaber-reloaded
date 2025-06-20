@@ -22,6 +22,7 @@
       "dependencies": {
         "@bogeychan/elysia-etag": "^0.1.0",
         "@discordx/importer": "^1.3.2",
+        "@discordx/utilities": "^7.0.4",
         "@dotenvx/dotenvx": "^1.44.2",
         "@elysiajs/cors": "^1.3.3",
         "@elysiajs/cron": "^1.3.0",
@@ -32,7 +33,7 @@
         "@ssr/common": "workspace:common",
         "@tqman/nice-logger": "^1.1.1",
         "@typegoose/auto-increment": "^4.13.0",
-        "@typegoose/typegoose": "^12.16.0",
+        "@typegoose/typegoose": "^12.17.0",
         "@typescript-eslint/eslint-plugin": "^8.34.1",
         "@typescript-eslint/parser": "^8.34.1",
         "discordx": "^11.12.4",
@@ -42,9 +43,9 @@
         "eslint": "^9.29.0",
         "globals": "^16.2.0",
         "minio": "^8.0.5",
-        "mongoose": "^8.15.1",
+        "mongoose": "^8.16.0",
         "pidusage": "^4.0.1",
-        "systeminformation": "^5.27.3",
+        "systeminformation": "^5.27.5",
       },
       "devDependencies": {
         "bun-types": "^1.2.16",
@@ -170,6 +171,8 @@
     "@discordx/importer": ["@discordx/importer@1.3.2", "", { "dependencies": { "glob": "^11.0.2" } }, "sha512-kuEvO8TlE6j3ZajAK66rWLRgi8R38GwMvy+hMWndhYZ0e4D/Vlsoio4JG7a5G6QaqyfDx1CwKmic87NU5Bns8w=="],
 
     "@discordx/internal": ["@discordx/internal@1.1.5", "", {}, "sha512-Wpr1bh9GpTud7+fRlHUSihf2zrFzXgSC+8OCvwzODSH794mwWhKRYjGQKMgk3xfOmqiP8FTzs0/5GfYSbCOQ0Q=="],
+
+    "@discordx/utilities": ["@discordx/utilities@7.0.4", "", { "dependencies": { "dayjs": "^1.11.13" }, "peerDependencies": { "discord.js": ">=14 || ^14.0.0-dev", "discordx": "*" } }, "sha512-fEbTju3xq5i7r5oQ2DnIps2vj5wTGXIP2Ki7fZkR1CnipSlYfNM7UztQu73krIOL3zSnJj1Z4CEEDXbjZntbaA=="],
 
     "@discoveryjs/json-ext": ["@discoveryjs/json-ext@0.5.7", "", {}, "sha512-dBVuXR082gk3jsFp7Rd/JI4kytwGHecnCoTtXFb7DB6CNHp4rg5k1bhg0nWdLGLnOV71lmDzGQaLMy8iPLY0pw=="],
 
