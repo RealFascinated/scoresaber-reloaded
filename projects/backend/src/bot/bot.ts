@@ -14,6 +14,7 @@ import {
 import { Client } from "discordx";
 
 import "./command/force-refresh-player-scores";
+import "./command/force-track-player-statistics";
 
 export const guildId = "1295984874942894100";
 export enum DiscordChannels {
