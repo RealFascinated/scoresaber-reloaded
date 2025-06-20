@@ -17,6 +17,13 @@ export default class SystemNetworkIoMetric extends NumberMetric {
       const isUp = stat.operstate === "up";
       const hasCorrectPrefix = stat.iface.startsWith("eno") || stat.iface.startsWith("enp");
 
+      console.log({
+        isUp,
+        hasCorrectPrefix,
+        iface: stat.iface,
+        operstate: stat.operstate,
+      });
+
       return isUp && hasCorrectPrefix;
     });
     if (!interfaceStats) {
