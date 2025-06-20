@@ -252,16 +252,16 @@ export function formatTime(seconds: number): string {
  * @param ms - Duration in milliseconds
  * @returns The formatted duration
  */
-export function formatDuration(ms: number): string {
+export function formatDuration(ms: number, long: boolean = false): string {
   if (ms < 0) ms = -ms;
 
   const duration = dayjs.duration(ms);
   const units = [
-    { value: duration.days(), unit: "d" },
-    { value: duration.hours(), unit: "h" },
-    { value: duration.minutes(), unit: "m" },
-    { value: duration.seconds(), unit: "s" },
-    { value: duration.milliseconds(), unit: "ms" },
+    { value: duration.days(), unit: long ? "Days" : "d" },
+    { value: duration.hours(), unit: long ? "Hours" : "h" },
+    { value: duration.minutes(), unit: long ? "Minutes" : "m" },
+    { value: duration.seconds(), unit: long ? "Seconds" : "s" },
+    { value: duration.milliseconds(), unit: long ? "Milliseconds" : "ms" },
   ];
 
   const result = units
@@ -269,7 +269,7 @@ export function formatDuration(ms: number): string {
     .slice(0, 2)
     .map(u => `${u.value}${u.unit}`);
 
-  return result.join(", ") || "0s";
+  return result.join(", ") || (long ? "0 Seconds" : "0s");
 }
 
 /**
