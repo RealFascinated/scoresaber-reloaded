@@ -65,32 +65,58 @@ export default function GenericPlayerChart({
     parseDate(sortedEntries[sortedEntries.length - 1][0])
   );
 
-  // Always use today as the end date to include today's data
-  const today = getMidnightAlignedDate(new Date());
-  const endDate = new Date(today);
-  const startDate = new Date(endDate);
-  startDate.setDate(startDate.getDate() - daysAmount + 1);
-
   // Create a map of available data for quick lookup
   const dataMap = new Map(sortedEntries.map(([dateString, history]) => [dateString, history]));
 
+  // Use the latest data date as end date, but check if today's data exists
+  const today = getMidnightAlignedDate(new Date());
+  const todayString = formatDateMinimal(today);
+  const hasTodayData = dataMap.has(todayString);
+
+  console.log("Debug dates:");
+  console.log("Today (midnight aligned):", today);
+  console.log("Today string:", todayString);
+  console.log("Has today data:", hasTodayData);
+  console.log("Available data keys:", Array.from(dataMap.keys()));
+  console.log("Latest data date:", latestDataDate);
+
+  // Use today as end date if today's data exists, otherwise use latest data date
+  const endDate = hasTodayData ? new Date(today) : new Date(latestDataDate);
+  const startDate = new Date(endDate);
+  startDate.setDate(startDate.getDate() - daysAmount + 1);
+
   // Generate all dates in the range
   const currentDate = new Date(startDate);
-  while (currentDate <= endDate) {
-    labels.push(new Date(currentDate));
+  console.log("Chart date range:");
+  console.log("Start date:", startDate);
+  console.log("End date:", endDate);
+  console.log("Days amount:", daysAmount);
+
+  // Use a more reliable approach: generate exactly the number of days we need
+  for (let i = 0; i < daysAmount; i++) {
+    const dateToProcess = new Date(startDate);
+    dateToProcess.setDate(startDate.getDate() + i);
+
+    labels.push(new Date(dateToProcess));
 
     // Format the current date to match the format used in statisticHistory keys
-    const currentDateString = formatDateMinimal(currentDate);
+    const currentDateString = formatDateMinimal(dateToProcess);
 
     const history = dataMap.get(currentDateString);
+
+    // Debug: Log when we process today's date
+    if (currentDateString === "Jun 20, 2025") {
+      console.log("Processing today:", currentDateString, "Data found:", !!history);
+    }
 
     datasetConfig.forEach(config => {
       const value = history ? getValueFromHistory(history, config.field) : null;
       histories[config.field].push(value ?? null);
     });
-
-    currentDate.setDate(currentDate.getDate() + 1);
   }
+
+  console.log("Total labels generated:", labels.length);
+  console.log("Last label:", labels[labels.length - 1]);
 
   return (
     <div className="flex justify-center">
