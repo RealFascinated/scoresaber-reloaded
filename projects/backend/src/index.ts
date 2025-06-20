@@ -64,7 +64,6 @@ try {
 Logger.info("Connected to MongoDB :)");
 
 export const app = new Elysia()
-  .use(metricsPlugin())
   .use(
     cron({
       name: "player-statistics-tracker-cron",
@@ -112,6 +111,9 @@ app.use(
     },
   })
 );
+
+// Register metrics plugin after etag middleware to capture final status codes including 304
+app.use(metricsPlugin());
 
 /**
  * Custom error handler
