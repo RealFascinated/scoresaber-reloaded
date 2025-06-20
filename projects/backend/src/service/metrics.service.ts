@@ -7,6 +7,7 @@ import CpuUsageMetric from "../metrics/impl/backend/cpu-usage";
 import EventLoopLagMetric from "../metrics/impl/backend/event-loop-lag";
 import EventLoopTimersMetric from "../metrics/impl/backend/event-loop-timers";
 import MemoryUsageMetric from "../metrics/impl/backend/memory-usage";
+import PointsPerSecondMetric from "../metrics/impl/backend/points-per-second";
 import RouteLatencyMetric from "../metrics/impl/backend/route-latency";
 import RequestsPerSecondMetric from "../metrics/impl/backend/total-requests";
 import MongoDbSizeMetric from "../metrics/impl/database/mongo-db-size";
@@ -28,6 +29,9 @@ const influxClient = new InfluxDB({
 const writeApi = influxClient.getWriteApi(env.INFLUXDB_ORG, env.INFLUXDB_BUCKET);
 
 export enum MetricType {
+  // Generic metrics
+  POINTS_PER_SECOND = "points-per-second",
+
   // Player metrics
   TRACKED_SCORES = "tracked-scores",
   TRACKED_PLAYERS = "tracked-players",
@@ -77,7 +81,10 @@ export default class MetricsService {
       return MetricsService.instance;
     }
     MetricsService.instance = this;
+    // Generic metrics
+    this.registerMetric(new PointsPerSecondMetric());
 
+    // Player metrics
     this.registerMetric(new TrackedScoresMetric());
     this.registerMetric(new TrackedPlayersMetric());
     this.registerMetric(new UniqueDailyPlayersMetric());
@@ -222,6 +229,14 @@ export default class MetricsService {
 
       points.timestamp(new Date());
       this.pointCache.push(points);
+
+      // Increment the points per second metric counter
+      const pointsPerSecondMetric = MetricsService.metrics.find(
+        metric => metric.id === MetricType.POINTS_PER_SECOND
+      ) as PointsPerSecondMetric;
+      if (pointsPerSecondMetric) {
+        pointsPerSecondMetric.incrementPointCount();
+      }
     } catch (error) {
       Logger.error("Failed to cache point for InfluxDB:", error);
     }
