@@ -15,7 +15,7 @@ export default class QueueSizesMetric extends NumberMetric {
     const point = this.getPointBase();
 
     for (const queue of QueueManager.getQueues()) {
-      point.floatField(queue.name, queue.getSize());
+      point.floatField(queue.id, queue.getSize());
     }
 
     return point;
