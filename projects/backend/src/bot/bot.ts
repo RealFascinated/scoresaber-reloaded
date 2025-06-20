@@ -17,7 +17,7 @@ import "./command/force-track-player-statistics";
 
 export const DiscordChannels = {
   TRACKED_PLAYER_LOGS: env.DISCORD_CHANNEL_TRACKED_PLAYER_LOGS,
-  SCORE_REFRESH_LOGS: env.DISCORD_CHANNEL_SCORE_REFRESH_LOGS,
+  PLAYER_SCORE_REFRESH_LOGS: env.DISCORD_CHANNEL_PLAYER_SCORE_REFRESH_LOGS,
   RANKED_BATCH_LOGS: env.DISCORD_CHANNEL_RANKED_BATCH_LOGS,
   NUMBER_ONE_FEED: env.DISCORD_CHANNEL_NUMBER_ONE_FEED,
   TOP_50_SCORES_FEED: env.DISCORD_CHANNEL_TOP_50_SCORES_FEED,
@@ -97,9 +97,6 @@ export async function logToChannel(
     | ActionRowData<MessageActionRowComponentBuilder>
   )[] = []
 ) {
-  console.log({
-    channelId,
-  });
   if (!channelId) {
     return;
   }
