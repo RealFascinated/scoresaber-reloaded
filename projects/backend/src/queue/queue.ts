@@ -42,6 +42,12 @@ export abstract class Queue<T> {
     if (this.isStopped) {
       return;
     }
+
+    // If the item is already in the queue, don't add it again
+    if (this.queue.includes(item)) {
+      return;
+    }
+
     this.queue.push(item);
     this.processQueue(); // Start processing immediately
   }
