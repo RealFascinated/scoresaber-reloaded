@@ -14,13 +14,10 @@ export default class SystemNetworkIoMetric extends NumberMetric {
   public async collect(): Promise<Point | undefined> {
     const networkStats = await systeminformation.networkStats();
     const interfaceStats = networkStats.find(stat => {
-      if (
-        (!stat.iface.startsWith("eno") && !stat.iface.startsWith("enp")) ||
-        stat.operstate !== "up"
-      ) {
-        return false;
-      }
-      return true;
+      const isUp = stat.operstate === "up";
+      const hasCorrectPrefix = stat.iface.startsWith("eno") || stat.iface.startsWith("enp");
+
+      return isUp && hasCorrectPrefix;
     });
     if (!interfaceStats) {
       return undefined;
