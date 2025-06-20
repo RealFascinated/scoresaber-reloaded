@@ -1,4 +1,5 @@
 import { Point } from "@influxdata/influxdb-client";
+import { TimeUnit } from "@ssr/common/utils/time-utils";
 import { MetricType } from "../../../service/metrics.service";
 import Metric from "../../metric";
 
@@ -23,7 +24,7 @@ export default class EventLoopTimersMetric extends Metric<TimerCleanupValue> {
         totalIntervals: 0,
       },
       {
-        interval: 1000 * 10, // Collect every 10 seconds
+        interval: TimeUnit.toMillis(TimeUnit.Second, 5),
         fetchAndStore: false,
       }
     );

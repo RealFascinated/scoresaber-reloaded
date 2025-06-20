@@ -1,4 +1,5 @@
 import { Point } from "@influxdata/influxdb-client";
+import { TimeUnit } from "@ssr/common/utils/time-utils";
 import { MetricType } from "../../../service/metrics.service";
 import NumberMetric from "../../number-metric";
 
@@ -9,7 +10,7 @@ export default class PointsPerSecondMetric extends NumberMetric {
   constructor() {
     super(MetricType.POINTS_PER_SECOND, 0, {
       fetchAndStore: false,
-      interval: 1000, // Collect every second
+      interval: TimeUnit.toMillis(TimeUnit.Second, 1),
     });
   }
 

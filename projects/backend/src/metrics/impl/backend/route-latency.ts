@@ -1,4 +1,5 @@
 import { Point } from "@influxdata/influxdb-client";
+import { TimeUnit } from "@ssr/common/utils/time-utils";
 import { app } from "../../../index";
 import { MetricType } from "../../../service/metrics.service";
 import NumberMetric from "../../number-metric";
@@ -19,7 +20,7 @@ export default class RouteLatencyMetric extends NumberMetric {
   constructor() {
     super(MetricType.ROUTE_LATENCY, 0, {
       fetchAndStore: false,
-      interval: 1000, // Check every second
+      interval: TimeUnit.toMillis(TimeUnit.Second, 1),
     });
 
     // Initialize all routes from the app

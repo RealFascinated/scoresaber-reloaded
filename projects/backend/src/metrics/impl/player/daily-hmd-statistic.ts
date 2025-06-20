@@ -1,5 +1,6 @@
 import { Point } from "@influxdata/influxdb-client";
 import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
+import { TimeUnit } from "@ssr/common/utils/time-utils";
 import { MetricType } from "../../../service/metrics.service";
 import NumberMetric from "../../number-metric";
 
@@ -7,7 +8,7 @@ export default class HmdStatisticMetric extends NumberMetric {
   constructor() {
     super(MetricType.DAILY_HMD_STATISTIC, 0, {
       fetchAndStore: false,
-      interval: 1000 * 60 * 5, // 5 minutes
+      interval: TimeUnit.toMillis(TimeUnit.Minute, 1),
     });
   }
 

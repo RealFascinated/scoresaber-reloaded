@@ -1,4 +1,5 @@
 import { Point } from "@influxdata/influxdb-client";
+import { TimeUnit } from "@ssr/common/utils/time-utils";
 import { MetricType } from "../../../service/metrics.service";
 import Metric from "../../metric";
 
@@ -10,7 +11,7 @@ export default class EventLoopLagMetric extends Metric<number> {
   constructor() {
     super(MetricType.EVENT_LOOP_LAG, 0, {
       fetchAndStore: false,
-      interval: 1000,
+      interval: TimeUnit.toMillis(TimeUnit.Second, 1),
     });
 
     this.lastCheck = Date.now();

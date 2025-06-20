@@ -1,5 +1,6 @@
 import { Point } from "@influxdata/influxdb-client";
 import { PlayerModel } from "@ssr/common/model/player";
+import { TimeUnit } from "@ssr/common/utils/time-utils";
 import { MetricType } from "../../../service/metrics.service";
 import NumberMetric from "../../number-metric";
 
@@ -7,7 +8,7 @@ export default class TrackedPlayersMetric extends NumberMetric {
   constructor() {
     super(MetricType.TRACKED_PLAYERS, 0, {
       fetchAndStore: false,
-      interval: 1000 * 60 * 5, // 5 minutes
+      interval: TimeUnit.toMillis(TimeUnit.Minute, 1),
     });
   }
 

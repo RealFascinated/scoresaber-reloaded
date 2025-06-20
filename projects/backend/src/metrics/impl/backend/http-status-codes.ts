@@ -1,4 +1,5 @@
 import { Point } from "@influxdata/influxdb-client";
+import { TimeUnit } from "@ssr/common/utils/time-utils";
 import { MetricType } from "../../../service/metrics.service";
 import Metric from "../../metric";
 
@@ -11,7 +12,7 @@ export default class HttpStatusCodesMetric extends Metric<HttpStatusCodes> {
       {},
       {
         fetchAndStore: true,
-        interval: 1000, // Check every second
+        interval: TimeUnit.toMillis(TimeUnit.Second, 1),
       }
     );
   }

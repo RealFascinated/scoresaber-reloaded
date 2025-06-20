@@ -1,4 +1,5 @@
 import { Point } from "@influxdata/influxdb-client";
+import { TimeUnit } from "@ssr/common/utils/time-utils";
 import os from "os";
 import pidusage from "pidusage";
 import { MetricType } from "../../../service/metrics.service";
@@ -8,7 +9,7 @@ export default class ProcessCpuUsageMetric extends NumberMetric {
   constructor() {
     super(MetricType.PROCESS_CPU_USAGE, 0, {
       fetchAndStore: false,
-      interval: 1000 * 5, // 5 seconds
+      interval: TimeUnit.toMillis(TimeUnit.Second, 1),
     });
   }
 

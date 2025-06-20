@@ -1,4 +1,5 @@
 import { Point } from "@influxdata/influxdb-client";
+import { TimeUnit } from "@ssr/common/utils/time-utils";
 import { mongoose } from "@typegoose/typegoose";
 import { MetricType } from "../../../service/metrics.service";
 import NumberMetric from "../../number-metric";
@@ -7,7 +8,7 @@ export default class MongoDbSizeMetric extends NumberMetric {
   constructor() {
     super(MetricType.MONGO_DB_SIZE, 0, {
       fetchAndStore: false,
-      interval: 1000 * 60 * 5, // 5 minutes
+      interval: TimeUnit.toMillis(TimeUnit.Minute, 1),
     });
   }
 
