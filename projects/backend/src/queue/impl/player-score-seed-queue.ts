@@ -56,7 +56,7 @@ export class PlayerScoreSeedQueue extends Queue<string> {
         ])
         .setTimestamp()
         .setFooter({
-          text: `Powered by ${env.NEXT_PUBLIC_WEBSITE_URL} | ${this.getSize() - 1 < 0 ? "No" : this.getSize() - 1} players left in queue`,
+          text: `${this.getSize() - 1 < 0 ? "No" : this.getSize() - 1} players left in queue`,
         })
         .setColor("#00ff00"),
       [
