@@ -2,6 +2,7 @@ import { InfluxDB, Point } from "@influxdata/influxdb-client";
 import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
 import { MetricValueModel } from "../common/model/metric";
+import { EventListener } from "../event/event-listener";
 import { ApiServicesMetric } from "../metrics/impl/backend/api-services";
 import EventLoopLagMetric from "../metrics/impl/backend/event-loop-lag";
 import EventLoopTimersMetric from "../metrics/impl/backend/event-loop-timers";
@@ -68,11 +69,10 @@ export enum MetricType {
   MONGO_DB_SIZE = "mongo-db-size",
 }
 
-export default class MetricsService {
+export default class MetricsService implements EventListener {
   private static instance: MetricsService;
   private static metrics: Metric<unknown>[] = [];
   private metricTimers: Map<string, NodeJS.Timeout> = new Map();
-  private pointCache: Point[] = [];
   private flushTimer: NodeJS.Timeout | null = null;
   private isInitialized = false;
 
@@ -84,7 +84,6 @@ export default class MetricsService {
 
     this.registerAllMetrics();
     this.initMetrics();
-    this.setupFlushTimer();
   }
 
   /**
@@ -127,33 +126,6 @@ export default class MetricsService {
   }
 
   /**
-   * Sets up a timer to flush cached points every 30 seconds
-   */
-  private setupFlushTimer(): void {
-    this.flushTimer = setInterval(() => {
-      this.flushPoints();
-    }, 30_000);
-  }
-
-  /**
-   * Flushes all cached points to InfluxDB and clears the cache
-   */
-  private async flushPoints(): Promise<void> {
-    if (this.pointCache.length === 0) return;
-
-    try {
-      for (const point of this.pointCache) {
-        writeApi.writePoint(point);
-      }
-      await writeApi.flush();
-      Logger.info(`Flushed ${this.pointCache.length} points to InfluxDB`);
-      this.pointCache = [];
-    } catch (error) {
-      Logger.error("Failed to flush points to InfluxDB:", error);
-    }
-  }
-
-  /**
    * Initializes all registered metrics and sets up their timers
    */
   private async initMetrics(): Promise<void> {
@@ -177,7 +149,7 @@ export default class MetricsService {
   private async setupMetricTimer(metric: Metric<unknown>): Promise<void> {
     const point = await metric.collect();
     if (point) {
-      await this.writePoints(point);
+      await this.writePoint(point);
     }
 
     const existingTimer = this.metricTimers.get(metric.id);
@@ -190,15 +162,7 @@ export default class MetricsService {
 
       const point = await metric.collect();
       if (point) {
-        await this.writePoints(point);
-      }
-
-      if (metric.options.fetchAndStore) {
-        await MetricValueModel.findOneAndUpdate(
-          { _id: metric.id },
-          { value: metric.value },
-          { upsert: true, setDefaultsOnInsert: true }
-        );
+        await this.writePoint(point);
       }
 
       const timeTaken = Date.now() - before;
@@ -237,11 +201,11 @@ export default class MetricsService {
   /**
    * Writes a point to the cache and increments the points per second counter
    *
-   * @param points the point to write
+   * @param point the point to write
    */
-  private async writePoints(points: Point): Promise<void> {
+  private async writePoint(point: Point): Promise<void> {
     try {
-      const fields = points.fields;
+      const fields = point.fields;
       for (const [key, value] of Object.entries(fields)) {
         if (value === undefined || value === null) {
           Logger.warn(`Skipping write to InfluxDB - invalid value for field '${key}': ${value}`);
@@ -249,8 +213,7 @@ export default class MetricsService {
         }
       }
 
-      points.timestamp(new Date());
-      this.pointCache.push(points);
+      writeApi.writePoint(point);
 
       const pointsPerSecondMetric = MetricsService.metrics.find(
         metric => metric.id === MetricType.POINTS_PER_SECOND
@@ -259,7 +222,23 @@ export default class MetricsService {
         pointsPerSecondMetric.incrementPointCount();
       }
     } catch (error) {
-      Logger.error("Failed to cache point for InfluxDB:", error);
+      Logger.error("Failed to write point for InfluxDB:", error);
+    }
+  }
+
+  /**
+   * Saves the metrics to the db
+   */
+  private async saveMetrics(): Promise<void> {
+    for (const metric of MetricsService.metrics) {
+      // Check if the metric needs to be saved to the db
+      if (metric.options.fetchAndStore) {
+        await MetricValueModel.findOneAndUpdate(
+          { _id: metric.id },
+          { value: metric.value },
+          { upsert: true, setDefaultsOnInsert: true }
+        );
+      }
     }
   }
 
@@ -285,6 +264,10 @@ export default class MetricsService {
       }
     }
 
-    await this.flushPoints();
+    await this.saveMetrics();
+  }
+
+  onStop(): Promise<void> {
+    return this.saveMetrics();
   }
 }

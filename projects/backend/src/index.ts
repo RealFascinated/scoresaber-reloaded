@@ -226,13 +226,13 @@ app.onStart(async () => {
   new ScoreWebsockets();
   new BeatSaverWebsocket();
 
-  new MetricsService();
   new CacheService();
   new StatisticsService();
   new ScoreService();
   new PlaylistService();
 
   EventsManager.registerListener(new QueueManager());
+  EventsManager.registerListener(new MetricsService());
 });
 
 app.listen({
