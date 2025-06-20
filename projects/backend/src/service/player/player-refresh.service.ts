@@ -18,6 +18,7 @@ import { PlayerService } from "./player.service";
 type PlayerRefreshResult = {
   missingScores: number;
   totalScores: number;
+  totalPages: number;
   timeTaken: number;
 };
 
@@ -40,6 +41,7 @@ export class PlayerRefreshService {
     const result: PlayerRefreshResult = {
       missingScores: 0,
       totalScores: 0,
+      totalPages: 0,
       timeTaken: 0,
     };
 
@@ -80,6 +82,7 @@ export class PlayerRefreshService {
 
       // Stop if we've reached the last page
       if (page >= Math.ceil(scoresPage.metadata.total / 100)) {
+        result.totalPages = page;
         hasMorePages = false;
       }
 

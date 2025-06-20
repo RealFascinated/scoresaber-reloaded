@@ -2,6 +2,7 @@ import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
 import { PlayerModel } from "@ssr/common/model/player";
+import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import { ButtonBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
 import { DiscordChannels, logToChannel } from "../../bot/bot";
@@ -33,7 +34,7 @@ export class PlayerScoreSeedQueue extends Queue<string> {
     }
 
     const player = await PlayerService.getPlayer(playerId, playerToken);
-    const { totalScores, missingScores, timeTaken } =
+    const { totalScores, missingScores, totalPages, timeTaken } =
       await PlayerRefreshService.refreshAllPlayerScores(player, playerToken);
 
     await logToChannel(
@@ -45,8 +46,9 @@ export class PlayerScoreSeedQueue extends Queue<string> {
           {
             name: "📊 Statistics",
             value: [
-              `**Total Scores:** ${totalScores.toLocaleString()}`,
-              `**Missing Scores:** ${missingScores.toLocaleString()}`,
+              `**Total Scores:** ${formatNumberWithCommas(totalScores)}`,
+              `**Missing Scores:** ${formatNumberWithCommas(missingScores)}`,
+              `**Pages:** ${formatNumberWithCommas(totalPages)}`,
               `**Time Taken:** ${formatDuration(timeTaken)}`,
             ].join("\n"),
             inline: false,
