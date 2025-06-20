@@ -15,14 +15,10 @@ export default class SystemNetworkIoMetric extends NumberMetric {
     const networkStats = await systeminformation.networkStats();
     const interfaceStats = networkStats.find(stat => {
       const isUp = stat.operstate === "up";
-      const hasCorrectPrefix = stat.iface.startsWith("eno") || stat.iface.startsWith("enp");
-
-      console.log({
-        isUp,
-        hasCorrectPrefix,
-        iface: stat.iface,
-        operstate: stat.operstate,
-      });
+      const hasCorrectPrefix =
+        stat.iface.startsWith("eno") ||
+        stat.iface.startsWith("enp") ||
+        stat.iface.startsWith("eth");
 
       return isUp && hasCorrectPrefix;
     });
