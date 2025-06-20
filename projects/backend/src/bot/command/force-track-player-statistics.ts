@@ -21,8 +21,8 @@ export class ForceTrackPlayerStatistics {
 
     await PlayerRefreshService.updatePlayerStatistics(
       (currentPage, totalPages, successCount, errorCount) => {
-        // Only update every 10 pages
-        if (currentPage % 10 !== 0) {
+        // Only update every 5 pages, and the first page (to show the progress)
+        if (currentPage % 5 !== 0 && currentPage !== 1) {
           return;
         }
 
