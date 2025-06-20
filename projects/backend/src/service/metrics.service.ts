@@ -3,11 +3,11 @@ import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
 import { MetricValueModel } from "../common/model/metric";
 import { ApiServicesMetric } from "../metrics/impl/backend/api-services";
-import CpuUsageMetric from "../metrics/impl/backend/cpu-usage";
 import EventLoopLagMetric from "../metrics/impl/backend/event-loop-lag";
 import EventLoopTimersMetric from "../metrics/impl/backend/event-loop-timers";
 import HttpStatusCodesMetric from "../metrics/impl/backend/http-status-codes";
 import MemoryUsageMetric from "../metrics/impl/backend/memory-usage";
+import ProcessCpuUsageMetric from "../metrics/impl/backend/process-cpu-usage";
 import RouteLatencyMetric from "../metrics/impl/backend/route-latency";
 import RequestsPerSecondMetric from "../metrics/impl/backend/total-requests";
 import MongoDbSizeMetric from "../metrics/impl/database/mongo-db-size";
@@ -21,6 +21,8 @@ import TrackedPlayersMetric from "../metrics/impl/player/tracked-players";
 import TrackedScoresMetric from "../metrics/impl/player/tracked-scores";
 import UniqueDailyPlayersMetric from "../metrics/impl/player/unique-daily-players";
 import QueueSizesMetric from "../metrics/impl/queue/queue-sizes";
+import SystemCpuUsageMetric from "../metrics/impl/system/system-cpu-usage";
+import SystemNetworkIoMetric from "../metrics/impl/system/system-network-io";
 import Metric from "../metrics/metric";
 
 const influxClient = new InfluxDB({
@@ -38,14 +40,13 @@ export enum MetricType {
   TRACKED_PLAYERS = "tracked-players",
   UNIQUE_DAILY_PLAYERS = "unique-daily-players",
   ACTIVE_ACCOUNTS = "active-accounts",
-  REPLAY_STATS = "replay-stats",
   DAILY_HMD_STATISTIC = "daily-hmd-statistic",
   ACTIVE_PLAYERS_HMD_STATISTIC = "active-players-hmd-statistic",
   TOTAL_TRACKED_SCORES = "total-tracked-scores",
   DAILY_NEW_ACCOUNTS = "daily-new-accounts",
 
   // Backend metrics
-  CPU_USAGE = "cpu-usage",
+  PROCESS_CPU_USAGE = "process-cpu-usage",
   MEMORY_USAGE = "memory-usage",
   EVENT_LOOP_LAG = "event-loop-lag",
   TOTAL_REQUESTS = "total-requests",
@@ -53,6 +54,10 @@ export enum MetricType {
   EVENT_LOOP_TIMERS = "event-loop-timers",
   API_SERVICES = "api-services",
   HTTP_STATUS_CODES = "http-status-codes",
+
+  // System metrics
+  SYSTEM_CPU_USAGE = "system-cpu-usage",
+  SYSTEM_NETWORK_IO = "system-network-io",
 
   // Queue metrics
   QUEUE_SIZES = "queue-sizes",
@@ -95,7 +100,7 @@ export default class MetricsService {
     this.registerMetric(new DailyNewAccountsMetric());
 
     // Backend metrics
-    this.registerMetric(new CpuUsageMetric());
+    this.registerMetric(new ProcessCpuUsageMetric());
     this.registerMetric(new MemoryUsageMetric());
     this.registerMetric(new EventLoopLagMetric());
     this.registerMetric(new RequestsPerSecondMetric());
@@ -103,6 +108,10 @@ export default class MetricsService {
     this.registerMetric(new EventLoopTimersMetric());
     this.registerMetric(new ApiServicesMetric());
     this.registerMetric(new HttpStatusCodesMetric());
+
+    // System metrics
+    this.registerMetric(new SystemCpuUsageMetric());
+    this.registerMetric(new SystemNetworkIoMetric());
 
     // Queue metrics
     this.registerMetric(new QueueSizesMetric());
