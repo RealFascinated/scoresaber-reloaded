@@ -97,6 +97,9 @@ export async function logToChannel(
     | ActionRowData<MessageActionRowComponentBuilder>
   )[] = []
 ) {
+  console.log({
+    channelId,
+  });
   if (!channelId) {
     return;
   }
