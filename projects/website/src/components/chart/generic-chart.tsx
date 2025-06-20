@@ -199,10 +199,16 @@ const GenericChart = ({ config, labels }: Props) => {
         point: {
           radius: (ctx: any) => {
             const dataset = ctx.chart.data.datasets[ctx.datasetIndex];
-            return labels.length > 90 ? 0 : dataset.type === "point" ? dataset.pointRadius || 3 : 3;
+            // Optimize point rendering for large datasets
+            if (labels.length > 365) return 0; // Hide points for very large datasets
+            if (labels.length > 90) return 0; // Hide points for large datasets
+            return dataset.type === "point" ? dataset.pointRadius || 3 : 3;
           },
           hoverRadius: (ctx: any) => {
             const dataset = ctx.chart.data.datasets[ctx.datasetIndex];
+            // Optimize hover radius for large datasets
+            if (labels.length > 365) return 0;
+            if (labels.length > 90) return 2;
             return dataset.type === "point" ? (dataset.pointRadius || 3) + 2 : 4;
           },
         },
