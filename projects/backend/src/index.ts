@@ -147,7 +147,7 @@ app.onError({ as: "global" }, ({ code, error }) => {
     }
   }
 
-  if (code === "INTERNAL_SERVER_ERROR") {
+  if (code === 500) {
     console.log(error);
   }
 
