@@ -169,7 +169,9 @@ export class PlayerRefreshService {
               const trackedScores = await ScoreSaberScoreModel.countDocuments({
                 playerId: player.id,
               });
-              if (trackedScores !== player.scoreStats.totalPlayCount) {
+
+              // If the player has less scores tracked than the total play count, add them to the refresh queue
+              if (trackedScores < player.scoreStats.totalPlayCount) {
                 Logger.info(
                   `Player ${player.id} has missing scores. Adding them to the refresh queue...`
                 );

@@ -1,3 +1,5 @@
+import Logger from "@ssr/common/logger";
+import { QueueModel } from "@ssr/common/model/queue";
 import { EventListener } from "../event/event-listener";
 import { PlayerScoreSeedQueue } from "./impl/player-score-seed-queue";
 import { Queue } from "./queue";
@@ -18,8 +20,22 @@ export class QueueManager implements EventListener {
    *
    * @param queue the queue to add
    */
-  public static addQueue(queue: Queue<unknown>) {
-    QueueManager.queues.set(queue.name, queue);
+  public static async addQueue(queue: Queue<unknown>) {
+    if (queue.saveQueueToDatabase) {
+      // Load the queue from the database
+      const queueData = await QueueModel.findOne({ id: queue.id });
+      if (queueData) {
+        Logger.info(`Loaded queue ${queue.id} with ${queueData.items.length} items from database`);
+
+        // Re-add the items to the queue
+        queueData.items.forEach(item => {
+          queue.add(item);
+        });
+      }
+    }
+
+    // Register the queue
+    QueueManager.queues.set(queue.id, queue);
   }
 
   /**
@@ -41,9 +57,18 @@ export class QueueManager implements EventListener {
     return Array.from(QueueManager.queues.values());
   }
 
-  onStop() {
+  async onStop() {
     for (const queue of QueueManager.queues.values()) {
-      queue.cleanup();
+      queue.stop();
+
+      if (queue.saveQueueToDatabase) {
+        await QueueModel.updateOne(
+          { id: queue.id },
+          { $set: { items: queue.getQueue() } },
+          { upsert: true, new: true }
+        );
+        Logger.info(`Saved queue ${queue.id} with ${queue.getQueue().length} items to database`);
+      }
     }
   }
 }

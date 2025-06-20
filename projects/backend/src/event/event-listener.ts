@@ -12,7 +12,7 @@ export interface EventListener {
   /**
    * Called when the application stops.
    */
-  onStop?: () => void;
+  onStop?: () => Promise<void>;
 
   /**
    * Called when a score is received.

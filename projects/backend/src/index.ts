@@ -273,9 +273,9 @@ const setupSignalHandlers = () => {
 
       // Stop all event listeners (this will also stop queues through QueueManager)
       Logger.info("Stopping all services...");
-      EventsManager.getListeners().forEach(listener => {
-        listener.onStop?.();
-      });
+      for (const listener of EventsManager.getListeners()) {
+        await listener.onStop?.();
+      }
       Logger.info("All services stopped");
 
       // Close MongoDB connection

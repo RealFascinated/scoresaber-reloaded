@@ -1,4 +1,5 @@
 import { IsGuildUser } from "@discordx/utilities";
+import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import { CommandInteraction } from "discord.js";
 import { Discord, Guard, Slash } from "discordx";
@@ -20,8 +21,18 @@ export class ForceTrackPlayerStatistics {
 
     await PlayerRefreshService.updatePlayerStatistics(
       (currentPage, totalPages, successCount, errorCount) => {
+        // Only update every 10 pages
+        if (currentPage % 10 !== 0) {
+          return;
+        }
+
         interaction.editReply({
-          content: `Updating player statistics... ${currentPage}/${totalPages} (${successCount} success, ${errorCount} errors)`,
+          content: [
+            "Updating player statistics...",
+            `Page: ${formatNumberWithCommas(currentPage)}/${formatNumberWithCommas(totalPages)}`,
+            `Success: ${formatNumberWithCommas(successCount)}`,
+            `Errors: ${formatNumberWithCommas(errorCount)}`,
+          ].join("\n"),
         });
       }
     );
