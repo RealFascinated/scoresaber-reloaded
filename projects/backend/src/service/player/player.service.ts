@@ -62,6 +62,12 @@ export class PlayerService {
       }
     }
 
+    // Update the player's name if it's different from the token
+    if (playerToken && playerToken.name !== player.name) {
+      player.name = playerToken.name;
+      await player.save();
+    }
+
     return player;
   }
 
