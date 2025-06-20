@@ -74,7 +74,9 @@ export default class MiniRankingService {
       Array.from({ length: finalEndPage - startPage + 1 }, (_, i) => startPage + i).map(page =>
         fetchWithCache(
           CacheService.getCache(ServiceCache.ScoreSaber),
-          `players:${type}:${page}`,
+          type === "global"
+            ? `players:global:${page}`
+            : `players:country:${player.country}:${page}`,
           async () =>
             type === "global"
               ? ApiServiceRegistry.getInstance().getScoreSaberService().lookupPlayers(page)
@@ -97,16 +99,26 @@ export default class MiniRankingService {
       return [];
     }
 
-    // Get exactly 5 players: 2 above, the player, and 2 below
-    const start = Math.max(0, playerIndex - 2);
-    const end = Math.min(allPlayers.length, playerIndex + 3);
-    const result = allPlayers.slice(start, end);
+    // Get exactly 5 players: 3 above, the player, and 1 below
+    const result = [];
 
-    // If we don't have enough players (e.g., for rank 1-3), get more from below
-    if (result.length < 5 && end < allPlayers.length) {
-      const extraNeeded = 5 - result.length;
-      const extraPlayers = allPlayers.slice(end, end + extraNeeded);
-      result.push(...extraPlayers);
+    // Add 3 players above (if available)
+    for (let i = Math.max(0, playerIndex - 3); i < playerIndex; i++) {
+      result.push(allPlayers[i]);
+    }
+
+    // Add the requested player
+    result.push(allPlayers[playerIndex]);
+
+    // Add players below to fill up to 5 total players
+    const playersBelowNeeded = Math.max(1, 5 - result.length); // At least 1, but more if needed to reach 5
+
+    for (
+      let i = playerIndex + 1;
+      i < Math.min(allPlayers.length, playerIndex + 1 + playersBelowNeeded);
+      i++
+    ) {
+      result.push(allPlayers[i]);
     }
 
     return await Promise.all(
