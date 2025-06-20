@@ -14,7 +14,7 @@ import { CalendarIcon, GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerStatisticHistory } from "@ssr/common/player/player-statistic-history";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
-import { getDaysAgoDate, getMidnightAlignedDate } from "@ssr/common/utils/time-utils";
+import { getDaysAgoDate } from "@ssr/common/utils/time-utils";
 import { useQuery } from "@tanstack/react-query";
 import { CalculatorIcon, ChartBarIcon, SwordIcon, TrendingUpIcon } from "lucide-react";
 import dynamic from "next/dynamic";
@@ -141,12 +141,15 @@ export default function PlayerViews({ player }: { player: ScoreSaberPlayer }) {
   const { data: statisticHistory } = useQuery({
     queryKey: ["player-statistic-history", player.id, daysAgo],
     queryFn: () => {
-      return ssrApi.getPlayerStatisticHistory(
-        player.id,
-        getMidnightAlignedDate(getDaysAgoDate(daysAgo)),
-        getMidnightAlignedDate(new Date())
-      );
+      return ssrApi.getPlayerStatisticHistory(player.id, getDaysAgoDate(daysAgo), new Date());
     },
+  });
+
+  console.log({
+    daysAgo,
+    startDate: getDaysAgoDate(daysAgo),
+    endDate: new Date(),
+    statisticHistory,
   });
 
   const views: SelectedView[] = [
