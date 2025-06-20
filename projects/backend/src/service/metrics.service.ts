@@ -7,10 +7,10 @@ import CpuUsageMetric from "../metrics/impl/backend/cpu-usage";
 import EventLoopLagMetric from "../metrics/impl/backend/event-loop-lag";
 import EventLoopTimersMetric from "../metrics/impl/backend/event-loop-timers";
 import MemoryUsageMetric from "../metrics/impl/backend/memory-usage";
-import PointsPerSecondMetric from "../metrics/impl/backend/points-per-second";
 import RouteLatencyMetric from "../metrics/impl/backend/route-latency";
 import RequestsPerSecondMetric from "../metrics/impl/backend/total-requests";
 import MongoDbSizeMetric from "../metrics/impl/database/mongo-db-size";
+import PointsPerSecondMetric from "../metrics/impl/general/points-per-second";
 import ActiveAccountsMetric from "../metrics/impl/player/active-accounts";
 import ActivePlayerHmdStatisticMetric from "../metrics/impl/player/active-player-hmd-statistic";
 import HmdStatisticMetric from "../metrics/impl/player/daily-hmd-statistic";
@@ -29,7 +29,7 @@ const influxClient = new InfluxDB({
 const writeApi = influxClient.getWriteApi(env.INFLUXDB_ORG, env.INFLUXDB_BUCKET);
 
 export enum MetricType {
-  // Generic metrics
+  // General metrics
   POINTS_PER_SECOND = "points-per-second",
 
   // Player metrics
@@ -76,11 +76,16 @@ export default class MetricsService {
    */
   private flushTimer: NodeJS.Timeout | null = null;
 
+  private isInitialized = false;
+
   constructor() {
     if (MetricsService.instance) {
       return MetricsService.instance;
     }
     MetricsService.instance = this;
+
+    this.isInitialized = false;
+
     // Player metrics
     this.registerMetric(new TrackedScoresMetric());
     this.registerMetric(new TrackedPlayersMetric());
@@ -106,7 +111,7 @@ export default class MetricsService {
     // Database metrics
     this.registerMetric(new MongoDbSizeMetric());
 
-    // Generic metrics
+    // General metrics
     this.registerMetric(new PointsPerSecondMetric());
 
     this.initMetrics();
@@ -158,6 +163,9 @@ export default class MetricsService {
       // Set up individual timer for each metric
       await this.setupMetricTimer(metric);
     }
+
+    // Mark as initialized after all metrics are set up
+    this.isInitialized = true;
   }
 
   /**
@@ -234,7 +242,7 @@ export default class MetricsService {
       const pointsPerSecondMetric = MetricsService.metrics.find(
         metric => metric.id === MetricType.POINTS_PER_SECOND
       ) as PointsPerSecondMetric;
-      if (pointsPerSecondMetric) {
+      if (pointsPerSecondMetric && this.isInitialized) {
         pointsPerSecondMetric.incrementPointCount();
       }
     } catch (error) {
