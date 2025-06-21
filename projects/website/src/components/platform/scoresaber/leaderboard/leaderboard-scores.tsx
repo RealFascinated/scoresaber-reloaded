@@ -272,6 +272,7 @@ export default function LeaderboardScores({
                                 highlightedPlayerId={highlightedPlayerId}
                                 isExpanded={true}
                                 showLeaderboardScores={false}
+                                showMapStats={false}
                                 onLoadingChange={loading =>
                                   handleLoadingChange(playerScore.scoreId, loading)
                                 }

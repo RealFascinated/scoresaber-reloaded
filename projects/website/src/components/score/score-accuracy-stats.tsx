@@ -4,7 +4,7 @@ import SimpleTooltip from "@/components/simple-tooltip";
 import { ScoreStatsResponse } from "@ssr/common/response/scorestats-response";
 import { capitalizeFirstLetter } from "@ssr/common/string-utils";
 import { ScoreStatsToken } from "@ssr/common/types/token/beatleader/score-stats/score-stats";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 
 type ScoreAccuracyStatProps = {
   scoreStats: ScoreStatsResponse;
@@ -57,18 +57,21 @@ function AccuracyCircle({ accuracy, averageCut, hand }: AccuracyCircleProps) {
               strokeWidth={STROKE_WIDTH}
               className="opacity-50"
             />
-            <motion.circle
-              cx={center}
-              cy={center}
-              r={CIRCLE_RADIUS}
-              fill="none"
-              stroke={handColors[hand]}
-              strokeWidth={STROKE_WIDTH}
-              strokeLinecap="round"
-              initial={{ pathLength: 0 }}
-              animate={{ pathLength: percent }}
-              transition={{ duration: 1.5, ease: "easeInOut" }}
-            />
+            <AnimatePresence mode="wait">
+              <motion.circle
+                key={`${hand}-${accuracy}`}
+                cx={center}
+                cy={center}
+                r={CIRCLE_RADIUS}
+                fill="none"
+                stroke={handColors[hand]}
+                strokeWidth={STROKE_WIDTH}
+                initial={{ pathLength: 0 }}
+                animate={{ pathLength: percent }}
+                exit={{ pathLength: 0 }}
+                transition={{ duration: 1.2, ease: "easeInOut" }}
+              />
+            </AnimatePresence>
           </svg>
           <div className="absolute inset-0 flex items-center justify-center">
             <SimpleTooltip

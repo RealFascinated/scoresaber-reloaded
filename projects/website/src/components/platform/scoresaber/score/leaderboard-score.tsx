@@ -41,7 +41,7 @@ export default function ScoreSaberLeaderboardScore({
       {/* Score Rank */}
       <td className="px-4 py-2 whitespace-nowrap">
         <p className={`${getRankColor(score.rank)}`}>
-          {score.rank !== -1 ? `#${score.rank}` : "-"}
+          {score.rank !== -1 ? `#${formatNumberWithCommas(score.rank)}` : "-"}
         </p>
       </td>
 

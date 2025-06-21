@@ -23,7 +23,7 @@ type PlayerRefreshResult = {
   timeTaken: number;
 };
 
-const CONCURRENT_PAGES = 5;
+const CONCURRENT_PAGES = 3;
 
 export class PlayerRefreshService {
   /**

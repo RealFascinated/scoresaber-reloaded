@@ -46,6 +46,7 @@ export default function ScoreDropdown({
   isExpanded,
   defaultMode: initialMode = defaultMode,
   showLeaderboardScores = true,
+  showMapStats = true,
   defaultScoresPage,
   onModeChange,
   onLoadingChange,
@@ -57,6 +58,7 @@ export default function ScoreDropdown({
   isExpanded: boolean;
   defaultMode?: ScoreMode;
   showLeaderboardScores?: boolean;
+  showMapStats?: boolean;
   defaultScoresPage?: number;
   onModeChange?: (mode: ScoreMode) => void;
   onLoadingChange?: (isLoading: boolean) => void;
@@ -71,7 +73,7 @@ export default function ScoreDropdown({
   );
 
   const scoresPage = useMemo(
-    () => defaultScoresPage || getPageFromRank(score.rank, 12),
+    () => defaultScoresPage ?? getPageFromRank(score.rank, 12),
     [score.rank, defaultScoresPage]
   );
 
@@ -122,7 +124,7 @@ export default function ScoreDropdown({
               ))}
             </div>
 
-            {beatSaverMap && <MapStats beatSaver={beatSaverMap} />}
+            {showMapStats && beatSaverMap && <MapStats beatSaver={beatSaverMap} />}
           </div>
 
           <AnimatePresence initial={false} mode="wait">
