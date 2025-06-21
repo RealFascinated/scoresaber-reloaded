@@ -38,7 +38,7 @@ export function EmptyState({ icon, title, description, className }: EmptyStatePr
         {icon || <ChartBarIcon className="h-10 w-10 text-gray-400 dark:text-gray-500" />}
       </div>
       <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-gray-100">{title}</h3>
-      <p className="max-w-[400px] text-center text-sm leading-relaxed text-gray-500 dark:text-gray-400">
+      <p className="max-w-[500px] text-center text-sm leading-relaxed text-gray-500 dark:text-gray-400">
         {description}
       </p>
     </div>

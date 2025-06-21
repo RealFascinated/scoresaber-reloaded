@@ -1,6 +1,7 @@
 "use client";
 
 import { Colors } from "@/common/colors";
+import { EmptyState } from "@/components/ui/empty-state";
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { formatDate, formatDateMinimal, getDaysAgo } from "@ssr/common/utils/time-utils";
@@ -16,6 +17,7 @@ import {
   Title,
   Tooltip,
 } from "chart.js";
+import { ClockIcon } from "lucide-react";
 import { Line } from "react-chartjs-2";
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
@@ -58,11 +60,13 @@ export default function ScoreHistoryGraph({ playerId, leaderboardId }: ScoreHist
     queryFn: () => ssrApi.getScoreHistoryGraph(playerId, leaderboardId),
   });
 
-  if (!scoreHistory) {
+  if (!scoreHistory || scoreHistory.scores.length === 1) {
     return (
-      <div className="flex justify-center">
-        <p>Unable to load score history chart, missing data...</p>
-      </div>
+      <EmptyState
+        icon={<ClockIcon className="h-10 w-10 text-gray-400 dark:text-gray-500" />}
+        title="Not Enough Data"
+        description="This score does not have enough data to show a graph"
+      />
     );
   }
 
