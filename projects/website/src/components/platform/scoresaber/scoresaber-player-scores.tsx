@@ -406,17 +406,57 @@ export default function ScoreSaberPlayerScores({
         {/* Controls */}
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex w-full flex-col gap-4 lg:flex-row lg:items-center lg:gap-4">
-            {renderModeButtons()}
+            {scoresMode === "live" ? (
+              // Live mode: mode and sort buttons next to each other with spacer on mobile
+              <div className="flex items-center justify-center gap-4 lg:justify-start">
+                <div className="flex items-center justify-center gap-1 lg:justify-start">
+                  {Object.keys(SCORES_MODES).map(mode => (
+                    <SimpleTooltip
+                      key={mode}
+                      display={SCORES_MODES[mode as ScoreSaberScoreDataMode].tooltip}
+                    >
+                      <Button
+                        variant={mode === scoresMode ? "default" : "outline"}
+                        onClick={() => handleScoreModeChange(mode as ScoreSaberScoreDataMode)}
+                        size="sm"
+                        className="h-8 px-3 text-xs"
+                      >
+                        {SCORES_MODES[mode as ScoreSaberScoreDataMode].icon}
+                        <span className="ml-1.5">{capitalizeFirstLetter(mode)}</span>
+                      </Button>
+                    </SimpleTooltip>
+                  ))}
+                </div>
 
-            {/* Divider */}
-            <div
-              className={clsx(
-                "bg-border h-6 w-px",
-                scoresMode === "live" ? "block" : "hidden lg:block"
-              )}
-            />
+                {/* Vertical spacer for mobile */}
+                <div className="bg-border h-6 w-px lg:hidden" />
 
-            {renderSortButtons()}
+                <div className="flex items-center justify-center gap-1 lg:justify-start">
+                  {LIVE_SCORE_SORT.map(sortOption => (
+                    <Button
+                      key={sortOption.value}
+                      variant={sortOption.value === currentSort ? "default" : "outline"}
+                      onClick={() => handleSortChange(sortOption.value as ScoreSaberScoreSort)}
+                      size="sm"
+                      className="h-8 flex-shrink-0 px-3 text-xs"
+                    >
+                      {sortOption.icon}
+                      <span className="ml-1.5">{capitalizeFirstLetter(sortOption.name)}</span>
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              // Cached mode: keep current layout
+              <>
+                {renderModeButtons()}
+
+                {/* Divider */}
+                <div className="bg-border hidden h-6 w-px lg:block" />
+
+                {renderSortButtons()}
+              </>
+            )}
           </div>
 
           {renderSearchInput()}
