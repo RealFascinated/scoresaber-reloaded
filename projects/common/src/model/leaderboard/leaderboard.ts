@@ -85,13 +85,6 @@ export default class Leaderboard {
   readonly songArt!: string;
 
   /**
-   * The song art color.
-   * @private
-   */
-  @Prop({ required: false })
-  readonly songArtColor?: string;
-
-  /**
    * The date the leaderboard was created.
    * @private
    */

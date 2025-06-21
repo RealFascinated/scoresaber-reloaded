@@ -8,6 +8,7 @@ import {
   getScoreSaberScoreFromToken,
 } from "@ssr/common/token-creators";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
+import { formatDuration } from "@ssr/common/utils/time-utils";
 import { EmbedBuilder } from "discord.js";
 import { DiscordChannels, logToChannel } from "../../bot/bot";
 import { QueueId, QueueManager } from "../../queue/queue-manager";
@@ -69,13 +70,11 @@ export class PlayerRefreshService {
     // Process the first page
     await Promise.all(
       firstPage.playerScores.map(async score => {
+        const leaderboard = getScoreSaberLeaderboardFromToken(score.leaderboard);
+
         const { tracked } = await ScoreService.trackScoreSaberScore(
-          getScoreSaberScoreFromToken(
-            score.score,
-            getScoreSaberLeaderboardFromToken(score.leaderboard),
-            player._id
-          ),
-          getScoreSaberLeaderboardFromToken(score.leaderboard),
+          getScoreSaberScoreFromToken(score.score, leaderboard, player._id),
+          leaderboard,
           playerToken,
           true,
           false
@@ -115,13 +114,10 @@ export class PlayerRefreshService {
 
             await Promise.all(
               scoresPage.playerScores.map(async score => {
+                const leaderboard = getScoreSaberLeaderboardFromToken(score.leaderboard);
                 const { tracked } = await ScoreService.trackScoreSaberScore(
-                  getScoreSaberScoreFromToken(
-                    score.score,
-                    getScoreSaberLeaderboardFromToken(score.leaderboard),
-                    player._id
-                  ),
-                  getScoreSaberLeaderboardFromToken(score.leaderboard),
+                  getScoreSaberScoreFromToken(score.score, leaderboard, player._id),
+                  leaderboard,
                   playerToken,
                   true,
                   false
@@ -141,15 +137,16 @@ export class PlayerRefreshService {
       Logger.info(`Completed batch ${batchStart} to ${batchEnd} for ${player._id}`);
     }
 
-    // Mark player as seeded
-    await PlayerModel.updateOne({ _id: player._id }, { $set: { seededScores: true } });
-    player.seededScores = true;
+    if (!player.seededScores) {
+      // Mark player as seeded
+      await PlayerModel.updateOne({ _id: player._id }, { $set: { seededScores: true } });
+    }
 
-    Logger.info(
-      `Finished refreshing scores for ${player._id}, total pages refreshed: ${totalPages}.`
-    );
     result.totalPages = totalPages;
     result.timeTaken = performance.now() - startTime;
+    Logger.info(
+      `Finished refreshing scores for ${player._id}, total pages refreshed: ${totalPages} in ${formatDuration(result.timeTaken)}`
+    );
     return result;
   }
 
