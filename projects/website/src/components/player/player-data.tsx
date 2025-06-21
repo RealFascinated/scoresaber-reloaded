@@ -13,19 +13,16 @@ import {
 } from "@ssr/common/api-service/impl/accsaber";
 import type ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import type { ScoreSaberScoreSort } from "@ssr/common/score/score-sort";
+import { ScoreSaberScoreDataMode } from "@ssr/common/types/score-data-mode";
+import { ScoreSort } from "@ssr/common/types/sort";
 import { useQuery } from "@tanstack/react-query";
 import { useLiveQuery } from "dexie-react-hooks";
-import dynamic from "next/dynamic";
 import Link from "next/link";
 import AccSaberPlayerScores from "../platform/accsaber/accsaber-player-scores";
 import ScoreSaberPlayerScores from "../platform/scoresaber/scoresaber-player-scores";
 import { Button } from "../ui/button";
 import PlayerHeader from "./header/player-header";
 import PlayerMiniRankings from "./mini-ranking/player-mini-ranking";
-
-const PlayerRankingMini = dynamic(() => import("./mini-ranking/player-mini-ranking"), {
-  ssr: false,
-});
 
 const platformRepository = PlatformRepository.getInstance();
 const scoresaberPlatform = platformRepository.getScoreSaberPlatform();
@@ -87,13 +84,22 @@ function ScoreComponent({
   };
   pageParams: string[];
 }) {
+  const mode = (pageParams[2] as ScoreSaberScoreDataMode) ?? ("live" as ScoreSaberScoreDataMode);
+
   return (
     <div className="[&>div]:rounded-tl-none">
       {platformType === PlatformType.ScoreSaber ? (
         <ScoreSaberPlayerScores
           player={player}
-          sort={(pageParams[2] as ScoreSaberScoreSort) ?? ("recent" as ScoreSaberScoreSort)}
-          page={parseInt(pageParams[3]) || 1}
+          mode={mode}
+          sort={(pageParams[3] as ScoreSaberScoreSort) ?? ("recent" as ScoreSaberScoreSort)}
+          direction={
+            mode
+              ? ((pageParams[mode === "cached" ? 4 : 3] as ScoreSort["direction"]) ??
+                ("desc" as ScoreSort["direction"]))
+              : undefined
+          }
+          page={parseInt(pageParams[mode === "cached" ? 4 : 3]) || 1}
           initialSearch={searchParams.search}
         />
       ) : (

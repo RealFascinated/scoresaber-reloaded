@@ -13,6 +13,7 @@ import { LeaderboardResponse } from "../response/leaderboard-response";
 import LeaderboardScoresResponse from "../response/leaderboard-scores-response";
 import { PlayerRankedPpsResponse } from "../response/player-ranked-pps-response";
 import { PlayerScoresChartResponse } from "../response/player-scores-chart";
+import { PlayerScoresResponse } from "../response/player-scores-response";
 import { PlayerSearchResponse } from "../response/player-search-response";
 import { PlaysByHmdResponse } from "../response/plays-by-hmd-response";
 import { PpBoundaryResponse } from "../response/pp-boundary-response";
@@ -23,6 +24,7 @@ import { PlayerScore } from "../score/player-score";
 import { ScoreSaberScoreSort } from "../score/score-sort";
 import { MapCharacteristic } from "../types/map-characteristic";
 import { ScoreCalendarData } from "../types/player/player-statistic";
+import { ScoreSort } from "../types/sort";
 import Request from "./request";
 import { updateScoreWeights } from "./scoresaber.util";
 
@@ -307,6 +309,26 @@ class SSRApi {
           ...(search ? { search: search } : {}),
           ...(comparisonPlayerId ? { comparisonPlayerId: comparisonPlayerId } : {}),
         },
+      }
+    );
+  }
+
+  /**
+   * Fetches the player's scores from the cache.
+   *
+   * @param id the player id
+   * @param page the page
+   * @param sort the sort
+   */
+  async fetchCachedScoreSaberPlayerScores(id: string, page: number, sort: ScoreSort) {
+    console.log(sort);
+    console.log(
+      `${env.NEXT_PUBLIC_API_URL}/scores/cached/player/${id}/${sort.field}/${sort.direction}/${page}`
+    );
+    return Request.get<PlayerScoresResponse>(
+      `${env.NEXT_PUBLIC_API_URL}/scores/cached/player/${id}/${sort.field}/${sort.direction}/${page}`,
+      {
+        returns: "json",
       }
     );
   }

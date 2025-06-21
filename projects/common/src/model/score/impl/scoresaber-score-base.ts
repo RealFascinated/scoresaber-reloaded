@@ -37,7 +37,7 @@ export class ScoreSaberScoreBase extends Score {
   /**
    * The max combo of the score.
    */
-  @Prop({ required: true })
+  @Prop({ required: true, index: true })
   public readonly maxCombo!: number;
 
   /**

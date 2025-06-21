@@ -1,6 +1,7 @@
 import { InfluxDB, Point } from "@influxdata/influxdb-client";
 import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
+import { TimeUnit } from "@ssr/common/utils/time-utils";
 import { MetricValueModel } from "../common/model/metric";
 import { EventListener } from "../event/event-listener";
 import { ApiServicesMetric } from "../metrics/impl/backend/api-services";
@@ -84,6 +85,14 @@ export default class MetricsService implements EventListener {
 
     this.registerAllMetrics();
     this.initMetrics();
+
+    // Save metrics in the background
+    setInterval(
+      () => {
+        this.saveMetrics();
+      },
+      TimeUnit.toMillis(TimeUnit.Minute, 1)
+    );
   }
 
   /**

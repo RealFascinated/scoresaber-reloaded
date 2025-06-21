@@ -2,6 +2,7 @@ import { env } from "@ssr/common/env";
 import { InternalServerError } from "@ssr/common/error/internal-server-error";
 import Logger from "@ssr/common/logger";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
+import { isProduction } from "@ssr/common/utils/utils";
 import { RedisClient } from "bun";
 import SuperJSON from "superjson";
 
@@ -41,6 +42,11 @@ export default class CacheService {
     cacheKey: string,
     fetchFn: () => Promise<T>
   ): Promise<T> {
+    // Skip cache in development
+    if (!isProduction()) {
+      return fetchFn();
+    }
+
     if (cache == undefined) {
       throw new InternalServerError(`Cache is not defined`);
     }

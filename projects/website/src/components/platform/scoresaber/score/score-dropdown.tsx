@@ -7,7 +7,7 @@ import { MapStats } from "@/components/score/map-stats";
 import { Button } from "@/components/ui/button";
 import { CubeIcon } from "@heroicons/react/24/solid";
 import { ChartBarIcon, TrendingUpIcon } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import LeaderboardScores from "@/components/platform/scoresaber/leaderboard/leaderboard-scores";
 import { Separator } from "@/components/ui/separator";
@@ -38,18 +38,6 @@ const modes: Mode[] = [
 
 const defaultMode = ScoreMode.Overview;
 
-interface ScoreDropdownProps {
-  score: ScoreSaberScore;
-  leaderboard: ScoreSaberLeaderboard;
-  beatSaverMap?: BeatSaverMapResponse;
-  highlightedPlayerId?: string;
-  isExpanded: boolean;
-  defaultMode?: ScoreMode;
-  showLeaderboardScores?: boolean;
-  onModeChange?: (mode: ScoreMode) => void;
-  onLoadingChange?: (isLoading: boolean) => void;
-}
-
 export default function ScoreDropdown({
   score,
   leaderboard,
@@ -58,9 +46,21 @@ export default function ScoreDropdown({
   isExpanded,
   defaultMode: initialMode = defaultMode,
   showLeaderboardScores = true,
+  defaultScoresPage,
   onModeChange,
   onLoadingChange,
-}: ScoreDropdownProps) {
+}: {
+  score: ScoreSaberScore;
+  leaderboard: ScoreSaberLeaderboard;
+  beatSaverMap?: BeatSaverMapResponse;
+  highlightedPlayerId?: string;
+  isExpanded: boolean;
+  defaultMode?: ScoreMode;
+  showLeaderboardScores?: boolean;
+  defaultScoresPage?: number;
+  onModeChange?: (mode: ScoreMode) => void;
+  onLoadingChange?: (isLoading: boolean) => void;
+}) {
   const [mode, setMode] = useState<ScoreMode>(initialMode);
 
   const { data: dropdownData, isLoading } = useLeaderboardDropdownData(
@@ -70,7 +70,10 @@ export default function ScoreDropdown({
     score.additionalData
   );
 
-  const scoresPage = getPageFromRank(score.rank, 12);
+  const scoresPage = useMemo(
+    () => defaultScoresPage || getPageFromRank(score.rank, 12),
+    [score.rank, defaultScoresPage]
+  );
 
   const handleModeChange = useCallback(
     (newMode: ScoreMode) => {

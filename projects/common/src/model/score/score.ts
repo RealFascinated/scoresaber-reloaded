@@ -39,13 +39,13 @@ export default class Score {
    * The base score for the score.
    * @private
    */
-  @prop({ required: true })
+  @prop({ required: true, index: true })
   public readonly score!: number;
 
   /**
    * The accuracy of the score.
    */
-  @prop({ required: true })
+  @prop({ required: true, index: true })
   public accuracy!: number;
 
   /**
@@ -66,7 +66,7 @@ export default class Score {
    * The total amount of misses.
    * @private
    */
-  @prop({ required: true })
+  @prop({ required: true, index: true })
   public readonly misses!: number;
 
   /**

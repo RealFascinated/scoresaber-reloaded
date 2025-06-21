@@ -1,4 +1,5 @@
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
+import { BadRequestError } from "@ssr/common/error/bad-request-error";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger from "@ssr/common/logger";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
@@ -15,10 +16,12 @@ import { ScoreType } from "@ssr/common/model/score/score";
 import { Page, Pagination } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import LeaderboardScoresResponse from "@ssr/common/response/leaderboard-scores-response";
+import { PlayerScoresResponse } from "@ssr/common/response/player-scores-response";
 import { PlayerScore } from "@ssr/common/score/player-score";
 import { Timeframe } from "@ssr/common/timeframe";
 import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 import { Metadata } from "@ssr/common/types/metadata";
+import { ScoreSort, validateSort } from "@ssr/common/types/sort";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score";
 import { getDaysAgoDate, getMidnightAlignedDate } from "@ssr/common/utils/time-utils";
@@ -593,5 +596,89 @@ export class ScoreService {
     const { items: top50Scores } = await ScoreService.getTopScores("all", 1);
     const lowestPp = top50Scores.reduce((min, score) => Math.min(min, score.score.pp), Infinity);
     return score.pp >= lowestPp;
+  }
+
+  /**
+   * Gets the scores for a player.
+   *
+   * @param playerId the id of the player
+   * @param page the page number
+   * @param options the sort options
+   * @returns the paginated scores
+   */
+  public static async getScores(
+    playerId: string,
+    page: number,
+    options: ScoreSort
+  ): Promise<PlayerScoresResponse> {
+    const isValid = validateSort(options);
+    if (!isValid) {
+      throw new BadRequestError("Invalid sort options");
+    }
+
+    const fieldsMapping: Record<ScoreSort["field"], string> = {
+      pp: "pp",
+      score: "score",
+      misses: "misses",
+      acc: "accuracy",
+      maxcombo: "maxCombo",
+      date: "timestamp",
+    };
+
+    const totalScores = await ScoreSaberScoreModel.countDocuments({ playerId: playerId });
+    const pagination = new Pagination<
+      PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>
+    >().setItemsPerPage(8);
+    pagination.setTotalItems(totalScores);
+
+    return pagination.getPage(page, async ({ start, end }) => {
+      // Build query to exclude Infinity values
+      const query: { playerId: string; [key: string]: string | { $ne: number; $exists: boolean } } =
+        { playerId: playerId };
+
+      // Add filter to exclude Infinity values for the sort field
+      if (options.field && options.field !== "date") {
+        query[fieldsMapping[options.field]] = { $ne: Infinity, $exists: true };
+      }
+
+      const rawScores = (await ScoreSaberScoreModel.find(query)
+        .sort({ [options.field]: options.direction === "asc" ? 1 : -1 })
+        .skip(start)
+        .limit(end - start)
+        .lean()) as unknown as ScoreSaberScore[];
+
+      const leaderboardResponses = await LeaderboardService.getLeaderboards(
+        rawScores.map(score => score.leaderboardId + ""),
+        {
+          includeBeatSaver: true,
+          cacheOnly: true,
+        }
+      );
+      const leaderboardMap = new Map(
+        leaderboardResponses.map(response => [response.leaderboard.id, response])
+      );
+
+      // Process scores in parallel
+      const processedScores = await Promise.all(
+        rawScores.map(async rawScore => {
+          const leaderboardResponse = leaderboardMap.get(rawScore.leaderboardId);
+          if (!leaderboardResponse) {
+            return null;
+          }
+
+          const { leaderboard, beatsaver } = leaderboardResponse;
+          const score = await ScoreService.insertScoreData(scoreToObject(rawScore), leaderboard);
+          return {
+            score: score,
+            leaderboard: leaderboard,
+            beatSaver: beatsaver,
+          } as PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>;
+        })
+      );
+
+      return processedScores.filter(
+        (score): score is PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard> => score !== null
+      );
+    });
   }
 }

@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { useIsMobile } from "@/hooks/use-is-mobile";
-import { getPageFromRank } from "@ssr/common/utils/utils";
 
 import Avatar from "@/components/avatar";
 import ScoreSaberScoreButtons from "@/components/platform/scoresaber/score/buttons/score-buttons";
@@ -41,6 +40,7 @@ export default function ScoreSaberScoreDisplay({
     disablePadding?: boolean;
     hideRank?: boolean;
     allowLeaderboardPreview?: boolean;
+    defaultLeaderboardScoresPage?: number;
   };
 }) {
   const [baseScore, setBaseScore] = useState(score.score);
@@ -50,7 +50,6 @@ export default function ScoreSaberScoreDisplay({
   );
   const [isLeaderboardLoading, setIsLeaderboardLoading] = useState(false);
 
-  const scoresPage = useMemo(() => getPageFromRank(score.rank, 12), [score.rank]);
   const isMobile = useIsMobile();
 
   useEffect(() => {
@@ -162,6 +161,7 @@ export default function ScoreSaberScoreDisplay({
         highlightedPlayerId={highlightedPlayerId}
         isExpanded={isLeaderboardExpanded}
         defaultMode={mode}
+        defaultScoresPage={settings?.defaultLeaderboardScoresPage}
         onModeChange={handleModeChange}
         onLoadingChange={handleLoadingChange}
       />

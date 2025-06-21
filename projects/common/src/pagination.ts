@@ -101,10 +101,10 @@ export class Page<T> {
   /**
    * Converts the page to a JSON object.
    */
-  toJSON() {
+  toJSON(): Page<T> {
     return {
       items: this.items,
       metadata: this.metadata,
-    };
+    } as Page<T>;
   }
 }

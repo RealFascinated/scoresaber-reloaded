@@ -11,7 +11,7 @@ import usePageNavigation from "@/hooks/use-page-navigation";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
 import { AnimatePresence, motion } from "framer-motion";
-import { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { DifficultyButton } from "../../../leaderboard/button/difficulty-button";
 import SimplePagination from "../../../simple-pagination";
 import ScoreSaberLeaderboardScore from "../score/leaderboard-score";
@@ -229,16 +229,14 @@ export default function LeaderboardScores({
               </thead>
               <tbody className="divide-border/30 divide-y">
                 {scores.items.map((playerScore, index) => (
-                  <>
+                  <React.Fragment key={playerScore.scoreId}>
                     <tr
-                      key={`row-${playerScore.scoreId}`}
                       className={cn(
                         "hover:bg-primary/5 transition-colors",
                         highlightedPlayerId === playerScore.playerId && "bg-primary/10"
                       )}
                     >
                       <ScoreSaberLeaderboardScore
-                        key={playerScore.scoreId}
                         score={playerScore}
                         leaderboard={leaderboard}
                         highlightedPlayerId={highlightedPlayerId}
@@ -283,7 +281,7 @@ export default function LeaderboardScores({
                         </motion.tr>
                       )}
                     </AnimatePresence>
-                  </>
+                  </React.Fragment>
                 ))}
               </tbody>
             </table>

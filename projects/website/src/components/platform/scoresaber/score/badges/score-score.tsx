@@ -8,7 +8,11 @@ export function ScoreScoreBadge({ score }: ScoreBadgeProps) {
 
   return (
     <div className="flex flex-col items-center justify-center">
-      <p>{formatNumberWithCommas(Number(score.score.toFixed(0)))}</p>
+      <SimpleTooltip
+        display={`Max Combo: ${formatNumberWithCommas(Number(score.maxCombo.toFixed(0)))}x`}
+      >
+        <p>{formatNumberWithCommas(Number(score.score.toFixed(0)))}</p>
+      </SimpleTooltip>
       {previousScore && previousScore.change && (
         <SimpleTooltip
           display={<p>Previous Score: {formatNumberWithCommas(previousScore.score)}</p>}
