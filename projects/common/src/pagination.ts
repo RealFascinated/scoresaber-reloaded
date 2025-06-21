@@ -90,7 +90,7 @@ class FetchItems {
 }
 
 export class Page<T> {
-  readonly items: T[];
+  items: T[];
   readonly metadata: Metadata;
 
   constructor(items: T[], metadata: Metadata) {

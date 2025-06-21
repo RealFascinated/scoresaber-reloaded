@@ -2,17 +2,10 @@ import { ScoreModeEnum } from "@/components/score/score-mode";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { Page, Pagination } from "@ssr/common/pagination";
-import { Metadata } from "@ssr/common/types/metadata";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { useLiveQuery } from "dexie-react-hooks";
 import useDatabase from "../use-database";
-
-const createPage = (items: ScoreSaberScore[], metadata: Metadata): Page<ScoreSaberScore> => ({
-  items,
-  metadata,
-  toJSON: () => ({ items, metadata }),
-});
 
 export const useLeaderboardScores = (
   leaderboardId: number,
@@ -28,11 +21,16 @@ export const useLeaderboardScores = (
     queryKey: ["leaderboardScores", leaderboardId, page, mode, country, friendIds, mainPlayer],
     queryFn: async () => {
       if (mode === ScoreModeEnum.Global) {
-        const leaderboard = await ssrApi.fetchLeaderboardScores<
+        const response = await ssrApi.fetchLeaderboardScores<
           ScoreSaberScore,
           ScoreSaberLeaderboard
         >(leaderboardId.toString(), page, country);
-        return createPage(leaderboard!.scores, leaderboard!.metadata);
+
+        if (response) {
+          return new Page(response.scores, response.metadata);
+        }
+
+        return undefined;
       }
 
       if (friendIds && mainPlayer) {
@@ -44,14 +42,13 @@ export const useLeaderboardScores = (
 
         if (friendScores) {
           const friends = await database.getFriends();
-          return createPage(
-            friendScores.items.map(score => ({
-              ...score,
-              rank: -1,
-              playerInfo: friends.find(f => f.id === score.playerId) || mainPlayer || undefined,
-            })),
-            friendScores.metadata
-          );
+
+          friendScores.items = friendScores.items.map(score => ({
+            ...score,
+            playerInfo: friends.find(f => f.id === score.playerId) || mainPlayer || undefined,
+          }));
+
+          return friendScores;
         }
       }
 
