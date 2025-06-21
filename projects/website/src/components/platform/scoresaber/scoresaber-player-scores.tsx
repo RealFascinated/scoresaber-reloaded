@@ -523,11 +523,11 @@ export default function ScoreSaberPlayerScores({
                 <div className="bg-border hidden h-6 w-px lg:block" />
 
                 {renderSortButtons()}
-
-                {renderFilters()}
               </>
             )}
           </div>
+
+          {scoresMode === "cached" && renderFilters()}
           {renderSearchInput()}
         </div>
 
