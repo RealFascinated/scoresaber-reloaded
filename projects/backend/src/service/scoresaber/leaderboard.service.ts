@@ -61,7 +61,6 @@ type LeaderboardOptions = {
   includeBeatSaver?: boolean;
   beatSaverType?: DetailType;
   type?: DetailType;
-  search?: string;
 };
 
 type LeaderboardData = {
@@ -300,36 +299,34 @@ export default class LeaderboardService {
   ): Promise<LeaderboardResponse[]> {
     const defaultOptions = this.getDefaultOptions(options);
 
-    // Bulk fetch leaderboards from MongoDB
-    const bulkLeaderboards = await ScoreSaberLeaderboardModel.find({
-      _id: { $in: ids },
-    }).lean();
+    // First, check cache for each ID
+    const cachePromises = ids.map(async id => {
+      return await CacheService.fetchWithCache(
+        CacheId.Leaderboards,
+        `leaderboard:id:${id}`,
+        async () => {
+          const cachedLeaderboard = await ScoreSaberLeaderboardModel.findById(id).lean();
+          const { cached, foundLeaderboard } = this.validateCachedLeaderboard(
+            cachedLeaderboard,
+            options
+          );
 
-    // Create a map for quick lookup
-    const bulkLeaderboardMap = new Map(bulkLeaderboards.map(lb => [lb._id.toString(), lb]));
+          let leaderboard = foundLeaderboard;
+          if (!leaderboard) {
+            try {
+              leaderboard = await this.fetchAndSaveLeaderboard(id);
+            } catch (error) {
+              Logger.warn(`Failed to fetch leaderboard for ID ${id}:`, error);
+              return null;
+            }
+          }
 
-    // Process each ID to get leaderboard data
-    const leaderboardDataPromises = ids.map(async id => {
-      const cachedLeaderboard = bulkLeaderboardMap.get(id);
-      const { cached, foundLeaderboard } = this.validateCachedLeaderboard(
-        cachedLeaderboard || null,
-        options
-      );
-
-      let leaderboard = foundLeaderboard;
-      if (!leaderboard) {
-        try {
-          leaderboard = await this.fetchAndSaveLeaderboard(id);
-        } catch (error) {
-          Logger.warn(`Failed to fetch leaderboard for ID ${id}:`, error);
-          return null;
+          return await this.createLeaderboardData(leaderboard, cached, id);
         }
-      }
-
-      return await this.createLeaderboardData(leaderboard, cached, id);
+      );
     });
 
-    const leaderboardDataResults = await Promise.all(leaderboardDataPromises);
+    const leaderboardDataResults = await Promise.all(cachePromises);
     const allLeaderboards = leaderboardDataResults.filter(result => result !== null);
 
     // Get BeatSaver data if needed
