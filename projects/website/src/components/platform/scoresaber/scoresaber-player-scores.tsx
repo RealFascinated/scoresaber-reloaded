@@ -412,15 +412,15 @@ export default function ScoreSaberPlayerScores({
 
           {/* Search and Filters - Bottom Row */}
           <ControlRow className="mb-0">
-            <div className="flex items-center gap-2">
+            <div className="flex w-full flex-col-reverse items-center gap-2 sm:w-auto sm:flex-row">
               {/* Search */}
-              <div className="relative">
+              <div className="relative w-full sm:w-auto">
                 <SearchIcon className="text-muted-foreground absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2" />
                 <Input
                   type="search"
                   placeholder="Query..."
                   className={clsx(
-                    "h-8 w-40 pr-3 pl-8 text-xs sm:w-64",
+                    "h-8 w-full pr-3 pl-8 text-xs sm:w-64",
                     invalidSearch && "border-red-500"
                   )}
                   value={searchTerm}
@@ -430,7 +430,7 @@ export default function ScoreSaberPlayerScores({
 
               {/* Filters (cached mode only) */}
               {scoresMode === "cached" && (
-                <>
+                <div className="flex w-full items-center gap-2 sm:w-auto">
                   <Select
                     value={currentFilter || ""}
                     onValueChange={value => {
@@ -439,7 +439,7 @@ export default function ScoreSaberPlayerScores({
                       animateLeft();
                     }}
                   >
-                    <SelectTrigger className="h-8 w-40 text-xs">
+                    <SelectTrigger className="h-8 w-full text-xs sm:w-40">
                       <SelectValue placeholder="Filter" />
                     </SelectTrigger>
                     <SelectContent>
@@ -468,7 +468,7 @@ export default function ScoreSaberPlayerScores({
                       </button>
                     </SimpleTooltip>
                   )}
-                </>
+                </div>
               )}
             </div>
           </ControlRow>
