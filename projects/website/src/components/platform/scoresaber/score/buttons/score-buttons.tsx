@@ -5,6 +5,7 @@ import { BeatSaverMapButton } from "@/components/score/button/beat-saver-map-but
 import { ScoreBsrButton } from "@/components/score/button/score-bsr-button";
 import { ScoreReplayButton } from "@/components/score/button/score-replay-button";
 import { SongOpenInYoutubeButton } from "@/components/score/button/song-open-in-youtube-button";
+import SimpleTooltip from "@/components/simple-tooltip";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { ArrowDownIcon, ArrowPathIcon } from "@heroicons/react/24/solid";
@@ -164,23 +165,25 @@ export default function ScoreSaberScoreButtons({
         {leaderboardExpanded != undefined &&
           setIsLeaderboardExpanded != undefined &&
           !hideLeaderboardDropdown && (
-            <Button
-              variant="ghost"
-              className="h-[28px] w-[28px] p-0"
-              onClick={handleDropdownToggle}
-              disabled={isLeaderboardLoading || isPending}
-            >
-              {isLeaderboardLoading || isPending ? (
-                <ArrowPathIcon className="h-4 w-4 animate-spin" />
-              ) : (
-                <ArrowDownIcon
-                  className={clsx(
-                    "h-4 w-4 transition-transform",
-                    leaderboardExpanded ? "rotate-180" : ""
-                  )}
-                />
-              )}
-            </Button>
+            <SimpleTooltip display="Score stats and leaderboard scores">
+              <Button
+                variant="ghost"
+                className="h-[28px] w-[28px] p-0"
+                onClick={handleDropdownToggle}
+                disabled={isLeaderboardLoading || isPending}
+              >
+                {isLeaderboardLoading || isPending ? (
+                  <ArrowPathIcon className="h-4 w-4 animate-spin" />
+                ) : (
+                  <ArrowDownIcon
+                    className={clsx(
+                      "h-4 w-4 transition-transform",
+                      leaderboardExpanded ? "rotate-180" : ""
+                    )}
+                  />
+                )}
+              </Button>
+            </SimpleTooltip>
           )}
       </div>
     </div>
