@@ -1,5 +1,4 @@
 import cron from "@elysiajs/cron";
-import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { env } from "@ssr/common/env";
 import { BadRequestError } from "@ssr/common/error/bad-request-error";
 import { InternalServerError } from "@ssr/common/error/internal-server-error";
@@ -13,7 +12,6 @@ import { parseCustomRankedPlaylistSettings } from "@ssr/common/playlist/ranked/c
 import { SnipePlaylist } from "@ssr/common/playlist/snipe/snipe-playlist";
 import { parseSnipePlaylistSettings } from "@ssr/common/snipe/snipe-playlist-utils";
 import { capitalizeFirstLetter, truncateText } from "@ssr/common/string-utils";
-import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
 import { formatDateMinimal } from "@ssr/common/utils/time-utils";
 import { app } from "..";
 import {
@@ -21,7 +19,6 @@ import {
   generatePlaylistImage,
   generateSnipePlaylistImage,
 } from "../common/playlist.util";
-import CacheService, { CacheId } from "./cache.service";
 import { PlayerService } from "./player/player.service";
 import { ScoreService } from "./score/score.service";
 import LeaderboardService from "./scoresaber/leaderboard.service";
@@ -246,28 +243,12 @@ export default class PlaylistService {
    * Creates a playlist for ranking queue maps
    */
   public static async createRankingQueuePlaylist(): Promise<Playlist> {
-    const leaderboards = await CacheService.fetchWithCache(
-      CacheId.Leaderboards,
-      "ranking-queue-maps",
-      async () => {
-        const rankingQueueTokens = await ApiServiceRegistry.getInstance()
-          .getScoreSaberService()
-          .lookupRankingRequests();
-        if (!rankingQueueTokens) {
-          return [];
-        }
-
-        return rankingQueueTokens.all.map(token =>
-          getScoreSaberLeaderboardFromToken(token.leaderboardInfo)
-        );
-      }
-    );
+    const leaderboards = await LeaderboardService.getRankingQueueLeaderboards();
+    const { maps } = this.processLeaderboards(leaderboards);
+    const highlightedIds = leaderboards.map(map => map.id);
 
     const title = `ScoreSaber Ranking Queue Maps (${formatDateMinimal(new Date())})`;
     const imageTitle = "Ranking Queue";
-    const highlightedIds = leaderboards.map(map => map.id);
-
-    const { maps } = this.processLeaderboards(leaderboards);
     const image = await generatePlaylistImage("SSR", { title: imageTitle });
 
     return this.createScoreSaberPlaylist(

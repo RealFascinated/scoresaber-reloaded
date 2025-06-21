@@ -997,7 +997,7 @@ export default class LeaderboardService {
   }): Promise<ScoreSaberLeaderboard[]> {
     return CacheService.fetchWithCache(
       CacheId.Leaderboards,
-      `leaderboards:ranked-leaderboards-${JSON.stringify(options)}`,
+      `leaderboard:ranked-leaderboards-${JSON.stringify(options)}`,
       async () => {
         const leaderboards: ScoreSaberLeaderboard[] = await ScoreSaberLeaderboardModel.aggregate([
           { $match: { ranked: true, ...(options?.match ?? {}) } },
@@ -1025,10 +1025,32 @@ export default class LeaderboardService {
   public static async getQualifiedLeaderboards(): Promise<ScoreSaberLeaderboard[]> {
     return CacheService.fetchWithCache(
       CacheId.Leaderboards,
-      "leaderboards:qualified-leaderboards",
+      "leaderboard:qualified-leaderboards",
       async () => {
         const leaderboards = await ScoreSaberLeaderboardModel.find({ qualified: true }).lean();
         return leaderboards.map(leaderboard => this.leaderboardToObject(leaderboard));
+      }
+    );
+  }
+
+  /**
+   * Gets the ranking queue leaderboards
+   */
+  public static async getRankingQueueLeaderboards(): Promise<ScoreSaberLeaderboard[]> {
+    return CacheService.fetchWithCache(
+      CacheId.Leaderboards,
+      "leaderboard:ranking-queue-maps",
+      async () => {
+        const rankingQueueTokens = await ApiServiceRegistry.getInstance()
+          .getScoreSaberService()
+          .lookupRankingRequests();
+        if (!rankingQueueTokens) {
+          return [];
+        }
+
+        return rankingQueueTokens.all.map(token =>
+          getScoreSaberLeaderboardFromToken(token.leaderboardInfo)
+        );
       }
     );
   }

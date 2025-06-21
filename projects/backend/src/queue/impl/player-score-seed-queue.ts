@@ -67,7 +67,7 @@ export class PlayerScoreSeedQueue extends Queue<string> {
               .setLabel("Player Profile")
               .setEmoji("👤")
               .setStyle(ButtonStyle.Link)
-              .setURL(`${env.NEXT_PUBLIC_WEBSITE_URL}/player/${player.id}`),
+              .setURL(`${env.NEXT_PUBLIC_WEBSITE_URL}/player/${player._id}`),
           ],
         },
       ]
