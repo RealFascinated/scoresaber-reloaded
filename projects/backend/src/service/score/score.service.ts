@@ -625,7 +625,16 @@ export class ScoreService {
       date: "timestamp",
     };
 
-    const totalScores = await ScoreSaberScoreModel.countDocuments({ playerId: playerId });
+    const filters = options.filters ?? {
+      rankedOnly: false,
+      unrankedOnly: false,
+    };
+
+    const totalScores = await ScoreSaberScoreModel.countDocuments({
+      playerId: playerId,
+      ...(filters.rankedOnly ? { pp: { $gt: 0 } } : {}),
+      ...(filters.unrankedOnly ? { pp: { $lte: 0 } } : {}),
+    });
     const pagination = new Pagination<
       PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>
     >().setItemsPerPage(8);
@@ -633,12 +642,22 @@ export class ScoreService {
 
     return pagination.getPage(page, async ({ start, end }) => {
       // Build query to exclude Infinity values
-      const query: { playerId: string; [key: string]: string | { $ne: number; $exists: boolean } } =
-        { playerId: playerId };
+      const query: {
+        playerId: string;
+        [key: string]: string | { $ne?: number; $exists?: boolean; $gt?: number; $lte?: number };
+      } = { playerId: playerId };
 
       // Add filter to exclude Infinity values for the sort field
       if (options.field && options.field !== "date") {
         query[fieldsMapping[options.field]] = { $ne: Infinity, $exists: true };
+      }
+
+      // Filter scores based on the filters
+      if (filters.rankedOnly) {
+        query.pp = { $gt: 0 };
+      }
+      if (filters.unrankedOnly) {
+        query.pp = { $lte: 0 };
       }
 
       const rawScores = (await ScoreSaberScoreModel.find(query)

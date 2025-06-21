@@ -26,7 +26,9 @@ import {
   ArrowUp,
   BarChart3,
   ClockIcon,
+  Filter,
   Hash,
+  MusicIcon,
   SearchIcon,
   Target,
   TrendingUpIcon,
@@ -38,6 +40,7 @@ import ScoresCard from "../../score/scores-card";
 import SimplePagination from "../../simple-pagination";
 import { Button } from "../../ui/button";
 import { EmptyState } from "../../ui/empty-state";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../ui/select";
 import ScoreSaberScoreDisplay from "./score/score";
 
 // Constants
@@ -93,6 +96,15 @@ const CACHED_SCORE_SORT: {
     defaultOrder: "desc" as const,
   },
 ];
+const CACHED_SCORE_FILTERS: {
+  name: string;
+  value: ScoreSort["filters"];
+  icon: React.ReactNode;
+}[] = [
+  { name: "All Scores", value: {}, icon: <Filter className="h-4 w-4" /> },
+  { name: "Ranked Only", value: { rankedOnly: true }, icon: <Trophy className="h-4 w-4" /> },
+  { name: "Unranked Only", value: { unrankedOnly: true }, icon: <MusicIcon className="h-4 w-4" /> },
+];
 
 const SCORES_MODES: Record<ScoreSaberScoreDataMode, { icon: React.ReactNode; tooltip: string }> = {
   cached: {
@@ -141,6 +153,7 @@ export default function ScoreSaberPlayerScores({
     direction ?? DEFAULT_CACHED_SORT_DIRECTION
   );
   const [searchTerm, setSearchTerm] = useState(initialSearch || "");
+  const [currentFilter, setCurrentFilter] = useState<string | null>("All Scores");
 
   // Derived state
   const debouncedSearchTerm = useDebounce(searchTerm, 250);
@@ -167,6 +180,7 @@ export default function ScoreSaberPlayerScores({
       showScoreComparison,
       currentSortDirection,
       scoresMode,
+      currentFilter,
     ],
     queryFn: async () => {
       if (scoresMode === "live") {
@@ -176,9 +190,13 @@ export default function ScoreSaberPlayerScores({
           comparisonPlayerId: showScoreComparison && mainPlayerId ? mainPlayerId : undefined,
         });
       } else {
+        // Find the selected filter
+        const selectedFilter = CACHED_SCORE_FILTERS.find(filter => filter.name === currentFilter);
+
         const response = await ssrApi.fetchCachedScoreSaberPlayerScores(player.id, currentPage, {
           field: currentSort,
           direction: currentSortDirection,
+          filters: selectedFilter ? selectedFilter.value : {},
         } as ScoreSort);
         return response || Pagination.empty();
       }
@@ -324,6 +342,56 @@ export default function ScoreSaberPlayerScores({
     </div>
   );
 
+  const renderFilters = () => (
+    <div className="flex items-center justify-center gap-1 lg:justify-start">
+      <div className="flex items-center gap-2">
+        <Select
+          value={currentFilter || ""}
+          onValueChange={value => {
+            if (value === "clear") {
+              setCurrentFilter("All Scores");
+            } else {
+              setCurrentFilter(value);
+            }
+            setCurrentPage(1);
+            animateLeft();
+          }}
+        >
+          <SelectTrigger className="h-8 w-44 cursor-pointer px-3 text-xs">
+            <SelectValue placeholder="Filters" />
+          </SelectTrigger>
+          <SelectContent>
+            {CACHED_SCORE_FILTERS.map(filter => (
+              <SelectItem key={filter.name} value={filter.name}>
+                <div className="flex cursor-pointer items-center gap-2">
+                  {filter.icon}
+                  <span>{filter.name}</span>
+                </div>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        {currentFilter && currentFilter !== "All Scores" && (
+          <SimpleTooltip display="Clear filters">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                setCurrentFilter("All Scores");
+                setCurrentPage(1);
+                animateLeft();
+              }}
+              className="h-8 w-8 p-0 text-red-500"
+            >
+              <XIcon className="h-4 w-4" />
+            </Button>
+          </SimpleTooltip>
+        )}
+      </div>
+    </div>
+  );
+
   const renderSearchInput = () => (
     <div
       className={clsx("flex justify-center lg:flex-shrink-0", scoresMode === "cached" && "hidden")}
@@ -369,7 +437,7 @@ export default function ScoreSaberPlayerScores({
         </div>
 
         <PageTransition className="divide-border grid min-w-full grid-cols-1 divide-y">
-          {scores.items.map((score, index) => (
+          {scores.items.map(score => (
             <ScoreSaberScoreDisplay
               key={score.score.scoreId}
               score={score.score}
@@ -459,6 +527,7 @@ export default function ScoreSaberPlayerScores({
             )}
           </div>
 
+          {renderFilters()}
           {renderSearchInput()}
         </div>
 

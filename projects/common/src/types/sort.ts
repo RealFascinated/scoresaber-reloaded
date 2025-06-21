@@ -2,10 +2,17 @@ import { z } from "zod";
 
 const sortField = z.enum(["pp", "misses", "acc", "score", "maxcombo", "date"]);
 const sortDirection = z.enum(["asc", "desc"]);
+const filters = z
+  .object({
+    rankedOnly: z.boolean().optional(),
+    unrankedOnly: z.boolean().optional(),
+  })
+  .optional();
 
 const sortSchema = z.object({
   field: sortField,
   direction: sortDirection,
+  filters,
 });
 
 /**

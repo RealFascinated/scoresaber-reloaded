@@ -325,6 +325,9 @@ class SSRApi {
       `${env.NEXT_PUBLIC_API_URL}/scores/cached/player/${id}/${sort.field}/${sort.direction}/${page}`,
       {
         returns: "json",
+        searchParams: Object.fromEntries(
+          Object.entries(sort.filters ?? {}).map(([key, value]) => [key, value])
+        ),
       }
     );
   }
