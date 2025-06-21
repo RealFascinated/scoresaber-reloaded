@@ -408,7 +408,7 @@ export default function ScoreSaberPlayerScores({
           <div className="flex w-full flex-col gap-4 lg:flex-row lg:items-center lg:gap-4">
             {scoresMode === "live" ? (
               // Live mode: mode and sort buttons next to each other with spacer on mobile
-              <div className="flex items-center justify-center gap-4 lg:justify-start">
+              <div className="flex items-center justify-center gap-1.5 lg:justify-start lg:gap-4">
                 <div className="flex items-center justify-center gap-1 lg:justify-start">
                   {Object.keys(SCORES_MODES).map(mode => (
                     <SimpleTooltip
