@@ -411,7 +411,7 @@ export default function ScoreSaberPlayerScores({
           </ControlRow>
 
           {/* Search and Filters - Bottom Row */}
-          <ControlRow className="mb-0">
+          <ControlRow className="!mb-0">
             <div className="flex w-full flex-col-reverse items-center gap-2 sm:w-auto sm:flex-row">
               {/* Search */}
               <div className="relative w-full sm:w-auto">

@@ -154,7 +154,7 @@ export default function AccSaberPlayerScores({ player, sort, page, type, order }
           </ControlRow>
 
           {/* Sort Options - Middle Row */}
-          <ControlRow>
+          <ControlRow className="!mb-0">
             <ButtonGroup>
               {scoreSort.map(sortOption => (
                 <ControlButton
