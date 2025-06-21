@@ -5,6 +5,7 @@ import { BeatSaverMapButton } from "@/components/score/button/beat-saver-map-but
 import { ScoreBsrButton } from "@/components/score/button/score-bsr-button";
 import { ScoreReplayButton } from "@/components/score/button/score-replay-button";
 import { SongOpenInYoutubeButton } from "@/components/score/button/song-open-in-youtube-button";
+import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { ArrowDownIcon, ArrowPathIcon } from "@heroicons/react/24/solid";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
@@ -140,7 +141,7 @@ export default function ScoreSaberScoreButtons({
   }, [memoizedButtons, buttonProps, isMobile]);
 
   return (
-    <div className={`flex items-center justify-end gap-2 lg:mr-1 lg:gap-2`}>
+    <div className={`flex items-center justify-end gap-1 lg:mr-2`}>
       <div
         className={`flex min-w-0 flex-row items-center justify-end gap-1 lg:grid lg:min-w-[92px] lg:grid-cols-3 lg:justify-center`}
       >
@@ -163,19 +164,23 @@ export default function ScoreSaberScoreButtons({
         {leaderboardExpanded != undefined &&
           setIsLeaderboardExpanded != undefined &&
           !hideLeaderboardDropdown && (
-            <div className="flex cursor-default items-center justify-center">
+            <Button
+              variant="ghost"
+              className="h-[28px] w-[28px] p-0"
+              onClick={handleDropdownToggle}
+              disabled={isLeaderboardLoading || isPending}
+            >
               {isLeaderboardLoading || isPending ? (
-                <ArrowPathIcon className="h-5 w-5 animate-spin" />
+                <ArrowPathIcon className="h-4 w-4 animate-spin" />
               ) : (
                 <ArrowDownIcon
                   className={clsx(
-                    "h-6 w-6 cursor-pointer transition-transform duration-350",
-                    leaderboardExpanded ? "" : "rotate-180"
+                    "h-4 w-4 transition-transform",
+                    leaderboardExpanded ? "rotate-180" : ""
                   )}
-                  onClick={handleDropdownToggle}
                 />
               )}
-            </div>
+            </Button>
           )}
       </div>
     </div>

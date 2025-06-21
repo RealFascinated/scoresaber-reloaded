@@ -48,7 +48,10 @@ const CommandInput = ({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<typeof CommandPrimitive.Input>) => (
-  <div className="border-muted/50 flex items-center border-b px-3" cmdk-input-wrapper="">
+  <div
+    className="border-muted/50 hover:border-primary/50 flex items-center border-b px-3 transition-all"
+    cmdk-input-wrapper=""
+  >
     <MagnifyingGlassIcon className="mr-2 h-4 w-4 shrink-0 opacity-50" />
     <CommandPrimitive.Input
       className={cn(

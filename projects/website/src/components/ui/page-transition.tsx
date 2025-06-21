@@ -6,37 +6,31 @@ import { usePageTransition } from "./page-transition-context";
 
 const containerVariants = {
   enter: (direction: number) => ({
-    x: direction > 0 ? -30 : 30,
+    x: direction > 0 ? -20 : 20,
     opacity: 0,
-    scale: 0.98,
   }),
   center: {
     x: 0,
     opacity: 1,
-    scale: 1,
   },
   exit: (direction: number) => ({
-    x: direction < 0 ? -30 : 30,
+    x: direction < 0 ? -20 : 20,
     opacity: 0,
-    scale: 0.98,
   }),
 };
 
 const itemVariants = {
   enter: (direction: number) => ({
-    x: direction > 0 ? -15 : 15,
+    x: direction > 0 ? -20 : 20,
     opacity: 0,
-    y: 10,
   }),
   center: {
     x: 0,
     opacity: 1,
-    y: 0,
   },
   exit: (direction: number) => ({
-    x: direction < 0 ? -15 : 15,
+    x: direction < 0 ? -20 : 20,
     opacity: 0,
-    y: -10,
   }),
 };
 
@@ -50,7 +44,7 @@ export default function PageTransition({
   const { currentPage, direction } = usePageTransition();
 
   return (
-    <AnimatePresence mode="wait" initial={false}>
+    <AnimatePresence mode="wait">
       <motion.div
         key={currentPage}
         className={className}
@@ -60,11 +54,9 @@ export default function PageTransition({
         animate="center"
         exit="exit"
         transition={{
-          type: "spring",
-          stiffness: 300,
-          damping: 30,
-          mass: 0.8,
-          duration: 0.4,
+          type: "tween",
+          duration: 0.15,
+          ease: "easeOut",
         }}
       >
         {Array.isArray(children) ? (
@@ -74,11 +66,10 @@ export default function PageTransition({
               custom={direction}
               variants={itemVariants}
               transition={{
-                type: "spring",
-                stiffness: 400,
-                damping: 35,
-                mass: 0.6,
-                delay: index * 0.03,
+                type: "tween",
+                duration: 0.15,
+                ease: "easeOut",
+                delay: index * 0.008,
               }}
             >
               {child}
@@ -89,10 +80,9 @@ export default function PageTransition({
             custom={direction}
             variants={itemVariants}
             transition={{
-              type: "spring",
-              stiffness: 400,
-              damping: 35,
-              mass: 0.6,
+              type: "tween",
+              duration: 0.15,
+              ease: "easeOut",
             }}
           >
             {children}

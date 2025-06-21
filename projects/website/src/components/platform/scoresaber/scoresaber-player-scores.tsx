@@ -462,7 +462,7 @@ export default function ScoreSaberPlayerScores({
                           setCurrentPage(1);
                           animateLeft();
                         }}
-                        className="border-border bg-background flex h-8 w-8 items-center justify-center rounded-md border text-red-500 transition-colors hover:border-red-500 hover:bg-red-50"
+                        className="border-border bg-background flex h-8 w-8 items-center justify-center rounded-md border text-red-500 transition-colors hover:border-red-500"
                       >
                         <XIcon className="h-3.5 w-3.5" />
                       </button>
