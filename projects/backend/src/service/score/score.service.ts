@@ -642,7 +642,7 @@ export class ScoreService {
       }
 
       const rawScores = (await ScoreSaberScoreModel.find(query)
-        .sort({ [options.field]: options.direction === "asc" ? 1 : -1 })
+        .sort({ [fieldsMapping[options.field]]: options.direction === "asc" ? 1 : -1 })
         .skip(start)
         .limit(end - start)
         .lean()) as unknown as ScoreSaberScore[];
