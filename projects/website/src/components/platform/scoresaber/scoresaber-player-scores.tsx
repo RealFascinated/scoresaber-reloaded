@@ -429,7 +429,7 @@ export default function ScoreSaberPlayerScores({
                 </div>
 
                 {/* Vertical spacer for mobile */}
-                <div className="bg-border h-6 w-px lg:hidden" />
+                <div className="bg-border h-6 w-px" />
 
                 <div className="flex items-center justify-center gap-1 lg:justify-start">
                   {LIVE_SCORE_SORT.map(sortOption => (

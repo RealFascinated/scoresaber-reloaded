@@ -52,7 +52,7 @@ type ScoreHistoryProps = {
   leaderboardId: string;
 };
 
-export function ScoreHistoryGraph({ playerId, leaderboardId }: ScoreHistoryProps) {
+export default function ScoreHistoryGraph({ playerId, leaderboardId }: ScoreHistoryProps) {
   const { data: scoreHistory } = useQuery({
     queryKey: ["score-history", playerId, leaderboardId],
     queryFn: () => ssrApi.getScoreHistoryGraph(playerId, leaderboardId),

@@ -145,13 +145,6 @@ export default function PlayerViews({ player }: { player: ScoreSaberPlayer }) {
     },
   });
 
-  console.log({
-    daysAgo,
-    startDate: getDaysAgoDate(daysAgo),
-    endDate: new Date(),
-    statisticHistory,
-  });
-
   const views: SelectedView[] = [
     {
       index: 0,

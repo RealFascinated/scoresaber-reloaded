@@ -1,23 +1,26 @@
 "use client";
 
 import Card from "@/components/card";
+import LeaderboardScores from "@/components/platform/scoresaber/leaderboard/leaderboard-scores";
 import { ScoreHistory } from "@/components/platform/scoresaber/score/score-views/score-history";
 import { ScoreOverview } from "@/components/platform/scoresaber/score/score-views/score-overview";
 import { MapStats } from "@/components/score/map-stats";
 import { Button } from "@/components/ui/button";
-import { CubeIcon } from "@heroicons/react/24/solid";
-import { ChartBarIcon, TrendingUpIcon } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
-
-import LeaderboardScores from "@/components/platform/scoresaber/leaderboard/leaderboard-scores";
 import { Separator } from "@/components/ui/separator";
 import { useLeaderboardDropdownData } from "@/hooks/use-leaderboard-dropdown-data";
+import { CubeIcon } from "@heroicons/react/24/solid";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
 import { getPageFromRank } from "@ssr/common/utils/utils";
 import { AnimatePresence, motion } from "framer-motion";
-import { ScoreHistoryGraph } from "./score-views/score-history-graph";
+import { ChartBarIcon, TrendingUpIcon } from "lucide-react";
+import dynamic from "next/dynamic";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
+
+const ScoreHistoryGraph = dynamic(() => import("./score-views/score-history-graph"), {
+  ssr: false,
+});
 
 export enum ScoreMode {
   Overview = "Overview",
@@ -94,6 +97,28 @@ export default function ScoreDropdown({
     return null;
   }
 
+  const renderModeContent = () => {
+    switch (mode) {
+      case ScoreMode.Overview:
+        return <ScoreOverview leaderboard={leaderboard} scoreStats={dropdownData.scoreStats} />;
+      case ScoreMode.ScoreHistory:
+        return <ScoreHistory playerId={score.playerId} leaderboard={leaderboard} />;
+      case ScoreMode.ScoreHistoryGraph:
+        return (
+          <Suspense
+            fallback={<div className="flex items-center justify-center p-4">Loading...</div>}
+          >
+            <ScoreHistoryGraph
+              playerId={score.playerId}
+              leaderboardId={leaderboard.id.toString()}
+            />
+          </Suspense>
+        );
+      default:
+        return null;
+    }
+  };
+
   return (
     <AnimatePresence>
       <motion.div
@@ -139,16 +164,7 @@ export default function ScoreDropdown({
               }}
               className="w-full"
             >
-              {mode === ScoreMode.Overview ? (
-                <ScoreOverview leaderboard={leaderboard} scoreStats={dropdownData.scoreStats} />
-              ) : mode === ScoreMode.ScoreHistory ? (
-                <ScoreHistory playerId={score.playerId} leaderboard={leaderboard} />
-              ) : (
-                <ScoreHistoryGraph
-                  playerId={score.playerId}
-                  leaderboardId={leaderboard.id.toString()}
-                />
-              )}
+              {renderModeContent()}
             </motion.div>
           </AnimatePresence>
 

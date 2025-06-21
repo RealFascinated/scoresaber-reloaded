@@ -145,6 +145,22 @@ export default function LeaderboardScores({
     setLoadingScoreId(isLoading ? scoreId : null);
   }, []);
 
+  const handleModeChange = useCallback((newMode: ScoreModeEnum) => {
+    setMode(newMode);
+    setPage(1);
+  }, []);
+
+  const handlePageChange = useCallback((newPage: number) => {
+    setPage(newPage);
+  }, []);
+
+  const generatePageUrl = useCallback(
+    (page: number) => {
+      return `/leaderboard/${leaderboardId}/${page}`;
+    },
+    [leaderboardId]
+  );
+
   useEffect(() => {
     if (disableUrlChanging) {
       return;
@@ -169,13 +185,7 @@ export default function LeaderboardScores({
           isLeaderboardPage && "lg:justify-between"
         )}
       >
-        <ScoreMode
-          initialMode={mode}
-          onModeChange={mode => {
-            setMode(mode);
-            setPage(1);
-          }}
-        />
+        <ScoreMode initialMode={mode} onModeChange={handleModeChange} />
 
         {showDifficulties && (
           <div className="bg-background/80 border-border/50 flex flex-wrap justify-center gap-1.5 rounded-lg border p-1.5 shadow-sm">
@@ -294,10 +304,8 @@ export default function LeaderboardScores({
             totalItems={scores.metadata.totalItems}
             itemsPerPage={scores.metadata.itemsPerPage}
             loadingPage={isLoading || isRefetching ? page : undefined}
-            generatePageUrl={page => {
-              return `/leaderboard/${leaderboardId}/${page}`;
-            }}
-            onPageChange={newPage => setPage(newPage)}
+            generatePageUrl={generatePageUrl}
+            onPageChange={handlePageChange}
           />
         </>
       )}

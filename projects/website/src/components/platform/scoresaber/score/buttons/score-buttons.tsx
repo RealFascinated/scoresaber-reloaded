@@ -11,7 +11,7 @@ import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scores
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
 import clsx from "clsx";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState, useTransition } from "react";
 
 type Props = {
   score?: ScoreSaberScore;
@@ -86,35 +86,65 @@ export default function ScoreSaberScoreButtons({
 }: Props) {
   const isMobile = useIsMobile();
   const [leaderboardExpanded, setLeaderboardExpanded] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
   const memoizedButtons = useMemo(() => buttons, []);
+
+  const handleDropdownToggle = useCallback(() => {
+    const newExpandedState = !leaderboardExpanded;
+
+    // Use transition to mark state updates as non-urgent
+    startTransition(() => {
+      setLeaderboardExpanded(newExpandedState);
+      setIsLeaderboardExpanded?.(newExpandedState);
+    });
+  }, [leaderboardExpanded, setIsLeaderboardExpanded]);
+
+  const buttonProps = useMemo(
+    () => ({
+      score,
+      leaderboard,
+      beatSaverMap,
+      alwaysSingleLine,
+      setIsLeaderboardExpanded,
+      isLeaderboardLoading,
+      updateScore,
+      hideLeaderboardDropdown,
+      hideAccuracyChanger,
+    }),
+    [
+      score,
+      leaderboard,
+      beatSaverMap,
+      alwaysSingleLine,
+      setIsLeaderboardExpanded,
+      isLeaderboardLoading,
+      updateScore,
+      hideLeaderboardDropdown,
+      hideAccuracyChanger,
+    ]
+  );
+
+  const renderedButtons = useMemo(() => {
+    return memoizedButtons.map((button, index) => {
+      const { render } = button;
+
+      const buttonElement = render(buttonProps);
+
+      if (isMobile && !buttonElement) {
+        return null;
+      }
+
+      return <div key={index}>{buttonElement}</div>;
+    });
+  }, [memoizedButtons, buttonProps, isMobile]);
 
   return (
     <div className={`flex items-center justify-end gap-2 lg:mr-1 lg:gap-2`}>
       <div
         className={`flex min-w-0 flex-row items-center justify-end gap-1 lg:grid lg:min-w-[92px] lg:grid-cols-3 lg:justify-center`}
       >
-        {memoizedButtons.map((button, index) => {
-          const { render } = button;
-
-          const buttonElement = render({
-            score,
-            leaderboard,
-            beatSaverMap,
-            alwaysSingleLine,
-            setIsLeaderboardExpanded,
-            isLeaderboardLoading,
-            updateScore,
-            hideLeaderboardDropdown,
-            hideAccuracyChanger,
-          });
-
-          if (isMobile && !buttonElement) {
-            return null;
-          }
-
-          return <div key={index}>{buttonElement}</div>;
-        })}
+        {renderedButtons}
       </div>
 
       <div
@@ -134,7 +164,7 @@ export default function ScoreSaberScoreButtons({
           setIsLeaderboardExpanded != undefined &&
           !hideLeaderboardDropdown && (
             <div className="flex cursor-default items-center justify-center">
-              {isLeaderboardLoading ? (
+              {isLeaderboardLoading || isPending ? (
                 <ArrowPathIcon className="h-5 w-5 animate-spin" />
               ) : (
                 <ArrowDownIcon
@@ -142,10 +172,7 @@ export default function ScoreSaberScoreButtons({
                     "h-6 w-6 cursor-pointer transition-transform duration-350",
                     leaderboardExpanded ? "" : "rotate-180"
                   )}
-                  onClick={() => {
-                    setLeaderboardExpanded(!leaderboardExpanded);
-                    setIsLeaderboardExpanded?.(!leaderboardExpanded);
-                  }}
+                  onClick={handleDropdownToggle}
                 />
               )}
             </div>

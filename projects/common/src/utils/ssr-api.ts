@@ -321,10 +321,6 @@ class SSRApi {
    * @param sort the sort
    */
   async fetchCachedScoreSaberPlayerScores(id: string, page: number, sort: ScoreSort) {
-    console.log(sort);
-    console.log(
-      `${env.NEXT_PUBLIC_API_URL}/scores/cached/player/${id}/${sort.field}/${sort.direction}/${page}`
-    );
     return Request.get<PlayerScoresResponse>(
       `${env.NEXT_PUBLIC_API_URL}/scores/cached/player/${id}/${sort.field}/${sort.direction}/${page}`,
       {

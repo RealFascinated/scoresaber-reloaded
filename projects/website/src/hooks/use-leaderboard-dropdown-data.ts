@@ -1,6 +1,7 @@
 import { ScoreStatsResponse } from "@ssr/common/response/scorestats-response";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 
 type DropdownData = {
   scoreStats?: ScoreStatsResponse;
@@ -12,6 +13,22 @@ export function useLeaderboardDropdownData(
   isExpanded: boolean,
   additionalData?: { scoreId: number }
 ) {
+  const [shouldFetch, setShouldFetch] = useState(false);
+
+  // Debounce the fetch to allow UI updates to complete first
+  useEffect(() => {
+    if (!isExpanded) {
+      setShouldFetch(false);
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setShouldFetch(true);
+    }, 50); // Small delay to allow UI updates
+
+    return () => clearTimeout(timer);
+  }, [isExpanded]);
+
   return useQuery<DropdownData>({
     queryKey: [`leaderboardDropdownData:${leaderboardId}`, leaderboardId, scoreId, isExpanded],
     queryFn: async () => {
@@ -22,6 +39,6 @@ export function useLeaderboardDropdownData(
       };
     },
     staleTime: 30000,
-    enabled: isExpanded,
+    enabled: shouldFetch && isExpanded,
   });
 }

@@ -90,8 +90,6 @@ function PlayerMiniRanking({
     return rankDigits * 14 + (rankDigits > 1 ? -10 : 0);
   }, [players, type]);
 
-  console.log(playerRankWidth);
-
   return (
     <Card className="sticky flex w-full flex-col gap-2 text-xs select-none sm:w-[400px] sm:text-sm">
       {/* Header */}

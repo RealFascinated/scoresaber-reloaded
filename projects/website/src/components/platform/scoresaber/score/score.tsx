@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
 
 import { useIsMobile } from "@/hooks/use-is-mobile";
 
@@ -18,6 +18,9 @@ import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/sc
 import { getScoreSaberAvatar } from "@ssr/common/utils/scoresaber.util";
 import Link from "next/link";
 import ScoreDropdown, { ScoreMode } from "./score-dropdown";
+
+// Memoize the player preview component to prevent unnecessary re-renders
+const MemoizedPlayerPreview = memo(PlayerPreview);
 
 export default function ScoreSaberScoreDisplay({
   leaderboard,
@@ -65,6 +68,7 @@ export default function ScoreSaberScoreDisplay({
     () => (baseScore / leaderboard.maxScore) * 100,
     [baseScore, leaderboard.maxScore]
   );
+
   const pp = useMemo(
     () =>
       baseScore === score.score
@@ -103,10 +107,20 @@ export default function ScoreSaberScoreDisplay({
 
   const memoizedScore = useMemo(() => ({ ...score, accuracy, pp }), [score, accuracy, pp]);
 
+  const containerClassName = useMemo(
+    () => `${settings?.disablePadding ? "" : "pt-2 pb-2"} relative`,
+    [settings?.disablePadding]
+  );
+
+  const gridClassName = useMemo(
+    () => `grid w-full gap-2 lg:gap-0 ${gridColsClass} ${settings?.hideRank ? "pt-1" : ""}`,
+    [gridColsClass, settings?.hideRank]
+  );
+
   return (
-    <div className={`${settings?.disablePadding ? "" : "pt-2 pb-2"} relative`}>
+    <div className={containerClassName}>
       {playerAbove && (
-        <PlayerPreview playerId={playerAbove.id}>
+        <MemoizedPlayerPreview playerId={playerAbove.id}>
           <div className="flex items-center gap-2 pl-2">
             <Avatar
               src={playerAbove.profilePicture ?? getScoreSaberAvatar(playerAbove)}
@@ -120,11 +134,9 @@ export default function ScoreSaberScoreDisplay({
               <p className="text-sm">{playerAbove.name}</p>
             </Link>
           </div>
-        </PlayerPreview>
+        </MemoizedPlayerPreview>
       )}
-      <div
-        className={`grid w-full gap-2 lg:gap-0 ${gridColsClass} ${settings?.hideRank ? "pt-1" : ""}`}
-      >
+      <div className={gridClassName}>
         <ScoreSaberScoreInfo
           score={score}
           leaderboard={leaderboard}
