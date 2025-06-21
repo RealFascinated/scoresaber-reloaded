@@ -91,6 +91,18 @@ export default function PlayerScoreAccuracyChart({ scoreStats, leaderboard }: Pr
 
   const config: ChartConfig = {
     id: "player-score-accuracy-chart",
+    // Enable animation on the chart
+    options: {
+      animation: {
+        tension: {
+          duration: 1000, // Animation duration in milliseconds
+          easing: "linear", // Easing function (default is 'easeOutQuart')
+          from: 1,
+          to: 0,
+          loop: true,
+        },
+      },
+    },
     datasets: datasetConfig.map(config => ({
       label: config.title,
       data: histories[config.field],

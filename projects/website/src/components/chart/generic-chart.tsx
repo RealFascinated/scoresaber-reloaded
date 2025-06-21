@@ -187,7 +187,7 @@ const GenericChart = ({ config, labels }: Props) => {
 
   const chartOptions = useMemo(
     () => ({
-      animation: { duration: 0 },
+      animation: customOptions?.animation || { duration: 0 },
       maintainAspectRatio: false,
       responsive: true,
       interaction: { mode: "index" as const, intersect: false },

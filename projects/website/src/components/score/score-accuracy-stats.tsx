@@ -69,7 +69,7 @@ function AccuracyCircle({ accuracy, averageCut, hand }: AccuracyCircleProps) {
                 initial={{ pathLength: 0 }}
                 animate={{ pathLength: percent }}
                 exit={{ pathLength: 0 }}
-                transition={{ duration: 1.2, ease: "easeInOut" }}
+                transition={{ duration: 1, ease: "easeInOut" }}
               />
             </AnimatePresence>
           </svg>
