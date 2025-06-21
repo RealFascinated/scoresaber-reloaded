@@ -19,6 +19,7 @@ export default class CachedScoresController {
       t.Object({
         rankedOnly: t.Optional(t.Boolean()),
         unrankedOnly: t.Optional(t.Boolean()),
+        search: t.Optional(t.String()),
       })
     ),
   })
@@ -32,14 +33,20 @@ export default class CachedScoresController {
       direction: ScoreSort["direction"];
       page: number;
     };
-    query: ScoreSort["filters"];
+    query: ScoreSort["filters"] & { search?: string };
   }): Promise<PlayerScoresResponse> {
+    const { search, ...otherFilters } = filters;
     return (
-      await ScoreService.getScores(id, page, {
-        field,
-        direction,
-        filters,
-      })
+      await ScoreService.getScores(
+        id,
+        page,
+        {
+          field,
+          direction,
+          filters: otherFilters,
+        },
+        search
+      )
     ).toJSON();
   }
 }

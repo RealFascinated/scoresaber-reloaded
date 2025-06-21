@@ -2,7 +2,9 @@ import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { BadRequestError } from "@ssr/common/error/bad-request-error";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger from "@ssr/common/logger";
-import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
+import ScoreSaberLeaderboard, {
+  ScoreSaberLeaderboardModel,
+} from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import {
   PlayerHistoryEntry,
   PlayerHistoryEntryModel,
@@ -25,7 +27,7 @@ import { ScoreSort, validateSort } from "@ssr/common/types/sort";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score";
 import { getDaysAgoDate, getMidnightAlignedDate } from "@ssr/common/utils/time-utils";
-import mongoose from "mongoose";
+import mongoose, { FilterQuery } from "mongoose";
 import { scoreToObject } from "../../common/score/score.util";
 import BeatLeaderService from "../beatleader.service";
 import { PlayerHmdService } from "../player/player-hmd.service";
@@ -609,7 +611,8 @@ export class ScoreService {
   public static async getScores(
     playerId: string,
     page: number,
-    options: ScoreSort
+    options: ScoreSort,
+    search?: string
   ): Promise<PlayerScoresResponse> {
     const isValid = validateSort(options);
     if (!isValid) {
@@ -630,8 +633,40 @@ export class ScoreService {
       unrankedOnly: false,
     };
 
+    // If search is provided, get matching leaderboard IDs first
+    let matchingLeaderboardIds: number[] = [];
+
+    // Only search if the search term is at least 3 characters long
+    if (search && search.length >= 3) {
+      // Get leaderboard IDs that match the search
+      const matchingLeaderboards = await ScoreSaberLeaderboardModel.find({
+        $or: [
+          { songName: { $regex: search, $options: "i" } },
+          { songSubName: { $regex: search, $options: "i" } },
+          { songAuthorName: { $regex: search, $options: "i" } },
+          { levelAuthorName: { $regex: search, $options: "i" } },
+        ],
+      })
+        .select("_id")
+        .lean();
+
+      if (matchingLeaderboards.length === 0) {
+        // No matching leaderboards, return empty result
+        const pagination = new Pagination<
+          PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>
+        >().setItemsPerPage(8);
+        pagination.setTotalItems(0);
+        return pagination.getPage(1, async () => []);
+      }
+
+      matchingLeaderboardIds = matchingLeaderboards.map((lb: { _id: number }) => lb._id);
+    }
+
     const totalScores = await ScoreSaberScoreModel.countDocuments({
       playerId: playerId,
+      ...(matchingLeaderboardIds.length > 0
+        ? { leaderboardId: { $in: matchingLeaderboardIds } }
+        : {}),
       ...(filters.rankedOnly ? { pp: { $gt: 0 } } : {}),
       ...(filters.unrankedOnly ? { pp: { $lte: 0 } } : {}),
     });
@@ -642,10 +677,12 @@ export class ScoreService {
 
     return pagination.getPage(page, async ({ start, end }) => {
       // Build query to exclude Infinity values
-      const query: {
-        playerId: string;
-        [key: string]: string | { $ne?: number; $exists?: boolean; $gt?: number; $lte?: number };
-      } = { playerId: playerId };
+      const query: FilterQuery<ScoreSaberScore> = {
+        playerId: playerId,
+        ...(matchingLeaderboardIds.length > 0
+          ? { leaderboardId: { $in: matchingLeaderboardIds } }
+          : {}),
+      };
 
       // Add filter to exclude Infinity values for the sort field
       if (options.field && options.field !== "date") {
@@ -666,6 +703,7 @@ export class ScoreService {
         .limit(end - start)
         .lean()) as unknown as ScoreSaberScore[];
 
+      // Get leaderboards for the scores we have
       const leaderboardResponses = await LeaderboardService.getLeaderboards(
         rawScores.map(score => score.leaderboardId + ""),
         {
@@ -673,14 +711,15 @@ export class ScoreService {
           cacheOnly: true,
         }
       );
-      const leaderboardMap = new Map(
+
+      const leaderboardMapForScores = new Map(
         leaderboardResponses.map(response => [response.leaderboard.id, response])
       );
 
       // Process scores in parallel
       const processedScores = await Promise.all(
         rawScores.map(async rawScore => {
-          const leaderboardResponse = leaderboardMap.get(rawScore.leaderboardId);
+          const leaderboardResponse = leaderboardMapForScores.get(rawScore.leaderboardId);
           if (!leaderboardResponse) {
             return null;
           }

@@ -12,13 +12,19 @@ import {
 } from "@ssr/common/api-service/impl/accsaber";
 import { Page } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import { capitalizeFirstLetter } from "@ssr/common/string-utils";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowDown, ArrowUp, ClockIcon, SearchIcon, Target, Trophy } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import ScoresCard from "../../score/scores-card";
 import SimplePagination from "../../simple-pagination";
-import { Button } from "../../ui/button";
+import {
+  ButtonGroup,
+  ControlButton,
+  ControlPanel,
+  ControlRow,
+  Tab,
+  TabGroup,
+} from "../../ui/control-panel";
 import { EmptyState } from "../../ui/empty-state";
 import PageTransition from "../../ui/page-transition";
 import { usePageTransition } from "../../ui/page-transition-context";
@@ -129,94 +135,96 @@ export default function AccSaberPlayerScores({ player, sort, page, type, order }
 
   return (
     <ScoresCard>
-      <div className="flex w-full justify-center">
-        <div className="flex w-full flex-col items-center justify-between gap-4 px-4 sm:w-[70%] sm:flex-row sm:px-0">
-          {/* Type */}
-          <div className="flex w-full flex-wrap justify-center gap-2 sm:w-auto sm:justify-start">
-            {scoreTypes.map(type => (
-              <Button
-                key={type.value}
-                variant={type.value === currentType ? "default" : "outline"}
-                onClick={() => handleTypeChange(type.value as AccSaberScoreType)}
-                size="sm"
-                className="flex items-center"
-              >
-                {type.name}
-              </Button>
-            ))}
-          </div>
-
-          {/* Sort */}
-          <div className="flex w-full flex-wrap justify-center gap-2 sm:w-auto sm:justify-start">
-            {scoreSort.map(sortOption => (
-              <Button
-                key={sortOption.value}
-                variant={sortOption.value === currentSort ? "default" : "outline"}
-                onClick={() =>
-                  handleSortChange(
-                    sortOption.value as AccSaberScoreSort,
-                    (sortOption.defaultOrder ?? "desc") as AccSaberScoreOrder
-                  )
-                }
-                size="sm"
-                className="flex items-center gap-1.5"
-              >
-                {/* Order / Icon */}
-                {sortOption.value === currentSort ? (
-                  currentOrder === "desc" ? (
-                    <ArrowDown className="h-4 w-4" />
-                  ) : (
-                    <ArrowUp className="h-4 w-4" />
-                  )
-                ) : (
-                  sortOption.icon
-                )}
-
-                {`${capitalizeFirstLetter(sortOption.name)}`}
-              </Button>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {isLoading && scores === undefined && (
-        <div className="flex w-full justify-center py-8">
-          <Spinner size="md" className="text-primary" />
-        </div>
-      )}
-
-      {scores !== undefined && (
-        <>
-          <div className="pt-2 text-center">
-            {isError ||
-              (scores.items.length === 0 && (
-                <EmptyState
-                  title="No Results"
-                  description="No scores were found on this page"
-                  icon={<SearchIcon />}
-                />
+      <div className="flex w-full flex-col gap-2">
+        {/* Control Panel */}
+        <ControlPanel>
+          {/* Type Selection - Top Row */}
+          <ControlRow>
+            <TabGroup>
+              {scoreTypes.map(type => (
+                <Tab
+                  key={type.value}
+                  isActive={type.value === currentType}
+                  onClick={() => handleTypeChange(type.value as AccSaberScoreType)}
+                >
+                  {type.name}
+                </Tab>
               ))}
+            </TabGroup>
+          </ControlRow>
+
+          {/* Sort Options - Middle Row */}
+          <ControlRow>
+            <ButtonGroup>
+              {scoreSort.map(sortOption => (
+                <ControlButton
+                  key={sortOption.value}
+                  isActive={sortOption.value === currentSort}
+                  onClick={() =>
+                    handleSortChange(
+                      sortOption.value as AccSaberScoreSort,
+                      (sortOption.defaultOrder ?? "desc") as AccSaberScoreOrder
+                    )
+                  }
+                >
+                  {sortOption.value === currentSort ? (
+                    isLoading || isRefetching ? (
+                      <Spinner size="sm" className="h-3.5 w-3.5" />
+                    ) : currentOrder === "desc" ? (
+                      <ArrowDown className="h-3.5 w-3.5" />
+                    ) : (
+                      <ArrowUp className="h-3.5 w-3.5" />
+                    )
+                  ) : (
+                    sortOption.icon
+                  )}
+                  {sortOption.name}
+                </ControlButton>
+              ))}
+            </ButtonGroup>
+          </ControlRow>
+        </ControlPanel>
+
+        {/* Scores List */}
+        {isLoading && scores === undefined && (
+          <div className="flex w-full justify-center py-8">
+            <Spinner size="md" className="text-primary" />
           </div>
+        )}
 
-          <PageTransition className="divide-border grid min-w-full grid-cols-1 divide-y">
-            {scores.items.map((score: AccSaberScore, index: number) => (
-              <AccSaberScoreComponent key={score.id} score={score} />
-            ))}
-          </PageTransition>
+        {scores !== undefined && (
+          <>
+            <div className="text-center">
+              {isError ||
+                (scores.items.length === 0 && (
+                  <EmptyState
+                    title="No Results"
+                    description="No scores were found on this page"
+                    icon={<SearchIcon />}
+                  />
+                ))}
+            </div>
 
-          {scores.metadata.totalPages > 1 && (
-            <SimplePagination
-              mobilePagination={isMobile}
-              page={currentPage}
-              totalItems={scores.metadata.totalItems}
-              itemsPerPage={scores.metadata.itemsPerPage}
-              loadingPage={isLoading || isRefetching ? currentPage : undefined}
-              generatePageUrl={page => getUrl(page)}
-              onPageChange={handlePageChange}
-            />
-          )}
-        </>
-      )}
+            <PageTransition className="divide-border grid min-w-full grid-cols-1 divide-y">
+              {scores.items.map((score: AccSaberScore, index: number) => (
+                <AccSaberScoreComponent key={score.id} score={score} />
+              ))}
+            </PageTransition>
+
+            {scores.metadata.totalPages > 1 && (
+              <SimplePagination
+                mobilePagination={isMobile}
+                page={currentPage}
+                totalItems={scores.metadata.totalItems}
+                itemsPerPage={scores.metadata.itemsPerPage}
+                loadingPage={isLoading || isRefetching ? currentPage : undefined}
+                generatePageUrl={page => getUrl(page)}
+                onPageChange={handlePageChange}
+              />
+            )}
+          </>
+        )}
+      </div>
     </ScoresCard>
   );
 }

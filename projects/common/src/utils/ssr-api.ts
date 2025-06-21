@@ -319,15 +319,24 @@ class SSRApi {
    * @param id the player id
    * @param page the page
    * @param sort the sort
+   * @param search the search term
    */
-  async fetchCachedScoreSaberPlayerScores(id: string, page: number, sort: ScoreSort) {
+  async fetchCachedScoreSaberPlayerScores(
+    id: string,
+    page: number,
+    sort: ScoreSort,
+    search?: string
+  ) {
     return Request.get<PlayerScoresResponse>(
       `${env.NEXT_PUBLIC_API_URL}/scores/cached/player/${id}/${sort.field}/${sort.direction}/${page}`,
       {
         returns: "json",
-        searchParams: Object.fromEntries(
-          Object.entries(sort.filters ?? {}).map(([key, value]) => [key, value])
-        ),
+        searchParams: {
+          ...Object.fromEntries(
+            Object.entries(sort.filters ?? {}).map(([key, value]) => [key, value])
+          ),
+          ...(search ? { search: search } : {}),
+        },
       }
     );
   }

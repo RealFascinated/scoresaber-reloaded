@@ -61,6 +61,7 @@ type LeaderboardOptions = {
   includeBeatSaver?: boolean;
   beatSaverType?: DetailType;
   type?: DetailType;
+  search?: string;
 };
 
 type LeaderboardData = {
@@ -299,78 +300,37 @@ export default class LeaderboardService {
   ): Promise<LeaderboardResponse[]> {
     const defaultOptions = this.getDefaultOptions(options);
 
-    // Check cache for each leaderboard
-    const cachedResults = await Promise.all(
-      ids.map(async id => {
+    // Bulk fetch leaderboards from MongoDB
+    const bulkLeaderboards = await ScoreSaberLeaderboardModel.find({
+      _id: { $in: ids },
+    }).lean();
+
+    // Create a map for quick lookup
+    const bulkLeaderboardMap = new Map(bulkLeaderboards.map(lb => [lb._id.toString(), lb]));
+
+    // Process each ID to get leaderboard data
+    const leaderboardDataPromises = ids.map(async id => {
+      const cachedLeaderboard = bulkLeaderboardMap.get(id);
+      const { cached, foundLeaderboard } = this.validateCachedLeaderboard(
+        cachedLeaderboard || null,
+        options
+      );
+
+      let leaderboard = foundLeaderboard;
+      if (!leaderboard) {
         try {
-          return await CacheService.fetchWithCache(
-            CacheId.Leaderboards,
-            `leaderboard:id:${id}`,
-            async () => {
-              const cachedLeaderboard = await ScoreSaberLeaderboardModel.findById(id).lean();
-              const { cached, foundLeaderboard } = this.validateCachedLeaderboard(
-                cachedLeaderboard,
-                options
-              );
-
-              if (foundLeaderboard) {
-                return await this.createLeaderboardData(foundLeaderboard, cached, id);
-              }
-
-              return null;
-            }
-          );
+          leaderboard = await this.fetchAndSaveLeaderboard(id);
         } catch (error) {
-          Logger.warn(`Failed to get cached leaderboard for ID ${id}:`, error);
+          Logger.warn(`Failed to fetch leaderboard for ID ${id}:`, error);
           return null;
         }
-      })
-    );
+      }
 
-    // Filter out cached results and get missing IDs
-    const cachedLeaderboards = cachedResults.filter(result => result !== null);
-    const missingIds = ids.filter(
-      id => !cachedResults.some(result => result?.leaderboard.id === Number(id))
-    );
+      return await this.createLeaderboardData(leaderboard, cached, id);
+    });
 
-    let fetchedLeaderboards: LeaderboardData[] = [];
-
-    if (missingIds.length > 0) {
-      // Bulk fetch missing leaderboards from MongoDB
-      const bulkLeaderboards = await ScoreSaberLeaderboardModel.find({
-        _id: { $in: missingIds },
-      }).lean();
-
-      // Create a map for quick lookup
-      const bulkLeaderboardMap = new Map(bulkLeaderboards.map(lb => [lb._id.toString(), lb]));
-
-      // Fetch from API for any still missing
-      const apiFetchPromises = missingIds.map(async id => {
-        const cachedLeaderboard = bulkLeaderboardMap.get(id);
-        const { cached, foundLeaderboard } = this.validateCachedLeaderboard(
-          cachedLeaderboard || null,
-          options
-        );
-
-        let leaderboard = foundLeaderboard;
-        if (!leaderboard) {
-          try {
-            leaderboard = await this.fetchAndSaveLeaderboard(id);
-          } catch (error) {
-            Logger.warn(`Failed to fetch leaderboard for ID ${id}:`, error);
-            return null;
-          }
-        }
-
-        return await this.createLeaderboardData(leaderboard, cached, id);
-      });
-
-      const apiResults = await Promise.all(apiFetchPromises);
-      fetchedLeaderboards = apiResults.filter(result => result !== null);
-    }
-
-    // Combine cached and fetched results
-    const allLeaderboards = [...cachedLeaderboards, ...fetchedLeaderboards];
+    const leaderboardDataResults = await Promise.all(leaderboardDataPromises);
+    const allLeaderboards = leaderboardDataResults.filter(result => result !== null);
 
     // Get BeatSaver data if needed
     if (defaultOptions.includeBeatSaver) {
