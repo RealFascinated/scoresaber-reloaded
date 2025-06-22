@@ -9,15 +9,16 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "border border-primary bg-primary/10 text-primary shadow-sm hover:bg-primary/20",
+        default:
+          "border border-primary bg-background/95 backdrop-blur-sm relative before:absolute before:inset-0 before:bg-primary/10 before:rounded-md text-primary shadow-sm hover:before:bg-primary/20",
         destructive:
-          "border border-destructive bg-destructive/10 text-destructive shadow-xs hover:bg-destructive/20",
+          "border border-destructive bg-background/95 backdrop-blur-sm relative before:absolute before:inset-0 before:bg-destructive/10 before:rounded-md text-destructive shadow-xs hover:before:bg-destructive/20",
         outline:
-          "border border-border bg-background text-muted-foreground shadow-xs hover:bg-accent hover:text-accent-foreground hover:border-primary/50",
+          "border border-border bg-background/95 backdrop-blur-sm text-foreground shadow-xs hover:bg-accent hover:text-accent-foreground hover:border-primary/50",
         secondary:
-          "border border-border bg-background text-muted-foreground shadow-xs hover:bg-secondary/80 hover:border-primary/50",
+          "border border-border bg-background/95 backdrop-blur-sm relative before:absolute before:inset-0 before:bg-secondary/10 before:rounded-md text-secondary-foreground shadow-xs hover:before:bg-secondary/20 hover:border-primary/50",
         ghost:
-          "border border-border bg-background text-muted-foreground hover:bg-accent hover:text-accent-foreground hover:border-primary/50",
+          "border border-border bg-background/95 backdrop-blur-sm text-foreground hover:bg-accent hover:text-accent-foreground hover:border-primary/50",
         link: "text-primary underline-offset-4 hover:underline",
       },
       size: {
