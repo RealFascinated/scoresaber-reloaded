@@ -15,6 +15,7 @@ import RequestsPerSecondMetric from "../metrics/impl/backend/total-requests";
 import ProcessUptimeMetric from "../metrics/impl/backend/uptime";
 import MongoDbSizeMetric from "../metrics/impl/database/mongo-db-size";
 import PointsPerSecondMetric from "../metrics/impl/general/points-per-second";
+import MapAuthorsMetric from "../metrics/impl/leaderboard/active-accounts";
 import ActiveAccountsMetric from "../metrics/impl/player/active-accounts";
 import ActivePlayerHmdStatisticMetric from "../metrics/impl/player/active-player-hmd-statistic";
 import HmdStatisticMetric from "../metrics/impl/player/daily-hmd-statistic";
@@ -47,6 +48,9 @@ export enum MetricType {
   ACTIVE_PLAYERS_HMD_STATISTIC = "active-players-hmd-statistic",
   TOTAL_TRACKED_SCORES = "total-tracked-scores",
   DAILY_NEW_ACCOUNTS = "daily-new-accounts",
+
+  // Leaderboard metrics
+  MAP_AUTHORS = "map-authors",
 
   // Backend metrics
   PROCESS_CPU_USAGE = "process-cpu-usage",
@@ -108,6 +112,9 @@ export default class MetricsService implements EventListener {
     this.registerMetric(new ActivePlayerHmdStatisticMetric());
     this.registerMetric(new TotalTrackedScoresMetric());
     this.registerMetric(new DailyNewAccountsMetric());
+
+    // Leaderboard metrics
+    this.registerMetric(new MapAuthorsMetric());
 
     // Backend metrics
     this.registerMetric(new ProcessCpuUsageMetric());
