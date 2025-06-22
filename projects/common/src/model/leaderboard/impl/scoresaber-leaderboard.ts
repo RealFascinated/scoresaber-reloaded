@@ -63,7 +63,7 @@ export default class ScoreSaberLeaderboardInternal extends Leaderboard {
    * have been tracked.
    */
   @Prop({ required: false })
-  readonly seededPlayers!: boolean;
+  readonly seededPlayers?: boolean;
 }
 
 export type ScoreSaberLeaderboard = InstanceType<typeof ScoreSaberLeaderboardInternal>;
