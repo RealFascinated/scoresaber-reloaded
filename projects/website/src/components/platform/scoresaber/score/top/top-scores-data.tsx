@@ -21,28 +21,28 @@ import ScoreSaberScoreDisplay from "../score";
 type TimeframesType = {
   timeframe: Timeframe;
   display: string;
-  icon: React.ReactNode;
+  icon: React.ElementType;
 };
 const timeframes: TimeframesType[] = [
   {
     timeframe: "daily",
     display: "Today",
-    icon: <CalendarDaysIcon className="h-4 w-4" />,
+    icon: CalendarDaysIcon,
   },
   {
     timeframe: "weekly",
     display: "This Week",
-    icon: <ClockIcon className="h-4 w-4" />,
+    icon: ClockIcon,
   },
   {
     timeframe: "monthly",
     display: "This Month",
-    icon: <CalendarIcon className="h-4 w-4" />,
+    icon: CalendarIcon,
   },
   {
     timeframe: "all",
     display: "All Time",
-    icon: <TrophyIcon className="h-4 w-4" />,
+    icon: TrophyIcon,
   },
 ];
 
@@ -106,7 +106,7 @@ export function TopScoresData({ timeframe }: TopScoresDataProps) {
       const name = score.playerInfo ? player.name || player.id : score.playerId;
 
       return (
-        <div key={score.scoreId} className="flex flex-col pt-2">
+        <div key={`${score.scoreId}`} className="flex flex-col pt-2">
           <div className="bg-muted/50 flex w-fit items-center gap-2 rounded-full px-3 py-1.5 text-sm">
             <span className="text-muted-foreground">Set by</span>
             <Link href={`/player/${player.id}`}>
@@ -153,12 +153,13 @@ export function TopScoresData({ timeframe }: TopScoresDataProps) {
               variant={selectedTimeframe === timeframe.timeframe ? "default" : "outline"}
               onClick={() => handleTimeframeChange(timeframe.timeframe)}
             >
-              <span className="flex items-center gap-2">
-                {timeframe.icon}
-                {timeframe.display}
-                {isChangingTimeframe && selectedTimeframe === timeframe.timeframe && (
+              <span className="flex items-center gap-1.5">
+                {isChangingTimeframe && selectedTimeframe === timeframe.timeframe ? (
                   <Spinner className="text-foreground h-3 w-3" />
+                ) : (
+                  <timeframe.icon className="h-4 w-4" />
                 )}
+                {timeframe.display}
               </span>
             </Button>
           ))}
