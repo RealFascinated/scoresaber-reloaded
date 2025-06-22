@@ -1,5 +1,4 @@
 import Logger from "@ssr/common/logger";
-import { isProduction } from "@ssr/common/utils/utils";
 import { QueueId } from "./queue-manager";
 
 export abstract class Queue<T> {
@@ -78,7 +77,7 @@ export abstract class Queue<T> {
   private async processQueue() {
     // Don't process the queue if it's locked,
     // stopped, or we're not in production
-    if (this.lock || this.isStopped || !isProduction()) {
+    if (this.lock || this.isStopped || /*isProduction()*/ false) {
       return;
     }
 

@@ -1,5 +1,4 @@
 export enum CooldownPriority {
-  HIGH = "high",
   NORMAL = "normal",
   LOW = "low",
   BACKGROUND = "background",
@@ -79,9 +78,14 @@ export class Cooldown {
    * Wait for the cooldown to be ready and consume it
    * @param multiplier Optional multiplier to adjust the cooldown time (e.g. 0.5 for half time, 2 for double time)
    */
-  async waitAndUse(multiplier: number = 1): Promise<void> {
+  async waitAndUse(priority: CooldownPriority = CooldownPriority.NORMAL): Promise<void> {
+    if (priority === CooldownPriority.BACKGROUND) {
+      await this.awaitCooldown(priority);
+      return;
+    }
+
     while (!this.use()) {
-      await this.awaitCooldown(multiplier);
+      await this.awaitCooldown(priority);
     }
   }
 
@@ -90,8 +94,22 @@ export class Cooldown {
    * @param multiplier Optional multiplier to adjust the cooldown time
    * @returns Promise that resolves when the cooldown is ready
    */
-  async awaitCooldown(multiplier: number = 1): Promise<void> {
-    const remainingTime = this.getRemainingTime() * multiplier;
+  async awaitCooldown(priority: CooldownPriority = CooldownPriority.NORMAL): Promise<void> {
+    if (priority === CooldownPriority.BACKGROUND) {
+      let timeoutId: NodeJS.Timeout | undefined;
+      try {
+        await new Promise<void>(resolve => {
+          timeoutId = setTimeout(resolve, this.cooldownMs * this.getCooldownMultiplier(priority));
+        });
+      } finally {
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+        }
+      }
+      return;
+    }
+
+    const remainingTime = this.getRemainingTime() * this.getCooldownMultiplier(priority);
     if (remainingTime > 0) {
       let timeoutId: NodeJS.Timeout | undefined;
       try {
@@ -104,6 +122,24 @@ export class Cooldown {
         }
       }
     }
+  }
+
+  /**
+   * Get the cooldown multiplier for a given priority
+   *
+   * @param priority the priority to get the cooldown multiplier for
+   * @returns the cooldown multiplier
+   */
+  public getCooldownMultiplier(priority: CooldownPriority): number {
+    // Adjust cooldown based on priority
+    let cooldownMultiplier = 1;
+    if (priority === CooldownPriority.LOW) {
+      cooldownMultiplier = 2;
+    } else if (priority === CooldownPriority.BACKGROUND) {
+      cooldownMultiplier = 5;
+    }
+
+    return cooldownMultiplier;
   }
 
   /**

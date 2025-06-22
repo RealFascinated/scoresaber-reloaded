@@ -17,12 +17,6 @@ export type RequestOptions = Omit<RequestInit, "priority"> & BaseRequestOptions;
 
 class Request {
   private static pendingRequests = new Map<string, Promise<unknown>>();
-  private static rateLimitThresholds = {
-    [CooldownPriority.HIGH]: 50, // Warn at 50 remaining
-    [CooldownPriority.NORMAL]: 100, // Warn at 100 remaining
-    [CooldownPriority.LOW]: 200, // Warn at 200 remaining
-    [CooldownPriority.BACKGROUND]: 250, // Warn at 250 remaining
-  };
   private static rateLimitInfo = new Map<string, { remaining: number; resetTime: number }>();
 
   private static getCacheKey(url: string, method: string, options?: RequestOptions): string {

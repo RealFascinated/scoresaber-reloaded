@@ -76,18 +76,7 @@ export default class ApiService {
     url: string,
     options?: RequestOptions & { priority?: CooldownPriority }
   ): Promise<T | undefined> {
-    // Adjust cooldown based on priority
-    const priority = options?.priority || CooldownPriority.NORMAL;
-    let cooldownMultiplier = 1; // normal speed
-    if (priority === CooldownPriority.HIGH) {
-      cooldownMultiplier = 0.5; // 2x faster than normal
-    } else if (priority === CooldownPriority.LOW) {
-      cooldownMultiplier = 2; // 2x slower than normal
-    } else if (priority === CooldownPriority.BACKGROUND) {
-      cooldownMultiplier = 10; // 10x slower than normal
-    }
-
-    await this.cooldown.waitAndUse(cooldownMultiplier);
+    await this.cooldown.waitAndUse(options?.priority || CooldownPriority.NORMAL);
 
     // Increment the call count if we're on the server
     if (isServer()) {
