@@ -1,11 +1,13 @@
 import Logger from "@ssr/common/logger";
 import { QueueModel } from "@ssr/common/model/queue";
 import { EventListener } from "../event/event-listener";
+import { LeaderboardPlayerSeedQueue } from "./impl/leaderboard-player-seed-queue";
 import { PlayerScoreSeedQueue } from "./impl/player-score-seed-queue";
 import { Queue } from "./queue";
 
 export enum QueueId {
   PlayerScoreRefreshQueue = "player-score-refresh-queue",
+  LeaderboardPlayerSeedQueue = "leaderboard-player-seed-queue",
 }
 
 export class QueueManager implements EventListener {
@@ -13,6 +15,7 @@ export class QueueManager implements EventListener {
 
   constructor() {
     QueueManager.addQueue(new PlayerScoreSeedQueue());
+    QueueManager.addQueue(new LeaderboardPlayerSeedQueue());
   }
 
   /**

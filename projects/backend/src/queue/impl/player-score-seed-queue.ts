@@ -15,12 +15,18 @@ export class PlayerScoreSeedQueue extends Queue<string> {
   constructor() {
     super(QueueId.PlayerScoreRefreshQueue, true);
 
-    (async () => {
-      const players = await PlayerModel.find({ seededScores: null }).select("_id");
-      for (const player of players) {
-        this.add(player._id);
+    // Load players efficiently using addAll
+    setImmediate(async () => {
+      try {
+        const players = await PlayerModel.find({ seededScores: null }).select("_id");
+        const playerIds = players.map(p => p._id);
+        this.addAll(playerIds);
+
+        Logger.info(`Added ${playerIds.length} players to score refresh queue`);
+      } catch (error) {
+        Logger.error("Failed to load unseeded players:", error);
       }
-    })();
+    });
   }
 
   protected async processItem(playerId: string): Promise<void> {

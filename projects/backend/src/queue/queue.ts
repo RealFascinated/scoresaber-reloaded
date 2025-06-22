@@ -1,4 +1,5 @@
 import Logger from "@ssr/common/logger";
+import { isProduction } from "@ssr/common/utils/utils";
 import { QueueId } from "./queue-manager";
 
 export abstract class Queue<T> {
@@ -53,10 +54,31 @@ export abstract class Queue<T> {
   }
 
   /**
+   * Adds multiple items to the queue
+   *
+   * @param items the items to add
+   */
+  public addAll(items: T[]) {
+    if (this.isStopped) {
+      return;
+    }
+
+    for (const item of items) {
+      if (!this.queue.includes(item)) {
+        this.queue.push(item);
+      }
+    }
+
+    this.processQueue(); // Start processing immediately
+  }
+
+  /**
    * Processes the queue
    */
   private async processQueue() {
-    if (this.lock || this.isStopped) {
+    // Don't process the queue if it's locked,
+    // stopped, or we're not in production
+    if (this.lock || this.isStopped || !isProduction()) {
       return;
     }
 

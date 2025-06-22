@@ -258,12 +258,18 @@ export class ScoreSaberService extends ApiService {
    * @param leaderboardId the ID of the leaderboard to look up
    */
   public async lookupLeaderboard(
-    leaderboardId: string
+    leaderboardId: string | number,
+    options?: {
+      priority?: CooldownPriority;
+    }
   ): Promise<ScoreSaberLeaderboardToken | undefined> {
     const before = performance.now();
     this.log(`Looking up leaderboard "${leaderboardId}"...`);
     const response = await this.fetch<ScoreSaberLeaderboardToken>(
-      LOOKUP_LEADERBOARD_ENDPOINT.replace(":id", leaderboardId)
+      LOOKUP_LEADERBOARD_ENDPOINT.replace(":id", leaderboardId.toString()),
+      {
+        ...(options?.priority ? { priority: options.priority } : {}),
+      }
     );
     if (response === undefined) {
       return undefined;
@@ -380,19 +386,23 @@ export class ScoreSaberService extends ApiService {
    * @returns the scores of the leaderboard, or undefined
    */
   public async lookupLeaderboardScores(
-    leaderboardId: string,
+    leaderboardId: string | number,
     page: number,
     options?: {
       country?: string;
+      priority?: CooldownPriority;
     }
   ): Promise<ScoreSaberLeaderboardScoresPageToken | undefined> {
     const before = performance.now();
     this.log(`Looking up scores for leaderboard "${leaderboardId}", page "${page}"...`);
     const response = await this.fetch<ScoreSaberLeaderboardScoresPageToken>(
-      LOOKUP_LEADERBOARD_SCORES_ENDPOINT.replace(":id", leaderboardId).replace(
+      LOOKUP_LEADERBOARD_SCORES_ENDPOINT.replace(":id", leaderboardId.toString()).replace(
         ":page",
         page.toString()
-      ) + (options?.country ? `&countries=${options.country}` : "")
+      ) + (options?.country ? `&countries=${options.country}` : ""),
+      {
+        ...(options?.priority ? { priority: options.priority } : {}),
+      }
     );
 
     if (response === undefined) {
