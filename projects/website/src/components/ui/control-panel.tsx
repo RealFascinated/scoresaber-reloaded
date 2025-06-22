@@ -41,10 +41,10 @@ export function Tab({ children, isActive, onClick, tooltip }: TabProps) {
   const button = (
     <button
       onClick={onClick}
-      className={`flex items-center gap-1.5 rounded-sm px-3 py-1.5 text-xs font-medium transition-all ${
+      className={`flex cursor-pointer items-center gap-1.5 rounded-sm px-3 py-1.5 text-xs font-medium transition-all ${
         isActive
           ? "bg-background text-foreground shadow-sm"
-          : "text-muted-foreground hover:text-foreground"
+          : "text-muted-foreground hover:bg-background/50 hover:text-foreground"
       }`}
     >
       {children}
@@ -78,7 +78,7 @@ export function ControlButton({ children, isActive, onClick, className = "" }: C
   return (
     <button
       onClick={onClick}
-      className={`flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs transition-all ${
+      className={`flex cursor-pointer items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs transition-all ${
         isActive
           ? "border-primary bg-primary/10 text-primary"
           : "border-border bg-background text-muted-foreground hover:border-primary/50 hover:text-foreground"
