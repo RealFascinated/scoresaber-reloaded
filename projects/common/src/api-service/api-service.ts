@@ -76,11 +76,6 @@ export default class ApiService {
     url: string,
     options?: RequestOptions & { priority?: CooldownPriority }
   ): Promise<T | undefined> {
-    // Increment the call count if we're on the server
-    if (isServer()) {
-      this.callCount++;
-    }
-
     // Adjust cooldown based on priority
     const priority = options?.priority || CooldownPriority.NORMAL;
     let cooldownMultiplier = 1; // normal speed
@@ -93,6 +88,11 @@ export default class ApiService {
     }
 
     await this.cooldown.waitAndUse(cooldownMultiplier);
+
+    // Increment the call count if we're on the server
+    if (isServer()) {
+      this.callCount++;
+    }
 
     return Request.get<T>(this.buildRequestUrl(!isServer(), url), {
       returns: "json",
@@ -118,6 +118,11 @@ export default class ApiService {
     }
 
     await this.cooldown.waitAndUse();
+
+    // Increment the call count if we're on the server
+    if (isServer()) {
+      this.callCount++;
+    }
 
     const response = await fetch(url, {
       method: "POST",
