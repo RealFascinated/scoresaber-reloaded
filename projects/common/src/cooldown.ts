@@ -21,6 +21,7 @@ export class Cooldown {
 
   /**
    * Use the cooldown. Will use a burst if available, otherwise updates the last used time.
+   *
    * @returns true if the cooldown was ready and is now used, false if it wasn't ready
    */
   use(): boolean {
@@ -76,7 +77,8 @@ export class Cooldown {
 
   /**
    * Wait for the cooldown to be ready and consume it
-   * @param multiplier Optional multiplier to adjust the cooldown time (e.g. 0.5 for half time, 2 for double time)
+   *
+   * @param priority the priority to wait for
    */
   async waitAndUse(priority: CooldownPriority = CooldownPriority.NORMAL): Promise<void> {
     if (priority === CooldownPriority.BACKGROUND) {
@@ -92,8 +94,9 @@ export class Cooldown {
 
   /**
    * Wait for the cooldown to be ready
-   * @param multiplier Optional multiplier to adjust the cooldown time
-   * @returns Promise that resolves when the cooldown is ready
+   *
+   * @param priority the priority to wait for
+   * @returns promise that resolves when the cooldown is ready
    */
   async awaitCooldown(priority: CooldownPriority = CooldownPriority.NORMAL): Promise<void> {
     if (priority === CooldownPriority.BACKGROUND) {
@@ -137,7 +140,7 @@ export class Cooldown {
     if (priority === CooldownPriority.LOW) {
       cooldownMultiplier = 2;
     } else if (priority === CooldownPriority.BACKGROUND) {
-      cooldownMultiplier = 5;
+      cooldownMultiplier = 3.5;
     }
 
     return cooldownMultiplier;
