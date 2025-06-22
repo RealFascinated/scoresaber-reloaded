@@ -96,11 +96,9 @@ export default function ScoreSaberScoreEditorButton({
     <div className="relative flex cursor-default items-center justify-center">
       <Popover onOpenChange={() => handleSliderReset()}>
         <PopoverTrigger asChild>
-          <SimpleTooltip display="Edit the scores accuracy">
-            <Button variant="ghost" className="h-[28px] w-[28px] p-0">
-              <FaCog className="size-4" />
-            </Button>
-          </SimpleTooltip>
+          <Button variant="ghost" className="h-[28px] w-[28px] p-0">
+            <FaCog className="size-4" />
+          </Button>
         </PopoverTrigger>
         <PopoverContent className="p-0" side={isMobile ? "top" : "left"}>
           <div className="flex flex-col gap-4 p-3">
