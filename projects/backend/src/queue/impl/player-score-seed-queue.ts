@@ -18,7 +18,7 @@ export class PlayerScoreSeedQueue extends Queue<string> {
     // Load players efficiently using addAll
     setImmediate(async () => {
       try {
-        const players = await PlayerModel.find({ seededScores: null }).select("_id");
+        const players = await PlayerModel.find({ seededScores: null }).select("_id").lean();
         const playerIds = players.map(p => p._id);
         this.addAll(playerIds);
 

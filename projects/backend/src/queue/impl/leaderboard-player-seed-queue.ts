@@ -17,8 +17,8 @@ export class LeaderboardPlayerSeedQueue extends Queue<number> {
           .sort({
             timestamp: -1, // Newest first
           })
-          .select("_id");
-
+          .select("_id")
+          .lean();
         const leaderboardIds = leaderboards.map(lb => lb._id);
         this.addAll(leaderboardIds);
 
