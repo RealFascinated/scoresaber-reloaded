@@ -81,6 +81,7 @@ export class Cooldown {
   async waitAndUse(priority: CooldownPriority = CooldownPriority.NORMAL): Promise<void> {
     if (priority === CooldownPriority.BACKGROUND) {
       await this.awaitCooldown(priority);
+      this.use();
       return;
     }
 
