@@ -15,8 +15,9 @@ export class LeaderboardPlayerSeedQueue extends Queue<number> {
       try {
         const leaderboards = await ScoreSaberLeaderboardModel.find({ seededPlayers: null })
           .sort({
-            timestamp: -1, // Newest first
+            stars: -1, // Highest stars first
           })
+          .limit(10000)
           .select("_id")
           .lean();
         const leaderboardIds = leaderboards.map(lb => lb._id);
