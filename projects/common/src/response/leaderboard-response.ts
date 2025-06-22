@@ -1,4 +1,4 @@
-import { ScoreSaberLeaderboard } from "src/model/leaderboard/impl/scoresaber-leaderboard";
+import { ScoreSaberLeaderboard } from "../model/leaderboard/impl/scoresaber-leaderboard";
 import { BeatSaverMapResponse } from "./beatsaver-map-response";
 
 export type LeaderboardResponse = {

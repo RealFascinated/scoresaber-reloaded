@@ -59,7 +59,13 @@ export class PlayerRefreshService {
       });
 
     if (!firstPage) {
-      console.warn(`Failed to fetch scores for ${player._id} on page 1.`);
+      Logger.log("No scores found for player", player._id);
+
+      // Mark player as seeded
+      if (!player.seededScores) {
+        await PlayerModel.updateOne({ _id: player._id }, { $set: { seededScores: true } });
+      }
+
       result.timeTaken = performance.now() - startTime;
       return result;
     }
@@ -137,8 +143,8 @@ export class PlayerRefreshService {
       Logger.info(`Completed batch ${batchStart} to ${batchEnd} for ${player._id}`);
     }
 
+    // Mark player as seeded
     if (!player.seededScores) {
-      // Mark player as seeded
       await PlayerModel.updateOne({ _id: player._id }, { $set: { seededScores: true } });
     }
 

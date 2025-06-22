@@ -97,7 +97,7 @@ class Request {
 
         if (!response.ok) {
           if (throwOnError) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            throw new Error(response.statusText);
           }
           return undefined;
         }

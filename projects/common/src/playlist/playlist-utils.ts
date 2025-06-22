@@ -1,4 +1,4 @@
-import { env } from "src/env";
+import { env } from "../env";
 import { encodeSnipePlaylistSettings } from "../snipe/snipe-playlist-utils";
 import { BeatSaberPlaylist } from "./beatsaber/beatsaber-playlist";
 import { Playlist } from "./playlist";

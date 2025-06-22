@@ -1,4 +1,4 @@
-import { ScoreSaberLeaderboard } from "src/model/leaderboard/impl/scoresaber-leaderboard";
+import { ScoreSaberLeaderboard } from "../model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "../model/score/impl/scoresaber-score";
 import { PlayerScore } from "../score/player-score";
 import { Timeframe } from "../timeframe";

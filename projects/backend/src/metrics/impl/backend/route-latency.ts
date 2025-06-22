@@ -1,6 +1,5 @@
 import { Point } from "@influxdata/influxdb-client";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
-import { app } from "../../../index";
 import { MetricType } from "../../../service/metrics.service";
 import NumberMetric from "../../number-metric";
 
@@ -22,16 +21,6 @@ export default class RouteLatencyMetric extends NumberMetric {
       fetchAndStore: false,
       interval: TimeUnit.toMillis(TimeUnit.Second, 1),
     });
-
-    // Initialize all routes from the app
-    for (const route of app.routes) {
-      const key = `${route.method} ${route.path}`;
-      this.routeLatencies.set(key, {
-        recentLatencies: [],
-        windowSize: this.routeWindowSize,
-        maxAge: this.maxAge,
-      });
-    }
   }
 
   private calculateRollingAverage(

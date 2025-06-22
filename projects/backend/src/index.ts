@@ -100,6 +100,22 @@ export const app = new Elysia()
         await LeaderboardService.refreshQualifiedLeaderboards();
       },
     })
+  )
+  .use(
+    cron({
+      name: "update-ranking-queue-playlist",
+      pattern: "0 */2 * * *", // Every 2 hours at 00:00, 02:00, 04:00, etc
+      timezone: "Europe/London",
+      protect: true,
+      run: async () => {
+        const playlist = await PlaylistService.createRankingQueuePlaylist();
+        await PlaylistService.updatePlaylist("scoresaber-ranking-queue-maps", {
+          title: playlist.title,
+          image: playlist.image,
+          songs: playlist.songs,
+        });
+      },
+    })
   );
 
 app.use(

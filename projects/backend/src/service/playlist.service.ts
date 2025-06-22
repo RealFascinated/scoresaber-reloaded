@@ -1,4 +1,3 @@
-import cron from "@elysiajs/cron";
 import { env } from "@ssr/common/env";
 import { BadRequestError } from "@ssr/common/error/bad-request-error";
 import { InternalServerError } from "@ssr/common/error/internal-server-error";
@@ -13,7 +12,6 @@ import { SnipePlaylist } from "@ssr/common/playlist/snipe/snipe-playlist";
 import { parseSnipePlaylistSettings } from "@ssr/common/snipe/snipe-playlist-utils";
 import { capitalizeFirstLetter, truncateText } from "@ssr/common/string-utils";
 import { formatDateMinimal } from "@ssr/common/utils/time-utils";
-import { app } from "..";
 import {
   generateCustomRankedPlaylistImage,
   generatePlaylistImage,
@@ -34,23 +32,6 @@ export type PlaylistId =
 
 export default class PlaylistService {
   constructor() {
-    app.use(
-      cron({
-        name: "update-ranking-queue-playlist",
-        pattern: "0 */2 * * *", // Every 2 hours at 00:00, 02:00, 04:00, etc
-        timezone: "Europe/London",
-        protect: true,
-        run: async () => {
-          const playlist = await PlaylistService.createRankingQueuePlaylist();
-          await PlaylistService.updatePlaylist("scoresaber-ranking-queue-maps", {
-            title: playlist.title,
-            image: playlist.image,
-            songs: playlist.songs,
-          });
-        },
-      })
-    );
-
     this.initializeDefaultPlaylists();
   }
 

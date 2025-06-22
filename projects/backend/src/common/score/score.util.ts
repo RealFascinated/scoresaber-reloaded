@@ -24,7 +24,7 @@ import { PreviousScoresService } from "../../service/score/previous-scores.servi
  */
 export function scoreToObject(score: ScoreSaberScore): ScoreSaberScore {
   return {
-    ...removeObjectFields<ScoreSaberScore>(score, ["_id", "__v"]),
+    ...removeObjectFields<ScoreSaberScore>(score, ["_id", "id", "__v"]),
     id: score._id,
   } as ScoreSaberScore;
 }
@@ -37,7 +37,7 @@ export function scoreToObject(score: ScoreSaberScore): ScoreSaberScore {
  * @param title the title of the notification
  */
 export async function sendScoreNotification(
-  channel: DiscordChannels,
+  channel: (typeof DiscordChannels)[keyof typeof DiscordChannels],
   score: ScoreSaberScore,
   leaderboard: ScoreSaberLeaderboard,
   player: ScoreSaberPlayerToken,
