@@ -1,4 +1,5 @@
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
+import { CooldownPriority } from "@ssr/common/cooldown";
 import { DetailType } from "@ssr/common/detail-type";
 import { env } from "@ssr/common/env";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
@@ -391,7 +392,7 @@ export default class LeaderboardService {
     while (hasMorePages) {
       const response = await ApiServiceRegistry.getInstance()
         .getScoreSaberService()
-        .lookupLeaderboards(page, filter);
+        .lookupLeaderboards(page, { ...filter, priority: CooldownPriority.LOW });
       if (!response) {
         Logger.warn(`Failed to fetch leaderboards on page ${page}.`);
         continue;

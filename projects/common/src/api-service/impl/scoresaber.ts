@@ -325,6 +325,7 @@ export class ScoreSaberService extends ApiService {
       category?: number;
       stars?: StarFilter;
       sort?: number;
+      priority?: CooldownPriority;
     }
   ): Promise<ScoreSaberLeaderboardPageToken | undefined> {
     const before = performance.now();
@@ -344,6 +345,7 @@ export class ScoreSaberService extends ApiService {
             : {}),
           ...(options?.sort ? { sort: options.sort } : {}),
         },
+        ...(options?.priority ? { priority: options.priority } : {}),
       }
     );
     if (response === undefined) {
