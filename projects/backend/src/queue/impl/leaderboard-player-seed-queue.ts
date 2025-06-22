@@ -13,11 +13,13 @@ export class LeaderboardPlayerSeedQueue extends Queue<number> {
     // Load leaderboards efficiently using addAll
     setImmediate(async () => {
       try {
-        const leaderboards = await ScoreSaberLeaderboardModel.find({ seededPlayers: null })
+        const leaderboards = await ScoreSaberLeaderboardModel.find({
+          seededPlayers: null,
+          ranked: true,
+        })
           .sort({
-            stars: -1, // Highest stars first
+            plays: -1, // Highest plays first
           })
-          .limit(10000)
           .select("_id")
           .lean();
         const leaderboardIds = leaderboards.map(lb => lb._id);
