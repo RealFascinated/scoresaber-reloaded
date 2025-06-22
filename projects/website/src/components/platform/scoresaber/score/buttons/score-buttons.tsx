@@ -60,12 +60,6 @@ const buttons: ButtonConfig[] = [
     },
   },
   {
-    render: () => null,
-  },
-  {
-    render: () => null,
-  },
-  {
     render: ({ score }: Props) => {
       if (!score?.additionalData) {
         return null;
@@ -127,64 +121,59 @@ export default function ScoreSaberScoreButtons({
     ]
   );
 
-  const renderedButtons = useMemo(() => {
-    return memoizedButtons.map((button, index) => {
-      const { render } = button;
-
-      const buttonElement = render(buttonProps);
-
-      if (isMobile && !buttonElement) {
-        return null;
-      }
-
-      return <div key={index}>{buttonElement}</div>;
-    });
-  }, [memoizedButtons, buttonProps, isMobile]);
-
   return (
-    <div className={`flex items-center justify-end gap-1 lg:mr-2`}>
-      <div
-        className={`flex min-w-0 flex-row items-center justify-end gap-1 lg:grid lg:min-w-[92px] lg:grid-cols-3 lg:justify-center`}
-      >
-        {renderedButtons}
-      </div>
+    <div className="flex flex-col justify-center">
+      <div className="flex items-center justify-end gap-1 lg:mr-2">
+        {/* Score Buttons */}
+        <div
+          className="flex min-w-0 flex-wrap justify-end gap-1"
+          style={{ width: isMobile ? "auto" : "80px" }}
+        >
+          {memoizedButtons
+            .filter(button => button.render(buttonProps) !== null)
+            .map((button, index) => (
+              <div key={index} className="flex-shrink-0">
+                {button.render(buttonProps)}
+              </div>
+            ))}
+        </div>
 
-      <div
-        className={`flex gap-1 ${alwaysSingleLine ? "flex-row" : "flex-row lg:flex-col"} items-center justify-center`}
-      >
-        {/* Edit score button */}
-        {score && leaderboard && updateScore && !hideAccuracyChanger && (
-          <ScoreSaberScoreEditorButton
-            score={score}
-            leaderboard={leaderboard}
-            updateScore={updateScore}
-          />
-        )}
-
-        {/* View Leaderboard button */}
-        {leaderboardExpanded != undefined &&
-          setIsLeaderboardExpanded != undefined &&
-          !hideLeaderboardDropdown && (
-            <SimpleTooltip display="Score stats and leaderboard scores">
-              <Button
-                variant="ghost"
-                className="h-[28px] w-[28px] p-0"
-                onClick={handleDropdownToggle}
-                disabled={isLeaderboardLoading || isPending}
-              >
-                {isLeaderboardLoading || isPending ? (
-                  <ArrowPathIcon className="h-4 w-4 animate-spin" />
-                ) : (
-                  <ArrowDownIcon
-                    className={clsx(
-                      "h-4 w-4 transition-transform",
-                      leaderboardExpanded ? "rotate-180" : ""
-                    )}
-                  />
-                )}
-              </Button>
-            </SimpleTooltip>
+        {/* Score Editor and Leaderboard buttons   */}
+        <div className={`flex gap-1 ${isMobile ? "flex-row" : "flex-col"}`}>
+          {/* Edit score button */}
+          {score && leaderboard && updateScore && !hideAccuracyChanger && (
+            <ScoreSaberScoreEditorButton
+              score={score}
+              leaderboard={leaderboard}
+              updateScore={updateScore}
+            />
           )}
+
+          {/* View Leaderboard button */}
+          {leaderboardExpanded != undefined &&
+            setIsLeaderboardExpanded != undefined &&
+            !hideLeaderboardDropdown && (
+              <SimpleTooltip display="Score stats and leaderboard scores">
+                <Button
+                  variant="ghost"
+                  className="h-[28px] w-[28px] p-0"
+                  onClick={handleDropdownToggle}
+                  disabled={isLeaderboardLoading || isPending}
+                >
+                  {isLeaderboardLoading || isPending ? (
+                    <ArrowPathIcon className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <ArrowDownIcon
+                      className={clsx(
+                        "h-4 w-4 transition-transform",
+                        leaderboardExpanded ? "rotate-180" : ""
+                      )}
+                    />
+                  )}
+                </Button>
+              </SimpleTooltip>
+            )}
+        </div>
       </div>
     </div>
   );
