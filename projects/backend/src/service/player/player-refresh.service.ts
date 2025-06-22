@@ -55,7 +55,7 @@ export class PlayerRefreshService {
         page: 1,
         limit: 100,
         sort: "recent",
-        priority: CooldownPriority.LOW,
+        priority: CooldownPriority.BACKGROUND,
       });
 
     if (!firstPage) {
@@ -74,10 +74,43 @@ export class PlayerRefreshService {
     Logger.info(`Found ${totalPages} total pages for ${player._id}`);
 
     // Process the first page
-    await Promise.all(
-      firstPage.playerScores.map(async score => {
-        const leaderboard = getScoreSaberLeaderboardFromToken(score.leaderboard);
+    for (const score of firstPage.playerScores) {
+      const leaderboard = getScoreSaberLeaderboardFromToken(score.leaderboard);
 
+      const { tracked } = await ScoreService.trackScoreSaberScore(
+        getScoreSaberScoreFromToken(score.score, leaderboard, player._id),
+        leaderboard,
+        playerToken,
+        true,
+        false
+      );
+      if (tracked) {
+        result.missingScores++;
+      }
+      result.totalScores++;
+    }
+
+    // Process remaining pages
+    for (let page = 2; page <= totalPages; page++) {
+      Logger.info(`Processing page ${page} for ${player._id}...`);
+
+      const scoresPage = await ApiServiceRegistry.getInstance()
+        .getScoreSaberService()
+        .lookupPlayerScores({
+          playerId: player._id,
+          page: page,
+          limit: 100,
+          sort: "recent",
+          priority: CooldownPriority.BACKGROUND,
+        });
+
+      if (!scoresPage) {
+        Logger.warn(`Failed to fetch scores for ${player._id} on page ${page}.`);
+        continue;
+      }
+
+      for (const score of scoresPage.playerScores) {
+        const leaderboard = getScoreSaberLeaderboardFromToken(score.leaderboard);
         const { tracked } = await ScoreService.trackScoreSaberScore(
           getScoreSaberScoreFromToken(score.score, leaderboard, player._id),
           leaderboard,
@@ -89,58 +122,9 @@ export class PlayerRefreshService {
           result.missingScores++;
         }
         result.totalScores++;
-      })
-    );
-
-    // Process remaining pages in batches
-    for (let batchStart = 2; batchStart <= totalPages; batchStart += CONCURRENT_PAGES) {
-      const batchEnd = Math.min(batchStart + CONCURRENT_PAGES - 1, totalPages);
-      Logger.info(
-        `Processing pages ${batchStart} to ${batchEnd} concurrently for ${player._id}...`
-      );
-
-      const batchPromises = [];
-      for (let page = batchStart; page <= batchEnd; page++) {
-        batchPromises.push(
-          (async () => {
-            const scoresPage = await ApiServiceRegistry.getInstance()
-              .getScoreSaberService()
-              .lookupPlayerScores({
-                playerId: player._id,
-                page: page,
-                limit: 100,
-                sort: "recent",
-                priority: CooldownPriority.LOW,
-              });
-
-            if (!scoresPage) {
-              Logger.warn(`Failed to fetch scores for ${player._id} on page ${page}.`);
-              return;
-            }
-
-            await Promise.all(
-              scoresPage.playerScores.map(async score => {
-                const leaderboard = getScoreSaberLeaderboardFromToken(score.leaderboard);
-                const { tracked } = await ScoreService.trackScoreSaberScore(
-                  getScoreSaberScoreFromToken(score.score, leaderboard, player._id),
-                  leaderboard,
-                  playerToken,
-                  true,
-                  false
-                );
-                if (tracked) {
-                  result.missingScores++;
-                }
-                result.totalScores++;
-              })
-            );
-          })()
-        );
       }
 
-      // Wait for all pages in the current batch to complete
-      await Promise.all(batchPromises);
-      Logger.info(`Completed batch ${batchStart} to ${batchEnd} for ${player._id}`);
+      Logger.info(`Completed page ${page} for ${player._id}`);
     }
 
     // Mark player as seeded

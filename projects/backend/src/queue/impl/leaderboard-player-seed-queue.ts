@@ -32,7 +32,7 @@ export class LeaderboardPlayerSeedQueue extends Queue<number> {
   protected async processItem(leaderboardId: number): Promise<void> {
     const leaderboard = await ApiServiceRegistry.getInstance()
       .getScoreSaberService()
-      .lookupLeaderboard(leaderboardId, { priority: CooldownPriority.LOW });
+      .lookupLeaderboard(leaderboardId, { priority: CooldownPriority.BACKGROUND });
     if (!leaderboard) {
       Logger.warn(`Leaderboard "${leaderboardId}" not found`);
       return;
@@ -40,7 +40,7 @@ export class LeaderboardPlayerSeedQueue extends Queue<number> {
 
     const firstPage = await ApiServiceRegistry.getInstance()
       .getScoreSaberService()
-      .lookupLeaderboardScores(leaderboardId, 1, { priority: CooldownPriority.LOW });
+      .lookupLeaderboardScores(leaderboardId, 1, { priority: CooldownPriority.BACKGROUND });
     if (!firstPage) {
       Logger.warn(`Leaderboard "${leaderboardId}" first page not found`);
       return;
@@ -55,7 +55,7 @@ export class LeaderboardPlayerSeedQueue extends Queue<number> {
 
       const page = await ApiServiceRegistry.getInstance()
         .getScoreSaberService()
-        .lookupLeaderboardScores(leaderboardId, i, { priority: CooldownPriority.LOW });
+        .lookupLeaderboardScores(leaderboardId, i, { priority: CooldownPriority.BACKGROUND });
       if (!page) {
         Logger.warn(`Leaderboard "${leaderboardId}" page "${i}" not found`);
         continue;
