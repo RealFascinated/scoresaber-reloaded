@@ -84,7 +84,7 @@ export default class ApiService {
     } else if (priority === CooldownPriority.LOW) {
       cooldownMultiplier = 2; // 2x slower than normal
     } else if (priority === CooldownPriority.BACKGROUND) {
-      cooldownMultiplier = 6; // 6x slower than normal
+      cooldownMultiplier = 10; // 10x slower than normal
     }
 
     await this.cooldown.waitAndUse(cooldownMultiplier);

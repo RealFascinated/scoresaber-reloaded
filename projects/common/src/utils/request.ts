@@ -48,7 +48,6 @@ class Request {
 
     if (rateLimit) {
       const remaining = Number(rateLimit);
-      const threshold = this.rateLimitThresholds[priority];
 
       // Update rate limit info
       this.rateLimitInfo.set(url, {
@@ -57,7 +56,7 @@ class Request {
       });
 
       // Log warning if below threshold
-      if (remaining < threshold) {
+      if (remaining <= 50) {
         Logger.warn(`Rate limit for ${url} is low (${remaining} remaining). Priority: ${priority}`);
       }
     }
