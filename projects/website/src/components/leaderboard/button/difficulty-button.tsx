@@ -43,12 +43,16 @@ export const DifficultyButton = memo(
           } as React.CSSProperties & { "--hover-bg": string }
         }
         onMouseEnter={e => {
-          if (!isSelected) {
+          if (isSelected) {
+            e.currentTarget.style.backgroundColor = `${difficultyData.color}30`;
+          } else {
             e.currentTarget.style.backgroundColor = `${difficultyData.color}15`;
           }
         }}
         onMouseLeave={e => {
-          if (!isSelected) {
+          if (isSelected) {
+            e.currentTarget.style.backgroundColor = `${difficultyData.color}15`;
+          } else {
             e.currentTarget.style.backgroundColor = "";
           }
         }}
