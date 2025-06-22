@@ -3,9 +3,9 @@ import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerStatChange } from "@ssr/common/player/player-stat-change";
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
 import Link from "next/link";
-import CountryFlag from "../country-flag";
 import { ChangeOverTime } from "../statistic/change-over-time";
 import { DailyChange } from "../statistic/daily-change";
+import CountryFlag from "../ui/country-flag";
 
 const playerData = [
   {

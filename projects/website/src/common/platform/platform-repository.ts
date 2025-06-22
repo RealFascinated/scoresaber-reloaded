@@ -9,7 +9,7 @@ export enum PlatformType {
 
 export class PlatformRepository {
   private static instance: PlatformRepository;
-  private platforms: Platform<any, any, any, any, any>[] = [];
+  private platforms: Platform[] = [];
 
   private constructor() {
     this.platforms.push(new ScoreSaberPlatform());
@@ -32,14 +32,8 @@ export class PlatformRepository {
    * @param type the type of the platform
    * @returns the platform
    */
-  public getPlatform(type: PlatformType): Platform<any, any, any, any, any> {
-    return this.platforms.find(platform => platform.getType() === type) as Platform<
-      any,
-      any,
-      any,
-      any,
-      any
-    >;
+  public getPlatform(type: PlatformType): Platform {
+    return this.platforms.find(platform => platform.getType() === type) as Platform;
   }
 
   /**
@@ -47,7 +41,7 @@ export class PlatformRepository {
    *
    * @returns all platforms
    */
-  public getPlatforms(): Platform<any, any, any, any, any>[] {
+  public getPlatforms(): Platform[] {
     return this.platforms;
   }
 

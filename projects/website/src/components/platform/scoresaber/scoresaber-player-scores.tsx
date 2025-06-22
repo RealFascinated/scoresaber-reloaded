@@ -191,11 +191,14 @@ export default function ScoreSaberPlayerScores({
     ],
     queryFn: async () => {
       if (scoresMode === "live") {
-        return platform.getPlayerScores(player.id, currentPage, {
-          sort: currentSort as ScoreSaberScoreSort,
-          search: invalidSearch ? undefined : debouncedSearchTerm,
-          comparisonPlayerId: showScoreComparison && mainPlayerId ? mainPlayerId : undefined,
-        });
+        const response = await ssrApi.fetchScoreSaberPlayerScores(
+          player.id,
+          currentPage,
+          currentSort as ScoreSaberScoreSort,
+          invalidSearch ? undefined : debouncedSearchTerm,
+          showScoreComparison && mainPlayerId ? mainPlayerId : undefined
+        );
+        return response || Pagination.empty();
       } else {
         // Find the selected filter
         const selectedFilter = CACHED_SCORE_FILTERS.find(filter => filter.name === currentFilter);

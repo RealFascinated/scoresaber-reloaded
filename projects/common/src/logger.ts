@@ -1,13 +1,20 @@
-import { formatDate } from "./utils/time-utils";
+import dayjs from "dayjs";
+import { ConsoleColors } from "./utils/console-colors";
+
+const LogLevel = {
+  debug: 0,
+  info: 1,
+  warn: 2,
+  error: 3,
+};
+const LogLevelColors: Record<keyof typeof LogLevel, string> = {
+  debug: ConsoleColors.magenta,
+  info: ConsoleColors.green,
+  warn: ConsoleColors.yellow,
+  error: ConsoleColors.red,
+};
 
 export default class Logger {
-  private static readonly LogLevel = {
-    debug: 0,
-    info: 1,
-    warn: 2,
-    error: 3,
-  };
-
   /**
    * Logs a message to the console.
    *
@@ -15,9 +22,9 @@ export default class Logger {
    * @param message the message to log
    * @param args the arguments to log
    */
-  public static log(level: keyof typeof Logger.LogLevel, message: string, ...args: unknown[]) {
-    const prefix = `${formatDate(new Date(), "DD/MM/YYYY, HH:mm:ss")} [SSR / ${level.toUpperCase()}]`;
-    const formattedMessage = `${prefix}: ${message}`;
+  public static log(level: keyof typeof LogLevel, message: string, ...args: unknown[]) {
+    const color = LogLevelColors[level];
+    const formattedMessage = `${ConsoleColors.gray}${dayjs().format("HH:mm:ss")} ${color}[SSR / ${level.toUpperCase()}]: ${ConsoleColors.reset}${message}`;
 
     switch (level) {
       case "debug":

@@ -11,10 +11,12 @@ import {
   AccSaberScoreSort,
   AccSaberScoreType,
 } from "@ssr/common/api-service/impl/accsaber";
+import { DetailType } from "@ssr/common/detail-type";
 import type ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import type { ScoreSaberScoreSort } from "@ssr/common/score/score-sort";
 import { ScoreSaberScoreDataMode } from "@ssr/common/types/score-data-mode";
 import { ScoreSort } from "@ssr/common/types/sort";
+import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { useLiveQuery } from "dexie-react-hooks";
 import Link from "next/link";
@@ -138,7 +140,11 @@ export default function PlayerData({
 
   const { data: playerData } = useQuery({
     queryKey: ["playerData", initialPlayerData.id, mainPlayerId, isFriend],
-    queryFn: () => scoresaberPlatform.getPlayer(initialPlayerData.id),
+    queryFn: () =>
+      ssrApi.getScoreSaberPlayer(initialPlayerData.id, {
+        createIfMissing: true,
+        type: DetailType.FULL,
+      }),
     initialData: initialPlayerData,
   });
 

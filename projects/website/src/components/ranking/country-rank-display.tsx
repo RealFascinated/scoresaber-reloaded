@@ -1,7 +1,7 @@
-import { getRankBgColor } from "@/common/color-utils";
+import { getRankBgColor } from "@/common/rank-color-utils";
 import { cn } from "@/common/utils";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
-import CountryFlag from "../country-flag";
+import CountryFlag from "../ui/country-flag";
 
 type CountryRankDisplayProps = {
   countryRank: number;

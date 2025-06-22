@@ -2,11 +2,11 @@
 
 import { SettingIds } from "@/common/database/database";
 import Card from "@/components/card";
-import CountryFlag from "@/components/country-flag";
 import { useLeaderboardFilter } from "@/components/providers/leaderboard/leaderboard-filter-provider";
 import SimpleTooltip from "@/components/simple-tooltip";
 import { Button } from "@/components/ui/button";
 import Combobox from "@/components/ui/combo-box";
+import CountryFlag from "@/components/ui/country-flag";
 import useDatabase from "@/hooks/use-database";
 import { FilterItem } from "@ssr/common/filter-item";
 import { countryFilter } from "@ssr/common/utils/country.util";

@@ -9,7 +9,7 @@ import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { ReactElement, useMemo } from "react";
 import Card from "../../card";
-import CountryFlag from "../../country-flag";
+import CountryFlag from "../../ui/country-flag";
 import PlayerPreview from "../player-preview";
 
 type Variants = {

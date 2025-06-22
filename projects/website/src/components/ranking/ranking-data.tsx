@@ -1,9 +1,9 @@
 "use client";
 
-import { getPlayerRankingColumnWidth } from "@/common/utils";
+import { getPlayerRankingColumnWidth } from "@/common/player-utils";
 import Card from "@/components/card";
-import CountryFlag from "@/components/country-flag";
 import SimplePagination from "@/components/simple-pagination";
+import CountryFlag from "@/components/ui/country-flag";
 import { Switch } from "@/components/ui/switch";
 import useDatabase from "@/hooks/use-database";
 import { useIsMobile } from "@/hooks/use-is-mobile";

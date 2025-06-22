@@ -3,8 +3,8 @@
 import { cn } from "@/common/utils";
 import Avatar from "@/components/avatar";
 import { useSearch } from "@/components/providers/search-provider";
-import SearchDialog from "@/components/shared/search-dialog";
 import { Input } from "@/components/ui/input";
+import SearchDialog from "@/components/ui/search-dialog";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { StarIcon } from "@heroicons/react/24/solid";
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";

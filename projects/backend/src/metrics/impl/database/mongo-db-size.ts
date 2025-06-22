@@ -1,4 +1,5 @@
 import { Point } from "@influxdata/influxdb-client";
+import Logger from "@ssr/common/logger";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
 import { mongoose } from "@typegoose/typegoose";
 import { MetricType } from "../../../service/metrics.service";
@@ -15,7 +16,7 @@ export default class MongoDbSizeMetric extends NumberMetric {
   public async collect(): Promise<Point | undefined> {
     try {
       if (!mongoose.connection.db) {
-        console.error("MongoDB connection not established");
+        Logger.error("MongoDB connection not established");
         return undefined;
       }
 
@@ -27,7 +28,7 @@ export default class MongoDbSizeMetric extends NumberMetric {
         .floatField("collections", stats.dataSize) // Total data size in bytes
         .timestamp(new Date());
     } catch (error) {
-      console.error("Failed to collect MongoDB size metric:", error);
+      Logger.error("Failed to collect MongoDB size metric:", error);
       return undefined;
     }
   }

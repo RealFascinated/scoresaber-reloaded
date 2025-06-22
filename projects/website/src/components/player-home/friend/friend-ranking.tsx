@@ -1,6 +1,6 @@
 "use client";
 
-import { getPlayerRankingColumnWidth } from "@/common/utils";
+import { getPlayerRankingColumnWidth } from "@/common/player-utils";
 import { PlayerRanking } from "@/components/ranking/player-ranking";
 import SimplePagination from "@/components/simple-pagination";
 import useDatabase from "@/hooks/use-database";

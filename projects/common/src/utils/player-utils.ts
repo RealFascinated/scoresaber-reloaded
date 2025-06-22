@@ -13,21 +13,10 @@ export function getValueFromHistory(
   history: FlattenedPlayerHistory,
   field: string
 ): number | undefined {
-  const keys = field.split(".");
-  /* eslint-disable @typescript-eslint/no-explicit-any */
-  let value: any = history;
-
-  // Navigate through the keys safely
-  for (const key of keys) {
-    if (value && key in value) {
-      value = value[key];
-    } else {
-      return undefined; // Return null if the key doesn't exist
-    }
+  if (field in history) {
+    return history[field as keyof FlattenedPlayerHistory];
   }
-
-  // Ensure we return a number or null
-  return typeof value === "number" ? value : undefined;
+  return undefined;
 }
 
 /**

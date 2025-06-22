@@ -1,4 +1,3 @@
-import { Page } from "@ssr/common/pagination";
 import { ReactNode } from "react";
 import { PlatformType } from "./platform-repository";
 
@@ -14,7 +13,7 @@ export type PlatformOptions = {
   displayPredicate: (playerId: string) => Promise<boolean>;
 };
 
-export abstract class Platform<Player, ScoreResponse, Leaderboard, ScoreLookupOptions, ScoreSort> {
+export abstract class Platform {
   /**
    * The id of this platform
    */
@@ -24,50 +23,16 @@ export abstract class Platform<Player, ScoreResponse, Leaderboard, ScoreLookupOp
    * The display name of this platform
    */
   private readonly displayName: string;
-
-  /**
-   * The default score sort for this platform
-   */
-  private readonly defaultScoreSort: ScoreSort;
-
   /**
    * The options for this platform
    */
   private readonly options: PlatformOptions;
 
-  constructor(
-    type: PlatformType,
-    displayName: string,
-    defaultScoreSort: ScoreSort,
-    options: PlatformOptions
-  ) {
+  constructor(type: PlatformType, displayName: string, options: PlatformOptions) {
     this.type = type;
     this.displayName = displayName;
-    this.defaultScoreSort = defaultScoreSort;
     this.options = options;
   }
-
-  /**
-   * Get a player from this platform
-   *
-   * @param id the id of the player
-   * @returns the player
-   */
-  abstract getPlayer(id: string): Promise<Player | undefined>;
-
-  /**
-   * Get the scores for a player
-   *
-   * @param playerId the id of the player
-   * @param page the page of the scores
-   * @param options the options for the score lookup
-   * @returns the scores for the player
-   */
-  abstract getPlayerScores(
-    playerId: string,
-    page: number,
-    options: ScoreLookupOptions
-  ): Promise<Page<ScoreResponse> | unknown>;
 
   /**
    * Get the type of this platform
@@ -85,15 +50,6 @@ export abstract class Platform<Player, ScoreResponse, Leaderboard, ScoreLookupOp
    */
   public getDisplayName(): string {
     return this.displayName;
-  }
-
-  /**
-   * Get the default score sort for this platform
-   *
-   * @returns the default score sort for this platform
-   */
-  public getDefaultScoreSort(): ScoreSort {
-    return this.defaultScoreSort;
   }
 
   /**

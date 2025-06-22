@@ -15,8 +15,8 @@ import { useEffect, useState } from "react";
 import CountUp from "react-countup";
 import Avatar from "../avatar";
 import Card from "../card";
-import CountryFlag from "../country-flag";
 import HMDIcon from "../hmd-icon";
+import CountryFlag from "../ui/country-flag";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 
 function PlayerHeader({ player }: { player: ScoreSaberPlayer }) {

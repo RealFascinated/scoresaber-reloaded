@@ -1,6 +1,6 @@
 "use client";
 
-import { getRankBgColor } from "@/common/color-utils";
+import { getRankBgColor } from "@/common/rank-color-utils";
 import { cn } from "@/common/utils";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
@@ -8,8 +8,8 @@ import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { getScoreSaberAvatar } from "@ssr/common/utils/scoresaber.util";
 import { ArrowDownRightIcon, ArrowUpRightIcon } from "lucide-react";
 import Link from "next/link";
-import CountryFlag from "../country-flag";
 import PlayerPreview from "../player/player-preview";
+import CountryFlag from "../ui/country-flag";
 import { PlayerAvatar } from "./player-avatar";
 import { PlayerName } from "./player-name";
 import { PlayerPpDisplay } from "./player-pp-display";

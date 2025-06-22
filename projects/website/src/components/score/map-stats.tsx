@@ -1,4 +1,4 @@
-import StatValue from "@/components/stat-value";
+import StatValue from "@/components/statistic/stat-value";
 import { CubeIcon } from "@heroicons/react/24/solid";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";

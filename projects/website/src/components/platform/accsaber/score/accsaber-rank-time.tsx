@@ -1,6 +1,6 @@
 "use client";
 
-import { getRankColor } from "@/common/color-utils";
+import { getRankColor } from "@/common/rank-color-utils";
 import { ScoreTimeSet } from "@/components/score/score-time-set";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import { AccSaberScore } from "@ssr/common/api-service/impl/accsaber";

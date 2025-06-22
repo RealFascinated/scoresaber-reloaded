@@ -1,5 +1,5 @@
 import Avatar from "@/components/avatar";
-import SearchDialog from "@/components/shared/search-dialog";
+import SearchDialog from "@/components/ui/search-dialog";
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { DetailType } from "@ssr/common/detail-type";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";

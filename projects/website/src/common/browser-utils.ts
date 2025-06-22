@@ -1,3 +1,5 @@
+import Logger from "@ssr/common/logger";
+
 /**
  * Copies the given string to the clipboard
  *
@@ -44,7 +46,7 @@ export async function downloadFile(url: string, fileName: string) {
     aElement.click();
     URL.revokeObjectURL(href);
   } catch (error) {
-    console.error("Error downloading file:", error);
+    Logger.error("Error downloading file:", error);
   }
 }
 

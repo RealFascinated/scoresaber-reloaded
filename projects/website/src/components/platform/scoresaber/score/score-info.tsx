@@ -1,4 +1,4 @@
-import { getRankColor } from "@/common/color-utils";
+import { getRankColor } from "@/common/rank-color-utils";
 import HMDIcon from "@/components/hmd-icon";
 import { ScoreSaberScoreTimeSetVs } from "@/components/platform/scoresaber/score/score-time-set-vs";
 import { ScoreTimeSet } from "@/components/score/score-time-set";

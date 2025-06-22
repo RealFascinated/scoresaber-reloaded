@@ -202,7 +202,7 @@ export default class BeatLeaderService {
                 `Failed to save replay for ${score.id}: ${error}`
               )
             );
-            console.error(`Failed to save replay for ${score.id}: ${error}`);
+            Logger.error(`Failed to save replay for ${score.id}: ${error}`);
           }
         }
         return false;

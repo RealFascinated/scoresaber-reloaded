@@ -621,7 +621,7 @@ export default class LeaderboardService {
     }).sort({ timestamp: -1 })) as unknown as ScoreSaberScoreDocument[];
 
     if (!scores) {
-      console.warn(`Failed to fetch local scores for leaderboard "${update.leaderboard.id}".`);
+      Logger.warn(`Failed to fetch local scores for leaderboard "${update.leaderboard.id}".`);
       return 0;
     }
 

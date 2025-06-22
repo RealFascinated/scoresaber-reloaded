@@ -1,6 +1,6 @@
-import { FriendRanking } from "@/components/home/friend/friend-ranking";
-import { FriendScores } from "@/components/home/friend/friend-scores";
-import { PlayerPreview } from "@/components/home/player-preview";
+import { FriendRanking } from "@/components/player-home/friend/friend-ranking";
+import { FriendScores } from "@/components/player-home/friend/friend-scores";
+import { PlayerPreview } from "@/components/player-home/player-preview";
 
 export default function HomePage() {
   return (

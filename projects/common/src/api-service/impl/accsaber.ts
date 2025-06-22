@@ -1,4 +1,5 @@
 import { Cooldown } from "../../cooldown";
+import Logger from "../../logger";
 import { Page, Pagination } from "../../pagination";
 import ApiService from "../api-service";
 import { ApiServiceName } from "../api-service-registry";
@@ -235,7 +236,7 @@ export class AccSaberService extends ApiService {
         totalPages,
       });
     } catch (error) {
-      console.error("Failed to fetch AccSaber scores:", error);
+      Logger.error("Failed to fetch AccSaber scores: ", error);
       return Pagination.empty<AccSaberScore>();
     }
   }

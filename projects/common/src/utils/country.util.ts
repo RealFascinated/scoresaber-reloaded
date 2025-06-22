@@ -56,7 +56,6 @@ function getCountries(): FilterItem[] {
   countries.push(new FilterItem("CD", "Congo, Democratic Republic of the"));
   countries.push(new FilterItem("CK", "Cook Islands"));
   countries.push(new FilterItem("CR", "Costa Rica"));
-  // eslint-disable-next-line quotes
   countries.push(new FilterItem("CI", "Côte d'Ivoire"));
   countries.push(new FilterItem("HR", "Croatia"));
   countries.push(new FilterItem("CU", "Cuba"));
@@ -125,7 +124,6 @@ function getCountries(): FilterItem[] {
   countries.push(new FilterItem("KR", "South Korea"));
   countries.push(new FilterItem("KW", "Kuwait"));
   countries.push(new FilterItem("KG", "Kyrgyzstan"));
-  // eslint-disable-next-line quotes
   countries.push(new FilterItem("LA", "Lao People's Democratic Republic"));
   countries.push(new FilterItem("LV", "Latvia"));
   countries.push(new FilterItem("LB", "Lebanon"));

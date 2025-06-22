@@ -59,7 +59,7 @@ export class PlayerRefreshService {
       });
 
     if (!firstPage) {
-      Logger.log("No scores found for player", player._id);
+      Logger.info(`No scores found for player ${player._id}`);
 
       // Mark player as seeded
       if (!player.seededScores) {
@@ -114,7 +114,7 @@ export class PlayerRefreshService {
               });
 
             if (!scoresPage) {
-              console.warn(`Failed to fetch scores for ${player._id} on page ${page}.`);
+              Logger.warn(`Failed to fetch scores for ${player._id} on page ${page}.`);
               return;
             }
 

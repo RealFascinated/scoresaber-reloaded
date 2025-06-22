@@ -1,4 +1,5 @@
 import { env } from "@ssr/common/env";
+import Logger from "@ssr/common/logger";
 import { getMinioBucketName, MinioBucket } from "@ssr/common/minio-buckets";
 import { Client } from "minio";
 import { Readable } from "node:stream";
@@ -64,7 +65,7 @@ export default class MinioService {
     try {
       await minioClient.putObject(getMinioBucketName(bucket), filename, data);
     } catch (error) {
-      console.error(`Failed to save file to Minio: ${error}`);
+      Logger.error(`Failed to save file to Minio: ${error}`);
     }
   }
 
@@ -78,7 +79,7 @@ export default class MinioService {
     try {
       await minioClient.removeObject(getMinioBucketName(bucket), filename);
     } catch (error) {
-      console.error(`Failed to delete file from Minio: ${error}`);
+      Logger.error(`Failed to delete file from Minio: ${error}`);
     }
   }
 
@@ -105,7 +106,7 @@ export default class MinioService {
         totalObjects,
       };
     } catch (error) {
-      console.error(`Failed to get bucket stats from Minio: ${error}`);
+      Logger.error(`Failed to get bucket stats from Minio: ${error}`);
       return {
         totalSize: 0,
         totalObjects: 0,

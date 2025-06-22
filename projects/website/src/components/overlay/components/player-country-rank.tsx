@@ -1,5 +1,5 @@
-import CountryFlag from "@/components/country-flag";
 import { DailyChange } from "@/components/statistic/daily-change";
+import CountryFlag from "@/components/ui/country-flag";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerStatChange } from "@ssr/common/player/player-stat-change";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";

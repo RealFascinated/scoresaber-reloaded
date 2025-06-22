@@ -1,4 +1,4 @@
-import { getRankColor } from "@/common/color-utils";
+import { getRankColor } from "@/common/rank-color-utils";
 import ScoreMissesAndPausesBadge from "@/components/platform/scoresaber/score/badges/score-misses-and-pauses";
 import { ScorePpBadge } from "@/components/platform/scoresaber/score/badges/score-pp";
 import { ScoreSaberScoreModifiers } from "@/components/platform/scoresaber/score/score-modifiers";

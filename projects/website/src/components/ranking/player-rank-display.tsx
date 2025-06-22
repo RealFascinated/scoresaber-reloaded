@@ -1,4 +1,4 @@
-import { getRankColor } from "@/common/color-utils";
+import { getRankColor } from "@/common/rank-color-utils";
 import { cn } from "@/common/utils";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 

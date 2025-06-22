@@ -1,5 +1,5 @@
 import SimpleTooltip from "@/components/simple-tooltip";
-import StatValue from "@/components/stat-value";
+import StatValue from "@/components/statistic/stat-value";
 import { getHMDInfo, HMD } from "@ssr/common/hmds";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";

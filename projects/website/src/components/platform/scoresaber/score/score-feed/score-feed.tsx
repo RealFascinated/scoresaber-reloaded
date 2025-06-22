@@ -2,6 +2,7 @@
 
 import Avatar from "@/components/avatar";
 import ScoreSaberScoreDisplay from "@/components/platform/scoresaber/score/score";
+import Logger from "@ssr/common/logger";
 import {
   getScoreSaberLeaderboardFromToken,
   getScoreSaberScoreFromToken,
@@ -46,7 +47,7 @@ export default function ScoreFeed() {
     <div className="divide-border flex flex-col divide-y">
       {scores.map(scoreToken => {
         if (!scoreToken.leaderboard || !scoreToken.score) {
-          console.error("Invalid leaderboard or score data:", scoreToken);
+          Logger.error("Invalid leaderboard or score data:", scoreToken);
           return null;
         }
 
