@@ -26,7 +26,7 @@ export default class MapAuthorsMetric extends NumberMetric {
         },
       },
       {
-        $limit: 100,
+        $limit: 250,
       },
     ]);
 
