@@ -8,6 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import useDatabase from "@/hooks/use-database";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import usePageNavigation from "@/hooks/use-page-navigation";
+import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { FilterItem } from "@ssr/common/filter-item";
 import { countryFilter } from "@ssr/common/utils/country.util";
@@ -45,111 +46,6 @@ type RankingHeaderProps = {
   setShowRelativePPDifference: (show: boolean) => void;
   mainPlayer: any | undefined;
 };
-
-function RankingFilters({
-  currentCountry,
-  setCurrentCountry,
-  setCurrentPage,
-  mainPlayerCountry,
-  currentSearch,
-  setCurrentSearch,
-}: RankingFiltersProps) {
-  return (
-    <Card className="order-1 mb-2 h-full w-full gap-4 xl:order-2 xl:mb-0 xl:w-[25%]">
-      <p className="text-lg">Filters</p>
-      <div className="flex flex-col gap-4">
-        <Combobox<string | undefined>
-          name="Country"
-          className="w-full"
-          items={countryFilter
-            .map(({ key, friendlyName }: FilterItem) => ({
-              value: key,
-              name: friendlyName,
-              icon: <CountryFlag code={key} size={12} />,
-            }))
-            .sort((country: { value: string }) => {
-              if (country.value === mainPlayerCountry) return -1;
-              return 1;
-            })}
-          value={currentCountry}
-          onValueChange={(newCountry: string | undefined) => {
-            setCurrentCountry(newCountry);
-            setCurrentPage(1);
-          }}
-        />
-
-        {/* Search */}
-        <div className="flex flex-row items-center gap-2">
-          <Input
-            placeholder="Search for players..."
-            value={currentSearch ?? ""}
-            onChange={e => setCurrentSearch(e.target.value)}
-          />
-          <SimpleTooltip display="Clear search">
-            <Button variant="outline" size="icon" onClick={() => setCurrentSearch("")}>
-              <XIcon className="size-4" />
-            </Button>
-          </SimpleTooltip>
-        </div>
-
-        <div className="flex gap-2">
-          <div className="w-full">
-            <SimpleTooltip display="Clear all current filters">
-              <Button
-                onClick={() => {
-                  setCurrentCountry(undefined);
-                  setCurrentPage(1);
-                }}
-                className="w-full"
-              >
-                Clear Filters
-              </Button>
-            </SimpleTooltip>
-          </div>
-        </div>
-      </div>
-    </Card>
-  );
-}
-
-function RankingHeader({
-  currentCountry,
-  showRelativePPDifference,
-  setShowRelativePPDifference,
-  mainPlayer,
-}: RankingHeaderProps) {
-  return (
-    <div className="flex flex-row items-center justify-between gap-4">
-      <div className="flex items-center font-medium">
-        {currentCountry && (
-          <div className="flex items-center gap-4">
-            <CountryFlag code={currentCountry} size={20} />
-            <span>
-              Players from <b>{countryFilter.find(c => c.key === currentCountry)?.friendlyName}</b>
-            </span>
-          </div>
-        )}
-        {!currentCountry && <p className="text-lg">Global Players</p>}
-      </div>
-
-      {mainPlayer !== undefined && (
-        <div className="bg-accent/50 flex min-w-fit items-center gap-3 rounded-md px-4 py-2">
-          <SimpleTooltip display="The amount of pp between you and each player" showOnMobile>
-            <p className="text-sm">Relative PP</p>
-          </SimpleTooltip>
-          <Switch
-            checked={showRelativePPDifference}
-            onCheckedChange={checked => setShowRelativePPDifference(checked)}
-          />
-        </div>
-      )}
-    </div>
-  );
-}
-
-function buildPageUrl(country: string | undefined, page: number): string {
-  return `/ranking/${country != undefined ? `${country}/` : ""}${page}`;
-}
 
 export default function RankingData({ initialPage, initialCountry }: RankingDataProps) {
   const isMobile = useIsMobile();
@@ -288,4 +184,114 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
       </div>
     </div>
   );
+}
+
+function RankingFilters({
+  currentCountry,
+  setCurrentCountry,
+  setCurrentPage,
+  mainPlayerCountry,
+  currentSearch,
+  setCurrentSearch,
+}: RankingFiltersProps) {
+  return (
+    <Card className="order-1 mb-2 h-full w-full gap-4 xl:order-2 xl:mb-0 xl:w-[25%]">
+      <p className="text-lg">Filters</p>
+      <div className="flex flex-col gap-4">
+        <Combobox<string | undefined>
+          name="Country"
+          className="w-full"
+          items={countryFilter
+            .map(({ key, friendlyName }: FilterItem) => ({
+              value: key,
+              name: friendlyName,
+              icon: <CountryFlag code={key} size={12} />,
+            }))
+            .sort((country: { value: string }) => {
+              if (country.value === mainPlayerCountry) return -1;
+              return 1;
+            })}
+          value={currentCountry}
+          onValueChange={(newCountry: string | undefined) => {
+            setCurrentCountry(newCountry);
+            setCurrentPage(1);
+          }}
+        />
+
+        {/* Search */}
+        <div className="flex flex-row items-center gap-2">
+          <Input
+            placeholder="Search for players..."
+            value={currentSearch ?? ""}
+            onChange={e => setCurrentSearch(e.target.value)}
+          />
+          <SimpleTooltip display="Clear search">
+            <Button variant="outline" size="icon" onClick={() => setCurrentSearch("")}>
+              <XIcon className="size-4" />
+            </Button>
+          </SimpleTooltip>
+        </div>
+
+        <div className="flex gap-2">
+          <div className="w-full">
+            <SimpleTooltip display="Clear all current filters">
+              <Button
+                onClick={() => {
+                  setCurrentCountry(undefined);
+                  setCurrentPage(1);
+                }}
+                className="w-full"
+              >
+                Clear Filters
+              </Button>
+            </SimpleTooltip>
+          </div>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+function RankingHeader({
+  currentCountry,
+  showRelativePPDifference,
+  setShowRelativePPDifference,
+  mainPlayer,
+}: RankingHeaderProps) {
+  return (
+    <div className="flex flex-row items-center justify-between gap-4">
+      <div className="flex items-center font-medium">
+        {currentCountry && (
+          <div className="flex items-center gap-2">
+            <CountryFlag code={currentCountry} size={18} />
+            <span>
+              Players from <b>{countryFilter.find(c => c.key === currentCountry)?.friendlyName}</b>
+            </span>
+          </div>
+        )}
+        {!currentCountry && (
+          <div className="flex items-center gap-2">
+            <GlobeAmericasIcon className="size-6" />
+            <p className="text-lg">Global Players</p>
+          </div>
+        )}
+      </div>
+
+      {mainPlayer !== undefined && (
+        <div className="bg-accent/50 flex min-w-fit items-center gap-3 rounded-md px-4 py-2">
+          <SimpleTooltip display="The amount of pp between you and each player" showOnMobile>
+            <p className="text-sm">Relative PP</p>
+          </SimpleTooltip>
+          <Switch
+            checked={showRelativePPDifference}
+            onCheckedChange={checked => setShowRelativePPDifference(checked)}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
+function buildPageUrl(country: string | undefined, page: number): string {
+  return `/ranking/${country != undefined ? `${country}/` : ""}${page}`;
 }
