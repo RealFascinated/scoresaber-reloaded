@@ -19,11 +19,6 @@ import { ReactElement, ReactNode, useEffect, useState } from "react";
  */
 type ComboboxProps<T> = {
   /**
-   * The name of the combobox.
-   */
-  name: string;
-
-  /**
    * The placeholder for the combobox.
    */
   placeholder?: string;
@@ -68,13 +63,17 @@ export type ComboboxItem<T> = {
   name: string | ReactNode;
 
   /**
+   * The display name for the button (simplified version of name).
+   */
+  displayName?: string;
+
+  /**
    * The class name of this item.
    */
   className?: string;
 };
 
 const Combobox = <T,>({
-  name,
   placeholder,
   items,
   value: controlledValue,
@@ -99,20 +98,23 @@ const Combobox = <T,>({
 
   return (
     <div className={cn("flex flex-col gap-1.5", className)}>
-      {/* Name */}
-      <h1 className="text-sm font-bold">{name}</h1>
-
       {/* Popover */}
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
-            className="justify-between gap-3 px-2"
+            className="h-10 justify-between gap-3 px-2"
             variant="outline"
+            size="lg"
             role="combobox"
             aria-expanded={open}
           >
-            {value ? items.find(item => item.value === value)?.name : "None"}
-            <ChevronsUpDown className="ml-2 size-5 opacity-50" />
+            <span className="truncate">
+              {value
+                ? items.find(item => item.value === value)?.displayName ||
+                  items.find(item => item.value === value)?.name
+                : placeholder || "None"}
+            </span>
+            <ChevronsUpDown className="ml-2 size-5 flex-shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-fit p-0">

@@ -46,7 +46,6 @@ export default function ScoreHistoryCalendar({ playerId }: ScoreHistoryCalendarP
           <div className="flex items-center justify-center gap-1">
             {/* Year Selection Combobox */}
             <Combobox<string>
-              name="Year"
               items={Object.keys(calendar?.metadata || {})
                 .sort((a, b) => Number(a) - Number(b))
                 .map(year => ({
@@ -61,7 +60,6 @@ export default function ScoreHistoryCalendar({ playerId }: ScoreHistoryCalendarP
 
             {/* Month Selection Combobox */}
             <Combobox<string>
-              name="Month"
               items={
                 calendar?.metadata[year]?.map((monthValue: number) => ({
                   value: String(monthValue),

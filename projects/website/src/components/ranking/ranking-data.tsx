@@ -187,38 +187,47 @@ function RankingFilters({
     <Card className="order-1 mb-2 h-full w-full gap-4 xl:order-2 xl:mb-0 xl:w-[25%]">
       <p className="text-lg">Filters</p>
       <div className="flex flex-col gap-4">
-        <div className="flex flex-row items-center gap-2">
-          <Combobox<string | undefined>
-            name="Country"
-            className="w-full"
-            items={Object.entries(countryMetadata).map(([key, count]) => ({
-              value: key,
-              name: (
-                <div className="flex w-full min-w-0 items-center justify-between">
-                  <span className="truncate">
-                    {countryFilter.find(c => c.key === key)?.friendlyName ?? key}
-                  </span>
-                  <span className="text-muted-foreground ml-4 text-sm whitespace-nowrap">
-                    {count.toLocaleString()} players
-                  </span>
-                </div>
-              ),
-              icon: <CountryFlag code={key} size={12} />,
-            }))}
-            value={currentCountry}
-            onValueChange={(newCountry: string | undefined) => {
-              setCurrentCountry(newCountry);
-              setCurrentPage(1);
-            }}
-          />
+        <div className="flex flex-col gap-2">
+          <label className="mb-1 text-sm font-bold">Country</label>
+          <div className="flex flex-row items-center gap-2">
+            <div className="flex w-full flex-col">
+              <Combobox<string | undefined>
+                className="w-full"
+                items={Object.entries(countryMetadata).map(([key, count]) => ({
+                  value: key,
+                  name: (
+                    <div className="flex w-full min-w-0 items-center justify-between">
+                      <span className="truncate">
+                        {countryFilter.find(c => c.key === key)?.friendlyName ?? key}
+                      </span>
+                      <span className="text-muted-foreground ml-4 text-sm whitespace-nowrap">
+                        {count.toLocaleString()} players
+                      </span>
+                    </div>
+                  ),
+                  displayName: countryFilter.find(c => c.key === key)?.friendlyName ?? key,
+                  icon: <CountryFlag code={key} size={12} />,
+                }))}
+                value={currentCountry}
+                onValueChange={(newCountry: string | undefined) => {
+                  setCurrentCountry(newCountry);
+                  setCurrentPage(1);
+                }}
+                placeholder="Select country..."
+              />
+            </div>
 
-          {currentCountry && (
-            <div className="flex gap-2">
-              <Button variant="outline" size="icon" onClick={() => setCurrentCountry(undefined)}>
+            {currentCountry && (
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-10 w-10"
+                onClick={() => setCurrentCountry(undefined)}
+              >
                 <XIcon className="size-4" />
               </Button>
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
         {/* Search */}
@@ -227,9 +236,15 @@ function RankingFilters({
             placeholder="Search for players..."
             value={currentSearch ?? ""}
             onChange={e => setCurrentSearch(e.target.value)}
+            className="h-10"
           />
           {currentSearch && currentSearch.length > 0 && (
-            <Button variant="outline" size="icon" onClick={() => setCurrentSearch("")}>
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-10 w-10"
+              onClick={() => setCurrentSearch("")}
+            >
               <XIcon className="size-4" />
             </Button>
           )}
