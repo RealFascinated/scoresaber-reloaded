@@ -124,6 +124,9 @@ function RankDisplay({ rank }: { rank: number }) {
 }
 
 function WeeklyRankChange({ weeklyRankChange }: { weeklyRankChange: number }) {
+  if (Math.abs(weeklyRankChange) > 999) {
+    return <div />;
+  }
   return (
     <div className="flex">
       {weeklyRankChange > 0 && <ArrowUpRightIcon className="h-4 w-4 text-green-500" />}

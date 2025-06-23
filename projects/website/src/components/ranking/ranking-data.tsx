@@ -98,21 +98,21 @@ function RankingHeader({
   mainPlayer,
 }: RankingHeaderProps) {
   return (
-    <div className="flex flex-col items-center justify-between gap-4 lg:flex-row">
-      <div className="flex items-center gap-3 font-medium">
+    <div className="flex flex-row items-center justify-between gap-4">
+      <div className="flex items-center font-medium">
         {currentCountry && (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-4">
             <CountryFlag code={currentCountry} size={20} />
-            <p className="text-lg">
-              Players from {countryFilter.find(c => c.key === currentCountry)?.friendlyName}
-            </p>
+            <span>
+              Players from <b>{countryFilter.find(c => c.key === currentCountry)?.friendlyName}</b>
+            </span>
           </div>
         )}
         {!currentCountry && <p className="text-lg">Global Players</p>}
       </div>
 
       {mainPlayer !== undefined && (
-        <div className="bg-accent/50 flex items-center gap-3 rounded-md px-4 py-2">
+        <div className="bg-accent/50 flex min-w-fit items-center gap-3 rounded-md px-4 py-2">
           <SimpleTooltip display="The amount of pp between you and each player" showOnMobile>
             <p className="text-sm">Relative PP</p>
           </SimpleTooltip>
@@ -176,78 +176,82 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
         mainPlayerCountry={mainPlayer?.country}
       />
 
-      <Card className="order-2 h-full w-full gap-4 xl:order-1 xl:w-[50%]">
-        <RankingHeader
-          currentCountry={currentCountry}
-          showRelativePPDifference={showRelativePPDifference}
-          setShowRelativePPDifference={setShowRelativePPDifference}
-          mainPlayer={mainPlayer}
-        />
-
-        {!rankingData && !isError && (
-          <FancyLoader
-            title="Loading Players"
-            description="Please wait while we fetch the players..."
+      <div className="flex w-full flex-col gap-2 xl:w-[50%]">
+        <Card>
+          <RankingHeader
+            currentCountry={currentCountry}
+            showRelativePPDifference={showRelativePPDifference}
+            setShowRelativePPDifference={setShowRelativePPDifference}
+            mainPlayer={mainPlayer}
           />
-        )}
+        </Card>
 
-        {isError && (
-          <div className="mt-2 flex h-full flex-col items-center justify-center gap-3">
-            <p className="text-lg">No players were found for this country or page.</p>
-            <Link href="/ranking">
-              <Button variant="outline" className="gap-2">
-                Back to Global
-                <LinkIcon className="size-4" />
-              </Button>
-            </Link>
-          </div>
-        )}
-
-        {rankingData && (
-          <div className="flex flex-col gap-4">
-            <SimplePagination
-              mobilePagination={isMobile}
-              page={currentPage}
-              totalItems={rankingData.metadata.total}
-              itemsPerPage={rankingData.metadata.itemsPerPage}
-              loadingPage={isLoading || isRefetching ? currentPage : undefined}
-              generatePageUrl={page => buildPageUrl(currentCountry, page)}
-              onPageChange={setCurrentPage}
-              showStats={false}
+        <Card className="order-2 h-full w-full gap-4 xl:order-1">
+          {!rankingData && !isError && (
+            <FancyLoader
+              title="Loading Players"
+              description="Please wait while we fetch the players..."
             />
+          )}
 
-            <div className="flex flex-col gap-2">
-              {rankingData.players.map(player => (
-                <div key={player.id} className="grid grid-cols-[1fr_25px] gap-3">
-                  <div className="flex-grow">
-                    <PlayerRanking
-                      player={player}
-                      relativePerformancePoints={showRelativePPDifference}
-                      mainPlayer={mainPlayer}
-                      firstColumnWidth={firstColumnWidth}
-                    />
-                  </div>
-
-                  <div className="flex h-full w-full items-center justify-center">
-                    <AddFriend player={player} className="bg-ssr rounded-full p-1.5" iconOnly />
-                  </div>
-                </div>
-              ))}
+          {isError && (
+            <div className="mt-2 flex h-full flex-col items-center justify-center gap-3">
+              <p className="text-lg">No players were found for this country or page.</p>
+              <Link href="/ranking">
+                <Button variant="outline" className="gap-2">
+                  Back to Global
+                  <LinkIcon className="size-4" />
+                </Button>
+              </Link>
             </div>
+          )}
 
-            <SimplePagination
-              mobilePagination={isMobile}
-              page={currentPage}
-              totalItems={rankingData.metadata.total}
-              itemsPerPage={rankingData.metadata.itemsPerPage}
-              loadingPage={isLoading || isRefetching ? currentPage : undefined}
-              generatePageUrl={page => buildPageUrl(currentCountry, page)}
-              onPageChange={setCurrentPage}
-              showStats={false}
-            />
-          </div>
-        )}
-      </Card>
+          {rankingData && (
+            <div className="flex flex-col gap-4">
+              <SimplePagination
+                mobilePagination={isMobile}
+                page={currentPage}
+                totalItems={rankingData.metadata.total}
+                itemsPerPage={rankingData.metadata.itemsPerPage}
+                loadingPage={isLoading || isRefetching ? currentPage : undefined}
+                generatePageUrl={page => buildPageUrl(currentCountry, page)}
+                onPageChange={setCurrentPage}
+                showStats={false}
+              />
+
+              <div className="flex flex-col gap-2">
+                {rankingData.players.map(player => (
+                  <div key={player.id} className="grid grid-cols-[1fr_25px] gap-3">
+                    <div className="flex-grow">
+                      <PlayerRanking
+                        player={player}
+                        relativePerformancePoints={showRelativePPDifference}
+                        mainPlayer={mainPlayer}
+                        firstColumnWidth={firstColumnWidth}
+                      />
+                    </div>
+
+                    <div className="flex h-full w-full items-center justify-center">
+                      <AddFriend player={player} className="bg-ssr rounded-full p-1.5" iconOnly />
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <SimplePagination
+                mobilePagination={isMobile}
+                page={currentPage}
+                totalItems={rankingData.metadata.total}
+                itemsPerPage={rankingData.metadata.itemsPerPage}
+                loadingPage={isLoading || isRefetching ? currentPage : undefined}
+                generatePageUrl={page => buildPageUrl(currentCountry, page)}
+                onPageChange={setCurrentPage}
+                showStats={false}
+              />
+            </div>
+          )}
+        </Card>
+      </div>
     </div>
   );
 }
