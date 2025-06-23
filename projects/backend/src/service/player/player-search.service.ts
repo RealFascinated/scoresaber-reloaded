@@ -48,4 +48,18 @@ export class PlayerSearchService {
       return a.rank - b.rank;
     });
   }
+
+  // public static async getPlayerRanking(options?: { country?: string; search?: string }): Promise<{
+  //   players: ScoreSaberPlayer[];
+  //   metadata: Metadata;
+  //   countryMetadata: Record<string, number>;
+  // }> {
+  //   const { country, search } = options ?? {};
+
+  //   return {
+  //     players: [],
+  //     metadata: new Metadata(0, 0, 0, 0),
+  //     countryMetadata: {},
+  //   };
+  // }
 }

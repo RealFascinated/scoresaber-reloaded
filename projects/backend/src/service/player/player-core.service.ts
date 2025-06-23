@@ -55,6 +55,12 @@ export class PlayerCoreService {
         updates.pp = playerToken.pp;
         shouldSave = true;
       }
+
+      // Update the player's country if it's different from the token
+      if (playerToken.country !== player.country) {
+        updates.country = playerToken.country;
+        shouldSave = true;
+      }
     }
 
     if (shouldSave) {

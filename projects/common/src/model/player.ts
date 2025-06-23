@@ -62,6 +62,12 @@ export class Player {
   public pp?: number;
 
   /**
+   * The player's country.
+   */
+  @prop()
+  public country?: string;
+
+  /**
    * The date the player was first tracked.
    */
   @prop()
