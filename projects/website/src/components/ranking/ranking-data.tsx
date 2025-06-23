@@ -34,7 +34,6 @@ type RankingFiltersProps = {
   currentCountry: string | undefined;
   setCurrentCountry: (country: string | undefined) => void;
   setCurrentPage: (page: number) => void;
-  mainPlayerCountry?: string;
   currentSearch: string | undefined;
   setCurrentSearch: (search: string | undefined) => void;
   countryMetadata: Record<string, number>;
@@ -91,7 +90,6 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
         currentCountry={currentCountry}
         setCurrentCountry={setCurrentCountry}
         setCurrentPage={setCurrentPage}
-        mainPlayerCountry={mainPlayer?.country}
         currentSearch={currentSearch}
         setCurrentSearch={setCurrentSearch}
         countryMetadata={rankingData?.countryMetadata ?? {}}
@@ -181,7 +179,6 @@ function RankingFilters({
   currentCountry,
   setCurrentCountry,
   setCurrentPage,
-  mainPlayerCountry,
   currentSearch,
   setCurrentSearch,
   countryMetadata,
@@ -190,29 +187,39 @@ function RankingFilters({
     <Card className="order-1 mb-2 h-full w-full gap-4 xl:order-2 xl:mb-0 xl:w-[25%]">
       <p className="text-lg">Filters</p>
       <div className="flex flex-col gap-4">
-        <Combobox<string | undefined>
-          name="Country"
-          className="w-full"
-          items={Object.entries(countryMetadata).map(([key, count]) => ({
-            value: key,
-            name: (
-              <div className="flex w-full min-w-0 items-center justify-between">
-                <span className="truncate">
-                  {countryFilter.find(c => c.key === key)?.friendlyName ?? key}
-                </span>
-                <span className="text-muted-foreground ml-4 text-sm whitespace-nowrap">
-                  {count.toLocaleString()} players
-                </span>
-              </div>
-            ),
-            icon: <CountryFlag code={key} size={12} />,
-          }))}
-          value={currentCountry}
-          onValueChange={(newCountry: string | undefined) => {
-            setCurrentCountry(newCountry);
-            setCurrentPage(1);
-          }}
-        />
+        <div className="flex flex-row items-center gap-2">
+          <Combobox<string | undefined>
+            name="Country"
+            className="w-full"
+            items={Object.entries(countryMetadata).map(([key, count]) => ({
+              value: key,
+              name: (
+                <div className="flex w-full min-w-0 items-center justify-between">
+                  <span className="truncate">
+                    {countryFilter.find(c => c.key === key)?.friendlyName ?? key}
+                  </span>
+                  <span className="text-muted-foreground ml-4 text-sm whitespace-nowrap">
+                    {count.toLocaleString()} players
+                  </span>
+                </div>
+              ),
+              icon: <CountryFlag code={key} size={12} />,
+            }))}
+            value={currentCountry}
+            onValueChange={(newCountry: string | undefined) => {
+              setCurrentCountry(newCountry);
+              setCurrentPage(1);
+            }}
+          />
+
+          {currentCountry && (
+            <div className="flex gap-2">
+              <Button variant="outline" size="icon" onClick={() => setCurrentCountry(undefined)}>
+                <XIcon className="size-4" />
+              </Button>
+            </div>
+          )}
+        </div>
 
         {/* Search */}
         <div className="flex flex-row items-center gap-2">
@@ -221,27 +228,11 @@ function RankingFilters({
             value={currentSearch ?? ""}
             onChange={e => setCurrentSearch(e.target.value)}
           />
-          <SimpleTooltip display="Clear search">
+          {currentSearch && currentSearch.length > 0 && (
             <Button variant="outline" size="icon" onClick={() => setCurrentSearch("")}>
               <XIcon className="size-4" />
             </Button>
-          </SimpleTooltip>
-        </div>
-
-        <div className="flex gap-2">
-          <div className="w-full">
-            <SimpleTooltip display="Clear all current filters">
-              <Button
-                onClick={() => {
-                  setCurrentCountry(undefined);
-                  setCurrentPage(1);
-                }}
-                className="w-full"
-              >
-                Clear Filters
-              </Button>
-            </SimpleTooltip>
-          </div>
+          )}
         </div>
       </div>
     </Card>

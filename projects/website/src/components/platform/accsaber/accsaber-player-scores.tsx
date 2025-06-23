@@ -13,7 +13,18 @@ import {
 import { Page } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowDown, ArrowUp, ClockIcon, SearchIcon, Target, Trophy } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowUp,
+  BarChart3,
+  ClockIcon,
+  Crosshair,
+  Gauge,
+  SearchIcon,
+  Target,
+  Trophy,
+  Zap,
+} from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import ScoresCard from "../../score/scores-card";
 import SimplePagination from "../../simple-pagination";
@@ -38,10 +49,10 @@ const scoreSort = [
 ];
 
 const scoreTypes = [
-  { name: "Overall", value: "overall" },
-  { name: "Tech Acc", value: "tech" },
-  { name: "Standard Acc", value: "standard" },
-  { name: "True Acc", value: "true" },
+  { name: "Overall", value: "overall", icon: <BarChart3 className="h-4 w-4" /> },
+  { name: "Tech Acc", value: "tech", icon: <Zap className="h-4 w-4" /> },
+  { name: "Standard Acc", value: "standard", icon: <Gauge className="h-4 w-4" /> },
+  { name: "True Acc", value: "true", icon: <Crosshair className="h-4 w-4" /> },
 ];
 
 type Props = {
@@ -147,6 +158,7 @@ export default function AccSaberPlayerScores({ player, sort, page, type, order }
                   isActive={type.value === currentType}
                   onClick={() => handleTypeChange(type.value as AccSaberScoreType)}
                 >
+                  {type.icon}
                   {type.name}
                 </Tab>
               ))}
