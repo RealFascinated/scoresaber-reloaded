@@ -205,6 +205,17 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
 
         {rankingData && (
           <div className="flex flex-col gap-4">
+            <SimplePagination
+              mobilePagination={isMobile}
+              page={currentPage}
+              totalItems={rankingData.metadata.total}
+              itemsPerPage={rankingData.metadata.itemsPerPage}
+              loadingPage={isLoading || isRefetching ? currentPage : undefined}
+              generatePageUrl={page => buildPageUrl(currentCountry, page)}
+              onPageChange={setCurrentPage}
+              showStats={false}
+            />
+
             <div className="flex flex-col gap-2">
               {rankingData.players.map(player => (
                 <div key={player.id} className="grid grid-cols-[1fr_25px] gap-3">
@@ -232,7 +243,7 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
               loadingPage={isLoading || isRefetching ? currentPage : undefined}
               generatePageUrl={page => buildPageUrl(currentCountry, page)}
               onPageChange={setCurrentPage}
-              statsBelow={true}
+              showStats={false}
             />
           </div>
         )}
