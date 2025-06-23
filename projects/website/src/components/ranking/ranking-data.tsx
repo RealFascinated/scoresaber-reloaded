@@ -12,8 +12,9 @@ import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { FilterItem } from "@ssr/common/filter-item";
 import { countryFilter } from "@ssr/common/utils/country.util";
 import { useQuery } from "@tanstack/react-query";
+import { useDebounce } from "@uidotdev/usehooks";
 import { useLiveQuery } from "dexie-react-hooks";
-import { LinkIcon } from "lucide-react";
+import { LinkIcon, XIcon } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { FancyLoader } from "../fancy-loader";
@@ -21,6 +22,7 @@ import AddFriend from "../friend/add-friend";
 import SimpleTooltip from "../simple-tooltip";
 import { Button } from "../ui/button";
 import Combobox from "../ui/combo-box";
+import { Input } from "../ui/input";
 import { PlayerRanking } from "./player-ranking";
 
 type RankingDataProps = {
@@ -33,6 +35,8 @@ type RankingFiltersProps = {
   setCurrentCountry: (country: string | undefined) => void;
   setCurrentPage: (page: number) => void;
   mainPlayerCountry?: string;
+  currentSearch: string | undefined;
+  setCurrentSearch: (search: string | undefined) => void;
 };
 
 type RankingHeaderProps = {
@@ -47,6 +51,8 @@ function RankingFilters({
   setCurrentCountry,
   setCurrentPage,
   mainPlayerCountry,
+  currentSearch,
+  setCurrentSearch,
 }: RankingFiltersProps) {
   return (
     <Card className="order-1 mb-2 h-full w-full gap-4 xl:order-2 xl:mb-0 xl:w-[25%]">
@@ -71,6 +77,21 @@ function RankingFilters({
             setCurrentPage(1);
           }}
         />
+
+        {/* Search */}
+        <div className="flex flex-row items-center gap-2">
+          <Input
+            placeholder="Search for players..."
+            value={currentSearch ?? ""}
+            onChange={e => setCurrentSearch(e.target.value)}
+          />
+          <SimpleTooltip display="Clear search">
+            <Button variant="outline" size="icon" onClick={() => setCurrentSearch("")}>
+              <XIcon className="size-4" />
+            </Button>
+          </SimpleTooltip>
+        </div>
+
         <div className="flex gap-2">
           <div className="w-full">
             <SimpleTooltip display="Clear all current filters">
@@ -139,6 +160,10 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
   const [showRelativePPDifference, setShowRelativePPDifference] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState(initialPage);
   const [currentCountry, setCurrentCountry] = useState(initialCountry);
+  const [currentSearch, setCurrentSearch] = useState<string | undefined>(undefined);
+
+  const debouncedSearch = useDebounce(currentSearch, 500);
+  const isValidSearch = debouncedSearch != undefined && debouncedSearch.length >= 3;
 
   const {
     data: rankingData,
@@ -146,13 +171,20 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
     isRefetching,
     isError,
   } = useQuery({
-    queryKey: ["rankingData", currentPage, currentCountry],
+    queryKey: ["rankingData", currentPage, currentCountry, isValidSearch],
     queryFn: async () => {
       const scoreSaberService = ApiServiceRegistry.getInstance().getScoreSaberService();
       const players =
         currentCountry == undefined
-          ? await scoreSaberService.lookupPlayers(currentPage)
-          : await scoreSaberService.lookupPlayersByCountry(currentPage, currentCountry);
+          ? await scoreSaberService.lookupPlayers(
+              currentPage,
+              isValidSearch ? debouncedSearch : undefined
+            )
+          : await scoreSaberService.lookupPlayersByCountry(
+              currentPage,
+              currentCountry,
+              isValidSearch ? debouncedSearch : undefined
+            );
       return players && players.players.length > 0 ? players : undefined;
     },
     refetchIntervalInBackground: false,
@@ -174,6 +206,8 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
         setCurrentCountry={setCurrentCountry}
         setCurrentPage={setCurrentPage}
         mainPlayerCountry={mainPlayer?.country}
+        currentSearch={currentSearch}
+        setCurrentSearch={setCurrentSearch}
       />
 
       <div className="flex w-full flex-col gap-2 xl:w-[50%]">

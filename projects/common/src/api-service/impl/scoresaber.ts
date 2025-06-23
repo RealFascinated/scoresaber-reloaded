@@ -146,11 +146,15 @@ export class ScoreSaberService extends ApiService {
    * @param page the page to get players for
    * @returns the players on the page, or undefined
    */
-  public async lookupPlayers(page: number): Promise<ScoreSaberPlayersPageToken | undefined> {
+  public async lookupPlayers(
+    page: number,
+    search?: string
+  ): Promise<ScoreSaberPlayersPageToken | undefined> {
     const before = performance.now();
     this.log(`Looking up players on page "${page}"...`);
     const response = await this.fetch<ScoreSaberPlayersPageToken>(
-      LOOKUP_PLAYERS_ENDPOINT.replace(":page", page.toString())
+      LOOKUP_PLAYERS_ENDPOINT.replace(":page", page.toString()) +
+        (search ? `&search=${search}` : "")
     );
     if (response === undefined) {
       return undefined;
@@ -170,7 +174,8 @@ export class ScoreSaberService extends ApiService {
    */
   public async lookupPlayersByCountry(
     page: number,
-    country: string
+    country: string,
+    search?: string
   ): Promise<ScoreSaberPlayersPageToken | undefined> {
     const before = performance.now();
     this.log(`Looking up players on page "${page}" for country "${country}"...`);
@@ -178,7 +183,7 @@ export class ScoreSaberService extends ApiService {
       LOOKUP_PLAYERS_BY_COUNTRY_ENDPOINT.replace(":page", page.toString()).replace(
         ":country",
         country
-      )
+      ) + (search ? `&search=${search}` : "")
     );
     if (response === undefined) {
       return undefined;
