@@ -3,7 +3,7 @@ import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import { CommandInteraction } from "discord.js";
 import { Discord, Guard, Slash } from "discordx";
-import { PlayerRefreshService } from "../../service/player/player-refresh.service";
+import { PlayerService } from "../../service/player/player.service";
 import { OwnerOnly } from "../lib/guards";
 
 @Discord()
@@ -19,7 +19,7 @@ export class ForceTrackPlayerStatistics {
       content: "Updating player statistics...",
     });
 
-    await PlayerRefreshService.updatePlayerStatistics(
+    await PlayerService.updatePlayerStatistics(
       (currentPage, totalPages, successCount, errorCount) => {
         // Only update every 5 pages, and the first page (to show the progress)
         if (currentPage % 5 !== 0 && currentPage !== 1) {

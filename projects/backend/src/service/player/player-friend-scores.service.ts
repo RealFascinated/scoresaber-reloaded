@@ -8,13 +8,13 @@ import {
 import { Page, Pagination } from "@ssr/common/pagination";
 import { PlayerScore } from "@ssr/common/score/player-score";
 import { scoreToObject } from "../../common/score/score.util";
+import { ScoreService } from "../score.service";
 import LeaderboardService from "../scoresaber/leaderboard.service";
-import { ScoreService } from "./score.service";
 
 const ITEMS_PER_PAGE = 8;
 const MAX_TOTAL_SCORES = 1000;
 
-export class FriendScoresService {
+export class PlayerFriendScoresService {
   /**
    * Gets friend scores for a leaderboard.
    *
@@ -22,7 +22,7 @@ export class FriendScoresService {
    * @param leaderboardId the leaderboard id
    * @param page the page to fetch
    */
-  public static async getFriendLeaderboardScores(
+  public static async getPlayerFriendLeaderboardScores(
     friendIds: string[],
     leaderboardId: number,
     page: number
@@ -95,7 +95,7 @@ export class FriendScoresService {
    * @param leaderboardId the leaderboard id
    * @param page the page to fetch
    */
-  public static async getFriendScores(
+  public static async getPlayerFriendScores(
     friendIds: string[],
     page: number
   ): Promise<Page<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>> {

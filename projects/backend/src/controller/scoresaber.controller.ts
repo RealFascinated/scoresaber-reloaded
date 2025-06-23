@@ -11,7 +11,7 @@ import { getDaysAgoDate } from "@ssr/common/utils/time-utils";
 import { t } from "elysia";
 import { Controller, Get } from "elysia-decorators";
 import SuperJSON from "superjson";
-import { PlayerService } from "../service/player.service";
+import { PlayerService } from "../service/player/player.service";
 import ScoreSaberService from "../service/scoresaber/scoresaber.service";
 
 @Controller("/scoresaber")

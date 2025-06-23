@@ -14,7 +14,7 @@ import { formatChange } from "@ssr/common/utils/utils";
 import { ButtonBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
 import { DiscordChannels, logToChannel } from "../../bot/bot";
 import BeatSaverService from "../../service/beatsaver.service";
-import { PreviousScoresService } from "../../service/score/previous-scores.service";
+import { PlayerService } from "../../service/player/player.service";
 
 /**
  * Converts a database score to a ScoreSaberScore.
@@ -51,7 +51,7 @@ export async function sendScoreNotification(
     DetailType.BASIC
   );
 
-  const previousScore = await PreviousScoresService.getPreviousScore(
+  const previousScore = await PlayerService.getPlayerPreviousScore(
     player.id,
     score,
     leaderboard,

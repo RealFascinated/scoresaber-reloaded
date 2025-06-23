@@ -2,7 +2,7 @@ import { NotFoundError } from "@ssr/common/error/not-found-error";
 import { t } from "elysia";
 import { Controller, Get } from "elysia-decorators";
 import SuperJSON from "superjson";
-import { FriendScoresService } from "../service/score/friend-scores.service";
+import { PlayerService } from "../service/player/player.service";
 
 @Controller("")
 export default class FriendsController {
@@ -31,7 +31,7 @@ export default class FriendsController {
     if (ids.length === 0) {
       throw new NotFoundError("Malformed friend ids, must be a comma separated list of friend ids");
     }
-    const data = await FriendScoresService.getFriendLeaderboardScores(ids, leaderboardId, page);
+    const data = await PlayerService.getPlayerFriendLeaderboardScores(ids, leaderboardId, page);
     return superJson ? SuperJSON.stringify(data) : data.toJSON();
   }
 
@@ -58,7 +58,7 @@ export default class FriendsController {
     if (ids.length === 0) {
       throw new NotFoundError("Malformed friend ids, must be a comma separated list of friend ids");
     }
-    const data = await FriendScoresService.getFriendScores(ids, page);
+    const data = await PlayerService.getPlayerFriendScores(ids, page);
     return superJson ? SuperJSON.stringify(data) : data.toJSON();
   }
 }

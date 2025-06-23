@@ -28,13 +28,11 @@ import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player
 import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score";
 import { getDaysAgoDate, getMidnightAlignedDate } from "@ssr/common/utils/time-utils";
 import mongoose, { FilterQuery } from "mongoose";
-import { scoreToObject } from "../../common/score/score.util";
-import BeatLeaderService from "../beatleader.service";
-import { PlayerService } from "../player.service";
-import { PlayerHmdService } from "../player/player-hmd.service";
-import LeaderboardService from "../scoresaber/leaderboard.service";
-import ScoreSaberService from "../scoresaber/scoresaber.service";
-import { PreviousScoresService } from "./previous-scores.service";
+import { scoreToObject } from "../common/score/score.util";
+import BeatLeaderService from "./beatleader.service";
+import { PlayerService } from "./player/player.service";
+import LeaderboardService from "./scoresaber/leaderboard.service";
+import ScoreSaberService from "./scoresaber/scoresaber.service";
 
 export class ScoreService {
   /**
@@ -307,9 +305,9 @@ export class ScoreService {
     await Promise.all([
       ScoreSaberScoreModel.create(score),
       !fastCreate
-        ? PlayerHmdService.getPlayerMostCommonRecentHmd(player.id).then(hmd => {
+        ? PlayerService.getPlayerMostCommonRecentHmd(player.id).then(hmd => {
             if (hmd) {
-              return PlayerHmdService.updatePlayerHmd(player.id, hmd);
+              return PlayerService.updatePlayerHmd(player.id, hmd);
             }
           })
         : undefined,
@@ -525,12 +523,7 @@ export class ScoreService {
           )
         : undefined,
       options?.insertPreviousScore
-        ? PreviousScoresService.getPreviousScore(
-            score.playerId,
-            score,
-            leaderboard,
-            score.timestamp
-          )
+        ? PlayerService.getPlayerPreviousScore(score.playerId, score, leaderboard, score.timestamp)
         : undefined,
       options?.insertPlayerInfo
         ? (score.playerInfo ??

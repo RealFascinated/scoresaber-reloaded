@@ -2,7 +2,7 @@ import { PlayerScoresResponse } from "@ssr/common/response/player-scores-respons
 import { ScoreSort } from "@ssr/common/types/sort";
 import { t } from "elysia";
 import { Controller, Get } from "elysia-decorators";
-import { ScoreService } from "../service/score/score.service";
+import { ScoreService } from "../service/score.service";
 
 @Controller("/scores/cached")
 export default class CachedScoresController {

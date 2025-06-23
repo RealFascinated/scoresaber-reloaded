@@ -1,7 +1,7 @@
 import { t } from "elysia";
 import { Controller, Get } from "elysia-decorators";
 import { SuperJSON } from "superjson";
-import { ScoreHistoryService } from "../service/score/score-history.service";
+import { PlayerService } from "../service/player/player.service";
 
 @Controller("")
 export default class PlayerScoreHistoryController {
@@ -27,7 +27,7 @@ export default class PlayerScoreHistoryController {
     };
     query: { superJson: boolean };
   }): Promise<unknown> {
-    const data = await ScoreHistoryService.getScoreHistory(playerId, leaderboardId, page);
+    const data = await PlayerService.getPlayerScoreHistory(playerId, leaderboardId, page);
     return superJson ? SuperJSON.stringify(data) : data.toJSON();
   }
 
@@ -48,7 +48,7 @@ export default class PlayerScoreHistoryController {
     params: { playerId: string; leaderboardId: string };
     query: { superJson: boolean };
   }): Promise<unknown> {
-    const data = await ScoreHistoryService.getScoreHistoryGraph(playerId, leaderboardId);
+    const data = await PlayerService.getPlayerScoreHistoryGraph(playerId, leaderboardId);
     return superJson ? SuperJSON.stringify(data) : data;
   }
 }

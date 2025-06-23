@@ -22,8 +22,8 @@ import { getDaysAgoDate } from "@ssr/common/utils/time-utils";
 import { getPageFromRank } from "@ssr/common/utils/utils";
 import sanitize from "sanitize-html";
 import CacheService, { CacheId } from "../cache.service";
-import { PlayerService } from "../player.service";
-import { ScoreService } from "../score/score.service";
+import { PlayerService } from "../player/player.service";
+import { ScoreService } from "../score.service";
 import LeaderboardService from "./leaderboard.service";
 
 export default class ScoreSaberService {

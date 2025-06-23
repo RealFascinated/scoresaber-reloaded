@@ -2,7 +2,7 @@ import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { CooldownPriority } from "@ssr/common/cooldown";
 import Logger from "@ssr/common/logger";
 import { ScoreSaberLeaderboardModel } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import { PlayerService } from "../../service/player.service";
+import { PlayerService } from "../../service/player/player.service";
 import { Queue } from "../queue";
 import { QueueId } from "../queue-manager";
 

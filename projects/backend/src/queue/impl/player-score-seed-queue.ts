@@ -6,8 +6,7 @@ import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import { ButtonBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
 import { DiscordChannels, logToChannel } from "../../bot/bot";
-import { PlayerService } from "../../service/player.service";
-import { PlayerRefreshService } from "../../service/player/player-refresh.service";
+import { PlayerService } from "../../service/player/player.service";
 import { Queue } from "../queue";
 import { QueueId } from "../queue-manager";
 
@@ -41,7 +40,7 @@ export class PlayerScoreSeedQueue extends Queue<string> {
 
     const player = await PlayerService.getPlayer(playerId, playerToken);
     const { totalScores, missingScores, totalPages, timeTaken } =
-      await PlayerRefreshService.refreshAllPlayerScores(player, playerToken);
+      await PlayerService.refreshAllPlayerScores(player, playerToken);
 
     await logToChannel(
       DiscordChannels.PLAYER_SCORE_REFRESH_LOGS,

@@ -1,6 +1,6 @@
 import { t } from "elysia";
 import { Controller, Get } from "elysia-decorators";
-import { ScoreService } from "../service/score/score.service";
+import { ScoreService } from "../service/score.service";
 import ScoreSaberService from "../service/scoresaber/scoresaber.service";
 
 @Controller("/scores")

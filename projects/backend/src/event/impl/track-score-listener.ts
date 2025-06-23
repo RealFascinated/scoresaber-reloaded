@@ -8,7 +8,7 @@ import { sendScoreNotification } from "../../common/score/score.util";
 import TrackedScoresMetric from "../../metrics/impl/player/tracked-scores";
 import BeatLeaderService from "../../service/beatleader.service";
 import MetricsService, { MetricType } from "../../service/metrics.service";
-import { ScoreService } from "../../service/score/score.service";
+import { ScoreService } from "../../service/score.service";
 import { EventListener } from "../event-listener";
 
 export class TrackScoreListener implements EventListener {

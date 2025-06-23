@@ -1,7 +1,7 @@
 import { Timeframe } from "@ssr/common/timeframe";
 import { t } from "elysia";
 import { Controller, Get } from "elysia-decorators";
-import { ScoreService } from "../service/score/score.service";
+import { ScoreService } from "../service/score.service";
 
 @Controller("")
 export default class TopScoresController {

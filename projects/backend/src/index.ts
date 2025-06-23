@@ -32,9 +32,9 @@ import { metricsPlugin } from "./plugins/metrics.plugin";
 import { QueueManager } from "./queue/queue-manager";
 import CacheService from "./service/cache.service";
 import MetricsService from "./service/metrics.service";
-import { PlayerRefreshService } from "./service/player/player-refresh.service";
+import { PlayerService } from "./service/player/player.service";
 import PlaylistService from "./service/playlist.service";
-import { ScoreService } from "./service/score/score.service";
+import { ScoreService } from "./service/score.service";
 import LeaderboardService from "./service/scoresaber/leaderboard.service";
 import StatisticsService from "./service/statistics.service";
 import { BeatSaverWebsocket } from "./websocket/beatsaver-websocket";
@@ -78,7 +78,7 @@ export const app = new Elysia()
           DiscordChannels.BACKEND_LOGS,
           new EmbedBuilder().setDescription(`Updating player statistics...`)
         );
-        await PlayerRefreshService.updatePlayerStatistics();
+        await PlayerService.updatePlayerStatistics();
         await logToChannel(
           DiscordChannels.BACKEND_LOGS,
           new EmbedBuilder().setDescription(
