@@ -1,12 +1,22 @@
+"use client";
+
 import { cn } from "@/common/utils";
 import { ArrowPathIcon } from "@heroicons/react/24/solid";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import clsx from "clsx";
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+  MoreHorizontal,
+} from "lucide-react";
 import React, { useCallback } from "react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+
+const PAGES_TO_SHOW = 5;
 
 type PaginationItemWrapperProps = {
   isLoadingPage: boolean;
@@ -29,9 +39,10 @@ PaginationItemWrapper.displayName = "PaginationItemWrapper";
 type PageSelectorProps = {
   totalPages: number;
   onPageSelect: (page: number) => void;
+  isLoading: boolean;
 };
 
-const PageSelector = React.memo(({ totalPages, onPageSelect }: PageSelectorProps) => {
+const PageSelector = React.memo(({ totalPages, onPageSelect, isLoading }: PageSelectorProps) => {
   const [isOpen, setIsOpen] = React.useState(false);
   const [inputValue, setInputValue] = React.useState("");
 
@@ -50,17 +61,10 @@ const PageSelector = React.memo(({ totalPages, onPageSelect }: PageSelectorProps
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
-      <PopoverTrigger asChild>
-        <button
-          className="hover:bg-accent hover:text-accent-foreground flex h-8 w-8 cursor-pointer items-center justify-center rounded-md transition-all"
-          aria-label="Select page"
-        >
-          <div className="flex gap-0.5">
-            <div className="h-1 w-1 rounded-full bg-current" />
-            <div className="h-1 w-1 rounded-full bg-current" />
-            <div className="h-1 w-1 rounded-full bg-current" />
-          </div>
-        </button>
+      <PopoverTrigger asChild disabled={isLoading}>
+        <Button variant="ghost" size="icon" aria-label="Select page" disabled={isLoading}>
+          <MoreHorizontal className="h-4 w-4" />
+        </Button>
       </PopoverTrigger>
       <PopoverContent className="w-48" align="center">
         <form onSubmit={handleSubmit}>
@@ -119,25 +123,29 @@ const PageButton = React.memo(
     const isButtonLoading = loadingPage === buttonPage;
 
     return (
-      <a
-        href={generatePageUrl ? generatePageUrl(buttonPage) : "#"}
-        onClick={e => onClick(buttonPage, e)}
-        aria-disabled={isLoading || buttonPage === currentPage}
+      <Button
+        asChild
+        variant={isActive ? "primary" : "ghost"}
+        size="icon"
         className={cn(
-          "relative flex h-8 min-w-[2rem] cursor-pointer items-center justify-center rounded-md px-2 text-sm transition-all",
-          isActive
-            ? "bg-primary text-primary-foreground font-medium shadow-sm"
-            : "hover:bg-accent hover:text-accent-foreground",
+          "relative transition-none",
           (isLoading || buttonPage === currentPage) && "cursor-not-allowed opacity-50"
         )}
       >
-        <span className={cn(isButtonLoading && "blur-[2px]")}>{children}</span>
-        {isButtonLoading && (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <ArrowPathIcon className="h-4 w-4 animate-spin" />
-          </div>
-        )}
-      </a>
+        <a
+          href={generatePageUrl ? generatePageUrl(buttonPage) : "#"}
+          onClick={e => onClick(buttonPage, e)}
+          aria-disabled={isLoading || buttonPage === currentPage}
+          className="flex items-center justify-center"
+        >
+          <span className={cn(isButtonLoading && "blur-[2px]")}>{children}</span>
+          {isButtonLoading && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <ArrowPathIcon className="h-4 w-4 animate-spin" />
+            </div>
+          )}
+        </a>
+      </Button>
     );
   }
 );
@@ -161,18 +169,21 @@ const NavigationButton = React.memo(
     generatePageUrl,
     onClick,
   }: NavigationButtonProps) => (
-    <a
-      href={generatePageUrl ? generatePageUrl(buttonPage) : "#"}
-      onClick={e => onClick(buttonPage, e)}
-      aria-disabled={disabled || isLoading}
-      className={cn(
-        "relative flex h-8 w-8 cursor-pointer items-center justify-center rounded-md transition-all",
-        !disabled && "hover:bg-accent hover:text-accent-foreground",
-        (disabled || isLoading) && "cursor-not-allowed opacity-50"
-      )}
+    <Button
+      asChild
+      variant="ghost"
+      size="icon"
+      disabled={disabled || isLoading}
+      className={cn((disabled || isLoading) && "cursor-not-allowed opacity-50")}
     >
-      {children}
-    </a>
+      <a
+        href={generatePageUrl ? generatePageUrl(buttonPage) : "#"}
+        onClick={e => onClick(buttonPage, e)}
+        aria-disabled={disabled || isLoading}
+      >
+        {children}
+      </a>
+    </Button>
   )
 );
 NavigationButton.displayName = "NavigationButton";
@@ -224,11 +235,15 @@ export default function SimplePagination({
   const renderPageNumbers = useCallback(() => {
     if (mobilePagination) return [];
 
-    const maxPagesToShow = 3;
+    const maxPagesToShow = PAGES_TO_SHOW;
     const pageNumbers = [];
 
-    const startPage = Math.max(1, page - Math.floor(maxPagesToShow / 2));
+    let startPage = Math.max(1, page - Math.floor(maxPagesToShow / 2));
     const endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+
+    if (totalPages > maxPagesToShow && endPage - startPage + 1 < maxPagesToShow) {
+      startPage = endPage - maxPagesToShow + 1;
+    }
 
     if (startPage > 1) {
       pageNumbers.push(
@@ -246,9 +261,12 @@ export default function SimplePagination({
       );
       if (startPage > 2)
         pageNumbers.push(
-          <PaginationItemWrapper key="ellipsis-start" isLoadingPage={isLoading}>
-            <PageSelector totalPages={totalPages} onPageSelect={handlePageChange} />
-          </PaginationItemWrapper>
+          <PageSelector
+            key="ellipsis-start"
+            totalPages={totalPages}
+            onPageSelect={handlePageChange}
+            isLoading={isLoading}
+          />
         );
     }
 
@@ -272,9 +290,12 @@ export default function SimplePagination({
     if (endPage < totalPages) {
       if (endPage < totalPages - 1)
         pageNumbers.push(
-          <PaginationItemWrapper key="ellipsis-end" isLoadingPage={isLoading}>
-            <PageSelector totalPages={totalPages} onPageSelect={handlePageChange} />
-          </PaginationItemWrapper>
+          <PageSelector
+            key="ellipsis-end"
+            totalPages={totalPages}
+            onPageSelect={handlePageChange}
+            isLoading={isLoading}
+          />
         );
       pageNumbers.push(
         <PageButton
@@ -327,7 +348,7 @@ export default function SimplePagination({
       )}
 
       {/* Pagination Buttons */}
-      <div className="bg-muted/50 flex items-center gap-1 rounded-lg p-1">
+      <div className="flex items-center gap-1">
         {mobilePagination && (
           <NavigationButton
             page={1}
