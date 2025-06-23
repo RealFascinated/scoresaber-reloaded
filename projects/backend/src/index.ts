@@ -21,6 +21,7 @@ import LeaderboardController from "./controller/leaderboard.controller";
 import MiniRankingController from "./controller/mini-ranking.controller";
 import PlayerHistoryController from "./controller/player-history.controller";
 import PlayerScoreHistoryController from "./controller/player-score-history.controller";
+import PlayerSearchController from "./controller/player-search.controller";
 import PlayerController from "./controller/player.controller";
 import PlaylistController from "./controller/playlist.controller";
 import ReplayController from "./controller/replay.controller";
@@ -223,6 +224,7 @@ app.use(
       PlayerScoreHistoryController,
       TopScoresController,
       CachedScoresController,
+      PlayerSearchController,
     ],
   })
 );

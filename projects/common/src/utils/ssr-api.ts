@@ -12,6 +12,7 @@ import { BeatSaverMapResponse } from "../response/beatsaver-map-response";
 import { LeaderboardResponse } from "../response/leaderboard-response";
 import LeaderboardScoresResponse from "../response/leaderboard-scores-response";
 import { PlayerRankedPpsResponse } from "../response/player-ranked-pps-response";
+import { PlayerRankingsResponse } from "../response/player-rankings-response";
 import { PlayerScoresChartResponse } from "../response/player-scores-chart";
 import { PlayerScoresResponse } from "../response/player-scores-response";
 import { PlayerSearchResponse } from "../response/player-search-response";
@@ -458,6 +459,30 @@ class SSRApi {
     }
 
     return SuperJSON.parse<PlayerSearchResponse>(response);
+  }
+
+  /**
+   * Searches for players by name.
+   *
+   * @param query the query to search for
+   * @returns the players that match the query
+   */
+  async searchPlayersRanking(
+    page: number,
+    options?: {
+      country?: string;
+      search?: string;
+    }
+  ): Promise<PlayerRankingsResponse> {
+    const response = await Request.get<string>(`${env.NEXT_PUBLIC_API_URL}/player/search/ranking`, {
+      returns: "text",
+      searchParams: {
+        superJson: true,
+        ...(options?.country ? { country: options.country } : {}),
+        ...(options?.search ? { search: options.search } : {}),
+      },
+    });
+    return SuperJSON.parse<PlayerRankingsResponse>(response!);
   }
 }
 

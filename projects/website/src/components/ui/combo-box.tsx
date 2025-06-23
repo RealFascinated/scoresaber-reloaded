@@ -11,7 +11,7 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { ChevronsUpDown } from "lucide-react";
 import { ReactElement, ReactNode, useEffect, useState } from "react";
 
 /**
@@ -130,17 +130,11 @@ const Combobox = <T,>({
                       setOpen(false);
                       handleValueChange(current === value ? undefined : current);
                     }}
-                    className={cn("flex items-center justify-between gap-2", item.className)}
+                    className={cn("flex items-center justify-between", item.className)}
                   >
-                    {item.icon}
-                    <div className={cn("flex w-full items-center justify-between gap-2")}>
-                      <div className="flex items-center gap-2">{item.name}</div>
-                      <Check
-                        className={cn(
-                          "mr-2 h-4 w-4",
-                          value === item.value ? "opacity-100" : "opacity-0"
-                        )}
-                      />
+                    <div className="flex min-w-0 flex-1 items-center gap-2">
+                      {item.icon}
+                      {typeof item.name === "string" ? <span>{item.name}</span> : item.name}
                     </div>
                   </CommandItem>
                 ))}

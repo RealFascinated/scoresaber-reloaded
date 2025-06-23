@@ -9,9 +9,8 @@ import useDatabase from "@/hooks/use-database";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import usePageNavigation from "@/hooks/use-page-navigation";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
-import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
-import { FilterItem } from "@ssr/common/filter-item";
 import { countryFilter } from "@ssr/common/utils/country.util";
+import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { useDebounce } from "@uidotdev/usehooks";
 import { useLiveQuery } from "dexie-react-hooks";
@@ -38,6 +37,7 @@ type RankingFiltersProps = {
   mainPlayerCountry?: string;
   currentSearch: string | undefined;
   setCurrentSearch: (search: string | undefined) => void;
+  countryMetadata: Record<string, number>;
 };
 
 type RankingHeaderProps = {
@@ -68,21 +68,11 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
     isError,
   } = useQuery({
     queryKey: ["rankingData", currentPage, currentCountry, isValidSearch],
-    queryFn: async () => {
-      const scoreSaberService = ApiServiceRegistry.getInstance().getScoreSaberService();
-      const players =
-        currentCountry == undefined
-          ? await scoreSaberService.lookupPlayers(
-              currentPage,
-              isValidSearch ? debouncedSearch : undefined
-            )
-          : await scoreSaberService.lookupPlayersByCountry(
-              currentPage,
-              currentCountry,
-              isValidSearch ? debouncedSearch : undefined
-            );
-      return players && players.players.length > 0 ? players : undefined;
-    },
+    queryFn: async () =>
+      ssrApi.searchPlayersRanking(currentPage, {
+        country: currentCountry,
+        search: isValidSearch ? debouncedSearch : undefined,
+      }),
     refetchIntervalInBackground: false,
     placeholderData: prev => prev,
   });
@@ -92,7 +82,7 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
   }, [currentPage, currentCountry, navigation]);
 
   const firstColumnWidth = useMemo(() => {
-    return getPlayerRankingColumnWidth(rankingData?.players ?? []);
+    return getPlayerRankingColumnWidth(rankingData?.items ?? []);
   }, [rankingData]);
 
   return (
@@ -104,6 +94,7 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
         mainPlayerCountry={mainPlayer?.country}
         currentSearch={currentSearch}
         setCurrentSearch={setCurrentSearch}
+        countryMetadata={rankingData?.countryMetadata ?? {}}
       />
 
       <div className="flex w-full flex-col gap-2 xl:w-[50%]">
@@ -141,7 +132,7 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
               <SimplePagination
                 mobilePagination={isMobile}
                 page={currentPage}
-                totalItems={rankingData.metadata.total}
+                totalItems={rankingData.metadata.totalItems}
                 itemsPerPage={rankingData.metadata.itemsPerPage}
                 loadingPage={isLoading || isRefetching ? currentPage : undefined}
                 generatePageUrl={page => buildPageUrl(currentCountry, page)}
@@ -150,7 +141,7 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
               />
 
               <div className="flex flex-col gap-2">
-                {rankingData.players.map(player => (
+                {rankingData.items.map(player => (
                   <div key={player.id} className="grid grid-cols-[1fr_25px] gap-3">
                     <div className="flex-grow">
                       <PlayerRanking
@@ -171,7 +162,7 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
               <SimplePagination
                 mobilePagination={isMobile}
                 page={currentPage}
-                totalItems={rankingData.metadata.total}
+                totalItems={rankingData.metadata.totalItems}
                 itemsPerPage={rankingData.metadata.itemsPerPage}
                 loadingPage={isLoading || isRefetching ? currentPage : undefined}
                 generatePageUrl={page => buildPageUrl(currentCountry, page)}
@@ -193,6 +184,7 @@ function RankingFilters({
   mainPlayerCountry,
   currentSearch,
   setCurrentSearch,
+  countryMetadata,
 }: RankingFiltersProps) {
   return (
     <Card className="order-1 mb-2 h-full w-full gap-4 xl:order-2 xl:mb-0 xl:w-[25%]">
@@ -201,16 +193,20 @@ function RankingFilters({
         <Combobox<string | undefined>
           name="Country"
           className="w-full"
-          items={countryFilter
-            .map(({ key, friendlyName }: FilterItem) => ({
-              value: key,
-              name: friendlyName,
-              icon: <CountryFlag code={key} size={12} />,
-            }))
-            .sort((country: { value: string }) => {
-              if (country.value === mainPlayerCountry) return -1;
-              return 1;
-            })}
+          items={Object.entries(countryMetadata).map(([key, count]) => ({
+            value: key,
+            name: (
+              <div className="flex w-full min-w-0 items-center justify-between">
+                <span className="truncate">
+                  {countryFilter.find(c => c.key === key)?.friendlyName ?? key}
+                </span>
+                <span className="text-muted-foreground ml-4 text-sm whitespace-nowrap">
+                  {count.toLocaleString()} players
+                </span>
+              </div>
+            ),
+            icon: <CountryFlag code={key} size={12} />,
+          }))}
           value={currentCountry}
           onValueChange={(newCountry: string | undefined) => {
             setCurrentCountry(newCountry);

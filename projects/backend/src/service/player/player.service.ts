@@ -17,6 +17,7 @@ export class PlayerService {
 
   // PlayerSearchService methods
   public static searchPlayers = PlayerSearchService.searchPlayers;
+  public static getPlayerRanking = PlayerSearchService.getPlayerRanking;
 
   // PlayerRankedService methods
   public static getPlayerRankedPps = PlayerRankedService.getPlayerRankedPps;
@@ -31,6 +32,10 @@ export class PlayerService {
   public static getPlayerStatisticHistory = PlayerHistoryService.getPlayerStatisticHistory;
   public static seedPlayerHistory = PlayerHistoryService.seedPlayerHistory;
   public static updatePlayerDailyScoreStats = PlayerHistoryService.updatePlayerDailyScoreStats;
+  public static getTodayPlayerStatistic = PlayerHistoryService.getTodayPlayerStatistic;
+  public static createPlayerStatistic = PlayerHistoryService.createPlayerStatistic;
+  public static playerHistoryToObject = PlayerHistoryService.playerHistoryToObject;
+  public static getDaysTracked = PlayerHistoryService.getDaysTracked;
 
   // PlayerCalendarService methods
   public static generateScoreCalendar = PlayerCalendarService.generateScoreCalendar;

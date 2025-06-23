@@ -282,9 +282,9 @@ export class PlayerHistoryService {
       return;
     }
 
-    const daysTracked = await this.getDaysTracked(foundPlayer._id);
+    const daysTracked = await PlayerService.getDaysTracked(foundPlayer._id);
     if (daysTracked === 0) {
-      await this.seedPlayerHistory(foundPlayer, player);
+      await PlayerService.seedPlayerHistory(foundPlayer, player);
     }
 
     if (foundPlayer.seededScores) {
@@ -293,7 +293,10 @@ export class PlayerHistoryService {
         date: getMidnightAlignedDate(trackTime),
       }).lean();
 
-      const updatedHistory = await this.createPlayerStatistic(player, existingEntry ?? undefined);
+      const updatedHistory = await PlayerService.createPlayerStatistic(
+        player,
+        existingEntry ?? undefined
+      );
 
       await PlayerHistoryEntryModel.findOneAndUpdate(
         { playerId: foundPlayer._id, date: getMidnightAlignedDate(trackTime) },
@@ -398,7 +401,7 @@ export class PlayerHistoryService {
   /**
    * Gets today's player statistics, either from database or generates fresh data.
    */
-  private static async getTodayPlayerStatistic(
+  public static async getTodayPlayerStatistic(
     player: ScoreSaberPlayerToken,
     projection?: Record<string, string | number | boolean | object>
   ): Promise<Partial<PlayerHistoryEntry> | undefined> {
@@ -411,7 +414,7 @@ export class PlayerHistoryService {
     }).lean();
 
     // Generate fresh data, merging with existing if available
-    const todayData = await this.createPlayerStatistic(player, existingEntry ?? undefined);
+    const todayData = await PlayerService.createPlayerStatistic(player, existingEntry ?? undefined);
 
     return projection && Object.keys(projection).length > 0
       ? Object.fromEntries(Object.entries(todayData).filter(([key]) => key in projection))
@@ -446,7 +449,7 @@ export class PlayerHistoryService {
   /**
    * Creates a new player statistic object from ScoreSaber data and existing history.
    */
-  private static async createPlayerStatistic(
+  public static async createPlayerStatistic(
     playerToken: ScoreSaberPlayerToken,
     existingEntry?: Partial<PlayerHistoryEntry>
   ): Promise<Partial<PlayerHistoryEntry>> {
@@ -521,9 +524,8 @@ export class PlayerHistoryService {
    *
    * @param history the player history entry to convert
    * @returns the converted player history entry
-   * @private
    */
-  private static playerHistoryToObject(history: PlayerHistoryEntry): PlayerHistoryEntry {
+  public static playerHistoryToObject(history: PlayerHistoryEntry): PlayerHistoryEntry {
     return {
       ...removeObjectFields<PlayerHistoryEntry>(history, ["_id", "__v", "playerId", "date"]),
     } as PlayerHistoryEntry;
@@ -532,7 +534,7 @@ export class PlayerHistoryService {
   /**
    * Gets the number of days tracked for a player.
    */
-  private static async getDaysTracked(playerId: string): Promise<number> {
+  public static async getDaysTracked(playerId: string): Promise<number> {
     return await PlayerHistoryEntryModel.countDocuments({ playerId });
   }
 }

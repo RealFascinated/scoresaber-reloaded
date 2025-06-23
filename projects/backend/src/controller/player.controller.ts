@@ -1,7 +1,6 @@
 import { DetailType } from "@ssr/common/detail-type";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerRankedPpsResponse } from "@ssr/common/response/player-ranked-pps-response";
-import { PlayerSearchResponse } from "@ssr/common/response/player-search-response";
 import { PpBoundaryResponse } from "@ssr/common/response/pp-boundary-response";
 import { t } from "elysia";
 import { Controller, Get } from "elysia-decorators";
@@ -82,23 +81,5 @@ export default class PlayerController {
     params: { id: string };
   }): Promise<PlayerRankedPpsResponse> {
     return await PlayerService.getPlayerRankedPps(id);
-  }
-
-  @Get("/search", {
-    config: {},
-    query: t.Object({
-      superJson: t.Optional(t.Boolean({ default: false })),
-      query: t.Optional(t.String({ default: "" })),
-    }),
-  })
-  public async searchPlayers({
-    query: { superJson, query },
-  }: {
-    query: { superJson: boolean; query: string };
-  }): Promise<PlayerSearchResponse | unknown> {
-    const players = {
-      players: await PlayerService.searchPlayers(query),
-    };
-    return superJson ? SuperJSON.stringify(players) : players;
   }
 }
