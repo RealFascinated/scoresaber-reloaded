@@ -1,7 +1,7 @@
 import { t } from "elysia";
 import { Controller, Get } from "elysia-decorators";
-import { ScoreService } from "../service/score.service";
-import ScoreSaberService from "../service/scoresaber/scoresaber.service";
+import { PlayerService } from "../service/player/player.service";
+import { ScoreService } from "../service/score/score.service";
 
 @Controller("/scores")
 export default class ScoresController {
@@ -30,7 +30,7 @@ export default class ScoresController {
     query: { search?: string; comparisonPlayerId?: string };
   }): Promise<unknown> {
     return (
-      await ScoreSaberService.lookupPlayerScores(id, page, sort, search, comparisonPlayerId)
+      await PlayerService.getScoreSaberLivePlayerScores(id, page, sort, search, comparisonPlayerId)
     ).toJSON();
   }
 

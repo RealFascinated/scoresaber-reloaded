@@ -2,7 +2,7 @@ import { IsGuildUser } from "@discordx/utilities";
 import { ApplicationCommandOptionType, CommandInteraction } from "discord.js";
 import { Discord, Guard, Slash, SlashOption } from "discordx";
 import { QueueId, QueueManager } from "../../queue/queue-manager";
-import ScoreSaberService from "../../service/scoresaber/scoresaber.service";
+import ScoreSaberService from "../../service/scoresaber.service";
 import { OwnerOnly } from "../lib/guards";
 
 @Discord()

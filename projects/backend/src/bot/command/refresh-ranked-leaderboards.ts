@@ -1,7 +1,7 @@
 import { IsGuildUser } from "@discordx/utilities";
 import { CommandInteraction } from "discord.js";
 import { Discord, Guard, Slash } from "discordx";
-import LeaderboardService from "../../service/scoresaber/leaderboard.service";
+import { LeaderboardService } from "../../service/leaderboard/leaderboard.service";
 import { OwnerOnly } from "../lib/guards";
 
 @Discord()

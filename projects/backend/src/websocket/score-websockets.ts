@@ -11,7 +11,7 @@ import { connectScoresaberWebsocket } from "@ssr/common/websocket/scoresaber-web
 import { EventListener } from "../event/event-listener";
 import { EventsManager } from "../event/events-manager";
 import { PlayerService } from "../service/player/player.service";
-import { ScoreService } from "../service/score.service";
+import { ScoreService } from "../service/score/score.service";
 
 interface PendingScore {
   scoreSaberToken?: ScoreSaberScoreToken;

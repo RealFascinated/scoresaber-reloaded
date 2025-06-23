@@ -57,13 +57,6 @@ export default class ScoreSaberLeaderboardInternal extends Leaderboard {
    */
   @Prop({ required: false })
   readonly dateQualified?: Date;
-
-  /**
-   * Whether all of the players on this leaderboard
-   * have been tracked.
-   */
-  @Prop({ required: false })
-  readonly seededPlayers?: boolean;
 }
 
 export type ScoreSaberLeaderboard = InstanceType<typeof ScoreSaberLeaderboardInternal>;

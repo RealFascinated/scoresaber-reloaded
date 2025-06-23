@@ -30,6 +30,7 @@ export class PlayerService {
   public static trackPlayerHistory = PlayerHistoryService.trackPlayerHistory;
   public static getPlayerStatisticHistory = PlayerHistoryService.getPlayerStatisticHistory;
   public static seedPlayerHistory = PlayerHistoryService.seedPlayerHistory;
+  public static updatePlayerDailyScoreStats = PlayerHistoryService.updatePlayerDailyScoreStats;
 
   // PlayerCalendarService methods
   public static generateScoreCalendar = PlayerCalendarService.generateScoreCalendar;
@@ -37,6 +38,10 @@ export class PlayerService {
   // PlayerScoresService methods
   public static refreshAllPlayerScores = PlayerScoresService.refreshAllPlayerScores;
   public static getPlayerScoreChart = PlayerScoresService.getPlayerScoreChart;
+  public static getPlayerScores = PlayerScoresService.getPlayerScores;
+  public static getScoreSaberCachedPlayerScores =
+    PlayerScoresService.getScoreSaberCachedPlayerScores;
+  public static getScoreSaberLivePlayerScores = PlayerScoresService.getScoreSaberLivePlayerScores;
 
   // PlayerAccuraciesService methods
   public static getPlayerAverageAccuracies = PlayerAccuraciesService.getPlayerAverageAccuracies;

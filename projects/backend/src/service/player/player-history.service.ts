@@ -475,6 +475,48 @@ export class PlayerHistoryService {
   }
 
   /**
+   * Updates the player's daily score statistics.
+   *
+   * @param playerId the player id
+   * @param isRanked whether the score is ranked
+   * @param isImprovement whether this is an improvement over a previous score
+   */
+  public static async updatePlayerDailyScoreStats(
+    playerId: string,
+    isRanked: boolean,
+    isImprovement: boolean
+  ): Promise<void> {
+    const today = getMidnightAlignedDate(new Date());
+
+    const getCounterToIncrement = (
+      isRanked: boolean,
+      isImprovement: boolean
+    ): keyof PlayerHistoryEntry => {
+      if (isRanked) {
+        return isImprovement ? "rankedScoresImproved" : "rankedScores";
+      }
+      return isImprovement ? "unrankedScoresImproved" : "unrankedScores";
+    };
+
+    await PlayerHistoryEntryModel.findOneAndUpdate(
+      { playerId, date: today },
+      {
+        $inc: {
+          [getCounterToIncrement(isRanked, isImprovement)]: 1,
+        },
+        $setOnInsert: {
+          playerId,
+          date: today,
+        },
+      },
+      {
+        upsert: true, // Create new entry if it doesn't exist
+        new: true,
+      }
+    );
+  }
+
+  /**
    * Converts a database player history entry to a PlayerHistoryEntry.
    *
    * @param history the player history entry to convert

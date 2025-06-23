@@ -3,7 +3,6 @@ import { PlayerModel } from "@ssr/common/model/player";
 import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import { PlayerRankedPpsResponse } from "@ssr/common/response/player-ranked-pps-response";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
-import { ScoreService } from "../score.service";
 import { PlayerService } from "./player.service";
 
 export class PlayerRankedService {
@@ -16,7 +15,7 @@ export class PlayerRankedService {
   public static async getPlayerRankedPps(playerId: string): Promise<PlayerRankedPpsResponse> {
     await PlayerService.playerExists(playerId, true);
 
-    const playerScores = await ScoreService.getPlayerScores(playerId, {
+    const playerScores = await PlayerService.getPlayerScores(playerId, {
       ranked: true,
       sort: "pp",
       projection: { pp: 1, scoreId: 1 },

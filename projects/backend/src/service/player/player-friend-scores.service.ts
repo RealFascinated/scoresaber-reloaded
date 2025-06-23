@@ -8,8 +8,8 @@ import {
 import { Page, Pagination } from "@ssr/common/pagination";
 import { PlayerScore } from "@ssr/common/score/player-score";
 import { scoreToObject } from "../../common/score/score.util";
-import { ScoreService } from "../score.service";
-import LeaderboardService from "../scoresaber/leaderboard.service";
+import { LeaderboardService } from "../leaderboard/leaderboard.service";
+import { ScoreService } from "../score/score.service";
 
 const ITEMS_PER_PAGE = 8;
 const MAX_TOTAL_SCORES = 1000;

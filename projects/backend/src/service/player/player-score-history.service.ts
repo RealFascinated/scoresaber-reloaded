@@ -9,8 +9,8 @@ import {
 import { Page, Pagination } from "@ssr/common/pagination";
 import { ScoreHistoryGraphResponse } from "@ssr/common/response/score-history-graph-response";
 import { PlayerScore } from "@ssr/common/score/player-score";
-import { ScoreService } from "../score.service";
-import LeaderboardService from "../scoresaber/leaderboard.service";
+import { LeaderboardService } from "../leaderboard/leaderboard.service";
+import { ScoreService } from "../score/score.service";
 
 export class PlayerScoreHistoryService {
   /**

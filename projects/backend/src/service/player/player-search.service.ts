@@ -2,7 +2,7 @@ import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { DetailType } from "@ssr/common/detail-type";
 import { PlayerModel } from "@ssr/common/model/player";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import ScoreSaberService from "../scoresaber/scoresaber.service";
+import ScoreSaberService from "../scoresaber.service";
 
 export class PlayerSearchService {
   /**

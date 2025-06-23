@@ -1,7 +1,7 @@
 import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import { AccBadges } from "@ssr/common/player/acc-badges";
 import { PlayerAccuracies } from "@ssr/common/player/player-accuracies";
-import { ScoreService } from "../score.service";
+import { PlayerService } from "./player.service";
 
 export class PlayerAccuraciesService {
   /**
@@ -83,7 +83,7 @@ export class PlayerAccuraciesService {
     };
 
     // Use aggregation to get only ranked scores with accuracy
-    const playerScores = await ScoreService.getPlayerScores(playerId, {
+    const playerScores = await PlayerService.getPlayerScores(playerId, {
       ranked: true,
       projection: {
         accuracy: 1,

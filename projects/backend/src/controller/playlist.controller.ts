@@ -10,7 +10,7 @@ import {
   generateSnipePlaylistImage,
 } from "../common/playlist.util";
 import PlaylistService, { PlaylistId, SnipeType } from "../service/playlist.service";
-import ScoreSaberService from "../service/scoresaber/scoresaber.service";
+import ScoreSaberService from "../service/scoresaber.service";
 
 @Controller("/playlist")
 export default class PlaylistController {

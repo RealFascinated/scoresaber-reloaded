@@ -17,10 +17,9 @@ import {
   generatePlaylistImage,
   generateSnipePlaylistImage,
 } from "../common/playlist.util";
+import { LeaderboardService } from "./leaderboard/leaderboard.service";
 import { PlayerService } from "./player/player.service";
-import { ScoreService } from "./score.service";
-import LeaderboardService from "./scoresaber/leaderboard.service";
-import ScoreSaberService from "./scoresaber/scoresaber.service";
+import ScoreSaberService from "./scoresaber.service";
 
 export type SnipeType = "top" | "recent";
 export type PlaylistId =
@@ -310,7 +309,7 @@ export default class PlaylistService {
       }
 
       // Get and filter scores
-      const rawScores = await ScoreService.getPlayerScores(toSnipe, {
+      const rawScores = await PlayerService.getPlayerScores(toSnipe, {
         includeLeaderboard: true,
         projection: {
           pp: 1,

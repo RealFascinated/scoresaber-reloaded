@@ -5,7 +5,7 @@ import { MapCharacteristic } from "@ssr/common/types/map-characteristic";
 import { t } from "elysia";
 import { Controller, Get } from "elysia-decorators";
 import SuperJSON from "superjson";
-import LeaderboardService from "../service/scoresaber/leaderboard.service";
+import { LeaderboardService } from "../service/leaderboard/leaderboard.service";
 
 @Controller("/leaderboard")
 export default class LeaderboardController {

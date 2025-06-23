@@ -2,29 +2,20 @@ import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { DetailType } from "@ssr/common/detail-type";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger from "@ssr/common/logger";
-import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import {
   scoreSaberCachedPlayerToObject,
   ScoreSaberPlayerCacheDocument,
   ScoreSaberPlayerCacheModel,
 } from "@ssr/common/model/scoresaber-player-cache";
-import { Pagination } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import { PlayerScoresResponse } from "@ssr/common/response/player-scores-response";
-import { PlayerScore } from "@ssr/common/score/player-score";
-import { ScoreSaberScoreSort } from "@ssr/common/score/score-sort";
-import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/leaderboard-player-info";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import { getPlayerStatisticChanges } from "@ssr/common/utils/player-utils";
 import { getDaysAgoDate } from "@ssr/common/utils/time-utils";
 import { getPageFromRank } from "@ssr/common/utils/utils";
 import sanitize from "sanitize-html";
-import CacheService, { CacheId } from "../cache.service";
-import { PlayerService } from "../player/player.service";
-import { ScoreService } from "../score.service";
-import LeaderboardService from "./leaderboard.service";
+import CacheService, { CacheId } from "./cache.service";
+import { PlayerService } from "./player/player.service";
 
 export default class ScoreSaberService {
   /**
@@ -215,87 +206,5 @@ export default class ScoreSaberService {
     }
 
     return player;
-  }
-
-  /**
-   * Looks up player scores.
-   *
-   * @param playerId the player id
-   * @param pageNumber the page to get
-   * @param sort the sort to get
-   * @param search the search to get
-   */
-  public static async lookupPlayerScores(
-    playerId: string,
-    pageNumber: number,
-    sort: string,
-    search?: string,
-    comparisonPlayerId?: string
-  ): Promise<PlayerScoresResponse> {
-    // Get the requested page directly
-    const requestedPage = await ApiServiceRegistry.getInstance()
-      .getScoreSaberService()
-      .lookupPlayerScores({
-        playerId,
-        page: pageNumber,
-        sort: sort as ScoreSaberScoreSort,
-        search,
-      });
-
-    if (!requestedPage) {
-      return Pagination.empty<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>();
-    }
-
-    const pagination = new Pagination<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>()
-      .setItemsPerPage(requestedPage.metadata.itemsPerPage)
-      .setTotalItems(requestedPage.metadata.total);
-
-    // Start fetching comparison player and leaderboard IDs in parallel
-    const [comparisonPlayer, leaderboardIds] = await Promise.all([
-      comparisonPlayerId !== playerId && comparisonPlayerId !== undefined
-        ? ScoreSaberService.getPlayer(comparisonPlayerId, DetailType.BASIC)
-        : undefined,
-      requestedPage.playerScores.map(score => score.leaderboard.id + ""),
-    ]);
-
-    return await pagination.getPage(pageNumber, async () => {
-      // Fetch all leaderboards in parallel using getLeaderboards
-      const leaderboardResponses = await LeaderboardService.getLeaderboards(leaderboardIds, {
-        includeBeatSaver: true,
-        beatSaverType: DetailType.FULL,
-      });
-
-      // Create a map for quick leaderboard lookup
-      const leaderboardMap = new Map(
-        leaderboardResponses.map(result => [result.leaderboard.id, result])
-      );
-
-      // Process all scores in parallel with a concurrency limit
-      const scorePromises = requestedPage.playerScores.map(async playerScore => {
-        const leaderboardResponse = leaderboardMap.get(playerScore.leaderboard.id);
-        if (!leaderboardResponse) {
-          return undefined;
-        }
-
-        const { leaderboard, beatsaver } = leaderboardResponse;
-        let score = getScoreSaberScoreFromToken(playerScore.score, leaderboard, playerId);
-        if (!score) {
-          return undefined;
-        }
-
-        score = await ScoreService.insertScoreData(score, leaderboard, comparisonPlayer);
-        return {
-          score: score,
-          leaderboard: leaderboard,
-          beatSaver: beatsaver,
-        } as PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>;
-      });
-
-      // Wait for all score processing to complete and filter out any undefined results
-      return (await Promise.all(scorePromises)).filter(Boolean) as PlayerScore<
-        ScoreSaberScore,
-        ScoreSaberLeaderboard
-      >[];
-    });
   }
 }
