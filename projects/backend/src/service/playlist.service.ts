@@ -17,7 +17,7 @@ import {
   generatePlaylistImage,
   generateSnipePlaylistImage,
 } from "../common/playlist.util";
-import { PlayerService } from "./player/player.service";
+import { PlayerService } from "./player.service";
 import { ScoreService } from "./score/score.service";
 import LeaderboardService from "./scoresaber/leaderboard.service";
 import ScoreSaberService from "./scoresaber/scoresaber.service";

@@ -11,8 +11,7 @@ import { getDaysAgoDate } from "@ssr/common/utils/time-utils";
 import { t } from "elysia";
 import { Controller, Get } from "elysia-decorators";
 import SuperJSON from "superjson";
-import { PlayerHistoryService } from "../service/player/player-history.service";
-import { PlayerService } from "../service/player/player.service";
+import { PlayerService } from "../service/player.service";
 import ScoreSaberService from "../service/scoresaber/scoresaber.service";
 
 @Controller("/scoresaber")
@@ -72,7 +71,7 @@ export default class ScoreSaberController {
           )
         : undefined;
 
-    return await PlayerHistoryService.getPlayerStatisticHistory(
+    return await PlayerService.getPlayerStatisticHistory(
       player,
       new Date(startDate),
       new Date(endDate),
@@ -161,7 +160,7 @@ export default class ScoreSaberController {
     query: { superJson: boolean; query: string };
   }): Promise<PlayerSearchResponse | unknown> {
     const players = {
-      players: await ScoreSaberService.searchPlayers(query),
+      players: await PlayerService.searchPlayers(query),
     };
     return superJson ? SuperJSON.stringify(players) : players;
   }

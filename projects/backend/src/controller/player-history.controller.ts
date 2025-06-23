@@ -4,8 +4,8 @@ import { ScoreCalendarData } from "@ssr/common/types/player/player-statistic";
 import { getDaysAgoDate } from "@ssr/common/utils/time-utils";
 import { NotFoundError, t } from "elysia";
 import { Controller, Get } from "elysia-decorators";
-import { PlayerHistoryService } from "../service/player/player-history.service";
-import { PlayerService } from "../service/player/player.service";
+import { PlayerService } from "../service/player.service";
+
 @Controller("")
 export default class PlayerHistoryController {
   @Get("/player/history/:id", {
@@ -43,7 +43,7 @@ export default class PlayerHistoryController {
           )
         : undefined;
 
-    return await PlayerHistoryService.getPlayerStatisticHistory(
+    return await PlayerService.getPlayerStatisticHistory(
       player,
       new Date(startDate),
       new Date(endDate),

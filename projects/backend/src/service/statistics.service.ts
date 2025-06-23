@@ -3,7 +3,7 @@ import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
 import { Statistic } from "@ssr/common/model/statistics/statistic";
 import { formatDateMinimal } from "@ssr/common/utils/time-utils";
-import { PlayerService } from "./player/player.service";
+import { PlayerService } from "./player.service";
 
 interface InfluxRow {
   _time: string;

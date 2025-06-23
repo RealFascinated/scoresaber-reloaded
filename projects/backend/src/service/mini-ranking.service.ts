@@ -5,8 +5,8 @@ import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { MiniRankingResponse } from "@ssr/common/response/around-player-response";
 import { MiniRankingType } from "@ssr/common/types/around-player";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
-import CacheService, { CacheId } from "../cache.service";
-import ScoreSaberService from "./scoresaber.service";
+import CacheService, { CacheId } from "./cache.service";
+import ScoreSaberService from "./scoresaber/scoresaber.service";
 
 export default class MiniRankingService {
   /**

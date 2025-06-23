@@ -3,7 +3,6 @@ import { DetailType } from "@ssr/common/detail-type";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger from "@ssr/common/logger";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import { PlayerModel } from "@ssr/common/model/player";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import {
   scoreSaberCachedPlayerToObject,
@@ -23,8 +22,7 @@ import { getDaysAgoDate } from "@ssr/common/utils/time-utils";
 import { getPageFromRank } from "@ssr/common/utils/utils";
 import sanitize from "sanitize-html";
 import CacheService, { CacheId } from "../cache.service";
-import { PlayerHistoryService } from "../player/player-history.service";
-import { PlayerService } from "../player/player.service";
+import { PlayerService } from "../player.service";
 import { ScoreService } from "../score/score.service";
 import LeaderboardService from "./leaderboard.service";
 
@@ -87,7 +85,7 @@ export default class ScoreSaberService {
             account ? PlayerService.updatePeakRank(id, player) : undefined,
             account ? PlayerService.getPlayerPpBoundary(id, 1) : [],
             account ? PlayerService.getAccBadges(id) : {},
-            PlayerHistoryService.getPlayerStatisticHistory(player, new Date(), getDaysAgoDate(30)),
+            PlayerService.getPlayerStatisticHistory(player, new Date(), getDaysAgoDate(30)),
             PlayerService.getPlayerHMD(player.id),
             PlayerService.updatePlayerName(player.id, player.name),
           ]);
@@ -298,50 +296,6 @@ export default class ScoreSaberService {
         ScoreSaberScore,
         ScoreSaberLeaderboard
       >[];
-    });
-  }
-
-  /**
-   * Searches for players by name.
-   *
-   * @param query the query to search for
-   * @returns the players that match the query
-   */
-  public static async searchPlayers(query: string): Promise<ScoreSaberPlayer[]> {
-    // Run ScoreSaber API call and database query in parallel
-    const [scoreSaberResponse, foundPlayers] = await Promise.all([
-      ApiServiceRegistry.getInstance().getScoreSaberService().searchPlayers(query),
-      query.length > 0
-        ? PlayerModel.find({
-            name: { $regex: query, $options: "i" },
-          }).select(["_id", "name"])
-        : [],
-    ]);
-
-    const scoreSaberPlayerTokens = scoreSaberResponse?.players;
-
-    // Merge their ids
-    const playerIds = foundPlayers.map(player => player._id);
-    playerIds.push(...(scoreSaberPlayerTokens?.map(token => token.id) ?? []));
-
-    // Deduplicate the player ids
-    const uniquePlayerIds = [...new Set(playerIds)];
-
-    // Get players from ScoreSaber
-    return (
-      await Promise.all(
-        uniquePlayerIds.map(id =>
-          ScoreSaberService.getPlayer(
-            id,
-            DetailType.BASIC,
-            scoreSaberPlayerTokens?.find(token => token.id === id)
-          )
-        )
-      )
-    ).sort((a, b) => {
-      if (a.inactive && !b.inactive) return 1;
-      if (!a.inactive && b.inactive) return -1;
-      return a.rank - b.rank;
     });
   }
 }

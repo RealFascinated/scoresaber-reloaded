@@ -1,7 +1,7 @@
 import { MiniRankingResponse } from "@ssr/common/response/around-player-response";
 import { t } from "elysia";
 import { Controller, Get } from "elysia-decorators";
-import MiniRankingService from "../service/scoresaber/mini-ranking.service";
+import MiniRankingService from "../service/mini-ranking.service";
 
 @Controller("")
 export default class MiniRankingController {

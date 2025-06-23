@@ -10,7 +10,7 @@ import { connectBeatLeaderWebsocket } from "@ssr/common/websocket/beatleader-web
 import { connectScoresaberWebsocket } from "@ssr/common/websocket/scoresaber-websocket";
 import { EventListener } from "../event/event-listener";
 import { EventsManager } from "../event/events-manager";
-import { PlayerService } from "../service/player/player.service";
+import { PlayerService } from "../service/player.service";
 import { ScoreService } from "../service/score/score.service";
 
 interface PendingScore {

@@ -30,8 +30,8 @@ import { getDaysAgoDate, getMidnightAlignedDate } from "@ssr/common/utils/time-u
 import mongoose, { FilterQuery } from "mongoose";
 import { scoreToObject } from "../../common/score/score.util";
 import BeatLeaderService from "../beatleader.service";
+import { PlayerService } from "../player.service";
 import { PlayerHmdService } from "../player/player-hmd.service";
-import { PlayerService } from "../player/player.service";
 import LeaderboardService from "../scoresaber/leaderboard.service";
 import ScoreSaberService from "../scoresaber/scoresaber.service";
 import { PreviousScoresService } from "./previous-scores.service";

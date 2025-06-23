@@ -19,7 +19,7 @@ import { DiscordChannels, logToChannel } from "../bot/bot";
 import { createGenericEmbed } from "../common/discord/embed";
 import CacheService, { CacheId } from "./cache.service";
 import MinioService from "./minio.service";
-import { PlayerService } from "./player/player.service";
+import { PlayerService } from "./player.service";
 
 export default class BeatLeaderService {
   /**

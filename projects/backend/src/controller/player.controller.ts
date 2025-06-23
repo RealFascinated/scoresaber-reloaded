@@ -6,7 +6,7 @@ import { PpBoundaryResponse } from "@ssr/common/response/pp-boundary-response";
 import { t } from "elysia";
 import { Controller, Get } from "elysia-decorators";
 import SuperJSON from "superjson";
-import { PlayerService } from "../service/player/player.service";
+import { PlayerService } from "../service/player.service";
 import ScoreSaberService from "../service/scoresaber/scoresaber.service";
 
 @Controller("/player")
@@ -97,7 +97,7 @@ export default class PlayerController {
     query: { superJson: boolean; query: string };
   }): Promise<PlayerSearchResponse | unknown> {
     const players = {
-      players: await ScoreSaberService.searchPlayers(query),
+      players: await PlayerService.searchPlayers(query),
     };
     return superJson ? SuperJSON.stringify(players) : players;
   }

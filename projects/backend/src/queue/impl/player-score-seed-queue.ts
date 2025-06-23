@@ -6,8 +6,8 @@ import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import { ButtonBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
 import { DiscordChannels, logToChannel } from "../../bot/bot";
+import { PlayerService } from "../../service/player.service";
 import { PlayerRefreshService } from "../../service/player/player-refresh.service";
-import { PlayerService } from "../../service/player/player.service";
 import { Queue } from "../queue";
 import { QueueId } from "../queue-manager";
 
