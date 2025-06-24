@@ -12,8 +12,8 @@ import { QueueId } from "../queue-manager";
 
 export class PlayerScoreSeedQueue extends Queue<string> {
   constructor() {
-    // Use FIFO mode to ensure the most recently added players are processed first
-    super(QueueId.PlayerScoreRefreshQueue, true, "fifo");
+    // Use LIFO mode to ensure the most recently added players are processed first
+    super(QueueId.PlayerScoreRefreshQueue, true, "lifo");
 
     // Load players efficiently using addAll
     setImmediate(async () => {
