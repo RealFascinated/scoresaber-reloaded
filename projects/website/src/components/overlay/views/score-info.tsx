@@ -34,9 +34,7 @@ export default function OverlayScoreInfoView({ overlayData }: OverlayScoreDataPr
       />
       <div className="text-md flex flex-col justify-between gap-2 py-1">
         <div>
-          <p className="font-semibold">
-            {beatSaverMap.metadata.songAuthorName} - {beatSaverMap.metadata.songName}
-          </p>
+          <p className="font-semibold">{beatSaverMap.metadata.songName}</p>
           <p>Mapped by {truncateText(beatSaverMap.metadata.levelAuthorName, 48)}</p>
         </div>
         <div className="flex items-center gap-2">
@@ -49,8 +47,13 @@ export default function OverlayScoreInfoView({ overlayData }: OverlayScoreDataPr
             <p>{getDifficultyName(difficulty)}</p>
           </div>
           <p>
-            !bsr {beatSaverMap.bsr} - {formatNumberWithCommas(beatSaverMap.metadata.bpm)} BPM{" "}
-            {leaderboard && leaderboard.stars > 0 ? ` - ${leaderboard.stars} ★` : ""}
+            !bsr {beatSaverMap.bsr} | {formatNumberWithCommas(beatSaverMap.metadata.bpm)} BPM{" "}
+            {leaderboard && leaderboard.stars > 0 ? (
+              <>
+                {" | "}
+                <span className="text-pp"> {leaderboard.stars} ★</span>
+              </>
+            ) : null}
           </p>
         </div>
       </div>

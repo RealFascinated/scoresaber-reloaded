@@ -35,15 +35,22 @@ export type ScoreBadge = {
   min: number | null;
   max: number | null;
   color: string;
+  textColor?: string;
 };
 
 const scoreBadges: ScoreBadge[] = [
-  { name: "SS+", min: 95, max: null, color: getDifficulty("ExpertPlus")!.color },
-  { name: "SS", min: 90, max: 95, color: getDifficulty("Expert")!.color },
-  { name: "S+", min: 85, max: 90, color: getDifficulty("Hard")!.color },
-  { name: "S", min: 80, max: 85, color: getDifficulty("Normal")!.color },
-  { name: "A", min: 70, max: 80, color: getDifficulty("Easy")!.color },
-  { name: "-", min: null, max: 70, color: "var(--accent)" },
+  {
+    name: "SS+",
+    min: 95,
+    max: null,
+    color: getDifficulty("ExpertPlus")!.color,
+    textColor: "#00FFFF",
+  },
+  { name: "SS", min: 90, max: 95, color: getDifficulty("Expert")!.color, textColor: "#00FFFF" },
+  { name: "S+", min: 85, max: 90, color: getDifficulty("Hard")!.color, textColor: "#FFFFFF" },
+  { name: "S", min: 80, max: 85, color: getDifficulty("Normal")!.color, textColor: "#FFFFFF" },
+  { name: "A", min: 70, max: 80, color: getDifficulty("Easy")!.color, textColor: "#00FF00" },
+  { name: "-", min: null, max: 70, color: "var(--accent)", textColor: "#FF0000" },
 ];
 
 /**

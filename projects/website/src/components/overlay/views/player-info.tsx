@@ -14,7 +14,7 @@ type OverlayPlayerInfoProps = {
 };
 
 export default function OverlayPlayerInfoView({ player }: OverlayPlayerInfoProps) {
-  const plusOnePp = player.statisticChange?.daily?.plusOnePp;
+  const plusOnePp = player.plusOnePP;
 
   return (
     <div className="flex gap-2 text-2xl">

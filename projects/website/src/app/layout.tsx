@@ -67,7 +67,7 @@ export default function RootLayout({
   children: ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={`${siteFont.className} h-full w-full antialiased`}>
         <PostHogProvider>
           {env.NEXT_PUBLIC_ANALYTICS_WEBSITE_ID && env.NEXT_PUBLIC_ANALYTICS_SCRIPT_URL && (
