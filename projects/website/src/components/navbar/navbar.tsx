@@ -113,7 +113,7 @@ export default function Navbar() {
       </div>
 
       {/* Right */}
-      <div className="flex items-center gap-2 transition-all md:gap-4">
+      <div className="flex items-center gap-2 transition-all">
         {/* Settings and Search */}
         <div className="flex items-center gap-2 md:gap-3">
           <Settings />
