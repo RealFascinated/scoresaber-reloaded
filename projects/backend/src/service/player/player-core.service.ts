@@ -1,5 +1,7 @@
+import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import { Player, PlayerModel } from "@ssr/common/model/player";
+import { PlayerRefreshResponse } from "@ssr/common/response/player-refresh-response";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import CacheService, { CacheId } from "../cache.service";
 import { PlayerService } from "./player.service";
@@ -84,6 +86,23 @@ export class PlayerCoreService {
       throw new NotFoundError(`Player "${id}" not found`);
     }
     return player !== null;
+  }
+
+  /**
+   * Refreshes a player.
+   *
+   * @param id the player's id
+   * @returns the player document if found
+   */
+  public static async refreshPlayer(id: string): Promise<PlayerRefreshResponse> {
+    const response = await ApiServiceRegistry.getInstance()
+      .getScoreSaberService()
+      .refreshPlayer(id);
+    if (response !== undefined) {
+      CacheService.invalidate(`player:${id}`); // Remove the player from the cache
+      return response;
+    }
+    return { result: false };
   }
 
   /**

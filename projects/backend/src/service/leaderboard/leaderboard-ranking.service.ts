@@ -1,4 +1,5 @@
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
+import { ScoreSaberCurve } from "@ssr/common/leaderboard-curve/scoresaber-curve";
 import Logger from "@ssr/common/logger";
 import {
   ScoreSaberLeaderboard,
@@ -227,9 +228,7 @@ export class LeaderboardRankingService {
             update: {
               $set: {
                 pp: update.leaderboard.ranked
-                  ? ApiServiceRegistry.getInstance()
-                      .getScoreSaberService()
-                      .getPp(update.leaderboard.stars, score.accuracy)
+                  ? ScoreSaberCurve.getPp(update.leaderboard.stars, score.accuracy)
                   : 0,
                 weight: 0,
               },

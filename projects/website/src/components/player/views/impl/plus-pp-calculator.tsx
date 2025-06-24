@@ -4,7 +4,7 @@ import SimpleTooltip from "@/components/simple-tooltip";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Slider } from "@/components/ui/slider";
-import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
+import { ScoreSaberCurve } from "@ssr/common/leaderboard-curve/scoresaber-curve";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { formatPp } from "@ssr/common/utils/number-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
@@ -17,8 +17,6 @@ const DEFAULT_ACC = 95;
 const MAX_STARS = 15;
 
 export default function PlusPpCalculator({ player }: { player: ScoreSaberPlayer }) {
-  const scoreSaberService = ApiServiceRegistry.getInstance().getScoreSaberService();
-
   // State
   const [ppValue, setPpValue] = useState(1);
   const [accuracy, setAccuracy] = useState(DEFAULT_ACC);
@@ -39,79 +37,73 @@ export default function PlusPpCalculator({ player }: { player: ScoreSaberPlayer 
   // Calculate raw PP needed for the current PP value
   const rawPp = useMemo(() => {
     if (!sortedScores.length) return 0;
-    return scoreSaberService.calcPpBoundary(sortedScores, ppValue);
-  }, [scoreSaberService, sortedScores, ppValue]);
+    return ScoreSaberCurve.calcPpBoundary(sortedScores, ppValue);
+  }, [sortedScores, ppValue]);
 
   // Calculate stars needed for each accuracy threshold with constraint
-  const getStarsForAcc = useCallback(
-    (rawPp: number, acc: number) => {
-      if (!rawPp || !acc) return 0;
+  const getStarsForAcc = useCallback((rawPp: number, acc: number) => {
+    if (!rawPp || !acc) return 0;
 
-      let calculatedStars = 0;
-      let adjustedAccuracy = acc;
+    let calculatedStars = 0;
+    let adjustedAccuracy = acc;
 
-      // If the calculated star is more than the max, increase the acc 1% until it's below the max star count
-      do {
-        const ppFactor = scoreSaberService.getModifier(adjustedAccuracy);
-        calculatedStars = rawPp / (scoreSaberService.STAR_MULTIPLIER * ppFactor);
+    // If the calculated star is more than the max, increase the acc 1% until it's below the max star count
+    do {
+      const ppFactor = ScoreSaberCurve.getModifier(adjustedAccuracy);
+      calculatedStars = rawPp / (ScoreSaberCurve.STAR_MULTIPLIER * ppFactor);
 
-        if (calculatedStars > MAX_STARS && adjustedAccuracy < 100) {
-          adjustedAccuracy += 1;
-        } else {
-          break;
-        }
-      } while (calculatedStars > MAX_STARS && adjustedAccuracy < 100);
+      if (calculatedStars > MAX_STARS && adjustedAccuracy < 100) {
+        adjustedAccuracy += 1;
+      } else {
+        break;
+      }
+    } while (calculatedStars > MAX_STARS && adjustedAccuracy < 100);
 
-      return calculatedStars;
-    },
-    [scoreSaberService]
-  );
+    return calculatedStars;
+  }, []);
 
   // Calculate stars and adjusted accuracy with constraint
-  const getStarsAndAccuracyForPp = useCallback(
-    (rawPp: number, acc: number) => {
-      if (!rawPp || !acc) return { stars: 0, accuracy: acc };
+  const getStarsAndAccuracyForPp = useCallback((rawPp: number, acc: number) => {
+    if (!rawPp || !acc) return { stars: 0, accuracy: acc };
 
-      let calculatedStars = 0;
-      let adjustedAccuracy = acc;
+    let calculatedStars = 0;
+    let adjustedAccuracy = acc;
 
-      // If the calculated star is more than the max, increase the acc 1% until it's below the max star count
-      do {
-        const ppFactor = scoreSaberService.getModifier(adjustedAccuracy);
-        calculatedStars = rawPp / (scoreSaberService.STAR_MULTIPLIER * ppFactor);
+    // If the calculated star is more than the max, increase the acc 1% until it's below the max star count
+    do {
+      const ppFactor = ScoreSaberCurve.getModifier(adjustedAccuracy);
+      calculatedStars = rawPp / (ScoreSaberCurve.STAR_MULTIPLIER * ppFactor);
 
-        if (calculatedStars > MAX_STARS && adjustedAccuracy < 100) {
-          adjustedAccuracy += 1;
-        } else {
-          break;
-        }
-      } while (calculatedStars > MAX_STARS && adjustedAccuracy < 100);
+      if (calculatedStars > MAX_STARS && adjustedAccuracy < 100) {
+        adjustedAccuracy += 1;
+      } else {
+        break;
+      }
+    } while (calculatedStars > MAX_STARS && adjustedAccuracy < 100);
 
-      return { stars: calculatedStars, accuracy: adjustedAccuracy };
-    },
-    [scoreSaberService]
-  );
+    return { stars: calculatedStars, accuracy: adjustedAccuracy };
+  }, []);
 
   // Calculate PP from stars and accuracy
   const getPpFromStarsAndAcc = useCallback(
-    (stars: number, acc: number) => scoreSaberService.getPp(stars, acc),
-    [scoreSaberService]
+    (stars: number, acc: number) => ScoreSaberCurve.getPp(stars, acc),
+    []
   );
 
   // Calculate what PP gain you would get from current stars/accuracy
   const calculatedPpGain = useMemo(() => {
     if (!sortedScores.length) return 0;
     const ppFromStars = getPpFromStarsAndAcc(stars, accuracy);
-    return scoreSaberService.getPpBoundaryForRawPp(sortedScores, ppFromStars);
-  }, [sortedScores, stars, accuracy, getPpFromStarsAndAcc, scoreSaberService]);
+    return ScoreSaberCurve.getPpBoundaryForRawPp(sortedScores, ppFromStars);
+  }, [sortedScores, stars, accuracy, getPpFromStarsAndAcc]);
 
   // Calculate max PP
   const maxPp = useMemo(() => {
     if (!sortedScores.length) return 100;
-    const maxPossiblePp = scoreSaberService.getPp(MAX_STARS, 100);
-    const maxBoundaryPp = scoreSaberService.getPpBoundaryForRawPp(sortedScores, maxPossiblePp);
+    const maxPossiblePp = ScoreSaberCurve.getPp(MAX_STARS, 100);
+    const maxBoundaryPp = ScoreSaberCurve.getPpBoundaryForRawPp(sortedScores, maxPossiblePp);
     return Math.min(maxBoundaryPp, 100);
-  }, [sortedScores, scoreSaberService]);
+  }, [sortedScores]);
 
   // Initialize stars based on 95% accuracy and +1pp when data loads
   useEffect(() => {

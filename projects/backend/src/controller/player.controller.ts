@@ -82,4 +82,14 @@ export default class PlayerController {
   }): Promise<PlayerRankedPpsResponse> {
     return await PlayerService.getPlayerRankedPps(id);
   }
+
+  @Get("/refresh/:id", {
+    config: {},
+    params: t.Object({
+      id: t.String({ required: true }),
+    }),
+  })
+  public async refreshPlayer({ params: { id } }: { params: { id: string } }) {
+    return await PlayerService.refreshPlayer(id);
+  }
 }

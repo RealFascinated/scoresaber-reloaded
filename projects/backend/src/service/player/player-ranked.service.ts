@@ -1,4 +1,4 @@
-import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
+import { ScoreSaberCurve } from "@ssr/common/leaderboard-curve/scoresaber-curve";
 import { PlayerModel } from "@ssr/common/model/player";
 import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import { PlayerRankedPpsResponse } from "@ssr/common/response/player-ranked-pps-response";
@@ -79,9 +79,7 @@ export class PlayerRankedService {
     // Calculate all boundaries in a single pass
     const boundaries: number[] = [];
     for (let i = 1; i <= boundary; i++) {
-      boundaries.push(
-        ApiServiceRegistry.getInstance().getScoreSaberService().calcPpBoundary(result[0].pps, i)
-      );
+      boundaries.push(ScoreSaberCurve.calcPpBoundary(result[0].pps, i));
     }
 
     return boundaries;
@@ -103,12 +101,10 @@ export class PlayerRankedService {
       return 0;
     }
 
-    return ApiServiceRegistry.getInstance()
-      .getScoreSaberService()
-      .getPpBoundaryForRawPp(
-        scoresPps.scores.map(score => score.pp),
-        boundary
-      );
+    return ScoreSaberCurve.getPpBoundaryForRawPp(
+      scoresPps.scores.map(score => score.pp),
+      boundary
+    );
   }
 
   /**

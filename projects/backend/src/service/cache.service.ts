@@ -78,4 +78,13 @@ export default class CacheService {
 
     return data;
   }
+
+  /**
+   * Invalidates a cache key.
+   *
+   * @param cacheKey the key to invalidate
+   */
+  public static async invalidate(cacheKey: string): Promise<void> {
+    await this.redisClient.del(cacheKey);
+  }
 }

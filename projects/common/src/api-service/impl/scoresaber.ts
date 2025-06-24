@@ -1,7 +1,7 @@
 import { Cooldown, CooldownPriority } from "../../cooldown";
-import { CurvePoint } from "../../curve-point";
 import { DetailType } from "../../detail-type";
 import { StarFilter } from "../../maps/types";
+import { PlayerRefreshResponse } from "../../response/player-refresh-response";
 import ScoreSaberRankingRequestsResponse from "../../response/scoresaber-ranking-requests-response";
 import { MapDifficulty } from "../../score/map-difficulty";
 import { ScoreSaberScoreSort } from "../../score/score-sort";
@@ -13,8 +13,8 @@ import ScoreSaberPlayerScoresPageToken from "../../types/token/scoresaber/player
 import { ScoreSaberPlayerSearchToken } from "../../types/token/scoresaber/player-search";
 import { ScoreSaberPlayersPageToken } from "../../types/token/scoresaber/players-page";
 import RankingRequestToken from "../../types/token/scoresaber/ranking-request-token";
-import { clamp, lerp } from "../../utils/math-utils";
 import { getDifficulty } from "../../utils/song-utils";
+import { formatDuration } from "../../utils/time-utils";
 import ApiService from "../api-service";
 import { ApiServiceName } from "../api-service-registry";
 
@@ -29,6 +29,7 @@ const LOOKUP_PLAYERS_ENDPOINT = `${API_BASE}/players?page=:page`;
 const LOOKUP_PLAYERS_BY_COUNTRY_ENDPOINT = `${API_BASE}/players?page=:page&countries=:country`;
 const LOOKUP_PLAYER_SCORES_ENDPOINT = `${API_BASE}/player/:id/scores?limit=:limit&sort=:sort&page=:page`;
 const LOOKUP_ACTIVE_PLAYER_COUNT = `${API_BASE}/players/count`;
+const REFRESH_PLAYER_ENDPOINT = `${API_BASE}/user/:id/refresh`;
 
 /**
  * Leaderboard
@@ -45,49 +46,6 @@ const SEARCH_LEADERBOARDS_ENDPOINT = `${API_BASE}/leaderboards?search=:query`;
 const RANKING_REQUESTS_ENDPOINT = `${API_BASE}/ranking/requests/:query`;
 
 export class ScoreSaberService extends ApiService {
-  readonly WEIGHT_COEFFICIENT = 0.965;
-  readonly STAR_MULTIPLIER = 42.117208413;
-
-  private curvePoints = [
-    new CurvePoint(0, 0),
-    new CurvePoint(0.6, 0.18223233667439062),
-    new CurvePoint(0.65, 0.5866010012767576),
-    new CurvePoint(0.7, 0.6125565959114954),
-    new CurvePoint(0.75, 0.6451808210101443),
-    new CurvePoint(0.8, 0.6872268862950283),
-    new CurvePoint(0.825, 0.7150465663454271),
-    new CurvePoint(0.85, 0.7462290664143185),
-    new CurvePoint(0.875, 0.7816934560296046),
-    new CurvePoint(0.9, 0.825756123560842),
-    new CurvePoint(0.91, 0.8488375988124467),
-    new CurvePoint(0.92, 0.8728710341448851),
-    new CurvePoint(0.93, 0.9039994071865736),
-    new CurvePoint(0.94, 0.9417362980580238),
-    new CurvePoint(0.95, 1),
-    new CurvePoint(0.955, 1.0388633331418984),
-    new CurvePoint(0.96, 1.0871883573850478),
-    new CurvePoint(0.965, 1.1552120359501035),
-    new CurvePoint(0.97, 1.2485807759957321),
-    new CurvePoint(0.9725, 1.3090333065057616),
-    new CurvePoint(0.975, 1.3807102743105126),
-    new CurvePoint(0.9775, 1.4664726399289512),
-    new CurvePoint(0.98, 1.5702410055532239),
-    new CurvePoint(0.9825, 1.697536248647543),
-    new CurvePoint(0.985, 1.8563887693647105),
-    new CurvePoint(0.9875, 2.058947159052738),
-    new CurvePoint(0.99, 2.324506282149922),
-    new CurvePoint(0.99125, 2.4902905794106913),
-    new CurvePoint(0.9925, 2.685667856592722),
-    new CurvePoint(0.99375, 2.9190155639254955),
-    new CurvePoint(0.995, 3.2022017597337955),
-    new CurvePoint(0.99625, 3.5526145337555373),
-    new CurvePoint(0.9975, 3.996793606763322),
-    new CurvePoint(0.99825, 4.325027383589547),
-    new CurvePoint(0.999, 4.715470646416203),
-    new CurvePoint(0.9995, 5.019543595874787),
-    new CurvePoint(1, 5.367394282890631),
-  ];
-
   constructor() {
     super(new Cooldown(60_000 / 300, 150), ApiServiceName.SCORE_SABER);
   }
@@ -112,7 +70,7 @@ export class ScoreSaberService extends ApiService {
     }
     results.players.sort((a, b) => a.rank - b.rank);
     this.log(
-      `Found ${results.players.length} players in ${(performance.now() - before).toFixed(0)}ms`
+      `Found ${results.players.length} players in ${formatDuration(performance.now() - before)}`
     );
     return results;
   }
@@ -136,7 +94,7 @@ export class ScoreSaberService extends ApiService {
     if (token === undefined) {
       return undefined;
     }
-    this.log(`Found player "${playerId}" in ${(performance.now() - before).toFixed(0)}ms`);
+    this.log(`Found player "${playerId}" in ${formatDuration(performance.now() - before)}`);
     return token;
   }
 
@@ -160,7 +118,7 @@ export class ScoreSaberService extends ApiService {
       return undefined;
     }
     this.log(
-      `Found ${response.players.length} players in ${(performance.now() - before).toFixed(0)}ms`
+      `Found ${response.players.length} players in ${formatDuration(performance.now() - before)}`
     );
     return response;
   }
@@ -189,7 +147,7 @@ export class ScoreSaberService extends ApiService {
       return undefined;
     }
     this.log(
-      `Found ${response.players.length} players in ${(performance.now() - before).toFixed(0)}ms`
+      `Found ${response.players.length} players in ${formatDuration(performance.now() - before)}`
     );
     return response;
   }
@@ -206,7 +164,7 @@ export class ScoreSaberService extends ApiService {
     if (response === undefined) {
       return undefined;
     }
-    this.log(`Found active player count in ${(performance.now() - before).toFixed(0)}ms`);
+    this.log(`Found active player count in ${formatDuration(performance.now() - before)}`);
     return response;
   }
 
@@ -252,7 +210,7 @@ export class ScoreSaberService extends ApiService {
       return undefined;
     }
     this.log(
-      `Found ${response.playerScores.length} scores for player "${playerId}" in ${(performance.now() - before).toFixed(0)}ms`
+      `Found ${response.playerScores.length} scores for player "${playerId}" in ${formatDuration(performance.now() - before)}`
     );
     return response;
   }
@@ -280,7 +238,7 @@ export class ScoreSaberService extends ApiService {
       return undefined;
     }
     this.log(
-      `Found leaderboard "${leaderboardId}" in ${(performance.now() - before).toFixed(0)}ms`
+      `Found leaderboard "${leaderboardId}" in ${formatDuration(performance.now() - before)}`
     );
     return response;
   }
@@ -310,7 +268,7 @@ export class ScoreSaberService extends ApiService {
       return undefined;
     }
     this.log(
-      `Found leaderboard by hash for "${hash}", difficulty "${difficulty}", gamemode "${gameMode}" in ${(performance.now() - before).toFixed(0)}ms`
+      `Found leaderboard by hash for "${hash}", difficulty "${difficulty}", gamemode "${gameMode}" in ${formatDuration(performance.now() - before)}`
     );
     return response;
   }
@@ -357,7 +315,7 @@ export class ScoreSaberService extends ApiService {
       return undefined;
     }
     this.log(
-      `Found ${response.leaderboards.length} leaderboards in ${(performance.now() - before).toFixed(0)}ms`
+      `Found ${response.leaderboards.length} leaderboards in ${formatDuration(performance.now() - before)}`
     );
     return response;
   }
@@ -379,7 +337,7 @@ export class ScoreSaberService extends ApiService {
       return undefined;
     }
     this.log(
-      `Found ${response.leaderboards.length} leaderboards in ${(performance.now() - before).toFixed(0)}ms`
+      `Found ${response.leaderboards.length} leaderboards in ${formatDuration(performance.now() - before)}`
     );
     return response;
   }
@@ -417,7 +375,7 @@ export class ScoreSaberService extends ApiService {
     }
 
     this.log(
-      `Found ${response.scores.length} scores for leaderboard "${leaderboardId}", page "${page}" in ${(performance.now() - before).toFixed(0)}ms`
+      `Found ${response.scores.length} scores for leaderboard "${leaderboardId}", page "${page}" in ${formatDuration(performance.now() - before)}`
     );
     return response;
   }
@@ -444,7 +402,7 @@ export class ScoreSaberService extends ApiService {
     }
 
     this.log(
-      `Found ${response.length} ranking requests in ${(performance.now() - before).toFixed(0)}ms`
+      `Found ${response.length} ranking requests in ${formatDuration(performance.now() - before)}`
     );
     return {
       nextInQueue: nextInQueueResponse || [],
@@ -454,150 +412,15 @@ export class ScoreSaberService extends ApiService {
   }
 
   /**
-   * Gets the modifier for the given accuracy.
+   * Refreshes a player
    *
-   * @param accuracy The accuracy.
-   * @return The modifier.
+   * @param id the id of the player to refresh
+   * @returns the result of the refresh
    */
-  public getModifier(accuracy: number): number {
-    accuracy = clamp(accuracy, 0, 100) / 100; // Normalize accuracy to a range of [0, 1]
-
-    if (accuracy <= 0) {
-      return 0;
-    }
-
-    if (accuracy >= 1) {
-      return this.curvePoints[this.curvePoints.length - 1].getMultiplier();
-    }
-
-    for (let i = 0; i < this.curvePoints.length - 1; i++) {
-      const point = this.curvePoints[i];
-      const nextPoint = this.curvePoints[i + 1];
-      if (accuracy >= point.getAcc() && accuracy <= nextPoint.getAcc()) {
-        return lerp(
-          point.getMultiplier(),
-          nextPoint.getMultiplier(),
-          (accuracy - point.getAcc()) / (nextPoint.getAcc() - point.getAcc())
-        );
-      }
-    }
-
-    return 0;
-  }
-
-  /**
-   * Gets the performance points (PP) based on stars and accuracy.
-   *
-   * @param stars The star count.
-   * @param accuracy The accuracy.
-   * @returns The calculated PP.
-   */
-  public getPp(stars: number, accuracy: number): number {
-    if (accuracy <= 1) {
-      accuracy *= 100; // Convert the accuracy to a percentage
-    }
-    const pp = stars * this.STAR_MULTIPLIER; // Calculate base PP value
-    return this.getModifier(accuracy) * pp; // Calculate and return final PP value
-  }
-
-  /**
-   * Ngl i have no idea what this does.
-   *
-   * @param bottomScores
-   * @param idx
-   * @param expected
-   * @private
-   */
-  private calcRawPpAtIdx(bottomScores: Array<any>, idx: number, expected: number) {
-    const oldBottomPp = this.getTotalWeightedPp(bottomScores, idx);
-    const newBottomPp = this.getTotalWeightedPp(bottomScores, idx + 1);
-
-    // 0.965^idx * rawPpToFind = expected + oldBottomPp - newBottomPp;
-    // rawPpToFind = (expected + oldBottomPp - newBottomPp) / 0.965^idx;
-    return (expected + oldBottomPp - newBottomPp) / Math.pow(this.WEIGHT_COEFFICIENT, idx);
-  }
-
-  /**
-   * Gets the total amount of weighted pp from
-   * the sorted pp array
-   *
-   * @param ppArray the sorted pp array
-   * @param startIdx the index to start from
-   * @returns the total amount of weighted pp
-   * @private
-   */
-  public getTotalWeightedPp(ppArray: Array<number>, startIdx = 0) {
-    return ppArray.reduce(
-      (cumulative, pp, idx) => cumulative + Math.pow(this.WEIGHT_COEFFICIENT, idx + startIdx) * pp,
-      0
+  public async refreshPlayer(id: string): Promise<PlayerRefreshResponse | undefined> {
+    const result = await this.fetch<PlayerRefreshResponse>(
+      REFRESH_PLAYER_ENDPOINT.replace(":id", id)
     );
-  }
-
-  /**
-   * Gets the amount of raw pp you need
-   * to gain the expected pp
-   *
-   * @param scoresPps the sorted pp array
-   * @param expectedPp the expected pp gain
-   * @returns the amount of raw pp
-   */
-  public calcPpBoundary(scoresPps: number[], expectedPp = 1) {
-    let left = 0;
-    let right = scoresPps.length - 1;
-    let boundaryIdx = -1;
-
-    while (left <= right) {
-      const mid = Math.floor((left + right) / 2);
-      const bottomSlice = scoresPps.slice(mid);
-      const bottomPp = this.getTotalWeightedPp(bottomSlice, mid);
-
-      bottomSlice.unshift(scoresPps[mid]);
-      const modifiedBottomPp = this.getTotalWeightedPp(bottomSlice, mid);
-      const diff = modifiedBottomPp - bottomPp;
-
-      if (diff > expectedPp) {
-        boundaryIdx = mid;
-        left = mid + 1;
-      } else {
-        right = mid - 1;
-      }
-    }
-
-    return boundaryIdx === -1
-      ? this.calcRawPpAtIdx(scoresPps, 0, expectedPp)
-      : this.calcRawPpAtIdx(scoresPps.slice(boundaryIdx + 1), boundaryIdx + 1, expectedPp);
-  }
-
-  /**
-   * Gets the boundary for a given raw PP value.
-   *
-   * @param scoresPps The sorted scores PP array.
-   * @param rawPp The raw PP value to evaluate.
-   * @returns The PP boundary corresponding to the given raw PP.
-   */
-  public getPpBoundaryForRawPp(scoresPps: number[], rawPp: number): number {
-    // If there are no existing scores, the boundary is just the raw PP
-    if (!scoresPps.length) {
-      return rawPp;
-    }
-
-    // Create a copy of scores and find where the new PP would fit
-    const newScores = [...scoresPps];
-    let insertIndex = newScores.findIndex(pp => rawPp > pp);
-
-    // If the new PP is smaller than all existing scores, add it to the end
-    if (insertIndex === -1) {
-      insertIndex = newScores.length;
-    }
-
-    // Insert the new PP value at the correct position
-    newScores.splice(insertIndex, 0, rawPp);
-
-    // Calculate the total weighted PP before and after insertion
-    const oldTotal = this.getTotalWeightedPp(scoresPps);
-    const newTotal = this.getTotalWeightedPp(newScores);
-
-    // The boundary is the difference between the new and old totals
-    return newTotal - oldTotal;
+    return result;
   }
 }

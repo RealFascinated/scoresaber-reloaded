@@ -1,5 +1,7 @@
 import { CooldownPriority } from "../cooldown";
+import { RateLimitError } from "../error/rate-limit-error";
 import Logger from "../logger";
+import { formatDate } from "./time-utils";
 
 type RequestReturns = "text" | "json" | "arraybuffer";
 
@@ -51,7 +53,17 @@ class Request {
 
       // Log warning if below threshold
       if (remaining <= 50) {
-        Logger.warn(`Rate limit for ${url} is low (${remaining} remaining). Priority: ${priority}`);
+        Logger.warn(
+          `The rate limit for ${url} is low (${remaining} remaining). ${
+            resetTime
+              ? `Reset date: ${formatDate(new Date(Number(resetTime) * 1000), "DD/MM/YYYY, HH:mm:ss")}.`
+              : ""
+          }`
+        );
+      }
+
+      if (remaining === 0) {
+        throw new RateLimitError("Rate limit exceeded");
       }
     }
   }

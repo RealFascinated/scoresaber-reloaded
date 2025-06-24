@@ -10,7 +10,7 @@ import ScoreSaberScoreInfo from "@/components/platform/scoresaber/score/score-in
 import ScoreSaberScoreSongInfo from "@/components/platform/scoresaber/score/score-song-info";
 import ScoreSaberScoreStats from "@/components/platform/scoresaber/score/score-stats";
 import PlayerPreview from "@/components/player/player-preview";
-import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
+import { ScoreSaberCurve } from "@ssr/common/leaderboard-curve/scoresaber-curve";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
@@ -71,11 +71,7 @@ export default function ScoreSaberScoreDisplay({
 
   const pp = useMemo(
     () =>
-      baseScore === score.score
-        ? score.pp
-        : ApiServiceRegistry.getInstance()
-            .getScoreSaberService()
-            .getPp(leaderboard.stars, accuracy),
+      baseScore === score.score ? score.pp : ScoreSaberCurve.getPp(leaderboard.stars, accuracy),
     [baseScore, score.score, score.pp, leaderboard.stars, accuracy]
   );
 

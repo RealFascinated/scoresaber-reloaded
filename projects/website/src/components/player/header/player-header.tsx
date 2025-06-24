@@ -1,4 +1,3 @@
-import Avatar from "@/components/avatar";
 import AddFriend from "@/components/friend/add-friend";
 import PlayerTrackedStatus from "@/components/player/player-tracked-status";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
@@ -9,6 +8,7 @@ import PlayerOverview from "../player-overview";
 import PlayerStats from "../player-stats";
 import PlayerAccBadges from "./acc-badges";
 import PlayerActions from "./player-actions";
+import PlayerAvatar from "./player-avatar";
 
 type PlayerHeaderProps = {
   /**
@@ -21,12 +21,7 @@ export default function PlayerHeader({ player }: PlayerHeaderProps) {
   return (
     <Card className="flex gap-2">
       <div className="relative flex flex-col items-center gap-3 text-center select-none lg:flex-row lg:items-start lg:text-start">
-        <Avatar
-          src={player.avatar}
-          size={128}
-          className="pointer-events-none h-32 w-32"
-          alt={`${player.name}'s Profile Picture`}
-        />
+        <PlayerAvatar player={player} />
         <div className="flex w-full flex-col items-center justify-center gap-2 lg:items-start lg:justify-start">
           <div>
             <div className="flex items-center justify-center gap-2 lg:justify-start">

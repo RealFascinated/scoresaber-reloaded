@@ -14,6 +14,7 @@ export class PlayerService {
   public static getPlayer = PlayerCoreService.getPlayer;
   public static playerExists = PlayerCoreService.playerExists;
   public static updatePlayerName = PlayerCoreService.updatePlayerName;
+  public static refreshPlayer = PlayerCoreService.refreshPlayer;
 
   // PlayerSearchService methods
   public static searchPlayers = PlayerSearchService.searchPlayers;

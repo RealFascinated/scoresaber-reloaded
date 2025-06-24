@@ -1,7 +1,6 @@
 import { OverlayData } from "@/common/overlay/overlay-data";
-import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
+import { ScoreSaberCurve } from "@ssr/common/leaderboard-curve/scoresaber-curve";
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
-ApiServiceRegistry.getInstance().getScoreSaberService();
 
 type OverlayScoreDataProps = {
   /**
@@ -18,9 +17,7 @@ export default function OverlayScoreDataView({ overlayData }: OverlayScoreDataPr
   const leaderboard = overlayData.map?.leaderboard;
   const pp =
     leaderboard && leaderboard.stars > 0
-      ? ApiServiceRegistry.getInstance()
-          .getScoreSaberService()
-          .getPp(leaderboard.stars, scoreData.accuracy)
+      ? ScoreSaberCurve.getPp(leaderboard.stars, scoreData.accuracy)
       : undefined;
 
   return (

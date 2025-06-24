@@ -1,7 +1,7 @@
 import { Change } from "@/components/change";
 import { ScoreBadgeProps } from "@/components/platform/scoresaber/score/badges/badge-props";
 import SimpleTooltip from "@/components/simple-tooltip";
-import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
+import { ScoreSaberCurve } from "@ssr/common/leaderboard-curve/scoresaber-curve";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ensurePositiveNumber, formatPp } from "@ssr/common/utils/number-utils";
 
@@ -28,10 +28,7 @@ export function ScorePpBadge({ score, leaderboard, showDifference = true }: Scor
   const weightedPp = weight ? pp * weight : undefined;
   const fcPp =
     !score.fullCombo && fcAccuracy
-      ? ApiServiceRegistry.getInstance()
-          .getScoreSaberService()
-          .getPp(leaderboard.stars, fcAccuracy)
-          .toFixed(0)
+      ? ScoreSaberCurve.getPp(leaderboard.stars, fcAccuracy).toFixed(0)
       : undefined;
 
   return (

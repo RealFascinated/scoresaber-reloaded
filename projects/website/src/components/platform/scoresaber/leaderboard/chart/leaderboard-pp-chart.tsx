@@ -5,7 +5,7 @@ import { DEFAULT_WHAT_IF_RANGE, SettingIds } from "@/common/database/database";
 import Card from "@/components/card";
 import { DualRangeSlider } from "@/components/ui/dual-range-slider";
 import useDatabase from "@/hooks/use-database";
-import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
+import { ScoreSaberCurve } from "@ssr/common/leaderboard-curve/scoresaber-curve";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { useDebounce } from "@uidotdev/usehooks";
 import type { ChartOptions } from "chart.js";
@@ -53,9 +53,7 @@ export default function LeaderboardPpChart({ leaderboard }: Props) {
     for (let accuracy = min; accuracy <= max; accuracy += precision) {
       dataPoints.push({
         x: accuracy,
-        y: ApiServiceRegistry.getInstance()
-          .getScoreSaberService()
-          .getPp(leaderboard.stars, accuracy),
+        y: ScoreSaberCurve.getPp(leaderboard.stars, accuracy),
       });
     }
 
