@@ -9,6 +9,17 @@ export abstract class Queue<T> {
   public readonly id: QueueId;
 
   /**
+   * Whether the queue should be saved
+   * and loaded from the database
+   */
+  public readonly saveQueueToDatabase: boolean;
+
+  /**
+   * The mode of the queue
+   */
+  public queueMode: "fifo" | "lifo" = "lifo";
+
+  /**
    * The queue of items
    */
   private queue: T[] = [];
@@ -23,15 +34,14 @@ export abstract class Queue<T> {
    */
   private isStopped = false;
 
-  /**
-   * Whether the queue should be saved
-   * and loaded from the database
-   */
-  public readonly saveQueueToDatabase: boolean;
-
-  constructor(id: QueueId, saveQueueToDatabase: boolean = false) {
+  constructor(
+    id: QueueId,
+    saveQueueToDatabase: boolean = false,
+    queueMode: "fifo" | "lifo" = "lifo"
+  ) {
     this.id = id;
     this.saveQueueToDatabase = saveQueueToDatabase;
+    this.queueMode = queueMode;
   }
 
   /**
@@ -84,7 +94,7 @@ export abstract class Queue<T> {
 
     this.lock = true;
     try {
-      const item = this.queue.shift();
+      const item = this.queueMode === "fifo" ? this.queue.shift() : this.queue.pop();
       if (!item) {
         return;
       }
