@@ -44,22 +44,7 @@ const nextConfig: NextConfig = {
   },
   poweredByHeader: false,
   images: {
-    loader: "custom",
-    loaderFile: "./src/common/image-loader.ts",
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "cdn.scoresaber.com",
-        port: "",
-        pathname: "/**",
-      },
-      {
-        protocol: "https",
-        hostname: "cdn.beatsaver.com",
-        port: "",
-        pathname: "/**",
-      },
-    ],
+    unoptimized: true,
   },
   env: {
     HOSTNAME: "0.0.0.0",
