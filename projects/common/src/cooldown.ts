@@ -139,8 +139,6 @@ export class Cooldown {
     let cooldownMultiplier = 1;
     if (priority === CooldownPriority.LOW) {
       cooldownMultiplier = 2;
-    } else if (priority === CooldownPriority.BACKGROUND) {
-      cooldownMultiplier = 2; // Used differently to the other priorities
     }
 
     return cooldownMultiplier;
