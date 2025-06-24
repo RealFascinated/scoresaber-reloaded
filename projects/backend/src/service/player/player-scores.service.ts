@@ -352,8 +352,6 @@ export class PlayerScoresService {
         search,
       });
 
-    console.log(requestedPage);
-
     if (!requestedPage) {
       return Pagination.empty<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>();
     }

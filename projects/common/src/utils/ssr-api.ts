@@ -478,6 +478,7 @@ class SSRApi {
       returns: "text",
       searchParams: {
         superJson: true,
+        page: page,
         ...(options?.country ? { country: options.country } : {}),
         ...(options?.search ? { search: options.search } : {}),
       },
