@@ -3,7 +3,7 @@
 import { type SIDE_OPTIONS } from "@radix-ui/react-popper";
 import { clsx } from "clsx";
 import React from "react";
-import { Tooltip as ShadCnTooltip } from "./ui/tooltip";
+import { Tooltip } from "./ui/tooltip";
 
 export default function SimpleTooltip({
   children,
@@ -19,7 +19,7 @@ export default function SimpleTooltip({
   showOnMobile?: boolean;
 }) {
   return (
-    <ShadCnTooltip
+    <Tooltip
       content={
         typeof display === "string" ? (
           <p className="max-w-[350px] text-center text-wrap">{display}</p>
@@ -31,6 +31,6 @@ export default function SimpleTooltip({
       showOnMobile={showOnMobile}
     >
       <div className={clsx("w-full cursor-default", className)}>{children}</div>
-    </ShadCnTooltip>
+    </Tooltip>
   );
 }

@@ -9,7 +9,7 @@ import { ChartBarIcon, MusicIcon, TrendingUpIcon, TrophyIcon } from "lucide-reac
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ReactElement, useEffect, useState } from "react";
+import { ReactElement } from "react";
 import Settings from "../settings/settings";
 
 const links: ReactElement<any>[] = [
@@ -68,24 +68,10 @@ const links: ReactElement<any>[] = [
 ];
 
 export default function Navbar() {
-  const [hasScrolled, setHasScrolled] = useState<boolean>(false);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const isScrolled = window.scrollY > 20;
-      if (isScrolled !== hasScrolled) {
-        setHasScrolled(isScrolled);
-      }
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [hasScrolled]);
-
   return (
     <nav
       className={cn(
-        "border-border bg-background sticky inset-x-0 top-0 z-50 flex h-12 w-full items-center justify-between border-b px-2 py-1 backdrop-blur-md select-none lg:justify-around lg:px-8",
-        hasScrolled && "shadow-sm"
+        "border-border bg-background sticky inset-x-0 top-0 z-50 flex h-12 w-full items-center justify-between border-b px-2 py-1 backdrop-blur-md select-none lg:justify-around lg:px-8"
       )}
     >
       {/* Left */}

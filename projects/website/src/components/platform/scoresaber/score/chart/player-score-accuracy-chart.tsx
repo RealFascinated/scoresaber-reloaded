@@ -93,11 +93,10 @@ export default function PlayerScoreAccuracyChart({ scoreStats, leaderboard }: Pr
     options: {
       animation: {
         tension: {
-          duration: 1000, // Animation duration in milliseconds
-          easing: "linear", // Easing function (default is 'easeOutQuart')
+          duration: 1000,
+          easing: "linear",
           from: 1,
           to: 0,
-          loop: true,
         },
       },
     },
