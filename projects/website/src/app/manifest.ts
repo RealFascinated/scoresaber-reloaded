@@ -7,10 +7,14 @@ export default function manifest(): MetadataRoute.Manifest {
     description:
       "The ultimate platform for Beat Saber players. Track your progress, compete with friends, and discover detailed insights about your gameplay like never before.",
     start_url: "/",
+    scope: "/",
     display: "standalone",
+    orientation: "portrait-primary",
     background_color: "#000000",
     theme_color: "#000000",
-    categories: ["scoresaber", "beatsaber"],
+    lang: "en",
+    dir: "ltr",
+    categories: ["scoresaber", "beatsaber", "games", "entertainment"],
     screenshots: [
       {
         src: "https://cdn.fascinated.cc/xmvzAW.png",
@@ -30,11 +34,13 @@ export default function manifest(): MetadataRoute.Manifest {
         src: "/icon-192x192.png",
         sizes: "192x192",
         type: "image/png",
+        purpose: "any",
       },
       {
         src: "/icon-512x512.png",
         sizes: "512x512",
         type: "image/png",
+        purpose: "any",
       },
     ],
   };
