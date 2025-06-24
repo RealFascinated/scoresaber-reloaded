@@ -1,4 +1,4 @@
-import ApiServiceRegistry from "../../src/api-service/api-service-registry";
+import { ScoreSaberCurve } from "src/leaderboard-curve/scoresaber-curve";
 import { ScoreSaberScore } from "../../src/model/score/impl/scoresaber-score";
 import { HMD } from "../hmds";
 import ScoreSaberPlayer from "../player/impl/scoresaber-player";
@@ -148,9 +148,6 @@ export function getScoreSaberAvatar(
  */
 export function updateScoreWeights(scores: Pick<ScoreSaberScore, "pp" | "weight" | "scoreId">[]) {
   for (let i = 0; i < scores.length; i++) {
-    scores[i].weight = Math.pow(
-      ApiServiceRegistry.getInstance().getScoreSaberService().WEIGHT_COEFFICIENT,
-      i
-    );
+    scores[i].weight = Math.pow(ScoreSaberCurve.WEIGHT_COEFFICIENT, i);
   }
 }

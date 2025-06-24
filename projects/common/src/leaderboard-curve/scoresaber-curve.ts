@@ -194,6 +194,7 @@ function getPpBoundaryForRawPp(scoresPps: number[], rawPp: number): number {
 
 export const ScoreSaberCurve = {
   STAR_MULTIPLIER,
+  WEIGHT_COEFFICIENT,
   getPp,
   getModifier,
   calcPpBoundary,
