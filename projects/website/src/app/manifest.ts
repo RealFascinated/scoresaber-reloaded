@@ -8,7 +8,7 @@ export default function manifest(): MetadataRoute.Manifest {
       "The ultimate platform for Beat Saber players. Track your progress, compete with friends, and discover detailed insights about your gameplay like never before.",
     start_url: "/",
     scope: "/",
-    display: "standalone",
+    display: "minimal-ui",
     orientation: "portrait-primary",
     background_color: "#000000",
     theme_color: "#000000",
