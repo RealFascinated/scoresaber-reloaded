@@ -47,7 +47,6 @@ export class PlayerService {
   public static getScoreSaberCachedPlayerScores =
     PlayerScoresService.getScoreSaberCachedPlayerScores;
   public static getScoreSaberLivePlayerScores = PlayerScoresService.getScoreSaberLivePlayerScores;
-  public static processScoresWithLeaderboards = PlayerScoresService.processScoresWithLeaderboards;
 
   // PlayerAccuraciesService methods
   public static getPlayerAverageAccuracies = PlayerAccuraciesService.getPlayerAverageAccuracies;

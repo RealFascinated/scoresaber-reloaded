@@ -13,7 +13,6 @@ import {
   ScoreSaberScoreModel,
 } from "@ssr/common/model/score/impl/scoresaber-score";
 import { Pagination } from "@ssr/common/pagination";
-import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerScoresChartResponse } from "@ssr/common/response/player-scores-chart";
 import { PlayerScoresResponse } from "@ssr/common/response/player-scores-response";
 import { PlayerScore } from "@ssr/common/score/player-score";
@@ -197,68 +196,6 @@ export class PlayerScoresService {
   }
 
   /**
-   * Processes raw scores with leaderboards
-   * @private
-   */
-  public static async processScoresWithLeaderboards(
-    rawScores: ScoreSaberScore[],
-    includeBeatSaver: boolean = false,
-    insertScoreData: boolean = true,
-    comparisonPlayer?: ScoreSaberPlayer
-  ): Promise<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>[]> {
-    if (!rawScores?.length) {
-      return [];
-    }
-
-    const validScores = rawScores.filter(
-      score => score.leaderboardId !== undefined && score.leaderboardId !== null
-    );
-
-    if (validScores.length === 0) {
-      return [];
-    }
-
-    const leaderboardResponses = await LeaderboardService.getLeaderboards(
-      validScores.map(score => score.leaderboardId + ""),
-      {
-        includeBeatSaver,
-        cacheOnly: true,
-      }
-    );
-
-    const leaderboardMap = new Map(
-      leaderboardResponses.map(response => [response.leaderboard.id, response])
-    );
-
-    const processedScores = await Promise.all(
-      validScores.map(async rawScore => {
-        const leaderboardResponse = leaderboardMap.get(rawScore.leaderboardId);
-        if (!leaderboardResponse) {
-          return null;
-        }
-
-        const { leaderboard, beatsaver } = leaderboardResponse;
-        const score = insertScoreData
-          ? await ScoreService.insertScoreData(
-              scoreToObject(rawScore),
-              leaderboard,
-              comparisonPlayer
-            )
-          : scoreToObject(rawScore);
-        return {
-          score: score,
-          leaderboard: leaderboard,
-          beatSaver: beatsaver,
-        } as PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>;
-      })
-    );
-
-    return processedScores.filter(
-      (score): score is PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard> => score !== null
-    );
-  }
-
-  /**
    * Gets the player scores from the database.
    *
    * @param playerId the id of the player
@@ -313,12 +250,20 @@ export class PlayerScoresService {
       ? { ...options.projection, leaderboardId: 1 }
       : options?.projection || {};
 
-    const rawScores = (await ScoreSaberScoreModel.find(query)
+    // Build the query with limit
+    let queryBuilder = ScoreSaberScoreModel.find(query)
       .sort({
         [fieldsMapping[options?.sort?.field || "pp"]]: options?.sort?.direction === "asc" ? 1 : -1,
       })
       .select(finalProjection)
-      .lean()) as unknown as ScoreSaberScore[];
+      .lean();
+
+    // Apply limit if specified
+    if (options?.limit) {
+      queryBuilder = queryBuilder.limit(options.limit);
+    }
+
+    const rawScores = (await queryBuilder) as unknown as ScoreSaberScore[];
 
     if (!rawScores?.length) {
       return [];
@@ -331,10 +276,38 @@ export class PlayerScoresService {
       }));
     }
 
-    return await PlayerScoresService.processScoresWithLeaderboards(
-      rawScores,
-      options?.includeBeatSaver ?? false,
-      options?.insertScoreData ?? true
+    // Optimized leaderboard processing - only fetch what we need
+    const leaderboardResponses = await LeaderboardService.getLeaderboards(
+      rawScores.map(score => score.leaderboardId + ""),
+      {
+        includeBeatSaver: options?.includeBeatSaver ?? false,
+        cacheOnly: true,
+      }
+    );
+
+    const leaderboardMap = new Map(
+      leaderboardResponses.map(response => [response.leaderboard.id, response])
+    );
+
+    // Process scores without async operations unless absolutely necessary
+    const processedScores = rawScores.map(rawScore => {
+      const leaderboardResponse = leaderboardMap.get(rawScore.leaderboardId);
+      if (!leaderboardResponse) {
+        return null;
+      }
+
+      const { leaderboard, beatsaver } = leaderboardResponse;
+      const score = scoreToObject(rawScore) as ScoreSaberScore;
+
+      return {
+        score: score,
+        leaderboard: leaderboard,
+        beatSaver: beatsaver,
+      } as PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>;
+    });
+
+    return processedScores.filter(
+      (score): score is PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard> => score !== null
     );
   }
 
