@@ -129,7 +129,7 @@ const PageButton = React.memo(
         size="icon"
         className={cn(
           "relative transition-none",
-          (isLoading || buttonPage === currentPage) && "cursor-not-allowed opacity-50"
+          (isLoading || buttonPage === currentPage) && "cursor-not-allowed"
         )}
       >
         <a
