@@ -17,7 +17,6 @@ export class PlayerRankedService {
 
     const playerScores = await PlayerService.getPlayerScores(playerId, {
       ranked: true,
-      sort: "pp",
       projection: { pp: 1, scoreId: 1 },
       includeLeaderboard: false,
     });

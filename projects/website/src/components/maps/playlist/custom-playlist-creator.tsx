@@ -19,11 +19,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Consts } from "@ssr/common/consts";
 import { env } from "@ssr/common/env";
 import {
   customRankedPlaylistSchema,
   encodeCustomRankedPlaylistSettings,
 } from "@ssr/common/playlist/ranked/custom-ranked-playlist";
+import { Download, Eye, Star, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
@@ -52,7 +54,10 @@ export default function CustomPlaylistCreator() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button>Custom Playlist</Button>
+        <Button className="gap-2">
+          <Star className="h-4 w-4" />
+          Custom Playlist
+        </Button>
       </DialogTrigger>
       <DialogContent className="max-w-[650px]">
         <DialogTitle>Playlist Creator</DialogTitle>
@@ -75,7 +80,7 @@ export default function CustomPlaylistCreator() {
                 render={({ field }) => (
                   <DualRangeSlider
                     min={0}
-                    max={20}
+                    max={Consts.MAX_STARS}
                     value={[field.value.min, field.value.max]}
                     label={value => value}
                     onValueChange={value => {
@@ -106,8 +111,18 @@ export default function CustomPlaylistCreator() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="stars">Stars</SelectItem>
-                      <SelectItem value="dateRanked">Date Ranked</SelectItem>
+                      <SelectItem value="stars">
+                        <span className="flex items-center gap-2">
+                          <Star className="h-3 w-3" />
+                          Stars
+                        </span>
+                      </SelectItem>
+                      <SelectItem value="dateRanked">
+                        <span className="flex items-center gap-2">
+                          <TrendingUp className="h-3 w-3" />
+                          Date Ranked
+                        </span>
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 )}
@@ -119,12 +134,17 @@ export default function CustomPlaylistCreator() {
           <DialogFooter>
             <Link
               href={`${env.NEXT_PUBLIC_API_URL}/playlist/custom-ranked/preview?settings=${encodeCustomRankedPlaylistSettings(watch())}`}
+              target="_blank"
             >
-              <Button variant="outline" type="button">
+              <Button variant="outline" type="button" className="gap-2">
+                <Eye className="h-4 w-4" />
                 Preview Art
               </Button>
             </Link>
-            <Button type="submit">Create Playlist</Button>
+            <Button type="submit" className="gap-2">
+              <Download className="h-4 w-4" />
+              Create Playlist
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

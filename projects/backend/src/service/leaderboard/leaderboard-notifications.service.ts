@@ -7,7 +7,7 @@ import { formatDate } from "@ssr/common/utils/time-utils";
 import { DiscordChannels, sendFile } from "../../bot/bot";
 import { generateRankedBatchPlaylistImage } from "../../common/playlist.util";
 import { LeaderboardUpdates } from "../../common/types/leaderboard";
-import PlaylistService from "../playlist.service";
+import PlaylistService from "../playlist/playlist.service";
 
 export class LeaderboardNotificationsService {
   /**

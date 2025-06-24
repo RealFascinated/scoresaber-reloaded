@@ -35,7 +35,7 @@ import CacheService from "./service/cache.service";
 import { LeaderboardService } from "./service/leaderboard/leaderboard.service";
 import MetricsService from "./service/metrics.service";
 import { PlayerService } from "./service/player/player.service";
-import PlaylistService from "./service/playlist.service";
+import PlaylistService from "./service/playlist/playlist.service";
 import { ScoreService } from "./service/score/score.service";
 import StatisticsService from "./service/statistics.service";
 import { BeatSaverWebsocket } from "./websocket/beatsaver-websocket";

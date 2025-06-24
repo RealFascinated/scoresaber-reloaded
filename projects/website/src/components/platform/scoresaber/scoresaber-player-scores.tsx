@@ -1,6 +1,5 @@
 "use client";
 
-import { PlatformRepository } from "@/common/platform/platform-repository";
 import SimpleTooltip from "@/components/simple-tooltip";
 import { Spinner } from "@/components/spinner";
 import { Input } from "@/components/ui/input";
@@ -142,7 +141,6 @@ export default function ScoreSaberPlayerScores({
   page,
 }: ScoreSaberPlayerScoresProps) {
   // Hooks
-  const platform = PlatformRepository.getInstance().getScoreSaberPlatform();
   const isMobile = useIsMobile();
   const database = useDatabase();
   const { changePageUrl } = usePageNavigation();

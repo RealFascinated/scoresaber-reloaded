@@ -77,6 +77,7 @@ interface ControlButtonProps {
 export function ControlButton({ children, isActive, onClick, className = "" }: ControlButtonProps) {
   return (
     <button
+      type="button"
       onClick={onClick}
       className={`flex cursor-pointer items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs transition-all ${
         isActive

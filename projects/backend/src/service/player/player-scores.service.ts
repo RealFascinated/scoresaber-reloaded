@@ -13,6 +13,7 @@ import {
   ScoreSaberScoreModel,
 } from "@ssr/common/model/score/impl/scoresaber-score";
 import { Pagination } from "@ssr/common/pagination";
+import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerScoresChartResponse } from "@ssr/common/response/player-scores-chart";
 import { PlayerScoresResponse } from "@ssr/common/response/player-scores-response";
 import { PlayerScore } from "@ssr/common/score/player-score";
@@ -25,7 +26,7 @@ import { ScoreSort, validateSort } from "@ssr/common/types/sort";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
 import { formatDuration } from "@ssr/common/utils/time-utils";
-import { FilterQuery, PipelineStage } from "mongoose";
+import { FilterQuery } from "mongoose";
 import { scoreToObject } from "../../common/score/score.util";
 import { LeaderboardService } from "../leaderboard/leaderboard.service";
 import { ScoreService } from "../score/score.service";
@@ -196,6 +197,68 @@ export class PlayerScoresService {
   }
 
   /**
+   * Processes raw scores with leaderboards
+   * @private
+   */
+  public static async processScoresWithLeaderboards(
+    rawScores: ScoreSaberScore[],
+    includeBeatSaver: boolean = false,
+    insertScoreData: boolean = true,
+    comparisonPlayer?: ScoreSaberPlayer
+  ): Promise<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>[]> {
+    if (!rawScores?.length) {
+      return [];
+    }
+
+    const validScores = rawScores.filter(
+      score => score.leaderboardId !== undefined && score.leaderboardId !== null
+    );
+
+    if (validScores.length === 0) {
+      return [];
+    }
+
+    const leaderboardResponses = await LeaderboardService.getLeaderboards(
+      validScores.map(score => score.leaderboardId + ""),
+      {
+        includeBeatSaver,
+        cacheOnly: true,
+      }
+    );
+
+    const leaderboardMap = new Map(
+      leaderboardResponses.map(response => [response.leaderboard.id, response])
+    );
+
+    const processedScores = await Promise.all(
+      validScores.map(async rawScore => {
+        const leaderboardResponse = leaderboardMap.get(rawScore.leaderboardId);
+        if (!leaderboardResponse) {
+          return null;
+        }
+
+        const { leaderboard, beatsaver } = leaderboardResponse;
+        const score = insertScoreData
+          ? await ScoreService.insertScoreData(
+              scoreToObject(rawScore),
+              leaderboard,
+              comparisonPlayer
+            )
+          : scoreToObject(rawScore);
+        return {
+          score: score,
+          leaderboard: leaderboard,
+          beatSaver: beatsaver,
+        } as PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>;
+      })
+    );
+
+    return processedScores.filter(
+      (score): score is PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard> => score !== null
+    );
+  }
+
+  /**
    * Gets the player scores from the database.
    *
    * @param playerId the id of the player
@@ -204,75 +267,75 @@ export class PlayerScoresService {
   public static async getPlayerScores(
     playerId: string,
     options: {
-      sort?: "pp" | "timestamp";
+      sort?: ScoreSort;
       limit?: number;
       ranked?: boolean;
       includeLeaderboard?: boolean;
+      includeBeatSaver?: boolean;
+      insertScoreData?: boolean;
       projection?: { [field: string]: number };
     } = {
-      sort: "pp",
+      sort: { field: "pp", direction: "desc" },
     }
   ): Promise<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>[]> {
-    // Build the aggregation pipeline
-    const pipeline: PipelineStage[] = [
-      // Match stage based on playerId and optional ranked filter
-      {
-        $match: {
-          playerId: playerId,
-          ...(options?.ranked ? { pp: { $gt: 0 } } : {}),
-        },
-      },
-    ];
-
-    // Add projection if specified
-    if (options?.projection) {
-      pipeline.push({
-        $project: {
-          ...options.projection,
-          _id: 0,
-          leaderboardId: 1,
-          playerId: 1,
-        },
-      });
+    // Validate sort options if provided
+    if (options?.sort && !validateSort(options.sort)) {
+      throw new BadRequestError("Invalid sort options");
     }
 
-    // Add sort stage only if specified
-    if (options?.sort) {
-      pipeline.push({ $sort: { [`${options.sort}`]: -1 } });
+    const fieldsMapping: Record<ScoreSort["field"], string> = {
+      pp: "pp",
+      score: "score",
+      misses: "misses",
+      acc: "accuracy",
+      maxcombo: "maxCombo",
+      date: "timestamp",
+    };
+
+    const filters = options?.sort?.filters ?? {
+      rankedOnly: false,
+      unrankedOnly: false,
+    };
+
+    const query: FilterQuery<ScoreSaberScore> = {
+      playerId: playerId,
+      leaderboardId: { $exists: true, $ne: null },
+      ...(filters.rankedOnly ? { pp: { $gt: 0 } } : {}),
+      ...(filters.unrankedOnly ? { pp: { $lte: 0 } } : {}),
+      ...(options?.ranked ? { pp: { $gt: 0 } } : {}),
+    };
+
+    if (options?.sort?.field && options.sort.field !== "date") {
+      query[fieldsMapping[options.sort.field]] = { $ne: Infinity, $exists: true };
     }
 
-    // Add limit if specified
-    if (options?.limit) {
-      pipeline.push({ $limit: options.limit });
-    }
+    const finalProjection = options?.includeLeaderboard
+      ? { ...options.projection, leaderboardId: 1 }
+      : options?.projection || {};
 
-    // Execute aggregation
-    const rawScores = await ScoreSaberScoreModel.aggregate(pipeline);
+    const rawScores = (await ScoreSaberScoreModel.find(query)
+      .sort({
+        [fieldsMapping[options?.sort?.field || "pp"]]: options?.sort?.direction === "asc" ? 1 : -1,
+      })
+      .select(finalProjection)
+      .lean()) as unknown as ScoreSaberScore[];
+
     if (!rawScores?.length) {
       return [];
     }
 
-    // If we don't need leaderboards, return early with minimal processing
     if (!options?.includeLeaderboard) {
       return rawScores.map(rawScore => ({
         score: scoreToObject(rawScore) as ScoreSaberScore,
-        leaderboard: null as unknown as ScoreSaberLeaderboard, // Type assertion to satisfy the interface
+        leaderboard: null as unknown as ScoreSaberLeaderboard,
       }));
     }
 
-    const leaderboards = await LeaderboardService.getLeaderboards(
-      rawScores.map(score => score.leaderboardId + ""),
-      {
-        cacheOnly: true,
-        includeBeatSaver: false,
-      }
+    return await PlayerScoresService.processScoresWithLeaderboards(
+      rawScores,
+      options?.includeBeatSaver ?? false,
+      options?.insertScoreData ?? true
     );
-
-    // Map scores with their leaderboards
-    return rawScores.map((rawScore, index) => ({
-      score: scoreToObject(rawScore) as ScoreSaberScore,
-      leaderboard: leaderboards[index]?.leaderboard || (null as unknown as ScoreSaberLeaderboard),
-    }));
   }
 
   /**

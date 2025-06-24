@@ -12,7 +12,7 @@ import { EmbedBuilder } from "discord.js";
 import { DiscordChannels, logToChannel } from "../../bot/bot";
 import { RefreshResult } from "../../common/types/leaderboard";
 import CacheService, { CacheId } from "../cache.service";
-import PlaylistService from "../playlist.service";
+import PlaylistService from "../playlist/playlist.service";
 import { LeaderboardService } from "./leaderboard.service";
 
 export class LeaderboardLeaderboardsService {

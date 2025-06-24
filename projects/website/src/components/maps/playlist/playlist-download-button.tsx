@@ -2,6 +2,7 @@
 
 import { downloadFile } from "@/common/browser-utils";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 type PlaylistDownloadButtonProps = {
   /**
@@ -17,12 +18,14 @@ type PlaylistDownloadButtonProps = {
 
 export default function PlaylistDownloadButton({ name, url }: PlaylistDownloadButtonProps) {
   return (
-    <Button
-      onClick={() => {
-        downloadFile(url, `${name}.bplist`);
-      }}
-    >
-      {name}
-    </Button>
+    <Link href={url} onClick={e => e.preventDefault()}>
+      <Button
+        onClick={() => {
+          downloadFile(url, `${name}.bplist`);
+        }}
+      >
+        {name}
+      </Button>
+    </Link>
   );
 }

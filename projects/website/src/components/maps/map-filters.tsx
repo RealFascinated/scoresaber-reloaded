@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Consts } from "@ssr/common/consts";
 import { MapCategory, MapSort } from "@ssr/common/maps/types";
 
 export default function MapFilters() {
@@ -94,12 +95,12 @@ export default function MapFilters() {
         <h1 className="text-sm font-bold">Stars</h1>
         <DualRangeSlider
           label={value => <span>{value}</span>}
-          value={[filter.stars?.min ?? 0, filter.stars?.max ?? 15]}
+          value={[filter.stars?.min ?? 0, filter.stars?.max ?? Consts.MAX_STARS]}
           onValueChange={value => {
             filter.setStars({ min: value[0], max: value[1] });
           }}
           min={0}
-          max={15}
+          max={Consts.MAX_STARS}
           step={0.1}
           className="pt-10 pb-2"
         />

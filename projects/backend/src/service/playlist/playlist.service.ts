@@ -1,3 +1,4 @@
+import { Consts } from "@ssr/common/consts";
 import { env } from "@ssr/common/env";
 import { BadRequestError } from "@ssr/common/error/bad-request-error";
 import { InternalServerError } from "@ssr/common/error/internal-server-error";
@@ -6,7 +7,6 @@ import Logger from "@ssr/common/logger";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { Playlist, PlaylistModel } from "@ssr/common/playlist/playlist";
-import { PlaylistSong } from "@ssr/common/playlist/playlist-song";
 import { parseCustomRankedPlaylistSettings } from "@ssr/common/playlist/ranked/custom-ranked-playlist";
 import { SnipePlaylist } from "@ssr/common/playlist/snipe/snipe-playlist";
 import { parseSnipePlaylistSettings } from "@ssr/common/snipe/snipe-playlist-utils";
@@ -16,24 +16,20 @@ import {
   generateCustomRankedPlaylistImage,
   generatePlaylistImage,
   generateSnipePlaylistImage,
-} from "../common/playlist.util";
-import { LeaderboardService } from "./leaderboard/leaderboard.service";
-import { PlayerService } from "./player/player.service";
-import ScoreSaberService from "./scoresaber.service";
+} from "../../common/playlist.util";
+import { LeaderboardService } from "../leaderboard/leaderboard.service";
+import { PlayerService } from "../player/player.service";
+import ScoreSaberService from "../scoresaber.service";
 
 export type SnipeType = "top" | "recent";
+
 export type PlaylistId =
   | "scoresaber-ranked-maps"
   | "scoresaber-qualified-maps"
   | "scoresaber-ranking-queue-maps"
-  | "scoresaber-custom-ranked-maps"
-  | (string & { __brand: "PlaylistId" });
+  | "scoresaber-custom-ranked-maps";
 
 export default class PlaylistService {
-  constructor() {
-    this.initializeDefaultPlaylists();
-  }
-
   /**
    * Initializes the default playlists if they don't exist
    * @private
@@ -96,30 +92,6 @@ export default class PlaylistService {
   }
 
   /**
-   * Updates a playlist with new data
-   *
-   * @param playlistId the ID of the playlist to update
-   * @param options the new data for the playlist
-   */
-  public static async updatePlaylist(
-    playlistId: PlaylistId,
-    options: {
-      title?: string;
-      author?: string;
-      image?: string;
-      songs?: PlaylistSong[];
-    }
-  ) {
-    const playlist = await PlaylistModel.findOne({ id: playlistId });
-    if (!playlist) {
-      throw new BadRequestError(`Playlist with id ${playlistId} does not exist`);
-    }
-
-    Object.assign(playlist, options);
-    await playlist.save();
-  }
-
-  /**
    * Creates a playlist
    *
    * @param playlist the playlist to create
@@ -131,6 +103,22 @@ export default class PlaylistService {
     }
 
     await PlaylistModel.create(playlist);
+    return playlist;
+  }
+
+  /**
+   * Updates a playlist
+   *
+   * @param playlistId the ID of the playlist to update
+   * @param updates the updates to apply
+   */
+  public static async updatePlaylist(playlistId: string, updates: Partial<Playlist>) {
+    const playlist = await PlaylistModel.findOne({ id: playlistId });
+    if (!playlist) {
+      throw new NotFoundError(`Playlist with id ${playlistId} does not exist`);
+    }
+
+    await PlaylistModel.updateOne({ id: playlistId }, updates);
     return playlist;
   }
 
@@ -287,16 +275,9 @@ export default class PlaylistService {
   public static async getSnipePlaylist(
     user: string,
     toSnipe: string,
-    type: SnipeType,
     settingsBase64?: string
   ): Promise<Playlist> {
-    const settings = parseSnipePlaylistSettings(settingsBase64, type);
-    type = settings?.sort || type;
-
-    if (type !== "top" && type !== "recent") {
-      throw new BadRequestError("Invalid snipe type");
-    }
-
+    const settings = parseSnipePlaylistSettings(settingsBase64);
     try {
       // Validate users exist
       if (
@@ -315,9 +296,15 @@ export default class PlaylistService {
           pp: 1,
           accuracy: 1,
           timestamp: 1,
+          leaderboardId: 1,
+          playerId: 1,
         },
+        sort: {
+          field: settings?.sort || "pp",
+          direction: settings?.sortDirection || "desc",
+        },
+        insertScoreData: false,
       });
-
       if (rawScores.length === 0) {
         throw new NotFoundError(
           `Unable to create a snipe playlist for ${toSnipe} as they have no scores.`
@@ -331,8 +318,16 @@ export default class PlaylistService {
         }))
         .filter(({ score, leaderboard }) => {
           if (!leaderboard) return false;
+          if (settings?.rankedStatus === "ranked" && !leaderboard.ranked) return false;
+          if (settings?.rankedStatus === "unranked" && leaderboard.ranked) return false;
 
-          if (settings?.starRange?.min && settings?.starRange?.max && leaderboard.stars > 0) {
+          if (
+            settings?.rankedStatus === "ranked" &&
+            settings?.starRange?.min &&
+            settings?.starRange?.max &&
+            leaderboard.stars > 0 &&
+            leaderboard.stars <= Consts.MAX_STARS
+          ) {
             if (
               leaderboard.stars < settings.starRange.min ||
               leaderboard.stars > settings.starRange.max
@@ -355,12 +350,6 @@ export default class PlaylistService {
 
       const toSnipePlayer = await ScoreSaberService.getPlayer(toSnipe);
       const formattedScores = filteredScores
-        .sort((a, b) => {
-          if (type === "top") {
-            return b.score.pp - a.score.pp;
-          }
-          return b.score.timestamp.getTime() - a.score.timestamp.getTime();
-        })
         .slice(0, settings.limit)
         .map(({ score, leaderboard }) => ({
           songName: leaderboard.songName,
@@ -377,10 +366,9 @@ export default class PlaylistService {
       return new SnipePlaylist(
         toSnipe,
         user,
-        type,
         settings,
         settings.name ||
-          `Snipe - ${truncateText(toSnipePlayer.name, 16)} (${capitalizeFirstLetter(settings.sort)})`,
+          `Snipe - ${truncateText(toSnipePlayer.name, 16)} (${capitalizeFirstLetter(settings.sort || "pp")})`,
         formattedScores,
         await generateSnipePlaylistImage(settings, toSnipePlayer)
       );

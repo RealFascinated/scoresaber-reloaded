@@ -6,14 +6,15 @@ import { SnipeSettings } from "./snipe-settings-schema";
  * @param settingsBase64 the raw settings
  * @param type the legacy type (old playlists)
  */
-export function parseSnipePlaylistSettings(settingsBase64?: string, type?: string) {
+export function parseSnipePlaylistSettings(settingsBase64?: string) {
   const settings: SnipeSettings = settingsBase64
     ? (JSON.parse(Buffer.from(settingsBase64, "base64").toString()) as SnipeSettings)
     : // Default values
       {
         name: "Snipe Playlist",
         limit: 100,
-        sort: "top",
+        sort: "pp",
+        sortDirection: "desc",
         starRange: {
           min: 1,
           max: 20,
@@ -25,8 +26,10 @@ export function parseSnipePlaylistSettings(settingsBase64?: string, type?: strin
       };
 
   // Enforce limitations
-  settings.sort = (settings?.sort || type) ?? "top";
   settings.limit = (settings?.limit > 250 ? 250 : settings?.limit) ?? 100;
+  settings.sort = settings?.sort ?? "pp";
+  settings.sortDirection = settings?.sortDirection ?? "desc";
+  settings.rankedStatus = settings?.rankedStatus ?? "all";
 
   return settings;
 }

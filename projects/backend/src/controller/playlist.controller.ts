@@ -9,7 +9,7 @@ import {
   generateRankedBatchPlaylistImage,
   generateSnipePlaylistImage,
 } from "../common/playlist.util";
-import PlaylistService, { PlaylistId, SnipeType } from "../service/playlist.service";
+import PlaylistService, { PlaylistId } from "../service/playlist/playlist.service";
 import ScoreSaberService from "../service/scoresaber.service";
 
 @Controller("/playlist")
@@ -55,19 +55,18 @@ export default class PlaylistController {
     query: t.Object({
       user: t.String({ required: true }),
       toSnipe: t.String({ required: true }),
-      type: t.Optional(t.String({ allowedValues: ["top", "recent"] })),
       settings: t.Optional(t.String()),
     }),
   })
   public async getSnipePlaylist({
-    query: { user, toSnipe, type, settings },
+    query: { user, toSnipe, settings },
   }: {
-    query: { user: string; toSnipe: string; type: SnipeType; settings: string };
+    query: { user: string; toSnipe: string; settings: string };
   }) {
     const response = new Response(
       JSON.stringify(
         await generateBeatSaberPlaylist(
-          await PlaylistService.getSnipePlaylist(user, toSnipe, type, settings)
+          await PlaylistService.getSnipePlaylist(user, toSnipe, settings)
         ),
         null,
         2
