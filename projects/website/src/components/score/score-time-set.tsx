@@ -1,6 +1,6 @@
 import SimpleTooltip from "@/components/simple-tooltip";
 import { format } from "@formkit/tempo";
-import { timeAgo, TimeUnit } from "@ssr/common/utils/time-utils";
+import { timeAgo } from "@ssr/common/utils/time-utils";
 import { useEffect, useState } from "react";
 
 type ScoreTimeSetProps = {
@@ -11,26 +11,12 @@ type ScoreTimeSetProps = {
 };
 
 export function ScoreTimeSet({ timestamp }: ScoreTimeSetProps) {
-  const [, forceUpdate] = useState({});
+  const [currentTime, setCurrentTime] = useState(timeAgo(new Date(timestamp)));
 
   useEffect(() => {
-    const updateInterval = () => {
-      const msAgo = Date.now() - new Date(timestamp).getTime();
-
-      let interval: number;
-      if (msAgo < TimeUnit.toMillis(TimeUnit.Hour, 1)) {
-        interval = TimeUnit.toMillis(TimeUnit.Second, 1);
-      } else {
-        interval = TimeUnit.toMillis(TimeUnit.Minute, 1);
-      }
-
-      return interval;
-    };
-
     const interval = setInterval(() => {
-      forceUpdate({});
-    }, updateInterval());
-
+      setCurrentTime(timeAgo(new Date(timestamp)));
+    }, 1000);
     return () => clearInterval(interval);
   }, [timestamp]);
 
@@ -46,7 +32,7 @@ export function ScoreTimeSet({ timestamp }: ScoreTimeSetProps) {
       }
       showOnMobile
     >
-      <p className="cursor-default text-sm select-none">{timeAgo(new Date(timestamp))}</p>
+      <p className="cursor-default text-sm select-none">{currentTime}</p>
     </SimpleTooltip>
   );
 }
