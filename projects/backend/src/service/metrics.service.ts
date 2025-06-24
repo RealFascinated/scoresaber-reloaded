@@ -1,7 +1,7 @@
 import { InfluxDB, Point } from "@influxdata/influxdb-client";
 import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
-import { TimeUnit } from "@ssr/common/utils/time-utils";
+import { formatDuration, TimeUnit } from "@ssr/common/utils/time-utils";
 import { MetricValueModel } from "../common/model/metric";
 import { EventListener } from "../event/event-listener";
 import { ApiServicesMetric } from "../metrics/impl/backend/api-services";
@@ -77,8 +77,7 @@ export enum MetricType {
 export default class MetricsService implements EventListener {
   private static instance: MetricsService;
   private static metrics: Metric<unknown>[] = [];
-  private metricTimers: Map<string, NodeJS.Timeout> = new Map();
-  private flushTimer: NodeJS.Timeout | null = null;
+
   private isInitialized = false;
 
   constructor() {
@@ -95,7 +94,7 @@ export default class MetricsService implements EventListener {
       () => {
         this.saveMetrics();
       },
-      TimeUnit.toMillis(TimeUnit.Minute, 1)
+      TimeUnit.toMillis(TimeUnit.Second, 10)
     );
   }
 
@@ -152,42 +151,22 @@ export default class MetricsService implements EventListener {
           metric.value = metricValue.value;
         }
       }
-      await this.setupMetricTimer(metric);
+
+      setInterval(async () => {
+        const before = Date.now();
+
+        const point = await metric.collect();
+        if (point) {
+          await this.writePoint(point);
+        }
+
+        const timeTaken = Date.now() - before;
+        if (timeTaken > 100) {
+          Logger.warn(`[METRICS] Collected and wrote metric ${metric.id} in ${timeTaken}ms`);
+        }
+      }, metric.options.interval);
     }
     this.isInitialized = true;
-  }
-
-  /**
-   * Sets up a timer for a specific metric to collect data at regular intervals
-   *
-   * @param metric the metric to set up a timer for
-   */
-  private async setupMetricTimer(metric: Metric<unknown>): Promise<void> {
-    const point = await metric.collect();
-    if (point) {
-      await this.writePoint(point);
-    }
-
-    const existingTimer = this.metricTimers.get(metric.id);
-    if (existingTimer) {
-      clearInterval(existingTimer);
-    }
-
-    const timer = setInterval(async () => {
-      const before = Date.now();
-
-      const point = await metric.collect();
-      if (point) {
-        await this.writePoint(point);
-      }
-
-      const timeTaken = Date.now() - before;
-      if (timeTaken > 3000) {
-        Logger.warn(`Collected and wrote metric ${metric.id} in ${timeTaken}ms`);
-      }
-    }, metric.options.interval);
-
-    this.metricTimers.set(metric.id, timer);
   }
 
   /**
@@ -197,6 +176,11 @@ export default class MetricsService implements EventListener {
    */
   private registerMetric(metric: Metric<unknown>): void {
     MetricsService.metrics.push(metric);
+    Logger.debug(
+      `[METRICS] Registered metric ${metric.id} with interval ${formatDuration(
+        metric.options.interval
+      )}`
+    );
   }
 
   /**
@@ -209,7 +193,7 @@ export default class MetricsService implements EventListener {
   public static async getMetric(type: MetricType): Promise<Metric<unknown>> {
     const metric = MetricsService.metrics.find(metric => metric.id === type);
     if (!metric) {
-      throw new Error(`Metric "${type}" not found`);
+      throw new Error(`[METRICS] Metric "${type}" not found`);
     }
     return metric;
   }
@@ -224,7 +208,9 @@ export default class MetricsService implements EventListener {
       const fields = point.fields;
       for (const [key, value] of Object.entries(fields)) {
         if (value === undefined || value === null) {
-          Logger.warn(`Skipping write to InfluxDB - invalid value for field '${key}': ${value}`);
+          Logger.warn(
+            `[METRICS] Skipping write to InfluxDB - invalid value for field '${key}': ${value}`
+          );
           return;
         }
       }
@@ -238,7 +224,7 @@ export default class MetricsService implements EventListener {
         pointsPerSecondMetric.incrementPointCount();
       }
     } catch (error) {
-      Logger.error("Failed to write point for InfluxDB:", error);
+      Logger.error("[METRICS] Failed to write point for InfluxDB:", error);
     }
   }
 
@@ -249,10 +235,16 @@ export default class MetricsService implements EventListener {
     for (const metric of MetricsService.metrics) {
       // Check if the metric needs to be saved to the db
       if (metric.options.fetchAndStore) {
+        const before = performance.now();
         await MetricValueModel.findOneAndUpdate(
           { _id: metric.id },
           { value: metric.value },
           { upsert: true, setDefaultsOnInsert: true }
+        );
+        Logger.debug(
+          `[METRICS] Saved metric ${metric.id} to primary storage in ${formatDuration(
+            performance.now() - before
+          )}`
         );
       }
     }
@@ -262,15 +254,6 @@ export default class MetricsService implements EventListener {
    * Cleans up all timers and flushes remaining points
    */
   public async cleanup(): Promise<void> {
-    if (this.flushTimer) {
-      clearInterval(this.flushTimer);
-    }
-
-    for (const timer of this.metricTimers.values()) {
-      clearInterval(timer);
-    }
-    this.metricTimers.clear();
-
     for (const metric of MetricsService.metrics) {
       if (
         "cleanup" in metric &&
@@ -284,6 +267,9 @@ export default class MetricsService implements EventListener {
   }
 
   onStop(): Promise<void> {
-    return this.saveMetrics();
+    this.saveMetrics();
+    writeApi.flush(); // Flush remaining points
+
+    return Promise.resolve();
   }
 }
