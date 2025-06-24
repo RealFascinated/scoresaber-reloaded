@@ -250,9 +250,21 @@ export class PlayerScoresService {
       query[fieldsMapping[options.sort.field]] = { $ne: Infinity, $exists: true };
     }
 
-    const finalProjection = options?.includeLeaderboard
-      ? { ...options.projection, leaderboardId: 1 }
-      : options?.projection || {};
+    // Build the final projection - ensure all necessary fields are included
+    let finalProjection = options?.projection || {};
+
+    // When including leaderboard, we need leaderboardId
+    if (options?.includeLeaderboard) {
+      finalProjection = { ...finalProjection, leaderboardId: 1 };
+    }
+
+    // Ensure sort field is included in projection if specified
+    if (options?.sort?.field && options.sort.field !== "date") {
+      const sortField = fieldsMapping[options.sort.field];
+      if (sortField && !finalProjection[sortField]) {
+        finalProjection[sortField] = 1;
+      }
+    }
 
     // Build the query with limit
     let queryBuilder = ScoreSaberScoreModel.find(query)

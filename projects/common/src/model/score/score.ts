@@ -20,7 +20,7 @@ export default class Score {
   /**
    * The id of the player who set the score.
    */
-  @prop({ required: true })
+  @prop({ required: true, index: true })
   public readonly playerId!: string;
 
   /**
