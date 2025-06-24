@@ -79,7 +79,7 @@ export function timeAgo(input: Date) {
   const now = new Date().getTime();
   const deltaSeconds = Math.floor((now - inputDate) / 1000); // Get time difference in seconds
 
-  if (deltaSeconds <= 10) {
+  if (deltaSeconds <= 5) {
     return "just now";
   }
 
