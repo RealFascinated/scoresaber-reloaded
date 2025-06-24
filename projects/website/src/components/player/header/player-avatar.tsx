@@ -47,7 +47,7 @@ export default function PlayerAvatar({ player }: PlayerAvatarProps) {
           <button
             onClick={handleRefresh}
             disabled={isRefreshing}
-            className="hover:bg-muted flex size-7 items-center justify-center rounded-md"
+            className="bg-muted/90 hover:bg-muted flex size-7 cursor-pointer items-center justify-center rounded-md"
           >
             <ArrowPathIcon className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
           </button>
