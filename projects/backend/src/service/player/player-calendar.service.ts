@@ -13,15 +13,8 @@ export class PlayerCalendarService {
   ): Promise<ScoreCalendarData> {
     await PlayerService.playerExists(playerId, true); // throws if player doesn't exist
 
-    const startDate = new Date(year, month - 1, 1);
-    const endDate = new Date(year, month, 0);
-
     const entries = await PlayerHistoryEntryModel.find({
       playerId: playerId,
-      date: {
-        $gte: startDate,
-        $lte: endDate,
-      },
     });
 
     const days: Record<number, { rankedMaps: number; unrankedMaps: number; totalMaps: number }> =
