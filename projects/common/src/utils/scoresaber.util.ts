@@ -1,6 +1,6 @@
-import { ScoreSaberCurve } from "src/leaderboard-curve/scoresaber-curve";
 import { ScoreSaberScore } from "../../src/model/score/impl/scoresaber-score";
 import { HMD } from "../hmds";
+import { ScoreSaberCurve } from "../leaderboard-curve/scoresaber-curve";
 import ScoreSaberPlayer from "../player/impl/scoresaber-player";
 import { MapDifficulty } from "../score/map-difficulty";
 import { ScoreSaberLeaderboardPlayerInfoToken } from "../types/token/scoresaber/leaderboard-player-info";
