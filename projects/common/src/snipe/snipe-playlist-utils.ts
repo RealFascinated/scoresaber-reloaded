@@ -1,3 +1,4 @@
+import { Consts } from "../consts";
 import { SnipeSettings } from "./snipe-settings-schema";
 
 /**
@@ -16,8 +17,8 @@ export function parseSnipePlaylistSettings(settingsBase64?: string) {
         sort: "pp",
         sortDirection: "desc",
         starRange: {
-          min: 1,
-          max: 20,
+          min: 0,
+          max: Consts.MAX_STARS,
         },
         accuracyRange: {
           min: 0,

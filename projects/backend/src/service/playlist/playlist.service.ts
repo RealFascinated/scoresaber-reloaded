@@ -278,6 +278,7 @@ export default class PlaylistService {
     settingsBase64?: string
   ): Promise<Playlist> {
     const settings = parseSnipePlaylistSettings(settingsBase64);
+
     try {
       // Validate users exist
       if (
@@ -291,7 +292,6 @@ export default class PlaylistService {
 
       // Get and filter scores
       const rawScores = await PlayerService.getPlayerScores(toSnipe, {
-        includeLeaderboard: true,
         projection: {
           pp: 1,
           accuracy: 1,
@@ -311,20 +311,52 @@ export default class PlaylistService {
         );
       }
 
-      const filteredScores = rawScores
+      // Apply some filters early to reduce the amount of leaderboards we need to fetch
+      const scores = rawScores.filter(({ score }) => {
+        // Apply ranked status filtering
+        if (settings?.rankedStatus === "ranked" && score.pp <= 0) return false;
+        if (settings?.rankedStatus === "unranked" && score.pp > 0) return false;
+
+        // Apply accuracy range filtering
+        if (
+          settings?.accuracyRange?.min !== undefined &&
+          settings?.accuracyRange?.max !== undefined
+        ) {
+          if (
+            score.accuracy < settings.accuracyRange.min ||
+            score.accuracy > settings.accuracyRange.max
+          ) {
+            return false;
+          }
+        }
+
+        return true;
+      });
+
+      // Fetch leaderboards for the scores
+      const leaderboards = await LeaderboardService.getLeaderboards(
+        scores.map(({ score }) => score.leaderboardId.toString()),
+        {
+          cacheOnly: true,
+          includeBeatSaver: false,
+        }
+      );
+
+      // Star range filtering
+      const filteredScores = scores
         .map(playerScore => ({
           score: playerScore.score as ScoreSaberScore,
-          leaderboard: playerScore.leaderboard,
+          leaderboard: leaderboards.find(
+            leaderboard => leaderboard.leaderboard.id == playerScore.score.leaderboardId
+          )?.leaderboard,
         }))
-        .filter(({ score, leaderboard }) => {
+        .filter(({ leaderboard }) => {
           if (!leaderboard) return false;
-          if (settings?.rankedStatus === "ranked" && !leaderboard.ranked) return false;
-          if (settings?.rankedStatus === "unranked" && leaderboard.ranked) return false;
 
+          // Apply star range filtering if star range is specified and leaderboard has valid stars
           if (
-            settings?.rankedStatus === "ranked" &&
-            settings?.starRange?.min &&
-            settings?.starRange?.max &&
+            settings?.starRange?.min !== undefined &&
+            settings?.starRange?.max !== undefined &&
             leaderboard.stars > 0 &&
             leaderboard.stars <= Consts.MAX_STARS
           ) {
@@ -336,32 +368,28 @@ export default class PlaylistService {
             }
           }
 
-          if (settings?.accuracyRange?.min && settings?.accuracyRange?.max) {
-            if (
-              score.accuracy < settings.accuracyRange.min ||
-              score.accuracy > settings.accuracyRange.max
-            ) {
-              return false;
-            }
-          }
-
           return true;
         });
 
+      // Format the scores
       const toSnipePlayer = await ScoreSaberService.getPlayer(toSnipe);
       const formattedScores = filteredScores
         .slice(0, settings.limit)
-        .map(({ score, leaderboard }) => ({
-          songName: leaderboard.songName,
-          songAuthor: leaderboard.songAuthorName,
-          songHash: leaderboard.songHash,
-          difficulties: leaderboard.difficulties
-            .filter(difficulty => difficulty.leaderboardId === score.leaderboardId)
-            .map(difficulty => ({
+        .map(({ score, leaderboard }) => {
+          const matchingDifficulties = leaderboard!.difficulties.filter(
+            difficulty => difficulty.leaderboardId === score.leaderboardId
+          );
+          return {
+            songName: leaderboard!.songName,
+            songAuthor: leaderboard!.songAuthorName,
+            songHash: leaderboard!.songHash,
+            difficulties: matchingDifficulties.map(difficulty => ({
               difficulty: difficulty.difficulty,
               characteristic: difficulty.characteristic,
             })),
-        }));
+          };
+        })
+        .filter(song => song.difficulties.length > 0);
 
       return new SnipePlaylist(
         toSnipe,
