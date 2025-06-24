@@ -242,12 +242,19 @@ export class PlayerScoresService {
     const query: FilterQuery<ScoreSaberScore> = {
       playerId: playerId,
       leaderboardId: { $exists: true, $ne: null },
-      ...(filters.rankedOnly ? { pp: { $gt: 0 } } : {}),
-      ...(filters.unrankedOnly ? { pp: { $lte: 0 } } : {}),
     };
 
+    // Add filter to exclude Infinity values for sort field
     if (options?.sort?.field && options.sort.field !== "date") {
       query[fieldsMapping[options.sort.field]] = { $ne: Infinity, $exists: true };
+    }
+
+    // Filter scores based on the filters (same approach as getScoreSaberCachedPlayerScores)
+    if (filters.rankedOnly) {
+      query.pp = { $gt: 0 };
+    }
+    if (filters.unrankedOnly) {
+      query.pp = { $lte: 0 };
     }
 
     // Build the final projection - ensure all necessary fields are included
@@ -266,20 +273,13 @@ export class PlayerScoresService {
       }
     }
 
-    // Build the query with limit
-    let queryBuilder = ScoreSaberScoreModel.find(query)
+    const rawScores = (await ScoreSaberScoreModel.find(query)
       .sort({
         [fieldsMapping[options?.sort?.field || "pp"]]: options?.sort?.direction === "asc" ? 1 : -1,
       })
       .select(finalProjection)
-      .lean();
-
-    // Apply limit if specified
-    if (options?.limit) {
-      queryBuilder = queryBuilder.limit(options.limit);
-    }
-
-    const rawScores = (await queryBuilder) as unknown as ScoreSaberScore[];
+      .limit(options?.limit || 0)
+      .lean()) as unknown as ScoreSaberScore[];
 
     if (!rawScores?.length) {
       return [];
