@@ -39,7 +39,7 @@ export default function PlayerAvatar({ player }: PlayerAvatarProps) {
       <Avatar
         src={player.avatar}
         size={128}
-        className="pointer-events-none h-32 w-32"
+        className="pointer-events-none"
         alt={`${player.name}'s Profile Picture`}
       />
       <div className="absolute top-[3px] right-[3px] z-10">
