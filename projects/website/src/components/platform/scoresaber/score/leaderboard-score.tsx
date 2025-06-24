@@ -74,7 +74,7 @@ export default function ScoreSaberLeaderboardScore({
 
       {/* PP / Score */}
       {leaderboard.stars > 0 ? (
-        <td className="text-ssr px-4 py-2 whitespace-nowrap">
+        <td className="text-pp px-4 py-2 whitespace-nowrap">
           <ScorePpBadge score={score} leaderboard={leaderboard} />
         </td>
       ) : (

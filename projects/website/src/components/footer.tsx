@@ -127,7 +127,7 @@ export default function Footer({
                   width={36}
                   height={36}
                 />
-                <h1 className="text-pp text-xl font-bold">ScoreSaber Reloaded</h1>
+                <h1 className="text-primary text-xl font-bold">ScoreSaber Reloaded</h1>
               </Link>
               <p className="max-w-md text-sm opacity-85">
                 ScoreSaber Reloaded is a new way to view your scores and get more stats about you
@@ -155,7 +155,7 @@ export default function Footer({
           <div className="flex gap-20 transition-all md:gap-32">
             {Object.entries(links).map(([title, links]) => (
               <div key={title} className="flex flex-col gap-0.5">
-                <h1 className="text-ssr pb-0.5 text-lg font-semibold">{title}</h1>
+                <h1 className="text-primary pb-0.5 text-lg font-semibold">{title}</h1>
                 {links.map(link => {
                   const external: boolean = !link.href.startsWith("/");
                   return (

@@ -7,25 +7,33 @@ import DatabaseLoader from "@/components/loaders/database-loader";
 import MeowMeow from "@/components/meow-meow";
 import Navbar from "@/components/navbar/navbar";
 import { SearchProvider } from "@/components/providers/search-provider";
+import ThemeProvider from "@/components/providers/theme-provider";
 import SSRLayout from "@/components/ssr-layout";
+import { SiteTheme, ssrConfig } from "config";
 import { ReactNode } from "react";
 
 export default function Layout({ children }: { children: ReactNode }) {
   const { buildId, buildTimeShort } = getBuildInformation();
 
   return (
-    <DatabaseLoader>
-      <MeowMeow />
-      <BackgroundCover />
-      <SnowBackground />
-      <ApiHealth />
-      <main className="flex min-h-screen w-full flex-col text-white">
-        <SearchProvider>
-          <Navbar />
-          <SSRLayout className="flex flex-col gap-2 px-2 pt-2">{children}</SSRLayout>
-        </SearchProvider>
-      </main>
-      <Footer buildId={buildId} buildTimeShort={buildTimeShort} />
-    </DatabaseLoader>
+    <ThemeProvider
+      attribute="class"
+      defaultTheme={ssrConfig.themes[0].id}
+      themes={ssrConfig.themes.map((theme: SiteTheme) => theme.id)}
+    >
+      <DatabaseLoader>
+        <MeowMeow />
+        <BackgroundCover />
+        <SnowBackground />
+        <ApiHealth />
+        <main className="flex min-h-screen w-full flex-col text-white">
+          <SearchProvider>
+            <Navbar />
+            <SSRLayout className="flex flex-col gap-2 px-2 pt-2">{children}</SSRLayout>
+          </SearchProvider>
+        </main>
+        <Footer buildId={buildId} buildTimeShort={buildTimeShort} />
+      </DatabaseLoader>
+    </ThemeProvider>
   );
 }

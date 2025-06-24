@@ -18,7 +18,7 @@ export default function EmbedLinks({ text }: EmbedLinksProps) {
           key={index}
           href={part}
           target="_blank"
-          className="text-ssr transition-all hover:brightness-75"
+          className="text-primary transition-all hover:brightness-75"
         >
           {part}
         </Link>

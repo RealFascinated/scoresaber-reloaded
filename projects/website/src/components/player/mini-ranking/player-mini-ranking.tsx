@@ -144,7 +144,7 @@ function PlayerMiniRanking({
                       gridTemplateColumns: isMobile ? "1fr" : "1fr 0.3fr",
                     }}
                   >
-                    <p className="text-ssr text-right font-mono sm:text-left">
+                    <p className="text-pp text-right font-mono sm:text-left">
                       {formatPp(playerRanking.pp)}pp
                     </p>
                     {playerRanking.id !== player.id && !isMobile && (

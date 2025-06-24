@@ -45,6 +45,7 @@ const categories: Category[] = [
 export default function Settings() {
   const [selectedCategory, setSelectedCategory] = useState<Category>(categories[0]);
   const [isOpen, setIsOpen] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
 
   // Handle body scroll lock
   useEffect(() => {
@@ -54,8 +55,20 @@ export default function Settings() {
     };
   }, [isOpen]);
 
+  const handleClose = () => {
+    setIsClosing(true);
+    setTimeout(() => {
+      setIsOpen(false);
+      setIsClosing(false);
+    }, 300);
+  };
+
   const settingsContent = isOpen ? (
-    <div className="bg-background fixed inset-0 z-50 h-screen w-screen overflow-hidden">
+    <div
+      className={`bg-background fixed inset-0 z-50 h-screen w-screen overflow-hidden ${
+        isClosing ? "animate-out fade-out duration-300" : "animate-in fade-in duration-300"
+      }`}
+    >
       <div className="flex h-full flex-col">
         {/* Header */}
         <div className="border-border/50 flex items-center justify-between border-b px-4 py-4 md:px-6">
@@ -95,7 +108,7 @@ export default function Settings() {
             variant="ghost"
             size="icon"
             className="text-muted-foreground hover:text-foreground"
-            onClick={() => setIsOpen(false)}
+            onClick={handleClose}
           >
             <XMarkIcon className="size-5" />
           </Button>

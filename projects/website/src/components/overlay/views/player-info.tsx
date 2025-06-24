@@ -27,7 +27,7 @@ export default function OverlayPlayerInfoView({ player }: OverlayPlayerInfoProps
       />
       <div>
         <p className="text-3xl font-semibold">{player.name}</p>
-        <p className="text-ssr flex gap-2">
+        <p className="text-pp flex gap-2">
           {formatPp(player.pp)}pp
           <DailyChange
             type={PlayerStatChange.PerformancePoints}

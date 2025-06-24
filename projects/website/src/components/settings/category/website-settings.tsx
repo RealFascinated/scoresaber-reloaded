@@ -6,11 +6,13 @@ import { Form } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import useDatabase from "@/hooks/use-database";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { ssrConfig } from "config";
 import { useLiveQuery } from "dexie-react-hooks";
+import { useTheme } from "next-themes";
 import { useEffect } from "react";
 import { Path, useForm } from "react-hook-form";
 import { IconType } from "react-icons";
-import { FaGlobe, FaImage, FaSnowflake, FaUndo } from "react-icons/fa";
+import { FaGlobe, FaImage, FaPalette, FaSnowflake, FaUndo } from "react-icons/fa";
 import { toast } from "sonner";
 import { z } from "zod";
 import { SettingCard } from "../setting-card";
@@ -21,6 +23,7 @@ const formSchema = z.object({
   snowParticles: z.boolean(),
   showKitty: z.boolean(),
   websiteLanding: z.nativeEnum(WebsiteLanding),
+  theme: z.string(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -107,9 +110,24 @@ const settings: {
       },
     ],
   },
+  {
+    id: "theme",
+    title: "Theme",
+    icon: FaPalette,
+    fields: [
+      {
+        name: "theme" as Path<FormValues>,
+        label: "Theme",
+        type: "select" as const,
+        description: "Choose which theme to use for the website",
+        options: ssrConfig.themes.map(theme => ({ value: theme.id, label: theme.name })),
+      },
+    ],
+  },
 ];
 
 const WebsiteSettings = () => {
+  const { setTheme, theme } = useTheme();
   const database = useDatabase();
   const backgroundCover = useLiveQuery(async () => await database.getBackgroundCover());
   const snowParticles = useLiveQuery(async () => await database.getSnowParticles());
@@ -123,6 +141,7 @@ const WebsiteSettings = () => {
       snowParticles: false,
       showKitty: false,
       websiteLanding: WebsiteLanding.PLAYER_HOME,
+      theme: ssrConfig.themes[0].id,
     },
   });
 
@@ -132,6 +151,7 @@ const WebsiteSettings = () => {
     await database.setSetting(SettingIds.SnowParticles, values.snowParticles);
     await database.setSetting(SettingIds.ShowKitty, values.showKitty);
     await database.setWebsiteLanding(values.websiteLanding);
+    setTheme(values.theme);
 
     const after = performance.now();
     toast("Settings saved", {
@@ -147,7 +167,8 @@ const WebsiteSettings = () => {
       backgroundCover === undefined ||
       snowParticles === undefined ||
       showKitty === undefined ||
-      websiteLanding === undefined
+      websiteLanding === undefined ||
+      theme === undefined
     ) {
       return;
     }
@@ -166,7 +187,10 @@ const WebsiteSettings = () => {
     if (currentValues.websiteLanding !== websiteLanding) {
       form.setValue("websiteLanding", websiteLanding);
     }
-  }, [backgroundCover, snowParticles, showKitty, websiteLanding, form]);
+    if (currentValues.theme !== theme) {
+      form.setValue("theme", theme);
+    }
+  }, [backgroundCover, snowParticles, showKitty, websiteLanding, theme, form]);
 
   return (
     <div className="grid gap-6">

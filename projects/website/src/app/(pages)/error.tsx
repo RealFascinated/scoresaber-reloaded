@@ -14,7 +14,7 @@ export default function Error() {
       </p>
 
       <div className="mt-6 flex flex-col items-center gap-2">
-        <Link href="/" className="text-blue-500 hover:underline">
+        <Link href="/" className="text-primary hover:underline">
           Go back to the homepage
         </Link>
 

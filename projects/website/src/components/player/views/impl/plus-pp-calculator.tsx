@@ -184,7 +184,7 @@ export default function PlusPpCalculator({ player }: { player: ScoreSaberPlayer 
       <div className="rounded-lg border border-blue-500/20 bg-slate-800 p-4">
         <div className="flex items-center justify-between">
           <div className="flex flex-col gap-1">
-            <span className="text-xl font-semibold text-blue-400">+{formatPp(ppValue)}pp</span>
+            <span className="text-primary text-xl font-semibold">+{formatPp(ppValue)}pp</span>
             <span className="text-muted-foreground text-sm">{formatPp(rawPp)}pp Raw</span>
           </div>
           <div className="text-muted-foreground flex flex-col items-end gap-1 text-sm">
@@ -212,8 +212,7 @@ export default function PlusPpCalculator({ player }: { player: ScoreSaberPlayer 
           {/* PP Slider */}
           <div className="space-y-2">
             <Label className="text-sm font-medium">
-              Desired +PP:{" "}
-              <span className="font-semibold text-blue-400">{formatPp(ppValue)}pp</span>
+              Desired +PP: <span className="text-primary font-semibold">{formatPp(ppValue)}pp</span>
             </Label>
             <Slider
               value={[ppValue]}

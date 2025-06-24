@@ -68,7 +68,7 @@ export default function ScoreSaberScoreSongInfo({
       <div className="flex flex-row items-end gap-1.5 text-sm leading-none">
         <p className="text-gray-400">
           {leaderboard.songAuthorName}{" "}
-          <span className="text-primary">
+          <span className="text-song-mapper">
             <FallbackLink
               href={mappersProfile}
               className={clsx(

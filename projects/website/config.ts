@@ -1,8 +1,19 @@
+export type SiteTheme = {
+  id: string;
+  name: string;
+  color: string;
+};
+
 type Config = {
   /**
    * Twitch accounts for players
    */
   playerTwitchAccounts: Record<string, string>;
+
+  /**
+   * Themes for the website
+   */
+  themes: SiteTheme[];
 };
 
 export const ssrConfig: Config = {
@@ -14,4 +25,27 @@ export const ssrConfig: Config = {
     "3225556157461414": "bizzy825", // Bizzy
     "76561199349221122": "apssl", // APSSL
   },
+
+  themes: [
+    {
+      id: "default",
+      name: "Default",
+      color: "#5555FF",
+    },
+    {
+      id: "purple",
+      name: "Purple",
+      color: "#9900FF",
+    },
+    {
+      id: "red",
+      name: "Red",
+      color: "#FF0000",
+    },
+    {
+      id: "green",
+      name: "Green",
+      color: "#00FF00",
+    },
+  ],
 };

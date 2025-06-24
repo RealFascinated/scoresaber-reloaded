@@ -8,7 +8,7 @@ import { getScoreBadgeFromAccuracy } from "@ssr/common/utils/song-utils";
 export const badges: ScoreBadge<AccSaberScoreResponse, AccSaberScoreResponse["leaderboard"]>[] = [
   {
     name: "AP",
-    color: () => "bg-ranked",
+    color: () => "bg-statistic",
     create: (score: AccSaberScoreResponse) => {
       return (
         <div className="flex items-center gap-1">

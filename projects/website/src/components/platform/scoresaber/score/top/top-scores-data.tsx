@@ -110,7 +110,7 @@ export function TopScoresData({ timeframe }: TopScoresDataProps) {
           <div className="bg-muted/50 flex w-fit items-center gap-2 rounded-full px-3 py-1.5 text-sm">
             <span className="text-muted-foreground">Set by</span>
             <Link href={`/player/${player.id}`}>
-              <span className="text-ssr hover:text-ssr/80 text-xs font-semibold transition-colors sm:text-sm">
+              <span className="text-primary hover:text-primary/80 text-xs font-semibold transition-colors sm:text-sm">
                 {name}
               </span>
             </Link>

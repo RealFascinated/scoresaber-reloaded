@@ -24,7 +24,7 @@ export function AccSaberSongInfo({ score }: AccSaberSongInfoProps) {
       </div>
       <div className="flex w-full flex-col gap-1">
         <div className="flex w-full min-w-0 flex-col gap-1 overflow-y-clip">
-          <p className="text-ssr w-fit min-w-0 break-all">{score.leaderboard.song.name}</p>
+          <p className="text-song-name w-fit min-w-0 break-all">{score.leaderboard.song.name}</p>
           <div className="flex flex-row items-end gap-1.5 text-sm leading-none">
             <p className="text-gray-400">
               {score.leaderboard.song.author}{" "}

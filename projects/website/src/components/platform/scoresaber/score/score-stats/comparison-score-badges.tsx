@@ -20,7 +20,7 @@ export function ComparisonScoreBadges({ score, leaderboard }: ComparisonScoreBad
           {
             name: "PP",
             color: () => {
-              return "bg-ranked";
+              return "bg-statistic";
             },
             create: (score: ScoreSaberScore, leaderboard: ScoreSaberLeaderboard) => {
               if (!score.pp) {

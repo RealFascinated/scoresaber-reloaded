@@ -40,7 +40,7 @@ export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
 
                 {/* Song Author */}
                 <p className="text-sm text-gray-400">
-                  By <span className="text-ssr">{leaderboardData.songAuthorName}</span>
+                  By <span className="text-primary">{leaderboardData.songAuthorName}</span>
                 </p>
               </div>
 
@@ -52,7 +52,7 @@ export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
                     <span
                       className={cn(
                         "font-semibold",
-                        beatSaverMap ? "text-ssr transition-all hover:brightness-[66%]" : ""
+                        beatSaverMap ? "text-primary transition-all hover:brightness-[66%]" : ""
                       )}
                     >
                       {leaderboardData.levelAuthorName}

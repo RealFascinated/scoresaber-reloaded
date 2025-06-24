@@ -147,7 +147,7 @@ function SimpleNavLink({
     <Link
       className={cn(
         "flex items-center gap-2 px-2 py-1 text-sm transition-colors",
-        isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground",
+        isActive ? "text-primary" : "text-muted-foreground hover:text-primary",
         className
       )}
       href={href}
