@@ -487,7 +487,7 @@ export default function SnipePlaylistCreator({ toSnipe }: SnipePlaylistCreatorPr
             </CollapsibleSection>
 
             {/* Action Buttons */}
-            <div className="flex flex-row gap-2 border-t pt-4">
+            <div className="border-muted/50 flex flex-row gap-2 border-t pt-4">
               <Button type="submit" className="flex-1 gap-2">
                 {downloading ? <Spinner className="h-4 w-4" /> : <Download className="h-4 w-4" />}
                 {downloading ? "Downloading..." : "Download Playlist"}
@@ -517,7 +517,7 @@ function CollapsibleSection({
   children,
 }: CollapsibleSectionProps) {
   return (
-    <div className="rounded-lg border">
+    <div className="border-muted/50 rounded-lg border">
       <button
         type="button"
         onClick={onToggle}
