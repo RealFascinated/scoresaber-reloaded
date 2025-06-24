@@ -73,7 +73,7 @@ const ScoreSettings = () => {
     await database.setShowScoreComparison(values.showScoreComparison);
     const after = performance.now();
 
-    toast("Settings saved", {
+    toast.success("Settings saved", {
       description: `Your settings have been saved in ${(after - before).toFixed(0)}ms`,
     });
   }

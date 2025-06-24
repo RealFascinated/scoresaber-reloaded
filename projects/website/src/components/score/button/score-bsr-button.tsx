@@ -13,7 +13,7 @@ export function ScoreBsrButton({ beatSaverMap }: ScoreBsrButtonProps) {
   return (
     <ScoreButton
       onClick={() => {
-        toast(`Copied "!bsr ${beatSaverMap.bsr}" to your clipboard!`);
+        toast.success(`Copied "!bsr ${beatSaverMap.bsr}" to your clipboard!`);
         copyToClipboard(`!bsr ${beatSaverMap.bsr}`);
       }}
       tooltip={<p>Click to copy the bsr code</p>}

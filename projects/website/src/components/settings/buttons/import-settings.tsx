@@ -15,9 +15,9 @@ export default function ImportSettings() {
       const text = await settings.text();
       try {
         await database.importSettings(text);
-        toast("Settings imported successfully");
+        toast.success("Settings imported successfully");
       } catch (error) {
-        toast("Failed to import settings", {
+        toast.error("Failed to import settings", {
           description: "Database version mismatch",
         });
       }

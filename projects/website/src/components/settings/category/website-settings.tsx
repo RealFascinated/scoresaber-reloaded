@@ -63,7 +63,7 @@ const settings: {
                 className="hover:bg-secondary/50 rounded-md p-2 transition-colors"
                 onClick={async () => {
                   props.field.onChange("https://cdn.fascinated.cc/assets/background.jpg");
-                  toast("Background cover reset to default");
+                  toast.success("Background cover reset to default");
                 }}
               >
                 <FaUndo className="size-4" />
@@ -154,7 +154,7 @@ const WebsiteSettings = () => {
     setTheme(values.theme);
 
     const after = performance.now();
-    toast("Settings saved", {
+    toast.success("Settings saved", {
       description: `Your settings have been saved in ${(after - before).toFixed(0)}ms`,
     });
   }

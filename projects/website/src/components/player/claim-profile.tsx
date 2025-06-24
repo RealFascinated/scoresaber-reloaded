@@ -27,7 +27,7 @@ export default function ClaimProfile({ playerId }: Props) {
     await database.setSetting(SettingIds.MainPlayer, playerId);
 
     setCookieValue("playerId", playerId);
-    toast("You have claimed this profile.");
+    toast.success("You have claimed this profile.");
   }
 
   if (!database) {

@@ -28,7 +28,7 @@ export default function Friend({ player, onClick }: FriendProps) {
    */
   async function removeFriend() {
     await database.removeFriend(id);
-    toast(`You have removed ${name} as a friend.`);
+    toast.success(`You have removed ${name} as a friend.`);
   }
 
   return (
