@@ -19,7 +19,7 @@ export function ApiHealth() {
       setOnline(status);
       return status;
     },
-    refetchInterval: 1000 * 15,
+    refetchInterval: 1000 * 5,
   });
 
   useEffect(() => {
