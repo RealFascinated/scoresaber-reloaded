@@ -34,7 +34,7 @@ import {
   Trophy,
   XIcon,
 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import ScoresCard from "../../score/scores-card";
 import SimplePagination from "../../simple-pagination";
 import {
@@ -150,10 +150,6 @@ export default function ScoreSaberPlayerScores({
   const mainPlayerId = useLiveQuery(() => database.getMainPlayerId());
   const showScoreComparison = useLiveQuery(() => database.getShowScoreComparison());
 
-  // Animation
-  const [pendingAnimation, setPendingAnimation] = useState<"left" | "right" | null>("left");
-  const previousSearchTermRef = useRef<string>("");
-
   // State
   const [currentPage, setCurrentPage] = useState(page);
   const [scoresMode, setScoresMode] = useState<ScoreSaberScoreDataMode>(mode);
@@ -163,7 +159,6 @@ export default function ScoreSaberPlayerScores({
   );
   const [searchTerm, setSearchTerm] = useState(initialSearch || "");
   const [currentFilter, setCurrentFilter] = useState<string | null>("All Scores");
-  const [previousScores, setPreviousScores] = useState<PlayerScoresResponse | undefined>(undefined);
 
   // Derived state
   const debouncedSearchTerm = useDebounce(searchTerm, 250);
@@ -256,13 +251,13 @@ export default function ScoreSaberPlayerScores({
   const handlePageChange = useCallback(
     (newPage: number) => {
       if (newPage > currentPage) {
-        setPendingAnimation("left");
+        animateLeft();
       } else {
-        setPendingAnimation("right");
+        animateRight();
       }
       setCurrentPage(newPage);
     },
-    [currentPage]
+    [currentPage, animateLeft, animateRight]
   );
 
   // URL management
@@ -291,26 +286,6 @@ export default function ScoreSaberPlayerScores({
     getUrl,
   ]);
 
-  // Trigger animation when search term changes
-  useEffect(() => {
-    if (previousSearchTermRef.current !== debouncedSearchTerm) {
-      setPendingAnimation("left");
-      previousSearchTermRef.current = debouncedSearchTerm;
-    }
-  }, [debouncedSearchTerm]);
-
-  useEffect(() => {
-    if (pendingAnimation && !isLoading) {
-      if (pendingAnimation === "left") {
-        animateLeft();
-      } else {
-        animateRight();
-      }
-      setPendingAnimation(null);
-      setPreviousScores(scores);
-    }
-  }, [pendingAnimation, animateLeft, animateRight, isLoading, scores]);
-
   // Render helpers
   const renderScoresList = () => {
     if (isLoading && scores === undefined) {
@@ -321,22 +296,23 @@ export default function ScoreSaberPlayerScores({
       );
     }
 
-    if (!previousScores) return null;
+    if (!scores) return null;
 
     return (
       <>
         <div className="text-center">
-          {(isError || previousScores.items.length === 0) && (
-            <EmptyState
-              title="No Results"
-              description="No score were found on this page"
-              icon={<SearchIcon />}
-            />
-          )}
+          {isError ||
+            (scores.items.length === 0 && (
+              <EmptyState
+                title="No Results"
+                description="No score were found on this page"
+                icon={<SearchIcon />}
+              />
+            ))}
         </div>
 
         <PageTransition className="divide-border grid min-w-full grid-cols-1 divide-y">
-          {previousScores.items.map(score => (
+          {scores.items.map(score => (
             <ScoreSaberScoreDisplay
               key={score.score.scoreId}
               score={score.score}
@@ -352,13 +328,13 @@ export default function ScoreSaberPlayerScores({
           ))}
         </PageTransition>
 
-        {previousScores.metadata.totalPages > 1 && (
+        {scores.metadata.totalPages > 1 && (
           <SimplePagination
             mobilePagination={isMobile}
             page={currentPage}
-            totalItems={previousScores.metadata.totalItems}
-            itemsPerPage={previousScores.metadata.itemsPerPage}
-            loadingPage={isLoading || isRefetching || pendingAnimation ? currentPage : undefined}
+            totalItems={scores.metadata.totalItems}
+            itemsPerPage={scores.metadata.itemsPerPage}
+            loadingPage={isLoading || isRefetching ? currentPage : undefined}
             generatePageUrl={getUrl}
             onPageChange={handlePageChange}
           />
@@ -399,8 +375,7 @@ export default function ScoreSaberPlayerScores({
                       isActive={sortOption.value === currentSort}
                       onClick={() => handleSortChange(sortOption.value as ScoreSaberScoreSort)}
                     >
-                      {sortOption.value === currentSort &&
-                      (isLoading || isRefetching || pendingAnimation) ? (
+                      {sortOption.value === currentSort && (isLoading || isRefetching) ? (
                         <Spinner size="sm" className="h-3.5 w-3.5" />
                       ) : (
                         sortOption.icon
@@ -420,7 +395,7 @@ export default function ScoreSaberPlayerScores({
                       }
                     >
                       {sortOption.value === currentSort ? (
-                        isLoading || isRefetching || pendingAnimation ? (
+                        isLoading || isRefetching ? (
                           <Spinner size="sm" className="h-3.5 w-3.5" />
                         ) : currentSortDirection === "desc" ? (
                           <ArrowDown className="h-3.5 w-3.5" />
@@ -446,22 +421,12 @@ export default function ScoreSaberPlayerScores({
                   type="search"
                   placeholder="Query..."
                   className={clsx(
-                    "h-8 w-full pr-8 pl-8 text-xs sm:w-64",
+                    "h-8 w-full pr-3 pl-8 text-xs sm:w-64",
                     invalidSearch && "border-red-500"
                   )}
                   value={searchTerm}
                   onChange={e => setSearchTerm(e.target.value)}
                 />
-                {searchTerm && (
-                  <button
-                    onClick={() => setSearchTerm("")}
-                    className="text-muted-foreground hover:text-foreground absolute top-1/2 right-2.5 h-3.5 w-3.5 -translate-y-1/2 transition-colors"
-                    type="button"
-                    aria-label="Clear search"
-                  >
-                    <XIcon className="h-3.5 w-3.5" />
-                  </button>
-                )}
               </div>
 
               {/* Filters (cached mode only) */}
