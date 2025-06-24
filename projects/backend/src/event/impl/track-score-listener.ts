@@ -7,6 +7,7 @@ import { DiscordChannels } from "../../bot/bot";
 import { sendScoreNotification } from "../../common/score/score.util";
 import TrackedScoresMetric from "../../metrics/impl/player/tracked-scores";
 import BeatLeaderService from "../../service/beatleader.service";
+import CacheService from "../../service/cache.service";
 import MetricsService, { MetricType } from "../../service/metrics.service";
 import { PlayerService } from "../../service/player/player.service";
 import { ScoreService } from "../../service/score/score.service";
@@ -47,6 +48,9 @@ export class TrackScoreListener implements EventListener {
         isTop50GlobalScore
       );
     }
+
+    // Invalidate caches
+    CacheService.invalidate(`scoresaber:player:${player.id}`);
 
     // Prepare notifications to send
     const notifications = [];

@@ -99,7 +99,7 @@ export class PlayerCoreService {
       .getScoreSaberService()
       .refreshPlayer(id);
     if (response !== undefined) {
-      CacheService.invalidate(`player:${id}`); // Remove the player from the cache
+      CacheService.invalidate(`scoresaber:player:${id}`); // Remove the player from the cache
       return response;
     }
     return { result: false };

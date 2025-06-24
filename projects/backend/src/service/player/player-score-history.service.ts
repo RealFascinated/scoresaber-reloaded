@@ -9,6 +9,7 @@ import {
 import { Page, Pagination } from "@ssr/common/pagination";
 import { ScoreHistoryGraphResponse } from "@ssr/common/response/score-history-graph-response";
 import { PlayerScore } from "@ssr/common/score/player-score";
+import CacheService, { CacheId } from "../cache.service";
 import { LeaderboardService } from "../leaderboard/leaderboard.service";
 import { ScoreService } from "../score/score.service";
 
@@ -142,42 +143,48 @@ export class PlayerScoreHistoryService {
     leaderboard: ScoreSaberLeaderboard,
     timestamp: Date
   ): Promise<ScoreSaberPreviousScoreOverview | undefined> {
-    const previousScore = await ScoreSaberPreviousScoreModel.findOne({
-      playerId: playerId,
-      leaderboardId: leaderboard.id,
-      timestamp: { $lt: timestamp },
-    })
-      .sort({ timestamp: -1 })
-      .lean();
+    return CacheService.fetchWithCache(
+      CacheId.PreviousScore,
+      `previous-score:${playerId}-${score.scoreId}`,
+      async () => {
+        const previousScore = await ScoreSaberPreviousScoreModel.findOne({
+          playerId: playerId,
+          leaderboardId: leaderboard.id,
+          timestamp: { $lt: timestamp },
+        })
+          .sort({ timestamp: -1 })
+          .lean();
 
-    if (!previousScore) {
-      return undefined;
-    }
+        if (!previousScore) {
+          return undefined;
+        }
 
-    return {
-      score: previousScore.score,
-      accuracy: previousScore.accuracy || (score.score / leaderboard.maxScore) * 100,
-      modifiers: previousScore.modifiers,
-      misses: previousScore.misses,
-      missedNotes: previousScore.missedNotes,
-      badCuts: previousScore.badCuts,
-      fullCombo: previousScore.fullCombo,
-      pp: previousScore.pp,
-      weight: previousScore.weight,
-      maxCombo: previousScore.maxCombo,
-      timestamp: previousScore.timestamp,
-      change: {
-        score: score.score - previousScore.score,
-        accuracy:
-          (score.accuracy || (score.score / leaderboard.maxScore) * 100) -
-          (previousScore.accuracy || (previousScore.score / leaderboard.maxScore) * 100),
-        misses: score.misses - previousScore.misses,
-        missedNotes: score.missedNotes - previousScore.missedNotes,
-        badCuts: score.badCuts - previousScore.badCuts,
-        pp: score.pp - previousScore.pp,
-        weight: score.weight && previousScore.weight && score.weight - previousScore.weight,
-        maxCombo: score.maxCombo - previousScore.maxCombo,
-      },
-    } as ScoreSaberPreviousScoreOverview;
+        return {
+          score: previousScore.score,
+          accuracy: previousScore.accuracy || (score.score / leaderboard.maxScore) * 100,
+          modifiers: previousScore.modifiers,
+          misses: previousScore.misses,
+          missedNotes: previousScore.missedNotes,
+          badCuts: previousScore.badCuts,
+          fullCombo: previousScore.fullCombo,
+          pp: previousScore.pp,
+          weight: previousScore.weight,
+          maxCombo: previousScore.maxCombo,
+          timestamp: previousScore.timestamp,
+          change: {
+            score: score.score - previousScore.score,
+            accuracy:
+              (score.accuracy || (score.score / leaderboard.maxScore) * 100) -
+              (previousScore.accuracy || (previousScore.score / leaderboard.maxScore) * 100),
+            misses: score.misses - previousScore.misses,
+            missedNotes: score.missedNotes - previousScore.missedNotes,
+            badCuts: score.badCuts - previousScore.badCuts,
+            pp: score.pp - previousScore.pp,
+            weight: score.weight && previousScore.weight && score.weight - previousScore.weight,
+            maxCombo: score.maxCombo - previousScore.maxCombo,
+          },
+        } as ScoreSaberPreviousScoreOverview;
+      }
+    );
   }
 }

@@ -14,6 +14,7 @@ export enum CacheId {
   AdditionalScoreData = "additionalScoreData",
   Players = "players",
   ScoreStats = "scoreStats",
+  PreviousScore = "previousScore",
 }
 
 export default class CacheService {
@@ -25,6 +26,7 @@ export default class CacheService {
     [CacheId.AdditionalScoreData]: TimeUnit.toSeconds(TimeUnit.Minute, 60),
     [CacheId.Players]: TimeUnit.toSeconds(TimeUnit.Minute, 5),
     [CacheId.ScoreStats]: TimeUnit.toSeconds(TimeUnit.Hour, 12),
+    [CacheId.PreviousScore]: TimeUnit.toSeconds(TimeUnit.Hour, 1),
   };
 
   private static readonly redisClient = new RedisClient(env.REDIS_URL);
