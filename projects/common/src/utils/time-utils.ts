@@ -110,6 +110,18 @@ export function timeAgo(input: Date) {
 }
 
 /**
+ * Gets the amount of milliseconds ago a date was
+ *
+ * @param input the date
+ * @returns the amount of milliseconds ago
+ */
+export function getMsAgo(input: Date) {
+  const inputDate = new Date(input).getTime(); // Convert input to a Date object if it's not already
+  const now = new Date().getTime();
+  return now - inputDate;
+}
+
+/**
  * Formats the date in the format "MMM D, YYYY"
  *
  * @param date the date
