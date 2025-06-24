@@ -34,7 +34,7 @@ import {
   Trophy,
   XIcon,
 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ScoresCard from "../../score/scores-card";
 import SimplePagination from "../../simple-pagination";
 import {
@@ -152,6 +152,7 @@ export default function ScoreSaberPlayerScores({
 
   // Animation
   const [pendingAnimation, setPendingAnimation] = useState<"left" | "right" | null>("left");
+  const previousSearchTermRef = useRef<string>("");
 
   // State
   const [currentPage, setCurrentPage] = useState(page);
@@ -290,6 +291,14 @@ export default function ScoreSaberPlayerScores({
     getUrl,
   ]);
 
+  // Trigger animation when search term changes
+  useEffect(() => {
+    if (previousSearchTermRef.current !== debouncedSearchTerm) {
+      setPendingAnimation("left");
+      previousSearchTermRef.current = debouncedSearchTerm;
+    }
+  }, [debouncedSearchTerm]);
+
   useEffect(() => {
     if (pendingAnimation && !isLoading) {
       if (pendingAnimation === "left") {
@@ -300,7 +309,7 @@ export default function ScoreSaberPlayerScores({
       setPendingAnimation(null);
       setPreviousScores(scores);
     }
-  }, [pendingAnimation, animateLeft, animateRight, isLoading]);
+  }, [pendingAnimation, animateLeft, animateRight, isLoading, scores]);
 
   // Render helpers
   const renderScoresList = () => {
@@ -317,14 +326,13 @@ export default function ScoreSaberPlayerScores({
     return (
       <>
         <div className="text-center">
-          {isError ||
-            (previousScores.items.length === 0 && (
-              <EmptyState
-                title="No Results"
-                description="No score were found on this page"
-                icon={<SearchIcon />}
-              />
-            ))}
+          {(isError || previousScores.items.length === 0) && (
+            <EmptyState
+              title="No Results"
+              description="No score were found on this page"
+              icon={<SearchIcon />}
+            />
+          )}
         </div>
 
         <PageTransition className="divide-border grid min-w-full grid-cols-1 divide-y">
@@ -438,12 +446,22 @@ export default function ScoreSaberPlayerScores({
                   type="search"
                   placeholder="Query..."
                   className={clsx(
-                    "h-8 w-full pr-3 pl-8 text-xs sm:w-64",
+                    "h-8 w-full pr-8 pl-8 text-xs sm:w-64",
                     invalidSearch && "border-red-500"
                   )}
                   value={searchTerm}
                   onChange={e => setSearchTerm(e.target.value)}
                 />
+                {searchTerm && (
+                  <button
+                    onClick={() => setSearchTerm("")}
+                    className="text-muted-foreground hover:text-foreground absolute top-1/2 right-2.5 h-3.5 w-3.5 -translate-y-1/2 transition-colors"
+                    type="button"
+                    aria-label="Clear search"
+                  >
+                    <XIcon className="h-3.5 w-3.5" />
+                  </button>
+                )}
               </div>
 
               {/* Filters (cached mode only) */}
