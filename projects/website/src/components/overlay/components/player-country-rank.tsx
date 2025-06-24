@@ -23,6 +23,7 @@ export default function OverlayPlayerCountryRank({ player }: OverlayPlayerRankPr
         type={PlayerStatChange.CountryRank}
         change={player.statisticChange?.daily?.countryRank ?? 0}
         className="text-md"
+        useTooltip={false}
       />
     </div>
   );

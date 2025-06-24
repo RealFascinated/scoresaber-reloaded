@@ -30,9 +30,21 @@ interface DailyChangeProps {
    * The class name
    */
   className?: string;
+
+  /**
+   * Whether to use the tooltip
+   */
+  useTooltip?: boolean;
 }
 
-export function DailyChange({ type, player, change, tooltip, className }: DailyChangeProps) {
+export function DailyChange({
+  type,
+  player,
+  change,
+  tooltip,
+  className,
+  useTooltip = true,
+}: DailyChangeProps) {
   const formatValue = type.type == "Performance Points" ? formatPp : formatNumberWithCommas;
   if (!change && player !== undefined) {
     change = type.value?.(player, "daily");
@@ -52,9 +64,11 @@ export function DailyChange({ type, player, change, tooltip, className }: DailyC
     tooltip = `${type.type} change compared to yesterday`;
   }
 
-  return (
+  return useTooltip ? (
     <SimpleTooltip display={tooltip} side="bottom">
       {value}
     </SimpleTooltip>
+  ) : (
+    value
   );
 }

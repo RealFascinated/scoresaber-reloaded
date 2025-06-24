@@ -126,7 +126,11 @@ export class LeaderboardCoreService {
           );
         }
 
-        return await LeaderboardService.createLeaderboardData(leaderboard, cached, leaderboard.id);
+        return await LeaderboardService.createLeaderboardData(
+          leaderboard,
+          cached,
+          leaderboard._id!.toString()
+        );
       }
     );
 

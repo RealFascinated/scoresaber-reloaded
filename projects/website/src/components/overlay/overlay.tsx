@@ -1,6 +1,7 @@
 "use client";
 
 import { OverlayDataClients } from "@/common/overlay/data-client";
+import BeatSaberPlusClient from "@/common/overlay/impl/beatsaberplus";
 import HTTPSiraStatusClient from "@/common/overlay/impl/httpsirastatus";
 import { useOverlayDataStore } from "@/common/overlay/overlay-data-store";
 import { OverlaySettings, OverlayViews } from "@/common/overlay/overlay-settings";
@@ -9,6 +10,7 @@ import OverlayScoreDataView from "@/components/overlay/views/score-data";
 import OverlayScoreInfoView from "@/components/overlay/views/score-info";
 import { Spinner } from "@/components/spinner";
 import { DetailType } from "@ssr/common/detail-type";
+import Logger from "@ssr/common/logger";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
@@ -40,8 +42,15 @@ export default function Overlay({ settings }: OverlayProps) {
       return;
     }
 
-    if (settings.dataClient === OverlayDataClients.HTTPSiraStatus && !clientRef.current) {
-      clientRef.current = new HTTPSiraStatusClient();
+    if (!clientRef.current) {
+      switch (settings.dataClient) {
+        case OverlayDataClients.HTTPSiraStatus:
+          clientRef.current = new HTTPSiraStatusClient();
+          break;
+        case OverlayDataClients.BeatSaberPlus:
+          clientRef.current = new BeatSaberPlusClient();
+          break;
+      }
     }
 
     return () => {
@@ -52,6 +61,10 @@ export default function Overlay({ settings }: OverlayProps) {
       }
     };
   }, [settings.dataClient, settings.useRealTimeData]);
+
+  useEffect(() => {
+    Logger.info("Overlay settings", JSON.stringify(settings, null, 2));
+  }, []);
 
   if (isLoading || !player) {
     return (

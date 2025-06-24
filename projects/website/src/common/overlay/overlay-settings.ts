@@ -1,9 +1,9 @@
 import { OverlayDataClients } from "@/common/overlay/data-client";
 
 export enum OverlayViews {
-  ScoreInfo = 1,
-  PlayerInfo = 2,
-  SongInfo = 3,
+  ScoreInfo = "scoreInfo",
+  PlayerInfo = "playerInfo",
+  SongInfo = "songInfo",
 }
 
 export type OverlaySettings = {
@@ -35,7 +35,7 @@ export type OverlaySettings = {
 export const defaultOverlaySettings: OverlaySettings = {
   playerId: "",
   useRealTimeData: true,
-  dataClient: OverlayDataClients.HTTPSiraStatus,
+  dataClient: OverlayDataClients.BeatSaberPlus,
   views: {
     [OverlayViews.ScoreInfo]: true,
     [OverlayViews.PlayerInfo]: true,

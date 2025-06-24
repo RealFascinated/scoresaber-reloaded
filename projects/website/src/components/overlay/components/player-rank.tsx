@@ -24,6 +24,7 @@ export default function OverlayPlayerRank({ player }: OverlayPlayerRankProps) {
         type={PlayerStatChange.Rank}
         change={player.statisticChange?.daily?.rank ?? 0}
         className="text-md"
+        useTooltip={false}
       />
     </div>
   );

@@ -33,6 +33,7 @@ export default function OverlayPlayerInfoView({ player }: OverlayPlayerInfoProps
             type={PlayerStatChange.PerformancePoints}
             change={player.statisticChange?.daily?.pp ?? 0}
             className="text-md"
+            useTooltip={false}
           />
           {!!plusOnePp && (
             <span className="text-muted-foreground">(+1 = {formatPp(plusOnePp)}pp)</span>
