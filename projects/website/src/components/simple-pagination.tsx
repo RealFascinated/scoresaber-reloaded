@@ -62,7 +62,13 @@ const PageSelector = React.memo(({ totalPages, onPageSelect, isLoading }: PageSe
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild disabled={isLoading}>
-        <Button variant="ghost" size="icon" aria-label="Select page" disabled={isLoading}>
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label="Select page"
+          disabled={isLoading}
+          className="transition-opacity duration-150"
+        >
           <MoreHorizontal className="h-4 w-4" />
         </Button>
       </PopoverTrigger>
@@ -128,8 +134,9 @@ const PageButton = React.memo(
         variant={isActive ? "primary" : "ghost"}
         size="icon"
         className={cn(
-          "relative transition-none",
-          (isLoading || buttonPage === currentPage) && "cursor-not-allowed"
+          "relative transition-opacity duration-150",
+          isButtonLoading && "cursor-not-allowed opacity-50",
+          buttonPage === currentPage && "cursor-not-allowed"
         )}
       >
         <a
@@ -174,7 +181,7 @@ const NavigationButton = React.memo(
       variant="ghost"
       size="icon"
       disabled={disabled || isLoading}
-      className={cn((disabled || isLoading) && "cursor-not-allowed opacity-50")}
+      className={cn("transition-opacity duration-150", disabled && "cursor-not-allowed opacity-50")}
     >
       <a
         href={generatePageUrl ? generatePageUrl(buttonPage) : "#"}
@@ -213,7 +220,12 @@ export default function SimplePagination({
 }: SimplePaginationProps) {
   page = page == 0 ? 1 : page;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
-  const isLoading = loadingPage !== undefined;
+
+  // Calculate loading state once and ensure it's consistent
+  const isLoading = Boolean(loadingPage);
+  const loadingState = isLoading
+    ? { isLoading: true, loadingPage }
+    : { isLoading: false, loadingPage: undefined };
 
   const handlePageChange = useCallback(
     (newPage: number) => {
@@ -251,10 +263,10 @@ export default function SimplePagination({
           key="start"
           page={1}
           currentPage={page}
-          isLoading={isLoading}
+          isLoading={loadingState.isLoading}
           onClick={handleLinkClick}
           generatePageUrl={generatePageUrl}
-          loadingPage={loadingPage}
+          loadingPage={loadingState.loadingPage}
         >
           1
         </PageButton>
@@ -265,7 +277,7 @@ export default function SimplePagination({
             key="ellipsis-start"
             totalPages={totalPages}
             onPageSelect={handlePageChange}
-            isLoading={isLoading}
+            isLoading={false}
           />
         );
     }
@@ -277,10 +289,10 @@ export default function SimplePagination({
           page={i}
           isActive={i === page}
           currentPage={page}
-          isLoading={isLoading}
+          isLoading={loadingState.isLoading}
           onClick={handleLinkClick}
           generatePageUrl={generatePageUrl}
-          loadingPage={loadingPage}
+          loadingPage={loadingState.loadingPage}
         >
           {formatNumberWithCommas(i)}
         </PageButton>
@@ -294,7 +306,7 @@ export default function SimplePagination({
             key="ellipsis-end"
             totalPages={totalPages}
             onPageSelect={handlePageChange}
-            isLoading={isLoading}
+            isLoading={false}
           />
         );
       pageNumbers.push(
@@ -302,10 +314,10 @@ export default function SimplePagination({
           key="end"
           page={totalPages}
           currentPage={page}
-          isLoading={isLoading}
+          isLoading={loadingState.isLoading}
           onClick={handleLinkClick}
           generatePageUrl={generatePageUrl}
-          loadingPage={loadingPage}
+          loadingPage={loadingState.loadingPage}
         >
           {formatNumberWithCommas(totalPages)}
         </PageButton>
@@ -317,12 +329,14 @@ export default function SimplePagination({
     mobilePagination,
     page,
     totalPages,
-    isLoading,
+    loadingState,
     handleLinkClick,
     generatePageUrl,
-    loadingPage,
     handlePageChange,
   ]);
+
+  // Calculate page numbers before render to ensure consistent timing
+  const pageNumbers = renderPageNumbers();
 
   return (
     <div
@@ -353,7 +367,7 @@ export default function SimplePagination({
           <NavigationButton
             page={1}
             disabled={page === 1}
-            isLoading={isLoading}
+            isLoading={loadingState.isLoading}
             onClick={handleLinkClick}
             generatePageUrl={generatePageUrl}
           >
@@ -363,17 +377,17 @@ export default function SimplePagination({
         <NavigationButton
           page={page - 1}
           disabled={page === 1}
-          isLoading={isLoading}
+          isLoading={loadingState.isLoading}
           onClick={handleLinkClick}
           generatePageUrl={generatePageUrl}
         >
           <ChevronLeft className="h-4 w-4" />
         </NavigationButton>
-        {renderPageNumbers()}
+        {pageNumbers}
         <NavigationButton
           page={page + 1}
           disabled={page === totalPages}
-          isLoading={isLoading}
+          isLoading={loadingState.isLoading}
           onClick={handleLinkClick}
           generatePageUrl={generatePageUrl}
         >
@@ -383,7 +397,7 @@ export default function SimplePagination({
           <NavigationButton
             page={totalPages}
             disabled={page === totalPages}
-            isLoading={isLoading}
+            isLoading={loadingState.isLoading}
             onClick={handleLinkClick}
             generatePageUrl={generatePageUrl}
           >

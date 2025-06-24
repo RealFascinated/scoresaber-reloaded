@@ -73,6 +73,10 @@ export default function AccSaberPlayerScores({ player, sort, page, type, order }
   const [currentType, setCurrentType] = useState<AccSaberScoreType>(type);
   const [currentOrder, setCurrentOrder] = useState<AccSaberScoreOrder>(order);
 
+  // Animation
+  const [pendingAnimation, setPendingAnimation] = useState<"left" | "right" | null>("left");
+  const [previousScores, setPreviousScores] = useState<Page<AccSaberScore> | undefined>(undefined);
+
   const {
     data: scores,
     isError,
@@ -104,13 +108,13 @@ export default function AccSaberPlayerScores({ player, sort, page, type, order }
         setCurrentSort(newSort);
         setCurrentOrder(defaultOrder);
         setCurrentPage(1);
-        animateLeft();
+        setPendingAnimation("left");
       } else {
         setCurrentOrder(currentOrder === "desc" ? "asc" : "desc");
-        animateLeft();
+        setPendingAnimation("left");
       }
     },
-    [currentSort, currentOrder, currentType, animateLeft]
+    [currentSort, currentOrder, currentType]
   );
 
   const handleTypeChange = useCallback(
@@ -118,10 +122,10 @@ export default function AccSaberPlayerScores({ player, sort, page, type, order }
       if (newType !== currentType) {
         setCurrentType(newType);
         setCurrentPage(1);
-        animateLeft();
+        setPendingAnimation("left");
       }
     },
-    [currentType, animateLeft]
+    [currentType]
   );
 
   const getUrl = useCallback(
@@ -133,9 +137,9 @@ export default function AccSaberPlayerScores({ player, sort, page, type, order }
 
   const handlePageChange = (newPage: number) => {
     if (newPage > currentPage) {
-      animateLeft();
+      setPendingAnimation("left");
     } else {
-      animateRight();
+      setPendingAnimation("right");
     }
     setCurrentPage(newPage);
   };
@@ -143,6 +147,18 @@ export default function AccSaberPlayerScores({ player, sort, page, type, order }
   useEffect(() => {
     changePageUrl(getUrl(currentPage));
   }, [currentPage, player.id, currentSort, currentType, currentOrder]);
+
+  useEffect(() => {
+    if (pendingAnimation && !isLoading) {
+      if (pendingAnimation === "left") {
+        animateLeft();
+      } else {
+        animateRight();
+      }
+      setPendingAnimation(null);
+      setPreviousScores(scores);
+    }
+  }, [pendingAnimation, animateLeft, animateRight, isLoading]);
 
   return (
     <ScoresCard>
@@ -180,7 +196,7 @@ export default function AccSaberPlayerScores({ player, sort, page, type, order }
                   }
                 >
                   {sortOption.value === currentSort ? (
-                    isLoading || isRefetching ? (
+                    isLoading || isRefetching || pendingAnimation ? (
                       <Spinner size="sm" className="h-3.5 w-3.5" />
                     ) : currentOrder === "desc" ? (
                       <ArrowDown className="h-3.5 w-3.5" />
@@ -204,11 +220,11 @@ export default function AccSaberPlayerScores({ player, sort, page, type, order }
           </div>
         )}
 
-        {scores !== undefined && (
+        {previousScores !== undefined && (
           <>
             <div className="text-center">
               {isError ||
-                (scores.items.length === 0 && (
+                (previousScores.items.length === 0 && (
                   <EmptyState
                     title="No Results"
                     description="No scores were found on this page"
@@ -218,18 +234,20 @@ export default function AccSaberPlayerScores({ player, sort, page, type, order }
             </div>
 
             <PageTransition className="divide-border grid min-w-full grid-cols-1 divide-y">
-              {scores.items.map((score: AccSaberScore, index: number) => (
+              {previousScores.items.map((score: AccSaberScore, index: number) => (
                 <AccSaberScoreComponent key={score.id} score={score} />
               ))}
             </PageTransition>
 
-            {scores.metadata.totalPages > 1 && (
+            {previousScores.metadata.totalPages > 1 && (
               <SimplePagination
                 mobilePagination={isMobile}
                 page={currentPage}
-                totalItems={scores.metadata.totalItems}
-                itemsPerPage={scores.metadata.itemsPerPage}
-                loadingPage={isLoading || isRefetching ? currentPage : undefined}
+                totalItems={previousScores.metadata.totalItems}
+                itemsPerPage={previousScores.metadata.itemsPerPage}
+                loadingPage={
+                  isLoading || isRefetching || pendingAnimation ? currentPage : undefined
+                }
                 generatePageUrl={page => getUrl(page)}
                 onPageChange={handlePageChange}
               />

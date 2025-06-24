@@ -6,7 +6,7 @@ import { usePageTransition } from "./page-transition-context";
 
 const containerVariants = {
   enter: (direction: number) => ({
-    x: direction > 0 ? -20 : 20,
+    x: direction > 0 ? 20 : -20,
     opacity: 0,
   }),
   center: {
@@ -14,14 +14,14 @@ const containerVariants = {
     opacity: 1,
   },
   exit: (direction: number) => ({
-    x: direction < 0 ? -20 : 20,
+    x: direction < 0 ? 20 : -20,
     opacity: 0,
   }),
 };
 
 const itemVariants = {
   enter: (direction: number) => ({
-    x: direction > 0 ? -20 : 20,
+    x: direction > 0 ? 20 : -20,
     opacity: 0,
   }),
   center: {
@@ -29,7 +29,7 @@ const itemVariants = {
     opacity: 1,
   },
   exit: (direction: number) => ({
-    x: direction < 0 ? -20 : 20,
+    x: direction < 0 ? 20 : -20,
     opacity: 0,
   }),
 };
@@ -55,7 +55,7 @@ export default function PageTransition({
         exit="exit"
         transition={{
           type: "tween",
-          duration: 0.15,
+          duration: 0.13,
           ease: "easeOut",
         }}
       >
@@ -67,9 +67,9 @@ export default function PageTransition({
               variants={itemVariants}
               transition={{
                 type: "tween",
-                duration: 0.15,
+                duration: 0.13,
                 ease: "easeOut",
-                delay: index * 0.008,
+                delay: index * 0.025,
               }}
             >
               {child}
@@ -81,7 +81,7 @@ export default function PageTransition({
             variants={itemVariants}
             transition={{
               type: "tween",
-              duration: 0.15,
+              duration: 0.13,
               ease: "easeOut",
             }}
           >

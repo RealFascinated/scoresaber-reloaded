@@ -150,6 +150,9 @@ export default function ScoreSaberPlayerScores({
   const mainPlayerId = useLiveQuery(() => database.getMainPlayerId());
   const showScoreComparison = useLiveQuery(() => database.getShowScoreComparison());
 
+  // Animation
+  const [pendingAnimation, setPendingAnimation] = useState<"left" | "right" | null>("left");
+
   // State
   const [currentPage, setCurrentPage] = useState(page);
   const [scoresMode, setScoresMode] = useState<ScoreSaberScoreDataMode>(mode);
@@ -159,6 +162,7 @@ export default function ScoreSaberPlayerScores({
   );
   const [searchTerm, setSearchTerm] = useState(initialSearch || "");
   const [currentFilter, setCurrentFilter] = useState<string | null>("All Scores");
+  const [previousScores, setPreviousScores] = useState<PlayerScoresResponse | undefined>(undefined);
 
   // Derived state
   const debouncedSearchTerm = useDebounce(searchTerm, 250);
@@ -251,13 +255,13 @@ export default function ScoreSaberPlayerScores({
   const handlePageChange = useCallback(
     (newPage: number) => {
       if (newPage > currentPage) {
-        animateLeft();
+        setPendingAnimation("left");
       } else {
-        animateRight();
+        setPendingAnimation("right");
       }
       setCurrentPage(newPage);
     },
-    [currentPage, animateLeft, animateRight]
+    [currentPage]
   );
 
   // URL management
@@ -286,6 +290,18 @@ export default function ScoreSaberPlayerScores({
     getUrl,
   ]);
 
+  useEffect(() => {
+    if (pendingAnimation && !isLoading) {
+      if (pendingAnimation === "left") {
+        animateLeft();
+      } else {
+        animateRight();
+      }
+      setPendingAnimation(null);
+      setPreviousScores(scores);
+    }
+  }, [pendingAnimation, animateLeft, animateRight, isLoading]);
+
   // Render helpers
   const renderScoresList = () => {
     if (isLoading && scores === undefined) {
@@ -296,13 +312,13 @@ export default function ScoreSaberPlayerScores({
       );
     }
 
-    if (!scores) return null;
+    if (!previousScores) return null;
 
     return (
       <>
         <div className="text-center">
           {isError ||
-            (scores.items.length === 0 && (
+            (previousScores.items.length === 0 && (
               <EmptyState
                 title="No Results"
                 description="No score were found on this page"
@@ -312,7 +328,7 @@ export default function ScoreSaberPlayerScores({
         </div>
 
         <PageTransition className="divide-border grid min-w-full grid-cols-1 divide-y">
-          {scores.items.map(score => (
+          {previousScores.items.map(score => (
             <ScoreSaberScoreDisplay
               key={score.score.scoreId}
               score={score.score}
@@ -328,13 +344,13 @@ export default function ScoreSaberPlayerScores({
           ))}
         </PageTransition>
 
-        {scores.metadata.totalPages > 1 && (
+        {previousScores.metadata.totalPages > 1 && (
           <SimplePagination
             mobilePagination={isMobile}
             page={currentPage}
-            totalItems={scores.metadata.totalItems}
-            itemsPerPage={scores.metadata.itemsPerPage}
-            loadingPage={isLoading || isRefetching ? currentPage : undefined}
+            totalItems={previousScores.metadata.totalItems}
+            itemsPerPage={previousScores.metadata.itemsPerPage}
+            loadingPage={isLoading || isRefetching || pendingAnimation ? currentPage : undefined}
             generatePageUrl={getUrl}
             onPageChange={handlePageChange}
           />
@@ -375,7 +391,8 @@ export default function ScoreSaberPlayerScores({
                       isActive={sortOption.value === currentSort}
                       onClick={() => handleSortChange(sortOption.value as ScoreSaberScoreSort)}
                     >
-                      {sortOption.value === currentSort && (isLoading || isRefetching) ? (
+                      {sortOption.value === currentSort &&
+                      (isLoading || isRefetching || pendingAnimation) ? (
                         <Spinner size="sm" className="h-3.5 w-3.5" />
                       ) : (
                         sortOption.icon
@@ -395,7 +412,7 @@ export default function ScoreSaberPlayerScores({
                       }
                     >
                       {sortOption.value === currentSort ? (
-                        isLoading || isRefetching ? (
+                        isLoading || isRefetching || pendingAnimation ? (
                           <Spinner size="sm" className="h-3.5 w-3.5" />
                         ) : currentSortDirection === "desc" ? (
                           <ArrowDown className="h-3.5 w-3.5" />
