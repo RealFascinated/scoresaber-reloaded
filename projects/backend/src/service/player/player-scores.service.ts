@@ -162,7 +162,13 @@ export class PlayerScoresService {
   public static async getPlayerScoreChart(playerId: string): Promise<PlayerScoresChartResponse> {
     const playerScores = await PlayerService.getPlayerScores(playerId, {
       includeLeaderboard: true,
-      ranked: true,
+      sort: {
+        field: "pp",
+        direction: "desc",
+        filters: {
+          rankedOnly: true,
+        },
+      },
       projection: {
         accuracy: 1,
         pp: 1,
@@ -206,7 +212,6 @@ export class PlayerScoresService {
     options: {
       sort?: ScoreSort;
       limit?: number;
-      ranked?: boolean;
       includeLeaderboard?: boolean;
       includeBeatSaver?: boolean;
       insertScoreData?: boolean;
@@ -239,7 +244,6 @@ export class PlayerScoresService {
       leaderboardId: { $exists: true, $ne: null },
       ...(filters.rankedOnly ? { pp: { $gt: 0 } } : {}),
       ...(filters.unrankedOnly ? { pp: { $lte: 0 } } : {}),
-      ...(options?.ranked ? { pp: { $gt: 0 } } : {}),
     };
 
     if (options?.sort?.field && options.sort.field !== "date") {

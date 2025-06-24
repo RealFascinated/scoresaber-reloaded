@@ -84,7 +84,13 @@ export class PlayerAccuraciesService {
 
     // Use aggregation to get only ranked scores with accuracy
     const playerScores = await PlayerService.getPlayerScores(playerId, {
-      ranked: true,
+      sort: {
+        field: "pp",
+        direction: "desc",
+        filters: {
+          rankedOnly: true,
+        },
+      },
       projection: {
         accuracy: 1,
       },

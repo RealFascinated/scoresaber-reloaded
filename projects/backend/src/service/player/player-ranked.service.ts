@@ -16,7 +16,13 @@ export class PlayerRankedService {
     await PlayerService.playerExists(playerId, true);
 
     const playerScores = await PlayerService.getPlayerScores(playerId, {
-      ranked: true,
+      sort: {
+        field: "pp",
+        direction: "desc",
+        filters: {
+          rankedOnly: true,
+        },
+      },
       projection: { pp: 1, scoreId: 1 },
       includeLeaderboard: false,
     });
