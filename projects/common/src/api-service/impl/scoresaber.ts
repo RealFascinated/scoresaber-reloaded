@@ -1,4 +1,4 @@
-import { Cooldown, CooldownPriority } from "../../cooldown";
+import { Cooldown, CooldownPriority, cooldownRequestsPerMinute } from "../../cooldown";
 import { DetailType } from "../../detail-type";
 import { StarFilter } from "../../maps/types";
 import { PlayerRefreshResponse } from "../../response/player-refresh-response";
@@ -47,7 +47,10 @@ const RANKING_REQUESTS_ENDPOINT = `${API_BASE}/ranking/requests/:query`;
 
 export class ScoreSaberService extends ApiService {
   constructor() {
-    super(new Cooldown(60_000 / 300, 150), ApiServiceName.SCORE_SABER);
+    super(
+      new Cooldown(cooldownRequestsPerMinute(280), 150, cooldownRequestsPerMinute(80), 50),
+      ApiServiceName.SCORE_SABER
+    );
   }
 
   /**
