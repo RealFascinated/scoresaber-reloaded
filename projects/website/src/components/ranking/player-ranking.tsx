@@ -48,7 +48,7 @@ export function PlayerRanking({
         >
           {/* Rank, Weekly Change, and Country Rank */}
           <div
-            className={cn("grid grid-cols-[0.85fr_0.85fr_1fr] items-center gap-3")}
+            className={cn("grid grid-cols-[0.75fr_0.75fr_1fr] items-center gap-3")}
             style={{
               width: `${firstColumnWidth}px`,
             }}
