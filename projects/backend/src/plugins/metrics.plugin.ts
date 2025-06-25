@@ -4,6 +4,7 @@ import { Elysia } from "elysia";
 import HttpStatusCodesMetric from "../metrics/impl/backend/http-status-codes";
 import RouteLatencyMetric from "../metrics/impl/backend/route-latency";
 import RequestsPerSecondMetric from "../metrics/impl/backend/total-requests";
+import TotalRequestsPerEndpointMetric from "../metrics/impl/backend/total-requests-per-endpoint";
 import MetricsService, { MetricType } from "../service/metrics.service";
 
 interface RequestStore {
@@ -29,6 +30,7 @@ export const metricsPlugin = () => {
           MetricType.TOTAL_REQUESTS
         )) as RequestsPerSecondMetric;
         rpsMetric.increment();
+
         (store as RequestStore).startTime = process.hrtime.bigint();
       } catch (error) {
         Logger.error("Failed to increment request counter:", error);
@@ -37,7 +39,7 @@ export const metricsPlugin = () => {
     .onAfterHandle({ as: "global" }, async ({ request, store, route, set }) => {
       try {
         const startTime = (store as RequestStore).startTime;
-        if (startTime) {
+        if (startTime && route) {
           const latency = Number(process.hrtime.bigint() - startTime) / 1_000_000;
           const routeLatencyMetric = (await MetricsService.getMetric(
             MetricType.ROUTE_LATENCY
@@ -58,6 +60,11 @@ export const metricsPlugin = () => {
             httpStatusMetric.recordStatusCode(statusCode);
           }
         }
+
+        const totalRequestsPerEndpointMetric = (await MetricsService.getMetric(
+          MetricType.TOTAL_REQUESTS_PER_ENDPOINT
+        )) as TotalRequestsPerEndpointMetric;
+        totalRequestsPerEndpointMetric.increment(route);
       } catch (error) {
         Logger.error("Failed to record route metrics:", error);
       }
