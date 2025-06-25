@@ -51,6 +51,7 @@ export enum SettingIds {
   ShowScoreComparison = "showScoreComparison",
   DefaultLeaderboardCountry = "defaultLeaderboardCountry",
   WebsiteLanding = "websiteLanding",
+  PlusPpDefaultAccuracy = "plusPpDefaultAccuracy",
 }
 
 export const DEFAULT_WHAT_IF_RANGE: [number, number] = [70, 98.5];
@@ -495,6 +496,24 @@ export default class Database extends Dexie {
   async setWebsiteLanding(websiteLanding: WebsiteLanding) {
     setCookieValue("websiteLanding", websiteLanding);
     await this.setSetting(SettingIds.WebsiteLanding, websiteLanding);
+  }
+
+  /**
+   * Gets the plus pp default accuracy setting from the database
+   *
+   * @returns the plus pp default accuracy setting
+   */
+  async getPlusPpDefaultAccuracy(): Promise<number> {
+    return (await this.getSetting<number>(SettingIds.PlusPpDefaultAccuracy, 95))!;
+  }
+
+  /**
+   * Sets the plus pp default accuracy setting in the database
+   *
+   * @param plusPpDefaultAccuracy the plus pp default accuracy setting
+   */
+  async setPlusPpDefaultAccuracy(plusPpDefaultAccuracy: number) {
+    await this.setSetting(SettingIds.PlusPpDefaultAccuracy, plusPpDefaultAccuracy);
   }
 
   /**

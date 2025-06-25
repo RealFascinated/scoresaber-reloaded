@@ -4,6 +4,7 @@ import SimpleTooltip from "@/components/simple-tooltip";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Slider } from "@/components/ui/slider";
+import useDatabase from "@/hooks/use-database";
 import { ScoreSaberCurve } from "@ssr/common/leaderboard-curve/scoresaber-curve";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { formatPp } from "@ssr/common/utils/number-utils";
@@ -12,14 +13,31 @@ import { useQuery } from "@tanstack/react-query";
 import { RotateCcw } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-const ACC_THRESHOLDS = [92, 93, 94, 95, 96, 97, 98, 99];
-const DEFAULT_ACC = 95;
 const MAX_STARS = 15;
 
 export default function PlusPpCalculator({ player }: { player: ScoreSaberPlayer }) {
+  const database = useDatabase();
+
+  // State for default accuracy
+  const [defaultAccuracy, setDefaultAccuracy] = useState(95);
+
+  // Load default accuracy from database
+  useEffect(() => {
+    const loadDefaultAccuracy = async () => {
+      const accuracy = await database.getPlusPpDefaultAccuracy();
+      setDefaultAccuracy(accuracy ?? 95);
+    };
+    loadDefaultAccuracy();
+  }, [database]);
+
+  // Update accuracy when defaultAccuracy loads
+  useEffect(() => {
+    setAccuracy(defaultAccuracy);
+  }, [defaultAccuracy]);
+
   // State
   const [ppValue, setPpValue] = useState(1);
-  const [accuracy, setAccuracy] = useState(DEFAULT_ACC);
+  const [accuracy, setAccuracy] = useState(defaultAccuracy);
   const [stars, setStars] = useState(10);
   const [isPpUserInput, setIsPpUserInput] = useState(false);
   const hasInitialized = useRef(false);
@@ -110,7 +128,7 @@ export default function PlusPpCalculator({ player }: { player: ScoreSaberPlayer 
     if (sortedScores.length > 0 && rawPp > 0 && !hasInitialized.current) {
       const { stars: initialStars, accuracy: adjustedAccuracy } = getStarsAndAccuracyForPp(
         rawPp,
-        DEFAULT_ACC
+        defaultAccuracy
       );
       setStars(initialStars);
       setAccuracy(adjustedAccuracy);
@@ -164,11 +182,11 @@ export default function PlusPpCalculator({ player }: { player: ScoreSaberPlayer 
 
   const handleReset = useCallback(() => {
     setPpValue(1);
-    setAccuracy(DEFAULT_ACC);
+    setAccuracy(defaultAccuracy);
     setStars(10);
     setIsPpUserInput(false);
     hasInitialized.current = false;
-  }, []);
+  }, [defaultAccuracy]);
 
   return (
     <div className="flex flex-col gap-4">
@@ -220,9 +238,23 @@ export default function PlusPpCalculator({ player }: { player: ScoreSaberPlayer 
 
           {/* Accuracy Slider */}
           <div className="space-y-2">
-            <Label className="text-sm font-medium">
-              Accuracy: <span className="font-semibold text-green-400">{accuracy.toFixed(1)}%</span>
-            </Label>
+            <div className="flex items-center justify-between">
+              <Label className="text-sm font-medium">
+                Accuracy:{" "}
+                <span className="font-semibold text-green-400">{accuracy.toFixed(1)}%</span>
+              </Label>
+              <SimpleTooltip display={<p>Save current accuracy as your default</p>}>
+                <button
+                  onClick={async () => {
+                    await database.setPlusPpDefaultAccuracy(accuracy);
+                    setDefaultAccuracy(accuracy);
+                  }}
+                  className="text-muted-foreground hover:text-foreground text-xs transition-colors"
+                >
+                  Set as Default
+                </button>
+              </SimpleTooltip>
+            </div>
             <Slider
               value={[accuracy]}
               onValueChange={([value]) => value !== undefined && handleAccuracyChange(value)}
