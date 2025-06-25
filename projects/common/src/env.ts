@@ -113,7 +113,12 @@ export const env = createEnv({
   emptyStringAsUndefined: true,
 
   /**
+   * Whether to skip validation of the environment variables.
+   */
+  skipValidation: true,
+
+  /**
    * Whether to check if the environment variables are valid.
    */
-  // isServer: process.env.NEXT_PUBLIC_APPLICATION_NAME === "backend",
+  isServer: process.env.NEXT_PUBLIC_APPLICATION_NAME === "backend",
 });
