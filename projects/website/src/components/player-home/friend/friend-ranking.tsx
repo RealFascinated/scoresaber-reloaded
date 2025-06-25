@@ -1,6 +1,6 @@
 "use client";
 
-import { getPlayerRankingColumnWidth } from "@/common/player-utils";
+import { getFriendRankingColumnWidth } from "@/common/player-utils";
 import { PlayerRanking } from "@/components/ranking/player-ranking";
 import SimplePagination from "@/components/simple-pagination";
 import useDatabase from "@/hooks/use-database";
@@ -41,7 +41,7 @@ export function FriendRanking() {
   }, [getFriendsPage]);
 
   const firstColumnWidth = useMemo(() => {
-    return getPlayerRankingColumnWidth(friendsPage?.items ?? []);
+    return getFriendRankingColumnWidth(friendsPage?.items ?? []);
   }, [friendsPage]);
 
   return (
@@ -70,6 +70,7 @@ export function FriendRanking() {
                   relativePerformancePoints={false}
                   mainPlayer={friendsPage.items[0]}
                   firstColumnWidth={firstColumnWidth}
+                  showWeeklyRankChange={false}
                 />
               ))}
             </div>

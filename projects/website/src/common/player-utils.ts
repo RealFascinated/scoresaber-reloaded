@@ -22,3 +22,23 @@ export function getPlayerRankingColumnWidth(
   // Ensure minimum width of 160px for small numbers
   return Math.max(minWidth, 75 + rankDigits * 15 + countryRankDigits * 20);
 }
+
+/**
+ * Calculates the width of the first column in the friend ranking table.
+ *
+ * @param players the players to calculate the width for
+ * @returns the width of the first column
+ */
+export function getFriendRankingColumnWidth(
+  players: (ScoreSaberPlayer | ScoreSaberPlayerToken)[],
+  minWidth = 150
+) {
+  const maxRank = players?.reduce((max, p) => Math.max(max, p.rank ?? 0), 0) ?? 0;
+
+  // Calculate padding based on number of digits
+  const rankDigits = maxRank > 0 ? Math.floor(Math.log10(maxRank)) + 1 : 0;
+
+  // Base width + padding for each rank type (20 per digit)
+  // Ensure minimum width of 160px for small numbers
+  return Math.max(minWidth, 75 + rankDigits * 15);
+}

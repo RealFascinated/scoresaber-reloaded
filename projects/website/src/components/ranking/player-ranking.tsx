@@ -19,11 +19,13 @@ export function PlayerRanking({
   mainPlayer,
   relativePerformancePoints,
   firstColumnWidth,
+  showWeeklyRankChange = true,
 }: {
   player: ScoreSaberPlayerToken | ScoreSaberPlayer;
   mainPlayer?: ScoreSaberPlayer;
   relativePerformancePoints: boolean;
   firstColumnWidth: number;
+  showWeeklyRankChange?: boolean;
 }) {
   let weeklyRankChange: number;
   if ("histories" in player) {
@@ -48,13 +50,16 @@ export function PlayerRanking({
         >
           {/* Rank, Weekly Change, and Country Rank */}
           <div
-            className={cn("grid grid-cols-[0.75fr_0.75fr_1fr] items-center gap-3")}
+            className={cn(
+              "grid items-center gap-3",
+              showWeeklyRankChange ? "grid-cols-[0.75fr_0.75fr_1fr]" : "grid-cols-[0.75fr_1fr]"
+            )}
             style={{
               width: `${firstColumnWidth}px`,
             }}
           >
             <RankDisplay rank={player.rank} />
-            <WeeklyRankChange weeklyRankChange={weeklyRankChange} />
+            {showWeeklyRankChange && <WeeklyRankChange weeklyRankChange={weeklyRankChange} />}
             <CountryRankDisplay country={player.country} countryRank={player.countryRank} />
           </div>
 
@@ -114,7 +119,7 @@ function RankDisplay({ rank }: { rank: number }) {
   return (
     <div
       className={cn(
-        "flex min-h-[22px] w-fit items-center justify-center gap-1 rounded px-1 py-1",
+        "flex min-h-[22px] w-fit items-center justify-center gap-1 rounded px-1 py-1 text-xs font-semibold",
         getRankBgColor(rank)
       )}
     >
