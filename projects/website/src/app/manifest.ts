@@ -10,8 +10,6 @@ export default function manifest(): MetadataRoute.Manifest {
     scope: "/",
     display: "minimal-ui",
     orientation: "portrait-primary",
-    background_color: "#000000",
-    theme_color: "#000000",
     lang: "en",
     dir: "ltr",
     categories: ["scoresaber", "beatsaber", "games", "entertainment"],
