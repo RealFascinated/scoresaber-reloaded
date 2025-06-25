@@ -29,12 +29,15 @@ export function ApiHealth() {
 
     // Trigger toast only if the online status changes
     if (previousOnlineStatus.current !== online) {
-      toast(`The API is now ${online ? "Online" : "Offline"}!`, {
-        description: online
-          ? "The API has recovered connectivity."
-          : "The API has lost connectivity, some data may be unavailable.",
-        duration: 5_000, // 5 seconds
-      });
+      if (online) {
+        toast.success("The API has now recovered connectivity.", {
+          duration: 5_000, // 5 seconds
+        });
+      } else {
+        toast.error("The API has lost connectivity, data will be unavailable.", {
+          duration: 5_000, // 5 seconds
+        });
+      }
     }
 
     // Update the previous online status
