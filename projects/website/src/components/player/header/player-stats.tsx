@@ -6,7 +6,7 @@ import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils
 import { getScoreSaberRoles } from "@ssr/common/utils/scoresaber.util";
 import { formatDate, timeAgo } from "@ssr/common/utils/time-utils";
 import { ReactNode } from "react";
-import HMDIcon from "../hmd-icon";
+import HMDIcon from "../../hmd-icon";
 
 type Stat = {
   name: string;

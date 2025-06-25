@@ -1,14 +1,14 @@
 import AddFriend from "@/components/friend/add-friend";
-import PlayerTrackedStatus from "@/components/player/player-tracked-status";
+import PlayerTrackedStatus from "@/components/player/header/player-tracked-status";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { getScoreSaberRoles } from "@ssr/common/utils/scoresaber.util";
 import Card from "../../card";
-import ClaimProfile from "../claim-profile";
-import PlayerOverview from "../player-overview";
-import PlayerStats from "../player-stats";
 import PlayerAccBadges from "./acc-badges";
+import ClaimProfile from "./claim-profile";
 import PlayerActions from "./player-actions";
 import PlayerAvatar from "./player-avatar";
+import PlayerOverview from "./player-overview";
+import PlayerStats from "./player-stats";
 
 type PlayerHeaderProps = {
   /**
@@ -23,7 +23,7 @@ export default function PlayerHeader({ player }: PlayerHeaderProps) {
       <div className="relative flex flex-col items-center gap-3 text-center select-none lg:flex-row lg:items-start lg:text-start">
         <PlayerAvatar player={player} />
         <div className="flex w-full flex-col items-center justify-center gap-2 lg:items-start lg:justify-start">
-          <div>
+          <div className="flex flex-col gap-1">
             <div className="flex items-center justify-center gap-2 lg:justify-start">
               <p
                 className="text-2xl font-bold"
@@ -33,9 +33,7 @@ export default function PlayerHeader({ player }: PlayerHeaderProps) {
               >
                 {player.name}
               </p>
-              <div className="absolute top-0 left-0 flex flex-col items-center gap-2 lg:relative lg:flex-row">
-                <PlayerTrackedStatus player={player} />
-              </div>
+              <PlayerTrackedStatus player={player} />
             </div>
             <div className="flex flex-col">
               <div>

@@ -24,7 +24,7 @@ export default function PlayerTrackedStatus({ player }: Props) {
         }
         showOnMobile
       >
-        <InformationCircleIcon className="h-[22px] w-[22px] text-neutral-200" />
+        <InformationCircleIcon className="text-muted-foreground size-5" />
       </SimpleTooltip>
     </div>
   );
