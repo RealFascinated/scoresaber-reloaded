@@ -115,5 +115,5 @@ export const env = createEnv({
   /**
    * Whether to check if the environment variables are valid.
    */
-  isServer: process.env.NEXT_PUBLIC_APPLICATION_NAME === "backend",
+  // isServer: process.env.NEXT_PUBLIC_APPLICATION_NAME === "backend",
 });
