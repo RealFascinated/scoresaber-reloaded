@@ -3,27 +3,26 @@
 import { downloadFile } from "@/common/browser-utils";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { ElementType } from "react";
 
-type PlaylistDownloadButtonProps = {
-  /**
-   * The name of the playlist
-   */
+export default function PlaylistDownloadButton({
+  name,
+  url,
+  icon: Icon,
+}: {
   name: string;
-
-  /**
-   * The url to download the playlist
-   */
   url: string;
-};
-
-export default function PlaylistDownloadButton({ name, url }: PlaylistDownloadButtonProps) {
+  icon: ElementType;
+}) {
   return (
     <Link href={url} onClick={e => e.preventDefault()}>
       <Button
         onClick={() => {
           downloadFile(url, `${name}.bplist`);
         }}
+        className="flex items-center gap-2"
       >
+        <Icon className="h-4 w-4" />
         {name}
       </Button>
     </Link>
