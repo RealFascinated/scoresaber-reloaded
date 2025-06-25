@@ -1,10 +1,10 @@
 import { Colors } from "@/common/colors";
-import ScoreAccuracyGrid from "@/components/score/score-accuracy-grid";
 import SimpleTooltip from "@/components/simple-tooltip";
 import { ScoreStatsResponse } from "@ssr/common/response/scorestats-response";
 import { capitalizeFirstLetter } from "@ssr/common/string-utils";
 import { ScoreStatsToken } from "@ssr/common/types/token/beatleader/score-stats/score-stats";
 import { AnimatePresence, motion } from "framer-motion";
+import ScoreAccuracyGrid from "./score-accuracy-grid";
 
 type ScoreAccuracyStatProps = {
   scoreStats: ScoreStatsResponse;
@@ -140,7 +140,7 @@ function HandAccuracy({ scoreStats, hand }: { scoreStats: ScoreStatsToken; hand:
 
 export default function ScoreAccuracyStats({ scoreStats }: ScoreAccuracyStatProps) {
   return (
-    <div className="bg-accent-deep border-border flex flex-col items-center justify-center gap-6 rounded-xl border p-4 backdrop-blur-sm">
+    <div className="flex flex-col gap-2">
       <div className="flex items-center justify-center gap-8">
         <HandAccuracy scoreStats={scoreStats.current} hand="left" />
         <HandAccuracy scoreStats={scoreStats.current} hand="right" />

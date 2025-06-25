@@ -100,7 +100,13 @@ export default function ScoreDropdown({
   const renderModeContent = () => {
     switch (mode) {
       case ScoreMode.Overview:
-        return <ScoreOverview leaderboard={leaderboard} scoreStats={dropdownData.scoreStats} />;
+        return (
+          <ScoreOverview
+            score={score}
+            leaderboard={leaderboard}
+            scoreStats={dropdownData.scoreStats}
+          />
+        );
       case ScoreMode.ScoreHistory:
         return <ScoreHistory playerId={score.playerId} leaderboard={leaderboard} />;
       case ScoreMode.ScoreHistoryGraph:
