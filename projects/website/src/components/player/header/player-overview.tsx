@@ -10,7 +10,7 @@ import CountryFlag from "../../ui/country-flag";
 
 function PlayerOverviewItem({ children }: { children: React.ReactNode }) {
   return (
-    <div className="bg-background/50 border-border/50 flex h-10 items-center gap-2 rounded-lg border px-3 py-2 text-gray-300">
+    <div className="bg-background/50 border-border/50 flex h-8 items-center gap-2 rounded-lg border px-3 py-2 text-gray-300">
       {children}
     </div>
   );
@@ -30,7 +30,7 @@ const playerData = [
           </SimpleTooltip>
           <ChangeOverTime player={player} type={PlayerStatChange.Rank}>
             <Link href={`/ranking/${player.rankPages.global}`}>
-              <p className="hover:text-primary font-medium transition-all hover:brightness-[66%]">
+              <p className="hover:text-primary text-sm transition-all hover:brightness-[66%]">
                 #{formatNumberWithCommas(player.rank)}
               </p>
             </Link>
@@ -50,13 +50,13 @@ const playerData = [
         <PlayerOverviewItem>
           <CountryFlag
             code={player.country}
-            size={16}
+            size={14}
             className="rounded-sm"
             tooltip={name => `Country Rank in ${name}`}
           />
           <ChangeOverTime player={player} type={PlayerStatChange.CountryRank}>
             <Link href={`/ranking/${player.country}/${player.rankPages.country}`}>
-              <p className="hover:text-primary font-medium transition-all hover:brightness-[66%]">
+              <p className="hover:text-primary text-sm transition-all hover:brightness-[66%]">
                 #{formatNumberWithCommas(player.countryRank)}
               </p>
             </Link>
@@ -75,7 +75,7 @@ const playerData = [
       return (
         <PlayerOverviewItem>
           <ChangeOverTime player={player} type={PlayerStatChange.PerformancePoints}>
-            <p className="text-pp truncate font-semibold transition-all hover:brightness-110">
+            <p className="text-pp truncate text-sm font-semibold transition-all hover:brightness-110">
               {formatPp(player.pp)}pp
             </p>
           </ChangeOverTime>
