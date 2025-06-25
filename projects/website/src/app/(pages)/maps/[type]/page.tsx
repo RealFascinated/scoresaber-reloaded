@@ -12,9 +12,9 @@ export const metadata: Metadata = {
 };
 
 type MapsPageProps = {
-  params: {
+  params: Promise<{
     type: string;
-  };
+  }>;
 };
 
 export default async function MapsPage({ params }: MapsPageProps) {
