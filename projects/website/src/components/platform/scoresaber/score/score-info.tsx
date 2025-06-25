@@ -25,12 +25,12 @@ export default function ScoreSaberScoreInfo({
 
   const rankElement = useMemo(() => {
     if (hideRank) {
-      return <span>#-</span>;
+      return <span className="font-semibold">#-</span>;
     }
     return (
       <Link href={`/leaderboard/${leaderboard.id}/${getPageFromRank(score.rank, 12)}`}>
         <p
-          className={`${getRankColor(score.rank)} cursor-pointer transition-all hover:brightness-[66%]`}
+          className={`${getRankColor(score.rank)} cursor-pointer font-semibold transition-all hover:brightness-[66%]`}
         >
           #{formatNumberWithCommas(score.rank)}
         </p>
@@ -60,7 +60,7 @@ export default function ScoreSaberScoreInfo({
   return (
     <div className="flex w-full flex-row items-center justify-between lg:w-[125px] lg:flex-col lg:justify-center">
       <div className="flex items-center gap-1">
-        <GlobeAmericasIcon className="h-5 w-5" />
+        <GlobeAmericasIcon className="size-5" />
         {rankElement}
         {hmdElement}
       </div>

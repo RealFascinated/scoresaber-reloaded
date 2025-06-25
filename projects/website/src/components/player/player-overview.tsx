@@ -63,7 +63,7 @@ const playerData = [
       return (
         <div className="flex min-w-0 items-center gap-1 text-gray-300">
           <ChangeOverTime player={player} type={PlayerStatChange.PerformancePoints}>
-            <p className="text-pp truncate transition-all hover:brightness-[66%]">
+            <p className="text-pp truncate font-semibold transition-all hover:brightness-[66%]">
               {formatPp(player.pp)}pp
             </p>
           </ChangeOverTime>
