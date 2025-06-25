@@ -10,6 +10,7 @@ import { SearchProvider } from "@/components/providers/search-provider";
 import ThemeProvider from "@/components/providers/theme-provider";
 import SSRLayout from "@/components/ssr-layout";
 import { SiteTheme, ssrConfig } from "config";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { ReactNode } from "react";
 
 export default function Layout({ children }: { children: ReactNode }) {
@@ -22,17 +23,19 @@ export default function Layout({ children }: { children: ReactNode }) {
       themes={ssrConfig.themes.map((theme: SiteTheme) => theme.id)}
     >
       <DatabaseLoader>
-        <MeowMeow />
-        <BackgroundCover />
-        <SnowBackground />
-        <ApiHealth />
-        <main className="flex min-h-screen w-full flex-col text-white">
-          <SearchProvider>
-            <Navbar />
-            <SSRLayout className="flex flex-col gap-2 px-2 pt-2">{children}</SSRLayout>
-          </SearchProvider>
-        </main>
-        <Footer buildId={buildId} buildTimeShort={buildTimeShort} />
+        <NuqsAdapter>
+          <MeowMeow />
+          <BackgroundCover />
+          <SnowBackground />
+          <ApiHealth />
+          <main className="flex min-h-screen w-full flex-col text-white">
+            <SearchProvider>
+              <Navbar />
+              <SSRLayout className="flex flex-col gap-2 px-2 pt-2">{children}</SSRLayout>
+            </SearchProvider>
+          </main>
+          <Footer buildId={buildId} buildTimeShort={buildTimeShort} />
+        </NuqsAdapter>
       </DatabaseLoader>
     </ThemeProvider>
   );

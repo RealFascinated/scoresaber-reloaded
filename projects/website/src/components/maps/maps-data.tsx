@@ -7,10 +7,10 @@ import Playlists from "@/components/maps/playlist/playlists";
 import { MapFilterProvider } from "@/components/providers/maps/map-filter-provider";
 import SimpleTooltip from "@/components/simple-tooltip";
 import { Button } from "@/components/ui/button";
-import usePageNavigation from "@/hooks/use-page-navigation";
 import { TrophyIcon } from "@heroicons/react/24/solid";
 import { ExternalLinkIcon, TrendingUpIcon } from "lucide-react";
-import { ElementType, ReactNode, useEffect, useState } from "react";
+import Link from "next/link";
+import { ElementType, ReactNode } from "react";
 
 type Category = {
   name: string;
@@ -19,7 +19,7 @@ type Category = {
   showFilter: boolean;
   preservePage?: boolean;
   externalLink?: string;
-  render: (page?: number) => ReactNode;
+  render: () => ReactNode;
 };
 
 const categories: Category[] = [
@@ -29,7 +29,7 @@ const categories: Category[] = [
     id: "leaderboards",
     showFilter: true,
     preservePage: true,
-    render: (page?: number) => <Leaderboards initialPage={page} />,
+    render: () => <Leaderboards />,
   },
   {
     name: "Ranking Queue",
@@ -45,36 +45,11 @@ type MapsDataProps = {
   /**
    * The selected category.
    */
-  category?: string;
-
-  /**
-   * The selected page.
-   */
-  page?: number;
+  type?: string;
 };
 
-export function MapsData({ category, page }: MapsDataProps) {
-  const defaultCategory = categories[0];
-
-  const pageNavigation = usePageNavigation();
-  const [selectedCategory, setSelectedCategory] = useState(
-    categories.find(c => c.id === category) || categories[0]
-  );
-
-  useEffect(() => {
-    const path = `/maps?category=${selectedCategory.id}`;
-
-    pageNavigation.changePageUrl(
-      `${path}${page && page !== 1 ? (path.includes("?") ? "&" : "?") + `page=${page}` : ""}`
-    );
-  }, [
-    category,
-    defaultCategory.id,
-    page,
-    pageNavigation,
-    selectedCategory.id,
-    selectedCategory.preservePage,
-  ]);
+export function MapsData({ type }: MapsDataProps) {
+  const selectedCategory = categories.find(c => c.id === type) || categories[0];
 
   return (
     <MapFilterProvider>
@@ -82,42 +57,40 @@ export function MapsData({ category, page }: MapsDataProps) {
         <article className="flex w-full flex-col gap-2 2xl:w-[800px]">
           <div className="flex w-full gap-2">
             {categories.map(category => (
-              <Button
-                key={category.name}
-                className="w-full"
-                variant={category.name == selectedCategory.name ? "default" : "secondary"}
-                onClick={() => {
-                  setSelectedCategory(category);
-                }}
-              >
-                <span className="flex items-center gap-2">
-                  <span className="text-2xl">
-                    <category.icon className="h-4 w-4" />
-                  </span>
-                  <span>{category.name}</span>
+              <Link href={`/maps/${category.id}`} key={category.name} className="w-full">
+                <Button
+                  className="w-full"
+                  variant={category.name == selectedCategory.name ? "default" : "secondary"}
+                >
+                  <span className="flex items-center gap-2">
+                    <span className="text-2xl">
+                      <category.icon className="h-4 w-4" />
+                    </span>
+                    <span>{category.name}</span>
 
-                  {category.externalLink && (
-                    <SimpleTooltip
-                      display={<p>View {category.name} on ScoreSaber</p>}
-                      side="bottom"
-                    >
-                      <div
-                        className="flex cursor-pointer items-center gap-2 p-1"
-                        onClick={() => {
-                          window.open(category.externalLink, "_blank");
-                        }}
+                    {category.externalLink && (
+                      <SimpleTooltip
+                        display={<p>View {category.name} on ScoreSaber</p>}
+                        side="bottom"
                       >
-                        <ExternalLinkIcon className="h-4 w-4" />
-                      </div>
-                    </SimpleTooltip>
-                  )}
-                </span>
-              </Button>
+                        <div
+                          className="flex cursor-pointer items-center gap-2 p-1"
+                          onClick={() => {
+                            window.open(category.externalLink, "_blank");
+                          }}
+                        >
+                          <ExternalLinkIcon className="h-4 w-4" />
+                        </div>
+                      </SimpleTooltip>
+                    )}
+                  </span>
+                </Button>
+              </Link>
             ))}
           </div>
 
           {/* Category Render */}
-          {selectedCategory.render(page)}
+          {selectedCategory.render()}
         </article>
         <div className="flex w-full flex-col gap-2 xl:w-[400px]">
           <Playlists />

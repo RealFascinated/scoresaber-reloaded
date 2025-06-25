@@ -12,28 +12,17 @@ export const metadata: Metadata = {
 };
 
 type MapsPageProps = {
-  /**
-   * The search params.
-   */
-  searchParams: Promise<{
-    /**
-     * The selected category.
-     */
-    category?: string;
-
-    /**
-     * The selected page.
-     */
-    page?: number;
-  }>;
+  params: {
+    type: string;
+  };
 };
 
-export default async function MapsPage({ searchParams }: MapsPageProps) {
-  const { category, page } = await searchParams;
+export default async function MapsPage({ params }: MapsPageProps) {
+  const { type } = await params;
 
   return (
     <main className="w-full">
-      <MapsData category={category} page={page} />
+      <MapsData type={type} />
     </main>
   );
 }

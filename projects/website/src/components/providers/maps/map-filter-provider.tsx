@@ -1,7 +1,9 @@
 "use client";
 
-import { MapCategory, MapSort, StarFilter } from "@ssr/common/maps/types";
-import { createContext, ReactNode, useContext, useState } from "react";
+import { Consts } from "@ssr/common/consts";
+import { MapCategory, MapSort } from "@ssr/common/maps/types";
+import { parseAsBoolean, parseAsInteger, useQueryState } from "nuqs";
+import { createContext, ReactNode, useContext } from "react";
 
 const defaultCategory = MapCategory.DateRanked;
 const defaultSort = MapSort.Descending;
@@ -9,10 +11,12 @@ const defaultSort = MapSort.Descending;
 type FilterContextProps = {
   category: number;
   sort: number;
-  stars: StarFilter | undefined;
+  starMin: number;
+  starMax: number;
   setCategory: (category: number) => void;
   setSort: (sort: number) => void;
-  setStars: (stars: StarFilter | undefined) => void;
+  setStarMin: (starMin: number) => void;
+  setStarMax: (starMax: number) => void;
 
   verified: boolean;
   ranked: boolean;
@@ -27,22 +31,41 @@ type FilterContextProps = {
 const MapFilterContext = createContext<FilterContextProps | undefined>(undefined);
 
 export const MapFilterProvider = ({ children }: { children: ReactNode }) => {
-  const [category, setCategory] = useState<number>(defaultCategory);
-  const [sort, setSort] = useState<number>(defaultSort);
-  const [stars, setStars] = useState<StarFilter | undefined>(undefined);
+  const [category, setCategory] = useQueryState(
+    "category",
+    parseAsInteger.withDefault(defaultCategory)
+  );
+  const [sort, setSort] = useQueryState("sort", parseAsInteger.withDefault(defaultSort));
+  const [starMin, setStarMin] = useQueryState("starMin", parseAsInteger.withDefault(0));
+  const [starMax, setStarMax] = useQueryState(
+    "starMax",
+    parseAsInteger.withDefault(Consts.MAX_STARS)
+  );
 
-  const [verified, setVerified] = useState<boolean>(false);
-  const [ranked, setRanked] = useState<boolean>(false);
-  const [qualified, setQualified] = useState<boolean>(false);
+  const [verified, setVerified] = useQueryState("verified", parseAsBoolean.withDefault(false));
+  const [ranked, setRanked] = useQueryState("ranked", parseAsBoolean.withDefault(false));
+  const [qualified, setQualified] = useQueryState("qualified", parseAsBoolean.withDefault(false));
 
   const clearFilters = () => {
     setCategory(defaultCategory);
     setSort(defaultSort);
-    setStars(undefined);
+    setStarMin(0);
+    setStarMax(Consts.MAX_STARS);
+    setVerified(false);
+    setRanked(false);
+    setQualified(false);
   };
 
   const hasFiltersApplied = () => {
-    return category !== undefined || sort !== undefined || stars !== undefined;
+    return (
+      category !== defaultCategory ||
+      sort !== defaultSort ||
+      starMin !== 0 ||
+      starMax !== Consts.MAX_STARS ||
+      verified ||
+      ranked ||
+      qualified
+    );
   };
 
   return (
@@ -50,10 +73,12 @@ export const MapFilterProvider = ({ children }: { children: ReactNode }) => {
       value={{
         category,
         sort,
-        stars,
+        starMin,
+        starMax,
         setCategory,
         setSort,
-        setStars,
+        setStarMin,
+        setStarMax,
         verified,
         ranked,
         qualified,

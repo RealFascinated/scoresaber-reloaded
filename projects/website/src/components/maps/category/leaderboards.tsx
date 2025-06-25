@@ -8,7 +8,6 @@ import SimpleTooltip from "@/components/simple-tooltip";
 import { Spinner } from "@/components/spinner";
 import { EmptyState } from "@/components/ui/empty-state";
 import { useIsMobile } from "@/hooks/use-is-mobile";
-import usePageNavigation from "@/hooks/use-page-navigation";
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
@@ -17,55 +16,35 @@ import { useQuery } from "@tanstack/react-query";
 import { useDebounce } from "@uidotdev/usehooks";
 import { ChartBarIcon } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { parseAsInteger, useQueryState } from "nuqs";
 
-type LeaderboardsProps = {
-  /**
-   * The selected page.
-   */
-  initialPage?: number;
-};
-
-export default function Leaderboards({ initialPage }: LeaderboardsProps) {
+export default function Leaderboards() {
   const isMobile = useIsMobile();
-  const pageNavigation = usePageNavigation();
 
   const filter = useMapFilter();
   const filterDebounced = useDebounce(filter, 100);
-  const [page, setPage] = useState(initialPage || 1);
+  const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
 
   const { data: leaderboardResponse, isLoading } = useQuery({
     queryKey: ["maps", filterDebounced, page],
     queryFn: async () =>
-      ApiServiceRegistry.getInstance().getScoreSaberService().lookupLeaderboards(page, {
-        category: filterDebounced.category,
-        sort: filterDebounced.sort,
-        stars: filterDebounced.stars,
-        ranked: filterDebounced.ranked,
-        qualified: filterDebounced.qualified,
-        verified: filterDebounced.verified,
-      }),
+      ApiServiceRegistry.getInstance()
+        .getScoreSaberService()
+        .lookupLeaderboards(page, {
+          category: filterDebounced.category,
+          sort: filterDebounced.sort,
+          stars: {
+            min: filterDebounced.starMin,
+            max: filterDebounced.starMax,
+          },
+          ranked: filterDebounced.ranked,
+          qualified: filterDebounced.qualified,
+          verified: filterDebounced.verified,
+        }),
     placeholderData: data => data,
   });
 
-  /**
-   * Reset the page when the filter changes
-   */
-  useEffect(() => {
-    if (!initialPage) {
-      setPage(1);
-    }
-  }, [filter, initialPage]);
-
-  /**
-   * Update the page url when the page changes
-   */
-  useEffect(() => {
-    pageNavigation.changePageUrl(`/maps?category=leaderboards&page=${page}`);
-  }, [page, pageNavigation]);
-
   const leaderboards = leaderboardResponse?.leaderboards;
-
   return (
     <Card>
       {isLoading && leaderboardResponse == undefined && (
