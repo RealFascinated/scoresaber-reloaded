@@ -1,3 +1,4 @@
+import SimpleTooltip from "@/components/simple-tooltip";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerStatChange } from "@ssr/common/player/player-stat-change";
@@ -24,7 +25,9 @@ const playerData = [
 
       return (
         <PlayerOverviewItem>
-          <GlobeAmericasIcon className="text-muted-foreground size-[20px]" />
+          <SimpleTooltip display={<p>Global Rank</p>}>
+            <GlobeAmericasIcon className="text-muted-foreground size-[20px]" />
+          </SimpleTooltip>
           <ChangeOverTime player={player} type={PlayerStatChange.Rank}>
             <Link href={`/ranking/${player.rankPages.global}`}>
               <p className="hover:text-primary font-medium transition-all hover:brightness-[66%]">
@@ -45,7 +48,12 @@ const playerData = [
 
       return (
         <PlayerOverviewItem>
-          <CountryFlag code={player.country} size={16} className="rounded-sm" />
+          <CountryFlag
+            code={player.country}
+            size={16}
+            className="rounded-sm"
+            tooltip={name => `Country Rank in ${name}`}
+          />
           <ChangeOverTime player={player} type={PlayerStatChange.CountryRank}>
             <Link href={`/ranking/${player.country}/${player.rankPages.country}`}>
               <p className="hover:text-primary font-medium transition-all hover:brightness-[66%]">
