@@ -50,8 +50,18 @@ export default function Settings() {
   // Handle body scroll lock
   useEffect(() => {
     document.body.style.overflow = isOpen ? "hidden" : "unset";
+
+    // Handle escape key
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        handleClose();
+      }
+    };
+    document.addEventListener("keydown", handleEscape);
+
     return () => {
       document.body.style.overflow = "unset";
+      document.removeEventListener("keydown", handleEscape);
     };
   }, [isOpen]);
 
