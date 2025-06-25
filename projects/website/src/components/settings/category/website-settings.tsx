@@ -1,18 +1,26 @@
 "use client";
 
 import { SettingIds, WebsiteLanding } from "@/common/database/database";
-import SimpleTooltip from "@/components/simple-tooltip";
+import { BACKGROUND_COVERS } from "@/components/background-cover";
 import { Form } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import useDatabase from "@/hooks/use-database";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useDebounce } from "@uidotdev/usehooks";
 import { ssrConfig } from "config";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useTheme } from "next-themes";
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Path, useForm } from "react-hook-form";
 import { IconType } from "react-icons";
-import { FaGlobe, FaImage, FaPalette, FaSnowflake, FaUndo } from "react-icons/fa";
+import { FaGlobe, FaImage, FaPalette, FaSnowflake } from "react-icons/fa";
 import { toast } from "sonner";
 import { z } from "zod";
 import { SettingCard } from "../setting-card";
@@ -28,6 +36,110 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
+// Custom component for background cover control
+const BackgroundCoverControl = (props: {
+  field: {
+    value: string | boolean;
+    onChange: (value: string | boolean) => void;
+    name?: string;
+  };
+}) => {
+  const [customValue, setCustomValue] = useState("");
+  const [selectedOption, setSelectedOption] = useState("default");
+  const [isInitialized, setIsInitialized] = useState(false);
+  const database = useDatabase();
+  const previousDebouncedValue = useRef<string>("");
+
+  // Debounce the custom value to prevent excessive database saves
+  const debouncedCustomValue = useDebounce(customValue, 500);
+
+  // Get both the selected option and custom value from database
+  const backgroundCoverOption = useLiveQuery(async () => await database.getBackgroundCover());
+  const customBackgroundCover = useLiveQuery(async () => await database.getCustomBackgroundCover());
+
+  // Initialize state based on current values from database
+  useEffect(() => {
+    if (backgroundCoverOption !== undefined) {
+      setSelectedOption(backgroundCoverOption);
+    }
+  }, [backgroundCoverOption]);
+
+  useEffect(() => {
+    if (customBackgroundCover !== undefined) {
+      setCustomValue(customBackgroundCover);
+    }
+  }, [customBackgroundCover]);
+
+  // Mark as initialized after both values are loaded
+  useEffect(() => {
+    if (backgroundCoverOption !== undefined && customBackgroundCover !== undefined) {
+      setIsInitialized(true);
+    }
+  }, [backgroundCoverOption, customBackgroundCover]);
+
+  // Save debounced custom value to database
+  useEffect(() => {
+    if (
+      isInitialized &&
+      selectedOption === "custom" &&
+      debouncedCustomValue !== previousDebouncedValue.current &&
+      debouncedCustomValue !== customBackgroundCover
+    ) {
+      previousDebouncedValue.current = debouncedCustomValue;
+      database.setCustomBackgroundCover(debouncedCustomValue);
+      props.field.onChange(debouncedCustomValue);
+    }
+  }, [debouncedCustomValue, isInitialized, selectedOption, customBackgroundCover]);
+
+  const handleSelectChange = async (value: string) => {
+    // Only save if component is initialized and value actually changed
+    if (!isInitialized || value === selectedOption) return;
+
+    setSelectedOption(value);
+
+    if (value === "custom") {
+      await database.setBackgroundCover("custom");
+    } else {
+      const cover = BACKGROUND_COVERS.find(c => c.id === value);
+      const coverValue = cover?.value || value;
+      await database.setBackgroundCover(value);
+      props.field.onChange(coverValue);
+    }
+  };
+
+  const handleCustomInputChange = (value: string) => {
+    setCustomValue(value);
+    // Don't save immediately - let the debounced effect handle it
+  };
+
+  return (
+    <div>
+      <Select onValueChange={handleSelectChange} value={selectedOption}>
+        <SelectTrigger>
+          <SelectValue placeholder="Select a background cover" />
+        </SelectTrigger>
+        <SelectContent>
+          {Object.values(BACKGROUND_COVERS).map(cover => (
+            <SelectItem key={cover.id} value={cover.id}>
+              {cover.name}
+            </SelectItem>
+          ))}
+          <SelectItem value="custom">Custom</SelectItem>
+        </SelectContent>
+      </Select>
+
+      {selectedOption === "custom" && (
+        <Input
+          placeholder="Enter a hex color or image URL..."
+          value={customValue}
+          onChange={e => handleCustomInputChange(e.target.value)}
+          className="mt-2"
+        />
+      )}
+    </div>
+  );
+};
+
 const settings: {
   id: string;
   title: string;
@@ -42,35 +154,9 @@ const settings: {
       {
         name: "backgroundCover" as Path<FormValues>,
         label: "Background Cover",
-        type: "text" as const,
-        description: "Set a custom background color or image URL",
-        customControl: (props: {
-          field: {
-            value: string | boolean;
-            onChange: (value: string | boolean) => void;
-            name?: string;
-          };
-        }) => (
-          <div className="flex gap-2">
-            <Input
-              placeholder="Enter a hex color or image URL..."
-              value={props.field.value as string}
-              onChange={e => props.field.onChange(e.target.value as string)}
-            />
-            <SimpleTooltip display="Reset to default background">
-              <button
-                type="button"
-                className="hover:bg-secondary/50 rounded-md p-2 transition-colors"
-                onClick={async () => {
-                  props.field.onChange("https://cdn.fascinated.cc/assets/background.jpg");
-                  toast.success("Background cover reset to default");
-                }}
-              >
-                <FaUndo className="size-4" />
-              </button>
-            </SimpleTooltip>
-          </div>
-        ),
+        type: "select" as const,
+        description: "Change the background cover of the website",
+        customControl: BackgroundCoverControl,
       },
     ],
   },
@@ -147,7 +233,6 @@ const WebsiteSettings = () => {
 
   async function onSubmit(values: FormValues) {
     const before = performance.now();
-    await database.setSetting(SettingIds.BackgroundCover, values.backgroundCover);
     await database.setSetting(SettingIds.SnowParticles, values.snowParticles);
     await database.setSetting(SettingIds.ShowKitty, values.showKitty);
     await database.setWebsiteLanding(values.websiteLanding);
@@ -175,9 +260,8 @@ const WebsiteSettings = () => {
 
     // Only set values if they're different from current values
     const currentValues = form.getValues();
-    if (currentValues.backgroundCover !== backgroundCover) {
-      form.setValue("backgroundCover", backgroundCover);
-    }
+
+    // Don't set backgroundCover here - let the BackgroundCoverControl handle it
     if (currentValues.snowParticles !== snowParticles) {
       form.setValue("snowParticles", snowParticles);
     }
@@ -195,7 +279,7 @@ const WebsiteSettings = () => {
   return (
     <div className="grid gap-6">
       <Form {...form}>
-        <form className="space-y-6">
+        <form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
           {settings.map(section => (
             <SettingCard key={section.id}>
               <SettingSection<FormValues>

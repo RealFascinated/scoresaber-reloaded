@@ -1,3 +1,4 @@
+import { BACKGROUND_COVERS } from "@/components/background-cover";
 import { DetailType } from "@ssr/common/detail-type";
 import Logger from "@ssr/common/logger";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
@@ -39,6 +40,7 @@ type Setting = {
 export enum SettingIds {
   MainPlayer = "mainPlayer",
   BackgroundCover = "backgroundCover",
+  CustomBackgroundCover = "customBackgroundCover",
   ShowKitty = "showKitty",
   SnowParticles = "snowParticles",
   WhatIfRange = "whatIfRange",
@@ -321,10 +323,12 @@ export default class Database extends Dexie {
    * @returns the background cover
    */
   async getBackgroundCover(): Promise<string> {
-    return (await this.getSetting<string>(
+    const cover = await this.getSetting<string>(
       SettingIds.BackgroundCover,
-      "https://cdn.fascinated.cc/assets/background.jpg"
-    ))!;
+      BACKGROUND_COVERS[0].id
+    );
+    // Default to the first cover if no cover is set
+    return cover ?? BACKGROUND_COVERS[0].id;
   }
 
   /**
@@ -334,6 +338,27 @@ export default class Database extends Dexie {
    */
   async setBackgroundCover(cover: string) {
     await this.setSetting(SettingIds.BackgroundCover, cover);
+  }
+
+  /**
+   * Gets the custom background cover from the database
+   *
+   * @returns the custom background cover
+   */
+  async getCustomBackgroundCover(): Promise<string> {
+    return (await this.getSetting<string>(
+      SettingIds.CustomBackgroundCover,
+      "https://cdn.fascinated.cc/assets/background.jpg"
+    ))!;
+  }
+
+  /**
+   * Sets the custom background cover in the database
+   *
+   * @param cover the custom background cover
+   */
+  async setCustomBackgroundCover(cover: string) {
+    await this.setSetting(SettingIds.CustomBackgroundCover, cover);
   }
 
   /**
