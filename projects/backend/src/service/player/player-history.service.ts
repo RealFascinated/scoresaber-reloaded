@@ -470,6 +470,8 @@ export class PlayerHistoryService {
       rankedScoresImproved: existingEntry?.rankedScoresImproved ?? 0,
       unrankedScoresImproved: existingEntry?.unrankedScoresImproved ?? 0,
       totalScores: playerToken.scoreStats.totalPlayCount,
+      totalUnrankedScores:
+        playerToken.scoreStats.totalPlayCount - playerToken.scoreStats.rankedPlayCount,
       totalRankedScores: playerToken.scoreStats.rankedPlayCount,
       totalScore: playerToken.scoreStats.totalScore,
       totalRankedScore: playerToken.scoreStats.totalRankedScore,

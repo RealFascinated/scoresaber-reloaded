@@ -99,12 +99,26 @@ const datasetConfig: DatasetConfig[] = [
     axisId: "y2",
     axisConfig: {
       reverse: false,
-      display: true,
+      display: false,
       hideOnMobile: true,
       displayName: "Total Ranked Scores",
       position: "right",
     },
     labelFormatter: (value: number) => `Total Ranked Scores: ${formatNumberWithCommas(value)}`,
+  },
+  {
+    title: "Total Unranked Scores",
+    field: "totalUnrankedScores",
+    color: "#6b7280",
+    axisId: "y3",
+    axisConfig: {
+      reverse: false,
+      display: false,
+      hideOnMobile: true,
+      displayName: "Total Unranked Scores",
+      position: "right",
+    },
+    labelFormatter: (value: number) => `Total Unranked Scores: ${formatNumberWithCommas(value)}`,
   },
   ...scoreBarsDataset,
 ];

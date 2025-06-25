@@ -100,6 +100,12 @@ export class PlayerHistoryEntry {
   public totalRankedScores?: number;
 
   /**
+   * The total amount of unranked scores
+   */
+  @prop()
+  public totalUnrankedScores?: number;
+
+  /**
    * The total amount of scores
    */
   @prop()
