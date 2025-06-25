@@ -132,9 +132,9 @@ const PageButton = React.memo(
       <Button
         asChild
         variant={isActive ? "primary" : "ghost"}
-        size="icon"
+        size="sm"
         className={cn(
-          "relative transition-opacity duration-150",
+          "relative h-9 min-w-[2.5rem] px-2 transition-opacity duration-150",
           isButtonLoading && "cursor-not-allowed opacity-50",
           buttonPage === currentPage && "cursor-not-allowed"
         )}

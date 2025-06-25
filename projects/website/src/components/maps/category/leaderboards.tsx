@@ -25,7 +25,11 @@ export default function Leaderboards() {
   const filterDebounced = useDebounce(filter, 100);
   const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
 
-  const { data: leaderboardResponse, isLoading } = useQuery({
+  const {
+    data: leaderboardResponse,
+    isLoading,
+    isRefetching,
+  } = useQuery({
     queryKey: ["maps", filterDebounced, page],
     queryFn: async () =>
       ApiServiceRegistry.getInstance()
@@ -122,7 +126,7 @@ export default function Leaderboards() {
             page={page}
             totalItems={leaderboardResponse.metadata.total}
             itemsPerPage={leaderboardResponse.metadata.itemsPerPage}
-            loadingPage={isLoading ? page : undefined}
+            loadingPage={isLoading || isRefetching ? page : undefined}
             onPageChange={newPage => setPage(newPage)}
             statsBelow={!isMobile}
           />
