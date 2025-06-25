@@ -74,7 +74,7 @@ const GenericChart = ({ config, labels }: Props) => {
           dataset.type === "bar" || dataset.type === "point" ? dataset.color : undefined,
         fill: false,
         lineTension: 0.4,
-        spanGaps: false,
+        spanGaps: true,
         yAxisID: dataset.axisId,
         hidden:
           id && dataset.label
@@ -85,6 +85,12 @@ const GenericChart = ({ config, labels }: Props) => {
         maxBarThickness: 12,
         pointRadius: dataset.type === "point" ? dataset.pointRadius || 3 : 0,
         showLine: dataset.type !== "point",
+        segment: {
+          borderDash: (ctx: any) => {
+            // Check if we're drawing across a gap using ctx.p0.skip or ctx.p1.skip
+            return ctx.p0.skip || ctx.p1.skip ? [5, 5] : [];
+          },
+        },
       };
 
       // Add type-specific configuration
