@@ -6,6 +6,8 @@ export const env = createEnv({
     MONGO_CONNECTION_STRING: z.string(),
     REDIS_URL: z.string(),
 
+    LOG_LEVEL: z.enum(["debug", "info", "warn", "error"]).optional(),
+
     MINIO_ENDPOINT: z.string(),
     MINIO_USE_SSL: z.boolean(),
     MINIO_PORT: z.number(),
@@ -48,7 +50,7 @@ export const env = createEnv({
    * This is the environment variables that are available on the server.
    */
   runtimeEnv: {
-    LOG_LEVEL: process.env.LOG_LEVEL,
+    LOG_LEVEL: process.env.LOG_LEVEL ?? "info",
 
     NEXT_PUBLIC_APP_ENV: process.env.NEXT_PUBLIC_APP_ENV ?? "development",
     NEXT_PUBLIC_APPLICATION_NAME: process.env.NEXT_PUBLIC_APPLICATION_NAME,
