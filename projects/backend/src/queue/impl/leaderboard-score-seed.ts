@@ -56,6 +56,10 @@ export class LeaderboardScoreSeedQueue extends Queue<number> {
 
     if (trackedScores >= firstPage.metadata.total) {
       Logger.info(`Leaderboard "${leaderboardId}" has no new scores to seed. Skipping...`);
+      await ScoreSaberLeaderboardModel.updateOne(
+        { _id: leaderboardId },
+        { $set: { seededScores: true } }
+      );
       return;
     }
 
