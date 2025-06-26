@@ -28,11 +28,9 @@ export class LeaderboardScoreRankService {
     const scoresCount = await ScoreSaberScoreModel.countDocuments({
       leaderboardId: leaderboard.id,
     });
-
-    // Use a simple and fast approach: get sorted scores and bulk update
     const scores = await ScoreSaberScoreModel.aggregate([
       { $match: { leaderboardId: leaderboard.id } },
-      { $sort: { modifiedScore: -1 } },
+      { $sort: { score: -1 } },
       { $project: { _id: 1 } },
     ]);
 
