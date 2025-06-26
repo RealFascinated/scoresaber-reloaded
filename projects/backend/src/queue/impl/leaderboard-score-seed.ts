@@ -15,7 +15,7 @@ import { QueueId } from "../queue-manager";
 
 export class LeaderboardScoreSeedQueue extends Queue<number> {
   constructor() {
-    super(QueueId.LeaderboardScoreRefreshQueue, false, "lifo");
+    super(QueueId.LeaderboardScoreRefreshQueue, false, "fifo");
 
     setImmediate(async () => {
       try {
