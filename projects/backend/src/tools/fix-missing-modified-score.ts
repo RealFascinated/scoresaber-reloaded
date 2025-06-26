@@ -48,13 +48,20 @@ async function migrateCurrentScores() {
 
     // Process scores in parallel for better performance
     const updatePromises = scores
-      .filter(score => score.modifiers.includes(Modifier.NF))
-      .map(score =>
-        ScoreSaberScoreModel.updateOne(
-          { _id: score._id },
-          { $set: { modifiedScore: score.score / 0.5 } }
-        )
-      );
+      .map(score => {
+        if (score.modifiers.includes(Modifier.NF)) {
+          return ScoreSaberScoreModel.updateOne(
+            { _id: score._id },
+            { $set: { modifiedScore: score.score / 0.5 } }
+          );
+        } else {
+          return ScoreSaberScoreModel.updateOne(
+            { _id: score._id },
+            { $set: { modifiedScore: score.score } }
+          );
+        }
+      })
+      .filter(promise => promise !== null);
 
     if (updatePromises.length > 0) {
       const results = await Promise.all(updatePromises);
@@ -107,14 +114,19 @@ async function migratePreviousScores() {
     );
 
     // Process scores in parallel for better performance
-    const updatePromises = scores
-      .filter(score => score.modifiers.includes(Modifier.NF))
-      .map(score =>
-        ScoreSaberPreviousScoreModel.updateOne(
+    const updatePromises = scores.map(score => {
+      if (score.modifiers.includes(Modifier.NF)) {
+        return ScoreSaberPreviousScoreModel.updateOne(
           { _id: score._id },
           { $set: { modifiedScore: score.score / 0.5 } }
-        )
-      );
+        );
+      } else {
+        return ScoreSaberPreviousScoreModel.updateOne(
+          { _id: score._id },
+          { $set: { modifiedScore: score.score } }
+        );
+      }
+    });
 
     if (updatePromises.length > 0) {
       const results = await Promise.all(updatePromises);
