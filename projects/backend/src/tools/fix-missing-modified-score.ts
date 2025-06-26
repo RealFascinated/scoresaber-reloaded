@@ -34,7 +34,6 @@ async function migrateCurrentScores() {
     const scores = await ScoreSaberScoreModel.find({
       modifiedScore: { $exists: false },
     })
-      .skip(skip)
       .limit(BATCH_SIZE)
       .lean();
 
@@ -101,7 +100,6 @@ async function migratePreviousScores() {
     const scores = await ScoreSaberPreviousScoreModel.find({
       modifiedScore: { $exists: false },
     })
-      .skip(skip)
       .limit(BATCH_SIZE)
       .lean();
 
