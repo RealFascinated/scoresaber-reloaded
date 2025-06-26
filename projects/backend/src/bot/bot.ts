@@ -15,6 +15,7 @@ import { Client } from "discordx";
 import "./command/force-refresh-player-scores";
 import "./command/force-track-player-statistics";
 import "./command/refresh-ranked-leaderboards";
+import "./command/update-leaderboard-ranks";
 
 export const DiscordChannels = {
   TRACKED_PLAYER_LOGS: env.DISCORD_CHANNEL_TRACKED_PLAYER_LOGS,
