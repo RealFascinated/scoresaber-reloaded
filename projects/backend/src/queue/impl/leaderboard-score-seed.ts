@@ -4,6 +4,7 @@ import {
   ScoreSaberLeaderboard,
   ScoreSaberLeaderboardModel,
 } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
+import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 import ScoreSaberLeaderboardScoresPageToken from "@ssr/common/types/token/scoresaber/leaderboard-scores-page";
 import { PlayerService } from "../../service/player/player.service";
@@ -46,6 +47,15 @@ export class LeaderboardScoreSeedQueue extends Queue<number> {
       .lookupLeaderboardScores(leaderboardId, 1);
     if (!firstPage) {
       Logger.warn(`Leaderboard "${leaderboardId}" has no scores`);
+      return;
+    }
+
+    const trackedScores = await ScoreSaberScoreModel.countDocuments({
+      leaderboardId,
+    });
+
+    if (trackedScores >= firstPage.metadata.total) {
+      Logger.info(`Leaderboard "${leaderboardId}" has no new scores to seed. Skipping...`);
       return;
     }
 
