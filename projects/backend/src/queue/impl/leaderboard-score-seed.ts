@@ -9,7 +9,6 @@ import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-sc
 import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 import ScoreSaberLeaderboardScoresPageToken from "@ssr/common/types/token/scoresaber/leaderboard-scores-page";
 import { LeaderboardService } from "../../service/leaderboard/leaderboard.service";
-import { PlayerService } from "../../service/player/player.service";
 import { ScoreService } from "../../service/score/score.service";
 import { Queue } from "../queue";
 import { QueueId } from "../queue-manager";
@@ -123,7 +122,7 @@ export class LeaderboardScoreSeedQueue extends Queue<number> {
     for (const scoreToken of token.scores) {
       try {
         const score = getScoreSaberScoreFromToken(scoreToken, leaderboard);
-        await PlayerService.trackPlayer(score.playerId);
+        // await PlayerService.trackPlayer(score.playerId);
         await ScoreService.trackScoreSaberScore(score, leaderboard, score.playerInfo);
       } catch (error) {
         Logger.error(

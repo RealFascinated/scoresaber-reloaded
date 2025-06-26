@@ -146,6 +146,14 @@ export class PlayerRankedService {
    * @param playerId the player's id
    */
   public static async updatePlayerScoreWeights(playerId: string) {
+    const player = await PlayerService.getPlayer(playerId);
+    if (!player.seededScores) {
+      Logger.info(
+        `[PLAYER] Player ${playerId} has not been seeded yet, skipping score weight update...`
+      );
+      return;
+    }
+
     const before = performance.now();
 
     // Get sorted scores with minimal data transfer
