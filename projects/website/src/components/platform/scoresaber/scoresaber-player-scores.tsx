@@ -321,6 +321,7 @@ export default function ScoreSaberPlayerScores({
               highlightedPlayerId={scoresMode === "cached" ? undefined : player.id}
               settings={{
                 allowLeaderboardPreview: true,
+                hideRank: scoresMode === "cached" && !score.leaderboard.ranked,
                 defaultLeaderboardScoresPage: scoresMode === "cached" ? 1 : undefined,
               }}
             />
