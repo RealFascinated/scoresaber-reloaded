@@ -42,7 +42,7 @@ const links: ReactElement<any>[] = [
         <span className="hidden xl:flex">Maps</span>
       </>
     }
-    href="/maps"
+    href="/maps/leaderboards"
   />,
   <SimpleNavLink
     key="overlay"
