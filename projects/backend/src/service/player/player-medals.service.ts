@@ -37,7 +37,6 @@ export class PlayerMedalsService {
 
     // Single aggregation that calculates everything in one go
     const results = await ScoreSaberScoreModel.aggregate([
-      // Match scores on ranked leaderboards with rank <= 10
       {
         $match: {
           leaderboardId: { $in: rankedLeaderboards.map(leaderboard => leaderboard.id) },

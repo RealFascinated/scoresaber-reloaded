@@ -24,28 +24,22 @@ export class LeaderboardLeaderboardsService {
     sort?: "dateRanked" | "stars";
     match?: { [field: string]: unknown };
   }): Promise<ScoreSaberLeaderboard[]> {
-    return CacheService.fetchWithCache(
-      CacheId.Leaderboards,
-      `leaderboard:ranked-leaderboards-${JSON.stringify(options)}`,
-      async () => {
-        const leaderboards: ScoreSaberLeaderboard[] = await ScoreSaberLeaderboardModel.aggregate([
-          { $match: { ranked: true, ...(options?.match ?? {}) } },
-          ...(options?.projection
-            ? [
-                {
-                  $project: {
-                    ...options.projection,
-                    dateRanked: 1,
-                  },
-                },
-              ]
-            : []),
-          { $sort: { dateRanked: -1 } },
-        ]);
+    const leaderboards: ScoreSaberLeaderboard[] = await ScoreSaberLeaderboardModel.aggregate([
+      { $match: { ranked: true, ...(options?.match ?? {}) } },
+      ...(options?.projection
+        ? [
+            {
+              $project: {
+                ...options.projection,
+                dateRanked: 1,
+              },
+            },
+          ]
+        : []),
+      { $sort: { dateRanked: -1 } },
+    ]);
 
-        return leaderboards.map(leaderboard => LeaderboardService.leaderboardToObject(leaderboard));
-      }
-    );
+    return leaderboards.map(leaderboard => LeaderboardService.leaderboardToObject(leaderboard));
   }
 
   /**
