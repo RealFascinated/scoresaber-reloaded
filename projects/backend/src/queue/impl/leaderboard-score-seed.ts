@@ -23,7 +23,7 @@ export class LeaderboardScoreSeedQueue extends Queue<number> {
           seededScores: null,
           ranked: true,
         })
-          .sort({ dateRanked: -1 }) // Sort by dateRanked descending (most recently ranked)
+          .sort({ plays: 1 }) // Sort by plays ascending (least played)
           .select("_id")
           .lean();
         const leaderboardIds = leaderboards.map(leaderboard => leaderboard._id);

@@ -1,41 +1,31 @@
 import { IsGuildUser } from "@discordx/utilities";
 import { ScoreSaberLeaderboardModel } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
-import { formatDuration } from "@ssr/common/utils/time-utils";
-import { ApplicationCommandOptionType, CommandInteraction } from "discord.js";
-import { Discord, Guard, Slash, SlashOption } from "discordx";
+import { CommandInteraction } from "discord.js";
+import { Discord, Guard, Slash } from "discordx";
 import { LeaderboardService } from "../../service/leaderboard/leaderboard.service";
 import { OwnerOnly } from "../lib/guards";
 
 @Discord()
 @Guard(IsGuildUser(OwnerOnly))
 export class ForceUpdateLeaderboardRanks {
-  @Slash({ description: "Force update a leaderboard's ranks", name: "update-leaderboard-ranks" })
-  async forceUpdateLeaderboardRanks(
-    @SlashOption({
-      description: "The leaderboard's id to update the ranks for",
-      name: "leaderboard",
-      required: true,
-      type: ApplicationCommandOptionType.String,
-    })
-    leaderboardId: number,
-    interaction: CommandInteraction
-  ) {
+  @Slash({ description: "Force update all leaderboard ranks", name: "update-leaderboard-ranks" })
+  async forceUpdateLeaderboardRanks(interaction: CommandInteraction) {
     await interaction.deferReply();
 
     try {
-      const leaderboard = await ScoreSaberLeaderboardModel.findById(leaderboardId);
-      if (!leaderboard) {
-        throw new Error("Leaderboard not found");
-      }
-      if (!leaderboard.ranked) {
-        throw new Error("Leaderboard is not ranked");
-      }
+      const leaderboards = await ScoreSaberLeaderboardModel.find({
+        ranked: true,
+      })
+        .sort({ plays: 1 })
+        .lean();
 
-      const { scoresCount, timeTaken } =
-        await LeaderboardService.refreshLeaderboardScoresRank(leaderboard);
+      for (const leaderboard of leaderboards) {
+        await LeaderboardService.refreshLeaderboardScoresRank(
+          LeaderboardService.leaderboardToObject(leaderboard)
+        );
+      }
       interaction.editReply({
-        content: `Updated ranks for leaderboard ${leaderboardId} in ${formatDuration(timeTaken)} (${formatNumberWithCommas(scoresCount)} scores)`,
+        content: `Updated ranks for all leaderboards`,
       });
     } catch (error) {
       interaction.editReply({

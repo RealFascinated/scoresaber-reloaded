@@ -18,23 +18,29 @@ export class LeaderboardScoreRankService {
     if (!leaderboard.ranked) {
       throw new BadRequestError("Leaderboard is not ranked, refreshing scores rank is not allowed");
     }
+    if (!leaderboard.seededScores) {
+      return {
+        scoresCount: 0,
+        timeTaken: 0,
+      };
+    }
 
     const scoresCount = await ScoreSaberScoreModel.countDocuments({
       leaderboardId: leaderboard.id,
     });
 
     // Use a simple and fast approach: get sorted scores and bulk update
-    const scoresWithRanks = await ScoreSaberScoreModel.aggregate([
+    const scores = await ScoreSaberScoreModel.aggregate([
       { $match: { leaderboardId: leaderboard.id } },
-      { $sort: { score: -1 } },
+      { $sort: { modifiedScore: -1 } },
       { $project: { _id: 1 } },
     ]);
 
     // Bulk update with calculated ranks
     await ScoreSaberScoreModel.bulkWrite(
-      scoresWithRanks.map((score, index) => ({
+      scores.map((score, index) => ({
         updateOne: {
-          filter: { _id: score._id },
+          filter: { _id: score._id.toString() },
           update: { rank: index + 1 },
         },
       }))

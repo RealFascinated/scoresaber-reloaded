@@ -37,10 +37,15 @@ export default class Score {
 
   /**
    * The base score for the score.
-   * @private
    */
   @prop({ required: true })
   public readonly score!: number;
+
+  /**
+   * The score with modifiers applied.
+   */
+  @prop({ required: true })
+  public modifiedScore!: number;
 
   /**
    * The accuracy of the score.
