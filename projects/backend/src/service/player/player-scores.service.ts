@@ -37,6 +37,7 @@ type PlayerRefreshResult = {
   totalScores: number;
   totalPages: number;
   timeTaken: number;
+  partialRefresh: boolean;
 };
 
 export class PlayerScoresService {
@@ -52,6 +53,11 @@ export class PlayerScoresService {
     playerToken: ScoreSaberPlayerToken
   ): Promise<PlayerRefreshResult> {
     Logger.info(`Refreshing scores for ${player._id}...`);
+
+    let playerScoresCount = await ScoreSaberScoreModel.countDocuments({
+      playerId: player._id,
+    });
+
     const startTime = performance.now();
 
     const result: PlayerRefreshResult = {
@@ -59,6 +65,7 @@ export class PlayerScoresService {
       totalScores: 0,
       totalPages: 0,
       timeTaken: 0,
+      partialRefresh: false,
     };
 
     // First, get the first page to determine total pages
@@ -74,71 +81,98 @@ export class PlayerScoresService {
 
     if (!firstPage) {
       Logger.info(`No scores found for player ${player._id}`);
+      result.partialRefresh = true;
+      result.totalScores = playerScoresCount;
+    } else if (playerScoresCount >= firstPage.metadata.total) {
+      Logger.info(`Player ${player._id} has no new scores to refresh. Skipping...`);
+      result.partialRefresh = true;
+      result.totalScores = playerScoresCount;
+    } else {
+      const totalPages = Math.ceil(firstPage.metadata.total / 100);
+      Logger.info(`Found ${totalPages} total pages for ${player._id}`);
+      result.totalPages = totalPages;
 
-      // Mark player as seeded
-      if (!player.seededScores) {
-        await PlayerModel.updateOne({ _id: player._id }, { $set: { seededScores: true } });
-      }
+      let processedScoresCount = 0;
 
-      result.timeTaken = performance.now() - startTime;
-      return result;
-    }
-
-    const totalPages = Math.ceil(firstPage.metadata.total / 100);
-    Logger.info(`Found ${totalPages} total pages for ${player._id}`);
-
-    // Process the first page
-    for (const score of firstPage.playerScores) {
-      const leaderboard = getScoreSaberLeaderboardFromToken(score.leaderboard);
-
-      const { tracked } = await ScoreService.trackScoreSaberScore(
-        getScoreSaberScoreFromToken(score.score, leaderboard, player._id),
-        leaderboard,
-        playerToken,
-        true,
-        false
-      );
-      if (tracked) {
-        result.missingScores++;
-      }
-      result.totalScores++;
-    }
-
-    // Process remaining pages
-    for (let page = 2; page <= totalPages; page++) {
-      Logger.info(`Processing page ${page} for ${player._id}...`);
-
-      const scoresPage = await ApiServiceRegistry.getInstance()
-        .getScoreSaberService()
-        .lookupPlayerScores({
-          playerId: player._id,
-          page: page,
-          limit: 100,
-          sort: "recent",
-          priority: CooldownPriority.BACKGROUND,
-        });
-
-      if (!scoresPage) {
-        Logger.warn(`Failed to fetch scores for ${player._id} on page ${page}.`);
-        continue;
-      }
-
-      for (const score of scoresPage.playerScores) {
+      // Process the first page
+      for (const score of firstPage.playerScores) {
         const leaderboard = getScoreSaberLeaderboardFromToken(score.leaderboard);
+
         const { tracked } = await ScoreService.trackScoreSaberScore(
           getScoreSaberScoreFromToken(score.score, leaderboard, player._id),
           leaderboard,
           playerToken,
           true,
+          false,
           false
         );
         if (tracked) {
           result.missingScores++;
         }
-        result.totalScores++;
+        playerScoresCount++;
+        processedScoresCount++;
+
+        if (processedScoresCount >= firstPage.metadata.total) {
+          Logger.info(
+            `Found ${result.missingScores}/${firstPage.metadata.total} missing scores for ${player._id}. All scores found, stopping refresh.`
+          );
+          result.partialRefresh = true;
+          break;
+        }
       }
 
-      Logger.info(`Completed page ${page} for ${player._id}`);
+      // Process remaining pages if needed
+      if (processedScoresCount < firstPage.metadata.total) {
+        for (let page = 2; page <= totalPages; page++) {
+          Logger.info(`Processing page ${page} for ${player._id}...`);
+
+          const scoresPage = await ApiServiceRegistry.getInstance()
+            .getScoreSaberService()
+            .lookupPlayerScores({
+              playerId: player._id,
+              page: page,
+              limit: 100,
+              sort: "recent",
+              priority: CooldownPriority.BACKGROUND,
+            });
+
+          if (!scoresPage) {
+            Logger.warn(`Failed to fetch scores for ${player._id} on page ${page}.`);
+            continue;
+          }
+
+          for (const score of scoresPage.playerScores) {
+            const leaderboard = getScoreSaberLeaderboardFromToken(score.leaderboard);
+            const { tracked } = await ScoreService.trackScoreSaberScore(
+              getScoreSaberScoreFromToken(score.score, leaderboard, player._id),
+              leaderboard,
+              playerToken,
+              true,
+              false,
+              false
+            );
+            if (tracked) {
+              result.missingScores++;
+            }
+            playerScoresCount++;
+            processedScoresCount++;
+
+            if (processedScoresCount >= firstPage.metadata.total) {
+              Logger.info(
+                `Found ${result.missingScores}/${firstPage.metadata.total} missing scores for ${player._id}. All scores found, stopping refresh.`
+              );
+              result.partialRefresh = true;
+              break;
+            }
+          }
+
+          Logger.info(`Completed page ${page} for ${player._id}`);
+
+          if (processedScoresCount >= firstPage.metadata.total) {
+            break;
+          }
+        }
+      }
     }
 
     // Mark player as seeded
@@ -146,11 +180,20 @@ export class PlayerScoresService {
       await PlayerModel.updateOne({ _id: player._id }, { $set: { seededScores: true } });
     }
 
-    result.totalPages = totalPages;
+    // Update player score weights if there are missing scores
+    if (result.missingScores > 0) {
+      await PlayerService.updatePlayerScoreWeights(player._id);
+    }
+
+    result.totalScores = playerScoresCount;
     result.timeTaken = performance.now() - startTime;
-    Logger.info(
-      `Finished refreshing scores for ${player._id}, total pages refreshed: ${totalPages} in ${formatDuration(result.timeTaken)}`
-    );
+
+    if (!result.partialRefresh) {
+      Logger.info(
+        `Finished refreshing scores for ${player._id}, total pages refreshed: ${result.totalPages} in ${formatDuration(result.timeTaken)}`
+      );
+    }
+
     return result;
   }
 

@@ -8,6 +8,7 @@ import { sendScoreNotification } from "../../common/score/score.util";
 import TrackedScoresMetric from "../../metrics/impl/player/tracked-scores";
 import BeatLeaderService from "../../service/beatleader.service";
 import CacheService from "../../service/cache.service";
+import { LeaderboardService } from "../../service/leaderboard/leaderboard.service";
 import MetricsService, { MetricType } from "../../service/metrics.service";
 import { PlayerService } from "../../service/player/player.service";
 import { ScoreService } from "../../service/score/score.service";
@@ -47,6 +48,11 @@ export class TrackScoreListener implements EventListener {
         beatLeaderScoreToken,
         isTop50GlobalScore
       );
+    }
+
+    // Update leaderboard scores rank
+    if (leaderboard.ranked) {
+      await LeaderboardService.refreshLeaderboardScoresRank(leaderboard);
     }
 
     // Invalidate caches

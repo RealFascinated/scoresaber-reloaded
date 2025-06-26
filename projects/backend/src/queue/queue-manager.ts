@@ -28,7 +28,7 @@ export class QueueManager implements EventListener {
       // Load the queue from the database
       const queueData = await QueueModel.findOne({ id: queue.id });
       if (queueData) {
-        Logger.info(`Loaded queue ${queue.id} with ${queueData.items.length} items from database`);
+        Logger.debug(`Loaded queue ${queue.id} with ${queueData.items.length} items from database`);
 
         // Re-add the items to the queue
         queueData.items.forEach(item => {
@@ -70,7 +70,7 @@ export class QueueManager implements EventListener {
           { $set: { items: queue.getQueue() } },
           { upsert: true, new: true }
         );
-        Logger.info(`Saved queue ${queue.id} with ${queue.getQueue().length} items to database`);
+        Logger.debug(`Saved queue ${queue.id} with ${queue.getQueue().length} items to database`);
       }
     }
   }

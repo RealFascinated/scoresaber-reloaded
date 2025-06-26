@@ -16,6 +16,7 @@ import { MapCharacteristic } from "@ssr/common/types/map-characteristic";
 import { getDifficulty } from "@ssr/common/utils/song-utils";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
 import { LeaderboardData, LeaderboardOptions } from "../../common/types/leaderboard";
+import { QueueId, QueueManager } from "../../queue/queue-manager";
 import BeatSaverService from "../beatsaver.service";
 import CacheService, { CacheId } from "../cache.service";
 import { LeaderboardService } from "./leaderboard.service";
@@ -59,6 +60,9 @@ export class LeaderboardCoreService {
         let leaderboard = foundLeaderboard;
         if (!leaderboard) {
           leaderboard = await LeaderboardService.fetchAndSaveLeaderboard(id);
+          if (leaderboard.ranked) {
+            QueueManager.getQueue(QueueId.LeaderboardScoreRefreshQueue).add(leaderboard.id);
+          }
         }
 
         return await LeaderboardService.createLeaderboardData(leaderboard, cached, id);
@@ -124,6 +128,9 @@ export class LeaderboardCoreService {
             difficulty,
             characteristic
           );
+          if (leaderboard.ranked) {
+            QueueManager.getQueue(QueueId.LeaderboardScoreRefreshQueue).add(leaderboard.id);
+          }
         }
 
         return await LeaderboardService.createLeaderboardData(

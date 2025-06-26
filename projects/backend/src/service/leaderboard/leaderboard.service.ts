@@ -3,6 +3,7 @@ import { LeaderboardHmdService } from "./leaderboard-hmd.service";
 import { LeaderboardLeaderboardsService } from "./leaderboard-leaderboards.service";
 import { LeaderboardNotificationsService } from "./leaderboard-notifications.service";
 import { LeaderboardRankingService } from "./leaderboard-ranking.service";
+import { LeaderboardScoreRankService } from "./leaderboard-score-rank.service";
 import { LeaderboardScoresService } from "./leaderboard-scores.service";
 
 export class LeaderboardService {
@@ -55,4 +56,8 @@ export class LeaderboardService {
 
   // LeaderboardHmdService methods
   public static getPlaysByHmd = LeaderboardHmdService.getPlaysByHmd;
+
+  // LeaderboardScoreRankService methods
+  public static refreshLeaderboardScoresRank =
+    LeaderboardScoreRankService.refreshLeaderboardScoresRank;
 }

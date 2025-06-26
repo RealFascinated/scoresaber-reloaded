@@ -12,7 +12,6 @@ import { QueueId } from "../queue-manager";
 
 export class PlayerScoreSeedQueue extends Queue<string> {
   constructor() {
-    // Use LIFO mode to ensure the most recently added players are processed first
     super(QueueId.PlayerScoreRefreshQueue, true, "lifo");
 
     // Load players efficiently using addAll
@@ -22,7 +21,7 @@ export class PlayerScoreSeedQueue extends Queue<string> {
         const playerIds = players.map(p => p._id);
         this.addAll(playerIds);
 
-        Logger.info(`Added ${playerIds.length} players to score refresh queue`);
+        Logger.debug(`Added ${playerIds.length} players to score refresh queue`);
       } catch (error) {
         Logger.error("Failed to load unseeded players:", error);
       }
@@ -40,13 +39,13 @@ export class PlayerScoreSeedQueue extends Queue<string> {
     }
 
     const player = await PlayerService.getPlayer(playerId, playerToken);
-    const { totalScores, missingScores, totalPages, timeTaken } =
+    const { totalScores, missingScores, totalPages, timeTaken, partialRefresh } =
       await PlayerService.refreshAllPlayerScores(player, playerToken);
 
     await logToChannel(
       DiscordChannels.PLAYER_SCORE_REFRESH_LOGS,
       new EmbedBuilder()
-        .setTitle("Player Score Refresh Complete")
+        .setTitle("Player Score Refresh Complete" + (partialRefresh ? " (Partial Refresh)" : ""))
         .setDescription(`🎯 **${player.name}**'s scores have been refreshed`)
         .addFields([
           {

@@ -1,4 +1,5 @@
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
+import { CooldownPriority } from "@ssr/common/cooldown";
 import Logger from "@ssr/common/logger";
 import {
   ScoreSaberLeaderboard,
@@ -7,6 +8,7 @@ import {
 import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 import ScoreSaberLeaderboardScoresPageToken from "@ssr/common/types/token/scoresaber/leaderboard-scores-page";
+import { LeaderboardService } from "../../service/leaderboard/leaderboard.service";
 import { PlayerService } from "../../service/player/player.service";
 import { ScoreService } from "../../service/score/score.service";
 import { Queue } from "../queue";
@@ -14,7 +16,7 @@ import { QueueId } from "../queue-manager";
 
 export class LeaderboardScoreSeedQueue extends Queue<number> {
   constructor() {
-    super(QueueId.LeaderboardScoreRefreshQueue, false, "fifo");
+    super(QueueId.LeaderboardScoreRefreshQueue, false, "lifo");
 
     setImmediate(async () => {
       try {
@@ -28,7 +30,7 @@ export class LeaderboardScoreSeedQueue extends Queue<number> {
         const leaderboardIds = leaderboards.map(leaderboard => leaderboard._id);
         this.addAll(leaderboardIds);
 
-        Logger.info(`Added ${leaderboardIds.length} leaderboards to score refresh queue`);
+        Logger.debug(`Added ${leaderboardIds.length} leaderboards to score refresh queue`);
       } catch (error) {
         Logger.error("Failed to load unseeded leaderboards:", error);
       }
@@ -44,7 +46,9 @@ export class LeaderboardScoreSeedQueue extends Queue<number> {
 
     const firstPage = await ApiServiceRegistry.getInstance()
       .getScoreSaberService()
-      .lookupLeaderboardScores(leaderboardId, 1);
+      .lookupLeaderboardScores(leaderboardId, 1, {
+        priority: CooldownPriority.BACKGROUND,
+      });
     if (!firstPage) {
       Logger.warn(`Leaderboard "${leaderboardId}" has no scores`);
       return;
@@ -75,17 +79,26 @@ export class LeaderboardScoreSeedQueue extends Queue<number> {
     while (currentPage <= totalPages) {
       const page = await ApiServiceRegistry.getInstance()
         .getScoreSaberService()
-        .lookupLeaderboardScores(leaderboardId, currentPage);
+        .lookupLeaderboardScores(leaderboardId, currentPage, {
+          priority: CooldownPriority.BACKGROUND,
+        });
 
       // Invalid page
       if (!page) {
-        Logger.warn(`Failed to fetch page ${currentPage} for leaderboard ${leaderboardId}`);
+        Logger.warn(
+          `Failed to fetch page ${currentPage}/${totalPages} for leaderboard ${leaderboardId}`
+        );
         break;
       }
 
       // Seed the scores
       await this.seedLeaderboardScores(leaderboard, page);
       currentPage++;
+    }
+
+    // Update leaderboard scores rank
+    if (leaderboard.ranked) {
+      await LeaderboardService.refreshLeaderboardScoresRank(leaderboard);
     }
 
     // Update the leaderboard

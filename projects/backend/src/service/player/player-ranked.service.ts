@@ -1,8 +1,11 @@
 import { ScoreSaberCurve } from "@ssr/common/leaderboard-curve/scoresaber-curve";
+import Logger from "@ssr/common/logger";
 import { PlayerModel } from "@ssr/common/model/player";
 import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import { PlayerRankedPpsResponse } from "@ssr/common/response/player-ranked-pps-response";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
+import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
+import { formatDuration } from "@ssr/common/utils/time-utils";
 import { PlayerService } from "./player.service";
 
 export class PlayerRankedService {
@@ -135,5 +138,57 @@ export class PlayerRankedService {
     }
 
     return foundPlayer;
+  }
+
+  /**
+   * Updates the weights of the player's scores using database aggregation
+   *
+   * @param playerId the player's id
+   */
+  public static async updatePlayerScoreWeights(playerId: string) {
+    const before = performance.now();
+
+    // Get sorted scores with minimal data transfer
+    const scores = await ScoreSaberScoreModel.aggregate([
+      {
+        $match: {
+          playerId: playerId,
+          pp: { $gt: 0 }, // Only consider scores with PP > 0
+        },
+      },
+      {
+        $sort: { pp: -1 }, // Sort by PP descending
+      },
+      {
+        $project: { _id: 1, pp: 1 },
+      },
+    ]);
+
+    if (scores.length === 0) {
+      const after = performance.now();
+      Logger.info(
+        `[PLAYER] No scores found for weight update in ${formatDuration(after - before)} for player ${playerId}`
+      );
+      return;
+    }
+
+    // Calculate weights and create bulk update operations
+    const bulkOps = scores.map((score, index) => ({
+      updateOne: {
+        filter: { _id: score._id },
+        update: {
+          $set: {
+            weight: Math.pow(ScoreSaberCurve.WEIGHT_COEFFICIENT, index),
+          },
+        },
+      },
+    }));
+
+    await ScoreSaberScoreModel.bulkWrite(bulkOps);
+
+    const after = performance.now();
+    Logger.info(
+      `[PLAYER] Score weights updated in ${formatDuration(after - before)} for player ${playerId} (${formatNumberWithCommas(scores.length)} scores)`
+    );
   }
 }

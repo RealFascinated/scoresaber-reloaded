@@ -1,8 +1,8 @@
 import { IsGuildUser } from "@discordx/utilities";
+import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { ApplicationCommandOptionType, CommandInteraction } from "discord.js";
 import { Discord, Guard, Slash, SlashOption } from "discordx";
-import { QueueId, QueueManager } from "../../queue/queue-manager";
-import ScoreSaberService from "../../service/scoresaber.service";
+import { PlayerService } from "../../service/player/player.service";
 import { OwnerOnly } from "../lib/guards";
 
 @Discord()
@@ -19,16 +19,24 @@ export class ForceRefreshPlayerScores {
     playerId: string,
     interaction: CommandInteraction
   ) {
+    interaction.deferReply();
+
     try {
-      const player = await ScoreSaberService.getPlayer(playerId);
+      const player = await PlayerService.getPlayer(playerId);
+      const playerToken = await ApiServiceRegistry.getInstance()
+        .getScoreSaberService()
+        .lookupPlayer(playerId);
+      if (!playerToken) {
+        throw new Error("Player not found");
+      }
 
-      QueueManager.getQueue(QueueId.PlayerScoreRefreshQueue).add(playerId);
+      await PlayerService.refreshAllPlayerScores(player, playerToken);
 
-      interaction.reply({
-        content: `Added ${player.name} to the refresh queue.`,
+      interaction.editReply({
+        content: `Refreshed ${player.name}'s scores.`,
       });
     } catch (error) {
-      interaction.reply({
+      interaction.editReply({
         content: error instanceof Error ? error.message : "An unknown error occurred",
       });
     }
