@@ -70,7 +70,7 @@ export class Player {
   /**
    * The player's medal count.
    */
-  @prop()
+  @prop({ index: true })
   public medals?: number;
 
   /**

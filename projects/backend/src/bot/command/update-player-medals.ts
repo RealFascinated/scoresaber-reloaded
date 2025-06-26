@@ -1,4 +1,5 @@
 import { IsGuildUser } from "@discordx/utilities";
+import { formatDuration } from "@ssr/common/utils/time-utils";
 import { CommandInteraction } from "discord.js";
 import { Discord, Guard, Slash } from "discordx";
 import { PlayerService } from "../../service/player/player.service";
@@ -12,10 +13,12 @@ export class ForceRefreshPlayerScores {
     await interaction.deferReply();
 
     try {
+      const before = performance.now();
       await PlayerService.updatePlayerMedalCounts();
+      const timeTaken = performance.now() - before;
 
       await interaction.editReply({
-        content: `Finished updating players' medal counts.`,
+        content: `Finished updating players' medal counts in ${formatDuration(timeTaken)}`,
       });
     } catch (error) {
       await interaction.editReply({
