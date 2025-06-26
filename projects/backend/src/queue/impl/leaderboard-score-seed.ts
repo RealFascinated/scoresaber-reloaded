@@ -31,7 +31,7 @@ export class LeaderboardScoreSeedQueue extends Queue<number> {
 
         Logger.debug(`Added ${leaderboardIds.length} leaderboards to score refresh queue`);
       } catch (error) {
-        Logger.error("Failed to load unseeded leaderboards:", error);
+        Logger.error("[LEADERBOARD SCORE SEED] Failed to load unseeded leaderboards:", error);
       }
     });
   }
@@ -39,7 +39,7 @@ export class LeaderboardScoreSeedQueue extends Queue<number> {
   protected async processItem(leaderboardId: number): Promise<void> {
     const leaderboard = await ScoreSaberLeaderboardModel.findById(leaderboardId);
     if (!leaderboard) {
-      Logger.warn(`Leaderboard "${leaderboardId}" not found`);
+      Logger.warn(`[LEADERBOARD SCORE SEED] Leaderboard "${leaderboardId}" not found`);
       return;
     }
 
@@ -49,7 +49,7 @@ export class LeaderboardScoreSeedQueue extends Queue<number> {
         priority: CooldownPriority.BACKGROUND,
       });
     if (!firstPage) {
-      Logger.warn(`Leaderboard "${leaderboardId}" has no scores`);
+      Logger.warn(`[LEADERBOARD SCORE SEED] Leaderboard "${leaderboardId}" has no scores`);
       return;
     }
 
@@ -58,7 +58,9 @@ export class LeaderboardScoreSeedQueue extends Queue<number> {
     });
 
     if (trackedScores >= firstPage.metadata.total) {
-      Logger.info(`Leaderboard "${leaderboardId}" has no new scores to seed. Skipping...`);
+      Logger.info(
+        `[LEADERBOARD SCORE SEED] Leaderboard "${leaderboardId}" has no new scores to seed. Skipping...`
+      );
       await ScoreSaberLeaderboardModel.updateOne(
         { _id: leaderboardId },
         { $set: { seededScores: true } }
@@ -76,6 +78,9 @@ export class LeaderboardScoreSeedQueue extends Queue<number> {
     let currentPage = 2;
 
     while (currentPage <= totalPages) {
+      Logger.info(
+        `[LEADERBOARD SCORE SEED] Seeding page ${currentPage}/${totalPages} for leaderboard ${leaderboardId}`
+      );
       const page = await ApiServiceRegistry.getInstance()
         .getScoreSaberService()
         .lookupLeaderboardScores(leaderboardId, currentPage, {
@@ -106,7 +111,9 @@ export class LeaderboardScoreSeedQueue extends Queue<number> {
       { $set: { seededScores: true } }
     );
 
-    Logger.info(`Successfully seeded scores for leaderboard ${leaderboardId}`);
+    Logger.info(
+      `[LEADERBOARD SCORE SEED] Successfully seeded scores for leaderboard ${leaderboardId}`
+    );
   }
 
   /**
@@ -126,7 +133,7 @@ export class LeaderboardScoreSeedQueue extends Queue<number> {
         await ScoreService.trackScoreSaberScore(score, leaderboard, score.playerInfo);
       } catch (error) {
         Logger.error(
-          `Failed to seed score for player ${scoreToken.leaderboardPlayerInfo.id} in leaderboard ${leaderboard._id}:`,
+          `[LEADERBOARD SCORE SEED] Failed to seed score for player ${scoreToken.leaderboardPlayerInfo.id} in leaderboard ${leaderboard._id}:`,
           error
         );
         // Continue processing other scores even if one fails
