@@ -1,0 +1,110 @@
+import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
+import Logger from "@ssr/common/logger";
+import {
+  ScoreSaberLeaderboard,
+  ScoreSaberLeaderboardModel,
+} from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
+import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
+import ScoreSaberLeaderboardScoresPageToken from "@ssr/common/types/token/scoresaber/leaderboard-scores-page";
+import { PlayerService } from "../../service/player/player.service";
+import { ScoreService } from "../../service/score/score.service";
+import { Queue } from "../queue";
+import { QueueId } from "../queue-manager";
+
+export class LeaderboardScoreSeedQueue extends Queue<number> {
+  constructor() {
+    super(QueueId.LeaderboardScoreRefreshQueue, false, "fifo");
+
+    setImmediate(async () => {
+      try {
+        const leaderboards = await ScoreSaberLeaderboardModel.find({
+          seededScores: null,
+          ranked: true,
+        })
+          .sort({ dateRanked: -1 }) // Sort by dateRanked descending (most recently ranked)
+          .select("_id")
+          .lean();
+        const leaderboardIds = leaderboards.map(leaderboard => leaderboard._id);
+        this.addAll(leaderboardIds);
+
+        Logger.info(`Added ${leaderboardIds.length} leaderboards to score refresh queue`);
+      } catch (error) {
+        Logger.error("Failed to load unseeded leaderboards:", error);
+      }
+    });
+  }
+
+  protected async processItem(leaderboardId: number): Promise<void> {
+    const leaderboard = await ScoreSaberLeaderboardModel.findById(leaderboardId);
+    if (!leaderboard) {
+      Logger.warn(`Leaderboard "${leaderboardId}" not found`);
+      return;
+    }
+
+    const firstPage = await ApiServiceRegistry.getInstance()
+      .getScoreSaberService()
+      .lookupLeaderboardScores(leaderboardId, 1);
+    if (!firstPage) {
+      Logger.warn(`Leaderboard "${leaderboardId}" has no scores`);
+      return;
+    }
+
+    // Seed the first page
+    await this.seedLeaderboardScores(leaderboard, firstPage);
+
+    // Calculate total pages
+    const totalPages = Math.ceil(firstPage.metadata.total / firstPage.metadata.itemsPerPage);
+
+    // Start from page 2 since we already processed page 1
+    let currentPage = 2;
+
+    while (currentPage <= totalPages) {
+      const page = await ApiServiceRegistry.getInstance()
+        .getScoreSaberService()
+        .lookupLeaderboardScores(leaderboardId, currentPage);
+
+      // Invalid page
+      if (!page) {
+        Logger.warn(`Failed to fetch page ${currentPage} for leaderboard ${leaderboardId}`);
+        break;
+      }
+
+      // Seed the scores
+      await this.seedLeaderboardScores(leaderboard, page);
+      currentPage++;
+    }
+
+    // Update the leaderboard
+    await ScoreSaberLeaderboardModel.updateOne(
+      { _id: leaderboardId },
+      { $set: { seededScores: true } }
+    );
+
+    Logger.info(`Successfully seeded scores for leaderboard ${leaderboardId}`);
+  }
+
+  /**
+   * Seeds the scores for a leaderboard.
+   *
+   * @param leaderboard the leaderboard object
+   * @param token the token of the leaderboard scores
+   */
+  private async seedLeaderboardScores(
+    leaderboard: ScoreSaberLeaderboard,
+    token: ScoreSaberLeaderboardScoresPageToken
+  ) {
+    for (const scoreToken of token.scores) {
+      try {
+        const score = getScoreSaberScoreFromToken(scoreToken, leaderboard);
+        await PlayerService.trackPlayer(score.playerId);
+        await ScoreService.trackScoreSaberScore(score, leaderboard, score.playerInfo);
+      } catch (error) {
+        Logger.error(
+          `Failed to seed score for player ${scoreToken.leaderboardPlayerInfo.id} in leaderboard ${leaderboard._id}:`,
+          error
+        );
+        // Continue processing other scores even if one fails
+      }
+    }
+  }
+}

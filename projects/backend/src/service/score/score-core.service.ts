@@ -6,6 +6,7 @@ import {
   ScoreSaberScoreModel,
 } from "@ssr/common/model/score/impl/scoresaber-score";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
+import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/leaderboard-player-info";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import { scoreToObject } from "../../common/score/score.util";
 import BeatLeaderService from "../beatleader.service";
@@ -28,7 +29,7 @@ export class ScoreCoreService {
   public static async trackScoreSaberScore(
     score: ScoreSaberScore,
     leaderboard: ScoreSaberLeaderboard,
-    player: ScoreSaberPlayerToken,
+    player: ScoreSaberPlayerToken | ScoreSaberLeaderboardPlayerInfoToken,
     fastCreate: boolean = false,
     log: boolean = true
   ): Promise<{

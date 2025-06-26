@@ -6,13 +6,27 @@ import GenericPlayerChart from "@/components/player/views/generic-player-chart";
 import { PlayerStatisticHistory } from "@ssr/common/player/player-statistic-history";
 import { isWholeNumber } from "@ssr/common/utils/number-utils";
 
-type Props = {
-  statisticHistory: PlayerStatisticHistory;
-  daysAmount: number;
-};
-
-// Dataset configuration for the chart
 const datasetConfig: DatasetConfig[] = [
+  {
+    title: "Average Accuracy",
+    field: "averageAccuracy",
+    color: "#48ff58",
+    axisId: "y2",
+    axisConfig: {
+      reverse: false,
+      display: true,
+      hideOnMobile: false,
+      displayName: "Average Accuracy",
+      position: "right",
+      valueFormatter: value => {
+        if (isWholeNumber(value)) {
+          return value.toString();
+        }
+        return value.toFixed(1);
+      },
+    },
+    labelFormatter: (value: number) => `Average Accuracy: ${value.toFixed(3)}%`,
+  },
   {
     title: "Average Ranked Accuracy",
     field: "averageRankedAccuracy",
@@ -53,29 +67,15 @@ const datasetConfig: DatasetConfig[] = [
     },
     labelFormatter: (value: number) => `Average Unranked Accuracy: ${value.toFixed(3)}%`,
   },
-  {
-    title: "Average Accuracy",
-    field: "averageAccuracy",
-    color: "#48ff58", // Changed to green
-    axisId: "y2",
-    axisConfig: {
-      reverse: false,
-      display: true,
-      hideOnMobile: false,
-      displayName: "Average Accuracy",
-      position: "right",
-      valueFormatter: value => {
-        if (isWholeNumber(value)) {
-          return value.toString();
-        }
-        return value.toFixed(1);
-      },
-    },
-    labelFormatter: (value: number) => `Average Accuracy: ${value.toFixed(3)}%`,
-  },
 ];
 
-export default function PlayerAccuracyChart({ statisticHistory, daysAmount }: Props) {
+export default function PlayerAccuracyChart({
+  statisticHistory,
+  daysAmount,
+}: {
+  statisticHistory: PlayerStatisticHistory;
+  daysAmount: number;
+}) {
   return (
     <GenericPlayerChart
       id="player-accuracy-chart"

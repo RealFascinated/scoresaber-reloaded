@@ -57,6 +57,12 @@ export default class ScoreSaberLeaderboardInternal extends Leaderboard {
    */
   @Prop({ required: false })
   readonly dateQualified?: Date;
+
+  /**
+   * Whether the leaderboard scores have been seeded.
+   */
+  @Prop({ required: false, index: true })
+  readonly seededScores?: boolean;
 }
 
 export type ScoreSaberLeaderboard = InstanceType<typeof ScoreSaberLeaderboardInternal>;
