@@ -10,7 +10,10 @@ export class LeaderboardScoreRankService {
    *
    * @param leaderboard the leaderboard to refresh the scores rank for
    */
-  public static async refreshLeaderboardScoresRank(leaderboard: ScoreSaberLeaderboard) {
+  public static async refreshLeaderboardScoresRank(leaderboard: ScoreSaberLeaderboard): Promise<{
+    scoresCount: number;
+    timeTaken: number;
+  }> {
     const before = performance.now();
     if (!leaderboard.ranked) {
       throw new BadRequestError("Leaderboard is not ranked, refreshing scores rank is not allowed");
@@ -41,5 +44,10 @@ export class LeaderboardScoreRankService {
     Logger.info(
       `[LEADERBOARD] Score ranks refreshed in ${formatDuration(after - before)} for leaderboard ${leaderboard.id} (${scoresCount} scores)`
     );
+
+    return {
+      scoresCount,
+      timeTaken: after - before,
+    };
   }
 }

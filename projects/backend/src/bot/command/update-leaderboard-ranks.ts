@@ -1,5 +1,6 @@
 import { IsGuildUser } from "@discordx/utilities";
 import { ScoreSaberLeaderboardModel } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
+import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import { ApplicationCommandOptionType, CommandInteraction } from "discord.js";
 import { Discord, Guard, Slash, SlashOption } from "discordx";
@@ -20,7 +21,7 @@ export class ForceUpdateLeaderboardRanks {
     leaderboardId: number,
     interaction: CommandInteraction
   ) {
-    interaction.deferReply();
+    await interaction.deferReply();
 
     try {
       const leaderboard = await ScoreSaberLeaderboardModel.findById(leaderboardId);
@@ -31,11 +32,10 @@ export class ForceUpdateLeaderboardRanks {
         throw new Error("Leaderboard is not ranked");
       }
 
-      const before = performance.now();
-      await LeaderboardService.refreshLeaderboardScoresRank(leaderboard);
-
+      const { scoresCount, timeTaken } =
+        await LeaderboardService.refreshLeaderboardScoresRank(leaderboard);
       interaction.editReply({
-        content: `Updated ranks for leaderboard ${leaderboardId} in ${formatDuration(performance.now() - before)}`,
+        content: `Updated ranks for leaderboard ${leaderboardId} in ${formatDuration(timeTaken)} (${formatNumberWithCommas(scoresCount)} scores)`,
       });
     } catch (error) {
       interaction.editReply({
