@@ -44,7 +44,7 @@ export default class Score {
   /**
    * The score with modifiers applied.
    */
-  @prop({ required: true })
+  @prop({ required: false })
   public modifiedScore!: number;
 
   /**
