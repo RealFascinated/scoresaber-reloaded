@@ -1,5 +1,5 @@
 import { Point } from "@influxdata/influxdb-client";
-import { PlayerModel } from "@ssr/common/model/player";
+import { PlayerModel } from "@ssr/common/model/player/player";
 import { getMidnightAlignedDate, TimeUnit } from "@ssr/common/utils/time-utils";
 import { MetricType } from "../../../service/metrics.service";
 import NumberMetric from "../../number-metric";

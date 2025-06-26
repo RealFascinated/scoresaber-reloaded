@@ -1,6 +1,6 @@
 import { ScoreSaberCurve } from "@ssr/common/leaderboard-curve/scoresaber-curve";
 import Logger from "@ssr/common/logger";
-import { PlayerModel } from "@ssr/common/model/player";
+import { PlayerModel } from "@ssr/common/model/player/player";
 import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import { PlayerRankedPpsResponse } from "@ssr/common/response/player-ranked-pps-response";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";

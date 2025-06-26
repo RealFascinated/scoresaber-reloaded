@@ -1,5 +1,6 @@
 import Logger from "@ssr/common/logger";
 import { QueueModel } from "@ssr/common/model/queue";
+import { isProduction } from "@ssr/common/utils/utils";
 import { EventListener } from "../event/event-listener";
 import { LeaderboardScoreSeedQueue } from "./impl/leaderboard-score-seed";
 import { PlayerScoreSeedQueue } from "./impl/player-score-seed-queue";
@@ -24,7 +25,7 @@ export class QueueManager implements EventListener {
    * @param queue the queue to add
    */
   public static async addQueue(queue: Queue<unknown>) {
-    if (queue.saveQueueToDatabase) {
+    if (queue.saveQueueToDatabase && isProduction()) {
       // Load the queue from the database
       const queueData = await QueueModel.findOne({ id: queue.id });
       if (queueData) {

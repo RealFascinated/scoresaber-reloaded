@@ -60,6 +60,8 @@ export default class ScoreSaberService {
           banned: player.banned,
           inactive: player.inactive,
           trackedSince: account?.trackedSince ?? new Date(),
+          medals: account?.medals ?? 0,
+          medalsRank: account?.medalsRank ?? 0,
           rankPages: {
             global: getPageFromRank(player.rank, 50),
             country: getPageFromRank(player.countryRank, 50),

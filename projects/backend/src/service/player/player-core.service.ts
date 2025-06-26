@@ -1,6 +1,6 @@
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
-import { Player, PlayerModel } from "@ssr/common/model/player";
+import { Player, PlayerModel } from "@ssr/common/model/player/player";
 import { PlayerRefreshResponse } from "@ssr/common/response/player-refresh-response";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import CacheService, { CacheId } from "../cache.service";

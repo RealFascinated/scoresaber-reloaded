@@ -485,6 +485,25 @@ class SSRApi {
     });
     return SuperJSON.parse<PlayerRankingsResponse>(response!);
   }
+
+  /**
+   * Gets the medal ranked players.
+   *
+   * @param page the page
+   * @param country the country
+   * @returns the medal ranked players
+   */
+  async getMedalRankedPlayers(page: number, country?: string) {
+    return Request.get<Page<ScoreSaberPlayer>>(
+      `${env.NEXT_PUBLIC_API_URL}/ranking/medals/${page}`,
+      {
+        returns: "json",
+        searchParams: {
+          ...(country ? { country: country } : {}),
+        },
+      }
+    );
+  }
 }
 
 export const ssrApi = new SSRApi();

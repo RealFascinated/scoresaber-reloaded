@@ -4,6 +4,7 @@ import { PlayerCoreService } from "./player-core.service";
 import { PlayerFriendScoresService } from "./player-friend-scores.service";
 import { PlayerHistoryService } from "./player-history.service";
 import { PlayerHmdService } from "./player-hmd.service";
+import { PlayerMedalsService } from "./player-medals.service";
 import { PlayerRankedService } from "./player-ranked.service";
 import { PlayerScoreHistoryService } from "./player-score-history.service";
 import { PlayerScoresService } from "./player-scores.service";
@@ -69,4 +70,12 @@ export class PlayerService {
   public static getPlayerFriendLeaderboardScores =
     PlayerFriendScoresService.getPlayerFriendLeaderboardScores;
   public static getPlayerFriendScores = PlayerFriendScoresService.getPlayerFriendScores;
+
+  // PlayerMedalsService methods
+  public static updatePlayerMedalCounts = PlayerMedalsService.updatePlayerMedalCounts;
+  public static updatePlayerGlobalMedalCounts = PlayerMedalsService.updatePlayerGlobalMedalCounts;
+  public static updatePlayerMedalsRank = PlayerMedalsService.updatePlayerMedalsRank;
+  public static updatePlayerMedalsRankForPlayers =
+    PlayerMedalsService.updatePlayerMedalsRankForPlayers;
+  public static getPlayerMedalRanking = PlayerMedalsService.getPlayerMedalRanking;
 }

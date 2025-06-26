@@ -20,6 +20,7 @@ import FriendsController from "./controller/friends.controller";
 import LeaderboardController from "./controller/leaderboard.controller";
 import MiniRankingController from "./controller/mini-ranking.controller";
 import PlayerHistoryController from "./controller/player-history.controller";
+import PlayerRankingController from "./controller/player-ranking.controller";
 import PlayerScoreHistoryController from "./controller/player-score-history.controller";
 import PlayerSearchController from "./controller/player-search.controller";
 import PlayerController from "./controller/player.controller";
@@ -225,6 +226,7 @@ app.use(
       TopScoresController,
       CachedScoresController,
       PlayerSearchController,
+      PlayerRankingController,
     ],
   })
 );

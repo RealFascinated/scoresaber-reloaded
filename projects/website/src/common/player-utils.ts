@@ -42,3 +42,17 @@ export function getFriendRankingColumnWidth(
   // Ensure minimum width of 160px for small numbers
   return Math.max(minWidth, 75 + rankDigits * 15);
 }
+
+/**
+ * Calculates the width of the first column in the medal ranking table.
+ *
+ * @param players the players to calculate the width for
+ * @returns the width of the first column
+ */
+export function getMedalRankingColumnWidth(players: ScoreSaberPlayer[]) {
+  const maxMedalsRank = players?.reduce((max, p) => Math.max(max, p.medalsRank ?? 0), 0) ?? 0;
+
+  // Calculate padding based on number of digits
+  const medalsRankDigits = maxMedalsRank > 0 ? Math.floor(Math.log10(maxMedalsRank)) + 1 : 0;
+  return medalsRankDigits * 15;
+}

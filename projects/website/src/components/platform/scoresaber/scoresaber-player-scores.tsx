@@ -322,9 +322,8 @@ export default function ScoreSaberPlayerScores({
               settings={{
                 allowLeaderboardPreview: true,
                 hideRank:
-                  (scoresMode === "cached" &&
-                    (!score.leaderboard.ranked || !score.leaderboard.seededScores)) ||
-                  (scoresMode === "live" && !score.leaderboard.seededScores),
+                  scoresMode === "cached" &&
+                  (!score.leaderboard.ranked || !score.leaderboard.seededScores),
                 defaultLeaderboardScoresPage: scoresMode === "cached" ? 1 : undefined,
               }}
             />

@@ -7,7 +7,7 @@ import {
   ScoreSaberLeaderboard,
   ScoreSaberLeaderboardModel,
 } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import { Player, PlayerModel } from "@ssr/common/model/player";
+import { Player, PlayerModel } from "@ssr/common/model/player/player";
 import {
   ScoreSaberScore,
   ScoreSaberScoreModel,

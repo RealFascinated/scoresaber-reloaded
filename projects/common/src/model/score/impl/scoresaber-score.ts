@@ -28,6 +28,8 @@ import { ScoreSaberScoreBase } from "./scoresaber-score-base";
 @index({ playerId: 1, leaderboardId: 1, score: 1 })
 @index({ playerId: 1, pp: -1 })
 @index({ playerId: 1, leaderboardId: 1, pp: -1 })
+@index({ leaderboardId: 1, rank: 1 })
+@index({ playerId: 1, rank: 1 })
 export class ScoreSaberScoreInternal extends ScoreSaberScoreBase {}
 
 class ScoreSaberScorePublic extends ScoreSaberScoreInternal {

@@ -1,4 +1,4 @@
-import { PlayerModel } from "@ssr/common/model/player";
+import { PlayerModel } from "@ssr/common/model/player/player";
 import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 
 export class PlayerHmdService {

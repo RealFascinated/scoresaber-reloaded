@@ -40,6 +40,16 @@ export default interface ScoreSaberPlayer extends ScoreSaberPlayerBase {
    * The date the player was first tracked.
    */
   trackedSince: Date;
+
+  /**
+   * The amount of global medals the player has.
+   */
+  medals: number;
+
+  /**
+   * The player's medal rank.
+   */
+  medalsRank: number;
 }
 
 export interface ScoreSaberPlayerBase extends Player {

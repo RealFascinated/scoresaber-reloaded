@@ -5,11 +5,12 @@ import FriendsButton from "@/components/friend/friends-button";
 import PlayerAndLeaderboardSearch from "@/components/navbar/player-and-leaderboard-search";
 import ProfileButton from "@/components/navbar/profile-button";
 import { CubeIcon } from "@heroicons/react/24/solid";
-import { ChartBarIcon, MusicIcon, TrendingUpIcon, TrophyIcon } from "lucide-react";
+import { MusicIcon, TrendingUpIcon, TrophyIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ReactElement } from "react";
+import { FaMedal } from "react-icons/fa";
 import Settings from "../settings/settings";
 
 const links: ReactElement<any>[] = [
@@ -24,15 +25,25 @@ const links: ReactElement<any>[] = [
     }
     href="/ranking"
   />,
+  // <SimpleNavLink
+  //   key="statistics"
+  //   content={
+  //     <>
+  //       <ChartBarIcon className="size-5" />
+  //       <span className="hidden xl:flex">Statistics</span>
+  //     </>
+  //   }
+  //   href="/statistics"
+  // />,
   <SimpleNavLink
-    key="statistics"
+    key="medals"
     content={
       <>
-        <ChartBarIcon className="size-5" />
-        <span className="hidden xl:flex">Statistics</span>
+        <FaMedal className="size-5" />
+        <span className="hidden xl:flex">Medals</span>
       </>
     }
-    href="/statistics"
+    href="/medals/1"
   />,
   <SimpleNavLink
     key="maps"

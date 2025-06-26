@@ -34,12 +34,20 @@ function PlayerHeader({ player }: { player: ScoreSaberPlayer }) {
         </p>
 
         {/* PP */}
-        <div className="text-pp">
+        <div className="flex flex-col">
           <CountUp
+            className="text-pp font-semibold"
             end={player.pp}
             duration={1}
             decimals={2}
             formattingFn={value => `${formatPp(value)}pp`}
+          />
+
+          <CountUp
+            className="text-sm"
+            end={player.medals}
+            duration={1}
+            formattingFn={value => `${formatNumberWithCommas(value)} Medals`}
           />
         </div>
       </div>

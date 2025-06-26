@@ -1,6 +1,6 @@
 import { getModelForClass, modelOptions, prop, Severity } from "@typegoose/typegoose";
 import type { Document } from "mongoose";
-import { type PeakRank } from "../player/peak-rank";
+import { type PeakRank } from "../../player/peak-rank";
 
 /**
  * The model for a player.
@@ -64,8 +64,20 @@ export class Player {
   /**
    * The player's country.
    */
-  @prop()
+  @prop({ index: true })
   public country?: string;
+
+  /**
+   * The player's medal count.
+   */
+  @prop()
+  public medals?: number;
+
+  /**
+   * The player's medal rank.
+   */
+  @prop({ index: true })
+  public medalsRank?: number;
 
   /**
    * The date the player was first tracked.
@@ -83,7 +95,7 @@ export class Player {
    * Gets the number of days tracked for this player.
    */
   public async getDaysTracked(): Promise<number> {
-    const PlayerHistoryEntryModel = (await import("./player/player-history-entry"))
+    const PlayerHistoryEntryModel = (await import("./player-history-entry"))
       .PlayerHistoryEntryModel;
     return await PlayerHistoryEntryModel.countDocuments({ playerId: this._id });
   }

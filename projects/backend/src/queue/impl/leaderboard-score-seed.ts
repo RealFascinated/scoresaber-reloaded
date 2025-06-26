@@ -9,6 +9,7 @@ import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-sc
 import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 import ScoreSaberLeaderboardScoresPageToken from "@ssr/common/types/token/scoresaber/leaderboard-scores-page";
 import { LeaderboardService } from "../../service/leaderboard/leaderboard.service";
+import { PlayerService } from "../../service/player/player.service";
 import { ScoreService } from "../../service/score/score.service";
 import { Queue } from "../queue";
 import { QueueId } from "../queue-manager";
@@ -110,6 +111,7 @@ export class LeaderboardScoreSeedQueue extends Queue<number> {
       { _id: leaderboardId },
       { $set: { seededScores: true } }
     );
+    await PlayerService.updatePlayerMedalCounts();
 
     Logger.info(
       `[LEADERBOARD SCORE SEED] Successfully seeded scores for leaderboard ${leaderboardId}`

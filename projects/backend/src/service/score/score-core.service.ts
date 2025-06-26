@@ -114,6 +114,10 @@ export class ScoreCoreService {
       await PlayerService.updatePlayerScoreWeights(player.id);
     }
 
+    if (leaderboard.ranked && leaderboard.seededScores && score.rank <= 5) {
+      await PlayerService.updatePlayerMedalCounts();
+    }
+
     if (log) {
       Logger.info(
         `Tracked ScoreSaber score "${score.scoreId}" for "${player.name}"(${player.id})${isImprovement ? " (improvement)" : ""} in ${(performance.now() - before).toFixed(0)}ms`

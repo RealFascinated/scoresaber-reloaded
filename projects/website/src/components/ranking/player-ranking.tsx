@@ -17,13 +17,13 @@ import { PlayerPpDisplay } from "./player-pp-display";
 export function PlayerRanking({
   player,
   mainPlayer,
-  relativePerformancePoints,
+  relativePerformancePoints = false,
   firstColumnWidth,
   showWeeklyRankChange = true,
 }: {
   player: ScoreSaberPlayerToken | ScoreSaberPlayer;
   mainPlayer?: ScoreSaberPlayer;
-  relativePerformancePoints: boolean;
+  relativePerformancePoints?: boolean;
   firstColumnWidth: number;
   showWeeklyRankChange?: boolean;
 }) {

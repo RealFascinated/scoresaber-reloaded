@@ -4,7 +4,7 @@ import { Metadata } from "./types/metadata";
 type FetchItemsFunction<T> = (fetchItems: FetchItems) => Promise<T[]>;
 
 export class Pagination<T> {
-  private itemsPerPage: number = 0;
+  public itemsPerPage: number = 0;
   private totalItems: number = 0;
   private items: T[] | null = null; // Optional array to hold set items
 

@@ -1,7 +1,7 @@
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { InternalServerError } from "@ssr/common/error/internal-server-error";
 import Logger from "@ssr/common/logger";
-import { Player, PlayerModel } from "@ssr/common/model/player";
+import { Player, PlayerModel } from "@ssr/common/model/player/player";
 import {
   PlayerHistoryEntry,
   PlayerHistoryEntryModel,

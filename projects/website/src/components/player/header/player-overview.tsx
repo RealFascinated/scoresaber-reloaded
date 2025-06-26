@@ -1,9 +1,11 @@
 import SimpleTooltip from "@/components/simple-tooltip";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
+import { MEDAL_COUNTS } from "@ssr/common/medal";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerStatChange } from "@ssr/common/player/player-stat-change";
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
 import Link from "next/link";
+import { FaMedal } from "react-icons/fa";
 import { ChangeOverTime } from "../../statistic/change-over-time";
 import { DailyChange } from "../../statistic/daily-change";
 import CountryFlag from "../../ui/country-flag";
@@ -62,6 +64,37 @@ const playerData = [
             </Link>
           </ChangeOverTime>
           <DailyChange type={PlayerStatChange.CountryRank} change={rankChange} />
+        </PlayerOverviewItem>
+      );
+    },
+  },
+  {
+    showWhenInactiveOrBanned: true,
+    render: (player: ScoreSaberPlayer) => {
+      return (
+        <PlayerOverviewItem>
+          <SimpleTooltip
+            display={
+              <div className="flex flex-col gap-1">
+                <span>Medals are awarded for the following ranks:</span>
+
+                {Object.entries(MEDAL_COUNTS).map(([rank, count]) => (
+                  <span key={rank} className="text-muted-foreground">
+                    #{rank}{" "}
+                    <span className="text-white">
+                      = {count} Medal{count !== 1 ? "s" : ""}
+                    </span>
+                  </span>
+                ))}
+              </div>
+            }
+            className="flex flex-row items-center gap-1 text-center"
+          >
+            <FaMedal className="text-muted-foreground size-[16px]" />
+            <p className="truncate text-sm transition-all hover:brightness-110">
+              {formatNumberWithCommas(player.medals)} Medals
+            </p>
+          </SimpleTooltip>
         </PlayerOverviewItem>
       );
     },

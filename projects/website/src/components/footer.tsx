@@ -64,6 +64,10 @@ const links: {
       name: "Score Feed",
       href: "/scores/live",
     },
+    {
+      name: "Statistics",
+      href: "/statistics",
+    },
   ],
 };
 
