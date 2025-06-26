@@ -106,7 +106,6 @@ export default function RankingData({ initialPage }: RankingDataProps) {
                 loadingPage={isLoading || isRefetching ? currentPage : undefined}
                 generatePageUrl={page => buildPageUrl(page)}
                 onPageChange={setCurrentPage}
-                showStats={false}
               />
             </div>
           )}

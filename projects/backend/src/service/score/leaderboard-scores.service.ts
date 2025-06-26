@@ -7,7 +7,6 @@ import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 import { Metadata } from "@ssr/common/types/metadata";
 import BeatLeaderService from "../beatleader.service";
 import { LeaderboardService } from "../leaderboard/leaderboard.service";
-import { PlayerService } from "../player/player.service";
 
 export class LeaderboardScoresService {
   /**
@@ -43,9 +42,9 @@ export class LeaderboardScoresService {
     }
 
     // ensure player is tracked (ran async to avoid blocking)
-    for (const score of leaderboardScores.scores) {
-      PlayerService.trackPlayer(score.leaderboardPlayerInfo.id);
-    }
+    // for (const score of leaderboardScores.scores) {
+    //   PlayerService.trackPlayer(score.leaderboardPlayerInfo.id);
+    // }
 
     // Process scores in parallel
     const scorePromises = leaderboardScores.scores.map(async token => {
