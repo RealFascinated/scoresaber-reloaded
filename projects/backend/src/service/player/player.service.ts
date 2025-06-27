@@ -55,7 +55,6 @@ export class PlayerService {
   public static getAccBadges = PlayerAccuraciesService.getAccBadges;
 
   // PlayerHmdService methods
-  public static getPlayerHMD = PlayerHmdService.getPlayerHMD;
   public static updatePlayerHmd = PlayerHmdService.updatePlayerHmd;
   public static getActiveHmdUsage = PlayerHmdService.getActiveHmdUsage;
   public static getPlayerMostCommonRecentHmd = PlayerHmdService.getPlayerMostCommonRecentHmd;
