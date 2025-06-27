@@ -8,12 +8,6 @@ export type LeaderboardResponse = {
   leaderboard: ScoreSaberLeaderboard;
 
   /**
-   * The amount of scores that we have
-   * tracked for this leaderboard.
-   */
-  trackedScores: number;
-
-  /**
    * The beatsaver map associated with this leaderboard.
    */
   beatsaver?: BeatSaverMapResponse;

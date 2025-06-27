@@ -15,6 +15,7 @@ import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
 import { MapCharacteristic } from "@ssr/common/types/map-characteristic";
 import { getDifficulty } from "@ssr/common/utils/song-utils";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
+import SuperJSON from "superjson";
 import { LeaderboardData, LeaderboardOptions } from "../../common/types/leaderboard";
 import { QueueId, QueueManager } from "../../queue/queue-manager";
 import BeatSaverService from "../beatsaver.service";
@@ -65,7 +66,7 @@ export class LeaderboardCoreService {
           }
         }
 
-        return await LeaderboardService.createLeaderboardData(leaderboard, cached, id);
+        return await LeaderboardService.createLeaderboardData(leaderboard, cached);
       }
     );
 
@@ -81,7 +82,6 @@ export class LeaderboardCoreService {
       leaderboard: leaderboardData.leaderboard,
       beatsaver: beatSaverMap,
       cached: leaderboardData.cached,
-      trackedScores: leaderboardData.trackedScores,
     };
   }
 
@@ -133,11 +133,7 @@ export class LeaderboardCoreService {
           }
         }
 
-        return await LeaderboardService.createLeaderboardData(
-          leaderboard,
-          cached,
-          leaderboard._id!.toString()
-        );
+        return await LeaderboardService.createLeaderboardData(leaderboard, cached);
       }
     );
 
@@ -153,7 +149,6 @@ export class LeaderboardCoreService {
       leaderboard: leaderboardData.leaderboard,
       beatsaver: beatSaverMap,
       cached: leaderboardData.cached,
-      trackedScores: leaderboardData.trackedScores,
     };
   }
 
@@ -173,35 +168,134 @@ export class LeaderboardCoreService {
       ...options,
     };
 
-    // First, check cache for each ID
-    const cachePromises = ids.map(async id => {
-      return await CacheService.fetchWithCache(
-        CacheId.Leaderboards,
-        `leaderboard:id:${id}`,
-        async () => {
-          const cachedLeaderboard = await ScoreSaberLeaderboardModel.findById(id).lean();
-          const { cached, foundLeaderboard } = LeaderboardService.validateCachedLeaderboard(
-            cachedLeaderboard,
-            options
-          );
+    // First, check Redis cache for all IDs in parallel
+    const cacheKeys = ids.map(id => `leaderboard:id:${id}`);
+    const cachedDataPromises = cacheKeys.map(key => CacheService.redisClient.get(key));
+    const cachedData = await Promise.all(cachedDataPromises);
 
-          let leaderboard = foundLeaderboard;
-          if (!leaderboard) {
-            try {
-              leaderboard = await LeaderboardService.fetchAndSaveLeaderboard(id);
-            } catch (error) {
-              Logger.warn(`Failed to fetch leaderboard for ID ${id}:`, error);
-              return null;
-            }
-          }
+    // Separate cached and uncached IDs
+    const uncachedIds: string[] = [];
+    const cachedResults: Array<{ id: string; data: LeaderboardData | null }> = [];
 
-          return await LeaderboardService.createLeaderboardData(leaderboard, cached, id);
+    // Process cached data
+    for (let i = 0; i < ids.length; i++) {
+      const id = ids[i];
+      const cachedDataItem = cachedData[i];
+
+      if (cachedDataItem) {
+        try {
+          const leaderboardData = SuperJSON.parse(cachedDataItem) as LeaderboardData;
+          cachedResults.push({ id, data: leaderboardData });
+        } catch {
+          Logger.warn(`Failed to parse cached data for leaderboard ${id}, removing from cache`);
+          // Fire and forget cache deletion
+          CacheService.redisClient.del(cacheKeys[i]).catch(() => {});
+          uncachedIds.push(id);
+          cachedResults.push({ id, data: null });
         }
+      } else {
+        uncachedIds.push(id);
+        cachedResults.push({ id, data: null });
+      }
+    }
+
+    // Check MongoDB cache for uncached IDs
+    // Convert string IDs to numbers for MongoDB query
+    const numericIds = uncachedIds.map(id => Number(id)).filter(id => !isNaN(id));
+
+    // Chunk the IDs to avoid MongoDB query size limits and improve performance
+    const CHUNK_SIZE = 100;
+    const mongoCachedLeaderboards: ScoreSaberLeaderboard[] = [];
+
+    for (let i = 0; i < numericIds.length; i += CHUNK_SIZE) {
+      const chunk = numericIds.slice(i, i + CHUNK_SIZE);
+      const chunkResults = await ScoreSaberLeaderboardModel.find({
+        _id: { $in: chunk },
+      }).lean();
+      mongoCachedLeaderboards.push(...chunkResults);
+    }
+
+    const mongoLeaderboardMap = new Map(
+      mongoCachedLeaderboards.map(lb => [lb._id!.toString(), lb])
+    );
+
+    const mongoCachedResults: Array<{ id: string; data: LeaderboardData | null }> = [];
+    const stillUncachedIds: string[] = [];
+
+    // Process all MongoDB results in parallel
+    const processPromises = uncachedIds.map(async id => {
+      const cachedLeaderboard = mongoLeaderboardMap.get(id) || null;
+      const { cached, foundLeaderboard } = LeaderboardService.validateCachedLeaderboard(
+        cachedLeaderboard,
+        options
       );
+
+      if (foundLeaderboard) {
+        const leaderboardData = await LeaderboardService.createLeaderboardData(
+          foundLeaderboard,
+          cached
+        );
+
+        // Cache the result in Redis
+        await CacheService.redisClient.set(
+          `leaderboard:id:${id}`,
+          SuperJSON.stringify(leaderboardData),
+          "EX",
+          TimeUnit.toSeconds(TimeUnit.Hour, 2)
+        );
+
+        return { id, data: leaderboardData };
+      } else {
+        return { id, data: null };
+      }
     });
 
-    const leaderboardDataResults = await Promise.all(cachePromises);
-    const allLeaderboards = leaderboardDataResults.filter(result => result !== null);
+    const processResults = await Promise.all(processPromises);
+
+    // Separate results
+    for (const result of processResults) {
+      if (result.data) {
+        mongoCachedResults.push(result);
+      } else {
+        stillUncachedIds.push(result.id);
+      }
+    }
+
+    // Fetch remaining uncached leaderboards from API
+    const fetchPromises = stillUncachedIds.map(async id => {
+      try {
+        const leaderboard = await LeaderboardService.fetchAndSaveLeaderboard(id);
+        const leaderboardData = await LeaderboardService.createLeaderboardData(
+          leaderboard,
+          false // Not cached since we just fetched it
+        );
+
+        // Cache the result
+        await CacheService.redisClient.set(
+          `leaderboard:id:${id}`,
+          SuperJSON.stringify(leaderboardData),
+          "EX",
+          TimeUnit.toSeconds(TimeUnit.Hour, 2) // 2 hours TTL for leaderboards
+        );
+
+        return { id, data: leaderboardData };
+      } catch (error) {
+        Logger.warn(`Failed to fetch leaderboard for ID ${id}:`, error);
+        return { id, data: null };
+      }
+    });
+
+    const fetchedResults = await Promise.all(fetchPromises);
+
+    // Combine all results
+    const allResults = new Map<string, LeaderboardData | null>();
+    [...cachedResults, ...mongoCachedResults, ...fetchedResults].forEach(result => {
+      allResults.set(result.id, result.data);
+    });
+
+    const allLeaderboards = ids
+      .map(id => allResults.get(id))
+      .filter((data): data is LeaderboardData => data !== null);
 
     // Get BeatSaver data if needed
     if (defaultOptions.includeBeatSaver) {
@@ -405,18 +499,16 @@ export class LeaderboardCoreService {
    *
    * @param leaderboard the leaderboard to create a data object from
    * @param cached whether the leaderboard is cached
-   * @param id the ID of the leaderboard
    * @returns a leaderboard data object
    */
   public static async createLeaderboardData(
     leaderboard: ScoreSaberLeaderboard,
-    cached: boolean,
-    id: string | number
+    cached: boolean
   ): Promise<LeaderboardData> {
     return {
       leaderboard: LeaderboardService.processLeaderboard(leaderboard),
       cached,
-      trackedScores: await LeaderboardService.getTrackedScoresCount(id),
+      trackedScores: 0, // Removed getTrackedScoresCount for performance
     };
   }
 

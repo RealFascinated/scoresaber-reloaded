@@ -15,7 +15,7 @@ type LeaderboardInfoProps = {
 };
 
 export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
-  const { leaderboard: leaderboardData, beatsaver: beatSaverMap, trackedScores } = leaderboard;
+  const { leaderboard: leaderboardData, beatsaver: beatSaverMap } = leaderboard;
   let statusDate = leaderboardData.dateRanked || leaderboardData.dateQualified;
   if (statusDate) {
     statusDate = new Date(statusDate);
@@ -66,17 +66,6 @@ export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
                   <span className="font-semibold">{formatNumber(leaderboardData.plays)}</span> (
                   {formatNumber(leaderboardData.dailyPlays)} today)
                 </p>
-
-                {/* Tracked Scores */}
-                <SimpleTooltip
-                  display="The amount of scores that ScoreSaber Reloaded has tracked for this leaderboard."
-                  side="bottom"
-                >
-                  <p>
-                    Tracked Scores:{" "}
-                    <span className="font-semibold">{formatNumber(trackedScores)}</span>
-                  </p>
-                </SimpleTooltip>
 
                 {/* Map Status (Ranked, Qualified, etc) */}
                 <div className="flex gap-2">
