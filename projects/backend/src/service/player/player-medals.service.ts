@@ -5,6 +5,7 @@ import { MEDAL_COUNTS } from "@ssr/common/medal";
 import { PlayerModel } from "@ssr/common/model/player/player";
 import { Page, Pagination } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
+import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import { LeaderboardService } from "../leaderboard/leaderboard.service";
 import ScoreSaberService from "../scoresaber.service";
@@ -158,13 +159,14 @@ export class PlayerMedalsService {
         .skip(start)
         .limit(pagination.itemsPerPage);
 
+      const cachedPlayers = new Map<string, ScoreSaberPlayerToken>();
+      for (const player of players) {
+        cachedPlayers.set(player.id, await ScoreSaberService.getCachedPlayer(player.id, true));
+      }
+
       return await Promise.all(
         players.map(async player =>
-          ScoreSaberService.getPlayer(
-            player.id,
-            DetailType.BASIC,
-            await ScoreSaberService.getCachedPlayer(player.id, true)
-          )
+          ScoreSaberService.getPlayer(player.id, DetailType.BASIC, cachedPlayers.get(player.id))
         )
       );
     });
