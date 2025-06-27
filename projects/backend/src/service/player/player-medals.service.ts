@@ -74,9 +74,11 @@ export class PlayerMedalsService {
         await callback(index + 1, rankedLeaderboards.length);
       }
 
-      Logger.debug(
-        `[PLAYER MEDALS] Finished processing leaderboard ${leaderboard.id} (${index + 1}/${rankedLeaderboards.length})`
-      );
+      if (index % 100 === 0) {
+        Logger.info(
+          `[PLAYER MEDALS] Finished processing leaderboard ${leaderboard.id} (${index + 1}/${rankedLeaderboards.length})`
+        );
+      }
     }
 
     // Get all players with medals > 0
