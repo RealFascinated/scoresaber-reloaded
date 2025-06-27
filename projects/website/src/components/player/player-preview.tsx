@@ -130,7 +130,7 @@ export default function PlayerPreview({
   const { data: player, isLoading } = useQuery({
     queryKey: ["player-preview", playerId],
     queryFn: () => ssrApi.getScoreSaberPlayer(playerId, { type: DetailType.BASIC }),
-    enabled: isOpen,
+    enabled: debouncedIsOpen,
   });
 
   return (
