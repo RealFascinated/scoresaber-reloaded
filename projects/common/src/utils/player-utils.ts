@@ -88,7 +88,7 @@ export function getPlayerStatisticChange(
 
   // Return if no valid `otherStats` or `statOther` was found
   if (statOther === undefined) {
-    return undefined;
+    return 0;
   }
 
   // Calculate change and apply the `isNegativeChange` modifier
