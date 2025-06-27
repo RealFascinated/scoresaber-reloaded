@@ -81,7 +81,6 @@ export default class BeatSaberPlusClient extends OverlayDataClient {
 
   onMessage(message: string) {
     const data = JSON.parse(message);
-    console.log(data);
     if (!isValidEventName(data._event)) {
       return;
     }
