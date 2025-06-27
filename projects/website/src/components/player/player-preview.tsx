@@ -25,13 +25,31 @@ function PlayerHeader({ player }: { player: ScoreSaberPlayer }) {
       <Avatar
         src={player.avatar}
         size={96}
-        className="pointer-events-none size-24 rounded-lg"
+        className={cn(
+          "pointer-events-none size-24 rounded-lg",
+          (player.inactive || player.banned) && "opacity-60"
+        )}
         alt={`${player.name}'s Profile Picture`}
       />
       <div className="min-w-0 flex-1">
-        <p className="block truncate text-2xl font-bold transition-all hover:brightness-[66%]">
+        <p
+          className={cn(
+            "block truncate text-2xl font-bold transition-all hover:brightness-[66%]",
+            (player.inactive || player.banned) && "opacity-60"
+          )}
+        >
           {player.name}
         </p>
+
+        {/* Status indicators */}
+        <div className="mb-1 flex flex-col gap-0.5">
+          {player.inactive && (
+            <p className="text-sm font-medium" style={{ color: "var(--inactive-account)" }}>
+              Inactive Account
+            </p>
+          )}
+          {player.banned && <p className="text-sm font-medium text-red-500">Banned Account</p>}
+        </div>
 
         {/* PP */}
         <div className="flex flex-col">
@@ -56,43 +74,58 @@ function PlayerHeader({ player }: { player: ScoreSaberPlayer }) {
 }
 
 function PlayerStats({ player }: { player: ScoreSaberPlayer }) {
+  // Don't show rank stats for inactive or banned players
+  const showRankStats = !player.inactive && !player.banned;
+
   return (
     <Card className="flex flex-col gap-2 text-sm">
-      <div className="flex items-center justify-between">
-        {/* Global Rank */}
-        <div className="grid grid-cols-[24px_1fr] items-center gap-2">
-          <div className="flex items-center justify-center">
-            <GlobeAmericasIcon className="text-muted-foreground size-5 min-w-5" />
-          </div>
-          <CountUp
-            end={player.rank}
-            duration={1}
-            formattingFn={value => `#${formatNumberWithCommas(value)}`}
-          />
-        </div>
+      {showRankStats && (
+        <>
+          <div className="flex items-center justify-between">
+            {/* Global Rank */}
+            <div className="grid grid-cols-[24px_1fr] items-center gap-2">
+              <div className="flex items-center justify-center">
+                <GlobeAmericasIcon className="text-muted-foreground size-5 min-w-5" />
+              </div>
+              <CountUp
+                end={player.rank}
+                duration={1}
+                formattingFn={value => `#${formatNumberWithCommas(value)}`}
+              />
+            </div>
 
-        {/* HMD */}
-        {player.hmd ? (
-          <div className="flex items-center gap-2">
-            <p>{player.hmd}</p>
-            <HMDIcon hmd={getHMDInfo(player.hmd as HMD)} />
+            {/* HMD */}
+            {player.hmd ? (
+              <div className="flex items-center gap-2">
+                <p>{player.hmd}</p>
+                <HMDIcon hmd={getHMDInfo(player.hmd as HMD)} />
+              </div>
+            ) : (
+              <p className="text-red-400">Unknown HMD</p>
+            )}
           </div>
-        ) : (
-          <p className="text-red-400">Unknown HMD</p>
-        )}
-      </div>
 
-      {/* Country Rank */}
-      <div className="flex items-center justify-between">
-        <div className="grid grid-cols-[24px_1fr] items-center gap-2">
-          <CountryFlag code={player.country} size={12} className="min-w-5" />
-          <CountUp
-            end={player.countryRank}
-            duration={1}
-            formattingFn={value => `#${formatNumberWithCommas(value)}`}
-          />
+          {/* Country Rank */}
+          <div className="flex items-center justify-between">
+            <div className="grid grid-cols-[24px_1fr] items-center gap-2">
+              <CountryFlag code={player.country} size={12} className="min-w-5" />
+              <CountUp
+                end={player.countryRank}
+                duration={1}
+                formattingFn={value => `#${formatNumberWithCommas(value)}`}
+              />
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Always show HMD if rank stats are hidden */}
+      {!showRankStats && player.hmd && (
+        <div className="flex items-center justify-center gap-2">
+          <p>{player.hmd}</p>
+          <HMDIcon hmd={getHMDInfo(player.hmd as HMD)} />
         </div>
-      </div>
+      )}
     </Card>
   );
 }
