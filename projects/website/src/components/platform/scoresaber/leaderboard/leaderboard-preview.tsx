@@ -1,13 +1,9 @@
 "use client";
 
-import Card from "@/components/card";
-import SimpleTooltip from "@/components/simple-tooltip";
 import { Spinner } from "@/components/spinner";
-import { ClockIcon, MusicalNoteIcon } from "@heroicons/react/24/solid";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
-import { getDifficultyName } from "@ssr/common/utils/song-utils";
-import { formatDate } from "@ssr/common/utils/time-utils";
+import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { useDebounce } from "@uidotdev/usehooks";
 import { StarIcon, TrendingUpIcon } from "lucide-react";
 import Image from "next/image";
@@ -49,22 +45,22 @@ export default function LeaderboardPreview({
             <Spinner />
           </div>
         ) : (
-          <div className="p-3">
+          <div className="space-y-4 p-4">
             {/* Header with song info */}
-            <div className="mb-3 flex items-center gap-3">
+            <div className="flex items-start gap-4">
               {leaderboard.songArt && (
                 <Image
                   src={leaderboard.songArt}
                   alt={`${leaderboard.songName} Cover Art`}
                   width={96}
                   height={96}
-                  className="pointer-events-none size-24 rounded-lg object-cover"
+                  className="pointer-events-none size-20 rounded-xl object-cover"
                 />
               )}
-              <div className="min-w-0 flex-1">
+              <div className="min-w-0 flex-1 space-y-2">
                 <Link
                   href={`/leaderboard/${leaderboard.id}`}
-                  className="block truncate text-2xl font-bold transition-all hover:brightness-[66%]"
+                  className="block truncate text-xl font-bold transition-all hover:brightness-[66%]"
                 >
                   {leaderboard.songName}
                 </Link>
@@ -77,52 +73,52 @@ export default function LeaderboardPreview({
               </div>
             </div>
 
-            {/* Stats card */}
-            <Card className="flex flex-col gap-2 text-sm">
-              <div className="flex items-center justify-between">
-                {/* Difficulty */}
-                <SimpleTooltip display="Song Difficulty">
-                  <div className="grid grid-cols-[24px_1fr] items-center gap-2">
-                    <div className="flex items-center justify-center">
-                      <MusicalNoteIcon className="text-muted-foreground size-5 min-w-5" />
+            {/* Stats section */}
+            <div className="relative">
+              {/* Background gradient effect */}
+              <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-pink-500/5" />
+
+              <div className="relative space-y-3 p-3">
+                {/* Stats display */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="relative">
+                      <div className="absolute inset-0 rounded-full bg-green-500/20 blur-sm" />
+                      <TrendingUpIcon className="relative size-6 text-green-500" />
                     </div>
-                    <p>{getDifficultyName(leaderboard.difficulty.difficulty)}</p>
-                  </div>
-                </SimpleTooltip>
-
-                {/* Stars */}
-                <SimpleTooltip display="Star Rating">
-                  <div className="flex items-center gap-2">
-                    {leaderboard.ranked ? (
-                      <CountUp end={leaderboard.stars} decimals={2} duration={1} />
-                    ) : (
-                      <p className="text-red-400">Unranked</p>
-                    )}
-                    <StarIcon className="size-5 min-w-5 text-yellow-400" />
-                  </div>
-                </SimpleTooltip>
-              </div>
-
-              <div className="flex items-center justify-between">
-                {/* Plays */}
-                <SimpleTooltip display="Total Plays">
-                  <div className="grid grid-cols-[24px_1fr] items-center gap-2">
-                    <div className="flex items-center justify-center">
-                      <TrendingUpIcon className="text-muted-foreground size-5 min-w-5" />
+                    <div>
+                      <p className="text-muted-foreground text-xs tracking-wide uppercase">Plays</p>
+                      <CountUp
+                        className="text-lg font-bold"
+                        end={leaderboard.plays}
+                        duration={1}
+                        formattingFn={value => formatNumberWithCommas(value)}
+                      />
                     </div>
-                    <CountUp end={leaderboard.plays} duration={1} />
                   </div>
-                </SimpleTooltip>
 
-                {/* Created Date */}
-                <SimpleTooltip display="Created Date">
-                  <div className="flex items-center gap-2">
-                    <p>{formatDate(leaderboard.timestamp)}</p>
-                    <ClockIcon className="text-muted-foreground size-5 min-w-5" />
+                  <div className="flex items-center gap-3">
+                    <div>
+                      <p className="text-muted-foreground text-xs tracking-wide uppercase">Stars</p>
+                      {leaderboard.ranked ? (
+                        <CountUp
+                          className="text-lg font-bold"
+                          end={leaderboard.stars}
+                          decimals={2}
+                          duration={1}
+                        />
+                      ) : (
+                        <p className="text-lg font-bold text-red-400">Unranked</p>
+                      )}
+                    </div>
+                    <div className="relative">
+                      <div className="absolute inset-0 rounded-full bg-yellow-500/20 blur-sm" />
+                      <StarIcon className="relative size-6 text-yellow-400" />
+                    </div>
                   </div>
-                </SimpleTooltip>
+                </div>
               </div>
-            </Card>
+            </div>
           </div>
         )}
       </PopoverContent>

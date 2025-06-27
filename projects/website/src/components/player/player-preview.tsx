@@ -14,59 +14,57 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import CountUp from "react-countup";
 import Avatar from "../avatar";
-import Card from "../card";
 import HMDIcon from "../hmd-icon";
 import CountryFlag from "../ui/country-flag";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 
 function PlayerHeader({ player }: { player: ScoreSaberPlayer }) {
   return (
-    <div className="mb-3 flex items-center gap-3">
+    <div className="flex items-center gap-4">
       <Avatar
         src={player.avatar}
         size={96}
         className={cn(
-          "pointer-events-none size-24 rounded-lg",
+          "pointer-events-none size-20 rounded-xl",
           (player.inactive || player.banned) && "opacity-60"
         )}
         alt={`${player.name}'s Profile Picture`}
       />
-      <div className="min-w-0 flex-1">
+      <div className="flex min-w-0 flex-1 flex-col justify-center space-y-2">
         <p
           className={cn(
-            "block truncate text-2xl font-bold transition-all hover:brightness-[66%]",
+            "block truncate text-xl font-bold transition-all hover:brightness-[66%]",
             (player.inactive || player.banned) && "opacity-60"
           )}
         >
           {player.name}
         </p>
 
-        {/* Status indicators */}
-        <div className="mb-1 flex flex-col gap-0.5">
-          {player.inactive && (
-            <p className="text-sm font-medium" style={{ color: "var(--inactive-account)" }}>
-              Inactive Account
-            </p>
-          )}
-          {player.banned && <p className="text-sm font-medium text-red-500">Banned Account</p>}
-        </div>
-
-        {/* PP */}
-        <div className="flex flex-col">
-          <CountUp
-            className="text-pp font-semibold"
-            end={player.pp}
-            duration={1}
-            decimals={2}
-            formattingFn={value => `${formatPp(value)}pp`}
-          />
-
-          <CountUp
-            className="text-sm"
-            end={player.medals}
-            duration={1}
-            formattingFn={value => `${formatNumberWithCommas(value)} Medals`}
-          />
+        {/* PP and Medals */}
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <div className="bg-pp/10 border-pp/20 flex items-center gap-2 rounded-lg border px-2 py-1">
+              <div className="bg-pp size-2 rounded-full" />
+              <CountUp
+                className="text-pp text-sm font-medium"
+                end={player.pp}
+                duration={1}
+                decimals={2}
+                formattingFn={value => `${formatPp(value)}pp`}
+              />
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 rounded-lg border border-yellow-500/20 bg-yellow-500/10 px-2 py-1">
+              <div className="size-2 rounded-full bg-yellow-500" />
+              <CountUp
+                className="text-sm font-medium text-yellow-500"
+                end={player.medals}
+                duration={1}
+                formattingFn={value => `${formatNumberWithCommas(value)} Medals`}
+              />
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -78,55 +76,86 @@ function PlayerStats({ player }: { player: ScoreSaberPlayer }) {
   const showRankStats = !player.inactive && !player.banned;
 
   return (
-    <Card className="flex flex-col gap-2 text-sm">
-      {showRankStats && (
-        <>
-          <div className="flex items-center justify-between">
-            {/* Global Rank */}
-            <div className="grid grid-cols-[24px_1fr] items-center gap-2">
-              <div className="flex items-center justify-center">
-                <GlobeAmericasIcon className="text-muted-foreground size-5 min-w-5" />
+    <div className="relative">
+      {/* Background gradient effect */}
+      <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-pink-500/5" />
+
+      <div className="relative space-y-3 p-3">
+        {showRankStats ? (
+          <>
+            {/* Rank display with visual hierarchy */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="relative">
+                  <div className="bg-pp/20 absolute inset-0 rounded-full blur-sm" />
+                  <GlobeAmericasIcon className="text-pp relative size-6" />
+                </div>
+                <div>
+                  <p className="text-muted-foreground text-xs tracking-wide uppercase">Global</p>
+                  <CountUp
+                    className="text-lg font-bold"
+                    end={player.rank}
+                    duration={1}
+                    formattingFn={value => `#${formatNumberWithCommas(value)}`}
+                  />
+                </div>
               </div>
-              <CountUp
-                end={player.rank}
-                duration={1}
-                formattingFn={value => `#${formatNumberWithCommas(value)}`}
-              />
+
+              <div className="flex items-center gap-3">
+                <div>
+                  <p className="text-muted-foreground text-xs tracking-wide uppercase">Country</p>
+                  <CountUp
+                    className="text-lg font-bold"
+                    end={player.countryRank}
+                    duration={1}
+                    formattingFn={value => `#${formatNumberWithCommas(value)}`}
+                  />
+                </div>
+                <div className="relative">
+                  <div className="absolute inset-0 rounded-full bg-yellow-500/20 blur-sm" />
+                  <CountryFlag code={player.country} size={14} className="relative size-6" />
+                </div>
+              </div>
             </div>
 
-            {/* HMD */}
-            {player.hmd ? (
-              <div className="flex items-center gap-2">
-                <p>{player.hmd}</p>
-                <HMDIcon hmd={getHMDInfo(player.hmd as HMD)} />
+            {/* HMD with animated border */}
+            {player.hmd && (
+              <div className="border-muted-foreground/30 flex items-center justify-center gap-2 rounded-lg border border-dashed p-2">
+                <div className="relative">
+                  <div className="absolute inset-0 animate-pulse rounded-full bg-green-500/20 blur-sm" />
+                  <HMDIcon hmd={getHMDInfo(player.hmd as HMD)} />
+                </div>
+                <span className="font-medium">{player.hmd}</span>
               </div>
-            ) : (
-              <p className="text-red-400">Unknown HMD</p>
+            )}
+          </>
+        ) : (
+          /* Status display for inactive/banned players */
+          <div className="space-y-2 text-center">
+            <div className="relative inline-block">
+              <div className="bg-destructive/20 absolute inset-0 animate-pulse rounded-full blur-md" />
+              <div className="bg-destructive relative mx-auto size-4 rounded-full" />
+            </div>
+            <div>
+              <p className="text-destructive font-semibold">
+                {player.banned ? "ACCOUNT BANNED" : "ACCOUNT INACTIVE"}
+              </p>
+              <p className="text-muted-foreground text-xs">
+                {player.banned
+                  ? "This account has been suspended"
+                  : "This account is no longer active"}
+              </p>
+            </div>
+            {player.hmd && (
+              <div className="border-muted-foreground/20 flex items-center justify-center gap-2 border-t pt-2">
+                <HMDIcon hmd={getHMDInfo(player.hmd as HMD)} />
+                <span className="text-muted-foreground text-sm">{player.hmd}</span>
+              </div>
             )}
           </div>
-
-          {/* Country Rank */}
-          <div className="flex items-center justify-between">
-            <div className="grid grid-cols-[24px_1fr] items-center gap-2">
-              <CountryFlag code={player.country} size={12} className="min-w-5" />
-              <CountUp
-                end={player.countryRank}
-                duration={1}
-                formattingFn={value => `#${formatNumberWithCommas(value)}`}
-              />
-            </div>
-          </div>
-        </>
-      )}
-
-      {/* Always show HMD if rank stats are hidden */}
-      {!showRankStats && player.hmd && (
-        <div className="flex items-center justify-center gap-2">
-          <p>{player.hmd}</p>
-          <HMDIcon hmd={getHMDInfo(player.hmd as HMD)} />
-        </div>
-      )}
-    </Card>
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -177,7 +206,7 @@ export default function PlayerPreview({
         {children}
       </PopoverTrigger>
       <PopoverContent
-        className="w-[400px] p-0"
+        className="w-[450px] p-0"
         onMouseEnter={() => setIsOpen(true)}
         onMouseLeave={() => setIsOpen(false)}
       >
@@ -186,7 +215,7 @@ export default function PlayerPreview({
             <Spinner />
           </div>
         ) : (
-          <div className="p-3">
+          <div className="space-y-4 p-4">
             {/* Player header */}
             {useLink ? (
               <Link
