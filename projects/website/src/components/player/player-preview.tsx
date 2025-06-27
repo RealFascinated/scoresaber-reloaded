@@ -102,6 +102,10 @@ function PlayerStats({ player }: { player: ScoreSaberPlayer }) {
               </div>
 
               <div className="flex items-center gap-3">
+                <div className="relative">
+                  <div className="absolute inset-0 rounded-full bg-yellow-500/20 blur-sm" />
+                  <CountryFlag code={player.country} size={14} className="relative size-6" />
+                </div>
                 <div>
                   <p className="text-muted-foreground text-xs tracking-wide uppercase">Country</p>
                   <CountUp
@@ -110,10 +114,6 @@ function PlayerStats({ player }: { player: ScoreSaberPlayer }) {
                     duration={1}
                     formattingFn={value => `#${formatNumberWithCommas(value)}`}
                   />
-                </div>
-                <div className="relative">
-                  <div className="absolute inset-0 rounded-full bg-yellow-500/20 blur-sm" />
-                  <CountryFlag code={player.country} size={14} className="relative size-6" />
                 </div>
               </div>
             </div>

@@ -4,8 +4,9 @@ import { Spinner } from "@/components/spinner";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
+import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
 import { useDebounce } from "@uidotdev/usehooks";
-import { StarIcon, TrendingUpIcon } from "lucide-react";
+import { AlertCircle, StarIcon, TrendingUpIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
@@ -47,7 +48,7 @@ export default function LeaderboardPreview({
         ) : (
           <div className="space-y-4 p-4">
             {/* Header with song info */}
-            <div className="flex items-start gap-4">
+            <div className="flex items-center gap-4">
               {leaderboard.songArt && (
                 <Image
                   src={leaderboard.songArt}
@@ -57,7 +58,7 @@ export default function LeaderboardPreview({
                   className="pointer-events-none size-20 rounded-xl object-cover"
                 />
               )}
-              <div className="min-w-0 flex-1 space-y-2">
+              <div className="flex min-w-0 flex-1 flex-col justify-center space-y-1">
                 <Link
                   href={`/leaderboard/${leaderboard.id}`}
                   className="block truncate text-xl font-bold transition-all hover:brightness-[66%]"
@@ -98,8 +99,18 @@ export default function LeaderboardPreview({
                   </div>
 
                   <div className="flex items-center gap-3">
+                    <div className="relative">
+                      <div className="absolute inset-0 rounded-full bg-yellow-500/20 blur-sm" />
+                      {leaderboard.ranked ? (
+                        <StarIcon className="relative size-6 text-yellow-400" />
+                      ) : (
+                        <AlertCircle className="relative size-6 text-red-400" />
+                      )}
+                    </div>
                     <div>
-                      <p className="text-muted-foreground text-xs tracking-wide uppercase">Stars</p>
+                      <p className="text-muted-foreground text-xs tracking-wide uppercase">
+                        {leaderboard.ranked ? "Stars" : "Status"}
+                      </p>
                       {leaderboard.ranked ? (
                         <CountUp
                           className="text-lg font-bold"
@@ -111,11 +122,26 @@ export default function LeaderboardPreview({
                         <p className="text-lg font-bold text-red-400">Unranked</p>
                       )}
                     </div>
-                    <div className="relative">
-                      <div className="absolute inset-0 rounded-full bg-yellow-500/20 blur-sm" />
-                      <StarIcon className="relative size-6 text-yellow-400" />
-                    </div>
                   </div>
+                </div>
+
+                {/* Difficulty Info */}
+                <div className="border-muted-foreground/30 flex items-center justify-center gap-2 rounded-lg border border-dashed p-2">
+                  <div className="relative">
+                    <div className="absolute inset-0 animate-pulse rounded-full bg-blue-500/20 blur-sm" />
+                    <div
+                      className="relative size-4 rounded-full"
+                      style={{
+                        backgroundColor: getDifficulty(leaderboard.difficulty.difficulty).color,
+                      }}
+                    />
+                  </div>
+                  <span
+                    className="font-medium"
+                    style={{ color: getDifficulty(leaderboard.difficulty.difficulty).color }}
+                  >
+                    {getDifficultyName(leaderboard.difficulty.difficulty)}
+                  </span>
                 </div>
               </div>
             </div>
