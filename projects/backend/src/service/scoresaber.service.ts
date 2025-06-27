@@ -59,7 +59,7 @@ export default class ScoreSaberService {
           rank: player.rank,
           countryRank: player.countryRank,
           pp: player.pp,
-          hmd: await PlayerService.getPlayerHMD(player.id),
+          hmd: account?.hmd ?? undefined,
           joinedDate: new Date(player.firstSeen),
           role: player.role ?? undefined,
           permissions: player.permissions,
@@ -71,6 +71,9 @@ export default class ScoreSaberService {
           rankPages: {
             global: getPageFromRank(player.rank, 50),
             country: getPageFromRank(player.countryRank, 50),
+            ...(account?.medalsRank !== undefined
+              ? { medals: getPageFromRank(account.medalsRank, 50) }
+              : {}),
           },
         } as ScoreSaberPlayer;
 
@@ -79,15 +82,16 @@ export default class ScoreSaberService {
         }
 
         // For full type, run all operations in parallel
-        const [updatedAccount, ppBoundaries, accBadges, statisticHistory, playerHMD] =
-          await Promise.all([
-            account ? PlayerService.updatePeakRank(id, player) : undefined,
-            account ? PlayerService.getPlayerPpBoundary(id, 1) : [],
-            account ? PlayerService.getAccBadges(id) : {},
-            PlayerService.getPlayerStatisticHistory(player, new Date(), getDaysAgoDate(30)),
-            PlayerService.getPlayerHMD(player.id),
-            PlayerService.updatePlayerName(player.id, player.name),
-          ]);
+        const [updatedAccount, ppBoundaries, accBadges, statisticHistory] = await Promise.all([
+          account ? PlayerService.updatePeakRank(id, player) : undefined,
+          account ? PlayerService.getPlayerPpBoundary(id, 1) : [],
+          account ? PlayerService.getAccBadges(id) : {},
+          PlayerService.getPlayerStatisticHistory(player, new Date(), getDaysAgoDate(30), {
+            rank: true,
+            countryRank: true,
+            pp: true,
+          }),
+        ]);
 
         // Calculate all statistic changes in parallel
         const [dailyChanges, weeklyChanges, monthlyChanges] = await Promise.all([
@@ -98,7 +102,6 @@ export default class ScoreSaberService {
 
         return {
           ...basePlayer,
-          hmd: playerHMD,
           bio: {
             lines: player.bio ? sanitize(player.bio).split("\n") : [],
             linesStripped: player.bio
@@ -119,10 +122,6 @@ export default class ScoreSaberService {
           accBadges,
           peakRank: updatedAccount?.peakRank,
           statistics: player.scoreStats,
-          rankPages: {
-            global: getPageFromRank(player.rank, 50),
-            country: getPageFromRank(player.countryRank, 50),
-          },
         } as ScoreSaberPlayer;
       }
     );

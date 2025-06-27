@@ -3,17 +3,6 @@ import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-sc
 
 export class PlayerHmdService {
   /**
-   * Gets a player's HMD.
-   *
-   * @param id the player's id
-   * @returns the player's HMD
-   */
-  public static async getPlayerHMD(id: string): Promise<string | undefined> {
-    const player = await PlayerModel.findById(id).select("hmd").lean();
-    return player?.hmd;
-  }
-
-  /**
    * Updates the player's HMD.
    *
    * @param playerId the player's id
