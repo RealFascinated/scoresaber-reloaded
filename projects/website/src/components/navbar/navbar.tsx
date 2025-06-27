@@ -25,21 +25,11 @@ const links: ReactElement<any>[] = [
     }
     href="/ranking"
   />,
-  // <SimpleNavLink
-  //   key="statistics"
-  //   content={
-  //     <>
-  //       <ChartBarIcon className="size-5" />
-  //       <span className="hidden xl:flex">Statistics</span>
-  //     </>
-  //   }
-  //   href="/statistics"
-  // />,
   <SimpleNavLink
     key="medals"
     content={
       <>
-        <FaMedal className="size-5" />
+        <FaMedal className="size-4.5" />
         <span className="hidden xl:flex">Medals</span>
       </>
     }

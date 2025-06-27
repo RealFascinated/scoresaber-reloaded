@@ -52,10 +52,10 @@ const playerData = [
 
       return (
         <PlayerOverviewItem>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center justify-center gap-1">
             <CountryFlag
               code={player.country}
-              size={14}
+              size={10}
               className="rounded-sm"
               tooltip={name => `Country Rank in ${name}`}
             />

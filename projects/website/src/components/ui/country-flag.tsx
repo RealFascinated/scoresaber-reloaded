@@ -1,9 +1,7 @@
 "use client";
 
-import { cn } from "@/common/utils";
 import SimpleTooltip from "@/components/simple-tooltip";
 import { normalizedRegionName } from "@ssr/common/utils/region-utils";
-import Image from "next/image";
 import { useState } from "react";
 
 type Props = {
@@ -26,20 +24,24 @@ export default function CountryFlag({ code, size = 24, className, tooltip }: Pro
   return (
     <SimpleTooltip
       display={<p>{tooltip ? tooltip(normalizedRegionName(code)) : normalizedRegionName(code)}</p>}
-      className={cn(`w-[${size * 2}px] min-w-[${size * 2}px]`, className)}
+      className={className}
     >
-      <Image
-        alt="Country Flag"
-        src={flagSrc}
-        width={size * 2}
-        height={size * 2}
-        className="object-contain"
+      <div
+        className="flex items-center justify-center"
         style={{
           width: size * 2,
+          height: size * 2,
           minWidth: size * 2,
+          minHeight: size * 2,
         }}
-        onError={handleError} // Handle error to load fallback
-      />
+      >
+        <img
+          alt="Country Flag"
+          src={flagSrc}
+          className="h-full w-full object-contain"
+          onError={handleError}
+        />
+      </div>
     </SimpleTooltip>
   );
 }
