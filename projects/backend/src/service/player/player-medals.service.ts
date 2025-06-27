@@ -134,6 +134,14 @@ export class PlayerMedalsService {
   }
 
   /**
+   * Gets the amount of medals a player has.
+   */
+  public static async getPlayerMedals(playerId: string): Promise<number> {
+    const player = await PlayerModel.findById(playerId).select("medals").lean();
+    return player?.medals ?? 0;
+  }
+
+  /**
    * Gets the player medal ranking for a page.
    *
    * @param page the page number

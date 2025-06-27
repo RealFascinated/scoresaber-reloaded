@@ -74,4 +74,5 @@ export class PlayerService {
   public static updatePlayerGlobalMedalCounts = PlayerMedalsService.updatePlayerGlobalMedalCounts;
   public static updatePlayerMedalsRank = PlayerMedalsService.updatePlayerMedalsRank;
   public static getPlayerMedalRanking = PlayerMedalsService.getPlayerMedalRanking;
+  public static getPlayerMedals = PlayerMedalsService.getPlayerMedals;
 }

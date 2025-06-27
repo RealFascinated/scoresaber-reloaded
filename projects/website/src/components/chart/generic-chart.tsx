@@ -78,7 +78,7 @@ const GenericChart = ({ config, labels }: Props) => {
         yAxisID: dataset.axisId,
         hidden:
           id && dataset.label
-            ? !database.getChartLegend(id, dataset.label, true)
+            ? !database.getChartLegend(id, dataset.label, dataset.showLegend ?? true)
             : !dataset.showLegend,
         stack: dataset.stack,
         order: dataset.stackOrder,

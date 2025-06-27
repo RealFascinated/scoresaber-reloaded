@@ -79,6 +79,20 @@ const datasetConfig: DatasetConfig[] = [
     },
     labelFormatter: (value: number) => `+1 PP: ${formatPp(value)}pp`,
   },
+  {
+    title: "Medals",
+    field: "medals",
+    color: Colors.medal,
+    axisId: "y4",
+    showLegend: false,
+    axisConfig: {
+      reverse: false,
+      display: false,
+      displayName: "Medals",
+      position: "right",
+    },
+    labelFormatter: (value: number) => `Medals: ${formatNumberWithCommas(value)}`,
+  },
   ...scoreBarsDataset,
 ];
 

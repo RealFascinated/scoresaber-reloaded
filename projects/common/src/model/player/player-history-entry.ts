@@ -128,6 +128,12 @@ export class PlayerHistoryEntry {
    */
   @prop()
   public averageAccuracy?: number;
+
+  /**
+   * The amount of medals the player has.
+   */
+  @prop()
+  public medals?: number;
 }
 
 export type PlayerHistoryEntryDocument = PlayerHistoryEntry & Document;

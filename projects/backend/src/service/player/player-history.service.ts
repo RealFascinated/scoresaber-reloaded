@@ -453,9 +453,10 @@ export class PlayerHistoryService {
     playerToken: ScoreSaberPlayerToken,
     existingEntry?: Partial<PlayerHistoryEntry>
   ): Promise<Partial<PlayerHistoryEntry>> {
-    const [accuracies, plusOnePp] = await Promise.all([
+    const [accuracies, plusOnePp, medals] = await Promise.all([
       PlayerService.getPlayerAverageAccuracies(playerToken.id),
       PlayerService.getPlayerPpBoundary(playerToken.id, 1),
+      PlayerService.getPlayerMedals(playerToken.id),
     ]);
 
     return {
@@ -476,6 +477,7 @@ export class PlayerHistoryService {
       totalScore: playerToken.scoreStats.totalScore,
       totalRankedScore: playerToken.scoreStats.totalRankedScore,
       plusOnePp: plusOnePp[0],
+      medals: medals,
     };
   }
 
