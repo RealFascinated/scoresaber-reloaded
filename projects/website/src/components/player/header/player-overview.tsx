@@ -27,17 +27,19 @@ const playerData = [
 
       return (
         <PlayerOverviewItem>
-          <SimpleTooltip display={<p>Global Rank</p>}>
-            <GlobeAmericasIcon className="text-muted-foreground size-[20px]" />
-          </SimpleTooltip>
-          <ChangeOverTime player={player} type={PlayerStatChange.Rank}>
-            <Link href={`/ranking/${player.rankPages.global}`}>
-              <p className="hover:text-primary text-sm transition-all hover:brightness-[66%]">
-                #{formatNumberWithCommas(player.rank)}
-              </p>
-            </Link>
-          </ChangeOverTime>
-          <DailyChange type={PlayerStatChange.Rank} change={rankChange} />
+          <div className="flex items-center gap-1">
+            <SimpleTooltip display={<span>Global Rank</span>}>
+              <GlobeAmericasIcon className="text-muted-foreground h-5 w-5" />
+            </SimpleTooltip>
+            <ChangeOverTime player={player} type={PlayerStatChange.Rank}>
+              <Link href={`/ranking/${player.rankPages.global}`}>
+                <span className="hover:text-primary m-0 text-sm leading-[1.2] transition-all hover:brightness-[66%]">
+                  #{formatNumberWithCommas(player.rank)}
+                </span>
+              </Link>
+            </ChangeOverTime>
+            <DailyChange type={PlayerStatChange.Rank} change={rankChange} />
+          </div>
         </PlayerOverviewItem>
       );
     },
@@ -50,20 +52,22 @@ const playerData = [
 
       return (
         <PlayerOverviewItem>
-          <CountryFlag
-            code={player.country}
-            size={14}
-            className="rounded-sm"
-            tooltip={name => `Country Rank in ${name}`}
-          />
-          <ChangeOverTime player={player} type={PlayerStatChange.CountryRank}>
-            <Link href={`/ranking/${player.country}/${player.rankPages.country}`}>
-              <p className="hover:text-primary text-sm transition-all hover:brightness-[66%]">
-                #{formatNumberWithCommas(player.countryRank)}
-              </p>
-            </Link>
-          </ChangeOverTime>
-          <DailyChange type={PlayerStatChange.CountryRank} change={rankChange} />
+          <div className="flex items-center gap-1">
+            <CountryFlag
+              code={player.country}
+              size={14}
+              className="rounded-sm"
+              tooltip={name => `Country Rank in ${name}`}
+            />
+            <ChangeOverTime player={player} type={PlayerStatChange.CountryRank}>
+              <Link href={`/ranking/${player.country}/${player.rankPages.country}`}>
+                <span className="hover:text-primary m-0 text-sm leading-[1.4] transition-all hover:brightness-[66%]">
+                  #{formatNumberWithCommas(player.countryRank)}
+                </span>
+              </Link>
+            </ChangeOverTime>
+            <DailyChange type={PlayerStatChange.CountryRank} change={rankChange} />
+          </div>
         </PlayerOverviewItem>
       );
     },
@@ -73,28 +77,42 @@ const playerData = [
     render: (player: ScoreSaberPlayer) => {
       return (
         <PlayerOverviewItem>
-          <SimpleTooltip
-            display={
-              <div className="flex flex-col gap-1">
-                <span>Medals are awarded for the following ranks:</span>
-
-                {Object.entries(MEDAL_COUNTS).map(([rank, count]) => (
-                  <span key={rank} className="text-muted-foreground">
-                    #{rank}{" "}
-                    <span className="text-white">
-                      = {count} Medal{count !== 1 ? "s" : ""}
+          <div className="flex items-center gap-1">
+            <SimpleTooltip
+              display={
+                <div className="flex flex-col gap-3 p-1">
+                  <div className="flex flex-col gap-1">
+                    <span className="font-semibold text-white">Medal System</span>
+                    <span className="text-muted-foreground text-xs">
+                      Medals awarded for ranked leaderboard positions
                     </span>
-                  </span>
-                ))}
-              </div>
-            }
-            className="flex flex-row items-center gap-1 text-center"
-          >
-            <FaMedal className="text-muted-foreground size-[16px]" />
-            <p className="truncate text-sm transition-all hover:brightness-110">
-              {formatNumberWithCommas(player.medals)} Medals
-            </p>
-          </SimpleTooltip>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    {Object.entries(MEDAL_COUNTS).map(([rank, count]) => (
+                      <div
+                        key={rank}
+                        className="bg-background/50 flex items-center justify-between gap-2 rounded-md p-2"
+                      >
+                        <div className="flex items-center gap-1">
+                          <FaMedal className="size-3 text-yellow-400" />
+                          <span className="text-xs font-medium text-white">#{rank}</span>
+                        </div>
+                        <span className="text-muted-foreground text-xs">
+                          {count} medal{count !== 1 ? "s" : ""}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              }
+              className="flex flex-row items-center gap-1"
+            >
+              <FaMedal className="text-muted-foreground size-4" />
+              <span className="m-0 truncate text-sm leading-[1.4] transition-all hover:brightness-110">
+                {formatNumberWithCommas(player.medals)} Medals
+              </span>
+            </SimpleTooltip>
+          </div>
         </PlayerOverviewItem>
       );
     },
@@ -107,12 +125,17 @@ const playerData = [
 
       return (
         <PlayerOverviewItem>
-          <ChangeOverTime player={player} type={PlayerStatChange.PerformancePoints}>
-            <p className="text-pp truncate text-sm font-semibold transition-all hover:brightness-110">
-              {formatPp(player.pp)}pp
-            </p>
-          </ChangeOverTime>
-          <DailyChange type={PlayerStatChange.PerformancePoints} change={ppChange} />
+          <div className="flex items-center gap-1" style={{ height: "100%" }}>
+            <ChangeOverTime player={player} type={PlayerStatChange.PerformancePoints}>
+              <span
+                className="text-pp m-0 truncate text-sm leading-[1.4] font-semibold transition-all hover:brightness-110"
+                style={{ display: "inline-block", verticalAlign: "middle" }}
+              >
+                {formatPp(player.pp)}pp
+              </span>
+            </ChangeOverTime>
+            <DailyChange type={PlayerStatChange.PerformancePoints} change={ppChange} />
+          </div>
         </PlayerOverviewItem>
       );
     },

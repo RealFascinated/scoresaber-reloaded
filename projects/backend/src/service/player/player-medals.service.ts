@@ -1,13 +1,15 @@
+import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { DetailType } from "@ssr/common/detail-type";
 import Logger from "@ssr/common/logger";
 import { MEDAL_COUNTS } from "@ssr/common/medal";
 import { PlayerModel } from "@ssr/common/model/player/player";
-import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import { Page, Pagination } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import { LeaderboardService } from "../leaderboard/leaderboard.service";
 import ScoreSaberService from "../scoresaber.service";
+
+type PlayerMedalsRefreshCallback = (currentPage: number, totalPages: number) => Promise<void>;
 
 export class PlayerMedalsService {
   /**
@@ -15,10 +17,13 @@ export class PlayerMedalsService {
    *
    * @param playerId the id of the player
    * @param rankedLeaderboards the ranked leaderboards
+   * @param callback the callback to call after each page is processed
    */
-  public static async updatePlayerMedalCounts(): Promise<void> {
+  public static async updatePlayerMedalCounts(
+    callback?: PlayerMedalsRefreshCallback
+  ): Promise<void> {
     const before = performance.now();
-    await PlayerMedalsService.updatePlayerGlobalMedalCounts();
+    await PlayerMedalsService.updatePlayerGlobalMedalCounts(callback);
     await PlayerMedalsService.updatePlayerMedalsRank();
     Logger.debug(
       `Updated medal counts for all players in ${formatDuration(performance.now() - before)}`
@@ -28,122 +33,72 @@ export class PlayerMedalsService {
   /**
    * Updates the global medal count for all players.
    */
-  public static async updatePlayerGlobalMedalCounts(): Promise<void> {
-    const rankedLeaderboards = await LeaderboardService.getRankedLeaderboards({
-      match: {
-        seededScores: true,
-      },
-    });
+  public static async updatePlayerGlobalMedalCounts(
+    callback?: PlayerMedalsRefreshCallback
+  ): Promise<void> {
+    const rankedLeaderboards = await LeaderboardService.getRankedLeaderboards();
 
-    // Single aggregation that calculates everything in one go
-    const results = await ScoreSaberScoreModel.aggregate([
-      {
-        $match: {
-          leaderboardId: { $in: rankedLeaderboards.map(leaderboard => leaderboard.id) },
-          rank: { $lte: 5 },
-        },
-      },
+    const playerMedalCounts = new Map<string, number>();
 
-      // Sort by player, leaderboard, and rank to ensure best scores come first
-      {
-        $sort: {
-          playerId: 1,
-          leaderboardId: 1,
-          rank: 1,
-        },
-      },
+    // Get the medal counts for each player
+    for (const [index, leaderboard] of rankedLeaderboards.entries()) {
+      const firstPage = await ApiServiceRegistry.getInstance()
+        .getScoreSaberService()
+        .lookupLeaderboardScores(leaderboard.id, 1);
+      if (!firstPage) {
+        continue;
+      }
 
-      // Group by player and leaderboard to get the best score (lowest rank) per leaderboard
-      {
-        $group: {
-          _id: {
-            playerId: "$playerId",
-            leaderboardId: "$leaderboardId",
-          },
-          bestRank: { $first: "$rank" }, // Use $first since we sorted by rank ascending
-        },
-      },
+      if (callback) {
+        await callback(index + 1, rankedLeaderboards.length);
+      }
 
-      // Calculate medals using the original medal values
-      {
-        $addFields: {
-          medals: {
-            $switch: {
-              branches: [
-                { case: { $lte: ["$bestRank", 1] }, then: MEDAL_COUNTS[1] },
-                { case: { $lte: ["$bestRank", 2] }, then: MEDAL_COUNTS[2] },
-                { case: { $lte: ["$bestRank", 3] }, then: MEDAL_COUNTS[3] },
-                { case: { $lte: ["$bestRank", 5] }, then: MEDAL_COUNTS[5] },
-              ],
-              default: 0,
-            },
-          },
-        },
-      },
+      const scores = firstPage.scores;
+      for (const score of scores) {
+        if (score.rank > 10) {
+          continue;
+        }
 
-      // Group by player to get total medals
-      {
-        $group: {
-          _id: "$_id.playerId",
-          totalMedals: { $sum: "$medals" },
-        },
-      },
-    ]).hint({ leaderboardId: 1, rank: 1 });
+        for (const [rank, medalCount] of Object.entries(MEDAL_COUNTS)) {
+          if (score.rank <= parseInt(rank)) {
+            playerMedalCounts.set(
+              score.leaderboardPlayerInfo.id,
+              (playerMedalCounts.get(score.leaderboardPlayerInfo.id) || 0) + medalCount
+            );
+            break;
+          }
+        }
+      }
 
-    // Update all players in one operation
-    await PlayerModel.bulkWrite([
-      // Update players with medals
-      ...results.map(result => ({
-        updateOne: {
-          filter: { _id: result._id },
-          update: { $set: { medals: result.totalMedals } },
-        },
-      })),
-      // Set all other players to 0 medals
-      {
-        updateMany: {
-          filter: {
-            _id: { $nin: results.map(r => r._id) },
-            medals: { $ne: 0 },
-          },
-          update: { $set: { medals: 0 } },
-        },
-      },
-    ]);
-  }
+      if (callback) {
+        await callback(index + 1, rankedLeaderboards.length);
+      }
 
-  /**
-   * Updates the medal rank for specific players.
-   */
-  public static async updatePlayerMedalsRankForPlayers(playerIds: string[]): Promise<void> {
-    if (playerIds.length === 0) return;
-
-    // Get all players with medals > 0, sorted by medals descending
-    const allPlayers = await PlayerModel.find({
-      medals: { $gt: 0 },
-    })
-      .select("_id medals")
-      .sort({ medals: -1 })
-      .lean();
-
-    // Create a map of player ID to their new rank
-    const rankMap = new Map<string, number>();
-    for (let i = 0; i < allPlayers.length; i++) {
-      rankMap.set(allPlayers[i]._id, i + 1);
+      Logger.debug(
+        `[PLAYER MEDALS] Finished processing leaderboard ${leaderboard.id} (${index + 1}/${rankedLeaderboards.length})`
+      );
     }
 
-    // Prepare bulk operations for affected players - only update if rank changed
-    const bulkOps = playerIds
-      .filter(id => rankMap.has(id))
-      .map(id => ({
-        updateOne: {
-          filter: { _id: id },
-          update: { $set: { medalsRank: rankMap.get(id) } },
-        },
-      }));
+    // Get all players with medals > 0
+    const playersWithMedals = await PlayerModel.find({
+      medals: { $gt: 0 },
+    });
 
-    if (bulkOps.length > 0) {
-      await PlayerModel.bulkWrite(bulkOps);
+    // Remove old medal counts
+    for (const player of playersWithMedals) {
+      const medalCount = playerMedalCounts.get(player.id);
+      if (!medalCount) {
+        await PlayerModel.updateOne({ _id: player._id }, { $set: { medals: 0 } });
+      }
+    }
+
+    // Add new medal counts
+    for (const [playerId, medalCount] of playerMedalCounts) {
+      await PlayerModel.updateOne({ _id: playerId }, { $set: { medals: medalCount } });
+    }
+
+    if (callback) {
+      await callback(rankedLeaderboards.length, rankedLeaderboards.length);
     }
   }
 

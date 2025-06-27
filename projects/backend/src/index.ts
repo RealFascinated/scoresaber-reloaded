@@ -105,6 +105,18 @@ export const app = new Elysia()
   )
   .use(
     cron({
+      name: "update-player-medals",
+      // pattern: "*/1 * * * *", // Every 5 minutes
+      pattern: "0 */8 * * *", // Every 8 hours at 00:00, 08:00, 16:00, etc
+      timezone: "Europe/London", // UTC time
+      protect: true,
+      run: async () => {
+        await PlayerService.updatePlayerMedalCounts();
+      },
+    })
+  )
+  .use(
+    cron({
       name: "update-ranking-queue-playlist",
       pattern: "0 */2 * * *", // Every 2 hours at 00:00, 02:00, 04:00, etc
       timezone: "Europe/London",

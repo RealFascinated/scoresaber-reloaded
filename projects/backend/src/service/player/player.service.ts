@@ -26,7 +26,6 @@ export class PlayerService {
   public static getPlayerPpBoundary = PlayerRankedService.getPlayerPpBoundary;
   public static getPlayerPpBoundaryFromScorePp = PlayerRankedService.getPlayerPpBoundaryFromScorePp;
   public static updatePeakRank = PlayerRankedService.updatePeakRank;
-  public static updatePlayerScoreWeights = PlayerRankedService.updatePlayerScoreWeights;
 
   // PlayerHistoryService methods
   public static trackPlayer = PlayerHistoryService.trackPlayer;
@@ -75,7 +74,5 @@ export class PlayerService {
   public static updatePlayerMedalCounts = PlayerMedalsService.updatePlayerMedalCounts;
   public static updatePlayerGlobalMedalCounts = PlayerMedalsService.updatePlayerGlobalMedalCounts;
   public static updatePlayerMedalsRank = PlayerMedalsService.updatePlayerMedalsRank;
-  public static updatePlayerMedalsRankForPlayers =
-    PlayerMedalsService.updatePlayerMedalsRankForPlayers;
   public static getPlayerMedalRanking = PlayerMedalsService.getPlayerMedalRanking;
 }

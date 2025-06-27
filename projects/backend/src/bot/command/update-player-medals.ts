@@ -14,7 +14,13 @@ export class ForceRefreshPlayerScores {
 
     try {
       const before = performance.now();
-      await PlayerService.updatePlayerMedalCounts();
+      await PlayerService.updatePlayerMedalCounts(async (currentPage, totalPages) => {
+        if (currentPage % 100 === 0) {
+          await interaction.editReply({
+            content: `Updating players' medal counts... (${currentPage}/${totalPages})`,
+          });
+        }
+      });
       const timeTaken = performance.now() - before;
 
       await interaction.editReply({

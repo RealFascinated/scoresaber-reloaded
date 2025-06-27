@@ -2,7 +2,6 @@ import Logger from "@ssr/common/logger";
 import { QueueModel } from "@ssr/common/model/queue";
 import { isProduction } from "@ssr/common/utils/utils";
 import { EventListener } from "../event/event-listener";
-import { LeaderboardScoreSeedQueue } from "./impl/leaderboard-score-seed";
 import { PlayerScoreSeedQueue } from "./impl/player-score-seed-queue";
 import { Queue } from "./queue";
 
@@ -16,7 +15,6 @@ export class QueueManager implements EventListener {
 
   constructor() {
     QueueManager.addQueue(new PlayerScoreSeedQueue());
-    QueueManager.addQueue(new LeaderboardScoreSeedQueue());
   }
 
   /**

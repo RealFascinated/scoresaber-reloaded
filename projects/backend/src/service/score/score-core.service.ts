@@ -31,8 +31,7 @@ export class ScoreCoreService {
     leaderboard: ScoreSaberLeaderboard,
     player: ScoreSaberPlayerToken | ScoreSaberLeaderboardPlayerInfoToken,
     fastCreate: boolean = false,
-    log: boolean = true,
-    updatePlayerScoreWeights: boolean = true
+    log: boolean = true
   ): Promise<{
     score: ScoreSaberScore | undefined;
     hasPreviousScore: boolean;
@@ -109,14 +108,6 @@ export class ScoreCoreService {
           })
         : undefined,
     ]);
-
-    if (leaderboard.ranked && updatePlayerScoreWeights) {
-      await PlayerService.updatePlayerScoreWeights(player.id);
-    }
-
-    if (leaderboard.ranked && leaderboard.seededScores && score.rank <= 5) {
-      await PlayerService.updatePlayerMedalCounts();
-    }
 
     if (log) {
       Logger.info(
