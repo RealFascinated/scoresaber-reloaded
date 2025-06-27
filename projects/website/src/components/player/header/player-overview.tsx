@@ -108,9 +108,11 @@ const playerData = [
               className="flex flex-row items-center gap-1"
             >
               <FaMedal className="text-muted-foreground size-4" />
-              <span className="m-0 truncate text-sm leading-[1.4] transition-all hover:brightness-110">
-                {formatNumberWithCommas(player.medals)} Medals
-              </span>
+              <Link href={`/medals/${player.rankPages.medals}`}>
+                <span className="hover:text-primary m-0 text-sm leading-[1.4] transition-all hover:brightness-[66%]">
+                  {formatNumberWithCommas(player.medals)} Medals
+                </span>
+              </Link>
             </SimpleTooltip>
           </div>
         </PlayerOverviewItem>

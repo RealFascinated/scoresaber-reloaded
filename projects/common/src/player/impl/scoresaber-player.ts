@@ -164,4 +164,9 @@ export type ScoreSaberRankPages = {
    * Their page for their country rank position.
    */
   country: number;
+
+  /**
+   * Their page for their medal rank position.
+   */
+  medals?: number;
 };
