@@ -1,3 +1,5 @@
+import { cn } from "@/common/utils";
+import FallbackLink from "@/components/fallback-link";
 import SimpleTooltip from "@/components/simple-tooltip";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import { MEDAL_COUNTS } from "@ssr/common/medal";
@@ -108,11 +110,20 @@ const playerData = [
               className="flex flex-row items-center gap-1"
             >
               <FaMedal className="text-muted-foreground size-4" />
-              <Link href={`/medals/${player.rankPages.medals}`}>
-                <span className="hover:text-primary m-0 text-sm leading-[1.4] transition-all hover:brightness-[66%]">
+              <FallbackLink
+                href={player.rankPages.medals ? `/medals/${player.rankPages.medals}` : undefined}
+              >
+                <span
+                  className={cn(
+                    "m-0 text-sm leading-[1.4]",
+                    player.rankPages.medals
+                      ? "hover:text-primary cursor-pointer transition-all hover:brightness-[66%]"
+                      : ""
+                  )}
+                >
                   {formatNumberWithCommas(player.medals)} Medals
                 </span>
-              </Link>
+              </FallbackLink>
             </SimpleTooltip>
           </div>
         </PlayerOverviewItem>
