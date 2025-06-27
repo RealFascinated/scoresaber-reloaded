@@ -11,7 +11,6 @@ export class ForceRefreshPlayerScores {
   async updatePlayerMedals(interaction: CommandInteraction) {
     await interaction.reply({
       content: "Updating players' medal counts...",
-      ephemeral: true,
     });
 
     try {

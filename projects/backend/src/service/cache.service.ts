@@ -29,7 +29,7 @@ export default class CacheService {
     [CacheId.PreviousScore]: TimeUnit.toSeconds(TimeUnit.Hour, 1),
   };
 
-  private static readonly redisClient = new RedisClient(env.REDIS_URL);
+  public static readonly redisClient = new RedisClient(env.REDIS_URL);
 
   /**
    * Fetches data with caching. If the data is not in cache, the fetchFn is called and the data is cached.

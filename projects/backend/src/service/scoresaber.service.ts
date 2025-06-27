@@ -11,11 +11,17 @@ import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/leaderboard-player-info";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import { getPlayerStatisticChanges } from "@ssr/common/utils/player-utils";
-import { getDaysAgoDate } from "@ssr/common/utils/time-utils";
+import { getDaysAgoDate, TimeUnit } from "@ssr/common/utils/time-utils";
 import { getPageFromRank } from "@ssr/common/utils/utils";
 import sanitize from "sanitize-html";
+import SuperJSON from "superjson";
 import CacheService, { CacheId } from "./cache.service";
 import { PlayerService } from "./player/player.service";
+
+// Type for cached player data with timestamp
+type CachedScoreSaberPlayerToken = ScoreSaberPlayerToken & {
+  lastUpdated: string;
+};
 
 export default class ScoreSaberService {
   /**
@@ -133,44 +139,45 @@ export default class ScoreSaberService {
     id: string,
     cacheOnly: boolean = false
   ): Promise<ScoreSaberPlayerToken> {
-    if (await ScoreSaberPlayerCacheModel.exists({ _id: id })) {
-      const player = await ScoreSaberPlayerCacheModel.findOne({ _id: id }).lean();
+    const cacheKey = `scoresaber:cached-player:${id}`;
 
-      // Check the cache status of the player
-      if (
-        player &&
-        ((player.lastUpdated &&
-          // If the player was updated less than 6 hours ago, return the cached player
-          new Date().getTime() - player.lastUpdated.getTime() < 6 * 60 * 60 * 1000) ||
-          // If the player was last updated more than 3 days ago, update the player reguardless of the cache only flag
-          (cacheOnly &&
-            new Date().getTime() - player.lastUpdated.getTime() < 3 * 24 * 60 * 60 * 1000))
-      ) {
-        return scoreSaberCachedPlayerToObject(player as unknown as ScoreSaberPlayerCacheDocument);
+    const cachedData = await CacheService.redisClient.get(cacheKey);
+    if (cachedData) {
+      try {
+        const player = SuperJSON.parse(cachedData) as CachedScoreSaberPlayerToken;
+
+        const cacheAge = new Date().getTime() - new Date(player.lastUpdated).getTime();
+        const refreshInterval = cacheOnly
+          ? TimeUnit.toMillis(TimeUnit.Day, 30)
+          : TimeUnit.toMillis(TimeUnit.Hour, 12);
+
+        if (cacheAge < refreshInterval) {
+          return player;
+        }
+      } catch {
+        Logger.warn(`Failed to parse cached player data for ${id}, removing from cache`);
+        await CacheService.redisClient.del(cacheKey);
       }
     }
 
-    // Fetch the player from the API
     const player = await ApiServiceRegistry.getInstance().getScoreSaberService().lookupPlayer(id);
     if (!player) {
       throw new NotFoundError(`Player "${id}" not found`);
     }
 
-    // Update the player in the cache
-    return scoreSaberCachedPlayerToObject(
-      (await ScoreSaberPlayerCacheModel.findOneAndUpdate(
-        { _id: id },
-        {
-          ...player,
-          lastUpdated: new Date(),
-        },
-        {
-          upsert: true,
-          new: true,
-          setDefaultsOnInsert: true,
-        }
-      ).lean()) as unknown as ScoreSaberPlayerCacheDocument
+    const playerWithTimestamp: CachedScoreSaberPlayerToken = {
+      ...player,
+      lastUpdated: new Date().toISOString(),
+    };
+
+    await CacheService.redisClient.set(
+      cacheKey,
+      SuperJSON.stringify(playerWithTimestamp),
+      "EX",
+      TimeUnit.toSeconds(TimeUnit.Day, 30)
     );
+
+    return playerWithTimestamp;
   }
 
   /**

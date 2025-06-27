@@ -76,7 +76,7 @@ export class PlayerMedalsService {
 
       if (index % 100 === 0) {
         Logger.info(
-          `[PLAYER MEDALS] Finished processing leaderboard ${leaderboard.id} (${index + 1}/${rankedLeaderboards.length})`
+          `[PLAYER MEDALS] Finished processing leaderboard page ${index + 1}/${rankedLeaderboards.length}`
         );
       }
     }
