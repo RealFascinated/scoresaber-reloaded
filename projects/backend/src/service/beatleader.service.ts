@@ -281,16 +281,19 @@ export default class BeatLeaderService {
   }
 
   /**
-   * Gets the player's previous score stats for a map.
+   * Gets the player's full score stats for a map.
    *
-   * @param scoreId the score id to get the previous score stats for
-   * @returns the score stats, or undefined if none
-   * @private
+   * @param scoreId the score id to get the full score stats for
+   * @returns the score stats
+   * @throws NotFoundError if the score stats are not found
    */
-  public static async getPreviousScoreStats(scoreId: number): Promise<ScoreStatsToken | undefined> {
+  public static async getScoresFullScoreStats(scoreId: number): Promise<{
+    current: ScoreStatsToken;
+    previous: ScoreStatsToken;
+  }> {
     const current = await this.getAdditionalScoreData(scoreId);
     if (current == undefined) {
-      return undefined;
+      throw new NotFoundError(`Score ${scoreId} not found`);
     }
 
     const previous = await this.getPreviousAdditionalScoreData(
@@ -300,10 +303,21 @@ export default class BeatLeaderService {
       current.timestamp
     );
     if (previous == undefined) {
-      return undefined;
+      throw new NotFoundError(`Previous score ${scoreId} not found`);
     }
 
-    return this.getScoreStats(previous.scoreId);
+    const [currentStats, previousStats] = await Promise.all([
+      this.getScoreStats(current.scoreId),
+      this.getScoreStats(previous.scoreId),
+    ]);
+    if (!currentStats || !previousStats) {
+      throw new NotFoundError(`Score stats not found for score ${scoreId}`);
+    }
+
+    return {
+      current: currentStats,
+      previous: previousStats,
+    };
   }
 
   /**
