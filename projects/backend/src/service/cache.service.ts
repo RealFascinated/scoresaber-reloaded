@@ -19,7 +19,7 @@ export enum CacheId {
 
 export default class CacheService {
   private static readonly cacheInfo = {
-    [CacheId.BeatSaver]: TimeUnit.toSeconds(TimeUnit.Hour, 12),
+    [CacheId.BeatSaver]: TimeUnit.toSeconds(TimeUnit.Day, 7),
     [CacheId.AppStatistics]: TimeUnit.toSeconds(TimeUnit.Hour, 1),
     [CacheId.ScoreSaber]: TimeUnit.toSeconds(TimeUnit.Minute, 1),
     [CacheId.Leaderboards]: TimeUnit.toSeconds(TimeUnit.Hour, 2),
