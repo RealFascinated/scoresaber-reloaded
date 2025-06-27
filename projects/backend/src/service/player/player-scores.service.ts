@@ -103,7 +103,6 @@ export class PlayerScoresService {
           leaderboard,
           playerToken,
           true,
-          false,
           false
         );
         if (tracked) {
@@ -148,7 +147,6 @@ export class PlayerScoresService {
               leaderboard,
               playerToken,
               true,
-              false,
               false
             );
             if (tracked) {
@@ -178,11 +176,6 @@ export class PlayerScoresService {
     // Mark player as seeded
     if (!player.seededScores) {
       await PlayerModel.updateOne({ _id: player._id }, { $set: { seededScores: true } });
-    }
-
-    // Update player score weights if there are missing scores
-    if (result.missingScores > 0) {
-      await PlayerService.updatePlayerScoreWeights(player._id);
     }
 
     result.totalScores = playerScoresCount;
