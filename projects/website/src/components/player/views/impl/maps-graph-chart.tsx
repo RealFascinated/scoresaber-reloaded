@@ -35,11 +35,9 @@ Chart.register(
   Legend
 );
 
-// Constants
 const MINIMUM_STAR = 10;
 const MAX_COMPARISON_PLAYERS = 3;
 
-// Types
 type DataPoint = {
   x: number;
   y: number;
@@ -49,175 +47,6 @@ type DataPoint = {
   pp: number;
   timestamp: Date;
 };
-
-type ChartLines = {
-  bestLine: { x: number; y: number }[];
-  averageLine: { x: number; y: number }[];
-};
-
-// Utility functions
-const mapDataPoint = (dataPoint: any): DataPoint => ({
-  x: dataPoint.stars,
-  y: dataPoint.accuracy,
-  leaderboardId: Number(dataPoint.leaderboardId),
-  leaderboardName: dataPoint.leaderboardName,
-  leaderboardDifficulty: dataPoint.leaderboardDifficulty,
-  pp: dataPoint.pp,
-  timestamp: dataPoint.timestamp,
-});
-
-const filterTop100 = (points: any[], showTop100: boolean): DataPoint[] => {
-  if (!showTop100) return points.map(mapDataPoint);
-  return [...points]
-    .sort((a, b) => (b.pp || 0) - (a.pp || 0))
-    .slice(0, 100)
-    .map(mapDataPoint);
-};
-
-const createDataset = (data: any[], label: string, color: string, showTop100: boolean) => ({
-  type: "scatter" as const,
-  label,
-  data: filterTop100(data, showTop100),
-  pointRadius: 2,
-  pointBackgroundColor: color,
-  pointBorderColor: color,
-  pointHoverRadius: 4,
-  pointHoverBackgroundColor: color.replace("0.5", "0.8"),
-});
-
-const createLineDataset = (data: any[], label: string, color: string) => ({
-  type: "line" as const,
-  label,
-  data,
-  borderColor: color,
-  backgroundColor: color.replace("0.5", "0.1"),
-  borderWidth: 3,
-  fill: false,
-  pointRadius: 0,
-  tension: 0.1,
-});
-
-const getComparisonPlayerColor = (index: number): string => {
-  const hue = (index * 137.5) % 360;
-  return `hsla(${hue}, 85%, 60%, 0.5)`;
-};
-
-const calculateBestAndAverageLines = (dataPoints: any[], showTop100: boolean): ChartLines => {
-  if (!dataPoints?.length) return { bestLine: [], averageLine: [] };
-
-  const filteredData = filterTop100(dataPoints, showTop100);
-  const groupedByStars = filteredData.reduce(
-    (acc, point) => {
-      const starGroup = Math.round(point.x * 2) / 2;
-      if (!acc[starGroup]) acc[starGroup] = [];
-      acc[starGroup].push(point.y);
-      return acc;
-    },
-    {} as Record<number, number[]>
-  );
-
-  const processLines = (aggregateFn: (values: number[]) => number) =>
-    Object.entries(groupedByStars)
-      .map(([stars, accuracies]) => ({
-        x: parseFloat(stars),
-        y: aggregateFn(accuracies),
-      }))
-      .sort((a, b) => a.x - b.x);
-
-  return {
-    bestLine: processLines(accuracies => Math.max(...accuracies)),
-    averageLine: processLines(
-      accuracies => accuracies.reduce((sum, acc) => sum + acc, 0) / accuracies.length
-    ),
-  };
-};
-
-const calculateChartScales = (visibleDataPoints: DataPoint[], showTop100: boolean) => {
-  const highestStar = Math.ceil(Math.max(MINIMUM_STAR, ...visibleDataPoints.map(point => point.x)));
-  const lowestStar = Math.floor(Math.min(...visibleDataPoints.map(point => point.x)));
-  const highestAcc = Math.ceil(Math.max(...visibleDataPoints.map(point => point.y)));
-  const lowestAcc = Math.floor(Math.min(...visibleDataPoints.map(point => point.y)));
-
-  return {
-    x: {
-      type: "linear" as const,
-      min: showTop100 ? lowestStar : 0,
-      max: highestStar,
-      grid: { color: "#252525" },
-      ticks: {
-        color: "white",
-        stepSize: 1,
-        callback: (value: any) => (value % 1 === 0 ? value : ""),
-      },
-      title: {
-        display: true,
-        text: "Star Rating",
-        color: "white",
-      },
-    },
-    y: {
-      type: "linear" as const,
-      min: showTop100 ? lowestAcc : 0,
-      max: showTop100 ? highestAcc : 100,
-      grid: { color: "#252525" },
-      ticks: { color: "white" },
-      title: {
-        display: true,
-        text: "Score %",
-        color: "white",
-      },
-    },
-  };
-};
-
-const createChartOptions = (
-  datasets: any,
-  onDataPointClick: (leaderboardId: number) => void,
-  scales: any
-): ChartOptions => ({
-  responsive: true,
-  animation: false,
-  maintainAspectRatio: false,
-  scales,
-  plugins: {
-    tooltip: {
-      callbacks: {
-        label: (context: any) => {
-          const dataPoint = context.raw;
-          const lines = [
-            `${dataPoint.leaderboardName || "N/A"} [${dataPoint.leaderboardDifficulty || "N/A"}]`,
-            `${dataPoint.x.toFixed(2)} ⭐ - ${dataPoint.y.toFixed(2)}%`,
-          ];
-
-          if (dataPoint.pp !== undefined) {
-            lines.push(`PP: ${formatPp(dataPoint.pp)}pp`);
-          }
-          if (dataPoint.timestamp) {
-            lines.push(`Played on ${formatDate(dataPoint.timestamp, "Do MMMM, YYYY HH:mm")}`);
-          }
-          if (dataPoint.leaderboardId) {
-            lines.push("", "Click to view leaderboard!");
-          }
-
-          return lines;
-        },
-      },
-    },
-    legend: {
-      display: true,
-      position: "top" as const,
-      labels: { color: "white" },
-    },
-  },
-  onClick: (event: any, elements: any[]) => {
-    if (elements.length > 0) {
-      const dataPoint = datasets.datasets[elements[0].datasetIndex].data[elements[0].index];
-      if (dataPoint?.leaderboardId) {
-        onDataPointClick(dataPoint.leaderboardId);
-      }
-    }
-  },
-});
 
 export default function MapsGraphChart({ player }: { player: ScoreSaberPlayer }) {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -248,66 +77,194 @@ export default function MapsGraphChart({ player }: { player: ScoreSaberPlayer })
     placeholderData: prev => prev,
   });
 
-  const handleAddComparisonPlayer = (newPlayer: ScoreSaberPlayer) => {
-    if (
-      !comparisonPlayers.find(p => p.id === newPlayer.id) &&
-      comparisonPlayers.length < MAX_COMPARISON_PLAYERS
-    ) {
-      setComparisonPlayers([...comparisonPlayers, newPlayer]);
-    }
+  // Process all data points
+  const processDataPoints = (rawData: any[]): DataPoint[] => {
+    const mapped = rawData.map(point => ({
+      x: point.stars,
+      y: point.accuracy,
+      leaderboardId: Number(point.leaderboardId),
+      leaderboardName: point.leaderboardName,
+      leaderboardDifficulty: point.leaderboardDifficulty,
+      pp: point.pp,
+      timestamp: point.timestamp,
+    }));
+
+    if (!showTop100) return mapped;
+
+    return [...mapped].sort((a, b) => (b.pp || 0) - (a.pp || 0)).slice(0, 100);
   };
 
-  const handleRemoveComparisonPlayer = (playerId: string) => {
-    setComparisonPlayers(players => players.filter(p => p.id !== playerId));
+  // Get all visible data points for scale calculation
+  const allDataPoints = [
+    ...processDataPoints(dataPoints || []),
+    ...comparisonPlayers.flatMap(p => {
+      const playerData = comparisonData?.find(d => d.id === p.id)?.data || [];
+      return processDataPoints(playerData);
+    }),
+  ];
+
+  // Calculate chart scales
+  const highestStar = Math.ceil(Math.max(MINIMUM_STAR, ...allDataPoints.map(point => point.x)));
+  const lowestStar = Math.floor(Math.min(...allDataPoints.map(point => point.x)));
+  const highestAcc = Math.ceil(Math.max(...allDataPoints.map(point => point.y)));
+  const lowestAcc = Math.floor(Math.min(...allDataPoints.map(point => point.y)));
+
+  const scales = {
+    x: {
+      type: "linear" as const,
+      min: showTop100 ? lowestStar : 0,
+      max: highestStar,
+      grid: { color: "#252525" },
+      ticks: {
+        color: "white",
+        stepSize: 1,
+        callback: (value: any) => (value % 1 === 0 ? value : ""),
+      },
+      title: {
+        display: true,
+        text: "Star Rating",
+        color: "white",
+      },
+    },
+    y: {
+      type: "linear" as const,
+      min: lowestAcc,
+      max: showTop100 ? highestAcc : 100,
+      grid: { color: "#252525" },
+      ticks: { color: "white" },
+      title: {
+        display: true,
+        text: "Score %",
+        color: "white",
+      },
+    },
   };
 
-  const visibleDataPoints = showTop100
-    ? [
-        ...filterTop100(dataPoints || [], showTop100),
-        ...comparisonPlayers.flatMap(p => {
-          const playerData = comparisonData?.find(d => d.id === p.id)?.data || [];
-          return filterTop100(playerData, showTop100);
-        }),
-      ]
-    : [...(dataPoints || []), ...(comparisonData || []).flatMap(d => d.data)].map(mapDataPoint);
-
-  const { bestLine, averageLine } =
-    comparisonPlayers.length === 0
-      ? calculateBestAndAverageLines(dataPoints || [], showTop100)
-      : { bestLine: [], averageLine: [] };
-
+  // Create datasets
   const datasets = {
     datasets: [
-      createDataset(
-        dataPoints || [],
-        comparisonPlayers.length === 0 ? "Maps" : player.name,
-        "rgba(255, 255, 255, 0.5)",
-        showTop100
-      ),
+      {
+        type: "scatter" as const,
+        label: comparisonPlayers.length === 0 ? "Maps" : player.name,
+        data: processDataPoints(dataPoints || []),
+        pointRadius: 2,
+        pointBackgroundColor: "rgba(255, 255, 255, 0.5)",
+        pointBorderColor: "rgba(255, 255, 255, 0.5)",
+        pointHoverRadius: 4,
+        pointHoverBackgroundColor: "rgba(255, 255, 255, 0.8)",
+      },
       ...comparisonPlayers.map((comparisonPlayer, index) => {
         const playerData = comparisonData?.find(d => d.id === comparisonPlayer.id)?.data;
-        return createDataset(
-          playerData || [],
-          comparisonPlayer.name,
-          getComparisonPlayerColor(index),
-          showTop100
-        );
+        const hue = (index * 137.5) % 360;
+        const color = `hsla(${hue}, 85%, 60%, 0.5)`;
+
+        return {
+          type: "scatter" as const,
+          label: comparisonPlayer.name,
+          data: processDataPoints(playerData || []),
+          pointRadius: 2,
+          pointBackgroundColor: color,
+          pointBorderColor: color,
+          pointHoverRadius: 4,
+          pointHoverBackgroundColor: color.replace("0.5", "0.8"),
+        };
       }),
+      // Add best/average lines only when no comparison players
       ...(comparisonPlayers.length === 0
-        ? [
-            createLineDataset(bestLine, "Best", "rgba(0, 255, 127, 0.8)"),
-            createLineDataset(averageLine, "Average", "rgba(0, 123, 255, 0.8)"),
-          ]
+        ? (() => {
+            const processedData = processDataPoints(dataPoints || []);
+            const groupedByStars = processedData.reduce(
+              (acc, point) => {
+                const starGroup = Math.round(point.x * 2) / 2;
+                if (!acc[starGroup]) acc[starGroup] = [];
+                acc[starGroup].push(point.y);
+                return acc;
+              },
+              {} as Record<number, number[]>
+            );
+
+            const createLine = (
+              aggregateFn: (values: number[]) => number,
+              label: string,
+              color: string
+            ) => {
+              const lineData = Object.entries(groupedByStars)
+                .map(([stars, accuracies]) => ({
+                  x: parseFloat(stars),
+                  y: aggregateFn(accuracies),
+                }))
+                .sort((a, b) => a.x - b.x);
+
+              return {
+                type: "line" as const,
+                label,
+                data: lineData,
+                borderColor: color,
+                backgroundColor: color.replace("0.8", "0.1"),
+                borderWidth: 3,
+                fill: false,
+                pointRadius: 0,
+                tension: 0.1,
+              };
+            };
+
+            return [
+              createLine(accuracies => Math.max(...accuracies), "Best", "rgba(0, 255, 127, 0.8)"),
+              createLine(
+                accuracies => accuracies.reduce((sum, acc) => sum + acc, 0) / accuracies.length,
+                "Average",
+                "rgba(0, 123, 255, 0.8)"
+              ),
+            ];
+          })()
         : []),
     ],
   };
 
-  const scales = calculateChartScales(visibleDataPoints, showTop100);
-  const options = createChartOptions(
-    datasets,
-    leaderboardId => openInNewTab(`${env.NEXT_PUBLIC_WEBSITE_URL}/leaderboard/${leaderboardId}`),
-    scales
-  );
+  const chartOptions: ChartOptions = {
+    responsive: true,
+    animation: false,
+    maintainAspectRatio: false,
+    scales,
+    plugins: {
+      tooltip: {
+        callbacks: {
+          label: (context: any) => {
+            const dataPoint = context.raw;
+            const lines = [
+              `${dataPoint.leaderboardName || "N/A"} [${dataPoint.leaderboardDifficulty || "N/A"}]`,
+              `${dataPoint.x.toFixed(2)} ⭐ - ${dataPoint.y.toFixed(2)}%`,
+            ];
+
+            if (dataPoint.pp !== undefined) {
+              lines.push(`PP: ${formatPp(dataPoint.pp)}pp`);
+            }
+            if (dataPoint.timestamp) {
+              lines.push(`Played on ${formatDate(dataPoint.timestamp, "Do MMMM, YYYY HH:mm")}`);
+            }
+            if (dataPoint.leaderboardId) {
+              lines.push("", "Click to view leaderboard!");
+            }
+
+            return lines;
+          },
+        },
+      },
+      legend: {
+        display: true,
+        position: "top" as const,
+        labels: { color: "white" },
+      },
+    },
+    onClick: (event: any, elements: any[]) => {
+      if (elements.length > 0) {
+        const dataPoint = datasets.datasets[elements[0].datasetIndex].data[elements[0].index];
+        if (dataPoint && "leaderboardId" in dataPoint && dataPoint.leaderboardId) {
+          openInNewTab(`${env.NEXT_PUBLIC_WEBSITE_URL}/leaderboard/${dataPoint.leaderboardId}`);
+        }
+      }
+    },
+  };
 
   if (!dataPoints || isComparisonLoading) {
     return (
@@ -323,7 +280,7 @@ export default function MapsGraphChart({ player }: { player: ScoreSaberPlayer })
   return (
     <div className="space-y-4">
       <div className="border-border/50 bg-background/50 h-[450px] rounded-lg border p-4">
-        <Line data={datasets as any} options={options as any} />
+        <Line data={datasets as any} options={chartOptions as any} />
       </div>
 
       <div className="space-y-3">
@@ -362,7 +319,11 @@ export default function MapsGraphChart({ player }: { player: ScoreSaberPlayer })
                       variant="ghost"
                       size="icon"
                       className="hover:bg-primary/20 h-5 w-5 shrink-0"
-                      onClick={() => handleRemoveComparisonPlayer(comparisonPlayer.id)}
+                      onClick={() =>
+                        setComparisonPlayers(players =>
+                          players.filter(p => p.id !== comparisonPlayer.id)
+                        )
+                      }
                     >
                       <X className="h-3 w-3" />
                     </Button>
@@ -383,7 +344,14 @@ export default function MapsGraphChart({ player }: { player: ScoreSaberPlayer })
         <PlayerSearch
           isOpen={isSearchOpen}
           onOpenChange={setIsSearchOpen}
-          onPlayerSelect={handleAddComparisonPlayer}
+          onPlayerSelect={newPlayer => {
+            if (
+              !comparisonPlayers.find(p => p.id === newPlayer.id) &&
+              comparisonPlayers.length < MAX_COMPARISON_PLAYERS
+            ) {
+              setComparisonPlayers([...comparisonPlayers, newPlayer]);
+            }
+          }}
           placeholder="Search for a player to compare..."
           excludePlayerIds={[player.id, ...comparisonPlayers.map(p => p.id)]}
         />
