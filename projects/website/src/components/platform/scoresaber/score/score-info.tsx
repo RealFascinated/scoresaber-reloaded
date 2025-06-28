@@ -25,7 +25,7 @@ export default function ScoreSaberScoreInfo({
 
   const rankElement = useMemo(() => {
     if (hideRank) {
-      return <span className="font-semibold">#-</span>;
+      return <p className="font-semibold">#-</p>;
     }
     return (
       <Link href={`/leaderboard/${leaderboard.id}/${getPageFromRank(score.rank, 12)}`}>

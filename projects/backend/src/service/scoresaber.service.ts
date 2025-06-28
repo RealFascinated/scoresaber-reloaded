@@ -90,6 +90,7 @@ export default class ScoreSaberService {
             rank: true,
             countryRank: true,
             pp: true,
+            medals: true,
           }),
         ]);
 

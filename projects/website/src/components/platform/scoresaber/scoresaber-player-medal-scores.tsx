@@ -9,6 +9,7 @@ import usePageNavigation from "@/hooks/use-page-navigation";
 import { Pagination } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerScoresResponse } from "@ssr/common/response/player-scores-response";
+import { capitalizeFirstLetter } from "@ssr/common/string-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { useLiveQuery } from "dexie-react-hooks";
@@ -98,7 +99,11 @@ export default function ScoreSaberPlayerMedalScores({
             (scores.items.length === 0 && (
               <EmptyState
                 title="No Results"
-                description="No score were found on this page"
+                description={
+                  currentPage === 1
+                    ? `${capitalizeFirstLetter(player.name)} has not earned any medals :(`
+                    : `No medals were found on this page`
+                }
                 icon={<SearchIcon />}
               />
             ))}

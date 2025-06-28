@@ -111,6 +111,7 @@ export async function getPlayerStatisticChanges(
     rank: getPlayerStatisticChange(history, "rank", true, daysAgo),
     countryRank: getPlayerStatisticChange(history, "countryRank", true, daysAgo),
     pp: getPlayerStatisticChange(history, "pp", false, daysAgo),
+    medals: getPlayerStatisticChange(history, "medals", false, daysAgo),
   };
 }
 

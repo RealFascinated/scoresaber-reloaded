@@ -93,6 +93,7 @@ export function ScoreHistory({ playerId, leaderboard }: ScoreHistoryProps) {
                 hideLeaderboardDropdown: true,
                 hideAccuracyChanger: true,
                 isPreviousScore: true,
+                hideRank: true,
               }}
             />
           );
