@@ -40,7 +40,7 @@ export function PlayerMedalRanking({
         </div>
 
         {/* Avatar and Name */}
-        <div className="flex items-center gap-2">
+        <div className="flex w-full min-w-0 items-center gap-2">
           <PlayerAvatar profilePicture={getScoreSaberAvatar(player)} name={player.name} />
           <PlayerName name={player.name} />
         </div>

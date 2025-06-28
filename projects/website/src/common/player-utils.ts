@@ -54,5 +54,5 @@ export function getMedalRankingColumnWidth(players: ScoreSaberPlayer[]) {
 
   // Calculate padding based on number of digits
   const medalsRankDigits = maxMedalsRank > 0 ? Math.floor(Math.log10(maxMedalsRank)) + 1 : 0;
-  return medalsRankDigits * 15;
+  return medalsRankDigits * 12;
 }
