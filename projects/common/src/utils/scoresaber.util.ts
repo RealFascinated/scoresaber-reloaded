@@ -13,6 +13,11 @@ export type ScoreSaberRole = {
   name: string;
 
   /**
+   * The short name of the role.
+   */
+  shortName?: string;
+
+  /**
    * The role for this role.
    */
   role: string;
@@ -31,28 +36,45 @@ export const scoreSaberRoles: ScoreSaberRole[] = [
   },
   {
     name: "Head of Quality Assurance",
+    shortName: "Head QAT",
     role: "Head of Quality Assurance",
     color: "#ff006f",
   },
   {
     name: "Nomination Assessment Team",
-    role: "Nomination Assessment",
+    shortName: "NAT",
+    role: "Nomination Assessment Team",
     color: "#0b64f0",
   },
   {
     name: "Quality Assurance Team",
+    shortName: "QA Team",
     role: "Quality Assurance",
     color: "#f70000",
   },
   {
     name: "Ranking Team",
+    shortName: "RT",
     role: "Ranking Team",
     color: "#1abc9c",
   },
   {
     name: "Ranking Team Recruit",
+    shortName: "RT Recruit",
     role: "Recruit",
     color: "#11806a",
+  },
+  {
+    name: "Head of Content Creation Team",
+    shortName: "Head CCT",
+    role: "Content Creation Lead",
+    color: "#62f60a",
+  },
+  {
+    name: "Content Creation Team",
+    shortName: "CCT",
+    role: "Content Creation Team",
+    color: "#62f60a",
   },
   {
     name: "Supporter",
@@ -84,9 +106,10 @@ export function getScoreSaberRoles(
 ): ScoreSaberRole[] {
   const toReturn: ScoreSaberRole[] = [];
   const rawRoles = player.role?.split(", ") || [player.role];
+  console.log(rawRoles);
 
   for (const role of rawRoles) {
-    const found = scoreSaberRoles.find(r => r.name === role);
+    const found = scoreSaberRoles.find(r => r.role === role);
     if (found) {
       toReturn.push(found);
     }

@@ -66,7 +66,7 @@ export function PlayerRanking({
           {/* Avatar and Name */}
           <div className="flex items-center gap-2">
             <PlayerAvatar profilePicture={getScoreSaberAvatar(player)} name={player.name} />
-            <PlayerName name={player.name} />
+            <PlayerName player={player} />
           </div>
 
           {/* PP */}
@@ -99,7 +99,7 @@ export function PlayerRanking({
               className="flex min-w-[28px] items-center"
             />
             <PlayerName
-              name={player.name}
+              player={player}
               className="flex max-w-[140px] min-w-[90px] flex-1 items-center overflow-hidden"
             />
             <PlayerPpDisplay

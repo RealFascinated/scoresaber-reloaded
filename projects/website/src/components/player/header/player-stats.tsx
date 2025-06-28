@@ -100,12 +100,28 @@ const playerStats: Stat[] = [
     },
   },
   {
-    name: "Role",
+    name: "Roles",
     create: (player: ScoreSaberPlayer) => {
       const roles = getScoreSaberRoles(player);
 
       return {
-        value: roles.length === 0 ? undefined : <p>{roles.map(role => role.name).join(", ")}</p>,
+        value:
+          roles.length === 0 ? undefined : (
+            <SimpleTooltip
+              display={
+                <div className="flex flex-col gap-1">
+                  {roles
+                    .map(role => role.name)
+                    .map(role => (
+                      <p key={role}>{role}</p>
+                    ))}
+                </div>
+              }
+              side="bottom"
+            >
+              <p>{roles.map(role => role.shortName ?? role.name).join(", ")}</p>
+            </SimpleTooltip>
+          ),
       };
     },
   },
