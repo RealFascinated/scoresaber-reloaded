@@ -2,29 +2,14 @@ import { DetailType } from "@ssr/common/detail-type";
 import Logger from "@ssr/common/logger";
 import { PlayerModel } from "@ssr/common/model/player/player";
 import { ScoreSaberMedalsScoreModel } from "@ssr/common/model/score/impl/scoresaber-medals-score";
-import { Page, Pagination } from "@ssr/common/pagination";
+import { Pagination } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
+import { PlayerMedalRankingsResponse } from "@ssr/common/response/player-medal-rankings-response";
 import { formatDuration } from "@ssr/common/utils/time-utils";
+import { FilterQuery } from "mongoose";
 import ScoreSaberService from "../scoresaber.service";
 
 export class PlayerMedalsService {
-  /**
-   * Updates the medal count for a player.
-   *
-   * @param playerId the id of the player
-   * @param rankedLeaderboards the ranked leaderboards
-   * @param callback the callback to call after each page is processed
-   */
-  public static async updatePlayerMedalCounts(): Promise<void> {
-    const before = performance.now();
-    await PlayerMedalsService.updatePlayerGlobalMedalCounts();
-    await PlayerMedalsService.updatePlayerMedalsRank();
-    Logger.debug(
-      `Updated medal counts for all players in ${formatDuration(performance.now() - before)}`
-    );
-  }
-
   /**
    * Updates the global medal count for all players.
    */
@@ -92,45 +77,6 @@ export class PlayerMedalsService {
   }
 
   /**
-   * Updates the medal rank for all players.
-   */
-  public static async updatePlayerMedalsRank(): Promise<void> {
-    const before = performance.now();
-
-    const rankedPlayers = await PlayerModel.aggregate([
-      {
-        $match: { medals: { $gt: 0 } },
-      },
-      {
-        $sort: { medals: -1 },
-      },
-      {
-        $project: {
-          _id: 1,
-          medals: 1,
-        },
-      },
-    ]);
-
-    if (rankedPlayers.length === 0) return;
-
-    const rankBulkOps = rankedPlayers.map((player, index) => ({
-      updateOne: {
-        filter: { _id: player._id },
-        update: { $set: { medalsRank: index + 1 } },
-      },
-    }));
-
-    await PlayerModel.bulkWrite(rankBulkOps);
-
-    await PlayerModel.updateMany({ medals: { $lte: 0 } }, { $unset: { medalsRank: "" } });
-
-    Logger.debug(
-      `[PLAYER MEDALS] Updated ranks for ${rankedPlayers.length} players in ${formatDuration(performance.now() - before)}`
-    );
-  }
-
-  /**
    * Gets the amount of medals a player has.
    */
   public static async getPlayerMedals(playerId: string): Promise<number> {
@@ -142,63 +88,149 @@ export class PlayerMedalsService {
    * Gets the player medal ranking for a page.
    *
    * @param page the page number
+   * @param country optional country filter
    * @returns the players
    */
-  public static async getPlayerMedalRanking(page: number): Promise<Page<ScoreSaberPlayer>> {
-    const totalPlayers = await PlayerModel.countDocuments({
+  public static async getPlayerMedalRanking(
+    page: number,
+    country?: string
+  ): Promise<PlayerMedalRankingsResponse> {
+    const filter: FilterQuery<typeof PlayerModel> = {
       medals: { $gt: 0 },
-    });
+      country: { $nin: [null, "", undefined] },
+      ...(country && { country: { $nin: [null, "", undefined], $in: [country] } }),
+    };
+
+    const totalPlayers = await PlayerModel.countDocuments(filter);
     if (totalPlayers === 0) {
-      return Pagination.empty<ScoreSaberPlayer>();
+      return {
+        ...Pagination.empty<ScoreSaberPlayer>(),
+        countryMetadata: {},
+      } as PlayerMedalRankingsResponse;
     }
 
     const pagination = new Pagination<ScoreSaberPlayer>()
       .setItemsPerPage(50)
       .setTotalItems(totalPlayers);
 
-    return pagination.getPage(page, async ({ start }) => {
-      const players = await PlayerModel.aggregate([
-        {
-          $match: { medals: { $gt: 0 } },
-        },
-        {
-          $sort: { medalsRank: 1 },
-        },
-        {
-          $skip: start,
-        },
-        {
-          $limit: pagination.itemsPerPage,
-        },
-        {
-          $project: {
-            _id: 1,
-          },
-        },
-      ]);
+    // Run player processing and country metadata aggregation in parallel
+    const [pageData, countryMetadata] = await Promise.all([
+      pagination.getPage(page, async ({ start }) => {
+        // Use aggregation to get players sorted by medal count
+        const players = await PlayerModel.aggregate([
+          { $match: filter },
+          // Sort by medals descending, then by _id ascending for consistent tiebreaking
+          { $sort: { medals: -1, _id: 1 } },
+          { $skip: start },
+          { $limit: pagination.itemsPerPage },
+        ]);
 
-      const playerIds = players.map(p => p._id.toString());
-      const cachedPlayers = new Map<string, ScoreSaberPlayerToken>();
+        if (players.length === 0) {
+          return [];
+        }
 
-      const cachePromises = playerIds.map(async playerId => {
-        const cached = await ScoreSaberService.getCachedPlayer(playerId, true);
-        return { playerId, cached };
-      });
+        // Process players sequentially to avoid race conditions
+        const result: ScoreSaberPlayer[] = [];
+        for (let i = 0; i < players.length; i++) {
+          const player = players[i];
+          const playerId = player._id.toString();
 
-      const cacheResults = await Promise.all(cachePromises);
-      for (const { playerId, cached } of cacheResults) {
-        cachedPlayers.set(playerId, cached);
-      }
-
-      return await Promise.all(
-        players.map(async player =>
-          ScoreSaberService.getPlayer(
-            player._id.toString(),
+          const playerData = await ScoreSaberService.getPlayer(
+            playerId,
             DetailType.BASIC,
-            cachedPlayers.get(player._id.toString())
-          )
-        )
-      );
+            await ScoreSaberService.getCachedPlayer(playerId, true)
+          );
+
+          // Calculate country rank
+          const isValidCountry = player.country && player.country.trim().length > 0;
+          if (isValidCountry) {
+            const countryRank = await PlayerModel.countDocuments({
+              country: player.country,
+              medals: { $gt: 0 },
+              $or: [
+                { medals: { $gt: player.medals ?? 0 } },
+                { $and: [{ medals: player.medals ?? 0 }, { _id: { $lt: player._id } }] },
+              ],
+            });
+            playerData.countryMedalsRank = countryRank + 1;
+          } else {
+            playerData.countryMedalsRank = 0;
+          }
+
+          // Calculate global rank only when filtering by country
+          if (country) {
+            const globalRank = await PlayerModel.countDocuments({
+              medals: { $gt: 0 },
+              $or: [
+                { medals: { $gt: player.medals ?? 0 } },
+                { $and: [{ medals: player.medals ?? 0 }, { _id: { $lt: player._id } }] },
+              ],
+            });
+            playerData.medalsRank = globalRank + 1;
+          } else {
+            // Use position in results for global mode
+            playerData.medalsRank = start + i + 1;
+          }
+
+          result.push(playerData);
+        }
+
+        return result;
+      }),
+      // Country metadata aggregation
+      PlayerModel.aggregate([
+        { $match: { ...filter, country: { $nin: [null, "", undefined] } } },
+        { $group: { _id: "$country", count: { $sum: 1 } } },
+        { $sort: { count: -1 } },
+      ]),
+    ]);
+
+    return {
+      ...pageData.toJSON(),
+      countryMetadata: countryMetadata.reduce(
+        (acc, curr) => {
+          acc[curr._id] = curr.count;
+          return acc;
+        },
+        {} as Record<string, number>
+      ),
+    } as PlayerMedalRankingsResponse;
+  }
+
+  /**
+   * Gets a player's medal rank on-demand without storing it in the database.
+   *
+   * @param playerId the id of the player
+   * @returns the rank
+   */
+  public static async getPlayerMedalRank(playerId: string): Promise<number | null> {
+    const player = await PlayerModel.findById(playerId).select("medals").lean();
+    if (!player || (player.medals ?? 0) <= 0) return null;
+
+    // Count how many players have more medals than this player
+    const rank = await PlayerModel.countDocuments({
+      medals: { $gt: player.medals ?? 0 },
     });
+
+    return rank + 1; // +1 because rank is 1-indexed
+  }
+
+  /**
+   * Gets a player's country medal rank on-demand.
+   *
+   * @param playerId the id of the player
+   * @returns the rank
+   */
+  public static async getPlayerCountryMedalRank(playerId: string): Promise<number | null> {
+    const player = await PlayerModel.findById(playerId).select("medals country").lean();
+    if (!player || (player.medals ?? 0) <= 0 || !player.country) return null;
+
+    // Count how many players from the same country have more medals
+    const rank = await PlayerModel.countDocuments({
+      medals: { $gt: player.medals ?? 0 },
+      country: player.country,
+    });
+
+    return rank + 1; // +1 because rank is 1-indexed
   }
 }

@@ -8,7 +8,6 @@ import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 import { isProduction } from "@ssr/common/utils/utils";
 import { LeaderboardService } from "../leaderboard/leaderboard.service";
-import { PlayerService } from "../player/player.service";
 
 export class MedalScoresService {
   private static IGNORE_SCORES = false;
@@ -117,9 +116,6 @@ export class MedalScoresService {
     if (affectedPlayers.size > 0) {
       await MedalScoresService.updateAffectedPlayerMedals(medalChanges);
     }
-
-    // Recalculate the medal ranks
-    PlayerService.updatePlayerMedalsRank();
   }
 
   /**

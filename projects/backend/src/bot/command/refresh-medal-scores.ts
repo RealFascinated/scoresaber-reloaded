@@ -7,7 +7,10 @@ import { OwnerOnly } from "../lib/guards";
 @Discord()
 @Guard(IsGuildUser(OwnerOnly))
 export class RefreshMedalScores {
-  @Slash({ description: "Refreshes the medal scores", name: "refresh-medal-scores" })
+  @Slash({
+    description: "Resets the medal scores cache and recalculates all medal counts (very slow)",
+    name: "refresh-medal-scores",
+  })
   async refreshMedalScores(interaction: CommandInteraction) {
     await interaction.reply({
       content: "Refreshing medal scores...",

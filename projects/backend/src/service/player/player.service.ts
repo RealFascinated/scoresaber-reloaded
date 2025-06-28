@@ -71,9 +71,9 @@ export class PlayerService {
   public static getPlayerFriendScores = PlayerFriendScoresService.getPlayerFriendScores;
 
   // PlayerMedalsService methods
-  public static updatePlayerMedalCounts = PlayerMedalsService.updatePlayerMedalCounts;
   public static updatePlayerGlobalMedalCounts = PlayerMedalsService.updatePlayerGlobalMedalCounts;
-  public static updatePlayerMedalsRank = PlayerMedalsService.updatePlayerMedalsRank;
   public static getPlayerMedalRanking = PlayerMedalsService.getPlayerMedalRanking;
   public static getPlayerMedals = PlayerMedalsService.getPlayerMedals;
+  public static getPlayerMedalRank = PlayerMedalsService.getPlayerMedalRank;
+  public static getPlayerCountryMedalRank = PlayerMedalsService.getPlayerCountryMedalRank;
 }

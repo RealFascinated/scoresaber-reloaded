@@ -74,12 +74,6 @@ export class Player {
   public medals?: number;
 
   /**
-   * The player's medal rank.
-   */
-  @prop({ index: true })
-  public medalsRank?: number;
-
-  /**
    * The date the player was first tracked.
    */
   @prop()

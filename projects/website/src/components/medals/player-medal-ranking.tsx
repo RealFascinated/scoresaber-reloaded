@@ -10,6 +10,7 @@ import { FaMedal } from "react-icons/fa";
 import PlayerPreview from "../player/player-preview";
 import { PlayerAvatar } from "../ranking/player-avatar";
 import { PlayerName } from "../ranking/player-name";
+import CountryFlag from "../ui/country-flag";
 
 export function PlayerMedalRanking({
   player,
@@ -37,6 +38,7 @@ export function PlayerMedalRanking({
           }}
         >
           <RankDisplay rank={player.medalsRank} />
+          <CountryRankDisplay country={player.country} countryRank={player.countryMedalsRank} />
         </div>
 
         {/* Avatar and Name */}
@@ -61,6 +63,22 @@ function RankDisplay({ rank }: { rank: number }) {
       )}
     >
       <span>#{formatNumberWithCommas(rank)}</span>
+    </div>
+  );
+}
+
+function CountryRankDisplay({ country, countryRank }: { country: string; countryRank: number }) {
+  return (
+    <div className="flex items-center">
+      <div
+        className={cn(
+          "flex min-h-[22px] items-center gap-1 rounded px-1 py-1 text-xs font-semibold",
+          getRankBgColor(countryRank)
+        )}
+      >
+        <CountryFlag code={country} size={10} />
+        <span>#{formatNumberWithCommas(countryRank)}</span>
+      </div>
     </div>
   );
 }

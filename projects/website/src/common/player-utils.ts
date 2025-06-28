@@ -44,15 +44,20 @@ export function getFriendRankingColumnWidth(
 }
 
 /**
- * Calculates the width of the first column in the medal ranking table.
+ * Calculates the width of the first column in the player ranking table.
  *
  * @param players the players to calculate the width for
  * @returns the width of the first column
  */
-export function getMedalRankingColumnWidth(players: ScoreSaberPlayer[]) {
+export function getMedalRankingColumnWidth(players: ScoreSaberPlayer[], minWidth = 120) {
   const maxMedalsRank = players?.reduce((max, p) => Math.max(max, p.medalsRank ?? 0), 0) ?? 0;
+  const maxCountryMedalsRank =
+    players?.reduce((max, p) => Math.max(max, p.countryMedalsRank ?? 0), 0) ?? 0;
 
   // Calculate padding based on number of digits
   const medalsRankDigits = maxMedalsRank > 0 ? Math.floor(Math.log10(maxMedalsRank)) + 1 : 0;
-  return medalsRankDigits * 12;
+  const countryMedalsRankDigits =
+    maxCountryMedalsRank > 0 ? Math.floor(Math.log10(maxCountryMedalsRank)) + 1 : 0;
+
+  return Math.max(minWidth, medalsRankDigits * 15 + countryMedalsRankDigits * 15);
 }

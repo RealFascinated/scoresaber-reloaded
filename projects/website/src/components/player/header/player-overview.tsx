@@ -1,6 +1,5 @@
 import { cn } from "@/common/utils";
 import FallbackLink from "@/components/fallback-link";
-import MedalsInfo from "@/components/medals/medals-info";
 import SimpleTooltip from "@/components/simple-tooltip";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
@@ -79,29 +78,21 @@ const playerData = [
     render: (player: ScoreSaberPlayer) => {
       return (
         <PlayerOverviewItem>
-          <div className="flex items-center gap-1">
-            <SimpleTooltip
-              display={<MedalsInfo />}
-              className="flex flex-row items-center gap-1"
-              showOnMobile
+          <FaMedal className="text-muted-foreground size-4" />
+          <FallbackLink
+            href={player.rankPages.medals ? `/medals/${player.rankPages.medals}` : undefined}
+          >
+            <span
+              className={cn(
+                "m-0 text-sm leading-[1.4]",
+                player.rankPages.medals
+                  ? "hover:text-primary cursor-pointer transition-all hover:brightness-[66%]"
+                  : ""
+              )}
             >
-              <FaMedal className="text-muted-foreground size-4" />
-              <FallbackLink
-                href={player.rankPages.medals ? `/medals/${player.rankPages.medals}` : undefined}
-              >
-                <span
-                  className={cn(
-                    "m-0 text-sm leading-[1.4]",
-                    player.rankPages.medals
-                      ? "hover:text-primary cursor-pointer transition-all hover:brightness-[66%]"
-                      : ""
-                  )}
-                >
-                  {formatNumberWithCommas(player.medals)} Medals
-                </span>
-              </FallbackLink>
-            </SimpleTooltip>
-          </div>
+              {formatNumberWithCommas(player.medals)} Medals
+            </span>
+          </FallbackLink>
         </PlayerOverviewItem>
       );
     },

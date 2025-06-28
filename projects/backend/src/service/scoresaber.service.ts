@@ -41,9 +41,10 @@ export default class ScoreSaberService {
       `scoresaber:player:${id}:${type}`,
       async () => {
         // Start fetching player token and account in parallel
-        const [player, account] = await Promise.all([
+        const [player, account, medalsRank] = await Promise.all([
           playerToken ?? ApiServiceRegistry.getInstance().getScoreSaberService().lookupPlayer(id),
           PlayerService.getPlayer(id).catch(() => undefined),
+          PlayerService.getPlayerMedalRank(id),
         ]);
 
         if (!player) {
@@ -67,13 +68,10 @@ export default class ScoreSaberService {
           inactive: player.inactive,
           trackedSince: account?.trackedSince ?? new Date(),
           medals: account?.medals ?? 0,
-          medalsRank: account?.medalsRank ?? 0,
           rankPages: {
             global: getPageFromRank(player.rank, 50),
             country: getPageFromRank(player.countryRank, 50),
-            ...(account?.medalsRank !== undefined
-              ? { medals: getPageFromRank(account.medalsRank, 50) }
-              : {}),
+            medals: medalsRank ? getPageFromRank(medalsRank, 50) : undefined,
           },
         } as ScoreSaberPlayer;
 

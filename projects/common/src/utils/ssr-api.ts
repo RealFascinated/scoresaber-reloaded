@@ -1,4 +1,3 @@
-import { PlayerMedalScoresResponse } from "src/response/player-medal-scores-response";
 import SuperJSON from "superjson";
 import { DetailType } from "../detail-type";
 import { env } from "../env";
@@ -12,6 +11,8 @@ import { MiniRankingResponse } from "../response/around-player-response";
 import { BeatSaverMapResponse } from "../response/beatsaver-map-response";
 import { LeaderboardResponse } from "../response/leaderboard-response";
 import LeaderboardScoresResponse from "../response/leaderboard-scores-response";
+import { PlayerMedalRankingsResponse } from "../response/player-medal-rankings-response";
+import { PlayerMedalScoresResponse } from "../response/player-medal-scores-response";
 import { PlayerRankedPpsResponse } from "../response/player-ranked-pps-response";
 import { PlayerRankingsResponse } from "../response/player-rankings-response";
 import { PlayerScoresChartResponse } from "../response/player-scores-chart";
@@ -495,7 +496,7 @@ class SSRApi {
    * @returns the medal ranked players
    */
   async getMedalRankedPlayers(page: number, country?: string) {
-    return Request.get<Page<ScoreSaberPlayer>>(
+    return Request.get<PlayerMedalRankingsResponse>(
       `${env.NEXT_PUBLIC_API_URL}/ranking/medals/${page}`,
       {
         returns: "json",

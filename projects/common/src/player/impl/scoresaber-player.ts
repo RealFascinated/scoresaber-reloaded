@@ -50,6 +50,11 @@ export default interface ScoreSaberPlayer extends ScoreSaberPlayerBase {
    * The player's medal rank.
    */
   medalsRank: number;
+
+  /**
+   * The player's country medal rank.
+   */
+  countryMedalsRank: number;
 }
 
 export interface ScoreSaberPlayerBase extends Player {
