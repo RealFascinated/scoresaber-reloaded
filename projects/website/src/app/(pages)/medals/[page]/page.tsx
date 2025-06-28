@@ -21,19 +21,14 @@ const getMedalsData = async ({
   return { page: pageNumber };
 };
 
-export async function generateMetadata(props: MedalProps): Promise<Metadata> {
-  const { page } = await getMedalsData(props);
-
-  const title = `Medals / ${page}`;
-  return {
-    title: title,
-    openGraph: {
-      siteName: env.NEXT_PUBLIC_WEBSITE_NAME,
-      title: title,
-      description: `View the players with the most medals!`,
-    },
-  };
-}
+export const metadata: Metadata = {
+  title: "Medals Ranking",
+  openGraph: {
+    siteName: env.NEXT_PUBLIC_WEBSITE_NAME,
+    title: "Medals Ranking",
+    description: "View the players with the most medals!",
+  },
+};
 
 export default async function MedalsPage(props: MedalProps) {
   const { page } = await getMedalsData(props);
