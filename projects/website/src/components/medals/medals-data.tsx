@@ -10,9 +10,13 @@ import { useQuery } from "@tanstack/react-query";
 import { LinkIcon } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { FaInfo } from "react-icons/fa";
 import { FancyLoader } from "../fancy-loader";
 import AddFriend from "../friend/add-friend";
+import SimpleTooltip from "../simple-tooltip";
 import { Button } from "../ui/button";
+import { Separator } from "../ui/separator";
+import MedalsInfo from "./medals-info";
 import { PlayerMedalRanking } from "./player-medal-ranking";
 
 type RankingDataProps = {
@@ -47,8 +51,20 @@ export default function RankingData({ initialPage }: RankingDataProps) {
   return (
     <div className="flex w-full flex-col justify-center xl:flex-row xl:gap-2">
       <div className="flex w-full flex-col gap-2 xl:w-[50%]">
-        <Card>
+        <Card className="flex flex-col gap-2">
           <p className="text-lg">Medal Ranking</p>
+          <Separator />
+          <div className="flex w-full justify-between">
+            <p className="text-muted-foreground text-sm">
+              Medals are earned by being one of the best on a Ranked Leaderboard!
+            </p>
+            <SimpleTooltip display={<MedalsInfo />} side="bottom" showOnMobile>
+              <div className="bg-accent flex items-center gap-1 rounded-md p-0.5">
+                <FaInfo className="text-muted-foreground size-4" />
+                Information
+              </div>
+            </SimpleTooltip>
+          </div>
         </Card>
 
         <Card className="order-2 h-full w-full gap-4 xl:order-1">

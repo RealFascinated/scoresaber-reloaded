@@ -1,8 +1,8 @@
 import { cn } from "@/common/utils";
 import FallbackLink from "@/components/fallback-link";
+import MedalsInfo from "@/components/medals/medals-info";
 import SimpleTooltip from "@/components/simple-tooltip";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
-import { MEDAL_COUNTS } from "@ssr/common/medal";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerStatChange } from "@ssr/common/player/player-stat-change";
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
@@ -81,33 +81,9 @@ const playerData = [
         <PlayerOverviewItem>
           <div className="flex items-center gap-1">
             <SimpleTooltip
-              display={
-                <div className="flex flex-col gap-3 p-1">
-                  <div className="flex flex-col gap-1">
-                    <span className="font-semibold text-white">Medal System</span>
-                    <span className="text-muted-foreground text-xs">
-                      Medals awarded for ranked leaderboard positions
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    {Object.entries(MEDAL_COUNTS).map(([rank, count]) => (
-                      <div
-                        key={rank}
-                        className="bg-background/50 flex items-center justify-between gap-2 rounded-md p-2"
-                      >
-                        <div className="flex items-center gap-1">
-                          <FaMedal className="size-3 text-yellow-400" />
-                          <span className="text-xs font-medium text-white">#{rank}</span>
-                        </div>
-                        <span className="text-muted-foreground text-xs">
-                          {count} medal{count !== 1 ? "s" : ""}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              }
+              display={<MedalsInfo />}
               className="flex flex-row items-center gap-1"
+              showOnMobile
             >
               <FaMedal className="text-muted-foreground size-4" />
               <FallbackLink
