@@ -146,23 +146,12 @@ export default function PlusPpCalculator({ player }: { player: ScoreSaberPlayer 
   // Update accuracy and stars when PP value changes (when user manually adjusts PP)
   useEffect(() => {
     if (isPpUserInput && rawPp > 0 && hasInitialized.current) {
-      // First try to maintain current accuracy and adjust stars
-      const starsForCurrentAcc = getStarsForAcc(rawPp, accuracy);
-
-      if (starsForCurrentAcc <= MAX_STARS) {
-        // We can achieve the desired PP with current accuracy, just adjust stars
-        setStars(starsForCurrentAcc);
-      } else {
-        // Need to increase accuracy to keep stars under max
-        const { stars: newStars, accuracy: newAccuracy } = getStarsAndAccuracyForPp(
-          rawPp,
-          accuracy
-        );
-        setStars(newStars);
-        setAccuracy(newAccuracy);
-      }
+      // Always use getStarsAndAccuracyForPp to ensure stars stay within MAX_STARS limit
+      const { stars: newStars, accuracy: newAccuracy } = getStarsAndAccuracyForPp(rawPp, accuracy);
+      setStars(newStars);
+      setAccuracy(newAccuracy);
     }
-  }, [rawPp, isPpUserInput, accuracy, getStarsForAcc, getStarsAndAccuracyForPp]);
+  }, [rawPp, isPpUserInput, accuracy, getStarsAndAccuracyForPp]);
 
   // Handlers
   const handlePpChange = useCallback((newPp: number) => {
@@ -183,10 +172,15 @@ export default function PlusPpCalculator({ player }: { player: ScoreSaberPlayer 
   const handleReset = useCallback(() => {
     setPpValue(1);
     setAccuracy(defaultAccuracy);
-    setStars(10);
+    // Recalculate stars based on default accuracy and +1pp
+    const { stars: resetStars } = getStarsAndAccuracyForPp(
+      ScoreSaberCurve.calcPpBoundary(sortedScores, 1),
+      defaultAccuracy
+    );
+    setStars(resetStars);
     setIsPpUserInput(false);
     hasInitialized.current = false;
-  }, [defaultAccuracy]);
+  }, [defaultAccuracy, getStarsAndAccuracyForPp, sortedScores]);
 
   return (
     <div className="flex flex-col gap-4">
