@@ -20,6 +20,7 @@ export default function Layout({ children }: { children: ReactNode }) {
     <ThemeProvider
       attribute="class"
       defaultTheme={ssrConfig.themes[0].id}
+      enableSystem={false}
       themes={ssrConfig.themes.map((theme: SiteTheme) => theme.id)}
     >
       <DatabaseLoader>

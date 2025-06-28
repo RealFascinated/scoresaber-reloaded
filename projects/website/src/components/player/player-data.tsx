@@ -65,7 +65,7 @@ function PlatformSelector({
             className="flex items-center gap-2 rounded-b-none"
           >
             {platform.getLogo()}
-            {platform.getDisplayName()}
+            <span className="hidden md:block">{platform.getDisplayName()}</span>
           </Button>
         </Link>
       ))}
