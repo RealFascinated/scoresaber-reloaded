@@ -23,27 +23,12 @@ import SimpleTooltip from "../simple-tooltip";
 import { Button } from "../ui/button";
 import Combobox from "../ui/combo-box";
 import { Input } from "../ui/input";
+import { Separator } from "../ui/separator";
 import { PlayerRanking } from "./player-ranking";
 
 type RankingDataProps = {
   initialPage: number;
   initialCountry?: string;
-};
-
-type RankingFiltersProps = {
-  currentCountry: string | undefined;
-  setCurrentCountry: (country: string | undefined) => void;
-  setCurrentPage: (page: number) => void;
-  currentSearch: string | undefined;
-  setCurrentSearch: (search: string | undefined) => void;
-  countryMetadata: Record<string, number>;
-};
-
-type RankingHeaderProps = {
-  currentCountry: string | undefined;
-  showRelativePPDifference: boolean;
-  setShowRelativePPDifference: (show: boolean) => void;
-  mainPlayer: any | undefined;
 };
 
 export default function RankingData({ initialPage, initialCountry }: RankingDataProps) {
@@ -85,27 +70,53 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
   }, [rankingData]);
 
   return (
-    <div className="flex w-full flex-col justify-center xl:flex-row xl:gap-2">
-      <RankingFilters
-        currentCountry={currentCountry}
-        setCurrentCountry={setCurrentCountry}
-        setCurrentPage={setCurrentPage}
-        currentSearch={currentSearch}
-        setCurrentSearch={setCurrentSearch}
-        countryMetadata={rankingData?.countryMetadata ?? {}}
-      />
-
+    <div className="flex w-full flex-col justify-center gap-2 xl:flex-row xl:gap-2">
       <div className="flex w-full flex-col gap-2 xl:w-[50%]">
         <Card>
-          <RankingHeader
-            currentCountry={currentCountry}
-            showRelativePPDifference={showRelativePPDifference}
-            setShowRelativePPDifference={setShowRelativePPDifference}
-            mainPlayer={mainPlayer}
-          />
+          <div className="flex flex-col justify-between gap-2">
+            <div className="flex w-full flex-row items-center justify-between gap-2">
+              <div className="flex items-center font-medium">
+                {currentCountry && (
+                  <div className="flex items-center gap-2">
+                    <CountryFlag code={currentCountry} size={18} />
+                    <span className="text-lg font-semibold">
+                      {countryFilter.find(c => c.key === currentCountry)?.friendlyName}
+                    </span>
+                  </div>
+                )}
+                {!currentCountry && (
+                  <div className="flex items-center gap-2">
+                    <GlobeAmericasIcon className="size-6" />
+                    <p className="text-lg font-semibold">Global Players</p>
+                  </div>
+                )}
+              </div>
+
+              {mainPlayer !== undefined && (
+                <div className="bg-accent/50 flex min-w-fit items-center gap-3 rounded-md px-4 py-2">
+                  <SimpleTooltip
+                    display="The amount of pp between you and each player"
+                    showOnMobile
+                  >
+                    <p className="text-sm">Relative PP</p>
+                  </SimpleTooltip>
+                  <Switch
+                    checked={showRelativePPDifference}
+                    onCheckedChange={checked => setShowRelativePPDifference(checked)}
+                  />
+                </div>
+              )}
+            </div>
+
+            <Separator />
+
+            <span className="text-muted-foreground text-sm">
+              Challenge yourself to become the best player in the world!
+            </span>
+          </div>
         </Card>
 
-        <Card className="order-2 h-full w-full gap-4 xl:order-1">
+        <Card className="h-full w-full gap-4">
           {!rankingData && !isError && (
             <FancyLoader
               title="Loading Players"
@@ -171,125 +182,73 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
           )}
         </Card>
       </div>
-    </div>
-  );
-}
 
-function RankingFilters({
-  currentCountry,
-  setCurrentCountry,
-  setCurrentPage,
-  currentSearch,
-  setCurrentSearch,
-  countryMetadata,
-}: RankingFiltersProps) {
-  return (
-    <Card className="order-1 mb-2 h-full w-full gap-4 xl:order-2 xl:mb-0 xl:w-[25%]">
-      <p className="text-lg">Filters</p>
-      <div className="flex flex-col gap-4">
-        <div className="flex flex-col gap-2">
-          <label className="mb-1 text-sm font-bold">Country</label>
-          <div className="flex flex-row items-center gap-2">
-            <div className="flex w-full flex-col">
-              <Combobox<string | undefined>
-                className="w-full"
-                items={Object.entries(countryMetadata).map(([key, count]) => ({
-                  value: key,
-                  name: (
-                    <div className="flex w-full min-w-0 items-center justify-between">
-                      <span className="truncate">
-                        {countryFilter.find(c => c.key === key)?.friendlyName ?? key}
-                      </span>
-                      <span className="text-muted-foreground ml-4 text-sm whitespace-nowrap">
-                        {count.toLocaleString()} players
-                      </span>
-                    </div>
-                  ),
-                  displayName: countryFilter.find(c => c.key === key)?.friendlyName ?? key,
-                  icon: <CountryFlag code={key} size={12} />,
-                }))}
-                value={currentCountry}
-                onValueChange={(newCountry: string | undefined) => {
-                  setCurrentCountry(newCountry);
-                  setCurrentPage(1);
-                }}
-                placeholder="Select country..."
-              />
+      <div className="flex w-full flex-col gap-2 xl:w-[25%]">
+        <Card className="h-fit w-full gap-2">
+          <span className="text-lg font-semibold">Filters</span>
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-row items-center gap-2">
+              <div className="flex w-full flex-col">
+                <Combobox<string | undefined>
+                  className="h-10 w-full"
+                  items={Object.entries(rankingData?.countryMetadata ?? {}).map(([key, count]) => ({
+                    value: key,
+                    name: (
+                      <div className="flex w-full min-w-0 items-center justify-between">
+                        <span className="truncate">
+                          {countryFilter.find(c => c.key === key)?.friendlyName ?? key}
+                        </span>
+                        <span className="text-muted-foreground ml-4 text-sm whitespace-nowrap">
+                          {count.toLocaleString()} players
+                        </span>
+                      </div>
+                    ),
+                    displayName: countryFilter.find(c => c.key === key)?.friendlyName ?? key,
+                    icon: <CountryFlag code={key} size={12} />,
+                  }))}
+                  value={currentCountry}
+                  onValueChange={(newCountry: string | undefined) => {
+                    setCurrentCountry(newCountry);
+                    setCurrentPage(1);
+                  }}
+                  placeholder="Select country..."
+                />
+              </div>
+
+              {currentCountry && (
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-10 w-10 flex-shrink-0"
+                  onClick={() => setCurrentCountry(undefined)}
+                >
+                  <XIcon className="size-4" />
+                </Button>
+              )}
             </div>
+          </div>
 
-            {currentCountry && (
+          {/* Search */}
+          <div className="flex flex-row items-center gap-2">
+            <Input
+              placeholder="Search for players..."
+              value={currentSearch ?? ""}
+              onChange={e => setCurrentSearch(e.target.value)}
+              className="h-10"
+            />
+            {currentSearch && currentSearch.length > 0 && (
               <Button
                 variant="outline"
                 size="icon"
-                className="h-10 w-10"
-                onClick={() => setCurrentCountry(undefined)}
+                className="h-10 w-10 flex-shrink-0"
+                onClick={() => setCurrentSearch("")}
               >
                 <XIcon className="size-4" />
               </Button>
             )}
           </div>
-        </div>
-
-        {/* Search */}
-        <div className="flex flex-row items-center gap-2">
-          <Input
-            placeholder="Search for players..."
-            value={currentSearch ?? ""}
-            onChange={e => setCurrentSearch(e.target.value)}
-            className="h-10"
-          />
-          {currentSearch && currentSearch.length > 0 && (
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-10 w-10"
-              onClick={() => setCurrentSearch("")}
-            >
-              <XIcon className="size-4" />
-            </Button>
-          )}
-        </div>
+        </Card>
       </div>
-    </Card>
-  );
-}
-
-function RankingHeader({
-  currentCountry,
-  showRelativePPDifference,
-  setShowRelativePPDifference,
-  mainPlayer,
-}: RankingHeaderProps) {
-  return (
-    <div className="flex flex-row items-center justify-between gap-4">
-      <div className="flex items-center font-medium">
-        {currentCountry && (
-          <div className="flex items-center gap-2">
-            <CountryFlag code={currentCountry} size={18} />
-            <span>
-              Players from <b>{countryFilter.find(c => c.key === currentCountry)?.friendlyName}</b>
-            </span>
-          </div>
-        )}
-        {!currentCountry && (
-          <div className="flex items-center gap-2">
-            <GlobeAmericasIcon className="size-6" />
-            <p className="text-lg">Global Players</p>
-          </div>
-        )}
-      </div>
-
-      {mainPlayer !== undefined && (
-        <div className="bg-accent/50 flex min-w-fit items-center gap-3 rounded-md px-4 py-2">
-          <SimpleTooltip display="The amount of pp between you and each player" showOnMobile>
-            <p className="text-sm">Relative PP</p>
-          </SimpleTooltip>
-          <Switch
-            checked={showRelativePPDifference}
-            onCheckedChange={checked => setShowRelativePPDifference(checked)}
-          />
-        </div>
-      )}
     </div>
   );
 }
