@@ -38,7 +38,7 @@
 }
 
 .purple {
-  --primary: oklch(65% 0.28 285);
+  --primary: oklch(70% 0.28 285);
   --accent-secondary: oklch(70% 0.3 285);
   --pp: oklch(58% 0.25 295);
   --ssr: oklch(55% 0.22 275);
