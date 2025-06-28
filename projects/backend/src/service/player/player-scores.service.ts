@@ -616,7 +616,7 @@ export class PlayerScoresService {
       const rawScores = (await ScoreSaberMedalsScoreModel.find({ playerId })
         .skip(start)
         .limit(end - start)
-        .sort({ medals: -1, timestamp: -1 })
+        .sort({ medals: -1, timestamp: -1 }) // Sort by medals and timestamp in descending order
         .lean()) as unknown as ScoreSaberMedalsScore[];
 
       // Get leaderboards for the scores we have

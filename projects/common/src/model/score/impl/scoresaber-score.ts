@@ -59,7 +59,7 @@ export type ScoreSaberPreviousScoreOverview = PreviousScore & {
    */
   maxCombo: number;
 
-  /**src
+  /**
    * The change between the previous score and the current score.
    */
   change?: ScoreSaberPreviousScoreOverview;

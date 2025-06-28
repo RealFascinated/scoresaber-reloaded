@@ -11,6 +11,7 @@ import { TrophyIcon } from "@heroicons/react/24/solid";
 import { ExternalLinkIcon, TrendingUpIcon } from "lucide-react";
 import Link from "next/link";
 import { ElementType, ReactNode } from "react";
+import Card from "../card";
 
 type Category = {
   name: string;
@@ -18,7 +19,6 @@ type Category = {
   id: string;
   showFilter: boolean;
   preservePage?: boolean;
-  externalLink?: string;
   render: () => ReactNode;
 };
 
@@ -36,7 +36,6 @@ const categories: Category[] = [
     icon: TrendingUpIcon,
     id: "ranking-queue",
     showFilter: false,
-    externalLink: "https://scoresaber.com/ranking/requests",
     render: () => <RankingQueue />,
   },
 ];
@@ -67,22 +66,6 @@ export function MapsData({ type }: MapsDataProps) {
                       <category.icon className="h-4 w-4" />
                     </span>
                     <span>{category.name}</span>
-
-                    {category.externalLink && (
-                      <SimpleTooltip
-                        display={<p>View {category.name} on ScoreSaber</p>}
-                        side="bottom"
-                      >
-                        <div
-                          className="flex cursor-pointer items-center gap-2 p-1"
-                          onClick={() => {
-                            window.open(category.externalLink, "_blank");
-                          }}
-                        >
-                          <ExternalLinkIcon className="h-4 w-4" />
-                        </div>
-                      </SimpleTooltip>
-                    )}
                   </span>
                 </Button>
               </Link>
@@ -93,7 +76,29 @@ export function MapsData({ type }: MapsDataProps) {
           {selectedCategory.render()}
         </article>
         <div className="flex w-full flex-col gap-2 xl:w-[400px]">
+          {/* Playlists */}
           <Playlists />
+
+          {/* External Links */}
+          <Card>
+            <SimpleTooltip
+              display={<p>Click to open the Ranking Queue on ScoreSaber</p>}
+              side="bottom"
+            >
+              <Link
+                href="https://scoresaber.com/ranking/requests"
+                target="_blank"
+                className="w-full"
+              >
+                <Button className="flex w-full items-center justify-center gap-2">
+                  <ExternalLinkIcon className="h-4 w-4" />
+                  <span>View Ranking Queue on ScoreSaber</span>
+                </Button>
+              </Link>
+            </SimpleTooltip>
+          </Card>
+
+          {/* Map Filters */}
           {selectedCategory.showFilter && <MapFilters />}
         </div>
       </div>
