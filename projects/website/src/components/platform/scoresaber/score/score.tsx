@@ -45,6 +45,7 @@ export default function ScoreSaberScoreDisplay({
     allowLeaderboardPreview?: boolean;
     defaultLeaderboardScoresPage?: number;
     medalsMode?: boolean;
+    isPreviousScore?: boolean;
   };
 }) {
   const [baseScore, setBaseScore] = useState(score.score);
@@ -157,6 +158,7 @@ export default function ScoreSaberScoreDisplay({
             setIsLeaderboardExpanded={handleLeaderboardOpen}
             isLeaderboardLoading={isLeaderboardLoading}
             updateScore={updatedScore => setBaseScore(updatedScore.score)}
+            isPreviousScore={settings?.isPreviousScore}
           />
         )}
 

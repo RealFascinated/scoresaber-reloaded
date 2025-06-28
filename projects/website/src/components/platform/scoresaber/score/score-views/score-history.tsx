@@ -92,6 +92,7 @@ export function ScoreHistory({ playerId, leaderboard }: ScoreHistoryProps) {
               settings={{
                 hideLeaderboardDropdown: true,
                 hideAccuracyChanger: true,
+                isPreviousScore: true,
               }}
             />
           );

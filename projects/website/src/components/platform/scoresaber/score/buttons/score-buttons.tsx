@@ -23,32 +23,37 @@ type Props = {
   hideLeaderboardDropdown?: boolean;
   hideAccuracyChanger?: boolean;
   isLeaderboardLoading?: boolean;
+  isPreviousScore?: boolean;
   setIsLeaderboardExpanded?: (isExpanded: boolean) => void;
   updateScore?: (score: ScoreSaberScore) => void;
 };
 
 type ButtonConfig = {
+  display: (props: Props) => boolean;
   render: (props: Props) => React.ReactNode;
 };
 
 const buttons: ButtonConfig[] = [
   {
+    display: ({ beatSaverMap, isPreviousScore }: Props) => {
+      return beatSaverMap != undefined && !isPreviousScore;
+    },
     render: ({ beatSaverMap }: Props) => {
-      if (!beatSaverMap) {
-        return null;
-      }
-      return <ScoreBsrButton beatSaverMap={beatSaverMap} />;
+      return <ScoreBsrButton beatSaverMap={beatSaverMap!} />;
     },
   },
   {
+    display: ({ beatSaverMap, isPreviousScore }: Props) => {
+      return beatSaverMap != undefined && !isPreviousScore;
+    },
     render: ({ beatSaverMap }: Props) => {
-      if (!beatSaverMap) {
-        return null;
-      }
-      return <BeatSaverMapButton beatSaverMap={beatSaverMap} />;
+      return <BeatSaverMapButton beatSaverMap={beatSaverMap!} />;
     },
   },
   {
+    display: ({ leaderboard, isPreviousScore }: Props) => {
+      return leaderboard != undefined && !isPreviousScore;
+    },
     render: ({ leaderboard }: Props) => {
       return (
         <SongOpenInYoutubeButton
@@ -60,11 +65,11 @@ const buttons: ButtonConfig[] = [
     },
   },
   {
+    display: ({ score }: Props) => {
+      return score?.additionalData != undefined;
+    },
     render: ({ score }: Props) => {
-      if (!score?.additionalData) {
-        return null;
-      }
-      return <ScoreReplayButton additionalData={score.additionalData} />;
+      return <ScoreReplayButton additionalData={score!.additionalData!} />;
     },
   },
 ];
@@ -79,6 +84,7 @@ export default function ScoreSaberScoreButtons({
   updateScore,
   hideLeaderboardDropdown,
   hideAccuracyChanger,
+  isPreviousScore,
 }: Props) {
   const isMobile = useIsMobile();
   const [leaderboardExpanded, setLeaderboardExpanded] = useState(false);
@@ -107,6 +113,7 @@ export default function ScoreSaberScoreButtons({
       updateScore,
       hideLeaderboardDropdown,
       hideAccuracyChanger,
+      isPreviousScore,
     }),
     [
       score,
@@ -118,6 +125,7 @@ export default function ScoreSaberScoreButtons({
       updateScore,
       hideLeaderboardDropdown,
       hideAccuracyChanger,
+      isPreviousScore,
     ]
   );
 
@@ -130,7 +138,7 @@ export default function ScoreSaberScoreButtons({
           style={{ width: isMobile ? "auto" : "80px" }}
         >
           {memoizedButtons
-            .filter(button => button.render(buttonProps) !== null)
+            .filter(button => button.display(buttonProps))
             .map((button, index) => (
               <div key={index} className="flex-shrink-0">
                 {button.render(buttonProps)}
