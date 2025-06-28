@@ -48,7 +48,7 @@ const RANKING_REQUESTS_ENDPOINT = `${API_BASE}/ranking/requests/:query`;
 export class ScoreSaberService extends ApiService {
   constructor() {
     super(
-      new Cooldown(cooldownRequestsPerMinute(300), 300, cooldownRequestsPerMinute(100), 100),
+      new Cooldown(cooldownRequestsPerMinute(250), 250, cooldownRequestsPerMinute(150), 150),
       ApiServiceName.SCORE_SABER
     );
   }
