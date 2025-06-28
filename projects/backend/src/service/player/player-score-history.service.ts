@@ -155,7 +155,7 @@ export class PlayerScoreHistoryService {
           .sort({ timestamp: -1 })
           .lean();
 
-        if (!previousScore) {
+        if (!previousScore || previousScore.scoreId === score.scoreId) {
           return undefined;
         }
 
