@@ -349,7 +349,7 @@ export default class Database extends Dexie {
   async getCustomBackgroundCover(): Promise<string> {
     return (await this.getSetting<string>(
       SettingIds.CustomBackgroundCover,
-      "https://cdn.fascinated.cc/assets/background.jpg"
+      BACKGROUND_COVERS[0].value
     ))!;
   }
 
