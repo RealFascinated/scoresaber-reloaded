@@ -132,6 +132,7 @@ function PlayerMiniRanking({
                       highlightedPlayerId={player.id}
                       hideCountryFlag
                       hoverBrightness={false}
+                      className="text-xs"
                     />
                   </div>
 
