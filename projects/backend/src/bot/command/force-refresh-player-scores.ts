@@ -22,7 +22,6 @@ export class ForceRefreshPlayerScores {
     interaction.deferReply();
 
     try {
-      const player = await PlayerService.getPlayer(playerId);
       const playerToken = await ApiServiceRegistry.getInstance()
         .getScoreSaberService()
         .lookupPlayer(playerId);
@@ -30,6 +29,7 @@ export class ForceRefreshPlayerScores {
         throw new Error("Player not found");
       }
 
+      const player = await PlayerService.getPlayer(playerId, playerToken);
       await PlayerService.refreshAllPlayerScores(player, playerToken);
 
       interaction.editReply({

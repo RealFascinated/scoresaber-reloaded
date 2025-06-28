@@ -114,7 +114,7 @@ export class PlayerRankedService {
    * @param playerToken the player's token
    */
   public static async updatePeakRank(playerId: string, playerToken: ScoreSaberPlayerToken) {
-    const foundPlayer = await PlayerService.getPlayer(playerId);
+    const foundPlayer = await PlayerService.getPlayer(playerId, playerToken);
     if (playerToken.rank == 0) {
       return foundPlayer;
     }

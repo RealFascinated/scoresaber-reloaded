@@ -15,7 +15,7 @@ await mongoose.connect(env.MONGO_CONNECTION_STRING); // Connect to MongoDB
 
 async function migrate() {
   Logger.info("Starting migration...");
-  const players = await PlayerModel.find({ joinedDate: { $exists: false } });
+  const players = await PlayerModel.find({ country: { $exists: false } });
 
   let current = 0;
   for (const player of players) {
@@ -30,8 +30,8 @@ async function migrate() {
         .lookupPlayer(player._id);
 
       if (token) {
-        player.joinedDate = new Date(token.firstSeen);
-        player.markModified("joinedDate");
+        player.country = token.country;
+        player.markModified("country");
         await player.save();
       }
     } catch (error) {

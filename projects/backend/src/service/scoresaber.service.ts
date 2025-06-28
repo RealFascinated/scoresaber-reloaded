@@ -34,22 +34,22 @@ export default class ScoreSaberService {
   public static async getPlayer(
     id: string,
     type: DetailType = DetailType.BASIC,
-    playerToken?: ScoreSaberPlayerToken
+    player?: ScoreSaberPlayerToken
   ): Promise<ScoreSaberPlayer> {
     return CacheService.fetchWithCache(
       CacheId.ScoreSaber,
       `scoresaber:player:${id}:${type}`,
       async () => {
-        // Start fetching player token and account in parallel
-        const [player, account, medalsRank] = await Promise.all([
-          playerToken ?? ApiServiceRegistry.getInstance().getScoreSaberService().lookupPlayer(id),
-          PlayerService.getPlayer(id).catch(() => undefined),
-          PlayerService.getPlayerMedalRank(id),
-        ]);
-
+        player ??= await ApiServiceRegistry.getInstance().getScoreSaberService().lookupPlayer(id);
         if (!player) {
           throw new NotFoundError(`Player "${id}" not found`);
         }
+
+        // Start fetching player token and account in parallel
+        const [account, medalsRank] = await Promise.all([
+          PlayerService.getPlayer(id, player).catch(() => undefined),
+          PlayerService.getPlayerMedalRank(id),
+        ]);
 
         // For basic type, return early with minimal data
         const basePlayer = {
