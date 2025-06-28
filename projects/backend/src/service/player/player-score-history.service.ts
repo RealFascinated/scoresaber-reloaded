@@ -36,22 +36,24 @@ export class PlayerScoreHistoryService {
       throw new NotFoundError(`No previous scores found for ${playerId} in ${leaderboardId}`);
     }
 
+    // Get leaderboard data once for all scores
+    const leaderboardResponse = await LeaderboardService.getLeaderboard(leaderboardId);
+    if (leaderboardResponse == undefined) {
+      throw new NotFoundError(`Leaderboard "${leaderboardId}" not found`);
+    }
+    const { leaderboard, beatsaver } = leaderboardResponse;
+
     return new Pagination<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>()
       .setItemsPerPage(8)
       .setTotalItems(scores.length)
       .getPage(page, async () => {
-        // Get leaderboard data once for all scores
-        const leaderboardResponse = await LeaderboardService.getLeaderboard(leaderboardId);
-        if (leaderboardResponse == undefined) {
-          throw new NotFoundError(`Leaderboard "${leaderboardId}" not found`);
-        }
-        const { leaderboard, beatsaver } = leaderboardResponse;
-
-        // Process all scores in parallel
-        const toReturn = await Promise.all(
+        return await Promise.all(
           scores.map(async scoreToken => {
             let score = scoreToken.toObject() as unknown as ScoreSaberScore;
-            score = await ScoreService.insertScoreData(score, leaderboard);
+            score = await ScoreService.insertScoreData(score, leaderboard, undefined, {
+              insertPreviousScore: false,
+              removeScoreWeight: true,
+            });
             return {
               score: score,
               leaderboard: leaderboard,
@@ -59,8 +61,6 @@ export class PlayerScoreHistoryService {
             };
           })
         );
-
-        return toReturn;
       });
   }
 
