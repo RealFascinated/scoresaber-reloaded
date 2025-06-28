@@ -6,7 +6,7 @@ import React from "react";
  */
 export type ScoreBadge<TScore, TLeaderboard> = {
   name: string;
-  color?: (score: TScore, leaderboard: TLeaderboard) => string | undefined;
+  color?: (score: TScore, leaderboard: TLeaderboard, medalsMode?: boolean) => string | undefined;
   create: (
     score: TScore,
     leaderboard: TLeaderboard,
@@ -32,7 +32,7 @@ export function ScoreBadges<TScore, TLeaderboard>({
 }: ScoreBadgeProps<TScore, TLeaderboard>) {
   return badges.map((badge, index) => {
     const toRender = badge.create(score, leaderboard, medalsMode);
-    const color = badge.color?.(score, leaderboard);
+    const color = badge.color?.(score, leaderboard, medalsMode);
     if (toRender === undefined) {
       return <div key={index} />;
     }
@@ -40,7 +40,7 @@ export function ScoreBadges<TScore, TLeaderboard>({
       <div
         key={index}
         className={clsx(
-          "flex h-fit cursor-default items-center justify-center rounded-md p-1 text-sm",
+          "flex h-full cursor-default items-center justify-center rounded-md p-1 text-sm",
           color ? color : "bg-accent"
         )}
         style={{

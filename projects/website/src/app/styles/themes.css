@@ -25,6 +25,7 @@
   --pp: #5c6bff;
   --ssr: #5c6bff;
   --ranked: #0070f3;
+  --medals: #cd7f32;
   --discord-blue: #5865f2;
   --inactive-account: #ff6467;
   --song-name: #5c6bff;
@@ -83,6 +84,7 @@
   --color-pp: var(--pp);
   --color-ssr: var(--ssr);
   --color-ranked: var(--ranked);
+  --color-medals: var(--medals);
   --color-discord-blue: var(--discord-blue);
   --color-inactive-account: var(--inactive-account);
   --color-song-name: var(--song-name);

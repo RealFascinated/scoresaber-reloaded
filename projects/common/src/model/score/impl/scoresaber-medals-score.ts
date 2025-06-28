@@ -9,7 +9,24 @@ import {
   Severity,
 } from "@typegoose/typegoose";
 import { Document } from "mongoose";
-import { ScoreSaberScorePublic } from "./scoresaber-score";
+import { ScoreSaberLeaderboardPlayerInfoToken } from "../../../types/token/scoresaber/leaderboard-player-info";
+import { ScoreSaberScore } from "./scoresaber-score";
+import { ScoreSaberScoreBase } from "./scoresaber-score-base";
+
+@modelOptions({
+  options: { allowMixed: Severity.ALLOW },
+})
+export class ScoreSaberMedalsScoreBase extends ScoreSaberScoreBase {
+  /**
+   * The player who set the score.
+   */
+  public playerInfo!: ScoreSaberLeaderboardPlayerInfoToken;
+
+  /**
+   * The score of the player who set the score.
+   */
+  public comparisonScore?: ScoreSaberScore;
+}
 
 @modelOptions({
   options: { allowMixed: Severity.ALLOW },
@@ -34,7 +51,7 @@ import { ScoreSaberScorePublic } from "./scoresaber-score";
   overwriteModelName: "scoresaber-medals-scores",
 })
 @index({ playerId: 1, medals: 1 })
-export class ScoreSaberMedalsScoreInternal extends ScoreSaberScorePublic {
+export class ScoreSaberMedalsScoreInternal extends ScoreSaberMedalsScoreBase {
   /**
    * The amount of medals this score rewarded the player.
    */

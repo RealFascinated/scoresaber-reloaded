@@ -112,7 +112,8 @@ export const app = new Elysia()
       timezone: "Europe/London", // UTC time
       protect: true,
       run: async () => {
-        await ScoreService.refreshMedalScores();
+        await ScoreService.refreshMedalScores(); // Refresh medal scores
+        await PlayerService.updatePlayerMedalCounts(); // Update player medal counts and ranks
       },
     })
   )

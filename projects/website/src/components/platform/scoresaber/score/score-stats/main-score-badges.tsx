@@ -12,8 +12,8 @@ import { ScoreMedalsBadge } from "../badges/score-medals";
 const mainBadges: ScoreBadge<ScoreSaberScore, ScoreSaberLeaderboard>[] = [
   {
     name: "PP",
-    color: () => {
-      return "bg-statistic";
+    color: (_, __, medalsMode?: boolean) => {
+      return medalsMode ? "bg-medals" : "bg-statistic";
     },
     create: (score: ScoreSaberScore, leaderboard: ScoreSaberLeaderboard, medalsMode?: boolean) => {
       if (medalsMode) {
