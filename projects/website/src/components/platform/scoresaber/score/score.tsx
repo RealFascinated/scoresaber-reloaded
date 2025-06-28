@@ -44,6 +44,7 @@ export default function ScoreSaberScoreDisplay({
     hideRank?: boolean;
     allowLeaderboardPreview?: boolean;
     defaultLeaderboardScoresPage?: number;
+    medalsMode?: boolean;
   };
 }) {
   const [baseScore, setBaseScore] = useState(score.score);
@@ -159,7 +160,11 @@ export default function ScoreSaberScoreDisplay({
           />
         )}
 
-        <ScoreSaberScoreStats score={memoizedScore} leaderboard={leaderboard} />
+        <ScoreSaberScoreStats
+          score={memoizedScore}
+          leaderboard={leaderboard}
+          medalsMode={settings?.medalsMode}
+        />
       </div>
 
       <ScoreDropdown

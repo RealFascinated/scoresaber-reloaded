@@ -9,10 +9,15 @@ import {
 } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { Player, PlayerModel } from "@ssr/common/model/player/player";
 import {
+  ScoreSaberMedalsScore,
+  ScoreSaberMedalsScoreModel,
+} from "@ssr/common/model/score/impl/scoresaber-medals-score";
+import {
   ScoreSaberScore,
   ScoreSaberScoreModel,
 } from "@ssr/common/model/score/impl/scoresaber-score";
 import { Pagination } from "@ssr/common/pagination";
+import { PlayerMedalScoresResponse } from "@ssr/common/response/player-medal-scores-response";
 import { PlayerScoresChartResponse } from "@ssr/common/response/player-scores-chart";
 import { PlayerScoresResponse } from "@ssr/common/response/player-scores-response";
 import { PlayerScore } from "@ssr/common/score/player-score";
@@ -581,6 +586,76 @@ export class PlayerScoresService {
 
       return processedScores.filter(
         (score): score is PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard> => score !== null
+      );
+    });
+  }
+
+  /**
+   * Gets the medal scores for a player.
+   *
+   * @param playerId the player's id.
+   * @param page the page number
+   * @returns the medal scores.
+   */
+  public static async getPlayerMedalScores(
+    playerId: string,
+    page: number = 1
+  ): Promise<PlayerMedalScoresResponse> {
+    const totalScores = await ScoreSaberMedalsScoreModel.countDocuments({
+      playerId,
+    });
+    if (totalScores === 0) {
+      return Pagination.empty<PlayerScore<ScoreSaberMedalsScore, ScoreSaberLeaderboard>>();
+    }
+
+    const pagination = new Pagination<PlayerScore<ScoreSaberMedalsScore, ScoreSaberLeaderboard>>()
+      .setItemsPerPage(8)
+      .setTotalItems(totalScores);
+
+    return pagination.getPage(page, async ({ start, end }) => {
+      const rawScores = (await ScoreSaberMedalsScoreModel.find({ playerId })
+        .skip(start)
+        .limit(end - start)
+        .sort({ medals: -1, timestamp: -1 })
+        .lean()) as unknown as ScoreSaberMedalsScore[];
+
+      // Get leaderboards for the scores we have
+      const leaderboardResponses = await LeaderboardService.getLeaderboards(
+        rawScores.map(score => score.leaderboardId + ""),
+        {
+          includeBeatSaver: true,
+          cacheOnly: true,
+        }
+      );
+
+      const leaderboardMapForScores = new Map(
+        leaderboardResponses.map(response => [response.leaderboard.id, response])
+      );
+
+      // Process scores in parallel - return PlayerScore objects
+      const processedScores = await Promise.all(
+        rawScores.map(async rawScore => {
+          const leaderboardResponse = leaderboardMapForScores.get(rawScore.leaderboardId);
+          if (!leaderboardResponse) {
+            return null;
+          }
+          const { leaderboard, beatsaver } = leaderboardResponse;
+
+          const score = (await ScoreService.insertScoreData(
+            scoreToObject(rawScore),
+            leaderboard
+          )) as unknown as ScoreSaberMedalsScore;
+          return {
+            score: score,
+            leaderboard: leaderboard,
+            beatSaver: beatsaver,
+          } as PlayerScore<ScoreSaberMedalsScore, ScoreSaberLeaderboard>;
+        })
+      );
+
+      return processedScores.filter(
+        (score): score is PlayerScore<ScoreSaberMedalsScore, ScoreSaberLeaderboard> =>
+          score !== null
       );
     });
   }

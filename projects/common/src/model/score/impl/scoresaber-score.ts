@@ -32,7 +32,7 @@ import { ScoreSaberScoreBase } from "./scoresaber-score-base";
 @index({ playerId: 1, rank: 1 })
 export class ScoreSaberScoreInternal extends ScoreSaberScoreBase {}
 
-class ScoreSaberScorePublic extends ScoreSaberScoreInternal {
+export class ScoreSaberScorePublic extends ScoreSaberScoreInternal {
   /**
    * The player who set the score.
    */

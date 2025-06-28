@@ -40,6 +40,11 @@ export class TrackScoreListener implements EventListener {
       hasPreviousScore
     );
 
+    // Update medal scores
+    if (leaderboard.ranked && score.rank <= 10) {
+      ScoreService.handleIncomingMedalsScoreUpdate(score);
+    }
+
     // Track BeatLeader score if available
     let beatLeaderScore: AdditionalScoreData | undefined;
     if (beatLeaderScoreToken) {

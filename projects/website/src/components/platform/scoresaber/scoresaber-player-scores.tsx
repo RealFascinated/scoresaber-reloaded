@@ -328,17 +328,15 @@ export default function ScoreSaberPlayerScores({
           ))}
         </PageTransition>
 
-        {scores.metadata.totalPages > 1 && (
-          <SimplePagination
-            mobilePagination={isMobile}
-            page={currentPage}
-            totalItems={scores.metadata.totalItems}
-            itemsPerPage={scores.metadata.itemsPerPage}
-            loadingPage={isLoading || isRefetching ? currentPage : undefined}
-            generatePageUrl={getUrl}
-            onPageChange={handlePageChange}
-          />
-        )}
+        <SimplePagination
+          mobilePagination={isMobile}
+          page={currentPage}
+          totalItems={scores.metadata.totalItems}
+          itemsPerPage={scores.metadata.itemsPerPage}
+          loadingPage={isLoading || isRefetching ? currentPage : undefined}
+          generatePageUrl={getUrl}
+          onPageChange={handlePageChange}
+        />
       </>
     );
   };

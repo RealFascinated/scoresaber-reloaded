@@ -18,6 +18,7 @@ import BeatSaverController from "./controller/beatsaver.controller";
 import CachedScoresController from "./controller/cached-scores.controller";
 import FriendsController from "./controller/friends.controller";
 import LeaderboardController from "./controller/leaderboard.controller";
+import MedalsScoresController from "./controller/medals-scores.controller";
 import MiniRankingController from "./controller/mini-ranking.controller";
 import PlayerHistoryController from "./controller/player-history.controller";
 import PlayerRankingController from "./controller/player-ranking.controller";
@@ -105,13 +106,13 @@ export const app = new Elysia()
   )
   .use(
     cron({
-      name: "update-player-medals",
-      // pattern: "*/1 * * * *", // Every 5 minutes
-      pattern: "0 */8 * * *", // Every 8 hours at 00:00, 08:00, 16:00, etc
+      name: "refresh-medal-scores",
+      // pattern: "*/1 * * * *", // Every minute
+      pattern: "0 23 * * *", // Every day at 23:00
       timezone: "Europe/London", // UTC time
       protect: true,
       run: async () => {
-        await PlayerService.updatePlayerMedalCounts();
+        await ScoreService.refreshMedalScores();
       },
     })
   )
@@ -239,6 +240,7 @@ app.use(
       CachedScoresController,
       PlayerSearchController,
       PlayerRankingController,
+      MedalsScoresController,
     ],
   })
 );

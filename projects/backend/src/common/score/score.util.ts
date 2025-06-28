@@ -2,6 +2,7 @@ import { DetailType } from "@ssr/common/detail-type";
 import { env } from "@ssr/common/env";
 import { AdditionalScoreData } from "@ssr/common/model/additional-score-data/additional-score-data";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
+import { ScoreSaberMedalsScore } from "@ssr/common/model/score/impl/scoresaber-medals-score";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { removeObjectFields } from "@ssr/common/object.util";
 import { ReplayViewers } from "@ssr/common/replay-viewer";
@@ -22,11 +23,13 @@ import { PlayerService } from "../../service/player/player.service";
  * @param score the score to convert
  * @returns the converted score
  */
-export function scoreToObject(score: ScoreSaberScore): ScoreSaberScore {
+export function scoreToObject(
+  score: ScoreSaberScore | ScoreSaberMedalsScore
+): ScoreSaberScore | ScoreSaberMedalsScore {
   return {
-    ...removeObjectFields<ScoreSaberScore>(score, ["_id", "id", "__v"]),
+    ...removeObjectFields<ScoreSaberScore | ScoreSaberMedalsScore>(score, ["_id", "id", "__v"]),
     id: score._id,
-  } as ScoreSaberScore;
+  } as unknown as ScoreSaberScore | ScoreSaberMedalsScore;
 }
 
 /**

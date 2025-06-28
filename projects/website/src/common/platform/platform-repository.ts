@@ -1,10 +1,12 @@
 import { AccSaberPlatform } from "./impl/accsaber";
+import { MedalScoresPlatform } from "./impl/medals";
 import { ScoreSaberPlatform } from "./impl/scoresaber";
 import { Platform } from "./platform";
 
 export enum PlatformType {
   ScoreSaber = "scoresaber",
   AccSaber = "accsaber",
+  MedalScores = "medals",
 }
 
 export class PlatformRepository {
@@ -14,6 +16,7 @@ export class PlatformRepository {
   private constructor() {
     this.platforms.push(new ScoreSaberPlatform());
     this.platforms.push(new AccSaberPlatform());
+    this.platforms.push(new MedalScoresPlatform());
   }
 
   /**

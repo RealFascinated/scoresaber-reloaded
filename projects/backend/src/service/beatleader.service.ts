@@ -162,17 +162,19 @@ export default class BeatLeaderService {
 
     // Save score stats (15 second delay to ensure the score stats are available on beatleader)
     // run in background
-    sleep(30_000).then(async () => {
-      await ApiServiceRegistry.getInstance()
-        .getBeatLeaderService()
-        .lookupScoreStats(score.id)
-        .then(async stats => {
-          if (stats) {
-            await this.trackScoreStats(score.id, stats);
-          }
-          return stats;
-        });
-    });
+    if (isProduction()) {
+      sleep(30_000).then(async () => {
+        await ApiServiceRegistry.getInstance()
+          .getBeatLeaderService()
+          .lookupScoreStats(score.id)
+          .then(async stats => {
+            if (stats) {
+              await this.trackScoreStats(score.id, stats);
+            }
+            return stats;
+          });
+      });
+    }
 
     // Parallelize independent operations
     const [replayData] = await Promise.all([
@@ -247,8 +249,13 @@ export default class BeatLeaderService {
    * @param scoreId the id of the score
    */
   public static async getScoreStats(scoreId: number): Promise<ScoreStatsToken | undefined> {
-    const additionalScoreData = await this.getAdditionalScoreData(scoreId);
+    if (!isProduction()) {
+      return (await ApiServiceRegistry.getInstance()
+        .getBeatLeaderService()
+        .lookupScoreStats(scoreId)) as ScoreStatsToken;
+    }
 
+    const additionalScoreData = await this.getAdditionalScoreData(scoreId);
     let scoreStats: ScoreStatsToken | null = await CacheService.fetchWithCache(
       CacheId.ScoreStats,
       `score-stats:${scoreId}`,

@@ -20,6 +20,7 @@ export default class AppController {
   public async getHealth() {
     return {
       status: "OK",
+      timestamp: new Date().toISOString(),
     };
   }
 

@@ -1,3 +1,4 @@
+import { PlayerMedalScoresResponse } from "src/response/player-medal-scores-response";
 import SuperJSON from "superjson";
 import { DetailType } from "../detail-type";
 import { env } from "../env";
@@ -501,6 +502,21 @@ class SSRApi {
         searchParams: {
           ...(country ? { country: country } : {}),
         },
+      }
+    );
+  }
+
+  /**
+   * Fetches the player's medal scores.
+   *
+   * @param playerId the player's id
+   * @param page the page
+   */
+  async fetchCachedScoreSaberPlayerMedalScores(playerId: string, page: number) {
+    return Request.get<PlayerMedalScoresResponse>(
+      `${env.NEXT_PUBLIC_API_URL}/scores/medals/player/${playerId}/${page}`,
+      {
+        returns: "json",
       }
     );
   }

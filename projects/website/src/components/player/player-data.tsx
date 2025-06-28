@@ -21,6 +21,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useLiveQuery } from "dexie-react-hooks";
 import Link from "next/link";
 import AccSaberPlayerScores from "../platform/accsaber/accsaber-player-scores";
+import ScoreSaberPlayerMedalScores from "../platform/scoresaber/scoresaber-player-medal-scores";
 import ScoreSaberPlayerScores from "../platform/scoresaber/scoresaber-player-scores";
 import { Button } from "../ui/button";
 import PlayerHeader from "./header/player-header";
@@ -103,6 +104,8 @@ function ScoreComponent({
           page={parseInt(pageParams[mode === "cached" ? 4 : 3]) || 1}
           initialSearch={searchParams.search}
         />
+      ) : platformType === PlatformType.MedalScores ? (
+        <ScoreSaberPlayerMedalScores player={player} page={parseInt(pageParams[2]) || 1} />
       ) : (
         <AccSaberPlayerScores
           player={player}

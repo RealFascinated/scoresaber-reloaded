@@ -7,6 +7,7 @@ import { ScoreBadge, ScoreBadges } from "@/components/score/score-badges";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { getScoreBadgeFromAccuracy } from "@ssr/common/utils/song-utils";
+import { ScoreMedalsBadge } from "../badges/score-medals";
 
 const mainBadges: ScoreBadge<ScoreSaberScore, ScoreSaberLeaderboard>[] = [
   {
@@ -14,7 +15,11 @@ const mainBadges: ScoreBadge<ScoreSaberScore, ScoreSaberLeaderboard>[] = [
     color: () => {
       return "bg-statistic";
     },
-    create: (score: ScoreSaberScore, leaderboard: ScoreSaberLeaderboard) => {
+    create: (score: ScoreSaberScore, leaderboard: ScoreSaberLeaderboard, medalsMode?: boolean) => {
+      if (medalsMode) {
+        return <ScoreMedalsBadge score={score} />;
+      }
+
       if (!score.pp) {
         return undefined;
       }
@@ -68,12 +73,18 @@ const mainBadges: ScoreBadge<ScoreSaberScore, ScoreSaberLeaderboard>[] = [
 type MainScoreBadgesProps = {
   score: ScoreSaberScore;
   leaderboard: ScoreSaberLeaderboard;
+  medalsMode?: boolean;
 };
 
-export function MainScoreBadges({ score, leaderboard }: MainScoreBadgesProps) {
+export function MainScoreBadges({ score, leaderboard, medalsMode }: MainScoreBadgesProps) {
   return (
     <div className="grid w-full grid-cols-3 justify-center gap-1">
-      <ScoreBadges badges={mainBadges} score={score} leaderboard={leaderboard} />
+      <ScoreBadges
+        badges={mainBadges}
+        score={score}
+        leaderboard={leaderboard}
+        medalsMode={medalsMode}
+      />
     </div>
   );
 }

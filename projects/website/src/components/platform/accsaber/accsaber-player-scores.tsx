@@ -239,19 +239,15 @@ export default function AccSaberPlayerScores({ player, sort, page, type, order }
               ))}
             </PageTransition>
 
-            {previousScores.metadata.totalPages > 1 && (
-              <SimplePagination
-                mobilePagination={isMobile}
-                page={currentPage}
-                totalItems={previousScores.metadata.totalItems}
-                itemsPerPage={previousScores.metadata.itemsPerPage}
-                loadingPage={
-                  isLoading || isRefetching || pendingAnimation ? currentPage : undefined
-                }
-                generatePageUrl={page => getUrl(page)}
-                onPageChange={handlePageChange}
-              />
-            )}
+            <SimplePagination
+              mobilePagination={isMobile}
+              page={currentPage}
+              totalItems={previousScores.metadata.totalItems}
+              itemsPerPage={previousScores.metadata.itemsPerPage}
+              loadingPage={isLoading || isRefetching || pendingAnimation ? currentPage : undefined}
+              generatePageUrl={page => getUrl(page)}
+              onPageChange={handlePageChange}
+            />
           </>
         )}
       </div>

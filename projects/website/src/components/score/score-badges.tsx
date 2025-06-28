@@ -7,7 +7,11 @@ import React from "react";
 export type ScoreBadge<TScore, TLeaderboard> = {
   name: string;
   color?: (score: TScore, leaderboard: TLeaderboard) => string | undefined;
-  create: (score: TScore, leaderboard: TLeaderboard) => React.ReactNode | undefined;
+  create: (
+    score: TScore,
+    leaderboard: TLeaderboard,
+    medalsMode?: boolean
+  ) => React.ReactNode | undefined;
 };
 
 /**
@@ -17,15 +21,17 @@ type ScoreBadgeProps<TScore, TLeaderboard> = {
   badges: ScoreBadge<TScore, TLeaderboard>[];
   score: TScore;
   leaderboard: TLeaderboard;
+  medalsMode?: boolean;
 };
 
 export function ScoreBadges<TScore, TLeaderboard>({
   badges,
   score,
   leaderboard,
+  medalsMode,
 }: ScoreBadgeProps<TScore, TLeaderboard>) {
   return badges.map((badge, index) => {
-    const toRender = badge.create(score, leaderboard);
+    const toRender = badge.create(score, leaderboard, medalsMode);
     const color = badge.color?.(score, leaderboard);
     if (toRender === undefined) {
       return <div key={index} />;
