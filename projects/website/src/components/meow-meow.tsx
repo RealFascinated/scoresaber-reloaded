@@ -2,7 +2,7 @@
 
 import useDatabase from "@/hooks/use-database";
 import { useLiveQuery } from "dexie-react-hooks";
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 
 type SpriteName =
   | "idle"
@@ -90,19 +90,149 @@ export default function MeowMeow() {
   const database = useDatabase();
   const showKitty = useLiveQuery(async () => database.getShowKitty());
   const nekoElRef = useRef<HTMLDivElement | null>(null);
+  const animationFrameRef = useRef<number | null>(null);
+  const mouseMoveListenerRef = useRef<((event: MouseEvent) => void) | null>(null);
 
-  useEffect(() => {
-    if (showKitty === undefined || !showKitty) {
-      cleanup();
+  // State refs to avoid re-renders
+  const stateRef = useRef({
+    lastFrameTimestamp: null as number | null,
+    idleTime: 0,
+    idleAnimation: null as string | null,
+    idleAnimationFrame: 0,
+    frameCount: 0,
+    nekoPosX: 32,
+    nekoPosY: 32,
+    mousePosX: 0,
+    mousePosY: 0,
+  });
+
+  const nekoSpeed = 10;
+
+  const setSprite = useCallback((name: SpriteName, frame: number) => {
+    if (!nekoElRef.current) return;
+    const sprite = spriteSets[name][frame % spriteSets[name].length];
+    nekoElRef.current.style.backgroundPosition = `${sprite[0] * 32}px ${sprite[1] * 32}px`;
+  }, []);
+
+  const resetIdleAnimation = useCallback(() => {
+    stateRef.current.idleAnimation = null;
+    stateRef.current.idleAnimationFrame = 0;
+  }, []);
+
+  const idle = useCallback(() => {
+    const state = stateRef.current;
+    state.idleTime += 1;
+
+    if (
+      state.idleTime > 10 &&
+      Math.floor(Math.random() * 200) === 0 &&
+      state.idleAnimation == null
+    ) {
+      const availableIdleAnimations = ["sleeping", "scratchSelf"];
+      if (state.nekoPosX < 32) {
+        availableIdleAnimations.push("scratchWallW");
+      }
+      if (state.nekoPosY < 32) {
+        availableIdleAnimations.push("scratchWallN");
+      }
+      if (state.nekoPosX > window.innerWidth - 32) {
+        availableIdleAnimations.push("scratchWallE");
+      }
+      if (state.nekoPosY > window.innerHeight - 32) {
+        availableIdleAnimations.push("scratchWallS");
+      }
+      state.idleAnimation =
+        availableIdleAnimations[Math.floor(Math.random() * availableIdleAnimations.length)];
+    }
+
+    switch (state.idleAnimation) {
+      case "sleeping":
+        if (state.idleAnimationFrame < 8) {
+          setSprite("tired", 0);
+          break;
+        }
+        setSprite("sleeping", Math.floor(state.idleAnimationFrame / 4));
+        if (state.idleAnimationFrame > 192) {
+          resetIdleAnimation();
+        }
+        break;
+      case "scratchWallN":
+      case "scratchWallS":
+      case "scratchWallE":
+      case "scratchWallW":
+      case "scratchSelf":
+        setSprite(state.idleAnimation as SpriteName, state.idleAnimationFrame);
+        if (state.idleAnimationFrame > 9) {
+          resetIdleAnimation();
+        }
+        break;
+      default:
+        setSprite("idle", 0);
+        return;
+    }
+    state.idleAnimationFrame += 1;
+  }, [setSprite, resetIdleAnimation]);
+
+  const frame = useCallback(() => {
+    if (!nekoElRef.current) return;
+
+    const state = stateRef.current;
+    state.frameCount += 1;
+    const diffX = state.nekoPosX - state.mousePosX;
+    const diffY = state.nekoPosY - state.mousePosY;
+    const distance = Math.sqrt(diffX ** 2 + diffY ** 2);
+
+    if (distance < nekoSpeed || distance < 48) {
+      idle();
       return;
     }
 
-    init();
+    state.idleAnimation = null;
+    state.idleAnimationFrame = 0;
 
-    return cleanup;
-  }, [showKitty]);
+    if (state.idleTime > 1) {
+      setSprite("alert", 0);
+      state.idleTime = Math.min(state.idleTime, 7);
+      state.idleTime -= 1;
+      return;
+    }
 
-  function init() {
+    let direction = "";
+    direction = diffY / distance > 0.5 ? "N" : "";
+    direction += diffY / distance < -0.5 ? "S" : "";
+    direction += diffX / distance > 0.5 ? "W" : "";
+    direction += diffX / distance < -0.5 ? "E" : "";
+    setSprite(direction as SpriteName, state.frameCount);
+
+    state.nekoPosX -= (diffX / distance) * nekoSpeed;
+    state.nekoPosY -= (diffY / distance) * nekoSpeed;
+
+    state.nekoPosX = Math.min(Math.max(16, state.nekoPosX), window.innerWidth - 16);
+    state.nekoPosY = Math.min(Math.max(16, state.nekoPosY), window.innerHeight - 16);
+
+    nekoElRef.current.style.left = `${state.nekoPosX - 16}px`;
+    nekoElRef.current.style.top = `${state.nekoPosY - 16}px`;
+  }, [idle, setSprite]);
+
+  const onAnimationFrame = useCallback(
+    (timestamp: number) => {
+      if (!nekoElRef.current) {
+        return;
+      }
+      const state = stateRef.current;
+      if (!state.lastFrameTimestamp) {
+        state.lastFrameTimestamp = timestamp;
+      }
+      if (timestamp - state.lastFrameTimestamp > 100) {
+        state.lastFrameTimestamp = timestamp;
+        frame();
+      }
+      animationFrameRef.current = window.requestAnimationFrame(onAnimationFrame);
+    },
+    [frame]
+  );
+
+  const init = useCallback(() => {
     const nekoEl = document.createElement("div");
     nekoElRef.current = nekoEl;
     nekoEl.id = "oneko";
@@ -113,8 +243,9 @@ export default function MeowMeow() {
     nekoEl.style.pointerEvents = "none";
     nekoEl.style.imageRendering = "pixelated";
 
-    nekoEl.style.left = `${nekoPosX - 16}px`;
-    nekoEl.style.top = `${nekoPosY - 16}px`;
+    const state = stateRef.current;
+    nekoEl.style.left = `${state.nekoPosX - 16}px`;
+    nekoEl.style.top = `${state.nekoPosY - 16}px`;
     nekoEl.style.zIndex = "2147483647";
 
     let nekoFile = "https://cdn.fascinated.cc/assets/oneko.gif";
@@ -126,144 +257,66 @@ export default function MeowMeow() {
 
     document.body.appendChild(nekoEl);
 
-    document.addEventListener("mousemove", function (event) {
-      mousePosX = event.clientX;
-      mousePosY = event.clientY;
-    });
+    // Create mouse move listener
+    const mouseMoveListener = (event: MouseEvent) => {
+      stateRef.current.mousePosX = event.clientX;
+      stateRef.current.mousePosY = event.clientY;
+    };
+    mouseMoveListenerRef.current = mouseMoveListener;
+    document.addEventListener("mousemove", mouseMoveListener);
 
-    window.requestAnimationFrame(onAnimationFrame);
-  }
+    animationFrameRef.current = window.requestAnimationFrame(onAnimationFrame);
+  }, [onAnimationFrame]);
 
-  function cleanup() {
+  const cleanup = useCallback(() => {
+    // Clean up animation frame
+    if (animationFrameRef.current) {
+      window.cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
+
+    // Clean up mouse move listener
+    if (mouseMoveListenerRef.current) {
+      document.removeEventListener("mousemove", mouseMoveListenerRef.current);
+      mouseMoveListenerRef.current = null;
+    }
+
+    // Clean up DOM element
     if (nekoElRef.current && nekoElRef.current.isConnected) {
       document.body.removeChild(nekoElRef.current);
     }
     nekoElRef.current = null;
-  }
 
-  let lastFrameTimestamp: number | null = null;
+    // Reset state
+    stateRef.current = {
+      lastFrameTimestamp: null,
+      idleTime: 0,
+      idleAnimation: null,
+      idleAnimationFrame: 0,
+      frameCount: 0,
+      nekoPosX: 32,
+      nekoPosY: 32,
+      mousePosX: 0,
+      mousePosY: 0,
+    };
+  }, []);
 
-  function onAnimationFrame(timestamp: number) {
-    if (!nekoElRef.current) {
-      return;
-    }
-    if (!lastFrameTimestamp) {
-      lastFrameTimestamp = timestamp;
-    }
-    if (timestamp - lastFrameTimestamp > 100) {
-      lastFrameTimestamp = timestamp;
-      frame();
-    }
-    window.requestAnimationFrame(onAnimationFrame);
-  }
+  // Memoize the showKitty value to prevent unnecessary re-renders
+  const shouldShowKitty = useMemo(() => {
+    return showKitty === true;
+  }, [showKitty]);
 
-  function setSprite(name: SpriteName, frame: number) {
-    const sprite = spriteSets[name][frame % spriteSets[name].length];
-    nekoElRef.current!.style.backgroundPosition = `${sprite[0] * 32}px ${sprite[1] * 32}px`;
-  }
-
-  function resetIdleAnimation() {
-    idleAnimation = null;
-    idleAnimationFrame = 0;
-  }
-
-  let idleTime = 0;
-  let idleAnimation: string | null = null;
-  let idleAnimationFrame = 0;
-  const nekoSpeed = 10;
-
-  function idle() {
-    idleTime += 1;
-
-    if (idleTime > 10 && Math.floor(Math.random() * 200) === 0 && idleAnimation == null) {
-      const availableIdleAnimations = ["sleeping", "scratchSelf"];
-      if (nekoPosX < 32) {
-        availableIdleAnimations.push("scratchWallW");
-      }
-      if (nekoPosY < 32) {
-        availableIdleAnimations.push("scratchWallN");
-      }
-      if (nekoPosX > window.innerWidth - 32) {
-        availableIdleAnimations.push("scratchWallE");
-      }
-      if (nekoPosY > window.innerHeight - 32) {
-        availableIdleAnimations.push("scratchWallS");
-      }
-      idleAnimation =
-        availableIdleAnimations[Math.floor(Math.random() * availableIdleAnimations.length)];
-    }
-
-    switch (idleAnimation) {
-      case "sleeping":
-        if (idleAnimationFrame < 8) {
-          setSprite("tired", 0);
-          break;
-        }
-        setSprite("sleeping", Math.floor(idleAnimationFrame / 4));
-        if (idleAnimationFrame > 192) {
-          resetIdleAnimation();
-        }
-        break;
-      case "scratchWallN":
-      case "scratchWallS":
-      case "scratchWallE":
-      case "scratchWallW":
-      case "scratchSelf":
-        setSprite(idleAnimation, idleAnimationFrame);
-        if (idleAnimationFrame > 9) {
-          resetIdleAnimation();
-        }
-        break;
-      default:
-        setSprite("idle", 0);
-        return;
-    }
-    idleAnimationFrame += 1;
-  }
-
-  let frameCount = 0;
-  let nekoPosX = 32;
-  let nekoPosY = 32;
-  let mousePosX = 0;
-  let mousePosY = 0;
-
-  function frame() {
-    frameCount += 1;
-    const diffX = nekoPosX - mousePosX;
-    const diffY = nekoPosY - mousePosY;
-    const distance = Math.sqrt(diffX ** 2 + diffY ** 2);
-
-    if (distance < nekoSpeed || distance < 48) {
-      idle();
+  useEffect(() => {
+    if (!shouldShowKitty) {
+      cleanup();
       return;
     }
 
-    idleAnimation = null;
-    idleAnimationFrame = 0;
+    init();
 
-    if (idleTime > 1) {
-      setSprite("alert", 0);
-      idleTime = Math.min(idleTime, 7);
-      idleTime -= 1;
-      return;
-    }
+    return cleanup;
+  }, [shouldShowKitty, init, cleanup]);
 
-    let direction = "";
-    direction = diffY / distance > 0.5 ? "N" : "";
-    direction += diffY / distance < -0.5 ? "S" : "";
-    direction += diffX / distance > 0.5 ? "W" : "";
-    direction += diffX / distance < -0.5 ? "E" : "";
-    setSprite(direction as SpriteName, frameCount);
-
-    nekoPosX -= (diffX / distance) * nekoSpeed;
-    nekoPosY -= (diffY / distance) * nekoSpeed;
-
-    nekoPosX = Math.min(Math.max(16, nekoPosX), window.innerWidth - 16);
-    nekoPosY = Math.min(Math.max(16, nekoPosY), window.innerHeight - 16);
-
-    nekoElRef.current!.style.left = `${nekoPosX - 16}px`;
-    nekoElRef.current!.style.top = `${nekoPosY - 16}px`;
-  }
-
+  // Return null to avoid rendering anything in the DOM
   return null;
 }
