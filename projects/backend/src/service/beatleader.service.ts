@@ -64,8 +64,7 @@ export default class BeatLeaderService {
    * @private
    */
   public static async getAdditionalScoreData(
-    scoreId: number,
-    throwIfNotFound: boolean = false
+    scoreId: number
   ): Promise<AdditionalScoreData | undefined> {
     return CacheService.fetchWithCache(
       CacheId.AdditionalScoreData,
@@ -75,9 +74,6 @@ export default class BeatLeaderService {
           scoreId: scoreId,
         }).lean();
         if (!additionalData) {
-          if (throwIfNotFound) {
-            throw new NotFoundError(`BeatLeader Score ${scoreId} not found`);
-          }
           return undefined;
         }
         return this.additionalScoreDataToObject(additionalData);

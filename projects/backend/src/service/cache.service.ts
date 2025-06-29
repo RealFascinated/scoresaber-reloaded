@@ -89,4 +89,14 @@ export default class CacheService {
   public static async invalidate(cacheKey: string): Promise<void> {
     await this.redisClient.del(cacheKey);
   }
+
+  /**
+   * Tests the connection to Redis.
+   */
+  public static async testConnection(): Promise<void> {
+    const result = (await this.redisClient.ping()) as string;
+    if (result !== "OK" && result !== "PONG") {
+      throw new InternalServerError("Failed to connect to Redis");
+    }
+  }
 }

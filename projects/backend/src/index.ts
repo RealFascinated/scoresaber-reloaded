@@ -67,6 +67,12 @@ try {
 
 Logger.info("Connected to MongoDB :)");
 
+Logger.info("Testing Redis connection...");
+
+await CacheService.testConnection();
+
+Logger.info("Connected to Redis :)");
+
 export const app = new Elysia()
   .use(
     cron({
@@ -113,7 +119,7 @@ export const app = new Elysia()
       protect: true,
       run: async () => {
         await ScoreService.refreshMedalScores(); // Refresh medal scores
-        await PlayerService.updatePlayerMedalCounts(); // Update player medal counts and ranks
+        await PlayerService.updatePlayerGlobalMedalCounts(); // Update player global medal counts and ranks
       },
     })
   )

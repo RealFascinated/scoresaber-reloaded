@@ -15,7 +15,7 @@ export function AccSaberRankTime({ score }: AccSaberRankTimeProps) {
   const rankElement = useMemo(() => {
     return (
       <p
-        className={`${getRankColor(score.score.rank)} cursor-pointer transition-all hover:brightness-[66%]`}
+        className={`${getRankColor(score.score.rank)} cursor-pointer font-semibold transition-all hover:brightness-[66%]`}
       >
         #{formatNumberWithCommas(score.score.rank)}
       </p>
