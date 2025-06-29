@@ -207,7 +207,7 @@ export class LeaderboardRankingService {
         // Update score
         scoreBulkOps.push({
           updateOne: {
-            filter: { _id: score._id },
+            filter: { _id: score.id },
             update: {
               $set: {
                 pp: scoreToken.pp,
@@ -331,7 +331,6 @@ export class LeaderboardRankingService {
                   lastRefreshed: new Date(),
                 },
               },
-              upsert: true,
             },
           });
         }
@@ -344,44 +343,46 @@ export class LeaderboardRankingService {
 
       // Handle leaderboards that need special processing
       if (leaderboardsToHandle.length > 0) {
-        const batchResults = await Promise.all(
-          leaderboardsToHandle.map(async ({ leaderboard, update }) => {
-            const updatedScores = await this.handleLeaderboardUpdate(update);
-
-            // Save the leaderboard after handling
-            const updatedLeaderboard = LeaderboardService.updateLeaderboardDifficulties(
-              leaderboard,
-              rankedMapDiffs
-            );
-            await ScoreSaberLeaderboardModel.findOneAndUpdate(
-              { _id: leaderboard.id },
-              {
-                $set: {
-                  ...updatedLeaderboard,
-                  lastRefreshed: new Date(),
-                },
-              },
-              { upsert: true, new: true }
-            );
-
-            return {
-              leaderboard,
-              update,
-              updatedScores,
-            };
-          })
+        Logger.info(
+          `Processing ${leaderboardsToHandle.length} leaderboards that need special handling...`
         );
 
-        // Process results
-        for (const result of batchResults) {
-          if (result) {
-            leaderboardUpdates.updatedScoresCount += result.updatedScores;
-            leaderboardUpdates.updatedLeaderboardsCount++;
-            leaderboardUpdates.updatedLeaderboards.push({
-              leaderboard: result.leaderboard,
-              update: result.update,
-            });
-          }
+        for (let i = 0; i < leaderboardsToHandle.length; i++) {
+          const { leaderboard, update } = leaderboardsToHandle[i];
+
+          Logger.info(
+            `Processing leaderboard ${i + 1}/${leaderboardsToHandle.length}: ${leaderboard.id} (${leaderboard.songName})`
+          );
+
+          const updatedScores = await LeaderboardRankingService.handleLeaderboardUpdate(update);
+
+          // Save the leaderboard after handling
+          const updatedLeaderboard = LeaderboardService.updateLeaderboardDifficulties(
+            leaderboard,
+            rankedMapDiffs
+          );
+          await ScoreSaberLeaderboardModel.findOneAndUpdate(
+            { _id: leaderboard.id },
+            {
+              $set: {
+                ...updatedLeaderboard,
+                lastRefreshed: new Date(),
+              },
+            },
+            { upsert: true, new: true }
+          );
+
+          // Update counters directly
+          leaderboardUpdates.updatedScoresCount += updatedScores;
+          leaderboardUpdates.updatedLeaderboardsCount++;
+          leaderboardUpdates.updatedLeaderboards.push({
+            leaderboard,
+            update,
+          });
+
+          Logger.info(
+            `Completed leaderboard ${i + 1}/${leaderboardsToHandle.length}: ${leaderboard.id} - Updated ${updatedScores} scores`
+          );
         }
       }
 
