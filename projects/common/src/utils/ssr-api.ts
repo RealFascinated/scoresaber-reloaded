@@ -4,6 +4,7 @@ import { env } from "../env";
 import { ScoreSaberLeaderboard } from "../model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "../model/score/impl/scoresaber-score";
 import { StatisticsType } from "../model/statistics/statistic-type";
+import { UserPreferences } from "../model/user-preferences";
 import { Page } from "../pagination";
 import ScoreSaberPlayer from "../player/impl/scoresaber-player";
 import { PlayerStatisticHistory } from "../player/player-statistic-history";
@@ -520,6 +521,28 @@ class SSRApi {
         returns: "json",
       }
     );
+  }
+
+  /**
+   * Gets the user's main player.
+   *
+   * @returns the user's main player, undefined if the user is not logged in.
+   */
+  async getUserMainPlayer() {
+    return Request.get<ScoreSaberPlayer>(`${env.NEXT_PUBLIC_API_URL}/@me/player`, {
+      credentials: "include",
+    });
+  }
+
+  /**
+   * Gets the user's preferences.
+   *
+   * @returns the user's preferences, undefined if the user is not logged in.
+   */
+  async getUserPreferences() {
+    return Request.get<UserPreferences>(`${env.NEXT_PUBLIC_API_URL}/@me/preferences`, {
+      credentials: "include",
+    });
   }
 }
 

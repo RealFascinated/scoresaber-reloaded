@@ -1,19 +1,22 @@
 "use client";
 
-import Database from "@/common/database/database";
 import Avatar from "@/components/avatar";
-import useDatabase from "@/hooks/use-database";
+import { useMainPlayer } from "@/hooks/user-main-player";
 import { truncateText } from "@ssr/common/string-utils";
-import { useLiveQuery } from "dexie-react-hooks";
 import Link from "next/link";
 import SimpleTooltip from "../simple-tooltip";
+import { Button } from "../ui/button";
 
 export default function ProfileButton() {
-  const database: Database = useDatabase();
-  const mainPlayer = useLiveQuery(() => database.getMainPlayer());
+  const { mainPlayer, isLoading, isError } = useMainPlayer();
+  console.log(mainPlayer, isLoading, isError);
 
-  if (mainPlayer == undefined) {
+  if (mainPlayer == undefined && isLoading) {
     return;
+  }
+
+  if (mainPlayer == undefined || isError) {
+    return <Button>Link Account</Button>;
   }
 
   return (

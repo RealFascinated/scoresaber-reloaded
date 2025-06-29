@@ -5,13 +5,17 @@ import FriendsButton from "@/components/friend/friends-button";
 import PlayerAndLeaderboardSearch from "@/components/navbar/player-and-leaderboard-search";
 import ProfileButton from "@/components/navbar/profile-button";
 import { CubeIcon } from "@heroicons/react/24/solid";
+import { signInWithSteam } from "@ssr/common/auth/auth-client";
 import { MusicIcon, TrendingUpIcon, TrophyIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ReactElement } from "react";
 import { FaMedal } from "react-icons/fa";
+import LoggedIn from "../auth/logged-in";
+import LoggedOut from "../auth/logged-out";
 import Settings from "../settings/settings";
+import { Button } from "../ui/button";
 
 const links: ReactElement<any>[] = [
   <FriendsButton key="friends" />,
@@ -111,7 +115,12 @@ export default function Navbar() {
 
         {/* Profile Section */}
         <div className="flex items-center gap-2 md:gap-3">
-          <ProfileButton />
+          <LoggedOut>
+            <Button onClick={() => signInWithSteam()}>Login with Steam</Button>
+          </LoggedOut>
+          <LoggedIn>
+            <ProfileButton />
+          </LoggedIn>
         </div>
       </div>
     </nav>

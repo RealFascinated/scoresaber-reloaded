@@ -19,6 +19,9 @@ export const env = createEnv({
     INFLUXDB_ORG: z.string(),
     INFLUXDB_TOKEN: z.string(),
 
+    BETTER_AUTH_SECRET: z.string(),
+    STEAM_API_KEY: z.string(),
+
     DISCORD_BOT_TOKEN: z.string().optional(),
 
     DISCORD_CHANNEL_TRACKED_PLAYER_LOGS: z.string().optional(),
@@ -60,6 +63,10 @@ export const env = createEnv({
 
     // Redis
     REDIS_URL: process.env.REDIS_URL,
+
+    // Better Auth
+    BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
+    STEAM_API_KEY: process.env.STEAM_API_KEY,
 
     // Discord Bot
     DISCORD_BOT_TOKEN: process.env.DISCORD_BOT_TOKEN,

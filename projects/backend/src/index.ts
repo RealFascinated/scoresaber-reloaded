@@ -2,8 +2,10 @@ import { etag } from "@bogeychan/elysia-etag";
 import * as dotenv from "@dotenvx/dotenvx";
 import cors from "@elysiajs/cors";
 import { cron } from "@elysiajs/cron";
+import { auth } from "@ssr/common/auth/auth";
 import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
+import { connectMongoose } from "@ssr/common/mongo";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import { logger } from "@tqman/nice-logger";
 import { mongoose } from "@typegoose/typegoose";
@@ -12,6 +14,7 @@ import { Elysia, ValidationError } from "elysia";
 import { decorators } from "elysia-decorators";
 import { helmet } from "elysia-helmet";
 import { DiscordChannels, initDiscordBot, logToChannel } from "./bot/bot";
+import MeController from "./controller/@me.controller";
 import AppController from "./controller/app.controller";
 import BeatLeaderController from "./controller/beatleader.controller";
 import BeatSaverController from "./controller/beatsaver.controller";
@@ -59,7 +62,7 @@ new EventsManager();
 Logger.info("Connecting to MongoDB...");
 
 try {
-  await mongoose.connect(env.MONGO_CONNECTION_STRING);
+  await connectMongoose();
 } catch (error) {
   Logger.error("Failed to connect to MongoDB:", error);
   process.exit(1);
@@ -225,6 +228,32 @@ app.use(
 );
 
 /**
+ * Authentication
+ */
+console.log("Mounting auth handler...");
+console.log("Auth config:", {
+  baseURL: env.NEXT_PUBLIC_API_URL,
+  appName: env.NEXT_PUBLIC_WEBSITE_NAME,
+  trustedOrigins: [env.NEXT_PUBLIC_WEBSITE_URL],
+  steamApiKey: env.STEAM_API_KEY ? "SET" : "NOT SET",
+  betterAuthSecret: env.BETTER_AUTH_SECRET ? "SET" : "NOT SET",
+});
+
+// Mount better-auth handler at root level
+app.mount(auth.handler);
+
+// Debug: Log all registered routes after mounting auth handler
+console.log("Registered routes after auth mount:");
+for (const route of app.routes) {
+  console.log(`${route.method} ${route.path}`);
+}
+
+console.log("Better-auth mounted at root level");
+console.log("Steam endpoints should be available at:");
+console.log("- POST /auth/sign-in/steam");
+console.log("- GET /auth/steam/callback");
+
+/**
  * Controllers
  */
 app.use(
@@ -248,6 +277,7 @@ app.use(
       PlayerSearchController,
       PlayerRankingController,
       MedalsScoresController,
+      MeController,
     ],
   })
 );
