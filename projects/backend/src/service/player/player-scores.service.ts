@@ -28,6 +28,7 @@ import {
 } from "@ssr/common/token-creators";
 import { ScoreSort, validateSort } from "@ssr/common/types/sort";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
+import ScoreSaberPlayerScoresPageToken from "@ssr/common/types/token/scoresaber/player-scores-page";
 import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import { FilterQuery } from "mongoose";
@@ -60,7 +61,7 @@ export class PlayerScoresService {
   ): Promise<PlayerRefreshResult> {
     Logger.info(`Refreshing scores for ${player._id}...`);
 
-    let playerScoresCount = await ScoreSaberScoreModel.countDocuments({
+    const playerScoresCount = await ScoreSaberScoreModel.countDocuments({
       playerId: player._id,
     });
 
@@ -73,6 +74,51 @@ export class PlayerScoresService {
       totalPages: 0,
       timeTaken: 0,
       partialRefresh: false,
+    };
+
+    // Helper function to process scores from a page
+    const processScoresPage = async (
+      scoresPage: ScoreSaberPlayerScoresPageToken,
+      result: PlayerRefreshResult,
+      player: Player,
+      playerToken: ScoreSaberPlayerToken,
+      totalProcessedCount: number
+    ): Promise<{ processedCount: number; shouldStop: boolean }> => {
+      let processedCount = 0;
+      let shouldStop = false;
+
+      for (const score of scoresPage.playerScores) {
+        const leaderboard = getScoreSaberLeaderboardFromToken(score.leaderboard);
+
+        const { tracked, updatedScore } = await ScoreService.trackScoreSaberScore(
+          getScoreSaberScoreFromToken(score.score, leaderboard, player._id),
+          leaderboard,
+          playerToken,
+          true,
+          false
+        );
+        if (tracked) {
+          result.missingScores++;
+        } else if (updatedScore) {
+          result.updatedScores++;
+        }
+        processedCount++;
+
+        // If the player has seeded scores and we've processed enough scores to match the API total, we can stop refreshing
+        if (
+          totalProcessedCount + processedCount >= scoresPage.metadata.total &&
+          player.seededScores
+        ) {
+          Logger.info(
+            `Found ${result.missingScores}/${scoresPage.metadata.total} missing scores for ${player._id}. All scores found, stopping refresh.`
+          );
+          result.partialRefresh = true;
+          shouldStop = true;
+          break;
+        }
+      }
+
+      return { processedCount, shouldStop };
     };
 
     // First, get the first page to determine total pages
@@ -103,36 +149,17 @@ export class PlayerScoresService {
       let processedScoresCount = 0;
 
       // Process the first page
-      for (const score of firstPage.playerScores) {
-        const leaderboard = getScoreSaberLeaderboardFromToken(score.leaderboard);
-
-        const { tracked, updatedScore } = await ScoreService.trackScoreSaberScore(
-          getScoreSaberScoreFromToken(score.score, leaderboard, player._id),
-          leaderboard,
-          playerToken,
-          true,
-          false
-        );
-        if (tracked) {
-          result.missingScores++;
-        } else if (updatedScore) {
-          result.updatedScores++;
-        }
-        playerScoresCount++;
-        processedScoresCount++;
-
-        // If the player has seeded scores and we've found all scores, we can stop refreshing
-        if (processedScoresCount >= firstPage.metadata.total && player.seededScores) {
-          Logger.info(
-            `Found ${result.missingScores}/${firstPage.metadata.total} missing scores for ${player._id}. All scores found, stopping refresh.`
-          );
-          result.partialRefresh = true;
-          break;
-        }
-      }
+      const firstPageResult = await processScoresPage(
+        firstPage,
+        result,
+        player,
+        playerToken,
+        processedScoresCount
+      );
+      processedScoresCount += firstPageResult.processedCount;
 
       // Process remaining pages if needed
-      if (processedScoresCount < firstPage.metadata.total) {
+      if (!firstPageResult.shouldStop && processedScoresCount < firstPage.metadata.total) {
         for (let page = 2; page <= totalPages; page++) {
           Logger.info(`Processing page ${page} for ${player._id}...`);
 
@@ -151,37 +178,19 @@ export class PlayerScoresService {
             continue;
           }
 
-          for (const score of scoresPage.playerScores) {
-            const leaderboard = getScoreSaberLeaderboardFromToken(score.leaderboard);
-            const { tracked, updatedScore } = await ScoreService.trackScoreSaberScore(
-              getScoreSaberScoreFromToken(score.score, leaderboard, player._id),
-              leaderboard,
-              playerToken,
-              true,
-              false
-            );
-            if (tracked) {
-              result.missingScores++;
-            } else if (updatedScore) {
-              result.updatedScores++;
-            }
-            playerScoresCount++;
-            processedScoresCount++;
-
-            // If the player has seeded scores and we've found all scores, we can stop refreshing
-            if (processedScoresCount >= firstPage.metadata.total && player.seededScores) {
-              Logger.info(
-                `Found ${result.missingScores}/${firstPage.metadata.total} missing scores for ${player._id}. All scores found, stopping refresh.`
-              );
-              result.partialRefresh = true;
-              break;
-            }
-          }
+          const pageResult = await processScoresPage(
+            scoresPage,
+            result,
+            player,
+            playerToken,
+            processedScoresCount
+          );
+          processedScoresCount += pageResult.processedCount;
 
           Logger.info(`Completed page ${page} for ${player._id}`);
 
           // If the player has seeded scores and we've found all scores, we can stop refreshing
-          if (processedScoresCount >= firstPage.metadata.total && player.seededScores) {
+          if (pageResult.shouldStop) {
             break;
           }
         }
