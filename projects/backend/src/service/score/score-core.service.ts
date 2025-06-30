@@ -62,7 +62,7 @@ export class ScoreCoreService {
     const isImprovement = previousScore !== null;
 
     if (scoreExists) {
-      // If the score already exits, update the score stats. eg: pp, rank, etc.
+      // If the score already exits, update the score. eg: pp, rank, etc.
       await ScoreSaberScoreModel.updateOne(
         {
           playerId: player.id,
