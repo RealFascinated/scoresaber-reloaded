@@ -116,7 +116,8 @@ export class PlayerScoresService {
         playerScoresCount++;
         processedScoresCount++;
 
-        if (processedScoresCount >= firstPage.metadata.total) {
+        // If the player has seeded scores and we've found all scores, we can stop refreshing
+        if (processedScoresCount >= firstPage.metadata.total && player.seededScores) {
           Logger.info(
             `Found ${result.missingScores}/${firstPage.metadata.total} missing scores for ${player._id}. All scores found, stopping refresh.`
           );
@@ -160,7 +161,8 @@ export class PlayerScoresService {
             playerScoresCount++;
             processedScoresCount++;
 
-            if (processedScoresCount >= firstPage.metadata.total) {
+            // If the player has seeded scores and we've found all scores, we can stop refreshing
+            if (processedScoresCount >= firstPage.metadata.total && player.seededScores) {
               Logger.info(
                 `Found ${result.missingScores}/${firstPage.metadata.total} missing scores for ${player._id}. All scores found, stopping refresh.`
               );
@@ -171,7 +173,8 @@ export class PlayerScoresService {
 
           Logger.info(`Completed page ${page} for ${player._id}`);
 
-          if (processedScoresCount >= firstPage.metadata.total) {
+          // If the player has seeded scores and we've found all scores, we can stop refreshing
+          if (processedScoresCount >= firstPage.metadata.total && player.seededScores) {
             break;
           }
         }
