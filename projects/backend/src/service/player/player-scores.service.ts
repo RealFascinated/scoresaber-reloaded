@@ -39,6 +39,7 @@ import { PlayerService } from "./player.service";
 
 type PlayerRefreshResult = {
   missingScores: number;
+  updatedScores: number;
   totalScores: number;
   totalPages: number;
   timeTaken: number;
@@ -67,6 +68,7 @@ export class PlayerScoresService {
 
     const result: PlayerRefreshResult = {
       missingScores: 0,
+      updatedScores: 0,
       totalScores: 0,
       totalPages: 0,
       timeTaken: 0,
@@ -104,7 +106,7 @@ export class PlayerScoresService {
       for (const score of firstPage.playerScores) {
         const leaderboard = getScoreSaberLeaderboardFromToken(score.leaderboard);
 
-        const { tracked } = await ScoreService.trackScoreSaberScore(
+        const { tracked, updatedScore } = await ScoreService.trackScoreSaberScore(
           getScoreSaberScoreFromToken(score.score, leaderboard, player._id),
           leaderboard,
           playerToken,
@@ -113,6 +115,8 @@ export class PlayerScoresService {
         );
         if (tracked) {
           result.missingScores++;
+        } else if (updatedScore) {
+          result.updatedScores++;
         }
         playerScoresCount++;
         processedScoresCount++;
@@ -149,7 +153,7 @@ export class PlayerScoresService {
 
           for (const score of scoresPage.playerScores) {
             const leaderboard = getScoreSaberLeaderboardFromToken(score.leaderboard);
-            const { tracked } = await ScoreService.trackScoreSaberScore(
+            const { tracked, updatedScore } = await ScoreService.trackScoreSaberScore(
               getScoreSaberScoreFromToken(score.score, leaderboard, player._id),
               leaderboard,
               playerToken,
@@ -158,6 +162,8 @@ export class PlayerScoresService {
             );
             if (tracked) {
               result.missingScores++;
+            } else if (updatedScore) {
+              result.updatedScores++;
             }
             playerScoresCount++;
             processedScoresCount++;

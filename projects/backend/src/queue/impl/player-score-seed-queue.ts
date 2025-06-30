@@ -41,7 +41,7 @@ export class PlayerScoreSeedQueue extends Queue<string> {
     }
 
     const player = await PlayerService.getPlayer(playerId, playerToken);
-    const { totalScores, missingScores, totalPages, timeTaken, partialRefresh } =
+    const { totalScores, missingScores, updatedScores, totalPages, timeTaken, partialRefresh } =
       await PlayerService.refreshAllPlayerScores(player, playerToken);
 
     await logToChannel(
@@ -55,6 +55,7 @@ export class PlayerScoreSeedQueue extends Queue<string> {
             value: [
               `**Total Scores:** ${formatNumberWithCommas(totalScores)}`,
               `**Missing Scores:** ${formatNumberWithCommas(missingScores)}`,
+              `**Updated Scores:** ${formatNumberWithCommas(updatedScores)}`,
               `**Pages:** ${formatNumberWithCommas(totalPages)}`,
               `**Time Taken:** ${formatDuration(timeTaken)}`,
             ].join("\n"),

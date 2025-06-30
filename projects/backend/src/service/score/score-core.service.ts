@@ -36,6 +36,7 @@ export class ScoreCoreService {
     score: ScoreSaberScore | undefined;
     hasPreviousScore: boolean;
     tracked: boolean;
+    updatedScore?: boolean;
   }> {
     const before = performance.now();
 
@@ -70,7 +71,7 @@ export class ScoreCoreService {
         { $set: score }
       );
 
-      return { score: undefined, hasPreviousScore: false, tracked: false };
+      return { score: undefined, hasPreviousScore: false, tracked: false, updatedScore: true };
     }
 
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
