@@ -88,7 +88,8 @@ export class PlayerScoresService {
       Logger.info(`No scores found for player ${player._id}`);
       result.partialRefresh = true;
       result.totalScores = playerScoresCount;
-    } else if (playerScoresCount >= firstPage.metadata.total) {
+      // If the player has seeded scores and we've found all scores, we can stop refreshing
+    } else if (playerScoresCount >= firstPage.metadata.total && player.seededScores) {
       Logger.info(`Player ${player._id} has no new scores to refresh. Skipping...`);
       result.partialRefresh = true;
       result.totalScores = playerScoresCount;
