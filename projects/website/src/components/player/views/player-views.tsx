@@ -17,9 +17,14 @@ import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { getDaysAgoDate } from "@ssr/common/utils/time-utils";
 import { useQuery } from "@tanstack/react-query";
 import { CalculatorIcon, ChartBarIcon, SwordIcon, TrendingUpIcon } from "lucide-react";
-import dynamic from "next/dynamic";
 import { ReactElement, useState } from "react";
 import PlayerRankingsButton from "../buttons/player-rankings-button";
+import MapsGraphChart from "./impl/maps-graph-chart";
+import PlayerAccuracyChart from "./impl/player-accuracy-chart";
+import PlayerRankingChart from "./impl/player-ranking-chart";
+import PlayerScoresChart from "./impl/player-scores-chart";
+import PlusPpCalculator from "./impl/plus-pp-calculator";
+import ScoreHistoryCalendar from "./impl/score-history-calendar";
 
 // Constants
 const DATE_PRESETS = [
@@ -34,37 +39,6 @@ const DATE_PRESETS = [
 ] as const;
 
 const DEFAULT_DAYS_AGO = 50;
-
-// Dynamic imports
-const PlayerRankingChart = dynamic(
-  () => import("@/components/player/views/impl/player-ranking-chart"),
-  { ssr: false, loading: () => <Loading /> }
-);
-
-const PlayerAccuracyChart = dynamic(
-  () => import("@/components/player/views/impl/player-accuracy-chart"),
-  { ssr: false, loading: () => <Loading /> }
-);
-
-const PlayerScoresChart = dynamic(
-  () => import("@/components/player/views/impl/player-scores-chart"),
-  { ssr: false, loading: () => <Loading /> }
-);
-
-const ScoreHistoryCalendar = dynamic(
-  () => import("@/components/player/views/impl/score-history-calendar"),
-  { ssr: false, loading: () => <Loading /> }
-);
-
-const MapsGraphChart = dynamic(() => import("@/components/player/views/impl/maps-graph-chart"), {
-  ssr: false,
-  loading: () => <Loading />,
-});
-
-const PlusPpCalculator = dynamic(
-  () => import("@/components/player/views/impl/plus-pp-calculator"),
-  { ssr: false, loading: () => <Loading /> }
-);
 
 type SelectedView = {
   index: number;
@@ -151,7 +125,7 @@ export default function PlayerViews({ player }: { player: ScoreSaberPlayer }) {
       label: "Rank & PP",
       icon: GlobeAmericasIcon,
       showDateRangeSelector: true,
-      chart: (player, statisticHistory) => (
+      chart: (_, statisticHistory) => (
         <PlayerRankingChart statisticHistory={statisticHistory} daysAmount={daysAgo} />
       ),
     },
@@ -160,7 +134,7 @@ export default function PlayerViews({ player }: { player: ScoreSaberPlayer }) {
       label: "Accuracy",
       icon: TrendingUpIcon,
       showDateRangeSelector: true,
-      chart: (player, statisticHistory) => (
+      chart: (_, statisticHistory) => (
         <PlayerAccuracyChart statisticHistory={statisticHistory} daysAmount={daysAgo} />
       ),
     },
@@ -169,7 +143,7 @@ export default function PlayerViews({ player }: { player: ScoreSaberPlayer }) {
       label: "Scores",
       icon: SwordIcon,
       showDateRangeSelector: true,
-      chart: (player, statisticHistory) => (
+      chart: (_, statisticHistory) => (
         <PlayerScoresChart statisticHistory={statisticHistory} daysAmount={daysAgo} />
       ),
     },
@@ -178,21 +152,21 @@ export default function PlayerViews({ player }: { player: ScoreSaberPlayer }) {
       label: "Score Calendar",
       icon: CalendarIcon,
       showDateRangeSelector: false,
-      chart: (player, statisticHistory) => <ScoreHistoryCalendar playerId={player.id} />,
+      chart: player => <ScoreHistoryCalendar playerId={player.id} />,
     },
     {
       index: 4,
       label: "Maps Graph",
       icon: ChartBarIcon,
       showDateRangeSelector: false,
-      chart: (player, statisticHistory) => <MapsGraphChart player={player} />,
+      chart: player => <MapsGraphChart player={player} />,
     },
     {
       index: 5,
       label: "+1 PP Calculator",
       icon: CalculatorIcon,
       showDateRangeSelector: false,
-      chart: (player, statisticHistory) => <PlusPpCalculator player={player} />,
+      chart: player => <PlusPpCalculator player={player} />,
     },
   ];
 
