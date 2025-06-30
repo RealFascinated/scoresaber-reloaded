@@ -46,9 +46,10 @@ export default class ScoreSaberService {
         }
 
         // Start fetching player token and account in parallel
-        const [account, medalsRank] = await Promise.all([
+        const [account, medalsRank, globalRankIncludingInactives] = await Promise.all([
           PlayerService.getPlayer(id, player).catch(() => undefined),
           PlayerService.getPlayerMedalRank(id),
+          PlayerService.getPlayerRankIncludingInactives(id),
         ]);
 
         // For basic type, return early with minimal data
@@ -59,6 +60,7 @@ export default class ScoreSaberService {
           country: player.country,
           rank: player.rank,
           countryRank: player.countryRank,
+          rankIncludingInactives: globalRankIncludingInactives ?? undefined,
           pp: player.pp,
           hmd: account?.hmd ?? undefined,
           joinedDate: new Date(player.firstSeen),
