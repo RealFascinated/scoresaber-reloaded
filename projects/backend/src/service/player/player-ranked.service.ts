@@ -136,4 +136,22 @@ export class PlayerRankedService {
 
     return foundPlayer;
   }
+
+  /**
+   * Gets a player's rank including inactive players.
+   *
+   * @param playerId the id of the player
+   * @returns the rank
+   */
+  public static async getPlayerRankIncludingInactives(playerId: string): Promise<number | null> {
+    const player = await PlayerModel.findById(playerId).select("pp").lean();
+    if (!player || (player.pp ?? 0) <= 0) return null;
+
+    // Count how many players have more medals than this player
+    const rank = await PlayerModel.countDocuments({
+      pp: { $gt: player.pp ?? 0 },
+    });
+
+    return rank + 1; // +1 because rank is 1-indexed
+  }
 }

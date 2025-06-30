@@ -26,6 +26,8 @@ export class PlayerService {
   public static getPlayerPpBoundary = PlayerRankedService.getPlayerPpBoundary;
   public static getPlayerPpBoundaryFromScorePp = PlayerRankedService.getPlayerPpBoundaryFromScorePp;
   public static updatePeakRank = PlayerRankedService.updatePeakRank;
+  public static getPlayerRankIncludingInactives =
+    PlayerRankedService.getPlayerRankIncludingInactives;
 
   // PlayerHistoryService methods
   public static trackPlayer = PlayerHistoryService.trackPlayer;
