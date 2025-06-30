@@ -21,6 +21,11 @@ type ChangeOverTimeProps = {
    * The children to render
    */
   children: ReactElement<any>;
+
+  /**
+   * The children to render in the tooltip
+   */
+  tooltipChildren?: ReactElement<any>;
 };
 
 // Format values based on stat type
@@ -52,12 +57,12 @@ const renderChange = (type: PlayerStatValue, value: number | undefined, range: S
             : "text-red-500"
       }
     >
-      {formatChangeValue(type, value)}
+      <b>{formatChangeValue(type, value)}</b>
     </span>
   </p>
 );
 
-export function ChangeOverTime({ player, type, children }: ChangeOverTimeProps) {
+export function ChangeOverTime({ player, type, children, tooltipChildren }: ChangeOverTimeProps) {
   const daily = type.value(player, "daily");
   const weekly = type.value(player, "weekly");
   const monthly = type.value(player, "monthly");
@@ -75,6 +80,9 @@ export function ChangeOverTime({ player, type, children }: ChangeOverTimeProps) 
           {renderChange(type, daily, "daily")}
           {renderChange(type, weekly, "weekly")}
           {renderChange(type, monthly, "monthly")}
+
+          {/* Add tooltip children if provided */}
+          {tooltipChildren}
         </div>
       }
     >

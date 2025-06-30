@@ -32,7 +32,16 @@ const playerData = [
             <SimpleTooltip display={<span>Global Rank</span>}>
               <GlobeAmericasIcon className="text-muted-foreground h-5 w-5" />
             </SimpleTooltip>
-            <ChangeOverTime player={player} type={PlayerStatChange.Rank}>
+            <ChangeOverTime
+              player={player}
+              type={PlayerStatChange.Rank}
+              tooltipChildren={
+                <p>
+                  Rank Including Inactives:{" "}
+                  <b>#{formatNumberWithCommas(player.rankIncludingInactives)}</b>
+                </p>
+              }
+            >
               <Link href={`/ranking/${player.rankPages.global}`}>
                 <span className="hover:text-primary m-0 text-sm leading-[1.2] transition-all hover:brightness-[66%]">
                   #{formatNumberWithCommas(player.rank)}
