@@ -141,11 +141,13 @@ export default function ScoreSaberScoreDisplay({
           hideRank={settings?.hideRank}
         />
 
-        <ScoreSaberScoreSongInfo
-          leaderboard={leaderboard}
-          beatSaverMap={beatSaverMap}
-          allowLeaderboardPreview={settings?.allowLeaderboardPreview && !isMobile}
-        />
+        <div className="min-w-0 overflow-hidden">
+          <ScoreSaberScoreSongInfo
+            leaderboard={leaderboard}
+            beatSaverMap={beatSaverMap}
+            allowLeaderboardPreview={settings?.allowLeaderboardPreview && !isMobile}
+          />
+        </div>
 
         {!settings?.noScoreButtons && (
           <ScoreSaberScoreButtons

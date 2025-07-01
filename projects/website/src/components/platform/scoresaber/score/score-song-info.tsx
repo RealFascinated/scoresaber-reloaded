@@ -90,7 +90,7 @@ export default function ScoreSaberScoreSongInfo({
   );
 
   return (
-    <div className="flex w-full items-center gap-3 break-all">
+    <div className="flex w-full items-center gap-3">
       <div
         className="relative flex justify-center"
         style={{
@@ -128,7 +128,7 @@ export default function ScoreSaberScoreSongInfo({
         </div>
       </div>
       <div className="flex w-full flex-col gap-1">
-        <div className="flex w-full min-w-0 flex-col gap-1 overflow-y-clip">
+        <div className="flex w-full min-w-0 flex-col gap-1 overflow-hidden">
           {allowLeaderboardPreview ? (
             <LeaderboardPreview leaderboard={leaderboard} beatSaverMap={beatSaverMap}>
               {songNameElement}
