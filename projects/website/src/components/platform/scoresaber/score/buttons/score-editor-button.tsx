@@ -11,7 +11,7 @@ import { formatScoreAccuracy } from "@ssr/common/utils/score.util";
 import { updateScoreWeights } from "@ssr/common/utils/scoresaber.util";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { FaCheck, FaCog, FaUndo } from "react-icons/fa";
 
 type ScoreEditorButtonProps = {
@@ -75,16 +75,11 @@ export default function ScoreSaberScoreEditorButton({
     setNewAccuracy(accuracy);
   };
 
-  const ppGain = useMemo(() => {
-    if (!rankedPps || !modifiedScores) {
-      return 0;
-    }
-
-    return (
-      ScoreSaberCurve.getTotalWeightedPp(modifiedScores.map(score => score.pp)) -
-      ScoreSaberCurve.getTotalWeightedPp(rankedPps.scores.map(score => score.pp))
-    );
-  }, [modifiedScores, rankedPps]);
+  const ppGain =
+    !rankedPps || !modifiedScores
+      ? 0
+      : ScoreSaberCurve.getTotalWeightedPp(modifiedScores.map(score => score.pp)) -
+        ScoreSaberCurve.getTotalWeightedPp(rankedPps.scores.map(score => score.pp));
 
   return (
     <div className="relative flex cursor-default items-center justify-center">

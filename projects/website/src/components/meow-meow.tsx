@@ -2,7 +2,7 @@
 
 import useDatabase from "@/hooks/use-database";
 import { useLiveQuery } from "dexie-react-hooks";
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 type SpriteName =
   | "idle"
@@ -301,13 +301,8 @@ export default function MeowMeow() {
     };
   }, []);
 
-  // Memoize the showKitty value to prevent unnecessary re-renders
-  const shouldShowKitty = useMemo(() => {
-    return showKitty === true;
-  }, [showKitty]);
-
   useEffect(() => {
-    if (!shouldShowKitty) {
+    if (showKitty !== true) {
       cleanup();
       return;
     }
@@ -315,7 +310,7 @@ export default function MeowMeow() {
     init();
 
     return cleanup;
-  }, [shouldShowKitty, init, cleanup]);
+  }, [showKitty, init, cleanup]);
 
   // Return null to avoid rendering anything in the DOM
   return null;

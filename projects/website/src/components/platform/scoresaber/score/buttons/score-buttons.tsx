@@ -13,7 +13,7 @@ import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scores
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
 import clsx from "clsx";
-import { useCallback, useMemo, useState, useTransition } from "react";
+import { useCallback, useState, useTransition } from "react";
 
 type Props = {
   score?: ScoreSaberScore;
@@ -90,8 +90,6 @@ export default function ScoreSaberScoreButtons({
   const [leaderboardExpanded, setLeaderboardExpanded] = useState(false);
   const [isPending, startTransition] = useTransition();
 
-  const memoizedButtons = useMemo(() => buttons, []);
-
   const handleDropdownToggle = useCallback(() => {
     const newExpandedState = !leaderboardExpanded;
 
@@ -102,32 +100,18 @@ export default function ScoreSaberScoreButtons({
     });
   }, [leaderboardExpanded, setIsLeaderboardExpanded]);
 
-  const buttonProps = useMemo(
-    () => ({
-      score,
-      leaderboard,
-      beatSaverMap,
-      alwaysSingleLine,
-      setIsLeaderboardExpanded,
-      isLeaderboardLoading,
-      updateScore,
-      hideLeaderboardDropdown,
-      hideAccuracyChanger,
-      isPreviousScore,
-    }),
-    [
-      score,
-      leaderboard,
-      beatSaverMap,
-      alwaysSingleLine,
-      setIsLeaderboardExpanded,
-      isLeaderboardLoading,
-      updateScore,
-      hideLeaderboardDropdown,
-      hideAccuracyChanger,
-      isPreviousScore,
-    ]
-  );
+  const buttonProps = {
+    score,
+    leaderboard,
+    beatSaverMap,
+    alwaysSingleLine,
+    setIsLeaderboardExpanded,
+    isLeaderboardLoading,
+    updateScore,
+    hideLeaderboardDropdown,
+    hideAccuracyChanger,
+    isPreviousScore,
+  };
 
   return (
     <div className="flex flex-col justify-center">
@@ -137,7 +121,7 @@ export default function ScoreSaberScoreButtons({
           className="flex min-w-0 flex-wrap justify-end gap-1"
           style={{ width: isMobile ? "auto" : "80px" }}
         >
-          {memoizedButtons
+          {buttons
             .filter(button => button.display(buttonProps))
             .map((button, index) => (
               <div key={index} className="flex-shrink-0">

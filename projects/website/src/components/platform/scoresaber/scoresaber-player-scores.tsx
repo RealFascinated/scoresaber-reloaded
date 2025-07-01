@@ -34,7 +34,7 @@ import {
   Trophy,
   XIcon,
 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import ScoresCard from "../../score/scores-card";
 import SimplePagination from "../../simple-pagination";
 import {
@@ -162,11 +162,8 @@ export default function ScoreSaberPlayerScores({
 
   // Derived state
   const debouncedSearchTerm = useDebounce(searchTerm, 250);
-  const isSearchActive = useMemo(() => debouncedSearchTerm.length >= 3, [debouncedSearchTerm]);
-  const invalidSearch = useMemo(
-    () => searchTerm.length >= 1 && searchTerm.length < 3,
-    [searchTerm]
-  );
+  const isSearchActive = debouncedSearchTerm.length >= 3;
+  const invalidSearch = searchTerm.length >= 1 && searchTerm.length < 3;
 
   // Data fetching
   const {
