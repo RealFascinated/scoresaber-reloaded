@@ -5,7 +5,7 @@ import Avatar from "@/components/avatar";
 import { useSearch } from "@/components/providers/search-provider";
 import { Input } from "@/components/ui/input";
 import SearchDialog from "@/components/ui/search-dialog";
-import { useIsMobile } from "@/hooks/use-is-mobile";
+import { useIsMobile } from "@/contexts/viewport-context";
 import { StarIcon } from "@heroicons/react/24/solid";
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";

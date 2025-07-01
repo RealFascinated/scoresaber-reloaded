@@ -4,7 +4,7 @@ import ScoreSaberScoreDisplay from "@/components/platform/scoresaber/score/score
 import PaginationComponent from "@/components/simple-pagination";
 import { Spinner } from "@/components/spinner";
 import { EmptyState } from "@/components/ui/empty-state";
-import { useIsMobile } from "@/hooks/use-is-mobile";
+import { useIsMobile } from "@/contexts/viewport-context";
 import { ClockIcon } from "@heroicons/react/24/outline";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";

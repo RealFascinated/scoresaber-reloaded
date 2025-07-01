@@ -1,8 +1,8 @@
 "use client";
 
 import { ChartConfig } from "@/common/chart/types";
+import { useIsMobile } from "@/contexts/viewport-context";
 import useDatabase from "@/hooks/use-database";
-import { useIsMobile } from "@/hooks/use-is-mobile";
 import {
   formatChartDate,
   formatDate,

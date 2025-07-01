@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/common/utils";
-import { useIsMobile } from "@/hooks/use-is-mobile";
+import { useIsMobile } from "@/contexts/viewport-context";
 import * as React from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";

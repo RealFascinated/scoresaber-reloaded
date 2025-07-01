@@ -1,7 +1,7 @@
 "use client";
 
 import { Spinner } from "@/components/spinner";
-import { useIsMobile } from "@/hooks/use-is-mobile";
+import { useIsMobile } from "@/contexts/viewport-context";
 import usePageNavigation from "@/hooks/use-page-navigation";
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import {

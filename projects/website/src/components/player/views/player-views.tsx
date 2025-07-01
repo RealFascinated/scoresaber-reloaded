@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useIsMobile } from "@/hooks/use-is-mobile";
+import { useIsMobile } from "@/contexts/viewport-context";
 import { CalendarIcon, GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerStatisticHistory } from "@ssr/common/player/player-statistic-history";

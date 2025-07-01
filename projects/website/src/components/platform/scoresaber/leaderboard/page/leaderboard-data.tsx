@@ -8,7 +8,7 @@ import LeaderboardScores from "@/components/platform/scoresaber/leaderboard/lead
 import { LeaderboardFilterProvider } from "@/components/providers/leaderboard/leaderboard-filter-provider";
 import HmdUsageChart from "@/components/score/charts/hmd-usage-chart";
 import { ScoreModeEnum } from "@/components/score/score-mode";
-import { useIsMobile } from "@/hooks/use-is-mobile";
+import { useIsMobile } from "@/contexts/viewport-context";
 import { DetailType } from "@ssr/common/detail-type";
 import { LeaderboardResponse } from "@ssr/common/response/leaderboard-response";
 import { PlaysByHmdResponse } from "@ssr/common/response/plays-by-hmd-response";

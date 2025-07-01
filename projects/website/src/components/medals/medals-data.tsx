@@ -3,7 +3,7 @@
 import { getMedalRankingColumnWidth } from "@/common/player-utils";
 import Card from "@/components/card";
 import SimplePagination from "@/components/simple-pagination";
-import { useIsMobile } from "@/hooks/use-is-mobile";
+import { useIsMobile } from "@/contexts/viewport-context";
 import usePageNavigation from "@/hooks/use-page-navigation";
 import { countryFilter } from "@ssr/common/utils/country.util";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
