@@ -11,14 +11,11 @@ export default function ScoreSaberSongName({
   return clickableSongName ? (
     <Link
       href={`/leaderboard/${leaderboard.id}`}
-      className="text-song-name w-fit min-w-0 cursor-pointer text-left break-all transition-all hover:brightness-[66%]"
-      style={{
-        overflowWrap: "anywhere",
-      }}
+      className="text-song-name w-full min-w-0 cursor-pointer overflow-hidden text-left transition-all hover:brightness-[66%]"
     >
-      <p>{leaderboard.fullName}</p>
+      <p className="w-full overflow-hidden whitespace-nowrap">{leaderboard.fullName}</p>
     </Link>
   ) : (
-    <p>{leaderboard.fullName}</p>
+    <p className="w-full overflow-hidden whitespace-nowrap">{leaderboard.fullName}</p>
   );
 }
