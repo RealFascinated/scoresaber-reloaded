@@ -10,7 +10,7 @@ import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { LinkIcon, XIcon } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { FancyLoader } from "../fancy-loader";
 import AddFriend from "../friend/add-friend";
 import { Button } from "../ui/button";
@@ -48,9 +48,7 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
     navigation.changePageUrl(buildPageUrl(currentCountry, currentPage));
   }, [currentPage, currentCountry, navigation]);
 
-  const firstColumnWidth = useMemo(() => {
-    return getMedalRankingColumnWidth(rankingData?.items ?? []);
-  }, [rankingData]);
+  const firstColumnWidth = getMedalRankingColumnWidth(rankingData?.items ?? []);
 
   return (
     <div className="flex w-full flex-col justify-center gap-2 xl:flex-row xl:gap-2">

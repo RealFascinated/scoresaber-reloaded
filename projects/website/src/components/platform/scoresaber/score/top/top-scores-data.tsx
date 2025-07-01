@@ -15,7 +15,7 @@ import { Timeframe } from "@ssr/common/timeframe";
 import Request from "@ssr/common/utils/request";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import ScoreSaberScoreDisplay from "../score";
 
 type TimeframesType = {
@@ -98,8 +98,6 @@ export function TopScoresData({ timeframe }: TopScoresDataProps) {
     }
   }, [isLoading, isRefetching, selectedTimeframe]);
 
-  const memoizedTimeframes = useMemo(() => timeframes, []);
-
   const renderScore = useCallback(
     ({ score, leaderboard, beatSaver }: PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>) => {
       const player = score.playerInfo;
@@ -146,7 +144,7 @@ export function TopScoresData({ timeframe }: TopScoresDataProps) {
       {/* Timeframe Selector */}
       <div className="flex flex-col gap-4">
         <div className="flex flex-row flex-wrap justify-center gap-3">
-          {memoizedTimeframes.map(timeframe => (
+          {timeframes.map(timeframe => (
             <Button
               key={timeframe.timeframe}
               className="relative min-w-[120px] transition-all duration-200"

@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useCallback, useEffect, useMemo, useState } from "react";
+import { memo, useCallback, useEffect, useState } from "react";
 
 import { useIsMobile } from "@/hooks/use-is-mobile";
 
@@ -66,16 +66,10 @@ export default function ScoreSaberScoreDisplay({
     setBaseScore(score.score);
   }, [score]);
 
-  const accuracy = useMemo(
-    () => (baseScore / leaderboard.maxScore) * 100,
-    [baseScore, leaderboard.maxScore]
-  );
+  const accuracy = (baseScore / leaderboard.maxScore) * 100;
 
-  const pp = useMemo(
-    () =>
-      baseScore === score.score ? score.pp : ScoreSaberCurve.getPp(leaderboard.stars, accuracy),
-    [baseScore, score.score, score.pp, leaderboard.stars, accuracy]
-  );
+  const pp =
+    baseScore === score.score ? score.pp : ScoreSaberCurve.getPp(leaderboard.stars, accuracy);
 
   const handleLeaderboardOpen = useCallback(
     (isExpanded: boolean) => {
@@ -95,25 +89,15 @@ export default function ScoreSaberScoreDisplay({
     setIsLeaderboardLoading(isLoading);
   }, []);
 
-  const gridColsClass = useMemo(
-    () =>
-      settings?.noScoreButtons
-        ? "grid-cols-[20px 1fr_1fr] lg:grid-cols-[0.5fr_4fr_350px]"
-        : "grid-cols-[20px 1fr_1fr] lg:grid-cols-[0.5fr_4fr_1fr_350px]",
-    [settings?.noScoreButtons]
-  );
+  const gridColsClass = settings?.noScoreButtons
+    ? "grid-cols-[20px 1fr_1fr] lg:grid-cols-[0.5fr_4fr_350px]"
+    : "grid-cols-[20px 1fr_1fr] lg:grid-cols-[0.5fr_4fr_1fr_350px]";
 
-  const memoizedScore = useMemo(() => ({ ...score, accuracy, pp }), [score, accuracy, pp]);
+  const memoizedScore = { ...score, accuracy, pp };
 
-  const containerClassName = useMemo(
-    () => `${settings?.disablePadding ? "" : "pt-2 pb-2"} relative`,
-    [settings?.disablePadding]
-  );
+  const containerClassName = `${settings?.disablePadding ? "" : "pt-2 pb-2"} relative`;
 
-  const gridClassName = useMemo(
-    () => `grid w-full gap-2 lg:gap-0 ${gridColsClass} ${settings?.hideRank ? "pt-1" : ""}`,
-    [gridColsClass, settings?.hideRank]
-  );
+  const gridClassName = `grid w-full gap-2 lg:gap-0 ${gridColsClass} ${settings?.hideRank ? "pt-1" : ""}`;
 
   return (
     <div className={containerClassName}>

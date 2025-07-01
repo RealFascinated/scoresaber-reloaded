@@ -8,7 +8,7 @@ import { useIsMobile } from "@/hooks/use-is-mobile";
 import { Page, Pagination } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { useLiveQuery } from "dexie-react-hooks";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Card from "../../card";
 import { Spinner } from "../../spinner";
 
@@ -40,9 +40,7 @@ export function FriendRanking() {
     getFriendsPage().then(setFriendsPage);
   }, [getFriendsPage]);
 
-  const firstColumnWidth = useMemo(() => {
-    return getFriendRankingColumnWidth(friendsPage?.items ?? []);
-  }, [friendsPage]);
+  const firstColumnWidth = getFriendRankingColumnWidth(friendsPage?.items ?? []);
 
   return (
     <Card className="flex h-fit flex-col gap-2">

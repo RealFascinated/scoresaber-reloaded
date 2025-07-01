@@ -7,7 +7,7 @@ import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { ReactElement, useMemo } from "react";
+import { ReactElement } from "react";
 import Card from "../../card";
 import CountryFlag from "../../ui/country-flag";
 import PlayerPreview from "../player-preview";
@@ -77,7 +77,7 @@ function PlayerMiniRanking({
   const variant = miniVariants[type];
   const icon = variant.icon(player);
 
-  const playerRankWidth = useMemo(() => {
+  const playerRankWidth = (() => {
     if (players.length === 0) return 0;
 
     const maxRank =
@@ -88,7 +88,7 @@ function PlayerMiniRanking({
     // Calculate padding based on number of digits
     const rankDigits = maxRank > 0 ? Math.floor(Math.log10(maxRank)) + 1 : 0;
     return rankDigits * 14 + (rankDigits > 1 ? -10 : 0);
-  }, [players, type]);
+  })();
 
   return (
     <Card className="sticky flex w-full flex-col gap-2 text-xs select-none sm:w-[400px] sm:text-sm">

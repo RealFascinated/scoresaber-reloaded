@@ -16,7 +16,7 @@ import { getPageFromRank } from "@ssr/common/utils/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChartBarIcon, TrendingUpIcon } from "lucide-react";
 import dynamic from "next/dynamic";
-import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 
 const ScoreHistoryGraph = dynamic(() => import("./score-views/score-history-graph"), {
   ssr: false,
@@ -75,10 +75,7 @@ export default function ScoreDropdown({
     score.additionalData
   );
 
-  const scoresPage = useMemo(
-    () => defaultScoresPage ?? getPageFromRank(score.rank, 12),
-    [score.rank, defaultScoresPage]
-  );
+  const scoresPage = defaultScoresPage ?? getPageFromRank(score.rank, 12);
 
   const handleModeChange = useCallback(
     (newMode: ScoreMode) => {

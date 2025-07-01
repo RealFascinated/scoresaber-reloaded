@@ -16,7 +16,7 @@ import { useDebounce } from "@uidotdev/usehooks";
 import { useLiveQuery } from "dexie-react-hooks";
 import { LinkIcon, XIcon } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { FancyLoader } from "../fancy-loader";
 import AddFriend from "../friend/add-friend";
 import SimpleTooltip from "../simple-tooltip";
@@ -65,9 +65,7 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
     navigation.changePageUrl(buildPageUrl(currentCountry, currentPage));
   }, [currentPage, currentCountry, navigation]);
 
-  const firstColumnWidth = useMemo(() => {
-    return getPlayerRankingColumnWidth(rankingData?.items ?? []);
-  }, [rankingData]);
+  const firstColumnWidth = getPlayerRankingColumnWidth(rankingData?.items ?? []);
 
   return (
     <div className="flex w-full flex-col justify-center gap-2 xl:flex-row xl:gap-2">
