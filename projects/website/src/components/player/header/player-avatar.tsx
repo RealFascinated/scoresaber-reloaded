@@ -1,3 +1,4 @@
+import { cn } from "@/common/utils";
 import Avatar from "@/components/avatar";
 import SimpleTooltip from "@/components/simple-tooltip";
 import { ArrowPathIcon } from "@heroicons/react/24/solid";
@@ -49,7 +50,7 @@ export default function PlayerAvatar({ player }: PlayerAvatarProps) {
             disabled={isRefreshing}
             className="bg-muted/90 hover:bg-muted flex size-7 cursor-pointer items-center justify-center rounded-md"
           >
-            <ArrowPathIcon className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
+            <ArrowPathIcon className={cn("h-4 w-4", isRefreshing && "animate-spin")} />
           </button>
         </SimpleTooltip>
       </div>

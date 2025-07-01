@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "@/common/utils";
 import ScoreSettings from "@/components/settings/category/score-settings";
 import WebsiteSettings from "@/components/settings/category/website-settings";
 import { Button } from "@/components/ui/button";
@@ -75,9 +76,10 @@ export default function Settings() {
 
   const settingsContent = isOpen ? (
     <div
-      className={`bg-background fixed inset-0 z-50 h-screen w-screen overflow-hidden ${
-        isClosing ? "animate-out fade-out duration-300" : "animate-in fade-in duration-300"
-      }`}
+      className={cn(
+        "bg-background fixed inset-0 z-50 h-screen w-screen overflow-hidden",
+        isOpen ? "block" : "hidden"
+      )}
     >
       <div className="flex h-full flex-col">
         {/* Header */}
@@ -137,28 +139,31 @@ export default function Settings() {
                 {categories.map(category => (
                   <div
                     key={category.name}
-                    className={`mb-2 rounded-lg transition-all duration-200 ${
+                    className={cn(
+                      "mb-2 rounded-lg transition-all duration-200",
                       selectedCategory.name === category.name
-                        ? "bg-primary/10"
-                        : "hover:bg-secondary/50"
-                    }`}
+                        ? "bg-primary/10 border-primary"
+                        : "bg-muted/50 border-border hover:bg-secondary/50"
+                    )}
                   >
                     <Button
                       variant="ghost"
-                      className={`h-14 w-full justify-start transition-all duration-200 ${
+                      className={cn(
+                        "h-14 w-full justify-start transition-all duration-200",
                         selectedCategory.name === category.name
                           ? "text-primary"
                           : "text-muted-foreground hover:text-foreground"
-                      }`}
+                      )}
                       onClick={() => setSelectedCategory(category)}
                     >
                       <div className="flex items-center gap-3">
                         <div
-                          className={`rounded-lg p-2 ${
+                          className={cn(
+                            "rounded-lg p-2",
                             selectedCategory.name === category.name
-                              ? "bg-primary/20"
-                              : "bg-secondary/50"
-                          }`}
+                              ? "bg-primary/10"
+                              : "bg-muted/50"
+                          )}
                         >
                           <category.icon className="size-5" />
                         </div>

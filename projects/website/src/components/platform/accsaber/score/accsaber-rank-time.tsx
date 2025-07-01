@@ -1,6 +1,7 @@
 "use client";
 
 import { getRankColor } from "@/common/rank-color-utils";
+import { cn } from "@/common/utils";
 import { ScoreTimeSet } from "@/components/score/score-time-set";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import { AccSaberScore } from "@ssr/common/api-service/impl/accsaber";
@@ -16,7 +17,10 @@ export function AccSaberRankTime({ score }: AccSaberRankTimeProps) {
       <div className="flex items-center gap-1">
         <GlobeAmericasIcon className="h-5 w-5" />
         <p
-          className={`${getRankColor(score.score.rank)} cursor-pointer font-semibold transition-all hover:brightness-[66%]`}
+          className={cn(
+            getRankColor(score.score.rank),
+            "cursor-pointer font-semibold transition-all hover:brightness-[66%]"
+          )}
         >
           #{formatNumberWithCommas(score.score.rank)}
         </p>

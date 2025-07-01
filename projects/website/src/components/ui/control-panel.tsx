@@ -1,12 +1,18 @@
+import { cn } from "@/common/utils";
 import { ReactNode } from "react";
 import SimpleTooltip from "../simple-tooltip";
 
 interface ControlPanelProps {
   children: ReactNode;
+  className?: string;
 }
 
-export function ControlPanel({ children }: ControlPanelProps) {
-  return <div className="border-border/50 bg-background/50 rounded-lg border p-4">{children}</div>;
+export function ControlPanel({ children, className }: ControlPanelProps) {
+  return (
+    <div className={cn("border-border/50 bg-background/50 rounded-lg border p-4", className)}>
+      {children}
+    </div>
+  );
 }
 
 interface ControlRowProps {
@@ -15,17 +21,18 @@ interface ControlRowProps {
 }
 
 export function ControlRow({ children, className = "" }: ControlRowProps) {
-  return <div className={`mb-3 flex justify-center ${className}`}>{children}</div>;
+  return <div className={cn("mb-3 flex justify-center", className)}>{children}</div>;
 }
 
 interface TabGroupProps {
   children: ReactNode;
+  className?: string;
 }
 
-export function TabGroup({ children }: TabGroupProps) {
+export function TabGroup({ children, className }: TabGroupProps) {
   return (
-    <div className="bg-muted w-fit rounded-md p-0.5">
-      <div className="flex w-fit flex-wrap justify-center gap-0.5">{children}</div>
+    <div className={cn("bg-muted w-fit rounded-md p-0.5", className)}>
+      <div className={cn("flex w-fit flex-wrap justify-center gap-0.5")}>{children}</div>
     </div>
   );
 }
@@ -38,24 +45,21 @@ interface TabProps {
 }
 
 export function Tab({ children, isActive, onClick, tooltip }: TabProps) {
-  const button = (
-    <button
-      onClick={onClick}
-      className={`flex cursor-pointer items-center gap-1.5 rounded-sm px-3 py-1.5 text-xs font-medium transition-all ${
-        isActive
-          ? "bg-background text-foreground shadow-sm"
-          : "text-muted-foreground hover:bg-background/50 hover:text-foreground"
-      }`}
-    >
-      {children}
-    </button>
+  return (
+    <SimpleTooltip display={tooltip}>
+      <button
+        className={cn(
+          "flex cursor-pointer items-center gap-1.5 rounded-sm px-3 py-1.5 text-xs font-medium transition-all",
+          isActive
+            ? "bg-primary text-primary-foreground"
+            : "bg-muted text-muted-foreground hover:bg-muted/80"
+        )}
+        onClick={onClick}
+      >
+        {children}
+      </button>
+    </SimpleTooltip>
   );
-
-  if (tooltip) {
-    return <SimpleTooltip display={tooltip}>{button}</SimpleTooltip>;
-  }
-
-  return button;
 }
 
 interface ButtonGroupProps {
@@ -64,7 +68,7 @@ interface ButtonGroupProps {
 }
 
 export function ButtonGroup({ children, className = "" }: ButtonGroupProps) {
-  return <div className={`flex flex-wrap justify-center gap-1.5 ${className}`}>{children}</div>;
+  return <div className={cn("flex flex-wrap justify-center gap-1.5", className)}>{children}</div>;
 }
 
 interface ControlButtonProps {
@@ -77,13 +81,13 @@ interface ControlButtonProps {
 export function ControlButton({ children, isActive, onClick, className = "" }: ControlButtonProps) {
   return (
     <button
-      type="button"
-      onClick={onClick}
-      className={`flex cursor-pointer items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs transition-all ${
+      className={cn(
+        "flex cursor-pointer items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs transition-all",
         isActive
-          ? "border-primary bg-primary/10 text-primary"
-          : "border-border bg-background text-muted-foreground hover:border-primary/50 hover:text-foreground"
-      } ${className}`}
+          ? "bg-primary text-primary-foreground border-primary"
+          : "bg-background text-muted-foreground border-border hover:bg-muted"
+      )}
+      onClick={onClick}
     >
       {children}
     </button>

@@ -1,3 +1,4 @@
+import { cn } from "@/common/utils";
 import { PlayerMiniRankingSkeleton } from "@/components/player/mini-ranking/player-mini-ranking-skeleton";
 import { PlayerInfo } from "@/components/player/player-info";
 import { useIsMobile } from "@/contexts/viewport-context";
@@ -150,7 +151,10 @@ function PlayerMiniRanking({
                     </p>
                     {playerRanking.id !== player.id && !isMobile && (
                       <p
-                        className={`font-mono ${ppDifference > 0 ? "text-green-400" : "text-red-400"}`}
+                        className={cn(
+                          "font-mono",
+                          ppDifference > 0 ? "text-green-400" : "text-red-400"
+                        )}
                       >
                         {ppDifference > 0 ? "+" : ""}
                         {formatPp(ppDifference, 2)}
