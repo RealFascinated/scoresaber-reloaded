@@ -1,4 +1,5 @@
 import { getRankColor } from "@/common/rank-color-utils";
+import { cn } from "@/common/utils";
 import HMDIcon from "@/components/hmd-icon";
 import { ScoreSaberScoreTimeSetVs } from "@/components/platform/scoresaber/score/score-time-set-vs";
 import { ScoreTimeSet } from "@/components/score/score-time-set";
@@ -31,7 +32,10 @@ export default function ScoreSaberScoreInfo({
         ) : (
           <Link href={`/leaderboard/${leaderboard.id}/${getPageFromRank(score.rank, 12)}`}>
             <p
-              className={`${getRankColor(score.rank)} cursor-pointer font-semibold transition-all hover:brightness-[66%]`}
+              className={cn(
+                getRankColor(score.rank),
+                "cursor-pointer font-semibold transition-all hover:brightness-[66%]"
+              )}
             >
               #{formatNumberWithCommas(score.rank)}
             </p>

@@ -1,10 +1,10 @@
+import { cn } from "@/common/utils";
 import FallbackLink from "@/components/fallback-link";
 import SimpleTooltip from "@/components/simple-tooltip";
 import { StarIcon } from "@heroicons/react/24/solid";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
 import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
-import clsx from "clsx";
 import Image from "next/image";
 import LeaderboardPreview from "../leaderboard/leaderboard-preview";
 import ScoreSaberSongName from "./song-name";
@@ -59,7 +59,7 @@ export default function ScoreSaberScoreSongInfo({
         <span className="text-song-mapper">
           <FallbackLink
             href={mappersProfile}
-            className={clsx(
+            className={cn(
               mappersProfile && "w-fit text-xs leading-none transition-all hover:brightness-[66%]"
             )}
           >

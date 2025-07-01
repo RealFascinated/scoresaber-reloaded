@@ -8,6 +8,7 @@ import {
   encodeOverlaySettings,
   OverlayViews,
 } from "@/common/overlay/overlay-settings";
+import { cn } from "@/common/utils";
 import Notice from "@/components/notice";
 import { Checkbox } from "@/components/ui/checkbox";
 import { FormField } from "@/components/ui/form";
@@ -335,7 +336,10 @@ export default function OverlayBuilder() {
                             />
                           </FormControl>
                           <div
-                            className={`flex items-center space-x-2 ${isDisabled ? "opacity-50" : ""}`}
+                            className={cn(
+                              "flex items-center space-x-2",
+                              isDisabled && "opacity-50"
+                            )}
                           >
                             {viewToggle.icon}
                             <FormLabel className="font-normal">

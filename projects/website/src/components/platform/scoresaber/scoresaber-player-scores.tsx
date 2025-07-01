@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "@/common/utils";
 import SimpleTooltip from "@/components/simple-tooltip";
 import { Spinner } from "@/components/spinner";
 import { Input } from "@/components/ui/input";
@@ -18,7 +19,6 @@ import { ScoreSort } from "@ssr/common/types/sort";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { useDebounce } from "@uidotdev/usehooks";
-import { clsx } from "clsx";
 import { useLiveQuery } from "dexie-react-hooks";
 import {
   ArrowDown,
@@ -415,7 +415,7 @@ export default function ScoreSaberPlayerScores({
                 <Input
                   type="search"
                   placeholder="Query..."
-                  className={clsx(
+                  className={cn(
                     "h-8 w-full pr-3 pl-8 text-xs sm:w-64",
                     invalidSearch && "border-red-500"
                   )}

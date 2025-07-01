@@ -2,6 +2,7 @@
 
 import { memo, useCallback, useEffect, useState } from "react";
 
+import { cn } from "@/common/utils";
 import { useIsMobile } from "@/contexts/viewport-context";
 
 import Avatar from "@/components/avatar";
@@ -95,9 +96,13 @@ export default function ScoreSaberScoreDisplay({
 
   const memoizedScore = { ...score, accuracy, pp };
 
-  const containerClassName = `${settings?.disablePadding ? "" : "pt-2 pb-2"} relative`;
+  const containerClassName = cn(settings?.disablePadding ? "" : "pt-2 pb-2", "relative");
 
-  const gridClassName = `grid w-full gap-2 lg:gap-0 ${gridColsClass} ${settings?.hideRank ? "pt-1" : ""}`;
+  const gridClassName = cn(
+    "grid w-full gap-2 lg:gap-0",
+    gridColsClass,
+    settings?.hideRank ? "pt-1" : ""
+  );
 
   return (
     <div className={containerClassName}>

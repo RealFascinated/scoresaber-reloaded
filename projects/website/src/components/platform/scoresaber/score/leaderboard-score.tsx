@@ -1,4 +1,5 @@
 import { getRankColor } from "@/common/rank-color-utils";
+import { cn } from "@/common/utils";
 import ScoreMissesAndPausesBadge from "@/components/platform/scoresaber/score/badges/score-misses-and-pauses";
 import { ScorePpBadge } from "@/components/platform/scoresaber/score/badges/score-pp";
 import { ScoreSaberScoreModifiers } from "@/components/platform/scoresaber/score/score-modifiers";
@@ -13,7 +14,6 @@ import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { formatScoreAccuracy } from "@ssr/common/utils/score.util";
-import { clsx } from "clsx";
 
 export default function ScoreSaberLeaderboardScore({
   score,
@@ -40,7 +40,7 @@ export default function ScoreSaberLeaderboardScore({
     <>
       {/* Score Rank */}
       <td className="px-4 py-2 whitespace-nowrap">
-        <p className={`${getRankColor(score.rank)}`}>
+        <p className={getRankColor(score.rank)}>
           {score.rank !== -1 ? `#${formatNumberWithCommas(score.rank)}` : "-"}
         </p>
       </td>
@@ -64,7 +64,7 @@ export default function ScoreSaberLeaderboardScore({
 
       {/* Score Misses */}
       <td
-        className={clsx(
+        className={cn(
           "cursor-default px-4 py-2 whitespace-nowrap",
           score.misses > 0 ? "text-red-500" : "text-green-500"
         )}
@@ -117,7 +117,7 @@ export default function ScoreSaberLeaderboardScore({
               <ArrowPathIcon className="size-5 animate-spin" />
             ) : (
               <ArrowDownIcon
-                className={clsx(
+                className={cn(
                   "size-5 cursor-pointer transition-transform duration-350",
                   isDropdownExpanded ? "" : "rotate-180"
                 )}

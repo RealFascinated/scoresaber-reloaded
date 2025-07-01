@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "@/common/utils";
 import ScoreSaberScoreEditorButton from "@/components/platform/scoresaber/score/buttons/score-editor-button";
 import { BeatSaverMapButton } from "@/components/score/button/beat-saver-map-button";
 import { ScoreBsrButton } from "@/components/score/button/score-bsr-button";
@@ -12,7 +13,6 @@ import { ArrowDownIcon, ArrowPathIcon } from "@heroicons/react/24/solid";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
-import clsx from "clsx";
 import { useCallback, useState, useTransition } from "react";
 
 type Props = {
@@ -131,7 +131,7 @@ export default function ScoreSaberScoreButtons({
         </div>
 
         {/* Score Editor and Leaderboard buttons   */}
-        <div className={`flex gap-1 ${isMobile ? "flex-row" : "flex-col"}`}>
+        <div className={cn("flex gap-1", isMobile ? "flex-row" : "flex-col")}>
           {/* Edit score button */}
           {score && leaderboard && updateScore && !hideAccuracyChanger && (
             <ScoreSaberScoreEditorButton
@@ -156,7 +156,7 @@ export default function ScoreSaberScoreButtons({
                     <ArrowPathIcon className="h-4 w-4 animate-spin" />
                   ) : (
                     <ArrowDownIcon
-                      className={clsx(
+                      className={cn(
                         "h-4 w-4 transition-transform",
                         leaderboardExpanded ? "rotate-180" : ""
                       )}
