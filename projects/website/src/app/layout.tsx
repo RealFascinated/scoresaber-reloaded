@@ -5,6 +5,7 @@ import { QueryProvider } from "@/components/providers/query-provider";
 import { PageTransitionProvider } from "@/components/ui/page-transition-context";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { ViewportProvider } from "@/contexts/viewport-context";
 import { env } from "@ssr/common/env";
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
@@ -81,7 +82,9 @@ export default function RootLayout({
           <PreloadResources />
           <TooltipProvider delayDuration={250}>
             <PageTransitionProvider>
-              <QueryProvider>{children}</QueryProvider>
+              <ViewportProvider>
+                <QueryProvider>{children}</QueryProvider>
+              </ViewportProvider>
             </PageTransitionProvider>
           </TooltipProvider>
         </PostHogProvider>

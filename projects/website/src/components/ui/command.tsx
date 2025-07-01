@@ -7,7 +7,7 @@ import * as React from "react";
 
 import { cn } from "@/common/utils";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { useIsMobile } from "@/hooks/use-is-mobile";
+import { useIsMobile } from "@/contexts/viewport-context";
 
 const Command = ({
   className,

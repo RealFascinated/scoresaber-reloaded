@@ -7,7 +7,7 @@ import SimplePagination from "@/components/simple-pagination";
 import SimpleTooltip from "@/components/simple-tooltip";
 import { Spinner } from "@/components/spinner";
 import { EmptyState } from "@/components/ui/empty-state";
-import { useIsMobile } from "@/hooks/use-is-mobile";
+import { useIsMobile } from "@/contexts/viewport-context";
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";

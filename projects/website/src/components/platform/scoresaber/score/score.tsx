@@ -2,7 +2,7 @@
 
 import { memo, useCallback, useEffect, useState } from "react";
 
-import { useIsMobile } from "@/hooks/use-is-mobile";
+import { useIsMobile } from "@/contexts/viewport-context";
 
 import Avatar from "@/components/avatar";
 import ScoreSaberScoreButtons from "@/components/platform/scoresaber/score/buttons/score-buttons";

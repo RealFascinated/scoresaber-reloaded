@@ -1,5 +1,3 @@
-"use client";
-
 import { type SIDE_OPTIONS } from "@radix-ui/react-popper";
 import { clsx } from "clsx";
 import React from "react";

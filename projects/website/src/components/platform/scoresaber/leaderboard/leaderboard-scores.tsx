@@ -5,8 +5,8 @@ import { useLeaderboardFilter } from "@/components/providers/leaderboard/leaderb
 import ScoreMode, { ScoreModeEnum } from "@/components/score/score-mode";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useIsMobile } from "@/contexts/viewport-context";
 import { useLeaderboardScores } from "@/hooks/score/use-leaderboard-scores";
-import { useIsMobile } from "@/hooks/use-is-mobile";
 import usePageNavigation from "@/hooks/use-page-navigation";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";

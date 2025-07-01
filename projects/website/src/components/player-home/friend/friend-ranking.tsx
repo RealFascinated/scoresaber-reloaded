@@ -3,8 +3,8 @@
 import { getFriendRankingColumnWidth } from "@/common/player-utils";
 import { PlayerRanking } from "@/components/ranking/player-ranking";
 import SimplePagination from "@/components/simple-pagination";
+import { useIsMobile } from "@/contexts/viewport-context";
 import useDatabase from "@/hooks/use-database";
-import { useIsMobile } from "@/hooks/use-is-mobile";
 import { Page, Pagination } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { useLiveQuery } from "dexie-react-hooks";

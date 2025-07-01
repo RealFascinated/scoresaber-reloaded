@@ -4,7 +4,7 @@ import Card from "@/components/card";
 import SimplePagination from "@/components/simple-pagination";
 import { Spinner } from "@/components/spinner";
 import { Button } from "@/components/ui/button";
-import { useIsMobile } from "@/hooks/use-is-mobile";
+import { useIsMobile } from "@/contexts/viewport-context";
 import { CalendarDaysIcon, CalendarIcon, ClockIcon, TrophyIcon } from "@heroicons/react/24/outline";
 import { env } from "@ssr/common/env";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";

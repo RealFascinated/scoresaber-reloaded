@@ -7,7 +7,7 @@ import { ScoreReplayButton } from "@/components/score/button/score-replay-button
 import { SongOpenInYoutubeButton } from "@/components/score/button/song-open-in-youtube-button";
 import SimpleTooltip from "@/components/simple-tooltip";
 import { Button } from "@/components/ui/button";
-import { useIsMobile } from "@/hooks/use-is-mobile";
+import { useIsMobile } from "@/contexts/viewport-context";
 import { ArrowDownIcon, ArrowPathIcon } from "@heroicons/react/24/solid";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
