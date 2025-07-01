@@ -12,6 +12,7 @@ export function PlayerAvatar({
       <img
         src={profilePicture}
         alt={name}
+        fetchPriority="high"
         className="size-7 min-w-7 rounded-full border border-[#333] object-cover"
       />
     </div>
