@@ -207,7 +207,7 @@ const settings: {
         name: "theme" as Path<FormValues>,
         label: "Theme",
         type: "select" as const,
-        description: "Choose which theme to use for the website",
+        description: "Choose which color theme to use for the website",
         options: ssrConfig.themes.map(theme => ({ value: theme.id, label: theme.name })),
       },
     ],
