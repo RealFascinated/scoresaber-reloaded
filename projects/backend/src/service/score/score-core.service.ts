@@ -195,7 +195,7 @@ export class ScoreCoreService {
         ? (score.playerInfo ??
           (await ScoreSaberService.getCachedPlayer(score.playerId, true).catch(() => undefined)))
         : undefined,
-      options?.isComparisonPlayerScore && comparisonPlayer
+      !options?.isComparisonPlayerScore && comparisonPlayer
         ? ScoreSaberScoreModel.findOne({
             playerId: comparisonPlayer.id,
             leaderboardId: leaderboard.id,

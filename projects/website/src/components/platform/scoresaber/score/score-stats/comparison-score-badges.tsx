@@ -3,10 +3,11 @@ import ScoreMissesAndPausesBadge from "@/components/platform/scoresaber/score/ba
 import { ScorePpBadge } from "@/components/platform/scoresaber/score/badges/score-pp";
 import { ScoreScoreBadge } from "@/components/platform/scoresaber/score/badges/score-score";
 import { ScoreBadge, ScoreBadges } from "@/components/score/score-badges";
+import SimpleTooltip from "@/components/simple-tooltip";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { getScoreBadgeFromAccuracy } from "@ssr/common/utils/song-utils";
-import { timeAgo } from "@ssr/common/utils/time-utils";
+import { formatDate, timeAgo } from "@ssr/common/utils/time-utils";
 
 type ComparisonScoreBadgesProps = {
   score: ScoreSaberScore;
@@ -60,10 +61,17 @@ export function ComparisonScoreBadges({ score, leaderboard }: ComparisonScoreBad
 
   return (
     <div className="flex h-full w-full flex-col justify-center">
-      <div className="mb-2 flex w-full items-center justify-center gap-2 text-sm text-gray-300">
-        <div className="h-[1px] flex-1 bg-gray-200"></div>
-        <span>vs me ({timeAgo(score.timestamp)})</span>
-        <div className="h-[1px] flex-1 bg-gray-200"></div>
+      <div className="text-muted-foreground mb-2 flex w-full items-center justify-center gap-2 text-sm">
+        <div className="bg-muted h-[1px] flex-1"></div>
+        <p className="flex items-center gap-1">
+          vs you{" "}
+          <span>
+            <SimpleTooltip display={formatDate(score.timestamp, "Do MMMM, YYYY HH:mm a")}>
+              ({timeAgo(score.timestamp)})
+            </SimpleTooltip>
+          </span>
+        </p>
+        <div className="bg-muted h-[1px] flex-1"></div>
       </div>
       <div className="grid w-full grid-cols-3 justify-center gap-1">
         <ScoreBadges badges={comparisonBadges} score={score} leaderboard={leaderboard} />

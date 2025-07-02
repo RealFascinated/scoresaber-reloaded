@@ -423,7 +423,11 @@ export class PlayerScoresService {
     // Start fetching comparison player and leaderboard IDs in parallel
     const [comparisonPlayer, leaderboardIds] = await Promise.all([
       comparisonPlayerId !== playerId && comparisonPlayerId !== undefined
-        ? ScoreSaberService.getPlayer(comparisonPlayerId, DetailType.BASIC)
+        ? ScoreSaberService.getPlayer(
+            comparisonPlayerId,
+            DetailType.BASIC,
+            await ScoreSaberService.getCachedPlayer(comparisonPlayerId, true)
+          )
         : undefined,
       requestedPage.playerScores.map(score => score.leaderboard.id + ""),
     ]);
