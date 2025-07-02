@@ -58,19 +58,23 @@ export default function PlayerScoreAccuracyChart({ scoreStats, leaderboard }: Pr
       },
       labelFormatter: (value: number) => `Accuracy: ${value.toFixed(2)}%`,
     },
-    {
-      title: "Previous Accuracy",
-      field: "previousAccuracy",
-      color: Colors.rankedLight,
-      axisId: "y1",
-      axisConfig: {
-        reverse: false,
-        display: false,
-        displayName: "Previous Accuracy",
-        position: "left",
-      },
-      labelFormatter: (value: number) => `Previous Accuracy: ${value.toFixed(2)}%`,
-    },
+    ...(scoreStats.previous
+      ? [
+          {
+            title: "Previous Accuracy",
+            field: "previousAccuracy",
+            color: Colors.rankedLight,
+            axisId: "y1",
+            axisConfig: {
+              reverse: false,
+              display: false,
+              displayName: "Previous Accuracy",
+              position: "left" as const,
+            },
+            labelFormatter: (value: number) => `Previous Accuracy: ${value.toFixed(2)}%`,
+          },
+        ]
+      : []),
     {
       title: "PP",
       field: "pp",
@@ -89,16 +93,8 @@ export default function PlayerScoreAccuracyChart({ scoreStats, leaderboard }: Pr
 
   const config: ChartConfig = {
     id: "player-score-accuracy-chart",
-    // Enable animation on the chart
     options: {
-      animation: {
-        tension: {
-          duration: 1000,
-          easing: "linear",
-          from: 1,
-          to: 0,
-        },
-      },
+      animation: true,
     },
     datasets: datasetConfig.map(config => ({
       label: config.title,
