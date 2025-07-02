@@ -9,12 +9,12 @@ export default function ScoreSaberSongName({
   clickableSongName: boolean;
 }) {
   const text = (
-    <p className="w-full overflow-hidden font-semibold whitespace-nowrap">{leaderboard.fullName}</p>
+    <p className="w-fit overflow-hidden font-semibold whitespace-nowrap">{leaderboard.fullName}</p>
   );
   return clickableSongName ? (
     <Link
       href={`/leaderboard/${leaderboard.id}`}
-      className="text-song-name w-full min-w-0 cursor-pointer overflow-hidden text-left transition-all hover:brightness-[66%]"
+      className="text-song-name w-fit min-w-0 cursor-pointer overflow-hidden text-left transition-all hover:brightness-[66%]"
     >
       {text}
     </Link>
