@@ -292,7 +292,7 @@ export default class BeatLeaderService {
    */
   public static async getScoresFullScoreStats(scoreId: number): Promise<{
     current: ScoreStatsToken;
-    previous: ScoreStatsToken;
+    previous?: ScoreStatsToken;
   }> {
     const current = await this.getAdditionalScoreData(scoreId);
     if (current == undefined) {
@@ -305,15 +305,12 @@ export default class BeatLeaderService {
       current.leaderboardId,
       current.timestamp
     );
-    if (previous == undefined) {
-      throw new NotFoundError(`Previous score ${scoreId} not found`);
-    }
 
     const [currentStats, previousStats] = await Promise.all([
       this.getScoreStats(current.scoreId),
-      this.getScoreStats(previous.scoreId),
+      previous ? this.getScoreStats(previous.scoreId) : undefined,
     ]);
-    if (!currentStats || !previousStats) {
+    if (!currentStats) {
       throw new NotFoundError(`Score stats not found for score ${scoreId}`);
     }
 
