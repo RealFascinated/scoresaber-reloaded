@@ -52,6 +52,8 @@ export enum SettingIds {
   DefaultLeaderboardCountry = "defaultLeaderboardCountry",
   WebsiteLanding = "websiteLanding",
   PlusPpDefaultAccuracy = "plusPpDefaultAccuracy",
+  PlayerPreviews = "playerPreviews",
+  LeaderboardPreviews = "leaderboardPreviews",
 }
 
 export const DEFAULT_WHAT_IF_RANGE: [number, number] = [70, 98.5];
@@ -514,6 +516,42 @@ export default class Database extends Dexie {
    */
   async setPlusPpDefaultAccuracy(plusPpDefaultAccuracy: number) {
     await this.setSetting(SettingIds.PlusPpDefaultAccuracy, plusPpDefaultAccuracy);
+  }
+
+  /**
+   * Gets the player previews setting from the database
+   *
+   * @returns the player previews setting
+   */
+  async getPlayerPreviews(): Promise<boolean> {
+    return (await this.getSetting<boolean>(SettingIds.PlayerPreviews, true))!;
+  }
+
+  /**
+   * Sets the player previews setting in the database
+   *
+   * @param playerPreviews the player previews setting
+   */
+  async setPlayerPreviews(playerPreviews: boolean) {
+    await this.setSetting(SettingIds.PlayerPreviews, playerPreviews);
+  }
+
+  /**
+   * Gets the leaderboard previews setting from the database
+   *
+   * @returns the leaderboard previews setting
+   */
+  async getLeaderboardPreviews(): Promise<boolean> {
+    return (await this.getSetting<boolean>(SettingIds.LeaderboardPreviews, true))!;
+  }
+
+  /**
+   * Sets the leaderboard previews setting in the database
+   *
+   * @param leaderboardPreviews the leaderboard previews setting
+   */
+  async setLeaderboardPreviews(leaderboardPreviews: boolean) {
+    await this.setSetting(SettingIds.LeaderboardPreviews, leaderboardPreviews);
   }
 
   /**

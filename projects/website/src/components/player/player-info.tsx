@@ -27,7 +27,7 @@ export function PlayerInfo({
       className={clsx(
         hoverBrightness ? "transition-all hover:brightness-[66%]" : "",
         player.id == highlightedPlayerId ? "font-bold" : "",
-        `w-[140px] overflow-hidden text-left break-all text-ellipsis whitespace-nowrap`,
+        `group-hover:text-primary w-[140px] overflow-hidden text-left break-all text-ellipsis whitespace-nowrap transition-all`,
         className
       )}
       style={{

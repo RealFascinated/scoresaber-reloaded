@@ -116,7 +116,7 @@ function PlayerMiniRanking({
               >
                 <Link
                   href={`/player/${playerRanking.id}`}
-                  className="grid cursor-pointer items-center gap-2.5 px-1 py-1.5 sm:px-2"
+                  className="group grid cursor-pointer items-center gap-2.5 px-1 py-1.5 sm:px-2"
                   style={{
                     gridTemplateColumns: isMobile
                       ? `${playerRankWidth}px 48px 1fr auto`
