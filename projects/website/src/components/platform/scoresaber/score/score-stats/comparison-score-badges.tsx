@@ -63,14 +63,12 @@ export function ComparisonScoreBadges({ score, leaderboard }: ComparisonScoreBad
     <div className="flex h-full w-full flex-col justify-center">
       <div className="text-muted-foreground mb-2 flex w-full items-center justify-center gap-2 text-sm">
         <div className="bg-muted h-[1px] flex-1"></div>
-        <p className="flex items-center gap-1">
-          vs you{" "}
-          <span>
-            <SimpleTooltip display={formatDate(score.timestamp, "Do MMMM, YYYY HH:mm a")}>
-              ({timeAgo(score.timestamp)})
-            </SimpleTooltip>
-          </span>
-        </p>
+        <div className="flex items-center gap-1">
+          <span>vs you </span>
+          <SimpleTooltip display={formatDate(score.timestamp, "Do MMMM, YYYY HH:mm a")}>
+            <span className="text-xs">({timeAgo(score.timestamp)})</span>
+          </SimpleTooltip>
+        </div>
         <div className="bg-muted h-[1px] flex-1"></div>
       </div>
       <div className="grid w-full grid-cols-3 justify-center gap-1">
