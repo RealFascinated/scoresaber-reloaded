@@ -6,6 +6,7 @@ import Footer from "@/components/footer";
 import DatabaseLoader from "@/components/loaders/database-loader";
 import MeowMeow from "@/components/meow-meow";
 import Navbar from "@/components/navbar/navbar";
+import { PreviewProvider } from "@/components/providers/preview-provider";
 import { SearchProvider } from "@/components/providers/search-provider";
 import ThemeProvider from "@/components/providers/theme-provider";
 import SSRLayout from "@/components/ssr-layout";
@@ -29,12 +30,14 @@ export default function Layout({ children }: { children: ReactNode }) {
           <BackgroundCover />
           <SnowBackground />
           <ApiHealth />
-          <main className="flex min-h-screen w-full flex-col text-white">
-            <SearchProvider>
-              <Navbar />
-              <SSRLayout className="flex flex-col gap-2 px-2 pt-2">{children}</SSRLayout>
-            </SearchProvider>
-          </main>
+          <PreviewProvider>
+            <main className="flex min-h-screen w-full flex-col text-white">
+              <SearchProvider>
+                <Navbar />
+                <SSRLayout className="flex flex-col gap-2 px-2 pt-2">{children}</SSRLayout>
+              </SearchProvider>
+            </main>
+          </PreviewProvider>
           <Footer buildId={buildId} buildTimeShort={buildTimeShort} />
         </NuqsAdapter>
       </DatabaseLoader>

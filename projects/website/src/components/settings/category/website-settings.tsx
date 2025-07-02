@@ -20,7 +20,7 @@ import { useTheme } from "next-themes";
 import { useEffect, useRef, useState } from "react";
 import { Path, useForm } from "react-hook-form";
 import { IconType } from "react-icons";
-import { FaGlobe, FaImage, FaPalette, FaSnowflake } from "react-icons/fa";
+import { FaEye, FaGlobe, FaImage, FaPalette, FaSnowflake } from "react-icons/fa";
 import { toast } from "sonner";
 import { z } from "zod";
 import { SettingCard } from "../setting-card";
@@ -32,6 +32,8 @@ const formSchema = z.object({
   showKitty: z.boolean(),
   websiteLanding: z.nativeEnum(WebsiteLanding),
   theme: z.string(),
+  playerPreviews: z.boolean(),
+  leaderboardPreviews: z.boolean(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -210,6 +212,25 @@ const settings: {
       },
     ],
   },
+  {
+    id: "previews",
+    title: "Previews",
+    icon: FaEye,
+    fields: [
+      {
+        name: "playerPreviews" as Path<FormValues>,
+        label: "Show Player Previews",
+        type: "checkbox" as const,
+        description: "Show player previews in the player home page",
+      },
+      {
+        name: "leaderboardPreviews" as Path<FormValues>,
+        label: "Show Leaderboard Previews",
+        type: "checkbox" as const,
+        description: "Show leaderboard previews in the leaderboard page",
+      },
+    ],
+  },
 ];
 
 const WebsiteSettings = () => {
@@ -219,6 +240,8 @@ const WebsiteSettings = () => {
   const snowParticles = useLiveQuery(async () => await database.getSnowParticles());
   const showKitty = useLiveQuery(async () => await database.getShowKitty());
   const websiteLanding = useLiveQuery(async () => await database.getWebsiteLanding());
+  const playerPreviews = useLiveQuery(async () => await database.getPlayerPreviews());
+  const leaderboardPreviews = useLiveQuery(async () => await database.getLeaderboardPreviews());
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -228,6 +251,8 @@ const WebsiteSettings = () => {
       showKitty: false,
       websiteLanding: WebsiteLanding.PLAYER_HOME,
       theme: ssrConfig.themes[0].id,
+      playerPreviews: true,
+      leaderboardPreviews: true,
     },
   });
 
@@ -237,6 +262,8 @@ const WebsiteSettings = () => {
     await database.setSetting(SettingIds.ShowKitty, values.showKitty);
     await database.setWebsiteLanding(values.websiteLanding);
     setTheme(values.theme);
+    await database.setSetting(SettingIds.PlayerPreviews, values.playerPreviews);
+    await database.setSetting(SettingIds.LeaderboardPreviews, values.leaderboardPreviews);
 
     const after = performance.now();
     toast.success("Settings saved", {
@@ -253,7 +280,9 @@ const WebsiteSettings = () => {
       snowParticles === undefined ||
       showKitty === undefined ||
       websiteLanding === undefined ||
-      theme === undefined
+      theme === undefined ||
+      playerPreviews === undefined ||
+      leaderboardPreviews === undefined
     ) {
       return;
     }
@@ -273,6 +302,12 @@ const WebsiteSettings = () => {
     }
     if (currentValues.theme !== theme) {
       form.setValue("theme", theme);
+    }
+    if (currentValues.playerPreviews !== playerPreviews) {
+      form.setValue("playerPreviews", playerPreviews);
+    }
+    if (currentValues.leaderboardPreviews !== leaderboardPreviews) {
+      form.setValue("leaderboardPreviews", leaderboardPreviews);
     }
   }, [backgroundCover, snowParticles, showKitty, websiteLanding, theme, form]);
 

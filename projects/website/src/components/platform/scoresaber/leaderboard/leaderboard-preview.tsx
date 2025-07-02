@@ -1,5 +1,6 @@
 "use client";
 
+import { usePreview } from "@/components/providers/preview-provider";
 import { Spinner } from "@/components/spinner";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
@@ -26,6 +27,11 @@ export default function LeaderboardPreview({
 }: LeaderboardPreviewProps) {
   const [isOpen, setIsOpen] = useState(false);
   const state = useDebounce(isOpen, 100);
+  const { leaderboardPreviews } = usePreview();
+
+  if (!leaderboardPreviews) {
+    return children;
+  }
 
   return (
     <Popover open={state} onOpenChange={setIsOpen}>

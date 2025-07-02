@@ -15,6 +15,7 @@ import { useEffect, useState } from "react";
 import CountUp from "react-countup";
 import Avatar from "../avatar";
 import HMDIcon from "../hmd-icon";
+import { usePreview } from "../providers/preview-provider";
 import CountryFlag from "../ui/country-flag";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 
@@ -174,6 +175,7 @@ export default function PlayerPreview({
   delay?: number;
   useLink?: boolean;
 }) {
+  const { playerPreviews } = usePreview();
   const [isOpen, setIsOpen] = useState(false);
   const [debouncedIsOpen, setDebouncedIsOpen] = useState(false);
 
@@ -192,8 +194,12 @@ export default function PlayerPreview({
   const { data: player, isLoading } = useQuery({
     queryKey: ["player-preview", playerId],
     queryFn: () => ssrApi.getScoreSaberPlayer(playerId, { type: DetailType.BASIC }),
-    enabled: debouncedIsOpen,
+    enabled: debouncedIsOpen && playerPreviews,
   });
+
+  if (!playerPreviews) {
+    return children;
+  }
 
   return (
     <Popover open={debouncedIsOpen} onOpenChange={setIsOpen}>
