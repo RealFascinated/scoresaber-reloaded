@@ -130,7 +130,7 @@ export default function ScoreSaberScoreDisplay({
           hideRank={settings?.hideRank}
         />
 
-        <div className="min-w-0 overflow-hidden">
+        <div className="flex min-w-0 items-center overflow-hidden">
           <ScoreSaberScoreSongInfo
             leaderboard={leaderboard}
             beatSaverMap={beatSaverMap}
