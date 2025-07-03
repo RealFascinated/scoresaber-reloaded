@@ -18,7 +18,8 @@ import { ScoreSaberScoreDataMode } from "@ssr/common/types/score-data-mode";
 import { ScoreSort } from "@ssr/common/types/sort";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
-import { useDebounce } from "@uidotdev/usehooks";
+import { useDebounce, useDocumentTitle } from "@uidotdev/usehooks";
+import { ssrConfig } from "config";
 import { useLiveQuery } from "dexie-react-hooks";
 import {
   ArrowDown,
@@ -153,7 +154,7 @@ export default function ScoreSaberPlayerScores({
   // State
   const [currentPage, setCurrentPage] = useState(page);
   const [scoresMode, setScoresMode] = useState<ScoreSaberScoreDataMode>(mode);
-  const [currentSort, setCurrentSort] = useState<unknown>(sort);
+  const [currentSort, setCurrentSort] = useState<string>(sort);
   const [currentSortDirection, setCurrentSortDirection] = useState<ScoreSort["direction"]>(
     direction ?? DEFAULT_CACHED_SORT_DIRECTION
   );
@@ -164,6 +165,15 @@ export default function ScoreSaberPlayerScores({
   const debouncedSearchTerm = useDebounce(searchTerm, 250);
   const isSearchActive = debouncedSearchTerm.length >= 3;
   const invalidSearch = searchTerm.length >= 1 && searchTerm.length < 3;
+
+  useDocumentTitle(
+    ssrConfig.siteTitleTemplate.replace(
+      "%s",
+      scoresMode === "live"
+        ? `${player.name} / ScoreSaber / ${currentPage} / ${capitalizeFirstLetter(currentSort)}`
+        : `${player.name} / ScoreSaber / ${currentPage} / ${CACHED_SCORE_SORT.find(sort => sort.value === currentSort)?.name} / ${capitalizeFirstLetter(currentSortDirection)}`
+    )
+  );
 
   // Data fetching
   const {
@@ -216,7 +226,7 @@ export default function ScoreSaberPlayerScores({
 
   // Event handlers
   const handleSortChange = useCallback(
-    async (newSort: unknown, defaultOrder: ScoreSort["direction"] = "desc") => {
+    async (newSort: string, defaultOrder: ScoreSort["direction"] = "desc") => {
       if (newSort !== currentSort) {
         setCurrentSort(newSort);
         setCurrentSortDirection(defaultOrder);

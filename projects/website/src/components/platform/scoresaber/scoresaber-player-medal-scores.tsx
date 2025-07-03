@@ -12,6 +12,8 @@ import { PlayerScoresResponse } from "@ssr/common/response/player-scores-respons
 import { capitalizeFirstLetter } from "@ssr/common/string-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
+import { useDocumentTitle } from "@uidotdev/usehooks";
+import { ssrConfig } from "config";
 import { useLiveQuery } from "dexie-react-hooks";
 import { SearchIcon } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
@@ -40,6 +42,10 @@ export default function ScoreSaberPlayerMedalScores({
 
   // State
   const [currentPage, setCurrentPage] = useState(page);
+
+  useDocumentTitle(
+    ssrConfig.siteTitleTemplate.replace("%s", `${player.name} / Medals / ${currentPage}`)
+  );
 
   // Data fetching
   const {

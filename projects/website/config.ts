@@ -6,6 +6,11 @@ export type SiteTheme = {
 
 type Config = {
   /**
+   * Template for the website title
+   */
+  siteTitleTemplate: string;
+
+  /**
    * Twitch accounts for players
    */
   playerTwitchAccounts: Record<string, string>;
@@ -17,6 +22,7 @@ type Config = {
 };
 
 export const ssrConfig: Config = {
+  siteTitleTemplate: "%s - ScoreSaber Reloaded",
   playerTwitchAccounts: {
     "76561198449412074": "fascinated_", // ImFascinated
     "76561198827283834": "nonetakenvr", // NoneTaken
@@ -25,7 +31,6 @@ export const ssrConfig: Config = {
     "3225556157461414": "bizzy825", // Bizzy
     "76561199349221122": "apssl", // APSSL
   },
-
   themes: [
     {
       id: "default",

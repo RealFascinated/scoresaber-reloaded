@@ -7,6 +7,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ViewportProvider } from "@/contexts/viewport-context";
 import { env } from "@ssr/common/env";
+import { ssrConfig } from "config";
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import Script from "next/script";
@@ -21,7 +22,7 @@ const siteFont = localFont({
 export const metadata: Metadata = {
   title: {
     default: env.NEXT_PUBLIC_WEBSITE_NAME,
-    template: "%s - ScoreSaber Reloaded",
+    template: ssrConfig.siteTitleTemplate,
   },
   applicationName: env.NEXT_PUBLIC_WEBSITE_NAME,
   authors: [

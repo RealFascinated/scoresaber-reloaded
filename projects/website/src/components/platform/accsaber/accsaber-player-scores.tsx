@@ -12,7 +12,10 @@ import {
 } from "@ssr/common/api-service/impl/accsaber";
 import { Page } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
+import { capitalizeFirstLetter } from "@ssr/common/string-utils";
 import { useQuery } from "@tanstack/react-query";
+import { useDocumentTitle } from "@uidotdev/usehooks";
+import { ssrConfig } from "config";
 import {
   ArrowDown,
   ArrowUp,
@@ -76,6 +79,13 @@ export default function AccSaberPlayerScores({ player, sort, page, type, order }
   // Animation
   const [pendingAnimation, setPendingAnimation] = useState<"left" | "right" | null>("left");
   const [previousScores, setPreviousScores] = useState<Page<AccSaberScore> | undefined>(undefined);
+
+  useDocumentTitle(
+    ssrConfig.siteTitleTemplate.replace(
+      "%s",
+      `${player.name} / AccSaber / ${currentPage} / ${capitalizeFirstLetter(currentType)} / ${scoreSort.find(sort => sort.value === currentSort)?.name}`
+    )
+  );
 
   const {
     data: scores,

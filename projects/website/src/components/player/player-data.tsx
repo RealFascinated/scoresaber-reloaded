@@ -28,7 +28,6 @@ import PlayerHeader from "./header/player-header";
 import PlayerMiniRankings from "./mini-ranking/player-mini-ranking";
 
 const platformRepository = PlatformRepository.getInstance();
-
 function PlatformSelector({
   player,
   currentPlatform,
