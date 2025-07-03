@@ -22,7 +22,9 @@ export class PlayerSearchService {
       query.length > 0
         ? PlayerModel.find({
             name: { $regex: query, $options: "i" },
-          }).select(["_id", "name"])
+          })
+            .select(["_id", "name"])
+            .lean()
         : [],
     ]);
 

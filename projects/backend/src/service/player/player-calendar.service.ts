@@ -15,7 +15,7 @@ export class PlayerCalendarService {
 
     const entries = await PlayerHistoryEntryModel.find({
       playerId: playerId,
-    });
+    }).lean();
 
     const days: Record<number, { rankedMaps: number; unrankedMaps: number; totalMaps: number }> =
       {};

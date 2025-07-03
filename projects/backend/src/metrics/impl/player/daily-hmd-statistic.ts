@@ -15,7 +15,9 @@ export default class HmdStatisticMetric extends NumberMetric {
   public async collect(): Promise<Point | undefined> {
     const scores = await ScoreSaberScoreModel.find({
       timestamp: { $gte: getMidnightAlignedDate(new Date()) }, // Today
-    }).select("hmd");
+    })
+      .select("hmd")
+      .lean();
     const hmds = new Map<string, number>();
     for (const score of scores) {
       if (score.hmd && score.hmd !== "Unknown") {
