@@ -189,64 +189,83 @@ export class LeaderboardRankingService {
       (update.rankedStatusChanged && update.leaderboard.ranked) ||
       (update.qualifiedStatusChanged && update.leaderboard.qualified)
     ) {
-      const scoreTokens = await LeaderboardService.fetchAllLeaderboardScores(
-        update.leaderboard.id + ""
-      );
-
-      // Create a map of scores for quick lookup
       const scoreMap = new Map(scores.map(score => [`${score.scoreId}-${score.score}`, score]));
 
-      // Prepare bulk operations
-      const scoreBulkOps = [];
-      const previousScoreBulkOps = [];
-
-      for (const scoreToken of scoreTokens) {
-        const score = scoreMap.get(`${scoreToken.id}-${scoreToken.baseScore}`);
-        if (!score) continue;
-
-        // Update score
-        scoreBulkOps.push({
-          updateOne: {
-            filter: { _id: score.id },
-            update: {
-              $set: {
-                pp: scoreToken.pp,
-                weight: scoreToken.weight,
-                rank: scoreToken.rank,
-              },
-            },
-          },
-        });
-
-        // Update previous scores
-        previousScoreBulkOps.push({
-          updateMany: {
-            filter: {
-              playerId: score.playerId,
-              leaderboardId: score.leaderboardId,
-            },
-            update: {
-              $set: {
-                pp: update.leaderboard.ranked
-                  ? ScoreSaberCurve.getPp(update.leaderboard.stars, score.accuracy)
-                  : 0,
-                weight: 0,
-              },
-            },
-          },
-        });
-      }
-
-      // Execute bulk operations
+      let currentPage = 1;
+      let totalPages = 1; // will be updated after first fetch
       let updatedCount = 0;
-      if (scoreBulkOps.length > 0) {
-        const scoreResult = await ScoreSaberScoreModel.bulkWrite(scoreBulkOps);
-        updatedCount = scoreResult.modifiedCount || 0;
-      }
-      if (previousScoreBulkOps.length > 0) {
-        await ScoreSaberPreviousScoreModel.bulkWrite(previousScoreBulkOps);
+
+      while (currentPage <= totalPages) {
+        const response = await ApiServiceRegistry.getInstance()
+          .getScoreSaberService()
+          .lookupLeaderboardScores(update.leaderboard.id + "", currentPage);
+
+        if (!response) {
+          Logger.warn(
+            `Failed to fetch scores for leaderboard "${update.leaderboard.id}" on page ${currentPage}. Skipping page.`
+          );
+          currentPage++;
+          continue;
+        }
+
+        totalPages = Math.ceil(response.metadata.total / response.metadata.itemsPerPage);
+
+        // Prepare bulk operations for this page only
+        const scoreBulkOpsPage = [];
+        const previousScoreBulkOpsPage = [];
+
+        for (const scoreToken of response.scores) {
+          const score = scoreMap.get(`${scoreToken.id}-${scoreToken.baseScore}`);
+          if (!score) continue;
+
+          // Update score
+          scoreBulkOpsPage.push({
+            updateOne: {
+              filter: { _id: score.id },
+              update: {
+                $set: {
+                  pp: scoreToken.pp,
+                  weight: scoreToken.weight,
+                  rank: scoreToken.rank,
+                },
+              },
+            },
+          });
+
+          // Update previous scores
+          previousScoreBulkOpsPage.push({
+            updateMany: {
+              filter: {
+                playerId: score.playerId,
+                leaderboardId: score.leaderboardId,
+              },
+              update: {
+                $set: {
+                  pp: update.leaderboard.ranked
+                    ? ScoreSaberCurve.getPp(update.leaderboard.stars, score.accuracy)
+                    : 0,
+                  weight: 0,
+                },
+              },
+            },
+          });
+        }
+
+        // Execute bulk operations for this page
+        if (scoreBulkOpsPage.length > 0) {
+          const pageResult = await ScoreSaberScoreModel.bulkWrite(scoreBulkOpsPage);
+          updatedCount += pageResult.modifiedCount || 0;
+        }
+        if (previousScoreBulkOpsPage.length > 0) {
+          await ScoreSaberPreviousScoreModel.bulkWrite(previousScoreBulkOpsPage);
+        }
+
+        scoreBulkOpsPage.length = 0;
+        previousScoreBulkOpsPage.length = 0;
+        currentPage++;
       }
 
+      scoreMap.clear();
       return updatedCount;
     }
 
