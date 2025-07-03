@@ -213,7 +213,12 @@ export default class PlaylistService {
   public static async createRankingQueuePlaylist(): Promise<Playlist> {
     const leaderboards = await LeaderboardService.getRankingQueueLeaderboards();
     const { maps } = this.processLeaderboards(leaderboards);
-    const highlightedIds = leaderboards.map(map => map.id);
+    const highlightedIds = leaderboards
+      .map(map => map.id) // Add base leaderboard IDs
+      .concat(
+        leaderboards.flatMap(map => map.difficulties.map(difficulty => difficulty.leaderboardId))
+      ) // Add difficulties to the highlighted IDs
+      .filter((id, index, self) => self.indexOf(id) === index); // Remove duplicates
 
     const title = `ScoreSaber Ranking Queue Maps (${formatDateMinimal(new Date())})`;
     const imageTitle = "Ranking Queue";
