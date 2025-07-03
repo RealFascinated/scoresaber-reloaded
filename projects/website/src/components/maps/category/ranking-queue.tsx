@@ -54,12 +54,14 @@ export default function RankingQueue() {
                             href={`/leaderboard/${leaderboard.id}`}
                             className="bg-border grid items-center gap-2 rounded-md p-1.5 transition-all hover:brightness-75 lg:grid-cols-[1fr_0.22fr]"
                           >
-                            <ScoreSaberScoreSongInfo
-                              leaderboard={leaderboard}
-                              imageSize={58}
-                              clickableSongName={false}
-                            />
-                            <div className="flex items-center text-sm lg:flex-col lg:justify-end lg:gap-1">
+                            <div className="flex items-center gap-2 overflow-hidden">
+                              <ScoreSaberScoreSongInfo
+                                leaderboard={leaderboard}
+                                imageSize={58}
+                                clickableSongName={false}
+                              />
+                            </div>
+                            <div className="flex flex-row-reverse items-center justify-between text-sm lg:flex-col lg:justify-end lg:gap-1">
                               <p>{rankingRequest.difficultyCount} Difficulties</p>
                               <p className="text-gray-400">
                                 {timeAgo(new Date(rankingRequest.created_at))}
