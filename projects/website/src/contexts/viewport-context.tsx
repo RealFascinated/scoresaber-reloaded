@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, ReactNode, useContext, useEffect, useState } from "react";
+import { createContext, ReactNode, useContext, useEffect, useLayoutEffect, useState } from "react";
 
 interface ViewportContextType {
   isMobile: boolean;
@@ -10,46 +10,23 @@ interface ViewportContextType {
 
 const ViewportContext = createContext<ViewportContextType | null>(null);
 
-function getWindowDimensions() {
-  if (typeof window === "undefined") {
-    return { width: 0, height: 0 };
-  }
-  const { innerWidth: width, innerHeight: height } = window;
-  return { width, height };
-}
-
-function checkMobile() {
-  if (typeof window === "undefined") {
-    return false;
-  }
-
-  // Check for mobile user agent
-  const isMobileUserAgent = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-    navigator.userAgent
-  );
-
-  // Check for small screen width (common mobile breakpoint)
-  const isSmallScreen = window.innerWidth < 768;
-
-  // Return true if either condition is met
-  return isMobileUserAgent || isSmallScreen;
-}
-
 export function ViewportProvider({ children }: { children: ReactNode }) {
-  const [viewport, setViewport] = useState<ViewportContextType>({
-    width: 0,
-    height: 0,
-    isMobile: false,
-  });
+  const [viewport, setViewport] = useState<ViewportContextType>(getInitialViewport);
 
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const handleResize = () => {
       const dimensions = getWindowDimensions();
-      setViewport({
+      const next = {
         width: dimensions.width,
         height: dimensions.height,
         isMobile: checkMobile(),
-      });
+      } as ViewportContextType;
+
+      if (process.env.NODE_ENV !== "production") {
+        console.debug("[Viewport] resize", next);
+      }
+
+      setViewport(next);
     };
 
     // Initialize on mount
@@ -64,6 +41,50 @@ export function ViewportProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return <ViewportContext.Provider value={viewport}>{children}</ViewportContext.Provider>;
+}
+
+const useIsomorphicLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
+
+function getInitialViewport(): ViewportContextType {
+  if (typeof window === "undefined") {
+    return { width: 0, height: 0, isMobile: false };
+  }
+  const { innerWidth, innerHeight } = window;
+  return {
+    width: innerWidth,
+    height: innerHeight,
+    isMobile: checkMobile(),
+  };
+}
+
+function getWindowDimensions() {
+  if (typeof window === "undefined") {
+    return { width: 0, height: 0 };
+  }
+  const { innerWidth: width, innerHeight: height } = window;
+  return { width, height };
+}
+
+function checkMobile(): boolean {
+  if (typeof window === "undefined") return false;
+
+  // 1. Use the high-level hint if the browser provides it *and it's true*.
+  // If it's false we still want to let viewport width affect the outcome for
+  // responsive desktop layouts.
+  const uaData = (navigator as any).userAgentData;
+  if (uaData?.mobile === true) {
+    return true;
+  }
+
+  // 2. Fall back to user-agent sniffing.
+  const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+    navigator.userAgent
+  );
+
+  // 3. Finally, rely on viewport width.
+  const isSmallViewport = window.innerWidth <= 767;
+
+  return isMobileUA || isSmallViewport;
 }
 
 export function useViewport() {
