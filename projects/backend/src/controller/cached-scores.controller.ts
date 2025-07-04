@@ -19,6 +19,7 @@ export default class CachedScoresController {
       t.Object({
         rankedOnly: t.Optional(t.Boolean()),
         unrankedOnly: t.Optional(t.Boolean()),
+        passedOnly: t.Optional(t.Boolean()),
         search: t.Optional(t.String()),
       })
     ),

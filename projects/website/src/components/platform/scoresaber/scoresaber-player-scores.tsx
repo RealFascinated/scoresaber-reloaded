@@ -25,16 +25,19 @@ import {
   ArrowDown,
   ArrowUp,
   BarChart3,
+  CheckIcon,
   ClockIcon,
   Filter,
   Hash,
   MusicIcon,
   SearchIcon,
+  StarIcon,
   Target,
   TrendingUpIcon,
   Trophy,
   XIcon,
 } from "lucide-react";
+import { parseAsString, useQueryState } from "nuqs";
 import { useCallback, useEffect, useState } from "react";
 import ScoresCard from "../../score/scores-card";
 import SimplePagination from "../../simple-pagination";
@@ -65,6 +68,7 @@ const CACHED_SCORE_SORT: {
   value: ScoreSort["field"];
   icon: React.ReactNode;
   defaultOrder: ScoreSort["direction"];
+  defaultFilter?: ScoreSort["filters"];
 }[] = [
   {
     name: "PP",
@@ -102,6 +106,13 @@ const CACHED_SCORE_SORT: {
     icon: <Hash className="h-4 w-4" />,
     defaultOrder: "desc" as const,
   },
+  {
+    name: "Star Count",
+    value: "starcount",
+    icon: <StarIcon className="h-4 w-4" />,
+    defaultOrder: "desc" as const,
+    defaultFilter: { passedOnly: true },
+  },
 ];
 const CACHED_SCORE_FILTERS: {
   name: string;
@@ -111,6 +122,7 @@ const CACHED_SCORE_FILTERS: {
   { name: "All Scores", value: {}, icon: <Filter className="h-4 w-4" /> },
   { name: "Ranked Only", value: { rankedOnly: true }, icon: <Trophy className="h-4 w-4" /> },
   { name: "Unranked Only", value: { unrankedOnly: true }, icon: <MusicIcon className="h-4 w-4" /> },
+  { name: "Passed Only", value: { passedOnly: true }, icon: <CheckIcon className="h-4 w-4" /> },
 ];
 
 const SCORES_MODES: Record<ScoreSaberScoreDataMode, { icon: React.ReactNode; tooltip: string }> = {
@@ -158,12 +170,17 @@ export default function ScoreSaberPlayerScores({
   const [currentSortDirection, setCurrentSortDirection] = useState<ScoreSort["direction"]>(
     direction ?? DEFAULT_CACHED_SORT_DIRECTION
   );
-  const [searchTerm, setSearchTerm] = useState(initialSearch || "");
-  const [currentFilter, setCurrentFilter] = useState<string | null>("All Scores");
+  const [currentFilter, setCurrentFilter] = useQueryState(
+    "filter",
+    parseAsString.withDefault("All Scores")
+  );
 
-  // Derived state
+  // Search
+  const [searchTerm, setSearchTerm] = useQueryState(
+    "search",
+    parseAsString.withDefault(initialSearch || "")
+  );
   const debouncedSearchTerm = useDebounce(searchTerm, 250);
-  const isSearchActive = debouncedSearchTerm.length >= 3;
   const invalidSearch = searchTerm.length >= 1 && searchTerm.length < 3;
 
   useDocumentTitle(
@@ -231,13 +248,19 @@ export default function ScoreSaberPlayerScores({
         setCurrentSort(newSort);
         setCurrentSortDirection(defaultOrder);
         setCurrentPage(1);
+        const defaultFilter = CACHED_SCORE_SORT.find(s => s.value === newSort)?.defaultFilter;
+        const filterName =
+          CACHED_SCORE_FILTERS.find(
+            f => JSON.stringify(f.value) === JSON.stringify(defaultFilter ?? {})
+          )?.name ?? "All Scores";
+        setCurrentFilter(filterName);
         animateLeft();
       } else {
         setCurrentSortDirection(currentSortDirection === "desc" ? "asc" : "desc");
         animateLeft();
       }
     },
-    [currentSort, currentSortDirection, animateLeft]
+    [currentSort, currentSortDirection, animateLeft, currentFilter]
   );
 
   const handleScoreModeChange = useCallback(
@@ -271,21 +294,19 @@ export default function ScoreSaberPlayerScores({
   const getUrl = useCallback(
     (page: number) => {
       if (scoresMode === "cached") {
-        return `/player/${player.id}/scoresaber/${scoresMode}/${currentSort}/${currentSortDirection}/${page}${isSearchActive ? `?search=${searchTerm}` : ""}`;
+        return `/player/${player.id}/scoresaber/${scoresMode}/${currentSort}/${currentSortDirection}/${page}`;
       } else {
-        return `/player/${player.id}/scoresaber/${scoresMode}/${currentSort}/${page}${isSearchActive ? `?search=${searchTerm}` : ""}`;
+        return `/player/${player.id}/scoresaber/${scoresMode}/${currentSort}/${page}`;
       }
     },
-    [searchTerm, player.id, currentSort, currentSortDirection, isSearchActive, scoresMode]
+    [player.id, currentSort, currentSortDirection, scoresMode]
   );
 
   useEffect(() => {
     changePageUrl(getUrl(currentPage));
   }, [
     currentPage,
-    debouncedSearchTerm,
     player.id,
-    isSearchActive,
     currentSort,
     currentSortDirection,
     scoresMode,
