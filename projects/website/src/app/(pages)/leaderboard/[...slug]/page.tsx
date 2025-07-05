@@ -81,6 +81,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
       description: `Plays: ${leaderboard.plays} (${leaderboard.dailyPlays} Daily)
 Mapped by: ${leaderboard.songAuthorName}
 Difficulty: ${getDifficultyName(leaderboard.difficulty.difficulty)}${leaderboard.stars > 0 ? ` (${leaderboard.stars}★)` : ""}
+Status: ${leaderboard.status}
 
 Click here to view the scores for ${leaderboard.fullName}`,
       images: [
