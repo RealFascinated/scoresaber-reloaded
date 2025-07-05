@@ -5,6 +5,7 @@ export type RefreshResult = {
   refreshedLeaderboards: number;
   updatedScoresCount: number;
   updatedLeaderboardsCount: number;
+  updatedLeaderboards: { leaderboard: ScoreSaberLeaderboard; update: LeaderboardUpdate }[];
 };
 
 export type LeaderboardUpdate = {

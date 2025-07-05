@@ -93,7 +93,7 @@ export class LeaderboardLeaderboardsService {
     Logger.info(`Refreshing ${playlistTitle.toLowerCase()} leaderboards...`);
     const before = Date.now();
     const { leaderboards, rankedMapDiffs } = await fetchFunction();
-    const updatedScores = await LeaderboardService.processLeaderboardUpdates(
+    const leaderboardUpdates = await LeaderboardService.processLeaderboardUpdates(
       leaderboards,
       rankedMapDiffs
     );
@@ -111,15 +111,16 @@ export class LeaderboardLeaderboardsService {
       new EmbedBuilder()
         .setTitle(`Refreshed ${leaderboards.length} ${playlistTitle.toLowerCase()} leaderboards.`)
         .setDescription(
-          `Updated ${updatedScores.updatedScoresCount} scores in ${formatDuration(Date.now() - before)}`
+          `Updated ${leaderboardUpdates.updatedScoresCount} scores in ${formatDuration(Date.now() - before)}`
         )
         .setColor("#00ff00")
     );
 
     return {
       refreshedLeaderboards: leaderboards.length,
-      updatedScoresCount: updatedScores.updatedScoresCount,
-      updatedLeaderboardsCount: updatedScores.updatedLeaderboardsCount,
+      updatedScoresCount: leaderboardUpdates.updatedScoresCount,
+      updatedLeaderboardsCount: leaderboardUpdates.updatedLeaderboardsCount,
+      updatedLeaderboards: leaderboardUpdates.updatedLeaderboards,
     };
   }
 
@@ -151,12 +152,12 @@ export class LeaderboardLeaderboardsService {
     // Handle unranking old leaderboards using the already fetched data
     const unrankedLeaderboards = await LeaderboardService.unrankOldLeaderboards(leaderboards);
 
-    if (result.updatedLeaderboardsCount > 0) {
+    if (result.updatedLeaderboardsCount > 0 || unrankedLeaderboards.length > 0) {
       await LeaderboardService.logLeaderboardUpdates(
         {
           updatedScoresCount: result.updatedScoresCount,
           updatedLeaderboardsCount: result.updatedLeaderboardsCount,
-          updatedLeaderboards: [],
+          updatedLeaderboards: result.updatedLeaderboards,
         },
         unrankedLeaderboards
       );
