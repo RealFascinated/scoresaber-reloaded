@@ -145,7 +145,7 @@ export class LeaderboardLeaderboardsService {
       async () => ({ leaderboards, rankedMapDiffs }),
       "scoresaber-ranked-maps",
       "ranked",
-      () => PlaylistService.createRankedPlaylist([])
+      () => PlaylistService.createRankedPlaylist(leaderboards)
     );
 
     // Handle unranking old leaderboards using the already fetched data
