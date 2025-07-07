@@ -406,7 +406,19 @@ export class PlayerScoresService {
 
     // Exclude Infinity for numeric fields (except date/starcount)
     if (options?.sort?.field && !["date", "starcount"].includes(options.sort.field)) {
-      query = { ...query, [FIELDS_MAP[options.sort.field]]: { $ne: Infinity, $exists: true } };
+      const fieldKey = FIELDS_MAP[options.sort.field];
+      const existingFieldFilter = (query as Record<string, unknown>)[fieldKey] as
+        | Record<string, unknown>
+        | undefined;
+
+      query = {
+        ...query,
+        [fieldKey]: {
+          ...(existingFieldFilter ?? {}),
+          $ne: Infinity,
+          $exists: true,
+        },
+      };
     }
 
     const rawScores = await fetchRawScores(
@@ -602,7 +614,19 @@ export class PlayerScoresService {
 
       // Add filter to exclude Infinity values for the sort field (skip for starcount)
       if (options.field && !["date", "starcount"].includes(options.field)) {
-        query = { ...query, [FIELDS_MAP[options.field]]: { $ne: Infinity, $exists: true } };
+        const fieldKey = FIELDS_MAP[options.field];
+        const existingFieldFilter = (query as Record<string, unknown>)[fieldKey] as
+          | Record<string, unknown>
+          | undefined;
+
+        query = {
+          ...query,
+          [fieldKey]: {
+            ...(existingFieldFilter ?? {}),
+            $ne: Infinity,
+            $exists: true,
+          },
+        };
       }
 
       // Filter scores based on the filters
