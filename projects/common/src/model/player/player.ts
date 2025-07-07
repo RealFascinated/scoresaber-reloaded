@@ -58,7 +58,7 @@ export class Player {
   /**
    * The player's pp.
    */
-  @prop()
+  @prop({ index: true })
   public pp?: number;
 
   /**

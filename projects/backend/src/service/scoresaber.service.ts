@@ -155,7 +155,7 @@ export default class ScoreSaberService {
           return player;
         }
       } catch {
-        Logger.warn(`Failed to parse cached player data for ${id}, removing from cache`);
+        Logger.warn(`Failed to parseP cached player data for ${id}, removing from cache`);
         await CacheService.redisClient.del(cacheKey);
       }
     }
