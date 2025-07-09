@@ -63,6 +63,12 @@ export class PlayerCoreService {
         updates.country = playerToken.country;
         shouldSave = true;
       }
+
+      // Update the player's banned status if it's different from the token
+      if (playerToken.banned !== player.banned) {
+        updates.banned = playerToken.banned;
+        shouldSave = true;
+      }
     }
 
     if (shouldSave) {

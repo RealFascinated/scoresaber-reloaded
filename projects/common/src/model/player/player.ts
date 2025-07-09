@@ -44,6 +44,12 @@ export class Player {
   public inactive?: boolean;
 
   /**
+   * Whether this player is banned or not.
+   */
+  @prop({ index: true })
+  public banned?: boolean;
+
+  /**
    * The date the player was last tracked.
    */
   @prop()
