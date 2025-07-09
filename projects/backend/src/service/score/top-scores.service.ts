@@ -97,6 +97,11 @@ export class TopScoresService {
           const { leaderboard, beatsaver } = leaderboardResponse;
           const player = playerMap.get(score.playerId.toString());
 
+          // Skip scores from banned players
+          if (player?.banned) {
+            return null;
+          }
+
           if (player) {
             score.playerInfo = {
               id: player.id,
