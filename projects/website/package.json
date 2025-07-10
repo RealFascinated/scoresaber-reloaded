@@ -65,7 +65,7 @@
     "tailwind-merge": "^3.3.1",
     "tailwindcss-animate": "^1.0.7",
     "websocket": "^1.0.35",
-    "zod": "^3.25.73",
+    "zod": "^4.0.2",
     "zustand": "^5.0.6"
   },
   "devDependencies": {
