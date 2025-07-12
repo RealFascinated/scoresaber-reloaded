@@ -1,5 +1,6 @@
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { DetailType } from "@ssr/common/detail-type";
+import { env } from "@ssr/common/env";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger from "@ssr/common/logger";
 import {
@@ -56,7 +57,7 @@ export default class ScoreSaberService {
         const basePlayer = {
           id: player.id,
           name: player.name,
-          avatar: player.profilePicture,
+          avatar: `${env.NEXT_PUBLIC_API_URL}/cdn/avatar/${player.id}.jpg`,
           country: player.country,
           rank: player.rank,
           countryRank: player.countryRank,
@@ -155,7 +156,7 @@ export default class ScoreSaberService {
           return player;
         }
       } catch {
-        Logger.warn(`Failed to parseP cached player data for ${id}, removing from cache`);
+        Logger.warn(`Failed to parse cached player data for ${id}, removing from cache`);
         await CacheService.redisClient.del(cacheKey);
       }
     }

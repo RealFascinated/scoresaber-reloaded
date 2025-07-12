@@ -1,8 +1,8 @@
-import { isProduction } from "./utils/utils";
-
 export enum MinioBucket {
   BeatLeaderReplays = "ssr-beatleader-replays",
   BeatLeaderScoreStats = "ssr-beatleader-scorestats",
+  Avatars = "ssr-avatars",
+  LeaderboardCoverArt = "ssr-leaderboard-cover-art",
 }
 
 /**
@@ -11,5 +11,5 @@ export enum MinioBucket {
  * @param bucket the bucket to get the name of
  */
 export function getMinioBucketName(bucket: MinioBucket) {
-  return bucket + (isProduction() ? "" : "-dev");
+  return bucket;
 }

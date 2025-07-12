@@ -82,7 +82,7 @@ export default class Leaderboard {
    * @private
    */
   @Prop({ required: true })
-  readonly songArt!: string;
+  songArt!: string;
 
   /**
    * The date the leaderboard was created.

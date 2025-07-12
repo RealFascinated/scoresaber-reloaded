@@ -13,6 +13,14 @@ const minioClient = new Client({
 });
 
 export default class MinioService {
+  constructor() {
+    for (const bucket of Object.values(MinioBucket)) {
+      minioClient.makeBucket(getMinioBucketName(bucket)).then(() => {
+        Logger.info(`Bucket ${getMinioBucketName(bucket)} created`);
+      });
+    }
+  }
+
   /**
    * Gets the Minio client.
    *

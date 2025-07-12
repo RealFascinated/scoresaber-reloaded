@@ -16,6 +16,7 @@ import AppController from "./controller/app.controller";
 import BeatLeaderController from "./controller/beatleader.controller";
 import BeatSaverController from "./controller/beatsaver.controller";
 import CachedScoresController from "./controller/cached-scores.controller";
+import CDNController from "./controller/cdn.controller";
 import FriendsController from "./controller/friends.controller";
 import LeaderboardController from "./controller/leaderboard.controller";
 import MedalsScoresController from "./controller/medals-scores.controller";
@@ -36,6 +37,7 @@ import { QueueManager } from "./queue/queue-manager";
 import CacheService from "./service/cache.service";
 import { LeaderboardService } from "./service/leaderboard/leaderboard.service";
 import MetricsService from "./service/metrics.service";
+import MinioService from "./service/minio.service";
 import { PlayerService } from "./service/player/player.service";
 import PlaylistService from "./service/playlist/playlist.service";
 import { ScoreService } from "./service/score/score.service";
@@ -248,6 +250,7 @@ app.use(
       PlayerSearchController,
       PlayerRankingController,
       MedalsScoresController,
+      CDNController,
     ],
   })
 );
@@ -270,6 +273,7 @@ app.onStart(async () => {
   // Must be registered first
   new ScoreWebsockets();
   new BeatSaverWebsocket();
+  new MinioService();
 
   new CacheService();
   new StatisticsService();

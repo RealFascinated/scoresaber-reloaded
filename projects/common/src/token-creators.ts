@@ -1,3 +1,4 @@
+import { env } from "./env";
 import type { HMD } from "./hmds";
 import ScoreSaberLeaderboard from "./model/leaderboard/impl/scoresaber-leaderboard";
 import LeaderboardDifficulty from "./model/leaderboard/leaderboard-difficulty";
@@ -55,7 +56,7 @@ export function getScoreSaberLeaderboardFromToken(
         : [difficulty],
     maxScore: token.maxScore,
     ranked: token.ranked,
-    songArt: token.coverImage,
+    songArt: `${env.NEXT_PUBLIC_API_URL}/cdn/leaderboard/${token.id}.jpg`,
     timestamp: parseDate(token.createdDate),
     stars: token.stars,
     plays: token.plays,
