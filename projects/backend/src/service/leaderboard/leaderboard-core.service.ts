@@ -4,7 +4,6 @@ import { DetailType } from "@ssr/common/detail-type";
 import { env } from "@ssr/common/env";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger from "@ssr/common/logger";
-import { MinioBucket } from "@ssr/common/minio-buckets";
 import {
   ScoreSaberLeaderboard,
   ScoreSaberLeaderboardModel,
@@ -22,7 +21,6 @@ import { LeaderboardData, LeaderboardOptions } from "../../common/types/leaderbo
 import { QueueId, QueueManager } from "../../queue/queue-manager";
 import BeatSaverService from "../beatsaver.service";
 import CacheService, { CacheId } from "../cache.service";
-import MinioService from "../minio.service";
 import { LeaderboardService } from "./leaderboard.service";
 
 const LEADERBOARD_REFRESH_TIME = TimeUnit.toMillis(TimeUnit.Hour, 12);
@@ -510,7 +508,6 @@ export class LeaderboardCoreService {
   ): Promise<LeaderboardData> {
     const processed = LeaderboardService.processLeaderboard(leaderboard);
     processed.songArt = `${env.NEXT_PUBLIC_API_URL}/cdn/leaderboard/${processed.id}.jpg`;
-    MinioService.deleteFile(MinioBucket.LeaderboardCoverArt, `${processed.id}.jpg`); // Delete old cover art (if any)
     return {
       leaderboard: processed,
       cached,
