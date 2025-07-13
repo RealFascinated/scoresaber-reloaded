@@ -170,7 +170,11 @@ app.onError({ as: "global" }, ({ code, error }) => {
     code = "INTERNAL_SERVER_ERROR";
   }
 
-  let status = "status" in error ? error.status : undefined;
+  let status: number | undefined = undefined;
+  if (typeof error === "object" && error !== null && "status" in error) {
+    status = (error as { status?: number }).status;
+  }
+
   if (status === undefined) {
     switch (code) {
       case "INTERNAL_SERVER_ERROR":

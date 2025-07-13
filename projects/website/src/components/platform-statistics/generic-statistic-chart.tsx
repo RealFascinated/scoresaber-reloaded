@@ -92,5 +92,9 @@ export default function GenericStatisticChart({ statistics, datasetConfig }: Pro
   };
 
   // Render the chart with collected data
-  return <GenericChart labels={labels} config={config} />;
+  return (
+    <div className="h-[360px] w-full">
+      <GenericChart labels={labels} config={config} />
+    </div>
+  );
 }

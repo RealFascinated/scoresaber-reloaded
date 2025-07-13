@@ -19,16 +19,6 @@ import BeatSaverMapVersion from "./map-version";
   options: { allowMixed: Severity.ALLOW },
   schemaOptions: {
     collection: "beatsaver-maps",
-    toObject: {
-      virtuals: true,
-      transform: function (_, ret) {
-        ret.id = ret._id;
-        delete ret._id;
-        delete ret.__v;
-        delete ret.brokenHashes; // don't need to return this
-        return ret;
-      },
-    },
   },
 })
 @plugin(AutoIncrementID, {

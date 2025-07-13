@@ -32,15 +32,6 @@ export class ScoreSaberMedalsScoreBase extends ScoreSaberScoreBase {
   options: { allowMixed: Severity.ALLOW },
   schemaOptions: {
     collection: "scoresaber-medals-scores",
-    toObject: {
-      virtuals: true,
-      transform: function (_, ret) {
-        ret.id = ret._id;
-        delete ret._id;
-        delete ret.__v;
-        return ret;
-      },
-    },
   },
 })
 @plugin(AutoIncrementID, {

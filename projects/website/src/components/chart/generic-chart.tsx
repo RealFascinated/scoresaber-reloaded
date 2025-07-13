@@ -269,13 +269,13 @@ const GenericChart = ({ config, labels }: Props) => {
   }, [datasets]);
 
   return (
-    <div className="relative flex h-[360px] w-full">
+    <div className="relative flex h-full w-full">
       {showNoData ? (
         <div className="bg-muted absolute top-1/2 left-1/2 z-9999 -translate-x-1/2 -translate-y-1/2 rounded-md p-2 text-center">
           <p className="text-red-500">No data available :(</p>
         </div>
       ) : null}
-      <div className="relative block h-[360px] w-full">
+      <div className="relative block h-full w-full">
         <Line
           className="max-w-[100%]"
           options={chartOptions}

@@ -147,25 +147,29 @@ export default function GenericPlayerChart({
   return (
     <div className="flex flex-col items-center">
       {samplingInfo && <div className="mb-2 text-sm text-gray-400">{samplingInfo}</div>}
-      <GenericChart
-        config={{
-          id,
-          datasets: datasetConfig.map(config => ({
-            label: config.title,
-            data: histories[config.field],
-            color: config.color,
-            axisId: config.axisId,
-            type: config.type,
-            pointRadius: config.pointRadius,
-            showLegend: config.showLegend,
-            stack: config.stack,
-            stackOrder: config.stackOrder,
-            labelFormatter: config.labelFormatter,
-          })),
-          axes: Object.fromEntries(datasetConfig.map(config => [config.axisId, config.axisConfig])),
-        }}
-        labels={labels}
-      />
+      <div className="h-[360px] w-full">
+        <GenericChart
+          config={{
+            id,
+            datasets: datasetConfig.map(config => ({
+              label: config.title,
+              data: histories[config.field],
+              color: config.color,
+              axisId: config.axisId,
+              type: config.type,
+              pointRadius: config.pointRadius,
+              showLegend: config.showLegend,
+              stack: config.stack,
+              stackOrder: config.stackOrder,
+              labelFormatter: config.labelFormatter,
+            })),
+            axes: Object.fromEntries(
+              datasetConfig.map(config => [config.axisId, config.axisConfig])
+            ),
+          }}
+          labels={labels}
+        />
+      </div>
     </div>
   );
 }

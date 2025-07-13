@@ -14,11 +14,15 @@ const minioClient = new Client({
 
 export default class MinioService {
   constructor() {
-    for (const bucket of Object.values(MinioBucket)) {
-      minioClient.makeBucket(getMinioBucketName(bucket)).then(() => {
-        Logger.info(`Bucket ${getMinioBucketName(bucket)} created`);
-      });
-    }
+    (async () => {
+      for (const bucket of Object.values(MinioBucket)) {
+        const bucketName = getMinioBucketName(bucket);
+        if (!(await minioClient.bucketExists(bucketName))) {
+          await minioClient.makeBucket(bucketName);
+          Logger.info(`Bucket ${bucketName} created`);
+        }
+      }
+    })();
   }
 
   /**
