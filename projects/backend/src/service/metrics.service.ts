@@ -2,6 +2,7 @@ import { InfluxDB, Point } from "@influxdata/influxdb-client";
 import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
 import { formatDuration, TimeUnit } from "@ssr/common/utils/time-utils";
+import { isProduction } from "@ssr/common/utils/utils";
 import { MetricValueModel } from "../common/model/metric";
 import { EventListener } from "../event/event-listener";
 import { ApiServicesMetric } from "../metrics/impl/backend/api-services";
@@ -155,19 +156,21 @@ export default class MetricsService implements EventListener {
         }
       }
 
-      setInterval(async () => {
-        const before = Date.now();
+      if (isProduction()) {
+        setInterval(async () => {
+          const before = Date.now();
 
-        const point = await metric.collect();
-        if (point) {
-          await this.writePoint(point);
-        }
+          const point = await metric.collect();
+          if (point) {
+            await this.writePoint(point);
+          }
 
-        const timeTaken = Date.now() - before;
-        if (timeTaken > 100) {
-          Logger.warn(`[METRICS] Collected and wrote metric ${metric.id} in ${timeTaken}ms`);
-        }
-      }, metric.options.interval);
+          const timeTaken = Date.now() - before;
+          if (timeTaken > 1000) {
+            Logger.warn(`[METRICS] Collected and wrote metric ${metric.id} in ${timeTaken}ms`);
+          }
+        }, metric.options.interval);
+      }
     }
     this.isInitialized = true;
   }

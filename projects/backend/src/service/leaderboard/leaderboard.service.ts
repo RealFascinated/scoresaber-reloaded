@@ -22,6 +22,7 @@ export class LeaderboardService {
   public static fetchAndSaveLeaderboardByHash =
     LeaderboardCoreService.fetchAndSaveLeaderboardByHash;
   public static createLeaderboardData = LeaderboardCoreService.createLeaderboardData;
+  public static updateLeaderboardPlayCounts = LeaderboardCoreService.updateLeaderboardPlayCounts;
 
   // LeaderboardLeaderboardsService methods
   public static getRankedLeaderboards = LeaderboardLeaderboardsService.getRankedLeaderboards;

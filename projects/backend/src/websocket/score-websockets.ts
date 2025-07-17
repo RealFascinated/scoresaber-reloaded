@@ -6,13 +6,13 @@ import { BeatLeaderScoreToken } from "@ssr/common/types/token/beatleader/score/s
 import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/leaderboard";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score";
+import { TimeUnit } from "@ssr/common/utils/time-utils";
 import { connectBeatLeaderWebsocket } from "@ssr/common/websocket/beatleader-websocket";
 import { connectScoresaberWebsocket } from "@ssr/common/websocket/scoresaber-websocket";
 import { EventListener } from "../event/event-listener";
 import { EventsManager } from "../event/events-manager";
 import { PlayerService } from "../service/player/player.service";
 import { ScoreService } from "../service/score/score.service";
-import { TimeUnit } from "@ssr/common/utils/time-utils";
 
 interface PendingScore {
   scoreSaberToken?: ScoreSaberScoreToken;

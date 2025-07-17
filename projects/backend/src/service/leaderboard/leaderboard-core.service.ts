@@ -9,6 +9,7 @@ import {
   ScoreSaberLeaderboardModel,
 } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import LeaderboardDifficulty from "@ssr/common/model/leaderboard/leaderboard-difficulty";
+import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import { removeObjectFields } from "@ssr/common/object.util";
 import { LeaderboardResponse } from "@ssr/common/response/leaderboard-response";
 import { MapDifficulty } from "@ssr/common/score/map-difficulty";
@@ -23,7 +24,7 @@ import BeatSaverService from "../beatsaver.service";
 import CacheService, { CacheId } from "../cache.service";
 import { LeaderboardService } from "./leaderboard.service";
 
-const LEADERBOARD_REFRESH_TIME = TimeUnit.toMillis(TimeUnit.Hour, 12);
+const LEADERBOARD_REFRESH_TIME = TimeUnit.toMillis(TimeUnit.Day, 3);
 const DEFAULT_OPTIONS: LeaderboardOptions = {
   cacheOnly: false,
   includeBeatSaver: false,
@@ -535,6 +536,94 @@ export class LeaderboardCoreService {
     return await LeaderboardService.saveLeaderboard(
       leaderboardToken.id + "",
       getScoreSaberLeaderboardFromToken(leaderboardToken)
+    );
+  }
+
+  /**
+   * Updates the play counts for all leaderboards
+   */
+  public static async updateLeaderboardPlayCounts() {
+    Logger.info(`[LEADERBOARD] Updating leaderboard play counts...`);
+    const before = performance.now();
+
+    // Calculate time boundaries once
+    const now = new Date();
+    const oneDayAgo = new Date(now.getTime() - TimeUnit.toMillis(TimeUnit.Day, 1));
+    const sevenDaysAgo = new Date(now.getTime() - TimeUnit.toMillis(TimeUnit.Day, 7));
+
+    // Use aggregation pipeline to calculate play counts for all leaderboards in one operation
+    const playCounts = await ScoreSaberScoreModel.aggregate([
+      {
+        $match: {
+          timestamp: { $gte: sevenDaysAgo }, // Only look at scores from last 7 days
+        },
+      },
+      {
+        $facet: {
+          dailyPlays: [
+            {
+              $match: {
+                timestamp: { $gte: oneDayAgo },
+              },
+            },
+            {
+              $group: {
+                _id: "$leaderboardId",
+                count: { $sum: 1 },
+              },
+            },
+          ],
+          weeklyPlays: [
+            {
+              $group: {
+                _id: "$leaderboardId",
+                count: { $sum: 1 },
+              },
+            },
+          ],
+        },
+      },
+    ]);
+
+    // Create maps for quick lookup
+    const dailyPlaysMap = new Map(
+      playCounts[0]?.dailyPlays?.map((item: { _id: number; count: number }) => [
+        item._id.toString(),
+        item.count,
+      ]) || []
+    );
+    const weeklyPlaysMap = new Map(
+      playCounts[0]?.weeklyPlays?.map((item: { _id: number; count: number }) => [
+        item._id.toString(),
+        item.count,
+      ]) || []
+    );
+
+    // Get all leaderboard IDs that need updating
+    const leaderboardIds = new Set([...dailyPlaysMap.keys(), ...weeklyPlaysMap.keys()]);
+
+    if (leaderboardIds.size === 0) {
+      Logger.info(`[LEADERBOARD] No leaderboards to update`);
+      return;
+    }
+
+    // Prepare bulk operations
+    const bulkOps = Array.from(leaderboardIds).map(leaderboardId => ({
+      updateOne: {
+        filter: { _id: Number(leaderboardId) },
+        update: {
+          dailyPlays: dailyPlaysMap.get(leaderboardId) || 0,
+          weeklyPlays: weeklyPlaysMap.get(leaderboardId) || 0,
+        },
+      },
+    }));
+
+    // Execute bulk update
+    const result = await ScoreSaberLeaderboardModel.bulkWrite(bulkOps);
+
+    const timeTaken = performance.now() - before;
+    Logger.info(
+      `[LEADERBOARD] Updated ${result.modifiedCount} leaderboard play counts in ${timeTaken}ms`
     );
   }
 
