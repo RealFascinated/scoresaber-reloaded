@@ -12,6 +12,7 @@ import { EventListener } from "../event/event-listener";
 import { EventsManager } from "../event/events-manager";
 import { PlayerService } from "../service/player/player.service";
 import { ScoreService } from "../service/score/score.service";
+import { TimeUnit } from "@ssr/common/utils/time-utils";
 
 interface PendingScore {
   scoreSaberToken?: ScoreSaberScoreToken;
@@ -23,7 +24,7 @@ interface PendingScore {
 }
 
 export class ScoreWebsockets implements EventListener {
-  private static readonly SCORE_MATCH_TIMEOUT = 10000; // 10 seconds in milliseconds
+  private static readonly SCORE_MATCH_TIMEOUT = TimeUnit.toMillis(TimeUnit.Minute, 1);
   private static readonly pendingScores = new Map<string, PendingScore>();
 
   onStop?: () => Promise<void> = async () => {
