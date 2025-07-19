@@ -26,6 +26,6 @@
     "@typegoose/typegoose": "^12.17.0",
     "sanitize-html": "^2.17.0",
     "ws": "^8.18.3",
-    "zod": "^3.25.76"
+    "zod": "^4.0.5"
   }
 }
