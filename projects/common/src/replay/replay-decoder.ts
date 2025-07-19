@@ -212,7 +212,7 @@ export class ReplayDecoder {
     if (!Number.isNaN(Number(url))) {
       const scoreId = Number(url);
       const beatleaderScore = await request.get<BeatLeaderScoreToken>(
-        `https://api.beatleader.com/score/${scoreId}`,
+        `https://proxy.fascinated.cc/https://api.beatleader.com/score/${scoreId}`,
         {
           returns: "json",
           throwOnError: true,
