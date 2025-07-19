@@ -5,7 +5,6 @@ import { cron } from "@elysiajs/cron";
 import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
 import { formatDuration } from "@ssr/common/utils/time-utils";
-import { logger } from "@tqman/nice-logger";
 import { mongoose } from "@typegoose/typegoose";
 import { EmbedBuilder } from "discord.js";
 import { Elysia, ValidationError } from "elysia";
@@ -224,12 +223,12 @@ app.use(cors());
 /**
  * Request logger
  */
-app.use(
-  logger({
-    enabled: true,
-    mode: "combined",
-  })
-);
+// app.use(
+//   logger({
+//     enabled: true,
+//     mode: "combined",
+//   })
+// );
 
 /**
  * Security settings
