@@ -36,10 +36,12 @@ const playerData = [
               player={player}
               type={PlayerStatChange.Rank}
               tooltipChildren={
-                <p>
-                  Rank Including Inactives:{" "}
-                  <b>#{formatNumberWithCommas(player.rankIncludingInactives)}</b>
-                </p>
+                player.rankIncludingInactives ? (
+                  <p>
+                    Rank Including Inactives:{" "}
+                    <b>#{formatNumberWithCommas(player.rankIncludingInactives)}</b>
+                  </p>
+                ) : null
               }
             >
               <Link href={`/ranking/${player.rankPages.global}`}>

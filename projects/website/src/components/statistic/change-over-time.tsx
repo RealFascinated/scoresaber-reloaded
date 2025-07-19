@@ -25,7 +25,7 @@ type ChangeOverTimeProps = {
   /**
    * The children to render in the tooltip
    */
-  tooltipChildren?: ReactElement<any>;
+  tooltipChildren?: ReactElement<any> | null;
 };
 
 // Format values based on stat type
