@@ -1,4 +1,4 @@
-FROM oven/bun:1.2.16-alpine AS base
+FROM oven/bun:1.2.19-alpine AS base
 
 # Install dependencies
 FROM base AS depends
