@@ -7,9 +7,13 @@ import CDNService from "../service/cdn.service";
 export default class CDNController {
   @Get("/avatar/:playerId", {
     config: {},
+    tags: ["CDN"],
     params: t.Object({
       playerId: t.String({ required: true }),
     }),
+    detail: {
+      description: "Fetch a player's avatar",
+    },
   })
   public async getPlayerAvatar({
     params: { playerId },
@@ -31,9 +35,13 @@ export default class CDNController {
 
   @Get("/leaderboard/:leaderboardId", {
     config: {},
+    tags: ["CDN"],
     params: t.Object({
       leaderboardId: t.String({ required: true }),
     }),
+    detail: {
+      description: "Fetch a leaderboard's cover art",
+    },
   })
   public async getLeaderboardCoverArt({
     params: { leaderboardId },

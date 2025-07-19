@@ -8,7 +8,7 @@ import { PlayerService } from "../service/player/player.service";
 export default class CachedScoresController {
   @Get("/player/:id/:field/:direction/:page", {
     config: {},
-    tags: ["scores"],
+    tags: ["Scores"],
     params: t.Object({
       id: t.String({ required: true }),
       field: t.String({ required: true }),
@@ -23,6 +23,9 @@ export default class CachedScoresController {
         search: t.Optional(t.String()),
       })
     ),
+    detail: {
+      description: "Lookup cached scores for a player",
+    },
   })
   public async getCachedScores({
     params: { id, page, field, direction },

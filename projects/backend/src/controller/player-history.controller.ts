@@ -10,7 +10,7 @@ import { PlayerService } from "../service/player/player.service";
 export default class PlayerHistoryController {
   @Get("/player/history/:id", {
     config: {},
-    tags: ["player"],
+    tags: ["Player"],
     params: t.Object({
       id: t.String({ required: true }),
     }),
@@ -19,6 +19,9 @@ export default class PlayerHistoryController {
       endDate: t.Optional(t.String({ default: getDaysAgoDate(50).toISOString() })),
       includeFields: t.Optional(t.String({ default: "" })),
     }),
+    detail: {
+      description: "Fetch a player's statistics history",
+    },
   })
   public async getPlayerHistory({
     params: { id },
@@ -53,12 +56,15 @@ export default class PlayerHistoryController {
 
   @Get("/player/history/calendar/:id/:year/:month", {
     config: {},
-    tags: ["player"],
+    tags: ["Player"],
     params: t.Object({
       id: t.String({ required: true }),
       year: t.Number({ required: true }),
       month: t.Number({ required: true }),
     }),
+    detail: {
+      description: "Fetch a player's score calendar for a given month and year",
+    },
   })
   public async getScoreCalendar({
     params: { id, year, month },

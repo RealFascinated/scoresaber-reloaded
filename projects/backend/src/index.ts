@@ -43,6 +43,8 @@ import { ScoreService } from "./service/score/score.service";
 import StatisticsService from "./service/statistics.service";
 import { BeatSaverWebsocket } from "./websocket/beatsaver-websocket";
 import { ScoreWebsockets } from "./websocket/score-websockets";
+import { swagger } from "@elysiajs/swagger";
+import { getAppVersion } from "./common/app.util";
 
 Logger.info("Starting SSR Backend...");
 
@@ -75,6 +77,22 @@ await CacheService.testConnection();
 Logger.info("Connected to Redis :)");
 
 export const app = new Elysia()
+  .use(
+    swagger({
+      autoDarkMode: false,
+      version: await getAppVersion(),
+      documentation: {
+        info: {
+          title: "SSR API",
+          description: "API for the SSR Backend",
+          version: await getAppVersion(),
+        },
+      },
+      scalarConfig: {
+        defaultOpenAllTags: true,
+      },
+    })
+  )
   .use(
     cron({
       name: "player-statistics-tracker-cron",

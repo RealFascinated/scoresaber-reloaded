@@ -16,7 +16,7 @@ import ScoreSaberService from "../service/scoresaber.service";
 export default class PlaylistController {
   @Get("/:id", {
     config: {},
-    tags: ["playlist"],
+    tags: ["Playlist"],
     params: t.Object({
       id: t.String({ required: true, pattern: "^[^/]+(?:\\.[a-zA-Z0-9]+)?$" }),
     }),
@@ -24,6 +24,9 @@ export default class PlaylistController {
       config: t.Optional(t.String()),
       download: t.Optional(t.Boolean()),
     }),
+    detail: {
+      description: "Fetch a playlist by its id",
+    },
   })
   public async getPlaylist({
     params: { id },
@@ -51,12 +54,15 @@ export default class PlaylistController {
 
   @Get("/snipe", {
     config: {},
-    tags: ["playlist"],
+    tags: ["Playlist"],
     query: t.Object({
       user: t.String({ required: true }),
       toSnipe: t.String({ required: true }),
       settings: t.Optional(t.String()),
     }),
+    detail: {
+      description: "Fetch a snipe playlist",
+    },
   })
   public async getSnipePlaylist({
     query: { user, toSnipe, settings },
@@ -78,11 +84,14 @@ export default class PlaylistController {
 
   @Get("/snipe/preview", {
     config: {},
-    tags: ["playlist"],
+    tags: ["Playlist"],
     query: t.Object({
       toSnipe: t.String({ required: true }),
       settings: t.Optional(t.String()),
     }),
+    detail: {
+      description: "Fetch a snipe playlist image preview",
+    },
   })
   public async getSnipePlaylistImagePreview({
     query: { toSnipe, settings },
@@ -102,10 +111,13 @@ export default class PlaylistController {
 
   @Get("/custom-ranked/preview", {
     config: {},
-    tags: ["playlist"],
+    tags: ["Playlist"],
     query: t.Object({
       settings: t.Optional(t.String()),
     }),
+    detail: {
+      description: "Fetch a custom ranked playlist image preview",
+    },
   })
   public async getCustomRankedPlaylistImagePreview({
     query: { settings },
@@ -124,7 +136,10 @@ export default class PlaylistController {
 
   @Get("/ranked-batch/preview", {
     config: {},
-    tags: ["playlist"],
+    tags: ["Playlist"],
+    detail: {
+      description: "Fetch a ranked batch playlist image preview",
+    },
   })
   public async getRankedBatchPlaylistImagePreview() {
     const response = new Response(Buffer.from(await generateRankedBatchPlaylistImage(), "base64"));

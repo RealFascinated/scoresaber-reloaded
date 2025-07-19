@@ -8,6 +8,7 @@ import { PlayerService } from "../service/player/player.service";
 export default class FriendsController {
   @Get("/scores/friends/leaderboard/:leaderboardId/:page", {
     config: {},
+    tags: ["Friends"],
     params: t.Object({
       leaderboardId: t.Number({ required: true }),
       page: t.Number({ required: true }),
@@ -16,6 +17,9 @@ export default class FriendsController {
       friendIds: t.String({ required: true }),
       superJson: t.Optional(t.Boolean({ default: false })),
     }),
+    detail: {
+      description: "Fetch friend leaderboard scores for a player",
+    },
   })
   public async getFriendLeaderboardScores({
     params: { leaderboardId, page },
@@ -37,6 +41,7 @@ export default class FriendsController {
 
   @Get("/scores/friends/:page", {
     config: {},
+    tags: ["Friends"],
     params: t.Object({
       page: t.Number({ required: true }),
     }),
@@ -44,6 +49,9 @@ export default class FriendsController {
       friendIds: t.String({ required: true }),
       superJson: t.Optional(t.Boolean({ default: false })),
     }),
+    detail: {
+      description: "Fetch friend scores for a player",
+    },
   })
   public async getFriendScores({
     params: { page },

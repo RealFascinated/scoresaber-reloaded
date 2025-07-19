@@ -7,11 +7,14 @@ import { PlayerService } from "../service/player/player.service";
 export default class MedalsScoresController {
   @Get("/player/:id/:page", {
     config: {},
-    tags: ["scores"],
+    tags: ["Scores"],
     params: t.Object({
       id: t.String({ required: true }),
       page: t.Number({ required: true }),
     }),
+    detail: {
+      description: "Fetch medal scores for a player",
+    },
   })
   public async getMedalsScores({
     params: { id, page },

@@ -7,7 +7,7 @@ import { ScoreService } from "../service/score/score.service";
 export default class ScoresController {
   @Get("/player/:id/:page/:sort", {
     config: {},
-    tags: ["scores"],
+    tags: ["Scores"],
     params: t.Object({
       id: t.String({ required: true }),
       page: t.Number({ required: true }),
@@ -17,6 +17,9 @@ export default class ScoresController {
       search: t.Optional(t.String()),
       comparisonPlayerId: t.Optional(t.String()),
     }),
+    detail: {
+      description: "Fetch a player's scores",
+    },
   })
   public async getScores({
     params: { id, page, sort },
@@ -36,7 +39,7 @@ export default class ScoresController {
 
   @Get("/leaderboard/:id/:page", {
     config: {},
-    tags: ["scores"],
+    tags: ["Scores"],
     params: t.Object({
       id: t.String({ required: true }),
       page: t.Number({ required: true }),
@@ -44,6 +47,9 @@ export default class ScoresController {
     query: t.Object({
       country: t.Optional(t.String()),
     }),
+    detail: {
+      description: "Fetch the scores for a leaderboard",
+    },
   })
   public async getLeaderboardScores({
     params: { id, page },

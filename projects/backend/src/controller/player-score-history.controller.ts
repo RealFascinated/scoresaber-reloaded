@@ -7,6 +7,7 @@ import { PlayerService } from "../service/player/player.service";
 export default class PlayerScoreHistoryController {
   @Get("/player/score-history/:playerId/:leaderboardId/:page", {
     config: {},
+    tags: ["Player"],
     params: t.Object({
       playerId: t.String({ required: true }),
       leaderboardId: t.String({ required: true }),
@@ -15,6 +16,9 @@ export default class PlayerScoreHistoryController {
     query: t.Object({
       superJson: t.Optional(t.Boolean({ default: false })),
     }),
+    detail: {
+      description: "Fetch a player's score history for a leaderboard",
+    },
   })
   public async getScoreHistory({
     params: { playerId, leaderboardId, page },
@@ -33,6 +37,7 @@ export default class PlayerScoreHistoryController {
 
   @Get("/player/score-history-graph/:playerId/:leaderboardId", {
     config: {},
+    tags: ["Player"],
     params: t.Object({
       playerId: t.String({ required: true }),
       leaderboardId: t.String({ required: true }),
@@ -40,6 +45,9 @@ export default class PlayerScoreHistoryController {
     query: t.Object({
       superJson: t.Optional(t.Boolean({ default: false })),
     }),
+    detail: {
+      description: "Fetch a player's score history graph for a leaderboard",
+    },
   })
   public async getScoreHistoryGraph({
     params: { playerId, leaderboardId },

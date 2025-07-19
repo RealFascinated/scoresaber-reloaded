@@ -12,6 +12,7 @@ import ScoreSaberService from "../service/scoresaber.service";
 export default class PlayerController {
   @Get("/:id", {
     config: {},
+    tags: ["Player"],
     params: t.Object({
       id: t.String({ required: true }),
     }),
@@ -19,6 +20,9 @@ export default class PlayerController {
       type: t.Optional(t.Union([t.Literal("full"), t.Literal("basic")], { default: "basic" })),
       superJson: t.Optional(t.Boolean({ default: false })),
     }),
+    detail: {
+      description: "Fetch a player by their id",
+    },
   })
   public async getPlayer({
     params: { id },
@@ -33,10 +37,14 @@ export default class PlayerController {
 
   @Get("/pp-boundary/:id/:boundary", {
     config: {},
+    tags: ["Player"],
     params: t.Object({
       id: t.String({ required: true }),
       boundary: t.Number({ maximum: 100, minimum: 1 }),
     }),
+    detail: {
+      description: "Fetch the player's pp boundary for a given boundary amount",
+    },
   })
   public async getPpBoundary({
     params: { id, boundary },
@@ -51,12 +59,16 @@ export default class PlayerController {
 
   @Get("/maps-graph/:id", {
     config: {},
+    tags: ["Player"],
     params: t.Object({
       id: t.String({ required: true }),
     }),
     query: t.Object({
       superJson: t.Optional(t.Boolean({ default: false })),
     }),
+    detail: {
+      description: "Fetch a player's scores chart data",
+    },
   })
   public async getPlayerStarsChartData({
     params: { id },
@@ -71,9 +83,13 @@ export default class PlayerController {
 
   @Get("/ranked-pps/:id", {
     config: {},
+    tags: ["Player"],
     params: t.Object({
       id: t.String({ required: true }),
     }),
+    detail: {
+      description: "Fetch a player's ranked pps",
+    },
   })
   public async getPlayerRankedPps({
     params: { id },
@@ -85,9 +101,13 @@ export default class PlayerController {
 
   @Get("/refresh/:id", {
     config: {},
+    tags: ["Player"],
     params: t.Object({
       id: t.String({ required: true }),
     }),
+    detail: {
+      description: "Refresh a player's for ScoreSaber and update their avatar",
+    },
   })
   public async refreshPlayer({ params: { id } }: { params: { id: string } }) {
     return await PlayerService.refreshPlayer(id);

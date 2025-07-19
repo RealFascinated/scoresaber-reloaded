@@ -10,12 +10,16 @@ import { PlayerService } from "../service/player/player.service";
 export default class PlayerRankingController {
   @Get("/player/search/ranking", {
     config: {},
+    tags: ["Player"],
     query: t.Object({
       superJson: t.Optional(t.Boolean({ default: false })),
       page: t.Optional(t.Number({ default: 1 })),
       country: t.Optional(t.String({ default: "" })),
       search: t.Optional(t.String({ default: "" })),
     }),
+    detail: {
+      description: "Fetch a player's ranking",
+    },
   })
   public async getPlayerRanking({
     query: { superJson, page, country, search },
@@ -31,6 +35,7 @@ export default class PlayerRankingController {
 
   @Get("/ranking/medals/:page", {
     config: {},
+    tags: ["Player"],
     params: t.Object({
       page: t.Number({ required: true, default: 1 }),
     }),
@@ -38,6 +43,9 @@ export default class PlayerRankingController {
       superJson: t.Optional(t.Boolean({ default: false })),
       country: t.Optional(t.String()),
     }),
+    detail: {
+      description: "Fetch a player's medal ranking",
+    },
   })
   public async getPlayerMedalRanking({
     params: { page },

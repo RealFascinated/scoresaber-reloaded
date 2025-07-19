@@ -6,9 +6,13 @@ import BeatLeaderService from "../service/beatleader.service";
 export default class BeatLeaderController {
   @Get("/scorestats/:id", {
     config: {},
+    tags: ["BeatLeader"],
     params: t.Object({
       id: t.Number({ required: true }),
     }),
+    detail: {
+      description: "Fetch score stats for a BeatLeader score",
+    },
   })
   public async getScoreStats({
     params: { id },

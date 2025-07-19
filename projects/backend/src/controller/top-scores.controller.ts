@@ -7,11 +7,14 @@ import { ScoreService } from "../service/score/score.service";
 export default class TopScoresController {
   @Get("/scores/top/:timeframe/:page", {
     config: {},
-    tags: ["scores"],
+    tags: ["Scores"],
     params: t.Object({
       timeframe: t.String({ required: true, default: "daily" }),
       page: t.Number({ required: true, default: 1 }),
     }),
+    detail: {
+      description: "Fetch the top scores for a given timeframe",
+    },
   })
   public async getTopScores({
     params: { timeframe, page },

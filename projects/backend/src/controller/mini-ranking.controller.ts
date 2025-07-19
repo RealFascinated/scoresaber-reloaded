@@ -7,9 +7,13 @@ import MiniRankingService from "../service/mini-ranking.service";
 export default class MiniRankingController {
   @Get("/player/mini-ranking/:playerId", {
     config: {},
+    tags: ["Player"],
     params: t.Object({
       playerId: t.String({ required: true }),
     }),
+    detail: {
+      description: "Fetch a player's mini ranking (global and country close rankings)",
+    },
   })
   public async getPlayerMiniRanking({
     params: { playerId },

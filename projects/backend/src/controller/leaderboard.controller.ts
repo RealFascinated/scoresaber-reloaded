@@ -11,7 +11,7 @@ import { LeaderboardService } from "../service/leaderboard/leaderboard.service";
 export default class LeaderboardController {
   @Get("/by-id/:id", {
     config: {},
-    tags: ["leaderboard"],
+    tags: ["Leaderboard"],
     params: t.Object({
       id: t.String({ required: true }),
     }),
@@ -19,6 +19,9 @@ export default class LeaderboardController {
       type: t.Optional(t.Union([t.Literal("basic"), t.Literal("full")], { default: "basic" })),
       superJson: t.Optional(t.Boolean({ default: false })),
     }),
+    detail: {
+      description: "Fetch a leaderboard by its id",
+    },
   })
   public async getLeaderboard({
     params: { id },
@@ -38,7 +41,7 @@ export default class LeaderboardController {
 
   @Get("/by-hash/:id/:difficulty/:characteristic", {
     config: {},
-    tags: ["leaderboard"],
+    tags: ["Leaderboard"],
     params: t.Object({
       id: t.String({ required: true }),
       difficulty: t.String({ required: true }),
@@ -48,6 +51,9 @@ export default class LeaderboardController {
       type: t.Optional(t.Union([t.Literal("basic"), t.Literal("full")], { default: "basic" })),
       superJson: t.Optional(t.Boolean({ default: false })),
     }),
+    detail: {
+      description: "Fetch a leaderboard by its hash, difficulty, and characteristic",
+    },
   })
   public async getLeaderboardByHash({
     params: { id, difficulty, characteristic },
@@ -69,10 +75,13 @@ export default class LeaderboardController {
 
   @Get("/plays-by-hmd/:id", {
     config: {},
-    tags: ["leaderboard"],
+    tags: ["Leaderboard"],
     params: t.Object({
       id: t.String({ required: true }),
     }),
+    detail: {
+      description: "Fetch the per hmd usage for a leaderboard",
+    },
   })
   public async getPlaysByHmd({
     params: { id },

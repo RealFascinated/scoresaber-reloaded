@@ -6,7 +6,10 @@ import StatisticsService from "../service/statistics.service";
 export default class StatisticsController {
   @Get("/scoresaber", {
     config: {},
-    tags: ["statistics"],
+    tags: ["Statistics"],
+    detail: {
+      description: "Fetch the platform statistics for ScoreSaber",
+    },
   })
   public async getPlatformStatistics(): Promise<StatisticsResponse> {
     return {

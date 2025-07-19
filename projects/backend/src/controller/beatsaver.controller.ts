@@ -12,7 +12,7 @@ import BeatSaverService from "../service/beatsaver.service";
 export default class BeatSaverController {
   @Get("/map/:hash/:difficulty/:characteristic", {
     config: {},
-    tags: ["beatsaver"],
+    tags: ["BeatSaver"],
     params: t.Object({
       hash: t.String({ required: true }),
       difficulty: t.String({ required: true }),
@@ -22,6 +22,9 @@ export default class BeatSaverController {
       type: t.Optional(t.Union([t.Literal("basic"), t.Literal("full")], { default: "basic" })),
       superJson: t.Optional(t.Boolean()),
     }),
+    detail: {
+      description: "Fetch a map by hash, difficulty, and characteristic",
+    },
   })
   public async getMapByHash({
     params: { hash, difficulty, characteristic },
