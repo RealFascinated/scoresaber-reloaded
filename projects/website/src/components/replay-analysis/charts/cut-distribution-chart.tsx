@@ -3,6 +3,7 @@
 import { ChartConfig } from "@/common/chart/types";
 import GenericChart from "@/components/chart/generic-chart";
 import { useMemo } from "react";
+import { CHART_COLORS, getEmptyStateClassName } from "./chart-utils";
 
 type Props = {
   cutDistribution: { score: number; count: number }[];
@@ -11,20 +12,15 @@ type Props = {
 const CutDistributionChart = ({ cutDistribution }: Props) => {
   const { chartData, labels } = useMemo(() => {
     if (!cutDistribution || cutDistribution.length === 0) {
-      return {
-        chartData: { datasets: [] },
-        labels: [],
-      };
+      return { chartData: { datasets: [] }, labels: [] };
     }
 
     // Create bins for each score from 0 to 115
-    const bins = new Array(116).fill(0); // 0 to 115 inclusive = 116 bins
-
+    const bins = new Array(116).fill(0);
     cutDistribution.forEach(cut => {
       bins[cut.score] = cut.count;
     });
 
-    // Create labels for each score
     const allLabels = Array.from({ length: 116 }, (_, i) => i.toString());
 
     return {
@@ -33,7 +29,7 @@ const CutDistributionChart = ({ cutDistribution }: Props) => {
           {
             label: "Cuts",
             data: bins,
-            color: "#3b82f6",
+            color: CHART_COLORS.primary,
             axisId: "y",
             type: "bar" as const,
             showLegend: true,
@@ -73,7 +69,7 @@ const CutDistributionChart = ({ cutDistribution }: Props) => {
 
   if (chartData.datasets.length === 0) {
     return (
-      <div className="border-border bg-muted flex h-[500px] w-full items-center justify-center rounded-lg border">
+      <div className={getEmptyStateClassName(500)}>
         <p className="text-muted-foreground">No cut data available</p>
       </div>
     );

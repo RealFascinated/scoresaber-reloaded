@@ -6,8 +6,8 @@ export const Colors = {
   rankedLight: "#00beff",
   medal: "#cd7f32",
   hands: {
-    left: "#a82020",
-    right: "#2064a8",
+    left: "#ff4444",
+    right: "#4488ff",
   },
   generic: {
     green: "#2ecc71",

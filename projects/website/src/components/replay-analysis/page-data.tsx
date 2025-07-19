@@ -1,14 +1,163 @@
 "use client";
 
+import { FancyLoader } from "@/components/fancy-loader";
+import Card from "@/components/card";
 import { Spinner } from "@/components/spinner";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getDecodedReplay } from "@ssr/common/replay/replay-utils";
+import { formatTime } from "@ssr/common/utils/time-utils";
 import { useQuery } from "@tanstack/react-query";
 import { BarChart3, Music, Target, XCircle } from "lucide-react";
 import { useQueryState } from "nuqs";
 import CutDistributionChart from "./charts/cut-distribution-chart";
 import HandAccuracyChart from "./charts/hand-accuracy-chart";
 import SwingSpeedChart from "./charts/swing-speed-chart";
+import { DecodedReplayResponse } from "@ssr/common/types/decoded-replay-response";
+
+type StateCardProps = {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+  variant?: "default" | "destructive";
+};
+
+const StateCard = ({ icon, title, description, variant = "default" }: StateCardProps) => (
+  <Card className="flex min-h-[600px] w-full items-center justify-center">
+    <div className="flex flex-col items-center gap-4 text-center">
+      <div
+        className={`rounded-full p-4 ${variant === "destructive" ? "bg-destructive/10" : "bg-muted"}`}
+      >
+        {icon}
+      </div>
+      <div className="space-y-2">
+        <h3 className="text-lg font-semibold">{title}</h3>
+        <p className={variant === "destructive" ? "text-destructive" : "text-muted-foreground"}>
+          {description}
+        </p>
+      </div>
+    </div>
+  </Card>
+);
+
+const SongInfoCard = ({ data }: { data: DecodedReplayResponse }) => (
+  <Card className="h-fit w-full space-y-3">
+    {/* Header Section */}
+    <div className="flex items-start justify-between gap-4">
+      {/* Song Art */}
+      <div className="h-20 w-20 overflow-hidden rounded-lg shadow-sm">
+        {data.rawReplay.info.hash ? (
+          <img
+            src={`https://cdn.beatsaver.com/${data.rawReplay.info.hash.toLowerCase()}.jpg`}
+            alt={data.rawReplay.info.songName}
+            className="h-full w-full object-cover"
+            onError={e => {
+              e.currentTarget.style.display = "none";
+            }}
+          />
+        ) : (
+          <div className="bg-muted flex h-full w-full items-center justify-center">
+            <Music className="text-muted-foreground h-8 w-8" />
+          </div>
+        )}
+      </div>
+
+      {/* Song Info */}
+      <div className="min-w-0 flex-1">
+        <div className="space-y-1.5">
+          {/* Song Name */}
+          <h3 className="text-foreground mb-1 line-clamp-2 text-xl leading-tight font-bold">
+            {data.rawReplay.info.songName}
+          </h3>
+
+          {/* Mapper */}
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 rounded-md bg-purple-50 px-2 py-1 text-xs font-medium text-purple-700 dark:bg-purple-900/20 dark:text-purple-300">
+              <Target className="h-3 w-3" />
+              <span className="font-medium">{data.rawReplay.info.mapper}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {/* Player and Difficulty Info */}
+    <div className="flex items-center justify-between">
+      {/* Player Name */}
+      <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 dark:bg-green-900/20 dark:text-green-300">
+          <Target className="h-3 w-3" />
+          <span>{data.rawReplay.info.playerName}</span>
+        </div>
+      </div>
+
+      {/* Difficulty Badge */}
+      <div className="flex items-center gap-2">
+        <div className="flex h-7 items-center gap-1.5 rounded-full bg-gradient-to-r from-orange-500 to-orange-600 px-3 text-xs font-semibold text-white shadow-sm">
+          <span>{data.rawReplay.info.difficulty}</span>
+        </div>
+      </div>
+    </div>
+
+    {/* Statistics Grid */}
+    <div className="space-y-4">
+      {/* Score */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="rounded-lg bg-green-500/10 p-2">
+            <BarChart3 className="h-5 w-5 text-green-500" />
+          </div>
+          <div>
+            <div className="text-sm font-medium">Final Score</div>
+            <div className="text-muted-foreground text-xs">Performance score</div>
+          </div>
+        </div>
+        <div className="text-2xl font-bold text-green-500">
+          {data.rawReplay.info.score?.toLocaleString() || "N/A"}
+        </div>
+      </div>
+
+      {/* Replay Length */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="rounded-lg bg-blue-500/10 p-2">
+            <Music className="h-5 w-5 text-blue-500" />
+          </div>
+          <div>
+            <div className="text-sm font-medium">Replay Length</div>
+            <div className="text-muted-foreground text-xs">Total duration</div>
+          </div>
+        </div>
+        <div className="text-2xl font-bold text-blue-500">
+          {data.replayLengthSeconds ? formatTime(data.replayLengthSeconds) : "N/A"}
+        </div>
+      </div>
+    </div>
+  </Card>
+);
+
+const ChartCard = ({
+  title,
+  description,
+  children,
+  icon = <BarChart3 className="h-5 w-5" />,
+}: {
+  title: string;
+  description: string;
+  children: React.ReactNode;
+  icon?: React.ReactNode;
+}) => (
+  <Card>
+    <div className="flex flex-col gap-4">
+      <div className="flex items-center gap-2">
+        {icon}
+        <div>
+          <h3 className="text-lg font-semibold">{title}</h3>
+          <p className="text-muted-foreground text-sm">{description}</p>
+        </div>
+      </div>
+      <div className="h-[400px] w-full">{children}</div>
+    </div>
+  </Card>
+);
 
 export default function ReplayAnalysisPageData() {
   const [replayQuery] = useQueryState("replay");
@@ -22,173 +171,81 @@ export default function ReplayAnalysisPageData() {
   if (!replayQuery) {
     return (
       <div className="container mx-auto max-w-7xl p-6">
-        <Card className="flex min-h-[600px] w-full items-center justify-center">
-          <CardContent className="flex flex-col items-center gap-4 text-center">
-            <div className="bg-muted rounded-full p-4">
-              <BarChart3 className="text-muted-foreground h-8 w-8" />
-            </div>
-            <div className="space-y-2">
-              <h3 className="text-lg font-semibold">No Replay URL Provided</h3>
-              <p className="text-muted-foreground">
-                Please provide a replay URL to analyze your Beat Saber performance.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+        <StateCard
+          icon={<BarChart3 className="text-muted-foreground h-8 w-8" />}
+          title="No Replay URL Provided"
+          description="Please provide a replay URL to analyze your Beat Saber performance."
+        />
       </div>
     );
   }
 
+  const renderContent = () => {
+    if (isLoading) {
+      return (
+        <FancyLoader
+          title="Loading Replay Data"
+          description="Decoding and analyzing your replay file..."
+        />
+      );
+    }
+
+    if (error) {
+      return (
+        <StateCard
+          icon={<XCircle className="text-destructive h-8 w-8" />}
+          title="Error Loading Replay"
+          description={error.message}
+          variant="destructive"
+        />
+      );
+    }
+
+    if (!data) {
+      return (
+        <StateCard
+          icon={<BarChart3 className="text-muted-foreground h-8 w-8" />}
+          title="No Replay Data Available"
+          description="Unable to decode the provided replay file."
+        />
+      );
+    }
+
+    return (
+      <>
+        <SongInfoCard data={data} />
+
+        <div className="flex flex-col gap-4 md:grid md:grid-cols-2 md:flex-row">
+          <ChartCard
+            title="Hand Accuracy Over Time"
+            description="Left and right hand accuracy throughout the song."
+            icon={<Target className="h-5 w-5" />}
+          >
+            <HandAccuracyChart replayResponse={data} />
+          </ChartCard>
+
+          <ChartCard title="Swing Speed" description="The speed of your swings per hand (in m/s).">
+            <SwingSpeedChart replayResponse={data} />
+          </ChartCard>
+
+          <ChartCard
+            title="Cut Score Distribution"
+            description="How often you achieved each cut score."
+          >
+            <CutDistributionChart cutDistribution={data.cutDistribution} />
+          </ChartCard>
+        </div>
+      </>
+    );
+  };
+
   return (
-    <div className="container mx-auto max-w-7xl space-y-6 p-6">
-      {/* Header */}
+    <div className="container mx-auto max-w-[1600px] space-y-6 p-6">
       <div className="space-y-2">
         <h1 className="text-4xl font-bold tracking-tight">Replay Analysis</h1>
         <p className="text-muted-foreground">Analysis of your Beat Saber performance</p>
       </div>
-
-      {!replayQuery ? (
-        <Card className="flex min-h-[600px] w-full items-center justify-center">
-          <CardContent className="flex flex-col items-center gap-4 text-center">
-            <div className="bg-muted rounded-full p-4">
-              <BarChart3 className="text-muted-foreground h-8 w-8" />
-            </div>
-            <div className="space-y-2">
-              <h3 className="text-lg font-semibold">No Replay URL Provided</h3>
-              <p className="text-muted-foreground">
-                Please provide a replay URL to analyze your Beat Saber performance.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      ) : isLoading ? (
-        <Card className="flex min-h-[600px] w-full items-center justify-center">
-          <CardContent className="flex flex-col items-center gap-4 text-center">
-            <Spinner size="lg" />
-            <div className="space-y-2">
-              <h3 className="text-lg font-semibold">Loading Replay Data</h3>
-              <p className="text-muted-foreground">Decoding and analyzing your replay file...</p>
-            </div>
-          </CardContent>
-        </Card>
-      ) : error ? (
-        <Card className="flex min-h-[600px] w-full items-center justify-center">
-          <CardContent className="flex flex-col items-center gap-4 text-center">
-            <div className="bg-destructive/10 rounded-full p-4">
-              <XCircle className="text-destructive h-8 w-8" />
-            </div>
-            <div className="space-y-2">
-              <h3 className="text-lg font-semibold">Error Loading Replay</h3>
-              <p className="text-destructive">{error.message}</p>
-            </div>
-          </CardContent>
-        </Card>
-      ) : !data ? (
-        <Card className="flex min-h-[600px] w-full items-center justify-center">
-          <CardContent className="flex flex-col items-center gap-4 text-center">
-            <div className="bg-muted rounded-full p-4">
-              <BarChart3 className="text-muted-foreground h-8 w-8" />
-            </div>
-            <div className="space-y-2">
-              <h3 className="text-lg font-semibold">No Replay Data Available</h3>
-              <p className="text-muted-foreground">Unable to decode the provided replay file.</p>
-            </div>
-          </CardContent>
-        </Card>
-      ) : (
-        <>
-          {/* Song Info Card */}
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-4">
-                {/* Song Artwork */}
-                <div className="flex-shrink-0">
-                  <div className="bg-muted h-16 w-16 overflow-hidden rounded-md">
-                    {data.rawReplay.info.hash && (
-                      <img
-                        src={`https://cdn.beatsaver.com/${data.rawReplay.info.hash.toLowerCase()}.jpg`}
-                        alt={data.rawReplay.info.songName}
-                        className="h-full w-full object-cover"
-                        onError={e => {
-                          e.currentTarget.style.display = "none";
-                        }}
-                      />
-                    )}
-                  </div>
-                </div>
-
-                {/* Song and Player Info */}
-                <div className="flex min-w-0 flex-1 items-center overflow-hidden">
-                  <div className="flex min-w-0 flex-col gap-2">
-                    <div className="flex items-center gap-2">
-                      <Target className="text-muted-foreground h-4 w-4" />
-                      <p className="truncate text-lg font-semibold">
-                        {data.rawReplay.info.playerName}
-                      </p>
-                    </div>
-                    <div className="text-muted-foreground flex items-center gap-2 text-sm">
-                      <Music className="h-3 w-3" />
-                      <p className="truncate">{data.rawReplay.info.songName}</p>
-                      <span>•</span>
-                      <p className="truncate">by {data.rawReplay.info.mapper}</p>
-                      <span>•</span>
-                      <p className="truncate">{data.rawReplay.info.difficulty}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Hand Accuracy Chart */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Target className="h-5 w-5" />
-                Hand Accuracy Over Time
-              </CardTitle>
-              <CardDescription>Left and right hand accuracy throughout the song.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[400px] w-full">
-                <HandAccuracyChart replayResponse={data} />
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Cut Distribution Chart */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <BarChart3 className="h-5 w-5" />
-                Cut Score Distribution
-              </CardTitle>
-              <CardDescription>How often you achieved each cut score.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[400px] w-full">
-                <CutDistributionChart cutDistribution={data.cutDistribution} />
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Swing Speed Chart */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <BarChart3 className="h-5 w-5" />
-                Swing Speed
-              </CardTitle>
-              <CardDescription>The speed of your swings per hand (in m/s).</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[400px] w-full">
-                <SwingSpeedChart replayResponse={data} />
-              </div>
-            </CardContent>
-          </Card>
-        </>
-      )}
+      {renderContent()}
     </div>
   );
 }
