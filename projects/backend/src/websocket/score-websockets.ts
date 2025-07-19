@@ -13,6 +13,7 @@ import { EventListener } from "../event/event-listener";
 import { EventsManager } from "../event/events-manager";
 import { PlayerService } from "../service/player/player.service";
 import { ScoreService } from "../service/score/score.service";
+import Logger from "@ssr/common/logger";
 
 interface PendingScore {
   scoreSaberToken?: ScoreSaberScoreToken;
@@ -56,6 +57,10 @@ export class ScoreWebsockets implements EventListener {
 
         const key = `${player.id}-${leaderboard.songHash.toUpperCase()}-${leaderboard.difficulty.difficulty}-${leaderboard.difficulty.characteristic}`;
         const pendingScore = ScoreWebsockets.pendingScores.get(key);
+
+        Logger.info(
+          `[SS-WS] Received score for player ${player.id} on leaderboard ${leaderboard.songHash}`
+        );
 
         if (pendingScore?.beatLeaderScore) {
           // Found a matching BeatLeader score, process both
@@ -102,6 +107,10 @@ export class ScoreWebsockets implements EventListener {
 
         const key = `${player.id}-${leaderboard.song.hash.toUpperCase()}-${leaderboard.difficulty.difficultyName}-${leaderboard.difficulty.modeName}`;
         const pendingScore = ScoreWebsockets.pendingScores.get(key);
+
+        Logger.info(
+          `[BL-WS] Received score for player ${player.id} on leaderboard ${leaderboard.song.hash}`
+        );
 
         if (pendingScore?.scoreSaberToken && pendingScore.leaderboardToken && pendingScore.player) {
           // Found a matching ScoreSaber score, process both
