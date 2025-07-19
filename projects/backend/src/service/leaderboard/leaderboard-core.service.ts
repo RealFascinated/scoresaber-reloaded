@@ -554,11 +554,6 @@ export class LeaderboardCoreService {
     // Use aggregation pipeline to calculate play counts for all leaderboards in one operation
     const playCounts = await ScoreSaberScoreModel.aggregate([
       {
-        $match: {
-          timestamp: { $gte: sevenDaysAgo }, // Only look at scores from last 7 days
-        },
-      },
-      {
         $facet: {
           dailyPlays: [
             {
@@ -574,6 +569,11 @@ export class LeaderboardCoreService {
             },
           ],
           weeklyPlays: [
+            {
+              $match: {
+                timestamp: { $gte: sevenDaysAgo },
+              },
+            },
             {
               $group: {
                 _id: "$leaderboardId",

@@ -1,5 +1,3 @@
-import Logger from "@ssr/common/logger";
-import { isProduction } from "@ssr/common/utils/utils";
 import { type NextRequest, NextResponse } from "next/server";
 
 export function middleware(request: NextRequest) {
@@ -22,8 +20,8 @@ export function middleware(request: NextRequest) {
   }
 
   // Log requests in production
-  if (isProduction()) {
-    Logger.info(`${request.method} ${request.nextUrl.pathname}${request.nextUrl.search}`);
+  if (process.env.NEXT_PUBLIC_APP_ENV === "production") {
+    console.log(`${request.method} ${request.nextUrl.pathname}${request.nextUrl.search}`);
   }
 }
 
