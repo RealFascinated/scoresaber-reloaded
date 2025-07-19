@@ -2,14 +2,18 @@
 
 import { ChartConfig } from "@/common/chart/types";
 import GenericChart from "@/components/chart/generic-chart";
-import { Replay } from "@ssr/common/replay/replay-decoder";
+import { getCutScore } from "@ssr/common/replay/replay-utils";
+import { DecodedReplayResponse } from "@ssr/common/types/decoded-replay-response";
+import { formatTime } from "@ssr/common/utils/time-utils";
 import { useMemo } from "react";
 
 type Props = {
-  replay: Replay;
+  replayResponse: DecodedReplayResponse;
 };
 
-const HandAccuracyChart = ({ replay }: Props) => {
+const HandAccuracyChart = ({ replayResponse }: Props) => {
+  const { rawReplay: replay, replayLengthSeconds } = replayResponse;
+
   const { chartData, labels } = useMemo(() => {
     if (!replay.notes || replay.notes.length === 0) {
       return {
@@ -19,8 +23,7 @@ const HandAccuracyChart = ({ replay }: Props) => {
     }
 
     // Calculate cumulative average accuracy up to each second for each hand
-    const maxTime = Math.max(...replay.notes.map(note => note.eventTime));
-    const seconds = Math.ceil(maxTime);
+    const seconds = Math.ceil(replayLengthSeconds);
 
     const leftHandData: (number | null)[] = [];
     const rightHandData: (number | null)[] = [];
@@ -35,23 +38,7 @@ const HandAccuracyChart = ({ replay }: Props) => {
     const leftHandScores = cutNotes
       .filter(note => note.noteCutInfo!.saberType === 0) // Left hand
       .map(note => {
-        const cutInfo = note.noteCutInfo!;
-
-        // According to BSOR documentation:
-        // beforeCutRating: 1 means 70 score (uncapped, can go over 1)
-        const approachScore = Math.max(0, Math.min(70, cutInfo.beforeCutRating * 70));
-
-        // afterCutRating: 1 means 30 score (uncapped, can go over 1)
-        const followThroughScore = Math.max(0, Math.min(30, cutInfo.afterCutRating * 30));
-
-        // cutDistanceToCenter: 15 * (1 - Clamp01(cutDistanceToCenter / 0.3f))
-        const centerCutScore = Math.max(
-          0,
-          Math.min(15, 15 * (1 - Math.min(1, cutInfo.cutDistanceToCenter / 0.3)))
-        );
-
-        const totalCutScore = Math.round(approachScore + followThroughScore + centerCutScore);
-        const finalScore = Math.max(0, Math.min(115, totalCutScore));
+        const finalScore = getCutScore(note.noteCutInfo!);
 
         return {
           time: note.eventTime,
@@ -62,23 +49,7 @@ const HandAccuracyChart = ({ replay }: Props) => {
     const rightHandScores = cutNotes
       .filter(note => note.noteCutInfo!.saberType === 1) // Right hand
       .map(note => {
-        const cutInfo = note.noteCutInfo!;
-
-        // According to BSOR documentation:
-        // beforeCutRating: 1 means 70 score (uncapped, can go over 1)
-        const approachScore = Math.max(0, Math.min(70, cutInfo.beforeCutRating * 70));
-
-        // afterCutRating: 1 means 30 score (uncapped, can go over 1)
-        const followThroughScore = Math.max(0, Math.min(30, cutInfo.afterCutRating * 30));
-
-        // cutDistanceToCenter: 15 * (1 - Clamp01(cutDistanceToCenter / 0.3f))
-        const centerCutScore = Math.max(
-          0,
-          Math.min(15, 15 * (1 - Math.min(1, cutInfo.cutDistanceToCenter / 0.3)))
-        );
-
-        const totalCutScore = Math.round(approachScore + followThroughScore + centerCutScore);
-        const finalScore = Math.max(0, Math.min(115, totalCutScore));
+        const finalScore = getCutScore(note.noteCutInfo!);
 
         return {
           time: note.eventTime,
@@ -112,7 +83,7 @@ const HandAccuracyChart = ({ replay }: Props) => {
       }
 
       if (hasData) {
-        timeLabels.push(`${second}s`);
+        timeLabels.push(formatTime(second));
       }
     }
 
@@ -139,7 +110,7 @@ const HandAccuracyChart = ({ replay }: Props) => {
       },
       labels: timeLabels,
     };
-  }, [replay]);
+  }, [replay, replayLengthSeconds]);
 
   const chartConfig: ChartConfig = {
     id: "hand-accuracy",
@@ -149,6 +120,7 @@ const HandAccuracyChart = ({ replay }: Props) => {
         display: true,
         displayName: "Time (seconds)",
         hideOnMobile: false,
+        valueFormatter: (value: number) => formatTime(value),
       },
       y: {
         display: true,

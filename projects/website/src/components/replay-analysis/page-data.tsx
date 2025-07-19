@@ -8,6 +8,7 @@ import { BarChart3, Music, Target, XCircle } from "lucide-react";
 import { useQueryState } from "nuqs";
 import CutDistributionChart from "./charts/cut-distribution-chart";
 import HandAccuracyChart from "./charts/hand-accuracy-chart";
+import SwingSpeedChart from "./charts/swing-speed-chart";
 
 export default function ReplayAnalysisPageData() {
   const [replayQuery] = useQueryState("replay");
@@ -150,7 +151,7 @@ export default function ReplayAnalysisPageData() {
             </CardHeader>
             <CardContent>
               <div className="h-[400px] w-full">
-                <HandAccuracyChart replay={data.rawReplay} />
+                <HandAccuracyChart replayResponse={data} />
               </div>
             </CardContent>
           </Card>
@@ -167,6 +168,22 @@ export default function ReplayAnalysisPageData() {
             <CardContent>
               <div className="h-[400px] w-full">
                 <CutDistributionChart cutDistribution={data.cutDistribution} />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Swing Speed Chart */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <BarChart3 className="h-5 w-5" />
+                Swing Speed
+              </CardTitle>
+              <CardDescription>The speed of your swings per hand (in m/s).</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[400px] w-full">
+                <SwingSpeedChart replayResponse={data} />
               </div>
             </CardContent>
           </Card>

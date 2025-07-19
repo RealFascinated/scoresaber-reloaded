@@ -31,7 +31,7 @@ const CutDistributionChart = ({ cutDistribution }: Props) => {
       chartData: {
         datasets: [
           {
-            label: "Cut Scores",
+            label: "Cuts",
             data: bins,
             color: "#3b82f6",
             axisId: "y",
