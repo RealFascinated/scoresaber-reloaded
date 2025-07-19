@@ -14,7 +14,6 @@ import {
 import { LeaderboardResponse } from "@ssr/common/response/leaderboard-response";
 import { getBeatSaverMapperProfileUrl } from "@ssr/common/utils/beatsaver.util";
 import { formatNumber } from "@ssr/common/utils/number-utils";
-import { getDifficulty } from "@ssr/common/utils/song-utils";
 import { formatDate } from "@ssr/common/utils/time-utils";
 import Image from "next/image";
 import { LeaderboardStarBadge } from "./leaderboard-star-badge";
@@ -26,10 +25,9 @@ type LeaderboardInfoProps = {
 export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
   const { leaderboard: leaderboardData, beatsaver: beatSaverMap } = leaderboard;
   const statusDate = leaderboardData.dateRanked || leaderboardData.dateQualified;
-  const difficultyInfo = getDifficulty(leaderboardData.difficulty.difficulty);
 
   return (
-    <Card className="h-fit w-full space-y-3 2xl:w-[420px]">
+    <Card className="h-fit w-full space-y-3 2xl:w-[405px]">
       {/* Header Section */}
       <div className="flex items-start justify-between gap-4">
         {/* Song Art */}
@@ -111,58 +109,76 @@ export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
       </div>
 
       {/* Statistics Grid */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="space-y-4">
         {/* Play Counts */}
-        <div className="space-y-2">
-          <div className="text-muted-foreground flex items-center gap-1.5 text-sm">
-            <PlayIcon className="h-4 w-4" />
-            <span>Total Plays</span>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="rounded-lg bg-blue-500/10 p-2">
+              <PlayIcon className="h-5 w-5 text-blue-500" />
+            </div>
+            <div>
+              <div className="text-sm font-medium">Total Plays</div>
+              <div className="text-muted-foreground text-xs">
+                {formatNumber(leaderboardData.dailyPlays)} today
+                {leaderboardData.weeklyPlays !== undefined && (
+                  <span> • {formatNumber(leaderboardData.weeklyPlays)} this week</span>
+                )}
+              </div>
+            </div>
           </div>
-          <p className="text-lg font-semibold">{formatNumber(leaderboardData.plays)}</p>
-          <div className="text-muted-foreground space-y-0.5 text-xs">
-            <p>{formatNumber(leaderboardData.dailyPlays)} today</p>
-            {leaderboardData.weeklyPlays !== undefined && (
-              <p>{formatNumber(leaderboardData.weeklyPlays)} this week</p>
-            )}
+          <div className="text-2xl font-bold text-blue-500">
+            {formatNumber(leaderboardData.plays)}
           </div>
         </div>
 
         {/* Max Score */}
-        <div className="space-y-2">
-          <div className="text-muted-foreground flex items-center gap-1.5 text-sm">
-            <ChartBarIcon className="h-4 w-4" />
-            <span>Max Score</span>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="rounded-lg bg-green-500/10 p-2">
+              <ChartBarIcon className="h-5 w-5 text-green-500" />
+            </div>
+            <div>
+              <div className="text-sm font-medium">Max Score</div>
+            </div>
           </div>
-          <p className="text-lg font-semibold">{formatNumber(leaderboardData.maxScore)}</p>
+          <div className="text-2xl font-bold text-green-500">
+            {formatNumber(leaderboardData.maxScore)}
+          </div>
         </div>
       </div>
 
       <Separator />
 
       {/* Information Section */}
-      <div className="space-y-1.5">
-        <div className="space-y-1.5 text-sm">
-          {/* Status Date */}
-          {statusDate && (
-            <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">
-                Date {leaderboardData.ranked ? "Ranked" : "Qualified"}
+      <div className="flex gap-3">
+        {/* Status Date */}
+        {statusDate && (
+          <div className="bg-muted/30 flex-1 rounded-lg p-3">
+            <div className="mb-1 flex items-center gap-2">
+              <div className="h-2 w-2 rounded-full bg-green-500"></div>
+              <span className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+                {leaderboardData.ranked ? "Ranked" : "Qualified"}
               </span>
-              <SimpleTooltip display={formatDate(statusDate, "Do MMMM, YYYY HH:mm a")}>
-                <span className="font-medium">{formatDate(statusDate, "DD MMMM YYYY")}</span>
-              </SimpleTooltip>
             </div>
-          )}
-
-          {/* Created Date */}
-          <div className="flex items-center justify-between">
-            <span className="text-muted-foreground">Leaderboard Created</span>
-            <SimpleTooltip display={formatDate(leaderboardData.timestamp, "Do MMMM, YYYY HH:mm a")}>
-              <span className="font-medium">
-                {formatDate(leaderboardData.timestamp, "DD MMMM YYYY")}
-              </span>
+            <SimpleTooltip display={formatDate(statusDate, "Do MMMM, YYYY HH:mm a")}>
+              <div className="text-sm font-semibold">{formatDate(statusDate, "DD MMMM YYYY")}</div>
             </SimpleTooltip>
           </div>
+        )}
+
+        {/* Created Date */}
+        <div className="bg-muted/30 flex-1 rounded-lg p-3">
+          <div className="mb-1 flex items-center gap-2">
+            <div className="h-2 w-2 rounded-full bg-blue-500"></div>
+            <span className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+              Created
+            </span>
+          </div>
+          <SimpleTooltip display={formatDate(leaderboardData.timestamp, "Do MMMM, YYYY HH:mm a")}>
+            <div className="text-sm font-semibold">
+              {formatDate(leaderboardData.timestamp, "DD MMMM YYYY")}
+            </div>
+          </SimpleTooltip>
         </div>
       </div>
 
@@ -173,3 +189,4 @@ export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
     </Card>
   );
 }
+
