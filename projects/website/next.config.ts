@@ -8,7 +8,6 @@ const nextConfig: NextConfig = {
   output: "standalone",
   outputFileTracingRoot: path.join(__dirname, "../../"),
   experimental: {
-    optimizeCss: true,
     reactCompiler: true,
     optimizePackageImports: [
       "@ssr/common",
@@ -37,11 +36,6 @@ const nextConfig: NextConfig = {
       "framer-motion",
       "react-icons",
     ],
-  },
-  logging: {
-    fetches: {
-      fullUrl: true,
-    },
   },
   modularizeImports: {
     "@heroicons/react/24/solid": { transform: "@heroicons/react/24/solid/{{member}}" },
