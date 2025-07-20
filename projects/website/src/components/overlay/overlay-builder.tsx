@@ -61,7 +61,7 @@ const formSchema = z.object({
   playerId: z.string().min(1).max(32),
   useRealTimeData: z.boolean(),
   dataClient: z.string().min(1).max(32),
-  views: z.record(z.boolean()),
+  views: z.record(z.string(), z.boolean()),
 });
 
 export default function OverlayBuilder() {
