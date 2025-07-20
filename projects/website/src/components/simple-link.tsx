@@ -13,7 +13,6 @@ export default function SimpleLink({
   return (
     <Link
       href={href}
-      className="text-blue-500 hover:underline"
       {...props}
       // Only prefetch when hovering
       onMouseEnter={() => setIsHovering(true)}
