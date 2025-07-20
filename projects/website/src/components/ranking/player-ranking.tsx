@@ -7,8 +7,8 @@ import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { getScoreSaberAvatar } from "@ssr/common/utils/scoresaber.util";
 import { ArrowDownRightIcon, ArrowUpRightIcon } from "lucide-react";
-import Link from "next/link";
 import PlayerPreview from "../player/player-preview";
+import SimpleLink from "../simple-link";
 import CountryFlag from "../ui/country-flag";
 import { PlayerAvatar } from "./player-avatar";
 import { PlayerName } from "./player-name";
@@ -36,7 +36,7 @@ export function PlayerRanking({
   }
 
   return (
-    <Link href={`/player/${player.id}`}>
+    <SimpleLink href={`/player/${player.id}`}>
       {/* Desktop Layout */}
       <div className="hidden xl:block">
         <PlayerPreview
@@ -111,7 +111,7 @@ export function PlayerRanking({
           </div>
         </div>
       </div>
-    </Link>
+    </SimpleLink>
   );
 }
 

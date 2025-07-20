@@ -3,6 +3,7 @@
 import Card from "@/components/card";
 import ScoreSaberScoreSongInfo from "@/components/platform/scoresaber/score/score-song-info";
 import { useMapFilter } from "@/components/providers/maps/map-filter-provider";
+import SimpleLink from "@/components/simple-link";
 import SimplePagination from "@/components/simple-pagination";
 import SimpleTooltip from "@/components/simple-tooltip";
 import { Spinner } from "@/components/spinner";
@@ -15,7 +16,6 @@ import { formatDate, timeAgo } from "@ssr/common/utils/time-utils";
 import { useQuery } from "@tanstack/react-query";
 import { useDebounce } from "@uidotdev/usehooks";
 import { ChartBarIcon } from "lucide-react";
-import Link from "next/link";
 import { parseAsInteger, useQueryState } from "nuqs";
 
 export default function Leaderboards() {
@@ -82,7 +82,7 @@ export default function Leaderboards() {
 
                 return (
                   <div key={index}>
-                    <Link
+                    <SimpleLink
                       href={`/leaderboard/${leaderboard.id}`}
                       className="bg-border grid items-center gap-2 rounded-md p-1.5 transition-all hover:brightness-75 lg:grid-cols-[1fr_0.19fr]"
                     >
@@ -112,7 +112,7 @@ export default function Leaderboards() {
                           </SimpleTooltip>
                         )}
                       </div>
-                    </Link>
+                    </SimpleLink>
                   </div>
                 );
               })}

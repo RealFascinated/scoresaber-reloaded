@@ -9,9 +9,9 @@ import SimpleTooltip from "@/components/simple-tooltip";
 import { Button } from "@/components/ui/button";
 import { TrophyIcon } from "@heroicons/react/24/solid";
 import { ExternalLinkIcon, TrendingUpIcon } from "lucide-react";
-import Link from "next/link";
 import { ElementType, ReactNode } from "react";
 import Card from "../card";
+import SimpleLink from "../simple-link";
 
 type Category = {
   name: string;
@@ -56,7 +56,7 @@ export function MapsData({ type }: MapsDataProps) {
         <article className="flex w-full flex-col gap-2 2xl:w-[800px]">
           <div className="flex w-full gap-2">
             {categories.map(category => (
-              <Link href={`/maps/${category.id}`} key={category.name} className="w-full">
+              <SimpleLink href={`/maps/${category.id}`} key={category.name} className="w-full">
                 <Button
                   className="w-full"
                   variant={category.name == selectedCategory.name ? "default" : "secondary"}
@@ -68,7 +68,7 @@ export function MapsData({ type }: MapsDataProps) {
                     <span>{category.name}</span>
                   </span>
                 </Button>
-              </Link>
+              </SimpleLink>
             ))}
           </div>
 
@@ -85,7 +85,7 @@ export function MapsData({ type }: MapsDataProps) {
               display={<p>Click to open the Ranking Queue on ScoreSaber</p>}
               side="bottom"
             >
-              <Link
+              <SimpleLink
                 href="https://scoresaber.com/ranking/requests"
                 target="_blank"
                 className="w-full"
@@ -94,7 +94,7 @@ export function MapsData({ type }: MapsDataProps) {
                   <ExternalLinkIcon className="h-4 w-4" />
                   <span>View Ranking Queue on ScoreSaber</span>
                 </Button>
-              </Link>
+              </SimpleLink>
             </SimpleTooltip>
           </Card>
 

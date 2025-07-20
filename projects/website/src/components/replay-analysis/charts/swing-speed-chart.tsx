@@ -1,6 +1,5 @@
 "use client";
 
-import { ChartConfig, ChartDataset } from "@/common/chart/types";
 import GenericChart from "@/components/chart/generic-chart";
 import { DecodedReplayResponse } from "@ssr/common/types/decoded-replay-response";
 import { useMemo } from "react";

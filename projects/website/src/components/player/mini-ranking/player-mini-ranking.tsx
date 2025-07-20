@@ -1,13 +1,13 @@
 import { cn } from "@/common/utils";
 import { PlayerMiniRankingSkeleton } from "@/components/player/mini-ranking/player-mini-ranking-skeleton";
 import { PlayerInfo } from "@/components/player/player-info";
+import SimpleLink from "@/components/simple-link";
 import { useIsMobile } from "@/contexts/viewport-context";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
-import Link from "next/link";
 import { ReactElement } from "react";
 import Card from "../../card";
 import CountryFlag from "../../ui/country-flag";
@@ -114,7 +114,7 @@ function PlayerMiniRanking({
                 key={playerRanking.id}
                 useLink={false}
               >
-                <Link
+                <SimpleLink
                   href={`/player/${playerRanking.id}`}
                   className="group grid cursor-pointer items-center gap-2.5 px-1 py-1.5 sm:px-2"
                   style={{
@@ -161,7 +161,7 @@ function PlayerMiniRanking({
                       </p>
                     )}
                   </div>
-                </Link>
+                </SimpleLink>
               </PlayerPreview>
             );
           })

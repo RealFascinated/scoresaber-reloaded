@@ -1,6 +1,7 @@
 "use client";
 
 import { usePreview } from "@/components/providers/preview-provider";
+import SimpleLink from "@/components/simple-link";
 import { Spinner } from "@/components/spinner";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
@@ -9,7 +10,6 @@ import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
 import { useDebounce } from "@uidotdev/usehooks";
 import { AlertCircle, StarIcon, TrendingUpIcon } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
 import { useState } from "react";
 import CountUp from "react-countup";
 import { Popover, PopoverContent, PopoverTrigger } from "../../../ui/popover";
@@ -65,12 +65,12 @@ export default function LeaderboardPreview({
                 />
               )}
               <div className="flex min-w-0 flex-1 flex-col justify-center space-y-1">
-                <Link
+                <SimpleLink
                   href={`/leaderboard/${leaderboard.id}`}
                   className="block truncate text-xl font-bold transition-all hover:brightness-[66%]"
                 >
                   {leaderboard.songName}
-                </Link>
+                </SimpleLink>
                 <p className="text-muted-foreground truncate text-sm">
                   {leaderboard.songAuthorName}
                 </p>

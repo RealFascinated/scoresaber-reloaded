@@ -1,5 +1,5 @@
+import SimpleLink from "@/components/simple-link";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import Link from "next/link";
 
 export default function ScoreSaberSongName({
   leaderboard,
@@ -12,12 +12,12 @@ export default function ScoreSaberSongName({
     <p className="w-fit overflow-hidden font-semibold whitespace-nowrap">{leaderboard.fullName}</p>
   );
   return clickableSongName ? (
-    <Link
+    <SimpleLink
       href={`/leaderboard/${leaderboard.id}`}
       className="text-song-name w-fit min-w-0 cursor-pointer overflow-hidden text-left transition-all hover:brightness-[66%]"
     >
       {text}
-    </Link>
+    </SimpleLink>
   ) : (
     text
   );

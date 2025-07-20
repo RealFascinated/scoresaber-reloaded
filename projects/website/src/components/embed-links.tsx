@@ -1,4 +1,4 @@
-import Link from "next/link";
+import SimpleLink from "./simple-link";
 
 type EmbedLinksProps = {
   text: string;
@@ -14,14 +14,14 @@ export default function EmbedLinks({ text }: EmbedLinksProps) {
   return parts.map((part, index) => {
     if (urlRegex.test(part)) {
       return (
-        <Link
+        <SimpleLink
           key={index}
           href={part}
           target="_blank"
           className="text-primary transition-all hover:brightness-75"
         >
           {part}
-        </Link>
+        </SimpleLink>
       );
     } else {
       return part;

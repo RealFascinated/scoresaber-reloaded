@@ -15,10 +15,10 @@ import { useQuery } from "@tanstack/react-query";
 import { useDebounce } from "@uidotdev/usehooks";
 import { useLiveQuery } from "dexie-react-hooks";
 import { LinkIcon, XIcon } from "lucide-react";
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import { FancyLoader } from "../fancy-loader";
 import AddFriend from "../friend/add-friend";
+import SimpleLink from "../simple-link";
 import SimpleTooltip from "../simple-tooltip";
 import { Button } from "../ui/button";
 import Combobox from "../ui/combo-box";
@@ -125,12 +125,12 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
           {isError && (
             <div className="mt-2 flex h-full flex-col items-center justify-center gap-3">
               <p className="text-lg">No players were found for this country or page.</p>
-              <Link href="/ranking">
+              <SimpleLink href="/ranking">
                 <Button variant="outline" className="gap-2">
                   Back to Global
                   <LinkIcon className="size-4" />
                 </Button>
-              </Link>
+              </SimpleLink>
             </div>
           )}
 

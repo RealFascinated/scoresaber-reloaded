@@ -72,5 +72,5 @@ export const createTimeChartConfig = (
   },
 });
 
-export const getEmptyStateClassName = (height: number = 400) => 
-  `border-border bg-muted flex h-[${height}px] w-full items-center justify-center rounded-lg border`; 
+export const getEmptyStateClassName = (height: number = 400) =>
+  `border-border bg-muted flex h-[${height}px] w-full items-center justify-center rounded-lg border`;

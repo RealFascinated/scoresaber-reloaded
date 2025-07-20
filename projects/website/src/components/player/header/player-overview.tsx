@@ -1,11 +1,11 @@
 import { cn } from "@/common/utils";
 import FallbackLink from "@/components/fallback-link";
+import SimpleLink from "@/components/simple-link";
 import SimpleTooltip from "@/components/simple-tooltip";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerStatChange } from "@ssr/common/player/player-stat-change";
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
-import Link from "next/link";
 import { FaMedal } from "react-icons/fa";
 import { ChangeOverTime } from "../../statistic/change-over-time";
 import { DailyChange } from "../../statistic/daily-change";
@@ -44,11 +44,11 @@ const playerData = [
                 ) : null
               }
             >
-              <Link href={`/ranking/${player.rankPages.global}`}>
+              <SimpleLink href={`/ranking/${player.rankPages.global}`}>
                 <span className="hover:text-primary m-0 text-sm leading-[1.2] transition-all hover:brightness-[66%]">
                   #{formatNumberWithCommas(player.rank)}
                 </span>
-              </Link>
+              </SimpleLink>
             </ChangeOverTime>
             <DailyChange type={PlayerStatChange.Rank} change={rankChange} />
           </div>
@@ -72,11 +72,11 @@ const playerData = [
               tooltip={name => `Country Rank in ${name}`}
             />
             <ChangeOverTime player={player} type={PlayerStatChange.CountryRank}>
-              <Link href={`/ranking/${player.country}/${player.rankPages.country}`}>
+              <SimpleLink href={`/ranking/${player.country}/${player.rankPages.country}`}>
                 <span className="hover:text-primary m-0 text-sm leading-[1.4] transition-all hover:brightness-[66%]">
                   #{formatNumberWithCommas(player.countryRank)}
                 </span>
-              </Link>
+              </SimpleLink>
             </ChangeOverTime>
             <DailyChange type={PlayerStatChange.CountryRank} change={rankChange} />
           </div>

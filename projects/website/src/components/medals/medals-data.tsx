@@ -9,10 +9,10 @@ import { countryFilter } from "@ssr/common/utils/country.util";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { LinkIcon, XIcon } from "lucide-react";
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import { FancyLoader } from "../fancy-loader";
 import AddFriend from "../friend/add-friend";
+import SimpleLink from "../simple-link";
 import { Button } from "../ui/button";
 import Combobox from "../ui/combo-box";
 import CountryFlag from "../ui/country-flag";
@@ -74,12 +74,12 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
           {isError && (
             <div className="mt-2 flex h-full flex-col items-center justify-center gap-3">
               <p className="text-lg">No players were found for this country or page.</p>
-              <Link href="/medals">
+              <SimpleLink href="/medals">
                 <Button variant="outline" className="gap-2">
                   Go to Page 1
                   <LinkIcon className="size-4" />
                 </Button>
-              </Link>
+              </SimpleLink>
             </div>
           )}
 

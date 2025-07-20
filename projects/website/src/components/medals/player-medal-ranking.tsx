@@ -5,11 +5,11 @@ import { cn } from "@/common/utils";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { getScoreSaberAvatar } from "@ssr/common/utils/scoresaber.util";
-import Link from "next/link";
 import { FaMedal } from "react-icons/fa";
 import PlayerPreview from "../player/player-preview";
 import { PlayerAvatar } from "../ranking/player-avatar";
 import { PlayerName } from "../ranking/player-name";
+import SimpleLink from "../simple-link";
 import CountryFlag from "../ui/country-flag";
 
 export function PlayerMedalRanking({
@@ -20,7 +20,7 @@ export function PlayerMedalRanking({
   firstColumnWidth: number;
 }) {
   return (
-    <Link href={`/player/${player.id}`}>
+    <SimpleLink href={`/player/${player.id}`}>
       <PlayerPreview
         playerId={player.id}
         className="mb-1 grid min-h-[40px] w-full cursor-pointer items-center gap-3 rounded-lg bg-[#232323] px-2 py-1 shadow-sm transition-all hover:bg-[#2d2d2d]"
@@ -50,7 +50,7 @@ export function PlayerMedalRanking({
         {/* Medals */}
         <MedalsDisplay medals={player.medals} />
       </PlayerPreview>
-    </Link>
+    </SimpleLink>
   );
 }
 

@@ -10,12 +10,12 @@ import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils
 import { getScoreSaberRoles } from "@ssr/common/utils/scoresaber.util";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import CountUp from "react-countup";
 import Avatar from "../avatar";
 import HMDIcon from "../hmd-icon";
 import { usePreview } from "../providers/preview-provider";
+import SimpleLink from "../simple-link";
 import CountryFlag from "../ui/country-flag";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 
@@ -224,14 +224,14 @@ export default function PlayerPreview({
           <div className="space-y-4 p-4">
             {/* Player header */}
             {useLink ? (
-              <Link
+              <SimpleLink
                 href={`/player/${player.id}`}
                 style={{
                   color: getScoreSaberRoles(player)[0]?.color,
                 }}
               >
                 <PlayerHeader player={player} />
-              </Link>
+              </SimpleLink>
             ) : (
               <PlayerHeader player={player} />
             )}

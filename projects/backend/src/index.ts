@@ -2,6 +2,7 @@ import { etag } from "@bogeychan/elysia-etag";
 import * as dotenv from "@dotenvx/dotenvx";
 import cors from "@elysiajs/cors";
 import { cron } from "@elysiajs/cron";
+import { swagger } from "@elysiajs/swagger";
 import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
 import { formatDuration } from "@ssr/common/utils/time-utils";
@@ -11,6 +12,7 @@ import { Elysia, ValidationError } from "elysia";
 import { decorators } from "elysia-decorators";
 import { helmet } from "elysia-helmet";
 import { DiscordChannels, initDiscordBot, logToChannel } from "./bot/bot";
+import { getAppVersion } from "./common/app.util";
 import AppController from "./controller/app.controller";
 import BeatLeaderController from "./controller/beatleader.controller";
 import BeatSaverController from "./controller/beatsaver.controller";
@@ -43,8 +45,6 @@ import { ScoreService } from "./service/score/score.service";
 import StatisticsService from "./service/statistics.service";
 import { BeatSaverWebsocket } from "./websocket/beatsaver-websocket";
 import { ScoreWebsockets } from "./websocket/score-websockets";
-import { swagger } from "@elysiajs/swagger";
-import { getAppVersion } from "./common/app.util";
 
 Logger.info("Starting SSR Backend...");
 

@@ -1,6 +1,5 @@
 "use client";
 
-import { ChartConfig } from "@/common/chart/types";
 import GenericChart from "@/components/chart/generic-chart";
 import { getCutScore } from "@ssr/common/replay/replay-utils";
 import { DecodedReplayResponse } from "@ssr/common/types/decoded-replay-response";

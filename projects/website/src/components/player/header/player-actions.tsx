@@ -1,11 +1,11 @@
 import BeatLeaderLogo from "@/components/logos/beatleader-logo";
 import SteamLogo from "@/components/logos/logos/steam-logo";
+import SimpleLink from "@/components/simple-link";
 import SimpleTooltip from "@/components/simple-tooltip";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { ssrConfig } from "config";
 import dynamic from "next/dynamic";
-import Link from "next/link";
 import { ReactNode } from "react";
 import { FaTwitch } from "react-icons/fa";
 import PlayerActionButtonWrapper from "../buttons/player-action-button-wrapper";
@@ -38,9 +38,9 @@ export function PlayerLink({ url, name, playerName, icon, children }: PlayerLink
 
   if (url) {
     return (
-      <Link href={url} target="_blank" rel="noreferrer">
+      <SimpleLink href={url} target="_blank" rel="noreferrer">
         {tooltipContent}
-      </Link>
+      </SimpleLink>
     );
   }
 

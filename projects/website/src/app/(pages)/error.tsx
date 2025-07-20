@@ -1,8 +1,8 @@
 "use client";
 
+import SimpleLink from "@/components/simple-link";
 import { DiscordButton } from "@/components/social/discord-button";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
-import Link from "next/link";
 
 export default function Error() {
   return (
@@ -14,9 +14,9 @@ export default function Error() {
       </p>
 
       <div className="mt-6 flex flex-col items-center gap-2">
-        <Link href="/" className="text-primary hover:underline">
+        <SimpleLink href="/" className="text-primary hover:underline">
           Go back to the homepage
-        </Link>
+        </SimpleLink>
 
         <DiscordButton />
       </div>

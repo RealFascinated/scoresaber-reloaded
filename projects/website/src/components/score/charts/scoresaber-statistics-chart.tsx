@@ -2,11 +2,11 @@
 
 import { DatasetConfig } from "@/common/chart/types";
 import GenericStatisticChart from "@/components/platform-statistics/generic-statistic-chart";
+import SimpleLink from "@/components/simple-link";
 import { Button } from "@/components/ui/button";
 import { Statistic } from "@ssr/common/model/statistics/statistic";
 import { StatisticsType } from "@ssr/common/model/statistics/statistic-type";
 import { formatNumberWithCommas, isWholeNumber } from "@ssr/common/utils/number-utils";
-import Link from "next/link";
 
 type Props = {
   statistics: StatisticsType;
@@ -55,13 +55,13 @@ export default function ScoreSaberStatisticsChart({ statistics }: Props) {
   return (
     <div className="flex flex-col gap-2">
       <div className="flex flex-col items-center gap-2">
-        <Link
+        <SimpleLink
           href="https://ssr-grafana.fascinated.cc/public-dashboards/19a90072026f442fafa6c371192dddff"
           target="_blank"
           className="w-fit"
         >
           <Button>View in Grafana</Button>
-        </Link>
+        </SimpleLink>
       </div>
 
       <div className="grid-cols-2 flex-col gap-2 lg:grid">

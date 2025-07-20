@@ -2,13 +2,13 @@
 
 import Card from "@/components/card";
 import ScoreSaberScoreSongInfo from "@/components/platform/scoresaber/score/score-song-info";
+import SimpleLink from "@/components/simple-link";
 import { Spinner } from "@/components/spinner";
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import ScoreSaberRankingRequestsResponse from "@ssr/common/response/scoresaber-ranking-requests-response";
 import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
 import { timeAgo } from "@ssr/common/utils/time-utils";
 import { useQuery } from "@tanstack/react-query";
-import Link from "next/link";
 
 const queues = [
   {
@@ -50,7 +50,7 @@ export default function RankingQueue() {
                       );
                       return (
                         <div key={index}>
-                          <Link
+                          <SimpleLink
                             href={`/leaderboard/${leaderboard.id}`}
                             className="bg-border grid items-center gap-2 rounded-md p-1.5 transition-all hover:brightness-75 lg:grid-cols-[1fr_0.22fr]"
                           >
@@ -67,7 +67,7 @@ export default function RankingQueue() {
                                 {timeAgo(new Date(rankingRequest.created_at))}
                               </p>
                             </div>
-                          </Link>
+                          </SimpleLink>
                         </div>
                       );
                     })}

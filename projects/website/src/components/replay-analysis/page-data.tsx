@@ -1,9 +1,9 @@
 "use client";
 
-import { FancyLoader } from "@/components/fancy-loader";
 import Card from "@/components/card";
-import { Spinner } from "@/components/spinner";
+import { FancyLoader } from "@/components/fancy-loader";
 import { getDecodedReplay } from "@ssr/common/replay/replay-utils";
+import { DecodedReplayResponse } from "@ssr/common/types/decoded-replay-response";
 import { formatTime } from "@ssr/common/utils/time-utils";
 import { useQuery } from "@tanstack/react-query";
 import { BarChart3, Music, Target, XCircle } from "lucide-react";
@@ -11,7 +11,6 @@ import { useQueryState } from "nuqs";
 import CutDistributionChart from "./charts/cut-distribution-chart";
 import HandAccuracyChart from "./charts/hand-accuracy-chart";
 import SwingSpeedChart from "./charts/swing-speed-chart";
-import { DecodedReplayResponse } from "@ssr/common/types/decoded-replay-response";
 
 type StateCardProps = {
   icon: React.ReactNode;

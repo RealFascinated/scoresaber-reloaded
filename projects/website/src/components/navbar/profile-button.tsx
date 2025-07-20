@@ -5,7 +5,7 @@ import Avatar from "@/components/avatar";
 import useDatabase from "@/hooks/use-database";
 import { truncateText } from "@ssr/common/string-utils";
 import { useLiveQuery } from "dexie-react-hooks";
-import Link from "next/link";
+import SimpleLink from "../simple-link";
 import SimpleTooltip from "../simple-tooltip";
 
 export default function ProfileButton() {
@@ -18,7 +18,7 @@ export default function ProfileButton() {
 
   return (
     <SimpleTooltip display="Click to view your profile" side="bottom">
-      <Link
+      <SimpleLink
         href={`/player/${mainPlayer.id}`}
         className="hover:bg-muted/50 flex h-full cursor-pointer items-center rounded-md p-2 transition-all"
       >
@@ -32,7 +32,7 @@ export default function ProfileButton() {
             {truncateText(mainPlayer.name, 20)}
           </p>
         </div>
-      </Link>
+      </SimpleLink>
     </SimpleTooltip>
   );
 }

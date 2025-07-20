@@ -19,10 +19,10 @@ import { ScoreSort } from "@ssr/common/types/sort";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { useLiveQuery } from "dexie-react-hooks";
-import Link from "next/link";
 import AccSaberPlayerScores from "../platform/accsaber/accsaber-player-scores";
 import ScoreSaberPlayerMedalScores from "../platform/scoresaber/scoresaber-player-medal-scores";
 import ScoreSaberPlayerScores from "../platform/scoresaber/scoresaber-player-scores";
+import SimpleLink from "../simple-link";
 import { Button } from "../ui/button";
 import PlayerHeader from "./header/player-header";
 import PlayerMiniRankings from "./mini-ranking/player-mini-ranking";
@@ -53,7 +53,7 @@ function PlatformSelector({
   return (
     <div className="flex">
       {availablePlatforms.map(platform => (
-        <Link
+        <SimpleLink
           href={`/player/${player.id}/${platform.getType()}`}
           key={platform.getDisplayName()}
           scroll={false}
@@ -66,7 +66,7 @@ function PlatformSelector({
             {platform.getLogo()}
             <span className="hidden md:block">{platform.getDisplayName()}</span>
           </Button>
-        </Link>
+        </SimpleLink>
       ))}
     </div>
   );

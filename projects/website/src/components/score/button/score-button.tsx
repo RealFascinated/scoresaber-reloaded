@@ -1,6 +1,6 @@
 import { cn } from "@/common/utils";
+import SimpleLink from "@/components/simple-link";
 import SimpleTooltip from "@/components/simple-tooltip";
-import Link from "next/link";
 
 export default function ScoreButton({
   children,
@@ -31,9 +31,9 @@ export default function ScoreButton({
     return (
       <SimpleTooltip display={tooltip}>
         {href ? (
-          <Link href={href} target="_blank">
+          <SimpleLink href={href} target="_blank">
             {button}
-          </Link>
+          </SimpleLink>
         ) : (
           button
         )}

@@ -11,13 +11,13 @@ import ScoreSaberScoreInfo from "@/components/platform/scoresaber/score/score-in
 import ScoreSaberScoreSongInfo from "@/components/platform/scoresaber/score/score-song-info";
 import ScoreSaberScoreStats from "@/components/platform/scoresaber/score/score-stats";
 import PlayerPreview from "@/components/player/player-preview";
+import SimpleLink from "@/components/simple-link";
 import { ScoreSaberCurve } from "@ssr/common/leaderboard-curve/scoresaber-curve";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
 import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/leaderboard-player-info";
 import { getScoreSaberAvatar } from "@ssr/common/utils/scoresaber.util";
-import Link from "next/link";
 import ScoreDropdown, { ScoreMode } from "./score-dropdown";
 
 // Memoize the player preview component to prevent unnecessary re-renders
@@ -114,12 +114,12 @@ export default function ScoreSaberScoreDisplay({
               alt={playerAbove.name ?? ""}
               size={20}
             />
-            <Link
+            <SimpleLink
               href={`/player/${playerAbove.id}`}
               className="cursor-pointer transition-all hover:brightness-[66%]"
             >
               <p className="text-sm">{playerAbove.name}</p>
-            </Link>
+            </SimpleLink>
           </div>
         </MemoizedPlayerPreview>
       )}

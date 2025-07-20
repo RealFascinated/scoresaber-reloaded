@@ -1,6 +1,7 @@
 "use client";
 
 import { downloadFile } from "@/common/browser-utils";
+import SimpleLink from "@/components/simple-link";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -26,7 +27,6 @@ import {
   encodeCustomRankedPlaylistSettings,
 } from "@ssr/common/playlist/ranked/custom-ranked-playlist";
 import { Download, Eye, Star, TrendingUp } from "lucide-react";
-import Link from "next/link";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -132,7 +132,7 @@ export default function CustomPlaylistCreator() {
 
           {/* Create Playlist Button */}
           <DialogFooter>
-            <Link
+            <SimpleLink
               href={`${env.NEXT_PUBLIC_API_URL}/playlist/custom-ranked/preview?settings=${encodeCustomRankedPlaylistSettings(watch())}`}
               target="_blank"
             >
@@ -140,7 +140,7 @@ export default function CustomPlaylistCreator() {
                 <Eye className="h-4 w-4" />
                 Preview Art
               </Button>
-            </Link>
+            </SimpleLink>
             <Button type="submit" className="gap-2">
               <Download className="h-4 w-4" />
               Create Playlist

@@ -5,7 +5,7 @@ import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/sc
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import { getScoreSaberAvatar, getScoreSaberRoles } from "@ssr/common/utils/scoresaber.util";
 import { clsx } from "clsx";
-import Link from "next/link";
+import SimpleLink from "../simple-link";
 
 export function PlayerInfo({
   player,
@@ -46,7 +46,7 @@ export function PlayerInfo({
         alt={`${player.name}'s Profile Picture`}
       />
       {!hideCountryFlag && <CountryFlag code={player.country!} size={10} />}
-      {useLink ? <Link href={`/player/${player.id}`}>{name}</Link> : name}
+      {useLink ? <SimpleLink href={`/player/${player.id}`}>{name}</SimpleLink> : name}
     </div>
   );
 }

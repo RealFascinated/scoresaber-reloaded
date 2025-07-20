@@ -1,3 +1,4 @@
+import Logger from "@ssr/common/logger";
 import {
   getScoreSaberLeaderboardFromToken,
   getScoreSaberScoreFromToken,
@@ -13,7 +14,6 @@ import { EventListener } from "../event/event-listener";
 import { EventsManager } from "../event/events-manager";
 import { PlayerService } from "../service/player/player.service";
 import { ScoreService } from "../service/score/score.service";
-import Logger from "@ssr/common/logger";
 
 interface PendingScore {
   scoreSaberToken?: ScoreSaberScoreToken;

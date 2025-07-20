@@ -1,6 +1,7 @@
 "use client";
 
 import Card from "@/components/card";
+import SimpleLink from "@/components/simple-link";
 import SimplePagination from "@/components/simple-pagination";
 import { Spinner } from "@/components/spinner";
 import { Button } from "@/components/ui/button";
@@ -14,7 +15,6 @@ import { PlayerScore } from "@ssr/common/score/player-score";
 import { Timeframe } from "@ssr/common/timeframe";
 import Request from "@ssr/common/utils/request";
 import { useQuery } from "@tanstack/react-query";
-import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import ScoreSaberScoreDisplay from "../score";
 
@@ -107,11 +107,11 @@ export function TopScoresData({ timeframe }: TopScoresDataProps) {
         <div key={`${score.scoreId}`} className="flex flex-col pt-2">
           <div className="bg-muted/50 flex w-fit items-center gap-2 rounded-full px-3 py-1.5 text-sm">
             <span className="text-muted-foreground">Set by</span>
-            <Link href={`/player/${player.id}`}>
+            <SimpleLink href={`/player/${player.id}`}>
               <span className="text-primary hover:text-primary/80 text-xs font-semibold transition-colors sm:text-sm">
                 {name}
               </span>
-            </Link>
+            </SimpleLink>
           </div>
           <ScoreSaberScoreDisplay
             score={score}

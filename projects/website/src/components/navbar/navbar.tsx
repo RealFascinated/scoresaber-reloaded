@@ -7,11 +7,11 @@ import ProfileButton from "@/components/navbar/profile-button";
 import { CubeIcon } from "@heroicons/react/24/solid";
 import { MusicIcon, TrendingUpIcon, TrophyIcon } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ReactElement } from "react";
 import { FaMedal } from "react-icons/fa";
 import Settings from "../settings/settings";
+import SimpleLink from "../simple-link";
 
 const links: ReactElement<any>[] = [
   <FriendsButton key="friends" />,
@@ -78,7 +78,7 @@ export default function Navbar() {
       {/* Left */}
       <div className="flex items-center gap-1 transition-all md:gap-3">
         {/* Branding */}
-        <Link
+        <SimpleLink
           className="flex items-center gap-1 transition-all hover:opacity-80 md:gap-2"
           href="/"
           draggable={false}
@@ -91,7 +91,7 @@ export default function Navbar() {
             alt="ScoreSaber Logo"
           />
           <h1 className="text-primary hidden text-base font-bold md:flex md:text-lg">SSR</h1>
-        </Link>
+        </SimpleLink>
 
         {/* Links */}
         <div className="ml-2 flex items-center gap-0.5 transition-all md:ml-4 md:gap-1">
@@ -131,7 +131,7 @@ function SimpleNavLink({
   const isActive = pathname && (pathname === href || (href !== "/" && pathname.startsWith(href)));
 
   return (
-    <Link
+    <SimpleLink
       className={cn(
         "flex items-center gap-2 px-2 py-1 text-sm transition-colors",
         isActive ? "text-primary" : "text-muted-foreground hover:text-primary",
@@ -142,6 +142,6 @@ function SimpleNavLink({
       draggable={false}
     >
       {content}
-    </Link>
+    </SimpleLink>
   );
 }
