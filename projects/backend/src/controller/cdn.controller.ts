@@ -28,7 +28,7 @@ export default class CDNController {
     return new Response(avatar, {
       headers: {
         "Content-Type": "image/jpeg",
-        "Cache-Control": `public, max-age=${TimeUnit.toSeconds(TimeUnit.Hour, 3)}`,
+        "Cache-Control": `public, max-age=${TimeUnit.toSeconds(TimeUnit.Day, 7)}`,
       },
     });
   }
@@ -56,7 +56,7 @@ export default class CDNController {
     return new Response(coverArt, {
       headers: {
         "Content-Type": "image/jpeg",
-        "Cache-Control": `public, max-age=${TimeUnit.toSeconds(TimeUnit.Hour, 3)}`,
+        "Cache-Control": `public, max-age=${TimeUnit.toSeconds(TimeUnit.Day, 7)}`,
       },
     });
   }
