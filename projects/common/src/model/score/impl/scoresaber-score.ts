@@ -31,6 +31,7 @@ import { ScoreSaberScoreBase } from "./scoresaber-score-base";
 @index({ leaderboardId: 1, timestamp: -1 }) // For leaderboard play counts
 @index({ timestamp: -1 }) // For pure timestamp queries
 @index({ pp: -1 }) // For top scores queries
+@index({ timestamp: 1, pp: -1 }) // For top scores with time filtering
 export class ScoreSaberScoreInternal extends ScoreSaberScoreBase {}
 
 export class ScoreSaberScorePublic extends ScoreSaberScoreInternal {

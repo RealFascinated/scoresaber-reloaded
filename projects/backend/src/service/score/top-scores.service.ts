@@ -38,32 +38,34 @@ export class TopScoresService {
       PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>
     >().setItemsPerPage(25);
 
-    // Get both count and scores in a single aggregation
-    const [result] = await ScoreSaberScoreModel.aggregate([
-      {
-        $match: {
-          ...(timeframe === "all" ? {} : { timestamp: { $gte: getDaysAgoDate(daysAgo) } }),
-          pp: { $gt: 0 },
-        },
-      },
-      { $sort: { pp: -1 } },
-      { $limit: 1000 },
-      {
-        $facet: {
-          total: [{ $count: "count" }],
-          scores: [{ $skip: (page - 1) * 25 }, { $limit: 25 }],
-        },
-      },
-    ]).hint({ pp: -1 }); // Force use of pp index
+    // Build the match condition
+    const matchCondition = {
+      ...(timeframe === "all" ? {} : { timestamp: { $gte: getDaysAgoDate(daysAgo) } }),
+      pp: { $gt: 0 },
+    };
 
-    const total = result.total[0]?.count || 0;
+    // Use separate queries for better performance
+    const [total, scores] = await Promise.all([
+      // Get total count
+      ScoreSaberScoreModel.countDocuments(matchCondition),
+      // Get scores with pagination
+      ScoreSaberScoreModel.aggregate([
+        { $match: matchCondition },
+        { $sort: { pp: -1 } },
+        { $skip: (page - 1) * 25 },
+        { $limit: 25 },
+      ]).hint(timeframe === "all" ? { pp: -1 } : { timestamp: 1, pp: -1 }), // Use appropriate index based on filtering
+    ]);
+
     pagination.setTotalItems(total);
 
     return pagination.getPage(page, async () => {
-      const scores = result.scores.map(scoreToObject);
+      const scoreObjects = scores.map(scoreToObject);
 
       // Batch fetch leaderboards using getLeaderboards
-      const leaderboardIds = scores.map((score: ScoreSaberScore) => score.leaderboardId.toString());
+      const leaderboardIds = scoreObjects.map((score: ScoreSaberScore) =>
+        score.leaderboardId.toString()
+      );
       const leaderboardResponses = await LeaderboardService.getLeaderboards(leaderboardIds, {
         includeBeatSaver: true,
         cacheOnly: true,
@@ -71,7 +73,7 @@ export class TopScoresService {
 
       // Batch fetch player info
       const uniquePlayerIds = [
-        ...new Set(scores.map((score: ScoreSaberScore) => score.playerId.toString())),
+        ...new Set(scoreObjects.map((score: ScoreSaberScore) => score.playerId.toString())),
       ] as string[];
       const playerPromises = uniquePlayerIds.map(playerId =>
         ScoreSaberService.getCachedPlayer(playerId, true).catch(() => undefined)
@@ -88,7 +90,7 @@ export class TopScoresService {
 
       // Process scores in parallel
       const processedScores = await Promise.all(
-        scores.map(async (score: ScoreSaberScore) => {
+        scoreObjects.map(async (score: ScoreSaberScore) => {
           const leaderboardResponse = leaderboardMap.get(score.leaderboardId);
           if (!leaderboardResponse) {
             return null;

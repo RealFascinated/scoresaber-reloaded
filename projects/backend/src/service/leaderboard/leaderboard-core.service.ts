@@ -546,71 +546,99 @@ export class LeaderboardCoreService {
     Logger.info(`[LEADERBOARD] Updating leaderboard play counts...`);
     const before = performance.now();
 
-    // Calculate time boundaries once
-    const now = new Date();
-    const oneDayAgo = new Date(now.getTime() - TimeUnit.toMillis(TimeUnit.Day, 1));
-    const sevenDaysAgo = new Date(now.getTime() - TimeUnit.toMillis(TimeUnit.Day, 7));
+    try {
+      // Calculate time boundaries once
+      const now = new Date();
+      const oneDayAgo = new Date(now.getTime() - TimeUnit.toMillis(TimeUnit.Day, 1));
+      const sevenDaysAgo = new Date(now.getTime() - TimeUnit.toMillis(TimeUnit.Day, 7));
 
-    // Use optimized aggregation pipeline with single scan
-    const playCounts = await ScoreSaberScoreModel.aggregate([
-      {
-        $match: {
-          timestamp: { $gte: sevenDaysAgo }, // Get all data from 7 days ago
-        },
-      },
-      {
-        $group: {
-          _id: "$leaderboardId",
-          dailyCount: {
-            $sum: {
-              $cond: [{ $gte: ["$timestamp", oneDayAgo] }, 1, 0],
+      // Use separate optimized queries for better performance
+      const [dailyPlayCounts, weeklyPlayCounts] = await Promise.all([
+        // Get daily play counts (last 24 hours)
+        ScoreSaberScoreModel.aggregate([
+          {
+            $match: {
+              timestamp: { $gte: oneDayAgo },
             },
           },
-          weeklyCount: { $sum: 1 }, // All records in the 7-day window
-        },
-      },
-    ]).hint({ leaderboardId: 1, timestamp: -1 }); // Force use of leaderboard timestamp index
+          {
+            $group: {
+              _id: "$leaderboardId",
+              dailyCount: { $sum: 1 },
+            },
+          },
+        ]).hint({ timestamp: -1 }), // Use timestamp index for time-based queries
 
-    // Create maps for quick lookup
-    const dailyPlaysMap = new Map(
-      playCounts.map((item: { _id: number; dailyCount: number }) => [
-        item._id.toString(),
-        item.dailyCount,
-      ])
-    );
-    const weeklyPlaysMap = new Map(
-      playCounts.map((item: { _id: number; weeklyCount: number }) => [
-        item._id.toString(),
-        item.weeklyCount,
-      ])
-    );
+        // Get weekly play counts (last 7 days)
+        ScoreSaberScoreModel.aggregate([
+          {
+            $match: {
+              timestamp: { $gte: sevenDaysAgo },
+            },
+          },
+          {
+            $group: {
+              _id: "$leaderboardId",
+              weeklyCount: { $sum: 1 },
+            },
+          },
+        ]).hint({ timestamp: -1 }), // Use timestamp index for time-based queries
+      ]);
 
-    // Get all leaderboard IDs that need updating
-    const leaderboardIds = new Set([...dailyPlaysMap.keys(), ...weeklyPlaysMap.keys()]);
+      // Create maps for quick lookup
+      const dailyPlaysMap = new Map(
+        dailyPlayCounts.map((item: { _id: number; dailyCount: number }) => [
+          item._id.toString(),
+          item.dailyCount,
+        ])
+      );
+      const weeklyPlaysMap = new Map(
+        weeklyPlayCounts.map((item: { _id: number; weeklyCount: number }) => [
+          item._id.toString(),
+          item.weeklyCount,
+        ])
+      );
 
-    if (leaderboardIds.size === 0) {
-      Logger.info(`[LEADERBOARD] No leaderboards to update`);
-      return;
+      // Get all leaderboard IDs that need updating
+      const leaderboardIds = new Set([...dailyPlaysMap.keys(), ...weeklyPlaysMap.keys()]);
+
+      if (leaderboardIds.size === 0) {
+        Logger.info(`[LEADERBOARD] No leaderboards to update`);
+        return;
+      }
+
+      // Process in batches to avoid memory issues with large datasets
+      const batchSize = 1000;
+      const leaderboardIdArray = Array.from(leaderboardIds);
+      let totalModified = 0;
+
+      for (let i = 0; i < leaderboardIdArray.length; i += batchSize) {
+        const batch = leaderboardIdArray.slice(i, i + batchSize);
+
+        // Prepare bulk operations for this batch
+        const bulkOps = batch.map(leaderboardId => ({
+          updateOne: {
+            filter: { _id: Number(leaderboardId) },
+            update: {
+              dailyPlays: dailyPlaysMap.get(leaderboardId) || 0,
+              weeklyPlays: weeklyPlaysMap.get(leaderboardId) || 0,
+            },
+          },
+        }));
+
+        // Execute bulk update for this batch
+        const result = await ScoreSaberLeaderboardModel.bulkWrite(bulkOps);
+        totalModified += result.modifiedCount || 0;
+      }
+
+      const timeTaken = performance.now() - before;
+      Logger.info(
+        `[LEADERBOARD] Updated ${totalModified} leaderboard play counts in ${timeTaken}ms`
+      );
+    } catch (error) {
+      Logger.error(`[LEADERBOARD] Error updating leaderboard play counts:`, error);
+      throw error;
     }
-
-    // Prepare bulk operations
-    const bulkOps = Array.from(leaderboardIds).map(leaderboardId => ({
-      updateOne: {
-        filter: { _id: Number(leaderboardId) },
-        update: {
-          dailyPlays: dailyPlaysMap.get(leaderboardId) || 0,
-          weeklyPlays: weeklyPlaysMap.get(leaderboardId) || 0,
-        },
-      },
-    }));
-
-    // Execute bulk update
-    const result = await ScoreSaberLeaderboardModel.bulkWrite(bulkOps);
-
-    const timeTaken = performance.now() - before;
-    Logger.info(
-      `[LEADERBOARD] Updated ${result.modifiedCount} leaderboard play counts in ${timeTaken}ms`
-    );
   }
 
   /**
