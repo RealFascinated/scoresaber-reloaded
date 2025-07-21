@@ -1,4 +1,4 @@
-import { getModelForClass, modelOptions, prop, Severity } from "@typegoose/typegoose";
+import { getModelForClass, index, modelOptions, prop, Severity } from "@typegoose/typegoose";
 import type { Document } from "mongoose";
 import { type PeakRank } from "../../player/peak-rank";
 
@@ -6,6 +6,7 @@ import { type PeakRank } from "../../player/peak-rank";
  * The model for a player.
  */
 @modelOptions({ options: { allowMixed: Severity.ALLOW }, schemaOptions: { collection: "players" } })
+@index({ inactive: 1, pp: -1 }) // Compound index for active player queries
 export class Player {
   /**
    * The id of the player.
@@ -46,7 +47,7 @@ export class Player {
   /**
    * Whether this player is banned or not.
    */
-  @prop({ index: true })
+  @prop()
   public banned?: boolean;
 
   /**
@@ -58,7 +59,7 @@ export class Player {
   /**
    * The player's HMD (Head Mounted Display).
    */
-  @prop({ index: true })
+  @prop()
   public hmd?: string;
 
   /**
@@ -70,7 +71,7 @@ export class Player {
   /**
    * The player's country.
    */
-  @prop({ index: true })
+  @prop()
   public country?: string;
 
   /**
@@ -88,7 +89,7 @@ export class Player {
   /**
    * The date the player's ScoreSaber account was created.
    */
-  @prop({ index: true })
+  @prop()
   public joinedDate?: Date;
 
   /**

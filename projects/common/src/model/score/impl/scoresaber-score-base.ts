@@ -17,14 +17,14 @@ export class ScoreSaberScoreBase extends Score {
   /**
    * The leaderboard the score was set on.
    */
-  @Prop({ required: true, index: true })
+  @Prop({ required: true })
   public readonly leaderboardId!: number;
 
   /**
    * The amount of pp for the score.
    * @private
    */
-  @Prop({ required: true, index: true })
+  @Prop({ required: true })
   public pp!: number;
 
   /**

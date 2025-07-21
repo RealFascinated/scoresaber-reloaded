@@ -583,7 +583,7 @@ export class LeaderboardCoreService {
           ],
         },
       },
-    ]);
+    ]).hint({ leaderboardId: 1, timestamp: -1 }); // Force use of leaderboard timestamp index
 
     // Create maps for quick lookup
     const dailyPlaysMap = new Map(

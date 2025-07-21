@@ -218,12 +218,21 @@ export class PlayerHistoryService {
     const allPlayerIds = await PlayerModel.find({}, { _id: 1 });
     Logger.info(`Total players in database: ${allPlayerIds.length}`);
 
-    // Mark players not in the active list as inactive
-    for (const { _id } of allPlayerIds) {
-      if (!playerIds.has(_id)) {
-        await PlayerModel.updateOne({ _id }, { $set: { inactive: true } });
-        Logger.info(`Marked player ${_id} as inactive`);
-      }
+    // Mark players not in the active list as inactive using bulk operation
+    const inactivePlayerIds = allPlayerIds
+      .filter(({ _id }) => !playerIds.has(_id))
+      .map(({ _id }) => _id);
+
+    if (inactivePlayerIds.length > 0) {
+      const bulkOps = inactivePlayerIds.map(playerId => ({
+        updateOne: {
+          filter: { _id: playerId },
+          update: { $set: { inactive: true } },
+        },
+      }));
+
+      await PlayerModel.bulkWrite(bulkOps);
+      Logger.info(`Marked ${inactivePlayerIds.length} players as inactive`);
     }
 
     const inactivePlayers = await PlayerModel.countDocuments({ inactive: true });
@@ -301,7 +310,7 @@ export class PlayerHistoryService {
       await PlayerHistoryEntryModel.findOneAndUpdate(
         { playerId: foundPlayer._id, date: getMidnightAlignedDate(trackTime) },
         updatedHistory,
-        { upsert: true }
+        { upsert: true, new: false } // Don't return updated document
       );
     }
 
@@ -344,7 +353,8 @@ export class PlayerHistoryService {
       })
         .select(projection ? { date: 1, ...projection } : {})
         .sort({ date: -1 })
-        .lean(),
+        .lean()
+        .hint({ playerId: 1, date: -1 }), // Force use of compound index
       parseRankHistory(player),
     ]);
 

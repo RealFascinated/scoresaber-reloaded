@@ -37,13 +37,13 @@ export class AdditionalScoreData {
   /**
    * The difficulty the score was set on.
    */
-  @prop({ required: true, index: true })
+  @prop({ required: true })
   public songDifficulty!: MapDifficulty;
 
   /**
    * The characteristic of the song.
    */
-  @prop({ required: true, index: true })
+  @prop({ required: true })
   public songCharacteristic!: MapCharacteristic;
 
   /**
@@ -58,7 +58,7 @@ export class AdditionalScoreData {
   /**
    * The BeatLeader score id for this score.
    */
-  @prop({ required: false, index: true })
+  @prop({ required: false })
   public scoreId!: number;
 
   /**
@@ -138,7 +138,7 @@ export class AdditionalScoreData {
   /**
    * The date the score was set on.
    */
-  @prop({ required: true, index: true })
+  @prop({ required: true })
   public timestamp!: Date;
 
   /**

@@ -20,7 +20,7 @@ export default class Score {
   /**
    * The id of the player who set the score.
    */
-  @prop({ required: true, index: true })
+  @prop({ required: true })
   public readonly playerId!: string;
 
   /**
@@ -97,7 +97,7 @@ export default class Score {
    * The time the score was set.
    * @private
    */
-  @prop({ required: true, index: true })
+  @prop({ required: true })
   public readonly timestamp!: Date;
 }
 

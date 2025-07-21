@@ -3,13 +3,7 @@ import { DetailType } from "@ssr/common/detail-type";
 import { env } from "@ssr/common/env";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger from "@ssr/common/logger";
-import {
-  scoreSaberCachedPlayerToObject,
-  ScoreSaberPlayerCacheDocument,
-  ScoreSaberPlayerCacheModel,
-} from "@ssr/common/model/scoresaber-player-cache";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/leaderboard-player-info";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import { getPlayerStatisticChanges } from "@ssr/common/utils/player-utils";
 import { getDaysAgoDate, TimeUnit } from "@ssr/common/utils/time-utils";
@@ -179,42 +173,5 @@ export default class ScoreSaberService {
     );
 
     return playerWithTimestamp;
-  }
-
-  /**
-   * Updates the player token inside the player cache.
-   *
-   * @param player the player to update
-   */
-  public static async updatePlayerCache(
-    playerToken: ScoreSaberPlayerToken | ScoreSaberLeaderboardPlayerInfoToken
-  ): Promise<ScoreSaberPlayerToken | undefined> {
-    const player = await this.getCachedPlayer(playerToken.id, true).catch(() => undefined);
-    if (player == undefined) {
-      Logger.warn(`Player "${playerToken.id}" not found on ScoreSaber`);
-      return undefined;
-    }
-
-    // Check if the player has changed
-    if (playerToken.name !== player.name || playerToken.country !== player.country) {
-      return scoreSaberCachedPlayerToObject(
-        (await ScoreSaberPlayerCacheModel.findOneAndUpdate(
-          { _id: player.id },
-          {
-            $set: {
-              name: playerToken.name,
-              country: playerToken.country,
-            },
-          },
-          {
-            upsert: true,
-            new: true,
-            setDefaultsOnInsert: true,
-          }
-        ).lean()) as unknown as ScoreSaberPlayerCacheDocument
-      );
-    }
-
-    return player;
   }
 }

@@ -1,4 +1,4 @@
-import { getModelForClass, modelOptions, prop, Severity } from "@typegoose/typegoose";
+import { getModelForClass, index, modelOptions, prop, Severity } from "@typegoose/typegoose";
 import type { Document } from "mongoose";
 
 /**
@@ -8,6 +8,7 @@ import type { Document } from "mongoose";
   options: { allowMixed: Severity.ALLOW },
   schemaOptions: { collection: "player-history" },
 })
+@index({ playerId: 1, date: -1 }) // Compound index for time-series queries
 export class PlayerHistoryEntry {
   /**
    * The id of the history entry.
