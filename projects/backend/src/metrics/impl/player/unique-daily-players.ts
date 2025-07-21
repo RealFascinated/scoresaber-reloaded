@@ -20,7 +20,7 @@ export default class UniqueDailyPlayersMetric extends NumberMetric {
           uniquePlayers: [{ $group: { _id: "$playerId" } }, { $count: "uniquePlayers" }],
         },
       },
-    ]);
+    ]).hint({ timestamp: -1 }); // Force use of pure timestamp index
 
     const uniquePlayersCount = statsResponse[0]?.uniquePlayers?.[0]?.uniquePlayers ?? 0;
     return this.getPointBase().intField("value", uniquePlayersCount);

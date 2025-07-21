@@ -28,7 +28,9 @@ import { ScoreSaberScoreBase } from "./scoresaber-score-base";
 @index({ playerId: 1, leaderboardId: 1, score: 1 })
 @index({ playerId: 1, pp: -1 })
 @index({ leaderboardId: 1, rank: 1 })
+@index({ timestamp: -1, playerId: 1 }) // For time-based aggregations
 @index({ leaderboardId: 1, timestamp: -1 }) // For leaderboard play counts
+@index({ timestamp: -1 }) // For pure timestamp queries
 export class ScoreSaberScoreInternal extends ScoreSaberScoreBase {}
 
 export class ScoreSaberScorePublic extends ScoreSaberScoreInternal {
