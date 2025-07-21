@@ -96,6 +96,15 @@ export class MedalScoresService {
     for (const [index, score] of scores.entries()) {
       score.rank = index + 1;
       score.medals = MEDAL_COUNTS[score.rank as keyof typeof MEDAL_COUNTS];
+
+      // Save the score if top 10
+      if (score.rank <= 10) {
+        await ScoreSaberMedalsScoreModel.updateOne(
+          { _id: score._id },
+          { $set: score },
+          { upsert: true }
+        );
+      }
     }
 
     // Calculate medals after changes (only top 10)
@@ -108,9 +117,6 @@ export class MedalScoresService {
     for (const score of scores.slice(10)) {
       await ScoreSaberMedalsScoreModel.deleteOne({ _id: score._id });
     }
-
-    // Insert the new score
-    await medalScore.save();
 
     // Update only affected players' medal counts
     if (affectedPlayers.size > 0) {
