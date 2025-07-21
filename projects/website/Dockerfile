@@ -26,7 +26,7 @@ RUN bun --filter '@ssr/common' build
 RUN bun run --filter website build
 
 # Run the app
-FROM base AS runner
+FROM node:alpine3.22 AS runner
 WORKDIR /app
 
 # -----------------------------------
@@ -47,4 +47,4 @@ ENV HOSTNAME="0.0.0.0"
 ENV PORT=3000
 
 # Use the correct path to server.js
-CMD ["bun", "--bun", "server.js"]
+CMD ["node", "server.js"]
