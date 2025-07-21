@@ -1,9 +1,5 @@
 FROM oven/bun:1.2.19-debian AS base
 
-# Used for health checks
-RUN apt update
-RUN apt install -y curl
-
 # Set the environment
 ENV NEXT_PUBLIC_APP_ENV=production
 
@@ -28,6 +24,8 @@ RUN bun run --filter website build
 # Run the app
 FROM node:alpine3.22 AS runner
 WORKDIR /app
+
+RUN apk add --no-cache curl
 
 # -----------------------------------
 
