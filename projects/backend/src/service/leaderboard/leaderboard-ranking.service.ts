@@ -1,6 +1,7 @@
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { ScoreSaberCurve } from "@ssr/common/leaderboard-curve/scoresaber-curve";
 import Logger from "@ssr/common/logger";
+import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 import {
   ScoreSaberLeaderboard,
   ScoreSaberLeaderboardModel,
@@ -219,16 +220,21 @@ export class LeaderboardRankingService {
           if (!score) continue;
 
           // Update score
+          const scoreDocument = getScoreSaberScoreFromToken(
+            scoreToken,
+            update.leaderboard,
+            score.playerId
+          );
           scoreBulkOpsPage.push({
             updateOne: {
               filter: { _id: score.id },
               update: {
                 $set: {
-                  pp: scoreToken.pp,
-                  weight: scoreToken.weight,
-                  rank: scoreToken.rank,
+                  ...scoreDocument,
+                  _id: score.id,
                 },
               },
+              upsert: true,
             },
           });
 
