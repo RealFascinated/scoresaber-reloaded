@@ -54,7 +54,7 @@ export class TopScoresService {
           scores: [{ $skip: (page - 1) * 25 }, { $limit: 25 }],
         },
       },
-    ]);
+    ]).hint({ pp: -1 }); // Force use of pp index
 
     const total = result.total[0]?.count || 0;
     pagination.setTotalItems(total);
