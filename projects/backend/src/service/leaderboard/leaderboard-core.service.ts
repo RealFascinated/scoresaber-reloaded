@@ -551,52 +551,38 @@ export class LeaderboardCoreService {
     const oneDayAgo = new Date(now.getTime() - TimeUnit.toMillis(TimeUnit.Day, 1));
     const sevenDaysAgo = new Date(now.getTime() - TimeUnit.toMillis(TimeUnit.Day, 7));
 
-    // Use aggregation pipeline to calculate play counts for all leaderboards in one operation
+    // Use optimized aggregation pipeline with single scan
     const playCounts = await ScoreSaberScoreModel.aggregate([
       {
-        $facet: {
-          dailyPlays: [
-            {
-              $match: {
-                timestamp: { $gte: oneDayAgo },
-              },
+        $match: {
+          timestamp: { $gte: sevenDaysAgo }, // Get all data from 7 days ago
+        },
+      },
+      {
+        $group: {
+          _id: "$leaderboardId",
+          dailyCount: {
+            $sum: {
+              $cond: [{ $gte: ["$timestamp", oneDayAgo] }, 1, 0],
             },
-            {
-              $group: {
-                _id: "$leaderboardId",
-                count: { $sum: 1 },
-              },
-            },
-          ],
-          weeklyPlays: [
-            {
-              $match: {
-                timestamp: { $gte: sevenDaysAgo },
-              },
-            },
-            {
-              $group: {
-                _id: "$leaderboardId",
-                count: { $sum: 1 },
-              },
-            },
-          ],
+          },
+          weeklyCount: { $sum: 1 }, // All records in the 7-day window
         },
       },
     ]).hint({ leaderboardId: 1, timestamp: -1 }); // Force use of leaderboard timestamp index
 
     // Create maps for quick lookup
     const dailyPlaysMap = new Map(
-      playCounts[0]?.dailyPlays?.map((item: { _id: number; count: number }) => [
+      playCounts.map((item: { _id: number; dailyCount: number }) => [
         item._id.toString(),
-        item.count,
-      ]) || []
+        item.dailyCount,
+      ])
     );
     const weeklyPlaysMap = new Map(
-      playCounts[0]?.weeklyPlays?.map((item: { _id: number; count: number }) => [
+      playCounts.map((item: { _id: number; weeklyCount: number }) => [
         item._id.toString(),
-        item.count,
-      ]) || []
+        item.weeklyCount,
+      ])
     );
 
     // Get all leaderboard IDs that need updating
