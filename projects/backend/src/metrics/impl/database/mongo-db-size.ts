@@ -23,9 +23,9 @@ export default class MongoDbSizeMetric extends NumberMetric {
       const stats = await mongoose.connection.db.command({ dbStats: 1 });
 
       return new Point(MetricType.MONGO_DB_SIZE)
-        .floatField("total", stats.dataSize + stats.indexSize) // Total size in bytes
-        .floatField("index", stats.indexSize) // Index size in bytes
-        .floatField("collections", stats.dataSize) // Total data size in bytes
+        .floatField("total", stats.storageSize + stats.indexSize) // Compressed total size in bytes
+        .floatField("index", stats.indexSize) // Compressed index size in bytes
+        .floatField("collections", stats.storageSize) // Compressed data size in bytes
         .timestamp(new Date());
     } catch (error) {
       Logger.error("Failed to collect MongoDB size metric:", error);
