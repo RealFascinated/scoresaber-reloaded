@@ -13,21 +13,21 @@ export default class HmdStatisticMetric extends NumberMetric {
   }
 
   public async collect(): Promise<Point | undefined> {
-    const scores = await ScoreSaberScoreModel.find({
-      timestamp: { $gte: getMidnightAlignedDate(new Date()) }, // Today
-    })
-      .select("hmd")
-      .lean();
-    const hmds = new Map<string, number>();
-    for (const score of scores) {
-      if (score.hmd && score.hmd !== "Unknown") {
-        hmds.set(score.hmd, (hmds.get(score.hmd) ?? 0) + 1);
-      }
-    }
+    const stats = await ScoreSaberScoreModel.aggregate([
+      {
+        $match: {
+          timestamp: { $gte: getMidnightAlignedDate(new Date()) },
+          hmd: { $nin: [null, "Unknown"] },
+        },
+      },
+      { $group: { _id: "$hmd", count: { $sum: 1 } } },
+    ]);
 
     const point = this.getPointBase();
-    for (const [hmd, count] of hmds) {
-      point.intField(`${hmd}`, count);
+    for (const stat of stats) {
+      if (stat._id) {
+        point.intField(`${stat._id}`, stat.count);
+      }
     }
     return point;
   }
