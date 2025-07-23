@@ -52,17 +52,33 @@ export class TopScoresService {
       };
     }
 
-    // Get total count with optimized query
-    const total = await ScoreSaberScoreModel.countDocuments(matchFilter);
-    pagination.setTotalItems(total);
+    // Get scores with optimized query - use different approach for time-filtered queries
+    let scores;
+    let total: number;
 
-    // Get scores with optimized query
-    const scores = await ScoreSaberScoreModel.aggregate([
-      { $match: matchFilter },
-      { $sort: { pp: -1 } },
-      { $skip: (page - 1) * 25 },
-      { $limit: 25 },
-    ]);
+    if (timeframe === "all") {
+      // For "all time" - skip count and just get the data efficiently
+      scores = await ScoreSaberScoreModel.aggregate([
+        { $match: { pp: { $gt: 0 } } },
+        { $sort: { pp: -1 } },
+        { $skip: Math.min((page - 1) * 25, 975) }, // Limit to 1000 scores max
+        { $limit: 25 },
+      ]).hint({ pp: -1 });
+
+      // Use a reasonable estimate for total - avoids expensive count
+      total = Math.min(500000, 1000); // Cap at 1000 scores
+    } else {
+      // For time-filtered - get count and use aggregation with timestamp index hint
+      total = await ScoreSaberScoreModel.countDocuments(matchFilter);
+      scores = await ScoreSaberScoreModel.aggregate([
+        { $match: matchFilter },
+        { $sort: { pp: -1 } },
+        { $skip: Math.min((page - 1) * 25, 975) }, // Limit to 1000 scores max
+        { $limit: 25 },
+      ]).hint({ timestamp: -1 });
+    }
+
+    pagination.setTotalItems(total);
 
     return pagination.getPage(page, async () => {
       const scoreObjects = scores.map(scoreToObject);

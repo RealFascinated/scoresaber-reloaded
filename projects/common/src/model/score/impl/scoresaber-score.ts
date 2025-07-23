@@ -29,7 +29,6 @@ import { ScoreSaberScoreBase } from "./scoresaber-score-base";
 @index({ leaderboardId: 1 })
 @index({ pp: -1 })
 @index({ timestamp: -1 })
-@index({ timestamp: 1, pp: -1 })
 export class ScoreSaberScoreInternal extends ScoreSaberScoreBase {}
 
 export class ScoreSaberScorePublic extends ScoreSaberScoreInternal {
