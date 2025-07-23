@@ -124,7 +124,7 @@ const GenericChart = ({ config, labels }: Props) => {
             return 10;
           },
           callback: (value: any, index: number) => {
-            if (typeof labels[index] === "string") return value;
+            if (typeof labels[index] === "string") return labels[index];
             const date = labels[index] instanceof Date ? labels[index] : parseDate(labels[index]);
             const daysAgo = getDaysAgo(date);
 

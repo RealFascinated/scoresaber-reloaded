@@ -178,7 +178,7 @@ export default function LeaderboardScores({
   const isFriends = mode === ScoreModeEnum.Friends;
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-2">
       <div
         className={cn(
           "flex flex-col flex-wrap items-center justify-center gap-4 lg:flex-row",

@@ -75,20 +75,24 @@ export default function PlayerScoreAccuracyChart({ scoreStats, leaderboard }: Pr
           },
         ]
       : []),
-    {
-      title: "PP",
-      field: "pp",
-      color: Colors.ranked,
-      axisId: "y2",
-      axisConfig: {
-        reverse: false,
-        display: true,
-        hideOnMobile: true,
-        displayName: "PP",
-        position: "right",
-      },
-      labelFormatter: (value: number) => `PP: ${value.toFixed(2)}pp`,
-    },
+    ...(leaderboard.ranked
+      ? [
+          {
+            title: "PP",
+            field: "pp",
+            color: Colors.ranked,
+            axisId: "y2",
+            axisConfig: {
+              reverse: false,
+              display: true,
+              hideOnMobile: true,
+              displayName: "PP",
+              position: "right" as const,
+            },
+            labelFormatter: (value: number) => `PP: ${value.toFixed(2)}pp`,
+          },
+        ]
+      : []),
   ];
 
   const config: ChartConfig = {
@@ -126,7 +130,7 @@ export default function PlayerScoreAccuracyChart({ scoreStats, leaderboard }: Pr
   };
 
   return (
-    <div className="bg-accent-deep border-border flex w-full flex-col items-center justify-center rounded-xl border p-4 backdrop-blur-sm">
+    <div className="bg-secondary/90 border-border flex h-[340px] w-full flex-col items-center justify-center rounded-xl border p-4 backdrop-blur-sm">
       <GenericChart labels={labels} config={config} />
     </div>
   );

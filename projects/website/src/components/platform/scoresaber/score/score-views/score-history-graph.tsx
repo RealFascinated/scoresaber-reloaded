@@ -19,6 +19,7 @@ import {
 } from "chart.js";
 import { ClockIcon } from "lucide-react";
 import { Line } from "react-chartjs-2";
+import Card from "@/components/card";
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
@@ -60,7 +61,7 @@ export default function ScoreHistoryGraph({ playerId, leaderboardId }: ScoreHist
     queryFn: () => ssrApi.getScoreHistoryGraph(playerId, leaderboardId),
   });
 
-  if (!scoreHistory || scoreHistory.scores.length === 1) {
+  if (!scoreHistory || scoreHistory.scores.length <= 1) {
     return (
       <EmptyState
         icon={<ClockIcon className="h-10 w-10 text-gray-400 dark:text-gray-500" />}
@@ -73,8 +74,6 @@ export default function ScoreHistoryGraph({ playerId, leaderboardId }: ScoreHist
   const scoreDates = scoreHistory.scores.map(
     (score: ScoreHistoryGraphScore) => new Date(score.timestamp)
   );
-
-  // Sort dates to ensure we get the correct min/max
   scoreDates.sort((a: Date, b: Date) => a.getTime() - b.getTime());
   const firstDate = new Date(scoreDates[0]);
   const lastDate = new Date(scoreDates[scoreDates.length - 1]);
@@ -287,12 +286,35 @@ export default function ScoreHistoryGraph({ playerId, leaderboardId }: ScoreHist
   };
 
   return (
-    <div className="bg-accent-deep border-border flex flex-col items-center justify-center gap-6 rounded-xl border p-4 backdrop-blur-sm">
-      <div className="relative flex h-[340px] w-full">
-        <div className="relative block h-[340px] w-full">
+    <Card className="mb-2 flex w-full flex-col rounded-xl p-3 shadow-xl md:mb-0 md:p-6">
+      {/* Compact header */}
+      <div className="mb-2 flex flex-col gap-1 md:flex-row md:items-center md:justify-between md:gap-2">
+        <div className="text-muted-foreground text-sm font-medium">
+          {formatDate(firstDate, "DD MMMM YYYY")} - {formatDate(lastDate, "DD MMMM YYYY")}
+        </div>
+        <div className="text-muted-foreground flex flex-col gap-1 text-xs md:flex-row md:gap-4">
+          {scoreHistory.isRanked ? (
+            <span>
+              PP: {Math.min(...scoreHistory.scores.map(s => s.pp)).toFixed(2)} -{" "}
+              {Math.max(...scoreHistory.scores.map(s => s.pp)).toFixed(2)}
+            </span>
+          ) : (
+            <span>
+              Score: {formatNumberWithCommas(Math.min(...scoreHistory.scores.map(s => s.score)))} -{" "}
+              {formatNumberWithCommas(Math.max(...scoreHistory.scores.map(s => s.score)))}
+            </span>
+          )}
+          <span>
+            Acc: {Math.min(...scoreHistory.scores.map(s => s.accuracy)).toFixed(2)}% -{" "}
+            {Math.max(...scoreHistory.scores.map(s => s.accuracy)).toFixed(2)}%
+          </span>
+        </div>
+      </div>
+      <div className="relative flex h-[220px] w-full md:h-[340px]">
+        <div className="relative block h-[220px] w-full md:h-[340px]">
           <Line options={options} data={{ labels: allDates, datasets }} />
         </div>
       </div>
-    </div>
+    </Card>
   );
 }

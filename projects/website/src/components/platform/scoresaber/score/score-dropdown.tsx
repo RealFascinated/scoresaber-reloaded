@@ -85,7 +85,6 @@ export default function ScoreDropdown({
     [onModeChange]
   );
 
-  // Notify parent component of loading state changes
   useEffect(() => {
     onLoadingChange?.(isLoading);
   }, [isLoading, onLoadingChange]);
@@ -125,67 +124,68 @@ export default function ScoreDropdown({
   return (
     <AnimatePresence>
       <motion.div
-        initial={{ opacity: 0, height: 0, scale: 0.95 }}
+        initial={{ opacity: 0, height: 0, scale: 0.97 }}
         animate={{ opacity: 1, height: "auto", scale: 1 }}
-        exit={{ opacity: 0, height: 0, scale: 0.95 }}
+        exit={{ opacity: 0, height: 0, scale: 0.97 }}
         transition={{
-          duration: 0.3,
+          duration: 0.25,
           ease: [0.4, 0, 0.2, 1],
-          height: { duration: 0.3 },
-          opacity: { duration: 0.2 },
+          height: { duration: 0.25 },
+          opacity: { duration: 0.18 },
         }}
-        className="mt-2 w-full origin-top"
+        className="w-full origin-top pt-3"
       >
-        <Card className="border-input relative flex w-full gap-4 border">
-          <div className="flex w-full flex-col items-center justify-center gap-2">
-            <div className="flex flex-wrap justify-center gap-2 lg:justify-start">
-              {modes.map(modeItem => (
-                <Button
-                  key={modeItem.name}
-                  variant={modeItem.name === mode ? "default" : "outline"}
-                  onClick={() => handleModeChange(modeItem.name)}
-                  className="flex gap-2"
-                >
-                  {modeItem.icon}
-                  <p>{modeItem.name}</p>
-                </Button>
-              ))}
-            </div>
-
-            {showMapStats && beatSaverMap && <MapStats beatSaver={beatSaverMap} />}
+        {/* Mode Switcher */}
+        <div className="mb-3 flex w-full justify-center">
+          <div className="flex flex-wrap justify-center gap-2">
+            {modes.map(modeItem => (
+              <Button
+                key={modeItem.name}
+                variant={mode === modeItem.name ? "default" : "outline"}
+                onClick={() => handleModeChange(modeItem.name)}
+                className="flex items-center gap-2 px-3 py-2 text-sm"
+              >
+                {modeItem.icon}
+                <span>{modeItem.name}</span>
+              </Button>
+            ))}
           </div>
+        </div>
 
-          <AnimatePresence initial={false} mode="wait">
-            <motion.div
-              key={mode}
-              initial={{ opacity: 0, y: 10, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -10, scale: 0.98 }}
-              transition={{
-                duration: 0.2,
-                ease: [0.4, 0, 0.2, 1],
-              }}
-              className="w-full"
-            >
-              {renderModeContent()}
-            </motion.div>
-          </AnimatePresence>
+        {/* Map Stats */}
+        {showMapStats && beatSaverMap && (
+          <div className="mb-2 flex w-full justify-center">
+            <div className="bg-secondary/90 border-border flex w-full flex-wrap justify-center gap-1 rounded-md border px-2 py-1 shadow-inner md:w-auto md:gap-2 md:rounded-xl">
+              <MapStats beatSaver={beatSaverMap} />
+            </div>
+          </div>
+        )}
 
-          {showLeaderboardScores && (
-            <>
-              <Separator />
+        {/* Main Card Content */}
+        <motion.div
+          key={mode}
+          initial={{ opacity: 0, y: 16, scale: 0.98 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: -16, scale: 0.98 }}
+          transition={{ duration: 0.22, ease: [0.4, 0, 0.2, 1] }}
+          className="w-full"
+        >
+          {renderModeContent()}
+        </motion.div>
 
-              <div className="w-full">
-                <LeaderboardScores
-                  initialPage={scoresPage}
-                  leaderboard={leaderboard}
-                  highlightedPlayerId={highlightedPlayerId}
-                  disableUrlChanging
-                />
-              </div>
-            </>
-          )}
-        </Card>
+        {/* Leaderboard Scores */}
+        {showLeaderboardScores && (
+          <div className="mt-2">
+            <Card className="bg-background/90 rounded-xl p-4 shadow-xl">
+              <LeaderboardScores
+                initialPage={scoresPage}
+                leaderboard={leaderboard}
+                highlightedPlayerId={highlightedPlayerId}
+                disableUrlChanging
+              />
+            </Card>
+          </div>
+        )}
       </motion.div>
     </AnimatePresence>
   );

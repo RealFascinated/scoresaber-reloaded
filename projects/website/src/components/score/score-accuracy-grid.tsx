@@ -14,12 +14,12 @@ export default function ScoreAccuracyGrid({ scoreStats }: ScoreAccuracyGridProps
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" className="flex flex-row items-center gap-2">
+        <Button variant="primary" className="flex flex-row items-center gap-2">
           Open Accuracy Grid
           <ChartBarIcon className="h-4 w-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="w-fit">
+      <DialogContent className="flex w-full flex-col items-center justify-center md:w-fit">
         <DialogTitle>Accuracy Grid</DialogTitle>
         <div className="grid grid-cols-4 grid-rows-3 gap-1">
           {scoreStats.accuracyTracker.gridAcc.map((acc, i) => {

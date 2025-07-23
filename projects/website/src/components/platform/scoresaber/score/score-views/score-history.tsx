@@ -1,5 +1,6 @@
 "use client";
 
+import Card from "@/components/card";
 import ScoreSaberScoreDisplay from "@/components/platform/scoresaber/score/score";
 import PaginationComponent from "@/components/simple-pagination";
 import { Spinner } from "@/components/spinner";
@@ -80,36 +81,38 @@ export function ScoreHistory({ playerId, leaderboard }: ScoreHistoryProps) {
   }
 
   return (
-    <div className="flex flex-col gap-2">
-      <div className="divide-border flex flex-col divide-y">
+    <Card className="flex flex-col gap-2 rounded-xl p-2 md:p-4">
+      <div className="divide-border flex flex-col gap-3 divide-y md:gap-2">
         {scores.items.map(({ score, leaderboard, beatSaver }, index) => {
           return (
-            <ScoreSaberScoreDisplay
-              key={`${score.scoreId}-${index}`}
-              score={score}
-              leaderboard={leaderboard}
-              beatSaverMap={beatSaver}
-              settings={{
-                hideLeaderboardDropdown: true,
-                hideAccuracyChanger: true,
-                isPreviousScore: true,
-                hideRank: true,
-              }}
-            />
+            <div key={`${score.scoreId}-${index}`} className="py-2 md:py-0">
+              <ScoreSaberScoreDisplay
+                score={score}
+                leaderboard={leaderboard}
+                beatSaverMap={beatSaver}
+                settings={{
+                  hideLeaderboardDropdown: true,
+                  hideAccuracyChanger: true,
+                  isPreviousScore: true,
+                  hideRank: true,
+                }}
+              />
+            </div>
           );
         })}
       </div>
-
-      <PaginationComponent
-        mobilePagination={isMobile}
-        page={page}
-        totalItems={scores.metadata.totalItems}
-        itemsPerPage={scores.metadata.itemsPerPage}
-        loadingPage={isLoading ? page : undefined}
-        onPageChange={newPage => {
-          setPage(newPage);
-        }}
-      />
-    </div>
+      <div className="mt-3 md:mt-2">
+        <PaginationComponent
+          mobilePagination={isMobile}
+          page={page}
+          totalItems={scores.metadata.totalItems}
+          itemsPerPage={scores.metadata.itemsPerPage}
+          loadingPage={isLoading ? page : undefined}
+          onPageChange={newPage => {
+            setPage(newPage);
+          }}
+        />
+      </div>
+    </Card>
   );
 }

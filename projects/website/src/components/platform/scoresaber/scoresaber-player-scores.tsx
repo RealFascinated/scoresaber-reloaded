@@ -453,6 +453,10 @@ export default function ScoreSaberPlayerScores({
                   value={searchTerm}
                   onChange={e => setSearchTerm(e.target.value)}
                 />
+                <XIcon
+                  className="text-muted-foreground absolute top-1/2 right-2 h-3.5 w-3.5 -translate-y-1/2 cursor-pointer"
+                  onClick={() => setSearchTerm("")}
+                />
               </div>
 
               {/* Filters (cached mode only) */}
