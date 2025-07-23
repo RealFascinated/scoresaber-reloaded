@@ -36,8 +36,9 @@ function getCutDistribution(replay: Replay): CutDistribution[] {
   );
 
   for (const note of cutNotes) {
-    const finalScore = getCutScore(note.noteCutInfo!);
-    scoreCounts.set(finalScore, (scoreCounts.get(finalScore) || 0) + 1);
+    // Calculate only the distance to center score (0-15)
+    const distanceToCenterScore = getDistanceToCenterScore(note.noteCutInfo!);
+    scoreCounts.set(distanceToCenterScore, (scoreCounts.get(distanceToCenterScore) || 0) + 1);
   }
 
   return Array.from(scoreCounts.entries())
@@ -67,6 +68,22 @@ export function getCutScore(cutInfo: NoteCutInfo): number {
 
   const totalCutScore = Math.round(approachScore + followThroughScore + centerCutScore);
   return Math.max(0, Math.min(115, totalCutScore));
+}
+
+/**
+ * Calculates only the distance to center score for a given note cut info
+ *
+ * @param cutInfo the note cut info to calculate the distance to center score for
+ * @returns the calculated distance to center score (0-15)
+ */
+export function getDistanceToCenterScore(cutInfo: NoteCutInfo): number {
+  // cutDistanceToCenter: 15 * (1 - Clamp01(cutDistanceToCenter / 0.3f))
+  const centerCutScore = Math.max(
+    0,
+    Math.min(15, 15 * (1 - Math.min(1, cutInfo.cutDistanceToCenter / 0.3)))
+  );
+
+  return Math.round(centerCutScore);
 }
 
 /**

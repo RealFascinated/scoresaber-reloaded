@@ -178,30 +178,39 @@ export class ScoreCoreService {
       return score;
     }
 
-    const [additionalData, previousScore, playerInfo, comparisonScore] = await Promise.all([
-      options?.insertAdditionalData
-        ? BeatLeaderService.getAdditionalScoreDataFromSong(
-            score.playerId,
-            leaderboard.songHash,
-            leaderboard.difficulty.difficulty,
-            leaderboard.difficulty.characteristic,
-            score.score
-          )
-        : undefined,
-      options?.insertPreviousScore
-        ? PlayerService.getPlayerPreviousScore(score.playerId, score, leaderboard, score.timestamp)
-        : undefined,
-      options?.insertPlayerInfo
-        ? (score.playerInfo ??
-          (await ScoreSaberService.getCachedPlayer(score.playerId, true).catch(() => undefined)))
-        : undefined,
-      !options?.isComparisonPlayerScore && comparisonPlayer
-        ? ScoreSaberScoreModel.findOne({
-            playerId: comparisonPlayer.id,
-            leaderboardId: leaderboard.id,
-          }).lean()
-        : undefined,
-    ]);
+    const [isScoreTracked, additionalData, previousScore, playerInfo, comparisonScore] =
+      await Promise.all([
+        ScoreService.scoreExists(score.playerId, leaderboard, score),
+        options?.insertAdditionalData
+          ? BeatLeaderService.getAdditionalScoreDataFromSong(
+              score.playerId,
+              leaderboard.songHash,
+              leaderboard.difficulty.difficulty,
+              leaderboard.difficulty.characteristic,
+              score.score
+            )
+          : undefined,
+        options?.insertPreviousScore
+          ? PlayerService.getPlayerPreviousScore(
+              score.playerId,
+              score,
+              leaderboard,
+              score.timestamp
+            )
+          : undefined,
+        options?.insertPlayerInfo
+          ? (score.playerInfo ??
+            (await ScoreSaberService.getCachedPlayer(score.playerId, true).catch(() => undefined)))
+          : undefined,
+        !options?.isComparisonPlayerScore && comparisonPlayer
+          ? ScoreSaberScoreModel.findOne({
+              playerId: comparisonPlayer.id,
+              leaderboardId: leaderboard.id,
+            }).lean()
+          : undefined,
+      ]);
+
+    score.isTracked = isScoreTracked;
 
     if (additionalData !== undefined) {
       score.additionalData = additionalData;

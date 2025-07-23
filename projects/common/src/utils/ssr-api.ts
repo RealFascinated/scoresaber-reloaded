@@ -521,6 +521,25 @@ class SSRApi {
       }
     );
   }
+
+  /**
+   * Gets a score by its ID.
+   *
+   * @param scoreId the id of the score
+   * @returns the score
+   */
+  async getScore(scoreId: string) {
+    const response = await Request.get<string>(`${env.NEXT_PUBLIC_API_URL}/scores/${scoreId}`, {
+      returns: "text",
+      searchParams: {
+        superJson: true,
+      },
+    });
+    if (response === undefined) {
+      return undefined;
+    }
+    return SuperJSON.parse<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>(response);
+  }
 }
 
 export const ssrApi = new SSRApi();

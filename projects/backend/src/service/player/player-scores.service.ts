@@ -2,6 +2,7 @@ import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { CooldownPriority } from "@ssr/common/cooldown";
 import { DetailType } from "@ssr/common/detail-type";
 import { BadRequestError } from "@ssr/common/error/bad-request-error";
+import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger from "@ssr/common/logger";
 import {
   ScoreSaberLeaderboard,
@@ -714,5 +715,48 @@ export class PlayerScoresService {
           score !== null
       );
     });
+  }
+
+  /**
+   * Gets a score by its ID.
+   *
+   * @param scoreId the id of the score
+   * @returns the score
+   */
+  public static async getScore(
+    scoreId: string
+  ): Promise<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>> {
+    const rawScore = await ScoreSaberScoreModel.findOne({ scoreId: `${scoreId}` }).lean();
+    if (!rawScore) {
+      throw new NotFoundError("Score not found");
+    }
+
+    const leaderboardResponse = await LeaderboardService.getLeaderboard(
+      rawScore.leaderboardId + "",
+      {
+        cacheOnly: true,
+        includeBeatSaver: true,
+        beatSaverType: DetailType.FULL,
+      }
+    );
+    if (!leaderboardResponse) {
+      throw new NotFoundError("Leaderboard not found");
+    }
+
+    const score = await ScoreService.insertScoreData(
+      scoreToObject(rawScore as unknown as ScoreSaberScore),
+      leaderboardResponse.leaderboard,
+      undefined,
+      {
+        insertPlayerInfo: true,
+        insertAdditionalData: true,
+        removeScoreWeight: true,
+      }
+    );
+    return {
+      score: score,
+      leaderboard: leaderboardResponse.leaderboard,
+      beatSaver: leaderboardResponse.beatsaver,
+    };
   }
 }

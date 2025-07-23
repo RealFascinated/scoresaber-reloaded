@@ -1,6 +1,7 @@
 "use client";
 
 import { Colors } from "@/common/colors";
+import Card from "@/components/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
@@ -19,7 +20,6 @@ import {
 } from "chart.js";
 import { ClockIcon } from "lucide-react";
 import { Line } from "react-chartjs-2";
-import Card from "@/components/card";
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 

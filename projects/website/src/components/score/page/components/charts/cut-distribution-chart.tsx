@@ -1,6 +1,7 @@
 "use client";
 
 import { ChartConfig } from "@/common/chart/types";
+import Card from "@/components/card";
 import GenericChart from "@/components/chart/generic-chart";
 import { useMemo } from "react";
 import { CHART_COLORS, getEmptyStateClassName } from "./chart-utils";
@@ -9,19 +10,19 @@ type Props = {
   cutDistribution: { score: number; count: number }[];
 };
 
-const CutDistributionChart = ({ cutDistribution }: Props) => {
+export default function CutDistributionChart({ cutDistribution }: Props) {
   const { chartData, labels } = useMemo(() => {
     if (!cutDistribution || cutDistribution.length === 0) {
       return { chartData: { datasets: [] }, labels: [] };
     }
 
-    // Create bins for each score from 0 to 115
-    const bins = new Array(116).fill(0);
+    // Create bins for each score from 0 to 15 (distance to center only)
+    const bins = new Array(16).fill(0);
     cutDistribution.forEach(cut => {
+      // The score is already the distance to center score (0-15)
       bins[cut.score] = cut.count;
     });
-
-    const allLabels = Array.from({ length: 116 }, (_, i) => i.toString());
+    const allLabels = Array.from({ length: 16 }, (_, i) => i.toString());
 
     return {
       chartData: {
@@ -46,7 +47,7 @@ const CutDistributionChart = ({ cutDistribution }: Props) => {
     axes: {
       x: {
         display: true,
-        displayName: "Cut Score (0-115)",
+        displayName: "Distance to Center (0-15)",
         hideOnMobile: false,
       },
       y: {
@@ -60,7 +61,7 @@ const CutDistributionChart = ({ cutDistribution }: Props) => {
       plugins: {
         title: {
           display: true,
-          text: "Cut Score Distribution (0-115)",
+          text: "Distance to Center Distribution (0-15)",
           color: "#ffffff",
         },
       },
@@ -75,7 +76,9 @@ const CutDistributionChart = ({ cutDistribution }: Props) => {
     );
   }
 
-  return <GenericChart config={chartConfig} labels={labels} />;
-};
-
-export default CutDistributionChart;
+  return (
+    <Card className="h-[350px] w-full rounded-xl">
+      <GenericChart config={chartConfig} labels={labels} />
+    </Card>
+  );
+}

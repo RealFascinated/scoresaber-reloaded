@@ -1,5 +1,6 @@
 import { t } from "elysia";
 import { Controller, Get } from "elysia-decorators";
+import { SuperJSON } from "superjson";
 import { PlayerService } from "../service/player/player.service";
 import { ScoreService } from "../service/score/score.service";
 
@@ -62,5 +63,29 @@ export default class ScoresController {
     query: { country?: string };
   }): Promise<unknown> {
     return await ScoreService.getLeaderboardScores(id, page, country);
+  }
+
+  @Get("/:id", {
+    config: {},
+    tags: ["Scores"],
+    params: t.Object({
+      id: t.String({ required: true }),
+    }),
+    query: t.Object({
+      superJson: t.Optional(t.Boolean()),
+    }),
+    detail: {
+      description: "Fetch a score by its ID",
+    },
+  })
+  public async getScore({
+    params: { id },
+    query: { superJson },
+  }: {
+    params: { id: string };
+    query: { superJson?: boolean };
+  }): Promise<unknown> {
+    const score = await PlayerService.getScore(id);
+    return superJson ? SuperJSON.stringify(score) : score;
   }
 }

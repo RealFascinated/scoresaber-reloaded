@@ -52,6 +52,7 @@ export class PlayerService {
     PlayerScoresService.getScoreSaberCachedPlayerScores;
   public static getScoreSaberLivePlayerScores = PlayerScoresService.getScoreSaberLivePlayerScores;
   public static getPlayerMedalScores = PlayerScoresService.getPlayerMedalScores;
+  public static getScore = PlayerScoresService.getScore;
 
   // PlayerAccuraciesService methods
   public static getPlayerAverageAccuracies = PlayerAccuraciesService.getPlayerAverageAccuracies;

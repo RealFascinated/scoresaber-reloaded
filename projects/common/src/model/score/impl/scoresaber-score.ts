@@ -30,6 +30,7 @@ import { ScoreSaberScoreBase } from "./scoresaber-score-base";
 @index({ pp: -1 })
 @index({ timestamp: -1 })
 @index({ playerId: 1, pp: -1 })
+@index({ scoreId: 1 })
 export class ScoreSaberScoreInternal extends ScoreSaberScoreBase {}
 
 export class ScoreSaberScorePublic extends ScoreSaberScoreInternal {
@@ -42,6 +43,11 @@ export class ScoreSaberScorePublic extends ScoreSaberScoreInternal {
    * The score of the player who set the score.
    */
   public comparisonScore?: ScoreSaberScore;
+
+  /**
+   * Whether the score is tracked.
+   */
+  public isTracked?: boolean;
 }
 
 export type ScoreSaberPreviousScoreOverview = PreviousScore & {

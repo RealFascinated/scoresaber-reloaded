@@ -1,7 +1,7 @@
+import Card from "@/components/card";
 import PlayerScoreAccuracyChart from "@/components/platform/scoresaber/score/chart/player-score-accuracy-chart";
 import ScoreAccuracyStats from "@/components/score/score-accuracy-stats";
 import StatValue from "@/components/statistic/stat-value";
-import Card from "@/components/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ChartBarIcon } from "@heroicons/react/24/outline";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
@@ -51,7 +51,7 @@ export function ScoreOverview({ score, scoreStats, leaderboard }: ScoreOverviewP
             name="Max Combo"
           />
         </div>
-        <div className="bg-accent-deep border-border flex w-full flex-col items-center justify-center gap-3 rounded-xl border p-3 backdrop-blur-sm">
+        <div className="bg-accent-deep border-border flex w-full flex-col items-center justify-center gap-3 rounded-md border p-3 backdrop-blur-sm">
           <ScoreAccuracyStats scoreStats={scoreStats} />
         </div>
       </Card>

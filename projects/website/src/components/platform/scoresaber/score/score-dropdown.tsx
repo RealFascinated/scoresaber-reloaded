@@ -6,7 +6,6 @@ import { ScoreHistory } from "@/components/platform/scoresaber/score/score-views
 import { ScoreOverview } from "@/components/platform/scoresaber/score/score-views/score-overview";
 import { MapStats } from "@/components/score/map-stats";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import { useLeaderboardDropdownData } from "@/hooks/use-leaderboard-dropdown-data";
 import { CubeIcon } from "@heroicons/react/24/solid";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";

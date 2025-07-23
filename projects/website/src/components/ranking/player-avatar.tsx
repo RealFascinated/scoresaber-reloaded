@@ -1,3 +1,5 @@
+import { cn } from "@/common/utils";
+
 export function PlayerAvatar({
   profilePicture,
   name,
@@ -13,7 +15,7 @@ export function PlayerAvatar({
         src={profilePicture}
         alt={name}
         fetchPriority="high"
-        className="size-7 min-w-7 rounded-full border border-[#333] object-cover"
+        className={cn("size-7 min-w-7 rounded-full border border-[#333] object-cover", className)}
       />
     </div>
   );

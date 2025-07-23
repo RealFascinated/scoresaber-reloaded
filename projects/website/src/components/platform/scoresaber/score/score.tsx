@@ -6,18 +6,21 @@ import { cn } from "@/common/utils";
 import { useIsMobile } from "@/contexts/viewport-context";
 
 import Avatar from "@/components/avatar";
+import FallbackLink from "@/components/fallback-link";
 import ScoreSaberScoreButtons from "@/components/platform/scoresaber/score/buttons/score-buttons";
 import ScoreSaberScoreInfo from "@/components/platform/scoresaber/score/score-info";
 import ScoreSaberScoreSongInfo from "@/components/platform/scoresaber/score/score-song-info";
 import ScoreSaberScoreStats from "@/components/platform/scoresaber/score/score-stats";
 import PlayerPreview from "@/components/player/player-preview";
 import SimpleLink from "@/components/simple-link";
+import SimpleTooltip from "@/components/simple-tooltip";
 import { ScoreSaberCurve } from "@ssr/common/leaderboard-curve/scoresaber-curve";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
 import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/leaderboard-player-info";
 import { getScoreSaberAvatar } from "@ssr/common/utils/scoresaber.util";
+import { ChevronRight } from "lucide-react";
 import ScoreDropdown, { ScoreMode } from "./score-dropdown";
 
 // Memoize the player preview component to prevent unnecessary re-renders
@@ -123,41 +126,56 @@ export default function ScoreSaberScoreDisplay({
           </div>
         </MemoizedPlayerPreview>
       )}
-      <div className={gridClassName}>
-        <ScoreSaberScoreInfo
-          score={score}
-          leaderboard={leaderboard}
-          hideRank={settings?.hideRank}
-        />
-
-        <div className="flex min-w-0 items-center overflow-hidden">
-          <ScoreSaberScoreSongInfo
+      <div className="flex items-center gap-2">
+        <div className={gridClassName}>
+          <ScoreSaberScoreInfo
+            score={score}
             leaderboard={leaderboard}
-            beatSaverMap={beatSaverMap}
-            allowLeaderboardPreview={settings?.allowLeaderboardPreview && !isMobile}
+            hideRank={settings?.hideRank}
+          />
+
+          <div className="flex min-w-0 items-center overflow-hidden">
+            <ScoreSaberScoreSongInfo
+              leaderboard={leaderboard}
+              beatSaverMap={beatSaverMap}
+              allowLeaderboardPreview={settings?.allowLeaderboardPreview && !isMobile}
+            />
+          </div>
+
+          {!settings?.noScoreButtons && (
+            <ScoreSaberScoreButtons
+              leaderboard={leaderboard}
+              beatSaverMap={beatSaverMap}
+              score={score}
+              alwaysSingleLine={isMobile}
+              hideLeaderboardDropdown={settings?.hideLeaderboardDropdown}
+              hideAccuracyChanger={settings?.hideAccuracyChanger}
+              setIsLeaderboardExpanded={handleLeaderboardOpen}
+              isLeaderboardLoading={isLeaderboardLoading}
+              updateScore={updatedScore => setBaseScore(updatedScore.score)}
+              isPreviousScore={settings?.isPreviousScore}
+            />
+          )}
+
+          <ScoreSaberScoreStats
+            score={memoizedScore}
+            leaderboard={leaderboard}
+            medalsMode={settings?.medalsMode}
           />
         </div>
 
-        {!settings?.noScoreButtons && (
-          <ScoreSaberScoreButtons
-            leaderboard={leaderboard}
-            beatSaverMap={beatSaverMap}
-            score={score}
-            alwaysSingleLine={isMobile}
-            hideLeaderboardDropdown={settings?.hideLeaderboardDropdown}
-            hideAccuracyChanger={settings?.hideAccuracyChanger}
-            setIsLeaderboardExpanded={handleLeaderboardOpen}
-            isLeaderboardLoading={isLeaderboardLoading}
-            updateScore={updatedScore => setBaseScore(updatedScore.score)}
-            isPreviousScore={settings?.isPreviousScore}
-          />
-        )}
-
-        <ScoreSaberScoreStats
-          score={memoizedScore}
-          leaderboard={leaderboard}
-          medalsMode={settings?.medalsMode}
-        />
+        <FallbackLink href={score.isTracked ? `/score/${score.scoreId}` : undefined}>
+          <SimpleTooltip
+            display={score.isTracked ? "View score details" : "No score data found :("}
+          >
+            <ChevronRight
+              className={cn(
+                "h-6 w-4",
+                score.isTracked ? "cursor-pointer" : "cursor-not-allowed text-red-400"
+              )}
+            />
+          </SimpleTooltip>
+        </FallbackLink>
       </div>
 
       <ScoreDropdown

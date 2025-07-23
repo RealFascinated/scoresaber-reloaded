@@ -1,7 +1,6 @@
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { ScoreSaberCurve } from "@ssr/common/leaderboard-curve/scoresaber-curve";
 import Logger from "@ssr/common/logger";
-import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 import {
   ScoreSaberLeaderboard,
   ScoreSaberLeaderboardModel,
@@ -12,6 +11,7 @@ import {
   ScoreSaberScoreDocument,
   ScoreSaberScoreModel,
 } from "@ssr/common/model/score/impl/scoresaber-score";
+import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 import { LeaderboardUpdate, LeaderboardUpdates } from "../../common/types/leaderboard";
 import { LeaderboardService } from "./leaderboard.service";
 
