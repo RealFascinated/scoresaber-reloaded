@@ -22,7 +22,7 @@ export default function ScoreDetails({
       <LeaderboardInfo leaderboard={leaderboard} beatSaver={beatSaver} />
 
       {/* Score Buttons */}
-      <div className="flex items-center gap-2 px-4 pb-4">
+      <div className="flex flex-wrap items-center gap-2 px-4 pb-4">
         <ReplayButton additionalData={score.score.additionalData} />
         <PlayerButton playerId={score.score.playerInfo.id} />
         <LeaderboardButton leaderboardId={leaderboard.id} />
