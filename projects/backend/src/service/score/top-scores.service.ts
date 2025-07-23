@@ -38,26 +38,31 @@ export class TopScoresService {
       PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>
     >().setItemsPerPage(25);
 
-    // Build the match condition
-    const matchCondition = {
-      ...(timeframe === "all" ? {} : { timestamp: { $gte: getDaysAgoDate(daysAgo) } }),
-      pp: { $gt: 0 },
-    };
+    // Optimize query based on timeframe
+    let matchFilter: Record<string, unknown>;
 
-    // Use separate queries for better performance
-    const [total, scores] = await Promise.all([
-      // Get total count
-      ScoreSaberScoreModel.countDocuments(matchCondition),
-      // Get scores with pagination
-      ScoreSaberScoreModel.aggregate([
-        { $match: matchCondition },
-        { $sort: { pp: -1 } },
-        { $skip: (page - 1) * 25 },
-        { $limit: 25 },
-      ]).hint(timeframe === "all" ? { pp: -1 } : { timestamp: 1, pp: -1 }), // Use appropriate index based on filtering
-    ]);
+    if (timeframe === "all") {
+      // For "all time" - use simple pp index
+      matchFilter = { pp: { $gt: 0 } };
+    } else {
+      // For time-filtered - use compound timestamp + pp index
+      matchFilter = {
+        timestamp: { $gte: getDaysAgoDate(daysAgo) },
+        pp: { $gt: 0 },
+      };
+    }
 
+    // Get total count with optimized query
+    const total = await ScoreSaberScoreModel.countDocuments(matchFilter);
     pagination.setTotalItems(total);
+
+    // Get scores with optimized query
+    const scores = await ScoreSaberScoreModel.aggregate([
+      { $match: matchFilter },
+      { $sort: { pp: -1 } },
+      { $skip: (page - 1) * 25 },
+      { $limit: 25 },
+    ]);
 
     return pagination.getPage(page, async () => {
       const scoreObjects = scores.map(scoreToObject);
@@ -145,8 +150,15 @@ export class TopScoresService {
       return false;
     }
 
-    const { items: top50Scores } = await ScoreService.getTopScores("all", 1);
-    const lowestPp = top50Scores.reduce((min, score) => Math.min(min, score.score.pp), Infinity);
+    // Get the 50th highest PP score directly from the database
+    const top50Scores = await ScoreSaberScoreModel.aggregate([
+      { $match: { pp: { $gt: 0 } } },
+      { $sort: { pp: -1 } },
+      { $limit: 50 },
+      { $group: { _id: null, minPp: { $min: "$pp" } } },
+    ]);
+
+    const lowestPp = top50Scores[0]?.minPp ?? Infinity;
     return score.pp >= lowestPp;
   }
 }

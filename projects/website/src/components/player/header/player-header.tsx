@@ -26,7 +26,7 @@ export default function PlayerHeader({ player }: PlayerHeaderProps) {
           <div className="flex flex-col gap-1">
             <div className="flex items-center justify-center gap-2 lg:justify-start">
               <p
-                className="text-2xl font-bold"
+                className="max-w-[300px] truncate text-2xl font-bold"
                 style={{
                   color: getScoreSaberRoles(player)[0]?.color,
                 }}
