@@ -4,7 +4,6 @@ import { cn } from "@/common/utils";
 import ScoreSaberScoreEditorButton from "@/components/platform/scoresaber/score/buttons/score-editor-button";
 import { BeatSaverMapButton } from "@/components/score/button/beat-saver-map-button";
 import { ScoreBsrButton } from "@/components/score/button/score-bsr-button";
-import { ScoreReplayAnalysisButton } from "@/components/score/button/score-replay-analysis-button";
 import { ScoreReplayButton } from "@/components/score/button/score-replay-button";
 import { SongOpenInYoutubeButton } from "@/components/score/button/song-open-in-youtube-button";
 import SimpleTooltip from "@/components/simple-tooltip";
@@ -71,14 +70,6 @@ const buttons: ButtonConfig[] = [
     },
     render: ({ score }: Props) => {
       return <ScoreReplayButton additionalData={score!.additionalData!} />;
-    },
-  },
-  {
-    display: ({ score }: Props) => {
-      return score?.additionalData != undefined;
-    },
-    render: ({ score }: Props) => {
-      return <ScoreReplayAnalysisButton additionalData={score!.additionalData!} />;
     },
   },
 ];
