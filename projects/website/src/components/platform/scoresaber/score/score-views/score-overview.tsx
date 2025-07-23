@@ -1,9 +1,11 @@
 import Card from "@/components/card";
+import HMDIcon from "@/components/hmd-icon";
 import PlayerScoreAccuracyChart from "@/components/platform/scoresaber/score/chart/player-score-accuracy-chart";
 import ScoreAccuracyStats from "@/components/score/score-accuracy-stats";
 import StatValue from "@/components/statistic/stat-value";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ChartBarIcon } from "@heroicons/react/24/outline";
+import { getHMDInfo } from "@ssr/common/hmds";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { ScoreStatsResponse } from "@ssr/common/response/scorestats-response";
@@ -50,6 +52,17 @@ export function ScoreOverview({ score, scoreStats, leaderboard }: ScoreOverviewP
             value={formatNumberWithCommas(scoreStats.current.hitTracker.maxCombo)}
             name="Max Combo"
           />
+          {score.hmd && (
+            <StatValue
+              value={
+                <div className="flex items-center gap-2">
+                  <HMDIcon hmd={getHMDInfo(score.hmd!)} />
+                  <p>{score.hmd}</p>
+                </div>
+              }
+              name="HMD"
+            />
+          )}
         </div>
         <div className="bg-accent-deep border-border flex w-full flex-col items-center justify-center gap-3 rounded-md border p-3 backdrop-blur-sm">
           <ScoreAccuracyStats scoreStats={scoreStats} />
