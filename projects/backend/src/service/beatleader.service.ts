@@ -14,12 +14,10 @@ import { BeatLeaderScoreImprovementToken } from "@ssr/common/types/token/beatlea
 import { getBeatLeaderReplayId } from "@ssr/common/utils/beatleader-utils";
 import Request from "@ssr/common/utils/request";
 import { isProduction } from "@ssr/common/utils/utils";
-import { sleep } from "bun";
 import { DiscordChannels, logToChannel } from "../bot/bot";
 import { createGenericEmbed } from "../common/discord/embed";
 import CacheService, { CacheId } from "./cache.service";
 import MinioService from "./minio.service";
-import { PlayerService } from "./player/player.service";
 
 export default class BeatLeaderService {
   /**
@@ -156,22 +154,6 @@ export default class BeatLeaderService {
       };
     }
 
-    // Save score stats (15 second delay to ensure the score stats are available on beatleader)
-    // run in background
-    if (isProduction()) {
-      sleep(30_000).then(async () => {
-        await ApiServiceRegistry.getInstance()
-          .getBeatLeaderService()
-          .lookupScoreStats(score.id)
-          .then(async stats => {
-            if (stats) {
-              await this.trackScoreStats(score.id, stats);
-            }
-            return stats;
-          });
-      });
-    }
-
     // Parallelize independent operations
     const [replayData] = await Promise.all([
       // Save replay data if needed
@@ -219,68 +201,17 @@ export default class BeatLeaderService {
     return data;
   }
 
-  /*
-   * Track score stats.
-   *
-   * @param scoreId the id of the score
-   * @param scoreStats the stats to track
-   */
-  private static async trackScoreStats(
-    scoreId: number,
-    scoreStats: ScoreStatsToken
-  ): Promise<ScoreStatsToken> {
-    const before = Date.now();
-    await MinioService.saveFile(
-      MinioBucket.BeatLeaderScoreStats,
-      `${scoreId}.json`,
-      Buffer.from(JSON.stringify(scoreStats))
-    );
-    Logger.info(`Tracked score stats for ${scoreId} in ${Date.now() - before}ms`);
-    return scoreStats;
-  }
-
   /**
    * Gets the score stats for a score id.
    *
    * @param scoreId the id of the score
    */
   public static async getScoreStats(scoreId: number): Promise<ScoreStatsToken | undefined> {
-    if (!isProduction()) {
+    return CacheService.fetchWithCache(CacheId.ScoreStats, `score-stats:${scoreId}`, async () => {
       return (await ApiServiceRegistry.getInstance()
         .getBeatLeaderService()
         .lookupScoreStats(scoreId)) as ScoreStatsToken;
-    }
-
-    const additionalScoreData = await this.getAdditionalScoreData(scoreId);
-    let scoreStats: ScoreStatsToken | null = await CacheService.fetchWithCache(
-      CacheId.ScoreStats,
-      `score-stats:${scoreId}`,
-      async () => {
-        const file = await MinioService.getFile(
-          MinioBucket.BeatLeaderScoreStats,
-          `${scoreId}.json`
-        );
-        return file ? (JSON.parse(file.toString()) as ScoreStatsToken) : null;
-      }
-    );
-    if (scoreStats == null) {
-      scoreStats = (await ApiServiceRegistry.getInstance()
-        .getBeatLeaderService()
-        .lookupScoreStats(scoreId)) as ScoreStatsToken;
-      // Only track score stats if the player exists
-      if (
-        scoreStats &&
-        additionalScoreData &&
-        (await PlayerService.playerExists(additionalScoreData.playerId))
-      ) {
-        return await this.trackScoreStats(scoreId, scoreStats);
-      }
-    }
-
-    if (scoreStats == null) {
-      return undefined;
-    }
-    return scoreStats;
+    });
   }
 
   /**
