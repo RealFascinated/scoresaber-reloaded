@@ -1,6 +1,9 @@
+import { InternalServerError } from "@ssr/common/error/internal-server-error";
+import { mongoose } from "@typegoose/typegoose";
 import { Controller, Get } from "elysia-decorators";
 import { getAppVersion } from "../common/app.util";
 import { AppService } from "../service/app.service";
+import CacheService from "../service/cache.service";
 
 @Controller()
 export default class AppController {
@@ -26,8 +29,18 @@ export default class AppController {
     },
   })
   public async getHealth() {
+    const mongo = mongoose.connection.readyState == 1;
+    const redis = CacheService.redisClient.connected;
+    if (!mongo || !redis) {
+      throw new InternalServerError(
+        `One of our databases is not connected, please contact an admin :(`
+      );
+    }
+
     return {
-      status: "OK",
+      status: mongo && redis ? "OK" : "ERROR",
+      mongo: mongo ? "CONNECTED" : "ERROR",
+      redis: redis ? "CONNECTED" : "ERROR",
       timestamp: new Date().toISOString(),
     };
   }
