@@ -142,6 +142,15 @@ export class ScoreCoreService {
   }
 
   /**
+   * Checks if a ScoreSaber score already exists by scoreId.
+   *
+   * @param scoreId the id of the score
+   */
+  public static async scoreExistsByScoreId(scoreId: string | number) {
+    return (await ScoreSaberScoreModel.exists({ scoreId: String(scoreId) })) !== null;
+  }
+
+  /**
    * Inserts the score data into the score.
    *
    * @param score the score to insert data into

@@ -7,6 +7,7 @@ export class ScoreService {
   // ScoreCoreService methods
   public static trackScoreSaberScore = ScoreCoreService.trackScoreSaberScore;
   public static scoreExists = ScoreCoreService.scoreExists;
+  public static scoreExistsByScoreId = ScoreCoreService.scoreExistsByScoreId;
   public static insertScoreData = ScoreCoreService.insertScoreData;
 
   // TopScoresService methods

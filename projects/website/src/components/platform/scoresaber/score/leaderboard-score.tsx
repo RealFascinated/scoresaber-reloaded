@@ -47,9 +47,13 @@ export default function ScoreSaberLeaderboardScore({
 
       {/* Player */}
       <td className="flex min-w-[250px] gap-2 px-4 py-2 whitespace-nowrap">
-        <PlayerPreview playerId={scorePlayer.id}>
-          <PlayerInfo player={scorePlayer} highlightedPlayerId={highlightedPlayerId} useLink />
-        </PlayerPreview>
+        {scorePlayer ? (
+          <PlayerPreview playerId={scorePlayer.id}>
+            <PlayerInfo player={scorePlayer} highlightedPlayerId={highlightedPlayerId} useLink />
+          </PlayerPreview>
+        ) : (
+          <p className="text-gray-500">Unknown Player</p>
+        )}
       </td>
 
       {/* Time Set */}

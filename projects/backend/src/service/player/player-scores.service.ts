@@ -513,6 +513,18 @@ export class PlayerScoresService {
           return undefined;
         }
 
+        // Track missing scores
+        if (!(await ScoreService.scoreExistsByScoreId(score.scoreId))) {
+          await ScoreService.trackScoreSaberScore(
+            score,
+            leaderboard,
+            await ScoreSaberService.getCachedPlayer(playerId, true),
+            true,
+            false
+          );
+          Logger.info(`Tracked missing score ${score.scoreId} for player ${playerId}`);
+        }
+
         score = await ScoreService.insertScoreData(score, leaderboard, comparisonPlayer);
         return {
           score: score,

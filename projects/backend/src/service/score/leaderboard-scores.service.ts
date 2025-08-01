@@ -1,12 +1,11 @@
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
-import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
-import { ScoreType } from "@ssr/common/model/score/score";
 import LeaderboardScoresResponse from "@ssr/common/response/leaderboard-scores-response";
 import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 import { Metadata } from "@ssr/common/types/metadata";
 import BeatLeaderService from "../beatleader.service";
 import { LeaderboardService } from "../leaderboard/leaderboard.service";
+import { ScoreService } from "./score.service";
 
 export class LeaderboardScoresService {
   /**
@@ -22,7 +21,6 @@ export class LeaderboardScoresService {
     page: number,
     country?: string
   ): Promise<LeaderboardScoresResponse<unknown, unknown> | undefined> {
-    const scores: ScoreType[] = [];
     let metadata: Metadata = new Metadata(0, 0, 0, 0); // Default values
 
     const leaderboardResponse = await LeaderboardService.getLeaderboard(leaderboardId);
@@ -41,11 +39,6 @@ export class LeaderboardScoresService {
       return;
     }
 
-    // ensure player is tracked (ran async to avoid blocking)
-    // for (const score of leaderboardScores.scores) {
-    //   PlayerService.trackPlayer(score.leaderboardPlayerInfo.id);
-    // }
-
     // Process scores in parallel
     const scorePromises = leaderboardScores.scores.map(async token => {
       const score = getScoreSaberScoreFromToken(
@@ -55,6 +48,18 @@ export class LeaderboardScoresService {
       );
       if (score == undefined) {
         return undefined;
+      }
+
+      // Track missing scores
+      if (!(await ScoreService.scoreExistsByScoreId(score.scoreId))) {
+        await ScoreService.trackScoreSaberScore(
+          { ...score },
+          leaderboard,
+          token.leaderboardPlayerInfo,
+          true,
+          false
+        );
+        // Logger.info(`Tracked missing score ${score.scoreId} for leaderboard ${leaderboardId}`);
       }
 
       const additionalData = await BeatLeaderService.getAdditionalScoreDataFromSong(
@@ -71,11 +76,6 @@ export class LeaderboardScoresService {
       return score;
     });
 
-    const processedScores = await Promise.all(scorePromises);
-    scores.push(
-      ...processedScores.filter((score): score is ScoreSaberScore => score !== undefined)
-    );
-
     metadata = new Metadata(
       Math.ceil(leaderboardScores.metadata.total / leaderboardScores.metadata.itemsPerPage),
       leaderboardScores.metadata.total,
@@ -84,7 +84,7 @@ export class LeaderboardScoresService {
     );
 
     return {
-      scores: scores,
+      scores: await Promise.all(scorePromises),
       leaderboard: leaderboard,
       beatSaver: beatSaverMap,
       metadata: metadata,
