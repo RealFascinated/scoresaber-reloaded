@@ -8,7 +8,6 @@ import PageTransition from "@/components/ui/page-transition";
 import { usePageTransition } from "@/components/ui/page-transition-context";
 import { useIsMobile } from "@/contexts/viewport-context";
 import useDatabase from "@/hooks/use-database";
-import usePageNavigation from "@/hooks/use-page-navigation";
 import { Pagination } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerScoresResponse } from "@ssr/common/response/player-scores-response";
@@ -37,8 +36,8 @@ import {
   Trophy,
   XIcon,
 } from "lucide-react";
-import { parseAsString, useQueryState } from "nuqs";
-import { useCallback, useEffect, useState } from "react";
+import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
+import { useCallback } from "react";
 import ScoresCard from "../../score/scores-card";
 import SimplePagination from "../../simple-pagination";
 import {
@@ -54,9 +53,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import ScoreSaberScoreDisplay from "./score/score";
 
 // Constants
+const DEFAULT_PAGE = 1;
 const DEFAULT_LIVE_SORT: ScoreSaberScoreSort = "recent";
 const DEFAULT_CACHED_SORT: ScoreSort["field"] = "date";
 const DEFAULT_CACHED_SORT_DIRECTION: ScoreSort["direction"] = "desc";
+const DEFAULT_SCORES_MODE: ScoreSaberScoreDataMode = "live";
+const DEFAULT_FILTER = "All Scores";
+const DEFAULT_SEARCH = "";
 
 const LIVE_SCORE_SORT = [
   { name: "Top", value: "top", icon: <TrendingUpIcon className="h-4 w-4" /> },
@@ -137,26 +140,13 @@ const SCORES_MODES: Record<ScoreSaberScoreDataMode, { icon: React.ReactNode; too
 };
 
 interface ScoreSaberPlayerScoresProps {
-  initialSearch?: string;
-  mode: ScoreSaberScoreDataMode;
   player: ScoreSaberPlayer;
-  sort: ScoreSaberScoreSort | ScoreSort["field"];
-  direction?: ScoreSort["direction"];
-  page: number;
 }
 
-export default function ScoreSaberPlayerScores({
-  initialSearch,
-  player,
-  mode,
-  sort,
-  direction,
-  page,
-}: ScoreSaberPlayerScoresProps) {
+export default function ScoreSaberPlayerScores({ player }: ScoreSaberPlayerScoresProps) {
   // Hooks
   const isMobile = useIsMobile();
   const database = useDatabase();
-  const { changePageUrl } = usePageNavigation();
   const { animateLeft, animateRight } = usePageTransition();
 
   // Database queries
@@ -164,24 +154,60 @@ export default function ScoreSaberPlayerScores({
   const showScoreComparison = useLiveQuery(() => database.getShowScoreComparison());
 
   // State
-  const [currentPage, setCurrentPage] = useState(page);
-  const [scoresMode, setScoresMode] = useState<ScoreSaberScoreDataMode>(mode);
-  const [currentSort, setCurrentSort] = useState<string>(sort);
-  const [currentSortDirection, setCurrentSortDirection] = useState<ScoreSort["direction"]>(
-    direction ?? DEFAULT_CACHED_SORT_DIRECTION
+  const [currentPage, setCurrentPage] = useQueryState(
+    "page",
+    parseAsInteger.withDefault(DEFAULT_PAGE)
+  );
+  const [scoresMode, setScoresMode] = useQueryState(
+    "mode",
+    parseAsString.withDefault(DEFAULT_SCORES_MODE)
+  );
+  const [currentSort, setCurrentSort] = useQueryState(
+    "sort",
+    parseAsString.withDefault(DEFAULT_LIVE_SORT)
+  );
+  const [currentSortDirection, setCurrentSortDirection] = useQueryState(
+    "direction",
+    parseAsString.withDefault(DEFAULT_CACHED_SORT_DIRECTION)
   );
   const [currentFilter, setCurrentFilter] = useQueryState(
     "filter",
-    parseAsString.withDefault("All Scores")
+    parseAsString.withDefault(DEFAULT_FILTER)
   );
 
   // Search
   const [searchTerm, setSearchTerm] = useQueryState(
     "search",
-    parseAsString.withDefault(initialSearch || "")
+    parseAsString.withDefault(DEFAULT_SEARCH)
   );
   const debouncedSearchTerm = useDebounce(searchTerm, 250);
   const invalidSearch = searchTerm.length >= 1 && searchTerm.length < 3;
+
+  const getUrl = useCallback(
+    (
+      page: number,
+      sort?: string,
+      direction?: string,
+      mode?: string,
+      filter?: string,
+      search?: string
+    ) => {
+      const params = new URLSearchParams();
+
+      if (page !== DEFAULT_PAGE) params.set("page", page.toString());
+      if ((mode || scoresMode) !== DEFAULT_SCORES_MODE) params.set("mode", mode || scoresMode);
+      if ((sort || currentSort) !== DEFAULT_LIVE_SORT) params.set("sort", sort || currentSort);
+      if ((direction || currentSortDirection) !== DEFAULT_CACHED_SORT_DIRECTION)
+        params.set("direction", direction || currentSortDirection);
+      if ((filter || currentFilter) !== DEFAULT_FILTER)
+        params.set("filter", filter || currentFilter);
+      if (search || searchTerm) params.set("search", search || searchTerm);
+
+      const queryString = params.toString();
+      return `${window.location.pathname}${queryString ? `?${queryString}` : ""}`;
+    },
+    [scoresMode, currentSort, currentSortDirection, currentFilter, searchTerm]
+  );
 
   useDocumentTitle(
     ssrConfig.siteTitleTemplate.replace(
@@ -252,15 +278,20 @@ export default function ScoreSaberPlayerScores({
         const filterName =
           CACHED_SCORE_FILTERS.find(
             f => JSON.stringify(f.value) === JSON.stringify(defaultFilter ?? {})
-          )?.name ?? "All Scores";
+          )?.name ?? DEFAULT_FILTER;
         setCurrentFilter(filterName);
-        animateLeft();
       } else {
         setCurrentSortDirection(currentSortDirection === "desc" ? "asc" : "desc");
-        animateLeft();
       }
     },
-    [currentSort, currentSortDirection, animateLeft, currentFilter]
+    [
+      currentSort,
+      currentSortDirection,
+      setCurrentSort,
+      setCurrentSortDirection,
+      setCurrentPage,
+      setCurrentFilter,
+    ]
   );
 
   const handleScoreModeChange = useCallback(
@@ -273,46 +304,13 @@ export default function ScoreSaberPlayerScores({
       }
       setScoresMode(newMode);
       setCurrentPage(1);
-      animateLeft();
     },
-    [animateLeft]
+    [setCurrentSort, setCurrentSortDirection, setScoresMode, setCurrentPage]
   );
 
-  const handlePageChange = useCallback(
-    (newPage: number) => {
-      if (newPage > currentPage) {
-        animateLeft();
-      } else {
-        animateRight();
-      }
-      setCurrentPage(newPage);
-    },
-    [currentPage, animateLeft, animateRight]
-  );
-
-  // URL management
-  const getUrl = useCallback(
-    (page: number) => {
-      if (scoresMode === "cached") {
-        return `/player/${player.id}/scoresaber/${scoresMode}/${currentSort}/${currentSortDirection}/${page}`;
-      } else {
-        return `/player/${player.id}/scoresaber/${scoresMode}/${currentSort}/${page}`;
-      }
-    },
-    [player.id, currentSort, currentSortDirection, scoresMode]
-  );
-
-  useEffect(() => {
-    changePageUrl(getUrl(currentPage));
-  }, [
-    currentPage,
-    player.id,
-    currentSort,
-    currentSortDirection,
-    scoresMode,
-    changePageUrl,
-    getUrl,
-  ]);
+  const handlePageChange = useCallback((newPage: number) => {
+    setCurrentPage(newPage);
+  }, []);
 
   // Render helpers
   const renderScoresList = () => {
@@ -364,6 +362,13 @@ export default function ScoreSaberPlayerScores({
           loadingPage={isLoading || isRefetching ? currentPage : undefined}
           generatePageUrl={getUrl}
           onPageChange={handlePageChange}
+          onBeforeNavigate={(newPage, currentPage) => {
+            if (newPage > currentPage) {
+              animateLeft();
+            } else {
+              animateRight();
+            }
+          }}
         />
       </>
     );
@@ -377,17 +382,23 @@ export default function ScoreSaberPlayerScores({
           {/* Mode Selection - Top Row */}
           <ControlRow>
             <TabGroup>
-              {Object.keys(SCORES_MODES).map(mode => (
-                <Tab
-                  key={mode}
-                  isActive={mode === scoresMode}
-                  onClick={() => handleScoreModeChange(mode as ScoreSaberScoreDataMode)}
-                  tooltip={SCORES_MODES[mode as ScoreSaberScoreDataMode].tooltip}
-                >
-                  {SCORES_MODES[mode as ScoreSaberScoreDataMode].icon}
-                  {capitalizeFirstLetter(mode)}
-                </Tab>
-              ))}
+              {Object.keys(SCORES_MODES).map(mode => {
+                const newSort = mode === "live" ? DEFAULT_LIVE_SORT : DEFAULT_CACHED_SORT;
+                const newDirection = mode === "live" ? "desc" : DEFAULT_CACHED_SORT_DIRECTION;
+                const url = getUrl(1, newSort, newDirection, mode, currentFilter, searchTerm);
+
+                return (
+                  <Tab
+                    key={mode}
+                    isActive={mode === scoresMode}
+                    href={url}
+                    tooltip={SCORES_MODES[mode as ScoreSaberScoreDataMode].tooltip}
+                  >
+                    {SCORES_MODES[mode as ScoreSaberScoreDataMode].icon}
+                    {capitalizeFirstLetter(mode)}
+                  </Tab>
+                );
+              })}
             </TabGroup>
           </ControlRow>
 
@@ -395,45 +406,62 @@ export default function ScoreSaberPlayerScores({
           <ControlRow>
             <ButtonGroup>
               {scoresMode === "live"
-                ? LIVE_SCORE_SORT.map(sortOption => (
-                    <ControlButton
-                      key={sortOption.value}
-                      isActive={sortOption.value === currentSort}
-                      onClick={() => handleSortChange(sortOption.value as ScoreSaberScoreSort)}
-                    >
-                      {sortOption.value === currentSort && (isLoading || isRefetching) ? (
-                        <Spinner size="sm" className="h-3.5 w-3.5" />
-                      ) : (
-                        sortOption.icon
-                      )}
-                      {sortOption.name}
-                    </ControlButton>
-                  ))
-                : CACHED_SCORE_SORT.map(sortOption => (
-                    <ControlButton
-                      key={sortOption.value}
-                      isActive={sortOption.value === currentSort}
-                      onClick={() =>
-                        handleSortChange(
-                          sortOption.value as ScoreSort["field"],
-                          sortOption.defaultOrder as ScoreSort["direction"]
-                        )
-                      }
-                    >
-                      {sortOption.value === currentSort ? (
-                        isLoading || isRefetching ? (
+                ? LIVE_SCORE_SORT.map(sortOption => {
+                    const url = getUrl(
+                      1,
+                      sortOption.value,
+                      "desc",
+                      scoresMode,
+                      currentFilter,
+                      searchTerm
+                    );
+
+                    return (
+                      <ControlButton
+                        key={sortOption.value}
+                        isActive={sortOption.value === currentSort}
+                        href={url}
+                      >
+                        {sortOption.value === currentSort && (isLoading || isRefetching) ? (
                           <Spinner size="sm" className="h-3.5 w-3.5" />
-                        ) : currentSortDirection === "desc" ? (
-                          <ArrowDown className="h-3.5 w-3.5" />
                         ) : (
-                          <ArrowUp className="h-3.5 w-3.5" />
-                        )
-                      ) : (
-                        sortOption.icon
-                      )}
-                      {sortOption.name}
-                    </ControlButton>
-                  ))}
+                          sortOption.icon
+                        )}
+                        {sortOption.name}
+                      </ControlButton>
+                    );
+                  })
+                : CACHED_SCORE_SORT.map(sortOption => {
+                    const url = getUrl(
+                      1,
+                      sortOption.value,
+                      sortOption.defaultOrder,
+                      scoresMode,
+                      currentFilter,
+                      searchTerm
+                    );
+
+                    return (
+                      <ControlButton
+                        key={sortOption.value}
+                        isActive={sortOption.value === currentSort}
+                        href={url}
+                      >
+                        {sortOption.value === currentSort ? (
+                          isLoading || isRefetching ? (
+                            <Spinner size="sm" className="h-3.5 w-3.5" />
+                          ) : currentSortDirection === "desc" ? (
+                            <ArrowDown className="h-3.5 w-3.5" />
+                          ) : (
+                            <ArrowUp className="h-3.5 w-3.5" />
+                          )
+                        ) : (
+                          sortOption.icon
+                        )}
+                        {sortOption.name}
+                      </ControlButton>
+                    );
+                  })}
             </ButtonGroup>
           </ControlRow>
 

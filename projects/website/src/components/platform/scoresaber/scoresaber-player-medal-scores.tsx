@@ -5,7 +5,6 @@ import PageTransition from "@/components/ui/page-transition";
 import { usePageTransition } from "@/components/ui/page-transition-context";
 import { useIsMobile } from "@/contexts/viewport-context";
 import useDatabase from "@/hooks/use-database";
-import usePageNavigation from "@/hooks/use-page-navigation";
 import { Pagination } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerScoresResponse } from "@ssr/common/response/player-scores-response";
@@ -16,7 +15,8 @@ import { useDocumentTitle } from "@uidotdev/usehooks";
 import { ssrConfig } from "config";
 import { useLiveQuery } from "dexie-react-hooks";
 import { SearchIcon } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { parseAsInteger, useQueryState } from "nuqs";
+import { useCallback } from "react";
 import ScoresCard from "../../score/scores-card";
 import SimplePagination from "../../simple-pagination";
 import { EmptyState } from "../../ui/empty-state";
@@ -24,24 +24,19 @@ import ScoreSaberScoreDisplay from "./score/score";
 
 interface ScoreSaberPlayerMedalScoresProps {
   player: ScoreSaberPlayer;
-  page: number;
 }
 
-export default function ScoreSaberPlayerMedalScores({
-  player,
-  page,
-}: ScoreSaberPlayerMedalScoresProps) {
+export default function ScoreSaberPlayerMedalScores({ player }: ScoreSaberPlayerMedalScoresProps) {
   // Hooks
   const isMobile = useIsMobile();
   const database = useDatabase();
-  const { changePageUrl } = usePageNavigation();
   const { animateLeft, animateRight } = usePageTransition();
 
   // Database queries
   const mainPlayerId = useLiveQuery(() => database.getMainPlayerId());
 
   // State
-  const [currentPage, setCurrentPage] = useState(page);
+  const [currentPage, setCurrentPage] = useQueryState("page", parseAsInteger.withDefault(1));
 
   useDocumentTitle(
     ssrConfig.siteTitleTemplate.replace("%s", `${player.name} / Medals / ${currentPage}`)
@@ -64,14 +59,9 @@ export default function ScoreSaberPlayerMedalScores({
 
   const handlePageChange = useCallback(
     (newPage: number) => {
-      if (newPage > currentPage) {
-        animateLeft();
-      } else {
-        animateRight();
-      }
       setCurrentPage(newPage);
     },
-    [currentPage, animateLeft, animateRight]
+    [setCurrentPage]
   );
 
   // URL management
@@ -81,10 +71,6 @@ export default function ScoreSaberPlayerMedalScores({
     },
     [player.id]
   );
-
-  useEffect(() => {
-    changePageUrl(getUrl(currentPage));
-  }, [currentPage, player.id, changePageUrl, getUrl]);
 
   // Render helpers
   const renderScoresList = () => {
@@ -138,6 +124,13 @@ export default function ScoreSaberPlayerMedalScores({
           loadingPage={isLoading || isRefetching ? currentPage : undefined}
           generatePageUrl={getUrl}
           onPageChange={handlePageChange}
+          onBeforeNavigate={(newPage, currentPage) => {
+            if (newPage > currentPage) {
+              animateLeft();
+            } else {
+              animateRight();
+            }
+          }}
         />
       </>
     );

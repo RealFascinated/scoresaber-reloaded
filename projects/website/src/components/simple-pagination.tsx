@@ -11,6 +11,8 @@ import {
   ChevronsRight,
   MoreHorizontal,
 } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import React, { useCallback } from "react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -139,7 +141,7 @@ const PageButton = React.memo(
           buttonPage === currentPage && "cursor-not-allowed"
         )}
       >
-        <a
+        <Link
           href={generatePageUrl ? generatePageUrl(buttonPage) : "#"}
           onClick={e => onClick(buttonPage, e)}
           aria-disabled={isLoading || buttonPage === currentPage}
@@ -151,7 +153,7 @@ const PageButton = React.memo(
               <ArrowPathIcon className="h-4 w-4 animate-spin" />
             </div>
           )}
-        </a>
+        </Link>
       </Button>
     );
   }
@@ -205,6 +207,7 @@ export type SimplePaginationProps = {
   showStats?: boolean;
   onPageChange: (page: number) => void;
   generatePageUrl?: (page: number) => string;
+  onBeforeNavigate?: (newPage: number, currentPage: number) => void;
 };
 
 export default function SimplePagination({
@@ -217,7 +220,9 @@ export default function SimplePagination({
   loadingPage,
   onPageChange,
   generatePageUrl,
+  onBeforeNavigate,
 }: SimplePaginationProps) {
+  const router = useRouter();
   page = page == 0 ? 1 : page;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
 
@@ -239,9 +244,16 @@ export default function SimplePagination({
   const handleLinkClick = useCallback(
     (newPage: number, event: React.MouseEvent) => {
       event.preventDefault();
-      handlePageChange(newPage);
+      if (generatePageUrl) {
+        onBeforeNavigate?.(newPage, page);
+        router.push(generatePageUrl(newPage), {
+          scroll: false,
+        });
+      } else {
+        handlePageChange(newPage);
+      }
     },
-    [handlePageChange]
+    [handlePageChange, generatePageUrl, router, onBeforeNavigate, page]
   );
 
   const renderPageNumbers = useCallback(() => {

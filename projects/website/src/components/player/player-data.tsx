@@ -6,16 +6,8 @@ import PlayerBadges from "@/components/player/player-badges";
 import PlayerViews from "@/components/player/views/player-views";
 import { useWindowDimensions } from "@/contexts/viewport-context";
 import useDatabase from "@/hooks/use-database";
-import {
-  AccSaberScoreOrder,
-  AccSaberScoreSort,
-  AccSaberScoreType,
-} from "@ssr/common/api-service/impl/accsaber";
 import { DetailType } from "@ssr/common/detail-type";
 import type ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import type { ScoreSaberScoreSort } from "@ssr/common/score/score-sort";
-import { ScoreSaberScoreDataMode } from "@ssr/common/types/score-data-mode";
-import { ScoreSort } from "@ssr/common/types/sort";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { useLiveQuery } from "dexie-react-hooks";
@@ -72,67 +64,12 @@ function PlatformSelector({
   );
 }
 
-function ScoreComponent({
-  platformType,
-  player,
-  searchParams,
-  pageParams,
-}: {
-  platformType: PlatformType;
-  player: ScoreSaberPlayer;
-  searchParams: {
-    [key: string]: string | undefined;
-  };
-  pageParams: string[];
-}) {
-  const mode = (pageParams[2] as ScoreSaberScoreDataMode) ?? ("live" as ScoreSaberScoreDataMode);
-
-  return (
-    <div className="[&>div]:rounded-tl-none">
-      {platformType === PlatformType.ScoreSaber ? (
-        <ScoreSaberPlayerScores
-          player={player}
-          mode={mode}
-          sort={(pageParams[3] as ScoreSaberScoreSort) ?? ("recent" as ScoreSaberScoreSort)}
-          direction={
-            mode
-              ? ((pageParams[mode === "cached" ? 4 : 3] as ScoreSort["direction"]) ??
-                ("desc" as ScoreSort["direction"]))
-              : undefined
-          }
-          page={parseInt(pageParams[mode === "cached" ? 4 : 3]) || 1}
-          initialSearch={searchParams.search}
-        />
-      ) : platformType === PlatformType.MedalScores ? (
-        <ScoreSaberPlayerMedalScores player={player} page={parseInt(pageParams[2]) || 1} />
-      ) : (
-        <AccSaberPlayerScores
-          player={player}
-          sort={(pageParams[2] as AccSaberScoreSort) ?? ("date" as AccSaberScoreSort)}
-          type={(pageParams[3] as AccSaberScoreType) ?? ("overall" as AccSaberScoreType)}
-          order={(pageParams[4] as AccSaberScoreOrder) ?? ("desc" as AccSaberScoreOrder)}
-          page={parseInt(pageParams[5]) || 1}
-        />
-      )}
-    </div>
-  );
-}
-
 interface PlayerDataProps {
   initialPlayerData: ScoreSaberPlayer;
   platformType: PlatformType;
-  searchParams: {
-    [key: string]: string | undefined;
-  };
-  pageParams: string[];
 }
 
-export default function PlayerData({
-  platformType,
-  initialPlayerData,
-  pageParams,
-  searchParams,
-}: PlayerDataProps) {
+export default function PlayerData({ platformType, initialPlayerData }: PlayerDataProps) {
   const { width } = useWindowDimensions();
   const database = useDatabase();
 
@@ -175,12 +112,17 @@ export default function PlayerData({
         <div className="flex flex-col">
           <div className="flex flex-col">
             <PlatformSelector currentPlatform={platformType} player={player} />
-            <ScoreComponent
-              platformType={platformType}
-              player={player}
-              searchParams={searchParams}
-              pageParams={pageParams}
-            />
+
+            {/* Platform Scores */}
+            <div className="[&>div]:rounded-tl-none">
+              {platformType === PlatformType.ScoreSaber ? (
+                <ScoreSaberPlayerScores player={player} />
+              ) : platformType === PlatformType.MedalScores ? (
+                <ScoreSaberPlayerMedalScores player={player} />
+              ) : (
+                <AccSaberPlayerScores player={player} />
+              )}
+            </div>
           </div>
         </div>
       </article>
