@@ -1,6 +1,5 @@
 import { TopScoresData } from "@/components/platform/scoresaber/score/top/top-scores-data";
 import { env } from "@ssr/common/env";
-import { Timeframe } from "@ssr/common/timeframe";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -12,18 +11,10 @@ export const metadata: Metadata = {
   },
 };
 
-type TopScoresPageProps = {
-  params: Promise<{
-    timeframe: Timeframe;
-  }>;
-};
-
-export default async function TopScoresPage({ params }: TopScoresPageProps) {
-  const { timeframe } = await params;
-
+export default async function TopScoresPage() {
   return (
     <main className="flex w-full justify-center">
-      <TopScoresData timeframe={timeframe} />
+      <TopScoresData />
     </main>
   );
 }
