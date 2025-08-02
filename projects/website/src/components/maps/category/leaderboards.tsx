@@ -10,6 +10,7 @@ import { Spinner } from "@/components/spinner";
 import { EmptyState } from "@/components/ui/empty-state";
 import { useIsMobile } from "@/contexts/viewport-context";
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
+import { MapSort } from "@ssr/common/maps/types";
 import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { formatDate, timeAgo } from "@ssr/common/utils/time-utils";
@@ -17,6 +18,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useDebounce } from "@uidotdev/usehooks";
 import { ChartBarIcon } from "lucide-react";
 import { parseAsInteger, useQueryState } from "nuqs";
+import { useCallback } from "react";
 
 export default function Leaderboards() {
   const isMobile = useIsMobile();
@@ -47,6 +49,36 @@ export default function Leaderboards() {
         }),
     placeholderData: data => data,
   });
+
+  const getUrl = useCallback(
+    (page: number) => {
+      const params = new URLSearchParams();
+
+      if (page !== 1) params.set("page", page.toString());
+
+      // Include filter parameters
+      if (filterDebounced.category !== 1)
+        params.set("category", filterDebounced.category.toString());
+      if (filterDebounced.sort !== MapSort.Descending)
+        params.set("sort", filterDebounced.sort.toString());
+      if (filterDebounced.starMin !== 0) params.set("starMin", filterDebounced.starMin.toString());
+      if (filterDebounced.starMax !== 15) params.set("starMax", filterDebounced.starMax.toString());
+      if (filterDebounced.verified) params.set("verified", "true");
+      if (filterDebounced.ranked) params.set("ranked", "true");
+      if (filterDebounced.qualified) params.set("qualified", "true");
+
+      const queryString = params.toString();
+      return `${window.location.pathname}${queryString ? `?${queryString}` : ""}`;
+    },
+    [filterDebounced]
+  );
+
+  const handlePageChange = useCallback(
+    (newPage: number) => {
+      setPage(newPage);
+    },
+    [setPage]
+  );
 
   const leaderboards = leaderboardResponse?.leaderboards;
   return (
@@ -127,7 +159,8 @@ export default function Leaderboards() {
             totalItems={leaderboardResponse.metadata.total}
             itemsPerPage={leaderboardResponse.metadata.itemsPerPage}
             loadingPage={isLoading || isRefetching ? page : undefined}
-            onPageChange={newPage => setPage(newPage)}
+            generatePageUrl={getUrl}
+            onPageChange={handlePageChange}
             statsBelow={!isMobile}
           />
         )}

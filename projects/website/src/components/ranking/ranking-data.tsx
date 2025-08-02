@@ -7,7 +7,6 @@ import CountryFlag from "@/components/ui/country-flag";
 import { Switch } from "@/components/ui/switch";
 import { useIsMobile } from "@/contexts/viewport-context";
 import useDatabase from "@/hooks/use-database";
-import usePageNavigation from "@/hooks/use-page-navigation";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import { countryFilter } from "@ssr/common/utils/country.util";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
@@ -15,7 +14,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useDebounce } from "@uidotdev/usehooks";
 import { useLiveQuery } from "dexie-react-hooks";
 import { LinkIcon, XIcon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
+import { useCallback, useState } from "react";
 import { FancyLoader } from "../fancy-loader";
 import AddFriend from "../friend/add-friend";
 import SimpleLink from "../simple-link";
@@ -26,21 +26,24 @@ import { Input } from "../ui/input";
 import { Separator } from "../ui/separator";
 import { PlayerRanking } from "./player-ranking";
 
-type RankingDataProps = {
-  initialPage: number;
-  initialCountry?: string;
-};
+// Constants
+const DEFAULT_PAGE = 1;
 
-export default function RankingData({ initialPage, initialCountry }: RankingDataProps) {
+export default function RankingData() {
   const isMobile = useIsMobile();
-  const navigation = usePageNavigation();
   const database = useDatabase();
   const mainPlayer = useLiveQuery(() => database.getMainPlayer());
 
   const [showRelativePPDifference, setShowRelativePPDifference] = useState<boolean>(false);
-  const [currentPage, setCurrentPage] = useState(initialPage);
-  const [currentCountry, setCurrentCountry] = useState(initialCountry);
-  const [currentSearch, setCurrentSearch] = useState<string | undefined>(undefined);
+  const [currentPage, setCurrentPage] = useQueryState(
+    "page",
+    parseAsInteger.withDefault(DEFAULT_PAGE)
+  );
+  const [currentCountry, setCurrentCountry] = useQueryState(
+    "country",
+    parseAsString.withDefault("")
+  );
+  const [currentSearch, setCurrentSearch] = useQueryState("search", parseAsString.withDefault(""));
 
   const debouncedSearch = useDebounce(currentSearch, 500);
   const isValidSearch = debouncedSearch != undefined && debouncedSearch.length >= 3;
@@ -54,16 +57,33 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
     queryKey: ["rankingData", currentPage, currentCountry, isValidSearch],
     queryFn: async () =>
       ssrApi.searchPlayersRanking(currentPage, {
-        country: currentCountry,
+        country: currentCountry || undefined,
         search: isValidSearch ? debouncedSearch : undefined,
       }),
     refetchIntervalInBackground: false,
     placeholderData: prev => prev,
   });
 
-  useEffect(() => {
-    navigation.changePageUrl(buildPageUrl(currentCountry, currentPage));
-  }, [currentPage, currentCountry, navigation]);
+  const getUrl = useCallback(
+    (page: number) => {
+      const params = new URLSearchParams();
+
+      if (page !== DEFAULT_PAGE) params.set("page", page.toString());
+      if (currentCountry) params.set("country", currentCountry);
+      if (currentSearch) params.set("search", currentSearch);
+
+      const queryString = params.toString();
+      return `${window.location.pathname}${queryString ? `?${queryString}` : ""}`;
+    },
+    [currentCountry, currentSearch]
+  );
+
+  const handlePageChange = useCallback(
+    (newPage: number) => {
+      setCurrentPage(newPage);
+    },
+    [setCurrentPage]
+  );
 
   const firstColumnWidth = getPlayerRankingColumnWidth(rankingData?.items ?? []);
 
@@ -142,8 +162,8 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
                 totalItems={rankingData.metadata.totalItems}
                 itemsPerPage={rankingData.metadata.itemsPerPage}
                 loadingPage={isLoading || isRefetching ? currentPage : undefined}
-                generatePageUrl={page => buildPageUrl(currentCountry, page)}
-                onPageChange={setCurrentPage}
+                generatePageUrl={getUrl}
+                onPageChange={handlePageChange}
                 showStats={false}
               />
 
@@ -172,8 +192,8 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
                 totalItems={rankingData.metadata.totalItems}
                 itemsPerPage={rankingData.metadata.itemsPerPage}
                 loadingPage={isLoading || isRefetching ? currentPage : undefined}
-                generatePageUrl={page => buildPageUrl(currentCountry, page)}
-                onPageChange={setCurrentPage}
+                generatePageUrl={getUrl}
+                onPageChange={handlePageChange}
                 showStats={false}
               />
             </div>
@@ -206,8 +226,8 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
                   }))}
                   value={currentCountry}
                   onValueChange={(newCountry: string | undefined) => {
-                    setCurrentCountry(newCountry);
-                    setCurrentPage(1);
+                    setCurrentCountry(newCountry ?? "");
+                    setCurrentPage(DEFAULT_PAGE);
                   }}
                   placeholder="Select country..."
                 />
@@ -218,7 +238,10 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
                   variant="outline"
                   size="icon"
                   className="h-10 w-10 flex-shrink-0"
-                  onClick={() => setCurrentCountry(undefined)}
+                  onClick={() => {
+                    setCurrentCountry("");
+                    setCurrentPage(DEFAULT_PAGE);
+                  }}
                 >
                   <XIcon className="size-4" />
                 </Button>
@@ -231,7 +254,10 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
             <Input
               placeholder="Search for players..."
               value={currentSearch ?? ""}
-              onChange={e => setCurrentSearch(e.target.value)}
+              onChange={e => {
+                setCurrentSearch(e.target.value);
+                setCurrentPage(DEFAULT_PAGE);
+              }}
               className="h-10"
             />
             {currentSearch && currentSearch.length > 0 && (
@@ -239,7 +265,10 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
                 variant="outline"
                 size="icon"
                 className="h-10 w-10 flex-shrink-0"
-                onClick={() => setCurrentSearch("")}
+                onClick={() => {
+                  setCurrentSearch("");
+                  setCurrentPage(DEFAULT_PAGE);
+                }}
               >
                 <XIcon className="size-4" />
               </Button>
@@ -249,8 +278,4 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
       </div>
     </div>
   );
-}
-
-function buildPageUrl(country: string | undefined, page: number): string {
-  return `/ranking/${country != undefined ? `${country}/` : ""}${page}`;
 }

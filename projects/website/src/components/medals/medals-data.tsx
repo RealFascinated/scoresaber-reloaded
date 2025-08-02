@@ -4,12 +4,12 @@ import { getMedalRankingColumnWidth } from "@/common/player-utils";
 import Card from "@/components/card";
 import SimplePagination from "@/components/simple-pagination";
 import { useIsMobile } from "@/contexts/viewport-context";
-import usePageNavigation from "@/hooks/use-page-navigation";
 import { countryFilter } from "@ssr/common/utils/country.util";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { LinkIcon, XIcon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
+import { useCallback } from "react";
 import { FancyLoader } from "../fancy-loader";
 import AddFriend from "../friend/add-friend";
 import SimpleLink from "../simple-link";
@@ -20,17 +20,21 @@ import { Separator } from "../ui/separator";
 import MedalsInfo from "./medals-info";
 import { PlayerMedalRanking } from "./player-medal-ranking";
 
-type RankingDataProps = {
-  initialPage: number;
-  initialCountry?: string;
-};
+// Constants
+const DEFAULT_PAGE = 1;
 
-export default function RankingData({ initialPage, initialCountry }: RankingDataProps) {
+export default function RankingData() {
   const isMobile = useIsMobile();
-  const navigation = usePageNavigation();
 
-  const [currentPage, setCurrentPage] = useState(initialPage);
-  const [currentCountry, setCurrentCountry] = useState(initialCountry);
+  // State
+  const [currentPage, setCurrentPage] = useQueryState(
+    "page",
+    parseAsInteger.withDefault(DEFAULT_PAGE)
+  );
+  const [currentCountry, setCurrentCountry] = useQueryState(
+    "country",
+    parseAsString.withDefault("")
+  );
 
   const {
     data: rankingData,
@@ -44,9 +48,25 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
     placeholderData: prev => prev,
   });
 
-  useEffect(() => {
-    navigation.changePageUrl(buildPageUrl(currentCountry, currentPage));
-  }, [currentPage, currentCountry, navigation]);
+  const getUrl = useCallback(
+    (page: number) => {
+      const params = new URLSearchParams();
+
+      if (page !== DEFAULT_PAGE) params.set("page", page.toString());
+      if (currentCountry) params.set("country", currentCountry);
+
+      const queryString = params.toString();
+      return `${window.location.pathname}${queryString ? `?${queryString}` : ""}`;
+    },
+    [currentCountry]
+  );
+
+  const handlePageChange = useCallback(
+    (newPage: number) => {
+      setCurrentPage(newPage);
+    },
+    [setCurrentPage]
+  );
 
   const firstColumnWidth = getMedalRankingColumnWidth(rankingData?.items ?? []);
 
@@ -91,8 +111,8 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
                 totalItems={rankingData.metadata.totalItems}
                 itemsPerPage={rankingData.metadata.itemsPerPage}
                 loadingPage={isLoading || isRefetching ? currentPage : undefined}
-                generatePageUrl={page => buildPageUrl(currentCountry, page)}
-                onPageChange={setCurrentPage}
+                generatePageUrl={getUrl}
+                onPageChange={handlePageChange}
                 showStats={false}
               />
 
@@ -116,8 +136,8 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
                 totalItems={rankingData.metadata.totalItems}
                 itemsPerPage={rankingData.metadata.itemsPerPage}
                 loadingPage={isLoading || isRefetching ? currentPage : undefined}
-                generatePageUrl={page => buildPageUrl(currentCountry, page)}
-                onPageChange={setCurrentPage}
+                generatePageUrl={getUrl}
+                onPageChange={handlePageChange}
               />
             </div>
           )}
@@ -149,7 +169,7 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
                   }))}
                   value={currentCountry}
                   onValueChange={(newCountry: string | undefined) => {
-                    setCurrentCountry(newCountry);
+                    setCurrentCountry(newCountry || "");
                     setCurrentPage(1);
                   }}
                   placeholder="Select country..."
@@ -161,7 +181,7 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
                   variant="outline"
                   size="icon"
                   className="h-10 w-10 flex-shrink-0"
-                  onClick={() => setCurrentCountry(undefined)}
+                  onClick={() => setCurrentCountry("")}
                 >
                   <XIcon className="size-4" />
                 </Button>
@@ -176,8 +196,4 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
       </div>
     </div>
   );
-}
-
-function buildPageUrl(country: string | undefined, page: number): string {
-  return `/medals/${country != undefined ? `${country}/` : ""}${page}`;
 }
