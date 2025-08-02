@@ -33,7 +33,7 @@ const links: ReactElement<any>[] = [
         <span className="hidden xl:flex">Medals</span>
       </>
     }
-    href="/medals/1"
+    href="/medals"
   />,
   <SimpleNavLink
     key="maps"
@@ -64,7 +64,7 @@ const links: ReactElement<any>[] = [
         <span className="hidden xl:flex">Top Scores</span>
       </>
     }
-    href="/scores/top/all"
+    href="/scores/top"
   />,
 ];
 
