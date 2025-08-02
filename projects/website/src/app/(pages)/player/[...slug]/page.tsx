@@ -29,10 +29,6 @@ type Props = {
 type PlayerData = {
   player: ScoreSaberPlayer | undefined;
   platformType: PlatformType;
-  searchParams: {
-    [key: string]: string | undefined;
-  };
-  pageParams: string[];
 };
 
 /**
@@ -55,8 +51,6 @@ const getPlayerData = async (
   return {
     player: player,
     platformType: platformType,
-    pageParams: slug,
-    searchParams: await searchParams,
   };
 };
 
@@ -99,7 +93,7 @@ Click here to view the scores for ${player.name}`,
 }
 
 export default async function PlayerPage(props: Props) {
-  const { player, platformType, pageParams, searchParams } = await getPlayerData(props);
+  const { player, platformType } = await getPlayerData(props);
   if (player == undefined) {
     return (
       <main className="mt-2 flex w-full justify-center">
@@ -117,12 +111,7 @@ export default async function PlayerPage(props: Props) {
 
   return (
     <main className="flex w-full justify-center">
-      <PlayerData
-        initialPlayerData={player}
-        platformType={platformType}
-        pageParams={pageParams}
-        searchParams={searchParams}
-      />
+      <PlayerData initialPlayerData={player} platformType={platformType} />
     </main>
   );
 }
