@@ -233,7 +233,8 @@ export class ScoreCoreService {
       score.playerInfo = {
         id: playerInfo.id,
         name: playerInfo.name,
-        profilePicture: playerInfo.profilePicture,
+        profilePicture:
+          playerInfo.profilePicture ?? "https://cdn.fascinated.cc/assets/default-avatar.jpg",
         country: playerInfo.country,
       };
     }

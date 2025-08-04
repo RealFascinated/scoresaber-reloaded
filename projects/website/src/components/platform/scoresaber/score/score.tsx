@@ -1,30 +1,23 @@
 "use client";
 
-import { memo, useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { cn } from "@/common/utils";
 import { useIsMobile } from "@/contexts/viewport-context";
 
-import Avatar from "@/components/avatar";
 import FallbackLink from "@/components/fallback-link";
 import ScoreSaberScoreButtons from "@/components/platform/scoresaber/score/buttons/score-buttons";
 import ScoreSaberScoreInfo from "@/components/platform/scoresaber/score/score-info";
 import ScoreSaberScoreSongInfo from "@/components/platform/scoresaber/score/score-song-info";
 import ScoreSaberScoreStats from "@/components/platform/scoresaber/score/score-stats";
-import PlayerPreview from "@/components/player/player-preview";
-import SimpleLink from "@/components/simple-link";
 import SimpleTooltip from "@/components/simple-tooltip";
 import { ScoreSaberCurve } from "@ssr/common/leaderboard-curve/scoresaber-curve";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
 import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/leaderboard-player-info";
-import { getScoreSaberAvatar } from "@ssr/common/utils/scoresaber.util";
 import { ChevronRight } from "lucide-react";
 import ScoreDropdown, { ScoreMode } from "./score-dropdown";
-
-// Memoize the player preview component to prevent unnecessary re-renders
-const MemoizedPlayerPreview = memo(PlayerPreview);
 
 export default function ScoreSaberScoreDisplay({
   leaderboard,
@@ -32,7 +25,6 @@ export default function ScoreSaberScoreDisplay({
   score,
   settings,
   highlightedPlayerId,
-  playerAbove,
 }: {
   highlightedPlayerId?: string;
   score: ScoreSaberScore;
@@ -93,41 +85,17 @@ export default function ScoreSaberScoreDisplay({
     setIsLeaderboardLoading(isLoading);
   }, []);
 
-  const gridColsClass = settings?.noScoreButtons
-    ? "grid-cols-[20px 1fr_1fr] lg:grid-cols-[0.5fr_4fr_350px]"
-    : "grid-cols-[20px 1fr_1fr] lg:grid-cols-[0.5fr_4fr_1fr_350px]";
-
-  const memoizedScore = { ...score, accuracy, pp };
-
-  const containerClassName = cn(settings?.disablePadding ? "" : "pt-2 pb-2", "relative");
-
-  const gridClassName = cn(
-    "grid w-full gap-2 lg:gap-0",
-    gridColsClass,
-    settings?.hideRank ? "pt-1" : ""
-  );
-
   return (
-    <div className={containerClassName}>
-      {playerAbove && (
-        <MemoizedPlayerPreview playerId={playerAbove.id}>
-          <div className="flex items-center gap-2 pl-2">
-            <Avatar
-              src={playerAbove.profilePicture ?? getScoreSaberAvatar(playerAbove)}
-              alt={playerAbove.name ?? ""}
-              size={20}
-            />
-            <SimpleLink
-              href={`/player/${playerAbove.id}`}
-              className="cursor-pointer transition-all hover:brightness-[66%]"
-            >
-              <p className="text-sm">{playerAbove.name}</p>
-            </SimpleLink>
-          </div>
-        </MemoizedPlayerPreview>
-      )}
-      <div className="flex items-center gap-2">
-        <div className={gridClassName}>
+    <div className={cn(settings?.disablePadding ? "" : "pt-2 pb-2", "relative")}>
+      <div className="flex items-center">
+        <div
+          className={cn(
+            "grid w-full gap-2 lg:gap-0",
+            settings?.noScoreButtons
+              ? "grid-cols-[20px 1fr_1fr] lg:grid-cols-[0.5fr_4fr_350px]"
+              : "grid-cols-[20px 1fr_1fr] lg:grid-cols-[0.5fr_4fr_1fr_350px]"
+          )}
+        >
           <ScoreSaberScoreInfo
             score={score}
             leaderboard={leaderboard}
@@ -158,7 +126,7 @@ export default function ScoreSaberScoreDisplay({
           )}
 
           <ScoreSaberScoreStats
-            score={memoizedScore}
+            score={{ ...score, accuracy, pp }}
             leaderboard={leaderboard}
             medalsMode={settings?.medalsMode}
           />
@@ -167,6 +135,7 @@ export default function ScoreSaberScoreDisplay({
         <FallbackLink href={score.isTracked ? `/score/${score.scoreId}` : undefined}>
           <SimpleTooltip
             display={score.isTracked ? "View score details" : "No score data found :("}
+            className="px-1"
           >
             <ChevronRight
               className={cn(

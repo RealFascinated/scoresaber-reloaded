@@ -277,9 +277,12 @@ export default class Database extends Dexie {
    * Initializes the chart legends cache
    */
   async initializeChartLegends() {
-    this.chartLegendsCache =
-      (await this.getSetting<Record<string, Record<string, boolean>>>(SettingIds.ChartLegends)) ||
-      {};
+    // Only initialize if not already done
+    if (this.chartLegendsCache === undefined) {
+      this.chartLegendsCache =
+        (await this.getSetting<Record<string, Record<string, boolean>>>(SettingIds.ChartLegends)) ||
+        {};
+    }
   }
 
   /**
@@ -612,12 +615,18 @@ export default class Database extends Dexie {
   }
 }
 
+// Singleton database instance
+let databaseInstance: Database | undefined;
+
 /**
- * Gets the database
+ * Gets the database (singleton pattern)
  *
  * @returns the database
  */
 export function getDatabase(): Database {
-  const before = performance.now();
-  return new Database(before);
+  if (!databaseInstance) {
+    const before = performance.now();
+    databaseInstance = new Database(before);
+  }
+  return databaseInstance;
 }
