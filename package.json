@@ -21,7 +21,7 @@
   "license": "MIT",
   "dependencies": {
     "axios": "^1.11.0",
-    "cross-env": "^7.0.3",
+    "cross-env": "^10.0.0",
     "dayjs": "^1.11.13",
     "discordx": "^11.12.2",
     "prettier": "^3.6.2",
