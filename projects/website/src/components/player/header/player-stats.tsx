@@ -109,12 +109,16 @@ const playerStats: Stat[] = [
           roles.length === 0 ? undefined : (
             <SimpleTooltip
               display={
-                <div className="flex flex-col gap-1">
-                  {roles
-                    .map(role => role.name)
-                    .map(role => (
-                      <p key={role}>{role}</p>
-                    ))}
+                <div className="flex flex-col gap-0.5">
+                  {roles.map(role => (
+                    <div key={role.roleId} className="flex items-center gap-2">
+                      <div
+                        className="h-2 w-2 rounded-full"
+                        style={{ backgroundColor: role.color }}
+                      />
+                      <span>{role.name}</span>
+                    </div>
+                  ))}
                 </div>
               }
               side="bottom"

@@ -18,9 +18,9 @@ export type ScoreSaberRole = {
   shortName?: string;
 
   /**
-   * The role for this role.
+   * The ScoreSaber role id for this role.
    */
-  role: string;
+  roleId: string;
 
   /**
    * The color of the role.
@@ -31,54 +31,54 @@ export type ScoreSaberRole = {
 export const scoreSaberRoles: ScoreSaberRole[] = [
   {
     name: "Admin",
-    role: "Admin",
+    roleId: "Admin",
     color: "#bfdcf9",
   },
   {
     name: "Head of Quality Assurance",
     shortName: "Head QAT",
-    role: "QAT Head",
+    roleId: "QAT Head",
     color: "#ff006f",
   },
   {
     name: "Nomination Assessment Team",
     shortName: "NAT",
-    role: "Nomination Assessment Team",
+    roleId: "Nomination Assessment Team",
     color: "#0b64f0",
   },
   {
     name: "Quality Assurance Team",
     shortName: "QA Team",
-    role: "Quality Assurance Team",
+    roleId: "Quality Assurance Team",
     color: "#f70000",
   },
   {
     name: "Ranking Team",
     shortName: "RT",
-    role: "Ranking Team",
+    roleId: "Ranking Team",
     color: "#1abc9c",
   },
   {
     name: "Ranking Team Recruit",
     shortName: "RT Recruit",
-    role: "Recruit",
+    roleId: "Recruit",
     color: "#11806a",
   },
   {
     name: "Head of Content Creation Team",
     shortName: "Head CCT",
-    role: "Content Creation Lead",
+    roleId: "Content Creation Lead",
     color: "#62f60a",
   },
   {
     name: "Content Creation Team",
     shortName: "CCT",
-    role: "Content Creation Team",
+    roleId: "Content Creation Team",
     color: "#62f60a",
   },
   {
     name: "Supporter",
-    role: "Supporter",
+    roleId: "Supporter",
     color: "#f96854",
   },
 ];
@@ -107,7 +107,7 @@ export function getScoreSaberRoles(
   const toReturn: ScoreSaberRole[] = [];
   const rawRoles = player.role?.split(", ") || [player.role];
   for (const role of rawRoles) {
-    const found = scoreSaberRoles.find(r => r.role === role);
+    const found = scoreSaberRoles.find(r => r.roleId === role);
     if (found) {
       toReturn.push(found);
     }
