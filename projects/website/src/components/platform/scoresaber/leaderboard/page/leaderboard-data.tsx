@@ -100,6 +100,7 @@ export function ScoreSaberLeaderboardData({
               {/* Star Change History */}
               {leaderboardResponse.starChangeHistory && (
                 <LeaderboardStarChangeHistory
+                  key={leaderboardResponse.leaderboard.id}
                   starChangeHistory={leaderboardResponse.starChangeHistory}
                 />
               )}
