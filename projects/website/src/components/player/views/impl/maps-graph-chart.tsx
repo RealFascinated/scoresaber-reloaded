@@ -268,7 +268,7 @@ export default function MapsGraphChart({ player }: { player: ScoreSaberPlayer })
 
   if (!dataPoints || isComparisonLoading) {
     return (
-      <div className="flex h-[500px] items-center justify-center">
+      <div className="flex h-[400px] items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <Spinner />
           <p className="text-muted-foreground text-sm">Loading chart data...</p>
@@ -279,7 +279,7 @@ export default function MapsGraphChart({ player }: { player: ScoreSaberPlayer })
 
   return (
     <div className="space-y-4">
-      <div className="border-border/50 bg-background/50 h-[450px] rounded-lg border p-4">
+      <div className="border-border/50 bg-background/50 h-[400px] rounded-lg border p-4">
         <Line data={datasets as any} options={chartOptions as any} />
       </div>
 

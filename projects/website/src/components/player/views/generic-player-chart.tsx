@@ -147,7 +147,7 @@ export default function GenericPlayerChart({
   return (
     <div className="flex flex-col items-center">
       {samplingInfo && <div className="mb-2 text-sm text-gray-400">{samplingInfo}</div>}
-      <div className="h-[360px] w-full">
+      <div className="h-[400px] w-full">
         <GenericChart
           config={{
             id,

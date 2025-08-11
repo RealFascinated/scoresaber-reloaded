@@ -50,7 +50,7 @@ type SelectedView = {
 
 function Loading() {
   return (
-    <div className="flex h-[360px] items-center justify-center">
+    <div className="flex h-[400px] items-center justify-center">
       <Spinner />
     </div>
   );
