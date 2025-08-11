@@ -1,6 +1,7 @@
 import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
+import { ScoreSaberLeaderboardStarChangeModel } from "@ssr/common/model/leaderboard/leaderboard-star-change";
 import { generateBeatSaberPlaylist } from "@ssr/common/playlist/playlist-utils";
 import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
 import { formatDate } from "@ssr/common/utils/time-utils";
@@ -72,6 +73,32 @@ export class LeaderboardNotificationsService {
       `ranked-batch-${date}.txt`,
       file.trim(),
       "<@&1338261690952978442>"
+    );
+
+    // Create star change documents for the newly ranked maps, buffed maps, and nerfed maps
+    await Promise.all(
+      [...newlyRankedMaps, ...buffedMaps, ...nerfedMaps].map(async update => {
+        // Create a star change document
+        await ScoreSaberLeaderboardStarChangeModel.create({
+          leaderboardId: update.leaderboard.id,
+          previousStars: update.update.previousLeaderboard?.stars ?? null,
+          newStars: update.leaderboard.stars,
+          timestamp: new Date(),
+        });
+      })
+    );
+
+    // Create star change documents for the maps that were unranked
+    await Promise.all(
+      unrankedLeaderboards.map(async leaderboard => {
+        // Create a star change document
+        await ScoreSaberLeaderboardStarChangeModel.create({
+          leaderboardId: leaderboard.id,
+          previousStars: leaderboard.stars,
+          newStars: 0,
+          timestamp: new Date(),
+        });
+      })
     );
 
     const leaderboards = PlaylistService.processLeaderboards(
