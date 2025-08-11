@@ -1,11 +1,16 @@
 import { DetailType } from "@ssr/common/detail-type";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 
+export type LeaderboardWithUpdate = {
+  leaderboard: ScoreSaberLeaderboard;
+  update: LeaderboardUpdate;
+};
+
 export type RefreshResult = {
   refreshedLeaderboards: number;
   updatedScoresCount: number;
   updatedLeaderboardsCount: number;
-  updatedLeaderboards: { leaderboard: ScoreSaberLeaderboard; update: LeaderboardUpdate }[];
+  updatedLeaderboards: LeaderboardWithUpdate[];
 };
 
 export type LeaderboardUpdate = {
@@ -19,7 +24,7 @@ export type LeaderboardUpdate = {
 export type LeaderboardUpdates = {
   updatedScoresCount: number;
   updatedLeaderboardsCount: number;
-  updatedLeaderboards: { leaderboard: ScoreSaberLeaderboard; update: LeaderboardUpdate }[];
+  updatedLeaderboards: LeaderboardWithUpdate[];
 };
 
 export type LeaderboardOptions = {

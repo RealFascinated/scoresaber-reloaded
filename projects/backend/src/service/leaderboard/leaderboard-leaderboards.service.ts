@@ -5,6 +5,7 @@ import {
   ScoreSaberLeaderboardModel,
 } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import LeaderboardDifficulty from "@ssr/common/model/leaderboard/leaderboard-difficulty";
+import { ScoreSaberLeaderboardStarChangeModel } from "@ssr/common/model/leaderboard/leaderboard-star-change";
 import { PlaylistSong } from "@ssr/common/playlist/playlist-song";
 import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
 import { formatDuration } from "@ssr/common/utils/time-utils";
@@ -152,14 +153,55 @@ export class LeaderboardLeaderboardsService {
     // Handle unranking old leaderboards using the already fetched data
     const unrankedLeaderboards = await LeaderboardService.unrankOldLeaderboards(leaderboards);
 
+    // Get the newly ranked maps, buffed maps, and nerfed maps
+    const newlyRankedMaps = result.updatedLeaderboards.filter(
+      update => update.update.rankedStatusChanged && update.leaderboard.ranked
+    );
+    const starRatingChangedMaps = result.updatedLeaderboards.filter(
+      update => update.update.starCountChanged
+    );
+    const nerfedMaps = starRatingChangedMaps.filter(
+      update => update.leaderboard.stars < update.update.previousLeaderboard?.stars
+    );
+    const buffedMaps = starRatingChangedMaps.filter(
+      update =>
+        update.leaderboard.stars > update.update.previousLeaderboard?.stars &&
+        update.update.previousLeaderboard?.stars > 0
+    );
+
     if (result.updatedLeaderboardsCount > 0 || unrankedLeaderboards.length > 0) {
+      // Log the leaderboard updates to Discord
       await LeaderboardService.logLeaderboardUpdates(
-        {
-          updatedScoresCount: result.updatedScoresCount,
-          updatedLeaderboardsCount: result.updatedLeaderboardsCount,
-          updatedLeaderboards: result.updatedLeaderboards,
-        },
+        newlyRankedMaps,
+        buffedMaps,
+        nerfedMaps,
         unrankedLeaderboards
+      );
+
+      // Create star change documents for the newly ranked maps, buffed maps, and nerfed maps
+      await Promise.all(
+        [...newlyRankedMaps, ...buffedMaps, ...nerfedMaps].map(async update => {
+          // Create a star change document
+          await ScoreSaberLeaderboardStarChangeModel.create({
+            leaderboardId: update.leaderboard.id,
+            previousStars: update.update.previousLeaderboard?.stars ?? null,
+            newStars: update.leaderboard.stars,
+            timestamp: new Date(),
+          });
+        })
+      );
+
+      // Create star change documents for the maps that were unranked
+      await Promise.all(
+        unrankedLeaderboards.map(async leaderboard => {
+          // Create a star change document
+          await ScoreSaberLeaderboardStarChangeModel.create({
+            leaderboardId: leaderboard.id,
+            previousStars: leaderboard.stars,
+            newStars: 0,
+            timestamp: new Date(),
+          });
+        })
       );
     }
 
