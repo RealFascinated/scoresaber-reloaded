@@ -98,12 +98,13 @@ export function ScoreSaberLeaderboardData({
               />
 
               {/* Star Change History */}
-              {leaderboardResponse.starChangeHistory && (
-                <LeaderboardStarChangeHistory
-                  key={leaderboardResponse.leaderboard.id}
-                  starChangeHistory={leaderboardResponse.starChangeHistory}
-                />
-              )}
+              {leaderboardResponse.starChangeHistory &&
+                leaderboardResponse.starChangeHistory.length > 0 && (
+                  <LeaderboardStarChangeHistory
+                    key={leaderboardResponse.leaderboard.id}
+                    starChangeHistory={leaderboardResponse.starChangeHistory}
+                  />
+                )}
             </Card>
 
             <div className="grid grid-cols-2 gap-2">
