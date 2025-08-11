@@ -46,6 +46,19 @@ export function LeaderboardStarChangeHistory({
             starChange.previousStars == 0 ? "Unranked" : starChange.previousStars.toFixed(2);
           const to = starChange.newStars == 0 ? "Unranked" : starChange.newStars.toFixed(2);
 
+          // Determine colors based on star change
+          const isIncrease = starChange.newStars > starChange.previousStars;
+          const isDecrease = starChange.newStars < starChange.previousStars;
+          const fromColor = starChange.previousStars === 0 ? "text-white" : "text-white";
+          const toColor =
+            starChange.newStars === 0
+              ? "text-white"
+              : isIncrease
+                ? "text-green-500"
+                : isDecrease
+                  ? "text-red-500"
+                  : "text-white";
+
           return (
             <div
               key={`${starChange.timestamp.toISOString()}-${starChange.previousStars}-${starChange.newStars}`}
@@ -54,9 +67,9 @@ export function LeaderboardStarChangeHistory({
               <span className="text-muted-foreground">{timeAgo(starChange.timestamp)}</span>
 
               <div className="flex items-center gap-2">
-                <span>{from}</span>
+                <span className={fromColor}>{from}</span>
                 <span className="text-muted-foreground">→</span>
-                <span>{to}</span>
+                <span className={toColor}>{to}</span>
               </div>
             </div>
           );
