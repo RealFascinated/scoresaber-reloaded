@@ -100,7 +100,7 @@ function ScoreComponent({
                 ("desc" as ScoreSort["direction"]))
               : undefined
           }
-          page={parseInt(pageParams[mode === "cached" ? 4 : 3]) || 1}
+          page={parseInt(pageParams[mode === "cached" ? 5 : 4]) || 1}
           initialSearch={searchParams.search}
         />
       ) : platformType === PlatformType.MedalScores ? (
