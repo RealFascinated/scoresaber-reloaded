@@ -6,11 +6,13 @@ import {
   ScoreSaberLeaderboardModel,
 } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import LeaderboardDifficulty from "@ssr/common/model/leaderboard/leaderboard-difficulty";
+import { ScoreSaberLeaderboardStarChangeModel } from "@ssr/common/model/leaderboard/leaderboard-star-change";
 import { ScoreSaberPreviousScoreModel } from "@ssr/common/model/score/impl/scoresaber-previous-score";
 import {
   ScoreSaberScoreDocument,
   ScoreSaberScoreModel,
 } from "@ssr/common/model/score/impl/scoresaber-score";
+import { LeaderboardStarChange } from "@ssr/common/response/leaderboard-star-change";
 import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 import { LeaderboardUpdate, LeaderboardUpdates } from "../../common/types/leaderboard";
 import { LeaderboardService } from "./leaderboard.service";
@@ -453,5 +455,24 @@ export class LeaderboardRankingService {
       difficultyRaw: leaderboard.difficulty.difficultyRaw,
     });
     rankedMapDiffs.set(leaderboard.songHash, difficulties);
+  }
+
+  /**
+   * Fetches the star change history for a given leaderboard
+   */
+  public static async fetchStarChangeHistory(
+    leaderboard: ScoreSaberLeaderboard
+  ): Promise<LeaderboardStarChange[]> {
+    return (
+      await ScoreSaberLeaderboardStarChangeModel.find({
+        leaderboardId: leaderboard.id,
+      })
+        .lean()
+        .sort({ timestamp: -1 })
+    ).map(starChange => ({
+      previousStars: starChange.previousStars,
+      newStars: starChange.newStars,
+      timestamp: starChange.timestamp,
+    }));
   }
 }

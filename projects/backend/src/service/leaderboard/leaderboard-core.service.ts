@@ -28,6 +28,7 @@ const LEADERBOARD_REFRESH_TIME = TimeUnit.toMillis(TimeUnit.Day, 3);
 const DEFAULT_OPTIONS: LeaderboardOptions = {
   cacheOnly: false,
   includeBeatSaver: false,
+  includeStarChangeHistory: false,
   beatSaverType: DetailType.BASIC,
   type: DetailType.BASIC,
 };
@@ -80,9 +81,14 @@ export class LeaderboardCoreService {
         )
       : undefined;
 
+    const starChangeHistory = defaultOptions.includeStarChangeHistory
+      ? await LeaderboardService.fetchStarChangeHistory(leaderboardData.leaderboard)
+      : undefined;
+
     return {
       leaderboard: leaderboardData.leaderboard,
       beatsaver: beatSaverMap,
+      starChangeHistory,
       cached: leaderboardData.cached,
     };
   }

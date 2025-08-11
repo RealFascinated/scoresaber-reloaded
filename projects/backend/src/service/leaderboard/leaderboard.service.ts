@@ -46,6 +46,7 @@ export class LeaderboardService {
   public static updateRankedMapDifficulties = LeaderboardRankingService.updateRankedMapDifficulties;
   public static handleLeaderboardUpdate = LeaderboardRankingService.handleLeaderboardUpdate;
   public static unrankLeaderboard = LeaderboardRankingService.unrankLeaderboard;
+  public static fetchStarChangeHistory = LeaderboardRankingService.fetchStarChangeHistory;
 
   // LeaderboardScoresService methods
   public static getTrackedScoresCount = LeaderboardScoresService.getTrackedScoresCount;

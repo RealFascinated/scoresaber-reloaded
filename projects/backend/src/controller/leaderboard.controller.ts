@@ -35,6 +35,7 @@ export default class LeaderboardController {
     const data = await LeaderboardService.getLeaderboard(id, {
       beatSaverType: type,
       includeBeatSaver: true,
+      includeStarChangeHistory: true,
     });
     return superJson ? SuperJSON.stringify(data) : data;
   }
@@ -69,6 +70,7 @@ export default class LeaderboardController {
     const data = await LeaderboardService.getLeaderboardByHash(id, difficulty, characteristic, {
       type,
       includeBeatSaver: true,
+      includeStarChangeHistory: true,
     });
     return superJson ? SuperJSON.stringify(data) : data;
   }

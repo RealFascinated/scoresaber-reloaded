@@ -16,6 +16,7 @@ import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import LeaderboardPpChart from "../chart/leaderboard-pp-chart";
+import { LeaderboardStarChangeHistory } from "../leaderboard-star-change-history";
 
 type LeaderboardDataProps = {
   /**
@@ -95,6 +96,13 @@ export function ScoreSaberLeaderboardData({
                 showDifficulties
                 isLeaderboardPage
               />
+
+              {/* Star Change History */}
+              {leaderboardResponse.starChangeHistory && (
+                <LeaderboardStarChangeHistory
+                  starChangeHistory={leaderboardResponse.starChangeHistory}
+                />
+              )}
             </Card>
 
             <div className="grid grid-cols-2 gap-2">

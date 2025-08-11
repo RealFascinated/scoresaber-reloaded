@@ -3,8 +3,6 @@ import Logger from "@ssr/common/logger";
 import {
   ActionRowData,
   ActivityType,
-  APIActionRowComponent,
-  APIMessageActionRowComponent,
   AttachmentBuilder,
   EmbedBuilder,
   GatewayIntentBits,
@@ -93,10 +91,7 @@ export async function initDiscordBot() {
 export async function logToChannel(
   channelId: (typeof DiscordChannels)[keyof typeof DiscordChannels],
   embed: EmbedBuilder,
-  components: (
-    | APIActionRowComponent<APIMessageActionRowComponent>
-    | ActionRowData<MessageActionRowComponentBuilder>
-  )[] = []
+  components: ActionRowData<MessageActionRowComponentBuilder>[] = []
 ) {
   if (!channelId) {
     return;

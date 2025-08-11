@@ -184,7 +184,7 @@ export class LeaderboardLeaderboardsService {
           // Create a star change document
           await ScoreSaberLeaderboardStarChangeModel.create({
             leaderboardId: update.leaderboard.id,
-            previousStars: update.update.previousLeaderboard?.stars ?? null,
+            previousStars: update.update.previousLeaderboard?.stars ?? 0,
             newStars: update.leaderboard.stars,
             timestamp: new Date(),
           });
