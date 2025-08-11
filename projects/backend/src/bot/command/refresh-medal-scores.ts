@@ -6,7 +6,7 @@ import { OwnerOnly } from "../lib/guards";
 
 @Discord()
 @Guard(IsGuildUser(OwnerOnly))
-export class RefreshMedalScores {
+class RefreshMedalScores {
   @Slash({
     description: "Resets the medal scores cache and recalculates all medal counts (very slow)",
     name: "refresh-medal-scores",

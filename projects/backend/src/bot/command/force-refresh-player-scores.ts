@@ -7,7 +7,7 @@ import { OwnerOnly } from "../lib/guards";
 
 @Discord()
 @Guard(IsGuildUser(OwnerOnly))
-export class ForceRefreshPlayerScores {
+class ForceRefreshPlayerScores {
   @Slash({ description: "Force refresh a player's scores", name: "force-refresh-player-scores" })
   async forceRefreshPlayerScores(
     @SlashOption({

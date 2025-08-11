@@ -8,7 +8,7 @@ import { OwnerOnly } from "../lib/guards";
 
 @Discord()
 @Guard(IsGuildUser(OwnerOnly))
-export class ForceTrackPlayerStatistics {
+class ForceTrackPlayerStatistics {
   @Slash({
     description: "Force track statistics for all players",
     name: "force-track-player-statistics",

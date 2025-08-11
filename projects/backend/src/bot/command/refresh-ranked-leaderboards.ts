@@ -6,7 +6,7 @@ import { OwnerOnly } from "../lib/guards";
 
 @Discord()
 @Guard(IsGuildUser(OwnerOnly))
-export class RefreshRankedLeaderboards {
+class RefreshRankedLeaderboards {
   @Slash({
     description: "Force refresh ranked leaderboards",
     name: "refresh-ranked-leaderboards",

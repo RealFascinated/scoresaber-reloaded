@@ -6,7 +6,7 @@ import { OwnerOnly } from "../lib/guards";
 
 @Discord()
 @Guard(IsGuildUser(OwnerOnly))
-export class ForceRefreshPlayerScores {
+class ForceRefreshPlayerScores {
   @Slash({ description: "Updates every players medal count", name: "update-player-medals" })
   async updatePlayerMedals(interaction: CommandInteraction) {
     await interaction.reply({

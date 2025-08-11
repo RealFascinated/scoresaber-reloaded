@@ -9,6 +9,7 @@ import {
   EmbedBuilder,
   GatewayIntentBits,
   MessageActionRowComponentBuilder,
+  MessageFlags,
 } from "discord.js";
 import { Client } from "discordx";
 
@@ -54,21 +55,18 @@ client.once("ready", async () => {
   Logger.info("Discord bot ready!");
 });
 
-// Add error handling for the client
-client.on("error", error => {
-  Logger.error("Discord client error:", error);
-});
-
-client.on("warn", warning => {
-  Logger.warn("Discord client warning:", warning);
-});
-
-client.on("debug", info => {
-  Logger.debug("Discord client debug:", info);
-});
-
 client.on("interactionCreate", interaction => {
-  client.executeInteraction(interaction);
+  try {
+    client.executeInteraction(interaction);
+  } catch (error) {
+    Logger.error("Error executing interaction:", error);
+    if (interaction.isCommand() || interaction.isContextMenuCommand()) {
+      interaction.reply({
+        content: "An error occurred while processing your request. Please try again later.",
+        flags: MessageFlags.Ephemeral,
+      });
+    }
+  }
 });
 
 export async function initDiscordBot() {
