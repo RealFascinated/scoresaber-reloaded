@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/outline";
 import { StarIcon } from "@heroicons/react/24/solid";
 import { LeaderboardStarChange } from "@ssr/common/response/leaderboard-star-change";
+import { timeAgo } from "@ssr/common/utils/time-utils";
 import { useState } from "react";
 
 export function LeaderboardStarChangeHistory({
@@ -46,10 +47,11 @@ export function LeaderboardStarChangeHistory({
           const to = starChange.newStars == 0 ? "Unranked" : starChange.newStars.toFixed(2);
 
           return (
-            <div key={starChange.timestamp.toISOString()} className="flex items-center gap-4">
-              <span className="text-muted-foreground">
-                {starChange.timestamp.toLocaleDateString()}
-              </span>
+            <div
+              key={`${starChange.timestamp.toISOString()}-${starChange.previousStars}-${starChange.newStars}`}
+              className="flex items-center gap-4 text-sm"
+            >
+              <span className="text-muted-foreground">{timeAgo(starChange.timestamp)}</span>
 
               <div className="flex items-center gap-2">
                 <span>{from}</span>
