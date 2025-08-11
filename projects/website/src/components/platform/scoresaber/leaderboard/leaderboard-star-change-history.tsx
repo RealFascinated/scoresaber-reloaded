@@ -41,7 +41,8 @@ export function LeaderboardStarChangeHistory({
       </div>
 
       <div className="flex flex-col gap-1">
-        {starChangeHistory.map(starChange => {
+        {starChangeHistory.map((starChange, index) => {
+          const isCurrent = index === starChangeHistory.length - 1;
           const from =
             starChange.previousStars == 0 ? "Unranked" : starChange.previousStars.toFixed(2);
           const to = starChange.newStars == 0 ? "Unranked" : starChange.newStars.toFixed(2);
@@ -69,7 +70,9 @@ export function LeaderboardStarChangeHistory({
               <div className="flex items-center gap-2">
                 <span className={fromColor}>{from}</span>
                 <span className="text-muted-foreground">→</span>
-                <span className={toColor}>{to}</span>
+                <span className={toColor}>
+                  {to} {isCurrent && <span className="text-muted-foreground">(Current)</span>}
+                </span>
               </div>
             </div>
           );
