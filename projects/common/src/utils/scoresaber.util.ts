@@ -37,7 +37,7 @@ export const scoreSaberRoles: ScoreSaberRole[] = [
   {
     name: "Head of Quality Assurance",
     shortName: "Head QAT",
-    role: "Head of Quality Assurance",
+    role: "QAT Head",
     color: "#ff006f",
   },
   {
@@ -49,7 +49,7 @@ export const scoreSaberRoles: ScoreSaberRole[] = [
   {
     name: "Quality Assurance Team",
     shortName: "QA Team",
-    role: "Quality Assurance",
+    role: "Quality Assurance Team",
     color: "#f70000",
   },
   {
