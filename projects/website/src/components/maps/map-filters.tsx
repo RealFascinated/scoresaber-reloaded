@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/select";
 import { Consts } from "@ssr/common/consts";
 import { MapCategory, MapSort } from "@ssr/common/maps/types";
+import { Input } from "../ui/input";
 
 export default function MapFilters() {
   const filter = useMapFilter();
@@ -44,6 +45,16 @@ export default function MapFilters() {
       </div>
 
       <div className="flex flex-col gap-2">
+        {/* Search */}
+        <div className="flex flex-col gap-1">
+          <h1 className="text-sm font-bold">Search</h1>
+          <Input
+            value={filter.search}
+            onChange={e => filter.setSearch(e.target.value)}
+            placeholder="Search for a map"
+          />
+        </div>
+
         {/* Category */}
         <div className="flex flex-col gap-1">
           <h1 className="text-sm font-bold">Category</h1>

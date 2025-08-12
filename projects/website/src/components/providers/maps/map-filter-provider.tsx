@@ -2,7 +2,7 @@
 
 import { Consts } from "@ssr/common/consts";
 import { MapCategory, MapSort } from "@ssr/common/maps/types";
-import { parseAsBoolean, parseAsInteger, useQueryState } from "nuqs";
+import { parseAsBoolean, parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import { createContext, ReactNode, useContext } from "react";
 
 const defaultCategory = MapCategory.DateRanked;
@@ -13,6 +13,8 @@ type FilterContextProps = {
   sort: number;
   starMin: number;
   starMax: number;
+  search: string;
+  setSearch: (search: string) => void;
   setCategory: (category: number) => void;
   setSort: (sort: number) => void;
   setStarMin: (starMin: number) => void;
@@ -41,6 +43,7 @@ export const MapFilterProvider = ({ children }: { children: ReactNode }) => {
     "starMax",
     parseAsInteger.withDefault(Consts.MAX_STARS)
   );
+  const [search, setSearch] = useQueryState("search", parseAsString.withDefault(""));
 
   const [verified, setVerified] = useQueryState("verified", parseAsBoolean.withDefault(false));
   const [ranked, setRanked] = useQueryState("ranked", parseAsBoolean.withDefault(false));
@@ -51,6 +54,7 @@ export const MapFilterProvider = ({ children }: { children: ReactNode }) => {
     setSort(defaultSort);
     setStarMin(0);
     setStarMax(Consts.MAX_STARS);
+    setSearch("");
     setVerified(false);
     setRanked(false);
     setQualified(false);
@@ -64,7 +68,8 @@ export const MapFilterProvider = ({ children }: { children: ReactNode }) => {
       starMax !== Consts.MAX_STARS ||
       verified ||
       ranked ||
-      qualified
+      qualified ||
+      search !== ""
     );
   };
 
@@ -75,6 +80,8 @@ export const MapFilterProvider = ({ children }: { children: ReactNode }) => {
         sort,
         starMin,
         starMax,
+        search,
+        setSearch,
         setCategory,
         setSort,
         setStarMin,
