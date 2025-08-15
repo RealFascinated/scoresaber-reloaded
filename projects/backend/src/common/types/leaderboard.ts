@@ -38,5 +38,4 @@ export type LeaderboardOptions = {
 export type LeaderboardData = {
   leaderboard: ScoreSaberLeaderboard;
   cached: boolean;
-  trackedScores: number;
 };

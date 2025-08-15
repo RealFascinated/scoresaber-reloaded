@@ -171,149 +171,102 @@ export class LeaderboardCoreService {
     ids: string[],
     options?: LeaderboardOptions
   ): Promise<LeaderboardResponse[]> {
-    const defaultOptions = {
-      ...DEFAULT_OPTIONS,
-      ...options,
-    };
+    const defaultOptions = { ...DEFAULT_OPTIONS, ...options };
+    const results = new Map<string, LeaderboardData | null>();
 
-    // First, check Redis cache for all IDs in parallel
-    const cacheKeys = ids.map(id => `leaderboard:id:${id}`);
-    const cachedDataPromises = cacheKeys.map(key => CacheService.redisClient.get(key));
-    const cachedData = await Promise.all(cachedDataPromises);
+    // Deduplicate IDs to avoid processing the same leaderboard multiple times
+    const uniqueIds = [...new Set(ids)];
 
-    // Separate cached and uncached IDs
-    const uncachedIds: string[] = [];
-    const cachedResults: Array<{ id: string; data: LeaderboardData | null }> = [];
+    // Check Redis cache
+    const cacheKeys = uniqueIds.map(id => `leaderboard:id:${id}`);
+    const cachedData = await Promise.all(cacheKeys.map(key => CacheService.redisClient.get(key)));
 
-    // Process cached data
-    for (let i = 0; i < ids.length; i++) {
-      const id = ids[i];
-      const cachedDataItem = cachedData[i];
-
-      if (cachedDataItem) {
+    const uncachedIds = uniqueIds.filter((id, i) => {
+      const cached = cachedData[i];
+      if (cached) {
         try {
-          const leaderboardData = SuperJSON.parse(cachedDataItem) as LeaderboardData;
-          cachedResults.push({ id, data: leaderboardData });
+          const data = SuperJSON.parse(cached) as LeaderboardData;
+          results.set(id, data);
+          return false;
         } catch {
           Logger.warn(`Failed to parse cached data for leaderboard ${id}, removing from cache`);
-          // Fire and forget cache deletion
           CacheService.redisClient.del(cacheKeys[i]).catch(() => {});
-          uncachedIds.push(id);
-          cachedResults.push({ id, data: null });
         }
-      } else {
-        uncachedIds.push(id);
-        cachedResults.push({ id, data: null });
       }
-    }
+      return true;
+    });
 
-    // Check MongoDB cache for uncached IDs
-    // Convert string IDs to numbers for MongoDB query
+    // Check MongoDB cache
     const numericIds = uncachedIds.map(id => Number(id)).filter(id => !isNaN(id));
-
-    // Chunk the IDs to avoid MongoDB query size limits and improve performance
     const CHUNK_SIZE = 100;
     const mongoCachedLeaderboards: ScoreSaberLeaderboard[] = [];
 
     for (let i = 0; i < numericIds.length; i += CHUNK_SIZE) {
       const chunk = numericIds.slice(i, i + CHUNK_SIZE);
-      const chunkResults = await ScoreSaberLeaderboardModel.find({
-        _id: { $in: chunk },
-      }).lean();
+      const chunkResults = await ScoreSaberLeaderboardModel.find({ _id: { $in: chunk } }).lean();
       mongoCachedLeaderboards.push(...chunkResults);
     }
 
-    const mongoLeaderboardMap = new Map(
-      mongoCachedLeaderboards.map(lb => [lb._id!.toString(), lb])
-    );
-
-    const mongoCachedResults: Array<{ id: string; data: LeaderboardData | null }> = [];
+    const mongoMap = new Map(mongoCachedLeaderboards.map(lb => [lb._id!.toString(), lb]));
     const stillUncachedIds: string[] = [];
 
-    // Process all MongoDB results in parallel
-    const processPromises = uncachedIds.map(async id => {
-      const cachedLeaderboard = mongoLeaderboardMap.get(id) || null;
-      const { cached, foundLeaderboard } = LeaderboardService.validateCachedLeaderboard(
-        cachedLeaderboard,
-        options
-      );
-
-      if (foundLeaderboard) {
-        const leaderboardData = await LeaderboardService.createLeaderboardData(
-          foundLeaderboard,
-          cached
+    // Process MongoDB results
+    await Promise.all(
+      uncachedIds.map(async id => {
+        const cached = mongoMap.get(id) || null;
+        const { cached: isCached, foundLeaderboard } = LeaderboardService.validateCachedLeaderboard(
+          cached,
+          options
         );
 
-        // Cache the result in Redis
-        await CacheService.redisClient.set(
-          `leaderboard:id:${id}`,
-          SuperJSON.stringify(leaderboardData),
-          "EX",
-          TimeUnit.toSeconds(TimeUnit.Hour, 2)
-        );
+        if (foundLeaderboard) {
+          const data = await LeaderboardService.createLeaderboardData(foundLeaderboard, isCached);
+          await CacheService.redisClient.set(
+            `leaderboard:id:${id}`,
+            SuperJSON.stringify(data),
+            "EX",
+            TimeUnit.toSeconds(TimeUnit.Hour, 2)
+          );
+          results.set(id, data);
+        } else {
+          stillUncachedIds.push(id);
+        }
+      })
+    );
 
-        return { id, data: leaderboardData };
-      } else {
-        return { id, data: null };
-      }
-    });
+    // Fetch from API
+    await Promise.all(
+      stillUncachedIds.map(async id => {
+        try {
+          const leaderboard = await LeaderboardService.fetchAndSaveLeaderboard(id);
+          const data = await LeaderboardService.createLeaderboardData(leaderboard, false);
+          await CacheService.redisClient.set(
+            `leaderboard:id:${id}`,
+            SuperJSON.stringify(data),
+            "EX",
+            TimeUnit.toSeconds(TimeUnit.Hour, 2)
+          );
+          results.set(id, data);
+        } catch (error) {
+          Logger.warn(`Failed to fetch leaderboard for ID ${id}:`, error);
+          results.set(id, null);
+        }
+      })
+    );
 
-    const processResults = await Promise.all(processPromises);
-
-    // Separate results
-    for (const result of processResults) {
-      if (result.data) {
-        mongoCachedResults.push(result);
-      } else {
-        stillUncachedIds.push(result.id);
-      }
-    }
-
-    // Fetch remaining uncached leaderboards from API
-    const fetchPromises = stillUncachedIds.map(async id => {
-      try {
-        const leaderboard = await LeaderboardService.fetchAndSaveLeaderboard(id);
-        const leaderboardData = await LeaderboardService.createLeaderboardData(
-          leaderboard,
-          false // Not cached since we just fetched it
-        );
-
-        // Cache the result
-        await CacheService.redisClient.set(
-          `leaderboard:id:${id}`,
-          SuperJSON.stringify(leaderboardData),
-          "EX",
-          TimeUnit.toSeconds(TimeUnit.Hour, 2) // 2 hours TTL for leaderboards
-        );
-
-        return { id, data: leaderboardData };
-      } catch (error) {
-        Logger.warn(`Failed to fetch leaderboard for ID ${id}:`, error);
-        return { id, data: null };
-      }
-    });
-
-    const fetchedResults = await Promise.all(fetchPromises);
-
-    // Combine all results
-    const allResults = new Map<string, LeaderboardData | null>();
-    [...cachedResults, ...mongoCachedResults, ...fetchedResults].forEach(result => {
-      allResults.set(result.id, result.data);
-    });
-
-    const allLeaderboards = ids
-      .map(id => allResults.get(id))
+    const allLeaderboards = uniqueIds
+      .map(id => results.get(id))
       .filter((data): data is LeaderboardData => data !== null);
 
-    // Get BeatSaver data if needed
+    // Add BeatSaver data if needed
     if (defaultOptions.includeBeatSaver) {
       await Promise.all(
-        allLeaderboards.map(async leaderboardData => {
+        allLeaderboards.map(async data => {
           const beatsaver = await LeaderboardService.fetchBeatSaverData(
-            leaderboardData.leaderboard,
+            data.leaderboard,
             defaultOptions.beatSaverType
           );
-          (leaderboardData as LeaderboardResponse).beatsaver = beatsaver;
+          (data as LeaderboardResponse).beatsaver = beatsaver;
         })
       );
     }
@@ -424,7 +377,7 @@ export class LeaderboardCoreService {
   }
 
   /**
-   * Processes a leaderboard by setting fullName and converting to object
+   * Process a leaderboard
    *
    * @param leaderboard the leaderboard to process
    * @returns the processed leaderboard
@@ -434,6 +387,7 @@ export class LeaderboardCoreService {
     if (!processed.fullName) {
       processed.fullName = `${processed.songName} ${processed.songSubName}`.trim();
     }
+    processed.songArt = `${env.NEXT_PUBLIC_API_URL}/cdn/map/${processed.songHash}.jpg`;
     return processed as ScoreSaberLeaderboard;
   }
 
@@ -514,11 +468,9 @@ export class LeaderboardCoreService {
     cached: boolean
   ): Promise<LeaderboardData> {
     const processed = LeaderboardService.processLeaderboard(leaderboard);
-    processed.songArt = `${env.NEXT_PUBLIC_API_URL}/cdn/map/${processed.songHash}.jpg`;
     return {
       leaderboard: processed,
       cached,
-      trackedScores: 0, // Removed getTrackedScoresCount for performance
     };
   }
 
