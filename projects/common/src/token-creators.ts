@@ -56,7 +56,7 @@ export function getScoreSaberLeaderboardFromToken(
         : [difficulty],
     maxScore: token.maxScore,
     ranked: token.ranked,
-    songArt: `${env.NEXT_PUBLIC_API_URL}/cdn/leaderboard/${token.id}.jpg`,
+    songArt: `${env.NEXT_PUBLIC_API_URL}/cdn/map/${token.songHash}.jpg`,
     timestamp: parseDate(token.createdDate),
     stars: token.stars,
     plays: token.plays,

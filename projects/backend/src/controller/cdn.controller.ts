@@ -33,27 +33,27 @@ export default class CDNController {
     });
   }
 
-  @Get("/leaderboard/:leaderboardId", {
+  @Get("/map/:mapHash", {
     config: {},
     tags: ["CDN"],
     params: t.Object({
-      leaderboardId: t.String({ required: true }),
+      mapHash: t.String({ required: true }),
     }),
     detail: {
       description: "Fetch a leaderboard's cover art",
     },
   })
-  public async getLeaderboardCoverArt({
-    params: { leaderboardId },
+  public async getMapArtwork({
+    params: { mapHash },
   }: {
     params: {
-      leaderboardId: string;
+      mapHash: string;
     };
   }): Promise<unknown> {
-    const coverArt = await CDNService.getLeaderboardCoverArt(
-      leaderboardId.includes(".") ? leaderboardId.split(".")[0] : leaderboardId
+    const artwork = await CDNService.getMapArtwork(
+      mapHash.includes(".") ? mapHash.split(".")[0] : mapHash
     );
-    return new Response(coverArt, {
+    return new Response(artwork, {
       headers: {
         "Content-Type": "image/jpeg",
         "Cache-Control": `public, max-age=${TimeUnit.toSeconds(TimeUnit.Day, 7)}`,

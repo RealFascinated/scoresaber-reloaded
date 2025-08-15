@@ -514,7 +514,7 @@ export class LeaderboardCoreService {
     cached: boolean
   ): Promise<LeaderboardData> {
     const processed = LeaderboardService.processLeaderboard(leaderboard);
-    processed.songArt = `${env.NEXT_PUBLIC_API_URL}/cdn/leaderboard/${processed.id}.jpg`;
+    processed.songArt = `${env.NEXT_PUBLIC_API_URL}/cdn/map/${processed.songHash}.jpg`;
     return {
       leaderboard: processed,
       cached,

@@ -1,4 +1,3 @@
-import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger from "@ssr/common/logger";
 import { MinioBucket } from "@ssr/common/minio-buckets";
@@ -64,32 +63,28 @@ export default class CDNService {
   }
 
   /**
-   * Gets a leaderboard cover art from the CDN, if it doesn't exist in the bucket,
+   * Gets a song's artwork from the CDN, if it doesn't exist in the bucket,
    * it will be fetched and saved to the bucket.
    *
-   * @param leaderboardId the id of the leaderboard
-   * @returns the player avatar
+   * @param songHash the hash of the song
+   * @returns the song's artwork
    */
-  public static async getLeaderboardCoverArt(leaderboardId: string): Promise<Buffer> {
+  public static async getMapArtwork(mapHash: string): Promise<Buffer> {
     return this.getFile(
       async () => {
-        const leaderboard = await ApiServiceRegistry.getInstance()
-          .getScoreSaberService()
-          .lookupLeaderboard(leaderboardId);
-        if (!leaderboard) {
-          throw new NotFoundError(`Leaderboard "${leaderboardId}" not found`);
-        }
-        const buffer = await Request.get<ArrayBuffer>(leaderboard.coverImage, {
-          returns: "arraybuffer",
-        });
+        const buffer = await Request.get<ArrayBuffer>(
+          `https://eu.cdn.beatsaver.com/${mapHash.toLowerCase()}.jpg`,
+          {
+            returns: "arraybuffer",
+          }
+        );
         if (!buffer) {
-          throw new NotFoundError(`Cover art for leaderboard "${leaderboardId}" not found`);
+          throw new NotFoundError(`Artwork for map "${mapHash}" not found`);
         }
-        const avatarBuffer = Buffer.from(buffer);
-        return avatarBuffer;
+        return Buffer.from(buffer);
       },
-      leaderboardId,
-      MinioBucket.LeaderboardCoverArt
+      mapHash,
+      MinioBucket.MapArtwork
     );
   }
 }
