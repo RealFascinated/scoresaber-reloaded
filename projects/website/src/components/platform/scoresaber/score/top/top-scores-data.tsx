@@ -88,7 +88,7 @@ export function TopScoresData() {
           <Spinner />
         </div>
       ) : (
-        <div className="divide-border flex flex-col gap-2 divide-y">
+        <div className="flex flex-col gap-2">
           {scores.items.map(renderScore)}
           <SimplePagination
             page={page}
