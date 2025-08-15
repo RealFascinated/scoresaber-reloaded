@@ -47,11 +47,15 @@ export default class ScoreSaberService {
           PlayerService.getPlayerRankIncludingInactives(id),
         ]);
 
+        const isOculusAccount = player.id.length === 16;
+
         // For basic type, return early with minimal data
         const basePlayer = {
           id: player.id,
           name: player.name,
-          avatar: `${env.NEXT_PUBLIC_API_URL}/cdn/avatar/${player.id}.jpg`,
+          avatar: isOculusAccount
+            ? "https://cdn.fascinated.cc/assets/oculus-avatar.jpg"
+            : `${env.NEXT_PUBLIC_API_URL}/cdn/avatar/${player.id}.jpg`,
           country: player.country,
           rank: player.rank,
           countryRank: player.countryRank,

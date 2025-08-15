@@ -234,7 +234,7 @@ export class ScoreCoreService {
         id: playerInfo.id,
         name: playerInfo.name,
         profilePicture:
-          playerInfo.profilePicture ?? "https://cdn.fascinated.cc/assets/default-avatar.jpg",
+          playerInfo.profilePicture ?? "https://cdn.fascinated.cc/assets/oculus-avatar.jpg",
         country: playerInfo.country,
       };
     }
