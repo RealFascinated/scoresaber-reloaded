@@ -39,38 +39,6 @@ export function TopScoresData() {
     setPage(newPage);
   }, []);
 
-  const renderScore = useCallback(
-    ({ score, leaderboard, beatSaver }: PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>) => {
-      const player = score.playerInfo;
-      const name = score.playerInfo ? player.name || player.id : score.playerId;
-
-      return (
-        <div key={score.scoreId} className="flex flex-col">
-          <div className="bg-primary/20 flex w-fit items-center gap-2 rounded-md rounded-b-none p-2">
-            <Avatar src={getScoreSaberAvatar(player)} alt={player?.name ?? ""} size={20} />
-            <p className="text-sm">{name}</p>
-          </div>
-
-          <div className="bg-accent-deep rounded-md rounded-tl-none">
-            <ScoreSaberScoreDisplay
-              key={score.scoreId}
-              score={score}
-              leaderboard={leaderboard}
-              beatSaverMap={beatSaver}
-              settings={{
-                hideLeaderboardDropdown: true,
-                hideAccuracyChanger: true,
-                noScoreButtons: true,
-                allowLeaderboardPreview: true,
-              }}
-            />
-          </div>
-        </div>
-      );
-    },
-    []
-  );
-
   return (
     <Card className="flex h-fit w-full flex-col justify-center gap-6 2xl:w-[75%]">
       {/* Header Section */}
@@ -89,7 +57,37 @@ export function TopScoresData() {
         </div>
       ) : (
         <div className="flex flex-col gap-2">
-          {scores.items.map(renderScore)}
+          {/* Scores */}
+          {scores.items.map(({ score, leaderboard, beatSaver }) => {
+            const player = score.playerInfo;
+            const name = score.playerInfo ? player.name || player.id : score.playerId;
+
+            return (
+              <div key={score.scoreId} className="flex flex-col">
+                <div className="bg-primary/20 flex w-fit items-center gap-2 rounded-md rounded-b-none p-2">
+                  <Avatar src={getScoreSaberAvatar(player)} alt={player?.name ?? ""} size={20} />
+                  <p className="text-sm">{name}</p>
+                </div>
+
+                <div className="bg-accent-deep rounded-md rounded-tl-none">
+                  <ScoreSaberScoreDisplay
+                    key={score.scoreId}
+                    score={score}
+                    leaderboard={leaderboard}
+                    beatSaverMap={beatSaver}
+                    settings={{
+                      hideLeaderboardDropdown: true,
+                      hideAccuracyChanger: true,
+                      noScoreButtons: true,
+                      allowLeaderboardPreview: true,
+                    }}
+                  />
+                </div>
+              </div>
+            );
+          })}
+
+          {/* Pagination */}
           <SimplePagination
             page={page}
             totalItems={scores.metadata.totalItems}
