@@ -1,7 +1,5 @@
 export enum MinioBucket {
   BeatLeaderReplays = "ssr-beatleader-replays",
-  Avatars = "ssr-avatars",
-  MapArtwork = "ssr-map-artwork",
 }
 
 /**

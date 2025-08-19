@@ -1,7 +1,6 @@
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { CooldownPriority } from "@ssr/common/cooldown";
 import { DetailType } from "@ssr/common/detail-type";
-import { env } from "@ssr/common/env";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger from "@ssr/common/logger";
 import {
@@ -387,7 +386,6 @@ export class LeaderboardCoreService {
     if (!processed.fullName) {
       processed.fullName = `${processed.songName} ${processed.songSubName}`.trim();
     }
-    processed.songArt = `${env.NEXT_PUBLIC_API_URL}/cdn/map/${processed.songHash}.jpg`;
     return processed as ScoreSaberLeaderboard;
   }
 

@@ -1,6 +1,5 @@
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { DetailType } from "@ssr/common/detail-type";
-import { env } from "@ssr/common/env";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger from "@ssr/common/logger";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
@@ -55,7 +54,7 @@ export default class ScoreSaberService {
           name: player.name,
           avatar: isOculusAccount
             ? "https://cdn.fascinated.cc/assets/oculus-avatar.jpg"
-            : `${env.NEXT_PUBLIC_API_URL}/cdn/avatar/${player.id}.jpg`,
+            : player.profilePicture,
           country: player.country,
           rank: player.rank,
           countryRank: player.countryRank,

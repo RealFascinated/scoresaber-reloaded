@@ -95,6 +95,7 @@ for (let i = 0; i < players.length; i++) {
       misses: score.misses,
       missedNotes: score.missedNotes,
       pp: score.pp,
+      leaderboardId: leaderboard.id,
       timestamp: score.timestamp,
     };
   });
@@ -105,5 +106,11 @@ for (let i = 0; i < players.length; i++) {
   fs.writeFileSync(`${outDir}/scores/${player._id}.json`, JSON.stringify(scores, null, 2));
   console.log(`Saved scores for ${player.name} to ${outDir}/scores/${player._id}.json`);
 }
+
+// write leaderboard cache to file
+fs.writeFileSync(
+  `${outDir}/leaderboards.json`,
+  JSON.stringify(Array.from(leaderboardCache.values()), null, 2)
+);
 
 process.exit(0);
