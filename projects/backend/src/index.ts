@@ -17,7 +17,6 @@ import AppController from "./controller/app.controller";
 import BeatLeaderController from "./controller/beatleader.controller";
 import BeatSaverController from "./controller/beatsaver.controller";
 import CachedScoresController from "./controller/cached-scores.controller";
-import CDNController from "./controller/cdn.controller";
 import FriendsController from "./controller/friends.controller";
 import LeaderboardController from "./controller/leaderboard.controller";
 import MedalsScoresController from "./controller/medals-scores.controller";
@@ -283,7 +282,6 @@ app.use(
       PlayerSearchController,
       PlayerRankingController,
       MedalsScoresController,
-      CDNController,
     ],
   })
 );
