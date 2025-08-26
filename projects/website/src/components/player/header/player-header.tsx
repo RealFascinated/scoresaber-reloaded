@@ -1,5 +1,4 @@
 import AddFriend from "@/components/friend/add-friend";
-import PlayerTrackedStatus from "@/components/player/header/player-tracked-status";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { getScoreSaberRoles } from "@ssr/common/utils/scoresaber.util";
 import Card from "../../card";
@@ -33,7 +32,6 @@ export default function PlayerHeader({ player }: PlayerHeaderProps) {
               >
                 {player.name}
               </p>
-              <PlayerTrackedStatus player={player} />
             </div>
             <div className="flex flex-col">
               <div>
