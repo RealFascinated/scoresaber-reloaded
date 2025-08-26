@@ -83,6 +83,19 @@ const playerStats: Stat[] = [
     },
   },
   {
+    name: "Tracked Since",
+    create: (player: ScoreSaberPlayer) => {
+      return {
+        tooltip: (
+          <p>
+            {formatDate(player.trackedSince, "DD MMMM YYYY HH:mm")} ({timeAgo(player.trackedSince)})
+          </p>
+        ),
+        value: formatDate(player.trackedSince),
+      };
+    },
+  },
+  {
     name: "Headset",
     create: (player: ScoreSaberPlayer) => {
       const hmd = getHMDInfo(player.hmd as HMD);
