@@ -1,6 +1,13 @@
 import Logger from "@ssr/common/logger";
 import { isProduction } from "@ssr/common/utils/utils";
+import SuperJSON from "superjson";
+import { redisClient } from "../common/redis";
 import { QueueId } from "./queue-manager";
+
+export type QueueItem<T> = {
+  id: string;
+  data: T;
+};
 
 export abstract class Queue<T> {
   /**
@@ -9,20 +16,9 @@ export abstract class Queue<T> {
   public readonly id: QueueId;
 
   /**
-   * Whether the queue should be saved
-   * and loaded from the database
-   */
-  public readonly saveQueueToDatabase: boolean;
-
-  /**
    * The mode of the queue
    */
   public queueMode: "fifo" | "lifo" = "lifo";
-
-  /**
-   * The queue of items
-   */
-  private queue: T[] = [];
 
   /**
    * The lock for the queue
@@ -34,13 +30,8 @@ export abstract class Queue<T> {
    */
   private isStopped = false;
 
-  constructor(
-    id: QueueId,
-    saveQueueToDatabase: boolean = false,
-    queueMode: "fifo" | "lifo" = "lifo"
-  ) {
+  constructor(id: QueueId, queueMode: "fifo" | "lifo" = "lifo") {
     this.id = id;
-    this.saveQueueToDatabase = saveQueueToDatabase;
     this.queueMode = queueMode;
   }
 
@@ -49,18 +40,14 @@ export abstract class Queue<T> {
    *
    * @param item the item to add
    */
-  public add(item: T) {
+  public async add(item: T) {
     if (this.isStopped) {
       return;
     }
 
-    // If the item is already in the queue, don't add it again
-    if (this.queue.includes(item)) {
-      return;
-    }
-
-    this.queue.push(item);
-    this.processQueue(); // Start processing immediately
+    await redisClient.lpush(`queue::${this.id}`, SuperJSON.stringify(item));
+    // Use setImmediate to ensure the item is committed before processing
+    setImmediate(() => this.processQueue());
   }
 
   /**
@@ -68,24 +55,20 @@ export abstract class Queue<T> {
    *
    * @param items the items to add
    */
-  public addAll(items: T[]) {
+  public async addAll(items: T[]) {
     if (this.isStopped) {
       return;
     }
 
-    for (const item of items) {
-      if (!this.queue.includes(item)) {
-        this.queue.push(item);
-      }
-    }
-
-    this.processQueue(); // Start processing immediately
+    await redisClient.lpush(`queue::${this.id}`, SuperJSON.stringify(items));
+    // Use setImmediate to ensure the items are committed before processing
+    setImmediate(() => this.processQueue());
   }
 
   /**
    * Processes the queue
    */
-  private async processQueue() {
+  public async processQueue() {
     // Don't process the queue if it's locked,
     // stopped, or we're not in production
     if (this.lock || this.isStopped || !isProduction()) {
@@ -94,8 +77,21 @@ export abstract class Queue<T> {
 
     this.lock = true;
     try {
-      const item = this.queueMode === "fifo" ? this.queue.shift() : this.queue.pop();
+      // Get the next item from the queue using proper Redis commands
+      const rawItem =
+        this.queueMode === "fifo"
+          ? await redisClient.rpop(`queue::${this.id}`)
+          : await redisClient.lpop(`queue::${this.id}`);
+
+      if (!rawItem) {
+        // No items in the queue, stop processing
+        return;
+      }
+
+      const item = SuperJSON.parse(rawItem) as T;
       if (!item) {
+        Logger.info(`Invalid queue item found in the queue ${this.id}: ${rawItem}`);
+        this.processQueue(); // Keep going
         return;
       }
 
@@ -105,19 +101,11 @@ export abstract class Queue<T> {
     } finally {
       this.lock = false;
       // If there are more items in the queue and we're not stopped, process the next one
-      if (this.queue.length > 0 && !this.isStopped) {
+      const queueSize = await this.getSize();
+      if (queueSize > 0 && !this.isStopped) {
         this.processQueue();
       }
     }
-  }
-
-  /**
-   * Gets the queue items
-   *
-   * @returns the queue
-   */
-  public getQueue(): T[] {
-    return this.queue;
   }
 
   /**
@@ -125,8 +113,8 @@ export abstract class Queue<T> {
    *
    * @returns the size of the queue
    */
-  public getSize(): number {
-    return this.queue.length;
+  public async getSize(): Promise<number> {
+    return await redisClient.llen(`queue::${this.id}`);
   }
 
   /**

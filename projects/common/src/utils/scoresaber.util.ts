@@ -118,10 +118,10 @@ export function getScoreSaberRoles(
 /**
  * Formats the ScoreSaber difficulty number
  *
- * @param diff the difficulty number
+ * @param ssDifficultyNumber the difficulty number
  */
-export function getDifficultyFromScoreSaberDifficulty(diff: number): MapDifficulty {
-  switch (diff) {
+export function getDifficultyFromScoreSaberDifficulty(ssDifficultyNumber: number): MapDifficulty {
+  switch (ssDifficultyNumber) {
     case 1: {
       return "Easy";
     }

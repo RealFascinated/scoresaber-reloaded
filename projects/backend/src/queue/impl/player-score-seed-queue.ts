@@ -7,30 +7,38 @@ import { formatDuration } from "@ssr/common/utils/time-utils";
 import { ButtonBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
 import { DiscordChannels, logToChannel } from "../../bot/bot";
 import { PlayerService } from "../../service/player/player.service";
-import { Queue } from "../queue";
+import { Queue, QueueItem } from "../queue";
 import { QueueId } from "../queue-manager";
 
-export class PlayerScoreSeedQueue extends Queue<string> {
+export class PlayerScoreSeedQueue extends Queue<QueueItem<string>> {
   constructor() {
-    super(QueueId.PlayerScoreRefreshQueue, true, "lifo");
+    super(QueueId.PlayerScoreRefreshQueue, "lifo");
 
-    // Load players efficiently using addAll
     setImmediate(async () => {
       try {
         const players = await PlayerModel.find({ seededScores: { $in: [null, false] } })
           .select("_id")
           .lean();
         const playerIds = players.map(p => p._id);
-        this.addAll(playerIds);
+        if (playerIds.length === 0) {
+          Logger.info("No players to seed scores for");
+          return;
+        }
 
-        Logger.debug(`Added ${playerIds.length} players to score refresh queue`);
+        for (const playerId of playerIds) {
+          await this.add({ id: playerId, data: playerId });
+        }
+
+        Logger.info(`Added ${playerIds.length} players to score refresh queue`);
       } catch (error) {
         Logger.error("Failed to load unseeded players:", error);
       }
     });
   }
 
-  protected async processItem(playerId: string): Promise<void> {
+  protected async processItem(item: QueueItem<string>): Promise<void> {
+    const { id: playerId } = item;
+
     const playerToken = await ApiServiceRegistry.getInstance()
       .getScoreSaberService()
       .lookupPlayer(playerId);
@@ -63,9 +71,6 @@ export class PlayerScoreSeedQueue extends Queue<string> {
           },
         ])
         .setTimestamp()
-        .setFooter({
-          text: `${this.getSize() - 1 <= 0 ? "No" : this.getSize() - 1} players left in queue`,
-        })
         .setColor("#00ff00"),
       [
         {

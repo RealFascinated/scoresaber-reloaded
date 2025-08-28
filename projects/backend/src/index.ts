@@ -11,6 +11,7 @@ import { EmbedBuilder } from "discord.js";
 import { Elysia, ValidationError } from "elysia";
 import { decorators } from "elysia-decorators";
 import { helmet } from "elysia-helmet";
+import Redis from "ioredis";
 import { DiscordChannels, initDiscordBot, logToChannel } from "./bot/bot";
 import { getAppVersion } from "./common/app.util";
 import AppController from "./controller/app.controller";
@@ -71,7 +72,7 @@ Logger.info("Connected to MongoDB :)");
 
 Logger.info("Testing Redis connection...");
 
-await CacheService.testConnection();
+export const redisClient = new Redis(env.REDIS_URL);
 
 Logger.info("Connected to Redis :)");
 

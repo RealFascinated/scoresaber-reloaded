@@ -1,10 +1,9 @@
-import { env } from "@ssr/common/env";
 import { InternalServerError } from "@ssr/common/error/internal-server-error";
 import Logger from "@ssr/common/logger";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
 import { isProduction } from "@ssr/common/utils/utils";
-import { RedisClient } from "bun";
 import SuperJSON from "superjson";
+import { redisClient } from "../common/redis";
 
 export enum CacheId {
   BeatSaver = "beatSaver",
@@ -29,8 +28,6 @@ export default class CacheService {
     [CacheId.PreviousScore]: TimeUnit.toSeconds(TimeUnit.Hour, 1),
   };
 
-  public static readonly redisClient = new RedisClient(env.REDIS_URL);
-
   /**
    * Fetches data with caching. If the data is not in cache, the fetchFn is called and the data is cached.
    * If the data is in cache, it is returned immediately.
@@ -54,20 +51,20 @@ export default class CacheService {
     }
 
     // const before = performance.now();
-    const cachedData = await this.redisClient.get(cacheKey);
+    const cachedData = await redisClient.get(cacheKey);
     if (cachedData) {
       try {
         // Logger.debug(`[REDIS] Found ${cacheKey} in ${formatDuration(performance.now() - before)}`);
         return SuperJSON.parse(cachedData) as T;
       } catch {
         Logger.warn(`Failed to parse cached data for ${cacheKey}, removing from cache`);
-        await this.redisClient.del(cacheKey);
+        await redisClient.del(cacheKey);
       }
     }
 
     const data = await fetchFn();
     if (data) {
-      const result = await this.redisClient.set(
+      const result = await redisClient.set(
         cacheKey,
         SuperJSON.stringify(data),
         "EX", // EX is used to set the TTL for the item
@@ -87,16 +84,6 @@ export default class CacheService {
    * @param cacheKey the key to invalidate
    */
   public static async invalidate(cacheKey: string): Promise<void> {
-    await this.redisClient.del(cacheKey);
-  }
-
-  /**
-   * Tests the connection to Redis.
-   */
-  public static async testConnection(): Promise<void> {
-    const result = (await this.redisClient.ping()) as string;
-    if (result !== "OK" && result !== "PONG") {
-      throw new InternalServerError("Failed to connect to Redis");
-    }
+    await redisClient.del(cacheKey);
   }
 }
