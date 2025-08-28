@@ -54,13 +54,15 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
         currentPage++;
         continue;
       }
+      const totalPages = Math.ceil(response.metadata.total / response.metadata.itemsPerPage);
+
       // Log every 10 pages
       if (currentPage % 10 === 0) {
         Logger.info(
-          `Fetched ${response.scores.length} scores for leaderboard "${leaderboardId}" on page ${currentPage}`
+          `Fetched ${response.scores.length} scores for leaderboard "${leaderboardId}" on page ${currentPage}/${totalPages}`
         );
       }
-      const totalPages = Math.ceil(response.metadata.total / response.metadata.itemsPerPage);
+
       for (const rawScore of response.scores) {
         const score = getScoreSaberScoreFromToken(rawScore, leaderboard, undefined);
 
@@ -96,6 +98,7 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
       })
         .select("_id")
         .limit(100)
+        .sort({ ranked: 1, stars: -1 }) // Ranked first, then most stars
         .lean();
       const leaderboardIds = leaderboards.map(p => p._id);
       if (leaderboardIds.length === 0) {
