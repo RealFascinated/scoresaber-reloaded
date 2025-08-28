@@ -54,6 +54,12 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
         currentPage++;
         continue;
       }
+      // Log every 10 pages
+      if (currentPage % 10 === 0) {
+        Logger.info(
+          `Fetched ${response.scores.length} scores for leaderboard "${leaderboardId}" on page ${currentPage}`
+        );
+      }
       const totalPages = Math.ceil(response.metadata.total / response.metadata.itemsPerPage);
       for (const rawScore of response.scores) {
         const score = getScoreSaberScoreFromToken(rawScore, leaderboard, undefined);
