@@ -1,4 +1,3 @@
-import { env } from "./env";
 import type { HMD } from "./hmds";
 import ScoreSaberLeaderboard from "./model/leaderboard/impl/scoresaber-leaderboard";
 import LeaderboardDifficulty from "./model/leaderboard/leaderboard-difficulty";

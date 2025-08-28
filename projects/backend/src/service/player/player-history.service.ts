@@ -21,6 +21,7 @@ import { isProduction } from "@ssr/common/utils/utils";
 import { EmbedBuilder } from "discord.js";
 import { DiscordChannels, logToChannel } from "../../bot/bot";
 import { logNewTrackedPlayer } from "../../common/embds";
+import { PlayerScoreSeedQueue } from "../../queue/impl/player-score-seed-queue";
 import { QueueId, QueueManager } from "../../queue/queue-manager";
 import { accountCreationLock } from "./player-core.service";
 import { PlayerService } from "./player.service";
@@ -65,7 +66,10 @@ export class PlayerHistoryService {
           });
 
           // Add to the seed queue
-          QueueManager.getQueue(QueueId.PlayerScoreRefreshQueue).add(id);
+          (QueueManager.getQueue(QueueId.PlayerScoreRefreshQueue) as PlayerScoreSeedQueue).add({
+            id,
+            data: id,
+          });
 
           // Notify in production
           if (isProduction()) {
@@ -181,7 +185,14 @@ export class PlayerHistoryService {
                         `Player ${player.id} has missing scores. Adding them to the refresh queue...`
                       );
                       // Add the player to the refresh queue
-                      QueueManager.getQueue(QueueId.PlayerScoreRefreshQueue).add(player.id);
+                      (
+                        QueueManager.getQueue(
+                          QueueId.PlayerScoreRefreshQueue
+                        ) as PlayerScoreSeedQueue
+                      ).add({
+                        id: player.id,
+                        data: player.id,
+                      });
                     }
 
                     successCount++;

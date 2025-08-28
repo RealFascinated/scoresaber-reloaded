@@ -17,12 +17,13 @@ import { MapCharacteristic } from "@ssr/common/types/map-characteristic";
 import { getDifficulty } from "@ssr/common/utils/song-utils";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
 import SuperJSON from "superjson";
+import { redisClient } from "../../common/redis";
 import { LeaderboardData, LeaderboardOptions } from "../../common/types/leaderboard";
+import { LeaderboardScoreSeedQueue } from "../../queue/impl/leaderboard-score-seed-queue";
 import { QueueId, QueueManager } from "../../queue/queue-manager";
 import BeatSaverService from "../beatsaver.service";
 import CacheService, { CacheId } from "../cache.service";
 import { LeaderboardService } from "./leaderboard.service";
-import { redisClient } from "../../common/redis";
 
 const LEADERBOARD_REFRESH_TIME = TimeUnit.toMillis(TimeUnit.Day, 3);
 const DEFAULT_OPTIONS: LeaderboardOptions = {
@@ -65,7 +66,12 @@ export class LeaderboardCoreService {
         if (!leaderboard) {
           leaderboard = await LeaderboardService.fetchAndSaveLeaderboard(id);
           if (leaderboard.ranked) {
-            QueueManager.getQueue(QueueId.LeaderboardScoreSeedQueue).add(leaderboard.id);
+            (
+              QueueManager.getQueue(QueueId.LeaderboardScoreSeedQueue) as LeaderboardScoreSeedQueue
+            ).add({
+              id: leaderboard.id.toString(),
+              data: leaderboard.id,
+            });
           }
         }
 
@@ -137,7 +143,12 @@ export class LeaderboardCoreService {
             characteristic
           );
           if (leaderboard.ranked) {
-            QueueManager.getQueue(QueueId.LeaderboardScoreSeedQueue).add(leaderboard.id);
+            (
+              QueueManager.getQueue(QueueId.LeaderboardScoreSeedQueue) as LeaderboardScoreSeedQueue
+            ).add({
+              id: leaderboard.id.toString(),
+              data: leaderboard.id,
+            });
           }
         }
 

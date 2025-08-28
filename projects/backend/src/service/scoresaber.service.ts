@@ -9,9 +9,9 @@ import { getDaysAgoDate, TimeUnit } from "@ssr/common/utils/time-utils";
 import { getPageFromRank } from "@ssr/common/utils/utils";
 import sanitize from "sanitize-html";
 import SuperJSON from "superjson";
+import { redisClient } from "../common/redis";
 import CacheService, { CacheId } from "./cache.service";
 import { PlayerService } from "./player/player.service";
-import { redisClient } from "../common/redis";
 
 // Type for cached player data with timestamp
 type CachedScoreSaberPlayerToken = ScoreSaberPlayerToken & {
