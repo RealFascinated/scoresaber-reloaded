@@ -19,7 +19,7 @@ export default class ScoreSaberLeaderboardInternal extends Leaderboard {
   /**
    * The star count for the leaderboard.
    */
-  @Prop({ required: true })
+  @Prop({ required: true, index: true })
   readonly stars!: number;
 
   /**
