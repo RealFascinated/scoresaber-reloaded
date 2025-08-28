@@ -22,6 +22,7 @@ import { QueueId, QueueManager } from "../../queue/queue-manager";
 import BeatSaverService from "../beatsaver.service";
 import CacheService, { CacheId } from "../cache.service";
 import { LeaderboardService } from "./leaderboard.service";
+import { redisClient } from "../../common/redis";
 
 const LEADERBOARD_REFRESH_TIME = TimeUnit.toMillis(TimeUnit.Day, 3);
 const DEFAULT_OPTIONS: LeaderboardOptions = {
@@ -64,7 +65,7 @@ export class LeaderboardCoreService {
         if (!leaderboard) {
           leaderboard = await LeaderboardService.fetchAndSaveLeaderboard(id);
           if (leaderboard.ranked) {
-            QueueManager.getQueue(QueueId.LeaderboardScoreRefreshQueue).add(leaderboard.id);
+            QueueManager.getQueue(QueueId.LeaderboardScoreSeedQueue).add(leaderboard.id);
           }
         }
 
@@ -136,7 +137,7 @@ export class LeaderboardCoreService {
             characteristic
           );
           if (leaderboard.ranked) {
-            QueueManager.getQueue(QueueId.LeaderboardScoreRefreshQueue).add(leaderboard.id);
+            QueueManager.getQueue(QueueId.LeaderboardScoreSeedQueue).add(leaderboard.id);
           }
         }
 
@@ -178,7 +179,7 @@ export class LeaderboardCoreService {
 
     // Check Redis cache
     const cacheKeys = uniqueIds.map(id => `leaderboard:id:${id}`);
-    const cachedData = await Promise.all(cacheKeys.map(key => CacheService.redisClient.get(key)));
+    const cachedData = await Promise.all(cacheKeys.map(key => redisClient.get(key)));
 
     const uncachedIds = uniqueIds.filter((id, i) => {
       const cached = cachedData[i];
@@ -189,7 +190,7 @@ export class LeaderboardCoreService {
           return false;
         } catch {
           Logger.warn(`Failed to parse cached data for leaderboard ${id}, removing from cache`);
-          CacheService.redisClient.del(cacheKeys[i]).catch(() => {});
+          redisClient.del(cacheKeys[i]).catch(() => {});
         }
       }
       return true;
@@ -220,7 +221,7 @@ export class LeaderboardCoreService {
 
         if (foundLeaderboard) {
           const data = await LeaderboardService.createLeaderboardData(foundLeaderboard, isCached);
-          await CacheService.redisClient.set(
+          await redisClient.set(
             `leaderboard:id:${id}`,
             SuperJSON.stringify(data),
             "EX",
@@ -239,7 +240,7 @@ export class LeaderboardCoreService {
         try {
           const leaderboard = await LeaderboardService.fetchAndSaveLeaderboard(id);
           const data = await LeaderboardService.createLeaderboardData(leaderboard, false);
-          await CacheService.redisClient.set(
+          await redisClient.set(
             `leaderboard:id:${id}`,
             SuperJSON.stringify(data),
             "EX",

@@ -11,6 +11,7 @@ import sanitize from "sanitize-html";
 import SuperJSON from "superjson";
 import CacheService, { CacheId } from "./cache.service";
 import { PlayerService } from "./player/player.service";
+import { redisClient } from "../common/redis";
 
 // Type for cached player data with timestamp
 type CachedScoreSaberPlayerToken = ScoreSaberPlayerToken & {
@@ -139,7 +140,7 @@ export default class ScoreSaberService {
   ): Promise<ScoreSaberPlayerToken> {
     const cacheKey = `scoresaber:cached-player:${id}`;
 
-    const cachedData = await CacheService.redisClient.get(cacheKey);
+    const cachedData = await redisClient.get(cacheKey);
     if (cachedData) {
       try {
         const player = SuperJSON.parse(cachedData) as CachedScoreSaberPlayerToken;
@@ -154,7 +155,7 @@ export default class ScoreSaberService {
         }
       } catch {
         Logger.warn(`Failed to parse cached player data for ${id}, removing from cache`);
-        await CacheService.redisClient.del(cacheKey);
+        await redisClient.del(cacheKey);
       }
     }
 
@@ -168,7 +169,7 @@ export default class ScoreSaberService {
       lastUpdated: new Date().toISOString(),
     };
 
-    await CacheService.redisClient.set(
+    await redisClient.set(
       cacheKey,
       SuperJSON.stringify(playerWithTimestamp),
       "EX",

@@ -55,17 +55,12 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
         continue;
       }
       const totalPages = Math.ceil(response.metadata.total / response.metadata.itemsPerPage);
-      Logger.info(
-        `Fetched scores for leaderboard "${leaderboardId}" on page ${currentPage}/${totalPages}`
-      );
-
       for (const rawScore of response.scores) {
         const score = getScoreSaberScoreFromToken(rawScore, leaderboard, undefined);
 
         // Check if the score is already tracked
         const scoreExists = await ScoreService.scoreExistsByScoreId(score.scoreId);
         if (scoreExists) {
-          // Logger.info(`Score "${score.scoreId}" already tracked`);
           continue;
         }
 
