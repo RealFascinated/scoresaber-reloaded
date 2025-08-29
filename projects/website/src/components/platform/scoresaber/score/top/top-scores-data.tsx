@@ -76,9 +76,9 @@ export function TopScoresData() {
                     leaderboard={leaderboard}
                     beatSaverMap={beatSaver}
                     settings={{
-                      hideLeaderboardDropdown: true,
+                      // hideLeaderboardDropdown: true,
                       hideAccuracyChanger: true,
-                      noScoreButtons: true,
+                      // noScoreButtons: true,
                       allowLeaderboardPreview: true,
                     }}
                   />

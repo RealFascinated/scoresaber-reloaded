@@ -77,7 +77,7 @@ export function FriendScores() {
                         settings={{
                           hideLeaderboardDropdown: true,
                           hideAccuracyChanger: true,
-                          noScoreButtons: true,
+                          // noScoreButtons: true,
                           allowLeaderboardPreview: true,
                         }}
                       />
