@@ -170,16 +170,10 @@ export default function ScoreSaberPlayerScores({
   const [currentSortDirection, setCurrentSortDirection] = useState<ScoreSort["direction"]>(
     direction ?? DEFAULT_CACHED_SORT_DIRECTION
   );
-  const [currentFilter, setCurrentFilter] = useQueryState(
-    "filter",
-    parseAsString.withDefault("All Scores")
-  );
+  const [searchTerm, setSearchTerm] = useState(initialSearch || "");
+  const [currentFilter, setCurrentFilter] = useState<string | null>("All Scores");
 
   // Search
-  const [searchTerm, setSearchTerm] = useQueryState(
-    "search",
-    parseAsString.withDefault(initialSearch || "")
-  );
   const debouncedSearchTerm = useDebounce(searchTerm, 250);
   const invalidSearch = searchTerm.length >= 1 && searchTerm.length < 3;
 
@@ -290,16 +284,34 @@ export default function ScoreSaberPlayerScores({
     [currentPage, animateLeft, animateRight]
   );
 
+  const handleSearchChange = useCallback(
+    (newSearch: string) => {
+      setSearchTerm(newSearch);
+      if (newSearch.length >= 3 || newSearch === "") {
+        setCurrentPage(1);
+        animateLeft();
+      }
+    },
+    [animateLeft]
+  );
+
   // URL management
   const getUrl = useCallback(
     (page: number) => {
+      const queryParams = new URLSearchParams();
+      if (searchTerm && searchTerm !== "") {
+        queryParams.set("search", searchTerm);
+      }
+      if (currentFilter && currentFilter !== "All Scores") {
+        queryParams.set("filter", currentFilter);
+      }
       if (scoresMode === "cached") {
-        return `/player/${player.id}/scoresaber/${scoresMode}/${currentSort}/${currentSortDirection}/${page}`;
+        return `/player/${player.id}/scoresaber/${scoresMode}/${currentSort}/${currentSortDirection}/${page}?${queryParams.toString()}`;
       } else {
-        return `/player/${player.id}/scoresaber/${scoresMode}/${currentSort}/${page}`;
+        return `/player/${player.id}/scoresaber/${scoresMode}/${currentSort}/${page}?${queryParams.toString()}`;
       }
     },
-    [player.id, currentSort, currentSortDirection, scoresMode]
+    [player.id, currentSort, currentSortDirection, scoresMode, searchTerm, currentFilter]
   );
 
   useEffect(() => {
@@ -451,11 +463,11 @@ export default function ScoreSaberPlayerScores({
                     invalidSearch && "border-red-500"
                   )}
                   value={searchTerm}
-                  onChange={e => setSearchTerm(e.target.value)}
+                  onChange={e => handleSearchChange(e.target.value)}
                 />
                 <XIcon
                   className="text-muted-foreground absolute top-1/2 right-2 h-3.5 w-3.5 -translate-y-1/2 cursor-pointer"
-                  onClick={() => setSearchTerm("")}
+                  onClick={() => handleSearchChange("")}
                 />
               </div>
 
