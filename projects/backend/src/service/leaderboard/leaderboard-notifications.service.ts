@@ -2,9 +2,10 @@ import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { generateBeatSaberPlaylist } from "@ssr/common/playlist/playlist-utils";
+import { uploadPaste } from "@ssr/common/utils/paste-utils";
 import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
 import { formatDate } from "@ssr/common/utils/time-utils";
-import { DiscordChannels, sendFile } from "../../bot/bot";
+import { DiscordChannels, sendFile, sendMessageToChannel } from "../../bot/bot";
 import { generateRankedBatchPlaylistImage } from "../../common/playlist.util";
 import { LeaderboardWithUpdate } from "../../common/types/leaderboard";
 import PlaylistService from "../playlist/playlist.service";
@@ -19,49 +20,48 @@ export class LeaderboardNotificationsService {
     nerfedMaps: LeaderboardWithUpdate[],
     unrankedLeaderboards: ScoreSaberLeaderboard[]
   ): Promise<void> {
-    let file = "";
+    let changelog = "";
 
     // Newly ranked maps
     for (const change of newlyRankedMaps) {
       const difficulty = getDifficultyName(getDifficulty(change.leaderboard.difficulty.difficulty));
 
-      file += `now ranked ${change.leaderboard.fullName} (${difficulty}) mapped by ${change.leaderboard.levelAuthorName} at ${change.leaderboard.stars} stars\n`;
+      changelog += `now ranked ${change.leaderboard.fullName} (${difficulty}) mapped by ${change.leaderboard.levelAuthorName} at ${change.leaderboard.stars} stars\n`;
     }
 
-    file += "\n";
+    changelog += "\n";
 
     // Buffed maps
     for (const change of buffedMaps) {
       const difficulty = getDifficultyName(getDifficulty(change.leaderboard.difficulty.difficulty));
 
-      file += `changed (buffed) ${change.leaderboard.fullName} (${difficulty}) mapped by ${change.leaderboard.levelAuthorName} from ${change.update.previousLeaderboard?.stars} to ${change.leaderboard.stars} stars\n`;
+      changelog += `changed (buffed) ${change.leaderboard.fullName} (${difficulty}) mapped by ${change.leaderboard.levelAuthorName} from ${change.update.previousLeaderboard?.stars} to ${change.leaderboard.stars} stars\n`;
     }
 
-    file += "\n";
+    changelog += "\n";
 
     // Nerfed maps
     for (const change of nerfedMaps) {
       const difficulty = getDifficultyName(getDifficulty(change.leaderboard.difficulty.difficulty));
 
-      file += `nerfed (nerf) ${change.leaderboard.fullName} (${difficulty}) mapped by ${change.leaderboard.levelAuthorName} from ${change.update.previousLeaderboard?.stars} to ${change.leaderboard.stars} stars\n`;
+      changelog += `nerfed (nerf) ${change.leaderboard.fullName} (${difficulty}) mapped by ${change.leaderboard.levelAuthorName} from ${change.update.previousLeaderboard?.stars} to ${change.leaderboard.stars} stars\n`;
     }
 
-    file += "\n";
+    changelog += "\n";
 
     // Unranked maps
     for (const leaderboard of unrankedLeaderboards) {
       const difficulty = getDifficultyName(getDifficulty(leaderboard.difficulty.difficulty));
 
-      file += `unranked ${leaderboard.fullName} (${difficulty}) mapped by ${leaderboard.levelAuthorName}\n`;
+      changelog += `unranked ${leaderboard.fullName} (${difficulty}) mapped by ${leaderboard.levelAuthorName}\n`;
     }
 
     const date = formatDate(new Date(), "DD-MM-YYYY");
 
-    await sendFile(
+    const pasteUrl = await uploadPaste(changelog);
+    await sendMessageToChannel(
       DiscordChannels.RANKED_BATCH_LOGS,
-      `ranked-batch-${date}.txt`,
-      file.trim(),
-      "<@&1338261690952978442>"
+      `<@&1338261690952978442> New Ranked Batch: ${pasteUrl}!`
     );
 
     const leaderboards = PlaylistService.processLeaderboards(
@@ -74,7 +74,7 @@ export class LeaderboardNotificationsService {
       `ScoreSaber Ranked Batch (${date})`,
       env.NEXT_PUBLIC_WEBSITE_NAME,
       leaderboards.maps,
-      [...newlyRankedMaps, ...buffedMaps].map(update => update.leaderboard.id),
+      leaderboards.highlightedIds,
       await generateRankedBatchPlaylistImage(),
       "ranked-batch"
     );
@@ -82,8 +82,10 @@ export class LeaderboardNotificationsService {
     await sendFile(
       DiscordChannels.RANKED_BATCH_LOGS,
       `scoresaber-ranked-batch-${date}.bplist`,
-      JSON.stringify(generateBeatSaberPlaylist(playlist), null, 2)
+      JSON.stringify(await generateBeatSaberPlaylist(playlist), null, 2)
     );
-    Logger.info("Logged leaderboard changes to Discord.");
+    Logger.info(
+      `Logged ${newlyRankedMaps.length + buffedMaps.length + nerfedMaps.length} leaderboard changes to Discord.`
+    );
   }
 }

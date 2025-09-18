@@ -10,7 +10,7 @@ import { PlaylistSong } from "@ssr/common/playlist/playlist-song";
 import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import { EmbedBuilder } from "discord.js";
-import { DiscordChannels, logToChannel } from "../../bot/bot";
+import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
 import { RefreshResult } from "../../common/types/leaderboard";
 import CacheService, { CacheId } from "../cache.service";
 import PlaylistService from "../playlist/playlist.service";
@@ -107,7 +107,7 @@ export class LeaderboardLeaderboardsService {
       songs: playlist.songs,
     });
 
-    await logToChannel(
+    await sendEmbedToChannel(
       DiscordChannels.BACKEND_LOGS,
       new EmbedBuilder()
         .setTitle(`Refreshed ${leaderboards.length} ${playlistTitle.toLowerCase()} leaderboards.`)

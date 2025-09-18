@@ -44,10 +44,10 @@ const client = new Client({
       },
     ],
   },
-  silent: false,
+  silent: true,
 });
 
-client.once("ready", async () => {
+client.once("clientReady", async () => {
   await client.initApplicationCommands();
 
   Logger.info("Discord bot ready!");
@@ -83,12 +83,12 @@ export async function initDiscordBot() {
 }
 
 /**
- * Logs the message to a discord channel.
+ * Sends an embed to a discord channel.
  *
  * @param channelId the channel id to log to
  * @param embed the embed to log
  */
-export async function logToChannel(
+export async function sendEmbedToChannel(
   channelId: (typeof DiscordChannels)[keyof typeof DiscordChannels],
   embed: EmbedBuilder,
   components: ActionRowData<MessageActionRowComponentBuilder>[] = []
@@ -100,6 +100,31 @@ export async function logToChannel(
     const channel = await client.channels.fetch(channelId);
     if (channel != undefined && channel.isSendable()) {
       return await channel.send({ embeds: [embed], components });
+    }
+  } catch (error) {
+    Logger.error(`Failed to send message to channel ${channelId}:`, error);
+  }
+  return undefined;
+}
+
+/**
+ * Sends a message to a discord channel.
+ *
+ * @param channelId the channel id to send the message to
+ * @param message the message to send
+ */
+export async function sendMessageToChannel(
+  channelId: (typeof DiscordChannels)[keyof typeof DiscordChannels],
+  message: string
+) {
+  if (!channelId) {
+    return;
+  }
+
+  try {
+    const channel = await client.channels.fetch(channelId);
+    if (channel != undefined && channel.isSendable()) {
+      return await channel.send(message);
     }
   } catch (error) {
     Logger.error(`Failed to send message to channel ${channelId}:`, error);

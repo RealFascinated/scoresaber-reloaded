@@ -14,7 +14,7 @@ import { BeatLeaderScoreImprovementToken } from "@ssr/common/types/token/beatlea
 import { getBeatLeaderReplayId } from "@ssr/common/utils/beatleader-utils";
 import Request from "@ssr/common/utils/request";
 import { isProduction } from "@ssr/common/utils/utils";
-import { DiscordChannels, logToChannel } from "../bot/bot";
+import { DiscordChannels, sendEmbedToChannel } from "../bot/bot";
 import { createGenericEmbed } from "../common/discord/embed";
 import CacheService, { CacheId } from "./cache.service";
 import MinioService from "./minio.service";
@@ -175,7 +175,7 @@ export default class BeatLeaderService {
               return true;
             }
           } catch (error) {
-            logToChannel(
+            sendEmbedToChannel(
               DiscordChannels.BACKEND_LOGS,
               createGenericEmbed(
                 "BeatLeader Replays",
