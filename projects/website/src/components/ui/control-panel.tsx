@@ -45,21 +45,25 @@ interface TabProps {
 }
 
 export function Tab({ children, isActive, onClick, tooltip }: TabProps) {
-  return (
-    <SimpleTooltip display={tooltip}>
-      <button
-        className={cn(
-          "flex cursor-pointer items-center gap-1.5 rounded-sm px-3 py-1.5 text-xs font-medium transition-all",
-          isActive
-            ? "bg-primary text-primary-foreground"
-            : "bg-muted text-muted-foreground hover:bg-muted/80"
-        )}
-        onClick={onClick}
-      >
-        {children}
-      </button>
-    </SimpleTooltip>
+  const button = (
+    <button
+      className={cn(
+        "flex cursor-pointer items-center gap-1.5 rounded-sm px-3 py-1.5 text-xs font-medium transition-all",
+        isActive
+          ? "bg-primary text-primary-foreground"
+          : "bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+      )}
+      onClick={onClick}
+    >
+      {children}
+    </button>
   );
+
+  if (tooltip) {
+    return <SimpleTooltip display={tooltip}>{button}</SimpleTooltip>;
+  }
+
+  return button;
 }
 
 interface ButtonGroupProps {
