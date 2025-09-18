@@ -10,6 +10,7 @@ const minioClient = new Client({
   useSSL: env.MINIO_USE_SSL,
   accessKey: env.MINIO_ACCESS_KEY,
   secretKey: env.MINIO_SECRET_KEY,
+  region: "",
 });
 
 export default class MinioService {
