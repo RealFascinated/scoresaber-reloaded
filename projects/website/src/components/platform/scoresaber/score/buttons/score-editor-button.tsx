@@ -20,6 +20,8 @@ type ScoreEditorButtonProps = {
   updateScore: (score: ScoreSaberScore) => void;
 };
 
+const MIN_ACCURACY = 70;
+
 export default function ScoreSaberScoreEditorButton({
   score,
   leaderboard,
@@ -31,7 +33,7 @@ export default function ScoreSaberScoreEditorButton({
 
   const isMobile = useIsMobile();
   const [newAccuracy, setNewAccuracy] = useState(accuracy);
-  const [baseValue, setBaseValue] = useState(Math.max(1, Math.floor(accuracy))); // 1, 2, 3, etc.
+  const [baseValue, setBaseValue] = useState(Math.max(MIN_ACCURACY, Math.floor(accuracy))); // 1, 2, 3, etc.
   const [decimalValue, setDecimalValue] = useState(accuracy - Math.floor(accuracy)); // 0.0, 0.1, 0.2, etc.
 
   const { data: rankedPps } = useQuery({
@@ -162,7 +164,7 @@ export default function ScoreSaberScoreEditorButton({
                 </div>
                 <Slider
                   className="w-full"
-                  min={1}
+                  min={MIN_ACCURACY}
                   max={99}
                   step={1}
                   value={[baseValue]}
