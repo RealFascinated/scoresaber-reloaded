@@ -38,7 +38,7 @@ export function PlayerRanking({
   return (
     <SimpleLink href={`/player/${player.id}`}>
       {/* Desktop Layout */}
-      <div className="hidden xl:block">
+      <div className="hidden lg:block">
         <PlayerPreview
           playerId={player.id}
           className="mb-1 grid min-h-[40px] w-full cursor-pointer items-center gap-3 rounded-lg bg-[#232323] px-2 py-1 shadow-sm transition-all hover:bg-[#2d2d2d]"
@@ -80,7 +80,7 @@ export function PlayerRanking({
       </div>
 
       {/* Mobile Layout */}
-      <div className="xl:hidden">
+      <div className="lg:hidden">
         <div className="mb-1 flex min-h-[67px] w-full cursor-pointer flex-col justify-center gap-1 rounded-lg bg-[#232323] px-2 py-1 shadow-sm transition-all hover:bg-[#2d2d2d]">
           {/* Top row: Rank, Country Rank, and Weekly Change */}
           <div className="flex items-center justify-between">
