@@ -43,7 +43,7 @@ export function LeaderboardStarChangeHistory({
 
           <div className="flex flex-col gap-1">
             {starChangeHistory.map((starChange, index) => {
-              const isCurrent = index === starChangeHistory.length - 1;
+              const isCurrent = index === 0;
               const from =
                 starChange.previousStars == 0 ? "Unranked" : starChange.previousStars.toFixed(2);
               const to = starChange.newStars == 0 ? "Unranked" : starChange.newStars.toFixed(2);
@@ -51,15 +51,26 @@ export function LeaderboardStarChangeHistory({
               // Determine colors based on star change
               const isIncrease = starChange.newStars > starChange.previousStars;
               const isDecrease = starChange.newStars < starChange.previousStars;
-              const fromColor = starChange.previousStars === 0 ? "text-white" : "text-white";
-              const toColor =
+              const isUnrankedToRanked = starChange.previousStars === 0 && starChange.newStars > 0;
+              const isRankedToUnranked = starChange.previousStars > 0 && starChange.newStars === 0;
+              
+              // From color: red for higher stars, green for lower stars, white for unranked
+              const fromColor = 
+                starChange.previousStars === 0 
+                  ? "text-white"
+                  : isDecrease || isRankedToUnranked
+                    ? "text-green-500"  // Higher to lower or ranked to unranked
+                    : "text-red-500";   // Lower to higher
+              
+              // To color: green for higher stars, red for lower stars, green for unranked to ranked
+              const toColor = 
                 starChange.newStars === 0
                   ? "text-white"
-                  : isIncrease
-                    ? "text-green-500"
-                    : isDecrease
-                      ? "text-red-500"
-                      : "text-white";
+                  : isUnrankedToRanked
+                    ? "text-green-500"  // Unranked to ranked
+                    : isIncrease
+                      ? "text-green-500"  // Lower to higher
+                      : "text-red-500";   // Higher to lower
 
               return (
                 <div
