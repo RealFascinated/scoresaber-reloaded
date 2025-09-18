@@ -13,6 +13,7 @@ export const env = createEnv({
     MINIO_PORT: z.number(),
     MINIO_ACCESS_KEY: z.string(),
     MINIO_SECRET_KEY: z.string(),
+    MINIO_REGION: z.string(),
 
     INFLUXDB_URL: z.string(),
     INFLUXDB_BUCKET: z.string(),
@@ -79,6 +80,7 @@ export const env = createEnv({
     MINIO_PORT: Number(process.env.MINIO_PORT),
     MINIO_ACCESS_KEY: process.env.MINIO_ACCESS_KEY,
     MINIO_SECRET_KEY: process.env.MINIO_SECRET_KEY,
+    MINIO_REGION: process.env.MINIO_REGION,
 
     // InfluxDB
     INFLUXDB_URL: process.env.INFLUXDB_URL,
