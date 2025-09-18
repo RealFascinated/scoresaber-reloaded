@@ -201,8 +201,8 @@ export default function PlayerAndLeaderboardSearch() {
                               <>
                                 -{" "}
                                 <div className="text-pp flex items-center gap-1">
-                                  {leaderboard.stars.toFixed(2)}
-                                  <StarIcon className="h-fit w-fit" />
+                                  <span>{leaderboard.stars.toFixed(2)}</span>
+                                  <StarIcon className="w-4" />
                                 </div>
                               </>
                             )}

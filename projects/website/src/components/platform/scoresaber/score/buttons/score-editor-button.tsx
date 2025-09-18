@@ -31,6 +31,8 @@ export default function ScoreSaberScoreEditorButton({
 
   const isMobile = useIsMobile();
   const [newAccuracy, setNewAccuracy] = useState(accuracy);
+  const [baseValue, setBaseValue] = useState(Math.max(1, Math.floor(accuracy))); // 1, 2, 3, etc.
+  const [decimalValue, setDecimalValue] = useState(accuracy - Math.floor(accuracy)); // 0.0, 0.1, 0.2, etc.
 
   const { data: rankedPps } = useQuery({
     queryKey: ["ranked-pps", score.playerId],
@@ -40,14 +42,13 @@ export default function ScoreSaberScoreEditorButton({
   const [modifiedScores, setModifiedScores] =
     useState<Pick<ScoreSaberScore, "pp" | "weight" | "scoreId">[]>();
 
-  const handleSliderChange = (value: number[]) => {
-    const newAccuracy = Math.max(0, Math.min(value[0], 100)); // Ensure the accuracy stays within 0-100
-    const newBaseScore = (newAccuracy / 100) * maxScore;
+  const updateScoreAndPP = (accuracy: number) => {
+    const newBaseScore = (accuracy / 100) * maxScore;
     updateScore({
       ...score,
       score: newBaseScore,
     });
-    setNewAccuracy(newAccuracy);
+    setNewAccuracy(accuracy);
 
     if (rankedPps) {
       let newModifiedScores = [...rankedPps.scores];
@@ -56,7 +57,7 @@ export default function ScoreSaberScoreEditorButton({
         if (score.scoreId == modifiedScore.scoreId) {
           newModifiedScores[i] = {
             ...modifiedScore,
-            pp: ScoreSaberCurve.getPp(leaderboard.stars, newAccuracy),
+            pp: ScoreSaberCurve.getPp(leaderboard.stars, accuracy),
           };
         }
       }
@@ -67,12 +68,28 @@ export default function ScoreSaberScoreEditorButton({
     }
   };
 
+  const handleBaseSliderChange = (value: number[]) => {
+    const baseVal = Math.max(1, Math.min(value[0], 100)); 
+    setBaseValue(baseVal);
+    const accuracy = baseVal + decimalValue;
+    updateScoreAndPP(accuracy);
+  };
+
+  const handleDecimalSliderChange = (value: number[]) => {
+    const decimalVal = Math.max(0, Math.min(value[0], 0.99));
+    setDecimalValue(decimalVal);
+    const accuracy = baseValue + decimalVal;
+    updateScoreAndPP(accuracy);
+  };
+
   const handleSliderReset = () => {
     updateScore({
       ...score,
       score: (accuracy / 100) * maxScore,
     });
     setNewAccuracy(accuracy);
+    setBaseValue(Math.max(1, Math.floor(accuracy)));
+    setDecimalValue(accuracy - Math.floor(accuracy));
   };
 
   const ppGain =
@@ -83,7 +100,13 @@ export default function ScoreSaberScoreEditorButton({
 
   return (
     <div className="relative flex cursor-default items-center justify-center">
-      <Popover onOpenChange={() => handleSliderReset()}>
+      <Popover onOpenChange={(open) => {
+        if (!open) {
+          // Reset when closing
+          handleSliderReset();
+          setModifiedScores(undefined);
+        }
+      }}>
         <PopoverTrigger asChild>
           <Button variant="ghost" className="h-[28px] w-[28px] p-0">
             <FaCog className="size-4" />
@@ -108,7 +131,12 @@ export default function ScoreSaberScoreEditorButton({
                       }
                     >
                       <Button
-                        onClick={() => handleSliderChange([score.additionalData!.fcAccuracy!])}
+                        onClick={() => {
+                          const fcAccuracy = score.additionalData!.fcAccuracy!;
+                          setBaseValue(Math.max(1, Math.floor(fcAccuracy)));
+                          setDecimalValue(fcAccuracy - Math.floor(fcAccuracy));
+                          updateScoreAndPP(fcAccuracy);
+                        }}
                         className="h-fit p-1"
                         variant="ghost"
                       >
@@ -126,14 +154,37 @@ export default function ScoreSaberScoreEditorButton({
                 </div>
               </div>
 
-              {/* Accuracy Slider */}
-              <Slider
-                className="w-full"
-                min={accuracy}
-                max={100}
-                step={0.01}
-                onValueChange={handleSliderChange}
-              />
+              {/* Base Slider */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs text-muted-foreground">Base</label>
+                  <span className="text-xs text-muted-foreground">{baseValue}</span>
+                </div>
+                <Slider
+                  className="w-full"
+                  min={1}
+                  max={99}
+                  step={1}
+                  value={[baseValue]}
+                  onValueChange={handleBaseSliderChange}
+                />
+              </div>
+
+              {/* Decimal Slider */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs text-muted-foreground">Decimal</label>
+                  <span className="text-xs text-muted-foreground">{decimalValue.toFixed(2)}</span>
+                </div>
+                <Slider
+                  className="w-full"
+                  min={0}
+                  max={0.99}
+                  step={0.01}
+                  value={[decimalValue]}
+                  onValueChange={handleDecimalSliderChange}
+                />
+              </div>
             </div>
 
             <div>
