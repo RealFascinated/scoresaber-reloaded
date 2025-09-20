@@ -83,10 +83,10 @@ export class MedalScoresService {
     const affectedPlayers = new Set<string>();
     const medalChanges = new Map<string, number>();
 
-    // Calculate medals before changes
+    // Calculate medals before changes (sum all medals per player)
     for (const score of leaderboardScores) {
       affectedPlayers.add(score.playerId);
-      medalChanges.set(score.playerId, (medalChanges.get(score.playerId) || 0) - score.medals);
+      medalChanges.set(score.playerId, (medalChanges.get(score.playerId) || 0) + score.medals);
     }
 
     // Add the new score and sort by from best to worst score
@@ -107,10 +107,18 @@ export class MedalScoresService {
       }
     }
 
-    // Calculate medals after changes (only top 10)
+    // Calculate medals after changes (sum all medals per player in top 10)
+    const newMedalCounts = new Map<string, number>();
     for (const score of scores.slice(0, 10)) {
       affectedPlayers.add(score.playerId);
-      medalChanges.set(score.playerId, (medalChanges.get(score.playerId) || 0) + score.medals);
+      newMedalCounts.set(score.playerId, (newMedalCounts.get(score.playerId) || 0) + score.medals);
+    }
+
+    // Calculate net change for each player
+    for (const playerId of affectedPlayers) {
+      const oldMedals = medalChanges.get(playerId) || 0;
+      const newMedals = newMedalCounts.get(playerId) || 0;
+      medalChanges.set(playerId, newMedals - oldMedals);
     }
 
     // Delete the scores past the 10th place
