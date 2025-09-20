@@ -1,7 +1,7 @@
 "use client";
 
-import Avatar from "@/components/avatar";
 import Card from "@/components/card";
+import PlayerScoreHeader from "@/components/score/player-score-header";
 import SimplePagination from "@/components/simple-pagination";
 import { Spinner } from "@/components/spinner";
 import { useIsMobile } from "@/contexts/viewport-context";
@@ -11,7 +11,6 @@ import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { Page } from "@ssr/common/pagination";
 import { PlayerScore } from "@ssr/common/score/player-score";
 import Request from "@ssr/common/utils/request";
-import { getScoreSaberAvatar } from "@ssr/common/utils/scoresaber.util";
 import { useQuery } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
 import ScoreSaberScoreDisplay from "../score";
@@ -64,10 +63,7 @@ export function TopScoresData() {
 
             return (
               <div key={score.scoreId} className="flex flex-col">
-                <div className="bg-primary/20 flex w-fit items-center gap-2 rounded-md rounded-b-none p-2">
-                  <Avatar src={getScoreSaberAvatar(player)} alt={player?.name ?? ""} size={20} />
-                  <p className="text-sm">{name}</p>
-                </div>
+                <PlayerScoreHeader player={player} />
 
                 <div className="bg-accent-deep rounded-md rounded-tl-none">
                   <ScoreSaberScoreDisplay
