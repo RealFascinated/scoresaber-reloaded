@@ -1,11 +1,9 @@
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
-import { MinioBucket } from "@ssr/common/minio-buckets";
 import { Player, PlayerModel } from "@ssr/common/model/player/player";
 import { PlayerRefreshResponse } from "@ssr/common/response/player-refresh-response";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import CacheService, { CacheId } from "../cache.service";
-import MinioService from "../minio.service";
 import { PlayerService } from "./player.service";
 
 export const accountCreationLock: Record<string, Promise<Player>> = {};
@@ -108,7 +106,6 @@ export class PlayerCoreService {
       .refreshPlayer(id);
     if (response !== undefined) {
       CacheService.invalidate(`scoresaber:player:${id}`); // Remove the player from the cache
-      MinioService.deleteFile(MinioBucket.Avatars, `${id}.jpg`); // Delete the player's avatar
       return response;
     }
     return { result: false };
