@@ -155,7 +155,7 @@ export default class BeatLeaderService {
     }
 
     // Parallelize independent operations
-    const [replayData] = await Promise.all([
+    const [savedReplay] = await Promise.all([
       // Save replay data if needed
       (async () => {
         if (isProduction() && player && (player.trackReplays || isTop50GlobalScore)) {
@@ -189,8 +189,8 @@ export default class BeatLeaderService {
       })(),
     ]);
 
-    if (replayData) {
-      data.savedReplay = replayData;
+    if (savedReplay) {
+      data.savedReplay = savedReplay;
     }
 
     await AdditionalScoreDataModel.create(data);

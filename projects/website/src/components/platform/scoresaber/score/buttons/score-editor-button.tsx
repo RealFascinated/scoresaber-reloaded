@@ -71,7 +71,7 @@ export default function ScoreSaberScoreEditorButton({
   };
 
   const handleBaseSliderChange = (value: number[]) => {
-    const baseVal = Math.max(1, Math.min(value[0], 100)); 
+    const baseVal = Math.max(1, Math.min(value[0], 100));
     setBaseValue(baseVal);
     const accuracy = baseVal + decimalValue;
     updateScoreAndPP(accuracy);
@@ -102,13 +102,15 @@ export default function ScoreSaberScoreEditorButton({
 
   return (
     <div className="relative flex cursor-default items-center justify-center">
-      <Popover onOpenChange={(open) => {
-        if (!open) {
-          // Reset when closing
-          handleSliderReset();
-          setModifiedScores(undefined);
-        }
-      }}>
+      <Popover
+        onOpenChange={open => {
+          if (!open) {
+            // Reset when closing
+            handleSliderReset();
+            setModifiedScores(undefined);
+          }
+        }}
+      >
         <PopoverTrigger asChild>
           <Button variant="ghost" className="h-[28px] w-[28px] p-0">
             <FaCog className="size-4" />
@@ -159,8 +161,8 @@ export default function ScoreSaberScoreEditorButton({
               {/* Base Slider */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <label className="text-xs text-muted-foreground">Base</label>
-                  <span className="text-xs text-muted-foreground">{baseValue}</span>
+                  <label className="text-muted-foreground text-xs">Base</label>
+                  <span className="text-muted-foreground text-xs">{baseValue}</span>
                 </div>
                 <Slider
                   className="w-full"
@@ -175,8 +177,8 @@ export default function ScoreSaberScoreEditorButton({
               {/* Decimal Slider */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <label className="text-xs text-muted-foreground">Decimal</label>
-                  <span className="text-xs text-muted-foreground">{decimalValue.toFixed(2)}</span>
+                  <label className="text-muted-foreground text-xs">Decimal</label>
+                  <span className="text-muted-foreground text-xs">{decimalValue.toFixed(2)}</span>
                 </div>
                 <Slider
                   className="w-full"

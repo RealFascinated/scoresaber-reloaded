@@ -37,7 +37,6 @@ import {
   Trophy,
   XIcon,
 } from "lucide-react";
-import { parseAsString, useQueryState } from "nuqs";
 import { useCallback, useEffect, useState } from "react";
 import ScoresCard from "../../score/scores-card";
 import SimplePagination from "../../simple-pagination";

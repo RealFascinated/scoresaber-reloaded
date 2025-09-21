@@ -53,24 +53,24 @@ export function LeaderboardStarChangeHistory({
               const isDecrease = starChange.newStars < starChange.previousStars;
               const isUnrankedToRanked = starChange.previousStars === 0 && starChange.newStars > 0;
               const isRankedToUnranked = starChange.previousStars > 0 && starChange.newStars === 0;
-              
+
               // From color: red for higher stars, green for lower stars, white for unranked
-              const fromColor = 
-                starChange.previousStars === 0 
+              const fromColor =
+                starChange.previousStars === 0
                   ? "text-white"
                   : isDecrease || isRankedToUnranked
-                    ? "text-green-500"  // Higher to lower or ranked to unranked
-                    : "text-red-500";   // Lower to higher
-              
+                    ? "text-green-500" // Higher to lower or ranked to unranked
+                    : "text-red-500"; // Lower to higher
+
               // To color: green for higher stars, red for lower stars, green for unranked to ranked
-              const toColor = 
+              const toColor =
                 starChange.newStars === 0
                   ? "text-white"
                   : isUnrankedToRanked
-                    ? "text-green-500"  // Unranked to ranked
+                    ? "text-green-500" // Unranked to ranked
                     : isIncrease
-                      ? "text-green-500"  // Lower to higher
-                      : "text-red-500";   // Higher to lower
+                      ? "text-green-500" // Lower to higher
+                      : "text-red-500"; // Higher to lower
 
               return (
                 <div
