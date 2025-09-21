@@ -12,6 +12,8 @@ import { ReactElement } from "react";
 import { FaMedal } from "react-icons/fa";
 import Settings from "../settings/settings";
 import SimpleLink from "../simple-link";
+import useDatabase from "@/hooks/use-database";
+import { useLiveQuery } from "dexie-react-hooks";
 
 const links: ReactElement<any>[] = [
   <FriendsButton key="friends" />,
@@ -69,6 +71,9 @@ const links: ReactElement<any>[] = [
 ];
 
 export default function Navbar() {
+  const database = useDatabase();
+  const hasMainPlayer = useLiveQuery(() => database.hasMainPlayer());
+
   return (
     <nav
       className={cn(
@@ -100,19 +105,19 @@ export default function Navbar() {
       </div>
 
       {/* Right */}
-      <div className="flex items-center gap-2 transition-all">
+      <div className="flex items-center gap-0.5 transition-all">
         {/* Settings and Search */}
         <div className="flex items-center gap-2 md:gap-3">
           <Settings />
-          <div className="w-12 md:w-64">
+          <div className="w-11 md:w-64">
             <PlayerAndLeaderboardSearch />
           </div>
         </div>
 
         {/* Profile Section */}
-        <div className="flex items-center gap-2 md:gap-3">
+        {hasMainPlayer && ( 
           <ProfileButton />
-        </div>
+        )}
       </div>
     </nav>
   );

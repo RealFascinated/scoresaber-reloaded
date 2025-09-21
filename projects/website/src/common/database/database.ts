@@ -95,6 +95,15 @@ export default class Database extends Dexie {
   }
 
   /**
+   * Checks if the database has a main player
+   *
+   * @returns whether the database has a main player
+   */
+  async hasMainPlayer(): Promise<boolean> {
+    return (await this.getMainPlayerId()) !== undefined;
+  }
+
+  /**
    * Gets the main player from the database
    *
    * @returns the main player

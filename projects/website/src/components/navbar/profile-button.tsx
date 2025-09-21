@@ -20,7 +20,7 @@ export default function ProfileButton() {
     <SimpleTooltip display="Click to view your profile" side="bottom">
       <SimpleLink
         href={`/player/${mainPlayer.id}`}
-        className="hover:bg-muted/50 flex h-full cursor-pointer items-center rounded-md p-2 transition-all"
+        className="flex h-full cursor-pointer items-center rounded-md p-2 transition-all"
       >
         <div className="flex h-full items-center gap-2">
           <Avatar
@@ -28,7 +28,7 @@ export default function ProfileButton() {
             className="ring-border/50 h-6 w-6 rounded-full ring-1"
             alt={`${mainPlayer.name}'s Profile Picture`}
           />
-          <p className="text-primary hidden text-sm font-medium lg:block">
+          <p className="text-primary hidden text-sm font-medium lg:block hover:text-primary/70 transition-all">
             {truncateText(mainPlayer.name, 20)}
           </p>
         </div>

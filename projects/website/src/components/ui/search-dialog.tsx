@@ -67,7 +67,7 @@ const SearchDialog = ({
           </div>
         </div>
 
-        <div className="[&::-webkit-scrollbar-thumb]:bg-muted max-h-[400px] overflow-x-hidden overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-transparent">
+        <div className="pb-2 [&::-webkit-scrollbar-thumb]:bg-muted max-h-[400px] overflow-x-hidden overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-transparent">
           {children}
         </div>
       </DialogContent>
