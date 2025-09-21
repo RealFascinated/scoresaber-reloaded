@@ -100,7 +100,7 @@ function PlayerMiniRanking({
       </div>
 
       {/* Players List */}
-      <div className="divide-border divide-y">
+      <div className="divide-border divide-y text-xs">
         {players.length > 0 ? (
           players.map((playerRanking, index) => {
             const rank = type == "Global" ? playerRanking.rank : playerRanking.countryRank;
