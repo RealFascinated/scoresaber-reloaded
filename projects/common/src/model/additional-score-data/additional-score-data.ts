@@ -58,7 +58,7 @@ export class AdditionalScoreData {
   /**
    * The BeatLeader score id for this score.
    */
-  @prop({ required: false })
+  @prop({ required: false, index: true })
   public scoreId!: number;
 
   /**

@@ -19,7 +19,7 @@ import {
 } from "@ssr/common/utils/time-utils";
 import { isProduction } from "@ssr/common/utils/utils";
 import { EmbedBuilder } from "discord.js";
-import { DiscordChannels, logToChannel } from "../../bot/bot";
+import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
 import { logNewTrackedPlayer } from "../../common/embds";
 import { PlayerScoreSeedQueue } from "../../queue/impl/player-score-seed-queue";
 import { QueueId, QueueManager } from "../../queue/queue-manager";
@@ -248,7 +248,7 @@ export class PlayerHistoryService {
 
     const inactivePlayers = await PlayerModel.countDocuments({ inactive: true });
 
-    logToChannel(
+    sendEmbedToChannel(
       DiscordChannels.BACKEND_LOGS,
       new EmbedBuilder()
         .setTitle(`Refreshed ${successCount} players.`)

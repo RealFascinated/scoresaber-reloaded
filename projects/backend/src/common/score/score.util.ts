@@ -13,7 +13,7 @@ import { formatScoreAccuracy } from "@ssr/common/utils/score.util";
 import { getDifficultyName } from "@ssr/common/utils/song-utils";
 import { formatChange } from "@ssr/common/utils/utils";
 import { ButtonBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
-import { DiscordChannels, logToChannel } from "../../bot/bot";
+import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
 import BeatSaverService from "../../service/beatsaver.service";
 import { PlayerService } from "../../service/player/player.service";
 
@@ -74,7 +74,7 @@ export async function sendScoreNotification(
       ? `${formatScoreAccuracy(score.accuracy)} ${change ? change.accuracy : ""}${beatLeaderScore && !score.fullCombo ? ` (FC: ${formatScoreAccuracy(beatLeaderScore.fcAccuracy)})` : ""}`
       : "N/A%";
 
-  const message = await logToChannel(
+  const message = await sendEmbedToChannel(
     channel,
     new EmbedBuilder()
       .setTitle(title)

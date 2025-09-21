@@ -1,9 +1,8 @@
 "use client";
 
-import Avatar from "@/components/avatar";
+import PlayerScoreHeader from "@/components/score/player-score-header";
 import { useIsMobile } from "@/contexts/viewport-context";
 import useDatabase from "@/hooks/use-database";
-import { getScoreSaberAvatar } from "@ssr/common/utils/scoresaber.util";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { useLiveQuery } from "dexie-react-hooks";
@@ -59,15 +58,7 @@ export function FriendScores() {
                 const beatSaverMap = playerScore.beatSaver;
                 return (
                   <div key={index} className="flex flex-col">
-                    <div className="bg-primary/20 flex w-fit items-center gap-2 rounded-md rounded-b-none p-2">
-                      <Avatar
-                        src={getScoreSaberAvatar(playerScore.score.playerInfo)}
-                        alt={playerScore.score.playerInfo?.name ?? ""}
-                        size={20}
-                      />
-                      <p className="text-sm">{playerScore.score.playerInfo?.name}</p>
-                    </div>
-
+                    <PlayerScoreHeader player={playerScore.score.playerInfo} />
                     <div className="bg-accent-deep rounded-md rounded-tl-none">
                       <ScoreSaberScoreDisplay
                         key={score.scoreId}

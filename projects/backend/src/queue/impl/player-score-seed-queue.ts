@@ -5,7 +5,7 @@ import { PlayerModel } from "@ssr/common/model/player/player";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import { ButtonBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
-import { DiscordChannels, logToChannel } from "../../bot/bot";
+import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
 import { PlayerService } from "../../service/player/player.service";
 import { Queue, QueueItem } from "../queue";
 import { QueueId } from "../queue-manager";
@@ -52,7 +52,7 @@ export class PlayerScoreSeedQueue extends Queue<QueueItem<string>> {
     const { totalScores, missingScores, updatedScores, totalPages, timeTaken, partialRefresh } =
       await PlayerService.refreshAllPlayerScores(player, playerToken);
 
-    await logToChannel(
+    await sendEmbedToChannel(
       DiscordChannels.PLAYER_SCORE_REFRESH_LOGS,
       new EmbedBuilder()
         .setTitle("Player Score Refresh Complete" + (partialRefresh ? " (Partial Refresh)" : ""))

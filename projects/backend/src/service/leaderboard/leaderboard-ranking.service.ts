@@ -340,7 +340,7 @@ export class LeaderboardRankingService {
           update.starCountChanged ||
           update.qualifiedStatusChanged
         ) {
-          // Leaderboard needs special handling
+          // Leaderboard has status changes
           leaderboardsToHandle.push({ leaderboard, update });
         } else {
           // Regular update - add to bulk update
@@ -368,10 +368,10 @@ export class LeaderboardRankingService {
         await ScoreSaberLeaderboardModel.bulkWrite(leaderboardBulkOps);
       }
 
-      // Handle leaderboards that need special processing
+      // Handle leaderboards with status changes
       if (leaderboardsToHandle.length > 0) {
         Logger.info(
-          `Processing ${leaderboardsToHandle.length} leaderboards that need special handling...`
+          `Processing ${leaderboardsToHandle.length} leaderboards with status changes...`
         );
 
         for (let i = 0; i < leaderboardsToHandle.length; i++) {

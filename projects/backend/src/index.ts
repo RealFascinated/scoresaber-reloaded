@@ -12,7 +12,7 @@ import { Elysia, ValidationError } from "elysia";
 import { decorators } from "elysia-decorators";
 import { helmet } from "elysia-helmet";
 import Redis from "ioredis";
-import { DiscordChannels, initDiscordBot, logToChannel } from "./bot/bot";
+import { DiscordChannels, initDiscordBot, sendEmbedToChannel } from "./bot/bot";
 import { getAppVersion } from "./common/app.util";
 import AppController from "./controller/app.controller";
 import BeatLeaderController from "./controller/beatleader.controller";
@@ -102,12 +102,12 @@ export const app = new Elysia()
       protect: true,
       run: async () => {
         const before = Date.now();
-        await logToChannel(
+        await sendEmbedToChannel(
           DiscordChannels.BACKEND_LOGS,
           new EmbedBuilder().setDescription(`Updating player statistics...`)
         );
         await PlayerService.updatePlayerStatistics();
-        await logToChannel(
+        await sendEmbedToChannel(
           DiscordChannels.BACKEND_LOGS,
           new EmbedBuilder().setDescription(
             `Updated player statistics in ${formatDuration(Date.now() - before)}`
@@ -119,7 +119,7 @@ export const app = new Elysia()
   .use(
     cron({
       name: "refresh-leaderboards-cron",
-      // pattern: "*/1 * * * *", // Every 5 minutes
+      // pattern: "*/1 * * * *", // Every minute
       pattern: "30 */2 * * *", // Every 2 hours at 30 minutes ex: 00:30, 02:30, 04:30, etc
       timezone: "Europe/London", // UTC time
       protect: true,
@@ -294,7 +294,10 @@ app.onStart(async () => {
 
   Logger.info("Listening on port http://localhost:8080");
   await initDiscordBot();
-  logToChannel(DiscordChannels.BACKEND_LOGS, new EmbedBuilder().setDescription("Backend started!"));
+  sendEmbedToChannel(
+    DiscordChannels.BACKEND_LOGS,
+    new EmbedBuilder().setDescription("Backend started!")
+  );
 
   // Log all registered routes
   Logger.info("Registered routes:");
@@ -340,7 +343,7 @@ const setupSignalHandlers = () => {
       await app.stop();
       Logger.info("Server stopped accepting new requests");
 
-      logToChannel(
+      sendEmbedToChannel(
         DiscordChannels.BACKEND_LOGS,
         new EmbedBuilder().setDescription("Backend shutting down...")
       );

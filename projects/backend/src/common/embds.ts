@@ -1,7 +1,7 @@
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import { formatPp } from "@ssr/common/utils/number-utils";
 import { EmbedBuilder } from "discord.js";
-import { DiscordChannels, logToChannel } from "../bot/bot";
+import { DiscordChannels, sendEmbedToChannel } from "../bot/bot";
 
 /**
  * Logs that a new player is being tracked
@@ -9,7 +9,7 @@ import { DiscordChannels, logToChannel } from "../bot/bot";
  * @param player the player being tracked
  */
 export async function logNewTrackedPlayer(player: ScoreSaberPlayerToken) {
-  await logToChannel(
+  await sendEmbedToChannel(
     DiscordChannels.TRACKED_PLAYER_LOGS,
     new EmbedBuilder()
       .setTitle("New Player Tracked")
