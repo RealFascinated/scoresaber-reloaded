@@ -41,6 +41,8 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
 
     let currentPage = 1;
     let hasMoreScores = true;
+		let consecutiveFailures = 0;
+    let processedAnyScores = false;
     while (hasMoreScores) {
       const response = await ApiServiceRegistry.getInstance()
         .getScoreSaberService()
@@ -51,10 +53,19 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
         Logger.warn(
           `Failed to fetch scoresaber api scores for leaderboard "${leaderboardId}" on page ${currentPage}`
         );
+        consecutiveFailures++;
+        // If we fail several pages in a row, abort this leaderboard to avoid spamming
+        if (consecutiveFailures >= 3) {
+          Logger.warn(
+            `Aborting seeding for leaderboard "${leaderboardId}" after ${consecutiveFailures} consecutive failures at page ${currentPage}`
+          );
+          break;
+        }
         currentPage++;
         continue;
       }
       const totalPages = Math.ceil(response.metadata.total / response.metadata.itemsPerPage);
+      consecutiveFailures = 0;
 
       // Log every 10 pages
       if (currentPage % 10 === 0) {
@@ -73,19 +84,25 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
         }
 
         await ScoreService.trackScoreSaberScore(score, leaderboard, score.playerInfo, false, false);
+        processedAnyScores = true;
       }
 
       hasMoreScores = currentPage < totalPages;
       currentPage++;
     }
 
-    // Update the seeded scores status
-    await ScoreSaberLeaderboardModel.updateOne(
-      { _id: leaderboardId },
-      { $set: { seededScores: true } }
-    );
-
-    Logger.info(`Updated seeded scores status for leaderboard "${leaderboardId}"`);
+    // Update the seeded scores status only if we processed at least one score and did not abort immediately
+    if (processedAnyScores) {
+      await ScoreSaberLeaderboardModel.updateOne(
+        { _id: leaderboardId },
+        { $set: { seededScores: true } }
+      );
+      Logger.info(`Updated seeded scores status for leaderboard "${leaderboardId}"`);
+    } else {
+      Logger.warn(
+        `Skipping seeded flag for leaderboard "${leaderboardId}" because no scores were processed`
+      );
+    }
   }
 
   /**
