@@ -8,15 +8,11 @@ import { EventListener } from "../event/event-listener";
 import { ApiServicesMetric } from "../metrics/impl/backend/api-services";
 import EventLoopLagMetric from "../metrics/impl/backend/event-loop-lag";
 import EventLoopTimersMetric from "../metrics/impl/backend/event-loop-timers";
-import HttpStatusCodesMetric from "../metrics/impl/backend/http-status-codes";
 import MemoryUsageMetric from "../metrics/impl/backend/memory-usage";
 import ProcessCpuUsageMetric from "../metrics/impl/backend/process-cpu-usage";
-import RouteLatencyMetric from "../metrics/impl/backend/route-latency";
 import RequestsPerSecondMetric from "../metrics/impl/backend/total-requests";
-import TotalRequestsPerEndpointMetric from "../metrics/impl/backend/total-requests-per-endpoint";
 import ProcessUptimeMetric from "../metrics/impl/backend/uptime";
 import MongoDbSizeMetric from "../metrics/impl/database/mongo-db-size";
-import PointsPerSecondMetric from "../metrics/impl/general/points-per-second";
 import MapAuthorsMetric from "../metrics/impl/leaderboard/active-accounts";
 import ActiveAccountsMetric from "../metrics/impl/player/active-accounts";
 import ActivePlayerHmdStatisticMetric from "../metrics/impl/player/active-player-hmd-statistic";
@@ -59,12 +55,9 @@ export enum MetricType {
   MEMORY_USAGE = "memory-usage",
   EVENT_LOOP_LAG = "event-loop-lag",
   TOTAL_REQUESTS = "total-requests",
-  ROUTE_LATENCY = "route-latency",
   EVENT_LOOP_TIMERS = "event-loop-timers",
   API_SERVICES = "api-services",
-  HTTP_STATUS_CODES = "http-status-codes",
   PROCESS_UPTIME = "process-uptime",
-  TOTAL_REQUESTS_PER_ENDPOINT = "total-requests-per-endpoint",
 
   // System metrics
   SYSTEM_CPU_USAGE = "system-cpu-usage",
@@ -80,8 +73,6 @@ export enum MetricType {
 export default class MetricsService implements EventListener {
   private static instance: MetricsService;
   private static metrics: Metric<unknown>[] = [];
-
-  private isInitialized = false;
 
   constructor() {
     if (MetricsService.instance) {
@@ -123,12 +114,9 @@ export default class MetricsService implements EventListener {
     this.registerMetric(new MemoryUsageMetric());
     this.registerMetric(new EventLoopLagMetric());
     this.registerMetric(new RequestsPerSecondMetric());
-    this.registerMetric(new RouteLatencyMetric());
     this.registerMetric(new EventLoopTimersMetric());
     this.registerMetric(new ApiServicesMetric());
-    this.registerMetric(new HttpStatusCodesMetric());
     this.registerMetric(new ProcessUptimeMetric());
-    this.registerMetric(new TotalRequestsPerEndpointMetric());
 
     // System metrics
     this.registerMetric(new SystemCpuUsageMetric());
@@ -139,9 +127,6 @@ export default class MetricsService implements EventListener {
 
     // Database metrics
     this.registerMetric(new MongoDbSizeMetric());
-
-    // General metrics
-    this.registerMetric(new PointsPerSecondMetric());
   }
 
   /**
@@ -172,7 +157,6 @@ export default class MetricsService implements EventListener {
         }, metric.options.interval);
       }
     }
-    this.isInitialized = true;
   }
 
   /**
@@ -222,13 +206,6 @@ export default class MetricsService implements EventListener {
       }
 
       writeApi.writePoint(point);
-
-      const pointsPerSecondMetric = MetricsService.metrics.find(
-        metric => metric.id === MetricType.POINTS_PER_SECOND
-      ) as PointsPerSecondMetric;
-      if (pointsPerSecondMetric && this.isInitialized) {
-        pointsPerSecondMetric.incrementPointCount();
-      }
     } catch (error) {
       Logger.error("[METRICS] Failed to write point for InfluxDB:", error);
     }

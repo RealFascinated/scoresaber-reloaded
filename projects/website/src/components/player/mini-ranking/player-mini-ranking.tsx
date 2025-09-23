@@ -33,8 +33,7 @@ const miniVariants: Variants = {
 export default function PlayerMiniRankings({ player }: { player: ScoreSaberPlayer }) {
   const {
     data: miniRankingResponse,
-    isLoading,
-    isError,
+    isLoading
   } = useQuery({
     queryKey: ["mini-ranking", player.id],
     queryFn: () => ssrApi.getPlayerMiniRanking(player.id),
