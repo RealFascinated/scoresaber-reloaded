@@ -30,7 +30,6 @@ COPY --from=depends /app/node_modules ./node_modules
 
 # Build the common library
 COPY --from=depends /app/projects/common ./projects/common
-RUN bun i -g typescript
 RUN bun --filter '@ssr/common' build
 
 # Copy only the backend source code (not node_modules or dist)
