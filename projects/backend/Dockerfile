@@ -4,13 +4,18 @@ FROM oven/bun:1.2.21-alpine AS base
 FROM base AS depends
 WORKDIR /app
 
-# Copy only the necessary package files
+# Copy workspace structure needed for dependency resolution
 COPY package.json bun.lock ./
 COPY projects/common/package.json ./projects/common/
 COPY projects/backend/package.json ./projects/backend/
+COPY projects/website/package.json ./projects/website/
 
 # Install only production dependencies for the specific packages
 RUN bun install --frozen-lockfile --production --filter '@ssr/common' --filter 'backend'
+
+# Copy source code after dependencies are installed
+COPY projects/common ./projects/common
+COPY projects/backend ./projects/backend
 
 # Run the app
 FROM base AS runner
