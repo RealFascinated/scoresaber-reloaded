@@ -3,8 +3,14 @@ FROM oven/bun:1.2.21-alpine AS base
 # Install dependencies
 FROM base AS depends
 WORKDIR /app
-COPY . .
-RUN bun install --frozen-lockfile --filter '@ssr/common' --filter 'backend' --filter './'
+
+# Copy only the necessary package files
+COPY package.json bun.lock ./
+COPY projects/common/package.json ./projects/common/
+COPY projects/backend/package.json ./projects/backend/
+
+# Install only production dependencies for the specific packages
+RUN bun install --frozen-lockfile --production --filter '@ssr/common' --filter 'backend'
 
 # Run the app
 FROM base AS runner
@@ -22,14 +28,32 @@ COPY --from=depends /app/projects/common ./projects/common
 RUN bun i -g typescript
 RUN bun --filter '@ssr/common' build
 
-# Copy the backend project
-COPY --from=depends /app/projects/backend ./projects/backend
+# Copy only the backend source code (not node_modules or dist)
+COPY --from=depends /app/projects/backend/src ./projects/backend/src
+COPY --from=depends /app/projects/backend/package.json ./projects/backend/
+COPY --from=depends /app/projects/backend/tsconfig.json ./projects/backend/
 
 # Lint before starting
 RUN bun run --filter 'backend' lint
 
 # Build the backend
 RUN bun run --filter 'backend' build
+
+# Final stage - minimal runtime image
+FROM base AS final
+WORKDIR /app
+
+ENV NODE_ENV production
+ENV APP_ENV backend
+
+# Copy only runtime dependencies
+COPY --from=depends /app/package.json* /app/bun.lock* ./
+COPY --from=depends /app/node_modules ./node_modules
+
+# Copy built applications
+COPY --from=runner /app/projects/common/dist ./projects/common/dist
+COPY --from=runner /app/projects/backend/dist ./projects/backend/dist
+COPY --from=runner /app/projects/backend/package.json ./projects/backend/
 
 ARG PORT=8080
 ENV PORT $PORT
@@ -41,4 +65,5 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
 
 WORKDIR /app/projects/backend
 CMD ["bun", "dist/index.js"]
+
 
