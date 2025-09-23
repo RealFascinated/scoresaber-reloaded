@@ -98,7 +98,7 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
       })
         .select("_id")
         .limit(100)
-        .sort({ ranked: 1, stars: -1 }) // Ranked first, then most stars
+        .sort({ ranked: 1, plays: 1 }) // Ranked first, then least plays
         .lean();
       const leaderboardIds = leaderboards.map(p => p._id);
       if (leaderboardIds.length === 0) {
