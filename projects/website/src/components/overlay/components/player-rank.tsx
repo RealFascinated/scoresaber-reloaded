@@ -17,13 +17,14 @@ export default function OverlayPlayerRank({ player }: OverlayPlayerRankProps) {
   const rank = player.rank;
 
   return (
-    <div className="flex min-h-[24px] items-center gap-3">
-      <div className="flex h-6 items-center gap-2">
-        <div className="flex w-[40px] items-center justify-center">
-          <GlobeAmericasIcon className="h-6 w-6" />
+    <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3">
+        <div className="flex w-6 justify-center">
+          <GlobeAmericasIcon className="h-6 w-6 text-slate-300" />
         </div>
-        <div className="h-full w-[1px] bg-white" />
-        <p className={cn(getRankColor(rank), "font-semibold")}>#{formatNumberWithCommas(rank)}</p>
+        <p className={cn(getRankColor(rank), "text-2xl font-bold")}>
+          #{formatNumberWithCommas(rank)}
+        </p>
       </div>
       <DailyChange
         type={PlayerStatChange.Rank}
