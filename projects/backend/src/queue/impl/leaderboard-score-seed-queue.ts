@@ -80,6 +80,7 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
         // Check if the score is already tracked
         const scoreExists = await ScoreService.scoreExistsByScoreId(score.scoreId);
         if (scoreExists) {
+          processedAnyScores = true;
           continue;
         }
 
