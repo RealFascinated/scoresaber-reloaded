@@ -32,10 +32,7 @@ COPY --from=depends /app/node_modules ./node_modules
 COPY --from=depends /app/projects/common ./projects/common
 RUN bun --filter '@ssr/common' build
 
-# Copy only the backend source code (not node_modules or dist)
-COPY --from=depends /app/projects/backend/src ./projects/backend/src
-COPY --from=depends /app/projects/backend/package.json ./projects/backend/
-COPY --from=depends /app/projects/backend/tsconfig.json ./projects/backend/
+COPY --from=depends /app/projects/backend ./projects/backend
 
 # Lint before starting
 RUN bun run --filter 'backend' lint
