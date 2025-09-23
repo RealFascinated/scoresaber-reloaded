@@ -32,9 +32,23 @@ export default class ApiService {
    */
   private currentProxy: string = ""; // No proxy by default
 
+  /**
+   * The last rate limit seen.
+   */
+  private lastRateLimitSeen: number | undefined = undefined;
+
   constructor(cooldown: Cooldown, name: ApiServiceName) {
     this.cooldown = cooldown;
     this.name = name;
+
+    if (name === ApiServiceName.SCORE_SABER) {
+      setInterval(() => {
+        if (this.lastRateLimitSeen && this.lastRateLimitSeen > 100) {
+          // Reset to no proxy
+          this.currentProxy = "";
+        }
+      }, 1000 * 30);
+    }
   }
 
   /**
@@ -69,8 +83,8 @@ export default class ApiService {
    * @param url the url to fetch
    * @returns the request url
    */
-  private buildRequestUrl(useProxy: boolean, url: string): string {
-    return (useProxy ? (isServer() ? this.currentProxy : CLIENT_PROXY) : "") + url;
+  private buildRequestUrl(url: string): string {
+    return (isServer() ? this.currentProxy : CLIENT_PROXY) + url;
   }
 
   /**
@@ -91,22 +105,24 @@ export default class ApiService {
       this.callCount++;
     }
 
-    Logger.debug(`Fetching ${url} with proxy: ${this.buildRequestUrl(!isServer(), url)}`);
-    const response = await Request.executeRequest(this.buildRequestUrl(!isServer(), url), "GET", {
+    const response = await Request.executeRequest(this.buildRequestUrl(url), "GET", {
       ...options,
     });
 
-    if (
-      response?.headers.get("x-ratelimit-remaining") &&
-      Number(response.headers.get("x-ratelimit-remaining")) <= 10 &&
-      isServer() // Only switch proxies on the server
-    ) {
-      // Get the next proxy in the list
-      const nextProxy = SERVER_PROXIES[SERVER_PROXIES.indexOf(this.currentProxy) + 1];
-      if (nextProxy) {
-        this.currentProxy = nextProxy;
-        this.log(`Rate limit exceeded, switching to proxy: ${nextProxy}`);
+    // Only switch proxies on the server
+    const remaining = response?.headers.get("x-ratelimit-remaining");
+    if (isServer()) {
+      if (remaining && Number(remaining) <= 10) {
+        // Get the next proxy in the list
+        const nextProxy = SERVER_PROXIES[SERVER_PROXIES.indexOf(this.currentProxy) + 1];
+        if (nextProxy) {
+          this.currentProxy = nextProxy;
+          this.log(`Rate limit exceeded, switching to proxy: ${nextProxy}`);
+        }
       }
+
+      // Update the last rate limit seen
+      this.lastRateLimitSeen = Number(remaining);
     }
 
     return response?.json() as Promise<T>;
