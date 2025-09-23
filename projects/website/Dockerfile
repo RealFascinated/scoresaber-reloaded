@@ -18,8 +18,8 @@ COPY projects/common/package.json ./projects/common/
 COPY projects/website/package.json ./projects/website/
 COPY projects/backend/package.json ./projects/backend/
 
-# Install only production dependencies for the specific packages
-RUN bun install --frozen-lockfile --production --filter '@ssr/common' --filter 'website'
+# Install dependencies for the specific packages (including dev dependencies for build)
+RUN bun install --frozen-lockfile --filter '@ssr/common' --filter 'website'
 
 # Copy source code after dependencies are installed
 COPY projects/common ./projects/common
