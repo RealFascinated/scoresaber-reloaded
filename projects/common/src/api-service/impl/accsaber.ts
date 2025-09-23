@@ -52,7 +52,11 @@ export type AccSaberScoreType = "overall" | "true" | "tech" | "speed";
 
 export class AccSaberService extends ApiService {
   constructor() {
-    super(new Cooldown(60_000 / 300, 150), ApiServiceName.ACCSABER);
+    super(new Cooldown(60_000 / 300, 150), ApiServiceName.ACCSABER, {
+      useProxy: true,
+      proxySwitchThreshold: 10,
+      proxyResetThreshold: 100,
+    });
   }
 
   public async checkPlayerExists(playerId: string): Promise<boolean> {

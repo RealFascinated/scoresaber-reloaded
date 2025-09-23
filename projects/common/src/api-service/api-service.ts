@@ -4,12 +4,18 @@ import Request, { RequestOptions } from "../utils/request";
 import { isServer } from "../utils/utils";
 import { ApiServiceName } from "./api-service-registry";
 
+export interface ServiceConfig {
+  useProxy: boolean;
+  proxySwitchThreshold: number;
+  proxyResetThreshold: number;
+}
+
 export const SERVER_PROXIES = [
   "", // No proxy
-  "https://proxy.fascinated.cc",
-  "https://proxy-3.fascinated.cc",
+  "https://proxy.fascinated.cc/",
+  "https://proxy-3.fascinated.cc/",
 ];
-export const CLIENT_PROXY = "https://proxy.fascinated.cc";
+export const CLIENT_PROXY = "https://proxy.fascinated.cc/";
 
 export default class ApiService {
   /**
@@ -21,6 +27,11 @@ export default class ApiService {
    * The name of the service.
    */
   private readonly name: ApiServiceName;
+
+  /**
+   * The configuration for the service.
+   */
+  private readonly config: ServiceConfig;
 
   /**
    * The number of times this service has been called.
@@ -38,15 +49,17 @@ export default class ApiService {
    */
   private lastRateLimitSeen: number | undefined = undefined;
 
-  constructor(cooldown: Cooldown, name: ApiServiceName) {
+  constructor(cooldown: Cooldown, name: ApiServiceName, config: ServiceConfig) {
     this.cooldown = cooldown;
     this.name = name;
+    this.config = config;
 
-    if (name === ApiServiceName.SCORE_SABER) {
+    if (config.useProxy) {
       setInterval(() => {
-        if (this.lastRateLimitSeen && this.lastRateLimitSeen > 100) {
+        if (this.lastRateLimitSeen && this.lastRateLimitSeen > config.proxyResetThreshold) {
           // Reset to no proxy
           this.currentProxy = "";
+          Logger.info("Switched back to no proxy for api service requests");
         }
       }, 1000 * 30);
     }
@@ -80,12 +93,11 @@ export default class ApiService {
   /**
    * Builds a request url.
    *
-   * @param useProxy whether to use proxy or not
    * @param url the url to fetch
    * @returns the request url
    */
   private buildRequestUrl(url: string): string {
-    return (isServer() ? this.currentProxy : CLIENT_PROXY) + url;
+    return (isServer() ? (this.config.useProxy ? this.currentProxy : "") : CLIENT_PROXY) + url;
   }
 
   /**
@@ -112,13 +124,13 @@ export default class ApiService {
 
     // Only switch proxies on the server
     const remaining = response?.headers.get("x-ratelimit-remaining");
-    if (isServer()) {
-      if (remaining && Number(remaining) <= 10) {
+    if (isServer() && this.config.useProxy) {
+      if (remaining && Number(remaining) <= this.config.proxySwitchThreshold) {
         // Get the next proxy in the list
         const nextProxy = SERVER_PROXIES[SERVER_PROXIES.indexOf(this.currentProxy) + 1];
         if (nextProxy) {
           this.currentProxy = nextProxy;
-          this.log(`Rate limit exceeded, switching to proxy: ${nextProxy}`);
+          this.log(`Rate limit exceeded, switching to another proxy for api service: ${nextProxy}`);
         }
       }
 

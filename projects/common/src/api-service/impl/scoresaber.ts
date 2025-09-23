@@ -57,7 +57,12 @@ export class ScoreSaberService extends ApiService {
         cooldownRequestsPerMinute(BACKGROUND_RATE_LIMIT),
         BACKGROUND_RATE_LIMIT
       ),
-      ApiServiceName.SCORE_SABER
+      ApiServiceName.SCORE_SABER,
+      {
+        useProxy: true,
+        proxySwitchThreshold: 10,
+        proxyResetThreshold: 100,
+      }
     );
   }
 

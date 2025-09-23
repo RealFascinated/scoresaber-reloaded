@@ -9,7 +9,11 @@ const LOOKUP_MAP_BY_HASH_ENDPOINT = `${API_BASE}/maps/hash/:query`;
 
 export class BeatSaverService extends ApiService {
   constructor() {
-    super(new Cooldown(60_000 / 300, 150), ApiServiceName.BEAT_SAVER);
+    super(new Cooldown(60_000 / 300, 150), ApiServiceName.BEAT_SAVER, {
+      useProxy: true,
+      proxySwitchThreshold: 10,
+      proxyResetThreshold: 100,
+    });
   }
 
   /**

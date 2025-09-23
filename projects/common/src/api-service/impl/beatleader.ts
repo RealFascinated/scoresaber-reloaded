@@ -7,7 +7,11 @@ const LOOKUP_MAP_STATS_BY_SCORE_ID_ENDPOINT = `https://cdn.scorestats.beatleader
 
 export class BeatLeaderService extends ApiService {
   constructor() {
-    super(new Cooldown(60_000 / 300, 150), ApiServiceName.BEAT_LEADER);
+    super(new Cooldown(60_000 / 300, 150), ApiServiceName.BEAT_LEADER, {
+      useProxy: true,
+      proxySwitchThreshold: 10,
+      proxyResetThreshold: 100,
+    });
   }
 
   /**
