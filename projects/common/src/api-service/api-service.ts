@@ -56,7 +56,11 @@ export default class ApiService {
 
     if (config.useProxy) {
       setInterval(() => {
-        if (this.lastRateLimitSeen && this.lastRateLimitSeen > config.proxyResetThreshold) {
+        if (
+          this.lastRateLimitSeen &&
+          this.lastRateLimitSeen > config.proxyResetThreshold &&
+          this.currentProxy !== "" // Already not using a proxy
+        ) {
           // Reset to no proxy
           this.currentProxy = "";
           Logger.info("Switched back to no proxy for api service requests");
@@ -126,12 +130,12 @@ export default class ApiService {
     const remaining = response?.headers.get("x-ratelimit-remaining");
     if (isServer() && this.config.useProxy) {
       if (remaining && Number(remaining) <= this.config.proxySwitchThreshold) {
-        // Get the next proxy in the list
-        const nextProxy = SERVER_PROXIES[SERVER_PROXIES.indexOf(this.currentProxy) + 1];
-        if (nextProxy) {
-          this.currentProxy = nextProxy;
-          this.log(`Rate limit exceeded, switching to another proxy for api service: ${nextProxy}`);
-        }
+        // Get the next proxy in the list (circular)
+        const currentIndex = SERVER_PROXIES.indexOf(this.currentProxy);
+        const nextIndex = (currentIndex + 1) % SERVER_PROXIES.length;
+        const nextProxy = SERVER_PROXIES[nextIndex];
+        this.currentProxy = nextProxy;
+        this.log(`Rate limit exceeded, switching to another proxy for api service: ${nextProxy}`);
       }
 
       // Update the last rate limit seen
