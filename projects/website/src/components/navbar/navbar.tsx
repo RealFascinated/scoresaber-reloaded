@@ -4,7 +4,9 @@ import { cn } from "@/common/utils";
 import FriendsButton from "@/components/friend/friends-button";
 import PlayerAndLeaderboardSearch from "@/components/navbar/player-and-leaderboard-search";
 import ProfileButton from "@/components/navbar/profile-button";
+import useDatabase from "@/hooks/use-database";
 import { CubeIcon } from "@heroicons/react/24/solid";
+import { useLiveQuery } from "dexie-react-hooks";
 import { MusicIcon, TrendingUpIcon, TrophyIcon } from "lucide-react";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -12,8 +14,6 @@ import { ReactElement } from "react";
 import { FaMedal } from "react-icons/fa";
 import Settings from "../settings/settings";
 import SimpleLink from "../simple-link";
-import useDatabase from "@/hooks/use-database";
-import { useLiveQuery } from "dexie-react-hooks";
 
 const links: ReactElement<any>[] = [
   <FriendsButton key="friends" />,
@@ -115,9 +115,7 @@ export default function Navbar() {
         </div>
 
         {/* Profile Section */}
-        {hasMainPlayer && ( 
-          <ProfileButton />
-        )}
+        {hasMainPlayer && <ProfileButton />}
       </div>
     </nav>
   );

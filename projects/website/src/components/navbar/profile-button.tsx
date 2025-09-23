@@ -28,7 +28,7 @@ export default function ProfileButton() {
             className="ring-border/50 h-6 w-6 rounded-full ring-1"
             alt={`${mainPlayer.name}'s Profile Picture`}
           />
-          <p className="text-primary hidden text-sm font-medium lg:block hover:text-primary/70 transition-all">
+          <p className="text-primary hover:text-primary/70 hidden text-sm font-medium transition-all lg:block">
             {truncateText(mainPlayer.name, 20)}
           </p>
         </div>
