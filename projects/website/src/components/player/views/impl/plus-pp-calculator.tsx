@@ -235,7 +235,7 @@ export default function PlusPpCalculator({ player }: { player: ScoreSaberPlayer 
             <div className="flex items-center justify-between">
               <Label className="text-sm font-medium">
                 Accuracy:{" "}
-                <span className="font-semibold text-green-400">{accuracy.toFixed(1)}%</span>
+                <span className="font-semibold text-green-400">{accuracy.toFixed(2)}%</span>
               </Label>
               <SimpleTooltip display={<p>Save current accuracy as your default</p>}>
                 <button
@@ -254,7 +254,7 @@ export default function PlusPpCalculator({ player }: { player: ScoreSaberPlayer 
               onValueChange={([value]) => value !== undefined && handleAccuracyChange(value)}
               max={100}
               min={70}
-              step={0.1}
+              step={0.01}
               className="w-full"
             />
           </div>
