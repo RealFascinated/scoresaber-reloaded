@@ -45,8 +45,8 @@ const SEARCH_LEADERBOARDS_ENDPOINT = `${API_BASE}/leaderboards?search=:query`;
  */
 const RANKING_REQUESTS_ENDPOINT = `${API_BASE}/ranking/requests/:query`;
 
-const FOREGROUND_RATE_LIMIT = 250 * SERVER_PROXIES.length;
-const BACKGROUND_RATE_LIMIT = 150 * SERVER_PROXIES.length;
+const FOREGROUND_RATE_LIMIT = 200 * SERVER_PROXIES.length;
+const BACKGROUND_RATE_LIMIT = 200 * SERVER_PROXIES.length;
 
 export class ScoreSaberService extends ApiService {
   constructor() {
