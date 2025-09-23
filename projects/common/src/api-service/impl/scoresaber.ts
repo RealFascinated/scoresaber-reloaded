@@ -15,7 +15,7 @@ import { ScoreSaberPlayersPageToken } from "../../types/token/scoresaber/players
 import RankingRequestToken from "../../types/token/scoresaber/ranking-request-token";
 import { getDifficulty } from "../../utils/song-utils";
 import { formatDuration } from "../../utils/time-utils";
-import ApiService from "../api-service";
+import ApiService, { SERVER_PROXIES } from "../api-service";
 import { ApiServiceName } from "../api-service-registry";
 
 const API_BASE = "https://scoresaber.com/api";
@@ -45,10 +45,18 @@ const SEARCH_LEADERBOARDS_ENDPOINT = `${API_BASE}/leaderboards?search=:query`;
  */
 const RANKING_REQUESTS_ENDPOINT = `${API_BASE}/ranking/requests/:query`;
 
+const FOREGROUND_RATE_LIMIT = 250 * SERVER_PROXIES.length;
+const BACKGROUND_RATE_LIMIT = 150 * SERVER_PROXIES.length;
+
 export class ScoreSaberService extends ApiService {
   constructor() {
     super(
-      new Cooldown(cooldownRequestsPerMinute(250), 250, cooldownRequestsPerMinute(150), 150),
+      new Cooldown(
+        cooldownRequestsPerMinute(FOREGROUND_RATE_LIMIT),
+        FOREGROUND_RATE_LIMIT,
+        cooldownRequestsPerMinute(BACKGROUND_RATE_LIMIT),
+        BACKGROUND_RATE_LIMIT
+      ),
       ApiServiceName.SCORE_SABER
     );
   }

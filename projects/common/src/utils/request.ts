@@ -34,11 +34,7 @@ class Request {
     return `${baseUrl}?${params.toString()}`;
   }
 
-  private static async handleRateLimit(
-    url: string,
-    response: Response,
-    priority: CooldownPriority
-  ): Promise<void> {
+  private static async handleRateLimit(url: string, response: Response): Promise<void> {
     const rateLimit = response.headers.get("x-ratelimit-remaining");
     const resetTime = response.headers.get("x-ratelimit-reset");
 
@@ -72,7 +68,7 @@ class Request {
     url: string,
     method: string,
     options?: RequestOptions
-  ): Promise<T | undefined> {
+  ): Promise<Response | undefined> {
     const {
       searchParams,
       returns = "json",
@@ -86,7 +82,7 @@ class Request {
     // Check if there's a pending request for this URL
     const pendingRequest = this.pendingRequests.get(cacheKey);
     if (pendingRequest) {
-      return pendingRequest as Promise<T | undefined>;
+      return pendingRequest as Promise<Response | undefined>;
     }
 
     // Create new request
@@ -98,7 +94,7 @@ class Request {
         });
 
         // Handle rate limits
-        await this.handleRateLimit(url, response, priority);
+        await this.handleRateLimit(url, response);
 
         if (!response.ok) {
           if (throwOnError) {
@@ -107,16 +103,7 @@ class Request {
           return undefined;
         }
 
-        switch (returns) {
-          case "text":
-            return response.text() as Promise<T>;
-          case "json":
-            return response.json() as Promise<T>;
-          case "arraybuffer":
-            return response.arrayBuffer() as Promise<T>;
-          default:
-            return response.json() as Promise<T>;
-        }
+        return response;
       } finally {
         this.pendingRequests.delete(cacheKey);
       }
@@ -126,20 +113,54 @@ class Request {
     return requestPromise;
   }
 
+  /**
+   * Handles the response from the request.
+   *
+   * @param response the response from the request
+   * @param returns the returns type
+   * @returns the response
+   */
+  private static handleResponse<T>(
+    response: Response | undefined,
+    returns: RequestReturns
+  ): Promise<T | undefined> {
+    if (!response) {
+      return Promise.resolve(undefined);
+    }
+    switch (returns) {
+      case "text":
+        return response.text() as Promise<T>;
+      case "json":
+        return response.json() as Promise<T>;
+      case "arraybuffer":
+        return response.arrayBuffer() as Promise<T>;
+      default:
+        return response.json() as Promise<T>;
+    }
+  }
+
   public static async get<T>(url: string, options?: RequestOptions): Promise<T | undefined> {
-    return this.executeRequest<T>(url, "GET", options);
+    return this.executeRequest<T>(url, "GET", options).then(response =>
+      this.handleResponse<T>(response ? response.clone() : undefined, options?.returns || "json")
+    );
   }
 
   public static async post<T>(url: string, options?: RequestOptions): Promise<T | undefined> {
-    return this.executeRequest<T>(url, "POST", options);
+    return this.executeRequest<T>(url, "POST", options).then(response =>
+      this.handleResponse<T>(response ? response.clone() : undefined, options?.returns || "json")
+    );
   }
 
   public static async put<T>(url: string, options?: RequestOptions): Promise<T | undefined> {
-    return this.executeRequest<T>(url, "PUT", options);
+    return this.executeRequest<T>(url, "PUT", options).then(response =>
+      this.handleResponse<T>(response ? response.clone() : undefined, options?.returns || "json")
+    );
   }
 
   public static async delete<T>(url: string, options?: RequestOptions): Promise<T | undefined> {
-    return this.executeRequest<T>(url, "DELETE", options);
+    return this.executeRequest<T>(url, "DELETE", options).then(response =>
+      this.handleResponse<T>(response ? response.clone() : undefined, options?.returns || "json")
+    );
   }
 }
 

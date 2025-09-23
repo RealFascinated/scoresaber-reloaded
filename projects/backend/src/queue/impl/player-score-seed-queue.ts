@@ -16,6 +16,10 @@ export class PlayerScoreSeedQueue extends Queue<QueueItem<string>> {
 
     setImmediate(async () => {
       try {
+        // If there are already items in the queue, don't add more
+        if ((await this.getSize()) !== 0) {
+          return;
+        }
         const players = await PlayerModel.find({ seededScores: { $in: [null, false] } })
           .select("_id")
           .lean();

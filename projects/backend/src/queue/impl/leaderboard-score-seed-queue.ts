@@ -41,7 +41,7 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
 
     let currentPage = 1;
     let hasMoreScores = true;
-		let consecutiveFailures = 0;
+    let consecutiveFailures = 0;
     let processedAnyScores = false;
     while (hasMoreScores) {
       const response = await ApiServiceRegistry.getInstance()

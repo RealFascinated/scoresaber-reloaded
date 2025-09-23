@@ -4,6 +4,13 @@ import Request, { RequestOptions } from "../utils/request";
 import { isServer } from "../utils/utils";
 import { ApiServiceName } from "./api-service-registry";
 
+export const SERVER_PROXIES = [
+  "", // No proxy
+  "https://proxy.fascinated.cc",
+  "https://proxy-2.fascinated.cc",
+];
+export const CLIENT_PROXY = "https://proxy.fascinated.cc";
+
 export default class ApiService {
   /**
    * The cooldown for the service.
@@ -20,6 +27,11 @@ export default class ApiService {
    * Only tracked on the server.
    */
   private callCount: number = 0;
+
+  /**
+   * The current proxy to use.
+   */
+  private currentProxy: string = ""; // No proxy by default
 
   constructor(cooldown: Cooldown, name: ApiServiceName) {
     this.cooldown = cooldown;
@@ -59,7 +71,7 @@ export default class ApiService {
    * @returns the request url
    */
   private buildRequestUrl(useProxy: boolean, url: string): string {
-    return (useProxy ? "https://proxy.fascinated.cc/" : "") + url;
+    return (useProxy ? (isServer() ? this.currentProxy : CLIENT_PROXY) : "") + url;
   }
 
   /**
@@ -80,10 +92,25 @@ export default class ApiService {
       this.callCount++;
     }
 
-    return Request.get<T>(this.buildRequestUrl(!isServer(), url), {
-      returns: "json",
+    Logger.debug(`Fetching ${url} with proxy: ${this.buildRequestUrl(!isServer(), url)}`);
+    const response = await Request.executeRequest(this.buildRequestUrl(!isServer(), url), "GET", {
       ...options,
     });
+
+    if (
+      response?.headers.get("x-ratelimit-remaining") &&
+      Number(response.headers.get("x-ratelimit-remaining")) <= 10 &&
+      isServer() // Only switch proxies on the server
+    ) {
+      // Get the next proxy in the list
+      const nextProxy = SERVER_PROXIES[SERVER_PROXIES.indexOf(this.currentProxy) + 1];
+      if (nextProxy) {
+        this.currentProxy = nextProxy;
+        this.log(`Rate limit exceeded, switching to proxy: ${nextProxy}`);
+      }
+    }
+
+    return response?.json() as Promise<T>;
   }
 
   /**
@@ -123,5 +150,14 @@ export default class ApiService {
     });
 
     return response.json() as Promise<T>;
+  }
+
+  /**
+   * Gets the total number of server proxies.
+   *
+   * @returns the total number of server proxies
+   */
+  public static getTotalServerProxies(): number {
+    return SERVER_PROXIES.length;
   }
 }
