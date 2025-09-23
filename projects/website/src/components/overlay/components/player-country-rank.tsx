@@ -16,13 +16,12 @@ export default function OverlayPlayerCountryRank({ player }: OverlayPlayerRankPr
   const { countryRank, country } = player;
 
   return (
-    <div className="flex min-h-[24px] items-center gap-3">
-      <div className="flex h-6 items-center gap-2">
-        <div className="flex w-[40px] items-center justify-center">
-          <CountryFlag code={country} size={20} />
+    <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3">
+        <div className="flex w-6 justify-center">
+          <CountryFlag code={country} size={12} />
         </div>
-        <div className="h-full w-[1px] bg-white" />
-        <p className={cn(getRankColor(countryRank), "font-semibold")}>
+        <p className={cn(getRankColor(countryRank), "text-2xl font-bold")}>
           #{formatNumberWithCommas(countryRank)}
         </p>
       </div>
