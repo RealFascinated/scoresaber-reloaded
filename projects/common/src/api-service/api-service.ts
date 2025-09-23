@@ -7,7 +7,6 @@ import { ApiServiceName } from "./api-service-registry";
 export const SERVER_PROXIES = [
   "", // No proxy
   "https://proxy.fascinated.cc",
-  "https://proxy-2.fascinated.cc",
 ];
 export const CLIENT_PROXY = "https://proxy.fascinated.cc";
 

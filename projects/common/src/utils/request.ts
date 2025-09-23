@@ -64,7 +64,7 @@ class Request {
     }
   }
 
-  private static async executeRequest<T>(
+  public static async executeRequest<T>(
     url: string,
     method: string,
     options?: RequestOptions
@@ -170,4 +170,5 @@ export default {
   post: Request.post.bind(Request),
   put: Request.put.bind(Request),
   delete: Request.delete.bind(Request),
+  executeRequest: Request.executeRequest.bind(Request),
 };
