@@ -11,11 +11,21 @@ ENV SOURCE_COMMIT=${SOURCE_COMMIT}
 # Install dependencies
 FROM base AS depends
 WORKDIR /app
-COPY . .
-RUN bun install --frozen-lockfile --filter '@ssr/common' --filter 'website' --filter './'
+
+# Copy workspace structure needed for dependency resolution
+COPY package.json bun.lock ./
+COPY projects/common/package.json ./projects/common/
+COPY projects/website/package.json ./projects/website/
+COPY projects/backend/package.json ./projects/backend/
+
+# Install only production dependencies for the specific packages
+RUN bun install --frozen-lockfile --production --filter '@ssr/common' --filter 'website'
+
+# Copy source code after dependencies are installed
+COPY projects/common ./projects/common
+COPY projects/website ./projects/website
 
 # Build the common library
-RUN bun i -g typescript
 RUN bun --filter '@ssr/common' build
 
 # Build the website
@@ -31,7 +41,7 @@ RUN apk add --no-cache curl
 
 COPY --from=depends /app/node_modules ./node_modules
 
-# Copy the built files
+# Copy the built filesf
 COPY --from=depends /app/projects/website/public ./public
 COPY --from=depends /app/projects/website/.next/standalone/projects/website/ ./
 COPY --from=depends /app/projects/website/.next/static ./.next/static
