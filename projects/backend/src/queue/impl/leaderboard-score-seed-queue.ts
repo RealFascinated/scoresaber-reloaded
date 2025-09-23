@@ -67,10 +67,10 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
       const totalPages = Math.ceil(response.metadata.total / response.metadata.itemsPerPage);
       consecutiveFailures = 0;
 
-      // Log every 10 pages
-      if (currentPage % 10 === 0) {
+      // Log every 10 pages, the first page, and the last page
+      if (currentPage % 10 === 0 || currentPage === 1 || currentPage === totalPages) {
         Logger.info(
-          `Fetched ${response.scores.length} scores for leaderboard "${leaderboardId}" on page ${currentPage}/${totalPages}`
+          `Fetched scores for leaderboard "${leaderboardId}" on page ${currentPage}/${totalPages}`
         );
       }
 
