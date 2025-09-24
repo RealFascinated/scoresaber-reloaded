@@ -101,7 +101,8 @@ class Request {
           return undefined;
         }
 
-        return response;
+        // Clone the response to avoid body consumption issues
+        return response.clone();
       } finally {
         this.pendingRequests.delete(cacheKey);
       }
