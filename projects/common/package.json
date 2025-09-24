@@ -15,7 +15,7 @@
     }
   },
   "devDependencies": {
-    "@types/node": "^24.5.0",
+    "@types/node": "^24.5.2",
     "@types/sanitize-html": "^2.16.0",
     "@types/ws": "^8.18.1",
     "typescript": "^5.9.2"
@@ -31,6 +31,6 @@
     "sanitize-html": "^2.17.0",
     "superjson": "^2.2.2",
     "ws": "^8.18.3",
-    "zod": "^4.1.8"
+    "zod": "^4.1.11"
   }
 }
