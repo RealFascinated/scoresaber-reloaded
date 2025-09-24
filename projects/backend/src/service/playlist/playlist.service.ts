@@ -20,6 +20,7 @@ import {
 import { LeaderboardService } from "../leaderboard/leaderboard.service";
 import { PlayerService } from "../player/player.service";
 import ScoreSaberService from "../scoresaber.service";
+import { DetailType } from "@ssr/common/detail-type";
 
 export type SnipeType = "top" | "recent";
 
@@ -377,7 +378,7 @@ export default class PlaylistService {
         });
 
       // Format the scores
-      const toSnipePlayer = await ScoreSaberService.getPlayer(toSnipe);
+      const toSnipePlayer = await ScoreSaberService.getPlayer(toSnipe, DetailType.BASIC, undefined, { setInactivesRank: false, setMedalsRank: false });
       const formattedScores = filteredScores
         .slice(0, settings.limit)
         .map(({ score, leaderboard }) => {

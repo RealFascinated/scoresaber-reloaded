@@ -482,7 +482,8 @@ export class PlayerScoresService {
         ? ScoreSaberService.getPlayer(
             comparisonPlayerId,
             DetailType.BASIC,
-            await ScoreSaberService.getCachedPlayer(comparisonPlayerId, true)
+            await ScoreSaberService.getCachedPlayer(comparisonPlayerId, true),
+            { setInactivesRank: false, setMedalsRank: false }
           )
         : undefined,
       requestedPage.playerScores.map(score => score.leaderboard.id + ""),

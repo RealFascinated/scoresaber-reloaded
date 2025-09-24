@@ -16,7 +16,7 @@ export default class MiniRankingService {
    * @param id the player to get around
    */
   public static async getPlayerMiniRankings(id: string): Promise<MiniRankingResponse> {
-    const player = await ScoreSaberService.getPlayer(id, DetailType.BASIC);
+    const player = await ScoreSaberService.getPlayer(id, DetailType.BASIC, undefined, { setInactivesRank: false, setMedalsRank: false });
     if (player == undefined) {
       throw new NotFoundError(`Player "${id}" not found`);
     }
@@ -114,7 +114,7 @@ export default class MiniRankingService {
     const allPlayers = pageResponses
       .filter((response): response is NonNullable<typeof response> => response !== undefined)
       .flatMap(response => response.players)
-      .map(async player => await ScoreSaberService.getPlayer(player.id, DetailType.BASIC, player));
+      .map(async player => await ScoreSaberService.getPlayer(player.id, DetailType.BASIC, player, { setInactivesRank: false, setMedalsRank: false }));
 
     return this.processPlayersAndBuildResult(allPlayers, player, type, getRank);
   }

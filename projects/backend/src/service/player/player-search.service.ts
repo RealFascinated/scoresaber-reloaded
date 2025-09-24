@@ -44,8 +44,9 @@ export class PlayerSearchService {
           ScoreSaberService.getPlayer(
             id,
             DetailType.BASIC,
-            scoreSaberPlayerTokens?.find(token => token.id === id)
-          )
+            scoreSaberPlayerTokens?.find(token => token.id === id),
+            { setInactivesRank: false, setMedalsRank: false }
+          ),
         )
       )
     ).sort((a, b) => {

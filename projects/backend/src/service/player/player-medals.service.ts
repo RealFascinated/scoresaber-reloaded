@@ -161,7 +161,7 @@ export class PlayerMedalsService {
               playerId,
               DetailType.BASIC,
               await ScoreSaberService.getCachedPlayer(playerId, true),
-              { setMedalsRank: false }
+              { setMedalsRank: false, setInactivesRank: false }
             );
 
             // Use pre-calculated rankings

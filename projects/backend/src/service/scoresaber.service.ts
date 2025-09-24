@@ -32,6 +32,7 @@ export default class ScoreSaberService {
     player?: ScoreSaberPlayerToken,
     options?: {
       setMedalsRank?: boolean;
+      setInactivesRank?: boolean;
     }
   ): Promise<ScoreSaberPlayer> {
     return CacheService.fetchWithCache(
@@ -47,7 +48,7 @@ export default class ScoreSaberService {
         const [account, medalsRank, globalRankIncludingInactives] = await Promise.all([
           PlayerService.getPlayer(id, player).catch(() => undefined),
           options?.setMedalsRank ? PlayerService.getPlayerMedalRank(id) : undefined,
-          PlayerService.getPlayerRankIncludingInactives(id),
+          options?.setInactivesRank ? PlayerService.getPlayerRankIncludingInactives(id) : undefined,
         ]);
 
         const isOculusAccount = player.id.length === 16;
