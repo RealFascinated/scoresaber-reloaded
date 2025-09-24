@@ -138,27 +138,23 @@ class Request {
   }
 
   public static async get<T>(url: string, options?: RequestOptions): Promise<T | undefined> {
-    return this.executeRequest<T>(url, "GET", options).then(response =>
-      this.handleResponse<T>(response ? response.clone() : undefined, options?.returns || "json")
-    );
+    const response = await this.executeRequest<T>(url, "GET", options);
+    return this.handleResponse<T>(response, options?.returns || "json");
   }
 
   public static async post<T>(url: string, options?: RequestOptions): Promise<T | undefined> {
-    return this.executeRequest<T>(url, "POST", options).then(response =>
-      this.handleResponse<T>(response ? response.clone() : undefined, options?.returns || "json")
-    );
+    const response = await this.executeRequest<T>(url, "POST", options);
+    return this.handleResponse<T>(response, options?.returns || "json");
   }
 
   public static async put<T>(url: string, options?: RequestOptions): Promise<T | undefined> {
-    return this.executeRequest<T>(url, "PUT", options).then(response =>
-      this.handleResponse<T>(response ? response.clone() : undefined, options?.returns || "json")
-    );
+    const response = await this.executeRequest<T>(url, "PUT", options);
+    return this.handleResponse<T>(response, options?.returns || "json");
   }
 
   public static async delete<T>(url: string, options?: RequestOptions): Promise<T | undefined> {
-    return this.executeRequest<T>(url, "DELETE", options).then(response =>
-      this.handleResponse<T>(response ? response.clone() : undefined, options?.returns || "json")
-    );
+    const response = await this.executeRequest<T>(url, "DELETE", options);
+    return this.handleResponse<T>(response, options?.returns || "json");
   }
 }
 
