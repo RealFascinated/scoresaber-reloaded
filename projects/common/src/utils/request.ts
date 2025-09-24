@@ -80,7 +80,9 @@ class Request {
     // Check if there's a pending request for this URL
     const pendingRequest = this.pendingRequests.get(cacheKey);
     if (pendingRequest) {
-      return pendingRequest as Promise<Response | undefined>;
+      const cachedResponse = await pendingRequest as Response | undefined;
+      // Clone the response for each consumer to avoid body consumption issues
+      return cachedResponse ? cachedResponse.clone() : undefined;
     }
 
     // Create new request
@@ -101,8 +103,7 @@ class Request {
           return undefined;
         }
 
-        // Clone the response to avoid body consumption issues
-        return response.clone();
+        return response;
       } finally {
         this.pendingRequests.delete(cacheKey);
       }
