@@ -113,10 +113,9 @@ export class PlayerMedalsService {
       .setItemsPerPage(50)
       .setTotalItems(totalPlayers);
 
-    // Run player processing and country metadata aggregation in parallel
     const [pageData, countryMetadata] = await Promise.all([
       pagination.getPage(page, async ({ start }) => {
-        // Use aggregation to get players sorted by medal count
+        // Get players sorted by medal count
         const players = await PlayerModel.aggregate([
           { $match: filter },
           // Sort by medals descending, then by _id ascending for consistent tiebreaking
@@ -129,6 +128,31 @@ export class PlayerMedalsService {
           return [];
         }
 
+        const [globalRankings, countryRankings] = await Promise.all([
+          // Global rankings for current page players
+          PlayerModel.aggregate([
+            { $match: { medals: { $gt: 0 } } },
+            { $sort: { medals: -1, _id: 1 } },
+            { $group: { _id: null, players: { $push: { id: "$_id", medals: "$medals" } } } },
+            { $unwind: { path: "$players", includeArrayIndex: "rank" } },
+            { $match: { "players.id": { $in: players.map(p => p._id) } } },
+            { $project: { playerId: "$players.id", globalRank: { $add: ["$rank", 1] } } }
+          ]),
+          // Country rankings for current page players
+          PlayerModel.aggregate([
+            { $match: { medals: { $gt: 0 }, country: { $in: [...new Set(players.map(p => p.country).filter(Boolean))] } } },
+            { $sort: { country: 1, medals: -1, _id: 1 } },
+            { $group: { _id: "$country", players: { $push: { id: "$_id", medals: "$medals" } } } },
+            { $unwind: { path: "$players", includeArrayIndex: "rank" } },
+            { $match: { "players.id": { $in: players.map(p => p._id) } } },
+            { $project: { playerId: "$players.id", country: "$_id", countryRank: { $add: ["$rank", 1] } } }
+          ])
+        ]);
+
+        // Create lookup maps
+        const globalRankMap = new Map(globalRankings.map(r => [r.playerId.toString(), r.globalRank]));
+        const countryRankMap = new Map(countryRankings.map(r => [r.playerId.toString(), r.countryRank]));
+
         const result = await Promise.all(
           players.map(async (player) => {
             const playerId = player._id.toString();
@@ -140,31 +164,9 @@ export class PlayerMedalsService {
               { setMedalsRank: false }
             );
 
-            // Calculate country rank
-            const isValidCountry = player.country && player.country.trim().length > 0;
-            if (isValidCountry) {
-              const countryRank = await PlayerModel.countDocuments({
-                country: player.country,
-                medals: { $gt: 0 },
-                $or: [
-                  { medals: { $gt: player.medals ?? 0 } },
-                  { $and: [{ medals: player.medals ?? 0 }, { _id: { $lt: player._id } }] },
-                ],
-              });
-              playerData.countryMedalsRank = countryRank + 1;
-            } else {
-              playerData.countryMedalsRank = 0;
-            }
-
-            // Calculate global rank
-            const globalRank = await PlayerModel.countDocuments({
-              medals: { $gt: 0 },
-              $or: [
-                { medals: { $gt: player.medals ?? 0 } },
-                { $and: [{ medals: player.medals ?? 0 }, { _id: { $lt: player._id } }] },
-              ],
-            });
-            playerData.medalsRank = globalRank + 1;
+            // Use pre-calculated rankings
+            playerData.medalsRank = globalRankMap.get(playerId) ?? 0;
+            playerData.countryMedalsRank = countryRankMap.get(playerId) ?? 0;
 
             return playerData;
           })
