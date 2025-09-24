@@ -45,6 +45,7 @@ import { ScoreService } from "./service/score/score.service";
 import StatisticsService from "./service/statistics.service";
 import { BeatSaverWebsocket } from "./websocket/beatsaver-websocket";
 import { ScoreWebsockets } from "./websocket/score-websockets";
+import { logger } from "@tqman/nice-logger";
 
 Logger.info("Starting SSR Backend...");
 
@@ -241,12 +242,12 @@ app.use(cors());
 /**
  * Request logger
  */
-// app.use(
-//   logger({
-//     enabled: true,
-//     mode: "combined",
-//   })
-// );
+app.use(
+  logger({
+    enabled: true,
+    mode: "combined",
+  })
+);
 
 /**
  * Security settings
