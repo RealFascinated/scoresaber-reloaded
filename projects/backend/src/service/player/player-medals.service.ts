@@ -129,36 +129,34 @@ export class PlayerMedalsService {
           return [];
         }
 
-        // Process players sequentially to avoid race conditions
-        const result: ScoreSaberPlayer[] = [];
-        for (let i = 0; i < players.length; i++) {
-          const player = players[i];
-          const playerId = player._id.toString();
+        const result = await Promise.all(
+          players.map(async (player) => {
+            const playerId = player._id.toString();
 
-          const playerData = await ScoreSaberService.getPlayer(
-            playerId,
-            DetailType.BASIC,
-            await ScoreSaberService.getCachedPlayer(playerId, true)
-          );
+            const playerData = await ScoreSaberService.getPlayer(
+              playerId,
+              DetailType.BASIC,
+              await ScoreSaberService.getCachedPlayer(playerId, true),
+              { setMedalsRank: false }
+            );
 
-          // Calculate country rank
-          const isValidCountry = player.country && player.country.trim().length > 0;
-          if (isValidCountry) {
-            const countryRank = await PlayerModel.countDocuments({
-              country: player.country,
-              medals: { $gt: 0 },
-              $or: [
-                { medals: { $gt: player.medals ?? 0 } },
-                { $and: [{ medals: player.medals ?? 0 }, { _id: { $lt: player._id } }] },
-              ],
-            });
-            playerData.countryMedalsRank = countryRank + 1;
-          } else {
-            playerData.countryMedalsRank = 0;
-          }
+            // Calculate country rank
+            const isValidCountry = player.country && player.country.trim().length > 0;
+            if (isValidCountry) {
+              const countryRank = await PlayerModel.countDocuments({
+                country: player.country,
+                medals: { $gt: 0 },
+                $or: [
+                  { medals: { $gt: player.medals ?? 0 } },
+                  { $and: [{ medals: player.medals ?? 0 }, { _id: { $lt: player._id } }] },
+                ],
+              });
+              playerData.countryMedalsRank = countryRank + 1;
+            } else {
+              playerData.countryMedalsRank = 0;
+            }
 
-          // Calculate global rank only when filtering by country
-          if (country) {
+            // Calculate global rank
             const globalRank = await PlayerModel.countDocuments({
               medals: { $gt: 0 },
               $or: [
@@ -167,13 +165,10 @@ export class PlayerMedalsService {
               ],
             });
             playerData.medalsRank = globalRank + 1;
-          } else {
-            // Use position in results for global mode
-            playerData.medalsRank = start + i + 1;
-          }
 
-          result.push(playerData);
-        }
+            return playerData;
+          })
+        );
 
         return result;
       }),

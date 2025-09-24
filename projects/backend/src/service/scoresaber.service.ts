@@ -29,7 +29,10 @@ export default class ScoreSaberService {
   public static async getPlayer(
     id: string,
     type: DetailType = DetailType.BASIC,
-    player?: ScoreSaberPlayerToken
+    player?: ScoreSaberPlayerToken,
+    options?: {
+      setMedalsRank?: boolean;
+    }
   ): Promise<ScoreSaberPlayer> {
     return CacheService.fetchWithCache(
       CacheId.ScoreSaber,
@@ -43,7 +46,7 @@ export default class ScoreSaberService {
         // Start fetching player token and account in parallel
         const [account, medalsRank, globalRankIncludingInactives] = await Promise.all([
           PlayerService.getPlayer(id, player).catch(() => undefined),
-          PlayerService.getPlayerMedalRank(id),
+          options?.setMedalsRank ? PlayerService.getPlayerMedalRank(id) : undefined,
           PlayerService.getPlayerRankIncludingInactives(id),
         ]);
 
