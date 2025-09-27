@@ -9,6 +9,12 @@ import { Queue, QueueItem } from "../queue";
 import { QueueId } from "../queue-manager";
 
 export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
+  /**
+   * The leaderboards that have failed to seed scores,
+   * they will be marked as seeded if they are re-added to the queue
+   */
+  failedLeaderboards: string[] = [];
+
   constructor() {
     super(QueueId.LeaderboardScoreSeedQueue, "fifo");
 
@@ -48,6 +54,7 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
           Logger.warn(
             `Aborting seeding for leaderboard "${leaderboardId}" after ${consecutiveFailures} consecutive failures at page ${currentPage}`
           );
+          this.failedLeaderboards.push(leaderboardId); // Add to failed leaderboards to prevent spamming
           break;
         }
         currentPage++;
@@ -82,7 +89,8 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
     }
 
     // Update the seeded scores status only if we processed at least one score and did not abort immediately
-    if (processedAnyScores) {
+    // or if the leaderboard has failed to seed scores and has been re-added to the queue
+    if (processedAnyScores || this.failedLeaderboards.includes(leaderboardId)) {
       await ScoreSaberLeaderboardModel.updateOne(
         { _id: leaderboardId },
         { $set: { seededScores: true } }
