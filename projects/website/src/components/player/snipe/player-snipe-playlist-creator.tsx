@@ -50,8 +50,8 @@ import {
   Trophy,
   XIcon,
 } from "lucide-react";
-import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useEffect, useMemo, useState } from "react";
+import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 import PlayerActionButtonWrapper from "../buttons/player-action-button-wrapper";
 
@@ -60,9 +60,9 @@ const DEFAULT_EXPANDED_SECTIONS = new Set(["basic", "filters"]);
 const SCORE_LIMIT_MIN = 25;
 const SCORE_LIMIT_MAX = 250;
 const SCORE_LIMIT_STEP = 25;
-const ACCURACY_MIN = 0;
+const ACCURACY_MIN = 70;
 const ACCURACY_MAX = 100;
-const ACCURACY_STEP = 1;
+const ACCURACY_STEP = 0.1;
 const STAR_STEP = 1;
 
 const SORT_OPTIONS = {
@@ -148,14 +148,12 @@ export default function SnipePlaylistCreator({ toSnipe }: SnipePlaylistCreatorPr
     },
   });
 
-  // Watch form values
-  const formValues = form.watch();
-  const rankedStatus = form.watch("rankedStatus");
-  const currentSort = form.watch("sort");
-  const currentSortDirection = form.watch("sortDirection");
+  const rankedStatus = useWatch({ control: form.control, name: "rankedStatus" });
+  const currentSort = useWatch({ control: form.control, name: "sort" });
+  const currentSortDirection = useWatch({ control: form.control, name: "sortDirection" });
 
   // Get available sort options based on ranked status
-  const getAvailableSortOptions = () => {
+  const availableSortOptions = useMemo(() => {
     const baseOptions = Object.entries(SORT_OPTIONS).map(([value, option]) => ({
       value: value as SortOption,
       ...option,
@@ -167,63 +165,54 @@ export default function SnipePlaylistCreator({ toSnipe }: SnipePlaylistCreatorPr
     }
 
     return baseOptions;
-  };
-
-  const availableSortOptions = getAvailableSortOptions();
+  }, [rankedStatus]);
 
   const handleSortChange = (sortValue: SortOption, direction?: "asc" | "desc") => {
     const sortOption = SORT_OPTIONS[sortValue];
-    if (sortOption) {
-      form.setValue("sort", sortValue);
+    if (!sortOption) {
+      return;
+    }
 
-      // Toggle direction if same sort option, otherwise use default or provided direction
-      if (currentSort === sortValue) {
-        const newDirection = currentSortDirection === "desc" ? "asc" : "desc";
-        form.setValue("sortDirection", newDirection);
-      } else {
-        form.setValue("sortDirection", direction || sortOption.defaultOrder);
-      }
+    form.setValue("sort", sortValue);
+
+    // Toggle direction if same sort option, otherwise use default or provided direction
+    if (currentSort === sortValue) {
+      const newDirection = currentSortDirection === "desc" ? "asc" : "desc";
+      form.setValue("sortDirection", newDirection);
+    } else {
+      form.setValue("sortDirection", direction || sortOption.defaultOrder);
     }
   };
 
   const generateFilename = (data: z.infer<typeof snipeSettingsSchema>) => {
-    const scoreType =
-      data.rankedStatus === "all"
-        ? "all"
-        : data.rankedStatus === "ranked"
-          ? "ranked-only"
-          : "unranked-only";
+    const scoreType = data.rankedStatus === "all" ? "all" : data.rankedStatus === "ranked" ? "ranked-only" : "unranked-only";
 
-    const starRange =
-      data.rankedStatus === "ranked" && data.starRange
-        ? `-${data.starRange.min}-${data.starRange.max}⭐`
-        : "";
+    const starRange = data.rankedStatus === "ranked" && data.starRange
+      ? `-${data.starRange.min}-${data.starRange.max}⭐` : "";
 
     const accRange = `-${data.accuracyRange.min}-${data.accuracyRange.max}%`;
     const sortInfo = `${data.sort}-${data.sortDirection}`;
 
-    return `ssr-snipe-${toSnipe.id}-${scoreType}${starRange}${accRange}-${sortInfo}-${data.limit}scores.bplist`;
+    return `ssr-snipe-${toSnipe.id}-${scoreType}${starRange}${accRange}-${sortInfo}.bplist`;
   };
 
   const handleSubmit = async (data: z.infer<typeof snipeSettingsSchema>) => {
-    const encodedData = encodeSnipePlaylistSettings(data);
     setDownloading(true);
+    try {
+      const encodedData = encodeSnipePlaylistSettings(data);
+      const filename = generateFilename(data);
+      const downloadUrl = `${env.NEXT_PUBLIC_API_URL}/playlist/snipe?user=${playerId}&toSnipe=${toSnipe.id}&settings=${encodedData}`;
 
-    const filename = generateFilename(data);
-    const downloadUrl = `${env.NEXT_PUBLIC_API_URL}/playlist/snipe?user=${playerId}&toSnipe=${toSnipe.id}&settings=${encodedData}`;
-
-    await downloadFile(downloadUrl, filename);
-    setDownloading(false);
+      await downloadFile(downloadUrl, filename);
+    } finally {
+      setDownloading(false);
+    }
   };
 
   const toggleSection = (section: string) => {
     setExpandedSections(prev => {
       const newExpanded = new Set(prev);
-      if (newExpanded.has(section)) {
-        newExpanded.delete(section);
-      } else {
-        newExpanded.add(section);
-      }
+      newExpanded.has(section) ? newExpanded.delete(section) : newExpanded.add(section);
       return newExpanded;
     });
   };
@@ -242,6 +231,7 @@ export default function SnipePlaylistCreator({ toSnipe }: SnipePlaylistCreatorPr
   }
 
   const currentSortOption = SORT_OPTIONS[currentSort];
+  const formValues = form.getValues();
   const previewUrl = `${env.NEXT_PUBLIC_API_URL}/playlist/snipe/preview?toSnipe=${toSnipe.id}&settings=${encodeSnipePlaylistSettings(formValues)}`;
 
   return (
@@ -301,24 +291,29 @@ export default function SnipePlaylistCreator({ toSnipe }: SnipePlaylistCreatorPr
                       <FormLabel className="text-sm">Sort By</FormLabel>
                       <FormControl>
                         <ButtonGroup>
-                          {availableSortOptions.map(option => (
-                            <ControlButton
-                              key={option.value}
-                              isActive={option.value === currentSort}
-                              onClick={() => handleSortChange(option.value)}
-                            >
-                              {option.value === currentSort ? (
-                                currentSortDirection === "desc" ? (
-                                  <ArrowDown className="h-4 w-4" />
+                          {availableSortOptions.map(option => {
+                            const currentFormSort = form.getValues("sort");
+                            const currentFormDirection = form.getValues("sortDirection");
+                            return (
+                              <ControlButton
+                                key={option.value}
+                                isActive={option.value === currentFormSort}
+                                onClick={() => handleSortChange(option.value)}
+                                type="button"
+                              >
+                                {option.value === currentFormSort ? (
+                                  currentFormDirection === "desc" ? (
+                                    <ArrowDown className="h-4 w-4" />
+                                  ) : (
+                                    <ArrowUp className="h-4 w-4" />
+                                  )
                                 ) : (
-                                  <ArrowUp className="h-4 w-4" />
-                                )
-                              ) : (
-                                option.icon
-                              )}
-                              {option.name}
-                            </ControlButton>
-                          ))}
+                                  option.icon
+                                )}
+                                {option.name}
+                              </ControlButton>
+                            );
+                          })}
                         </ButtonGroup>
                       </FormControl>
                     </FormItem>
@@ -385,7 +380,7 @@ export default function SnipePlaylistCreator({ toSnipe }: SnipePlaylistCreatorPr
                   )}
                 />
 
-                <div className="grid grid-cols-2 gap-6">
+                <div className={`grid gap-6 ${rankedStatus === "ranked" ? "grid-cols-2" : "grid-cols-1"}`}>
                   {rankedStatus === "ranked" && (
                     <FormField
                       control={form.control}

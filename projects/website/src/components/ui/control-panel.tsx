@@ -79,10 +79,10 @@ interface ControlButtonProps {
   children: ReactNode;
   isActive: boolean;
   onClick: () => void;
-  className?: string;
+  type?: "button" | "submit" | "reset";
 }
 
-export function ControlButton({ children, isActive, onClick, className = "" }: ControlButtonProps) {
+export function ControlButton({ children, isActive, onClick, type = "button", ...props }: ControlButtonProps) {
   return (
     <button
       className={cn(
@@ -92,6 +92,8 @@ export function ControlButton({ children, isActive, onClick, className = "" }: C
           : "bg-background text-muted-foreground border-border hover:bg-muted"
       )}
       onClick={onClick}
+      type={type}
+      {...props}
     >
       {children}
     </button>
