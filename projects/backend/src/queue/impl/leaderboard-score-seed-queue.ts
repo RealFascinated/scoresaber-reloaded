@@ -13,19 +13,8 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
     super(QueueId.LeaderboardScoreSeedQueue, "fifo");
 
     setImmediate(async () => {
-      // Always start processing the queue, regardless of whether it's empty or not
+      await this.insertLeaderboards();
       await this.processQueue();
-
-      const interval = setInterval(async () => {
-        // If there are already items in the queue, don't add more
-        if ((await this.getSize()) !== 0) {
-          return;
-        }
-        const inserted = await this.insertLeaderboards();
-        if (inserted === 0) {
-          clearInterval(interval);
-        }
-      }, 10_000);
     });
   }
 
@@ -115,7 +104,6 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
         seededScores: { $in: [null, false] },
       })
         .select("_id")
-        .limit(100)
         .sort({ ranked: -1, plays: 1 }) // Ranked first, then least plays
         .lean();
       const leaderboardIds = leaderboards.map(p => p._id);
