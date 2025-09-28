@@ -82,7 +82,13 @@ interface ControlButtonProps {
   type?: "button" | "submit" | "reset";
 }
 
-export function ControlButton({ children, isActive, onClick, type = "button", ...props }: ControlButtonProps) {
+export function ControlButton({
+  children,
+  isActive,
+  onClick,
+  type = "button",
+  ...props
+}: ControlButtonProps) {
   return (
     <button
       className={cn(

@@ -98,7 +98,10 @@ export default class PlaylistController {
   }: {
     query: { toSnipe: string; settings: string };
   }) {
-    const toSnipePlayer = await ScoreSaberService.getPlayer(toSnipe, DetailType.BASIC, undefined, { setInactivesRank: false, setMedalsRank: false });
+    const toSnipePlayer = await ScoreSaberService.getPlayer(toSnipe, DetailType.BASIC, undefined, {
+      setInactivesRank: false,
+      setMedalsRank: false,
+    });
     const response = new Response(
       Buffer.from(
         await generateSnipePlaylistImage(parseSnipePlaylistSettings(settings), toSnipePlayer),

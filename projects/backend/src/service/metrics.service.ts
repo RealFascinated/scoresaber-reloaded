@@ -13,7 +13,7 @@ import ProcessCpuUsageMetric from "../metrics/impl/backend/process-cpu-usage";
 import RequestsPerSecondMetric from "../metrics/impl/backend/total-requests";
 import ProcessUptimeMetric from "../metrics/impl/backend/uptime";
 import MongoDbSizeMetric from "../metrics/impl/database/mongo-db-size";
-import MapAuthorsMetric from "../metrics/impl/leaderboard/active-accounts";
+import MapAuthorsMetric from "../metrics/impl/leaderboard/map-authors";
 import ActiveAccountsMetric from "../metrics/impl/player/active-accounts";
 import ActivePlayerHmdStatisticMetric from "../metrics/impl/player/active-player-hmd-statistic";
 import HmdStatisticMetric from "../metrics/impl/player/daily-hmd-statistic";

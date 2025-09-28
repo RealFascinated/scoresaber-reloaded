@@ -13,7 +13,6 @@ export interface ServiceConfig {
 export const SERVER_PROXIES = [
   "", // No proxy
   "https://proxy.fascinated.cc/",
-  "https://proxy-3.fascinated.cc/",
 ];
 export const CLIENT_PROXY = "https://proxy.fascinated.cc/";
 

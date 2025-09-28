@@ -46,7 +46,7 @@ export class PlayerSearchService {
             DetailType.BASIC,
             scoreSaberPlayerTokens?.find(token => token.id === id),
             { setInactivesRank: false, setMedalsRank: false }
-          ),
+          )
         )
       )
     ).sort((a, b) => {

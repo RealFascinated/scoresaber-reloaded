@@ -8,7 +8,7 @@ export default class MapAuthorsMetric extends NumberMetric {
   constructor() {
     super(MetricType.MAP_AUTHORS, 0, {
       fetchAndStore: false,
-      interval: TimeUnit.toMillis(TimeUnit.Minute, 1),
+      interval: TimeUnit.toMillis(TimeUnit.Hour, 1),
     });
   }
 

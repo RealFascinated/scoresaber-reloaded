@@ -1,4 +1,5 @@
 import { Consts } from "@ssr/common/consts";
+import { DetailType } from "@ssr/common/detail-type";
 import { env } from "@ssr/common/env";
 import { BadRequestError } from "@ssr/common/error/bad-request-error";
 import { InternalServerError } from "@ssr/common/error/internal-server-error";
@@ -20,7 +21,6 @@ import {
 import { LeaderboardService } from "../leaderboard/leaderboard.service";
 import { PlayerService } from "../player/player.service";
 import ScoreSaberService from "../scoresaber.service";
-import { DetailType } from "@ssr/common/detail-type";
 
 export type SnipeType = "top" | "recent";
 
@@ -378,7 +378,12 @@ export default class PlaylistService {
         });
 
       // Format the scores
-      const toSnipePlayer = await ScoreSaberService.getPlayer(toSnipe, DetailType.BASIC, undefined, { setInactivesRank: false, setMedalsRank: false });
+      const toSnipePlayer = await ScoreSaberService.getPlayer(
+        toSnipe,
+        DetailType.BASIC,
+        undefined,
+        { setInactivesRank: false, setMedalsRank: false }
+      );
       const formattedScores = filteredScores
         .slice(0, settings.limit)
         .map(({ score, leaderboard }) => {

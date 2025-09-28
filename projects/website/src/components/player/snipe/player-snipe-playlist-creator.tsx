@@ -185,10 +185,17 @@ export default function SnipePlaylistCreator({ toSnipe }: SnipePlaylistCreatorPr
   };
 
   const generateFilename = (data: z.infer<typeof snipeSettingsSchema>) => {
-    const scoreType = data.rankedStatus === "all" ? "all" : data.rankedStatus === "ranked" ? "ranked-only" : "unranked-only";
+    const scoreType =
+      data.rankedStatus === "all"
+        ? "all"
+        : data.rankedStatus === "ranked"
+          ? "ranked-only"
+          : "unranked-only";
 
-    const starRange = data.rankedStatus === "ranked" && data.starRange
-      ? `-${data.starRange.min}-${data.starRange.max}⭐` : "";
+    const starRange =
+      data.rankedStatus === "ranked" && data.starRange
+        ? `-${data.starRange.min}-${data.starRange.max}⭐`
+        : "";
 
     const accRange = `-${data.accuracyRange.min}-${data.accuracyRange.max}%`;
     const sortInfo = `${data.sort}-${data.sortDirection}`;
@@ -380,7 +387,9 @@ export default function SnipePlaylistCreator({ toSnipe }: SnipePlaylistCreatorPr
                   )}
                 />
 
-                <div className={`grid gap-6 ${rankedStatus === "ranked" ? "grid-cols-2" : "grid-cols-1"}`}>
+                <div
+                  className={`grid gap-6 ${rankedStatus === "ranked" ? "grid-cols-2" : "grid-cols-1"}`}
+                >
                   {rankedStatus === "ranked" && (
                     <FormField
                       control={form.control}

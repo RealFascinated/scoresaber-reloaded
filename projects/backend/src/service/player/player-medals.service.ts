@@ -136,25 +136,40 @@ export class PlayerMedalsService {
             { $group: { _id: null, players: { $push: { id: "$_id", medals: "$medals" } } } },
             { $unwind: { path: "$players", includeArrayIndex: "rank" } },
             { $match: { "players.id": { $in: players.map(p => p._id) } } },
-            { $project: { playerId: "$players.id", globalRank: { $add: ["$rank", 1] } } }
+            { $project: { playerId: "$players.id", globalRank: { $add: ["$rank", 1] } } },
           ]),
           // Country rankings for current page players
           PlayerModel.aggregate([
-            { $match: { medals: { $gt: 0 }, country: { $in: [...new Set(players.map(p => p.country).filter(Boolean))] } } },
+            {
+              $match: {
+                medals: { $gt: 0 },
+                country: { $in: [...new Set(players.map(p => p.country).filter(Boolean))] },
+              },
+            },
             { $sort: { country: 1, medals: -1, _id: 1 } },
             { $group: { _id: "$country", players: { $push: { id: "$_id", medals: "$medals" } } } },
             { $unwind: { path: "$players", includeArrayIndex: "rank" } },
             { $match: { "players.id": { $in: players.map(p => p._id) } } },
-            { $project: { playerId: "$players.id", country: "$_id", countryRank: { $add: ["$rank", 1] } } }
-          ])
+            {
+              $project: {
+                playerId: "$players.id",
+                country: "$_id",
+                countryRank: { $add: ["$rank", 1] },
+              },
+            },
+          ]),
         ]);
 
         // Create lookup maps
-        const globalRankMap = new Map(globalRankings.map(r => [r.playerId.toString(), r.globalRank]));
-        const countryRankMap = new Map(countryRankings.map(r => [r.playerId.toString(), r.countryRank]));
+        const globalRankMap = new Map(
+          globalRankings.map(r => [r.playerId.toString(), r.globalRank])
+        );
+        const countryRankMap = new Map(
+          countryRankings.map(r => [r.playerId.toString(), r.countryRank])
+        );
 
         const result = await Promise.all(
-          players.map(async (player) => {
+          players.map(async player => {
             const playerId = player._id.toString();
 
             const playerData = await ScoreSaberService.getPlayer(
