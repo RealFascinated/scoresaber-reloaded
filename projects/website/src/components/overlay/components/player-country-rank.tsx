@@ -16,7 +16,7 @@ export default function OverlayPlayerCountryRank({ player }: OverlayPlayerRankPr
   const { countryRank, country } = player;
 
   return (
-    <div className="flex items-center gap-4">
+    <div className="flex items-center gap-2">
       <div className="flex items-center gap-3">
         <div className="flex w-6 justify-center">
           <CountryFlag code={country} size={12} />
@@ -28,7 +28,7 @@ export default function OverlayPlayerCountryRank({ player }: OverlayPlayerRankPr
       <DailyChange
         type={PlayerStatChange.CountryRank}
         change={player.statisticChange?.daily?.countryRank ?? 0}
-        className="text-sm"
+        className="text-lg"
         useTooltip={false}
       />
     </div>

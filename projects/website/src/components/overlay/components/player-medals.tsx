@@ -15,7 +15,7 @@ export default function OverlayPlayerMedals({ player }: OverlayPlayerMedalsProps
   const { medals } = player;
 
   return (
-    <div className="flex items-center gap-4">
+    <div className="flex items-center gap-2">
       <div className="flex items-center gap-3">
         <div className="flex w-6 justify-center">
           <FaMedal className="h-6 w-6 text-slate-300" />
@@ -25,7 +25,7 @@ export default function OverlayPlayerMedals({ player }: OverlayPlayerMedalsProps
       <DailyChange
         type={PlayerStatChange.Medals}
         change={player.statisticChange?.daily?.medals ?? 0}
-        className="text-sm"
+        className="text-lg"
         useTooltip={false}
       />
     </div>
