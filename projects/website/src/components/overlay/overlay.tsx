@@ -7,7 +7,7 @@ import { useOverlayDataStore } from "@/common/overlay/overlay-data-store";
 import { OverlaySettings, OverlayViews } from "@/common/overlay/overlay-settings";
 import OverlayPlayerInfoView from "@/components/overlay/views/player-info";
 import OverlayScoreDataView from "@/components/overlay/views/score-data";
-import OverlayScoreInfoView from "@/components/overlay/views/score-info";
+import OverlaySongInfoView from "@/components/overlay/views/song-info";
 import { Spinner } from "@/components/spinner";
 import { DetailType } from "@ssr/common/detail-type";
 import Logger from "@ssr/common/logger";
@@ -83,7 +83,7 @@ export default function Overlay({ settings }: OverlayProps) {
         )}
       </OverlayView>
       {overlayData && overlayData.map && settings.views[OverlayViews.SongInfo] && (
-        <OverlayScoreInfoView overlayData={overlayData} />
+        <OverlaySongInfoView overlayData={overlayData} />
       )}
     </div>
   );

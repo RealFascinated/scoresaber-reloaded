@@ -1,7 +1,8 @@
 import { OverlayData } from "@/common/overlay/overlay-data";
 import { ScoreSaberCurve } from "@ssr/common/leaderboard-curve/scoresaber-curve";
-import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
+import { formatPp } from "@ssr/common/utils/number-utils";
 import { getScoreBadgeFromAccuracy } from "@ssr/common/utils/song-utils";
+import { useMemo } from "react";
 
 type OverlayScoreDataProps = {
   /**
@@ -12,31 +13,32 @@ type OverlayScoreDataProps = {
 
 export default function OverlayScoreDataView({ overlayData }: OverlayScoreDataProps) {
   const scoreData = overlayData.score;
+  const leaderboard = overlayData.map?.leaderboard;
+  const pp = useMemo(() => {
+    if (!leaderboard || leaderboard.stars == 0 || !scoreData) {
+      return undefined;
+    }
+    return ScoreSaberCurve.getPp(leaderboard.stars, scoreData.accuracy);
+  }, [leaderboard, scoreData?.accuracy]);
+
+  // No score data, nothing to display
   if (!scoreData) {
     return null;
   }
-  const leaderboard = overlayData.map?.leaderboard;
-  const pp =
-    leaderboard && leaderboard.stars > 0
-      ? ScoreSaberCurve.getPp(leaderboard.stars, scoreData.accuracy)
-      : undefined;
 
   return (
-    <div className="text-xl">
-      {/* Score Information */}
-      <p>Combo: {formatNumberWithCommas(scoreData.combo)}x</p>
-      <p>Score: {formatNumberWithCommas(scoreData.score)}</p>
-      <p>
-        Accuracy:{" "}
-        <span
-          style={{
-            color: getScoreBadgeFromAccuracy(scoreData.accuracy).textColor,
-          }}
-        >
-          {scoreData.accuracy.toFixed(2)}%
-        </span>
-      </p>
-      {!!leaderboard && pp && <p className="text-pp">{formatPp(pp)}pp</p>}
+    <div className="flex flex-col text-xl">
+      {/* PP */}
+      {!!leaderboard && pp && <b className="text-pp">{formatPp(pp)}pp</b>}
+
+      {/* Accuracy */}
+      <b
+        style={{
+          color: getScoreBadgeFromAccuracy(scoreData.accuracy).textColor,
+        }}
+      >
+        {scoreData.accuracy.toFixed(2)}%
+      </b>
 
       {/* Paused */}
       {overlayData.paused && <p className="text-md text-red-500 italic">Currently Paused</p>}

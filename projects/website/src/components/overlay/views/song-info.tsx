@@ -6,11 +6,11 @@ import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
 import Image from "next/image";
 
-type OverlayScoreDataProps = {
+type OverlaySongInfoProps = {
   overlayData: OverlayData;
 };
 
-export default function OverlayScoreInfoView({ overlayData }: OverlayScoreDataProps) {
+export default function OverlaySongInfoView({ overlayData }: OverlaySongInfoProps) {
   const { map, paused } = overlayData;
   const { beatSaverMap } = map || {};
   if (!beatSaverMap) {
@@ -29,32 +29,38 @@ export default function OverlayScoreInfoView({ overlayData }: OverlayScoreDataPr
         className="rounded-md"
         src={beatSaverMap.songArt}
         alt={`${beatSaverMap.name}`}
-        width={96}
-        height={96}
+        width={112}
+        height={112}
       />
       <div className="text-md flex flex-col justify-between gap-2 py-1">
         <div>
-          <p className="font-semibold">{beatSaverMap.metadata.songName}</p>
-          <p>Mapped by {truncateText(beatSaverMap.metadata.levelAuthorName, 48)}</p>
+          <p className="font-bold">{beatSaverMap.metadata.songName}</p>
+          {beatSaverMap.metadata.songAuthorName && (
+            <p className="text-muted-foreground text-sm">
+              by {beatSaverMap.metadata.songAuthorName}
+            </p>
+          )}
+          <p className="text-muted-foreground text-sm">
+            Mapped by {truncateText(beatSaverMap.metadata.levelAuthorName, 48)}
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <div
-            className="w-fit rounded-md px-1 py-0.5"
+            className="w-fit rounded-md px-2 py-1 text-sm font-medium"
             style={{
               backgroundColor: difficulty.color,
+              color: difficulty.color === "#FFFFFF" ? "#000000" : "#FFFFFF",
             }}
           >
-            <p>{getDifficultyName(difficulty)}</p>
+            {getDifficultyName(difficulty)}
           </div>
-          <p>
-            !bsr {beatSaverMap.bsr} | {formatNumberWithCommas(beatSaverMap.metadata.bpm)} BPM{" "}
-            {leaderboard && leaderboard.stars > 0 ? (
-              <>
-                {" | "}
-                <span className="text-pp"> {leaderboard.stars} ★</span>
-              </>
-            ) : null}
-          </p>
+           <div className="flex items-center [&>*:not(:last-child)]:after:content-['|'] [&>*:not(:last-child)]:after:mx-2 [&>*:not(:last-child)]:after:text-muted-foreground">
+             <span>!bsr {beatSaverMap.bsr}</span>
+             <span>{formatNumberWithCommas(beatSaverMap.metadata.bpm)} BPM</span>
+             {leaderboard && leaderboard.stars > 0 && (
+               <span className="text-primary">{leaderboard.stars} ★</span>
+             )}
+           </div>
         </div>
       </div>
     </OverlayView>
