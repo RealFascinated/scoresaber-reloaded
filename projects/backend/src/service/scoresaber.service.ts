@@ -108,12 +108,15 @@ export default class ScoreSaberService {
             // todo: cleanup this mess
             options?.getHmdBreakdown && player !== undefined
               ? (async () => {
-                  const totalScores = player!.scoreStats.totalPlayCount;
                   const hmdUsage = await PlayerService.getPlayerHmdBreakdown(id);
+                  const totalKnownHmdScores = Object.values(hmdUsage).reduce(
+                    (sum, count) => sum + count,
+                    0
+                  );
                   return Object.fromEntries(
                     Object.entries(hmdUsage).map(([hmd, count]) => [
                       hmd,
-                      (count / totalScores) * 100,
+                      totalKnownHmdScores > 0 ? (count / totalKnownHmdScores) * 100 : 0,
                     ])
                   ) as Record<HMD, number>;
                 })()
