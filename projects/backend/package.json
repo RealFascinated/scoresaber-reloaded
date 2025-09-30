@@ -10,7 +10,7 @@
   "dependencies": {
     "@bogeychan/elysia-etag": "^0.1.0",
     "@discordx/importer": "^1.3.3",
-    "@discordx/utilities": "^7.0.5",
+    "@discordx/utilities": "^8.0.0",
     "@dotenvx/dotenvx": "^1.51.0",
     "@elysiajs/cors": "^1.4.0",
     "@elysiajs/cron": "^1.4.1",
