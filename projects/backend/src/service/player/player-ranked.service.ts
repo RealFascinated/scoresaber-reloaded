@@ -4,6 +4,7 @@ import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-sc
 import { PlayerRankedPpsResponse } from "@ssr/common/response/player-ranked-pps-response";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import { PlayerService } from "./player.service";
+import { Player } from "@ssr/common/model/player/player";
 
 export class PlayerRankedService {
   /**
@@ -113,28 +114,24 @@ export class PlayerRankedService {
    * @param playerId the player's id
    * @param playerToken the player's token
    */
-  public static async updatePeakRank(playerId: string, playerToken: ScoreSaberPlayerToken) {
-    const foundPlayer = await PlayerService.getPlayer(playerId, playerToken);
+  public static async updatePeakRank(player: Player, playerToken: ScoreSaberPlayerToken) {
     if (playerToken.rank == 0) {
-      return foundPlayer;
+      return player;
     }
 
-    if (
-      !foundPlayer.peakRank ||
-      (foundPlayer.peakRank && playerToken.rank < foundPlayer.peakRank.rank)
-    ) {
+    if (!player.peakRank || (player.peakRank && playerToken.rank < player.peakRank.rank)) {
       const newPeakRank = {
         rank: playerToken.rank,
         date: new Date(),
       };
 
-      await PlayerModel.updateOne({ _id: playerId }, { $set: { peakRank: newPeakRank } });
+      await PlayerModel.updateOne({ _id: player._id }, { $set: { peakRank: newPeakRank } });
 
       // Update the local player object
-      foundPlayer.peakRank = newPeakRank;
+      player.peakRank = newPeakRank;
     }
 
-    return foundPlayer;
+    return player;
   }
 
   /**

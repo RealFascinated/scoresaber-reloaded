@@ -96,7 +96,7 @@ export default class ScoreSaberService {
         // For full type, run all operations in parallel
         const [updatedAccount, ppBoundaries, accBadges, statisticHistory, hmdBreakdown] =
           await Promise.all([
-            account ? PlayerService.updatePeakRank(id, player) : undefined,
+            account ? PlayerService.updatePeakRank(account, player) : undefined,
             account ? PlayerService.getPlayerPpBoundary(id, 1) : [],
             account ? PlayerService.getAccBadges(id) : {},
             PlayerService.getPlayerStatisticHistory(player, new Date(), getDaysAgoDate(30), {
