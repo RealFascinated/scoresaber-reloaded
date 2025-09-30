@@ -1,3 +1,4 @@
+import { HMD } from "@ssr/common/hmds";
 import { PlayerModel } from "@ssr/common/model/player/player";
 import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 
@@ -39,16 +40,36 @@ export class PlayerHmdService {
    * @returns the player's most common recent HMD
    */
   public static async getPlayerMostCommonRecentHmd(playerId: string): Promise<string | undefined> {
+    const hmds = await this.getPlayerHmdBreakdown(playerId, 50); // get the last 50 scores
+    return Object.keys(hmds)[0] ?? undefined; // get the most common hmd
+  }
+
+  /**
+   * Gets the player's HMD breakdown.
+   *
+   * @param playerId the player's id
+   * @param limit the limit of scores to get
+   * @returns the player's HMD breakdown
+   */
+  public static async getPlayerHmdBreakdown(
+    playerId: string,
+    limit?: number
+  ): Promise<Record<HMD, number>> {
     const hmds = await ScoreSaberScoreModel.aggregate([
       { $match: { playerId: playerId } }, // get all scores for the player
       { $sort: { timestamp: -1 } }, // sort by timestamp descending
       { $match: { hmd: { $ne: "Unknown" } } }, // filter out scores with unknown hmd
-      { $limit: 50 }, // get the last 50 scores
+      ...(limit ? [{ $limit: limit }] : []), // get the last x scores
       { $group: { _id: "$hmd", count: { $sum: 1 } } }, // group by hmd and count the number of scores
       { $sort: { count: -1 } }, // sort by count descending (most common first)
-      { $limit: 1 }, // get the most common hmd
     ]);
 
-    return hmds[0]?._id ?? undefined;
+    return hmds.reduce(
+      (acc, curr) => {
+        acc[curr._id as HMD] = curr.count;
+        return acc;
+      },
+      {} as Record<HMD, number>
+    );
   }
 }

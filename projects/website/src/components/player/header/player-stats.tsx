@@ -101,7 +101,18 @@ const playerStats: Stat[] = [
       const hmd = getHMDInfo(player.hmd as HMD);
 
       return {
-        tooltip: <p>The most common headset used in the last 50 scores</p>,
+        tooltip: (
+          <div className="flex flex-col gap-1">
+            <p className="mb-1">Percentage breakdown of headsets for all scores</p>
+            {Object.entries(player.hmdBreakdown ?? {}).map(([hmd, percentage]) => (
+              <div key={hmd} className="flex items-center gap-2">
+                <HMDIcon hmd={getHMDInfo(hmd as HMD)} />
+                <span>{hmd}</span>
+                <span className="text-muted-foreground text-sm">{percentage.toFixed(2)}%</span>
+              </div>
+            ))}
+          </div>
+        ),
         value:
           player.hmd === undefined ? undefined : (
             <div className="flex items-center gap-1.5">
@@ -118,27 +129,21 @@ const playerStats: Stat[] = [
       const roles = getScoreSaberRoles(player);
 
       return {
-        value:
-          roles.length === 0 ? undefined : (
-            <SimpleTooltip
-              display={
-                <div className="flex flex-col gap-0.5">
-                  {roles.map(role => (
-                    <div key={role.roleId} className="flex items-center gap-2">
-                      <div
-                        className="h-2 w-2 rounded-full"
-                        style={{ backgroundColor: role.color }}
-                      />
-                      <span>{role.name}</span>
-                    </div>
-                  ))}
+        tooltip:
+          roles.length > 0 ? (
+            <div className="flex flex-col gap-0.5">
+              {roles.map(role => (
+                <div key={role.roleId} className="flex items-center gap-2">
+                  <div className="h-2 w-2 rounded-full" style={{ backgroundColor: role.color }} />
+                  <span>{role.name}</span>
                 </div>
-              }
-              side="bottom"
-            >
-              <p>{roles.map(role => role.shortName ?? role.name).join(", ")}</p>
-            </SimpleTooltip>
-          ),
+              ))}
+            </div>
+          ) : undefined,
+        value:
+          roles.length > 0 ? (
+            <p>{roles.map(role => role.shortName ?? role.name).join(", ")}</p>
+          ) : undefined,
       };
     },
   },
@@ -190,7 +195,7 @@ export default function PlayerStats({ player }: Props) {
         return (
           <div key={index}>
             {tooltip ? (
-              <SimpleTooltip display={tooltip} showOnMobile>
+              <SimpleTooltip display={tooltip} side="bottom" showOnMobile>
                 {stat}
               </SimpleTooltip>
             ) : (

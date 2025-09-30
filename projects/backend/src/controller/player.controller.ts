@@ -31,7 +31,11 @@ export default class PlayerController {
     params: { id: string };
     query: { type: DetailType; superJson: boolean };
   }): Promise<ScoreSaberPlayer | string> {
-    const player = await ScoreSaberService.getPlayer(id, type);
+    const player = await ScoreSaberService.getPlayer(id, type, undefined, {
+      setMedalsRank: true,
+      setInactivesRank: true,
+      getHmdBreakdown: true,
+    });
     return superJson ? SuperJSON.stringify(player) : player;
   }
 

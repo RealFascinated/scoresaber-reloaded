@@ -95,7 +95,7 @@ export class ScoreSaberService extends ApiService {
    * Looks up a player by their ID.
    *
    * @param playerId the ID of the player to look up
-   * @param type the data type to return
+   * @param type the data type to return (default: full)
    * @returns the player that matches the ID, or undefined
    */
   public async lookupPlayer(

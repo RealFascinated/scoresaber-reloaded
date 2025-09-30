@@ -12,6 +12,7 @@ import SuperJSON from "superjson";
 import { redisClient } from "../common/redis";
 import CacheService, { CacheId } from "./cache.service";
 import { PlayerService } from "./player/player.service";
+import { HMD } from "@ssr/common/hmds";
 
 // Type for cached player data with timestamp
 type CachedScoreSaberPlayerToken = ScoreSaberPlayerToken & {
@@ -33,11 +34,19 @@ export default class ScoreSaberService {
     options?: {
       setMedalsRank?: boolean;
       setInactivesRank?: boolean;
+      getHmdBreakdown?: boolean;
     }
   ): Promise<ScoreSaberPlayer> {
+    // If options are not provided, set them to the default values
+    options ??= {
+      setMedalsRank: true,
+      setInactivesRank: true,
+      getHmdBreakdown: true,
+    };
+
     return CacheService.fetchWithCache(
       CacheId.ScoreSaber,
-      `scoresaber:player:${id}:${type}`,
+      `scoresaber:player:${id}:${type}:${JSON.stringify(options)}`,
       async () => {
         player ??= await ApiServiceRegistry.getInstance().getScoreSaberService().lookupPlayer(id);
         if (!player) {
@@ -85,17 +94,31 @@ export default class ScoreSaberService {
         }
 
         // For full type, run all operations in parallel
-        const [updatedAccount, ppBoundaries, accBadges, statisticHistory] = await Promise.all([
-          account ? PlayerService.updatePeakRank(id, player) : undefined,
-          account ? PlayerService.getPlayerPpBoundary(id, 1) : [],
-          account ? PlayerService.getAccBadges(id) : {},
-          PlayerService.getPlayerStatisticHistory(player, new Date(), getDaysAgoDate(30), {
-            rank: true,
-            countryRank: true,
-            pp: true,
-            medals: true,
-          }),
-        ]);
+        const [updatedAccount, ppBoundaries, accBadges, statisticHistory, hmdBreakdown] =
+          await Promise.all([
+            account ? PlayerService.updatePeakRank(id, player) : undefined,
+            account ? PlayerService.getPlayerPpBoundary(id, 1) : [],
+            account ? PlayerService.getAccBadges(id) : {},
+            PlayerService.getPlayerStatisticHistory(player, new Date(), getDaysAgoDate(30), {
+              rank: true,
+              countryRank: true,
+              pp: true,
+              medals: true,
+            }),
+            // todo: cleanup this mess
+            options?.getHmdBreakdown && player !== undefined
+              ? (async () => {
+                  const totalScores = player!.scoreStats.totalPlayCount;
+                  const hmdUsage = await PlayerService.getPlayerHmdBreakdown(id);
+                  return Object.fromEntries(
+                    Object.entries(hmdUsage).map(([hmd, count]) => [
+                      hmd,
+                      (count / totalScores) * 100,
+                    ])
+                  ) as Record<HMD, number>;
+                })()
+              : undefined,
+          ]);
 
         // Calculate all statistic changes in parallel
         const [dailyChanges, weeklyChanges, monthlyChanges] = await Promise.all([
@@ -126,6 +149,7 @@ export default class ScoreSaberService {
           accBadges,
           peakRank: updatedAccount?.peakRank,
           statistics: player.scoreStats,
+          hmdBreakdown: hmdBreakdown,
         } as ScoreSaberPlayer;
       }
     );

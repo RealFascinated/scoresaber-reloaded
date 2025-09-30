@@ -62,6 +62,7 @@ export class PlayerService {
   public static updatePlayerHmd = PlayerHmdService.updatePlayerHmd;
   public static getActiveHmdUsage = PlayerHmdService.getActiveHmdUsage;
   public static getPlayerMostCommonRecentHmd = PlayerHmdService.getPlayerMostCommonRecentHmd;
+  public static getPlayerHmdBreakdown = PlayerHmdService.getPlayerHmdBreakdown;
 
   // PlayerScoreHistoryService methods
   public static getPlayerScoreHistory = PlayerScoreHistoryService.getPlayerScoreHistory;

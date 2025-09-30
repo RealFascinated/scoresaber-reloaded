@@ -1,3 +1,4 @@
+import { HMD } from "../../hmds";
 import { AccBadges } from "../acc-badges";
 import { PeakRank } from "../peak-rank";
 import Player, { StatisticChange } from "../player";
@@ -60,6 +61,12 @@ export default interface ScoreSaberPlayer extends ScoreSaberPlayerBase {
    * The player's global rank including inactive players.
    */
   rankIncludingInactives: number;
+
+  /**
+   * The player's hmd breakdown.
+   * HMD -> Percentage
+   */
+  hmdBreakdown: Record<HMD, number> | undefined;
 }
 
 export interface ScoreSaberPlayerBase extends Player {
