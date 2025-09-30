@@ -15,7 +15,7 @@
     }
   },
   "devDependencies": {
-    "@types/node": "^24.5.2",
+    "@types/node": "^24.6.0",
     "@types/sanitize-html": "^2.16.0",
     "@types/ws": "^8.18.1",
     "typescript": "^5.9.2"
