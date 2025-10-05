@@ -44,7 +44,7 @@ export class ScoreSaberScoreBase extends Score {
    * The hmd used to set the score.
    */
   @Prop({ required: false })
-  public readonly hmd?: HMD;
+  public hmd?: HMD;
 
   /**
    * The hmd used to set the score.

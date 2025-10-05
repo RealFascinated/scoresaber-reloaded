@@ -85,6 +85,7 @@ function buildScoreQuery(
   if (filters.passedOnly) {
     return { ...query, modifiers: { $nin: [Modifier.NF, "NF", "No Fail"] } };
   }
+  if (filters.hmd) query.hmd = filters.hmd;
 
   return query;
 }
@@ -565,6 +566,7 @@ export class PlayerScoresService {
       rankedOnly: false,
       unrankedOnly: false,
       passedOnly: false,
+      hmd: null,
       ...(options.filters ?? {}),
     } as ScoreFilters;
 
@@ -652,6 +654,9 @@ export class PlayerScoresService {
       }
       if (filters.passedOnly) {
         query = { ...query, modifiers: { $nin: [Modifier.NF, "NF", "No Fail"] } };
+      }
+      if (filters.hmd) {
+        query.hmd = filters.hmd;
       }
 
       const rawScores = await fetchRawScores(query, options, start, end - start);

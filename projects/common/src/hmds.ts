@@ -21,7 +21,7 @@ export type HMDInfo = {
   filters?: string;
 };
 
-const HMDs: Record<HMD, HMDInfo> = {
+export const HMDs: Record<HMD, HMDInfo> = {
   Unknown: {
     logo: "unknown.svg",
     filters: "invert(100%)",

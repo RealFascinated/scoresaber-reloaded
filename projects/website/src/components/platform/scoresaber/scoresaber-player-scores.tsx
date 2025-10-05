@@ -51,6 +51,8 @@ import {
 import { EmptyState } from "../../ui/empty-state";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../ui/select";
 import ScoreSaberScoreDisplay from "./score/score";
+import { getHMDInfo, HMD, HMDs } from "@ssr/common/hmds";
+import HMDIcon from "@/components/hmd-icon";
 
 // Constants
 const DEFAULT_LIVE_SORT: ScoreSaberScoreSort = "recent";
@@ -69,60 +71,60 @@ const CACHED_SCORE_SORT: {
   defaultOrder: ScoreSort["direction"];
   defaultFilter?: ScoreSort["filters"];
 }[] = [
-  {
-    name: "PP",
-    value: "pp",
-    icon: <Trophy className="h-4 w-4" />,
-    defaultOrder: "desc" as const,
-  },
-  {
-    name: "Date",
-    value: "date",
-    icon: <ClockIcon className="h-4 w-4" />,
-    defaultOrder: "desc" as const,
-  },
-  {
-    name: "Misses",
-    value: "misses",
-    icon: <XIcon className="h-4 w-4" />,
-    defaultOrder: "desc" as const,
-  },
-  {
-    name: "Accuracy",
-    value: "acc",
-    icon: <Target className="h-4 w-4" />,
-    defaultOrder: "desc" as const,
-  },
-  {
-    name: "Score",
-    value: "score",
-    icon: <BarChart3 className="h-4 w-4" />,
-    defaultOrder: "desc" as const,
-  },
-  {
-    name: "Max Combo",
-    value: "maxcombo",
-    icon: <Hash className="h-4 w-4" />,
-    defaultOrder: "desc" as const,
-  },
-  {
-    name: "Star Count",
-    value: "starcount",
-    icon: <StarIcon className="h-4 w-4" />,
-    defaultOrder: "desc" as const,
-    defaultFilter: { passedOnly: true },
-  },
-];
+    {
+      name: "PP",
+      value: "pp",
+      icon: <Trophy className="h-4 w-4" />,
+      defaultOrder: "desc" as const,
+    },
+    {
+      name: "Date",
+      value: "date",
+      icon: <ClockIcon className="h-4 w-4" />,
+      defaultOrder: "desc" as const,
+    },
+    {
+      name: "Misses",
+      value: "misses",
+      icon: <XIcon className="h-4 w-4" />,
+      defaultOrder: "desc" as const,
+    },
+    {
+      name: "Accuracy",
+      value: "acc",
+      icon: <Target className="h-4 w-4" />,
+      defaultOrder: "desc" as const,
+    },
+    {
+      name: "Score",
+      value: "score",
+      icon: <BarChart3 className="h-4 w-4" />,
+      defaultOrder: "desc" as const,
+    },
+    {
+      name: "Max Combo",
+      value: "maxcombo",
+      icon: <Hash className="h-4 w-4" />,
+      defaultOrder: "desc" as const,
+    },
+    {
+      name: "Star Count",
+      value: "starcount",
+      icon: <StarIcon className="h-4 w-4" />,
+      defaultOrder: "desc" as const,
+      defaultFilter: { passedOnly: true },
+    },
+  ];
 const CACHED_SCORE_FILTERS: {
   name: string;
   value: ScoreSort["filters"];
   icon: React.ReactNode;
 }[] = [
-  { name: "All Scores", value: {}, icon: <Filter className="h-4 w-4" /> },
-  { name: "Ranked Only", value: { rankedOnly: true }, icon: <Trophy className="h-4 w-4" /> },
-  { name: "Unranked Only", value: { unrankedOnly: true }, icon: <MusicIcon className="h-4 w-4" /> },
-  { name: "Passed Only", value: { passedOnly: true }, icon: <CheckIcon className="h-4 w-4" /> },
-];
+    { name: "All Scores", value: {}, icon: <Filter className="h-4 w-4" /> },
+    { name: "Ranked Only", value: { rankedOnly: true }, icon: <Trophy className="h-4 w-4" /> },
+    { name: "Unranked Only", value: { unrankedOnly: true }, icon: <MusicIcon className="h-4 w-4" /> },
+    { name: "Passed Only", value: { passedOnly: true }, icon: <CheckIcon className="h-4 w-4" /> },
+  ];
 
 const SCORES_MODES: Record<ScoreSaberScoreDataMode, { icon: React.ReactNode; tooltip: string }> = {
   cached: {
@@ -169,10 +171,11 @@ export default function ScoreSaberPlayerScores({
   const [currentSortDirection, setCurrentSortDirection] = useState<ScoreSort["direction"]>(
     direction ?? DEFAULT_CACHED_SORT_DIRECTION
   );
-  const [searchTerm, setSearchTerm] = useState(initialSearch || "");
   const [currentFilter, setCurrentFilter] = useState<string | null>("All Scores");
+  const [hmdFilter, setHmdFilter] = useState<HMD | null>(null);
 
   // Search
+  const [searchTerm, setSearchTerm] = useState(initialSearch || "");
   const debouncedSearchTerm = useDebounce(searchTerm, 250);
   const invalidSearch = searchTerm.length >= 1 && searchTerm.length < 3;
 
@@ -203,6 +206,7 @@ export default function ScoreSaberPlayerScores({
       currentSortDirection,
       scoresMode,
       currentFilter,
+      hmdFilter
     ],
     queryFn: async () => {
       if (scoresMode === "live") {
@@ -224,7 +228,10 @@ export default function ScoreSaberPlayerScores({
           {
             field: currentSort,
             direction: currentSortDirection,
-            filters: selectedFilter ? selectedFilter.value : {},
+            filters: selectedFilter ? {
+              ...selectedFilter.value,
+              ...(hmdFilter ? { hmd: hmdFilter } : {}),
+            } : {},
           } as ScoreSort,
           invalidSearch ? undefined : debouncedSearchTerm
         );
@@ -407,44 +414,44 @@ export default function ScoreSaberPlayerScores({
             <ButtonGroup>
               {scoresMode === "live"
                 ? LIVE_SCORE_SORT.map(sortOption => (
-                    <ControlButton
-                      key={sortOption.value}
-                      isActive={sortOption.value === currentSort}
-                      onClick={() => handleSortChange(sortOption.value as ScoreSaberScoreSort)}
-                    >
-                      {sortOption.value === currentSort && (isLoading || isRefetching) ? (
-                        <Spinner size="sm" className="h-3.5 w-3.5" />
-                      ) : (
-                        sortOption.icon
-                      )}
-                      {sortOption.name}
-                    </ControlButton>
-                  ))
+                  <ControlButton
+                    key={sortOption.value}
+                    isActive={sortOption.value === currentSort}
+                    onClick={() => handleSortChange(sortOption.value as ScoreSaberScoreSort)}
+                  >
+                    {sortOption.value === currentSort && (isLoading || isRefetching) ? (
+                      <Spinner size="sm" className="h-3.5 w-3.5" />
+                    ) : (
+                      sortOption.icon
+                    )}
+                    {sortOption.name}
+                  </ControlButton>
+                ))
                 : CACHED_SCORE_SORT.map(sortOption => (
-                    <ControlButton
-                      key={sortOption.value}
-                      isActive={sortOption.value === currentSort}
-                      onClick={() =>
-                        handleSortChange(
-                          sortOption.value as ScoreSort["field"],
-                          sortOption.defaultOrder as ScoreSort["direction"]
-                        )
-                      }
-                    >
-                      {sortOption.value === currentSort ? (
-                        isLoading || isRefetching ? (
-                          <Spinner size="sm" className="h-3.5 w-3.5" />
-                        ) : currentSortDirection === "desc" ? (
-                          <ArrowDown className="h-3.5 w-3.5" />
-                        ) : (
-                          <ArrowUp className="h-3.5 w-3.5" />
-                        )
+                  <ControlButton
+                    key={sortOption.value}
+                    isActive={sortOption.value === currentSort}
+                    onClick={() =>
+                      handleSortChange(
+                        sortOption.value as ScoreSort["field"],
+                        sortOption.defaultOrder as ScoreSort["direction"]
+                      )
+                    }
+                  >
+                    {sortOption.value === currentSort ? (
+                      isLoading || isRefetching ? (
+                        <Spinner size="sm" className="h-3.5 w-3.5" />
+                      ) : currentSortDirection === "desc" ? (
+                        <ArrowDown className="h-3.5 w-3.5" />
                       ) : (
-                        sortOption.icon
-                      )}
-                      {sortOption.name}
-                    </ControlButton>
-                  ))}
+                        <ArrowUp className="h-3.5 w-3.5" />
+                      )
+                    ) : (
+                      sortOption.icon
+                    )}
+                    {sortOption.name}
+                  </ControlButton>
+                ))}
             </ButtonGroup>
           </ControlRow>
 
@@ -512,6 +519,33 @@ export default function ScoreSaberPlayerScores({
                       </button>
                     </SimpleTooltip>
                   )}
+
+                  <Select
+                    value={hmdFilter || "All Hmds"}
+                    onValueChange={value => {
+                      setHmdFilter(value === "All Hmds" ? null : value as HMD);
+                      setCurrentPage(1);
+                      animateLeft();
+                    }}
+                  >
+                    <SelectTrigger className="h-8 w-full text-xs sm:w-40">
+                      <SelectValue placeholder="Hmd Filter" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={"All Hmds"}>
+                        All Hmds
+                      </SelectItem>
+
+                      {player.hmdBreakdown && Object.keys(player.hmdBreakdown).map(filter => (
+                        <SelectItem key={filter} value={filter}>
+                          <div className="flex items-center gap-2">
+                            <HMDIcon hmd={getHMDInfo(filter as HMD)} />
+                            <span>{filter}</span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               )}
             </div>
