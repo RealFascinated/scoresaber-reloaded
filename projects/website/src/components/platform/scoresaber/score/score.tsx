@@ -132,7 +132,7 @@ export default function ScoreSaberScoreDisplay({
           />
         </div>
 
-        <FallbackLink href={score.isTracked ? `/score/${score.scoreId}` : undefined}>
+        {!isMobile && <FallbackLink href={score.isTracked ? `/score/${score.scoreId}` : undefined}>
           <SimpleTooltip
             display={score.isTracked ? "View score details" : "No score data found :("}
             className="px-1"
@@ -144,7 +144,7 @@ export default function ScoreSaberScoreDisplay({
               )}
             />
           </SimpleTooltip>
-        </FallbackLink>
+        </FallbackLink>}
       </div>
 
       <ScoreDropdown
