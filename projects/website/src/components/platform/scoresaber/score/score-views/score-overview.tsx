@@ -63,6 +63,16 @@ export function ScoreOverview({ score, scoreStats, leaderboard }: ScoreOverviewP
               name="HMD"
             />
           )}
+          {!score.fullCombo && score.additionalData && (
+            <StatValue
+              value={
+                <div className="flex items-center gap-2">
+                  <p>{score.additionalData.fcAccuracy.toFixed(2)}%</p>
+                </div>
+              }
+              name="FC Acc"
+            />
+          )}
         </div>
         <div className="bg-accent-deep border-border flex w-full flex-col items-center justify-center gap-3 rounded-md border p-3 backdrop-blur-sm">
           <ScoreAccuracyStats scoreStats={scoreStats} />
