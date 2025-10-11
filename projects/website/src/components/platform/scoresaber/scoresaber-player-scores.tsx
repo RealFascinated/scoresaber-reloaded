@@ -533,9 +533,12 @@ export default function ScoreSaberPlayerScores({
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value={"All Hmds"}>
-                        All Hmds
+                        <div className="flex items-center gap-2">
+                          <HMDIcon hmd={getHMDInfo("Unknown" as HMD)} />
+                          <span>All Hmds</span>
+                        </div>
                       </SelectItem>
-
+z
                       {player.hmdBreakdown && Object.keys(player.hmdBreakdown).map(filter => (
                         <SelectItem key={filter} value={filter}>
                           <div className="flex items-center gap-2">
