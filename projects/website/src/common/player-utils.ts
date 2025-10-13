@@ -31,7 +31,7 @@ export function getPlayerRankingColumnWidth(
  */
 export function getFriendRankingColumnWidth(
   players: (ScoreSaberPlayer | ScoreSaberPlayerToken)[],
-  minWidth = 150
+  minWidth = 130
 ) {
   const maxRank = players?.reduce((max, p) => Math.max(max, p.rank ?? 0), 0) ?? 0;
 

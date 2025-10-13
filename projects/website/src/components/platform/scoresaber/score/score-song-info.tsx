@@ -54,13 +54,13 @@ export default function ScoreSaberScoreSongInfo({
 
   const authorInfo = (
     <div className="flex flex-row items-end gap-1.5 text-sm leading-none">
-      <p className="text-gray-400">
+      <p className="text-gray-400 line-clamp-2">
         {leaderboard.songAuthorName}{" "}
         <span className="text-song-mapper">
           <FallbackLink
             href={mappersProfile}
             className={cn(
-              mappersProfile && "w-fit text-xs leading-none transition-all hover:brightness-[66%]"
+              mappersProfile && "text-xs leading-none transition-all hover:brightness-[66%]"
             )}
           >
             {leaderboard.levelAuthorName}
@@ -112,7 +112,7 @@ export default function ScoreSaberScoreSongInfo({
         </div>
       </div>
       <div className="flex w-full flex-col gap-1">
-        <div className="flex w-full min-w-0 flex-col gap-1 overflow-hidden">
+        <div className="flex w-full flex-col gap-1">
           {allowLeaderboardPreview ? (
             <LeaderboardPreview leaderboard={leaderboard} beatSaverMap={beatSaverMap}>
               {songNameElement}

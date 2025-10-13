@@ -5,7 +5,7 @@ import { PlayerPreview } from "@/components/player-home/player-preview";
 export default function HomePage() {
   return (
     <main className="flex w-full flex-col gap-2 2xl:flex-row">
-      <article className="flex w-full flex-col gap-2 2xl:w-[600px]">
+      <article className="flex w-full flex-col gap-2 2xl:w-[500px]">
         <PlayerPreview />
         <FriendRanking />
       </article>
