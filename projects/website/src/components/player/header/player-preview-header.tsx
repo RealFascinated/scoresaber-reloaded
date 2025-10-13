@@ -21,7 +21,7 @@ export default function PlayerPreviewHeader({ player }: PlayerPreviewHeaderProps
         alt={`${player.name}'s Profile Picture`}
       />
       <div className="flex w-full flex-col items-center justify-center gap-2 lg:items-start">
-        <div>
+        <div className="flex flex-col gap-1">
           <div className="flex items-center justify-center gap-2 lg:justify-start">
             <SimpleLink
               href={`/player/${player.id}`}
