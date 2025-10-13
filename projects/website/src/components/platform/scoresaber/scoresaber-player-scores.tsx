@@ -538,7 +538,6 @@ export default function ScoreSaberPlayerScores({
                           <span>All Hmds</span>
                         </div>
                       </SelectItem>
-z
                       {player.hmdBreakdown && Object.keys(player.hmdBreakdown).map(filter => (
                         <SelectItem key={filter} value={filter}>
                           <div className="flex items-center gap-2">
