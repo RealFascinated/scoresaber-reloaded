@@ -74,14 +74,30 @@ export default function Settings() {
     }, 300);
   };
 
-  const settingsContent = isOpen ? (
+  const settingsContent = (isOpen || isClosing) ? (
     <div
       className={cn(
         "bg-background fixed inset-0 z-50 h-screen w-screen overflow-hidden",
-        isOpen ? "block" : "hidden"
+        "animate-in fade-in-0 duration-300",
+        isClosing && "animate-out fade-out-0 duration-300"
       )}
     >
-      <div className="flex h-full flex-col">
+      {/* Backdrop */}
+      <div 
+        className={cn(
+          "absolute inset-0 bg-black/50",
+          "animate-in fade-in-0 duration-300",
+          isClosing && "animate-out fade-out-0 duration-300"
+        )}
+        onClick={handleClose}
+      />
+      
+      {/* Modal Content */}
+      <div className={cn(
+        "relative flex h-full flex-col",
+        "animate-in slide-in-from-bottom-4 duration-300",
+        isClosing && "animate-out slide-out-to-bottom-4 duration-300"
+      )}>
         {/* Header */}
         <div className="border-border/50 flex items-center justify-between border-b px-4 py-4 md:px-6">
           <div className="flex items-center gap-4">
@@ -208,7 +224,7 @@ export default function Settings() {
           onClick={() => setIsOpen(true)}
         />
       </SimpleTooltip>
-      {isOpen && createPortal(settingsContent, document.body)}
+      {(isOpen || isClosing) && createPortal(settingsContent, document.body)}
     </>
   );
 }
