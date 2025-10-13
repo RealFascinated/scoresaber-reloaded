@@ -71,7 +71,7 @@ export const Tooltip = React.memo(function Tooltip({
 
   // Add click outside handler
   useEffect(() => {
-    if (!isMobile || !isOpen) return;
+    if (!isOpen) return;
 
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -88,11 +88,15 @@ export const Tooltip = React.memo(function Tooltip({
       setIsOpen(false);
     };
 
-    document.addEventListener("mousedown", handleClickOutside);
+    if (isMobile) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
     document.addEventListener("scroll", handleScroll, { passive: true });
 
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      if (isMobile) {
+        document.removeEventListener("mousedown", handleClickOutside);
+      }
       document.removeEventListener("scroll", handleScroll);
     };
   }, [isMobile, isOpen]);
