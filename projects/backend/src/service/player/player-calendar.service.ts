@@ -54,6 +54,11 @@ export class PlayerCalendarService {
       }
     }
 
+    // Insert current month and year if not already present
+    if (!metadata[year] || !metadata[year].includes(month)) {
+      metadata[year].push(month);
+    }
+
     // Sort months in metadata
     for (const [year, months] of Object.entries(metadata)) {
       metadata[Number(year)] = months.sort();
