@@ -58,7 +58,7 @@ function RankDisplay({ rank }: { rank: number }) {
   return (
     <div
       className={cn(
-        "flex min-h-[22px] w-fit items-center justify-center gap-1 rounded px-1 py-1 text-xs font-semibold",
+        "flex h-[24px] w-fit items-center justify-center gap-1 rounded px-1 py-1 text-xs font-semibold",
         getRankBgColor(rank)
       )}
     >

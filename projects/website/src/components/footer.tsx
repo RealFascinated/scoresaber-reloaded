@@ -113,7 +113,6 @@ export default function Footer({
       )}
     >
       {/* Top Section */}
-
       <div className="flex justify-center">
         {/* Branding & Social Links */}
         <div className="flex w-full max-w-(--breakpoint-2xl) flex-col items-center justify-between gap-7 lg:flex-row lg:items-start">
@@ -186,10 +185,10 @@ export default function Footer({
 
       {/* Bottom Section */}
       <div className="flex justify-center">
-        {/* Build Info */}
-        <p className="text-sm opacity-50">
+        {/* Build Ifo */}
+        <SimpleLink className="text-sm opacity-50" href={`https://github.com/RealFascinated/scoresaber-reloaded/commit/${buildId}`}>
           Build {buildId} ({buildTimeShort})
-        </p>
+        </SimpleLink>
       </div>
     </footer>
   );

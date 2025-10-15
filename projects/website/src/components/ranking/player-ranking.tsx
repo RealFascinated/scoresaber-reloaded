@@ -119,7 +119,7 @@ function RankDisplay({ rank }: { rank: number }) {
   return (
     <div
       className={cn(
-        "flex min-h-[22px] w-fit items-center justify-center gap-1 rounded px-1 py-1 text-xs font-semibold",
+        "flex h-[24px] w-fit items-center justify-center gap-1 rounded px-1 py-1 text-xs font-semibold ",
         getRankBgColor(rank)
       )}
     >
@@ -155,7 +155,7 @@ function CountryRankDisplay({ country, countryRank }: { country: string; country
     <div className="flex items-center">
       <div
         className={cn(
-          "flex min-h-[22px] items-center gap-1 rounded px-1 py-1 text-xs font-semibold",
+          "flex h-[24px] items-center gap-1 rounded px-1 py-1 text-xs font-semibold",
           getRankBgColor(countryRank)
         )}
       >
