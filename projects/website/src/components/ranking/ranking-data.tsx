@@ -67,6 +67,16 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
 
   const firstColumnWidth = getPlayerRankingColumnWidth(rankingData?.items ?? []);
 
+  // Check if any players have weekly changes
+  const hasAnyWeeklyChanges = rankingData?.items?.some(player => {
+    if ("histories" in player) {
+      const history = player.histories.split(",").map(Number);
+      const weeklyRankChange = history[history?.length - 6] - player.rank;
+      return Math.abs(weeklyRankChange) <= 999 && weeklyRankChange !== 0;
+    }
+    return false;
+  }) ?? false;
+
   return (
     <div className="flex w-full flex-col justify-center gap-2 xl:flex-row xl:gap-2">
       <div className="flex w-full flex-col gap-2 xl:w-[50%]">
@@ -156,6 +166,7 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
                         relativePerformancePoints={showRelativePPDifference}
                         mainPlayer={mainPlayer}
                         firstColumnWidth={firstColumnWidth}
+                        showWeeklyRankChange={hasAnyWeeklyChanges}
                       />
                     </div>
 

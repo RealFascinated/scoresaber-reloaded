@@ -9,7 +9,7 @@ import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player
  */
 export function getPlayerRankingColumnWidth(
   players: (ScoreSaberPlayer | ScoreSaberPlayerToken)[],
-  minWidth = 185
+  minWidth = 150
 ) {
   const maxRank = players?.reduce((max, p) => Math.max(max, p.rank ?? 0), 0) ?? 0;
   const maxCountryRank = players?.reduce((max, p) => Math.max(max, p.countryRank ?? 0), 0) ?? 0;
@@ -20,7 +20,7 @@ export function getPlayerRankingColumnWidth(
 
   // Base width + padding for each rank type (20 per digit)
   // Ensure minimum width of 160px for small numbers
-  return Math.max(minWidth, 75 + rankDigits * 15 + countryRankDigits * 20);
+  return Math.max(minWidth, 75 + rankDigits * 18 + countryRankDigits * 18);
 }
 
 /**

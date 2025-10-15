@@ -88,7 +88,7 @@ export function PlayerRanking({
               <RankDisplay rank={player.rank} />
               <CountryRankDisplay country={player.country} countryRank={player.countryRank} />
             </div>
-            <WeeklyRankChange weeklyRankChange={weeklyRankChange} />
+            {showWeeklyRankChange && <WeeklyRankChange weeklyRankChange={weeklyRankChange} />}
           </div>
 
           {/* Bottom row: Avatar, Name, PP, and Action Button */}
@@ -133,7 +133,7 @@ function WeeklyRankChange({ weeklyRankChange }: { weeklyRankChange: number }) {
     return <div />;
   }
   return (
-    <div className="flex">
+    <div className="flex items-center justify-center">
       {weeklyRankChange > 0 && <ArrowUpRightIcon className="h-4 w-4 text-green-500" />}
       {weeklyRankChange < 0 && <ArrowDownRightIcon className="h-4 w-4 text-red-500" />}
       {weeklyRankChange !== 0 && (

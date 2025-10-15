@@ -32,6 +32,6 @@ export function getRankBgColor(rank: number) {
     case 3:
       return "bg-[#8B4513]"; // Lighter bronze
     default:
-      return "bg-[#2d2d2d]"; // Default
+      return "bg-[#313131]"; // Default
   }
 }
