@@ -64,10 +64,6 @@ export default function FriendAction({
     return null;
   }
 
-  if (playerId == undefined) {
-    return null;
-  }
-
   // Don't show the button for the current user
   if (playerId == id) {
     return null;
