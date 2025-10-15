@@ -61,7 +61,7 @@ export class LeaderboardNotificationsService {
     const pasteUrl = await uploadPaste(changelog);
     await sendMessageToChannel(
       DiscordChannels.RANKED_BATCH_LOGS,
-      `<@&1338261690952978442> New Ranked Batch: ${pasteUrl}!`
+      `<@&1338261690952978442> New Ranked Batch: ${pasteUrl}`
     );
 
     const leaderboards = PlaylistService.processLeaderboards(
