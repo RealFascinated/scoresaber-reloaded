@@ -14,6 +14,7 @@ import { EventsManager } from "../event/events-manager";
 import { PlayerService } from "../service/player/player.service";
 import { ScoreService } from "../service/score/score.service";
 import Logger from "@ssr/common/logger";
+import { PlayerModel } from "@ssr/common/model/player/player";
 
 interface PendingScore {
   scoreSaberToken?: ScoreSaberScoreToken;
@@ -174,6 +175,9 @@ export class ScoreWebsockets implements EventListener {
 
       PlayerService.trackPlayer(player.id);
       PlayerService.updatePlayerName(player.id, player.name);
+
+      // Update the player's last score date
+      await PlayerModel.updateOne({ _id: player.id }, { $set: { lastScore: new Date() } });
 
       EventsManager.getListeners().forEach(listener => {
         listener.onScoreReceived?.(score, leaderboard, player, beatLeaderScore, isTop50GlobalScore);

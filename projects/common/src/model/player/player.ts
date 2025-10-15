@@ -93,6 +93,12 @@ export class Player {
   public joinedDate?: Date;
 
   /**
+   * The date the player's last score was set.
+   */
+  @prop()
+  public lastScore?: Date;
+
+  /**
    * Gets the number of days tracked for this player.
    */
   public async getDaysTracked(): Promise<number> {
