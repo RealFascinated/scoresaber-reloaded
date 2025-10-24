@@ -3,7 +3,6 @@ import { ScoreSort } from "@ssr/common/types/sort";
 import { t } from "elysia";
 import { Controller, Get } from "elysia-decorators";
 import { PlayerService } from "../service/player/player.service";
-import { HMD } from "@ssr/common/hmds";
 
 @Controller("/scores/cached")
 export default class CachedScoresController {
