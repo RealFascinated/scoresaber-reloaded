@@ -11,7 +11,7 @@ export function BeatSaverMapButton({ beatSaverMap }: BeatSaverMapProps) {
   const url = `https://beatsaver.com/maps/${beatSaverMap.bsr}`;
 
   return (
-    <SimpleLink href={url} target="_blank">
+    <SimpleLink href={url} target="_blank" data-umami-event="leaderboard-beatsaver-map-button">
       <ScoreButton tooltip={<p>Click to open the map</p>}>
         <BeatSaverLogo />
       </ScoreButton>
