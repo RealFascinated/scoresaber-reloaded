@@ -19,6 +19,7 @@ export default class ActiveAccountsMetric extends NumberMetric {
     if (count === undefined) {
       return undefined;
     }
+    this.value = count;
     return this.getPointBase().intField("value", count ?? 0);
   }
 }
