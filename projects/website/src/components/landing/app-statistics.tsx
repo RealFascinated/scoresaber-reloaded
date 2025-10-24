@@ -41,7 +41,7 @@ export function AppStats() {
   }
 
   return (
-    <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-5">
       <StatCard icon={User} title="Tracked Players" value={statistics.trackedPlayers} />
       <StatCard icon={User} title="Active Players" value={statistics.activePlayers} />
       <StatCard icon={UserX} title="Inactive Players" value={statistics.inactivePlayers} />
