@@ -111,8 +111,8 @@ export default function ScoreSaberScoreSongInfo({
           </SimpleTooltip>
         </div>
       </div>
-      <div className="flex w-full flex-col gap-1">
-        <div className="flex w-full flex-col gap-1">
+      <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-1">
           {allowLeaderboardPreview ? (
             <LeaderboardPreview leaderboard={leaderboard} beatSaverMap={beatSaverMap}>
               {songNameElement}

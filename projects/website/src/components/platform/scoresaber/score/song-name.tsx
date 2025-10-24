@@ -8,13 +8,11 @@ export default function ScoreSaberSongName({
   leaderboard: ScoreSaberLeaderboard;
   clickableSongName: boolean;
 }) {
-  const text = (
-    <p className="font-semibold line-clamp-2">{leaderboard.fullName}</p>
-  );
+  const text = <p className="line-clamp-2 w-fit font-semibold">{leaderboard.fullName}</p>;
   return clickableSongName ? (
     <SimpleLink
       href={`/leaderboard/${leaderboard.id}`}
-      className="text-song-name cursor-pointer text-left transition-all hover:brightness-[66%]"
+      className="text-song-name w-fit cursor-pointer text-left transition-all hover:brightness-[66%]"
     >
       {text}
     </SimpleLink>
