@@ -118,6 +118,7 @@ function PlayerMiniRanking({
                       ? `${playerRankWidth}px 48px 1fr auto`
                       : `${playerRankWidth}px 48px 0.73fr 1fr`,
                   }}
+                  data-umami-event="player-mini-ranking-button"
                 >
                   {/* Rank */}
                   <p className="font-mono text-gray-400">#{formatNumberWithCommas(rank)}</p>
