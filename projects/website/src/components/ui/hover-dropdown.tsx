@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, useRef, useState, useEffect, cloneElement, isValidElement } from "react";
+import React, { ReactNode, useRef, useState, useEffect, cloneElement, isValidElement } from "react";
 import { useIsMobile } from "@/contexts/viewport-context";
 import SimpleLink from "../simple-link";
 
@@ -119,11 +119,11 @@ export function HoverDropdown({
                     {Array.isArray(children) 
                       ? children.map((child, index) => 
                           isValidElement(child) && child.type === DropdownButton
-                            ? cloneElement(child, { onNavigate: closeDropdown, key: index })
+                            ? cloneElement(child as React.ReactElement<DropdownButtonProps>, { onNavigate: closeDropdown, key: index })
                             : child
                         )
                       : isValidElement(children) && children.type === DropdownButton
-                        ? cloneElement(children, { onNavigate: closeDropdown })
+                        ? cloneElement(children as React.ReactElement<DropdownButtonProps>, { onNavigate: closeDropdown })
                         : children
                     }
                   </div>
