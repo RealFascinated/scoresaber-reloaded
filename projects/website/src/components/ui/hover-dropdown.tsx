@@ -104,30 +104,34 @@ export function HoverDropdown({
       {trigger}
 
       {open && (
-                <div
-                  className={`bg-card text-card-foreground absolute top-full z-50 overflow-hidden rounded-xl shadow-lg backdrop-blur-sm transition-all duration-200 ${
-                    isMobile
-                      ? "right-0 left-auto max-w-[calc(100vw-1rem)]" // Better positioning on mobile
-                      : "left-0"
-                  } ${
-                    isVisible
-                      ? "animate-in fade-in-0 zoom-in-95 slide-in-from-top-2"
-                      : "animate-out fade-out-0 zoom-out-95 slide-out-to-top-2"
-                  } ${contentClassName}`}
-                >
-                  <div className="p-2">
-                    {Array.isArray(children) 
-                      ? children.map((child, index) => 
-                          isValidElement(child) && child.type === DropdownButton
-                            ? cloneElement(child as React.ReactElement<DropdownButtonProps>, { onNavigate: closeDropdown, key: index })
-                            : child
-                        )
-                      : isValidElement(children) && children.type === DropdownButton
-                        ? cloneElement(children as React.ReactElement<DropdownButtonProps>, { onNavigate: closeDropdown })
-                        : children
-                    }
-                  </div>
-                </div>
+        <div
+          className={`bg-card text-card-foreground absolute top-full z-50 overflow-hidden rounded-xl shadow-lg backdrop-blur-sm transition-all duration-200 ${
+            isMobile
+              ? "right-0 left-auto max-w-[calc(100vw-1rem)]" // Better positioning on mobile
+              : "left-0"
+          } ${
+            isVisible
+              ? "animate-in fade-in-0 zoom-in-95 slide-in-from-top-2"
+              : "animate-out fade-out-0 zoom-out-95 slide-out-to-top-2"
+          } ${contentClassName}`}
+        >
+          <div className="p-2">
+            {Array.isArray(children)
+              ? children.map((child, index) =>
+                  isValidElement(child) && child.type === DropdownButton
+                    ? cloneElement(child as React.ReactElement<DropdownButtonProps>, {
+                        onNavigate: closeDropdown,
+                        key: index,
+                      })
+                    : child
+                )
+              : isValidElement(children) && children.type === DropdownButton
+                ? cloneElement(children as React.ReactElement<DropdownButtonProps>, {
+                    onNavigate: closeDropdown,
+                  })
+                : children}
+          </div>
+        </div>
       )}
     </div>
   );
