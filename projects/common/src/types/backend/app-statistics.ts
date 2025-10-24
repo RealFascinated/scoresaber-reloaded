@@ -10,6 +10,11 @@ export type AppStatistics = {
   trackedScores: number;
 
   /**
+   * The total amount of score history scores.
+   */
+  scoreHistoryScores: number;
+
+  /**
    * The total amount of replays stored.
    */
   storedReplays: number;

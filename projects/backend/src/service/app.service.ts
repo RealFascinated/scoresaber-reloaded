@@ -2,31 +2,41 @@ import { AdditionalScoreDataModel } from "@ssr/common/model/additional-score-dat
 import { PlayerModel } from "@ssr/common/model/player/player";
 import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import { AppStatistics } from "@ssr/common/types/backend/app-statistics";
+import { PlayerScoreHistoryService } from "./player/player-score-history.service";
+import { ScoreSaberPreviousScoreModel } from "@ssr/common/model/score/impl/scoresaber-previous-score";
 
 export class AppService {
   /**
    * Gets the app statistics.
    */
   public static async getAppStatistics(): Promise<AppStatistics> {
-    const [trackedPlayers, trackedScores, storedReplays, inactivePlayers, activePlayers] =
-      await Promise.all([
-        PlayerModel.estimatedDocumentCount(),
-        ScoreSaberScoreModel.estimatedDocumentCount(),
-        AdditionalScoreDataModel.countDocuments({
-          savedReplay: true,
-        }),
-        PlayerModel.countDocuments({
-          inactive: true,
-        }),
+    const [
+      trackedPlayers,
+      trackedScores,
+      scoreHistoryScores,
+      storedReplays,
+      inactivePlayers,
+      activePlayers,
+    ] = await Promise.all([
+      PlayerModel.estimatedDocumentCount(),
+      ScoreSaberScoreModel.estimatedDocumentCount(),
+      ScoreSaberPreviousScoreModel.estimatedDocumentCount(),
+      AdditionalScoreDataModel.countDocuments({
+        savedReplay: true,
+      }),
+      PlayerModel.countDocuments({
+        inactive: true,
+      }),
 
-        PlayerModel.countDocuments({
-          inactive: false,
-        }),
-      ]);
+      PlayerModel.countDocuments({
+        inactive: false,
+      }),
+    ]);
 
     return {
       trackedPlayers,
       trackedScores,
+      scoreHistoryScores,
       storedReplays,
       inactivePlayers,
       activePlayers,
