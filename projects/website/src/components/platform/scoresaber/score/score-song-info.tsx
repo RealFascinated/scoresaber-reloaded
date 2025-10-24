@@ -5,6 +5,7 @@ import { StarIcon } from "@heroicons/react/24/solid";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
 import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
+import { MapDifficulty } from "@ssr/common/score/map-difficulty";
 import Image from "next/image";
 import LeaderboardPreview from "../leaderboard/leaderboard-preview";
 import ScoreSaberSongName from "./song-name";
@@ -54,7 +55,7 @@ export default function ScoreSaberScoreSongInfo({
 
   const authorInfo = (
     <div className="flex flex-row items-end gap-1.5 text-sm leading-none">
-      <p className="text-gray-400 line-clamp-2">
+      <p className="line-clamp-2 text-gray-400">
         {leaderboard.songAuthorName}{" "}
         <span className="text-song-mapper">
           <FallbackLink
@@ -69,9 +70,6 @@ export default function ScoreSaberScoreSongInfo({
       </p>
     </div>
   );
-
-  const difficultyLabel =
-    beatSaverMap?.difficultyLabels?.[leaderboard.difficulty.difficulty]?.trim() ?? "";
 
   return (
     <div className="flex w-full items-center gap-3">
@@ -95,15 +93,36 @@ export default function ScoreSaberScoreSongInfo({
           <SimpleTooltip
             side="bottom"
             display={
-              <div>
-                <p>
-                  Difficulty: {getDifficultyName(difficulty)}{" "}
-                  {difficultyLabel && (
-                    <span className="text-xs text-gray-300">({difficultyLabel})</span>
-                  )}
-                </p>
-                <p>Characteristic: {leaderboard.difficulty.characteristic}</p>
-                {starCount > 0 && <p>Stars: {starCount.toFixed(2)}</p>}
+              <div className="flex flex-col gap-1">
+                <div className="flex flex-row gap-1">
+                  {leaderboard.difficulties.map(difficulty => {
+                    const difficultyLabel =
+                      beatSaverMap?.difficultyLabels?.[difficulty.difficulty]?.trim() ?? null;
+                    const isSelected =
+                      difficulty.difficultyRaw === leaderboard.difficulty.difficultyRaw;
+
+                    return (
+                      <SimpleTooltip
+                        key={difficulty.leaderboardId}
+                        display={getDifficultyName(difficulty.difficulty)}
+                      >
+                        <p
+                          className={cn(
+                            isSelected ? "font-semibold" : "",
+                            "border-muted rounded-md border p-2 text-xs leading-none"
+                          )}
+                          style={{
+                            backgroundColor:
+                              getDifficulty(difficulty.difficulty).color +
+                              (isSelected ? "f5" : "20"),
+                          }}
+                        >
+                          {difficultyLabel ?? getDifficultyName(difficulty.difficulty)}
+                        </p>
+                      </SimpleTooltip>
+                    );
+                  })}
+                </div>
               </div>
             }
           >
