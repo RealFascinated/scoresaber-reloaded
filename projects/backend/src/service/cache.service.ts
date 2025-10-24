@@ -7,7 +7,6 @@ import { redisClient } from "../common/redis";
 
 export enum CacheId {
   BeatSaver = "beatSaver",
-  AppStatistics = "appStatistics",
   ScoreSaber = "scoresaber",
   Leaderboards = "leaderboards",
   AdditionalScoreData = "additionalScoreData",
@@ -19,7 +18,6 @@ export enum CacheId {
 export default class CacheService {
   private static readonly cacheInfo = {
     [CacheId.BeatSaver]: TimeUnit.toSeconds(TimeUnit.Day, 7),
-    [CacheId.AppStatistics]: TimeUnit.toSeconds(TimeUnit.Hour, 1),
     [CacheId.ScoreSaber]: TimeUnit.toSeconds(TimeUnit.Minute, 1),
     [CacheId.Leaderboards]: TimeUnit.toSeconds(TimeUnit.Hour, 2),
     [CacheId.AdditionalScoreData]: TimeUnit.toSeconds(TimeUnit.Minute, 60),

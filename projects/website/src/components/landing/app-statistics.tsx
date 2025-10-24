@@ -11,6 +11,7 @@ export function AppStats() {
   const { data: statistics } = useQuery({
     queryKey: ["app-statistics"],
     queryFn: () => Request.get<AppStatistics>(env.NEXT_PUBLIC_API_URL + "/statistics"),
+    refetchInterval: 1000,
   });
 
   if (!statistics) {
