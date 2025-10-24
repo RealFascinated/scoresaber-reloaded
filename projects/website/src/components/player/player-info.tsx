@@ -46,7 +46,13 @@ export function PlayerInfo({
         alt={`${player.name}'s Profile Picture`}
       />
       {!hideCountryFlag && <CountryFlag code={player.country!} size={10} />}
-      {useLink ? <SimpleLink href={`/player/${player.id}`}>{name}</SimpleLink> : name}
+      {useLink ? (
+        <SimpleLink href={`/player/${player.id}`} data-umami-event="player-button">
+          {name}
+        </SimpleLink>
+      ) : (
+        name
+      )}
     </div>
   );
 }

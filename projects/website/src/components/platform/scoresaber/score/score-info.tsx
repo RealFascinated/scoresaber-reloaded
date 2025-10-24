@@ -30,7 +30,10 @@ export default function ScoreSaberScoreInfo({
         {hideRank ? (
           <p className="font-semibold">#-</p>
         ) : (
-          <SimpleLink href={`/leaderboard/${leaderboard.id}/${getPageFromRank(score.rank, 12)}`}>
+          <SimpleLink
+            href={`/leaderboard/${leaderboard.id}/${getPageFromRank(score.rank, 12)}`}
+            data-umami-event="leaderboard-by-rank-button"
+          >
             <p
               className={cn(
                 getRankColor(score.rank),

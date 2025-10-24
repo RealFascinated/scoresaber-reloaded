@@ -68,6 +68,7 @@ export default function LeaderboardPreview({
                 <SimpleLink
                   href={`/leaderboard/${leaderboard.id}`}
                   className="block truncate text-xl font-bold transition-all hover:brightness-[66%]"
+                  data-umami-event="leaderboard-button"
                 >
                   {leaderboard.songName}
                 </SimpleLink>
