@@ -27,7 +27,7 @@ export default function Statistic({ icon, title, value, isCache }: Statistic) {
         )}
       </h1>
       <span>
-        <CountUp end={value} duration={1.2} enableScrollSpy scrollSpyOnce />
+        <CountUp end={value} duration={1.2} enableScrollSpy scrollSpyOnce preserveValue={true} />
       </span>
     </div>
   );

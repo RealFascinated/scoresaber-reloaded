@@ -1,4 +1,5 @@
 import Card from "@/components/card";
+import { AppStats } from "@/components/landing/app-statistics";
 import HmdUsageChart from "@/components/score/charts/hmd-usage-chart";
 import ScoreSaberStatisticsChart from "@/components/score/charts/scoresaber-statistics-chart";
 import { ChartBarIcon, DevicePhoneMobileIcon } from "@heroicons/react/24/solid";
@@ -49,6 +50,8 @@ export default async function StatisticsPage() {
             <h1 className="text-foreground text-xl font-semibold">ScoreSaber Statistics</h1>
           </div>
         </div>
+
+        <AppStats />
 
         {statistics ? (
           <div className="flex flex-col gap-2">
