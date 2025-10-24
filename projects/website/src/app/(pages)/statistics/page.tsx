@@ -2,6 +2,8 @@ import Card from "@/components/card";
 import { AppStats } from "@/components/landing/app-statistics";
 import HmdUsageChart from "@/components/score/charts/hmd-usage-chart";
 import ScoreSaberStatisticsChart from "@/components/score/charts/scoresaber-statistics-chart";
+import SimpleLink from "@/components/simple-link";
+import { Button } from "@/components/ui/button";
 import { ChartBarIcon, DevicePhoneMobileIcon } from "@heroicons/react/24/solid";
 import { env } from "@ssr/common/env";
 import { Statistic } from "@ssr/common/model/statistics/statistic";
@@ -45,49 +47,69 @@ export default async function StatisticsPage() {
     <div className="flex w-full justify-center gap-2">
       <article className="flex flex-1 flex-col gap-2">
         {/* Header */}
-        <div className="border-border/50 flex items-center justify-between border-b px-4 py-4 md:px-6">
+        <div className="flex items-center justify-between px-4 py-6 md:px-6">
           <div className="flex items-center gap-4">
-            <h1 className="text-foreground text-xl font-semibold">ScoreSaber Statistics</h1>
+            <div className="bg-primary/10 text-primary rounded-xl p-3 shadow-lg">
+              <ChartBarIcon className="size-6" />
+            </div>
+            <div>
+              <h1 className="text-foreground text-2xl font-bold">ScoreSaber Statistics</h1>
+              <p className="text-muted-foreground mt-1 text-sm">
+                Real-time platform analytics and player insights
+              </p>
+            </div>
           </div>
         </div>
-
-        <AppStats />
 
         {statistics ? (
           <div className="flex flex-col gap-2">
             {/* Game Statistics Section */}
-            <Card className="gap-1">
-              <div className="flex items-center gap-3 p-4">
-                <div className="bg-primary/20 rounded-lg p-2">
-                  <ChartBarIcon className="text-primary size-5" />
+            <Card className="gap-2">
+              <div className="flex items-center justify-between p-4">
+                <div className="flex items-center gap-3">
+                  <div className="bg-primary/10 text-primary rounded-lg p-2">
+                    <ChartBarIcon className="size-5" />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="font-medium">Game Statistics</span>
+                    <span className="text-muted-foreground text-sm">
+                      Daily player activity and metrics
+                    </span>
+                  </div>
                 </div>
-                <div className="flex flex-col">
-                  <span className="font-medium">Game Statistics</span>
-                  <span className="text-muted-foreground text-sm">
-                    Daily player activity and account growth
-                  </span>
-                </div>
+                <SimpleLink
+                  href="https://ssr-grafana.fascinated.cc/public-dashboards/19a90072026f442fafa6c371192dddff"
+                  target="_blank"
+                  className="text-primary hover:text-primary/80 text-sm font-medium"
+                >
+                  View in Grafana →
+                </SimpleLink>
               </div>
-              <div className="p-4 pt-0">
+
+              <div className="border-border/20 border-t px-4 py-4">
+                <AppStats />
+              </div>
+
+              <div className="px-4 pb-4">
                 <ScoreSaberStatisticsChart statistics={statistics.statistics} />
               </div>
             </Card>
 
             {/* HMD Usage Section */}
             {statistics.statistics.hmdUsage && (
-              <Card className="gap-1">
+              <Card className="gap-2">
                 <div className="flex items-center gap-3 p-4">
-                  <div className="bg-primary/20 rounded-lg p-2">
-                    <DevicePhoneMobileIcon className="text-primary size-5" />
+                  <div className="bg-primary/10 text-primary rounded-lg p-2">
+                    <DevicePhoneMobileIcon className="size-5" />
                   </div>
                   <div className="flex flex-col">
-                    <span className="font-medium">HMD Usage</span>
+                    <span className="font-medium">HMD Usage Distribution</span>
                     <span className="text-muted-foreground text-sm">
-                      Distribution of HMDs used by active players
+                      Popular VR headsets among active players
                     </span>
                   </div>
                 </div>
-                <div className="p-4 pt-0">
+                <div className="px-4 pb-4">
                   <HmdUsageChart hmdUsage={statistics.statistics.hmdUsage} />
                 </div>
               </Card>
