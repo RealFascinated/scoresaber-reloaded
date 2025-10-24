@@ -9,12 +9,14 @@ export default function SimpleTooltip({
   side,
   className,
   showOnMobile,
+  closeDelayDuration,
 }: {
   children: React.ReactNode;
   display: React.ReactNode | string;
   side?: (typeof SIDE_OPTIONS)[number];
   className?: string;
   showOnMobile?: boolean;
+  closeDelayDuration?: number;
 }) {
   return (
     <Tooltip
@@ -27,6 +29,7 @@ export default function SimpleTooltip({
       }
       side={side}
       showOnMobile={showOnMobile}
+      closeDelayDuration={closeDelayDuration}
     >
       <div className={clsx("w-full cursor-default", className)}>{children}</div>
     </Tooltip>

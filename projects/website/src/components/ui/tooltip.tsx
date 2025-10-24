@@ -37,6 +37,7 @@ export const Tooltip = React.memo(function Tooltip({
   side = "top",
   className,
   delayDuration = 0,
+  closeDelayDuration = 0,
   showOnMobile = false,
 }: {
   children: React.ReactNode;
@@ -44,6 +45,7 @@ export const Tooltip = React.memo(function Tooltip({
   side?: "top" | "right" | "bottom" | "left";
   className?: string;
   delayDuration?: number;
+  closeDelayDuration?: number;
   showOnMobile?: boolean;
 }) {
   const isMobile = useIsMobile();
@@ -52,11 +54,17 @@ export const Tooltip = React.memo(function Tooltip({
   const [isPositioned, setIsPositioned] = useState(false);
   const triggerRef = useRef<HTMLDivElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
+  const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Initialize shared portal container
   useEffect(() => {
     ensurePortalContainer();
     return () => {
+      // Clear any pending close timeout on unmount
+      if (closeTimeoutRef.current) {
+        clearTimeout(closeTimeoutRef.current);
+        closeTimeoutRef.current = null;
+      }
       // Don't remove the portal container on unmount
       // It will be reused by other tooltips
     };
@@ -80,11 +88,21 @@ export const Tooltip = React.memo(function Tooltip({
         tooltipRef.current &&
         !tooltipRef.current.contains(event.target as Node)
       ) {
+        // Clear any pending close timeout
+        if (closeTimeoutRef.current) {
+          clearTimeout(closeTimeoutRef.current);
+          closeTimeoutRef.current = null;
+        }
         setIsOpen(false);
       }
     };
 
     const handleScroll = () => {
+      // Clear any pending close timeout
+      if (closeTimeoutRef.current) {
+        clearTimeout(closeTimeoutRef.current);
+        closeTimeoutRef.current = null;
+      }
       setIsOpen(false);
     };
 
@@ -217,15 +235,27 @@ export const Tooltip = React.memo(function Tooltip({
 
   const handleMouseEnter = useCallback(() => {
     if (!isMobile) {
+      // Clear any pending close timeout
+      if (closeTimeoutRef.current) {
+        clearTimeout(closeTimeoutRef.current);
+        closeTimeoutRef.current = null;
+      }
       setIsOpen(true);
     }
   }, [isMobile]);
 
   const handleMouseLeave = useCallback(() => {
     if (!isMobile) {
-      setIsOpen(false);
+      if (closeDelayDuration > 0) {
+        closeTimeoutRef.current = setTimeout(() => {
+          setIsOpen(false);
+          closeTimeoutRef.current = null;
+        }, closeDelayDuration);
+      } else {
+        setIsOpen(false);
+      }
     }
-  }, [isMobile]);
+  }, [isMobile, closeDelayDuration]);
 
   if (isMobile && !showOnMobile) {
     return <div>{children}</div>;

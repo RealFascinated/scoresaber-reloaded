@@ -9,6 +9,7 @@ import { MapDifficulty } from "@ssr/common/score/map-difficulty";
 import Image from "next/image";
 import LeaderboardPreview from "../leaderboard/leaderboard-preview";
 import ScoreSaberSongName from "./song-name";
+import SimpleLink from "@/components/simple-link";
 
 export default function ScoreSaberScoreSongInfo({
   leaderboard,
@@ -92,8 +93,9 @@ export default function ScoreSaberScoreSongInfo({
         <div className="absolute flex h-full w-full items-end justify-center">
           <SimpleTooltip
             side="bottom"
+            closeDelayDuration={250}
             display={
-              <div className="flex flex-col gap-1">
+              <div className="flex flex-col gap-1 py-2">
                 <div className="flex flex-row gap-1">
                   {leaderboard.difficulties.map(difficulty => {
                     const difficultyLabel =
@@ -106,19 +108,25 @@ export default function ScoreSaberScoreSongInfo({
                         key={difficulty.leaderboardId}
                         display={getDifficultyName(difficulty.difficulty)}
                       >
-                        <p
+                        <SimpleLink
+                          href={`/leaderboard/${difficulty.leaderboardId}`}
+                          target="_blank"
                           className={cn(
                             isSelected ? "font-semibold" : "",
-                            "border-muted rounded-md border p-2 text-xs leading-none"
+                            `border-muted group rounded-md border p-1 px-2 text-xs leading-none`
                           )}
-                          style={{
-                            backgroundColor:
-                              getDifficulty(difficulty.difficulty).color +
-                              (isSelected ? "f5" : "20"),
-                          }}
+                          style={
+                            {
+                              backgroundColor:
+                                getDifficulty(difficulty.difficulty).color +
+                                (isSelected ? "f5" : "20"),
+                            } as React.CSSProperties
+                          }
                         >
-                          {difficultyLabel ?? getDifficultyName(difficulty.difficulty)}
-                        </p>
+                          <span className="group-hover:brightness-75">
+                            {difficultyLabel ?? getDifficultyName(difficulty.difficulty)}
+                          </span>
+                        </SimpleLink>
                       </SimpleTooltip>
                     );
                   })}
