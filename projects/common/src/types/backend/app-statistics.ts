@@ -18,4 +18,9 @@ export type AppStatistics = {
    * The total amount of inactive players.
    */
   inactivePlayers: number;
+
+  /**
+   * The total amount of active players.
+   */
+  activePlayers: number;
 };

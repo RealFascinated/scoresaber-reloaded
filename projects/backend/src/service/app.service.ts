@@ -8,22 +8,28 @@ export class AppService {
    * Gets the app statistics.
    */
   public static async getAppStatistics(): Promise<AppStatistics> {
-    const [trackedPlayers, trackedScores, storedReplays, inactivePlayers] = await Promise.all([
-      PlayerModel.estimatedDocumentCount(),
-      ScoreSaberScoreModel.estimatedDocumentCount(),
-      AdditionalScoreDataModel.countDocuments({
-        savedReplay: true,
-      }),
-      PlayerModel.countDocuments({
-        inactive: true,
-      }),
-    ]);
+    const [trackedPlayers, trackedScores, storedReplays, inactivePlayers, activePlayers] =
+      await Promise.all([
+        PlayerModel.estimatedDocumentCount(),
+        ScoreSaberScoreModel.estimatedDocumentCount(),
+        AdditionalScoreDataModel.countDocuments({
+          savedReplay: true,
+        }),
+        PlayerModel.countDocuments({
+          inactive: true,
+        }),
+
+        PlayerModel.countDocuments({
+          inactive: false,
+        }),
+      ]);
 
     return {
       trackedPlayers,
       trackedScores,
       storedReplays,
       inactivePlayers,
+      activePlayers,
     } as AppStatistics;
   }
 }
