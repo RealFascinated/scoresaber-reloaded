@@ -19,7 +19,7 @@ type Props = {
 
 export default function GenericStatisticChart({ statistics, datasetConfig }: Props) {
   const histories: Record<string, (number | null)[]> = {};
-  const historyDays = 180; // 6 months
+  const historyDays = 120; // ~4 months
 
   // Initialize histories for each dataset with null values for all days
   datasetConfig.forEach(config => {
