@@ -132,7 +132,7 @@ export class AdditionalScoreData {
   /**
    * Whether the replay was saved to storage.
    */
-  @prop({ required: false })
+  @prop({ required: false, index: true })
   public savedReplay?: boolean;
 
   /**
