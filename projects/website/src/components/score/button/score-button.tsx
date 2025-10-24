@@ -8,6 +8,7 @@ export default function ScoreButton({
   href,
   onClick,
   className,
+  ...props
 }: {
   children: React.ReactNode;
   tooltip?: React.ReactNode;
@@ -22,6 +23,7 @@ export default function ScoreButton({
         className
       )}
       onClick={onClick}
+      {...props}
     >
       {children}
     </button>

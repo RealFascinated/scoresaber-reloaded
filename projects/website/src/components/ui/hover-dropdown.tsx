@@ -224,6 +224,7 @@ export function DropdownButton({
   className = "",
   style = "default",
   onNavigate,
+  ...props
 }: DropdownButtonProps) {
   const styleClass =
     style === "warning"
@@ -247,6 +248,7 @@ export function DropdownButton({
         disabled ? "pointer-events-none opacity-50" : ""
       } ${className}`}
       onClick={handleClick}
+      {...props}
     >
       {children}
     </SimpleLink>

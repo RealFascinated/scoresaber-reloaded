@@ -17,6 +17,7 @@ export function ScoreBsrButton({ beatSaverMap }: ScoreBsrButtonProps) {
         copyToClipboard(`!bsr ${beatSaverMap.bsr}`);
       }}
       tooltip={<p>Click to copy the bsr code</p>}
+      data-umami-event="leaderboard-copy-bsr-button"
     >
       <p>!</p>
     </ScoreButton>

@@ -44,7 +44,10 @@ const playerData = [
                 ) : null
               }
             >
-              <SimpleLink href={`/ranking/${player.rankPages.global}`}>
+              <SimpleLink
+                href={`/ranking/${player.rankPages.global}`}
+                data-umami-event="player-global-rank-button"
+              >
                 <span className="hover:text-primary m-0 text-sm leading-[1.2] transition-all hover:brightness-[66%]">
                   #{formatNumberWithCommas(player.rank)}
                 </span>
@@ -72,7 +75,10 @@ const playerData = [
               tooltip={name => `Country Rank in ${name}`}
             />
             <ChangeOverTime player={player} type={PlayerStatChange.CountryRank}>
-              <SimpleLink href={`/ranking/${player.country}/${player.rankPages.country}`}>
+              <SimpleLink
+                href={`/ranking/${player.country}/${player.rankPages.country}`}
+                data-umami-event="player-country-rank-button"
+              >
                 <span className="hover:text-primary m-0 text-sm leading-[1.4] transition-all hover:brightness-[66%]">
                   #{formatNumberWithCommas(player.countryRank)}
                 </span>
@@ -92,6 +98,7 @@ const playerData = [
           <FaMedal className="text-muted-foreground size-4" />
           <FallbackLink
             href={player.rankPages.medals ? `/medals/${player.rankPages.medals}` : undefined}
+            data-umami-event="player-medal-rank-button"
           >
             <span
               className={cn(

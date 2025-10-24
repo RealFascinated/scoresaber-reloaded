@@ -18,9 +18,9 @@ type Props = {
   children: React.ReactNode;
 };
 
-export default function FallbackLink({ href, children, className }: Props) {
+export default function FallbackLink({ href, children, className, ...props }: Props) {
   return href ? (
-    <NextLink href={href} target="_blank" className={clsx("w-fit", className)}>
+    <NextLink href={href} target="_blank" className={clsx("w-fit", className)} {...props}>
       {children}
     </NextLink>
   ) : (

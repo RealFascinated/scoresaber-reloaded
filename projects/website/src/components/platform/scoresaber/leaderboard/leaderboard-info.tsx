@@ -46,6 +46,7 @@ export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
             <FallbackLink
               href={beatSaverMap ? `https://beatsaver.com/maps/${beatSaverMap?.bsr}` : undefined}
               className="transition-all hover:brightness-[66%]"
+              data-umami-event="leaderboard-beatsaver-button"
             >
               <h3 className="text-foreground mb-1 line-clamp-2 text-xl leading-tight font-bold">
                 {leaderboardData.fullName}
@@ -64,7 +65,10 @@ export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-1.5 rounded-md bg-purple-50 px-2 py-1 text-xs font-medium text-purple-700 dark:bg-purple-900/20 dark:text-purple-300">
                 <MapIcon className="h-3 w-3" />
-                <FallbackLink href={getBeatSaverMapperProfileUrl(beatSaverMap)}>
+                <FallbackLink
+                  href={getBeatSaverMapperProfileUrl(beatSaverMap)}
+                  data-umami-event="leaderboard-mapper-button"
+                >
                   <span
                     className={cn(
                       "font-medium",

@@ -13,6 +13,7 @@ export default function ScoreSaberSongName({
     <SimpleLink
       href={`/leaderboard/${leaderboard.id}`}
       className="text-song-name w-fit cursor-pointer text-left transition-all hover:brightness-[66%]"
+      data-umami-event="leaderboard-button"
     >
       {text}
     </SimpleLink>
