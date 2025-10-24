@@ -1,6 +1,5 @@
 "use client";
 
-import Statistic from "@/components/landing/statistic";
 import { env } from "@ssr/common/env";
 import { AppStatistics } from "@ssr/common/types/backend/app-statistics";
 import Request from "@ssr/common/utils/request";

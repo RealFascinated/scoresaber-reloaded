@@ -54,13 +54,13 @@ export default function OverlaySongInfoView({ overlayData }: OverlaySongInfoProp
           >
             {getDifficultyName(difficulty)}
           </div>
-           <div className="flex items-center [&>*:not(:last-child)]:after:content-['|'] [&>*:not(:last-child)]:after:mx-2 [&>*:not(:last-child)]:after:text-muted-foreground">
-             <span>!bsr {beatSaverMap.bsr}</span>
-             <span>{formatNumberWithCommas(beatSaverMap.metadata.bpm)} BPM</span>
-             {leaderboard && leaderboard.stars > 0 && (
-               <span className="text-primary">{leaderboard.stars} ★</span>
-             )}
-           </div>
+          <div className="[&>*:not(:last-child)]:after:text-muted-foreground flex items-center [&>*:not(:last-child)]:after:mx-2 [&>*:not(:last-child)]:after:content-['|']">
+            <span>!bsr {beatSaverMap.bsr}</span>
+            <span>{formatNumberWithCommas(beatSaverMap.metadata.bpm)} BPM</span>
+            {leaderboard && leaderboard.stars > 0 && (
+              <span className="text-primary">{leaderboard.stars} ★</span>
+            )}
+          </div>
         </div>
       </div>
     </OverlayView>

@@ -7,7 +7,7 @@ const filters = z
     rankedOnly: z.boolean().optional(),
     unrankedOnly: z.boolean().optional(),
     passedOnly: z.boolean().optional(),
-    hmd: z.string().optional()
+    hmd: z.string().optional(),
   })
   .optional();
 

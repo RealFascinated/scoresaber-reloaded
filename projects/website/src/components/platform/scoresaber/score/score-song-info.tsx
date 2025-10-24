@@ -1,15 +1,14 @@
 import { cn } from "@/common/utils";
 import FallbackLink from "@/components/fallback-link";
+import SimpleLink from "@/components/simple-link";
 import SimpleTooltip from "@/components/simple-tooltip";
 import { StarIcon } from "@heroicons/react/24/solid";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
 import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
-import { MapDifficulty } from "@ssr/common/score/map-difficulty";
 import Image from "next/image";
 import LeaderboardPreview from "../leaderboard/leaderboard-preview";
 import ScoreSaberSongName from "./song-name";
-import SimpleLink from "@/components/simple-link";
 
 export default function ScoreSaberScoreSongInfo({
   leaderboard,

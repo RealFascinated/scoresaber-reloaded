@@ -3,7 +3,6 @@ import { AppStats } from "@/components/landing/app-statistics";
 import HmdUsageChart from "@/components/score/charts/hmd-usage-chart";
 import ScoreSaberStatisticsChart from "@/components/score/charts/scoresaber-statistics-chart";
 import SimpleLink from "@/components/simple-link";
-import { Button } from "@/components/ui/button";
 import { ChartBarIcon, DevicePhoneMobileIcon } from "@heroicons/react/24/solid";
 import { env } from "@ssr/common/env";
 import { Statistic } from "@ssr/common/model/statistics/statistic";

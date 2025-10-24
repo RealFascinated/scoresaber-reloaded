@@ -1,6 +1,7 @@
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { DetailType } from "@ssr/common/detail-type";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
+import { HMD } from "@ssr/common/hmds";
 import Logger from "@ssr/common/logger";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
@@ -12,7 +13,6 @@ import SuperJSON from "superjson";
 import { redisClient } from "../common/redis";
 import CacheService, { CacheId } from "./cache.service";
 import { PlayerService } from "./player/player.service";
-import { HMD } from "@ssr/common/hmds";
 
 // Type for cached player data with timestamp
 type CachedScoreSaberPlayerToken = ScoreSaberPlayerToken & {

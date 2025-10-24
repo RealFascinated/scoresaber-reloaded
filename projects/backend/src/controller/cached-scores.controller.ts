@@ -38,7 +38,7 @@ export default class CachedScoresController {
       direction: ScoreSort["direction"];
       page: number;
     };
-    query: ScoreSort["filters"] & { search?: string; };
+    query: ScoreSort["filters"] & { search?: string };
   }): Promise<PlayerScoresResponse> {
     const { search, ...otherFilters } = filters;
     return (

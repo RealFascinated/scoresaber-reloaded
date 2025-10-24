@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useIsMobile } from "@/contexts/viewport-context";
 import useDatabase from "@/hooks/use-database";
-import { PersonIcon } from "@radix-ui/react-icons";
 import { useLiveQuery } from "dexie-react-hooks";
+import { UsersIcon } from "lucide-react";
 import { useRef, useState } from "react";
 import NavbarButton from "../navbar/navbar-button";
 
@@ -45,8 +45,8 @@ export default function FriendsButton() {
         onMouseLeave={handleMouseLeave}
       >
         <NavbarButton className="px-0">
-          <PersonIcon className="text-muted-foreground size-5" />
-          <span className="text-muted-foreground hidden xl:flex">Friends</span>
+          <UsersIcon className="text-muted-foreground size-5" />
+          <span className="text-muted-foreground hidden 2xl:flex">Friends</span>
         </NavbarButton>
       </PopoverTrigger>
       <PopoverContent

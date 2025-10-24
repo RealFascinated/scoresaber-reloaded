@@ -186,7 +186,10 @@ export default function Footer({
       {/* Bottom Section */}
       <div className="flex justify-center">
         {/* Build Ifo */}
-        <SimpleLink className="text-sm opacity-50" href={`https://github.com/RealFascinated/scoresaber-reloaded/commit/${buildId}`}>
+        <SimpleLink
+          className="text-sm opacity-50"
+          href={`https://github.com/RealFascinated/scoresaber-reloaded/commit/${buildId}`}
+        >
           Build {buildId} ({buildTimeShort})
         </SimpleLink>
       </div>

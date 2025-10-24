@@ -1,12 +1,12 @@
 "use client";
 
+import SimpleLink from "@/components/simple-link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import SimpleLink from "@/components/simple-link";
-import { ExclamationTriangleIcon, BoltIcon } from "@heroicons/react/24/solid";
-import { ArrowLeftIcon, ArrowPathIcon } from "@heroicons/react/24/outline";
-import Image from "next/image";
+import { ArrowPathIcon } from "@heroicons/react/24/outline";
+import { BoltIcon, ExclamationTriangleIcon } from "@heroicons/react/24/solid";
 import { HomeIcon } from "lucide-react";
+import Image from "next/image";
 
 export default function Error() {
   return (

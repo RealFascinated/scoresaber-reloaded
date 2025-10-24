@@ -123,6 +123,7 @@ export default class Database extends Dexie {
    */
   async setMainPlayerId(id: string) {
     await this.setSetting(SettingIds.MainPlayer, id);
+    deleteCookieValue("playerId");
   }
 
   /**

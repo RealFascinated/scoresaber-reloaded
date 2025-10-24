@@ -7,66 +7,51 @@ import ProfileButton from "@/components/navbar/profile-button";
 import useDatabase from "@/hooks/use-database";
 import { CubeIcon } from "@heroicons/react/24/solid";
 import { useLiveQuery } from "dexie-react-hooks";
-import { MusicIcon, TrendingUpIcon, TrophyIcon } from "lucide-react";
+import { ChartBarIcon, MusicIcon, TrendingUpIcon, TrophyIcon } from "lucide-react";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { ReactElement } from "react";
 import { FaMedal } from "react-icons/fa";
-import Settings from "../settings/settings";
 import SimpleLink from "../simple-link";
 
 const links: ReactElement<any>[] = [
   <FriendsButton key="friends" />,
   <SimpleNavLink
     key="ranking"
-    content={
-      <>
-        <TrendingUpIcon className="size-5" />
-        <span className="hidden xl:flex">Ranking</span>
-      </>
-    }
+    name="Ranking"
+    icon={<TrendingUpIcon className="size-5" />}
     href="/ranking"
   />,
   <SimpleNavLink
     key="medals"
-    content={
-      <>
-        <FaMedal className="size-4.5" />
-        <span className="hidden xl:flex">Medals</span>
-      </>
-    }
+    name="Medals"
+    icon={<FaMedal className="size-4.5" />}
     href="/medals/1"
   />,
   <SimpleNavLink
     key="maps"
-    content={
-      <>
-        <MusicIcon className="size-5" />
-        <span className="hidden xl:flex">Maps</span>
-      </>
-    }
+    name="Maps"
+    icon={<MusicIcon className="size-5" />}
     href="/maps/leaderboards"
   />,
   <SimpleNavLink
     key="overlay"
-    content={
-      <>
-        <CubeIcon className="size-5" />
-        <span className="hidden xl:flex">Overlay</span>
-      </>
-    }
+    name="Overlay"
+    icon={<CubeIcon className="size-5" />}
     href="/overlay/builder"
     className="hidden md:flex"
   />,
   <SimpleNavLink
     key="top-scores"
-    content={
-      <>
-        <TrophyIcon className="size-5" />
-        <span className="hidden xl:flex">Top Scores</span>
-      </>
-    }
+    name="Top Scores"
+    icon={<TrophyIcon className="size-5" />}
     href="/scores/top"
+  />,
+  <SimpleNavLink
+    key="statistics"
+    name="Statistics"
+    icon={<ChartBarIcon className="size-5" />}
+    href="/statistics"
   />,
 ];
 
@@ -77,7 +62,7 @@ export default function Navbar() {
   return (
     <nav
       className={cn(
-        "border-border bg-background/55 backdrop-blur-sm sticky inset-x-0 top-0 z-50 flex h-12 w-full items-center justify-between border-b px-2 py-1 backdrop-blur-md select-none lg:justify-around lg:px-8"
+        "border-border bg-background/55 sticky inset-x-0 top-0 z-50 flex h-12 w-full items-center justify-between border-b px-2 py-1 backdrop-blur-md select-none lg:justify-around lg:px-8"
       )}
     >
       {/* Left */}
@@ -106,12 +91,9 @@ export default function Navbar() {
 
       {/* Right */}
       <div className="flex items-center gap-0.5 transition-all">
-        {/* Settings and Search */}
-        <div className="flex items-center gap-2 md:gap-3">
-          <Settings />
-          <div className="w-11 md:w-64">
-            <PlayerAndLeaderboardSearch />
-          </div>
+        {/* Search */}
+        <div className="w-11 md:w-64">
+          <PlayerAndLeaderboardSearch />
         </div>
 
         {/* Profile Section */}
@@ -122,11 +104,13 @@ export default function Navbar() {
 }
 
 function SimpleNavLink({
-  content,
+  name,
+  icon,
   href,
   className,
 }: {
-  content: ReactElement<any>;
+  name: string;
+  icon: ReactElement<any>;
   href: string;
   className?: string;
 }) {
@@ -144,7 +128,8 @@ function SimpleNavLink({
       target={href.startsWith("/") ? "_self" : "_blank"}
       draggable={false}
     >
-      {content}
+      {icon}
+      <span className="hidden 2xl:flex">{name}</span>
     </SimpleLink>
   );
 }

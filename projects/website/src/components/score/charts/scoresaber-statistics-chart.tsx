@@ -2,8 +2,6 @@
 
 import { DatasetConfig } from "@/common/chart/types";
 import GenericStatisticChart from "@/components/platform-statistics/generic-statistic-chart";
-import SimpleLink from "@/components/simple-link";
-import { Button } from "@/components/ui/button";
 import { Statistic } from "@ssr/common/model/statistics/statistic";
 import { StatisticsType } from "@ssr/common/model/statistics/statistic-type";
 import { formatNumberWithCommas, isWholeNumber } from "@ssr/common/utils/number-utils";

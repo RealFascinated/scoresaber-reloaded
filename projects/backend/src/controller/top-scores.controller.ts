@@ -11,7 +11,7 @@ export default class TopScoresController {
       page: t.Number({ required: true, default: 1 }),
     }),
     detail: {
-      description: "Fetch the top scores for a given timeframe",
+      description: "Fetch the all-time top scores",
     },
   })
   public async getTopScores({ params: { page } }: { params: { page: number } }): Promise<unknown> {

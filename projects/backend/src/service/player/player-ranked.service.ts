@@ -1,10 +1,9 @@
 import { ScoreSaberCurve } from "@ssr/common/leaderboard-curve/scoresaber-curve";
-import { PlayerModel } from "@ssr/common/model/player/player";
+import { Player, PlayerModel } from "@ssr/common/model/player/player";
 import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import { PlayerRankedPpsResponse } from "@ssr/common/response/player-ranked-pps-response";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import { PlayerService } from "./player.service";
-import { Player } from "@ssr/common/model/player/player";
 
 export class PlayerRankedService {
   /**

@@ -132,19 +132,21 @@ export default function ScoreSaberScoreDisplay({
           />
         </div>
 
-        {!isMobile && <FallbackLink href={score.isTracked ? `/score/${score.scoreId}` : undefined}>
-          <SimpleTooltip
-            display={score.isTracked ? "View score details" : "No score data found :("}
-            className="px-1"
-          >
-            <ChevronRight
-              className={cn(
-                "h-6 w-4",
-                score.isTracked ? "cursor-pointer" : "cursor-not-allowed text-red-400"
-              )}
-            />
-          </SimpleTooltip>
-        </FallbackLink>}
+        {!isMobile && (
+          <FallbackLink href={score.isTracked ? `/score/${score.scoreId}` : undefined}>
+            <SimpleTooltip
+              display={score.isTracked ? "View score details" : "No score data found :("}
+              className="px-1"
+            >
+              <ChevronRight
+                className={cn(
+                  "h-6 w-4",
+                  score.isTracked ? "cursor-pointer" : "cursor-not-allowed text-red-400"
+                )}
+              />
+            </SimpleTooltip>
+          </FallbackLink>
+        )}
       </div>
 
       <ScoreDropdown
