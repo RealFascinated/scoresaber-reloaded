@@ -13,7 +13,7 @@ export default class StatisticsController {
   })
   public async getPlatformStatistics(): Promise<StatisticsResponse> {
     return {
-      statistics: await StatisticsService.getScoreSaberStatistics(180),
+      statistics: await StatisticsService.getScoreSaberStatistics(120), // ~4 months
     };
   }
 }
