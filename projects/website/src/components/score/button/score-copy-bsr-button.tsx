@@ -9,7 +9,7 @@ type ScoreBsrButtonProps = {
   beatSaverMap: BeatSaverMapResponse;
 };
 
-export function ScoreBsrButton({ beatSaverMap }: ScoreBsrButtonProps) {
+export function ScoreCopyBsrButton({ beatSaverMap }: ScoreBsrButtonProps) {
   return (
     <ScoreButton
       onClick={() => {

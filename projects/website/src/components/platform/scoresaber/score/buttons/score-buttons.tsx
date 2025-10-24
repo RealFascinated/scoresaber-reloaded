@@ -3,7 +3,7 @@
 import { cn } from "@/common/utils";
 import ScoreSaberScoreEditorButton from "@/components/platform/scoresaber/score/buttons/score-editor-button";
 import { BeatSaverMapButton } from "@/components/score/button/beat-saver-map-button";
-import { ScoreBsrButton } from "@/components/score/button/score-bsr-button";
+import { ScoreCopyBsrButton } from "@/components/score/button/score-copy-bsr-button";
 import { ScoreReplayButton } from "@/components/score/button/score-replay-button";
 import { SongOpenInYoutubeButton } from "@/components/score/button/song-open-in-youtube-button";
 import SimpleTooltip from "@/components/simple-tooltip";
@@ -39,7 +39,7 @@ const buttons: ButtonConfig[] = [
       return beatSaverMap != undefined && !isPreviousScore;
     },
     render: ({ beatSaverMap }: Props) => {
-      return <ScoreBsrButton beatSaverMap={beatSaverMap!} />;
+      return <ScoreCopyBsrButton beatSaverMap={beatSaverMap!} />;
     },
   },
   {
