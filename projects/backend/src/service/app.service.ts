@@ -2,7 +2,6 @@ import { AdditionalScoreDataModel } from "@ssr/common/model/additional-score-dat
 import { PlayerModel } from "@ssr/common/model/player/player";
 import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import { AppStatistics } from "@ssr/common/types/backend/app-statistics";
-import { PlayerScoreHistoryService } from "./player/player-score-history.service";
 import { ScoreSaberPreviousScoreModel } from "@ssr/common/model/score/impl/scoresaber-previous-score";
 
 export class AppService {
