@@ -3,6 +3,7 @@ import { PlayerModel } from "@ssr/common/model/player/player";
 import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import { AppStatistics } from "@ssr/common/types/backend/app-statistics";
 import { ScoreSaberPreviousScoreModel } from "@ssr/common/model/score/impl/scoresaber-previous-score";
+import MetricsService, { MetricType } from "./metrics.service";
 
 export class AppService {
   /**
@@ -26,10 +27,7 @@ export class AppService {
       PlayerModel.countDocuments({
         inactive: true,
       }),
-
-      PlayerModel.countDocuments({
-        inactive: false,
-      }),
+      (await MetricsService.getMetric(MetricType.ACTIVE_ACCOUNTS)).value,
     ]);
 
     return {
