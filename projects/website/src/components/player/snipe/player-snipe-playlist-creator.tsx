@@ -243,7 +243,7 @@ export default function SnipePlaylistCreator({ toSnipe }: SnipePlaylistCreatorPr
 
   return (
     <Dialog>
-      <DialogTrigger>
+      <DialogTrigger data-umami-event="player-snipe-creator-button">
         <SimpleTooltip
           side="top"
           className="cursor-pointer"
