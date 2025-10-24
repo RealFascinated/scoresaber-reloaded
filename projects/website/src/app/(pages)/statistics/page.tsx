@@ -46,7 +46,7 @@ export default async function StatisticsPage() {
     <div className="flex w-full justify-center gap-2">
       <article className="flex flex-1 flex-col gap-2">
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-6 md:px-6">
+        <div className="px-4 py-6 md:px-6">
           <div className="flex items-center gap-4">
             <div className="bg-primary/10 text-primary rounded-xl p-3 shadow-lg">
               <ChartBarIcon className="size-6" />
@@ -64,7 +64,7 @@ export default async function StatisticsPage() {
           <div className="flex flex-col gap-2">
             {/* Game Statistics Section */}
             <Card className="gap-2">
-              <div className="flex items-center justify-between p-4">
+              <div className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center gap-3">
                   <div className="bg-primary/10 text-primary rounded-lg p-2">
                     <ChartBarIcon className="size-5" />
@@ -81,7 +81,7 @@ export default async function StatisticsPage() {
                   target="_blank"
                   className="text-primary hover:text-primary/80 text-sm font-medium"
                 >
-                  View in Grafana →
+                  View more in Grafana →
                 </SimpleLink>
               </div>
 
