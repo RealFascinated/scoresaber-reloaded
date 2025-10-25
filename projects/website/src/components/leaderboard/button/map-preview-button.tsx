@@ -16,6 +16,7 @@ export function MapPreviewButton({ beatSaverMap }: MapPreviewButtonProps) {
     <ScoreButton
       href={`https://allpoland.github.io/ArcViewer/?id=${beatSaverMap.bsr}&difficulty=${difficulty.difficulty}&mode=${difficulty.characteristic}`}
       tooltip={<p>Click to view a preview of the map</p>}
+      data-umami-event="map-preview-button"
     >
       <PlayCircleIcon className="h-5 w-5" />
     </ScoreButton>
