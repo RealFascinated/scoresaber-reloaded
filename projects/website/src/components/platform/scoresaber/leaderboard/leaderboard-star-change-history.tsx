@@ -1,9 +1,10 @@
 "use client";
 
 import { cn } from "@/common/utils";
+import SimpleTooltip from "@/components/simple-tooltip";
 import { StarIcon } from "@heroicons/react/24/solid";
 import { LeaderboardStarChange } from "@ssr/common/response/leaderboard-star-change";
-import { timeAgo } from "@ssr/common/utils/time-utils";
+import { formatDate, timeAgo } from "@ssr/common/utils/time-utils";
 import {
   ArrowRightIcon,
   ChevronDownIcon,
@@ -79,7 +80,17 @@ export function LeaderboardStarChangeHistory({
                   >
                     {/* Timestamp and change indicator */}
                     <div className="flex items-center gap-2">
-                      <span className="text-muted-foreground">{timeAgo(starChange.timestamp)}</span>
+                      <SimpleTooltip
+                        display={
+                          <p>
+                            {formatDate(new Date(starChange.timestamp), "Do MMMM, YYYY HH:mm a")}
+                          </p>
+                        }
+                      >
+                        <span className="text-muted-foreground">
+                          {timeAgo(starChange.timestamp)}
+                        </span>
+                      </SimpleTooltip>
                       {changeType === "increase" && (
                         <TrendingUpIcon className="h-3 w-3 text-green-500" />
                       )}
