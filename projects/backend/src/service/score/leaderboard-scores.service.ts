@@ -35,8 +35,8 @@ export class LeaderboardScoresService {
       .lookupLeaderboardScores(leaderboardId, page, {
         country: country,
       });
-    if (leaderboardScores == undefined) {
-      return;
+    if (!leaderboardScores) {
+      throw new NotFoundError(`Leaderboard scores for leaderboard "${leaderboardId}" not found`);
     }
 
     // Process scores in parallel
