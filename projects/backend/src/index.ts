@@ -172,18 +172,6 @@ export const app = new Elysia()
     })
   );
 
-app.use(
-  etag({
-    serialize(response) {
-      if (typeof response === "object") {
-        return JSON.stringify(response);
-      }
-      return String(response);
-    },
-  })
-);
-
-// Register metrics plugin after etag middleware to capture final status codes including 304
 app.use(metricsPlugin());
 
 /**
@@ -242,12 +230,12 @@ app.use(cors());
 /**
  * Request logger
  */
-app.use(
-  logger({
-    enabled: true,
-    mode: "combined",
-  })
-);
+// app.use(
+//   logger({
+//     enabled: true,
+//     mode: "combined",
+//   })
+// );
 
 /**
  * Security settings
@@ -325,85 +313,57 @@ app.listen({
   idleTimeout: 120, // 2 minutes
 });
 
-// Add signal handlers for graceful shutdown
-const setupSignalHandlers = () => {
-  let isShuttingDown = false;
-  let forceExitTimeout: NodeJS.Timeout | null = null;
+// Graceful shutdown handlers
+let isShuttingDown = false;
+let forceExitTimeout: NodeJS.Timeout | null = null;
 
-  const shutdown = async () => {
-    if (isShuttingDown) {
-      Logger.info("Shutdown already in progress, ignoring signal");
-      return;
-    }
-    isShuttingDown = true;
+const gracefulShutdown = async () => {
+  if (isShuttingDown) return;
+  isShuttingDown = true;
 
-    Logger.info("Starting graceful shutdown...");
+  Logger.info("Starting graceful shutdown...");
 
-    try {
-      // Stop accepting new requests
-      await app.stop();
-      Logger.info("Server stopped accepting new requests");
+  try {
+    await app.stop();
+    Logger.info("Server stopped accepting new requests");
 
-      sendEmbedToChannel(
-        DiscordChannels.BACKEND_LOGS,
-        new EmbedBuilder().setDescription("Backend shutting down...")
-      );
+    await sendEmbedToChannel(
+      DiscordChannels.BACKEND_LOGS,
+      new EmbedBuilder().setDescription("Backend shutting down...")
+    );
 
-      // Stop all event listeners (this will also stop queues through QueueManager)
-      Logger.info("Stopping all services...");
-      for (const listener of EventsManager.getListeners()) {
-        await listener.onStop?.();
-      }
-      Logger.info("All services stopped");
-
-      // Close MongoDB connection
-      try {
-        await mongoose.disconnect();
-        Logger.info("MongoDB connection closed");
-      } catch (error) {
-        Logger.error("Error closing MongoDB connection:", error);
-      }
-
-      // Clear the force exit timeout if it exists
-      if (forceExitTimeout) {
-        clearTimeout(forceExitTimeout);
-      }
-
-      Logger.info("Shutdown complete");
-      process.exit(0);
-    } catch (error) {
-      Logger.error("Error during shutdown:", error);
-      process.exit(1);
-    }
-  };
-
-  // Handle both SIGTERM and SIGINT with a single handler
-  const handleSignal = (signal: string) => {
-    if (isShuttingDown) {
-      Logger.info(`Received ${signal} but shutdown already in progress, ignoring`);
-      return;
+    Logger.info("Stopping all services...");
+    for (const listener of EventsManager.getListeners()) {
+      await listener.onStop?.();
     }
 
-    Logger.info(`Received ${signal}`);
-    shutdown();
+    await mongoose.disconnect();
+    Logger.info("MongoDB connection closed");
 
-    // Set up force exit timeout only once
-    if (!forceExitTimeout) {
-      forceExitTimeout = setTimeout(() => {
-        Logger.error("Forced shutdown after timeout");
-        process.exit(1);
-      }, 10000);
-    }
-  };
+    if (forceExitTimeout) clearTimeout(forceExitTimeout);
 
-  // Remove any existing handlers first
-  process.removeAllListeners("SIGTERM");
-  process.removeAllListeners("SIGINT");
-
-  // Add our handlers
-  process.on("SIGTERM", () => handleSignal("SIGTERM"));
-  process.on("SIGINT", () => handleSignal("SIGINT"));
+    Logger.info("Shutdown complete");
+    process.exit(0);
+  } catch (error) {
+    Logger.error("Error during shutdown:", error);
+    process.exit(1);
+  }
 };
 
-// Setup signal handlers after server starts
-setupSignalHandlers();
+const handleSignal = (signal: string) => {
+  if (isShuttingDown) return;
+
+  Logger.info(`Received ${signal}`);
+  gracefulShutdown();
+
+  if (!forceExitTimeout) {
+    forceExitTimeout = setTimeout(() => {
+      Logger.error("Forced shutdown after timeout");
+      process.exit(1);
+    }, 10000);
+  }
+};
+
+process.removeAllListeners("SIGTERM").removeAllListeners("SIGINT");
+process.on("SIGTERM", () => handleSignal("SIGTERM"));
+process.on("SIGINT", () => handleSignal("SIGINT"));
