@@ -16,6 +16,7 @@ import { DifficultyButton } from "../../../leaderboard/button/difficulty-button"
 import SimplePagination from "../../../simple-pagination";
 import ScoreSaberLeaderboardScore from "../score/leaderboard-score";
 import ScoreDropdown from "../score/score-dropdown";
+import { buildSearchParams } from "@ssr/common/utils/search-params";
 
 function LeaderboardScoresSkeleton() {
   const skeletonRows = new Array(10).fill(0);
@@ -162,18 +163,18 @@ export default function LeaderboardScores({
   );
 
   useEffect(() => {
+    setPage(1);
+  }, [filter.country]);
+
+  useEffect(() => {
     if (disableUrlChanging) {
       return;
     }
 
     changePageUrl(
-      `/leaderboard/${leaderboardId}${page !== 1 ? `/${page}` : ""}${mode !== ScoreModeEnum.Global ? "?category=" + mode : ""}`
+      `/leaderboard/${leaderboardId}${page !== 1 ? `/${page}` : ""}?${buildSearchParams({ category: mode === ScoreModeEnum.Global ? undefined : mode, country: filter.country ?? undefined })}`
     );
-  }, [leaderboardId, page, disableUrlChanging, changePageUrl, mode]);
-
-  if (!scores || isLoading) {
-    return <LeaderboardScoresSkeleton />;
-  }
+  }, [leaderboardId, page, disableUrlChanging, changePageUrl, mode, filter.country]);
 
   const isFriends = mode === ScoreModeEnum.Friends;
 
@@ -202,19 +203,19 @@ export default function LeaderboardScores({
         )}
       </div>
 
-      {isError ||
-        (scores.items.length === 0 && (
-          <EmptyState
-            title="No Scores Found"
-            description={
-              isFriends
-                ? "You or your friends haven't played this map yet"
-                : "No scores were found on this leaderboard or page"
-            }
-          />
-        ))}
+      {(isError ||
+        (!isLoading && !isRefetching && (!scores || (scores && scores.items.length === 0)))) && (
+        <EmptyState
+          title="No Scores Found"
+          description={
+            isFriends
+              ? "You or your friends haven't played this map yet"
+              : "No scores were found on this leaderboard or page"
+          }
+        />
+      )}
 
-      {scores.items.length > 0 && (
+      {scores && scores.items.length > 0 && (
         <>
           <div className="border-border/30 bg-background/50 relative overflow-x-auto rounded-lg border">
             <table className="table w-full table-auto border-spacing-0 text-left text-sm">

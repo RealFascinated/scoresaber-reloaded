@@ -13,15 +13,21 @@ type FilterContextProps = {
 };
 const LeaderboardFilterContext = createContext<FilterContextProps | undefined>(undefined);
 
-export const LeaderboardFilterProvider = ({ children }: { children: ReactNode }) => {
+export const LeaderboardFilterProvider = ({
+  children,
+  initialCountry,
+}: {
+  children: ReactNode;
+  initialCountry?: string;
+}) => {
   const database = useDatabase();
   const defaultCountry = useLiveQuery(() =>
     database.getSetting<string>(SettingIds.DefaultLeaderboardCountry)
   );
-  const [country, setCountry] = useState<string | undefined>();
+  const [country, setCountry] = useState<string | undefined>(initialCountry ?? undefined);
 
   useEffect(() => {
-    setCountry(defaultCountry ?? undefined);
+    setCountry(initialCountry ?? defaultCountry ?? undefined);
   }, [defaultCountry]);
 
   const clearFilters = () => {
@@ -45,11 +51,11 @@ export const LeaderboardFilterProvider = ({ children }: { children: ReactNode })
 /**
  * Use the leaderboard filter context.
  */
-export const useLeaderboardFilter = (): FilterContextProps => {
+export const useLeaderboardFilter = (initialCountry?: string): FilterContextProps => {
   const context = useContext(LeaderboardFilterContext);
   if (!context) {
     return {
-      country: undefined,
+      country: initialCountry ?? undefined,
       setCountry: () => {},
       clearFilters: () => {},
       resetFilters: () => {},

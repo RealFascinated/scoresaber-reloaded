@@ -17,6 +17,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import LeaderboardPpChart from "../chart/leaderboard-pp-chart";
 import { LeaderboardStarChangeHistory } from "../leaderboard-star-change-history";
+import { useSearchParams } from "next/navigation";
 
 type LeaderboardDataProps = {
   /**
@@ -40,6 +41,7 @@ export function ScoreSaberLeaderboardData({
   initialPage,
   initialCategory,
 }: LeaderboardDataProps) {
+  const country = useSearchParams().get("country");
   const isMobile = useIsMobile();
   const [currentLeaderboardId, setCurrentLeaderboardId] = useState(
     initialLeaderboard.leaderboard.id
@@ -62,7 +64,7 @@ export function ScoreSaberLeaderboardData({
   const { leaderboard, beatsaver } = leaderboardResponse;
 
   return (
-    <LeaderboardFilterProvider>
+    <LeaderboardFilterProvider initialCountry={country ?? undefined}>
       <div className="w-full">
         <div className="flex w-full flex-col-reverse gap-2 2xl:flex-row">
           {/* Mobile Only */}
