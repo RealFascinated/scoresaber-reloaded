@@ -13,10 +13,9 @@ export class PlayerCoreService {
    * Gets a player by id.
    *
    * @param id the player's id
-   * @param create whether to create the player if it doesn't exist
    * @param playerToken an optional player token
    * @returns the player document if found
-   * @throws NotFoundError if the player doesn't exist and create is false
+   * @throws NotFoundError if the player doesn't exist on ScoreSaber
    */
   public static async getPlayer(id: string, playerToken?: ScoreSaberPlayerToken): Promise<Player> {
     // Wait for the existing lock if it's in progress
