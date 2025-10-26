@@ -153,7 +153,6 @@ export default function AccSaberPlayerScores({ player, sort, page, type, order }
       { value: currentOrder, condition: !isDefaultState },
       { value: currentPage, condition: !isDefaultState },
     ],
-    currentPage,
   });
 
   const handlePageChange = (newPage: number) => {
@@ -262,7 +261,6 @@ export default function AccSaberPlayerScores({ player, sort, page, type, order }
               totalItems={previousScores.metadata.totalItems}
               itemsPerPage={previousScores.metadata.itemsPerPage}
               loadingPage={isLoading || isRefetching || pendingAnimation ? currentPage : undefined}
-              generatePageUrl={page => buildUrl(page)}
               onPageChange={handlePageChange}
             />
           </>

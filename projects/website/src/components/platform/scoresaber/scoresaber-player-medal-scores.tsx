@@ -80,7 +80,6 @@ export default function ScoreSaberPlayerMedalScores({
       { value: "medals" },
       { value: currentPage, condition: currentPage !== 1 },
     ],
-    currentPage,
   });
 
   // Render helpers
@@ -133,7 +132,6 @@ export default function ScoreSaberPlayerMedalScores({
           totalItems={scores.metadata.totalItems}
           itemsPerPage={scores.metadata.itemsPerPage}
           loadingPage={isLoading || isRefetching ? currentPage : undefined}
-          generatePageUrl={buildUrl}
           onPageChange={handlePageChange}
         />
       </>

@@ -329,7 +329,6 @@ export default function ScoreSaberPlayerScores({
         condition: Boolean(currentFilter && currentFilter !== "All Scores"),
       },
     ],
-    currentPage,
   });
 
   // Render helpers
