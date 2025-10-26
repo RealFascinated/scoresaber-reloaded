@@ -5,7 +5,7 @@ import PageTransition from "@/components/ui/page-transition";
 import { usePageTransition } from "@/components/ui/page-transition-context";
 import { useIsMobile } from "@/contexts/viewport-context";
 import useDatabase from "@/hooks/use-database";
-import usePageNavigation from "@/hooks/use-page-navigation";
+import { useUrlBuilder } from "@/hooks/use-url-builder";
 import { Pagination } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerScoresResponse } from "@ssr/common/response/player-scores-response";
@@ -34,7 +34,6 @@ export default function ScoreSaberPlayerMedalScores({
   // Hooks
   const isMobile = useIsMobile();
   const database = useDatabase();
-  const { changePageUrl } = usePageNavigation();
   const { animateLeft, animateRight } = usePageTransition();
 
   // Database queries
@@ -75,16 +74,14 @@ export default function ScoreSaberPlayerMedalScores({
   );
 
   // URL management
-  const getUrl = useCallback(
-    (page: number) => {
-      return `/player/${player.id}/medals/${page}`;
-    },
-    [player.id]
-  );
-
-  useEffect(() => {
-    changePageUrl(getUrl(currentPage));
-  }, [currentPage, player.id, changePageUrl, getUrl]);
+  const { buildUrl } = useUrlBuilder({
+    basePath: `/player/${player.id}`,
+    segments: [
+      { value: "medals" },
+      { value: currentPage, condition: currentPage !== 1 },
+    ],
+    currentPage,
+  });
 
   // Render helpers
   const renderScoresList = () => {
@@ -136,7 +133,7 @@ export default function ScoreSaberPlayerMedalScores({
           totalItems={scores.metadata.totalItems}
           itemsPerPage={scores.metadata.itemsPerPage}
           loadingPage={isLoading || isRefetching ? currentPage : undefined}
-          generatePageUrl={getUrl}
+          generatePageUrl={buildUrl}
           onPageChange={handlePageChange}
         />
       </>

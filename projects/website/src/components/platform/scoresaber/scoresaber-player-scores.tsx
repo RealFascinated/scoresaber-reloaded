@@ -9,7 +9,7 @@ import PageTransition from "@/components/ui/page-transition";
 import { usePageTransition } from "@/components/ui/page-transition-context";
 import { useIsMobile } from "@/contexts/viewport-context";
 import useDatabase from "@/hooks/use-database";
-import usePageNavigation from "@/hooks/use-page-navigation";
+import { useUrlBuilder } from "@/hooks/use-url-builder";
 import { getHMDInfo, HMD } from "@ssr/common/hmds";
 import { Pagination } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
@@ -157,7 +157,6 @@ export default function ScoreSaberPlayerScores({
   // Hooks
   const isMobile = useIsMobile();
   const database = useDatabase();
-  const { changePageUrl } = usePageNavigation();
   const { animateLeft, animateRight } = usePageTransition();
 
   // Database queries
@@ -304,35 +303,34 @@ export default function ScoreSaberPlayerScores({
   );
 
   // URL management
-  const getUrl = useCallback(
-    (page: number) => {
-      const queryParams = new URLSearchParams();
-      if (searchTerm && searchTerm !== "") {
-        queryParams.set("search", searchTerm);
-      }
-      if (currentFilter && currentFilter !== "All Scores") {
-        queryParams.set("filter", currentFilter);
-      }
-      if (scoresMode === "cached") {
-        return `/player/${player.id}/scoresaber/${scoresMode}/${currentSort}/${currentSortDirection}/${page}?${queryParams.toString()}`;
-      } else {
-        return `/player/${player.id}/scoresaber/${scoresMode}/${currentSort}/${page}?${queryParams.toString()}`;
-      }
-    },
-    [player.id, currentSort, currentSortDirection, scoresMode, searchTerm, currentFilter]
-  );
+  const isDefaultLiveState =
+    scoresMode === "live" && currentSort === DEFAULT_LIVE_SORT && currentPage === 1;
+  const isDefaultCachedState =
+    scoresMode === "cached" &&
+    currentSort === DEFAULT_CACHED_SORT &&
+    currentSortDirection === DEFAULT_CACHED_SORT_DIRECTION &&
+    currentPage === 1;
+  const isDefaultState = isDefaultLiveState || isDefaultCachedState;
 
-  useEffect(() => {
-    changePageUrl(getUrl(currentPage));
-  }, [
+  const { buildUrl } = useUrlBuilder({
+    basePath: `/player/${player.id}`,
+    segments: [
+      { value: "scoresaber", condition: !isDefaultState },
+      { value: scoresMode, condition: !isDefaultState },
+      { value: currentSort, condition: !isDefaultState },
+      { value: currentSortDirection, condition: scoresMode === "cached" && !isDefaultState },
+      { value: currentPage, condition: !isDefaultState },
+    ],
+    queryParams: [
+      { key: "search", value: searchTerm, condition: Boolean(searchTerm && searchTerm !== "") },
+      {
+        key: "filter",
+        value: currentFilter,
+        condition: Boolean(currentFilter && currentFilter !== "All Scores"),
+      },
+    ],
     currentPage,
-    player.id,
-    currentSort,
-    currentSortDirection,
-    scoresMode,
-    changePageUrl,
-    getUrl,
-  ]);
+  });
 
   // Render helpers
   const renderScoresList = () => {
@@ -382,7 +380,7 @@ export default function ScoreSaberPlayerScores({
           totalItems={scores.metadata.totalItems}
           itemsPerPage={scores.metadata.itemsPerPage}
           loadingPage={isLoading || isRefetching ? currentPage : undefined}
-          generatePageUrl={getUrl}
+          generatePageUrl={buildUrl}
           onPageChange={handlePageChange}
         />
       </>
@@ -458,16 +456,16 @@ export default function ScoreSaberPlayerScores({
           </ControlRow>
 
           {/* Search and Filters - Bottom Row */}
-          <ControlRow className="!mb-0">
+          <ControlRow className="mb-0!">
             <div className="flex w-full flex-col-reverse items-center gap-2 sm:w-auto sm:flex-row">
               {/* Search */}
               <div className="relative w-full sm:w-auto">
-                <SearchIcon className="text-muted-foreground absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2" />
+                <SearchIcon className="text-muted-foreground absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2" />
                 <Input
                   type="search"
                   placeholder="Query..."
                   className={cn(
-                    "h-8 w-full pr-3 pl-8 text-xs sm:w-64",
+                    "h-8 w-full pl-8 pr-3 text-xs sm:w-64",
                     invalidSearch && "border-red-500"
                   )}
                   value={searchTerm}
@@ -475,7 +473,7 @@ export default function ScoreSaberPlayerScores({
                 />
                 {searchTerm.length > 0 && (
                   <XIcon
-                    className="text-muted-foreground absolute top-1/2 right-2 h-3.5 w-3.5 -translate-y-1/2 cursor-pointer"
+                    className="text-muted-foreground absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 cursor-pointer"
                     onClick={() => handleSearchChange("")}
                   />
                 )}

@@ -2,7 +2,7 @@
 
 import { Spinner } from "@/components/spinner";
 import { useIsMobile } from "@/contexts/viewport-context";
-import usePageNavigation from "@/hooks/use-page-navigation";
+import { useUrlBuilder } from "@/hooks/use-url-builder";
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import {
   AccSaberScore,
@@ -67,7 +67,6 @@ type Props = {
 };
 
 export default function AccSaberPlayerScores({ player, sort, page, type, order }: Props) {
-  const { changePageUrl } = usePageNavigation();
   const isMobile = useIsMobile();
   const { animateLeft, animateRight } = usePageTransition();
   const [currentPage, setCurrentPage] = useState(page);
@@ -138,12 +137,24 @@ export default function AccSaberPlayerScores({ player, sort, page, type, order }
     [currentType]
   );
 
-  const getUrl = useCallback(
-    (page: number) => {
-      return `/player/${player.id}/accsaber/${currentSort}/${currentType}/${currentOrder}/${page}`;
-    },
-    [player.id, currentSort, currentType, currentOrder]
-  );
+  // URL management
+  const isDefaultState =
+    currentSort === "date" &&
+    currentType === "overall" &&
+    currentOrder === "desc" &&
+    currentPage === 1;
+
+  const { buildUrl } = useUrlBuilder({
+    basePath: `/player/${player.id}`,
+    segments: [
+      { value: "accsaber" },
+      { value: currentSort, condition: !isDefaultState },
+      { value: currentType, condition: !isDefaultState },
+      { value: currentOrder, condition: !isDefaultState },
+      { value: currentPage, condition: !isDefaultState },
+    ],
+    currentPage,
+  });
 
   const handlePageChange = (newPage: number) => {
     if (newPage > currentPage) {
@@ -153,10 +164,6 @@ export default function AccSaberPlayerScores({ player, sort, page, type, order }
     }
     setCurrentPage(newPage);
   };
-
-  useEffect(() => {
-    changePageUrl(getUrl(currentPage));
-  }, [currentPage, player.id, currentSort, currentType, currentOrder]);
 
   useEffect(() => {
     if (pendingAnimation && !isLoading) {
@@ -255,7 +262,7 @@ export default function AccSaberPlayerScores({ player, sort, page, type, order }
               totalItems={previousScores.metadata.totalItems}
               itemsPerPage={previousScores.metadata.itemsPerPage}
               loadingPage={isLoading || isRefetching || pendingAnimation ? currentPage : undefined}
-              generatePageUrl={page => getUrl(page)}
+              generatePageUrl={page => buildUrl(page)}
               onPageChange={handlePageChange}
             />
           </>

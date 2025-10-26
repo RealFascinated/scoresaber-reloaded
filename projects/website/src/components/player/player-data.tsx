@@ -54,7 +54,7 @@ function PlatformSelector({
     <div className="flex">
       {availablePlatforms.map(platform => (
         <SimpleLink
-          href={`/player/${player.id}/${platform.getType()}`}
+          href={`/player/${player.id}${platform.getType() !== PlatformType.ScoreSaber ? `/${platform.getType()}` : ""}`}
           key={platform.getDisplayName()}
           scroll={false}
         >
