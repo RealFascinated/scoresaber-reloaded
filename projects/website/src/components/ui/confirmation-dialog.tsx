@@ -61,20 +61,20 @@ export function ConfirmationDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <div 
-        onClick={(e) => {
+      <div
+        onClick={e => {
           e.stopPropagation(); // Prevent event bubbling to parent components
           e.preventDefault(); // Prevent default behavior
           setOpen(true);
         }}
-        onMouseDown={(e) => e.stopPropagation()} // Prevent mousedown events too
+        onMouseDown={e => e.stopPropagation()} // Prevent mousedown events too
       >
         {trigger}
       </div>
-      <DialogContent 
+      <DialogContent
         className="sm:max-w-md"
-        onClick={(e) => e.stopPropagation()} // Prevent backdrop clicks from closing parent modals
-        onMouseDown={(e) => e.stopPropagation()} // Prevent mousedown events too
+        onClick={e => e.stopPropagation()} // Prevent backdrop clicks from closing parent modals
+        onMouseDown={e => e.stopPropagation()} // Prevent mousedown events too
       >
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>

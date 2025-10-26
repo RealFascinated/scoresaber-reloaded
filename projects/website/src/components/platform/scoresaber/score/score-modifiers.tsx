@@ -23,8 +23,8 @@ export function ScoreSaberScoreModifiers({
       return (
         <span>
           {Object.entries(Modifier)
-            .filter(([_, mod]) => modifiers.includes(mod))
-            .map(([mod, _]) => mod)
+            .filter(([, mod]) => modifiers.includes(mod))
+            .map(([mod]) => mod)
             .slice(0, limit)
             .join(",")}
         </span>

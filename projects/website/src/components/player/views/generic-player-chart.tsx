@@ -1,7 +1,7 @@
 "use client";
 
 import { DatasetConfig } from "@/common/chart/types";
-import GenericChart from "@/components/chart/generic-chart";
+import GenericChart from "@/components/api/chart/generic-chart";
 import { PlayerStatisticHistory } from "@ssr/common/player/player-statistic-history";
 import { getValueFromHistory } from "@ssr/common/utils/player-utils";
 import { formatDateMinimal, getMidnightAlignedDate, parseDate } from "@ssr/common/utils/time-utils";

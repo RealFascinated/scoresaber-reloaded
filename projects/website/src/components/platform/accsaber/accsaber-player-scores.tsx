@@ -192,7 +192,7 @@ export default function AccSaberPlayerScores({ player, sort, page, type, order }
           </ControlRow>
 
           {/* Sort Options - Middle Row */}
-          <ControlRow className="!mb-0">
+          <ControlRow className="mb-0!">
             <ButtonGroup>
               {scoreSort.map(sortOption => (
                 <ControlButton
@@ -244,7 +244,7 @@ export default function AccSaberPlayerScores({ player, sort, page, type, order }
             </div>
 
             <PageTransition className="divide-border grid min-w-full grid-cols-1 divide-y">
-              {previousScores.items.map((score: AccSaberScore, index: number) => (
+              {previousScores.items.map(score => (
                 <AccSaberScoreComponent key={score.id} score={score} />
               ))}
             </PageTransition>

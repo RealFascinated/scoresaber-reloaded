@@ -93,7 +93,9 @@ const Combobox = <T,>({
 
   const handleValueChange = (newValue: T | undefined) => {
     setInternalValue(newValue);
-    onValueChange && onValueChange(newValue);
+    if (onValueChange) {
+      onValueChange(newValue);
+    }
   };
 
   return (
@@ -114,7 +116,7 @@ const Combobox = <T,>({
                   items.find(item => item.value === value)?.name
                 : placeholder || "None"}
             </span>
-            <ChevronsUpDown className="ml-2 size-5 flex-shrink-0 opacity-50" />
+            <ChevronsUpDown className="ml-2 size-5 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-fit p-0">

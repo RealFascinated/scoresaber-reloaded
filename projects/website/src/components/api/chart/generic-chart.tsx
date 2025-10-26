@@ -60,7 +60,7 @@ const GenericChart = ({ config, labels }: Props) => {
 
   const hiddenAxes = useMemo(() => {
     return Object.entries(axes)
-      .filter(([_, axis]) => axis.hideOnMobile && isMobile)
+      .filter(([, axis]) => axis.hideOnMobile && isMobile)
       .map(([axisId]) => axisId);
   }, [axes, isMobile]);
 
@@ -115,7 +115,7 @@ const GenericChart = ({ config, labels }: Props) => {
         ticks: {
           maxRotation: 45,
           minRotation: 45,
-          maxTicksLimit: (context: any) => {
+          maxTicksLimit: () => {
             // For ranges less than 3 months, show all days
             if (labels.length <= 90) {
               return labels.length;
@@ -234,7 +234,9 @@ const GenericChart = ({ config, labels }: Props) => {
             const chart = legend.chart;
             chart[chart.isDatasetVisible(index) ? "hide" : "show"](index);
             legendItem.hidden = !legendItem.hidden;
-            id && database.setChartLegend(id, legendItem.text, !legendItem.hidden);
+            if (id) {
+              database.setChartLegend(id, legendItem.text, !legendItem.hidden);
+            }
           },
         },
         tooltip: {
@@ -277,7 +279,7 @@ const GenericChart = ({ config, labels }: Props) => {
       ) : null}
       <div className="relative block h-full w-full">
         <Line
-          className="max-w-[100%]"
+          className="max-w-full"
           options={chartOptions}
           data={{ labels: formattedLabels, datasets: chartDatasets as any }}
         />

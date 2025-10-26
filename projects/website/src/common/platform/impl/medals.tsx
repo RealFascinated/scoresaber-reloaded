@@ -13,7 +13,7 @@ export class MedalScoresPlatform extends Platform {
   constructor() {
     super(PlatformType.MedalScores, "Medals", {
       logo: <Medal className="h-4.5 w-4.5" />,
-      displayPredicate: async (playerId: string) => {
+      displayPredicate: async () => {
         return true;
       },
     });

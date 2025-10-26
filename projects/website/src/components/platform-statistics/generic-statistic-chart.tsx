@@ -1,7 +1,7 @@
 "use client";
 
 import { ChartConfig, DatasetConfig } from "@/common/chart/types";
-import GenericChart from "@/components/chart/generic-chart";
+import GenericChart from "@/components/api/chart/generic-chart";
 import { StatisticsType } from "@ssr/common/model/statistics/statistic-type";
 import { formatDateMinimal, parseDate } from "@ssr/common/utils/time-utils";
 

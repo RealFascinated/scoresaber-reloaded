@@ -54,7 +54,9 @@ export default function ScoreMode({ initialMode, onModeChange }: ScoreModeProps)
           )}
           onClick={() => {
             setSelectedMode(mode.id);
-            onModeChange && onModeChange(mode.id);
+            if (onModeChange) {
+              onModeChange(mode.id);
+            }
           }}
         >
           <span

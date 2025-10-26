@@ -14,10 +14,10 @@ import { LeaderboardResponse } from "@ssr/common/response/leaderboard-response";
 import { PlaysByHmdResponse } from "@ssr/common/response/plays-by-hmd-response";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
+import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import LeaderboardPpChart from "../chart/leaderboard-pp-chart";
 import { LeaderboardStarChangeHistory } from "../leaderboard-star-change-history";
-import { useSearchParams } from "next/navigation";
 
 type LeaderboardDataProps = {
   /**

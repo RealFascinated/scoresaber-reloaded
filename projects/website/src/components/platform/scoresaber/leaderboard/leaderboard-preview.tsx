@@ -4,7 +4,6 @@ import { usePreview } from "@/components/providers/preview-provider";
 import SimpleLink from "@/components/simple-link";
 import { Spinner } from "@/components/spinner";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
 import { useDebounce } from "@uidotdev/usehooks";
@@ -16,15 +15,10 @@ import { Popover, PopoverContent, PopoverTrigger } from "../../../ui/popover";
 
 type LeaderboardPreviewProps = {
   leaderboard: ScoreSaberLeaderboard;
-  beatSaverMap?: BeatSaverMapResponse;
   children: React.ReactNode;
 };
 
-export default function LeaderboardPreview({
-  leaderboard,
-  beatSaverMap,
-  children,
-}: LeaderboardPreviewProps) {
+export default function LeaderboardPreview({ leaderboard, children }: LeaderboardPreviewProps) {
   const [isOpen, setIsOpen] = useState(false);
   const state = useDebounce(isOpen, 100);
   const { leaderboardPreviews } = usePreview();
@@ -67,7 +61,7 @@ export default function LeaderboardPreview({
               <div className="flex min-w-0 flex-1 flex-col justify-center space-y-1">
                 <SimpleLink
                   href={`/leaderboard/${leaderboard.id}`}
-                  className="block truncate text-xl font-bold transition-all hover:brightness-[66%]"
+                  className="block truncate text-xl font-bold transition-all hover:brightness-66"
                   data-umami-event="leaderboard-button"
                 >
                   {leaderboard.songName}

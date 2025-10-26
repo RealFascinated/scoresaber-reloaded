@@ -2,6 +2,7 @@
 
 import Database from "@/common/database/database";
 import Avatar from "@/components/avatar";
+import { useIsMobile } from "@/contexts/viewport-context";
 import useDatabase from "@/hooks/use-database";
 import { truncateText } from "@ssr/common/string-utils";
 import { useLiveQuery } from "dexie-react-hooks";
@@ -10,13 +11,11 @@ import SimpleLink from "../simple-link";
 import {
   DropdownButton,
   DropdownGroup,
-  DropdownItem,
   DropdownLabel,
   DropdownSeparator,
   HoverDropdown,
 } from "../ui/hover-dropdown";
 import UnlinkProfile from "./unlink-profile";
-import { useIsMobile } from "@/contexts/viewport-context";
 
 export default function ProfileButton() {
   const isMobile = useIsMobile();

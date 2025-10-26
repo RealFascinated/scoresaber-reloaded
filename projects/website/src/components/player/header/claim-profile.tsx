@@ -2,13 +2,12 @@
 
 import { setCookieValue } from "@/common/cookie.util";
 import { SettingIds } from "@/common/database/database";
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import useDatabase from "@/hooks/use-database";
 import { useLiveQuery } from "dexie-react-hooks";
 import { BadgeCheckIcon } from "lucide-react";
 import { toast } from "sonner";
-import SimpleTooltip from "../../simple-tooltip";
 import { Button } from "../../ui/button";
-import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 
 type Props = {
   /**

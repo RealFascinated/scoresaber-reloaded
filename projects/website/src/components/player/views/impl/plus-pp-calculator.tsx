@@ -58,28 +58,6 @@ export default function PlusPpCalculator({ player }: { player: ScoreSaberPlayer 
     return ScoreSaberCurve.calcPpBoundary(sortedScores, ppValue);
   }, [sortedScores, ppValue]);
 
-  // Calculate stars needed for each accuracy threshold with constraint
-  const getStarsForAcc = useCallback((rawPp: number, acc: number) => {
-    if (!rawPp || !acc) return 0;
-
-    let calculatedStars = 0;
-    let adjustedAccuracy = acc;
-
-    // If the calculated star is more than the max, increase the acc 1% until it's below the max star count
-    do {
-      const ppFactor = ScoreSaberCurve.getModifier(adjustedAccuracy);
-      calculatedStars = rawPp / (ScoreSaberCurve.STAR_MULTIPLIER * ppFactor);
-
-      if (calculatedStars > MAX_STARS && adjustedAccuracy < 100) {
-        adjustedAccuracy += 1;
-      } else {
-        break;
-      }
-    } while (calculatedStars > MAX_STARS && adjustedAccuracy < 100);
-
-    return calculatedStars;
-  }, []);
-
   // Calculate stars and adjusted accuracy with constraint
   const getStarsAndAccuracyForPp = useCallback((rawPp: number, acc: number) => {
     if (!rawPp || !acc) return { stars: 0, accuracy: acc };

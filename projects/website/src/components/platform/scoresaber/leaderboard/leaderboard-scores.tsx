@@ -4,89 +4,18 @@ import { cn } from "@/common/utils";
 import { useLeaderboardFilter } from "@/components/providers/leaderboard/leaderboard-filter-provider";
 import ScoreMode, { ScoreModeEnum } from "@/components/score/score-mode";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useIsMobile } from "@/contexts/viewport-context";
 import { useLeaderboardScores } from "@/hooks/score/use-leaderboard-scores";
 import usePageNavigation from "@/hooks/use-page-navigation";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
+import { buildSearchParams } from "@ssr/common/utils/search-params";
 import { AnimatePresence, motion } from "framer-motion";
 import React, { useCallback, useEffect, useState } from "react";
 import { DifficultyButton } from "../../../leaderboard/button/difficulty-button";
 import SimplePagination from "../../../simple-pagination";
 import ScoreSaberLeaderboardScore from "../score/leaderboard-score";
 import ScoreDropdown from "../score/score-dropdown";
-import { buildSearchParams } from "@ssr/common/utils/search-params";
-
-function LeaderboardScoresSkeleton() {
-  const skeletonRows = new Array(10).fill(0);
-
-  return (
-    <div className="flex flex-col gap-4">
-      <div className="border-border/30 bg-background/50 relative overflow-x-auto rounded-lg border">
-        <table className="table w-full table-auto border-spacing-0 text-left text-sm">
-          <thead>
-            <tr className="border-border/30 bg-background/80 border-b">
-              <th className="text-foreground/80 px-2 py-2 font-medium">Rank</th>
-              <th className="text-foreground/80 px-2 py-2 font-medium">Player</th>
-              <th className="text-foreground/80 px-2 py-2 text-center font-medium">Time Set</th>
-              <th className="text-foreground/80 px-2 py-2 text-center font-medium">Accuracy</th>
-              <th className="text-foreground/80 px-2 py-2 text-center font-medium">Misses</th>
-              <th className="text-foreground/80 px-2 py-2 text-center font-medium">PP</th>
-              <th className="text-foreground/80 px-2 py-2 text-center font-medium">HMD</th>
-              <th className="text-foreground/80 px-2 py-2 text-center font-medium">Mods</th>
-              <th className="text-foreground/80 w-[28px] px-2 py-2 text-center font-medium">
-                Replay
-              </th>
-              <th className="text-foreground/80 w-[32px] px-2 py-2 text-center font-medium">
-                Details
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-border/30 divide-y">
-            {skeletonRows.map((_, index) => (
-              <tr key={index} className="hover:bg-primary/5 transition-colors">
-                <td className="px-2 py-1">
-                  <Skeleton className="h-6 w-8 rounded-md" />
-                </td>
-                <td className="px-2 py-1">
-                  <div className="flex items-center gap-3">
-                    <Skeleton className="h-8 w-8 rounded-full" />
-                    <Skeleton className="h-6 w-32 rounded-md" />
-                  </div>
-                </td>
-                <td className="px-2 py-1 text-center">
-                  <Skeleton className="mx-auto h-6 w-24 rounded-md" />
-                </td>
-                <td className="px-2 py-1 text-center">
-                  <Skeleton className="mx-auto h-6 w-16 rounded-md" />
-                </td>
-                <td className="px-2 py-1 text-center">
-                  <Skeleton className="mx-auto h-6 w-8 rounded-md" />
-                </td>
-                <td className="px-2 py-1 text-center">
-                  <Skeleton className="mx-auto h-6 w-20 rounded-md" />
-                </td>
-                <td className="px-2 py-1 text-center">
-                  <Skeleton className="mx-auto h-6 w-16 rounded-md" />
-                </td>
-                <td className="px-2 py-1 text-center">
-                  <Skeleton className="mx-auto h-6 w-8 rounded-md" />
-                </td>
-                <td className="px-2 py-1 text-center">
-                  <Skeleton className="mx-auto h-6 w-6 rounded-md" />
-                </td>
-                <td className="px-2 py-1 text-center">
-                  <Skeleton className="mx-auto h-6 w-6 rounded-md" />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
-}
 
 export default function LeaderboardScores({
   initialPage = 1,
@@ -239,7 +168,7 @@ export default function LeaderboardScores({
                 </tr>
               </thead>
               <tbody className="divide-border/30 divide-y">
-                {scores.items.map((playerScore, index) => (
+                {scores.items.map(playerScore => (
                   <React.Fragment key={playerScore.scoreId}>
                     <tr
                       className={cn(

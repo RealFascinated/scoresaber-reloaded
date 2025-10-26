@@ -3,7 +3,6 @@ import { PreloadResources } from "@/components/preload-resources";
 import { QueryProvider } from "@/components/providers/query-provider";
 import { PageTransitionProvider } from "@/components/ui/page-transition-context";
 import { Toaster } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
 import { ViewportProvider } from "@/contexts/viewport-context";
 import { env } from "@ssr/common/env";
 import { ssrConfig } from "config";
@@ -79,13 +78,11 @@ export default function RootLayout({
         )}
         <Toaster />
         <PreloadResources />
-        <TooltipProvider delayDuration={250}>
-          <PageTransitionProvider>
-            <ViewportProvider>
-              <QueryProvider>{children}</QueryProvider>
-            </ViewportProvider>
-          </PageTransitionProvider>
-        </TooltipProvider>
+        <PageTransitionProvider>
+          <ViewportProvider>
+            <QueryProvider>{children}</QueryProvider>
+          </ViewportProvider>
+        </PageTransitionProvider>
       </body>
     </html>
   );

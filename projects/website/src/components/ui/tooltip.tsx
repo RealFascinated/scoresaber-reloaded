@@ -313,38 +313,3 @@ export const Tooltip = React.memo(function Tooltip({
     </>
   );
 });
-
-// For backward compatibility
-export const TooltipProvider = React.memo(function TooltipProvider({
-  children,
-  delayDuration = 0,
-}: {
-  children: React.ReactNode;
-  delayDuration?: number;
-}) {
-  return <>{children}</>;
-});
-
-export const TooltipTrigger = React.memo(function TooltipTrigger({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return <>{children}</>;
-});
-
-export const TooltipContent = React.memo(function TooltipContent({
-  children,
-  className,
-  ...props
-}: {
-  children: React.ReactNode;
-  className?: string;
-  [key: string]: any;
-}) {
-  return (
-    <div className={className} {...props}>
-      {children}
-    </div>
-  );
-});

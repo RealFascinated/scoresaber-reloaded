@@ -1,20 +1,15 @@
 import BeatLeaderLogo from "@/components/logos/beatleader-logo";
+import ScoresaberLogo from "@/components/logos/logos/scoresaber-logo";
 import SteamLogo from "@/components/logos/logos/steam-logo";
 import SimpleLink from "@/components/simple-link";
 import SimpleTooltip from "@/components/simple-tooltip";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { ssrConfig } from "config";
-import dynamic from "next/dynamic";
 import { ReactNode } from "react";
 import { FaTwitch } from "react-icons/fa";
 import PlayerActionButtonWrapper from "../buttons/player-action-button-wrapper";
 import SnipePlaylistCreator from "../snipe/player-snipe-playlist-creator";
-import ScoresaberLogo from "@/components/logos/logos/scoresaber-logo";
-
-const PlayerRankingMini = dynamic(() => import("../mini-ranking/player-mini-ranking"), {
-  ssr: false,
-});
 
 type PlayerLinkProps = {
   url?: string;
@@ -98,7 +93,7 @@ export default function PlayerActions({ player }: { player: ScoreSaberPlayer }) 
 
       {/* Divider */}
       <div className="flex items-center">
-        <div className="bg-border h-7 w-[1px]" />
+        <div className="bg-border h-7 w-px" />
       </div>
 
       {/* Actions */}

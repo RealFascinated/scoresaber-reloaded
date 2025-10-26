@@ -1,7 +1,7 @@
 "use client";
 
-import React, { ReactNode, useRef, useState, useEffect, cloneElement, isValidElement } from "react";
 import { useIsMobile } from "@/contexts/viewport-context";
+import React, { cloneElement, isValidElement, ReactNode, useEffect, useRef, useState } from "react";
 import SimpleLink from "../simple-link";
 
 interface HoverDropdownProps {
@@ -35,7 +35,7 @@ export function HoverDropdown({
 
   const handleMouseEnter = () => {
     if (isMobile) return; // Don't handle hover on mobile
-    
+
     if (delayedCloseTimeout.current) {
       clearTimeout(delayedCloseTimeout.current);
       delayedCloseTimeout.current = null;
@@ -51,7 +51,7 @@ export function HoverDropdown({
 
   const handleMouseLeave = () => {
     if (isMobile) return; // Don't handle hover on mobile
-    
+
     if (delayedCloseTimeout.current) {
       clearTimeout(delayedCloseTimeout.current);
     }
@@ -89,8 +89,8 @@ export function HoverDropdown({
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isMobile, open]);
 
   return (

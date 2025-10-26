@@ -140,9 +140,7 @@ export default function ScoreSaberScoreSongInfo({
       <div className="flex flex-col gap-1">
         <div className="flex flex-col gap-1">
           {allowLeaderboardPreview ? (
-            <LeaderboardPreview leaderboard={leaderboard} beatSaverMap={beatSaverMap}>
-              {songNameElement}
-            </LeaderboardPreview>
+            <LeaderboardPreview leaderboard={leaderboard}>{songNameElement}</LeaderboardPreview>
           ) : (
             songNameElement
           )}

@@ -3,7 +3,7 @@ import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { Platform } from "../platform";
 import { PlatformType } from "../platform-repository";
 
-export type AccSaberScoreLookupOptions = {};
+export type AccSaberScoreLookupOptions = Record<string, never>;
 
 export class AccSaberPlatform extends Platform {
   constructor() {

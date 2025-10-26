@@ -98,7 +98,7 @@ function PlayerMiniRanking({
       {/* Players List */}
       <div className="divide-border divide-y text-xs">
         {players.length > 0 ? (
-          players.map((playerRanking, index) => {
+          players.map(playerRanking => {
             const rank = type == "Global" ? playerRanking.rank : playerRanking.countryRank;
             const ppDifference = playerRanking.pp - player.pp;
 

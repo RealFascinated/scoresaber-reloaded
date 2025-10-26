@@ -13,7 +13,7 @@ export class ScoreSaberPlatform extends Platform {
   constructor() {
     super(PlatformType.ScoreSaber, "ScoreSaber", {
       logo: <ScoresaberLogo className="h-4.5 w-4.5" />,
-      displayPredicate: async (playerId: string) => {
+      displayPredicate: async () => {
         return true;
       },
     });

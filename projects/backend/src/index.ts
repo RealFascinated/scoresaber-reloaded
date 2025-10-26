@@ -1,4 +1,3 @@
-import { etag } from "@bogeychan/elysia-etag";
 import * as dotenv from "@dotenvx/dotenvx";
 import cors from "@elysiajs/cors";
 import { cron } from "@elysiajs/cron";
@@ -6,7 +5,6 @@ import { swagger } from "@elysiajs/swagger";
 import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
 import { formatDuration } from "@ssr/common/utils/time-utils";
-import { logger } from "@tqman/nice-logger";
 import { mongoose } from "@typegoose/typegoose";
 import { EmbedBuilder } from "discord.js";
 import { Elysia, ValidationError } from "elysia";

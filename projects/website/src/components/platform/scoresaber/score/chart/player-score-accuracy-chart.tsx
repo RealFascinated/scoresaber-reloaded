@@ -2,7 +2,7 @@
 
 import { ChartConfig, DatasetConfig } from "@/common/chart/types";
 import { Colors } from "@/common/colors";
-import GenericChart from "@/components/chart/generic-chart";
+import GenericChart from "@/components/api/chart/generic-chart";
 import { ScoreSaberCurve } from "@ssr/common/leaderboard-curve/scoresaber-curve";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreStatsResponse } from "@ssr/common/response/scorestats-response";

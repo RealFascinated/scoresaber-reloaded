@@ -219,7 +219,11 @@ export default function SnipePlaylistCreator({ toSnipe }: SnipePlaylistCreatorPr
   const toggleSection = (section: string) => {
     setExpandedSections(prev => {
       const newExpanded = new Set(prev);
-      newExpanded.has(section) ? newExpanded.delete(section) : newExpanded.add(section);
+      if (newExpanded.has(section)) {
+        newExpanded.delete(section);
+      } else {
+        newExpanded.add(section);
+      }
       return newExpanded;
     });
   };
@@ -293,7 +297,7 @@ export default function SnipePlaylistCreator({ toSnipe }: SnipePlaylistCreatorPr
                 <FormField
                   control={form.control}
                   name="sort"
-                  render={({ field }) => (
+                  render={() => (
                     <FormItem>
                       <FormLabel className="text-sm">Sort By</FormLabel>
                       <FormControl>

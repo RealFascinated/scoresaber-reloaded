@@ -59,7 +59,6 @@ export function TopScoresData() {
           {/* Scores */}
           {scores.items.map(({ score, leaderboard, beatSaver }) => {
             const player = score.playerInfo;
-            const name = score.playerInfo ? player.name || player.id : score.playerId;
 
             return (
               <div key={score.scoreId} className="flex flex-col">

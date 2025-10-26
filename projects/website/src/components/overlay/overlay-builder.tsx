@@ -78,8 +78,6 @@ export default function OverlayBuilder() {
 
   // Watch form values
   const formValues = form.watch();
-  const useRealTimeData = form.watch("useRealTimeData");
-  const views = form.watch("views");
 
   useEffect(() => {
     if (!overlaySettings) {

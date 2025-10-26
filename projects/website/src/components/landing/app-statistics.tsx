@@ -4,7 +4,7 @@ import { env } from "@ssr/common/env";
 import { AppStatistics } from "@ssr/common/types/backend/app-statistics";
 import Request from "@ssr/common/utils/request";
 import { useQuery } from "@tanstack/react-query";
-import { Box, Play, User, UserX, LucideIcon } from "lucide-react";
+import { Box, LucideIcon, Play, User, UserX } from "lucide-react";
 import CountUp from "react-countup";
 
 interface StatCardProps {

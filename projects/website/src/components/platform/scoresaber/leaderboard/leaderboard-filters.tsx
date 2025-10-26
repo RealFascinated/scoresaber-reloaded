@@ -17,12 +17,7 @@ import { toast } from "sonner";
 export default function ScoreSaberLeaderboardFilters() {
   const database = useDatabase();
   const mainPlayer = useLiveQuery(() => database.getMainPlayer());
-
   const filter = useLeaderboardFilter();
-
-  async function resetDefault() {
-    filter.setCountry(undefined);
-  }
 
   return (
     <Card className="flex h-fit w-full flex-col gap-2 text-sm 2xl:w-[405px]">

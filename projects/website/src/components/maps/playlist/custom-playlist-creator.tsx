@@ -31,9 +31,7 @@ import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 
 export default function CustomPlaylistCreator() {
-  const { control, handleSubmit, setValue, watch } = useForm<
-    z.infer<typeof customRankedPlaylistSchema>
-  >({
+  const { control, handleSubmit, watch } = useForm<z.infer<typeof customRankedPlaylistSchema>>({
     resolver: zodResolver(customRankedPlaylistSchema),
     defaultValues: {
       stars: {

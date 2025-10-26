@@ -11,7 +11,6 @@ import SimpleTooltip from "@/components/simple-tooltip";
 import { ArrowDownIcon, ArrowPathIcon } from "@heroicons/react/24/outline";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
-import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { formatScoreAccuracy } from "@ssr/common/utils/score.util";
 
@@ -19,7 +18,6 @@ export default function ScoreSaberLeaderboardScore({
   score,
   leaderboard,
   highlightedPlayerId,
-  beatSaverMap,
   showDropdown = false,
   onDropdownToggle,
   isDropdownExpanded,
@@ -28,7 +26,6 @@ export default function ScoreSaberLeaderboardScore({
   score: ScoreSaberScore;
   leaderboard: ScoreSaberLeaderboard;
   highlightedPlayerId?: string;
-  beatSaverMap?: BeatSaverMapResponse;
   showDropdown?: boolean;
   onDropdownToggle?: () => void;
   isDropdownExpanded?: boolean;

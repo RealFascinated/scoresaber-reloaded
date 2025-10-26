@@ -61,7 +61,7 @@ export function FriendRanking() {
         <div className="flex flex-col gap-2">
           <>
             <div className="divide-border divide-y">
-              {friendsPage.items.map((player, index) => (
+              {friendsPage.items.map(player => (
                 <PlayerRanking
                   key={player.id}
                   player={player}
