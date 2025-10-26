@@ -12,7 +12,7 @@ export default function NotFoundPage() {
         {/* 404 Content */}
         <div className="z-10 flex flex-col items-center gap-8">
           {/* 404 Number */}
-          <div className="from-primary to-accent-secondary animate-gradient-slow bg-gradient-to-r bg-[length:200%_200%] bg-clip-text text-8xl font-bold text-transparent sm:text-9xl lg:text-[12rem]">
+          <div className="from-primary to-accent-secondary animate-gradient-slow bg-linear-to-r bg-[length:200%_200%] bg-clip-text text-8xl font-bold text-transparent sm:text-9xl lg:text-[12rem]">
             404
           </div>
 
@@ -34,7 +34,7 @@ export default function NotFoundPage() {
                 size="lg"
                 className="group border-primary/30 bg-primary/5 text-primary hover:border-primary/50 hover:bg-primary/10 relative h-12 overflow-hidden rounded-xl border-2 px-8 backdrop-blur-sm transition-all duration-300"
               >
-                <div className="from-primary/10 to-accent-secondary/10 absolute inset-0 bg-gradient-to-r opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                <div className="from-primary/10 to-accent-secondary/10 absolute inset-0 bg-linear-to-r opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
                 <HomeIcon className="relative z-10 mr-2 h-5 w-5" />
                 <span className="relative z-10 font-semibold">Return Home</span>
               </Button>
@@ -46,7 +46,7 @@ export default function NotFoundPage() {
                 variant="outline"
                 className="group border-primary/30 bg-primary/5 text-primary hover:border-primary/50 hover:bg-primary/10 relative h-12 overflow-hidden rounded-xl border-2 px-8 backdrop-blur-sm transition-all duration-300"
               >
-                <div className="from-primary/10 to-accent-secondary/10 absolute inset-0 bg-gradient-to-r opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                <div className="from-primary/10 to-accent-secondary/10 absolute inset-0 bg-linear-to-r opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
                 <SearchIcon className="relative z-10 mr-2 h-5 w-5" />
                 <span className="relative z-10 font-semibold">Search Players</span>
               </Button>

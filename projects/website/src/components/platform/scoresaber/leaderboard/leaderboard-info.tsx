@@ -92,19 +92,19 @@ export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
         {/* Status Badge */}
         <div className="flex items-center gap-2">
           {leaderboardData.ranked && (
-            <div className="flex h-7 items-center gap-1.5 rounded-full bg-gradient-to-r from-green-500 to-green-600 px-3 text-xs font-semibold text-white shadow-sm">
+            <div className="flex h-7 items-center gap-1.5 rounded-full bg-linear-to-r from-green-500 to-green-600 px-3 text-xs font-semibold text-white shadow-sm">
               <CheckBadgeIcon className="h-3.5 w-3.5" />
               Ranked
             </div>
           )}
           {leaderboardData.qualified && !leaderboardData.ranked && (
-            <div className="flex h-7 items-center gap-1.5 rounded-full bg-gradient-to-r from-yellow-500 to-yellow-600 px-3 text-xs font-semibold text-white shadow-sm">
+            <div className="flex h-7 items-center gap-1.5 rounded-full bg-linear-to-r from-yellow-500 to-yellow-600 px-3 text-xs font-semibold text-white shadow-sm">
               <CheckBadgeIcon className="h-3.5 w-3.5" />
               Qualified
             </div>
           )}
           {!leaderboardData.ranked && !leaderboardData.qualified && (
-            <div className="flex h-7 items-center gap-1.5 rounded-full bg-gradient-to-r from-gray-500 to-gray-600 px-3 text-xs font-semibold text-white shadow-sm">
+            <div className="flex h-7 items-center gap-1.5 rounded-full bg-linear-to-r from-gray-500 to-gray-600 px-3 text-xs font-semibold text-white shadow-sm">
               <CheckBadgeIcon className="h-3.5 w-3.5" />
               Unranked
             </div>

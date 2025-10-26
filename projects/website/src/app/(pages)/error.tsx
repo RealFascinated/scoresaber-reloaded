@@ -28,7 +28,7 @@ export default function Error() {
               </div>
             </div>
 
-            <CardTitle className="from-foreground to-muted-foreground mb-2 bg-gradient-to-r bg-clip-text text-2xl font-bold text-transparent">
+            <CardTitle className="from-foreground to-muted-foreground mb-2 bg-linear-to-r bg-clip-text text-2xl font-bold text-transparent">
               Oops! Something went wrong
             </CardTitle>
             <CardDescription className="text-muted-foreground mx-auto max-w-sm text-base leading-relaxed">

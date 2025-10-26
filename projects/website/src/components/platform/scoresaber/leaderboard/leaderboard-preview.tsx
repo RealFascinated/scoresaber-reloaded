@@ -84,7 +84,7 @@ export default function LeaderboardPreview({
             {/* Stats section */}
             <div className="relative">
               {/* Background gradient effect */}
-              <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-pink-500/5" />
+              <div className="absolute inset-0 rounded-lg bg-linear-to-r from-blue-500/5 via-purple-500/5 to-pink-500/5" />
 
               <div className="relative space-y-3 p-3">
                 {/* Stats display */}
