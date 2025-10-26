@@ -87,20 +87,20 @@ export default function PlayerAndLeaderboardSearch() {
   return (
     <>
       <div
-        className="group relative flex cursor-pointer transition-all select-none hover:opacity-85"
+        className="group relative flex cursor-pointer select-none transition-all duration-200 hover:shadow-md"
         onClick={openSearch}
       >
         <div
           className={cn(
-            "absolute top-1/2 z-10 -translate-y-1/2",
-            isMobile ? "inset-x-0 flex justify-center" : "left-2.5"
+            "absolute top-1/2 z-10 -translate-y-1/2 transition-colors duration-200",
+            isMobile ? "inset-x-0 flex justify-center" : "left-3"
           )}
         >
-          <UserSearch className="size-5" />
+          <UserSearch className="text-muted-foreground group-hover:text-foreground size-5 transition-colors duration-200" />
         </div>
 
         <Input
-          className="group-hover:border-ssr/75 h-8 w-full cursor-pointer rounded-lg px-0 pl-9 transition-all"
+          className="group-hover:border-ssr/75 bg-background/50 border-border/50 focus:border-ssr/75 h-9 w-full cursor-pointer rounded-xl px-0 pl-10 backdrop-blur-sm transition-all duration-200 group-hover:shadow-sm"
           type="search"
           name="search"
           placeholder={isMobile ? undefined : "Query..."}
@@ -108,10 +108,10 @@ export default function PlayerAndLeaderboardSearch() {
         />
 
         <div
-          className={cn("absolute top-1/2 right-3 hidden -translate-y-1/2", !isMobile && "flex")}
+          className={cn("absolute right-3 top-1/2 hidden -translate-y-1/2", !isMobile && "flex")}
         >
-          <kbd className="bg-muted text-muted-foreground pointer-events-none inline-flex h-5 items-center gap-1 rounded px-1.5 font-medium select-none">
-            <span>⌘</span>K
+          <kbd className="bg-muted/80 text-muted-foreground border-border/50 pointer-events-none inline-flex h-6 select-none items-center gap-1 rounded-md border px-2 text-xs font-medium shadow-sm">
+            <span className="text-xs">⌘</span>K
           </kbd>
         </div>
       </div>
