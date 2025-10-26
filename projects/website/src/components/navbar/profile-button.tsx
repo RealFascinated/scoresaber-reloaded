@@ -26,13 +26,13 @@ export default function ProfileButton() {
   }
 
   const buttonContent = (
-    <div className="flex h-full items-center gap-2">
+    <div className="flex h-full items-center gap-2.5">
       <Avatar
         src={mainPlayer.avatar}
-        className="ring-border/50 h-6 w-6 rounded-full ring-1"
+        className="h-7 w-7 rounded-full ring-1 ring-border/30"
         alt={`${mainPlayer.name}'s Profile Picture`}
       />
-      <p className="text-primary hover:text-primary/70 hidden text-sm font-medium transition-all lg:block">
+      <p className="text-primary hover:text-primary/80 hidden text-sm font-medium transition-colors duration-200 lg:block">
         {truncateText(mainPlayer.name, 20)}
       </p>
     </div>
@@ -45,7 +45,7 @@ export default function ProfileButton() {
       ) : (
         <SimpleLink
           href={`/player/${mainPlayer.id}`}
-          className="flex h-full cursor-pointer items-center rounded-md transition-all"
+          className="flex h-full cursor-pointer items-center rounded-lg px-2.5 py-1.5 transition-all duration-200 hover:bg-primary/5 hover:shadow-sm"
           data-umami-event="player-profile-button"
         >
           {buttonContent}
