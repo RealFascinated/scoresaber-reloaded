@@ -62,7 +62,7 @@ export default function Navbar() {
   return (
     <nav
       className={cn(
-        "border-border bg-background/55 sticky inset-x-0 top-0 z-50 flex h-12 w-full items-center justify-between border-b px-2 py-1 backdrop-blur-md select-none lg:justify-around lg:px-8"
+        "border-border bg-background/55 sticky inset-x-0 top-0 z-50 flex h-12 w-full select-none items-center justify-between border-b px-2 py-1 backdrop-blur-md lg:justify-around lg:px-8"
       )}
     >
       {/* Left */}
@@ -120,8 +120,10 @@ function SimpleNavLink({
   return (
     <SimpleLink
       className={cn(
-        "flex items-center gap-2 px-2 py-1 text-sm transition-colors",
-        isActive ? "text-primary" : "text-muted-foreground hover:text-primary",
+        "group relative flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm font-medium transition-colors duration-150",
+        isActive
+          ? "bg-primary/10 text-primary border-primary/20 border"
+          : "text-muted-foreground hover:text-primary hover:bg-primary/5",
         className
       )}
       href={href}
@@ -130,6 +132,11 @@ function SimpleNavLink({
     >
       {icon}
       <span className="hidden 2xl:flex">{name}</span>
+
+      {/* Active indicator */}
+      {isActive && (
+        <div className="bg-primary absolute -bottom-0.5 left-1/2 h-0.5 w-4 -translate-x-1/2 rounded-full transition-all duration-200" />
+      )}
     </SimpleLink>
   );
 }

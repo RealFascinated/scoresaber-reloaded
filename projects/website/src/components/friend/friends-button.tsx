@@ -44,13 +44,13 @@ export default function FriendsButton() {
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
-        <NavbarButton className="px-0">
-          <UsersIcon className="text-muted-foreground size-5" />
-          <span className="text-muted-foreground hidden 2xl:flex">Friends</span>
+        <NavbarButton className="text-muted-foreground hover:text-primary hover:bg-primary/5 rounded-md px-2 py-1.5 text-sm font-medium transition-colors duration-150">
+          <UsersIcon className="size-5" />
+          <span className="hidden 2xl:flex">Friends</span>
         </NavbarButton>
       </PopoverTrigger>
       <PopoverContent
-        className="mt-2.5 max-h-[400px] w-screen overflow-hidden overflow-y-auto p-2 text-sm select-none md:w-[350px]"
+        className="mt-1.5 max-h-[400px] w-screen select-none overflow-hidden overflow-y-auto p-2 text-sm md:w-[350px]"
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
