@@ -391,42 +391,92 @@ export default function ScoreSaberPlayerScores({
       <div className="flex w-full flex-col gap-2">
         {/* Control Panel */}
         <ControlPanel>
-          {/* Mode Selection - Top Row */}
-          <ControlRow>
-            <TabGroup>
-              {Object.keys(SCORES_MODES).map(mode => (
-                <Tab
-                  key={mode}
-                  isActive={mode === scoresMode}
-                  onClick={() => handleScoreModeChange(mode as ScoreSaberScoreDataMode)}
-                  tooltip={SCORES_MODES[mode as ScoreSaberScoreDataMode].tooltip}
-                >
-                  {SCORES_MODES[mode as ScoreSaberScoreDataMode].icon}
-                  {capitalizeFirstLetter(mode)}
-                </Tab>
-              ))}
-            </TabGroup>
-          </ControlRow>
+          {scoresMode === "live" ? (
+            // Responsive Layout for Live Mode
+            <ControlRow className="mb-0!">
+              <div className="flex w-full flex-col-reverse items-center gap-2">
+                {/* Bottom Row on Mobile, Right Side on Desktop: Search */}
+                <div className="relative w-full sm:w-auto">
+                  <SearchIcon className="text-muted-foreground absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2" />
+                  <Input
+                    type="search"
+                    placeholder="Query..."
+                    className={cn(
+                      "h-8 w-full pl-8 pr-3 text-xs sm:w-64",
+                      invalidSearch && "border-red-500"
+                    )}
+                    value={searchTerm}
+                    onChange={e => handleSearchChange(e.target.value)}
+                  />
+                  {searchTerm.length > 0 && (
+                    <XIcon
+                      className="text-muted-foreground absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 cursor-pointer"
+                      onClick={() => handleSearchChange("")}
+                    />
+                  )}
+                </div>
 
-          {/* Sort Options - Middle Row */}
-          <ControlRow>
-            <ButtonGroup>
-              {scoresMode === "live"
-                ? LIVE_SCORE_SORT.map(sortOption => (
-                    <ControlButton
-                      key={sortOption.value}
-                      isActive={sortOption.value === currentSort}
-                      onClick={() => handleSortChange(sortOption.value as ScoreSaberScoreSort)}
+                {/* Top Row on Mobile, Left Side on Desktop: Mode Selection and Sort Options */}
+                <div className="flex w-full flex-col items-center gap-2 sm:w-auto sm:flex-row sm:gap-4">
+                  {/* Mode Selection */}
+                  <TabGroup>
+                    {Object.keys(SCORES_MODES).map(mode => (
+                      <Tab
+                        key={mode}
+                        isActive={mode === scoresMode}
+                        onClick={() => handleScoreModeChange(mode as ScoreSaberScoreDataMode)}
+                        tooltip={SCORES_MODES[mode as ScoreSaberScoreDataMode].tooltip}
+                      >
+                        {SCORES_MODES[mode as ScoreSaberScoreDataMode].icon}
+                        {capitalizeFirstLetter(mode)}
+                      </Tab>
+                    ))}
+                  </TabGroup>
+
+                  {/* Sort Options */}
+                  <ButtonGroup>
+                    {LIVE_SCORE_SORT.map(sortOption => (
+                      <ControlButton
+                        key={sortOption.value}
+                        isActive={sortOption.value === currentSort}
+                        onClick={() => handleSortChange(sortOption.value as ScoreSaberScoreSort)}
+                      >
+                        {sortOption.value === currentSort && (isLoading || isRefetching) ? (
+                          <Spinner size="sm" className="h-3.5 w-3.5" />
+                        ) : (
+                          sortOption.icon
+                        )}
+                        {sortOption.name}
+                      </ControlButton>
+                    ))}
+                  </ButtonGroup>
+                </div>
+              </div>
+            </ControlRow>
+          ) : (
+            // Multi-Row Layout for Cached Mode
+            <>
+              {/* Mode Selection - Top Row */}
+              <ControlRow>
+                <TabGroup>
+                  {Object.keys(SCORES_MODES).map(mode => (
+                    <Tab
+                      key={mode}
+                      isActive={mode === scoresMode}
+                      onClick={() => handleScoreModeChange(mode as ScoreSaberScoreDataMode)}
+                      tooltip={SCORES_MODES[mode as ScoreSaberScoreDataMode].tooltip}
                     >
-                      {sortOption.value === currentSort && (isLoading || isRefetching) ? (
-                        <Spinner size="sm" className="h-3.5 w-3.5" />
-                      ) : (
-                        sortOption.icon
-                      )}
-                      {sortOption.name}
-                    </ControlButton>
-                  ))
-                : CACHED_SCORE_SORT.map(sortOption => (
+                      {SCORES_MODES[mode as ScoreSaberScoreDataMode].icon}
+                      {capitalizeFirstLetter(mode)}
+                    </Tab>
+                  ))}
+                </TabGroup>
+              </ControlRow>
+
+              {/* Sort Options - Middle Row */}
+              <ControlRow>
+                <ButtonGroup>
+                  {CACHED_SCORE_SORT.map(sortOption => (
                     <ControlButton
                       key={sortOption.value}
                       isActive={sortOption.value === currentSort}
@@ -451,107 +501,107 @@ export default function ScoreSaberPlayerScores({
                       {sortOption.name}
                     </ControlButton>
                   ))}
-            </ButtonGroup>
-          </ControlRow>
+                </ButtonGroup>
+              </ControlRow>
 
-          {/* Search and Filters - Bottom Row */}
-          <ControlRow className="mb-0!">
-            <div className="flex w-full flex-col-reverse items-center gap-2 sm:w-auto sm:flex-row">
-              {/* Search */}
-              <div className="relative w-full sm:w-auto">
-                <SearchIcon className="text-muted-foreground absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2" />
-                <Input
-                  type="search"
-                  placeholder="Query..."
-                  className={cn(
-                    "h-8 w-full pl-8 pr-3 text-xs sm:w-64",
-                    invalidSearch && "border-red-500"
-                  )}
-                  value={searchTerm}
-                  onChange={e => handleSearchChange(e.target.value)}
-                />
-                {searchTerm.length > 0 && (
-                  <XIcon
-                    className="text-muted-foreground absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 cursor-pointer"
-                    onClick={() => handleSearchChange("")}
-                  />
-                )}
-              </div>
+              {/* Search and Filters - Bottom Row */}
+              <ControlRow className="mb-0!">
+                <div className="flex w-full flex-col-reverse items-center gap-2 sm:w-auto sm:flex-row">
+                  {/* Search */}
+                  <div className="relative w-full sm:w-auto">
+                    <SearchIcon className="text-muted-foreground absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2" />
+                    <Input
+                      type="search"
+                      placeholder="Query..."
+                      className={cn(
+                        "h-8 w-full pl-8 pr-3 text-xs sm:w-64",
+                        invalidSearch && "border-red-500"
+                      )}
+                      value={searchTerm}
+                      onChange={e => handleSearchChange(e.target.value)}
+                    />
+                    {searchTerm.length > 0 && (
+                      <XIcon
+                        className="text-muted-foreground absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 cursor-pointer"
+                        onClick={() => handleSearchChange("")}
+                      />
+                    )}
+                  </div>
 
-              {/* Filters (cached mode only) */}
-              {scoresMode === "cached" && (
-                <div className="flex w-full items-center gap-2 sm:w-auto">
-                  <Select
-                    value={currentFilter || ""}
-                    onValueChange={value => {
-                      setCurrentFilter(value);
-                      setCurrentPage(1);
-                      animateLeft();
-                    }}
-                  >
-                    <SelectTrigger className="h-8 w-full text-xs sm:w-40">
-                      <SelectValue placeholder="Filter" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {CACHED_SCORE_FILTERS.map(filter => (
-                        <SelectItem key={filter.name} value={filter.name}>
-                          <div className="flex items-center gap-2">
-                            {filter.icon}
-                            <span>{filter.name}</span>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-
-                  {currentFilter && currentFilter !== "All Scores" && (
-                    <SimpleTooltip display="Clear filter">
-                      <button
-                        onClick={() => {
-                          setCurrentFilter("All Scores");
-                          setCurrentPage(1);
-                          animateLeft();
-                        }}
-                        className="border-border bg-background flex h-8 w-8 items-center justify-center rounded-md border text-red-500 transition-colors hover:border-red-500"
-                      >
-                        <XIcon className="h-3.5 w-3.5" />
-                      </button>
-                    </SimpleTooltip>
-                  )}
-
-                  <Select
-                    value={hmdFilter || "All Hmds"}
-                    onValueChange={value => {
-                      setHmdFilter(value === "All Hmds" ? null : (value as HMD));
-                      setCurrentPage(1);
-                      animateLeft();
-                    }}
-                  >
-                    <SelectTrigger className="h-8 w-full text-xs sm:w-40">
-                      <SelectValue placeholder="Hmd Filter" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value={"All Hmds"}>
-                        <div className="flex items-center gap-2">
-                          <HMDIcon hmd={getHMDInfo("Unknown" as HMD)} />
-                          <span>All Hmds</span>
-                        </div>
-                      </SelectItem>
-                      {player.hmdBreakdown &&
-                        Object.keys(player.hmdBreakdown).map(filter => (
-                          <SelectItem key={filter} value={filter}>
+                  {/* Filters */}
+                  <div className="flex w-full items-center gap-2 sm:w-auto">
+                    <Select
+                      value={currentFilter || ""}
+                      onValueChange={value => {
+                        setCurrentFilter(value);
+                        setCurrentPage(1);
+                        animateLeft();
+                      }}
+                    >
+                      <SelectTrigger className="h-8 w-full text-xs sm:w-40">
+                        <SelectValue placeholder="Filter" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {CACHED_SCORE_FILTERS.map(filter => (
+                          <SelectItem key={filter.name} value={filter.name}>
                             <div className="flex items-center gap-2">
-                              <HMDIcon hmd={getHMDInfo(filter as HMD)} />
-                              <span>{filter}</span>
+                              {filter.icon}
+                              <span>{filter.name}</span>
                             </div>
                           </SelectItem>
                         ))}
-                    </SelectContent>
-                  </Select>
+                      </SelectContent>
+                    </Select>
+
+                    {currentFilter && currentFilter !== "All Scores" && (
+                      <SimpleTooltip display="Clear filter">
+                        <button
+                          onClick={() => {
+                            setCurrentFilter("All Scores");
+                            setCurrentPage(1);
+                            animateLeft();
+                          }}
+                          className="border-border bg-background flex h-8 w-8 items-center justify-center rounded-md border text-red-500 transition-colors hover:border-red-500"
+                        >
+                          <XIcon className="h-3.5 w-3.5" />
+                        </button>
+                      </SimpleTooltip>
+                    )}
+
+                    <Select
+                      value={hmdFilter || "All Hmds"}
+                      onValueChange={value => {
+                        setHmdFilter(value === "All Hmds" ? null : (value as HMD));
+                        setCurrentPage(1);
+                        animateLeft();
+                      }}
+                    >
+                      <SelectTrigger className="h-8 w-full text-xs sm:w-40">
+                        <SelectValue placeholder="Hmd Filter" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value={"All Hmds"}>
+                          <div className="flex items-center gap-2">
+                            <HMDIcon hmd={getHMDInfo("Unknown" as HMD)} />
+                            <span>All Hmds</span>
+                          </div>
+                        </SelectItem>
+                        {player.hmdBreakdown &&
+                          Object.keys(player.hmdBreakdown).map(filter => (
+                            <SelectItem key={filter} value={filter}>
+                              <div className="flex items-center gap-2">
+                                <HMDIcon hmd={getHMDInfo(filter as HMD)} />
+                                <span>{filter}</span>
+                              </div>
+                            </SelectItem>
+                          ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
-              )}
-            </div>
-          </ControlRow>
+              </ControlRow>
+            </>
+          )}
         </ControlPanel>
 
         {/* Scores List */}
