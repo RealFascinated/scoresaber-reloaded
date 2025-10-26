@@ -8,6 +8,7 @@ import { BadgeCheckIcon } from "lucide-react";
 import { toast } from "sonner";
 import SimpleTooltip from "../../simple-tooltip";
 import { Button } from "../../ui/button";
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 
 type Props = {
   /**
@@ -39,22 +40,19 @@ export default function ClaimProfile({ playerId }: Props) {
   }
 
   return (
-    <SimpleTooltip
-      display={
-        <div className="flex flex-col gap-2">
-          <p>Set as your profile!</p>
-          {mainPlayer && (
-            <p className="text-red-400">
-              This will overwrite your current profile ({mainPlayer.name})
-            </p>
-          )}
-        </div>
+    <ConfirmationDialog
+      trigger={
+        <Button variant={"outline"}>
+          <BadgeCheckIcon className="size-5 text-green-500" />
+        </Button>
       }
-      side={"bottom"}
-    >
-      <Button variant={"outline"} onClick={claimProfile}>
-        <BadgeCheckIcon className="size-5 text-green-500" />
-      </Button>
-    </SimpleTooltip>
+      title="Claim Profile"
+      description={
+        mainPlayer
+          ? `This will overwrite your current profile (${mainPlayer.name}). Are you sure you want to do this?`
+          : "Are you sure you want to claim this profile?"
+      }
+      onConfirm={claimProfile}
+    />
   );
 }
