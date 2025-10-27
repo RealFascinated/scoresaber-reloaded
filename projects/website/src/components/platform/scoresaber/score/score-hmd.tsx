@@ -12,12 +12,17 @@ export function ScoreSaberScoreHMD({
     <SimpleTooltip
       display={
         <div className="flex flex-col gap-2">
-          {score.hmd ? (
+          {score.hmd !== "Unknown" ? (
             <p>
               Score was set on <span className="font-semibold">{score.hmd}</span>
             </p>
           ) : (
-            <p>An unknown HMD was used (mod did not submit hmd data)</p>
+            <div>
+              <p>An unknown HMD was used (outdated mod?)</p>
+              {score.controllers?.leftController === "Touch" && (
+                <p>Likely a Quest variant was used</p>
+              )}
+            </div>
           )}
 
           {score.controllers && (
