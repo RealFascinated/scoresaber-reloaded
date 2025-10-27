@@ -5,9 +5,10 @@ import { SettingIds } from "@/common/database/database";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import useDatabase from "@/hooks/use-database";
 import { useLiveQuery } from "dexie-react-hooks";
-import { BadgeCheckIcon } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "../../ui/button";
+import SimpleTooltip from "@/components/simple-tooltip";
 
 type Props = {
   /**
@@ -41,9 +42,11 @@ export default function ClaimProfile({ playerId }: Props) {
   return (
     <ConfirmationDialog
       trigger={
-        <Button variant={"outline"}>
-          <BadgeCheckIcon className="size-5 text-green-500" />
-        </Button>
+        <SimpleTooltip display={<p>Claim this player to use it as your profile.</p>} side="bottom">
+          <Button variant={"outline"}>
+            <ShieldCheck className="size-5 text-green-500" />
+          </Button>
+        </SimpleTooltip>
       }
       title="Claim Profile"
       description={
