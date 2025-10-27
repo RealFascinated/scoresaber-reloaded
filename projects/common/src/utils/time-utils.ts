@@ -173,7 +173,9 @@ export function formatDate(
     | "DD/MM/YYYY, HH:mm:ss"
     | "Do MMMM, YYYY"
     | "Do MMMM, YYYY HH:mm"
-    | "Do MMMM, YYYY HH:mm a" = "MMMM YYYY"
+    | "Do MM, YYYY HH:mm a"
+    | "Do MMMM, YYYY HH:mm a"
+    | "Do MM, YYYY" = "MMMM YYYY"
 ) {
   const formatMap = {
     "MMMM YYYY": "MMMM YYYY",
@@ -185,6 +187,8 @@ export function formatDate(
     "Do MMMM, YYYY": "D MMMM, YYYY",
     "Do MMMM, YYYY HH:mm": "D MMMM, YYYY HH:mm",
     "Do MMMM, YYYY HH:mm a": "D MMMM, YYYY HH:mm a",
+    "Do MM, YYYY": "D MMM, YYYY",
+    "Do MM, YYYY HH:mm a": "D MM, YYYY HH:mm a",
   };
 
   const formatted = dayjs(date)

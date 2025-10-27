@@ -88,11 +88,9 @@ export default function ScoreDropdown({
     onLoadingChange?.(isLoading);
   }, [isLoading, onLoadingChange]);
 
-  if (!isExpanded || !dropdownData || isLoading) {
-    return null;
-  }
-
   const renderModeContent = () => {
+    if (!dropdownData) return null;
+
     switch (mode) {
       case ScoreMode.Overview:
         return (
@@ -120,72 +118,78 @@ export default function ScoreDropdown({
     }
   };
 
-  return (
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0, height: 0, scale: 0.97 }}
-        animate={{ opacity: 1, height: "auto", scale: 1 }}
-        exit={{ opacity: 0, height: 0, scale: 0.97 }}
-        transition={{
-          duration: 0.25,
-          ease: [0.4, 0, 0.2, 1],
-          height: { duration: 0.25 },
-          opacity: { duration: 0.18 },
-        }}
-        className="w-full origin-top pt-3"
-      >
-        {/* Mode Switcher */}
-        <div className="mb-3 flex w-full justify-center">
-          <div className="flex flex-wrap justify-center gap-2">
-            {modes.map(modeItem => (
-              <Button
-                key={modeItem.name}
-                variant={mode === modeItem.name ? "default" : "outline"}
-                onClick={() => handleModeChange(modeItem.name)}
-                className="flex items-center gap-2 px-3 py-2 text-sm"
-              >
-                {modeItem.icon}
-                <span>{modeItem.name}</span>
-              </Button>
-            ))}
-          </div>
-        </div>
+  if (isLoading) {
+    return null;
+  }
 
-        {/* Map Stats */}
-        {showMapStats && beatSaverMap && (
-          <div className="mb-2 flex w-full justify-center">
-            <div className="bg-secondary/90 border-border flex w-full flex-wrap justify-center gap-1 rounded-md border px-2 py-1 shadow-inner md:w-auto md:gap-2 md:rounded-xl">
-              <MapStats beatSaver={beatSaverMap} />
+  return (
+    <AnimatePresence mode="wait">
+      {isExpanded && dropdownData && (
+        <motion.div
+          initial={{ opacity: 0, height: 0, scale: 0.97 }}
+          animate={{ opacity: 1, height: "auto", scale: 1 }}
+          exit={{ opacity: 0, height: 0, scale: 0.97 }}
+          transition={{
+            duration: 0.25,
+            ease: [0.4, 0, 0.2, 1],
+            height: { duration: 0.25 },
+            opacity: { duration: 0.18 },
+          }}
+          className="w-full origin-top pt-3"
+        >
+          {/* Mode Switcher */}
+          <div className="mb-3 flex w-full justify-center">
+            <div className="flex flex-wrap justify-center gap-2">
+              {modes.map(modeItem => (
+                <Button
+                  key={modeItem.name}
+                  variant={mode === modeItem.name ? "default" : "outline"}
+                  onClick={() => handleModeChange(modeItem.name)}
+                  className="flex items-center gap-2 px-3 py-2 text-sm"
+                >
+                  {modeItem.icon}
+                  <span>{modeItem.name}</span>
+                </Button>
+              ))}
             </div>
           </div>
-        )}
 
-        {/* Main Card Content */}
-        <motion.div
-          key={mode}
-          initial={{ opacity: 0, y: 16, scale: 0.98 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: -16, scale: 0.98 }}
-          transition={{ duration: 0.22, ease: [0.4, 0, 0.2, 1] }}
-          className="w-full"
-        >
-          {renderModeContent()}
+          {/* Map Stats */}
+          {showMapStats && beatSaverMap && (
+            <div className="mb-2 flex w-full justify-center">
+              <div className="bg-secondary/90 border-border flex w-full flex-wrap justify-center gap-1 rounded-md border px-2 py-1 shadow-inner md:w-auto md:gap-2 md:rounded-xl">
+                <MapStats beatSaver={beatSaverMap} />
+              </div>
+            </div>
+          )}
+
+          {/* Main Card Content */}
+          <motion.div
+            key={mode}
+            initial={{ opacity: 0, y: 16, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -16, scale: 0.98 }}
+            transition={{ duration: 0.22, ease: [0.4, 0, 0.2, 1] }}
+            className="w-full"
+          >
+            {renderModeContent()}
+          </motion.div>
+
+          {/* Leaderboard Scores */}
+          {showLeaderboardScores && (
+            <div className="mt-2">
+              <Card className="bg-background/90 rounded-xl p-4 shadow-xl">
+                <LeaderboardScores
+                  initialPage={scoresPage}
+                  leaderboard={leaderboard}
+                  highlightedPlayerId={highlightedPlayerId}
+                  disableUrlChanging
+                />
+              </Card>
+            </div>
+          )}
         </motion.div>
-
-        {/* Leaderboard Scores */}
-        {showLeaderboardScores && (
-          <div className="mt-2">
-            <Card className="bg-background/90 rounded-xl p-4 shadow-xl">
-              <LeaderboardScores
-                initialPage={scoresPage}
-                leaderboard={leaderboard}
-                highlightedPlayerId={highlightedPlayerId}
-                disableUrlChanging
-              />
-            </Card>
-          </div>
-        )}
-      </motion.div>
+      )}
     </AnimatePresence>
   );
 }
