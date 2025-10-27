@@ -17,11 +17,18 @@ import { LeaderboardResponse } from "@ssr/common/response/leaderboard-response";
 import { getBeatSaverMapperProfileUrl } from "@ssr/common/utils/beatsaver.util";
 import { formatNumber, formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { formatDate, formatTime } from "@ssr/common/utils/time-utils";
-import { BombIcon, BrickWallIcon, DrumIcon, GaugeIcon, MusicIcon, TimerIcon } from "lucide-react";
+import {
+  BombIcon,
+  BrickWallIcon,
+  DrumIcon,
+  GaugeIcon,
+  MusicIcon,
+  StarIcon,
+  TimerIcon,
+} from "lucide-react";
 import { CubeIcon } from "@heroicons/react/24/solid";
 import Image from "next/image";
 import { useState } from "react";
-import { LeaderboardStarBadge } from "./leaderboard-star-badge";
 
 type LeaderboardInfoProps = {
   leaderboard: LeaderboardResponse;
@@ -55,7 +62,7 @@ export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
             {/* Song Name */}
             <FallbackLink
               href={beatSaverMap ? `https://beatsaver.com/maps/${beatSaverMap?.bsr}` : undefined}
-              className="transition-all hover:brightness-[66%]"
+              className="hover:brightness-66 transition-all"
               data-umami-event="leaderboard-beatsaver-button"
             >
               <h3 className="text-foreground mb-1 line-clamp-2 text-lg font-semibold leading-tight">
@@ -82,7 +89,7 @@ export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
                   <span
                     className={cn(
                       "font-medium",
-                      beatSaverMap ? "transition-all hover:brightness-[66%]" : ""
+                      beatSaverMap ? "hover:brightness-66 transition-all" : ""
                     )}
                   >
                     {leaderboardData.levelAuthorName}
@@ -94,146 +101,129 @@ export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
         </div>
       </div>
 
-      {/* Status and Star Rating */}
-      <div className="flex items-center justify-between">
-        {/* Star Rating */}
-        <LeaderboardStarBadge leaderboard={leaderboardData} />
+      {/* Star Rating and Status */}
+      <div className="flex items-center gap-2">
+        {leaderboardData.stars > 0 && (
+          <div className="flex items-center gap-1.5 rounded-md bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-300">
+            <StarIcon className="h-3 w-3" />
+            <span>{leaderboardData.stars.toFixed(2)}</span>
+          </div>
+        )}
 
-        {/* Status Badge */}
-        <div className="flex items-center gap-2">
-          {leaderboardData.ranked && (
-            <div className="bg-linear-to-r flex h-7 items-center gap-1.5 rounded-full from-green-500 to-green-600 px-3 text-xs font-semibold text-white shadow-sm">
-              <CheckBadgeIcon className="h-3.5 w-3.5" />
-              Ranked
-            </div>
-          )}
-          {leaderboardData.qualified && !leaderboardData.ranked && (
-            <div className="bg-linear-to-r flex h-7 items-center gap-1.5 rounded-full from-yellow-500 to-yellow-600 px-3 text-xs font-semibold text-white shadow-sm">
-              <CheckBadgeIcon className="h-3.5 w-3.5" />
-              Qualified
-            </div>
-          )}
-          {!leaderboardData.ranked && !leaderboardData.qualified && (
-            <div className="bg-linear-to-r flex h-7 items-center gap-1.5 rounded-full from-gray-500 to-gray-600 px-3 text-xs font-semibold text-white shadow-sm">
-              <CheckBadgeIcon className="h-3.5 w-3.5" />
-              Unranked
-            </div>
-          )}
-        </div>
+        {leaderboardData.ranked && (
+          <div className="flex items-center gap-1.5 rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 dark:bg-green-900/20 dark:text-green-300">
+            <CheckBadgeIcon className="h-3 w-3" />
+            <span>Ranked</span>
+          </div>
+        )}
+        {leaderboardData.qualified && !leaderboardData.ranked && (
+          <div className="flex items-center gap-1.5 rounded-md bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-300">
+            <CheckBadgeIcon className="h-3 w-3" />
+            <span>Qualified</span>
+          </div>
+        )}
+        {!leaderboardData.ranked && !leaderboardData.qualified && (
+          <div className="flex items-center gap-1.5 rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-700 dark:bg-gray-900/20 dark:text-gray-300">
+            <CheckBadgeIcon className="h-3 w-3" />
+            <span>Unranked</span>
+          </div>
+        )}
       </div>
 
-      {/* Statistics Grid */}
-      <div className="space-y-3">
+      {/* Map Stats */}
+      {beatSaverMap && beatSaverMap.difficulty && (
+        <div className="flex flex-wrap justify-center gap-2">
+          <StatValue
+            name="Length"
+            icon={<TimerIcon className="h-4 w-4" />}
+            value={formatTime(beatSaverMap.metadata.duration)}
+          />
+          <StatValue
+            name="BPM"
+            icon={<MusicIcon className="h-4 w-4" />}
+            value={formatNumberWithCommas(beatSaverMap.metadata.bpm)}
+          />
+          <StatValue
+            name="NPS"
+            icon={<DrumIcon className="h-4 w-4" />}
+            value={beatSaverMap.difficulty.nps.toFixed(2)}
+          />
+          <StatValue
+            name="NJS"
+            icon={<GaugeIcon className="h-4 w-4" />}
+            value={beatSaverMap.difficulty.njs.toFixed(2)}
+          />
+          <StatValue
+            name="Notes"
+            icon={<CubeIcon className="h-4 w-4" />}
+            value={formatNumberWithCommas(beatSaverMap.difficulty.notes)}
+          />
+          <StatValue
+            name="Bombs"
+            icon={<BombIcon className="h-4 w-4" />}
+            value={formatNumberWithCommas(beatSaverMap.difficulty.bombs)}
+          />
+          <StatValue
+            name="Obstacles"
+            icon={<BrickWallIcon className="h-4 w-4" />}
+            value={formatNumberWithCommas(beatSaverMap.difficulty.obstacles)}
+          />
+        </div>
+      )}
+
+      <Separator />
+
+      {/* Statistics */}
+      <div className="bg-muted/30 flex items-center rounded-lg p-3">
         {/* Play Counts */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="rounded-lg bg-blue-500/10 p-1.5">
-              <PlayIcon className="h-4.5 w-4.5 text-blue-500" />
-            </div>
-            <div>
-              <div className="text-xs font-medium">Total Plays</div>
+        <div className="flex items-center gap-3">
+          <div className="rounded-lg bg-blue-500/10 p-2">
+            <PlayIcon className="h-4 w-4 text-blue-500" />
+          </div>
+          <div>
+            <div className="text-muted-foreground text-xs font-medium">Total Plays</div>
+            <div className="flex items-center gap-2">
+              <div className="text-sm font-semibold text-blue-500">
+                {formatNumber(leaderboardData.plays)}
+              </div>
               <div className="text-muted-foreground text-xs">
-                {formatNumber(leaderboardData.dailyPlays)} today
+                ({formatNumber(leaderboardData.dailyPlays)} today
                 {leaderboardData.weeklyPlays !== undefined && (
-                  <span> • {formatNumber(leaderboardData.weeklyPlays)} this week</span>
+                  <>, {formatNumber(leaderboardData.weeklyPlays)} this week</>
                 )}
+                )
               </div>
             </div>
-          </div>
-          <div className="text-lg font-semibold text-blue-500">
-            {formatNumber(leaderboardData.plays)}
-          </div>
-        </div>
-
-        {/* Max Score */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="rounded-lg bg-green-500/10 p-1.5">
-              <ChartBarIcon className="h-4.5 w-4.5 text-green-500" />
-            </div>
-            <div>
-              <div className="text-xs font-medium">Max Score</div>
-            </div>
-          </div>
-          <div className="text-lg font-semibold text-green-500">
-            {formatNumber(leaderboardData.maxScore)}
           </div>
         </div>
       </div>
 
       {/* Map Description */}
       {beatSaverMap && description && (
-        <div className="space-y-2">
-          <div className="bg-muted/30 w-full break-all rounded-lg p-3">
-            {(showExpandButton && !expanded
-              ? description.slice(0, descriptionMaxSize) + "..."
-              : description
-            )
-              .split("\n")
-              .map((line, index) => {
-                return (
-                  <p key={index} className="text-sm">
-                    <EmbedLinks text={line} />
-                  </p>
-                );
-              })}
+        <div className="bg-muted/30 w-full break-all rounded-lg p-3">
+          {(showExpandButton && !expanded
+            ? description.slice(0, descriptionMaxSize) + "..."
+            : description
+          )
+            .split("\n")
+            .map((line, index) => {
+              return (
+                <p key={index} className="text-sm">
+                  <EmbedLinks text={line} />
+                </p>
+              );
+            })}
 
-            {showExpandButton && (
-              <button
-                className="text-muted-foreground hover:text-foreground mt-2 text-center text-xs transition-all"
-                onClick={() => setExpanded(!expanded)}
-              >
-                {expanded ? "Show Less" : "Show More"}
-              </button>
-            )}
-          </div>
+          {showExpandButton && (
+            <button
+              className="text-muted-foreground hover:text-foreground mt-2 text-center text-xs transition-all"
+              onClick={() => setExpanded(!expanded)}
+            >
+              {expanded ? "Show Less" : "Show More"}
+            </button>
+          )}
         </div>
       )}
-
-      {/* Map Stats */}
-      {beatSaverMap && beatSaverMap.difficulty && (
-        <div className="space-y-2">
-          <div className="flex flex-wrap justify-center gap-2">
-            <StatValue
-              name="Length"
-              icon={<TimerIcon className="h-4 w-4" />}
-              value={formatTime(beatSaverMap.metadata.duration)}
-            />
-            <StatValue
-              name="BPM"
-              icon={<MusicIcon className="h-4 w-4" />}
-              value={formatNumberWithCommas(beatSaverMap.metadata.bpm)}
-            />
-            <StatValue
-              name="NPS"
-              icon={<DrumIcon className="h-4 w-4" />}
-              value={beatSaverMap.difficulty.nps.toFixed(2)}
-            />
-            <StatValue
-              name="NJS"
-              icon={<GaugeIcon className="h-4 w-4" />}
-              value={beatSaverMap.difficulty.njs.toFixed(2)}
-            />
-            <StatValue
-              name="Notes"
-              icon={<CubeIcon className="h-4 w-4" />}
-              value={formatNumberWithCommas(beatSaverMap.difficulty.notes)}
-            />
-            <StatValue
-              name="Bombs"
-              icon={<BombIcon className="h-4 w-4" />}
-              value={formatNumberWithCommas(beatSaverMap.difficulty.bombs)}
-            />
-            <StatValue
-              name="Obstacles"
-              icon={<BrickWallIcon className="h-4 w-4" />}
-              value={formatNumberWithCommas(beatSaverMap.difficulty.obstacles)}
-            />
-          </div>
-        </div>
-      )}
-
-      <Separator />
 
       {/* Information Section */}
       <div className="flex gap-3">
@@ -247,7 +237,7 @@ export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
               </span>
             </div>
             <SimpleTooltip display={formatDate(statusDate, "Do MMMM, YYYY HH:mm a")}>
-              <div className="text-sm font-semibold">{formatDate(statusDate, "DD MMMM YYYY")}</div>
+              <div className="text-sm font-semibold">{formatDate(statusDate, "Do MM, YYYY")}</div>
             </SimpleTooltip>
           </div>
         )}
@@ -262,7 +252,7 @@ export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
           </div>
           <SimpleTooltip display={formatDate(leaderboardData.timestamp, "Do MMMM, YYYY HH:mm a")}>
             <div className="text-sm font-semibold">
-              {formatDate(leaderboardData.timestamp, "DD MMMM YYYY")}
+              {formatDate(leaderboardData.timestamp, "Do MM, YYYY")}
             </div>
           </SimpleTooltip>
         </div>
