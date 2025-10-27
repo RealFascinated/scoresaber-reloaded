@@ -1,4 +1,6 @@
+import HMDIcon from "@/components/hmd-icon";
 import SimpleTooltip from "@/components/simple-tooltip";
+import { getHMDInfo, HMD } from "@ssr/common/hmds";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 
 export function ScoreSaberScoreHMD({
@@ -13,9 +15,10 @@ export function ScoreSaberScoreHMD({
       display={
         <div className="flex flex-col gap-2">
           {score.hmd !== "Unknown" ? (
-            <p>
-              Score was set on <span className="font-semibold">{score.hmd}</span>
-            </p>
+            <div className="flex items-center gap-2">
+              Score was set using a <HMDIcon hmd={getHMDInfo(score.hmd as HMD)} />{" "}
+              <span className="font-semibold">{score.hmd}</span>
+            </div>
           ) : (
             <div>
               <p>An unknown HMD was used (outdated mod?)</p>
