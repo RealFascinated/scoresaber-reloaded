@@ -411,7 +411,7 @@ export default function SnipePlaylistCreator({ toSnipe }: SnipePlaylistCreatorPr
                               onValueChange={value => {
                                 field.onChange({ min: value[0], max: value[1] });
                               }}
-                              className="pt-10 pb-1"
+                              className="pb-1 pt-10"
                             />
                           </FormControl>
                         </FormItem>
@@ -435,7 +435,7 @@ export default function SnipePlaylistCreator({ toSnipe }: SnipePlaylistCreatorPr
                             onValueChange={value => {
                               field.onChange({ min: value[0], max: value[1] });
                             }}
-                            className="pt-10 pb-1"
+                            className="pb-1 pt-10"
                           />
                         </FormControl>
                       </FormItem>

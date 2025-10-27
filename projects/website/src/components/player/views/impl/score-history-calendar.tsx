@@ -38,7 +38,7 @@ export default function ScoreHistoryCalendar({ playerId }: ScoreHistoryCalendarP
   };
 
   return (
-    <div className="flex flex-col items-center justify-center gap-3 py-2 select-none">
+    <div className="flex select-none flex-col items-center justify-center gap-3 py-2">
       {isLoading ? (
         <Spinner /> // Only show Spinner for initial load
       ) : (

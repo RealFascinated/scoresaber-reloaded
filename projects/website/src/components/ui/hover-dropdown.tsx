@@ -107,7 +107,7 @@ export function HoverDropdown({
         <div
           className={`bg-card text-card-foreground absolute top-full z-50 overflow-hidden rounded-xl shadow-lg backdrop-blur-sm transition-all duration-200 ${
             isMobile
-              ? "right-0 left-auto max-w-[calc(100vw-1rem)]" // Better positioning on mobile
+              ? "left-auto right-0 max-w-[calc(100vw-1rem)]" // Better positioning on mobile
               : "left-0"
           } ${
             isVisible
@@ -166,7 +166,7 @@ export function DropdownItem({
 
   return (
     <div
-      className={`${styleClass} relative flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-sm font-medium transition-all duration-200 outline-none select-none data-disabled:pointer-events-none data-disabled:opacity-50 ${
+      className={`${styleClass} data-disabled:pointer-events-none data-disabled:opacity-50 relative flex cursor-pointer select-none items-center gap-2 rounded-md px-2 py-1.5 text-sm font-medium outline-none transition-all duration-200 ${
         disabled ? "pointer-events-none opacity-50" : ""
       } ${className}`}
       onClick={handleClick}
@@ -184,7 +184,7 @@ interface DropdownLabelProps {
 export function DropdownLabel({ children, className = "" }: DropdownLabelProps) {
   return (
     <div
-      className={`text-muted-foreground px-2 py-1 text-xs font-semibold tracking-wide uppercase ${className}`}
+      className={`text-muted-foreground px-2 py-1 text-xs font-semibold uppercase tracking-wide ${className}`}
     >
       {children}
     </div>
@@ -244,7 +244,7 @@ export function DropdownButton({
   return (
     <SimpleLink
       href={href}
-      className={`${styleClass} relative flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-sm font-medium transition-all duration-200 outline-none select-none data-disabled:pointer-events-none data-disabled:opacity-50 ${
+      className={`${styleClass} data-disabled:pointer-events-none data-disabled:opacity-50 relative flex cursor-pointer select-none items-center gap-2 rounded-md px-2 py-1.5 text-sm font-medium outline-none transition-all duration-200 ${
         disabled ? "pointer-events-none opacity-50" : ""
       } ${className}`}
       onClick={handleClick}

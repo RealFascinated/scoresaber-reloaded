@@ -126,7 +126,7 @@ const playerData = [
           <div className="flex items-center gap-1" style={{ height: "100%" }}>
             <ChangeOverTime player={player} type={PlayerStatChange.PerformancePoints}>
               <span
-                className="text-pp m-0 truncate text-sm leading-[1.4] font-semibold transition-all hover:brightness-110"
+                className="text-pp m-0 truncate text-sm font-semibold leading-[1.4] transition-all hover:brightness-110"
                 style={{ display: "inline-block", verticalAlign: "middle" }}
               >
                 {formatPp(player.pp)}pp

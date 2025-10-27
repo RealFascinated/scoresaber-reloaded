@@ -273,7 +273,7 @@ const GenericChart = ({ config, labels }: Props) => {
   return (
     <div className="relative flex h-full w-full">
       {showNoData ? (
-        <div className="bg-muted absolute top-1/2 left-1/2 z-9999 -translate-x-1/2 -translate-y-1/2 rounded-md p-2 text-center">
+        <div className="bg-muted z-9999 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-md p-2 text-center">
           <p className="text-red-500">No data available :(</p>
         </div>
       ) : null}

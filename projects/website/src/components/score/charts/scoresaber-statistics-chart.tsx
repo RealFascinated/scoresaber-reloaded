@@ -53,10 +53,10 @@ export default function ScoreSaberStatisticsChart({ statistics }: Props) {
   return (
     <div className="flex flex-col gap-4">
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <div className="group border-primary/20 from-accent-deep/50 to-accent/50 relative overflow-hidden rounded-xl border bg-gradient-to-br p-4">
+        <div className="border-primary/20 from-accent-deep/50 to-accent/50 group relative overflow-hidden rounded-xl border bg-gradient-to-br p-4">
           <GenericStatisticChart statistics={statistics} datasetConfig={[datasetConfig[0]]} />
         </div>
-        <div className="group border-primary/20 from-accent-deep/50 to-accent/50 relative overflow-hidden rounded-xl border bg-gradient-to-br p-4">
+        <div className="border-primary/20 from-accent-deep/50 to-accent/50 group relative overflow-hidden rounded-xl border bg-gradient-to-br p-4">
           <GenericStatisticChart statistics={statistics} datasetConfig={[datasetConfig[1]]} />
         </div>
       </div>

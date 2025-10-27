@@ -32,9 +32,9 @@ export default function NotFoundPage() {
             <SimpleLink href="/">
               <Button
                 size="lg"
-                className="group border-primary/30 bg-primary/5 text-primary hover:border-primary/50 hover:bg-primary/10 relative h-12 overflow-hidden rounded-xl border-2 px-8 backdrop-blur-sm transition-all duration-300"
+                className="border-primary/30 bg-primary/5 text-primary hover:border-primary/50 hover:bg-primary/10 group relative h-12 overflow-hidden rounded-xl border-2 px-8 backdrop-blur-sm transition-all duration-300"
               >
-                <div className="from-primary/10 to-accent-secondary/10 absolute inset-0 bg-linear-to-r opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                <div className="from-primary/10 to-accent-secondary/10 bg-linear-to-r absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
                 <HomeIcon className="relative z-10 mr-2 h-5 w-5" />
                 <span className="relative z-10 font-semibold">Return Home</span>
               </Button>
@@ -44,9 +44,9 @@ export default function NotFoundPage() {
               <Button
                 size="lg"
                 variant="outline"
-                className="group border-primary/30 bg-primary/5 text-primary hover:border-primary/50 hover:bg-primary/10 relative h-12 overflow-hidden rounded-xl border-2 px-8 backdrop-blur-sm transition-all duration-300"
+                className="border-primary/30 bg-primary/5 text-primary hover:border-primary/50 hover:bg-primary/10 group relative h-12 overflow-hidden rounded-xl border-2 px-8 backdrop-blur-sm transition-all duration-300"
               >
-                <div className="from-primary/10 to-accent-secondary/10 absolute inset-0 bg-linear-to-r opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                <div className="from-primary/10 to-accent-secondary/10 bg-linear-to-r absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
                 <SearchIcon className="relative z-10 mr-2 h-5 w-5" />
                 <span className="relative z-10 font-semibold">Search Players</span>
               </Button>

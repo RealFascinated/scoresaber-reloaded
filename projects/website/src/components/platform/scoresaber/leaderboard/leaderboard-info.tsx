@@ -6,13 +6,8 @@ import LeaderboardButtons from "@/components/platform/scoresaber/leaderboard/lea
 import SimpleTooltip from "@/components/simple-tooltip";
 import StatValue from "@/components/statistic/stat-value";
 import { Separator } from "@/components/ui/separator";
-import {
-  ChartBarIcon,
-  CheckBadgeIcon,
-  MapIcon,
-  MusicalNoteIcon,
-  PlayIcon,
-} from "@heroicons/react/24/outline";
+import { CheckBadgeIcon, MapIcon, MusicalNoteIcon, PlayIcon } from "@heroicons/react/24/outline";
+import { CubeIcon } from "@heroicons/react/24/solid";
 import { LeaderboardResponse } from "@ssr/common/response/leaderboard-response";
 import { getBeatSaverMapperProfileUrl } from "@ssr/common/utils/beatsaver.util";
 import { formatNumber, formatNumberWithCommas } from "@ssr/common/utils/number-utils";
@@ -26,7 +21,6 @@ import {
   StarIcon,
   TimerIcon,
 } from "lucide-react";
-import { CubeIcon } from "@heroicons/react/24/solid";
 import Image from "next/image";
 import { useState } from "react";
 

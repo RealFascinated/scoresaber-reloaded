@@ -83,7 +83,7 @@ export default function HmdUsageChart({ hmdUsage }: Props) {
   };
 
   return (
-    <div className="group border-primary/20 from-accent-deep/50 to-accent/50 relative w-full overflow-hidden rounded-xl border bg-gradient-to-br p-4">
+    <div className="border-primary/20 from-accent-deep/50 to-accent/50 group relative w-full overflow-hidden rounded-xl border bg-gradient-to-br p-4">
       <div className="h-[360px] w-full">
         <Pie data={data} options={options} />
       </div>

@@ -29,7 +29,7 @@ export default function ProfileButton() {
     <div className="flex h-full items-center gap-2.5">
       <Avatar
         src={mainPlayer.avatar}
-        className="h-7 w-7 rounded-full ring-1 ring-border/30"
+        className="ring-border/30 h-7 w-7 rounded-full ring-1"
         alt={`${mainPlayer.name}'s Profile Picture`}
       />
       <p className="text-primary hover:text-primary/80 hidden text-sm font-medium transition-colors duration-200 lg:block">
@@ -45,7 +45,7 @@ export default function ProfileButton() {
       ) : (
         <SimpleLink
           href={`/player/${mainPlayer.id}`}
-          className="flex h-full cursor-pointer items-center rounded-lg px-2.5 py-1.5 transition-all duration-200 hover:bg-primary/5 hover:shadow-sm"
+          className="hover:bg-primary/5 flex h-full cursor-pointer items-center rounded-lg px-2.5 py-1.5 transition-all duration-200 hover:shadow-sm"
           data-umami-event="player-profile-button"
         >
           {buttonContent}

@@ -125,7 +125,7 @@ export default function BackgroundCover() {
     return (
       <div
         className={cn(
-          "pointer-events-none fixed -z-50 h-screen w-screen object-cover select-none",
+          "pointer-events-none fixed -z-50 h-screen w-screen select-none object-cover",
           cover.id === "none" ? "bg-background" : ""
         )}
         style={{
@@ -142,7 +142,7 @@ export default function BackgroundCover() {
         alt="Background image"
         fetchPriority="high"
         className={cn(
-          "pointer-events-none fixed -z-50 h-screen w-screen object-cover blur-xs brightness-[50%] select-none",
+          "blur-xs pointer-events-none fixed -z-50 h-screen w-screen select-none object-cover brightness-[50%]",
           "transition-opacity duration-1000 ease-in-out",
           isTransitioning ? "opacity-10" : "opacity-100"
         )}
@@ -155,7 +155,7 @@ export default function BackgroundCover() {
       src={cover.value}
       alt="Background image"
       fetchPriority="high"
-      className={`pointer-events-none fixed -z-50 h-screen w-screen object-cover blur-xs brightness-[50%] select-none`}
+      className={`blur-xs pointer-events-none fixed -z-50 h-screen w-screen select-none object-cover brightness-[50%]`}
     />
   );
 }

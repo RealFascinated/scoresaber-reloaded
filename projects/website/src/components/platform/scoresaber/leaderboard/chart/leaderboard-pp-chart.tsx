@@ -152,12 +152,12 @@ export default function LeaderboardPpChart({ leaderboard }: Props) {
   return (
     <Card className="flex w-full flex-col gap-4">
       <div className="space-y-1">
-        <h3 className="text-lg font-semibold text-foreground">PP Curve</h3>
-        <p className="text-sm text-muted-foreground">
+        <h3 className="text-foreground text-lg font-semibold">PP Curve</h3>
+        <p className="text-muted-foreground text-sm">
           Shows PP values for different accuracy percentages.
         </p>
       </div>
-      
+
       <div className="h-[300px] sm:h-[400px]">
         <Line data={data} options={options} />
       </div>

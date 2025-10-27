@@ -147,13 +147,17 @@ export default function LeaderboardScores({
       {scores && scores.items.length > 0 && (
         <>
           <div className="border-border/50 bg-background/50 relative overflow-x-auto rounded-lg border shadow-sm">
-            <table className="table w-full table-auto border-spacing-0 text-left text-sm min-w-[800px]">
+            <table className="table w-full min-w-[800px] table-auto border-spacing-0 text-left text-sm">
               <thead>
                 <tr className="border-border/50 bg-muted/30 border-b">
                   <th className="text-foreground/90 px-3 py-3 font-semibold">Rank</th>
                   <th className="text-foreground/90 px-3 py-3 font-semibold">Player</th>
-                  <th className="text-foreground/90 px-3 py-3 text-center font-semibold">Time Set</th>
-                  <th className="text-foreground/90 px-3 py-3 text-center font-semibold">Accuracy</th>
+                  <th className="text-foreground/90 px-3 py-3 text-center font-semibold">
+                    Time Set
+                  </th>
+                  <th className="text-foreground/90 px-3 py-3 text-center font-semibold">
+                    Accuracy
+                  </th>
                   <th className="text-foreground/90 px-3 py-3 text-center font-semibold">Misses</th>
                   <th className="text-foreground/90 px-3 py-3 text-center font-semibold">
                     {leaderboard.stars > 0 ? "PP" : "Score"}

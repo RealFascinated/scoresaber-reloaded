@@ -245,7 +245,7 @@ export default function OverlayBuilder() {
                 control={form.control}
                 name="useRealTimeData"
                 render={({ field }) => (
-                  <FormItem className="flex flex-row items-center space-y-0 space-x-3">
+                  <FormItem className="flex flex-row items-center space-x-3 space-y-0">
                     <FormControl>
                       <Checkbox
                         checked={field.value}
@@ -325,7 +325,7 @@ export default function OverlayBuilder() {
                       control={form.control}
                       name={`views.${viewToggle.value}`}
                       render={({ field }) => (
-                        <FormItem className="flex flex-row items-center space-y-0 space-x-3">
+                        <FormItem className="flex flex-row items-center space-x-3 space-y-0">
                           <FormControl>
                             <Checkbox
                               checked={field.value}

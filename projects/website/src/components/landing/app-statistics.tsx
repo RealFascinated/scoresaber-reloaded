@@ -15,7 +15,7 @@ interface StatCardProps {
 
 function StatCard({ icon: Icon, title, value }: StatCardProps) {
   return (
-    <div className="group border-primary/20 from-accent-deep/50 to-accent/50 relative overflow-hidden rounded-xl border bg-gradient-to-br p-4">
+    <div className="border-primary/20 from-accent-deep/50 to-accent/50 group relative overflow-hidden rounded-xl border bg-gradient-to-br p-4">
       <div className="relative">
         <div className="bg-primary/10 text-primary mb-3 inline-flex rounded-lg p-2">
           <Icon className="size-5" />

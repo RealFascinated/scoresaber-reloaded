@@ -32,7 +32,7 @@ export function ScoreTimeSet({ timestamp }: ScoreTimeSetProps) {
       }
       showOnMobile
     >
-      <p className="cursor-default text-sm select-none">{currentTime}</p>
+      <p className="cursor-default select-none text-sm">{currentTime}</p>
     </SimpleTooltip>
   );
 }

@@ -208,7 +208,7 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
                         <span className="truncate">
                           {countryFilter.find(c => c.key === key)?.friendlyName ?? key}
                         </span>
-                        <span className="text-muted-foreground ml-4 text-sm whitespace-nowrap">
+                        <span className="text-muted-foreground ml-4 whitespace-nowrap text-sm">
                           {count.toLocaleString()} players
                         </span>
                       </div>

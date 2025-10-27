@@ -43,7 +43,7 @@ export default function PlayerAvatar({ player }: PlayerAvatarProps) {
         className="pointer-events-none"
         alt={`${player.name}'s Profile Picture`}
       />
-      <div className="absolute top-[3px] right-[3px] z-10">
+      <div className="absolute right-[3px] top-[3px] z-10">
         <SimpleTooltip display="Refresh player">
           <button
             onClick={handleRefresh}

@@ -37,7 +37,7 @@ export default function ScoreSaberScoreSongInfo({
 
   const difficultyInfo = (
     <div
-      className="absolute right-0 bottom-0 flex h-[18px] w-full cursor-default items-center justify-center rounded-sm text-[0.70rem]"
+      className="absolute bottom-0 right-0 flex h-[18px] w-full cursor-default items-center justify-center rounded-sm text-[0.70rem]"
       style={{
         backgroundColor: difficulty.color + "f0",
       }}

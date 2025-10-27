@@ -94,7 +94,7 @@ function AccuracyCircle({ accuracy, averageCut, hand }: AccuracyCircleProps) {
 function HandStat({ hand, name, value }: { hand: Hand; name: string; value: string }) {
   return (
     <div
-      className="bg-opacity-20 inline-flex w-full items-center justify-around rounded-md px-2 py-1 backdrop-blur-sm"
+      className="inline-flex w-full items-center justify-around rounded-md bg-opacity-20 px-2 py-1 backdrop-blur-sm"
       style={{ backgroundColor: `${handColors[hand]}40` }}
     >
       <p className="min-w-[38px] grow font-medium">{name}</p>

@@ -76,7 +76,7 @@ const PageSelector = React.memo(({ totalPages, onPageSelect, isLoading }: PageSe
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4">
             <div className="space-y-1.5 text-center">
-              <h4 className="leading-none font-medium">Go to Page</h4>
+              <h4 className="font-medium leading-none">Go to Page</h4>
               <p className="text-muted-foreground text-sm">
                 Max: {formatNumberWithCommas(totalPages)}
               </p>
@@ -349,7 +349,7 @@ export default function SimplePagination({
       {showStats && (
         <div
           className={cn(
-            "text-muted-foreground text-sm select-none",
+            "text-muted-foreground select-none text-sm",
             !statsBelow && "left-0 lg:absolute"
           )}
         >

@@ -100,7 +100,7 @@ export function PlayerRanking({
             />
             <PlayerName
               player={player}
-              className="flex max-w-[140px] min-w-[90px] flex-1 items-center overflow-hidden"
+              className="flex min-w-[90px] max-w-[140px] flex-1 items-center overflow-hidden"
             />
             <PlayerPpDisplay
               pp={player.pp}

@@ -28,7 +28,7 @@ import {
   Trophy,
   Zap,
 } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import ScoresCard from "../../score/scores-card";
 import SimplePagination from "../../simple-pagination";
 import {
@@ -74,7 +74,6 @@ export default function AccSaberPlayerScores({ player, sort, page, type, order }
   const [currentSort, setCurrentSort] = useState<AccSaberScoreSort>(sort);
   const [currentType, setCurrentType] = useState<AccSaberScoreType>(type);
   const [currentOrder, setCurrentOrder] = useState<AccSaberScoreOrder>(order);
-
 
   useDocumentTitle(
     ssrConfig.siteTitleTemplate.replace(

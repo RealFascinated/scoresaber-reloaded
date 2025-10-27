@@ -19,7 +19,7 @@ type PlayerHeaderProps = {
 export default function PlayerHeader({ player }: PlayerHeaderProps) {
   return (
     <Card className="flex gap-2">
-      <div className="relative flex flex-col items-center gap-3 text-center select-none lg:flex-row lg:items-start lg:text-start">
+      <div className="relative flex select-none flex-col items-center gap-3 text-center lg:flex-row lg:items-start lg:text-start">
         <PlayerAvatar player={player} />
         <div className="flex w-full flex-col items-center justify-center gap-2 lg:items-start lg:justify-start">
           <div className="flex flex-col gap-1">
@@ -44,7 +44,7 @@ export default function PlayerHeader({ player }: PlayerHeaderProps) {
 
           <PlayerStats player={player} />
 
-          <div className="absolute top-0 right-0 flex flex-col gap-2 lg:flex-row">
+          <div className="absolute right-0 top-0 flex flex-col gap-2 lg:flex-row">
             <AddFriend player={player} />
             <ClaimProfile playerId={player.id} />
           </div>

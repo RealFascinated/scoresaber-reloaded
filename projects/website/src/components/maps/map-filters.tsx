@@ -114,7 +114,7 @@ export default function MapFilters() {
           min={0}
           max={Consts.MAX_STARS}
           step={0.1}
-          className="pt-10 pb-2"
+          className="pb-2 pt-10"
         />
       </div>
 

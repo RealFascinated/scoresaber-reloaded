@@ -36,14 +36,14 @@ export default function ScoreSaberLeaderboardScore({
   return (
     <>
       {/* Score Rank */}
-      <td className="px-4 py-2 whitespace-nowrap">
+      <td className="whitespace-nowrap px-4 py-2">
         <p className={getRankColor(score.rank)}>
           {score.rank !== -1 ? `#${formatNumberWithCommas(score.rank)}` : "-"}
         </p>
       </td>
 
       {/* Player */}
-      <td className="flex min-w-[250px] gap-2 px-4 py-2 whitespace-nowrap">
+      <td className="flex min-w-[250px] gap-2 whitespace-nowrap px-4 py-2">
         {scorePlayer ? (
           <PlayerPreview playerId={scorePlayer.id}>
             <PlayerInfo player={scorePlayer} highlightedPlayerId={highlightedPlayerId} useLink />
@@ -54,19 +54,19 @@ export default function ScoreSaberLeaderboardScore({
       </td>
 
       {/* Time Set */}
-      <td className="px-4 py-2 text-center whitespace-nowrap">
+      <td className="whitespace-nowrap px-4 py-2 text-center">
         <ScoreTimeSet timestamp={score.timestamp} />
       </td>
 
       {/* Score Accuracy */}
-      <td className="px-4 py-2 text-center whitespace-nowrap">
+      <td className="whitespace-nowrap px-4 py-2 text-center">
         {formatScoreAccuracy(score.accuracy)}
       </td>
 
       {/* Score Misses */}
       <td
         className={cn(
-          "cursor-default px-4 py-2 whitespace-nowrap",
+          "cursor-default whitespace-nowrap px-4 py-2",
           score.misses > 0 ? "text-red-500" : "text-green-500"
         )}
       >
@@ -75,17 +75,17 @@ export default function ScoreSaberLeaderboardScore({
 
       {/* PP / Score */}
       {leaderboard.stars > 0 ? (
-        <td className="text-pp px-4 py-2 whitespace-nowrap">
+        <td className="text-pp whitespace-nowrap px-4 py-2">
           <ScorePpBadge score={score} leaderboard={leaderboard} />
         </td>
       ) : (
-        <td className="px-4 py-2 text-center whitespace-nowrap">
+        <td className="whitespace-nowrap px-4 py-2 text-center">
           <p>{formatNumberWithCommas(score.score)}</p>
         </td>
       )}
 
       {/* Score Modifiers */}
-      <td className="px-4 py-2 text-center whitespace-nowrap">
+      <td className="whitespace-nowrap px-4 py-2 text-center">
         <SimpleTooltip
           side="bottom"
           display={
@@ -119,7 +119,7 @@ export default function ScoreSaberLeaderboardScore({
             ) : (
               <ArrowDownIcon
                 className={cn(
-                  "size-5 cursor-pointer transition-transform duration-350",
+                  "duration-350 size-5 cursor-pointer transition-transform",
                   isDropdownExpanded ? "" : "rotate-180"
                 )}
                 onClick={onDropdownToggle}

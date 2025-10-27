@@ -84,7 +84,7 @@ function FormFieldComponent<
 
   return (
     <FormItem
-      className={field.type === "checkbox" ? "flex flex-row items-center space-y-0 space-x-2" : ""}
+      className={field.type === "checkbox" ? "flex flex-row items-center space-x-2 space-y-0" : ""}
     >
       {field.type === "checkbox" ? (
         <>

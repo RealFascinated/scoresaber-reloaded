@@ -16,7 +16,7 @@ import { useDocumentTitle } from "@uidotdev/usehooks";
 import { ssrConfig } from "config";
 import { useLiveQuery } from "dexie-react-hooks";
 import { SearchIcon } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import ScoresCard from "../../score/scores-card";
 import SimplePagination from "../../simple-pagination";
 import { EmptyState } from "../../ui/empty-state";
@@ -76,10 +76,7 @@ export default function ScoreSaberPlayerMedalScores({
   // URL management
   const { buildUrl } = useUrlBuilder({
     basePath: `/player/${player.id}`,
-    segments: [
-      { value: "medals" },
-      { value: currentPage, condition: currentPage !== 1 },
-    ],
+    segments: [{ value: "medals" }, { value: currentPage, condition: currentPage !== 1 }],
   });
 
   // Render helpers
