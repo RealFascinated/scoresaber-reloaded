@@ -1,6 +1,5 @@
 import Card from "@/components/card";
 import EmbedLinks from "@/components/embed-links";
-import { MapStats } from "@/components/score/map-stats";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
 import { useState } from "react";
 
@@ -20,8 +19,8 @@ export function LeaderboardBeatSaverInfo({ beatSaverMap }: LeaderboardBeatSaverI
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <Card className="flex h-fit w-full gap-2 text-sm">
-      <div className="bg-border w-full rounded-sm p-1 break-all">
+    <Card className="flex h-fit w-full flex-col gap-4 text-sm">
+      <div className="bg-muted/30 w-full rounded-lg p-3 break-all">
         {(showExpandButton && !expanded
           ? description.slice(0, descriptionMaxSize) + "..."
           : description
@@ -29,7 +28,7 @@ export function LeaderboardBeatSaverInfo({ beatSaverMap }: LeaderboardBeatSaverI
           .split("\n")
           .map((line, index) => {
             return (
-              <p key={index}>
+              <p key={index} className="text-sm">
                 <EmbedLinks text={line} />
               </p>
             );
@@ -37,16 +36,12 @@ export function LeaderboardBeatSaverInfo({ beatSaverMap }: LeaderboardBeatSaverI
 
         {showExpandButton && (
           <button
-            className="text-center text-xs text-gray-400 transition-all hover:brightness-75"
+            className="text-center text-xs text-muted-foreground transition-all hover:text-foreground mt-2"
             onClick={() => setExpanded(!expanded)}
           >
             {expanded ? "Show Less" : "Show More"}
           </button>
         )}
-      </div>
-
-      <div className="flex flex-wrap justify-center gap-1">
-        <MapStats beatSaver={beatSaverMap} />
       </div>
     </Card>
   );

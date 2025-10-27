@@ -20,7 +20,14 @@ export default function ScoreSaberLeaderboardFilters() {
   const filter = useLeaderboardFilter();
 
   return (
-    <Card className="flex h-fit w-full flex-col gap-2 text-sm 2xl:w-[405px]">
+    <Card className="flex h-fit w-full flex-col gap-4 text-sm">
+      <div className="space-y-1">
+        <h3 className="text-lg font-semibold text-foreground">Country Filter</h3>
+        <p className="text-sm text-muted-foreground">
+          Filter leaderboard scores by country
+        </p>
+      </div>
+      
       <div className="flex flex-row items-end gap-2">
         <Combobox<string | undefined>
           className="w-full"

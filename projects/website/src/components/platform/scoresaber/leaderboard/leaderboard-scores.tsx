@@ -111,8 +111,8 @@ export default function LeaderboardScores({
     <div className="flex flex-col gap-2">
       <div
         className={cn(
-          "flex flex-col flex-wrap items-center justify-center gap-4 lg:flex-row",
-          isLeaderboardPage && "lg:justify-between"
+          "flex flex-col flex-wrap items-center justify-center gap-4 sm:flex-row",
+          isLeaderboardPage && "sm:justify-between"
         )}
       >
         <ScoreMode initialMode={mode} onModeChange={handleModeChange} />
@@ -146,33 +146,33 @@ export default function LeaderboardScores({
 
       {scores && scores.items.length > 0 && (
         <>
-          <div className="border-border/30 bg-background/50 relative overflow-x-auto rounded-lg border">
-            <table className="table w-full table-auto border-spacing-0 text-left text-sm">
+          <div className="border-border/50 bg-background/50 relative overflow-x-auto rounded-lg border shadow-sm">
+            <table className="table w-full table-auto border-spacing-0 text-left text-sm min-w-[800px]">
               <thead>
-                <tr className="border-border/30 bg-background/80 border-b">
-                  <th className="text-foreground/80 px-2 py-2 font-medium">Rank</th>
-                  <th className="text-foreground/80 px-2 py-2 font-medium">Player</th>
-                  <th className="text-foreground/80 px-2 py-2 text-center font-medium">Time Set</th>
-                  <th className="text-foreground/80 px-2 py-2 text-center font-medium">Accuracy</th>
-                  <th className="text-foreground/80 px-2 py-2 text-center font-medium">Misses</th>
-                  <th className="text-foreground/80 px-2 py-2 text-center font-medium">
+                <tr className="border-border/50 bg-muted/30 border-b">
+                  <th className="text-foreground/90 px-3 py-3 font-semibold">Rank</th>
+                  <th className="text-foreground/90 px-3 py-3 font-semibold">Player</th>
+                  <th className="text-foreground/90 px-3 py-3 text-center font-semibold">Time Set</th>
+                  <th className="text-foreground/90 px-3 py-3 text-center font-semibold">Accuracy</th>
+                  <th className="text-foreground/90 px-3 py-3 text-center font-semibold">Misses</th>
+                  <th className="text-foreground/90 px-3 py-3 text-center font-semibold">
                     {leaderboard.stars > 0 ? "PP" : "Score"}
                   </th>
-                  <th className="text-foreground/80 px-2 py-2 text-center font-medium">Mods</th>
-                  <th className="text-foreground/80 w-[28px] px-2 py-2 text-center font-medium">
+                  <th className="text-foreground/90 px-3 py-3 text-center font-semibold">Mods</th>
+                  <th className="text-foreground/90 w-[28px] px-3 py-3 text-center font-semibold">
                     Replay
                   </th>
-                  <th className="text-foreground/80 w-[32px] px-2 py-2 text-center font-medium">
+                  <th className="text-foreground/90 w-[32px] px-3 py-3 text-center font-semibold">
                     Details
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-border/30 divide-y">
+              <tbody className="divide-border/50 divide-y">
                 {scores.items.map(playerScore => (
                   <React.Fragment key={playerScore.scoreId}>
                     <tr
                       className={cn(
-                        "hover:bg-primary/5 transition-colors",
+                        "hover:bg-muted/30 transition-colors",
                         highlightedPlayerId === playerScore.playerId && "bg-primary/10"
                       )}
                     >
@@ -204,7 +204,7 @@ export default function LeaderboardScores({
                           }}
                         >
                           <td colSpan={10} className="p-0">
-                            <div className="px-4 py-2">
+                            <div className="bg-muted/20 px-4 py-3">
                               <ScoreDropdown
                                 score={playerScore}
                                 leaderboard={leaderboard}

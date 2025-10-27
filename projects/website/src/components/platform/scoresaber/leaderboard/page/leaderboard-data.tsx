@@ -1,7 +1,6 @@
 "use client";
 
 import Card from "@/components/card";
-import { LeaderboardBeatSaverInfo } from "@/components/leaderboard/beatsaver-info";
 import ScoreSaberLeaderboardFilters from "@/components/platform/scoresaber/leaderboard/leaderboard-filters";
 import { LeaderboardInfo } from "@/components/platform/scoresaber/leaderboard/leaderboard-info";
 import LeaderboardScores from "@/components/platform/scoresaber/leaderboard/leaderboard-scores";
@@ -65,30 +64,31 @@ export function ScoreSaberLeaderboardData({
 
   return (
     <LeaderboardFilterProvider initialCountry={country ?? undefined}>
-      <div className="w-full">
-        <div className="flex w-full flex-col-reverse gap-2 2xl:flex-row">
-          {/* Mobile Only */}
+      <div className="w-full space-y-2">
+        <div className="flex w-full flex-col-reverse gap-2 2xl:flex-row 2xl:gap-2">
+          {/* Mobile Sidebar */}
           {isMobile && (
             <div className="flex flex-col gap-2">
               {/* Filters */}
               <ScoreSaberLeaderboardFilters />
 
-              {/* BeatSaver Info */}
-              {beatsaver && <LeaderboardBeatSaverInfo beatSaverMap={beatsaver} />}
+              {/* Charts Grid */}
+              <div className="grid grid-cols-1 gap-2">
+                {/* PP Chart */}
+                {leaderboard.stars > 0 && leaderboard.maxScore > 0 && (
+                  <LeaderboardPpChart leaderboard={leaderboard} />
+                )}
 
-              {/* PP Chart */}
-              {leaderboard.stars > 0 && leaderboard.maxScore > 0 && (
-                <LeaderboardPpChart leaderboard={leaderboard} />
-              )}
-
-              {/* Headset Distribution */}
-              {hmdData && <LeaderboardHmdPlays hmdUsage={hmdData} />}
+                {/* Headset Distribution */}
+                {hmdData && <LeaderboardHmdPlays hmdUsage={hmdData} />}
+              </div>
             </div>
           )}
 
+          {/* Main Content Area */}
           <div className="flex w-full flex-col gap-2">
             {/* Leaderboard Scores */}
-            <Card className="relative flex h-fit w-full gap-2">
+            <Card className="relative w-full">
               <LeaderboardScores
                 leaderboard={leaderboard}
                 beatSaver={beatsaver}
@@ -102,30 +102,30 @@ export function ScoreSaberLeaderboardData({
               {/* Star Change History */}
               {leaderboardResponse.starChangeHistory &&
                 leaderboardResponse.starChangeHistory.length > 0 && (
-                  <LeaderboardStarChangeHistory
-                    key={leaderboardResponse.leaderboard.id}
-                    starChangeHistory={leaderboardResponse.starChangeHistory}
-                  />
+                  <div className="border-border/50 border-t pt-2">
+                    <LeaderboardStarChangeHistory
+                      key={leaderboardResponse.leaderboard.id}
+                      starChangeHistory={leaderboardResponse.starChangeHistory}
+                    />
+                  </div>
                 )}
             </Card>
 
-            <div className="grid grid-cols-2 gap-2">
-              {/* Mobile Only */}
-              {!isMobile && (
-                <>
-                  {/* Headset Distribution */}
-                  {hmdData && <LeaderboardHmdPlays hmdUsage={hmdData} />}
+            {/* Desktop Charts Grid */}
+            {!isMobile && (
+              <div className="grid grid-cols-1 gap-2 lg:grid-cols-2">
+                {/* Headset Distribution */}
+                {hmdData && <LeaderboardHmdPlays hmdUsage={hmdData} />}
 
-                  {/* PP Chart */}
-                  {leaderboard.stars > 0 && leaderboard.maxScore > 0 && (
-                    <LeaderboardPpChart leaderboard={leaderboard} />
-                  )}
-                </>
-              )}
-            </div>
+                {/* PP Chart */}
+                {leaderboard.stars > 0 && leaderboard.maxScore > 0 && (
+                  <LeaderboardPpChart leaderboard={leaderboard} />
+                )}
+              </div>
+            )}
           </div>
 
-          {/* Leaderboard Data */}
+          {/* Desktop Sidebar */}
           <div className="flex w-full flex-col gap-2 2xl:w-[550px]">
             {/* Leaderboard Info */}
             <LeaderboardInfo leaderboard={leaderboardResponse} />
@@ -141,14 +141,14 @@ export function ScoreSaberLeaderboardData({
 
 function LeaderboardHmdPlays({ hmdUsage }: { hmdUsage: PlaysByHmdResponse }) {
   return (
-    <Card className="flex w-full flex-col gap-2">
-      <div className="flex flex-col">
-        <p className="font-semibold">Headset Distribution</p>
-        <p className="text-sm text-gray-400">
+    <Card className="flex w-full flex-col gap-4">
+      <div className="space-y-1">
+        <h3 className="text-foreground text-lg font-semibold">Headset Distribution</h3>
+        <p className="text-muted-foreground text-sm">
           Shows the distribution of headsets used on this leaderboard.
         </p>
       </div>
-      <div className="mt-0 flex w-full items-center justify-center 2xl:mt-6">
+      <div className="flex w-full items-center justify-center">
         <HmdUsageChart hmdUsage={hmdUsage} />
       </div>
     </Card>

@@ -150,29 +150,28 @@ export default function LeaderboardPpChart({ leaderboard }: Props) {
   };
 
   return (
-    <Card>
-      <div className="flex flex-col gap-4">
-        <div className="flex flex-col">
-          <p className="font-semibold">PP Curve</p>
-          <p className="text-sm text-gray-400">
-            Shows PP values for different accuracy percentages.
-          </p>
-          <div className="h-[300px] sm:h-[400px]">
-            <Line data={data} options={options} />
-          </div>
-        </div>
+    <Card className="flex w-full flex-col gap-4">
+      <div className="space-y-1">
+        <h3 className="text-lg font-semibold text-foreground">PP Curve</h3>
+        <p className="text-sm text-muted-foreground">
+          Shows PP values for different accuracy percentages.
+        </p>
+      </div>
+      
+      <div className="h-[300px] sm:h-[400px]">
+        <Line data={data} options={options} />
+      </div>
 
-        <div className="flex items-center justify-center">
-          <div className="w-[95%]">
-            <DualRangeSlider
-              label={value => <span>{value}%</span>}
-              value={values}
-              onValueChange={updateRange}
-              min={5}
-              max={100}
-              step={1}
-            />
-          </div>
+      <div className="flex items-center justify-center">
+        <div className="w-[95%]">
+          <DualRangeSlider
+            label={value => <span>{value}%</span>}
+            value={values}
+            onValueChange={updateRange}
+            min={5}
+            max={100}
+            step={1}
+          />
         </div>
       </div>
     </Card>

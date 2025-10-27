@@ -1,8 +1,10 @@
 import { cn } from "@/common/utils";
 import Card from "@/components/card";
+import EmbedLinks from "@/components/embed-links";
 import FallbackLink from "@/components/fallback-link";
 import LeaderboardButtons from "@/components/platform/scoresaber/leaderboard/leaderboard-buttons";
 import SimpleTooltip from "@/components/simple-tooltip";
+import StatValue from "@/components/statistic/stat-value";
 import { Separator } from "@/components/ui/separator";
 import {
   ChartBarIcon,
@@ -13,9 +15,12 @@ import {
 } from "@heroicons/react/24/outline";
 import { LeaderboardResponse } from "@ssr/common/response/leaderboard-response";
 import { getBeatSaverMapperProfileUrl } from "@ssr/common/utils/beatsaver.util";
-import { formatNumber } from "@ssr/common/utils/number-utils";
-import { formatDate } from "@ssr/common/utils/time-utils";
+import { formatNumber, formatNumberWithCommas } from "@ssr/common/utils/number-utils";
+import { formatDate, formatTime } from "@ssr/common/utils/time-utils";
+import { BombIcon, BrickWallIcon, DrumIcon, GaugeIcon, MusicIcon, TimerIcon } from "lucide-react";
+import { CubeIcon } from "@heroicons/react/24/solid";
 import Image from "next/image";
+import { useState } from "react";
 import { LeaderboardStarBadge } from "./leaderboard-star-badge";
 
 type LeaderboardInfoProps = {
@@ -26,8 +31,13 @@ export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
   const { leaderboard: leaderboardData, beatsaver: beatSaverMap } = leaderboard;
   const statusDate = leaderboardData.dateRanked || leaderboardData.dateQualified;
 
+  const descriptionMaxSize = 300;
+  const description = beatSaverMap?.description || "";
+  const showExpandButton = description.length > descriptionMaxSize;
+  const [expanded, setExpanded] = useState(false);
+
   return (
-    <Card className="h-fit w-full space-y-3 2xl:w-[405px]">
+    <Card className="h-fit w-full space-y-4">
       {/* Header Section */}
       <div className="flex items-start justify-between gap-4">
         {/* Song Art */}
@@ -41,14 +51,14 @@ export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
 
         {/* Song Info */}
         <div className="min-w-0 flex-1">
-          <div className="space-y-1.5">
+          <div className="space-y-2">
             {/* Song Name */}
             <FallbackLink
               href={beatSaverMap ? `https://beatsaver.com/maps/${beatSaverMap?.bsr}` : undefined}
               className="transition-all hover:brightness-[66%]"
               data-umami-event="leaderboard-beatsaver-button"
             >
-              <h3 className="text-foreground mb-1 line-clamp-2 text-xl leading-tight font-bold">
+              <h3 className="text-foreground mb-1 line-clamp-2 text-lg font-semibold leading-tight">
                 {leaderboardData.fullName}
               </h3>
             </FallbackLink>
@@ -92,19 +102,19 @@ export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
         {/* Status Badge */}
         <div className="flex items-center gap-2">
           {leaderboardData.ranked && (
-            <div className="flex h-7 items-center gap-1.5 rounded-full bg-linear-to-r from-green-500 to-green-600 px-3 text-xs font-semibold text-white shadow-sm">
+            <div className="bg-linear-to-r flex h-7 items-center gap-1.5 rounded-full from-green-500 to-green-600 px-3 text-xs font-semibold text-white shadow-sm">
               <CheckBadgeIcon className="h-3.5 w-3.5" />
               Ranked
             </div>
           )}
           {leaderboardData.qualified && !leaderboardData.ranked && (
-            <div className="flex h-7 items-center gap-1.5 rounded-full bg-linear-to-r from-yellow-500 to-yellow-600 px-3 text-xs font-semibold text-white shadow-sm">
+            <div className="bg-linear-to-r flex h-7 items-center gap-1.5 rounded-full from-yellow-500 to-yellow-600 px-3 text-xs font-semibold text-white shadow-sm">
               <CheckBadgeIcon className="h-3.5 w-3.5" />
               Qualified
             </div>
           )}
           {!leaderboardData.ranked && !leaderboardData.qualified && (
-            <div className="flex h-7 items-center gap-1.5 rounded-full bg-linear-to-r from-gray-500 to-gray-600 px-3 text-xs font-semibold text-white shadow-sm">
+            <div className="bg-linear-to-r flex h-7 items-center gap-1.5 rounded-full from-gray-500 to-gray-600 px-3 text-xs font-semibold text-white shadow-sm">
               <CheckBadgeIcon className="h-3.5 w-3.5" />
               Unranked
             </div>
@@ -113,15 +123,15 @@ export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
       </div>
 
       {/* Statistics Grid */}
-      <div className="space-y-4">
+      <div className="space-y-3">
         {/* Play Counts */}
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="rounded-lg bg-blue-500/10 p-2">
-              <PlayIcon className="h-5 w-5 text-blue-500" />
+          <div className="flex items-center gap-2">
+            <div className="rounded-lg bg-blue-500/10 p-1.5">
+              <PlayIcon className="h-4.5 w-4.5 text-blue-500" />
             </div>
             <div>
-              <div className="text-sm font-medium">Total Plays</div>
+              <div className="text-xs font-medium">Total Plays</div>
               <div className="text-muted-foreground text-xs">
                 {formatNumber(leaderboardData.dailyPlays)} today
                 {leaderboardData.weeklyPlays !== undefined && (
@@ -130,26 +140,98 @@ export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
               </div>
             </div>
           </div>
-          <div className="text-2xl font-bold text-blue-500">
+          <div className="text-lg font-semibold text-blue-500">
             {formatNumber(leaderboardData.plays)}
           </div>
         </div>
 
         {/* Max Score */}
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="rounded-lg bg-green-500/10 p-2">
-              <ChartBarIcon className="h-5 w-5 text-green-500" />
+          <div className="flex items-center gap-2">
+            <div className="rounded-lg bg-green-500/10 p-1.5">
+              <ChartBarIcon className="h-4.5 w-4.5 text-green-500" />
             </div>
             <div>
-              <div className="text-sm font-medium">Max Score</div>
+              <div className="text-xs font-medium">Max Score</div>
             </div>
           </div>
-          <div className="text-2xl font-bold text-green-500">
+          <div className="text-lg font-semibold text-green-500">
             {formatNumber(leaderboardData.maxScore)}
           </div>
         </div>
       </div>
+
+      {/* Map Description */}
+      {beatSaverMap && description && (
+        <div className="space-y-2">
+          <div className="bg-muted/30 w-full break-all rounded-lg p-3">
+            {(showExpandButton && !expanded
+              ? description.slice(0, descriptionMaxSize) + "..."
+              : description
+            )
+              .split("\n")
+              .map((line, index) => {
+                return (
+                  <p key={index} className="text-sm">
+                    <EmbedLinks text={line} />
+                  </p>
+                );
+              })}
+
+            {showExpandButton && (
+              <button
+                className="text-muted-foreground hover:text-foreground mt-2 text-center text-xs transition-all"
+                onClick={() => setExpanded(!expanded)}
+              >
+                {expanded ? "Show Less" : "Show More"}
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Map Stats */}
+      {beatSaverMap && beatSaverMap.difficulty && (
+        <div className="space-y-2">
+          <div className="flex flex-wrap justify-center gap-2">
+            <StatValue
+              name="Length"
+              icon={<TimerIcon className="h-4 w-4" />}
+              value={formatTime(beatSaverMap.metadata.duration)}
+            />
+            <StatValue
+              name="BPM"
+              icon={<MusicIcon className="h-4 w-4" />}
+              value={formatNumberWithCommas(beatSaverMap.metadata.bpm)}
+            />
+            <StatValue
+              name="NPS"
+              icon={<DrumIcon className="h-4 w-4" />}
+              value={beatSaverMap.difficulty.nps.toFixed(2)}
+            />
+            <StatValue
+              name="NJS"
+              icon={<GaugeIcon className="h-4 w-4" />}
+              value={beatSaverMap.difficulty.njs.toFixed(2)}
+            />
+            <StatValue
+              name="Notes"
+              icon={<CubeIcon className="h-4 w-4" />}
+              value={formatNumberWithCommas(beatSaverMap.difficulty.notes)}
+            />
+            <StatValue
+              name="Bombs"
+              icon={<BombIcon className="h-4 w-4" />}
+              value={formatNumberWithCommas(beatSaverMap.difficulty.bombs)}
+            />
+            <StatValue
+              name="Obstacles"
+              icon={<BrickWallIcon className="h-4 w-4" />}
+              value={formatNumberWithCommas(beatSaverMap.difficulty.obstacles)}
+            />
+          </div>
+        </div>
+      )}
 
       <Separator />
 
@@ -160,7 +242,7 @@ export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
           <div className="bg-muted/30 flex-1 rounded-lg p-3">
             <div className="mb-1 flex items-center gap-2">
               <div className="h-2 w-2 rounded-full bg-green-500"></div>
-              <span className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+              <span className="text-muted-foreground text-xs font-medium uppercase tracking-wide">
                 {leaderboardData.ranked ? "Ranked" : "Qualified"}
               </span>
             </div>
@@ -174,7 +256,7 @@ export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
         <div className="bg-muted/30 flex-1 rounded-lg p-3">
           <div className="mb-1 flex items-center gap-2">
             <div className="h-2 w-2 rounded-full bg-blue-500"></div>
-            <span className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+            <span className="text-muted-foreground text-xs font-medium uppercase tracking-wide">
               Created
             </span>
           </div>
