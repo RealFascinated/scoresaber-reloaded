@@ -7,8 +7,8 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   output: "standalone",
   outputFileTracingRoot: path.join(__dirname, "../../"),
+  reactCompiler: true,
   experimental: {
-    reactCompiler: true,
     preloadEntriesOnStart: false,
     optimizePackageImports: [
       "@ssr/common",
@@ -72,6 +72,4 @@ const nextConfig: NextConfig = {
   skipTrailingSlashRedirect: true,
 };
 
-export default withBundleAnalyzer({
-  enabled: process.env.ANALYZE === "true",
-})(nextConfig);
+export default nextConfig;
