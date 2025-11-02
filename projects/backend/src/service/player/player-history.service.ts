@@ -68,13 +68,19 @@ export class PlayerHistoryService {
           const trackedScores = await ScoreSaberScoreModel.countDocuments({
             playerId: id,
           });
-          if (trackedScores < playerToken.scoreStats.totalPlayCount) {
-            Logger.info(`Player ${id} has missing scores. Adding them to the refresh queue...`);
-            // Add the player to the refresh queue
-            (QueueManager.getQueue(QueueId.PlayerScoreRefreshQueue) as PlayerScoreSeedQueue).add({
-              id,
-              data: id,
-            });
+
+          const seedQueue = QueueManager.getQueue(
+            QueueId.PlayerScoreRefreshQueue
+          ) as PlayerScoreSeedQueue;
+          if (!(await seedQueue.hasItem({ id: id, data: id }))) {
+            if (trackedScores < playerToken.scoreStats.totalPlayCount) {
+              Logger.info(`Player ${id} has missing scores. Adding them to the refresh queue...`);
+              // Add the player to the refresh queue
+              (QueueManager.getQueue(QueueId.PlayerScoreRefreshQueue) as PlayerScoreSeedQueue).add({
+                id,
+                data: id,
+              });
+            }
           }
 
           // Notify in production

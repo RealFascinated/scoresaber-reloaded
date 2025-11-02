@@ -7,6 +7,7 @@ import { LeaderboardService } from "../../service/leaderboard/leaderboard.servic
 import { ScoreService } from "../../service/score/score.service";
 import { Queue, QueueItem } from "../queue";
 import { QueueId } from "../queue-manager";
+import { PlayerService } from "../../service/player/player.service";
 
 export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
   /**
@@ -79,6 +80,8 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
           processedAnyScores = true;
           continue;
         }
+
+        PlayerService.trackPlayer(score.playerId);
 
         await ScoreService.trackScoreSaberScore(score, leaderboard, score.playerInfo, false, false);
         processedAnyScores = true;

@@ -117,6 +117,10 @@ export abstract class Queue<T> {
     return await redisClient.llen(`queue::${this.id}`);
   }
 
+  public async hasItem(item: T): Promise<boolean> {
+    return (await redisClient.lindex(`queue::${this.id}`, 0)) === SuperJSON.stringify(item);
+  }
+
   /**
    * Stops the queue
    */
