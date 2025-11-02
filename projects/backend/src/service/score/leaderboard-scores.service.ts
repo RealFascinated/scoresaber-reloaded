@@ -6,6 +6,7 @@ import { Metadata } from "@ssr/common/types/metadata";
 import BeatLeaderService from "../beatleader.service";
 import { LeaderboardService } from "../leaderboard/leaderboard.service";
 import { ScoreService } from "./score.service";
+import { PlayerService } from "../player/player.service";
 
 export class LeaderboardScoresService {
   /**
@@ -49,6 +50,8 @@ export class LeaderboardScoresService {
       if (score == undefined) {
         return undefined;
       }
+
+      PlayerService.trackPlayer(score.playerId);
 
       // Track missing scores
       if (!(await ScoreService.scoreExistsByScoreId(score.scoreId))) {
