@@ -61,7 +61,7 @@ export default function ScoreSaberScoreSongInfo({
           <FallbackLink
             href={mappersProfile}
             className={cn(
-              mappersProfile && "text-xs leading-none transition-all hover:brightness-[66%]"
+              mappersProfile && "hover:brightness-66 text-xs leading-none transition-all"
             )}
           >
             {leaderboard.levelAuthorName}
@@ -97,8 +97,6 @@ export default function ScoreSaberScoreSongInfo({
               <div className="flex flex-col gap-1 py-2">
                 <div className="flex flex-row gap-1">
                   {leaderboard.difficulties.map(difficulty => {
-                    const difficultyLabel =
-                      beatSaverMap?.difficultyLabels?.[difficulty.difficulty]?.trim() ?? null;
                     const isSelected =
                       difficulty.difficultyRaw === leaderboard.difficulty.difficultyRaw;
 
@@ -123,7 +121,7 @@ export default function ScoreSaberScoreSongInfo({
                           }
                         >
                           <span className="group-hover:brightness-75">
-                            {difficultyLabel ?? getDifficultyName(difficulty.difficulty)}
+                            {getDifficultyName(difficulty.difficulty)}
                           </span>
                         </SimpleLink>
                       </SimpleTooltip>
