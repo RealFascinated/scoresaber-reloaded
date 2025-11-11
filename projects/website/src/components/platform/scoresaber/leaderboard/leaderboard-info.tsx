@@ -165,9 +165,9 @@ export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
 
 function LeaderboardInfoItem({ label, value }: { label: string; value: React.ReactNode }) {
   return (
-    <div className="flex min-h-6 items-center gap-2">
-      <p className="text-muted-foreground min-w-[100px] text-sm">{label}:</p>
-      <div className="text-foreground text-sm">{value}</div>
+    <div className="flex min-h-6 flex-wrap items-start gap-2">
+      <p className="text-muted-foreground min-w-[100px] shrink-0 text-sm">{label}:</p>
+      <div className="text-foreground *:wrap-break-word min-w-0 max-w-full text-sm">{value}</div>
     </div>
   );
 }
