@@ -20,12 +20,15 @@ type LeaderboardInfoProps = {
 
 export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
   const { leaderboard: leaderboardData, beatsaver: beatSaverMap } = leaderboard;
-  const statusDate = leaderboardData.dateRanked || leaderboardData.dateQualified;
 
   const descriptionMaxSize = 300;
   const description = beatSaverMap?.description || "";
   const showExpandButton = description.length > descriptionMaxSize;
   const [expanded, setExpanded] = useState(false);
+
+  const statusDate = leaderboard.leaderboard.ranked
+    ? leaderboardData.timestamp
+    : leaderboardData.dateRanked || leaderboardData.timestamp;
 
   return (
     <Card className="h-fit w-full space-y-4">
@@ -111,6 +114,16 @@ export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
           label="Status"
           value={<LeaderboardStatus leaderboard={leaderboard.leaderboard} />}
         />
+
+        {/* Ranked / Created Date */}
+        <LeaderboardInfoItem
+          label={leaderboard.leaderboard.ranked ? "Ranked" : "Created"}
+          value={
+            <SimpleTooltip display={formatDate(statusDate, "Do MMMM, YYYY HH:mm a")}>
+              {formatDate(statusDate, "Do MMMM, YYYY")}
+            </SimpleTooltip>
+          }
+        />
       </div>
 
       <Separator />
@@ -141,39 +154,6 @@ export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
           )}
         </div>
       )}
-
-      {/* Information Section */}
-      <div className="flex gap-3">
-        {/* Status Date */}
-        {statusDate && (
-          <div className="bg-muted/30 flex-1 rounded-lg p-3">
-            <div className="mb-1 flex items-center gap-2">
-              <div className="h-2 w-2 rounded-full bg-green-500"></div>
-              <span className="text-muted-foreground text-xs font-medium uppercase tracking-wide">
-                {leaderboardData.ranked ? "Ranked" : "Qualified"}
-              </span>
-            </div>
-            <SimpleTooltip display={formatDate(statusDate, "Do MMMM, YYYY HH:mm a")}>
-              <div className="text-sm font-semibold">{formatDate(statusDate, "Do MM, YYYY")}</div>
-            </SimpleTooltip>
-          </div>
-        )}
-
-        {/* Created Date */}
-        <div className="bg-muted/30 flex-1 rounded-lg p-3">
-          <div className="mb-1 flex items-center gap-2">
-            <div className="h-2 w-2 rounded-full bg-blue-500"></div>
-            <span className="text-muted-foreground text-xs font-medium uppercase tracking-wide">
-              Created
-            </span>
-          </div>
-          <SimpleTooltip display={formatDate(leaderboardData.timestamp, "Do MMMM, YYYY HH:mm a")}>
-            <div className="text-sm font-semibold">
-              {formatDate(leaderboardData.timestamp, "Do MM, YYYY")}
-            </div>
-          </SimpleTooltip>
-        </div>
-      </div>
 
       {/* Action Buttons */}
       <div className="flex items-center justify-between gap-2">
