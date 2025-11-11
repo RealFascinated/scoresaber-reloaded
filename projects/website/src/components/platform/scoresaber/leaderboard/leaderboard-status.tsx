@@ -8,5 +8,5 @@ export function LeaderboardStatus({ leaderboard }: { leaderboard: ScoreSaberLead
   } else if (leaderboard.status === "Qualified") {
     color = "bg-yellow-600"; // qualified
   }
-  return <div className={cn(color, "rounded-md p-2 py-1 uppercase")}>{leaderboard.status}</div>;
+  return <div className={cn(color, "rounded-md p-3 py-1 uppercase")}>{leaderboard.status}</div>;
 }
