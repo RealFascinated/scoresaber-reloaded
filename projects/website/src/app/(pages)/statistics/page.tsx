@@ -5,36 +5,19 @@ import ScoreSaberStatisticsChart from "@/components/score/charts/scoresaber-stat
 import SimpleLink from "@/components/simple-link";
 import { ChartBarIcon, DevicePhoneMobileIcon } from "@heroicons/react/24/solid";
 import { env } from "@ssr/common/env";
-import { Statistic } from "@ssr/common/model/statistics/statistic";
-import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
-import { formatDateMinimal } from "@ssr/common/utils/time-utils";
 import { Metadata } from "next";
 
 export const revalidate = 300; // Revalidate every 5 minutes
 
 export async function generateMetadata(): Promise<Metadata> {
-  const statistics = await ssrApi.getScoreSaberPlatformStatistics();
-  const yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
-  const date = formatDateMinimal(yesterday);
-  const statisticsData = statistics?.statistics.daily[date];
-
-  const activePlayers = statisticsData?.[Statistic.DailyUniquePlayers] ?? 0;
-  const playerCount = statisticsData?.[Statistic.ActiveAccounts] ?? 0;
-
-  const descriptionParts = [
-    `Daily Unique Players: ${formatNumberWithCommas(activePlayers)}`,
-    playerCount && `Active Accounts: ${formatNumberWithCommas(playerCount)}`,
-  ].filter(Boolean);
-
   return {
     title: `ScoreSaber Statistics`,
-    description: descriptionParts.join("\n"),
+    description: "View the statistics for ScoreSaber",
     openGraph: {
       siteName: env.NEXT_PUBLIC_WEBSITE_NAME,
       title: `ScoreSaber Statistics`,
-      description: `${descriptionParts.join("\n")}\n\nClick here to view the statistics for ScoreSaber`,
+      description: "View the statistics for ScoreSaber",
     },
   };
 }

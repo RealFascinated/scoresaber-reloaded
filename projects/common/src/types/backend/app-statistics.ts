@@ -1,8 +1,8 @@
 export type AppStatistics = {
   /**
-   * The total amount of players being tracked.
+   * The total amount of leaderboards.
    */
-  trackedPlayers: number;
+  leaderboardCount: number;
 
   /**
    * The total amount of ScoreSaber scores tracked.

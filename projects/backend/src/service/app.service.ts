@@ -4,6 +4,7 @@ import { ScoreSaberPreviousScoreModel } from "@ssr/common/model/score/impl/score
 import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import { AppStatistics } from "@ssr/common/types/backend/app-statistics";
 import MetricsService, { MetricType } from "./metrics.service";
+import { ScoreSaberLeaderboardModel } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 
 export class AppService {
   /**
@@ -11,14 +12,13 @@ export class AppService {
    */
   public static async getAppStatistics(): Promise<AppStatistics> {
     const [
-      trackedPlayers,
       trackedScores,
       scoreHistoryScores,
       storedReplays,
       inactivePlayers,
       activePlayers,
+      leaderboardCount,
     ] = await Promise.all([
-      PlayerModel.estimatedDocumentCount(),
       ScoreSaberScoreModel.estimatedDocumentCount(),
       ScoreSaberPreviousScoreModel.estimatedDocumentCount(),
       AdditionalScoreDataModel.countDocuments({
@@ -28,10 +28,11 @@ export class AppService {
         inactive: true,
       }),
       (await MetricsService.getMetric(MetricType.ACTIVE_ACCOUNTS)).value,
+      ScoreSaberLeaderboardModel.estimatedDocumentCount(),
     ]);
 
     return {
-      trackedPlayers,
+      leaderboardCount,
       trackedScores,
       scoreHistoryScores,
       storedReplays,

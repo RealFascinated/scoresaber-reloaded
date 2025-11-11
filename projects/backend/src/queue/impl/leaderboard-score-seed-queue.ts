@@ -74,14 +74,14 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
       for (const rawScore of response.scores) {
         const score = getScoreSaberScoreFromToken(rawScore, leaderboard, undefined);
 
+        PlayerService.trackPlayer(score.playerId);
+
         // Check if the score is already tracked
         const scoreExists = await ScoreService.scoreExistsByScoreId(score.scoreId);
         if (scoreExists) {
           processedAnyScores = true;
           continue;
         }
-
-        PlayerService.trackPlayer(score.playerId);
 
         await ScoreService.trackScoreSaberScore(score, leaderboard, score.playerInfo, false, false);
         processedAnyScores = true;
