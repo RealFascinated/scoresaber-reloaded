@@ -1,28 +1,18 @@
-import { cn } from "@/common/utils";
 import Card from "@/components/card";
 import EmbedLinks from "@/components/embed-links";
 import FallbackLink from "@/components/fallback-link";
 import LeaderboardButtons from "@/components/platform/scoresaber/leaderboard/leaderboard-buttons";
 import SimpleTooltip from "@/components/simple-tooltip";
-import StatValue from "@/components/statistic/stat-value";
 import { Separator } from "@/components/ui/separator";
-import { CheckBadgeIcon, MapIcon, MusicalNoteIcon, PlayIcon } from "@heroicons/react/24/outline";
-import { CubeIcon } from "@heroicons/react/24/solid";
+import { StarFilledIcon } from "@radix-ui/react-icons";
 import { LeaderboardResponse } from "@ssr/common/response/leaderboard-response";
 import { getBeatSaverMapperProfileUrl } from "@ssr/common/utils/beatsaver.util";
-import { formatNumber, formatNumberWithCommas } from "@ssr/common/utils/number-utils";
-import { formatDate, formatTime } from "@ssr/common/utils/time-utils";
-import {
-  BombIcon,
-  BrickWallIcon,
-  DrumIcon,
-  GaugeIcon,
-  MusicIcon,
-  StarIcon,
-  TimerIcon,
-} from "lucide-react";
+import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
+import { getDifficultyName } from "@ssr/common/utils/song-utils";
+import { formatDate } from "@ssr/common/utils/time-utils";
 import Image from "next/image";
 import { useState } from "react";
+import { LeaderboardStatus } from "./leaderboard-status";
 
 type LeaderboardInfoProps = {
   leaderboard: LeaderboardResponse;
@@ -41,156 +31,89 @@ export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
     <Card className="h-fit w-full space-y-4">
       {/* Header Section */}
       <div className="flex items-start justify-between gap-4">
-        {/* Song Art */}
-        <Image
-          src={leaderboardData.songArt}
-          alt={`${leaderboardData.songName} Cover Image`}
-          className="h-20 w-20 rounded-lg object-cover shadow-sm"
-          width={80}
-          height={80}
-        />
-
         {/* Song Info */}
-        <div className="min-w-0 flex-1">
-          <div className="space-y-2">
+        <div className="flex h-full flex-col justify-center gap-3">
+          {/* Star Count / Difficulty */}
+          <div className="bg-pp flex w-fit items-center gap-1 rounded-md p-1.5 py-1">
+            {leaderboard.leaderboard.ranked ? (
+              <>
+                <StarFilledIcon className="h-[15px] w-[15px] text-white" />
+                <p className="text-xs font-semibold text-white">
+                  {leaderboardData.stars.toFixed(2)}
+                </p>
+              </>
+            ) : (
+              <p className="text-xs font-semibold text-white">
+                {getDifficultyName(leaderboardData.difficulty.difficulty)}
+              </p>
+            )}
+          </div>
+
+          <div className="flex flex-col gap-1">
             {/* Song Name */}
             <FallbackLink
               href={beatSaverMap ? `https://beatsaver.com/maps/${beatSaverMap?.bsr}` : undefined}
               className="hover:brightness-66 transition-all"
               data-umami-event="leaderboard-beatsaver-button"
             >
-              <h3 className="text-foreground mb-1 line-clamp-2 text-lg font-semibold leading-tight">
+              <h3 className="text-foreground line-clamp-2 text-lg font-semibold leading-tight">
                 {leaderboardData.fullName}
               </h3>
             </FallbackLink>
 
-            {/* Song Author */}
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1.5 rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 dark:bg-blue-900/20 dark:text-blue-300">
-                <MusicalNoteIcon className="h-3 w-3" />
-                <span>{leaderboardData.songAuthorName}</span>
-              </div>
-            </div>
-
-            {/* Mapper */}
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1.5 rounded-md bg-purple-50 px-2 py-1 text-xs font-medium text-purple-700 dark:bg-purple-900/20 dark:text-purple-300">
-                <MapIcon className="h-3 w-3" />
-                <FallbackLink
-                  href={getBeatSaverMapperProfileUrl(beatSaverMap)}
-                  data-umami-event="leaderboard-mapper-button"
-                >
-                  <span
-                    className={cn(
-                      "font-medium",
-                      beatSaverMap ? "hover:brightness-66 transition-all" : ""
-                    )}
-                  >
-                    {leaderboardData.levelAuthorName}
-                  </span>
-                </FallbackLink>
-              </div>
-            </div>
+            <span className="text-muted-foreground text-sm">{leaderboardData.songAuthorName}</span>
           </div>
         </div>
+
+        {/* Song Art */}
+        <Image
+          src={leaderboardData.songArt}
+          alt={`${leaderboardData.songName} Cover Image`}
+          className="rounded-lg object-cover shadow-sm"
+          width={96}
+          height={96}
+        />
       </div>
-
-      {/* Star Rating and Status */}
-      <div className="flex items-center gap-2">
-        {leaderboardData.stars > 0 && (
-          <div className="flex items-center gap-1.5 rounded-md bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-300">
-            <StarIcon className="h-3 w-3" />
-            <span>{leaderboardData.stars.toFixed(2)}</span>
-          </div>
-        )}
-
-        {leaderboardData.ranked && (
-          <div className="flex items-center gap-1.5 rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 dark:bg-green-900/20 dark:text-green-300">
-            <CheckBadgeIcon className="h-3 w-3" />
-            <span>Ranked</span>
-          </div>
-        )}
-        {leaderboardData.qualified && !leaderboardData.ranked && (
-          <div className="flex items-center gap-1.5 rounded-md bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-300">
-            <CheckBadgeIcon className="h-3 w-3" />
-            <span>Qualified</span>
-          </div>
-        )}
-        {!leaderboardData.ranked && !leaderboardData.qualified && (
-          <div className="flex items-center gap-1.5 rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-700 dark:bg-gray-900/20 dark:text-gray-300">
-            <CheckBadgeIcon className="h-3 w-3" />
-            <span>Unranked</span>
-          </div>
-        )}
-      </div>
-
-      {/* Map Stats */}
-      {beatSaverMap && beatSaverMap.difficulty && (
-        <div className="flex flex-wrap justify-center gap-2">
-          <StatValue
-            name="Length"
-            icon={<TimerIcon className="h-4 w-4" />}
-            value={formatTime(beatSaverMap.metadata.duration)}
-          />
-          <StatValue
-            name="BPM"
-            icon={<MusicIcon className="h-4 w-4" />}
-            value={formatNumberWithCommas(beatSaverMap.metadata.bpm)}
-          />
-          <StatValue
-            name="NPS"
-            icon={<DrumIcon className="h-4 w-4" />}
-            value={beatSaverMap.difficulty.nps.toFixed(2)}
-          />
-          <StatValue
-            name="NJS"
-            icon={<GaugeIcon className="h-4 w-4" />}
-            value={beatSaverMap.difficulty.njs.toFixed(2)}
-          />
-          <StatValue
-            name="Notes"
-            icon={<CubeIcon className="h-4 w-4" />}
-            value={formatNumberWithCommas(beatSaverMap.difficulty.notes)}
-          />
-          <StatValue
-            name="Bombs"
-            icon={<BombIcon className="h-4 w-4" />}
-            value={formatNumberWithCommas(beatSaverMap.difficulty.bombs)}
-          />
-          <StatValue
-            name="Obstacles"
-            icon={<BrickWallIcon className="h-4 w-4" />}
-            value={formatNumberWithCommas(beatSaverMap.difficulty.obstacles)}
-          />
-        </div>
-      )}
 
       <Separator />
 
-      {/* Statistics */}
-      <div className="bg-muted/30 flex items-center rounded-lg p-3">
-        {/* Play Counts */}
-        <div className="flex items-center gap-3">
-          <div className="rounded-lg bg-blue-500/10 p-2">
-            <PlayIcon className="h-4 w-4 text-blue-500" />
-          </div>
-          <div>
-            <div className="text-muted-foreground text-xs font-medium">Total Plays</div>
-            <div className="flex items-center gap-2">
-              <div className="text-sm font-semibold text-blue-500">
-                {formatNumber(leaderboardData.plays)}
-              </div>
-              <div className="text-muted-foreground text-xs">
-                ({formatNumber(leaderboardData.dailyPlays)} today
-                {leaderboardData.weeklyPlays !== undefined && (
-                  <>, {formatNumber(leaderboardData.weeklyPlays)} this week</>
-                )}
-                )
-              </div>
-            </div>
-          </div>
-        </div>
+      {/* Leaderboard Info */}
+      <div className="flex flex-col gap-3">
+        {/* Mapped by */}
+        <LeaderboardInfoItem
+          label="Mapped by"
+          value={
+            <FallbackLink
+              href={getBeatSaverMapperProfileUrl(beatSaverMap)}
+              className="hover:text-primary/80 transition-all"
+              data-umami-event="leaderboard-mapper-button"
+            >
+              {leaderboardData.levelAuthorName}
+            </FallbackLink>
+          }
+        />
+
+        {/* Plays */}
+        <LeaderboardInfoItem
+          label="Plays"
+          value={
+            <p>
+              {formatNumberWithCommas(leaderboardData.plays)}{" "}
+              <span className="text-muted-foreground">
+                ({leaderboardData.dailyPlays} in the last 24h)
+              </span>
+            </p>
+          }
+        />
+
+        {/* Status */}
+        <LeaderboardInfoItem
+          label="Status"
+          value={<LeaderboardStatus leaderboard={leaderboard.leaderboard} />}
+        />
       </div>
+
+      <Separator />
 
       {/* Map Description */}
       {beatSaverMap && description && (
@@ -257,5 +180,14 @@ export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
         <LeaderboardButtons leaderboard={leaderboardData} beatSaverMap={beatSaverMap} />
       </div>
     </Card>
+  );
+}
+
+function LeaderboardInfoItem({ label, value }: { label: string; value: React.ReactNode }) {
+  return (
+    <div className="flex min-h-6 items-center gap-2">
+      <p className="text-muted-foreground min-w-[100px] text-sm">{label}:</p>
+      <div className="text-foreground text-sm">{value}</div>
+    </div>
   );
 }

@@ -102,7 +102,7 @@ export function ScoreSaberLeaderboardData({
               {/* Star Change History */}
               {leaderboardResponse.starChangeHistory &&
                 leaderboardResponse.starChangeHistory.length > 0 && (
-                  <div className="border-border/50 border-t pt-2">
+                  <div className="pt-2">
                     <LeaderboardStarChangeHistory
                       key={leaderboardResponse.leaderboard.id}
                       starChangeHistory={leaderboardResponse.starChangeHistory}
