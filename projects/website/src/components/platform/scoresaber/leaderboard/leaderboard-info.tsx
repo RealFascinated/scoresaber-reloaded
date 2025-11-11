@@ -109,12 +109,6 @@ export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
           }
         />
 
-        {/* Status */}
-        <LeaderboardInfoItem
-          label="Status"
-          value={<LeaderboardStatus leaderboard={leaderboard.leaderboard} />}
-        />
-
         {/* Ranked / Created Date */}
         <LeaderboardInfoItem
           label={leaderboard.leaderboard.ranked ? "Ranked" : "Created"}
@@ -123,6 +117,12 @@ export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
               {formatDate(statusDate, "Do MMMM, YYYY")}
             </SimpleTooltip>
           }
+        />
+
+        {/* Status */}
+        <LeaderboardInfoItem
+          label="Status"
+          value={<LeaderboardStatus leaderboard={leaderboard.leaderboard} />}
         />
       </div>
 
