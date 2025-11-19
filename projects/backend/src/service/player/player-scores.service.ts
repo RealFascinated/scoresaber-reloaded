@@ -19,7 +19,10 @@ import {
 } from "@ssr/common/model/score/impl/scoresaber-score";
 import { Pagination } from "@ssr/common/pagination";
 import { PlayerMedalScoresResponse } from "@ssr/common/response/player-medal-scores-response";
-import { PlayerScoresChartResponse } from "@ssr/common/response/player-scores-chart";
+import {
+  PlayerScoreChartDataPoint,
+  PlayerScoresChartResponse,
+} from "@ssr/common/response/player-scores-chart";
 import { PlayerScoresResponse } from "@ssr/common/response/player-scores-response";
 import { Modifier } from "@ssr/common/score/modifier";
 import { PlayerScore } from "@ssr/common/score/player-score";
@@ -127,7 +130,14 @@ async function fetchRawScores(
     .lean()) as unknown as ScoreSaberScore[];
 }
 
-// Converts raw score list to PlayerScore objects with leaderboard/BeatSaver attached
+/**
+ * Maps raw scores to PlayerScore objects with leaderboard/BeatSaver attached
+ *
+ * @param rawScores the raw scores to map
+ * @param includeBeatSaver whether to include the BeatSaver data
+ * @param cacheOnly whether to only use cached leaderboards
+ * @returns the mapped scores
+ */
 async function mapScoresWithLeaderboards(
   rawScores: ScoreSaberScore[],
   includeBeatSaver = true,
@@ -331,53 +341,56 @@ export class PlayerScoresService {
    * @param playerId the player's id
    */
   public static async getPlayerScoreChart(playerId: string): Promise<PlayerScoresChartResponse> {
-    const playerScores = await PlayerService.getPlayerScores(playerId, {
-      includeLeaderboard: true,
-      sort: {
-        field: "pp",
-        direction: "desc",
-        filters: {
-          rankedOnly: true,
-        },
-      },
-      projection: {
+    const playerScores = await ScoreSaberScoreModel.find({
+      playerId: playerId,
+      leaderboardId: { $exists: true, $nin: [null, undefined] },
+    })
+      .select({
         accuracy: 1,
         pp: 1,
         timestamp: 1,
-      },
-    });
-
-    // Process data points in parallel using Promise.all
-    const data = await Promise.all(
-      playerScores.map(async playerScore => {
-        const leaderboard = playerScore.leaderboard as ScoreSaberLeaderboard;
-        const score = playerScore.score as ScoreSaberScore;
-
-        return {
-          accuracy: score.accuracy,
-          stars: leaderboard.stars,
-          pp: score.pp,
-          timestamp: score.timestamp,
-          leaderboardId: leaderboard.id + "",
-          leaderboardName: leaderboard.fullName,
-          leaderboardDifficulty: getDifficultyName(
-            getDifficulty(leaderboard.difficulty.difficulty)
-          ),
-        };
+        leaderboardId: 1,
       })
+      .sort({
+        timestamp: -1,
+      })
+      .lean();
+
+    if (!playerScores.length) {
+      return {
+        data: [],
+      };
+    }
+
+    const leaderboardResponses = await LeaderboardService.getLeaderboards(
+      playerScores.map(score => score.leaderboardId + ""),
+      { includeBeatSaver: false, cacheOnly: true }
     );
 
+    const leaderboardMap = new Map(leaderboardResponses.map(r => [r.leaderboard.id, r]));
+
+    const dataPoints: PlayerScoreChartDataPoint[] = [];
+    for (const score of playerScores) {
+      const leaderboard = leaderboardMap.get(score.leaderboardId)?.leaderboard;
+      if (!leaderboard) {
+        continue;
+      }
+      dataPoints.push({
+        accuracy: score.accuracy,
+        stars: leaderboard.stars,
+        pp: score.pp,
+        timestamp: score.timestamp,
+        leaderboardId: leaderboard.id + "",
+        leaderboardName: leaderboard.fullName,
+        leaderboardDifficulty: getDifficultyName(getDifficulty(leaderboard.difficulty.difficulty)),
+      });
+    }
+
     return {
-      data,
+      data: dataPoints,
     };
   }
 
-  /**
-   * Gets the player scores from the database.
-   *
-   * @param playerId the id of the player
-   * @param options the fetch options
-   */
   public static async getPlayerScores(
     playerId: string,
     options: {
