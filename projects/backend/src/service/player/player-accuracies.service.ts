@@ -82,25 +82,20 @@ export class PlayerAccuraciesService {
       A: 0,
     };
 
-    // Use aggregation to get only ranked scores with accuracy
-    const playerScores = await PlayerService.getPlayerScores(playerId, {
-      sort: {
-        field: "pp",
-        direction: "desc",
-        filters: {
-          rankedOnly: true,
-        },
-      },
-      projection: {
+    
+    const playerScores = await ScoreSaberScoreModel.find({
+      playerId: playerId,
+      pp: { $gt: 0 },
+    })
+      .select({
         accuracy: 1,
-      },
-      includeLeaderboard: false,
-    });
+      })
+      .lean();
 
     // Process scores in parallel using Promise.all
     const badgeCounts = await Promise.all(
       playerScores.map(async playerScore => {
-        const accuracy = playerScore.score.accuracy;
+        const accuracy = playerScore.accuracy;
         if (accuracy >= 95) return { SSPlus: 1, SS: 0, SPlus: 0, S: 0, A: 0 };
         if (accuracy >= 90) return { SSPlus: 0, SS: 1, SPlus: 0, S: 0, A: 0 };
         if (accuracy >= 85) return { SSPlus: 0, SS: 0, SPlus: 1, S: 0, A: 0 };

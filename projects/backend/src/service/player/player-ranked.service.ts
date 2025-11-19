@@ -15,17 +15,15 @@ export class PlayerRankedService {
   public static async getPlayerRankedPps(playerId: string): Promise<PlayerRankedPpsResponse> {
     await PlayerService.playerExists(playerId, true);
 
-    const playerScores = await PlayerService.getPlayerScores(playerId, {
-      sort: {
-        field: "pp",
-        direction: "desc",
-        filters: {
-          rankedOnly: true,
-        },
-      },
-      projection: { pp: 1, scoreId: 1 },
-      includeLeaderboard: false,
-    });
+    const playerScores = await ScoreSaberScoreModel.find({
+      playerId: playerId,
+      pp: { $gt: 0 },
+    })
+      .select({
+        pp: 1,
+        scoreId: 1,
+      })
+      .lean();
 
     if (playerScores.length === 0) {
       return {
@@ -34,8 +32,8 @@ export class PlayerRankedService {
     }
 
     const scores = playerScores.map(score => ({
-      pp: score.score.pp,
-      scoreId: score.score.scoreId,
+      pp: score.pp,
+      scoreId: score.scoreId,
     }));
 
     return {

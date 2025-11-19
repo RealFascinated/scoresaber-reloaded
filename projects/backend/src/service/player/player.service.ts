@@ -47,7 +47,6 @@ export class PlayerService {
   // PlayerScoresService methods
   public static refreshAllPlayerScores = PlayerScoresService.refreshAllPlayerScores;
   public static getPlayerScoreChart = PlayerScoresService.getPlayerScoreChart;
-  public static getPlayerScores = PlayerScoresService.getPlayerScores;
   public static getScoreSaberCachedPlayerScores =
     PlayerScoresService.getScoreSaberCachedPlayerScores;
   public static getScoreSaberLivePlayerScores = PlayerScoresService.getScoreSaberLivePlayerScores;
