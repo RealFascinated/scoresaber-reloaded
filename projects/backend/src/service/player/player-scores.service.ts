@@ -344,6 +344,7 @@ export class PlayerScoresService {
     const playerScores = await ScoreSaberScoreModel.find({
       playerId: playerId,
       leaderboardId: { $exists: true, $nin: [null, undefined] },
+      pp: { $gt: 0 },
     })
       .select({
         accuracy: 1,
