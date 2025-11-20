@@ -192,7 +192,7 @@ export class LeaderboardCoreService {
     const cacheKeys = uniqueIds.map(id => `leaderboard:id:${id}`);
     const cachedData = await Promise.all(cacheKeys.map(key => redisClient.get(key)));
 
-    const uncachedIds = uniqueIds.filter((id, i) => {
+    const uncachedIds: string[] = uniqueIds.filter((id, i) => {
       const cached = cachedData[i];
       if (cached) {
         try {
@@ -245,25 +245,23 @@ export class LeaderboardCoreService {
       })
     );
 
-    // Fetch from API
-    await Promise.all(
-      stillUncachedIds.map(async id => {
-        try {
-          const leaderboard = await LeaderboardService.fetchAndSaveLeaderboard(id);
-          const data = await LeaderboardService.createLeaderboardData(leaderboard, false);
-          await redisClient.set(
-            `leaderboard:id:${id}`,
-            SuperJSON.stringify(data),
-            "EX",
-            TimeUnit.toSeconds(TimeUnit.Hour, 2)
-          );
-          results.set(id, data);
-        } catch (error) {
-          Logger.warn(`Failed to fetch leaderboard for ID ${id}:`, error);
-          results.set(id, null);
-        }
-      })
-    );
+    // Dont parallelize this, we get rate limited
+    for (const id of stillUncachedIds) {
+      try {
+        const leaderboard = await LeaderboardService.fetchAndSaveLeaderboard(id);
+        const data = await LeaderboardService.createLeaderboardData(leaderboard, false);
+        await redisClient.set(
+          `leaderboard:id:${id}`,
+          SuperJSON.stringify(data),
+          "EX",
+          TimeUnit.toSeconds(TimeUnit.Hour, 2)
+        );
+        results.set(id, data);
+      } catch (error) {
+        Logger.warn(`Failed to fetch leaderboard for ID ${id}:`, error);
+        results.set(id, null);
+      }
+    }
 
     const allLeaderboards = uniqueIds
       .map(id => results.get(id))
@@ -280,6 +278,10 @@ export class LeaderboardCoreService {
           (data as LeaderboardResponse).beatsaver = beatsaver;
         })
       );
+    }
+
+    if (stillUncachedIds.length > 0) {
+      Logger.warn(`Fetched ${allLeaderboards.length} leaderboards from ScoreSaber!`);
     }
 
     return allLeaderboards as LeaderboardResponse[];
