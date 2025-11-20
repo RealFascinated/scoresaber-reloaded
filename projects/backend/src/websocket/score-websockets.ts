@@ -1,4 +1,3 @@
-import Logger from "@ssr/common/logger";
 import { PlayerModel } from "@ssr/common/model/player/player";
 import {
   getScoreSaberLeaderboardFromToken,

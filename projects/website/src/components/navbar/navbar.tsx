@@ -62,7 +62,7 @@ export default function Navbar() {
   return (
     <nav
       className={cn(
-        "border-border bg-background/55 sticky inset-x-0 top-0 z-50 flex h-12 w-full select-none items-center justify-between border-b px-2 py-1 backdrop-blur-md lg:justify-around lg:px-8"
+        "border-border bg-background/55 sticky inset-x-0 top-0 z-50 flex h-12 w-full items-center justify-between border-b px-2 py-1 backdrop-blur-md select-none lg:justify-around lg:px-8"
       )}
     >
       {/* Left */}

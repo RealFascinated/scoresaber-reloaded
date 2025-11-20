@@ -42,7 +42,6 @@ import { scoreToObject } from "../../common/score/score.util";
 import { LeaderboardService } from "../leaderboard/leaderboard.service";
 import { ScoreService } from "../score/score.service";
 import ScoreSaberService from "../scoresaber.service";
-import { PlayerService } from "./player.service";
 
 type PlayerRefreshResult = {
   missingScores: number;

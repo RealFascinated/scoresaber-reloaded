@@ -56,10 +56,10 @@ export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
             {/* Song Name */}
             <FallbackLink
               href={beatSaverMap ? `https://beatsaver.com/maps/${beatSaverMap?.bsr}` : undefined}
-              className="hover:brightness-66 transition-all"
+              className="transition-all hover:brightness-66"
               data-umami-event="leaderboard-beatsaver-button"
             >
-              <h3 className="text-foreground line-clamp-2 text-lg font-semibold leading-tight">
+              <h3 className="text-foreground line-clamp-2 text-lg leading-tight font-semibold">
                 {leaderboardData.fullName}
               </h3>
             </FallbackLink>
@@ -130,7 +130,7 @@ export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
 
       {/* Map Description */}
       {beatSaverMap && description && (
-        <div className="bg-muted/30 w-full break-all rounded-lg p-3">
+        <div className="bg-muted/30 w-full rounded-lg p-3 break-all">
           {(showExpandButton && !expanded
             ? description.slice(0, descriptionMaxSize) + "..."
             : description
@@ -167,7 +167,7 @@ function LeaderboardInfoItem({ label, value }: { label: string; value: React.Rea
   return (
     <div className="flex min-h-6 flex-wrap items-start gap-2">
       <p className="text-muted-foreground min-w-[100px] shrink-0 text-sm">{label}:</p>
-      <div className="text-foreground *:wrap-break-word min-w-0 max-w-full text-sm">{value}</div>
+      <div className="text-foreground max-w-full min-w-0 text-sm *:wrap-break-word">{value}</div>
     </div>
   );
 }

@@ -50,7 +50,7 @@ export default function FriendsButton() {
         </NavbarButton>
       </PopoverTrigger>
       <PopoverContent
-        className="mt-1.5 max-h-[400px] w-screen select-none overflow-hidden overflow-y-auto p-2 text-sm md:w-[350px]"
+        className="mt-1.5 max-h-[400px] w-screen overflow-hidden overflow-y-auto p-2 text-sm select-none md:w-[350px]"
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >

@@ -1,7 +1,6 @@
 import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import { AccBadges } from "@ssr/common/player/acc-badges";
 import { PlayerAccuracies } from "@ssr/common/player/player-accuracies";
-import { PlayerService } from "./player.service";
 
 export class PlayerAccuraciesService {
   /**
@@ -82,7 +81,6 @@ export class PlayerAccuraciesService {
       A: 0,
     };
 
-    
     const playerScores = await ScoreSaberScoreModel.find({
       playerId: playerId,
       pp: { $gt: 0 },

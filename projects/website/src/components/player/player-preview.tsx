@@ -79,7 +79,7 @@ function PlayerStats({ player }: { player: ScoreSaberPlayer }) {
   return (
     <div className="relative">
       {/* Background gradient effect */}
-      <div className="bg-linear-to-r absolute inset-0 rounded-lg from-blue-500/5 via-purple-500/5 to-pink-500/5" />
+      <div className="absolute inset-0 rounded-lg bg-linear-to-r from-blue-500/5 via-purple-500/5 to-pink-500/5" />
 
       <div className="relative space-y-3 p-3">
         {showRankStats ? (
@@ -92,7 +92,7 @@ function PlayerStats({ player }: { player: ScoreSaberPlayer }) {
                   <GlobeAmericasIcon className="text-pp relative size-6" />
                 </div>
                 <div>
-                  <p className="text-muted-foreground text-xs uppercase tracking-wide">Global</p>
+                  <p className="text-muted-foreground text-xs tracking-wide uppercase">Global</p>
                   <CountUp
                     className="text-lg font-bold"
                     end={player.rank}
@@ -108,7 +108,7 @@ function PlayerStats({ player }: { player: ScoreSaberPlayer }) {
                   <CountryFlag code={player.country} size={14} className="relative size-6" />
                 </div>
                 <div>
-                  <p className="text-muted-foreground text-xs uppercase tracking-wide">Country</p>
+                  <p className="text-muted-foreground text-xs tracking-wide uppercase">Country</p>
                   <CountUp
                     className="text-lg font-bold"
                     end={player.countryRank}

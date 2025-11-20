@@ -87,7 +87,7 @@ export default function PlayerAndLeaderboardSearch() {
   return (
     <>
       <div
-        className="group relative flex cursor-pointer select-none transition-all duration-200 hover:shadow-md"
+        className="group relative flex cursor-pointer transition-all duration-200 select-none hover:shadow-md"
         onClick={openSearch}
       >
         <div
@@ -108,9 +108,9 @@ export default function PlayerAndLeaderboardSearch() {
         />
 
         <div
-          className={cn("absolute right-3 top-1/2 hidden -translate-y-1/2", !isMobile && "flex")}
+          className={cn("absolute top-1/2 right-3 hidden -translate-y-1/2", !isMobile && "flex")}
         >
-          <kbd className="bg-muted/80 text-muted-foreground border-border/50 pointer-events-none inline-flex h-6 select-none items-center gap-1 rounded-md border px-2 text-xs font-medium shadow-sm">
+          <kbd className="bg-muted/80 text-muted-foreground border-border/50 pointer-events-none inline-flex h-6 items-center gap-1 rounded-md border px-2 text-xs font-medium shadow-sm select-none">
             <span className="text-xs">⌘</span>K
           </kbd>
         </div>

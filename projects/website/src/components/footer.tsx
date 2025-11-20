@@ -108,14 +108,14 @@ export default function Footer({
   return (
     <footer
       className={cn(
-        "border-muted/50 flex min-h-80 select-none flex-col justify-between gap-10 border-t px-10 py-5 lg:gap-0",
+        "border-muted/50 flex min-h-80 flex-col justify-between gap-10 border-t px-10 py-5 select-none lg:gap-0",
         isHome ? "bg-secondary" : "bg-secondary/60 mt-5"
       )}
     >
       {/* Top Section */}
       <div className="flex justify-center">
         {/* Branding & Social Links */}
-        <div className="max-w-(--breakpoint-2xl) flex w-full flex-col items-center justify-between gap-7 lg:flex-row lg:items-start">
+        <div className="flex w-full max-w-(--breakpoint-2xl) flex-col items-center justify-between gap-7 lg:flex-row lg:items-start">
           <div className="flex flex-col gap-5">
             {/* Branding */}
             <div className="flex flex-col items-center gap-2 text-center lg:items-start lg:text-left">

@@ -86,7 +86,7 @@ export default function ScoreSaberScoreDisplay({
   }, []);
 
   return (
-    <div className={cn(settings?.disablePadding ? "" : "pb-2 pt-2", "relative")}>
+    <div className={cn(settings?.disablePadding ? "" : "pt-2 pb-2", "relative")}>
       <div className="flex items-center">
         <div
           className={cn(

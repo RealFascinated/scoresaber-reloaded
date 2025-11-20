@@ -33,7 +33,7 @@ export default function LeaderboardInfo({
             className="transition-all hover:brightness-[66%]"
             data-umami-event="leaderboard-beatsaver-button"
           >
-            <h3 className="text-foreground mb-1 line-clamp-2 text-xl font-bold leading-tight">
+            <h3 className="text-foreground mb-1 line-clamp-2 text-xl leading-tight font-bold">
               {leaderboard.fullName}
             </h3>
           </FallbackLink>

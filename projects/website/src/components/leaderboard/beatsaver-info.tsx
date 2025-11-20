@@ -20,7 +20,7 @@ export function LeaderboardBeatSaverInfo({ beatSaverMap }: LeaderboardBeatSaverI
 
   return (
     <Card className="flex h-fit w-full flex-col gap-4 text-sm">
-      <div className="bg-muted/30 w-full break-all rounded-lg p-3">
+      <div className="bg-muted/30 w-full rounded-lg p-3 break-all">
         {(showExpandButton && !expanded
           ? description.slice(0, descriptionMaxSize) + "..."
           : description

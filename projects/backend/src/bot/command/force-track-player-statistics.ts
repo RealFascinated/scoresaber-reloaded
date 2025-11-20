@@ -1,5 +1,4 @@
 import { IsGuildUser } from "@discordx/utilities";
-import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import { CommandInteraction } from "discord.js";
 import { Discord, Guard, Slash } from "discordx";

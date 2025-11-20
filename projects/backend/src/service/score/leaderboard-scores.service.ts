@@ -5,8 +5,8 @@ import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 import { Metadata } from "@ssr/common/types/metadata";
 import BeatLeaderService from "../beatleader.service";
 import { LeaderboardService } from "../leaderboard/leaderboard.service";
-import { ScoreService } from "./score.service";
 import { PlayerService } from "../player/player.service";
+import { ScoreService } from "./score.service";
 
 export class LeaderboardScoresService {
   /**

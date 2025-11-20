@@ -3,12 +3,12 @@ import { CooldownPriority } from "@ssr/common/cooldown";
 import Logger from "@ssr/common/logger";
 import { ScoreSaberLeaderboardModel } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
+import { isProduction } from "@ssr/common/utils/utils";
 import { LeaderboardService } from "../../service/leaderboard/leaderboard.service";
+import { PlayerService } from "../../service/player/player.service";
 import { ScoreService } from "../../service/score/score.service";
 import { Queue, QueueItem } from "../queue";
 import { QueueId } from "../queue-manager";
-import { PlayerService } from "../../service/player/player.service";
-import { isProduction } from "@ssr/common/utils/utils";
 
 export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
   /**

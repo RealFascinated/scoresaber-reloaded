@@ -397,12 +397,12 @@ export default function ScoreSaberPlayerScores({
               <div className="flex w-full flex-col-reverse items-center gap-2">
                 {/* Bottom Row on Mobile, Right Side on Desktop: Search */}
                 <div className="relative w-full sm:w-auto">
-                  <SearchIcon className="text-muted-foreground absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2" />
+                  <SearchIcon className="text-muted-foreground absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2" />
                   <Input
                     type="search"
                     placeholder="Query..."
                     className={cn(
-                      "h-8 w-full pl-8 pr-3 text-xs sm:w-64",
+                      "h-8 w-full pr-3 pl-8 text-xs sm:w-64",
                       invalidSearch && "border-red-500"
                     )}
                     value={searchTerm}
@@ -410,7 +410,7 @@ export default function ScoreSaberPlayerScores({
                   />
                   {searchTerm.length > 0 && (
                     <XIcon
-                      className="text-muted-foreground absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 cursor-pointer"
+                      className="text-muted-foreground absolute top-1/2 right-2 h-3.5 w-3.5 -translate-y-1/2 cursor-pointer"
                       onClick={() => handleSearchChange("")}
                     />
                   )}
@@ -509,12 +509,12 @@ export default function ScoreSaberPlayerScores({
                 <div className="flex w-full flex-col-reverse items-center gap-2 sm:w-auto sm:flex-row">
                   {/* Search */}
                   <div className="relative w-full sm:w-auto">
-                    <SearchIcon className="text-muted-foreground absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2" />
+                    <SearchIcon className="text-muted-foreground absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2" />
                     <Input
                       type="search"
                       placeholder="Query..."
                       className={cn(
-                        "h-8 w-full pl-8 pr-3 text-xs sm:w-64",
+                        "h-8 w-full pr-3 pl-8 text-xs sm:w-64",
                         invalidSearch && "border-red-500"
                       )}
                       value={searchTerm}
@@ -522,7 +522,7 @@ export default function ScoreSaberPlayerScores({
                     />
                     {searchTerm.length > 0 && (
                       <XIcon
-                        className="text-muted-foreground absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 cursor-pointer"
+                        className="text-muted-foreground absolute top-1/2 right-2 h-3.5 w-3.5 -translate-y-1/2 cursor-pointer"
                         onClick={() => handleSearchChange("")}
                       />
                     )}

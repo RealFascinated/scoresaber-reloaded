@@ -61,7 +61,7 @@ export default function LeaderboardPreview({ leaderboard, children }: Leaderboar
               <div className="flex min-w-0 flex-1 flex-col justify-center space-y-1">
                 <SimpleLink
                   href={`/leaderboard/${leaderboard.id}`}
-                  className="hover:brightness-66 block truncate text-xl font-bold transition-all"
+                  className="block truncate text-xl font-bold transition-all hover:brightness-66"
                   data-umami-event="leaderboard-button"
                 >
                   {leaderboard.songName}
@@ -78,7 +78,7 @@ export default function LeaderboardPreview({ leaderboard, children }: Leaderboar
             {/* Stats section */}
             <div className="relative">
               {/* Background gradient effect */}
-              <div className="bg-linear-to-r absolute inset-0 rounded-lg from-blue-500/5 via-purple-500/5 to-pink-500/5" />
+              <div className="absolute inset-0 rounded-lg bg-linear-to-r from-blue-500/5 via-purple-500/5 to-pink-500/5" />
 
               <div className="relative space-y-3 p-3">
                 {/* Stats display */}
@@ -89,7 +89,7 @@ export default function LeaderboardPreview({ leaderboard, children }: Leaderboar
                       <TrendingUpIcon className="relative size-6 text-green-500" />
                     </div>
                     <div>
-                      <p className="text-muted-foreground text-xs uppercase tracking-wide">Plays</p>
+                      <p className="text-muted-foreground text-xs tracking-wide uppercase">Plays</p>
                       <CountUp
                         className="text-lg font-bold"
                         end={leaderboard.plays}
@@ -109,7 +109,7 @@ export default function LeaderboardPreview({ leaderboard, children }: Leaderboar
                       )}
                     </div>
                     <div>
-                      <p className="text-muted-foreground text-xs uppercase tracking-wide">
+                      <p className="text-muted-foreground text-xs tracking-wide uppercase">
                         {leaderboard.ranked ? "Stars" : "Status"}
                       </p>
                       {leaderboard.ranked ? (

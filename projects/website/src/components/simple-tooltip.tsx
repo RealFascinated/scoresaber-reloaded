@@ -22,7 +22,7 @@ export default function SimpleTooltip({
     <Tooltip
       content={
         typeof display === "string" ? (
-          <p className="max-w-[350px] text-wrap text-center">{display}</p>
+          <p className="max-w-[350px] text-center text-wrap">{display}</p>
         ) : (
           display
         )

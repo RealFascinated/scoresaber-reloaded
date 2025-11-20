@@ -25,7 +25,7 @@ export default async function LandingPage() {
               </SimpleLink>
             </div>
 
-            <h1 className="from-primary to-accent-secondary animate-gradient-slow bg-linear-to-r mb-6 bg-[length:200%_200%] bg-clip-text text-5xl font-bold text-transparent sm:text-6xl lg:text-7xl">
+            <h1 className="from-primary to-accent-secondary animate-gradient-slow mb-6 bg-linear-to-r bg-[length:200%_200%] bg-clip-text text-5xl font-bold text-transparent sm:text-6xl lg:text-7xl">
               ScoreSaber Reloaded
             </h1>
 
@@ -44,7 +44,7 @@ export default async function LandingPage() {
                   variant="outline"
                   className="border-primary/30 bg-primary/5 text-primary hover:border-primary/50 hover:bg-primary/10 group relative h-12 overflow-hidden rounded-xl border-2 px-8 backdrop-blur-sm transition-all duration-300"
                 >
-                  <div className="from-primary/10 to-accent-secondary/10 bg-linear-to-r absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                  <div className="from-primary/10 to-accent-secondary/10 absolute inset-0 bg-linear-to-r opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
                   <span className="relative z-10 font-semibold">Join Discord</span>
                 </Button>
               </SimpleLink>
@@ -137,7 +137,7 @@ export default async function LandingPage() {
                   variant="outline"
                   className="border-primary/30 bg-primary/5 text-primary hover:border-primary/50 hover:bg-primary/10 group relative h-12 overflow-hidden rounded-xl border-2 px-8 backdrop-blur-sm transition-all duration-300"
                 >
-                  <div className="from-primary/10 to-accent-secondary/10 bg-linear-to-r absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                  <div className="from-primary/10 to-accent-secondary/10 absolute inset-0 bg-linear-to-r opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
                   <span className="relative z-10 font-semibold">Join Discord</span>
                 </Button>
               </SimpleLink>

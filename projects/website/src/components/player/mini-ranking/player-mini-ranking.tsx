@@ -88,7 +88,7 @@ function PlayerMiniRanking({
   })();
 
   return (
-    <Card className="sticky flex w-full select-none flex-col gap-2 text-xs sm:w-[400px] sm:text-sm">
+    <Card className="sticky flex w-full flex-col gap-2 text-xs select-none sm:w-[400px] sm:text-sm">
       {/* Header */}
       <div className="flex items-center gap-2">
         {icon}

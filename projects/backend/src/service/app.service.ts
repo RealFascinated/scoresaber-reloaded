@@ -1,10 +1,10 @@
 import { AdditionalScoreDataModel } from "@ssr/common/model/additional-score-data/additional-score-data";
+import { ScoreSaberLeaderboardModel } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { PlayerModel } from "@ssr/common/model/player/player";
 import { ScoreSaberPreviousScoreModel } from "@ssr/common/model/score/impl/scoresaber-previous-score";
 import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import { AppStatistics } from "@ssr/common/types/backend/app-statistics";
 import MetricsService, { MetricType } from "./metrics.service";
-import { ScoreSaberLeaderboardModel } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 
 export class AppService {
   /**

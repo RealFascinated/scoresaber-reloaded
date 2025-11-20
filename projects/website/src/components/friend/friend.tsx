@@ -32,7 +32,7 @@ export default function Friend({ player, onClick }: FriendProps) {
   }
 
   return (
-    <div className="hover:bg-accent flex select-none items-center justify-between gap-2 rounded-md p-2 transition-all">
+    <div className="hover:bg-accent flex items-center justify-between gap-2 rounded-md p-2 transition-all select-none">
       <SimpleLink
         href={`/player/${player.id}`}
         onClick={() => onClick?.()}
