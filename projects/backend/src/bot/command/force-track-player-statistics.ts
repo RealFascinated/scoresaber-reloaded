@@ -19,23 +19,7 @@ class ForceTrackPlayerStatistics {
       content: "Updating player statistics...",
     });
 
-    await PlayerService.updatePlayerStatistics(
-      (currentPage, totalPages, successCount, errorCount) => {
-        // Only update every 5 pages, and the first page (to show the progress)
-        if (currentPage % 5 !== 0 && currentPage !== 1) {
-          return;
-        }
-
-        interaction.editReply({
-          content: [
-            "Updating player statistics...",
-            `Page: ${formatNumberWithCommas(currentPage)}/${formatNumberWithCommas(totalPages)}`,
-            `Success: ${formatNumberWithCommas(successCount)}`,
-            `Errors: ${formatNumberWithCommas(errorCount)}`,
-          ].join("\n"),
-        });
-      }
-    );
+    await PlayerService.updatePlayerStatistics();
 
     interaction.editReply({
       content: `Player statistics updated in ${formatDuration(Date.now() - before)}`,

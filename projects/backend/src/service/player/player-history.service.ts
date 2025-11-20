@@ -26,7 +26,6 @@ import { QueueId, QueueManager } from "../../queue/queue-manager";
 import { accountCreationLock } from "./player-core.service";
 import { PlayerService } from "./player.service";
 
-const PLAYER_REFRESH_CONCURRENT_PAGE_FETCH_COUNT = 3;
 const INACTIVE_RANK = 999_999;
 
 export class PlayerHistoryService {
@@ -110,14 +109,7 @@ export class PlayerHistoryService {
    *
    * @param callback the callback that gets called when a page is fetched
    */
-  public static async updatePlayerStatistics(
-    callback?: (
-      currentPage: number,
-      totalPages: number,
-      successCount: number,
-      errorCount: number
-    ) => void
-  ) {
+  public static async updatePlayerStatistics() {
     const now = new Date();
     Logger.info("Starting player statistics update...");
 
@@ -132,107 +124,52 @@ export class PlayerHistoryService {
     const pages = Math.ceil(firstPage.metadata.total / (firstPage.metadata.itemsPerPage ?? 100));
     Logger.info(`Fetching ${pages} pages of players from ScoreSaber...`);
 
-    const PLAYER_TIMEOUT = 30000;
     let successCount = 0;
     let errorCount = 0;
 
-    const playerIds = new Set<string>();
+    const players: ScoreSaberPlayerToken[] = [];
 
-    // Process pages in batches
-    for (
-      let batchStart = 1;
-      batchStart <= pages;
-      batchStart += PLAYER_REFRESH_CONCURRENT_PAGE_FETCH_COUNT
-    ) {
-      const batchEnd = Math.min(batchStart + PLAYER_REFRESH_CONCURRENT_PAGE_FETCH_COUNT - 1, pages);
-      Logger.info(`Processing pages ${batchStart} to ${batchEnd} concurrently...`);
+    // Fetch all the active players from ScoreSaber
+    for (let page = 1; page <= pages; page++) {
+      if (page % 10 === 0 || page === 1 || page === pages) {
+        Logger.info(`Fetching page ${page} of ${pages}...`);
+      }
+      const response = await ApiServiceRegistry.getInstance()
+        .getScoreSaberService()
+        .lookupPlayers(page);
+      if (page == undefined) {
+        Logger.error(`Failed to fetch players on page ${page}, skipping page...`);
+        errorCount++;
+        continue;
+      }
+      players.push(...(response?.players ?? []));
+    }
+    Logger.info(`Found ${players.length} active players from ScoreSaber API`);
 
-      const batchPromises = [];
-      for (let i = batchStart; i <= batchEnd; i++) {
-        batchPromises.push(
-          (async () => {
-            Logger.info(`Fetching page ${i}...`);
-            const page = await ApiServiceRegistry.getInstance()
-              .getScoreSaberService()
-              .lookupPlayers(i);
+    // Track the players
+    for (const player of players) {
+      const foundPlayer = await PlayerService.getPlayer(player.id, player);
+      await PlayerService.trackPlayerHistory(foundPlayer, now, player);
 
-            if (page == undefined) {
-              Logger.error(`Failed to fetch players on page ${i}, skipping page...`);
-              errorCount++;
-              return;
-            }
+      // Get the total amount of scores tracked for this player
+      const trackedScores = await ScoreSaberScoreModel.countDocuments({
+        playerId: player.id,
+      });
 
-            callback?.(i, pages, successCount, errorCount);
-            Logger.info(`Processing page ${i} with ${page.players.length} players...`);
-
-            await Promise.all(
-              page.players.map(async player => {
-                // Add player ids to the list
-                if (playerIds.has(player.id)) {
-                  return;
-                }
-                playerIds.add(player.id);
-
-                let timeoutId: NodeJS.Timeout | undefined;
-                try {
-                  const timeoutPromise = new Promise((_, reject) => {
-                    timeoutId = setTimeout(
-                      () => reject(new Error(`Timeout processing player ${player.id}`)),
-                      PLAYER_TIMEOUT
-                    );
-                  });
-
-                  const processPromise = (async () => {
-                    const foundPlayer = await PlayerService.getPlayer(player.id, player);
-                    await PlayerService.trackPlayerHistory(foundPlayer, now, player);
-
-                    // Get the total amount of scores tracked for this player
-                    const trackedScores = await ScoreSaberScoreModel.countDocuments({
-                      playerId: player.id,
-                    });
-
-                    // If the player has less scores tracked than the total play count, add them to the refresh queue
-                    if (trackedScores < player.scoreStats.totalPlayCount) {
-                      Logger.info(
-                        `Player ${player.id} has missing scores. Adding them to the refresh queue...`
-                      );
-                      // Add the player to the refresh queue
-                      (
-                        QueueManager.getQueue(
-                          QueueId.PlayerScoreRefreshQueue
-                        ) as PlayerScoreSeedQueue
-                      ).add({
-                        id: player.id,
-                        data: player.id,
-                      });
-                    }
-
-                    successCount++;
-                  })();
-
-                  await Promise.race([processPromise, timeoutPromise]);
-                } catch (error) {
-                  Logger.error(
-                    `Failed to track seeded player ${player.id} (${player.name}): ${error}`
-                  );
-                  errorCount++;
-                } finally {
-                  if (timeoutId) {
-                    clearTimeout(timeoutId);
-                  }
-                }
-              })
-            );
-
-            Logger.info(`Completed page ${i}`);
-          })()
-        );
+      // If the player has less scores tracked than the total play count, add them to the refresh queue
+      if (trackedScores < player.scoreStats.totalPlayCount) {
+        Logger.info(`Player ${player.id} has missing scores. Adding them to the refresh queue...`);
+        // Add the player to the refresh queue
+        (QueueManager.getQueue(QueueId.PlayerScoreRefreshQueue) as PlayerScoreSeedQueue).add({
+          id: player.id,
+          data: player.id,
+        });
       }
 
-      // Wait for all pages in the current batch to complete
-      await Promise.all(batchPromises);
-      Logger.info(`Completed batch ${batchStart} to ${batchEnd}`);
+      successCount++;
     }
+
+    const playerIds = new Set(players.map(player => player.id));
 
     // Log the number of active players found
     Logger.info(`Found ${playerIds.size} active players from ScoreSaber API`);
