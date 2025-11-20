@@ -12,12 +12,12 @@ export const revalidate = 300; // Revalidate every 5 minutes
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
-    title: `ScoreSaber Statistics`,
-    description: "View the statistics for ScoreSaber",
+    title: `SSR Statistics`,
+    description: "View the statistics for SSR",
     openGraph: {
       siteName: env.NEXT_PUBLIC_WEBSITE_NAME,
-      title: `ScoreSaber Statistics`,
-      description: "View the statistics for ScoreSaber",
+      title: `SSR Statistics`,
+      description: "View the statistics for SSR",
     },
   };
 }
@@ -35,7 +35,7 @@ export default async function StatisticsPage() {
               <ChartBarIcon className="size-6" />
             </div>
             <div>
-              <h1 className="text-foreground text-2xl font-bold">ScoreSaber Statistics</h1>
+              <h1 className="text-foreground text-2xl font-bold">SSR Statistics</h1>
               <p className="text-muted-foreground mt-1 text-sm">
                 Real-time platform analytics and player insights
               </p>
