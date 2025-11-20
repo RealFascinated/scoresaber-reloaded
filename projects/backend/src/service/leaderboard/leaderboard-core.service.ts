@@ -190,7 +190,7 @@ export class LeaderboardCoreService {
 
     // Check Redis cache
     const cacheKeys = uniqueIds.map(id => `leaderboard:id:${id}`);
-    const cachedData = await Promise.all(cacheKeys.map(key => redisClient.get(key)));
+    const cachedData = cacheKeys.length > 0 ? await redisClient.mget(...cacheKeys) : [];
 
     const uncachedIds: string[] = uniqueIds.filter((id, i) => {
       const cached = cachedData[i];
@@ -209,14 +209,10 @@ export class LeaderboardCoreService {
 
     // Check MongoDB cache
     const numericIds = uncachedIds.map(id => Number(id)).filter(id => !isNaN(id));
-    const CHUNK_SIZE = 100;
-    const mongoCachedLeaderboards: ScoreSaberLeaderboard[] = [];
-
-    for (let i = 0; i < numericIds.length; i += CHUNK_SIZE) {
-      const chunk = numericIds.slice(i, i + CHUNK_SIZE);
-      const chunkResults = await ScoreSaberLeaderboardModel.find({ _id: { $in: chunk } }).lean();
-      mongoCachedLeaderboards.push(...chunkResults);
-    }
+    const mongoCachedLeaderboards =
+      numericIds.length > 0
+        ? await ScoreSaberLeaderboardModel.find({ _id: { $in: numericIds } }).lean()
+        : [];
 
     const mongoMap = new Map(mongoCachedLeaderboards.map(lb => [lb._id!.toString(), lb]));
     const stillUncachedIds: string[] = [];
