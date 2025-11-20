@@ -13,6 +13,8 @@ import SuperJSON from "superjson";
 import { redisClient } from "../common/redis";
 import CacheService, { CacheId } from "./cache.service";
 import { PlayerService } from "./player/player.service";
+import MetricsService, { MetricType } from "./metrics.service";
+import Metric from "../metrics/metric";
 
 // Type for cached player data with timestamp
 type CachedScoreSaberPlayerToken = ScoreSaberPlayerToken & {
@@ -87,6 +89,10 @@ export default class ScoreSaberService {
             country: getPageFromRank(player.countryRank, 50),
             medals: medalsRank ? getPageFromRank(medalsRank, 50) : undefined,
           },
+          rankPercentile:
+            (player.rank /
+              ((await MetricsService.getMetric(MetricType.ACTIVE_ACCOUNTS)).value as number)) *
+            100,
         } as ScoreSaberPlayer;
 
         if (type === DetailType.BASIC) {

@@ -67,6 +67,11 @@ export default interface ScoreSaberPlayer extends ScoreSaberPlayerBase {
    * HMD -> Percentage
    */
   hmdBreakdown: Record<HMD, number> | undefined;
+
+  /**
+   * The players rank percentile (top 0.1%)
+   */
+  rankPercentile: number;
 }
 
 export interface ScoreSaberPlayerBase extends Player {

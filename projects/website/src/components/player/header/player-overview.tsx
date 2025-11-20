@@ -36,12 +36,19 @@ const playerData = [
               player={player}
               type={PlayerStatChange.Rank}
               tooltipChildren={
-                player.rankIncludingInactives ? (
-                  <p>
-                    Rank Including Inactives:{" "}
-                    <b>#{formatNumberWithCommas(player.rankIncludingInactives)}</b>
-                  </p>
-                ) : null
+                <div className="mt-3">
+                  {player.rankIncludingInactives && (
+                    <p>
+                      Rank Including Inactives:{" "}
+                      <b>#{formatNumberWithCommas(player.rankIncludingInactives)}</b>
+                    </p>
+                  )}
+                  {player.rankPercentile && (
+                    <p>
+                      Rank Percentile: <b>{player.rankPercentile.toFixed(2)}%</b>
+                    </p>
+                  )}
+                </div>
               }
             >
               <SimpleLink
