@@ -16,6 +16,7 @@ import { LeaderboardStarChange } from "@ssr/common/response/leaderboard-star-cha
 import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 import { LeaderboardUpdate, LeaderboardUpdates } from "../../common/types/leaderboard";
 import { LeaderboardService } from "./leaderboard.service";
+import CacheService from "../cache.service";
 
 const BATCH_SIZE = 100;
 
@@ -276,6 +277,9 @@ export class LeaderboardRankingService {
       scoreMap.clear();
       return updatedCount;
     }
+
+    // Remove this leaderboard from the Redis cache
+    await CacheService.invalidate(`leaderboard:id:${update.leaderboard.id}`);
 
     return 0;
   }
