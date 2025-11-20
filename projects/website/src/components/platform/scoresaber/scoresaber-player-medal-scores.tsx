@@ -73,8 +73,7 @@ export default function ScoreSaberPlayerMedalScores({
     [currentPage, animateLeft, animateRight]
   );
 
-  // URL management
-  const { buildUrl } = useUrlBuilder({
+  useUrlBuilder({
     basePath: `/player/${player.id}`,
     segments: [{ value: "medals" }, { value: currentPage, condition: currentPage !== 1 }],
   });
