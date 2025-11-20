@@ -7,9 +7,9 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   output: "standalone",
   outputFileTracingRoot: path.join(__dirname, "../../"),
+  reactCompiler: true,
   experimental: {
-    reactCompiler: true,
-    preloadEntriesOnStart: false,
+    turbopackFileSystemCacheForDev: true,
     optimizePackageImports: [
       "@ssr/common",
       "@radix-ui/react-checkbox",
@@ -68,8 +68,6 @@ const nextConfig: NextConfig = {
       },
     ];
   },
-  // This is required to support PostHog trailing slash API requests
-  skipTrailingSlashRedirect: true,
 };
 
 export default withBundleAnalyzer({
