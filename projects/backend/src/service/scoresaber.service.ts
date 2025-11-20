@@ -14,7 +14,6 @@ import { redisClient } from "../common/redis";
 import CacheService, { CacheId } from "./cache.service";
 import { PlayerService } from "./player/player.service";
 import MetricsService, { MetricType } from "./metrics.service";
-import Metric from "../metrics/metric";
 
 // Type for cached player data with timestamp
 type CachedScoreSaberPlayerToken = ScoreSaberPlayerToken & {

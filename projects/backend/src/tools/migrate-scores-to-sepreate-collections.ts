@@ -59,7 +59,6 @@ async function migrate() {
     // First score is the latest, rest are previous scores
     for (let i = 1; i < sortedScores.length; i++) {
       const { fullDocument } = sortedScores[i];
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { _id, ...rest } = fullDocument;
 
       try {
