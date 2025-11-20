@@ -9,10 +9,14 @@ import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
 import { PlayerService } from "../../service/player/player.service";
 import { Queue, QueueItem } from "../queue";
 import { QueueId } from "../queue-manager";
+import { isProduction } from "@ssr/common/utils/utils";
 
 export class PlayerScoreSeedQueue extends Queue<QueueItem<string>> {
   constructor() {
     super(QueueId.PlayerScoreRefreshQueue, "lifo");
+    if (!isProduction()) {
+      return;
+    }
 
     setImmediate(async () => {
       try {

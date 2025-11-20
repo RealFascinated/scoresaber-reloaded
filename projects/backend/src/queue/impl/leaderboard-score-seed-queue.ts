@@ -8,6 +8,7 @@ import { ScoreService } from "../../service/score/score.service";
 import { Queue, QueueItem } from "../queue";
 import { QueueId } from "../queue-manager";
 import { PlayerService } from "../../service/player/player.service";
+import { isProduction } from "@ssr/common/utils/utils";
 
 export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
   /**
@@ -18,6 +19,9 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
 
   constructor() {
     super(QueueId.LeaderboardScoreSeedQueue, "fifo");
+    if (!isProduction()) {
+      return;
+    }
 
     setImmediate(async () => {
       await this.insertLeaderboards();
