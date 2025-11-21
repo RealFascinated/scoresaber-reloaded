@@ -15,8 +15,8 @@ import {
 import { LeaderboardStarChange } from "@ssr/common/response/leaderboard-star-change";
 import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 import { LeaderboardUpdate, LeaderboardUpdates } from "../../common/types/leaderboard";
-import { LeaderboardService } from "./leaderboard.service";
 import CacheService from "../cache.service";
+import { LeaderboardService } from "./leaderboard.service";
 
 const BATCH_SIZE = 100;
 

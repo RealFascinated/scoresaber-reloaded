@@ -257,22 +257,6 @@ export default class PlaylistService {
         );
       }
 
-      // Get and filter scores
-      // const rawScores = await PlayerService.getPlayerScores(toSnipe, {
-      //   projection: {
-      //     pp: 1,
-      //     accuracy: 1,
-      //     timestamp: 1,
-      //     leaderboardId: 1,
-      //     playerId: 1,
-      //   },
-      //   sort: {
-      //     field: settings?.sort || "pp",
-      //     direction: settings?.sortDirection || "desc",
-      //   },
-      //   insertScoreData: false,
-      // });
-
       const rawScores = (await ScoreSaberScoreModel.find({
         playerId: toSnipe,
       })
