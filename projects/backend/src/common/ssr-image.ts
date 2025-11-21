@@ -3,12 +3,42 @@ import { SSRCache } from "@ssr/common/cache";
 import * as path from "node:path";
 import { fetchWithCache } from "./cache.util";
 
-// Register fonts once
-GlobalFonts.registerFromPath(path.resolve("./src/common/font/Roboto-Medium.ttf"), "SSR");
-GlobalFonts.registerFromPath(
-  path.resolve("./src/common/font/TwitterColorEmoji-SVGinOT.ttf"),
-  "TwitterEmoji"
-);
+// Register fonts once - resolve paths correctly in both dev and prod
+// In dev: fonts are at src/common/font/ (import.meta.dir points to src/common/)
+// In prod: fonts are at dist/font/ or dist/common/font/ (import.meta.dir points to dist/ when bundled)
+function registerFont(filename: string, fontName: string): void {
+  const paths: string[] = [];
+
+  // Try import.meta.dir first (works in dev and if structure preserved)
+  if (import.meta.dir) {
+    paths.push(path.resolve(import.meta.dir, "font", filename));
+  }
+
+  // Production paths (when bundled, import.meta.dir is dist/)
+  paths.push(
+    path.resolve(process.cwd(), "dist", "font", filename),
+    path.resolve(process.cwd(), "dist", "common", "font", filename),
+    path.resolve(process.cwd(), "src", "common", "font", filename) // Dev fallback
+  );
+
+  // Try each path until one works
+  for (const fontPath of paths) {
+    try {
+      GlobalFonts.registerFromPath(fontPath, fontName);
+      return; // Success
+    } catch {
+      // Continue to next path
+    }
+  }
+
+  // If all paths failed, throw error with helpful message
+  throw new Error(
+    `Failed to register font ${fontName} from ${filename}. Tried paths: ${paths.join(", ")}`
+  );
+}
+
+registerFont("Roboto-Medium.ttf", "SSR");
+registerFont("TwitterColorEmoji-SVGinOT.ttf", "TwitterEmoji");
 
 type TextPlacement = "top-left" | "top-right" | "center" | "bottom-left" | "bottom-right";
 
@@ -45,19 +75,20 @@ export default class SSRImage {
       blur?: boolean;
     }
   ): Promise<void> {
-    if (options?.blur) {
-      this.ctx.filter = "blur(1px)";
+    const blur = options?.blur ?? false;
+    if (blur) {
+      this.ctx.filter = "blur(2.5px) brightness(0.5)";
     }
 
     this.ctx.drawImage(
       await fetchWithCache(backgroundImageCache, url, () => loadImage(url)),
-      0,
-      0,
-      this.options.width,
-      this.options.height
+      blur ? -5 : 0,
+      blur ? -5 : 0,
+      this.options.width + (blur ? 10 : 0),
+      this.options.height + (blur ? 10 : 0)
     );
 
-    if (options?.blur) {
+    if (blur) {
       this.ctx.filter = "none";
     }
   }

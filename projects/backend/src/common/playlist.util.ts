@@ -2,14 +2,8 @@ import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { CustomRankedPlaylist } from "@ssr/common/playlist/ranked/custom-ranked-playlist";
 import { SnipeSettings } from "@ssr/common/snipe/snipe-settings-schema";
 import { capitalizeFirstLetter, truncateText } from "@ssr/common/string-utils";
-import { formatDateMinimal } from "@ssr/common/utils/time-utils";
+import { formatDate } from "@ssr/common/utils/time-utils";
 import SSRImage, { ImageTextOptions } from "./ssr-image";
-
-const SNIPE_PLAYLIST_RANKED_STATUS_NAMES: Record<string, string> = {
-  all: "All Scores",
-  ranked: "Ranked Only",
-  unranked: "Unranked Only",
-};
 
 /**
  * Generates a playlist image for a Snipe
@@ -22,7 +16,6 @@ export async function generateSnipePlaylistImage(
   settings: SnipeSettings,
   toSnipe: ScoreSaberPlayer
 ): Promise<string> {
-  // Map sort field to display name
   const sortFieldNames: Record<string, string> = {
     pp: "PP",
     date: "Date",
@@ -31,17 +24,22 @@ export async function generateSnipePlaylistImage(
     score: "Score",
     maxcombo: "Max Combo",
   };
+  const rankedStatusNames: Record<string, { text: string; color: string }> = {
+    all: { text: "All Scores", color: "#fff" },
+    ranked: { text: "Ranked Only", color: "#ffde1a" },
+    unranked: { text: "Unranked Only", color: "#fff" },
+  };
 
   const sortFieldName = sortFieldNames[settings.sort || "pp"];
   const sortDirection = settings.sortDirection === "asc" ? "Asc" : "Desc";
-  const scoreTypeText = SNIPE_PLAYLIST_RANKED_STATUS_NAMES[settings.rankedStatus || "all"];
+  const scoreTypeText = rankedStatusNames[settings.rankedStatus || "all"].text;
 
   const lines = [
     ...(settings.name
       ? [
           {
             text: settings.name,
-            color: "#222222",
+            color: "#fff",
             fontSize: 45,
             wrap: true,
           },
@@ -49,27 +47,33 @@ export async function generateSnipePlaylistImage(
       : [
           {
             text: truncateText(toSnipe.name, 16)!,
-            color: "#222222",
+            color: "#fff",
             fontSize: 45,
           },
         ]),
 
     {
       text: ``,
-      color: "#222222",
+      color: "#fff",
       fontSize: 25,
     },
     {
       text: `${sortFieldName} (${sortDirection})`,
-      color: "#222222",
-      fontSize: 45,
+      color: "#fff",
+      fontSize: 40,
     },
     {
       text: scoreTypeText,
-      color: "#2d2d2d",
+      color: rankedStatusNames[settings.rankedStatus || "all"].color,
       fontSize: 40,
     },
   ];
+
+  lines.push({
+    text: ``,
+    color: "#fff",
+    fontSize: 25,
+  });
 
   // Only show star range for ranked maps
   if (
@@ -79,7 +83,7 @@ export async function generateSnipePlaylistImage(
   ) {
     lines.push({
       text: `${settings.starRange.min}⭐ - ${settings.starRange.max}⭐`,
-      color: "#2d2d2d",
+      color: "#ffde1a",
       fontSize: 40,
     });
   }
@@ -87,8 +91,8 @@ export async function generateSnipePlaylistImage(
   // Always show accuracy range
   lines.push({
     text: `${settings.accuracyRange.min}% - ${settings.accuracyRange.max}%`,
-    color: "#2d2d2d",
-    fontSize: 40,
+    color: "#fff",
+    fontSize: 35,
   });
 
   return generatePlaylistImage("SSR", { lines });
@@ -104,27 +108,31 @@ export async function generateCustomRankedPlaylistImage(
   settings: CustomRankedPlaylist
 ): Promise<string> {
   const type = capitalizeFirstLetter(settings.sort);
+  const sortNames: Record<string, string> = {
+    dateRanked: "Date Ranked",
+    stars: "Stars",
+  };
 
   return generatePlaylistImage("SSR", {
     lines: [
       {
         text: `ScoreSaber Ranked`,
-        color: "#222222",
+        color: "#fff",
         fontSize: 45,
       },
       {
-        text: `Sort: ${type == "dateRanked" ? "Date Ranked" : "Stars"}`,
-        color: "#313131",
+        text: `Sort: ${sortNames[type]}`,
+        color: "#fff",
         fontSize: 40,
       },
       {
         text: ``,
-        color: "#222222",
+        color: "#fff",
         fontSize: 45,
       },
       {
         text: `${settings.stars.min}⭐ - ${settings.stars.max}⭐`,
-        color: "#2d2d2d",
+        color: "#fff",
         fontSize: 45,
       },
     ],
@@ -149,14 +157,14 @@ export async function generatePlaylistImage(
     width: 512,
     height: 512,
   });
-  await image.setBackgroundImage("https://cdn.fascinated.cc/cFkchQkc.png", {
+  await image.setBackgroundImage("https://cdn.fascinated.cc/MW5WDvKW69.png", {
     blur: true,
   });
   image.drawText(
     [
       {
         text: author,
-        color: "#000",
+        color: "#ffde1a",
         fontSize: 65,
       },
       // Title
@@ -164,7 +172,7 @@ export async function generatePlaylistImage(
         ? ([
             {
               text: options.title,
-              color: "#222222",
+              color: "#fff",
               fontSize: 55,
               wrap: true,
             },
@@ -186,13 +194,13 @@ export async function generatePlaylistImage(
  * @returns the base64 encoded image
  */
 export async function generateRankedBatchPlaylistImage(): Promise<string> {
-  return generatePlaylistImage("SSR", {
+  return generatePlaylistImage("ScoreSaber", {
     title: `Ranked Batch`,
     lines: [
       {
-        text: `${formatDateMinimal(new Date())}`,
-        color: "#222222",
-        fontSize: 45,
+        text: `${formatDate(new Date(), "MMMM YYYY")}`,
+        color: "#ffde1a",
+        fontSize: 40,
       },
     ],
   });

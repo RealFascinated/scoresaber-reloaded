@@ -55,6 +55,10 @@ COPY --from=depends /app/node_modules ./node_modules
 COPY --from=runner /app/projects/common/dist ./projects/common/dist
 COPY --from=runner /app/projects/backend/dist ./projects/backend/dist
 COPY --from=runner /app/projects/backend/package.json ./projects/backend/
+# Copy font files needed for SSR image generation
+# Copy to both locations to handle different bundling scenarios
+COPY --from=depends /app/projects/backend/src/common/font ./projects/backend/dist/common/font
+COPY --from=depends /app/projects/backend/src/common/font ./projects/backend/dist/font
 
 ARG PORT=8080
 ENV PORT $PORT
