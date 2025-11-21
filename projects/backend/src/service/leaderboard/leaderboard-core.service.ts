@@ -24,7 +24,7 @@ import BeatSaverService from "../beatsaver.service";
 import CacheService, { CacheId } from "../cache.service";
 import { LeaderboardService } from "./leaderboard.service";
 
-const LEADERBOARD_REFRESH_TIME = TimeUnit.toMillis(TimeUnit.Day, 3);
+const LEADERBOARD_REFRESH_TIME = TimeUnit.toMillis(TimeUnit.Hour, 12);
 const DEFAULT_OPTIONS: LeaderboardOptions = {
   cacheOnly: false,
   includeBeatSaver: false,
