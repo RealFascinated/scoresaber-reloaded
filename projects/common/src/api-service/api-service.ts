@@ -170,7 +170,7 @@ export default class ApiService {
       this.callCount++;
     }
 
-    const response = await fetch(this.buildRequestUrl(url), {
+    const response = await fetch(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
