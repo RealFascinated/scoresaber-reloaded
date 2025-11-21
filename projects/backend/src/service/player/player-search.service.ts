@@ -16,7 +16,6 @@ export class PlayerSearchService {
    * @returns the players that match the query
    */
   public static async searchPlayers(query: string): Promise<ScoreSaberPlayer[]> {
-    // Run ScoreSaber API call and database query in parallel
     const [scoreSaberResponse, foundPlayers] = await Promise.all([
       ApiServiceRegistry.getInstance().getScoreSaberService().searchPlayers(query),
       query.length > 0
@@ -50,9 +49,9 @@ export class PlayerSearchService {
         )
       )
     ).sort((a, b) => {
-      if (a.inactive && !b.inactive) return 1;
-      if (!a.inactive && b.inactive) return -1;
-      return a.rank - b.rank;
+      if (a.inactive && !b.inactive) return 1; // Inactive players should be at the bottom
+      if (!a.inactive && b.inactive) return -1; // Active players should be at the top
+      return a.rank - b.rank; // Sort by rank ascending
     });
   }
 

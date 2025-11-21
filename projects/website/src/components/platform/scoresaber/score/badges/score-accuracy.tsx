@@ -38,10 +38,7 @@ export function ScoreAccuracyBadge({ score, showDifference = true }: ScoreAccura
                 <p>
                   Accuracy: {formatScoreAccuracy(score.accuracy)}
                   {!score.fullCombo && fcAccuracy && (
-                    <span className="text-green-500">
-                      {" "}
-                      (FC: {formatScoreAccuracy(fcAccuracy)}%)
-                    </span>
+                    <span className="text-green-500"> (FC: {formatScoreAccuracy(fcAccuracy)})</span>
                   )}
                 </p>
                 <p>Max Combo: {formatNumberWithCommas(score.maxCombo)}x</p>
