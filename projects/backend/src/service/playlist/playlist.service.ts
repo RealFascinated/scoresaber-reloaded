@@ -6,7 +6,10 @@ import { InternalServerError } from "@ssr/common/error/internal-server-error";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger from "@ssr/common/logger";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
+import {
+  ScoreSaberScore,
+  ScoreSaberScoreModel,
+} from "@ssr/common/model/score/impl/scoresaber-score";
 import { Playlist, PlaylistModel } from "@ssr/common/playlist/playlist";
 import { parseCustomRankedPlaylistSettings } from "@ssr/common/playlist/ranked/custom-ranked-playlist";
 import { SnipePlaylist } from "@ssr/common/playlist/snipe/snipe-playlist";
@@ -31,48 +34,6 @@ export type PlaylistId =
   | "scoresaber-custom-ranked-maps";
 
 export default class PlaylistService {
-  /**
-   * Initializes the default playlists if they don't exist
-   * @private
-   */
-  private async initializeDefaultPlaylists() {
-    const defaultPlaylists = {
-      "scoresaber-ranked-maps": PlaylistService.createRankedPlaylist,
-      "scoresaber-qualified-maps": PlaylistService.createQualifiedPlaylist,
-      "scoresaber-ranking-queue-maps": PlaylistService.createRankingQueuePlaylist,
-    } as const;
-
-    const results = await Promise.allSettled(
-      Object.entries(defaultPlaylists).map(async ([playlistId, createFn]) => {
-        try {
-          const existingPlaylist = await PlaylistModel.findOne({ id: playlistId });
-          if (existingPlaylist) {
-            return;
-          }
-
-          Logger.info(`[PlaylistService] Creating default playlist: ${playlistId}`);
-          const createdPlaylist = await createFn();
-          await PlaylistService.createPlaylist(createdPlaylist);
-          Logger.info(`[PlaylistService] Successfully created playlist: ${playlistId}`);
-        } catch (error) {
-          Logger.error(`[PlaylistService] Failed to create playlist ${playlistId}:`, error);
-          throw error; // Re-throw to be caught by Promise.allSettled
-        }
-      })
-    );
-
-    // Log any failures
-    results.forEach((result, index) => {
-      if (result.status === "rejected") {
-        const playlistId = Object.keys(defaultPlaylists)[index];
-        Logger.error(
-          `[PlaylistService] Failed to initialize playlist ${playlistId}:`,
-          result.reason
-        );
-      }
-    });
-  }
-
   /**
    * Gets a playlist by ID
    *
@@ -297,20 +258,36 @@ export default class PlaylistService {
       }
 
       // Get and filter scores
-      const rawScores = await PlayerService.getPlayerScores(toSnipe, {
-        projection: {
+      // const rawScores = await PlayerService.getPlayerScores(toSnipe, {
+      //   projection: {
+      //     pp: 1,
+      //     accuracy: 1,
+      //     timestamp: 1,
+      //     leaderboardId: 1,
+      //     playerId: 1,
+      //   },
+      //   sort: {
+      //     field: settings?.sort || "pp",
+      //     direction: settings?.sortDirection || "desc",
+      //   },
+      //   insertScoreData: false,
+      // });
+
+      const rawScores = (await ScoreSaberScoreModel.find({
+        playerId: toSnipe,
+      })
+        .sort({
+          [settings?.sort || "pp"]: settings?.sortDirection || "desc",
+        })
+        .select({
           pp: 1,
           accuracy: 1,
           timestamp: 1,
           leaderboardId: 1,
           playerId: 1,
-        },
-        sort: {
-          field: settings?.sort || "pp",
-          direction: settings?.sortDirection || "desc",
-        },
-        insertScoreData: false,
-      });
+        })
+        .lean()) as unknown as ScoreSaberScore[];
+
       if (rawScores.length === 0) {
         throw new NotFoundError(
           `Unable to create a snipe playlist for ${toSnipe} as they have no scores.`
@@ -318,7 +295,7 @@ export default class PlaylistService {
       }
 
       // Apply some filters early to reduce the amount of leaderboards we need to fetch
-      const scores = rawScores.filter(({ score }) => {
+      const scores = rawScores.filter(score => {
         // Apply ranked status filtering
         if (settings?.rankedStatus === "ranked" && score.pp <= 0) return false;
         if (settings?.rankedStatus === "unranked" && score.pp > 0) return false;
@@ -341,7 +318,7 @@ export default class PlaylistService {
 
       // Fetch leaderboards for the scores
       const leaderboards = await LeaderboardService.getLeaderboards(
-        scores.map(({ score }) => score.leaderboardId.toString()),
+        scores.map(score => score.leaderboardId.toString()),
         {
           cacheOnly: true,
           includeBeatSaver: false,
@@ -351,9 +328,9 @@ export default class PlaylistService {
       // Star range filtering
       const filteredScores = scores
         .map(playerScore => ({
-          score: playerScore.score as ScoreSaberScore,
+          score: playerScore,
           leaderboard: leaderboards.find(
-            leaderboard => leaderboard.leaderboard.id == playerScore.score.leaderboardId
+            leaderboard => leaderboard.leaderboard.id == playerScore.leaderboardId
           )?.leaderboard,
         }))
         .filter(({ leaderboard }) => {
