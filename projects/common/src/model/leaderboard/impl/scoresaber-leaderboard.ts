@@ -35,12 +35,6 @@ export default class ScoreSaberLeaderboardInternal extends Leaderboard {
   dailyPlays!: number;
 
   /**
-   * The amount of plays this week.
-   */
-  @Prop({ required: false })
-  weeklyPlays?: number;
-
-  /**
    * Whether this leaderboard is qualified to be ranked.
    */
   @Prop({ required: true, index: true })

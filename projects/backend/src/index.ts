@@ -156,18 +156,6 @@ export const app = new Elysia()
         });
       },
     })
-  )
-  .use(
-    cron({
-      name: "hourly-updates",
-      // pattern: "*/1 * * * *", // Every minute
-      pattern: "0 */1 * * *", // Every hour at 00:00, 01:00, 02:00, etc
-      timezone: "Europe/London",
-      protect: true,
-      run: async () => {
-        await LeaderboardService.updateLeaderboardPlayCounts();
-      },
-    })
   );
 
 app.use(metricsPlugin());
