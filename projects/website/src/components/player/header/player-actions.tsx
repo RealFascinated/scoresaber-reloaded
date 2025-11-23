@@ -66,17 +66,6 @@ export default function PlayerActions({ player }: { player: ScoreSaberPlayer }) 
         icon={<ScoresaberLogo size={20} className="select-none" />}
         data-umami-event="player-scoresaber-button"
       />
-
-      {/* Social Links */}
-      {twitchName && (
-        <PlayerLink
-          playerName={player.name}
-          name="Twitch"
-          url={`https://twitch.tv/${twitchName}`}
-          icon={<FaTwitch className="size-[20px] select-none" />}
-          data-umami-event="player-twitch-button"
-        />
-      )}
       <PlayerLink
         playerName={player.name}
         name="BeatLeader"
@@ -98,6 +87,17 @@ export default function PlayerActions({ player }: { player: ScoreSaberPlayer }) 
         icon={<SteamLogo size={20} className="select-none" />}
         data-umami-event="player-steam-button"
       />
+
+      {/* Social Links */}
+      {twitchName && (
+        <PlayerLink
+          playerName={player.name}
+          name="Twitch"
+          url={`https://twitch.tv/${twitchName}`}
+          icon={<FaTwitch className="size-[20px] select-none" />}
+          data-umami-event="player-twitch-button"
+        />
+      )}
 
       {/* Divider */}
       <div className="flex items-center">
