@@ -1,4 +1,5 @@
-import BeatLeaderLogo from "@/components/logos/beatleader-logo";
+import AccSaberLogo from "@/components/logos/logos/accsaber-logo";
+import BeatLeaderLogo from "@/components/logos/logos/beatleader-logo";
 import ScoresaberLogo from "@/components/logos/logos/scoresaber-logo";
 import SteamLogo from "@/components/logos/logos/steam-logo";
 import SimpleLink from "@/components/simple-link";
@@ -82,6 +83,13 @@ export default function PlayerActions({ player }: { player: ScoreSaberPlayer }) 
         url={`https://beatleader.xyz/u/${player.id}`}
         icon={<BeatLeaderLogo size={20} className="select-none" />}
         data-umami-event="player-beatleader-button"
+      />
+      <PlayerLink
+        playerName={player.name}
+        name="AccSaber"
+        url={`https://accsaber.com/profile/${player.id}`}
+        icon={<AccSaberLogo size={20} className="select-none" />}
+        data-umami-event="player-accsaber-button"
       />
       <PlayerLink
         playerName={player.name}
