@@ -60,7 +60,7 @@ const PlayerSearch = ({
 
   const handlePlayerSelect = async (playerToken: any) => {
     // Convert player token to full player object
-    const fullPlayer = await ssrApi.getScoreSaberPlayer(playerToken.id, { type: DetailType.FULL });
+    const fullPlayer = await ssrApi.getScoreSaberPlayer(playerToken.id, DetailType.FULL);
     if (fullPlayer) {
       onPlayerSelect(fullPlayer);
       onOpenChange(false);

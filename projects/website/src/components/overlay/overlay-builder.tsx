@@ -162,9 +162,7 @@ export default function OverlayBuilder() {
     dataClient,
     views,
   }: z.infer<typeof formSchema>) {
-    const player = await ssrApi.getScoreSaberPlayer(playerId, {
-      type: DetailType.BASIC,
-    });
+    const player = await ssrApi.getScoreSaberPlayer(playerId, DetailType.BASIC);
     if (!player) {
       toast.error("The player id you entered could not be found.");
       return;

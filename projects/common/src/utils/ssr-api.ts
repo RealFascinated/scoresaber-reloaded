@@ -28,6 +28,7 @@ import { MapCharacteristic } from "../types/map-characteristic";
 import { ScoreCalendarData } from "../types/player/player-statistic";
 import { ScoreSort } from "../types/sort";
 import Request, { RequestOptions } from "./request";
+import Logger from "../logger";
 
 class SSRApi {
   /**
@@ -40,13 +41,15 @@ class SSRApi {
   async get<T>(url: string, options?: RequestOptions) {
     options = {
       returns: "text",
+      ...options,
       searchParams: {
         superjson: true,
+        ...options?.searchParams,
       },
-      ...options,
     };
     const response = await Request.get<string>(url, options);
     if (response === undefined) {
+      Logger.error(`Failed to get ${url}: ${response}`);
       return undefined;
     }
     return SuperJSON.parse<T>(response);
@@ -187,17 +190,10 @@ class SSRApi {
    * @param options the fetch options
    * @returns the player
    */
-  async getScoreSaberPlayer(
-    playerId: string,
-    options?: {
-      createIfMissing?: boolean;
-      type?: DetailType;
-    }
-  ) {
+  async getScoreSaberPlayer(playerId: string, type: DetailType = DetailType.BASIC) {
     return await this.get<ScoreSaberPlayer>(`${env.NEXT_PUBLIC_API_URL}/player/${playerId}`, {
       searchParams: {
-        ...(options?.createIfMissing ? { createIfMissing: options.createIfMissing } : {}),
-        ...(options?.type ? { type: options.type } : {}),
+        type: type,
       },
     });
   }

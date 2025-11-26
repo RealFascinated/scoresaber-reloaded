@@ -15,11 +15,7 @@ export function PlayerPreview() {
 
   const { data: player, isLoading } = useQuery({
     queryKey: ["player-preview-home", mainPlayerId],
-    queryFn: () =>
-      ssrApi.getScoreSaberPlayer(mainPlayerId!, {
-        createIfMissing: true,
-        type: DetailType.FULL,
-      }),
+    queryFn: () => ssrApi.getScoreSaberPlayer(mainPlayerId!, DetailType.FULL),
     enabled: !!mainPlayerId,
   });
 

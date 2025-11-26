@@ -50,8 +50,7 @@ const getPlayerData = async (
   const id = slug[0]; // The players id
   const platformType = (slug[1] as PlatformType) ?? PlatformType.ScoreSaber;
 
-  const player = await ssrApi.getScoreSaberPlayer(id, { type: type });
-
+  const player = await ssrApi.getScoreSaberPlayer(id, type);
   return {
     player: player,
     platformType: platformType,

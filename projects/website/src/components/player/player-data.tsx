@@ -141,11 +141,7 @@ export default function PlayerData({
 
   const { data: playerData } = useQuery({
     queryKey: ["playerData", initialPlayerData.id, mainPlayerId, isFriend],
-    queryFn: () =>
-      ssrApi.getScoreSaberPlayer(initialPlayerData.id, {
-        createIfMissing: true,
-        type: DetailType.FULL,
-      }),
+    queryFn: () => ssrApi.getScoreSaberPlayer(initialPlayerData.id, DetailType.FULL),
     initialData: initialPlayerData,
   });
 

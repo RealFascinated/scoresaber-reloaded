@@ -273,9 +273,7 @@ export default class Database extends Dexie {
   public async getPlayer(id: string): Promise<ScoreSaberPlayer | undefined> {
     return this.getCache<ScoreSaberPlayer>(`player:${id}`, 60 * 60 * 6, async () => {
       try {
-        return await ssrApi.getScoreSaberPlayer(id, {
-          type: DetailType.FULL,
-        });
+        return await ssrApi.getScoreSaberPlayer(id, DetailType.FULL);
       } catch (error) {
         Logger.error(`Failed to fetch player ${id}:`, error);
         return undefined;
