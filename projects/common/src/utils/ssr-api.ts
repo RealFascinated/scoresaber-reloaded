@@ -1,6 +1,7 @@
 import SuperJSON from "superjson";
 import { DetailType } from "../detail-type";
 import { env } from "../env";
+import Logger from "../logger";
 import { ScoreSaberLeaderboard } from "../model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "../model/score/impl/scoresaber-score";
 import { StatisticsType } from "../model/statistics/statistic-type";
@@ -28,7 +29,6 @@ import { MapCharacteristic } from "../types/map-characteristic";
 import { ScoreCalendarData } from "../types/player/player-statistic";
 import { ScoreSort } from "../types/sort";
 import Request, { RequestOptions } from "./request";
-import Logger from "../logger";
 
 class SSRApi {
   /**

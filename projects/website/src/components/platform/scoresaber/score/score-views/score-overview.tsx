@@ -3,8 +3,6 @@ import HMDIcon from "@/components/hmd-icon";
 import PlayerScoreAccuracyChart from "@/components/platform/scoresaber/score/chart/player-score-accuracy-chart";
 import ScoreAccuracyStats from "@/components/score/score-accuracy-stats";
 import StatValue from "@/components/statistic/stat-value";
-import { EmptyState } from "@/components/ui/empty-state";
-import { ChartBarIcon } from "@heroicons/react/24/outline";
 import { getHMDInfo } from "@ssr/common/hmds";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";

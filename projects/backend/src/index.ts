@@ -5,6 +5,7 @@ import { swagger } from "@elysiajs/swagger";
 import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
 import { formatDuration } from "@ssr/common/utils/time-utils";
+import { logger } from "@tqman/nice-logger";
 import { mongoose } from "@typegoose/typegoose";
 import { EmbedBuilder } from "discord.js";
 import { Elysia, ValidationError } from "elysia";
@@ -45,7 +46,6 @@ import { ScoreService } from "./service/score/score.service";
 import StatisticsService from "./service/statistics.service";
 import { BeatSaverWebsocket } from "./websocket/beatsaver-websocket";
 import { ScoreWebsockets } from "./websocket/score-websockets";
-import { logger } from "@tqman/nice-logger";
 
 Logger.info("Starting SSR Backend...");
 

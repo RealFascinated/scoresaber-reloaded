@@ -5,7 +5,6 @@ import { ScoreStatsResponse } from "@ssr/common/response/scorestats-response";
 import { capitalizeFirstLetter } from "@ssr/common/string-utils";
 import { ScoreStatsToken } from "@ssr/common/types/token/beatleader/score-stats/score-stats";
 import { AnimatePresence, motion } from "framer-motion";
-import ScoreAccuracyGrid from "./score-accuracy-grid";
 
 type ScoreAccuracyStatProps = {
   scoreStats: ScoreStatsResponse;

@@ -3,8 +3,8 @@ import { Player, PlayerModel } from "@ssr/common/model/player/player";
 import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import { PlayerRankedPpsResponse } from "@ssr/common/response/player-ranked-pps-response";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
-import { PlayerService } from "./player.service";
 import { updateScoreWeights } from "@ssr/common/utils/scoresaber.util";
+import { PlayerService } from "./player.service";
 
 export class PlayerRankedService {
   /**
