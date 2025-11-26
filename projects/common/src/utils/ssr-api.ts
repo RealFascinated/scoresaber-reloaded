@@ -69,7 +69,12 @@ class SSRApi {
     type: DetailType = DetailType.BASIC
   ) {
     return await this.get<BeatSaverMapResponse>(
-      `${env.NEXT_PUBLIC_API_URL}/beatsaver/map/${hash}/${difficulty}/${characteristic}`
+      `${env.NEXT_PUBLIC_API_URL}/beatsaver/map/${hash}/${difficulty}/${characteristic}`,
+      {
+        searchParams: {
+          type: type,
+        },
+      }
     );
   }
 
@@ -241,6 +246,7 @@ class SSRApi {
    * @param page the page
    * @param sort the sort
    * @param search the search
+   * @param comparisonPlayerId the player to compare scores with
    */
   async fetchScoreSaberPlayerScores(
     id: string,
@@ -311,6 +317,7 @@ class SSRApi {
    * @param playerId the id of the player
    * @param startDate the start date
    * @param endDate the end date
+   * @param includedFields the fields to include in the response
    */
   async getPlayerStatisticHistory(
     playerId: string,
@@ -374,6 +381,7 @@ class SSRApi {
    * Searches for players by name.
    *
    * @param query the query to search for
+   * @param options the options for the search
    * @returns the players that match the query
    */
   async searchPlayersRanking(
