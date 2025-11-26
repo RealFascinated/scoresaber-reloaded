@@ -4,6 +4,7 @@ import { cn } from "@/common/utils";
 import { Button } from "@/components/ui/button";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import { PersonIcon } from "@radix-ui/react-icons";
+import { TrendingUpIcon } from "lucide-react";
 import { ReactElement, useState } from "react";
 
 export type ScoreModeType = {
@@ -15,6 +16,7 @@ export type ScoreModeType = {
 export enum ScoreModeEnum {
   Global = "global",
   Friends = "friend",
+  History = "history",
 }
 
 export const scoreModes: ScoreModeType[] = [
@@ -27,6 +29,11 @@ export const scoreModes: ScoreModeType[] = [
     name: "Friends",
     id: ScoreModeEnum.Friends,
     icon: <PersonIcon className="h-4 w-4" />,
+  },
+  {
+    name: "History",
+    id: ScoreModeEnum.History,
+    icon: <TrendingUpIcon className="h-4 w-4" />,
   },
 ];
 

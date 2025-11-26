@@ -8,7 +8,6 @@ import {
 } from "@ssr/common/model/score/impl/scoresaber-score";
 import { Page, Pagination } from "@ssr/common/pagination";
 import { ScoreHistoryGraphResponse } from "@ssr/common/response/score-history-graph-response";
-import { PlayerScore } from "@ssr/common/score/player-score";
 import CacheService, { CacheId } from "../cache.service";
 import { LeaderboardService } from "../leaderboard/leaderboard.service";
 import { ScoreService } from "../score/score.service";
@@ -25,7 +24,7 @@ export class PlayerScoreHistoryService {
     playerId: string,
     leaderboardId: string,
     page: number
-  ): Promise<Page<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>> {
+  ): Promise<Page<ScoreSaberScore>> {
     const scores = await ScoreSaberPreviousScoreModel.find({
       playerId: playerId,
       leaderboardId: leaderboardId,
@@ -41,9 +40,9 @@ export class PlayerScoreHistoryService {
     if (leaderboardResponse == undefined) {
       throw new NotFoundError(`Leaderboard "${leaderboardId}" not found`);
     }
-    const { leaderboard, beatsaver } = leaderboardResponse;
+    const { leaderboard } = leaderboardResponse;
 
-    return new Pagination<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>()
+    return new Pagination<ScoreSaberScore>()
       .setItemsPerPage(8)
       .setTotalItems(scores.length)
       .getPage(page, async () => {
@@ -54,11 +53,7 @@ export class PlayerScoreHistoryService {
               insertPreviousScore: false,
               removeScoreWeight: true,
             });
-            return {
-              score: score,
-              leaderboard: leaderboard,
-              beatSaver: beatsaver,
-            };
+            return score;
           })
         );
       });

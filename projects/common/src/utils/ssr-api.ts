@@ -275,7 +275,7 @@ class SSRApi {
     if (response === undefined) {
       return undefined;
     }
-    return SuperJSON.parse<Page<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>>(response);
+    return SuperJSON.parse<Page<ScoreSaberScore>>(response);
   }
 
   /**
