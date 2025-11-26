@@ -123,13 +123,15 @@ export default function ScoreSaberScoreDisplay({
         )}
       </div>
 
-      <ScoreDropdown
-        score={score}
-        leaderboard={leaderboard}
-        beatSaverMap={beatSaverMap}
-        isExpanded={isLeaderboardExpanded}
-        defaultScoresPage={settings?.defaultLeaderboardScoresPage}
-      />
+      <div className="mt-2">
+        <ScoreDropdown
+          score={score}
+          leaderboard={leaderboard}
+          beatSaverMap={beatSaverMap}
+          isExpanded={isLeaderboardExpanded}
+          defaultScoresPage={settings?.defaultLeaderboardScoresPage}
+        />
+      </div>
     </div>
   );
 }

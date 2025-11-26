@@ -55,7 +55,7 @@ export default function ScoreDropdown({
             height: { duration: 0.25 },
             opacity: { duration: 0.18 },
           }}
-          className="w-full origin-top pt-3"
+          className="w-full origin-top"
         >
           {/* Map Stats */}
           {showMapStats && beatSaverMap && (

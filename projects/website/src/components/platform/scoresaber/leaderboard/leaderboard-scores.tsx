@@ -16,6 +16,11 @@ import { DifficultyButton } from "../../../leaderboard/button/difficulty-button"
 import SimplePagination from "../../../simple-pagination";
 import ScoreSaberLeaderboardScore from "../score/leaderboard-score";
 import ScoreDropdown from "../score/score-dropdown";
+import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
+
+function getScoreId(score: ScoreSaberScore) {
+  return score.scoreId + "-" + score.timestamp;
+}
 
 export default function LeaderboardScores({
   initialPage = 1,
@@ -64,7 +69,8 @@ export default function LeaderboardScores({
   );
 
   const handleDropdownToggle = useCallback(
-    (scoreId: string) => {
+    (score: ScoreSaberScore) => {
+      const scoreId = getScoreId(score);
       setExpandedScoreId(expandedScoreId === scoreId ? null : scoreId);
     },
     [expandedScoreId]
@@ -180,15 +186,15 @@ export default function LeaderboardScores({
                         leaderboard={leaderboard}
                         highlightedPlayerId={highlightedPlayerId}
                         showDropdown
-                        onDropdownToggle={() => handleDropdownToggle(playerScore.scoreId)}
+                        onDropdownToggle={() => handleDropdownToggle(playerScore)}
                       />
                     </tr>
 
                     {/* Dropdown row - appears directly below the clicked row */}
                     <AnimatePresence>
-                      {expandedScoreId === playerScore.scoreId && (
+                      {expandedScoreId === getScoreId(playerScore) && (
                         <motion.tr
-                          key={`dropdown-${playerScore.scoreId}`}
+                          key={`dropdown-${getScoreId(playerScore)}`}
                           className="origin-top border-none"
                           initial={{ opacity: 0, height: 0, scale: 0.95 }}
                           animate={{ opacity: 1, height: "auto", scale: 1 }}
