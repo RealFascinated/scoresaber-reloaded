@@ -20,7 +20,6 @@ import { PlayerScoresResponse } from "../response/player-scores-response";
 import { PlayerSearchResponse } from "../response/player-search-response";
 import { PlaysByHmdResponse } from "../response/plays-by-hmd-response";
 import { PpBoundaryResponse } from "../response/pp-boundary-response";
-import { ScoreHistoryGraphResponse } from "../response/score-history-graph-response";
 import { ScoreStatsResponse } from "../response/scorestats-response";
 import { MapDifficulty } from "../score/map-difficulty";
 import { PlayerScore } from "../score/player-score";
@@ -28,10 +27,31 @@ import { ScoreSaberScoreSort } from "../score/score-sort";
 import { MapCharacteristic } from "../types/map-characteristic";
 import { ScoreCalendarData } from "../types/player/player-statistic";
 import { ScoreSort } from "../types/sort";
-import Request from "./request";
-import { updateScoreWeights } from "./scoresaber.util";
+import Request, { RequestOptions } from "./request";
 
 class SSRApi {
+  /**
+   * Gets a response from the API.
+   *
+   * @param url the url to get
+   * @param options the options for the request
+   * @returns the response
+   */
+  async get<T>(url: string, options?: RequestOptions) {
+    options = {
+      returns: "text",
+      searchParams: {
+        superjson: true,
+      },
+      ...options,
+    };
+    const response = await Request.get<string>(url, options);
+    if (response === undefined) {
+      return undefined;
+    }
+    return SuperJSON.parse<T>(response);
+  }
+
   /**
    * Gets a BeatSaver map.
    *
@@ -73,19 +93,9 @@ class SSRApi {
     difficulty: MapDifficulty,
     characteristic: MapCharacteristic
   ) {
-    const response = await Request.get<string>(
-      `${env.NEXT_PUBLIC_API_URL}/leaderboard/by-hash/${hash}/${difficulty}/${characteristic}`,
-      {
-        returns: "text",
-        searchParams: {
-          superJson: true,
-        },
-      }
+    return await this.get<LeaderboardResponse>(
+      `${env.NEXT_PUBLIC_API_URL}/leaderboard/by-hash/${hash}/${difficulty}/${characteristic}`
     );
-    if (response === undefined) {
-      return undefined;
-    }
-    return SuperJSON.parse<LeaderboardResponse>(response);
   }
 
   /**
@@ -94,20 +104,9 @@ class SSRApi {
    * @param id the id for the leaderboard
    */
   async fetchLeaderboard(id: string, type: DetailType = DetailType.BASIC) {
-    const response = await Request.get<string>(
-      `${env.NEXT_PUBLIC_API_URL}/leaderboard/by-id/${id}`,
-      {
-        returns: "text",
-        searchParams: {
-          type: type,
-          superJson: true,
-        },
-      }
+    return await this.get<LeaderboardResponse>(
+      `${env.NEXT_PUBLIC_API_URL}/leaderboard/by-id/${id}`
     );
-    if (response === undefined) {
-      return undefined;
-    }
-    return SuperJSON.parse<LeaderboardResponse>(response);
   }
 
   /**
@@ -116,7 +115,7 @@ class SSRApi {
    * @returns the statistics
    */
   async getScoreSaberPlatformStatistics() {
-    return await Request.get<{ statistics: StatisticsType }>(
+    return await this.get<{ statistics: StatisticsType }>(
       `${env.NEXT_PUBLIC_API_URL}/statistics/scoresaber`
     );
   }
@@ -128,7 +127,7 @@ class SSRApi {
    * @param boundary the pp boundary
    */
   async getPlayerPpBoundary(playerId: string, boundary: number = 1) {
-    return await Request.get<PpBoundaryResponse>(
+    return await this.get<PpBoundaryResponse>(
       `${env.NEXT_PUBLIC_API_URL}/player/pp-boundary/${playerId}/${boundary}`
     );
   }
@@ -141,7 +140,7 @@ class SSRApi {
    * @param month the month to get the score calendar for
    */
   async getScoreCalendar(playerId: string, year: number, month: number) {
-    return await Request.get<ScoreCalendarData>(
+    return await this.get<ScoreCalendarData>(
       `${env.NEXT_PUBLIC_API_URL}/player/history/calendar/${playerId}/${year}/${month}`
     );
   }
@@ -152,7 +151,7 @@ class SSRApi {
    * @param playerId the player to get around
    */
   async getPlayerMiniRanking(playerId: string) {
-    return await Request.get<MiniRankingResponse>(
+    return await this.get<MiniRankingResponse>(
       `${env.NEXT_PUBLIC_API_URL}/player/mini-ranking/${playerId}`
     );
   }
@@ -165,20 +164,14 @@ class SSRApi {
    * @param page the page
    */
   async getFriendLeaderboardScores(friendIds: string[], leaderboardId: string, page: number) {
-    const response = await Request.get<string>(
+    return await this.get<Page<ScoreSaberScore>>(
       `${env.NEXT_PUBLIC_API_URL}/scores/friends/leaderboard/${leaderboardId}/${page}`,
       {
-        returns: "text",
         searchParams: {
           friendIds: friendIds.join(","),
-          superJson: true,
         },
       }
     );
-    if (response === undefined) {
-      return undefined;
-    }
-    return SuperJSON.parse<Page<ScoreSaberScore>>(response);
   }
 
   /**
@@ -188,21 +181,14 @@ class SSRApi {
    * @param page the page
    */
   async getFriendScores(friendIds: string[], page: number) {
-    const response = await Request.get<string>(
+    return await this.get<Page<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>>(
       `${env.NEXT_PUBLIC_API_URL}/scores/friends/${page}`,
       {
-        returns: "text",
         searchParams: {
           friendIds: friendIds.join(","),
-          superJson: true,
         },
       }
     );
-    if (response === undefined) {
-      return undefined;
-    }
-
-    return SuperJSON.parse<Page<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>>(response);
   }
 
   /**
@@ -219,18 +205,12 @@ class SSRApi {
       type?: DetailType;
     }
   ) {
-    const response = await Request.get<string>(`${env.NEXT_PUBLIC_API_URL}/player/${playerId}`, {
-      returns: "text",
+    return await this.get<ScoreSaberPlayer>(`${env.NEXT_PUBLIC_API_URL}/player/${playerId}`, {
       searchParams: {
-        superJson: true,
         ...(options?.createIfMissing ? { createIfMissing: options.createIfMissing } : {}),
         ...(options?.type ? { type: options.type } : {}),
       },
     });
-    if (response === undefined) {
-      return undefined;
-    }
-    return SuperJSON.parse<ScoreSaberPlayer>(response);
   }
 
   /**
@@ -240,19 +220,9 @@ class SSRApi {
    * @returns the score chart data
    */
   async getPlayerMapsGraphData(playerId: string) {
-    const response = await Request.get<string>(
-      `${env.NEXT_PUBLIC_API_URL}/player/maps-graph/${playerId}`,
-      {
-        returns: "text",
-        searchParams: {
-          superJson: true,
-        },
-      }
+    return await this.get<PlayerScoresChartResponse>(
+      `${env.NEXT_PUBLIC_API_URL}/player/maps-graph/${playerId}`
     );
-    if (response === undefined) {
-      return undefined;
-    }
-    return SuperJSON.parse<PlayerScoresChartResponse>(response);
   }
 
   /**
@@ -263,19 +233,9 @@ class SSRApi {
    * @param page the page
    */
   async fetchPlayerScoresHistory(playerId: string, leaderboardId: string, page: number) {
-    const response = await Request.get<string>(
-      `${env.NEXT_PUBLIC_API_URL}/player/score-history/${playerId}/${leaderboardId}/${page}`,
-      {
-        returns: "text",
-        searchParams: {
-          superJson: true,
-        },
-      }
+    return await this.get<Page<ScoreSaberScore>>(
+      `${env.NEXT_PUBLIC_API_URL}/player/score-history/${playerId}/${leaderboardId}/${page}`
     );
-    if (response === undefined) {
-      return undefined;
-    }
-    return SuperJSON.parse<Page<ScoreSaberScore>>(response);
   }
 
   /**
@@ -284,7 +244,7 @@ class SSRApi {
    * @param scoreId the id of the score
    */
   async fetchScoreStats(scoreId: number) {
-    return Request.get<ScoreStatsResponse>(
+    return await this.get<ScoreStatsResponse>(
       `${env.NEXT_PUBLIC_API_URL}/beatleader/scorestats/${scoreId}`
     );
   }
@@ -304,10 +264,9 @@ class SSRApi {
     search?: string,
     comparisonPlayerId?: string
   ) {
-    return Request.get<Page<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>>(
+    return await this.get<Page<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>>(
       `${env.NEXT_PUBLIC_API_URL}/scores/player/${id}/${page}/${sort}`,
       {
-        returns: "json",
         searchParams: {
           ...(search ? { search: search } : {}),
           ...(comparisonPlayerId ? { comparisonPlayerId: comparisonPlayerId } : {}),
@@ -330,10 +289,9 @@ class SSRApi {
     sort: ScoreSort,
     search?: string
   ) {
-    return Request.get<PlayerScoresResponse>(
+    return await this.get<PlayerScoresResponse>(
       `${env.NEXT_PUBLIC_API_URL}/scores/cached/player/${id}/${sort.field}/${sort.direction}/${page}`,
       {
-        returns: "json",
         searchParams: {
           ...Object.fromEntries(
             Object.entries(sort.filters ?? {}).map(([key, value]) => [key, value])
@@ -352,10 +310,9 @@ class SSRApi {
    * @param country the country to get scores in
    */
   async fetchLeaderboardScores<S, L>(leaderboardId: string, page: number, country?: string) {
-    return Request.get<LeaderboardScoresResponse<S, L>>(
+    return await this.get<LeaderboardScoresResponse<S, L>>(
       `${env.NEXT_PUBLIC_API_URL}/scores/leaderboard/${leaderboardId}/${page}`,
       {
-        returns: "json",
         searchParams: {
           ...(country ? { country: country } : {}),
         },
@@ -376,10 +333,9 @@ class SSRApi {
     endDate: Date,
     includedFields?: (keyof PlayerStatisticHistory)[]
   ) {
-    return Request.get<PlayerStatisticHistory>(
+    return await this.get<PlayerStatisticHistory>(
       `${env.NEXT_PUBLIC_API_URL}/player/history/${playerId}`,
       {
-        returns: "json",
         searchParams: {
           startDate: startDate.toISOString(),
           endDate: endDate.toISOString(),
@@ -395,14 +351,9 @@ class SSRApi {
    * @param playerId the player id
    */
   async getPlayerRankedPps(playerId: string) {
-    const response = await Request.get<PlayerRankedPpsResponse>(
+    return await this.get<PlayerRankedPpsResponse>(
       `${env.NEXT_PUBLIC_API_URL}/player/ranked-pps/${playerId}`
     );
-    if (response === undefined) {
-      return undefined;
-    }
-    updateScoreWeights(response.scores);
-    return response;
   }
 
   /**
@@ -412,34 +363,12 @@ class SSRApi {
    * @returns the plays by HMD
    */
   async getPlaysByHmdForLeaderboard(leaderboardId: string) {
-    return (await Request.get<PlaysByHmdResponse>(
+    return await this.get<PlaysByHmdResponse>(
       `${env.NEXT_PUBLIC_API_URL}/leaderboard/plays-by-hmd/${leaderboardId}`,
       {
         throwOnError: true,
       }
-    ))!;
-  }
-
-  /**
-   * Gets the score history graph for a player on a map.
-   *
-   * @param playerId the player's id to get the previous scores for
-   * @param leaderboardId the leaderboard to get the previous scores on
-   */
-  async getScoreHistoryGraph(playerId: string, leaderboardId: string) {
-    const response = await Request.get<string>(
-      `${env.NEXT_PUBLIC_API_URL}/player/score-history-graph/${playerId}/${leaderboardId}`,
-      {
-        returns: "text",
-        searchParams: {
-          superJson: true,
-        },
-      }
-    );
-    if (response === undefined) {
-      return undefined;
-    }
-    return SuperJSON.parse<ScoreHistoryGraphResponse>(response);
+    )!;
   }
 
   /**
@@ -448,19 +377,12 @@ class SSRApi {
    * @param query the query to search for
    * @returns the players that match the query
    */
-  async searchPlayers(query: string): Promise<PlayerSearchResponse | undefined> {
-    const response = await Request.get<string>(`${env.NEXT_PUBLIC_API_URL}/player/search`, {
-      returns: "text",
+  async searchPlayers(query: string) {
+    return await this.get<PlayerSearchResponse>(`${env.NEXT_PUBLIC_API_URL}/player/search`, {
       searchParams: {
-        superJson: true,
         query: query,
       },
     });
-    if (response === undefined) {
-      return undefined;
-    }
-
-    return SuperJSON.parse<PlayerSearchResponse>(response);
   }
 
   /**
@@ -475,17 +397,17 @@ class SSRApi {
       country?: string;
       search?: string;
     }
-  ): Promise<PlayerRankingsResponse> {
-    const response = await Request.get<string>(`${env.NEXT_PUBLIC_API_URL}/player/search/ranking`, {
-      returns: "text",
-      searchParams: {
-        superJson: true,
-        page: page,
-        ...(options?.country ? { country: options.country } : {}),
-        ...(options?.search ? { search: options.search } : {}),
-      },
-    });
-    return SuperJSON.parse<PlayerRankingsResponse>(response!);
+  ) {
+    return await this.get<PlayerRankingsResponse>(
+      `${env.NEXT_PUBLIC_API_URL}/player/search/ranking`,
+      {
+        searchParams: {
+          page: page,
+          ...(options?.country ? { country: options.country } : {}),
+          ...(options?.search ? { search: options.search } : {}),
+        },
+      }
+    );
   }
 
   /**
@@ -496,10 +418,9 @@ class SSRApi {
    * @returns the medal ranked players
    */
   async getMedalRankedPlayers(page: number, country?: string) {
-    return Request.get<PlayerMedalRankingsResponse>(
+    return await this.get<PlayerMedalRankingsResponse>(
       `${env.NEXT_PUBLIC_API_URL}/ranking/medals/${page}`,
       {
-        returns: "json",
         searchParams: {
           ...(country ? { country: country } : {}),
         },
@@ -514,11 +435,8 @@ class SSRApi {
    * @param page the page
    */
   async fetchCachedScoreSaberPlayerMedalScores(playerId: string, page: number) {
-    return Request.get<PlayerMedalScoresResponse>(
-      `${env.NEXT_PUBLIC_API_URL}/scores/medals/player/${playerId}/${page}`,
-      {
-        returns: "json",
-      }
+    return await this.get<PlayerMedalScoresResponse>(
+      `${env.NEXT_PUBLIC_API_URL}/scores/medals/player/${playerId}/${page}`
     );
   }
 
@@ -529,16 +447,14 @@ class SSRApi {
    * @returns the score
    */
   async getScore(scoreId: string) {
-    const response = await Request.get<string>(`${env.NEXT_PUBLIC_API_URL}/scores/${scoreId}`, {
-      returns: "text",
-      searchParams: {
-        superJson: true,
-      },
-    });
-    if (response === undefined) {
-      return undefined;
-    }
-    return SuperJSON.parse<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>(response);
+    return await this.get<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>(
+      `${env.NEXT_PUBLIC_API_URL}/scores/${scoreId}`,
+      {
+        searchParams: {
+          superJson: true,
+        },
+      }
+    );
   }
 }
 

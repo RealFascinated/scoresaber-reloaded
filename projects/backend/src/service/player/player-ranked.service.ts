@@ -4,6 +4,7 @@ import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-sc
 import { PlayerRankedPpsResponse } from "@ssr/common/response/player-ranked-pps-response";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import { PlayerService } from "./player.service";
+import { updateScoreWeights } from "@ssr/common/utils/scoresaber.util";
 
 export class PlayerRankedService {
   /**
@@ -36,6 +37,7 @@ export class PlayerRankedService {
       scoreId: score.scoreId,
     }));
 
+    updateScoreWeights(scores); // Set the weights for the scores
     return {
       scores,
     };

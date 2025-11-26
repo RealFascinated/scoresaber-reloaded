@@ -1,13 +1,9 @@
 import { PlayerMedalRankingsResponse } from "@ssr/common/response/player-medal-rankings-response";
-import { PlayerSearchResponse } from "@ssr/common/response/player-search-response";
+import { PlayerRankingsResponse } from "@ssr/common/response/player-rankings-response";
 import { t } from "elysia";
 import { Controller, Get } from "elysia-decorators";
-import SuperJSON from "superjson";
 import { PlayerMedalsService } from "../service/player/player-medals.service";
 import { PlayerService } from "../service/player/player.service";
-import { Page } from "@ssr/common/pagination";
-import { ScoreSaberPlayer } from "@ssr/common/model/player/impl/scoresaber-player";
-import { PlayerRankingsResponse } from "@ssr/common/response/player-rankings-response";
 
 @Controller("")
 export default class PlayerRankingController {

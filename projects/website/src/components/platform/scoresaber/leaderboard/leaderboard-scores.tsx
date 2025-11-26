@@ -8,6 +8,7 @@ import { useIsMobile } from "@/contexts/viewport-context";
 import { useLeaderboardScores } from "@/hooks/score/use-leaderboard-scores";
 import usePageNavigation from "@/hooks/use-page-navigation";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
+import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
 import { buildSearchParams } from "@ssr/common/utils/search-params";
 import { AnimatePresence, motion } from "framer-motion";
@@ -16,7 +17,6 @@ import { DifficultyButton } from "../../../leaderboard/button/difficulty-button"
 import SimplePagination from "../../../simple-pagination";
 import ScoreSaberLeaderboardScore from "../score/leaderboard-score";
 import ScoreDropdown from "../score/score-dropdown";
-import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 
 function getScoreId(score: ScoreSaberScore) {
   return score.scoreId + "-" + score.timestamp;

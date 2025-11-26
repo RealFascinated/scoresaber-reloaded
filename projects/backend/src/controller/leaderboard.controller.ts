@@ -1,12 +1,11 @@
 import { DetailType } from "@ssr/common/detail-type";
+import { LeaderboardResponse } from "@ssr/common/response/leaderboard-response";
 import { PlaysByHmdResponse } from "@ssr/common/response/plays-by-hmd-response";
 import { MapDifficulty } from "@ssr/common/score/map-difficulty";
 import { MapCharacteristic } from "@ssr/common/types/map-characteristic";
 import { t } from "elysia";
 import { Controller, Get } from "elysia-decorators";
-import SuperJSON from "superjson";
 import { LeaderboardService } from "../service/leaderboard/leaderboard.service";
-import { LeaderboardResponse } from "@ssr/common/response/leaderboard-response";
 
 @Controller("/leaderboard")
 export default class LeaderboardController {

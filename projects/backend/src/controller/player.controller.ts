@@ -1,12 +1,12 @@
 import { DetailType } from "@ssr/common/detail-type";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerRankedPpsResponse } from "@ssr/common/response/player-ranked-pps-response";
+import { PlayerScoresChartResponse } from "@ssr/common/response/player-scores-chart";
 import { PpBoundaryResponse } from "@ssr/common/response/pp-boundary-response";
 import { t } from "elysia";
 import { Controller, Get } from "elysia-decorators";
 import { PlayerService } from "../service/player/player.service";
 import ScoreSaberService from "../service/scoresaber.service";
-import { PlayerScoresChartResponse } from "@ssr/common/response/player-scores-chart";
 
 @Controller("/player")
 export default class PlayerController {

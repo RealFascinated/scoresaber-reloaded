@@ -11,6 +11,7 @@ import { Elysia, ValidationError } from "elysia";
 import { decorators } from "elysia-decorators";
 import { helmet } from "elysia-helmet";
 import Redis from "ioredis";
+import SuperJSON from "superjson";
 import { DiscordChannels, initDiscordBot, sendEmbedToChannel } from "./bot/bot";
 import { getAppVersion } from "./common/app.util";
 import AppController from "./controller/app.controller";
@@ -44,7 +45,6 @@ import { ScoreService } from "./service/score/score.service";
 import StatisticsService from "./service/statistics.service";
 import { BeatSaverWebsocket } from "./websocket/beatsaver-websocket";
 import { ScoreWebsockets } from "./websocket/score-websockets";
-import SuperJSON from "superjson";
 
 Logger.info("Starting SSR Backend...");
 

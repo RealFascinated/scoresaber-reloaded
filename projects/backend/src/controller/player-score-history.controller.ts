@@ -1,8 +1,8 @@
+import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
+import { Page } from "@ssr/common/pagination";
 import { t } from "elysia";
 import { Controller, Get } from "elysia-decorators";
 import { PlayerService } from "../service/player/player.service";
-import { Page } from "@ssr/common/pagination";
-import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 
 @Controller("")
 export default class PlayerScoreHistoryController {

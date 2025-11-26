@@ -1,11 +1,11 @@
 import { NotFoundError } from "@ssr/common/error/not-found-error";
+import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
+import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
+import { Page } from "@ssr/common/pagination";
+import { PlayerScore } from "@ssr/common/score/player-score";
 import { t } from "elysia";
 import { Controller, Get } from "elysia-decorators";
 import { PlayerService } from "../service/player/player.service";
-import { Page } from "@ssr/common/pagination";
-import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
-import { PlayerScore } from "@ssr/common/score/player-score";
-import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 
 @Controller("")
 export default class FriendsController {
