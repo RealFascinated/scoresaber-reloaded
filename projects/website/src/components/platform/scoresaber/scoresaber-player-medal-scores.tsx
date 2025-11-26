@@ -55,7 +55,7 @@ export default function ScoreSaberPlayerMedalScores({
   } = useQuery<PlayerScoresResponse>({
     queryKey: ["playerMedalScores", player.id, currentPage, mainPlayerId],
     queryFn: async () => {
-      const response = await ssrApi.fetchCachedScoreSaberPlayerMedalScores(player.id, currentPage);
+      const response = await ssrApi.fetchPlayerMedalScores(player.id, currentPage);
       return response || Pagination.empty();
     },
     placeholderData: prev => prev,

@@ -427,7 +427,7 @@ class SSRApi {
    * @param playerId the player's id
    * @param page the page
    */
-  async fetchCachedScoreSaberPlayerMedalScores(playerId: string, page: number) {
+  async fetchPlayerMedalScores(playerId: string, page: number) {
     return await this.get<PlayerMedalScoresResponse>(
       `${env.NEXT_PUBLIC_API_URL}/scores/medals/player/${playerId}/${page}`
     );
