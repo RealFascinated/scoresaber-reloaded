@@ -126,7 +126,9 @@ export default function LeaderboardScores({
                 {...difficultyData}
                 selectedId={leaderboardId}
                 onSelect={handleLeaderboardChange}
-                inGameDifficulty={beatSaver?.difficultyLabels[difficultyData.difficulty]}
+                inGameDifficulty={
+                  beatSaver?.difficultyLabels?.[difficultyData.difficulty] ?? undefined
+                }
               />
             ))}
           </div>
