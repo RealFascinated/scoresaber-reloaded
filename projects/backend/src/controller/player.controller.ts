@@ -4,9 +4,9 @@ import { PlayerRankedPpsResponse } from "@ssr/common/response/player-ranked-pps-
 import { PpBoundaryResponse } from "@ssr/common/response/pp-boundary-response";
 import { t } from "elysia";
 import { Controller, Get } from "elysia-decorators";
-import SuperJSON from "superjson";
 import { PlayerService } from "../service/player/player.service";
 import ScoreSaberService from "../service/scoresaber.service";
+import { PlayerScoresChartResponse } from "@ssr/common/response/player-scores-chart";
 
 @Controller("/player")
 export default class PlayerController {
@@ -18,7 +18,6 @@ export default class PlayerController {
     }),
     query: t.Object({
       type: t.Optional(t.Union([t.Literal("full"), t.Literal("basic")], { default: "basic" })),
-      superJson: t.Optional(t.Boolean({ default: false })),
     }),
     detail: {
       description: "Fetch a player by their id",
@@ -26,17 +25,17 @@ export default class PlayerController {
   })
   public async getPlayer({
     params: { id },
-    query: { type, superJson },
+    query: { type },
   }: {
     params: { id: string };
-    query: { type: DetailType; superJson: boolean };
-  }): Promise<ScoreSaberPlayer | string> {
+    query: { type: DetailType };
+  }): Promise<ScoreSaberPlayer> {
     const player = await ScoreSaberService.getPlayer(id, type, undefined, {
       setMedalsRank: true,
       setInactivesRank: true,
       getHmdBreakdown: true,
     });
-    return superJson ? SuperJSON.stringify(player) : player;
+    return player;
   }
 
   @Get("/pp-boundary/:id/:boundary", {
@@ -67,22 +66,16 @@ export default class PlayerController {
     params: t.Object({
       id: t.String({ required: true }),
     }),
-    query: t.Object({
-      superJson: t.Optional(t.Boolean({ default: false })),
-    }),
     detail: {
       description: "Fetch a player's scores chart data",
     },
   })
   public async getPlayerStarsChartData({
     params: { id },
-    query: { superJson },
   }: {
     params: { id: string };
-    query: { superJson: boolean };
-  }): Promise<unknown> {
-    const data = await PlayerService.getPlayerScoreChart(id);
-    return superJson ? SuperJSON.stringify(data) : data;
+  }): Promise<PlayerScoresChartResponse> {
+    return await PlayerService.getPlayerScoreChart(id);
   }
 
   @Get("/ranked-pps/:id", {

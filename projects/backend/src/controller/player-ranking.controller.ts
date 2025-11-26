@@ -5,6 +5,9 @@ import { Controller, Get } from "elysia-decorators";
 import SuperJSON from "superjson";
 import { PlayerMedalsService } from "../service/player/player-medals.service";
 import { PlayerService } from "../service/player/player.service";
+import { Page } from "@ssr/common/pagination";
+import { ScoreSaberPlayer } from "@ssr/common/model/player/impl/scoresaber-player";
+import { PlayerRankingsResponse } from "@ssr/common/response/player-rankings-response";
 
 @Controller("")
 export default class PlayerRankingController {
@@ -12,7 +15,6 @@ export default class PlayerRankingController {
     config: {},
     tags: ["Player"],
     query: t.Object({
-      superJson: t.Optional(t.Boolean({ default: false })),
       page: t.Optional(t.Number({ default: 1 })),
       country: t.Optional(t.String({ default: "" })),
       search: t.Optional(t.String({ default: "" })),
@@ -22,15 +24,14 @@ export default class PlayerRankingController {
     },
   })
   public async getPlayerRanking({
-    query: { superJson, page, country, search },
+    query: { page, country, search },
   }: {
-    query: { superJson: boolean; page: number; country: string; search: string };
-  }): Promise<PlayerSearchResponse | unknown> {
-    const players = await PlayerService.getPlayerRanking(page, {
+    query: { page: number; country: string; search: string };
+  }): Promise<PlayerRankingsResponse> {
+    return await PlayerService.getPlayerRanking(page, {
       country: country,
       search: search,
     });
-    return superJson ? SuperJSON.stringify(players) : players;
   }
 
   @Get("/ranking/medals/:page", {
@@ -40,7 +41,6 @@ export default class PlayerRankingController {
       page: t.Number({ required: true, default: 1 }),
     }),
     query: t.Object({
-      superJson: t.Optional(t.Boolean({ default: false })),
       country: t.Optional(t.String()),
     }),
     detail: {
@@ -49,12 +49,11 @@ export default class PlayerRankingController {
   })
   public async getPlayerMedalRanking({
     params: { page },
-    query: { superJson, country },
+    query: { country },
   }: {
     params: { page: number };
-    query: { superJson: boolean; country?: string };
-  }): Promise<PlayerMedalRankingsResponse | unknown> {
-    const players = await PlayerMedalsService.getPlayerMedalRanking(page, country);
-    return superJson ? SuperJSON.stringify(players) : players;
+    query: { country?: string };
+  }): Promise<PlayerMedalRankingsResponse> {
+    return await PlayerMedalsService.getPlayerMedalRanking(page, country);
   }
 }

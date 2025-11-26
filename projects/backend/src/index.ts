@@ -44,6 +44,7 @@ import { ScoreService } from "./service/score/score.service";
 import StatisticsService from "./service/statistics.service";
 import { BeatSaverWebsocket } from "./websocket/beatsaver-websocket";
 import { ScoreWebsockets } from "./websocket/score-websockets";
+import SuperJSON from "superjson";
 
 Logger.info("Starting SSR Backend...");
 
@@ -206,6 +207,17 @@ app.onError({ as: "global" }, ({ code, error }) => {
     ...(error.message != code && { message: error.message }),
     timestamp: new Date().toISOString(),
   };
+});
+
+/**
+ * Global toggle for SuperJSON for all responses
+ */
+app.onAfterHandle(({ request, response }) => {
+  const url = new URL(request.url.toLowerCase());
+  if (url.searchParams.get("superjson") === "true") {
+    return SuperJSON.stringify(response);
+  }
+  return response;
 });
 
 /**

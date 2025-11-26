@@ -7,7 +7,6 @@ import {
   ScoreSaberScoreModel,
 } from "@ssr/common/model/score/impl/scoresaber-score";
 import { Page, Pagination } from "@ssr/common/pagination";
-import { ScoreHistoryGraphResponse } from "@ssr/common/response/score-history-graph-response";
 import CacheService, { CacheId } from "../cache.service";
 import { LeaderboardService } from "../leaderboard/leaderboard.service";
 import { ScoreService } from "../score/score.service";
@@ -64,70 +63,6 @@ export class PlayerScoreHistoryService {
           })
         );
       });
-  }
-
-  /**
-   * Gets the score history graph for a player on a map.
-   *
-   * @param playerId the player's id to get the previous scores for
-   * @param leaderboardId the leaderboard to get the previous scores on
-   */
-  public static async getPlayerScoreHistoryGraph(
-    playerId: string,
-    leaderboardId: string
-  ): Promise<ScoreHistoryGraphResponse> {
-    // Run leaderboard fetch and score queries in parallel
-    const [leaderboardResponse, scores, previousScores] = await Promise.all([
-      LeaderboardService.getLeaderboard(leaderboardId, {
-        cacheOnly: true,
-        includeBeatSaver: false,
-      }),
-      ScoreSaberScoreModel.find({
-        playerId: playerId,
-        leaderboardId: leaderboardId,
-      })
-        .select({
-          score: 1,
-          accuracy: 1,
-          misses: 1,
-          pp: 1,
-          timestamp: 1,
-        })
-        .sort({
-          timestamp: -1,
-        })
-        .lean(),
-      ScoreSaberPreviousScoreModel.find({
-        playerId: playerId,
-        leaderboardId: leaderboardId,
-      })
-        .select({
-          score: 1,
-          accuracy: 1,
-          misses: 1,
-          pp: 1,
-          timestamp: 1,
-        })
-        .sort({
-          timestamp: -1,
-        })
-        .lean(),
-    ]);
-
-    const { leaderboard } = leaderboardResponse;
-
-    return {
-      isRanked: leaderboard.ranked,
-      scores: [...scores, ...previousScores]
-        .sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime())
-        .map(score => ({
-          score: score.score,
-          accuracy: score.accuracy,
-          misses: score.misses,
-          pp: score.pp,
-          timestamp: score.timestamp,
-        })),
-    };
   }
 
   /**

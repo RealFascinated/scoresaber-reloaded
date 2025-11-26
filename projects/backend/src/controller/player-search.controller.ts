@@ -1,7 +1,6 @@
 import { PlayerSearchResponse } from "@ssr/common/response/player-search-response";
 import { t } from "elysia";
 import { Controller, Get } from "elysia-decorators";
-import SuperJSON from "superjson";
 import { PlayerService } from "../service/player/player.service";
 
 @Controller("")
@@ -10,7 +9,6 @@ export default class PlayerSearchController {
     config: {},
     tags: ["Player"],
     query: t.Object({
-      superJson: t.Optional(t.Boolean({ default: false })),
       query: t.Optional(t.String({ default: "" })),
     }),
     detail: {
@@ -18,13 +16,12 @@ export default class PlayerSearchController {
     },
   })
   public async searchPlayers({
-    query: { superJson, query },
+    query: { query },
   }: {
-    query: { superJson: boolean; query: string };
-  }): Promise<PlayerSearchResponse | unknown> {
-    const players = {
+    query: { query: string };
+  }): Promise<PlayerSearchResponse> {
+    return {
       players: await PlayerService.searchPlayers(query),
     };
-    return superJson ? SuperJSON.stringify(players) : players;
   }
 }

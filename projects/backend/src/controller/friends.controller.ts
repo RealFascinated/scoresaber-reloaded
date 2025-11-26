@@ -1,8 +1,11 @@
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import { t } from "elysia";
 import { Controller, Get } from "elysia-decorators";
-import SuperJSON from "superjson";
 import { PlayerService } from "../service/player/player.service";
+import { Page } from "@ssr/common/pagination";
+import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
+import { PlayerScore } from "@ssr/common/score/player-score";
+import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 
 @Controller("")
 export default class FriendsController {
@@ -15,7 +18,6 @@ export default class FriendsController {
     }),
     query: t.Object({
       friendIds: t.String({ required: true }),
-      superJson: t.Optional(t.Boolean({ default: false })),
     }),
     detail: {
       description: "Fetch friend leaderboard scores for a player",
@@ -23,20 +25,19 @@ export default class FriendsController {
   })
   public async getFriendLeaderboardScores({
     params: { leaderboardId, page },
-    query: { friendIds, superJson },
+    query: { friendIds },
   }: {
     params: {
       leaderboardId: number;
       page: number;
     };
-    query: { friendIds: string; superJson: boolean };
-  }): Promise<unknown> {
+    query: { friendIds: string };
+  }): Promise<Page<ScoreSaberScore>> {
     const ids = friendIds.split(",");
     if (ids.length === 0) {
       throw new NotFoundError("Malformed friend ids, must be a comma separated list of friend ids");
     }
-    const data = await PlayerService.getPlayerFriendLeaderboardScores(ids, leaderboardId, page);
-    return superJson ? SuperJSON.stringify(data) : data.toJSON();
+    return await PlayerService.getPlayerFriendLeaderboardScores(ids, leaderboardId, page);
   }
 
   @Get("/scores/friends/:page", {
@@ -47,7 +48,6 @@ export default class FriendsController {
     }),
     query: t.Object({
       friendIds: t.String({ required: true }),
-      superJson: t.Optional(t.Boolean({ default: false })),
     }),
     detail: {
       description: "Fetch friend scores for a player",
@@ -55,18 +55,17 @@ export default class FriendsController {
   })
   public async getFriendScores({
     params: { page },
-    query: { friendIds, superJson },
+    query: { friendIds },
   }: {
     params: {
       page: number;
     };
-    query: { friendIds: string; superJson: boolean };
-  }): Promise<unknown> {
+    query: { friendIds: string };
+  }): Promise<Page<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>> {
     const ids = friendIds.split(",");
     if (ids.length === 0) {
       throw new NotFoundError("Malformed friend ids, must be a comma separated list of friend ids");
     }
-    const data = await PlayerService.getPlayerFriendScores(ids, page);
-    return superJson ? SuperJSON.stringify(data) : data.toJSON();
+    return await PlayerService.getPlayerFriendScores(ids, page);
   }
 }

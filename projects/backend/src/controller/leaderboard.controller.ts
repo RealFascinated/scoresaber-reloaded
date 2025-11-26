@@ -6,6 +6,7 @@ import { t } from "elysia";
 import { Controller, Get } from "elysia-decorators";
 import SuperJSON from "superjson";
 import { LeaderboardService } from "../service/leaderboard/leaderboard.service";
+import { LeaderboardResponse } from "@ssr/common/response/leaderboard-response";
 
 @Controller("/leaderboard")
 export default class LeaderboardController {
@@ -17,7 +18,6 @@ export default class LeaderboardController {
     }),
     query: t.Object({
       type: t.Optional(t.Union([t.Literal("basic"), t.Literal("full")], { default: "basic" })),
-      superJson: t.Optional(t.Boolean({ default: false })),
     }),
     detail: {
       description: "Fetch a leaderboard by its id",
@@ -25,19 +25,18 @@ export default class LeaderboardController {
   })
   public async getLeaderboard({
     params: { id },
-    query: { type, superJson },
+    query: { type },
   }: {
     params: {
       id: string;
     };
-    query: { type: DetailType; superJson: boolean };
-  }): Promise<unknown> {
-    const data = await LeaderboardService.getLeaderboard(id, {
+    query: { type: DetailType };
+  }): Promise<LeaderboardResponse> {
+    return await LeaderboardService.getLeaderboard(id, {
       beatSaverType: type,
       includeBeatSaver: true,
       includeStarChangeHistory: true,
     });
-    return superJson ? SuperJSON.stringify(data) : data;
   }
 
   @Get("/by-hash/:id/:difficulty/:characteristic", {
@@ -50,7 +49,6 @@ export default class LeaderboardController {
     }),
     query: t.Object({
       type: t.Optional(t.Union([t.Literal("basic"), t.Literal("full")], { default: "basic" })),
-      superJson: t.Optional(t.Boolean({ default: false })),
     }),
     detail: {
       description: "Fetch a leaderboard by its hash, difficulty, and characteristic",
@@ -58,21 +56,21 @@ export default class LeaderboardController {
   })
   public async getLeaderboardByHash({
     params: { id, difficulty, characteristic },
-    query: { type, superJson },
+    query: { type },
   }: {
     params: {
       id: string;
       difficulty: MapDifficulty;
       characteristic: MapCharacteristic;
     };
-    query: { type: DetailType; superJson: boolean };
-  }): Promise<unknown> {
+    query: { type: DetailType };
+  }): Promise<LeaderboardResponse> {
     const data = await LeaderboardService.getLeaderboardByHash(id, difficulty, characteristic, {
       type,
       includeBeatSaver: true,
       includeStarChangeHistory: true,
     });
-    return superJson ? SuperJSON.stringify(data) : data;
+    return data;
   }
 
   @Get("/plays-by-hmd/:id", {
