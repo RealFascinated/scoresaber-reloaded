@@ -279,7 +279,7 @@ const GenericChart = ({ config, labels }: Props) => {
       ) : null}
       <div className="relative block h-full w-full">
         <Line
-          className="max-w-full"
+          className="h-full max-w-full"
           options={chartOptions}
           data={{ labels: formattedLabels, datasets: chartDatasets as any }}
         />

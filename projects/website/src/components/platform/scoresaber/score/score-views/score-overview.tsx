@@ -30,13 +30,7 @@ type ScoreOverviewProps = {
 
 export function ScoreOverview({ score, scoreStats, leaderboard }: ScoreOverviewProps) {
   if (!scoreStats) {
-    return (
-      <EmptyState
-        icon={<ChartBarIcon className="h-10 w-10 text-gray-400 dark:text-gray-500" />}
-        title="No Performance Data"
-        description="No BeatLeader data found for this score"
-      />
-    );
+    return null;
   }
 
   return (
@@ -80,7 +74,7 @@ export function ScoreOverview({ score, scoreStats, leaderboard }: ScoreOverviewP
       </Card>
 
       {/* Accuracy Chart */}
-      <div className="flex min-h-[220px] w-full items-center justify-center md:min-h-[320px]">
+      <div className="flex h-full w-full items-center justify-center md:min-h-[320px]">
         <PlayerScoreAccuracyChart scoreStats={scoreStats} leaderboard={leaderboard} />
       </div>
     </div>

@@ -152,7 +152,6 @@ export default function ScoreAccuracyStats({ scoreStats }: ScoreAccuracyStatProp
         <HandAccuracy scoreStats={scoreStats.current} hand="left" />
         <HandAccuracy scoreStats={scoreStats.current} hand="right" />
       </div>
-      <ScoreAccuracyGrid scoreStats={scoreStats.current} />
     </div>
   );
 }
