@@ -1,10 +1,9 @@
 import { ScoreModeEnum } from "@/components/score/score-mode";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
-import { Page, Pagination } from "@ssr/common/pagination";
-import { PlayerScore } from "@ssr/common/score/player-score";
+import { Page } from "@ssr/common/pagination";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
-import { useQuery, UseQueryResult } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useLiveQuery } from "dexie-react-hooks";
 import useDatabase from "../use-database";
 

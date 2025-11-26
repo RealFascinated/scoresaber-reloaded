@@ -8,11 +8,11 @@ import PlayerPreview from "@/components/player/player-preview";
 import { ScoreReplayButton } from "@/components/score/button/score-replay-button";
 import { ScoreTimeSet } from "@/components/score/score-time-set";
 import SimpleTooltip from "@/components/simple-tooltip";
-import { ArrowDownIcon, ArrowPathIcon } from "@heroicons/react/24/outline";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { formatScoreAccuracy } from "@ssr/common/utils/score.util";
+import { ArrowUpIcon } from "lucide-react";
 
 export default function ScoreSaberLeaderboardScore({
   score,
@@ -20,16 +20,12 @@ export default function ScoreSaberLeaderboardScore({
   highlightedPlayerId,
   showDropdown = false,
   onDropdownToggle,
-  isDropdownExpanded,
-  isLoading,
 }: {
   score: ScoreSaberScore;
   leaderboard: ScoreSaberLeaderboard;
   highlightedPlayerId?: string;
   showDropdown?: boolean;
   onDropdownToggle?: () => void;
-  isDropdownExpanded?: boolean;
-  isLoading?: boolean;
 }) {
   const scorePlayer = score.playerInfo;
 
@@ -114,17 +110,13 @@ export default function ScoreSaberLeaderboardScore({
         <td className="w-[32px]">
           {/* View Leaderboard button */}
           <div className="flex cursor-default items-center justify-center">
-            {isLoading ? (
-              <ArrowPathIcon className="size-5 animate-spin" />
-            ) : (
-              <ArrowDownIcon
-                className={cn(
-                  "size-5 cursor-pointer transition-transform duration-350",
-                  isDropdownExpanded ? "" : "rotate-180"
-                )}
-                onClick={onDropdownToggle}
-              />
-            )}
+            <ArrowUpIcon
+              className={cn(
+                "size-5 cursor-pointer transition-transform duration-350"
+                // !isDropdownExpanded ? "" : "rotate-180"
+              )}
+              onClick={onDropdownToggle}
+            />
           </div>
         </td>
       )}

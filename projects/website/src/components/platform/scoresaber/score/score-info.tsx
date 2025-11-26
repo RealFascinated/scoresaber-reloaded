@@ -15,11 +15,9 @@ import { ScoreSaberScoreHMD } from "./score-hmd";
 export default function ScoreSaberScoreInfo({
   score,
   leaderboard,
-  hideRank,
 }: {
   score: ScoreSaberScore;
   leaderboard: ScoreSaberLeaderboard;
-  hideRank?: boolean;
 }) {
   const hmd = getHMDInfo(score.hmd as HMD);
 
@@ -27,7 +25,7 @@ export default function ScoreSaberScoreInfo({
     <div className="flex w-full flex-row items-center justify-between lg:w-[125px] lg:flex-col lg:justify-center">
       <div className="flex items-center gap-1">
         <GlobeAmericasIcon className="size-5" />
-        {hideRank ? (
+        {score.rank === -1 ? (
           <p className="font-semibold">#-</p>
         ) : (
           <SimpleLink
@@ -37,7 +35,7 @@ export default function ScoreSaberScoreInfo({
             <p
               className={cn(
                 getRankColor(score.rank),
-                "cursor-pointer font-semibold transition-all hover:brightness-[66%]"
+                "cursor-pointer font-semibold transition-all hover:brightness-66"
               )}
             >
               #{formatNumberWithCommas(score.rank)}

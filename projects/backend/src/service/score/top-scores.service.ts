@@ -89,7 +89,7 @@ export class TopScoresService {
           }
 
           const processedScore = await ScoreService.insertScoreData(score, leaderboard, undefined, {
-            removeScoreWeight: true,
+            removeScoreWeightAndRank: true,
             insertPlayerInfo: true,
           });
           return {

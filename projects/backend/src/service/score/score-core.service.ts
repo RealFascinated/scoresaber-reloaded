@@ -166,7 +166,7 @@ export class ScoreCoreService {
       insertPreviousScore?: boolean;
       insertPlayerInfo?: boolean;
       isComparisonPlayerScore?: boolean;
-      removeScoreWeight?: boolean;
+      removeScoreWeightAndRank?: boolean;
     }
   ) {
     options = {
@@ -174,7 +174,7 @@ export class ScoreCoreService {
       insertPreviousScore: true,
       insertPlayerInfo: true,
       isComparisonPlayerScore: false,
-      removeScoreWeight: false,
+      removeScoreWeightAndRank: false,
       ...options,
     };
 
@@ -254,8 +254,9 @@ export class ScoreCoreService {
       );
     }
 
-    if (options?.removeScoreWeight) {
+    if (options?.removeScoreWeightAndRank) {
       score.weight = undefined;
+      score.rank = -1;
     }
 
     return score;

@@ -140,7 +140,8 @@ async function fetchRawScores(
 async function mapScoresWithLeaderboards(
   rawScores: ScoreSaberScore[],
   includeBeatSaver = true,
-  cacheOnly = true
+  cacheOnly = true,
+  removeScoreWeightAndRank = true
 ) {
   if (!rawScores.length) return [];
 
@@ -156,7 +157,9 @@ async function mapScoresWithLeaderboards(
       const lbResp = lbMap.get(rs.leaderboardId);
       if (!lbResp) return null;
       const { leaderboard, beatsaver } = lbResp;
-      const score = await ScoreService.insertScoreData(scoreToObject(rs), leaderboard);
+      const score = await ScoreService.insertScoreData(scoreToObject(rs), leaderboard, undefined, {
+        removeScoreWeightAndRank,
+      });
       return { score, leaderboard, beatSaver: beatsaver } as PlayerScore<
         ScoreSaberScore,
         ScoreSaberLeaderboard
@@ -572,7 +575,7 @@ export class PlayerScoresService {
         // star count which is not present on the score document itself.
         const rawScores = await fetchRawScores(query, options, start, end - start);
 
-        return await mapScoresWithLeaderboards(rawScores);
+        return await mapScoresWithLeaderboards(rawScores, false, false, true);
       }
 
       // Add filter to exclude Infinity values for the sort field (skip for starcount)
@@ -715,7 +718,7 @@ export class PlayerScoresService {
       {
         insertPlayerInfo: true,
         insertAdditionalData: true,
-        removeScoreWeight: true,
+        removeScoreWeightAndRank: true,
       }
     );
     return {

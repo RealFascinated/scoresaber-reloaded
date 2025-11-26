@@ -363,10 +363,8 @@ export default function ScoreSaberPlayerScores({
               score={score.score}
               leaderboard={score.leaderboard}
               beatSaverMap={score.beatSaver}
-              highlightedPlayerId={scoresMode === "cached" ? undefined : player.id}
               settings={{
                 allowLeaderboardPreview: true,
-                hideRank: scoresMode === "cached",
                 defaultLeaderboardScoresPage: scoresMode === "cached" ? 1 : undefined,
               }}
             />

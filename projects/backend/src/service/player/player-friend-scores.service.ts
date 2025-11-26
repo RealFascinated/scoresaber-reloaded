@@ -72,7 +72,7 @@ export class PlayerFriendScoresService {
               insertAdditionalData: true,
               insertPreviousScore: false,
               insertPlayerInfo: true,
-              removeScoreWeight: true,
+              removeScoreWeightAndRank: true,
             }
           );
         });
@@ -168,7 +168,7 @@ export class PlayerFriendScoresService {
                 undefined,
                 {
                   insertPlayerInfo: true,
-                  removeScoreWeight: true,
+                  removeScoreWeightAndRank: true,
                 }
               ),
               leaderboard: leaderboardResponse.leaderboard,

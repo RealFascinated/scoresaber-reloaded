@@ -17,16 +17,14 @@ import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
 import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/leaderboard-player-info";
 import { ChevronRight } from "lucide-react";
-import ScoreDropdown, { ScoreMode } from "./score-dropdown";
+import ScoreDropdown from "./score-dropdown";
 
 export default function ScoreSaberScoreDisplay({
   leaderboard,
   beatSaverMap,
   score,
   settings,
-  highlightedPlayerId,
 }: {
-  highlightedPlayerId?: string;
   score: ScoreSaberScore;
   leaderboard: ScoreSaberLeaderboard;
   beatSaverMap?: BeatSaverMapResponse;
@@ -34,10 +32,8 @@ export default function ScoreSaberScoreDisplay({
   settings?: {
     noScoreButtons?: boolean;
     hideLeaderboardDropdown?: boolean;
-    defaultLeaderboardDropdown?: ScoreMode;
     hideAccuracyChanger?: boolean;
     disablePadding?: boolean;
-    hideRank?: boolean;
     allowLeaderboardPreview?: boolean;
     defaultLeaderboardScoresPage?: number;
     medalsMode?: boolean;
@@ -46,43 +42,23 @@ export default function ScoreSaberScoreDisplay({
 }) {
   const [baseScore, setBaseScore] = useState(score.score);
   const [isLeaderboardExpanded, setIsLeaderboardExpanded] = useState(false);
-  const [mode, setMode] = useState<ScoreMode>(
-    settings?.defaultLeaderboardDropdown ?? ScoreMode.Overview
-  );
-  const [isLeaderboardLoading, setIsLeaderboardLoading] = useState(false);
 
   const isMobile = useIsMobile();
 
   useEffect(() => {
     setIsLeaderboardExpanded(false);
-    setMode(settings?.defaultLeaderboardDropdown ?? ScoreMode.Overview);
-  }, [score.scoreId, settings?.defaultLeaderboardDropdown]);
+  }, [score.scoreId]);
 
   useEffect(() => {
     setBaseScore(score.score);
   }, [score]);
 
   const accuracy = (baseScore / leaderboard.maxScore) * 100;
-
   const pp =
     baseScore === score.score ? score.pp : ScoreSaberCurve.getPp(leaderboard.stars, accuracy);
 
-  const handleLeaderboardOpen = useCallback(
-    (isExpanded: boolean) => {
-      if (!isExpanded) {
-        setMode(settings?.defaultLeaderboardDropdown ?? ScoreMode.Overview);
-      }
-      setIsLeaderboardExpanded(isExpanded);
-    },
-    [settings?.defaultLeaderboardDropdown]
-  );
-
-  const handleModeChange = useCallback((newMode: ScoreMode) => {
-    setMode(newMode);
-  }, []);
-
-  const handleLoadingChange = useCallback((isLoading: boolean) => {
-    setIsLeaderboardLoading(isLoading);
+  const handleLeaderboardOpen = useCallback((isExpanded: boolean) => {
+    setIsLeaderboardExpanded(isExpanded);
   }, []);
 
   return (
@@ -96,11 +72,7 @@ export default function ScoreSaberScoreDisplay({
               : "grid-cols-[20px 1fr_1fr] lg:grid-cols-[0.5fr_4fr_1fr_350px]"
           )}
         >
-          <ScoreSaberScoreInfo
-            score={score}
-            leaderboard={leaderboard}
-            hideRank={settings?.hideRank}
-          />
+          <ScoreSaberScoreInfo score={score} leaderboard={leaderboard} />
 
           <div className="flex min-w-0 items-center overflow-hidden">
             <ScoreSaberScoreSongInfo
@@ -119,7 +91,6 @@ export default function ScoreSaberScoreDisplay({
               hideLeaderboardDropdown={settings?.hideLeaderboardDropdown}
               hideAccuracyChanger={settings?.hideAccuracyChanger}
               setIsLeaderboardExpanded={handleLeaderboardOpen}
-              isLeaderboardLoading={isLeaderboardLoading}
               updateScore={updatedScore => setBaseScore(updatedScore.score)}
               isPreviousScore={settings?.isPreviousScore}
             />
@@ -156,12 +127,8 @@ export default function ScoreSaberScoreDisplay({
         score={score}
         leaderboard={leaderboard}
         beatSaverMap={beatSaverMap}
-        highlightedPlayerId={highlightedPlayerId}
         isExpanded={isLeaderboardExpanded}
-        defaultMode={mode}
         defaultScoresPage={settings?.defaultLeaderboardScoresPage}
-        onModeChange={handleModeChange}
-        onLoadingChange={handleLoadingChange}
       />
     </div>
   );

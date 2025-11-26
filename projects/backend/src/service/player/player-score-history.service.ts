@@ -25,12 +25,19 @@ export class PlayerScoreHistoryService {
     leaderboardId: string,
     page: number
   ): Promise<Page<ScoreSaberScore>> {
-    const scores = await ScoreSaberPreviousScoreModel.find({
-      playerId: playerId,
-      leaderboardId: leaderboardId,
-    }).sort({
-      timestamp: -1,
-    });
+    const [scoreHistory, currentScores] = await Promise.all([
+      ScoreSaberPreviousScoreModel.find({
+        playerId: playerId,
+        leaderboardId: leaderboardId,
+      }),
+      ScoreSaberScoreModel.find({
+        playerId: playerId,
+        leaderboardId: leaderboardId,
+      }),
+    ]);
+    const scores = [...scoreHistory, ...currentScores].sort(
+      (a, b) => b.timestamp.getTime() - a.timestamp.getTime()
+    );
     if (scores == null || scores.length == 0) {
       throw new NotFoundError(`No previous scores found for ${playerId} in ${leaderboardId}`);
     }
@@ -51,7 +58,7 @@ export class PlayerScoreHistoryService {
             let score = scoreToken.toObject() as unknown as ScoreSaberScore;
             score = await ScoreService.insertScoreData(score, leaderboard, undefined, {
               insertPreviousScore: false,
-              removeScoreWeight: true,
+              removeScoreWeightAndRank: true,
             });
             return score;
           })

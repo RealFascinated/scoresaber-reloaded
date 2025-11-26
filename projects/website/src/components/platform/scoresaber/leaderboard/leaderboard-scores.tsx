@@ -46,7 +46,6 @@ export default function LeaderboardScores({
   const [leaderboardId, setLeaderboardId] = useState(leaderboard.id);
   const [page, setPage] = useState(initialPage);
   const [expandedScoreId, setExpandedScoreId] = useState<string | null>(null);
-  const [loadingScoreId, setLoadingScoreId] = useState<string | null>(null);
 
   const {
     data: scores,
@@ -70,10 +69,6 @@ export default function LeaderboardScores({
     },
     [expandedScoreId]
   );
-
-  const handleLoadingChange = useCallback((scoreId: string, isLoading: boolean) => {
-    setLoadingScoreId(isLoading ? scoreId : null);
-  }, []);
 
   const handleModeChange = useCallback((newMode: ScoreModeEnum) => {
     setMode(newMode);
@@ -186,8 +181,6 @@ export default function LeaderboardScores({
                         highlightedPlayerId={highlightedPlayerId}
                         showDropdown
                         onDropdownToggle={() => handleDropdownToggle(playerScore.scoreId)}
-                        isDropdownExpanded={expandedScoreId === playerScore.scoreId}
-                        isLoading={loadingScoreId === playerScore.scoreId}
                       />
                     </tr>
 
@@ -217,9 +210,6 @@ export default function LeaderboardScores({
                                 isExpanded={true}
                                 showLeaderboardScores={false}
                                 showMapStats={false}
-                                onLoadingChange={loading =>
-                                  handleLoadingChange(playerScore.scoreId, loading)
-                                }
                               />
                             </div>
                           </td>
