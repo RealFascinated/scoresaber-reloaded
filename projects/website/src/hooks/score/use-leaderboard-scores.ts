@@ -1,7 +1,7 @@
 import { ScoreModeEnum } from "@/components/score/score-mode";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
-import { Page } from "@ssr/common/pagination";
+import { Page, Pagination } from "@ssr/common/pagination";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { useLiveQuery } from "dexie-react-hooks";
@@ -31,44 +31,44 @@ export const useLeaderboardScores = (
             return new Page(response.scores, response.metadata);
           }
 
-          return undefined;
+          return Pagination.empty();
         }
         case ScoreModeEnum.Friends: {
           if (friendIds && mainPlayer) {
-            const friendScores = await ssrApi.getFriendLeaderboardScores(
+            const response = await ssrApi.getFriendLeaderboardScores(
               [...friendIds, mainPlayer.id],
               leaderboardId.toString(),
               page
             );
 
-            if (friendScores) {
+            if (response) {
               const friends = await database.getFriends();
 
-              friendScores.items = friendScores.items.map(score => ({
+              response.items = response.items.map(score => ({
                 ...score,
                 playerInfo: friends.find(f => f.id === score.playerId) || mainPlayer || undefined,
               }));
 
-              return friendScores;
+              return response;
             }
           }
 
-          return undefined;
+          return Pagination.empty();
         }
         case ScoreModeEnum.History: {
           if (mainPlayer) {
-            const history = await ssrApi.fetchPlayerScoresHistory(
+            const response = await ssrApi.fetchPlayerScoresHistory(
               mainPlayer.id,
               leaderboardId.toString(),
               page
             );
 
-            if (history) {
-              return history;
+            if (response) {
+              return response;
             }
-
-            return undefined;
           }
+
+          return Pagination.empty();
         }
       }
     },
