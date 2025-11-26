@@ -65,20 +65,9 @@ class SSRApi {
     characteristic: MapCharacteristic,
     type: DetailType = DetailType.BASIC
   ) {
-    const response = await Request.get<string>(
-      `${env.NEXT_PUBLIC_API_URL}/beatsaver/map/${hash}/${difficulty}/${characteristic}`,
-      {
-        returns: "text",
-        searchParams: {
-          type: type,
-          superJson: true,
-        },
-      }
+    return await this.get<BeatSaverMapResponse>(
+      `${env.NEXT_PUBLIC_API_URL}/beatsaver/map/${hash}/${difficulty}/${characteristic}`
     );
-    if (response === undefined) {
-      return undefined;
-    }
-    return SuperJSON.parse<BeatSaverMapResponse>(response);
   }
 
   /**

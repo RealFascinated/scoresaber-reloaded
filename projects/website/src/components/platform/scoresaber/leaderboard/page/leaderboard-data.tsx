@@ -54,7 +54,7 @@ export function ScoreSaberLeaderboardData({
     placeholderData: data => data ?? initialLeaderboard,
   });
 
-  const { data: hmdData } = useQuery<PlaysByHmdResponse>({
+  const { data: hmdData } = useQuery({
     queryKey: ["leaderboard-hmd", currentLeaderboardId],
     queryFn: () => ssrApi.getPlaysByHmdForLeaderboard(currentLeaderboardId.toString()),
   });
