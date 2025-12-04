@@ -8,7 +8,11 @@ import { EmbedBuilder } from "discord.js";
 export class BeatSaverWebsocket {
   constructor() {
     connectBeatSaverWebsocket({
-      onMapChange: async map => {
+      onMapUpdate: async map => {
+        sendEmbedToChannel(
+          DiscordChannels.BEATSAVER_LOGS,
+          new EmbedBuilder().setDescription(`BeatSaver map ${map.id} updated`)
+        );
         const latestHash = map.versions.sort(
           (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
         )[0].hash;
@@ -32,19 +36,6 @@ export class BeatSaverWebsocket {
         await CacheService.invalidate(`beatsaver:${latestHash}`); // Invalidate the cache for the map
 
         Logger.info(`BeatSaver map ${latestHash} updated`);
-      },
-
-      onMapCreate: async map => {
-        sendEmbedToChannel(
-          DiscordChannels.BEATSAVER_LOGS,
-          new EmbedBuilder().setDescription(`BeatSaver map ${map.id} created`)
-        );
-      },
-      onMapUpdate: async map => {
-        sendEmbedToChannel(
-          DiscordChannels.BEATSAVER_LOGS,
-          new EmbedBuilder().setDescription(`BeatSaver map ${map.id} updated`)
-        );
       },
     });
   }
