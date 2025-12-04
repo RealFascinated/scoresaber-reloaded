@@ -16,10 +16,13 @@ export class BeatSaverWebsocket {
         // Update the map in the database if it exists, otherwise create it
         await BeatSaverMapModel.updateOne(
           {
-            "versions.hash": latestHash,
+            _id: map.id,
           },
           {
-            $set: map,
+            $set: {
+              ...map,
+              _id: map.id,
+            },
           },
           {
             upsert: true,
