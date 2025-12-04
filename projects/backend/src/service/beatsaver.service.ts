@@ -81,9 +81,9 @@ export default class BeatSaverService {
       bsr: map.id,
       name: map.name,
       author: {
-        avatar: map.uploader.avatar,
-        name: map.uploader.name,
-        id: map.uploader.id,
+        avatar: map.uploader.avatar ?? undefined,
+        name: map.uploader.name ?? undefined,
+        id: map.uploader.id ?? undefined,
       },
     } as BeatSaverMapResponse;
 
