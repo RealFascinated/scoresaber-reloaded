@@ -29,6 +29,7 @@ export const env = createEnv({
     DISCORD_CHANNEL_TOP_50_SCORES_FEED: z.string().optional(),
     DISCORD_CHANNEL_SCORE_FLOODGATE_FEED: z.string().optional(),
     DISCORD_CHANNEL_BACKEND_LOGS: z.string().optional(),
+    DISCORD_CHANNEL_BEATSAVER_LOGS: z.string().optional(),
   },
 
   client: {
@@ -73,6 +74,7 @@ export const env = createEnv({
     DISCORD_CHANNEL_TOP_50_SCORES_FEED: process.env.DISCORD_CHANNEL_TOP_50_SCORES_FEED,
     DISCORD_CHANNEL_SCORE_FLOODGATE_FEED: process.env.DISCORD_CHANNEL_SCORE_FLOODGATE_FEED,
     DISCORD_CHANNEL_BACKEND_LOGS: process.env.DISCORD_CHANNEL_BACKEND_LOGS,
+    DISCORD_CHANNEL_BEATSAVER_LOGS: process.env.DISCORD_CHANNEL_BEATSAVER_LOGS,
 
     // Minio
     MINIO_ENDPOINT: process.env.MINIO_ENDPOINT,

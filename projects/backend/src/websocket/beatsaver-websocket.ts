@@ -2,6 +2,8 @@ import Logger from "@ssr/common/logger";
 import { BeatSaverMapModel } from "@ssr/common/model/beatsaver/map";
 import { connectBeatSaverWebsocket } from "@ssr/common/websocket/beatsaver-websocket";
 import CacheService from "../service/cache.service";
+import { DiscordChannels, sendEmbedToChannel } from "../bot/bot";
+import { EmbedBuilder } from "discord.js";
 
 export class BeatSaverWebsocket {
   constructor() {
@@ -27,6 +29,19 @@ export class BeatSaverWebsocket {
         await CacheService.invalidate(`beatsaver:${latestHash}`); // Invalidate the cache for the map
 
         Logger.info(`BeatSaver map ${latestHash} updated`);
+      },
+
+      onMapCreate: async map => {
+        sendEmbedToChannel(
+          DiscordChannels.BEATSAVER_LOGS,
+          new EmbedBuilder().setDescription(`BeatSaver map ${map.id} created`)
+        );
+      },
+      onMapUpdate: async map => {
+        sendEmbedToChannel(
+          DiscordChannels.BEATSAVER_LOGS,
+          new EmbedBuilder().setDescription(`BeatSaver map ${map.id} updated`)
+        );
       },
     });
   }
