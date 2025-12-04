@@ -4,8 +4,9 @@ import type BeatSaverMapDifficultyToken from "./map-difficulty";
 export default class BeatSaverMapVersionToken {
   /**
    * The hash of the map.
+   * Indexed for faster lookups by hash.
    */
-  @prop()
+  @prop({ index: true })
   public hash!: string;
 
   /**
