@@ -1,7 +1,7 @@
-import BeatSaverAuthor from "../model/beatsaver/author";
-import BeatSaverMapDifficulty from "../model/beatsaver/map-difficulty";
-import BeatSaverMapMetadata from "../model/beatsaver/map-metadata";
 import { MapDifficulty } from "../score/map-difficulty";
+import BeatSaverAccountToken from "../types/token/beatsaver/account";
+import BeatSaverMapDifficultyToken from "../types/token/beatsaver/map-difficulty";
+import BeatSaverMapMetadataToken from "../types/token/beatsaver/map-metadata";
 
 export type BeatSaverMapResponse = {
   /**
@@ -32,12 +32,12 @@ export type BeatSaverMapResponse = {
   /**
    * The author of the map.
    */
-  author: BeatSaverAuthor;
+  author: BeatSaverAccountToken;
 
   /**
    * The versions of the map.
    */
-  difficulty: BeatSaverMapDifficulty;
+  difficulty: BeatSaverMapDifficultyToken;
 
   /**
    * The difficulty labels of the map.
@@ -47,5 +47,5 @@ export type BeatSaverMapResponse = {
   /**
    * The metadata of the map.
    */
-  metadata: BeatSaverMapMetadata;
+  metadata: BeatSaverMapMetadataToken;
 };

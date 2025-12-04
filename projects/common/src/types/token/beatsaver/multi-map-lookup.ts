@@ -1,4 +1,4 @@
-import { BeatSaverMapToken } from "./map";
+import BeatSaverMapToken from "./map";
 
 export type BeatSaverMultiMapLookup = {
   /**

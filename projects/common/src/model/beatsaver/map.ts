@@ -1,16 +1,12 @@
-import { AutoIncrementID } from "@typegoose/auto-increment";
 import {
   getModelForClass,
   modelOptions,
-  plugin,
   prop,
   ReturnModelType,
   Severity,
 } from "@typegoose/typegoose";
 import { Document } from "mongoose";
-import BeatSaverAuthor from "./author";
-import BeatSaverMapMetadata from "./map-metadata";
-import BeatSaverMapVersion from "./map-version";
+import BeatSaverMapToken from "../../types/token/beatsaver/map";
 
 /**
  * The model for a BeatSaver map.
@@ -21,74 +17,12 @@ import BeatSaverMapVersion from "./map-version";
     collection: "beatsaver-maps",
   },
 })
-@plugin(AutoIncrementID, {
-  field: "_id",
-  startAt: 1,
-  trackerModelName: "beatsaver-maps",
-  trackerCollection: "increments",
-  overwriteModelName: "beatsaver-maps",
-})
-export class BeatSaverMap {
+export class BeatSaverMap extends BeatSaverMapToken {
   /**
-   * The internal MongoDB ID (_id).
+   * The MongoDB _id, which should be set to the BeatSaver map ID (BSR).
    */
   @prop()
-  public _id!: number;
-
-  /**
-   * The name of the map.
-   */
-  @prop({ required: false })
-  public name!: string;
-
-  /**
-   * The description of the map.
-   */
-  @prop({ required: false })
-  public description!: string;
-
-  /**
-   * The bsr code for the map.
-   */
-  @prop({ required: false })
-  public bsr!: string;
-
-  /**
-   * The author of the map.
-   */
-  @prop({ required: false, _id: false, type: () => BeatSaverAuthor })
-  public author!: BeatSaverAuthor;
-
-  /**
-   * The versions of the map.
-   */
-  @prop({ required: false, _id: false, type: () => [BeatSaverMapVersion] })
-  public versions!: BeatSaverMapVersion[];
-
-  /**
-   * The metadata of the map.
-   */
-  @prop({ required: false, _id: false, type: () => BeatSaverMapMetadata })
-  public metadata!: BeatSaverMapMetadata;
-
-  /**
-   * True if the map is not found on beatsaver.
-   */
-  @prop({ required: false })
-  public notFound?: boolean;
-
-  /**
-   * An array of hashes that point to this map
-   * but don't show in the versions array.
-   */
-  @prop({ required: false, _id: false, type: () => [String] })
-  public brokenHashes!: string[];
-
-  /**
-   * The last time the map data was refreshed.
-   */
-  @prop({ required: true })
-  public lastRefreshed!: Date;
+  public _id!: string;
 }
 
 export type BeatSaverMapDocument = BeatSaverMap & Document;

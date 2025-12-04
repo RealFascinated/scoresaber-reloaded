@@ -1,16 +1,21 @@
-export type MapDifficultyParitySummaryToken = {
+import { prop } from "@typegoose/typegoose";
+
+export default class MapDifficultyParitySummaryToken {
   /**
    * The amount of parity errors.
    */
-  errors: number;
+  @prop()
+  public errors!: number;
 
   /**
    * The amount of parity warnings.
    */
-  warns: number;
+  @prop()
+  public warns!: number;
 
   /**
    * The amount of resets in the difficulty.
    */
-  resets: number;
-};
+  @prop()
+  public resets!: number;
+}

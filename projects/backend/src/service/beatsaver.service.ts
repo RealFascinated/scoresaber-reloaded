@@ -1,148 +1,52 @@
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { DetailType } from "@ssr/common/detail-type";
-import {
-  BeatSaverMap,
-  BeatSaverMapDocument,
-  BeatSaverMapModel,
-} from "@ssr/common/model/beatsaver/map";
+import { BeatSaverMapModel } from "@ssr/common/model/beatsaver/map";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
 import { MapDifficulty } from "@ssr/common/score/map-difficulty";
 import { MapCharacteristic } from "@ssr/common/types/map-characteristic";
-import { BeatSaverMapToken } from "@ssr/common/types/token/beatsaver/map";
+import BeatSaverMapToken from "@ssr/common/types/token/beatsaver/map";
 import { getBeatSaverDifficulty } from "@ssr/common/utils/beatsaver.util";
 import CacheService, { CacheId } from "./cache.service";
+import Logger from "@ssr/common/logger";
+import { formatDuration } from "@ssr/common/utils/time-utils";
 
 export default class BeatSaverService {
   /**
-   * Gets a fallback name if the name is empty or null
-   *
-   * @param name - The name to get
-   * @returns The fallback name
-   */
-  private static getFallbackName(name: string | null): string {
-    return !name || name.trim() === "" ? "Unknown" : name;
-  }
-
-  /**
-   * Finds a map by version hash
-   *
-   * @param hash the hash to search for
-   * @returns the found map document or null
-   */
-  private static async findMapByVersionHash(hash: string): Promise<BeatSaverMapDocument | null> {
-    return BeatSaverMapModel.findOne({ "versions.hash": hash });
-  }
-
-  /**
-   * Parses a map from a token
-   *
-   * @param token the token to parse
-   * @returns the parsed map
-   */
-  private static parseMapFromToken(token: BeatSaverMapToken) {
-    const { uploader, metadata, versions, id, name, description } = token;
-    return {
-      bsr: id,
-      name,
-      description,
-      author: {
-        id: uploader.id,
-        name: uploader.name,
-        avatar: uploader.avatar,
-      },
-      metadata: {
-        bpm: metadata.bpm,
-        duration: metadata.duration,
-        levelAuthorName: this.getFallbackName(metadata.levelAuthorName),
-        songAuthorName: this.getFallbackName(metadata.songAuthorName),
-        songName: this.getFallbackName(metadata.songName),
-        songSubName: this.getFallbackName(metadata.songSubName),
-      },
-      versions: versions.map(version => ({
-        hash: version.hash.toUpperCase(),
-        difficulties: version.diffs.map(diff => ({
-          njs: diff.njs,
-          offset: diff.offset,
-          notes: diff.notes,
-          bombs: diff.bombs,
-          obstacles: diff.obstacles,
-          nps: diff.nps,
-          characteristic: diff.characteristic as MapCharacteristic,
-          difficulty: diff.difficulty as MapDifficulty,
-          events: diff.events,
-          chroma: diff.chroma,
-          mappingExtensions: diff.me,
-          noodleExtensions: diff.ne,
-          cinema: diff.cinema,
-          maxScore: diff.maxScore,
-          label: diff.label,
-        })),
-        createdAt: new Date(version.createdAt),
-      })),
-      notFound: false,
-      lastRefreshed: new Date(),
-    };
-  }
-
-  /**
-   * Creates or updates a map in the database
+   * Gets the raw BeatSaver map for a given hash
    *
    * @param hash the hash of the map
    * @param token the optional token to use
-   * @returns the created or updated map
+   * @returns the raw BeatSaver map
    */
-  public static async createOrUpdateMap(
-    hash: string,
-    token?: BeatSaverMapToken
-  ): Promise<BeatSaverMap | undefined> {
-    const hashUpper = hash.toUpperCase();
+  public static async getMapToken(hash: string): Promise<BeatSaverMapToken | undefined> {
+    const normalizedHash = hash.toLowerCase();
 
-    return CacheService.fetchWithCache(CacheId.BeatSaver, `beatsaver:${hashUpper}`, async () => {
-      const existingMap = await this.findMapByVersionHash(hashUpper);
-
-      // If map exists, return it without updating
-      if (existingMap) {
-        return existingMap.toObject<BeatSaverMap>();
-      }
-
-      // Only create new map if it doesn't exist
-      const resolvedToken =
-        token || (await ApiServiceRegistry.getInstance().getBeatSaverService().lookupMap(hash));
-      if (!resolvedToken) {
-        return this.createUnknownMap(hash);
-      }
-
-      return this.createNewMap(resolvedToken);
+    const map = await BeatSaverMapModel.findOne({
+      "versions.hash": normalizedHash,
     });
-  }
+    if (map) {
+      return map;
+    }
 
-  /**
-   * Creates a new map in the database
-   *
-   * @param token the token containing the map data
-   * @returns the created map
-   */
-  private static async createNewMap(token: BeatSaverMapToken): Promise<BeatSaverMap> {
-    const newMap = new BeatSaverMapModel(this.parseMapFromToken(token));
-    await newMap.save();
-    return newMap.toObject<BeatSaverMap>();
-  }
+    const before = performance.now();
+    const token = await ApiServiceRegistry.getInstance()
+      .getBeatSaverService()
+      .lookupMap(normalizedHash);
+    if (!token) {
+      return undefined;
+    }
 
-  /**
-   * Persists an unknown map to the database
-   *
-   * @param hash the hash of the map
-   * @returns the created map
-   */
-  private static async createUnknownMap(hash: string): Promise<BeatSaverMap> {
-    const newMap = new BeatSaverMapModel({
-      notFound: true,
-      versions: [{ hash: hash.toUpperCase() }] as never,
-      lastRefreshed: new Date(),
+    token.versions.forEach(version => {
+      version.hash = version.hash.toLowerCase(); // Ensure the hash is lowercase
     });
 
-    await newMap.save();
-    return newMap.toObject<BeatSaverMap>();
+    const newMap = await BeatSaverMapModel.findOneAndUpdate(
+      { _id: token.id },
+      { $set: token },
+      { upsert: true, new: true }
+    );
+    Logger.info(`Created BeatSaver map ${hash} in ${formatDuration(performance.now() - before)}`);
+    return newMap;
   }
 
   /**
@@ -162,23 +66,25 @@ export default class BeatSaverService {
     type: DetailType = DetailType.BASIC,
     token?: BeatSaverMapToken
   ): Promise<BeatSaverMapResponse | undefined> {
-    const map = await CacheService.fetchWithCache(
-      CacheId.BeatSaver,
-      `beatsaver:${hash}`,
-      async () => {
-        return await this.createOrUpdateMap(hash, token);
-      }
-    );
+    const map =
+      token ??
+      (await CacheService.fetchWithCache(CacheId.BeatSaver, `beatsaver:${hash}`, async () => {
+        return await this.getMapToken(hash);
+      }));
 
-    if (!map || map.versions.length === 0 || map.notFound) {
+    if (!map || map.versions.length === 0) {
       return undefined;
     }
 
     const response = {
       hash,
-      bsr: map.bsr,
+      bsr: map.id,
       name: map.name,
-      author: map.author,
+      author: {
+        avatar: map.uploader.avatar,
+        name: map.uploader.name,
+        id: map.uploader.id,
+      },
     } as BeatSaverMapResponse;
 
     if (type === DetailType.BASIC) {
@@ -193,7 +99,7 @@ export default class BeatSaverService {
       difficulty: getBeatSaverDifficulty(map, hash, difficulty, characteristic),
       difficultyLabels: map.versions.reduce(
         (acc, version) => {
-          version.difficulties.forEach(diff => {
+          version.diffs.forEach(diff => {
             acc[diff.difficulty] = diff.label;
           });
           return acc;

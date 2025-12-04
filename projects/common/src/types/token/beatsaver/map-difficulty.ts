@@ -1,90 +1,113 @@
-import { MapDifficulty } from "../../../score/map-difficulty";
-import { MapDifficultyParitySummaryToken } from "./difficulty-parity-summary";
+import { prop } from "@typegoose/typegoose";
+import type { MapDifficulty } from "../../../score/map-difficulty";
+import type MapDifficultyParitySummaryToken from "./difficulty-parity-summary";
 
-export type BeatSaverMapDifficultyToken = {
+export default class BeatSaverMapDifficultyToken {
   /**
    * The NJS of this difficulty.
    */
-  njs: number;
+  @prop()
+  public njs!: number;
 
   /**
    * The NJS offset of this difficulty.
    */
-  offset: number;
+  @prop()
+  public offset!: number;
 
   /**
    * The amount of notes in this difficulty.
    */
-  notes: number;
+  @prop()
+  public notes!: number;
 
   /**
    * The amount of bombs in this difficulty.
    */
-  bombs: number;
+  @prop()
+  public bombs!: number;
 
   /**
    * The amount of obstacles in this difficulty.
    */
-  obstacles: number;
+  @prop()
+  public obstacles!: number;
 
   /**
    * The notes per second in this difficulty.
    */
-  nps: number;
+  @prop()
+  public nps!: number;
 
   /**
    * The length of this difficulty in seconds.
    */
-  length: number;
+  @prop()
+  public length!: number;
 
   /**
    * The characteristic of this difficulty.
    */
-  characteristic: "Standard" | "Lawless";
+  @prop()
+  public characteristic!: "Standard" | "Lawless";
 
   /**
    * The difficulty of this difficulty.
    */
-  difficulty: MapDifficulty;
+  @prop()
+  public difficulty!: MapDifficulty;
 
   /**
    * The amount of lighting events in this difficulty.
    */
-  events: number;
+  @prop()
+  public events!: number;
 
   /**
    * Whether this difficulty uses Chroma.
    */
-  chroma: boolean;
+  @prop()
+  public chroma!: boolean;
 
   /**
-   * Quite frankly I have no fucking idea what these are.
+   * Mapping Extensions
    */
-  me: boolean;
-  ne: boolean;
+  @prop()
+  public me!: boolean;
+
+  /**
+   * Noodle Extensions
+   */
+  @prop()
+  public ne!: boolean;
 
   /**
    * Does this difficulty use cinema?
    */
-  cinema: boolean;
+  @prop()
+  public cinema!: boolean;
 
   /**
    * The length of this difficulty in seconds.
    */
-  seconds: number;
+  @prop()
+  public seconds!: number;
 
   /**
    * The parity summary of this difficulty.
    */
-  paritySummary: MapDifficultyParitySummaryToken;
+  @prop()
+  public paritySummary!: MapDifficultyParitySummaryToken;
 
   /**
    * The maximum score of this difficulty.
    */
-  maxScore: number;
+  @prop()
+  public maxScore!: number;
 
   /**
    * The custom difficulty label.
    */
-  label: string;
-};
+  @prop()
+  public label!: string;
+}

@@ -72,9 +72,7 @@ try {
 Logger.info("Connected to MongoDB :)");
 
 Logger.info("Testing Redis connection...");
-
 export const redisClient = new Redis(env.REDIS_URL);
-
 Logger.info("Connected to Redis :)");
 
 export const app = new Elysia()

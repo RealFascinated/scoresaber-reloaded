@@ -441,12 +441,7 @@ class SSRApi {
    */
   async getScore(scoreId: string) {
     return await this.get<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>(
-      `${env.NEXT_PUBLIC_API_URL}/scores/${scoreId}`,
-      {
-        searchParams: {
-          superJson: true,
-        },
-      }
+      `${env.NEXT_PUBLIC_API_URL}/scores/${scoreId}`
     );
   }
 }

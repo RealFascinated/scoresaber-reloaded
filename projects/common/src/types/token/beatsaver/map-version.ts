@@ -1,43 +1,52 @@
-import { BeatSaverMapDifficultyToken } from "./map-difficulty";
+import { prop } from "@typegoose/typegoose";
+import type BeatSaverMapDifficultyToken from "./map-difficulty";
 
-export type BeatSaverMapVersionToken = {
+export default class BeatSaverMapVersionToken {
   /**
    * The hash of the map.
    */
-  hash: string;
+  @prop()
+  public hash!: string;
 
   /**
    * The stage of the map.
    */
-  stage: "Published"; // todo: find the rest of these
+  @prop()
+  public stage!: "Published"; // todo: find the rest of these
 
   /**
    * The date the map was created.
    */
-  createdAt: string;
+  @prop()
+  public createdAt!: string;
 
   /**
    * The sage score of the map. (no idea what this is x.x)
    */
-  sageScore: number;
+  @prop()
+  public sageScore!: number;
 
   /**
    * The difficulties in the map.
    */
-  diffs: BeatSaverMapDifficultyToken[];
+  @prop()
+  public diffs!: BeatSaverMapDifficultyToken[];
 
   /**
    * The URL to the download of the map.
    */
-  downloadURL: string;
+  @prop()
+  public downloadURL!: string;
 
   /**
    * The URL to the cover image.
    */
-  coverURL: string;
+  @prop()
+  public coverURL!: string;
 
   /**
    * The URL to the preview of the map.
    */
-  previewURL: string;
-};
+  @prop()
+  public previewURL!: string;
+}

@@ -1,8 +1,8 @@
-import { BeatSaverMap } from "../model/beatsaver/map";
-import BeatSaverMapDifficulty from "../model/beatsaver/map-difficulty";
 import { BeatSaverMapResponse } from "../response/beatsaver-map-response";
 import { MapDifficulty } from "../score/map-difficulty";
 import { MapCharacteristic } from "../types/map-characteristic";
+import BeatSaverMapToken from "../types/token/beatsaver/map";
+import BeatSaverMapDifficultyToken from "../types/token/beatsaver/map-difficulty";
 
 /**
  * Gets the BeatSaver mapper profile url.
@@ -23,15 +23,18 @@ export function getBeatSaverMapperProfileUrl(map?: BeatSaverMapResponse) {
  * @param characteristic the characteristic to get
  */
 export function getBeatSaverDifficulty(
-  map: BeatSaverMap,
+  map: BeatSaverMapToken,
   hash: string,
   difficulty: MapDifficulty,
   characteristic: MapCharacteristic
-): BeatSaverMapDifficulty | undefined {
+): BeatSaverMapDifficultyToken | undefined {
   const version = map.versions.find(v => v.hash === hash);
 
   // Fallback to the latest version if the version is undefined
   return (
-    version ?? map.versions.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0]
-  ).difficulties.find(d => d.difficulty === difficulty && d.characteristic === characteristic);
+    version ??
+    map.versions.sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    )[0]
+  ).diffs.find(d => d.difficulty === difficulty && d.characteristic === characteristic);
 }

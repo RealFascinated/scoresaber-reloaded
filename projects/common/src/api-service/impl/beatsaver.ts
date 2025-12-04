@@ -1,5 +1,5 @@
 import { Cooldown } from "../../cooldown";
-import { BeatSaverMapToken } from "../../types/token/beatsaver/map";
+import BeatSaverMapToken from "../../types/token/beatsaver/map";
 import { BeatSaverMultiMapLookup } from "../../types/token/beatsaver/multi-map-lookup";
 import ApiService from "../api-service";
 import { ApiServiceName } from "../api-service-registry";

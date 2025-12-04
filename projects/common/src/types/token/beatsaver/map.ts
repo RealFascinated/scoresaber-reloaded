@@ -1,96 +1,115 @@
-import BeatSaverAccountToken from "./account";
-import BeatSaverMapMetadataToken from "./map-metadata";
-import BeatSaverMapStatsToken from "./map-stats";
-import { BeatSaverMapVersionToken } from "./map-version";
+import { prop } from "@typegoose/typegoose";
+import type BeatSaverAccountToken from "./account";
+import type BeatSaverMapMetadataToken from "./map-metadata";
+import type BeatSaverMapStatsToken from "./map-stats";
+import type BeatSaverMapVersionToken from "./map-version";
 
-export interface BeatSaverMapToken {
+export default class BeatSaverMapToken {
   /**
-   * The id of the map.
+   * The BSR code of the map.
    */
-  id: string;
+  @prop({ localField: "id", foreignField: "_id", ref: "BeatSaverMap" })
+  public id!: string;
 
   /**
    * The name of the map.
    */
-  name: string;
+  @prop()
+  public name!: string;
 
   /**
    * The description of the map.
    */
-  description: string;
+  @prop()
+  public description!: string;
 
   /**
    * The uploader of the map.
    */
-  uploader: BeatSaverAccountToken;
+  @prop()
+  public uploader!: BeatSaverAccountToken;
 
   /**
    * The metadata of the map.
    */
-  metadata: BeatSaverMapMetadataToken;
+  @prop()
+  public metadata!: BeatSaverMapMetadataToken;
 
   /**
    * The stats of the map.
    */
-  stats: BeatSaverMapStatsToken;
+  @prop()
+  public stats!: BeatSaverMapStatsToken;
 
   /**
    * The date the map was uploaded.
    */
-  uploaded: string;
+  @prop()
+  public uploaded!: string;
 
   /**
    * Whether the map was mapped by an automapper.
    */
-  automapper: boolean;
+  @prop()
+  public automapper!: boolean;
 
   /**
    * Whether the map is ranked on ScoreSaber.
    */
-  ranked: boolean;
+  @prop()
+  public ranked!: boolean;
 
   /**
    * Whether the map is qualified on ScoreSaber.
    */
-  qualified: boolean;
+  @prop()
+  public qualified!: boolean;
 
   /**
    * The versions of the map.
    */
-  versions: BeatSaverMapVersionToken[];
+  @prop()
+  public versions!: BeatSaverMapVersionToken[];
 
   /**
    * The date the map was created.
    */
-  createdAt: string;
+  @prop()
+  public createdAt!: string;
 
   /**
    * The date the map was last updated.
    */
-  updatedAt: string;
+  @prop()
+  public updatedAt!: string;
 
   /**
    * The date the map was last published.
    */
-  lastPublishedAt: string;
+  @prop()
+  public lastPublishedAt!: string;
 
   /**
    * The tags of the map.
    */
-  tags: string[];
+  @prop()
+  public tags!: string[];
 
   /**
    * Whether the map is declared to be mapped by an AI.
    */
-  declaredAi: string;
+  @prop()
+  public declaredAi!: string;
 
   /**
    * Whether the map is ranked on BeatLeader.
    */
-  blRanked: boolean;
+  @prop()
+  public blRanked!: boolean;
 
   /**
    * Whether the map is qualified on BeatLeader.
    */
-  blQualified: boolean;
+  @prop()
+  public blQualified!: boolean;
 }

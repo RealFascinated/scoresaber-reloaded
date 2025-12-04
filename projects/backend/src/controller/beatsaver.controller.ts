@@ -5,7 +5,6 @@ import { MapDifficulty } from "@ssr/common/score/map-difficulty";
 import { MapCharacteristic } from "@ssr/common/types/map-characteristic";
 import { t } from "elysia";
 import { Controller, Get } from "elysia-decorators";
-import SuperJSON, { SuperJSONResult } from "superjson";
 import BeatSaverService from "../service/beatsaver.service";
 
 @Controller("/beatsaver")
@@ -20,7 +19,6 @@ export default class BeatSaverController {
     }),
     query: t.Object({
       type: t.Optional(t.Union([t.Literal("basic"), t.Literal("full")], { default: "basic" })),
-      superJson: t.Optional(t.Boolean()),
     }),
     detail: {
       description: "Fetch a map by hash, difficulty, and characteristic",
@@ -28,19 +26,19 @@ export default class BeatSaverController {
   })
   public async getMapByHash({
     params: { hash, difficulty, characteristic },
-    query: { type, superJson },
+    query: { type },
   }: {
     params: {
       hash: string;
       difficulty: MapDifficulty;
       characteristic: MapCharacteristic;
     };
-    query: { type: DetailType; superJson: boolean };
-  }): Promise<SuperJSONResult | BeatSaverMapResponse> {
+    query: { type: DetailType };
+  }): Promise<BeatSaverMapResponse> {
     const map = await BeatSaverService.getMap(hash, difficulty, characteristic, type);
     if (!map) {
-      throw new NotFoundError("BeatSaver map not found");
+      throw new NotFoundError(`BeatSaver map ${hash} not found`);
     }
-    return superJson ? SuperJSON.serialize(map) : map;
+    return map;
   }
 }
