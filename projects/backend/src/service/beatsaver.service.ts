@@ -25,6 +25,8 @@ export default class BeatSaverService {
       "versions.hash": normalizedHash,
     });
     if (map) {
+      // Fix the id of the map
+      map.id = (map as BeatSaverMapToken & { _id?: string })._id ?? map.id;
       return map;
     }
 
@@ -46,6 +48,8 @@ export default class BeatSaverService {
       { upsert: true, new: true }
     );
     Logger.info(`Created BeatSaver map ${hash} in ${formatDuration(performance.now() - before)}`);
+    // Fix the id of the map
+    newMap.id = (newMap as BeatSaverMapToken & { _id?: string })._id ?? newMap.id;
     return newMap;
   }
 
