@@ -21,8 +21,8 @@ export default class BeatSaverService {
 
     const map = await BeatSaverMapModel.findOne({
       "versions.hash": normalizedHash,
-    });
-    if (map) {
+    }).lean();
+    if (map != null) {
       // Add the id to the map
       map.id = (map as BeatSaverMapToken & { _id?: string })._id ?? map.id;
       return map;
