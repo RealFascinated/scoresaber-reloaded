@@ -3,7 +3,7 @@ import { BeatSaverMapModel } from "@ssr/common/model/beatsaver/map";
 import { connectBeatSaverWebsocket } from "@ssr/common/websocket/beatsaver-websocket";
 import CacheService from "../service/cache.service";
 import { DiscordChannels, sendEmbedToChannel } from "../bot/bot";
-import { EmbedBuilder } from "discord.js";
+import { ButtonBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
 
 export class BeatSaverWebsocket {
   constructor() {
@@ -40,7 +40,19 @@ export class BeatSaverWebsocket {
             .setTitle("BeatSaver Map")
             .setDescription(`Updated map ${map.id} - ${map.name}`)
             .setColor("#00ff00")
-            .setThumbnail(latestVersion.coverURL)
+            .setThumbnail(latestVersion.coverURL),
+          [
+            {
+              type: 1,
+              components: [
+                new ButtonBuilder()
+                  .setLabel("Map")
+                  .setEmoji("🗺️")
+                  .setStyle(ButtonStyle.Link)
+                  .setURL(`https://beatsaver.com/maps/${map.id}`),
+              ],
+            },
+          ]
         );
       },
     });
