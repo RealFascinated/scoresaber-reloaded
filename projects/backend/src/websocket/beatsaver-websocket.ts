@@ -9,13 +9,11 @@ export class BeatSaverWebsocket {
   constructor() {
     connectBeatSaverWebsocket({
       onMapUpdate: async map => {
-        sendEmbedToChannel(
-          DiscordChannels.BEATSAVER_LOGS,
-          new EmbedBuilder().setDescription(`BeatSaver map ${map.id} updated`)
-        );
-        const latestHash = map.versions.sort(
+        const latestVersion = map.versions.sort(
           (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-        )[0].hash;
+        )[0];
+
+        const mapHash = latestVersion.hash;
 
         // Update the map in the database if it exists, otherwise create it
         await BeatSaverMapModel.updateOne(
@@ -33,9 +31,17 @@ export class BeatSaverWebsocket {
           }
         );
 
-        await CacheService.invalidate(`beatsaver:${latestHash}`); // Invalidate the cache for the map
+        await CacheService.invalidate(`beatsaver:${mapHash}`); // Invalidate the cache for the map
+        Logger.info(`BeatSaver map ${mapHash} updated`);
 
-        Logger.info(`BeatSaver map ${latestHash} updated`);
+        await sendEmbedToChannel(
+          DiscordChannels.BEATSAVER_LOGS,
+          new EmbedBuilder()
+            .setTitle("BeatSaver Map")
+            .setDescription(`Updated map ${map.id} - ${map.name}`)
+            .setColor("#00ff00")
+            .setThumbnail(latestVersion.coverURL)
+        );
       },
     });
   }
