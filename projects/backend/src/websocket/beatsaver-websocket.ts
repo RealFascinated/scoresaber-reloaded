@@ -1,9 +1,9 @@
 import Logger from "@ssr/common/logger";
 import { BeatSaverMapModel } from "@ssr/common/model/beatsaver/map";
 import { connectBeatSaverWebsocket } from "@ssr/common/websocket/beatsaver-websocket";
-import CacheService from "../service/cache.service";
-import { DiscordChannels, sendEmbedToChannel } from "../bot/bot";
 import { ButtonBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
+import { DiscordChannels, sendEmbedToChannel } from "../bot/bot";
+import CacheService from "../service/cache.service";
 
 export class BeatSaverWebsocket {
   constructor() {
@@ -14,8 +14,6 @@ export class BeatSaverWebsocket {
         )[0];
 
         const mapHash = latestVersion.hash;
-
-        // Update the map in the database if it exists, otherwise create it
         await BeatSaverMapModel.updateOne(
           {
             _id: map.id,

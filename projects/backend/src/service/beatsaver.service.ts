@@ -7,8 +7,6 @@ import { MapCharacteristic } from "@ssr/common/types/map-characteristic";
 import BeatSaverMapToken from "@ssr/common/types/token/beatsaver/map";
 import { getBeatSaverDifficulty } from "@ssr/common/utils/beatsaver.util";
 import CacheService, { CacheId } from "./cache.service";
-import Logger from "@ssr/common/logger";
-import { formatDuration } from "@ssr/common/utils/time-utils";
 
 export default class BeatSaverService {
   /**
@@ -25,12 +23,10 @@ export default class BeatSaverService {
       "versions.hash": normalizedHash,
     });
     if (map) {
-      // Fix the id of the map
+      // Add the id to the map
       map.id = (map as BeatSaverMapToken & { _id?: string })._id ?? map.id;
       return map;
     }
-
-    const before = performance.now();
     const token = await ApiServiceRegistry.getInstance()
       .getBeatSaverService()
       .lookupMap(normalizedHash);
@@ -38,17 +34,20 @@ export default class BeatSaverService {
       return undefined;
     }
 
-    token.versions.forEach(version => {
+    return this.saveMap(token);
+  }
+
+  public static async saveMap(map: BeatSaverMapToken): Promise<BeatSaverMapToken> {
+    map.versions.forEach(version => {
       version.hash = version.hash.toLowerCase(); // Ensure the hash is lowercase
     });
 
     const newMap = await BeatSaverMapModel.findOneAndUpdate(
-      { _id: token.id },
-      { $set: token },
+      { _id: map.id },
+      { $set: map },
       { upsert: true, new: true }
     );
-    Logger.info(`Created BeatSaver map ${hash} in ${formatDuration(performance.now() - before)}`);
-    // Fix the id of the map
+    // Add the id to the map
     newMap.id = (newMap as BeatSaverMapToken & { _id?: string })._id ?? newMap.id;
     return newMap;
   }

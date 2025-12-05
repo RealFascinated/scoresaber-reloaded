@@ -2,6 +2,7 @@ import * as dotenv from "@dotenvx/dotenvx";
 import cors from "@elysiajs/cors";
 import { cron } from "@elysiajs/cron";
 import { swagger } from "@elysiajs/swagger";
+import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
 import { formatDuration } from "@ssr/common/utils/time-utils";
@@ -36,6 +37,7 @@ import TopScoresController from "./controller/top-scores.controller";
 import { EventsManager } from "./event/events-manager";
 import { metricsPlugin } from "./plugins/metrics.plugin";
 import { QueueManager } from "./queue/queue-manager";
+import BeatSaverService from "./service/beatsaver.service";
 import CacheService from "./service/cache.service";
 import { LeaderboardService } from "./service/leaderboard/leaderboard.service";
 import MetricsService from "./service/metrics.service";
@@ -303,6 +305,52 @@ app.onStart(async () => {
 
   EventsManager.registerListener(new QueueManager());
   EventsManager.registerListener(new MetricsService());
+
+  // Scrape beatsaver maps
+  (async () => {
+    const redisKey = "beatsaver:scrape:beforeDate";
+
+    let shouldScrape = true;
+    const redisValue = await redisClient.get(redisKey);
+    let beforeDate = redisValue ? new Date(redisValue) : new Date();
+    Logger.info(`Starting to scrape beatsaver maps before ${beforeDate.toISOString()}...`);
+
+    while (shouldScrape) {
+      const latestMaps = await ApiServiceRegistry.getInstance()
+        .getBeatSaverService()
+        .lookupLatestMaps(false, 100, {
+          before: beforeDate,
+        });
+      if (latestMaps == undefined || latestMaps.docs.length === 0) {
+        Logger.info(`No maps found before ${beforeDate.toISOString()}!`);
+        shouldScrape = false;
+        continue;
+      }
+
+      const sortedMaps = latestMaps.docs.sort(
+        (a, b) => new Date(a.uploaded).getTime() - new Date(b.uploaded).getTime()
+      );
+      const oldestDate = new Date(sortedMaps[0].uploaded);
+      beforeDate = oldestDate;
+
+      // Save the maps
+      for (const map of sortedMaps) {
+        await BeatSaverService.saveMap(map);
+      }
+
+      // Save progress to Redis
+      await redisClient.set(redisKey, beforeDate.toISOString());
+
+      // If we got fewer than 100 maps, we've reached the end
+      if (latestMaps.docs.length < 100) {
+        shouldScrape = false;
+        continue;
+      }
+      await Bun.sleep(500); // 500ms to avoid touching their server inappropriately
+
+      Logger.info(`Scraped ${latestMaps.docs.length} maps before ${beforeDate.toISOString()}!`);
+    }
+  })();
 });
 
 app.listen({

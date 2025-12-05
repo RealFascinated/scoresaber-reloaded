@@ -1,4 +1,5 @@
 import { Cooldown } from "../../cooldown";
+import { BeatSaverLatestMapsToken } from "../../types/token/beatsaver/api/latest-maps";
 import BeatSaverMapToken from "../../types/token/beatsaver/map";
 import { BeatSaverMultiMapLookup } from "../../types/token/beatsaver/multi-map-lookup";
 import ApiService from "../api-service";
@@ -6,6 +7,7 @@ import { ApiServiceName } from "../api-service-registry";
 
 const API_BASE = "https://api.beatsaver.com";
 const LOOKUP_MAP_BY_HASH_ENDPOINT = `${API_BASE}/maps/hash/:query`;
+const LOOKUP_LATEST_MAPS_ENDPOINT = `${API_BASE}/maps/latest`;
 
 export class BeatSaverService extends ApiService {
   constructor() {
@@ -63,6 +65,49 @@ export class BeatSaverService extends ApiService {
     this.log(
       `Found ${Object.entries(response).length} maps in ${(performance.now() - before).toFixed(0)}ms`
     );
+    return response;
+  }
+
+  /**
+   * Gets the latest maps.
+   *
+   * @param automapper the automapper to get the maps from
+   * @param pageSize the page size to get the maps from
+   * @param sort the sort to get the maps from
+   * @returns the latest maps
+   */
+  async lookupLatestMaps(
+    automapper: boolean,
+    pageSize: number,
+    options?: {
+      sort?: "FIRST_PUBLISHED" | "UPDATED" | "LAST_PUBLISHED" | "CREATED" | "CURATED";
+      before?: Date;
+      after?: Date;
+    }
+  ): Promise<BeatSaverLatestMapsToken | undefined> {
+    const before = performance.now();
+    this.log(`Looking up latest maps...`);
+
+    const formatDateForAPI = (date: Date): string => {
+      // Format as YYYY-MM-DDTHH:MM:SS+00:00 (no milliseconds, +00:00 instead of Z)
+      const isoString = date.toISOString();
+      return isoString.replace(/\.\d{3}Z$/, "+00:00");
+    };
+
+    const response = await this.fetch<BeatSaverLatestMapsToken>(LOOKUP_LATEST_MAPS_ENDPOINT, {
+      searchParams: {
+        ...(pageSize ? { pageSize: pageSize } : {}),
+        ...(automapper ? { automapper: automapper } : {}),
+        ...(options?.sort ? { sort: options.sort } : {}),
+        ...(options?.before ? { before: formatDateForAPI(options.before) } : {}),
+        ...(options?.after ? { after: formatDateForAPI(options.after) } : {}),
+      },
+    });
+    if (response == undefined) {
+      return undefined;
+    }
+
+    this.log(`Found ${response.docs.length} maps in ${(performance.now() - before).toFixed(0)}ms`);
     return response;
   }
 }

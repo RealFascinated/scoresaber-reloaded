@@ -29,7 +29,8 @@ class Request {
     const params = new URLSearchParams(
       Object.entries(searchParams).map(([key, value]) => [key, String(value)])
     );
-    return `${baseUrl}?${params.toString()}`;
+    const separator = baseUrl.includes("?") ? "&" : "?";
+    return `${baseUrl}${separator}${params.toString()}`;
   }
 
   private static async handleRateLimit(url: string, response: Response): Promise<void> {
