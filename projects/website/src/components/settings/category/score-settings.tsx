@@ -10,7 +10,6 @@ import { FaChartLine, FaPlay } from "react-icons/fa";
 import { toast } from "sonner";
 import { z } from "zod";
 import { Form } from "../../ui/form";
-import { SettingCard } from "../setting-card";
 import { SettingSection } from "../setting-section";
 
 const formSchema = z.object({
@@ -91,18 +90,17 @@ const ScoreSettings = () => {
   }, [replayViewer, form, showScoreComparison]);
 
   return (
-    <div className="grid gap-6">
+    <div className="space-y-6">
       <Form {...form}>
         <form className="space-y-6">
           {settings.map(section => (
-            <SettingCard key={section.id}>
-              <SettingSection
-                title={section.title}
-                icon={section.icon}
-                fields={section.fields}
-                form={form}
-              />
-            </SettingCard>
+            <SettingSection
+              key={section.id}
+              title={section.title}
+              icon={section.icon}
+              fields={section.fields}
+              form={form}
+            />
           ))}
         </form>
       </Form>

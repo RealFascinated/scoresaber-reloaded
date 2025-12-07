@@ -6,7 +6,6 @@ import { useIsMobile } from "@/contexts/viewport-context";
 import useDatabase from "@/hooks/use-database";
 import { truncateText } from "@ssr/common/string-utils";
 import { useLiveQuery } from "dexie-react-hooks";
-import Settings from "../settings/settings";
 import SimpleLink from "../simple-link";
 import {
   DropdownButton,
@@ -63,7 +62,7 @@ export default function ProfileButton() {
         </DropdownButton>
       )}
       <DropdownGroup>
-        <Settings />
+        <DropdownButton href="/settings">Settings</DropdownButton>
       </DropdownGroup>
       {mainPlayer.id && (
         <>

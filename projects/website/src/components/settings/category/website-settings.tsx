@@ -2,7 +2,7 @@
 
 import { SettingIds, WebsiteLanding } from "@/common/database/database";
 import { BACKGROUND_COVERS } from "@/components/background-cover";
-import { Form } from "@/components/ui/form";
+import { Form, FormDescription, FormLabel } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -23,7 +23,6 @@ import { IconType } from "react-icons";
 import { FaEye, FaGlobe, FaImage, FaPalette, FaSnowflake } from "react-icons/fa";
 import { toast } from "sonner";
 import { z } from "zod";
-import { SettingCard } from "../setting-card";
 import { Field, SettingSection } from "../setting-section";
 
 const formSchema = z.object({
@@ -115,9 +114,23 @@ const BackgroundCoverControl = (props: {
   };
 
   return (
-    <div>
+    <div className="flex flex-col space-y-2 md:flex-row md:items-start md:justify-between md:space-y-0">
+      <div className="flex-1 space-y-0 md:pr-4">
+        <FormLabel className="text-sm leading-tight font-normal">Background Cover</FormLabel>
+        <FormDescription className="text-xs leading-tight">
+          Change the background cover of the website
+        </FormDescription>
+        {selectedOption === "custom" && (
+          <Input
+            placeholder="Hex color or image URL"
+            value={customValue}
+            onChange={e => handleCustomInputChange(e.target.value)}
+            className="mt-2 h-8 w-full text-xs md:w-2xl"
+          />
+        )}
+      </div>
       <Select onValueChange={handleSelectChange} value={selectedOption}>
-        <SelectTrigger>
+        <SelectTrigger className="w-full md:w-52">
           <SelectValue placeholder="Select a background cover" />
         </SelectTrigger>
         <SelectContent>
@@ -129,15 +142,6 @@ const BackgroundCoverControl = (props: {
           <SelectItem value="custom">Custom</SelectItem>
         </SelectContent>
       </Select>
-
-      {selectedOption === "custom" && (
-        <Input
-          placeholder="Enter a hex color or image URL..."
-          value={customValue}
-          onChange={e => handleCustomInputChange(e.target.value)}
-          className="mt-2"
-        />
-      )}
     </div>
   );
 };
@@ -155,9 +159,8 @@ const settings: {
     fields: [
       {
         name: "backgroundCover" as Path<FormValues>,
-        label: "Background Cover",
+        label: "",
         type: "select" as const,
-        description: "Change the background cover of the website",
         customControl: BackgroundCoverControl,
       },
     ],
@@ -312,18 +315,17 @@ const WebsiteSettings = () => {
   }, [backgroundCover, snowParticles, showKitty, websiteLanding, theme, form]);
 
   return (
-    <div className="grid gap-6">
+    <div className="space-y-6">
       <Form {...form}>
         <form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
           {settings.map(section => (
-            <SettingCard key={section.id}>
-              <SettingSection<FormValues>
-                title={section.title}
-                icon={section.icon}
-                fields={section.fields}
-                form={form}
-              />
-            </SettingCard>
+            <SettingSection<FormValues>
+              key={section.id}
+              title={section.title}
+              icon={section.icon}
+              fields={section.fields}
+              form={form}
+            />
           ))}
         </form>
       </Form>

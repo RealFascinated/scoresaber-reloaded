@@ -84,32 +84,41 @@ function FormFieldComponent<
 
   return (
     <FormItem
-      className={field.type === "checkbox" ? "flex flex-row items-center space-y-0 space-x-2" : ""}
+      className={
+        field.customControl
+          ? ""
+          : field.type === "checkbox"
+            ? "flex flex-row items-center justify-between gap-4 space-y-0 py-1"
+            : "flex flex-col items-start space-y-2 py-1 md:flex-row md:items-start md:justify-between md:space-y-0"
+      }
     >
-      {field.type === "checkbox" ? (
-        <>
-          <FormControl>
-            <Checkbox checked={formField.value as boolean} onCheckedChange={wrappedOnChange} />
-          </FormControl>
-          <div className="leading-none">
-            <FormLabel className="mb-1 block">{field.label}</FormLabel>
-            {field.description && <FormDescription>{field.description}</FormDescription>}
+      {field.customControl ? (
+        <FormControl>
+          <div className="py-1">
+            {field.customControl({
+              field: {
+                ...formField,
+                onChange: wrappedOnChange,
+              },
+            })}
           </div>
-        </>
+        </FormControl>
       ) : (
         <>
-          <FormLabel className="mb-1 block">{field.label}</FormLabel>
+          <div className="flex-1 space-y-0 md:pr-4">
+            <FormLabel className="text-sm leading-tight font-normal">{field.label}</FormLabel>
+            {field.description && (
+              <FormDescription className="text-xs leading-tight">
+                {field.description}
+              </FormDescription>
+            )}
+          </div>
           <FormControl>
-            {field.customControl ? (
-              field.customControl({
-                field: {
-                  ...formField,
-                  onChange: wrappedOnChange,
-                },
-              })
+            {field.type === "checkbox" ? (
+              <Checkbox checked={formField.value as boolean} onCheckedChange={wrappedOnChange} />
             ) : field.type === "select" ? (
               <Select value={formField.value as string} onValueChange={wrappedOnChange}>
-                <SelectTrigger>
+                <SelectTrigger className="w-full md:w-52">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -122,9 +131,6 @@ function FormFieldComponent<
               </Select>
             ) : null}
           </FormControl>
-          {field.description && (
-            <FormDescription className="mt-1">{field.description}</FormDescription>
-          )}
         </>
       )}
     </FormItem>
@@ -138,12 +144,12 @@ export function SettingSection<TFormValues extends Record<string, any>>({
   form,
 }: SettingSectionProps<TFormValues>) {
   return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-2">
-        <Icon className="text-muted-foreground size-5" />
-        <h3 className="text-lg font-medium">{title}</h3>
+    <div className="space-y-2">
+      <div className="text-muted-foreground flex items-center gap-2 text-xs font-semibold tracking-wider uppercase">
+        <Icon className="size-3.5" />
+        <span>{title}</span>
       </div>
-      <div className="space-y-4">
+      <div className="space-y-1">
         {fields.map(field => (
           <FormField
             key={String(field.name)}
