@@ -21,8 +21,8 @@
   "license": "MIT",
   "dependencies": {
     "cross-env": "^7.0.3",
-    "prettier": "^3.6.2",
-    "prettier-plugin-organize-imports": "^4.2.0",
+    "prettier": "^3.7.4",
+    "prettier-plugin-organize-imports": "^4.3.0",
     "prettier-plugin-tailwindcss": "^0.6.14"
   }
 }
