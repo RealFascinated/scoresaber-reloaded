@@ -3,7 +3,6 @@
 import { DatasetConfig } from "@/common/chart/types";
 import { Colors } from "@/common/colors";
 import GenericPlayerChart from "@/components/player/views/generic-player-chart";
-import { scoreBarsDataset } from "@/components/player/views/impl/player-scores-chart";
 import { PlayerStatisticHistory } from "@ssr/common/player/player-statistic-history";
 import { formatNumberWithCommas, formatPp, isWholeNumber } from "@ssr/common/utils/number-utils";
 
@@ -46,7 +45,7 @@ const datasetConfig: DatasetConfig[] = [
       },
     },
     labelFormatter: (value: number) => `PP: ${formatPp(value)}pp`,
-  }
+  },
 ];
 
 export default function PlayerSimpleRankingChart({ statisticHistory, daysAmount }: Props) {

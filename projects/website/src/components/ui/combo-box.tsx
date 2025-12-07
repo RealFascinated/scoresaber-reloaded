@@ -125,23 +125,30 @@ const Combobox = <T,>({
             <CommandList>
               <CommandEmpty>No results found.</CommandEmpty>
               <CommandGroup>
-                {items.map((item, index) => (
-                  <CommandItem
-                    key={index}
-                    value={item.value as string}
-                    onSelect={currentValue => {
-                      const current = currentValue as T;
-                      setOpen(false);
-                      handleValueChange(current === value ? undefined : current);
-                    }}
-                    className={cn("flex items-center justify-between", item.className)}
-                  >
-                    <div className="flex min-w-0 flex-1 items-center gap-2">
-                      {item.icon}
-                      {typeof item.name === "string" ? <span>{item.name}</span> : item.name}
-                    </div>
-                  </CommandItem>
-                ))}
+                {items.map((item, index) => {
+                  const searchValue =
+                    typeof item.displayName === "string"
+                      ? item.displayName
+                      : typeof item.name === "string"
+                        ? item.name
+                        : String(item.value);
+                  return (
+                    <CommandItem
+                      key={index}
+                      value={searchValue}
+                      onSelect={() => {
+                        setOpen(false);
+                        handleValueChange(item.value === value ? undefined : item.value);
+                      }}
+                      className={cn("flex items-center justify-between", item.className)}
+                    >
+                      <div className="flex min-w-0 flex-1 items-center gap-2">
+                        {item.icon}
+                        {typeof item.name === "string" ? <span>{item.name}</span> : item.name}
+                      </div>
+                    </CommandItem>
+                  );
+                })}
               </CommandGroup>
             </CommandList>
           </Command>

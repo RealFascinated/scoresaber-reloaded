@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useEffect } from "react";
 import { Path, useForm } from "react-hook-form";
-import { FaHistory, FaPlay } from "react-icons/fa";
+import { FaHistory } from "react-icons/fa";
 import { toast } from "sonner";
 import { z } from "zod";
 import { Form } from "../../ui/form";

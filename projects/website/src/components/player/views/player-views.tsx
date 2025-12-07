@@ -1,5 +1,6 @@
 "use client";
 
+import { HistoryMode } from "@/common/player/history-mode";
 import { Spinner } from "@/components/spinner";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,12 +11,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useIsMobile } from "@/contexts/viewport-context";
+import useDatabase from "@/hooks/use-database";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerStatisticHistory } from "@ssr/common/player/player-statistic-history";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { getDaysAgoDate } from "@ssr/common/utils/time-utils";
 import { useQuery } from "@tanstack/react-query";
+import { useLiveQuery } from "dexie-react-hooks";
 import { CalculatorIcon, ChartBarIcon, SwordIcon, TrendingUpIcon } from "lucide-react";
 import { ReactElement, useState } from "react";
 import PlayerRankingsButton from "../buttons/player-rankings-button";
@@ -23,11 +26,8 @@ import MapsGraphChart from "./impl/maps-graph-chart";
 import PlayerAccuracyChart from "./impl/player-accuracy-chart";
 import PlayerAdvancedRankingChart from "./impl/player-advanced-ranking-chart";
 import PlayerScoresChart from "./impl/player-scores-chart";
-import PlusPpCalculator from "./impl/plus-pp-calculator";
 import PlayerSimpleRankingChart from "./impl/player-simple-ranking-chart";
-import { HistoryMode } from "@/common/player/history-mode";
-import useDatabase from "@/hooks/use-database";
-import { useLiveQuery } from "dexie-react-hooks";
+import PlusPpCalculator from "./impl/plus-pp-calculator";
 
 // Constants
 const DATE_PRESETS = [

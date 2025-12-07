@@ -14,7 +14,7 @@ import { MapDifficulty } from "@ssr/common/score/map-difficulty";
 import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
 import { MapCharacteristic } from "@ssr/common/types/map-characteristic";
 import { getDifficulty } from "@ssr/common/utils/song-utils";
-import { formatDuration, TimeUnit } from "@ssr/common/utils/time-utils";
+import { TimeUnit } from "@ssr/common/utils/time-utils";
 import SuperJSON from "superjson";
 import { redisClient } from "../../common/redis";
 import { LeaderboardData, LeaderboardOptions } from "../../common/types/leaderboard";
@@ -240,10 +240,8 @@ export class LeaderboardCoreService {
       })
     );
 
-    // Dont parallelize this, we get rate limited
-    const before = performance.now();
-    for (const id of stillUncachedIds) {
-      try {
+    await Promise.all(
+      stillUncachedIds.map(async id => {
         const leaderboard = await LeaderboardService.fetchAndSaveLeaderboard(id);
         const data = await LeaderboardService.createLeaderboardData(leaderboard, false);
         await redisClient.set(
@@ -253,19 +251,14 @@ export class LeaderboardCoreService {
           TimeUnit.toSeconds(TimeUnit.Hour, 2)
         );
         results.set(id, data);
-      } catch (error) {
-        Logger.warn(`Failed to fetch leaderboard for ID ${id}:`, error);
-        results.set(id, null);
-      }
-    }
+      })
+    );
 
     const allLeaderboards = uniqueIds
       .map(id => results.get(id))
       .filter((data): data is LeaderboardData => data !== null);
     if (stillUncachedIds.length > 0) {
-      Logger.info(
-        `Fetched ${allLeaderboards.length} leaderboards from ScoreSaber in ${formatDuration(performance.now() - before)}!`
-      );
+      Logger.info(`Fetched ${allLeaderboards.length} leaderboards from ScoreSaber!`);
     }
 
     // Add BeatSaver data if needed
