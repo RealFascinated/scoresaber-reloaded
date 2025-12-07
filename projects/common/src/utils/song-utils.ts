@@ -39,6 +39,7 @@ export type ScoreBadge = {
 };
 
 const scoreBadges: ScoreBadge[] = [
+  { name: "GOD", min: 98, max: null, color: "#008B8B", textColor: "#00FFFF" },
   {
     name: "SS+",
     min: 95,
@@ -60,19 +61,25 @@ const scoreBadges: ScoreBadge[] = [
  * @returns The corresponding color for the accuracy.
  */
 export function getScoreBadgeFromAccuracy(acc: number): ScoreBadge {
-  // Check for SS+ first since it has no upper limit
-  if (acc >= 95) {
-    return scoreBadges[0]; // SS+ color
-  }
-
-  // Iterate through the rest of the badges
+  // Iterate through all badges in order
   for (const badge of scoreBadges) {
-    const min = badge.min ?? -Infinity; // Treat null `min` as -Infinity
-    const max = badge.max ?? Infinity; // Treat null `max` as Infinity
-
-    // Check if the accuracy falls within the badge's range
-    if (acc >= min && acc < (max === null ? Infinity : max)) {
-      return badge; // Return the color of the matching badge
+    // Badge with no upper limit (SS++, SS+)
+    if (badge.max === null && badge.min !== null) {
+      if (acc >= badge.min) {
+        return badge;
+      }
+    }
+    // Badge with no lower limit ("-")
+    else if (badge.min === null && badge.max !== null) {
+      if (acc < badge.max) {
+        return badge;
+      }
+    }
+    // Badge with both min and max (SS, S+, S, A)
+    else if (badge.min !== null && badge.max !== null) {
+      if (acc >= badge.min && acc < badge.max) {
+        return badge;
+      }
     }
   }
 
