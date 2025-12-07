@@ -10,50 +10,7 @@ import CacheService, { CacheId } from "./cache.service";
 
 export default class BeatSaverService {
   /**
-   * Gets the raw BeatSaver map for a given hash
-   *
-   * @param hash the hash of the map
-   * @param token the optional token to use
-   * @returns the raw BeatSaver map
-   */
-  public static async getMapToken(hash: string): Promise<BeatSaverMapToken | undefined> {
-    const normalizedHash = hash.toLowerCase();
-
-    const map = await BeatSaverMapModel.findOne({
-      "versions.hash": normalizedHash,
-    }).lean();
-    if (map != null) {
-      // Add the id to the map
-      map.id = (map as BeatSaverMapToken & { _id?: string })._id ?? map.id;
-      return map;
-    }
-    const token = await ApiServiceRegistry.getInstance()
-      .getBeatSaverService()
-      .lookupMap(normalizedHash);
-    if (!token) {
-      return undefined;
-    }
-
-    return this.saveMap(token);
-  }
-
-  public static async saveMap(map: BeatSaverMapToken): Promise<BeatSaverMapToken> {
-    map.versions.forEach(version => {
-      version.hash = version.hash.toLowerCase(); // Ensure the hash is lowercase
-    });
-
-    const newMap = await BeatSaverMapModel.findOneAndUpdate(
-      { _id: map.id },
-      { $set: map },
-      { upsert: true, new: true }
-    );
-    // Add the id to the map
-    newMap.id = (newMap as BeatSaverMapToken & { _id?: string })._id ?? newMap.id;
-    return newMap;
-  }
-
-  /**
-   * Fetches a BeatSaver map with caching
+   * Fetches a BeatSaver map
    *
    * @param hash the hash of the map
    * @param difficulty the difficulty to get
@@ -110,5 +67,54 @@ export default class BeatSaverService {
         {} as Record<MapDifficulty, string>
       ),
     } as BeatSaverMapResponse;
+  }
+
+  /**
+   * Gets the raw BeatSaver map token for a given hash
+   *
+   * @param hash the hash of the map
+   * @param token the optional token to use
+   * @returns the raw BeatSaver map
+   */
+  public static async getMapToken(hash: string): Promise<BeatSaverMapToken | undefined> {
+    const normalizedHash = hash.toLowerCase();
+
+    const map = await BeatSaverMapModel.findOne({
+      "versions.hash": normalizedHash,
+    }).lean();
+    if (map != null) {
+      // Add the id to the map
+      map.id = (map as BeatSaverMapToken & { _id?: string })._id ?? map.id;
+      return map;
+    }
+    const token = await ApiServiceRegistry.getInstance()
+      .getBeatSaverService()
+      .lookupMap(normalizedHash);
+    if (!token) {
+      return undefined;
+    }
+
+    return this.saveMap(token);
+  }
+
+  /**
+   * Saves a BeatSaver map to the database
+   *
+   * @param map the map to save
+   * @returns the saved map
+   */
+  public static async saveMap(map: BeatSaverMapToken): Promise<BeatSaverMapToken> {
+    map.versions.forEach(version => {
+      version.hash = version.hash.toLowerCase(); // Ensure the hash is lowercase
+    });
+
+    const newMap = await BeatSaverMapModel.findOneAndUpdate(
+      { _id: map.id },
+      { $set: map },
+      { upsert: true, new: true }
+    );
+    // Add the id to the map
+    newMap.id = (newMap as BeatSaverMapToken & { _id?: string })._id ?? newMap.id;
+    return newMap;
   }
 }

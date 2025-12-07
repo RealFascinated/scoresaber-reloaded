@@ -48,7 +48,7 @@ export default function ScoreMode({ initialMode, onModeChange }: ScoreModeProps)
   );
 
   return (
-    <div className="bg-background/80 border-border/50 flex gap-2 rounded-lg border p-1.5 shadow-sm">
+    <div className="bg-background/80 border-border/50 flex flex-wrap items-center justify-center gap-2 rounded-lg border p-1.5 shadow-sm">
       {scoreModes.map(mode => (
         <Button
           key={mode.name}

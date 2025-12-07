@@ -1,5 +1,4 @@
 import { PlayerAccuraciesService } from "./player-accuracies.service";
-import { PlayerCalendarService } from "./player-calendar.service";
 import { PlayerCoreService } from "./player-core.service";
 import { PlayerFriendScoresService } from "./player-friend-scores.service";
 import { PlayerHistoryService } from "./player-history.service";
@@ -41,9 +40,6 @@ export class PlayerService {
   public static playerHistoryToObject = PlayerHistoryService.playerHistoryToObject;
   public static getDaysTracked = PlayerHistoryService.getDaysTracked;
 
-  // PlayerCalendarService methods
-  public static generateScoreCalendar = PlayerCalendarService.generateScoreCalendar;
-
   // PlayerScoresService methods
   public static refreshAllPlayerScores = PlayerScoresService.refreshAllPlayerScores;
   public static getPlayerScoreChart = PlayerScoresService.getPlayerScoreChart;
@@ -65,7 +61,6 @@ export class PlayerService {
 
   // PlayerScoreHistoryService methods
   public static getPlayerScoreHistory = PlayerScoreHistoryService.getPlayerScoreHistory;
-  public static getPlayerScoreHistoryGraph = PlayerScoreHistoryService.getPlayerScoreHistoryGraph;
   public static getPlayerPreviousScore = PlayerScoreHistoryService.getPlayerPreviousScore;
 
   // PlayerFriendScoresService methods

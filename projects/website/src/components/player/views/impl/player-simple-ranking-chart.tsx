@@ -28,19 +28,6 @@ const datasetConfig: DatasetConfig[] = [
     labelFormatter: (value: number) => `Rank: #${formatNumberWithCommas(value)}`,
   },
   {
-    title: "Country Rank",
-    field: "countryRank",
-    color: "#FFEA00",
-    axisId: "y1",
-    axisConfig: {
-      reverse: true,
-      display: false,
-      displayName: "Country Rank",
-      position: "left",
-    },
-    labelFormatter: (value: number) => `Country Rank: #${formatNumberWithCommas(value)}`,
-  },
-  {
     title: "PP",
     field: "pp",
     color: Colors.ranked,
@@ -59,47 +46,13 @@ const datasetConfig: DatasetConfig[] = [
       },
     },
     labelFormatter: (value: number) => `PP: ${formatPp(value)}pp`,
-  },
-  {
-    title: "+1 PP",
-    field: "plusOnePp",
-    color: Colors.rankedLight,
-    axisId: "y3",
-    axisConfig: {
-      reverse: false,
-      display: false,
-      displayName: "+1 PP",
-      position: "right",
-      valueFormatter: value => {
-        if (isWholeNumber(value)) {
-          return value.toString();
-        }
-        return value.toFixed(1);
-      },
-    },
-    labelFormatter: (value: number) => `+1 PP: ${formatPp(value)}pp`,
-  },
-  {
-    title: "Medals",
-    field: "medals",
-    color: Colors.medal,
-    axisId: "y4",
-    showLegend: false,
-    axisConfig: {
-      reverse: false,
-      display: false,
-      displayName: "Medals",
-      position: "right",
-    },
-    labelFormatter: (value: number) => `Medals: ${formatNumberWithCommas(value)}`,
-  },
-  ...scoreBarsDataset,
+  }
 ];
 
-export default function PlayerRankingChart({ statisticHistory, daysAmount }: Props) {
+export default function PlayerSimpleRankingChart({ statisticHistory, daysAmount }: Props) {
   return (
     <GenericPlayerChart
-      id="player-ranking-chart"
+      id="player-simple-ranking-chart"
       statisticHistory={statisticHistory}
       datasetConfig={datasetConfig}
       daysAmount={daysAmount}

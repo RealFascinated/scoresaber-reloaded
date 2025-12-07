@@ -19,7 +19,7 @@ export interface Field<TFormValues extends Record<string, any>, TName extends Pa
   label: string;
   type: FieldType;
   description?: string;
-  options?: { label: string; value: string }[];
+  options?: readonly { label: string; value: string }[];
   customControl?: (props: {
     field: {
       value: TFormValues[TName];

@@ -1,6 +1,5 @@
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { PlayerStatisticHistory } from "@ssr/common/player/player-statistic-history";
-import { ScoreCalendarData } from "@ssr/common/types/player/player-statistic";
 import { getDaysAgoDate } from "@ssr/common/utils/time-utils";
 import { NotFoundError, t } from "elysia";
 import { Controller, Get } from "elysia-decorators";
@@ -52,25 +51,5 @@ export default class PlayerHistoryController {
       new Date(endDate),
       projection
     );
-  }
-
-  @Get("/player/history/calendar/:id/:year/:month", {
-    config: {},
-    tags: ["Player"],
-    params: t.Object({
-      id: t.String({ required: true }),
-      year: t.Number({ required: true }),
-      month: t.Number({ required: true }),
-    }),
-    detail: {
-      description: "Fetch a player's score calendar for a given month and year",
-    },
-  })
-  public async getScoreCalendar({
-    params: { id, year, month },
-  }: {
-    params: { id: string; year: number; month: number };
-  }): Promise<ScoreCalendarData> {
-    return await PlayerService.generateScoreCalendar(id, year, month);
   }
 }

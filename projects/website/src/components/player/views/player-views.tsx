@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useIsMobile } from "@/contexts/viewport-context";
-import { CalendarIcon, GlobeAmericasIcon } from "@heroicons/react/24/solid";
+import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerStatisticHistory } from "@ssr/common/player/player-statistic-history";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
@@ -21,21 +21,20 @@ import { ReactElement, useState } from "react";
 import PlayerRankingsButton from "../buttons/player-rankings-button";
 import MapsGraphChart from "./impl/maps-graph-chart";
 import PlayerAccuracyChart from "./impl/player-accuracy-chart";
-import PlayerRankingChart from "./impl/player-ranking-chart";
+import PlayerAdvancedRankingChart from "./impl/player-advanced-ranking-chart";
 import PlayerScoresChart from "./impl/player-scores-chart";
 import PlusPpCalculator from "./impl/plus-pp-calculator";
-import ScoreHistoryCalendar from "./impl/score-history-calendar";
+import PlayerSimpleRankingChart from "./impl/player-simple-ranking-chart";
+import { HistoryMode } from "@/common/player/history-mode";
+import useDatabase from "@/hooks/use-database";
+import { useLiveQuery } from "dexie-react-hooks";
 
 // Constants
 const DATE_PRESETS = [
-  { label: "Last 7 Days", value: 7 },
-  { label: "Last 30 Days", value: 30 },
   { label: "Last 50 Days", value: 50 },
   { label: "Last 90 Days", value: 90 },
   { label: "Last 180 Days", value: 180 },
   { label: "Last 365 Days", value: 365 },
-  { label: "Last 2 Years", value: 365 * 2 },
-  { label: "Last 5 Years", value: 365 * 5 },
 ] as const;
 
 const DEFAULT_DAYS_AGO = 50;
@@ -109,6 +108,9 @@ function DateRangeSelector({
 // Main component
 export default function PlayerViews({ player }: { player: ScoreSaberPlayer }) {
   const isMobile = useIsMobile();
+  const database = useDatabase();
+  const historyMode = useLiveQuery(() => database.getHistoryMode());
+
   const [selectedViewIndex, setSelectedViewIndex] = useState(0);
   const [daysAgo, setDaysAgo] = useState(DEFAULT_DAYS_AGO);
 
@@ -120,15 +122,32 @@ export default function PlayerViews({ player }: { player: ScoreSaberPlayer }) {
   });
 
   const views: SelectedView[] = [
-    {
-      index: 0,
-      label: "Rank & PP",
-      icon: GlobeAmericasIcon,
-      showDateRangeSelector: true,
-      chart: (_, statisticHistory) => (
-        <PlayerRankingChart statisticHistory={statisticHistory} daysAmount={daysAgo} />
-      ),
-    },
+    ...(historyMode === HistoryMode.SIMPLE
+      ? [
+          {
+            index: 0,
+            label: "Ranking",
+            icon: GlobeAmericasIcon,
+            showDateRangeSelector: true,
+            chart: (_: ScoreSaberPlayer, statisticHistory: PlayerStatisticHistory) => (
+              <PlayerSimpleRankingChart statisticHistory={statisticHistory} daysAmount={daysAgo} />
+            ),
+          },
+        ]
+      : [
+          {
+            index: 0,
+            label: "Ranking",
+            icon: GlobeAmericasIcon,
+            showDateRangeSelector: true,
+            chart: (_: ScoreSaberPlayer, statisticHistory: PlayerStatisticHistory) => (
+              <PlayerAdvancedRankingChart
+                statisticHistory={statisticHistory}
+                daysAmount={daysAgo}
+              />
+            ),
+          },
+        ]),
     {
       index: 1,
       label: "Accuracy",
@@ -149,20 +168,13 @@ export default function PlayerViews({ player }: { player: ScoreSaberPlayer }) {
     },
     {
       index: 3,
-      label: "Score Calendar",
-      icon: CalendarIcon,
-      showDateRangeSelector: false,
-      chart: player => <ScoreHistoryCalendar playerId={player.id} />,
-    },
-    {
-      index: 4,
       label: "Maps Graph",
       icon: ChartBarIcon,
       showDateRangeSelector: false,
       chart: player => <MapsGraphChart player={player} />,
     },
     {
-      index: 5,
+      index: 4,
       label: "+1 PP Calculator",
       icon: CalculatorIcon,
       showDateRangeSelector: false,

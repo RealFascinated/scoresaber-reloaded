@@ -7,6 +7,7 @@ import { ssrApi } from "@ssr/common/utils/ssr-api";
 import Dexie, { EntityTable } from "dexie";
 import { deleteCookieValue, setCookieValue } from "../cookie.util";
 import { defaultOverlaySettings, OverlaySettings } from "../overlay/overlay-settings";
+import { HistoryMode } from "../player/history-mode";
 
 type CacheItem = {
   /**
@@ -54,6 +55,7 @@ export enum SettingIds {
   PlusPpDefaultAccuracy = "plusPpDefaultAccuracy",
   PlayerPreviews = "playerPreviews",
   LeaderboardPreviews = "leaderboardPreviews",
+  HistoryMode = "historyMode",
 }
 
 export const DEFAULT_WHAT_IF_RANGE: [number, number] = [70, 98.5];
@@ -563,6 +565,24 @@ export default class Database extends Dexie {
    */
   async setLeaderboardPreviews(leaderboardPreviews: boolean) {
     await this.setSetting(SettingIds.LeaderboardPreviews, leaderboardPreviews);
+  }
+
+  /**
+   * Gets the history mode from the database
+   *
+   * @returns the history mode
+   */
+  async getHistoryMode(): Promise<HistoryMode> {
+    return (await this.getSetting<HistoryMode>(SettingIds.HistoryMode, HistoryMode.SIMPLE))!;
+  }
+
+  /**
+   * Sets the history mode in the database
+   *
+   * @param historyMode the history mode
+   */
+  async setHistoryMode(historyMode: HistoryMode) {
+    await this.setSetting(SettingIds.HistoryMode, historyMode);
   }
 
   /**

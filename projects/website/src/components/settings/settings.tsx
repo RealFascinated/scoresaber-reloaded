@@ -11,14 +11,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CubeIcon, GlobeAmericasIcon, XMarkIcon } from "@heroicons/react/24/solid";
-import { ReactNode, useEffect, useState } from "react";
+import { CubeIcon, GlobeAmericasIcon, UserIcon, XMarkIcon } from "@heroicons/react/24/solid";
+import { ReactNode, useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { IconType } from "react-icons";
 import { DropdownItem } from "../ui/hover-dropdown";
 import ExportSettings from "./buttons/export-settings";
 import ImportSettings from "./buttons/import-settings";
 import ResetDatabase from "./buttons/reset-database";
+import PlayerSettings from "./category/player-settings";
 
 type Category = {
   name: string;
@@ -40,6 +41,12 @@ const categories: Category[] = [
     icon: CubeIcon,
     component: <ScoreSettings />,
   },
+  {
+    name: "Player",
+    description: "Manage your player",
+    icon: UserIcon,
+    component: <PlayerSettings />,
+  },
 ];
 
 export default function Settings() {
@@ -47,9 +54,22 @@ export default function Settings() {
   const [isOpen, setIsOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
 
+  const handleClose = useCallback(() => {
+    setIsClosing(true);
+    setTimeout(() => {
+      setIsOpen(false);
+      setIsClosing(false);
+    }, 300);
+  }, []);
+
   // Handle body scroll lock
   useEffect(() => {
-    document.body.style.overflow = isOpen ? "hidden" : "unset";
+    if (!isOpen) {
+      document.body.style.overflow = "unset";
+      return;
+    }
+
+    document.body.style.overflow = "hidden";
 
     // Handle escape key
     const handleEscape = (event: KeyboardEvent) => {
@@ -63,15 +83,7 @@ export default function Settings() {
       document.body.style.overflow = "unset";
       document.removeEventListener("keydown", handleEscape);
     };
-  }, [isOpen]);
-
-  const handleClose = () => {
-    setIsClosing(true);
-    setTimeout(() => {
-      setIsOpen(false);
-      setIsClosing(false);
-    }, 300);
-  };
+  }, [isOpen, handleClose]);
 
   const settingsContent =
     isOpen || isClosing ? (
@@ -91,7 +103,7 @@ export default function Settings() {
           )}
           onClick={e => {
             // Only close if clicking directly on the backdrop, not on child elements
-            if (e.target === e.currentTarget) {
+            if (e.target === e.currentTarget && !isClosing) {
               handleClose();
             }
           }}
@@ -104,6 +116,7 @@ export default function Settings() {
             "animate-in slide-in-from-bottom-4 duration-300",
             isClosing && "animate-out slide-out-to-bottom-4 duration-300"
           )}
+          onClick={e => e.stopPropagation()}
         >
           {/* Header */}
           <div className="border-border/50 flex items-center justify-between border-b px-4 py-4 md:px-6">
