@@ -301,6 +301,7 @@ export class LeaderboardCoreService {
         .lookupLeaderboards(page, { ...filter, priority: CooldownPriority.LOW });
       if (!response) {
         Logger.warn(`Failed to fetch leaderboards on page ${page}.`);
+        hasMorePages = false;
         continue;
       }
 
