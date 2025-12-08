@@ -43,7 +43,7 @@ const scoreBadges: ScoreBadge[] = [
   {
     name: "SS+",
     min: 95,
-    max: null,
+    max: 98,
     color: getDifficulty("ExpertPlus")!.color,
     textColor: "#00FFFF",
   },
