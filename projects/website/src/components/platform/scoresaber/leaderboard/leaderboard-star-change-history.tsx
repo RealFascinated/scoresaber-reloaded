@@ -23,7 +23,7 @@ function LeaderboardStarChangeHistoryButton({
 }) {
   return (
     <button
-      className="border-border/50 bg-background/95 text-foreground hover:bg-accent/50 hover:border-primary/50 focus-visible:ring-primary/20 flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-all focus-visible:ring-2 focus-visible:outline-none"
+      className="border-border/50 bg-background/95 text-foreground hover:bg-accent/50 hover:border-primary/50 focus-visible:ring-primary/50 flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-all focus-visible:ring-2 focus-visible:outline-none"
       onClick={onClick}
     >
       <StarIcon className="h-4 w-4 text-yellow-500" />

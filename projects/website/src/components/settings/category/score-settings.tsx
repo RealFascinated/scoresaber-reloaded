@@ -1,10 +1,9 @@
 "use client";
 
 import useDatabase from "@/hooks/use-database";
+import { useSettingsForm } from "@/hooks/use-settings-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ReplayViewers } from "@ssr/common/replay-viewer";
-import { useLiveQuery } from "dexie-react-hooks";
-import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { FaChartLine, FaPlay } from "react-icons/fa";
 import { toast } from "sonner";
@@ -53,10 +52,6 @@ const settings = [
 
 const ScoreSettings = () => {
   const database = useDatabase();
-  const replayViewer = useLiveQuery(async () =>
-    (await database.getReplayViewer()).name.toLowerCase()
-  );
-  const showScoreComparison = useLiveQuery(() => database.getShowScoreComparison());
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -64,6 +59,12 @@ const ScoreSettings = () => {
       replayViewer: "",
       showScoreComparison: true,
     },
+  });
+
+  // Sync form with database settings
+  useSettingsForm(form, {
+    replayViewer: async () => (await database.getReplayViewer()).name.toLowerCase(),
+    showScoreComparison: () => database.getShowScoreComparison(),
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -79,15 +80,6 @@ const ScoreSettings = () => {
 
   // Add onSubmit to the form instance
   (form as any).onSubmit = onSubmit;
-
-  useEffect(() => {
-    if (replayViewer === undefined || showScoreComparison === undefined) {
-      return;
-    }
-
-    form.setValue("replayViewer", replayViewer);
-    form.setValue("showScoreComparison", showScoreComparison);
-  }, [replayViewer, form, showScoreComparison]);
 
   return (
     <div className="space-y-6">

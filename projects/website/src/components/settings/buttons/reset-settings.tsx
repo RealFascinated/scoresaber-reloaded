@@ -2,7 +2,7 @@ import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import useDatabase from "@/hooks/use-database";
 import { Button } from "../../ui/button";
 
-export default function ResetDatabase() {
+export default function ResetSettings() {
   const database = useDatabase();
 
   async function reset() {
@@ -13,7 +13,7 @@ export default function ResetDatabase() {
 
   return (
     <ConfirmationDialog
-      trigger={<Button variant="destructive">Reset Database</Button>}
+      trigger={<Button variant="destructive">Reset Settings</Button>}
       title="Reset Database"
       description="This will reset the database to default values. You'll need to claim a new profile again."
       confirmText="Reset"

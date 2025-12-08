@@ -11,13 +11,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useBackgroundCover } from "@/hooks/use-background-cover";
 import useDatabase from "@/hooks/use-database";
+import { useSettingsForm } from "@/hooks/use-settings-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useDebounce } from "@uidotdev/usehooks";
 import { ssrConfig } from "config";
-import { useLiveQuery } from "dexie-react-hooks";
 import { useTheme } from "next-themes";
-import { useEffect, useRef, useState } from "react";
 import { Path, useForm } from "react-hook-form";
 import { IconType } from "react-icons";
 import { FaEye, FaGlobe, FaImage, FaPalette, FaSnowflake } from "react-icons/fa";
@@ -39,7 +38,6 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-// Custom component for background cover control
 const BackgroundCoverControl = (props: {
   field: {
     value: string | number | boolean;
@@ -47,73 +45,8 @@ const BackgroundCoverControl = (props: {
     name?: string;
   };
 }) => {
-  const [customValue, setCustomValue] = useState("");
-  const [selectedOption, setSelectedOption] = useState("default");
-  const [isInitialized, setIsInitialized] = useState(false);
-  const database = useDatabase();
-  const previousDebouncedValue = useRef<string>("");
-
-  // Debounce the custom value to prevent excessive database saves
-  const debouncedCustomValue = useDebounce(customValue, 500);
-
-  // Get both the selected option and custom value from database
-  const backgroundCoverOption = useLiveQuery(async () => await database.getBackgroundCover());
-  const customBackgroundCover = useLiveQuery(async () => await database.getCustomBackgroundUrl());
-
-  // Initialize state based on current values from database
-  useEffect(() => {
-    if (backgroundCoverOption !== undefined) {
-      setSelectedOption(backgroundCoverOption);
-    }
-  }, [backgroundCoverOption]);
-
-  useEffect(() => {
-    if (customBackgroundCover !== undefined) {
-      setCustomValue(customBackgroundCover);
-    }
-  }, [customBackgroundCover]);
-
-  // Mark as initialized after both values are loaded
-  useEffect(() => {
-    if (backgroundCoverOption !== undefined && customBackgroundCover !== undefined) {
-      setIsInitialized(true);
-    }
-  }, [backgroundCoverOption, customBackgroundCover]);
-
-  // Save debounced custom value to database
-  useEffect(() => {
-    if (
-      isInitialized &&
-      selectedOption === "custom" &&
-      debouncedCustomValue !== previousDebouncedValue.current &&
-      debouncedCustomValue !== customBackgroundCover
-    ) {
-      previousDebouncedValue.current = debouncedCustomValue;
-      database.setCustomBackgroundUrl(debouncedCustomValue);
-      props.field.onChange(debouncedCustomValue);
-    }
-  }, [debouncedCustomValue, isInitialized, selectedOption, customBackgroundCover]);
-
-  const handleSelectChange = async (value: string) => {
-    // Only save if component is initialized and value actually changed
-    if (!isInitialized || value === selectedOption) return;
-
-    setSelectedOption(value);
-
-    if (value === "custom") {
-      await database.setBackgroundCover("custom");
-    } else {
-      const cover = BACKGROUND_COVERS.find(c => c.id === value);
-      const coverValue = cover?.value || value;
-      await database.setBackgroundCover(value);
-      props.field.onChange(coverValue);
-    }
-  };
-
-  const handleCustomInputChange = (value: string) => {
-    setCustomValue(value);
-    // Don't save immediately - let the debounced effect handle it
-  };
+  const { selectedOption, customValue, handleSelectChange, handleCustomInputChange } =
+    useBackgroundCover(props.field.onChange);
 
   return (
     <div className="flex flex-col space-y-2 md:flex-row md:items-start md:justify-between md:space-y-0">
@@ -260,16 +193,6 @@ const settings: {
 const WebsiteSettings = () => {
   const { setTheme, theme } = useTheme();
   const database = useDatabase();
-  const backgroundCover = useLiveQuery(async () => await database.getBackgroundCover());
-  const backgroundCoverBrightness = useLiveQuery(
-    async () => await database.getBackgroundCoverBrightness()
-  );
-  const backgroundCoverBlur = useLiveQuery(async () => await database.getBackgroundCoverBlur());
-  const snowParticles = useLiveQuery(async () => await database.getSnowParticles());
-  const showKitty = useLiveQuery(async () => await database.getShowKitty());
-  const websiteLanding = useLiveQuery(async () => await database.getWebsiteLanding());
-  const playerPreviews = useLiveQuery(async () => await database.getPlayerPreviews());
-  const leaderboardPreviews = useLiveQuery(async () => await database.getLeaderboardPreviews());
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -285,6 +208,23 @@ const WebsiteSettings = () => {
       leaderboardPreviews: true,
     },
   });
+
+  // Sync form with database settings
+  useSettingsForm(
+    form,
+    {
+      backgroundCover: () => database.getBackgroundCover(),
+      backgroundCoverBrightness: () => database.getBackgroundCoverBrightness(),
+      backgroundCoverBlur: () => database.getBackgroundCoverBlur(),
+      snowParticles: () => database.getSnowParticles(),
+      showKitty: () => database.getShowKitty(),
+      websiteLanding: () => database.getWebsiteLanding(),
+      theme: () => theme,
+      playerPreviews: () => database.getPlayerPreviews(),
+      leaderboardPreviews: () => database.getLeaderboardPreviews(),
+    },
+    ["backgroundCover"] // Exclude backgroundCover - let BackgroundCoverControl handle it
+  );
 
   async function onSubmit(values: FormValues) {
     const before = performance.now();
@@ -305,60 +245,6 @@ const WebsiteSettings = () => {
 
   // Add onSubmit to the form instance
   (form as any).onSubmit = onSubmit;
-
-  useEffect(() => {
-    if (
-      backgroundCover === undefined ||
-      backgroundCoverBrightness === undefined ||
-      backgroundCoverBlur === undefined ||
-      snowParticles === undefined ||
-      showKitty === undefined ||
-      websiteLanding === undefined ||
-      theme === undefined ||
-      playerPreviews === undefined ||
-      leaderboardPreviews === undefined
-    ) {
-      return;
-    }
-
-    // Only set values if they're different from current values
-    const currentValues = form.getValues();
-
-    // Don't set backgroundCover here - let the BackgroundCoverControl handle it
-    if (currentValues.backgroundCoverBrightness !== backgroundCoverBrightness) {
-      form.setValue("backgroundCoverBrightness", backgroundCoverBrightness);
-    }
-    if (currentValues.backgroundCoverBlur !== backgroundCoverBlur) {
-      form.setValue("backgroundCoverBlur", backgroundCoverBlur);
-    }
-    if (currentValues.snowParticles !== snowParticles) {
-      form.setValue("snowParticles", snowParticles);
-    }
-    if (currentValues.showKitty !== showKitty) {
-      form.setValue("showKitty", showKitty);
-    }
-    if (currentValues.websiteLanding !== websiteLanding) {
-      form.setValue("websiteLanding", websiteLanding);
-    }
-    if (currentValues.theme !== theme) {
-      form.setValue("theme", theme);
-    }
-    if (currentValues.playerPreviews !== playerPreviews) {
-      form.setValue("playerPreviews", playerPreviews);
-    }
-    if (currentValues.leaderboardPreviews !== leaderboardPreviews) {
-      form.setValue("leaderboardPreviews", leaderboardPreviews);
-    }
-  }, [
-    backgroundCover,
-    backgroundCoverBrightness,
-    backgroundCoverBlur,
-    snowParticles,
-    showKitty,
-    websiteLanding,
-    theme,
-    form,
-  ]);
 
   return (
     <div className="space-y-6">

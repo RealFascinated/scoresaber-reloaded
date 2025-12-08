@@ -16,7 +16,7 @@ import { IconType } from "react-icons";
 import Card from "../card";
 import ExportSettings from "./buttons/export-settings";
 import ImportSettings from "./buttons/import-settings";
-import ResetDatabase from "./buttons/reset-database";
+import ResetSettings from "./buttons/reset-settings";
 import PlayerSettings from "./category/player-settings";
 
 type Category = {
@@ -116,7 +116,7 @@ export default function Settings() {
 
       {/* Footer */}
       <div className="border-border/50 flex items-center justify-end gap-3 border-t px-6 py-4">
-        <ResetDatabase />
+        <ResetSettings />
         <div className="bg-border/50 h-5 w-px" />
         <ExportSettings />
         <ImportSettings />

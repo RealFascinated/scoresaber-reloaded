@@ -2,9 +2,8 @@
 
 import { HistoryMode } from "@/common/player/history-mode";
 import useDatabase from "@/hooks/use-database";
+import { useSettingsForm } from "@/hooks/use-settings-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useLiveQuery } from "dexie-react-hooks";
-import { useEffect } from "react";
 import { Path, useForm } from "react-hook-form";
 import { FaHistory } from "react-icons/fa";
 import { toast } from "sonner";
@@ -38,15 +37,19 @@ const settings = [
   },
 ] as const;
 
-const ScoreSettings = () => {
+const PlayerSettings = () => {
   const database = useDatabase();
-  const historyMode = useLiveQuery(() => database.getHistoryMode());
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       historyMode: HistoryMode.SIMPLE,
     },
+  });
+
+  // Sync form with database settings
+  useSettingsForm(form, {
+    historyMode: () => database.getHistoryMode(),
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -61,14 +64,6 @@ const ScoreSettings = () => {
 
   // Add onSubmit to the form instance
   (form as any).onSubmit = onSubmit;
-
-  useEffect(() => {
-    if (historyMode === undefined) {
-      return;
-    }
-
-    form.setValue("historyMode", historyMode);
-  }, [historyMode, form]);
 
   return (
     <div className="space-y-6">
@@ -89,6 +84,6 @@ const ScoreSettings = () => {
   );
 };
 
-ScoreSettings.displayName = "ScoreSettings";
+PlayerSettings.displayName = "PlayerSettings";
 
-export default ScoreSettings;
+export default PlayerSettings;
