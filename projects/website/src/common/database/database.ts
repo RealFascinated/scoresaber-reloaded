@@ -41,7 +41,9 @@ type Setting = {
 export enum SettingIds {
   MainPlayer = "mainPlayer",
   BackgroundCover = "backgroundCover",
-  CustomBackgroundCover = "customBackgroundCover",
+  BackgroundCoverBrightness = "backgroundCoverBrightness",
+  BackgroundCoverBlur = "backgroundCoverBlur",
+  CustomBackgroundUrl = "customBackgroundCover",
   ShowKitty = "showKitty",
   SnowParticles = "snowParticles",
   WhatIfRange = "whatIfRange",
@@ -357,24 +359,59 @@ export default class Database extends Dexie {
   }
 
   /**
-   * Gets the custom background cover from the database
+   * Gets the custom background url from the database
    *
-   * @returns the custom background cover
+   * @returns the custom background url
    */
-  async getCustomBackgroundCover(): Promise<string> {
+  async getCustomBackgroundUrl(): Promise<string> {
     return (await this.getSetting<string>(
-      SettingIds.CustomBackgroundCover,
+      SettingIds.CustomBackgroundUrl,
       BACKGROUND_COVERS[0].value
     ))!;
   }
 
   /**
-   * Sets the custom background cover in the database
+   * Sets the custom background url in the database
    *
-   * @param cover the custom background cover
+   * @param url the custom background url
    */
-  async setCustomBackgroundCover(cover: string) {
-    await this.setSetting(SettingIds.CustomBackgroundCover, cover);
+  async setCustomBackgroundUrl(url: string) {
+    await this.setSetting(SettingIds.CustomBackgroundUrl, url);
+  }
+  /**
+   * Gets the background cover brightness from the database
+   *
+   * @returns the background cover brightness
+   */
+  async getBackgroundCoverBrightness(): Promise<number> {
+    return (await this.getSetting<number>(SettingIds.BackgroundCoverBrightness, 50))!;
+  }
+
+  /**
+   * Sets the background cover brightness in the database
+   *
+   * @param brightness the background cover brightness
+   */
+  async setBackgroundCoverBrightness(brightness: number) {
+    await this.setSetting(SettingIds.BackgroundCoverBrightness, brightness);
+  }
+
+  /**
+   * Gets the background cover blur from the database
+   *
+   * @returns the background cover blur
+   */
+  async getBackgroundCoverBlur(): Promise<number> {
+    return (await this.getSetting<number>(SettingIds.BackgroundCoverBlur, 6))!;
+  }
+
+  /**
+   * Sets the background cover blur in the database
+   *
+   * @param blur the background cover blur
+   */
+  async setBackgroundCoverBlur(blur: number) {
+    await this.setSetting(SettingIds.BackgroundCoverBlur, blur);
   }
 
   /**

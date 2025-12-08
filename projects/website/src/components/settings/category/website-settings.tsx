@@ -27,6 +27,8 @@ import { Field, SettingSection } from "../setting-section";
 
 const formSchema = z.object({
   backgroundCover: z.string().min(0).max(128),
+  backgroundCoverBrightness: z.number().min(0).max(100),
+  backgroundCoverBlur: z.number().min(0).max(100),
   snowParticles: z.boolean(),
   showKitty: z.boolean(),
   websiteLanding: z.nativeEnum(WebsiteLanding),
@@ -40,8 +42,8 @@ type FormValues = z.infer<typeof formSchema>;
 // Custom component for background cover control
 const BackgroundCoverControl = (props: {
   field: {
-    value: string | boolean;
-    onChange: (value: string | boolean) => void;
+    value: string | number | boolean;
+    onChange: (value: string | number | boolean) => void;
     name?: string;
   };
 }) => {
@@ -56,7 +58,7 @@ const BackgroundCoverControl = (props: {
 
   // Get both the selected option and custom value from database
   const backgroundCoverOption = useLiveQuery(async () => await database.getBackgroundCover());
-  const customBackgroundCover = useLiveQuery(async () => await database.getCustomBackgroundCover());
+  const customBackgroundCover = useLiveQuery(async () => await database.getCustomBackgroundUrl());
 
   // Initialize state based on current values from database
   useEffect(() => {
@@ -87,7 +89,7 @@ const BackgroundCoverControl = (props: {
       debouncedCustomValue !== customBackgroundCover
     ) {
       previousDebouncedValue.current = debouncedCustomValue;
-      database.setCustomBackgroundCover(debouncedCustomValue);
+      database.setCustomBackgroundUrl(debouncedCustomValue);
       props.field.onChange(debouncedCustomValue);
     }
   }, [debouncedCustomValue, isInitialized, selectedOption, customBackgroundCover]);
@@ -162,6 +164,25 @@ const settings: {
         label: "",
         type: "select" as const,
         customControl: BackgroundCoverControl,
+      },
+      {
+        name: "backgroundCoverBrightness" as Path<FormValues>,
+        label: "Background Cover Brightness",
+        type: "slider" as const,
+        description: "Adjust the brightness of the background cover",
+        min: 20,
+        max: 100,
+        step: 1,
+      },
+      {
+        name: "backgroundCoverBlur" as Path<FormValues>,
+        label: "Background Cover Blur",
+        type: "slider" as const,
+        description: "Adjust the blur of the background cover",
+        min: 0,
+        max: 10,
+        step: 1,
+        labelFormatter: (value: number | undefined) => `${value}px`,
       },
     ],
   },
@@ -240,6 +261,10 @@ const WebsiteSettings = () => {
   const { setTheme, theme } = useTheme();
   const database = useDatabase();
   const backgroundCover = useLiveQuery(async () => await database.getBackgroundCover());
+  const backgroundCoverBrightness = useLiveQuery(
+    async () => await database.getBackgroundCoverBrightness()
+  );
+  const backgroundCoverBlur = useLiveQuery(async () => await database.getBackgroundCoverBlur());
   const snowParticles = useLiveQuery(async () => await database.getSnowParticles());
   const showKitty = useLiveQuery(async () => await database.getShowKitty());
   const websiteLanding = useLiveQuery(async () => await database.getWebsiteLanding());
@@ -250,6 +275,8 @@ const WebsiteSettings = () => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       backgroundCover: "",
+      backgroundCoverBrightness: 50,
+      backgroundCoverBlur: 6,
       snowParticles: false,
       showKitty: false,
       websiteLanding: WebsiteLanding.PLAYER_HOME,
@@ -261,6 +288,8 @@ const WebsiteSettings = () => {
 
   async function onSubmit(values: FormValues) {
     const before = performance.now();
+    await database.setBackgroundCoverBrightness(values.backgroundCoverBrightness);
+    await database.setBackgroundCoverBlur(values.backgroundCoverBlur);
     await database.setSetting(SettingIds.SnowParticles, values.snowParticles);
     await database.setSetting(SettingIds.ShowKitty, values.showKitty);
     await database.setWebsiteLanding(values.websiteLanding);
@@ -280,6 +309,8 @@ const WebsiteSettings = () => {
   useEffect(() => {
     if (
       backgroundCover === undefined ||
+      backgroundCoverBrightness === undefined ||
+      backgroundCoverBlur === undefined ||
       snowParticles === undefined ||
       showKitty === undefined ||
       websiteLanding === undefined ||
@@ -294,6 +325,12 @@ const WebsiteSettings = () => {
     const currentValues = form.getValues();
 
     // Don't set backgroundCover here - let the BackgroundCoverControl handle it
+    if (currentValues.backgroundCoverBrightness !== backgroundCoverBrightness) {
+      form.setValue("backgroundCoverBrightness", backgroundCoverBrightness);
+    }
+    if (currentValues.backgroundCoverBlur !== backgroundCoverBlur) {
+      form.setValue("backgroundCoverBlur", backgroundCoverBlur);
+    }
     if (currentValues.snowParticles !== snowParticles) {
       form.setValue("snowParticles", snowParticles);
     }
@@ -312,7 +349,16 @@ const WebsiteSettings = () => {
     if (currentValues.leaderboardPreviews !== leaderboardPreviews) {
       form.setValue("leaderboardPreviews", leaderboardPreviews);
     }
-  }, [backgroundCover, snowParticles, showKitty, websiteLanding, theme, form]);
+  }, [
+    backgroundCover,
+    backgroundCoverBrightness,
+    backgroundCoverBlur,
+    snowParticles,
+    showKitty,
+    websiteLanding,
+    theme,
+    form,
+  ]);
 
   return (
     <div className="space-y-6">

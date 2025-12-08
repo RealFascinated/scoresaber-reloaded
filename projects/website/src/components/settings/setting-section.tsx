@@ -6,19 +6,31 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
 import { useDebounce } from "@uidotdev/usehooks";
-import { ReactElement, useEffect, useRef } from "react";
+import { ReactElement, ReactNode, useEffect, useRef } from "react";
 import { Path, UseFormReturn } from "react-hook-form";
 import { IconType } from "react-icons";
 import { FormControl, FormDescription, FormField, FormItem, FormLabel } from "../ui/form";
 
-type FieldType = "text" | "checkbox" | "select";
-
-export interface Field<TFormValues extends Record<string, any>, TName extends Path<TFormValues>> {
+interface BaseField<TFormValues extends Record<string, any>, TName extends Path<TFormValues>> {
   name: TName;
   label: string;
-  type: FieldType;
   description?: string;
+}
+
+export interface CheckboxField<
+  TFormValues extends Record<string, any>,
+  TName extends Path<TFormValues>,
+> extends BaseField<TFormValues, TName> {
+  type: "checkbox";
+}
+
+export interface SelectField<
+  TFormValues extends Record<string, any>,
+  TName extends Path<TFormValues>,
+> extends BaseField<TFormValues, TName> {
+  type: "select";
   options?: readonly { label: string; value: string }[];
   customControl?: (props: {
     field: {
@@ -27,6 +39,31 @@ export interface Field<TFormValues extends Record<string, any>, TName extends Pa
     };
   }) => ReactElement;
 }
+
+export interface SliderField<
+  TFormValues extends Record<string, any>,
+  TName extends Path<TFormValues>,
+> extends BaseField<TFormValues, TName> {
+  type: "slider";
+  min: number;
+  max: number;
+  step: number;
+  labelFormatter?: (value: number | undefined) => ReactNode;
+  labelDisplay?: "inline" | "thumb";
+}
+
+export interface TextField<
+  TFormValues extends Record<string, any>,
+  TName extends Path<TFormValues>,
+> extends BaseField<TFormValues, TName> {
+  type: "text";
+}
+
+export type Field<TFormValues extends Record<string, any>, TName extends Path<TFormValues>> =
+  | CheckboxField<TFormValues, TName>
+  | SelectField<TFormValues, TName>
+  | SliderField<TFormValues, TName>
+  | TextField<TFormValues, TName>;
 
 interface SettingSectionProps<TFormValues extends Record<string, any>> {
   title: string;
@@ -47,6 +84,70 @@ interface FormFieldComponentProps<
   form: UseFormReturn<TFormValues>;
 }
 
+type RenderFieldProps<TFormValues extends Record<string, any>, TName extends Path<TFormValues>> = {
+  field: Field<TFormValues, TName>;
+  value: TFormValues[TName];
+  onChange: (value: TFormValues[TName]) => void;
+};
+
+function renderCheckboxField<
+  TFormValues extends Record<string, any>,
+  TName extends Path<TFormValues>,
+>({ value, onChange }: RenderFieldProps<TFormValues, TName>) {
+  return <Checkbox checked={value as boolean} onCheckedChange={onChange} />;
+}
+
+function renderSelectField<
+  TFormValues extends Record<string, any>,
+  TName extends Path<TFormValues>,
+>({ field, value, onChange }: RenderFieldProps<TFormValues, TName>) {
+  if (field.type !== "select") return null;
+
+  return (
+    <Select value={value as string} onValueChange={onChange}>
+      <SelectTrigger className="w-full md:w-52">
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        {field.options?.map(option => (
+          <SelectItem key={option.value} value={option.value}>
+            {option.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+}
+
+function renderSliderField<
+  TFormValues extends Record<string, any>,
+  TName extends Path<TFormValues>,
+>({ field, value, onChange }: RenderFieldProps<TFormValues, TName>) {
+  if (field.type !== "slider") return null;
+
+  const labelFormatter = field.labelFormatter ?? ((val: number | undefined) => `${val}%`);
+
+  return (
+    <div className="flex w-full items-center gap-3 md:w-52">
+      <Slider
+        value={[value as number]}
+        onValueChange={values => onChange(values[0] as TFormValues[TName])}
+        min={field.min}
+        max={field.max}
+        step={field.step}
+        label={field.labelDisplay === "thumb" ? labelFormatter : undefined}
+        labelPosition={field.labelDisplay === "thumb" ? "top" : "none"}
+        className="flex-1"
+      />
+      {field.labelDisplay !== "thumb" && (
+        <span className="text-muted-foreground min-w-12 text-right text-sm font-medium">
+          {labelFormatter(value as number)}
+        </span>
+      )}
+    </div>
+  );
+}
+
 function FormFieldComponent<
   TFormValues extends Record<string, any>,
   TName extends Path<TFormValues>,
@@ -57,8 +158,8 @@ function FormFieldComponent<
   const wrappedOnChange = (value: any) => {
     hasChanged.current = true;
     formField.onChange(value);
-    if (field.type === "text") {
-      // For text inputs, we'll let the debounced effect handle the save
+    if (field.type === "text" || field.type === "slider") {
+      // For text and slider inputs, we'll let the debounced effect handle the save
       return;
     }
     // For other inputs, save immediately
@@ -68,13 +169,13 @@ function FormFieldComponent<
     }
   };
 
-  // Effect to handle debounced saves for text inputs
+  // Effect to handle debounced saves for text and slider inputs
   useEffect(() => {
     if (!hasChanged.current) {
       return;
     }
 
-    if (field.type === "text" && debouncedValue !== undefined) {
+    if ((field.type === "text" || field.type === "slider") && debouncedValue !== undefined) {
       const onSubmit = (form as any).onSubmit;
       if (onSubmit) {
         form.handleSubmit(onSubmit)();
@@ -82,25 +183,48 @@ function FormFieldComponent<
     }
   }, [debouncedValue, field.type, form]);
 
+  const hasCustomControl = field.type === "select" && field.customControl;
+
+  const renderControl = () => {
+    const renderProps: RenderFieldProps<TFormValues, TName> = {
+      field,
+      value: formField.value,
+      onChange: wrappedOnChange,
+    };
+
+    switch (field.type) {
+      case "checkbox":
+        return renderCheckboxField(renderProps);
+      case "select":
+        return renderSelectField(renderProps);
+      case "slider":
+        return renderSliderField(renderProps);
+      default:
+        return null;
+    }
+  };
+
   return (
     <FormItem
       className={
-        field.customControl
+        hasCustomControl
           ? ""
           : field.type === "checkbox"
             ? "flex flex-row items-center justify-between gap-4 space-y-0 py-1"
             : "flex flex-col items-start space-y-2 py-1 md:flex-row md:items-start md:justify-between md:space-y-0"
       }
     >
-      {field.customControl ? (
+      {hasCustomControl ? (
         <FormControl>
           <div className="py-1">
-            {field.customControl({
-              field: {
-                ...formField,
-                onChange: wrappedOnChange,
-              },
-            })}
+            {field.type === "select" &&
+              field.customControl &&
+              field.customControl({
+                field: {
+                  ...formField,
+                  onChange: wrappedOnChange,
+                },
+              })}
           </div>
         </FormControl>
       ) : (
@@ -113,24 +237,7 @@ function FormFieldComponent<
               </FormDescription>
             )}
           </div>
-          <FormControl>
-            {field.type === "checkbox" ? (
-              <Checkbox checked={formField.value as boolean} onCheckedChange={wrappedOnChange} />
-            ) : field.type === "select" ? (
-              <Select value={formField.value as string} onValueChange={wrappedOnChange}>
-                <SelectTrigger className="w-full md:w-52">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {field.options?.map(option => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            ) : null}
-          </FormControl>
+          <FormControl>{renderControl()}</FormControl>
         </>
       )}
     </FormItem>
