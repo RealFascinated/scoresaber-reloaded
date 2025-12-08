@@ -74,7 +74,7 @@ export const Months = [
  * @param input Date | number (timestamp)
  * @returns the format of the time ago
  */
-export function timeAgo(input: Date) {
+export function timeAgo(input: Date, maxUnits: number = 2) {
   const inputDate = new Date(input).getTime(); // Convert input to a Date object if it's not already
   const now = new Date().getTime();
   const deltaSeconds = Math.floor((now - inputDate) / 1000); // Get time difference in seconds
@@ -102,7 +102,7 @@ export function timeAgo(input: Date) {
       remainingSeconds -= count * seconds;
     }
     // Stop after two units have been added
-    if (result.length === 2) break;
+    if (result.length === maxUnits) break;
   }
 
   // Return formatted result with at most two units

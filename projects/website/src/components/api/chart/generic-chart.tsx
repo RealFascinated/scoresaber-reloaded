@@ -10,6 +10,7 @@ import {
   getDaysAgo,
   getDaysAgoDate,
   parseDate,
+  timeAgo,
 } from "@ssr/common/utils/time-utils";
 import {
   BarController,
@@ -250,7 +251,17 @@ const GenericChart = ({ config, labels }: Props) => {
               const formattedDate = formatDate(date, "dddd, DD MMM, YYYY");
               if (differenceInDays === 0) return `${formattedDate} (Now)`;
               if (differenceInDays === 1) return `${formattedDate} (Yesterday)`;
-              return `${formattedDate} (${differenceInDays} day${differenceInDays > 1 ? "s" : ""} ago)`;
+
+              let maxUnits = 2;
+              if (differenceInDays <= 30) {
+                maxUnits = 1;
+              } else if (differenceInDays < 365 + 30) {
+                maxUnits = 2;
+              } else {
+                maxUnits = 3;
+              }
+
+              return `${formattedDate} (${timeAgo(date, maxUnits)})`;
             },
             label: (context: any) => {
               const value = Number(context.parsed.y);

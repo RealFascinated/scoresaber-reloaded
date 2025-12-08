@@ -16,7 +16,7 @@ import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerStatisticHistory } from "@ssr/common/player/player-statistic-history";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
-import { getDaysAgoDate } from "@ssr/common/utils/time-utils";
+import { getDaysAgo, getDaysAgoDate } from "@ssr/common/utils/time-utils";
 import { useQuery } from "@tanstack/react-query";
 import { useLiveQuery } from "dexie-react-hooks";
 import { CalculatorIcon, ChartBarIcon, SwordIcon, TrendingUpIcon } from "lucide-react";
@@ -35,6 +35,7 @@ const DATE_PRESETS = [
   { label: "Last 90 Days", value: 90 },
   { label: "Last 180 Days", value: 180 },
   { label: "Last 365 Days", value: 365 },
+  { label: "Since Tracked", value: Infinity },
 ] as const;
 
 const DEFAULT_DAYS_AGO = 50;
@@ -90,13 +91,20 @@ function DateRangeSelector({
   onDaysChange: (days: number) => void;
 }) {
   return (
-    <Select value={daysAgo.toString()} onValueChange={value => onDaysChange(parseInt(value))}>
+    <Select
+      value={daysAgo === Infinity ? "Infinity" : daysAgo.toString()}
+      onValueChange={value => onDaysChange(value === "Infinity" ? Infinity : parseInt(value))}
+    >
       <SelectTrigger className="w-[180px] cursor-pointer">
         <SelectValue placeholder="Select time range" />
       </SelectTrigger>
       <SelectContent>
         {DATE_PRESETS.map(preset => (
-          <SelectItem key={preset.value} value={preset.value.toString()} className="cursor-pointer">
+          <SelectItem
+            key={preset.value}
+            value={preset.value === Infinity ? "Infinity" : preset.value.toString()}
+            className="cursor-pointer"
+          >
             {preset.label}
           </SelectItem>
         ))}
@@ -113,11 +121,12 @@ export default function PlayerViews({ player }: { player: ScoreSaberPlayer }) {
 
   const [selectedViewIndex, setSelectedViewIndex] = useState(0);
   const [daysAgo, setDaysAgo] = useState(DEFAULT_DAYS_AGO);
+  const actualDaysAgo = daysAgo === Infinity ? getDaysAgo(player.trackedSince) : daysAgo;
 
   const { data: statisticHistory } = useQuery({
     queryKey: ["player-statistic-history", player.id, daysAgo],
     queryFn: () => {
-      return ssrApi.getPlayerStatisticHistory(player.id, getDaysAgoDate(daysAgo), new Date());
+      return ssrApi.getPlayerStatisticHistory(player.id, getDaysAgoDate(actualDaysAgo), new Date());
     },
   });
 
@@ -130,7 +139,10 @@ export default function PlayerViews({ player }: { player: ScoreSaberPlayer }) {
             icon: GlobeAmericasIcon,
             showDateRangeSelector: true,
             chart: (_: ScoreSaberPlayer, statisticHistory: PlayerStatisticHistory) => (
-              <PlayerSimpleRankingChart statisticHistory={statisticHistory} daysAmount={daysAgo} />
+              <PlayerSimpleRankingChart
+                statisticHistory={statisticHistory}
+                daysAmount={actualDaysAgo}
+              />
             ),
           },
         ]
@@ -143,7 +155,7 @@ export default function PlayerViews({ player }: { player: ScoreSaberPlayer }) {
             chart: (_: ScoreSaberPlayer, statisticHistory: PlayerStatisticHistory) => (
               <PlayerAdvancedRankingChart
                 statisticHistory={statisticHistory}
-                daysAmount={daysAgo}
+                daysAmount={actualDaysAgo}
               />
             ),
           },
@@ -154,7 +166,7 @@ export default function PlayerViews({ player }: { player: ScoreSaberPlayer }) {
       icon: TrendingUpIcon,
       showDateRangeSelector: true,
       chart: (_, statisticHistory) => (
-        <PlayerAccuracyChart statisticHistory={statisticHistory} daysAmount={daysAgo} />
+        <PlayerAccuracyChart statisticHistory={statisticHistory} daysAmount={actualDaysAgo} />
       ),
     },
     {
@@ -163,7 +175,7 @@ export default function PlayerViews({ player }: { player: ScoreSaberPlayer }) {
       icon: SwordIcon,
       showDateRangeSelector: true,
       chart: (_, statisticHistory) => (
-        <PlayerScoresChart statisticHistory={statisticHistory} daysAmount={daysAgo} />
+        <PlayerScoresChart statisticHistory={statisticHistory} daysAmount={actualDaysAgo} />
       ),
     },
     {
