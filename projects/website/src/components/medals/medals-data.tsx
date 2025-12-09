@@ -96,7 +96,7 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
               <div className="flex flex-col gap-2">
                 {rankingData.items.map(player => (
                   <div key={player.id} className="grid grid-cols-[1fr_25px] gap-3">
-                    <div className="grow">
+                    <div className="flex-grow">
                       <PlayerMedalRanking player={player} firstColumnWidth={firstColumnWidth} />
                     </div>
 
@@ -157,7 +157,7 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
                 <Button
                   variant="outline"
                   size="icon"
-                  className="h-10 w-10 shrink-0"
+                  className="h-10 w-10 flex-shrink-0"
                   onClick={() => setCurrentCountry(undefined)}
                 >
                   <XIcon className="size-4" />
