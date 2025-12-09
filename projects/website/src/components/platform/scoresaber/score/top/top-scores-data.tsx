@@ -71,8 +71,6 @@ export function TopScoresData() {
                     settings={{
                       // hideLeaderboardDropdown: true,
                       hideAccuracyChanger: true,
-                      // noScoreButtons: true,
-                      allowLeaderboardPreview: true,
                     }}
                   />
                 </div>

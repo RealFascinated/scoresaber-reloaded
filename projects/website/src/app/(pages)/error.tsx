@@ -4,7 +4,6 @@ import Card from "@/components/card";
 import SimpleLink from "@/components/simple-link";
 import { Button } from "@/components/ui/button";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
-import { BoltIcon, ExclamationTriangleIcon } from "@heroicons/react/24/solid";
 import { HomeIcon } from "lucide-react";
 import Image from "next/image";
 

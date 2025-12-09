@@ -23,7 +23,6 @@ import SimpleTooltip from "../simple-tooltip";
 import { Button } from "../ui/button";
 import Combobox from "../ui/combo-box";
 import { Input } from "../ui/input";
-import { Separator } from "../ui/separator";
 import { PlayerRanking } from "./player-ranking";
 
 type RankingDataProps = {

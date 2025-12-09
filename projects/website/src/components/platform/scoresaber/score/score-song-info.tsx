@@ -7,7 +7,6 @@ import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
 import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
 import Image from "next/image";
-import LeaderboardPreview from "../leaderboard/leaderboard-preview";
 import ScoreSaberSongName from "./song-name";
 
 export default function ScoreSaberScoreSongInfo({

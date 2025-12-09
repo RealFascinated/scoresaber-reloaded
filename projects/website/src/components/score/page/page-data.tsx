@@ -36,9 +36,7 @@ export default function ScorePageData({ scoreId }: { scoreId: string }) {
     return (
       <Card className="flex flex-col items-center justify-center text-center">
         <AlertCircle className="mb-(--spacing-xl) h-16 w-16 text-red-500" />
-        <h2 className="mb-(--spacing-sm) text-xl font-semibold">
-          Score Not Found
-        </h2>
+        <h2 className="mb-(--spacing-sm) text-xl font-semibold">Score Not Found</h2>
         <p className="text-muted-foreground">
           This score has not been tracked or may have been removed.
         </p>
@@ -64,31 +62,25 @@ export default function ScorePageData({ scoreId }: { scoreId: string }) {
         <Card className="flex flex-col items-center justify-center text-center">
           <div className="mb-(--spacing-2xl) flex flex-col items-center gap-(--spacing-xl)">
             <AlertCircle className="h-16 w-16 text-amber-500" />
-            <h2 className="text-xl font-semibold">
-              Limited Score Data
-            </h2>
+            <h2 className="text-xl font-semibold">Limited Score Data</h2>
           </div>
 
           <div className="mb-(--spacing-lg) flex flex-col gap-(--spacing-lg) text-left">
             {!hasScoreStats && (
               <div className="flex items-center gap-(--spacing-lg)">
-                <BarChart3 className="h-5 w-5 text-muted-foreground" />
-                <span className="text-muted-foreground">
-                  Score statistics unavailable
-                </span>
+                <BarChart3 className="text-muted-foreground h-5 w-5" />
+                <span className="text-muted-foreground">Score statistics unavailable</span>
               </div>
             )}
             {!hasReplay && (
               <div className="flex items-center gap-(--spacing-lg)">
-                <FileX className="h-5 w-5 text-muted-foreground" />
-                <span className="text-muted-foreground">
-                  Replay analysis data unavailable
-                </span>
+                <FileX className="text-muted-foreground h-5 w-5" />
+                <span className="text-muted-foreground">Replay analysis data unavailable</span>
               </div>
             )}
           </div>
 
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             Some data may not be available for this score.
           </p>
         </Card>

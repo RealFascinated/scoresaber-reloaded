@@ -1,4 +1,3 @@
-import Card from "@/components/card";
 import OverlayBuilder from "@/components/overlay/overlay-builder";
 import { env } from "@ssr/common/env";
 import { Metadata } from "next";
