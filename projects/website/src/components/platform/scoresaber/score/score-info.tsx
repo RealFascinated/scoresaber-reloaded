@@ -11,6 +11,7 @@ import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { getPageFromRank } from "@ssr/common/utils/utils";
 import { ScoreSaberScoreHMD } from "./score-hmd";
+import SimpleTooltip from "@/components/simple-tooltip";
 
 export default function ScoreSaberScoreInfo({
   score,
@@ -26,7 +27,9 @@ export default function ScoreSaberScoreInfo({
       <div className="flex items-center gap-1">
         <GlobeAmericasIcon className="size-5" />
         {score.rank === -1 ? (
-          <p className="font-semibold">#-</p>
+          <SimpleTooltip display="Unknown Score Rank">
+            <p className="font-semibold">#-</p>
+          </SimpleTooltip>
         ) : (
           <SimpleLink
             href={`/leaderboard/${leaderboard.id}/${getPageFromRank(score.rank, 12)}`}
