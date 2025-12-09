@@ -67,6 +67,8 @@ export function FriendRanking() {
               <PlayerRanking
                 key={player.id}
                 player={player}
+                getRank={player => player.rank}
+                getCountryRank={player => player.countryRank}
                 firstColumnWidth={firstColumnWidth}
                 renderWorth={() => (
                   <PlayerPpDisplay

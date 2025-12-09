@@ -2,28 +2,44 @@
 
 import { getRankBgColor } from "@/common/rank-color-utils";
 import { cn } from "@/common/utils";
+import useDatabase from "@/hooks/use-database";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
-import { getScoreSaberAvatar } from "@ssr/common/utils/scoresaber.util";
+import { getScoreSaberAvatar, getScoreSaberRoles } from "@ssr/common/utils/scoresaber.util";
+import { useLiveQuery } from "dexie-react-hooks";
 import { PlayerAvatar } from "../ranking/player-avatar";
-import { PlayerName } from "../ranking/player-name";
 import SimpleLink from "../simple-link";
 import CountryFlag from "../ui/country-flag";
 
 export function PlayerRanking({
   player,
+  getRank,
+  getCountryRank,
   firstColumnWidth,
   renderWorth,
 }: {
   player: ScoreSaberPlayerToken | ScoreSaberPlayer;
+  getRank: (player: ScoreSaberPlayerToken | ScoreSaberPlayer) => number;
+  getCountryRank: (player: ScoreSaberPlayerToken | ScoreSaberPlayer) => number;
   firstColumnWidth: number;
   renderWorth: () => React.ReactNode;
 }) {
+  const database = useDatabase();
+  const mainPlayer = useLiveQuery(() => database.getMainPlayer());
+
+  const rank = getRank(player);
+  const countryRank = getCountryRank(player);
+
   return (
     <SimpleLink href={`/player/${player.id}`}>
       {/* Desktop Layout */}
-      <div className="bg-muted/50 hover:bg-accent/50 hidden items-center gap-2 rounded-md px-(--spacing-xs) py-(--spacing-xs) lg:flex">
+      <div
+        className={cn(
+          "bg-muted/50 hover:bg-accent/50 hidden items-center gap-2 rounded-md px-(--spacing-xs) py-(--spacing-xs) lg:flex",
+          mainPlayer?.id == player.id ? "bg-ssr/20 hover:bg-ssr/30" : ""
+        )}
+      >
         {/* Rank, Weekly Change, and Country Rank */}
         <div
           className={cn("grid grid-cols-[0.65fr_1fr] items-center gap-3")}
@@ -31,14 +47,14 @@ export function PlayerRanking({
             width: `${firstColumnWidth}px`,
           }}
         >
-          <RankDisplay rank={player.rank} />
-          <CountryRankDisplay country={player.country} countryRank={player.countryRank} />
+          <RankDisplay rank={rank} />
+          <CountryRankDisplay country={player.country} countryRank={countryRank} />
         </div>
 
         {/* Avatar and Name */}
         <div className="flex items-center gap-2">
           <PlayerAvatar profilePicture={getScoreSaberAvatar(player)} name={player.name} />
-          <PlayerName player={player} />
+          <PlayerNameDisplay player={player} />
         </div>
 
         {/* Worth */}
@@ -51,8 +67,8 @@ export function PlayerRanking({
           {/* Top row: Rank, Country Rank, and Weekly Change */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <RankDisplay rank={player.rank} />
-              <CountryRankDisplay country={player.country} countryRank={player.countryRank} />
+              <RankDisplay rank={rank} />
+              <CountryRankDisplay country={player.country} countryRank={countryRank} />
             </div>
           </div>
 
@@ -63,7 +79,7 @@ export function PlayerRanking({
               name={player.name}
               className="flex min-w-[28px] items-center"
             />
-            <PlayerName
+            <PlayerNameDisplay
               player={player}
               className="flex max-w-[140px] min-w-[90px] flex-1 items-center overflow-hidden"
             />
@@ -101,6 +117,27 @@ function CountryRankDisplay({ country, countryRank }: { country: string; country
         <CountryFlag code={country} size={10} />
         <span>#{formatNumberWithCommas(countryRank)}</span>
       </div>
+    </div>
+  );
+}
+
+function PlayerNameDisplay({
+  player,
+  className,
+}: {
+  player: ScoreSaberPlayerToken | ScoreSaberPlayer;
+  className?: string;
+}) {
+  return (
+    <div className={cn("flex min-w-0 flex-1 justify-start", className)}>
+      <span
+        className="truncate text-sm font-medium text-white"
+        style={{
+          color: getScoreSaberRoles(player)[0]?.color,
+        }}
+      >
+        {player.name}
+      </span>
     </div>
   );
 }
