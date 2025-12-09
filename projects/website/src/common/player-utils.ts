@@ -34,7 +34,7 @@ export function getRankingColumnWidth(
   players: (ScoreSaberPlayer | ScoreSaberPlayerToken)[],
   rank: (player: ScoreSaberPlayer | ScoreSaberPlayerToken) => number,
   countryRank: (player: ScoreSaberPlayer | ScoreSaberPlayerToken) => number,
-  minWidth = 120
+  minWidth = 113
 ) {
   const maxRank = players?.reduce((max, p) => Math.max(max, rank(p) ?? 0), 0) ?? 0;
   const maxCountryRank = players?.reduce((max, p) => Math.max(max, countryRank(p) ?? 0), 0) ?? 0;
@@ -43,5 +43,5 @@ export function getRankingColumnWidth(
   const rankDigits = maxRank > 0 ? Math.floor(Math.log10(maxRank)) + 1 : 0;
   const countryRankDigits = maxCountryRank > 0 ? Math.floor(Math.log10(maxCountryRank)) + 1 : 0;
 
-  return Math.max(minWidth, rankDigits * 15 + countryRankDigits * 15);
+  return Math.max(minWidth, rankDigits * 16 + countryRankDigits * 16);
 }

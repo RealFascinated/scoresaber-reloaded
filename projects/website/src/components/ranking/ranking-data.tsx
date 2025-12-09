@@ -146,7 +146,6 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
                     <div className="grow">
                       <PlayerRanking
                         player={player}
-                        mainPlayer={mainPlayer}
                         firstColumnWidth={firstColumnWidth}
                         renderWorth={() => (
                           <PlayerPpDisplay

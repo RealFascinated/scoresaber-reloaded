@@ -13,19 +13,17 @@ import CountryFlag from "../ui/country-flag";
 
 export function PlayerRanking({
   player,
-  mainPlayer,
   firstColumnWidth,
   renderWorth,
 }: {
   player: ScoreSaberPlayerToken | ScoreSaberPlayer;
-  mainPlayer?: ScoreSaberPlayer;
   firstColumnWidth: number;
   renderWorth: () => React.ReactNode;
 }) {
   return (
     <SimpleLink href={`/player/${player.id}`}>
       {/* Desktop Layout */}
-      <div className="hover:bg-accent/50 hidden items-center gap-2 rounded-md px-(--spacing-xs) py-(--spacing-xs) lg:flex">
+      <div className="bg-muted/50 hover:bg-accent/50 hidden items-center gap-2 rounded-md px-(--spacing-xs) py-(--spacing-xs) lg:flex">
         {/* Rank, Weekly Change, and Country Rank */}
         <div
           className={cn("grid grid-cols-[0.65fr_1fr] items-center gap-3")}
@@ -49,7 +47,7 @@ export function PlayerRanking({
 
       {/* Mobile Layout */}
       <div className="block lg:hidden">
-        <div className="mb-1 flex min-h-[67px] w-full cursor-pointer flex-col justify-center gap-1 rounded-lg bg-[#232323] px-2 py-1 shadow-sm transition-all hover:bg-[#2d2d2d]">
+        <div className="bg-muted/50 mb-1 flex min-h-[67px] w-full cursor-pointer flex-col justify-center gap-1 rounded-lg px-2 py-1 shadow-sm transition-all">
           {/* Top row: Rank, Country Rank, and Weekly Change */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
