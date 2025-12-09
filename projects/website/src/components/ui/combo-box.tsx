@@ -99,12 +99,12 @@ const Combobox = <T,>({
   };
 
   return (
-    <div className={cn("flex flex-col gap-1.5", className)}>
+    <div className={cn("flex flex-col gap-(--spacing-md)", className)}>
       {/* Popover */}
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
-            className="h-10 justify-between gap-3 px-2"
+            className="h-10 justify-between gap-(--spacing-lg) px-(--spacing-sm)"
             variant="outline"
             size="lg"
             role="combobox"
@@ -142,7 +142,7 @@ const Combobox = <T,>({
                       }}
                       className={cn("flex items-center justify-between", item.className)}
                     >
-                      <div className="flex min-w-0 flex-1 items-center gap-2">
+                      <div className="flex min-w-0 flex-1 items-center gap-(--spacing-sm)">
                         {item.icon}
                         {typeof item.name === "string" ? <span>{item.name}</span> : item.name}
                       </div>

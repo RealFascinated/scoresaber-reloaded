@@ -7,7 +7,6 @@ import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { getScoreSaberAvatar } from "@ssr/common/utils/scoresaber.util";
 import { ArrowDownRightIcon, ArrowUpRightIcon } from "lucide-react";
-import PlayerPreview from "../player/player-preview";
 import SimpleLink from "../simple-link";
 import CountryFlag from "../ui/country-flag";
 import { PlayerAvatar } from "./player-avatar";
@@ -39,44 +38,34 @@ export function PlayerRanking({
     <SimpleLink href={`/player/${player.id}`}>
       {/* Desktop Layout */}
       <div className="hidden lg:block">
-        <PlayerPreview
-          playerId={player.id}
-          className="mb-1 grid min-h-[40px] w-full cursor-pointer items-center gap-3 rounded-lg bg-[#232323] px-2 py-1 shadow-sm transition-all hover:bg-[#2d2d2d]"
+        {/* Rank, Weekly Change, and Country Rank */}
+        <div
+          className={cn(
+            "grid items-center gap-3",
+            showWeeklyRankChange ? "grid-cols-[0.75fr_0.75fr_1fr]" : "grid-cols-[0.75fr_1fr]"
+          )}
           style={{
-            gridTemplateColumns: `${firstColumnWidth}px 1fr 90px`,
+            width: `${firstColumnWidth}px`,
           }}
-          delay={750}
-          useLink={false}
         >
-          {/* Rank, Weekly Change, and Country Rank */}
-          <div
-            className={cn(
-              "grid items-center gap-3",
-              showWeeklyRankChange ? "grid-cols-[0.75fr_0.75fr_1fr]" : "grid-cols-[0.75fr_1fr]"
-            )}
-            style={{
-              width: `${firstColumnWidth}px`,
-            }}
-          >
-            <RankDisplay rank={player.rank} />
-            {showWeeklyRankChange && <WeeklyRankChange weeklyRankChange={weeklyRankChange} />}
-            <CountryRankDisplay country={player.country} countryRank={player.countryRank} />
-          </div>
+          <RankDisplay rank={player.rank} />
+          {showWeeklyRankChange && <WeeklyRankChange weeklyRankChange={weeklyRankChange} />}
+          <CountryRankDisplay country={player.country} countryRank={player.countryRank} />
+        </div>
 
-          {/* Avatar and Name */}
-          <div className="flex items-center gap-2">
-            <PlayerAvatar profilePicture={getScoreSaberAvatar(player)} name={player.name} />
-            <PlayerName player={player} />
-          </div>
+        {/* Avatar and Name */}
+        <div className="flex items-center gap-2">
+          <PlayerAvatar profilePicture={getScoreSaberAvatar(player)} name={player.name} />
+          <PlayerName player={player} />
+        </div>
 
-          {/* PP */}
-          <PlayerPpDisplay
-            pp={player.pp}
-            mainPlayer={mainPlayer}
-            relativePerformancePoints={relativePerformancePoints}
-            className="justify-end"
-          />
-        </PlayerPreview>
+        {/* PP */}
+        <PlayerPpDisplay
+          pp={player.pp}
+          mainPlayer={mainPlayer}
+          relativePerformancePoints={relativePerformancePoints}
+          className="justify-end"
+        />
       </div>
 
       {/* Mobile Layout */}

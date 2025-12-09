@@ -10,7 +10,7 @@ const Checkbox = ({
   <CheckboxPrimitive.Root
     data-slot="checkbox"
     className={cn(
-      "border-primary focus-visible:ring-primary/50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground hover:border-primary/70 peer h-4 w-4 shrink-0 rounded-[var(--radius-sm)] border shadow-sm transition-colors duration-200 focus-visible:ring-2 focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-50",
+      "border-primary focus-visible:ring-primary/50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground hover:border-primary/70 peer h-4 w-4 shrink-0 rounded-(--radius-sm) border shadow-sm transition-colors duration-200 focus-visible:ring-2 focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-50",
       className
     )}
     {...props}

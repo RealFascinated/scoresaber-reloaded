@@ -31,10 +31,10 @@ export function FriendScores() {
   });
 
   return (
-    <Card className="flex h-fit flex-col gap-2">
-      <div>
-        <p className="font-bold">Friend Scores</p>
-        <p className="text-sm text-gray-400">
+    <Card className="flex h-fit flex-col">
+      <div className="mb-(--spacing-lg)">
+        <h2 className="text-lg font-semibold">Friend Scores</h2>
+        <p className="text-muted-foreground mt-(--spacing-xs) text-sm">
           The 100 most recent scores from your friends. Score ranks aren&apos;t available as this is
           based on cached data
         </p>
@@ -42,51 +42,47 @@ export function FriendScores() {
 
       {/* Loading */}
       {isLoading && !scoreData && (
-        <div className="flex w-full justify-center py-8">
+        <div className="flex w-full justify-center py-(--spacing-2xl)">
           <Spinner size="md" className="text-primary" />
         </div>
       )}
 
       {/* Scores */}
       {scoreData && (
-        <div className="flex flex-col gap-2">
-          <>
-            <div className="flex flex-col gap-2">
-              {scoreData.items.map((playerScore, index) => {
-                const score = playerScore.score;
-                const leaderboard = playerScore.leaderboard;
-                const beatSaverMap = playerScore.beatSaver;
-                return (
-                  <div key={index} className="flex flex-col">
-                    <PlayerScoreHeader player={playerScore.score.playerInfo} />
-                    <div className="bg-accent-deep rounded-md rounded-tl-none">
-                      <ScoreSaberScoreDisplay
-                        key={score.scoreId}
-                        score={score}
-                        leaderboard={leaderboard}
-                        beatSaverMap={beatSaverMap}
-                        settings={{
-                          hideLeaderboardDropdown: true,
-                          hideAccuracyChanger: true,
-                          // noScoreButtons: true,
-                          allowLeaderboardPreview: true,
-                        }}
-                      />
-                    </div>
+        <div className="flex flex-col gap-(--spacing-lg)">
+          <div className="flex flex-col gap-(--spacing-lg)">
+            {scoreData.items.map((playerScore, index) => {
+              const score = playerScore.score;
+              const leaderboard = playerScore.leaderboard;
+              const beatSaverMap = playerScore.beatSaver;
+              return (
+                <div key={index} className="flex flex-col">
+                  <PlayerScoreHeader player={playerScore.score.playerInfo} />
+                  <div className="bg-accent-deep rounded-(--radius-md) rounded-tl-none">
+                    <ScoreSaberScoreDisplay
+                      key={score.scoreId}
+                      score={score}
+                      leaderboard={leaderboard}
+                      beatSaverMap={beatSaverMap}
+                      settings={{
+                        hideLeaderboardDropdown: true,
+                        hideAccuracyChanger: true,
+                      }}
+                    />
                   </div>
-                );
-              })}
-            </div>
+                </div>
+              );
+            })}
+          </div>
 
-            <SimplePagination
-              mobilePagination={isMobile}
-              page={page}
-              totalItems={scoreData.metadata.totalItems}
-              itemsPerPage={scoreData.metadata.itemsPerPage}
-              loadingPage={isLoading || isFetching ? page : undefined}
-              onPageChange={newPage => setPage(newPage)}
-            />
-          </>
+          <SimplePagination
+            mobilePagination={isMobile}
+            page={page}
+            totalItems={scoreData.metadata.totalItems}
+            itemsPerPage={scoreData.metadata.itemsPerPage}
+            loadingPage={isLoading || isFetching ? page : undefined}
+            onPageChange={newPage => setPage(newPage)}
+          />
         </div>
       )}
     </Card>

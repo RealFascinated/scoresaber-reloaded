@@ -14,17 +14,15 @@ export const metadata: Metadata = {
 
 export default function ScoresPage() {
   return (
-    <main className="flex w-full flex-col items-center justify-center gap-4">
-      <Card className="flex h-fit w-full flex-col gap-2 xl:w-[75%]">
-        <div>
-          <p className="text-lg font-semibold">Live Score Feed</p>
-          <p className="text-muted-foreground text-sm">
-            This is the real-time scores being set on ScoreSaber.
-          </p>
-        </div>
+    <main className="flex w-full flex-col items-center justify-center gap-(--spacing-xl)">
+      <Card className="flex h-fit w-full flex-col xl:w-[75%]">
+        <h1 className="text-lg font-semibold">Live Score Feed</h1>
+        <p className="text-muted-foreground mt-(--spacing-xs) text-sm">
+          This is the real-time scores being set on ScoreSaber.
+        </p>
       </Card>
 
-      <Card className="flex h-fit w-full flex-col gap-2 xl:w-[75%]">
+      <Card className="flex h-fit w-full flex-col xl:w-[75%]">
         <ScoreFeed />
       </Card>
     </main>

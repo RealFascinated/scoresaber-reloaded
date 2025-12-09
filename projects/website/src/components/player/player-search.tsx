@@ -78,12 +78,16 @@ const PlayerSearch = ({
       placeholder={placeholder}
     >
       {isLoading ? (
-        <div className="text-muted-foreground py-6 text-center text-sm">Loading...</div>
+        <div className="text-muted-foreground py-(--spacing-2xl) text-center text-sm">
+          Loading...
+        </div>
       ) : !results?.players.length ? (
-        <div className="py-6 text-center text-sm text-red-500">No results were found.</div>
+        <div className="py-(--spacing-2xl) text-center text-sm text-red-500">
+          No results were found.
+        </div>
       ) : (
-        <div className="p-2">
-          <div className="text-muted-foreground px-2 py-1.5 text-xs font-medium">
+        <div className="p-(--spacing-sm)">
+          <div className="text-muted-foreground px-(--spacing-sm) py-(--spacing-xs) text-xs font-medium">
             Player Results
           </div>
           <div className="mt-1 space-y-1">
@@ -93,7 +97,7 @@ const PlayerSearch = ({
               .map(player => (
                 <div
                   key={player.id}
-                  className="hover:bg-accent hover:text-accent-foreground flex cursor-pointer items-center gap-3 rounded-[var(--radius-md)] px-2 py-2 text-sm transition-colors duration-200"
+                  className="hover:bg-accent hover:text-accent-foreground flex cursor-pointer items-center gap-(--spacing-lg) rounded-(--radius-md) px-(--spacing-sm) py-(--spacing-sm) text-sm transition-colors duration-200"
                   onClick={() => handlePlayerSelect(player)}
                 >
                   <Avatar

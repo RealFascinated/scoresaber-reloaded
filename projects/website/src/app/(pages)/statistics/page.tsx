@@ -26,17 +26,17 @@ export default async function StatisticsPage() {
   const statistics = await ssrApi.getScoreSaberPlatformStatistics();
 
   return (
-    <div className="flex w-full justify-center gap-2">
-      <article className="flex flex-1 flex-col gap-2">
+    <div className="flex w-full justify-center gap-(--spacing-sm)">
+      <article className="flex w-full flex-1 flex-col gap-(--spacing-sm)">
         {/* Header */}
-        <div className="px-4 py-6 md:px-6">
-          <div className="flex items-center gap-4">
-            <div className="bg-primary/10 text-primary rounded-xl p-3 shadow-lg">
+        <div className="px-(--spacing-xl) py-(--spacing-2xl) md:px-(--spacing-2xl)">
+          <div className="flex items-center gap-(--spacing-xl)">
+            <div className="bg-primary/10 text-primary rounded-(--radius-xl) p-(--spacing-lg) shadow-lg">
               <ChartBarIcon className="size-6" />
             </div>
             <div>
-              <h1 className="text-foreground text-2xl font-bold">SSR Statistics</h1>
-              <p className="text-muted-foreground mt-1 text-sm">
+              <h1 className="text-2xl font-semibold">SSR Statistics</h1>
+              <p className="text-muted-foreground mt-(--spacing-xs) text-sm">
                 Real-time platform analytics and player insights
               </p>
             </div>
@@ -44,62 +44,66 @@ export default async function StatisticsPage() {
         </div>
 
         {statistics ? (
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-(--spacing-sm)">
             {/* Game Statistics Section */}
-            <Card className="gap-2">
-              <div className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="bg-primary/10 text-primary rounded-lg p-2">
-                    <ChartBarIcon className="size-5" />
+            <Card>
+              <div className="mb-(--spacing-lg)">
+                <div className="flex flex-col gap-(--spacing-lg) sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex items-center gap-(--spacing-lg)">
+                    <div className="bg-primary/10 text-primary rounded-(--radius-lg) p-(--spacing-sm)">
+                      <ChartBarIcon className="size-5" />
+                    </div>
+                    <div className="flex flex-col">
+                      <h2 className="text-lg font-semibold">Game Statistics</h2>
+                      <p className="text-muted-foreground mt-(--spacing-xs) text-sm">
+                        Daily player activity and metrics
+                      </p>
+                    </div>
                   </div>
-                  <div className="flex flex-col">
-                    <span className="font-medium">Game Statistics</span>
-                    <span className="text-muted-foreground text-sm">
-                      Daily player activity and metrics
-                    </span>
-                  </div>
+                  <SimpleLink
+                    href="https://ssr-grafana.fascinated.cc/public-dashboards/19a90072026f442fafa6c371192dddff"
+                    target="_blank"
+                    className="text-primary hover:text-primary/80 text-sm font-medium transition-colors duration-200"
+                  >
+                    View more in Grafana →
+                  </SimpleLink>
                 </div>
-                <SimpleLink
-                  href="https://ssr-grafana.fascinated.cc/public-dashboards/19a90072026f442fafa6c371192dddff"
-                  target="_blank"
-                  className="text-primary hover:text-primary/80 text-sm font-medium"
-                >
-                  View more in Grafana →
-                </SimpleLink>
               </div>
 
-              <div className="border-border/20 border-t px-4 py-4">
+              <div className="border-border/20 border-t pt-(--spacing-lg)">
                 <AppStats />
               </div>
 
-              <div className="px-4 pb-4">
+              <div className="pt-(--spacing-lg)">
                 <ScoreSaberStatisticsChart statistics={statistics.statistics} />
               </div>
             </Card>
 
             {/* HMD Usage Section */}
             {statistics.statistics.hmdUsage && (
-              <Card className="gap-2">
-                <div className="flex items-center gap-3 p-4">
-                  <div className="bg-primary/10 text-primary rounded-lg p-2">
-                    <DevicePhoneMobileIcon className="size-5" />
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="font-medium">HMD Usage Distribution</span>
-                    <span className="text-muted-foreground text-sm">
-                      Popular VR headsets among active players
-                    </span>
+              <Card>
+                <div className="mb-(--spacing-lg)">
+                  <div className="flex items-center gap-(--spacing-lg)">
+                    <div className="bg-primary/10 text-primary rounded-(--radius-lg) p-(--spacing-sm)">
+                      <DevicePhoneMobileIcon className="size-5" />
+                    </div>
+                    <div className="flex flex-col">
+                      <h2 className="text-lg font-semibold">HMD Usage Distribution</h2>
+                      <p className="text-muted-foreground mt-(--spacing-xs) text-sm">
+                        Popular VR headsets among active players
+                      </p>
+                    </div>
                   </div>
                 </div>
-                <div className="px-4 pb-4">
+                <div className="pt-(--spacing-lg)">
                   <HmdUsageChart hmdUsage={statistics.statistics.hmdUsage} />
                 </div>
               </Card>
             )}
           </div>
         ) : (
-          <Card className="p-6">
-            <div className="flex h-32 items-center justify-center">
+          <Card>
+            <div className="flex h-32 items-center justify-center py-(--spacing-2xl)">
               <p className="text-muted-foreground">Unable to load statistics, missing data...</p>
             </div>
           </Card>

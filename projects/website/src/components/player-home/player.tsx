@@ -9,7 +9,7 @@ import Card from "../card";
 import PlayerPreviewHeader from "../player/header/player-preview-header";
 import { Spinner } from "../spinner";
 
-export function PlayerPreview() {
+export function Player() {
   const database = useDatabase();
   const mainPlayerId = useLiveQuery(() => database.getMainPlayerId());
 
@@ -22,7 +22,7 @@ export function PlayerPreview() {
   return (
     <Card className="flex min-h-[180px] justify-center">
       {isLoading && (
-        <div className="flex h-full items-center justify-center">
+        <div className="flex h-full items-center justify-center py-(--spacing-2xl)">
           <Spinner />
         </div>
       )}

@@ -30,15 +30,16 @@ export default function CountryFlag({ code, size = 24, className, tooltip }: Pro
         className="flex items-center justify-center"
         style={{
           width: size * 2,
-          height: size * 2,
           minWidth: size * 2,
-          minHeight: size * 2,
         }}
       >
         <img
           alt="Country Flag"
           src={flagSrc}
-          className="h-full w-full object-contain"
+          className="h-auto w-full object-contain"
+          style={{
+            maxHeight: size * 2,
+          }}
           onError={handleError}
         />
       </div>

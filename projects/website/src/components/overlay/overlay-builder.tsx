@@ -9,6 +9,7 @@ import {
   OverlayViews,
 } from "@/common/overlay/overlay-settings";
 import { cn } from "@/common/utils";
+import Card from "@/components/card";
 import Notice from "@/components/notice";
 import { Checkbox } from "@/components/ui/checkbox";
 import { FormField } from "@/components/ui/form";
@@ -25,16 +26,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { DetailType } from "@ssr/common/detail-type";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useLiveQuery } from "dexie-react-hooks";
-import { ChevronDown, ChevronRight, Eye, Monitor, Settings, User, Users } from "lucide-react";
+import { Eye, Monitor, User } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 import { Button } from "../ui/button";
 import { Form, FormControl, FormDescription, FormItem, FormLabel } from "../ui/form";
-
-// Constants
-const DEFAULT_EXPANDED_SECTIONS = new Set(["basic", "views"]);
 
 const viewToggles = [
   {
@@ -67,7 +65,6 @@ const formSchema = z.object({
 export default function OverlayBuilder() {
   const database = useDatabase();
   const overlaySettings = useLiveQuery(async () => database.getOverlaySettings());
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(DEFAULT_EXPANDED_SECTIONS);
   const [isRealTimeDataEnabled, setIsRealTimeDataEnabled] = useState(true);
   const hasInitialized = useRef(false);
 
@@ -179,226 +176,159 @@ export default function OverlayBuilder() {
     openInNewTab(`/overlay?settings=${encodeOverlaySettings(overlaySettings)}`);
   }
 
-  const toggleSection = (section: string) => {
-    setExpandedSections(prev => {
-      const newExpanded = new Set(prev);
-      if (newExpanded.has(section)) {
-        newExpanded.delete(section);
-      } else {
-        newExpanded.add(section);
-      }
-      return newExpanded;
-    });
-  };
-
   return (
-    <div className="flex h-full w-full flex-col items-center gap-4 p-4 text-sm">
-      {/* Title */}
-      <div className="text-center">
-        <h2 className="text-2xl font-semibold">Overlay Builder</h2>
-        <p className="text-muted-foreground mt-1 text-sm">
+    <Card className="flex h-fit w-full flex-col 2xl:w-[75%]">
+      {/* Header Section */}
+      <div className="mb-(--spacing-lg)">
+        <h1 className="text-2xl font-semibold">Overlay Builder</h1>
+        <p className="text-muted-foreground mt-(--spacing-xs) text-sm">
           Configure your streaming overlay settings
         </p>
       </div>
 
       {/* Streamer Warning */}
-      <Notice>
-        You must use a resolution of 1920x1080 in OBS (or similar) to use this overlay.
-      </Notice>
+      <div className="mb-(--spacing-lg)">
+        <Notice>
+          You must use a resolution of 1920x1080 in OBS (or similar) to use this overlay.
+        </Notice>
+      </div>
 
       {/* Unknown Account ID Notice */}
-      <p className="text-muted-foreground text-center text-sm">
+      <p className="text-muted-foreground mb-(--spacing-lg) text-sm">
         If you don&#39;t know your player id, you can link your account and it will be automatically
         filled in.
       </p>
 
       {/* Overlay Settings */}
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="w-full max-w-2xl space-y-4">
-          {/* Basic Settings Section */}
-          <CollapsibleSection
-            title="Basic Settings"
-            icon={<Settings className="h-4 w-4" />}
-            isExpanded={expandedSections.has("basic")}
-            onToggle={() => toggleSection("basic")}
-          >
-            <div className="space-y-4">
-              <FormField
-                control={form.control}
-                name="playerId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm">Player ID</FormLabel>
-                    <FormDescription>
-                      The id for the player you want to show in the overlay.
-                    </FormDescription>
-                    <FormControl>
-                      <Input placeholder="Enter your ScoreSaber player ID" {...field} />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <FormField
+            control={form.control}
+            name="playerId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-sm">Player ID</FormLabel>
+                <FormDescription>
+                  The id for the player you want to show in the overlay.
+                </FormDescription>
+                <FormControl>
+                  <Input placeholder="Enter your ScoreSaber player ID" {...field} />
+                </FormControl>
+              </FormItem>
+            )}
+          />
 
-              <FormField
-                control={form.control}
-                name="useRealTimeData"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-center space-y-0 space-x-3">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={checked => {
-                          field.onChange(checked);
-                          handleRealTimeDataChange(checked as boolean);
-                        }}
-                      />
-                    </FormControl>
-                    <div className="space-y-1">
-                      <FormLabel className="text-sm">Use Real-Time Data</FormLabel>
-                      <FormDescription>
-                        Whether to fetch real-time data from the data client.
-                      </FormDescription>
-                    </div>
-                  </FormItem>
-                )}
-              />
+          <FormField
+            control={form.control}
+            name="useRealTimeData"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-center space-y-0 space-x-3">
+                <FormControl>
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={checked => {
+                      field.onChange(checked);
+                      handleRealTimeDataChange(checked as boolean);
+                    }}
+                  />
+                </FormControl>
+                <div className="space-y-1">
+                  <FormLabel className="text-sm">Use Real-Time Data</FormLabel>
+                  <FormDescription>
+                    Whether to fetch real-time data from the data client.
+                  </FormDescription>
+                </div>
+              </FormItem>
+            )}
+          />
 
-              {/* Data Clients */}
-              {isRealTimeDataEnabled && (
+          {/* Data Clients */}
+          {isRealTimeDataEnabled && (
+            <FormField
+              control={form.control}
+              name="dataClient"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-sm">Data Client</FormLabel>
+                  <FormDescription>The data client to use for the overlay.</FormDescription>
+                  <FormControl>
+                    <Select
+                      onValueChange={value => {
+                        field.onChange(value);
+                      }}
+                      value={field.value}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a data client to use" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Object.entries(OverlayDataClients).map(([id, clientName]) => {
+                          return (
+                            <SelectItem key={id} value={id}>
+                              {clientName}
+                            </SelectItem>
+                          );
+                        })}
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+          )}
+
+          {/* Views Section */}
+          <div className="space-y-3">
+            <div>
+              <FormLabel className="text-sm">Enabled Views</FormLabel>
+              <FormDescription>Toggle which views to show in the overlay.</FormDescription>
+            </div>
+
+            {viewToggles.map(viewToggle => {
+              const isDisabled = viewToggle.requiresRealTimeData && !isRealTimeDataEnabled;
+
+              return (
                 <FormField
+                  key={viewToggle.value}
                   control={form.control}
-                  name="dataClient"
+                  name={`views.${viewToggle.value}`}
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm">Data Client</FormLabel>
-                      <FormDescription>The data client to use for the overlay.</FormDescription>
+                    <FormItem className="flex flex-row items-center space-y-0 space-x-3">
                       <FormControl>
-                        <Select
-                          onValueChange={value => {
-                            field.onChange(value);
-                          }}
-                          defaultValue={form.getValues().dataClient}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a data client to use" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {Object.entries(OverlayDataClients).map(([id, clientName]) => {
-                              return (
-                                <SelectItem key={id} value={id}>
-                                  {clientName}
-                                </SelectItem>
-                              );
-                            })}
-                          </SelectContent>
-                        </Select>
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                          disabled={isDisabled}
+                        />
                       </FormControl>
+                      <div
+                        className={cn("flex items-center space-x-2", isDisabled && "opacity-50")}
+                      >
+                        {viewToggle.icon}
+                        <FormLabel className="font-normal">
+                          {viewToggle.name}
+                          {viewToggle.requiresRealTimeData && (
+                            <span className="text-muted-foreground ml-1 text-xs">
+                              (requires real-time data)
+                            </span>
+                          )}
+                        </FormLabel>
+                      </div>
                     </FormItem>
                   )}
                 />
-              )}
-            </div>
-          </CollapsibleSection>
-
-          {/* Views Section */}
-          <CollapsibleSection
-            title="Overlay Views"
-            icon={<Users className="h-4 w-4" />}
-            isExpanded={expandedSections.has("views")}
-            onToggle={() => toggleSection("views")}
-          >
-            <div className="space-y-4">
-              <div>
-                <FormLabel className="text-sm">Enabled Views</FormLabel>
-                <FormDescription>Toggle which views to show in the overlay.</FormDescription>
-              </div>
-
-              <div className="space-y-3">
-                {viewToggles.map(viewToggle => {
-                  const isDisabled = viewToggle.requiresRealTimeData && !isRealTimeDataEnabled;
-
-                  return (
-                    <FormField
-                      key={viewToggle.value}
-                      control={form.control}
-                      name={`views.${viewToggle.value}`}
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-center space-y-0 space-x-3">
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                              disabled={isDisabled}
-                            />
-                          </FormControl>
-                          <div
-                            className={cn(
-                              "flex items-center space-x-2",
-                              isDisabled && "opacity-50"
-                            )}
-                          >
-                            {viewToggle.icon}
-                            <FormLabel className="font-normal">
-                              {viewToggle.name}
-                              {viewToggle.requiresRealTimeData && (
-                                <span className="text-muted-foreground ml-1 text-xs">
-                                  (requires real-time data)
-                                </span>
-                              )}
-                            </FormLabel>
-                          </div>
-                        </FormItem>
-                      )}
-                    />
-                  );
-                })}
-              </div>
-            </div>
-          </CollapsibleSection>
+              );
+            })}
+          </div>
 
           {/* Action Buttons */}
-          <div className="border-muted/50 flex flex-row gap-2 border-t pt-4">
+          <div className="border-muted/50 flex flex-row gap-(--spacing-sm) border-t pt-(--spacing-xl)">
             <Button type="submit" className="flex-1">
               Open Overlay
             </Button>
           </div>
         </form>
       </Form>
-    </div>
-  );
-}
-
-// Helper component for collapsible sections
-interface CollapsibleSectionProps {
-  title: string;
-  icon: React.ReactNode;
-  isExpanded: boolean;
-  onToggle: () => void;
-  children: React.ReactNode;
-}
-
-function CollapsibleSection({
-  title,
-  icon,
-  isExpanded,
-  onToggle,
-  children,
-}: CollapsibleSectionProps) {
-  return (
-    <div className="border-muted/50 rounded-[var(--radius-lg)] border">
-      <button
-        type="button"
-        onClick={onToggle}
-        className="hover:bg-muted/50 flex w-full items-center justify-between p-3 transition-colors duration-200"
-      >
-        <div className="flex items-center gap-2">
-          {icon}
-          <span className="font-medium">{title}</span>
-        </div>
-        {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-      </button>
-
-      {isExpanded && <div className="p-4 pt-0">{children}</div>}
-    </div>
+    </Card>
   );
 }

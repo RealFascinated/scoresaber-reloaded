@@ -44,6 +44,15 @@
   --radius-xl: 0.75rem; /* 12px */
   --radius-2xl: 1rem; /* 16px */
   --radius-full: 9999px;
+
+  /* Spacing Scale */
+  --spacing-xs: 0.25rem; /* 4px - very tight spacing */
+  --spacing-sm: 0.5rem; /* 8px - tight spacing */
+  --spacing-md: 0.75rem; /* 12px - compact */
+  --spacing-lg: 1rem; /* 16px - standard */
+  --spacing-xl: 1.5rem; /* 24px - comfortable */
+  --spacing-2xl: 2rem; /* 32px - spacious */
+  --spacing-3xl: 3rem; /* 48px - very spacious */
 }
 
 .purple {

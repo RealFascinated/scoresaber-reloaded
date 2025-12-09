@@ -1,5 +1,4 @@
 import { cn } from "@/common/utils";
-import { PlayerMiniRankingSkeleton } from "@/components/player/mini-ranking/player-mini-ranking-skeleton";
 import { PlayerInfo } from "@/components/player/player-info";
 import SimpleLink from "@/components/simple-link";
 import { useIsMobile } from "@/contexts/viewport-context";
@@ -11,7 +10,6 @@ import { useQuery } from "@tanstack/react-query";
 import { ReactElement } from "react";
 import Card from "../../card";
 import CountryFlag from "../../ui/country-flag";
-import PlayerPreview from "../player-preview";
 
 type Variants = {
   [key: string]: {
@@ -21,11 +19,11 @@ type Variants = {
 
 const miniVariants: Variants = {
   Global: {
-    icon: () => <GlobeAmericasIcon className="h-5 w-5" />,
+    icon: () => <GlobeAmericasIcon className="size-6" />,
   },
   Country: {
     icon: (player: ScoreSaberPlayer) => {
-      return <CountryFlag code={player.country} size={12} />;
+      return <CountryFlag code={player.country} size={18} />;
     },
   },
 };
@@ -36,26 +34,17 @@ export default function PlayerMiniRankings({ player }: { player: ScoreSaberPlaye
     queryFn: () => ssrApi.getPlayerMiniRanking(player.id),
   });
 
-  if (isLoading || !miniRankingResponse) {
-    return (
-      <>
-        <PlayerMiniRankingSkeleton />
-        <PlayerMiniRankingSkeleton />
-      </>
-    );
-  }
-
   return (
     <>
       <PlayerMiniRanking
         type="Global"
         player={player}
-        players={miniRankingResponse.globalRankings}
+        players={miniRankingResponse?.globalRankings ?? []}
       />
       <PlayerMiniRanking
         type="Country"
         player={player}
-        players={miniRankingResponse.countryRankings}
+        players={miniRankingResponse?.countryRankings ?? []}
       />
     </>
   );
@@ -88,11 +77,11 @@ function PlayerMiniRanking({
   })();
 
   return (
-    <Card className="sticky flex w-full flex-col gap-2 text-xs select-none sm:w-[400px] sm:text-sm">
+    <Card className="sticky flex w-full flex-col gap-(--spacing-sm) text-xs select-none sm:w-[400px] sm:text-sm">
       {/* Header */}
       <div className="flex items-center gap-2">
         {icon}
-        <p className="font-medium">{type} Ranking</p>
+        <p className="font-bold">{type} Ranking</p>
       </div>
 
       {/* Players List */}
@@ -103,67 +92,62 @@ function PlayerMiniRanking({
             const ppDifference = playerRanking.pp - player.pp;
 
             return (
-              <PlayerPreview
-                playerId={playerRanking.id}
-                delay={750}
-                className="w-full transition-all hover:bg-[#2d2d2d]"
+              <SimpleLink
                 key={playerRanking.id}
-                useLink={false}
+                href={`/player/${playerRanking.id}`}
+                className="group hover:bg-accent/50 grid cursor-pointer items-center gap-(--spacing-md) px-(--spacing-xs) py-(--spacing-xs) transition-colors duration-200 sm:px-(--spacing-sm)"
+                style={{
+                  gridTemplateColumns: isMobile
+                    ? `${playerRankWidth}px 48px 1fr auto`
+                    : `${playerRankWidth}px 48px 0.73fr 1fr`,
+                }}
+                data-umami-event="player-mini-ranking-button"
               >
-                <SimpleLink
-                  href={`/player/${playerRanking.id}`}
-                  className="group grid cursor-pointer items-center gap-2.5 px-1 py-1.5 sm:px-2"
+                {/* Rank */}
+                <p className="text-muted-foreground font-mono">#{formatNumberWithCommas(rank)}</p>
+
+                {/* Player */}
+                <div className="flex items-center">
+                  <PlayerInfo
+                    player={playerRanking}
+                    highlightedPlayerId={player.id}
+                    hideCountryFlag
+                    hoverBrightness={false}
+                    className="text-xs"
+                  />
+                </div>
+
+                <div className="m-auto" />
+
+                {/* PP */}
+                <div
+                  className="grid w-fit items-center gap-(--spacing-sm) md:w-[100px]"
                   style={{
-                    gridTemplateColumns: isMobile
-                      ? `${playerRankWidth}px 48px 1fr auto`
-                      : `${playerRankWidth}px 48px 0.73fr 1fr`,
+                    gridTemplateColumns: isMobile ? "1fr" : "1fr 0.3fr",
                   }}
-                  data-umami-event="player-mini-ranking-button"
                 >
-                  {/* Rank */}
-                  <p className="font-mono text-gray-400">#{formatNumberWithCommas(rank)}</p>
-
-                  {/* Player */}
-                  <div className="flex items-center">
-                    <PlayerInfo
-                      player={playerRanking}
-                      highlightedPlayerId={player.id}
-                      hideCountryFlag
-                      hoverBrightness={false}
-                      className="text-xs"
-                    />
-                  </div>
-
-                  <div className="m-auto" />
-
-                  {/* PP */}
-                  <div
-                    className="grid w-fit items-center gap-2 md:w-[100px]"
-                    style={{
-                      gridTemplateColumns: isMobile ? "1fr" : "1fr 0.3fr",
-                    }}
-                  >
-                    <p className="text-pp text-right font-mono sm:text-left">
-                      {formatPp(playerRanking.pp)}pp
+                  <p className="text-pp text-right font-mono sm:text-left">
+                    {formatPp(playerRanking.pp)}pp
+                  </p>
+                  {playerRanking.id !== player.id && !isMobile && (
+                    <p
+                      className={cn(
+                        "font-mono",
+                        ppDifference > 0 ? "text-green-400" : "text-red-400"
+                      )}
+                    >
+                      {ppDifference > 0 ? "+" : ""}
+                      {formatPp(ppDifference, 2)}
                     </p>
-                    {playerRanking.id !== player.id && !isMobile && (
-                      <p
-                        className={cn(
-                          "font-mono",
-                          ppDifference > 0 ? "text-green-400" : "text-red-400"
-                        )}
-                      >
-                        {ppDifference > 0 ? "+" : ""}
-                        {formatPp(ppDifference, 2)}
-                      </p>
-                    )}
-                  </div>
-                </SimpleLink>
-              </PlayerPreview>
+                  )}
+                </div>
+              </SimpleLink>
             );
           })
         ) : (
-          <p className="text-gray-400">No players found</p>
+          <div className="flex items-center justify-center py-(--spacing-xl)">
+            <p className="text-muted-foreground text-sm">No players found</p>
+          </div>
         )}
       </div>
     </Card>

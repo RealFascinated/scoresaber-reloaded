@@ -1,12 +1,12 @@
 import { FriendRanking } from "@/components/player-home/friend/friend-ranking";
 import { FriendScores } from "@/components/player-home/friend/friend-scores";
-import { PlayerPreview } from "@/components/player-home/player-preview";
+import { Player } from "@/components/player-home/player";
 
 export default function HomePage() {
   return (
-    <main className="flex w-full flex-col gap-2 2xl:flex-row">
-      <article className="flex w-full flex-col gap-2 2xl:w-[500px]">
-        <PlayerPreview />
+    <main className="flex w-full flex-col gap-(--spacing-xl) 2xl:flex-row">
+      <article className="flex w-full flex-col gap-(--spacing-xl) 2xl:w-[500px]">
+        <Player />
         <FriendRanking />
       </article>
       <article className="flex-1">

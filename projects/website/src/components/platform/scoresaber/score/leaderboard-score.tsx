@@ -4,7 +4,6 @@ import ScoreMissesAndPausesBadge from "@/components/platform/scoresaber/score/ba
 import { ScorePpBadge } from "@/components/platform/scoresaber/score/badges/score-pp";
 import { ScoreSaberScoreModifiers } from "@/components/platform/scoresaber/score/score-modifiers";
 import { PlayerInfo } from "@/components/player/player-info";
-import PlayerPreview from "@/components/player/player-preview";
 import { ScoreReplayButton } from "@/components/score/button/score-replay-button";
 import { ScoreTimeSet } from "@/components/score/score-time-set";
 import SimpleTooltip from "@/components/simple-tooltip";
@@ -41,9 +40,7 @@ export default function ScoreSaberLeaderboardScore({
       {/* Player */}
       <td className="flex min-w-[250px] gap-2 px-4 py-2 whitespace-nowrap">
         {scorePlayer ? (
-          <PlayerPreview playerId={scorePlayer.id}>
-            <PlayerInfo player={scorePlayer} highlightedPlayerId={highlightedPlayerId} useLink />
-          </PlayerPreview>
+          <PlayerInfo player={scorePlayer} highlightedPlayerId={highlightedPlayerId} useLink />
         ) : (
           <p className="text-gray-500">Unknown Player</p>
         )}

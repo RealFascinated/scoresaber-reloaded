@@ -33,7 +33,7 @@ export default function PlayerRankingsButton({ player }: PlayerRankingsButtonPro
               </p>
             }
           >
-            <span className="cursor-pointer">Player Rankings</span>
+            <span className="cursor-pointer">Rankings</span>
           </SimpleTooltip>
         </Button>
       </DialogTrigger>

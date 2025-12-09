@@ -23,7 +23,7 @@ function LeaderboardStarChangeHistoryButton({
 }) {
   return (
     <button
-      className="border-border/50 bg-background/95 text-foreground hover:bg-accent/50 hover:border-primary/50 focus-visible:ring-primary/50 flex items-center gap-2 rounded-[var(--radius-lg)] border px-3 py-2 text-sm font-medium transition-colors duration-200 focus-visible:ring-2 focus-visible:outline-none"
+      className="border-border/50 bg-background/95 text-foreground hover:bg-accent/50 hover:border-primary/50 focus-visible:ring-primary/50 flex items-center gap-(--spacing-sm) rounded-(--radius-lg) border px-(--spacing-lg) py-(--spacing-sm) text-sm font-medium transition-colors duration-200 focus-visible:ring-2 focus-visible:outline-none"
       onClick={onClick}
     >
       <StarIcon className="h-4 w-4 text-yellow-500" />
@@ -41,11 +41,11 @@ export function LeaderboardStarChangeHistory({
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="flex w-full flex-col items-center justify-center gap-3">
+    <div className="flex w-full flex-col items-center justify-center gap-(--spacing-lg)">
       <LeaderboardStarChangeHistoryButton onClick={() => setOpen(!open)} isOpen={open} />
       {open && (
         <div className="animate-in slide-in-from-top-2 w-full duration-200">
-          <div className="border-border/30 bg-background/80 rounded-[var(--radius-lg)] border p-2 shadow-sm">
+          <div className="border-border/30 bg-background/80 rounded-(--radius-lg) border p-(--spacing-sm) shadow-sm">
             <div className="space-y-1">
               {starChangeHistory.map((starChange, index) => {
                 const isCurrent = index === 0;
@@ -74,12 +74,12 @@ export function LeaderboardStarChangeHistory({
                   <div
                     key={`${starChange.timestamp.toISOString()}-${starChange.previousStars}-${starChange.newStars}`}
                     className={cn(
-                      "hover:bg-accent/30 flex items-center justify-between rounded-[var(--radius-md)] px-2 py-1.5 text-xs transition-colors duration-200",
+                      "hover:bg-accent/30 flex items-center justify-between rounded-(--radius-md) px-(--spacing-sm) py-(--spacing-xs) text-xs transition-colors duration-200",
                       isCurrent && "bg-primary/10"
                     )}
                   >
                     {/* Timestamp and change indicator */}
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-(--spacing-sm)">
                       <SimpleTooltip
                         display={
                           <p>
@@ -100,18 +100,18 @@ export function LeaderboardStarChangeHistory({
                       {changeType === "new" && <StarIcon className="h-3 w-3 text-yellow-500" />}
                       {changeType === "removed" && <StarIcon className="h-3 w-3 text-gray-500" />}
                       {isCurrent && (
-                        <span className="bg-primary/20 text-primary rounded-full px-1.5 py-0.5 text-xs font-medium">
+                        <span className="bg-primary/20 text-primary rounded-full px-(--spacing-md) py-(--spacing-xs) text-xs font-medium">
                           Current
                         </span>
                       )}
                     </div>
 
                     {/* Star change display */}
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-(--spacing-md)">
                       {/* From */}
                       <div
                         className={cn(
-                          "flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium",
+                          "flex items-center gap-(--spacing-xs) rounded px-(--spacing-md) py-(--spacing-xs) text-xs font-medium",
                           starChange.previousStars === 0
                             ? "bg-muted/50 text-muted-foreground"
                             : isDecrease || isRankedToUnranked
@@ -129,7 +129,7 @@ export function LeaderboardStarChangeHistory({
                       {/* To */}
                       <div
                         className={cn(
-                          "flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium",
+                          "flex items-center gap-(--spacing-xs) rounded px-(--spacing-md) py-(--spacing-xs) text-xs font-medium",
                           starChange.newStars === 0
                             ? "bg-muted/50 text-muted-foreground"
                             : isUnrankedToRanked || isIncrease

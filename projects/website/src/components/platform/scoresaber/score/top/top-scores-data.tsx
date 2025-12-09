@@ -39,23 +39,21 @@ export function TopScoresData() {
   }, []);
 
   return (
-    <Card className="flex h-fit w-full flex-col justify-center gap-6 2xl:w-[75%]">
+    <Card className="flex h-fit w-full flex-col 2xl:w-[75%]">
       {/* Header Section */}
-      <div className="flex flex-col items-center gap-3 text-center">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-bold tracking-tight">Top ScoreSaber Scores</h1>
-          <p className="text-muted-foreground text-sm">
-            Discover the highest scores tracked across ScoreSaber
-          </p>
-        </div>
+      <div className="mb-(--spacing-lg)">
+        <h1 className="text-2xl font-semibold">Top ScoreSaber Scores</h1>
+        <p className="text-muted-foreground mt-(--spacing-xs) text-sm">
+          Discover the highest scores tracked across ScoreSaber
+        </p>
       </div>
 
       {isLoading || !scores ? (
-        <div className="flex items-center justify-center py-8">
+        <div className="flex items-center justify-center py-(--spacing-2xl)">
           <Spinner />
         </div>
       ) : (
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-(--spacing-sm)">
           {/* Scores */}
           {scores.items.map(({ score, leaderboard, beatSaver }) => {
             const player = score.playerInfo;
@@ -64,7 +62,7 @@ export function TopScoresData() {
               <div key={score.scoreId} className="flex flex-col">
                 <PlayerScoreHeader player={player} />
 
-                <div className="bg-accent-deep rounded-md rounded-tl-none">
+                <div className="bg-accent-deep rounded-(--radius-md) rounded-tl-none">
                   <ScoreSaberScoreDisplay
                     key={score.scoreId}
                     score={score}

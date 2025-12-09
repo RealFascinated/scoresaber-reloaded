@@ -18,17 +18,6 @@ export default function Error() {
         <Card className="border-destructive/30 relative w-full shadow-lg backdrop-blur-md">
           {/* Header */}
           <div className="pb-4 text-center">
-            {/* Animated icon with gradient background */}
-            <div className="relative mx-auto mb-4">
-              <div className="from-destructive/20 to-primary/20 absolute inset-0 animate-pulse rounded-full bg-gradient-to-br blur-md" />
-              <div className="from-destructive/10 to-primary/10 border-destructive/20 relative flex h-16 w-16 items-center justify-center rounded-full border bg-gradient-to-br">
-                <ExclamationTriangleIcon className="text-destructive h-8 w-8 animate-bounce drop-shadow-lg" />
-                <div className="absolute -top-0.5 -right-0.5">
-                  <BoltIcon className="h-4 w-4 animate-ping text-yellow-500" />
-                </div>
-              </div>
-            </div>
-
             <h1 className="from-foreground to-muted-foreground mb-2 bg-linear-to-r bg-clip-text text-2xl font-bold text-transparent">
               Oops! Something went wrong
             </h1>

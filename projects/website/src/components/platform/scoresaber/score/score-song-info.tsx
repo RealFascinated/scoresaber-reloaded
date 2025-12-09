@@ -15,13 +15,11 @@ export default function ScoreSaberScoreSongInfo({
   beatSaverMap,
   clickableSongName = true,
   imageSize = 64,
-  allowLeaderboardPreview = false,
 }: {
   leaderboard: ScoreSaberLeaderboard;
   beatSaverMap?: BeatSaverMapResponse;
   imageSize?: number;
   clickableSongName?: boolean;
-  allowLeaderboardPreview?: boolean;
 }) {
   const mappersProfile =
     beatSaverMap != undefined
@@ -30,10 +28,6 @@ export default function ScoreSaberScoreSongInfo({
 
   const starCount = leaderboard.stars;
   const difficulty = getDifficulty(leaderboard.difficulty.difficulty);
-
-  const songNameElement = (
-    <ScoreSaberSongName leaderboard={leaderboard} clickableSongName={clickableSongName} />
-  );
 
   const difficultyInfo = (
     <div
@@ -50,24 +44,6 @@ export default function ScoreSaberScoreSongInfo({
       ) : (
         <p>{getDifficultyName(difficulty)}</p>
       )}
-    </div>
-  );
-
-  const authorInfo = (
-    <div className="flex flex-row items-end gap-1.5 text-sm leading-none">
-      <p className="line-clamp-2 text-gray-400">
-        {leaderboard.songAuthorName}{" "}
-        <span className="text-song-mapper">
-          <FallbackLink
-            href={mappersProfile}
-            className={cn(
-              mappersProfile && "text-xs leading-none transition-all hover:brightness-66"
-            )}
-          >
-            {leaderboard.levelAuthorName}
-          </FallbackLink>
-        </span>
-      </p>
     </div>
   );
 
@@ -137,12 +113,24 @@ export default function ScoreSaberScoreSongInfo({
       </div>
       <div className="flex flex-col gap-1">
         <div className="flex flex-col gap-1">
-          {allowLeaderboardPreview ? (
-            <LeaderboardPreview leaderboard={leaderboard}>{songNameElement}</LeaderboardPreview>
-          ) : (
-            songNameElement
-          )}
-          {authorInfo}
+          <ScoreSaberSongName leaderboard={leaderboard} clickableSongName={clickableSongName} />
+
+          {/* Author Info */}
+          <div className="flex flex-row items-end gap-1.5 text-sm leading-none">
+            <p className="line-clamp-2 text-gray-400">
+              {leaderboard.songAuthorName}{" "}
+              <span className="text-song-mapper">
+                <FallbackLink
+                  href={mappersProfile}
+                  className={cn(
+                    mappersProfile && "text-xs leading-none transition-all hover:brightness-66"
+                  )}
+                >
+                  {leaderboard.levelAuthorName}
+                </FallbackLink>
+              </span>
+            </p>
+          </div>
         </div>
       </div>
     </div>

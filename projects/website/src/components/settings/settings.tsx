@@ -52,12 +52,12 @@ export default function Settings() {
   return (
     <Card className="relative flex h-full flex-col">
       {/* Header */}
-      <div className="border-border/50 border-b px-6 py-6">
+      <div className="border-border/50 border-b px-(--spacing-2xl) py-(--spacing-2xl)">
         <h1 className="text-2xl font-semibold">Settings</h1>
       </div>
 
       {/* Mobile Category Selector */}
-      <div className="border-border/50 border-b p-4 md:hidden">
+      <div className="border-border/50 border-b p-(--spacing-xl) md:hidden">
         <Select
           value={selectedCategory.name}
           onValueChange={value => {
@@ -67,7 +67,7 @@ export default function Settings() {
         >
           <SelectTrigger className="w-full">
             <SelectValue>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-(--spacing-sm)">
                 <selectedCategory.icon className="size-5" />
                 <span>{selectedCategory.name}</span>
               </div>
@@ -76,7 +76,7 @@ export default function Settings() {
           <SelectContent>
             {categories.map(category => (
               <SelectItem key={category.name} value={category.name}>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-(--spacing-sm)">
                   <category.icon className="size-5" />
                   <span>{category.name}</span>
                 </div>
@@ -89,12 +89,12 @@ export default function Settings() {
       <div className="flex min-h-0 flex-1 overflow-hidden">
         {/* Sidebar */}
         <div className="border-border/50 hidden w-44 border-r md:block">
-          <div className="flex h-full flex-col gap-1 p-3">
+          <div className="flex h-full flex-col gap-(--spacing-xs) p-(--spacing-lg)">
             {categories.map(category => (
               <button
                 key={category.name}
                 className={cn(
-                  "flex cursor-pointer items-center gap-2.5 rounded-[var(--radius-md)] px-3 py-2 text-sm transition-colors duration-200",
+                  "flex cursor-pointer items-center gap-(--spacing-md) rounded-(--radius-md) px-(--spacing-lg) py-(--spacing-sm) text-sm transition-colors duration-200",
                   selectedCategory.name === category.name
                     ? "bg-primary/10 text-primary"
                     : "text-muted-foreground hover:bg-accent hover:text-foreground"
@@ -110,12 +110,12 @@ export default function Settings() {
 
         {/* Content */}
         <div className="flex-1 overflow-x-hidden overflow-y-auto">
-          <div className="p-6">{selectedCategory.component}</div>
+          <div className="p-(--spacing-2xl)">{selectedCategory.component}</div>
         </div>
       </div>
 
       {/* Footer */}
-      <div className="border-border/50 flex items-center justify-end gap-3 border-t px-6 py-4">
+      <div className="border-border/50 flex items-center justify-end gap-(--spacing-lg) border-t px-(--spacing-2xl) py-(--spacing-xl)">
         <ResetSettings />
         <div className="bg-border/50 h-5 w-px" />
         <ExportSettings />

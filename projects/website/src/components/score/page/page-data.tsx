@@ -34,12 +34,12 @@ export default function ScorePageData({ scoreId }: { scoreId: string }) {
 
   if (isError) {
     return (
-      <Card className="flex flex-col items-center justify-center p-12 text-center">
-        <AlertCircle className="mb-4 h-16 w-16 text-red-500" />
-        <h2 className="mb-2 text-xl font-semibold text-gray-900 dark:text-gray-100">
+      <Card className="flex flex-col items-center justify-center text-center">
+        <AlertCircle className="mb-(--spacing-xl) h-16 w-16 text-red-500" />
+        <h2 className="mb-(--spacing-sm) text-xl font-semibold">
           Score Not Found
         </h2>
-        <p className="text-gray-600 dark:text-gray-400">
+        <p className="text-muted-foreground">
           This score has not been tracked or may have been removed.
         </p>
       </Card>
@@ -61,34 +61,34 @@ export default function ScorePageData({ scoreId }: { scoreId: string }) {
       <ScoreDetails score={score} />
 
       {!hasAnyAdditionalData && !isAnyDataLoading ? (
-        <Card className="flex flex-col items-center justify-center p-12 text-center">
-          <div className="mb-6 flex flex-col items-center space-y-4">
+        <Card className="flex flex-col items-center justify-center text-center">
+          <div className="mb-(--spacing-2xl) flex flex-col items-center gap-(--spacing-xl)">
             <AlertCircle className="h-16 w-16 text-amber-500" />
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+            <h2 className="text-xl font-semibold">
               Limited Score Data
             </h2>
           </div>
 
-          <div className="space-y-3 text-left">
+          <div className="mb-(--spacing-lg) flex flex-col gap-(--spacing-lg) text-left">
             {!hasScoreStats && (
-              <div className="flex items-center space-x-3">
-                <BarChart3 className="h-5 w-5 text-gray-400" />
-                <span className="text-gray-600 dark:text-gray-400">
+              <div className="flex items-center gap-(--spacing-lg)">
+                <BarChart3 className="h-5 w-5 text-muted-foreground" />
+                <span className="text-muted-foreground">
                   Score statistics unavailable
                 </span>
               </div>
             )}
             {!hasReplay && (
-              <div className="flex items-center space-x-3">
-                <FileX className="h-5 w-5 text-gray-400" />
-                <span className="text-gray-600 dark:text-gray-400">
+              <div className="flex items-center gap-(--spacing-lg)">
+                <FileX className="h-5 w-5 text-muted-foreground" />
+                <span className="text-muted-foreground">
                   Replay analysis data unavailable
                 </span>
               </div>
             )}
           </div>
 
-          <p className="mt-4 text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-sm text-muted-foreground">
             Some data may not be available for this score.
           </p>
         </Card>

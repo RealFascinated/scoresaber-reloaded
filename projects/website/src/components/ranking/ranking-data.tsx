@@ -82,46 +82,35 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
     <div className="flex w-full flex-col justify-center gap-2 xl:flex-row xl:gap-2">
       <div className="flex w-full flex-col gap-2 xl:w-[50%]">
         <Card>
-          <div className="flex flex-col justify-between gap-2">
-            <div className="flex w-full flex-row items-center justify-between gap-2">
-              <div className="flex items-center font-medium">
-                {currentCountry && (
-                  <div className="flex items-center gap-2">
-                    <CountryFlag code={currentCountry} size={18} />
-                    <span className="text-lg font-semibold">
-                      {countryFilter.find(c => c.key === currentCountry)?.friendlyName}
-                    </span>
-                  </div>
-                )}
-                {!currentCountry && (
-                  <div className="flex items-center gap-2">
-                    <GlobeAmericasIcon className="size-6" />
-                    <p className="text-lg font-semibold">Global Players</p>
-                  </div>
-                )}
-              </div>
-
-              {mainPlayer !== undefined && (
-                <div className="bg-accent/50 flex min-w-fit items-center gap-3 rounded-md px-4 py-2">
-                  <SimpleTooltip
-                    display="The amount of pp between you and each player"
-                    showOnMobile
-                  >
-                    <p className="text-sm">Relative PP</p>
-                  </SimpleTooltip>
-                  <Switch
-                    checked={showRelativePPDifference}
-                    onCheckedChange={checked => setShowRelativePPDifference(checked)}
-                  />
-                </div>
+          <div className="flex w-full flex-col justify-between gap-(--spacing-sm) md:flex-row">
+            <div className="flex items-center gap-(--spacing-sm)">
+              {currentCountry && (
+                <>
+                  <CountryFlag code={currentCountry} size={18} />
+                  <h1 className="text-lg font-semibold">
+                    {countryFilter.find(c => c.key === currentCountry)?.friendlyName}
+                  </h1>
+                </>
+              )}
+              {!currentCountry && (
+                <>
+                  <GlobeAmericasIcon className="size-6" />
+                  <h1 className="text-lg font-semibold">Global Players</h1>
+                </>
               )}
             </div>
 
-            <Separator />
-
-            <span className="text-muted-foreground text-sm">
-              Challenge yourself to become the best player in the world!
-            </span>
+            {mainPlayer !== undefined && (
+              <div className="bg-accent/50 flex min-w-fit items-center justify-between gap-(--spacing-lg) rounded-(--radius-md) px-(--spacing-lg) py-(--spacing-sm)">
+                <SimpleTooltip display="The amount of pp between you and each player" showOnMobile>
+                  <p className="text-sm">Relative PP</p>
+                </SimpleTooltip>
+                <Switch
+                  checked={showRelativePPDifference}
+                  onCheckedChange={checked => setShowRelativePPDifference(checked)}
+                />
+              </div>
+            )}
           </div>
         </Card>
 

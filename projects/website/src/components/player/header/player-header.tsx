@@ -18,14 +18,14 @@ type PlayerHeaderProps = {
 
 export default function PlayerHeader({ player }: PlayerHeaderProps) {
   return (
-    <Card className="flex gap-2">
-      <div className="relative flex flex-col items-center gap-3 text-center select-none lg:flex-row lg:items-start lg:text-start">
+    <Card className="flex gap-(--spacing-sm)">
+      <div className="relative flex flex-col items-center gap-(--spacing-lg) text-center select-none lg:flex-row lg:items-start lg:text-start">
         <PlayerAvatar player={player} />
-        <div className="flex w-full flex-col items-center justify-center gap-2 lg:items-start lg:justify-start">
-          <div className="flex flex-col gap-1">
-            <div className="flex items-center justify-center gap-2 lg:justify-start">
+        <div className="flex w-full flex-col items-center justify-center gap-(--spacing-sm) lg:items-start lg:justify-start">
+          <div className="flex flex-col gap-(--spacing-xs)">
+            <div className="flex items-center justify-center gap-(--spacing-sm) lg:justify-start">
               <p
-                className="max-w-[300px] truncate text-2xl font-bold"
+                className="max-w-[300px] truncate text-2xl font-semibold"
                 style={{
                   color: getScoreSaberRoles(player)[0]?.color,
                 }}
@@ -44,7 +44,7 @@ export default function PlayerHeader({ player }: PlayerHeaderProps) {
 
           <PlayerStats player={player} />
 
-          <div className="absolute top-0 right-0 flex flex-col gap-2 lg:flex-row">
+          <div className="absolute top-0 right-0 flex flex-col gap-(--spacing-sm) lg:flex-row">
             <AddFriend player={player} />
             <ClaimProfile playerId={player.id} />
           </div>
@@ -52,7 +52,7 @@ export default function PlayerHeader({ player }: PlayerHeaderProps) {
       </div>
 
       {/* Player Footer */}
-      <div className="flex flex-col-reverse items-center gap-2 md:flex-row md:justify-between">
+      <div className="flex flex-col-reverse items-center gap-(--spacing-sm) md:flex-row md:justify-between">
         <PlayerActions player={player} />
         <PlayerAccBadges badges={player.accBadges} />
       </div>

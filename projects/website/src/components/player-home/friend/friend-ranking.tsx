@@ -43,44 +43,44 @@ export function FriendRanking() {
   const firstColumnWidth = getFriendRankingColumnWidth(friendsPage?.items ?? []);
 
   return (
-    <Card className="flex h-fit flex-col gap-2">
-      <div>
-        <p className="font-bold">Friend Ranking</p>
-        <p className="text-sm text-gray-400">See how your friends rank compared to each other.</p>
+    <Card className="flex h-fit flex-col">
+      <div className="mb-(--spacing-lg)">
+        <h2 className="text-lg font-semibold">Friend Ranking</h2>
+        <p className="text-muted-foreground mt-(--spacing-xs) text-sm">
+          See how your friends rank compared to each other.
+        </p>
       </div>
 
       {/* Loading */}
       {!friendsPage && (
-        <div className="flex w-full items-center justify-center">
+        <div className="flex w-full items-center justify-center py-(--spacing-2xl)">
           <Spinner />
         </div>
       )}
 
       {/* Scores */}
       {friendsPage && (
-        <div className="flex flex-col gap-2">
-          <>
-            <div className="divide-border divide-y">
-              {friendsPage.items.map(player => (
-                <PlayerRanking
-                  key={player.id}
-                  player={player}
-                  relativePerformancePoints={false}
-                  mainPlayer={friendsPage.items[0]}
-                  firstColumnWidth={firstColumnWidth}
-                  showWeeklyRankChange={false}
-                />
-              ))}
-            </div>
+        <div className="flex flex-col gap-(--spacing-lg)">
+          <div className="divide-border divide-y">
+            {friendsPage.items.map(player => (
+              <PlayerRanking
+                key={player.id}
+                player={player}
+                relativePerformancePoints={false}
+                mainPlayer={friendsPage.items[0]}
+                firstColumnWidth={firstColumnWidth}
+                showWeeklyRankChange={false}
+              />
+            ))}
+          </div>
 
-            <SimplePagination
-              mobilePagination={isMobile}
-              page={page}
-              totalItems={friendsPage.metadata.totalItems}
-              itemsPerPage={friendsPage.metadata.itemsPerPage}
-              onPageChange={newPage => setPage(newPage)}
-            />
-          </>
+          <SimplePagination
+            mobilePagination={isMobile}
+            page={page}
+            totalItems={friendsPage.metadata.totalItems}
+            itemsPerPage={friendsPage.metadata.itemsPerPage}
+            onPageChange={newPage => setPage(newPage)}
+          />
         </div>
       )}
     </Card>

@@ -11,7 +11,7 @@ const Pagination = ({ className, ...props }: React.ComponentProps<"nav">) => (
 Pagination.displayName = "Pagination";
 
 const PaginationContent = ({ className, ...props }: React.ComponentProps<"ul">) => (
-  <ul className={cn("flex flex-row items-center gap-1", className)} {...props} />
+  <ul className={cn("flex flex-row items-center gap-(--spacing-xs)", className)} {...props} />
 );
 
 const PaginationItem = ({ className, ...props }: React.ComponentProps<"li">) => (
@@ -46,7 +46,7 @@ const PaginationPrevious = ({
   <PaginationLink
     aria-label="Go to previous page"
     size="default"
-    className={cn("gap-1", className)}
+    className={cn("gap-(--spacing-xs)", className)}
     {...props}
   >
     <ChevronLeftIcon className="h-4 w-4" />
@@ -58,7 +58,7 @@ const PaginationNext = ({ className, ...props }: React.ComponentProps<typeof Pag
   <PaginationLink
     aria-label="Go to next page"
     size="default"
-    className={cn("gap-1", className)}
+    className={cn("gap-(--spacing-xs)", className)}
     {...props}
   >
     <ChevronRightIcon className="h-4 w-4" />

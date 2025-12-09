@@ -9,6 +9,7 @@ import { countryFilter } from "@ssr/common/utils/country.util";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { LinkIcon, XIcon } from "lucide-react";
+import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import { useEffect, useState } from "react";
 import { FancyLoader } from "../fancy-loader";
 import AddFriend from "../friend/add-friend";
@@ -53,13 +54,10 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
   return (
     <div className="flex w-full flex-col justify-center gap-2 xl:flex-row xl:gap-2">
       <div className="flex w-full flex-col gap-2 xl:w-[50%]">
-        <Card className="flex flex-col gap-2">
-          <p className="text-lg font-semibold">Medal Ranking</p>
-          <Separator />
-          <div className="flex w-full justify-between">
-            <p className="text-muted-foreground text-sm">
-              Medals are earned by being one of the best on a Ranked Leaderboard!
-            </p>
+        <Card>
+          <div className="flex items-center gap-(--spacing-sm)">
+            <GlobeAmericasIcon className="size-6" />
+            <h1 className="text-lg font-semibold">Medal Ranking</h1>
           </div>
         </Card>
 

@@ -44,7 +44,7 @@ export default function ProfileButton() {
       ) : (
         <SimpleLink
           href={`/player/${mainPlayer.id}`}
-          className="hover:bg-primary/5 flex h-full cursor-pointer items-center rounded-[var(--radius-lg)] px-2.5 py-1.5 transition-colors duration-200 hover:shadow-sm"
+          className="hover:bg-primary/5 flex h-full cursor-pointer items-center rounded-(--radius-lg) px-2.5 py-1.5 transition-colors duration-200 hover:shadow-sm"
           data-umami-event="player-profile-button"
         >
           {buttonContent}

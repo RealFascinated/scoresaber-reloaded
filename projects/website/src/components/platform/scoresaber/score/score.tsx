@@ -34,7 +34,6 @@ export default function ScoreSaberScoreDisplay({
     hideLeaderboardDropdown?: boolean;
     hideAccuracyChanger?: boolean;
     disablePadding?: boolean;
-    allowLeaderboardPreview?: boolean;
     defaultLeaderboardScoresPage?: number;
     medalsMode?: boolean;
     isPreviousScore?: boolean;
@@ -75,11 +74,7 @@ export default function ScoreSaberScoreDisplay({
           <ScoreSaberScoreInfo score={score} leaderboard={leaderboard} />
 
           <div className="flex min-w-0 items-center overflow-hidden">
-            <ScoreSaberScoreSongInfo
-              leaderboard={leaderboard}
-              beatSaverMap={beatSaverMap}
-              allowLeaderboardPreview={settings?.allowLeaderboardPreview && !isMobile}
-            />
+            <ScoreSaberScoreSongInfo leaderboard={leaderboard} beatSaverMap={beatSaverMap} />
           </div>
 
           {!settings?.noScoreButtons && (
@@ -123,7 +118,7 @@ export default function ScoreSaberScoreDisplay({
         )}
       </div>
 
-      <div className="mt-2">
+      <div className={isLeaderboardExpanded ? "mt-2" : ""}>
         <ScoreDropdown
           score={score}
           leaderboard={leaderboard}

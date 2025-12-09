@@ -1,4 +1,5 @@
 import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -148,6 +149,19 @@ function renderSliderField<
   );
 }
 
+function renderTextField<TFormValues extends Record<string, any>, TName extends Path<TFormValues>>({
+  value,
+  onChange,
+}: RenderFieldProps<TFormValues, TName>) {
+  return (
+    <Input
+      value={value as string}
+      onChange={e => onChange(e.target.value as TFormValues[TName])}
+      className="w-full md:w-52"
+    />
+  );
+}
+
 function FormFieldComponent<
   TFormValues extends Record<string, any>,
   TName extends Path<TFormValues>,
@@ -199,6 +213,8 @@ function FormFieldComponent<
         return renderSelectField(renderProps);
       case "slider":
         return renderSliderField(renderProps);
+      case "text":
+        return renderTextField(renderProps);
       default:
         return null;
     }

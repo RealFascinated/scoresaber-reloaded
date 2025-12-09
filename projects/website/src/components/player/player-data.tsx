@@ -61,7 +61,7 @@ function PlatformSelector({
           <Button
             key={platform.getDisplayName()}
             variant={currentPlatform === platform.getType() ? "default" : "secondary"}
-            className="flex items-center gap-2 rounded-b-none"
+            className="flex items-center gap-(--spacing-sm) rounded-b-none"
           >
             {platform.getLogo()}
             <span className="hidden md:block">{platform.getDisplayName()}</span>
@@ -149,8 +149,8 @@ export default function PlayerData({
   const showRankings = width > 1536 && !player.inactive && !player.banned;
 
   return (
-    <div className="flex w-full justify-center gap-2">
-      <article className="flex flex-1 flex-col gap-2">
+    <div className="flex w-full justify-center gap-(--spacing-sm)">
+      <article className="flex w-full flex-1 flex-col gap-(--spacing-sm)">
         <PlayerHeader player={player} />
 
         {/* Player Badges */}
@@ -162,7 +162,7 @@ export default function PlayerData({
 
         {/* Player Views */}
         {!player.inactive && (
-          <Card className="flex flex-col gap-2">
+          <Card>
             <PlayerViews player={player} />
           </Card>
         )}
@@ -183,7 +183,7 @@ export default function PlayerData({
 
       {/* Mini Rankings */}
       {showRankings && (
-        <aside className="hidden w-[400px] flex-col gap-2 2xl:flex">
+        <aside className="hidden w-[400px] flex-col gap-(--spacing-sm) 2xl:flex">
           <PlayerMiniRankings player={player} />
         </aside>
       )}

@@ -6,7 +6,6 @@ import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { getScoreSaberAvatar } from "@ssr/common/utils/scoresaber.util";
 import { FaMedal } from "react-icons/fa";
-import PlayerPreview from "../player/player-preview";
 import { PlayerAvatar } from "../ranking/player-avatar";
 import { PlayerName } from "../ranking/player-name";
 import SimpleLink from "../simple-link";
@@ -21,35 +20,25 @@ export function PlayerMedalRanking({
 }) {
   return (
     <SimpleLink href={`/player/${player.id}`}>
-      <PlayerPreview
-        playerId={player.id}
-        className="mb-1 grid min-h-[40px] w-full cursor-pointer items-center gap-3 rounded-lg bg-[#232323] px-2 py-1 shadow-sm transition-all hover:bg-[#2d2d2d]"
+      {/* Rank, Weekly Change, and Country Rank */}
+      <div
+        className={cn("grid items-center gap-3", "grid-cols-[0.75fr_1fr]")}
         style={{
-          gridTemplateColumns: `${firstColumnWidth}px 1fr 90px`,
+          width: `${firstColumnWidth}px`,
         }}
-        delay={750}
-        useLink={false}
       >
-        {/* Rank, Weekly Change, and Country Rank */}
-        <div
-          className={cn("grid items-center gap-3", "grid-cols-[0.75fr_1fr]")}
-          style={{
-            width: `${firstColumnWidth}px`,
-          }}
-        >
-          <RankDisplay rank={player.medalsRank} />
-          <CountryRankDisplay country={player.country} countryRank={player.countryMedalsRank} />
-        </div>
+        <RankDisplay rank={player.medalsRank} />
+        <CountryRankDisplay country={player.country} countryRank={player.countryMedalsRank} />
+      </div>
 
-        {/* Avatar and Name */}
-        <div className="flex w-full min-w-0 items-center gap-2">
-          <PlayerAvatar profilePicture={getScoreSaberAvatar(player)} name={player.name} />
-          <PlayerName player={player} />
-        </div>
+      {/* Avatar and Name */}
+      <div className="flex w-full min-w-0 items-center gap-2">
+        <PlayerAvatar profilePicture={getScoreSaberAvatar(player)} name={player.name} />
+        <PlayerName player={player} />
+      </div>
 
-        {/* Medals */}
-        <MedalsDisplay medals={player.medals} />
-      </PlayerPreview>
+      {/* Medals */}
+      <MedalsDisplay medals={player.medals} />
     </SimpleLink>
   );
 }
