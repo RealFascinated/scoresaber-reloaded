@@ -62,17 +62,15 @@ export function FriendRanking() {
       {/* Scores */}
       {friendsPage && (
         <div className="flex flex-col gap-(--spacing-lg)">
-          <div className="divide-border divide-y">
+          <div className="flex flex-col gap-2">
             {friendsPage.items.map(player => (
               <PlayerRanking
                 key={player.id}
                 player={player}
-                mainPlayer={friendsPage.items[0]}
                 firstColumnWidth={firstColumnWidth}
                 renderWorth={() => (
                   <PlayerPpDisplay
                     pp={player.pp}
-                    mainPlayer={friendsPage.items[0]}
                     className="ml-auto min-w-[70px]"
                     relativePerformancePoints={false}
                   />
