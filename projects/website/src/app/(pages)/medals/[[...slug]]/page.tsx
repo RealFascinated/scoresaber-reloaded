@@ -6,19 +6,20 @@ export const revalidate = 300; // Revalidate every 5 minutes
 
 type MedalProps = {
   params: Promise<{
-    page: string;
+    slug: string[];
   }>;
 };
+
 
 const getMedalsData = async ({
   params,
 }: MedalProps): Promise<{
   page: number;
 }> => {
-  const { page } = await params;
-  const pageNumber = parseInt(page);
+  const { slug } = await params;
+  const page = (slug && parseInt(slug[0])) || 1; // The page number
 
-  return { page: pageNumber };
+  return { page };
 };
 
 export const metadata: Metadata = {

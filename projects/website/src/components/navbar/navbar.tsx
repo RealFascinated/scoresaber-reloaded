@@ -26,7 +26,7 @@ const links: ReactElement<any>[] = [
     key="medals"
     name="Medals"
     icon={<FaMedal className="size-4.5" />}
-    href="/medals/1"
+    href="/medals"
   />,
   <SimpleNavLink
     key="maps"
