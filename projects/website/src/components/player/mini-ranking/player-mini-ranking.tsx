@@ -23,7 +23,7 @@ const miniVariants: Variants = {
   },
   Country: {
     icon: (player: ScoreSaberPlayer) => {
-      return <CountryFlag code={player.country} size={16} />;
+      return <CountryFlag code={player.country} size={15} />;
     },
   },
 };
