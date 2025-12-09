@@ -42,13 +42,20 @@ export function PlayerRanking({
       >
         {/* Rank, Weekly Change, and Country Rank */}
         <div
-          className={cn("grid grid-cols-[0.65fr_1fr] items-center gap-3")}
+          className={cn(
+            "grid grid-cols-[0.65fr_1fr] items-center gap-3",
+            player.inactive ? "flex" : ""
+          )}
           style={{
             width: `${firstColumnWidth}px`,
           }}
         >
-          <RankDisplay rank={rank} />
-          <CountryRankDisplay country={player.country} countryRank={countryRank} />
+          <PlayerRanks
+            rank={rank}
+            countryRank={countryRank}
+            country={player.country}
+            inactive={player.inactive}
+          />
         </div>
 
         {/* Avatar and Name */}
@@ -67,8 +74,12 @@ export function PlayerRanking({
           {/* Top row: Rank, Country Rank, and Weekly Change */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <RankDisplay rank={rank} />
-              <CountryRankDisplay country={player.country} countryRank={countryRank} />
+              <PlayerRanks
+                rank={rank}
+                countryRank={countryRank}
+                country={player.country}
+                inactive={player.inactive}
+              />
             </div>
           </div>
 
@@ -139,5 +150,28 @@ function PlayerNameDisplay({
         {player.name}
       </span>
     </div>
+  );
+}
+
+function PlayerRanks({
+  rank,
+  countryRank,
+  country,
+  inactive,
+}: {
+  rank: number;
+  countryRank: number;
+  country: string;
+  inactive: boolean;
+}) {
+  if (inactive) {
+    return <p className="text-inactive-account text-xs font-bold">Inactive Account</p>;
+  }
+
+  return (
+    <>
+      <RankDisplay rank={rank} />
+      <CountryRankDisplay country={country} countryRank={countryRank} />
+    </>
   );
 }

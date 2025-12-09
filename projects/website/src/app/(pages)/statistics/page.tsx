@@ -31,7 +31,7 @@ export default async function StatisticsPage() {
         {/* Header */}
         <div className="px-(--spacing-xl) py-(--spacing-2xl) md:px-(--spacing-2xl)">
           <div className="flex items-center gap-(--spacing-xl)">
-            <div className="bg-primary/10 text-primary rounded-(--radius-xl) p-(--spacing-lg) shadow-lg">
+            <div className="bg-primary/10 text-primary rounded-xl p-(--spacing-lg) shadow-lg">
               <ChartBarIcon className="size-6" />
             </div>
             <div>
@@ -50,7 +50,7 @@ export default async function StatisticsPage() {
               <div className="mb-(--spacing-lg)">
                 <div className="flex flex-col gap-(--spacing-lg) sm:flex-row sm:items-center sm:justify-between">
                   <div className="flex items-center gap-(--spacing-lg)">
-                    <div className="bg-primary/10 text-primary rounded-(--radius-lg) p-(--spacing-sm)">
+                    <div className="bg-primary/10 text-primary rounded-lg p-(--spacing-sm)">
                       <ChartBarIcon className="size-5" />
                     </div>
                     <div className="flex flex-col">
@@ -84,7 +84,7 @@ export default async function StatisticsPage() {
               <Card>
                 <div className="mb-(--spacing-lg)">
                   <div className="flex items-center gap-(--spacing-lg)">
-                    <div className="bg-primary/10 text-primary rounded-(--radius-lg) p-(--spacing-sm)">
+                    <div className="bg-primary/10 text-primary rounded-lg p-(--spacing-sm)">
                       <DevicePhoneMobileIcon className="size-5" />
                     </div>
                     <div className="flex flex-col">
