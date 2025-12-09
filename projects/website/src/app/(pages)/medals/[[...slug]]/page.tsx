@@ -10,7 +10,6 @@ type MedalProps = {
   }>;
 };
 
-
 const getMedalsData = async ({
   params,
 }: MedalProps): Promise<{

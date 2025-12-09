@@ -1,6 +1,6 @@
 "use client";
 
-import { getPlayerRankingColumnWidth } from "@/common/player-utils";
+import { getRankingColumnWidth } from "@/common/player-utils";
 import Card from "@/components/card";
 import SimplePagination from "@/components/simple-pagination";
 import CountryFlag from "@/components/ui/country-flag";
@@ -18,12 +18,13 @@ import { LinkIcon, XIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { FancyLoader } from "../fancy-loader";
 import AddFriend from "../friend/add-friend";
+import { PlayerRanking } from "../player/player-ranking";
 import SimpleLink from "../simple-link";
 import SimpleTooltip from "../simple-tooltip";
 import { Button } from "../ui/button";
 import Combobox from "../ui/combo-box";
 import { Input } from "../ui/input";
-import { PlayerRanking } from "./player-ranking";
+import { PlayerPpDisplay } from "./player-pp-display";
 
 type RankingDataProps = {
   initialPage: number;
@@ -64,18 +65,11 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
     navigation.changePageUrl(buildPageUrl(currentCountry, currentPage));
   }, [currentPage, currentCountry, navigation]);
 
-  const firstColumnWidth = getPlayerRankingColumnWidth(rankingData?.items ?? []);
-
-  // Check if any players have weekly changes
-  const hasAnyWeeklyChanges =
-    rankingData?.items?.some(player => {
-      if ("histories" in player) {
-        const history = player.histories.split(",").map(Number);
-        const weeklyRankChange = history[history?.length - 6] - player.rank;
-        return Math.abs(weeklyRankChange) <= 999 && weeklyRankChange !== 0;
-      }
-      return false;
-    }) ?? false;
+  const firstColumnWidth = getRankingColumnWidth(
+    rankingData?.items ?? [],
+    player => player.rank,
+    player => player.countryRank
+  );
 
   return (
     <div className="flex w-full flex-col justify-center gap-2 xl:flex-row xl:gap-2">
@@ -100,7 +94,7 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
             </div>
 
             {mainPlayer !== undefined && (
-              <div className="bg-accent/50 flex min-w-fit items-center justify-between gap-(--spacing-lg) rounded-(--radius-md) px-(--spacing-lg) py-(--spacing-sm)">
+              <div className="bg-accent/50 flex min-w-fit items-center justify-between gap-(--spacing-lg) rounded-md px-(--spacing-lg) py-(--spacing-sm)">
                 <SimpleTooltip display="The amount of pp between you and each player" showOnMobile>
                   <p className="text-sm">Relative PP</p>
                 </SimpleTooltip>
@@ -149,13 +143,19 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
               <div className="flex flex-col gap-2">
                 {rankingData.items.map(player => (
                   <div key={player.id} className="grid grid-cols-[1fr_25px] gap-3">
-                    <div className="flex-grow">
+                    <div className="grow">
                       <PlayerRanking
                         player={player}
-                        relativePerformancePoints={showRelativePPDifference}
                         mainPlayer={mainPlayer}
                         firstColumnWidth={firstColumnWidth}
-                        showWeeklyRankChange={hasAnyWeeklyChanges}
+                        renderWorth={() => (
+                          <PlayerPpDisplay
+                            pp={player.pp}
+                            mainPlayer={mainPlayer}
+                            className="ml-auto min-w-[70px]"
+                            relativePerformancePoints={showRelativePPDifference}
+                          />
+                        )}
                       />
                     </div>
 
@@ -217,7 +217,7 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
                 <Button
                   variant="outline"
                   size="icon"
-                  className="h-10 w-10 flex-shrink-0"
+                  className="h-10 w-10 shrink-0"
                   onClick={() => setCurrentCountry(undefined)}
                 >
                   <XIcon className="size-4" />
@@ -238,7 +238,7 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
               <Button
                 variant="outline"
                 size="icon"
-                className="h-10 w-10 flex-shrink-0"
+                className="h-10 w-10 shrink-0"
                 onClick={() => setCurrentSearch("")}
               >
                 <XIcon className="size-4" />

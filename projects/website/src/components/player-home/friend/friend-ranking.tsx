@@ -1,7 +1,8 @@
 "use client";
 
 import { getFriendRankingColumnWidth } from "@/common/player-utils";
-import { PlayerRanking } from "@/components/ranking/player-ranking";
+import { PlayerRanking } from "@/components/player/player-ranking";
+import { PlayerPpDisplay } from "@/components/ranking/player-pp-display";
 import SimplePagination from "@/components/simple-pagination";
 import { useIsMobile } from "@/contexts/viewport-context";
 import useDatabase from "@/hooks/use-database";
@@ -66,10 +67,16 @@ export function FriendRanking() {
               <PlayerRanking
                 key={player.id}
                 player={player}
-                relativePerformancePoints={false}
                 mainPlayer={friendsPage.items[0]}
                 firstColumnWidth={firstColumnWidth}
-                showWeeklyRankChange={false}
+                renderWorth={() => (
+                  <PlayerPpDisplay
+                    pp={player.pp}
+                    mainPlayer={friendsPage.items[0]}
+                    className="ml-auto min-w-[70px]"
+                    relativePerformancePoints={false}
+                  />
+                )}
               />
             ))}
           </div>

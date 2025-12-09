@@ -1,24 +1,27 @@
 "use client";
 
-import { getMedalRankingColumnWidth } from "@/common/player-utils";
+import { getRankingColumnWidth } from "@/common/player-utils";
 import Card from "@/components/card";
 import SimplePagination from "@/components/simple-pagination";
 import { useIsMobile } from "@/contexts/viewport-context";
 import usePageNavigation from "@/hooks/use-page-navigation";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
+import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { countryFilter } from "@ssr/common/utils/country.util";
+import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { LinkIcon, XIcon } from "lucide-react";
 import { useEffect, useState } from "react";
+import { FaMedal } from "react-icons/fa";
 import { FancyLoader } from "../fancy-loader";
 import AddFriend from "../friend/add-friend";
+import { PlayerRanking } from "../player/player-ranking";
 import SimpleLink from "../simple-link";
 import { Button } from "../ui/button";
 import Combobox from "../ui/combo-box";
 import CountryFlag from "../ui/country-flag";
 import MedalsInfo from "./medals-info";
-import { PlayerMedalRanking } from "./player-medal-ranking";
 
 type RankingDataProps = {
   initialPage: number;
@@ -48,7 +51,11 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
     navigation.changePageUrl(buildPageUrl(currentCountry, currentPage));
   }, [currentPage, currentCountry, navigation]);
 
-  const firstColumnWidth = getMedalRankingColumnWidth(rankingData?.items ?? []);
+  const firstColumnWidth = getRankingColumnWidth(
+    rankingData?.items ?? [],
+    player => (player as ScoreSaberPlayer).medals,
+    player => (player as ScoreSaberPlayer).countryMedalsRank
+  );
 
   return (
     <div className="flex w-full flex-col justify-center gap-2 xl:flex-row xl:gap-2">
@@ -96,8 +103,19 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
               <div className="flex flex-col gap-2">
                 {rankingData.items.map(player => (
                   <div key={player.id} className="grid grid-cols-[1fr_25px] gap-3">
-                    <div className="flex-grow">
-                      <PlayerMedalRanking player={player} firstColumnWidth={firstColumnWidth} />
+                    <div className="grow">
+                      <PlayerRanking
+                        player={player}
+                        firstColumnWidth={firstColumnWidth}
+                        renderWorth={() => (
+                          <div className="ml-auto flex min-w-[70px] flex-row items-center justify-end gap-2">
+                            <FaMedal className="size-4" />
+                            <p className="text-pp font-semibold">
+                              {formatNumberWithCommas(player.medals)}
+                            </p>
+                          </div>
+                        )}
+                      />
                     </div>
 
                     <div className="flex h-full w-full items-center justify-center">
@@ -157,7 +175,7 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
                 <Button
                   variant="outline"
                   size="icon"
-                  className="h-10 w-10 flex-shrink-0"
+                  className="h-10 w-10 shrink-0"
                   onClick={() => setCurrentCountry(undefined)}
                 >
                   <XIcon className="size-4" />
