@@ -37,7 +37,7 @@ export function PlayerRanking({
       <div
         className={cn(
           "bg-muted/50 hover:bg-accent/50 hidden items-center gap-2 rounded-md px-(--spacing-xs) py-(--spacing-xs) lg:flex",
-          mainPlayer?.id == player.id ? "bg-ssr/20 hover:bg-ssr/30" : ""
+          mainPlayer?.id == player.id ? "bg-primary/10 hover:bg-primary/15" : ""
         )}
       >
         {/* Rank, Weekly Change, and Country Rank */}
@@ -70,7 +70,12 @@ export function PlayerRanking({
 
       {/* Mobile Layout */}
       <div className="block lg:hidden">
-        <div className="bg-muted/50 mb-1 flex min-h-[67px] w-full cursor-pointer flex-col justify-center gap-1 rounded-lg px-2 py-1 shadow-sm transition-all">
+        <div
+          className={cn(
+            "bg-muted/50 mb-1 flex min-h-[67px] w-full cursor-pointer flex-col justify-center gap-1 rounded-lg px-2 py-1 shadow-sm transition-all",
+            mainPlayer?.id == player.id ? "bg-primary/10" : ""
+          )}
+        >
           {/* Top row: Rank, Country Rank, and Weekly Change */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
