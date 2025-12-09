@@ -67,7 +67,7 @@ const PageSelector = React.memo(({ totalPages, onPageSelect, isLoading }: PageSe
           size="icon"
           aria-label="Select page"
           disabled={isLoading}
-          className="transition-opacity duration-150"
+          className="transition-opacity duration-200"
         >
           <MoreHorizontal className="h-4 w-4" />
         </Button>
@@ -134,7 +134,7 @@ const PageButton = React.memo(
         variant={isActive ? "primary" : "ghost"}
         size="sm"
         className={cn(
-          "relative h-9 min-w-[2.5rem] px-2 transition-opacity duration-150",
+          "relative h-9 min-w-[2.5rem] px-2 transition-opacity duration-200",
           isButtonLoading && "cursor-not-allowed opacity-50",
           buttonPage === currentPage && "cursor-not-allowed"
         )}
@@ -181,7 +181,7 @@ const NavigationButton = React.memo(
       variant="ghost"
       size="icon"
       disabled={disabled || isLoading}
-      className={cn("transition-opacity duration-150", disabled && "cursor-not-allowed opacity-50")}
+      className={cn("transition-opacity duration-200", disabled && "cursor-not-allowed opacity-50")}
     >
       <a
         href={generatePageUrl ? generatePageUrl(buttonPage) : "#"}

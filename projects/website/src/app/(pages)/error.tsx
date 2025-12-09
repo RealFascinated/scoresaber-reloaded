@@ -1,8 +1,8 @@
 "use client";
 
+import Card from "@/components/card";
 import SimpleLink from "@/components/simple-link";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
 import { BoltIcon, ExclamationTriangleIcon } from "@heroicons/react/24/solid";
 import { HomeIcon } from "lucide-react";
@@ -15,8 +15,9 @@ export default function Error() {
         {/* Background gradient effect */}
         <div className="from-destructive/5 via-primary/5 to-accent-secondary/5 absolute inset-0 rounded-xl bg-gradient-to-br blur-lg" />
 
-        <Card className="border-destructive/30 bg-card/80 relative w-full shadow-lg backdrop-blur-md">
-          <CardHeader className="pb-6 text-center">
+        <Card className="border-destructive/30 relative w-full shadow-lg backdrop-blur-md">
+          {/* Header */}
+          <div className="pb-4 text-center">
             {/* Animated icon with gradient background */}
             <div className="relative mx-auto mb-4">
               <div className="from-destructive/20 to-primary/20 absolute inset-0 animate-pulse rounded-full bg-gradient-to-br blur-md" />
@@ -28,21 +29,22 @@ export default function Error() {
               </div>
             </div>
 
-            <CardTitle className="from-foreground to-muted-foreground mb-2 bg-linear-to-r bg-clip-text text-2xl font-bold text-transparent">
+            <h1 className="from-foreground to-muted-foreground mb-2 bg-linear-to-r bg-clip-text text-2xl font-bold text-transparent">
               Oops! Something went wrong
-            </CardTitle>
-            <CardDescription className="text-muted-foreground mx-auto max-w-sm text-base leading-relaxed">
+            </h1>
+            <p className="text-muted-foreground mx-auto max-w-sm text-base leading-relaxed">
               The error has been logged to your console. Please report this to a developer in our
               Discord.
-            </CardDescription>
-          </CardHeader>
+            </p>
+          </div>
 
-          <CardContent className="space-y-4 pb-6">
+          {/* Content */}
+          <div className="space-y-4">
             <div className="flex flex-col gap-3">
               <Button
                 asChild
                 variant="default"
-                className="h-10 w-full text-sm font-semibold shadow-md transition-all duration-300 hover:shadow-lg"
+                className="h-10 w-full text-sm font-semibold shadow-md transition-colors duration-200 hover:shadow-lg"
               >
                 <SimpleLink href="/" className="flex items-center justify-center gap-2">
                   <HomeIcon className="h-4 w-4" />
@@ -52,7 +54,7 @@ export default function Error() {
 
               <Button
                 variant="outline"
-                className="hover:border-primary/50 flex h-10 w-full items-center justify-center gap-2 border-2 text-sm font-semibold transition-all duration-300"
+                className="hover:border-primary/50 flex h-10 w-full items-center justify-center gap-2 border-2 text-sm font-semibold transition-colors duration-200"
                 onClick={() => window.location.reload()}
               >
                 <ArrowPathIcon className="h-4 w-4" />
@@ -63,7 +65,7 @@ export default function Error() {
             <div className="border-border/50 border-t pt-3">
               <Button
                 asChild
-                className="h-10 w-full bg-[#5865F2] text-sm font-semibold text-white shadow-md transition-all duration-300 hover:bg-[#5865F2]/85 hover:shadow-lg"
+                className="h-10 w-full bg-[#5865F2] text-sm font-semibold text-white shadow-md transition-colors duration-200 hover:bg-[#5865F2]/85 hover:shadow-lg"
               >
                 <SimpleLink
                   href="https://discord.gg/kmNfWGA4A8"
@@ -81,7 +83,7 @@ export default function Error() {
                 </SimpleLink>
               </Button>
             </div>
-          </CardContent>
+          </div>
         </Card>
       </div>
     </div>

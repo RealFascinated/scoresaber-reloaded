@@ -112,7 +112,7 @@ export default function ScoreSaberLeaderboardScore({
           <div className="flex cursor-default items-center justify-center">
             <ArrowUpIcon
               className={cn(
-                "size-5 cursor-pointer transition-transform duration-350"
+                "size-5 cursor-pointer transition-transform duration-200"
                 // !isDropdownExpanded ? "" : "rotate-180"
               )}
               onClick={onDropdownToggle}

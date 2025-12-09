@@ -34,7 +34,7 @@ function PlayerHeader({ player }: { player: ScoreSaberPlayer }) {
       <div className="flex min-w-0 flex-1 flex-col justify-center space-y-2">
         <p
           className={cn(
-            "block truncate text-xl font-bold transition-all hover:brightness-[66%]",
+            "block truncate text-xl font-bold transition-all duration-200 hover:brightness-[66%]",
             (player.inactive || player.banned) && "opacity-60"
           )}
         >

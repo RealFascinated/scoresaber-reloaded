@@ -35,7 +35,7 @@ export default function ScoreSaberScoreInfo({
             <p
               className={cn(
                 getRankColor(score.rank),
-                "cursor-pointer font-semibold transition-all hover:brightness-66"
+                "cursor-pointer font-semibold transition-all duration-200 hover:brightness-66"
               )}
             >
               #{formatNumberWithCommas(score.rank)}

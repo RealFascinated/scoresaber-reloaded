@@ -93,7 +93,7 @@ const PlayerSearch = ({
               .map(player => (
                 <div
                   key={player.id}
-                  className="hover:bg-accent hover:text-accent-foreground flex cursor-pointer items-center gap-3 rounded-md px-2 py-2 text-sm transition-colors"
+                  className="hover:bg-accent hover:text-accent-foreground flex cursor-pointer items-center gap-3 rounded-[var(--radius-md)] px-2 py-2 text-sm transition-colors duration-200"
                   onClick={() => handlePlayerSelect(player)}
                 >
                   <Avatar

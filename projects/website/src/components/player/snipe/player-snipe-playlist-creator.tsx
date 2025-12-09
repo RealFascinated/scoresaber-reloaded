@@ -477,7 +477,7 @@ function CollapsibleSection({
       <button
         type="button"
         onClick={onToggle}
-        className="hover:bg-muted/50 flex w-full items-center justify-between p-3 transition-colors"
+        className="hover:bg-muted/50 flex w-full items-center justify-between p-3 transition-colors duration-200"
         aria-expanded={isExpanded}
       >
         <div className="flex items-center gap-2">

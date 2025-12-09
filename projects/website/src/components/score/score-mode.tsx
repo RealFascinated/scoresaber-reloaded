@@ -48,13 +48,13 @@ export default function ScoreMode({ initialMode, onModeChange }: ScoreModeProps)
   );
 
   return (
-    <div className="bg-background/80 border-border/50 flex flex-wrap items-center justify-center gap-2 rounded-lg border p-1.5 shadow-sm">
+    <div className="bg-background/80 border-border/50 flex flex-wrap items-center justify-center gap-2 rounded-[var(--radius-lg)] border p-1.5 shadow-sm">
       {scoreModes.map(mode => (
         <Button
           key={mode.name}
           variant={selectedMode === mode.id ? "default" : "ghost"}
           className={cn(
-            "flex h-9 w-28 items-center gap-2 transition-all duration-200",
+            "flex h-9 w-28 items-center gap-2 transition-transform duration-200",
             selectedMode === mode.id
               ? "bg-primary text-primary-foreground shadow-sm"
               : "hover:bg-accent/80"

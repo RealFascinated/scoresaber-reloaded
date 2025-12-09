@@ -162,7 +162,7 @@ export default function ScoreSaberScoreButtons({
                   ) : (
                     <ArrowDownIcon
                       className={cn(
-                        "h-4 w-4 transition-transform",
+                        "h-4 w-4 transition-transform duration-200",
                         leaderboardExpanded ? "" : "rotate-180"
                       )}
                     />

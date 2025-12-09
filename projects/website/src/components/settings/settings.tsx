@@ -94,7 +94,7 @@ export default function Settings() {
               <button
                 key={category.name}
                 className={cn(
-                  "flex cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 text-sm transition-colors",
+                  "flex cursor-pointer items-center gap-2.5 rounded-[var(--radius-md)] px-3 py-2 text-sm transition-colors duration-200",
                   selectedCategory.name === category.name
                     ? "bg-primary/10 text-primary"
                     : "text-muted-foreground hover:bg-accent hover:text-foreground"

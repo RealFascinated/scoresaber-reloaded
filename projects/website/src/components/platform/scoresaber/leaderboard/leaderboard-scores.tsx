@@ -119,7 +119,7 @@ export default function LeaderboardScores({
         <ScoreMode initialMode={mode} onModeChange={handleModeChange} />
 
         {showDifficulties && (
-          <div className="bg-background/80 border-border/50 flex flex-wrap justify-center gap-1.5 rounded-lg border p-1.5 shadow-sm">
+          <div className="bg-background/80 border-border/50 flex flex-wrap justify-center gap-1.5 rounded-[var(--radius-lg)] border p-1.5 shadow-sm">
             {leaderboard.difficulties.map((difficultyData, index) => (
               <DifficultyButton
                 key={index}
@@ -149,7 +149,7 @@ export default function LeaderboardScores({
 
       {scores && scores.items.length > 0 && (
         <>
-          <div className="border-border/50 bg-background/50 relative overflow-x-auto rounded-lg border shadow-sm">
+          <div className="border-border/50 bg-background/50 relative overflow-x-auto rounded-[var(--radius-lg)] border shadow-sm">
             <table className="table w-full min-w-[800px] table-auto border-spacing-0 text-left text-sm">
               <thead>
                 <tr className="border-border/50 bg-muted/30 border-b">
@@ -179,7 +179,7 @@ export default function LeaderboardScores({
                   <React.Fragment key={playerScore.scoreId}>
                     <tr
                       className={cn(
-                        "hover:bg-muted/30 transition-colors",
+                        "hover:bg-muted/30 transition-colors duration-200",
                         highlightedPlayerId === playerScore.playerId && "bg-primary/10"
                       )}
                     >

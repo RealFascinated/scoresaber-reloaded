@@ -153,7 +153,7 @@ export default function BackgroundCover() {
       fetchPriority="high"
       className={cn(
         "pointer-events-none fixed -z-50 h-screen w-screen object-cover select-none",
-        cover.type === "rotating-images" && "transition-opacity duration-1000 ease-in-out",
+        cover.type === "rotating-images" && "transition-opacity duration-[1000ms] ease-in-out",
         cover.type === "rotating-images" && (isTransitioning ? "opacity-10" : "opacity-100")
       )}
       style={{

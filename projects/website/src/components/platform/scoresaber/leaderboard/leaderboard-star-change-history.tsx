@@ -23,7 +23,7 @@ function LeaderboardStarChangeHistoryButton({
 }) {
   return (
     <button
-      className="border-border/50 bg-background/95 text-foreground hover:bg-accent/50 hover:border-primary/50 focus-visible:ring-primary/50 flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-all focus-visible:ring-2 focus-visible:outline-none"
+      className="border-border/50 bg-background/95 text-foreground hover:bg-accent/50 hover:border-primary/50 focus-visible:ring-primary/50 flex items-center gap-2 rounded-[var(--radius-lg)] border px-3 py-2 text-sm font-medium transition-colors duration-200 focus-visible:ring-2 focus-visible:outline-none"
       onClick={onClick}
     >
       <StarIcon className="h-4 w-4 text-yellow-500" />
@@ -45,7 +45,7 @@ export function LeaderboardStarChangeHistory({
       <LeaderboardStarChangeHistoryButton onClick={() => setOpen(!open)} isOpen={open} />
       {open && (
         <div className="animate-in slide-in-from-top-2 w-full duration-200">
-          <div className="border-border/30 bg-background/80 rounded-lg border p-2 shadow-sm">
+          <div className="border-border/30 bg-background/80 rounded-[var(--radius-lg)] border p-2 shadow-sm">
             <div className="space-y-1">
               {starChangeHistory.map((starChange, index) => {
                 const isCurrent = index === 0;
@@ -74,7 +74,7 @@ export function LeaderboardStarChangeHistory({
                   <div
                     key={`${starChange.timestamp.toISOString()}-${starChange.previousStars}-${starChange.newStars}`}
                     className={cn(
-                      "hover:bg-accent/30 flex items-center justify-between rounded-md px-2 py-1.5 text-xs transition-colors",
+                      "hover:bg-accent/30 flex items-center justify-between rounded-[var(--radius-md)] px-2 py-1.5 text-xs transition-colors duration-200",
                       isCurrent && "bg-primary/10"
                     )}
                   >
