@@ -23,13 +23,13 @@ const miniVariants: Variants = {
   },
   Country: {
     icon: (player: ScoreSaberPlayer) => {
-      return <CountryFlag code={player.country} size={18} />;
+      return <CountryFlag code={player.country} size={16} />;
     },
   },
 };
 
 export default function PlayerMiniRankings({ player }: { player: ScoreSaberPlayer }) {
-  const { data: miniRankingResponse, isLoading } = useQuery({
+  const { data: miniRankingResponse } = useQuery({
     queryKey: ["mini-ranking", player.id],
     queryFn: () => ssrApi.getPlayerMiniRanking(player.id),
   });
@@ -77,7 +77,7 @@ function PlayerMiniRanking({
   })();
 
   return (
-    <Card className="sticky flex w-full flex-col gap-(--spacing-sm) text-xs select-none sm:w-[400px] sm:text-sm">
+    <Card className="sticky flex w-full flex-col gap-(--spacing-md) text-xs select-none sm:w-[400px] sm:text-sm">
       {/* Header */}
       <div className="flex items-center gap-2">
         {icon}
@@ -85,7 +85,7 @@ function PlayerMiniRanking({
       </div>
 
       {/* Players List */}
-      <div className="divide-border divide-y text-xs">
+      <div className="divide-border bg-accent/50 divide-y rounded-md text-xs">
         {players.length > 0 ? (
           players.map(playerRanking => {
             const rank = type == "Global" ? playerRanking.rank : playerRanking.countryRank;
@@ -95,7 +95,7 @@ function PlayerMiniRanking({
               <SimpleLink
                 key={playerRanking.id}
                 href={`/player/${playerRanking.id}`}
-                className="group hover:bg-accent/50 grid cursor-pointer items-center gap-(--spacing-md) px-(--spacing-xs) py-(--spacing-xs) transition-colors duration-200 sm:px-(--spacing-sm)"
+                className="group hover:bg-accent/50 sm:px-(--spacing-sm grid cursor-pointer items-center gap-(--spacing-md) px-(--spacing-sm) py-(--spacing-xs) transition-colors duration-200 first:rounded-t-md last:rounded-b-md"
                 style={{
                   gridTemplateColumns: isMobile
                     ? `${playerRankWidth}px 48px 1fr auto`
