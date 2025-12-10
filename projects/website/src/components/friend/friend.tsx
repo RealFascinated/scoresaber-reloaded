@@ -38,12 +38,7 @@ export default function Friend({ player, onClick }: FriendProps) {
         onClick={() => onClick?.()}
         className="flex w-full items-center gap-2"
       >
-        <Avatar
-          src={player.avatar}
-          size={64}
-          className="h-10 w-10"
-          alt={`${player.name}'s Profile Picture`}
-        />
+        <Avatar src={player.avatar} size={40} alt={`${player.name}'s Profile Picture`} />
         <div className="flex flex-col">
           <p className="font-semibold">{player.name}</p>
           {player.inactive ? (
