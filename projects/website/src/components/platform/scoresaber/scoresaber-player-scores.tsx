@@ -589,7 +589,7 @@ export default function ScoreSaberPlayerScores({
                         <SelectContent>
                           <SelectItem value={"All Hmds"}>
                             <div className="flex items-center gap-2">
-                              <HMDIcon hmd={getHMDInfo("Unknown" as HMD)} />
+                              <HMDIcon hmd={getHMDInfo("Unknown")} />
                               <span>All HMDs</span>
                             </div>
                           </SelectItem>
