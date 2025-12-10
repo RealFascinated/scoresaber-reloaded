@@ -63,7 +63,6 @@ new EventsManager();
 
 // Connect to Mongo
 Logger.info("Connecting to MongoDB...");
-
 try {
   await mongoose.connect(env.MONGO_CONNECTION_STRING);
 } catch (error) {
@@ -72,13 +71,13 @@ try {
 }
 
 // Print slow queries
-mongoose.connection.on("query", (event) => {
-  if (event.milliseconds > 100) {
+mongoose.connection.on("query", event => {
+  if (event.milliseconds > 50) {
     const collection = event.query?.collectionName || "unknown";
     const operation = event.query?.op || "unknown";
     const query = event.query?.filter || event.query?.query || {};
     const queryString = JSON.stringify(query, null, 2);
-    
+
     Logger.warn(
       `Slow query detected: ${collection}.${operation} took ${event.milliseconds}ms`,
       queryString
@@ -95,7 +94,7 @@ mongoose.connection.on("query", (event) => {
         })
         .setColor(0xffaa00)
         .setTimestamp()
-    ).catch((error) => {
+    ).catch(error => {
       Logger.error("Failed to send slow query to Discord:", error);
     });
   }
@@ -388,15 +387,19 @@ app.listen({
   idleTimeout: 120, // 2 minutes
 });
 
-// Graceful shutdown handlers
+// Graceful shutdown
 let isShuttingDown = false;
-let forceExitTimeout: NodeJS.Timeout | null = null;
 
-const gracefulShutdown = async () => {
+const gracefulShutdown = async (signal: string) => {
   if (isShuttingDown) return;
   isShuttingDown = true;
 
-  Logger.info("Starting graceful shutdown...");
+  Logger.info(`Received ${signal}, starting graceful shutdown...`);
+
+  const forceExit = setTimeout(() => {
+    Logger.error("Forced shutdown after timeout");
+    process.exit(1);
+  }, 10000);
 
   try {
     await app.stop();
@@ -415,30 +418,15 @@ const gracefulShutdown = async () => {
     await mongoose.disconnect();
     Logger.info("MongoDB connection closed");
 
-    if (forceExitTimeout) clearTimeout(forceExitTimeout);
-
+    clearTimeout(forceExit);
     Logger.info("Shutdown complete");
     process.exit(0);
   } catch (error) {
     Logger.error("Error during shutdown:", error);
+    clearTimeout(forceExit);
     process.exit(1);
   }
 };
 
-const handleSignal = (signal: string) => {
-  if (isShuttingDown) return;
-
-  Logger.info(`Received ${signal}`);
-  gracefulShutdown();
-
-  if (!forceExitTimeout) {
-    forceExitTimeout = setTimeout(() => {
-      Logger.error("Forced shutdown after timeout");
-      process.exit(1);
-    }, 10000);
-  }
-};
-
-process.removeAllListeners("SIGTERM").removeAllListeners("SIGINT");
-process.on("SIGTERM", () => handleSignal("SIGTERM"));
-process.on("SIGINT", () => handleSignal("SIGINT"));
+process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
+process.on("SIGINT", () => gracefulShutdown("SIGINT"));
