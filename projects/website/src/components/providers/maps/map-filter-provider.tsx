@@ -2,7 +2,7 @@
 
 import { Consts } from "@ssr/common/consts";
 import { MapCategory, MapSort } from "@ssr/common/maps/types";
-import { parseAsBoolean, parseAsInteger, parseAsString, useQueryState } from "nuqs";
+import { parseAsBoolean, parseAsFloat, parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import { createContext, ReactNode, useContext } from "react";
 
 const defaultCategory = MapCategory.DateRanked;
@@ -38,10 +38,10 @@ export const MapFilterProvider = ({ children }: { children: ReactNode }) => {
     parseAsInteger.withDefault(defaultCategory)
   );
   const [sort, setSort] = useQueryState("sort", parseAsInteger.withDefault(defaultSort));
-  const [starMin, setStarMin] = useQueryState("starMin", parseAsInteger.withDefault(0));
+  const [starMin, setStarMin] = useQueryState("starMin", parseAsFloat.withDefault(0));
   const [starMax, setStarMax] = useQueryState(
     "starMax",
-    parseAsInteger.withDefault(Consts.MAX_STARS)
+    parseAsFloat.withDefault(Consts.MAX_STARS)
   );
   const [search, setSearch] = useQueryState("search", parseAsString.withDefault(""));
 

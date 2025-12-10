@@ -42,21 +42,20 @@ const playlists: Playlist[] = [
 
 export default function Playlists() {
   return (
-    <Card className="h-fit gap-2">
-      <div className="text-center">
-        <p>Playlists</p>
-        <p className="text-sm text-gray-300">Easily download maps from ScoreSaber.</p>
+    <Card className="h-fit gap-4">
+      <div className="space-y-1">
+        <h3 className="text-foreground text-lg font-semibold">Playlists</h3>
+        <p className="text-muted-foreground text-sm">Easily download maps from ScoreSaber.</p>
       </div>
 
-      <div className="flex flex-wrap justify-center gap-2">
+      <div className="flex flex-wrap gap-2">
         {playlists.map(playlist => (
-          <div key={playlist.id}>
-            <PlaylistDownloadButton
-              name={playlist.name}
-              url={`${env.NEXT_PUBLIC_API_URL}/playlist/${playlist.id}.bplist?download=true`}
-              icon={playlist.icon}
-            />
-          </div>
+          <PlaylistDownloadButton
+            key={playlist.id}
+            name={playlist.name}
+            url={`${env.NEXT_PUBLIC_API_URL}/playlist/${playlist.id}.bplist?download=true`}
+            icon={playlist.icon}
+          />
         ))}
         <CustomPlaylistCreator />
       </div>

@@ -75,7 +75,7 @@ export function MapsData({ type }: MapsDataProps) {
           {/* Category Render */}
           {selectedCategory.render()}
         </article>
-        <div className="flex w-full flex-col gap-2 xl:w-[400px]">
+        <div className="flex w-full flex-col gap-2 xl:w-[430px]">
           {/* Playlists */}
           <Playlists />
 
@@ -92,7 +92,7 @@ export function MapsData({ type }: MapsDataProps) {
               >
                 <Button className="flex w-full items-center justify-center gap-2">
                   <ExternalLinkIcon className="h-4 w-4" />
-                  <span>View Ranking Queue on ScoreSaber</span>
+                  <span>ScoreSaber Ranking Queue</span>
                 </Button>
               </SimpleLink>
             </SimpleTooltip>

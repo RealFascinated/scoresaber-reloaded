@@ -304,7 +304,10 @@ export default function SnipePlaylistCreator({ toSnipe }: Props) {
                   control={form.control}
                   render={({ field, fieldState }) => (
                     <div className="space-y-2">
-                      <label htmlFor="ranked-status" className="text-sm font-medium">
+                      <label
+                        htmlFor="ranked-status"
+                        className="text-foreground text-sm font-medium"
+                      >
                         Score Type
                       </label>
                       <Select
@@ -312,7 +315,7 @@ export default function SnipePlaylistCreator({ toSnipe }: Props) {
                         onValueChange={field.onChange}
                         aria-invalid={fieldState.invalid}
                       >
-                        <SelectTrigger id="ranked-status">
+                        <SelectTrigger id="ranked-status" className="h-10">
                           <SelectValue placeholder="Select score type" />
                         </SelectTrigger>
                         <SelectContent>
@@ -321,7 +324,7 @@ export default function SnipePlaylistCreator({ toSnipe }: Props) {
                             return (
                               <SelectItem key={opt.value} value={opt.value}>
                                 <span className="flex items-center gap-2">
-                                  <Icon className="h-3 w-3" />
+                                  <Icon className="h-3.5 w-3.5" />
                                   {opt.label}
                                 </span>
                               </SelectItem>
@@ -347,7 +350,9 @@ export default function SnipePlaylistCreator({ toSnipe }: Props) {
                         const val = field.value ?? { min: 0, max: Consts.MAX_STARS };
                         return (
                           <div className="space-y-2">
-                            <label className="text-sm font-medium">Star Range</label>
+                            <label className="text-foreground text-sm font-medium">
+                              Star Range
+                            </label>
                             <DualRangeSlider
                               min={0}
                               max={Consts.MAX_STARS}
@@ -373,7 +378,9 @@ export default function SnipePlaylistCreator({ toSnipe }: Props) {
                       const val = field.value;
                       return (
                         <div className="space-y-2">
-                          <label className="text-sm font-medium">Accuracy Range (%)</label>
+                          <label className="text-foreground text-sm font-medium">
+                            Accuracy Range (%)
+                          </label>
                           <DualRangeSlider
                             min={ACCURACY_MIN}
                             max={ACCURACY_MAX}

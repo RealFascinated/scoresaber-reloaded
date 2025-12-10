@@ -1,5 +1,4 @@
 import { ScoreModeEnum } from "@/components/score/score-mode-switcher";
-import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { Page, Pagination } from "@ssr/common/pagination";
 import { ssrApi } from "@ssr/common/utils/ssr-api";

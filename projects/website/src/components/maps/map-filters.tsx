@@ -1,10 +1,9 @@
 "use client";
 
-import Card from "@/components/card";
 import { useMapFilter } from "@/components/providers/maps/map-filter-provider";
-import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DualRangeSlider } from "@/components/ui/dual-range-slider";
+import { FilterField, FilterSection } from "@/components/ui/filter-section";
 import {
   Select,
   SelectContent,
@@ -19,93 +18,108 @@ import { Input } from "../ui/input";
 export default function MapFilters() {
   const filter = useMapFilter();
 
+  const hasActiveFilters =
+    filter.ranked ||
+    filter.qualified ||
+    filter.search.length > 0 ||
+    filter.category !== undefined ||
+    filter.starMin !== undefined ||
+    filter.starMax !== Consts.MAX_STARS;
+
   return (
-    <Card className="flex h-fit w-full gap-2 text-sm">
-      <p className="text-md text-center font-bold">Search Filters</p>
-
-      <div>
-        <div className="flex items-center gap-2">
-          <Checkbox
-            checked={filter.ranked}
-            onCheckedChange={checked => {
-              filter.setRanked(checked as boolean);
-            }}
-          />
-          <h1 className="text-sm">Ranked Maps</h1>
+    <FilterSection
+      title="Search Filters"
+      description="Filter maps by various criteria"
+      hasActiveFilters={hasActiveFilters}
+      onClear={() => filter.clearFilters()}
+    >
+      {/* Status Filters */}
+      <FilterField>
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center gap-2">
+            <Checkbox
+              id="ranked-maps"
+              checked={filter.ranked}
+              onCheckedChange={checked => {
+                filter.setRanked(checked as boolean);
+              }}
+            />
+            <label htmlFor="ranked-maps" className="cursor-pointer text-sm font-medium">
+              Ranked Maps
+            </label>
+          </div>
+          <div className="flex items-center gap-2">
+            <Checkbox
+              id="qualified-maps"
+              checked={filter.qualified}
+              onCheckedChange={checked => {
+                filter.setQualified(checked as boolean);
+              }}
+            />
+            <label htmlFor="qualified-maps" className="cursor-pointer text-sm font-medium">
+              Qualified Maps
+            </label>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Checkbox
-            checked={filter.qualified}
-            onCheckedChange={checked => {
-              filter.setQualified(checked as boolean);
-            }}
-          />
-          <h1 className="text-sm">Qualified Maps</h1>
-        </div>
-      </div>
+      </FilterField>
 
-      <div className="flex flex-col gap-2">
-        {/* Search */}
-        <div className="flex flex-col gap-1">
-          <h1 className="text-sm font-bold">Search</h1>
-          <Input
-            value={filter.search}
-            onChange={e => filter.setSearch(e.target.value)}
-            placeholder="Search for a map"
-          />
-        </div>
+      {/* Search */}
+      <FilterField label="Search">
+        <Input
+          value={filter.search}
+          onChange={e => filter.setSearch(e.target.value)}
+          placeholder="Search for a map..."
+          className="h-10"
+        />
+      </FilterField>
 
-        {/* Category */}
-        <div className="flex flex-col gap-1">
-          <h1 className="text-sm font-bold">Category</h1>
-          <Select
-            value={filter.category !== undefined ? String(filter.category) : undefined}
-            onValueChange={newCategory => {
-              if (newCategory) {
-                filter.setCategory(Number(newCategory));
-              }
-            }}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select category" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={String(MapCategory.Trending)}>Trending</SelectItem>
-              <SelectItem value={String(MapCategory.DateRanked)}>Date Ranked</SelectItem>
-              <SelectItem value={String(MapCategory.ScoresSet)}>Scores Set</SelectItem>
-              <SelectItem value={String(MapCategory.StarDifficulty)}>Star Difficulty</SelectItem>
-              <SelectItem value={String(MapCategory.Author)}>Author</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+      {/* Category */}
+      <FilterField label="Category">
+        <Select
+          value={filter.category !== undefined ? String(filter.category) : undefined}
+          onValueChange={newCategory => {
+            if (newCategory) {
+              filter.setCategory(Number(newCategory));
+            }
+          }}
+        >
+          <SelectTrigger className="h-10">
+            <SelectValue placeholder="Select category" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={String(MapCategory.Trending)}>Trending</SelectItem>
+            <SelectItem value={String(MapCategory.DateRanked)}>Date Ranked</SelectItem>
+            <SelectItem value={String(MapCategory.ScoresSet)}>Scores Set</SelectItem>
+            <SelectItem value={String(MapCategory.StarDifficulty)}>Star Difficulty</SelectItem>
+            <SelectItem value={String(MapCategory.Author)}>Author</SelectItem>
+          </SelectContent>
+        </Select>
+      </FilterField>
 
-        {/* Sort */}
-        <div>
-          <h1 className="text-sm font-bold">Sort</h1>
-          <Select
-            value={String(filter.sort)}
-            onValueChange={newSort => {
-              if (newSort) {
-                filter.setSort(Number(newSort));
-              }
-            }}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select sort" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={String(MapSort.Ascending)}>Ascending</SelectItem>
-              <SelectItem value={String(MapSort.Descending)}>Descending</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
+      {/* Sort */}
+      <FilterField label="Sort">
+        <Select
+          value={String(filter.sort)}
+          onValueChange={newSort => {
+            if (newSort) {
+              filter.setSort(Number(newSort));
+            }
+          }}
+        >
+          <SelectTrigger className="h-10">
+            <SelectValue placeholder="Select sort" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={String(MapSort.Ascending)}>Ascending</SelectItem>
+            <SelectItem value={String(MapSort.Descending)}>Descending</SelectItem>
+          </SelectContent>
+        </Select>
+      </FilterField>
 
-      {/* Min/Max Stars */}
-      <div>
-        <h1 className="text-sm font-bold">Stars</h1>
+      {/* Star Range */}
+      <FilterField label="Star Range">
         <DualRangeSlider
-          label={value => <span>{value}</span>}
+          label={value => <span className="text-xs">{value}</span>}
           value={[filter.starMin ?? 0, filter.starMax ?? Consts.MAX_STARS]}
           onValueChange={value => {
             filter.setStarMin(value[0]);
@@ -116,10 +130,7 @@ export default function MapFilters() {
           step={0.1}
           className="pt-10 pb-2"
         />
-      </div>
-
-      {/* Clear filters */}
-      <Button onClick={() => filter.clearFilters()}>Clear Filters</Button>
-    </Card>
+      </FilterField>
+    </FilterSection>
   );
 }

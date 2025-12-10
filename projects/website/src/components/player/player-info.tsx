@@ -6,8 +6,6 @@ import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player
 import { getScoreSaberAvatar, getScoreSaberRoles } from "@ssr/common/utils/scoresaber.util";
 import { clsx } from "clsx";
 import SimpleLink from "../simple-link";
-import HMDIcon from "../hmd-icon";
-import { getHMDInfo, HMD } from "@ssr/common/hmds";
 
 export function PlayerInfo({
   player,

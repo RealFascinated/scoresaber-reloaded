@@ -531,73 +531,96 @@ export default function ScoreSaberPlayerScores({
 
                   {/* Filters */}
                   <div className="flex w-full items-center gap-2 sm:w-auto">
-                    <Select
-                      value={currentFilter || ""}
-                      onValueChange={value => {
-                        setCurrentFilter(value);
-                        setCurrentPage(1);
-                        animateLeft();
-                      }}
-                    >
-                      <SelectTrigger className="h-8 w-full text-xs sm:w-40">
-                        <SelectValue placeholder="Filter" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {CACHED_SCORE_FILTERS.map(filter => (
-                          <SelectItem key={filter.name} value={filter.name}>
-                            <div className="flex items-center gap-2">
-                              {filter.icon}
-                              <span>{filter.name}</span>
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-
-                    {currentFilter && currentFilter !== "All Scores" && (
-                      <SimpleTooltip display="Clear filter">
-                        <button
-                          onClick={() => {
-                            setCurrentFilter("All Scores");
-                            setCurrentPage(1);
-                            animateLeft();
-                          }}
-                          className="border-border bg-background flex h-8 w-8 items-center justify-center rounded-(--radius-md) border text-red-500 transition-colors duration-200 hover:border-red-500"
-                        >
-                          <XIcon className="h-3.5 w-3.5" />
-                        </button>
-                      </SimpleTooltip>
-                    )}
-
-                    <Select
-                      value={hmdFilter || "All Hmds"}
-                      onValueChange={value => {
-                        setHmdFilter(value === "All Hmds" ? null : (value as HMD));
-                        setCurrentPage(1);
-                        animateLeft();
-                      }}
-                    >
-                      <SelectTrigger className="h-8 w-full text-xs sm:w-40">
-                        <SelectValue placeholder="Hmd Filter" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value={"All Hmds"}>
-                          <div className="flex items-center gap-2">
-                            <HMDIcon hmd={getHMDInfo("Unknown" as HMD)} />
-                            <span>All Hmds</span>
-                          </div>
-                        </SelectItem>
-                        {player.hmdBreakdown &&
-                          Object.keys(player.hmdBreakdown).map(filter => (
-                            <SelectItem key={filter} value={filter}>
+                    <div className="relative flex items-center gap-2">
+                      <Select
+                        value={currentFilter || ""}
+                        onValueChange={value => {
+                          setCurrentFilter(value);
+                          setCurrentPage(1);
+                          animateLeft();
+                        }}
+                      >
+                        <SelectTrigger className="h-8 w-full text-xs sm:w-40">
+                          <SelectValue placeholder="Filter" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {CACHED_SCORE_FILTERS.map(filter => (
+                            <SelectItem key={filter.name} value={filter.name}>
                               <div className="flex items-center gap-2">
-                                <HMDIcon hmd={getHMDInfo(filter as HMD)} />
-                                <span>{filter}</span>
+                                {filter.icon}
+                                <span>{filter.name}</span>
                               </div>
                             </SelectItem>
                           ))}
-                      </SelectContent>
-                    </Select>
+                        </SelectContent>
+                      </Select>
+
+                      {currentFilter && currentFilter !== "All Scores" && (
+                        <SimpleTooltip display="Clear filter">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-muted-foreground hover:text-destructive h-8 w-8 shrink-0"
+                            onClick={() => {
+                              setCurrentFilter("All Scores");
+                              setCurrentPage(1);
+                              animateLeft();
+                            }}
+                          >
+                            <XIcon className="h-3.5 w-3.5" />
+                          </Button>
+                        </SimpleTooltip>
+                      )}
+                    </div>
+
+                    <div className="relative flex items-center gap-2">
+                      <Select
+                        value={hmdFilter || "All Hmds"}
+                        onValueChange={value => {
+                          setHmdFilter(value === "All Hmds" ? null : (value as HMD));
+                          setCurrentPage(1);
+                          animateLeft();
+                        }}
+                      >
+                        <SelectTrigger className="h-8 w-full text-xs sm:w-40">
+                          <SelectValue placeholder="HMD Filter" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value={"All Hmds"}>
+                            <div className="flex items-center gap-2">
+                              <HMDIcon hmd={getHMDInfo("Unknown" as HMD)} />
+                              <span>All HMDs</span>
+                            </div>
+                          </SelectItem>
+                          {player.hmdBreakdown &&
+                            Object.keys(player.hmdBreakdown).map(filter => (
+                              <SelectItem key={filter} value={filter}>
+                                <div className="flex items-center gap-2">
+                                  <HMDIcon hmd={getHMDInfo(filter as HMD)} />
+                                  <span>{filter}</span>
+                                </div>
+                              </SelectItem>
+                            ))}
+                        </SelectContent>
+                      </Select>
+
+                      {hmdFilter && (
+                        <SimpleTooltip display="Clear HMD filter">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-muted-foreground hover:text-destructive h-8 w-8 shrink-0"
+                            onClick={() => {
+                              setHmdFilter(null);
+                              setCurrentPage(1);
+                              animateLeft();
+                            }}
+                          >
+                            <XIcon className="h-3.5 w-3.5" />
+                          </Button>
+                        </SimpleTooltip>
+                      )}
+                    </div>
                   </div>
                 </div>
               </ControlRow>
