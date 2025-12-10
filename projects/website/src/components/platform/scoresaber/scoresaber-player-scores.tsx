@@ -53,6 +53,7 @@ import {
 import { EmptyState } from "../../ui/empty-state";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../ui/select";
 import ScoreSaberScoreDisplay from "./score/score";
+import { Button } from "@/components/ui/button";
 
 // Constants
 const DEFAULT_LIVE_SORT: ScoreSaberScoreSort = "recent";
