@@ -9,7 +9,7 @@ interface ControlPanelProps {
 
 export function ControlPanel({ children, className }: ControlPanelProps) {
   return (
-    <div className={cn("border-border/50 bg-background/50 rounded-lg border p-4", className)}>
+    <div className={cn("border-border bg-background/50 rounded-lg border p-4", className)}>
       {children}
     </div>
   );

@@ -6,7 +6,7 @@ export function FancyLoader({ title, description }: { title: string; description
     <div
       className={cn(
         "flex min-h-[200px] flex-col items-center justify-center rounded-xl p-8",
-        "bg-accent-deep/50 border-border/50 gap-4 border backdrop-blur-sm"
+        "bg-accent-deep/50 border-border gap-4 border backdrop-blur-sm"
       )}
     >
       <Spinner size="lg" />

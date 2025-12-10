@@ -47,7 +47,7 @@ const CommandInput = ({
   ...props
 }: React.ComponentPropsWithoutRef<typeof CommandPrimitive.Input>) => (
   <div
-    className="border-muted/50 hover:border-primary/50 flex items-center border-b px-3 transition-colors duration-200"
+    className="border-border hover:border-primary/50 flex items-center border-b px-3 transition-colors duration-200"
     cmdk-input-wrapper=""
   >
     <MagnifyingGlassIcon className="mr-2 h-4 w-4 shrink-0 opacity-50" />

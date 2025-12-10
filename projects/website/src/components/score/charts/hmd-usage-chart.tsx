@@ -1,5 +1,6 @@
 "use client";
 
+import Card from "@/components/card";
 import { ArcElement, Chart as ChartJS, ChartOptions, Legend, Tooltip } from "chart.js";
 import { Pie } from "react-chartjs-2";
 
@@ -83,10 +84,10 @@ export default function HmdUsageChart({ hmdUsage }: Props) {
   };
 
   return (
-    <div className="border-primary/20 from-accent-deep/50 to-accent/50 group relative w-full overflow-hidden rounded-xl border bg-gradient-to-br p-4">
+    <Card>
       <div className="h-[360px] w-full">
         <Pie data={data} options={options} />
       </div>
-    </div>
+    </Card>
   );
 }

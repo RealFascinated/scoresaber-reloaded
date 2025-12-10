@@ -322,7 +322,7 @@ export default function OverlayBuilder() {
           </div>
 
           {/* Action Buttons */}
-          <div className="border-muted/50 flex flex-row gap-(--spacing-sm) border-t pt-(--spacing-xl)">
+          <div className="border-border flex flex-row gap-(--spacing-sm) border-t pt-(--spacing-xl)">
             <Button type="submit" className="flex-1">
               Open Overlay
             </Button>

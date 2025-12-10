@@ -1,6 +1,7 @@
 "use client";
 
 import { DatasetConfig } from "@/common/chart/types";
+import Card from "@/components/card";
 import GenericStatisticChart from "@/components/platform-statistics/generic-statistic-chart";
 import { Statistic } from "@ssr/common/model/statistics/statistic";
 import { StatisticsType } from "@ssr/common/model/statistics/statistic-type";
@@ -51,15 +52,13 @@ const datasetConfig: DatasetConfig[] = [
 
 export default function ScoreSaberStatisticsChart({ statistics }: Props) {
   return (
-    <div className="flex flex-col gap-4">
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <div className="border-primary/20 from-accent-deep/50 to-accent/50 group relative overflow-hidden rounded-xl border bg-gradient-to-br p-4">
-          <GenericStatisticChart statistics={statistics} datasetConfig={[datasetConfig[0]]} />
-        </div>
-        <div className="border-primary/20 from-accent-deep/50 to-accent/50 group relative overflow-hidden rounded-xl border bg-gradient-to-br p-4">
-          <GenericStatisticChart statistics={statistics} datasetConfig={[datasetConfig[1]]} />
-        </div>
-      </div>
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+      <Card>
+        <GenericStatisticChart statistics={statistics} datasetConfig={[datasetConfig[0]]} />
+      </Card>
+      <Card>
+        <GenericStatisticChart statistics={statistics} datasetConfig={[datasetConfig[1]]} />
+      </Card>
     </div>
   );
 }

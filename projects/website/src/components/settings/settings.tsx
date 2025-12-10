@@ -52,12 +52,12 @@ export default function Settings() {
   return (
     <Card className="relative flex h-full flex-col">
       {/* Header */}
-      <div className="border-border/50 border-b px-(--spacing-2xl) py-(--spacing-2xl)">
+      <div className="border-border border-b px-(--spacing-2xl) py-(--spacing-2xl)">
         <h1 className="text-2xl font-semibold">Settings</h1>
       </div>
 
       {/* Mobile Category Selector */}
-      <div className="border-border/50 border-b p-(--spacing-xl) md:hidden">
+      <div className="border-border border-b p-(--spacing-xl) md:hidden">
         <Select
           value={selectedCategory.name}
           onValueChange={value => {
@@ -88,7 +88,7 @@ export default function Settings() {
 
       <div className="flex min-h-0 flex-1 overflow-hidden">
         {/* Sidebar */}
-        <div className="border-border/50 hidden w-44 border-r md:block">
+        <div className="border-border hidden w-44 border-r md:block">
           <div className="flex h-full flex-col gap-(--spacing-xs) p-(--spacing-lg)">
             {categories.map(category => (
               <button
@@ -115,7 +115,7 @@ export default function Settings() {
       </div>
 
       {/* Footer */}
-      <div className="border-border/50 flex items-center justify-end gap-(--spacing-lg) border-t px-(--spacing-2xl) py-(--spacing-xl)">
+      <div className="border-border flex items-center justify-end gap-(--spacing-lg) border-t px-(--spacing-2xl) py-(--spacing-xl)">
         <ResetSettings />
         <div className="bg-border/50 h-5 w-px" />
         <ExportSettings />

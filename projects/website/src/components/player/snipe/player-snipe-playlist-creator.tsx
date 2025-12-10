@@ -446,7 +446,7 @@ export default function SnipePlaylistCreator({ toSnipe }: Props) {
               </div>
             </CollapsibleSection>
 
-            <div className="border-muted/50 flex flex-row gap-2 border-t pt-4">
+            <div className="border-border flex flex-row gap-2 border-t pt-4">
               <Button
                 type="submit"
                 form="snipe-playlist-form"
@@ -480,11 +480,11 @@ function CollapsibleSection({
   children,
 }: CollapsibleSectionProps) {
   return (
-    <div className="border-muted/50 rounded-lg border">
+    <div className="border-border rounded-lg border">
       <button
         type="button"
         onClick={onToggle}
-        className="hover:bg-muted/50 flex w-full items-center justify-between p-3 transition-colors duration-200"
+        className="hover:bg-muted flex w-full items-center justify-between p-3 transition-colors duration-200"
         aria-expanded={isExpanded}
       >
         <div className="flex items-center gap-2">

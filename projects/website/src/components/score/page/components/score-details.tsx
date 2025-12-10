@@ -18,7 +18,7 @@ export default function ScoreDetails({
   const { leaderboard, beatSaver } = score;
 
   return (
-    <div className="bg-secondary/90 border-muted/50 flex flex-col rounded-xl border p-0">
+    <div className="bg-secondary/90 border-border flex flex-col rounded-xl border p-0">
       <LeaderboardInfo leaderboard={leaderboard} beatSaver={beatSaver} />
 
       {/* Score Buttons */}

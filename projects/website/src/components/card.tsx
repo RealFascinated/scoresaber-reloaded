@@ -9,7 +9,7 @@ export default function Card({ children, className }: Props) {
   return (
     <div
       className={clsx(
-        "bg-secondary/95 border-muted/75 flex flex-col rounded-md border p-(--spacing-lg) drop-shadow-sm",
+        "bg-card/90 border-border flex flex-col rounded-lg border p-(--spacing-lg) drop-shadow-sm",
         className
       )}
     >

@@ -50,7 +50,7 @@ export default function Error() {
               </Button>
             </div>
 
-            <div className="border-border/50 border-t pt-3">
+            <div className="border-border border-t pt-3">
               <Button
                 asChild
                 className="h-10 w-full bg-[#5865F2] text-sm font-semibold text-white shadow-md transition-colors duration-200 hover:bg-[#5865F2]/85 hover:shadow-lg"

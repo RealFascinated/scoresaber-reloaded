@@ -100,7 +100,7 @@ export default function PlayerAndLeaderboardSearch() {
         </div>
 
         <Input
-          className="group-hover:border-ssr/75 bg-background/50 border-border/50 focus:border-ssr/75 h-9 w-full cursor-pointer rounded-xl px-0 pl-10 backdrop-blur-sm transition-all duration-200 group-hover:shadow-sm"
+          className="group-hover:border-ssr/75 bg-background/50 border-border focus:border-ssr/75 h-9 w-full cursor-pointer rounded-xl px-0 pl-10 backdrop-blur-sm transition-all duration-200 group-hover:shadow-sm"
           type="search"
           name="search"
           placeholder={isMobile ? undefined : "Query..."}
@@ -110,7 +110,7 @@ export default function PlayerAndLeaderboardSearch() {
         <div
           className={cn("absolute top-1/2 right-3 hidden -translate-y-1/2", !isMobile && "flex")}
         >
-          <kbd className="bg-muted/80 text-muted-foreground border-border/50 pointer-events-none inline-flex h-6 items-center gap-1 rounded-md border px-2 text-xs font-medium shadow-sm select-none">
+          <kbd className="bg-muted/80 text-muted-foreground border-border pointer-events-none inline-flex h-6 items-center gap-1 rounded-md border px-2 text-xs font-medium shadow-sm select-none">
             <span className="text-xs">⌘</span>K
           </kbd>
         </div>

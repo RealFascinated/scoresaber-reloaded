@@ -177,7 +177,7 @@ export default function PlusPpCalculator({ player }: { player: ScoreSaberPlayer 
       </div>
 
       {/* Controls Card */}
-      <div className="border-border/50 bg-background/50 rounded-lg border p-4">
+      <div className="border-border bg-background/50 rounded-lg border p-4">
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-lg font-semibold">Calculator</h3>
           <SimpleTooltip display={<p>Reset back to the default values</p>}>

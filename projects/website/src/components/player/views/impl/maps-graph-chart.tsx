@@ -279,7 +279,7 @@ export default function MapsGraphChart({ player }: { player: ScoreSaberPlayer })
 
   return (
     <div className="space-y-4">
-      <div className="border-border/50 bg-background/50 h-[400px] rounded-lg border p-4">
+      <div className="border-border bg-background/50 h-[400px] rounded-lg border p-4">
         <Line data={datasets as any} options={chartOptions as any} />
       </div>
 

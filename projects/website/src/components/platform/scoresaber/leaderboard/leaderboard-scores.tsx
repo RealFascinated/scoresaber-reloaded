@@ -131,7 +131,7 @@ export default function LeaderboardScores({
         <ScoreModeSwitcher initialMode={mode} onModeChange={handleModeChange} />
 
         {showDifficulties && (
-          <div className="bg-background/80 border-border/50 flex flex-wrap justify-center gap-1.5 rounded-lg border p-1.5 shadow-sm">
+          <div className="bg-background/80 border-border flex flex-wrap justify-center gap-1.5 rounded-lg border p-1.5 shadow-sm">
             {leaderboard.difficulties.map((difficultyData, index) => (
               <DifficultyButton
                 key={index}
@@ -161,10 +161,10 @@ export default function LeaderboardScores({
 
       {scores && scores.items.length > 0 && (
         <>
-          <div className="border-border/50 bg-background/50 relative overflow-x-auto rounded-lg border shadow-sm">
+          <div className="border-border bg-background/50 relative overflow-x-auto rounded-lg border shadow-sm">
             <table className="table w-full min-w-[800px] table-auto border-spacing-0 text-left text-sm">
               <thead>
-                <tr className="border-border/50 bg-muted/30 border-b">
+                <tr className="border-border bg-muted/30 border-b">
                   <th className="text-foreground/90 px-3 py-3 font-semibold">Rank</th>
                   <th className="text-foreground/90 px-3 py-3 font-semibold">Player</th>
                   <th className="text-foreground/90 px-3 py-3 text-center font-semibold">

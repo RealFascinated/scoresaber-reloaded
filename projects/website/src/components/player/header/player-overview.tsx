@@ -13,7 +13,7 @@ import CountryFlag from "../../ui/country-flag";
 
 function PlayerOverviewItem({ children }: { children: React.ReactNode }) {
   return (
-    <div className="bg-background border-border/80 flex h-8 items-center gap-2 rounded-lg border px-3 py-2 text-gray-300">
+    <div className="bg-background border-border flex h-8 items-center gap-2 rounded-lg border px-3 py-2 text-gray-300">
       {children}
     </div>
   );

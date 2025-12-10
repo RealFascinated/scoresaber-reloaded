@@ -4,6 +4,7 @@ import { cn } from "@/common/utils";
 import HMDIcon from "@/components/hmd-icon";
 import SimpleTooltip from "@/components/simple-tooltip";
 import { Spinner } from "@/components/spinner";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import PageTransition from "@/components/ui/page-transition";
 import { usePageTransition } from "@/components/ui/page-transition-context";
@@ -53,7 +54,6 @@ import {
 import { EmptyState } from "../../ui/empty-state";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../ui/select";
 import ScoreSaberScoreDisplay from "./score/score";
-import { Button } from "@/components/ui/button";
 
 // Constants
 const DEFAULT_LIVE_SORT: ScoreSaberScoreSort = "recent";
