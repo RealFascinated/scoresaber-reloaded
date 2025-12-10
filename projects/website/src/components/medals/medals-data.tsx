@@ -109,6 +109,7 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
                         getRank={player => (player as ScoreSaberPlayer).medalsRank}
                         getCountryRank={player => (player as ScoreSaberPlayer).countryMedalsRank}
                         firstColumnWidth={firstColumnWidth}
+                        showAccountInactive={false}
                         renderWorth={() => (
                           <div className="ml-auto flex min-w-[70px] flex-row items-center justify-end gap-2">
                             <FaMedal className="size-4" />

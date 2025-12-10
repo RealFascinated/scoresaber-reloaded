@@ -18,12 +18,14 @@ export function PlayerRanking({
   getCountryRank,
   firstColumnWidth,
   renderWorth,
+  showAccountInactive = true,
 }: {
   player: ScoreSaberPlayerToken | ScoreSaberPlayer;
   getRank: (player: ScoreSaberPlayerToken | ScoreSaberPlayer) => number;
   getCountryRank: (player: ScoreSaberPlayerToken | ScoreSaberPlayer) => number;
   firstColumnWidth: number;
   renderWorth: () => React.ReactNode;
+  showAccountInactive?: boolean;
 }) {
   const database = useDatabase();
   const mainPlayer = useLiveQuery(() => database.getMainPlayer());
@@ -44,7 +46,7 @@ export function PlayerRanking({
         <div
           className={cn(
             "grid grid-cols-[0.65fr_1fr] items-center gap-3",
-            player.inactive ? "flex" : ""
+            player.inactive && showAccountInactive ? "flex" : ""
           )}
           style={{
             width: `${firstColumnWidth}px`,
@@ -54,7 +56,7 @@ export function PlayerRanking({
             rank={rank}
             countryRank={countryRank}
             country={player.country}
-            inactive={player.inactive}
+            inactive={player.inactive && showAccountInactive}
           />
         </div>
 
@@ -83,7 +85,7 @@ export function PlayerRanking({
                 rank={rank}
                 countryRank={countryRank}
                 country={player.country}
-                inactive={player.inactive}
+                inactive={player.inactive && showAccountInactive}
               />
             </div>
           </div>
