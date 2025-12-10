@@ -68,6 +68,7 @@ export default class ScoreSaberService {
           rank: player.rank,
           countryRank: player.countryRank,
           pp: player.pp,
+          medals: account?.medals ?? 0,
           hmd: account?.hmd ?? undefined,
           role: player.role ?? undefined,
           permissions: player.permissions,
@@ -156,7 +157,6 @@ export default class ScoreSaberService {
             country: getPageFromRank(player.countryRank, 50),
             medals: medalsRank ? getPageFromRank(medalsRank, 50) : undefined,
           },
-          medals: account?.medals ?? 0,
           rankPercentile:
             (player.rank /
               ((await MetricsService.getMetric(MetricType.ACTIVE_ACCOUNTS)).value as number)) *
