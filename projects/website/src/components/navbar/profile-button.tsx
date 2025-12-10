@@ -14,7 +14,7 @@ import {
   DropdownSeparator,
   HoverDropdown,
 } from "../ui/hover-dropdown";
-import UnlinkProfile from "./unlink-profile";
+import { ConfirmationDialog } from "../ui/confirmation-dialog";
 
 export default function ProfileButton() {
   const isMobile = useIsMobile();
@@ -22,6 +22,10 @@ export default function ProfileButton() {
   const mainPlayer = useLiveQuery(() => database.getMainPlayer());
   if (mainPlayer == undefined) {
     return;
+  }
+
+  async function unlinkAccount() {
+    await database.setMainPlayerId("");
   }
 
   const buttonContent = (
@@ -44,7 +48,7 @@ export default function ProfileButton() {
       ) : (
         <SimpleLink
           href={`/player/${mainPlayer.id}`}
-          className="hover:bg-primary/5 flex h-full cursor-pointer items-center rounded-(--radius-lg) px-2.5 py-1.5 transition-colors duration-200 hover:shadow-sm"
+          className="hover:bg-primary/5 flex h-full cursor-pointer items-center rounded-lg px-2.5 py-1.5 transition-colors duration-200 hover:shadow-sm"
           data-umami-event="player-profile-button"
         >
           {buttonContent}
@@ -67,7 +71,16 @@ export default function ProfileButton() {
       {mainPlayer.id && (
         <>
           <DropdownSeparator />
-          <UnlinkProfile />
+
+          {/* Unlink Account */}
+          <ConfirmationDialog
+            trigger={<DropdownButton style="warning">Unlink Account</DropdownButton>}
+            title="Unlink Account"
+            description="This will unlink your account from the website. You'll need to claim a new profile again."
+            confirmText="Unlink"
+            variant="destructive"
+            onConfirm={unlinkAccount}
+          />
         </>
       )}
     </HoverDropdown>

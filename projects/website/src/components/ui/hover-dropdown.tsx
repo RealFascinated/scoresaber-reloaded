@@ -3,6 +3,7 @@
 import { useIsMobile } from "@/contexts/viewport-context";
 import React, { cloneElement, isValidElement, ReactNode, useEffect, useRef, useState } from "react";
 import SimpleLink from "../simple-link";
+import { cn } from "@/common/utils";
 
 interface HoverDropdownProps {
   trigger: ReactNode;
@@ -115,7 +116,7 @@ export function HoverDropdown({
               : "animate-out fade-out-0 zoom-out-95 slide-out-to-top-2"
           } ${contentClassName}`}
         >
-          <div className="p-2">
+          <div className="flex flex-col gap-1 p-2">
             {Array.isArray(children)
               ? children.map((child, index) =>
                   isValidElement(child) && child.type === DropdownButton
@@ -184,7 +185,7 @@ interface DropdownLabelProps {
 export function DropdownLabel({ children, className = "" }: DropdownLabelProps) {
   return (
     <div
-      className={`text-muted-foreground px-2 py-1 text-xs font-semibold tracking-wide uppercase ${className}`}
+      className={`text-muted-foreground px-(--spacing-sm) py-(--spacing-xs) text-xs font-semibold tracking-wide uppercase ${className}`}
     >
       {children}
     </div>
@@ -196,7 +197,7 @@ interface DropdownSeparatorProps {
 }
 
 export function DropdownSeparator({ className = "" }: DropdownSeparatorProps) {
-  return <div className={`bg-border/50 mx-2 my-1 h-px ${className}`} />;
+  return <div className={`bg-border/50 mx-2 my-2 h-px ${className}`} />;
 }
 
 interface DropdownGroupProps {
@@ -205,12 +206,12 @@ interface DropdownGroupProps {
 }
 
 export function DropdownGroup({ children, className = "" }: DropdownGroupProps) {
-  return <div className={`py-1 ${className}`}>{children}</div>;
+  return <div className={`flex flex-col gap-1 ${className}`}>{children}</div>;
 }
 
 interface DropdownButtonProps {
   children: ReactNode;
-  href: string;
+  href?: string;
   disabled?: boolean;
   className?: string;
   style?: "default" | "warning";
@@ -240,17 +241,24 @@ export function DropdownButton({
       onNavigate?.();
     }
   };
+  const buttonClassName = cn(
+    styleClass,
+    "relative w-full flex cursor-pointer items-center gap-(--spacing-sm) rounded-(--radius-md) px-(--spacing-sm) py-(--spacing-xs) text-sm font-medium transition-colors duration-200 outline-none select-none data-disabled:pointer-events-none data-disabled:opacity-50",
+    disabled ? "pointer-events-none opacity-50" : "",
+    className
+  );
+
+  if (href) {
+    return (
+      <SimpleLink href={href} className={buttonClassName}>
+        {children}
+      </SimpleLink>
+    );
+  }
 
   return (
-    <SimpleLink
-      href={href}
-      className={`${styleClass} relative flex cursor-pointer items-center gap-(--spacing-sm) rounded-(--radius-md) px-(--spacing-sm) py-(--spacing-xs) text-sm font-medium transition-colors duration-200 outline-none select-none data-disabled:pointer-events-none data-disabled:opacity-50 ${
-        disabled ? "pointer-events-none opacity-50" : ""
-      } ${className}`}
-      onClick={handleClick}
-      {...props}
-    >
+    <button className={buttonClassName} onClick={handleClick} {...props}>
       {children}
-    </SimpleLink>
+    </button>
   );
 }
