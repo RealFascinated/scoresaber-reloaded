@@ -71,6 +71,36 @@ try {
   process.exit(1);
 }
 
+// Print slow queries
+mongoose.connection.on("query", (event) => {
+  if (event.milliseconds > 100) {
+    const collection = event.query?.collectionName || "unknown";
+    const operation = event.query?.op || "unknown";
+    const query = event.query?.filter || event.query?.query || {};
+    const queryString = JSON.stringify(query, null, 2);
+    
+    Logger.warn(
+      `Slow query detected: ${collection}.${operation} took ${event.milliseconds}ms`,
+      queryString
+    );
+
+    sendEmbedToChannel(
+      DiscordChannels.BACKEND_LOGS,
+      new EmbedBuilder()
+        .setTitle("🐌 Slow Query Detected")
+        .setDescription(`**${collection}.${operation}** took **${event.milliseconds}ms**`)
+        .addFields({
+          name: "Query",
+          value: `\`\`\`json\n${queryString.length > 1000 ? queryString.substring(0, 1000) + "..." : queryString}\n\`\`\``,
+        })
+        .setColor(0xffaa00)
+        .setTimestamp()
+    ).catch((error) => {
+      Logger.error("Failed to send slow query to Discord:", error);
+    });
+  }
+});
+
 Logger.info("Connected to MongoDB :)");
 
 Logger.info("Testing Redis connection...");
