@@ -47,7 +47,6 @@ function PlatformSelector({
       );
       return available.filter(p => p.available).map(p => p.platform);
     },
-    enabled: true,
   });
 
   return (
