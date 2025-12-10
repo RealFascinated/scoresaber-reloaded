@@ -33,7 +33,7 @@ export class PlayerService {
   public static updatePlayerStatistics = PlayerHistoryService.updatePlayerStatistics;
   public static trackPlayerHistory = PlayerHistoryService.trackPlayerHistory;
   public static getPlayerStatisticHistory = PlayerHistoryService.getPlayerStatisticHistory;
-  public static seedPlayerHistory = PlayerHistoryService.seedPlayerHistory;
+  public static seedPlayerRankHistory = PlayerHistoryService.seedPlayerHistory;
   public static updatePlayerDailyScoreStats = PlayerHistoryService.updatePlayerDailyScoreStats;
   public static getTodayPlayerStatistic = PlayerHistoryService.getTodayPlayerStatistic;
   public static createPlayerStatistic = PlayerHistoryService.createPlayerStatistic;

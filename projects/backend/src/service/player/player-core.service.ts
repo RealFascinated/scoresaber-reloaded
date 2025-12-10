@@ -23,19 +23,14 @@ export class PlayerCoreService {
       return await accountCreationLock[id];
     }
 
-    let player: Player | null = await CacheService.fetchWithCache(
+    let player: Player | null | undefined = await CacheService.fetchWithCache(
       CacheId.Players,
       `player:${id}`,
       async () => PlayerModel.findOne({ _id: id }).lean()
     );
 
     if (player === null) {
-      const success = await PlayerService.trackPlayer(id, playerToken);
-      if (!success) {
-        throw new NotFoundError(`Player "${id}" not found`);
-      }
-
-      player = await PlayerModel.findOne({ _id: id }).lean();
+      player = await PlayerService.trackPlayer(id, playerToken);
       if (!player) {
         throw new NotFoundError(`Player "${id}" not found after creation`);
       }

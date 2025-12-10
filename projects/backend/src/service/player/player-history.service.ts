@@ -25,6 +25,8 @@ import { PlayerScoreSeedQueue } from "../../queue/impl/player-score-seed-queue";
 import { QueueId, QueueManager } from "../../queue/queue-manager";
 import { accountCreationLock } from "./player-core.service";
 import { PlayerService } from "./player.service";
+import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
+import { processInBatches } from "@ssr/common/utils/batch-utils";
 
 const INACTIVE_RANK = 999_999;
 
@@ -34,22 +36,22 @@ export class PlayerHistoryService {
    *
    * @param id the player's id
    * @param playerToken an optional player token
-   * @returns whether the player was successfully tracked
+   * @returns the player if successfully tracked, undefined otherwise
    */
   public static async trackPlayer(
     id: string,
     playerToken?: ScoreSaberPlayerToken
-  ): Promise<boolean> {
+  ): Promise<Player | undefined> {
     try {
       if (await PlayerService.playerExists(id)) {
-        return true;
+        return undefined;
       }
 
       playerToken =
         playerToken ||
         (await ApiServiceRegistry.getInstance().getScoreSaberService().lookupPlayer(id));
       if (!playerToken) {
-        return false;
+        return undefined;
       }
 
       // Create a new lock promise and assign it
@@ -73,7 +75,9 @@ export class PlayerHistoryService {
           ) as PlayerScoreSeedQueue;
           if (!(await seedQueue.hasItem({ id: id, data: id }))) {
             if (trackedScores < playerToken.scoreStats.totalPlayCount) {
-              Logger.info(`Player ${id} has missing scores. Adding them to the refresh queue...`);
+              Logger.info(
+                `Player ${id} has ${formatNumberWithCommas(playerToken.scoreStats.totalPlayCount - trackedScores)} missing scores. Adding them to the refresh queue...`
+              );
               // Add the player to the refresh queue
               (QueueManager.getQueue(QueueId.PlayerScoreRefreshQueue) as PlayerScoreSeedQueue).add({
                 id,
@@ -96,11 +100,11 @@ export class PlayerHistoryService {
         }
       })();
 
-      // Wait for the player creation to complete
-      await accountCreationLock[id];
-      return true;
-    } catch {
-      return false;
+      // Return the player document
+      return await accountCreationLock[id];
+    } catch (err) {
+      Logger.error(`Failed to create player document for "${id}"`, err);
+      return undefined;
     }
   }
 
@@ -146,15 +150,22 @@ export class PlayerHistoryService {
     }
     Logger.info(`Found ${players.length} active players from ScoreSaber API`);
 
-    // Track the players
-    for (const player of players) {
+    await processInBatches(players, 25, async player => {
       const foundPlayer = await PlayerService.getPlayer(player.id, player);
-      await PlayerService.trackPlayerHistory(foundPlayer, now, player);
 
-      // Get the total amount of scores tracked for this player
-      const trackedScores = await ScoreSaberScoreModel.countDocuments({
-        playerId: player.id,
-      });
+      const [, trackedScores] = await Promise.all([
+        // Track the player's history
+        PlayerService.trackPlayerHistory(foundPlayer, now, player),
+
+        // Get the number of scores tracked for the player
+        ScoreSaberScoreModel.countDocuments({
+          playerId: player.id,
+        }),
+
+        // Update the player's inactive status if it has changed
+        foundPlayer.inactive !== player.inactive &&
+          PlayerModel.updateOne({ _id: foundPlayer._id }, { $set: { inactive: player.inactive } }),
+      ]);
 
       // If the player has less scores tracked than the total play count, add them to the refresh queue
       if (trackedScores < player.scoreStats.totalPlayCount) {
@@ -167,32 +178,20 @@ export class PlayerHistoryService {
       }
 
       successCount++;
-    }
+    });
 
     const playerIds = new Set(players.map(player => player.id));
-
-    // Log the number of active players found
+    const activePlayerIdsArray = Array.from(playerIds);
     Logger.info(`Found ${playerIds.size} active players from ScoreSaber API`);
 
-    // Get all player IDs from database
-    const allPlayerIds = await PlayerModel.find({}, { _id: 1 });
-    Logger.info(`Total players in database: ${allPlayerIds.length}`);
+    // Mark players as inactive
+    const result = await PlayerModel.updateMany(
+      { _id: { $nin: activePlayerIdsArray } },
+      { $set: { inactive: true } }
+    );
 
-    // Mark players not in the active list as inactive using bulk operation
-    const inactivePlayerIds = allPlayerIds
-      .filter(({ _id }) => !playerIds.has(_id))
-      .map(({ _id }) => _id);
-
-    if (inactivePlayerIds.length > 0) {
-      const bulkOps = inactivePlayerIds.map(playerId => ({
-        updateOne: {
-          filter: { _id: playerId },
-          update: { $set: { inactive: true } },
-        },
-      }));
-
-      await PlayerModel.bulkWrite(bulkOps);
-      Logger.info(`Marked ${inactivePlayerIds.length} players as inactive`);
+    if (result.modifiedCount > 0) {
+      Logger.info(`Marked ${result.modifiedCount} players as inactive`);
     }
 
     const inactivePlayers = await PlayerModel.countDocuments({ inactive: true });
@@ -233,27 +232,14 @@ export class PlayerHistoryService {
       playerToken ??
       (await ApiServiceRegistry.getInstance().getScoreSaberService().lookupPlayer(foundPlayer._id));
 
-    if (!player) {
-      Logger.warn(`Player "${foundPlayer._id}" not found on ScoreSaber`);
-      return;
-    }
-
-    if (foundPlayer.inactive !== player.inactive) {
-      await PlayerModel.updateOne(
-        { _id: foundPlayer._id },
-        { $set: { inactive: player.inactive } }
-      );
-      foundPlayer.inactive = player.inactive;
-    }
-
-    if (player.inactive) {
-      Logger.info(`Player "${foundPlayer._id}" is inactive on ScoreSaber`);
+    // Don't track inactive players
+    if (!player || player.inactive) {
       return;
     }
 
     const daysTracked = await PlayerService.getDaysTracked(foundPlayer._id);
     if (daysTracked === 0) {
-      await PlayerService.seedPlayerHistory(foundPlayer, player);
+      await PlayerService.seedPlayerRankHistory(foundPlayer, player);
     }
 
     if (foundPlayer.seededScores) {
