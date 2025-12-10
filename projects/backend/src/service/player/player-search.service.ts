@@ -46,7 +46,7 @@ export class PlayerSearchService {
             DetailType.BASIC,
             scoreSaberPlayerTokens?.find(token => token.id === id) ||
               (await ScoreSaberService.getCachedPlayer(id, true)), // Use the cache for inactive players
-            { setInactivesRank: false, setMedalsRank: false }
+            { setInactivesRank: false, setMedalsRank: false, getHmdBreakdown: false }
           )
         )
       )
