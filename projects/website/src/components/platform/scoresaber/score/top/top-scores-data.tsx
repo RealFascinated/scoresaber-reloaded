@@ -13,7 +13,7 @@ import { PlayerScore } from "@ssr/common/score/player-score";
 import Request from "@ssr/common/utils/request";
 import { useQuery } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
-import ScoreSaberScoreDisplay from "../score";
+import ScoreSaberScoreDisplay from "../scoresaber-score";
 
 export function TopScoresData() {
   const isMobile = useIsMobile();

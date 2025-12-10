@@ -8,9 +8,10 @@ import { useIsMobile } from "@/contexts/viewport-context";
 import FallbackLink from "@/components/fallback-link";
 import ScoreSaberScoreButtons from "@/components/platform/scoresaber/score/buttons/score-buttons";
 import ScoreSaberScoreInfo from "@/components/platform/scoresaber/score/score-info";
-import ScoreSaberScoreSongInfo from "@/components/platform/scoresaber/score/score-song-info";
 import ScoreSaberScoreStats from "@/components/platform/scoresaber/score/score-stats";
+import ScoreSongInfo from "@/components/score/score-song-info";
 import SimpleTooltip from "@/components/simple-tooltip";
+import { StarIcon } from "@heroicons/react/24/solid";
 import { ScoreSaberCurve } from "@ssr/common/leaderboard-curve/scoresaber-curve";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
@@ -74,7 +75,23 @@ export default function ScoreSaberScoreDisplay({
           <ScoreSaberScoreInfo score={score} leaderboard={leaderboard} />
 
           <div className="flex min-w-0 items-center overflow-hidden">
-            <ScoreSaberScoreSongInfo leaderboard={leaderboard} beatSaverMap={beatSaverMap} />
+            <ScoreSongInfo
+              song={{
+                name: leaderboard.fullName,
+                authorName: leaderboard.songAuthorName,
+                art: leaderboard.songArt,
+              }}
+              level={{
+                authorName: leaderboard.levelAuthorName,
+                difficulty: leaderboard.difficulty.difficulty,
+              }}
+              worth={{
+                value: leaderboard.stars,
+                icon: StarIcon,
+              }}
+              beatSaverMap={beatSaverMap}
+              leaderboardId={leaderboard.id}
+            />
           </div>
 
           {!settings?.noScoreButtons && (

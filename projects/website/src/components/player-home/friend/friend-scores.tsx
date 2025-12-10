@@ -8,7 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useState } from "react";
 import Card from "../../card";
-import ScoreSaberScoreDisplay from "../../platform/scoresaber/score/score";
+import ScoreSaberScoreDisplay from "../../platform/scoresaber/score/scoresaber-score";
 import SimplePagination from "../../simple-pagination";
 import { Spinner } from "../../spinner";
 

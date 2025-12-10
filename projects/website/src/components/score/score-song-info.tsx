@@ -1,30 +1,47 @@
 import { cn } from "@/common/utils";
 import FallbackLink from "@/components/fallback-link";
-import { StarIcon } from "@heroicons/react/24/solid";
-import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
+import { MapDifficulty } from "@ssr/common/score/map-difficulty";
 import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
 import Image from "next/image";
-import ScoreSaberSongName from "./song-name";
+import LeaderboardSongName from "./leaderboard-song-name";
 
-export default function ScoreSaberScoreSongInfo({
-  leaderboard,
+interface ScoreSongInfoProps {
+  song: {
+    name: string;
+    authorName: string;
+    art: string;
+  };
+  level: {
+    authorName: string;
+    difficulty: MapDifficulty;
+  };
+  worth?: {
+    value: number;
+    icon: React.ComponentType<{ className?: string }>;
+  };
+  beatSaverMap?: BeatSaverMapResponse;
+  clickableSongName?: boolean;
+  leaderboardId?: number;
+  imageSize?: number;
+}
+
+export default function ScoreSongInfo({
+  song,
+  level,
+  worth,
   beatSaverMap,
   clickableSongName = true,
+  leaderboardId,
   imageSize = 64,
-}: {
-  leaderboard: ScoreSaberLeaderboard;
-  beatSaverMap?: BeatSaverMapResponse;
-  imageSize?: number;
-  clickableSongName?: boolean;
-}) {
+}: ScoreSongInfoProps) {
   const mappersProfile =
     beatSaverMap != undefined
       ? `https://beatsaver.com/profile/${beatSaverMap.author.id}`
       : undefined;
 
-  const starCount = leaderboard.stars;
-  const difficulty = getDifficulty(leaderboard.difficulty.difficulty);
+  const diff = getDifficulty(level.difficulty);
+  const WorthIcon = worth?.icon;
 
   return (
     <div className="flex w-full items-center gap-3">
@@ -35,10 +52,10 @@ export default function ScoreSaberScoreSongInfo({
         }}
       >
         <Image
-          src={leaderboard.songArt}
+          src={song.art}
           width={imageSize}
           height={imageSize}
-          alt={`${leaderboard.fullName}'s Artwork`}
+          alt={`${song.name}'s Artwork`}
           className="rounded-md"
           style={{
             minWidth: `${imageSize}px`,
@@ -47,27 +64,31 @@ export default function ScoreSaberScoreSongInfo({
         <div
           className="absolute right-0 bottom-0 flex h-[18px] w-full cursor-default items-center justify-center rounded-sm text-[0.70rem]"
           style={{
-            backgroundColor: difficulty.color + "f0",
+            backgroundColor: diff.color + "f0",
           }}
         >
-          {starCount > 0 ? (
+          {worth != undefined && worth.value > 0 ? (
             <div className="flex items-center justify-center gap-1">
-              <p>{starCount.toFixed(2)}</p>
-              <StarIcon className="h-[14px] w-[14px]" />
+              <p>{worth.value.toFixed(2)}</p>
+              {WorthIcon && <WorthIcon className="h-[14px] w-[14px]" />}
             </div>
           ) : (
-            <p>{getDifficultyName(difficulty)}</p>
+            <p>{getDifficultyName(diff)}</p>
           )}
         </div>
       </div>
       <div className="flex flex-col gap-1">
         <div className="flex flex-col gap-1">
-          <ScoreSaberSongName leaderboard={leaderboard} clickableSongName={clickableSongName} />
+          <LeaderboardSongName
+            leaderboardName={song.name}
+            leaderboardId={leaderboardId}
+            clickableSongName={clickableSongName}
+          />
 
           {/* Author Info */}
           <div className="flex flex-row items-end gap-1.5 text-sm leading-none">
             <p className="line-clamp-2 text-gray-400">
-              {leaderboard.songAuthorName}{" "}
+              {song.authorName}{" "}
               <span className="text-song-mapper">
                 <FallbackLink
                   href={mappersProfile}
@@ -75,7 +96,7 @@ export default function ScoreSaberScoreSongInfo({
                     mappersProfile && "hover:text-primary/80 text-xs leading-none transition-all"
                   )}
                 >
-                  {leaderboard.levelAuthorName}
+                  {level.authorName}
                 </FallbackLink>
               </span>
             </p>

@@ -2,6 +2,11 @@ import { MapDifficulty } from "../score/map-difficulty";
 
 export type Difficulty = {
   /**
+   * The id of the difficulty
+   */
+  id: string;
+
+  /**
    * The name of the difficulty
    */
   name: MapDifficulty;
@@ -17,17 +22,23 @@ export type Difficulty = {
   color: string;
 
   /**
-   * The difficulty id (used for sorting)
+   * The sort order of the difficulty
    */
-  id: number;
+  sortOrder: number;
 };
 
 const difficulties: Difficulty[] = [
-  { name: "Easy", color: "#3cb371", id: 1 },
-  { name: "Normal", color: "#59b0f4", id: 3 },
-  { name: "Hard", color: "#FF6347", id: 5 },
-  { name: "Expert", color: "#bf2a42", id: 7 },
-  { name: "ExpertPlus", alternativeName: "Expert+", color: "#8f48db", id: 9 },
+  { id: "easy", name: "Easy", color: "#3cb371", sortOrder: 1 },
+  { id: "normal", name: "Normal", color: "#59b0f4", sortOrder: 3 },
+  { id: "hard", name: "Hard", color: "#FF6347", sortOrder: 5 },
+  { id: "expert", name: "Expert", color: "#bf2a42", sortOrder: 7 },
+  {
+    id: "expertplus",
+    name: "ExpertPlus",
+    alternativeName: "Expert+",
+    color: "#8f48db",
+    sortOrder: 9,
+  },
 ];
 
 export type ScoreBadge = {
@@ -98,13 +109,6 @@ export function getScoreBadgeFromName(name: string): ScoreBadge {
 }
 
 /**
- * Get a random difficulty, except ExpertPlus.
- */
-export function getRandomDifficulty(): Difficulty {
-  return difficulties[Math.floor(Math.random() * (difficulties.length - 1))];
-}
-
-/**
  * Gets the name of the difficulty
  *
  * @param diff the difficulty
@@ -122,10 +126,12 @@ export function getDifficultyName(diff: Difficulty | MapDifficulty) {
  */
 export function getDifficulty(diff: Difficulty | MapDifficulty) {
   const difficulty = difficulties.find(
-    d => d.name === (typeof diff === "string" ? diff : diff.name)
+    d => d.id === (typeof diff === "string" ? diff.toLowerCase() : diff.name.toLowerCase())
   );
   if (!difficulty) {
-    throw new Error(`Unknown difficulty: ${diff}`);
+    throw new Error(
+      `Unknown difficulty: ${typeof diff === "string" ? diff : diff.name.toLowerCase()}`
+    );
   }
   return difficulty;
 }

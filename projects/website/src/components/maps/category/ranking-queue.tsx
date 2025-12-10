@@ -1,6 +1,6 @@
 import { cn } from "@/common/utils";
 import Card from "@/components/card";
-import ScoreSaberScoreSongInfo from "@/components/platform/scoresaber/score/score-song-info";
+import ScoreSongInfo from "@/components/score/score-song-info";
 import SimpleLink from "@/components/simple-link";
 import { Spinner } from "@/components/spinner";
 import { Button } from "@/components/ui/button";
@@ -35,8 +35,16 @@ export default function RankingQueue() {
                   className="bg-accent-deep hover:bg-accent-deep/50 grid items-center gap-2 rounded-md p-1.5 transition-all lg:grid-cols-[1fr_0.22fr]"
                 >
                   <div className="flex items-center gap-2 overflow-hidden">
-                    <ScoreSaberScoreSongInfo
-                      leaderboard={leaderboard}
+                    <ScoreSongInfo
+                      song={{
+                        name: leaderboard.fullName,
+                        authorName: leaderboard.songAuthorName,
+                        art: leaderboard.songArt,
+                      }}
+                      level={{
+                        authorName: leaderboard.levelAuthorName,
+                        difficulty: leaderboard.difficulty.difficulty,
+                      }}
                       imageSize={58}
                       clickableSongName={false}
                     />

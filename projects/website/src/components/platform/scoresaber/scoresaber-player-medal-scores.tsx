@@ -20,7 +20,7 @@ import { useCallback, useEffect, useState } from "react";
 import ScoresCard from "../../score/scores-card";
 import SimplePagination from "../../simple-pagination";
 import { EmptyState } from "../../ui/empty-state";
-import ScoreSaberScoreDisplay from "./score/score";
+import ScoreSaberScoreDisplay from "./score/scoresaber-score";
 
 interface ScoreSaberPlayerMedalScoresProps {
   player: ScoreSaberPlayer;

@@ -1,7 +1,7 @@
 "use client";
 
 import Avatar from "@/components/avatar";
-import ScoreSaberScoreDisplay from "@/components/platform/scoresaber/score/score";
+import ScoreSaberScoreDisplay from "@/components/platform/scoresaber/score/scoresaber-score";
 import SimpleLink from "@/components/simple-link";
 import Logger from "@ssr/common/logger";
 import {
