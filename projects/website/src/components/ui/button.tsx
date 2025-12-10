@@ -9,17 +9,17 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        primary: "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90",
+        primary: "bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-sm",
         default:
-          "border border-primary bg-background/95 backdrop-blur-sm relative before:absolute before:inset-0 before:bg-primary/10 before:rounded-(--radius-md) text-primary shadow-sm hover:before:bg-primary/20",
+          "border border-primary bg-background/95 relative before:absolute before:inset-0 before:bg-primary/10 before:rounded-(--radius-md) text-primary hover:before:bg-primary/20 hover:shadow-sm",
         destructive:
-          "bg-destructive/10 border border-destructive/50 backdrop-blur-sm text-destructive shadow-sm hover:bg-destructive/20 hover:border-destructive",
+          "bg-destructive/10 border border-destructive/50 text-destructive hover:bg-destructive/20 hover:border-destructive hover:shadow-sm",
         outline:
-          "border border-border bg-background/95 backdrop-blur-sm text-foreground shadow-xs hover:text-accent-foreground hover:border-primary/50",
+          "border border-border bg-background/95 text-foreground hover:text-accent-foreground hover:border-primary/50 hover:shadow-xs",
         secondary:
-          "border border-border bg-background/95 backdrop-blur-sm relative before:absolute before:inset-0 before:bg-secondary/10 before:rounded-(--radius-md) text-secondary-foreground shadow-xs hover:before:bg-secondary/20 hover:border-primary/50",
+          "border border-border bg-background/95 relative before:absolute before:inset-0 before:bg-secondary/10 before:rounded-(--radius-md) text-secondary-foreground hover:before:bg-secondary/20 hover:border-primary/50 hover:shadow-xs",
         ghost:
-          "border border-border bg-background/95 backdrop-blur-sm text-foreground hover:text-accent-foreground hover:border-primary/50",
+          "border border-border bg-background/95 text-foreground hover:text-accent-foreground hover:border-primary/50",
         link: "text-primary underline-offset-4 hover:underline",
       },
       size: {

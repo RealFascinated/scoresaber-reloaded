@@ -72,7 +72,7 @@ export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
         <Image
           src={leaderboardData.songArt}
           alt={`${leaderboardData.songName} Cover Image`}
-          className="rounded-lg object-cover shadow-sm"
+          className="rounded-lg object-cover"
           width={96}
           height={96}
         />

@@ -7,7 +7,7 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   output: "standalone",
   outputFileTracingRoot: path.join(__dirname, "../../"),
-  reactCompiler: true,
+  // reactCompiler: true,
   experimental: {
     turbopackFileSystemCacheForDev: true,
     optimizePackageImports: [

@@ -161,7 +161,7 @@ export default function LeaderboardScores({
 
       {scores && scores.items.length > 0 && (
         <>
-          <div className="border-border bg-background/50 relative overflow-x-auto rounded-lg border shadow-sm">
+          <div className="border-border bg-background/50 relative overflow-x-auto rounded-lg border">
             <table className="table w-full min-w-[800px] table-auto border-spacing-0 text-left text-sm">
               <thead>
                 <tr className="border-border bg-muted/30 border-b">
