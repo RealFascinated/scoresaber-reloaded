@@ -184,7 +184,7 @@ export default class ScoreSaberService {
         const cacheAge = new Date().getTime() - new Date(player.lastUpdated).getTime();
         const refreshInterval = cacheOnly
           ? TimeUnit.toMillis(TimeUnit.Month, 2)
-          : TimeUnit.toMillis(TimeUnit.Day, 48);
+          : TimeUnit.toMillis(TimeUnit.Hour, 48);
 
         if (cacheAge < refreshInterval) {
           return player;
