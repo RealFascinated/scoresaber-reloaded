@@ -55,7 +55,7 @@ const playerData = [
                 href={`/ranking/${player.rankPages.global}`}
                 data-umami-event="player-global-rank-button"
               >
-                <span className="hover:text-primary m-0 text-sm leading-[1.2] transition-all hover:brightness-[66%]">
+                <span className="hover:text-primary/80 m-0 text-sm leading-[1.2] transition-all">
                   #{formatNumberWithCommas(player.rank)}
                 </span>
               </SimpleLink>
@@ -86,7 +86,7 @@ const playerData = [
                 href={`/ranking/${player.country}/${player.rankPages.country}`}
                 data-umami-event="player-country-rank-button"
               >
-                <span className="hover:text-primary m-0 text-sm leading-[1.4] transition-all hover:brightness-[66%]">
+                <span className="hover:text-primary/80 m-0 text-sm leading-[1.4] transition-all">
                   #{formatNumberWithCommas(player.countryRank)}
                 </span>
               </SimpleLink>
@@ -110,9 +110,7 @@ const playerData = [
             <span
               className={cn(
                 "m-0 text-sm leading-[1.4]",
-                player.rankPages.medals
-                  ? "hover:text-primary cursor-pointer transition-all hover:brightness-[66%]"
-                  : ""
+                player.rankPages.medals ? "hover:text-primary/80 cursor-pointer transition-all" : ""
               )}
             >
               {formatNumberWithCommas(player.medals)} Medals
@@ -133,7 +131,7 @@ const playerData = [
           <div className="flex items-center gap-1" style={{ height: "100%" }}>
             <ChangeOverTime player={player} type={PlayerStatChange.PerformancePoints}>
               <span
-                className="text-pp m-0 truncate text-sm leading-[1.4] font-semibold transition-all hover:brightness-110"
+                className="text-pp hover:text-primary/80 m-0 truncate text-sm leading-[1.4] font-semibold transition-all"
                 style={{ display: "inline-block", verticalAlign: "middle" }}
               >
                 {formatPp(player.pp)}pp

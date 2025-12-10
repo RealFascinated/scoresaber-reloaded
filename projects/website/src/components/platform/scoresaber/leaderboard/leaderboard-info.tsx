@@ -56,10 +56,10 @@ export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
             {/* Song Name */}
             <FallbackLink
               href={beatSaverMap ? `https://beatsaver.com/maps/${beatSaverMap?.bsr}` : undefined}
-              className="transition-all hover:brightness-66"
+              className="hover:text-primary/80 transition-all"
               data-umami-event="leaderboard-beatsaver-button"
             >
-              <h3 className="text-foreground line-clamp-2 text-lg leading-tight font-semibold">
+              <h3 className="text-song-name line-clamp-2 text-lg leading-tight font-semibold">
                 {leaderboardData.fullName}
               </h3>
             </FallbackLink>

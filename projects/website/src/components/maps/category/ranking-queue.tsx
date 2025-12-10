@@ -52,7 +52,7 @@ export default function RankingQueue() {
                         <div key={index}>
                           <SimpleLink
                             href={`/leaderboard/${leaderboard.id}`}
-                            className="bg-border grid items-center gap-2 rounded-md p-1.5 transition-all hover:brightness-75 lg:grid-cols-[1fr_0.22fr]"
+                            className="bg-accent-deep hover:bg-accent-deep/50 grid items-center gap-2 rounded-md p-1.5 transition-all lg:grid-cols-[1fr_0.22fr]"
                           >
                             <div className="flex items-center gap-2 overflow-hidden">
                               <ScoreSaberScoreSongInfo

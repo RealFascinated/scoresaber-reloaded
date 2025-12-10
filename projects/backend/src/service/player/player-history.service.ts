@@ -10,6 +10,8 @@ import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-sc
 import { removeObjectFields } from "@ssr/common/object.util";
 import { PlayerStatisticHistory } from "@ssr/common/player/player-statistic-history";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
+import { processInBatches } from "@ssr/common/utils/batch-utils";
+import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { parseRankHistory } from "@ssr/common/utils/player-utils";
 import {
   formatDateMinimal,
@@ -25,8 +27,6 @@ import { PlayerScoreSeedQueue } from "../../queue/impl/player-score-seed-queue";
 import { QueueId, QueueManager } from "../../queue/queue-manager";
 import { accountCreationLock } from "./player-core.service";
 import { PlayerService } from "./player.service";
-import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
-import { processInBatches } from "@ssr/common/utils/batch-utils";
 
 const INACTIVE_RANK = 999_999;
 

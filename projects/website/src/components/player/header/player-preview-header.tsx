@@ -25,7 +25,7 @@ export default function PlayerPreviewHeader({ player }: PlayerPreviewHeaderProps
           <div className="flex items-center justify-center gap-2 lg:justify-start">
             <SimpleLink
               href={`/player/${player.id}`}
-              className="text-2xl font-bold transition-all hover:brightness-[66%]"
+              className="hover:text-primary/80 text-2xl font-bold transition-all"
               style={{
                 color: getScoreSaberRoles(player)[0]?.color,
               }}

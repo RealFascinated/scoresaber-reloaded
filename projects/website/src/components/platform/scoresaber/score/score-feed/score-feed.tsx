@@ -64,7 +64,7 @@ export default function ScoreFeed() {
                 alt={`${player.name}'s Profile Picture`}
               />
               <SimpleLink href={`/player/${player.id}`}>
-                <span className="text-primary transition-all duration-200 hover:brightness-66">
+                <span className="text-primary hover:text-primary/80 transition-all">
                   {player.name}
                 </span>
               </SimpleLink>

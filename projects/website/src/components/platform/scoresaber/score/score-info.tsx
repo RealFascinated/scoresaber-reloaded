@@ -4,6 +4,7 @@ import HMDIcon from "@/components/hmd-icon";
 import { ScoreSaberScoreTimeSetVs } from "@/components/platform/scoresaber/score/score-time-set-vs";
 import { ScoreTimeSet } from "@/components/score/score-time-set";
 import SimpleLink from "@/components/simple-link";
+import SimpleTooltip from "@/components/simple-tooltip";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import { getHMDInfo, HMD } from "@ssr/common/hmds";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
@@ -11,7 +12,6 @@ import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { getPageFromRank } from "@ssr/common/utils/utils";
 import { ScoreSaberScoreHMD } from "./score-hmd";
-import SimpleTooltip from "@/components/simple-tooltip";
 
 export default function ScoreSaberScoreInfo({
   score,
@@ -38,7 +38,7 @@ export default function ScoreSaberScoreInfo({
             <p
               className={cn(
                 getRankColor(score.rank),
-                "cursor-pointer font-semibold transition-all duration-200 hover:brightness-66"
+                "hover:text-primary/80 cursor-pointer font-semibold transition-all"
               )}
             >
               #{formatNumberWithCommas(score.rank)}

@@ -95,7 +95,7 @@ export default function ScoreSaberScoreSongInfo({
                             } as React.CSSProperties
                           }
                         >
-                          <span className="group-hover:brightness-75">
+                          <span className="group-hover:text-primary/80">
                             {getDifficultyName(difficulty.difficulty)}
                           </span>
                         </SimpleLink>
@@ -122,7 +122,7 @@ export default function ScoreSaberScoreSongInfo({
                 <FallbackLink
                   href={mappersProfile}
                   className={cn(
-                    mappersProfile && "text-xs leading-none transition-all hover:brightness-66"
+                    mappersProfile && "hover:text-primary/80 text-xs leading-none transition-all"
                   )}
                 >
                   {leaderboard.levelAuthorName}

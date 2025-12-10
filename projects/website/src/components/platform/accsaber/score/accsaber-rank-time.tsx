@@ -19,7 +19,7 @@ export function AccSaberRankTime({ score }: AccSaberRankTimeProps) {
         <p
           className={cn(
             getRankColor(score.score.rank),
-            "cursor-pointer font-semibold transition-all hover:brightness-[66%]"
+            "hover:text-primary/80 cursor-pointer font-semibold transition-all"
           )}
         >
           #{formatNumberWithCommas(score.score.rank)}

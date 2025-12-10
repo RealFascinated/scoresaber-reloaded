@@ -38,7 +38,7 @@ export function PlayerRanking({
       {/* Desktop Layout */}
       <div
         className={cn(
-          "bg-muted/50 hover:bg-accent/50 hidden items-center gap-2 rounded-md px-(--spacing-xs) py-(--spacing-xs) lg:flex",
+          "bg-accent-deep hover:bg-accent-deep/50 hidden items-center gap-2 rounded-md px-(--spacing-xs) py-(--spacing-xs) lg:flex",
           mainPlayer?.id == player.id ? "bg-primary/10 hover:bg-primary/15" : ""
         )}
       >

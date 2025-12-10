@@ -30,7 +30,7 @@ export default function LeaderboardInfo({
           {/* Song Name */}
           <FallbackLink
             href={beatSaver ? `https://beatsaver.com/maps/${beatSaver?.bsr}` : undefined}
-            className="transition-all duration-200 hover:brightness-[66%]"
+            className="hover:text-primary/80 transition-all"
             data-umami-event="leaderboard-beatsaver-button"
           >
             <h3 className="text-foreground mb-1 line-clamp-2 text-xl leading-tight font-bold">
@@ -57,7 +57,7 @@ export default function LeaderboardInfo({
                 <span
                   className={cn(
                     "font-medium",
-                    beatSaver ? "transition-all duration-200 hover:brightness-[66%]" : ""
+                    beatSaver ? "hover:text-primary/80 transition-all" : ""
                   )}
                 >
                   {leaderboard.levelAuthorName}
