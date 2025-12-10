@@ -22,22 +22,22 @@ export type Difficulty = {
   color: string;
 
   /**
-   * The sort order of the difficulty
+   * The difficulty id of the difficulty
    */
-  sortOrder: number;
+  diffId: number;
 };
 
 const difficulties: Difficulty[] = [
-  { id: "easy", name: "Easy", color: "#3cb371", sortOrder: 1 },
-  { id: "normal", name: "Normal", color: "#59b0f4", sortOrder: 3 },
-  { id: "hard", name: "Hard", color: "#FF6347", sortOrder: 5 },
-  { id: "expert", name: "Expert", color: "#bf2a42", sortOrder: 7 },
+  { id: "easy", name: "Easy", color: "#3cb371", diffId: 1 },
+  { id: "normal", name: "Normal", color: "#59b0f4", diffId: 3 },
+  { id: "hard", name: "Hard", color: "#FF6347", diffId: 5 },
+  { id: "expert", name: "Expert", color: "#bf2a42", diffId: 7 },
   {
     id: "expertplus",
     name: "ExpertPlus",
     alternativeName: "Expert+",
     color: "#8f48db",
-    sortOrder: 9,
+    diffId: 9,
   },
 ];
 

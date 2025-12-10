@@ -277,7 +277,7 @@ export class ScoreSaberService extends ApiService {
     );
     const response = await this.fetch<ScoreSaberLeaderboardToken>(
       LOOKUP_LEADERBOARD_BY_HASH_ENDPOINT.replace(":query", hash)
-        .replace(":difficulty", getDifficulty(difficulty).sort + "")
+        .replace(":difficulty", getDifficulty(difficulty).diffId + "")
         .replace(":gameMode", gameMode)
     );
     if (response === undefined) {
