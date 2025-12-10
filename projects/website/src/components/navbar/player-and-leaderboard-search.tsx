@@ -2,6 +2,7 @@
 
 import { cn } from "@/common/utils";
 import Avatar from "@/components/avatar";
+import PlayerSearchResultItem from "@/components/player/player-search-result-item";
 import { useSearch } from "@/components/providers/search-provider";
 import { Input } from "@/components/ui/input";
 import SearchDialog from "@/components/ui/search-dialog";
@@ -13,12 +14,11 @@ import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { truncateText } from "@ssr/common/string-utils";
 import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
 import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/leaderboard";
-import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
 import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { useDebounce } from "@uidotdev/usehooks";
-import { UserSearch } from "lucide-react";
+import { LoaderCircle, Music, SearchX, Users, UserSearch } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -125,61 +125,57 @@ export default function PlayerAndLeaderboardSearch() {
         placeholder="Enter a player or leaderboard name..."
       >
         {isLoading ? (
-          <div className="text-muted-foreground py-6 text-center text-sm">Loading...</div>
+          <div className="flex flex-col items-center justify-center py-12">
+            <LoaderCircle className="text-muted-foreground mb-3 size-6 animate-spin" />
+            <p className="text-muted-foreground text-sm">Searching...</p>
+          </div>
         ) : !results?.players.length && !results?.leaderboards.length ? (
-          <div className="py-6 text-center text-sm text-red-500">No results were found.</div>
+          <div className="flex flex-col items-center justify-center px-4 py-12">
+            <SearchX className="text-muted-foreground/50 mb-3 size-10" />
+            <p className="text-muted-foreground mb-1 text-sm font-medium">No results found</p>
+            <p className="text-muted-foreground/70 text-center text-xs">
+              {query.length > 0
+                ? "Try adjusting your search query"
+                : "Start typing to search for players or leaderboards"}
+            </p>
+          </div>
         ) : (
           <>
             {results.players.length > 0 && (
-              <div className="px-2 pt-2.5">
-                <div className="text-muted-foreground text-xs font-medium">Player Results</div>
-                <div className="mt-1 space-y-1">
+              <div className="p-2">
+                <div className="text-muted-foreground mb-1.5 flex items-center gap-2 px-2 py-2 text-xs font-semibold tracking-wider uppercase">
+                  <Users className="size-3.5" />
+                  <span>Players</span>
+                  <span className="text-muted-foreground/50">({results.players.length})</span>
+                </div>
+                <div className="space-y-0.5">
                   {results.players.map(player => (
-                    <div
+                    <PlayerSearchResultItem
                       key={player.id}
-                      className="hover:bg-accent hover:text-accent-foreground flex cursor-pointer items-center gap-3 rounded-md px-2 py-2 text-sm transition-colors"
+                      player={player}
                       onClick={() => {
                         closeSearch();
                         router.push(`/player/${player.id}`);
                       }}
-                    >
-                      <Avatar
-                        src={player.avatar}
-                        className="h-8 w-8"
-                        alt={`${player.name}'s Profile Picture`}
-                      />
-                      <div className="flex flex-col">
-                        <p className="font-medium">{truncateText(player.name, 32)}</p>
-                        <p className="text-muted-foreground text-xs">
-                          {player.inactive ? (
-                            <span className="text-inactive-account">Inactive Account</span>
-                          ) : (
-                            <span className="text-gray-400">
-                              #{formatNumberWithCommas(player.rank)}
-                            </span>
-                          )}
-                          {!player.inactive && (
-                            <>
-                              {" "}
-                              - <span className="text-pp">{formatPp(player.pp)}pp</span>
-                            </>
-                          )}
-                        </p>
-                      </div>
-                    </div>
+                      showInactiveLabel
+                    />
                   ))}
                 </div>
               </div>
             )}
 
             {results.leaderboards.length > 0 && (
-              <div className="px-2 pt-2.5">
-                <div className="text-muted-foreground text-xs font-medium">Leaderboard Results</div>
-                <div className="mt-1 space-y-1">
+              <div className="p-2">
+                <div className="text-muted-foreground mb-1.5 flex items-center gap-2 px-2 py-2 text-xs font-semibold tracking-wider uppercase">
+                  <Music className="size-3.5" />
+                  <span>Leaderboards</span>
+                  <span className="text-muted-foreground/50">({results.leaderboards.length})</span>
+                </div>
+                <div className="space-y-0.5">
                   {results.leaderboards.map(leaderboard => (
                     <div
                       key={leaderboard.id}
-                      className="hover:bg-accent hover:text-accent-foreground flex cursor-pointer items-center gap-3 rounded-md px-2 py-2 text-sm transition-colors"
+                      className="group hover:bg-accent flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all duration-200 hover:shadow-sm active:scale-[0.98]"
                       onClick={() => {
                         closeSearch();
                         router.push(`/leaderboard/${leaderboard.id}`);
@@ -187,37 +183,45 @@ export default function PlayerAndLeaderboardSearch() {
                     >
                       <Avatar
                         src={leaderboard.songArt}
-                        className="h-8 w-8"
+                        className="ring-border group-hover:ring-primary/20 h-9 w-9 shrink-0 ring-2 transition-all duration-200"
                         alt={leaderboard.songName}
                       />
-                      <div className="flex flex-col">
-                        <p className="font-medium">{truncateText(leaderboard.fullName, 48)}</p>
-                        <div className="text-muted-foreground text-xs">
-                          <div className="flex items-center gap-2">
+                      <div className="min-w-0 flex-1 flex-col">
+                        <p className="group-hover:text-foreground leading-tight font-medium transition-colors duration-200">
+                          {truncateText(leaderboard.fullName, 48)}
+                        </p>
+                        <div className="text-muted-foreground mt-0.5 text-xs leading-tight">
+                          <div className="flex flex-wrap items-center gap-1.5">
                             <span
+                              className="font-medium"
                               style={{
                                 color:
                                   getDifficulty(leaderboard.difficulty.difficulty).color + "f0",
                               }}
                             >
                               {getDifficultyName(leaderboard.difficulty.difficulty)}
-                            </span>{" "}
+                            </span>
                             {leaderboard.ranked && (
                               <>
-                                -{" "}
+                                <span className="text-muted-foreground/60">·</span>
                                 <div className="text-pp flex items-center gap-1">
-                                  <span>{leaderboard.stars.toFixed(2)}</span>
-                                  <StarIcon className="w-4" />
+                                  <span className="font-medium">
+                                    {leaderboard.stars.toFixed(2)}
+                                  </span>
+                                  <StarIcon className="w-3.5" />
                                 </div>
                               </>
                             )}
                             {leaderboard.qualified && (
                               <>
-                                - <span className="text-gray-400">Qualified</span>
+                                <span className="text-muted-foreground/60">·</span>
+                                <span className="text-muted-foreground/80">Qualified</span>
                               </>
                             )}
                           </div>
-                          <div className="text-gray-300">Mapper: {leaderboard.levelAuthorName}</div>
+                          <div className="text-muted-foreground/70 mt-0.5">
+                            Mapper: {leaderboard.levelAuthorName}
+                          </div>
                         </div>
                       </div>
                     </div>

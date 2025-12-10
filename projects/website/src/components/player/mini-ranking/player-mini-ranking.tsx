@@ -1,6 +1,7 @@
 import { cn } from "@/common/utils";
 import { PlayerInfo } from "@/components/player/player-info";
 import SimpleLink from "@/components/simple-link";
+import { Spinner } from "@/components/spinner";
 import { useIsMobile } from "@/contexts/viewport-context";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
@@ -10,7 +11,6 @@ import { useQuery } from "@tanstack/react-query";
 import { ReactElement } from "react";
 import Card from "../../card";
 import CountryFlag from "../../ui/country-flag";
-import { Spinner } from "@/components/spinner";
 
 type Variants = {
   [key: string]: {

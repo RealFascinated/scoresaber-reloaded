@@ -21,13 +21,13 @@ import {
 } from "@ssr/common/utils/time-utils";
 import { isProduction } from "@ssr/common/utils/utils";
 import { EmbedBuilder } from "discord.js";
+import { redisClient } from "../..";
 import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
 import { logNewTrackedPlayer } from "../../common/embds";
 import { PlayerScoreSeedQueue } from "../../queue/impl/player-score-seed-queue";
 import { QueueId, QueueManager } from "../../queue/queue-manager";
 import { accountCreationLock } from "./player-core.service";
 import { PlayerService } from "./player.service";
-import { redisClient } from "../..";
 
 const INACTIVE_RANK = 999_999;
 

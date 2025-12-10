@@ -1,14 +1,11 @@
-import Avatar from "@/components/avatar";
 import SearchDialog from "@/components/ui/search-dialog";
-import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
-import { DetailType } from "@ssr/common/detail-type";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import { truncateText } from "@ssr/common/string-utils";
-import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { useDebounce } from "@uidotdev/usehooks";
+import { LoaderCircle, SearchX, Users } from "lucide-react";
 import { useState } from "react";
+import PlayerSearchResultItem from "./player-search-result-item";
 
 type PlayerSearchProps = {
   /**
@@ -49,23 +46,17 @@ const PlayerSearch = ({
       if (debouncedQuery.length <= 3 && debouncedQuery.length !== 0) {
         return { players: [] };
       }
-      const playerResults = await ApiServiceRegistry.getInstance()
-        .getScoreSaberService()
-        .searchPlayers(debouncedQuery);
+      const playerResults = await ssrApi.searchPlayers(debouncedQuery);
       return playerResults || { players: [] };
     },
     refetchInterval: false,
     enabled: isOpen,
   });
 
-  const handlePlayerSelect = async (playerToken: any) => {
-    // Convert player token to full player object
-    const fullPlayer = await ssrApi.getScoreSaberPlayer(playerToken.id, DetailType.FULL);
-    if (fullPlayer) {
-      onPlayerSelect(fullPlayer);
-      onOpenChange(false);
-      setQuery("");
-    }
+  const handlePlayerSelect = (player: ScoreSaberPlayer) => {
+    onPlayerSelect(player);
+    onOpenChange(false);
+    setQuery("");
   };
 
   return (
@@ -78,46 +69,39 @@ const PlayerSearch = ({
       placeholder={placeholder}
     >
       {isLoading ? (
-        <div className="text-muted-foreground py-(--spacing-2xl) text-center text-sm">
-          Loading...
+        <div className="flex flex-col items-center justify-center py-12">
+          <LoaderCircle className="text-muted-foreground mb-3 size-6 animate-spin" />
+          <p className="text-muted-foreground text-sm">Searching players...</p>
         </div>
       ) : !results?.players.length ? (
-        <div className="py-(--spacing-2xl) text-center text-sm text-red-500">
-          No results were found.
+        <div className="flex flex-col items-center justify-center px-4 py-12">
+          <SearchX className="text-muted-foreground/50 mb-3 size-10" />
+          <p className="text-muted-foreground mb-1 text-sm font-medium">No players found</p>
+          <p className="text-muted-foreground/70 text-center text-xs">
+            {query.length > 0
+              ? "Try adjusting your search query"
+              : "Start typing to search for players"}
+          </p>
         </div>
       ) : (
-        <div className="p-(--spacing-sm)">
-          <div className="text-muted-foreground px-(--spacing-sm) py-(--spacing-xs) text-xs font-medium">
-            Player Results
+        <div className="p-2">
+          <div className="text-muted-foreground mb-1.5 flex items-center gap-2 px-2 py-2 text-xs font-semibold tracking-wider uppercase">
+            <Users className="size-3.5" />
+            <span>Players</span>
+            <span className="text-muted-foreground/50">
+              ({results.players.filter(player => !excludePlayerIds.includes(player.id)).length})
+            </span>
           </div>
-          <div className="mt-1 space-y-1">
+          <div className="space-y-0.5">
             {results.players
               .filter(player => !excludePlayerIds.includes(player.id))
               .sort((a, b) => a.rank - b.rank)
               .map(player => (
-                <div
+                <PlayerSearchResultItem
                   key={player.id}
-                  className="hover:bg-accent hover:text-accent-foreground flex cursor-pointer items-center gap-(--spacing-lg) rounded-(--radius-md) px-(--spacing-sm) py-(--spacing-sm) text-sm transition-colors duration-200"
+                  player={player}
                   onClick={() => handlePlayerSelect(player)}
-                >
-                  <Avatar
-                    src={player.profilePicture!}
-                    className="h-8 w-8"
-                    alt={`${player.name}'s Profile Picture`}
-                  />
-                  <div className="flex flex-col">
-                    <p className="font-medium">{truncateText(player.name, 32)}</p>
-                    <p className="text-muted-foreground text-xs">
-                      <span className="text-gray-400">#{formatNumberWithCommas(player.rank)}</span>
-                      {!player.inactive && (
-                        <>
-                          {" "}
-                          - <span className="text-pp">{formatPp(player.pp)}pp</span>
-                        </>
-                      )}
-                    </p>
-                  </div>
-                </div>
+                />
               ))}
           </div>
         </div>

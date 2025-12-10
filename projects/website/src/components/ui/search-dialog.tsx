@@ -49,25 +49,26 @@ const SearchDialog = ({
 }: SearchDialogProps) => {
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="gap-0 overflow-hidden p-0">
+      <DialogContent className="gap-0 overflow-hidden p-0 sm:max-w-[600px]">
         <DialogTitle className="sr-only">Search</DialogTitle>
-        <div className="relative">
-          <div className="border-border flex h-12 items-center gap-(--spacing-sm) border-b px-(--spacing-xl)">
-            <Search className="size-4 shrink-0 opacity-50" />
+        <div className="border-border/50 bg-muted/30 relative border-b">
+          <div className="flex h-14 items-center gap-3 px-4">
+            <Search className="text-muted-foreground size-4 shrink-0" />
             <input
-              className="placeholder:text-muted-foreground flex h-2 w-full rounded-md bg-transparent py-3 text-sm outline-none disabled:cursor-not-allowed disabled:opacity-50"
+              className="placeholder:text-muted-foreground focus:text-foreground flex h-full w-full rounded-md bg-transparent py-3 text-sm transition-colors outline-none disabled:cursor-not-allowed disabled:opacity-50"
               placeholder={placeholder}
               maxLength={maxLength}
               value={query}
               onChange={e => onQueryChange(e.target.value)}
+              autoFocus
             />
             {isLoading && (
-              <LoaderCircle className="absolute inset-y-0 right-12 size-5 h-full animate-spin opacity-85" />
+              <LoaderCircle className="text-muted-foreground size-4 shrink-0 animate-spin" />
             )}
           </div>
         </div>
 
-        <div className="[&::-webkit-scrollbar-thumb]:bg-muted max-h-[400px] overflow-x-hidden overflow-y-auto pb-2 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-transparent">
+        <div className="[&::-webkit-scrollbar-thumb]:bg-muted/50 max-h-[500px] overflow-x-hidden overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-transparent">
           {children}
         </div>
       </DialogContent>
