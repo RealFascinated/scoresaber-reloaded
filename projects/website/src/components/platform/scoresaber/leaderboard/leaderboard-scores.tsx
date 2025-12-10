@@ -131,7 +131,7 @@ export default function LeaderboardScores({
         <ScoreModeSwitcher initialMode={mode} onModeChange={handleModeChange} />
 
         {showDifficulties && (
-          <div className="bg-background/80 border-border flex flex-wrap justify-center gap-1.5 rounded-lg border p-1.5 shadow-sm">
+          <div className="flex flex-wrap justify-center gap-(--spacing-sm)">
             {leaderboard.difficulties.map((difficultyData, index) => (
               <DifficultyButton
                 key={index}

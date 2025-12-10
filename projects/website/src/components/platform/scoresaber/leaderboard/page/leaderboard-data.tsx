@@ -5,12 +5,10 @@ import ScoreSaberLeaderboardFilters from "@/components/platform/scoresaber/leade
 import { LeaderboardInfo } from "@/components/platform/scoresaber/leaderboard/leaderboard-info";
 import LeaderboardScores from "@/components/platform/scoresaber/leaderboard/leaderboard-scores";
 import { LeaderboardFilterProvider } from "@/components/providers/leaderboard/leaderboard-filter-provider";
-import HmdUsageChart from "@/components/score/charts/hmd-usage-chart";
 import { ScoreModeEnum } from "@/components/score/score-mode-switcher";
 import { useIsMobile } from "@/contexts/viewport-context";
 import { DetailType } from "@ssr/common/detail-type";
 import { LeaderboardResponse } from "@ssr/common/response/leaderboard-response";
-import { PlaysByHmdResponse } from "@ssr/common/response/plays-by-hmd-response";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
@@ -54,11 +52,6 @@ export function ScoreSaberLeaderboardData({
     placeholderData: data => data ?? initialLeaderboard,
   });
 
-  const { data: hmdData } = useQuery({
-    queryKey: ["leaderboard-hmd", currentLeaderboardId],
-    queryFn: () => ssrApi.getPlaysByHmdForLeaderboard(currentLeaderboardId.toString()),
-  });
-
   const leaderboardResponse = data ?? initialLeaderboard;
   const { leaderboard, beatsaver } = leaderboardResponse;
 
@@ -78,9 +71,6 @@ export function ScoreSaberLeaderboardData({
                 {leaderboard.stars > 0 && leaderboard.maxScore > 0 && (
                   <LeaderboardPpChart leaderboard={leaderboard} />
                 )}
-
-                {/* Headset Distribution */}
-                {hmdData && <LeaderboardHmdPlays hmdUsage={hmdData} />}
               </div>
             </div>
           )}
@@ -114,9 +104,6 @@ export function ScoreSaberLeaderboardData({
             {/* Desktop Charts Grid */}
             {!isMobile && (
               <div className="grid grid-cols-1 gap-2 lg:grid-cols-2">
-                {/* Headset Distribution */}
-                {hmdData && <LeaderboardHmdPlays hmdUsage={hmdData} />}
-
                 {/* PP Chart */}
                 {leaderboard.stars > 0 && leaderboard.maxScore > 0 && (
                   <LeaderboardPpChart leaderboard={leaderboard} />
@@ -136,21 +123,5 @@ export function ScoreSaberLeaderboardData({
         </div>
       </div>
     </LeaderboardFilterProvider>
-  );
-}
-
-function LeaderboardHmdPlays({ hmdUsage }: { hmdUsage: PlaysByHmdResponse }) {
-  return (
-    <Card className="flex w-full flex-col gap-4">
-      <div className="space-y-1">
-        <h3 className="text-foreground text-lg font-semibold">Headset Distribution</h3>
-        <p className="text-muted-foreground text-sm">
-          Shows the distribution of headsets used on this leaderboard.
-        </p>
-      </div>
-      <div className="flex w-full items-center justify-center">
-        <HmdUsageChart hmdUsage={hmdUsage} />
-      </div>
-    </Card>
   );
 }

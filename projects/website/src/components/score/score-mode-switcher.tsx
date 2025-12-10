@@ -48,7 +48,7 @@ export default function ScoreModeSwitcher({ initialMode, onModeChange }: ScoreMo
   );
 
   return (
-    <div className="bg-background/80 border-border flex flex-wrap items-center justify-center gap-2 rounded-(--radius-lg) border p-1.5 shadow-sm">
+    <div className="flex flex-wrap items-center justify-center gap-(--spacing-sm)">
       {scoreModes.map(mode => (
         <Button
           key={mode.name}
@@ -56,7 +56,7 @@ export default function ScoreModeSwitcher({ initialMode, onModeChange }: ScoreMo
           className={cn(
             "flex h-9 w-28 items-center gap-2 transition-transform duration-200",
             selectedMode === mode.id
-              ? "bg-primary text-primary-foreground shadow-sm"
+              ? "bg-accent-deep text-primary-foreground"
               : "hover:bg-accent/80"
           )}
           onClick={() => {
@@ -66,14 +66,7 @@ export default function ScoreModeSwitcher({ initialMode, onModeChange }: ScoreMo
             }
           }}
         >
-          <span
-            className={cn(
-              "transition-transform duration-200",
-              selectedMode === mode.id ? "scale-110" : "scale-100"
-            )}
-          >
-            {mode.icon}
-          </span>
+          <span>{mode.icon}</span>
           <span className="font-medium">{mode.name}</span>
         </Button>
       ))}
