@@ -105,7 +105,7 @@ export function HoverDropdown({
 
       {open && (
         <div
-          className={`bg-card text-card-foreground absolute top-full z-50 overflow-hidden rounded-(--radius-xl) shadow-lg backdrop-blur-sm transition-all duration-200 ${
+          className={`bg-card border-border text-card-foreground absolute top-full z-50 overflow-hidden rounded-xl border shadow-lg backdrop-blur-sm transition-all duration-200 ${
             isMobile
               ? "right-0 left-auto max-w-[calc(100vw-1rem)]" // Better positioning on mobile
               : "left-0"
