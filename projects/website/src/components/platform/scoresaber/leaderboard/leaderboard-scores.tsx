@@ -2,7 +2,7 @@
 
 import { cn } from "@/common/utils";
 import { useLeaderboardFilter } from "@/components/providers/leaderboard/leaderboard-filter-provider";
-import ScoreMode, { ScoreModeEnum } from "@/components/score/score-mode";
+import ScoreModeSwitcher, { ScoreModeEnum } from "@/components/score/score-mode-switcher";
 import { EmptyState } from "@/components/ui/empty-state";
 import { useIsMobile } from "@/contexts/viewport-context";
 import { useLeaderboardScores } from "@/hooks/score/use-leaderboard-scores";
@@ -17,6 +17,8 @@ import { DifficultyButton } from "../../../leaderboard/button/difficulty-button"
 import SimplePagination from "../../../simple-pagination";
 import ScoreSaberLeaderboardScore from "../score/leaderboard-score";
 import ScoreDropdown from "../score/score-dropdown";
+import useDatabase from "@/hooks/use-database";
+import { useLiveQuery } from "dexie-react-hooks";
 
 function getScoreId(score: ScoreSaberScore) {
   return score.scoreId + "-" + score.timestamp;
@@ -32,6 +34,7 @@ export default function LeaderboardScores({
   leaderboardChanged,
   disableUrlChanging,
   highlightedPlayerId,
+  historyPlayerId,
 }: {
   initialPage?: number;
   initialCategory?: ScoreModeEnum;
@@ -42,9 +45,12 @@ export default function LeaderboardScores({
   leaderboardChanged?: (id: number) => void;
   disableUrlChanging?: boolean;
   highlightedPlayerId?: string;
+  historyPlayerId?: string;
 }) {
   const { changePageUrl } = usePageNavigation();
   const isMobile = useIsMobile();
+  const database = useDatabase();
+  const mainPlayerId = useLiveQuery(() => database.getMainPlayerId());
   const filter = useLeaderboardFilter();
 
   const [mode, setMode] = useState<ScoreModeEnum>(initialCategory);
@@ -57,7 +63,13 @@ export default function LeaderboardScores({
     isError,
     isLoading,
     isRefetching,
-  } = useLeaderboardScores(leaderboardId, page, mode, filter.country);
+  } = useLeaderboardScores(
+    leaderboardId,
+    historyPlayerId ?? mainPlayerId ?? "",
+    page,
+    mode,
+    filter.country
+  );
 
   const handleLeaderboardChange = useCallback(
     (id: number) => {
@@ -116,10 +128,10 @@ export default function LeaderboardScores({
           isLeaderboardPage && "sm:justify-between"
         )}
       >
-        <ScoreMode initialMode={mode} onModeChange={handleModeChange} />
+        <ScoreModeSwitcher initialMode={mode} onModeChange={handleModeChange} />
 
         {showDifficulties && (
-          <div className="bg-background/80 border-border/50 flex flex-wrap justify-center gap-1.5 rounded-(--radius-lg) border p-1.5 shadow-sm">
+          <div className="bg-background/80 border-border/50 flex flex-wrap justify-center gap-1.5 rounded-lg border p-1.5 shadow-sm">
             {leaderboard.difficulties.map((difficultyData, index) => (
               <DifficultyButton
                 key={index}
@@ -149,7 +161,7 @@ export default function LeaderboardScores({
 
       {scores && scores.items.length > 0 && (
         <>
-          <div className="border-border/50 bg-background/50 relative overflow-x-auto rounded-(--radius-lg) border shadow-sm">
+          <div className="border-border/50 bg-background/50 relative overflow-x-auto rounded-lg border shadow-sm">
             <table className="table w-full min-w-[800px] table-auto border-spacing-0 text-left text-sm">
               <thead>
                 <tr className="border-border/50 bg-muted/30 border-b">

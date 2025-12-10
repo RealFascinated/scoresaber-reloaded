@@ -6,7 +6,7 @@ import { LeaderboardInfo } from "@/components/platform/scoresaber/leaderboard/le
 import LeaderboardScores from "@/components/platform/scoresaber/leaderboard/leaderboard-scores";
 import { LeaderboardFilterProvider } from "@/components/providers/leaderboard/leaderboard-filter-provider";
 import HmdUsageChart from "@/components/score/charts/hmd-usage-chart";
-import { ScoreModeEnum } from "@/components/score/score-mode";
+import { ScoreModeEnum } from "@/components/score/score-mode-switcher";
 import { useIsMobile } from "@/contexts/viewport-context";
 import { DetailType } from "@ssr/common/detail-type";
 import { LeaderboardResponse } from "@ssr/common/response/leaderboard-response";

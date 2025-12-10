@@ -1,4 +1,4 @@
-import { ScoreModeEnum } from "@/components/score/score-mode";
+import { ScoreModeEnum } from "@/components/score/score-mode-switcher";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { Page, Pagination } from "@ssr/common/pagination";
@@ -9,6 +9,7 @@ import useDatabase from "../use-database";
 
 export const useLeaderboardScores = (
   leaderboardId: number,
+  historyPlayerId: string,
   page: number,
   mode: ScoreModeEnum,
   country?: string
@@ -18,7 +19,16 @@ export const useLeaderboardScores = (
   const mainPlayer = useLiveQuery(() => database.getMainPlayer());
 
   return useQuery<Page<ScoreSaberScore> | undefined>({
-    queryKey: ["leaderboardScores", leaderboardId, page, mode, country, friendIds, mainPlayer],
+    queryKey: [
+      "leaderboardScores",
+      leaderboardId,
+      historyPlayerId,
+      page,
+      mode,
+      country,
+      friendIds,
+      mainPlayer,
+    ],
     queryFn: async () => {
       switch (mode) {
         case ScoreModeEnum.Global: {
@@ -58,7 +68,7 @@ export const useLeaderboardScores = (
         case ScoreModeEnum.History: {
           if (mainPlayer) {
             const response = await ssrApi.fetchPlayerScoresHistory(
-              mainPlayer.id,
+              historyPlayerId,
               leaderboardId.toString(),
               page
             );

@@ -89,6 +89,7 @@ export default function ScoreDropdown({
                   initialPage={scoresPage}
                   leaderboard={leaderboard}
                   highlightedPlayerId={highlightedPlayerId}
+                  historyPlayerId={score.playerId}
                   disableUrlChanging
                 />
               </Card>

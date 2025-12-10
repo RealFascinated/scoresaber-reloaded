@@ -1,6 +1,6 @@
 import NotFound from "@/components/not-found";
 import { ScoreSaberLeaderboardData } from "@/components/platform/scoresaber/leaderboard/page/leaderboard-data";
-import { ScoreModeEnum } from "@/components/score/score-mode";
+import { ScoreModeEnum } from "@/components/score/score-mode-switcher";
 import { DetailType } from "@ssr/common/detail-type";
 import { env } from "@ssr/common/env";
 import { LeaderboardResponse } from "@ssr/common/response/leaderboard-response";
