@@ -16,35 +16,35 @@ export class PlayerSearchService {
    * @returns the players that match the query
    */
   public static async searchPlayers(query: string): Promise<ScoreSaberPlayer[]> {
-    const [scoreSaberResponse, foundPlayers] = await Promise.all([
-      ApiServiceRegistry.getInstance().getScoreSaberService().searchPlayers(query),
-      query.length > 0
-        ? PlayerModel.find({
-            name: { $regex: query, $options: "i" },
+    if (query.length == 0) {
+      const players = await ApiServiceRegistry.getInstance()
+        .getScoreSaberService()
+        .searchPlayers(query);
+      return await Promise.all(
+        players?.players?.map(async player =>
+          ScoreSaberService.getPlayer(player.id, DetailType.BASIC, player, {
+            setInactivesRank: false,
+            setMedalsRank: false,
           })
-            .select(["_id", "name"])
-            .limit(10)
-            .lean()
-        : [],
-    ]);
+        ) ?? []
+      );
+    }
 
-    const scoreSaberPlayerTokens = scoreSaberResponse?.players;
-
-    // Merge their ids
-    const playerIds = foundPlayers.map(player => player._id);
-    playerIds.push(...(scoreSaberPlayerTokens?.map(token => token.id) ?? []));
-
-    // Deduplicate the player ids
-    const uniquePlayerIds = [...new Set(playerIds)];
+    const players = await PlayerModel.find({
+      name: { $regex: query, $options: "i" },
+    })
+      .select(["_id", "name"])
+      .limit(20)
+      .lean();
 
     // Get players from ScoreSaber
     return (
       await Promise.all(
-        uniquePlayerIds.map(id =>
+        players.map(async player =>
           ScoreSaberService.getPlayer(
-            id,
+            player._id,
             DetailType.BASIC,
-            scoreSaberPlayerTokens?.find(token => token.id === id),
+            await ScoreSaberService.getCachedPlayer(player._id, false),
             { setInactivesRank: false, setMedalsRank: false }
           )
         )
