@@ -146,11 +146,9 @@ function HandAccuracy({ scoreStats, hand }: { scoreStats: ScoreStatsToken; hand:
 
 export default function ScoreAccuracyStats({ scoreStats }: ScoreAccuracyStatProps) {
   return (
-    <div className="flex flex-col gap-2">
-      <div className="flex items-center justify-center gap-8">
-        <HandAccuracy scoreStats={scoreStats.current} hand="left" />
-        <HandAccuracy scoreStats={scoreStats.current} hand="right" />
-      </div>
+    <div className="flex w-full items-center justify-between">
+      <HandAccuracy scoreStats={scoreStats.current} hand="left" />
+      <HandAccuracy scoreStats={scoreStats.current} hand="right" />
     </div>
   );
 }
