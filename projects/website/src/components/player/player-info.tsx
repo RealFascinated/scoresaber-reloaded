@@ -39,7 +39,8 @@ export function PlayerInfo({
     <div className="flex items-center gap-2">
       <Avatar
         src={getScoreSaberAvatar(player)}
-        className="pointer-events-none h-[24px] w-[24px]"
+        className="pointer-events-none"
+        size={26}
         alt={`${player.name}'s Profile Picture`}
       />
       {!hideCountryFlag && <CountryFlag code={player.country!} size={10} />}

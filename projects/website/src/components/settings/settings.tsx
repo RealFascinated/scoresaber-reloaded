@@ -52,12 +52,12 @@ export default function Settings() {
   return (
     <Card className="relative flex h-full flex-col">
       {/* Header */}
-      <div className="border-border border-b px-(--spacing-2xl) py-(--spacing-2xl)">
-        <h1 className="text-2xl font-semibold">Settings</h1>
+      <div className="border-border border-b px-(--spacing-lg) py-(--spacing-lg) md:px-(--spacing-xl) md:py-(--spacing-xl)">
+        <h1 className="text-xl font-semibold md:text-2xl">Settings</h1>
       </div>
 
       {/* Mobile Category Selector */}
-      <div className="border-border border-b p-(--spacing-xl) md:hidden">
+      <div className="border-border border-b p-(--spacing-lg) md:hidden">
         <Select
           value={selectedCategory.name}
           onValueChange={value => {
@@ -88,7 +88,7 @@ export default function Settings() {
 
       <div className="flex min-h-0 flex-1 overflow-hidden">
         {/* Sidebar */}
-        <div className="border-border hidden w-44 border-r md:block">
+        <div className="border-border hidden w-40 border-r md:block lg:w-44">
           <div className="flex h-full flex-col gap-(--spacing-xs) p-(--spacing-lg)">
             {categories.map(category => (
               <button
@@ -110,14 +110,16 @@ export default function Settings() {
 
         {/* Content */}
         <div className="flex-1 overflow-x-hidden overflow-y-auto">
-          <div className="p-(--spacing-2xl)">{selectedCategory.component}</div>
+          <div className="p-(--spacing-lg) md:p-(--spacing-xl) lg:p-(--spacing-2xl)">
+            {selectedCategory.component}
+          </div>
         </div>
       </div>
 
       {/* Footer */}
-      <div className="border-border flex items-center justify-end gap-(--spacing-lg) border-t px-(--spacing-2xl) py-(--spacing-xl)">
+      <div className="border-border flex flex-wrap items-center justify-end gap-(--spacing-sm) border-t px-(--spacing-lg) py-(--spacing-lg) md:gap-(--spacing-lg) md:px-(--spacing-xl) md:py-(--spacing-xl)">
         <ResetSettings />
-        <div className="bg-border/50 h-5 w-px" />
+        <div className="bg-border/50 hidden h-5 w-px md:block" />
         <ExportSettings />
         <ImportSettings />
       </div>

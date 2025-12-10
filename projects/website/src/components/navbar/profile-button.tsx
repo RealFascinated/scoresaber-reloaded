@@ -7,6 +7,7 @@ import useDatabase from "@/hooks/use-database";
 import { truncateText } from "@ssr/common/string-utils";
 import { useLiveQuery } from "dexie-react-hooks";
 import SimpleLink from "../simple-link";
+import { ConfirmationDialog } from "../ui/confirmation-dialog";
 import {
   DropdownButton,
   DropdownGroup,
@@ -14,10 +15,9 @@ import {
   DropdownSeparator,
   HoverDropdown,
 } from "../ui/hover-dropdown";
-import { ConfirmationDialog } from "../ui/confirmation-dialog";
 
 export default function ProfileButton() {
-  const isMobile = useIsMobile();
+  const isMobile = useIsMobile("2xl");
   const database: Database = useDatabase();
   const mainPlayer = useLiveQuery(() => database.getMainPlayer());
   if (mainPlayer == undefined) {
@@ -32,17 +32,17 @@ export default function ProfileButton() {
     <div className="flex h-full items-center gap-2.5">
       <Avatar
         src={mainPlayer.avatar}
-        className="ring-border/30 h-7 w-7 rounded-full ring-1"
+        className="border-border size-7 rounded-full border"
         alt={`${mainPlayer.name}'s Profile Picture`}
       />
-      <p className="text-primary hover:text-primary/80 hidden text-sm font-medium transition-colors duration-200 lg:block">
+      <p className="text-primary hover:text-primary/80 hidden text-sm font-medium transition-colors duration-200 md:block">
         {truncateText(mainPlayer.name, 20)}
       </p>
     </div>
   );
 
   const trigger = (
-    <div className="flex h-full items-center gap-2 p-2">
+    <div className="flex h-full items-center gap-(--spacing-sm)">
       {isMobile ? (
         buttonContent
       ) : (

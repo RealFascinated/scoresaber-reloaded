@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, useState } from "react";
+import { cloneElement, isValidElement, ReactElement, ReactNode, useState } from "react";
 import { Button } from "./button";
 import {
   Dialog,
@@ -59,18 +59,36 @@ export function ConfirmationDialog({
     }
   };
 
+  const handleTriggerClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    setOpen(true);
+  };
+
+  const handleTriggerMouseDown = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  };
+
+  const triggerElement = isValidElement(trigger) ? (
+    cloneElement(
+      trigger as ReactElement<{
+        onClick?: (e: React.MouseEvent) => void;
+        onMouseDown?: (e: React.MouseEvent) => void;
+      }>,
+      {
+        onClick: handleTriggerClick,
+        onMouseDown: handleTriggerMouseDown,
+      }
+    )
+  ) : (
+    <div onClick={handleTriggerClick} onMouseDown={handleTriggerMouseDown} className="inline-block">
+      {trigger}
+    </div>
+  );
+
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <div
-        onClick={e => {
-          e.stopPropagation(); // Prevent event bubbling to parent components
-          e.preventDefault(); // Prevent default behavior
-          setOpen(true);
-        }}
-        onMouseDown={e => e.stopPropagation()} // Prevent mousedown events too
-      >
-        {trigger}
-      </div>
+      {triggerElement}
       <DialogContent
         className="sm:max-w-md"
         onClick={e => e.stopPropagation()} // Prevent backdrop clicks from closing parent modals

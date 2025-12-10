@@ -1,12 +1,9 @@
 "use client";
 
-import { cn } from "@/common/utils";
 import Avatar from "@/components/avatar";
 import PlayerSearchResultItem from "@/components/player/player-search-result-item";
 import { useSearch } from "@/components/providers/search-provider";
-import { Input } from "@/components/ui/input";
 import SearchDialog from "@/components/ui/search-dialog";
-import { useIsMobile } from "@/contexts/viewport-context";
 import { StarIcon } from "@heroicons/react/24/solid";
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
@@ -24,11 +21,10 @@ import { useEffect, useState } from "react";
 
 export default function PlayerAndLeaderboardSearch() {
   const router = useRouter();
-  const isMobile = useIsMobile();
   const { isOpen, openSearch, closeSearch } = useSearch();
 
   const [query, setQuery] = useState<string>("");
-  const debouncedQuery = useDebounce(query, 500);
+  const debouncedQuery = useDebounce(query, 200);
 
   const { data: results, isLoading } = useQuery({
     queryKey: ["playerAndLeaderboardSearch", debouncedQuery],
@@ -87,30 +83,17 @@ export default function PlayerAndLeaderboardSearch() {
   return (
     <>
       <div
-        className="group relative flex cursor-pointer transition-all duration-200 select-none hover:shadow-md"
+        className="group bg-card border-border hover:border-primary/50 relative flex h-9 w-full cursor-pointer items-center justify-center rounded-xl border px-2 backdrop-blur-sm transition-all duration-200 select-none sm:min-w-16 xl:w-64 xl:justify-start xl:px-(--spacing-sm)"
         onClick={openSearch}
       >
-        <div
-          className={cn(
-            "absolute top-1/2 z-10 -translate-y-1/2 transition-colors duration-200",
-            isMobile ? "inset-x-0 flex justify-center" : "left-3"
-          )}
-        >
-          <UserSearch className="text-muted-foreground group-hover:text-foreground size-5 transition-colors duration-200" />
-        </div>
+        <UserSearch className="text-muted-foreground size-5" />
 
-        <Input
-          className="group-hover:border-ssr/75 bg-background/50 border-border focus:border-ssr/75 h-9 w-full cursor-pointer rounded-xl px-0 pl-10 backdrop-blur-sm transition-all duration-200 group-hover:shadow-sm"
-          type="search"
-          name="search"
-          placeholder={isMobile ? undefined : "Query..."}
-          readOnly
-        />
+        <p className="text-muted-foreground group-hover:text-foreground hidden flex-1 px-(--spacing-sm) text-sm transition-colors duration-200 xl:block">
+          Query...
+        </p>
 
-        <div
-          className={cn("absolute top-1/2 right-3 hidden -translate-y-1/2", !isMobile && "flex")}
-        >
-          <kbd className="bg-muted/80 text-muted-foreground border-border pointer-events-none inline-flex h-6 items-center gap-1 rounded-md border px-2 text-xs font-medium shadow-sm select-none">
+        <div className="hidden shrink-0 xl:flex">
+          <kbd className="bg-muted/80 text-muted-foreground pointer-events-none inline-flex h-6 items-center gap-1 rounded-md px-2 text-xs font-medium shadow-sm select-none">
             <span className="text-xs">⌘</span>K
           </kbd>
         </div>

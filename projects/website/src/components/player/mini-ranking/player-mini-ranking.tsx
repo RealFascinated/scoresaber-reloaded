@@ -24,7 +24,7 @@ const miniVariants: Variants = {
   },
   Country: {
     icon: (player: ScoreSaberPlayer) => {
-      return <CountryFlag code={player.country} size={16} />;
+      return <CountryFlag code={player.country} size={16} className="rounded-full" />;
     },
   },
 };
@@ -100,12 +100,19 @@ function PlayerMiniRanking({
                 style={{
                   gridTemplateColumns: isMobile
                     ? `${playerRankWidth}px 48px 1fr auto`
-                    : `${playerRankWidth}px 48px 0.73fr 1fr`,
+                    : `${playerRankWidth}px 48px 0.69fr 1fr`,
                 }}
                 data-umami-event="player-mini-ranking-button"
               >
                 {/* Rank */}
-                <p className="text-muted-foreground font-mono">#{formatNumberWithCommas(rank)}</p>
+                <p
+                  className={cn(
+                    "text-muted-foreground",
+                    playerRanking.id === player.id ? "font-bold" : ""
+                  )}
+                >
+                  #{formatNumberWithCommas(rank)}
+                </p>
 
                 {/* Player */}
                 <div className="flex items-center">
@@ -126,13 +133,18 @@ function PlayerMiniRanking({
                     gridTemplateColumns: isMobile ? "1fr" : "1fr 0.3fr",
                   }}
                 >
-                  <p className="text-pp text-right font-mono sm:text-left">
+                  <p
+                    className={cn(
+                      "text-pp text-right sm:text-left",
+                      playerRanking.id === player.id ? "font-bold" : ""
+                    )}
+                  >
                     {formatPp(playerRanking.pp)}pp
                   </p>
                   {playerRanking.id !== player.id && !isMobile && (
                     <p
                       className={cn(
-                        "font-mono",
+                        "text-xs",
                         ppDifference > 0 ? "text-green-400" : "text-red-400"
                       )}
                     >

@@ -2,8 +2,20 @@
 
 import { createContext, ReactNode, useContext, useEffect, useLayoutEffect, useState } from "react";
 
+// Tailwind breakpoints matching the project's theme
+export const Breakpoint = {
+  xxs: 320,
+  xs: 475,
+  sm: 640,
+  md: 768,
+  lg: 1024,
+  xl: 1280,
+  "2xl": 1536,
+} as const;
+
+export type BreakpointKey = keyof typeof Breakpoint;
+
 interface ViewportContextType {
-  isMobile: boolean;
   width: number;
   height: number;
 }
@@ -16,11 +28,10 @@ export function ViewportProvider({ children }: { children: ReactNode }) {
   useIsomorphicLayoutEffect(() => {
     const handleResize = () => {
       const dimensions = getWindowDimensions();
-      const next = {
+      const next: ViewportContextType = {
         width: dimensions.width,
         height: dimensions.height,
-        isMobile: checkMobile(),
-      } as ViewportContextType;
+      };
 
       if (process.env.NODE_ENV !== "production") {
         console.debug("[Viewport] resize", next);
@@ -47,13 +58,12 @@ const useIsomorphicLayoutEffect = typeof window !== "undefined" ? useLayoutEffec
 
 function getInitialViewport(): ViewportContextType {
   if (typeof window === "undefined") {
-    return { width: 0, height: 0, isMobile: false };
+    return { width: 0, height: 0 };
   }
   const { innerWidth, innerHeight } = window;
   return {
     width: innerWidth,
     height: innerHeight,
-    isMobile: checkMobile(),
   };
 }
 
@@ -65,28 +75,6 @@ function getWindowDimensions() {
   return { width, height };
 }
 
-function checkMobile(): boolean {
-  if (typeof window === "undefined") return false;
-
-  // 1. Use the high-level hint if the browser provides it *and it's true*.
-  // If it's false we still want to let viewport width affect the outcome for
-  // responsive desktop layouts.
-  const uaData = (navigator as any).userAgentData;
-  if (uaData?.mobile === true) {
-    return true;
-  }
-
-  // 2. Fall back to user-agent sniffing.
-  const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-    navigator.userAgent
-  );
-
-  // 3. Finally, rely on viewport width.
-  const isSmallViewport = window.innerWidth <= 767;
-
-  return isMobileUA || isSmallViewport;
-}
-
 export function useViewport() {
   const context = useContext(ViewportContext);
   if (!context) {
@@ -95,9 +83,10 @@ export function useViewport() {
   return context;
 }
 
-export function useIsMobile() {
-  const { isMobile } = useViewport();
-  return isMobile;
+export function useIsMobile(breakpoint?: BreakpointKey): boolean {
+  const { width } = useViewport();
+  breakpoint = breakpoint ?? "md";
+  return width <= Breakpoint[breakpoint];
 }
 
 export function useWindowDimensions() {

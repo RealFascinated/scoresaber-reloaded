@@ -1,9 +1,9 @@
 "use client";
 
+import { cn } from "@/common/utils";
 import { useIsMobile } from "@/contexts/viewport-context";
 import React, { cloneElement, isValidElement, ReactNode, useEffect, useRef, useState } from "react";
 import SimpleLink from "../simple-link";
-import { cn } from "@/common/utils";
 
 interface HoverDropdownProps {
   trigger: ReactNode;
@@ -94,6 +94,24 @@ export function HoverDropdown({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isMobile, open]);
 
+  // Handle scroll to close dropdown
+  useEffect(() => {
+    if (!open) return;
+
+    const handleScroll = () => {
+      closeDropdown();
+    };
+
+    // Listen to scroll events on window and all scrollable containers
+    window.addEventListener("scroll", handleScroll, true);
+    document.addEventListener("scroll", handleScroll, true);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll, true);
+      document.removeEventListener("scroll", handleScroll, true);
+    };
+  }, [open]);
+
   return (
     <div
       ref={dropdownRef}
@@ -167,7 +185,7 @@ export function DropdownItem({
 
   return (
     <div
-      className={`${styleClass} relative flex cursor-pointer items-center gap-(--spacing-sm) rounded-(--radius-md) px-(--spacing-sm) py-(--spacing-xs) text-sm font-medium transition-colors duration-200 outline-none select-none data-disabled:pointer-events-none data-disabled:opacity-50 ${
+      className={`${styleClass} relative flex cursor-pointer items-center gap-(--spacing-sm) rounded-md px-(--spacing-sm) py-(--spacing-xs) text-sm font-medium transition-colors duration-200 outline-none select-none data-disabled:pointer-events-none data-disabled:opacity-50 ${
         disabled ? "pointer-events-none opacity-50" : ""
       } ${className}`}
       onClick={handleClick}

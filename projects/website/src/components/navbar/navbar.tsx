@@ -66,10 +66,10 @@ export default function Navbar() {
       )}
     >
       {/* Left */}
-      <div className="flex items-center gap-1 md:gap-3">
+      <div className="flex items-center gap-(--spacing-sm) md:gap-3">
         {/* Branding */}
         <SimpleLink
-          className="flex items-center gap-1 hover:opacity-80 md:gap-2"
+          className="flex items-center gap-(--spacing-sm) hover:opacity-80 md:gap-2"
           href="/"
           draggable={false}
         >
@@ -84,17 +84,13 @@ export default function Navbar() {
         </SimpleLink>
 
         {/* Links */}
-        <div className="ml-2 flex items-center gap-0.5 md:ml-4 md:gap-1">
-          {links.map(link => link)}
-        </div>
+        <div className="flex items-center gap-0.5 md:gap-1">{links.map(link => link)}</div>
       </div>
 
       {/* Right */}
-      <div className="flex items-center gap-0.5">
+      <div className="flex items-center gap-(--spacing-sm)">
         {/* Search */}
-        <div className="w-11 md:w-64">
-          <PlayerAndLeaderboardSearch />
-        </div>
+        <PlayerAndLeaderboardSearch />
 
         {/* Profile Section */}
         {hasMainPlayer && <ProfileButton />}

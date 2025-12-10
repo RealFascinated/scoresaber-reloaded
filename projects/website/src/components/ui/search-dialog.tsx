@@ -53,7 +53,11 @@ const SearchDialog = ({
         <DialogTitle className="sr-only">Search</DialogTitle>
         <div className="border-border/50 bg-muted/30 relative border-b">
           <div className="flex h-14 items-center gap-3 px-4">
-            <Search className="text-muted-foreground size-4 shrink-0" />
+            {isLoading ? (
+              <LoaderCircle className="text-muted-foreground size-4 shrink-0 animate-spin" />
+            ) : (
+              <Search className="text-muted-foreground size-4 shrink-0" />
+            )}
             <input
               className="placeholder:text-muted-foreground focus:text-foreground flex h-full w-full rounded-md bg-transparent py-3 text-sm transition-colors outline-none disabled:cursor-not-allowed disabled:opacity-50"
               placeholder={placeholder}
@@ -62,9 +66,6 @@ const SearchDialog = ({
               onChange={e => onQueryChange(e.target.value)}
               autoFocus
             />
-            {isLoading && (
-              <LoaderCircle className="text-muted-foreground size-4 shrink-0 animate-spin" />
-            )}
           </div>
         </div>
 
