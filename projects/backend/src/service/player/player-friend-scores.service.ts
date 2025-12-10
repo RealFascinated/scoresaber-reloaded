@@ -7,6 +7,7 @@ import {
 } from "@ssr/common/model/score/impl/scoresaber-score";
 import { Page, Pagination } from "@ssr/common/pagination";
 import { PlayerScore } from "@ssr/common/score/player-score";
+import { processInBatches } from "@ssr/common/utils/batch-utils";
 import { scoreToObject } from "../../common/score/score.util";
 import { LeaderboardService } from "../leaderboard/leaderboard.service";
 import { ScoreService } from "../score/score.service";
@@ -55,32 +56,21 @@ export class PlayerFriendScoresService {
     }
 
     // Process scores in parallel with batching
-    const batchSize = 10;
-    const scoreBatches = [];
-    for (let i = 0; i < friendScores.length; i += batchSize) {
-      scoreBatches.push(friendScores.slice(i, i + batchSize));
-    }
-
-    const processedBatches = await Promise.all(
-      scoreBatches.map(async batch => {
-        const batchPromises = batch.map(async friendScore => {
-          return ScoreService.insertScoreData(
-            scoreToObject(friendScore),
-            leaderboard.leaderboard,
-            undefined,
-            {
-              insertAdditionalData: true,
-              insertPreviousScore: false,
-              insertPlayerInfo: true,
-              removeScoreWeightAndRank: true,
-            }
-          );
-        });
-        return Promise.all(batchPromises);
-      })
-    );
-
-    const scores = processedBatches.flat() as ScoreSaberScore[];
+    const scores: ScoreSaberScore[] = [];
+    await processInBatches(friendScores, 10, async friendScore => {
+      const processedScore = await ScoreService.insertScoreData(
+        scoreToObject(friendScore),
+        leaderboard.leaderboard,
+        undefined,
+        {
+          insertAdditionalData: true,
+          insertPreviousScore: false,
+          insertPlayerInfo: true,
+          removeScoreWeightAndRank: true,
+        }
+      );
+      scores.push(processedScore);
+    });
     return new Pagination<ScoreSaberScore>()
       .setItems(scores.sort((a, b) => b.score - a.score))
       .setTotalItems(scores.length)

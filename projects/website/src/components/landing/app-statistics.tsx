@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "@/common/utils";
 import { env } from "@ssr/common/env";
 import { AppStatistics } from "@ssr/common/types/backend/app-statistics";
 import Request from "@ssr/common/utils/request";
@@ -15,12 +16,12 @@ interface StatCardProps {
 
 function StatCard({ icon: Icon, title, value }: StatCardProps) {
   return (
-    <div className="border-primary/20 from-accent-deep/50 to-accent/50 group relative overflow-hidden rounded-xl border bg-gradient-to-br p-4">
+    <div className="border-primary/20 from-accent-deep/50 to-accent/50 group relative overflow-hidden rounded-xl border bg-linear-to-br p-(--spacing-lg)">
       <div className="relative">
-        <div className="bg-primary/10 text-primary mb-3 inline-flex rounded-lg p-2">
+        <div className="bg-primary/10 text-primary mb-(--spacing-md) inline-flex rounded-lg p-(--spacing-sm)">
           <Icon className="size-5" />
         </div>
-        <h3 className="text-muted-foreground mb-1 text-sm font-semibold">{title}</h3>
+        <h3 className="text-muted-foreground mb-(--spacing-xs) text-sm font-semibold">{title}</h3>
         <p className="text-2xl font-bold">
           <CountUp end={value} duration={1.2} enableScrollSpy scrollSpyOnce preserveValue={true} />
         </p>
@@ -29,7 +30,7 @@ function StatCard({ icon: Icon, title, value }: StatCardProps) {
   );
 }
 
-export function AppStats() {
+export function AppStats({ className }: { className?: string }) {
   const { data: statistics } = useQuery({
     queryKey: ["app-statistics"],
     queryFn: () => Request.get<AppStatistics>(env.NEXT_PUBLIC_API_URL + "/statistics"),
@@ -41,7 +42,7 @@ export function AppStats() {
   }
 
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-6">
+    <div className={className}>
       <StatCard icon={User} title="Active Players" value={statistics.activePlayers} />
       <StatCard icon={UserX} title="Inactive Players" value={statistics.inactivePlayers} />
       <StatCard icon={User} title="Leaderboards" value={statistics.leaderboardCount} />

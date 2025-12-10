@@ -300,7 +300,7 @@ export class LeaderboardRankingService {
     Logger.info(`Processing ${leaderboards.length} leaderboards...`);
 
     // Process leaderboards in batches of 100
-    const batches = [];
+    const batches: ScoreSaberLeaderboard[][] = [];
     for (let i = 0; i < leaderboards.length; i += BATCH_SIZE) {
       batches.push(leaderboards.slice(i, i + BATCH_SIZE));
     }
@@ -317,7 +317,10 @@ export class LeaderboardRankingService {
 
       // Prepare bulk operations for leaderboards
       const leaderboardBulkOps = [];
-      const leaderboardsToHandle = [];
+      const leaderboardsToHandle: Array<{
+        leaderboard: ScoreSaberLeaderboard;
+        update: LeaderboardUpdate;
+      }> = [];
 
       // Process batch to categorize leaderboards
       for (const leaderboard of batch) {

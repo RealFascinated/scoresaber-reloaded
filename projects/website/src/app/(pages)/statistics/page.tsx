@@ -71,7 +71,7 @@ export default async function StatisticsPage() {
               </div>
 
               <div className="border-border/20 border-t pt-(--spacing-lg)">
-                <AppStats />
+                <AppStats className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-6" />
               </div>
 
               <div className="pt-(--spacing-lg)">
