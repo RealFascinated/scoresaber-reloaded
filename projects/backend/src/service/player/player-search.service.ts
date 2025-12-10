@@ -23,6 +23,7 @@ export class PlayerSearchService {
             name: { $regex: query, $options: "i" },
           })
             .select(["_id", "name"])
+            .limit(10)
             .lean()
         : [],
     ]);
