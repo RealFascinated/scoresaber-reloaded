@@ -44,7 +44,10 @@ export class PlayerSearchService {
           ScoreSaberService.getPlayer(
             player._id,
             DetailType.BASIC,
-            await ScoreSaberService.getCachedPlayer(player._id, false),
+            await ScoreSaberService.getCachedPlayer(
+              player._id,
+              player.inactive /* Use the long cache time for inactive players */
+            ),
             { setInactivesRank: false, setMedalsRank: false }
           )
         )
