@@ -5,7 +5,6 @@ import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 import { Metadata } from "@ssr/common/types/metadata";
 import BeatLeaderService from "../beatleader.service";
 import { LeaderboardService } from "../leaderboard/leaderboard.service";
-import { PlayerService } from "../player/player.service";
 import { ScoreService } from "./score.service";
 
 export class LeaderboardScoresService {
@@ -21,7 +20,7 @@ export class LeaderboardScoresService {
     leaderboardId: string,
     page: number,
     country?: string
-  ): Promise<LeaderboardScoresResponse<unknown, unknown> | undefined> {
+  ): Promise<LeaderboardScoresResponse | undefined> {
     let metadata: Metadata = new Metadata(0, 0, 0, 0); // Default values
 
     const leaderboardResponse = await LeaderboardService.getLeaderboard(leaderboardId);
@@ -50,8 +49,6 @@ export class LeaderboardScoresService {
       if (score == undefined) {
         return undefined;
       }
-
-      PlayerService.trackPlayer(score.playerId);
 
       // Track missing scores
       if (!(await ScoreService.scoreExistsByScoreId(score.scoreId))) {

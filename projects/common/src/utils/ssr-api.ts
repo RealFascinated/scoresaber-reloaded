@@ -300,8 +300,8 @@ class SSRApi {
    * @param page the page to lookup
    * @param country the country to get scores in
    */
-  async fetchLeaderboardScores<S, L>(leaderboardId: string, page: number, country?: string) {
-    return await this.get<LeaderboardScoresResponse<S, L>>(
+  async fetchLeaderboardScores(leaderboardId: string, page: number, country?: string) {
+    return await this.get<LeaderboardScoresResponse>(
       `${env.NEXT_PUBLIC_API_URL}/scores/leaderboard/${leaderboardId}/${page}`,
       {
         searchParams: {

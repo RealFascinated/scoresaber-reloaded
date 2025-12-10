@@ -168,7 +168,7 @@ export default function LeaderboardScores({
                   <th className="text-foreground/90 px-3 py-3 font-semibold">Rank</th>
                   <th className="text-foreground/90 px-3 py-3 font-semibold">Player</th>
                   <th className="text-foreground/90 px-3 py-3 text-center font-semibold">
-                    Time Set
+                    Date Set
                   </th>
                   <th className="text-foreground/90 px-3 py-3 text-center font-semibold">
                     Accuracy
@@ -178,12 +178,8 @@ export default function LeaderboardScores({
                     {leaderboard.stars > 0 ? "PP" : "Score"}
                   </th>
                   <th className="text-foreground/90 px-3 py-3 text-center font-semibold">Mods</th>
-                  <th className="text-foreground/90 w-[28px] px-3 py-3 text-center font-semibold">
-                    Replay
-                  </th>
-                  <th className="text-foreground/90 w-[32px] px-3 py-3 text-center font-semibold">
-                    Details
-                  </th>
+                  <th></th>
+                  <th></th>
                 </tr>
               </thead>
               <tbody className="divide-border/50 divide-y">
@@ -201,6 +197,7 @@ export default function LeaderboardScores({
                         highlightedPlayerId={highlightedPlayerId}
                         showDropdown
                         onDropdownToggle={() => handleDropdownToggle(playerScore)}
+                        isDropdownExpanded={expandedScoreId === getScoreId(playerScore)}
                       />
                     </tr>
 

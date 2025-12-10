@@ -32,10 +32,11 @@ export const useLeaderboardScores = (
     queryFn: async () => {
       switch (mode) {
         case ScoreModeEnum.Global: {
-          const response = await ssrApi.fetchLeaderboardScores<
-            ScoreSaberScore,
-            ScoreSaberLeaderboard
-          >(leaderboardId.toString(), page, country);
+          const response = await ssrApi.fetchLeaderboardScores(
+            leaderboardId.toString(),
+            page,
+            country
+          );
 
           if (response) {
             return new Page(response.scores, response.metadata);

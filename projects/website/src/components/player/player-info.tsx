@@ -6,6 +6,8 @@ import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player
 import { getScoreSaberAvatar, getScoreSaberRoles } from "@ssr/common/utils/scoresaber.util";
 import { clsx } from "clsx";
 import SimpleLink from "../simple-link";
+import HMDIcon from "../hmd-icon";
+import { getHMDInfo, HMD } from "@ssr/common/hmds";
 
 export function PlayerInfo({
   player,
@@ -13,21 +15,18 @@ export function PlayerInfo({
   className,
   hideCountryFlag,
   useLink,
-  hoverBrightness = true,
 }: {
   player: ScoreSaberPlayerToken | ScoreSaberLeaderboardPlayerInfoToken | ScoreSaberPlayer;
   highlightedPlayerId?: string;
   className?: string;
   hideCountryFlag?: boolean;
   useLink?: boolean;
-  hoverBrightness?: boolean;
 }) {
   const name = (
     <p
       className={clsx(
-        hoverBrightness ? "hover:text-primary/80 transition-all" : "",
         player.id == highlightedPlayerId ? "font-bold" : "",
-        `group-hover:text-primary w-[140px] overflow-hidden text-left break-all text-ellipsis whitespace-nowrap transition-all duration-200`,
+        "w-[140px] overflow-hidden text-left break-all text-ellipsis whitespace-nowrap transition-all duration-200",
         className
       )}
       style={{
