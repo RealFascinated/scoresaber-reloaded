@@ -28,7 +28,7 @@ import {
   Trophy,
   Zap,
 } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import ScoresCard from "../../score/scores-card";
 import SimplePagination from "../../simple-pagination";
 import {
@@ -68,9 +68,9 @@ type Props = {
 
 export default function AccSaberPlayerScores({ player, sort, page, type, order }: Props) {
   const isMobile = useIsMobile();
-  const { animateLeft, animateRight } = usePageTransition();
-  const [currentPage, setCurrentPage] = useState(page);
+  const { animateLeft, animateRight, setIsLoading } = usePageTransition();
 
+  const [currentPage, setCurrentPage] = useState(page);
   const [currentSort, setCurrentSort] = useState<AccSaberScoreSort>(sort);
   const [currentType, setCurrentType] = useState<AccSaberScoreType>(type);
   const [currentOrder, setCurrentOrder] = useState<AccSaberScoreOrder>(order);
@@ -106,6 +106,10 @@ export default function AccSaberPlayerScores({ player, sort, page, type, order }
         }),
     placeholderData: prev => prev,
   });
+
+  useEffect(() => {
+    setIsLoading(isLoading);
+  }, [isLoading, setIsLoading]);
 
   const handleSortChange = useCallback(
     async (newSort: typeof sort, defaultOrder: AccSaberScoreOrder) => {

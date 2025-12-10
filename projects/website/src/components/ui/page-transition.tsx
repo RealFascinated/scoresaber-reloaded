@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useRef } from "react";
 import { usePageTransition } from "./page-transition-context";
 
 const containerVariants = {
@@ -41,12 +41,21 @@ export default function PageTransition({
   children: ReactNode;
   className?: string;
 }) {
-  const { currentPage, direction } = usePageTransition();
+  const { currentPage, direction, isLoading } = usePageTransition();
+  const stablePageRef = useRef(currentPage);
+
+  useEffect(() => {
+    if (!isLoading) {
+      stablePageRef.current = currentPage;
+    }
+  }, [isLoading, currentPage]);
+
+  const transitionKey = isLoading ? stablePageRef.current : currentPage;
 
   return (
     <AnimatePresence mode="wait">
       <motion.div
-        key={currentPage}
+        key={transitionKey}
         className={className}
         custom={direction}
         variants={containerVariants}

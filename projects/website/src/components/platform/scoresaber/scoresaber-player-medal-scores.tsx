@@ -16,7 +16,7 @@ import { useDocumentTitle } from "@uidotdev/usehooks";
 import { ssrConfig } from "config";
 import { useLiveQuery } from "dexie-react-hooks";
 import { SearchIcon } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import ScoresCard from "../../score/scores-card";
 import SimplePagination from "../../simple-pagination";
 import { EmptyState } from "../../ui/empty-state";
@@ -34,7 +34,7 @@ export default function ScoreSaberPlayerMedalScores({
   // Hooks
   const isMobile = useIsMobile();
   const database = useDatabase();
-  const { animateLeft, animateRight } = usePageTransition();
+  const { animateLeft, animateRight, setIsLoading } = usePageTransition();
 
   // Database queries
   const mainPlayerId = useLiveQuery(() => database.getMainPlayerId());
@@ -61,6 +61,10 @@ export default function ScoreSaberPlayerMedalScores({
     placeholderData: prev => prev,
   });
 
+  useEffect(() => {
+    setIsLoading(isLoading);
+  }, [isLoading, setIsLoading]);
+
   const handlePageChange = useCallback(
     (newPage: number) => {
       if (newPage > currentPage) {
@@ -78,65 +82,56 @@ export default function ScoreSaberPlayerMedalScores({
     segments: [{ value: "medals" }, { value: currentPage, condition: currentPage !== 1 }],
   });
 
-  // Render helpers
-  const renderScoresList = () => {
-    if (isLoading && scores === undefined) {
-      return (
-        <div className="flex w-full justify-center py-8">
-          <Spinner size="md" className="text-primary" />
-        </div>
-      );
-    }
-
-    if (!scores) return null;
-
-    return (
-      <>
-        <div className="text-center">
-          {isError ||
-            (scores.items.length === 0 && (
-              <EmptyState
-                title="No Results"
-                description={
-                  currentPage === 1
-                    ? `${capitalizeFirstLetter(player.name)} has not earned any medals :(`
-                    : `No medals were found on this page`
-                }
-                icon={<SearchIcon />}
-              />
-            ))}
-        </div>
-
-        <PageTransition className="divide-border grid min-w-full grid-cols-1 divide-y">
-          {scores.items.map(score => (
-            <ScoreSaberScoreDisplay
-              key={score.score.scoreId}
-              score={score.score}
-              leaderboard={score.leaderboard}
-              beatSaverMap={score.beatSaver}
-              settings={{
-                defaultLeaderboardScoresPage: 1,
-                medalsMode: true,
-              }}
-            />
-          ))}
-        </PageTransition>
-
-        <SimplePagination
-          mobilePagination={isMobile}
-          page={currentPage}
-          totalItems={scores.metadata.totalItems}
-          itemsPerPage={scores.metadata.itemsPerPage}
-          loadingPage={isLoading || isRefetching ? currentPage : undefined}
-          onPageChange={handlePageChange}
-        />
-      </>
-    );
-  };
-
   return (
     <ScoresCard>
-      <div className="flex w-full flex-col gap-2">{renderScoresList()}</div>
+      <div className="flex w-full flex-col gap-2">
+        {isLoading && scores === undefined ? (
+          <div className="flex w-full justify-center py-8">
+            <Spinner size="md" className="text-primary" />
+          </div>
+        ) : !scores ? null : (
+          <>
+            <div className="text-center">
+              {isError ||
+                (scores.items.length === 0 && (
+                  <EmptyState
+                    title="No Results"
+                    description={
+                      currentPage === 1
+                        ? `${capitalizeFirstLetter(player.name)} has not earned any medals :(`
+                        : `No medals were found on this page`
+                    }
+                    icon={<SearchIcon />}
+                  />
+                ))}
+            </div>
+
+            <PageTransition className="divide-border grid min-w-full grid-cols-1 divide-y">
+              {scores.items.map(score => (
+                <ScoreSaberScoreDisplay
+                  key={score.score.scoreId}
+                  score={score.score}
+                  leaderboard={score.leaderboard}
+                  beatSaverMap={score.beatSaver}
+                  settings={{
+                    defaultLeaderboardScoresPage: 1,
+                    medalsMode: true,
+                  }}
+                />
+              ))}
+            </PageTransition>
+
+            <SimplePagination
+              mobilePagination={isMobile}
+              page={currentPage}
+              totalItems={scores.metadata.totalItems}
+              itemsPerPage={scores.metadata.itemsPerPage}
+              loadingPage={isLoading || isRefetching ? currentPage : undefined}
+              onPageChange={handlePageChange}
+            />
+          </>
+        )}
+      </div>
     </ScoresCard>
   );
 }

@@ -1,6 +1,14 @@
 "use client";
 
-import { createContext, ReactNode, useCallback, useContext, useRef, useState } from "react";
+import {
+  createContext,
+  ReactNode,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 interface PageTransitionContextType {
   currentPage: number;
@@ -8,12 +16,15 @@ interface PageTransitionContextType {
   animateLeft: () => void;
   animateRight: () => void;
   reset: () => void;
+  setIsLoading: (isLoading: boolean) => void;
+  isLoading: boolean;
 }
 
 const PageTransitionContext = createContext<PageTransitionContextType | null>(null);
 
 export function PageTransitionProvider({ children }: { children: ReactNode }) {
   const [[currentPage, direction], setPage] = useState([1, 0]);
+  const [isLoading, setIsLoading] = useState(false);
   const prevPageRef = useRef(1);
 
   const animateLeft = useCallback(() => {
@@ -39,6 +50,8 @@ export function PageTransitionProvider({ children }: { children: ReactNode }) {
         animateLeft,
         animateRight,
         reset,
+        setIsLoading,
+        isLoading,
       }}
     >
       {children}

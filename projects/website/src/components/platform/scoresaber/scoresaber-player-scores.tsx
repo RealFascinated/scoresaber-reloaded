@@ -39,7 +39,7 @@ import {
   Trophy,
   XIcon,
 } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import ScoresCard from "../../score/scores-card";
 import SimplePagination from "../../simple-pagination";
 import {
@@ -157,7 +157,7 @@ export default function ScoreSaberPlayerScores({
   // Hooks
   const isMobile = useIsMobile();
   const database = useDatabase();
-  const { animateLeft, animateRight } = usePageTransition();
+  const { animateLeft, animateRight, setIsLoading } = usePageTransition();
 
   // Database queries
   const mainPlayerId = useLiveQuery(() => database.getMainPlayerId());
@@ -241,6 +241,10 @@ export default function ScoreSaberPlayerScores({
     },
     placeholderData: prev => prev,
   });
+
+  useEffect(() => {
+    setIsLoading(isLoading);
+  }, [isLoading, setIsLoading]);
 
   // Event handlers
   const handleSortChange = useCallback(
