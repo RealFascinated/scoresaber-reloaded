@@ -24,7 +24,7 @@ const miniVariants: Variants = {
   },
   Country: {
     icon: (player: ScoreSaberPlayer) => {
-      return <CountryFlag code={player.country} size={15} />;
+      return <CountryFlag code={player.country} size={16} />;
     },
   },
 };
@@ -80,7 +80,7 @@ function PlayerMiniRanking({
   return (
     <Card className="sticky flex w-full flex-col gap-(--spacing-md) text-xs select-none sm:w-[400px] sm:text-sm">
       {/* Header */}
-      <div className="flex items-center gap-2">
+      <div className="flex h-[24px] items-center gap-2">
         {icon}
         <p className="font-bold">{type} Ranking</p>
       </div>
