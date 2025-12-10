@@ -19,7 +19,7 @@ export default function LeaderboardInfo({
       <Image
         src={leaderboard.songArt}
         alt={`${leaderboard.songName} Cover Image`}
-        className="h-20 w-20 rounded-lg object-cover shadow-sm"
+        className="h-20 w-20 rounded-lg object-cover"
         width={80}
         height={80}
       />

@@ -66,10 +66,10 @@ export default function Navbar() {
       )}
     >
       {/* Left */}
-      <div className="flex items-center gap-1 transition-all md:gap-3">
+      <div className="flex items-center gap-1 md:gap-3">
         {/* Branding */}
         <SimpleLink
-          className="flex items-center gap-1 transition-all hover:opacity-80 md:gap-2"
+          className="flex items-center gap-1 hover:opacity-80 md:gap-2"
           href="/"
           draggable={false}
         >
@@ -84,13 +84,13 @@ export default function Navbar() {
         </SimpleLink>
 
         {/* Links */}
-        <div className="ml-2 flex items-center gap-0.5 transition-all md:ml-4 md:gap-1">
+        <div className="ml-2 flex items-center gap-0.5 md:ml-4 md:gap-1">
           {links.map(link => link)}
         </div>
       </div>
 
       {/* Right */}
-      <div className="flex items-center gap-0.5 transition-all">
+      <div className="flex items-center gap-0.5">
         {/* Search */}
         <div className="w-11 md:w-64">
           <PlayerAndLeaderboardSearch />
@@ -135,7 +135,7 @@ function SimpleNavLink({
 
       {/* Active indicator */}
       {isActive && (
-        <div className="bg-primary absolute -bottom-0.5 left-1/2 h-0.5 w-4 -translate-x-1/2 rounded-full transition-all duration-200" />
+        <div className="bg-primary absolute -bottom-0.5 left-1/2 h-0.5 w-4 -translate-x-1/2 rounded-full transition-opacity duration-200" />
       )}
     </SimpleLink>
   );

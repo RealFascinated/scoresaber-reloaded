@@ -76,7 +76,7 @@ export default function ScoreDropdown({
           {/* Leaderboard Scores */}
           {showLeaderboardScores && (
             <div className="mt-2">
-              <Card className="bg-background/90 rounded-xl p-4 shadow-xl">
+              <Card className="bg-background/90 rounded-xl p-4">
                 <LeaderboardScores
                   initialPage={scoresPage}
                   leaderboard={leaderboard}

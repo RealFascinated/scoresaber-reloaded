@@ -93,7 +93,7 @@ export default function ScoreSongInfo({
                 <FallbackLink
                   href={mappersProfile}
                   className={cn(
-                    mappersProfile && "hover:text-primary/80 text-xs leading-none transition-all"
+                    mappersProfile && "hover:text-primary/80 text-xs leading-none transition-colors"
                   )}
                 >
                   {level.authorName}

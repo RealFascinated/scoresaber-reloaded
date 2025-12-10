@@ -45,7 +45,7 @@ export function LeaderboardStarChangeHistory({
       <LeaderboardStarChangeHistoryButton onClick={() => setOpen(!open)} isOpen={open} />
       {open && (
         <div className="animate-in slide-in-from-top-2 w-full duration-200">
-          <div className="border-border bg-background/80 rounded-(--radius-lg) border p-(--spacing-sm) shadow-sm">
+          <div className="border-border bg-background/80 rounded-(--radius-lg) border p-(--spacing-sm)">
             <div className="space-y-1">
               {starChangeHistory.map((starChange, index) => {
                 const isCurrent = index === 0;

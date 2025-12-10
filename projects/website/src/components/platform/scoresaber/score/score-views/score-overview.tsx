@@ -66,7 +66,7 @@ export function ScoreOverview({ score, scoreStats, leaderboard }: ScoreOverviewP
             />
           )}
         </div>
-        <div className="bg-accent-deep border-border flex w-full flex-col items-center justify-center gap-3 rounded-md border p-3 backdrop-blur-sm">
+        <div className="bg-accent-deep border-border flex w-full flex-col items-center justify-center gap-3 rounded-md border p-3">
           <ScoreAccuracyStats scoreStats={scoreStats} />
         </div>
       </Card>
