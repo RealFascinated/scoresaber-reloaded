@@ -207,7 +207,11 @@ export default function PlayerViews({ player }: { player: ScoreSaberPlayer }) {
   return (
     <div className="flex flex-col gap-2">
       <ViewSelector views={views} selectedView={selectedView} onViewSelect={handleViewSelect} />
-      {statisticHistory ? selectedView.chart(player, statisticHistory) : <Loading />}
+      {statisticHistory && historyMode !== undefined ? (
+        selectedView.chart(player, statisticHistory)
+      ) : (
+        <Loading />
+      )}
       {selectedView.showDateRangeSelector && (
         <div className="flex items-center justify-between gap-2">
           <DateRangeSelector daysAgo={daysAgo} onDaysChange={handleDaysChange} />
