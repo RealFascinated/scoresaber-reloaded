@@ -33,7 +33,7 @@
     "eslint": "^9.39.1",
     "globals": "^16.5.0",
     "minio": "^8.0.6",
-    "mongoose": "^8.20.2",
+    "mongoose": "^9.0.1",
     "pidusage": "^4.0.1",
     "systeminformation": "^5.27.13"
   },
