@@ -157,8 +157,13 @@ export default function PlayerAndLeaderboardSearch() {
                             <span className="text-gray-400">
                               #{formatNumberWithCommas(player.rank)}
                             </span>
-                          )}{" "}
-                          - <span className="text-pp">{formatPp(player.pp)}pp</span>
+                          )}
+                          {!player.inactive && (
+                            <>
+                              {" "}
+                              - <span className="text-pp">{formatPp(player.pp)}pp</span>
+                            </>
+                          )}
                         </p>
                       </div>
                     </div>

@@ -108,8 +108,13 @@ const PlayerSearch = ({
                   <div className="flex flex-col">
                     <p className="font-medium">{truncateText(player.name, 32)}</p>
                     <p className="text-muted-foreground text-xs">
-                      <span className="text-gray-400">#{formatNumberWithCommas(player.rank)}</span>{" "}
-                      - <span className="text-pp">{formatPp(player.pp)}pp</span>
+                      <span className="text-gray-400">#{formatNumberWithCommas(player.rank)}</span>
+                      {!player.inactive && (
+                        <>
+                          {" "}
+                          - <span className="text-pp">{formatPp(player.pp)}pp</span>
+                        </>
+                      )}
                     </p>
                   </div>
                 </div>
