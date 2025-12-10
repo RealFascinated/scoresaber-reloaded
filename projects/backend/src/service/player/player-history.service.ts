@@ -27,6 +27,7 @@ import { PlayerScoreSeedQueue } from "../../queue/impl/player-score-seed-queue";
 import { QueueId, QueueManager } from "../../queue/queue-manager";
 import { accountCreationLock } from "./player-core.service";
 import { PlayerService } from "./player.service";
+import { redisClient } from "../..";
 
 const INACTIVE_RANK = 999_999;
 
@@ -164,7 +165,13 @@ export class PlayerHistoryService {
 
         // Update the player's inactive status if it has changed
         foundPlayer.inactive !== player.inactive &&
-          PlayerModel.updateOne({ _id: foundPlayer._id }, { $set: { inactive: player.inactive } }),
+          (async () => {
+            PlayerModel.updateOne(
+              { _id: foundPlayer._id },
+              { $set: { inactive: player.inactive } }
+            );
+            redisClient.del(`scoresaber:cached-player:${foundPlayer._id}`);
+          })(),
       ]);
 
       // If the player has less scores tracked than the total play count, add them to the refresh queue

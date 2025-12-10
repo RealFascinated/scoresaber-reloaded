@@ -16,38 +16,30 @@ export class PlayerSearchService {
    * @returns the players that match the query
    */
   public static async searchPlayers(query: string): Promise<ScoreSaberPlayer[]> {
-    if (query.length == 0) {
-      const players = await ApiServiceRegistry.getInstance()
-        .getScoreSaberService()
-        .searchPlayers(query);
-      return await Promise.all(
-        players?.players?.map(async player =>
-          ScoreSaberService.getPlayer(player.id, DetailType.BASIC, player, {
-            setInactivesRank: false,
-            setMedalsRank: false,
+    const [scoreSaberResponse, foundPlayers] = await Promise.all([
+      ApiServiceRegistry.getInstance().getScoreSaberService().searchPlayers(query),
+      query.length > 0
+        ? PlayerModel.find({
+            name: { $regex: query, $options: "i" },
           })
-        ) ?? []
-      );
-    }
+            .select(["_id", "name"])
+            .limit(20)
+            .lean()
+        : [],
+    ]);
 
-    const players = await PlayerModel.find({
-      name: { $regex: query, $options: "i" },
-    })
-      .select(["_id", "name"])
-      .limit(20)
-      .lean();
+    const scoreSaberPlayerTokens = scoreSaberResponse?.players;
+    const uniquePlayerIds = [...new Set(foundPlayers.map(player => player._id))];
 
     // Get players from ScoreSaber
     return (
       await Promise.all(
-        players.map(async player =>
+        uniquePlayerIds.map(async id =>
           ScoreSaberService.getPlayer(
-            player._id,
+            id,
             DetailType.BASIC,
-            await ScoreSaberService.getCachedPlayer(
-              player._id,
-              player.inactive /* Use the long cache time for inactive players */
-            ),
+            scoreSaberPlayerTokens?.find(token => token.id === id) ||
+              (await ScoreSaberService.getCachedPlayer(id, true)), // Use the cache for inactive players
             { setInactivesRank: false, setMedalsRank: false }
           )
         )
