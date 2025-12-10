@@ -9,16 +9,17 @@ export default function LeaderboardSongName({
   leaderboardId?: number;
   clickableSongName: boolean;
 }) {
-  const text = <p className="line-clamp-2 w-fit font-semibold">{leaderboardName}</p>;
   return clickableSongName && leaderboardId != undefined ? (
     <SimpleLink
       href={`/leaderboard/${leaderboardId}`}
-      className="text-song-name hover:text-primary/80 w-fit cursor-pointer text-left transition-all"
+      className="group w-fit cursor-pointer text-left transition-all"
       data-umami-event="leaderboard-button"
     >
-      {text}
+      <p className="text-song-name group-hover:text-song-name/80 line-clamp-2 w-fit font-semibold transition-all">
+        {leaderboardName}
+      </p>
     </SimpleLink>
   ) : (
-    text
+    <p className="text-song-name line-clamp-2 w-fit font-semibold">{leaderboardName}</p>
   );
 }

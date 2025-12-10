@@ -28,8 +28,8 @@
   --medals: #cd7f32;
   --discord-blue: #5865f2;
   --inactive-account: #ff6467;
-  --song-name: #5c6bff;
-  --song-mapper: #5c6bff;
+  --song-name: #4a56cc;
+  --song-mapper: #7d8aff;
   --statistic: #5c6bff;
 
   --hands-left: #a82020;
@@ -61,8 +61,8 @@
   --pp: oklch(58% 0.25 295);
   --ssr: oklch(55% 0.22 275);
   --ranked: oklch(62% 0.3 285);
-  --song-name: oklch(55% 0.2 295);
-  --song-mapper: oklch(70% 0.2 295);
+  --song-name: oklch(50% 0.22 295);
+  --song-mapper: oklch(75% 0.18 280);
   --statistic: oklch(65% 0.25 285);
 }
 
@@ -72,8 +72,8 @@
   --pp: oklch(65% 0.22 20);
   --ssr: oklch(60% 0.2 15);
   --ranked: oklch(68% 0.28 30);
-  --song-name: oklch(60% 0.18 25);
-  --song-mapper: oklch(75% 0.18 25);
+  --song-name: oklch(55% 0.2 25);
+  --song-mapper: oklch(78% 0.15 30);
   --statistic: oklch(70% 0.2 20);
 }
 
@@ -83,8 +83,8 @@
   --pp: oklch(58% 0.25 135);
   --ssr: oklch(55% 0.22 130);
   --ranked: oklch(62% 0.3 145);
-  --song-name: oklch(55% 0.2 150);
-  --song-mapper: oklch(70% 0.2 150);
+  --song-name: oklch(50% 0.22 150);
+  --song-mapper: oklch(75% 0.18 145);
   --statistic: oklch(70% 0.2 145);
 }
 
