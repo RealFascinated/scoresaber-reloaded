@@ -10,6 +10,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ReactElement } from "react";
 import Card from "../../card";
 import CountryFlag from "../../ui/country-flag";
+import { Spinner } from "@/components/spinner";
 
 type Variants = {
   [key: string]: {
@@ -145,7 +146,7 @@ function PlayerMiniRanking({
           })
         ) : (
           <div className="flex items-center justify-center py-(--spacing-xl)">
-            <p className="text-muted-foreground text-sm">No players found</p>
+            <Spinner />
           </div>
         )}
       </div>
