@@ -74,7 +74,7 @@ export function PlayerRanking({
       <div className="block lg:hidden">
         <div
           className={cn(
-            "bg-muted/50 mb-1 flex min-h-[67px] w-full cursor-pointer flex-col justify-center gap-1 rounded-lg px-2 py-1 transition-all hover:shadow-sm",
+            "bg-muted/50 mb-1 flex min-h-[67px] w-full cursor-pointer flex-col justify-center gap-1 rounded-lg px-2 py-1 transition-colors hover:shadow-sm",
             mainPlayer?.id == player.id ? "bg-primary/10" : ""
           )}
         >
