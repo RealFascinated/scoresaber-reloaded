@@ -95,6 +95,7 @@ export default function ScoreSaberPlayerMedalScores({
               {isError ||
                 (scores.items.length === 0 && (
                   <EmptyState
+                    className="border-border rounded-lg border"
                     title="No Results"
                     description={
                       currentPage === 1

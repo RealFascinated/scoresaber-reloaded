@@ -230,6 +230,7 @@ export default function AccSaberPlayerScores({ player, sort, page, type, order }
               {isError ||
                 (scores.items.length === 0 && (
                   <EmptyState
+                    className="border-border rounded-lg border"
                     title="No Results"
                     description="No scores were found on this page"
                     icon={<SearchIcon />}

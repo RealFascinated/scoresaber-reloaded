@@ -29,8 +29,7 @@ export function EmptyState({ icon, title, description, className }: EmptyStatePr
   return (
     <div
       className={cn(
-        "flex min-h-[200px] flex-col items-center justify-center rounded-xl p-8",
-        "bg-secondary/90 border-border border backdrop-blur-sm",
+        "bg-secondary/90 flex min-h-[200px] flex-col items-center justify-center p-8",
         className
       )}
     >

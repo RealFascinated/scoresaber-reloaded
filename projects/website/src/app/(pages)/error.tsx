@@ -17,7 +17,7 @@ export default function Error() {
         <Card className="border-destructive/30 relative w-full shadow-lg backdrop-blur-md">
           {/* Header */}
           <div className="pb-4 text-center">
-            <h1 className="from-foreground to-muted-foreground mb-2 bg-linear-to-r bg-clip-text text-2xl font-bold text-transparent">
+            <h1 className="mb-2 bg-linear-to-r bg-clip-text text-2xl font-bold">
               Oops! Something went wrong
             </h1>
             <p className="text-muted-foreground mx-auto max-w-sm text-base leading-relaxed">

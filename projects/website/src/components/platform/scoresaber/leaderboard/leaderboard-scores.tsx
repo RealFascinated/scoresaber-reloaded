@@ -4,6 +4,7 @@ import { cn } from "@/common/utils";
 import { useLeaderboardFilter } from "@/components/providers/leaderboard/leaderboard-filter-provider";
 import ScoreModeSwitcher, { ScoreModeEnum } from "@/components/score/score-mode-switcher";
 import { EmptyState } from "@/components/ui/empty-state";
+import { Spinner } from "@/components/spinner";
 import { useIsMobile } from "@/contexts/viewport-context";
 import { useLeaderboardScores } from "@/hooks/score/use-leaderboard-scores";
 import useDatabase from "@/hooks/use-database";
@@ -119,6 +120,8 @@ export default function LeaderboardScores({
   }, [leaderboardId, page, disableUrlChanging, changePageUrl, mode, filter.country]);
 
   const isFriends = mode === ScoreModeEnum.Friends;
+  const noScores =
+    isError || (!isLoading && !isRefetching && (!scores || (scores && scores.items.length === 0)));
 
   return (
     <div className="flex flex-col gap-2">
@@ -147,19 +150,11 @@ export default function LeaderboardScores({
         )}
       </div>
 
-      {(isError ||
-        (!isLoading && !isRefetching && (!scores || (scores && scores.items.length === 0)))) && (
-        <EmptyState
-          title="No Scores Found"
-          description={
-            isFriends
-              ? "You or your friends haven't played this map yet"
-              : "No scores were found on this leaderboard or page"
-          }
-        />
-      )}
-
-      {scores && scores.items.length > 0 && (
+      {isLoading && !scores ? (
+        <div className="flex items-center justify-center py-12">
+          <Spinner size="lg" />
+        </div>
+      ) : (
         <>
           <div className="border-border bg-background/50 relative overflow-x-auto rounded-lg border">
             <table className="table w-full min-w-[800px] table-auto border-spacing-0 text-left text-sm">
@@ -182,72 +177,94 @@ export default function LeaderboardScores({
                   <th></th>
                 </tr>
               </thead>
-              <tbody className="divide-border/50 divide-y">
-                {scores.items.map(playerScore => (
-                  <React.Fragment key={playerScore.scoreId}>
-                    <tr
-                      className={cn(
-                        "hover:bg-muted/30 transition-colors duration-200",
-                        highlightedPlayerId === playerScore.playerId && "bg-primary/10"
-                      )}
-                    >
-                      <ScoreSaberLeaderboardScore
-                        score={playerScore}
-                        leaderboard={leaderboard}
-                        highlightedPlayerId={highlightedPlayerId}
-                        showDropdown
-                        onDropdownToggle={() => handleDropdownToggle(playerScore)}
-                        isDropdownExpanded={expandedScoreId === getScoreId(playerScore)}
-                      />
-                    </tr>
 
-                    {/* Dropdown row - appears directly below the clicked row */}
-                    <AnimatePresence>
-                      {expandedScoreId === getScoreId(playerScore) && (
-                        <motion.tr
-                          key={`dropdown-${getScoreId(playerScore)}`}
-                          className="origin-top border-none"
-                          initial={{ opacity: 0, height: 0, scale: 0.95 }}
-                          animate={{ opacity: 1, height: "auto", scale: 1 }}
-                          exit={{ opacity: 0, height: 0, scale: 0.95 }}
-                          transition={{
-                            duration: 0.3,
-                            ease: [0.4, 0, 0.2, 1],
-                            height: { duration: 0.3 },
-                            opacity: { duration: 0.2 },
-                          }}
-                        >
-                          <td colSpan={10} className="p-0">
-                            <div className="bg-muted/20 px-4 py-3">
-                              <ScoreDropdown
-                                score={playerScore}
-                                leaderboard={leaderboard}
-                                beatSaverMap={beatSaver}
-                                highlightedPlayerId={highlightedPlayerId}
-                                isExpanded={true}
-                                showLeaderboardScores={false}
-                                showMapStats={false}
-                              />
-                            </div>
-                          </td>
-                        </motion.tr>
-                      )}
-                    </AnimatePresence>
-                  </React.Fragment>
-                ))}
-              </tbody>
+              {noScores && (
+                <tbody className="text-center">
+                  <tr>
+                    <td colSpan={10}>
+                      <EmptyState
+                        title="No Scores Found"
+                        description={
+                          isFriends
+                            ? "You or your friends haven't played this map yet"
+                            : "No scores were found on this leaderboard or page"
+                        }
+                      />
+                    </td>
+                  </tr>
+                </tbody>
+              )}
+
+              {scores && scores.items.length > 0 && (
+                <tbody className="divide-border/50 divide-y">
+                  {scores.items.map(playerScore => (
+                    <React.Fragment key={playerScore.scoreId}>
+                      <tr
+                        className={cn(
+                          "hover:bg-muted/30 transition-colors duration-200",
+                          highlightedPlayerId === playerScore.playerId && "bg-primary/10"
+                        )}
+                      >
+                        <ScoreSaberLeaderboardScore
+                          score={playerScore}
+                          leaderboard={leaderboard}
+                          highlightedPlayerId={highlightedPlayerId}
+                          showDropdown
+                          onDropdownToggle={() => handleDropdownToggle(playerScore)}
+                          isDropdownExpanded={expandedScoreId === getScoreId(playerScore)}
+                        />
+                      </tr>
+
+                      {/* Dropdown row - appears directly below the clicked row */}
+                      <AnimatePresence>
+                        {expandedScoreId === getScoreId(playerScore) && (
+                          <motion.tr
+                            key={`dropdown-${getScoreId(playerScore)}`}
+                            className="origin-top border-none"
+                            initial={{ opacity: 0, height: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, height: "auto", scale: 1 }}
+                            exit={{ opacity: 0, height: 0, scale: 0.95 }}
+                            transition={{
+                              duration: 0.3,
+                              ease: [0.4, 0, 0.2, 1],
+                              height: { duration: 0.3 },
+                              opacity: { duration: 0.2 },
+                            }}
+                          >
+                            <td colSpan={10} className="p-0">
+                              <div className="bg-muted/20 px-4 py-3">
+                                <ScoreDropdown
+                                  score={playerScore}
+                                  leaderboard={leaderboard}
+                                  beatSaverMap={beatSaver}
+                                  highlightedPlayerId={highlightedPlayerId}
+                                  isExpanded={true}
+                                  showLeaderboardScores={false}
+                                  showMapStats={false}
+                                />
+                              </div>
+                            </td>
+                          </motion.tr>
+                        )}
+                      </AnimatePresence>
+                    </React.Fragment>
+                  ))}
+                </tbody>
+              )}
             </table>
           </div>
 
-          <SimplePagination
-            mobilePagination={isMobile}
-            page={page}
-            totalItems={scores.metadata.totalItems}
-            itemsPerPage={scores.metadata.itemsPerPage}
-            loadingPage={isLoading || isRefetching ? page : undefined}
-            generatePageUrl={generatePageUrl}
-            onPageChange={handlePageChange}
-          />
+          {scores && scores.items.length > 0 && (
+            <SimplePagination
+              mobilePagination={isMobile}
+              page={page}
+              totalItems={scores.metadata.totalItems}
+              itemsPerPage={scores.metadata.itemsPerPage}
+              loadingPage={isLoading || isRefetching ? page : undefined}
+              generatePageUrl={generatePageUrl}
+              onPageChange={handlePageChange}
+            />
+          )}
         </>
       )}
     </div>
