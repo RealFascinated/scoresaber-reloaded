@@ -17,12 +17,29 @@ type DatabaseLoaderProps = {
   children: ReactNode;
 };
 
-// Singleton database instance
+// Singleton database instance - also store on window for persistence across module reloads
 let databaseInstance: Database | undefined;
+
+// Type declaration for window
+declare global {
+  interface Window {
+    __ssrDatabase?: Database;
+  }
+}
+
+function getDatabaseInstance(): Database | undefined {
+  if (isServer()) return undefined;
+  // Check window first (persists across module reloads in production)
+  if (typeof window !== "undefined" && window.__ssrDatabase) {
+    databaseInstance = window.__ssrDatabase;
+    return window.__ssrDatabase;
+  }
+  return databaseInstance;
+}
 
 export default function DatabaseLoader({ children }: DatabaseLoaderProps) {
   // Check if database already exists synchronously to prevent flash
-  const existingDatabase = !isServer() && databaseInstance ? databaseInstance : undefined;
+  const existingDatabase = getDatabaseInstance();
 
   const [database, setDatabase] = useState<Database | undefined>(existingDatabase);
   const [isLoading, setIsLoading] = useState(!existingDatabase);
@@ -45,6 +62,11 @@ export default function DatabaseLoader({ children }: DatabaseLoaderProps) {
         // Use singleton pattern
         if (!databaseInstance) {
           databaseInstance = getDatabase();
+        }
+
+        // Store on window for persistence across module reloads (production code splitting)
+        if (typeof window !== "undefined") {
+          window.__ssrDatabase = databaseInstance;
         }
 
         // Set database immediately for non-blocking access
