@@ -1,7 +1,7 @@
 "use client";
 
 import { isServer } from "@ssr/common/utils/utils";
-import { createContext, ReactNode, useEffect, useMemo, useState } from "react";
+import { createContext, ReactNode, useEffect, useState } from "react";
 import Database, { getDatabase } from "../../common/database/database";
 import FullscreenLoader from "./fullscreen-loader";
 
@@ -21,28 +21,12 @@ type DatabaseLoaderProps = {
 let databaseInstance: Database | undefined;
 
 export default function DatabaseLoader({ children }: DatabaseLoaderProps) {
-  // Initialize with singleton if available (for client-side remounts)
-  const [database, setDatabase] = useState<Database | undefined>(() => {
-    if (isServer()) return undefined;
-    // If singleton exists, use it immediately to avoid undefined during remounts
-    return databaseInstance;
-  });
-  // If database instance already exists, we're not loading
-  const [isLoading, setIsLoading] = useState(() => {
-    if (isServer()) return false;
-    // If singleton already exists, we're not loading
-    return databaseInstance === undefined;
-  });
+  const [database, setDatabase] = useState<Database | undefined>();
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (isServer()) {
-      setIsLoading(false);
-      return;
-    }
-
-    // If database is already available, we're done
-    if (databaseInstance && database) {
       setIsLoading(false);
       return;
     }
@@ -68,7 +52,7 @@ export default function DatabaseLoader({ children }: DatabaseLoaderProps) {
     };
 
     initializeDatabase();
-  }, [database]);
+  }, []);
 
   // Show error state
   if (error) {
@@ -87,11 +71,8 @@ export default function DatabaseLoader({ children }: DatabaseLoaderProps) {
     );
   }
 
-  // Memoize context value to prevent unnecessary re-renders
-  const contextValue = useMemo(() => database, [database]);
-
   return (
-    <DatabaseContext.Provider value={contextValue}>
+    <DatabaseContext.Provider value={database}>
       {isLoading ? <FullscreenLoader reason="Loading database..." /> : children}
     </DatabaseContext.Provider>
   );
