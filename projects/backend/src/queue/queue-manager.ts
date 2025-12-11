@@ -1,6 +1,6 @@
 import { EventListener } from "../event/event-listener";
 import { LeaderboardScoreSeedQueue } from "./impl/leaderboard-score-seed-queue";
-import { PlayerScoreSeedQueue } from "./impl/player-score-seed-queue";
+import { FetchMissingScoresQueue } from "./impl/fetch-missing-scores-queue";
 import { Queue, QueueItem } from "./queue";
 
 export enum QueueId {
@@ -12,7 +12,7 @@ export class QueueManager implements EventListener {
   private static queues: Map<QueueId, Queue<QueueItem<unknown>>> = new Map();
 
   constructor() {
-    QueueManager.addQueue(new PlayerScoreSeedQueue());
+    QueueManager.addQueue(new FetchMissingScoresQueue());
     QueueManager.addQueue(new LeaderboardScoreSeedQueue());
   }
 

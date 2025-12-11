@@ -9,7 +9,7 @@ import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { isProduction } from "@ssr/common/utils/utils";
 import { logNewTrackedPlayer } from "../../common/embds";
-import { PlayerScoreSeedQueue } from "../../queue/impl/player-score-seed-queue";
+import { FetchMissingScoresQueue } from "../../queue/impl/fetch-missing-scores-queue";
 import { QueueId, QueueManager } from "../../queue/queue-manager";
 import CacheService, { CacheId } from "../cache.service";
 
@@ -122,14 +122,16 @@ export class PlayerCoreService {
 
           const seedQueue = QueueManager.getQueue(
             QueueId.PlayerScoreRefreshQueue
-          ) as PlayerScoreSeedQueue;
+          ) as FetchMissingScoresQueue;
           if (!(await seedQueue.hasItem({ id: id, data: id }))) {
             if (trackedScores < playerToken.scoreStats.totalPlayCount) {
               Logger.info(
                 `Player ${id} has ${formatNumberWithCommas(playerToken.scoreStats.totalPlayCount - trackedScores)} missing scores. Adding them to the refresh queue...`
               );
               // Add the player to the refresh queue
-              (QueueManager.getQueue(QueueId.PlayerScoreRefreshQueue) as PlayerScoreSeedQueue).add({
+              (
+                QueueManager.getQueue(QueueId.PlayerScoreRefreshQueue) as FetchMissingScoresQueue
+              ).add({
                 id,
                 data: id,
               });

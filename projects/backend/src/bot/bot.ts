@@ -11,7 +11,7 @@ import {
 } from "discord.js";
 import { Client } from "discordx";
 
-import "./command/force-refresh-player-scores";
+import "./command/fetch-missing-player-scores";
 import "./command/force-track-player-statistics";
 import "./command/refresh-medal-scores";
 import "./command/refresh-ranked-leaderboards";

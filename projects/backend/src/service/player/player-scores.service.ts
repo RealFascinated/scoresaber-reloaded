@@ -84,7 +84,6 @@ export class PlayerScoresService {
       playerId: playerId,
     });
     if (playerScoresCount === playerToken.scoreStats.totalPlayCount) {
-      Logger.info(`%s does not have any missing scores. Skipping...`, player.name);
       return {
         missingScores: 0,
         totalScores: playerScoresCount,

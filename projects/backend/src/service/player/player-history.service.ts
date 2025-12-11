@@ -20,7 +20,7 @@ import {
 import { EmbedBuilder } from "discord.js";
 import { redisClient } from "../..";
 import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
-import { PlayerScoreSeedQueue } from "../../queue/impl/player-score-seed-queue";
+import { FetchMissingScoresQueue } from "../../queue/impl/fetch-missing-scores-queue";
 import { QueueId, QueueManager } from "../../queue/queue-manager";
 import { PlayerAccuraciesService } from "./player-accuracies.service";
 import { PlayerCoreService } from "./player-core.service";
@@ -99,7 +99,7 @@ export class PlayerHistoryService {
       if (trackedScores < player.scoreStats.totalPlayCount) {
         Logger.info(`Player ${player.id} has missing scores. Adding them to the refresh queue...`);
         // Add the player to the refresh queue
-        (QueueManager.getQueue(QueueId.PlayerScoreRefreshQueue) as PlayerScoreSeedQueue).add({
+        (QueueManager.getQueue(QueueId.PlayerScoreRefreshQueue) as FetchMissingScoresQueue).add({
           id: player.id,
           data: player.id,
         });

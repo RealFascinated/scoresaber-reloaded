@@ -12,7 +12,7 @@ import { PlayerScoresService } from "../../service/player/player-scores.service"
 import { Queue, QueueItem } from "../queue";
 import { QueueId } from "../queue-manager";
 
-export class PlayerScoreSeedQueue extends Queue<QueueItem<string>> {
+export class FetchMissingScoresQueue extends Queue<QueueItem<string>> {
   constructor() {
     super(QueueId.PlayerScoreRefreshQueue, "lifo");
     if (!isProduction()) {
@@ -60,6 +60,9 @@ export class PlayerScoreSeedQueue extends Queue<QueueItem<string>> {
     const player = await PlayerCoreService.getPlayer(playerId, playerToken);
     const { totalScores, missingScores, totalPagesFetched, timeTaken, partialRefresh } =
       await PlayerScoresService.fetchMissingPlayerScores(player, playerToken);
+    if (missingScores == 0) {
+      return;
+    } 
 
     await sendEmbedToChannel(
       DiscordChannels.PLAYER_SCORE_REFRESH_LOGS,
