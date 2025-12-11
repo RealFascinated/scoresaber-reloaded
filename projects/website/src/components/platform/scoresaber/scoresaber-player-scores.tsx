@@ -209,7 +209,6 @@ export default function ScoreSaberPlayerScores({
       hmdFilter,
     ],
     queryFn: async () => {
-      await new Promise(resolve => setTimeout(resolve, 1000)); // test
       if (scoresMode === "live") {
         const response = await ssrApi.fetchScoreSaberPlayerScores(
           player.id,
