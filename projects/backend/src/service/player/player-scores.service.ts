@@ -84,7 +84,6 @@ export class PlayerScoresService {
       playerId: playerId,
     });
     if (playerScoresCount === playerToken.scoreStats.totalPlayCount) {
-      Logger.info(`%s has no missing scores. Skipping...`, player.name);
       return {
         missingScores: 0,
         totalScores: playerScoresCount,
@@ -93,6 +92,13 @@ export class PlayerScoresService {
         partialRefresh: false,
       };
     }
+
+    Logger.info(
+      `%s has count mismatch: DB has %s, API reports %s. Fetching to verify...`,
+      playerId,
+      playerScoresCount,
+      playerToken.scoreStats.totalPlayCount
+    );
 
     const shouldDeleteScores = playerScoresCount > playerToken.scoreStats.totalPlayCount;
     if (shouldDeleteScores) {
@@ -153,7 +159,6 @@ export class PlayerScoresService {
         if (!leaderboard) {
           continue;
         }
-
         const score = getScoreSaberScoreFromToken(scoreToken.score, leaderboard, playerId);
         if (!score) {
           continue;
