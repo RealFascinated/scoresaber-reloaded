@@ -33,9 +33,7 @@ class FetchMissingPlayerScores {
         interaction.reply({
           content: "Adding all players to the fetch missing scores queue...",
         });
-        const players = await PlayerModel.find({ seededScores: { $in: [null, false] } })
-          .select("_id")
-          .lean();
+        const players = await PlayerModel.find().select("_id").lean();
         const playerIds = players.map(p => p._id);
         if (playerIds.length === 0) {
           interaction.editReply({
