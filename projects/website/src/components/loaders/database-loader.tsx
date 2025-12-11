@@ -1,7 +1,7 @@
 "use client";
 
 import { isServer } from "@ssr/common/utils/utils";
-import { createContext, ReactNode, useEffect, useRef, useState } from "react";
+import { createContext, ReactNode, useEffect, useState } from "react";
 import Database, { getDatabase } from "../../common/database/database";
 import FullscreenLoader from "./fullscreen-loader";
 
@@ -17,43 +17,17 @@ type DatabaseLoaderProps = {
   children: ReactNode;
 };
 
-// Singleton database instance - also store on window for persistence across module reloads
+// Singleton database instance
 let databaseInstance: Database | undefined;
 
-// Type declaration for window
-declare global {
-  interface Window {
-    __ssrDatabase?: Database;
-  }
-}
-
-function getDatabaseInstance(): Database | undefined {
-  if (isServer()) return undefined;
-  // Check window first (persists across module reloads in production)
-  if (typeof window !== "undefined" && window.__ssrDatabase) {
-    databaseInstance = window.__ssrDatabase;
-    return window.__ssrDatabase;
-  }
-  return databaseInstance;
-}
-
 export default function DatabaseLoader({ children }: DatabaseLoaderProps) {
-  // Check if database already exists synchronously to prevent flash
-  const existingDatabase = getDatabaseInstance();
-
-  const [database, setDatabase] = useState<Database | undefined>(existingDatabase);
-  const [isLoading, setIsLoading] = useState(!existingDatabase);
+  const [database, setDatabase] = useState<Database | undefined>();
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const hasInitialized = useRef(!!existingDatabase);
 
   useEffect(() => {
     if (isServer()) {
       setIsLoading(false);
-      return;
-    }
-
-    // Skip if already initialized (prevents re-initialization on remounts)
-    if (hasInitialized.current) {
       return;
     }
 
@@ -64,14 +38,8 @@ export default function DatabaseLoader({ children }: DatabaseLoaderProps) {
           databaseInstance = getDatabase();
         }
 
-        // Store on window for persistence across module reloads (production code splitting)
-        if (typeof window !== "undefined") {
-          window.__ssrDatabase = databaseInstance;
-        }
-
         // Set database immediately for non-blocking access
         setDatabase(databaseInstance);
-        hasInitialized.current = true;
 
         // Initialize chart legends in background
         await databaseInstance.initializeChartLegends();
