@@ -208,10 +208,11 @@ export class PlayerScoresService {
     result.timeTaken = performance.now() - startTime;
     if (!result.partialRefresh) {
       Logger.info(
-        `Finished fetching missing scores for %s, total pages fetched: %s, total scores: %s, in %s`,
+        `Finished fetching missing scores for %s, total pages fetched: %s, total scores: %s, missing scores: %s, in %s`,
         playerId,
         formatNumberWithCommas(result.totalPagesFetched),
         formatNumberWithCommas(result.totalScores),
+        formatNumberWithCommas(result.missingScores),
         formatDuration(result.timeTaken)
       );
     }
