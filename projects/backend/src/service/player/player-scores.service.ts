@@ -96,7 +96,7 @@ export class PlayerScoresService {
     const shouldDeleteScores = playerScoresCount > playerToken.scoreStats.totalPlayCount;
     if (shouldDeleteScores) {
       Logger.info(
-        `Player ${playerId} has more scores than they should. Deleteing their scores and refreshing...`
+        `Player ${playerId} has more scores than they should (${playerScoresCount} > ${playerToken.scoreStats.totalPlayCount}). Deleteing their scores and refreshing...`
       );
       await ScoreSaberScoreModel.deleteMany({
         playerId: playerId,
