@@ -5,7 +5,7 @@ import { swagger } from "@elysiajs/swagger";
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
-import { formatDuration } from "@ssr/common/utils/time-utils";
+import { formatDuration, TimeUnit } from "@ssr/common/utils/time-utils";
 import { logger } from "@tqman/nice-logger";
 import { mongoose } from "@typegoose/typegoose";
 import { EmbedBuilder } from "discord.js";
@@ -48,6 +48,7 @@ import { ScoreService } from "./service/score/score.service";
 import StatisticsService from "./service/statistics.service";
 import { BeatSaverWebsocket } from "./websocket/beatsaver-websocket";
 import { ScoreWebsockets } from "./websocket/score-websockets";
+import { isProduction } from "@ssr/common/utils/utils";
 
 Logger.info("Starting SSR Backend...");
 
@@ -65,42 +66,11 @@ new EventsManager();
 Logger.info("Connecting to MongoDB...");
 try {
   await mongoose.connect(env.MONGO_CONNECTION_STRING);
+  Logger.info("Connected to MongoDB :)");
 } catch (error) {
   Logger.error("Failed to connect to MongoDB:", error);
   process.exit(1);
 }
-
-// Print slow queries
-mongoose.connection.on("query", event => {
-  if (event.milliseconds > 50) {
-    const collection = event.query?.collectionName || "unknown";
-    const operation = event.query?.op || "unknown";
-    const query = event.query?.filter || event.query?.query || {};
-    const queryString = JSON.stringify(query, null, 2);
-
-    Logger.warn(
-      `Slow query detected: ${collection}.${operation} took ${event.milliseconds}ms`,
-      queryString
-    );
-
-    sendEmbedToChannel(
-      DiscordChannels.BACKEND_LOGS,
-      new EmbedBuilder()
-        .setTitle("🐌 Slow Query Detected")
-        .setDescription(`**${collection}.${operation}** took **${event.milliseconds}ms**`)
-        .addFields({
-          name: "Query",
-          value: `\`\`\`json\n${queryString.length > 1000 ? queryString.substring(0, 1000) + "..." : queryString}\n\`\`\``,
-        })
-        .setColor(0xffaa00)
-        .setTimestamp()
-    ).catch(error => {
-      Logger.error("Failed to send slow query to Discord:", error);
-    });
-  }
-});
-
-Logger.info("Connected to MongoDB :)");
 
 Logger.info("Testing Redis connection...");
 export const redisClient = new Redis(env.REDIS_URL);
@@ -156,6 +126,13 @@ export const app = new Elysia()
       run: async () => {
         await LeaderboardService.refreshRankedLeaderboards();
         await LeaderboardService.refreshQualifiedLeaderboards();
+
+        const playlist = await PlaylistService.createRankingQueuePlaylist();
+        await PlaylistService.updatePlaylist("scoresaber-ranking-queue-maps", {
+          title: playlist.title,
+          image: playlist.image,
+          songs: playlist.songs,
+        });
       },
     })
   )
@@ -174,21 +151,48 @@ export const app = new Elysia()
   )
   .use(
     cron({
-      name: "update-ranking-queue-playlist",
-      pattern: "0 */2 * * *", // Every 2 hours at 00:00, 02:00, 04:00, etc
+      name: "refresh-beatsaver-scrape",
+      pattern: "0 8 * * *", // Every day at 08:00
       timezone: "Europe/London",
       protect: true,
       run: async () => {
-        const playlist = await PlaylistService.createRankingQueuePlaylist();
-        await PlaylistService.updatePlaylist("scoresaber-ranking-queue-maps", {
-          title: playlist.title,
-          image: playlist.image,
-          songs: playlist.songs,
-        });
+        let shouldScrape = true;
+        let beforeDate = new Date();
+        Logger.info(`Starting to scrape beatsaver maps before ${beforeDate.toISOString()}...`);
+        while (shouldScrape) {
+          const latestMaps = await ApiServiceRegistry.getInstance()
+            .getBeatSaverService()
+            .lookupLatestMaps(false, 100, {
+              before: beforeDate,
+            });
+          if (latestMaps == undefined || latestMaps.docs.length === 0) {
+            Logger.info(`No maps found before ${beforeDate.toISOString()}!`);
+            shouldScrape = false;
+            continue;
+          }
+
+          const sortedMaps = latestMaps.docs.sort(
+            (a, b) => new Date(a.uploaded).getTime() - new Date(b.uploaded).getTime()
+          );
+          beforeDate = new Date(sortedMaps[0].uploaded);
+
+          // Save the maps
+          for (const map of sortedMaps) {
+            await BeatSaverService.saveMap(map);
+          }
+
+          // No more maps to scrape
+          if (latestMaps.docs.length == 0) {
+            shouldScrape = false;
+            continue;
+          }
+          await Bun.sleep(TimeUnit.toMillis(TimeUnit.Minute, 1)); // avoid touching their server inappropriately
+
+          Logger.info(`Scraped ${latestMaps.docs.length} maps before ${beforeDate.toISOString()}!`);
+        }
       },
     })
   );
-
 app.use(metricsPlugin());
 
 /**
@@ -256,14 +260,16 @@ app.onAfterHandle(({ request, response }) => {
 app.use(cors());
 
 /**
- * Request logger
+ * Request logger (only in development)
  */
-app.use(
-  logger({
-    enabled: true,
-    mode: "combined",
-  })
-);
+if (!isProduction()) {
+  app.use(
+    logger({
+      enabled: true,
+      mode: "combined",
+    })
+  );
+}
 
 /**
  * Security settings
@@ -334,52 +340,6 @@ app.onStart(async () => {
 
   EventsManager.registerListener(new QueueManager());
   EventsManager.registerListener(new MetricsService());
-
-  // Scrape beatsaver maps
-  (async () => {
-    const redisKey = "beatsaver:scrape:beforeDate";
-
-    let shouldScrape = true;
-    const redisValue = await redisClient.get(redisKey);
-    let beforeDate = redisValue ? new Date(redisValue) : new Date();
-    Logger.info(`Starting to scrape beatsaver maps before ${beforeDate.toISOString()}...`);
-
-    while (shouldScrape) {
-      const latestMaps = await ApiServiceRegistry.getInstance()
-        .getBeatSaverService()
-        .lookupLatestMaps(false, 100, {
-          before: beforeDate,
-        });
-      if (latestMaps == undefined || latestMaps.docs.length === 0) {
-        Logger.info(`No maps found before ${beforeDate.toISOString()}!`);
-        shouldScrape = false;
-        continue;
-      }
-
-      const sortedMaps = latestMaps.docs.sort(
-        (a, b) => new Date(a.uploaded).getTime() - new Date(b.uploaded).getTime()
-      );
-      const oldestDate = new Date(sortedMaps[0].uploaded);
-      beforeDate = oldestDate;
-
-      // Save the maps
-      for (const map of sortedMaps) {
-        await BeatSaverService.saveMap(map);
-      }
-
-      // Save progress to Redis
-      await redisClient.set(redisKey, beforeDate.toISOString());
-
-      // If we got fewer than 100 maps, we've reached the end
-      if (latestMaps.docs.length < 100) {
-        shouldScrape = false;
-        continue;
-      }
-      await Bun.sleep(500); // 500ms to avoid touching their server inappropriately
-
-      Logger.info(`Scraped ${latestMaps.docs.length} maps before ${beforeDate.toISOString()}!`);
-    }
-  })();
 });
 
 app.listen({
@@ -430,3 +390,33 @@ const gracefulShutdown = async (signal: string) => {
 
 process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
 process.on("SIGINT", () => gracefulShutdown("SIGINT"));
+
+// Print slow queries
+mongoose.connection.on("query", event => {
+  if (event.milliseconds > 50) {
+    const collection = event.query?.collectionName || "unknown";
+    const operation = event.query?.op || "unknown";
+    const query = event.query?.filter || event.query?.query || {};
+    const queryString = JSON.stringify(query, null, 2);
+
+    Logger.warn(
+      `Slow query detected: ${collection}.${operation} took ${event.milliseconds}ms`,
+      queryString
+    );
+
+    sendEmbedToChannel(
+      DiscordChannels.BACKEND_LOGS,
+      new EmbedBuilder()
+        .setTitle("🐌 Slow Query Detected")
+        .setDescription(`**${collection}.${operation}** took **${event.milliseconds}ms**`)
+        .addFields({
+          name: "Query",
+          value: `\`\`\`json\n${queryString.length > 1000 ? queryString.substring(0, 1000) + "..." : queryString}\n\`\`\``,
+        })
+        .setColor(0xffaa00)
+        .setTimestamp()
+    ).catch(error => {
+      Logger.error("Failed to send slow query to Discord:", error);
+    });
+  }
+});
