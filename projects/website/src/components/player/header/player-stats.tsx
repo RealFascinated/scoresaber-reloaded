@@ -162,7 +162,7 @@ const playerStats: Stat[] = [
             {formatDate(player.peakRank.date, "DD MMMM YYYY")} ({timeAgo(player.peakRank.date)})
           </p>
         ),
-        value: formatNumberWithCommas(player.peakRank.rank),
+        value: `#${formatNumberWithCommas(player.peakRank.rank)}`,
       };
     },
   },

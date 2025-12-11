@@ -43,7 +43,7 @@ export default function StatValue({ name, icon, color, className, value }: Props
       {name && (
         <>
           <p>{name}</p>
-          <div className="h-4 w-[1px] bg-white" />
+          <div className="h-4 w-px bg-white" />
         </>
       )}
       <div className="flex items-center gap-1">
