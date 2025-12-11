@@ -372,11 +372,17 @@ const gracefulShutdown = async (signal: string) => {
 
     Logger.info("Stopping all services...");
     for (const listener of EventsManager.getListeners()) {
-      await listener.onStop?.();
+      try {
+        await listener.onStop?.();
+      } catch (error) {
+        Logger.warn(`Error stopping service ${listener.constructor.name}:`, error);
+      }
     }
 
-    await mongoose.disconnect();
-    Logger.info("MongoDB connection closed");
+    if (mongoose.connection.readyState === 1) {
+      await mongoose.disconnect();
+      Logger.info("MongoDB connection closed");
+    }
 
     clearTimeout(forceExit);
     Logger.info("Shutdown complete");

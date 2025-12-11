@@ -11,7 +11,8 @@ const LOOKUP_LATEST_MAPS_ENDPOINT = `${API_BASE}/maps/latest`;
 
 export class BeatSaverService extends ApiService {
   constructor() {
-    super(new Cooldown(60_000 / 300, 150), ApiServiceName.BEAT_SAVER, {
+    // 10 requests per second
+    super(new Cooldown(1000 / 10, 10), ApiServiceName.BEAT_SAVER, {
       useProxy: true,
       proxySwitchThreshold: 10,
       proxyResetThreshold: 100,

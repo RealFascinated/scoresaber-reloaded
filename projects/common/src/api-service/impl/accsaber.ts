@@ -52,6 +52,7 @@ export type AccSaberScoreType = "overall" | "true" | "tech" | "speed";
 
 export class AccSaberService extends ApiService {
   constructor() {
+    // 300 requests per minute
     super(new Cooldown(60_000 / 300, 150), ApiServiceName.ACCSABER, {
       useProxy: true,
       proxySwitchThreshold: 10,
