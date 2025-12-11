@@ -169,25 +169,24 @@ export class PlayerScoresService {
           result.missingScores++;
           result.totalScores++;
         }
-
-       
-        if (
-          result.totalScores >= playerToken.scoreStats.totalPlayCount || // We have found all the scores !!
-          page === Math.ceil(scoresPage.metadata.total / scoresPage.metadata.itemsPerPage) // We have reached the last page
-        ) {
-          break;
-        }
-
-        if (
-          page % 10 === 0 || // Log every 10 pages
-          page === 1 || // Log the first page
-          page === Math.ceil(scoresPage.metadata.total / scoresPage.metadata.itemsPerPage) // Log the last page
-        ) {
-          Logger.info(`Fetched ${page} pages of scores for ${playerId}...`);
-        }
       }
 
-      return result.totalScores < playerToken.scoreStats.totalPlayCount;
+      // Early exit if we've found all the scores we need
+      if (result.totalScores >= playerToken.scoreStats.totalPlayCount) {
+        return false; // no more scores
+      }
+
+      const totalPages = Math.ceil(scoresPage.metadata.total / scoresPage.metadata.itemsPerPage);
+
+      // Log progress
+      if (
+        page % 10 === 0 || // Log every 10 pages
+        page === 1 || // Log the first page
+        page === totalPages // Log the last page
+      ) {
+        Logger.info(`Fetched ${page} pages of scores for ${playerId}...`);
+      }
+      return page < totalPages;
     }
 
     Logger.info(`Fetching missing scores for ${playerId}...`);
