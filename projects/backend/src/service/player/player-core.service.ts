@@ -3,10 +3,8 @@ import { InternalServerError } from "@ssr/common/error/internal-server-error";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger from "@ssr/common/logger";
 import { Player, PlayerModel } from "@ssr/common/model/player/player";
-import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import { PlayerRefreshResponse } from "@ssr/common/response/player-refresh-response";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
-import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { isProduction } from "@ssr/common/utils/utils";
 import { logNewTrackedPlayer } from "../../common/embds";
 import { FetchMissingScoresQueue } from "../../queue/impl/fetch-missing-scores-queue";
@@ -116,26 +114,16 @@ export class PlayerCoreService {
             trackedSince: new Date(),
           });
 
-          const trackedScores = await ScoreSaberScoreModel.countDocuments({
-            playerId: id,
-          });
-
           const seedQueue = QueueManager.getQueue(
             QueueId.PlayerScoreRefreshQueue
           ) as FetchMissingScoresQueue;
           if (!(await seedQueue.hasItem({ id: id, data: id }))) {
-            if (trackedScores < playerToken.scoreStats.totalPlayCount) {
-              Logger.info(
-                `Player ${id} has ${formatNumberWithCommas(playerToken.scoreStats.totalPlayCount - trackedScores)} missing scores. Adding them to the refresh queue...`
-              );
-              // Add the player to the refresh queue
-              (
-                QueueManager.getQueue(QueueId.PlayerScoreRefreshQueue) as FetchMissingScoresQueue
-              ).add({
+            (QueueManager.getQueue(QueueId.PlayerScoreRefreshQueue) as FetchMissingScoresQueue).add(
+              {
                 id,
                 data: id,
-              });
-            }
+              }
+            );
           }
 
           // Notify in production

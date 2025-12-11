@@ -84,6 +84,7 @@ export class PlayerScoresService {
       playerId: playerId,
     });
     if (playerScoresCount === playerToken.scoreStats.totalPlayCount) {
+      Logger.info(`%s has no missing scores. Skipping...`, player.name);
       return {
         missingScores: 0,
         totalScores: playerScoresCount,
@@ -172,6 +173,10 @@ export class PlayerScoresService {
         // We have found all the scores !!
         if (result.totalScores >= playerToken.scoreStats.totalPlayCount) {
           break;
+        }
+
+        if (page % 10 === 0) {
+          Logger.info(`Fetched ${page} pages of scores for ${playerId}...`);
         }
       }
 
