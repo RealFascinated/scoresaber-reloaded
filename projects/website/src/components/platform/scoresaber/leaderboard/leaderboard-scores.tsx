@@ -12,7 +12,7 @@ import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
 import { buildSearchParams } from "@ssr/common/utils/search-params";
-import { useLiveQuery } from "dexie-react-hooks";
+import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { AnimatePresence, motion } from "framer-motion";
 import React, { useCallback, useEffect, useState } from "react";
 import { DifficultyButton } from "../../../leaderboard/button/difficulty-button";
@@ -50,7 +50,7 @@ export default function LeaderboardScores({
   const { changePageUrl } = usePageNavigation();
   const isMobile = useIsMobile();
   const database = useDatabase();
-  const mainPlayerId = useLiveQuery(() => database.getMainPlayerId());
+  const mainPlayerId = useStableLiveQuery(() => database.getMainPlayerId());
   const filter = useLeaderboardFilter();
 
   const [mode, setMode] = useState<ScoreModeEnum>(initialCategory);

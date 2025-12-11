@@ -1,6 +1,6 @@
-import { useLiveQuery } from "dexie-react-hooks";
 import { useEffect } from "react";
 import { FieldValues, Path, UseFormReturn } from "react-hook-form";
+import { useStableLiveQuery } from "./use-stable-live-query";
 
 type SettingConfig<T extends FieldValues> = {
   [K in Path<T>]?: () => Promise<T[K] | undefined> | T[K] | undefined;
@@ -19,7 +19,7 @@ export function useSettingsForm<T extends FieldValues>(
   excludeFromSync: Path<T>[] = []
 ) {
   // Create a single object to hold all setting values
-  const settings = useLiveQuery(async () => {
+  const settings = useStableLiveQuery(async () => {
     const entries = Object.entries(config) as [
       Path<T>,
       () => Promise<T[Path<T>] | undefined> | T[Path<T>] | undefined,

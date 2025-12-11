@@ -14,7 +14,7 @@ import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { useDocumentTitle } from "@uidotdev/usehooks";
 import { ssrConfig } from "config";
-import { useLiveQuery } from "dexie-react-hooks";
+import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { SearchIcon } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import ScoresCard from "../../score/scores-card";
@@ -37,7 +37,7 @@ export default function ScoreSaberPlayerMedalScores({
   const { animateLeft, animateRight, setIsLoading } = usePageTransition();
 
   // Database queries
-  const mainPlayerId = useLiveQuery(() => database.getMainPlayerId());
+  const mainPlayerId = useStableLiveQuery(() => database.getMainPlayerId());
 
   // State
   const [currentPage, setCurrentPage] = useState(page);

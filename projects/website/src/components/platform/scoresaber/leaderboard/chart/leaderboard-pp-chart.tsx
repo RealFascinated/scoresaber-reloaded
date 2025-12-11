@@ -19,7 +19,7 @@ import {
   Title,
   Tooltip,
 } from "chart.js";
-import { useLiveQuery } from "dexie-react-hooks";
+import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { useEffect, useState } from "react";
 import { Line } from "react-chartjs-2";
 
@@ -35,7 +35,7 @@ type Props = {
 
 export default function LeaderboardPpChart({ leaderboard }: Props) {
   const database = useDatabase();
-  const whatIfRange = useLiveQuery(() => database.getWhatIfRange());
+  const whatIfRange = useStableLiveQuery(() => database.getWhatIfRange());
 
   const [values, setValues] = useState(DEFAULT_WHAT_IF_RANGE);
   const debouncedValues = useDebounce(values, 100);

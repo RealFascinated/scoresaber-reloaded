@@ -6,14 +6,14 @@ import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useIsMobile } from "@/contexts/viewport-context";
 import useDatabase from "@/hooks/use-database";
-import { useLiveQuery } from "dexie-react-hooks";
+import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { UsersIcon } from "lucide-react";
 import { useRef, useState } from "react";
 import NavbarButton from "../navbar/navbar-button";
 
 export default function FriendsButton() {
   const database = useDatabase();
-  const friends = useLiveQuery(() => database.getFriends());
+  const friends = useStableLiveQuery(() => database.getFriends());
   const isMobile: boolean = useIsMobile();
   const { openSearch } = useSearch();
 

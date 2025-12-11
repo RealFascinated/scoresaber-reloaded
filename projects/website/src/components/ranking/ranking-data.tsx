@@ -13,7 +13,7 @@ import { countryFilter } from "@ssr/common/utils/country.util";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { useDebounce } from "@uidotdev/usehooks";
-import { useLiveQuery } from "dexie-react-hooks";
+import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { LinkIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { FancyLoader } from "../fancy-loader";
@@ -36,7 +36,7 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
   const isMobile = useIsMobile();
   const navigation = usePageNavigation();
   const database = useDatabase();
-  const mainPlayer = useLiveQuery(() => database.getMainPlayer());
+  const mainPlayer = useStableLiveQuery(() => database.getMainPlayer());
 
   const [showRelativePPDifference, setShowRelativePPDifference] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState(initialPage);

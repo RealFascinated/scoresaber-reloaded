@@ -1,12 +1,12 @@
 "use client";
 
 import useDatabase from "@/hooks/use-database";
-import { useLiveQuery } from "dexie-react-hooks";
+import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { Snowfall } from "react-snowfall";
 
 export function SnowBackground() {
   const database = useDatabase();
-  const snowParticles = useLiveQuery(async () => database.getSnowParticles());
+  const snowParticles = useStableLiveQuery(async () => database.getSnowParticles());
 
   if (!snowParticles) {
     return null;

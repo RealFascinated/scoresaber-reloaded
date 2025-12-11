@@ -21,11 +21,7 @@ export default function SimpleTooltip({
   return (
     <Tooltip
       content={
-        typeof display === "string" ? (
-          <p className="max-w-[350px] text-center text-wrap">{display}</p>
-        ) : (
-          display
-        )
+        typeof display === "string" ? <p className="max-w-[400px] text-wrap">{display}</p> : display
       }
       side={side}
       showOnMobile={showOnMobile}

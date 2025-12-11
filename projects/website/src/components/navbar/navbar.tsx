@@ -6,7 +6,7 @@ import PlayerAndLeaderboardSearch from "@/components/navbar/player-and-leaderboa
 import ProfileButton from "@/components/navbar/profile-button";
 import useDatabase from "@/hooks/use-database";
 import { CubeIcon } from "@heroicons/react/24/solid";
-import { useLiveQuery } from "dexie-react-hooks";
+import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { ChartBarIcon, MusicIcon, TrendingUpIcon, TrophyIcon } from "lucide-react";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -57,7 +57,7 @@ const links: ReactElement<any>[] = [
 
 export default function Navbar() {
   const database = useDatabase();
-  const hasMainPlayer = useLiveQuery(() => database.hasMainPlayer());
+  const hasMainPlayer = useStableLiveQuery(() => database.hasMainPlayer());
 
   return (
     <nav

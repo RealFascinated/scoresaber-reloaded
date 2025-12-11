@@ -3,7 +3,7 @@
 import { cn } from "@/common/utils";
 import useDatabase from "@/hooks/use-database";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
-import { useLiveQuery } from "dexie-react-hooks";
+import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { useEffect, useState } from "react";
 
 const IMAGE_CHANGE_INTERVAL = TimeUnit.toMillis(TimeUnit.Second, 30);
@@ -95,11 +95,11 @@ const getRandomIndex = (excludeIndex?: number): number => {
 
 export default function BackgroundCover() {
   const database = useDatabase();
-  const backgroundCover = useLiveQuery(async () => database.getBackgroundCover());
+  const backgroundCover = useStableLiveQuery(async () => database.getBackgroundCover());
   const [currentImageIndex, setCurrentImageIndex] = useState(() => getRandomIndex());
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const blur = useLiveQuery(async () => database.getBackgroundCoverBlur());
-  const brightness = useLiveQuery(async () => database.getBackgroundCoverBrightness());
+  const blur = useStableLiveQuery(async () => database.getBackgroundCoverBlur());
+  const brightness = useStableLiveQuery(async () => database.getBackgroundCoverBrightness());
 
   const cover = BACKGROUND_COVERS.find(cover => cover.id === backgroundCover);
 

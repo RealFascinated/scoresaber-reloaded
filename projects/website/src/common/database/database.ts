@@ -102,7 +102,8 @@ export default class Database extends Dexie {
    * @returns whether the database has a main player
    */
   async hasMainPlayer(): Promise<boolean> {
-    return (await this.getMainPlayerId()) !== undefined;
+    const id = await this.getMainPlayerId();
+    return id !== undefined && id !== "";
   }
 
   /**
@@ -123,7 +124,7 @@ export default class Database extends Dexie {
    *
    * @param id the id of the main player
    */
-  async setMainPlayerId(id: string) {
+  async setMainPlayerId(id: string | undefined) {
     await this.setSetting(SettingIds.MainPlayer, id);
     deleteCookieValue("playerId");
   }
@@ -275,7 +276,7 @@ export default class Database extends Dexie {
   public async getPlayer(id: string): Promise<ScoreSaberPlayer | undefined> {
     return this.getCache<ScoreSaberPlayer>(`player:${id}`, 60 * 60 * 6, async () => {
       try {
-        return await ssrApi.getScoreSaberPlayer(id, DetailType.FULL);
+        return await ssrApi.getScoreSaberPlayer(id, DetailType.BASIC);
       } catch (error) {
         Logger.error(`Failed to fetch player ${id}:`, error);
         return undefined;

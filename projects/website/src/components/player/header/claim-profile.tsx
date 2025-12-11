@@ -5,7 +5,7 @@ import { SettingIds } from "@/common/database/database";
 import SimpleTooltip from "@/components/simple-tooltip";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import useDatabase from "@/hooks/use-database";
-import { useLiveQuery } from "dexie-react-hooks";
+import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "../../ui/button";
@@ -19,7 +19,7 @@ type Props = {
 
 export default function ClaimProfile({ playerId }: Props) {
   const database = useDatabase();
-  const mainPlayer = useLiveQuery(() => database.getMainPlayer());
+  const hasMainPlayer = useStableLiveQuery(() => database.hasMainPlayer());
 
   /**
    * Claims the profile.
@@ -31,12 +31,8 @@ export default function ClaimProfile({ playerId }: Props) {
     toast.success("You have claimed this profile.");
   }
 
-  if (!database) {
+  if (!database || hasMainPlayer) {
     return null;
-  }
-
-  if (mainPlayer?.id == playerId) {
-    return null; // Don't show the claim button if it's the same user.
   }
 
   return (
@@ -48,11 +44,7 @@ export default function ClaimProfile({ playerId }: Props) {
           </Button>
         }
         title="Claim Profile"
-        description={
-          mainPlayer
-            ? `This will overwrite your current profile (${mainPlayer.name}). Are you sure you want to do this?`
-            : "Are you sure you want to claim this profile?"
-        }
+        description="Are you sure you want to claim this profile?"
         onConfirm={claimProfile}
       />
     </SimpleTooltip>

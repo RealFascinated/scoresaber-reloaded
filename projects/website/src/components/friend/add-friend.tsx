@@ -3,7 +3,7 @@
 import { cn } from "@/common/utils";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
-import { useLiveQuery } from "dexie-react-hooks";
+import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { UserMinus, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 import useDatabase from "../../hooks/use-database";
@@ -33,8 +33,8 @@ export default function FriendAction({
   const { id, name } = player;
 
   const database = useDatabase();
-  const isFriend = useLiveQuery(() => database.isFriend(id));
-  const playerId = useLiveQuery(() => database.getMainPlayerId());
+  const isFriend = useStableLiveQuery(() => database.isFriend(id));
+  const playerId = useStableLiveQuery(() => database.getMainPlayerId());
 
   /**
    * Adds this player as a friend

@@ -8,7 +8,7 @@ import { useIsMobile } from "@/contexts/viewport-context";
 import useDatabase from "@/hooks/use-database";
 import { Page, Pagination } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import { useLiveQuery } from "dexie-react-hooks";
+import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { useCallback, useEffect, useState } from "react";
 import Card from "../../card";
 import { Spinner } from "../../spinner";
@@ -16,7 +16,7 @@ import { Spinner } from "../../spinner";
 export function FriendRanking() {
   const isMobile = useIsMobile();
   const database = useDatabase();
-  const friends = useLiveQuery(async () => database.getFriends(true));
+  const friends = useStableLiveQuery(() => database.getFriends(true));
 
   const [page, setPage] = useState(1);
   const [friendsPage, setFriendsPage] = useState<Page<ScoreSaberPlayer>>();

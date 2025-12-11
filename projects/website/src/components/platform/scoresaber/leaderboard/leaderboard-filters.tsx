@@ -10,13 +10,13 @@ import { FilterField, FilterRow, FilterSection } from "@/components/ui/filter-se
 import useDatabase from "@/hooks/use-database";
 import { FilterItem } from "@ssr/common/filter-item";
 import { countryFilter } from "@ssr/common/utils/country.util";
-import { useLiveQuery } from "dexie-react-hooks";
+import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { FaCheck } from "react-icons/fa";
 import { toast } from "sonner";
 
 export default function ScoreSaberLeaderboardFilters() {
   const database = useDatabase();
-  const mainPlayer = useLiveQuery(() => database.getMainPlayer());
+  const mainPlayer = useStableLiveQuery(() => database.getMainPlayer());
   const filter = useLeaderboardFilter();
 
   return (

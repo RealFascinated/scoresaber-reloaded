@@ -1,3 +1,5 @@
+"use client";
+
 import AccSaberLogo from "@/components/logos/logos/accsaber-logo";
 import BeatLeaderLogo from "@/components/logos/logos/beatleader-logo";
 import ScoresaberLogo from "@/components/logos/logos/scoresaber-logo";
@@ -5,6 +7,8 @@ import SteamLogo from "@/components/logos/logos/steam-logo";
 import SimpleLink from "@/components/simple-link";
 import SimpleTooltip from "@/components/simple-tooltip";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
+import useDatabase from "@/hooks/use-database";
+import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { ssrConfig } from "config";
 import { ReactNode } from "react";
@@ -54,6 +58,9 @@ export function PlayerLink({ url, name, playerName, icon, children }: PlayerLink
 }
 
 export default function PlayerActions({ player }: { player: ScoreSaberPlayer }) {
+  const database = useDatabase();
+  const hasMainPlayer = useStableLiveQuery(() => database.hasMainPlayer());
+
   const twitchName = ssrConfig.playerTwitchAccounts[player.id];
 
   return (
@@ -100,14 +107,15 @@ export default function PlayerActions({ player }: { player: ScoreSaberPlayer }) 
       )}
 
       {/* Divider */}
-      <div className="flex items-center">
-        <div className="bg-border h-7 w-px" />
-      </div>
+      {hasMainPlayer && (
+        <>
+          <div className="flex items-center">
+            <div className="bg-border h-7 w-px" />
+          </div>
 
-      {/* Actions */}
-      <>
-        <SnipePlaylistCreator toSnipe={player} />
-      </>
+          <SnipePlaylistCreator toSnipe={player} />
+        </>
+      )}
     </div>
   );
 }

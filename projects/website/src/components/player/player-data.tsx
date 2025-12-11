@@ -18,7 +18,7 @@ import { ScoreSaberScoreDataMode } from "@ssr/common/types/score-data-mode";
 import { ScoreSort } from "@ssr/common/types/sort";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
-import { useLiveQuery } from "dexie-react-hooks";
+import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import AccSaberPlayerScores from "../platform/accsaber/accsaber-player-scores";
 import ScoreSaberPlayerMedalScores from "../platform/scoresaber/scoresaber-player-medal-scores";
 import ScoreSaberPlayerScores from "../platform/scoresaber/scoresaber-player-scores";
@@ -135,8 +135,8 @@ export default function PlayerData({
   const { width } = useWindowDimensions();
   const database = useDatabase();
 
-  const mainPlayerId = useLiveQuery(() => database.getMainPlayerId());
-  const isFriend = useLiveQuery(() => database.isFriend(initialPlayerData.id));
+  const mainPlayerId = useStableLiveQuery(() => database.getMainPlayerId());
+  const isFriend = useStableLiveQuery(() => database.isFriend(initialPlayerData.id));
 
   const { data: playerData } = useQuery({
     queryKey: ["playerData", initialPlayerData.id, mainPlayerId, isFriend],

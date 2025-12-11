@@ -18,7 +18,7 @@ import { PlayerStatisticHistory } from "@ssr/common/player/player-statistic-hist
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { getDaysAgo, getDaysAgoDate } from "@ssr/common/utils/time-utils";
 import { useQuery } from "@tanstack/react-query";
-import { useLiveQuery } from "dexie-react-hooks";
+import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { CalculatorIcon, ChartBarIcon, SwordIcon, TrendingUpIcon } from "lucide-react";
 import { ReactElement, useState } from "react";
 import PlayerRankingsButton from "../buttons/player-rankings-button";
@@ -117,7 +117,7 @@ function DateRangeSelector({
 export default function PlayerViews({ player }: { player: ScoreSaberPlayer }) {
   const isMobile = useIsMobile("2xl");
   const database = useDatabase();
-  const historyMode = useLiveQuery(() => database.getHistoryMode());
+  const historyMode = useStableLiveQuery(() => database.getHistoryMode());
 
   const [selectedViewIndex, setSelectedViewIndex] = useState(0);
   const [daysAgo, setDaysAgo] = useState(DEFAULT_DAYS_AGO);

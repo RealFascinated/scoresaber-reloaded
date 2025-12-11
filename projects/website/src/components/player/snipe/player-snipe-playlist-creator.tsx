@@ -31,7 +31,7 @@ import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { encodeSnipePlaylistSettings } from "@ssr/common/snipe/snipe-playlist-utils";
 import { SnipeSettings, snipeSettingsSchema } from "@ssr/common/snipe/snipe-settings-schema";
 import { truncateText } from "@ssr/common/string-utils";
-import { useLiveQuery } from "dexie-react-hooks";
+import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import {
   ArrowDown,
   ArrowUp,
@@ -101,7 +101,7 @@ function generateFilename(toSnipeId: string, data: SnipeSettings): string {
 
 export default function SnipePlaylistCreator({ toSnipe }: Props) {
   const database = useDatabase();
-  const playerId = useLiveQuery(() => database.getMainPlayerId());
+  const playerId = useStableLiveQuery(() => database.getMainPlayerId());
   const [downloading, setDownloading] = useState(false);
   const [expanded, setExpanded] = useState<Set<string>>(DEFAULT_EXPANDED);
 

@@ -23,7 +23,7 @@ import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { useDebounce, useDocumentTitle } from "@uidotdev/usehooks";
 import { ssrConfig } from "config";
-import { useLiveQuery } from "dexie-react-hooks";
+import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import {
   ArrowDown,
   ArrowUp,
@@ -161,8 +161,8 @@ export default function ScoreSaberPlayerScores({
   const { animateLeft, animateRight, setIsLoading } = usePageTransition();
 
   // Database queries
-  const mainPlayerId = useLiveQuery(() => database.getMainPlayerId());
-  const showScoreComparison = useLiveQuery(() => database.getShowScoreComparison());
+  const mainPlayerId = useStableLiveQuery(() => database.getMainPlayerId());
+  const showScoreComparison = useStableLiveQuery(() => database.getShowScoreComparison());
 
   // State
   const [currentPage, setCurrentPage] = useState(page);

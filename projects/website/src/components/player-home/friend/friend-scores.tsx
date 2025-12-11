@@ -5,7 +5,7 @@ import { useIsMobile } from "@/contexts/viewport-context";
 import useDatabase from "@/hooks/use-database";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
-import { useLiveQuery } from "dexie-react-hooks";
+import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { useState } from "react";
 import Card from "../../card";
 import ScoreSaberScoreDisplay from "../../platform/scoresaber/score/scoresaber-score";
@@ -15,7 +15,7 @@ import { Spinner } from "../../spinner";
 export function FriendScores() {
   const isMobile = useIsMobile();
   const database = useDatabase();
-  const friendIds = useLiveQuery(async () => database.getFriendIds(true));
+  const friendIds = useStableLiveQuery(async () => database.getFriendIds(true));
 
   const [page, setPage] = useState(1);
 

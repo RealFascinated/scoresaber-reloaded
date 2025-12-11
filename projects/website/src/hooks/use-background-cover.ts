@@ -1,7 +1,7 @@
 import { BACKGROUND_COVERS } from "@/components/background-cover";
 import useDatabase from "@/hooks/use-database";
 import { useDebounce } from "@uidotdev/usehooks";
-import { useLiveQuery } from "dexie-react-hooks";
+import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { useEffect, useRef, useState } from "react";
 
 export function useBackgroundCover(onChange: (value: string | number | boolean) => void) {
@@ -12,8 +12,8 @@ export function useBackgroundCover(onChange: (value: string | number | boolean) 
   const previousDebouncedValue = useRef<string>("");
   const debouncedCustomValue = useDebounce(customValue, 500);
 
-  const backgroundCoverOption = useLiveQuery(() => database.getBackgroundCover());
-  const customBackgroundCover = useLiveQuery(() => database.getCustomBackgroundUrl());
+  const backgroundCoverOption = useStableLiveQuery(() => database.getBackgroundCover());
+  const customBackgroundCover = useStableLiveQuery(() => database.getCustomBackgroundUrl());
 
   // Initialize state from database
   useEffect(() => {

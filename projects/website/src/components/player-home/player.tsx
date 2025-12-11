@@ -4,14 +4,14 @@ import useDatabase from "@/hooks/use-database";
 import { DetailType } from "@ssr/common/detail-type";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
-import { useLiveQuery } from "dexie-react-hooks";
+import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import Card from "../card";
 import PlayerPreviewHeader from "../player/header/player-preview-header";
 import { Spinner } from "../spinner";
 
 export function Player() {
   const database = useDatabase();
-  const mainPlayerId = useLiveQuery(() => database.getMainPlayerId());
+  const mainPlayerId = useStableLiveQuery(() => database.getMainPlayerId());
 
   const { data: player, isLoading } = useQuery({
     queryKey: ["player-preview-home", mainPlayerId],

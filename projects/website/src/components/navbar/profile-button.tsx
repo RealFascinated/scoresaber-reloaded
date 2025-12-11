@@ -5,7 +5,7 @@ import Avatar from "@/components/avatar";
 import { useIsMobile } from "@/contexts/viewport-context";
 import useDatabase from "@/hooks/use-database";
 import { truncateText } from "@ssr/common/string-utils";
-import { useLiveQuery } from "dexie-react-hooks";
+import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import SimpleLink from "../simple-link";
 import { ConfirmationDialog } from "../ui/confirmation-dialog";
 import {
@@ -19,13 +19,13 @@ import {
 export default function ProfileButton() {
   const isMobile = useIsMobile("2xl");
   const database: Database = useDatabase();
-  const mainPlayer = useLiveQuery(() => database.getMainPlayer());
+  const mainPlayer = useStableLiveQuery(() => database.getMainPlayer());
   if (mainPlayer == undefined) {
     return;
   }
 
   async function unlinkAccount() {
-    await database.setMainPlayerId("");
+    await database.setMainPlayerId(undefined);
   }
 
   const buttonContent = (

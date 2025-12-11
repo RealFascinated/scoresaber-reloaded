@@ -1,7 +1,7 @@
 "use client";
 
 import { isServer } from "@ssr/common/utils/utils";
-import { createContext, ReactNode, useEffect, useState } from "react";
+import { createContext, ReactNode, useEffect, useMemo, useState } from "react";
 import Database, { getDatabase } from "../../common/database/database";
 import FullscreenLoader from "./fullscreen-loader";
 
@@ -21,7 +21,12 @@ type DatabaseLoaderProps = {
 let databaseInstance: Database | undefined;
 
 export default function DatabaseLoader({ children }: DatabaseLoaderProps) {
-  const [database, setDatabase] = useState<Database | undefined>();
+  // Initialize with singleton if available (for client-side remounts)
+  const [database, setDatabase] = useState<Database | undefined>(() => {
+    if (isServer()) return undefined;
+    // If singleton exists, use it immediately to avoid undefined during remounts
+    return databaseInstance;
+  });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -71,8 +76,11 @@ export default function DatabaseLoader({ children }: DatabaseLoaderProps) {
     );
   }
 
+  // Memoize context value to prevent unnecessary re-renders
+  const contextValue = useMemo(() => database, [database]);
+
   return (
-    <DatabaseContext.Provider value={database}>
+    <DatabaseContext.Provider value={contextValue}>
       {isLoading ? <FullscreenLoader reason="Loading database..." /> : children}
     </DatabaseContext.Provider>
   );

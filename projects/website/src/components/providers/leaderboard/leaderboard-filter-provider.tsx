@@ -1,6 +1,6 @@
 import { SettingIds } from "@/common/database/database";
 import useDatabase from "@/hooks/use-database";
-import { useLiveQuery } from "dexie-react-hooks";
+import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { createContext, ReactNode, useContext, useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -21,7 +21,7 @@ export const LeaderboardFilterProvider = ({
   initialCountry?: string;
 }) => {
   const database = useDatabase();
-  const defaultCountry = useLiveQuery(() =>
+  const defaultCountry = useStableLiveQuery(() =>
     database.getSetting<string>(SettingIds.DefaultLeaderboardCountry)
   );
   const [country, setCountry] = useState<string | undefined>(initialCountry ?? undefined);
