@@ -38,8 +38,7 @@ class FetchMissingPlayerScores {
           .lean();
         const playerIds = players.map(p => p._id);
         if (playerIds.length === 0) {
-          Logger.info("No players to fetch missing scores for");
-          interaction.reply({
+          interaction.editReply({
             content: "No players to fetch missing scores for",
           });
           return;
@@ -50,7 +49,7 @@ class FetchMissingPlayerScores {
             data: playerId,
           });
         }
-        interaction.reply({
+        interaction.editReply({
           content: `Added ${playerIds.length} players to the fetch missing scores queue`,
         });
         return;
