@@ -1,7 +1,7 @@
 import { BACKGROUND_COVERS } from "@/components/background-cover";
 import useDatabase from "@/hooks/use-database";
-import { useDebounce } from "@uidotdev/usehooks";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
+import { useDebounce } from "@uidotdev/usehooks";
 import { useEffect, useRef, useState } from "react";
 
 export function useBackgroundCover(onChange: (value: string | number | boolean) => void) {

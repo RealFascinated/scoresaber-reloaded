@@ -1,9 +1,9 @@
 import { ScoreModeEnum } from "@/components/score/score-mode-switcher";
+import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { Page, Pagination } from "@ssr/common/pagination";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
-import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import useDatabase from "../use-database";
 
 export const useLeaderboardScores = (

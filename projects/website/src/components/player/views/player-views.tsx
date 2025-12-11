@@ -12,13 +12,13 @@ import {
 } from "@/components/ui/select";
 import { useIsMobile } from "@/contexts/viewport-context";
 import useDatabase from "@/hooks/use-database";
+import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerStatisticHistory } from "@ssr/common/player/player-statistic-history";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { getDaysAgo, getDaysAgoDate } from "@ssr/common/utils/time-utils";
 import { useQuery } from "@tanstack/react-query";
-import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { CalculatorIcon, ChartBarIcon, SwordIcon, TrendingUpIcon } from "lucide-react";
 import { ReactElement, useState } from "react";
 import PlayerRankingsButton from "../buttons/player-rankings-button";

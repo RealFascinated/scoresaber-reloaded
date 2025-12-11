@@ -3,9 +3,9 @@
 import PlayerScoreHeader from "@/components/score/player-score-header";
 import { useIsMobile } from "@/contexts/viewport-context";
 import useDatabase from "@/hooks/use-database";
+import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
-import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { useState } from "react";
 import Card from "../../card";
 import ScoreSaberScoreDisplay from "../../platform/scoresaber/score/scoresaber-score";

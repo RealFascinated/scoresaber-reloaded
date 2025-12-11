@@ -5,6 +5,7 @@ import { DEFAULT_WHAT_IF_RANGE, SettingIds } from "@/common/database/database";
 import Card from "@/components/card";
 import { DualRangeSlider } from "@/components/ui/dual-range-slider";
 import useDatabase from "@/hooks/use-database";
+import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { ScoreSaberCurve } from "@ssr/common/leaderboard-curve/scoresaber-curve";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { useDebounce } from "@uidotdev/usehooks";
@@ -19,7 +20,6 @@ import {
   Title,
   Tooltip,
 } from "chart.js";
-import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { useEffect, useState } from "react";
 import { Line } from "react-chartjs-2";
 

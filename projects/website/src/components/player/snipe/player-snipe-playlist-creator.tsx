@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import useDatabase from "@/hooks/use-database";
+import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Consts } from "@ssr/common/consts";
 import { env } from "@ssr/common/env";
@@ -31,7 +32,6 @@ import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { encodeSnipePlaylistSettings } from "@ssr/common/snipe/snipe-playlist-utils";
 import { SnipeSettings, snipeSettingsSchema } from "@ssr/common/snipe/snipe-settings-schema";
 import { truncateText } from "@ssr/common/string-utils";
-import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import {
   ArrowDown,
   ArrowUp,

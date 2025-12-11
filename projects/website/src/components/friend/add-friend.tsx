@@ -1,9 +1,9 @@
 "use client";
 
 import { cn } from "@/common/utils";
+import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
-import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { UserMinus, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 import useDatabase from "../../hooks/use-database";

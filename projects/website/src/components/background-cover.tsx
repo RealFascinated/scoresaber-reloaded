@@ -2,8 +2,8 @@
 
 import { cn } from "@/common/utils";
 import useDatabase from "@/hooks/use-database";
-import { TimeUnit } from "@ssr/common/utils/time-utils";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
+import { TimeUnit } from "@ssr/common/utils/time-utils";
 import { useEffect, useState } from "react";
 
 const IMAGE_CHANGE_INTERVAL = TimeUnit.toMillis(TimeUnit.Second, 30);

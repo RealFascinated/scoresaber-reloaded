@@ -10,6 +10,7 @@ import PageTransition from "@/components/ui/page-transition";
 import { usePageTransition } from "@/components/ui/page-transition-context";
 import { useIsMobile } from "@/contexts/viewport-context";
 import useDatabase from "@/hooks/use-database";
+import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { useUrlBuilder } from "@/hooks/use-url-builder";
 import { getHMDInfo, HMD } from "@ssr/common/hmds";
 import { Pagination } from "@ssr/common/pagination";
@@ -23,7 +24,6 @@ import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { useDebounce, useDocumentTitle } from "@uidotdev/usehooks";
 import { ssrConfig } from "config";
-import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import {
   ArrowDown,
   ArrowUp,

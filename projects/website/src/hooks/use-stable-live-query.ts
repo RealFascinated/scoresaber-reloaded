@@ -38,7 +38,7 @@ export function useStableLiveQuery<T>(
 ): T | undefined {
   // Generate a stable cache key for this query
   const cacheKey = useMemo(() => getStableCacheKey(querier, deps), [querier, deps]);
-  
+
   // Memoize the safe querier to ensure stable reference for useLiveQuery deduplication
   // useLiveQuery deduplicates based on the function reference and deps
   const safeQuerier = useMemo(() => {
@@ -55,11 +55,11 @@ export function useStableLiveQuery<T>(
   // useLiveQuery will deduplicate calls with the same function reference and deps
   // Multiple components using the same query will share the same database call
   const result = useLiveQuery(safeQuerier, deps);
-  
+
   // Use a ref to track the last value for comparison and caching
   const lastValueRef = useRef<T | undefined>(queryCache.get(cacheKey) as T | undefined);
   const resultRef = useRef(result);
-  
+
   // Update cache when result changes
   useEffect(() => {
     resultRef.current = result;
@@ -74,8 +74,7 @@ export function useStableLiveQuery<T>(
   if (result !== undefined) {
     return result;
   }
-  
+
   // Fallback to cached value during remounts
   return lastValueRef.current;
 }
-

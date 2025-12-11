@@ -1,10 +1,10 @@
 "use client";
 
 import useDatabase from "@/hooks/use-database";
+import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { DetailType } from "@ssr/common/detail-type";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
-import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import Card from "../card";
 import PlayerPreviewHeader from "../player/header/player-preview-header";
 import { Spinner } from "../spinner";

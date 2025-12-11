@@ -4,8 +4,8 @@ import Database from "@/common/database/database";
 import Avatar from "@/components/avatar";
 import { useIsMobile } from "@/contexts/viewport-context";
 import useDatabase from "@/hooks/use-database";
-import { truncateText } from "@ssr/common/string-utils";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
+import { truncateText } from "@ssr/common/string-utils";
 import SimpleLink from "../simple-link";
 import { ConfirmationDialog } from "../ui/confirmation-dialog";
 import {

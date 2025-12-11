@@ -3,11 +3,11 @@
 import { getRankBgColor } from "@/common/rank-color-utils";
 import { cn } from "@/common/utils";
 import useDatabase from "@/hooks/use-database";
+import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { getScoreSaberAvatar, getScoreSaberRoles } from "@ssr/common/utils/scoresaber.util";
-import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { PlayerAvatar } from "../ranking/player-avatar";
 import SimpleLink from "../simple-link";
 import CountryFlag from "../ui/country-flag";

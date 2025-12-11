@@ -22,10 +22,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import useDatabase from "@/hooks/use-database";
+import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DetailType } from "@ssr/common/detail-type";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
-import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { Eye, Monitor, User } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";

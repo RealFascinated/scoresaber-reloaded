@@ -27,11 +27,22 @@ export default function DatabaseLoader({ children }: DatabaseLoaderProps) {
     // If singleton exists, use it immediately to avoid undefined during remounts
     return databaseInstance;
   });
-  const [isLoading, setIsLoading] = useState(true);
+  // If database instance already exists, we're not loading
+  const [isLoading, setIsLoading] = useState(() => {
+    if (isServer()) return false;
+    // If singleton already exists, we're not loading
+    return databaseInstance === undefined;
+  });
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (isServer()) {
+      setIsLoading(false);
+      return;
+    }
+
+    // If database is already available, we're done
+    if (databaseInstance && database) {
       setIsLoading(false);
       return;
     }
@@ -57,7 +68,7 @@ export default function DatabaseLoader({ children }: DatabaseLoaderProps) {
     };
 
     initializeDatabase();
-  }, []);
+  }, [database]);
 
   // Show error state
   if (error) {

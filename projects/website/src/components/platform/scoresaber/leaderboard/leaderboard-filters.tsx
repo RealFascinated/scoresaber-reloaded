@@ -8,9 +8,9 @@ import Combobox from "@/components/ui/combo-box";
 import CountryFlag from "@/components/ui/country-flag";
 import { FilterField, FilterRow, FilterSection } from "@/components/ui/filter-section";
 import useDatabase from "@/hooks/use-database";
+import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { FilterItem } from "@ssr/common/filter-item";
 import { countryFilter } from "@ssr/common/utils/country.util";
-import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { FaCheck } from "react-icons/fa";
 import { toast } from "sonner";
 

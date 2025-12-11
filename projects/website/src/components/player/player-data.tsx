@@ -6,6 +6,7 @@ import PlayerBadges from "@/components/player/player-badges";
 import PlayerViews from "@/components/player/views/player-views";
 import { useWindowDimensions } from "@/contexts/viewport-context";
 import useDatabase from "@/hooks/use-database";
+import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import {
   AccSaberScoreOrder,
   AccSaberScoreSort,
@@ -18,7 +19,6 @@ import { ScoreSaberScoreDataMode } from "@ssr/common/types/score-data-mode";
 import { ScoreSort } from "@ssr/common/types/sort";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
-import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import AccSaberPlayerScores from "../platform/accsaber/accsaber-player-scores";
 import ScoreSaberPlayerMedalScores from "../platform/scoresaber/scoresaber-player-medal-scores";
 import ScoreSaberPlayerScores from "../platform/scoresaber/scoresaber-player-scores";
