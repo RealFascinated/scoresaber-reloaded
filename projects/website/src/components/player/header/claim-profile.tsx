@@ -40,21 +40,21 @@ export default function ClaimProfile({ playerId }: Props) {
   }
 
   return (
-    <ConfirmationDialog
-      trigger={
-        <SimpleTooltip display={<p>Claim this player to use it as your profile.</p>} side="bottom">
+    <SimpleTooltip display={<p>Claim this player to use it as your profile.</p>} side="bottom">
+      <ConfirmationDialog
+        trigger={
           <Button variant={"outline"}>
             <ShieldCheck className="size-5 text-green-500" />
           </Button>
-        </SimpleTooltip>
-      }
-      title="Claim Profile"
-      description={
-        mainPlayer
-          ? `This will overwrite your current profile (${mainPlayer.name}). Are you sure you want to do this?`
-          : "Are you sure you want to claim this profile?"
-      }
-      onConfirm={claimProfile}
-    />
+        }
+        title="Claim Profile"
+        description={
+          mainPlayer
+            ? `This will overwrite your current profile (${mainPlayer.name}). Are you sure you want to do this?`
+            : "Are you sure you want to claim this profile?"
+        }
+        onConfirm={claimProfile}
+      />
+    </SimpleTooltip>
   );
 }
