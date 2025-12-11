@@ -245,7 +245,7 @@ export default function ScoreSaberPlayerScores({
 
   useEffect(() => {
     setIsLoading(isLoading || isRefetching);
-  }, [isLoading, isRefetching, setIsLoading]);
+  }, [isLoading, isRefetching, scores, setIsLoading]);
 
   // Event handlers
   const handleSortChange = useCallback(

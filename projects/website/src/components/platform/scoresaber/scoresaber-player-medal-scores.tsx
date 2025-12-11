@@ -63,7 +63,7 @@ export default function ScoreSaberPlayerMedalScores({
 
   useEffect(() => {
     setIsLoading(isLoading || isRefetching);
-  }, [isLoading, isRefetching, setIsLoading]);
+  }, [isLoading, isRefetching, scores, setIsLoading]);
 
   const handlePageChange = useCallback(
     (newPage: number) => {
