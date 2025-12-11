@@ -14,7 +14,7 @@ import { MapDifficulty } from "@ssr/common/score/map-difficulty";
 import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
 import { MapCharacteristic } from "@ssr/common/types/map-characteristic";
 import { getDifficulty } from "@ssr/common/utils/song-utils";
-import { TimeUnit } from "@ssr/common/utils/time-utils";
+import { formatDuration, TimeUnit } from "@ssr/common/utils/time-utils";
 import SuperJSON from "superjson";
 import { redisClient } from "../../common/redis";
 import { LeaderboardData, LeaderboardOptions } from "../../common/types/leaderboard";
@@ -240,6 +240,7 @@ export class LeaderboardCoreService {
       })
     );
 
+    const before = performance.now();
     await Promise.all(
       stillUncachedIds.map(async id => {
         const leaderboard = await LeaderboardService.fetchAndSaveLeaderboard(id);
@@ -258,7 +259,9 @@ export class LeaderboardCoreService {
       .map(id => results.get(id))
       .filter((data): data is LeaderboardData => data !== null);
     if (stillUncachedIds.length > 0) {
-      Logger.info(`Fetched ${allLeaderboards.length} leaderboards from ScoreSaber!`);
+      Logger.info(
+        `Fetched ${allLeaderboards.length} leaderboards from ScoreSaber in ${formatDuration(performance.now() - before)}!`
+      );
     }
 
     // Add BeatSaver data if needed
@@ -407,7 +410,7 @@ export class LeaderboardCoreService {
   ): ScoreSaberLeaderboard {
     const difficulties = rankedMapDiffs
       .get(leaderboard.songHash)
-      ?.sort((a, b) => getDifficulty(a.difficulty).id - getDifficulty(b.difficulty).id);
+      ?.sort((a, b) => getDifficulty(a.difficulty).diffId - getDifficulty(b.difficulty).diffId);
 
     return {
       ...leaderboard,
