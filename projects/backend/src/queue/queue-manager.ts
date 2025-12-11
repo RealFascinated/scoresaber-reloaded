@@ -14,6 +14,11 @@ export class QueueManager implements EventListener {
   constructor() {
     QueueManager.addQueue(new FetchMissingScoresQueue());
     QueueManager.addQueue(new LeaderboardScoreSeedQueue());
+
+    // Start all queues
+    for (const queue of QueueManager.queues.values()) {
+      queue.processQueue();
+    }
   }
 
   /**

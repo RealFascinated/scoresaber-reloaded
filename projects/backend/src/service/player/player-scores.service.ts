@@ -170,12 +170,19 @@ export class PlayerScoresService {
           result.totalScores++;
         }
 
-        // We have found all the scores !!
-        if (result.totalScores >= playerToken.scoreStats.totalPlayCount) {
+       
+        if (
+          result.totalScores >= playerToken.scoreStats.totalPlayCount || // We have found all the scores !!
+          page === Math.ceil(scoresPage.metadata.total / scoresPage.metadata.itemsPerPage) // We have reached the last page
+        ) {
           break;
         }
 
-        if (page % 10 === 0) {
+        if (
+          page % 10 === 0 || // Log every 10 pages
+          page === 1 || // Log the first page
+          page === Math.ceil(scoresPage.metadata.total / scoresPage.metadata.itemsPerPage) // Log the last page
+        ) {
           Logger.info(`Fetched ${page} pages of scores for ${playerId}...`);
         }
       }
