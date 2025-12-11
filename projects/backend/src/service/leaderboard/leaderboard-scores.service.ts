@@ -7,7 +7,7 @@ import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 import { Metadata } from "@ssr/common/types/metadata";
 import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score";
 import BeatLeaderService from "../beatleader.service";
-import { LeaderboardService } from "./leaderboard.service";
+import { LeaderboardCoreService } from "./leaderboard-core.service";
 
 export class LeaderboardScoresService {
   /**
@@ -70,7 +70,7 @@ export class LeaderboardScoresService {
   ): Promise<LeaderboardScoresResponse | undefined> {
     let metadata: Metadata = new Metadata(0, 0, 0, 0); // Default values
 
-    const leaderboardResponse = await LeaderboardService.getLeaderboard(leaderboardId);
+    const leaderboardResponse = await LeaderboardCoreService.getLeaderboard(leaderboardId);
     if (leaderboardResponse == undefined) {
       throw new NotFoundError(`Leaderboard "${leaderboardId}" not found`);
     }

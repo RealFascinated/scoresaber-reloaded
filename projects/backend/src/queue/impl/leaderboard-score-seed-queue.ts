@@ -4,7 +4,7 @@ import Logger from "@ssr/common/logger";
 import { ScoreSaberLeaderboardModel } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 import { isProduction } from "@ssr/common/utils/utils";
-import { LeaderboardService } from "../../service/leaderboard/leaderboard.service";
+import { LeaderboardCoreService } from "../../service/leaderboard/leaderboard-core.service";
 import { ScoreCoreService } from "../../service/score/score-core.service";
 import { Queue, QueueItem } from "../queue";
 import { QueueId } from "../queue-manager";
@@ -31,7 +31,7 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
   protected async processItem(item: QueueItem<number>): Promise<void> {
     const leaderboardId = item.id;
 
-    const leaderboardResponse = await LeaderboardService.getLeaderboard(leaderboardId);
+    const leaderboardResponse = await LeaderboardCoreService.getLeaderboard(leaderboardId);
     if (!leaderboardResponse) {
       Logger.warn(`Leaderboard "${leaderboardId}" not found`);
       return;

@@ -9,7 +9,7 @@ import { Page, Pagination } from "@ssr/common/pagination";
 import { PlayerScore } from "@ssr/common/score/player-score";
 import { processInBatches } from "@ssr/common/utils/batch-utils";
 import { scoreToObject } from "../../common/score/score.util";
-import { LeaderboardService } from "../leaderboard/leaderboard.service";
+import { LeaderboardCoreService } from "../leaderboard/leaderboard-core.service";
 import { ScoreCoreService } from "../score/score-core.service";
 
 const ITEMS_PER_PAGE = 8;
@@ -28,7 +28,7 @@ export class PlayerFriendScoresService {
     leaderboardId: number,
     page: number
   ): Promise<Page<ScoreSaberScore>> {
-    const leaderboard = await LeaderboardService.getLeaderboard(leaderboardId + "", {
+    const leaderboard = await LeaderboardCoreService.getLeaderboard(leaderboardId + "", {
       includeBeatSaver: false,
       cacheOnly: true,
     });
@@ -132,7 +132,7 @@ export class PlayerFriendScoresService {
         const leaderboardIds = friendScores.map(score => score.leaderboardId + "");
 
         // Fetch all leaderboards in parallel using getLeaderboards
-        const leaderboardResults = await LeaderboardService.getLeaderboards(leaderboardIds, {
+        const leaderboardResults = await LeaderboardCoreService.getLeaderboards(leaderboardIds, {
           includeBeatSaver: true,
           beatSaverType: DetailType.FULL,
         });

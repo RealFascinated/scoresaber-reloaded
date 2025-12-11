@@ -16,7 +16,7 @@ import { LeaderboardStarChange } from "@ssr/common/response/leaderboard-star-cha
 import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 import { LeaderboardUpdate, LeaderboardUpdates } from "../../common/types/leaderboard";
 import CacheService from "../cache.service";
-import { LeaderboardService } from "./leaderboard.service";
+import { LeaderboardCoreService } from "./leaderboard-core.service";
 
 const BATCH_SIZE = 100;
 
@@ -341,7 +341,7 @@ export class LeaderboardRankingService {
           continue;
         }
 
-        const update = LeaderboardService.checkLeaderboardChanges(leaderboard, previousLeaderboard);
+        const update = this.checkLeaderboardChanges(leaderboard, previousLeaderboard);
         if (
           update.rankedStatusChanged ||
           update.starCountChanged ||
@@ -351,7 +351,7 @@ export class LeaderboardRankingService {
           leaderboardsToHandle.push({ leaderboard, update });
         } else {
           // Regular update - add to bulk update
-          const updatedLeaderboard = LeaderboardService.updateLeaderboardDifficulties(
+          const updatedLeaderboard = LeaderboardCoreService.updateLeaderboardDifficulties(
             leaderboard,
             rankedMapDiffs
           );
@@ -391,7 +391,7 @@ export class LeaderboardRankingService {
           const updatedScores = await LeaderboardRankingService.handleLeaderboardUpdate(update);
 
           // Save the leaderboard after handling
-          const updatedLeaderboard = LeaderboardService.updateLeaderboardDifficulties(
+          const updatedLeaderboard = LeaderboardCoreService.updateLeaderboardDifficulties(
             leaderboard,
             rankedMapDiffs
           );

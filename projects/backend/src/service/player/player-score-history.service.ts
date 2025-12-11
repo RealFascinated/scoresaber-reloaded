@@ -8,7 +8,7 @@ import {
 } from "@ssr/common/model/score/impl/scoresaber-score";
 import { Page, Pagination } from "@ssr/common/pagination";
 import CacheService, { CacheId } from "../cache.service";
-import { LeaderboardService } from "../leaderboard/leaderboard.service";
+import { LeaderboardCoreService } from "../leaderboard/leaderboard-core.service";
 import { ScoreCoreService } from "../score/score-core.service";
 
 export class PlayerScoreHistoryService {
@@ -42,7 +42,7 @@ export class PlayerScoreHistoryService {
     }
 
     // Get leaderboard data once for all scores
-    const leaderboardResponse = await LeaderboardService.getLeaderboard(leaderboardId);
+    const leaderboardResponse = await LeaderboardCoreService.getLeaderboard(leaderboardId);
     if (leaderboardResponse == undefined) {
       throw new NotFoundError(`Leaderboard "${leaderboardId}" not found`);
     }

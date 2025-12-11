@@ -21,7 +21,8 @@ import {
   generatePlaylistImage,
   generateSnipePlaylistImage,
 } from "../../common/playlist.util";
-import { LeaderboardService } from "../leaderboard/leaderboard.service";
+import { LeaderboardCoreService } from "../leaderboard/leaderboard-core.service";
+import { LeaderboardLeaderboardsService } from "../leaderboard/leaderboard-leaderboards.service";
 import { PlayerCoreService } from "../player/player-core.service";
 import ScoreSaberService from "../scoresaber.service";
 
@@ -112,7 +113,7 @@ export default class PlaylistService {
     leaderboards?: ScoreSaberLeaderboard[]
   ): Promise<Playlist> {
     if (!leaderboards) {
-      leaderboards = await LeaderboardService.getRankedLeaderboards();
+      leaderboards = await LeaderboardLeaderboardsService.getRankedLeaderboards();
     }
 
     const title = `ScoreSaber Ranked Maps (${formatDateMinimal(new Date())})`;
@@ -140,7 +141,7 @@ export default class PlaylistService {
     leaderboards?: ScoreSaberLeaderboard[]
   ): Promise<Playlist> {
     if (!leaderboards) {
-      leaderboards = await LeaderboardService.getQualifiedLeaderboards();
+      leaderboards = await LeaderboardLeaderboardsService.getQualifiedLeaderboards();
     }
 
     const title = `ScoreSaber Qualified Maps (${formatDateMinimal(new Date())})`;
@@ -173,7 +174,7 @@ export default class PlaylistService {
    * Creates a playlist for ranking queue maps
    */
   public static async createRankingQueuePlaylist(): Promise<Playlist> {
-    const leaderboards = await LeaderboardService.getRankingQueueLeaderboards();
+    const leaderboards = await LeaderboardLeaderboardsService.getRankingQueueLeaderboards();
     const { maps } = this.processLeaderboards(leaderboards);
     const highlightedIds = leaderboards
       .map(map => map.id) // Add base leaderboard IDs
@@ -206,7 +207,7 @@ export default class PlaylistService {
     }
 
     const parsedConfig = parseCustomRankedPlaylistSettings(config);
-    const leaderboards = await LeaderboardService.getRankedLeaderboards({
+    const leaderboards = await LeaderboardLeaderboardsService.getRankedLeaderboards({
       sort: parsedConfig.sort,
       match: {
         stars: {
@@ -301,7 +302,7 @@ export default class PlaylistService {
       });
 
       // Fetch leaderboards for the scores
-      const leaderboards = await LeaderboardService.getLeaderboards(
+      const leaderboards = await LeaderboardCoreService.getLeaderboards(
         scores.map(score => score.leaderboardId.toString()),
         {
           cacheOnly: true,

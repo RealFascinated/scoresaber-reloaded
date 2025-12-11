@@ -1,7 +1,7 @@
 import { IsGuildUser } from "@discordx/utilities";
 import { CommandInteraction } from "discord.js";
 import { Discord, Guard, Slash } from "discordx";
-import { LeaderboardService } from "../../service/leaderboard/leaderboard.service";
+import { LeaderboardLeaderboardsService } from "../../service/leaderboard/leaderboard-leaderboards.service";
 import { OwnerOnly } from "../lib/guards";
 
 @Discord()
@@ -15,7 +15,7 @@ class RefreshRankedLeaderboards {
   async forceRankedLeaderboardsRefresh(interaction: CommandInteraction) {
     await interaction.deferReply();
     try {
-      await LeaderboardService.refreshRankedLeaderboards();
+      await LeaderboardLeaderboardsService.refreshRankedLeaderboards();
       await interaction.editReply({
         content: "Ranked leaderboards refreshed",
       });

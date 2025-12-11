@@ -14,7 +14,9 @@ import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
 import { RefreshResult } from "../../common/types/leaderboard";
 import CacheService, { CacheId } from "../cache.service";
 import PlaylistService from "../playlist/playlist.service";
-import { LeaderboardService } from "./leaderboard.service";
+import { LeaderboardCoreService } from "./leaderboard-core.service";
+import { LeaderboardRankingService } from "./leaderboard-ranking.service";
+import { LeaderboardNotificationsService } from "./leaderboard-notifications.service";
 
 export class LeaderboardLeaderboardsService {
   /**
@@ -40,7 +42,7 @@ export class LeaderboardLeaderboardsService {
       { $sort: { dateRanked: -1 } },
     ]);
 
-    return leaderboards.map(leaderboard => LeaderboardService.leaderboardToObject(leaderboard));
+    return leaderboards.map(leaderboard => LeaderboardCoreService.leaderboardToObject(leaderboard));
   }
 
   /**
@@ -52,7 +54,9 @@ export class LeaderboardLeaderboardsService {
       "leaderboard:qualified-leaderboards",
       async () => {
         const leaderboards = await ScoreSaberLeaderboardModel.find({ qualified: true }).lean();
-        return leaderboards.map(leaderboard => LeaderboardService.leaderboardToObject(leaderboard));
+        return leaderboards.map(leaderboard =>
+          LeaderboardCoreService.leaderboardToObject(leaderboard)
+        );
       }
     );
   }
@@ -94,7 +98,7 @@ export class LeaderboardLeaderboardsService {
     Logger.info(`Refreshing ${playlistTitle.toLowerCase()} leaderboards...`);
     const before = Date.now();
     const { leaderboards, rankedMapDiffs } = await fetchFunction();
-    const leaderboardUpdates = await LeaderboardService.processLeaderboardUpdates(
+    const leaderboardUpdates = await LeaderboardRankingService.processLeaderboardUpdates(
       leaderboards,
       rankedMapDiffs
     );
@@ -151,7 +155,8 @@ export class LeaderboardLeaderboardsService {
     );
 
     // Handle unranking old leaderboards using the already fetched data
-    const unrankedLeaderboards = await LeaderboardService.unrankOldLeaderboards(leaderboards);
+    const unrankedLeaderboards =
+      await LeaderboardRankingService.unrankOldLeaderboards(leaderboards);
 
     // Get the newly ranked maps, buffed maps, and nerfed maps
     const newlyRankedMaps = result.updatedLeaderboards.filter(
@@ -171,7 +176,7 @@ export class LeaderboardLeaderboardsService {
 
     if (result.updatedLeaderboardsCount > 0 || unrankedLeaderboards.length > 0) {
       // Log the leaderboard updates to Discord
-      await LeaderboardService.logLeaderboardUpdates(
+      await LeaderboardNotificationsService.logLeaderboardUpdates(
         newlyRankedMaps,
         buffedMaps,
         nerfedMaps,
@@ -215,7 +220,7 @@ export class LeaderboardLeaderboardsService {
     leaderboards: ScoreSaberLeaderboard[];
     rankedMapDiffs: Map<string, LeaderboardDifficulty[]>;
   }> {
-    return LeaderboardService.fetchAllLeaderboards({ ranked: true });
+    return LeaderboardCoreService.fetchAllLeaderboards({ ranked: true });
   }
 
   /**
@@ -225,6 +230,6 @@ export class LeaderboardLeaderboardsService {
     leaderboards: ScoreSaberLeaderboard[];
     rankedMapDiffs: Map<string, LeaderboardDifficulty[]>;
   }> {
-    return LeaderboardService.fetchAllLeaderboards({ qualified: true });
+    return LeaderboardCoreService.fetchAllLeaderboards({ qualified: true });
   }
 }

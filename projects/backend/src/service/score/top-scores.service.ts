@@ -7,7 +7,7 @@ import { Page, Pagination } from "@ssr/common/pagination";
 import { PlayerScore } from "@ssr/common/score/player-score";
 import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score";
 import { scoreToObject } from "../../common/score/score.util";
-import { LeaderboardService } from "../leaderboard/leaderboard.service";
+import { LeaderboardCoreService } from "../leaderboard/leaderboard-core.service";
 import ScoreSaberService from "../scoresaber.service";
 import { ScoreCoreService } from "./score-core.service";
 
@@ -39,7 +39,7 @@ export class TopScoresService {
       const leaderboardIds = scoreObjects.map((score: ScoreSaberScore) =>
         score.leaderboardId.toString()
       );
-      const leaderboardResponses = await LeaderboardService.getLeaderboards(leaderboardIds, {
+      const leaderboardResponses = await LeaderboardCoreService.getLeaderboards(leaderboardIds, {
         includeBeatSaver: true,
         cacheOnly: true,
       });

@@ -11,7 +11,7 @@ import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import { scoreToObject } from "../../common/score/score.util";
 import BeatLeaderService from "../beatleader.service";
-import { LeaderboardService } from "../leaderboard/leaderboard.service";
+import { LeaderboardCoreService } from "../leaderboard/leaderboard-core.service";
 import { PlayerHmdService } from "../player/player-hmd.service";
 import { PlayerScoreHistoryService } from "../player/player-score-history.service";
 import ScoreSaberService from "../scoresaber.service";
@@ -137,7 +137,7 @@ export class ScoreCoreService {
     };
 
     leaderboard = !leaderboard
-      ? (await LeaderboardService.getLeaderboard(score.leaderboardId + "")).leaderboard
+      ? (await LeaderboardCoreService.getLeaderboard(score.leaderboardId + "")).leaderboard
       : leaderboard;
 
     // If the leaderboard is not found, return the plain score

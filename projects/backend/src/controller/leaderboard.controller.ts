@@ -5,7 +5,8 @@ import { MapDifficulty } from "@ssr/common/score/map-difficulty";
 import { MapCharacteristic } from "@ssr/common/types/map-characteristic";
 import { t } from "elysia";
 import { Controller, Get } from "elysia-decorators";
-import { LeaderboardService } from "../service/leaderboard/leaderboard.service";
+import { LeaderboardCoreService } from "../service/leaderboard/leaderboard-core.service";
+import { LeaderboardHmdService } from "../service/leaderboard/leaderboard-hmd.service";
 
 @Controller("/leaderboard")
 export default class LeaderboardController {
@@ -31,7 +32,7 @@ export default class LeaderboardController {
     };
     query: { type: DetailType };
   }): Promise<LeaderboardResponse> {
-    return await LeaderboardService.getLeaderboard(id, {
+    return await LeaderboardCoreService.getLeaderboard(id, {
       beatSaverType: type,
       includeBeatSaver: true,
       includeStarChangeHistory: true,
@@ -64,7 +65,7 @@ export default class LeaderboardController {
     };
     query: { type: DetailType };
   }): Promise<LeaderboardResponse> {
-    const data = await LeaderboardService.getLeaderboardByHash(id, difficulty, characteristic, {
+    const data = await LeaderboardCoreService.getLeaderboardByHash(id, difficulty, characteristic, {
       type,
       includeBeatSaver: true,
       includeStarChangeHistory: true,
@@ -87,6 +88,6 @@ export default class LeaderboardController {
   }: {
     params: { id: string };
   }): Promise<PlaysByHmdResponse> {
-    return LeaderboardService.getPlaysByHmd(id);
+    return LeaderboardHmdService.getPlaysByHmd(id);
   }
 }
