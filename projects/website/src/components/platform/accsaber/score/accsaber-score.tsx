@@ -22,7 +22,7 @@ export default function AccSaberScoreComponent({ score }: AccSaberScoreProps) {
           song={{
             name: score.leaderboard.song.name,
             authorName: score.leaderboard.song.author,
-            art: `https://cdn.beatsaver.com/${score.leaderboard.song.hash}.jpg`,
+            art: `https://cdn.scoresaber.com/covers/${score.leaderboard.song.hash.toUpperCase()}.png`,
           }}
           level={{
             authorName: score.leaderboard.song.mapper,
