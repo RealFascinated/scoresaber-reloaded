@@ -54,17 +54,12 @@ export class ScoreCoreService {
         leaderboardId: leaderboard.id,
       }).lean(),
     ]);
+    const isImprovement = previousScore !== null && previousScore !== undefined;
 
     // Skip saving the score if it already exists
     if (scoreExists) {
-      return { score: undefined, hasPreviousScore: false, tracked: false };
+      return { score: undefined, hasPreviousScore: isImprovement, tracked: false };
     }
-
-    const isImprovement = previousScore !== null && previousScore !== undefined;
-
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
-    delete score.playerInfo;
 
     // Handle previous score if it exists
     if (isImprovement) {
@@ -77,6 +72,10 @@ export class ScoreCoreService {
       await ScoreSaberPreviousScoreModel.create(previousScore);
     }
 
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
+    delete score.playerInfo;
+    
     await ScoreSaberScoreModel.create(score);
     await PlayerHmdService.updatePlayerHmd(player.id);
 

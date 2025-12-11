@@ -93,13 +93,6 @@ export class PlayerScoresService {
       };
     }
 
-    Logger.info(
-      `%s has count mismatch: DB has %s, API reports %s. Fetching to verify...`,
-      playerId,
-      playerScoresCount,
-      playerToken.scoreStats.totalPlayCount
-    );
-
     const shouldDeleteScores = playerScoresCount > playerToken.scoreStats.totalPlayCount;
     if (shouldDeleteScores) {
       Logger.info(
