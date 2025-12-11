@@ -1,7 +1,7 @@
 "use client";
 
 import { isServer } from "@ssr/common/utils/utils";
-import { createContext, ReactNode, useEffect, useState } from "react";
+import { createContext, ReactNode, useEffect, useRef, useState } from "react";
 import Database, { getDatabase } from "../../common/database/database";
 import FullscreenLoader from "./fullscreen-loader";
 
@@ -21,13 +21,22 @@ type DatabaseLoaderProps = {
 let databaseInstance: Database | undefined;
 
 export default function DatabaseLoader({ children }: DatabaseLoaderProps) {
-  const [database, setDatabase] = useState<Database | undefined>();
-  const [isLoading, setIsLoading] = useState(true);
+  // Check if database already exists synchronously to prevent flash
+  const existingDatabase = !isServer() && databaseInstance ? databaseInstance : undefined;
+
+  const [database, setDatabase] = useState<Database | undefined>(existingDatabase);
+  const [isLoading, setIsLoading] = useState(!existingDatabase);
   const [error, setError] = useState<string | null>(null);
+  const hasInitialized = useRef(!!existingDatabase);
 
   useEffect(() => {
     if (isServer()) {
       setIsLoading(false);
+      return;
+    }
+
+    // Skip if already initialized (prevents re-initialization on remounts)
+    if (hasInitialized.current) {
       return;
     }
 
@@ -40,6 +49,7 @@ export default function DatabaseLoader({ children }: DatabaseLoaderProps) {
 
         // Set database immediately for non-blocking access
         setDatabase(databaseInstance);
+        hasInitialized.current = true;
 
         // Initialize chart legends in background
         await databaseInstance.initializeChartLegends();
