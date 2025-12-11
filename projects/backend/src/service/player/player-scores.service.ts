@@ -175,18 +175,7 @@ export class PlayerScoresService {
       if (result.totalScores >= playerToken.scoreStats.totalPlayCount) {
         return false; // no more scores
       }
-
-      const totalPages = Math.ceil(scoresPage.metadata.total / scoresPage.metadata.itemsPerPage);
-
-      // Log progress
-      if (
-        page % 10 === 0 || // Log every 10 pages
-        page === 1 || // Log the first page
-        page === totalPages // Log the last page
-      ) {
-        Logger.info(`Fetched ${page} pages of scores for ${playerId}...`);
-      }
-      return page < totalPages;
+      return page < Math.ceil(scoresPage.metadata.total / scoresPage.metadata.itemsPerPage);
     }
 
     Logger.info(`Fetching missing scores for ${playerId}...`);
