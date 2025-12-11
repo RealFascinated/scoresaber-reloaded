@@ -2,7 +2,7 @@ import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { Page } from "@ssr/common/pagination";
 import { t } from "elysia";
 import { Controller, Get } from "elysia-decorators";
-import { PlayerService } from "../service/player/player.service";
+import { PlayerScoreHistoryService } from "../service/player/player-score-history.service";
 
 @Controller("")
 export default class PlayerScoreHistoryController {
@@ -27,6 +27,6 @@ export default class PlayerScoreHistoryController {
       page: number;
     };
   }): Promise<Page<ScoreSaberScore>> {
-    return await PlayerService.getPlayerScoreHistory(playerId, leaderboardId, page);
+    return await PlayerScoreHistoryService.getPlayerScoreHistory(playerId, leaderboardId, page);
   }
 }

@@ -8,12 +8,13 @@ import {
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/leaderboard-player-info";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
+import { formatDuration } from "@ssr/common/utils/time-utils";
 import { scoreToObject } from "../../common/score/score.util";
 import BeatLeaderService from "../beatleader.service";
 import { LeaderboardService } from "../leaderboard/leaderboard.service";
-import { PlayerService } from "../player/player.service";
+import { PlayerHmdService } from "../player/player-hmd.service";
+import { PlayerScoreHistoryService } from "../player/player-score-history.service";
 import ScoreSaberService from "../scoresaber.service";
-import { ScoreService } from "./score.service";
 
 export class ScoreCoreService {
   /**
@@ -22,7 +23,7 @@ export class ScoreCoreService {
    * @param score the score to track
    * @param leaderboard the leaderboard for the score
    * @param player the player for the score
-   * @param fastCreate skips some checks to speed up score insertion
+   * @param newScore whether the score was just set
    * @param log whether to log the score
    * @returns whether the score was tracked
    */
@@ -30,16 +31,13 @@ export class ScoreCoreService {
     score: ScoreSaberScore,
     leaderboard: ScoreSaberLeaderboard,
     player: ScoreSaberPlayerToken | ScoreSaberLeaderboardPlayerInfoToken,
-    fastCreate: boolean = false,
-    log: boolean = true
+    newScore: boolean = false
   ): Promise<{
     score: ScoreSaberScore | undefined;
     hasPreviousScore: boolean;
     tracked: boolean;
-    updatedScore?: boolean;
   }> {
     const before = performance.now();
-
     // Skip saving the score if characteristic is missing
     if (!score.characteristic) {
       Logger.warn(
@@ -50,104 +48,65 @@ export class ScoreCoreService {
 
     // Check if score exists and get previous score in parallel
     const [scoreExists, previousScore] = await Promise.all([
-      ScoreService.scoreExists(player.id, leaderboard, score),
-      !fastCreate
-        ? ScoreSaberScoreModel.findOne({
-            playerId: player.id,
-            leaderboardId: leaderboard.id,
-          })
-        : undefined,
+      ScoreCoreService.scoreExists(score.scoreId, score.score),
+      ScoreSaberScoreModel.findOne({
+        playerId: player.id,
+        leaderboardId: leaderboard.id,
+      }).lean(),
     ]);
 
-    const isImprovement = previousScore !== null;
-
+    // Skip saving the score if it already exists
     if (scoreExists) {
-      // If the score already exits, update the score. eg: pp, rank, etc.
-      await ScoreSaberScoreModel.updateOne(
-        {
-          playerId: player.id,
-          leaderboardId: leaderboard.id,
-        },
-        { $set: score }
-      );
-
-      return { score: undefined, hasPreviousScore: false, tracked: false, updatedScore: true };
+      return { score: undefined, hasPreviousScore: false, tracked: false };
     }
+
+    const isImprovement = previousScore !== null && previousScore !== undefined;
 
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
     delete score.playerInfo;
 
     // Handle previous score if it exists
-    if (isImprovement && previousScore !== undefined) {
-      await Promise.all([
-        ScoreSaberScoreModel.deleteOne({
-          playerId: player.id,
-          leaderboardId: leaderboard.id,
-        }),
-        (async () => {
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const { _id, ...rest } = previousScore.toObject();
-          await ScoreSaberPreviousScoreModel.create(rest);
-        })(),
-      ]);
+    if (isImprovement) {
+      // Delete the the old score
+      await ScoreSaberScoreModel.deleteOne({ scoreId: previousScore.scoreId });
 
-      if (log) {
-        Logger.info(
-          `Archived previous score to history "${previousScore.scoreId}" for "${player.name}"(${player.id}) in ${(performance.now() - before).toFixed(0)}ms`
-        );
-      }
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-expect-error
+      delete previousScore._id; // Remove _id to let a new one be generated
+      await ScoreSaberPreviousScoreModel.create(previousScore);
     }
 
-    await Promise.all([
-      ScoreSaberScoreModel.create(score),
-      !fastCreate
-        ? PlayerService.getPlayerMostCommonRecentHmd(player.id).then(hmd => {
-            if (hmd) {
-              return PlayerService.updatePlayerHmd(player.id, hmd);
-            }
-          })
-        : undefined,
-    ]);
+    await ScoreSaberScoreModel.create(score);
+    await PlayerHmdService.updatePlayerHmd(player.id);
 
-    if (log) {
-      Logger.info(
-        `Tracked ScoreSaber score "${score.scoreId}" for "${player.name}"(${player.id})${isImprovement ? " (improvement)" : ""} in ${(performance.now() - before).toFixed(0)}ms`
-      );
-    }
+    Logger.info(
+      `Tracked %s ScoreSaber score "%s" for "%s"(%s) on "%s" [%s]%s in %s`,
+      newScore ? "New" : "Missing",
+      score.scoreId,
+      player.name,
+      player.id,
+      leaderboard.fullName,
+      leaderboard.difficulty.difficulty,
+      isImprovement ? ` (improvement - archived previous score)` : "",
+      formatDuration(performance.now() - before)
+    );
     return { score: score, hasPreviousScore: isImprovement, tracked: true };
   }
 
   /**
    * Checks if a ScoreSaber score already exists.
    *
-   * @param playerId the id of the player
-   * @param leaderboard the leaderboard
-   * @param score the score to check
+   * @param scoreId the id of the score
+   * @param score the score to check if it exists to do an exact match
    */
-  public static async scoreExists(
-    playerId: string,
-    leaderboard: ScoreSaberLeaderboard,
-    score: ScoreSaberScore
-  ) {
+  public static async scoreExists(scoreId: string | number, score?: number): Promise<boolean> {
     return (
       (await ScoreSaberScoreModel.exists({
-        playerId: playerId + "",
-        leaderboardId: leaderboard.id,
-        difficulty: leaderboard.difficulty.difficulty,
-        characteristic: leaderboard.difficulty.characteristic,
-        score: score.score,
+        scoreId: String(scoreId),
+        ...(score ? { score } : {}),
       })) !== null
     );
-  }
-
-  /**
-   * Checks if a ScoreSaber score already exists by scoreId.
-   *
-   * @param scoreId the id of the score
-   */
-  public static async scoreExistsByScoreId(scoreId: string | number) {
-    return (await ScoreSaberScoreModel.exists({ scoreId: String(scoreId) })) !== null;
   }
 
   /**
@@ -189,7 +148,7 @@ export class ScoreCoreService {
 
     const [isScoreTracked, additionalData, previousScore, playerInfo, comparisonScore] =
       await Promise.all([
-        ScoreService.scoreExists(score.playerId, leaderboard, score),
+        ScoreCoreService.scoreExists(score.scoreId),
         options?.insertAdditionalData
           ? BeatLeaderService.getAdditionalScoreDataFromSong(
               score.playerId,
@@ -200,7 +159,7 @@ export class ScoreCoreService {
             )
           : undefined,
         options?.insertPreviousScore
-          ? PlayerService.getPlayerPreviousScore(
+          ? PlayerScoreHistoryService.getPlayerPreviousScore(
               score.playerId,
               score,
               leaderboard,
@@ -241,7 +200,7 @@ export class ScoreCoreService {
 
     if (comparisonScore) {
       const rawComparisonScore = scoreToObject(comparisonScore as unknown as ScoreSaberScore);
-      score.comparisonScore = await ScoreService.insertScoreData(
+      score.comparisonScore = await ScoreCoreService.insertScoreData(
         rawComparisonScore,
         leaderboard,
         comparisonPlayer,

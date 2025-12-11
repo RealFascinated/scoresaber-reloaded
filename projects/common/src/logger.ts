@@ -30,9 +30,21 @@ export default class Logger {
     }
 
     const color = Logger.LogColors[level];
+    let formattedMessage = message;
+    const remainingArgs: unknown[] = [];
+
+    for (let i = 0; i < args.length; i++) {
+      if (formattedMessage.includes("%s")) {
+        formattedMessage = formattedMessage.replace("%s", String(args[i]));
+      } else {
+        remainingArgs.push(...args.slice(i));
+        break;
+      }
+    }
+
     console[level](
-      `${ConsoleColors.gray}${dayjs().format("HH:mm:ss")} ${color}[SSR / ${level.toUpperCase()}]: ${ConsoleColors.reset}${message}`,
-      ...args
+      `${ConsoleColors.gray}${dayjs().format("HH:mm:ss")} ${color}[SSR / ${level.toUpperCase()}]: ${ConsoleColors.reset}${formattedMessage}`,
+      ...remainingArgs
     );
   }
 

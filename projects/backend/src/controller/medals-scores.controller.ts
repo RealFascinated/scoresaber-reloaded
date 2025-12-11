@@ -1,7 +1,7 @@
 import { PlayerMedalScoresResponse } from "@ssr/common/response/player-medal-scores-response";
 import { t } from "elysia";
 import { Controller, Get } from "elysia-decorators";
-import { PlayerService } from "../service/player/player.service";
+import { PlayerScoresService } from "../service/player/player-scores.service";
 
 @Controller("/scores/medals")
 export default class MedalsScoresController {
@@ -24,6 +24,6 @@ export default class MedalsScoresController {
       page: number;
     };
   }): Promise<PlayerMedalScoresResponse> {
-    return (await PlayerService.getPlayerMedalScores(id, page)).toJSON();
+    return (await PlayerScoresService.getPlayerMedalScores(id, page)).toJSON();
   }
 }

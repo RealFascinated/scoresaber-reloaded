@@ -1,6 +1,6 @@
 import { t } from "elysia";
 import { Controller, Get } from "elysia-decorators";
-import { ScoreService } from "../service/score/score.service";
+import { TopScoresService } from "../service/score/top-scores.service";
 
 @Controller("")
 export default class TopScoresController {
@@ -15,6 +15,6 @@ export default class TopScoresController {
     },
   })
   public async getTopScores({ params: { page } }: { params: { page: number } }): Promise<unknown> {
-    return (await ScoreService.getTopScores(page)).toJSON();
+    return (await TopScoresService.getTopScores(page)).toJSON();
   }
 }

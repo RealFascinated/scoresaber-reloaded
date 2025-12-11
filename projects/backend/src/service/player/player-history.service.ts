@@ -1,5 +1,4 @@
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
-import { InternalServerError } from "@ssr/common/error/internal-server-error";
 import Logger from "@ssr/common/logger";
 import { Player, PlayerModel } from "@ssr/common/model/player/player";
 import {
@@ -11,7 +10,6 @@ import { removeObjectFields } from "@ssr/common/object.util";
 import { PlayerStatisticHistory } from "@ssr/common/player/player-statistic-history";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import { processInBatches } from "@ssr/common/utils/batch-utils";
-import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { parseRankHistory } from "@ssr/common/utils/player-utils";
 import {
   formatDateMinimal,
@@ -19,96 +17,19 @@ import {
   getMidnightAlignedDate,
   isToday,
 } from "@ssr/common/utils/time-utils";
-import { isProduction } from "@ssr/common/utils/utils";
 import { EmbedBuilder } from "discord.js";
 import { redisClient } from "../..";
 import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
-import { logNewTrackedPlayer } from "../../common/embds";
 import { PlayerScoreSeedQueue } from "../../queue/impl/player-score-seed-queue";
 import { QueueId, QueueManager } from "../../queue/queue-manager";
-import { accountCreationLock } from "./player-core.service";
-import { PlayerService } from "./player.service";
+import { PlayerAccuraciesService } from "./player-accuracies.service";
+import { PlayerCoreService } from "./player-core.service";
+import { PlayerMedalsService } from "./player-medals.service";
+import { PlayerRankedService } from "./player-ranked.service";
 
 const INACTIVE_RANK = 999_999;
 
 export class PlayerHistoryService {
-  /**
-   * Tracks a player.
-   *
-   * @param id the player's id
-   * @param playerToken an optional player token
-   * @returns the player if successfully tracked, undefined otherwise
-   */
-  public static async trackPlayer(
-    id: string,
-    playerToken?: ScoreSaberPlayerToken
-  ): Promise<Player | undefined> {
-    try {
-      if (await PlayerService.playerExists(id)) {
-        return undefined;
-      }
-
-      playerToken =
-        playerToken ||
-        (await ApiServiceRegistry.getInstance().getScoreSaberService().lookupPlayer(id));
-      if (!playerToken) {
-        return undefined;
-      }
-
-      // Create a new lock promise and assign it
-      accountCreationLock[id] = (async () => {
-        try {
-          Logger.info(`Creating player "${id}"...`);
-          const newPlayer = await PlayerModel.create({
-            _id: id,
-            joinedDate: new Date(playerToken.firstSeen),
-            inactive: playerToken.inactive,
-            name: playerToken.name,
-            trackedSince: new Date(),
-          });
-
-          const trackedScores = await ScoreSaberScoreModel.countDocuments({
-            playerId: id,
-          });
-
-          const seedQueue = QueueManager.getQueue(
-            QueueId.PlayerScoreRefreshQueue
-          ) as PlayerScoreSeedQueue;
-          if (!(await seedQueue.hasItem({ id: id, data: id }))) {
-            if (trackedScores < playerToken.scoreStats.totalPlayCount) {
-              Logger.info(
-                `Player ${id} has ${formatNumberWithCommas(playerToken.scoreStats.totalPlayCount - trackedScores)} missing scores. Adding them to the refresh queue...`
-              );
-              // Add the player to the refresh queue
-              (QueueManager.getQueue(QueueId.PlayerScoreRefreshQueue) as PlayerScoreSeedQueue).add({
-                id,
-                data: id,
-              });
-            }
-          }
-
-          // Notify in production
-          if (isProduction()) {
-            await logNewTrackedPlayer(playerToken);
-          }
-          return newPlayer.toObject();
-        } catch (err) {
-          Logger.error(`Failed to create player document for "${id}"`, err);
-          throw new InternalServerError(`Failed to create player document for "${id}"`);
-        } finally {
-          // Ensure the lock is always removed
-          delete accountCreationLock[id];
-        }
-      })();
-
-      // Return the player document
-      return await accountCreationLock[id];
-    } catch (err) {
-      Logger.error(`Failed to create player document for "${id}"`, err);
-      return undefined;
-    }
-  }
-
   /**
    * Updates the player statistics for all players.
    *
@@ -152,11 +73,11 @@ export class PlayerHistoryService {
     Logger.info(`Found ${players.length} active players from ScoreSaber API`);
 
     await processInBatches(players, 25, async player => {
-      const foundPlayer = await PlayerService.getPlayer(player.id, player);
+      const foundPlayer = await PlayerCoreService.getPlayer(player.id, player);
 
       const [, trackedScores] = await Promise.all([
         // Track the player's history
-        PlayerService.trackPlayerHistory(foundPlayer, now, player),
+        PlayerHistoryService.trackPlayerHistory(foundPlayer, now, player),
 
         // Get the number of scores tracked for the player
         ScoreSaberScoreModel.countDocuments({
@@ -244,9 +165,9 @@ export class PlayerHistoryService {
       return;
     }
 
-    const daysTracked = await PlayerService.getDaysTracked(foundPlayer._id);
+    const daysTracked = await PlayerHistoryService.getDaysTracked(foundPlayer._id);
     if (daysTracked === 0) {
-      await PlayerService.seedPlayerRankHistory(foundPlayer, player);
+      await PlayerHistoryService.seedPlayerRankHistory(foundPlayer, player);
     }
 
     if (foundPlayer.seededScores) {
@@ -255,7 +176,7 @@ export class PlayerHistoryService {
         date: getMidnightAlignedDate(trackTime),
       }).lean();
 
-      const updatedHistory = await PlayerService.createPlayerStatistic(
+      const updatedHistory = await PlayerHistoryService.createPlayerStatistic(
         player,
         existingEntry ?? undefined
       );
@@ -377,7 +298,10 @@ export class PlayerHistoryService {
     }).lean();
 
     // Generate fresh data, merging with existing if available
-    const todayData = await PlayerService.createPlayerStatistic(player, existingEntry ?? undefined);
+    const todayData = await PlayerHistoryService.createPlayerStatistic(
+      player,
+      existingEntry ?? undefined
+    );
 
     return projection && Object.keys(projection).length > 0
       ? Object.fromEntries(Object.entries(todayData).filter(([key]) => key in projection))
@@ -388,7 +312,7 @@ export class PlayerHistoryService {
    * Seeds a player's history with data from ScoreSaber API.
    * This method populates the player's rank history from their ScoreSaber profile.
    */
-  public static async seedPlayerHistory(
+  public static async seedPlayerRankHistory(
     player: Player,
     playerToken: ScoreSaberPlayerToken
   ): Promise<void> {
@@ -417,9 +341,9 @@ export class PlayerHistoryService {
     existingEntry?: Partial<PlayerHistoryEntry>
   ): Promise<Partial<PlayerHistoryEntry>> {
     const [accuracies, plusOnePp, medals] = await Promise.all([
-      PlayerService.getPlayerAverageAccuracies(playerToken.id),
-      PlayerService.getPlayerPpBoundary(playerToken.id, 1),
-      PlayerService.getPlayerMedals(playerToken.id),
+      PlayerAccuraciesService.getPlayerAverageAccuracies(playerToken.id),
+      PlayerRankedService.getPlayerPpBoundary(playerToken.id, 1),
+      PlayerMedalsService.getPlayerMedals(playerToken.id),
     ]);
 
     return {

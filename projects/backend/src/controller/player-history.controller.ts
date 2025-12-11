@@ -3,7 +3,7 @@ import { PlayerStatisticHistory } from "@ssr/common/player/player-statistic-hist
 import { getDaysAgoDate } from "@ssr/common/utils/time-utils";
 import { NotFoundError, t } from "elysia";
 import { Controller, Get } from "elysia-decorators";
-import { PlayerService } from "../service/player/player.service";
+import { PlayerHistoryService } from "../service/player/player-history.service";
 
 @Controller("")
 export default class PlayerHistoryController {
@@ -45,7 +45,7 @@ export default class PlayerHistoryController {
           )
         : undefined;
 
-    return await PlayerService.getPlayerStatisticHistory(
+    return await PlayerHistoryService.getPlayerStatisticHistory(
       player,
       new Date(startDate),
       new Date(endDate),

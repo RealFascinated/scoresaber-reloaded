@@ -1,7 +1,7 @@
 import { IsGuildUser } from "@discordx/utilities";
 import { CommandInteraction } from "discord.js";
 import { Discord, Guard, Slash } from "discordx";
-import { ScoreService } from "../../service/score/score.service";
+import { MedalScoresService } from "../../service/score/medal-scores.service";
 import { OwnerOnly } from "../lib/guards";
 
 @Discord()
@@ -17,7 +17,7 @@ class RefreshMedalScores {
     });
 
     try {
-      await ScoreService.refreshMedalScores();
+      await MedalScoresService.refreshMedalScores();
     } catch (error) {
       await interaction.editReply({
         content: error instanceof Error ? error.message : "An unknown error occurred",

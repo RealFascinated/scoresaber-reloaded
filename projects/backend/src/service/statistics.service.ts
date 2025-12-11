@@ -3,7 +3,7 @@ import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
 import { Statistic } from "@ssr/common/model/statistics/statistic";
 import { formatDateMinimal } from "@ssr/common/utils/time-utils";
-import { PlayerService } from "./player/player.service";
+import { PlayerHmdService } from "./player/player-hmd.service";
 
 interface InfluxRow {
   _time: string;
@@ -117,7 +117,7 @@ export default class StatisticsService {
       });
 
       // Get hmd usage
-      result.hmdUsage = await PlayerService.getActiveHmdUsage();
+      result.hmdUsage = await PlayerHmdService.getActiveHmdUsage();
 
       return result;
     } catch (error) {

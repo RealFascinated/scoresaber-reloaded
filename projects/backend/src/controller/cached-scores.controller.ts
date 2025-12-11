@@ -2,7 +2,7 @@ import { PlayerScoresResponse } from "@ssr/common/response/player-scores-respons
 import { ScoreSort } from "@ssr/common/types/sort";
 import { t } from "elysia";
 import { Controller, Get } from "elysia-decorators";
-import { PlayerService } from "../service/player/player.service";
+import { PlayerScoresService } from "../service/player/player-scores.service";
 
 @Controller("/scores/cached")
 export default class CachedScoresController {
@@ -42,7 +42,7 @@ export default class CachedScoresController {
   }): Promise<PlayerScoresResponse> {
     const { search, ...otherFilters } = filters;
     return (
-      await PlayerService.getScoreSaberCachedPlayerScores(
+      await PlayerScoresService.getScoreSaberCachedPlayerScores(
         id,
         page,
         {

@@ -33,26 +33,18 @@ import {
 } from "@ssr/common/token-creators";
 import { ScoreSort, validateSort } from "@ssr/common/types/sort";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
-import ScoreSaberPlayerScoresPageToken from "@ssr/common/types/token/scoresaber/player-scores-page";
 import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import type { PipelineStage } from "mongoose";
 import { FilterQuery } from "mongoose";
 import { scoreToObject } from "../../common/score/score.util";
 import { LeaderboardService } from "../leaderboard/leaderboard.service";
-import { ScoreService } from "../score/score.service";
+import { ScoreCoreService } from "../score/score-core.service";
 import ScoreSaberService from "../scoresaber.service";
+import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
+import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
+import { EmbedBuilder } from "discord.js";
 
-type PlayerRefreshResult = {
-  missingScores: number;
-  updatedScores: number;
-  totalScores: number;
-  totalPages: number;
-  timeTaken: number;
-  partialRefresh: boolean;
-};
-
-// Shared field mapping once per class
 const FIELDS_MAP: Record<ScoreSort["field"], string> = {
   pp: "pp",
   score: "score",
@@ -60,264 +52,142 @@ const FIELDS_MAP: Record<ScoreSort["field"], string> = {
   acc: "accuracy",
   maxcombo: "maxCombo",
   date: "timestamp",
-  starcount: "stars", // star count lives on leaderboard, handled separately when sorting
+  starcount: "stars",
 };
 
 type ScoreFilters = Required<NonNullable<ScoreSort["filters"]>> & {
-  // ensures booleans with default false
   rankedOnly: boolean;
   unrankedOnly: boolean;
   passedOnly: boolean;
 };
 
-// Build a base query object from common filter flags
-function buildScoreQuery(
-  playerId: string,
-  filters: ScoreFilters,
-  extra: FilterQuery<ScoreSaberScore> = {}
-): FilterQuery<ScoreSaberScore> {
-  const query: FilterQuery<ScoreSaberScore> = {
-    playerId,
-    leaderboardId: { $exists: true, $ne: null },
-    ...extra,
-  };
-
-  if (filters.rankedOnly) query.pp = { $gt: 0 };
-  if (filters.unrankedOnly) query.pp = { $lte: 0 };
-  if (filters.passedOnly) {
-    return { ...query, modifiers: { $nin: [Modifier.NF, "NF", "No Fail"] } };
-  }
-  if (filters.hmd) query.hmd = filters.hmd;
-
-  return query;
-}
-
-// Retrieve raw score documents with optional star-count sorting
-async function fetchRawScores(
-  query: FilterQuery<ScoreSaberScore>,
-  sort: ScoreSort,
-  skip = 0,
-  limit = 0
-): Promise<ScoreSaberScore[]> {
-  if (sort.field === "starcount") {
-    const pipeline: PipelineStage[] = [
-      { $match: query },
-      {
-        $lookup: {
-          from: ScoreSaberLeaderboardModel.collection.name,
-          localField: "leaderboardId",
-          foreignField: "_id",
-          as: "leaderboardDoc",
-        },
-      },
-      { $unwind: "$leaderboardDoc" },
-      {
-        $sort: { "leaderboardDoc.stars": sort.direction === "asc" ? 1 : -1 },
-      },
-    ];
-    if (skip) pipeline.push({ $skip: skip });
-    if (limit) pipeline.push({ $limit: limit });
-    pipeline.push({ $project: { leaderboardDoc: 0 } });
-
-    return (await ScoreSaberScoreModel.aggregate(pipeline).exec()) as unknown as ScoreSaberScore[];
-  }
-
-  return (await ScoreSaberScoreModel.find(query)
-    .sort({ [FIELDS_MAP[sort.field]]: sort.direction === "asc" ? 1 : -1 })
-    .skip(skip)
-    .limit(limit)
-    .lean()) as unknown as ScoreSaberScore[];
-}
-
-/**
- * Maps raw scores to PlayerScore objects with leaderboard/BeatSaver attached
- *
- * @param rawScores the raw scores to map
- * @param includeBeatSaver whether to include the BeatSaver data
- * @param cacheOnly whether to only use cached leaderboards
- * @returns the mapped scores
- */
-async function mapScoresWithLeaderboards(
-  rawScores: ScoreSaberScore[],
-  includeBeatSaver = true,
-  cacheOnly = true,
-  removeScoreWeightAndRank = true
-) {
-  if (!rawScores.length) return [];
-
-  const leaderboardResponses = await LeaderboardService.getLeaderboards(
-    rawScores.map(s => s.leaderboardId + ""),
-    { includeBeatSaver, cacheOnly }
-  );
-
-  const lbMap = new Map(leaderboardResponses.map(r => [r.leaderboard.id, r]));
-
-  const processed = await Promise.all(
-    rawScores.map(async rs => {
-      const lbResp = lbMap.get(rs.leaderboardId);
-      if (!lbResp) return null;
-      const { leaderboard, beatsaver } = lbResp;
-      const score = await ScoreService.insertScoreData(scoreToObject(rs), leaderboard, undefined, {
-        removeScoreWeightAndRank,
-      });
-      return { score, leaderboard, beatSaver: beatsaver } as PlayerScore<
-        ScoreSaberScore,
-        ScoreSaberLeaderboard
-      >;
-    })
-  );
-
-  return processed.filter(Boolean) as PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>[];
-}
-
 export class PlayerScoresService {
   /**
-   * Refreshes all scores for a player.
+   * Fetches missing scores for a player.
    *
    * @param player the player to refresh scores for
    * @param playerToken the player's token
-   * @returns the result of the refresh
+   * @returns the result of the fetch
    */
-  public static async refreshAllPlayerScores(
+  public static async fetchMissingPlayerScores(
     player: Player,
     playerToken: ScoreSaberPlayerToken
-  ): Promise<PlayerRefreshResult> {
-    Logger.info(`Refreshing scores for ${player._id}...`);
-
+  ): Promise<{
+    missingScores: number;
+    totalScores: number;
+    totalPagesFetched: number;
+    timeTaken: number;
+    partialRefresh: boolean;
+  }> {
+    const playerId = playerToken.id;
     const playerScoresCount = await ScoreSaberScoreModel.countDocuments({
-      playerId: player._id,
+      playerId: playerId,
     });
+    if (playerScoresCount === playerToken.scoreStats.totalPlayCount) {
+      Logger.info(`%s does not have any missing scores. Skipping...`, player.name);
+      return {
+        missingScores: 0,
+        totalScores: playerScoresCount,
+        totalPagesFetched: 0,
+        timeTaken: 0,
+        partialRefresh: false,
+      };
+    }
+
+    const shouldDeleteScores = playerScoresCount > playerToken.scoreStats.totalPlayCount;
+    if (shouldDeleteScores) {
+      Logger.info(
+        `Player ${playerId} has more scores than they should. Deleteing their scores and refreshing...`
+      );
+      await ScoreSaberScoreModel.deleteMany({
+        playerId: playerId,
+      });
+      player.seededScores = false;
+      await PlayerModel.updateOne({ _id: playerId }, { $set: { seededScores: false } });
+
+      await sendEmbedToChannel(
+        DiscordChannels.PLAYER_SCORE_REFRESH_LOGS,
+        new EmbedBuilder()
+          .setTitle("Player Has More Scores Than They Should!!! 🚨")
+          .setDescription(
+            `**${player.name}** has more scores than they should. Deleting their scores and refreshing...`
+          )
+          .setTimestamp()
+          .setColor("#00ff00")
+      );
+    }
 
     const startTime = performance.now();
-
-    const result: PlayerRefreshResult = {
+    const result = {
       missingScores: 0,
-      updatedScores: 0,
-      totalScores: 0,
-      totalPages: 0,
+      totalScores: shouldDeleteScores ? 0 : playerScoresCount,
+      totalPagesFetched: 0,
       timeTaken: 0,
       partialRefresh: false,
     };
 
-    // Helper function to process scores from a page
-    const processScoresPage = async (
-      scoresPage: ScoreSaberPlayerScoresPageToken,
-      result: PlayerRefreshResult,
-      player: Player,
-      playerToken: ScoreSaberPlayerToken,
-      totalProcessedCount: number
-    ): Promise<{ processedCount: number; shouldStop: boolean }> => {
-      let processedCount = 0;
-      let shouldStop = false;
+    /**
+     * Processes a page of scores.
+     *
+     * @param page the page to process
+     * @returns whether the page has more scores to process
+     */
+    async function processPage(page: number): Promise<boolean> {
+      result.totalPagesFetched++;
+      const scoresPage = await ApiServiceRegistry.getInstance()
+        .getScoreSaberService()
+        .lookupPlayerScores({
+          playerId: playerId,
+          page: page,
+          limit: 100,
+          sort: "recent",
+          priority: CooldownPriority.BACKGROUND,
+        });
+      if (!scoresPage) {
+        Logger.warn(`Failed to fetch scores for %s on page %s.`, playerId, page);
+        return false;
+      }
 
-      for (const score of scoresPage.playerScores) {
-        const leaderboard = getScoreSaberLeaderboardFromToken(score.leaderboard);
+      for (const scoreToken of scoresPage.playerScores) {
+        const leaderboard = getScoreSaberLeaderboardFromToken(scoreToken.leaderboard);
+        if (!leaderboard) {
+          continue;
+        }
 
-        const { tracked, updatedScore } = await ScoreService.trackScoreSaberScore(
-          getScoreSaberScoreFromToken(score.score, leaderboard, player._id),
+        const score = getScoreSaberScoreFromToken(scoreToken.score, leaderboard, playerId);
+        if (!score) {
+          continue;
+        }
+
+        const trackingResult = await ScoreCoreService.trackScoreSaberScore(
+          score,
           leaderboard,
           playerToken,
-          true,
           false
         );
-        if (tracked) {
+        if (trackingResult.tracked) {
           result.missingScores++;
-        } else if (updatedScore) {
-          result.updatedScores++;
+          result.totalScores++;
         }
-        processedCount++;
 
-        // If the player has seeded scores and we've processed enough scores to match the API total, we can stop refreshing
-        if (
-          totalProcessedCount + processedCount >= scoresPage.metadata.total &&
-          player.seededScores
-        ) {
-          Logger.info(
-            `Found ${result.missingScores}/${scoresPage.metadata.total} missing scores for ${player._id}. All scores found, stopping refresh.`
-          );
-          result.partialRefresh = true;
-          shouldStop = true;
+        // We have found all the scores !!
+        if (result.totalScores >= playerToken.scoreStats.totalPlayCount) {
           break;
         }
       }
 
-      return { processedCount, shouldStop };
-    };
+      return result.totalScores < playerToken.scoreStats.totalPlayCount;
+    }
 
-    // First, get the first page to determine total pages
-    const firstPage = await ApiServiceRegistry.getInstance()
-      .getScoreSaberService()
-      .lookupPlayerScores({
-        playerId: player._id,
-        page: 1,
-        limit: 100,
-        sort: "recent",
-        priority: CooldownPriority.BACKGROUND,
-      });
-
-    if (!firstPage) {
-      Logger.info(`No scores found for player ${player._id}`);
-      result.partialRefresh = true;
-      result.totalScores = playerScoresCount;
-      // If the player has seeded scores and we've found all scores, we can stop refreshing
-    } else if (playerScoresCount >= firstPage.metadata.total && player.seededScores) {
-      Logger.info(`Player ${player._id} has no new scores to refresh. Skipping...`);
-      result.partialRefresh = true;
-      result.totalScores = playerScoresCount;
-    } else {
-      const totalPages = Math.ceil(firstPage.metadata.total / 100);
-      Logger.info(`Found ${totalPages} total pages for ${player._id}`);
-      result.totalPages = totalPages;
-
-      let processedScoresCount = 0;
-
-      // Process the first page
-      const firstPageResult = await processScoresPage(
-        firstPage,
-        result,
-        player,
-        playerToken,
-        processedScoresCount
-      );
-      processedScoresCount += firstPageResult.processedCount;
-
-      // Process remaining pages if needed
-      if (!firstPageResult.shouldStop && processedScoresCount < firstPage.metadata.total) {
-        for (let page = 2; page <= totalPages; page++) {
-          Logger.info(`Processing page ${page} for ${player._id}...`);
-
-          const scoresPage = await ApiServiceRegistry.getInstance()
-            .getScoreSaberService()
-            .lookupPlayerScores({
-              playerId: player._id,
-              page: page,
-              limit: 100,
-              sort: "recent",
-              priority: CooldownPriority.BACKGROUND,
-            });
-
-          if (!scoresPage) {
-            Logger.warn(`Failed to fetch scores for ${player._id} on page ${page}.`);
-            continue;
-          }
-
-          const pageResult = await processScoresPage(
-            scoresPage,
-            result,
-            player,
-            playerToken,
-            processedScoresCount
-          );
-          processedScoresCount += pageResult.processedCount;
-
-          Logger.info(`Completed page ${page} for ${player._id}`);
-
-          // If the player has seeded scores and we've found all scores, we can stop refreshing
-          if (pageResult.shouldStop) {
-            break;
-          }
-        }
+    Logger.info(`Fetching missing scores for ${playerId}...`);
+    let currentPage = 1;
+    let hasMoreScores = true;
+    while (hasMoreScores) {
+      hasMoreScores = await processPage(currentPage);
+      if (!hasMoreScores) {
+        break;
       }
+      currentPage++;
     }
 
     // Mark player as seeded
@@ -325,12 +195,14 @@ export class PlayerScoresService {
       await PlayerModel.updateOne({ _id: player._id }, { $set: { seededScores: true } });
     }
 
-    result.totalScores = playerScoresCount;
     result.timeTaken = performance.now() - startTime;
-
     if (!result.partialRefresh) {
       Logger.info(
-        `Finished refreshing scores for ${player._id}, total pages refreshed: ${result.totalPages} in ${formatDuration(result.timeTaken)}`
+        `Finished fetching missing scores for %s, total pages fetched: %s, total scores: %s, in %s`,
+        playerId,
+        formatNumberWithCommas(result.totalPagesFetched),
+        formatNumberWithCommas(result.totalScores),
+        formatDuration(result.timeTaken)
       );
     }
 
@@ -460,26 +332,21 @@ export class PlayerScoresService {
         }
 
         const { leaderboard, beatsaver } = leaderboardResponse;
-        let score = getScoreSaberScoreFromToken(playerScore.score, leaderboard, playerId);
+        const score = getScoreSaberScoreFromToken(playerScore.score, leaderboard, playerId);
         if (!score) {
           return undefined;
         }
 
         // Track missing scores
-        if (!(await ScoreService.scoreExistsByScoreId(score.scoreId))) {
-          await ScoreService.trackScoreSaberScore(
-            score,
-            leaderboard,
-            await ScoreSaberService.getCachedPlayer(playerId, true),
-            true,
-            false
-          );
-          Logger.info(`Tracked missing score ${score.scoreId} for player ${playerId}`);
-        }
+        await ScoreCoreService.trackScoreSaberScore(
+          score,
+          leaderboard,
+          await ScoreSaberService.getCachedPlayer(playerId, true),
+          false
+        );
 
-        score = await ScoreService.insertScoreData(score, leaderboard, comparisonPlayer);
         return {
-          score: score,
+          score: await ScoreCoreService.insertScoreData(score, leaderboard, comparisonPlayer),
           leaderboard: leaderboard,
           beatSaver: beatsaver,
         } as PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>;
@@ -666,7 +533,7 @@ export class PlayerScoresService {
           }
           const { leaderboard, beatsaver } = leaderboardResponse;
 
-          const score = (await ScoreService.insertScoreData(
+          const score = (await ScoreCoreService.insertScoreData(
             scoreToObject(rawScore),
             leaderboard
           )) as unknown as ScoreSaberMedalsScore;
@@ -711,7 +578,7 @@ export class PlayerScoresService {
       throw new NotFoundError("Leaderboard not found");
     }
 
-    const score = await ScoreService.insertScoreData(
+    const score = await ScoreCoreService.insertScoreData(
       scoreToObject(rawScore as unknown as ScoreSaberScore),
       leaderboardResponse.leaderboard,
       undefined,
@@ -727,4 +594,109 @@ export class PlayerScoresService {
       beatSaver: leaderboardResponse.beatsaver,
     };
   }
+}
+
+// Build a base query object from common filter flags
+function buildScoreQuery(
+  playerId: string,
+  filters: ScoreFilters,
+  extra: FilterQuery<ScoreSaberScore> = {}
+): FilterQuery<ScoreSaberScore> {
+  const query: FilterQuery<ScoreSaberScore> = {
+    playerId,
+    leaderboardId: { $exists: true, $ne: null },
+    ...extra,
+  };
+
+  if (filters.rankedOnly) query.pp = { $gt: 0 };
+  if (filters.unrankedOnly) query.pp = { $lte: 0 };
+  if (filters.passedOnly) {
+    return { ...query, modifiers: { $nin: [Modifier.NF, "NF", "No Fail"] } };
+  }
+  if (filters.hmd) query.hmd = filters.hmd;
+
+  return query;
+}
+
+// Retrieve raw score documents with optional star-count sorting
+async function fetchRawScores(
+  query: FilterQuery<ScoreSaberScore>,
+  sort: ScoreSort,
+  skip = 0,
+  limit = 0
+): Promise<ScoreSaberScore[]> {
+  if (sort.field === "starcount") {
+    const pipeline: PipelineStage[] = [
+      { $match: query },
+      {
+        $lookup: {
+          from: ScoreSaberLeaderboardModel.collection.name,
+          localField: "leaderboardId",
+          foreignField: "_id",
+          as: "leaderboardDoc",
+        },
+      },
+      { $unwind: "$leaderboardDoc" },
+      {
+        $sort: { "leaderboardDoc.stars": sort.direction === "asc" ? 1 : -1 },
+      },
+    ];
+    if (skip) pipeline.push({ $skip: skip });
+    if (limit) pipeline.push({ $limit: limit });
+    pipeline.push({ $project: { leaderboardDoc: 0 } });
+
+    return (await ScoreSaberScoreModel.aggregate(pipeline).exec()) as unknown as ScoreSaberScore[];
+  }
+
+  return (await ScoreSaberScoreModel.find(query)
+    .sort({ [FIELDS_MAP[sort.field]]: sort.direction === "asc" ? 1 : -1 })
+    .skip(skip)
+    .limit(limit)
+    .lean()) as unknown as ScoreSaberScore[];
+}
+
+/**
+ * Maps raw scores to PlayerScore objects with leaderboard/BeatSaver attached
+ *
+ * @param rawScores the raw scores to map
+ * @param includeBeatSaver whether to include the BeatSaver data
+ * @param cacheOnly whether to only use cached leaderboards
+ * @returns the mapped scores
+ */
+async function mapScoresWithLeaderboards(
+  rawScores: ScoreSaberScore[],
+  includeBeatSaver = true,
+  cacheOnly = true,
+  removeScoreWeightAndRank = true
+) {
+  if (!rawScores.length) return [];
+
+  const leaderboardResponses = await LeaderboardService.getLeaderboards(
+    rawScores.map(s => s.leaderboardId + ""),
+    { includeBeatSaver, cacheOnly }
+  );
+
+  const lbMap = new Map(leaderboardResponses.map(r => [r.leaderboard.id, r]));
+
+  const processed = await Promise.all(
+    rawScores.map(async rs => {
+      const lbResp = lbMap.get(rs.leaderboardId);
+      if (!lbResp) return null;
+      const { leaderboard, beatsaver } = lbResp;
+      const score = await ScoreCoreService.insertScoreData(
+        scoreToObject(rs),
+        leaderboard,
+        undefined,
+        {
+          removeScoreWeightAndRank,
+        }
+      );
+      return { score, leaderboard, beatSaver: beatsaver } as PlayerScore<
+        ScoreSaberScore,
+        ScoreSaberLeaderboard
+      >;
+    })
+  );
+
+  return processed.filter(Boolean) as PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>[];
 }

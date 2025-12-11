@@ -9,7 +9,7 @@ import {
 import { Page, Pagination } from "@ssr/common/pagination";
 import CacheService, { CacheId } from "../cache.service";
 import { LeaderboardService } from "../leaderboard/leaderboard.service";
-import { ScoreService } from "../score/score.service";
+import { ScoreCoreService } from "../score/score-core.service";
 
 export class PlayerScoreHistoryService {
   /**
@@ -55,7 +55,7 @@ export class PlayerScoreHistoryService {
         return await Promise.all(
           scores.map(async scoreToken => {
             let score = scoreToken.toObject() as unknown as ScoreSaberScore;
-            score = await ScoreService.insertScoreData(score, leaderboard, undefined, {
+            score = await ScoreCoreService.insertScoreData(score, leaderboard, undefined, {
               insertPreviousScore: false,
               removeScoreWeightAndRank: true,
             });

@@ -1,7 +1,7 @@
 import { Point } from "@influxdata/influxdb-client";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
 import { MetricType } from "../../../service/metrics.service";
-import { PlayerService } from "../../../service/player/player.service";
+import { PlayerHmdService } from "../../../service/player/player-hmd.service";
 import NumberMetric from "../../number-metric";
 
 export default class ActivePlayerHmdStatisticMetric extends NumberMetric {
@@ -13,7 +13,7 @@ export default class ActivePlayerHmdStatisticMetric extends NumberMetric {
   }
 
   public async collect(): Promise<Point | undefined> {
-    const hmdUsage = await PlayerService.getActiveHmdUsage();
+    const hmdUsage = await PlayerHmdService.getActiveHmdUsage();
     const point = this.getPointBase();
     for (const [hmd, count] of Object.entries(hmdUsage)) {
       point.intField(hmd, count);

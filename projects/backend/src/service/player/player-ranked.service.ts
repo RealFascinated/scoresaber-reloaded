@@ -1,10 +1,8 @@
 import { ScoreSaberCurve } from "@ssr/common/leaderboard-curve/scoresaber-curve";
-import { Player, PlayerModel } from "@ssr/common/model/player/player";
 import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import { PlayerRankedPpsResponse } from "@ssr/common/response/player-ranked-pps-response";
-import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import { updateScoreWeights } from "@ssr/common/utils/scoresaber.util";
-import { PlayerService } from "./player.service";
+import { PlayerCoreService } from "./player-core.service";
 
 export class PlayerRankedService {
   /**
@@ -14,7 +12,7 @@ export class PlayerRankedService {
    * @returns the ranked pp scores
    */
   public static async getPlayerRankedPps(playerId: string): Promise<PlayerRankedPpsResponse> {
-    await PlayerService.playerExists(playerId, true);
+    await PlayerCoreService.playerExists(playerId, true);
 
     const playerScores = await ScoreSaberScoreModel.find({
       playerId: playerId,
@@ -95,7 +93,7 @@ export class PlayerRankedService {
     playerId: string,
     boundary: number = 1
   ): Promise<number> {
-    await PlayerService.playerExists(playerId, true);
+    await PlayerCoreService.playerExists(playerId, true);
     const scoresPps = await this.getPlayerRankedPps(playerId);
     if (scoresPps.scores.length === 0) {
       return 0;
@@ -105,49 +103,5 @@ export class PlayerRankedService {
       scoresPps.scores.map(score => score.pp),
       boundary
     );
-  }
-
-  /**
-   * Updates the player's peak rank.
-   *
-   * @param playerId the player's id
-   * @param playerToken the player's token
-   */
-  public static async updatePeakRank(player: Player, playerToken: ScoreSaberPlayerToken) {
-    if (playerToken.rank == 0) {
-      return player;
-    }
-
-    if (!player.peakRank || (player.peakRank && playerToken.rank < player.peakRank.rank)) {
-      const newPeakRank = {
-        rank: playerToken.rank,
-        date: new Date(),
-      };
-
-      await PlayerModel.updateOne({ _id: player._id }, { $set: { peakRank: newPeakRank } });
-
-      // Update the local player object
-      player.peakRank = newPeakRank;
-    }
-
-    return player;
-  }
-
-  /**
-   * Gets a player's rank including inactive players.
-   *
-   * @param playerId the id of the player
-   * @returns the rank
-   */
-  public static async getPlayerRankIncludingInactives(playerId: string): Promise<number | null> {
-    const player = await PlayerModel.findById(playerId).select("pp").lean();
-    if (!player || (player.pp ?? 0) <= 0) return null;
-
-    // Count how many players have more medals than this player
-    const rank = await PlayerModel.countDocuments({
-      pp: { $gt: player.pp ?? 0 },
-    });
-
-    return rank + 1; // +1 because rank is 1-indexed
   }
 }

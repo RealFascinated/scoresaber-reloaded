@@ -175,15 +175,10 @@ export default class MetricsService implements EventListener {
    * Retrieves a metric by its type
    *
    * @param type the type of metric to retrieve
-   * @returns the metric instance
-   * @throws error if the metric is not found
+   * @returns the metric instance, or undefined if not found
    */
-  public static async getMetric(type: MetricType): Promise<Metric<unknown>> {
-    const metric = MetricsService.metrics.find(metric => metric.id === type);
-    if (!metric) {
-      throw new Error(`[METRICS] Metric "${type}" not found`);
-    }
-    return metric;
+  public static async getMetric(type: MetricType): Promise<Metric<unknown> | undefined> {
+    return MetricsService.metrics.find(metric => metric.id === type);
   }
 
   /**

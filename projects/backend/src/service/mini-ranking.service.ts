@@ -4,7 +4,7 @@ import { NotFoundError } from "@ssr/common/error/not-found-error";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { MiniRankingResponse } from "@ssr/common/response/around-player-response";
 import CacheService, { CacheId } from "./cache.service";
-import { PlayerService } from "./player/player.service";
+import { PlayerMedalsService } from "./player/player-medals.service";
 import ScoreSaberService from "./scoresaber.service";
 
 type MiniRankingType = "global" | "country" | "medals";
@@ -79,7 +79,7 @@ export default class MiniRankingService {
           CacheService.fetchWithCache(
             CacheId.ScoreSaber,
             `scoresaber:mini-ranking:medals:${page}`,
-            async () => PlayerService.getPlayerMedalRanking(page)
+            async () => PlayerMedalsService.getPlayerMedalRanking(page)
           )
         )
       );

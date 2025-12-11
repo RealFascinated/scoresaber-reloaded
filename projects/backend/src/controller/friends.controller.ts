@@ -5,7 +5,7 @@ import { Page } from "@ssr/common/pagination";
 import { PlayerScore } from "@ssr/common/score/player-score";
 import { t } from "elysia";
 import { Controller, Get } from "elysia-decorators";
-import { PlayerService } from "../service/player/player.service";
+import { PlayerFriendScoresService } from "../service/player/player-friend-scores.service";
 
 @Controller("")
 export default class FriendsController {
@@ -37,7 +37,7 @@ export default class FriendsController {
     if (ids.length === 0) {
       throw new NotFoundError("Malformed friend ids, must be a comma separated list of friend ids");
     }
-    return await PlayerService.getPlayerFriendLeaderboardScores(ids, leaderboardId, page);
+    return await PlayerFriendScoresService.getFriendLeaderboardScores(ids, leaderboardId, page);
   }
 
   @Get("/scores/friends/:page", {
@@ -66,6 +66,6 @@ export default class FriendsController {
     if (ids.length === 0) {
       throw new NotFoundError("Malformed friend ids, must be a comma separated list of friend ids");
     }
-    return await PlayerService.getPlayerFriendScores(ids, page);
+    return await PlayerFriendScoresService.getFriendScores(ids, page);
   }
 }

@@ -12,8 +12,8 @@ import { connectBeatLeaderWebsocket } from "@ssr/common/websocket/beatleader-web
 import { connectScoresaberWebsocket } from "@ssr/common/websocket/scoresaber-websocket";
 import { EventListener } from "../event/event-listener";
 import { EventsManager } from "../event/events-manager";
-import { PlayerService } from "../service/player/player.service";
-import { ScoreService } from "../service/score/score.service";
+import { PlayerCoreService } from "../service/player/player-core.service";
+import { TopScoresService } from "../service/score/top-scores.service";
 
 interface PendingScore {
   scoreSaberToken?: ScoreSaberScoreToken;
@@ -172,13 +172,16 @@ export class ScoreWebsockets implements EventListener {
     if (scoreSaberToken && leaderboardToken && player) {
       const leaderboard = getScoreSaberLeaderboardFromToken(leaderboardToken);
       const score = getScoreSaberScoreFromToken(scoreSaberToken, leaderboard, player.id);
-      const isTop50GlobalScore = await ScoreService.isTop50GlobalScore(score);
+      const isTop50GlobalScore = await TopScoresService.isTop50GlobalScore(score);
 
-      PlayerService.trackPlayer(player.id);
-      PlayerService.updatePlayerName(player.id, player.name);
-
-      // Update the player's last score date
-      await PlayerModel.updateOne({ _id: player.id }, { $set: { lastScore: new Date() } });
+      // Create the player, update their name if they are already being tracked
+      if (!(await PlayerCoreService.createPlayer(player.id))) {
+        // Update the player's name and last score date
+        Promise.all([
+          PlayerCoreService.updatePlayerName(player.id, player.name),
+          PlayerModel.updateOne({ _id: player.id }, { $set: { lastScore: new Date() } }),
+        ]);
+      }
 
       EventsManager.getListeners().forEach(listener => {
         listener.onScoreReceived?.(score, leaderboard, player, beatLeaderScore, isTop50GlobalScore);

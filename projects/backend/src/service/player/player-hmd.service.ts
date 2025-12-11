@@ -9,8 +9,12 @@ export class PlayerHmdService {
    * @param playerId the player's id
    * @param hmd the player's HMD
    */
-  public static async updatePlayerHmd(playerId: string, hmd: string): Promise<void> {
-    await PlayerModel.updateOne({ _id: playerId }, { $set: { hmd } });
+  public static async updatePlayerHmd(playerId: string): Promise<void> {
+    const hmds = await this.getPlayerHmdBreakdown(playerId, 50); // get the last 50 scores
+    const mostCommonHmd = Object.keys(hmds)[0] ?? undefined; // get the most common hmd
+    if (mostCommonHmd) {
+      await PlayerModel.updateOne({ _id: playerId }, { $set: { hmd: mostCommonHmd } });
+    }
   }
 
   /**
@@ -22,7 +26,7 @@ export class PlayerHmdService {
     const hmdUsage = await PlayerModel.aggregate([
       {
         $match: {
-          hmd: { $nin: ["Unknown", null] },
+          hmd: { $nin: [null] },
           inactive: false,
         },
       },
@@ -31,17 +35,6 @@ export class PlayerHmdService {
     ]).then(results => Object.fromEntries(results.map(r => [r.hmd, r.count])));
 
     return hmdUsage;
-  }
-
-  /**
-   * Gets the player's most common recent HMD.
-   *
-   * @param playerId the player's id
-   * @returns the player's most common recent HMD
-   */
-  public static async getPlayerMostCommonRecentHmd(playerId: string): Promise<string | undefined> {
-    const hmds = await this.getPlayerHmdBreakdown(playerId, 50); // get the last 50 scores
-    return Object.keys(hmds)[0] ?? undefined; // get the most common hmd
   }
 
   /**
@@ -58,7 +51,6 @@ export class PlayerHmdService {
     const hmds = await ScoreSaberScoreModel.aggregate([
       { $match: { playerId: playerId } }, // get all scores for the player
       { $sort: { timestamp: -1 } }, // sort by timestamp descending
-      { $match: { hmd: { $ne: "Unknown" } } }, // filter out scores with unknown hmd
       ...(limit ? [{ $limit: limit }] : []), // get the last x scores
       { $group: { _id: "$hmd", count: { $sum: 1 } } }, // group by hmd and count the number of scores
       { $sort: { count: -1 } }, // sort by count descending (most common first)

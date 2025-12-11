@@ -1,7 +1,7 @@
 import { IsGuildUser } from "@discordx/utilities";
 import { CommandInteraction } from "discord.js";
 import { Discord, Guard, Slash } from "discordx";
-import { PlayerService } from "../../service/player/player.service";
+import { PlayerMedalsService } from "../../service/player/player-medals.service";
 import { OwnerOnly } from "../lib/guards";
 
 @Discord()
@@ -14,7 +14,7 @@ class ForceRefreshPlayerScores {
     });
 
     try {
-      await PlayerService.updatePlayerGlobalMedalCounts();
+      await PlayerMedalsService.updatePlayerGlobalMedalCounts();
     } catch (error) {
       await interaction.editReply({
         content: error instanceof Error ? error.message : "An unknown error occurred",

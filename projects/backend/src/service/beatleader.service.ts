@@ -88,9 +88,7 @@ export default class BeatLeaderService {
     score: BeatLeaderScoreToken,
     isTop50GlobalScore?: boolean
   ): Promise<AdditionalScoreData | undefined> {
-    const before = Date.now();
-
-    const { playerId, player: scorePlayer, leaderboard } = score;
+    const { playerId, leaderboard } = score;
     const player: PlayerDocument | null = await CacheService.fetchWithCache(
       CacheId.Players,
       `player:${playerId}`,
@@ -194,9 +192,9 @@ export default class BeatLeaderService {
     }
 
     await AdditionalScoreDataModel.create(data);
-    Logger.info(
-      `Tracked additional score data for "${scorePlayer.name}"(${playerId}) in ${Date.now() - before}ms`
-    );
+    // Logger.info(
+    //   `Tracked BeatLeader score "${score.id}" for "${scorePlayer.name}"(${playerId})`
+    // );
 
     return data;
   }

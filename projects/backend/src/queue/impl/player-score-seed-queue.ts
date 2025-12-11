@@ -7,7 +7,8 @@ import { formatDuration } from "@ssr/common/utils/time-utils";
 import { isProduction } from "@ssr/common/utils/utils";
 import { ButtonBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
 import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
-import { PlayerService } from "../../service/player/player.service";
+import { PlayerCoreService } from "../../service/player/player-core.service";
+import { PlayerScoresService } from "../../service/player/player-scores.service";
 import { Queue, QueueItem } from "../queue";
 import { QueueId } from "../queue-manager";
 
@@ -56,23 +57,22 @@ export class PlayerScoreSeedQueue extends Queue<QueueItem<string>> {
       return;
     }
 
-    const player = await PlayerService.getPlayer(playerId, playerToken);
-    const { totalScores, missingScores, updatedScores, totalPages, timeTaken, partialRefresh } =
-      await PlayerService.refreshAllPlayerScores(player, playerToken);
+    const player = await PlayerCoreService.getPlayer(playerId, playerToken);
+    const { totalScores, missingScores, totalPagesFetched, timeTaken, partialRefresh } =
+      await PlayerScoresService.fetchMissingPlayerScores(player, playerToken);
 
     await sendEmbedToChannel(
       DiscordChannels.PLAYER_SCORE_REFRESH_LOGS,
       new EmbedBuilder()
         .setTitle("Player Score Refresh Complete" + (partialRefresh ? " (Partial Refresh)" : ""))
-        .setDescription(`🎯 **${player.name}**'s scores have been refreshed`)
+        .setDescription(`🎯 **${player.name}**'s scores have been fetched`)
         .addFields([
           {
             name: "📊 Statistics",
             value: [
               `**Total Scores:** ${formatNumberWithCommas(totalScores)}`,
               `**Missing Scores:** ${formatNumberWithCommas(missingScores)}`,
-              `**Updated Scores:** ${formatNumberWithCommas(updatedScores)}`,
-              `**Pages:** ${formatNumberWithCommas(totalPages)}`,
+              `**Pages Fetched:** ${formatNumberWithCommas(totalPagesFetched)}`,
               `**Time Taken:** ${formatDuration(timeTaken)}`,
             ].join("\n"),
             inline: false,

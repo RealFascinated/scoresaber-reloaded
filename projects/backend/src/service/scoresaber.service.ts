@@ -13,7 +13,12 @@ import SuperJSON from "superjson";
 import { redisClient } from "../common/redis";
 import CacheService, { CacheId } from "./cache.service";
 import MetricsService, { MetricType } from "./metrics.service";
-import { PlayerService } from "./player/player.service";
+import { PlayerAccuraciesService } from "./player/player-accuracies.service";
+import { PlayerCoreService } from "./player/player-core.service";
+import { PlayerHistoryService } from "./player/player-history.service";
+import { PlayerHmdService } from "./player/player-hmd.service";
+import { PlayerMedalsService } from "./player/player-medals.service";
+import { PlayerRankedService } from "./player/player-ranked.service";
 
 // Type for cached player data with timestamp
 type CachedScoreSaberPlayerToken = ScoreSaberPlayerToken & {
@@ -54,7 +59,7 @@ export default class ScoreSaberService {
           throw new NotFoundError(`Player "${id}" not found`);
         }
 
-        const account = await PlayerService.getPlayer(id, player).catch(() => undefined);
+        const account = await PlayerCoreService.getPlayer(id, player).catch(() => undefined);
         const isOculusAccount = player.id.length === 16;
 
         // For basic type, return early with minimal data
@@ -92,10 +97,10 @@ export default class ScoreSaberService {
           globalRankIncludingInactives,
           medalsRank,
         ] = await Promise.all([
-          account ? PlayerService.updatePeakRank(account, player) : undefined,
-          account ? PlayerService.getPlayerPpBoundary(id, 1) : [],
-          account ? PlayerService.getAccBadges(id) : {},
-          PlayerService.getPlayerStatisticHistory(player, new Date(), getDaysAgoDate(30), {
+          account ? PlayerCoreService.updatePeakRank(account, player) : undefined,
+          account ? PlayerRankedService.getPlayerPpBoundary(id, 1) : [],
+          account ? PlayerAccuraciesService.getAccBadges(id) : {},
+          PlayerHistoryService.getPlayerStatisticHistory(player, new Date(), getDaysAgoDate(30), {
             rank: true,
             countryRank: true,
             pp: true,
@@ -104,7 +109,7 @@ export default class ScoreSaberService {
           // todo: cleanup this mess
           options?.getHmdBreakdown && player !== undefined
             ? (async () => {
-                const hmdUsage = await PlayerService.getPlayerHmdBreakdown(id);
+                const hmdUsage = await PlayerHmdService.getPlayerHmdBreakdown(id);
                 const totalKnownHmdScores = Object.values(hmdUsage).reduce(
                   (sum, count) => sum + count,
                   0
@@ -117,8 +122,10 @@ export default class ScoreSaberService {
                 ) as Record<HMD, number>;
               })()
             : undefined,
-          options?.setInactivesRank ? PlayerService.getPlayerRankIncludingInactives(id) : undefined,
-          options?.setMedalsRank ? PlayerService.getPlayerMedalRank(id) : undefined,
+          options?.setInactivesRank
+            ? PlayerCoreService.getPlayerRankIncludingInactives(id)
+            : undefined,
+          options?.setMedalsRank ? PlayerMedalsService.getPlayerMedalRank(id) : undefined,
         ]);
 
         // Calculate all statistic changes in parallel
@@ -159,7 +166,8 @@ export default class ScoreSaberService {
           },
           rankPercentile:
             (player.rank /
-              ((await MetricsService.getMetric(MetricType.ACTIVE_ACCOUNTS)).value as number)) *
+              (((await MetricsService.getMetric(MetricType.ACTIVE_ACCOUNTS))?.value as number) ||
+                1)) *
             100,
         } as ScoreSaberPlayer;
       }

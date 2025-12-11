@@ -3,7 +3,7 @@ import { PlayerRankingsResponse } from "@ssr/common/response/player-rankings-res
 import { t } from "elysia";
 import { Controller, Get } from "elysia-decorators";
 import { PlayerMedalsService } from "../service/player/player-medals.service";
-import { PlayerService } from "../service/player/player.service";
+import { PlayerSearchService } from "../service/player/player-search.service";
 
 @Controller("")
 export default class PlayerRankingController {
@@ -24,7 +24,7 @@ export default class PlayerRankingController {
   }: {
     query: { page: number; country: string; search: string };
   }): Promise<PlayerRankingsResponse> {
-    return await PlayerService.getPlayerRanking(page, {
+    return await PlayerSearchService.getPlayerRanking(page, {
       country: country,
       search: search,
     });

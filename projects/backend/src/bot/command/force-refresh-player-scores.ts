@@ -2,7 +2,8 @@ import { IsGuildUser } from "@discordx/utilities";
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { ApplicationCommandOptionType, CommandInteraction } from "discord.js";
 import { Discord, Guard, Slash, SlashOption } from "discordx";
-import { PlayerService } from "../../service/player/player.service";
+import { PlayerCoreService } from "../../service/player/player-core.service";
+import { PlayerScoresService } from "../../service/player/player-scores.service";
 import { OwnerOnly } from "../lib/guards";
 
 @Discord()
@@ -19,8 +20,6 @@ class ForceRefreshPlayerScores {
     playerId: string,
     interaction: CommandInteraction
   ) {
-    interaction.deferReply();
-
     try {
       const playerToken = await ApiServiceRegistry.getInstance()
         .getScoreSaberService()
@@ -29,14 +28,14 @@ class ForceRefreshPlayerScores {
         throw new Error("Player not found");
       }
 
-      const player = await PlayerService.getPlayer(playerId, playerToken);
-      await PlayerService.refreshAllPlayerScores(player, playerToken);
+      const player = await PlayerCoreService.getPlayer(playerId, playerToken);
+      PlayerScoresService.fetchMissingPlayerScores(player, playerToken);
 
-      interaction.editReply({
-        content: `Refreshed ${player.name}'s scores.`,
+      interaction.reply({
+        content: `Fetching missing scores for ${player.name}...`,
       });
     } catch (error) {
-      interaction.editReply({
+      interaction.reply({
         content: error instanceof Error ? error.message : "An unknown error occurred",
       });
     }

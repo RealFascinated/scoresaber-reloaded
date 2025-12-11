@@ -5,8 +5,7 @@ import { ScoreSaberLeaderboardModel } from "@ssr/common/model/leaderboard/impl/s
 import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 import { isProduction } from "@ssr/common/utils/utils";
 import { LeaderboardService } from "../../service/leaderboard/leaderboard.service";
-import { PlayerService } from "../../service/player/player.service";
-import { ScoreService } from "../../service/score/score.service";
+import { ScoreCoreService } from "../../service/score/score-core.service";
 import { Queue, QueueItem } from "../queue";
 import { QueueId } from "../queue-manager";
 
@@ -78,16 +77,14 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
       for (const rawScore of response.scores) {
         const score = getScoreSaberScoreFromToken(rawScore, leaderboard, undefined);
 
-        PlayerService.trackPlayer(score.playerId);
-
         // Check if the score is already tracked
-        const scoreExists = await ScoreService.scoreExistsByScoreId(score.scoreId);
+        const scoreExists = await ScoreCoreService.scoreExists(score.scoreId);
         if (scoreExists) {
           processedAnyScores = true;
           continue;
         }
 
-        await ScoreService.trackScoreSaberScore(score, leaderboard, score.playerInfo, false, false);
+        await ScoreCoreService.trackScoreSaberScore(score, leaderboard, score.playerInfo, false);
         processedAnyScores = true;
       }
 

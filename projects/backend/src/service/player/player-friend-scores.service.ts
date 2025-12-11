@@ -10,7 +10,7 @@ import { PlayerScore } from "@ssr/common/score/player-score";
 import { processInBatches } from "@ssr/common/utils/batch-utils";
 import { scoreToObject } from "../../common/score/score.util";
 import { LeaderboardService } from "../leaderboard/leaderboard.service";
-import { ScoreService } from "../score/score.service";
+import { ScoreCoreService } from "../score/score-core.service";
 
 const ITEMS_PER_PAGE = 8;
 const MAX_TOTAL_SCORES = 1000;
@@ -23,7 +23,7 @@ export class PlayerFriendScoresService {
    * @param leaderboardId the leaderboard id
    * @param page the page to fetch
    */
-  public static async getPlayerFriendLeaderboardScores(
+  public static async getFriendLeaderboardScores(
     friendIds: string[],
     leaderboardId: number,
     page: number
@@ -58,7 +58,7 @@ export class PlayerFriendScoresService {
     // Process scores in parallel with batching
     const scores: ScoreSaberScore[] = [];
     await processInBatches(friendScores, 10, async friendScore => {
-      const processedScore = await ScoreService.insertScoreData(
+      const processedScore = await ScoreCoreService.insertScoreData(
         scoreToObject(friendScore),
         leaderboard.leaderboard,
         undefined,
@@ -85,7 +85,7 @@ export class PlayerFriendScoresService {
    * @param leaderboardId the leaderboard id
    * @param page the page to fetch
    */
-  public static async getPlayerFriendScores(
+  public static async getFriendScores(
     friendIds: string[],
     page: number
   ): Promise<Page<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>> {
@@ -152,7 +152,7 @@ export class PlayerFriendScoresService {
             }
 
             return {
-              score: await ScoreService.insertScoreData(
+              score: await ScoreCoreService.insertScoreData(
                 score,
                 leaderboardResponse.leaderboard,
                 undefined,

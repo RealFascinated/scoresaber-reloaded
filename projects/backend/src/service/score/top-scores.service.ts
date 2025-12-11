@@ -9,13 +9,13 @@ import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score";
 import { scoreToObject } from "../../common/score/score.util";
 import { LeaderboardService } from "../leaderboard/leaderboard.service";
 import ScoreSaberService from "../scoresaber.service";
-import { ScoreService } from "./score.service";
+import { ScoreCoreService } from "./score-core.service";
 
 export class TopScoresService {
   /**
    * Gets the top tracked scores.
    *
-   * @param page the page number (1-based)
+   * @param page the page number
    * @returns the top scores with pagination metadata
    */
   public static async getTopScores(
@@ -88,10 +88,15 @@ export class TopScoresService {
             };
           }
 
-          const processedScore = await ScoreService.insertScoreData(score, leaderboard, undefined, {
-            removeScoreWeightAndRank: true,
-            insertPlayerInfo: true,
-          });
+          const processedScore = await ScoreCoreService.insertScoreData(
+            score,
+            leaderboard,
+            undefined,
+            {
+              removeScoreWeightAndRank: true,
+              insertPlayerInfo: true,
+            }
+          );
           return {
             score: processedScore,
             leaderboard: leaderboard,

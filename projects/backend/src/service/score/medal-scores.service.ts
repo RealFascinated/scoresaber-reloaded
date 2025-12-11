@@ -68,18 +68,15 @@ export class MedalScoresService {
       );
       return;
     }
-    const medalScore = new ScoreSaberMedalsScoreModel({
-      ...incomingScore,
-      medals: MEDAL_COUNTS[incomingScore.rank as keyof typeof MEDAL_COUNTS],
-    });
 
+    // Get all existing scores for this leaderboard
     const leaderboardScores = await ScoreSaberMedalsScoreModel.find({
-      leaderboardId: medalScore.leaderboardId,
+      leaderboardId: incomingScore.leaderboardId,
     })
       .sort({ score: -1 }) // Sort by score descending (highest score first)
       .lean();
 
-    // Track affected players and their medal changes
+    // Track affected players and their medal changes (before recalculation)
     const affectedPlayers = new Set<string>();
     const medalChanges = new Map<string, number>();
 
@@ -89,41 +86,150 @@ export class MedalScoresService {
       medalChanges.set(score.playerId, (medalChanges.get(score.playerId) || 0) + score.medals);
     }
 
-    // Add the new score and sort by from best to worst score
-    const scores = [...leaderboardScores, medalScore].sort((a, b) => b.score - a.score); // Sort by score descending (highest score first)
+    // Check if this score already exists (player improvement case)
+    const existingScoreIndex = leaderboardScores.findIndex(
+      s => s.playerId === incomingScore.playerId && s.leaderboardId === incomingScore.leaderboardId
+    );
 
-    // Recalculate score ranks and medals
+    // Create the incoming score as a plain object (matching .lean() format)
+    const incomingScoreData = {
+      ...incomingScore,
+      medals: MEDAL_COUNTS[incomingScore.rank as keyof typeof MEDAL_COUNTS],
+    };
+
+    // Replace existing score or add new one
+    let scores: Array<typeof incomingScoreData & { _id?: number }>;
+    if (existingScoreIndex >= 0) {
+      // Replace existing score with the new one
+      scores = [...leaderboardScores];
+      scores[existingScoreIndex] = {
+        ...incomingScoreData,
+        _id: leaderboardScores[existingScoreIndex]._id,
+      };
+    } else {
+      // Add new score
+      scores = [...leaderboardScores, incomingScoreData];
+    }
+
+    // Sort by score descending (highest score first)
+    scores.sort((a, b) => b.score - a.score);
+
+    // Track score changes for logging
+    const scoreChanges: Array<{
+      playerId: string;
+      oldRank?: number;
+      oldMedals?: number;
+      newRank: number;
+      newMedals: number;
+    }> = [];
+
+    // Create a map of old scores by playerId for comparison
+    const oldScoresByPlayer = new Map<string, { rank: number; medals: number }>();
+    for (const score of leaderboardScores) {
+      oldScoresByPlayer.set(score.playerId, { rank: score.rank, medals: score.medals });
+    }
+
+    // Recalculate score ranks and medals for all scores
     for (const [index, score] of scores.entries()) {
-      score.rank = index + 1;
-      score.medals = MEDAL_COUNTS[score.rank as keyof typeof MEDAL_COUNTS];
+      const oldScore = oldScoresByPlayer.get(score.playerId);
+      const newRank = index + 1;
+      const newMedals = MEDAL_COUNTS[newRank as keyof typeof MEDAL_COUNTS];
 
-      // Save the score if top 10
-      if (score.rank <= 10) {
-        await ScoreSaberMedalsScoreModel.updateOne(
-          { _id: score._id },
-          { $set: score },
-          { upsert: true }
-        );
+      score.rank = newRank;
+      score.medals = newMedals;
+
+      // Track changes for scores in top 10
+      if (newRank <= 10) {
+        if (!oldScore || oldScore.rank !== newRank || oldScore.medals !== newMedals) {
+          scoreChanges.push({
+            playerId: score.playerId,
+            oldRank: oldScore?.rank,
+            oldMedals: oldScore?.medals,
+            newRank,
+            newMedals,
+          });
+        }
       }
+    }
+
+    // Log score medal changes
+    if (scoreChanges.length > 0) {
+      Logger.info(
+        `[MEDAL SCORES] Score changes for leaderboard ${incomingScore.leaderboardId}: ${scoreChanges
+          .map(
+            s =>
+              `Player ${s.playerId}: ${s.oldRank ? `rank ${s.oldRank} (${s.oldMedals} medals)` : "new"} → rank ${s.newRank} (${s.newMedals} medals)`
+          )
+          .join(", ")}`
+      );
+    }
+
+    // Save all top 10 scores using upsert (playerId + leaderboardId is unique per leaderboard)
+    const top10Scores = scores.slice(0, 10);
+    const bulkOps = [];
+    for (const score of top10Scores) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { _id, ...scoreData } = score;
+      bulkOps.push({
+        updateOne: {
+          filter: {
+            playerId: score.playerId,
+            leaderboardId: score.leaderboardId,
+          },
+          update: {
+            $set: scoreData,
+          },
+          upsert: true,
+        },
+      });
+    }
+
+    if (bulkOps.length > 0) {
+      await ScoreSaberMedalsScoreModel.bulkWrite(bulkOps);
     }
 
     // Calculate medals after changes (sum all medals per player in top 10)
     const newMedalCounts = new Map<string, number>();
-    for (const score of scores.slice(0, 10)) {
+    for (const score of top10Scores) {
       affectedPlayers.add(score.playerId);
       newMedalCounts.set(score.playerId, (newMedalCounts.get(score.playerId) || 0) + score.medals);
     }
 
+    // Delete scores past the 10th place (only those that were in the database)
+    const scoresToDelete = scores.slice(10).filter(s => s._id !== undefined);
+    if (scoresToDelete.length > 0) {
+      await ScoreSaberMedalsScoreModel.deleteMany({
+        _id: { $in: scoresToDelete.map(s => s._id) },
+      });
+    }
+
     // Calculate net change for each player
+    const playerMedalChanges: Array<{
+      playerId: string;
+      oldMedals: number;
+      newMedals: number;
+      change: number;
+    }> = [];
     for (const playerId of affectedPlayers) {
       const oldMedals = medalChanges.get(playerId) || 0;
       const newMedals = newMedalCounts.get(playerId) || 0;
-      medalChanges.set(playerId, newMedals - oldMedals);
+      const change = newMedals - oldMedals;
+      medalChanges.set(playerId, change);
+      if (change !== 0) {
+        playerMedalChanges.push({ playerId, oldMedals, newMedals, change });
+      }
     }
 
-    // Delete the scores past the 10th place
-    for (const score of scores.slice(10)) {
-      await ScoreSaberMedalsScoreModel.deleteOne({ _id: score._id });
+    // Log player medal changes
+    if (playerMedalChanges.length > 0) {
+      Logger.info(
+        `[MEDAL SCORES] Player medal changes: ${playerMedalChanges
+          .map(
+            p =>
+              `Player ${p.playerId}: ${p.oldMedals} → ${p.newMedals} (${p.change > 0 ? "+" : ""}${p.change})`
+          )
+          .join(", ")}`
+      );
     }
 
     // Update only affected players' medal counts
@@ -151,7 +257,13 @@ export class MedalScoresService {
 
     if (bulkOps.length > 0) {
       await PlayerModel.bulkWrite(bulkOps);
-      Logger.debug(`[MEDAL SCORES] Updated ${bulkOps.length} players' medal counts`);
+      const changesSummary = Array.from(medalChanges.entries())
+        .filter(([, change]) => change !== 0)
+        .map(([playerId, change]) => `${playerId}: ${change > 0 ? "+" : ""}${change}`)
+        .join(", ");
+      Logger.info(
+        `[MEDAL SCORES] Updated ${bulkOps.length} players' medal counts${changesSummary ? ` (${changesSummary})` : ""}`
+      );
     }
   }
 }

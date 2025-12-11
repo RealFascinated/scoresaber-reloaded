@@ -1,7 +1,7 @@
 import { PlayerSearchResponse } from "@ssr/common/response/player-search-response";
 import { t } from "elysia";
 import { Controller, Get } from "elysia-decorators";
-import { PlayerService } from "../service/player/player.service";
+import { PlayerSearchService } from "../service/player/player-search.service";
 
 @Controller("")
 export default class PlayerSearchController {
@@ -21,7 +21,7 @@ export default class PlayerSearchController {
     query: { query: string };
   }): Promise<PlayerSearchResponse> {
     return {
-      players: await PlayerService.searchPlayers(query),
+      players: await PlayerSearchService.searchPlayers(query),
     };
   }
 }

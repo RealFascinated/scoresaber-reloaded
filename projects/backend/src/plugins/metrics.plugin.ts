@@ -10,10 +10,13 @@ interface RequestStore {
 export const metricsPlugin = () => {
   return new Elysia().onRequest(async ({ store }) => {
     try {
-      const rpsMetric = (await MetricsService.getMetric(
-        MetricType.TOTAL_REQUESTS
-      )) as RequestsPerSecondMetric;
-      rpsMetric.increment();
+      const rpsMetric = (await MetricsService.getMetric(MetricType.TOTAL_REQUESTS)) as
+        | RequestsPerSecondMetric
+        | undefined;
+
+      if (rpsMetric) {
+        rpsMetric.increment();
+      }
 
       (store as RequestStore).startTime = process.hrtime.bigint();
     } catch (error) {

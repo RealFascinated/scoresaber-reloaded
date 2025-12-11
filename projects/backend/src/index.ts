@@ -6,6 +6,7 @@ import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
 import { formatDuration, TimeUnit } from "@ssr/common/utils/time-utils";
+import { isProduction } from "@ssr/common/utils/utils";
 import { logger } from "@tqman/nice-logger";
 import { mongoose } from "@typegoose/typegoose";
 import { EmbedBuilder } from "discord.js";
@@ -42,13 +43,13 @@ import CacheService from "./service/cache.service";
 import { LeaderboardService } from "./service/leaderboard/leaderboard.service";
 import MetricsService from "./service/metrics.service";
 import MinioService from "./service/minio.service";
-import { PlayerService } from "./service/player/player.service";
+import { PlayerHistoryService } from "./service/player/player-history.service";
+import { PlayerMedalsService } from "./service/player/player-medals.service";
 import PlaylistService from "./service/playlist/playlist.service";
-import { ScoreService } from "./service/score/score.service";
+import { MedalScoresService } from "./service/score/medal-scores.service";
 import StatisticsService from "./service/statistics.service";
 import { BeatSaverWebsocket } from "./websocket/beatsaver-websocket";
 import { ScoreWebsockets } from "./websocket/score-websockets";
-import { isProduction } from "@ssr/common/utils/utils";
 
 Logger.info("Starting SSR Backend...");
 
@@ -98,7 +99,7 @@ export const app = new Elysia()
       name: "player-statistics-tracker-cron",
       // pattern: "*/1 * * * *", // Every 1 minute
       pattern: "59 23 * * *", // Every day at 23:59
-      timezone: "Europe/London", // UTC time
+      timezone: "Europe/London",
       protect: true,
       run: async () => {
         const before = Date.now();
@@ -106,7 +107,7 @@ export const app = new Elysia()
           DiscordChannels.BACKEND_LOGS,
           new EmbedBuilder().setDescription(`Updating player statistics...`)
         );
-        await PlayerService.updatePlayerStatistics();
+        await PlayerHistoryService.updatePlayerStatistics();
         await sendEmbedToChannel(
           DiscordChannels.BACKEND_LOGS,
           new EmbedBuilder().setDescription(
@@ -121,7 +122,7 @@ export const app = new Elysia()
       name: "refresh-leaderboards-cron",
       // pattern: "*/1 * * * *", // Every minute
       pattern: "30 */2 * * *", // Every 2 hours at 30 minutes ex: 00:30, 02:30, 04:30, etc
-      timezone: "Europe/London", // UTC time
+      timezone: "Europe/London",
       protect: true,
       run: async () => {
         await LeaderboardService.refreshRankedLeaderboards();
@@ -140,18 +141,18 @@ export const app = new Elysia()
     cron({
       name: "refresh-medal-scores",
       // pattern: "*/1 * * * *", // Every minute
-      pattern: "0 23 * * *", // Every day at 23:00
-      timezone: "Europe/London", // UTC time
+      pattern: "0 20 * * *", // Every day at 20:00
+      timezone: "Europe/London",
       protect: true,
       run: async () => {
-        await ScoreService.refreshMedalScores(); // Refresh medal scores
-        await PlayerService.updatePlayerGlobalMedalCounts(); // Update player global medal counts and ranks
+        await MedalScoresService.refreshMedalScores(); // Refresh medal scores
+        await PlayerMedalsService.updatePlayerGlobalMedalCounts(); // Update player global medal counts and ranks
       },
     })
   )
   .use(
     cron({
-      name: "refresh-beatsaver-scrape",
+      name: "scrape-beatsaver-maps",
       pattern: "0 8 * * *", // Every day at 08:00
       timezone: "Europe/London",
       protect: true,
@@ -335,7 +336,6 @@ app.onStart(async () => {
 
   new CacheService();
   new StatisticsService();
-  new ScoreService();
   new PlaylistService();
 
   EventsManager.registerListener(new QueueManager());

@@ -9,8 +9,9 @@ import TrackedScoresMetric from "../../metrics/impl/player/tracked-scores";
 import BeatLeaderService from "../../service/beatleader.service";
 import CacheService from "../../service/cache.service";
 import MetricsService, { MetricType } from "../../service/metrics.service";
-import { PlayerService } from "../../service/player/player.service";
-import { ScoreService } from "../../service/score/score.service";
+import { PlayerHistoryService } from "../../service/player/player-history.service";
+import { MedalScoresService } from "../../service/score/medal-scores.service";
+import { ScoreCoreService } from "../../service/score/score-core.service";
 import { EventListener } from "../event-listener";
 
 export class TrackScoreListener implements EventListener {
@@ -24,17 +25,18 @@ export class TrackScoreListener implements EventListener {
     const playerInfo = score.playerInfo;
 
     // Track ScoreSaber score
-    const { score: trackedScore, hasPreviousScore } = await ScoreService.trackScoreSaberScore(
+    const { score: trackedScore, hasPreviousScore } = await ScoreCoreService.trackScoreSaberScore(
       score,
       leaderboard,
-      player
+      player,
+      true
     );
     if (trackedScore == undefined) {
       return;
     }
 
     // Update player daily score stats
-    PlayerService.updatePlayerDailyScoreStats(
+    PlayerHistoryService.updatePlayerDailyScoreStats(
       score.playerId,
       leaderboard.stars > 0,
       hasPreviousScore
@@ -42,7 +44,7 @@ export class TrackScoreListener implements EventListener {
 
     // Update medal scores
     if (leaderboard.ranked && score.rank <= 10) {
-      ScoreService.handleIncomingMedalsScoreUpdate(score);
+      MedalScoresService.handleIncomingMedalsScoreUpdate(score);
     }
 
     // Track BeatLeader score if available
@@ -107,9 +109,11 @@ export class TrackScoreListener implements EventListener {
     await Promise.all(notifications);
 
     // Update metric
-    const trackedScoresMetric = (await MetricsService.getMetric(
-      MetricType.TRACKED_SCORES
-    )) as TrackedScoresMetric;
-    trackedScoresMetric.increment();
+    const trackedScoresMetric = (await MetricsService.getMetric(MetricType.TRACKED_SCORES)) as
+      | TrackedScoresMetric
+      | undefined;
+    if (trackedScoresMetric) {
+      trackedScoresMetric.increment();
+    }
   }
 }

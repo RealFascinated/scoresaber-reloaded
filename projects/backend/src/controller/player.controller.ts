@@ -5,7 +5,9 @@ import { PlayerScoresChartResponse } from "@ssr/common/response/player-scores-ch
 import { PpBoundaryResponse } from "@ssr/common/response/pp-boundary-response";
 import { t } from "elysia";
 import { Controller, Get } from "elysia-decorators";
-import { PlayerService } from "../service/player/player.service";
+import { PlayerCoreService } from "../service/player/player-core.service";
+import { PlayerRankedService } from "../service/player/player-ranked.service";
+import { PlayerScoresService } from "../service/player/player-scores.service";
 import ScoreSaberService from "../service/scoresaber.service";
 
 @Controller("/player")
@@ -55,7 +57,7 @@ export default class PlayerController {
     params: { id: string; boundary: number };
   }): Promise<PpBoundaryResponse> {
     return {
-      boundaries: await PlayerService.getPlayerPpBoundary(id, boundary),
+      boundaries: await PlayerRankedService.getPlayerPpBoundary(id, boundary),
       boundary: boundary,
     };
   }
@@ -75,7 +77,7 @@ export default class PlayerController {
   }: {
     params: { id: string };
   }): Promise<PlayerScoresChartResponse> {
-    return await PlayerService.getPlayerScoreChart(id);
+    return await PlayerScoresService.getPlayerScoreChart(id);
   }
 
   @Get("/ranked-pps/:id", {
@@ -93,7 +95,7 @@ export default class PlayerController {
   }: {
     params: { id: string };
   }): Promise<PlayerRankedPpsResponse> {
-    return await PlayerService.getPlayerRankedPps(id);
+    return await PlayerRankedService.getPlayerRankedPps(id);
   }
 
   @Get("/refresh/:id", {
@@ -107,6 +109,6 @@ export default class PlayerController {
     },
   })
   public async refreshPlayer({ params: { id } }: { params: { id: string } }) {
-    return await PlayerService.refreshPlayer(id);
+    return await PlayerCoreService.refreshPlayer(id);
   }
 }

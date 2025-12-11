@@ -27,7 +27,7 @@ export class AppService {
       PlayerModel.countDocuments({
         inactive: true,
       }),
-      (await MetricsService.getMetric(MetricType.ACTIVE_ACCOUNTS)).value,
+      ((await MetricsService.getMetric(MetricType.ACTIVE_ACCOUNTS))?.value as number) || 0,
       ScoreSaberLeaderboardModel.estimatedDocumentCount(),
     ]);
 

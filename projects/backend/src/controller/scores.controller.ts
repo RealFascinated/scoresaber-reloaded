@@ -1,8 +1,8 @@
 import { t } from "elysia";
 import { Controller, Get } from "elysia-decorators";
 import { SuperJSON } from "superjson";
-import { PlayerService } from "../service/player/player.service";
-import { ScoreService } from "../service/score/score.service";
+import { LeaderboardScoresService } from "../service/leaderboard/leaderboard-scores.service";
+import { PlayerScoresService } from "../service/player/player-scores.service";
 
 @Controller("/scores")
 export default class ScoresController {
@@ -34,7 +34,13 @@ export default class ScoresController {
     query: { search?: string; comparisonPlayerId?: string };
   }): Promise<unknown> {
     return (
-      await PlayerService.getScoreSaberLivePlayerScores(id, page, sort, search, comparisonPlayerId)
+      await PlayerScoresService.getScoreSaberLivePlayerScores(
+        id,
+        page,
+        sort,
+        search,
+        comparisonPlayerId
+      )
     ).toJSON();
   }
 
@@ -62,7 +68,7 @@ export default class ScoresController {
     };
     query: { country?: string };
   }): Promise<unknown> {
-    return await ScoreService.getLeaderboardScores(id, page, country);
+    return await LeaderboardScoresService.getLeaderboardScores(id, page, country);
   }
 
   @Get("/:id", {
@@ -85,7 +91,7 @@ export default class ScoresController {
     params: { id: string };
     query: { superJson?: boolean };
   }): Promise<unknown> {
-    const score = await PlayerService.getScore(id);
+    const score = await PlayerScoresService.getScore(id);
     return superJson ? SuperJSON.stringify(score) : score;
   }
 }

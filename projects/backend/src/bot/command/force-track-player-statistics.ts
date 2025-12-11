@@ -2,7 +2,7 @@ import { IsGuildUser } from "@discordx/utilities";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import { CommandInteraction } from "discord.js";
 import { Discord, Guard, Slash } from "discordx";
-import { PlayerService } from "../../service/player/player.service";
+import { PlayerHistoryService } from "../../service/player/player-history.service";
 import { OwnerOnly } from "../lib/guards";
 
 @Discord()
@@ -18,7 +18,7 @@ class ForceTrackPlayerStatistics {
       content: "Updating player statistics...",
     });
 
-    await PlayerService.updatePlayerStatistics();
+    await PlayerHistoryService.updatePlayerStatistics();
 
     interaction.editReply({
       content: `Player statistics updated in ${formatDuration(Date.now() - before)}`,
