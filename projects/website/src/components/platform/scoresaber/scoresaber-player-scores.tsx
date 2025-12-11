@@ -209,6 +209,7 @@ export default function ScoreSaberPlayerScores({
       hmdFilter,
     ],
     queryFn: async () => {
+      await new Promise(resolve => setTimeout(resolve, 1000)); // test
       if (scoresMode === "live") {
         const response = await ssrApi.fetchScoreSaberPlayerScores(
           player.id,
@@ -244,12 +245,13 @@ export default function ScoreSaberPlayerScores({
   });
 
   useEffect(() => {
-    setIsLoading(isLoading);
-  }, [isLoading, setIsLoading]);
+    setIsLoading(isLoading || isRefetching);
+  }, [isLoading, isRefetching, setIsLoading]);
 
   // Event handlers
   const handleSortChange = useCallback(
     async (newSort: string, defaultOrder: ScoreSort["direction"] = "desc") => {
+      setIsLoading(true);
       if (newSort !== currentSort) {
         setCurrentSort(newSort);
         setCurrentSortDirection(defaultOrder);
@@ -266,11 +268,12 @@ export default function ScoreSaberPlayerScores({
         animateLeft();
       }
     },
-    [currentSort, currentSortDirection, animateLeft, currentFilter]
+    [currentSort, currentSortDirection, animateLeft, currentFilter, setIsLoading]
   );
 
   const handleScoreModeChange = useCallback(
     (newMode: ScoreSaberScoreDataMode) => {
+      setIsLoading(true);
       if (newMode === "live") {
         setCurrentSort(DEFAULT_LIVE_SORT);
       } else {
@@ -281,11 +284,12 @@ export default function ScoreSaberPlayerScores({
       setCurrentPage(1);
       animateLeft();
     },
-    [animateLeft]
+    [animateLeft, setIsLoading]
   );
 
   const handlePageChange = useCallback(
     (newPage: number) => {
+      setIsLoading(true);
       if (newPage > currentPage) {
         animateLeft();
       } else {
@@ -293,18 +297,19 @@ export default function ScoreSaberPlayerScores({
       }
       setCurrentPage(newPage);
     },
-    [currentPage, animateLeft, animateRight]
+    [currentPage, animateLeft, animateRight, setIsLoading]
   );
 
   const handleSearchChange = useCallback(
     (newSearch: string) => {
       setSearchTerm(newSearch);
       if (newSearch.length >= 3 || newSearch === "") {
+        setIsLoading(true);
         setCurrentPage(1);
         animateLeft();
       }
     },
-    [animateLeft]
+    [animateLeft, setIsLoading]
   );
 
   // URL management
@@ -536,6 +541,7 @@ export default function ScoreSaberPlayerScores({
                       <Select
                         value={currentFilter || ""}
                         onValueChange={value => {
+                          setIsLoading(true);
                           setCurrentFilter(value);
                           setCurrentPage(1);
                           animateLeft();
@@ -555,7 +561,7 @@ export default function ScoreSaberPlayerScores({
                           ))}
                         </SelectContent>
                       </Select>
-
+                      ;
                       {currentFilter && currentFilter !== "All Scores" && (
                         <SimpleTooltip display="Clear filter">
                           <Button
@@ -563,6 +569,7 @@ export default function ScoreSaberPlayerScores({
                             size="icon"
                             className="text-muted-foreground hover:text-destructive h-8 w-8 shrink-0"
                             onClick={() => {
+                              setIsLoading(true);
                               setCurrentFilter("All Scores");
                               setCurrentPage(1);
                               animateLeft();
@@ -578,6 +585,7 @@ export default function ScoreSaberPlayerScores({
                       <Select
                         value={hmdFilter || "All Hmds"}
                         onValueChange={value => {
+                          setIsLoading(true);
                           setHmdFilter(value === "All Hmds" ? null : (value as HMD));
                           setCurrentPage(1);
                           animateLeft();
@@ -604,7 +612,7 @@ export default function ScoreSaberPlayerScores({
                             ))}
                         </SelectContent>
                       </Select>
-
+                      ;
                       {hmdFilter && (
                         <SimpleTooltip display="Clear HMD filter">
                           <Button
@@ -612,6 +620,7 @@ export default function ScoreSaberPlayerScores({
                             size="icon"
                             className="text-muted-foreground hover:text-destructive h-8 w-8 shrink-0"
                             onClick={() => {
+                              setIsLoading(true);
                               setHmdFilter(null);
                               setCurrentPage(1);
                               animateLeft();

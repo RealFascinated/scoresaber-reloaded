@@ -108,8 +108,8 @@ export default function AccSaberPlayerScores({ player, sort, page, type, order }
   });
 
   useEffect(() => {
-    setIsLoading(isLoading);
-  }, [isLoading, setIsLoading]);
+    setIsLoading(isLoading || isRefetching);
+  }, [isLoading, isRefetching, setIsLoading]);
 
   const handleSortChange = useCallback(
     async (newSort: typeof sort, defaultOrder: AccSaberScoreOrder) => {
