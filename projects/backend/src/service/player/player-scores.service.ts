@@ -202,6 +202,8 @@ export class PlayerScoresService {
       scoresPage: ScoreSaberPlayerScoresPageToken
     ): Promise<boolean> {
       for (const scoreToken of scoresPage.playerScores) {
+        result.totalScores++;
+
         const { score, leaderboard } = parseScoreToken(scoreToken);
         if (!score || !leaderboard) {
           continue;
@@ -214,7 +216,6 @@ export class PlayerScoresService {
         );
         if (trackingResult.tracked) {
           result.missingScores++;
-          result.totalScores++;
         }
       }
 
@@ -230,7 +231,6 @@ export class PlayerScoresService {
     let currentPage = 1;
     let hasMoreScores = true;
     while (hasMoreScores) {
-      result.totalPagesFetched++;
       const scoresPage = await getScoresPage(currentPage);
       if (!scoresPage) {
         hasMoreScores = false;
@@ -258,6 +258,7 @@ export class PlayerScoresService {
     }
 
     result.timeTaken = performance.now() - startTime;
+    result.totalPagesFetched = currentPage - 1;
     if (currentPage !== 1) {
       Logger.info(
         `[Score Refresh] Fetched missing scores for %s, total pages fetched: %s, total scores: %s, missing scores: %s, in %s`,
