@@ -10,7 +10,6 @@ import BeatLeaderService from "../../service/beatleader.service";
 import CacheService from "../../service/cache.service";
 import MetricsService, { MetricType } from "../../service/metrics.service";
 import { PlayerHistoryService } from "../../service/player/player-history.service";
-import { MedalScoresService } from "../../service/score/medal-scores.service";
 import { ScoreCoreService } from "../../service/score/score-core.service";
 import { EventListener } from "../event-listener";
 
@@ -41,11 +40,6 @@ export class TrackScoreListener implements EventListener {
       leaderboard.stars > 0,
       hasPreviousScore
     );
-
-    // Update medal scores
-    if (leaderboard.ranked && score.rank <= 10) {
-      MedalScoresService.handleIncomingMedalsScoreUpdate(score);
-    }
 
     // Track BeatLeader score if available
     let beatLeaderScore: AdditionalScoreData | undefined;
