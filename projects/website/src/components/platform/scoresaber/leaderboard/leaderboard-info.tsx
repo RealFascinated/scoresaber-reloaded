@@ -8,7 +8,7 @@ import { StarFilledIcon } from "@radix-ui/react-icons";
 import { LeaderboardResponse } from "@ssr/common/response/leaderboard-response";
 import { getBeatSaverMapperProfileUrl } from "@ssr/common/utils/beatsaver.util";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
-import { getDifficultyName } from "@ssr/common/utils/song-utils";
+import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
 import { formatDate } from "@ssr/common/utils/time-utils";
 import Image from "next/image";
 import { useState } from "react";
@@ -30,6 +30,8 @@ export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
     ? leaderboardData.timestamp
     : leaderboardData.dateRanked || leaderboardData.timestamp;
 
+  const difficulty = getDifficulty(leaderboardData.difficulty.difficulty);
+
   return (
     <Card className="h-fit w-full space-y-4">
       {/* Header Section */}
@@ -37,7 +39,10 @@ export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
         {/* Song Info */}
         <div className="flex h-full flex-col justify-center gap-3">
           {/* Star Count / Difficulty */}
-          <div className="bg-pp flex w-fit items-center gap-1 rounded-md p-1.5 py-1">
+          <div
+            className="flex w-fit items-center gap-1 rounded-md p-1.5 py-1"
+            style={{ backgroundColor: difficulty.color }}
+          >
             {leaderboard.leaderboard.ranked ? (
               <>
                 <StarFilledIcon className="h-[15px] w-[15px] text-white" />
