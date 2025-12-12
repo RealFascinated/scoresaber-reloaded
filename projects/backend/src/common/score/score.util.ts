@@ -18,6 +18,7 @@ import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
 import BeatSaverService from "../../service/beatsaver.service";
 import { PlayerScoreHistoryService } from "../../service/player/player-score-history.service";
 import { PlayerCoreService } from "../../service/player/player-core.service";
+import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/leaderboard-player-info";
 
 /**
  * Converts a database score to a ScoreSaberScore.
@@ -136,7 +137,7 @@ export async function sendScoreNotification(
 export async function sendMedalScoreNotification(
   score: ScoreSaberScore,
   leaderboard: ScoreSaberLeaderboard,
-  player: ScoreSaberPlayerToken,
+  player: ScoreSaberPlayerToken | ScoreSaberLeaderboardPlayerInfoToken,
   beatLeaderScore: AdditionalScoreData | undefined,
   changes: Map<string, number>
 ) {
