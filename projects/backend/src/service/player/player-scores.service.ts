@@ -79,7 +79,6 @@ export class PlayerScoresService {
     totalScores: number;
     totalPagesFetched: number;
     timeTaken: number;
-    partialRefresh: boolean;
   }> {
     const startTime = performance.now();
     const playerId = playerToken.id;
@@ -94,7 +93,6 @@ export class PlayerScoresService {
         totalScores: playerScoresCount,
         totalPagesFetched: 0,
         timeTaken: 0,
-        partialRefresh: false,
       };
     }
 
@@ -103,7 +101,6 @@ export class PlayerScoresService {
       totalScores: playerScoresCount,
       totalPagesFetched: 0,
       timeTaken: 0,
-      partialRefresh: false,
     };
 
     /**
@@ -155,7 +152,7 @@ export class PlayerScoresService {
       playerScoresCount: number
     ): Promise<void> {
       Logger.info(
-        `Player %s has more scores than they should (%s > %s). Deleteing their scores and re-seeding...`,
+        `[Score Refresh] Player %s has more scores than they should (%s > %s). Deleteing their scores and re-seeding...`,
         playerId,
         playerScoresCount,
         scoresPage.metadata.total
@@ -230,7 +227,7 @@ export class PlayerScoresService {
       return currentPage < Math.ceil(scoresPage.metadata.total / scoresPage.metadata.itemsPerPage);
     }
 
-    Logger.info(`Fetching missing scores for ${playerId}...`);
+    Logger.info(`[Score Refresh] Checking scores for ${playerId}...`);
 
     let currentPage = 1;
     let hasMoreScores = true;
@@ -263,9 +260,9 @@ export class PlayerScoresService {
     }
 
     result.timeTaken = performance.now() - startTime;
-    if (!result.partialRefresh) {
+    if (currentPage !== 1) {
       Logger.info(
-        `Finished fetching missing scores for %s, total pages fetched: %s, total scores: %s, missing scores: %s, in %s`,
+        `[Score Refresh] Fetched missing scores for %s, total pages fetched: %s, total scores: %s, missing scores: %s, in %s`,
         playerId,
         formatNumberWithCommas(result.totalPagesFetched),
         formatNumberWithCommas(result.totalScores),
