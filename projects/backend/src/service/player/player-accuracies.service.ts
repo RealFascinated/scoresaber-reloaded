@@ -94,11 +94,11 @@ export class PlayerAccuraciesService {
     for (const playerScore of playerScores) {
       const accuracy = playerScore.accuracy;
       if (accuracy >= 98) badges.GOD++;
-      if (accuracy >= 95) badges.SSPlus++;
-      if (accuracy >= 90) badges.SS++;
-      if (accuracy >= 85) badges.SPlus++;
-      if (accuracy >= 80) badges.S++;
-      if (accuracy >= 70) badges.A++;
+      else if (accuracy >= 95) badges.SSPlus++;
+      else if (accuracy >= 90) badges.SS++;
+      else if (accuracy >= 85) badges.SPlus++;
+      else if (accuracy >= 80) badges.S++;
+      else if (accuracy >= 70) badges.A++;
     }
     return badges;
   }
