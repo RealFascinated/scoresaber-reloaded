@@ -64,7 +64,7 @@ export default function ScoreSongInfo({
         <div
           className="absolute right-0 bottom-0 flex h-[18px] w-full cursor-default items-center justify-center rounded-sm text-[0.70rem]"
           style={{
-            backgroundColor: diff.color + "f0",
+            backgroundColor: `color-mix(in srgb, ${diff.color} 95%, transparent)`,
           }}
         >
           {worth != undefined && worth.value > 0 ? (
