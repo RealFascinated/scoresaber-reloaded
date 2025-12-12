@@ -202,10 +202,9 @@ export class PlayerScoresService {
       scoresPage: ScoreSaberPlayerScoresPageToken
     ): Promise<boolean> {
       for (const scoreToken of scoresPage.playerScores) {
-        result.totalScores++;
-
         const { score, leaderboard } = parseScoreToken(scoreToken);
         if (!score || !leaderboard) {
+          result.totalScores++;
           continue;
         }
         const trackingResult = await ScoreCoreService.trackScoreSaberScore(
@@ -216,6 +215,7 @@ export class PlayerScoresService {
         );
         if (trackingResult.tracked) {
           result.missingScores++;
+          result.totalScores++;
         }
       }
 
