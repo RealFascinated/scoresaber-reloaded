@@ -227,8 +227,6 @@ export class PlayerScoresService {
       return currentPage < Math.ceil(scoresPage.metadata.total / scoresPage.metadata.itemsPerPage);
     }
 
-    Logger.info(`[Score Refresh] Checking scores for ${playerId}...`);
-
     let currentPage = 1;
     let hasMoreScores = true;
     while (hasMoreScores) {
