@@ -89,7 +89,7 @@ export async function sendScoreNotification(
       )
       .addFields([
         {
-          name: "Performance",
+          name: "**__Performance__**",
           value: [
             `**Accuracy:** ${accuracy}`,
             ...(score.pp > 0 ? [`**PP:** ${formatPp(score.pp)}pp ${change ? change.pp : ""}`] : []),
@@ -98,7 +98,7 @@ export async function sendScoreNotification(
           inline: false,
         },
         {
-          name: "Statistics",
+          name: "**__Statistics__**",
           value: [
             `**Misses:** ${formatNumberWithCommas(score.missedNotes)} ${change ? change.misses : ""}`,
             `**Bad Cuts:** ${formatNumberWithCommas(score.badCuts)} ${change ? change.badCuts : ""}`,
