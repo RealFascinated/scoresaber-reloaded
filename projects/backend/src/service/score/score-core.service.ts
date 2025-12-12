@@ -15,6 +15,7 @@ import { LeaderboardCoreService } from "../leaderboard/leaderboard-core.service"
 import { PlayerHmdService } from "../player/player-hmd.service";
 import { PlayerScoreHistoryService } from "../player/player-score-history.service";
 import ScoreSaberService from "../scoresaber.service";
+import { MedalScoresService } from "./medal-scores.service";
 
 export class ScoreCoreService {
   /**
@@ -78,6 +79,11 @@ export class ScoreCoreService {
 
     await ScoreSaberScoreModel.create(score);
     await PlayerHmdService.updatePlayerHmd(player.id);
+
+    // Handle score for medal updates
+    if (leaderboard.ranked && score.rank <= 10) {
+      await MedalScoresService.handleIncomingMedalsScoreUpdate(score);
+    }
 
     Logger.info(
       `Tracked %s ScoreSaber score "%s" for "%s"(%s) on "%s" [%s]%s in %s`,

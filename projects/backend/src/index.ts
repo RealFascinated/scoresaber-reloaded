@@ -44,9 +44,7 @@ import { LeaderboardLeaderboardsService } from "./service/leaderboard/leaderboar
 import MetricsService from "./service/metrics.service";
 import MinioService from "./service/minio.service";
 import { PlayerHistoryService } from "./service/player/player-history.service";
-import { PlayerMedalsService } from "./service/player/player-medals.service";
 import PlaylistService from "./service/playlist/playlist.service";
-import { MedalScoresService } from "./service/score/medal-scores.service";
 import StatisticsService from "./service/statistics.service";
 import { BeatSaverWebsocket } from "./websocket/beatsaver-websocket";
 import { ScoreWebsockets } from "./websocket/score-websockets";
@@ -137,19 +135,19 @@ export const app = new Elysia()
       },
     })
   )
-  .use(
-    cron({
-      name: "refresh-medal-scores",
-      // pattern: "*/1 * * * *", // Every minute
-      pattern: "0 20 * * *", // Every day at 20:00
-      timezone: "Europe/London",
-      protect: true,
-      run: async () => {
-        await MedalScoresService.refreshMedalScores(); // Refresh medal scores
-        await PlayerMedalsService.updatePlayerGlobalMedalCounts(); // Update player global medal counts and ranks
-      },
-    })
-  )
+  // .use(
+  //   cron({
+  //     name: "refresh-medal-scores",
+  //     // pattern: "*/1 * * * *", // Every minute
+  //     pattern: "0 20 * * *", // Every day at 20:00
+  //     timezone: "Europe/London",
+  //     protect: true,
+  //     run: async () => {
+  //       await MedalScoresService.rescanMedalScores(); // Refresh medal scores
+  //       await PlayerMedalsService.updatePlayerGlobalMedalCounts(); // Update player global medal counts and ranks
+  //     },
+  //   })
+  // )
   .use(
     cron({
       name: "scrape-beatsaver-maps",

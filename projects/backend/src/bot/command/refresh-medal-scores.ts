@@ -18,7 +18,7 @@ class RefreshMedalScores {
     });
 
     try {
-      await MedalScoresService.refreshMedalScores();
+      await MedalScoresService.rescanMedalScores();
     } catch (error) {
       await interaction.editReply({
         content: error instanceof Error ? error.message : "An unknown error occurred",
