@@ -20,9 +20,9 @@ export default class CacheService {
     [CacheId.BeatSaver]: TimeUnit.toSeconds(TimeUnit.Day, 7),
     [CacheId.ScoreSaber]: TimeUnit.toSeconds(TimeUnit.Minute, 1),
     [CacheId.Leaderboards]: TimeUnit.toSeconds(TimeUnit.Hour, 2),
-    [CacheId.AdditionalScoreData]: TimeUnit.toSeconds(TimeUnit.Minute, 60),
-    [CacheId.Players]: TimeUnit.toSeconds(TimeUnit.Minute, 5),
-    [CacheId.ScoreStats]: TimeUnit.toSeconds(TimeUnit.Week, 2),
+    [CacheId.AdditionalScoreData]: TimeUnit.toSeconds(TimeUnit.Hour, 1),
+    [CacheId.Players]: TimeUnit.toSeconds(TimeUnit.Minute, 30),
+    [CacheId.ScoreStats]: TimeUnit.toSeconds(TimeUnit.Hour, 12),
     [CacheId.PreviousScore]: TimeUnit.toSeconds(TimeUnit.Hour, 1),
   };
 
