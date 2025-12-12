@@ -378,7 +378,7 @@ export class LeaderboardCoreService {
   /**
    * Converts a database leaderboard to a ScoreSaberLeaderboard.
    */
-  private static leaderboardToObject(leaderboard: ScoreSaberLeaderboard): ScoreSaberLeaderboard {
+  public static leaderboardToObject(leaderboard: ScoreSaberLeaderboard): ScoreSaberLeaderboard {
     return {
       ...removeObjectFields<ScoreSaberLeaderboard>(leaderboard, ["_id", "__v"]),
       id: leaderboard._id,

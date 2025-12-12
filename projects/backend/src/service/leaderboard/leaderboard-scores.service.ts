@@ -1,7 +1,6 @@
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger from "@ssr/common/logger";
-import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import LeaderboardScoresResponse from "@ssr/common/response/leaderboard-scores-response";
 import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 import { Metadata } from "@ssr/common/types/metadata";
@@ -10,17 +9,6 @@ import BeatLeaderService from "../beatleader.service";
 import { LeaderboardCoreService } from "./leaderboard-core.service";
 
 export class LeaderboardScoresService {
-  /**
-   * Gets the amount of tracked scores for a leaderboard
-   */
-  public static async getTrackedScoresCount(leaderboardId: number | string): Promise<number> {
-    const id = Number(leaderboardId);
-    if (isNaN(id)) {
-      throw new Error(`Invalid leaderboardId: ${leaderboardId}`);
-    }
-    return ScoreSaberScoreModel.countDocuments({ leaderboardId: id });
-  }
-
   /**
    * Fetches all scores for a specific leaderboard
    */

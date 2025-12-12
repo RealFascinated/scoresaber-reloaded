@@ -46,6 +46,7 @@ import { scoreToObject } from "../../common/score/score.util";
 import { LeaderboardCoreService } from "../leaderboard/leaderboard-core.service";
 import { ScoreCoreService } from "../score/score-core.service";
 import ScoreSaberService from "../scoresaber.service";
+import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 
 const FIELDS_MAP: Record<ScoreSort["field"], string> = {
   pp: "pp",
@@ -364,67 +365,62 @@ export class PlayerScoresService {
       .setItemsPerPage(requestedPage.metadata.itemsPerPage)
       .setTotalItems(requestedPage.metadata.total);
 
-    // Start fetching comparison player and leaderboard IDs in parallel
-    const [comparisonPlayer, leaderboardIds] = await Promise.all([
-      comparisonPlayerId !== playerId && comparisonPlayerId !== undefined
-        ? ScoreSaberService.getPlayer(
-            comparisonPlayerId,
-            DetailType.BASIC,
-            await ScoreSaberService.getCachedPlayer(comparisonPlayerId, true),
-            { setInactivesRank: false, setMedalsRank: false }
-          )
-        : undefined,
-      requestedPage.playerScores.map(score => score.leaderboard.id + ""),
-    ]);
+    let comparisonPlayer: ScoreSaberPlayer | undefined;
+    if (comparisonPlayerId !== playerId && comparisonPlayerId !== undefined) {
+      comparisonPlayer = await ScoreSaberService.getPlayer(
+        comparisonPlayerId,
+        DetailType.BASIC,
+        await ScoreSaberService.getCachedPlayer(comparisonPlayerId, true),
+        { setInactivesRank: false, setMedalsRank: false }
+      );
+    }
 
+    const leaderboardIds = requestedPage.playerScores.map(score => score.leaderboard.id + "");
     return await pagination.getPage(pageNumber, async () => {
-      // Fetch all leaderboards in parallel using getLeaderboards
       const leaderboardResponses = await LeaderboardCoreService.getLeaderboards(leaderboardIds, {
         includeBeatSaver: true,
         beatSaverType: DetailType.FULL,
       });
-
-      // Create a map for quick leaderboard lookup
       const leaderboardMap = new Map(
         leaderboardResponses.map(result => [result.leaderboard.id, result])
       );
 
-      // Process all scores in parallel with a concurrency limit
-      const scorePromises = requestedPage.playerScores.map(async playerScore => {
-        const leaderboardResponse = leaderboardMap.get(playerScore.leaderboard.id);
-        if (!leaderboardResponse) {
-          return undefined;
-        }
+      return (
+        await Promise.all(
+          requestedPage.playerScores.map(async playerScore => {
+            const leaderboardResponse = leaderboardMap.get(playerScore.leaderboard.id);
+            if (!leaderboardResponse) {
+              return undefined;
+            }
 
-        const { leaderboard, beatsaver } = leaderboardResponse;
-        const score = getScoreSaberScoreFromToken(playerScore.score, leaderboard, playerId);
-        if (!score) {
-          return undefined;
-        }
+            const { leaderboard, beatsaver } = leaderboardResponse;
+            const score = getScoreSaberScoreFromToken(playerScore.score, leaderboard, playerId);
+            if (!score) {
+              return undefined;
+            }
 
-        // Track missing scores
-        await ScoreCoreService.trackScoreSaberScore(
-          score,
-          leaderboard,
-          await ScoreSaberService.getCachedPlayer(playerId, true),
-          undefined,
-          false
-        );
+            // Track missing scores
+            ScoreCoreService.trackScoreSaberScore(
+              score,
+              leaderboard,
+              await ScoreSaberService.getCachedPlayer(playerId, true),
+              undefined,
+              false
+            );
 
-        return {
-          score: await ScoreCoreService.insertScoreData(score, leaderboard, {
-            comparisonPlayer: comparisonPlayer,
-          }),
-          leaderboard: leaderboard,
-          beatSaver: beatsaver,
-        } as PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>;
-      });
-
-      // Wait for all score processing to complete and filter out any undefined results
-      return (await Promise.all(scorePromises)).filter(Boolean) as PlayerScore<
-        ScoreSaberScore,
-        ScoreSaberLeaderboard
-      >[];
+            return {
+              score: await ScoreCoreService.insertScoreData(score, leaderboard, {
+                comparisonPlayer: comparisonPlayer,
+              }),
+              leaderboard: leaderboard,
+              beatSaver: beatsaver,
+            } as PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>;
+          })
+        )
+      ).filter(
+        (result): result is PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard> =>
+          result !== undefined
+      );
     });
   }
 
