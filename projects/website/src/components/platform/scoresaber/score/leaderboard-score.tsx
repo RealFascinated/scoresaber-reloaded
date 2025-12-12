@@ -17,6 +17,7 @@ import { ArrowUpIcon } from "lucide-react";
 import { ScoreSaberScoreHMD } from "./score-hmd";
 
 const TABLE_CELL_WIDTH = "px-3 py-2";
+const TABLE_CELL_WIDTH_SMALL = "px-1.5 py-2";
 
 export default function ScoreSaberLeaderboardScore({
   score,
@@ -93,7 +94,7 @@ export default function ScoreSaberLeaderboardScore({
       )}
 
       {/* Score Modifiers */}
-      <td className="px-4 py-2 text-center whitespace-nowrap">
+      <td className={cn(TABLE_CELL_WIDTH, "text-center whitespace-nowrap")}>
         {score.modifiers.length > 0 ? (
           <SimpleTooltip
             side="bottom"
@@ -114,7 +115,7 @@ export default function ScoreSaberLeaderboardScore({
       </td>
 
       {/* Score Replay */}
-      <td className="w-[40px]">
+      <td className={cn(TABLE_CELL_WIDTH_SMALL, "w-[37px]")}>
         {score.additionalData && (
           <div className="flex justify-center">
             <ScoreReplayButton additionalData={score.additionalData} />
@@ -122,8 +123,8 @@ export default function ScoreSaberLeaderboardScore({
         )}
       </td>
 
-      {showDropdown && (
-        <td className="w-[40px]">
+      {showDropdown && score.additionalData && (
+        <td className={cn(TABLE_CELL_WIDTH_SMALL, "w-[45px] pr-3")}>
           <SimpleTooltip display="View score details">
             <div className="flex cursor-default items-center justify-center">
               <ArrowUpIcon
