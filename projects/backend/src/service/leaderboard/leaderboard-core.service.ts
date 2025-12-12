@@ -106,18 +106,18 @@ export class LeaderboardCoreService {
       throw new NotFoundError(`Leaderboard not found for "${id}"`);
     }
 
-    const leaderboard = await LeaderboardCoreService.saveLeaderboard(
+    const data = LeaderboardCoreService.processLeaderboard(await LeaderboardCoreService.saveLeaderboard(
       id,
       getScoreSaberLeaderboardFromToken(leaderboardToken)
-    );
+    ), false);
 
     (QueueManager.getQueue(QueueId.LeaderboardScoreSeedQueue) as LeaderboardScoreSeedQueue).add({
-      id: leaderboard.id.toString(),
-      data: leaderboard.id,
+      id: data.leaderboard.id.toString(),
+      data: data.leaderboard.id,
     });
 
     Logger.info(`Created leaderboard "${id}" in ${formatDuration(performance.now() - before)}`);
-    return LeaderboardCoreService.processLeaderboard(leaderboard, false);
+    return data;
   }
 
   /**
