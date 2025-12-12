@@ -23,6 +23,7 @@ import { QueueId, QueueManager } from "../../queue/queue-manager";
 import BeatSaverService from "../beatsaver.service";
 import CacheService, { CacheId } from "../cache.service";
 import { LeaderboardRankingService } from "./leaderboard-ranking.service";
+import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/leaderboard";
 
 const DEFAULT_OPTIONS: LeaderboardOptions = {
   includeBeatSaver: false,
@@ -93,11 +94,12 @@ export class LeaderboardCoreService {
    * Fetches a leaderboard from the ScoreSaber API and saves it to the database.
    *
    * @param id the ID of the leaderboard to fetch
+   * @param token the ScoreSaber leaderboard token to use
    * @returns the fetched leaderboard
    */
-  public static async createLeaderboard(id: string): Promise<LeaderboardResponse> {
+  public static async createLeaderboard(id: string, token?: ScoreSaberLeaderboardToken): Promise<LeaderboardResponse> {
     const before = performance.now();
-    const leaderboardToken = await ApiServiceRegistry.getInstance()
+    const leaderboardToken = token ?? await ApiServiceRegistry.getInstance()
       .getScoreSaberService()
       .lookupLeaderboard(id);
     if (leaderboardToken == undefined) {
