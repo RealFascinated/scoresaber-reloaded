@@ -71,11 +71,11 @@ function PlayerMiniRanking({
     );
     const digits = maxRank > 0 ? Math.floor(Math.log10(maxRank)) + 1 : 0;
     const commas = Math.floor((digits - 1) / 3);
-    return (digits + commas + 1) * 6;
+    return (digits + commas + 1) * 6.5;
   })();
 
   return (
-    <Card className="sticky flex w-full flex-col gap-(--spacing-md) text-xs select-none sm:w-[400px] sm:text-sm">
+    <Card className="sticky flex w-full flex-col gap-(--spacing-md) text-sm select-none sm:w-[400px]">
       {/* Header */}
       <div className="flex h-[24px] items-center gap-2">
         {icon}
@@ -136,7 +136,7 @@ function PlayerMiniRanking({
                       playerRanking.id === player.id ? "font-bold" : ""
                     )}
                   >
-                    {formatPp(playerRanking.pp, isMobile ? 0 : 2)}pp
+                    {formatPp(playerRanking.pp, isMobile ? 1 : 2)}pp
                   </p>
                   {playerRanking.id !== player.id && !isMobile && (
                     <p
