@@ -62,7 +62,7 @@ const playerStats: Stat[] = [
     },
   },
   {
-    name: "Total Replays Watched",
+    name: "Replays Watched by Others",
     create: (player: ScoreSaberPlayer) => {
       return {
         value: <>{formatNumberWithCommas(player.statistics.replaysWatched)}</>,
