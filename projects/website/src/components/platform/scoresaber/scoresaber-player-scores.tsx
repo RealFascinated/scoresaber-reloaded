@@ -54,6 +54,7 @@ import {
 import { EmptyState } from "../../ui/empty-state";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../ui/select";
 import ScoreSaberScoreDisplay from "./score/scoresaber-score";
+import ScoresaberLogo from "@/components/logos/logos/scoresaber-logo";
 
 // Constants
 const DEFAULT_LIVE_SORT: ScoreSaberScoreSort = "recent";
@@ -127,14 +128,20 @@ const CACHED_SCORE_FILTERS: {
   { name: "Passed Only", value: { passedOnly: true }, icon: <CheckIcon className="h-4 w-4" /> },
 ];
 
-const SCORES_MODES: Record<ScoreSaberScoreDataMode, { icon: React.ReactNode; tooltip: string }> = {
-  cached: {
-    icon: <ClockIcon className="h-4 w-4" />,
-    tooltip: "Cached scores are the scores that are stored in SSR. This is NOT live data.",
+const SCORES_MODES: Record<
+  ScoreSaberScoreDataMode,
+  { name: string; icon: React.ReactNode; tooltip: string }
+> = {
+  ssr: {
+    name: "SSR",
+    icon: <ScoresaberLogo className="h-4 w-4" />,
+    tooltip:
+      "SSR scores are the scores that are stored in SSR. They may be missing or out of date.",
   },
   live: {
+    name: "Live",
     icon: <TrendingUpIcon className="h-4 w-4" />,
-    tooltip: "This data is fetched from the ScoreSaber API. This is live data.",
+    tooltip: "Live data pulled from the ScoreSaber API.",
   },
 };
 
@@ -315,7 +322,7 @@ export default function ScoreSaberPlayerScores({
   const isDefaultLiveState =
     scoresMode === "live" && currentSort === DEFAULT_LIVE_SORT && currentPage === 1;
   const isDefaultCachedState =
-    scoresMode === "cached" &&
+    scoresMode === "ssr" &&
     currentSort === DEFAULT_CACHED_SORT &&
     currentSortDirection === DEFAULT_CACHED_SORT_DIRECTION &&
     currentPage === 1;
@@ -327,7 +334,7 @@ export default function ScoreSaberPlayerScores({
       { value: "scoresaber", condition: !isDefaultState },
       { value: scoresMode, condition: !isDefaultState },
       { value: currentSort, condition: !isDefaultState },
-      { value: currentSortDirection, condition: scoresMode === "cached" && !isDefaultState },
+      { value: currentSortDirection, condition: scoresMode === "ssr" && !isDefaultState },
       { value: currentPage, condition: !isDefaultState },
     ],
     queryParams: [
@@ -374,7 +381,7 @@ export default function ScoreSaberPlayerScores({
               leaderboard={score.leaderboard}
               beatSaverMap={score.beatSaver}
               settings={{
-                defaultLeaderboardScoresPage: scoresMode === "cached" ? 1 : undefined,
+                defaultLeaderboardScoresPage: scoresMode === "ssr" ? 1 : undefined,
               }}
             />
           ))}
@@ -427,17 +434,21 @@ export default function ScoreSaberPlayerScores({
                 <div className="flex w-full flex-col items-center gap-2 sm:w-auto sm:flex-row sm:gap-4">
                   {/* Mode Selection */}
                   <TabGroup>
-                    {Object.keys(SCORES_MODES).map(mode => (
-                      <Tab
-                        key={mode}
-                        isActive={mode === scoresMode}
-                        onClick={() => handleScoreModeChange(mode as ScoreSaberScoreDataMode)}
-                        tooltip={SCORES_MODES[mode as ScoreSaberScoreDataMode].tooltip}
-                      >
-                        {SCORES_MODES[mode as ScoreSaberScoreDataMode].icon}
-                        {capitalizeFirstLetter(mode)}
-                      </Tab>
-                    ))}
+                    {Object.keys(SCORES_MODES).map(mode => {
+                      const scoreMode = mode as ScoreSaberScoreDataMode;
+
+                      return (
+                        <Tab
+                          key={mode}
+                          isActive={mode === scoresMode}
+                          onClick={() => handleScoreModeChange(scoreMode)}
+                          tooltip={SCORES_MODES[scoreMode].tooltip}
+                        >
+                          {SCORES_MODES[scoreMode].icon}
+                          {SCORES_MODES[scoreMode].name}
+                        </Tab>
+                      );
+                    })}
                   </TabGroup>
 
                   {/* Sort Options */}
@@ -474,7 +485,7 @@ export default function ScoreSaberPlayerScores({
                       tooltip={SCORES_MODES[mode as ScoreSaberScoreDataMode].tooltip}
                     >
                       {SCORES_MODES[mode as ScoreSaberScoreDataMode].icon}
-                      {capitalizeFirstLetter(mode)}
+                      {SCORES_MODES[mode as ScoreSaberScoreDataMode].name}
                     </Tab>
                   ))}
                 </TabGroup>

@@ -111,7 +111,7 @@ export default async function PlayerPage(props: Props) {
   }
   const platform = PlatformRepository.getInstance().getPlatform(platformType);
   if (platform == undefined) {
-    return redirect(`/player/${player.id}/scoresaber`);
+    return redirect(`/player/${player.id}`);
   }
 
   return (

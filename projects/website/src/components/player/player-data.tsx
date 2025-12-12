@@ -71,7 +71,7 @@ function PlatformSelector({
   );
 }
 
-function ScoreComponent({
+function PlayerScores({
   platformType,
   player,
   searchParams,
@@ -95,11 +95,11 @@ function ScoreComponent({
           sort={(pageParams[3] as ScoreSaberScoreSort) ?? ("recent" as ScoreSaberScoreSort)}
           direction={
             mode
-              ? ((pageParams[mode === "cached" ? 4 : 3] as ScoreSort["direction"]) ??
+              ? ((pageParams[mode === "ssr" ? 4 : 3] as ScoreSort["direction"]) ??
                 ("desc" as ScoreSort["direction"]))
               : undefined
           }
-          page={parseInt(pageParams[mode === "cached" ? 5 : 4]) || 1}
+          page={parseInt(pageParams[mode === "ssr" ? 5 : 4]) || 1}
           initialSearch={searchParams.search}
         />
       ) : platformType === PlatformType.MedalScores ? (
@@ -170,7 +170,7 @@ export default function PlayerData({
         <div className="flex flex-col">
           <div className="flex flex-col">
             <PlatformSelector currentPlatform={platformType} player={player} />
-            <ScoreComponent
+            <PlayerScores
               platformType={platformType}
               player={player}
               searchParams={searchParams}

@@ -1,1 +1,1 @@
-export type ScoreSaberScoreDataMode = "live" | "cached";
+export type ScoreSaberScoreDataMode = "live" | "ssr";
