@@ -47,14 +47,22 @@ export default function ScoreSaberLeaderboardScore({
 
       {/* Player */}
       <td
-        className={cn(TABLE_CELL_WIDTH, "flex min-w-[250px] items-center gap-2 whitespace-nowrap")}
+        className={cn(
+          TABLE_CELL_WIDTH,
+          "flex w-full min-w-[300px] items-center gap-2 whitespace-nowrap"
+        )}
       >
         {scorePlayer ? (
           <>
             <ScoreSaberScoreHMD score={score}>
               <HMDIcon hmd={getHMDInfo(score.hmd as HMD)} />
             </ScoreSaberScoreHMD>
-            <PlayerInfo player={scorePlayer} highlightedPlayerId={highlightedPlayerId} useLink />
+            <PlayerInfo
+              player={scorePlayer}
+              highlightedPlayerId={highlightedPlayerId}
+              useLink
+              className="w-full"
+            />
           </>
         ) : (
           <p className="text-gray-500">Unknown Player</p>
