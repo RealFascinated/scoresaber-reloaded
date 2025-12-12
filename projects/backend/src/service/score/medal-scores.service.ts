@@ -11,6 +11,8 @@ import { isProduction } from "@ssr/common/utils/utils";
 import { sendMedalScoreNotification } from "../../common/score/score.util";
 import { LeaderboardCoreService } from "../leaderboard/leaderboard-core.service";
 import { LeaderboardLeaderboardsService } from "../leaderboard/leaderboard-leaderboards.service";
+import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
+import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/leaderboard-player-info";
 
 export class MedalScoresService {
   private static IGNORE_SCORES = false;
@@ -65,6 +67,7 @@ export class MedalScoresService {
    */
   public static async handleIncomingMedalsScoreUpdate(
     incomingScore: ScoreSaberScore,
+    player: ScoreSaberPlayerToken | ScoreSaberLeaderboardPlayerInfoToken,
     beatLeaderScore: AdditionalScoreData | undefined
   ) {
     if (MedalScoresService.IGNORE_SCORES || incomingScore.rank > 10 || incomingScore.pp <= 0) {
@@ -181,6 +184,7 @@ export class MedalScoresService {
       await sendMedalScoreNotification(
         incomingScore,
         leaderboard.leaderboard,
+        player,
         beatLeaderScore,
         medalChanges
       );

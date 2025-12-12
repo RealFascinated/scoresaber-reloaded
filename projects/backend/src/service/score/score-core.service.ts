@@ -87,7 +87,7 @@ export class ScoreCoreService {
 
     // Handle score for medal updates
     if (leaderboard.ranked && score.rank <= 10) {
-      await MedalScoresService.handleIncomingMedalsScoreUpdate(score, beatLeaderScore);
+      await MedalScoresService.handleIncomingMedalsScoreUpdate(score, player, beatLeaderScore);
     }
 
     // leaderboard play count

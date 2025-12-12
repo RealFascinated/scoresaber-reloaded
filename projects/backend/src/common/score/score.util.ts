@@ -17,6 +17,7 @@ import { ButtonBuilder, ButtonStyle, Colors, EmbedBuilder } from "discord.js";
 import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
 import BeatSaverService from "../../service/beatsaver.service";
 import { PlayerScoreHistoryService } from "../../service/player/player-score-history.service";
+import { PlayerCoreService } from "../../service/player/player-core.service";
 
 /**
  * Converts a database score to a ScoreSaberScore.
@@ -135,6 +136,7 @@ export async function sendScoreNotification(
 export async function sendMedalScoreNotification(
   score: ScoreSaberScore,
   leaderboard: ScoreSaberLeaderboard,
+  player: ScoreSaberPlayerToken,
   beatLeaderScore: AdditionalScoreData | undefined,
   changes: Map<string, number>
 ) {
@@ -148,9 +150,9 @@ export async function sendMedalScoreNotification(
   await sendEmbedToChannel(
     DiscordChannels.MEDAL_SCORES_FEED,
     new EmbedBuilder()
-      .setTitle(`${score.playerInfo.name} gained medals!`)
+      .setTitle(`${player.name} gained medals!`)
       .setDescription(
-        `**${score.playerInfo.name}** just gained **${changes.get(score.playerId)}** medals on **${leaderboard.fullName}**
+        `**${player.name}** just gained **${changes.get(score.playerId)}** medals on **${leaderboard.fullName}**
 
       **Changes:**
       ${Array.from(changes.entries())
