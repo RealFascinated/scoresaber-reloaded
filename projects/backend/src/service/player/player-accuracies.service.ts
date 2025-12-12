@@ -74,6 +74,7 @@ export class PlayerAccuraciesService {
    */
   public static async getAccBadges(playerId: string): Promise<AccBadges> {
     const badges: AccBadges = {
+      GOD: 0,
       SSPlus: 0,
       SS: 0,
       SPlus: 0,
@@ -90,28 +91,15 @@ export class PlayerAccuraciesService {
       })
       .lean();
 
-    // Process scores in parallel using Promise.all
-    const badgeCounts = await Promise.all(
-      playerScores.map(async playerScore => {
-        const accuracy = playerScore.accuracy;
-        if (accuracy >= 95) return { SSPlus: 1, SS: 0, SPlus: 0, S: 0, A: 0 };
-        if (accuracy >= 90) return { SSPlus: 0, SS: 1, SPlus: 0, S: 0, A: 0 };
-        if (accuracy >= 85) return { SSPlus: 0, SS: 0, SPlus: 1, S: 0, A: 0 };
-        if (accuracy >= 80) return { SSPlus: 0, SS: 0, SPlus: 0, S: 1, A: 0 };
-        if (accuracy >= 70) return { SSPlus: 0, SS: 0, SPlus: 0, S: 0, A: 1 };
-        return { SSPlus: 0, SS: 0, SPlus: 0, S: 0, A: 0 };
-      })
-    );
-
-    // Aggregate results
-    badgeCounts.forEach(count => {
-      badges.SSPlus += count.SSPlus;
-      badges.SS += count.SS;
-      badges.SPlus += count.SPlus;
-      badges.S += count.S;
-      badges.A += count.A;
-    });
-
+    for (const playerScore of playerScores) {
+      const accuracy = playerScore.accuracy;
+      if (accuracy >= 98) badges.GOD++;
+      if (accuracy >= 95) badges.SSPlus++;
+      if (accuracy >= 90) badges.SS++;
+      if (accuracy >= 85) badges.SPlus++;
+      if (accuracy >= 80) badges.S++;
+      if (accuracy >= 70) badges.A++;
+    }
     return badges;
   }
 }
