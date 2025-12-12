@@ -15,7 +15,7 @@ export function Spinner({ size = "md", className }: SpinnerProps) {
 
   return (
     <div className="flex items-center justify-center">
-      <ArrowPathIcon className={cn("text-primary/80 animate-spin", sizeClasses[size], className)} />
+      <ArrowPathIcon className={cn("animate-spin text-white", sizeClasses[size], className)} />
     </div>
   );
 }

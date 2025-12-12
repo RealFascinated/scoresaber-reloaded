@@ -28,17 +28,34 @@ export function DifficultyButton({
   const difficultyData = getDifficulty(difficulty);
   const color = difficultyData.color;
 
+  const buttonId = `difficulty-btn-${leaderboardId}`;
+
   const button = (
-    <Button
-      variant={isSelected ? "default" : "ghost"}
-      onClick={() => onSelect(leaderboardId)}
-      className={cn(
-        "hover:text-foreground px-4 py-2 transition-all duration-200",
-        isSelected ? "font-semibold" : "font-medium"
-      )}
-    >
-      <span style={{ color }}>{getDifficultyName(difficulty)}</span>
-    </Button>
+    <>
+      <style>{`
+        @media (hover: hover) {
+          #${buttonId}.difficulty-button-hover:hover {
+            border-color: ${color} !important;
+          }
+        }
+      `}</style>
+      <Button
+        id={buttonId}
+        variant={isSelected ? "default" : "ghost"}
+        onClick={() => onSelect(leaderboardId)}
+        className={cn(
+          "difficulty-button-hover",
+          "px-4 py-2 transition-all duration-200",
+          isSelected ? "font-semibold" : "font-medium"
+        )}
+        style={{
+          borderColor: isSelected ? color : undefined,
+          backgroundColor: isSelected ? color + "00" : undefined,
+        }}
+      >
+        <span style={{ color }}>{getDifficultyName(difficulty)}</span>
+      </Button>
+    </>
   );
 
   return inGameDifficulty ? (
