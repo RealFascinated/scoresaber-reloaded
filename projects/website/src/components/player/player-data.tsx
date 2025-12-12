@@ -7,16 +7,8 @@ import PlayerViews from "@/components/player/views/player-views";
 import { useWindowDimensions } from "@/contexts/viewport-context";
 import useDatabase from "@/hooks/use-database";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
-import {
-  AccSaberScoreOrder,
-  AccSaberScoreSort,
-  AccSaberScoreType,
-} from "@ssr/common/api-service/impl/accsaber";
 import { DetailType } from "@ssr/common/detail-type";
 import type ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import type { ScoreSaberScoreSort } from "@ssr/common/score/score-sort";
-import { ScoreSaberScoreDataMode } from "@ssr/common/types/score-data-mode";
-import { ScoreSort } from "@ssr/common/types/sort";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import AccSaberPlayerScores from "../platform/accsaber/accsaber-player-scores";
@@ -28,13 +20,28 @@ import PlayerHeader from "./header/player-header";
 import PlayerMiniRankings from "./mini-ranking/player-mini-ranking";
 
 const platformRepository = PlatformRepository.getInstance();
-function PlatformSelector({
-  player,
-  currentPlatform,
-}: {
-  currentPlatform: PlatformType;
+
+interface PlayerDataProps {
   player: ScoreSaberPlayer;
-}) {
+  platformType: PlatformType;
+}
+
+export default function PlayerData({ platformType, player }: PlayerDataProps) {
+  const { width } = useWindowDimensions();
+  const database = useDatabase();
+
+  const mainPlayerId = useStableLiveQuery(() => database.getMainPlayerId());
+  const isFriend = useStableLiveQuery(() => database.isFriend(player.id));
+
+  const { data: playerData } = useQuery({
+    queryKey: ["playerData", player.id, mainPlayerId, isFriend],
+    queryFn: () => ssrApi.getScoreSaberPlayer(player.id, DetailType.FULL),
+    initialData: player,
+  });
+  player = playerData ?? player;
+
+  const showRankings = width > 1536 && !player.inactive && !player.banned;
+
   const { data: availablePlatforms = [] } = useQuery({
     queryKey: ["available-platforms", player.id],
     queryFn: async () => {
@@ -49,103 +56,20 @@ function PlatformSelector({
     },
   });
 
-  return (
-    <div className="flex">
-      {availablePlatforms.map(platform => (
-        <SimpleLink
-          href={`/player/${player.id}${platform.getType() !== PlatformType.ScoreSaber ? `/${platform.getType()}` : ""}`}
-          key={platform.getDisplayName()}
-          scroll={false}
-        >
-          <Button
-            key={platform.getDisplayName()}
-            variant={currentPlatform === platform.getType() ? "default" : "secondary"}
-            className="flex items-center gap-(--spacing-sm) rounded-b-none"
-          >
-            {platform.getLogo()}
-            <span className="hidden md:block">{platform.getDisplayName()}</span>
-          </Button>
-        </SimpleLink>
-      ))}
-    </div>
-  );
-}
-
-function PlayerScores({
-  platformType,
-  player,
-  searchParams,
-  pageParams,
-}: {
-  platformType: PlatformType;
-  player: ScoreSaberPlayer;
-  searchParams: {
-    [key: string]: string | undefined;
-  };
-  pageParams: string[];
-}) {
-  const mode = (pageParams[2] as ScoreSaberScoreDataMode) ?? ("live" as ScoreSaberScoreDataMode);
-
-  return (
-    <div className="[&>div]:rounded-tl-none">
-      {platformType === PlatformType.ScoreSaber ? (
-        <ScoreSaberPlayerScores
-          player={player}
-          mode={mode}
-          sort={(pageParams[3] as ScoreSaberScoreSort) ?? ("recent" as ScoreSaberScoreSort)}
-          direction={
-            mode
-              ? ((pageParams[mode === "ssr" ? 4 : 3] as ScoreSort["direction"]) ??
-                ("desc" as ScoreSort["direction"]))
-              : undefined
-          }
-          page={parseInt(pageParams[mode === "ssr" ? 5 : 4]) || 1}
-          initialSearch={searchParams.search}
-        />
-      ) : platformType === PlatformType.MedalScores ? (
-        <ScoreSaberPlayerMedalScores player={player} page={parseInt(pageParams[2]) || 1} />
-      ) : (
-        <AccSaberPlayerScores
-          player={player}
-          sort={(pageParams[2] as AccSaberScoreSort) ?? ("date" as AccSaberScoreSort)}
-          type={(pageParams[3] as AccSaberScoreType) ?? ("overall" as AccSaberScoreType)}
-          order={(pageParams[4] as AccSaberScoreOrder) ?? ("desc" as AccSaberScoreOrder)}
-          page={parseInt(pageParams[5]) || 1}
-        />
-      )}
-    </div>
-  );
-}
-
-interface PlayerDataProps {
-  initialPlayerData: ScoreSaberPlayer;
-  platformType: PlatformType;
-  searchParams: {
-    [key: string]: string | undefined;
-  };
-  pageParams: string[];
-}
-
-export default function PlayerData({
-  platformType,
-  initialPlayerData,
-  pageParams,
-  searchParams,
-}: PlayerDataProps) {
-  const { width } = useWindowDimensions();
-  const database = useDatabase();
-
-  const mainPlayerId = useStableLiveQuery(() => database.getMainPlayerId());
-  const isFriend = useStableLiveQuery(() => database.isFriend(initialPlayerData.id));
-
-  const { data: playerData } = useQuery({
-    queryKey: ["playerData", initialPlayerData.id, mainPlayerId, isFriend],
-    queryFn: () => ssrApi.getScoreSaberPlayer(initialPlayerData.id, DetailType.FULL),
-    initialData: initialPlayerData,
-  });
-
-  const player = playerData ?? initialPlayerData;
-  const showRankings = width > 1536 && !player.inactive && !player.banned;
+  let platform: React.ReactNode;
+  switch (platformType) {
+    case PlatformType.ScoreSaber:
+      platform = <ScoreSaberPlayerScores player={player} />;
+      break;
+    case PlatformType.MedalScores:
+      platform = <ScoreSaberPlayerMedalScores player={player} />;
+      break;
+    case PlatformType.AccSaber:
+      platform = <AccSaberPlayerScores player={player} />;
+      break;
+    default:
+      platform = <ScoreSaberPlayerScores player={player} />;
+  }
 
   return (
     <div className="flex w-full justify-center gap-(--spacing-sm)">
@@ -169,13 +93,27 @@ export default function PlayerData({
         {/* Platform Selector and Score Component */}
         <div className="flex flex-col">
           <div className="flex flex-col">
-            <PlatformSelector currentPlatform={platformType} player={player} />
-            <PlayerScores
-              platformType={platformType}
-              player={player}
-              searchParams={searchParams}
-              pageParams={pageParams}
-            />
+            {/* Platform Selector */}
+            <div className="flex">
+              {availablePlatforms.map(platform => (
+                <SimpleLink
+                  href={`/player/${player.id}${platform.getType() !== PlatformType.ScoreSaber ? `/${platform.getType()}` : ""}`}
+                  key={platform.getDisplayName()}
+                  scroll={false}
+                >
+                  <Button
+                    key={platform.getDisplayName()}
+                    variant={platformType === platform.getType() ? "default" : "secondary"}
+                    className="flex items-center gap-(--spacing-sm) rounded-b-none"
+                  >
+                    {platform.getLogo()}
+                    <span className="hidden md:block">{platform.getDisplayName()}</span>
+                  </Button>
+                </SimpleLink>
+              ))}
+            </div>
+            {/* Score Component */}
+            <div className="[&>div]:rounded-tl-none">{platform}</div>
           </div>
         </div>
       </article>

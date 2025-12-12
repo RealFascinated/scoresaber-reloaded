@@ -220,13 +220,14 @@ export class LeaderboardCoreService {
     await Promise.all(
       uncachedIds.map(async id => {
         const cached = mongoMap.get(id) || null;
-        const { cached: isCached, foundLeaderboard } = LeaderboardCoreService.validateCachedLeaderboard(
-          cached,
-          options
-        );
+        const { cached: isCached, foundLeaderboard } =
+          LeaderboardCoreService.validateCachedLeaderboard(cached, options);
 
         if (foundLeaderboard) {
-          const data = await LeaderboardCoreService.createLeaderboardData(foundLeaderboard, isCached);
+          const data = await LeaderboardCoreService.createLeaderboardData(
+            foundLeaderboard,
+            isCached
+          );
           await redisClient.set(
             `leaderboard:id:${id}`,
             SuperJSON.stringify(data),

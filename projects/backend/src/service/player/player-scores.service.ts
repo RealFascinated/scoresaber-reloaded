@@ -33,19 +33,19 @@ import {
 } from "@ssr/common/token-creators";
 import { ScoreSort, validateSort } from "@ssr/common/types/sort";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
+import ScoreSaberPlayerScoreToken from "@ssr/common/types/token/scoresaber/player-score";
+import ScoreSaberPlayerScoresPageToken from "@ssr/common/types/token/scoresaber/player-scores-page";
+import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
 import { formatDuration } from "@ssr/common/utils/time-utils";
+import { EmbedBuilder } from "discord.js";
 import type { PipelineStage } from "mongoose";
 import { FilterQuery } from "mongoose";
+import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
 import { scoreToObject } from "../../common/score/score.util";
 import { LeaderboardCoreService } from "../leaderboard/leaderboard-core.service";
 import { ScoreCoreService } from "../score/score-core.service";
 import ScoreSaberService from "../scoresaber.service";
-import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
-import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
-import { EmbedBuilder } from "discord.js";
-import ScoreSaberPlayerScoreToken from "@ssr/common/types/token/scoresaber/player-score";
-import ScoreSaberPlayerScoresPageToken from "@ssr/common/types/token/scoresaber/player-scores-page";
 
 const FIELDS_MAP: Record<ScoreSort["field"], string> = {
   pp: "pp",

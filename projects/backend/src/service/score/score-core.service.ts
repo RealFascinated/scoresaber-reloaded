@@ -75,7 +75,7 @@ export class ScoreCoreService {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
     delete score.playerInfo;
-    
+
     await ScoreSaberScoreModel.create(score);
     await PlayerHmdService.updatePlayerHmd(player.id);
 

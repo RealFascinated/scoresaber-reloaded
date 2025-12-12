@@ -3,8 +3,8 @@
 import { cn } from "@/common/utils";
 import { useLeaderboardFilter } from "@/components/providers/leaderboard/leaderboard-filter-provider";
 import ScoreModeSwitcher, { ScoreModeEnum } from "@/components/score/score-mode-switcher";
-import { EmptyState } from "@/components/ui/empty-state";
 import { Spinner } from "@/components/spinner";
+import { EmptyState } from "@/components/ui/empty-state";
 import { useIsMobile } from "@/contexts/viewport-context";
 import { useLeaderboardScores } from "@/hooks/score/use-leaderboard-scores";
 import useDatabase from "@/hooks/use-database";

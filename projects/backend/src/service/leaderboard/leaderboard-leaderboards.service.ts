@@ -15,8 +15,8 @@ import { RefreshResult } from "../../common/types/leaderboard";
 import CacheService, { CacheId } from "../cache.service";
 import PlaylistService from "../playlist/playlist.service";
 import { LeaderboardCoreService } from "./leaderboard-core.service";
-import { LeaderboardRankingService } from "./leaderboard-ranking.service";
 import { LeaderboardNotificationsService } from "./leaderboard-notifications.service";
+import { LeaderboardRankingService } from "./leaderboard-ranking.service";
 
 export class LeaderboardLeaderboardsService {
   /**

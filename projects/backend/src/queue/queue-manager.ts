@@ -1,6 +1,6 @@
 import { EventListener } from "../event/event-listener";
-import { LeaderboardScoreSeedQueue } from "./impl/leaderboard-score-seed-queue";
 import { FetchMissingScoresQueue } from "./impl/fetch-missing-scores-queue";
+import { LeaderboardScoreSeedQueue } from "./impl/leaderboard-score-seed-queue";
 import { Queue, QueueItem } from "./queue";
 
 export enum QueueId {

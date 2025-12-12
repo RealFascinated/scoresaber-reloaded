@@ -6,7 +6,6 @@ import { usePageTransition } from "@/components/ui/page-transition-context";
 import { useIsMobile } from "@/contexts/viewport-context";
 import useDatabase from "@/hooks/use-database";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
-import { useUrlBuilder } from "@/hooks/use-url-builder";
 import { Pagination } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerScoresResponse } from "@ssr/common/response/player-scores-response";
@@ -16,7 +15,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useDocumentTitle } from "@uidotdev/usehooks";
 import { ssrConfig } from "config";
 import { SearchIcon } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { parseAsInteger, useQueryState } from "nuqs";
+import { useCallback, useEffect } from "react";
 import ScoresCard from "../../score/scores-card";
 import SimplePagination from "../../simple-pagination";
 import { EmptyState } from "../../ui/empty-state";
@@ -24,27 +24,20 @@ import ScoreSaberScoreDisplay from "./score/scoresaber-score";
 
 interface ScoreSaberPlayerMedalScoresProps {
   player: ScoreSaberPlayer;
-  page: number;
 }
 
-export default function ScoreSaberPlayerMedalScores({
-  player,
-  page,
-}: ScoreSaberPlayerMedalScoresProps) {
-  // Hooks
+const DEFAULT_PAGE = 1;
+
+export default function ScoreSaberPlayerMedalScores({ player }: ScoreSaberPlayerMedalScoresProps) {
   const isMobile = useIsMobile();
   const database = useDatabase();
   const { animateLeft, animateRight, setIsLoading } = usePageTransition();
 
-  // Database queries
   const mainPlayerId = useStableLiveQuery(() => database.getMainPlayerId());
 
-  // State
-  const [currentPage, setCurrentPage] = useState(page);
+  const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(DEFAULT_PAGE));
 
-  useDocumentTitle(
-    ssrConfig.siteTitleTemplate.replace("%s", `${player.name} / Medals / ${currentPage}`)
-  );
+  useDocumentTitle(ssrConfig.siteTitleTemplate.replace("%s", `${player.name} / Medals / ${page}`));
 
   // Data fetching
   const {
@@ -53,9 +46,9 @@ export default function ScoreSaberPlayerMedalScores({
     isLoading,
     isRefetching,
   } = useQuery<PlayerScoresResponse>({
-    queryKey: ["playerMedalScores", player.id, currentPage, mainPlayerId],
+    queryKey: ["playerScores:medals", player.id, page, mainPlayerId],
     queryFn: async () => {
-      const response = await ssrApi.fetchPlayerMedalScores(player.id, currentPage);
+      const response = await ssrApi.fetchPlayerMedalScores(player.id, page);
       return response || Pagination.empty();
     },
     placeholderData: prev => prev,
@@ -67,20 +60,25 @@ export default function ScoreSaberPlayerMedalScores({
 
   const handlePageChange = useCallback(
     (newPage: number) => {
-      if (newPage > currentPage) {
+      if (newPage > page) {
         animateLeft();
       } else {
         animateRight();
       }
-      setCurrentPage(newPage);
+      setPage(newPage);
     },
-    [currentPage, animateLeft, animateRight]
+    [page, animateLeft, animateRight, setPage]
   );
 
-  useUrlBuilder({
-    basePath: `/player/${player.id}`,
-    segments: [{ value: "medals" }, { value: currentPage, condition: currentPage !== 1 }],
-  });
+  const buildUrl = useCallback(
+    (pageNum: number) => {
+      const params = new URLSearchParams();
+      if (pageNum !== 1) params.set("page", String(pageNum));
+      const queryString = params.toString();
+      return `/player/${player.id}/medals${queryString ? `?${queryString}` : ""}`;
+    },
+    [player.id]
+  );
 
   return (
     <ScoresCard>
@@ -98,7 +96,7 @@ export default function ScoreSaberPlayerMedalScores({
                     className="border-border rounded-lg border"
                     title="No Results"
                     description={
-                      currentPage === 1
+                      page === 1
                         ? `${capitalizeFirstLetter(player.name)} has not earned any medals :(`
                         : `No medals were found on this page`
                     }
@@ -124,10 +122,11 @@ export default function ScoreSaberPlayerMedalScores({
 
             <SimplePagination
               mobilePagination={isMobile}
-              page={currentPage}
+              page={page}
               totalItems={scores.metadata.totalItems}
               itemsPerPage={scores.metadata.itemsPerPage}
-              loadingPage={isLoading || isRefetching ? currentPage : undefined}
+              loadingPage={isLoading || isRefetching ? page : undefined}
+              generatePageUrl={buildUrl}
               onPageChange={handlePageChange}
             />
           </>
