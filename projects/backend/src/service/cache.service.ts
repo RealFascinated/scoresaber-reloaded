@@ -18,7 +18,7 @@ export enum CacheId {
 export default class CacheService {
   public static readonly CACHE_EXPIRY = {
     [CacheId.BeatSaver]: TimeUnit.toSeconds(TimeUnit.Day, 7),
-    [CacheId.ScoreSaber]: TimeUnit.toSeconds(TimeUnit.Minute, 1),
+    [CacheId.ScoreSaber]: TimeUnit.toSeconds(TimeUnit.Minute, 5),
     [CacheId.Leaderboards]: TimeUnit.toSeconds(TimeUnit.Hour, 2),
     [CacheId.AdditionalScoreData]: TimeUnit.toSeconds(TimeUnit.Hour, 1),
     [CacheId.Players]: TimeUnit.toSeconds(TimeUnit.Minute, 30),
