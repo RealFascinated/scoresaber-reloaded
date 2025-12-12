@@ -20,11 +20,11 @@ type Props = {
   leaderboard: ScoreSaberLeaderboard;
   beatSaverMap?: BeatSaverMapResponse;
   alwaysSingleLine?: boolean;
-  hideLeaderboardDropdown?: boolean;
+  hideDetailsDropdown?: boolean;
   hideAccuracyChanger?: boolean;
   isLeaderboardLoading?: boolean;
   isPreviousScore?: boolean;
-  setIsLeaderboardExpanded?: (isExpanded: boolean) => void;
+  setDetailsExpanded?: (isExpanded: boolean) => void;
   updateScore?: (score: ScoreSaberScore) => void;
 };
 
@@ -79,10 +79,10 @@ export default function ScoreSaberScoreButtons({
   leaderboard,
   beatSaverMap,
   alwaysSingleLine,
-  setIsLeaderboardExpanded,
+  setDetailsExpanded: setIsLeaderboardExpanded,
   isLeaderboardLoading,
   updateScore,
-  hideLeaderboardDropdown,
+  hideDetailsDropdown: hideLeaderboardDropdown,
   hideAccuracyChanger,
   isPreviousScore,
 }: Props) {

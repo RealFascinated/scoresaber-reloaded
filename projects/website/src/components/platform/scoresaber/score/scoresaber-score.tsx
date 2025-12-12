@@ -18,7 +18,7 @@ import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
 import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/leaderboard-player-info";
 import { ChevronRight } from "lucide-react";
-import ScoreDropdown from "./score-dropdown";
+import ScoreDetailsDropdown from "./score-dropdown";
 
 export default function ScoreSaberScoreDisplay({
   leaderboard,
@@ -32,7 +32,7 @@ export default function ScoreSaberScoreDisplay({
   playerAbove?: ScoreSaberLeaderboardPlayerInfoToken;
   settings?: {
     noScoreButtons?: boolean;
-    hideLeaderboardDropdown?: boolean;
+    hideDetailsDropdown?: boolean;
     hideAccuracyChanger?: boolean;
     disablePadding?: boolean;
     defaultLeaderboardScoresPage?: number;
@@ -41,12 +41,12 @@ export default function ScoreSaberScoreDisplay({
   };
 }) {
   const [baseScore, setBaseScore] = useState(score.score);
-  const [isLeaderboardExpanded, setIsLeaderboardExpanded] = useState(false);
+  const [detailsExpanded, setDetailsExpanded] = useState(false);
 
   const isMobile = useIsMobile();
 
   useEffect(() => {
-    setIsLeaderboardExpanded(false);
+    setDetailsExpanded(false);
   }, [score.scoreId]);
 
   useEffect(() => {
@@ -56,10 +56,6 @@ export default function ScoreSaberScoreDisplay({
   const accuracy = (baseScore / leaderboard.maxScore) * 100;
   const pp =
     baseScore === score.score ? score.pp : ScoreSaberCurve.getPp(leaderboard.stars, accuracy);
-
-  const handleLeaderboardOpen = useCallback((isExpanded: boolean) => {
-    setIsLeaderboardExpanded(isExpanded);
-  }, []);
 
   return (
     <div className={cn(settings?.disablePadding ? "" : "pt-2 pb-2", "relative")}>
@@ -100,9 +96,9 @@ export default function ScoreSaberScoreDisplay({
               beatSaverMap={beatSaverMap}
               score={score}
               alwaysSingleLine={isMobile}
-              hideLeaderboardDropdown={settings?.hideLeaderboardDropdown}
+              hideDetailsDropdown={settings?.hideDetailsDropdown}
               hideAccuracyChanger={settings?.hideAccuracyChanger}
-              setIsLeaderboardExpanded={handleLeaderboardOpen}
+              setDetailsExpanded={setDetailsExpanded}
               updateScore={updatedScore => setBaseScore(updatedScore.score)}
               isPreviousScore={settings?.isPreviousScore}
             />
@@ -135,12 +131,12 @@ export default function ScoreSaberScoreDisplay({
         )}
       </div>
 
-      <div className={isLeaderboardExpanded ? "mt-2" : ""}>
-        <ScoreDropdown
+      <div className={detailsExpanded ? "mt-2" : ""}>
+        <ScoreDetailsDropdown
           score={score}
           leaderboard={leaderboard}
           beatSaverMap={beatSaverMap}
-          isExpanded={isLeaderboardExpanded}
+          isExpanded={detailsExpanded}
           defaultScoresPage={settings?.defaultLeaderboardScoresPage}
         />
       </div>

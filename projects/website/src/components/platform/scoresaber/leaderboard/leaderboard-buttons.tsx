@@ -30,11 +30,11 @@ const buttons = [
     },
   },
   {
-    render: ({ beatSaverMap }: Props) => {
+    render: ({ leaderboard, beatSaverMap }: Props) => {
       if (!beatSaverMap) {
         return null;
       }
-      return <MapPreviewButton beatSaverMap={beatSaverMap} />;
+      return <MapPreviewButton leaderboard={leaderboard} beatSaverMap={beatSaverMap} />;
     },
   },
   {
@@ -77,10 +77,9 @@ export default function LeaderboardButtons({ leaderboard, beatSaverMap }: Props)
           beatSaverMap,
         });
 
-        if (!buttonElement) {
+        if (buttonElement == null) {
           return null;
         }
-
         return <div key={index}>{buttonElement}</div>;
       })}
     </div>

@@ -19,7 +19,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { DifficultyButton } from "../../../leaderboard/button/difficulty-button";
 import SimplePagination from "../../../simple-pagination";
 import ScoreSaberLeaderboardScore from "../score/leaderboard-score";
-import ScoreDropdown from "../score/score-dropdown";
+import ScoreDetailsDropdown from "../score/score-dropdown";
 
 function getScoreId(score: ScoreSaberScore) {
   return score.scoreId + "-" + score.timestamp;
@@ -233,7 +233,7 @@ export default function LeaderboardScores({
                           >
                             <td colSpan={10} className="p-0">
                               <div className="bg-muted/20 px-4 py-3">
-                                <ScoreDropdown
+                                <ScoreDetailsDropdown
                                   score={playerScore}
                                   leaderboard={leaderboard}
                                   beatSaverMap={beatSaver}

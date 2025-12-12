@@ -1,20 +1,17 @@
 import ScoreButton from "@/components/score/button/score-button";
+import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
 import { PlayCircleIcon } from "lucide-react";
 
 type MapPreviewButtonProps = {
+  leaderboard: ScoreSaberLeaderboard;
   beatSaverMap: BeatSaverMapResponse;
 };
 
-export function MapPreviewButton({ beatSaverMap }: MapPreviewButtonProps) {
-  const difficulty = beatSaverMap.difficulty;
-  if (!difficulty) {
-    return null;
-  }
-
+export function MapPreviewButton({ leaderboard, beatSaverMap }: MapPreviewButtonProps) {
   return (
     <ScoreButton
-      href={`https://allpoland.github.io/ArcViewer/?id=${beatSaverMap.bsr}&difficulty=${difficulty.difficulty}&mode=${difficulty.characteristic}`}
+      href={`https://allpoland.github.io/ArcViewer/?id=${beatSaverMap.bsr}&difficulty=${leaderboard.difficulty.difficulty}&mode=${leaderboard.difficulty.characteristic}`}
       tooltip={<p>Click to view a preview of the map</p>}
       data-umami-event="map-preview-button"
     >

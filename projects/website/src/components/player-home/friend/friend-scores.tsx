@@ -65,7 +65,6 @@ export function FriendScores() {
                       leaderboard={leaderboard}
                       beatSaverMap={beatSaverMap}
                       settings={{
-                        hideLeaderboardDropdown: true,
                         hideAccuracyChanger: true,
                       }}
                     />

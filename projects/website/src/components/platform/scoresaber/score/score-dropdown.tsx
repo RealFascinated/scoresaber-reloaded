@@ -11,7 +11,7 @@ import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-respons
 import { getPageFromRank } from "@ssr/common/utils/utils";
 import { AnimatePresence, motion } from "framer-motion";
 
-export default function ScoreDropdown({
+export default function ScoreDetailsDropdown({
   score,
   leaderboard,
   beatSaverMap,
