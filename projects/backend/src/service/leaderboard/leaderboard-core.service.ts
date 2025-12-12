@@ -57,28 +57,7 @@ export class LeaderboardCoreService {
           return LeaderboardCoreService.processLeaderboard(cachedLeaderboard, true);
         }
 
-        const before = performance.now();
-        const leaderboardToken = await ApiServiceRegistry.getInstance()
-          .getScoreSaberService()
-          .lookupLeaderboard(id);
-        if (leaderboardToken == undefined) {
-          throw new NotFoundError(`Leaderboard not found for "${id}"`);
-        }
-
-        const leaderboard = await LeaderboardCoreService.saveLeaderboard(
-          id,
-          getScoreSaberLeaderboardFromToken(leaderboardToken)
-        );
-
-        (QueueManager.getQueue(QueueId.LeaderboardScoreSeedQueue) as LeaderboardScoreSeedQueue).add(
-          {
-            id: leaderboard.id.toString(),
-            data: leaderboard.id,
-          }
-        );
-
-        Logger.info(`Created leaderboard "${id}" in ${formatDuration(performance.now() - before)}`);
-        return LeaderboardCoreService.processLeaderboard(leaderboard, false);
+        return await LeaderboardCoreService.createLeaderboard(id);
       }
     );
 
@@ -98,6 +77,45 @@ export class LeaderboardCoreService {
         : undefined,
       cached: leaderboardData.cached,
     };
+  }
+
+  /**
+   * Checks if a leaderboard exists.
+   *
+   * @param id the ID of the leaderboard to check
+   * @returns whether the leaderboard exists
+   */
+  public static async leaderboardExists(id: string): Promise<boolean> {
+    return (await ScoreSaberLeaderboardModel.exists({ _id: id })) !== null;
+  }
+
+  /**
+   * Fetches a leaderboard from the ScoreSaber API and saves it to the database.
+   *
+   * @param id the ID of the leaderboard to fetch
+   * @returns the fetched leaderboard
+   */
+  public static async createLeaderboard(id: string): Promise<LeaderboardResponse> {
+    const before = performance.now();
+    const leaderboardToken = await ApiServiceRegistry.getInstance()
+      .getScoreSaberService()
+      .lookupLeaderboard(id);
+    if (leaderboardToken == undefined) {
+      throw new NotFoundError(`Leaderboard not found for "${id}"`);
+    }
+
+    const leaderboard = await LeaderboardCoreService.saveLeaderboard(
+      id,
+      getScoreSaberLeaderboardFromToken(leaderboardToken)
+    );
+
+    (QueueManager.getQueue(QueueId.LeaderboardScoreSeedQueue) as LeaderboardScoreSeedQueue).add({
+      id: leaderboard.id.toString(),
+      data: leaderboard.id,
+    });
+
+    Logger.info(`Created leaderboard "${id}" in ${formatDuration(performance.now() - before)}`);
+    return LeaderboardCoreService.processLeaderboard(leaderboard, false);
   }
 
   /**
@@ -183,7 +201,7 @@ export class LeaderboardCoreService {
         if (cachedLeaderboard) {
           return LeaderboardCoreService.processLeaderboard(cachedLeaderboard, true);
         }
-        
+
         const before = performance.now();
         const leaderboardToken = await ApiServiceRegistry.getInstance()
           .getScoreSaberService()

@@ -14,6 +14,7 @@ import { EventListener } from "../event/event-listener";
 import { EventsManager } from "../event/events-manager";
 import { PlayerCoreService } from "../service/player/player-core.service";
 import { TopScoresService } from "../service/score/top-scores.service";
+import { LeaderboardCoreService } from "../service/leaderboard/leaderboard-core.service";
 
 interface PendingScore {
   scoreSaberToken?: ScoreSaberScoreToken;
@@ -179,8 +180,13 @@ export class ScoreWebsockets implements EventListener {
         // Update the player's name and last score date
         Promise.all([
           PlayerCoreService.updatePlayerName(player.id, player.name),
-          PlayerModel.updateOne({ _id: player.id }, { $set: { lastScore: new Date() } }),
+          PlayerModel.updateOne({ _id: player.id }, { $set: { lastScore: new Date() } })
         ]);
+      }
+
+      // Fetch the leaderboard if it doesn't exist
+      if (!(await LeaderboardCoreService.leaderboardExists(leaderboard.id + ""))) {
+        await LeaderboardCoreService.createLeaderboard(leaderboard.id + "");
       }
 
       EventsManager.getListeners().forEach(listener => {
