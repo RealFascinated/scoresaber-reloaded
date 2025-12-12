@@ -242,9 +242,12 @@ export class PlayerScoresService {
         continue;
       }
 
-      const shouldDeleteScores = scoresPage.metadata.total > playerScoresCount;
-      if (shouldDeleteScores) {
-        await handleDesyncedScoreCount(scoresPage, playerScoresCount);
+      // Only check for desynced score count on the first page
+      if (currentPage === 1) {
+        const shouldDeleteScores = playerScoresCount > scoresPage.metadata.total;
+        if (shouldDeleteScores) {
+          await handleDesyncedScoreCount(scoresPage, playerScoresCount);
+        }
       }
 
       hasMoreScores = await processPage(currentPage, scoresPage);
