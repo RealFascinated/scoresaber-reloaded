@@ -175,8 +175,20 @@ export class PlayerScoresService {
         new EmbedBuilder()
           .setTitle("Player Has More Scores Than They Should!")
           .setDescription(
-            `Player ${playerId} has more scores than they should (${formatNumberWithCommas(playerScoresCount)} > ${formatNumberWithCommas(scoresPage.metadata.total)}). Deleting their scores and re-seeding...`
+            `**${playerToken.name}** has more scores than they should. Deleting their scores and re-seeding...`
           )
+          .addFields([
+            {
+              name: "Has",
+              value: formatNumberWithCommas(playerScoresCount),
+              inline: true,
+            },
+            {
+              name: "Should Have",
+              value: formatNumberWithCommas(scoresPage.metadata.total),
+              inline: true,
+            },
+          ])
           .setTimestamp()
           .setColor("#ff0000")
       );
