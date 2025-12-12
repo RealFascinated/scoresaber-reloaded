@@ -220,7 +220,7 @@ export class LeaderboardLeaderboardsService {
     leaderboards: ScoreSaberLeaderboard[];
     rankedMapDiffs: Map<string, LeaderboardDifficulty[]>;
   }> {
-    return LeaderboardCoreService.fetchAllLeaderboards({ ranked: true });
+    return LeaderboardCoreService.fetchLeaderboardsFromAPI({ ranked: true });
   }
 
   /**
@@ -230,6 +230,6 @@ export class LeaderboardLeaderboardsService {
     leaderboards: ScoreSaberLeaderboard[];
     rankedMapDiffs: Map<string, LeaderboardDifficulty[]>;
   }> {
-    return LeaderboardCoreService.fetchAllLeaderboards({ qualified: true });
+    return LeaderboardCoreService.fetchLeaderboardsFromAPI({ qualified: true });
   }
 }

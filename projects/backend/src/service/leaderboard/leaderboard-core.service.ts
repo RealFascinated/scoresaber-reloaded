@@ -14,7 +14,7 @@ import { LeaderboardResponse } from "@ssr/common/response/leaderboard-response";
 import { MapDifficulty } from "@ssr/common/score/map-difficulty";
 import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
 import { MapCharacteristic } from "@ssr/common/types/map-characteristic";
-import { getDifficulty } from "@ssr/common/utils/song-utils";
+import { formatDuration } from "@ssr/common/utils/time-utils";
 import SuperJSON from "superjson";
 import { redisClient } from "../../common/redis";
 import { LeaderboardData, LeaderboardOptions } from "../../common/types/leaderboard";
@@ -52,15 +52,33 @@ export class LeaderboardCoreService {
       CacheId.Leaderboards,
       `leaderboard:id:${id}`,
       async () => {
-        let cachedLeaderboard = (await ScoreSaberLeaderboardModel.findById(
-          id
-        ).lean()) as ScoreSaberLeaderboard | null;
-        if (!cachedLeaderboard) {
-          cachedLeaderboard = await LeaderboardCoreService.fetchAndSaveLeaderboard(id);
-          LeaderboardCoreService.addToScoreSeedQueueIfRanked(cachedLeaderboard);
+        const cachedLeaderboard = await ScoreSaberLeaderboardModel.findById(id).lean();
+        if (cachedLeaderboard) {
+          return LeaderboardCoreService.processLeaderboard(cachedLeaderboard, true);
         }
 
-        return LeaderboardCoreService.processLeaderboard(cachedLeaderboard, true);
+        const before = performance.now();
+        const leaderboardToken = await ApiServiceRegistry.getInstance()
+          .getScoreSaberService()
+          .lookupLeaderboard(id);
+        if (leaderboardToken == undefined) {
+          throw new NotFoundError(`Leaderboard not found for "${id}"`);
+        }
+
+        const leaderboard = await LeaderboardCoreService.saveLeaderboard(
+          id,
+          getScoreSaberLeaderboardFromToken(leaderboardToken)
+        );
+
+        (QueueManager.getQueue(QueueId.LeaderboardScoreSeedQueue) as LeaderboardScoreSeedQueue).add(
+          {
+            id: leaderboard.id.toString(),
+            data: leaderboard.id,
+          }
+        );
+
+        Logger.info(`Created leaderboard "${id}" in ${formatDuration(performance.now() - before)}`);
+        return LeaderboardCoreService.processLeaderboard(leaderboard, false);
       }
     );
 
@@ -80,6 +98,56 @@ export class LeaderboardCoreService {
         : undefined,
       cached: leaderboardData.cached,
     };
+  }
+
+  /**
+   * Gets multiple ScoreSaber leaderboards by IDs efficiently.
+   *
+   * @param ids the IDs of the leaderboards to get
+   * @param options the options to use for the fetch
+   * @returns the fetched leaderboards
+   */
+  public static async getLeaderboards(
+    ids: string[],
+    options?: LeaderboardOptions
+  ): Promise<LeaderboardResponse[]> {
+    options = { ...DEFAULT_OPTIONS, ...options };
+    const leaderboardIds = [...new Set(ids)]; // deduplicate IDs
+    const leaderboards = new Map<string, LeaderboardResponse | null>();
+
+    // Get cached leaderboards from Redis
+    const cacheKeys = leaderboardIds.map(id => `leaderboard:id:${id}`);
+    const cachedData = cacheKeys.length > 0 ? await redisClient.mget(...cacheKeys) : [];
+    for (const [index] of cacheKeys.entries()) {
+      const cached = cachedData[index];
+      if (cached) {
+        leaderboards.set(leaderboardIds[index], SuperJSON.parse(cached) as LeaderboardResponse);
+      }
+    }
+
+    // Get leaderboards from Mongo or ScoreSaber API
+    const uncachedIds = leaderboardIds.filter(id => !leaderboards.has(id));
+    await Promise.all(
+      uncachedIds.map(async id => {
+        leaderboards.set(id, await LeaderboardCoreService.getLeaderboard(id));
+      })
+    );
+
+    // Fetch BeatSaver data for all leaderboards
+    const allLeaderboards = Array.from(leaderboards.values()).filter(
+      (data): data is LeaderboardResponse => data !== null
+    );
+    await Promise.all(
+      allLeaderboards.map(async data => {
+        const beatsaver = await LeaderboardCoreService.fetchBeatSaverData(
+          data.leaderboard,
+          options.beatSaverType
+        );
+        data.beatsaver = beatsaver;
+      })
+    );
+
+    return allLeaderboards;
   }
 
   /**
@@ -107,33 +175,44 @@ export class LeaderboardCoreService {
       CacheId.Leaderboards,
       `leaderboard:hash:${hash}:${difficulty}:${characteristic}`,
       async () => {
-        let cachedLeaderboard = (await ScoreSaberLeaderboardModel.findOne({
+        const cachedLeaderboard = await ScoreSaberLeaderboardModel.findOne({
           songHash: hash,
           "difficulty.difficulty": difficulty,
           "difficulty.characteristic": characteristic,
-        }).lean()) as ScoreSaberLeaderboard | null;
-        if (!cachedLeaderboard) {
-          const leaderboardToken = await ApiServiceRegistry.getInstance()
-            .getScoreSaberService()
-            .lookupLeaderboardByHash(hash, difficulty, characteristic);
-          if (leaderboardToken == undefined) {
-            throw new NotFoundError(
-              `Leaderboard not found for hash "${hash}", difficulty "${difficulty}", characteristic "${characteristic}"`
-            );
-          }
-
-          cachedLeaderboard = await LeaderboardCoreService.saveLeaderboard(
-            leaderboardToken.id + "",
-            getScoreSaberLeaderboardFromToken(leaderboardToken)
+        }).lean();
+        if (cachedLeaderboard) {
+          return LeaderboardCoreService.processLeaderboard(cachedLeaderboard, true);
+        }
+        
+        const before = performance.now();
+        const leaderboardToken = await ApiServiceRegistry.getInstance()
+          .getScoreSaberService()
+          .lookupLeaderboardByHash(hash, difficulty, characteristic);
+        if (leaderboardToken == undefined) {
+          throw new NotFoundError(
+            `Leaderboard not found for hash "${hash}", difficulty "${difficulty}", characteristic "${characteristic}"`
           );
-          LeaderboardCoreService.addToScoreSeedQueueIfRanked(cachedLeaderboard);
         }
 
-        return LeaderboardCoreService.processLeaderboard(cachedLeaderboard, true);
+        const leaderboard = await LeaderboardCoreService.saveLeaderboard(
+          leaderboardToken.id + "",
+          getScoreSaberLeaderboardFromToken(leaderboardToken)
+        );
+
+        (QueueManager.getQueue(QueueId.LeaderboardScoreSeedQueue) as LeaderboardScoreSeedQueue).add(
+          {
+            id: leaderboard.id.toString(),
+            data: leaderboard.id,
+          }
+        );
+
+        Logger.info(
+          `Created leaderboard "${leaderboard.id}" in ${formatDuration(performance.now() - before)}`
+        );
+        return LeaderboardCoreService.processLeaderboard(leaderboard, false);
       }
     );
 
-    // Get BeatSaver data if needed
     let beatSaverMap: BeatSaverMapResponse | undefined;
     if (options.includeBeatSaver) {
       beatSaverMap = await LeaderboardCoreService.fetchBeatSaverData(
@@ -150,64 +229,12 @@ export class LeaderboardCoreService {
   }
 
   /**
-   * Gets multiple ScoreSaber leaderboards by IDs efficiently.
-   *
-   * @param ids the IDs of the leaderboards to get
-   * @param options the options to use for the fetch
-   * @returns the fetched leaderboards
-   */
-  public static async getLeaderboards(
-    ids: string[],
-    options?: LeaderboardOptions
-  ): Promise<LeaderboardResponse[]> {
-    options = { ...DEFAULT_OPTIONS, ...options };
-    const results = new Map<string, LeaderboardResponse | null>();
-
-    // Deduplicate IDs to avoid processing the same leaderboard multiple times
-    const uniqueIds = [...new Set(ids)];
-
-    // Get cached leaderboards from Redis
-    const cacheKeys = uniqueIds.map(id => `leaderboard:id:${id}`);
-    const cachedData = cacheKeys.length > 0 ? await redisClient.mget(...cacheKeys) : [];
-    for (const [index] of cacheKeys.entries()) {
-      const cached = cachedData[index];
-      if (cached) {
-        results.set(uniqueIds[index], SuperJSON.parse(cached) as LeaderboardResponse);
-      }
-    }
-
-    // Get leaderboards from Mongo or ScoreSaber API
-    const uncachedIds = uniqueIds.filter(id => !results.has(id));
-    await Promise.all(
-      uncachedIds.map(async id => {
-        results.set(id, await LeaderboardCoreService.getLeaderboard(id));
-      })
-    );
-
-    // Fetch BeatSaver data for all leaderboards
-    const allLeaderboards = Array.from(results.values()).filter(
-      (data): data is LeaderboardResponse => data !== null
-    );
-    await Promise.all(
-      allLeaderboards.map(async data => {
-        const beatsaver = await LeaderboardCoreService.fetchBeatSaverData(
-          data.leaderboard,
-          options.beatSaverType
-        );
-        data.beatsaver = beatsaver;
-      })
-    );
-
-    return allLeaderboards;
-  }
-
-  /**
-   * Fetches all leaderboards from the ScoreSaber API with pagination
+   * Fetches all leaderboards from the ScoreSaber API
    *
    * @param filter the filter to use for the fetch
    * @returns the fetched leaderboards
    */
-  public static async fetchAllLeaderboards(filter: {
+  public static async fetchLeaderboardsFromAPI(filter: {
     ranked?: boolean;
     qualified?: boolean;
   }): Promise<{
@@ -266,47 +293,6 @@ export class LeaderboardCoreService {
   }
 
   /**
-   * Updates the difficulties for a leaderboard
-   *
-   * @param leaderboard the leaderboard to update the difficulties for
-   * @param rankedMapDiffs the map of ranked difficulties
-   * @returns the updated leaderboard
-   */
-  public static updateLeaderboardDifficulties(
-    leaderboard: ScoreSaberLeaderboard,
-    rankedMapDiffs: Map<string, LeaderboardDifficulty[]>
-  ): ScoreSaberLeaderboard {
-    const difficulties = rankedMapDiffs
-      .get(leaderboard.songHash)
-      ?.sort((a, b) => getDifficulty(a.difficulty).diffId - getDifficulty(b.difficulty).diffId);
-
-    return {
-      ...leaderboard,
-      difficulties: difficulties ?? [],
-    } as ScoreSaberLeaderboard;
-  }
-
-  /**
-   * Fetches a leaderboard from the API and saves it
-   *
-   * @param id the ID of the leaderboard to fetch
-   * @returns the fetched leaderboard
-   */
-  public static async fetchAndSaveLeaderboard(id: string): Promise<ScoreSaberLeaderboard> {
-    const leaderboardToken = await ApiServiceRegistry.getInstance()
-      .getScoreSaberService()
-      .lookupLeaderboard(id);
-    if (leaderboardToken == undefined) {
-      throw new NotFoundError(`Leaderboard not found for "${id}"`);
-    }
-
-    return await LeaderboardCoreService.saveLeaderboard(
-      id,
-      getScoreSaberLeaderboardFromToken(leaderboardToken)
-    );
-  }
-
-  /**
    * Saves a leaderboard to the database.
    *
    * @param id the ID of the leaderboard to save
@@ -359,18 +345,6 @@ export class LeaderboardCoreService {
     } catch (error) {
       Logger.warn(`Failed to fetch BeatSaver data for leaderboard ${leaderboard.id}:`, error);
       return undefined;
-    }
-  }
-
-  /**
-   * Adds a leaderboard to the score seed queue if it's ranked
-   */
-  private static addToScoreSeedQueueIfRanked(leaderboard: ScoreSaberLeaderboard): void {
-    if (leaderboard.ranked) {
-      (QueueManager.getQueue(QueueId.LeaderboardScoreSeedQueue) as LeaderboardScoreSeedQueue).add({
-        id: leaderboard.id.toString(),
-        data: leaderboard.id,
-      });
     }
   }
 

@@ -14,9 +14,9 @@ import {
 } from "@ssr/common/model/score/impl/scoresaber-score";
 import { LeaderboardStarChange } from "@ssr/common/response/leaderboard-star-change";
 import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
+import { getDifficulty } from "@ssr/common/utils/song-utils";
 import { LeaderboardUpdate, LeaderboardUpdates } from "../../common/types/leaderboard";
 import CacheService from "../cache.service";
-import { LeaderboardCoreService } from "./leaderboard-core.service";
 
 const BATCH_SIZE = 100;
 
@@ -351,7 +351,7 @@ export class LeaderboardRankingService {
           leaderboardsToHandle.push({ leaderboard, update });
         } else {
           // Regular update - add to bulk update
-          const updatedLeaderboard = LeaderboardCoreService.updateLeaderboardDifficulties(
+          const updatedLeaderboard = LeaderboardRankingService.updateLeaderboardDifficulties(
             leaderboard,
             rankedMapDiffs
           );
@@ -391,7 +391,7 @@ export class LeaderboardRankingService {
           const updatedScores = await LeaderboardRankingService.handleLeaderboardUpdate(update);
 
           // Save the leaderboard after handling
-          const updatedLeaderboard = LeaderboardCoreService.updateLeaderboardDifficulties(
+          const updatedLeaderboard = LeaderboardRankingService.updateLeaderboardDifficulties(
             leaderboard,
             rankedMapDiffs
           );
@@ -462,6 +462,27 @@ export class LeaderboardRankingService {
       difficultyRaw: leaderboard.difficulty.difficultyRaw,
     });
     rankedMapDiffs.set(leaderboard.songHash, difficulties);
+  }
+
+  /**
+   * Updates the difficulties for a leaderboard
+   *
+   * @param leaderboard the leaderboard to update the difficulties for
+   * @param rankedMapDiffs the map of ranked difficulties
+   * @returns the updated leaderboard
+   */
+  public static updateLeaderboardDifficulties(
+    leaderboard: ScoreSaberLeaderboard,
+    rankedMapDiffs: Map<string, LeaderboardDifficulty[]>
+  ): ScoreSaberLeaderboard {
+    const difficulties = rankedMapDiffs
+      .get(leaderboard.songHash)
+      ?.sort((a, b) => getDifficulty(a.difficulty).diffId - getDifficulty(b.difficulty).diffId);
+
+    return {
+      ...leaderboard,
+      difficulties: difficulties ?? [],
+    } as ScoreSaberLeaderboard;
   }
 
   /**

@@ -18,6 +18,7 @@ import {
   ScoreSaberScoreModel,
 } from "@ssr/common/model/score/impl/scoresaber-score";
 import { Pagination } from "@ssr/common/pagination";
+import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerMedalScoresResponse } from "@ssr/common/response/player-medal-scores-response";
 import {
   PlayerScoreChartDataPoint,
@@ -46,7 +47,6 @@ import { scoreToObject } from "../../common/score/score.util";
 import { LeaderboardCoreService } from "../leaderboard/leaderboard-core.service";
 import { ScoreCoreService } from "../score/score-core.service";
 import ScoreSaberService from "../scoresaber.service";
-import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 
 const FIELDS_MAP: Record<ScoreSort["field"], string> = {
   pp: "pp",
