@@ -119,9 +119,10 @@ interface ScoreSaberPlayerScoresSSRProps {
 
 export default function ScoreSaberPlayerScoresSSR({ player }: ScoreSaberPlayerScoresSSRProps) {
   const isMobile = useIsMobile();
-  const { mode } = useScoreModeSelector();
   const { animateLeft, animateRight, setIsLoading } = usePageTransition();
 
+  // Sorting
+  const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(DEFAULT_PAGE));
   const [sort, setSort] = useQueryState("sort", parseAsString.withDefault(DEFAULT_SORT)) as [
     ScoreSort["field"],
     (value: ScoreSort["field"] | null) => void,
@@ -130,17 +131,19 @@ export default function ScoreSaberPlayerScoresSSR({ player }: ScoreSaberPlayerSc
     "direction",
     parseAsString.withDefault(DEFAULT_SORT_DIRECTION)
   ) as [ScoreSort["direction"], (value: ScoreSort["direction"] | null) => void];
-  const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(DEFAULT_PAGE));
-  const [search, setSearch] = useQueryState("search", parseAsString);
+
+  // Filters
   const [scoreFilter, setScoreFilter] = useQueryState(
-    "filter",
+    "scores",
     parseAsString.withDefault(DEFAULT_FILTER)
   ) as [string | null, (value: string | null) => void];
-  const [hmdFilter, setHmdFilter] = useQueryState("hmdFilter", parseAsString) as [
+  const [hmdFilter, setHmdFilter] = useQueryState("hmd", parseAsString) as [
     HMD | null,
     (value: HMD | null) => void,
   ];
 
+  // Search
+  const [search, setSearch] = useQueryState("search", parseAsString);
   const debouncedSearchTerm = useDebounce(search || "", 250);
   const invalidSearch = search && search.length >= 1 && search.length < 3;
 
