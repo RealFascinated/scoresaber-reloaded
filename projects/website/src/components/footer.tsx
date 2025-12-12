@@ -108,7 +108,7 @@ export default function Footer({
   return (
     <footer
       className={cn(
-        "border-border flex min-h-80 flex-col justify-between gap-10 border-t px-10 py-5 select-none lg:gap-0",
+        "border-border flex min-h-60 flex-col justify-between gap-10 border-t px-10 py-5 select-none lg:gap-0",
         isHome ? "bg-secondary" : "bg-secondary/60 mt-5"
       )}
     >
