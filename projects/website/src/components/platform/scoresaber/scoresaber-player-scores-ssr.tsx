@@ -2,9 +2,7 @@
 
 import { cn } from "@/common/utils";
 import HMDIcon from "@/components/hmd-icon";
-import SimpleTooltip from "@/components/simple-tooltip";
 import { Spinner } from "@/components/spinner";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import PageTransition from "@/components/ui/page-transition";
 import { usePageTransition } from "@/components/ui/page-transition-context";
@@ -42,7 +40,7 @@ import { ButtonGroup, ControlButton, ControlPanel, ControlRow } from "../../ui/c
 import { EmptyState } from "../../ui/empty-state";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../ui/select";
 import ScoreSaberScoreDisplay from "./score/scoresaber-score";
-import { ScoreSaberScoreModeTabs, useScoreModeSelector } from "./scoresaber-score-mode-selector";
+import { ScoreSaberScoreModeTabs } from "./scoresaber-score-mode-selector";
 
 const DEFAULT_SORT: ScoreSort["field"] = "date";
 const DEFAULT_SORT_DIRECTION: ScoreSort["direction"] = "desc";
@@ -378,101 +376,79 @@ export default function ScoreSaberPlayerScoresSSR({ player }: ScoreSaberPlayerSc
                 )}
               </div>
 
-              <div className="flex w-full items-center gap-2 sm:w-auto">
-                <div className="relative flex items-center gap-2">
-                  <Select
-                    value={scoreFilter || ""}
-                    onValueChange={value => {
+              <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+                <Select
+                  value={scoreFilter || ""}
+                  onValueChange={value => {
+                    setIsLoading(true);
+                    setScoreFilter(value);
+                    setPage(1);
+                    animateLeft();
+                  }}
+                >
+                  <SelectTrigger
+                    className="h-8 w-full text-xs sm:w-46"
+                    showClearButton={!!(scoreFilter && scoreFilter !== "All Scores")}
+                    onClear={() => {
                       setIsLoading(true);
-                      setScoreFilter(value);
+                      setScoreFilter("All Scores");
                       setPage(1);
                       animateLeft();
                     }}
                   >
-                    <SelectTrigger className="h-8 w-full text-xs sm:w-40">
-                      <SelectValue placeholder="Filter" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {FILTERS.map(filterOption => (
-                        <SelectItem key={filterOption.name} value={filterOption.name}>
+                    <SelectValue placeholder="Filter" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {FILTERS.map(filterOption => (
+                      <SelectItem key={filterOption.name} value={filterOption.name}>
+                        <div className="flex items-center gap-2">
+                          {filterOption.icon}
+                          <span>{filterOption.name}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <Select
+                  value={hmdFilter || "All Hmds"}
+                  onValueChange={value => {
+                    setIsLoading(true);
+                    setHmdFilter(value === "All Hmds" ? null : (value as HMD));
+                    setPage(1);
+                    animateLeft();
+                  }}
+                >
+                  <SelectTrigger
+                    className="h-8 w-full text-xs sm:w-42"
+                    showClearButton={!!hmdFilter}
+                    onClear={() => {
+                      setIsLoading(true);
+                      setHmdFilter(null);
+                      setPage(1);
+                      animateLeft();
+                    }}
+                  >
+                    <SelectValue placeholder="HMD Filter" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={"All Hmds"}>
+                      <div className="flex items-center gap-2">
+                        <HMDIcon hmd={getHMDInfo("Unknown")} />
+                        <span>All HMDs</span>
+                      </div>
+                    </SelectItem>
+                    {player.hmdBreakdown &&
+                      Object.keys(player.hmdBreakdown).map(filter => (
+                        <SelectItem key={filter} value={filter}>
                           <div className="flex items-center gap-2">
-                            {filterOption.icon}
-                            <span>{filterOption.name}</span>
+                            <HMDIcon hmd={getHMDInfo(filter as HMD)} />
+                            <span>{filter}</span>
                           </div>
                         </SelectItem>
                       ))}
-                    </SelectContent>
-                  </Select>
-
-                  {scoreFilter && scoreFilter !== "All Scores" && (
-                    <SimpleTooltip display="Clear filter">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="text-muted-foreground hover:text-destructive h-8 w-8 shrink-0"
-                        onClick={() => {
-                          setIsLoading(true);
-                          setScoreFilter("All Scores");
-                          setPage(1);
-                          animateLeft();
-                        }}
-                      >
-                        <XIcon className="h-3.5 w-3.5" />
-                      </Button>
-                    </SimpleTooltip>
-                  )}
-                </div>
-
-                <div className="relative flex items-center gap-2">
-                  <Select
-                    value={hmdFilter || "All Hmds"}
-                    onValueChange={value => {
-                      setIsLoading(true);
-                      setHmdFilter(value === "All Hmds" ? null : (value as HMD));
-                      setPage(1);
-                      animateLeft();
-                    }}
-                  >
-                    <SelectTrigger className="h-8 w-full text-xs sm:w-40">
-                      <SelectValue placeholder="HMD Filter" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value={"All Hmds"}>
-                        <div className="flex items-center gap-2">
-                          <HMDIcon hmd={getHMDInfo("Unknown")} />
-                          <span>All HMDs</span>
-                        </div>
-                      </SelectItem>
-                      {player.hmdBreakdown &&
-                        Object.keys(player.hmdBreakdown).map(filter => (
-                          <SelectItem key={filter} value={filter}>
-                            <div className="flex items-center gap-2">
-                              <HMDIcon hmd={getHMDInfo(filter as HMD)} />
-                              <span>{filter}</span>
-                            </div>
-                          </SelectItem>
-                        ))}
-                    </SelectContent>
-                  </Select>
-
-                  {hmdFilter && (
-                    <SimpleTooltip display="Clear HMD filter">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="text-muted-foreground hover:text-destructive h-8 w-8 shrink-0"
-                        onClick={() => {
-                          setIsLoading(true);
-                          setHmdFilter(null);
-                          setPage(1);
-                          animateLeft();
-                        }}
-                      >
-                        <XIcon className="h-3.5 w-3.5" />
-                      </Button>
-                    </SimpleTooltip>
-                  )}
-                </div>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
           </ControlRow>

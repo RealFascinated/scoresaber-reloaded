@@ -4,9 +4,9 @@ import ScoresaberLogo from "@/components/logos/logos/scoresaber-logo";
 import { usePageTransition } from "@/components/ui/page-transition-context";
 import { ScoreSaberScoreDataMode } from "@ssr/common/types/score-data-mode";
 import { TrendingUpIcon } from "lucide-react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { parseAsString, useQueryState } from "nuqs";
-import { useCallback, startTransition } from "react";
+import { useCallback } from "react";
 import { Tab, TabGroup } from "../../ui/control-panel";
 
 export const SCORES_MODES: Record<
