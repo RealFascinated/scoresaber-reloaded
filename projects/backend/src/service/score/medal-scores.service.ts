@@ -22,17 +22,16 @@ export class MedalScoresService {
 
     const rankedLeaderboards = await LeaderboardLeaderboardsService.getRankedLeaderboards();
     for (const [index, leaderboard] of rankedLeaderboards.entries()) {
-      const firstPage = await ApiServiceRegistry.getInstance()
+      const page = await ApiServiceRegistry.getInstance()
         .getScoreSaberService()
         .lookupLeaderboardScores(leaderboard.id, 1, {
           priority: isProduction() ? CooldownPriority.BACKGROUND : CooldownPriority.NORMAL,
         });
-      if (!firstPage) {
+      if (!page) {
         continue;
       }
 
-      const scores = firstPage.scores;
-      for (const score of scores) {
+      for (const score of page.scores) {
         // Ignore scores that aren't top 10
         if (score.rank > 10) {
           continue;
@@ -113,7 +112,7 @@ export class MedalScoresService {
     }
 
     // Save top 10 scores
-    const bulkOps = top10Scores.map(score => {
+    const scoreUpdates = top10Scores.map(score => {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { _id, ...scoreData } = score;
       return {
@@ -124,8 +123,8 @@ export class MedalScoresService {
         },
       };
     });
-    if (bulkOps.length > 0) {
-      await ScoreSaberMedalsScoreModel.bulkWrite(bulkOps);
+    if (scoreUpdates.length > 0) {
+      await ScoreSaberMedalsScoreModel.bulkWrite(scoreUpdates);
     }
 
     // Delete scores below top 10
@@ -140,55 +139,30 @@ export class MedalScoresService {
     const medalChanges = new Map<string, number>();
     const allPlayers = new Set([...oldMedalCounts.keys(), ...newMedalCounts.keys()]);
     for (const playerId of allPlayers) {
-      const oldMedals = oldMedalCounts.get(playerId) || 0;
-      const newMedals = newMedalCounts.get(playerId) || 0;
-      const change = newMedals - oldMedals;
+      const change = (newMedalCounts.get(playerId) || 0) - (oldMedalCounts.get(playerId) || 0);
       if (change !== 0) {
         medalChanges.set(playerId, change);
       }
     }
 
-    // Log medal changes
-    Logger.info(
-      `[MEDAL SCORES] Medal changes on leaderboard ${incomingScore.leaderboardId}: ${Array.from(
-        medalChanges.entries()
-      )
-        .map(([playerId, change]) => `${playerId}: ${change > 0 ? "+" : ""}${change}`)
-        .join(", ")}`
-    );
-
     if (medalChanges.size > 0) {
-      await MedalScoresService.updatePlayerMedalCounts(medalChanges);
-    }
-  }
-
-  /**
-   * Updates medal counts for players.
-   *
-   * @param medalChanges the medal changes by player id.
-   */
-  public static async updatePlayerMedalCounts(medalChanges: Map<string, number>): Promise<void> {
-    // Use bulk operations for efficiency
-    const bulkOps = [];
-    for (const [playerId, change] of medalChanges) {
-      if (change !== 0) {
-        bulkOps.push({
+      const playerUpdates = Array.from(medalChanges.entries()).map(([playerId, change]) => {
+        return {
           updateOne: {
             filter: { _id: playerId },
             update: { $inc: { medals: change } },
           },
-        });
-      }
-    }
+        };
+      });
+      await PlayerModel.bulkWrite(playerUpdates);
 
-    if (bulkOps.length > 0) {
-      await PlayerModel.bulkWrite(bulkOps);
-      const changesSummary = Array.from(medalChanges.entries())
-        .filter(([, change]) => change !== 0)
-        .map(([playerId, change]) => `${playerId}: ${change > 0 ? "+" : ""}${change}`)
-        .join(", ");
+      // Log medal changes
       Logger.info(
-        `[MEDAL SCORES] Updated ${bulkOps.length} players' medal counts${changesSummary ? ` (${changesSummary})` : ""}`
+        `[MEDAL SCORES] Medal changes on leaderboard ${incomingScore.leaderboardId}: ${Array.from(
+          medalChanges.entries()
+        )
+          .map(([playerId, change]) => `${playerId}: ${change > 0 ? "+" : ""}${change}`)
+          .join(", ")}`
       );
     }
   }
