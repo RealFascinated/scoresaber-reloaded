@@ -44,6 +44,8 @@ import ScoreSaberService from "../scoresaber.service";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
 import { EmbedBuilder } from "discord.js";
+import ScoreSaberPlayerScoreToken from "@ssr/common/types/token/scoresaber/player-score";
+import ScoreSaberPlayerScoresPageToken from "@ssr/common/types/token/scoresaber/player-scores-page";
 
 const FIELDS_MAP: Record<ScoreSort["field"], string> = {
   pp: "pp",
@@ -79,10 +81,13 @@ export class PlayerScoresService {
     timeTaken: number;
     partialRefresh: boolean;
   }> {
+    const startTime = performance.now();
     const playerId = playerToken.id;
     const playerScoresCount = await ScoreSaberScoreModel.countDocuments({
       playerId: playerId,
     });
+
+    // The player has the correct number of scores
     if (playerScoresCount === playerToken.scoreStats.totalPlayCount) {
       return {
         missingScores: 0,
@@ -93,37 +98,89 @@ export class PlayerScoresService {
       };
     }
 
-    const shouldDeleteScores = playerScoresCount > playerToken.scoreStats.totalPlayCount;
-    if (shouldDeleteScores) {
-      Logger.info(
-        `Player ${playerId} has more scores than they should (${playerScoresCount} > ${playerToken.scoreStats.totalPlayCount}). Deleteing their scores and refreshing...`
-      );
-      await ScoreSaberScoreModel.deleteMany({
-        playerId: playerId,
-      });
-      player.seededScores = false;
-      await PlayerModel.updateOne({ _id: playerId }, { $set: { seededScores: false } });
-
-      await sendEmbedToChannel(
-        DiscordChannels.PLAYER_SCORE_REFRESH_LOGS,
-        new EmbedBuilder()
-          .setTitle("Player Has More Scores Than They Should!!! 🚨")
-          .setDescription(
-            `**${player.name}** has more scores than they should. Deleting their scores and refreshing...`
-          )
-          .setTimestamp()
-          .setColor("#00ff00")
-      );
-    }
-
-    const startTime = performance.now();
     const result = {
       missingScores: 0,
-      totalScores: shouldDeleteScores ? 0 : playerScoresCount,
+      totalScores: playerScoresCount,
       totalPagesFetched: 0,
       timeTaken: 0,
       partialRefresh: false,
     };
+
+    /**
+     * Gets a page of scores for a player.
+     *
+     * @param page the page to get
+     * @returns the scores page
+     */
+    async function getScoresPage(
+      page: number
+    ): Promise<ScoreSaberPlayerScoresPageToken | undefined> {
+      return ApiServiceRegistry.getInstance().getScoreSaberService().lookupPlayerScores({
+        playerId: playerId,
+        page: page,
+        limit: 100,
+        sort: "recent",
+        priority: CooldownPriority.BACKGROUND,
+      });
+    }
+
+    /**
+     * Parse a score token into a score and leaderboard.
+     *
+     * @param scoreToken the score token to process
+     * @returns the score and leaderboard
+     */
+    function parseScoreToken(scoreToken: ScoreSaberPlayerScoreToken): {
+      score: ScoreSaberScore | undefined;
+      leaderboard: ScoreSaberLeaderboard | undefined;
+    } {
+      const leaderboard = getScoreSaberLeaderboardFromToken(scoreToken.leaderboard);
+      if (leaderboard !== undefined) {
+        const score = getScoreSaberScoreFromToken(scoreToken.score, leaderboard, playerId);
+        if (score !== undefined) {
+          return { score, leaderboard };
+        }
+      }
+      return { score: undefined, leaderboard: undefined };
+    }
+
+    /**
+     * Handles desynced score count. This will delete the player's scores and re-seed them.
+     *
+     * @param scoresPage the scores page
+     * @param playerScoresCount the current count of player scores in the database
+     */
+    async function handleDesyncedScoreCount(
+      scoresPage: ScoreSaberPlayerScoresPageToken,
+      playerScoresCount: number
+    ): Promise<void> {
+      Logger.info(
+        `Player %s has more scores than they should (%s > %s). Deleteing their scores and re-seeding...`,
+        playerId,
+        playerScoresCount,
+        scoresPage.metadata.total
+      );
+
+      await ScoreSaberScoreModel.deleteMany({
+        playerId: playerId,
+      });
+      result.totalScores = 0;
+
+      player.seededScores = false;
+      await PlayerModel.updateOne({ _id: playerId }, { $set: { seededScores: false } });
+
+      // Notify
+      sendEmbedToChannel(
+        DiscordChannels.PLAYER_SCORE_REFRESH_LOGS,
+        new EmbedBuilder()
+          .setTitle("Player Has More Scores Than They Should!")
+          .setDescription(
+            `Player ${playerId} has more scores than they should (${formatNumberWithCommas(playerScoresCount)} > ${formatNumberWithCommas(scoresPage.metadata.total)}). Deleting their scores and re-seeding...`
+          )
+          .setTimestamp()
+          .setColor("#ff0000")
+      );
+    }
 
     /**
      * Processes a page of scores.
@@ -131,32 +188,15 @@ export class PlayerScoresService {
      * @param page the page to process
      * @returns whether the page has more scores to process
      */
-    async function processPage(page: number): Promise<boolean> {
-      result.totalPagesFetched++;
-      const scoresPage = await ApiServiceRegistry.getInstance()
-        .getScoreSaberService()
-        .lookupPlayerScores({
-          playerId: playerId,
-          page: page,
-          limit: 100,
-          sort: "recent",
-          priority: CooldownPriority.BACKGROUND,
-        });
-      if (!scoresPage) {
-        Logger.warn(`Failed to fetch scores for %s on page %s.`, playerId, page);
-        return false;
-      }
-
+    async function processPage(
+      currentPage: number,
+      scoresPage: ScoreSaberPlayerScoresPageToken
+    ): Promise<boolean> {
       for (const scoreToken of scoresPage.playerScores) {
-        const leaderboard = getScoreSaberLeaderboardFromToken(scoreToken.leaderboard);
-        if (!leaderboard) {
+        const { score, leaderboard } = parseScoreToken(scoreToken);
+        if (!score || !leaderboard) {
           continue;
         }
-        const score = getScoreSaberScoreFromToken(scoreToken.score, leaderboard, playerId);
-        if (!score) {
-          continue;
-        }
-
         const trackingResult = await ScoreCoreService.trackScoreSaberScore(
           score,
           leaderboard,
@@ -169,18 +209,33 @@ export class PlayerScoresService {
         }
       }
 
-      // Early exit if we've found all the scores we need
-      if (result.totalScores >= playerToken.scoreStats.totalPlayCount) {
-        return false; // no more scores
+      // We've found all the scores we need
+      if (result.totalScores >= scoresPage.metadata.total) {
+        return false;
       }
-      return page < Math.ceil(scoresPage.metadata.total / scoresPage.metadata.itemsPerPage);
+
+      // No more pages to fetch
+      return currentPage < Math.ceil(scoresPage.metadata.total / scoresPage.metadata.itemsPerPage);
     }
 
     Logger.info(`Fetching missing scores for ${playerId}...`);
+
     let currentPage = 1;
     let hasMoreScores = true;
     while (hasMoreScores) {
-      hasMoreScores = await processPage(currentPage);
+      result.totalPagesFetched++;
+      const scoresPage = await getScoresPage(currentPage);
+      if (!scoresPage) {
+        hasMoreScores = false;
+        continue;
+      }
+
+      const shouldDeleteScores = scoresPage.metadata.total > playerScoresCount;
+      if (shouldDeleteScores) {
+        await handleDesyncedScoreCount(scoresPage, playerScoresCount);
+      }
+
+      hasMoreScores = await processPage(currentPage, scoresPage);
       if (!hasMoreScores) {
         break;
       }
