@@ -58,16 +58,16 @@ export class FetchMissingScoresQueue extends Queue<QueueItem<string>> {
     }
 
     const player = await PlayerCoreService.getPlayer(playerId, playerToken);
-    const { totalScores, missingScores, totalPagesFetched, timeTaken, partialRefresh } =
+    const { totalScores, missingScores, totalPagesFetched, timeTaken } =
       await PlayerScoresService.fetchMissingPlayerScores(player, playerToken);
     if (missingScores == 0) {
       return;
-    } 
+    }
 
     await sendEmbedToChannel(
       DiscordChannels.PLAYER_SCORE_REFRESH_LOGS,
       new EmbedBuilder()
-        .setTitle("Player Score Refresh Complete" + (partialRefresh ? " (Partial Refresh)" : ""))
+        .setTitle("Player Score Refresh Complete")
         .setDescription(`🎯 **${player.name}**'s scores have been fetched`)
         .addFields([
           {
