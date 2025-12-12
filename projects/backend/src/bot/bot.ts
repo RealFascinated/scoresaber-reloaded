@@ -11,6 +11,9 @@ import {
 } from "discord.js";
 import { Client } from "discordx";
 
+import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
+import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
+import { TimeUnit } from "@ssr/common/utils/time-utils";
 import "./command/fetch-missing-player-scores";
 import "./command/force-track-player-statistics";
 import "./command/refresh-medal-scores";
@@ -36,16 +39,6 @@ const client = new Client({
     GatewayIntentBits.MessageContent,
     GatewayIntentBits.GuildMembers,
   ],
-  presence: {
-    status: "online",
-    activities: [
-      {
-        name: "scores...",
-        type: ActivityType.Watching,
-        url: "https://ssr.fascinated.cc",
-      },
-    ],
-  },
   silent: true,
 });
 
@@ -78,6 +71,22 @@ export async function initDiscordBot() {
   Logger.info("Initializing discord bot...");
   try {
     await client.login(env.DISCORD_BOT_TOKEN);
+
+    async function updatePresence() {
+      client.user?.setPresence({
+        status: "online",
+        activities: [
+          {
+            name: `${formatNumberWithCommas(await ScoreSaberScoreModel.estimatedDocumentCount())} Scores!`,
+            type: ActivityType.Watching,
+            url: "https://ssr.fascinated.cc",
+          },
+        ],
+      });
+    }
+
+    updatePresence();
+    setInterval(updatePresence, TimeUnit.toMillis(TimeUnit.Minute, 1));
   } catch (error) {
     Logger.error("Failed to login to Discord:", error);
     throw error; // Re-throw to handle it in the application
