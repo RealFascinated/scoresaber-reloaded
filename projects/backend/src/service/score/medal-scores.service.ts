@@ -8,6 +8,10 @@ import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 import { isProduction } from "@ssr/common/utils/utils";
 import { LeaderboardLeaderboardsService } from "../leaderboard/leaderboard-leaderboards.service";
+import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
+import { Colors, EmbedBuilder } from "discord.js";
+import { PlayerCoreService } from "../player/player-core.service";
+import { LeaderboardCoreService } from "../leaderboard/leaderboard-core.service";
 
 export class MedalScoresService {
   private static IGNORE_SCORES = false;
@@ -67,6 +71,13 @@ export class MedalScoresService {
       );
       return;
     }
+    const leaderboard = await LeaderboardCoreService.getLeaderboard(
+      incomingScore.leaderboardId + "",
+      {
+        cacheOnly: true,
+        includeBeatSaver: false,
+      }
+    );
 
     const existingScores = await ScoreSaberMedalsScoreModel.find({
       leaderboardId: incomingScore.leaderboardId,
@@ -163,6 +174,26 @@ export class MedalScoresService {
         )
           .map(([playerId, change]) => `${playerId}: ${change > 0 ? "+" : ""}${change}`)
           .join(", ")}`
+      );
+
+      // Send notifications for medal changes
+      await sendEmbedToChannel(
+        DiscordChannels.MEDAL_SCORES_FEED,
+        new EmbedBuilder()
+          .setTitle(`${incomingScore.playerInfo.name} gained medals!`)
+          .setDescription(
+            `**${incomingScore.playerInfo.name}** just gained **${medalChanges.get(incomingScore.playerId)}** medals on **${leaderboard.leaderboard.fullName}**
+
+            **Changes:**
+            ${Array.from(medalChanges.entries())
+              .map(async ([playerId, change]) => {
+                const player = await PlayerCoreService.getPlayer(playerId);
+                return `${player?.name}: ${change > 0 ? "lost" : "gained"} ${change} medals`;
+              })
+              .join("\n")}
+            `
+          )
+          .setColor(Colors.Green)
       );
     }
   }
