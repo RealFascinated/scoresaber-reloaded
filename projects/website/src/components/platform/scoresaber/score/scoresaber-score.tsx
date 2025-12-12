@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { cn } from "@/common/utils";
 import { useIsMobile } from "@/contexts/viewport-context";

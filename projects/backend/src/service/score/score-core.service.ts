@@ -1,6 +1,9 @@
 import Logger from "@ssr/common/logger";
 import { AdditionalScoreData } from "@ssr/common/model/additional-score-data/additional-score-data";
-import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
+import {
+  ScoreSaberLeaderboard,
+  ScoreSaberLeaderboardModel,
+} from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberPreviousScoreModel } from "@ssr/common/model/score/impl/scoresaber-previous-score";
 import {
   ScoreSaberScore,
@@ -87,6 +90,11 @@ export class ScoreCoreService {
       await MedalScoresService.handleIncomingMedalsScoreUpdate(score, beatLeaderScore);
     }
 
+    // leaderboard play count
+    if (newScore) {
+      await ScoreSaberLeaderboardModel.updateOne({ _id: leaderboard.id }, { $inc: { plays: 1 } });
+    }
+
     Logger.info(
       `Tracked %s ScoreSaber score "%s" for "%s"(%s) on "%s" [%s]%s in %s`,
       newScore ? "New" : "Missing",
@@ -126,8 +134,8 @@ export class ScoreCoreService {
   public static async insertScoreData(
     score: ScoreSaberScore,
     leaderboard?: ScoreSaberLeaderboard,
-    comparisonPlayer?: ScoreSaberPlayer,
     options?: {
+      comparisonPlayer?: ScoreSaberPlayer;
       insertAdditionalData?: boolean;
       insertPreviousScore?: boolean;
       insertPlayerInfo?: boolean;
@@ -177,9 +185,9 @@ export class ScoreCoreService {
           ? (score.playerInfo ??
             (await ScoreSaberService.getCachedPlayer(score.playerId, true).catch(() => undefined)))
           : undefined,
-        !options?.isComparisonPlayerScore && comparisonPlayer
+        !options?.isComparisonPlayerScore && options?.comparisonPlayer
           ? ScoreSaberScoreModel.findOne({
-              playerId: comparisonPlayer.id,
+              playerId: options.comparisonPlayer.id,
               leaderboardId: leaderboard.id,
             }).lean()
           : undefined,
@@ -210,8 +218,8 @@ export class ScoreCoreService {
       score.comparisonScore = await ScoreCoreService.insertScoreData(
         rawComparisonScore,
         leaderboard,
-        comparisonPlayer,
         {
+          comparisonPlayer: options.comparisonPlayer,
           insertAdditionalData: options.insertAdditionalData,
           insertPreviousScore: options.insertPreviousScore,
           insertPlayerInfo: options.insertPlayerInfo,

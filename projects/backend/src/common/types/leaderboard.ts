@@ -28,7 +28,6 @@ export type LeaderboardUpdates = {
 };
 
 export type LeaderboardOptions = {
-  cacheOnly?: boolean;
   includeBeatSaver?: boolean;
   includeStarChangeHistory?: boolean;
   beatSaverType?: DetailType;

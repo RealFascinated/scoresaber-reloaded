@@ -30,7 +30,6 @@ export class PlayerFriendScoresService {
   ): Promise<Page<ScoreSaberScore>> {
     const leaderboard = await LeaderboardCoreService.getLeaderboard(leaderboardId + "", {
       includeBeatSaver: false,
-      cacheOnly: true,
     });
 
     // Use aggregation pipeline for better performance
@@ -61,7 +60,6 @@ export class PlayerFriendScoresService {
       const processedScore = await ScoreCoreService.insertScoreData(
         scoreToObject(friendScore),
         leaderboard.leaderboard,
-        undefined,
         {
           insertAdditionalData: true,
           insertPreviousScore: false,
@@ -155,7 +153,6 @@ export class PlayerFriendScoresService {
               score: await ScoreCoreService.insertScoreData(
                 score,
                 leaderboardResponse.leaderboard,
-                undefined,
                 {
                   insertPlayerInfo: true,
                   removeScoreWeightAndRank: true,

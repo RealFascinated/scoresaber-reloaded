@@ -76,7 +76,6 @@ export class MedalScoresService {
     const leaderboard = await LeaderboardCoreService.getLeaderboard(
       incomingScore.leaderboardId + "",
       {
-        cacheOnly: true,
         includeBeatSaver: false,
       }
     );

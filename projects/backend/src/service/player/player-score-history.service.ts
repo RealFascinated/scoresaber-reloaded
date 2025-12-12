@@ -55,7 +55,7 @@ export class PlayerScoreHistoryService {
         return await Promise.all(
           scores.map(async scoreToken => {
             let score = scoreToken.toObject() as unknown as ScoreSaberScore;
-            score = await ScoreCoreService.insertScoreData(score, leaderboard, undefined, {
+            score = await ScoreCoreService.insertScoreData(score, leaderboard, {
               insertPreviousScore: false,
               removeScoreWeightAndRank: true,
             });

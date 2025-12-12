@@ -304,7 +304,7 @@ export class PlayerScoresService {
 
     const leaderboardResponses = await LeaderboardCoreService.getLeaderboards(
       playerScores.map(score => score.leaderboardId + ""),
-      { includeBeatSaver: false, cacheOnly: true }
+      { includeBeatSaver: false }
     );
 
     const leaderboardMap = new Map(leaderboardResponses.map(r => [r.leaderboard.id, r]));
@@ -412,7 +412,9 @@ export class PlayerScoresService {
         );
 
         return {
-          score: await ScoreCoreService.insertScoreData(score, leaderboard, comparisonPlayer),
+          score: await ScoreCoreService.insertScoreData(score, leaderboard, {
+            comparisonPlayer: comparisonPlayer,
+          }),
           leaderboard: leaderboard,
           beatSaver: beatsaver,
         } as PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>;
@@ -506,9 +508,11 @@ export class PlayerScoresService {
       if (options.field === "starcount") {
         // Use an aggregation pipeline so that we can sort by the leaderboard
         // star count which is not present on the score document itself.
-        const rawScores = await fetchRawScores(query, options, start, end - start);
-
-        return await mapScoresWithLeaderboards(rawScores, false, false, true);
+        return await mapScoresWithLeaderboards(
+          await fetchRawScores(query, options, start, end - start),
+          false,
+          false
+        );
       }
 
       // Add filter to exclude Infinity values for the sort field (skip for starcount)
@@ -528,9 +532,9 @@ export class PlayerScoresService {
         };
       }
 
-      const rawScores = await fetchRawScores(query, options, start, end - start);
-
-      return await mapScoresWithLeaderboards(rawScores);
+      return await mapScoresWithLeaderboards(
+        await fetchRawScores(query, options, start, end - start)
+      );
     });
   }
 
@@ -568,7 +572,6 @@ export class PlayerScoresService {
         rawScores.map(score => score.leaderboardId + ""),
         {
           includeBeatSaver: true,
-          cacheOnly: true,
         }
       );
 
@@ -621,7 +624,6 @@ export class PlayerScoresService {
     const leaderboardResponse = await LeaderboardCoreService.getLeaderboard(
       rawScore.leaderboardId + "",
       {
-        cacheOnly: true,
         includeBeatSaver: true,
         beatSaverType: DetailType.FULL,
       }
@@ -633,7 +635,6 @@ export class PlayerScoresService {
     const score = await ScoreCoreService.insertScoreData(
       scoreToObject(rawScore as unknown as ScoreSaberScore),
       leaderboardResponse.leaderboard,
-      undefined,
       {
         insertPlayerInfo: true,
         insertAdditionalData: true,
@@ -712,20 +713,18 @@ async function fetchRawScores(
  *
  * @param rawScores the raw scores to map
  * @param includeBeatSaver whether to include the BeatSaver data
- * @param cacheOnly whether to only use cached leaderboards
  * @returns the mapped scores
  */
 async function mapScoresWithLeaderboards(
   rawScores: ScoreSaberScore[],
   includeBeatSaver = true,
-  cacheOnly = true,
   removeScoreWeightAndRank = true
 ) {
   if (!rawScores.length) return [];
 
   const leaderboardResponses = await LeaderboardCoreService.getLeaderboards(
     rawScores.map(s => s.leaderboardId + ""),
-    { includeBeatSaver, cacheOnly }
+    { includeBeatSaver }
   );
 
   const lbMap = new Map(leaderboardResponses.map(r => [r.leaderboard.id, r]));
@@ -737,7 +736,7 @@ async function mapScoresWithLeaderboards(
         if (!lbResp) return null;
         const { leaderboard, beatsaver } = lbResp;
         return {
-          score: await ScoreCoreService.insertScoreData(scoreToObject(rs), leaderboard, undefined, {
+          score: await ScoreCoreService.insertScoreData(scoreToObject(rs), leaderboard, {
             removeScoreWeightAndRank,
           }),
           leaderboard,

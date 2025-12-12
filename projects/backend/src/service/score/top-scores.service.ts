@@ -41,7 +41,6 @@ export class TopScoresService {
       );
       const leaderboardResponses = await LeaderboardCoreService.getLeaderboards(leaderboardIds, {
         includeBeatSaver: true,
-        cacheOnly: true,
       });
 
       // Batch fetch player info
@@ -88,15 +87,10 @@ export class TopScoresService {
             };
           }
 
-          const processedScore = await ScoreCoreService.insertScoreData(
-            score,
-            leaderboard,
-            undefined,
-            {
-              removeScoreWeightAndRank: true,
-              insertPlayerInfo: true,
-            }
-          );
+          const processedScore = await ScoreCoreService.insertScoreData(score, leaderboard, {
+            removeScoreWeightAndRank: true,
+            insertPlayerInfo: true,
+          });
           return {
             score: processedScore,
             leaderboard: leaderboard,

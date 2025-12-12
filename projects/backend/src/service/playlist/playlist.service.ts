@@ -305,7 +305,6 @@ export default class PlaylistService {
       const leaderboards = await LeaderboardCoreService.getLeaderboards(
         scores.map(score => score.leaderboardId.toString()),
         {
-          cacheOnly: true,
           includeBeatSaver: false,
         }
       );
