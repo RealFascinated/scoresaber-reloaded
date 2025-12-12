@@ -66,15 +66,12 @@ function PlayerMiniRanking({
 
   const playerRankWidth = (() => {
     if (players.length === 0) return 0;
-
-    const maxRank =
-      type === "Global"
-        ? Math.max(...players.map(player => player.rank ?? 0))
-        : Math.max(...players.map(player => player.countryRank ?? 0));
-
-    // Calculate padding based on number of digits
-    const rankDigits = maxRank > 0 ? Math.floor(Math.log10(maxRank)) + 1 : 0;
-    return rankDigits * 14 + (rankDigits > 1 ? -10 : 0);
+    const maxRank = Math.max(
+      ...players.map(p => (type === "Global" ? p.rank : p.countryRank) ?? 0)
+    );
+    const digits = maxRank > 0 ? Math.floor(Math.log10(maxRank)) + 1 : 0;
+    const commas = Math.floor((digits - 1) / 3);
+    return (digits + commas + 1) * 6;
   })();
 
   return (
@@ -139,7 +136,7 @@ function PlayerMiniRanking({
                       playerRanking.id === player.id ? "font-bold" : ""
                     )}
                   >
-                    {formatPp(playerRanking.pp)}pp
+                    {formatPp(playerRanking.pp, isMobile ? 0 : 2)}pp
                   </p>
                   {playerRanking.id !== player.id && !isMobile && (
                     <p

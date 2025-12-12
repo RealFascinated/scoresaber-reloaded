@@ -45,7 +45,7 @@ export function PlayerRanking({
         {/* Rank, Weekly Change, and Country Rank */}
         <div
           className={cn(
-            "grid grid-cols-[0.65fr_1fr] items-center gap-3",
+            "grid grid-cols-[0.55fr_0.9fr] items-center gap-3",
             player.inactive && showAccountInactive ? "flex" : ""
           )}
           style={{

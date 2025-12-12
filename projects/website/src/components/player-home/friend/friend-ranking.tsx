@@ -1,6 +1,6 @@
 "use client";
 
-import { getFriendRankingColumnWidth } from "@/common/player-utils";
+import { getRankingColumnWidth } from "@/common/player-utils";
 import { PlayerRanking } from "@/components/player/player-ranking";
 import { PlayerPpDisplay } from "@/components/ranking/player-pp-display";
 import SimplePagination from "@/components/simple-pagination";
@@ -41,7 +41,11 @@ export function FriendRanking() {
     getFriendsPage().then(setFriendsPage);
   }, [getFriendsPage]);
 
-  const firstColumnWidth = getFriendRankingColumnWidth(friendsPage?.items ?? []);
+  const firstColumnWidth = getRankingColumnWidth(
+    friendsPage?.items ?? [],
+    player => player.rank,
+    player => player.countryRank
+  );
 
   return (
     <Card className="flex h-fit flex-col">
