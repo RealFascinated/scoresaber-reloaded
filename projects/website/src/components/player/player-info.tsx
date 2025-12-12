@@ -36,7 +36,7 @@ export function PlayerInfo({
   );
 
   return (
-    <div className="flex w-full items-center gap-2">
+    <div className="flex items-center gap-2">
       <Avatar
         src={getScoreSaberAvatar(player)}
         className="pointer-events-none"
