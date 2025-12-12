@@ -45,7 +45,9 @@ export default function ScoreSaberLeaderboardScore({
       </td>
 
       {/* Player */}
-      <td className={cn(TABLE_CELL_WIDTH, "flex min-w-[250px] gap-2 whitespace-nowrap")}>
+      <td
+        className={cn(TABLE_CELL_WIDTH, "flex min-w-[250px] items-center gap-2 whitespace-nowrap")}
+      >
         {scorePlayer ? (
           <>
             <ScoreSaberScoreHMD score={score}>
