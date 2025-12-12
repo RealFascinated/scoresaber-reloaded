@@ -16,7 +16,7 @@ export enum CacheId {
 }
 
 export default class CacheService {
-  private static readonly cacheInfo = {
+  public static readonly CACHE_EXPIRY = {
     [CacheId.BeatSaver]: TimeUnit.toSeconds(TimeUnit.Day, 7),
     [CacheId.ScoreSaber]: TimeUnit.toSeconds(TimeUnit.Minute, 1),
     [CacheId.Leaderboards]: TimeUnit.toSeconds(TimeUnit.Hour, 2),
@@ -66,7 +66,7 @@ export default class CacheService {
         cacheKey,
         SuperJSON.stringify(data),
         "EX", // EX is used to set the TTL for the item
-        this.cacheInfo[cache] // The TTL of the item
+        this.CACHE_EXPIRY[cache] // The TTL of the item
       );
       if (result !== "OK") {
         throw new InternalServerError(`Failed to set cache for ${cacheKey}`);

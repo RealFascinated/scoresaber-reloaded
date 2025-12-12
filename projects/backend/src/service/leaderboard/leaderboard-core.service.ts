@@ -52,8 +52,9 @@ export class LeaderboardCoreService {
       CacheId.Leaderboards,
       `leaderboard:id:${id}`,
       async () => {
-        let cachedLeaderboard: ScoreSaberLeaderboard | null =
-          await ScoreSaberLeaderboardModel.findById(id).lean();
+        let cachedLeaderboard = (await ScoreSaberLeaderboardModel.findById(
+          id
+        ).lean()) as ScoreSaberLeaderboard | null;
         if (!cachedLeaderboard) {
           cachedLeaderboard = await LeaderboardCoreService.fetchAndSaveLeaderboard(id);
           LeaderboardCoreService.addToScoreSeedQueueIfRanked(cachedLeaderboard);
@@ -179,9 +180,7 @@ export class LeaderboardCoreService {
     const uncachedIds = uniqueIds.filter(id => !results.has(id));
     await Promise.all(
       uncachedIds.map(async id => {
-        const leaderboard = await LeaderboardCoreService.fetchAndSaveLeaderboard(id);
-        const data = LeaderboardCoreService.processLeaderboard(leaderboard, false);
-        results.set(id, data);
+        results.set(id, await LeaderboardCoreService.getLeaderboard(id));
       })
     );
 
