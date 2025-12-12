@@ -80,7 +80,7 @@ export default function PlayerScoreAccuracyChart({ scoreStats, leaderboard }: Pr
           {
             title: "PP",
             field: "pp",
-            color: Colors.ranked,
+            color: Colors.pp,
             axisId: "y2",
             axisConfig: {
               reverse: false,

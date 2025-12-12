@@ -58,7 +58,7 @@ export function ScoreSaberLeaderboardData({
   return (
     <LeaderboardFilterProvider initialCountry={country ?? undefined}>
       <div className="w-full space-y-2">
-        <div className="flex w-full flex-col-reverse gap-2 2xl:flex-row 2xl:gap-2">
+        <div className="flex w-full flex-col-reverse gap-2 xl:flex-row xl:gap-2">
           {/* Mobile Sidebar */}
           {isMobile && (
             <div className="flex flex-col gap-2">
@@ -113,7 +113,7 @@ export function ScoreSaberLeaderboardData({
           </div>
 
           {/* Desktop Sidebar */}
-          <div className="flex w-full flex-col gap-2 2xl:w-[550px]">
+          <div className="flex w-full flex-col gap-2 xl:w-[550px]">
             {/* Leaderboard Info */}
             <LeaderboardInfo leaderboard={leaderboardResponse} />
 

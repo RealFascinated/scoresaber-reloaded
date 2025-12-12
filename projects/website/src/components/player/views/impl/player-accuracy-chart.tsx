@@ -30,7 +30,7 @@ const datasetConfig: DatasetConfig[] = [
   {
     title: "Average Ranked Accuracy",
     field: "averageRankedAccuracy",
-    color: Colors.ranked,
+    color: Colors.pp,
     axisId: "y",
     axisConfig: {
       reverse: false,

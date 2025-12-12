@@ -70,7 +70,7 @@ export default function LeaderboardPpChart({ leaderboard }: Props) {
       {
         label: "PP",
         data: generateDataPoints(debouncedValues[0], debouncedValues[1]),
-        borderColor: Colors.ranked,
+        borderColor: Colors.pp,
         backgroundColor: Colors.rankedLight,
         tension: 0.4,
         pointRadius: 0,

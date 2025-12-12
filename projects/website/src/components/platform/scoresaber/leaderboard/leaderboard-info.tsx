@@ -26,10 +26,6 @@ export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
   const showExpandButton = description.length > descriptionMaxSize;
   const [expanded, setExpanded] = useState(false);
 
-  const statusDate = leaderboard.leaderboard.ranked
-    ? leaderboardData.timestamp
-    : leaderboardData.dateRanked || leaderboardData.timestamp;
-
   const difficulty = getDifficulty(leaderboardData.difficulty.difficulty);
 
   return (
@@ -114,15 +110,38 @@ export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
           }
         />
 
-        {/* Ranked / Created Date */}
-        <LeaderboardInfoItem
-          label={leaderboard.leaderboard.ranked ? "Ranked" : "Created"}
-          value={
-            <SimpleTooltip display={formatDate(statusDate, "Do MMMM, YYYY HH:mm a")}>
-              {formatDate(statusDate, "Do MMMM, YYYY")}
-            </SimpleTooltip>
-          }
-        />
+        {/* Ranked Date */}
+        {leaderboard.leaderboard.dateRanked && (
+          <LeaderboardInfoItem
+            label="Ranked"
+            value={
+              <SimpleTooltip
+                display={formatDate(leaderboard.leaderboard.dateRanked, "Do MMMM, YYYY HH:mm a")}
+              >
+                {formatDate(
+                  leaderboard.leaderboard.dateRanked
+                    ? leaderboard.leaderboard.dateRanked
+                    : leaderboard.leaderboard.timestamp,
+                  "Do MMMM, YYYY"
+                )}
+              </SimpleTooltip>
+            }
+          />
+        )}
+
+        {/* Created Date */}
+        {leaderboard.leaderboard.timestamp && (
+          <LeaderboardInfoItem
+            label="Created"
+            value={
+              <SimpleTooltip
+                display={formatDate(leaderboard.leaderboard.timestamp, "Do MMMM, YYYY HH:mm a")}
+              >
+                {formatDate(leaderboard.leaderboard.timestamp, "Do MMMM, YYYY")}
+              </SimpleTooltip>
+            }
+          />
+        )}
 
         {/* Status */}
         <LeaderboardInfoItem
@@ -170,7 +189,7 @@ export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
 
 function LeaderboardInfoItem({ label, value }: { label: string; value: React.ReactNode }) {
   return (
-    <div className="flex min-h-6 flex-wrap items-start gap-2">
+    <div className="flex min-h-6 flex-wrap items-center gap-2">
       <p className="text-muted-foreground min-w-[100px] shrink-0 text-sm">{label}:</p>
       <div className="text-foreground max-w-full min-w-0 text-sm *:wrap-break-word">{value}</div>
     </div>

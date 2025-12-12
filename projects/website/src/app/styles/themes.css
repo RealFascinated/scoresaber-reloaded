@@ -24,13 +24,16 @@
 
   --pp: #5c6bff;
   --ssr: #5c6bff;
-  --ranked: #0070f3;
   --medals: #cd7f32;
   --discord-blue: #5865f2;
   --inactive-account: #ff6467;
   --song-name: #4a56cc;
   --song-mapper: #7d8aff;
   --statistic: #5c6bff;
+  
+  --ranked: #23d160;
+  --unranked: #8b949e;
+  --qualified: #ffde1a;
 
   --hands-left: #a82020;
   --hands-right: #2064a8;
@@ -60,7 +63,6 @@
   --accent-secondary: oklch(70% 0.3 285);
   --pp: oklch(58% 0.25 295);
   --ssr: oklch(55% 0.22 275);
-  --ranked: oklch(62% 0.3 285);
   --song-name: oklch(50% 0.22 295);
   --song-mapper: oklch(75% 0.18 280);
   --statistic: oklch(65% 0.25 285);
@@ -71,7 +73,6 @@
   --accent-secondary: oklch(75% 0.3 25);
   --pp: oklch(65% 0.22 20);
   --ssr: oklch(60% 0.2 15);
-  --ranked: oklch(68% 0.28 30);
   --song-name: oklch(55% 0.2 25);
   --song-mapper: oklch(78% 0.15 30);
   --statistic: oklch(70% 0.2 20);
@@ -82,7 +83,6 @@
   --accent-secondary: oklch(70% 0.3 140);
   --pp: oklch(58% 0.25 135);
   --ssr: oklch(55% 0.22 130);
-  --ranked: oklch(62% 0.3 145);
   --song-name: oklch(50% 0.22 150);
   --song-mapper: oklch(75% 0.18 145);
   --statistic: oklch(70% 0.2 145);
@@ -101,13 +101,16 @@
   --color-landing: var(--background);
   --color-pp: var(--pp);
   --color-ssr: var(--ssr);
-  --color-ranked: var(--ranked);
   --color-medals: var(--medals);
   --color-discord-blue: var(--discord-blue);
   --color-inactive-account: var(--inactive-account);
   --color-song-name: var(--song-name);
   --color-song-mapper: var(--song-mapper);
   --color-statistic: var(--statistic);
+
+  --color-ranked: var(--ranked);
+  --color-unranked: var(--unranked);
+  --color-qualified: var(--qualified);
 
   --color-hands-left: var(--hands-left);
   --color-hands-right: var(--hands-right);

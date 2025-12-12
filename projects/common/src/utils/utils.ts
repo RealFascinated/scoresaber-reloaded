@@ -75,3 +75,18 @@ export function stringToColor(str: string): string {
   const h = hash % 360;
   return `hsl(${h}, 70%, 60%)`;
 }
+
+/**
+ * Darkens a hex color by reducing each RGB component.
+ *
+ * @param hex the hex color string (e.g., "#5c6bff")
+ * @param amount the amount to darken each RGB component (0-255)
+ * @returns the darkened hex color string
+ */
+export function darkenColor(hex: string, amount: number): string {
+  const num = parseInt(hex.replace("#", ""), 16);
+  const r = Math.max(0, ((num >> 16) & 0xff) - amount);
+  const g = Math.max(0, ((num >> 8) & 0xff) - amount);
+  const b = Math.max(0, (num & 0xff) - amount);
+  return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, "0")}`;
+}
