@@ -117,7 +117,7 @@ export class LeaderboardCoreService {
 
     // Get cached leaderboards from Redis
     const cacheKeys = leaderboardIds.map(id => `leaderboard:id:${id}`);
-    const cachedData = cacheKeys.length > 0 ? await redisClient.mget(...cacheKeys) : [];
+    const cachedData = cacheKeys.length > 0 ? await redisClient.mget(cacheKeys) : [];
     for (const [index] of cacheKeys.entries()) {
       const cached = cachedData[index];
       if (cached) {
@@ -354,7 +354,7 @@ export class LeaderboardCoreService {
   public static leaderboardToObject(leaderboard: ScoreSaberLeaderboard): ScoreSaberLeaderboard {
     return {
       ...removeObjectFields<ScoreSaberLeaderboard>(leaderboard, ["_id", "__v"]),
-      id: leaderboard._id,
+      id: leaderboard.id ?? leaderboard._id,
     } as ScoreSaberLeaderboard;
   }
 }
