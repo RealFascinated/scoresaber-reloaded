@@ -561,7 +561,7 @@ export default function ScoreSaberPlayerScores({
                           ))}
                         </SelectContent>
                       </Select>
-                      ;
+
                       {currentFilter && currentFilter !== "All Scores" && (
                         <SimpleTooltip display="Clear filter">
                           <Button
@@ -612,7 +612,7 @@ export default function ScoreSaberPlayerScores({
                             ))}
                         </SelectContent>
                       </Select>
-                      ;
+
                       {hmdFilter && (
                         <SimpleTooltip display="Clear HMD filter">
                           <Button
