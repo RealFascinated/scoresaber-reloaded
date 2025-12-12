@@ -211,6 +211,7 @@ export class PlayerScoresService {
           score,
           leaderboard,
           playerToken,
+          undefined,
           false
         );
         if (trackingResult.tracked) {
@@ -406,6 +407,7 @@ export class PlayerScoresService {
           score,
           leaderboard,
           await ScoreSaberService.getCachedPlayer(playerId, true),
+          undefined,
           false
         );
 

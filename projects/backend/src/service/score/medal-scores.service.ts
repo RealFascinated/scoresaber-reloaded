@@ -2,16 +2,15 @@ import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { CooldownPriority } from "@ssr/common/cooldown";
 import Logger from "@ssr/common/logger";
 import { MEDAL_COUNTS } from "@ssr/common/medal";
+import { AdditionalScoreData } from "@ssr/common/model/additional-score-data/additional-score-data";
 import { PlayerModel } from "@ssr/common/model/player/player";
 import { ScoreSaberMedalsScoreModel } from "@ssr/common/model/score/impl/scoresaber-medals-score";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 import { isProduction } from "@ssr/common/utils/utils";
-import { LeaderboardLeaderboardsService } from "../leaderboard/leaderboard-leaderboards.service";
-import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
-import { Colors, EmbedBuilder } from "discord.js";
-import { PlayerCoreService } from "../player/player-core.service";
+import { sendMedalScoreNotification } from "../../common/score/score.util";
 import { LeaderboardCoreService } from "../leaderboard/leaderboard-core.service";
+import { LeaderboardLeaderboardsService } from "../leaderboard/leaderboard-leaderboards.service";
 
 export class MedalScoresService {
   private static IGNORE_SCORES = false;
@@ -64,7 +63,10 @@ export class MedalScoresService {
    *
    * @param incomingScore the incoming score.
    */
-  public static async handleIncomingMedalsScoreUpdate(incomingScore: ScoreSaberScore) {
+  public static async handleIncomingMedalsScoreUpdate(
+    incomingScore: ScoreSaberScore,
+    beatLeaderScore: AdditionalScoreData | undefined
+  ) {
     if (MedalScoresService.IGNORE_SCORES || incomingScore.rank > 10 || incomingScore.pp <= 0) {
       Logger.debug(
         `[MEDAL SCORES] Ignoring score ${incomingScore.scoreId}. Ignore scores: ${MedalScoresService.IGNORE_SCORES}, rank: ${incomingScore.rank}, pp: ${incomingScore.pp}`
@@ -177,23 +179,11 @@ export class MedalScoresService {
       );
 
       // Send notifications for medal changes
-      await sendEmbedToChannel(
-        DiscordChannels.MEDAL_SCORES_FEED,
-        new EmbedBuilder()
-          .setTitle(`${incomingScore.playerInfo.name} gained medals!`)
-          .setDescription(
-            `**${incomingScore.playerInfo.name}** just gained **${medalChanges.get(incomingScore.playerId)}** medals on **${leaderboard.leaderboard.fullName}**
-
-            **Changes:**
-            ${Array.from(medalChanges.entries())
-              .map(async ([playerId, change]) => {
-                const player = await PlayerCoreService.getPlayer(playerId);
-                return `${player?.name}: ${change > 0 ? "lost" : "gained"} ${change} medals`;
-              })
-              .join("\n")}
-            `
-          )
-          .setColor(Colors.Green)
+      await sendMedalScoreNotification(
+        incomingScore,
+        leaderboard.leaderboard,
+        beatLeaderScore,
+        medalChanges
       );
     }
   }

@@ -16,6 +16,7 @@ import { PlayerHmdService } from "../player/player-hmd.service";
 import { PlayerScoreHistoryService } from "../player/player-score-history.service";
 import ScoreSaberService from "../scoresaber.service";
 import { MedalScoresService } from "./medal-scores.service";
+import { AdditionalScoreData } from "@ssr/common/model/additional-score-data/additional-score-data";
 
 export class ScoreCoreService {
   /**
@@ -32,6 +33,7 @@ export class ScoreCoreService {
     score: ScoreSaberScore,
     leaderboard: ScoreSaberLeaderboard,
     player: ScoreSaberPlayerToken | ScoreSaberLeaderboardPlayerInfoToken,
+    beatLeaderScore?: AdditionalScoreData,
     newScore: boolean = false
   ): Promise<{
     score: ScoreSaberScore | undefined;
@@ -82,7 +84,7 @@ export class ScoreCoreService {
 
     // Handle score for medal updates
     if (leaderboard.ranked && score.rank <= 10) {
-      await MedalScoresService.handleIncomingMedalsScoreUpdate(score);
+      await MedalScoresService.handleIncomingMedalsScoreUpdate(score, beatLeaderScore);
     }
 
     Logger.info(

@@ -84,7 +84,13 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
           continue;
         }
 
-        await ScoreCoreService.trackScoreSaberScore(score, leaderboard, score.playerInfo, false);
+        await ScoreCoreService.trackScoreSaberScore(
+          score,
+          leaderboard,
+          score.playerInfo,
+          undefined,
+          false
+        );
         processedAnyScores = true;
       }
 

@@ -23,11 +23,21 @@ export class TrackScoreListener implements EventListener {
   ) {
     const playerInfo = score.playerInfo;
 
+    // Track BeatLeader score if available
+    let beatLeaderScore: AdditionalScoreData | undefined;
+    if (beatLeaderScoreToken) {
+      beatLeaderScore = await BeatLeaderService.trackBeatLeaderScore(
+        beatLeaderScoreToken,
+        isTop50GlobalScore
+      );
+    }
+
     // Track ScoreSaber score
     const { score: trackedScore, hasPreviousScore } = await ScoreCoreService.trackScoreSaberScore(
       score,
       leaderboard,
       player,
+      beatLeaderScore,
       true
     );
     if (trackedScore == undefined) {
@@ -40,15 +50,6 @@ export class TrackScoreListener implements EventListener {
       leaderboard.stars > 0,
       hasPreviousScore
     );
-
-    // Track BeatLeader score if available
-    let beatLeaderScore: AdditionalScoreData | undefined;
-    if (beatLeaderScoreToken) {
-      beatLeaderScore = await BeatLeaderService.trackBeatLeaderScore(
-        beatLeaderScoreToken,
-        isTop50GlobalScore
-      );
-    }
 
     // Invalidate caches
     CacheService.invalidate(`scoresaber:player:${player.id}`);

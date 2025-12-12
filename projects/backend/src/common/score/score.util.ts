@@ -12,10 +12,11 @@ import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils
 import { formatScoreAccuracy } from "@ssr/common/utils/score.util";
 import { getDifficultyName } from "@ssr/common/utils/song-utils";
 import { formatChange } from "@ssr/common/utils/utils";
-import { ButtonBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
+import { ButtonBuilder, ButtonStyle, Colors, EmbedBuilder } from "discord.js";
 import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
 import BeatSaverService from "../../service/beatsaver.service";
 import { PlayerScoreHistoryService } from "../../service/player/player-score-history.service";
+import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
 
 /**
  * Converts a database score to a ScoreSaberScore.
@@ -80,15 +81,15 @@ export async function sendScoreNotification(
       .setTitle(title)
       .setDescription(
         [
-          `🎵 **${leaderboard.fullName}**`,
-          `⚡ ${getDifficultyName(leaderboard.difficulty.difficulty)} / ${leaderboard.difficulty.characteristic}${leaderboard.stars > 0 ? ` • ${leaderboard.stars.toFixed(2)}★` : ""}`,
+          `**${leaderboard.fullName}**`,
+          `${getDifficultyName(leaderboard.difficulty.difficulty)} / ${leaderboard.difficulty.characteristic}${leaderboard.stars > 0 ? ` • ${leaderboard.stars.toFixed(2)}★` : ""}`,
         ]
           .join("\n")
           .trim()
       )
       .addFields([
         {
-          name: "🎯 Performance",
+          name: "Performance",
           value: [
             `**Accuracy:** ${accuracy}`,
             ...(score.pp > 0 ? [`**PP:** ${formatPp(score.pp)}pp ${change ? change.pp : ""}`] : []),
@@ -97,15 +98,15 @@ export async function sendScoreNotification(
           inline: false,
         },
         {
-          name: "📊 Statistics",
+          name: "Statistics",
           value: [
             `**Misses:** ${formatNumberWithCommas(score.missedNotes)} ${change ? change.misses : ""}`,
             `**Bad Cuts:** ${formatNumberWithCommas(score.badCuts)} ${change ? change.badCuts : ""}`,
             `**Max Combo:** ${formatNumberWithCommas(score.maxCombo)} ${score.fullCombo ? " (FC)" : ""} ${change ? change.maxCombo : ""}`,
             ...(beatLeaderScore
               ? [
-                  `**Bomb Cuts** ${beatLeaderScore.misses.bombCuts}`,
-                  `**Wall Hits** ${beatLeaderScore.misses.wallsHit}`,
+                  `**Bomb Cuts**: ${beatLeaderScore.misses.bombCuts}`,
+                  `**Wall Hits**: ${beatLeaderScore.misses.wallsHit}`,
                 ]
               : []),
           ].join("\n"),
@@ -118,47 +119,109 @@ export async function sendScoreNotification(
         text: `Powered by ${env.NEXT_PUBLIC_WEBSITE_URL}`,
       })
       .setColor(score.pp > 0 ? "#d4af37" : "#808080"),
-    [
-      {
-        type: 1,
-        components: [
-          new ButtonBuilder()
-            .setLabel("Player")
-            .setEmoji("👤")
-            .setStyle(ButtonStyle.Link)
-            .setURL(`${env.NEXT_PUBLIC_WEBSITE_URL}/player/${player.id}`),
-          new ButtonBuilder()
-            .setLabel("Leaderboard")
-            .setEmoji("🏆")
-            .setStyle(ButtonStyle.Link)
-            .setURL(`${env.NEXT_PUBLIC_WEBSITE_URL}/leaderboard/${leaderboard.id}`),
-          ...(beatSaver
-            ? [
-                new ButtonBuilder()
-                  .setLabel("Map")
-                  .setEmoji("🗺️")
-                  .setStyle(ButtonStyle.Link)
-                  .setURL(`https://beatsaver.com/maps/${beatSaver.bsr}`),
-              ]
-            : []),
-          ...(beatLeaderScore
-            ? [
-                new ButtonBuilder()
-                  .setLabel("Replay")
-                  .setEmoji("🎥")
-                  .setStyle(ButtonStyle.Link)
-                  .setURL(
-                    ReplayViewers.beatleader.generateUrl(
-                      beatLeaderScore.scoreId,
-                      getBeatLeaderReplayRedirectUrl(beatLeaderScore)
-                    )
-                  ),
-              ]
-            : []),
-        ],
-      },
-    ]
+    getScoreButtons(score, leaderboard, beatSaver, beatLeaderScore)
   );
 
   return message;
+}
+
+/**
+ * Sends a medal score notification to the medal scores feed.
+ *
+ * @param score the score to send
+ * @param leaderboard the leaderboard the score was set on
+ * @param changes the changes to the medal scores
+ */
+export async function sendMedalScoreNotification(
+  score: ScoreSaberScore,
+  leaderboard: ScoreSaberLeaderboard,
+  beatLeaderScore: AdditionalScoreData | undefined,
+  changes: Map<string, number>
+) {
+  const beatSaver = await BeatSaverService.getMap(
+    leaderboard.songHash,
+    leaderboard.difficulty.difficulty,
+    leaderboard.difficulty.characteristic,
+    DetailType.BASIC
+  );
+
+  await sendEmbedToChannel(
+    DiscordChannels.MEDAL_SCORES_FEED,
+    new EmbedBuilder()
+      .setTitle(`${score.playerInfo.name} gained medals!`)
+      .setDescription(
+        `**${score.playerInfo.name}** just gained **${changes.get(score.playerId)}** medals on **${leaderboard.fullName}**
+
+      **Changes:**
+      ${Array.from(changes.entries())
+        .map(
+          ([playerId, change]) => `${playerId}: ${change > 0 ? "lost" : "gained"} ${change} medals`
+        )
+        .join("\n")}
+    `
+      )
+      .setColor(Colors.Green)
+      .setTimestamp(score.timestamp)
+      .setFooter({
+        text: `Powered by ${env.NEXT_PUBLIC_WEBSITE_URL}`,
+      }),
+    getScoreButtons(score, leaderboard, beatSaver, beatLeaderScore)
+  );
+}
+
+/**
+ * Gets the buttons for a score.
+ *
+ * @param score the score to get the buttons for
+ * @param leaderboard the leaderboard the score was set on
+ * @param beatSaver the beatSaver map
+ * @param beatLeaderScore the beatLeader score
+ * @returns the buttons for the score
+ */
+function getScoreButtons(
+  score: ScoreSaberScore,
+  leaderboard: ScoreSaberLeaderboard,
+  beatSaver: BeatSaverMapResponse | undefined,
+  beatLeaderScore: AdditionalScoreData | undefined
+) {
+  return [
+    {
+      type: 1,
+      components: [
+        new ButtonBuilder()
+          .setLabel("Player")
+          .setEmoji("👤")
+          .setStyle(ButtonStyle.Link)
+          .setURL(`${env.NEXT_PUBLIC_WEBSITE_URL}/player/${score.playerId}`),
+        new ButtonBuilder()
+          .setLabel("Leaderboard")
+          .setEmoji("🏆")
+          .setStyle(ButtonStyle.Link)
+          .setURL(`${env.NEXT_PUBLIC_WEBSITE_URL}/leaderboard/${leaderboard.id}`),
+        ...(beatSaver
+          ? [
+              new ButtonBuilder()
+                .setLabel("Map")
+                .setEmoji("🗺️")
+                .setStyle(ButtonStyle.Link)
+                .setURL(`https://beatsaver.com/maps/${beatSaver.bsr}`),
+            ]
+          : []),
+        ...(beatLeaderScore
+          ? [
+              new ButtonBuilder()
+                .setLabel("Replay")
+                .setEmoji("🎥")
+                .setStyle(ButtonStyle.Link)
+                .setURL(
+                  ReplayViewers.beatleader.generateUrl(
+                    beatLeaderScore.scoreId,
+                    getBeatLeaderReplayRedirectUrl(beatLeaderScore)
+                  )
+                ),
+            ]
+          : []),
+      ],
+    },
+  ];
 }
