@@ -1,5 +1,3 @@
-import { RateLimitError } from "src/error/rate-limit-error";
-import { HttpCode } from "src/http-codes";
 import { Cooldown, CooldownPriority } from "../cooldown";
 import Logger from "../logger";
 import Request, { RequestOptions } from "../utils/request";
@@ -128,26 +126,21 @@ export default class ApiService {
     });
 
     // Handle rate limit errors
-    if (response?.status === HttpCode.TOO_MANY_REQUESTS.code) {
-      throw new RateLimitError("Rate limit exceeded");
-    } else {
-      // Only switch proxies on the server
-      const remaining = response?.headers.get("x-ratelimit-remaining");
-      if (isServer() && this.config.useProxy) {
-        if (remaining && Number(remaining) <= this.config.proxySwitchThreshold) {
-          // Get the next proxy in the list (circular)
-          const currentIndex = SERVER_PROXIES.indexOf(this.currentProxy);
-          const nextIndex = (currentIndex + 1) % SERVER_PROXIES.length;
-          const nextProxy = SERVER_PROXIES[nextIndex];
-          this.currentProxy = nextProxy;
-          Logger.info(
-            `Rate limit exceeded for ${this.name}, switching to another proxy for api service: ${nextProxy}`
-          );
-        }
-
-        // Update the last rate limit seen
-        this.lastRateLimitSeen = Number(remaining);
+    const remaining = response?.headers.get("x-ratelimit-remaining");
+    if (isServer() && this.config.useProxy) {
+      if (remaining && Number(remaining) <= this.config.proxySwitchThreshold) {
+        // Get the next proxy in the list (circular)
+        const currentIndex = SERVER_PROXIES.indexOf(this.currentProxy);
+        const nextIndex = (currentIndex + 1) % SERVER_PROXIES.length;
+        const nextProxy = SERVER_PROXIES[nextIndex];
+        this.currentProxy = nextProxy;
+        Logger.info(
+          `Rate limit exceeded for ${this.name}, switching to another proxy for api service: ${nextProxy}`
+        );
       }
+
+      // Update the last rate limit seen
+      this.lastRateLimitSeen = Number(remaining);
     }
 
     return response?.json() as Promise<T>;
