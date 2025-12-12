@@ -1,4 +1,5 @@
 import Logger from "@ssr/common/logger";
+import { AdditionalScoreData } from "@ssr/common/model/additional-score-data/additional-score-data";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberPreviousScoreModel } from "@ssr/common/model/score/impl/scoresaber-previous-score";
 import {
@@ -16,7 +17,6 @@ import { PlayerHmdService } from "../player/player-hmd.service";
 import { PlayerScoreHistoryService } from "../player/player-score-history.service";
 import ScoreSaberService from "../scoresaber.service";
 import { MedalScoresService } from "./medal-scores.service";
-import { AdditionalScoreData } from "@ssr/common/model/additional-score-data/additional-score-data";
 
 export class ScoreCoreService {
   /**

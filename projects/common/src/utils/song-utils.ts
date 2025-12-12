@@ -28,15 +28,15 @@ export type Difficulty = {
 };
 
 const difficulties: Difficulty[] = [
-  { id: "easy", name: "Easy", color: "#3cb371", diffId: 1 },
-  { id: "normal", name: "Normal", color: "#59b0f4", diffId: 3 },
-  { id: "hard", name: "Hard", color: "#FF6347", diffId: 5 },
-  { id: "expert", name: "Expert", color: "#bf2a42", diffId: 7 },
+  { id: "easy", name: "Easy", color: "var(--easy)", diffId: 1 },
+  { id: "normal", name: "Normal", color: "var(--normal)", diffId: 3 },
+  { id: "hard", name: "Hard", color: "var(--hard)", diffId: 5 },
+  { id: "expert", name: "Expert", color: "var(--expert)", diffId: 7 },
   {
     id: "expertplus",
     name: "ExpertPlus",
     alternativeName: "Expert+",
-    color: "#8f48db",
+    color: "var(--expertPlus)",
     diffId: 9,
   },
 ];

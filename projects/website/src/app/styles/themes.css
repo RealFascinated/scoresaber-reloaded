@@ -22,19 +22,41 @@
   --input: hsl(12 6.5% 45.1%);
   --ring: hsl(24 5.7% 82.9%);
 
+  /* SSR Colors */
   --pp: #5c6bff;
   --ssr: #5c6bff;
   --medals: #cd7f32;
   --discord-blue: #5865f2;
   --inactive-account: #ff6467;
+  --statistic: #5c6bff;
+
+  /* Song Colors */
   --song-name: #4a56cc;
   --song-mapper: #7d8aff;
-  --statistic: #5c6bff;
-  
+
+  /* Difficulty Colors */
+  --easy: #3cb371;
+  --normal: #59b0f4;
+  --hard: #ff6347;
+  --expert: #bf2a42;
+  --expertPlus: #8f48db;
+
+  /* Leaderboard Status Colors */
   --ranked: #23d160;
   --unranked: #8b949e;
   --qualified: #ffde1a;
 
+  /* Leaderboard Status Colors */
+  --ranked: #23d160;
+  --unranked: #8b949e;
+  --qualified: #ffde1a;
+
+  /* Score Mode Colors */
+  --global: #5c6bff;
+  --friends: #ff9500;
+  --history: #9d4edd;
+
+  /* Hand Colors */
   --hands-left: #a82020;
   --hands-right: #2064a8;
 
@@ -108,9 +130,19 @@
   --color-song-mapper: var(--song-mapper);
   --color-statistic: var(--statistic);
 
+  --color-easy: var(--easy);
+  --color-normal: var(--normal);
+  --color-hard: var(--hard);
+  --color-expert: var(--expert);
+  --color-expertPlus: var(--expertPlus);
+
   --color-ranked: var(--ranked);
   --color-unranked: var(--unranked);
   --color-qualified: var(--qualified);
+
+  --color-global: var(--global);
+  --color-friends: var(--friends);
+  --color-history: var(--history);
 
   --color-hands-left: var(--hands-left);
   --color-hands-right: var(--hands-right);

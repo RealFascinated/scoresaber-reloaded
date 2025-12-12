@@ -6,6 +6,7 @@ import { ScoreSaberMedalsScore } from "@ssr/common/model/score/impl/scoresaber-m
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { removeObjectFields } from "@ssr/common/object.util";
 import { ReplayViewers } from "@ssr/common/replay-viewer";
+import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import { getBeatLeaderReplayRedirectUrl } from "@ssr/common/utils/beatleader-utils";
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
@@ -16,7 +17,6 @@ import { ButtonBuilder, ButtonStyle, Colors, EmbedBuilder } from "discord.js";
 import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
 import BeatSaverService from "../../service/beatsaver.service";
 import { PlayerScoreHistoryService } from "../../service/player/player-score-history.service";
-import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
 
 /**
  * Converts a database score to a ScoreSaberScore.

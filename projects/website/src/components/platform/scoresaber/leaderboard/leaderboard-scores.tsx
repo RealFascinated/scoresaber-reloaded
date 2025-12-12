@@ -198,7 +198,7 @@ export default function LeaderboardScores({
               {scores && scores.items.length > 0 && (
                 <tbody className="divide-border/50 divide-y">
                   {scores.items.map(playerScore => (
-                    <React.Fragment key={playerScore.scoreId}>
+                    <React.Fragment key={`${playerScore.scoreId}-${playerScore.timestamp}-${mode}`}>
                       <tr
                         className={cn(
                           "hover:bg-muted/30 transition-colors duration-200",
