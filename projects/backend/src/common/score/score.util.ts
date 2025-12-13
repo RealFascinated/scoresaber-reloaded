@@ -47,7 +47,7 @@ export async function sendScoreNotification(
   channel: (typeof DiscordChannels)[keyof typeof DiscordChannels],
   score: ScoreSaberScore,
   leaderboard: ScoreSaberLeaderboard,
-  player: ScoreSaberPlayerToken,
+  player: ScoreSaberLeaderboardPlayerInfoToken,
   beatLeaderScore: AdditionalScoreData | undefined,
   title: string
 ) {

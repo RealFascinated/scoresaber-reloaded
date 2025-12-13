@@ -4,6 +4,7 @@ import { NotFoundError } from "@ssr/common/error/not-found-error";
 import { HMD } from "@ssr/common/hmds";
 import Logger from "@ssr/common/logger";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
+import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/leaderboard-player-info";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import { getPlayerStatisticChanges } from "@ssr/common/utils/player-utils";
 import { getDaysAgoDate, TimeUnit } from "@ssr/common/utils/time-utils";
@@ -20,26 +21,9 @@ import { PlayerHmdService } from "./player/player-hmd.service";
 import { PlayerMedalsService } from "./player/player-medals.service";
 import { PlayerRankedService } from "./player/player-ranked.service";
 
-// Type for cached player data with timestamp
-type CachedScoreSaberPlayerToken = ScoreSaberPlayerToken & {
-  lastUpdated: string;
-};
+const CACHED_PLAYER_EXPIRY = TimeUnit.toSeconds(TimeUnit.Month, 3);
 
 export default class ScoreSaberService {
-  /**
-   * Gets a player token from the cache or API.
-   *
-   * @param id the player's id
-   * @returns the player token or undefined if not found
-   */
-  public static async getPlayerToken(id: string): Promise<ScoreSaberPlayerToken | undefined> {
-    return await CacheService.fetchWithCache(
-      CacheId.ScoreSaber,
-      `scoresaber:player-token:${id}`,
-      () => ApiServiceRegistry.getInstance().getScoreSaberService().lookupPlayer(id)
-    );
-  }
-
   /**
    * Gets a ScoreSaber player using their account id.
    *
@@ -64,7 +48,7 @@ export default class ScoreSaberService {
       getHmdBreakdown: true,
     };
 
-    player ??= await ScoreSaberService.getPlayerToken(id);
+    player ??= await ScoreSaberService.getCachedPlayer(id, true);
     if (!player) {
       throw new NotFoundError(`Player "${id}" not found`);
     }
@@ -189,31 +173,23 @@ export default class ScoreSaberService {
   }
 
   /**
-   * Gets a cached ScoreSaber player token.
+   * Gets a cached ScoreSaber player token. The short cache uses a seperate redis
+   * key so the long-lived cache is not affected.
    *
    * @param id the player's id
-   * @param cacheOnly whether to only check the cache
+   * @param useShortCache whether to use the short cache
    * @returns the player token
    */
   public static async getCachedPlayer(
     id: string,
-    cacheOnly: boolean = false
+    useShortCache: boolean = false
   ): Promise<ScoreSaberPlayerToken> {
-    const cacheKey = `scoresaber:cached-player:${id}`;
+    const cacheKey = `scoresaber:${useShortCache ? "temp-" : ""}cached-player:${id}`;
 
     const cachedData = await redisClient.get(cacheKey);
     if (cachedData) {
       try {
-        const player = SuperJSON.parse(cachedData) as CachedScoreSaberPlayerToken;
-
-        const cacheAge = new Date().getTime() - new Date(player.lastUpdated).getTime();
-        const refreshInterval = cacheOnly
-          ? TimeUnit.toMillis(TimeUnit.Month, 2)
-          : TimeUnit.toMillis(TimeUnit.Hour, 48);
-
-        if (cacheAge < refreshInterval) {
-          return player;
-        }
+        return SuperJSON.parse(cachedData) as ScoreSaberPlayerToken;
       } catch {
         Logger.warn(`Failed to parse cached player data for ${id}, removing from cache`);
         await redisClient.del(cacheKey);
@@ -225,18 +201,45 @@ export default class ScoreSaberService {
       throw new NotFoundError(`Player "${id}" not found`);
     }
 
-    const playerWithTimestamp: CachedScoreSaberPlayerToken = {
-      ...player,
-      lastUpdated: new Date().toISOString(),
-    };
-
     await redisClient.set(
       cacheKey,
-      SuperJSON.stringify(playerWithTimestamp),
+      SuperJSON.stringify(player),
       "EX",
-      TimeUnit.toSeconds(TimeUnit.Day, 30)
+      useShortCache ? CacheService.CACHE_EXPIRY[CacheId.ScoreSaber] : CACHED_PLAYER_EXPIRY
     );
+    return player;
+  }
 
-    return playerWithTimestamp;
+  /**
+   * Update a cached ScoreSaber player token.
+   *
+   * @param id the player's id
+   * @param player the player token to update
+   */
+  public static async updateCachedPlayer(
+    id: string,
+    player: ScoreSaberLeaderboardPlayerInfoToken | ScoreSaberPlayerToken
+  ) {
+    const cachedPlayer = await redisClient.get(`scoresaber:cached-player:${player.id}`);
+
+    try {
+      if (cachedPlayer && player.name && player.profilePicture && player.country) {
+        const cachedPlayerData = SuperJSON.parse(cachedPlayer) as ScoreSaberPlayerToken;
+
+        cachedPlayerData.name = player.name;
+        cachedPlayerData.profilePicture = player.profilePicture;
+        cachedPlayerData.country = player.country;
+
+        await redisClient.set(
+          `scoresaber:cached-player:${id}`,
+          SuperJSON.stringify(cachedPlayerData),
+          "EX",
+          CACHED_PLAYER_EXPIRY
+        );
+      }
+    } catch {
+      Logger.warn(`Failed to update cached player data for ${id}, removing from cache`);
+      await redisClient.del(`scoresaber:cached-player:${id}`);
+    }
   }
 }

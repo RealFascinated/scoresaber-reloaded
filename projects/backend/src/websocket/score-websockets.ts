@@ -5,7 +5,7 @@ import {
 } from "@ssr/common/token-creators";
 import { BeatLeaderScoreToken } from "@ssr/common/types/token/beatleader/score/score";
 import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/leaderboard";
-import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
+import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/leaderboard-player-info";
 import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
 import { connectBeatLeaderWebsocket } from "@ssr/common/websocket/beatleader-websocket";
@@ -15,11 +15,12 @@ import { EventsManager } from "../event/events-manager";
 import { LeaderboardCoreService } from "../service/leaderboard/leaderboard-core.service";
 import { PlayerCoreService } from "../service/player/player-core.service";
 import { TopScoresService } from "../service/score/top-scores.service";
+import ScoreSaberService from "../service/scoresaber.service";
 
 interface PendingScore {
   scoreSaberToken?: ScoreSaberScoreToken;
   leaderboardToken?: ScoreSaberLeaderboardToken;
-  player?: ScoreSaberPlayerToken;
+  player?: ScoreSaberLeaderboardPlayerInfoToken;
   beatLeaderScore?: BeatLeaderScoreToken;
   timestamp: number;
   timeoutId?: NodeJS.Timeout;
@@ -53,7 +54,7 @@ export class ScoreWebsockets implements EventListener {
     // Connect to websockets
     connectScoresaberWebsocket({
       onScore: async score => {
-        const player = score.score.leaderboardPlayerInfo as unknown as ScoreSaberPlayerToken;
+        const player = score.score.leaderboardPlayerInfo;
         const leaderboard = getScoreSaberLeaderboardFromToken(score.leaderboard);
 
         const key =
@@ -68,7 +69,7 @@ export class ScoreWebsockets implements EventListener {
           await this.processScore(
             score.score,
             score.leaderboard,
-            score.score.leaderboardPlayerInfo as unknown as ScoreSaberPlayerToken,
+            score.score.leaderboardPlayerInfo,
             pendingScore.beatLeaderScore
           );
         } else {
@@ -92,7 +93,7 @@ export class ScoreWebsockets implements EventListener {
           ScoreWebsockets.pendingScores.set(key, {
             scoreSaberToken: score.score,
             leaderboardToken: score.leaderboard,
-            player: score.score.leaderboardPlayerInfo as unknown as ScoreSaberPlayerToken,
+            player: score.score.leaderboardPlayerInfo,
             timestamp: Date.now(),
             timeoutId,
           });
@@ -167,7 +168,7 @@ export class ScoreWebsockets implements EventListener {
   private async processScore(
     scoreSaberToken?: ScoreSaberScoreToken,
     leaderboardToken?: ScoreSaberLeaderboardToken,
-    player?: ScoreSaberPlayerToken,
+    player?: ScoreSaberLeaderboardPlayerInfoToken,
     beatLeaderScore?: BeatLeaderScoreToken
   ) {
     if (scoreSaberToken && leaderboardToken && player) {
@@ -179,10 +180,13 @@ export class ScoreWebsockets implements EventListener {
       if (!(await PlayerCoreService.createPlayer(player.id))) {
         // Update the player's name and last score date
         Promise.all([
-          PlayerCoreService.updatePlayerName(player.id, player.name),
+          player.name ? PlayerCoreService.updatePlayerName(player.id, player.name) : undefined,
           PlayerModel.updateOne({ _id: player.id }, { $set: { lastScore: new Date() } }),
         ]);
       }
+
+      // Update cached player in Redis
+      await ScoreSaberService.updateCachedPlayer(player.id, player);
 
       // Fetch the leaderboard if it doesn't exist
       if (!(await LeaderboardCoreService.leaderboardExists(leaderboard.id + ""))) {

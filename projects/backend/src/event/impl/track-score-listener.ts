@@ -2,7 +2,7 @@ import { AdditionalScoreData } from "@ssr/common/model/additional-score-data/add
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { BeatLeaderScoreToken } from "@ssr/common/types/token/beatleader/score/score";
-import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
+import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/leaderboard-player-info";
 import { DiscordChannels } from "../../bot/bot";
 import { sendScoreNotification } from "../../common/score/score.util";
 import TrackedScoresMetric from "../../metrics/impl/player/tracked-scores";
@@ -17,7 +17,7 @@ export class TrackScoreListener implements EventListener {
   async onScoreReceived(
     score: ScoreSaberScore,
     leaderboard: ScoreSaberLeaderboard,
-    player: ScoreSaberPlayerToken,
+    player: ScoreSaberLeaderboardPlayerInfoToken,
     beatLeaderScoreToken: BeatLeaderScoreToken | undefined,
     isTop50GlobalScore: boolean
   ) {

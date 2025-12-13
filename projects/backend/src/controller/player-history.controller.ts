@@ -29,7 +29,7 @@ export default class PlayerHistoryController {
     params: { id: string };
     query: { startDate: string; endDate: string; includeFields: string };
   }): Promise<PlayerStatisticHistory> {
-    const player = await ScoreSaberService.getPlayerToken(id);
+    const player = await ScoreSaberService.getCachedPlayer(id, true);
     if (!player) {
       throw new NotFoundError(`Player "${id}" not found`);
     }

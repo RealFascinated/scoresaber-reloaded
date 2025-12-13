@@ -96,7 +96,7 @@ export class PlayerCoreService {
         return undefined;
       }
 
-      playerToken = playerToken || (await ScoreSaberService.getPlayerToken(id));
+      playerToken = playerToken || (await ScoreSaberService.getCachedPlayer(id, true));
       if (!playerToken) {
         return undefined;
       }
