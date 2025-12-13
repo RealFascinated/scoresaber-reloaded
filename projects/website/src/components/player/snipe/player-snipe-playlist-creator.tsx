@@ -6,7 +6,13 @@ import SimpleTooltip from "@/components/simple-tooltip";
 import { Spinner } from "@/components/spinner";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup, ControlButton } from "@/components/ui/control-panel";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { DualRangeSlider } from "@/components/ui/dual-range-slider";
 import { Form, FormControl, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -181,6 +187,10 @@ export default function SnipePlaylistCreator({ toSnipe }: Props) {
       </DialogTrigger>
 
       <DialogContent className="max-h-[85vh] overflow-hidden p-0 sm:max-w-4xl">
+        <DialogTitle className="sr-only">Create Snipe Playlist</DialogTitle>
+        <DialogDescription className="sr-only">
+          Generate a new snipe playlist for {truncateText(toSnipe.name, 16)}!
+        </DialogDescription>
         <Card className="relative m-0 flex h-full max-h-[85vh] flex-col rounded-lg">
           {/* Header */}
           <div className="border-border border-b px-(--spacing-lg) py-(--spacing-lg) md:px-(--spacing-xl) md:py-(--spacing-xl)">
