@@ -12,3 +12,14 @@ export function randomString(length: number) {
   }
   return result;
 }
+
+/**
+ * Pluralizes a string.
+ *
+ * @param count the count of the string
+ * @param word the word to pluralize
+ * @returns the pluralized string
+ */
+export function pluralize(count: number, word: string) {
+  return count === 1 ? word : `${word}s`;
+}

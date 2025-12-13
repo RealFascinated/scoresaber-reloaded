@@ -19,6 +19,7 @@ import BeatSaverService from "../../service/beatsaver.service";
 import { PlayerScoreHistoryService } from "../../service/player/player-score-history.service";
 import { PlayerCoreService } from "../../service/player/player-core.service";
 import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/leaderboard-player-info";
+import { pluralize } from "@ssr/common/utils/string.util";
 
 /**
  * Converts a database score to a ScoreSaberScore.
@@ -160,12 +161,12 @@ export async function sendMedalScoreNotification(
     }
 
     const player = await PlayerCoreService.getPlayer(playerId);
-    description.push(`**[${player.name}](${env.NEXT_PUBLIC_WEBSITE_URL}/player/${playerId})**: ${change < 0 ? "lost" : "gained"} ${Math.abs(change)} medals`);
+    description.push(`**[${player.name}](${env.NEXT_PUBLIC_WEBSITE_URL}/player/${playerId})**: ${change < 0 ? "lost" : "gained"} ${Math.abs(change)} ${pluralize(Math.abs(change), "medal")}`);
   }
 
   await sendEmbedToChannel(
     DiscordChannels.MEDAL_SCORES_FEED,
-    new EmbedBuilder().setTitle(`${player.name} gained ${changes.get(score.playerId)} medals!`).setDescription(description.join("\n").trim())
+    new EmbedBuilder().setTitle(`${player.name} gained ${pluralize(changes.get(score.playerId) || 0, "medal")}!`).setDescription(description.join("\n").trim())
       .setColor(Colors.Green)
       .setTimestamp(score.timestamp)
       .setFooter({
