@@ -58,7 +58,7 @@ export default function ScoreDetailsDropdown({
             opacity: { duration: 0.2 },
             scale: { duration: 0.2 },
           }}
-          className={cn("w-full origin-top px-(--spacing-sm)", !isLeaderboardScore ? "mt-2" : "")}
+          className={cn("w-full origin-top px-(--spacing-xs)", !isLeaderboardScore ? "mt-2" : "")}
         >
           {/* Map Stats */}
           {showMapStats && beatSaverMap && (
