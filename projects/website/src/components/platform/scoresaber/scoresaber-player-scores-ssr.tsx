@@ -12,7 +12,7 @@ import { Pagination } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerScoresResponse } from "@ssr/common/response/player-scores-response";
 import { capitalizeFirstLetter } from "@ssr/common/string-utils";
-import { SortDirection, SortField } from "@ssr/common/types/sort";
+import { SortDirection, SortField } from "@ssr/common/types/score-query";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { useDebounce, useDocumentTitle } from "@uidotdev/usehooks";
