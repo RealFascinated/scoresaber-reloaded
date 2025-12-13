@@ -164,9 +164,10 @@ export async function sendMedalScoreNotification(
     description.push(`**[${player.name}](${env.NEXT_PUBLIC_WEBSITE_URL}/player/${playerId})**: ${change < 0 ? "lost" : "gained"} ${Math.abs(change)} ${pluralize(Math.abs(change), "medal")}`);
   }
 
+  const change = changes.get(score.playerId) || 0;
   await sendEmbedToChannel(
     DiscordChannels.MEDAL_SCORES_FEED,
-    new EmbedBuilder().setTitle(`${player.name} gained ${pluralize(changes.get(score.playerId) || 0, "medal")}!`).setDescription(description.join("\n").trim())
+    new EmbedBuilder().setTitle(`${player.name} gained ${formatNumberWithCommas(change)} ${pluralize(change, "medal")}!`).setDescription(description.join("\n").trim())
       .setColor(Colors.Green)
       .setTimestamp(score.timestamp)
       .setFooter({
