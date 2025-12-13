@@ -50,15 +50,19 @@ export default class ScoreSaberService {
       getHmdBreakdown: true,
     };
 
+    player ??= await CacheService.fetchWithCache(
+      CacheId.ScoreSaber,
+      `scoresaber:player-token:${id}`,
+      async () => ApiServiceRegistry.getInstance().getScoreSaberService().lookupPlayer(id)
+    );
+    if (!player) {
+      throw new NotFoundError(`Player "${id}" not found`);
+    }
+
     return CacheService.fetchWithCache(
       CacheId.ScoreSaber,
       `scoresaber:player:${id}:${type}:${JSON.stringify(options)}`,
       async () => {
-        player ??= await ApiServiceRegistry.getInstance().getScoreSaberService().lookupPlayer(id);
-        if (!player) {
-          throw new NotFoundError(`Player "${id}" not found`);
-        }
-
         const account = await PlayerCoreService.getPlayer(id, player).catch(() => undefined);
         const isOculusAccount = player.id.length === 16;
 
