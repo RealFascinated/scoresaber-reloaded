@@ -108,7 +108,7 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
           </div>
         </Card>
 
-        <Card className="h-full w-full gap-4">
+        <Card className="h-fit w-full gap-4">
           {!rankingData && !isError && (
             <FancyLoader
               title="Loading Players"
