@@ -52,22 +52,6 @@ const nextConfig: NextConfig = {
     NEXT_PUBLIC_BUILD_TIME: formatDate(new Date(), "DD MMMM YYYY HH:mm"),
     NEXT_PUBLIC_BUILD_TIME_SHORT: formatDate(new Date(), "Do MMMM, YYYY"),
   },
-  async rewrites() {
-    return [
-      {
-        source: "/ingest/static/:path*",
-        destination: "https://us-assets.i.posthog.com/static/:path*",
-      },
-      {
-        source: "/ingest/:path*",
-        destination: "https://us.i.posthog.com/:path*",
-      },
-      {
-        source: "/ingest/decide",
-        destination: "https://us.i.posthog.com/decide",
-      },
-    ];
-  },
 };
 
 export default withBundleAnalyzer({

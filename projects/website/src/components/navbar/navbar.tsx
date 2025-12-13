@@ -4,12 +4,12 @@ import { cn } from "@/common/utils";
 import FriendsButton from "@/components/friend/friends-button";
 import PlayerAndLeaderboardSearch from "@/components/navbar/player-and-leaderboard-search";
 import ProfileButton from "@/components/navbar/profile-button";
+import SimpleLink from "@/components/simple-link";
 import useDatabase from "@/hooks/use-database";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { CubeIcon } from "@heroicons/react/24/solid";
 import { ChartBarIcon, MusicIcon, TrendingUpIcon, TrophyIcon } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ReactElement } from "react";
 import { FaMedal } from "react-icons/fa";
@@ -68,7 +68,7 @@ export default function Navbar() {
       {/* Left */}
       <div className="flex items-center gap-(--spacing-sm) md:gap-3">
         {/* Branding */}
-        <Link
+        <SimpleLink
           className="flex items-center gap-(--spacing-sm) hover:opacity-80 md:gap-2"
           href="/"
           draggable={false}
@@ -81,7 +81,7 @@ export default function Navbar() {
             alt="ScoreSaber Logo"
           />
           <h1 className="text-primary hidden text-base font-bold md:flex md:text-lg">SSR</h1>
-        </Link>
+        </SimpleLink>
 
         {/* Links */}
         <div className="flex items-center gap-0.5 md:gap-1">{links.map(link => link)}</div>
@@ -114,7 +114,7 @@ function SimpleNavLink({
   const isActive = pathname && (pathname === href || (href !== "/" && pathname.startsWith(href)));
 
   return (
-    <Link
+    <SimpleLink
       className={cn(
         "group relative flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm font-medium transition-colors duration-150",
         isActive
@@ -133,6 +133,6 @@ function SimpleNavLink({
       {isActive && (
         <div className="bg-primary absolute -bottom-0.5 left-1/2 h-0.5 w-4 -translate-x-1/2 rounded-full transition-opacity duration-200" />
       )}
-    </Link>
+    </SimpleLink>
   );
 }

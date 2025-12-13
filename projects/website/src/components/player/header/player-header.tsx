@@ -1,7 +1,7 @@
 import AddFriend from "@/components/friend/add-friend";
+import SimpleLink from "@/components/simple-link";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { getScoreSaberRoles } from "@ssr/common/utils/scoresaber.util";
-import Link from "next/link";
 import Card from "../../card";
 import PlayerAccBadges from "./acc-badges";
 import ClaimProfile from "./claim-profile";
@@ -25,7 +25,7 @@ export default function PlayerHeader({ player }: PlayerHeaderProps) {
         <div className="flex w-full flex-col items-center justify-center gap-(--spacing-sm) lg:items-start lg:justify-start">
           <div className="flex flex-col gap-(--spacing-xs)">
             <div className="flex items-center justify-center gap-(--spacing-sm) lg:justify-start">
-              <Link
+              <SimpleLink
                 href={`https://steamcommunity.com/profiles/${player.id}`}
                 target="_blank"
                 className="hover:text-primary/80 max-w-[300px] truncate text-2xl font-semibold transition-colors duration-200"
@@ -35,7 +35,7 @@ export default function PlayerHeader({ player }: PlayerHeaderProps) {
                 data-umami-event="player-steam-button"
               >
                 {player.name}
-              </Link>
+              </SimpleLink>
             </div>
             <div className="flex flex-col">
               <div>

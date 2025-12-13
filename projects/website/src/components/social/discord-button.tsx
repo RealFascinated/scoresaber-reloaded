@@ -1,10 +1,10 @@
+import SimpleLink from "@/components/simple-link";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import Link from "next/link";
 
 export function DiscordButton() {
   return (
-    <Link href="https://discord.gg/kmNfWGA4A8" target="_blank">
+    <SimpleLink href="https://discord.gg/kmNfWGA4A8" target="_blank">
       <Button
         variant="ghost"
         className="border-border gap-2 bg-[#5865F2]/65 text-white hover:border-[#5865F2]/80"
@@ -18,6 +18,6 @@ export function DiscordButton() {
         />
         <span>Join our Discord</span>
       </Button>
-    </Link>
+    </SimpleLink>
   );
 }

@@ -1,10 +1,10 @@
 import Avatar from "@/components/avatar";
+import SimpleLink from "@/components/simple-link";
 import SimpleTooltip from "@/components/simple-tooltip";
 import useDatabase from "@/hooks/use-database";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { XIcon } from "lucide-react";
-import Link from "next/link";
 import { toast } from "sonner";
 
 type FriendProps = {
@@ -33,7 +33,7 @@ export default function Friend({ player, onClick }: FriendProps) {
 
   return (
     <div className="hover:bg-accent flex items-center justify-between gap-2 rounded-md p-2 transition-all select-none">
-      <Link
+      <SimpleLink
         href={`/player/${player.id}`}
         onClick={() => onClick?.()}
         className="flex w-full items-center gap-2"
@@ -47,7 +47,7 @@ export default function Friend({ player, onClick }: FriendProps) {
             <p className="text-gray-400">#{formatNumberWithCommas(player.rank)}</p>
           )}
         </div>
-      </Link>
+      </SimpleLink>
       <SimpleTooltip
         display={
           <p className="pointer-events-none cursor-default">Remove {name} from your friends</p>

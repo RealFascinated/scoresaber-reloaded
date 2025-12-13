@@ -4,14 +4,13 @@ import { PlatformRepository, PlatformType } from "@/common/platform/platform-rep
 import Card from "@/components/card";
 import PlayerBadges from "@/components/player/player-badges";
 import PlayerViews from "@/components/player/views/player-views";
+import SimpleLink from "@/components/simple-link";
 import { useWindowDimensions } from "@/contexts/viewport-context";
 import useDatabase from "@/hooks/use-database";
-import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { DetailType } from "@ssr/common/detail-type";
 import type ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
-import Link from "next/link";
 import AccSaberPlayerScores from "../platform/accsaber/accsaber-player-scores";
 import ScoreSaberPlayerScores from "../platform/scoresaber/scoresaber-player-scores";
 import ScoreSaberPlayerScoresSSR from "../platform/scoresaber/scoresaber-player-scores-ssr";
@@ -93,7 +92,7 @@ export default function PlayerData({ platformType, player }: PlayerDataProps) {
             {/* Platform Selector */}
             <div className="flex">
               {availablePlatforms.map(platform => (
-                <Link
+                <SimpleLink
                   href={`/player/${player.id}${platform.getType() !== PlatformType.ScoreSaber ? `/${platform.getType()}` : ""}`}
                   key={platform.getDisplayName()}
                   scroll={false}
@@ -106,7 +105,7 @@ export default function PlayerData({ platformType, player }: PlayerDataProps) {
                     {platform.getLogo()}
                     <span className="hidden md:block">{platform.getDisplayName()}</span>
                   </Button>
-                </Link>
+                </SimpleLink>
               ))}
             </div>
             {/* Score Component */}

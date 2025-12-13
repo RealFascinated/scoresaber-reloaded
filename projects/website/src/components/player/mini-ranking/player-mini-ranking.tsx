@@ -1,5 +1,6 @@
 import { cn } from "@/common/utils";
 import { PlayerInfo } from "@/components/player/player-info";
+import SimpleLink from "@/components/simple-link";
 import { Spinner } from "@/components/spinner";
 import { useIsMobile } from "@/contexts/viewport-context";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
@@ -7,7 +8,6 @@ import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
-import Link from "next/link";
 import { ReactElement } from "react";
 import Card from "../../card";
 import CountryFlag from "../../ui/country-flag";
@@ -90,7 +90,7 @@ function PlayerMiniRanking({
             const ppDifference = playerRanking.pp - player.pp;
 
             return (
-              <Link
+              <SimpleLink
                 key={playerRanking.id}
                 href={`/player/${playerRanking.id}`}
                 className="group hover:bg-accent/50 sm:px-(--spacing-sm grid cursor-pointer items-center gap-(--spacing-md) px-(--spacing-sm) py-(--spacing-xs) transition-colors duration-200 first:rounded-t-md last:rounded-b-md"
@@ -150,7 +150,7 @@ function PlayerMiniRanking({
                     </p>
                   )}
                 </div>
-              </Link>
+              </SimpleLink>
             );
           })
         ) : (

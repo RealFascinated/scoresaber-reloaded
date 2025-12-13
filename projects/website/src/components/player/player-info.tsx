@@ -1,11 +1,11 @@
 import Avatar from "@/components/avatar";
+import SimpleLink from "@/components/simple-link";
 import CountryFlag from "@/components/ui/country-flag";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/leaderboard-player-info";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import { getScoreSaberAvatar, getScoreSaberRoles } from "@ssr/common/utils/scoresaber.util";
 import { clsx } from "clsx";
-import Link from "next/link";
 
 export function PlayerInfo({
   player,
@@ -45,9 +45,9 @@ export function PlayerInfo({
       />
       {!hideCountryFlag && <CountryFlag code={player.country!} size={10} />}
       {useLink ? (
-        <Link href={`/player/${player.id}`} data-umami-event="player-button">
+        <SimpleLink href={`/player/${player.id}`} data-umami-event="player-button">
           {name}
-        </Link>
+        </SimpleLink>
       ) : (
         name
       )}

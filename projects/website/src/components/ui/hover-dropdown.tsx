@@ -1,8 +1,8 @@
 "use client";
 
 import { cn } from "@/common/utils";
+import SimpleLink from "@/components/simple-link";
 import { useIsMobile } from "@/contexts/viewport-context";
-import Link from "next/link";
 import React, { cloneElement, isValidElement, ReactNode, useEffect, useRef, useState } from "react";
 
 interface HoverDropdownProps {
@@ -268,9 +268,9 @@ export function DropdownButton({
 
   if (href) {
     return (
-      <Link href={href} className={buttonClassName}>
+      <SimpleLink href={href} className={buttonClassName}>
         {children}
-      </Link>
+      </SimpleLink>
     );
   }
 

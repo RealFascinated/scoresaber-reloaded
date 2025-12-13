@@ -3,13 +3,13 @@
 import AccSaberLogo from "@/components/logos/logos/accsaber-logo";
 import BeatLeaderLogo from "@/components/logos/logos/beatleader-logo";
 import ScoresaberLogo from "@/components/logos/logos/scoresaber-logo";
+import SimpleLink from "@/components/simple-link";
 import SimpleTooltip from "@/components/simple-tooltip";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import useDatabase from "@/hooks/use-database";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { ssrConfig } from "config";
-import Link from "next/link";
 import { ReactNode } from "react";
 import { FaTwitch } from "react-icons/fa";
 import PlayerActionButtonWrapper from "../buttons/player-action-button-wrapper";
@@ -38,9 +38,9 @@ export function PlayerLink({ url, name, playerName, icon, children }: PlayerLink
 
   if (url) {
     return (
-      <Link href={url} target="_blank" rel="noreferrer">
+      <SimpleLink href={url} target="_blank" rel="noreferrer">
         {tooltipContent}
-      </Link>
+      </SimpleLink>
     );
   }
 

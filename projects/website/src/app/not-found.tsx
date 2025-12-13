@@ -1,7 +1,7 @@
+import SimpleLink from "@/components/simple-link";
 import { DiscordButton } from "@/components/social/discord-button";
 import { Button } from "@/components/ui/button";
 import { HomeIcon, SearchIcon } from "lucide-react";
-import Link from "next/link";
 
 export default function NotFoundPage() {
   return (
@@ -29,7 +29,7 @@ export default function NotFoundPage() {
 
           {/* Action Buttons */}
           <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-            <Link href="/">
+            <SimpleLink href="/">
               <Button
                 size="lg"
                 className="border-primary/30 bg-primary/5 text-primary hover:border-primary/50 hover:bg-primary/10 group relative h-12 overflow-hidden rounded-xl border-2 px-8 backdrop-blur-sm transition-all duration-300"
@@ -38,9 +38,9 @@ export default function NotFoundPage() {
                 <HomeIcon className="relative z-10 mr-2 h-5 w-5" />
                 <span className="relative z-10 font-semibold">Return Home</span>
               </Button>
-            </Link>
+            </SimpleLink>
 
-            <Link href="/search">
+            <SimpleLink href="/search">
               <Button
                 size="lg"
                 variant="outline"
@@ -50,7 +50,7 @@ export default function NotFoundPage() {
                 <SearchIcon className="relative z-10 mr-2 h-5 w-5" />
                 <span className="relative z-10 font-semibold">Search Players</span>
               </Button>
-            </Link>
+            </SimpleLink>
           </div>
 
           {/* Discord Support */}

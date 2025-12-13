@@ -1,10 +1,10 @@
 "use client";
 
 import Card from "@/components/card";
+import SimpleLink from "@/components/simple-link";
 import { DiscordButton } from "@/components/social/discord-button";
 import { Button } from "@/components/ui/button";
 import { Frown, HomeIcon } from "lucide-react";
-import Link from "next/link";
 import { useEffect } from "react";
 
 type ErrorProps = {
@@ -52,12 +52,12 @@ export default function Error({ error, reset }: ErrorProps) {
 
         {/* Action Buttons */}
         <div className="flex flex-col gap-3 sm:flex-row">
-          <Link href="/">
+          <SimpleLink href="/">
             <Button variant="outline" className="gap-2">
               <HomeIcon className="h-4 w-4" />
               Go back to homepage
             </Button>
-          </Link>
+          </SimpleLink>
         </div>
 
         {/* Discord Support */}

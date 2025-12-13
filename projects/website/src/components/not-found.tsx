@@ -1,7 +1,7 @@
 "use client";
 
+import SimpleLink from "@/components/simple-link";
 import Image from "next/image";
-import Link from "next/link";
 import Card from "./card";
 import { Button } from "./ui/button";
 
@@ -21,9 +21,9 @@ export default function NotFound({ title, description }: NotFoundProps) {
           <p className="text-lg">{description}</p>
         </div>
 
-        <Link href="/">
+        <SimpleLink href="/">
           <Button>Return Home</Button>
-        </Link>
+        </SimpleLink>
       </Card>
     </div>
   );

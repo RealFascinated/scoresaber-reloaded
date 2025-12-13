@@ -3,6 +3,7 @@ import { cn } from "@/common/utils";
 import HMDIcon from "@/components/hmd-icon";
 import { ScoreSaberScoreTimeSetVs } from "@/components/platform/scoresaber/score/score-time-set-vs";
 import { ScoreTimeSet } from "@/components/score/score-time-set";
+import SimpleLink from "@/components/simple-link";
 import SimpleTooltip from "@/components/simple-tooltip";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import { getHMDInfo, HMD } from "@ssr/common/hmds";
@@ -10,7 +11,6 @@ import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { getPageFromRank } from "@ssr/common/utils/utils";
-import Link from "next/link";
 import { ScoreSaberScoreHMD } from "./score-hmd";
 
 export default function ScoreSaberScoreInfo({
@@ -31,7 +31,7 @@ export default function ScoreSaberScoreInfo({
             <p className="font-semibold">#-</p>
           </SimpleTooltip>
         ) : (
-          <Link
+          <SimpleLink
             href={`/leaderboard/${leaderboard.id}/${getPageFromRank(score.rank, 12)}`}
             data-umami-event="leaderboard-by-rank-button"
           >
@@ -43,7 +43,7 @@ export default function ScoreSaberScoreInfo({
             >
               #{formatNumberWithCommas(score.rank)}
             </p>
-          </Link>
+          </SimpleLink>
         )}
         {hmd.logo && (
           <ScoreSaberScoreHMD score={score}>

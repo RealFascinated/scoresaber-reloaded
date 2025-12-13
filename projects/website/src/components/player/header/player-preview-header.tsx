@@ -1,7 +1,7 @@
 import Avatar from "@/components/avatar";
+import SimpleLink from "@/components/simple-link";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { getScoreSaberRoles } from "@ssr/common/utils/scoresaber.util";
-import Link from "next/link";
 import PlayerOverview from "./player-overview";
 
 type PlayerPreviewHeaderProps = {
@@ -23,7 +23,7 @@ export default function PlayerPreviewHeader({ player }: PlayerPreviewHeaderProps
       <div className="flex w-full flex-col items-center justify-center gap-2 lg:items-start">
         <div className="flex flex-col gap-1">
           <div className="flex items-center justify-center gap-2 lg:justify-start">
-            <Link
+            <SimpleLink
               href={`/player/${player.id}`}
               className="hover:text-primary/80 text-2xl font-bold transition-all"
               style={{
@@ -32,7 +32,7 @@ export default function PlayerPreviewHeader({ player }: PlayerPreviewHeaderProps
               data-umami-event="player-button"
             >
               {player.name}
-            </Link>
+            </SimpleLink>
           </div>
           <div className="flex flex-col">
             <PlayerOverview player={player} />

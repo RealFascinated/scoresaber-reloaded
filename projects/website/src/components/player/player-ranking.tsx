@@ -2,13 +2,13 @@
 
 import { getRankBgColor } from "@/common/rank-color-utils";
 import { cn } from "@/common/utils";
+import SimpleLink from "@/components/simple-link";
 import useDatabase from "@/hooks/use-database";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { getScoreSaberAvatar, getScoreSaberRoles } from "@ssr/common/utils/scoresaber.util";
-import Link from "next/link";
 import { PlayerAvatar } from "../ranking/player-avatar";
 import CountryFlag from "../ui/country-flag";
 
@@ -34,7 +34,7 @@ export function PlayerRanking({
   const countryRank = getCountryRank(player);
 
   return (
-    <Link href={`/player/${player.id}`}>
+    <SimpleLink href={`/player/${player.id}`}>
       {/* Desktop Layout */}
       <div
         className={cn(
@@ -106,7 +106,7 @@ export function PlayerRanking({
           </div>
         </div>
       </div>
-    </Link>
+    </SimpleLink>
   );
 }
 

@@ -2,6 +2,7 @@
 
 import { getRankingColumnWidth } from "@/common/player-utils";
 import Card from "@/components/card";
+import SimpleLink from "@/components/simple-link";
 import SimplePagination from "@/components/simple-pagination";
 import { useIsMobile } from "@/contexts/viewport-context";
 import usePageNavigation from "@/hooks/use-page-navigation";
@@ -12,7 +13,6 @@ import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { LinkIcon } from "lucide-react";
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import { FaMedal } from "react-icons/fa";
 import { FancyLoader } from "../fancy-loader";
@@ -79,12 +79,12 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
           {isError && (
             <div className="mt-2 flex h-full flex-col items-center justify-center gap-3">
               <p className="text-lg">No players were found for this country or page.</p>
-              <Link href="/medals">
+              <SimpleLink href="/medals">
                 <Button variant="outline" className="gap-2">
                   Go to Page 1
                   <LinkIcon className="size-4" />
                 </Button>
-              </Link>
+              </SimpleLink>
             </div>
           )}
 

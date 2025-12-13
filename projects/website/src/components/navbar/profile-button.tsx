@@ -2,11 +2,11 @@
 
 import Database from "@/common/database/database";
 import Avatar from "@/components/avatar";
+import SimpleLink from "@/components/simple-link";
 import { useIsMobile } from "@/contexts/viewport-context";
 import useDatabase from "@/hooks/use-database";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { truncateText } from "@ssr/common/string-utils";
-import Link from "next/link";
 import { ConfirmationDialog } from "../ui/confirmation-dialog";
 import {
   DropdownButton,
@@ -46,13 +46,13 @@ export default function ProfileButton() {
       {isMobile ? (
         buttonContent
       ) : (
-        <Link
+        <SimpleLink
           href={`/player/${mainPlayer.id}`}
           className="hover:bg-primary/5 flex h-full cursor-pointer items-center rounded-lg px-2.5 py-1.5 transition-colors duration-200 hover:shadow-sm"
           data-umami-event="player-profile-button"
         >
           {buttonContent}
-        </Link>
+        </SimpleLink>
       )}
     </div>
   );

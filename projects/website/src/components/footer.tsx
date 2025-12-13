@@ -3,9 +3,9 @@
 import { cn } from "@/common/utils";
 import GithubLogo from "@/components/logos/logos/github-logo";
 import TwitterLogo from "@/components/logos/logos/twitter-logo";
+import SimpleLink from "@/components/simple-link";
 import { ExternalLink } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ReactElement } from "react";
 
@@ -119,7 +119,7 @@ export default function Footer({
           <div className="flex flex-col gap-5">
             {/* Branding */}
             <div className="flex flex-col items-center gap-2 text-center lg:items-start lg:text-left">
-              <Link
+              <SimpleLink
                 className="flex items-center gap-3 transition-all hover:opacity-75"
                 href="/"
                 draggable={false}
@@ -131,7 +131,7 @@ export default function Footer({
                   height={36}
                 />
                 <h1 className="text-primary text-xl font-bold">ScoreSaber Reloaded</h1>
-              </Link>
+              </SimpleLink>
               <p className="max-w-md text-sm opacity-85">
                 ScoreSaber Reloaded is a new way to view your scores and get more stats about you
                 and your plays
@@ -141,7 +141,7 @@ export default function Footer({
             {/* Social Links */}
             <div className="flex items-center justify-center gap-4 lg:justify-start">
               {socialLinks.map(link => (
-                <Link
+                <SimpleLink
                   key={link.name}
                   className="transition-all hover:opacity-75"
                   href={link.href}
@@ -149,7 +149,7 @@ export default function Footer({
                   draggable={false}
                 >
                   {link.logo}
-                </Link>
+                </SimpleLink>
               ))}
             </div>
           </div>
@@ -162,7 +162,7 @@ export default function Footer({
                 {links.map(link => {
                   const external: boolean = !link.href.startsWith("/");
                   return (
-                    <Link
+                    <SimpleLink
                       key={link.name}
                       className="flex items-center gap-2 text-sm transition-all hover:opacity-75"
                       href={link.href}
@@ -174,7 +174,7 @@ export default function Footer({
                       </span>
                       {link.shortName && <span className="flex sm:hidden">{link.shortName}</span>}
                       {external && <ExternalLink className="h-3.5 w-3.5" />}
-                    </Link>
+                    </SimpleLink>
                   );
                 })}
               </div>
@@ -186,12 +186,12 @@ export default function Footer({
       {/* Bottom Section */}
       <div className="flex justify-center">
         {/* Build Ifo */}
-        <Link
+        <SimpleLink
           className="text-sm opacity-50"
           href={`https://github.com/RealFascinated/scoresaber-reloaded/commit/${buildId}`}
         >
           Build {buildId} ({buildTimeShort})
-        </Link>
+        </SimpleLink>
       </div>
     </footer>
   );

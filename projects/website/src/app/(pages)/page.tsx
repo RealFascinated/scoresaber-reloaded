@@ -1,8 +1,8 @@
 import { AppStats } from "@/components/landing/app-statistics";
 import { SearchButton } from "@/components/landing/search-button";
+import SimpleLink from "@/components/simple-link";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, BarChart3, Database, Globe, Heart, Monitor, Star, Users } from "lucide-react";
-import Link from "next/link";
 
 export default async function LandingPage() {
   return (
@@ -11,7 +11,7 @@ export default async function LandingPage() {
       <section className="mx-auto max-w-6xl px-(--spacing-xl) py-(--spacing-3xl) md:px-(--spacing-2xl)">
         <div className="text-center">
           <div className="mb-(--spacing-2xl)">
-            <Link
+            <SimpleLink
               href="https://github.com/RealFascinated/scoresaber-reloaded"
               target="_blank"
               className="border-primary/20 bg-primary/10 text-primary hover:bg-primary/20 inline-flex items-center gap-(--spacing-sm) rounded-full border px-(--spacing-lg) py-(--spacing-sm) text-sm transition-all"
@@ -19,7 +19,7 @@ export default async function LandingPage() {
               <Star className="h-4 w-4" />
               <span>Open Source</span>
               <ArrowRight className="h-4 w-4" />
-            </Link>
+            </SimpleLink>
           </div>
 
           <h1 className="from-primary to-accent-secondary animate-gradient-slow mb-(--spacing-xl) bg-linear-to-r bg-size-[200%_200%] bg-clip-text text-5xl font-bold text-transparent sm:text-6xl lg:text-7xl">
@@ -35,7 +35,7 @@ export default async function LandingPage() {
           <div className="flex flex-col items-center gap-(--spacing-lg) sm:flex-row sm:justify-center">
             <SearchButton />
 
-            <Link href="https://discord.gg/kmNfWGA4A8" target="_blank">
+            <SimpleLink href="https://discord.gg/kmNfWGA4A8" target="_blank">
               <Button
                 size="lg"
                 variant="outline"
@@ -44,7 +44,7 @@ export default async function LandingPage() {
                 <div className="from-primary/10 to-accent-secondary/10 absolute inset-0 bg-linear-to-r opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
                 <span className="relative z-10 font-semibold">Join Discord</span>
               </Button>
-            </Link>
+            </SimpleLink>
           </div>
         </div>
       </section>
