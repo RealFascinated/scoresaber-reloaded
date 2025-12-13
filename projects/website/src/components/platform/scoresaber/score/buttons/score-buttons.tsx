@@ -43,17 +43,11 @@ const buttons: ButtonConfig[] = [
     },
   },
   {
-    display: ({ leaderboard, isPreviousScore }: Props) => {
-      return leaderboard != undefined && !isPreviousScore;
+    display: ({ score }: Props) => {
+      return score?.additionalData != undefined;
     },
-    render: ({ leaderboard }: Props) => {
-      return (
-        <SongOpenInYoutubeButton
-          songName={leaderboard.songName}
-          songSubName={leaderboard.songSubName}
-          songAuthorName={leaderboard.songAuthorName}
-        />
-      );
+    render: ({ score, leaderboard, updateScore }: Props) => {
+      return <ScoreEditorButton score={score!} leaderboard={leaderboard!} updateScore={updateScore!} />;
     },
   },
   {
@@ -65,11 +59,17 @@ const buttons: ButtonConfig[] = [
     },
   },
   {
-    display: ({ score }: Props) => {
-      return score?.additionalData != undefined;
+    display: ({ leaderboard, isPreviousScore }: Props) => {
+      return leaderboard != undefined && !isPreviousScore;
     },
-    render: ({ score, leaderboard, updateScore }: Props) => {
-      return <ScoreEditorButton score={score!} leaderboard={leaderboard!} updateScore={updateScore!} />;
+    render: ({ leaderboard }: Props) => {
+      return (
+        <SongOpenInYoutubeButton
+          songName={leaderboard.songName}
+          songSubName={leaderboard.songSubName}
+          songAuthorName={leaderboard.songAuthorName}
+        />
+      );
     },
   },
 ];
