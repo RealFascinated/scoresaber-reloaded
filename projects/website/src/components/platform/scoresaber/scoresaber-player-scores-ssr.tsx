@@ -162,7 +162,7 @@ export default function ScoreSaberPlayerScoresSSR({
     isRefetching,
   } = useQuery<PlayerScoresResponse>({
     queryKey: [
-      "playerScores:ssr",
+      "playerScores:" + mode,
       player.id,
       page,
       sort,
@@ -275,6 +275,7 @@ export default function ScoreSaberPlayerScoresSSR({
               beatSaverMap={score.beatSaver}
               settings={{
                 defaultLeaderboardScoresPage: 1,
+                medalsMode: mode === "medals",
               }}
             />
           ))}
