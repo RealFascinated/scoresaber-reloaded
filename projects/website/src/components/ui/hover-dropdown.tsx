@@ -66,7 +66,13 @@ export function HoverDropdown({
     }, delay);
   };
 
-  const handleClick = () => {
+  const handleClick = (e: React.MouseEvent) => {
+    // Don't interfere with link clicks - let them navigate normally
+    const target = e.target as HTMLElement;
+    if (target.closest('a')) {
+      return;
+    }
+    
     if (isMobile) {
       // On mobile, toggle on click
       if (open) {
@@ -268,7 +274,11 @@ export function DropdownButton({
 
   if (href) {
     return (
-      <SimpleLink href={href} className={buttonClassName}>
+      <SimpleLink 
+        href={href} 
+        className={buttonClassName}
+        onClick={() => onNavigate?.()}
+      >
         {children}
       </SimpleLink>
     );
