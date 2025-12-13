@@ -165,8 +165,8 @@ export async function sendMedalScoreNotification(
         change < 0 ? "lost" : "gained",
         Math.abs(change),
         pluralize(Math.abs(change), "medal"),
-        (changePlayer.medals || 0) - change,
-        changePlayer.medals || 0
+        formatNumberWithCommas((changePlayer.medals || 0) - change),
+        formatNumberWithCommas(changePlayer.medals || 0)
       )
     );
   }
