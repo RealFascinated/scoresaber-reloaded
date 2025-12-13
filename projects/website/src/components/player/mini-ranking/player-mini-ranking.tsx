@@ -99,7 +99,6 @@ function PlayerMiniRanking({
                     ? `${playerRankWidth}px 48px 1fr auto`
                     : `${playerRankWidth}px 48px 0.69fr 1fr`,
                 }}
-                data-umami-event="player-mini-ranking-button"
               >
                 {/* Rank */}
                 <p
