@@ -1,4 +1,5 @@
 import { PlatformRepository, PlatformType } from "@/common/platform/platform-repository";
+import Card from "@/components/card";
 import NotFound from "@/components/not-found";
 import PlayerData from "@/components/player/player-data";
 import { DetailType } from "@ssr/common/detail-type";
@@ -9,8 +10,6 @@ import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { formatDate } from "@ssr/common/utils/time-utils";
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
-
-export const revalidate = 300; // Revalidate every 5 minutes
 
 const UNKNOWN_PLAYER = {
   title: "Unknown Player",
@@ -99,12 +98,12 @@ export default async function PlayerPage(props: Props) {
   const { player, platformType } = await getPlayerData(props);
   if (player == undefined) {
     return (
-      <main className="mt-2 flex w-full justify-center">
+      <Card className="mt-2 flex w-full justify-center">
         <NotFound
           title="Player Not Found"
           description="The player you were looking for could not be found"
         />
-      </main>
+      </Card>
     );
   }
   const platform = PlatformRepository.getInstance().getPlatform(platformType);
