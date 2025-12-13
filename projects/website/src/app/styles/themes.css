@@ -78,6 +78,11 @@
   --spacing-xl: 1.5rem; /* 24px - comfortable */
   --spacing-2xl: 2rem; /* 32px - spacious */
   --spacing-3xl: 3rem; /* 48px - very spacious */
+
+  /* Scrollbar Colors */
+  --scrollbar-track: hsl(12 6.5% 9.5%);
+  --scrollbar-thumb: hsl(12 6.5% 20%);
+  --scrollbar-thumb-hover: hsl(12 6.5% 25%);
 }
 
 .purple {
