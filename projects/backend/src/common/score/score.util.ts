@@ -158,7 +158,7 @@ export async function sendMedalScoreNotification(
     }
 
     const player = await PlayerCoreService.getPlayer(playerId);
-    description.push(`**${player.name}**: ${change < 0 ? "lost" : "gained"} ${Math.abs(change)} medals`);
+    description.push(`**[${player.name}](${env.NEXT_PUBLIC_WEBSITE_URL}/player/${playerId})**: ${change < 0 ? "lost" : "gained"} ${Math.abs(change)} medals`);
   }
 
   await sendEmbedToChannel(
