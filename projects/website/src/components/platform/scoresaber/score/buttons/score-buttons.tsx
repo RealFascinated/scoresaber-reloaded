@@ -155,7 +155,6 @@ export default function ScoreSaberScoreButtons({
                   className="h-[28px] w-[28px] p-0"
                   onClick={handleDropdownToggle}
                   disabled={isLeaderboardLoading || isPending}
-                  data-umami-event="score-dropdown-button"
                 >
                   {isLeaderboardLoading || isPending ? (
                     <ArrowPathIcon className="h-4 w-4 animate-spin" />

@@ -53,7 +53,6 @@ const playerData = [
             >
               <SimpleLink
                 href={`/ranking/${player.rankPages.global}`}
-                data-umami-event="player-global-rank-button"
               >
                 <span className="hover:text-primary/80 m-0 text-sm leading-[1.2] transition-all">
                   #{formatNumberWithCommas(player.rank)}
@@ -84,7 +83,6 @@ const playerData = [
             <ChangeOverTime player={player} type={PlayerStatChange.CountryRank}>
               <SimpleLink
                 href={`/ranking/${player.country}/${player.rankPages.country}`}
-                data-umami-event="player-country-rank-button"
               >
                 <span className="hover:text-primary/80 m-0 text-sm leading-[1.4] transition-all">
                   #{formatNumberWithCommas(player.countryRank)}
@@ -105,7 +103,6 @@ const playerData = [
           <FaMedal className="text-muted-foreground size-4" />
           <FallbackLink
             href={player.rankPages.medals ? `/medals/${player.rankPages.medals}` : undefined}
-            data-umami-event="player-medal-rank-button"
           >
             <span
               className={cn(

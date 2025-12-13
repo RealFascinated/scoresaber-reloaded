@@ -49,7 +49,6 @@ export default function ProfileButton() {
         <SimpleLink
           href={`/player/${mainPlayer.id}`}
           className="hover:bg-primary/5 flex h-full cursor-pointer items-center rounded-lg px-2.5 py-1.5 transition-colors duration-200 hover:shadow-sm"
-          data-umami-event="player-profile-button"
         >
           {buttonContent}
         </SimpleLink>
@@ -61,7 +60,7 @@ export default function ProfileButton() {
     <HoverDropdown trigger={trigger} contentClassName="w-56">
       <DropdownLabel>Website</DropdownLabel>
       {isMobile && (
-        <DropdownButton href={`/player/${mainPlayer.id}`} data-umami-event="player-profile-button">
+        <DropdownButton href={`/player/${mainPlayer.id}`}>
           Open Profile
         </DropdownButton>
       )}

@@ -58,7 +58,6 @@ export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
             <FallbackLink
               href={beatSaverMap ? `https://beatsaver.com/maps/${beatSaverMap?.bsr}` : undefined}
               className="hover:text-primary/80 transition-all"
-              data-umami-event="leaderboard-beatsaver-button"
             >
               <h3 className="text-song-name line-clamp-2 text-lg leading-tight font-semibold">
                 {leaderboardData.fullName}
@@ -90,7 +89,6 @@ export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
             <FallbackLink
               href={getBeatSaverMapperProfileUrl(beatSaverMap)}
               className="hover:text-primary/80 transition-all"
-              data-umami-event="leaderboard-mapper-button"
             >
               {leaderboardData.levelAuthorName}
             </FallbackLink>

@@ -22,7 +22,6 @@ export function ScoreReplayButton({ additionalData }: { additionalData: Addition
         getBeatLeaderReplayRedirectUrl(additionalData)
       )}
       tooltip={<p>Click to view the score replay!</p>}
-      data-umami-event="score-replay-button"
     >
       <BeatSaberPepeLogo />
     </ScoreButton>

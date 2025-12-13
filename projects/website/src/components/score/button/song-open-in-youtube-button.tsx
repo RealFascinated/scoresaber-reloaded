@@ -17,7 +17,6 @@ export function SongOpenInYoutubeButton({
     <ScoreButton
       href={songNameToYouTubeLink(songName, songSubName, songAuthorName)}
       tooltip={<p>Click to open the song in YouTube</p>}
-      data-umami-event="song-open-youtube-button"
     >
       <YouTubeLogo />
     </ScoreButton>

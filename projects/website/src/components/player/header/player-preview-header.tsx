@@ -29,7 +29,6 @@ export default function PlayerPreviewHeader({ player }: PlayerPreviewHeaderProps
               style={{
                 color: getScoreSaberRoles(player)[0]?.color,
               }}
-              data-umami-event="player-button"
             >
               {player.name}
             </SimpleLink>

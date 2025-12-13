@@ -11,7 +11,6 @@ export function MapCheckButton({ beatSaverMap }: MapCheckButtonProps) {
     <ScoreButton
       href={`https://kivalevan.me/BeatSaber-MapCheck/?id=${beatSaverMap.bsr}`}
       tooltip={<p>Click to check the map</p>}
-      data-umami-event="map-check-button"
     >
       <EyeIcon className="h-5 w-5" />
     </ScoreButton>

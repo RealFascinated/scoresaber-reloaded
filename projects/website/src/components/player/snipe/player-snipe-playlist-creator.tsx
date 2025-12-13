@@ -170,7 +170,7 @@ export default function SnipePlaylistCreator({ toSnipe }: Props) {
 
   return (
     <Dialog>
-      <DialogTrigger data-umami-event="player-snipe-creator-button">
+      <DialogTrigger>
         <SimpleTooltip
           side="top"
           className="cursor-pointer"

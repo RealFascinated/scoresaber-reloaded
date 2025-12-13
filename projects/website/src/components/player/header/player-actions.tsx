@@ -70,21 +70,18 @@ export default function PlayerActions({ player }: { player: ScoreSaberPlayer }) 
         name="ScoreSaber"
         url={`https://scoresaber.com/u/${player.id}`}
         icon={<ScoresaberLogo size={20} className="select-none" />}
-        data-umami-event="player-scoresaber-button"
       />
       <PlayerLink
         playerName={player.name}
         name="BeatLeader"
         url={`https://beatleader.xyz/u/${player.id}`}
         icon={<BeatLeaderLogo size={20} className="select-none" />}
-        data-umami-event="player-beatleader-button"
       />
       <PlayerLink
         playerName={player.name}
         name="AccSaber"
         url={`https://accsaber.com/profile/${player.id}`}
         icon={<AccSaberLogo size={20} className="select-none" />}
-        data-umami-event="player-accsaber-button"
       />
 
       {/* Social Links */}
@@ -94,7 +91,6 @@ export default function PlayerActions({ player }: { player: ScoreSaberPlayer }) 
           name="Twitch"
           url={`https://twitch.tv/${twitchName}`}
           icon={<FaTwitch className="size-[20px] select-none" />}
-          data-umami-event="player-twitch-button"
         />
       )}
 

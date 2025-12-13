@@ -115,7 +115,6 @@ export default function ScoreSaberScoreEditorButton({
           <Button
             variant="ghost"
             className="h-[28px] w-[28px] p-0"
-            data-umami-event="score-editor-button"
           >
             <FaCog className="size-4" />
           </Button>

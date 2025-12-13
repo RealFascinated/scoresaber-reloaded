@@ -114,7 +114,6 @@ export default function ScoreSaberScoreDisplay({
         {!isMobile && (
           <FallbackLink
             href={score.isTracked ? `/score/${score.scoreId}` : undefined}
-            data-umami-event="score-details-button"
           >
             <SimpleTooltip
               display={score.isTracked ? "View score" : "No score data found :("}

@@ -31,7 +31,6 @@ export default function LeaderboardInfo({
           <FallbackLink
             href={beatSaver ? `https://beatsaver.com/maps/${beatSaver?.bsr}` : undefined}
             className="hover:text-primary/80 transition-all"
-            data-umami-event="leaderboard-beatsaver-button"
           >
             <h3 className="text-foreground mb-1 line-clamp-2 text-xl leading-tight font-bold">
               {leaderboard.fullName}
@@ -52,7 +51,6 @@ export default function LeaderboardInfo({
               <MapIcon className="h-3 w-3" />
               <FallbackLink
                 href={getBeatSaverMapperProfileUrl(beatSaver)}
-                data-umami-event="leaderboard-mapper-button"
               >
                 <span
                   className={cn(

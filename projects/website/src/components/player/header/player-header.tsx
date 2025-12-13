@@ -32,7 +32,6 @@ export default function PlayerHeader({ player }: PlayerHeaderProps) {
                 style={{
                   color: getScoreSaberRoles(player)[0]?.color,
                 }}
-                data-umami-event="player-steam-button"
               >
                 {player.name}
               </SimpleLink>

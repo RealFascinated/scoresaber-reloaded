@@ -25,7 +25,6 @@ export default function ReplayButton({ additionalData }: { additionalData?: Addi
         additionalData.scoreId,
         getBeatLeaderReplayRedirectUrl(additionalData)
       )}
-      data-umami-event="score-replay-button"
     >
       <Button>View Replay</Button>
     </SimpleLink>

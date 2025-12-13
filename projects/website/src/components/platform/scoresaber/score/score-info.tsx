@@ -33,7 +33,6 @@ export default function ScoreSaberScoreInfo({
         ) : (
           <SimpleLink
             href={`/leaderboard/${leaderboard.id}/${getPageFromRank(score.rank, 12)}`}
-            data-umami-event="leaderboard-by-rank-button"
           >
             <p
               className={cn(
