@@ -160,7 +160,9 @@ export class MedalScoresService {
       }
     }
 
-    if (medalChanges.size > 0) {
+    // Only send notification if at least one player gained medals
+    const hasGainedMedals = Array.from(medalChanges.values()).some(change => change > 0);
+    if (medalChanges.size > 0 && hasGainedMedals) {
       const playerUpdates = Array.from(medalChanges.entries()).map(([playerId, change]) => {
         return {
           updateOne: {

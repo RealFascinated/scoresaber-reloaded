@@ -156,28 +156,32 @@ export async function sendMedalScoreNotification(
   ];
   // Sort the changes by the number of medals gained/lost
   for (const [playerId, change] of Array.from(changes.entries()).sort((a, b) => b[1] - a[1])) {
-    const player = await PlayerCoreService.getPlayer(playerId);
+    const changePlayer = await PlayerCoreService.getPlayer(playerId);
     description.push(
       format(
         `**[%s](%s)** %s %s %s (%s -> %s)`,
-        player.name,
+        changePlayer.name,
         env.NEXT_PUBLIC_WEBSITE_URL + "/player/" + playerId,
         change < 0 ? "lost" : "gained",
         Math.abs(change),
         pluralize(Math.abs(change), "medal"),
-        (player.medals || 0) - change,
-        player.medals || 0
+        (changePlayer.medals || 0) - change,
+        changePlayer.medals || 0
       )
     );
   }
 
-  const change = changes.get(score.playerId) || 0;
+  // Find the player with the highest positive change for the title
+  const sortedChanges = Array.from(changes.entries()).sort((a, b) => b[1] - a[1]);
+  const [topPlayerId, topMedalChange] = sortedChanges.find(([, change]) => change > 0)!;
+  
+  const topChangePlayer = await PlayerCoreService.getPlayer(topPlayerId);
+  const title = `${topChangePlayer.name} gained ${formatNumberWithCommas(topMedalChange)} ${pluralize(topMedalChange, "medal")}!`;
+  
   await sendEmbedToChannel(
     DiscordChannels.MEDAL_SCORES_FEED,
     new EmbedBuilder()
-      .setTitle(
-        `${player.name} gained ${formatNumberWithCommas(change)} ${pluralize(change, "medal")}!`
-      )
+      .setTitle(title)
       .setDescription(description.join("\n").trim())
       .setThumbnail(leaderboard.songArt)
       .setColor(Colors.Green)
