@@ -23,3 +23,14 @@ export function randomString(length: number) {
 export function pluralize(count: number, word: string) {
   return count === 1 ? word : `${word}s`;
 }
+
+/**
+ * Formats a string with a variable number of arguments.
+ *
+ * @param template the template string
+ * @param args the arguments to format the string with
+ * @returns the formatted string
+ */
+export function format(template: string, ...args: any[]) {
+  return template.replace(/%s/g, (match, index) => args[index]?.toString() || match);
+}
