@@ -133,7 +133,7 @@ export default function ScoreSaberLeaderboardScore({
 
       {showDropdown && score.additionalData && (
         <td className={cn(TABLE_CELL_WIDTH_SMALL, "w-[45px] pr-3")}>
-          <SimpleTooltip display="View score details">
+          <SimpleTooltip display="View score">
             <div className="flex cursor-default items-center justify-center">
               <ArrowUpIcon
                 className={cn(

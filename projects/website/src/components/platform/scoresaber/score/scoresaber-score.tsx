@@ -117,7 +117,7 @@ export default function ScoreSaberScoreDisplay({
             data-umami-event="score-details-button"
           >
             <SimpleTooltip
-              display={score.isTracked ? "View score details" : "No score data found :("}
+              display={score.isTracked ? "View score" : "No score data found :("}
               className="px-1"
             >
               <ChevronRight
@@ -131,7 +131,6 @@ export default function ScoreSaberScoreDisplay({
         )}
       </div>
 
-      <div className={detailsExpanded ? "mt-2" : ""}>
         <ScoreDetailsDropdown
           score={score}
           leaderboard={leaderboard}
@@ -139,7 +138,6 @@ export default function ScoreSaberScoreDisplay({
           isExpanded={detailsExpanded}
           defaultScoresPage={settings?.defaultLeaderboardScoresPage}
         />
-      </div>
     </div>
   );
 }

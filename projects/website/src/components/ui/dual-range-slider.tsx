@@ -32,7 +32,7 @@ export function DualRangeSlider({
   const showLabel = labelPosition !== "none" && (!showLabelOnHover || isHovering || isDragging);
 
   return (
-    <div className="flex w-full items-center gap-3 md:w-52">
+    
       <SliderPrimitive.Root
         {...props}
         className={cn(
@@ -55,7 +55,7 @@ export function DualRangeSlider({
         {currentValue.map((val, index) => (
           <SliderPrimitive.Thumb
             key={index}
-            className="border-primary bg-background ring-offset-background hover:border-primary/80 block h-5 w-5 rounded-full border-2 shadow-md transition-all duration-200 select-none hover:scale-110 focus:ring-0 focus:outline-none disabled:pointer-events-none disabled:opacity-50"
+            className="border-primary bg-background ring-offset-background hover:border-primary/80 block h-5 w-5 rounded-full border-2 shadow-md transition-all duration-200 select-none focus:ring-0 focus:outline-none disabled:pointer-events-none disabled:opacity-50"
             onKeyDown={handleKeyDown}
           >
             {label && showLabel && (
@@ -73,6 +73,5 @@ export function DualRangeSlider({
           </SliderPrimitive.Thumb>
         ))}
       </SliderPrimitive.Root>
-    </div>
   );
 }

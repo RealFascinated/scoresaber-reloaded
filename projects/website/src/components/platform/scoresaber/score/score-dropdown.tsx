@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "@/common/utils";
 import Card from "@/components/card";
 import LeaderboardScores from "@/components/platform/scoresaber/leaderboard/leaderboard-scores";
 import { ScoreOverview } from "@/components/platform/scoresaber/score/score-views/score-overview";
@@ -20,6 +21,7 @@ export default function ScoreDetailsDropdown({
   showLeaderboardScores = true,
   showMapStats = true,
   defaultScoresPage,
+  isLeaderboardScore = false,
 }: {
   score: ScoreSaberScore;
   leaderboard: ScoreSaberLeaderboard;
@@ -29,6 +31,7 @@ export default function ScoreDetailsDropdown({
   showLeaderboardScores?: boolean;
   showMapStats?: boolean;
   defaultScoresPage?: number;
+  isLeaderboardScore?: boolean;
 }) {
   const { data: dropdownData, isLoading } = useLeaderboardDropdownData(
     leaderboard.id,
@@ -55,7 +58,7 @@ export default function ScoreDetailsDropdown({
             height: { duration: 0.25 },
             opacity: { duration: 0.18 },
           }}
-          className="w-full origin-top"
+          className={cn("w-full origin-top px-(--spacing-sm)", !isLeaderboardScore ? "mt-2" : "")}
         >
           {/* Map Stats */}
           {showMapStats && beatSaverMap && (

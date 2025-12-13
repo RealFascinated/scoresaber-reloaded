@@ -149,7 +149,7 @@ export default function ScoreSaberScoreButtons({
           {leaderboardExpanded != undefined &&
             setIsLeaderboardExpanded != undefined &&
             !hideLeaderboardDropdown && (
-              <SimpleTooltip display="Score stats and leaderboard scores">
+              <SimpleTooltip display="View score details and leaderboard scores">
                 <Button
                   variant="ghost"
                   className="h-[28px] w-[28px] p-0"

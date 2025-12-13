@@ -62,7 +62,7 @@ export function TopScoresData() {
               <div key={score.scoreId} className="flex flex-col">
                 <PlayerScoreHeader player={player} />
 
-                <div className="bg-card border-border rounded-md rounded-tl-none border px-(--spacing-sm) md:px-0">
+                <div className="bg-card border-border rounded-lg rounded-tl-none border px-(--spacing-sm) md:px-0">
                   <ScoreSaberScoreDisplay
                     key={score.scoreId}
                     score={score}

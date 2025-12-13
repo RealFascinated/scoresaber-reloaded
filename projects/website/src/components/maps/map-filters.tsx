@@ -128,6 +128,7 @@ export default function MapFilters() {
           min={0}
           max={Consts.MAX_STARS}
           step={0.1}
+          showLabelOnHover={false}
           className="pt-10 pb-2"
         />
       </FilterField>

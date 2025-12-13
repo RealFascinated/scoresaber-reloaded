@@ -349,18 +349,20 @@ export default function SnipePlaylistCreator({ toSnipe }: Props) {
                                     </FormLabel>
                                   </div>
                                   <FormControl>
-                                    <DualRangeSlider
-                                      min={0}
-                                      max={Consts.MAX_STARS}
-                                      step={STAR_STEP}
-                                      label={v => <span className="text-xs">{v}</span>}
-                                      value={[val.min, val.max]}
-                                      showLabelOnHover={false}
-                                      onValueChange={vals =>
-                                        field.onChange({ min: vals[0], max: vals[1] })
-                                      }
-                                      className="pt-10 pb-1"
-                                    />
+                                    <div className="flex w-full items-center gap-3 md:w-52">
+                                      <DualRangeSlider
+                                        min={0}
+                                        max={Consts.MAX_STARS}
+                                        step={STAR_STEP}
+                                        label={v => <span className="text-xs">{v}</span>}
+                                        value={[val.min, val.max]}
+                                        showLabelOnHover={false}
+                                        onValueChange={vals =>
+                                          field.onChange({ min: vals[0], max: vals[1] })
+                                        }
+                                        className="pt-10 pb-1 md:w-52"
+                                      />
+                                    </div>
                                   </FormControl>
                                   <FormMessage />
                                 </FormItem>
@@ -382,18 +384,20 @@ export default function SnipePlaylistCreator({ toSnipe }: Props) {
                                   </FormLabel>
                                 </div>
                                 <FormControl>
-                                  <DualRangeSlider
-                                    min={ACCURACY_MIN}
-                                    max={ACCURACY_MAX}
-                                    step={ACCURACY_STEP}
-                                    label={v => <span className="text-xs">{v}%</span>}
-                                    value={[val.min, val.max]}
-                                    showLabelOnHover={false}
-                                    onValueChange={vals =>
-                                      field.onChange({ min: vals[0], max: vals[1] })
-                                    }
-                                    className="pt-10 pb-1"
-                                  />
+                                  <div className="flex w-full items-center gap-3 md:w-52">
+                                    <DualRangeSlider
+                                      min={ACCURACY_MIN}
+                                      max={ACCURACY_MAX}
+                                      step={ACCURACY_STEP}
+                                      label={v => <span className="text-xs">{v}%</span>}
+                                      value={[val.min, val.max]}
+                                      showLabelOnHover={false}
+                                      onValueChange={vals =>
+                                        field.onChange({ min: vals[0], max: vals[1] })
+                                      }
+                                      className="pt-10 pb-1"
+                                    />
+                                  </div>
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>

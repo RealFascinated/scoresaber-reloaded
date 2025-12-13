@@ -241,6 +241,7 @@ export default function LeaderboardScores({
                                   isExpanded={true}
                                   showLeaderboardScores={false}
                                   showMapStats={false}
+                                  isLeaderboardScore={true}
                                 />
                               </div>
                             </td>
