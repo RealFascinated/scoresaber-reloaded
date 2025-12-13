@@ -5,7 +5,7 @@ import Card from "@/components/card";
 import PlayerBadges from "@/components/player/player-badges";
 import PlayerViews from "@/components/player/views/player-views";
 import SimpleLink from "@/components/simple-link";
-import { useWindowDimensions } from "@/contexts/viewport-context";
+import { useIsMobile, useWindowDimensions } from "@/contexts/viewport-context";
 import useDatabase from "@/hooks/use-database";
 import { DetailType } from "@ssr/common/detail-type";
 import type ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
@@ -26,8 +26,8 @@ interface PlayerDataProps {
 }
 
 export default function PlayerData({ platformType, player }: PlayerDataProps) {
+  const isMobile = useIsMobile("2xl");
   const { width } = useWindowDimensions();
-  const database = useDatabase();
 
   const { data: playerData } = useQuery({
     queryKey: ["player", player.id],
@@ -36,7 +36,7 @@ export default function PlayerData({ platformType, player }: PlayerDataProps) {
   });
   player = playerData ?? player;
 
-  const showRankings = width > 1536 && !player.inactive && !player.banned;
+  const showRankings = !isMobile && !player.inactive && !player.banned;
 
   const { data: availablePlatforms = [] } = useQuery({
     queryKey: ["available-platforms", player.id],

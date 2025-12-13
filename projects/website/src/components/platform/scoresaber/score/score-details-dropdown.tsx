@@ -11,6 +11,7 @@ import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
 import { getPageFromRank } from "@ssr/common/utils/utils";
 import { AnimatePresence, motion } from "framer-motion";
+import { useEffect } from "react";
 
 export default function ScoreDetailsDropdown({
   score,
@@ -22,6 +23,7 @@ export default function ScoreDetailsDropdown({
   showMapStats = true,
   defaultScoresPage,
   isLeaderboardScore = false,
+  isLoading: setIsDetailsLoading,
 }: {
   score: ScoreSaberScore;
   leaderboard: ScoreSaberLeaderboard;
@@ -32,6 +34,7 @@ export default function ScoreDetailsDropdown({
   showMapStats?: boolean;
   defaultScoresPage?: number;
   isLeaderboardScore?: boolean;
+  isLoading: (isLoading: boolean) => void;
 }) {
   const { data: dropdownData, isLoading } = useLeaderboardDropdownData(
     leaderboard.id,
@@ -39,6 +42,12 @@ export default function ScoreDetailsDropdown({
     isExpanded,
     score.additionalData
   );
+
+  useEffect(() => {
+    if (setIsDetailsLoading) {
+      setIsDetailsLoading(isLoading);
+    }
+  }, [setIsDetailsLoading, isLoading]);
 
   const scoresPage = defaultScoresPage ?? getPageFromRank(score.rank, 12);
   if (isLoading) {

@@ -11,14 +11,16 @@ import ScoreSaberScoreInfo from "@/components/platform/scoresaber/score/score-in
 import ScoreSaberScoreStats from "@/components/platform/scoresaber/score/score-stats";
 import ScoreSongInfo from "@/components/score/score-song-info";
 import SimpleTooltip from "@/components/simple-tooltip";
+import { Button } from "@/components/ui/button";
 import { StarIcon } from "@heroicons/react/24/solid";
 import { ScoreSaberCurve } from "@ssr/common/leaderboard-curve/scoresaber-curve";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
 import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/leaderboard-player-info";
-import { ChevronRight } from "lucide-react";
+import { ArrowDownIcon, ChevronDown, ChevronRight, Loader2Icon } from "lucide-react";
 import ScoreDetailsDropdown from "./score-details-dropdown";
+import { Spinner } from "@/components/spinner";
 
 export default function ScoreSaberScoreDisplay({
   leaderboard,
@@ -40,10 +42,11 @@ export default function ScoreSaberScoreDisplay({
     isPreviousScore?: boolean;
   };
 }) {
+  const isMobile = useIsMobile("2xl");
   const [baseScore, setBaseScore] = useState(score.score);
-  const [detailsExpanded, setDetailsExpanded] = useState(false);
 
-  const isMobile = useIsMobile();
+  const [detailsExpanded, setDetailsExpanded] = useState(false);
+  const [isDetailsLoading, setIsDetailsLoading] = useState(false);
 
   useEffect(() => {
     setDetailsExpanded(false);
@@ -89,19 +92,35 @@ export default function ScoreSaberScoreDisplay({
             />
           </div>
 
-          {!settings?.noScoreButtons && (
-            <ScoreSaberScoreButtons
-              leaderboard={leaderboard}
-              beatSaverMap={beatSaverMap}
-              score={score}
-              alwaysSingleLine={isMobile}
-              hideDetailsDropdown={settings?.hideDetailsDropdown}
-              hideAccuracyChanger={settings?.hideAccuracyChanger}
-              setDetailsExpanded={setDetailsExpanded}
-              updateScore={updatedScore => setBaseScore(updatedScore.score)}
-              isPreviousScore={settings?.isPreviousScore}
-            />
-          )}
+          <div className="flex items-center justify-end gap-(--spacing-md) px-(--spacing-md)">
+            {!settings?.noScoreButtons && (
+              <ScoreSaberScoreButtons
+                leaderboard={leaderboard}
+                beatSaverMap={beatSaverMap}
+                score={score}
+                alwaysSingleLine={isMobile}
+                hideDetailsDropdown={settings?.hideDetailsDropdown}
+                hideAccuracyChanger={settings?.hideAccuracyChanger}
+                updateScore={updatedScore => setBaseScore(updatedScore.score)}
+                isPreviousScore={settings?.isPreviousScore}
+              />
+            )}
+
+            {/* View Leaderboard button */}
+            {detailsExpanded != undefined && setDetailsExpanded != undefined && !settings?.hideDetailsDropdown && (
+              <SimpleTooltip display="View score details and leaderboard scores">
+                <button className="cursor-pointer size-6" onClick={() => setDetailsExpanded(!detailsExpanded)}>
+                  {isDetailsLoading ? (
+                    <Spinner size="sm" />
+                  ) : (
+                    <ChevronDown
+                      className={cn("size-6 transition-transform duration-200", detailsExpanded ? "" : "rotate-180")}
+                    />
+                  )}
+                </button>
+              </SimpleTooltip>
+            )}
+          </div>
 
           <ScoreSaberScoreStats
             score={{ ...score, accuracy, pp }}
@@ -127,6 +146,7 @@ export default function ScoreSaberScoreDisplay({
         beatSaverMap={beatSaverMap}
         isExpanded={detailsExpanded}
         defaultScoresPage={settings?.defaultLeaderboardScoresPage}
+        isLoading={setIsDetailsLoading}
       />
     </div>
   );
