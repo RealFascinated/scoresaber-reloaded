@@ -30,11 +30,8 @@ export default function PlayerData({ platformType, player }: PlayerDataProps) {
   const { width } = useWindowDimensions();
   const database = useDatabase();
 
-  const mainPlayerId = useStableLiveQuery(() => database.getMainPlayerId());
-  const isFriend = useStableLiveQuery(() => database.isFriend(player.id));
-
   const { data: playerData } = useQuery({
-    queryKey: ["playerData", player.id, mainPlayerId, isFriend],
+    queryKey: ["player", player.id],
     queryFn: () => ssrApi.getScoreSaberPlayer(player.id, DetailType.FULL),
     initialData: player,
   });

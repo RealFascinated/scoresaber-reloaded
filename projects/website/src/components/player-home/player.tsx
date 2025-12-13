@@ -14,7 +14,7 @@ export function Player() {
   const mainPlayerId = useStableLiveQuery(() => database.getMainPlayerId());
 
   const { data: player, isLoading } = useQuery({
-    queryKey: ["player-preview-home", mainPlayerId],
+    queryKey: ["player", mainPlayerId],
     queryFn: () => ssrApi.getScoreSaberPlayer(mainPlayerId!, DetailType.FULL),
     enabled: !!mainPlayerId,
   });

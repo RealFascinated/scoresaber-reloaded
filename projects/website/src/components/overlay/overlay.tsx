@@ -25,8 +25,8 @@ type OverlayProps = {
 
 export default function Overlay({ settings }: OverlayProps) {
   const { data: player, isLoading } = useQuery({
-    queryKey: ["overlay:player"],
-    queryFn: async () => ssrApi.getScoreSaberPlayer(settings.playerId, DetailType.FULL),
+    queryKey: ["player", settings.playerId],
+    queryFn: () => ssrApi.getScoreSaberPlayer(settings.playerId, DetailType.FULL),
     refetchInterval: 1000 * 30,
   });
 
