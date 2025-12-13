@@ -8,7 +8,6 @@ import { removeObjectFields } from "@ssr/common/object.util";
 import { ReplayViewers } from "@ssr/common/replay-viewer";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
 import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/leaderboard-player-info";
-import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import { getBeatLeaderReplayRedirectUrl } from "@ssr/common/utils/beatleader-utils";
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
 import { formatScoreAccuracy } from "@ssr/common/utils/score.util";
@@ -136,7 +135,6 @@ export async function sendScoreNotification(
 export async function sendMedalScoreNotification(
   score: ScoreSaberScore,
   leaderboard: ScoreSaberLeaderboard,
-  player: ScoreSaberPlayerToken | ScoreSaberLeaderboardPlayerInfoToken,
   beatLeaderScore: AdditionalScoreData | undefined,
   changes: Map<string, number>
 ) {

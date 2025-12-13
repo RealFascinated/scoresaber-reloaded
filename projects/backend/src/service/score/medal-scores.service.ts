@@ -7,8 +7,6 @@ import { PlayerModel } from "@ssr/common/model/player/player";
 import { ScoreSaberMedalsScoreModel } from "@ssr/common/model/score/impl/scoresaber-medals-score";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
-import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/leaderboard-player-info";
-import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import { isProduction } from "@ssr/common/utils/utils";
 import { sendMedalScoreNotification } from "../../common/score/score.util";
 import { LeaderboardCoreService } from "../leaderboard/leaderboard-core.service";
@@ -65,7 +63,6 @@ export class MedalScoresService {
    */
   public static async handleIncomingMedalsScoreUpdate(
     incomingScore: ScoreSaberScore,
-    player: ScoreSaberPlayerToken | ScoreSaberLeaderboardPlayerInfoToken,
     beatLeaderScore: AdditionalScoreData | undefined
   ) {
     if (MedalScoresService.IGNORE_SCORES || incomingScore.rank > 10 || incomingScore.pp <= 0) {
@@ -176,7 +173,7 @@ export class MedalScoresService {
       );
 
       // Send notifications for medal changes
-      await sendMedalScoreNotification(incomingScore, leaderboard.leaderboard, player, beatLeaderScore, medalChanges);
+      await sendMedalScoreNotification(incomingScore, leaderboard.leaderboard, beatLeaderScore, medalChanges);
     }
   }
 }

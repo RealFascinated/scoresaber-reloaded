@@ -174,18 +174,16 @@ export class ScoreWebsockets implements EventListener {
 
           // Update the player's last score date
           PlayerModel.updateOne({ _id: player.id }, { $set: { lastScore: new Date() } }),
-          
+
           // Update cached player in Redis
-          ScoreSaberService.updateCachedPlayer(player.id, player)
+          ScoreSaberService.updateCachedPlayer(player.id, player),
         ]);
       }
-
 
       // Fetch the leaderboard if it doesn't exist
       if (!(await LeaderboardCoreService.leaderboardExists(leaderboard.id + ""))) {
         await LeaderboardCoreService.createLeaderboard(leaderboard.id + "", leaderboardToken);
-      } 
-      else {
+      } else {
         await ScoreSaberLeaderboardModel.updateOne(
           { _id: leaderboard.id },
           { $set: { plays: leaderboard.plays, dailyPlays: leaderboard.dailyPlays } }
