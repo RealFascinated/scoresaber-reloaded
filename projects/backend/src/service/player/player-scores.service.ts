@@ -488,7 +488,9 @@ export class PlayerScoresService {
 
       // Filter out invalid accuracies (null, undefined, Infinity, etc.)
       if (sort === "acc") {
-        queryConditions.push({ accuracy: { $exists: true, $nin: [null, undefined, Infinity], $gte: 0 } });
+        queryConditions.push({
+          accuracy: { $exists: true, $nin: [null, undefined, Infinity], $gte: 0 },
+        });
       }
 
       // Medal scores only
