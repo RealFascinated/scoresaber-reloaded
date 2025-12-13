@@ -396,7 +396,7 @@ export class PlayerScoresService {
       comparisonPlayer = await ScoreSaberService.getPlayer(
         comparisonPlayerId,
         DetailType.BASIC,
-        await ScoreSaberService.getCachedPlayer(comparisonPlayerId, true),
+        await ScoreSaberService.getCachedPlayer(comparisonPlayerId),
         { setInactivesRank: false, setMedalsRank: false }
       );
     }
@@ -414,7 +414,7 @@ export class PlayerScoresService {
             ScoreCoreService.trackScoreSaberScore(
               score,
               leaderboard,
-              await ScoreSaberService.getCachedPlayer(playerId, true),
+              await ScoreSaberService.getCachedPlayer(playerId),
               undefined,
               false
             );

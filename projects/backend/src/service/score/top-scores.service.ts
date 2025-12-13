@@ -48,7 +48,7 @@ export class TopScoresService {
         ...new Set(scoreObjects.map((score: ScoreSaberScore) => score.playerId.toString())),
       ] as string[];
       const playerPromises = uniquePlayerIds.map(playerId =>
-        ScoreSaberService.getCachedPlayer(playerId, true).catch(() => undefined)
+        ScoreSaberService.getCachedPlayer(playerId).catch(() => undefined)
       );
       const players = await Promise.all(playerPromises);
       const playerMap = new Map(

@@ -183,7 +183,7 @@ export class ScoreCoreService {
           : undefined,
         options?.insertPlayerInfo
           ? (score.playerInfo ??
-            (await ScoreSaberService.getCachedPlayer(score.playerId, true).catch(() => undefined)))
+            (await ScoreSaberService.getCachedPlayer(score.playerId).catch(() => undefined)))
           : undefined,
         !options?.isComparisonPlayerScore && options?.comparisonPlayer
           ? ScoreSaberScoreModel.findOne({

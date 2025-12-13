@@ -175,7 +175,7 @@ export class PlayerMedalsService {
             const playerData = await ScoreSaberService.getPlayer(
               playerId,
               DetailType.BASIC,
-              await ScoreSaberService.getCachedPlayer(playerId, true),
+              await ScoreSaberService.getCachedPlayer(playerId),
               { setMedalsRank: false, setInactivesRank: false }
             );
 
