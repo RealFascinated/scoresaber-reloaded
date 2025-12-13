@@ -8,6 +8,7 @@ import PlayerActions from "./player-actions";
 import PlayerAvatar from "./player-avatar";
 import PlayerOverview from "./player-overview";
 import PlayerStats from "./player-stats";
+import Link from "next/link";
 
 type PlayerHeaderProps = {
   /**
@@ -24,14 +25,17 @@ export default function PlayerHeader({ player }: PlayerHeaderProps) {
         <div className="flex w-full flex-col items-center justify-center gap-(--spacing-sm) lg:items-start lg:justify-start">
           <div className="flex flex-col gap-(--spacing-xs)">
             <div className="flex items-center justify-center gap-(--spacing-sm) lg:justify-start">
-              <p
-                className="max-w-[300px] truncate text-2xl font-semibold"
+              <Link
+                href={`https://steamcommunity.com/profiles/${player.id}`}
+                target="_blank"
+                className="max-w-[300px] truncate text-2xl font-semibold hover:text-primary/80 transition-colors duration-200"
                 style={{
                   color: getScoreSaberRoles(player)[0]?.color,
                 }}
+                data-umami-event="player-steam-button"
               >
                 {player.name}
-              </p>
+              </Link>
             </div>
             <div className="flex flex-col">
               <div>

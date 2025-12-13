@@ -87,13 +87,6 @@ export default function PlayerActions({ player }: { player: ScoreSaberPlayer }) 
         icon={<AccSaberLogo size={20} className="select-none" />}
         data-umami-event="player-accsaber-button"
       />
-      <PlayerLink
-        playerName={player.name}
-        name="Steam"
-        url={`https://steamcommunity.com/profiles/${player.id}`}
-        icon={<SteamLogo size={20} className="select-none" />}
-        data-umami-event="player-steam-button"
-      />
 
       {/* Social Links */}
       {twitchName && (
