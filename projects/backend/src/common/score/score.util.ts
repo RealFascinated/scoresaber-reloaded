@@ -152,7 +152,7 @@ export async function sendMedalScoreNotification(
     `**${leaderboard.fullName}**`,
     `${getDifficultyName(leaderboard.difficulty.difficulty)} / ${leaderboard.difficulty.characteristic}${leaderboard.stars > 0 ? ` • ${leaderboard.stars.toFixed(2)}★` : ""}`,
     "",
-    "**Changes:**",
+    "**__Changes__**",
   ];
   // Sort the changes by the number of medals gained/lost
   for (const [playerId, change] of Array.from(changes.entries()).sort((a, b) => b[1] - a[1])) {
@@ -161,7 +161,7 @@ export async function sendMedalScoreNotification(
     }
 
     const player = await PlayerCoreService.getPlayer(playerId);
-    description.push(`**[${player.name}](${env.NEXT_PUBLIC_WEBSITE_URL}/player/${playerId})**: ${change < 0 ? "lost" : "gained"} ${Math.abs(change)} ${pluralize(Math.abs(change), "medal")}`);
+    description.push(`**[${player.name}](${env.NEXT_PUBLIC_WEBSITE_URL}/player/${playerId})** ${change < 0 ? "lost" : "gained"} ${Math.abs(change)} ${pluralize(Math.abs(change), "medal")}`);
   }
 
   const change = changes.get(score.playerId) || 0;
