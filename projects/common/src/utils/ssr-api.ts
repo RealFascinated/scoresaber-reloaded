@@ -37,15 +37,13 @@ class SSRApi {
    * @throws an error if the request fails
    */
   async get<T>(url: string, queryParams?: Record<string, string>) {
-    const queryString = new URLSearchParams({
-      ...queryParams,
-      superjson: "true",
-    }).toString();
-    const fullUrl = `${url}?${queryString}`;
-    const response = await fetch(fullUrl);
+    const queryString = queryParams ? `?${new URLSearchParams(queryParams)}` : "";
+    const response = await fetch(`${url}${queryString}`, {
+      headers: { Accept: "application/superjson" },
+    });
 
     if (response.status === 500) {
-      throw new Error(`Failed to get ${fullUrl}: ${response.statusText}`);
+      throw new Error(`Failed to get ${url}${queryString}: ${response.statusText}`);
     }
     if (response.status === 404) {
       return undefined;

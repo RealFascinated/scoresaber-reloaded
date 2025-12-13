@@ -243,9 +243,9 @@ app.onError({ as: "global" }, ({ code, error }) => {
 /**
  * Global toggle for SuperJSON for all responses
  */
-app.onAfterHandle(({ request, response }) => {
-  const url = new URL(request.url.toLowerCase());
-  if (url.searchParams.get("superjson") === "true") {
+app.onAfterHandle(({ request, response, set }) => {
+  if (request.headers.get("accept") === "application/superjson") {
+    set.headers["content-type"] = "application/superjson";
     return SuperJSON.stringify(response);
   }
   return response;
