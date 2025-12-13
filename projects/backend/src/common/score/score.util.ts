@@ -174,6 +174,7 @@ export async function sendMedalScoreNotification(
         `${player.name} gained ${formatNumberWithCommas(change)} ${pluralize(change, "medal")}!`
       )
       .setDescription(description.join("\n").trim())
+      .setThumbnail(leaderboard.songArt)
       .setColor(Colors.Green)
       .setTimestamp(score.timestamp)
       .setFooter({
