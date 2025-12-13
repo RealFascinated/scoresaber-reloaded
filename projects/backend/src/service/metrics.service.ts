@@ -46,9 +46,6 @@ export enum MetricType {
   TOTAL_TRACKED_SCORES = "total-tracked-scores",
   DAILY_NEW_ACCOUNTS = "daily-new-accounts",
 
-  // Leaderboard metrics
-  MAP_AUTHORS = "map-authors",
-
   // Backend metrics
   PROCESS_CPU_USAGE = "process-cpu-usage",
   MEMORY_USAGE = "memory-usage",
@@ -104,9 +101,6 @@ export default class MetricsService implements EventListener {
     this.registerMetric(new ActivePlayerHmdStatisticMetric());
     this.registerMetric(new TotalTrackedScoresMetric());
     this.registerMetric(new DailyNewAccountsMetric());
-
-    // Leaderboard metrics
-    this.registerMetric(new MapAuthorsMetric());
 
     // Backend metrics
     this.registerMetric(new ProcessCpuUsageMetric());
