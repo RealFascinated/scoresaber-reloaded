@@ -147,22 +147,23 @@ export async function sendMedalScoreNotification(
     leaderboard.difficulty.characteristic,
     DetailType.BASIC
   );
+  const description = [
+    `**${leaderboard.fullName}**`,
+    `${getDifficultyName(leaderboard.difficulty.difficulty)} / ${leaderboard.difficulty.characteristic}${leaderboard.stars > 0 ? ` • ${leaderboard.stars.toFixed(2)}★` : ""}`,
+  ];
+  // Sort the changes by the number of medals gained/lost
+  for (const [playerId, change] of Array.from(changes.entries()).sort((a, b) => b[1] - a[1])) {
+    if (playerId === score.playerId) {
+      continue;
+    }
+
+    const player = await PlayerCoreService.getPlayer(playerId);
+    description.push(`**${player.name}**: ${change < 0 ? "lost" : "gained"} ${Math.abs(change)} medals`);
+  }
 
   await sendEmbedToChannel(
     DiscordChannels.MEDAL_SCORES_FEED,
-    new EmbedBuilder()
-      .setTitle(`${player.name} gained medals!`)
-      .setDescription(
-        `**${player.name}** just gained **${changes.get(score.playerId)}** medals on **${leaderboard.fullName}**
-
-      **Changes:**
-      ${Array.from(changes.entries())
-        .map(
-          ([playerId, change]) => `${playerId}: ${change > 0 ? "lost" : "gained"} ${change} medals`
-        )
-        .join("\n")}
-    `
-      )
+    new EmbedBuilder().setTitle(`${player.name} gained ${changes.get(score.playerId)} medals!`).setDescription(description.join("\n").trim())
       .setColor(Colors.Green)
       .setTimestamp(score.timestamp)
       .setFooter({
