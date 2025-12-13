@@ -23,7 +23,7 @@ function StatCard({ icon: Icon, title, value }: StatCardProps) {
         </div>
         <h3 className="text-muted-foreground mb-1 text-sm font-semibold">{title}</h3>
         <p className="text-2xl font-bold">
-          <CountUp end={value} duration={1.2} enableScrollSpy scrollSpyOnce preserveValue={true} />
+          <CountUp end={value} duration={1.2} enableScrollSpy scrollSpyOnce preserveValue />
         </p>
       </div>
     </Card>

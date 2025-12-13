@@ -14,12 +14,10 @@ import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
 import { buildSearchParams } from "@ssr/common/utils/search-params";
-import { AnimatePresence, motion } from "framer-motion";
-import React, { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { DifficultyButton } from "../../../leaderboard/button/difficulty-button";
 import SimplePagination from "../../../simple-pagination";
 import ScoreSaberLeaderboardScore from "../score/leaderboard-score";
-import ScoreDetailsDropdown from "../score/score-details-dropdown";
 
 function getScoreId(score: ScoreSaberScore) {
   return score.scoreId + "-" + score.timestamp;
@@ -57,7 +55,6 @@ export default function LeaderboardScores({
   const [mode, setMode] = useState<ScoreModeEnum>(initialCategory);
   const [leaderboardId, setLeaderboardId] = useState(leaderboard.id);
   const [page, setPage] = useState(initialPage);
-  const [expandedScoreId, setExpandedScoreId] = useState<string | null>(null);
 
   const {
     data: scores,
@@ -73,14 +70,6 @@ export default function LeaderboardScores({
       leaderboardChanged?.(id);
     },
     [leaderboardChanged]
-  );
-
-  const handleDropdownToggle = useCallback(
-    (score: ScoreSaberScore) => {
-      const scoreId = getScoreId(score);
-      setExpandedScoreId(expandedScoreId === scoreId ? null : scoreId);
-    },
-    [expandedScoreId]
   );
 
   const handleModeChange = useCallback((newMode: ScoreModeEnum) => {
@@ -185,57 +174,12 @@ export default function LeaderboardScores({
               {scores && scores.items.length > 0 && (
                 <tbody className="divide-border/50 divide-y">
                   {scores.items.map(playerScore => (
-                    <React.Fragment key={`${playerScore.scoreId}-${playerScore.timestamp}-${mode}`}>
-                      <tr
-                        className={cn(
-                          "hover:bg-muted/30 transition-colors duration-200",
-                          highlightedPlayerId === playerScore.playerId && "bg-primary/10"
-                        )}
-                      >
-                        <ScoreSaberLeaderboardScore
-                          score={playerScore}
-                          leaderboard={leaderboard}
-                          highlightedPlayerId={highlightedPlayerId}
-                          showDropdown
-                          onDropdownToggle={() => handleDropdownToggle(playerScore)}
-                          isDropdownExpanded={expandedScoreId === getScoreId(playerScore)}
-                        />
-                      </tr>
-
-                      {/* Dropdown row - appears directly below the clicked row */}
-                      <AnimatePresence>
-                        {expandedScoreId === getScoreId(playerScore) && (
-                          <motion.tr
-                            key={`dropdown-${getScoreId(playerScore)}`}
-                            className="origin-top border-none"
-                            initial={{ opacity: 0, height: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, height: "auto", scale: 1 }}
-                            exit={{ opacity: 0, height: 0, scale: 0.95 }}
-                            transition={{
-                              duration: 0.3,
-                              ease: [0.4, 0, 0.2, 1],
-                              height: { duration: 0.3 },
-                              opacity: { duration: 0.2 },
-                            }}
-                          >
-                            <td colSpan={10} className="p-0">
-                              <div className="bg-muted/20 px-4 py-3">
-                                <ScoreDetailsDropdown
-                                  score={playerScore}
-                                  leaderboard={leaderboard}
-                                  beatSaverMap={beatSaver}
-                                  highlightedPlayerId={highlightedPlayerId}
-                                  isExpanded={true}
-                                  showLeaderboardScores={false}
-                                  showMapStats={false}
-                                  isLeaderboardScore={true}
-                                />
-                              </div>
-                            </td>
-                          </motion.tr>
-                        )}
-                      </AnimatePresence>
-                    </React.Fragment>
+                    <ScoreSaberLeaderboardScore
+                      key={getScoreId(playerScore)}
+                      score={playerScore}
+                      leaderboard={leaderboard}
+                      highlightedPlayerId={highlightedPlayerId}
+                    />
                   ))}
                 </tbody>
               )}

@@ -130,11 +130,7 @@ export default function ScoreSaberScoreEditorButton({ score, leaderboard, update
                         <p>Set accuracy to FC Accuracy ({formatScoreAccuracy(score.additionalData!.fcAccuracy!)})</p>
                       }
                     >
-                      <Button
-                        onClick={setAccuracyToFC}
-                        className="h-fit p-1.5"
-                        variant="ghost"
-                      >
+                      <Button onClick={setAccuracyToFC} className="h-fit p-1.5" variant="ghost">
                         <FaFlagCheckered className="size-3.5" />
                       </Button>
                     </SimpleTooltip>
