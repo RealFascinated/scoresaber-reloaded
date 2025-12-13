@@ -152,8 +152,18 @@ export async function sendMedalScoreNotification(
     "",
     "**__Changes__**",
   ];
-  // Sort the changes by the number of medals gained/lost
-  for (const [playerId, change] of Array.from(changes.entries()).sort((a, b) => b[1] - a[1])) {
+  // Sort the changes by the number of medals gained -> most lost -> least lost
+  for (const [playerId, change] of Array.from(changes.entries()).sort((a, b) => {
+    const changeA = a[1];
+    const changeB = b[1];
+    // Positive changes come first
+    if (changeA > 0 && changeB < 0) return -1;
+    if (changeA < 0 && changeB > 0) return 1;
+    // Both positive: sort descending (most gained first)
+    if (changeA > 0 && changeB > 0) return changeB - changeA;
+    // Both negative: sort ascending (most lost first, since -10 < -5)
+    return changeA - changeB;
+  })) {
     const changePlayer = await PlayerCoreService.getPlayer(playerId);
     description.push(
       format(
