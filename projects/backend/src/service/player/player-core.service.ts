@@ -42,29 +42,22 @@ export class PlayerCoreService {
       }
     }
 
-    let shouldSave = false; // Whether to save the player
+    let shouldSave = false;
     const updates: Partial<Player> = {};
 
     if (playerToken) {
-      // Update the player's name if it's different from the token
       if (playerToken.name !== player.name) {
         updates.name = playerToken.name;
         shouldSave = true;
       }
-
-      // Update the players pp if it's different from the token
       if (playerToken.pp !== player.pp) {
         updates.pp = playerToken.pp;
         shouldSave = true;
       }
-
-      // Update the player's country if it's different from the token
       if (playerToken.country !== player.country) {
         updates.country = playerToken.country;
         shouldSave = true;
       }
-
-      // Update the player's banned status if it's different from the token
       if (playerToken.banned !== player.banned) {
         updates.banned = playerToken.banned;
         shouldSave = true;
@@ -73,7 +66,6 @@ export class PlayerCoreService {
 
     if (shouldSave) {
       await PlayerModel.updateOne({ _id: id }, { $set: updates });
-      // Update the local player object with the new values
       Object.assign(player, updates);
     }
 

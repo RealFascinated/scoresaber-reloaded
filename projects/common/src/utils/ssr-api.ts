@@ -37,7 +37,7 @@ class SSRApi {
    * @throws an error if the request fails
    */
   async get<T>(url: string, queryParams?: Record<string, string>) {
-    const queryString = queryParams ? `?${new URLSearchParams(queryParams)}` : "";
+    const queryString = queryParams && Object.keys(queryParams).length > 0 ? `?${new URLSearchParams(queryParams)}` : "";
     const response = await fetch(`${url}${queryString}`, {
       headers: { Accept: "application/superjson" },
     });
