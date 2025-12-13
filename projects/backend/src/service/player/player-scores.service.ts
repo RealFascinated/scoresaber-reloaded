@@ -9,17 +9,13 @@ import {
   ScoreSaberLeaderboardModel,
 } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { Player, PlayerModel } from "@ssr/common/model/player/player";
-import {
-  ScoreSaberMedalsScore,
-  ScoreSaberMedalsScoreModel,
-} from "@ssr/common/model/score/impl/scoresaber-medals-score";
+import { ScoreSaberMedalsScoreModel } from "@ssr/common/model/score/impl/scoresaber-medals-score";
 import {
   ScoreSaberScore,
   ScoreSaberScoreModel,
 } from "@ssr/common/model/score/impl/scoresaber-score";
 import { Pagination } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import { PlayerMedalScoresResponse } from "@ssr/common/response/player-medal-scores-response";
 import {
   PlayerScoreChartDataPoint,
   PlayerScoresChartResponse,
@@ -44,12 +40,14 @@ import type { PipelineStage } from "mongoose";
 import { FilterQuery } from "mongoose";
 import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
 import { scoreToObject } from "../../common/score/score.util";
+import BeatSaverService from "../beatsaver.service";
 import { LeaderboardCoreService } from "../leaderboard/leaderboard-core.service";
 import { ScoreCoreService } from "../score/score-core.service";
 import ScoreSaberService from "../scoresaber.service";
 
 const FIELDS_MAP: Record<ScoreSort["field"], string> = {
   pp: "pp",
+  medals: "medals",
   score: "score",
   misses: "misses",
   acc: "accuracy",
@@ -333,6 +331,47 @@ export class PlayerScoresService {
   }
 
   /**
+   * Gets a score by its ID.
+   *
+   * @param scoreId the id of the score
+   * @returns the score
+   */
+  public static async getScore(
+    scoreId: string
+  ): Promise<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>> {
+    const rawScore = await ScoreSaberScoreModel.findOne({ scoreId: `${scoreId}` }).lean();
+    if (!rawScore) {
+      throw new NotFoundError("Score not found");
+    }
+
+    const leaderboardResponse = await LeaderboardCoreService.getLeaderboard(
+      rawScore.leaderboardId + "",
+      {
+        includeBeatSaver: true,
+        beatSaverType: DetailType.FULL,
+      }
+    );
+    if (!leaderboardResponse) {
+      throw new NotFoundError("Leaderboard not found");
+    }
+
+    const score = await ScoreCoreService.insertScoreData(
+      scoreToObject(rawScore as unknown as ScoreSaberScore),
+      leaderboardResponse.leaderboard,
+      {
+        insertPlayerInfo: true,
+        insertAdditionalData: true,
+        removeScoreWeightAndRank: true,
+      }
+    );
+    return {
+      score: score,
+      leaderboard: leaderboardResponse.leaderboard,
+      beatSaver: leaderboardResponse.beatsaver,
+    };
+  }
+
+  /**
    * Looks up player scores.
    *
    * @param playerId the player id
@@ -374,26 +413,11 @@ export class PlayerScoresService {
         { setInactivesRank: false, setMedalsRank: false }
       );
     }
-
-    const leaderboardIds = requestedPage.playerScores.map(score => score.leaderboard.id + "");
     return await pagination.getPage(pageNumber, async () => {
-      const leaderboardResponses = await LeaderboardCoreService.getLeaderboards(leaderboardIds, {
-        includeBeatSaver: true,
-        beatSaverType: DetailType.FULL,
-      });
-      const leaderboardMap = new Map(
-        leaderboardResponses.map(result => [result.leaderboard.id, result])
-      );
-
       return (
         await Promise.all(
           requestedPage.playerScores.map(async playerScore => {
-            const leaderboardResponse = leaderboardMap.get(playerScore.leaderboard.id);
-            if (!leaderboardResponse) {
-              return undefined;
-            }
-
-            const { leaderboard, beatsaver } = leaderboardResponse;
+            const leaderboard = getScoreSaberLeaderboardFromToken(playerScore.leaderboard);
             const score = getScoreSaberScoreFromToken(playerScore.score, leaderboard, playerId);
             if (!score) {
               return undefined;
@@ -413,7 +437,11 @@ export class PlayerScoresService {
                 comparisonPlayer: comparisonPlayer,
               }),
               leaderboard: leaderboard,
-              beatSaver: beatsaver,
+              beatSaver: await BeatSaverService.getMap(
+                leaderboard.songHash,
+                leaderboard.difficulty.difficulty,
+                leaderboard.difficulty.characteristic
+              ),
             } as PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>;
           })
         )
@@ -427,17 +455,22 @@ export class PlayerScoresService {
   /**
    * Gets the scores for a player.
    *
-   * @param playerId the id of the player
+   * @param mode the mode to get
+   * @param playerId the player id
    * @param page the page number
    * @param options the sort options
-   * @returns the paginated scores
+   * @param search the search term
+   * @param model the model to use
+   * @returns the scores
    */
-  public static async getScoreSaberCachedPlayerScores(
+  public static async getPlayerScores(
+    mode: "ssr" | "medals",
     playerId: string,
     page: number,
     options: ScoreSort,
-    search?: string
-  ): Promise<PlayerScoresResponse> {
+    search: string
+  ) {
+    const model = mode === "medals" ? ScoreSaberMedalsScoreModel : ScoreSaberScoreModel;
     const isValid = validateSort(options);
     if (!isValid) {
       throw new BadRequestError("Invalid sort options");
@@ -477,20 +510,154 @@ export class PlayerScoresService {
         return pagination.getPage(1, async () => []);
       }
 
-      matchingLeaderboardIds = matchingLeaderboards.map((lb: { _id: number }) => lb._id);
+      matchingLeaderboardIds = matchingLeaderboards.map(lb => lb._id);
     }
 
-    const totalScores = await ScoreSaberScoreModel.countDocuments(
-      buildScoreQuery(playerId, filters, {
-        ...(matchingLeaderboardIds.length > 0
-          ? { leaderboardId: { $in: matchingLeaderboardIds } }
-          : {}),
-      })
-    );
+    /**
+     * Builds a score query.
+     *
+     * @param playerId the player id
+     * @param filters the filters to apply
+     * @param extra the extra filters to apply
+     * @returns the score query
+     */
+    function buildScoreQuery(
+      playerId: string,
+      filters: ScoreFilters,
+      extra: FilterQuery<ScoreSaberScore> = {}
+    ): FilterQuery<ScoreSaberScore> {
+      const query: FilterQuery<ScoreSaberScore> = {
+        playerId,
+        leaderboardId: { $exists: true, $ne: null },
+        ...(mode === "medals" ? { medals: { $gt: 0 } } : {}),
+        ...extra,
+      };
+
+      if (filters.rankedOnly) query.pp = { $gt: 0 };
+      if (filters.unrankedOnly) query.pp = { $lte: 0 };
+      if (filters.passedOnly) {
+        return { ...query, modifiers: { $nin: [Modifier.NF, "NF", "No Fail"] } };
+      }
+      if (filters.hmd) query.hmd = filters.hmd;
+
+      return query;
+    }
+
+    // Build the count query - must match the fetch query logic
+    let countQuery = buildScoreQuery(playerId, filters, {
+      ...(matchingLeaderboardIds.length > 0
+        ? { leaderboardId: { $in: matchingLeaderboardIds } }
+        : {}),
+    });
+
+    // Apply the same Infinity filter to count query as we do for fetch query
+    // (skip for date and starcount fields)
+    if (options.field && !["date", "starcount"].includes(options.field)) {
+      const fieldKey = FIELDS_MAP[options.field];
+      const existingFieldFilter = (countQuery as Record<string, unknown>)[fieldKey] as
+        | Record<string, unknown>
+        | undefined;
+
+      countQuery = {
+        ...countQuery,
+        [fieldKey]: {
+          ...(existingFieldFilter ?? {}),
+          $ne: Infinity,
+          $exists: true,
+        },
+      };
+    }
+
+    const totalScores = await model.countDocuments(countQuery);
     const pagination = new Pagination<
       PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>
     >().setItemsPerPage(8);
     pagination.setTotalItems(totalScores);
+
+    /**
+     * Fetches raw scores.
+     *
+     * @param query the query to apply
+     * @param sort the sort to apply
+     * @param skip the skip to apply
+     * @param limit the limit to apply
+     * @returns the raw scores
+     */
+    async function fetchRawScores(
+      query: FilterQuery<ScoreSaberScore>,
+      sort: ScoreSort,
+      skip = 0,
+      limit = 0
+    ): Promise<ScoreSaberScore[]> {
+      if (sort.field === "starcount") {
+        const pipeline: PipelineStage[] = [
+          { $match: query },
+          {
+            $lookup: {
+              from: ScoreSaberLeaderboardModel.collection.name,
+              localField: "leaderboardId",
+              foreignField: "_id",
+              as: "leaderboardDoc",
+            },
+          },
+          { $unwind: "$leaderboardDoc" },
+          {
+            $sort: { "leaderboardDoc.stars": sort.direction === "asc" ? 1 : -1 },
+          },
+        ];
+        if (skip) pipeline.push({ $skip: skip });
+        if (limit) pipeline.push({ $limit: limit });
+        pipeline.push({ $project: { leaderboardDoc: 0 } });
+
+        return (await (model as typeof ScoreSaberScoreModel)
+          .aggregate(pipeline)
+          .exec()) as unknown as ScoreSaberScore[];
+      }
+
+      return (await (model as typeof ScoreSaberScoreModel)
+        .find(query)
+        .sort({ [FIELDS_MAP[sort.field]]: sort.direction === "asc" ? 1 : -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean()) as unknown as ScoreSaberScore[];
+    }
+
+    /**
+     * Maps raw scores to PlayerScore objects with leaderboard/BeatSaver attached
+     *
+     * @param rawScores the raw scores to map
+     * @param includeBeatSaver whether to include the BeatSaver data
+     * @returns the mapped scores
+     */
+    async function mapScoresWithLeaderboards(rawScores: ScoreSaberScore[]) {
+      if (!rawScores.length) {
+        return [];
+      }
+
+      const leaderboardResponses = await LeaderboardCoreService.getLeaderboards(
+        rawScores.map(s => s.leaderboardId + ""),
+        { includeBeatSaver: true }
+      );
+
+      const lbMap = new Map(leaderboardResponses.map(r => [r.leaderboard.id, r]));
+
+      return (
+        await Promise.all(
+          rawScores.map(async rs => {
+            const lbResp = lbMap.get(rs.leaderboardId);
+            if (!lbResp) return null;
+            const { leaderboard, beatsaver } = lbResp;
+            return {
+              score: await ScoreCoreService.insertScoreData(scoreToObject(rs), leaderboard, {
+                removeScoreWeightAndRank: mode === "ssr",
+              }),
+              leaderboard,
+              beatSaver: beatsaver,
+            } as PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>;
+          })
+        )
+      ).filter(Boolean) as PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>[];
+    }
 
     return pagination.getPage(page, async ({ start, end }) => {
       // Build the base query for this page
@@ -505,9 +672,7 @@ export class PlayerScoresService {
         // Use an aggregation pipeline so that we can sort by the leaderboard
         // star count which is not present on the score document itself.
         return await mapScoresWithLeaderboards(
-          await fetchRawScores(query, options, start, end - start),
-          false,
-          false
+          await fetchRawScores(query, options, start, end - start)
         );
       }
 
@@ -535,210 +700,35 @@ export class PlayerScoresService {
   }
 
   /**
+   * Gets the scores for a player.
+   *
+   * @param playerId the id of the player
+   * @param page the page number
+   * @param options the sort options
+   * @returns the paginated scores
+   */
+  public static async getSSRPlayerScores(
+    playerId: string,
+    page: number,
+    options: ScoreSort,
+    search: string
+  ): Promise<PlayerScoresResponse> {
+    return await this.getPlayerScores("ssr", playerId, page, options, search);
+  }
+
+  /**
    * Gets the medal scores for a player.
    *
    * @param playerId the player's id.
    * @param page the page number
    * @returns the medal scores.
    */
-  public static async getPlayerMedalScores(
+  public static async getMedalPlayerScores(
     playerId: string,
-    page: number = 1
-  ): Promise<PlayerMedalScoresResponse> {
-    const totalScores = await ScoreSaberMedalsScoreModel.countDocuments({
-      playerId,
-    });
-    if (totalScores === 0) {
-      return Pagination.empty<PlayerScore<ScoreSaberMedalsScore, ScoreSaberLeaderboard>>();
-    }
-
-    const pagination = new Pagination<PlayerScore<ScoreSaberMedalsScore, ScoreSaberLeaderboard>>()
-      .setItemsPerPage(8)
-      .setTotalItems(totalScores);
-
-    return pagination.getPage(page, async ({ start, end }) => {
-      const rawScores = (await ScoreSaberMedalsScoreModel.find({ playerId })
-        .skip(start)
-        .limit(end - start)
-        .sort({ medals: -1, timestamp: -1 }) // Sort by medals and timestamp in descending order
-        .lean()) as unknown as ScoreSaberMedalsScore[];
-
-      // Get leaderboards for the scores we have
-      const leaderboardResponses = await LeaderboardCoreService.getLeaderboards(
-        rawScores.map(score => score.leaderboardId + ""),
-        {
-          includeBeatSaver: true,
-        }
-      );
-
-      const leaderboardMapForScores = new Map(
-        leaderboardResponses.map(response => [response.leaderboard.id, response])
-      );
-
-      // Process scores in parallel - return PlayerScore objects
-      const processedScores = await Promise.all(
-        rawScores.map(async rawScore => {
-          const leaderboardResponse = leaderboardMapForScores.get(rawScore.leaderboardId);
-          if (!leaderboardResponse) {
-            return null;
-          }
-          const { leaderboard, beatsaver } = leaderboardResponse;
-
-          const score = (await ScoreCoreService.insertScoreData(
-            scoreToObject(rawScore),
-            leaderboard
-          )) as unknown as ScoreSaberMedalsScore;
-          return {
-            score: score,
-            leaderboard: leaderboard,
-            beatSaver: beatsaver,
-          } as PlayerScore<ScoreSaberMedalsScore, ScoreSaberLeaderboard>;
-        })
-      );
-
-      return processedScores.filter(
-        (score): score is PlayerScore<ScoreSaberMedalsScore, ScoreSaberLeaderboard> =>
-          score !== null
-      );
-    });
+    page: number,
+    options: ScoreSort,
+    search: string
+  ): Promise<PlayerScoresResponse> {
+    return await this.getPlayerScores("medals", playerId, page, options, search);
   }
-
-  /**
-   * Gets a score by its ID.
-   *
-   * @param scoreId the id of the score
-   * @returns the score
-   */
-  public static async getScore(
-    scoreId: string
-  ): Promise<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>> {
-    const rawScore = await ScoreSaberScoreModel.findOne({ scoreId: `${scoreId}` }).lean();
-    if (!rawScore) {
-      throw new NotFoundError("Score not found");
-    }
-
-    const leaderboardResponse = await LeaderboardCoreService.getLeaderboard(
-      rawScore.leaderboardId + "",
-      {
-        includeBeatSaver: true,
-        beatSaverType: DetailType.FULL,
-      }
-    );
-    if (!leaderboardResponse) {
-      throw new NotFoundError("Leaderboard not found");
-    }
-
-    const score = await ScoreCoreService.insertScoreData(
-      scoreToObject(rawScore as unknown as ScoreSaberScore),
-      leaderboardResponse.leaderboard,
-      {
-        insertPlayerInfo: true,
-        insertAdditionalData: true,
-        removeScoreWeightAndRank: true,
-      }
-    );
-    return {
-      score: score,
-      leaderboard: leaderboardResponse.leaderboard,
-      beatSaver: leaderboardResponse.beatsaver,
-    };
-  }
-}
-
-// Build a base query object from common filter flags
-function buildScoreQuery(
-  playerId: string,
-  filters: ScoreFilters,
-  extra: FilterQuery<ScoreSaberScore> = {}
-): FilterQuery<ScoreSaberScore> {
-  const query: FilterQuery<ScoreSaberScore> = {
-    playerId,
-    leaderboardId: { $exists: true, $ne: null },
-    ...extra,
-  };
-
-  if (filters.rankedOnly) query.pp = { $gt: 0 };
-  if (filters.unrankedOnly) query.pp = { $lte: 0 };
-  if (filters.passedOnly) {
-    return { ...query, modifiers: { $nin: [Modifier.NF, "NF", "No Fail"] } };
-  }
-  if (filters.hmd) query.hmd = filters.hmd;
-
-  return query;
-}
-
-// Retrieve raw score documents with optional star-count sorting
-async function fetchRawScores(
-  query: FilterQuery<ScoreSaberScore>,
-  sort: ScoreSort,
-  skip = 0,
-  limit = 0
-): Promise<ScoreSaberScore[]> {
-  if (sort.field === "starcount") {
-    const pipeline: PipelineStage[] = [
-      { $match: query },
-      {
-        $lookup: {
-          from: ScoreSaberLeaderboardModel.collection.name,
-          localField: "leaderboardId",
-          foreignField: "_id",
-          as: "leaderboardDoc",
-        },
-      },
-      { $unwind: "$leaderboardDoc" },
-      {
-        $sort: { "leaderboardDoc.stars": sort.direction === "asc" ? 1 : -1 },
-      },
-    ];
-    if (skip) pipeline.push({ $skip: skip });
-    if (limit) pipeline.push({ $limit: limit });
-    pipeline.push({ $project: { leaderboardDoc: 0 } });
-
-    return (await ScoreSaberScoreModel.aggregate(pipeline).exec()) as unknown as ScoreSaberScore[];
-  }
-
-  return (await ScoreSaberScoreModel.find(query)
-    .sort({ [FIELDS_MAP[sort.field]]: sort.direction === "asc" ? 1 : -1 })
-    .skip(skip)
-    .limit(limit)
-    .lean()) as unknown as ScoreSaberScore[];
-}
-
-/**
- * Maps raw scores to PlayerScore objects with leaderboard/BeatSaver attached
- *
- * @param rawScores the raw scores to map
- * @param includeBeatSaver whether to include the BeatSaver data
- * @returns the mapped scores
- */
-async function mapScoresWithLeaderboards(
-  rawScores: ScoreSaberScore[],
-  includeBeatSaver = true,
-  removeScoreWeightAndRank = true
-) {
-  if (!rawScores.length) return [];
-
-  const leaderboardResponses = await LeaderboardCoreService.getLeaderboards(
-    rawScores.map(s => s.leaderboardId + ""),
-    { includeBeatSaver }
-  );
-
-  const lbMap = new Map(leaderboardResponses.map(r => [r.leaderboard.id, r]));
-
-  return (
-    await Promise.all(
-      rawScores.map(async rs => {
-        const lbResp = lbMap.get(rs.leaderboardId);
-        if (!lbResp) return null;
-        const { leaderboard, beatsaver } = lbResp;
-        return {
-          score: await ScoreCoreService.insertScoreData(scoreToObject(rs), leaderboard, {
-            removeScoreWeightAndRank,
-          }),
-          leaderboard,
-          beatSaver: beatsaver,
-        } as PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>;
-      })
-    )
-  ).filter(Boolean) as PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>[];
 }

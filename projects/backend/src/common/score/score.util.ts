@@ -21,7 +21,6 @@ import BeatSaverService from "../../service/beatsaver.service";
 import { PlayerCoreService } from "../../service/player/player-core.service";
 import { PlayerScoreHistoryService } from "../../service/player/player-score-history.service";
 
-
 /**
  * Converts a database score to a ScoreSaberScore.
  *
@@ -67,12 +66,12 @@ export async function sendScoreNotification(
   );
   const change = previousScore &&
     previousScore.change && {
-    accuracy: `${formatChange(previousScore.change.accuracy, value => value.toFixed(2) + "%") || ""}`,
-    pp: `${formatChange(previousScore.change.pp, undefined, true) || ""}`,
-    misses: previousScore.misses == score.misses ? "" : ` vs ${previousScore.misses}`,
-    badCuts: previousScore.badCuts == score.badCuts ? "" : ` vs ${previousScore.badCuts}`,
-    maxCombo: previousScore.maxCombo == score.maxCombo ? "" : ` vs ${previousScore.maxCombo}`,
-  };
+      accuracy: `${formatChange(previousScore.change.accuracy, value => value.toFixed(2) + "%") || ""}`,
+      pp: `${formatChange(previousScore.change.pp, undefined, true) || ""}`,
+      misses: previousScore.misses == score.misses ? "" : ` vs ${previousScore.misses}`,
+      badCuts: previousScore.badCuts == score.badCuts ? "" : ` vs ${previousScore.badCuts}`,
+      maxCombo: previousScore.maxCombo == score.maxCombo ? "" : ` vs ${previousScore.maxCombo}`,
+    };
 
   const accuracy =
     leaderboard.maxScore > 0
@@ -109,9 +108,9 @@ export async function sendScoreNotification(
             `**Max Combo:** ${formatNumberWithCommas(score.maxCombo)} ${score.fullCombo ? " (FC)" : ""} ${change ? change.maxCombo : ""}`,
             ...(beatLeaderScore
               ? [
-                `**Bomb Cuts**: ${beatLeaderScore.misses.bombCuts}`,
-                `**Wall Hits**: ${beatLeaderScore.misses.wallsHit}`,
-              ]
+                  `**Bomb Cuts**: ${beatLeaderScore.misses.bombCuts}`,
+                  `**Wall Hits**: ${beatLeaderScore.misses.wallsHit}`,
+                ]
               : []),
           ].join("\n"),
           inline: false,
@@ -159,11 +158,12 @@ export async function sendMedalScoreNotification(
   for (const [playerId, change] of Array.from(changes.entries()).sort((a, b) => b[1] - a[1])) {
     const player = await PlayerCoreService.getPlayer(playerId);
     description.push(
-      format(`**[%s](%s)** %s %s %s (%s -> %s)`, 
-        player.name, 
-        env.NEXT_PUBLIC_WEBSITE_URL + "/player/" + playerId, 
-        change < 0 ? "lost" : "gained", 
-        Math.abs(change), 
+      format(
+        `**[%s](%s)** %s %s %s (%s -> %s)`,
+        player.name,
+        env.NEXT_PUBLIC_WEBSITE_URL + "/player/" + playerId,
+        change < 0 ? "lost" : "gained",
+        Math.abs(change),
         pluralize(Math.abs(change), "medal"),
         (player.medals || 0) - change,
         player.medals || 0
@@ -220,26 +220,26 @@ function getScoreButtons(
           .setURL(`${env.NEXT_PUBLIC_WEBSITE_URL}/leaderboard/${leaderboard.id}`),
         ...(beatSaver
           ? [
-            new ButtonBuilder()
-              .setLabel("Map")
-              .setEmoji("🗺️")
-              .setStyle(ButtonStyle.Link)
-              .setURL(`https://beatsaver.com/maps/${beatSaver.bsr}`),
-          ]
+              new ButtonBuilder()
+                .setLabel("Map")
+                .setEmoji("🗺️")
+                .setStyle(ButtonStyle.Link)
+                .setURL(`https://beatsaver.com/maps/${beatSaver.bsr}`),
+            ]
           : []),
         ...(beatLeaderScore
           ? [
-            new ButtonBuilder()
-              .setLabel("Replay")
-              .setEmoji("🎥")
-              .setStyle(ButtonStyle.Link)
-              .setURL(
-                ReplayViewers.beatleader.generateUrl(
-                  beatLeaderScore.scoreId,
-                  getBeatLeaderReplayRedirectUrl(beatLeaderScore)
-                )
-              ),
-          ]
+              new ButtonBuilder()
+                .setLabel("Replay")
+                .setEmoji("🎥")
+                .setStyle(ButtonStyle.Link)
+                .setURL(
+                  ReplayViewers.beatleader.generateUrl(
+                    beatLeaderScore.scoreId,
+                    getBeatLeaderReplayRedirectUrl(beatLeaderScore)
+                  )
+                ),
+            ]
           : []),
       ],
     },

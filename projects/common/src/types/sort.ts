@@ -1,6 +1,15 @@
 import { z } from "zod";
 
-const sortField = z.enum(["pp", "misses", "acc", "score", "maxcombo", "date", "starcount"]);
+const sortField = z.enum([
+  "pp",
+  "medals",
+  "misses",
+  "acc",
+  "score",
+  "maxcombo",
+  "date",
+  "starcount",
+]);
 const sortDirection = z.enum(["asc", "desc"]);
 const filters = z
   .object({

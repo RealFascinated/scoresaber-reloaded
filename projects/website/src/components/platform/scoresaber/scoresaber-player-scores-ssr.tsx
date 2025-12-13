@@ -45,7 +45,6 @@ import { ScoreSaberScoreModeTabs } from "./scoresaber-score-mode-selector";
 const DEFAULT_SORT: ScoreSort["field"] = "date";
 const DEFAULT_SORT_DIRECTION: ScoreSort["direction"] = "desc";
 const DEFAULT_PAGE = 1;
-const DEFAULT_SEARCH = "";
 const DEFAULT_FILTER = "All Scores";
 
 const SORT_OPTIONS: {
@@ -179,7 +178,7 @@ export default function ScoreSaberPlayerScoresSSR({ player }: ScoreSaberPlayerSc
     queryFn: async () => {
       const selectedFilter = FILTERS.find(f => f.name === scoreFilter);
 
-      const response = await ssrApi.fetchCachedScoreSaberPlayerScores(
+      const response = await ssrApi.fetchSSRPlayerScores(
         player.id,
         page,
         {

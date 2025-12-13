@@ -12,7 +12,6 @@ import { BeatSaverMapResponse } from "../response/beatsaver-map-response";
 import { LeaderboardResponse } from "../response/leaderboard-response";
 import LeaderboardScoresResponse from "../response/leaderboard-scores-response";
 import { PlayerMedalRankingsResponse } from "../response/player-medal-rankings-response";
-import { PlayerMedalScoresResponse } from "../response/player-medal-scores-response";
 import { PlayerRankedPpsResponse } from "../response/player-ranked-pps-response";
 import { PlayerRankingsResponse } from "../response/player-rankings-response";
 import { PlayerScoresChartResponse } from "../response/player-scores-chart";
@@ -246,7 +245,7 @@ class SSRApi {
     search?: string,
     comparisonPlayerId?: string
   ) {
-    return await this.get<Page<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>>(
+    return await this.get<PlayerScoresResponse>(
       `${env.NEXT_PUBLIC_API_URL}/scores/player/${id}/${page}/${sort}`,
       {
         ...(search ? { search: search } : {}),
@@ -263,17 +262,38 @@ class SSRApi {
    * @param sort the sort
    * @param search the search term
    */
-  async fetchCachedScoreSaberPlayerScores(
-    id: string,
-    page: number,
-    sort: ScoreSort,
-    search?: string
-  ) {
+  async fetchSSRPlayerScores(id: string, page: number, sort: ScoreSort, search?: string) {
     return await this.get<PlayerScoresResponse>(
-      `${env.NEXT_PUBLIC_API_URL}/scores/cached/player/${id}/${sort.field}/${sort.direction}/${page}`,
+      `${env.NEXT_PUBLIC_API_URL}/scores/ssr/player/${id}/${sort.field}/${sort.direction}/${page}`,
       {
         ...Object.fromEntries(
-          Object.entries(sort.filters ?? {}).map(([key, value]) => [key, value])
+          Object.entries(sort.filters ?? {}).map(([key, value]) => [
+            key,
+            typeof value === "boolean" ? String(value) : (value ?? ""),
+          ])
+        ),
+        ...(search ? { search: search } : {}),
+      }
+    );
+  }
+
+  /**
+   * Fetches the player's medal scores.
+   *
+   * @param id the player's id
+   * @param page the page
+   * @param sort the sort
+   * @param search the search term
+   */
+  async fetchPlayerMedalScores(id: string, page: number, sort: ScoreSort, search?: string) {
+    return await this.get<PlayerScoresResponse>(
+      `${env.NEXT_PUBLIC_API_URL}/scores/medals/player/${id}/${sort.field}/${sort.direction}/${page}`,
+      {
+        ...Object.fromEntries(
+          Object.entries(sort.filters ?? {}).map(([key, value]) => [
+            key,
+            typeof value === "boolean" ? String(value) : (value ?? ""),
+          ])
         ),
         ...(search ? { search: search } : {}),
       }
@@ -392,18 +412,6 @@ class SSRApi {
       {
         ...(country ? { country: country } : {}),
       }
-    );
-  }
-
-  /**
-   * Fetches the player's medal scores.
-   *
-   * @param playerId the player's id
-   * @param page the page
-   */
-  async fetchPlayerMedalScores(playerId: string, page: number) {
-    return await this.get<PlayerMedalScoresResponse>(
-      `${env.NEXT_PUBLIC_API_URL}/scores/medals/player/${playerId}/${page}`
     );
   }
 

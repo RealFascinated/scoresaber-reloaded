@@ -4,9 +4,9 @@ import { t } from "elysia";
 import { Controller, Get } from "elysia-decorators";
 import { PlayerScoresService } from "../service/player/player-scores.service";
 
-@Controller("/scores/cached")
+@Controller("")
 export default class CachedScoresController {
-  @Get("/player/:id/:field/:direction/:page", {
+  @Get("/scores/ssr/player/:id/:field/:direction/:page", {
     config: {},
     tags: ["Scores"],
     params: t.Object({
@@ -25,10 +25,10 @@ export default class CachedScoresController {
       })
     ),
     detail: {
-      description: "Lookup cached scores for a player",
+      description: "Lookup SSR scores for a player",
     },
   })
-  public async getCachedScores({
+  public async getSSRScores({
     params: { id, page, field, direction },
     query: filters,
   }: {
@@ -42,7 +42,7 @@ export default class CachedScoresController {
   }): Promise<PlayerScoresResponse> {
     const { search, ...otherFilters } = filters;
     return (
-      await PlayerScoresService.getScoreSaberCachedPlayerScores(
+      await PlayerScoresService.getSSRPlayerScores(
         id,
         page,
         {
@@ -50,7 +50,53 @@ export default class CachedScoresController {
           direction,
           filters: otherFilters,
         },
-        search
+        search ?? ""
+      )
+    ).toJSON();
+  }
+
+  @Get("/scores/medals/player/:id/:field/:direction/:page", {
+    config: {},
+    tags: ["Scores"],
+    params: t.Object({
+      id: t.String({ required: true }),
+      field: t.String({ required: true }),
+      direction: t.String({ required: true }),
+      page: t.Number({ required: true }),
+    }),
+    query: t.Optional(
+      t.Object({
+        search: t.Optional(t.String()),
+        hmd: t.Optional(t.String()),
+      })
+    ),
+    detail: {
+      description: "Lookup medal scores for a player",
+    },
+  })
+  public async getMedalScores({
+    params: { id, page, field, direction },
+    query: filters,
+  }: {
+    params: {
+      id: string;
+      field: ScoreSort["field"];
+      direction: ScoreSort["direction"];
+      page: number;
+    };
+    query: ScoreSort["filters"] & { search?: string };
+  }): Promise<PlayerScoresResponse> {
+    const { search, ...otherFilters } = filters;
+    return (
+      await PlayerScoresService.getMedalPlayerScores(
+        id,
+        page,
+        {
+          field,
+          direction,
+          filters: otherFilters,
+        },
+        search ?? ""
       )
     ).toJSON();
   }

@@ -3,7 +3,6 @@
 import AccSaberLogo from "@/components/logos/logos/accsaber-logo";
 import BeatLeaderLogo from "@/components/logos/logos/beatleader-logo";
 import ScoresaberLogo from "@/components/logos/logos/scoresaber-logo";
-import SteamLogo from "@/components/logos/logos/steam-logo";
 import SimpleTooltip from "@/components/simple-tooltip";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import useDatabase from "@/hooks/use-database";

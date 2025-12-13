@@ -33,5 +33,5 @@ export function pluralize(count: number, word: string) {
  */
 export function format(template: string, ...args: unknown[]) {
   let argIndex = 0;
-  return template.replace(/%s/g, () => args[argIndex++]?.toString() || '%s');
+  return template.replace(/%s/g, () => args[argIndex++]?.toString() || "%s");
 }
