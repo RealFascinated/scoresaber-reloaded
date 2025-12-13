@@ -1,10 +1,4 @@
-import {
-  getModelForClass,
-  modelOptions,
-  Prop,
-  ReturnModelType,
-  Severity,
-} from "@typegoose/typegoose";
+import { getModelForClass, modelOptions, Prop, ReturnModelType, Severity } from "@typegoose/typegoose";
 import { Document } from "mongoose";
 
 @modelOptions({
@@ -27,10 +21,7 @@ export class ScoreSaberLeaderboardStarChangeInternal {
   readonly timestamp!: Date;
 }
 
-export type ScoreSaberLeaderboardStarChange = InstanceType<
-  typeof ScoreSaberLeaderboardStarChangeInternal
->;
+export type ScoreSaberLeaderboardStarChange = InstanceType<typeof ScoreSaberLeaderboardStarChangeInternal>;
 export type ScoreSaberLeaderboardStarChangeDocument = ScoreSaberLeaderboardStarChange & Document;
-export const ScoreSaberLeaderboardStarChangeModel: ReturnModelType<
-  typeof ScoreSaberLeaderboardStarChangeInternal
-> = getModelForClass(ScoreSaberLeaderboardStarChangeInternal);
+export const ScoreSaberLeaderboardStarChangeModel: ReturnModelType<typeof ScoreSaberLeaderboardStarChangeInternal> =
+  getModelForClass(ScoreSaberLeaderboardStarChangeInternal);

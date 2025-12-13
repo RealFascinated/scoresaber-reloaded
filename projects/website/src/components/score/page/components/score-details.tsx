@@ -10,11 +10,7 @@ import PlayerButton from "./buttons/player-button";
 import ReplayButton from "./buttons/replay-button";
 import LeaderboardInfo from "./leaderboard-info";
 
-export default function ScoreDetails({
-  score,
-}: {
-  score: PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>;
-}) {
+export default function ScoreDetails({ score }: { score: PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard> }) {
   const { leaderboard, beatSaver } = score;
 
   return (

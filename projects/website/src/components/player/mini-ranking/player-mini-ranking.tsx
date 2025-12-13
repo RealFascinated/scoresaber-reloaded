@@ -37,16 +37,8 @@ export default function PlayerMiniRankings({ player }: { player: ScoreSaberPlaye
 
   return (
     <>
-      <PlayerMiniRanking
-        type="Global"
-        player={player}
-        players={miniRankingResponse?.globalRankings ?? []}
-      />
-      <PlayerMiniRanking
-        type="Country"
-        player={player}
-        players={miniRankingResponse?.countryRankings ?? []}
-      />
+      <PlayerMiniRanking type="Global" player={player} players={miniRankingResponse?.globalRankings ?? []} />
+      <PlayerMiniRanking type="Country" player={player} players={miniRankingResponse?.countryRankings ?? []} />
     </>
   );
 }
@@ -66,9 +58,7 @@ function PlayerMiniRanking({
 
   const playerRankWidth = (() => {
     if (players.length === 0) return 0;
-    const maxRank = Math.max(
-      ...players.map(p => (type === "Global" ? p.rank : p.countryRank) ?? 0)
-    );
+    const maxRank = Math.max(...players.map(p => (type === "Global" ? p.rank : p.countryRank) ?? 0));
     const digits = maxRank > 0 ? Math.floor(Math.log10(maxRank)) + 1 : 0;
     const commas = Math.floor((digits - 1) / 3);
     return (digits + commas + 1) * 6.5;
@@ -101,12 +91,7 @@ function PlayerMiniRanking({
                 }}
               >
                 {/* Rank */}
-                <p
-                  className={cn(
-                    "text-muted-foreground",
-                    playerRanking.id === player.id ? "font-bold" : ""
-                  )}
-                >
+                <p className={cn("text-muted-foreground", playerRanking.id === player.id ? "font-bold" : "")}>
                   #{formatNumberWithCommas(rank)}
                 </p>
 
@@ -130,20 +115,12 @@ function PlayerMiniRanking({
                   }}
                 >
                   <p
-                    className={cn(
-                      "text-pp text-right sm:text-left",
-                      playerRanking.id === player.id ? "font-bold" : ""
-                    )}
+                    className={cn("text-pp text-right sm:text-left", playerRanking.id === player.id ? "font-bold" : "")}
                   >
                     {formatPp(playerRanking.pp, isMobile ? 1 : 2)}pp
                   </p>
                   {playerRanking.id !== player.id && !isMobile && (
-                    <p
-                      className={cn(
-                        "text-xs",
-                        ppDifference > 0 ? "text-green-400" : "text-red-400"
-                      )}
-                    >
+                    <p className={cn("text-xs", ppDifference > 0 ? "text-green-400" : "text-red-400")}>
                       {ppDifference > 0 ? "+" : ""}
                       {formatPp(ppDifference, 2)}
                     </p>

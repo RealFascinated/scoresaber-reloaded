@@ -33,16 +33,10 @@ type FilterContextProps = {
 const MapFilterContext = createContext<FilterContextProps | undefined>(undefined);
 
 export const MapFilterProvider = ({ children }: { children: ReactNode }) => {
-  const [category, setCategory] = useQueryState(
-    "category",
-    parseAsInteger.withDefault(defaultCategory)
-  );
+  const [category, setCategory] = useQueryState("category", parseAsInteger.withDefault(defaultCategory));
   const [sort, setSort] = useQueryState("sort", parseAsInteger.withDefault(defaultSort));
   const [starMin, setStarMin] = useQueryState("starMin", parseAsFloat.withDefault(0));
-  const [starMax, setStarMax] = useQueryState(
-    "starMax",
-    parseAsFloat.withDefault(Consts.MAX_STARS)
-  );
+  const [starMax, setStarMax] = useQueryState("starMax", parseAsFloat.withDefault(Consts.MAX_STARS));
   const [search, setSearch] = useQueryState("search", parseAsString.withDefault(""));
 
   const [verified, setVerified] = useQueryState("verified", parseAsBoolean.withDefault(false));

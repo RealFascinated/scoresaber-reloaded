@@ -27,9 +27,7 @@ import { PlayerScoreHistoryService } from "../../service/player/player-score-his
  * @param score the score to convert
  * @returns the converted score
  */
-export function scoreToObject(
-  score: ScoreSaberScore | ScoreSaberMedalsScore
-): ScoreSaberScore | ScoreSaberMedalsScore {
+export function scoreToObject(score: ScoreSaberScore | ScoreSaberMedalsScore): ScoreSaberScore | ScoreSaberMedalsScore {
   return {
     ...removeObjectFields<ScoreSaberScore | ScoreSaberMedalsScore>(score, ["_id", "id", "__v"]),
     id: score._id,
@@ -174,10 +172,10 @@ export async function sendMedalScoreNotification(
   // Find the player with the highest positive change for the title
   const sortedChanges = Array.from(changes.entries()).sort((a, b) => b[1] - a[1]);
   const [topPlayerId, topMedalChange] = sortedChanges.find(([, change]) => change > 0)!;
-  
+
   const topChangePlayer = await PlayerCoreService.getPlayer(topPlayerId);
   const title = `${topChangePlayer.name} gained ${formatNumberWithCommas(topMedalChange)} ${pluralize(topMedalChange, "medal")}!`;
-  
+
   await sendEmbedToChannel(
     DiscordChannels.MEDAL_SCORES_FEED,
     new EmbedBuilder()

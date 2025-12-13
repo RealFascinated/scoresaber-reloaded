@@ -29,10 +29,7 @@ function AverageCutValues({ cuts, hand }: { cuts: number[]; hand: Hand }) {
   return (
     <div className="space-y-1">
       {cuts.map((cut, i) => (
-        <div
-          key={i}
-          className={cn("flex gap-1", hand === "right" ? "justify-end" : "justify-start")}
-        >
+        <div key={i} className={cn("flex gap-1", hand === "right" ? "justify-end" : "justify-start")}>
           <p className="text-sm font-medium text-gray-200">{cut.toFixed(2)}</p>
         </div>
       ))}
@@ -115,21 +112,13 @@ function useHandStats(scoreStats: ScoreStatsToken, hand: Hand) {
 }
 
 function HandAccuracy({ scoreStats, hand }: { scoreStats: ScoreStatsToken; hand: Hand }) {
-  const { accuracy, averageCut, timeDependence, preSwing, postSwing } = useHandStats(
-    scoreStats,
-    hand
-  );
+  const { accuracy, averageCut, timeDependence, preSwing, postSwing } = useHandStats(scoreStats, hand);
   const tooltipLabel = (text: string) => `${capitalizeFirstLetter(hand)} Hand ${text}`;
 
   return (
     <div className="flex flex-col gap-2">
       <AccuracyCircle accuracy={accuracy} averageCut={averageCut} hand={hand} />
-      <div
-        className={cn(
-          "flex flex-col gap-1 text-sm",
-          hand === "right" ? "justify-end" : "justify-start"
-        )}
-      >
+      <div className={cn("flex flex-col gap-1 text-sm", hand === "right" ? "justify-end" : "justify-start")}>
         <SimpleTooltip display={tooltipLabel("Time-Dependence")} className="cursor-default">
           <HandStat hand={hand} name="TD" value={`${timeDependence.toFixed(3)}`} />
         </SimpleTooltip>

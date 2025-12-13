@@ -31,9 +31,7 @@ export default function ScoreMissesAndPausesBadge({
 
   const misses = score.misses + (previousMisses?.bombCuts ?? 0) + (previousMisses?.wallsHit ?? 0);
   const previousMissCount =
-    (previousScore?.misses ?? 0) +
-    (additionalData?.misses?.bombCuts ?? 0) +
-    (additionalData?.misses?.wallsHit ?? 0);
+    (previousScore?.misses ?? 0) + (additionalData?.misses?.bombCuts ?? 0) + (additionalData?.misses?.wallsHit ?? 0);
 
   return (
     <div className="flex w-full flex-row items-center justify-center gap-1">
@@ -45,13 +43,7 @@ export default function ScoreMissesAndPausesBadge({
         pauses={additionalData?.pauses ?? undefined}
         fullCombo={score.fullCombo}
       >
-        <span>
-          {score.fullCombo ? (
-            <span className="text-green-400">FC</span>
-          ) : (
-            formatNumberWithCommas(misses)
-          )}
-        </span>
+        <span>{score.fullCombo ? <span className="text-green-400">FC</span> : formatNumberWithCommas(misses)}</span>
         {!hideXMark && !score.fullCombo && <span>x</span>}
       </ScoreMissesTooltip>
       {previousScore && !hidePreviousScore && showDifference && (

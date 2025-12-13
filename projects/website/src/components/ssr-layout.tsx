@@ -13,12 +13,7 @@ export default function SSRLayout({ children, className }: SSRLayoutProps) {
   const path = usePathname();
 
   return (
-    <div
-      className={cn(
-        "z-1 flex w-full grow",
-        path !== "/" ? "m-auto max-w-[1600px] " + className : ""
-      )}
-    >
+    <div className={cn("z-1 flex w-full grow", path !== "/" ? "m-auto max-w-[1600px] " + className : "")}>
       {children}
     </div>
   );

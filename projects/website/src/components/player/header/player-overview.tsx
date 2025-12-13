@@ -39,8 +39,7 @@ const playerData = [
                 <div className="mt-3">
                   {player.rankIncludingInactives && (
                     <p>
-                      Rank Including Inactives:{" "}
-                      <b>#{formatNumberWithCommas(player.rankIncludingInactives)}</b>
+                      Rank Including Inactives: <b>#{formatNumberWithCommas(player.rankIncludingInactives)}</b>
                     </p>
                   )}
                   {player.rankPercentile && (
@@ -51,9 +50,7 @@ const playerData = [
                 </div>
               }
             >
-              <SimpleLink
-                href={`/ranking/${player.rankPages.global}`}
-              >
+              <SimpleLink href={`/ranking/${player.rankPages.global}`}>
                 <span className="hover:text-primary/80 m-0 text-sm leading-[1.2] transition-all">
                   #{formatNumberWithCommas(player.rank)}
                 </span>
@@ -81,9 +78,7 @@ const playerData = [
               tooltip={name => `Country Rank in ${name}`}
             />
             <ChangeOverTime player={player} type={PlayerStatChange.CountryRank}>
-              <SimpleLink
-                href={`/ranking/${player.country}/${player.rankPages.country}`}
-              >
+              <SimpleLink href={`/ranking/${player.country}/${player.rankPages.country}`}>
                 <span className="hover:text-primary/80 m-0 text-sm leading-[1.4] transition-all">
                   #{formatNumberWithCommas(player.countryRank)}
                 </span>
@@ -101,9 +96,7 @@ const playerData = [
       return (
         <PlayerOverviewItem>
           <FaMedal className="text-muted-foreground size-4" />
-          <FallbackLink
-            href={player.rankPages.medals ? `/medals/${player.rankPages.medals}` : undefined}
-          >
+          <FallbackLink href={player.rankPages.medals ? `/medals/${player.rankPages.medals}` : undefined}>
             <span
               className={cn(
                 "m-0 text-sm leading-[1.4]",

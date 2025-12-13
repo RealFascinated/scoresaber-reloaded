@@ -269,11 +269,7 @@ export class ReplayDecoder {
 
     const replay: Partial<Replay> = {};
 
-    for (
-      let a = 0;
-      a <= StructType.customData && (dataView as any).pointer < dataView.byteLength;
-      a++
-    ) {
+    for (let a = 0; a <= StructType.customData && (dataView as any).pointer < dataView.byteLength; a++) {
       const type = this.DecodeUint8(dataView);
       switch (type) {
         case StructType.info:
@@ -341,10 +337,7 @@ export class ReplayDecoder {
 
     for (let i = 0; i < length; i++) {
       const frame = this.DecodeFrame(dataView);
-      if (
-        frame.time !== 0 &&
-        (result.length === 0 || frame.time !== result[result.length - 1].time)
-      ) {
+      if (frame.time !== 0 && (result.length === 0 || frame.time !== result[result.length - 1].time)) {
         result.push(frame);
       }
     }
@@ -434,10 +427,7 @@ export class ReplayDecoder {
       const key = this.DecodeString(dataView);
       const customDataLength = this.DecodeInt(dataView);
       const value = new Int8Array(
-        dataView.buffer.slice(
-          (dataView as any).pointer,
-          customDataLength + (dataView as any).pointer
-        )
+        dataView.buffer.slice((dataView as any).pointer, customDataLength + (dataView as any).pointer)
       );
       result[key] = value;
       (dataView as any).pointer += customDataLength;
@@ -513,10 +503,7 @@ export class ReplayDecoder {
       let frameIndex = 0;
       for (const segment of tricksReplay.left.segmentsArray) {
         for (const trickFrame of segment.framesArray) {
-          while (
-            frameIndex < replay.frames.length - 1 &&
-            replay.frames[frameIndex + 1].time <= trickFrame.songTime
-          ) {
+          while (frameIndex < replay.frames.length - 1 && replay.frames[frameIndex + 1].time <= trickFrame.songTime) {
             frameIndex++;
           }
 
@@ -531,10 +518,7 @@ export class ReplayDecoder {
       let frameIndex = 0;
       for (const segment of tricksReplay.right.segmentsArray) {
         for (const trickFrame of segment.framesArray) {
-          while (
-            frameIndex < replay.frames.length - 1 &&
-            replay.frames[frameIndex + 1].time <= trickFrame.songTime
-          ) {
+          while (frameIndex < replay.frames.length - 1 && replay.frames[frameIndex + 1].time <= trickFrame.songTime) {
             frameIndex++;
           }
 
@@ -683,9 +667,7 @@ export class ReplayDecoder {
 
     const enc = new TextDecoder("utf-8");
     const string = enc.decode(
-      new Int8Array(
-        dataView.buffer.slice((dataView as any).pointer + 4, length + (dataView as any).pointer + 4)
-      )
+      new Int8Array(dataView.buffer.slice((dataView as any).pointer + 4, length + (dataView as any).pointer + 4))
     );
     (dataView as any).pointer += length + 4;
     return string;
@@ -708,10 +690,7 @@ export class ReplayDecoder {
 
     const string = enc.decode(
       new Int8Array(
-        dataView.buffer.slice(
-          (dataView as any).pointer + 4,
-          length + (dataView as any).pointer + 4 + lengthOffset
-        )
+        dataView.buffer.slice((dataView as any).pointer + 4, length + (dataView as any).pointer + 4 + lengthOffset)
       )
     );
     (dataView as any).pointer += length + 4 + lengthOffset;

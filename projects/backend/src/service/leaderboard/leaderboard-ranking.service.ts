@@ -8,10 +8,7 @@ import {
 import LeaderboardDifficulty from "@ssr/common/model/leaderboard/leaderboard-difficulty";
 import { ScoreSaberLeaderboardStarChangeModel } from "@ssr/common/model/leaderboard/leaderboard-star-change";
 import { ScoreSaberPreviousScoreModel } from "@ssr/common/model/score/impl/scoresaber-previous-score";
-import {
-  ScoreSaberScoreDocument,
-  ScoreSaberScoreModel,
-} from "@ssr/common/model/score/impl/scoresaber-score";
+import { ScoreSaberScoreDocument, ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import { LeaderboardStarChange } from "@ssr/common/response/leaderboard-star-change";
 import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 import { getDifficulty } from "@ssr/common/utils/song-utils";
@@ -26,16 +23,10 @@ export class LeaderboardRankingService {
    */
   public static async unrankLeaderboard(leaderboard: ScoreSaberLeaderboard): Promise<void> {
     // Use bulk operations to reset PP and weight for all scores in this leaderboard
-    await ScoreSaberScoreModel.updateMany(
-      { leaderboardId: leaderboard.id },
-      { $set: { pp: 0, weight: 0 } }
-    );
+    await ScoreSaberScoreModel.updateMany({ leaderboardId: leaderboard.id }, { $set: { pp: 0, weight: 0 } });
 
     // Also reset PP and weight for previous scores
-    await ScoreSaberPreviousScoreModel.updateMany(
-      { leaderboardId: leaderboard.id },
-      { $set: { pp: 0, weight: 0 } }
-    );
+    await ScoreSaberPreviousScoreModel.updateMany({ leaderboardId: leaderboard.id }, { $set: { pp: 0, weight: 0 } });
 
     // Update the leaderboard
     await ScoreSaberLeaderboardModel.findOneAndUpdate(
@@ -223,11 +214,7 @@ export class LeaderboardRankingService {
           if (!score) continue;
 
           // Update score
-          const scoreDocument = getScoreSaberScoreFromToken(
-            scoreToken,
-            update.leaderboard,
-            score.playerId
-          );
+          const scoreDocument = getScoreSaberScoreFromToken(scoreToken, update.leaderboard, score.playerId);
           scoreBulkOpsPage.push({
             updateOne: {
               filter: { _id: score.id },
@@ -250,9 +237,7 @@ export class LeaderboardRankingService {
               },
               update: {
                 $set: {
-                  pp: update.leaderboard.ranked
-                    ? ScoreSaberCurve.getPp(update.leaderboard.stars, score.accuracy)
-                    : 0,
+                  pp: update.leaderboard.ranked ? ScoreSaberCurve.getPp(update.leaderboard.stars, score.accuracy) : 0,
                   weight: 0,
                 },
               },
@@ -342,11 +327,7 @@ export class LeaderboardRankingService {
         }
 
         const update = this.checkLeaderboardChanges(leaderboard, previousLeaderboard);
-        if (
-          update.rankedStatusChanged ||
-          update.starCountChanged ||
-          update.qualifiedStatusChanged
-        ) {
+        if (update.rankedStatusChanged || update.starCountChanged || update.qualifiedStatusChanged) {
           // Leaderboard has status changes
           leaderboardsToHandle.push({ leaderboard, update });
         } else {
@@ -377,9 +358,7 @@ export class LeaderboardRankingService {
 
       // Handle leaderboards with status changes
       if (leaderboardsToHandle.length > 0) {
-        Logger.info(
-          `Processing ${leaderboardsToHandle.length} leaderboards with status changes...`
-        );
+        Logger.info(`Processing ${leaderboardsToHandle.length} leaderboards with status changes...`);
 
         for (let i = 0; i < leaderboardsToHandle.length; i++) {
           const { leaderboard, update } = leaderboardsToHandle[i];
@@ -488,9 +467,7 @@ export class LeaderboardRankingService {
   /**
    * Fetches the star change history for a given leaderboard
    */
-  public static async fetchStarChangeHistory(
-    leaderboard: ScoreSaberLeaderboard
-  ): Promise<LeaderboardStarChange[]> {
+  public static async fetchStarChangeHistory(leaderboard: ScoreSaberLeaderboard): Promise<LeaderboardStarChange[]> {
     return (
       await ScoreSaberLeaderboardStarChangeModel.find({
         leaderboardId: leaderboard.id,

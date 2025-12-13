@@ -34,11 +34,7 @@ export default class CacheService {
    * @param cacheKey the key used for caching.
    * @param fetchFn the function to fetch data if it's not in cache.
    */
-  public static async fetchWithCache<T>(
-    cache: CacheId,
-    cacheKey: string,
-    fetchFn: () => Promise<T>
-  ): Promise<T> {
+  public static async fetchWithCache<T>(cache: CacheId, cacheKey: string, fetchFn: () => Promise<T>): Promise<T> {
     // Skip cache in development
     if (!isProduction()) {
       return fetchFn();

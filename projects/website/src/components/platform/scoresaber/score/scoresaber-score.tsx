@@ -54,8 +54,7 @@ export default function ScoreSaberScoreDisplay({
   }, [score]);
 
   const accuracy = (baseScore / leaderboard.maxScore) * 100;
-  const pp =
-    baseScore === score.score ? score.pp : ScoreSaberCurve.getPp(leaderboard.stars, accuracy);
+  const pp = baseScore === score.score ? score.pp : ScoreSaberCurve.getPp(leaderboard.stars, accuracy);
 
   return (
     <div className={cn(settings?.disablePadding ? "" : "pt-2 pb-2", "relative")}>
@@ -112,18 +111,10 @@ export default function ScoreSaberScoreDisplay({
         </div>
 
         {!isMobile && (
-          <FallbackLink
-            href={score.isTracked ? `/score/${score.scoreId}` : undefined}
-          >
-            <SimpleTooltip
-              display={score.isTracked ? "View score" : "No score data found :("}
-              className="px-1"
-            >
+          <FallbackLink href={score.isTracked ? `/score/${score.scoreId}` : undefined}>
+            <SimpleTooltip display={score.isTracked ? "View score" : "No score data found :("} className="px-1">
               <ChevronRight
-                className={cn(
-                  "h-6 w-4",
-                  score.isTracked ? "cursor-pointer" : "cursor-not-allowed text-red-400"
-                )}
+                className={cn("h-6 w-4", score.isTracked ? "cursor-pointer" : "cursor-not-allowed text-red-400")}
               />
             </SimpleTooltip>
           </FallbackLink>

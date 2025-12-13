@@ -102,8 +102,7 @@ export class Player {
    * Gets the number of days tracked for this player.
    */
   public async getDaysTracked(): Promise<number> {
-    const PlayerHistoryEntryModel = (await import("./player-history-entry"))
-      .PlayerHistoryEntryModel;
+    const PlayerHistoryEntryModel = (await import("./player-history-entry")).PlayerHistoryEntryModel;
     return await PlayerHistoryEntryModel.countDocuments({ playerId: this._id });
   }
 }

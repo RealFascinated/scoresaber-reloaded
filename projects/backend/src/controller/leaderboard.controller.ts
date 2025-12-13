@@ -83,11 +83,7 @@ export default class LeaderboardController {
       description: "Fetch the per hmd usage for a leaderboard",
     },
   })
-  public async getPlaysByHmd({
-    params: { id },
-  }: {
-    params: { id: string };
-  }): Promise<PlaysByHmdResponse> {
+  public async getPlaysByHmd({ params: { id } }: { params: { id: string } }): Promise<PlaysByHmdResponse> {
     return LeaderboardHmdService.getPlaysByHmd(id);
   }
 }

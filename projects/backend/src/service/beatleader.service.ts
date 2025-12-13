@@ -61,22 +61,16 @@ export default class BeatLeaderService {
    * @param scoreId the id of the score
    * @private
    */
-  public static async getAdditionalScoreData(
-    scoreId: number
-  ): Promise<AdditionalScoreData | undefined> {
-    return CacheService.fetchWithCache(
-      CacheId.AdditionalScoreData,
-      `additional-score-data:${scoreId}`,
-      async () => {
-        const additionalData = await AdditionalScoreDataModel.findOne({
-          scoreId: scoreId,
-        }).lean();
-        if (!additionalData) {
-          return undefined;
-        }
-        return this.additionalScoreDataToObject(additionalData);
+  public static async getAdditionalScoreData(scoreId: number): Promise<AdditionalScoreData | undefined> {
+    return CacheService.fetchWithCache(CacheId.AdditionalScoreData, `additional-score-data:${scoreId}`, async () => {
+      const additionalData = await AdditionalScoreDataModel.findOne({
+        scoreId: scoreId,
+      }).lean();
+      if (!additionalData) {
+        return undefined;
       }
-    );
+      return this.additionalScoreDataToObject(additionalData);
+    });
   }
 
   /**
@@ -159,26 +153,18 @@ export default class BeatLeaderService {
         if (isProduction() && player && (player.trackReplays || isTop50GlobalScore)) {
           try {
             const replayId = getBeatLeaderReplayId(data);
-            const replay = await Request.get<ArrayBuffer>(
-              `https://cdn.replays.beatleader.xyz/${replayId}`,
-              { returns: "arraybuffer" }
-            );
+            const replay = await Request.get<ArrayBuffer>(`https://cdn.replays.beatleader.xyz/${replayId}`, {
+              returns: "arraybuffer",
+            });
 
             if (replay !== undefined) {
-              await MinioService.saveFile(
-                MinioBucket.BeatLeaderReplays,
-                `${replayId}`,
-                Buffer.from(replay)
-              );
+              await MinioService.saveFile(MinioBucket.BeatLeaderReplays, `${replayId}`, Buffer.from(replay));
               return true;
             }
           } catch (error) {
             sendEmbedToChannel(
               DiscordChannels.BACKEND_LOGS,
-              createGenericEmbed(
-                "BeatLeader Replays",
-                `Failed to save replay for ${score.id}: ${error}`
-              )
+              createGenericEmbed("BeatLeader Replays", `Failed to save replay for ${score.id}: ${error}`)
             );
             Logger.error(`Failed to save replay for ${score.id}: ${error}`);
           }
@@ -290,9 +276,7 @@ export default class BeatLeaderService {
    * @returns the converted additional score data
    * @private
    */
-  private static additionalScoreDataToObject(
-    additionalData: AdditionalScoreData
-  ): AdditionalScoreData {
+  private static additionalScoreDataToObject(additionalData: AdditionalScoreData): AdditionalScoreData {
     return {
       ...removeObjectFields<AdditionalScoreData>(additionalData, ["_id", "__v"]),
     } as AdditionalScoreData;

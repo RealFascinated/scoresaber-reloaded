@@ -75,11 +75,7 @@ export function FriendRanking() {
                 getCountryRank={player => player.countryRank}
                 firstColumnWidth={firstColumnWidth}
                 renderWorth={() => (
-                  <PlayerPpDisplay
-                    pp={player.pp}
-                    className="ml-auto min-w-[70px]"
-                    relativePerformancePoints={false}
-                  />
+                  <PlayerPpDisplay pp={player.pp} className="ml-auto min-w-[70px]" relativePerformancePoints={false} />
                 )}
               />
             ))}

@@ -31,9 +31,7 @@ export default function ScoreSaberScoreInfo({
             <p className="font-semibold">#-</p>
           </SimpleTooltip>
         ) : (
-          <SimpleLink
-            href={`/leaderboard/${leaderboard.id}/${getPageFromRank(score.rank, 12)}`}
-          >
+          <SimpleLink href={`/leaderboard/${leaderboard.id}/${getPageFromRank(score.rank, 12)}`}>
             <p
               className={cn(
                 getRankColor(score.rank),

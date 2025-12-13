@@ -32,10 +32,7 @@ function getStableCacheKey(querier: () => unknown, deps?: unknown[]): string {
  * @param deps - Optional dependency array for the query function
  * @returns The query result, or the previous value if the current result is undefined
  */
-export function useStableLiveQuery<T>(
-  querier: () => T | Promise<T> | undefined,
-  deps?: unknown[]
-): T | undefined {
+export function useStableLiveQuery<T>(querier: () => T | Promise<T> | undefined, deps?: unknown[]): T | undefined {
   // Generate a stable cache key for this query
   const cacheKey = useMemo(() => getStableCacheKey(querier, deps), [querier, deps]);
 

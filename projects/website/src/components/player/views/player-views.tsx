@@ -3,13 +3,7 @@
 import { HistoryMode } from "@/common/player/history-mode";
 import { Spinner } from "@/components/spinner";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useIsMobile } from "@/contexts/viewport-context";
 import useDatabase from "@/hooks/use-database";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
@@ -83,13 +77,7 @@ function ViewSelector({
   );
 }
 
-function DateRangeSelector({
-  daysAgo,
-  onDaysChange,
-}: {
-  daysAgo: number;
-  onDaysChange: (days: number) => void;
-}) {
+function DateRangeSelector({ daysAgo, onDaysChange }: { daysAgo: number; onDaysChange: (days: number) => void }) {
   return (
     <Select
       value={daysAgo === Infinity ? "Infinity" : daysAgo.toString()}
@@ -139,10 +127,7 @@ export default function PlayerViews({ player }: { player: ScoreSaberPlayer }) {
             icon: GlobeAmericasIcon,
             showDateRangeSelector: true,
             chart: (_: ScoreSaberPlayer, statisticHistory: PlayerStatisticHistory) => (
-              <PlayerSimpleRankingChart
-                statisticHistory={statisticHistory}
-                daysAmount={actualDaysAgo}
-              />
+              <PlayerSimpleRankingChart statisticHistory={statisticHistory} daysAmount={actualDaysAgo} />
             ),
           },
         ]
@@ -153,10 +138,7 @@ export default function PlayerViews({ player }: { player: ScoreSaberPlayer }) {
             icon: GlobeAmericasIcon,
             showDateRangeSelector: true,
             chart: (_: ScoreSaberPlayer, statisticHistory: PlayerStatisticHistory) => (
-              <PlayerAdvancedRankingChart
-                statisticHistory={statisticHistory}
-                daysAmount={actualDaysAgo}
-              />
+              <PlayerAdvancedRankingChart statisticHistory={statisticHistory} daysAmount={actualDaysAgo} />
             ),
           },
         ]),
@@ -207,11 +189,7 @@ export default function PlayerViews({ player }: { player: ScoreSaberPlayer }) {
   return (
     <div className="flex flex-col gap-2">
       <ViewSelector views={views} selectedView={selectedView} onViewSelect={handleViewSelect} />
-      {statisticHistory && historyMode !== undefined ? (
-        selectedView.chart(player, statisticHistory)
-      ) : (
-        <Loading />
-      )}
+      {statisticHistory && historyMode !== undefined ? selectedView.chart(player, statisticHistory) : <Loading />}
       {selectedView.showDateRangeSelector && (
         <div className="flex items-center justify-between gap-2">
           <DateRangeSelector daysAgo={daysAgo} onDaysChange={handleDaysChange} />

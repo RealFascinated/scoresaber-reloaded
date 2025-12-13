@@ -10,10 +10,7 @@ export default function LeaderboardSongName({
   clickableSongName: boolean;
 }) {
   return clickableSongName && leaderboardId != undefined ? (
-    <SimpleLink
-      href={`/leaderboard/${leaderboardId}`}
-      className="group w-fit cursor-pointer text-left transition-all"
-    >
+    <SimpleLink href={`/leaderboard/${leaderboardId}`} className="group w-fit cursor-pointer text-left transition-all">
       <p className="text-song-name group-hover:text-song-name/80 line-clamp-2 w-fit font-semibold transition-all">
         {leaderboardName}
       </p>

@@ -64,9 +64,7 @@ export default class ScoreSaberService {
         const basePlayer = {
           id: player.id,
           name: player.name,
-          avatar: isOculusAccount
-            ? "https://cdn.fascinated.cc/assets/oculus-avatar.jpg"
-            : player.profilePicture,
+          avatar: isOculusAccount ? "https://cdn.fascinated.cc/assets/oculus-avatar.jpg" : player.profilePicture,
           country: player.country,
           rank: player.rank,
           countryRank: player.countryRank,
@@ -108,10 +106,7 @@ export default class ScoreSaberService {
           options?.getHmdBreakdown && player !== undefined
             ? (async () => {
                 const hmdUsage = await PlayerHmdService.getPlayerHmdBreakdown(id);
-                const totalKnownHmdScores = Object.values(hmdUsage).reduce(
-                  (sum, count) => sum + count,
-                  0
-                );
+                const totalKnownHmdScores = Object.values(hmdUsage).reduce((sum, count) => sum + count, 0);
                 return Object.fromEntries(
                   Object.entries(hmdUsage).map(([hmd, count]) => [
                     hmd,
@@ -120,9 +115,7 @@ export default class ScoreSaberService {
                 ) as Record<HMD, number>;
               })()
             : undefined,
-          options?.setInactivesRank
-            ? PlayerCoreService.getPlayerRankIncludingInactives(id)
-            : undefined,
+          options?.setInactivesRank ? PlayerCoreService.getPlayerRankIncludingInactives(id) : undefined,
           options?.setMedalsRank ? PlayerMedalsService.getPlayerMedalRank(id) : undefined,
         ]);
 
@@ -137,9 +130,7 @@ export default class ScoreSaberService {
           ...basePlayer,
           bio: {
             lines: player.bio ? sanitize(player.bio).split("\n") : [],
-            linesStripped: player.bio
-              ? sanitize(player.bio.replace(/<[^>]+>/g, "")).split("\n")
-              : [],
+            linesStripped: player.bio ? sanitize(player.bio.replace(/<[^>]+>/g, "")).split("\n") : [],
           },
           badges:
             player.badges?.map(badge => ({
@@ -163,9 +154,7 @@ export default class ScoreSaberService {
             medals: medalsRank ? getPageFromRank(medalsRank, 50) : undefined,
           },
           rankPercentile:
-            (player.rank /
-              (((await MetricsService.getMetric(MetricType.ACTIVE_ACCOUNTS))?.value as number) ||
-                1)) *
+            (player.rank / (((await MetricsService.getMetric(MetricType.ACTIVE_ACCOUNTS))?.value as number) || 1)) *
             100,
         } as ScoreSaberPlayer;
       }
@@ -180,10 +169,7 @@ export default class ScoreSaberService {
    * @param useShortCache whether to use the short cache
    * @returns the player token
    */
-  public static async getCachedPlayer(
-    id: string,
-    useShortCache: boolean = false
-  ): Promise<ScoreSaberPlayerToken> {
+  public static async getCachedPlayer(id: string, useShortCache: boolean = false): Promise<ScoreSaberPlayerToken> {
     const cacheKey = `scoresaber:${useShortCache ? "temp-" : ""}cached-player:${id}`;
 
     const cachedData = await redisClient.get(cacheKey);

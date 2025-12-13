@@ -33,16 +33,10 @@ type LeaderboardDataProps = {
   initialCategory?: ScoreModeEnum;
 };
 
-export function ScoreSaberLeaderboardData({
-  initialLeaderboard,
-  initialPage,
-  initialCategory,
-}: LeaderboardDataProps) {
+export function ScoreSaberLeaderboardData({ initialLeaderboard, initialPage, initialCategory }: LeaderboardDataProps) {
   const country = useSearchParams().get("country");
   const isMobile = useIsMobile();
-  const [currentLeaderboardId, setCurrentLeaderboardId] = useState(
-    initialLeaderboard.leaderboard.id
-  );
+  const [currentLeaderboardId, setCurrentLeaderboardId] = useState(initialLeaderboard.leaderboard.id);
 
   const { data } = useQuery({
     queryKey: ["leaderboard", currentLeaderboardId],
@@ -68,9 +62,7 @@ export function ScoreSaberLeaderboardData({
               {/* Charts Grid */}
               <div className="grid grid-cols-1 gap-2">
                 {/* PP Chart */}
-                {leaderboard.stars > 0 && leaderboard.maxScore > 0 && (
-                  <LeaderboardPpChart leaderboard={leaderboard} />
-                )}
+                {leaderboard.stars > 0 && leaderboard.maxScore > 0 && <LeaderboardPpChart leaderboard={leaderboard} />}
               </div>
             </div>
           )}
@@ -90,24 +82,21 @@ export function ScoreSaberLeaderboardData({
               />
 
               {/* Star Change History */}
-              {leaderboardResponse.starChangeHistory &&
-                leaderboardResponse.starChangeHistory.length > 0 && (
-                  <div className="pt-2">
-                    <LeaderboardStarChangeHistory
-                      key={leaderboardResponse.leaderboard.id}
-                      starChangeHistory={leaderboardResponse.starChangeHistory}
-                    />
-                  </div>
-                )}
+              {leaderboardResponse.starChangeHistory && leaderboardResponse.starChangeHistory.length > 0 && (
+                <div className="pt-2">
+                  <LeaderboardStarChangeHistory
+                    key={leaderboardResponse.leaderboard.id}
+                    starChangeHistory={leaderboardResponse.starChangeHistory}
+                  />
+                </div>
+              )}
             </Card>
 
             {/* Desktop Charts Grid */}
             {!isMobile && (
               <div className="grid grid-cols-1 gap-2 lg:grid-cols-2">
                 {/* PP Chart */}
-                {leaderboard.stars > 0 && leaderboard.maxScore > 0 && (
-                  <LeaderboardPpChart leaderboard={leaderboard} />
-                )}
+                {leaderboard.stars > 0 && leaderboard.maxScore > 0 && <LeaderboardPpChart leaderboard={leaderboard} />}
               </div>
             )}
           </div>

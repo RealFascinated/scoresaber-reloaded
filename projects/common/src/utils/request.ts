@@ -26,9 +26,7 @@ class Request {
   private static buildUrl(baseUrl: string, searchParams?: Record<string, unknown>): string {
     if (!searchParams) return baseUrl;
 
-    const params = new URLSearchParams(
-      Object.entries(searchParams).map(([key, value]) => [key, String(value)])
-    );
+    const params = new URLSearchParams(Object.entries(searchParams).map(([key, value]) => [key, String(value)]));
     const separator = baseUrl.includes("?") ? "&" : "?";
     return `${baseUrl}${separator}${params.toString()}`;
   }
@@ -121,10 +119,7 @@ class Request {
    * @param returns the returns type
    * @returns the response
    */
-  private static handleResponse<T>(
-    response: Response | undefined,
-    returns: RequestReturns
-  ): Promise<T | undefined> {
+  private static handleResponse<T>(response: Response | undefined, returns: RequestReturns): Promise<T | undefined> {
     if (!response) {
       return Promise.resolve(undefined);
     }

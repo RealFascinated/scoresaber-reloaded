@@ -13,9 +13,7 @@ export default class ActiveAccountsMetric extends NumberMetric {
   }
 
   public async collect(): Promise<Point | undefined> {
-    const count = await ApiServiceRegistry.getInstance()
-      .getScoreSaberService()
-      .lookupActivePlayerCount();
+    const count = await ApiServiceRegistry.getInstance().getScoreSaberService().lookupActivePlayerCount();
     if (count === undefined) {
       return undefined;
     }

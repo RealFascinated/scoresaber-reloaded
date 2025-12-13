@@ -20,26 +20,10 @@ export function MapStats({ beatSaver }: MapAndScoreData) {
       {/* Map Stats */}
       {beatSaver && beatSaver.difficulty && (
         <div className="flex flex-wrap justify-center gap-2">
-          <StatValue
-            name="Length"
-            icon={<TimerIcon className="h-4 w-4" />}
-            value={formatTime(metadata.duration)}
-          />
-          <StatValue
-            name="BPM"
-            icon={<MusicIcon className="h-4 w-4" />}
-            value={formatNumberWithCommas(metadata.bpm)}
-          />
-          <StatValue
-            name="NPS"
-            icon={<DrumIcon className="h-4 w-4" />}
-            value={beatSaver.difficulty.nps.toFixed(2)}
-          />
-          <StatValue
-            name="NJS"
-            icon={<GaugeIcon className="h-4 w-4" />}
-            value={beatSaver.difficulty.njs.toFixed(2)}
-          />
+          <StatValue name="Length" icon={<TimerIcon className="h-4 w-4" />} value={formatTime(metadata.duration)} />
+          <StatValue name="BPM" icon={<MusicIcon className="h-4 w-4" />} value={formatNumberWithCommas(metadata.bpm)} />
+          <StatValue name="NPS" icon={<DrumIcon className="h-4 w-4" />} value={beatSaver.difficulty.nps.toFixed(2)} />
+          <StatValue name="NJS" icon={<GaugeIcon className="h-4 w-4" />} value={beatSaver.difficulty.njs.toFixed(2)} />
           <StatValue
             name="Notes"
             icon={<CubeIcon className="h-4 w-4" />}

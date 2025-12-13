@@ -1,10 +1,7 @@
 import { DetailType } from "@ssr/common/detail-type";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import {
-  ScoreSaberScore,
-  ScoreSaberScoreModel,
-} from "@ssr/common/model/score/impl/scoresaber-score";
+import { ScoreSaberScore, ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import { Page, Pagination } from "@ssr/common/pagination";
 import { PlayerScore } from "@ssr/common/score/player-score";
 import { processInBatches } from "@ssr/common/utils/batch-utils";
@@ -49,9 +46,7 @@ export class PlayerFriendScoresService {
     ]);
 
     if (!friendScores.length) {
-      throw new NotFoundError(
-        `No scores found for friends "${friendIds.join(",")}" in leaderboard "${leaderboardId}"`
-      );
+      throw new NotFoundError(`No scores found for friends "${friendIds.join(",")}" in leaderboard "${leaderboardId}"`);
     }
 
     // Process scores in parallel with batching
@@ -136,9 +131,7 @@ export class PlayerFriendScoresService {
         });
 
         // Create a map for quick leaderboard lookup
-        const leaderboardMap = new Map(
-          leaderboardResults.map(result => [result.leaderboard.id, result])
-        );
+        const leaderboardMap = new Map(leaderboardResults.map(result => [result.leaderboard.id, result]));
 
         // Process scores
         const scores = await Promise.all(
@@ -150,14 +143,10 @@ export class PlayerFriendScoresService {
             }
 
             return {
-              score: await ScoreCoreService.insertScoreData(
-                score,
-                leaderboardResponse.leaderboard,
-                {
-                  insertPlayerInfo: true,
-                  removeScoreWeightAndRank: true,
-                }
-              ),
+              score: await ScoreCoreService.insertScoreData(score, leaderboardResponse.leaderboard, {
+                insertPlayerInfo: true,
+                removeScoreWeightAndRank: true,
+              }),
               leaderboard: leaderboardResponse.leaderboard,
               beatSaver: leaderboardResponse.beatsaver,
             };

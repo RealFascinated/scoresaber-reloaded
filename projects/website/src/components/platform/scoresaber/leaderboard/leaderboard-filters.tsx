@@ -63,9 +63,7 @@ export default function ScoreSaberLeaderboardFilters() {
                   return;
                 }
                 database.setSetting(SettingIds.DefaultLeaderboardCountry, filter.country);
-                toast.success(
-                  `Set ${countryFilter.find(c => c.key === filter.country)?.friendlyName} as default`
-                );
+                toast.success(`Set ${countryFilter.find(c => c.key === filter.country)?.friendlyName} as default`);
               }}
             >
               <FaCheck className="h-4 w-4" />

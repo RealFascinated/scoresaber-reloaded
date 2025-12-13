@@ -78,9 +78,7 @@ const PlayerSearch = ({
           <SearchX className="text-muted-foreground/50 mb-3 size-10" />
           <p className="text-muted-foreground mb-1 text-sm font-medium">No players found</p>
           <p className="text-muted-foreground/70 text-center text-xs">
-            {query.length > 0
-              ? "Try adjusting your search query"
-              : "Start typing to search for players"}
+            {query.length > 0 ? "Try adjusting your search query" : "Start typing to search for players"}
           </p>
         </div>
       ) : (
@@ -97,11 +95,7 @@ const PlayerSearch = ({
               .filter(player => !excludePlayerIds.includes(player.id))
               .sort((a, b) => a.rank - b.rank)
               .map(player => (
-                <PlayerSearchResultItem
-                  key={player.id}
-                  player={player}
-                  onClick={() => handlePlayerSelect(player)}
-                />
+                <PlayerSearchResultItem key={player.id} player={player} onClick={() => handlePlayerSelect(player)} />
               ))}
           </div>
         </div>

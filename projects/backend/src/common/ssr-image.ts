@@ -32,9 +32,7 @@ function registerFont(filename: string, fontName: string): void {
   }
 
   // If all paths failed, throw error with helpful message
-  throw new Error(
-    `Failed to register font ${fontName} from ${filename}. Tried paths: ${paths.join(", ")}`
-  );
+  throw new Error(`Failed to register font ${fontName} from ${filename}. Tried paths: ${paths.join(", ")}`);
 }
 
 registerFont("Roboto-Medium.ttf", "SSR");
@@ -93,11 +91,7 @@ export default class SSRImage {
     }
   }
 
-  drawText(
-    lines: ImageTextOptions[],
-    placement: TextPlacement = "top-left",
-    lineHeightMultiplier: number = 0.9
-  ): void {
+  drawText(lines: ImageTextOptions[], placement: TextPlacement = "top-left", lineHeightMultiplier: number = 0.9): void {
     // Calculate total height of all text including wrapped lines
     let totalHeight = 0;
     lines.forEach(line => {

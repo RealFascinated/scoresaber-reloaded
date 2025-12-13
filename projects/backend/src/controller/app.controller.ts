@@ -32,9 +32,7 @@ export default class AppController {
     const mongo = mongoose.connection.readyState == 1;
     const redis = redisClient.status === "ready";
     if (!mongo || !redis) {
-      throw new InternalServerError(
-        `One of our databases is not connected, please contact an admin :(`
-      );
+      throw new InternalServerError(`One of our databases is not connected, please contact an admin :(`);
     }
 
     return {

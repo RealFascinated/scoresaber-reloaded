@@ -17,9 +17,7 @@ export default class SystemNetworkIoMetric extends NumberMetric {
     const interfaceStats = networkStats.find(stat => {
       const isUp = stat.operstate === "up";
       const hasCorrectPrefix =
-        stat.iface.startsWith("eno") ||
-        stat.iface.startsWith("enp") ||
-        stat.iface.startsWith("eth");
+        stat.iface.startsWith("eno") || stat.iface.startsWith("enp") || stat.iface.startsWith("eth");
 
       return isUp && hasCorrectPrefix;
     });
@@ -32,8 +30,6 @@ export default class SystemNetworkIoMetric extends NumberMetric {
       return undefined;
     }
 
-    return this.getPointBase()
-      .floatField("in", interfaceStats.rx_sec)
-      .floatField("out", interfaceStats.tx_sec);
+    return this.getPointBase().floatField("in", interfaceStats.rx_sec).floatField("out", interfaceStats.tx_sec);
   }
 }

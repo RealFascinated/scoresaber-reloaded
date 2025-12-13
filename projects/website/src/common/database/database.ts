@@ -196,9 +196,7 @@ export default class Database extends Dexie {
       })
     );
 
-    return players
-      .filter((player): player is ScoreSaberPlayer => player !== undefined)
-      .sort((a, b) => a.rank - b.rank);
+    return players.filter((player): player is ScoreSaberPlayer => player !== undefined).sort((a, b) => a.rank - b.rank);
   }
 
   /**
@@ -291,8 +289,7 @@ export default class Database extends Dexie {
     // Only initialize if not already done
     if (this.chartLegendsCache === undefined) {
       this.chartLegendsCache =
-        (await this.getSetting<Record<string, Record<string, boolean>>>(SettingIds.ChartLegends)) ||
-        {};
+        (await this.getSetting<Record<string, Record<string, boolean>>>(SettingIds.ChartLegends)) || {};
     }
   }
 
@@ -316,10 +313,7 @@ export default class Database extends Dexie {
    * @param state the state of the chart
    */
   async setChartLegend(id: string, title: string, state: boolean) {
-    const setting = await this.getSetting<Record<string, Record<string, boolean>>>(
-      SettingIds.ChartLegends,
-      {}
-    );
+    const setting = await this.getSetting<Record<string, Record<string, boolean>>>(SettingIds.ChartLegends, {});
 
     if (!setting) {
       return;
@@ -340,10 +334,7 @@ export default class Database extends Dexie {
    * @returns the background cover
    */
   async getBackgroundCover(): Promise<string> {
-    const cover = await this.getSetting<string>(
-      SettingIds.BackgroundCover,
-      BACKGROUND_COVERS[0].id
-    );
+    const cover = await this.getSetting<string>(SettingIds.BackgroundCover, BACKGROUND_COVERS[0].id);
     // Default to the first cover if no cover is set
     return cover ?? BACKGROUND_COVERS[0].id;
   }
@@ -363,10 +354,7 @@ export default class Database extends Dexie {
    * @returns the custom background url
    */
   async getCustomBackgroundUrl(): Promise<string> {
-    return (await this.getSetting<string>(
-      SettingIds.CustomBackgroundUrl,
-      BACKGROUND_COVERS[0].value
-    ))!;
+    return (await this.getSetting<string>(SettingIds.CustomBackgroundUrl, BACKGROUND_COVERS[0].value))!;
   }
 
   /**
@@ -455,10 +443,7 @@ export default class Database extends Dexie {
    * @returns the what if range setting
    */
   async getWhatIfRange(): Promise<[number, number]> {
-    return (await this.getSetting<[number, number]>(
-      SettingIds.WhatIfRange,
-      DEFAULT_WHAT_IF_RANGE
-    ))!;
+    return (await this.getSetting<[number, number]>(SettingIds.WhatIfRange, DEFAULT_WHAT_IF_RANGE))!;
   }
 
   /**
@@ -533,10 +518,7 @@ export default class Database extends Dexie {
    * @returns the website landing setting
    */
   async getWebsiteLanding(): Promise<WebsiteLanding> {
-    return (await this.getSetting<WebsiteLanding>(
-      SettingIds.WebsiteLanding,
-      WebsiteLanding.PLAYER_HOME
-    ))!;
+    return (await this.getSetting<WebsiteLanding>(SettingIds.WebsiteLanding, WebsiteLanding.PLAYER_HOME))!;
   }
 
   /**

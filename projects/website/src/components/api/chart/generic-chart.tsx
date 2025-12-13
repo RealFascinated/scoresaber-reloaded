@@ -27,16 +27,7 @@ import { useMemo } from "react";
 import { Line } from "react-chartjs-2";
 
 // Register only the required components
-Chart.register(
-  LineElement,
-  PointElement,
-  BarElement,
-  LinearScale,
-  CategoryScale,
-  Legend,
-  Tooltip,
-  BarController
-);
+Chart.register(LineElement, PointElement, BarElement, LinearScale, CategoryScale, Legend, Tooltip, BarController);
 
 // Extend Chart.js types to support mixed chart types
 declare module "chart.js" {
@@ -71,8 +62,7 @@ const GenericChart = ({ config, labels }: Props) => {
         label: dataset.label,
         data: dataset.data,
         borderColor: dataset.color,
-        backgroundColor:
-          dataset.type === "bar" || dataset.type === "point" ? dataset.color : undefined,
+        backgroundColor: dataset.type === "bar" || dataset.type === "point" ? dataset.color : undefined,
         fill: false,
         lineTension: 0.4,
         spanGaps: true,

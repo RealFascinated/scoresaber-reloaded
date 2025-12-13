@@ -42,9 +42,7 @@ export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
             {leaderboard.leaderboard.ranked ? (
               <>
                 <StarFilledIcon className="h-[15px] w-[15px] text-white" />
-                <p className="text-xs font-semibold text-white">
-                  {leaderboardData.stars.toFixed(2)}
-                </p>
+                <p className="text-xs font-semibold text-white">{leaderboardData.stars.toFixed(2)}</p>
               </>
             ) : (
               <p className="text-xs font-semibold text-white">
@@ -101,9 +99,7 @@ export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
           value={
             <p>
               {formatNumberWithCommas(leaderboardData.plays)}{" "}
-              <span className="text-muted-foreground">
-                ({leaderboardData.dailyPlays} in the last 24h)
-              </span>
+              <span className="text-muted-foreground">({leaderboardData.dailyPlays} in the last 24h)</span>
             </p>
           }
         />
@@ -113,9 +109,7 @@ export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
           <LeaderboardInfoItem
             label="Ranked"
             value={
-              <SimpleTooltip
-                display={formatDate(leaderboard.leaderboard.dateRanked, "Do MMMM, YYYY HH:mm a")}
-              >
+              <SimpleTooltip display={formatDate(leaderboard.leaderboard.dateRanked, "Do MMMM, YYYY HH:mm a")}>
                 {formatDate(
                   leaderboard.leaderboard.dateRanked
                     ? leaderboard.leaderboard.dateRanked
@@ -132,9 +126,7 @@ export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
           <LeaderboardInfoItem
             label="Created"
             value={
-              <SimpleTooltip
-                display={formatDate(leaderboard.leaderboard.timestamp, "Do MMMM, YYYY HH:mm a")}
-              >
+              <SimpleTooltip display={formatDate(leaderboard.leaderboard.timestamp, "Do MMMM, YYYY HH:mm a")}>
                 {formatDate(leaderboard.leaderboard.timestamp, "Do MMMM, YYYY")}
               </SimpleTooltip>
             }
@@ -142,10 +134,7 @@ export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
         )}
 
         {/* Status */}
-        <LeaderboardInfoItem
-          label="Status"
-          value={<LeaderboardStatus leaderboard={leaderboard.leaderboard} />}
-        />
+        <LeaderboardInfoItem label="Status" value={<LeaderboardStatus leaderboard={leaderboard.leaderboard} />} />
       </div>
 
       <Separator />
@@ -153,10 +142,7 @@ export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
       {/* Map Description */}
       {beatSaverMap && description && (
         <div className="bg-muted/30 w-full rounded-lg p-3 break-all">
-          {(showExpandButton && !expanded
-            ? description.slice(0, descriptionMaxSize) + "..."
-            : description
-          )
+          {(showExpandButton && !expanded ? description.slice(0, descriptionMaxSize) + "..." : description)
             .split("\n")
             .map((line, index) => {
               return (

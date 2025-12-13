@@ -27,9 +27,7 @@ export function ComparisonScoreBadges({ score, leaderboard }: ComparisonScoreBad
               if (!score.pp) {
                 return undefined;
               }
-              return (
-                <ScorePpBadge score={score} leaderboard={leaderboard} showDifference={false} />
-              );
+              return <ScorePpBadge score={score} leaderboard={leaderboard} showDifference={false} />;
             },
           },
         ]

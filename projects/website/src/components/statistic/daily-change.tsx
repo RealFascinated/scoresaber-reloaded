@@ -37,14 +37,7 @@ interface DailyChangeProps {
   useTooltip?: boolean;
 }
 
-export function DailyChange({
-  type,
-  player,
-  change,
-  tooltip,
-  className,
-  useTooltip = true,
-}: DailyChangeProps) {
+export function DailyChange({ type, player, change, tooltip, className, useTooltip = true }: DailyChangeProps) {
   const formatValue = type.type == "Performance Points" ? formatPp : formatNumberWithCommas;
   if (!change && player !== undefined) {
     change = type.value?.(player, "daily");

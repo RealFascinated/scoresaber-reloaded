@@ -44,10 +44,7 @@ export class PlayerHmdService {
    * @param limit the limit of scores to get
    * @returns the player's HMD breakdown
    */
-  public static async getPlayerHmdBreakdown(
-    playerId: string,
-    limit?: number
-  ): Promise<Record<HMD, number>> {
+  public static async getPlayerHmdBreakdown(playerId: string, limit?: number): Promise<Record<HMD, number>> {
     const hmds = await ScoreSaberScoreModel.aggregate([
       { $match: { playerId: playerId } }, // get all scores for the player
       { $sort: { timestamp: -1 } }, // sort by timestamp descending

@@ -4,10 +4,7 @@ import Avatar from "@/components/avatar";
 import ScoreSaberScoreDisplay from "@/components/platform/scoresaber/score/scoresaber-score";
 import SimpleLink from "@/components/simple-link";
 import Logger from "@ssr/common/logger";
-import {
-  getScoreSaberLeaderboardFromToken,
-  getScoreSaberScoreFromToken,
-} from "@ssr/common/token-creators";
+import { getScoreSaberLeaderboardFromToken, getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 import ScoreSaberPlayerScoreToken from "@ssr/common/types/token/scoresaber/player-score";
 import { ScoreSaberWebsocketMessageToken } from "@ssr/common/types/token/scoresaber/websocket/websocket-message";
 import { parseDate } from "@ssr/common/utils/time-utils";
@@ -15,8 +12,7 @@ import { useEffect, useState } from "react";
 import useWebSocket, { ReadyState } from "react-use-websocket";
 
 export default function ScoreFeed() {
-  const { readyState, lastJsonMessage } =
-    useWebSocket<ScoreSaberWebsocketMessageToken>("wss://scoresaber.com/ws");
+  const { readyState, lastJsonMessage } = useWebSocket<ScoreSaberWebsocketMessageToken>("wss://scoresaber.com/ws");
   const [scores, setScores] = useState<ScoreSaberPlayerScoreToken[]>([]);
 
   useEffect(() => {
@@ -58,20 +54,11 @@ export default function ScoreFeed() {
         return (
           <div key={score.scoreId} className="flex flex-col py-2">
             <div className="flex flex-row items-center gap-2">
-              <Avatar
-                src={player.profilePicture!}
-                className="h-6 w-6"
-                alt={`${player.name}'s Profile Picture`}
-              />
+              <Avatar src={player.profilePicture!} className="h-6 w-6" alt={`${player.name}'s Profile Picture`} />
               <SimpleLink href={`/player/${player.id}`}>
-                <span className="text-primary hover:text-primary/80 transition-all">
-                  {player.name}
-                </span>
+                <span className="text-primary hover:text-primary/80 transition-all">{player.name}</span>
               </SimpleLink>
-              <p className="text-xs text-gray-400">
-                {" "}
-                on {scoreToken.score.deviceHmd || "Unknown Device"}
-              </p>
+              <p className="text-xs text-gray-400"> on {scoreToken.score.deviceHmd || "Unknown Device"}</p>
             </div>
             <ScoreSaberScoreDisplay
               key={score.scoreId}

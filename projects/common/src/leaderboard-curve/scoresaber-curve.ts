@@ -103,10 +103,7 @@ function calcRawPpAtIdx(bottomScores: Array<any>, idx: number, expected: number)
  * @private
  */
 function getTotalWeightedPp(ppArray: Array<number>, startIdx = 0) {
-  return ppArray.reduce(
-    (cumulative, pp, idx) => cumulative + Math.pow(WEIGHT_COEFFICIENT, idx + startIdx) * pp,
-    0
-  );
+  return ppArray.reduce((cumulative, pp, idx) => cumulative + Math.pow(WEIGHT_COEFFICIENT, idx + startIdx) * pp, 0);
 }
 
 /**

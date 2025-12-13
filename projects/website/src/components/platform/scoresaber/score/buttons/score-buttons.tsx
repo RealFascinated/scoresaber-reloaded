@@ -120,9 +120,7 @@ export default function ScoreSaberScoreButtons({
         <div
           className="flex min-w-0 flex-wrap justify-end gap-1"
           style={{
-            width: isMobile
-              ? "auto"
-              : (buttons.filter(button => button.display(buttonProps)).length / 2) * 40,
+            width: isMobile ? "auto" : (buttons.filter(button => button.display(buttonProps)).length / 2) * 40,
           }}
         >
           {buttons
@@ -138,37 +136,28 @@ export default function ScoreSaberScoreButtons({
         <div className={cn("flex gap-1", isMobile ? "flex-row" : "flex-col")}>
           {/* Edit score button */}
           {score && leaderboard && updateScore && !hideAccuracyChanger && (
-            <ScoreSaberScoreEditorButton
-              score={score}
-              leaderboard={leaderboard}
-              updateScore={updateScore}
-            />
+            <ScoreSaberScoreEditorButton score={score} leaderboard={leaderboard} updateScore={updateScore} />
           )}
 
           {/* View Leaderboard button */}
-          {leaderboardExpanded != undefined &&
-            setIsLeaderboardExpanded != undefined &&
-            !hideLeaderboardDropdown && (
-              <SimpleTooltip display="View score details and leaderboard scores">
-                <Button
-                  variant="ghost"
-                  className="h-[28px] w-[28px] p-0"
-                  onClick={handleDropdownToggle}
-                  disabled={isLeaderboardLoading || isPending}
-                >
-                  {isLeaderboardLoading || isPending ? (
-                    <ArrowPathIcon className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <ArrowDownIcon
-                      className={cn(
-                        "h-4 w-4 transition-transform duration-200",
-                        leaderboardExpanded ? "" : "rotate-180"
-                      )}
-                    />
-                  )}
-                </Button>
-              </SimpleTooltip>
-            )}
+          {leaderboardExpanded != undefined && setIsLeaderboardExpanded != undefined && !hideLeaderboardDropdown && (
+            <SimpleTooltip display="View score details and leaderboard scores">
+              <Button
+                variant="ghost"
+                className="h-[28px] w-[28px] p-0"
+                onClick={handleDropdownToggle}
+                disabled={isLeaderboardLoading || isPending}
+              >
+                {isLeaderboardLoading || isPending ? (
+                  <ArrowPathIcon className="h-4 w-4 animate-spin" />
+                ) : (
+                  <ArrowDownIcon
+                    className={cn("h-4 w-4 transition-transform duration-200", leaderboardExpanded ? "" : "rotate-180")}
+                  />
+                )}
+              </Button>
+            </SimpleTooltip>
+          )}
         </div>
       </div>
     </div>

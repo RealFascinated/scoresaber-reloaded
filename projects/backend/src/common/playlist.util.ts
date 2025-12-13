@@ -12,10 +12,7 @@ import SSRImage, { ImageTextOptions } from "./ssr-image";
  * @param toSnipe the player to snipe
  * @returns the base64 encoded image
  */
-export async function generateSnipePlaylistImage(
-  settings: SnipeSettings,
-  toSnipe: ScoreSaberPlayer
-): Promise<string> {
+export async function generateSnipePlaylistImage(settings: SnipeSettings, toSnipe: ScoreSaberPlayer): Promise<string> {
   const sortFieldNames: Record<string, string> = {
     pp: "PP",
     date: "Date",
@@ -104,9 +101,7 @@ export async function generateSnipePlaylistImage(
  * @param settings the custom ranked playlist settings
  * @returns the base64 encoded image
  */
-export async function generateCustomRankedPlaylistImage(
-  settings: CustomRankedPlaylist
-): Promise<string> {
+export async function generateCustomRankedPlaylistImage(settings: CustomRankedPlaylist): Promise<string> {
   const type = capitalizeFirstLetter(settings.sort);
   const sortNames: Record<string, string> = {
     dateRanked: "Date Ranked",

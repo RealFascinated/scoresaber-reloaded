@@ -17,10 +17,7 @@ export function ScoreReplayButton({ additionalData }: { additionalData: Addition
 
   return (
     <ScoreButton
-      href={viewer.generateUrl(
-        additionalData.scoreId,
-        getBeatLeaderReplayRedirectUrl(additionalData)
-      )}
+      href={viewer.generateUrl(additionalData.scoreId, getBeatLeaderReplayRedirectUrl(additionalData))}
       tooltip={<p>Click to view the score replay!</p>}
     >
       <BeatSaberPepeLogo />

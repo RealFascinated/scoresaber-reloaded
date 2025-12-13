@@ -1,12 +1,5 @@
 import { AutoIncrementID } from "@typegoose/auto-increment";
-import {
-  getModelForClass,
-  index,
-  modelOptions,
-  plugin,
-  ReturnModelType,
-  Severity,
-} from "@typegoose/typegoose";
+import { getModelForClass, index, modelOptions, plugin, ReturnModelType, Severity } from "@typegoose/typegoose";
 import { Document } from "mongoose";
 import { ScoreSaberLeaderboardPlayerInfoToken } from "../../../types/token/scoresaber/leaderboard-player-info";
 import { PreviousScore } from "../previous-score";

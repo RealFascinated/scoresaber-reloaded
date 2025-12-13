@@ -99,11 +99,7 @@ async function loadStatusData(status: HttpSiraStatus_Status) {
           DetailType.FULL
         ),
         leaderboard: (
-          await ssrApi.fetchLeaderboardByHash(
-            beatmap.songHash,
-            beatmap.difficultyEnum,
-            beatmap.characteristic
-          )
+          await ssrApi.fetchLeaderboardByHash(beatmap.songHash, beatmap.difficultyEnum, beatmap.characteristic)
         )?.leaderboard,
       },
     });

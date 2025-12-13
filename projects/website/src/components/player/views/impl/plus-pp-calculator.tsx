@@ -81,10 +81,7 @@ export default function PlusPpCalculator({ player }: { player: ScoreSaberPlayer 
   }, []);
 
   // Calculate PP from stars and accuracy
-  const getPpFromStarsAndAcc = useCallback(
-    (stars: number, acc: number) => ScoreSaberCurve.getPp(stars, acc),
-    []
-  );
+  const getPpFromStarsAndAcc = useCallback((stars: number, acc: number) => ScoreSaberCurve.getPp(stars, acc), []);
 
   // Calculate what PP gain you would get from current stars/accuracy
   const calculatedPpGain = useMemo(() => {
@@ -104,10 +101,7 @@ export default function PlusPpCalculator({ player }: { player: ScoreSaberPlayer 
   // Initialize stars based on 95% accuracy and +1pp when data loads
   useEffect(() => {
     if (sortedScores.length > 0 && rawPp > 0 && !hasInitialized.current) {
-      const { stars: initialStars, accuracy: adjustedAccuracy } = getStarsAndAccuracyForPp(
-        rawPp,
-        defaultAccuracy
-      );
+      const { stars: initialStars, accuracy: adjustedAccuracy } = getStarsAndAccuracyForPp(rawPp, defaultAccuracy);
       setStars(initialStars);
       setAccuracy(adjustedAccuracy);
       hasInitialized.current = true;
@@ -212,8 +206,7 @@ export default function PlusPpCalculator({ player }: { player: ScoreSaberPlayer 
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label className="text-sm font-medium">
-                Accuracy:{" "}
-                <span className="font-semibold text-green-400">{accuracy.toFixed(2)}%</span>
+                Accuracy: <span className="font-semibold text-green-400">{accuracy.toFixed(2)}%</span>
               </Label>
               <SimpleTooltip display={<p>Save current accuracy as your default</p>}>
                 <button

@@ -95,12 +95,7 @@ Click here to view the scores for ${player.name}`,
 export default async function PlayerPage(props: Props) {
   const { player, platformType } = await getPlayerData(props);
   if (player == undefined) {
-    return (
-      <NotFound
-        title="Player Not Found"
-        description="The player you were looking for could not be found"
-      />
-    );
+    return <NotFound title="Player Not Found" description="The player you were looking for could not be found" />;
   }
   return (
     <main className="flex w-full justify-center">

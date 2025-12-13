@@ -5,22 +5,10 @@ import SimpleTooltip from "@/components/simple-tooltip";
 import { StarIcon } from "@heroicons/react/24/solid";
 import { LeaderboardStarChange } from "@ssr/common/response/leaderboard-star-change";
 import { formatDate, timeAgo } from "@ssr/common/utils/time-utils";
-import {
-  ArrowRightIcon,
-  ChevronDownIcon,
-  ChevronUpIcon,
-  TrendingDownIcon,
-  TrendingUpIcon,
-} from "lucide-react";
+import { ArrowRightIcon, ChevronDownIcon, ChevronUpIcon, TrendingDownIcon, TrendingUpIcon } from "lucide-react";
 import { useState } from "react";
 
-function LeaderboardStarChangeHistoryButton({
-  onClick,
-  isOpen,
-}: {
-  onClick: () => void;
-  isOpen: boolean;
-}) {
+function LeaderboardStarChangeHistoryButton({ onClick, isOpen }: { onClick: () => void; isOpen: boolean }) {
   return (
     <button
       className="border-border bg-background/95 text-foreground hover:bg-accent/50 hover:border-primary/50 focus-visible:ring-primary/50 flex items-center gap-(--spacing-sm) rounded-(--radius-lg) border px-(--spacing-lg) py-(--spacing-sm) text-sm font-medium transition-colors duration-200 focus-visible:ring-2 focus-visible:outline-none"
@@ -33,11 +21,7 @@ function LeaderboardStarChangeHistoryButton({
   );
 }
 
-export function LeaderboardStarChangeHistory({
-  starChangeHistory,
-}: {
-  starChangeHistory: LeaderboardStarChange[];
-}) {
+export function LeaderboardStarChangeHistory({ starChangeHistory }: { starChangeHistory: LeaderboardStarChange[] }) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -49,17 +33,14 @@ export function LeaderboardStarChangeHistory({
             <div className="space-y-1">
               {starChangeHistory.map((starChange, index) => {
                 const isCurrent = index === 0;
-                const from =
-                  starChange.previousStars == 0 ? "Unranked" : starChange.previousStars.toFixed(2);
+                const from = starChange.previousStars == 0 ? "Unranked" : starChange.previousStars.toFixed(2);
                 const to = starChange.newStars == 0 ? "Unranked" : starChange.newStars.toFixed(2);
 
                 // Determine colors and icons based on star change
                 const isIncrease = starChange.newStars > starChange.previousStars;
                 const isDecrease = starChange.newStars < starChange.previousStars;
-                const isUnrankedToRanked =
-                  starChange.previousStars === 0 && starChange.newStars > 0;
-                const isRankedToUnranked =
-                  starChange.previousStars > 0 && starChange.newStars === 0;
+                const isUnrankedToRanked = starChange.previousStars === 0 && starChange.newStars > 0;
+                const isRankedToUnranked = starChange.previousStars > 0 && starChange.newStars === 0;
 
                 // Determine change type for better visual representation
                 const changeType = isUnrankedToRanked
@@ -81,22 +62,12 @@ export function LeaderboardStarChangeHistory({
                     {/* Timestamp and change indicator */}
                     <div className="flex items-center gap-(--spacing-sm)">
                       <SimpleTooltip
-                        display={
-                          <p>
-                            {formatDate(new Date(starChange.timestamp), "Do MMMM, YYYY HH:mm a")}
-                          </p>
-                        }
+                        display={<p>{formatDate(new Date(starChange.timestamp), "Do MMMM, YYYY HH:mm a")}</p>}
                       >
-                        <span className="text-muted-foreground">
-                          {timeAgo(starChange.timestamp)}
-                        </span>
+                        <span className="text-muted-foreground">{timeAgo(starChange.timestamp)}</span>
                       </SimpleTooltip>
-                      {changeType === "increase" && (
-                        <TrendingUpIcon className="h-3 w-3 text-green-500" />
-                      )}
-                      {changeType === "decrease" && (
-                        <TrendingDownIcon className="h-3 w-3 text-red-500" />
-                      )}
+                      {changeType === "increase" && <TrendingUpIcon className="h-3 w-3 text-green-500" />}
+                      {changeType === "decrease" && <TrendingDownIcon className="h-3 w-3 text-red-500" />}
                       {changeType === "new" && <StarIcon className="h-3 w-3 text-yellow-500" />}
                       {changeType === "removed" && <StarIcon className="h-3 w-3 text-gray-500" />}
                       {isCurrent && (

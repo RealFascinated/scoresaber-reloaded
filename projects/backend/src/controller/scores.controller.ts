@@ -36,13 +36,7 @@ export default class ScoresController {
     query: { search?: string; comparisonPlayerId?: string };
   }): Promise<unknown> {
     return (
-      await PlayerScoresService.getScoreSaberLivePlayerScores(
-        id,
-        page,
-        sort,
-        search,
-        comparisonPlayerId
-      )
+      await PlayerScoresService.getScoreSaberLivePlayerScores(id, page, sort, search, comparisonPlayerId)
     ).toJSON();
   }
 
@@ -79,9 +73,7 @@ export default class ScoresController {
     };
     query: ScoreQuery;
   }): Promise<PlayerScoresResponse> {
-    return (
-      await PlayerScoresService.getPlayerScores(mode, id, page, field, direction, query)
-    ).toJSON();
+    return (await PlayerScoresService.getPlayerScores(mode, id, page, field, direction, query)).toJSON();
   }
 
   @Get("/leaderboard/:id/:page", {

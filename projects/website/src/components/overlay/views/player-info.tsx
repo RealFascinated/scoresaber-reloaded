@@ -38,9 +38,7 @@ export default function OverlayPlayerInfoView({ player }: OverlayPlayerInfoProps
               className="text-xl"
               useTooltip={false}
             />
-            {!!plusOnePp && (
-              <span className="text-muted-foreground text-xl">(+1 = {formatPp(plusOnePp)}pp)</span>
-            )}
+            {!!plusOnePp && <span className="text-muted-foreground text-xl">(+1 = {formatPp(plusOnePp)}pp)</span>}
           </p>
         </div>
 

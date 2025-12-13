@@ -30,11 +30,7 @@ export class PlayerSearchService {
 
     const scoreSaberPlayerTokens = scoreSaberResponse?.players;
     const uniquePlayerIds = [
-      ...new Set(
-        foundPlayers
-          .map(player => player._id)
-          .concat(scoreSaberPlayerTokens?.map(token => token.id) ?? [])
-      ),
+      ...new Set(foundPlayers.map(player => player._id).concat(scoreSaberPlayerTokens?.map(token => token.id) ?? [])),
     ];
 
     // Get players from ScoreSaber
@@ -44,8 +40,7 @@ export class PlayerSearchService {
           ScoreSaberService.getPlayer(
             id,
             DetailType.BASIC,
-            scoreSaberPlayerTokens?.find(token => token.id === id) ||
-              (await ScoreSaberService.getCachedPlayer(id)), // Use the cache for inactive players
+            scoreSaberPlayerTokens?.find(token => token.id === id) || (await ScoreSaberService.getCachedPlayer(id)), // Use the cache for inactive players
             { setInactivesRank: false, setMedalsRank: false, getHmdBreakdown: false }
           )
         )
@@ -116,9 +111,7 @@ export class PlayerSearchService {
 
     const [foundPlayers, countryCounts] = await Promise.all([
       country
-        ? ApiServiceRegistry.getInstance()
-            .getScoreSaberService()
-            .lookupPlayersByCountry(page, country, search)
+        ? ApiServiceRegistry.getInstance().getScoreSaberService().lookupPlayersByCountry(page, country, search)
         : ApiServiceRegistry.getInstance().getScoreSaberService().lookupPlayers(page, search),
       getPlayerCountryCounts(),
     ]);

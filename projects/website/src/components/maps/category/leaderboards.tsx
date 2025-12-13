@@ -112,8 +112,8 @@ export default function Leaderboards() {
                           <SimpleTooltip
                             display={
                               <p>
-                                {leaderboard.status == "Unranked" ? "Created" : leaderboard.status}{" "}
-                                {timeAgo(date)} ({formatDate(date, "Do MMMM, YYYY HH:mm a")})
+                                {leaderboard.status == "Unranked" ? "Created" : leaderboard.status} {timeAgo(date)} (
+                                {formatDate(date, "Do MMMM, YYYY HH:mm a")})
                               </p>
                             }
                           >

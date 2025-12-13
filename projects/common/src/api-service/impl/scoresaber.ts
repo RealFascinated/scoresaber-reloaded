@@ -76,9 +76,7 @@ export class ScoreSaberService extends ApiService {
   public async searchPlayers(query: string): Promise<ScoreSaberPlayerSearchToken | undefined> {
     const before = performance.now();
     this.log(`Searching for players matching "${query}"...`);
-    const results = await this.fetch<ScoreSaberPlayerSearchToken>(
-      SEARCH_PLAYERS_ENDPOINT.replace(":query", query)
-    );
+    const results = await this.fetch<ScoreSaberPlayerSearchToken>(SEARCH_PLAYERS_ENDPOINT.replace(":query", query));
     if (results === undefined) {
       return undefined;
     }
@@ -86,9 +84,7 @@ export class ScoreSaberService extends ApiService {
       return undefined;
     }
     results.players.sort((a, b) => a.rank - b.rank);
-    this.log(
-      `Found ${results.players.length} players in ${formatDuration(performance.now() - before)}`
-    );
+    this.log(`Found ${results.players.length} players in ${formatDuration(performance.now() - before)}`);
     return results;
   }
 
@@ -121,22 +117,16 @@ export class ScoreSaberService extends ApiService {
    * @param page the page to get players for
    * @returns the players on the page, or undefined
    */
-  public async lookupPlayers(
-    page: number,
-    search?: string
-  ): Promise<ScoreSaberPlayersPageToken | undefined> {
+  public async lookupPlayers(page: number, search?: string): Promise<ScoreSaberPlayersPageToken | undefined> {
     const before = performance.now();
     this.log(`Looking up players on page "${page}"...`);
     const response = await this.fetch<ScoreSaberPlayersPageToken>(
-      LOOKUP_PLAYERS_ENDPOINT.replace(":page", page.toString()) +
-        (search ? `&search=${search}` : "")
+      LOOKUP_PLAYERS_ENDPOINT.replace(":page", page.toString()) + (search ? `&search=${search}` : "")
     );
     if (response === undefined) {
       return undefined;
     }
-    this.log(
-      `Found ${response.players.length} players in ${formatDuration(performance.now() - before)}`
-    );
+    this.log(`Found ${response.players.length} players in ${formatDuration(performance.now() - before)}`);
     return response;
   }
 
@@ -155,17 +145,13 @@ export class ScoreSaberService extends ApiService {
     const before = performance.now();
     this.log(`Looking up players on page "${page}" for country "${country}"...`);
     const response = await this.fetch<ScoreSaberPlayersPageToken>(
-      LOOKUP_PLAYERS_BY_COUNTRY_ENDPOINT.replace(":page", page.toString()).replace(
-        ":country",
-        country
-      ) + (search ? `&search=${search}` : "")
+      LOOKUP_PLAYERS_BY_COUNTRY_ENDPOINT.replace(":page", page.toString()).replace(":country", country) +
+        (search ? `&search=${search}` : "")
     );
     if (response === undefined) {
       return undefined;
     }
-    this.log(
-      `Found ${response.players.length} players in ${formatDuration(performance.now() - before)}`
-    );
+    this.log(`Found ${response.players.length} players in ${formatDuration(performance.now() - before)}`);
     return response;
   }
 
@@ -254,9 +240,7 @@ export class ScoreSaberService extends ApiService {
     if (response === undefined) {
       return undefined;
     }
-    this.log(
-      `Found leaderboard "${leaderboardId}" in ${formatDuration(performance.now() - before)}`
-    );
+    this.log(`Found leaderboard "${leaderboardId}" in ${formatDuration(performance.now() - before)}`);
     return response;
   }
 
@@ -273,9 +257,7 @@ export class ScoreSaberService extends ApiService {
     gameMode: string
   ): Promise<ScoreSaberLeaderboardToken | undefined> {
     const before = performance.now();
-    this.log(
-      `Looking up leaderboard by hash for "${hash}", difficulty "${difficulty}", gamemode "${gameMode}"...`
-    );
+    this.log(`Looking up leaderboard by hash for "${hash}", difficulty "${difficulty}", gamemode "${gameMode}"...`);
     const response = await this.fetch<ScoreSaberLeaderboardToken>(
       LOOKUP_LEADERBOARD_BY_HASH_ENDPOINT.replace(":query", hash)
         .replace(":difficulty", getDifficulty(difficulty).diffId + "")
@@ -312,30 +294,23 @@ export class ScoreSaberService extends ApiService {
     const before = performance.now();
     this.log(`Looking up leaderboard page "${page}"...`);
 
-    const response = await this.fetch<ScoreSaberLeaderboardPageToken>(
-      LOOKUP_LEADERBOARDS_ENDPOINT,
-      {
-        searchParams: {
-          page: page.toString(),
-          ...(options?.ranked ? { ranked: options.ranked } : {}),
-          ...(options?.qualified ? { qualified: options.qualified } : {}),
-          ...(options?.verified ? { verified: options.verified } : {}),
-          ...(options?.category ? { category: options.category } : {}),
-          ...(options?.stars
-            ? { minStar: options.stars.min ?? 0, maxStar: options.stars.max }
-            : {}),
-          ...(options?.sort ? { sort: options.sort } : {}),
-          ...(options?.search ? { search: options.search } : {}),
-        },
-        ...(options?.priority ? { priority: options.priority } : {}),
-      }
-    );
+    const response = await this.fetch<ScoreSaberLeaderboardPageToken>(LOOKUP_LEADERBOARDS_ENDPOINT, {
+      searchParams: {
+        page: page.toString(),
+        ...(options?.ranked ? { ranked: options.ranked } : {}),
+        ...(options?.qualified ? { qualified: options.qualified } : {}),
+        ...(options?.verified ? { verified: options.verified } : {}),
+        ...(options?.category ? { category: options.category } : {}),
+        ...(options?.stars ? { minStar: options.stars.min ?? 0, maxStar: options.stars.max } : {}),
+        ...(options?.sort ? { sort: options.sort } : {}),
+        ...(options?.search ? { search: options.search } : {}),
+      },
+      ...(options?.priority ? { priority: options.priority } : {}),
+    });
     if (response === undefined) {
       return undefined;
     }
-    this.log(
-      `Found ${response.leaderboards.length} leaderboards in ${formatDuration(performance.now() - before)}`
-    );
+    this.log(`Found ${response.leaderboards.length} leaderboards in ${formatDuration(performance.now() - before)}`);
     return response;
   }
 
@@ -344,9 +319,7 @@ export class ScoreSaberService extends ApiService {
    *
    * @param query the query to search for
    */
-  public async searchLeaderboards(
-    query: string
-  ): Promise<ScoreSaberLeaderboardPageToken | undefined> {
+  public async searchLeaderboards(query: string): Promise<ScoreSaberLeaderboardPageToken | undefined> {
     const before = performance.now();
     this.log(`Searching for leaderboards matching "${query}"...`);
     const response = await this.fetch<ScoreSaberLeaderboardPageToken>(
@@ -355,9 +328,7 @@ export class ScoreSaberService extends ApiService {
     if (response === undefined) {
       return undefined;
     }
-    this.log(
-      `Found ${response.leaderboards.length} leaderboards in ${formatDuration(performance.now() - before)}`
-    );
+    this.log(`Found ${response.leaderboards.length} leaderboards in ${formatDuration(performance.now() - before)}`);
     return response;
   }
 
@@ -380,10 +351,8 @@ export class ScoreSaberService extends ApiService {
     const before = performance.now();
     this.log(`Looking up scores for leaderboard "${leaderboardId}", page "${page}"...`);
     const response = await this.fetch<ScoreSaberLeaderboardScoresPageToken>(
-      LOOKUP_LEADERBOARD_SCORES_ENDPOINT.replace(":id", leaderboardId.toString()).replace(
-        ":page",
-        page.toString()
-      ) + (options?.country ? `&countries=${options.country}` : ""),
+      LOOKUP_LEADERBOARD_SCORES_ENDPOINT.replace(":id", leaderboardId.toString()).replace(":page", page.toString()) +
+        (options?.country ? `&countries=${options.country}` : ""),
       {
         ...(options?.priority ? { priority: options.priority } : {}),
       }
@@ -420,9 +389,7 @@ export class ScoreSaberService extends ApiService {
       return undefined;
     }
 
-    this.log(
-      `Found ${response.length} ranking requests in ${formatDuration(performance.now() - before)}`
-    );
+    this.log(`Found ${response.length} ranking requests in ${formatDuration(performance.now() - before)}`);
     return {
       nextInQueue: nextInQueueResponse || [],
       openRankUnrank: openRankUnrankResponse || [],
@@ -437,9 +404,7 @@ export class ScoreSaberService extends ApiService {
    * @returns the result of the refresh
    */
   public async refreshPlayer(id: string): Promise<PlayerRefreshResponse | undefined> {
-    const result = await this.fetch<PlayerRefreshResponse>(
-      REFRESH_PLAYER_ENDPOINT.replace(":id", id)
-    );
+    const result = await this.fetch<PlayerRefreshResponse>(REFRESH_PLAYER_ENDPOINT.replace(":id", id));
     return result;
   }
 }

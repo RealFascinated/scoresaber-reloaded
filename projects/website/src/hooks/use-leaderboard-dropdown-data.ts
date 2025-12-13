@@ -33,9 +33,7 @@ export function useLeaderboardDropdownData(
     queryKey: [`leaderboardDropdownData:${leaderboardId}`, leaderboardId, scoreId, isExpanded],
     queryFn: async () => {
       return {
-        scoreStats: additionalData
-          ? await ssrApi.fetchScoreStats(additionalData.scoreId)
-          : undefined,
+        scoreStats: additionalData ? await ssrApi.fetchScoreStats(additionalData.scoreId) : undefined,
       };
     },
     staleTime: 30000,

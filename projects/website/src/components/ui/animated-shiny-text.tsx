@@ -7,11 +7,7 @@ interface AnimatedShinyTextProps {
   shimmerWidth?: number;
 }
 
-const AnimatedShinyText: FC<AnimatedShinyTextProps> = ({
-  children,
-  className,
-  shimmerWidth = 100,
-}) => {
+const AnimatedShinyText: FC<AnimatedShinyTextProps> = ({ children, className, shimmerWidth = 100 }) => {
   return (
     <p
       style={

@@ -4,13 +4,7 @@ import { SettingIds, WebsiteLanding } from "@/common/database/database";
 import { BACKGROUND_COVERS } from "@/components/background-cover";
 import { Form, FormDescription, FormLabel } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useBackgroundCover } from "@/hooks/use-background-cover";
 import useDatabase from "@/hooks/use-database";
 import { useSettingsForm } from "@/hooks/use-settings-form";
@@ -43,16 +37,15 @@ const BackgroundCoverControl = (props: {
     name?: string;
   };
 }) => {
-  const { selectedOption, customValue, handleSelectChange, handleCustomInputChange } =
-    useBackgroundCover(props.field.onChange);
+  const { selectedOption, customValue, handleSelectChange, handleCustomInputChange } = useBackgroundCover(
+    props.field.onChange
+  );
 
   return (
     <div className="flex flex-col space-y-2 md:flex-row md:items-start md:justify-between md:space-y-0">
       <div className="flex-1 space-y-0 md:pr-4">
         <FormLabel className="text-sm leading-tight font-normal">Background Cover</FormLabel>
-        <FormDescription className="text-xs leading-tight">
-          Change the background cover of the website
-        </FormDescription>
+        <FormDescription className="text-xs leading-tight">Change the background cover of the website</FormDescription>
         {selectedOption === "custom" && (
           <Input
             placeholder="Hex color or image URL"

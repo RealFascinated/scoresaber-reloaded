@@ -1,22 +1,14 @@
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import Logger from "@ssr/common/logger";
 import { Player, PlayerModel } from "@ssr/common/model/player/player";
-import {
-  PlayerHistoryEntry,
-  PlayerHistoryEntryModel,
-} from "@ssr/common/model/player/player-history-entry";
+import { PlayerHistoryEntry, PlayerHistoryEntryModel } from "@ssr/common/model/player/player-history-entry";
 import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import { removeObjectFields } from "@ssr/common/object.util";
 import { PlayerStatisticHistory } from "@ssr/common/player/player-statistic-history";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import { processInBatches } from "@ssr/common/utils/batch-utils";
 import { parseRankHistory } from "@ssr/common/utils/player-utils";
-import {
-  formatDateMinimal,
-  getDaysAgoDate,
-  getMidnightAlignedDate,
-  isToday,
-} from "@ssr/common/utils/time-utils";
+import { formatDateMinimal, getDaysAgoDate, getMidnightAlignedDate, isToday } from "@ssr/common/utils/time-utils";
 import { EmbedBuilder } from "discord.js";
 import { redisClient } from "../..";
 import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
@@ -39,9 +31,7 @@ export class PlayerHistoryService {
     const now = new Date();
     Logger.info("Starting player statistics update...");
 
-    const firstPage = await ApiServiceRegistry.getInstance()
-      .getScoreSaberService()
-      .lookupPlayers(1);
+    const firstPage = await ApiServiceRegistry.getInstance().getScoreSaberService().lookupPlayers(1);
     if (firstPage == undefined) {
       Logger.error("Failed to fetch players on page 1, skipping player statistics update...");
       return;
@@ -60,9 +50,7 @@ export class PlayerHistoryService {
       if (page % 10 === 0 || page === 1 || page === pages) {
         Logger.info(`Fetching page ${page} of ${pages}...`);
       }
-      const response = await ApiServiceRegistry.getInstance()
-        .getScoreSaberService()
-        .lookupPlayers(page);
+      const response = await ApiServiceRegistry.getInstance().getScoreSaberService().lookupPlayers(page);
       if (page == undefined) {
         Logger.error(`Failed to fetch players on page ${page}, skipping page...`);
         errorCount++;
@@ -87,10 +75,7 @@ export class PlayerHistoryService {
         // Update the player's inactive status if it has changed
         foundPlayer.inactive !== player.inactive &&
           (async () => {
-            PlayerModel.updateOne(
-              { _id: foundPlayer._id },
-              { $set: { inactive: player.inactive } }
-            );
+            PlayerModel.updateOne({ _id: foundPlayer._id }, { $set: { inactive: player.inactive } });
             redisClient.del(`scoresaber:cached-player:${foundPlayer._id}`);
           })(),
       ]);
@@ -113,10 +98,7 @@ export class PlayerHistoryService {
     Logger.info(`Found ${playerIds.size} active players from ScoreSaber API`);
 
     // Mark players as inactive
-    const result = await PlayerModel.updateMany(
-      { _id: { $nin: activePlayerIdsArray } },
-      { $set: { inactive: true } }
-    );
+    const result = await PlayerModel.updateMany({ _id: { $nin: activePlayerIdsArray } }, { $set: { inactive: true } });
 
     if (result.modifiedCount > 0) {
       Logger.info(`Marked ${result.modifiedCount} players as inactive`);
@@ -157,8 +139,7 @@ export class PlayerHistoryService {
   ): Promise<void> {
     const before = performance.now();
     const player =
-      playerToken ??
-      (await ApiServiceRegistry.getInstance().getScoreSaberService().lookupPlayer(foundPlayer._id));
+      playerToken ?? (await ApiServiceRegistry.getInstance().getScoreSaberService().lookupPlayer(foundPlayer._id));
 
     // Don't track inactive players
     if (!player || player.inactive) {
@@ -176,10 +157,7 @@ export class PlayerHistoryService {
         date: getMidnightAlignedDate(trackTime),
       }).lean();
 
-      const updatedHistory = await PlayerHistoryService.createPlayerStatistic(
-        player,
-        existingEntry ?? undefined
-      );
+      const updatedHistory = await PlayerHistoryService.createPlayerStatistic(player, existingEntry ?? undefined);
 
       await PlayerHistoryEntryModel.findOneAndUpdate(
         { playerId: foundPlayer._id, date: getMidnightAlignedDate(trackTime) },
@@ -191,9 +169,7 @@ export class PlayerHistoryService {
     await PlayerModel.updateOne({ _id: foundPlayer._id }, { $set: { lastTracked: new Date() } });
     foundPlayer.lastTracked = new Date();
 
-    Logger.info(
-      `Tracked player "${foundPlayer._id}" in ${(performance.now() - before).toFixed(0)}ms`
-    );
+    Logger.info(`Tracked player "${foundPlayer._id}" in ${(performance.now() - before).toFixed(0)}ms`);
   }
 
   /**
@@ -212,9 +188,7 @@ export class PlayerHistoryService {
 
     // Ensure start date is before end date
     const [queryStart, queryEnd] =
-      startTimestamp > endTimestamp
-        ? [endTimestamp, startTimestamp]
-        : [startTimestamp, endTimestamp];
+      startTimestamp > endTimestamp ? [endTimestamp, startTimestamp] : [startTimestamp, endTimestamp];
 
     // Run queries in parallel
     const [entries, playerRankHistory] = await Promise.all([
@@ -239,15 +213,10 @@ export class PlayerHistoryService {
     }
 
     // Process rank history in parallel chunks
-    const daysDiff =
-      Math.abs(Math.ceil((endTimestamp - startTimestamp) / (1000 * 60 * 60 * 24))) + 1;
+    const daysDiff = Math.abs(Math.ceil((endTimestamp - startTimestamp) / (1000 * 60 * 60 * 24))) + 1;
     let daysAgo = 0;
 
-    for (
-      let i = playerRankHistory.length - 1;
-      i >= Math.max(0, playerRankHistory.length - daysDiff - 1);
-      i--
-    ) {
+    for (let i = playerRankHistory.length - 1; i >= Math.max(0, playerRankHistory.length - daysDiff - 1); i--) {
       const rank = playerRankHistory[i];
       if (rank === INACTIVE_RANK || rank === 0) continue;
 
@@ -298,10 +267,7 @@ export class PlayerHistoryService {
     }).lean();
 
     // Generate fresh data, merging with existing if available
-    const todayData = await PlayerHistoryService.createPlayerStatistic(
-      player,
-      existingEntry ?? undefined
-    );
+    const todayData = await PlayerHistoryService.createPlayerStatistic(player, existingEntry ?? undefined);
 
     return projection && Object.keys(projection).length > 0
       ? Object.fromEntries(Object.entries(todayData).filter(([key]) => key in projection))
@@ -312,10 +278,7 @@ export class PlayerHistoryService {
    * Seeds a player's history with data from ScoreSaber API.
    * This method populates the player's rank history from their ScoreSaber profile.
    */
-  public static async seedPlayerRankHistory(
-    player: Player,
-    playerToken: ScoreSaberPlayerToken
-  ): Promise<void> {
+  public static async seedPlayerRankHistory(player: Player, playerToken: ScoreSaberPlayerToken): Promise<void> {
     const playerRankHistory = parseRankHistory(playerToken);
     let daysAgo = 0;
 
@@ -324,11 +287,7 @@ export class PlayerHistoryService {
       if (rank === INACTIVE_RANK || rank === 0) continue;
 
       const date = getMidnightAlignedDate(getDaysAgoDate(daysAgo));
-      await PlayerHistoryEntryModel.findOneAndUpdate(
-        { playerId: player._id, date },
-        { rank },
-        { upsert: true }
-      );
+      await PlayerHistoryEntryModel.findOneAndUpdate({ playerId: player._id, date }, { rank }, { upsert: true });
       daysAgo += 1;
     }
   }
@@ -358,8 +317,7 @@ export class PlayerHistoryService {
       rankedScoresImproved: existingEntry?.rankedScoresImproved ?? 0,
       unrankedScoresImproved: existingEntry?.unrankedScoresImproved ?? 0,
       totalScores: playerToken.scoreStats.totalPlayCount,
-      totalUnrankedScores:
-        playerToken.scoreStats.totalPlayCount - playerToken.scoreStats.rankedPlayCount,
+      totalUnrankedScores: playerToken.scoreStats.totalPlayCount - playerToken.scoreStats.rankedPlayCount,
       totalRankedScores: playerToken.scoreStats.rankedPlayCount,
       totalScore: playerToken.scoreStats.totalScore,
       totalRankedScore: playerToken.scoreStats.totalRankedScore,
@@ -382,10 +340,7 @@ export class PlayerHistoryService {
   ): Promise<void> {
     const today = getMidnightAlignedDate(new Date());
 
-    const getCounterToIncrement = (
-      isRanked: boolean,
-      isImprovement: boolean
-    ): keyof PlayerHistoryEntry => {
+    const getCounterToIncrement = (isRanked: boolean, isImprovement: boolean): keyof PlayerHistoryEntry => {
       if (isRanked) {
         return isImprovement ? "rankedScoresImproved" : "rankedScores";
       }

@@ -27,9 +27,7 @@ export function ScorePpBadge({ score, leaderboard, showDifference = true }: Scor
   }
   const weightedPp = weight ? pp * weight : undefined;
   const fcPp =
-    !score.fullCombo && fcAccuracy
-      ? ScoreSaberCurve.getPp(leaderboard.stars, fcAccuracy).toFixed(0)
-      : undefined;
+    !score.fullCombo && fcAccuracy ? ScoreSaberCurve.getPp(leaderboard.stars, fcAccuracy).toFixed(0) : undefined;
 
   return (
     <>
@@ -53,18 +51,11 @@ export function ScorePpBadge({ score, leaderboard, showDifference = true }: Scor
         >
           <p>{formatPp(pp)}pp</p>
         </SimpleTooltip>
-        {previousScore &&
-          previousScore.change &&
-          previousScore.pp !== score.pp &&
-          showDifference && (
-            <SimpleTooltip display={<p>Previous PP: {formatPp(previousScore.pp)}pp</p>}>
-              <Change
-                className="text-xs"
-                change={ensurePositiveNumber(previousScore.change.pp)}
-                isPp
-              />
-            </SimpleTooltip>
-          )}
+        {previousScore && previousScore.change && previousScore.pp !== score.pp && showDifference && (
+          <SimpleTooltip display={<p>Previous PP: {formatPp(previousScore.pp)}pp</p>}>
+            <Change className="text-xs" change={ensurePositiveNumber(previousScore.change.pp)} isPp />
+          </SimpleTooltip>
+        )}
       </div>
     </>
   );

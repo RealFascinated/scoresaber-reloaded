@@ -6,10 +6,7 @@ import { InternalServerError } from "@ssr/common/error/internal-server-error";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger from "@ssr/common/logger";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import {
-  ScoreSaberScore,
-  ScoreSaberScoreModel,
-} from "@ssr/common/model/score/impl/scoresaber-score";
+import { ScoreSaberScore, ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import { Playlist, PlaylistModel } from "@ssr/common/playlist/playlist";
 import { parseCustomRankedPlaylistSettings } from "@ssr/common/playlist/ranked/custom-ranked-playlist";
 import { SnipePlaylist } from "@ssr/common/playlist/snipe/snipe-playlist";
@@ -109,9 +106,7 @@ export default class PlaylistService {
    * @param leaderboards the leaderboards to use, if not provided, all ranked leaderboards will be used
    * @returns the created playlist
    */
-  public static async createRankedPlaylist(
-    leaderboards?: ScoreSaberLeaderboard[]
-  ): Promise<Playlist> {
+  public static async createRankedPlaylist(leaderboards?: ScoreSaberLeaderboard[]): Promise<Playlist> {
     if (!leaderboards) {
       leaderboards = await LeaderboardLeaderboardsService.getRankedLeaderboards();
     }
@@ -137,9 +132,7 @@ export default class PlaylistService {
    * Creates a playlist for qualified maps
    * @private
    */
-  public static async createQualifiedPlaylist(
-    leaderboards?: ScoreSaberLeaderboard[]
-  ): Promise<Playlist> {
+  public static async createQualifiedPlaylist(leaderboards?: ScoreSaberLeaderboard[]): Promise<Playlist> {
     if (!leaderboards) {
       leaderboards = await LeaderboardLeaderboardsService.getQualifiedLeaderboards();
     }
@@ -178,9 +171,7 @@ export default class PlaylistService {
     const { maps } = this.processLeaderboards(leaderboards);
     const highlightedIds = leaderboards
       .map(map => map.id) // Add base leaderboard IDs
-      .concat(
-        leaderboards.flatMap(map => map.difficulties.map(difficulty => difficulty.leaderboardId))
-      ) // Add difficulties to the highlighted IDs
+      .concat(leaderboards.flatMap(map => map.difficulties.map(difficulty => difficulty.leaderboardId))) // Add difficulties to the highlighted IDs
       .filter((id, index, self) => self.indexOf(id) === index); // Remove duplicates
 
     const title = `ScoreSaber Ranking Queue Maps (${formatDateMinimal(new Date())})`;
@@ -240,22 +231,13 @@ export default class PlaylistService {
    * @param settingsBase64 optional base64 encoded settings
    * @returns the created snipe playlist
    */
-  public static async getSnipePlaylist(
-    user: string,
-    toSnipe: string,
-    settingsBase64?: string
-  ): Promise<Playlist> {
+  public static async getSnipePlaylist(user: string, toSnipe: string, settingsBase64?: string): Promise<Playlist> {
     const settings = parseSnipePlaylistSettings(settingsBase64);
 
     try {
       // Validate users exist
-      if (
-        !(await PlayerCoreService.playerExists(user)) ||
-        !(await PlayerCoreService.playerExists(toSnipe))
-      ) {
-        throw new NotFoundError(
-          `Unable to create a snipe playlist for ${toSnipe} as one of the users isn't tracked.`
-        );
+      if (!(await PlayerCoreService.playerExists(user)) || !(await PlayerCoreService.playerExists(toSnipe))) {
+        throw new NotFoundError(`Unable to create a snipe playlist for ${toSnipe} as one of the users isn't tracked.`);
       }
 
       const rawScores = (await ScoreSaberScoreModel.find({
@@ -274,9 +256,7 @@ export default class PlaylistService {
         .lean()) as unknown as ScoreSaberScore[];
 
       if (rawScores.length === 0) {
-        throw new NotFoundError(
-          `Unable to create a snipe playlist for ${toSnipe} as they have no scores.`
-        );
+        throw new NotFoundError(`Unable to create a snipe playlist for ${toSnipe} as they have no scores.`);
       }
 
       // Apply some filters early to reduce the amount of leaderboards we need to fetch
@@ -286,14 +266,8 @@ export default class PlaylistService {
         if (settings?.rankedStatus === "unranked" && score.pp > 0) return false;
 
         // Apply accuracy range filtering
-        if (
-          settings?.accuracyRange?.min !== undefined &&
-          settings?.accuracyRange?.max !== undefined
-        ) {
-          if (
-            score.accuracy < settings.accuracyRange.min ||
-            score.accuracy > settings.accuracyRange.max
-          ) {
+        if (settings?.accuracyRange?.min !== undefined && settings?.accuracyRange?.max !== undefined) {
+          if (score.accuracy < settings.accuracyRange.min || score.accuracy > settings.accuracyRange.max) {
             return false;
           }
         }
@@ -313,9 +287,8 @@ export default class PlaylistService {
       const filteredScores = scores
         .map(playerScore => ({
           score: playerScore,
-          leaderboard: leaderboards.find(
-            leaderboard => leaderboard.leaderboard.id == playerScore.leaderboardId
-          )?.leaderboard,
+          leaderboard: leaderboards.find(leaderboard => leaderboard.leaderboard.id == playerScore.leaderboardId)
+            ?.leaderboard,
         }))
         .filter(({ leaderboard }) => {
           if (!leaderboard) return false;
@@ -327,10 +300,7 @@ export default class PlaylistService {
             leaderboard.stars > 0 &&
             leaderboard.stars <= Consts.MAX_STARS
           ) {
-            if (
-              leaderboard.stars < settings.starRange.min ||
-              leaderboard.stars > settings.starRange.max
-            ) {
+            if (leaderboard.stars < settings.starRange.min || leaderboard.stars > settings.starRange.max) {
               return false;
             }
           }
@@ -339,12 +309,10 @@ export default class PlaylistService {
         });
 
       // Format the scores
-      const toSnipePlayer = await ScoreSaberService.getPlayer(
-        toSnipe,
-        DetailType.BASIC,
-        undefined,
-        { setInactivesRank: false, setMedalsRank: false }
-      );
+      const toSnipePlayer = await ScoreSaberService.getPlayer(toSnipe, DetailType.BASIC, undefined, {
+        setInactivesRank: false,
+        setMedalsRank: false,
+      });
       const formattedScores = filteredScores
         .slice(0, settings.limit)
         .map(({ score, leaderboard }) => {

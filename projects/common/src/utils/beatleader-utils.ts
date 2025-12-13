@@ -9,9 +9,7 @@ import { AdditionalScoreData } from "../model/additional-score-data/additional-s
  * @param additionalData the additional score data
  * @returns the URL of the replay
  */
-export function getBeatLeaderReplayRedirectUrl(
-  additionalData: AdditionalScoreData
-): string | undefined {
+export function getBeatLeaderReplayRedirectUrl(additionalData: AdditionalScoreData): string | undefined {
   if (additionalData.savedReplay) {
     return `${env.NEXT_PUBLIC_API_URL}/replay/${additionalData.scoreId}.bsor`;
   }

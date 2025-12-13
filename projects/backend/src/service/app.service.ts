@@ -11,25 +11,19 @@ export class AppService {
    * Gets the app statistics.
    */
   public static async getAppStatistics(): Promise<AppStatistics> {
-    const [
-      trackedScores,
-      scoreHistoryScores,
-      storedReplays,
-      inactivePlayers,
-      activePlayers,
-      leaderboardCount,
-    ] = await Promise.all([
-      ScoreSaberScoreModel.estimatedDocumentCount(),
-      ScoreSaberPreviousScoreModel.estimatedDocumentCount(),
-      AdditionalScoreDataModel.countDocuments({
-        savedReplay: true,
-      }),
-      PlayerModel.countDocuments({
-        inactive: true,
-      }),
-      ((await MetricsService.getMetric(MetricType.ACTIVE_ACCOUNTS))?.value as number) || 0,
-      ScoreSaberLeaderboardModel.estimatedDocumentCount(),
-    ]);
+    const [trackedScores, scoreHistoryScores, storedReplays, inactivePlayers, activePlayers, leaderboardCount] =
+      await Promise.all([
+        ScoreSaberScoreModel.estimatedDocumentCount(),
+        ScoreSaberPreviousScoreModel.estimatedDocumentCount(),
+        AdditionalScoreDataModel.countDocuments({
+          savedReplay: true,
+        }),
+        PlayerModel.countDocuments({
+          inactive: true,
+        }),
+        ((await MetricsService.getMetric(MetricType.ACTIVE_ACCOUNTS))?.value as number) || 0,
+        ScoreSaberLeaderboardModel.estimatedDocumentCount(),
+      ]);
 
     return {
       leaderboardCount,

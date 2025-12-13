@@ -15,11 +15,7 @@ export default class PlayerSearchController {
       description: "Search for players",
     },
   })
-  public async searchPlayers({
-    query: { query },
-  }: {
-    query: { query: string };
-  }): Promise<PlayerSearchResponse> {
+  public async searchPlayers({ query: { query } }: { query: { query: string } }): Promise<PlayerSearchResponse> {
     return {
       players: await PlayerSearchService.searchPlayers(query),
     };

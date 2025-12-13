@@ -9,15 +9,11 @@ import { parseAsString, useQueryState } from "nuqs";
 import { useCallback } from "react";
 import { Tab, TabGroup } from "../../ui/control-panel";
 
-export const SCORES_MODES: Record<
-  ScoreSaberScoreDataMode,
-  { name: string; icon: React.ReactNode; tooltip: string }
-> = {
+export const SCORES_MODES: Record<ScoreSaberScoreDataMode, { name: string; icon: React.ReactNode; tooltip: string }> = {
   ssr: {
     name: "SSR",
     icon: <ScoresaberLogo className="h-4 w-4" />,
-    tooltip:
-      "SSR scores are the scores that are stored in SSR. They may be missing or out of date.",
+    tooltip: "SSR scores are the scores that are stored in SSR. They may be missing or out of date.",
   },
   live: {
     name: "Live",

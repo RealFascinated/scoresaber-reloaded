@@ -47,10 +47,7 @@ export class PlayerRankedService {
    * @param playerId the player's id
    * @param boundary the pp boundary
    */
-  public static async getPlayerPpBoundary(
-    playerId: string,
-    boundary: number = 1
-  ): Promise<number[]> {
+  public static async getPlayerPpBoundary(playerId: string, boundary: number = 1): Promise<number[]> {
     // Get the ranked pps list for the player
     const result = await ScoreSaberScoreModel.aggregate([
       {
@@ -89,10 +86,7 @@ export class PlayerRankedService {
    * @param playerId the player's id
    * @param boundary the pp boundary
    */
-  public static async getPlayerPpBoundaryFromScorePp(
-    playerId: string,
-    boundary: number = 1
-  ): Promise<number> {
+  public static async getPlayerPpBoundaryFromScorePp(playerId: string, boundary: number = 1): Promise<number> {
     await PlayerCoreService.playerExists(playerId, true);
     const scoresPps = await this.getPlayerRankedPps(playerId);
     if (scoresPps.scores.length === 0) {

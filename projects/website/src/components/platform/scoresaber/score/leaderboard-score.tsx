@@ -40,29 +40,17 @@ export default function ScoreSaberLeaderboardScore({
     <>
       {/* Score Rank */}
       <td className={cn(TABLE_CELL_WIDTH, "whitespace-nowrap")}>
-        <p className={getRankColor(score.rank)}>
-          {score.rank !== -1 ? `#${formatNumberWithCommas(score.rank)}` : "-"}
-        </p>
+        <p className={getRankColor(score.rank)}>{score.rank !== -1 ? `#${formatNumberWithCommas(score.rank)}` : "-"}</p>
       </td>
 
       {/* Player */}
-      <td
-        className={cn(
-          TABLE_CELL_WIDTH,
-          "flex w-full min-w-[300px] items-center gap-2 whitespace-nowrap"
-        )}
-      >
+      <td className={cn(TABLE_CELL_WIDTH, "flex w-full min-w-[300px] items-center gap-2 whitespace-nowrap")}>
         {scorePlayer ? (
           <>
             <ScoreSaberScoreHMD score={score}>
               <HMDIcon hmd={getHMDInfo(score.hmd as HMD)} />
             </ScoreSaberScoreHMD>
-            <PlayerInfo
-              player={scorePlayer}
-              highlightedPlayerId={highlightedPlayerId}
-              useLink
-              className="w-full"
-            />
+            <PlayerInfo player={scorePlayer} highlightedPlayerId={highlightedPlayerId} useLink className="w-full" />
           </>
         ) : (
           <p className="text-gray-500">Unknown Player</p>
@@ -75,9 +63,7 @@ export default function ScoreSaberLeaderboardScore({
       </td>
 
       {/* Score Accuracy */}
-      <td className={cn(TABLE_CELL_WIDTH, "text-center whitespace-nowrap")}>
-        {formatScoreAccuracy(score.accuracy)}
-      </td>
+      <td className={cn(TABLE_CELL_WIDTH, "text-center whitespace-nowrap")}>{formatScoreAccuracy(score.accuracy)}</td>
 
       {/* Score Misses */}
       <td

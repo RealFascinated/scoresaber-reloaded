@@ -70,10 +70,7 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
 
         <Card className="h-fit w-full gap-4">
           {!rankingData && !isError && (
-            <FancyLoader
-              title="Loading Players"
-              description="Please wait while we fetch the players..."
-            />
+            <FancyLoader title="Loading Players" description="Please wait while we fetch the players..." />
           )}
 
           {isError && (
@@ -114,9 +111,7 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
                         renderWorth={() => (
                           <div className="ml-auto flex min-w-[70px] flex-row items-center justify-end gap-2">
                             <FaMedal className="size-4" />
-                            <p className="text-pp font-semibold">
-                              {formatNumberWithCommas(player.medals)}
-                            </p>
+                            <p className="text-pp font-semibold">{formatNumberWithCommas(player.medals)}</p>
                           </div>
                         )}
                       />
@@ -161,9 +156,7 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
                   value: key,
                   name: (
                     <div className="flex w-full min-w-0 items-center justify-between">
-                      <span className="truncate">
-                        {countryFilter.find(c => c.key === key)?.friendlyName ?? key}
-                      </span>
+                      <span className="truncate">{countryFilter.find(c => c.key === key)?.friendlyName ?? key}</span>
                       <span className="text-muted-foreground ml-4 text-sm whitespace-nowrap">
                         {count.toLocaleString()} players
                       </span>

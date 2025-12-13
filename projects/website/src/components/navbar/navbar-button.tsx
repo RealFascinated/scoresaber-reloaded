@@ -6,11 +6,7 @@ type Props = {
   children: ReactNode;
 };
 
-export default function NavbarButton({
-  className,
-  children,
-  ...props
-}: Props & HTMLAttributes<HTMLDivElement>) {
+export default function NavbarButton({ className, children, ...props }: Props & HTMLAttributes<HTMLDivElement>) {
   return (
     <div
       className={cn(

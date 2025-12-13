@@ -55,13 +55,13 @@ const scoreBadges: ScoreBadge[] = [
     name: "SS+",
     min: 95,
     max: 98,
-    color: getDifficulty("ExpertPlus")!.color,
+    color: "var(--expertPlus)",
     textColor: "#00FFFF",
   },
-  { name: "SS", min: 90, max: 95, color: getDifficulty("Expert")!.color, textColor: "#00FFFF" },
-  { name: "S+", min: 85, max: 90, color: getDifficulty("Hard")!.color, textColor: "#FFFFFF" },
-  { name: "S", min: 80, max: 85, color: getDifficulty("Normal")!.color, textColor: "#FFFFFF" },
-  { name: "A", min: 70, max: 80, color: getDifficulty("Easy")!.color, textColor: "#00FF00" },
+  { name: "SS", min: 90, max: 95, color: "var(--expert)", textColor: "#00FFFF" },
+  { name: "S+", min: 85, max: 90, color: "var(--hard)", textColor: "#FFFFFF" },
+  { name: "S", min: 80, max: 85, color: "var(--normal)", textColor: "#FFFFFF" },
+  { name: "A", min: 70, max: 80, color: "var(--easy)", textColor: "#00FF00" },
   { name: "-", min: null, max: 70, color: "var(--accent)", textColor: "#FF0000" },
 ];
 
@@ -129,9 +129,7 @@ export function getDifficulty(diff: Difficulty | MapDifficulty) {
     d => d.id === (typeof diff === "string" ? diff.toLowerCase() : diff.name.toLowerCase())
   );
   if (!difficulty) {
-    throw new Error(
-      `Unknown difficulty: ${typeof diff === "string" ? diff : diff.name.toLowerCase()}`
-    );
+    throw new Error(`Unknown difficulty: ${typeof diff === "string" ? diff : diff.name.toLowerCase()}`);
   }
   return difficulty;
 }

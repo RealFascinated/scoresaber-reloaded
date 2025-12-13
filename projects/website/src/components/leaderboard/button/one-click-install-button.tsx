@@ -8,10 +8,7 @@ type OneClickInstallButtonProps = {
 
 export function OneClickInstallButton({ beatSaverMap }: OneClickInstallButtonProps) {
   return (
-    <ScoreButton
-      href={`beatsaver://${beatSaverMap.bsr}`}
-      tooltip={<p>Click to install the map</p>}
-    >
+    <ScoreButton href={`beatsaver://${beatSaverMap.bsr}`} tooltip={<p>Click to install the map</p>}>
       <HandIcon className="h-4 w-4" />
     </ScoreButton>
   );

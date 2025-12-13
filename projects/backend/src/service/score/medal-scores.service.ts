@@ -50,9 +50,7 @@ export class MedalScoresService {
       }
 
       if (index % 100 === 0) {
-        Logger.info(
-          `[MEDAL SCORES] Refreshed ${index} of ${rankedLeaderboards.length} ranked leaderboards`
-        );
+        Logger.info(`[MEDAL SCORES] Refreshed ${index} of ${rankedLeaderboards.length} ranked leaderboards`);
       }
     }
 
@@ -76,12 +74,9 @@ export class MedalScoresService {
       );
       return;
     }
-    const leaderboard = await LeaderboardCoreService.getLeaderboard(
-      incomingScore.leaderboardId + "",
-      {
-        includeBeatSaver: false,
-      }
-    );
+    const leaderboard = await LeaderboardCoreService.getLeaderboard(incomingScore.leaderboardId + "", {
+      includeBeatSaver: false,
+    });
 
     const existingScores = await ScoreSaberMedalsScoreModel.find({
       leaderboardId: incomingScore.leaderboardId,
@@ -107,9 +102,7 @@ export class MedalScoresService {
       medals: MEDAL_COUNTS[incomingScore.rank as keyof typeof MEDAL_COUNTS] || 0,
       _id: existingScore?._id,
     };
-    const updatedScores = [...scoresWithoutPlayer, incomingScoreData].sort(
-      (a, b) => b.score - a.score
-    );
+    const updatedScores = [...scoresWithoutPlayer, incomingScoreData].sort((a, b) => b.score - a.score);
 
     // Recalculate ranks and medals
     for (const [index, score] of updatedScores.entries()) {
@@ -183,13 +176,7 @@ export class MedalScoresService {
       );
 
       // Send notifications for medal changes
-      await sendMedalScoreNotification(
-        incomingScore,
-        leaderboard.leaderboard,
-        player,
-        beatLeaderScore,
-        medalChanges
-      );
+      await sendMedalScoreNotification(incomingScore, leaderboard.leaderboard, player, beatLeaderScore, medalChanges);
     }
   }
 }

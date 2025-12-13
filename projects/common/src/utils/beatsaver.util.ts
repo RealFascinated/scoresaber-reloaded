@@ -32,9 +32,6 @@ export function getBeatSaverDifficulty(
 
   // Fallback to the latest version if the version is undefined
   return (
-    version ??
-    map.versions.sort(
-      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    )[0]
+    version ?? map.versions.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0]
   ).diffs.find(d => d.difficulty === difficulty && d.characteristic === characteristic);
 }

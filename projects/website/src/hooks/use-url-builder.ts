@@ -25,9 +25,7 @@ export function useUrlBuilder(config: UrlBuilderConfig) {
     const { basePath, segments = [], queryParams = [] } = config;
 
     // Build path segments
-    const pathSegments = segments
-      .filter(segment => segment.condition !== false)
-      .map(segment => String(segment.value));
+    const pathSegments = segments.filter(segment => segment.condition !== false).map(segment => String(segment.value));
 
     const fullPath = [basePath, ...pathSegments].join("/");
 

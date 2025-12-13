@@ -90,11 +90,7 @@ export default class PlayerController {
       description: "Fetch a player's ranked pps",
     },
   })
-  public async getPlayerRankedPps({
-    params: { id },
-  }: {
-    params: { id: string };
-  }): Promise<PlayerRankedPpsResponse> {
+  public async getPlayerRankedPps({ params: { id } }: { params: { id: string } }): Promise<PlayerRankedPpsResponse> {
     return await PlayerRankedService.getPlayerRankedPps(id);
   }
 

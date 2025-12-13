@@ -22,14 +22,9 @@ type ScoreEditorButtonProps = {
 
 const MIN_ACCURACY = 70;
 
-export default function ScoreSaberScoreEditorButton({
-  score,
-  leaderboard,
-  updateScore,
-}: ScoreEditorButtonProps) {
+export default function ScoreSaberScoreEditorButton({ score, leaderboard, updateScore }: ScoreEditorButtonProps) {
   const maxScore = leaderboard.maxScore || 1; // Use 1 to prevent division by zero
-  const accuracy =
-    (score.score / maxScore) * 100 * (score.modifiers.includes(Modifier.NF) ? 0.5 : 1);
+  const accuracy = (score.score / maxScore) * 100 * (score.modifiers.includes(Modifier.NF) ? 0.5 : 1);
 
   const isMobile = useIsMobile();
   const [newAccuracy, setNewAccuracy] = useState(accuracy);
@@ -41,8 +36,7 @@ export default function ScoreSaberScoreEditorButton({
     queryFn: () => ssrApi.getPlayerRankedPps(score.playerId),
   });
 
-  const [modifiedScores, setModifiedScores] =
-    useState<Pick<ScoreSaberScore, "pp" | "weight" | "scoreId">[]>();
+  const [modifiedScores, setModifiedScores] = useState<Pick<ScoreSaberScore, "pp" | "weight" | "scoreId">[]>();
 
   const updateScoreAndPP = (accuracy: number) => {
     const newBaseScore = (accuracy / 100) * maxScore;
@@ -112,10 +106,7 @@ export default function ScoreSaberScoreEditorButton({
         }}
       >
         <PopoverTrigger asChild>
-          <Button
-            variant="ghost"
-            className="h-[28px] w-[28px] p-0"
-          >
+          <Button variant="ghost" className="h-[28px] w-[28px] p-0">
             <FaCog className="size-4" />
           </Button>
         </PopoverTrigger>
@@ -131,10 +122,7 @@ export default function ScoreSaberScoreEditorButton({
                   {score.additionalData !== undefined && !score.fullCombo && (
                     <SimpleTooltip
                       display={
-                        <p>
-                          Set accuracy to FC Accuracy (
-                          {formatScoreAccuracy(score.additionalData!.fcAccuracy!)})
-                        </p>
+                        <p>Set accuracy to FC Accuracy ({formatScoreAccuracy(score.additionalData!.fcAccuracy!)})</p>
                       }
                     >
                       <Button
@@ -200,9 +188,7 @@ export default function ScoreSaberScoreEditorButton({
 
               {/* PP Gain */}
               {rankedPps && leaderboard.ranked && (
-                <p className="text-sm font-medium">
-                  Global PP Gain - {ppGain > 0.1 ? ppGain.toFixed(2) : 0}pp
-                </p>
+                <p className="text-sm font-medium">Global PP Gain - {ppGain > 0.1 ? ppGain.toFixed(2) : 0}pp</p>
               )}
             </div>
           </div>

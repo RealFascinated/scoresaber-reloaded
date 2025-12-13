@@ -39,11 +39,7 @@ export default class PlaylistController {
     const extension = id.includes(".") ? id.split(".")[1] : "bplist";
 
     const response = new Response(
-      JSON.stringify(
-        await generateBeatSaberPlaylist(await PlaylistService.getPlaylist(id, config)),
-        null,
-        2
-      )
+      JSON.stringify(await generateBeatSaberPlaylist(await PlaylistService.getPlaylist(id, config)), null, 2)
     );
     response.headers.set("Content-Type", "application/json");
     if (download) {
@@ -71,9 +67,7 @@ export default class PlaylistController {
   }) {
     const response = new Response(
       JSON.stringify(
-        await generateBeatSaberPlaylist(
-          await PlaylistService.getSnipePlaylist(user, toSnipe, settings)
-        ),
+        await generateBeatSaberPlaylist(await PlaylistService.getSnipePlaylist(user, toSnipe, settings)),
         null,
         2
       )
@@ -103,10 +97,7 @@ export default class PlaylistController {
       setMedalsRank: false,
     });
     const response = new Response(
-      Buffer.from(
-        await generateSnipePlaylistImage(parseSnipePlaylistSettings(settings), toSnipePlayer),
-        "base64"
-      )
+      Buffer.from(await generateSnipePlaylistImage(parseSnipePlaylistSettings(settings), toSnipePlayer), "base64")
     );
     response.headers.set("Content-Type", "image/png");
     return response;
@@ -122,16 +113,9 @@ export default class PlaylistController {
       description: "Fetch a custom ranked playlist image preview",
     },
   })
-  public async getCustomRankedPlaylistImagePreview({
-    query: { settings },
-  }: {
-    query: { settings: string };
-  }) {
+  public async getCustomRankedPlaylistImagePreview({ query: { settings } }: { query: { settings: string } }) {
     const response = new Response(
-      Buffer.from(
-        await generateCustomRankedPlaylistImage(parseCustomRankedPlaylistSettings(settings)),
-        "base64"
-      )
+      Buffer.from(await generateCustomRankedPlaylistImage(parseCustomRankedPlaylistSettings(settings)), "base64")
     );
     response.headers.set("Content-Type", "image/png");
     return response;

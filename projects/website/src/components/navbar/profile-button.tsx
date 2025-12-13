@@ -8,13 +8,7 @@ import useDatabase from "@/hooks/use-database";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { truncateText } from "@ssr/common/string-utils";
 import { ConfirmationDialog } from "../ui/confirmation-dialog";
-import {
-  DropdownButton,
-  DropdownGroup,
-  DropdownLabel,
-  DropdownSeparator,
-  HoverDropdown,
-} from "../ui/hover-dropdown";
+import { DropdownButton, DropdownGroup, DropdownLabel, DropdownSeparator, HoverDropdown } from "../ui/hover-dropdown";
 
 export default function ProfileButton() {
   const isMobile = useIsMobile("2xl");
@@ -59,11 +53,7 @@ export default function ProfileButton() {
   return (
     <HoverDropdown trigger={trigger} contentClassName="w-56">
       <DropdownLabel>Website</DropdownLabel>
-      {isMobile && (
-        <DropdownButton href={`/player/${mainPlayer.id}`}>
-          Open Profile
-        </DropdownButton>
-      )}
+      {isMobile && <DropdownButton href={`/player/${mainPlayer.id}`}>Open Profile</DropdownButton>}
       <DropdownGroup>
         <DropdownButton href="/settings">Settings</DropdownButton>
       </DropdownGroup>

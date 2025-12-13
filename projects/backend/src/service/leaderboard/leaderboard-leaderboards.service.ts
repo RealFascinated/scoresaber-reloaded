@@ -49,38 +49,24 @@ export class LeaderboardLeaderboardsService {
    * Gets all the qualified leaderboards
    */
   public static async getQualifiedLeaderboards(): Promise<ScoreSaberLeaderboard[]> {
-    return CacheService.fetchWithCache(
-      CacheId.Leaderboards,
-      "leaderboard:qualified-leaderboards",
-      async () => {
-        const leaderboards = await ScoreSaberLeaderboardModel.find({ qualified: true }).lean();
-        return leaderboards.map(leaderboard =>
-          LeaderboardCoreService.leaderboardToObject(leaderboard)
-        );
-      }
-    );
+    return CacheService.fetchWithCache(CacheId.Leaderboards, "leaderboard:qualified-leaderboards", async () => {
+      const leaderboards = await ScoreSaberLeaderboardModel.find({ qualified: true }).lean();
+      return leaderboards.map(leaderboard => LeaderboardCoreService.leaderboardToObject(leaderboard));
+    });
   }
 
   /**
    * Gets the ranking queue leaderboards
    */
   public static async getRankingQueueLeaderboards(): Promise<ScoreSaberLeaderboard[]> {
-    return CacheService.fetchWithCache(
-      CacheId.Leaderboards,
-      "leaderboard:ranking-queue-maps",
-      async () => {
-        const rankingQueueTokens = await ApiServiceRegistry.getInstance()
-          .getScoreSaberService()
-          .lookupRankingRequests();
-        if (!rankingQueueTokens) {
-          return [];
-        }
-
-        return rankingQueueTokens.all.map(token =>
-          getScoreSaberLeaderboardFromToken(token.leaderboardInfo)
-        );
+    return CacheService.fetchWithCache(CacheId.Leaderboards, "leaderboard:ranking-queue-maps", async () => {
+      const rankingQueueTokens = await ApiServiceRegistry.getInstance().getScoreSaberService().lookupRankingRequests();
+      if (!rankingQueueTokens) {
+        return [];
       }
-    );
+
+      return rankingQueueTokens.all.map(token => getScoreSaberLeaderboardFromToken(token.leaderboardInfo));
+    });
   }
 
   /**
@@ -98,10 +84,7 @@ export class LeaderboardLeaderboardsService {
     Logger.info(`Refreshing ${playlistTitle.toLowerCase()} leaderboards...`);
     const before = Date.now();
     const { leaderboards, rankedMapDiffs } = await fetchFunction();
-    const leaderboardUpdates = await LeaderboardRankingService.processLeaderboardUpdates(
-      leaderboards,
-      rankedMapDiffs
-    );
+    const leaderboardUpdates = await LeaderboardRankingService.processLeaderboardUpdates(leaderboards, rankedMapDiffs);
 
     // Update the playlist
     const playlist = await createPlaylistFunction();
@@ -155,16 +138,13 @@ export class LeaderboardLeaderboardsService {
     );
 
     // Handle unranking old leaderboards using the already fetched data
-    const unrankedLeaderboards =
-      await LeaderboardRankingService.unrankOldLeaderboards(leaderboards);
+    const unrankedLeaderboards = await LeaderboardRankingService.unrankOldLeaderboards(leaderboards);
 
     // Get the newly ranked maps, buffed maps, and nerfed maps
     const newlyRankedMaps = result.updatedLeaderboards.filter(
       update => update.update.rankedStatusChanged && update.leaderboard.ranked
     );
-    const starRatingChangedMaps = result.updatedLeaderboards.filter(
-      update => update.update.starCountChanged
-    );
+    const starRatingChangedMaps = result.updatedLeaderboards.filter(update => update.update.starCountChanged);
     const nerfedMaps = starRatingChangedMaps.filter(
       update => update.leaderboard.stars < update.update.previousLeaderboard?.stars
     );

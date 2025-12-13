@@ -9,10 +9,7 @@ import { formatDateMinimal, getDaysAgoDate, getMidnightAlignedDate } from "./tim
  * @param history the history to get the value from
  * @param field the field to get
  */
-export function getValueFromHistory(
-  history: FlattenedPlayerHistory,
-  field: string
-): number | undefined {
+export function getValueFromHistory(history: FlattenedPlayerHistory, field: string): number | undefined {
   if (field in history) {
     return history[field as keyof FlattenedPlayerHistory];
   }
@@ -56,9 +53,7 @@ export function getPlayerStatisticChange(
     const targetDate = getDaysAgoDate(daysAgo);
 
     // Retrieve a list of dates only once, sorted for easier access
-    const sortedDates = Object.keys(history).sort(
-      (a, b) => new Date(a).getTime() - new Date(b).getTime()
-    );
+    const sortedDates = Object.keys(history).sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
 
     // Use binary search to efficiently find the closest date to `targetDate`
     let closestDate: Date | undefined;

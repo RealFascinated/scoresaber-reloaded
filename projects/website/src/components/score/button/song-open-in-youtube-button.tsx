@@ -8,11 +8,7 @@ type SongOpenInYoutubeButtonProps = {
   songAuthorName: string;
 };
 
-export function SongOpenInYoutubeButton({
-  songName,
-  songSubName,
-  songAuthorName,
-}: SongOpenInYoutubeButtonProps) {
+export function SongOpenInYoutubeButton({ songName, songSubName, songAuthorName }: SongOpenInYoutubeButtonProps) {
   return (
     <ScoreButton
       href={songNameToYouTubeLink(songName, songSubName, songAuthorName)}
