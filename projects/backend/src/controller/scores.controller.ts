@@ -1,3 +1,5 @@
+import { PlayerScoresResponse } from "@ssr/common/response/player-scores-response";
+import { ScoreQuery, SortDirection, SortField } from "@ssr/common/types/score-query";
 import { t } from "elysia";
 import { Controller, Get } from "elysia-decorators";
 import { SuperJSON } from "superjson";
@@ -6,7 +8,7 @@ import { PlayerScoresService } from "../service/player/player-scores.service";
 
 @Controller("/scores")
 export default class ScoresController {
-  @Get("/player/:id/:page/:sort", {
+  @Get("/player/scoresaber/:id/:page/:sort", {
     config: {},
     tags: ["Scores"],
     params: t.Object({
@@ -41,6 +43,44 @@ export default class ScoresController {
         search,
         comparisonPlayerId
       )
+    ).toJSON();
+  }
+
+  @Get("/player/:mode/:id/:field/:direction/:page", {
+    config: {},
+    tags: ["Scores"],
+    params: t.Object({
+      mode: t.String({ required: true }),
+      id: t.String({ required: true }),
+      field: t.String({ required: true }),
+      direction: t.String({ required: true }),
+      page: t.Number({ required: true }),
+    }),
+    query: t.Optional(
+      t.Object({
+        search: t.Optional(t.String()),
+        hmd: t.Optional(t.String()),
+      })
+    ),
+    detail: {
+      description: "Lookup scores for a player",
+    },
+  })
+  public async getSSRScores({
+    params: { mode, id, page, field, direction },
+    query,
+  }: {
+    params: {
+      mode: "ssr" | "medals";
+      id: string;
+      field: SortField;
+      direction: SortDirection;
+      page: number;
+    };
+    query: ScoreQuery;
+  }): Promise<PlayerScoresResponse> {
+    return (
+      await PlayerScoresService.getPlayerScores(mode, id, page, field, direction, query)
     ).toJSON();
   }
 

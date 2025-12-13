@@ -25,7 +25,7 @@ import { PlayerScore } from "../score/player-score";
 import { ScoreSaberScoreSort } from "../score/score-sort";
 import { MapCharacteristic } from "../types/map-characteristic";
 import { ScoreCalendarData } from "../types/player/player-statistic";
-import { ScoreSort } from "../types/sort";
+import { ScoreQuery, SortDirection, SortField } from "../types/score-query";
 
 class SSRApi {
   /**
@@ -246,7 +246,7 @@ class SSRApi {
     comparisonPlayerId?: string
   ) {
     return await this.get<PlayerScoresResponse>(
-      `${env.NEXT_PUBLIC_API_URL}/scores/player/${id}/${page}/${sort}`,
+      `${env.NEXT_PUBLIC_API_URL}/scores/player/scoresaber/${id}/${page}/${sort}`,
       {
         ...(search ? { search: search } : {}),
         ...(comparisonPlayerId ? { comparisonPlayerId: comparisonPlayerId } : {}),
@@ -262,41 +262,17 @@ class SSRApi {
    * @param sort the sort
    * @param search the search term
    */
-  async fetchSSRPlayerScores(id: string, page: number, sort: ScoreSort, search?: string) {
+  async fetchPlayerScores(
+    id: string,
+    mode: "ssr" | "medals",
+    page: number,
+    sort: SortField,
+    direction: SortDirection,
+    filters: ScoreQuery
+  ) {
     return await this.get<PlayerScoresResponse>(
-      `${env.NEXT_PUBLIC_API_URL}/scores/ssr/player/${id}/${sort.field}/${sort.direction}/${page}`,
-      {
-        ...Object.fromEntries(
-          Object.entries(sort.filters ?? {}).map(([key, value]) => [
-            key,
-            typeof value === "boolean" ? String(value) : (value ?? ""),
-          ])
-        ),
-        ...(search ? { search: search } : {}),
-      }
-    );
-  }
-
-  /**
-   * Fetches the player's medal scores.
-   *
-   * @param id the player's id
-   * @param page the page
-   * @param sort the sort
-   * @param search the search term
-   */
-  async fetchPlayerMedalScores(id: string, page: number, sort: ScoreSort, search?: string) {
-    return await this.get<PlayerScoresResponse>(
-      `${env.NEXT_PUBLIC_API_URL}/scores/medals/player/${id}/${sort.field}/${sort.direction}/${page}`,
-      {
-        ...Object.fromEntries(
-          Object.entries(sort.filters ?? {}).map(([key, value]) => [
-            key,
-            typeof value === "boolean" ? String(value) : (value ?? ""),
-          ])
-        ),
-        ...(search ? { search: search } : {}),
-      }
+      `${env.NEXT_PUBLIC_API_URL}/scores/player/${mode}/${id}/${sort}/${direction}/${page}`,
+      filters
     );
   }
 

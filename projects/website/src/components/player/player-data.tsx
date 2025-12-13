@@ -13,8 +13,8 @@ import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import AccSaberPlayerScores from "../platform/accsaber/accsaber-player-scores";
-import ScoreSaberPlayerMedalScores from "../platform/scoresaber/scoresaber-player-medal-scores";
 import ScoreSaberPlayerScores from "../platform/scoresaber/scoresaber-player-scores";
+import ScoreSaberPlayerScoresSSR from "../platform/scoresaber/scoresaber-player-scores-ssr";
 import { Button } from "../ui/button";
 import PlayerHeader from "./header/player-header";
 import PlayerMiniRankings from "./mini-ranking/player-mini-ranking";
@@ -62,7 +62,7 @@ export default function PlayerData({ platformType, player }: PlayerDataProps) {
       platform = <ScoreSaberPlayerScores player={player} />;
       break;
     case PlatformType.MedalScores:
-      platform = <ScoreSaberPlayerMedalScores player={player} />;
+      platform = <ScoreSaberPlayerScoresSSR player={player} mode="medals" />;
       break;
     case PlatformType.AccSaber:
       platform = <AccSaberPlayerScores player={player} />;

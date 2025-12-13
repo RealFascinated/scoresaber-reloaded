@@ -1,13 +1,9 @@
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { CooldownPriority } from "@ssr/common/cooldown";
 import { DetailType } from "@ssr/common/detail-type";
-import { BadRequestError } from "@ssr/common/error/bad-request-error";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger from "@ssr/common/logger";
-import {
-  ScoreSaberLeaderboard,
-  ScoreSaberLeaderboardModel,
-} from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
+import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { Player, PlayerModel } from "@ssr/common/model/player/player";
 import { ScoreSaberMedalsScoreModel } from "@ssr/common/model/score/impl/scoresaber-medals-score";
 import {
@@ -21,14 +17,13 @@ import {
   PlayerScoresChartResponse,
 } from "@ssr/common/response/player-scores-chart";
 import { PlayerScoresResponse } from "@ssr/common/response/player-scores-response";
-import { Modifier } from "@ssr/common/score/modifier";
 import { PlayerScore } from "@ssr/common/score/player-score";
 import { ScoreSaberScoreSort } from "@ssr/common/score/score-sort";
 import {
   getScoreSaberLeaderboardFromToken,
   getScoreSaberScoreFromToken,
 } from "@ssr/common/token-creators";
-import { ScoreSort, validateSort } from "@ssr/common/types/sort";
+import { ScoreQuery, SortDirection, SortField } from "@ssr/common/types/score-query";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import ScoreSaberPlayerScoreToken from "@ssr/common/types/token/scoresaber/player-score";
 import ScoreSaberPlayerScoresPageToken from "@ssr/common/types/token/scoresaber/player-scores-page";
@@ -36,7 +31,6 @@ import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import { EmbedBuilder } from "discord.js";
-import type { PipelineStage } from "mongoose";
 import { FilterQuery } from "mongoose";
 import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
 import { scoreToObject } from "../../common/score/score.util";
@@ -45,7 +39,7 @@ import { LeaderboardCoreService } from "../leaderboard/leaderboard-core.service"
 import { ScoreCoreService } from "../score/score-core.service";
 import ScoreSaberService from "../scoresaber.service";
 
-const FIELDS_MAP: Record<ScoreSort["field"], string> = {
+const FIELDS_MAP: Record<SortField, string> = {
   pp: "pp",
   medals: "medals",
   score: "score",
@@ -53,13 +47,6 @@ const FIELDS_MAP: Record<ScoreSort["field"], string> = {
   acc: "accuracy",
   maxcombo: "maxCombo",
   date: "timestamp",
-  starcount: "stars",
-};
-
-type ScoreFilters = Required<NonNullable<ScoreSort["filters"]>> & {
-  rankedOnly: boolean;
-  unrankedOnly: boolean;
-  passedOnly: boolean;
 };
 
 export class PlayerScoresService {
@@ -460,275 +447,105 @@ export class PlayerScoresService {
    * @param page the page number
    * @param options the sort options
    * @param search the search term
-   * @param model the model to use
    * @returns the scores
    */
   public static async getPlayerScores(
     mode: "ssr" | "medals",
     playerId: string,
     page: number,
-    options: ScoreSort,
-    search: string
+    sort: SortField,
+    direction: SortDirection,
+    filters: ScoreQuery
   ) {
     const model = mode === "medals" ? ScoreSaberMedalsScoreModel : ScoreSaberScoreModel;
-    const isValid = validateSort(options);
-    if (!isValid) {
-      throw new BadRequestError("Invalid sort options");
-    }
-
-    const filters: ScoreFilters = {
-      rankedOnly: false,
-      unrankedOnly: false,
-      passedOnly: false,
-      hmd: null,
-      ...(options.filters ?? {}),
-    } as ScoreFilters;
-
-    // If search is provided, get matching leaderboard IDs first
-    let matchingLeaderboardIds: number[] = [];
-
-    // Only search if the search term is at least 3 characters long
-    if (search && search.length >= 3) {
-      // Get leaderboard IDs that match the search
-      const matchingLeaderboards = await ScoreSaberLeaderboardModel.find({
-        $or: [
-          { songName: { $regex: search, $options: "i" } },
-          { songSubName: { $regex: search, $options: "i" } },
-          { songAuthorName: { $regex: search, $options: "i" } },
-          { levelAuthorName: { $regex: search, $options: "i" } },
-        ],
-      })
-        .select("_id")
-        .lean();
-
-      if (matchingLeaderboards.length === 0) {
-        // No matching leaderboards, return empty result
-        const pagination = new Pagination<
-          PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>
-        >().setItemsPerPage(8);
-        pagination.setTotalItems(0);
-        return pagination.getPage(1, async () => []);
-      }
-
-      matchingLeaderboardIds = matchingLeaderboards.map(lb => lb._id);
+    const leaderboardIds = await LeaderboardCoreService.searchLeaderboardIds(filters.search);
+    if (leaderboardIds == null) {
+      return new Pagination<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>()
+        .setItemsPerPage(8)
+        .getPage(1, async () => []);
     }
 
     /**
      * Builds a score query.
      *
+     * @param mode the mode to build the query for
      * @param playerId the player id
-     * @param filters the filters to apply
-     * @param extra the extra filters to apply
+     * @param filters the filters to apply to the query
+     * @param matchingLeaderboardIds the leaderboard ids to include in the query
      * @returns the score query
      */
     function buildScoreQuery(
+      mode: "ssr" | "medals",
       playerId: string,
-      filters: ScoreFilters,
-      extra: FilterQuery<ScoreSaberScore> = {}
+      sort: SortField,
+      filters: ScoreQuery,
+      matchingLeaderboardIds: number[]
     ): FilterQuery<ScoreSaberScore> {
-      const query: FilterQuery<ScoreSaberScore> = {
-        playerId,
-        leaderboardId: { $exists: true, $ne: null },
-        ...(mode === "medals" ? { medals: { $gt: 0 } } : {}),
-        ...extra,
-      };
+      const queryConditions: FilterQuery<ScoreSaberScore>[] = [
+        { playerId },
+        { leaderboardId: { $exists: true, $ne: null } },
+      ];
 
-      if (filters.rankedOnly) query.pp = { $gt: 0 };
-      if (filters.unrankedOnly) query.pp = { $lte: 0 };
-      if (filters.passedOnly) {
-        return { ...query, modifiers: { $nin: [Modifier.NF, "NF", "No Fail"] } };
-      }
-      if (filters.hmd) query.hmd = filters.hmd;
-
-      return query;
-    }
-
-    // Build the count query - must match the fetch query logic
-    let countQuery = buildScoreQuery(playerId, filters, {
-      ...(matchingLeaderboardIds.length > 0
-        ? { leaderboardId: { $in: matchingLeaderboardIds } }
-        : {}),
-    });
-
-    // Apply the same Infinity filter to count query as we do for fetch query
-    // (skip for date and starcount fields)
-    if (options.field && !["date", "starcount"].includes(options.field)) {
-      const fieldKey = FIELDS_MAP[options.field];
-      const existingFieldFilter = (countQuery as Record<string, unknown>)[fieldKey] as
-        | Record<string, unknown>
-        | undefined;
-
-      countQuery = {
-        ...countQuery,
-        [fieldKey]: {
-          ...(existingFieldFilter ?? {}),
-          $ne: Infinity,
-          $exists: true,
-        },
-      };
-    }
-
-    const totalScores = await model.countDocuments(countQuery);
-    const pagination = new Pagination<
-      PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>
-    >().setItemsPerPage(8);
-    pagination.setTotalItems(totalScores);
-
-    /**
-     * Fetches raw scores.
-     *
-     * @param query the query to apply
-     * @param sort the sort to apply
-     * @param skip the skip to apply
-     * @param limit the limit to apply
-     * @returns the raw scores
-     */
-    async function fetchRawScores(
-      query: FilterQuery<ScoreSaberScore>,
-      sort: ScoreSort,
-      skip = 0,
-      limit = 0
-    ): Promise<ScoreSaberScore[]> {
-      if (sort.field === "starcount") {
-        const pipeline: PipelineStage[] = [
-          { $match: query },
-          {
-            $lookup: {
-              from: ScoreSaberLeaderboardModel.collection.name,
-              localField: "leaderboardId",
-              foreignField: "_id",
-              as: "leaderboardDoc",
-            },
-          },
-          { $unwind: "$leaderboardDoc" },
-          {
-            $sort: { "leaderboardDoc.stars": sort.direction === "asc" ? 1 : -1 },
-          },
-        ];
-        if (skip) pipeline.push({ $skip: skip });
-        if (limit) pipeline.push({ $limit: limit });
-        pipeline.push({ $project: { leaderboardDoc: 0 } });
-
-        return (await (model as typeof ScoreSaberScoreModel)
-          .aggregate(pipeline)
-          .exec()) as unknown as ScoreSaberScore[];
+      // Filter out invalid accuracies (null, undefined, Infinity, etc.)
+      if (sort === "acc") {
+        queryConditions.push({ accuracy: { $exists: true, $nin: [null, undefined, Infinity], $gte: 0 } });
       }
 
-      return (await (model as typeof ScoreSaberScoreModel)
+      // Medal scores only
+      if (mode === "medals") {
+        queryConditions.push({ medals: { $gt: 0 } });
+      }
+
+      // Search was used in the query
+      if (matchingLeaderboardIds.length > 0) {
+        queryConditions.push({ leaderboardId: { $in: matchingLeaderboardIds } });
+      }
+
+      // HMD filter was used in the query
+      if (filters.hmd) {
+        queryConditions.push({ hmd: filters.hmd });
+      }
+
+      return { $and: queryConditions };
+    }
+
+    const query = buildScoreQuery(mode, playerId, sort, filters, leaderboardIds);
+    const totalScores = await model.countDocuments(query);
+
+    const pagination = new Pagination<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>()
+      .setItemsPerPage(8)
+      .setTotalItems(totalScores);
+
+    return pagination.getPage(page, async ({ start, end }) => {
+      const rawScores = (await (model as typeof ScoreSaberScoreModel)
         .find(query)
-        .sort({ [FIELDS_MAP[sort.field]]: sort.direction === "asc" ? 1 : -1 })
-        .skip(skip)
-        .limit(limit)
+        .sort({ [FIELDS_MAP[sort]]: direction === "asc" ? 1 : -1 })
+        .skip(start)
+        .limit(end - start)
         .lean()) as unknown as ScoreSaberScore[];
-    }
-
-    /**
-     * Maps raw scores to PlayerScore objects with leaderboard/BeatSaver attached
-     *
-     * @param rawScores the raw scores to map
-     * @param includeBeatSaver whether to include the BeatSaver data
-     * @returns the mapped scores
-     */
-    async function mapScoresWithLeaderboards(rawScores: ScoreSaberScore[]) {
-      if (!rawScores.length) {
-        return [];
-      }
-
-      const leaderboardResponses = await LeaderboardCoreService.getLeaderboards(
-        rawScores.map(s => s.leaderboardId + ""),
-        { includeBeatSaver: true }
-      );
-
-      const lbMap = new Map(leaderboardResponses.map(r => [r.leaderboard.id, r]));
 
       return (
         await Promise.all(
-          rawScores.map(async rs => {
-            const lbResp = lbMap.get(rs.leaderboardId);
-            if (!lbResp) return null;
-            const { leaderboard, beatsaver } = lbResp;
+          rawScores.map(async rawScore => {
+            const leaderboardResponse = await LeaderboardCoreService.getLeaderboard(
+              rawScore.leaderboardId + "",
+              { includeBeatSaver: true }
+            );
+            if (!leaderboardResponse) {
+              return null;
+            }
+
+            const { leaderboard, beatsaver } = leaderboardResponse;
             return {
-              score: await ScoreCoreService.insertScoreData(scoreToObject(rs), leaderboard, {
+              score: await ScoreCoreService.insertScoreData(scoreToObject(rawScore), leaderboard, {
                 removeScoreWeightAndRank: mode === "ssr",
               }),
-              leaderboard,
+              leaderboard: leaderboard,
               beatSaver: beatsaver,
             } as PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>;
           })
         )
       ).filter(Boolean) as PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>[];
-    }
-
-    return pagination.getPage(page, async ({ start, end }) => {
-      // Build the base query for this page
-      let query = buildScoreQuery(playerId, filters, {
-        ...(matchingLeaderboardIds.length > 0
-          ? { leaderboardId: { $in: matchingLeaderboardIds } }
-          : {}),
-      });
-
-      // Special handling when sorting by star count
-      if (options.field === "starcount") {
-        // Use an aggregation pipeline so that we can sort by the leaderboard
-        // star count which is not present on the score document itself.
-        return await mapScoresWithLeaderboards(
-          await fetchRawScores(query, options, start, end - start)
-        );
-      }
-
-      // Add filter to exclude Infinity values for the sort field (skip for starcount)
-      if (options.field && !["date", "starcount"].includes(options.field)) {
-        const fieldKey = FIELDS_MAP[options.field];
-        const existingFieldFilter = (query as Record<string, unknown>)[fieldKey] as
-          | Record<string, unknown>
-          | undefined;
-
-        query = {
-          ...query,
-          [fieldKey]: {
-            ...(existingFieldFilter ?? {}),
-            $ne: Infinity,
-            $exists: true,
-          },
-        };
-      }
-
-      return await mapScoresWithLeaderboards(
-        await fetchRawScores(query, options, start, end - start)
-      );
     });
-  }
-
-  /**
-   * Gets the scores for a player.
-   *
-   * @param playerId the id of the player
-   * @param page the page number
-   * @param options the sort options
-   * @returns the paginated scores
-   */
-  public static async getSSRPlayerScores(
-    playerId: string,
-    page: number,
-    options: ScoreSort,
-    search: string
-  ): Promise<PlayerScoresResponse> {
-    return await this.getPlayerScores("ssr", playerId, page, options, search);
-  }
-
-  /**
-   * Gets the medal scores for a player.
-   *
-   * @param playerId the player's id.
-   * @param page the page number
-   * @returns the medal scores.
-   */
-  public static async getMedalPlayerScores(
-    playerId: string,
-    page: number,
-    options: ScoreSort,
-    search: string
-  ): Promise<PlayerScoresResponse> {
-    return await this.getPlayerScores("medals", playerId, page, options, search);
   }
 }

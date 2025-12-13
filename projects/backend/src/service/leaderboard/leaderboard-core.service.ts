@@ -378,6 +378,33 @@ export class LeaderboardCoreService {
   }
 
   /**
+   * Searches for leaderboard IDs by name.
+   *
+   * @param search the search query
+   * @returns the leaderboard IDs that match the search query
+   */
+  public static async searchLeaderboardIds(search?: string): Promise<number[] | null> {
+    if (!search || search.length < 3) {
+      return [];
+    }
+    const matchingLeaderboards = await ScoreSaberLeaderboardModel.find({
+      $or: [
+        { songName: { $regex: search, $options: "i" } },
+        { songSubName: { $regex: search, $options: "i" } },
+        { songAuthorName: { $regex: search, $options: "i" } },
+        { levelAuthorName: { $regex: search, $options: "i" } },
+      ],
+    })
+      .select("_id")
+      .lean();
+
+    if (!matchingLeaderboards.length) {
+      return null;
+    }
+    return matchingLeaderboards.map(lb => lb._id);
+  }
+
+  /**
    * Converts a database leaderboard to a ScoreSaberLeaderboard.
    */
   public static leaderboardToObject(leaderboard: ScoreSaberLeaderboard): ScoreSaberLeaderboard {

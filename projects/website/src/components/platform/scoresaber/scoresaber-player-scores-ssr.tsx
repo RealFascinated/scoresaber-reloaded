@@ -12,7 +12,7 @@ import { Pagination } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerScoresResponse } from "@ssr/common/response/player-scores-response";
 import { capitalizeFirstLetter } from "@ssr/common/string-utils";
-import { ScoreSort } from "@ssr/common/types/sort";
+import { SortDirection, SortField } from "@ssr/common/types/sort";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { useDebounce, useDocumentTitle } from "@uidotdev/usehooks";
@@ -21,13 +21,9 @@ import {
   ArrowDown,
   ArrowUp,
   BarChart3,
-  CheckIcon,
   ClockIcon,
-  Filter,
   Hash,
-  MusicIcon,
   SearchIcon,
-  StarIcon,
   Target,
   Trophy,
   XIcon,
@@ -42,24 +38,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import ScoreSaberScoreDisplay from "./score/scoresaber-score";
 import { ScoreSaberScoreModeTabs } from "./scoresaber-score-mode-selector";
 
-const DEFAULT_SORT: ScoreSort["field"] = "date";
-const DEFAULT_SORT_DIRECTION: ScoreSort["direction"] = "desc";
-const DEFAULT_PAGE = 1;
-const DEFAULT_FILTER = "All Scores";
-
-const SORT_OPTIONS: {
+type SortOption = {
   name: string;
-  value: ScoreSort["field"];
+  value: SortField;
   icon: React.ReactNode;
-  defaultOrder: ScoreSort["direction"];
-  defaultFilter?: ScoreSort["filters"];
-}[] = [
-  {
-    name: "PP",
-    value: "pp",
-    icon: <Trophy className="h-4 w-4" />,
-    defaultOrder: "desc" as const,
-  },
+  defaultOrder: SortDirection;
+};
+type Mode = "ssr" | "medals";
+
+const DEFAULT_SORT: SortField = "date";
+const DEFAULT_SORT_DIRECTION: SortDirection = "desc";
+const DEFAULT_PAGE = 1;
+
+const SORT_OPTIONS: SortOption[] = [
   {
     name: "Date",
     value: "date",
@@ -90,53 +81,58 @@ const SORT_OPTIONS: {
     icon: <Hash className="h-4 w-4" />,
     defaultOrder: "desc" as const,
   },
-  {
-    name: "Star Count",
-    value: "starcount",
-    icon: <StarIcon className="h-4 w-4" />,
-    defaultOrder: "desc" as const,
-    defaultFilter: { passedOnly: true },
-  },
 ];
+const MODE_NAME: Record<Mode, string> = {
+  ssr: "SSR",
+  medals: "Medals",
+};
 
-const FILTERS: {
-  name: string;
-  value: ScoreSort["filters"];
-  icon: React.ReactNode;
-}[] = [
-  { name: "All Scores", value: {}, icon: <Filter className="h-4 w-4" /> },
-  { name: "Ranked Only", value: { rankedOnly: true }, icon: <Trophy className="h-4 w-4" /> },
-  { name: "Unranked Only", value: { unrankedOnly: true }, icon: <MusicIcon className="h-4 w-4" /> },
-  { name: "Passed Only", value: { passedOnly: true }, icon: <CheckIcon className="h-4 w-4" /> },
-];
-
-interface ScoreSaberPlayerScoresSSRProps {
+export default function ScoreSaberPlayerScoresSSR({
+  player,
+  mode,
+}: {
   player: ScoreSaberPlayer;
-}
-
-export default function ScoreSaberPlayerScoresSSR({ player }: ScoreSaberPlayerScoresSSRProps) {
+  mode: Mode;
+}) {
   const isMobile = useIsMobile();
   const { animateLeft, animateRight, setIsLoading } = usePageTransition();
 
   // Sorting
   const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(DEFAULT_PAGE));
   const [sort, setSort] = useQueryState("sort", parseAsString.withDefault(DEFAULT_SORT)) as [
-    ScoreSort["field"],
-    (value: ScoreSort["field"] | null) => void,
+    SortField,
+    (value: SortField | null) => void,
   ];
   const [direction, setDirection] = useQueryState(
     "direction",
     parseAsString.withDefault(DEFAULT_SORT_DIRECTION)
-  ) as [ScoreSort["direction"], (value: ScoreSort["direction"] | null) => void];
+  ) as [SortDirection, (value: SortDirection | null) => void];
 
   // Filters
-  const [scoreFilter, setScoreFilter] = useQueryState(
-    "scores",
-    parseAsString.withDefault(DEFAULT_FILTER)
-  ) as [string | null, (value: string | null) => void];
   const [hmdFilter, setHmdFilter] = useQueryState("hmd", parseAsString) as [
-    HMD | null,
-    (value: HMD | null) => void,
+    HMD | undefined,
+    (value: HMD | undefined) => void,
+  ];
+
+  const sortOptions: SortOption[] = [
+    ...(mode === "ssr"
+      ? ([
+          {
+            name: "PP",
+            value: "pp",
+            icon: <Trophy className="h-4 w-4" />,
+            defaultOrder: "desc" as const,
+          },
+        ] as SortOption[])
+      : ([
+          {
+            name: "Medals",
+            value: "medals",
+            icon: <Trophy className="h-4 w-4" />,
+            defaultOrder: "desc" as const,
+          },
+        ] as SortOption[])),
+    ...SORT_OPTIONS,
   ];
 
   // Search
@@ -147,7 +143,7 @@ export default function ScoreSaberPlayerScoresSSR({ player }: ScoreSaberPlayerSc
   useDocumentTitle(
     ssrConfig.siteTitleTemplate.replace(
       "%s",
-      `${player.name} / ScoreSaber / ${page} / ${SORT_OPTIONS.find(s => s.value === sort)?.name} / ${capitalizeFirstLetter(direction)}`
+      `${player.name} / ${MODE_NAME[mode]} / ${page} / ${sortOptions.find(s => s.value === sort)?.name} / ${capitalizeFirstLetter(direction)}`
     )
   );
 
@@ -172,27 +168,13 @@ export default function ScoreSaberPlayerScoresSSR({ player }: ScoreSaberPlayerSc
       sort,
       debouncedSearchTerm,
       direction,
-      scoreFilter,
       hmdFilter,
     ],
     queryFn: async () => {
-      const selectedFilter = FILTERS.find(f => f.name === scoreFilter);
-
-      const response = await ssrApi.fetchSSRPlayerScores(
-        player.id,
-        page,
-        {
-          field: sort,
-          direction,
-          filters: selectedFilter
-            ? {
-                ...selectedFilter.value,
-                ...(hmdFilter ? { hmd: hmdFilter } : {}),
-              }
-            : {},
-        } as ScoreSort,
-        invalidSearch ? undefined : debouncedSearchTerm
-      );
+      const response = await ssrApi.fetchPlayerScores(player.id, mode, page, sort, direction, {
+        ...(!invalidSearch ? { search: debouncedSearchTerm } : {}),
+        ...(hmdFilter ? { hmd: hmdFilter } : {}),
+      });
       return response || Pagination.empty();
     },
     placeholderData: prev => prev,
@@ -203,17 +185,12 @@ export default function ScoreSaberPlayerScoresSSR({ player }: ScoreSaberPlayerSc
   }, [isLoading, isRefetching, scores, setIsLoading]);
 
   const handleSortChange = useCallback(
-    (newSort: ScoreSort["field"], defaultOrder: ScoreSort["direction"] = "desc") => {
+    (newSort: SortField, defaultOrder: SortDirection = "desc") => {
       setIsLoading(true);
       if (newSort !== sort) {
         setSort(newSort);
         setDirection(defaultOrder);
         setPage(1);
-        const defaultFilter = SORT_OPTIONS.find(s => s.value === newSort)?.defaultFilter;
-        const filterName =
-          FILTERS.find(f => JSON.stringify(f.value) === JSON.stringify(defaultFilter ?? {}))
-            ?.name ?? "All Scores";
-        setScoreFilter(filterName);
         animateLeft();
       } else {
         setDirection(direction === "desc" ? "asc" : "desc");
@@ -257,11 +234,11 @@ export default function ScoreSaberPlayerScoresSSR({ player }: ScoreSaberPlayerSc
       if (pageNum !== 1) params.set("page", String(pageNum));
       if (debouncedSearchTerm && debouncedSearchTerm.length >= 3)
         params.set("search", debouncedSearchTerm);
-      if (scoreFilter && scoreFilter !== "All Scores") params.set("filter", scoreFilter);
+
       const queryString = params.toString();
       return `/player/${player.id}/scoresaber?${queryString}`;
     },
-    [player.id, sort, direction, debouncedSearchTerm, scoreFilter]
+    [player.id, sort, direction, debouncedSearchTerm]
   );
 
   const renderScoresList = () => {
@@ -320,20 +297,19 @@ export default function ScoreSaberPlayerScoresSSR({ player }: ScoreSaberPlayerSc
     <ScoresCard>
       <div className="flex w-full flex-col gap-2">
         <ControlPanel>
-          <ControlRow>
-            <ScoreSaberScoreModeTabs />
-          </ControlRow>
+          {mode === "ssr" && (
+            <ControlRow>
+              <ScoreSaberScoreModeTabs />
+            </ControlRow>
+          )}
           <ControlRow>
             <ButtonGroup>
-              {SORT_OPTIONS.map(sortOption => (
+              {sortOptions.map(sortOption => (
                 <ControlButton
                   key={sortOption.value}
                   isActive={sortOption.value === sort}
                   onClick={() =>
-                    handleSortChange(
-                      sortOption.value,
-                      sortOption.defaultOrder as ScoreSort["direction"]
-                    )
+                    handleSortChange(sortOption.value, sortOption.defaultOrder as SortDirection)
                   }
                 >
                   {sortOption.value === sort ? (
@@ -375,80 +351,51 @@ export default function ScoreSaberPlayerScoresSSR({ player }: ScoreSaberPlayerSc
                 )}
               </div>
 
-              <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
-                <Select
-                  value={scoreFilter || ""}
-                  onValueChange={value => {
-                    setIsLoading(true);
-                    setScoreFilter(value);
-                    setPage(1);
-                    animateLeft();
-                  }}
-                >
-                  <SelectTrigger
-                    className="h-8 w-full text-xs sm:w-46"
-                    showClearButton={!!(scoreFilter && scoreFilter !== "All Scores")}
-                    onClear={() => {
+              {mode === "ssr" && (
+                <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+                  <Select
+                    value={hmdFilter || "All Hmds"}
+                    onValueChange={value => {
                       setIsLoading(true);
-                      setScoreFilter("All Scores");
+                      setHmdFilter(value === "All Hmds" ? undefined : (value as HMD));
                       setPage(1);
                       animateLeft();
                     }}
                   >
-                    <SelectValue placeholder="Filter" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {FILTERS.map(filterOption => (
-                      <SelectItem key={filterOption.name} value={filterOption.name}>
+                    <SelectTrigger
+                      className="h-8 w-full text-xs sm:w-42"
+                      showClearButton={hmdFilter !== undefined}
+                      onClear={() => {
+                        setIsLoading(true);
+                        setHmdFilter(undefined);
+                        setPage(1);
+                        animateLeft();
+                      }}
+                    >
+                      <SelectValue placeholder="HMD Filter" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={"All Hmds"}>
                         <div className="flex items-center gap-2">
-                          {filterOption.icon}
-                          <span>{filterOption.name}</span>
+                          <HMDIcon hmd={getHMDInfo("Unknown")} />
+                          <span>All HMDs</span>
                         </div>
                       </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-
-                <Select
-                  value={hmdFilter || "All Hmds"}
-                  onValueChange={value => {
-                    setIsLoading(true);
-                    setHmdFilter(value === "All Hmds" ? null : (value as HMD));
-                    setPage(1);
-                    animateLeft();
-                  }}
-                >
-                  <SelectTrigger
-                    className="h-8 w-full text-xs sm:w-42"
-                    showClearButton={!!hmdFilter}
-                    onClear={() => {
-                      setIsLoading(true);
-                      setHmdFilter(null);
-                      setPage(1);
-                      animateLeft();
-                    }}
-                  >
-                    <SelectValue placeholder="HMD Filter" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value={"All Hmds"}>
-                      <div className="flex items-center gap-2">
-                        <HMDIcon hmd={getHMDInfo("Unknown")} />
-                        <span>All HMDs</span>
-                      </div>
-                    </SelectItem>
-                    {player.hmdBreakdown &&
-                      Object.keys(player.hmdBreakdown).map(filter => (
-                        <SelectItem key={filter} value={filter}>
-                          <div className="flex items-center gap-2">
-                            <HMDIcon hmd={getHMDInfo(filter as HMD)} />
-                            <span>{filter}</span>
-                          </div>
-                        </SelectItem>
-                      ))}
-                  </SelectContent>
-                </Select>
-              </div>
+                      {player.hmdBreakdown &&
+                        Object.keys(player.hmdBreakdown)
+                          .filter(filter => filter !== "Unknown")
+                          .map(filter => (
+                            <SelectItem key={filter} value={filter}>
+                              <div className="flex items-center gap-2">
+                                <HMDIcon hmd={getHMDInfo(filter as HMD)} />
+                                <span>{filter}</span>
+                              </div>
+                            </SelectItem>
+                          ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
             </div>
           </ControlRow>
         </ControlPanel>

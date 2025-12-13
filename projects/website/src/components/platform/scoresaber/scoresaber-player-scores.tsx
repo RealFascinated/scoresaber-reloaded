@@ -17,7 +17,7 @@ export default function ScoreSaberPlayerScores({ player }: ScoreSaberPlayerScore
       {mode === "live" ? (
         <ScoreSaberPlayerScoresLive player={player} />
       ) : (
-        <ScoreSaberPlayerScoresSSR player={player} />
+        <ScoreSaberPlayerScoresSSR player={player} mode="ssr" />
       )}
     </>
   );
