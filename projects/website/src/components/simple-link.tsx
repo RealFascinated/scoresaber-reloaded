@@ -7,7 +7,7 @@ export default function SimpleLink({
   children,
   href,
   ...props
-}: { children: React.ReactNode; href: string } & React.ComponentProps<"a">) {
+}: { children: React.ReactNode; href: string } & React.ComponentProps<typeof Link>) {
   const [isHovering, setIsHovering] = useState(false);
 
   return (
