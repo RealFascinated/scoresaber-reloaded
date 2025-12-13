@@ -5,7 +5,7 @@ import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/sc
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import { getScoreSaberAvatar, getScoreSaberRoles } from "@ssr/common/utils/scoresaber.util";
 import { clsx } from "clsx";
-import SimpleLink from "../simple-link";
+import Link from "next/link";
 
 export function PlayerInfo({
   player,
@@ -45,9 +45,9 @@ export function PlayerInfo({
       />
       {!hideCountryFlag && <CountryFlag code={player.country!} size={10} />}
       {useLink ? (
-        <SimpleLink href={`/player/${player.id}`} data-umami-event="player-button">
+        <Link href={`/player/${player.id}`} data-umami-event="player-button">
           {name}
-        </SimpleLink>
+        </Link>
       ) : (
         name
       )}

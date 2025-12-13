@@ -12,9 +12,9 @@ import { connectBeatLeaderWebsocket } from "@ssr/common/websocket/beatleader-web
 import { connectScoresaberWebsocket } from "@ssr/common/websocket/scoresaber-websocket";
 import { EventListener } from "../event/event-listener";
 import { EventsManager } from "../event/events-manager";
+import { LeaderboardCoreService } from "../service/leaderboard/leaderboard-core.service";
 import { PlayerCoreService } from "../service/player/player-core.service";
 import { TopScoresService } from "../service/score/top-scores.service";
-import { LeaderboardCoreService } from "../service/leaderboard/leaderboard-core.service";
 
 interface PendingScore {
   scoreSaberToken?: ScoreSaberScoreToken;
@@ -180,7 +180,7 @@ export class ScoreWebsockets implements EventListener {
         // Update the player's name and last score date
         Promise.all([
           PlayerCoreService.updatePlayerName(player.id, player.name),
-          PlayerModel.updateOne({ _id: player.id }, { $set: { lastScore: new Date() } })
+          PlayerModel.updateOne({ _id: player.id }, { $set: { lastScore: new Date() } }),
         ]);
       }
 

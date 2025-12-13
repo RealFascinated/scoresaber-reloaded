@@ -1,7 +1,6 @@
 import { cn } from "@/common/utils";
 import Card from "@/components/card";
 import ScoreSongInfo from "@/components/score/score-song-info";
-import SimpleLink from "@/components/simple-link";
 import { Spinner } from "@/components/spinner";
 import { Button } from "@/components/ui/button";
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
@@ -10,6 +9,7 @@ import RankingRequestToken from "@ssr/common/types/token/scoresaber/ranking-requ
 import { timeAgo } from "@ssr/common/utils/time-utils";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronDownIcon } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 
 export default function RankingQueue() {
@@ -30,7 +30,7 @@ export default function RankingQueue() {
             const leaderboard = getScoreSaberLeaderboardFromToken(rankingRequest.leaderboardInfo);
             return (
               <div key={index}>
-                <SimpleLink
+                <Link
                   href={`/leaderboard/${leaderboard.id}`}
                   className="bg-accent-deep hover:bg-accent-deep/50 grid items-center gap-2 rounded-md p-1.5 transition-all lg:grid-cols-[1fr_0.22fr]"
                 >
@@ -53,7 +53,7 @@ export default function RankingQueue() {
                     <p>{rankingRequest.difficultyCount} Difficulties</p>
                     <p className="text-gray-400">{timeAgo(new Date(rankingRequest.created_at))}</p>
                   </div>
-                </SimpleLink>
+                </Link>
               </div>
             );
           })}

@@ -11,10 +11,10 @@ import { DetailType } from "@ssr/common/detail-type";
 import type ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
+import Link from "next/link";
 import AccSaberPlayerScores from "../platform/accsaber/accsaber-player-scores";
 import ScoreSaberPlayerMedalScores from "../platform/scoresaber/scoresaber-player-medal-scores";
 import ScoreSaberPlayerScores from "../platform/scoresaber/scoresaber-player-scores";
-import SimpleLink from "../simple-link";
 import { Button } from "../ui/button";
 import PlayerHeader from "./header/player-header";
 import PlayerMiniRankings from "./mini-ranking/player-mini-ranking";
@@ -96,7 +96,7 @@ export default function PlayerData({ platformType, player }: PlayerDataProps) {
             {/* Platform Selector */}
             <div className="flex">
               {availablePlatforms.map(platform => (
-                <SimpleLink
+                <Link
                   href={`/player/${player.id}${platform.getType() !== PlatformType.ScoreSaber ? `/${platform.getType()}` : ""}`}
                   key={platform.getDisplayName()}
                   scroll={false}
@@ -109,7 +109,7 @@ export default function PlayerData({ platformType, player }: PlayerDataProps) {
                     {platform.getLogo()}
                     <span className="hidden md:block">{platform.getDisplayName()}</span>
                   </Button>
-                </SimpleLink>
+                </Link>
               ))}
             </div>
             {/* Score Component */}

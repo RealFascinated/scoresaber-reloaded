@@ -2,7 +2,6 @@
 
 import Avatar from "@/components/avatar";
 import ScoreSaberScoreDisplay from "@/components/platform/scoresaber/score/scoresaber-score";
-import SimpleLink from "@/components/simple-link";
 import Logger from "@ssr/common/logger";
 import {
   getScoreSaberLeaderboardFromToken,
@@ -11,6 +10,7 @@ import {
 import ScoreSaberPlayerScoreToken from "@ssr/common/types/token/scoresaber/player-score";
 import { ScoreSaberWebsocketMessageToken } from "@ssr/common/types/token/scoresaber/websocket/websocket-message";
 import { parseDate } from "@ssr/common/utils/time-utils";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import useWebSocket, { ReadyState } from "react-use-websocket";
 
@@ -63,11 +63,11 @@ export default function ScoreFeed() {
                 className="h-6 w-6"
                 alt={`${player.name}'s Profile Picture`}
               />
-              <SimpleLink href={`/player/${player.id}`}>
+              <Link href={`/player/${player.id}`}>
                 <span className="text-primary hover:text-primary/80 transition-all">
                   {player.name}
                 </span>
-              </SimpleLink>
+              </Link>
               <p className="text-xs text-gray-400">
                 {" "}
                 on {scoreToken.score.deviceHmd || "Unknown Device"}

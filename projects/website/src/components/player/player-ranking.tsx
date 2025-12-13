@@ -8,8 +8,8 @@ import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { getScoreSaberAvatar, getScoreSaberRoles } from "@ssr/common/utils/scoresaber.util";
+import Link from "next/link";
 import { PlayerAvatar } from "../ranking/player-avatar";
-import SimpleLink from "../simple-link";
 import CountryFlag from "../ui/country-flag";
 
 export function PlayerRanking({
@@ -34,7 +34,7 @@ export function PlayerRanking({
   const countryRank = getCountryRank(player);
 
   return (
-    <SimpleLink href={`/player/${player.id}`}>
+    <Link href={`/player/${player.id}`}>
       {/* Desktop Layout */}
       <div
         className={cn(
@@ -106,7 +106,7 @@ export function PlayerRanking({
           </div>
         </div>
       </div>
-    </SimpleLink>
+    </Link>
   );
 }
 

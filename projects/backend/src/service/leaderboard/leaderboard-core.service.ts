@@ -14,6 +14,7 @@ import { LeaderboardResponse } from "@ssr/common/response/leaderboard-response";
 import { MapDifficulty } from "@ssr/common/score/map-difficulty";
 import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
 import { MapCharacteristic } from "@ssr/common/types/map-characteristic";
+import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/leaderboard";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import SuperJSON from "superjson";
 import { redisClient } from "../../common/redis";
@@ -23,7 +24,6 @@ import { QueueId, QueueManager } from "../../queue/queue-manager";
 import BeatSaverService from "../beatsaver.service";
 import CacheService, { CacheId } from "../cache.service";
 import { LeaderboardRankingService } from "./leaderboard-ranking.service";
-import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/leaderboard";
 
 const DEFAULT_OPTIONS: LeaderboardOptions = {
   includeBeatSaver: false,
@@ -97,19 +97,25 @@ export class LeaderboardCoreService {
    * @param token the ScoreSaber leaderboard token to use
    * @returns the fetched leaderboard
    */
-  public static async createLeaderboard(id: string, token?: ScoreSaberLeaderboardToken): Promise<LeaderboardResponse> {
+  public static async createLeaderboard(
+    id: string,
+    token?: ScoreSaberLeaderboardToken
+  ): Promise<LeaderboardResponse> {
     const before = performance.now();
-    const leaderboardToken = token ?? await ApiServiceRegistry.getInstance()
-      .getScoreSaberService()
-      .lookupLeaderboard(id);
+    const leaderboardToken =
+      token ??
+      (await ApiServiceRegistry.getInstance().getScoreSaberService().lookupLeaderboard(id));
     if (leaderboardToken == undefined) {
       throw new NotFoundError(`Leaderboard not found for "${id}"`);
     }
 
-    const data = LeaderboardCoreService.processLeaderboard(await LeaderboardCoreService.saveLeaderboard(
-      id,
-      getScoreSaberLeaderboardFromToken(leaderboardToken)
-    ), false);
+    const data = LeaderboardCoreService.processLeaderboard(
+      await LeaderboardCoreService.saveLeaderboard(
+        id,
+        getScoreSaberLeaderboardFromToken(leaderboardToken)
+      ),
+      false
+    );
 
     (QueueManager.getQueue(QueueId.LeaderboardScoreSeedQueue) as LeaderboardScoreSeedQueue).add({
       id: data.leaderboard.id.toString(),

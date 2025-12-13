@@ -1,10 +1,10 @@
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import SimpleLink from "../simple-link";
+import Link from "next/link";
 
 export function DiscordButton() {
   return (
-    <SimpleLink href="https://discord.gg/kmNfWGA4A8" target="_blank">
+    <Link href="https://discord.gg/kmNfWGA4A8" target="_blank">
       <Button className="flex max-w-52 gap-2.5 bg-[#5865F2] text-white hover:bg-[#5865F2]/85">
         <Image
           className="size-6"
@@ -15,6 +15,6 @@ export function DiscordButton() {
         />
         <span>Join our Discord</span>
       </Button>
-    </SimpleLink>
+    </Link>
   );
 }

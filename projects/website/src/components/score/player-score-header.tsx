@@ -1,8 +1,8 @@
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/leaderboard-player-info";
 import { getScoreSaberAvatar } from "@ssr/common/utils/scoresaber.util";
+import Link from "next/link";
 import Avatar from "../avatar";
-import SimpleLink from "../simple-link";
 
 export default function PlayerScoreHeader({
   player,
@@ -12,9 +12,9 @@ export default function PlayerScoreHeader({
   return (
     <div className="bg-primary/20 flex w-fit items-center gap-2 rounded-md rounded-b-none p-2">
       <Avatar src={getScoreSaberAvatar(player)} alt={player.name ?? ""} size={20} />
-      <SimpleLink href={`/player/${player.id}`}>
+      <Link href={`/player/${player.id}`}>
         <p className="hover:text-primary text-sm transition-all">{player.name}</p>
-      </SimpleLink>
+      </Link>
     </div>
   );
 }

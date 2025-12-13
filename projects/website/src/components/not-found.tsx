@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import SimpleLink from "./simple-link";
+import Link from "next/link";
 import { Button } from "./ui/button";
 
 type NotFoundProps = {
@@ -19,9 +19,9 @@ export default function NotFound({ title, description }: NotFoundProps) {
         <p className="text-lg">{description ?? "The page you are looking for does not exist."}</p>
       </div>
 
-      <SimpleLink href="/">
+      <Link href="/">
         <Button>Return Home</Button>
-      </SimpleLink>
+      </Link>
     </div>
   );
 }

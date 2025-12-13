@@ -1,11 +1,11 @@
 "use client";
 
 import Card from "@/components/card";
-import SimpleLink from "@/components/simple-link";
 import { Button } from "@/components/ui/button";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
 import { HomeIcon } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 
 export default function Error() {
   return (
@@ -34,10 +34,10 @@ export default function Error() {
                 variant="default"
                 className="h-10 w-full text-sm font-semibold shadow-md transition-colors duration-200 hover:shadow-lg"
               >
-                <SimpleLink href="/" className="flex items-center justify-center gap-2">
+                <Link href="/" className="flex items-center justify-center gap-2">
                   <HomeIcon className="h-4 w-4" />
                   Go back to homepage
-                </SimpleLink>
+                </Link>
               </Button>
 
               <Button
@@ -55,7 +55,7 @@ export default function Error() {
                 asChild
                 className="h-10 w-full bg-[#5865F2] text-sm font-semibold text-white shadow-md transition-colors duration-200 hover:bg-[#5865F2]/85 hover:shadow-lg"
               >
-                <SimpleLink
+                <Link
                   href="https://discord.gg/kmNfWGA4A8"
                   target="_blank"
                   className="flex items-center justify-center gap-2"
@@ -68,7 +68,7 @@ export default function Error() {
                     height={16}
                   />
                   Join our Discord
-                </SimpleLink>
+                </Link>
               </Button>
             </div>
           </div>
