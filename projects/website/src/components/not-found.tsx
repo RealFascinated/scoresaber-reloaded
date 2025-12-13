@@ -3,25 +3,28 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "./ui/button";
+import Card from "./card";
 
 type NotFoundProps = {
-  title?: string;
-  description?: string;
+  title: string;
+  description: string;
 };
 
 export default function NotFound({ title, description }: NotFoundProps) {
   return (
-    <div className="flex flex-col items-center gap-6">
-      <Image src="https://cdn.fascinated.cc/wqmfeQ.gif" alt="404" width={128} height={128} />
+    <div className="flex w-full justify-center">
+      <Card className="flex w-full flex-col items-center gap-6 md:w-4xl">
+        <Image src="https://cdn.fascinated.cc/wqmfeQ.gif" alt="404" width={128} height={128} />
 
-      <div className="flex flex-col items-center gap-2 text-center">
-        <h1 className="text-3xl font-bold text-red-400">{title ?? "Not Found"}</h1>
-        <p className="text-lg">{description ?? "The page you are looking for does not exist."}</p>
-      </div>
+        <div className="flex flex-col items-center gap-2 text-center">
+          <h1 className="text-3xl font-bold text-red-400">{title}</h1>
+          <p className="text-lg">{description}</p>
+        </div>
 
-      <Link href="/">
-        <Button>Return Home</Button>
-      </Link>
+        <Link href="/">
+          <Button>Return Home</Button>
+        </Link>
+      </Card>
     </div>
   );
 }

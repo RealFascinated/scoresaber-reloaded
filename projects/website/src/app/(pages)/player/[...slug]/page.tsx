@@ -98,12 +98,10 @@ export default async function PlayerPage(props: Props) {
   const { player, platformType } = await getPlayerData(props);
   if (player == undefined) {
     return (
-      <Card className="mt-2 flex w-full justify-center">
-        <NotFound
-          title="Player Not Found"
-          description="The player you were looking for could not be found"
-        />
-      </Card>
+      <NotFound
+        title="Player Not Found"
+        description="The player you were looking for could not be found"
+      />
     );
   }
   return (

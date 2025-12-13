@@ -1,7 +1,6 @@
 import SuperJSON from "superjson";
 import { DetailType } from "../detail-type";
 import { env } from "../env";
-import Logger from "../logger";
 import { ScoreSaberLeaderboard } from "../model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "../model/score/impl/scoresaber-score";
 import { StatisticsType } from "../model/statistics/statistic-type";
@@ -28,31 +27,31 @@ import { ScoreSaberScoreSort } from "../score/score-sort";
 import { MapCharacteristic } from "../types/map-characteristic";
 import { ScoreCalendarData } from "../types/player/player-statistic";
 import { ScoreSort } from "../types/sort";
-import Request, { RequestOptions } from "./request";
 
 class SSRApi {
   /**
-   * Gets a response from the API.
+   * Retrieves a response from the API.
    *
-   * @param url the url to get
-   * @param options the options for the request
-   * @returns the response
+   * @param url the url to fetch
+   * @param queryParams the query parameters for the request
+   * @returns the parsed response
+   * @throws an error if the request fails
    */
-  async get<T>(url: string, options?: RequestOptions) {
-    options = {
-      returns: "text",
-      ...options,
-      searchParams: {
-        superjson: true,
-        ...options?.searchParams,
-      },
-    };
-    const response = await Request.get<string>(url, options);
-    if (response === undefined) {
-      Logger.error(`Failed to get ${url}: ${response}`);
+  async get<T>(url: string, queryParams?: Record<string, string>) {
+    const queryString = new URLSearchParams({
+      ...queryParams,
+      superjson: "true",
+    }).toString();
+    const fullUrl = `${url}?${queryString}`;
+    const response = await fetch(fullUrl);
+    
+    if (response.status === 500) {
+      throw new Error(`Failed to get ${fullUrl}: ${response.statusText}`);
+    }
+    if (response.status === 404) {
       return undefined;
     }
-    return SuperJSON.parse<T>(response);
+    return SuperJSON.parse<T>(await response.text());
   }
 
   /**
@@ -71,9 +70,7 @@ class SSRApi {
     return await this.get<BeatSaverMapResponse>(
       `${env.NEXT_PUBLIC_API_URL}/beatsaver/map/${hash}/${difficulty}/${characteristic}`,
       {
-        searchParams: {
-          type: type,
-        },
+        type: type,
       }
     );
   }
@@ -164,9 +161,7 @@ class SSRApi {
     return await this.get<Page<ScoreSaberScore>>(
       `${env.NEXT_PUBLIC_API_URL}/scores/friends/leaderboard/${leaderboardId}/${page}`,
       {
-        searchParams: {
-          friendIds: friendIds.join(","),
-        },
+        friendIds: friendIds.join(","),
       }
     );
   }
@@ -181,9 +176,7 @@ class SSRApi {
     return await this.get<Page<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>>(
       `${env.NEXT_PUBLIC_API_URL}/scores/friends/${page}`,
       {
-        searchParams: {
-          friendIds: friendIds.join(","),
-        },
+        friendIds: friendIds.join(","),
       }
     );
   }
@@ -197,9 +190,7 @@ class SSRApi {
    */
   async getScoreSaberPlayer(playerId: string, type: DetailType = DetailType.BASIC) {
     return await this.get<ScoreSaberPlayer>(`${env.NEXT_PUBLIC_API_URL}/player/${playerId}`, {
-      searchParams: {
-        type: type,
-      },
+      type: type,
     });
   }
 
@@ -258,10 +249,8 @@ class SSRApi {
     return await this.get<Page<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>>(
       `${env.NEXT_PUBLIC_API_URL}/scores/player/${id}/${page}/${sort}`,
       {
-        searchParams: {
-          ...(search ? { search: search } : {}),
-          ...(comparisonPlayerId ? { comparisonPlayerId: comparisonPlayerId } : {}),
-        },
+        ...(search ? { search: search } : {}),
+        ...(comparisonPlayerId ? { comparisonPlayerId: comparisonPlayerId } : {}),
       }
     );
   }
@@ -283,12 +272,10 @@ class SSRApi {
     return await this.get<PlayerScoresResponse>(
       `${env.NEXT_PUBLIC_API_URL}/scores/cached/player/${id}/${sort.field}/${sort.direction}/${page}`,
       {
-        searchParams: {
-          ...Object.fromEntries(
-            Object.entries(sort.filters ?? {}).map(([key, value]) => [key, value])
-          ),
-          ...(search ? { search: search } : {}),
-        },
+        ...Object.fromEntries(
+          Object.entries(sort.filters ?? {}).map(([key, value]) => [key, value])
+        ),
+        ...(search ? { search: search } : {}),
       }
     );
   }
@@ -304,9 +291,7 @@ class SSRApi {
     return await this.get<LeaderboardScoresResponse>(
       `${env.NEXT_PUBLIC_API_URL}/scores/leaderboard/${leaderboardId}/${page}`,
       {
-        searchParams: {
-          ...(country ? { country: country } : {}),
-        },
+        ...(country ? { country: country } : {}),
       }
     );
   }
@@ -328,11 +313,9 @@ class SSRApi {
     return await this.get<PlayerStatisticHistory>(
       `${env.NEXT_PUBLIC_API_URL}/player/history/${playerId}`,
       {
-        searchParams: {
-          startDate: startDate.toISOString(),
-          endDate: endDate.toISOString(),
-          ...(includedFields ? { includedFields: includedFields.join(",") } : {}),
-        },
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString(),
+        ...(includedFields ? { includedFields: includedFields.join(",") } : {}),
       }
     );
   }
@@ -356,11 +339,8 @@ class SSRApi {
    */
   async getPlaysByHmdForLeaderboard(leaderboardId: string) {
     return await this.get<PlaysByHmdResponse>(
-      `${env.NEXT_PUBLIC_API_URL}/leaderboard/plays-by-hmd/${leaderboardId}`,
-      {
-        throwOnError: true,
-      }
-    )!;
+      `${env.NEXT_PUBLIC_API_URL}/leaderboard/plays-by-hmd/${leaderboardId}`
+    );
   }
 
   /**
@@ -371,9 +351,7 @@ class SSRApi {
    */
   async searchPlayers(query: string) {
     return await this.get<PlayerSearchResponse>(`${env.NEXT_PUBLIC_API_URL}/player/search`, {
-      searchParams: {
-        query: query,
-      },
+      query: query,
     });
   }
 
@@ -394,11 +372,9 @@ class SSRApi {
     return await this.get<PlayerRankingsResponse>(
       `${env.NEXT_PUBLIC_API_URL}/player/search/ranking`,
       {
-        searchParams: {
-          page: page,
-          ...(options?.country ? { country: options.country } : {}),
-          ...(options?.search ? { search: options.search } : {}),
-        },
+        page: page.toString(),
+        ...(options?.country ? { country: options.country } : {}),
+        ...(options?.search ? { search: options.search } : {}),
       }
     );
   }
@@ -414,9 +390,7 @@ class SSRApi {
     return await this.get<PlayerMedalRankingsResponse>(
       `${env.NEXT_PUBLIC_API_URL}/ranking/medals/${page}`,
       {
-        searchParams: {
-          ...(country ? { country: country } : {}),
-        },
+        ...(country ? { country: country } : {}),
       }
     );
   }
