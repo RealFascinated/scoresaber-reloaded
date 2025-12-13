@@ -106,11 +106,6 @@ export default async function PlayerPage(props: Props) {
       </Card>
     );
   }
-  const platform = PlatformRepository.getInstance().getPlatform(platformType);
-  if (platform == undefined) {
-    return redirect(`/player/${player.id}`);
-  }
-
   return (
     <main className="flex w-full justify-center">
       <PlayerData player={player} platformType={platformType} />
