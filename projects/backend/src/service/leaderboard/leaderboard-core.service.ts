@@ -48,6 +48,9 @@ export class LeaderboardCoreService {
       ...DEFAULT_OPTIONS,
       ...options,
     };
+    if (isNaN(Number(id))) {
+      throw new NotFoundError(`Leaderboard not found for "${id}"`);
+    }
 
     const leaderboardData = await CacheService.fetchWithCache(
       CacheId.Leaderboards,
