@@ -31,6 +31,7 @@ export function pluralize(count: number, word: string) {
  * @param args the arguments to format the string with
  * @returns the formatted string
  */
-export function format(template: string, ...args: any[]) {
-  return template.replace(/%s/g, (match, index) => args[index]?.toString() || match);
+export function format(template: string, ...args: unknown[]) {
+  let argIndex = 0;
+  return template.replace(/%s/g, () => args[argIndex++]?.toString() || '%s');
 }
