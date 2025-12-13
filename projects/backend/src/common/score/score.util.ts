@@ -150,6 +150,8 @@ export async function sendMedalScoreNotification(
   const description = [
     `**${leaderboard.fullName}**`,
     `${getDifficultyName(leaderboard.difficulty.difficulty)} / ${leaderboard.difficulty.characteristic}${leaderboard.stars > 0 ? ` • ${leaderboard.stars.toFixed(2)}★` : ""}`,
+    "",
+    "**Changes:**",
   ];
   // Sort the changes by the number of medals gained/lost
   for (const [playerId, change] of Array.from(changes.entries()).sort((a, b) => b[1] - a[1])) {
