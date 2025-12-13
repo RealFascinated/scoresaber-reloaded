@@ -44,7 +44,7 @@ class SSRApi {
     }).toString();
     const fullUrl = `${url}?${queryString}`;
     const response = await fetch(fullUrl);
-    
+
     if (response.status === 500) {
       throw new Error(`Failed to get ${fullUrl}: ${response.statusText}`);
     }

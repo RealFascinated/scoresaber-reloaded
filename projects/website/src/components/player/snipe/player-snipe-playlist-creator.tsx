@@ -1,19 +1,14 @@
 "use client";
 
 import { downloadFile } from "@/common/browser-utils";
+import Card from "@/components/card";
 import SimpleTooltip from "@/components/simple-tooltip";
 import { Spinner } from "@/components/spinner";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup, ControlButton } from "@/components/ui/control-panel";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { DualRangeSlider } from "@/components/ui/dual-range-slider";
+import { Form, FormControl, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -36,8 +31,6 @@ import {
   ArrowDown,
   ArrowUp,
   BarChart3,
-  ChevronDown,
-  ChevronRight,
   Clock,
   Crosshair,
   Download,
@@ -53,7 +46,6 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import PlayerActionButtonWrapper from "../buttons/player-action-button-wrapper";
 
-const DEFAULT_EXPANDED = new Set(["basic", "filters"]);
 const SCORE_LIMIT_MIN = 25;
 const SCORE_LIMIT_MAX = 250;
 const SCORE_LIMIT_STEP = 25;
@@ -103,7 +95,6 @@ export default function SnipePlaylistCreator({ toSnipe }: Props) {
   const database = useDatabase();
   const playerId = useStableLiveQuery(() => database.getMainPlayerId());
   const [downloading, setDownloading] = useState(false);
-  const [expanded, setExpanded] = useState<Set<string>>(DEFAULT_EXPANDED);
 
   const form = useForm<SnipeSettings>({
     resolver: zodResolver(snipeSettingsSchema),
@@ -142,14 +133,6 @@ export default function SnipePlaylistCreator({ toSnipe }: Props) {
     },
     [form, sort, sortDirection]
   );
-
-  const toggleExpanded = useCallback((section: string) => {
-    setExpanded(prev => {
-      const next = new Set(prev);
-      next.has(section) ? next.delete(section) : next.add(section);
-      return next;
-    });
-  }, []);
 
   const handleSubmit = useCallback(
     async (data: SnipeSettings) => {
@@ -197,303 +180,252 @@ export default function SnipePlaylistCreator({ toSnipe }: Props) {
         </SimpleTooltip>
       </DialogTrigger>
 
-      <DialogContent className="max-h-[85vh] sm:max-w-4xl overflow-y-auto">
-        <DialogHeader className="pb-4">
-          <DialogTitle>Create Snipe Playlist</DialogTitle>
-          <DialogDescription>
-            Generate a new snipe playlist for {truncateText(toSnipe.name, 16)}!
-          </DialogDescription>
-        </DialogHeader>
+      <DialogContent className="max-h-[85vh] overflow-hidden p-0 sm:max-w-4xl">
+        <Card className="relative m-0 flex h-full max-h-[85vh] flex-col rounded-lg">
+          {/* Header */}
+          <div className="border-border border-b px-(--spacing-lg) py-(--spacing-lg) md:px-(--spacing-xl) md:py-(--spacing-xl)">
+            <h1 className="text-xl font-semibold md:text-2xl">Create Snipe Playlist</h1>
+            <p className="text-muted-foreground mt-1 text-sm">
+              Generate a new snipe playlist for {truncateText(toSnipe.name, 16)}!
+            </p>
+          </div>
 
-        <form id="snipe-playlist-form" onSubmit={form.handleSubmit(handleSubmit)}>
-          <div className="space-y-4">
-            <CollapsibleSection
-              title="Basic Settings"
-              icon={<Target className="h-4 w-4" />}
-              isExpanded={expanded.has("basic")}
-              onToggle={() => toggleExpanded("basic")}
-            >
-              <div className="space-y-4">
-                <Controller
-                  name="name"
-                  control={form.control}
-                  render={({ field, fieldState }) => (
+          {/* Content */}
+          <div className="flex-1 overflow-x-hidden overflow-y-auto">
+            <div className="p-(--spacing-lg) md:p-(--spacing-xl) lg:p-(--spacing-2xl)">
+              <Form {...form}>
+                <form id="snipe-playlist-form" onSubmit={form.handleSubmit(handleSubmit)}>
+                  <div className="space-y-4">
+                    {/* Basic Settings */}
                     <div className="space-y-2">
-                      <label htmlFor="playlist-name" className="text-sm font-medium">
-                        Playlist Name
-                      </label>
-                      <Input
-                        {...field}
-                        id="playlist-name"
-                        placeholder="Snipe Playlist"
-                        aria-invalid={fieldState.invalid}
-                      />
-                      {fieldState.error && (
-                        <p className="text-destructive text-sm">{fieldState.error.message}</p>
-                      )}
-                    </div>
-                  )}
-                />
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Sort By</label>
-                  <ButtonGroup>
-                    {availableSorts.map(opt => {
-                      const isActive = opt.value === sort;
-                      const Icon = opt.icon;
-                      const DirectionIcon =
-                        isActive && sortDirection === "desc" ? ArrowDown : ArrowUp;
-                      return (
-                        <ControlButton
-                          key={opt.value}
-                          isActive={isActive}
-                          onClick={() => handleSort(opt.value)}
-                          type="button"
-                        >
-                          {isActive ? (
-                            <DirectionIcon className="h-4 w-4" />
-                          ) : (
-                            <Icon className="h-4 w-4" />
-                          )}
-                          {opt.name}
-                        </ControlButton>
-                      );
-                    })}
-                  </ButtonGroup>
-                </div>
-
-                <Controller
-                  name="limit"
-                  control={form.control}
-                  render={({ field, fieldState }) => (
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <label htmlFor="score-limit" className="text-sm font-medium">
-                          Score Limit
-                        </label>
-                        <span className="text-sm font-medium">{field.value} scores</span>
+                      <div className="text-muted-foreground flex items-center gap-2 text-xs font-semibold tracking-wider uppercase">
+                        <Target className="size-3.5" />
+                        <span>Basic Settings</span>
                       </div>
-                      <Slider
-                        id="score-limit"
-                        min={SCORE_LIMIT_MIN}
-                        max={SCORE_LIMIT_MAX}
-                        step={SCORE_LIMIT_STEP}
-                        value={[field.value]}
-                        onValueChange={vals => field.onChange(vals[0])}
-                        className="mt-2"
-                        aria-invalid={fieldState.invalid}
-                      />
-                      {fieldState.error && (
-                        <p className="text-destructive text-sm">{fieldState.error.message}</p>
-                      )}
-                    </div>
-                  )}
-                />
-              </div>
-            </CollapsibleSection>
+                      <div className="space-y-1">
+                        <Controller
+                          name="name"
+                          control={form.control}
+                          render={({ field, fieldState }) => (
+                            <FormItem className="flex flex-col items-start space-y-2 py-1 md:flex-row md:items-center md:justify-between md:space-y-0">
+                              <div className="flex-1 space-y-0 md:pr-4">
+                                <FormLabel className="text-sm leading-tight font-normal">
+                                  Playlist Name
+                                </FormLabel>
+                              </div>
+                              <FormControl>
+                                <Input
+                                  {...field}
+                                  placeholder="Snipe Playlist"
+                                  className="w-full md:w-52"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
 
-            <CollapsibleSection
-              title="Filters"
-              icon={<Filter className="h-4 w-4" />}
-              isExpanded={expanded.has("filters")}
-              onToggle={() => toggleExpanded("filters")}
-            >
-              <div className="space-y-4">
-                <Controller
-                  name="rankedStatus"
-                  control={form.control}
-                  render={({ field, fieldState }) => (
+                        <Controller
+                          name="limit"
+                          control={form.control}
+                          render={({ field, fieldState }) => (
+                            <FormItem className="flex flex-col items-start space-y-2 py-1 md:flex-row md:items-center md:justify-between md:space-y-0">
+                              <div className="flex-1 space-y-0 md:pr-4">
+                                <FormLabel className="text-sm leading-tight font-normal">
+                                  Score Limit
+                                </FormLabel>
+                              </div>
+                              <FormControl>
+                                <div className="flex w-full items-center gap-3 md:w-52">
+                                  <Slider
+                                    min={SCORE_LIMIT_MIN}
+                                    max={SCORE_LIMIT_MAX}
+                                    step={SCORE_LIMIT_STEP}
+                                    value={[field.value]}
+                                    onValueChange={vals => field.onChange(vals[0])}
+                                    className="flex-1"
+                                  />
+                                  <span className="text-muted-foreground min-w-16 text-right text-sm font-medium">
+                                    {field.value} scores
+                                  </span>
+                                </div>
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </div>
+
                     <div className="space-y-2">
-                      <label
-                        htmlFor="ranked-status"
-                        className="text-foreground text-sm font-medium"
-                      >
-                        Score Type
-                      </label>
-                      <Select
-                        value={field.value}
-                        onValueChange={field.onChange}
-                        aria-invalid={fieldState.invalid}
-                      >
-                        <SelectTrigger id="ranked-status" className="h-10">
-                          <SelectValue placeholder="Select score type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {RANKED_OPTIONS.map(opt => {
-                            const Icon = opt.icon;
-                            return (
-                              <SelectItem key={opt.value} value={opt.value}>
-                                <span className="flex items-center gap-2">
-                                  <Icon className="h-3.5 w-3.5" />
-                                  {opt.label}
-                                </span>
-                              </SelectItem>
-                            );
-                          })}
-                        </SelectContent>
-                      </Select>
-                      {fieldState.error && (
-                        <p className="text-destructive text-sm">{fieldState.error.message}</p>
-                      )}
+                      <ButtonGroup>
+                        {availableSorts.map(opt => {
+                          const isActive = opt.value === sort;
+                          const Icon = opt.icon;
+                          const DirectionIcon =
+                            isActive && sortDirection === "desc" ? ArrowDown : ArrowUp;
+                          return (
+                            <ControlButton
+                              key={opt.value}
+                              isActive={isActive}
+                              onClick={() => handleSort(opt.value)}
+                              type="button"
+                            >
+                              {isActive ? (
+                                <DirectionIcon className="h-4 w-4" />
+                              ) : (
+                                <Icon className="h-4 w-4" />
+                              )}
+                              {opt.name}
+                            </ControlButton>
+                          );
+                        })}
+                      </ButtonGroup>
                     </div>
-                  )}
-                />
 
-                <div
-                  className={`grid gap-6 ${rankedStatus === "ranked" ? "grid-cols-2" : "grid-cols-1"}`}
-                >
-                  {rankedStatus === "ranked" && (
-                    <Controller
-                      name="starRange"
-                      control={form.control}
-                      render={({ field, fieldState }) => {
-                        const val = field.value ?? { min: 0, max: Consts.MAX_STARS };
-                        return (
-                          <div className="space-y-2">
-                            <label className="text-foreground text-sm font-medium">
-                              Star Range
-                            </label>
-                            <DualRangeSlider
-                              min={0}
-                              max={Consts.MAX_STARS}
-                              step={STAR_STEP}
-                              label={v => <span className="text-xs">{v}</span>}
-                              value={[val.min, val.max]}
-                              onValueChange={vals => field.onChange({ min: vals[0], max: vals[1] })}
-                              className="pt-10 pb-1"
-                            />
-                            {fieldState.error && (
-                              <p className="text-destructive text-sm">{fieldState.error.message}</p>
-                            )}
-                          </div>
-                        );
-                      }}
-                    />
-                  )}
+                    {/* Filters */}
+                    <div className="space-y-2">
+                      <div className="text-muted-foreground flex items-center gap-2 text-xs font-semibold tracking-wider uppercase">
+                        <Filter className="size-3.5" />
+                        <span>Filters</span>
+                      </div>
+                      <div className="space-y-1">
+                        <Controller
+                          name="rankedStatus"
+                          control={form.control}
+                          render={({ field, fieldState }) => (
+                            <FormItem className="flex flex-col items-start space-y-2 py-1 md:flex-row md:items-center md:justify-between md:space-y-0">
+                              <div className="flex-1 space-y-0 md:pr-4">
+                                <FormLabel className="text-sm leading-tight font-normal">
+                                  Score Type
+                                </FormLabel>
+                              </div>
+                              <FormControl>
+                                <Select value={field.value} onValueChange={field.onChange}>
+                                  <SelectTrigger className="w-full md:w-52">
+                                    <SelectValue placeholder="Select score type" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {RANKED_OPTIONS.map(opt => {
+                                      const Icon = opt.icon;
+                                      return (
+                                        <SelectItem key={opt.value} value={opt.value}>
+                                          <span className="flex items-center gap-2">
+                                            <Icon className="h-3.5 w-3.5" />
+                                            {opt.label}
+                                          </span>
+                                        </SelectItem>
+                                      );
+                                    })}
+                                  </SelectContent>
+                                </Select>
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
 
-                  <Controller
-                    name="accuracyRange"
-                    control={form.control}
-                    render={({ field, fieldState }) => {
-                      const val = field.value;
-                      return (
-                        <div className="space-y-2">
-                          <label className="text-foreground text-sm font-medium">
-                            Accuracy Range (%)
-                          </label>
-                          <DualRangeSlider
-                            min={ACCURACY_MIN}
-                            max={ACCURACY_MAX}
-                            step={ACCURACY_STEP}
-                            label={v => <span className="text-xs">{v}%</span>}
-                            value={[val.min, val.max]}
-                            onValueChange={vals => field.onChange({ min: vals[0], max: vals[1] })}
-                            className="pt-10 pb-1"
+                        {rankedStatus === "ranked" && (
+                          <Controller
+                            name="starRange"
+                            control={form.control}
+                            render={({ field, fieldState }) => {
+                              const val = field.value ?? { min: 0, max: Consts.MAX_STARS };
+                              return (
+                                <FormItem className="flex flex-col items-start space-y-2 py-1 md:flex-row md:items-center md:justify-between md:space-y-0">
+                                  <div className="flex-1 space-y-0 md:pr-4">
+                                    <FormLabel className="text-sm leading-tight font-normal">
+                                      Star Range
+                                    </FormLabel>
+                                  </div>
+                                  <FormControl>
+                                    <DualRangeSlider
+                                      min={0}
+                                      max={Consts.MAX_STARS}
+                                      step={STAR_STEP}
+                                      label={v => <span className="text-xs">{v}</span>}
+                                      value={[val.min, val.max]}
+                                      showLabelOnHover={false}
+                                      onValueChange={vals =>
+                                        field.onChange({ min: vals[0], max: vals[1] })
+                                      }
+                                      className="pt-10 pb-1"
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              );
+                            }}
                           />
-                          {fieldState.error && (
-                            <p className="text-destructive text-sm">{fieldState.error.message}</p>
-                          )}
-                        </div>
-                      );
-                    }}
-                  />
-                </div>
-              </div>
-            </CollapsibleSection>
+                        )}
 
-            <CollapsibleSection
-              title="Preview & Settings"
-              icon={<Eye className="h-4 w-4" />}
-              isExpanded={expanded.has("preview")}
-              onToggle={() => toggleExpanded("preview")}
-            >
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <h5 className="text-xs font-medium">Current Settings</h5>
-                  <div className="text-muted-foreground space-y-1 text-xs">
-                    <div>Name: {formValues.name}</div>
-                    <div>
-                      Sort: {currentSortOpt.name} (
-                      {formValues.sortDirection === "desc" ? "Desc" : "Asc"})
-                    </div>
-                    <div>Limit: {formValues.limit} scores</div>
-                    <div>
-                      Score Type:{" "}
-                      {RANKED_OPTIONS.find(o => o.value === formValues.rankedStatus)?.label}
-                    </div>
-                    {rankedStatus === "ranked" && formValues.starRange && (
-                      <div>
-                        Stars: {formValues.starRange.min}-{formValues.starRange.max}
+                        <Controller
+                          name="accuracyRange"
+                          control={form.control}
+                          render={({ field, fieldState }) => {
+                            const val = field.value;
+                            return (
+                              <FormItem className="flex flex-col items-start space-y-2 py-1 md:flex-row md:items-center md:justify-between md:space-y-0">
+                                <div className="flex-1 space-y-0 md:pr-4">
+                                  <FormLabel className="text-sm leading-tight font-normal">
+                                    Accuracy Range
+                                  </FormLabel>
+                                </div>
+                                <FormControl>
+                                  <DualRangeSlider
+                                    min={ACCURACY_MIN}
+                                    max={ACCURACY_MAX}
+                                    step={ACCURACY_STEP}
+                                    label={v => <span className="text-xs">{v}%</span>}
+                                    value={[val.min, val.max]}
+                                    showLabelOnHover={false}
+                                    onValueChange={vals =>
+                                      field.onChange({ min: vals[0], max: vals[1] })
+                                    }
+                                    className="pt-10 pb-1"
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            );
+                          }}
+                        />
                       </div>
-                    )}
-                    <div>
-                      Accuracy: {formValues.accuracyRange.min}%-{formValues.accuracyRange.max}%
+                    </div>
+
+                    {/* Preview & Settings */}
+                    <div className="space-y-2">
+                      <div className="text-muted-foreground flex items-center gap-2 text-xs font-semibold tracking-wider uppercase">
+                        <Eye className="size-3.5" />
+                        <span>Preview</span>
+                      </div>
+                      <img
+                        src={previewUrl}
+                        alt="Playlist Preview"
+                        className="h-auto max-w-full rounded-lg border"
+                        style={{ maxHeight: "200px" }}
+                      />
                     </div>
                   </div>
-                </div>
-
-                <div className="space-y-2">
-                  <h5 className="text-xs font-medium">Preview</h5>
-                  <div className="flex justify-center">
-                    <img
-                      src={previewUrl}
-                      alt="Playlist Preview"
-                      className="h-auto max-w-full rounded-lg border"
-                      style={{ maxHeight: "200px" }}
-                    />
-                  </div>
-                </div>
-              </div>
-            </CollapsibleSection>
-
-            <div className="border-border flex flex-row gap-2 border-t pt-4">
-              <Button
-                type="submit"
-                form="snipe-playlist-form"
-                className="flex-1 gap-2"
-                disabled={downloading}
-              >
-                {downloading ? <Spinner className="h-4 w-4" /> : <Download className="h-4 w-4" />}
-                {downloading ? "Downloading..." : "Download Playlist"}
-              </Button>
+                </form>
+              </Form>
             </div>
           </div>
-        </form>
+
+          {/* Footer */}
+          <div className="border-border flex flex-wrap items-center justify-end gap-(--spacing-sm) border-t px-(--spacing-lg) py-(--spacing-lg) md:gap-(--spacing-lg) md:px-(--spacing-xl) md:py-(--spacing-xl)">
+            <Button
+              type="submit"
+              form="snipe-playlist-form"
+              className="gap-2"
+              disabled={downloading}
+            >
+              {downloading ? <Spinner className="h-4 w-4" /> : <Download className="h-4 w-4" />}
+              <span>Download Playlist</span>
+            </Button>
+          </div>
+        </Card>
       </DialogContent>
     </Dialog>
-  );
-}
-
-interface CollapsibleSectionProps {
-  title: string;
-  icon: React.ReactNode;
-  isExpanded: boolean;
-  onToggle: () => void;
-  children: React.ReactNode;
-}
-
-function CollapsibleSection({
-  title,
-  icon,
-  isExpanded,
-  onToggle,
-  children,
-}: CollapsibleSectionProps) {
-  return (
-    <div className="border-border rounded-lg border">
-      <button
-        type="button"
-        onClick={onToggle}
-        className="hover:bg-muted flex w-full items-center justify-between p-3 transition-colors duration-200"
-        aria-expanded={isExpanded}
-      >
-        <div className="flex items-center gap-2">
-          {icon}
-          <span className="font-medium">{title}</span>
-        </div>
-        {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-      </button>
-      {isExpanded && <div className="p-4 pt-0">{children}</div>}
-    </div>
   );
 }

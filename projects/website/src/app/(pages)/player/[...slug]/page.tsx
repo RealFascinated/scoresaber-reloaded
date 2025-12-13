@@ -1,5 +1,4 @@
-import { PlatformRepository, PlatformType } from "@/common/platform/platform-repository";
-import Card from "@/components/card";
+import { PlatformType } from "@/common/platform/platform-repository";
 import NotFound from "@/components/not-found";
 import PlayerData from "@/components/player/player-data";
 import { DetailType } from "@ssr/common/detail-type";
@@ -9,7 +8,6 @@ import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { formatDate } from "@ssr/common/utils/time-utils";
 import { Metadata } from "next";
-import { redirect } from "next/navigation";
 
 const UNKNOWN_PLAYER = {
   title: "Unknown Player",

@@ -7,7 +7,7 @@ export function DiscordButton() {
     <Link href="https://discord.gg/kmNfWGA4A8" target="_blank">
       <Button
         variant="ghost"
-        className="gap-2 bg-[#5865F2]/65 text-white hover:border-[#5865F2]/80 border-border"
+        className="border-border gap-2 bg-[#5865F2]/65 text-white hover:border-[#5865F2]/80"
       >
         <Image
           className="size-6"

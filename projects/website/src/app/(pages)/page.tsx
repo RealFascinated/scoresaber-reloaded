@@ -1,8 +1,8 @@
 import { AppStats } from "@/components/landing/app-statistics";
 import { SearchButton } from "@/components/landing/search-button";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, BarChart3, Database, Globe, Heart, Monitor, Star, Users } from "lucide-react";
+import Link from "next/link";
 
 export default async function LandingPage() {
   return (

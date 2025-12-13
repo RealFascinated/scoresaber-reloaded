@@ -3,10 +3,9 @@
 import Card from "@/components/card";
 import { DiscordButton } from "@/components/social/discord-button";
 import { Button } from "@/components/ui/button";
-import { ArrowPathIcon } from "@heroicons/react/24/outline";
-import { ChevronDownIcon, ChevronUpIcon, Frown, HomeIcon } from "lucide-react";
+import { Frown, HomeIcon } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 type ErrorProps = {
   error: Error & { digest?: string };
@@ -23,7 +22,9 @@ export default function Error({ error, reset }: ErrorProps) {
     <div className="flex w-full justify-center">
       <Card className="mt-2 flex w-full max-w-2xl flex-col items-center gap-4">
         <div className="flex flex-col items-center gap-2 text-center">
-          <h1 className="text-2xl font-bold text-red-400 flex items-center gap-2">Something went wrong <Frown className="size-6" /></h1>
+          <h1 className="flex items-center gap-2 text-2xl font-bold text-red-400">
+            Something went wrong <Frown className="size-6" />
+          </h1>
           <p className="text-muted-foreground text-lg">{errorMessage}</p>
         </div>
 
