@@ -71,7 +71,7 @@ export class PlayerMedalsService {
       await PlayerModel.bulkWrite(bulkOps);
     }
 
-    Logger.debug(
+    Logger.info(
       `[PLAYER MEDALS] Updated ${bulkOps.length} player medal counts in ${formatDuration(performance.now() - before)}`
     );
   }
