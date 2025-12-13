@@ -12,7 +12,7 @@ import { updateScoreWeights } from "@ssr/common/utils/scoresaber.util";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { FaCheck, FaCog, FaUndo } from "react-icons/fa";
+import { FaCog, FaFlagCheckered, FaUndo } from "react-icons/fa";
 
 type ScoreEditorButtonProps = {
   score: ScoreSaberScore;
@@ -85,6 +85,13 @@ export default function ScoreSaberScoreEditorButton({ score, leaderboard, update
     setDecimalValue(accuracy - Math.floor(accuracy));
   };
 
+  const setAccuracyToFC = () => {
+    const fcAccuracy = score.additionalData!.fcAccuracy!;
+    setBaseValue(Math.max(1, Math.floor(fcAccuracy)));
+    setDecimalValue(fcAccuracy - Math.floor(fcAccuracy));
+    updateScoreAndPP(fcAccuracy);
+  };
+
   const ppGain =
     !rankedPps || !modifiedScores
       ? 0
@@ -124,16 +131,11 @@ export default function ScoreSaberScoreEditorButton({ score, leaderboard, update
                       }
                     >
                       <Button
-                        onClick={() => {
-                          const fcAccuracy = score.additionalData!.fcAccuracy!;
-                          setBaseValue(Math.max(1, Math.floor(fcAccuracy)));
-                          setDecimalValue(fcAccuracy - Math.floor(fcAccuracy));
-                          updateScoreAndPP(fcAccuracy);
-                        }}
+                        onClick={setAccuracyToFC}
                         className="h-fit p-1.5"
                         variant="ghost"
                       >
-                        <FaCheck className="size-3.5" />
+                        <FaFlagCheckered className="size-3.5" />
                       </Button>
                     </SimpleTooltip>
                   )}
