@@ -53,10 +53,10 @@ export default function ScoreDetailsDropdown({
           animate={{ opacity: 1, height: "auto", scale: 1 }}
           exit={{ opacity: 0, height: 0, scale: 0.97 }}
           transition={{
-            duration: 0.25,
             ease: [0.4, 0, 0.2, 1],
             height: { duration: 0.25 },
-            opacity: { duration: 0.18 },
+            opacity: { duration: 0.2 },
+            scale: { duration: 0.2 },
           }}
           className={cn("w-full origin-top px-(--spacing-sm)", !isLeaderboardScore ? "mt-2" : "")}
         >

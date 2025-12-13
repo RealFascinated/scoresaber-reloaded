@@ -18,7 +18,7 @@ import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
 import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/leaderboard-player-info";
 import { ChevronRight } from "lucide-react";
-import ScoreDetailsDropdown from "./score-dropdown";
+import ScoreDetailsDropdown from "./score-details-dropdown";
 
 export default function ScoreSaberScoreDisplay({
   leaderboard,

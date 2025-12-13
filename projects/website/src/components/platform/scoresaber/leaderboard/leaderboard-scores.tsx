@@ -19,7 +19,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { DifficultyButton } from "../../../leaderboard/button/difficulty-button";
 import SimplePagination from "../../../simple-pagination";
 import ScoreSaberLeaderboardScore from "../score/leaderboard-score";
-import ScoreDetailsDropdown from "../score/score-dropdown";
+import ScoreDetailsDropdown from "../score/score-details-dropdown";
 
 function getScoreId(score: ScoreSaberScore) {
   return score.scoreId + "-" + score.timestamp;
