@@ -1,9 +1,9 @@
-import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { PlayerStatisticHistory } from "@ssr/common/player/player-statistic-history";
 import { getDaysAgoDate } from "@ssr/common/utils/time-utils";
 import { NotFoundError, t } from "elysia";
 import { Controller, Get } from "elysia-decorators";
 import { PlayerHistoryService } from "../service/player/player-history.service";
+import ScoreSaberService from "../service/scoresaber.service";
 
 @Controller("")
 export default class PlayerHistoryController {
@@ -29,7 +29,7 @@ export default class PlayerHistoryController {
     params: { id: string };
     query: { startDate: string; endDate: string; includeFields: string };
   }): Promise<PlayerStatisticHistory> {
-    const player = await ApiServiceRegistry.getInstance().getScoreSaberService().lookupPlayer(id);
+    const player = await ScoreSaberService.getPlayerToken(id);
     if (!player) {
       throw new NotFoundError(`Player "${id}" not found`);
     }

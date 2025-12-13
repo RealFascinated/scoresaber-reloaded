@@ -10,6 +10,7 @@ import { logNewTrackedPlayer } from "../../common/embds";
 import { FetchMissingScoresQueue } from "../../queue/impl/fetch-missing-scores-queue";
 import { QueueId, QueueManager } from "../../queue/queue-manager";
 import CacheService, { CacheId } from "../cache.service";
+import ScoreSaberService from "../scoresaber.service";
 
 export const accountCreationLock: Record<string, Promise<Player>> = {};
 
@@ -95,9 +96,7 @@ export class PlayerCoreService {
         return undefined;
       }
 
-      playerToken =
-        playerToken ||
-        (await ApiServiceRegistry.getInstance().getScoreSaberService().lookupPlayer(id));
+      playerToken = playerToken || (await ScoreSaberService.getPlayerToken(id));
       if (!playerToken) {
         return undefined;
       }

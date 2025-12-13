@@ -27,6 +27,20 @@ type CachedScoreSaberPlayerToken = ScoreSaberPlayerToken & {
 
 export default class ScoreSaberService {
   /**
+   * Gets a player token from the cache or API.
+   *
+   * @param id the player's id
+   * @returns the player token or undefined if not found
+   */
+  public static async getPlayerToken(id: string): Promise<ScoreSaberPlayerToken | undefined> {
+    return await CacheService.fetchWithCache(
+      CacheId.ScoreSaber,
+      `scoresaber:player-token:${id}`,
+      () => ApiServiceRegistry.getInstance().getScoreSaberService().lookupPlayer(id)
+    );
+  }
+
+  /**
    * Gets a ScoreSaber player using their account id.
    *
    * @param id the player's account id
@@ -50,11 +64,7 @@ export default class ScoreSaberService {
       getHmdBreakdown: true,
     };
 
-    player ??= await CacheService.fetchWithCache(
-      CacheId.ScoreSaber,
-      `scoresaber:player-token:${id}`,
-      async () => ApiServiceRegistry.getInstance().getScoreSaberService().lookupPlayer(id)
-    );
+    player ??= await ScoreSaberService.getPlayerToken(id);
     if (!player) {
       throw new NotFoundError(`Player "${id}" not found`);
     }
