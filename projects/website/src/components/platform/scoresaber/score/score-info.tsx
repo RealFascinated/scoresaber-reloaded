@@ -23,7 +23,7 @@ export default function ScoreSaberScoreInfo({
   const hmd = getHMDInfo(score.hmd as HMD);
 
   return (
-    <div className="flex w-full flex-row items-center justify-between lg:w-[125px] lg:flex-col lg:justify-center">
+    <div className="flex w-full flex-row items-center justify-between lg:w-[120px] lg:flex-col lg:justify-center">
       <div className="flex items-center gap-1">
         <GlobeAmericasIcon className="size-5" />
         {score.rank === -1 ? (

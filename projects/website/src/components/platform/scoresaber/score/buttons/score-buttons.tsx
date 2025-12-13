@@ -8,19 +8,15 @@ import { useIsMobile } from "@/contexts/viewport-context";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
-import { useCallback, useState, useTransition } from "react";
+import { useMemo } from "react";
 import ScoreEditorButton from "./score-editor-button";
 
 type Props = {
   score?: ScoreSaberScore;
   leaderboard: ScoreSaberLeaderboard;
   beatSaverMap?: BeatSaverMapResponse;
-  alwaysSingleLine?: boolean;
-  hideDetailsDropdown?: boolean;
-  hideAccuracyChanger?: boolean;
   isLeaderboardLoading?: boolean;
   isPreviousScore?: boolean;
-  setDetailsExpanded?: (isExpanded: boolean) => void;
   updateScore?: (score: ScoreSaberScore) => void;
 };
 
@@ -82,40 +78,37 @@ export default function ScoreSaberScoreButtons({
   score,
   leaderboard,
   beatSaverMap,
-  alwaysSingleLine,
   updateScore,
-  hideAccuracyChanger,
   isPreviousScore,
 }: Props) {
-  const isMobile = useIsMobile("2xl");
+  const isMobile = useIsMobile("lg");
 
-  const buttonProps = {
-    score,
-    leaderboard,
-    beatSaverMap,
-    alwaysSingleLine,
-    updateScore,
-    hideAccuracyChanger,
-    isPreviousScore,
-  };
+  const buttonProps = useMemo(
+    () => ({
+      score,
+      leaderboard,
+      beatSaverMap,
+      updateScore,
+      isPreviousScore,
+    }),
+    [score, leaderboard, beatSaverMap, updateScore, isPreviousScore]
+  );
+  const visibleButtons = useMemo(() => buttons.filter(button => button.display(buttonProps)), [buttonProps]);
 
   return (
-    <div className="flex flex-col justify-center items-end">
-      {/* Score Buttons */}
-      <div
-        className="flex w-full flex-wrap justify-end gap-1"
-        style={{
-          width: isMobile ? "auto" : (buttons.filter(button => button.display(buttonProps)).length / 2) * 40,
-        }}
-      >
-        {buttons
-          .filter(button => button.display(buttonProps))
-          .map((button, index) => (
-            <div key={index} className="shrink-0">
-              {button.render(buttonProps)}
-            </div>
-          ))}
-      </div>
+    <div
+      className="flex min-w-0 flex-wrap justify-end gap-1"
+      style={{
+        width: isMobile ? "auto" : (visibleButtons.length / 2) * 40,
+      }}
+    >
+      {visibleButtons
+        .filter(button => button.display(buttonProps))
+        .map((button, index) => (
+          <div key={index} className="shrink-0">
+            {button.render(buttonProps)}
+          </div>
+        ))}
     </div>
   );
 }

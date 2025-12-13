@@ -13,7 +13,7 @@ type AccSaberRankTimeProps = {
 
 export function AccSaberRankTime({ score }: AccSaberRankTimeProps) {
   return (
-    <div className="flex w-full flex-row items-center justify-between lg:w-[125px] lg:flex-col lg:justify-center">
+    <div className="flex w-full flex-row items-center justify-between lg:w-[120px] lg:flex-col lg:justify-center">
       <div className="flex items-center gap-1">
         <GlobeAmericasIcon className="h-5 w-5" />
         <p

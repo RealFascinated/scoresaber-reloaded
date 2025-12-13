@@ -6,7 +6,6 @@ import PlayerBadges from "@/components/player/player-badges";
 import PlayerViews from "@/components/player/views/player-views";
 import SimpleLink from "@/components/simple-link";
 import { useIsMobile, useWindowDimensions } from "@/contexts/viewport-context";
-import useDatabase from "@/hooks/use-database";
 import { DetailType } from "@ssr/common/detail-type";
 import type ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { ssrApi } from "@ssr/common/utils/ssr-api";

@@ -25,7 +25,7 @@ export default function SimpleTooltip({
       showOnMobile={showOnMobile}
       closeDelayDuration={closeDelayDuration}
     >
-      <div className={clsx("w-full cursor-default flex items-center justify-center", className)}>{children}</div>
+      <div className={clsx("flex w-full cursor-default items-center justify-center", className)}>{children}</div>
     </Tooltip>
   );
 }
