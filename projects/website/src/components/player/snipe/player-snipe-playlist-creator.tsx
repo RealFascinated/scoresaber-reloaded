@@ -28,7 +28,6 @@ import {
   Clock,
   Crosshair,
   Download,
-  Eye,
   Filter,
   Hash,
   MusicIcon,
@@ -361,20 +360,6 @@ export default function SnipePlaylistCreator({ toSnipe }: Props) {
                           }}
                         />
                       </div>
-                    </div>
-
-                    {/* Preview & Settings */}
-                    <div className="space-y-2">
-                      <div className="text-muted-foreground flex items-center gap-2 text-xs font-semibold tracking-wider uppercase">
-                        <Eye className="size-3.5" />
-                        <span>Preview</span>
-                      </div>
-                      <img
-                        src={previewUrl}
-                        alt="Playlist Preview"
-                        className="h-auto max-w-full rounded-lg border"
-                        style={{ maxHeight: "200px" }}
-                      />
                     </div>
                   </div>
                 </form>

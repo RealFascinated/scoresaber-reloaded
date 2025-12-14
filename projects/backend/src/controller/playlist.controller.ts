@@ -1,14 +1,6 @@
 import { generateBeatSaberPlaylist } from "@ssr/common/playlist/playlist-utils";
-import { parseCustomRankedPlaylistSettings } from "@ssr/common/playlist/ranked/custom-ranked-playlist";
-import { parseSnipePlaylistSettings } from "@ssr/common/snipe/snipe-playlist-utils";
 import { Elysia, t } from "elysia";
-import {
-  generateCustomRankedPlaylistImage,
-  generateRankedBatchPlaylistImage,
-  generateSnipePlaylistImage,
-} from "../common/playlist.util";
 import PlaylistService, { PlaylistId } from "../service/playlist/playlist.service";
-import ScoreSaberService from "../service/scoresaber.service";
 
 export default function playlistController(app: Elysia) {
   return app.group("/playlist", app =>
@@ -68,63 +60,6 @@ export default function playlistController(app: Elysia) {
           }),
           detail: {
             description: "Fetch a snipe playlist",
-          },
-        }
-      )
-      .get(
-        "/snipe/preview",
-        async ({ query: { toSnipe, settings } }) => {
-          const toSnipePlayer = await ScoreSaberService.getPlayer(toSnipe, "basic", undefined, {
-            setInactivesRank: false,
-            setMedalsRank: false,
-          });
-          const response = new Response(
-            Buffer.from(await generateSnipePlaylistImage(parseSnipePlaylistSettings(settings), toSnipePlayer), "base64")
-          );
-          response.headers.set("Content-Type", "image/png");
-          return response;
-        },
-        {
-          tags: ["Playlist"],
-          query: t.Object({
-            toSnipe: t.String({ required: true }),
-            settings: t.Optional(t.String()),
-          }),
-          detail: {
-            description: "Fetch a snipe playlist image preview",
-          },
-        }
-      )
-      .get(
-        "/custom-ranked/preview",
-        async ({ query: { settings } }) => {
-          const response = new Response(
-            Buffer.from(await generateCustomRankedPlaylistImage(parseCustomRankedPlaylistSettings(settings)), "base64")
-          );
-          response.headers.set("Content-Type", "image/png");
-          return response;
-        },
-        {
-          tags: ["Playlist"],
-          query: t.Object({
-            settings: t.Optional(t.String()),
-          }),
-          detail: {
-            description: "Fetch a custom ranked playlist image preview",
-          },
-        }
-      )
-      .get(
-        "/ranked-batch/preview",
-        async () => {
-          const response = new Response(Buffer.from(await generateRankedBatchPlaylistImage(), "base64"));
-          response.headers.set("Content-Type", "image/png");
-          return response;
-        },
-        {
-          tags: ["Playlist"],
-          detail: {
-            description: "Fetch a ranked batch playlist image preview",
           },
         }
       )

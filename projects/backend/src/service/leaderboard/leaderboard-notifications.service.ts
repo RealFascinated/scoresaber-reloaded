@@ -6,7 +6,6 @@ import { uploadPaste } from "@ssr/common/utils/paste-utils";
 import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
 import { formatDate } from "@ssr/common/utils/time-utils";
 import { DiscordChannels, sendFile, sendMessageToChannel } from "../../bot/bot";
-import { generateRankedBatchPlaylistImage } from "../../common/playlist.util";
 import { LeaderboardWithUpdate } from "../../common/types/leaderboard";
 import PlaylistService from "../playlist/playlist.service";
 
@@ -75,7 +74,7 @@ export class LeaderboardNotificationsService {
       env.NEXT_PUBLIC_WEBSITE_NAME,
       leaderboards.maps,
       leaderboards.highlightedIds,
-      await generateRankedBatchPlaylistImage(),
+      PlaylistService.PLAYLIST_IMAGE_BASE64,
       "ranked-batch"
     );
     await PlaylistService.createPlaylist(playlist);

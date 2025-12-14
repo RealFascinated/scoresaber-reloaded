@@ -12,18 +12,12 @@ import { SnipePlaylist } from "@ssr/common/playlist/snipe/snipe-playlist";
 import { parseSnipePlaylistSettings } from "@ssr/common/snipe/snipe-playlist-utils";
 import { capitalizeFirstLetter, truncateText } from "@ssr/common/string-utils";
 import { formatDateMinimal } from "@ssr/common/utils/time-utils";
-import {
-  generateCustomRankedPlaylistImage,
-  generatePlaylistImage,
-  generateSnipePlaylistImage,
-} from "../../common/playlist.util";
 import { LeaderboardCoreService } from "../leaderboard/leaderboard-core.service";
 import { LeaderboardLeaderboardsService } from "../leaderboard/leaderboard-leaderboards.service";
 import { PlayerCoreService } from "../player/player-core.service";
 import ScoreSaberService from "../scoresaber.service";
 
 export type SnipeType = "top" | "recent";
-
 export type PlaylistId =
   | "scoresaber-ranked-maps"
   | "scoresaber-qualified-maps"
@@ -31,6 +25,14 @@ export type PlaylistId =
   | "scoresaber-custom-ranked-maps";
 
 export default class PlaylistService {
+  public static PLAYLIST_IMAGE_BASE64 = "";
+  static {
+    (async () => {
+      this.PLAYLIST_IMAGE_BASE64 = `data:image/png;base64,${Buffer.from(await (await fetch("https://cdn.fascinated.cc/MW5WDvKW69.png")).arrayBuffer()).toString("base64")}`;
+      Logger.info(`Loaded playlists image!`);
+    })();
+  }
+
   /**
    * Gets a playlist by ID
    *
@@ -111,19 +113,16 @@ export default class PlaylistService {
     }
 
     const title = `ScoreSaber Ranked Maps (${formatDateMinimal(new Date())})`;
-    const imageTitle = "Ranked";
     const highlightedIds = leaderboards.map(map => map.id);
 
     const { maps } = this.processLeaderboards(leaderboards);
-    const image = await generatePlaylistImage("SSR", { title: imageTitle });
-
     return this.createScoreSaberPlaylist(
       "scoresaber-ranked-maps",
       title,
       env.NEXT_PUBLIC_WEBSITE_NAME,
       maps,
       highlightedIds,
-      image
+      this.PLAYLIST_IMAGE_BASE64
     );
   }
 
@@ -137,7 +136,6 @@ export default class PlaylistService {
     }
 
     const title = `ScoreSaber Qualified Maps (${formatDateMinimal(new Date())})`;
-    const imageTitle = "Qualified";
 
     const highlightedIds = [...leaderboards.map(map => map.id)];
     for (const map of leaderboards) {
@@ -150,15 +148,13 @@ export default class PlaylistService {
     const uniqueHighlightedIds = [...new Set(highlightedIds)];
 
     const { maps } = this.processLeaderboards(leaderboards);
-    const image = await generatePlaylistImage("SSR", { title: imageTitle });
-
     return this.createScoreSaberPlaylist(
       "scoresaber-qualified-maps",
       title,
       env.NEXT_PUBLIC_WEBSITE_NAME,
       maps,
       uniqueHighlightedIds,
-      image
+      this.PLAYLIST_IMAGE_BASE64
     );
   }
 
@@ -174,16 +170,13 @@ export default class PlaylistService {
       .filter((id, index, self) => self.indexOf(id) === index); // Remove duplicates
 
     const title = `ScoreSaber Ranking Queue Maps (${formatDateMinimal(new Date())})`;
-    const imageTitle = "Ranking Queue";
-    const image = await generatePlaylistImage("SSR", { title: imageTitle });
-
     return this.createScoreSaberPlaylist(
       "scoresaber-ranking-queue-maps",
       title,
       env.NEXT_PUBLIC_WEBSITE_NAME,
       maps,
       highlightedIds,
-      image
+      this.PLAYLIST_IMAGE_BASE64
     );
   }
 
@@ -209,7 +202,6 @@ export default class PlaylistService {
 
     const title = `Custom Ranked Maps (${formatDateMinimal(new Date())})`;
     const { maps, highlightedIds } = this.processLeaderboards(leaderboards);
-    const image = await generateCustomRankedPlaylistImage(parsedConfig);
 
     return this.createScoreSaberPlaylist(
       "scoresaber-custom-ranked-maps",
@@ -217,7 +209,7 @@ export default class PlaylistService {
       env.NEXT_PUBLIC_WEBSITE_NAME,
       maps,
       highlightedIds,
-      image
+      this.PLAYLIST_IMAGE_BASE64
     );
   }
 
@@ -337,7 +329,7 @@ export default class PlaylistService {
         settings.name ||
           `Snipe - ${truncateText(toSnipePlayer.name, 16)} (${capitalizeFirstLetter(settings.sort || "pp")})`,
         formattedScores,
-        await generateSnipePlaylistImage(settings, toSnipePlayer)
+        this.PLAYLIST_IMAGE_BASE64
       );
     } catch (error) {
       Logger.error("Error creating snipe playlist", error);

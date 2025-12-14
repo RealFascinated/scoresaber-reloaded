@@ -12,7 +12,7 @@ import { AdditionalScoreData } from "../model/additional-score-data/additional-s
  */
 export function getBeatLeaderReplayRedirectUrl(score: ScoreSaberScore): string | undefined {
   if (score.additionalData && score.additionalData.savedReplay && !!score.isPreviousScore) {
-    return `${env.NEXT_PUBLIC_API_URL}/replay/${score.additionalData?.scoreId}.bsor`;
+    return `${env.NEXT_PUBLIC_API_URL}/beatleader/replay/${score.additionalData?.scoreId}.bsor`;
   }
   return undefined;
 }

@@ -53,12 +53,8 @@ COPY --from=depends /app/node_modules ./node_modules
 
 # Copy built applications
 COPY --from=runner /app/projects/common/dist ./projects/common/dist
-COPY --from=runner /app/projects/backend/dist ./projects/backend/dist
 COPY --from=runner /app/projects/backend/package.json ./projects/backend/
-# Copy font files needed for SSR image generation
-# Copy to both locations to handle different bundling scenarios
-COPY --from=depends /app/projects/backend/src/common/font ./projects/backend/dist/common/font
-COPY --from=depends /app/projects/backend/src/common/font ./projects/backend/dist/font
+COPY --from=runner /app/projects/backend/ssr-backend ./projects/backend/ssr-backend
 
 ARG PORT=8080
 ENV PORT $PORT
@@ -69,6 +65,6 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:${PORT}/health || exit 1
 
 WORKDIR /app/projects/backend
-CMD ["bun", "dist/index.js"]
+CMD ["./ssr-backend"]
 
 

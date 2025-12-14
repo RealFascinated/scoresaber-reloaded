@@ -31,7 +31,6 @@ import PlayerScoreHistoryController from "./controller/player-score-history.cont
 import PlayerSearchController from "./controller/player-search.controller";
 import PlayerController from "./controller/player.controller";
 import PlaylistController from "./controller/playlist.controller";
-import ReplayController from "./controller/replay.controller";
 import ScoresController from "./controller/scores.controller";
 import StatisticsController from "./controller/statistics.controller";
 import TopScoresController from "./controller/top-scores.controller";
@@ -85,8 +84,11 @@ export const app = new Elysia()
   .use(
     openapi({
       path: "/swagger",
-      references: fromTypes(),
+      references: fromTypes("src/index.ts"),
       provider: "swagger-ui",
+      swagger: {
+        autoDarkMode: false,
+      },
       documentation: {
         info: {
           title: "SSR API",
@@ -194,72 +196,82 @@ export const app = new Elysia()
         }
       },
     })
-  );
-app.use(metricsPlugin());
-
-/**
- * Custom error handler
- */
-app.onError({ as: "global" }, ({ code, error }) => {
-  // Return default error for type validation
-  if (code === "VALIDATION") {
-    return (error as ValidationError).all;
-  }
-
-  // Assume unknown error is an internal server error
-  if (code === "UNKNOWN") {
-    code = "INTERNAL_SERVER_ERROR";
-  }
-
-  let status: number | undefined = undefined;
-  if (typeof error === "object" && error !== null && "status" in error) {
-    status = (error as { status?: number }).status;
-  }
-
-  if (status === undefined) {
-    switch (code) {
-      case "INTERNAL_SERVER_ERROR":
-        status = 500;
-        break;
-      case "NOT_FOUND":
-        status = 404;
-        break;
-      case "PARSE":
-        status = 400;
-        break;
-      case "INVALID_COOKIE_SIGNATURE":
-        status = 401;
-        break;
+  )
+  .use(metricsPlugin())
+  .onError({ as: "global" }, ({ code, error }) => {
+    // Return default error for type validation
+    if (code === "VALIDATION") {
+      return (error as ValidationError).all;
     }
-  }
 
-  if (code === 500) {
-    console.log(error);
-  }
+    // Assume unknown error is an internal server error
+    if (code === "UNKNOWN") {
+      code = "INTERNAL_SERVER_ERROR";
+    }
 
-  return {
-    ...((status && { statusCode: status }) || { status: code }),
-    // @ts-expect-error - message is not in the error type
-    ...(error.message != code && { message: error.message }),
-    timestamp: new Date().toISOString(),
-  };
-});
+    let status: number | undefined = undefined;
+    if (typeof error === "object" && error !== null && "status" in error) {
+      status = (error as { status?: number }).status;
+    }
 
-/**
- * Global toggle for SuperJSON for all responses
- */
-app.onAfterHandle(({ request, response, set }) => {
-  if (request.headers.get("accept") === "application/superjson") {
-    set.headers["content-type"] = "application/superjson";
-    return SuperJSON.stringify(response);
-  }
-  return response;
-});
+    if (status === undefined) {
+      switch (code) {
+        case "INTERNAL_SERVER_ERROR":
+          status = 500;
+          break;
+        case "NOT_FOUND":
+          status = 404;
+          break;
+        case "PARSE":
+          status = 400;
+          break;
+        case "INVALID_COOKIE_SIGNATURE":
+          status = 401;
+          break;
+      }
+    }
 
-/**
- * Enable CORS
- */
-app.use(cors());
+    if (code === 500) {
+      console.log(error);
+    }
+
+    return {
+      ...((status && { statusCode: status }) || { status: code }),
+      // @ts-expect-error - message is not in the error type
+      ...(error.message != code && { message: error.message }),
+      timestamp: new Date().toISOString(),
+    };
+  })
+  .onAfterHandle(({ request, response, set }) => {
+    if (request.headers.get("accept") === "application/superjson") {
+      set.headers["content-type"] = "application/superjson";
+      return SuperJSON.stringify(response);
+    }
+    return response;
+  })
+  .use(cors())
+  .use(
+    helmet({
+      hsts: false, // Disable HSTS
+      contentSecurityPolicy: false, // Disable CSP
+      dnsPrefetchControl: true, // Enable DNS prefetch
+    })
+  )
+  .use(AppController)
+  .use(PlayerController)
+  .use(ScoresController)
+  .use(LeaderboardController)
+  .use(StatisticsController)
+  .use(PlaylistController)
+  .use(BeatSaverController)
+  .use(BeatLeaderController)
+  .use(FriendsController)
+  .use(MiniRankingController)
+  .use(PlayerHistoryController)
+  .use(PlayerScoreHistoryController)
+  .use(TopScoresController)
+  .use(PlayerSearchController)
+  .use(PlayerRankingController);
 
 /**
  * Request logger (only in development)
@@ -272,38 +284,6 @@ if (!isProduction()) {
     })
   );
 }
-
-/**
- * Security settings
- */
-app.use(
-  helmet({
-    hsts: false, // Disable HSTS
-    contentSecurityPolicy: false, // Disable CSP
-    dnsPrefetchControl: true, // Enable DNS prefetch
-  })
-);
-
-/**
- * Controllers
- */
-app
-  .use(AppController)
-  .use(PlayerController)
-  .use(ScoresController)
-  .use(LeaderboardController)
-  .use(StatisticsController)
-  .use(PlaylistController)
-  .use(BeatSaverController)
-  .use(ReplayController)
-  .use(BeatLeaderController)
-  .use(FriendsController)
-  .use(MiniRankingController)
-  .use(PlayerHistoryController)
-  .use(PlayerScoreHistoryController)
-  .use(TopScoresController)
-  .use(PlayerSearchController)
-  .use(PlayerRankingController);
 
 app.onStart(async () => {
   EventsManager.getListeners().forEach(listener => {
