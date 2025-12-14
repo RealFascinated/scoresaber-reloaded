@@ -1,7 +1,5 @@
 "use client";
 
-import { env } from "@ssr/common/env";
-import { getApiHealth } from "@ssr/common/utils/api-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { useIsFirstRender } from "@uidotdev/usehooks";
