@@ -14,7 +14,7 @@ export default function playerSearchController(app: Elysia) {
     {
       tags: ["Player"],
       query: z.object({
-        query: z.string().default("").optional(),
+        query: z.string().optional(),
       }),
       detail: {
         description: "Search for players",
