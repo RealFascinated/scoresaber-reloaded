@@ -14,7 +14,7 @@
     "incremental": true,
     "sourceMap": true,
     "declarationMap": true,
-    "baseUrl": "./",
+    "baseUrl": "./"
   },
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "dist"]

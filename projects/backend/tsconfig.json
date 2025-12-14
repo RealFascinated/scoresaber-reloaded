@@ -13,5 +13,5 @@
     "jsxFactory": "Html.createElement",
     "jsxFragmentFactory": "Html.Fragment",
     "types": []
-  },
+  }
 }

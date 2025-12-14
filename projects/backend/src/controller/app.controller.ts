@@ -1,10 +1,10 @@
 import { InternalServerError } from "@ssr/common/error/internal-server-error";
+import { AppStatistics } from "@ssr/common/types/backend/app-statistics";
 import { mongoose } from "@typegoose/typegoose";
 import { Elysia } from "elysia";
 import { getAppVersion } from "../common/app.util";
 import { redisClient } from "../common/redis";
 import { AppService } from "../service/app.service";
-import { AppStatistics } from "@ssr/common/types/backend/app-statistics";
 
 export default function appController(app: Elysia) {
   return app

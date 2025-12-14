@@ -13,11 +13,7 @@ export default function playlistController(app: Elysia) {
           const extension = playlistId.includes(".") ? playlistId.split(".")[1] : "bplist";
 
           const response = new Response(
-            JSON.stringify(
-              await generateBeatSaberPlaylist(await PlaylistService.getPlaylist(id, config)),
-              null,
-              2
-            )
+            JSON.stringify(await generateBeatSaberPlaylist(await PlaylistService.getPlaylist(id, config)), null, 2)
           );
           response.headers.set("Content-Type", "application/json");
           if (download) {

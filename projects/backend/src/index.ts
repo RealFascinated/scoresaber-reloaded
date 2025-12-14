@@ -87,7 +87,6 @@ const typeReferences = fromTypes("src/index.ts", {
   silent: false,
 })();
 
-
 export const app = new Elysia()
   .use(
     openapi({

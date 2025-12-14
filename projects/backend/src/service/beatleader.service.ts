@@ -8,6 +8,7 @@ import {
 } from "@ssr/common/model/additional-score-data/additional-score-data";
 import { PlayerDocument, PlayerModel } from "@ssr/common/model/player/player";
 import { removeObjectFields } from "@ssr/common/object.util";
+import { ScoreStatsResponse } from "@ssr/common/response/score-stats-response";
 import { ScoreStatsToken } from "@ssr/common/types/token/beatleader/score-stats/score-stats";
 import { BeatLeaderScoreToken } from "@ssr/common/types/token/beatleader/score/score";
 import { BeatLeaderScoreImprovementToken } from "@ssr/common/types/token/beatleader/score/score-improvement";
@@ -18,7 +19,6 @@ import { DiscordChannels, sendEmbedToChannel } from "../bot/bot";
 import { createGenericEmbed } from "../common/discord/embed";
 import CacheService, { CacheId } from "./cache.service";
 import MinioService from "./minio.service";
-import { ScoreStatsResponse } from "@ssr/common/response/score-stats-response";
 
 export default class BeatLeaderService {
   /**

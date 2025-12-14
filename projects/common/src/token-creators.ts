@@ -1,4 +1,5 @@
 import type { HMD } from "./hmds";
+import { validateMap } from "./maps/validators";
 import ScoreSaberLeaderboard from "./model/leaderboard/impl/scoresaber-leaderboard";
 import LeaderboardDifficulty from "./model/leaderboard/leaderboard-difficulty";
 import { LeaderboardStatus } from "./model/leaderboard/leaderboard-status";
@@ -10,7 +11,6 @@ import ScoreSaberLeaderboardToken from "./types/token/scoresaber/leaderboard";
 import ScoreSaberScoreToken from "./types/token/scoresaber/score";
 import { getDifficultyFromScoreSaberDifficulty, ScoreSaberHMDs } from "./utils/scoresaber.util";
 import { parseDate } from "./utils/time-utils";
-import { validateMap } from "./maps/validators";
 
 /**
  * Parses a {@link ScoreSaberLeaderboardToken} into a {@link ScoreSaberLeaderboard}.

@@ -1,9 +1,15 @@
-import { QuerySchema, SortDirection, SortDirectionSchema, SortField, SortFieldSchema } from "@ssr/common/types/score-query";
+import { ScoreSaberScoreSortSchema } from "@ssr/common/score/score-sort";
+import {
+  QuerySchema,
+  SortDirection,
+  SortDirectionSchema,
+  SortField,
+  SortFieldSchema,
+} from "@ssr/common/types/score-query";
 import { Elysia } from "elysia";
+import { z } from "zod";
 import { LeaderboardScoresService } from "../service/leaderboard/leaderboard-scores.service";
 import { PlayerScoresService } from "../service/player/player-scores.service";
-import { z } from "zod";
-import { ScoreSaberScoreSortSchema } from "@ssr/common/score/score-sort";
 
 export default function scoresController(app: Elysia) {
   return app.group("/scores", app =>

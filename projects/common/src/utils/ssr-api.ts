@@ -126,7 +126,9 @@ class SSRApi {
    * @param boundary the pp boundary
    */
   async getPlayerPpBoundary(playerId: string, boundary: number = 1) {
-    return await this.request<PpBoundaryResponse>(`${env.NEXT_PUBLIC_API_URL}/player/pp-boundary/${playerId}/${boundary}`);
+    return await this.request<PpBoundaryResponse>(
+      `${env.NEXT_PUBLIC_API_URL}/player/pp-boundary/${playerId}/${boundary}`
+    );
   }
 
   /**
@@ -325,7 +327,9 @@ class SSRApi {
    * @returns the plays by HMD
    */
   async getPlaysByHmdForLeaderboard(leaderboardId: string) {
-    return await this.request<PlaysByHmdResponse>(`${env.NEXT_PUBLIC_API_URL}/leaderboard/plays-by-hmd/${leaderboardId}`);
+    return await this.request<PlaysByHmdResponse>(
+      `${env.NEXT_PUBLIC_API_URL}/leaderboard/plays-by-hmd/${leaderboardId}`
+    );
   }
 
   /**
