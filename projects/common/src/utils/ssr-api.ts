@@ -53,14 +53,15 @@ class SSRApi {
       },
       body: body ? JSON.stringify(body) : undefined,
     });
+
+    const responseText = await response.text();
     console.log({
       fullUrl,
       method: body ? "POST" : "GET",
       headers: {
         Accept: "application/superjson",
       },
-      body: body ? JSON.stringify(body) : undefined,
-      response: await response.text(),
+      response: responseText,
     })
 
     if (response.status === 500) {
@@ -70,10 +71,9 @@ class SSRApi {
       return undefined;
     }
     if (!response.ok) {
-      const text = await response.text();
-      throw new Error(`Request failed with status ${response.status}: ${text}`);
+      throw new Error(`Request failed with status ${response.status}: ${responseText}`);
     }
-    return SuperJSON.parse<T>(await response.text());
+    return SuperJSON.parse<T>(responseText);
   }
 
   /**
