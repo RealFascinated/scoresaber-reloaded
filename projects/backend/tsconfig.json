@@ -3,7 +3,6 @@
     "target": "ES2021",
     "module": "ESNext",
     "moduleResolution": "bundler",
-    "declaration": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
@@ -14,5 +13,5 @@
     "jsxFactory": "Html.createElement",
     "jsxFragmentFactory": "Html.Fragment",
     "types": []
-  }
+  },
 }

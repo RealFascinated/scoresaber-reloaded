@@ -138,7 +138,7 @@ export function getDifficultyFromScoreSaberDifficulty(ssDifficultyNumber: number
       return "ExpertPlus";
     }
     default: {
-      return "Unknown";
+      throw new Error(`Unknown difficulty number: ${ssDifficultyNumber}`);
     }
   }
 }

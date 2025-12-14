@@ -1,8 +1,8 @@
-/// <reference types="bun-types" />
 import * as dotenv from "@dotenvx/dotenvx";
 import cors from "@elysiajs/cors";
 import { cron } from "@elysiajs/cron";
-import { fromTypes, openapi } from "@elysiajs/openapi";
+import { openapi } from "@elysiajs/openapi";
+import { fromTypes } from "@elysiajs/openapi/gen";
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
@@ -85,11 +85,14 @@ export const app = new Elysia()
     openapi({
       path: "/swagger",
       references: fromTypes("src/index.ts", {
-        projectRoot: "../../",
+        projectRoot: process.cwd(),
+        overrideOutputPath: (tempDir: string) => `${tempDir}/dist/backend/src/index.d.ts`,
       }),
       provider: "swagger-ui",
       swagger: {
+        showExtensions: true,
         autoDarkMode: false,
+        deepLinking: true,
       },
       documentation: {
         info: {

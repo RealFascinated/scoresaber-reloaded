@@ -18,6 +18,7 @@ import { DiscordChannels, sendEmbedToChannel } from "../bot/bot";
 import { createGenericEmbed } from "../common/discord/embed";
 import CacheService, { CacheId } from "./cache.service";
 import MinioService from "./minio.service";
+import { ScoreStatsResponse } from "@ssr/common/response/score-stats-response";
 
 export default class BeatLeaderService {
   /**
@@ -205,10 +206,7 @@ export default class BeatLeaderService {
    * @returns the score stats
    * @throws NotFoundError if the score stats are not found
    */
-  public static async getScoresFullScoreStats(scoreId: number): Promise<{
-    current: ScoreStatsToken;
-    previous?: ScoreStatsToken;
-  }> {
+  public static async getScoresFullScoreStats(scoreId: number): Promise<ScoreStatsResponse> {
     const current = await this.getAdditionalScoreData(scoreId);
     if (current == undefined) {
       throw new NotFoundError(`Score ${scoreId} not found`);

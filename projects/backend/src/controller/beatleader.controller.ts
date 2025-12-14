@@ -1,3 +1,4 @@
+import { ScoreStatsResponse } from "@ssr/common/response/score-stats-response";
 import { Elysia, redirect, t } from "elysia";
 import BeatLeaderService from "../service/beatleader.service";
 import { PlayerReplayService } from "../service/player/player-replay.service";
@@ -7,8 +8,8 @@ export default function beatleaderController(app: Elysia) {
     app
       .get(
         "/scorestats/:id",
-        async ({ params: { id } }) => {
-          return await BeatLeaderService.getScoresFullScoreStats(id);
+        async ({ params: { id } }): Promise<ScoreStatsResponse> => {
+          return BeatLeaderService.getScoresFullScoreStats(id);
         },
         {
           tags: ["BeatLeader"],

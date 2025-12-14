@@ -1,3 +1,4 @@
+import { DetailTypeSchema } from "@ssr/common/detail-type";
 import { LeaderboardResponse } from "@ssr/common/response/leaderboard-response";
 import { PlaysByHmdResponse } from "@ssr/common/response/plays-by-hmd-response";
 import { Elysia, t } from "elysia";
@@ -21,11 +22,11 @@ export default function leaderboardController(app: Elysia) {
         },
         {
           tags: ["Leaderboard"],
-          params: t.Object({
-            id: t.String({ required: true }),
+          params: z.object({
+            id: z.string(),
           }),
-          query: t.Object({
-            type: t.Optional(t.Union([t.Literal("basic"), t.Literal("full")], { default: "basic" })),
+          query: z.object({
+            type: z.optional(DetailTypeSchema),
           }),
           detail: {
             description: "Fetch a leaderboard by its id",

@@ -1,4 +1,4 @@
-import { DetailType } from "@ssr/common/detail-type";
+import { DetailType, DetailTypeSchema } from "@ssr/common/detail-type";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerRankedPpsResponse } from "@ssr/common/response/player-ranked-pps-response";
 import { PlayerScoresChartResponse } from "@ssr/common/response/player-scores-chart";
@@ -8,6 +8,7 @@ import { PlayerCoreService } from "../service/player/player-core.service";
 import { PlayerRankedService } from "../service/player/player-ranked.service";
 import { PlayerScoresService } from "../service/player/player-scores.service";
 import ScoreSaberService from "../service/scoresaber.service";
+import { z } from "zod";
 
 export default function playerController(app: Elysia) {
   return app.group("/player", app =>
@@ -27,8 +28,8 @@ export default function playerController(app: Elysia) {
           params: t.Object({
             id: t.String({ required: true }),
           }),
-          query: t.Object({
-            type: t.Optional(t.Union([t.Literal("full"), t.Literal("basic")], { default: "basic" })),
+          query: z.object({
+            type: z.optional(DetailTypeSchema),
           }),
           detail: {
             description: "Fetch a player by their id",
