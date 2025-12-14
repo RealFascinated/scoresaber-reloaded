@@ -4,6 +4,7 @@ import { cn } from "@/common/utils";
 import GithubLogo from "@/components/logos/logos/github-logo";
 import TwitterLogo from "@/components/logos/logos/twitter-logo";
 import SimpleLink from "@/components/simple-link";
+import { env } from "@ssr/common/env";
 import { ExternalLink } from "lucide-react";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -52,6 +53,11 @@ const links: {
       name: "Source Code",
       shortName: "Source",
       href: "https://github.com/RealFascinated/scoresaber-reloaded",
+    },
+    {
+      name: "API Documentation",
+      shortName: "API",
+      href: `${env.NEXT_PUBLIC_API_URL}/swagger`,
     },
     {
       name: "System Status",
