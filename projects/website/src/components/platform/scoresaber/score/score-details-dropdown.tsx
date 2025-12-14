@@ -34,7 +34,7 @@ export default function ScoreDetailsDropdown({
   showMapStats?: boolean;
   defaultScoresPage?: number;
   isLeaderboardScore?: boolean;
-  isLoading?: (isLoading: boolean) => void;
+  isLoading: (isLoading: boolean) => void;
 }) {
   const { data: dropdownData, isLoading } = useLeaderboardDropdownData(
     leaderboard.id,

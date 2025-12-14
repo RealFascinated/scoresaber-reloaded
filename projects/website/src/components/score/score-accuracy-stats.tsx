@@ -27,10 +27,10 @@ interface AccuracyCircleProps {
 
 function AverageCutValues({ cuts, hand }: { cuts: number[]; hand: Hand }) {
   return (
-    <div className="space-y-1">
+    <div className="space-y-0.5">
       {cuts.map((cut, i) => (
         <div key={i} className={cn("flex gap-1", hand === "right" ? "justify-end" : "justify-start")}>
-          <p className="text-sm font-medium text-gray-200">{cut.toFixed(2)}</p>
+          <p className="text-xs font-medium text-gray-400">{cut.toFixed(2)}</p>
         </div>
       ))}
     </div>
@@ -43,19 +43,19 @@ function AccuracyCircle({ accuracy, averageCut, hand }: AccuracyCircleProps) {
   const size = (CIRCLE_RADIUS + STROKE_WIDTH) * 2;
 
   return (
-    <div className="flex items-center gap-4">
-      <div className={cn("flex gap-4", hand === "right" ? "flex-row-reverse" : "flex-row")}>
+    <div className="flex items-center gap-2 md:gap-3">
+      <div className={cn("flex gap-2 md:gap-3 items-center", hand === "right" ? "flex-row-reverse" : "flex-row")}>
         <AverageCutValues cuts={averageCut} hand={hand} />
-        <div className="relative">
-          <svg width={size} height={size} style={{ transform: "rotate(-90deg)" }}>
+        <div className="relative shrink-0">
+          <svg width={size} height={size} style={{ transform: "rotate(-90deg)" }} className="drop-shadow-sm">
             <circle
               cx={center}
               cy={center}
               r={CIRCLE_RADIUS}
               fill="none"
-              stroke="#374151"
+              stroke="currentColor"
               strokeWidth={STROKE_WIDTH}
-              className="opacity-50"
+              className="text-gray-800"
             />
             <AnimatePresence mode="wait">
               <motion.circle
@@ -66,10 +66,12 @@ function AccuracyCircle({ accuracy, averageCut, hand }: AccuracyCircleProps) {
                 fill="none"
                 stroke={handColors[hand]}
                 strokeWidth={STROKE_WIDTH}
+                strokeLinecap="round"
                 initial={{ pathLength: 0 }}
                 animate={{ pathLength: percent }}
                 exit={{ pathLength: 0 }}
                 transition={{ duration: 1, ease: "easeInOut" }}
+                className="drop-shadow-sm"
               />
             </AnimatePresence>
           </svg>
@@ -78,7 +80,7 @@ function AccuracyCircle({ accuracy, averageCut, hand }: AccuracyCircleProps) {
               display={<p className="text-sm font-medium">{(percent * 100).toFixed(2)}%</p>}
               className="cursor-default"
             >
-              <p className="text-[14px] font-semibold">{accuracy.toFixed(2)}</p>
+              <p className="text-sm font-semibold text-white">{accuracy.toFixed(2)}</p>
             </SimpleTooltip>
           </div>
         </div>
@@ -90,12 +92,11 @@ function AccuracyCircle({ accuracy, averageCut, hand }: AccuracyCircleProps) {
 function HandStat({ hand, name, value }: { hand: Hand; name: string; value: string }) {
   return (
     <div
-      className="bg-opacity-20 inline-flex w-full items-center justify-around rounded-md px-2 py-1"
-      style={{ backgroundColor: `${handColors[hand]}40` }}
+      className="inline-flex w-full items-center justify-between rounded-lg px-2 md:px-3 py-1.5 transition-colors hover:bg-opacity-30 min-w-0"
+      style={{ backgroundColor: `${handColors[hand]}20` }}
     >
-      <p className="min-w-[38px] grow font-medium">{name}</p>
-      <span className="mx-2 opacity-40">|</span>
-      <p className="grow text-right font-medium">{value}</p>
+      <p className="text-xs font-semibold text-gray-300 uppercase tracking-wide shrink-0">{name}</p>
+      <p className="text-sm font-bold text-white truncate ml-2">{value}</p>
     </div>
   );
 }
@@ -116,9 +117,9 @@ function HandAccuracy({ scoreStats, hand }: { scoreStats: ScoreStatsToken; hand:
   const tooltipLabel = (text: string) => `${capitalizeFirstLetter(hand)} Hand ${text}`;
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className={cn("flex flex-col gap-3 min-w-0 flex-1", hand === "right" ? "items-end" : "items-start")}>
       <AccuracyCircle accuracy={accuracy} averageCut={averageCut} hand={hand} />
-      <div className={cn("flex flex-col gap-1 text-sm", hand === "right" ? "justify-end" : "justify-start")}>
+      <div className="flex flex-col gap-1.5 w-full max-w-[200px]">
         <SimpleTooltip display={tooltipLabel("Time-Dependence")} className="cursor-default">
           <HandStat hand={hand} name="TD" value={`${timeDependence.toFixed(3)}`} />
         </SimpleTooltip>
@@ -135,8 +136,9 @@ function HandAccuracy({ scoreStats, hand }: { scoreStats: ScoreStatsToken; hand:
 
 export default function ScoreAccuracyStats({ scoreStats }: ScoreAccuracyStatProps) {
   return (
-    <div className="flex w-full items-center justify-between">
+    <div className="flex w-full items-start justify-between gap-3 md:gap-6 overflow-hidden">
       <HandAccuracy scoreStats={scoreStats.current} hand="left" />
+      <div className="hidden md:block h-full w-px bg-border self-stretch shrink-0" />
       <HandAccuracy scoreStats={scoreStats.current} hand="right" />
     </div>
   );
