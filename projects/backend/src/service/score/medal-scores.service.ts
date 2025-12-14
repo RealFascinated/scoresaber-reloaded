@@ -153,6 +153,14 @@ export class MedalScoresService {
     // Only send notification if at least one player gained medals
     const hasGainedMedals = Array.from(medalChanges.values()).some(change => change > 0);
     if (medalChanges.size > 0 && hasGainedMedals) {
+      // Fetch current medal counts before updating
+      const playerIds = Array.from(medalChanges.keys());
+      const players = await PlayerModel.find({ _id: { $in: playerIds } }).select("_id medals").lean();
+      const oldPlayerMedalCounts = new Map<string, number>();
+      for (const player of players) {
+        oldPlayerMedalCounts.set(player._id.toString(), player.medals || 0);
+      }
+
       const playerUpdates = Array.from(medalChanges.entries()).map(([playerId, change]) => {
         return {
           updateOne: {
@@ -173,7 +181,7 @@ export class MedalScoresService {
       );
 
       // Send notifications for medal changes
-      await sendMedalScoreNotification(incomingScore, leaderboard.leaderboard, beatLeaderScore, medalChanges);
+      await sendMedalScoreNotification(incomingScore, leaderboard.leaderboard, beatLeaderScore, medalChanges, oldPlayerMedalCounts);
     }
   }
 }

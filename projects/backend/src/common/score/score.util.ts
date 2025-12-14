@@ -136,7 +136,8 @@ export async function sendMedalScoreNotification(
   score: ScoreSaberScore,
   leaderboard: ScoreSaberLeaderboard,
   beatLeaderScore: AdditionalScoreData | undefined,
-  changes: Map<string, number>
+  changes: Map<string, number>,
+  oldPlayerMedalCounts: Map<string, number>
 ) {
   const beatSaver = await BeatSaverService.getMap(
     leaderboard.songHash,
@@ -163,6 +164,7 @@ export async function sendMedalScoreNotification(
     return changeA - changeB;
   })) {
     const changePlayer = await PlayerCoreService.getPlayer(playerId);
+    const oldMedalCount = oldPlayerMedalCounts.get(playerId) || 0;
     description.push(
       format(
         `**[%s](%s)** %s %s %s (%s -> %s)`,
@@ -171,7 +173,7 @@ export async function sendMedalScoreNotification(
         change < 0 ? "lost" : "gained",
         Math.abs(change),
         pluralize(Math.abs(change), "medal"),
-        formatNumberWithCommas((changePlayer.medals || 0) - change),
+        formatNumberWithCommas(oldMedalCount),
         formatNumberWithCommas(changePlayer.medals || 0)
       )
     );
@@ -179,15 +181,13 @@ export async function sendMedalScoreNotification(
 
   // Find the player with the highest positive change for the title
   const sortedChanges = Array.from(changes.entries()).sort((a, b) => b[1] - a[1]);
-  const [topPlayerId, topMedalChange] = sortedChanges.find(([, change]) => change > 0)!;
-
+  const [topPlayerId] = sortedChanges.find(([, change]) => change > 0)!;
   const topChangePlayer = await PlayerCoreService.getPlayer(topPlayerId);
-  const title = `${topChangePlayer.name} gained ${formatNumberWithCommas(topMedalChange)} ${pluralize(topMedalChange, "medal")}!`;
 
   await sendEmbedToChannel(
     DiscordChannels.MEDAL_SCORES_FEED,
     new EmbedBuilder()
-      .setTitle(title)
+      .setTitle(`${topChangePlayer.name} set a #${score.rank}!`)
       .setDescription(description.join("\n").trim())
       .setThumbnail(leaderboard.songArt)
       .setColor(Colors.Green)
