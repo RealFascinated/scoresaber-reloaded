@@ -24,6 +24,7 @@ import { ScoreSaberScoreBase } from "./scoresaber-score-base";
 @index({ pp: -1 })
 @index({ timestamp: -1 })
 @index({ playerId: 1, pp: -1 })
+@index({ playerId: 1, accuracy: 1 })
 @index({ scoreId: 1, score: 1 })
 export class ScoreSaberScoreInternal extends ScoreSaberScoreBase {}
 

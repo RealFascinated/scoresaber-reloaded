@@ -19,6 +19,7 @@ export class PlayerAccuraciesService {
       {
         $match: {
           playerId: playerId,
+          accuracy: { $gte: 0, $lte: 100 },
         },
       },
       {
