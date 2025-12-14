@@ -1,4 +1,5 @@
 import { modelOptions, Prop, Severity } from "@typegoose/typegoose";
+import { AdditionalScoreData } from "src/model/additional-score-data/additional-score-data";
 import type { HMD } from "../../../hmds";
 import { type Controllers } from "../controllers";
 import Score from "../score";
@@ -22,14 +23,12 @@ export class ScoreSaberScoreBase extends Score {
 
   /**
    * The amount of pp for the score.
-   * @private
    */
   @Prop({ required: true })
   public pp!: number;
 
   /**
    * The weight of the score, or undefined if not ranked.
-   * @private
    */
   @Prop()
   public weight?: number;
@@ -43,7 +42,7 @@ export class ScoreSaberScoreBase extends Score {
   /**
    * The hmd used to set the score.
    */
-  @Prop({ required: false })
+  @Prop({ required: false, index: true })
   public hmd?: HMD;
 
   /**
@@ -56,4 +55,9 @@ export class ScoreSaberScoreBase extends Score {
    * The previous score, if any.
    */
   public previousScore?: ScoreSaberPreviousScoreOverview;
+
+  /**
+   * The additional data for the score.
+   */
+  public additionalData?: AdditionalScoreData;
 }

@@ -42,12 +42,12 @@ import { LeaderboardLeaderboardsService } from "./service/leaderboard/leaderboar
 import MetricsService from "./service/metrics.service";
 import MinioService from "./service/minio.service";
 import { PlayerHistoryService } from "./service/player/player-history.service";
+import { PlayerMedalsService } from "./service/player/player-medals.service";
 import PlaylistService from "./service/playlist/playlist.service";
+import { MedalScoresService } from "./service/score/medal-scores.service";
 import StatisticsService from "./service/statistics.service";
 import { BeatSaverWebsocket } from "./websocket/beatsaver-websocket";
 import { ScoreWebsockets } from "./websocket/score-websockets";
-import { MedalScoresService } from "./service/score/medal-scores.service";
-import { PlayerMedalsService } from "./service/player/player-medals.service";
 
 Logger.info("Starting SSR Backend...");
 
