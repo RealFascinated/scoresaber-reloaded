@@ -45,24 +45,14 @@ class SSRApi {
         ? `?${new URLSearchParams(filteredQueryParams)}`
         : "";
 
-        const fullUrl = `${env.NEXT_PUBLIC_API_URL}${url}${queryString}`;
-    const response = await fetch(fullUrl, {
+    const response = await fetch(`${env.NEXT_PUBLIC_API_URL}${url}${queryString}`, {
       method: body ? "POST" : "GET",
       headers: {
         Accept: "application/superjson",
       },
       body: body ? JSON.stringify(body) : undefined,
     });
-
     const responseText = await response.text();
-    console.log({
-      fullUrl,
-      method: body ? "POST" : "GET",
-      headers: {
-        Accept: "application/superjson",
-      },
-      response: responseText,
-    })
 
     if (response.status === 500) {
       throw new Error(`Failed to get ${url}${queryString}: ${response.statusText}`);
