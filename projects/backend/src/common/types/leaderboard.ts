@@ -31,10 +31,4 @@ export type LeaderboardOptions = {
   includeBeatSaver?: boolean;
   includeStarChangeHistory?: boolean;
   beatSaverType?: DetailType;
-  type?: DetailType;
-};
-
-export type LeaderboardData = {
-  leaderboard: ScoreSaberLeaderboard;
-  cached: boolean;
 };

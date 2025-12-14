@@ -49,6 +49,7 @@ class SSRApi {
       method: body ? "POST" : "GET",
       headers: {
         Accept: "application/superjson",
+        ...(body && { "Content-Type": "application/json" }),
       },
       body: body ? JSON.stringify(body) : undefined,
     });
@@ -101,7 +102,9 @@ class SSRApi {
    * @param id the id for the leaderboard
    */
   async fetchLeaderboard(id: string, type: DetailType = "basic") {
-    return await this.request<LeaderboardResponse>(`/leaderboard/by-id/${id}`);
+    return await this.request<LeaderboardResponse>(`/leaderboard/by-id/${id}`, {
+      type: type,
+    });
   }
 
   /**
@@ -151,13 +154,9 @@ class SSRApi {
    * @param page the page
    */
   async getFriendLeaderboardScores(friendIds: string[], leaderboardId: string, page: number) {
-    return await this.request<Page<ScoreSaberScore>>(
-      `/scores/friends/leaderboard/${leaderboardId}/${page}`,
-      undefined,
-      {
-        friendIds: friendIds,
-      }
-    );
+    return await this.request<Page<ScoreSaberScore>>(`/scores/friend/leaderboard/${leaderboardId}/${page}`, undefined, {
+      friendIds: friendIds,
+    });
   }
 
   /**
@@ -167,7 +166,7 @@ class SSRApi {
    * @param page the page
    */
   async getFriendScores(friendIds: string[], page: number) {
-    return await this.request<Page<PlayerScore>>(`/scores/friends/${page}`, undefined, {
+    return await this.request<Page<PlayerScore>>(`/scores/friend/${page}`, undefined, {
       friendIds: friendIds,
     });
   }
@@ -338,7 +337,7 @@ class SSRApi {
       search?: string;
     }
   ) {
-    return await this.request<PlayerRankingsResponse>(`/player/search/ranking/${page}`, {
+    return await this.request<PlayerRankingsResponse>(`/ranking/${page}`, {
       ...(options?.country ? { country: options.country } : {}),
       ...(options?.search ? { search: options.search } : {}),
     });

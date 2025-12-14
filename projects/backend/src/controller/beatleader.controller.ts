@@ -28,7 +28,7 @@ export default function beatleaderController(app: Elysia) {
           return redirect(await PlayerReplayService.getPlayerReplayUrl(scoreId));
         },
         {
-          tags: ["Replay"],
+          tags: ["BeatLeader"],
           params: z.object({
             scoreId: z.string().regex(/^\d+\.bsor$/),
           }),

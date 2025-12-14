@@ -1,13 +1,15 @@
 import { DetailType, DetailTypeSchema } from "@ssr/common/detail-type";
-import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import { PlayerRankedPpsResponse } from "@ssr/common/response/player-ranked-pps-response";
-import { PlayerScoresChartResponse } from "@ssr/common/response/player-scores-chart";
-import { PpBoundaryResponse } from "@ssr/common/response/pp-boundary-response";
+import { NotFoundError } from "@ssr/common/error/not-found-error";
+import { getDaysAgoDate } from "@ssr/common/utils/time-utils";
 import { Elysia } from "elysia";
 import { z } from "zod";
+import MiniRankingService from "../service/mini-ranking.service";
 import { PlayerCoreService } from "../service/player/player-core.service";
+import { PlayerHistoryService } from "../service/player/player-history.service";
 import { PlayerRankedService } from "../service/player/player-ranked.service";
+import { PlayerScoreHistoryService } from "../service/player/player-score-history.service";
 import { PlayerScoresService } from "../service/player/player-scores.service";
+import { PlayerSearchService } from "../service/player/player-search.service";
 import ScoreSaberService from "../service/scoresaber.service";
 
 export default function playerController(app: Elysia) {
@@ -15,7 +17,7 @@ export default function playerController(app: Elysia) {
     app
       .get(
         "/:playerId",
-        async ({ params: { playerId }, query: { type } }): Promise<ScoreSaberPlayer> => {
+        async ({ params: { playerId }, query: { type } }) => {
           const player = await ScoreSaberService.getPlayer(playerId, type as DetailType, undefined, {
             setMedalsRank: true,
             setInactivesRank: true,
@@ -38,7 +40,7 @@ export default function playerController(app: Elysia) {
       )
       .get(
         "/pp-boundary/:playerId/:boundaryCount",
-        async ({ params: { playerId, boundaryCount } }): Promise<PpBoundaryResponse> => {
+        async ({ params: { playerId, boundaryCount } }) => {
           return {
             boundaries: await PlayerRankedService.getPlayerPpBoundary(playerId, boundaryCount),
             boundary: boundaryCount,
@@ -57,7 +59,7 @@ export default function playerController(app: Elysia) {
       )
       .get(
         "/maps-graph/:playerId",
-        async ({ params: { playerId } }): Promise<PlayerScoresChartResponse> => {
+        async ({ params: { playerId } }) => {
           return await PlayerScoresService.getPlayerScoreChart(playerId);
         },
         {
@@ -72,7 +74,7 @@ export default function playerController(app: Elysia) {
       )
       .get(
         "/ranked-pps/:playerId",
-        async ({ params: { playerId } }): Promise<PlayerRankedPpsResponse> => {
+        async ({ params: { playerId } }) => {
           return await PlayerRankedService.getPlayerRankedPps(playerId);
         },
         {
@@ -97,6 +99,96 @@ export default function playerController(app: Elysia) {
           }),
           detail: {
             description: "Refresh a player's for ScoreSaber and update their avatar",
+          },
+        }
+      )
+      .get(
+        "/mini-ranking/:playerId",
+        async ({ params: { playerId } }) => {
+          return await MiniRankingService.getPlayerMiniRankings(playerId);
+        },
+        {
+          tags: ["Player"],
+          params: z.object({
+            playerId: z.string(),
+          }),
+          detail: {
+            description: "Fetch a player's mini ranking (global and country close rankings)",
+          },
+        }
+      )
+      .get(
+        "/search",
+        async ({ query: { query } }) => {
+          return {
+            players: await PlayerSearchService.searchPlayers(query),
+          };
+        },
+        {
+          tags: ["Player"],
+          query: z.object({
+            query: z.string().optional(),
+          }),
+          detail: {
+            description: "Search for players",
+          },
+        }
+      )
+      .get(
+        "/history/:playerId",
+        async ({ params: { playerId }, query: { startDate, endDate, includeFields } }) => {
+          const player = await ScoreSaberService.getCachedPlayer(playerId, true);
+          if (!player) {
+            throw new NotFoundError(`Player "${playerId}" not found`);
+          }
+
+          const projection =
+            includeFields && includeFields !== ""
+              ? includeFields.split(",").reduce(
+                  (acc, field) => {
+                    acc[field] = 1;
+                    return acc;
+                  },
+                  {} as Record<string, string | number | boolean | object>
+                )
+              : undefined;
+
+          return await PlayerHistoryService.getPlayerStatisticHistory(
+            player,
+            new Date(startDate),
+            new Date(endDate),
+            projection
+          );
+        },
+        {
+          tags: ["Player"],
+          params: z.object({
+            playerId: z.string(),
+          }),
+          query: z.object({
+            startDate: z.string().default(new Date().toISOString()),
+            endDate: z.string().default(getDaysAgoDate(50).toISOString()),
+            includeFields: z.string().default("").optional(),
+          }),
+          detail: {
+            description: "Fetch a player's statistics history",
+          },
+        }
+      )
+      .get(
+        "/score-history/:playerId/:leaderboardId/:page",
+        async ({ params: { playerId, leaderboardId, page } }) => {
+          return await PlayerScoreHistoryService.getPlayerScoreHistory(playerId, leaderboardId, page);
+        },
+        {
+          tags: ["Player"],
+          params: z.object({
+            playerId: z.string(),
+            leaderboardId: z.string(),
+            page: z.coerce.number(),
+          }),
+          detail: {
+            description: "Fetch a player's score history for a leaderboard",
           },
         }
       )

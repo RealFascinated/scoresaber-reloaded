@@ -22,18 +22,12 @@ import { getAppVersion } from "./common/app.util";
 import AppController from "./controller/app.controller";
 import BeatLeaderController from "./controller/beatleader.controller";
 import BeatSaverController from "./controller/beatsaver.controller";
-import FriendsController from "./controller/friends.controller";
 import LeaderboardController from "./controller/leaderboard.controller";
-import MiniRankingController from "./controller/mini-ranking.controller";
-import PlayerHistoryController from "./controller/player-history.controller";
 import PlayerRankingController from "./controller/player-ranking.controller";
-import PlayerScoreHistoryController from "./controller/player-score-history.controller";
-import PlayerSearchController from "./controller/player-search.controller";
 import PlayerController from "./controller/player.controller";
 import PlaylistController from "./controller/playlist.controller";
 import ScoresController from "./controller/scores.controller";
 import StatisticsController from "./controller/statistics.controller";
-import TopScoresController from "./controller/top-scores.controller";
 import { EventsManager } from "./event/events-manager";
 import { metricsPlugin } from "./plugins/metrics.plugin";
 import { QueueManager } from "./queue/queue-manager";
@@ -274,12 +268,6 @@ export const app = new Elysia()
   .use(PlaylistController)
   .use(BeatSaverController)
   .use(BeatLeaderController)
-  .use(FriendsController)
-  .use(MiniRankingController)
-  .use(PlayerHistoryController)
-  .use(PlayerScoreHistoryController)
-  .use(TopScoresController)
-  .use(PlayerSearchController)
   .use(PlayerRankingController);
 
 /**

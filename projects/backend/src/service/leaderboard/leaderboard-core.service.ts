@@ -18,7 +18,7 @@ import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/leade
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import SuperJSON from "superjson";
 import { redisClient } from "../../common/redis";
-import { LeaderboardData, LeaderboardOptions } from "../../common/types/leaderboard";
+import { LeaderboardOptions } from "../../common/types/leaderboard";
 import { LeaderboardScoreSeedQueue } from "../../queue/impl/leaderboard-score-seed-queue";
 import { QueueId, QueueManager } from "../../queue/queue-manager";
 import BeatSaverService from "../beatsaver.service";
@@ -29,7 +29,6 @@ const DEFAULT_OPTIONS: LeaderboardOptions = {
   includeBeatSaver: false,
   includeStarChangeHistory: false,
   beatSaverType: "basic",
-  type: "basic",
 };
 
 export class LeaderboardCoreService {
@@ -45,6 +44,7 @@ export class LeaderboardCoreService {
       ...DEFAULT_OPTIONS,
       ...options,
     };
+
     if (isNaN(Number(id))) {
       throw new NotFoundError(`Leaderboard not found for "${id}"`);
     }
@@ -55,7 +55,7 @@ export class LeaderboardCoreService {
       async () => {
         const cachedLeaderboard = await ScoreSaberLeaderboardModel.findById(id).lean();
         if (cachedLeaderboard) {
-          return LeaderboardCoreService.processLeaderboard(cachedLeaderboard, true);
+          return LeaderboardCoreService.processLeaderboard(cachedLeaderboard);
         }
 
         return await LeaderboardCoreService.createLeaderboard(id);
@@ -76,7 +76,6 @@ export class LeaderboardCoreService {
       starChangeHistory: defaultOptions.includeStarChangeHistory
         ? await LeaderboardRankingService.fetchStarChangeHistory(leaderboardData.leaderboard)
         : undefined,
-      cached: leaderboardData.cached,
     };
   }
 
@@ -106,8 +105,7 @@ export class LeaderboardCoreService {
     }
 
     const data = LeaderboardCoreService.processLeaderboard(
-      await LeaderboardCoreService.saveLeaderboard(id, getScoreSaberLeaderboardFromToken(leaderboardToken)),
-      false
+      await LeaderboardCoreService.saveLeaderboard(id, getScoreSaberLeaderboardFromToken(leaderboardToken))
     );
 
     (QueueManager.getQueue(QueueId.LeaderboardScoreSeedQueue) as LeaderboardScoreSeedQueue).add({
@@ -194,7 +192,7 @@ export class LeaderboardCoreService {
           "difficulty.characteristic": characteristic,
         }).lean();
         if (cachedLeaderboard) {
-          return LeaderboardCoreService.processLeaderboard(cachedLeaderboard, true);
+          return LeaderboardCoreService.processLeaderboard(cachedLeaderboard);
         }
 
         const before = performance.now();
@@ -218,7 +216,7 @@ export class LeaderboardCoreService {
         });
 
         Logger.info(`Created leaderboard "${leaderboard.id}" in ${formatDuration(performance.now() - before)}`);
-        return LeaderboardCoreService.processLeaderboard(leaderboard, false);
+        return LeaderboardCoreService.processLeaderboard(leaderboard);
       }
     );
 
@@ -233,7 +231,6 @@ export class LeaderboardCoreService {
     return {
       leaderboard: leaderboardData.leaderboard,
       beatsaver: beatSaverMap,
-      cached: leaderboardData.cached,
     };
   }
 
@@ -285,12 +282,12 @@ export class LeaderboardCoreService {
    * @param cached whether the leaderboard was cached
    * @returns the processed leaderboard
    */
-  public static processLeaderboard(leaderboard: ScoreSaberLeaderboard, cached = false): LeaderboardData {
+  public static processLeaderboard(leaderboard: ScoreSaberLeaderboard): LeaderboardResponse {
     const processedLeaderboard = {
       ...LeaderboardCoreService.leaderboardToObject(leaderboard),
       fullName: `${leaderboard.songName} ${leaderboard.songSubName}`.trim(),
     } as ScoreSaberLeaderboard;
-    return { leaderboard: processedLeaderboard, cached };
+    return { leaderboard: processedLeaderboard };
   }
 
   /**

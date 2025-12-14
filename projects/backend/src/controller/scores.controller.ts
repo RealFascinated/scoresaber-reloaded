@@ -9,7 +9,9 @@ import {
 import { Elysia } from "elysia";
 import { z } from "zod";
 import { LeaderboardScoresService } from "../service/leaderboard/leaderboard-scores.service";
+import { PlayerFriendScoresService } from "../service/player/player-friend-scores.service";
 import { PlayerScoresService } from "../service/player/player-scores.service";
+import { TopScoresService } from "../service/score/top-scores.service";
 
 export default function scoresController(app: Elysia) {
   return app.group("/scores", app =>
@@ -98,6 +100,59 @@ export default function scoresController(app: Elysia) {
           }),
           detail: {
             description: "Fetch the scores for a leaderboard",
+          },
+        }
+      )
+      .post(
+        "/friend/leaderboard/:leaderboardId/:page",
+        async ({ params: { leaderboardId, page }, body: { friendIds } }) => {
+          console.log("friendIds", friendIds);
+          return await PlayerFriendScoresService.getFriendLeaderboardScores(friendIds, leaderboardId, page);
+        },
+        {
+          tags: ["Scores"],
+          params: z.object({
+            leaderboardId: z.coerce.number(),
+            page: z.coerce.number(),
+          }),
+          body: z.object({
+            friendIds: z.array(z.string()),
+          }),
+          detail: {
+            description: "Fetch friend leaderboard scores for a player",
+          },
+        }
+      )
+      .post(
+        "/friend/:page",
+        async ({ params: { page }, body: { friendIds } }) => {
+          return await PlayerFriendScoresService.getFriendScores(friendIds, page);
+        },
+        {
+          tags: ["Scores"],
+          params: z.object({
+            page: z.coerce.number(),
+          }),
+          body: z.object({
+            friendIds: z.array(z.string()),
+          }),
+          detail: {
+            description: "Fetch friend scores for a player",
+          },
+        }
+      )
+      .get(
+        "/scores/top/:page",
+        async ({ params: { page } }) => {
+          return (await TopScoresService.getTopScores(page)).toJSON();
+        },
+        {
+          tags: ["Scores"],
+          params: z.object({
+            page: z.coerce.number().default(1),
+          }),
+          detail: {
+            description: "Fetch the all-time top scores",
           },
         }
       )

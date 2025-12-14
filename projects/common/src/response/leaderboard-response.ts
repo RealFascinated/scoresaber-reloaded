@@ -17,9 +17,4 @@ export type LeaderboardResponse = {
    * The star change history for this leaderboard.
    */
   starChangeHistory?: LeaderboardStarChange[];
-
-  /**
-   * Was this leaderboard cached locally?
-   */
-  cached?: boolean;
 };
