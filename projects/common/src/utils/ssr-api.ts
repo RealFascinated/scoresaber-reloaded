@@ -37,8 +37,14 @@ class SSRApi {
    * @throws an error if the request fails
    */
   async get<T>(url: string, queryParams?: Record<string, string>) {
+    // Filter out undefined values and empty strings from the query params
+    const filteredQueryParams = Object.fromEntries(
+      Object.entries(queryParams || {}).filter(([_, value]) => value !== undefined && value !== "")
+    );
     const queryString =
-      queryParams && Object.keys(queryParams).length > 0 ? `?${new URLSearchParams(queryParams)}` : "";
+      filteredQueryParams && Object.keys(filteredQueryParams).length > 0
+        ? `?${new URLSearchParams(filteredQueryParams)}`
+        : "";
     const response = await fetch(`${url}${queryString}`, {
       headers: { Accept: "application/superjson" },
     });
