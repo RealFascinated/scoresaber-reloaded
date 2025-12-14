@@ -244,10 +244,7 @@ function getScoreButtons(
                 .setEmoji("🎥")
                 .setStyle(ButtonStyle.Link)
                 .setURL(
-                  ReplayViewers.beatleader.generateUrl(
-                    beatLeaderScore.scoreId,
-                    getBeatLeaderReplayRedirectUrl(score)
-                  )
+                  ReplayViewers.beatleader.generateUrl(beatLeaderScore.scoreId, getBeatLeaderReplayRedirectUrl(score))
                 ),
             ]
           : []),

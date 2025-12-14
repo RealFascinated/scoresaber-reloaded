@@ -57,4 +57,3 @@ mongoose.plugin((schema: mongoose.Schema) => {
     queryTimings.delete(this);
   });
 });
-    

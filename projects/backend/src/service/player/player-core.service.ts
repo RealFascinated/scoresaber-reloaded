@@ -196,5 +196,4 @@ export class PlayerCoreService {
 
     return player;
   }
-
 }

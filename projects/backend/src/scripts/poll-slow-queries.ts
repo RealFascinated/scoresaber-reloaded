@@ -33,22 +33,22 @@ async function getSlowQueries(): Promise<SlowQuery[]> {
   });
 
   const inprog = (result.inprog as unknown[]) || [];
-  
+
   return inprog
     .filter((op: unknown): op is SlowQuery => {
       const opObj = op as SlowQuery;
-      
+
       // Only include query/command/getmore operations
       if (opObj.op !== "query" && opObj.op !== "command" && opObj.op !== "getmore") {
         return false;
       }
-      
+
       // Filter by duration
       const durationMs = opObj.microsecs_running / 1000;
       if (durationMs < SLOW_QUERY_THRESHOLD_MS) {
         return false;
       }
-      
+
       // Must have required fields
       return !!(opObj.ns && opObj.command);
     })
@@ -102,7 +102,7 @@ async function main() {
             // Create a unique key based on query pattern (not opid) to ignore duplicates
             const commandHash = JSON.stringify(query.command);
             const queryKey = `${query.ns}-${query.op}-${commandHash}`;
-            
+
             if (!seenQueries.has(queryKey)) {
               seenQueries.add(queryKey);
               console.log(formatQuery(query));
@@ -156,4 +156,3 @@ main().catch(error => {
   Logger.error("Fatal error:", error);
   process.exit(1);
 });
-

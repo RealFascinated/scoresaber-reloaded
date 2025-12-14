@@ -84,38 +84,33 @@ export default class ScoreSaberService {
         }
 
         // For full type, run all operations in parallel
-        const [
-          updatedAccount,
-          ppBoundaries,
-          accBadges,
-          statisticHistory,
-          hmdBreakdown,
-          medalsRank,
-        ] = await Promise.all([
-          account ? PlayerCoreService.updatePeakRank(account, player) : undefined,
-          account ? PlayerRankedService.getPlayerPpBoundary(id, 1) : [],
-          account ? PlayerAccuraciesService.getAccBadges(id) : {},
-          PlayerHistoryService.getPlayerStatisticHistory(player, new Date(), getDaysAgoDate(30), {
-            rank: true,
-            countryRank: true,
-            pp: true,
-            medals: true,
-          }),
-          // todo: cleanup this mess
-          options?.getHmdBreakdown && player !== undefined
-            ? (async () => {
-                const hmdUsage = await PlayerHmdService.getPlayerHmdBreakdown(id);
-                const totalKnownHmdScores = Object.values(hmdUsage).reduce((sum, count) => sum + count, 0);
-                return Object.fromEntries(
-                  Object.entries(hmdUsage).map(([hmd, count]) => [
-                    hmd,
-                    totalKnownHmdScores > 0 ? (count / totalKnownHmdScores) * 100 : 0,
-                  ])
-                ) as Record<HMD, number>;
-              })()
-            : undefined,
-          options?.setMedalsRank ? PlayerMedalsService.getPlayerMedalRank(id) : undefined,
-        ]);
+        const [updatedAccount, ppBoundaries, accBadges, statisticHistory, hmdBreakdown, medalsRank] = await Promise.all(
+          [
+            account ? PlayerCoreService.updatePeakRank(account, player) : undefined,
+            account ? PlayerRankedService.getPlayerPpBoundary(id, 1) : [],
+            account ? PlayerAccuraciesService.getAccBadges(id) : {},
+            PlayerHistoryService.getPlayerStatisticHistory(player, new Date(), getDaysAgoDate(30), {
+              rank: true,
+              countryRank: true,
+              pp: true,
+              medals: true,
+            }),
+            // todo: cleanup this mess
+            options?.getHmdBreakdown && player !== undefined
+              ? (async () => {
+                  const hmdUsage = await PlayerHmdService.getPlayerHmdBreakdown(id);
+                  const totalKnownHmdScores = Object.values(hmdUsage).reduce((sum, count) => sum + count, 0);
+                  return Object.fromEntries(
+                    Object.entries(hmdUsage).map(([hmd, count]) => [
+                      hmd,
+                      totalKnownHmdScores > 0 ? (count / totalKnownHmdScores) * 100 : 0,
+                    ])
+                  ) as Record<HMD, number>;
+                })()
+              : undefined,
+            options?.setMedalsRank ? PlayerMedalsService.getPlayerMedalRank(id) : undefined,
+          ]
+        );
 
         // Calculate all statistic changes in parallel
         const [dailyChanges, weeklyChanges, monthlyChanges] = await Promise.all([

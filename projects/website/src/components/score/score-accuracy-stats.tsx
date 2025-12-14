@@ -44,7 +44,7 @@ function AccuracyCircle({ accuracy, averageCut, hand }: AccuracyCircleProps) {
 
   return (
     <div className="flex items-center gap-2 md:gap-3">
-      <div className={cn("flex gap-2 md:gap-3 items-center", hand === "right" ? "flex-row-reverse" : "flex-row")}>
+      <div className={cn("flex items-center gap-2 md:gap-3", hand === "right" ? "flex-row-reverse" : "flex-row")}>
         <AverageCutValues cuts={averageCut} hand={hand} />
         <div className="relative shrink-0">
           <svg width={size} height={size} style={{ transform: "rotate(-90deg)" }} className="drop-shadow-sm">
@@ -92,11 +92,11 @@ function AccuracyCircle({ accuracy, averageCut, hand }: AccuracyCircleProps) {
 function HandStat({ hand, name, value }: { hand: Hand; name: string; value: string }) {
   return (
     <div
-      className="inline-flex w-full items-center justify-between rounded-lg px-2 md:px-3 py-1.5 transition-colors hover:bg-opacity-30 min-w-0"
+      className="hover:bg-opacity-30 inline-flex w-full min-w-0 items-center justify-between rounded-lg px-2 py-1.5 transition-colors md:px-3"
       style={{ backgroundColor: `${handColors[hand]}20` }}
     >
-      <p className="text-xs font-semibold text-gray-300 uppercase tracking-wide shrink-0">{name}</p>
-      <p className="text-sm font-bold text-white truncate ml-2">{value}</p>
+      <p className="shrink-0 text-xs font-semibold tracking-wide text-gray-300 uppercase">{name}</p>
+      <p className="ml-2 truncate text-sm font-bold text-white">{value}</p>
     </div>
   );
 }
@@ -117,9 +117,9 @@ function HandAccuracy({ scoreStats, hand }: { scoreStats: ScoreStatsToken; hand:
   const tooltipLabel = (text: string) => `${capitalizeFirstLetter(hand)} Hand ${text}`;
 
   return (
-    <div className={cn("flex flex-col gap-3 min-w-0 flex-1", hand === "right" ? "items-end" : "items-start")}>
+    <div className={cn("flex min-w-0 flex-1 flex-col gap-3", hand === "right" ? "items-end" : "items-start")}>
       <AccuracyCircle accuracy={accuracy} averageCut={averageCut} hand={hand} />
-      <div className="flex flex-col gap-1.5 w-full max-w-[200px]">
+      <div className="flex w-full max-w-[200px] flex-col gap-1.5">
         <SimpleTooltip display={tooltipLabel("Time-Dependence")} className="cursor-default">
           <HandStat hand={hand} name="TD" value={`${timeDependence.toFixed(3)}`} />
         </SimpleTooltip>
@@ -136,9 +136,9 @@ function HandAccuracy({ scoreStats, hand }: { scoreStats: ScoreStatsToken; hand:
 
 export default function ScoreAccuracyStats({ scoreStats }: ScoreAccuracyStatProps) {
   return (
-    <div className="flex w-full items-start justify-between gap-3 md:gap-6 overflow-hidden">
+    <div className="flex w-full items-start justify-between gap-3 overflow-hidden md:gap-6">
       <HandAccuracy scoreStats={scoreStats.current} hand="left" />
-      <div className="hidden md:block h-full w-px bg-border self-stretch shrink-0" />
+      <div className="bg-border hidden h-full w-px shrink-0 self-stretch md:block" />
       <HandAccuracy scoreStats={scoreStats.current} hand="right" />
     </div>
   );
