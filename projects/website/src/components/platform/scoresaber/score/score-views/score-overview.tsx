@@ -39,17 +39,6 @@ export function ScoreOverview({ score, scoreStats, leaderboard }: ScoreOverviewP
           {score.additionalData && <StatValue value={score.additionalData.pauses} name="Pauses" />}
           {scoreStats && <StatValue value={scoreStats.current.winTracker.jumpDistance.toFixed(2)} name="JD" />}
           <StatValue value={formatNumberWithCommas(scoreStats.current.hitTracker.maxCombo)} name="Max Combo" />
-          {score.hmd && (
-            <StatValue
-              value={
-                <div className="flex items-center gap-2">
-                  <HMDIcon hmd={getHMDInfo(score.hmd!)} />
-                  <p>{score.hmd}</p>
-                </div>
-              }
-              name="HMD"
-            />
-          )}
           {!score.fullCombo && score.additionalData && (
             <StatValue
               value={

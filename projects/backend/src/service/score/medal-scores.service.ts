@@ -133,10 +133,14 @@ export class MedalScoresService {
     }
 
     // Delete scores below top 10
-    const scoresToDelete = updatedScores.slice(10).filter(s => s._id !== undefined);
+    const scoresToDelete = updatedScores.slice(10);
     if (scoresToDelete.length > 0) {
+      const deleteConditions = scoresToDelete.map(s => ({
+        playerId: s.playerId,
+        leaderboardId: s.leaderboardId,
+      }));
       await ScoreSaberMedalsScoreModel.deleteMany({
-        _id: { $in: scoresToDelete.map(s => s._id) },
+        $or: deleteConditions,
       });
     }
 
