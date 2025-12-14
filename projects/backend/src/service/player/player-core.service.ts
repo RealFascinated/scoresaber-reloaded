@@ -205,9 +205,11 @@ export class PlayerCoreService {
    */
   public static async getPlayerRankIncludingInactives(playerId: string): Promise<number | null> {
     const player = await PlayerModel.findById(playerId).select("pp").lean();
-    if (!player || (player.pp ?? 0) <= 0) return null;
+    if (!player || (player.pp ?? 0) <= 0 || player.inactive) {
+      return null;
+    }
 
-    // Count how many players have more medals than this player
+    // Count how many players have more pp than this player
     const rank = await PlayerModel.countDocuments({
       pp: { $gt: player.pp ?? 0 },
     });
