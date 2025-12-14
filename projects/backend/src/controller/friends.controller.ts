@@ -7,9 +7,10 @@ import { PlayerFriendScoresService } from "../service/player/player-friend-score
 
 export default function friendsController(app: Elysia) {
   return app
-    .get(
+    .post(
       "/scores/friends/leaderboard/:leaderboardId/:page",
       async ({ params: { leaderboardId, page }, body: { friendIds } }): Promise<Page<ScoreSaberScore>> => {
+        console.log("friendIds", friendIds);
         return await PlayerFriendScoresService.getFriendLeaderboardScores(friendIds, leaderboardId, page);
       },
       {
@@ -26,7 +27,7 @@ export default function friendsController(app: Elysia) {
         },
       }
     )
-    .get(
+    .post(
       "/scores/friends/:page",
       async ({ params: { page }, body: { friendIds } }): Promise<PlayerScoresResponse> => {
         return await PlayerFriendScoresService.getFriendScores(friendIds, page);
