@@ -1,44 +1,37 @@
-import { DetailType } from "@ssr/common/detail-type";
+import { DetailTypeSchema } from "@ssr/common/detail-type";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
-import { MapDifficulty } from "@ssr/common/score/map-difficulty";
-import { MapCharacteristic } from "@ssr/common/types/map-characteristic";
-import { t } from "elysia";
-import { Controller, Get } from "elysia-decorators";
+import { MapDifficultySchema } from "@ssr/common/score/map-difficulty";
+import { Elysia } from "elysia";
+import { z } from "zod";
+import { MapCharacteristicSchema } from "../../../common/src/types/map-characteristic";
 import BeatSaverService from "../service/beatsaver.service";
 
-@Controller("/beatsaver")
-export default class BeatSaverController {
-  @Get("/map/:hash/:difficulty/:characteristic", {
-    config: {},
-    tags: ["BeatSaver"],
-    params: t.Object({
-      hash: t.String({ required: true }),
-      difficulty: t.String({ required: true }),
-      characteristic: t.String({ required: true }),
-    }),
-    query: t.Object({
-      type: t.Optional(t.Union([t.Literal("basic"), t.Literal("full")], { default: "basic" })),
-    }),
-    detail: {
-      description: "Fetch a map by hash, difficulty, and characteristic",
-    },
-  })
-  public async getMapByHash({
-    params: { hash, difficulty, characteristic },
-    query: { type },
-  }: {
-    params: {
-      hash: string;
-      difficulty: MapDifficulty;
-      characteristic: MapCharacteristic;
-    };
-    query: { type: DetailType };
-  }): Promise<BeatSaverMapResponse> {
-    const map = await BeatSaverService.getMap(hash, difficulty, characteristic, type);
-    if (!map) {
-      throw new NotFoundError(`BeatSaver map ${hash} not found`);
-    }
-    return map;
-  }
+export default function beatsaverController(app: Elysia) {
+  return app.group("/beatsaver", app =>
+    app.get(
+      "/map/:hash/:difficulty/:characteristic",
+      async ({ params: { hash, difficulty, characteristic }, query: { type } }): Promise<BeatSaverMapResponse> => {
+        const map = await BeatSaverService.getMap(hash, difficulty, characteristic, type);
+        if (!map) {
+          throw new NotFoundError(`BeatSaver map ${hash} not found`);
+        }
+        return map;
+      },
+      {
+        tags: ["BeatSaver"],
+        params: z.object({
+          hash: z.string(),
+          difficulty: MapDifficultySchema,
+          characteristic: MapCharacteristicSchema,
+        }),
+        query: z.object({
+          type: DetailTypeSchema,
+        }),
+        detail: {
+          description: "Fetch a map by hash, difficulty, and characteristic",
+        },
+      }
+    )
+  );
 }

@@ -1,4 +1,3 @@
-import { DetailType } from "@ssr/common/detail-type";
 import { env } from "@ssr/common/env";
 import { AdditionalScoreData } from "@ssr/common/model/additional-score-data/additional-score-data";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
@@ -52,7 +51,7 @@ export async function sendScoreNotification(
     leaderboard.songHash,
     leaderboard.difficulty.difficulty,
     leaderboard.difficulty.characteristic,
-    DetailType.BASIC
+    "basic"
   );
 
   const previousScore = await PlayerScoreHistoryService.getPlayerPreviousScore(
@@ -143,7 +142,7 @@ export async function sendMedalScoreNotification(
     leaderboard.songHash,
     leaderboard.difficulty.difficulty,
     leaderboard.difficulty.characteristic,
-    DetailType.BASIC
+    "basic"
   );
   const description = [
     `**${leaderboard.fullName}**`,

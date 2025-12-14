@@ -8,7 +8,6 @@ import { ApiServicesMetric } from "../metrics/impl/backend/api-services";
 import EventLoopLagMetric from "../metrics/impl/backend/event-loop-lag";
 import EventLoopTimersMetric from "../metrics/impl/backend/event-loop-timers";
 import MemoryUsageMetric from "../metrics/impl/backend/memory-usage";
-import ProcessCpuUsageMetric from "../metrics/impl/backend/process-cpu-usage";
 import RequestsPerSecondMetric from "../metrics/impl/backend/total-requests";
 import ProcessUptimeMetric from "../metrics/impl/backend/uptime";
 import MongoDbSizeMetric from "../metrics/impl/database/mongo-db-size";
@@ -20,8 +19,6 @@ import TrackedPlayersMetric from "../metrics/impl/player/tracked-players";
 import TrackedScoresMetric from "../metrics/impl/player/tracked-scores";
 import UniqueDailyPlayersMetric from "../metrics/impl/player/unique-daily-players";
 import QueueSizesMetric from "../metrics/impl/queue/queue-sizes";
-import SystemCpuUsageMetric from "../metrics/impl/system/system-cpu-usage";
-import SystemNetworkIoMetric from "../metrics/impl/system/system-network-io";
 import Metric from "../metrics/metric";
 
 const influxClient = new InfluxDB({
@@ -44,17 +41,12 @@ export enum MetricType {
   DAILY_NEW_ACCOUNTS = "daily-new-accounts",
 
   // Backend metrics
-  PROCESS_CPU_USAGE = "process-cpu-usage",
   MEMORY_USAGE = "memory-usage",
   EVENT_LOOP_LAG = "event-loop-lag",
   TOTAL_REQUESTS = "total-requests",
   EVENT_LOOP_TIMERS = "event-loop-timers",
   API_SERVICES = "api-services",
   PROCESS_UPTIME = "process-uptime",
-
-  // System metrics
-  SYSTEM_CPU_USAGE = "system-cpu-usage",
-  SYSTEM_NETWORK_IO = "system-network-io",
 
   // Queue metrics
   QUEUE_SIZES = "queue-sizes",
@@ -99,17 +91,12 @@ export default class MetricsService implements EventListener {
     this.registerMetric(new DailyNewAccountsMetric());
 
     // Backend metrics
-    this.registerMetric(new ProcessCpuUsageMetric());
     this.registerMetric(new MemoryUsageMetric());
     this.registerMetric(new EventLoopLagMetric());
     this.registerMetric(new RequestsPerSecondMetric());
     this.registerMetric(new EventLoopTimersMetric());
     this.registerMetric(new ApiServicesMetric());
     this.registerMetric(new ProcessUptimeMetric());
-
-    // System metrics
-    this.registerMetric(new SystemCpuUsageMetric());
-    this.registerMetric(new SystemNetworkIoMetric());
 
     // Queue metrics
     this.registerMetric(new QueueSizesMetric());

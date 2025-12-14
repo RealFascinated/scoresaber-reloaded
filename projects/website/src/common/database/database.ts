@@ -1,5 +1,4 @@
 import { BACKGROUND_COVERS } from "@/components/background-cover";
-import { DetailType } from "@ssr/common/detail-type";
 import Logger from "@ssr/common/logger";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { ReplayViewer, ReplayViewers } from "@ssr/common/replay-viewer";
@@ -274,7 +273,7 @@ export default class Database extends Dexie {
   public async getPlayer(id: string): Promise<ScoreSaberPlayer | undefined> {
     return this.getCache<ScoreSaberPlayer>(`player:${id}`, 60 * 60 * 6, async () => {
       try {
-        return await ssrApi.getScoreSaberPlayer(id, DetailType.BASIC);
+        return await ssrApi.getScoreSaberPlayer(id, "basic");
       } catch (error) {
         Logger.error(`Failed to fetch player ${id}:`, error);
         return undefined;

@@ -95,10 +95,7 @@ export class ScoreSaberService extends ApiService {
    * @param type the data type to return (default: full)
    * @returns the player that matches the ID, or undefined
    */
-  public async lookupPlayer(
-    playerId: string,
-    type: DetailType = DetailType.FULL
-  ): Promise<ScoreSaberPlayerToken | undefined> {
+  public async lookupPlayer(playerId: string, type: DetailType = "full"): Promise<ScoreSaberPlayerToken | undefined> {
     const before = performance.now();
     this.log(`Looking up player "${playerId}"...`);
     const token = await this.fetch<ScoreSaberPlayerToken>(

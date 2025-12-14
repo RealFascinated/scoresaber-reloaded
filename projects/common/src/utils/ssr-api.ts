@@ -1,7 +1,6 @@
 import SuperJSON from "superjson";
 import { DetailType } from "../detail-type";
 import { env } from "../env";
-import { ScoreSaberLeaderboard } from "../model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "../model/score/impl/scoresaber-score";
 import { StatisticsType } from "../model/statistics/statistic-type";
 import { Page } from "../pagination";
@@ -36,7 +35,7 @@ class SSRApi {
    * @returns the parsed response
    * @throws an error if the request fails
    */
-  async get<T>(url: string, queryParams?: Record<string, string>) {
+  async get<T>(url: string, queryParams?: Record<string, string>, body?: any) {
     // Filter out undefined values and empty strings from the query params
     const filteredQueryParams = Object.fromEntries(
       Object.entries(queryParams || {}).filter(([_, value]) => value !== undefined && value !== "")
@@ -48,6 +47,7 @@ class SSRApi {
 
     const response = await fetch(`${url}${queryString}`, {
       headers: { Accept: "application/superjson" },
+      body: body ? JSON.stringify(body) : undefined,
     });
 
     if (response.status === 500) {
@@ -70,7 +70,7 @@ class SSRApi {
     hash: string,
     difficulty: MapDifficulty,
     characteristic: MapCharacteristic,
-    type: DetailType = DetailType.BASIC
+    type: DetailType = "basic"
   ) {
     return await this.get<BeatSaverMapResponse>(
       `${env.NEXT_PUBLIC_API_URL}/beatsaver/map/${hash}/${difficulty}/${characteristic}`,
@@ -98,7 +98,7 @@ class SSRApi {
    *
    * @param id the id for the leaderboard
    */
-  async fetchLeaderboard(id: string, type: DetailType = DetailType.BASIC) {
+  async fetchLeaderboard(id: string, type: DetailType = "basic") {
     return await this.get<LeaderboardResponse>(`${env.NEXT_PUBLIC_API_URL}/leaderboard/by-id/${id}`);
   }
 
@@ -153,8 +153,9 @@ class SSRApi {
   async getFriendLeaderboardScores(friendIds: string[], leaderboardId: string, page: number) {
     return await this.get<Page<ScoreSaberScore>>(
       `${env.NEXT_PUBLIC_API_URL}/scores/friends/leaderboard/${leaderboardId}/${page}`,
+      undefined,
       {
-        friendIds: friendIds.join(","),
+        friendIds: friendIds,
       }
     );
   }
@@ -166,12 +167,9 @@ class SSRApi {
    * @param page the page
    */
   async getFriendScores(friendIds: string[], page: number) {
-    return await this.get<Page<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>>(
-      `${env.NEXT_PUBLIC_API_URL}/scores/friends/${page}`,
-      {
-        friendIds: friendIds.join(","),
-      }
-    );
+    return await this.get<Page<PlayerScore>>(`${env.NEXT_PUBLIC_API_URL}/scores/friends/${page}`, undefined, {
+      friendIds: friendIds,
+    });
   }
 
   /**
@@ -181,7 +179,7 @@ class SSRApi {
    * @param options the fetch options
    * @returns the player
    */
-  async getScoreSaberPlayer(playerId: string, type: DetailType = DetailType.BASIC) {
+  async getScoreSaberPlayer(playerId: string, type: DetailType = "basic") {
     return await this.get<ScoreSaberPlayer>(`${env.NEXT_PUBLIC_API_URL}/player/${playerId}`, {
       type: type,
     });
@@ -348,8 +346,7 @@ class SSRApi {
       search?: string;
     }
   ) {
-    return await this.get<PlayerRankingsResponse>(`${env.NEXT_PUBLIC_API_URL}/player/search/ranking`, {
-      page: page.toString(),
+    return await this.get<PlayerRankingsResponse>(`${env.NEXT_PUBLIC_API_URL}/player/search/ranking/${page}`, {
       ...(options?.country ? { country: options.country } : {}),
       ...(options?.search ? { search: options.search } : {}),
     });
@@ -375,9 +372,7 @@ class SSRApi {
    * @returns the score
    */
   async getScore(scoreId: string) {
-    return await this.get<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>(
-      `${env.NEXT_PUBLIC_API_URL}/scores/${scoreId}`
-    );
+    return await this.get<PlayerScore>(`${env.NEXT_PUBLIC_API_URL}/scores/${scoreId}`);
   }
 }
 

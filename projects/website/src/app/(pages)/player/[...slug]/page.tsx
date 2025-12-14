@@ -37,10 +37,7 @@ type PlayerData = {
  * @param params the params
  * @returns the player data and scores
  */
-const getPlayerData = async (
-  { params, searchParams }: Props,
-  type: DetailType = DetailType.FULL
-): Promise<PlayerData> => {
+const getPlayerData = async ({ params, searchParams }: Props, type: DetailType = "full"): Promise<PlayerData> => {
   const { slug } = await params;
 
   const id = slug[0]; // The players id
@@ -55,7 +52,7 @@ const getPlayerData = async (
 };
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
-  const { player } = await getPlayerData(props, DetailType.FULL);
+  const { player } = await getPlayerData(props, "full");
   if (player === undefined) {
     return {
       title: UNKNOWN_PLAYER.title,

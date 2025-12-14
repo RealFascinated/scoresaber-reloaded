@@ -6,7 +6,6 @@ import PlayerBadges from "@/components/player/player-badges";
 import PlayerViews from "@/components/player/views/player-views";
 import SimpleLink from "@/components/simple-link";
 import { useIsMobile, useWindowDimensions } from "@/contexts/viewport-context";
-import { DetailType } from "@ssr/common/detail-type";
 import type ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
@@ -30,7 +29,7 @@ export default function PlayerData({ platformType, player }: PlayerDataProps) {
 
   const { data: playerData } = useQuery({
     queryKey: ["player", player.id],
-    queryFn: () => ssrApi.getScoreSaberPlayer(player.id, DetailType.FULL),
+    queryFn: () => ssrApi.getScoreSaberPlayer(player.id, "full"),
     initialData: player,
   });
   player = playerData ?? player;

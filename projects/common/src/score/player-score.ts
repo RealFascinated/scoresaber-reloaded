@@ -1,15 +1,17 @@
+import { ScoreSaberLeaderboard } from "../model/leaderboard/impl/scoresaber-leaderboard";
+import { ScoreSaberScore } from "../model/score/impl/scoresaber-score";
 import { BeatSaverMapResponse } from "../response/beatsaver-map-response";
 
-export interface PlayerScore<S, L> {
+export interface PlayerScore {
   /**
    * The score.
    */
-  readonly score: S;
+  readonly score: ScoreSaberScore;
 
   /**
    * The leaderboard the score was set on.
    */
-  readonly leaderboard: L;
+  readonly leaderboard: ScoreSaberLeaderboard;
 
   /**
    * The BeatSaver of the song.

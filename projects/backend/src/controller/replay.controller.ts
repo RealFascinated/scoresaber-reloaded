@@ -1,23 +1,25 @@
-import { redirect, t } from "elysia";
-import { Controller, Get } from "elysia-decorators";
+import { Elysia, redirect, t } from "elysia";
 import { PlayerReplayService } from "../service/player/player-replay.service";
 
-@Controller("/replay")
-export default class ReplayController {
-  @Get("/:scoreId", {
-    config: {},
-    tags: ["Replay"],
-    params: t.Object({
-      scoreId: t.String({
-        required: true,
-        pattern: "^\\d+\\.bsor$",
-      }),
-    }),
-    detail: {
-      description: "Redirect to a player's raw replay url for a given score id",
-    },
-  })
-  public async redirectReplay({ params: { scoreId } }: { params: { scoreId: string } }) {
-    return redirect(await PlayerReplayService.getPlayerReplayUrl(scoreId));
-  }
+export default function replayController(app: Elysia) {
+  return app.group("/replay", app =>
+    app.get(
+      "/:scoreId",
+      async ({ params: { scoreId } }) => {
+        return redirect(await PlayerReplayService.getPlayerReplayUrl(scoreId));
+      },
+      {
+        tags: ["Replay"],
+        params: t.Object({
+          scoreId: t.String({
+            required: true,
+            pattern: "^\\d+\\.bsor$",
+          }),
+        }),
+        detail: {
+          description: "Redirect to a player's raw replay url for a given score id",
+        },
+      }
+    )
+  );
 }

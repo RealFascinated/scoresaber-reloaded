@@ -1,5 +1,4 @@
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
-import { DetailType } from "@ssr/common/detail-type";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { MiniRankingResponse } from "@ssr/common/response/around-player-response";
@@ -16,7 +15,7 @@ export default class MiniRankingService {
    * @param id the player to get around
    */
   public static async getPlayerMiniRankings(id: string): Promise<MiniRankingResponse> {
-    const player = await ScoreSaberService.getPlayer(id, DetailType.BASIC, undefined, {
+    const player = await ScoreSaberService.getPlayer(id, "basic", undefined, {
       setInactivesRank: false,
       setMedalsRank: false,
     });
@@ -115,7 +114,7 @@ export default class MiniRankingService {
       .flatMap(response => response.players)
       .map(
         async player =>
-          await ScoreSaberService.getPlayer(player.id, DetailType.BASIC, player, {
+          await ScoreSaberService.getPlayer(player.id, "basic", player, {
             setInactivesRank: false,
             setMedalsRank: false,
           })

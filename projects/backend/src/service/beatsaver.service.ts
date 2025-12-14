@@ -23,7 +23,7 @@ export default class BeatSaverService {
     hash: string,
     difficulty: MapDifficulty,
     characteristic: MapCharacteristic,
-    type: DetailType = DetailType.BASIC,
+    type: DetailType = "basic",
     token?: BeatSaverMapToken
   ): Promise<BeatSaverMapResponse | undefined> {
     const map =
@@ -47,7 +47,7 @@ export default class BeatSaverService {
       },
     } as BeatSaverMapResponse;
 
-    if (type === DetailType.BASIC) {
+    if (type === "basic") {
       return response;
     }
 

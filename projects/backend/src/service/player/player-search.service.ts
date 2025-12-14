@@ -1,5 +1,4 @@
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
-import { DetailType } from "@ssr/common/detail-type";
 import { PlayerModel } from "@ssr/common/model/player/player";
 import { Pagination } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
@@ -15,10 +14,12 @@ export class PlayerSearchService {
    * @param query the query to search for
    * @returns the players that match the query
    */
-  public static async searchPlayers(query: string): Promise<ScoreSaberPlayer[]> {
+  public static async searchPlayers(query?: string): Promise<ScoreSaberPlayer[]> {
     const [scoreSaberResponse, foundPlayers] = await Promise.all([
-      ApiServiceRegistry.getInstance().getScoreSaberService().searchPlayers(query),
-      query.length > 0
+      ApiServiceRegistry.getInstance()
+        .getScoreSaberService()
+        .searchPlayers(query ?? ""),
+      query && query.length > 0
         ? PlayerModel.find({
             name: { $regex: query, $options: "i" },
           })
@@ -39,7 +40,7 @@ export class PlayerSearchService {
         uniquePlayerIds.map(async id =>
           ScoreSaberService.getPlayer(
             id,
-            DetailType.BASIC,
+            "basic",
             scoreSaberPlayerTokens?.find(token => token.id === id) || (await ScoreSaberService.getCachedPlayer(id)), // Use the cache for inactive players
             { setInactivesRank: false, setMedalsRank: false, getHmdBreakdown: false }
           )

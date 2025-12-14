@@ -1,4 +1,3 @@
-import { DetailType } from "@ssr/common/detail-type";
 import { MapDifficulty } from "@ssr/common/score/map-difficulty";
 import { MapCharacteristic } from "@ssr/common/types/map-characteristic";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
@@ -31,7 +30,7 @@ const handlers: EventHandlers = {
             mapHash,
             difficulty as MapDifficulty,
             characteristic as MapCharacteristic,
-            DetailType.FULL
+            "full"
           ),
           leaderboard: (
             await ssrApi.fetchLeaderboardByHash(

@@ -6,8 +6,6 @@ import SimplePagination from "@/components/simple-pagination";
 import { Spinner } from "@/components/spinner";
 import { useIsMobile } from "@/contexts/viewport-context";
 import { env } from "@ssr/common/env";
-import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { Page } from "@ssr/common/pagination";
 import { PlayerScore } from "@ssr/common/score/player-score";
 import Request from "@ssr/common/utils/request";
@@ -26,9 +24,7 @@ export function TopScoresData() {
   } = useQuery({
     queryKey: ["top-scores", page],
     queryFn: async () => {
-      return Request.get<Page<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>>(
-        `${env.NEXT_PUBLIC_API_URL}/scores/top/${page}`
-      );
+      return Request.get<Page<PlayerScore>>(`${env.NEXT_PUBLIC_API_URL}/scores/top/${page}`);
     },
     refetchInterval: false,
     placeholderData: data => data,

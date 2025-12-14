@@ -7,7 +7,6 @@ import LeaderboardScores from "@/components/platform/scoresaber/leaderboard/lead
 import { LeaderboardFilterProvider } from "@/components/providers/leaderboard/leaderboard-filter-provider";
 import { ScoreModeEnum } from "@/components/score/score-mode-switcher";
 import { useIsMobile } from "@/contexts/viewport-context";
-import { DetailType } from "@ssr/common/detail-type";
 import { LeaderboardResponse } from "@ssr/common/response/leaderboard-response";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
@@ -41,7 +40,7 @@ export function ScoreSaberLeaderboardData({ initialLeaderboard, initialPage, ini
   const { data } = useQuery({
     queryKey: ["leaderboard", currentLeaderboardId],
     queryFn: async (): Promise<LeaderboardResponse | undefined> => {
-      return ssrApi.fetchLeaderboard(currentLeaderboardId + "", DetailType.FULL);
+      return ssrApi.fetchLeaderboard(currentLeaderboardId + "", "full");
     },
     placeholderData: data => data ?? initialLeaderboard,
   });

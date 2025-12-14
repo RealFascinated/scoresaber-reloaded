@@ -1,6 +1,5 @@
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { CooldownPriority } from "@ssr/common/cooldown";
-import { DetailType } from "@ssr/common/detail-type";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger from "@ssr/common/logger";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
@@ -309,7 +308,7 @@ export class PlayerScoresService {
    * @param scoreId the id of the score
    * @returns the score
    */
-  public static async getScore(scoreId: string): Promise<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>> {
+  public static async getScore(scoreId: string): Promise<PlayerScore> {
     const rawScore = await ScoreSaberScoreModel.findOne({ scoreId: `${scoreId}` }).lean();
     if (!rawScore) {
       throw new NotFoundError("Score not found");
@@ -317,7 +316,7 @@ export class PlayerScoresService {
 
     const leaderboardResponse = await LeaderboardCoreService.getLeaderboard(rawScore.leaderboardId + "", {
       includeBeatSaver: true,
-      beatSaverType: DetailType.FULL,
+      beatSaverType: "full",
     });
     if (!leaderboardResponse) {
       throw new NotFoundError("Leaderboard not found");
@@ -365,10 +364,10 @@ export class PlayerScoresService {
       });
 
     if (!requestedPage) {
-      return Pagination.empty<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>();
+      return Pagination.empty<PlayerScore>();
     }
 
-    const pagination = new Pagination<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>()
+    const pagination = new Pagination<PlayerScore>()
       .setItemsPerPage(requestedPage.metadata.itemsPerPage)
       .setTotalItems(requestedPage.metadata.total);
 
@@ -376,7 +375,7 @@ export class PlayerScoresService {
     if (comparisonPlayerId !== playerId && comparisonPlayerId !== undefined) {
       comparisonPlayer = await ScoreSaberService.getPlayer(
         comparisonPlayerId,
-        DetailType.BASIC,
+        "basic",
         await ScoreSaberService.getCachedPlayer(comparisonPlayerId),
         { setInactivesRank: false, setMedalsRank: false }
       );
@@ -410,10 +409,10 @@ export class PlayerScoresService {
                 leaderboard.difficulty.difficulty,
                 leaderboard.difficulty.characteristic
               ),
-            } as PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>;
+            } as PlayerScore;
           })
         )
-      ).filter((result): result is PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard> => result !== undefined);
+      ).filter((result): result is PlayerScore => result !== undefined);
     });
   }
 
@@ -438,9 +437,7 @@ export class PlayerScoresService {
     const model = mode === "medals" ? ScoreSaberMedalsScoreModel : ScoreSaberScoreModel;
     const leaderboardIds = await LeaderboardCoreService.searchLeaderboardIds(filters.search);
     if (leaderboardIds == null) {
-      return new Pagination<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>()
-        .setItemsPerPage(8)
-        .getPage(1, async () => []);
+      return new Pagination<PlayerScore>().setItemsPerPage(8).getPage(1, async () => []);
     }
 
     /**
@@ -492,9 +489,7 @@ export class PlayerScoresService {
     const query = buildScoreQuery(mode, playerId, sort, filters, leaderboardIds);
     const totalScores = await model.countDocuments(query);
 
-    const pagination = new Pagination<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>()
-      .setItemsPerPage(8)
-      .setTotalItems(totalScores);
+    const pagination = new Pagination<PlayerScore>().setItemsPerPage(8).setTotalItems(totalScores);
 
     return pagination.getPage(page, async ({ start, end }) => {
       const rawScores = (await (model as typeof ScoreSaberScoreModel)
@@ -521,10 +516,10 @@ export class PlayerScoresService {
               }),
               leaderboard: leaderboard,
               beatSaver: beatsaver,
-            } as PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>;
+            } as PlayerScore;
           })
         )
-      ).filter(Boolean) as PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>[];
+      ).filter(Boolean) as PlayerScore[];
     });
   }
 }

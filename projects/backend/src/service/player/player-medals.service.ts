@@ -1,4 +1,3 @@
-import { DetailType } from "@ssr/common/detail-type";
 import Logger from "@ssr/common/logger";
 import { PlayerModel } from "@ssr/common/model/player/player";
 import { ScoreSaberMedalsScoreModel } from "@ssr/common/model/score/impl/scoresaber-medals-score";
@@ -165,7 +164,7 @@ export class PlayerMedalsService {
 
             const playerData = await ScoreSaberService.getPlayer(
               playerId,
-              DetailType.BASIC,
+              "basic",
               await ScoreSaberService.getCachedPlayer(playerId),
               { setMedalsRank: false, setInactivesRank: false }
             );

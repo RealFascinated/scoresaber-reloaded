@@ -2,7 +2,6 @@
 
 import useDatabase from "@/hooks/use-database";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
-import { DetailType } from "@ssr/common/detail-type";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import Card from "../card";
@@ -15,7 +14,7 @@ export function Player() {
 
   const { data: player, isLoading } = useQuery({
     queryKey: ["player", mainPlayerId],
-    queryFn: () => ssrApi.getScoreSaberPlayer(mainPlayerId!, DetailType.FULL),
+    queryFn: () => ssrApi.getScoreSaberPlayer(mainPlayerId!, "full"),
     enabled: !!mainPlayerId,
   });
 

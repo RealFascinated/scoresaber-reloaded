@@ -28,8 +28,8 @@ import { LeaderboardRankingService } from "./leaderboard-ranking.service";
 const DEFAULT_OPTIONS: LeaderboardOptions = {
   includeBeatSaver: false,
   includeStarChangeHistory: false,
-  beatSaverType: DetailType.BASIC,
-  type: DetailType.BASIC,
+  beatSaverType: "basic",
+  type: "basic",
 };
 
 export class LeaderboardCoreService {
@@ -335,7 +335,7 @@ export class LeaderboardCoreService {
         leaderboard.songHash,
         leaderboard.difficulty.difficulty,
         leaderboard.difficulty.characteristic,
-        beatSaverType ?? DetailType.BASIC
+        beatSaverType ?? "basic"
       );
     } catch (error) {
       Logger.warn(`Failed to fetch BeatSaver data for leaderboard ${leaderboard.id}:`, error);

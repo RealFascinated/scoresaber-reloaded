@@ -33,7 +33,7 @@ export default class ScoreSaberService {
    */
   public static async getPlayer(
     id: string,
-    type: DetailType = DetailType.BASIC,
+    type: DetailType = "basic",
     player?: ScoreSaberPlayerToken,
     options?: {
       setMedalsRank?: boolean;
@@ -79,7 +79,7 @@ export default class ScoreSaberService {
           joinedDate: new Date(player.firstSeen),
         } as ScoreSaberPlayer;
 
-        if (type === DetailType.BASIC) {
+        if (type === "basic") {
           return basePlayer;
         }
 

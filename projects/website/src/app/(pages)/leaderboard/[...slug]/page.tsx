@@ -39,7 +39,7 @@ type LeaderboardData = {
  */
 const getLeaderboardData = async (
   { params, searchParams }: Props,
-  type: DetailType = DetailType.BASIC
+  type: DetailType = "basic"
 ): Promise<LeaderboardData | undefined> => {
   const { slug } = await params;
   const id = slug[0]; // The leaderboard id
@@ -58,7 +58,7 @@ const getLeaderboardData = async (
 };
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
-  const response = await getLeaderboardData(props, DetailType.FULL);
+  const response = await getLeaderboardData(props, "full");
   if (response === undefined) {
     return {
       title: UNKNOWN_LEADERBOARD.title,
@@ -97,7 +97,7 @@ Click here to view the scores for ${leaderboard.fullName}`,
 }
 
 export default async function LeaderboardPage(props: Props) {
-  const response = await getLeaderboardData(props, DetailType.FULL);
+  const response = await getLeaderboardData(props, "full");
   if (response == undefined) {
     return (
       <NotFound title="Leaderboard Not Found" description="The leaderboard you were looking for could not be found" />

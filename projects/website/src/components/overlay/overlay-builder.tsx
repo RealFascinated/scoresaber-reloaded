@@ -14,7 +14,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import useDatabase from "@/hooks/use-database";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { DetailType } from "@ssr/common/detail-type";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { Eye, Monitor, User } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -144,7 +143,7 @@ export default function OverlayBuilder() {
    * @param replayViewer the new replay viewer
    */
   async function onSubmit({ playerId, useRealTimeData, dataClient, views }: z.infer<typeof formSchema>) {
-    const player = await ssrApi.getScoreSaberPlayer(playerId, DetailType.BASIC);
+    const player = await ssrApi.getScoreSaberPlayer(playerId, "basic");
     if (!player) {
       toast.error("The player id you entered could not be found.");
       return;

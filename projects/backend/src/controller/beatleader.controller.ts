@@ -1,26 +1,22 @@
-import { t } from "elysia";
-import { Controller, Get } from "elysia-decorators";
+import { Elysia, t } from "elysia";
 import BeatLeaderService from "../service/beatleader.service";
 
-@Controller("/beatleader")
-export default class BeatLeaderController {
-  @Get("/scorestats/:id", {
-    config: {},
-    tags: ["BeatLeader"],
-    params: t.Object({
-      id: t.Number({ required: true }),
-    }),
-    detail: {
-      description: "Fetch score stats for a BeatLeader score",
-    },
-  })
-  public async getScoreStats({
-    params: { id },
-  }: {
-    params: {
-      id: number;
-    };
-  }): Promise<unknown> {
-    return await BeatLeaderService.getScoresFullScoreStats(id);
-  }
+export default function beatleaderController(app: Elysia) {
+  return app.group("/beatleader", app =>
+    app.get(
+      "/scorestats/:id",
+      async ({ params: { id } }) => {
+        return await BeatLeaderService.getScoresFullScoreStats(id);
+      },
+      {
+        tags: ["BeatLeader"],
+        params: t.Object({
+          id: t.Number({ required: true }),
+        }),
+        detail: {
+          description: "Fetch score stats for a BeatLeader score",
+        },
+      }
+    )
+  );
 }

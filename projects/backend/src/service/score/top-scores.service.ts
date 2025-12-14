@@ -1,4 +1,3 @@
-import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore, ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import { Page, Pagination } from "@ssr/common/pagination";
 import { PlayerScore } from "@ssr/common/score/player-score";
@@ -15,12 +14,8 @@ export class TopScoresService {
    * @param page the page number
    * @returns the top scores with pagination metadata
    */
-  public static async getTopScores(
-    page: number = 1
-  ): Promise<Page<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>> {
-    const pagination = new Pagination<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>()
-      .setItemsPerPage(25)
-      .setTotalItems(1000);
+  public static async getTopScores(page: number = 1): Promise<Page<PlayerScore>> {
+    const pagination = new Pagination<PlayerScore>().setItemsPerPage(25).setTotalItems(1000);
 
     return pagination.getPage(page, async () => {
       const scoreObjects = (
@@ -86,14 +81,12 @@ export class TopScoresService {
             score: processedScore,
             leaderboard: leaderboard,
             beatSaver: beatsaver,
-          } as PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>;
+          } as PlayerScore;
         })
       );
 
       // Filter out any null entries that might result from skipped scores
-      return processedScores.filter(
-        (score): score is PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard> => score !== null
-      );
+      return processedScores.filter((score): score is PlayerScore => score !== null);
     });
   }
 

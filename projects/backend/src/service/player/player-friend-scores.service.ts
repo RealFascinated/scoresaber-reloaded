@@ -1,6 +1,4 @@
-import { DetailType } from "@ssr/common/detail-type";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
-import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore, ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import { Page, Pagination } from "@ssr/common/pagination";
 import { PlayerScore } from "@ssr/common/score/player-score";
@@ -78,10 +76,7 @@ export class PlayerFriendScoresService {
    * @param leaderboardId the leaderboard id
    * @param page the page to fetch
    */
-  public static async getFriendScores(
-    friendIds: string[],
-    page: number
-  ): Promise<Page<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>> {
+  public static async getFriendScores(friendIds: string[], page: number): Promise<Page<PlayerScore>> {
     const skip = (page - 1) * ITEMS_PER_PAGE;
     const limit = ITEMS_PER_PAGE;
 
@@ -93,7 +88,7 @@ export class PlayerFriendScoresService {
       MAX_TOTAL_SCORES
     );
 
-    return new Pagination<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>()
+    return new Pagination<PlayerScore>()
       .setTotalItems(totalCount)
       .setItemsPerPage(ITEMS_PER_PAGE)
       .getPage(page, async () => {
@@ -127,7 +122,7 @@ export class PlayerFriendScoresService {
         // Fetch all leaderboards in parallel using getLeaderboards
         const leaderboardResults = await LeaderboardCoreService.getLeaderboards(leaderboardIds, {
           includeBeatSaver: true,
-          beatSaverType: DetailType.FULL,
+          beatSaverType: "full",
         });
 
         // Create a map for quick leaderboard lookup
@@ -153,7 +148,7 @@ export class PlayerFriendScoresService {
           })
         );
 
-        return scores.filter(Boolean) as PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>[];
+        return scores.filter(Boolean) as PlayerScore[];
       });
   }
 }

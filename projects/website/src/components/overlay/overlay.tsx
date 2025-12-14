@@ -9,7 +9,6 @@ import OverlayPlayerInfoView from "@/components/overlay/views/player-info";
 import OverlayScoreDataView from "@/components/overlay/views/score-data";
 import OverlaySongInfoView from "@/components/overlay/views/song-info";
 import { Spinner } from "@/components/spinner";
-import { DetailType } from "@ssr/common/detail-type";
 import Logger from "@ssr/common/logger";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
@@ -26,7 +25,7 @@ type OverlayProps = {
 export default function Overlay({ settings }: OverlayProps) {
   const { data: player, isLoading } = useQuery({
     queryKey: ["player", settings.playerId],
-    queryFn: () => ssrApi.getScoreSaberPlayer(settings.playerId, DetailType.FULL),
+    queryFn: () => ssrApi.getScoreSaberPlayer(settings.playerId, "full"),
     refetchInterval: 1000 * 30,
   });
 

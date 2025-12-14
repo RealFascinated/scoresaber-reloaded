@@ -1,7 +1,8 @@
+/// <reference types="bun-types" />
 import * as dotenv from "@dotenvx/dotenvx";
 import cors from "@elysiajs/cors";
 import { cron } from "@elysiajs/cron";
-import { swagger } from "@elysiajs/swagger";
+import { fromTypes, openapi } from "@elysiajs/openapi";
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
@@ -11,10 +12,11 @@ import { logger } from "@tqman/nice-logger";
 import { mongoose } from "@typegoose/typegoose";
 import { EmbedBuilder } from "discord.js";
 import { Elysia, ValidationError } from "elysia";
-import { decorators } from "elysia-decorators";
 import { helmet } from "elysia-helmet";
+import fs from "fs";
 import Redis from "ioredis";
 import SuperJSON from "superjson";
+import { z } from "zod";
 import { DiscordChannels, initDiscordBot, sendEmbedToChannel } from "./bot/bot";
 import { getAppVersion } from "./common/app.util";
 import AppController from "./controller/app.controller";
@@ -52,7 +54,7 @@ import { ScoreWebsockets } from "./websocket/score-websockets";
 Logger.info("Starting SSR Backend...");
 
 // Load .env file
-if (await Bun.file(".env").exists()) {
+if (fs.existsSync(".env")) {
   dotenv.config({
     path: ".env",
     override: true,
@@ -81,9 +83,10 @@ Logger.info("Connected to Redis :)");
 
 export const app = new Elysia()
   .use(
-    swagger({
-      autoDarkMode: false,
-      version: await getAppVersion(),
+    openapi({
+      path: "/swagger",
+      references: fromTypes(),
+      provider: "swagger-ui",
       documentation: {
         info: {
           title: "SSR API",
@@ -91,8 +94,8 @@ export const app = new Elysia()
           version: await getAppVersion(),
         },
       },
-      scalarConfig: {
-        defaultOpenAllTags: true,
+      mapJsonSchema: {
+        zod: z.toJSONSchema,
       },
     })
   )
@@ -284,28 +287,23 @@ app.use(
 /**
  * Controllers
  */
-app.use(
-  decorators({
-    controllers: [
-      AppController,
-      PlayerController,
-      ScoresController,
-      LeaderboardController,
-      StatisticsController,
-      PlaylistController,
-      BeatSaverController,
-      ReplayController,
-      BeatLeaderController,
-      FriendsController,
-      MiniRankingController,
-      PlayerHistoryController,
-      PlayerScoreHistoryController,
-      TopScoresController,
-      PlayerSearchController,
-      PlayerRankingController,
-    ],
-  })
-);
+app
+  .use(AppController)
+  .use(PlayerController)
+  .use(ScoresController)
+  .use(LeaderboardController)
+  .use(StatisticsController)
+  .use(PlaylistController)
+  .use(BeatSaverController)
+  .use(ReplayController)
+  .use(BeatLeaderController)
+  .use(FriendsController)
+  .use(MiniRankingController)
+  .use(PlayerHistoryController)
+  .use(PlayerScoreHistoryController)
+  .use(TopScoresController)
+  .use(PlayerSearchController)
+  .use(PlayerRankingController);
 
 app.onStart(async () => {
   EventsManager.getListeners().forEach(listener => {
