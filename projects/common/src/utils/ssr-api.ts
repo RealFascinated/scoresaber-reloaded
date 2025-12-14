@@ -68,6 +68,16 @@ class SSRApi {
   }
 
   /**
+   * Checks if the API is healthy.
+   *
+   * @returns true if the API is healthy, false otherwise
+   */
+  async health() {
+    const response = await this.request<string>("/health");
+    return response === "OK";
+  }
+
+  /**
    * Gets a BeatSaver map.
    *
    * @param hash the hash of the map
