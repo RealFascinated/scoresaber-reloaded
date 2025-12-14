@@ -87,6 +87,7 @@ export const app = new Elysia()
       references: fromTypes("src/index.ts", {
         projectRoot: process.cwd(),
         overrideOutputPath: (tempDir: string) => `${tempDir}/dist/backend/src/index.d.ts`,
+        silent: false,
       }),
       provider: "swagger-ui",
       swagger: {
