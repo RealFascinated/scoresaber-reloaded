@@ -84,7 +84,9 @@ export const app = new Elysia()
   .use(
     openapi({
       path: "/swagger",
-      references: fromTypes("src/index.ts"),
+      references: fromTypes("src/index.ts", {
+        projectRoot: "./",
+      }),
       provider: "swagger-ui",
       swagger: {
         autoDarkMode: false,
