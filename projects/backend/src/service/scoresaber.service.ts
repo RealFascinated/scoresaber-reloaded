@@ -9,7 +9,6 @@ import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player
 import { getPlayerStatisticChanges } from "@ssr/common/utils/player-utils";
 import { getDaysAgoDate, TimeUnit } from "@ssr/common/utils/time-utils";
 import { getPageFromRank } from "@ssr/common/utils/utils";
-import sanitize from "sanitize-html";
 import SuperJSON from "superjson";
 import { redisClient } from "../common/redis";
 import CacheService, { CacheId } from "./cache.service";
@@ -122,8 +121,8 @@ export default class ScoreSaberService {
         return {
           ...basePlayer,
           bio: {
-            lines: player.bio ? sanitize(player.bio).split("\n") : [],
-            linesStripped: player.bio ? sanitize(player.bio.replace(/<[^>]+>/g, "")).split("\n") : [],
+            lines: player.bio ? player.bio.split("\n") : [],
+            linesStripped: player.bio ? player.bio.replace(/<[^>]+>/g, "").split("\n") : [],
           },
           badges:
             player.badges?.map(badge => ({
