@@ -1,12 +1,13 @@
+import { HmdSchema } from "../hmds";
 import { z } from "zod";
 
-const sortField = z.enum(["pp", "medals", "misses", "acc", "score", "maxcombo", "date"]);
-const sortDirection = z.enum(["asc", "desc"]);
-const query = z.object({
+export const SortFieldSchema = z.enum(["pp", "medals", "misses", "acc", "score", "maxcombo", "date"]);
+export const SortDirectionSchema = z.enum(["asc", "desc"]);
+export const QuerySchema = z.object({
   search: z.string().optional(),
-  hmd: z.string().optional(),
+  hmd: HmdSchema.optional(),
 });
 
-export type SortField = z.infer<typeof sortField>;
-export type SortDirection = z.infer<typeof sortDirection>;
-export type ScoreQuery = z.infer<typeof query>;
+export type SortField = z.infer<typeof SortFieldSchema>;
+export type SortDirection = z.infer<typeof SortDirectionSchema>;
+export type ScoreQuery = z.infer<typeof QuerySchema>;

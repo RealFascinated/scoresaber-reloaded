@@ -1,6 +1,7 @@
 import { PlayerMedalRankingsResponse } from "@ssr/common/response/player-medal-rankings-response";
 import { PlayerRankingsResponse } from "@ssr/common/response/player-rankings-response";
-import { Elysia, t } from "elysia";
+import { Elysia } from "elysia";
+import { z } from "zod";
 import { PlayerMedalsService } from "../service/player/player-medals.service";
 import { PlayerSearchService } from "../service/player/player-search.service";
 
@@ -16,12 +17,12 @@ export default function playerRankingController(app: Elysia) {
       },
       {
         tags: ["Player"],
-        params: t.Object({
-          page: t.Number({ required: true, default: 1 }),
+        params: z.object({
+          page: z.coerce.number().default(1),
         }),
-        query: t.Object({
-          country: t.Optional(t.String({ default: "" })),
-          search: t.Optional(t.String({ default: "" })),
+        query: z.object({
+          country: z.string().default("").optional(),
+          search: z.string().default("").optional(),
         }),
         detail: {
           description: "Fetch a player's ranking",
@@ -35,11 +36,11 @@ export default function playerRankingController(app: Elysia) {
       },
       {
         tags: ["Player"],
-        params: t.Object({
-          page: t.Number({ required: true, default: 1 }),
+        params: z.object({
+          page: z.coerce.number().default(1),
         }),
-        query: t.Object({
-          country: t.Optional(t.String()),
+        query: z.object({
+          country: z.string().optional(),
         }),
         detail: {
           description: "Fetch a player's medal ranking",

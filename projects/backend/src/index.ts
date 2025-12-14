@@ -80,27 +80,31 @@ Logger.info("Testing Redis connection...");
 export const redisClient = new Redis(env.REDIS_URL);
 Logger.info("Connected to Redis :)");
 
+Logger.info("Generating type references...");
+const typeReferences = fromTypes("src/index.ts", {
+  projectRoot: process.cwd(),
+  overrideOutputPath: (tempDir: string) => `${tempDir}/dist/backend/src/index.d.ts`,
+  silent: false,
+})();
+
+
 export const app = new Elysia()
   .use(
     openapi({
       path: "/swagger",
-      references: fromTypes("src/index.ts", {
-        projectRoot: process.cwd(),
-        overrideOutputPath: (tempDir: string) => `${tempDir}/dist/backend/src/index.d.ts`,
-        silent: false,
-      }),
-      provider: "swagger-ui",
-      swagger: {
-        showExtensions: true,
-        autoDarkMode: false,
-        deepLinking: true,
-      },
+      references: typeReferences,
       documentation: {
         info: {
           title: "SSR API",
           description: "API for the SSR Backend",
           version: await getAppVersion(),
         },
+        servers: [
+          {
+            url: env.NEXT_PUBLIC_API_URL,
+            description: isProduction() ? "Production" : "Development",
+          },
+        ],
       },
       mapJsonSchema: {
         zod: z.toJSONSchema,

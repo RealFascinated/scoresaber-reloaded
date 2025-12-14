@@ -1,6 +1,7 @@
 import { Page } from "@ssr/common/pagination";
 import { PlayerScore } from "@ssr/common/score/player-score";
-import { Elysia, t } from "elysia";
+import { Elysia } from "elysia";
+import { z } from "zod";
 import { TopScoresService } from "../service/score/top-scores.service";
 
 export default function topScoresController(app: Elysia) {
@@ -11,8 +12,8 @@ export default function topScoresController(app: Elysia) {
     },
     {
       tags: ["Scores"],
-      params: t.Object({
-        page: t.Number({ required: true, default: 1 }),
+      params: z.object({
+        page: z.coerce.number().default(1),
       }),
       detail: {
         description: "Fetch the all-time top scores",

@@ -1,20 +1,22 @@
-import { SortDirection, SortField } from "@ssr/common/types/score-query";
-import { Elysia, t } from "elysia";
+import { QuerySchema, SortDirection, SortDirectionSchema, SortField, SortFieldSchema } from "@ssr/common/types/score-query";
+import { Elysia } from "elysia";
 import { LeaderboardScoresService } from "../service/leaderboard/leaderboard-scores.service";
 import { PlayerScoresService } from "../service/player/player-scores.service";
+import { z } from "zod";
+import { ScoreSaberScoreSortSchema } from "@ssr/common/score/score-sort";
 
 export default function scoresController(app: Elysia) {
   return app.group("/scores", app =>
     app
       .get(
-        "/:id",
-        async ({ params: { id } }) => {
-          return PlayerScoresService.getScore(id);
+        "/:scoreId",
+        async ({ params: { scoreId } }) => {
+          return PlayerScoresService.getScore(scoreId);
         },
         {
           tags: ["Scores"],
-          params: t.Object({
-            id: t.String({ required: true }),
+          params: z.object({
+            scoreId: z.string(),
           }),
 
           detail: {
@@ -23,22 +25,22 @@ export default function scoresController(app: Elysia) {
         }
       )
       .get(
-        "/player/scoresaber/:id/:page/:sort",
-        async ({ params: { id, page, sort }, query: { search, comparisonPlayerId } }) => {
+        "/player/scoresaber/:playerId/:page/:sort",
+        async ({ params: { playerId, page, sort }, query: { search, comparisonPlayerId } }) => {
           return (
-            await PlayerScoresService.getScoreSaberLivePlayerScores(id, page, sort, search, comparisonPlayerId)
+            await PlayerScoresService.getScoreSaberLivePlayerScores(playerId, page, sort, search, comparisonPlayerId)
           ).toJSON();
         },
         {
           tags: ["Scores"],
-          params: t.Object({
-            id: t.String({ required: true }),
-            page: t.Number({ required: true }),
-            sort: t.String({ required: true }),
+          params: z.object({
+            playerId: z.string(),
+            page: z.coerce.number().default(1),
+            sort: ScoreSaberScoreSortSchema,
           }),
-          query: t.Object({
-            search: t.Optional(t.String()),
-            comparisonPlayerId: t.Optional(t.String()),
+          query: z.object({
+            search: z.string().optional(),
+            comparisonPlayerId: z.string().optional(),
           }),
           detail: {
             description: "Fetch a player's scores",
@@ -46,12 +48,12 @@ export default function scoresController(app: Elysia) {
         }
       )
       .get(
-        "/player/:mode/:id/:field/:direction/:page",
-        async ({ params: { mode, id, page, field, direction }, query }) => {
+        "/player/:mode/:playerId/:field/:direction/:page",
+        async ({ params: { mode, playerId, page, field, direction }, query }) => {
           return (
             await PlayerScoresService.getPlayerScores(
-              mode as "ssr" | "medals",
-              id,
+              mode,
+              playerId,
               page,
               field as SortField,
               direction as SortDirection,
@@ -61,37 +63,32 @@ export default function scoresController(app: Elysia) {
         },
         {
           tags: ["Scores"],
-          params: t.Object({
-            mode: t.String({ required: true }),
-            id: t.String({ required: true }),
-            field: t.String({ required: true }),
-            direction: t.String({ required: true }),
-            page: t.Number({ required: true }),
+          params: z.object({
+            mode: z.enum(["ssr", "medals"]),
+            playerId: z.string(),
+            field: SortFieldSchema,
+            direction: SortDirectionSchema,
+            page: z.coerce.number().default(1),
           }),
-          query: t.Optional(
-            t.Object({
-              search: t.Optional(t.String()),
-              hmd: t.Optional(t.String()),
-            })
-          ),
+          query: QuerySchema,
           detail: {
             description: "Lookup scores for a player",
           },
         }
       )
       .get(
-        "/leaderboard/:id/:page",
-        async ({ params: { id, page }, query: { country } }) => {
-          return await LeaderboardScoresService.getLeaderboardScores(id, page, country);
+        "/leaderboard/:leaderboardId/:page",
+        async ({ params: { leaderboardId, page }, query: { country } }) => {
+          return await LeaderboardScoresService.getLeaderboardScores(leaderboardId, page, country);
         },
         {
           tags: ["Scores"],
-          params: t.Object({
-            id: t.String({ required: true }),
-            page: t.Number({ required: true }),
+          params: z.object({
+            leaderboardId: z.string(),
+            page: z.coerce.number(),
           }),
-          query: t.Object({
-            country: t.Optional(t.String()),
+          query: z.object({
+            country: z.string().optional(),
           }),
           detail: {
             description: "Fetch the scores for a leaderboard",

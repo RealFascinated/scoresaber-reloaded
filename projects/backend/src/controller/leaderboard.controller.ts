@@ -1,7 +1,7 @@
 import { DetailTypeSchema } from "@ssr/common/detail-type";
 import { LeaderboardResponse } from "@ssr/common/response/leaderboard-response";
 import { PlaysByHmdResponse } from "@ssr/common/response/plays-by-hmd-response";
-import { Elysia, t } from "elysia";
+import { Elysia } from "elysia";
 import { z } from "zod";
 import { MapDifficultySchema } from "../../../common/src/score/map-difficulty";
 import { MapCharacteristicSchema } from "../../../common/src/types/map-characteristic";
@@ -12,9 +12,9 @@ export default function leaderboardController(app: Elysia) {
   return app.group("/leaderboard", app =>
     app
       .get(
-        "/by-id/:id",
-        async ({ params: { id }, query: { type } }): Promise<LeaderboardResponse> => {
-          return await LeaderboardCoreService.getLeaderboard(id, {
+        "/by-id/:leaderboardId",
+        async ({ params: { leaderboardId }, query: { type } }): Promise<LeaderboardResponse> => {
+          return await LeaderboardCoreService.getLeaderboard(leaderboardId, {
             beatSaverType: type,
             includeBeatSaver: true,
             includeStarChangeHistory: true,
@@ -23,7 +23,7 @@ export default function leaderboardController(app: Elysia) {
         {
           tags: ["Leaderboard"],
           params: z.object({
-            id: z.string(),
+            leaderboardId: z.string(),
           }),
           query: z.object({
             type: z.optional(DetailTypeSchema),
@@ -34,9 +34,9 @@ export default function leaderboardController(app: Elysia) {
         }
       )
       .get(
-        "/by-hash/:id/:difficulty/:characteristic",
-        async ({ params: { id, difficulty, characteristic }, query: { type } }): Promise<LeaderboardResponse> => {
-          const data = await LeaderboardCoreService.getLeaderboardByHash(id, difficulty, characteristic, {
+        "/by-hash/:hash/:difficulty/:characteristic",
+        async ({ params: { hash, difficulty, characteristic }, query: { type } }): Promise<LeaderboardResponse> => {
+          const data = await LeaderboardCoreService.getLeaderboardByHash(hash, difficulty, characteristic, {
             type,
             includeBeatSaver: true,
             includeStarChangeHistory: true,
@@ -46,12 +46,12 @@ export default function leaderboardController(app: Elysia) {
         {
           tags: ["Leaderboard"],
           params: z.object({
-            id: z.string(),
+            hash: z.string(),
             difficulty: MapDifficultySchema,
             characteristic: MapCharacteristicSchema,
           }),
-          query: t.Object({
-            type: t.Optional(t.Union([t.Literal("basic"), t.Literal("full")], { default: "basic" })),
+          query: z.object({
+            type: DetailTypeSchema.optional(),
           }),
           detail: {
             description: "Fetch a leaderboard by its hash, difficulty, and characteristic",
@@ -59,14 +59,14 @@ export default function leaderboardController(app: Elysia) {
         }
       )
       .get(
-        "/plays-by-hmd/:id",
-        async ({ params: { id } }): Promise<PlaysByHmdResponse> => {
-          return LeaderboardHmdService.getPlaysByHmd(id);
+        "/plays-by-hmd/:leaderboardId",
+        async ({ params: { leaderboardId } }): Promise<PlaysByHmdResponse> => {
+          return LeaderboardHmdService.getPlaysByHmd(leaderboardId);
         },
         {
           tags: ["Leaderboard"],
-          params: t.Object({
-            id: t.String({ required: true }),
+          params: z.object({
+            leaderboardId: z.string(),
           }),
           detail: {
             description: "Fetch the per hmd usage for a leaderboard",

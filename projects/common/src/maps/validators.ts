@@ -14,8 +14,9 @@ export function validateMap(difficulty: MapDifficulty, characteristic: MapCharac
   if (!MapDifficultySchema.parse(difficulty)) {
     throw new Error(`Invalid difficulty: ${difficulty}`);
   }
-  // Validate the characteristic
-  if (!MapCharacteristicSchema.parse(characteristic)) {
-    throw new Error(`Invalid characteristic: ${characteristic}`);
-  }
+  // todo: look into this more
+  // // Validate the characteristic
+  // if (!MapCharacteristicSchema.parse(characteristic)) {
+  //   throw new Error(`Invalid characteristic: ${characteristic}`);
+  // }
 }

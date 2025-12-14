@@ -1,20 +1,24 @@
-export type HMD =
-  | "Unknown"
-  | "Rift CV1"
-  | "Vive"
-  | "Vive Pro"
-  | "Vive Pro 2"
-  | "HTC Vive Elite"
-  | "Windows Mixed Reality"
-  | "Rift S"
-  | "Quest"
-  | "Quest 2"
-  | "Quest Pro"
-  | "Quest 3"
-  | "Quest 3S"
-  | "Valve Index"
-  | "Vive Cosmos"
-  | "Bigscreen Beyond";
+import { z } from "zod";
+
+export const HmdSchema = z.enum([
+  "Unknown",
+  "Rift CV1",
+  "Vive",
+  "Vive Pro",
+  "Vive Pro 2",
+  "HTC Vive Elite",
+  "Windows Mixed Reality",
+  "Rift S",
+  "Quest",
+  "Quest 2",
+  "Quest Pro",
+  "Quest 3",
+  "Quest 3S",
+  "Valve Index",
+  "Vive Cosmos",
+  "Bigscreen Beyond",
+]);
+export type HMD = z.infer<typeof HmdSchema>;
 
 export type HMDInfo = {
   logo: string;

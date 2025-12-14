@@ -1,5 +1,6 @@
 import { PlayerSearchResponse } from "@ssr/common/response/player-search-response";
-import { Elysia, t } from "elysia";
+import { Elysia } from "elysia";
+import { z } from "zod";
 import { PlayerSearchService } from "../service/player/player-search.service";
 
 export default function playerSearchController(app: Elysia) {
@@ -12,8 +13,8 @@ export default function playerSearchController(app: Elysia) {
     },
     {
       tags: ["Player"],
-      query: t.Object({
-        query: t.Optional(t.String({ default: "" })),
+      query: z.object({
+        query: z.string().default("").optional(),
       }),
       detail: {
         description: "Search for players",

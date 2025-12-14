@@ -1,5 +1,6 @@
 import { MiniRankingResponse } from "@ssr/common/response/around-player-response";
-import { Elysia, t } from "elysia";
+import { Elysia } from "elysia";
+import { z } from "zod";
 import MiniRankingService from "../service/mini-ranking.service";
 
 export default function miniRankingController(app: Elysia) {
@@ -10,8 +11,8 @@ export default function miniRankingController(app: Elysia) {
     },
     {
       tags: ["Player"],
-      params: t.Object({
-        playerId: t.String({ required: true }),
+      params: z.object({
+        playerId: z.string(),
       }),
       detail: {
         description: "Fetch a player's mini ranking (global and country close rankings)",

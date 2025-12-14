@@ -1,37 +1,38 @@
 import { generateBeatSaberPlaylist } from "@ssr/common/playlist/playlist-utils";
-import { Elysia, t } from "elysia";
+import { Elysia } from "elysia";
+import { z } from "zod";
 import PlaylistService, { PlaylistId } from "../service/playlist/playlist.service";
 
 export default function playlistController(app: Elysia) {
   return app.group("/playlist", app =>
     app
       .get(
-        "/:id",
-        async ({ params: { id }, query: { config, download } }) => {
-          const playlistId = (id.includes(".") ? id.split(".")[0] : id) as PlaylistId;
-          const extension = id.includes(".") ? id.split(".")[1] : "bplist";
+        "/:playlistId",
+        async ({ params: { playlistId }, query: { config, download } }) => {
+          const id = (playlistId.includes(".") ? playlistId.split(".")[0] : playlistId) as PlaylistId;
+          const extension = playlistId.includes(".") ? playlistId.split(".")[1] : "bplist";
 
           const response = new Response(
             JSON.stringify(
-              await generateBeatSaberPlaylist(await PlaylistService.getPlaylist(playlistId, config)),
+              await generateBeatSaberPlaylist(await PlaylistService.getPlaylist(id, config)),
               null,
               2
             )
           );
           response.headers.set("Content-Type", "application/json");
           if (download) {
-            response.headers.set("Content-Disposition", `attachment; filename="ssr-${playlistId}.${extension}"`);
+            response.headers.set("Content-Disposition", `attachment; filename="ssr-${id}.${extension}"`);
           }
           return response;
         },
         {
           tags: ["Playlist"],
-          params: t.Object({
-            id: t.String({ required: true, pattern: "^[^/]+(?:\\.[a-zA-Z0-9]+)?$" }),
+          params: z.object({
+            playlistId: z.string().regex(/^[^/]+(?:\.[a-zA-Z0-9]+)?$/),
           }),
-          query: t.Object({
-            config: t.Optional(t.String()),
-            download: t.Optional(t.Boolean()),
+          query: z.object({
+            config: z.string().optional(),
+            download: z.boolean().optional(),
           }),
           detail: {
             description: "Fetch a playlist by its id",
@@ -53,10 +54,10 @@ export default function playlistController(app: Elysia) {
         },
         {
           tags: ["Playlist"],
-          query: t.Object({
-            user: t.String({ required: true }),
-            toSnipe: t.String({ required: true }),
-            settings: t.Optional(t.String()),
+          query: z.object({
+            user: z.string(),
+            toSnipe: z.string(),
+            settings: z.string().optional(),
           }),
           detail: {
             description: "Fetch a snipe playlist",

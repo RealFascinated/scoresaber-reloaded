@@ -28,8 +28,6 @@ import ScoreSaberScoreDisplay from "./score/scoresaber-score";
 import { ScoreSaberScoreModeTabs } from "./scoresaber-score-mode-selector";
 
 const DEFAULT_SORT: ScoreSaberScoreSort = "recent";
-const DEFAULT_PAGE = 1;
-const DEFAULT_SEARCH = "";
 
 const SORT_OPTIONS = [
   { name: "Top", value: "top", icon: <TrendingUpIcon className="h-4 w-4" /> },

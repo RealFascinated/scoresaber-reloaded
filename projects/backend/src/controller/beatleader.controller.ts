@@ -1,5 +1,6 @@
 import { ScoreStatsResponse } from "@ssr/common/response/score-stats-response";
-import { Elysia, redirect, t } from "elysia";
+import { Elysia, redirect } from "elysia";
+import { z } from "zod";
 import BeatLeaderService from "../service/beatleader.service";
 import { PlayerReplayService } from "../service/player/player-replay.service";
 
@@ -7,14 +8,14 @@ export default function beatleaderController(app: Elysia) {
   return app.group("/beatleader", app =>
     app
       .get(
-        "/scorestats/:id",
-        async ({ params: { id } }): Promise<ScoreStatsResponse> => {
-          return BeatLeaderService.getScoresFullScoreStats(id);
+        "/scorestats/:scoreId",
+        async ({ params: { scoreId } }): Promise<ScoreStatsResponse> => {
+          return BeatLeaderService.getScoresFullScoreStats(scoreId);
         },
         {
           tags: ["BeatLeader"],
-          params: t.Object({
-            id: t.Number({ required: true }),
+          params: z.object({
+            scoreId: z.coerce.number(),
           }),
           detail: {
             description: "Fetch score stats for a BeatLeader score",
@@ -28,11 +29,8 @@ export default function beatleaderController(app: Elysia) {
         },
         {
           tags: ["Replay"],
-          params: t.Object({
-            scoreId: t.String({
-              required: true,
-              pattern: "^\\d+\\.bsor$",
-            }),
+          params: z.object({
+            scoreId: z.string().regex(/^\d+\.bsor$/),
           }),
           detail: {
             description: "Redirect to a player's raw replay url for a given score id",

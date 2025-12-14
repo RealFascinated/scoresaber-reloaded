@@ -1,6 +1,7 @@
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { Page } from "@ssr/common/pagination";
-import { Elysia, t } from "elysia";
+import { Elysia } from "elysia";
+import { z } from "zod";
 import { PlayerScoreHistoryService } from "../service/player/player-score-history.service";
 
 export default function playerScoreHistoryController(app: Elysia) {
@@ -11,10 +12,10 @@ export default function playerScoreHistoryController(app: Elysia) {
     },
     {
       tags: ["Player"],
-      params: t.Object({
-        playerId: t.String({ required: true }),
-        leaderboardId: t.String({ required: true }),
-        page: t.Number({ required: true }),
+      params: z.object({
+        playerId: z.string(),
+        leaderboardId: z.string(),
+        page: z.coerce.number(),
       }),
       detail: {
         description: "Fetch a player's score history for a leaderboard",
