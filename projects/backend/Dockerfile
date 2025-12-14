@@ -56,6 +56,10 @@ COPY --from=runner /app/projects/common/dist ./projects/common/dist
 COPY --from=runner /app/projects/backend/package.json ./projects/backend/
 COPY --from=runner /app/projects/backend/ssr-backend ./projects/backend/ssr-backend
 
+# Type generation for OpenAPI schema
+RUN bun install typescript
+COPY --from=runner /app/projects/backend/src ./projects/backend/src
+
 ARG PORT=8080
 ENV PORT $PORT
 EXPOSE $PORT
