@@ -61,6 +61,7 @@ COPY --from=runner /app/projects/backend/package.json ./projects/backend/
 COPY --from=runner /app/projects/backend/ssr-backend ./projects/backend/ssr-backend
 
 # Copy for Types used in OpenAPI schema
+RUN bun install typescript --global
 COPY --from=runner /app/projects/backend/src ./projects/backend/src
 
 ARG PORT=8080
