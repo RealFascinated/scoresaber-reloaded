@@ -45,6 +45,7 @@ class SSRApi {
       filteredQueryParams && Object.keys(filteredQueryParams).length > 0
         ? `?${new URLSearchParams(filteredQueryParams)}`
         : "";
+
     const response = await fetch(`${url}${queryString}`, {
       headers: { Accept: "application/superjson" },
     });
