@@ -99,8 +99,9 @@ async function main() {
 
         if (slowQueries.length > 0) {
           for (const query of slowQueries) {
-            // Create a unique key for this query to avoid spam (use opid to track same query)
-            const queryKey = `${query.opid}-${query.ns}-${query.op}`;
+            // Create a unique key based on query pattern (not opid) to ignore duplicates
+            const commandHash = JSON.stringify(query.command);
+            const queryKey = `${query.ns}-${query.op}-${commandHash}`;
             
             if (!seenQueries.has(queryKey)) {
               seenQueries.add(queryKey);

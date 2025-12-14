@@ -14,7 +14,6 @@ import ProcessUptimeMetric from "../metrics/impl/backend/uptime";
 import MongoDbSizeMetric from "../metrics/impl/database/mongo-db-size";
 import ActiveAccountsMetric from "../metrics/impl/player/active-accounts";
 import ActivePlayerHmdStatisticMetric from "../metrics/impl/player/active-player-hmd-statistic";
-import HmdStatisticMetric from "../metrics/impl/player/daily-hmd-statistic";
 import DailyNewAccountsMetric from "../metrics/impl/player/daily-new-accounts";
 import TotalTrackedScoresMetric from "../metrics/impl/player/total-tracked-scores";
 import TrackedPlayersMetric from "../metrics/impl/player/tracked-players";
@@ -40,7 +39,6 @@ export enum MetricType {
   TRACKED_PLAYERS = "tracked-players",
   UNIQUE_DAILY_PLAYERS = "unique-daily-players",
   ACTIVE_ACCOUNTS = "active-accounts",
-  DAILY_HMD_STATISTIC = "daily-hmd-statistic",
   ACTIVE_PLAYERS_HMD_STATISTIC = "active-players-hmd-statistic",
   TOTAL_TRACKED_SCORES = "total-tracked-scores",
   DAILY_NEW_ACCOUNTS = "daily-new-accounts",
@@ -96,7 +94,6 @@ export default class MetricsService implements EventListener {
     this.registerMetric(new TrackedPlayersMetric());
     this.registerMetric(new UniqueDailyPlayersMetric());
     this.registerMetric(new ActiveAccountsMetric());
-    this.registerMetric(new HmdStatisticMetric());
     this.registerMetric(new ActivePlayerHmdStatisticMetric());
     this.registerMetric(new TotalTrackedScoresMetric());
     this.registerMetric(new DailyNewAccountsMetric());
