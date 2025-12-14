@@ -19,7 +19,7 @@ export default function ScoreDetails({ score }: { score: PlayerScore<ScoreSaberS
 
       {/* Score Buttons */}
       <div className="flex flex-wrap items-center gap-2 px-4 pb-4">
-        <ReplayButton additionalData={score.score.additionalData} />
+        <ReplayButton score={score.score} />
         <PlayerButton playerId={score.score.playerInfo.id} />
         <LeaderboardButton leaderboardId={leaderboard.id} />
       </div>

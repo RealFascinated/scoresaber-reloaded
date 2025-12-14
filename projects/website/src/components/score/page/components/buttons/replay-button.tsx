@@ -4,19 +4,14 @@ import SimpleLink from "@/components/simple-link";
 import { Button } from "@/components/ui/button";
 import useDatabase from "@/hooks/use-database";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
-import { AdditionalScoreData } from "@ssr/common/model/additional-score-data/additional-score-data";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { getBeatLeaderReplayRedirectUrl } from "@ssr/common/utils/beatleader-utils";
 
-export default function ReplayButton({ score, additionalData }: { score: ScoreSaberScore, additionalData?: AdditionalScoreData }) {
+export default function ReplayButton({ score }: { score: ScoreSaberScore }) {
   const database = useDatabase();
   const viewer = useStableLiveQuery(async () => database.getReplayViewer());
 
-  if (!viewer) {
-    return null;
-  }
-
-  if (!additionalData) {
+  if (!viewer || !score.additionalData) {
     return null;
   }
 
