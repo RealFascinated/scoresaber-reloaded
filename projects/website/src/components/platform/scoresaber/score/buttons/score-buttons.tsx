@@ -55,7 +55,7 @@ const buttons: ButtonConfig[] = [
       return score?.additionalData != undefined;
     },
     render: ({ score }: Props) => {
-      return <ScoreReplayButton additionalData={score!.additionalData!} />;
+      return <ScoreReplayButton score={score!} />;
     },
   },
   {

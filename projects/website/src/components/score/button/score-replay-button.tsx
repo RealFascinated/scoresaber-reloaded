@@ -4,20 +4,20 @@ import BeatSaberPepeLogo from "@/components/logos/beatsaber-pepe-logo";
 import ScoreButton from "@/components/score/button/score-button";
 import useDatabase from "@/hooks/use-database";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
-import { AdditionalScoreData } from "@ssr/common/model/additional-score-data/additional-score-data";
+import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { getBeatLeaderReplayRedirectUrl } from "@ssr/common/utils/beatleader-utils";
 
-export function ScoreReplayButton({ additionalData }: { additionalData: AdditionalScoreData }) {
+export function ScoreReplayButton({ score }: { score: ScoreSaberScore }) {
   const database = useDatabase();
   const viewer = useStableLiveQuery(async () => database.getReplayViewer());
 
-  if (!viewer) {
+  if (!viewer || !score.additionalData) {
     return null;
   }
 
   return (
     <ScoreButton
-      href={viewer.generateUrl(additionalData.scoreId, getBeatLeaderReplayRedirectUrl(additionalData))}
+      href={viewer.generateUrl(score.additionalData.scoreId, getBeatLeaderReplayRedirectUrl(score))}
       tooltip={<p>Click to view the score replay!</p>}
     >
       <BeatSaberPepeLogo />

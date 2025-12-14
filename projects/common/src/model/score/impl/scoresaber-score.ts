@@ -43,6 +43,11 @@ export class ScoreSaberScorePublic extends ScoreSaberScoreInternal {
    * Whether the score is tracked.
    */
   public isTracked?: boolean;
+
+  /**
+   * Whether the score is a previous score.
+   */
+  public isPreviousScore?: boolean;
 }
 
 export type ScoreSaberPreviousScoreOverview = PreviousScore & {

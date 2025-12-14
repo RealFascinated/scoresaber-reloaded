@@ -57,6 +57,7 @@ export class PlayerScoreHistoryService {
               insertPreviousScore: false,
               removeScoreWeightAndRank: true,
             });
+            score.isPreviousScore = true;
             return score;
           })
         );

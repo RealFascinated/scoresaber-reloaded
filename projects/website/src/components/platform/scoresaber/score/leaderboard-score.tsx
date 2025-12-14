@@ -127,7 +127,7 @@ export default function ScoreSaberLeaderboardScore({
           <td className={cn(TABLE_CELL_WIDTH_SMALL, "w-[37px]")}>
             {score.additionalData && (
               <div className="flex justify-center">
-                <ScoreReplayButton additionalData={score.additionalData} />
+                <ScoreReplayButton score={score} />
               </div>
             )}
           </td>

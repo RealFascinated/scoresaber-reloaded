@@ -246,7 +246,7 @@ function getScoreButtons(
                 .setURL(
                   ReplayViewers.beatleader.generateUrl(
                     beatLeaderScore.scoreId,
-                    getBeatLeaderReplayRedirectUrl(beatLeaderScore)
+                    getBeatLeaderReplayRedirectUrl(score)
                   )
                 ),
             ]

@@ -1,3 +1,4 @@
+import { ScoreSaberScore } from "src/model/score/impl/scoresaber-score";
 import { env } from "../env";
 import { NotFoundError } from "../error/not-found-error";
 import { getMinioBucketName, MinioBucket } from "../minio-buckets";
@@ -9,9 +10,9 @@ import { AdditionalScoreData } from "../model/additional-score-data/additional-s
  * @param additionalData the additional score data
  * @returns the URL of the replay
  */
-export function getBeatLeaderReplayRedirectUrl(additionalData: AdditionalScoreData): string | undefined {
-  if (additionalData.savedReplay) {
-    return `${env.NEXT_PUBLIC_API_URL}/replay/${additionalData.scoreId}.bsor`;
+export function getBeatLeaderReplayRedirectUrl(score: ScoreSaberScore): string | undefined {
+  if (score.additionalData && score.additionalData.savedReplay && score.isPreviousScore) {
+    return `${env.NEXT_PUBLIC_API_URL}/replay/${score.additionalData?.scoreId}.bsor`;
   }
   return undefined;
 }
