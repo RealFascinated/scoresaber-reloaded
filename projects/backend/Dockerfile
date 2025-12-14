@@ -52,13 +52,13 @@ COPY --from=depends /app/package.json* /app/bun.lock* ./
 COPY --from=depends /app/node_modules ./node_modules
 
 # Copy built applications
-COPY --from=runner /app/projects/common/dist ./projects/common/dist
+COPY --from=runner /app/projects/common ./projects/common
 COPY --from=runner /app/projects/backend/package.json ./projects/backend/
 COPY --from=runner /app/projects/backend/ssr-backend ./projects/backend/ssr-backend
 
 # Type generation for OpenAPI schema
 RUN bun install typescript --global
-COPY --from=runner /app/projects/common/src ./projects/common/src
+RUN tsc --project tsconfig.json
 COPY --from=runner /app/projects/backend/src ./projects/backend/src
 
 ARG PORT=8080
