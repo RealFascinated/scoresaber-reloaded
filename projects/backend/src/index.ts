@@ -46,6 +46,8 @@ import PlaylistService from "./service/playlist/playlist.service";
 import StatisticsService from "./service/statistics.service";
 import { BeatSaverWebsocket } from "./websocket/beatsaver-websocket";
 import { ScoreWebsockets } from "./websocket/score-websockets";
+import { MedalScoresService } from "./service/score/medal-scores.service";
+import { PlayerMedalsService } from "./service/player/player-medals.service";
 
 Logger.info("Starting SSR Backend...");
 
@@ -131,19 +133,19 @@ export const app = new Elysia()
       },
     })
   )
-  // .use(
-  //   cron({
-  //     name: "refresh-medal-scores",
-  //     // pattern: "*/1 * * * *", // Every minute
-  //     pattern: "0 20 * * *", // Every day at 20:00
-  //     timezone: "Europe/London",
-  //     protect: true,
-  //     run: async () => {
-  //       await MedalScoresService.rescanMedalScores(); // Refresh medal scores
-  //       await PlayerMedalsService.updatePlayerGlobalMedalCounts(); // Update player global medal counts and ranks
-  //     },
-  //   })
-  // )
+  .use(
+    cron({
+      name: "refresh-medal-scores",
+      // pattern: "*/1 * * * *", // Every minute
+      pattern: "0 20 * * *", // Every day at 20:00
+      timezone: "Europe/London",
+      protect: true,
+      run: async () => {
+        await MedalScoresService.rescanMedalScores(); // Refresh medal scores
+        await PlayerMedalsService.updatePlayerGlobalMedalCounts(); // Update player global medal counts and ranks
+      },
+    })
+  )
   .use(
     cron({
       name: "scrape-beatsaver-maps",

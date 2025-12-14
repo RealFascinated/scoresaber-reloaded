@@ -96,7 +96,7 @@ export class MedalScoresService {
     );
     const incomingScoreData = {
       ...incomingScore,
-      medals: MEDAL_COUNTS[incomingScore.rank as keyof typeof MEDAL_COUNTS] || 0,
+      medals: 0, // Will be recalculated after sorting
       _id: existingScore?._id,
     };
     const updatedScores = [...scoresWithoutPlayer, incomingScoreData].sort((a, b) => b.score - a.score);
