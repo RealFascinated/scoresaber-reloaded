@@ -90,7 +90,6 @@ export default class ScoreSaberService {
           accBadges,
           statisticHistory,
           hmdBreakdown,
-          globalRankIncludingInactives,
           medalsRank,
         ] = await Promise.all([
           account ? PlayerCoreService.updatePeakRank(account, player) : undefined,
@@ -115,7 +114,6 @@ export default class ScoreSaberService {
                 ) as Record<HMD, number>;
               })()
             : undefined,
-          options?.setInactivesRank ? PlayerCoreService.getPlayerRankIncludingInactives(id) : undefined,
           options?.setMedalsRank ? PlayerMedalsService.getPlayerMedalRank(id) : undefined,
         ]);
 
@@ -147,7 +145,6 @@ export default class ScoreSaberService {
           peakRank: updatedAccount?.peakRank,
           statistics: player.scoreStats,
           hmdBreakdown: hmdBreakdown,
-          rankIncludingInactives: globalRankIncludingInactives,
           rankPages: {
             global: getPageFromRank(player.rank, 50),
             country: getPageFromRank(player.countryRank, 50),
