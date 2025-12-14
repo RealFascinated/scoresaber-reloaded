@@ -4,6 +4,7 @@
   "scripts": {
     "dev": "bun run --inspect --watch src/index.ts",
     "build": "bun build --compile --sourcemap --target bun --outfile ssr-backend src/index.js",
+    "build:types": "tsc --project tsconfig.json",
     "start": "NODE_ENV=production ./ssr-backend",
     "lint": "eslint src/**/*.ts"
   },

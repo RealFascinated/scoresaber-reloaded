@@ -40,6 +40,10 @@ RUN bun run --filter 'backend' lint
 # Build the backend
 RUN bun run --filter 'backend' build
 
+# Type generation for OpenAPI schema
+RUN bun install typescript --global
+RUN bun run --filter 'backend' build:types
+
 # Final stage - minimal runtime image
 FROM base AS final
 WORKDIR /app
@@ -56,11 +60,8 @@ COPY --from=runner /app/projects/common ./projects/common
 COPY --from=runner /app/projects/backend/package.json ./projects/backend/
 COPY --from=runner /app/projects/backend/ssr-backend ./projects/backend/ssr-backend
 
-# Type generation for OpenAPI schema
-RUN bun install typescript --global
-COPY --from=runner /app/projects/backend/tsconfig.json ./projects/backend/
+# Copy for Types used in OpenAPI schema
 COPY --from=runner /app/projects/backend/src ./projects/backend/src
-RUN tsc --project ./projects/backend/tsconfig.json
 
 ARG PORT=8080
 ENV PORT $PORT
