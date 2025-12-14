@@ -16,7 +16,7 @@ interface DailyStatistics {
   [Statistic.ActiveAccounts]: number;
 }
 
-interface StatisticsData {
+export interface StatisticsData {
   daily: {
     [date: string]: DailyStatistics;
   };

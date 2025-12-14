@@ -15,9 +15,7 @@ export function ApiHealth() {
   useQuery({
     queryKey: ["api-health"],
     queryFn: async () => {
-      const status = (await getApiHealth(env.NEXT_PUBLIC_API_URL)).online;
-      setOnline(status);
-      return status;
+      setOnline(await getApiHealth(env.NEXT_PUBLIC_API_URL));
     },
     refetchInterval: 1000 * 5,
   });
