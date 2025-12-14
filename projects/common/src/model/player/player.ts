@@ -6,7 +6,8 @@ import { type PeakRank } from "../../player/peak-rank";
  * The model for a player.
  */
 @modelOptions({ options: { allowMixed: Severity.ALLOW }, schemaOptions: { collection: "players" } })
-@index({ inactive: 1, pp: -1 }) // Compound index for active player queries
+@index({ inactive: 1, pp: -1 })
+@index({ joinedDate: 1 })
 export class Player {
   /**
    * The id of the player.

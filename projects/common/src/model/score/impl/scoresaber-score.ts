@@ -18,14 +18,13 @@ import { ScoreSaberScoreBase } from "./scoresaber-score-base";
   trackerCollection: "increments",
   overwriteModelName: "scoresaber-scores",
 })
-@index({ playerId: 1 })
 @index({ leaderboardId: 1 })
 @index({ playerId: 1, leaderboardId: 1 })
 @index({ playerId: 1, timestamp: -1 })
 @index({ pp: -1 })
 @index({ timestamp: -1 })
 @index({ playerId: 1, pp: -1 })
-@index({ scoreId: 1 })
+@index({ scoreId: 1, score: 1 })
 export class ScoreSaberScoreInternal extends ScoreSaberScoreBase {}
 
 export class ScoreSaberScorePublic extends ScoreSaberScoreInternal {

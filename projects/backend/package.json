@@ -5,7 +5,8 @@
     "dev": "bun run --inspect --watch src/index.ts",
     "build": "bun build src/index.ts --sourcemap --target bun --outdir ./dist",
     "start": "NODE_ENV=production bun dist/index.js",
-    "lint": "eslint src/**/*.ts"
+    "lint": "eslint src/**/*.ts",
+    "poll-slow-queries": "bun run src/scripts/poll-slow-queries.ts"
   },
   "dependencies": {
     "@bogeychan/elysia-etag": "^0.1.0",
