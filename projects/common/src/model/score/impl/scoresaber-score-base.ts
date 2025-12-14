@@ -1,5 +1,5 @@
 import { modelOptions, Prop, Severity } from "@typegoose/typegoose";
-import { AdditionalScoreData } from "src/model/additional-score-data/additional-score-data";
+import { AdditionalScoreData } from "../../additional-score-data/additional-score-data";
 import type { HMD } from "../../../hmds";
 import { type Controllers } from "../controllers";
 import Score from "../score";
