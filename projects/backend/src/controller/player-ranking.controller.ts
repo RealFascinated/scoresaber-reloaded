@@ -34,7 +34,7 @@ export default function playerRankingController(app: Elysia) {
           return await PlayerMedalsService.getPlayerMedalRanking(page, country);
         },
         {
-          tags: ["Player"],
+          tags: ["Ranking"],
           params: z.object({
             page: z.coerce.number().default(1),
           }),
