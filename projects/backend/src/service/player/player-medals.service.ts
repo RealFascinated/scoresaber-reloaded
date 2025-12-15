@@ -103,7 +103,7 @@ export class PlayerMedalsService {
       },
     ]);
 
-    for (const [playerId, medalCount] of medalCounts) {
+    for (const [playerId, medalCount] of Object.entries(medalCounts)) {
       await PlayerModel.updateOne({ _id: playerId }, { $set: { medals: medalCount } });
     }
 
