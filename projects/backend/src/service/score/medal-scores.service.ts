@@ -148,7 +148,15 @@ export class MedalScoresService {
     const changes = new Map<string, MedalChange>();
     for (const [playerId, newMedalCount] of newMedalCounts.entries()) {
       const oldMedalCount = oldMedalCounts.get(playerId) || 0;
-      changes.set(playerId, { before: oldMedalCount, after: newMedalCount });
+      if (oldMedalCount !== newMedalCount) {
+        changes.set(playerId, { before: oldMedalCount, after: newMedalCount });
+      }
+    }
+
+    for (const [playerId, oldMedalCount] of oldMedalCounts.entries()) {
+      if (!newMedalCounts.has(playerId) && oldMedalCount > 0) {
+        changes.set(playerId, { before: oldMedalCount, after: 0 });
+      }
     }
 
     await PlayerMedalsService.updatePlayerMedalCounts(...changes.keys());
