@@ -16,7 +16,7 @@ import { useQuery } from "@tanstack/react-query";
 import { CalculatorIcon, ChartBarIcon, SwordIcon, TrendingUpIcon } from "lucide-react";
 import { ReactElement, useState } from "react";
 import PlayerRankingsButton from "../buttons/player-rankings-button";
-import MapsGraphChart from "./impl/maps-graph-chart";
+import ScoresGraphChart from "./impl/scores-graph-chart";
 import PlayerAccuracyChart from "./impl/player-accuracy-chart";
 import PlayerAdvancedRankingChart from "./impl/player-advanced-ranking-chart";
 import PlayerScoresChart from "./impl/player-scores-chart";
@@ -162,10 +162,10 @@ export default function PlayerViews({ player }: { player: ScoreSaberPlayer }) {
     },
     {
       index: 3,
-      label: "Maps Graph",
+      label: "Scores Graph",
       icon: ChartBarIcon,
       showDateRangeSelector: false,
-      chart: player => <MapsGraphChart player={player} />,
+      chart: player => <ScoresGraphChart player={player} />,
     },
     {
       index: 4,

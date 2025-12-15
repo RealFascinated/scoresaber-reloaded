@@ -40,7 +40,7 @@ type DataPoint = {
   timestamp: Date;
 };
 
-export default function MapsGraphChart({ player }: { player: ScoreSaberPlayer }) {
+export default function ScoresGraphChart({ player }: { player: ScoreSaberPlayer }) {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [comparisonPlayers, setComparisonPlayers] = useState<ScoreSaberPlayer[]>([]);
   const [showTop100, setShowTop100] = useState(false);
@@ -48,7 +48,7 @@ export default function MapsGraphChart({ player }: { player: ScoreSaberPlayer })
   const { data: dataPoints } = useQuery({
     queryKey: ["player-maps-graph", player.id],
     queryFn: async () => {
-      const scoreChartData = await ssrApi.getPlayerMapsGraphData(player.id);
+      const scoreChartData = await ssrApi.getPlayerScoresChart(player.id);
       return scoreChartData?.data || [];
     },
     placeholderData: prev => prev,
@@ -59,7 +59,7 @@ export default function MapsGraphChart({ player }: { player: ScoreSaberPlayer })
     queryFn: async () => {
       const results = await Promise.all(
         comparisonPlayers.map(async p => {
-          const scoreChartData = await ssrApi.getPlayerMapsGraphData(p.id);
+          const scoreChartData = await ssrApi.getPlayerScoresChart(p.id);
           return { id: p.id, data: scoreChartData?.data || [] };
         })
       );
