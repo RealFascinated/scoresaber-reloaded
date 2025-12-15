@@ -142,7 +142,7 @@ export default function scoresController(app: Elysia) {
         }
       )
       .get(
-        "/scores/top/:page",
+        "/top/:page",
         async ({ params: { page } }) => {
           return (await TopScoresService.getTopScores(page)).toJSON();
         },
