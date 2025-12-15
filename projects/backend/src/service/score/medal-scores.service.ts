@@ -87,10 +87,10 @@ export class MedalScoresService {
         .sort({ score: -1 })
         .lean();
 
-      const oldMedalCounts = new Map<string, number>();
+      const oldScoreMedals = new Map<string, number>();
       for (const score of existingScores) {
-        const current = oldMedalCounts.get(score.playerId) ?? 0;
-        oldMedalCounts.set(score.playerId, current + score.medals);
+        const current = oldScoreMedals.get(score.playerId) ?? 0;
+        oldScoreMedals.set(score.playerId, current + score.medals);
       }
 
       const existingScoreIndex = existingScores.findIndex(
@@ -116,10 +116,10 @@ export class MedalScoresService {
       const top10Scores = allScores.slice(0, 10);
       const belowTop10 = allScores.slice(10);
 
-      const newMedalCounts = new Map<string, number>();
+      const newScoreMedals = new Map<string, number>();
       for (const score of top10Scores) {
-        const current = newMedalCounts.get(score.playerId) ?? 0;
-        newMedalCounts.set(score.playerId, current + score.medals);
+        const current = newScoreMedals.get(score.playerId) ?? 0;
+        newScoreMedals.set(score.playerId, current + score.medals);
       }
 
       if (top10Scores.length > 0) {
@@ -146,7 +146,12 @@ export class MedalScoresService {
         });
       }
 
-      return [...oldMedalCounts.keys(), ...newMedalCounts.keys()];
+      const allPlayerIds = new Set([...oldScoreMedals.keys(), ...newScoreMedals.keys()]);
+      return Array.from(allPlayerIds).filter(playerId => {
+        const oldCount = oldScoreMedals.get(playerId) ?? 0;
+        const newCount = newScoreMedals.get(playerId) ?? 0;
+        return oldCount !== newCount;
+      });
     }
 
     /**
