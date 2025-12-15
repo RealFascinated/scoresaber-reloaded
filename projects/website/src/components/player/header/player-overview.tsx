@@ -47,7 +47,7 @@ const playerData = [
               }
             >
               <SimpleLink href={`/ranking/${player.rankPages.global}`}>
-                <span className="hover:text-primary/80 m-0 text-sm leading-[1.2] transition-all">
+                <span className="hover:text-primary/80 m-0 text-sm transition-all">
                   #{formatNumberWithCommas(player.rank)}
                 </span>
               </SimpleLink>
@@ -75,7 +75,7 @@ const playerData = [
             />
             <ChangeOverTime player={player} type={PlayerStatChange.CountryRank}>
               <SimpleLink href={`/ranking/${player.country}/${player.rankPages.country}`}>
-                <span className="hover:text-primary/80 m-0 text-sm leading-[1.4] transition-all">
+                <span className="hover:text-primary/80 m-0 text-sm transition-all">
                   #{formatNumberWithCommas(player.countryRank)}
                 </span>
               </SimpleLink>
