@@ -5,13 +5,13 @@ import SimpleTooltip from "@/components/simple-tooltip";
 import { StarIcon } from "@heroicons/react/24/solid";
 import { LeaderboardStarChange } from "@ssr/common/schemas/leaderboard/leaderboard-star-change";
 import { formatDate, timeAgo } from "@ssr/common/utils/time-utils";
-import { ArrowRightIcon, ChevronDownIcon, ChevronUpIcon, TrendingDownIcon, TrendingUpIcon } from "lucide-react";
+import { ArrowRightIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react";
 import { useState } from "react";
 
 function LeaderboardStarChangeHistoryButton({ onClick, isOpen }: { onClick: () => void; isOpen: boolean }) {
   return (
     <button
-      className="border-border bg-background/95 text-foreground hover:bg-accent/50 hover:border-primary/50 focus-visible:ring-primary/50 flex items-center gap-(--spacing-sm) rounded-(--radius-lg) border px-(--spacing-sm) py-(--spacing-sm) text-xs sm:px-(--spacing-lg) sm:text-sm font-medium transition-colors duration-200 focus-visible:ring-2 focus-visible:outline-none"
+      className="border-border bg-background/95 text-foreground hover:bg-accent/50 hover:border-primary/50 focus-visible:ring-primary/50 flex items-center gap-(--spacing-sm) rounded-(--radius-lg) border px-(--spacing-sm) py-(--spacing-sm) text-xs font-medium transition-colors duration-200 focus-visible:ring-2 focus-visible:outline-none sm:px-(--spacing-lg) sm:text-sm"
       onClick={onClick}
     >
       <StarIcon className="h-4 w-4 text-yellow-500" />
@@ -27,9 +27,11 @@ export function LeaderboardStarChangeHistory({ starChangeHistory }: { starChange
   return (
     <div className="flex w-full flex-col items-center justify-center gap-(--spacing-lg)">
       <LeaderboardStarChangeHistoryButton onClick={() => setOpen(!open)} isOpen={open} />
+
+      {/* Star change history */}
       {open && (
-        <div className="animate-in slide-in-from-top-2 duration-200 w-full max-w-[500px]">
-          <div className="border-border bg-background/80 rounded-(--radius-lg) border p-2 sm:p-(--spacing-sm)">
+        <div className="animate-in slide-in-from-top-2 w-full max-w-[500px] duration-200">
+          <div className="border-border bg-background/80 rounded-lg border p-2 sm:p-(--spacing-sm)">
             <div className="space-y-1">
               {starChangeHistory.map((starChange, index) => {
                 const isCurrent = index === 0;
@@ -42,38 +44,23 @@ export function LeaderboardStarChangeHistory({ starChangeHistory }: { starChange
                 const isUnrankedToRanked = starChange.previousStars === 0 && starChange.newStars > 0;
                 const isRankedToUnranked = starChange.previousStars > 0 && starChange.newStars === 0;
 
-                // Determine change type for better visual representation
-                const changeType = isUnrankedToRanked
-                  ? "new"
-                  : isRankedToUnranked
-                    ? "removed"
-                    : isIncrease
-                      ? "increase"
-                      : "decrease";
-
                 return (
                   <div
                     key={`${starChange.timestamp.toISOString()}-${starChange.previousStars}-${starChange.newStars}`}
                     className={cn(
-                      "hover:bg-accent/30 flex items-center justify-between rounded-(--radius-md) px-1 py-(--spacing-xs) text-xs transition-colors duration-200 sm:px-(--spacing-sm)",
-                      isCurrent && "bg-primary/10"
+                      "hover:bg-accent/30 flex items-center justify-between rounded-md px-1 py-(--spacing-xs) text-xs transition-colors duration-200 sm:px-(--spacing-sm)",
+                      isCurrent && "bg-primary/7"
                     )}
                   >
                     {/* Timestamp and change indicator */}
-                    <div className="flex items-center gap-1 sm:gap-(--spacing-sm) min-w-0 flex-shrink">
-                      <SimpleTooltip
-                        display={<p>{formatDate(new Date(starChange.timestamp), "Do MMMM, YYYY HH:mm a")}</p>}
-                      >
-                        <span className="text-muted-foreground text-xs truncate">{timeAgo(starChange.timestamp)}</span>
-                      </SimpleTooltip>
-                      {changeType === "increase" && <TrendingUpIcon className="h-3 w-3 text-green-500 shrink-0" />}
-                      {changeType === "decrease" && <TrendingDownIcon className="h-3 w-3 text-red-500 shrink-0" />}
-                      {changeType === "new" && <StarIcon className="h-3 w-3 text-yellow-500 shrink-0" />}
-                      {changeType === "removed" && <StarIcon className="h-3 w-3 text-gray-500 shrink-0" />}
-                    </div>
+                    <SimpleTooltip
+                      display={<p>{formatDate(new Date(starChange.timestamp), "Do MMMM, YYYY HH:mm a")}</p>}
+                    >
+                      <span className="text-muted-foreground truncate text-xs">{timeAgo(starChange.timestamp)}</span>
+                    </SimpleTooltip>
 
                     {/* Star change display */}
-                    <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+                    <div className="flex shrink-0 items-center gap-1 sm:gap-2">
                       {/* From */}
                       <div
                         className={cn(
