@@ -24,6 +24,8 @@ import { Users, X } from "lucide-react";
 import { useState } from "react";
 import { Line } from "react-chartjs-2";
 import PlayerSearch from "../../player-search";
+import Card from "@/components/card";
+import { useIsMobile } from "@/contexts/viewport-context";
 
 Chart.register(LineController, ScatterController, LineElement, PointElement, LinearScale, Tooltip, Legend);
 
@@ -41,6 +43,8 @@ type DataPoint = {
 };
 
 export default function ScoresGraphChart({ player }: { player: ScoreSaberPlayer }) {
+  const isMobile = useIsMobile();
+
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [comparisonPlayers, setComparisonPlayers] = useState<ScoreSaberPlayer[]>([]);
   const [showTop100, setShowTop100] = useState(false);
@@ -230,7 +234,7 @@ export default function ScoresGraphChart({ player }: { player: ScoreSaberPlayer 
             if (dataPoint.timestamp) {
               lines.push(`Played on ${formatDate(dataPoint.timestamp, "Do MMMM, YYYY HH:mm")}`);
             }
-            if (dataPoint.leaderboardId) {
+            if (dataPoint.leaderboardId && !isMobile) {
               lines.push("", "Click to view leaderboard!");
             }
 
@@ -244,7 +248,8 @@ export default function ScoresGraphChart({ player }: { player: ScoreSaberPlayer 
         labels: { color: "white" },
       },
     },
-    onClick: (event: any, elements: any[]) => {
+    onClick: (_, elements: any[]) => {
+      if (isMobile) return;
       if (elements.length > 0) {
         const dataPoint = datasets.datasets[elements[0].datasetIndex].data[elements[0].index];
         if (dataPoint && "leaderboardId" in dataPoint && dataPoint.leaderboardId) {
@@ -267,9 +272,9 @@ export default function ScoresGraphChart({ player }: { player: ScoreSaberPlayer 
 
   return (
     <div className="space-y-4">
-      <div className="border-border bg-background/50 h-[400px] rounded-lg border p-4">
+      <Card className="h-[400px] p-2.5">
         <Line data={datasets as any} options={chartOptions as any} />
-      </div>
+      </Card>
 
       <div className="space-y-3">
         <div

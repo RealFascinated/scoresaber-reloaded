@@ -1,6 +1,7 @@
 "use client";
 
 import { HistoryMode } from "@/common/player/history-mode";
+import Card from "@/components/card";
 import { Spinner } from "@/components/spinner";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -13,14 +14,13 @@ import { PlayerStatisticHistory } from "@ssr/common/player/player-statistic-hist
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { getDaysAgo, getDaysAgoDate } from "@ssr/common/utils/time-utils";
 import { useQuery } from "@tanstack/react-query";
-import { CalculatorIcon, ChartBarIcon, SwordIcon, TrendingUpIcon } from "lucide-react";
+import { ChartBarIcon, SwordIcon, TrendingUpIcon } from "lucide-react";
 import { ReactElement, useState } from "react";
 import PlayerRankingsButton from "../buttons/player-rankings-button";
 import PlayerAccuracyChart from "./impl/player-accuracy-chart";
 import PlayerAdvancedRankingChart from "./impl/player-advanced-ranking-chart";
 import PlayerScoresChart from "./impl/player-scores-chart";
 import PlayerSimpleRankingChart from "./impl/player-simple-ranking-chart";
-import PlusPpCalculator from "./impl/plus-pp-calculator";
 import ScoresGraphChart from "./impl/scores-graph-chart";
 
 // Constants
@@ -38,17 +38,10 @@ type SelectedView = {
   index: number;
   label: string;
   showDateRangeSelector: boolean;
+  wrapCard: boolean;
   icon: React.ElementType;
   chart: (player: ScoreSaberPlayer, statisticHistory: PlayerStatisticHistory) => ReactElement;
 };
-
-function Loading() {
-  return (
-    <div className="flex h-[400px] items-center justify-center">
-      <Spinner />
-    </div>
-  );
-}
 
 function ViewSelector({
   views,
@@ -60,7 +53,7 @@ function ViewSelector({
   onViewSelect: (view: SelectedView) => void;
 }) {
   return (
-    <div className="flex items-center justify-center gap-1">
+    <div className="flex flex-wrap items-center justify-center gap-1">
       {views.map(view => (
         <Button
           key={view.index}
@@ -70,7 +63,7 @@ function ViewSelector({
           className="flex items-center gap-2"
         >
           <view.icon className="size-5 md:size-4" />
-          <span className="hidden sm:inline">{view.label}</span>
+          <span>{view.label}</span>
         </Button>
       ))}
     </div>
@@ -113,40 +106,33 @@ export default function PlayerViews({ player }: { player: ScoreSaberPlayer }) {
 
   const { data: statisticHistory } = useQuery({
     queryKey: ["player-statistic-history", player.id, daysAgo],
-    queryFn: () => {
-      return ssrApi.getPlayerStatisticHistory(player.id, getDaysAgoDate(actualDaysAgo), new Date());
-    },
+    queryFn: () => ssrApi.getPlayerStatisticHistory(player.id, getDaysAgoDate(actualDaysAgo), new Date()),
   });
 
   const views: SelectedView[] = [
-    ...(historyMode === HistoryMode.SIMPLE
-      ? [
-          {
-            index: 0,
-            label: "Ranking",
-            icon: GlobeAmericasIcon,
-            showDateRangeSelector: true,
-            chart: (_: ScoreSaberPlayer, statisticHistory: PlayerStatisticHistory) => (
-              <PlayerSimpleRankingChart statisticHistory={statisticHistory} daysAmount={actualDaysAgo} />
-            ),
-          },
-        ]
-      : [
-          {
-            index: 0,
-            label: "Ranking",
-            icon: GlobeAmericasIcon,
-            showDateRangeSelector: true,
-            chart: (_: ScoreSaberPlayer, statisticHistory: PlayerStatisticHistory) => (
-              <PlayerAdvancedRankingChart statisticHistory={statisticHistory} daysAmount={actualDaysAgo} />
-            ),
-          },
-        ]),
+    {
+      index: 0,
+      label: "Ranking",
+      icon: GlobeAmericasIcon,
+      showDateRangeSelector: true,
+      wrapCard: true,
+      chart: (_: ScoreSaberPlayer, statisticHistory: PlayerStatisticHistory) => {
+        switch (historyMode) {
+          case HistoryMode.SIMPLE:
+            return <PlayerSimpleRankingChart statisticHistory={statisticHistory} daysAmount={actualDaysAgo} />;
+          case HistoryMode.ADVANCED:
+            return <PlayerAdvancedRankingChart statisticHistory={statisticHistory} daysAmount={actualDaysAgo} />;
+          default:
+            return <PlayerSimpleRankingChart statisticHistory={statisticHistory} daysAmount={actualDaysAgo} />;
+        }
+      },
+    },
     {
       index: 1,
       label: "Accuracy",
       icon: TrendingUpIcon,
       showDateRangeSelector: true,
+      wrapCard: true,
       chart: (_, statisticHistory) => (
         <PlayerAccuracyChart statisticHistory={statisticHistory} daysAmount={actualDaysAgo} />
       ),
@@ -156,6 +142,7 @@ export default function PlayerViews({ player }: { player: ScoreSaberPlayer }) {
       label: "Scores",
       icon: SwordIcon,
       showDateRangeSelector: true,
+      wrapCard: true,
       chart: (_, statisticHistory) => (
         <PlayerScoresChart statisticHistory={statisticHistory} daysAmount={actualDaysAgo} />
       ),
@@ -165,31 +152,43 @@ export default function PlayerViews({ player }: { player: ScoreSaberPlayer }) {
       label: "Scores Graph",
       icon: ChartBarIcon,
       showDateRangeSelector: false,
+      wrapCard: false,
       chart: player => <ScoresGraphChart player={player} />,
     },
-    {
-      index: 4,
-      label: "+1 PP Calculator",
-      icon: CalculatorIcon,
-      showDateRangeSelector: false,
-      chart: player => <PlusPpCalculator player={player} />,
-    },
+    // {
+    //   index: 4,
+    //   label: "+1 PP Calculator",
+    //   icon: CalculatorIcon,
+    //   showDateRangeSelector: false,
+    //   wrapCard: false,
+    //   chart: player => <PlusPpCalculator player={player} />,
+    // },
   ];
-
-  const selectedView = views[selectedViewIndex];
 
   const handleViewSelect = (view: SelectedView) => {
     setSelectedViewIndex(view.index);
   };
-
   const handleDaysChange = (days: number) => {
     setDaysAgo(days);
   };
 
+  const selectedView = views[selectedViewIndex];
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-(--spacing-md)">
       <ViewSelector views={views} selectedView={selectedView} onViewSelect={handleViewSelect} />
-      {statisticHistory && historyMode !== undefined ? selectedView.chart(player, statisticHistory) : <Loading />}
+
+      {statisticHistory && historyMode !== undefined ? (
+        selectedView.wrapCard ? (
+          <Card className="p-2.5">{selectedView.chart(player, statisticHistory)}</Card>
+        ) : (
+          selectedView.chart(player, statisticHistory)
+        )
+      ) : (
+        <div className="flex h-[400px] items-center justify-center">
+          <Spinner />
+        </div>
+      )}
+
       {selectedView.showDateRangeSelector && (
         <div className="flex items-center justify-between gap-2">
           <DateRangeSelector daysAgo={daysAgo} onDaysChange={handleDaysChange} />
