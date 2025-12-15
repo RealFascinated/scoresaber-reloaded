@@ -74,9 +74,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 Country Rank: #${formatNumberWithCommas(player.countryRank)} (${player.country})
 PP: ${formatPp(player.pp)}pp
 HMD: ${player.hmd ?? "Unknown"}
-Joined: ${formatDate(player.joinedDate, "Do MMMM, YYYY")}
-
-Click here to view the scores for ${player.name}`,
+Joined: ${formatDate(player.joinedDate, "Do MMMM, YYYY")}`,
       images: [
         {
           url: player.avatar,
