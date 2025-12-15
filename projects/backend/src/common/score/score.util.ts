@@ -180,9 +180,11 @@ export async function sendMedalScoreNotification(
   }
 
   // Find the player with the highest positive change for the title
-  const topChangePlayer = await PlayerCoreService.getPlayer(
-    Array.from(changes.entries()).find(([, change]) => change.after - change.before > 0)?.[0] ?? ""
-  );
+  const topChangePlayerId = Array.from(changes.entries()).find(([, change]) => change.after - change.before > 0)?.[0] ?? "";
+  if (!topChangePlayerId) {
+    return;
+  }
+  const topChangePlayer = await PlayerCoreService.getPlayer(topChangePlayerId);
 
   await sendEmbedToChannel(
     DiscordChannels.MEDAL_SCORES_FEED,
