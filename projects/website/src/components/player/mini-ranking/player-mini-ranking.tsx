@@ -1,19 +1,18 @@
 import { cn } from "@/common/utils";
-import { PlayerInfo } from "@/components/player/player-info";
+import Avatar from "@/components/avatar";
 import SimpleLink from "@/components/simple-link";
 import { Spinner } from "@/components/spinner";
 import { useIsMobile } from "@/contexts/viewport-context";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
+import { getScoreSaberAvatar, getScoreSaberRoles } from "@ssr/common/utils/scoresaber.util";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
+import clsx from "clsx";
 import { ReactElement } from "react";
 import Card from "../../card";
 import CountryFlag from "../../ui/country-flag";
-import { getScoreSaberAvatar, getScoreSaberRoles } from "@ssr/common/utils/scoresaber.util";
-import clsx from "clsx";
-import Avatar from "@/components/avatar";
 
 type Variants = {
   [key: string]: {
@@ -68,7 +67,7 @@ function PlayerMiniRanking({
   })();
 
   return (
-    <Card className="sticky flex w-full flex-col gap-(--spacing-md) p-(--spacing-md) select-none sm:w-[400px] text-xs">
+    <Card className="sticky flex w-full flex-col gap-(--spacing-md) p-(--spacing-md) text-xs select-none sm:w-[400px]">
       {/* Header */}
       <div className="flex h-[24px] items-center gap-2">
         {icon}
@@ -100,20 +99,23 @@ function PlayerMiniRanking({
 
                 {/* Player */}
                 <div className="flex items-center gap-2">
-                  <Avatar src={getScoreSaberAvatar(playerRanking)} size={26} alt={`${playerRanking.name}'s Profile Picture`} />
-                  <SimpleLink href={`/player/${player.id}`}>
-                    <p
-                      className={clsx(
-                        playerRanking.id == player.id ? "font-bold" : "",
-                        "w-[125px] overflow-hidden text-left break-all text-ellipsis whitespace-nowrap transition-all duration-200",
-                      )}
-                      style={{
-                        color: getScoreSaberRoles(playerRanking)[0]?.color,
-                      }}
-                    >
-                      {playerRanking.name}
-                    </p>
-                  </SimpleLink>
+                  <Avatar
+                    src={getScoreSaberAvatar(playerRanking)}
+                    size={26}
+                    alt={`${playerRanking.name}'s Profile Picture`}
+                  />
+
+                  <p
+                    className={clsx(
+                      playerRanking.id == player.id ? "font-bold" : "",
+                      "w-[125px] overflow-hidden text-left break-all text-ellipsis whitespace-nowrap transition-all duration-200"
+                    )}
+                    style={{
+                      color: getScoreSaberRoles(playerRanking)[0]?.color,
+                    }}
+                  >
+                    {playerRanking.name}
+                  </p>
                 </div>
 
                 <div className="m-auto" />
