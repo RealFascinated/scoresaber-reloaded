@@ -10,6 +10,7 @@ import { FaMedal } from "react-icons/fa";
 import { ChangeOverTime } from "../../statistic/change-over-time";
 import { DailyChange } from "../../statistic/daily-change";
 import CountryFlag from "../../ui/country-flag";
+import { pluralize } from "@ssr/common/utils/string.util";
 
 function PlayerOverviewItem({ children }: { children: React.ReactNode }) {
   return (
@@ -98,7 +99,7 @@ const playerData = [
                 player.rankPages.medals ? "hover:text-primary/80 cursor-pointer transition-all" : ""
               )}
             >
-              {formatNumberWithCommas(player.medals)} Medals
+              {formatNumberWithCommas(player.medals)} Medal{pluralize(player.medals, "s")}
             </span>
           </FallbackLink>
         </PlayerOverviewItem>
