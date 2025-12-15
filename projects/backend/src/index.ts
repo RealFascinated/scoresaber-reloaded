@@ -106,10 +106,10 @@ export const app = new Elysia()
           },
         ],
       },
-      provider: "swagger-ui",
-      swagger: {
-        autoDarkMode: false,
-        defaultModelsExpandDepth: 1,
+      scalar: {
+        defaultOpenAllTags: true,
+        expandAllModelSections: true,
+        expandAllResponses: true,
       },
       mapJsonSchema: {
         zod: z.toJSONSchema,
@@ -261,6 +261,17 @@ export const app = new Elysia()
     if (request.headers.get("accept") === "application/superjson") {
       set.headers["content-type"] = "application/superjson";
       return SuperJSON.stringify(response);
+    }
+    // Ensure JSON responses have proper Content-Type for Swagger UI
+    if (!(response instanceof Response)) {
+      const contentType = set.headers["content-type"];
+      if (!contentType) {
+        if (typeof response === "string") {
+          set.headers["content-type"] = "text/plain";
+        } else if (typeof response === "object" && response !== null) {
+          set.headers["content-type"] = "application/json; charset=utf-8";
+        }
+      }
     }
     return response;
   })
