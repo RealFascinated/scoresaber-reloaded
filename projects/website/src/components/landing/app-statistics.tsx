@@ -1,7 +1,7 @@
 "use client";
 
 import { env } from "@ssr/common/env";
-import { AppStatistics } from "@ssr/common/schemas/response/ssr/app-statistics";
+import { AppStatisticsResponse } from "@ssr/common/schemas/response/ssr/app-statistics";
 import Request from "@ssr/common/utils/request";
 import { useQuery } from "@tanstack/react-query";
 import { History, LucideIcon, Target, Trophy, User, UserX, Video } from "lucide-react";
@@ -33,7 +33,7 @@ function StatCard({ icon: Icon, title, value }: StatCardProps) {
 export function AppStats({ className }: { className?: string }) {
   const { data: statistics } = useQuery({
     queryKey: ["app-statistics"],
-    queryFn: () => Request.get<AppStatistics>(env.NEXT_PUBLIC_API_URL + "/statistics"),
+    queryFn: () => Request.get<AppStatisticsResponse>(env.NEXT_PUBLIC_API_URL + "/statistics"),
     refetchInterval: 1000,
   });
 
