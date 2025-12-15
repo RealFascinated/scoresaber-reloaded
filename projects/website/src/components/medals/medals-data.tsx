@@ -23,6 +23,7 @@ import Combobox from "../ui/combo-box";
 import CountryFlag from "../ui/country-flag";
 import { FilterField, FilterRow, FilterSection } from "../ui/filter-section";
 import MedalsInfo from "./medals-info";
+import { pluralize } from "@ssr/common/utils/string.util";
 
 type RankingDataProps = {
   initialPage: number;
@@ -158,7 +159,7 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
                     <div className="flex w-full min-w-0 items-center justify-between">
                       <span className="truncate">{countryFilter.find(c => c.key === key)?.friendlyName ?? key}</span>
                       <span className="text-muted-foreground ml-4 text-sm whitespace-nowrap">
-                        {count.toLocaleString()} players
+                        {count.toLocaleString()} player{pluralize(count, "s")}
                       </span>
                     </div>
                   ),
