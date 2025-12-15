@@ -1,21 +1,19 @@
 "use client";
 
+import { ChartConfig } from "@/common/chart/types";
 import { Colors } from "@/common/colors";
 import { DEFAULT_WHAT_IF_RANGE, SettingIds } from "@/common/database/database";
-import Card from "@/components/card";
+import GenericChart from "@/components/api/chart/generic-chart";
+import ScoreButton from "@/components/score/button/score-button";
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { DualRangeSlider } from "@/components/ui/dual-range-slider";
 import useDatabase from "@/hooks/use-database";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { ScoreSaberCurve } from "@ssr/common/leaderboard-curve/scoresaber-curve";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { useDebounce } from "@uidotdev/usehooks";
-import type { ChartOptions } from "chart.js";
-import { Chart, Legend, LineController, LineElement, LinearScale, PointElement, Title, Tooltip } from "chart.js";
-import { useEffect, useState } from "react";
-import { Line } from "react-chartjs-2";
-
-// Register Chart.js components
-Chart.register(LineController, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
+import { ChartBarIcon } from "lucide-react";
+import { useMemo, useEffect, useState } from "react";
 
 type Props = {
   /**
@@ -24,7 +22,7 @@ type Props = {
   leaderboard: ScoreSaberLeaderboard;
 };
 
-export default function LeaderboardPpChart({ leaderboard }: Props) {
+export default function LeaderboardPpChartButton({ leaderboard }: Props) {
   const database = useDatabase();
   const whatIfRange = useStableLiveQuery(() => database.getWhatIfRange());
 
@@ -37,133 +35,113 @@ export default function LeaderboardPpChart({ leaderboard }: Props) {
     }
   }, [whatIfRange]);
 
-  const generateDataPoints = (min: number, max: number) => {
-    const precision = 0.5; // Use a smaller step size for smoother curve
-    const dataPoints = [];
-
-    for (let accuracy = min; accuracy <= max; accuracy += precision) {
-      dataPoints.push({
-        x: accuracy,
-        y: ScoreSaberCurve.getPp(leaderboard.stars, accuracy),
-      });
-    }
-
-    return dataPoints;
-  };
-
   const updateRange = (range: [number, number]) => {
     setValues(range);
     database.setSetting(SettingIds.WhatIfRange, range);
   };
 
-  const data = {
-    datasets: [
-      {
-        label: "PP",
-        data: generateDataPoints(debouncedValues[0], debouncedValues[1]),
-        borderColor: Colors.pp,
-        backgroundColor: Colors.rankedLight,
-        tension: 0.4,
-        pointRadius: 0,
-      },
-    ],
-  };
+  const { labels, dataPoints } = useMemo(() => {
+    const precision = 0.05;
+    const labels: number[] = [];
+    const dataPoints: (number | null)[] = [];
 
-  const options: ChartOptions<"line"> = {
-    responsive: true,
-    maintainAspectRatio: false,
-    animation: {
-      duration: 0,
-    },
-    interaction: { mode: "index", intersect: false },
-    scales: {
-      x: {
-        type: "linear",
-        min: debouncedValues[0],
-        max: debouncedValues[1],
-        title: {
-          display: false,
+    for (let accuracy = debouncedValues[0]; accuracy <= debouncedValues[1]; accuracy += precision) {
+      labels.push(accuracy);
+      dataPoints.push(ScoreSaberCurve.getPp(leaderboard.stars, accuracy));
+    }
+
+    return { labels, dataPoints };
+  }, [debouncedValues, leaderboard.stars]);
+
+  const chartConfig: ChartConfig = useMemo(
+    () => ({
+      datasets: [
+        {
+          label: "PP",
+          data: dataPoints,
+          color: Colors.pp,
+          axisId: "y",
+          type: "line",
+          pointRadius: 0,
+          showLegend: true,
+          labelFormatter: (value: number) => `${value.toFixed(2)}pp`,
         },
-        ticks: {
-          stepSize: 1,
-          color: "white",
-          callback: value => `${value}%`,
-          maxRotation: 45,
-          minRotation: 45,
-          font: {
-            size: 11,
-          },
-        },
-        grid: {
-          color: "#252525",
-        },
-      },
-      y: {
-        title: {
+      ],
+      axes: {
+        x: {
           display: true,
-          text: "PP",
+          displayName: "",
+          valueFormatter: (value: number) => `${value.toFixed(2)}%`,
         },
-        ticks: {
-          color: "white",
-          precision: 0,
-          callback: value => {
-            if (typeof value === "number") {
-              return `${value.toFixed(0)}pp`;
-            }
-            return value;
+        y: {
+          display: true,
+          position: "left",
+          displayName: "PP",
+          valueFormatter: (value: number) => `${value.toFixed(0)}pp`,
+        },
+      },
+      options: {
+        layout: {
+          padding: {
+            top: 20,
+            right: 10,
+            bottom: 20,
+            left: 0,
           },
         },
-        grid: {
-          color: "#252525",
-        },
-      },
-    },
-    plugins: {
-      legend: {
-        display: false,
-      },
-      tooltip: {
-        callbacks: {
-          label: (context: any) => {
-            return `${context.parsed.y.toFixed(2)}pp`;
+        scales: {
+          x: {
+            type: "linear",
+            min: debouncedValues[0],
+            max: debouncedValues[1],
+            grid: { color: "#252525" },
+            ticks: {
+              stepSize: 1,
+              callback: (value: number) => `${value.toFixed(2)}%`,
+              maxRotation: 45,
+              minRotation: 45,
+              color: "white",
+              font: {
+                size: 11,
+              },
+            },
+            title: {
+              display: false,
+            },
           },
         },
       },
-    },
-    layout: {
-      padding: {
-        top: 20,
-        right: 10,
-        bottom: 20,
-        left: 0,
-      },
-    },
-  };
+    }),
+    [dataPoints, debouncedValues]
+  );
 
   return (
-    <Card className="flex w-full flex-col gap-4">
-      <div className="space-y-1">
-        <h3 className="text-foreground text-lg font-semibold">PP Curve</h3>
-        <p className="text-muted-foreground text-sm">Shows PP values for different accuracy percentages.</p>
-      </div>
-
-      <div className="h-[300px] sm:h-[400px]">
-        <Line data={data} options={options} />
-      </div>
-
-      <div className="flex items-center justify-center">
-        <div className="w-[95%]">
-          <DualRangeSlider
-            label={value => <span>{value}%</span>}
-            value={values}
-            onValueChange={updateRange}
-            min={DEFAULT_WHAT_IF_RANGE[0]}
-            max={100}
-            step={0.5}
-            showLabelOnHover={false}
-          />
+    <Dialog>
+      <DialogTrigger asChild>
+        <ScoreButton tooltip={<p>View PP Chart</p>}>
+          <ChartBarIcon className="h-4 w-4" />
+        </ScoreButton>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-3xl">
+        <DialogTitle>PP Chart</DialogTitle>
+        <div className="h-[300px] sm:h-[400px]">
+          <GenericChart config={chartConfig} labels={labels} />
         </div>
-      </div>
-    </Card>
+
+        <div className="flex items-center justify-center">
+          <div className="w-[95%]">
+            <DualRangeSlider
+              label={value => <span>{value}%</span>}
+              value={values}
+              onValueChange={updateRange}
+              min={DEFAULT_WHAT_IF_RANGE[0]}
+              max={100}
+              step={0.5}
+              showLabelOnHover={false}
+            />
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }

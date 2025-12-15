@@ -15,7 +15,7 @@ export type ChartAxis = {
 
 export type ChartDataset = {
   label: string;
-  data: (number | null)[];
+  data: (number | null)[] | ({ x: number; y: number } | null)[];
   color: string;
   axisId: string;
   type?: ChartType;

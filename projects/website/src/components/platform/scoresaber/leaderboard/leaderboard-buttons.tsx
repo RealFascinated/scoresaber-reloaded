@@ -6,6 +6,7 @@ import { ScoreCopyBsrButton } from "@/components/score/button/score-copy-bsr-but
 import { SongOpenInYoutubeButton } from "@/components/score/button/song-open-in-youtube-button";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { BeatSaverMapResponse } from "@ssr/common/schemas/response/beatsaver/beatsaver-map";
+import LeaderboardPpChartButton from "./chart/leaderboard-pp-chart";
 
 type Props = {
   leaderboard: ScoreSaberLeaderboard;
@@ -62,6 +63,14 @@ const buttons = [
           songAuthorName={leaderboard.songAuthorName}
         />
       );
+    },
+  },
+  {
+    render: ({ leaderboard }: Props) => {
+      if (!leaderboard.ranked) {
+        return null;
+      }
+      return <LeaderboardPpChartButton leaderboard={leaderboard} />;
     },
   },
 ];

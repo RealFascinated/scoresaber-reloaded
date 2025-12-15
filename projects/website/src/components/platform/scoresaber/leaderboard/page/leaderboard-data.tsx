@@ -12,7 +12,7 @@ import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
-import LeaderboardPpChart from "../chart/leaderboard-pp-chart";
+import LeaderboardPpChartButton from "../chart/leaderboard-pp-chart";
 import { LeaderboardStarChangeHistory } from "../leaderboard-star-change-history";
 
 type LeaderboardDataProps = {
@@ -53,18 +53,7 @@ export function ScoreSaberLeaderboardData({ initialLeaderboard, initialPage, ini
       <div className="w-full space-y-2">
         <div className="flex w-full flex-col-reverse gap-2 xl:flex-row xl:gap-2">
           {/* Mobile Sidebar */}
-          {isMobile && (
-            <div className="flex flex-col gap-2">
-              {/* Filters */}
-              <ScoreSaberLeaderboardFilters />
-
-              {/* Charts Grid */}
-              <div className="grid grid-cols-1 gap-2">
-                {/* PP Chart */}
-                {leaderboard.stars > 0 && leaderboard.maxScore > 0 && <LeaderboardPpChart leaderboard={leaderboard} />}
-              </div>
-            </div>
-          )}
+          {isMobile && <ScoreSaberLeaderboardFilters />}
 
           {/* Main Content Area */}
           <div className="flex w-full flex-col gap-2">
@@ -90,14 +79,6 @@ export function ScoreSaberLeaderboardData({ initialLeaderboard, initialPage, ini
                 </div>
               )}
             </Card>
-
-            {/* Desktop Charts Grid */}
-            {!isMobile && (
-              <div className="grid grid-cols-1 gap-2 lg:grid-cols-2">
-                {/* PP Chart */}
-                {leaderboard.stars > 0 && leaderboard.maxScore > 0 && <LeaderboardPpChart leaderboard={leaderboard} />}
-              </div>
-            )}
           </div>
 
           {/* Desktop Sidebar */}

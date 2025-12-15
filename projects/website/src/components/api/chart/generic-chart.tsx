@@ -42,7 +42,7 @@ declare module "chart.js" {
 
 type Props = {
   config: ChartConfig;
-  labels: Date[] | string[];
+  labels: Date[] | string[] | number[];
 };
 
 const GenericChart = ({ config, labels }: Props) => {
@@ -57,10 +57,31 @@ const GenericChart = ({ config, labels }: Props) => {
   }, [axes, isMobile]);
 
   const chartDatasets = useMemo(() => {
+    // Check if x-axis is linear and labels are numeric
+    const isXAxisLinear = customOptions?.scales?.x?.type === "linear";
+    const isNumericLabels = labels.length > 0 && typeof labels[0] === "number";
+
     return datasets.map(dataset => {
+      // Transform data to {x, y} format for linear x-axis with numeric labels
+      let transformedData: (number | null)[] | ({ x: number; y: number } | null)[] = dataset.data;
+      if (isXAxisLinear && isNumericLabels && Array.isArray(dataset.data) && dataset.data.length > 0) {
+        // Check if data is already in {x, y} format
+        const firstItem = dataset.data[0];
+        if (firstItem !== null && typeof firstItem === "object" && "x" in firstItem && "y" in firstItem) {
+          // Already in {x, y} format, use as is
+          transformedData = dataset.data as ({ x: number; y: number } | null)[];
+        } else {
+          // Transform from number[] to {x, y}[]
+          transformedData = (dataset.data as (number | null)[]).map((y, index) => {
+            if (y === null) return null;
+            return { x: labels[index] as number, y };
+          });
+        }
+      }
+
       const baseConfig = {
         label: dataset.label,
-        data: dataset.data,
+        data: transformedData,
         borderColor: dataset.color,
         backgroundColor: dataset.type === "bar" || dataset.type === "point" ? dataset.color : undefined,
         fill: false,
@@ -97,57 +118,74 @@ const GenericChart = ({ config, labels }: Props) => {
         type: "line" as const,
       };
     });
-  }, [datasets, database, id, hiddenAxes]);
+  }, [datasets, database, id, hiddenAxes, labels, customOptions]);
 
   const chartAxes = useMemo(() => {
+    // Check if x-axis is configured as linear in customOptions
+    const isXAxisLinear = customOptions?.scales?.x?.type === "linear";
+    const isNumericLabels = labels.length > 0 && typeof labels[0] === "number";
+
     const generatedAxes: Record<string, any> = {
-      x: {
-        grid: { color: "#252525" },
-        ticks: {
-          maxRotation: 45,
-          minRotation: 45,
-          maxTicksLimit: () => {
-            // For ranges less than 3 months, show all days
-            if (labels.length <= 90) {
-              return labels.length;
-            }
-            // For larger ranges, limit to 10 ticks
-            return 10;
+      x: isXAxisLinear
+        ? {
+            // If linear scale is specified in customOptions, use it (will be merged/overridden)
+            type: "linear",
+            grid: { color: "#252525" },
+            // Use valueFormatter from axes config if available
+            ticks: axes.x?.valueFormatter
+              ? {
+                  callback: (value: number) => axes.x!.valueFormatter!(value),
+                }
+              : undefined,
+          }
+        : {
+            grid: { color: "#252525" },
+            ticks: {
+              maxRotation: 45,
+              minRotation: 45,
+              maxTicksLimit: () => {
+                // For ranges less than 3 months, show all days
+                if (labels.length <= 90) {
+                  return labels.length;
+                }
+                // For larger ranges, limit to 10 ticks
+                return 10;
+              },
+              callback: (value: any, index: number) => {
+                if (typeof labels[index] === "string") return labels[index];
+                if (typeof labels[index] === "number") return labels[index].toString();
+                const date = labels[index] instanceof Date ? labels[index] : parseDate(labels[index]);
+                const daysAgo = getDaysAgo(date);
+
+                // For large date ranges, show month and year
+                if (labels.length > 90) {
+                  const currentYear = new Date().getUTCFullYear();
+                  const dateYear = date.getUTCFullYear();
+                  return dateYear === currentYear
+                    ? date.toLocaleString("en-US", { timeZone: "Europe/London", month: "long" })
+                    : formatDate(date, "MMMM YYYY");
+                }
+
+                // For medium date ranges, show day and month
+                if (labels.length > 30) {
+                  const currentYear = new Date().getUTCFullYear();
+                  const dateYear = date.getUTCFullYear();
+                  return dateYear === currentYear
+                    ? date.toLocaleString("en-US", {
+                        timeZone: "Europe/London",
+                        day: "numeric",
+                        month: "long",
+                      })
+                    : formatDate(date, "DD MMMM YYYY");
+                }
+
+                // For small date ranges, show relative dates
+                if (daysAgo === 0) return "Now";
+                if (daysAgo === 1) return "Yesterday";
+                return `${daysAgo}d ago`;
+              },
+            },
           },
-          callback: (value: any, index: number) => {
-            if (typeof labels[index] === "string") return labels[index];
-            const date = labels[index] instanceof Date ? labels[index] : parseDate(labels[index]);
-            const daysAgo = getDaysAgo(date);
-
-            // For large date ranges, show month and year
-            if (labels.length > 90) {
-              const currentYear = new Date().getUTCFullYear();
-              const dateYear = date.getUTCFullYear();
-              return dateYear === currentYear
-                ? date.toLocaleString("en-US", { timeZone: "Europe/London", month: "long" })
-                : formatDate(date, "MMMM YYYY");
-            }
-
-            // For medium date ranges, show day and month
-            if (labels.length > 30) {
-              const currentYear = new Date().getUTCFullYear();
-              const dateYear = date.getUTCFullYear();
-              return dateYear === currentYear
-                ? date.toLocaleString("en-US", {
-                    timeZone: "Europe/London",
-                    day: "numeric",
-                    month: "long",
-                  })
-                : formatDate(date, "DD MMMM YYYY");
-            }
-
-            // For small date ranges, show relative dates
-            if (daysAgo === 0) return "Now";
-            if (daysAgo === 1) return "Yesterday";
-            return `${daysAgo}d ago`;
-          },
-        },
-      },
     };
 
     Object.entries(axes).forEach(([axisId, axis]) => {
@@ -170,25 +208,51 @@ const GenericChart = ({ config, labels }: Props) => {
     });
 
     return generatedAxes;
-  }, [axes, isMobile, labels]);
+  }, [axes, isMobile, labels, customOptions]);
 
   const formattedLabels = useMemo(() => {
+    // Check if x-axis is linear - if so, use numeric labels directly
+    const isXAxisLinear = customOptions?.scales?.x?.type === "linear";
+    if (isXAxisLinear && labels.length > 0 && typeof labels[0] === "number") {
+      return labels.map(value => (typeof value === "number" ? value.toString() : value));
+    }
+
     return labels.map(value => {
       if (typeof value === "string") return value;
+      if (typeof value === "number") return value.toString();
       const formattedDate = formatChartDate(value);
       if (formattedDate === formatDateMinimal(getDaysAgoDate(0))) return "Now";
       if (formattedDate === formatDateMinimal(getDaysAgoDate(1))) return "Yesterday";
       return formattedDate;
     });
-  }, [labels]);
+  }, [labels, customOptions]);
 
-  const chartOptions = useMemo(
-    () => ({
+  const chartOptions = useMemo(() => {
+    // Merge customOptions.scales with chartAxes
+    const mergedScales = { ...chartAxes };
+    if (customOptions?.scales) {
+      Object.keys(customOptions.scales).forEach(axisId => {
+        mergedScales[axisId] = {
+          ...mergedScales[axisId],
+          ...customOptions.scales[axisId],
+          // Deep merge ticks if both exist
+          ticks: mergedScales[axisId]?.ticks && customOptions.scales[axisId]?.ticks
+            ? { ...mergedScales[axisId].ticks, ...customOptions.scales[axisId].ticks }
+            : customOptions.scales[axisId]?.ticks || mergedScales[axisId]?.ticks,
+          // Deep merge title if both exist
+          title: mergedScales[axisId]?.title && customOptions.scales[axisId]?.title
+            ? { ...mergedScales[axisId].title, ...customOptions.scales[axisId].title }
+            : customOptions.scales[axisId]?.title || mergedScales[axisId]?.title,
+        };
+      });
+    }
+
+    return {
       animation: customOptions?.animation || { duration: 0 },
       maintainAspectRatio: false,
       responsive: true,
       interaction: { mode: "index" as const, intersect: false },
-      scales: chartAxes,
+      scales: mergedScales,
       elements: {
         line: {
           tension: 0.4,
@@ -233,8 +297,28 @@ const GenericChart = ({ config, labels }: Props) => {
         tooltip: {
           callbacks: {
             title: (context: any) => {
+              // For linear scales with {x, y} data, use parsed.x
+              const isXAxisLinear = customOptions?.scales?.x?.type === "linear";
+              const isNumericLabels = labels.length > 0 && typeof labels[0] === "number";
+              
+              if (isXAxisLinear && isNumericLabels) {
+                const xValue = context[0].parsed.x;
+                // Use valueFormatter from axes config if available
+                if (axes.x?.valueFormatter) {
+                  return axes.x.valueFormatter(xValue);
+                }
+                return `${xValue.toFixed(1)}%`;
+              }
+
               const value = labels[context[0].dataIndex];
               if (typeof value === "string") return value;
+              if (typeof value === "number") {
+                // Use valueFormatter from axes config if available
+                if (axes.x?.valueFormatter) {
+                  return axes.x.valueFormatter(value);
+                }
+                return value.toString();
+              }
 
               const date = value instanceof Date ? value : parseDate(value);
               const differenceInDays = getDaysAgo(date);
@@ -255,16 +339,23 @@ const GenericChart = ({ config, labels }: Props) => {
             },
             label: (context: any) => {
               const value = Number(context.parsed.y);
-              const dataset = datasets[context.datasetIndex];
-              return dataset.labelFormatter?.(value) ?? "";
+              const datasetConfig = datasets[context.datasetIndex];
+              if (datasetConfig.labelFormatter) {
+                return datasetConfig.labelFormatter(value);
+              }
+              // Fallback: show label and value
+              const chartDataset = context.chart.data.datasets[context.datasetIndex];
+              return `${chartDataset.label || datasetConfig.label}: ${value.toFixed(2)}`;
             },
           },
         },
       },
-      ...customOptions,
-    }),
-    [chartAxes, labels, datasets, database, id, customOptions]
-  );
+      // Spread other customOptions (excluding scales which we already merged)
+      ...Object.fromEntries(
+        Object.entries(customOptions || {}).filter(([key]) => key !== "scales")
+      ),
+    };
+  }, [chartAxes, labels, datasets, database, id, customOptions]);
 
   // Check if any dataset has data
   const showNoData = useMemo(() => {
