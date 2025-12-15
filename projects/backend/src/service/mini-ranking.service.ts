@@ -15,10 +15,7 @@ export default class MiniRankingService {
    * @param id the player to get around
    */
   public static async getPlayerMiniRankings(id: string): Promise<MiniRankingResponse> {
-    const player = await ScoreSaberService.getPlayer(id, "basic", undefined, {
-      setInactivesRank: false,
-      setMedalsRank: false,
-    });
+    const player = await ScoreSaberService.getPlayer(id, "basic");
     if (player == undefined) {
       throw new NotFoundError(`Player "${id}" not found`);
     }
@@ -114,10 +111,7 @@ export default class MiniRankingService {
       .flatMap(response => response.players)
       .map(
         async player =>
-          await ScoreSaberService.getPlayer(player.id, "basic", player, {
-            setInactivesRank: false,
-            setMedalsRank: false,
-          })
+          await ScoreSaberService.getPlayer(player.id, "basic", player)
       );
 
     return this.processPlayersAndBuildResult(allPlayers, player, type, getRank);
