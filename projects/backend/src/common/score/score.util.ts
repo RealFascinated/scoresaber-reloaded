@@ -181,7 +181,13 @@ export async function sendMedalScoreNotification(
   const sortedChanges = Array.from(changes.entries()).sort(
     (a, b) => b[1].after - b[1].before - (a[1].after - a[1].before)
   );
-  const [topPlayerId] = sortedChanges.find(([, change]) => change.after - change.before > 0)!;
+  const topChangeEntry = sortedChanges.find(([, change]) => change.after - change.before > 0);
+  // If no positive change, return
+  if (!topChangeEntry) {
+    return;
+  }
+  
+  const [topPlayerId] = topChangeEntry;
   const topChangePlayer = await PlayerCoreService.getPlayer(topPlayerId);
 
   await sendEmbedToChannel(
