@@ -15,7 +15,7 @@ function LeaderboardStarChangeHistoryButton({ onClick, isOpen }: { onClick: () =
       onClick={onClick}
     >
       <StarIcon className="h-4 w-4 text-yellow-500" />
-      <span>Show Ranked Changes</span>
+      <span>Show Star Changes</span>
       {isOpen ? <ChevronUpIcon className="h-4 w-4" /> : <ChevronDownIcon className="h-4 w-4" />}
     </button>
   );
