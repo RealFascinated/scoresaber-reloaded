@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import useDatabase from "../../hooks/use-database";
 import SimpleTooltip from "../simple-tooltip";
 import { Button } from "../ui/button";
+import { SHARED_CONSTS } from "@ssr/common/shared-consts";
 
 export default function FriendAction({
   player,
@@ -40,6 +41,12 @@ export default function FriendAction({
    * Adds this player as a friend
    */
   async function addFriend() {
+    const friends = await database.getFriendIds();
+    if (friends.length >= SHARED_CONSTS.maxFriends) {
+      toast.error(`You can only have a maximum of ${SHARED_CONSTS.maxFriends} friends.`);
+      return;
+    }
+
     await database.addFriend(id);
     toast.success(
       <p>

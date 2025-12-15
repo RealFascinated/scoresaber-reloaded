@@ -5,7 +5,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { DualRangeSlider } from "@/components/ui/dual-range-slider";
 import { FilterField, FilterSection } from "@/components/ui/filter-section";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Consts } from "@ssr/common/consts";
+import { SHARED_CONSTS } from "@ssr/common/shared-consts";
 import { MapCategory, MapSort } from "@ssr/common/maps/types";
 import { Input } from "../ui/input";
 
@@ -18,7 +18,7 @@ export default function MapFilters() {
     filter.search.length > 0 ||
     filter.category !== undefined ||
     filter.starMin !== undefined ||
-    filter.starMax !== Consts.MAX_STARS;
+    filter.starMax !== SHARED_CONSTS.maxStars;
 
   return (
     <FilterSection
@@ -114,13 +114,13 @@ export default function MapFilters() {
       <FilterField label="Star Range">
         <DualRangeSlider
           label={value => <span className="text-xs">{value}</span>}
-          value={[filter.starMin ?? 0, filter.starMax ?? Consts.MAX_STARS]}
+          value={[filter.starMin ?? 0, filter.starMax ?? SHARED_CONSTS.maxStars]}
           onValueChange={value => {
             filter.setStarMin(value[0]);
             filter.setStarMax(value[1]);
           }}
           min={0}
-          max={Consts.MAX_STARS}
+          max={SHARED_CONSTS.maxStars}
           step={0.1}
           showLabelOnHover={false}
           className="pt-10 pb-2"

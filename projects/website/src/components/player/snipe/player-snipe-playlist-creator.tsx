@@ -15,7 +15,7 @@ import { Slider } from "@/components/ui/slider";
 import useDatabase from "@/hooks/use-database";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Consts } from "@ssr/common/consts";
+import { SHARED_CONSTS } from "@ssr/common/shared-consts";
 import { env } from "@ssr/common/env";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { encodeSnipePlaylistSettings } from "@ssr/common/snipe/snipe-playlist-utils";
@@ -91,7 +91,7 @@ export default function SnipePlaylistCreator({ toSnipe }: Props) {
       sortDirection: "desc",
       limit: 150,
       rankedStatus: "ranked",
-      starRange: { min: 0, max: Consts.MAX_STARS },
+      starRange: { min: 0, max: SHARED_CONSTS.maxStars },
       accuracyRange: { min: ACCURACY_MIN, max: ACCURACY_MAX },
     },
   });
@@ -303,7 +303,7 @@ export default function SnipePlaylistCreator({ toSnipe }: Props) {
                             name="starRange"
                             control={form.control}
                             render={({ field, fieldState }) => {
-                              const val = field.value ?? { min: 0, max: Consts.MAX_STARS };
+                              const val = field.value ?? { min: 0, max: SHARED_CONSTS.maxStars };
                               return (
                                 <FormItem className="flex flex-col items-start space-y-2 py-1 md:flex-row md:items-center md:justify-between md:space-y-0">
                                   <div className="flex-1 space-y-0 md:pr-4">
@@ -313,7 +313,7 @@ export default function SnipePlaylistCreator({ toSnipe }: Props) {
                                     <div className="flex w-full items-center gap-3 md:w-52">
                                       <DualRangeSlider
                                         min={0}
-                                        max={Consts.MAX_STARS}
+                                        max={SHARED_CONSTS.maxStars}
                                         step={STAR_STEP}
                                         label={v => <span className="text-xs">{v}</span>}
                                         value={[val.min, val.max]}

@@ -14,7 +14,7 @@ import {
 import { DualRangeSlider } from "@/components/ui/dual-range-slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Consts } from "@ssr/common/consts";
+import { SHARED_CONSTS } from "@ssr/common/shared-consts";
 import { env } from "@ssr/common/env";
 import {
   customRankedPlaylistSchema,
@@ -68,7 +68,7 @@ export default function CustomPlaylistCreator() {
                 render={({ field }) => (
                   <DualRangeSlider
                     min={0}
-                    max={Consts.MAX_STARS}
+                    max={SHARED_CONSTS.maxStars}
                     value={[field.value.min, field.value.max]}
                     label={value => value}
                     onValueChange={value => {

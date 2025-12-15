@@ -1,4 +1,4 @@
-import { Consts } from "@ssr/common/consts";
+import { SHARED_CONSTS } from "@ssr/common/shared-consts";
 import { env } from "@ssr/common/env";
 import { BadRequestError } from "@ssr/common/error/bad-request-error";
 import { InternalServerError } from "@ssr/common/error/internal-server-error";
@@ -289,7 +289,7 @@ export default class PlaylistService {
             settings?.starRange?.min !== undefined &&
             settings?.starRange?.max !== undefined &&
             leaderboard.stars > 0 &&
-            leaderboard.stars <= Consts.MAX_STARS
+            leaderboard.stars <= SHARED_CONSTS.maxStars
           ) {
             if (leaderboard.stars < settings.starRange.min || leaderboard.stars > settings.starRange.max) {
               return false;
