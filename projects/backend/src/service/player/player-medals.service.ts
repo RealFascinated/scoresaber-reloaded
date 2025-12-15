@@ -80,7 +80,7 @@ export class PlayerMedalsService {
    *
    * @param playerIds the ids of the players
    */
-  public static async updatePlayerMedalCounts(...playerIds: string[]): Promise<void> {
+  public static async updatePlayerMedalCounts(...playerIds: string[]): Promise<Record<string, number>> {
     const before = performance.now();
     const medalCounts = await ScoreSaberMedalsScoreModel.aggregate([
       {
@@ -109,6 +109,14 @@ export class PlayerMedalsService {
 
     Logger.info(
       `[PLAYER MEDALS] Updated ${medalCounts.length} player medal counts in ${formatDuration(performance.now() - before)}`
+    );
+
+    return medalCounts.reduce(
+      (acc, curr) => {
+        acc[curr.playerId] = curr.totalMedals;
+        return acc;
+      },
+      {} as Record<string, number>
     );
   }
 
