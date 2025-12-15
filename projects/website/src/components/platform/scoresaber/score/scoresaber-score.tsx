@@ -140,7 +140,7 @@ export default function ScoreSaberScoreDisplay({
                     : "cursor-not-allowed text-red-400"
                 )}
                 fill="none"
-                viewBox="0 0 10 32"
+                viewBox="0 0 6 32"
                 stroke="currentColor"
                 strokeWidth="2"
                 strokeLinecap="round"
