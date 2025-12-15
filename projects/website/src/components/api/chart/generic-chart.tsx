@@ -32,6 +32,7 @@ dayjs.extend(utc);
 
 Chart.register(LineElement, PointElement, BarElement, LinearScale, CategoryScale, Legend, Tooltip, BarController);
 
+
 type Props = {
   config: ChartConfig;
   labels: Date[] | string[] | number[];
@@ -201,13 +202,15 @@ const GenericChart = ({ config, labels }: Props) => {
         point: {
           radius: (ctx: any) => {
             if (labels.length > 90) return 0;
-            const dataset = ctx.chart.data.datasets[ctx.datasetIndex];
+            const dataset = ctx.chart?.data?.datasets?.[ctx.datasetIndex];
+            if (!dataset) return 3;
             return dataset.type === "point" ? dataset.pointRadius || 3 : 3;
           },
           hoverRadius: (ctx: any) => {
             if (labels.length > 365) return 0;
             if (labels.length > 90) return 2;
-            const dataset = ctx.chart.data.datasets[ctx.datasetIndex];
+            const dataset = ctx.chart?.data?.datasets?.[ctx.datasetIndex];
+            if (!dataset) return 4;
             return dataset.type === "point" ? (dataset.pointRadius || 3) + 2 : 4;
           },
         },
@@ -286,6 +289,18 @@ const GenericChart = ({ config, labels }: Props) => {
           className="h-full max-w-full"
           options={chartOptions}
           data={{ labels: formattedLabels, datasets: chartDatasets as any }}
+          plugins={[
+            {
+              id: "paddingBelowLegends",
+              beforeInit(chart: any) {
+                const originalFit = chart.legend.fit;
+                chart.legend.fit = function fit() {
+                  originalFit.bind(chart.legend)();
+                  this.height += 8;
+                };
+              },
+            },
+          ]}
         />
       </div>
     </div>
