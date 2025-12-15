@@ -1,6 +1,6 @@
 import { ScoreSaberCurve } from "@ssr/common/leaderboard-curve/scoresaber-curve";
 import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
-import { PlayerRankedPpsResponse } from "@ssr/common/response/player-ranked-pps-response";
+import { PlayerPpsResponse } from "@ssr/common/schemas/response/player/player-pps";
 import { updateScoreWeights } from "@ssr/common/utils/scoresaber.util";
 import { PlayerCoreService } from "./player-core.service";
 
@@ -11,7 +11,7 @@ export class PlayerRankedService {
    * @param playerId the player's id
    * @returns the ranked pp scores
    */
-  public static async getPlayerPps(playerId: string): Promise<PlayerRankedPpsResponse> {
+  public static async getPlayerPps(playerId: string): Promise<PlayerPpsResponse> {
     await PlayerCoreService.playerExists(playerId, true);
 
     const playerScores = await ScoreSaberScoreModel.find({
@@ -33,6 +33,7 @@ export class PlayerRankedService {
     const scores = playerScores.map(score => ({
       pp: score.pp,
       scoreId: score.scoreId,
+      weight: 0,
     }));
 
     updateScoreWeights(scores); // Set the weights for the scores

@@ -152,14 +152,16 @@ export function getDifficultyFromScoreSaberDifficulty(ssDifficultyNumber: number
 export function getScoreSaberAvatar(
   player: ScoreSaberPlayerToken | ScoreSaberLeaderboardPlayerInfoToken | ScoreSaberPlayer
 ): string {
+  const fallbackAvatar = `https://cdn.scoresaber.com/avatars/${player.id}.jpg`;
+
   if ("profilePicture" in player) {
-    return player.profilePicture ?? `https://cdn.scoresaber.com/avatars/${player.id}.jpg`;
+    return player.profilePicture ?? fallbackAvatar;
   }
   if ("avatar" in player) {
-    return player.avatar ?? `https://cdn.scoresaber.com/avatars/${player.id}.jpg`;
+    return player.avatar ?? fallbackAvatar;
   }
 
-  return `https://cdn.scoresaber.com/avatars/${player.id}.jpg`;
+  return fallbackAvatar;
 }
 
 /**

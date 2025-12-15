@@ -57,7 +57,6 @@ export default function ScoreSaberScoreEditorButton({ score, leaderboard, update
       }
       newModifiedScores = newModifiedScores.sort((a, b) => b.pp - a.pp);
       updateScoreWeights(newModifiedScores);
-
       setModifiedScores(newModifiedScores);
     }
   };
