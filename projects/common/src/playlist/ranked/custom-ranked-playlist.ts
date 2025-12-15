@@ -1,4 +1,4 @@
-import { SHARED_CONSTS } from "src/shared-consts";
+import { SHARED_CONSTS } from "../../shared-consts";
 import { z } from "zod";
 
 export const customRankedPlaylistSchema = z.object({

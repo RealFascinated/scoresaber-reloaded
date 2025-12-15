@@ -69,7 +69,7 @@ export function ScoreSaberLeaderboardData({ initialLeaderboard, initialPage, ini
           {/* Main Content Area */}
           <div className="flex w-full flex-col gap-2">
             {/* Leaderboard Scores */}
-            <Card className="relative w-full">
+            <Card className="relative w-full gap-(--spacing-sm)">
               <LeaderboardScores
                 leaderboard={leaderboard}
                 beatSaver={beatsaver}
