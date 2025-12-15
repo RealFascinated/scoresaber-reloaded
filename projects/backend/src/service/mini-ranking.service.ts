@@ -1,7 +1,7 @@
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import { MiniRankingResponse } from "@ssr/common/response/around-player-response";
+import { MiniRankingResponse } from "@ssr/common/schemas/response/player/around-player";
 import CacheService, { CacheId } from "./cache.service";
 import { PlayerMedalsService } from "./player/player-medals.service";
 import ScoreSaberService from "./scoresaber.service";

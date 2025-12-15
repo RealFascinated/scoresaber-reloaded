@@ -1,7 +1,7 @@
 import BeatSaverLogo from "@/components/logos/beatsaver-logo";
 import ScoreButton from "@/components/score/button/score-button";
 import SimpleLink from "@/components/simple-link";
-import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
+import { BeatSaverMapResponse } from "@ssr/common/schemas/response/beatsaver/beatsaver-map";
 
 type BeatSaverMapProps = {
   beatSaverMap: BeatSaverMapResponse;

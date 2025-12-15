@@ -44,7 +44,7 @@ export default function PlusPpCalculator({ player }: { player: ScoreSaberPlayer 
 
   const { data: rankedPps } = useQuery({
     queryKey: ["ranked-pps", player.id],
-    queryFn: () => ssrApi.getPlayerRankedPps(player.id),
+    queryFn: () => ssrApi.getPlayerPps(player.id),
   });
 
   const sortedScores = useMemo(

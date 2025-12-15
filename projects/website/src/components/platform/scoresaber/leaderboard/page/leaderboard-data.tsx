@@ -7,7 +7,7 @@ import LeaderboardScores from "@/components/platform/scoresaber/leaderboard/lead
 import { LeaderboardFilterProvider } from "@/components/providers/leaderboard/leaderboard-filter-provider";
 import { ScoreModeEnum } from "@/components/score/score-mode-switcher";
 import { useIsMobile } from "@/contexts/viewport-context";
-import { LeaderboardResponse } from "@ssr/common/response/leaderboard-response";
+import { LeaderboardResponse } from "@ssr/common/schemas/response/leaderboard/leaderboard";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";

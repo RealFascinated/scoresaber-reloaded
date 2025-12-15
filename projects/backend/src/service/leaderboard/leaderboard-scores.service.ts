@@ -1,7 +1,8 @@
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger from "@ssr/common/logger";
-import LeaderboardScoresResponse from "@ssr/common/response/leaderboard-scores-response";
+import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
+import LeaderboardScoresResponse from "@ssr/common/schemas/response/leaderboard/leaderboard-scores";
 import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 import { Metadata } from "@ssr/common/types/metadata";
 import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score";
@@ -97,7 +98,7 @@ export class LeaderboardScoresService {
     );
 
     return {
-      scores: await Promise.all(scorePromises),
+      scores: (await Promise.all(scorePromises)).filter(score => score !== undefined) as ScoreSaberScore[],
       leaderboard: leaderboard,
       beatSaver: beatSaverMap,
       metadata: metadata,

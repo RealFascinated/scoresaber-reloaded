@@ -3,14 +3,15 @@ import { CooldownPriority } from "@ssr/common/cooldown";
 import Logger from "@ssr/common/logger";
 import { MEDAL_COUNTS } from "@ssr/common/medal";
 import { AdditionalScoreData } from "@ssr/common/model/additional-score-data/additional-score-data";
-import { PlayerModel } from "@ssr/common/model/player/player";
 import { ScoreSaberMedalsScoreModel } from "@ssr/common/model/score/impl/scoresaber-medals-score";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
+import { MedalChange } from "@ssr/common/schemas/medals/medal-changes";
 import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 import { isProduction } from "@ssr/common/utils/utils";
 import { sendMedalScoreNotification } from "../../common/score/score.util";
 import { LeaderboardCoreService } from "../leaderboard/leaderboard-core.service";
 import { LeaderboardLeaderboardsService } from "../leaderboard/leaderboard-leaderboards.service";
+import { PlayerMedalsService } from "../player/player-medals.service";
 
 export class MedalScoresService {
   private static IGNORE_SCORES = false;
@@ -144,56 +145,22 @@ export class MedalScoresService {
       });
     }
 
-    // Calculate medal changes
-    const medalChanges = new Map<string, number>();
-    const allPlayers = new Set([...oldMedalCounts.keys(), ...newMedalCounts.keys()]);
-    for (const playerId of allPlayers) {
-      const change = (newMedalCounts.get(playerId) || 0) - (oldMedalCounts.get(playerId) || 0);
-      if (change !== 0) {
-        medalChanges.set(playerId, change);
-      }
+    const changes = new Map<string, MedalChange>();
+    for (const [playerId, newMedalCount] of newMedalCounts.entries()) {
+      const oldMedalCount = oldMedalCounts.get(playerId) || 0;
+      changes.set(playerId, { before: oldMedalCount, after: newMedalCount });
     }
 
-    // Only send notification if at least one player gained medals
-    const hasGainedMedals = Array.from(medalChanges.values()).some(change => change > 0);
-    if (medalChanges.size > 0 && hasGainedMedals) {
-      // Fetch current medal counts before updating
-      const playerIds = Array.from(medalChanges.keys());
-      const players = await PlayerModel.find({ _id: { $in: playerIds } })
-        .select("_id medals")
-        .lean();
-      const oldPlayerMedalCounts = new Map<string, number>();
-      for (const player of players) {
-        oldPlayerMedalCounts.set(player._id.toString(), player.medals || 0);
-      }
+    await PlayerMedalsService.updatePlayerMedalCounts(...changes.keys());
 
-      const playerUpdates = Array.from(medalChanges.entries()).map(([playerId, change]) => {
-        return {
-          updateOne: {
-            filter: { _id: playerId },
-            update: { $inc: { medals: change } },
-          },
-        };
-      });
-      await PlayerModel.bulkWrite(playerUpdates);
+    //  Log medal changes
+    Logger.info(
+      `[MEDAL SCORES] Medal changes on leaderboard ${incomingScore.leaderboardId}: ${Array.from(changes.entries())
+        .map(([playerId, change]) => `${playerId}: ${change.before} -> ${change.after}`)
+        .join(", ")}`
+    );
 
-      // Log medal changes
-      Logger.info(
-        `[MEDAL SCORES] Medal changes on leaderboard ${incomingScore.leaderboardId}: ${Array.from(
-          medalChanges.entries()
-        )
-          .map(([playerId, change]) => `${playerId}: ${change > 0 ? "+" : ""}${change}`)
-          .join(", ")}`
-      );
-
-      // Send notifications for medal changes
-      await sendMedalScoreNotification(
-        incomingScore,
-        leaderboard.leaderboard,
-        beatLeaderScore,
-        medalChanges,
-        oldPlayerMedalCounts
-      );
-    }
+    // Send notifications for medal changes
+    await sendMedalScoreNotification(incomingScore, leaderboard.leaderboard, beatLeaderScore, changes);
   }
 }

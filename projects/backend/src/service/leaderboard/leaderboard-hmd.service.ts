@@ -1,5 +1,5 @@
 import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
-import { PlaysByHmdResponse } from "@ssr/common/response/plays-by-hmd-response";
+import { PlaysByHmdResponse } from "@ssr/common/schemas/response/leaderboard/plays-by-hmd";
 
 export class LeaderboardHmdService {
   /**

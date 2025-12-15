@@ -1,5 +1,4 @@
 import { DetailType, DetailTypeSchema } from "@ssr/common/detail-type";
-import { NotFoundError } from "@ssr/common/error/not-found-error";
 import { getDaysAgoDate } from "@ssr/common/utils/time-utils";
 import { Elysia } from "elysia";
 import { z } from "zod";
@@ -58,7 +57,7 @@ export default function playerController(app: Elysia) {
         }
       )
       .get(
-        "/maps-graph/:playerId",
+        "/scores-chart/:playerId",
         async ({ params: { playerId } }) => {
           return await PlayerScoresService.getPlayerScoreChart(playerId);
         },
@@ -73,9 +72,9 @@ export default function playerController(app: Elysia) {
         }
       )
       .get(
-        "/ranked-pps/:playerId",
+        "/pps/:playerId",
         async ({ params: { playerId } }) => {
-          return await PlayerRankedService.getPlayerRankedPps(playerId);
+          return await PlayerRankedService.getPlayerPps(playerId);
         },
         {
           tags: ["Player"],
@@ -83,7 +82,7 @@ export default function playerController(app: Elysia) {
             playerId: z.string(),
           }),
           detail: {
-            description: "Fetch a player's ranked pps",
+            description: "Get the pp values for a player's scores",
           },
         }
       )
@@ -138,10 +137,6 @@ export default function playerController(app: Elysia) {
         "/history/:playerId",
         async ({ params: { playerId }, query: { startDate, endDate, includeFields } }) => {
           const player = await ScoreSaberService.getCachedPlayer(playerId, true);
-          if (!player) {
-            throw new NotFoundError(`Player "${playerId}" not found`);
-          }
-
           const projection =
             includeFields && includeFields !== ""
               ? includeFields.split(",").reduce(

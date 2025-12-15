@@ -8,8 +8,8 @@ import { ScoreSaberMedalsScoreModel } from "@ssr/common/model/score/impl/scoresa
 import { ScoreSaberScore, ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import { Pagination } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import { PlayerScoreChartDataPoint, PlayerScoresChartResponse } from "@ssr/common/response/player-scores-chart";
-import { PlayerScoresResponse } from "@ssr/common/response/player-scores-response";
+import { PlayerScoreChartDataPoint, PlayerScoresChartResponse } from "@ssr/common/schemas/response/player/scores-chart";
+import { PlayerScoresPageResponse } from "@ssr/common/schemas/response/score/player-scores";
 import { PlayerScore } from "@ssr/common/score/player-score";
 import { ScoreSaberScoreSort } from "@ssr/common/score/score-sort";
 import { getScoreSaberLeaderboardFromToken, getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
@@ -352,7 +352,7 @@ export class PlayerScoresService {
     sort: string,
     search?: string,
     comparisonPlayerId?: string
-  ): Promise<PlayerScoresResponse> {
+  ): Promise<PlayerScoresPageResponse> {
     // Get the requested page directly
     const requestedPage = await ApiServiceRegistry.getInstance()
       .getScoreSaberService()

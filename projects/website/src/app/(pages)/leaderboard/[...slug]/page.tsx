@@ -3,7 +3,7 @@ import { ScoreSaberLeaderboardData } from "@/components/platform/scoresaber/lead
 import { ScoreModeEnum } from "@/components/score/score-mode-switcher";
 import { DetailType } from "@ssr/common/detail-type";
 import { env } from "@ssr/common/env";
-import { LeaderboardResponse } from "@ssr/common/response/leaderboard-response";
+import { LeaderboardResponse } from "@ssr/common/schemas/response/leaderboard/leaderboard";
 import { getDifficultyName } from "@ssr/common/utils/song-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { Metadata } from "next";

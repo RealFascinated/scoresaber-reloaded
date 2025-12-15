@@ -1,8 +1,8 @@
 import { Cooldown, CooldownPriority, cooldownRequestsPerMinute } from "../../cooldown";
 import { DetailType } from "../../detail-type";
 import { StarFilter } from "../../maps/types";
-import { PlayerRefreshResponse } from "../../response/player-refresh-response";
-import ScoreSaberRankingRequestsResponse from "../../response/scoresaber-ranking-requests-response";
+import { PlayerRefreshResponse } from "../../schemas/response/player/player-refresh";
+import ScoreSaberRankingRequestsResponse from "../../schemas/response/scoresaber/ranking-requests";
 import { MapDifficulty } from "../../score/map-difficulty";
 import { ScoreSaberScoreSort } from "../../score/score-sort";
 import ScoreSaberLeaderboardToken from "../../types/token/scoresaber/leaderboard";

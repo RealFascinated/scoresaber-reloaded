@@ -5,7 +5,7 @@ import { BeatSaverMapButton } from "@/components/score/button/beat-saver-map-but
 import { ScoreCopyBsrButton } from "@/components/score/button/score-copy-bsr-button";
 import { SongOpenInYoutubeButton } from "@/components/score/button/song-open-in-youtube-button";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
+import { BeatSaverMapResponse } from "@ssr/common/schemas/response/beatsaver/beatsaver-map";
 
 type Props = {
   leaderboard: ScoreSaberLeaderboard;

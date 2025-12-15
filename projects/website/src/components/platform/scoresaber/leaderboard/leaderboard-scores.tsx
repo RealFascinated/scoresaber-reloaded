@@ -12,7 +12,7 @@ import usePageNavigation from "@/hooks/use-page-navigation";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
-import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
+import { BeatSaverMapResponse } from "@ssr/common/schemas/response/beatsaver/beatsaver-map";
 import { buildSearchParams } from "@ssr/common/utils/search-params";
 import { useCallback, useEffect, useState } from "react";
 import { DifficultyButton } from "../../../leaderboard/button/difficulty-button";

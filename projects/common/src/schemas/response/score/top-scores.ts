@@ -1,5 +1,5 @@
-import { PlayerScore } from "../score/player-score";
-import { Timeframe } from "../timeframe";
+import { PlayerScore } from "../../../score/player-score";
+import { Timeframe } from "../../../timeframe";
 
 export type TopScoresResponse = {
   /**

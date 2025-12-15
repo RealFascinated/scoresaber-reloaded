@@ -1,4 +1,4 @@
-import { ScoreStatsToken } from "../types/token/beatleader/score-stats/score-stats";
+import { ScoreStatsToken } from "../../types/token/beatleader/score-stats/score-stats";
 
 export type ScoreStatsResponse = {
   /**

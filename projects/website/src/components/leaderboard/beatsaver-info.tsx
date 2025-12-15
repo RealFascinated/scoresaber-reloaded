@@ -1,6 +1,6 @@
 import Card from "@/components/card";
 import EmbedLinks from "@/components/embed-links";
-import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
+import { BeatSaverMapResponse } from "@ssr/common/schemas/response/beatsaver/beatsaver-map";
 import { useState } from "react";
 
 type LeaderboardBeatSaverInfoProps = {

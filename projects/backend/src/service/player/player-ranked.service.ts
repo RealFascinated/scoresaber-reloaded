@@ -11,7 +11,7 @@ export class PlayerRankedService {
    * @param playerId the player's id
    * @returns the ranked pp scores
    */
-  public static async getPlayerRankedPps(playerId: string): Promise<PlayerRankedPpsResponse> {
+  public static async getPlayerPps(playerId: string): Promise<PlayerRankedPpsResponse> {
     await PlayerCoreService.playerExists(playerId, true);
 
     const playerScores = await ScoreSaberScoreModel.find({
@@ -88,7 +88,7 @@ export class PlayerRankedService {
    */
   public static async getPlayerPpBoundaryFromScorePp(playerId: string, boundary: number = 1): Promise<number> {
     await PlayerCoreService.playerExists(playerId, true);
-    const scoresPps = await this.getPlayerRankedPps(playerId);
+    const scoresPps = await this.getPlayerPps(playerId);
     if (scoresPps.scores.length === 0) {
       return 0;
     }

@@ -1,4 +1,4 @@
-import RankingRequestToken from "../types/token/scoresaber/ranking-request-token";
+import RankingRequestToken from "../../../types/token/scoresaber/ranking-request-token";
 
 export default interface ScoreSaberRankingRequestsResponse {
   nextInQueue: RankingRequestToken[];

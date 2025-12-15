@@ -8,7 +8,7 @@ import { MapStats } from "@/components/score/map-stats";
 import { useLeaderboardDropdownData } from "@/hooks/use-leaderboard-dropdown-data";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
-import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
+import { BeatSaverMapResponse } from "@ssr/common/schemas/response/beatsaver/beatsaver-map";
 import { getPageFromRank } from "@ssr/common/utils/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect } from "react";

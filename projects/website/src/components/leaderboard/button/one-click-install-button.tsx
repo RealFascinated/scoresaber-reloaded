@@ -1,6 +1,6 @@
 import ScoreButton from "@/components/score/button/score-button";
 import { HandIcon } from "@radix-ui/react-icons";
-import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
+import { BeatSaverMapResponse } from "@ssr/common/schemas/response/beatsaver/beatsaver-map";
 
 type OneClickInstallButtonProps = {
   beatSaverMap: BeatSaverMapResponse;

@@ -32,7 +32,7 @@ export default function ScoreSaberScoreEditorButton({ score, leaderboard, update
 
   const { data: rankedPps } = useQuery({
     queryKey: ["ranked-pps", score.playerId],
-    queryFn: () => ssrApi.getPlayerRankedPps(score.playerId),
+    queryFn: () => ssrApi.getPlayerPps(score.playerId),
   });
 
   const [modifiedScores, setModifiedScores] = useState<Pick<ScoreSaberScore, "pp" | "weight" | "scoreId">[]>();

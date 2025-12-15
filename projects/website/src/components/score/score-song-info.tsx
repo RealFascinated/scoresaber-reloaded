@@ -1,6 +1,6 @@
 import { cn } from "@/common/utils";
 import FallbackLink from "@/components/fallback-link";
-import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
+import { BeatSaverMapResponse } from "@ssr/common/schemas/response/beatsaver/beatsaver-map";
 import { MapDifficulty } from "@ssr/common/score/map-difficulty";
 import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
 import Image from "next/image";

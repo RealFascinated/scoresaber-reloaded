@@ -10,7 +10,7 @@ import useDatabase from "@/hooks/use-database";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { Pagination } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import { PlayerScoresResponse } from "@ssr/common/response/player-scores-response";
+import { PlayerScoresPageResponse } from "@ssr/common/schemas/response/score/player-scores";
 import { ScoreSaberScoreSort } from "@ssr/common/score/score-sort";
 import { capitalizeFirstLetter } from "@ssr/common/string-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
@@ -76,7 +76,7 @@ export default function ScoreSaberPlayerScoresLive({ player }: ScoreSaberPlayerS
     isError,
     isLoading,
     isRefetching,
-  } = useQuery<PlayerScoresResponse>({
+  } = useQuery<PlayerScoresPageResponse>({
     queryKey: ["playerScores:live", player.id, page, sort, debouncedSearchTerm, mainPlayerId, showScoreComparison],
     queryFn: async () => {
       const response = await ssrApi.fetchScoreSaberPlayerScores(

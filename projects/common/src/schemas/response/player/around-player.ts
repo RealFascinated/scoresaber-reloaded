@@ -1,4 +1,4 @@
-import ScoreSaberPlayer from "../player/impl/scoresaber-player";
+import ScoreSaberPlayer from "../../../player/impl/scoresaber-player";
 
 export type MiniRankingResponse = {
   /**

@@ -1,4 +1,4 @@
-import { BeatSaverMapResponse } from "../response/beatsaver-map-response";
+import { BeatSaverMapResponse } from "../schemas/response/beatsaver/beatsaver-map";
 import { MapDifficulty } from "../score/map-difficulty";
 import { MapCharacteristic } from "../types/map-characteristic";
 import BeatSaverMapToken from "../types/token/beatsaver/map";

@@ -3,7 +3,7 @@ import { InternalServerError } from "@ssr/common/error/internal-server-error";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger from "@ssr/common/logger";
 import { Player, PlayerModel } from "@ssr/common/model/player/player";
-import { PlayerRefreshResponse } from "@ssr/common/response/player-refresh-response";
+import { PlayerRefreshResponse } from "@ssr/common/schemas/response/player/player-refresh";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import { isProduction } from "@ssr/common/utils/utils";
 import { logNewTrackedPlayer } from "../../common/embds";

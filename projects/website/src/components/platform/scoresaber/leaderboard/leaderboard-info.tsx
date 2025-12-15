@@ -5,7 +5,7 @@ import LeaderboardButtons from "@/components/platform/scoresaber/leaderboard/lea
 import SimpleTooltip from "@/components/simple-tooltip";
 import { Separator } from "@/components/ui/separator";
 import { StarFilledIcon } from "@radix-ui/react-icons";
-import { LeaderboardResponse } from "@ssr/common/response/leaderboard-response";
+import { LeaderboardResponse } from "@ssr/common/schemas/response/leaderboard/leaderboard";
 import { getBeatSaverMapperProfileUrl } from "@ssr/common/utils/beatsaver.util";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";

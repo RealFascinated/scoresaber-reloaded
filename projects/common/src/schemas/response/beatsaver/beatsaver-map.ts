@@ -1,7 +1,7 @@
-import { MapDifficulty } from "../score/map-difficulty";
-import BeatSaverAccountToken from "../types/token/beatsaver/account";
-import BeatSaverMapDifficultyToken from "../types/token/beatsaver/map-difficulty";
-import BeatSaverMapMetadataToken from "../types/token/beatsaver/map-metadata";
+import { MapDifficulty } from "../../../score/map-difficulty";
+import BeatSaverAccountToken from "../../../types/token/beatsaver/account";
+import BeatSaverMapDifficultyToken from "../../../types/token/beatsaver/map-difficulty";
+import BeatSaverMapMetadataToken from "../../../types/token/beatsaver/map-metadata";
 
 export type BeatSaverMapResponse = {
   /**

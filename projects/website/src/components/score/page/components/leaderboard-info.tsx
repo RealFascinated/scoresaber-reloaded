@@ -2,7 +2,7 @@ import { cn } from "@/common/utils";
 import FallbackLink from "@/components/fallback-link";
 import { MapIcon, MusicalNoteIcon } from "@heroicons/react/24/outline";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
+import { BeatSaverMapResponse } from "@ssr/common/schemas/response/beatsaver/beatsaver-map";
 import { getBeatSaverMapperProfileUrl } from "@ssr/common/utils/beatsaver.util";
 import Image from "next/image";
 

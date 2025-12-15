@@ -10,7 +10,7 @@ import { useIsMobile } from "@/contexts/viewport-context";
 import { getHMDInfo, HMD } from "@ssr/common/hmds";
 import { Pagination } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import { PlayerScoresResponse } from "@ssr/common/response/player-scores-response";
+import { PlayerScoresPageResponse } from "@ssr/common/schemas/response/score/player-scores";
 import { capitalizeFirstLetter } from "@ssr/common/string-utils";
 import { SortDirection, SortField } from "@ssr/common/types/score-query";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
@@ -144,7 +144,7 @@ export default function ScoreSaberPlayerScoresSSR({ player, mode }: { player: Sc
     isError,
     isLoading,
     isRefetching,
-  } = useQuery<PlayerScoresResponse>({
+  } = useQuery<PlayerScoresPageResponse>({
     queryKey: ["playerScores:" + mode, player.id, page, sort, debouncedSearchTerm, direction, hmdFilter],
     queryFn: async () => {
       const response = await ssrApi.fetchPlayerScores(player.id, mode, page, sort, direction, {

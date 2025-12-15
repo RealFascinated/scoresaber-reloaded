@@ -1,7 +1,7 @@
 "use client";
 
 import { env } from "@ssr/common/env";
-import { AppStatistics } from "@ssr/common/types/backend/app-statistics";
+import { AppStatistics } from "@ssr/common/schemas/response/ssr/app-statistics";
 import Request from "@ssr/common/utils/request";
 import { useQuery } from "@tanstack/react-query";
 import { History, LucideIcon, Target, Trophy, User, UserX, Video } from "lucide-react";

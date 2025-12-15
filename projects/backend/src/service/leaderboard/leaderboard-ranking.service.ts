@@ -9,7 +9,7 @@ import LeaderboardDifficulty from "@ssr/common/model/leaderboard/leaderboard-dif
 import { ScoreSaberLeaderboardStarChangeModel } from "@ssr/common/model/leaderboard/leaderboard-star-change";
 import { ScoreSaberPreviousScoreModel } from "@ssr/common/model/score/impl/scoresaber-previous-score";
 import { ScoreSaberScoreDocument, ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
-import { LeaderboardStarChange } from "@ssr/common/response/leaderboard-star-change";
+import { LeaderboardStarChange } from "@ssr/common/schemas/leaderboard/leaderboard-star-change";
 import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 import { getDifficulty } from "@ssr/common/utils/song-utils";
 import { LeaderboardUpdate, LeaderboardUpdates } from "../../common/types/leaderboard";

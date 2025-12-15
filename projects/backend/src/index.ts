@@ -79,17 +79,24 @@ const typeReferences = fromTypes("src/index.ts", {
   projectRoot: process.cwd(),
   overrideOutputPath: (tempDir: string) => `${tempDir}/dist/backend/src/index.d.ts`,
   silent: false,
+  debug: true,
 })();
 
 export const app = new Elysia()
+  .use(
+    logger({
+      enabled: !isProduction(),
+      mode: "combined",
+    })
+  )
   .use(
     openapi({
       path: "/swagger",
       references: typeReferences,
       documentation: {
         info: {
-          title: "SSR API",
-          description: "API for the SSR Backend",
+          title: "SSR Backend",
+          description: "The API for ScoreSaber Reloaded!",
           version: await getAppVersion(),
         },
         servers: [
@@ -98,6 +105,11 @@ export const app = new Elysia()
             description: isProduction() ? "Production" : "Development",
           },
         ],
+      },
+      provider: "swagger-ui",
+      swagger: {
+        autoDarkMode: false,
+        defaultModelsExpandDepth: 1,
       },
       mapJsonSchema: {
         zod: z.toJSONSchema,
@@ -269,18 +281,6 @@ export const app = new Elysia()
   .use(BeatSaverController)
   .use(BeatLeaderController)
   .use(PlayerRankingController);
-
-/**
- * Request logger (only in development)
- */
-if (!isProduction()) {
-  app.use(
-    logger({
-      enabled: true,
-      mode: "combined",
-    })
-  );
-}
 
 app.onStart(async () => {
   EventsManager.getListeners().forEach(listener => {

@@ -1,6 +1,6 @@
 import ScoreButton from "@/components/score/button/score-button";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
+import { BeatSaverMapResponse } from "@ssr/common/schemas/response/beatsaver/beatsaver-map";
 import { PlayCircleIcon } from "lucide-react";
 
 type MapPreviewButtonProps = {

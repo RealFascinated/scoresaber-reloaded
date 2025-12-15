@@ -3,7 +3,7 @@
 import { cn } from "@/common/utils";
 import SimpleTooltip from "@/components/simple-tooltip";
 import { StarIcon } from "@heroicons/react/24/solid";
-import { LeaderboardStarChange } from "@ssr/common/response/leaderboard-star-change";
+import { LeaderboardStarChange } from "@ssr/common/schemas/leaderboard/leaderboard-star-change";
 import { formatDate, timeAgo } from "@ssr/common/utils/time-utils";
 import { ArrowRightIcon, ChevronDownIcon, ChevronUpIcon, TrendingDownIcon, TrendingUpIcon } from "lucide-react";
 import { useState } from "react";

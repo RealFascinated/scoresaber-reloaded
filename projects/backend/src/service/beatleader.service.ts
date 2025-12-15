@@ -8,7 +8,7 @@ import {
 } from "@ssr/common/model/additional-score-data/additional-score-data";
 import { PlayerDocument, PlayerModel } from "@ssr/common/model/player/player";
 import { removeObjectFields } from "@ssr/common/object.util";
-import { ScoreStatsResponse } from "@ssr/common/response/score-stats-response";
+import { ScoreStatsResponse } from "@ssr/common/schemas/beatleader/score-stats";
 import { ScoreStatsToken } from "@ssr/common/types/token/beatleader/score-stats/score-stats";
 import { BeatLeaderScoreToken } from "@ssr/common/types/token/beatleader/score/score";
 import { BeatLeaderScoreImprovementToken } from "@ssr/common/types/token/beatleader/score/score-improvement";

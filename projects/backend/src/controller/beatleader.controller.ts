@@ -1,4 +1,4 @@
-import { ScoreStatsResponse } from "@ssr/common/response/score-stats-response";
+import { ScoreStatsResponse } from "@ssr/common/schemas/beatleader/score-stats";
 import { Elysia, redirect } from "elysia";
 import { z } from "zod";
 import BeatLeaderService from "../service/beatleader.service";

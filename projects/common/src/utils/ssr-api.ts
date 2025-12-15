@@ -6,19 +6,19 @@ import { StatisticsType } from "../model/statistics/statistic-type";
 import { Page } from "../pagination";
 import ScoreSaberPlayer from "../player/impl/scoresaber-player";
 import { PlayerStatisticHistory } from "../player/player-statistic-history";
-import { MiniRankingResponse } from "../response/around-player-response";
-import { BeatSaverMapResponse } from "../response/beatsaver-map-response";
-import { LeaderboardResponse } from "../response/leaderboard-response";
-import LeaderboardScoresResponse from "../response/leaderboard-scores-response";
-import { PlayerMedalRankingsResponse } from "../response/player-medal-rankings-response";
-import { PlayerRankedPpsResponse } from "../response/player-ranked-pps-response";
-import { PlayerRankingsResponse } from "../response/player-rankings-response";
-import { PlayerScoresChartResponse } from "../response/player-scores-chart";
-import { PlayerScoresResponse } from "../response/player-scores-response";
-import { PlayerSearchResponse } from "../response/player-search-response";
-import { PlaysByHmdResponse } from "../response/plays-by-hmd-response";
-import { PpBoundaryResponse } from "../response/pp-boundary-response";
-import { ScoreStatsResponse } from "../response/scorestats-response";
+import { ScoreStatsResponse } from "../schemas/beatleader/score-stats";
+import { BeatSaverMapResponse } from "../schemas/response/beatsaver/beatsaver-map";
+import { LeaderboardResponse } from "../schemas/response/leaderboard/leaderboard";
+import LeaderboardScoresResponse from "../schemas/response/leaderboard/leaderboard-scores";
+import { PlaysByHmdResponse } from "../schemas/response/leaderboard/plays-by-hmd";
+import { MiniRankingResponse } from "../schemas/response/player/around-player";
+import { PlayerPpsResponse } from "../schemas/response/player/player-pps";
+import { PlayerRankingsResponse } from "../schemas/response/player/player-rankings";
+import { PlayerSearchResponse } from "../schemas/response/player/player-search";
+import { PpBoundaryResponse } from "../schemas/response/player/pp-boundary";
+import { PlayerScoresChartResponse } from "../schemas/response/player/scores-chart";
+import { PlayerMedalRankingsResponse } from "../schemas/response/ranking/medal-rankings";
+import { PlayerScoresPageResponse } from "../schemas/response/score/player-scores";
 import { MapDifficulty } from "../score/map-difficulty";
 import { PlayerScore } from "../score/player-score";
 import { ScoreSaberScoreSort } from "../score/score-sort";
@@ -195,13 +195,13 @@ class SSRApi {
   }
 
   /**
-   * Gets the player's score chart data.
+   * Gets the player's scores chart data.
    *
    * @param playerId the player to get the score chart data for
    * @returns the score chart data
    */
-  async getPlayerMapsGraphData(playerId: string) {
-    return await this.request<PlayerScoresChartResponse>(`/player/maps-graph/${playerId}`);
+  async getPlayerScoresChart(playerId: string) {
+    return await this.request<PlayerScoresChartResponse>(`/player/scores-chart/${playerId}`);
   }
 
   /**
@@ -240,7 +240,7 @@ class SSRApi {
     search?: string,
     comparisonPlayerId?: string
   ) {
-    return await this.request<PlayerScoresResponse>(`/scores/player/scoresaber/${id}/${page}/${sort}`, {
+    return await this.request<PlayerScoresPageResponse>(`/scores/player/scoresaber/${id}/${page}/${sort}`, {
       ...(search ? { search: search } : {}),
       ...(comparisonPlayerId ? { comparisonPlayerId: comparisonPlayerId } : {}),
     });
@@ -262,7 +262,7 @@ class SSRApi {
     direction: SortDirection,
     filters: ScoreQuery
   ) {
-    return await this.request<PlayerScoresResponse>(
+    return await this.request<PlayerScoresPageResponse>(
       `/scores/player/${mode}/${id}/${sort}/${direction}/${page}`,
       filters
     );
@@ -303,12 +303,12 @@ class SSRApi {
   }
 
   /**
-   * Gets the ranked pp scores for a player.
+   * Gets the pp values for a player's scores.
    *
    * @param playerId the player id
    */
-  async getPlayerRankedPps(playerId: string) {
-    return await this.request<PlayerRankedPpsResponse>(`/player/ranked-pps/${playerId}`);
+  async getPlayerPps(playerId: string) {
+    return await this.request<PlayerPpsResponse>(`/player/pps/${playerId}`);
   }
 
   /**

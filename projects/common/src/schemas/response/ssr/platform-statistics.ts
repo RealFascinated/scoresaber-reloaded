@@ -1,4 +1,4 @@
-import { StatisticsType } from "../model/statistics/statistic-type";
+import { StatisticsType } from "../../../model/statistics/statistic-type";
 
 export type StatisticsResponse = {
   /**

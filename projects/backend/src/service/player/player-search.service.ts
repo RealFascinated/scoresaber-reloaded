@@ -2,7 +2,7 @@ import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { PlayerModel } from "@ssr/common/model/player/player";
 import { Pagination } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import { PlayerRankingsResponse } from "@ssr/common/response/player-rankings-response";
+import { PlayerRankingsResponse } from "@ssr/common/schemas/response/player/player-rankings";
 import { Metadata } from "@ssr/common/types/metadata";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import ScoreSaberService from "../scoresaber.service";

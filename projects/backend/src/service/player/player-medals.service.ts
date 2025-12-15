@@ -3,7 +3,7 @@ import { PlayerModel } from "@ssr/common/model/player/player";
 import { ScoreSaberMedalsScoreModel } from "@ssr/common/model/score/impl/scoresaber-medals-score";
 import { Pagination } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import { PlayerMedalRankingsResponse } from "@ssr/common/response/player-medal-rankings-response";
+import { PlayerMedalRankingsResponse } from "@ssr/common/schemas/response/ranking/medal-rankings";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import { FilterQuery } from "mongoose";
 import ScoreSaberService from "../scoresaber.service";
@@ -72,6 +72,43 @@ export class PlayerMedalsService {
 
     Logger.info(
       `[PLAYER MEDALS] Updated ${bulkOps.length} player medal counts in ${formatDuration(performance.now() - before)}`
+    );
+  }
+
+  /**
+   * Updates the medal count for a list of players.
+   *
+   * @param playerIds the ids of the players
+   */
+  public static async updatePlayerMedalCounts(...playerIds: string[]): Promise<void> {
+    const before = performance.now();
+    const medalCounts = await ScoreSaberMedalsScoreModel.aggregate([
+      {
+        $match: {
+          playerId: { $in: playerIds },
+        },
+      },
+      {
+        $group: {
+          _id: "$playerId",
+          totalMedals: { $sum: "$medals" },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          playerId: "$_id",
+          totalMedals: 1,
+        },
+      },
+    ]);
+
+    for (const [playerId, medalCount] of medalCounts) {
+      await PlayerModel.updateOne({ _id: playerId }, { $set: { medals: medalCount } });
+    }
+
+    Logger.info(
+      `[PLAYER MEDALS] Updated ${medalCounts.length} player medal counts in ${formatDuration(performance.now() - before)}`
     );
   }
 
