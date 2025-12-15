@@ -103,8 +103,8 @@ export class PlayerMedalsService {
       },
     ]);
 
-    for (const [playerId, medalCount] of Object.entries(medalCounts)) {
-      await PlayerModel.updateOne({ _id: playerId }, { $set: { medals: medalCount } });
+    for (const result of medalCounts) {
+      await PlayerModel.updateOne({ _id: result.playerId }, { $set: { medals: result.totalMedals } });
     }
 
     Logger.info(
