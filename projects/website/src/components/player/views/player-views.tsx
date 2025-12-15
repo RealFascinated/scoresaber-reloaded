@@ -179,7 +179,7 @@ export default function PlayerViews({ player }: { player: ScoreSaberPlayer }) {
 
       {statisticHistory && historyMode !== undefined ? (
         selectedView.wrapCard ? (
-          <Card className="p-2.5">{selectedView.chart(player, statisticHistory)}</Card>
+          <Card className="p-2.5 bg-chart-card">{selectedView.chart(player, statisticHistory)}</Card>
         ) : (
           selectedView.chart(player, statisticHistory)
         )
