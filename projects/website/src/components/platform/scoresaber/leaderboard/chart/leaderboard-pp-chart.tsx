@@ -160,6 +160,7 @@ export default function LeaderboardPpChart({ leaderboard }: Props) {
             min={DEFAULT_WHAT_IF_RANGE[0]}
             max={100}
             step={0.5}
+            showLabelOnHover={false}
           />
         </div>
       </div>
