@@ -123,18 +123,19 @@ export class MedalScoresService {
       }
 
       if (top10Scores.length > 0) {
-        const updates = top10Scores.map(score => {
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const { _id, __v, ...data } = score;
-          return {
-            updateOne: {
-              filter: { playerId: score.playerId, leaderboardId: score.leaderboardId },
-              update: { $set: data },
-              upsert: true,
-            },
-          };
-        });
-        await ScoreSaberMedalsScoreModel.bulkWrite(updates);
+        await ScoreSaberMedalsScoreModel.bulkWrite(
+          top10Scores.map(score => {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const { _id, __v, ...data } = score;
+            return {
+              updateOne: {
+                filter: { playerId: score.playerId, leaderboardId: score.leaderboardId },
+                update: { $set: data },
+                upsert: true,
+              },
+            };
+          })
+        );
       }
 
       if (belowTop10.length > 0) {
