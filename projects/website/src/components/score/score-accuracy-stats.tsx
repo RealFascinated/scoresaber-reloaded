@@ -1,7 +1,7 @@
 import { Colors } from "@/common/colors";
 import { cn } from "@/common/utils";
 import SimpleTooltip from "@/components/simple-tooltip";
-import { ScoreStatsResponse } from "@ssr/common/response/scorestats-response";
+import { ScoreStatsResponse } from "import { ScoreStatsResponse } from "@ssr/common/schemas/beatleader/score-stats";";
 import { capitalizeFirstLetter } from "@ssr/common/string-utils";
 import { ScoreStatsToken } from "@ssr/common/types/token/beatleader/score-stats/score-stats";
 import { AnimatePresence, motion } from "framer-motion";
