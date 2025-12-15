@@ -159,7 +159,7 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
                     <div className="flex w-full min-w-0 items-center justify-between">
                       <span className="truncate">{countryFilter.find(c => c.key === key)?.friendlyName ?? key}</span>
                       <span className="text-muted-foreground ml-4 text-sm whitespace-nowrap">
-                        {count.toLocaleString()} player{pluralize(count, "s")}
+                        {count.toLocaleString()} {pluralize(count, "player")}
                       </span>
                     </div>
                   ),

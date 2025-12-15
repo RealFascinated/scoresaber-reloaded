@@ -99,7 +99,7 @@ const playerData = [
                 player.rankPages.medals ? "hover:text-primary/80 cursor-pointer transition-all" : ""
               )}
             >
-              {formatNumberWithCommas(player.medals)} Medal{pluralize(player.medals, "s")}
+              {formatNumberWithCommas(player.medals)} {pluralize(player.medals, "Medal")}
             </span>
           </FallbackLink>
         </PlayerOverviewItem>
