@@ -15,8 +15,6 @@ type OverlayPlayerInfoProps = {
 };
 
 export default function OverlayPlayerInfoView({ player }: OverlayPlayerInfoProps) {
-  const plusOnePp = player.plusOnePP;
-
   return (
     <div className="flex gap-2 text-2xl">
       <Image
@@ -38,7 +36,7 @@ export default function OverlayPlayerInfoView({ player }: OverlayPlayerInfoProps
               className="text-xl"
               useTooltip={false}
             />
-            {!!plusOnePp && <span className="text-muted-foreground text-xl">(+1 = {formatPp(plusOnePp)}pp)</span>}
+            {!!player.plusOnePp && <span className="text-muted-foreground text-xl">(+1 = {formatPp(player.plusOnePp)}pp)</span>}
           </p>
         </div>
 
