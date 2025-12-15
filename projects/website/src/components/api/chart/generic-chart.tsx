@@ -32,7 +32,6 @@ dayjs.extend(utc);
 
 Chart.register(LineElement, PointElement, BarElement, LinearScale, CategoryScale, Legend, Tooltip, BarController);
 
-
 type Props = {
   config: ChartConfig;
   labels: Date[] | string[] | number[];

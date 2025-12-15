@@ -45,56 +45,43 @@ export class TrackScoreListener implements EventListener {
     PlayerHistoryService.updatePlayerDailyScoreStats(score.playerId, leaderboard.stars > 0, hasPreviousScore);
 
     // Invalidate caches
-    CacheService.invalidate(`scoresaber:player:${player.id}`);
+    CacheService.invalidate(`scoresaber:temp-cached-player:${player.id}`);
 
-    // Prepare notifications to send
-    const notifications = [];
-
-    // Always send score flood gate notifications
-    notifications.push(
-      sendScoreNotification(
-        DiscordChannels.SCORE_FLOODGATE_FEED,
-        score,
-        leaderboard,
-        player,
-        beatLeaderScore,
-        `${playerInfo.name} just set a rank #${score.rank}!`
-      )
+    sendScoreNotification(
+      DiscordChannels.SCORE_FLOODGATE_FEED,
+      score,
+      leaderboard,
+      player,
+      beatLeaderScore,
+      `${playerInfo.name} just set a rank #${score.rank}!`
     );
 
     // Only send ranked notifications if the map is ranked
     if (leaderboard.stars > 0) {
       // Send #1 notification if applicable
       if (score.rank === 1) {
-        notifications.push(
-          sendScoreNotification(
-            DiscordChannels.NUMBER_ONE_FEED,
-            score,
-            leaderboard,
-            player,
-            beatLeaderScore,
-            `${playerInfo.name} just set a #1!`
-          )
+        sendScoreNotification(
+          DiscordChannels.NUMBER_ONE_FEED,
+          score,
+          leaderboard,
+          player,
+          beatLeaderScore,
+          `${playerInfo.name} just set a #1!`
         );
       }
 
       // Send top 50 notification if applicable
       if (isTop50GlobalScore) {
-        notifications.push(
-          sendScoreNotification(
-            DiscordChannels.TOP_50_SCORES_FEED,
-            score,
-            leaderboard,
-            player,
-            beatLeaderScore,
-            `${playerInfo.name} just set a new top 50 score!`
-          )
+        sendScoreNotification(
+          DiscordChannels.TOP_50_SCORES_FEED,
+          score,
+          leaderboard,
+          player,
+          beatLeaderScore,
+          `${playerInfo.name} just set a new top 50 score!`
         );
       }
     }
-
-    // Send all notifications in parallel
-    await Promise.all(notifications);
 
     // Update metric
     const trackedScoresMetric = (await MetricsService.getMetric(MetricType.TRACKED_SCORES)) as

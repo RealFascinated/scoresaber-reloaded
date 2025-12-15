@@ -41,8 +41,7 @@ export class PlayerSearchService {
           ScoreSaberService.getPlayer(
             id,
             "basic",
-            scoreSaberPlayerTokens?.find(token => token.id === id) || (await ScoreSaberService.getCachedPlayer(id)), // Use the cache for inactive players
-            { setInactivesRank: false, setMedalsRank: false, getHmdBreakdown: false }
+            scoreSaberPlayerTokens?.find(token => token.id === id) || (await ScoreSaberService.getCachedPlayer(id)) // Use the cache for inactive players
           )
         )
       )

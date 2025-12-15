@@ -3,6 +3,7 @@ import cors from "@elysiajs/cors";
 import { cron } from "@elysiajs/cron";
 import { openapi } from "@elysiajs/openapi";
 import { fromTypes } from "@elysiajs/openapi/gen";
+import { AdditionalReferences } from "@elysiajs/openapi/types";
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
@@ -43,7 +44,6 @@ import { MedalScoresService } from "./service/score/medal-scores.service";
 import StatisticsService from "./service/statistics.service";
 import { BeatSaverWebsocket } from "./websocket/beatsaver-websocket";
 import { ScoreWebsockets } from "./websocket/score-websockets";
-import { AdditionalReferences } from "@elysiajs/openapi/types";
 
 Logger.info("Starting SSR Backend...");
 

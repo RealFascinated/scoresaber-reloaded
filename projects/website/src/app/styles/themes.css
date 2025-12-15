@@ -184,12 +184,6 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
 
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
-
   --animate-shiny-text: shiny-text 8s infinite;
   --animate-border-beam: border-beam calc(var(--duration) * 1s) infinite linear;
   --animate-spin-slow: spin 2s linear infinite;

@@ -28,66 +28,29 @@ export function getValueFromHistory(history: FlattenedPlayerHistory, field: stri
  */
 export function getPlayerStatisticChange(
   history: Record<string, FlattenedPlayerHistory>,
-  statType: string,
+  statType: keyof FlattenedPlayerHistory,
   isNegativeChange: boolean,
   daysAgo: number = 1
 ): number | undefined {
-  const todayDate = formatDateMinimal(getMidnightAlignedDate(new Date()));
-  const todayStats = history[todayDate];
+  const today = formatDateMinimal(getMidnightAlignedDate(new Date()));
+  const todayStats = history[today];
 
-  // Ensure todayStats exists and contains the statType
   const statToday = todayStats ? getValueFromHistory(todayStats, statType) : undefined;
   if (statToday === undefined) {
     return undefined;
   }
 
-  let otherDate: Date | undefined;
-  let statOther: number | undefined;
+  const previousDate = getMidnightAlignedDate(getDaysAgoDate(daysAgo));
+  const previousDateKey = formatDateMinimal(previousDate);
+  const previousStats = history[previousDateKey];
+  const previousStat = previousStats ? getValueFromHistory(previousStats, statType) : undefined;
 
-  // Optimize `daysAgo === 1` case by avoiding unnecessary computations
-  if (daysAgo === 1) {
-    otherDate = getMidnightAlignedDate(getDaysAgoDate(1)); // Yesterday
-    const otherStats = history[formatDateMinimal(otherDate)];
-    statOther = otherStats ? getValueFromHistory(otherStats, statType) : undefined;
-  } else {
-    const targetDate = getDaysAgoDate(daysAgo);
-
-    // Retrieve a list of dates only once, sorted for easier access
-    const sortedDates = Object.keys(history).sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
-
-    // Use binary search to efficiently find the closest date to `targetDate`
-    let closestDate: Date | undefined;
-    let minDiff = Number.POSITIVE_INFINITY;
-
-    for (const dateKey of sortedDates) {
-      const date = new Date(dateKey);
-      const diff = Math.abs(date.getTime() - targetDate.getTime());
-
-      // Skip future dates
-      if (date.getTime() >= new Date().getTime()) break;
-
-      const statsForDate = history[dateKey];
-      if (statType in statsForDate && diff < minDiff) {
-        minDiff = diff;
-        closestDate = date;
-      }
-    }
-
-    // If we found a closest valid date, use it
-    if (closestDate) {
-      otherDate = closestDate;
-      const otherStats = history[formatDateMinimal(otherDate)];
-      statOther = otherStats ? getValueFromHistory(otherStats, statType) : undefined;
-    }
-  }
-
-  // Return if no valid `otherStats` or `statOther` was found
-  if (statOther === undefined) {
+  // No previous stats found
+  if (previousStat === undefined) {
     return 0;
   }
 
-  // Calculate change and apply the `isNegativeChange` modifier
-  return (statToday - statOther) * (isNegativeChange ? -1 : 1);
+  return (statToday - previousStat) * (isNegativeChange ? -1 : 1);
 }
 
 /**

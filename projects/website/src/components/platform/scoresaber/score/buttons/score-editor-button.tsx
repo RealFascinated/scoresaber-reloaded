@@ -23,16 +23,19 @@ type ScoreEditorButtonProps = {
 const MIN_ACCURACY = 70;
 
 export default function ScoreSaberScoreEditorButton({ score, leaderboard, updateScore }: ScoreEditorButtonProps) {
+  const isMobile = useIsMobile();
+  const [open, setOpen] = useState(false);
+
   const maxScore = leaderboard.maxScore || 1; // Use 1 to prevent division by zero
   const accuracy = (score.score / maxScore) * 100 * (score.modifiers.includes(Modifier.NF) ? 0.5 : 1);
 
-  const isMobile = useIsMobile();
   const [baseValue, setBaseValue] = useState(Math.max(MIN_ACCURACY, Math.floor(accuracy))); // 1, 2, 3, etc.
   const [decimalValue, setDecimalValue] = useState(accuracy - Math.floor(accuracy)); // 0.0, 0.1, 0.2, etc.
 
   const { data: rankedPps } = useQuery({
     queryKey: ["ranked-pps", score.playerId],
     queryFn: () => ssrApi.getPlayerPps(score.playerId),
+    enabled: open,
   });
 
   const [modifiedScores, setModifiedScores] = useState<Pick<ScoreSaberScore, "pp" | "weight" | "scoreId">[]>();
@@ -100,12 +103,15 @@ export default function ScoreSaberScoreEditorButton({ score, leaderboard, update
   return (
     <div className="relative flex cursor-default items-center justify-center">
       <Popover
+        open={open}
         onOpenChange={open => {
           if (!open) {
             // Reset when closing
             handleSliderReset();
             setModifiedScores(undefined);
           }
+
+          setOpen(open);
         }}
       >
         <PopoverTrigger asChild>

@@ -37,7 +37,6 @@ export class LeaderboardRankingService {
       },
       {
         upsert: true,
-        new: true,
         setDefaultsOnInsert: true,
       }
     );
@@ -382,7 +381,7 @@ export class LeaderboardRankingService {
                 lastRefreshed: new Date(),
               },
             },
-            { upsert: true, new: true }
+            { upsert: true }
           );
 
           // Update counters directly

@@ -17,12 +17,7 @@ export default function playerController(app: Elysia) {
       .get(
         "/:playerId",
         async ({ params: { playerId }, query: { type } }) => {
-          const player = await ScoreSaberService.getPlayer(playerId, type as DetailType, undefined, {
-            setMedalsRank: true,
-            setInactivesRank: true,
-            getHmdBreakdown: true,
-          });
-          return player;
+          return ScoreSaberService.getPlayer(playerId, type as DetailType);
         },
         {
           tags: ["Player"],
@@ -38,28 +33,9 @@ export default function playerController(app: Elysia) {
         }
       )
       .get(
-        "/pp-boundary/:playerId/:boundaryCount",
-        async ({ params: { playerId, boundaryCount } }) => {
-          return {
-            boundaries: await PlayerRankedService.getPlayerPpBoundary(playerId, boundaryCount),
-            boundary: boundaryCount,
-          };
-        },
-        {
-          tags: ["Player"],
-          params: z.object({
-            playerId: z.string(),
-            boundaryCount: z.coerce.number().max(50).min(1),
-          }),
-          detail: {
-            description: "Fetch the player's pp boundary for a given boundary amount",
-          },
-        }
-      )
-      .get(
         "/scores-chart/:playerId",
         async ({ params: { playerId } }) => {
-          return await PlayerScoresService.getPlayerScoreChart(playerId);
+          return PlayerScoresService.getPlayerScoreChart(playerId);
         },
         {
           tags: ["Player"],
@@ -74,7 +50,7 @@ export default function playerController(app: Elysia) {
       .get(
         "/pps/:playerId",
         async ({ params: { playerId } }) => {
-          return await PlayerRankedService.getPlayerPps(playerId);
+          return PlayerRankedService.getPlayerPps(playerId);
         },
         {
           tags: ["Player"],
@@ -89,7 +65,7 @@ export default function playerController(app: Elysia) {
       .get(
         "/refresh/:playerId",
         async ({ params: { playerId } }) => {
-          return await PlayerCoreService.refreshPlayer(playerId);
+          return PlayerCoreService.refreshPlayer(playerId);
         },
         {
           tags: ["Player"],
@@ -104,7 +80,7 @@ export default function playerController(app: Elysia) {
       .get(
         "/mini-ranking/:playerId",
         async ({ params: { playerId } }) => {
-          return await MiniRankingService.getPlayerMiniRankings(playerId);
+          return MiniRankingService.getPlayerMiniRankings(playerId);
         },
         {
           tags: ["Player"],
@@ -120,7 +96,7 @@ export default function playerController(app: Elysia) {
         "/search",
         async ({ query: { query } }) => {
           return {
-            players: await PlayerSearchService.searchPlayers(query),
+            players: PlayerSearchService.searchPlayers(query),
           };
         },
         {
@@ -148,7 +124,7 @@ export default function playerController(app: Elysia) {
                 )
               : undefined;
 
-          return await PlayerHistoryService.getPlayerStatisticHistory(
+          return await PlayerHistoryService.getPlayerStatisticHistories(
             player,
             new Date(startDate),
             new Date(endDate),
@@ -173,7 +149,7 @@ export default function playerController(app: Elysia) {
       .get(
         "/score-history/:playerId/:leaderboardId/:page",
         async ({ params: { playerId, leaderboardId, page } }) => {
-          return await PlayerScoreHistoryService.getPlayerScoreHistory(playerId, leaderboardId, page);
+          return PlayerScoreHistoryService.getPlayerScoreHistory(playerId, leaderboardId, page);
         },
         {
           tags: ["Player"],

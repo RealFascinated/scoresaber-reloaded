@@ -1,3 +1,4 @@
+import { PpGainResponse } from "src/schemas/response/player/pp-boundary";
 import SuperJSON from "superjson";
 import { DetailType } from "../detail-type";
 import { env } from "../env";
@@ -15,7 +16,6 @@ import { MiniRankingResponse } from "../schemas/response/player/around-player";
 import { PlayerPpsResponse } from "../schemas/response/player/player-pps";
 import { PlayerRankingsResponse } from "../schemas/response/player/player-rankings";
 import { PlayerSearchResponse } from "../schemas/response/player/player-search";
-import { PpBoundaryResponse } from "../schemas/response/player/pp-boundary";
 import { PlayerScoresChartResponse } from "../schemas/response/player/scores-chart";
 import { PlayerMedalRankingsResponse } from "../schemas/response/ranking/medal-rankings";
 import { PlayerScoresPageResponse } from "../schemas/response/score/player-scores";
@@ -127,13 +127,13 @@ class SSRApi {
   }
 
   /**
-   * Gets the pp boundary for a player.
+   * Gets the pp gain for a player.
    *
    * @param playerId the player's id
-   * @param boundary the pp boundary
+   * @param count the number of raw pp values to get
    */
-  async getPlayerPpBoundary(playerId: string, boundary: number = 1) {
-    return await this.request<PpBoundaryResponse>(`/player/pp-boundary/${playerId}/${boundary}`);
+  async getPlayerWeightedPpGainForRawPps(playerId: string, count: number = 1) {
+    return await this.request<PpGainResponse>(`/player/pp-gain/${playerId}/${count}`);
   }
 
   /**

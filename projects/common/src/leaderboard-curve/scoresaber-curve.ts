@@ -129,7 +129,7 @@ function getPp(stars: number, accuracy: number): number {
  * @param expectedPp the expected pp gain
  * @returns the amount of raw pp
  */
-function calcPpBoundary(scoresPps: number[], expectedPp = 1) {
+function calcRawPpForExpectedPp(scoresPps: number[], expectedPp = 1) {
   let left = 0;
   let right = scoresPps.length - 1;
   let boundaryIdx = -1;
@@ -163,7 +163,7 @@ function calcPpBoundary(scoresPps: number[], expectedPp = 1) {
  * @param rawPp The raw PP value to evaluate.
  * @returns The PP boundary corresponding to the given raw PP.
  */
-function getPpBoundaryForRawPp(scoresPps: number[], rawPp: number): number {
+function getWeightedPpForRawPp(scoresPps: number[], rawPp: number): number {
   // If there are no existing scores, the boundary is just the raw PP
   if (!scoresPps.length) {
     return rawPp;
@@ -194,7 +194,7 @@ export const ScoreSaberCurve = {
   WEIGHT_COEFFICIENT,
   getPp,
   getModifier,
-  calcPpBoundary,
-  getPpBoundaryForRawPp,
+  calcRawPpForExpectedPp,
+  getWeightedPpForRawPp,
   getTotalWeightedPp,
 };

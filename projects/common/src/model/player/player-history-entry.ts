@@ -53,12 +53,6 @@ export class PlayerHistoryEntry {
   public plusOnePp?: number;
 
   /**
-   * How many times replays of the player scores have been watched
-   */
-  @prop()
-  public replaysWatched?: number;
-
-  /**
    * The total amount of unranked and ranked score.
    */
   @prop()

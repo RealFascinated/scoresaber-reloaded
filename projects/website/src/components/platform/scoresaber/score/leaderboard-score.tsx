@@ -25,7 +25,7 @@ const TABLE_CELL_WIDTH_SMALL = "px-1.5 py-2";
 export default function ScoreSaberLeaderboardScore({
   score,
   leaderboard,
-  highlightedPlayerId
+  highlightedPlayerId,
 }: {
   score: ScoreSaberScore;
   leaderboard: ScoreSaberLeaderboard;
@@ -41,7 +41,7 @@ export default function ScoreSaberLeaderboardScore({
       <tr
         className={cn(
           highlightedPlayerId === score.playerId && "bg-primary/10",
-          detailsExpanded ? "border-b border-transparent" : "border-b border-border/50"
+          detailsExpanded ? "border-b border-transparent" : "border-border/50 border-b"
         )}
       >
         {/* Score Rank */}
@@ -58,12 +58,7 @@ export default function ScoreSaberLeaderboardScore({
               <ScoreSaberScoreHMD score={score}>
                 <HMDIcon hmd={getHMDInfo(score.hmd as HMD)} />
               </ScoreSaberScoreHMD>
-              <PlayerInfo
-                player={scorePlayer}
-                highlightedPlayerId={highlightedPlayerId}
-                useLink
-                className="w-full"
-              />
+              <PlayerInfo player={scorePlayer} highlightedPlayerId={highlightedPlayerId} useLink className="w-full" />
             </>
           ) : (
             <p className="text-gray-500">Unknown Player</p>
@@ -76,9 +71,7 @@ export default function ScoreSaberLeaderboardScore({
         </td>
 
         {/* Score Accuracy */}
-        <td className={cn(TABLE_CELL_WIDTH, "text-center whitespace-nowrap")}>
-          {formatScoreAccuracy(score.accuracy)}
-        </td>
+        <td className={cn(TABLE_CELL_WIDTH, "text-center whitespace-nowrap")}>{formatScoreAccuracy(score.accuracy)}</td>
 
         {/* Score Misses */}
         <td
@@ -151,7 +144,7 @@ export default function ScoreSaberLeaderboardScore({
 
       {/* Dropdown row - appears directly below the clicked row */}
       {detailsExpanded && (
-        <tr className="border-b border-border/50">
+        <tr className="border-border/50 border-b">
           <td colSpan={10} className="p-(--spacing-md)">
             <ScoreDetailsDropdown
               score={score}

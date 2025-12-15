@@ -217,8 +217,7 @@ export class PlayerMedalsService {
             const playerData = await ScoreSaberService.getPlayer(
               playerId,
               "basic",
-              await ScoreSaberService.getCachedPlayer(playerId),
-              { setMedalsRank: false, setInactivesRank: false }
+              await ScoreSaberService.getCachedPlayer(playerId)
             );
 
             // Use pre-calculated rankings
@@ -252,7 +251,7 @@ export class PlayerMedalsService {
   }
 
   /**
-   * Gets a player's medal rank on-demand without storing it in the database.
+   * Gets a player's medal rank.
    *
    * @param playerId the id of the player
    * @returns the rank

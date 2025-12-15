@@ -272,7 +272,7 @@ export default function ScoresGraphChart({ player }: { player: ScoreSaberPlayer 
 
   return (
     <div className="space-y-4">
-      <Card className="h-[400px] p-2.5 bg-chart-card">
+      <Card className="bg-chart-card h-[400px] p-2.5">
         <Line data={datasets as any} options={chartOptions as any} />
       </Card>
 

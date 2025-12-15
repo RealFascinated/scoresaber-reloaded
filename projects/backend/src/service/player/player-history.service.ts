@@ -157,7 +157,7 @@ export class PlayerHistoryService {
         date: getMidnightAlignedDate(trackTime),
       }).lean();
 
-      const updatedHistory = await PlayerHistoryService.createPlayerStatistic(player, existingEntry ?? undefined);
+      const updatedHistory = await PlayerHistoryService.createHistoryEntry(player, existingEntry ?? undefined);
 
       await PlayerHistoryEntryModel.findOneAndUpdate(
         { playerId: foundPlayer._id, date: getMidnightAlignedDate(trackTime) },
@@ -173,9 +173,69 @@ export class PlayerHistoryService {
   }
 
   /**
-   * Gets a player's statistic history for a specific date range.
+   * Gets a player's statistic history for a specific day.
+   *
+   * @param player the player to get the statistic history for
+   * @param date the date to get the statistic history for
+   * @param projection the projection to use
+   * @returns the statistic history
    */
   public static async getPlayerStatisticHistory(
+    player: ScoreSaberPlayerToken,
+    date: Date,
+    projection?: Record<string, string | number | boolean | object>
+  ): Promise<PlayerStatisticHistory> {
+    const targetDate = getMidnightAlignedDate(date);
+    const dateKey = formatDateMinimal(targetDate);
+    const isTargetToday = isToday(date);
+
+    const history: PlayerStatisticHistory = {};
+
+    // Get entry from database
+    const entry = await PlayerHistoryEntryModel.findOne({
+      playerId: player.id,
+      date: targetDate,
+    })
+      .select(projection ? { date: 1, ...projection } : {})
+      .lean()
+      .hint({ playerId: 1, date: -1 });
+
+    if (entry) {
+      history[dateKey] = PlayerHistoryService.playerHistoryToObject(entry);
+    }
+
+    // Handle today's data if target is today
+    if (isTargetToday) {
+      const todayData = await PlayerHistoryService.getTodayPlayerStatistic(player, projection);
+      if (todayData) {
+        history[dateKey] = todayData;
+      }
+    } else if (!entry) {
+      // If no entry found and not today, try to get rank from history
+      const playerRankHistory = parseRankHistory(player);
+      const daysAgo = Math.floor((Date.now() - targetDate.getTime()) / (1000 * 60 * 60 * 24));
+
+      if (daysAgo >= 0 && daysAgo < playerRankHistory.length) {
+        const rankIndex = playerRankHistory.length - 1 - daysAgo;
+        const rank = playerRankHistory[rankIndex];
+        if (rank !== INACTIVE_RANK && rank !== 0) {
+          history[dateKey] = { rank };
+        }
+      }
+    }
+    return history;
+  }
+
+  /**
+   * Gets a player's statistic history for a specific date range.
+   *
+   * @param player the player to get the statistic history for
+   * @param startDate the start date to get the statistic history for
+   * @param endDate the end date to get the statistic history for
+   * @param projection the projection to use
+   * @returns the statistic history
+   */
+  public static async getPlayerStatisticHistories(
     player: ScoreSaberPlayerToken,
     startDate: Date,
     endDate: Date,
@@ -267,7 +327,7 @@ export class PlayerHistoryService {
     }).lean();
 
     // Generate fresh data, merging with existing if available
-    const todayData = await PlayerHistoryService.createPlayerStatistic(player, existingEntry ?? undefined);
+    const todayData = await PlayerHistoryService.createHistoryEntry(player, existingEntry ?? undefined);
 
     return projection && Object.keys(projection).length > 0
       ? Object.fromEntries(Object.entries(todayData).filter(([key]) => key in projection))
@@ -293,15 +353,19 @@ export class PlayerHistoryService {
   }
 
   /**
-   * Creates a new player statistic object from ScoreSaber data and existing history.
+   * Creates a new player history entry from ScoreSaber data and existing history.
+   *
+   * @param playerToken the player token to create the history entry for
+   * @param existingEntry the existing history entry to merge with
+   * @returns the created history entry
    */
-  public static async createPlayerStatistic(
+  public static async createHistoryEntry(
     playerToken: ScoreSaberPlayerToken,
     existingEntry?: Partial<PlayerHistoryEntry>
   ): Promise<Partial<PlayerHistoryEntry>> {
     const [accuracies, plusOnePp, medals] = await Promise.all([
       PlayerAccuraciesService.getPlayerAverageAccuracies(playerToken.id),
-      PlayerRankedService.getPlayerPpBoundary(playerToken.id, 1),
+      PlayerRankedService.getPlayerWeightedPpGainForRawPp(playerToken.id),
       PlayerMedalsService.getPlayerMedals(playerToken.id),
     ]);
 
@@ -321,7 +385,7 @@ export class PlayerHistoryService {
       totalRankedScores: playerToken.scoreStats.rankedPlayCount,
       totalScore: playerToken.scoreStats.totalScore,
       totalRankedScore: playerToken.scoreStats.totalRankedScore,
-      plusOnePp: plusOnePp[0],
+      plusOnePp: plusOnePp,
       medals: medals,
     };
   }
@@ -338,8 +402,6 @@ export class PlayerHistoryService {
     isRanked: boolean,
     isImprovement: boolean
   ): Promise<void> {
-    const today = getMidnightAlignedDate(new Date());
-
     const getCounterToIncrement = (isRanked: boolean, isImprovement: boolean): keyof PlayerHistoryEntry => {
       if (isRanked) {
         return isImprovement ? "rankedScoresImproved" : "rankedScores";
@@ -347,6 +409,7 @@ export class PlayerHistoryService {
       return isImprovement ? "unrankedScoresImproved" : "unrankedScores";
     };
 
+    const today = getMidnightAlignedDate(new Date());
     await PlayerHistoryEntryModel.findOneAndUpdate(
       { playerId, date: today },
       {
@@ -360,7 +423,6 @@ export class PlayerHistoryService {
       },
       {
         upsert: true, // Create new entry if it doesn't exist
-        new: true,
       }
     );
   }

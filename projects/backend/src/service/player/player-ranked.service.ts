@@ -43,60 +43,28 @@ export class PlayerRankedService {
   }
 
   /**
-   * Gets the pp boundary for a player.
+   * Gets the raw pp needed to gain 1 weighted pp for a player.
    *
    * @param playerId the player's id
-   * @param boundary the pp boundary
+   * @returns the raw pp needed to gain 1 weighted pp
    */
-  public static async getPlayerPpBoundary(playerId: string, boundary: number = 1): Promise<number[]> {
-    // Get the ranked pps list for the player
-    const result = await ScoreSaberScoreModel.aggregate([
-      {
-        $match: {
-          playerId: playerId,
-          pp: { $gt: 0 },
-        },
-      },
-      {
-        $sort: { pp: -1 },
-      },
-      {
-        $group: {
-          _id: null,
-          pps: { $push: "$pp" },
-        },
-      },
-    ]);
+  public static async getPlayerWeightedPpGainForRawPp(playerId: string): Promise<number> {
+    const playerScores = await ScoreSaberScoreModel.find({
+      playerId: playerId,
+      pp: { $gt: 0 },
+    })
+      .select({
+        pp: 1,
+      })
+      .lean();
 
-    if (!result.length || !result[0].pps.length) {
-      return [0];
-    }
-
-    // Calculate all boundaries in a single pass
-    const boundaries: number[] = [];
-    for (let i = 1; i <= boundary; i++) {
-      boundaries.push(ScoreSaberCurve.calcPpBoundary(result[0].pps, i));
-    }
-
-    return boundaries;
-  }
-
-  /**
-   * Gets the pp boundary amount for a pp value.
-   *
-   * @param playerId the player's id
-   * @param boundary the pp boundary
-   */
-  public static async getPlayerPpBoundaryFromScorePp(playerId: string, boundary: number = 1): Promise<number> {
-    await PlayerCoreService.playerExists(playerId, true);
-    const scoresPps = await this.getPlayerPps(playerId);
-    if (scoresPps.scores.length === 0) {
+    // No ranked score set
+    if (playerScores.length === 0) {
       return 0;
     }
-
-    return ScoreSaberCurve.getPpBoundaryForRawPp(
-      scoresPps.scores.map(score => score.pp),
-      boundary
+    return ScoreSaberCurve.calcRawPpForExpectedPp(
+      playerScores.map(score => score.pp),
+      1
     );
   }
 }

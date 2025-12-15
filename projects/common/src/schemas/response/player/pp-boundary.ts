@@ -1,7 +1,7 @@
 import { z } from "zod";
 
-const PpBoundaryResponseSchema = z.object({
+const PpGainResponseSchema = z.object({
   boundaries: z.array(z.number()),
-  boundary: z.number(),
+  count: z.number(),
 });
-export type PpBoundaryResponse = z.infer<typeof PpBoundaryResponseSchema>;
+export type PpGainResponse = z.infer<typeof PpGainResponseSchema>;

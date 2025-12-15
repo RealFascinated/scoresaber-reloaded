@@ -300,10 +300,7 @@ export default class PlaylistService {
         });
 
       // Format the scores
-      const toSnipePlayer = await ScoreSaberService.getPlayer(toSnipe, "basic", undefined, {
-        setInactivesRank: false,
-        setMedalsRank: false,
-      });
+      const toSnipePlayer = await ScoreSaberService.getPlayer(toSnipe, "basic");
       const formattedScores = filteredScores
         .slice(0, settings.limit)
         .map(({ score, leaderboard }) => {

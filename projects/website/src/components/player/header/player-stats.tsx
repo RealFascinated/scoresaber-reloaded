@@ -168,7 +168,7 @@ const playerStats: Stat[] = [
     create: (player: ScoreSaberPlayer) => {
       return {
         tooltip: <p>Amount of raw PP required to increase your global pp by 1pp</p>,
-        value: <>{formatPp(player.plusOnePP)}pp</>,
+        value: <>{formatPp(player.plusOnePp)}pp</>,
       };
     },
   },
