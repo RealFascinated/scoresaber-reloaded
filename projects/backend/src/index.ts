@@ -262,18 +262,11 @@ export const app = new Elysia()
       set.headers["content-type"] = "application/superjson";
       return SuperJSON.stringify(response);
     }
-    // Ensure JSON responses have proper Content-Type for Swagger UI
-    if (!(response instanceof Response)) {
-      const contentType = set.headers["content-type"];
-      if (!contentType) {
-        if (typeof response === "string") {
-          set.headers["content-type"] = "text/plain";
-        } else if (typeof response === "object" && response !== null) {
-          set.headers["content-type"] = "application/json; charset=utf-8";
-        }
-      }
+
+    if (response instanceof Object && response !== null) {
+      set.headers["content-type"] = "application/json";
+      return JSON.stringify(response);
     }
-    return response;
   })
   .use(cors())
   .use(
