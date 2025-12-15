@@ -131,7 +131,7 @@ export default function ScoreSaberScoreDisplay({
         {/* Score Page */}
         {!isMobile && (
           <FallbackLink href={isTracked ? `/score/${score.scoreId}` : undefined}>
-            <SimpleTooltip display={isTracked ? "Open score page" : "No score data found :("} className="pl-2">
+            <SimpleTooltip display={isTracked ? "Open score page" : "No score data found :("} className="pl-1.5">
               <svg
                 className={cn(
                   "h-8 w-3",
