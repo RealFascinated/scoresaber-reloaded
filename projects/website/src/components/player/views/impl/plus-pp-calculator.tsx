@@ -55,7 +55,7 @@ export default function PlusPpCalculator({ player }: { player: ScoreSaberPlayer 
   // Calculate raw PP needed for the current PP value
   const rawPp = useMemo(() => {
     if (!sortedScores.length) return 0;
-    return ScoreSaberCurve.calcPpBoundary(sortedScores, ppValue);
+    return ScoreSaberCurve.calcRawPpForExpectedPp(sortedScores, ppValue);
   }, [sortedScores, ppValue]);
 
   // Calculate stars and adjusted accuracy with constraint
@@ -87,14 +87,14 @@ export default function PlusPpCalculator({ player }: { player: ScoreSaberPlayer 
   const calculatedPpGain = useMemo(() => {
     if (!sortedScores.length) return 0;
     const ppFromStars = getPpFromStarsAndAcc(stars, accuracy);
-    return ScoreSaberCurve.getPpBoundaryForRawPp(sortedScores, ppFromStars);
+    return ScoreSaberCurve.calcRawPpForExpectedPp(sortedScores, ppFromStars);
   }, [sortedScores, stars, accuracy, getPpFromStarsAndAcc]);
 
   // Calculate max PP
   const maxPp = useMemo(() => {
     if (!sortedScores.length) return 100;
     const maxPossiblePp = ScoreSaberCurve.getPp(MAX_STARS, 100);
-    const maxBoundaryPp = ScoreSaberCurve.getPpBoundaryForRawPp(sortedScores, maxPossiblePp);
+    const maxBoundaryPp = ScoreSaberCurve.calcRawPpForExpectedPp(sortedScores, maxPossiblePp);
     return Math.min(maxBoundaryPp, 100);
   }, [sortedScores]);
 
@@ -146,7 +146,7 @@ export default function PlusPpCalculator({ player }: { player: ScoreSaberPlayer 
     setAccuracy(defaultAccuracy);
     // Recalculate stars based on default accuracy and +1pp
     const { stars: resetStars } = getStarsAndAccuracyForPp(
-      ScoreSaberCurve.calcPpBoundary(sortedScores, 1),
+      ScoreSaberCurve.getRawPpForWeightedPpGain(sortedScores, 1),
       defaultAccuracy
     );
     setStars(resetStars);

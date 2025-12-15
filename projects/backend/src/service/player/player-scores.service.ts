@@ -376,8 +376,7 @@ export class PlayerScoresService {
       comparisonPlayer = await ScoreSaberService.getPlayer(
         comparisonPlayerId,
         "basic",
-        await ScoreSaberService.getCachedPlayer(comparisonPlayerId),
-        { setInactivesRank: false, setMedalsRank: false }
+        await ScoreSaberService.getCachedPlayer(comparisonPlayerId)
       );
     }
     return await pagination.getPage(pageNumber, async () => {

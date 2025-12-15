@@ -1,4 +1,4 @@
-import { DetailType, DetailTypeSchema } from "@ssr/common/detail-type";
+import { DetailTypeSchema } from "@ssr/common/detail-type";
 import { getDaysAgoDate } from "@ssr/common/utils/time-utils";
 import { Elysia } from "elysia";
 import { z } from "zod";
@@ -17,7 +17,7 @@ export default function playerController(app: Elysia) {
       .get(
         "/:playerId",
         async ({ params: { playerId }, query: { type } }) => {
-          return ScoreSaberService.getPlayer(playerId, type as DetailType);
+          return ScoreSaberService.getPlayer(playerId, type);
         },
         {
           tags: ["Player"],
