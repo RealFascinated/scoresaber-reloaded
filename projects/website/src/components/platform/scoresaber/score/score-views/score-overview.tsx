@@ -4,7 +4,7 @@ import ScoreAccuracyStats from "@/components/score/score-accuracy-stats";
 import StatValue from "@/components/statistic/stat-value";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
-import { ScoreStatsResponse } from "import { ScoreStatsResponse } from "@ssr/common/schemas/beatleader/score-stats";";
+import { ScoreStatsResponse } from "@ssr/common/schemas/beatleader/score-stats";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 
 type ScoreOverviewProps = {

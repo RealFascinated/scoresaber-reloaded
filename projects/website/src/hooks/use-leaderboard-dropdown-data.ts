@@ -1,4 +1,4 @@
-import { ScoreStatsResponse } from "import { ScoreStatsResponse } from "@ssr/common/schemas/beatleader/score-stats";";
+import { ScoreStatsResponse } from "@ssr/common/schemas/beatleader/score-stats";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
