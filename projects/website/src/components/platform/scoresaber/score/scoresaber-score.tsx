@@ -13,6 +13,7 @@ import ScoreSongInfo from "@/components/score/score-song-info";
 import SimpleTooltip from "@/components/simple-tooltip";
 import { Spinner } from "@/components/spinner";
 import { StarIcon } from "@heroicons/react/24/solid";
+import { ChevronRightIcon } from "@heroicons/react/16/solid";
 import { ScoreSaberCurve } from "@ssr/common/leaderboard-curve/scoresaber-curve";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
@@ -57,6 +58,8 @@ export default function ScoreSaberScoreDisplay({
 
   const accuracy = (baseScore / leaderboard.maxScore) * 100;
   const pp = baseScore === score.score ? score.pp : ScoreSaberCurve.getPp(leaderboard.stars, accuracy);
+
+  const isTracked = score.isTracked && score.additionalData;
 
   return (
     <div className={cn(settings?.disablePadding ? "" : "pt-2 pb-2", "relative px-2 lg:pl-0")}>
@@ -125,12 +128,26 @@ export default function ScoreSaberScoreDisplay({
           />
         </div>
 
+        {/* Score Page */}
         {!isMobile && (
-          <FallbackLink href={score.isTracked ? `/score/${score.scoreId}` : undefined}>
-            <SimpleTooltip display={score.isTracked ? "View score" : "No score data found :("} className="pl-2">
-              <ChevronRight
-                className={cn("h-6 w-4", score.isTracked ? "cursor-pointer" : "cursor-not-allowed text-red-400")}
-              />
+          <FallbackLink href={isTracked ? `/score/${score.scoreId}` : undefined}>
+            <SimpleTooltip display={isTracked ? "Open score page" : "No score data found :("} className="pl-2">
+              <svg
+                className={cn(
+                  "h-8 w-3",
+                  isTracked
+                    ? "text-muted-foreground hover:text-primary/80 cursor-pointer transition-colors duration-200"
+                    : "cursor-not-allowed text-red-400"
+                )}
+                fill="none"
+                viewBox="0 0 10 32"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M0.5 2 L7.5 16 L0.5 30" />
+              </svg>
             </SimpleTooltip>
           </FallbackLink>
         )}
