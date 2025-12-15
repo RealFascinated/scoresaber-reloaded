@@ -59,7 +59,7 @@ export default function ScoreSaberScoreDisplay({
   const pp = baseScore === score.score ? score.pp : ScoreSaberCurve.getPp(leaderboard.stars, accuracy);
 
   return (
-    <div className={cn(settings?.disablePadding ? "" : "pt-2 pb-2", "relative")}>
+    <div className={cn(settings?.disablePadding ? "" : "pt-2 pb-2", "relative px-2 lg:pl-0")}>
       <div className="flex items-center">
         <div
           className={cn(
@@ -127,7 +127,7 @@ export default function ScoreSaberScoreDisplay({
 
         {!isMobile && (
           <FallbackLink href={score.isTracked ? `/score/${score.scoreId}` : undefined}>
-            <SimpleTooltip display={score.isTracked ? "View score" : "No score data found :("} className="px-1">
+            <SimpleTooltip display={score.isTracked ? "View score" : "No score data found :("} className="pl-2">
               <ChevronRight
                 className={cn("h-6 w-4", score.isTracked ? "cursor-pointer" : "cursor-not-allowed text-red-400")}
               />
