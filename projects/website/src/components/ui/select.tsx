@@ -3,7 +3,6 @@
 import { cn } from "@/common/utils";
 import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from "@radix-ui/react-icons";
 import * as SelectPrimitive from "@radix-ui/react-select";
-import { XIcon } from "lucide-react";
 import * as React from "react";
 
 const Select = SelectPrimitive.Root;
@@ -12,14 +11,7 @@ const SelectGroup = SelectPrimitive.Group;
 
 const SelectValue = SelectPrimitive.Value;
 
-interface SelectTriggerProps extends React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger> {
-  onClear?: () => void;
-  showClearButton?: boolean;
-}
-
-function SelectTrigger({ className, children, onClear, showClearButton, ...props }: SelectTriggerProps) {
-  const showClear = onClear && showClearButton;
-
+function SelectTrigger({ className, children, ...props }: React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger>) {
   return (
     <SelectPrimitive.Trigger
       className={cn(
@@ -29,29 +21,9 @@ function SelectTrigger({ className, children, onClear, showClearButton, ...props
       {...props}
     >
       {children}
-      {showClear ? (
-        <button
-          type="button"
-          onPointerDown={e => {
-            e.stopPropagation();
-            e.preventDefault();
-          }}
-          onClick={e => {
-            e.stopPropagation();
-            e.preventDefault();
-            onClear();
-          }}
-          className="hover:bg-muted focus-visible:ring-ring flex items-center justify-center rounded-sm p-0.5 transition-colors outline-none focus-visible:ring-2"
-        >
-          <SelectPrimitive.Icon asChild>
-            <XIcon className="text-muted-foreground hover:text-destructive h-4 w-4 cursor-pointer transition-colors" />
-          </SelectPrimitive.Icon>
-        </button>
-      ) : (
-        <SelectPrimitive.Icon asChild>
-          <ChevronDownIcon className="h-4 w-4 opacity-50" />
-        </SelectPrimitive.Icon>
-      )}
+      <SelectPrimitive.Icon asChild>
+        <ChevronDownIcon className="h-4 w-4 opacity-50" />
+      </SelectPrimitive.Icon>
     </SelectPrimitive.Trigger>
   );
 }

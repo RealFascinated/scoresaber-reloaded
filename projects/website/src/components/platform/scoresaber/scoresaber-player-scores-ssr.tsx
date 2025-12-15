@@ -93,10 +93,7 @@ export default function ScoreSaberPlayerScoresSSR({ player, mode }: { player: Sc
   ];
 
   // Filters
-  const [hmdFilter, setHmdFilter] = useQueryState("hmd", parseAsString) as [
-    HMD | undefined,
-    (value: HMD | undefined) => void,
-  ];
+  const [hmdFilter, setHmdFilter] = useQueryState("hmd", parseAsString) as [HMD | null, (value: HMD | null) => void];
 
   const sortOptions: SortOption[] = [
     ...(mode === "ssr"
@@ -328,20 +325,13 @@ export default function ScoreSaberPlayerScoresSSR({ player, mode }: { player: Sc
                     value={hmdFilter || "All Hmds"}
                     onValueChange={value => {
                       setIsLoading(true);
-                      setHmdFilter(value === "All Hmds" ? undefined : (value as HMD));
+                      setHmdFilter(value === "All Hmds" ? null : (value as HMD));
                       setPage(1);
                       animateLeft();
                     }}
                   >
                     <SelectTrigger
                       className="h-8 w-full text-xs sm:w-42"
-                      showClearButton={hmdFilter !== undefined}
-                      onClear={() => {
-                        setIsLoading(true);
-                        setHmdFilter(undefined);
-                        setPage(1);
-                        animateLeft();
-                      }}
                     >
                       <SelectValue placeholder="HMD Filter" />
                     </SelectTrigger>
