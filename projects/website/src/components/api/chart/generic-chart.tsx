@@ -12,10 +12,6 @@ import {
   parseDate,
   timeAgo,
 } from "@ssr/common/utils/time-utils";
-import dayjs from "dayjs";
-import utc from "dayjs/plugin/utc.js";
-
-dayjs.extend(utc);
 import {
   BarController,
   BarElement,
@@ -27,8 +23,12 @@ import {
   PointElement,
   Tooltip,
 } from "chart.js";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc.js";
 import { useMemo } from "react";
 import { Line } from "react-chartjs-2";
+
+dayjs.extend(utc);
 
 Chart.register(LineElement, PointElement, BarElement, LinearScale, CategoryScale, Legend, Tooltip, BarController);
 
@@ -48,7 +48,7 @@ const GenericChart = ({ config, labels }: Props) => {
   const chartDatasets = useMemo(() => {
     return datasets.map(dataset => {
       let transformedData: (number | null)[] | ({ x: number; y: number } | null)[] = dataset.data;
-      
+
       if (isXAxisLinear && isNumericLabels && Array.isArray(dataset.data) && dataset.data.length > 0) {
         const firstItem = dataset.data[0];
         if (firstItem !== null && typeof firstItem === "object" && "x" in firstItem && "y" in firstItem) {
@@ -100,9 +100,7 @@ const GenericChart = ({ config, labels }: Props) => {
         ? {
             type: "linear",
             grid: { color: "#252525" },
-            ticks: axes.x?.valueFormatter
-              ? { callback: (value: number) => axes.x!.valueFormatter!(value) }
-              : undefined,
+            ticks: axes.x?.valueFormatter ? { callback: (value: number) => axes.x!.valueFormatter!(value) } : undefined,
           }
         : {
             grid: { color: "#252525" },
@@ -112,7 +110,7 @@ const GenericChart = ({ config, labels }: Props) => {
               callback: (_: any, index: number) => {
                 if (typeof labels[index] === "string") return labels[index];
                 if (typeof labels[index] === "number") return labels[index].toString();
-                
+
                 const date = labels[index] instanceof Date ? labels[index] : parseDate(labels[index]);
                 const daysAgo = getDaysAgo(date);
                 const currentYear = new Date().getUTCFullYear();
@@ -178,12 +176,14 @@ const GenericChart = ({ config, labels }: Props) => {
         mergedScales[axisId] = {
           ...existingAxis,
           ...customAxis,
-          ticks: existingAxis?.ticks && customAxis?.ticks
-            ? { ...existingAxis.ticks, ...customAxis.ticks }
-            : customAxis?.ticks || existingAxis?.ticks,
-          title: existingAxis?.title && customAxis?.title
-            ? { ...existingAxis.title, ...customAxis.title }
-            : customAxis?.title || existingAxis?.title,
+          ticks:
+            existingAxis?.ticks && customAxis?.ticks
+              ? { ...existingAxis.ticks, ...customAxis.ticks }
+              : customAxis?.ticks || existingAxis?.ticks,
+          title:
+            existingAxis?.title && customAxis?.title
+              ? { ...existingAxis.title, ...customAxis.title }
+              : customAxis?.title || existingAxis?.title,
         };
       });
     }
@@ -249,7 +249,7 @@ const GenericChart = ({ config, labels }: Props) => {
               const date = value instanceof Date ? value : parseDate(value);
               const differenceInDays = getDaysAgo(date);
               const formattedDate = formatDate(date, "dddd, DD MMM, YYYY");
-              
+
               if (differenceInDays === 0) return `${formattedDate} (Now)`;
               if (differenceInDays === 1) return `${formattedDate} (Yesterday)`;
 

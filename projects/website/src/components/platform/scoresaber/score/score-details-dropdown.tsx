@@ -1,7 +1,6 @@
 "use client";
 
 import { cn } from "@/common/utils";
-import Card from "@/components/card";
 import LeaderboardScores from "@/components/platform/scoresaber/leaderboard/leaderboard-scores";
 import { ScoreOverview } from "@/components/platform/scoresaber/score/score-views/score-overview";
 import { MapStats } from "@/components/score/map-stats";
@@ -57,6 +56,7 @@ export default function ScoreDetailsDropdown({
   return (
     <AnimatePresence mode="wait">
       {isExpanded && dropdownData && (
+        // <Card className="bg-background/90 rounded-xl p-4">
         <motion.div
           initial={{ opacity: 0, height: 0, scale: 0.97 }}
           animate={{ opacity: 1, height: "auto", scale: 1 }}
@@ -84,18 +84,17 @@ export default function ScoreDetailsDropdown({
           {/* Leaderboard Scores */}
           {showLeaderboardScores && (
             <div className="mt-2">
-              <Card className="bg-background/90 rounded-xl p-4">
-                <LeaderboardScores
-                  initialPage={scoresPage}
-                  leaderboard={leaderboard}
-                  highlightedPlayerId={highlightedPlayerId}
-                  historyPlayerId={score.playerId}
-                  disableUrlChanging
-                />
-              </Card>
+              <LeaderboardScores
+                initialPage={scoresPage}
+                leaderboard={leaderboard}
+                highlightedPlayerId={highlightedPlayerId}
+                historyPlayerId={score.playerId}
+                disableUrlChanging
+              />
             </div>
           )}
         </motion.div>
+        // </Card>
       )}
     </AnimatePresence>
   );

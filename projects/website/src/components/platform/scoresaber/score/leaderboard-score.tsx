@@ -15,7 +15,6 @@ import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { BeatSaverMapResponse } from "@ssr/common/schemas/response/beatsaver/beatsaver-map";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { formatScoreAccuracy } from "@ssr/common/utils/score.util";
-import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import React, { useState } from "react";
 import ScoreDetailsDropdown from "./score-details-dropdown";
@@ -152,37 +151,19 @@ export default function ScoreSaberLeaderboardScore({
 
       {/* Dropdown row - appears directly below the clicked row */}
       {detailsExpanded && (
-        <AnimatePresence>
-          <motion.tr
-            key={`dropdown-${score.scoreId}-${score.timestamp}`}
-            className="origin-top border-none"
-            initial={{ opacity: 0, height: 0, scale: 0.95 }}
-            animate={{ opacity: 1, height: "auto", scale: 1 }}
-            exit={{ opacity: 0, height: 0, scale: 0.95 }}
-            transition={{
-              duration: 0.3,
-              ease: [0.4, 0, 0.2, 1],
-              height: { duration: 0.3 },
-              opacity: { duration: 0.2 },
-            }}
-          >
-            <td colSpan={10} className="p-0">
-              <div className="bg-muted/20 px-4 py-3">
-                <ScoreDetailsDropdown
-                  score={score}
-                  leaderboard={leaderboard}
-                  beatSaverMap={beatSaverMap}
-                  highlightedPlayerId={highlightedPlayerId}
-                  showLeaderboardScores={false}
-                  showMapStats={false}
-                  isLoading={setIsDetailsLoading}
-                  isExpanded
-                  isLeaderboardScore
-                />
-              </div>
-            </td>
-          </motion.tr>
-        </AnimatePresence>
+        <td colSpan={10} className="p-(--spacing-md)">
+          <ScoreDetailsDropdown
+            score={score}
+            leaderboard={leaderboard}
+            beatSaverMap={beatSaverMap}
+            highlightedPlayerId={highlightedPlayerId}
+            showLeaderboardScores={false}
+            showMapStats={false}
+            isLoading={setIsDetailsLoading}
+            isExpanded
+            isLeaderboardScore
+          />
+        </td>
       )}
     </React.Fragment>
   );

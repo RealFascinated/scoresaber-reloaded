@@ -1,8 +1,10 @@
 import { openInNewTab } from "@/common/browser-utils";
 import { cn } from "@/common/utils";
+import Card from "@/components/card";
 import { Spinner } from "@/components/spinner";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
+import { useIsMobile } from "@/contexts/viewport-context";
 import { env } from "@ssr/common/env";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { formatPp } from "@ssr/common/utils/number-utils";
@@ -24,8 +26,6 @@ import { Users, X } from "lucide-react";
 import { useState } from "react";
 import { Line } from "react-chartjs-2";
 import PlayerSearch from "../../player-search";
-import Card from "@/components/card";
-import { useIsMobile } from "@/contexts/viewport-context";
 
 Chart.register(LineController, ScatterController, LineElement, PointElement, LinearScale, Tooltip, Legend);
 

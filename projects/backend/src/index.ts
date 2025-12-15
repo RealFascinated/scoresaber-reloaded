@@ -43,6 +43,7 @@ import { MedalScoresService } from "./service/score/medal-scores.service";
 import StatisticsService from "./service/statistics.service";
 import { BeatSaverWebsocket } from "./websocket/beatsaver-websocket";
 import { ScoreWebsockets } from "./websocket/score-websockets";
+import { AdditionalReferences } from "@elysiajs/openapi/types";
 
 Logger.info("Starting SSR Backend...");
 
@@ -60,7 +61,6 @@ new EventsManager();
  * Mongoose Plugins
  */
 import "./common/mongoose/slow-query-plugin";
-import { AdditionalReferences } from "@elysiajs/openapi/types";
 
 try {
   Logger.info("Connecting to MongoDB...");
