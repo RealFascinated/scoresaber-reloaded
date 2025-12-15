@@ -106,7 +106,7 @@ export default function LeaderboardScores({
   const noScores = isError || (!isLoading && !isRefetching && (!scores || (scores && scores.items.length === 0)));
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-(--spacing-md)">
       <div
         className={cn(
           "flex flex-col flex-wrap items-center justify-center gap-4 sm:flex-row",

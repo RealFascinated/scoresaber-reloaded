@@ -407,7 +407,8 @@ export class PlayerScoresService {
               beatSaver: await BeatSaverService.getMap(
                 leaderboard.songHash,
                 leaderboard.difficulty.difficulty,
-                leaderboard.difficulty.characteristic
+                leaderboard.difficulty.characteristic,
+                "full"
               ),
             } as PlayerScore;
           })

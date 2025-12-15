@@ -19,7 +19,6 @@ export default function ScoreDetailsDropdown({
   highlightedPlayerId,
   isExpanded,
   showLeaderboardScores = true,
-  showMapStats = true,
   defaultScoresPage,
   isLeaderboardScore = false,
   isLoading: setIsDetailsLoading,
@@ -30,7 +29,6 @@ export default function ScoreDetailsDropdown({
   highlightedPlayerId?: string;
   isExpanded: boolean;
   showLeaderboardScores?: boolean;
-  showMapStats?: boolean;
   defaultScoresPage?: number;
   isLeaderboardScore?: boolean;
   isLoading: (isLoading: boolean) => void;
@@ -56,7 +54,6 @@ export default function ScoreDetailsDropdown({
   return (
     <AnimatePresence mode="wait">
       {isExpanded && dropdownData && (
-        // <Card className="bg-background/90 rounded-xl p-4">
         <motion.div
           initial={{ opacity: 0, height: 0, scale: 0.97 }}
           animate={{ opacity: 1, height: "auto", scale: 1 }}
@@ -67,34 +64,28 @@ export default function ScoreDetailsDropdown({
             opacity: { duration: 0.2 },
             scale: { duration: 0.2 },
           }}
-          className={cn("w-full origin-top px-(--spacing-xs)", !isLeaderboardScore ? "mt-2" : "")}
+          className={cn(
+            "flex w-full origin-top flex-col gap-(--spacing-md) px-(--spacing-xs)",
+            !isLeaderboardScore ? "mt-2" : ""
+          )}
         >
           {/* Map Stats */}
-          {showMapStats && beatSaverMap && (
-            <div className="mb-2 flex w-full justify-center">
-              <div className="flex w-full flex-wrap justify-center gap-1 md:w-auto">
-                <MapStats beatSaver={beatSaverMap} />
-              </div>
-            </div>
-          )}
+          {beatSaverMap && <MapStats beatSaver={beatSaverMap} />}
 
           {/* Main Card Content */}
           <ScoreOverview score={score} leaderboard={leaderboard} scoreStats={dropdownData.scoreStats} />
 
           {/* Leaderboard Scores */}
           {showLeaderboardScores && (
-            <div className="mt-2">
-              <LeaderboardScores
-                initialPage={scoresPage}
-                leaderboard={leaderboard}
-                highlightedPlayerId={highlightedPlayerId}
-                historyPlayerId={score.playerId}
-                disableUrlChanging
-              />
-            </div>
+            <LeaderboardScores
+              initialPage={scoresPage}
+              leaderboard={leaderboard}
+              highlightedPlayerId={highlightedPlayerId}
+              historyPlayerId={score.playerId}
+              disableUrlChanging
+            />
           )}
         </motion.div>
-        // </Card>
       )}
     </AnimatePresence>
   );

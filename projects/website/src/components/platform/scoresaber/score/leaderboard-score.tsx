@@ -155,10 +155,8 @@ export default function ScoreSaberLeaderboardScore({
           <ScoreDetailsDropdown
             score={score}
             leaderboard={leaderboard}
-            beatSaverMap={beatSaverMap}
             highlightedPlayerId={highlightedPlayerId}
             showLeaderboardScores={false}
-            showMapStats={false}
             isLoading={setIsDetailsLoading}
             isExpanded
             isLeaderboardScore

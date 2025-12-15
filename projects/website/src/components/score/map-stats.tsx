@@ -18,7 +18,7 @@ export function MapStats({ beatSaver }: MapAndScoreData) {
   return (
     <div className="flex flex-col gap-2">
       {/* Map Stats */}
-      {beatSaver && beatSaver.difficulty && (
+      {beatSaver.difficulty && (
         <div className="flex flex-wrap justify-center gap-2">
           <StatValue name="Length" icon={<TimerIcon className="h-4 w-4" />} value={formatTime(metadata.duration)} />
           <StatValue name="BPM" icon={<MusicIcon className="h-4 w-4" />} value={formatNumberWithCommas(metadata.bpm)} />
