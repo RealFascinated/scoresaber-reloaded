@@ -88,8 +88,8 @@ function PlayerMiniRanking({
                 className="group hover:bg-accent/50 sm:px-(--spacing-sm grid cursor-pointer items-center gap-(--spacing-md) px-(--spacing-sm) py-(--spacing-xs) transition-colors duration-200 first:rounded-t-md last:rounded-b-md"
                 style={{
                   gridTemplateColumns: isMobile
-                    ? `${playerRankWidth}px 48px 1fr auto`
-                    : `${playerRankWidth}px 48px 0.69fr 1fr`,
+                    ? `${playerRankWidth}px 1fr auto`
+                    : `${playerRankWidth}px 1fr 1fr`,
                 }}
               >
                 {/* Rank */}
@@ -98,7 +98,7 @@ function PlayerMiniRanking({
                 </p>
 
                 {/* Player */}
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 w-full">
                   <Avatar
                     src={getScoreSaberAvatar(playerRanking)}
                     size={26}
@@ -117,8 +117,6 @@ function PlayerMiniRanking({
                     {playerRanking.name}
                   </p>
                 </div>
-
-                <div className="m-auto" />
 
                 {/* PP */}
                 <div
