@@ -11,6 +11,9 @@ import { useQuery } from "@tanstack/react-query";
 import { ReactElement } from "react";
 import Card from "../../card";
 import CountryFlag from "../../ui/country-flag";
+import { getScoreSaberAvatar, getScoreSaberRoles } from "@ssr/common/utils/scoresaber.util";
+import clsx from "clsx";
+import Avatar from "@/components/avatar";
 
 type Variants = {
   [key: string]: {
@@ -48,7 +51,7 @@ function PlayerMiniRanking({
   player,
   players,
 }: {
-  type: "Global" | "Country";
+  type: keyof Variants;
   player: ScoreSaberPlayer;
   players: ScoreSaberPlayer[];
 }) {
@@ -65,7 +68,7 @@ function PlayerMiniRanking({
   })();
 
   return (
-    <Card className="sticky flex w-full flex-col gap-(--spacing-md) text-sm select-none sm:w-[400px]">
+    <Card className="sticky flex w-full flex-col gap-(--spacing-md) p-(--spacing-md) select-none sm:w-[400px] text-xs">
       {/* Header */}
       <div className="flex h-[24px] items-center gap-2">
         {icon}
@@ -73,7 +76,7 @@ function PlayerMiniRanking({
       </div>
 
       {/* Players List */}
-      <div className="divide-border bg-accent/50 divide-y rounded-md text-xs">
+      <div className="divide-border bg-accent/50 divide-y rounded-md">
         {players.length > 0 ? (
           players.map(playerRanking => {
             const rank = type == "Global" ? playerRanking.rank : playerRanking.countryRank;
@@ -96,13 +99,21 @@ function PlayerMiniRanking({
                 </p>
 
                 {/* Player */}
-                <div className="flex items-center">
-                  <PlayerInfo
-                    player={playerRanking}
-                    highlightedPlayerId={player.id}
-                    hideCountryFlag
-                    className="text-xs"
-                  />
+                <div className="flex items-center gap-2">
+                  <Avatar src={getScoreSaberAvatar(playerRanking)} size={26} alt={`${playerRanking.name}'s Profile Picture`} />
+                  <SimpleLink href={`/player/${player.id}`}>
+                    <p
+                      className={clsx(
+                        playerRanking.id == player.id ? "font-bold" : "",
+                        "w-[125px] overflow-hidden text-left break-all text-ellipsis whitespace-nowrap transition-all duration-200",
+                      )}
+                      style={{
+                        color: getScoreSaberRoles(playerRanking)[0]?.color,
+                      }}
+                    >
+                      {playerRanking.name}
+                    </p>
+                  </SimpleLink>
                 </div>
 
                 <div className="m-auto" />
@@ -120,7 +131,7 @@ function PlayerMiniRanking({
                     {formatPp(playerRanking.pp, isMobile ? 1 : 2)}pp
                   </p>
                   {playerRanking.id !== player.id && !isMobile && (
-                    <p className={cn("text-xs", ppDifference > 0 ? "text-green-400" : "text-red-400")}>
+                    <p className={ppDifference > 0 ? "text-green-400" : "text-red-400"}>
                       {ppDifference > 0 ? "+" : ""}
                       {formatPp(ppDifference, 2)}
                     </p>

@@ -24,7 +24,7 @@ export function PlayerInfo({
     <p
       className={clsx(
         player.id == highlightedPlayerId ? "font-bold" : "",
-        "w-[140px] overflow-hidden text-left break-all text-ellipsis whitespace-nowrap transition-all duration-200",
+        "overflow-hidden text-left break-all text-ellipsis whitespace-nowrap transition-all duration-200",
         className
       )}
       style={{

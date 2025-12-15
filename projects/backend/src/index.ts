@@ -60,6 +60,7 @@ new EventsManager();
  * Mongoose Plugins
  */
 import "./common/mongoose/slow-query-plugin";
+import { AdditionalReferences } from "@elysiajs/openapi/types";
 
 try {
   Logger.info("Connecting to MongoDB...");
@@ -74,13 +75,16 @@ Logger.info("Testing Redis connection...");
 export const redisClient = new Redis(env.REDIS_URL);
 Logger.info("Connected to Redis :)");
 
-Logger.info("Generating type references...");
-const typeReferences = fromTypes("src/index.ts", {
-  projectRoot: process.cwd(),
-  overrideOutputPath: (tempDir: string) => `${tempDir}/dist/backend/src/index.d.ts`,
-  silent: false,
-  debug: true,
-})();
+let typeReferences: AdditionalReferences | undefined;
+if (isProduction()) {
+  Logger.info("Generating type references...");
+  fromTypes("src/index.ts", {
+    projectRoot: process.cwd(),
+    overrideOutputPath: (tempDir: string) => `${tempDir}/dist/backend/src/index.d.ts`,
+    silent: false,
+    debug: true,
+  })();
+}
 
 export const app = new Elysia()
   .use(
