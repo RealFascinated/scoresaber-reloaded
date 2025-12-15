@@ -66,7 +66,7 @@ export default function ScoreDetailsDropdown({
           }}
           className={cn(
             "flex w-full origin-top flex-col gap-(--spacing-md) px-(--spacing-xs)",
-            !isLeaderboardScore ? "mt-2" : ""
+            !isLeaderboardScore ? "mt-(--spacing-md)" : ""
           )}
         >
           {/* Map Stats */}

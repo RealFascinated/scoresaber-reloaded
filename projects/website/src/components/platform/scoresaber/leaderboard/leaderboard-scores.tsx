@@ -171,18 +171,16 @@ export default function LeaderboardScores({
                 </tbody>
               )}
 
-              {scores && scores.items.length > 0 && (
-                <tbody className="divide-border/50 divide-y">
-                  {scores.items.map(playerScore => (
-                    <ScoreSaberLeaderboardScore
-                      key={getScoreId(playerScore)}
-                      score={playerScore}
-                      leaderboard={leaderboard}
-                      highlightedPlayerId={highlightedPlayerId}
-                    />
-                  ))}
-                </tbody>
-              )}
+              {scores &&
+                scores.items.length > 0 &&
+                scores.items.map(playerScore => (
+                  <ScoreSaberLeaderboardScore
+                    key={getScoreId(playerScore)}
+                    score={playerScore}
+                    leaderboard={leaderboard}
+                    highlightedPlayerId={highlightedPlayerId}
+                  />
+                ))}
             </table>
           </div>
 
