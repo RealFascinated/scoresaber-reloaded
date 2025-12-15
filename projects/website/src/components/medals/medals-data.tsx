@@ -11,6 +11,7 @@ import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { countryFilter } from "@ssr/common/utils/country.util";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
+import { pluralize } from "@ssr/common/utils/string.util";
 import { useQuery } from "@tanstack/react-query";
 import { LinkIcon } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -23,7 +24,6 @@ import Combobox from "../ui/combo-box";
 import CountryFlag from "../ui/country-flag";
 import { FilterField, FilterRow, FilterSection } from "../ui/filter-section";
 import MedalsInfo from "./medals-info";
-import { pluralize } from "@ssr/common/utils/string.util";
 
 type RankingDataProps = {
   initialPage: number;

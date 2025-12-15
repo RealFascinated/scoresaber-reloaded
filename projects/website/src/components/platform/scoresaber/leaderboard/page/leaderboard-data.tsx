@@ -12,7 +12,6 @@ import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
-import LeaderboardPpChartButton from "../chart/leaderboard-pp-chart";
 import { LeaderboardStarChangeHistory } from "../leaderboard-star-change-history";
 
 type LeaderboardDataProps = {

@@ -330,9 +330,7 @@ export default function ScoreSaberPlayerScoresSSR({ player, mode }: { player: Sc
                       animateLeft();
                     }}
                   >
-                    <SelectTrigger
-                      className="h-8 w-full text-xs sm:w-42"
-                    >
+                    <SelectTrigger className="h-8 w-full text-xs sm:w-42">
                       <SelectValue placeholder="HMD Filter" />
                     </SelectTrigger>
                     <SelectContent>

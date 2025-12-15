@@ -5,8 +5,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { DualRangeSlider } from "@/components/ui/dual-range-slider";
 import { FilterField, FilterSection } from "@/components/ui/filter-section";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { SHARED_CONSTS } from "@ssr/common/shared-consts";
 import { MapCategory, MapSort } from "@ssr/common/maps/types";
+import { SHARED_CONSTS } from "@ssr/common/shared-consts";
 import { Input } from "../ui/input";
 
 export default function MapFilters() {

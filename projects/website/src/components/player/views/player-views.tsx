@@ -16,12 +16,12 @@ import { useQuery } from "@tanstack/react-query";
 import { CalculatorIcon, ChartBarIcon, SwordIcon, TrendingUpIcon } from "lucide-react";
 import { ReactElement, useState } from "react";
 import PlayerRankingsButton from "../buttons/player-rankings-button";
-import ScoresGraphChart from "./impl/scores-graph-chart";
 import PlayerAccuracyChart from "./impl/player-accuracy-chart";
 import PlayerAdvancedRankingChart from "./impl/player-advanced-ranking-chart";
 import PlayerScoresChart from "./impl/player-scores-chart";
 import PlayerSimpleRankingChart from "./impl/player-simple-ranking-chart";
 import PlusPpCalculator from "./impl/plus-pp-calculator";
+import ScoresGraphChart from "./impl/scores-graph-chart";
 
 // Constants
 const DATE_PRESETS = [

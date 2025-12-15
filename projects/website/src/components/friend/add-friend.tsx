@@ -3,13 +3,13 @@
 import { cn } from "@/common/utils";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
+import { SHARED_CONSTS } from "@ssr/common/shared-consts";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import { UserMinus, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 import useDatabase from "../../hooks/use-database";
 import SimpleTooltip from "../simple-tooltip";
 import { Button } from "../ui/button";
-import { SHARED_CONSTS } from "@ssr/common/shared-consts";
 
 export default function FriendAction({
   player,

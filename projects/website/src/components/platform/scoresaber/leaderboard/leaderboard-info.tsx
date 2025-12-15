@@ -13,7 +13,6 @@ import { formatDate } from "@ssr/common/utils/time-utils";
 import Image from "next/image";
 import { useState } from "react";
 import { LeaderboardStatus } from "./leaderboard-status";
-import LeaderboardPpChartButton from "./chart/leaderboard-pp-chart";
 
 type LeaderboardInfoProps = {
   leaderboard: LeaderboardResponse;

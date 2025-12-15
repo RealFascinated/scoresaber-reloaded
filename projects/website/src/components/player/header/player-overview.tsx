@@ -6,11 +6,11 @@ import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerStatChange } from "@ssr/common/player/player-stat-change";
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
+import { pluralize } from "@ssr/common/utils/string.util";
 import { FaMedal } from "react-icons/fa";
 import { ChangeOverTime } from "../../statistic/change-over-time";
 import { DailyChange } from "../../statistic/daily-change";
 import CountryFlag from "../../ui/country-flag";
-import { pluralize } from "@ssr/common/utils/string.util";
 
 function PlayerOverviewItem({ children }: { children: React.ReactNode }) {
   return (

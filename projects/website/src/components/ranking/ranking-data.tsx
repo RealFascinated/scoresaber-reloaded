@@ -13,6 +13,7 @@ import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import { countryFilter } from "@ssr/common/utils/country.util";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
+import { pluralize } from "@ssr/common/utils/string.util";
 import { useQuery } from "@tanstack/react-query";
 import { useDebounce } from "@uidotdev/usehooks";
 import { LinkIcon } from "lucide-react";
@@ -26,7 +27,6 @@ import Combobox from "../ui/combo-box";
 import { FilterField, FilterRow, FilterSection } from "../ui/filter-section";
 import { Input } from "../ui/input";
 import { PlayerPpDisplay } from "./player-pp-display";
-import { pluralize } from "@ssr/common/utils/string.util";
 
 type RankingDataProps = {
   initialPage: number;

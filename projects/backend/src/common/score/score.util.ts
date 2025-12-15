@@ -151,7 +151,7 @@ export async function sendMedalScoreNotification(
     "**__Changes__**",
   ];
   // Sort the changes by the number of medals gained -> most lost -> least lost
-  for (const [playerId, change] of Array.from(changes.entries()).sort((a, b) => {
+  const sortedChanges = Array.from(changes.entries()).sort((a, b) => {
     const changeA = a[1].after - a[1].before;
     const changeB = b[1].after - b[1].before;
     // Positive changes come first
@@ -161,7 +161,9 @@ export async function sendMedalScoreNotification(
     if (changeA > 0 && changeB > 0) return changeB - changeA;
     // Both negative: sort ascending (most lost first, since -10 < -5)
     return changeA - changeB;
-  })) {
+  });
+
+  for (const [playerId, change] of sortedChanges) {
     const changePlayer = await PlayerCoreService.getPlayer(playerId);
     description.push(
       format(
@@ -178,17 +180,9 @@ export async function sendMedalScoreNotification(
   }
 
   // Find the player with the highest positive change for the title
-  const sortedChanges = Array.from(changes.entries()).sort(
-    (a, b) => b[1].after - b[1].before - (a[1].after - a[1].before)
+  const topChangePlayer = await PlayerCoreService.getPlayer(
+    Array.from(changes.entries()).find(([, change]) => change.after - change.before > 0)?.[0] ?? ""
   );
-  const topChangeEntry = sortedChanges.find(([, change]) => change.after - change.before > 0);
-  // If no positive change, return
-  if (!topChangeEntry) {
-    return;
-  }
-  
-  const [topPlayerId] = topChangeEntry;
-  const topChangePlayer = await PlayerCoreService.getPlayer(topPlayerId);
 
   await sendEmbedToChannel(
     DiscordChannels.MEDAL_SCORES_FEED,

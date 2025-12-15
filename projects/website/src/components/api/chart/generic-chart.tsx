@@ -236,13 +236,15 @@ const GenericChart = ({ config, labels }: Props) => {
           ...mergedScales[axisId],
           ...customOptions.scales[axisId],
           // Deep merge ticks if both exist
-          ticks: mergedScales[axisId]?.ticks && customOptions.scales[axisId]?.ticks
-            ? { ...mergedScales[axisId].ticks, ...customOptions.scales[axisId].ticks }
-            : customOptions.scales[axisId]?.ticks || mergedScales[axisId]?.ticks,
+          ticks:
+            mergedScales[axisId]?.ticks && customOptions.scales[axisId]?.ticks
+              ? { ...mergedScales[axisId].ticks, ...customOptions.scales[axisId].ticks }
+              : customOptions.scales[axisId]?.ticks || mergedScales[axisId]?.ticks,
           // Deep merge title if both exist
-          title: mergedScales[axisId]?.title && customOptions.scales[axisId]?.title
-            ? { ...mergedScales[axisId].title, ...customOptions.scales[axisId].title }
-            : customOptions.scales[axisId]?.title || mergedScales[axisId]?.title,
+          title:
+            mergedScales[axisId]?.title && customOptions.scales[axisId]?.title
+              ? { ...mergedScales[axisId].title, ...customOptions.scales[axisId].title }
+              : customOptions.scales[axisId]?.title || mergedScales[axisId]?.title,
         };
       });
     }
@@ -300,7 +302,7 @@ const GenericChart = ({ config, labels }: Props) => {
               // For linear scales with {x, y} data, use parsed.x
               const isXAxisLinear = customOptions?.scales?.x?.type === "linear";
               const isNumericLabels = labels.length > 0 && typeof labels[0] === "number";
-              
+
               if (isXAxisLinear && isNumericLabels) {
                 const xValue = context[0].parsed.x;
                 // Use valueFormatter from axes config if available
@@ -351,9 +353,7 @@ const GenericChart = ({ config, labels }: Props) => {
         },
       },
       // Spread other customOptions (excluding scales which we already merged)
-      ...Object.fromEntries(
-        Object.entries(customOptions || {}).filter(([key]) => key !== "scales")
-      ),
+      ...Object.fromEntries(Object.entries(customOptions || {}).filter(([key]) => key !== "scales")),
     };
   }, [chartAxes, labels, datasets, database, id, customOptions]);
 

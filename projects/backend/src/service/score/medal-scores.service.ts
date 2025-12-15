@@ -3,12 +3,12 @@ import { CooldownPriority } from "@ssr/common/cooldown";
 import Logger from "@ssr/common/logger";
 import { MEDAL_COUNTS } from "@ssr/common/medal";
 import { AdditionalScoreData } from "@ssr/common/model/additional-score-data/additional-score-data";
+import { PlayerModel } from "@ssr/common/model/player/player";
 import { ScoreSaberMedalsScoreModel } from "@ssr/common/model/score/impl/scoresaber-medals-score";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { MedalChange } from "@ssr/common/schemas/medals/medal-changes";
 import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 import { isProduction } from "@ssr/common/utils/utils";
-import { PlayerModel } from "@ssr/common/model/player/player";
 import { sendMedalScoreNotification } from "../../common/score/score.util";
 import { LeaderboardCoreService } from "../leaderboard/leaderboard-core.service";
 import { LeaderboardLeaderboardsService } from "../leaderboard/leaderboard-leaderboards.service";
@@ -74,7 +74,7 @@ export class MedalScoresService {
       );
       return;
     }
-    
+
     /**
      * Updates the medal scores for the leaderboard.
      *
@@ -102,7 +102,7 @@ export class MedalScoresService {
         const existingScore = existingScores[existingScoreIndex];
         allScores[existingScoreIndex] = { ...existingScore, ...incomingScore, medals: 0 };
       } else {
-        allScores.push({ ...incomingScore, medals: 0 } as typeof existingScores[0]);
+        allScores.push({ ...incomingScore, medals: 0 } as (typeof existingScores)[0]);
       }
 
       allScores.sort((a, b) => b.score - a.score);
@@ -181,7 +181,7 @@ export class MedalScoresService {
     }
 
     const medalChanges = await updateMedalScores();
-    
+
     // No medal changes
     if (medalChanges.length === 0) {
       return;

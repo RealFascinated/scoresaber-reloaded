@@ -13,7 +13,7 @@ import { ScoreSaberCurve } from "@ssr/common/leaderboard-curve/scoresaber-curve"
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { useDebounce } from "@uidotdev/usehooks";
 import { ChartBarIcon } from "lucide-react";
-import { useMemo, useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 type Props = {
   /**

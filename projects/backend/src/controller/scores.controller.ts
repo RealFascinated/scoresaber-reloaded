@@ -1,4 +1,5 @@
 import { ScoreSaberScoreSortSchema } from "@ssr/common/score/score-sort";
+import { SHARED_CONSTS } from "@ssr/common/shared-consts";
 import {
   QuerySchema,
   SortDirection,
@@ -12,7 +13,6 @@ import { LeaderboardScoresService } from "../service/leaderboard/leaderboard-sco
 import { PlayerFriendScoresService } from "../service/player/player-friend-scores.service";
 import { PlayerScoresService } from "../service/player/player-scores.service";
 import { TopScoresService } from "../service/score/top-scores.service";
-import { SHARED_CONSTS } from "@ssr/common/shared-consts";
 
 export default function scoresController(app: Elysia) {
   return app.group("/scores", app =>
