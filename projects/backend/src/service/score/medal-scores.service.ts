@@ -181,6 +181,11 @@ export class MedalScoresService {
     }
 
     const medalChanges = await updateMedalScores();
+    
+    // No medal changes
+    if (medalChanges.length === 0) {
+      return;
+    }
     const changes = await getChanges(medalChanges);
 
     Logger.info(
