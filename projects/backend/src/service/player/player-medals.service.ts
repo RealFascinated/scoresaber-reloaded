@@ -103,9 +103,16 @@ export class PlayerMedalsService {
       },
     ]);
 
-    for (const result of medalCounts) {
-      await PlayerModel.updateOne({ _id: result.playerId }, { $set: { medals: result.totalMedals } });
-    }
+    await PlayerModel.bulkWrite(
+      medalCounts.map(result => {
+        return {
+          updateOne: {
+            filter: { _id: result.playerId },
+            update: { $set: { medals: result.totalMedals } },
+          },
+        };
+      })
+    );
 
     Logger.info(
       `[PLAYER MEDALS] Updated ${medalCounts.length} player medal counts in ${formatDuration(performance.now() - before)}`
