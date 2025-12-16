@@ -17,7 +17,9 @@ import { parseDate } from "./utils/time-utils";
  *
  * @param token the token to parse
  */
-export function getScoreSaberLeaderboardFromToken(token: ScoreSaberLeaderboardToken): ScoreSaberLeaderboard {
+export function getScoreSaberLeaderboardFromToken(
+  token: ScoreSaberLeaderboardToken
+): ScoreSaberLeaderboard {
   const difficulty: LeaderboardDifficulty = {
     leaderboardId: token.difficulty.leaderboardId,
     difficulty: getDifficultyFromScoreSaberDifficulty(token.difficulty.difficulty),

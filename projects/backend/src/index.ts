@@ -131,7 +131,9 @@ export const app = new Elysia()
         await PlayerHistoryService.updatePlayerStatistics();
         await sendEmbedToChannel(
           DiscordChannels.BACKEND_LOGS,
-          new EmbedBuilder().setDescription(`Updated player statistics in ${formatDuration(Date.now() - before)}`)
+          new EmbedBuilder().setDescription(
+            `Updated player statistics in ${formatDuration(Date.now() - before)}`
+          )
         );
       },
     })
@@ -180,9 +182,11 @@ export const app = new Elysia()
         let beforeDate = new Date();
         Logger.info(`Starting to scrape beatsaver maps before ${beforeDate.toISOString()}...`);
         while (shouldScrape) {
-          const latestMaps = await ApiServiceRegistry.getInstance().getBeatSaverService().lookupLatestMaps(false, 100, {
-            before: beforeDate,
-          });
+          const latestMaps = await ApiServiceRegistry.getInstance()
+            .getBeatSaverService()
+            .lookupLatestMaps(false, 100, {
+              before: beforeDate,
+            });
           if (latestMaps == undefined || latestMaps.docs.length === 0) {
             Logger.info(`No maps found before ${beforeDate.toISOString()}!`);
             shouldScrape = false;
@@ -292,7 +296,10 @@ app.onStart(async () => {
 
   Logger.info("Listening on port http://localhost:8080");
   await initDiscordBot();
-  sendEmbedToChannel(DiscordChannels.BACKEND_LOGS, new EmbedBuilder().setDescription("Backend started!"));
+  sendEmbedToChannel(
+    DiscordChannels.BACKEND_LOGS,
+    new EmbedBuilder().setDescription("Backend started!")
+  );
 
   // Log all registered routes
   Logger.info("Registered routes:");

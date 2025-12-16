@@ -92,7 +92,9 @@ const playerData = [
       return (
         <PlayerOverviewItem>
           <FaMedal className="text-muted-foreground size-4" />
-          <FallbackLink href={player.rankPages.medals ? `/medals/${player.rankPages.medals}` : undefined}>
+          <FallbackLink
+            href={player.rankPages.medals ? `/medals/${player.rankPages.medals}` : undefined}
+          >
             <span
               className={cn(
                 "m-0 text-sm leading-[1.4]",

@@ -36,7 +36,9 @@ export default function ScoreSongInfo({
   imageSize = 64,
 }: ScoreSongInfoProps) {
   const mappersProfile =
-    beatSaverMap != undefined ? `https://beatsaver.com/profile/${beatSaverMap.author.id}` : undefined;
+    beatSaverMap != undefined
+      ? `https://beatsaver.com/profile/${beatSaverMap.author.id}`
+      : undefined;
 
   const diff = getDifficulty(level.difficulty);
   const WorthIcon = worth?.icon;
@@ -90,7 +92,9 @@ export default function ScoreSongInfo({
               <span className="text-song-mapper">
                 <FallbackLink
                   href={mappersProfile}
-                  className={cn(mappersProfile && "hover:text-primary/80 text-xs leading-none transition-colors")}
+                  className={cn(
+                    mappersProfile && "hover:text-primary/80 text-xs leading-none transition-colors"
+                  )}
                 >
                   {level.authorName}
                 </FallbackLink>

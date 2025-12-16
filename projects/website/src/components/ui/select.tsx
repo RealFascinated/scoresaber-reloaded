@@ -83,7 +83,8 @@ function SelectContent({
         <SelectPrimitive.Viewport
           className={cn(
             "p-1",
-            position === "popper" && "h-(--radix-select-trigger-height) w-full min-w-(--radix-select-trigger-width)"
+            position === "popper" &&
+              "h-(--radix-select-trigger-height) w-full min-w-(--radix-select-trigger-width)"
           )}
         >
           {children}
@@ -94,11 +95,23 @@ function SelectContent({
   );
 }
 
-function SelectLabel({ className, ...props }: React.ComponentPropsWithoutRef<typeof SelectPrimitive.Label>) {
-  return <SelectPrimitive.Label className={cn("px-2 py-1.5 text-sm font-semibold", className)} {...props} />;
+function SelectLabel({
+  className,
+  ...props
+}: React.ComponentPropsWithoutRef<typeof SelectPrimitive.Label>) {
+  return (
+    <SelectPrimitive.Label
+      className={cn("px-2 py-1.5 text-sm font-semibold", className)}
+      {...props}
+    />
+  );
 }
 
-function SelectItem({ className, children, ...props }: React.ComponentPropsWithoutRef<typeof SelectPrimitive.Item>) {
+function SelectItem({
+  className,
+  children,
+  ...props
+}: React.ComponentPropsWithoutRef<typeof SelectPrimitive.Item>) {
   return (
     <SelectPrimitive.Item
       className={cn(
@@ -117,8 +130,13 @@ function SelectItem({ className, children, ...props }: React.ComponentPropsWitho
   );
 }
 
-function SelectSeparator({ className, ...props }: React.ComponentPropsWithoutRef<typeof SelectPrimitive.Separator>) {
-  return <SelectPrimitive.Separator className={cn("bg-muted -mx-1 my-1 h-px", className)} {...props} />;
+function SelectSeparator({
+  className,
+  ...props
+}: React.ComponentPropsWithoutRef<typeof SelectPrimitive.Separator>) {
+  return (
+    <SelectPrimitive.Separator className={cn("bg-muted -mx-1 my-1 h-px", className)} {...props} />
+  );
 }
 
 export {

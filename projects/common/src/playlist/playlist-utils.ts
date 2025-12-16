@@ -35,7 +35,8 @@ export async function generateBeatSaberPlaylist(playlist: Playlist): Promise<Bea
         newDiff =>
           !existingSong.difficulties.some(
             existingDiff =>
-              existingDiff.characteristic === newDiff.characteristic && existingDiff.difficulty === newDiff.difficulty
+              existingDiff.characteristic === newDiff.characteristic &&
+              existingDiff.difficulty === newDiff.difficulty
           )
       );
       existingSong.difficulties.push(...newDifficulties);

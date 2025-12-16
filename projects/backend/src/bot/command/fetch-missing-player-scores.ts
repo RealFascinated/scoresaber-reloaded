@@ -52,7 +52,9 @@ class FetchMissingPlayerScores {
         return;
       }
 
-      const playerToken = await ApiServiceRegistry.getInstance().getScoreSaberService().lookupPlayer(playerId);
+      const playerToken = await ApiServiceRegistry.getInstance()
+        .getScoreSaberService()
+        .lookupPlayer(playerId);
       if (!playerToken) {
         throw new Error("Player not found");
       }

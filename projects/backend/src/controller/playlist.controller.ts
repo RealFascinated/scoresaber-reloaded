@@ -9,15 +9,24 @@ export default function playlistController(app: Elysia) {
       .get(
         "/:playlistId",
         async ({ params: { playlistId }, query: { config, download } }) => {
-          const id = (playlistId.includes(".") ? playlistId.split(".")[0] : playlistId) as PlaylistId;
+          const id = (
+            playlistId.includes(".") ? playlistId.split(".")[0] : playlistId
+          ) as PlaylistId;
           const extension = playlistId.includes(".") ? playlistId.split(".")[1] : "bplist";
 
           const response = new Response(
-            JSON.stringify(await generateBeatSaberPlaylist(await PlaylistService.getPlaylist(id, config)), null, 2)
+            JSON.stringify(
+              await generateBeatSaberPlaylist(await PlaylistService.getPlaylist(id, config)),
+              null,
+              2
+            )
           );
           response.headers.set("Content-Type", "application/json");
           if (download) {
-            response.headers.set("Content-Disposition", `attachment; filename="ssr-${id}.${extension}"`);
+            response.headers.set(
+              "Content-Disposition",
+              `attachment; filename="ssr-${id}.${extension}"`
+            );
           }
           return response;
         },
@@ -40,7 +49,9 @@ export default function playlistController(app: Elysia) {
         async ({ query: { user, toSnipe, settings } }) => {
           const response = new Response(
             JSON.stringify(
-              await generateBeatSaberPlaylist(await PlaylistService.getSnipePlaylist(user, toSnipe, settings)),
+              await generateBeatSaberPlaylist(
+                await PlaylistService.getSnipePlaylist(user, toSnipe, settings)
+              ),
               null,
               2
             )

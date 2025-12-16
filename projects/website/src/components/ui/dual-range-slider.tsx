@@ -34,7 +34,10 @@ export function DualRangeSlider({
   return (
     <SliderPrimitive.Root
       {...props}
-      className={cn("relative flex flex-1 touch-none items-center pt-2 text-[15px] select-none", className)}
+      className={cn(
+        "relative flex flex-1 touch-none items-center pt-2 text-[15px] select-none",
+        className
+      )}
       onKeyDown={handleKeyDown}
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}

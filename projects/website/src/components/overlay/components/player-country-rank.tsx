@@ -21,7 +21,9 @@ export default function OverlayPlayerCountryRank({ player }: OverlayPlayerRankPr
         <div className="flex w-6 justify-center">
           <CountryFlag code={country} size={12} />
         </div>
-        <p className={cn(getRankColor(countryRank), "text-2xl font-bold")}>#{formatNumberWithCommas(countryRank)}</p>
+        <p className={cn(getRankColor(countryRank), "text-2xl font-bold")}>
+          #{formatNumberWithCommas(countryRank)}
+        </p>
       </div>
       <DailyChange
         type={PlayerStatChange.CountryRank}

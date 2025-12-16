@@ -29,10 +29,15 @@ export default function leaderboardController(app: Elysia) {
       .get(
         "/by-hash/:hash/:difficulty/:characteristic",
         async ({ params: { hash, difficulty, characteristic } }) => {
-          const data = await LeaderboardCoreService.getLeaderboardByHash(hash, difficulty, characteristic, {
-            includeBeatSaver: true,
-            includeStarChangeHistory: true,
-          });
+          const data = await LeaderboardCoreService.getLeaderboardByHash(
+            hash,
+            difficulty,
+            characteristic,
+            {
+              includeBeatSaver: true,
+              includeStarChangeHistory: true,
+            }
+          );
           return data;
         },
         {

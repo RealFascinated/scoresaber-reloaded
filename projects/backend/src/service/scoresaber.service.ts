@@ -40,50 +40,63 @@ export default class ScoreSaberService {
       throw new NotFoundError(`Player "${id}" not found`);
     }
 
-    return CacheService.fetchWithCache(CacheId.ScoreSaber, `scoresaber:player:${id}:${type}`, async () => {
-      const account = await PlayerCoreService.getPlayer(id, player).catch(() => undefined);
-      const isOculusAccount = player.id.length === 16;
+    return CacheService.fetchWithCache(
+      CacheId.ScoreSaber,
+      `scoresaber:player:${id}:${type}`,
+      async () => {
+        const account = await PlayerCoreService.getPlayer(id, player).catch(() => undefined);
+        const isOculusAccount = player.id.length === 16;
 
-      const basePlayer = {
-        id: player.id,
-        name: player.name,
-        avatar: isOculusAccount ? "https://cdn.fascinated.cc/assets/oculus-avatar.jpg" : player.profilePicture,
-        country: player.country,
-        rank: player.rank,
-        countryRank: player.countryRank,
-        pp: player.pp,
-        medals: account?.medals ?? 0,
-        hmd: account?.hmd ?? undefined,
-        role: player.role ?? undefined,
-        permissions: player.permissions,
-        banned: player.banned,
-        inactive: player.inactive,
-        trackedSince: account?.trackedSince ?? new Date(),
-        joinedDate: new Date(player.firstSeen),
-      } as ScoreSaberPlayer;
+        const basePlayer = {
+          id: player.id,
+          name: player.name,
+          avatar: isOculusAccount
+            ? "https://cdn.fascinated.cc/assets/oculus-avatar.jpg"
+            : player.profilePicture,
+          country: player.country,
+          rank: player.rank,
+          countryRank: player.countryRank,
+          pp: player.pp,
+          medals: account?.medals ?? 0,
+          hmd: account?.hmd ?? undefined,
+          role: player.role ?? undefined,
+          permissions: player.permissions,
+          banned: player.banned,
+          inactive: player.inactive,
+          trackedSince: account?.trackedSince ?? new Date(),
+          joinedDate: new Date(player.firstSeen),
+        } as ScoreSaberPlayer;
 
-      if (type === "basic") {
-        return basePlayer;
-      }
+        if (type === "basic") {
+          return basePlayer;
+        }
 
-      /**
-       * Gets a player's statistic history for a specific date range.
-       *
-       * @param player the player to get the statistic history for
-       * @param daysAgo the amount of days to look back
-       * @returns the statistic history
-       */
-      async function getStatisticHistory(player: ScoreSaberPlayerToken, date: Date) {
-        return await PlayerHistoryService.getPlayerStatisticHistory(player, date, true, {
-          rank: true,
-          countryRank: true,
-          pp: true,
-          medals: true,
-        });
-      }
+        /**
+         * Gets a player's statistic history for a specific date range.
+         *
+         * @param player the player to get the statistic history for
+         * @param daysAgo the amount of days to look back
+         * @returns the statistic history
+         */
+        async function getStatisticHistory(player: ScoreSaberPlayerToken, date: Date) {
+          return await PlayerHistoryService.getPlayerStatisticHistory(player, date, true, {
+            rank: true,
+            countryRank: true,
+            pp: true,
+            medals: true,
+          });
+        }
 
-      const [, plusOnePp, accBadges, hmdBreakdown, medalsRank, dailyChanges, weeklyChanges, monthlyChanges] =
-        await Promise.all([
+        const [
+          ,
+          plusOnePp,
+          accBadges,
+          hmdBreakdown,
+          medalsRank,
+          dailyChanges,
+          weeklyChanges,
+          monthlyChanges,
+        ] = await Promise.all([
           account ? PlayerCoreService.updatePeakRank(account, player) : undefined,
           account ? PlayerRankedService.getPlayerWeightedPpGainForRawPp(id) : 0,
           account ? PlayerAccuraciesService.getAccBadges(id) : {},
@@ -91,7 +104,10 @@ export default class ScoreSaberService {
           account && player !== undefined
             ? (async () => {
                 const hmdUsage = await PlayerHmdService.getPlayerHmdBreakdown(id);
-                const totalKnownHmdScores = Object.values(hmdUsage).reduce((sum, count) => sum + count, 0);
+                const totalKnownHmdScores = Object.values(hmdUsage).reduce(
+                  (sum, count) => sum + count,
+                  0
+                );
                 return Object.fromEntries(
                   Object.entries(hmdUsage).map(([hmd, count]) => [
                     hmd,
@@ -101,41 +117,50 @@ export default class ScoreSaberService {
               })()
             : undefined,
           account ? PlayerMedalsService.getPlayerMedalRank(id) : undefined,
-          account ? getPlayerStatisticChanges(await getStatisticHistory(player, getDaysAgoDate(1)), 1) : {},
-          account ? getPlayerStatisticChanges(await getStatisticHistory(player, getDaysAgoDate(7)), 7) : {},
-          account ? getPlayerStatisticChanges(await getStatisticHistory(player, getDaysAgoDate(30)), 30) : {},
+          account
+            ? getPlayerStatisticChanges(await getStatisticHistory(player, getDaysAgoDate(1)), 1)
+            : {},
+          account
+            ? getPlayerStatisticChanges(await getStatisticHistory(player, getDaysAgoDate(7)), 7)
+            : {},
+          account
+            ? getPlayerStatisticChanges(await getStatisticHistory(player, getDaysAgoDate(30)), 30)
+            : {},
         ]);
 
-      return {
-        ...basePlayer,
-        bio: {
-          lines: player.bio ? player.bio.split("\n") : [],
-          linesStripped: player.bio ? player.bio.replace(/<[^>]+>/g, "").split("\n") : [],
-        },
-        badges:
-          player.badges?.map(badge => ({
-            url: badge.image,
-            description: badge.description,
-          })) || [],
-        statisticChange: {
-          daily: dailyChanges,
-          weekly: weeklyChanges,
-          monthly: monthlyChanges,
-        },
-        plusOnePp: plusOnePp,
-        accBadges,
-        peakRank: account?.peakRank,
-        statistics: player.scoreStats,
-        hmdBreakdown: hmdBreakdown,
-        rankPages: {
-          global: getPageFromRank(player.rank, 50),
-          country: getPageFromRank(player.countryRank, 50),
-          medals: medalsRank ? getPageFromRank(medalsRank, 50) : undefined,
-        },
-        rankPercentile:
-          (player.rank / ((await MetricsService.getMetric(MetricType.ACTIVE_ACCOUNTS))?.value as number) || 1) * 100,
-      } as ScoreSaberPlayer;
-    });
+        return {
+          ...basePlayer,
+          bio: {
+            lines: player.bio ? player.bio.split("\n") : [],
+            linesStripped: player.bio ? player.bio.replace(/<[^>]+>/g, "").split("\n") : [],
+          },
+          badges:
+            player.badges?.map(badge => ({
+              url: badge.image,
+              description: badge.description,
+            })) || [],
+          statisticChange: {
+            daily: dailyChanges,
+            weekly: weeklyChanges,
+            monthly: monthlyChanges,
+          },
+          plusOnePp: plusOnePp,
+          accBadges,
+          peakRank: account?.peakRank,
+          statistics: player.scoreStats,
+          hmdBreakdown: hmdBreakdown,
+          rankPages: {
+            global: getPageFromRank(player.rank, 50),
+            country: getPageFromRank(player.countryRank, 50),
+            medals: medalsRank ? getPageFromRank(medalsRank, 50) : undefined,
+          },
+          rankPercentile:
+            (player.rank /
+              ((await MetricsService.getMetric(MetricType.ACTIVE_ACCOUNTS))?.value as number) ||
+              1) * 100,
+        } as ScoreSaberPlayer;
+      }
+    );
   }
 
   /**
@@ -146,7 +171,10 @@ export default class ScoreSaberService {
    * @param useShortCache whether to use the short cache
    * @returns the player token
    */
-  public static async getCachedPlayer(id: string, useShortCache: boolean = false): Promise<ScoreSaberPlayerToken> {
+  public static async getCachedPlayer(
+    id: string,
+    useShortCache: boolean = false
+  ): Promise<ScoreSaberPlayerToken> {
     const cacheKey = `scoresaber:${useShortCache ? "temp-" : ""}cached-player:${id}`;
 
     const cachedData = await redisClient.get(cacheKey);

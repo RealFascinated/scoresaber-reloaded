@@ -37,7 +37,13 @@ export default function scoresController(app: Elysia) {
         "/player/scoresaber/:playerId/:page/:sort",
         async ({ params: { playerId, page, sort }, query: { search, comparisonPlayerId } }) => {
           return (
-            await PlayerScoresService.getScoreSaberLivePlayerScores(playerId, page, sort, search, comparisonPlayerId)
+            await PlayerScoresService.getScoreSaberLivePlayerScores(
+              playerId,
+              page,
+              sort,
+              search,
+              comparisonPlayerId
+            )
           ).toJSON();
         },
         {
@@ -107,7 +113,11 @@ export default function scoresController(app: Elysia) {
       .post(
         "/friend/leaderboard/:leaderboardId/:page",
         async ({ params: { leaderboardId, page }, body: { friendIds } }) => {
-          return await PlayerFriendScoresService.getFriendLeaderboardScores(friendIds, leaderboardId, page);
+          return await PlayerFriendScoresService.getFriendLeaderboardScores(
+            friendIds,
+            leaderboardId,
+            page
+          );
         },
         {
           tags: ["Scores"],

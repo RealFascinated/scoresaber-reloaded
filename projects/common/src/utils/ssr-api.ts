@@ -90,9 +90,12 @@ class SSRApi {
     characteristic: MapCharacteristic,
     type: DetailType = "basic"
   ) {
-    return await this.request<BeatSaverMapResponse>(`/beatsaver/map/${hash}/${difficulty}/${characteristic}`, {
-      type: type,
-    });
+    return await this.request<BeatSaverMapResponse>(
+      `/beatsaver/map/${hash}/${difficulty}/${characteristic}`,
+      {
+        type: type,
+      }
+    );
   }
 
   /**
@@ -102,8 +105,14 @@ class SSRApi {
    * @param difficulty the difficulty to get
    * @param characteristic the characteristic to get
    */
-  async fetchLeaderboardByHash(hash: string, difficulty: MapDifficulty, characteristic: MapCharacteristic) {
-    return await this.request<LeaderboardResponse>(`/leaderboard/by-hash/${hash}/${difficulty}/${characteristic}`);
+  async fetchLeaderboardByHash(
+    hash: string,
+    difficulty: MapDifficulty,
+    characteristic: MapCharacteristic
+  ) {
+    return await this.request<LeaderboardResponse>(
+      `/leaderboard/by-hash/${hash}/${difficulty}/${characteristic}`
+    );
   }
 
   /**
@@ -144,7 +153,9 @@ class SSRApi {
    * @param month the month to get the score calendar for
    */
   async getScoreCalendar(playerId: string, year: number, month: number) {
-    return await this.request<ScoreCalendarData>(`/player/history/calendar/${playerId}/${year}/${month}`);
+    return await this.request<ScoreCalendarData>(
+      `/player/history/calendar/${playerId}/${year}/${month}`
+    );
   }
 
   /**
@@ -164,9 +175,13 @@ class SSRApi {
    * @param page the page
    */
   async getFriendLeaderboardScores(friendIds: string[], leaderboardId: string, page: number) {
-    return await this.request<Page<ScoreSaberScore>>(`/scores/friend/leaderboard/${leaderboardId}/${page}`, undefined, {
-      friendIds: friendIds,
-    });
+    return await this.request<Page<ScoreSaberScore>>(
+      `/scores/friend/leaderboard/${leaderboardId}/${page}`,
+      undefined,
+      {
+        friendIds: friendIds,
+      }
+    );
   }
 
   /**
@@ -212,7 +227,9 @@ class SSRApi {
    * @param page the page
    */
   async fetchPlayerScoresHistory(playerId: string, leaderboardId: string, page: number) {
-    return await this.request<Page<ScoreSaberScore>>(`/player/score-history/${playerId}/${leaderboardId}/${page}`);
+    return await this.request<Page<ScoreSaberScore>>(
+      `/player/score-history/${playerId}/${leaderboardId}/${page}`
+    );
   }
 
   /**
@@ -240,10 +257,13 @@ class SSRApi {
     search?: string,
     comparisonPlayerId?: string
   ) {
-    return await this.request<PlayerScoresPageResponse>(`/scores/player/scoresaber/${id}/${page}/${sort}`, {
-      ...(search ? { search: search } : {}),
-      ...(comparisonPlayerId ? { comparisonPlayerId: comparisonPlayerId } : {}),
-    });
+    return await this.request<PlayerScoresPageResponse>(
+      `/scores/player/scoresaber/${id}/${page}/${sort}`,
+      {
+        ...(search ? { search: search } : {}),
+        ...(comparisonPlayerId ? { comparisonPlayerId: comparisonPlayerId } : {}),
+      }
+    );
   }
 
   /**
@@ -276,9 +296,12 @@ class SSRApi {
    * @param country the country to get scores in
    */
   async fetchLeaderboardScores(leaderboardId: string, page: number, country?: string) {
-    return await this.request<LeaderboardScoresResponse>(`/scores/leaderboard/${leaderboardId}/${page}`, {
-      ...(country ? { country: country } : {}),
-    });
+    return await this.request<LeaderboardScoresResponse>(
+      `/scores/leaderboard/${leaderboardId}/${page}`,
+      {
+        ...(country ? { country: country } : {}),
+      }
+    );
   }
 
   /**

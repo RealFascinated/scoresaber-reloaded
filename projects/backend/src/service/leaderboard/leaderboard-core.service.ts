@@ -39,7 +39,10 @@ export class LeaderboardCoreService {
    * @param options the options to use for the fetch
    * @returns the fetched leaderboard
    */
-  public static async getLeaderboard(id: string, options?: LeaderboardOptions): Promise<LeaderboardResponse> {
+  public static async getLeaderboard(
+    id: string,
+    options?: LeaderboardOptions
+  ): Promise<LeaderboardResponse> {
     const defaultOptions = {
       ...DEFAULT_OPTIONS,
       ...options,
@@ -96,16 +99,23 @@ export class LeaderboardCoreService {
    * @param token the ScoreSaber leaderboard token to use
    * @returns the fetched leaderboard
    */
-  public static async createLeaderboard(id: string, token?: ScoreSaberLeaderboardToken): Promise<LeaderboardResponse> {
+  public static async createLeaderboard(
+    id: string,
+    token?: ScoreSaberLeaderboardToken
+  ): Promise<LeaderboardResponse> {
     const before = performance.now();
     const leaderboardToken =
-      token ?? (await ApiServiceRegistry.getInstance().getScoreSaberService().lookupLeaderboard(id));
+      token ??
+      (await ApiServiceRegistry.getInstance().getScoreSaberService().lookupLeaderboard(id));
     if (leaderboardToken == undefined) {
       throw new NotFoundError(`Leaderboard not found for "${id}"`);
     }
 
     const data = LeaderboardCoreService.processLeaderboard(
-      await LeaderboardCoreService.saveLeaderboard(id, getScoreSaberLeaderboardFromToken(leaderboardToken))
+      await LeaderboardCoreService.saveLeaderboard(
+        id,
+        getScoreSaberLeaderboardFromToken(leaderboardToken)
+      )
     );
 
     (QueueManager.getQueue(QueueId.LeaderboardScoreSeedQueue) as LeaderboardScoreSeedQueue).add({
@@ -124,7 +134,10 @@ export class LeaderboardCoreService {
    * @param options the options to use for the fetch
    * @returns the fetched leaderboards
    */
-  public static async getLeaderboards(ids: string[], options?: LeaderboardOptions): Promise<LeaderboardResponse[]> {
+  public static async getLeaderboards(
+    ids: string[],
+    options?: LeaderboardOptions
+  ): Promise<LeaderboardResponse[]> {
     options = { ...DEFAULT_OPTIONS, ...options };
     const leaderboardIds = [...new Set(ids)]; // deduplicate IDs
     const leaderboards = new Map<string, LeaderboardResponse | null>();
@@ -153,7 +166,10 @@ export class LeaderboardCoreService {
     );
     await Promise.all(
       allLeaderboards.map(async data => {
-        const beatsaver = await LeaderboardCoreService.fetchBeatSaverData(data.leaderboard, options.beatSaverType);
+        const beatsaver = await LeaderboardCoreService.fetchBeatSaverData(
+          data.leaderboard,
+          options.beatSaverType
+        );
         data.beatsaver = beatsaver;
       })
     );
@@ -210,12 +226,16 @@ export class LeaderboardCoreService {
           getScoreSaberLeaderboardFromToken(leaderboardToken)
         );
 
-        (QueueManager.getQueue(QueueId.LeaderboardScoreSeedQueue) as LeaderboardScoreSeedQueue).add({
-          id: leaderboard.id.toString(),
-          data: leaderboard.id,
-        });
+        (QueueManager.getQueue(QueueId.LeaderboardScoreSeedQueue) as LeaderboardScoreSeedQueue).add(
+          {
+            id: leaderboard.id.toString(),
+            data: leaderboard.id,
+          }
+        );
 
-        Logger.info(`Created leaderboard "${leaderboard.id}" in ${formatDuration(performance.now() - before)}`);
+        Logger.info(
+          `Created leaderboard "${leaderboard.id}" in ${formatDuration(performance.now() - before)}`
+        );
         return LeaderboardCoreService.processLeaderboard(leaderboard);
       }
     );
@@ -240,7 +260,7 @@ export class LeaderboardCoreService {
    * @param filter the filter to use for the fetch
    * @returns the fetched leaderboards
    */
-  public static async fetchLeaderboardsFromAPI(filter: { ranked?: boolean; qualified?: boolean }): Promise<{
+  public static async fetchLeaderboardsFromAPI(status: "ranked" | "qualified"): Promise<{
     leaderboards: ScoreSaberLeaderboard[];
     rankedMapDiffs: Map<string, LeaderboardDifficulty[]>;
   }> {
@@ -252,7 +272,7 @@ export class LeaderboardCoreService {
     while (hasMorePages) {
       const response = await ApiServiceRegistry.getInstance()
         .getScoreSaberService()
-        .lookupLeaderboards(page, { ...filter, priority: CooldownPriority.LOW });
+        .lookupLeaderboards(page, { [status]: true, priority: CooldownPriority.LOW });
       if (!response) {
         Logger.warn(`Failed to fetch leaderboards on page ${page}.`);
         hasMorePages = false;
@@ -260,12 +280,19 @@ export class LeaderboardCoreService {
       }
 
       const totalPages = Math.ceil(response.metadata.total / response.metadata.itemsPerPage);
-      Logger.info(`Fetched ${response.leaderboards.length} leaderboards on page ${page}/${totalPages}.`);
+      Logger.info(
+        `Fetched ${response.leaderboards.length} leaderboards on page ${page}/${totalPages}.`
+      );
 
       for (const token of response.leaderboards) {
         const leaderboard = getScoreSaberLeaderboardFromToken(token);
         leaderboards.push(leaderboard);
-        LeaderboardRankingService.updateRankedMapDifficulties(rankedMapDiffs, leaderboard);
+
+        // Since ScoreSaber only returns the difficulties for the
+        // leaderboard, we need to store them in a map to fetch them all.
+        const difficulties = rankedMapDiffs.get(leaderboard.songHash) ?? [];
+        difficulties.push(leaderboard.difficulty);
+        rankedMapDiffs.set(leaderboard.songHash, difficulties);
       }
 
       hasMorePages = page < totalPages;
@@ -297,7 +324,10 @@ export class LeaderboardCoreService {
    * @param leaderboard the leaderboard to save
    * @returns the saved leaderboard
    */
-  public static async saveLeaderboard(id: string, leaderboard: ScoreSaberLeaderboard): Promise<ScoreSaberLeaderboard> {
+  public static async saveLeaderboard(
+    id: string,
+    leaderboard: ScoreSaberLeaderboard
+  ): Promise<ScoreSaberLeaderboard> {
     const savedLeaderboard = await ScoreSaberLeaderboardModel.findOneAndUpdate(
       { _id: id },
       {
@@ -326,7 +356,10 @@ export class LeaderboardCoreService {
    * @param beatSaverType the type of BeatSaver data to fetch
    * @returns the BeatSaver data
    */
-  public static async fetchBeatSaverData(leaderboard: ScoreSaberLeaderboard, beatSaverType?: DetailType) {
+  public static async fetchBeatSaverData(
+    leaderboard: ScoreSaberLeaderboard,
+    beatSaverType?: DetailType
+  ) {
     try {
       return await BeatSaverService.getMap(
         leaderboard.songHash,

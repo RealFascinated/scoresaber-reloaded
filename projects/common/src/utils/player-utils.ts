@@ -9,7 +9,10 @@ import { formatDateMinimal, getDaysAgoDate, getMidnightAlignedDate } from "./tim
  * @param history the history to get the value from
  * @param field the field to get
  */
-export function getValueFromHistory(history: FlattenedPlayerHistory, field: string): number | undefined {
+export function getValueFromHistory(
+  history: FlattenedPlayerHistory,
+  field: string
+): number | undefined {
   if (field in history) {
     return history[field as keyof FlattenedPlayerHistory];
   }

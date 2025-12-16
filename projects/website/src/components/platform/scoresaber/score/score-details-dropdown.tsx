@@ -73,7 +73,11 @@ export default function ScoreDetailsDropdown({
           {beatSaverMap && <MapStats beatSaver={beatSaverMap} />}
 
           {/* Main Card Content */}
-          <ScoreOverview score={score} leaderboard={leaderboard} scoreStats={dropdownData.scoreStats} />
+          <ScoreOverview
+            score={score}
+            leaderboard={leaderboard}
+            scoreStats={dropdownData.scoreStats}
+          />
 
           {/* Leaderboard Scores */}
           {showLeaderboardScores && (

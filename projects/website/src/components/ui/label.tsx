@@ -4,12 +4,15 @@ import * as React from "react";
 
 import { cn } from "@/common/utils";
 
-const labelVariants = cva("text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70");
+const labelVariants = cva(
+  "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+);
 
 function Label({
   className,
   ...props
-}: React.ComponentPropsWithoutRef<typeof LabelPrimitive.Root> & VariantProps<typeof labelVariants>) {
+}: React.ComponentPropsWithoutRef<typeof LabelPrimitive.Root> &
+  VariantProps<typeof labelVariants>) {
   return <LabelPrimitive.Root className={cn(labelVariants(), className)} {...props} />;
 }
 

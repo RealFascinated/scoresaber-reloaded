@@ -134,7 +134,9 @@ export default class ApiService {
         const nextIndex = (currentIndex + 1) % SERVER_PROXIES.length;
         const nextProxy = SERVER_PROXIES[nextIndex];
         this.currentProxy = nextProxy;
-        Logger.info(`Rate limit exceeded for ${this.name}, switching to another proxy for api service: ${nextProxy}`);
+        Logger.info(
+          `Rate limit exceeded for ${this.name}, switching to another proxy for api service: ${nextProxy}`
+        );
       }
 
       // Update the last rate limit seen

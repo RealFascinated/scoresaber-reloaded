@@ -12,7 +12,13 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { DualRangeSlider } from "@/components/ui/dual-range-slider";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { env } from "@ssr/common/env";
 import {
@@ -53,14 +59,18 @@ export default function CustomPlaylistCreator() {
       </DialogTrigger>
       <DialogContent className="max-w-[650px]">
         <DialogTitle>Playlist Creator</DialogTitle>
-        <DialogDescription>Create a custom playlist based on ScoreSaber Ranked Maps.</DialogDescription>
+        <DialogDescription>
+          Create a custom playlist based on ScoreSaber Ranked Maps.
+        </DialogDescription>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {/* Stars */}
           <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-8">
               <div>
                 <p>Stars</p>
-                <p className="text-muted-foreground text-sm">The star range of maps in the playlist.</p>
+                <p className="text-muted-foreground text-sm">
+                  The star range of maps in the playlist.
+                </p>
               </div>
               <Controller
                 name="stars"
@@ -86,7 +96,9 @@ export default function CustomPlaylistCreator() {
             <div className="flex flex-col gap-2">
               <div>
                 <p>Sort</p>
-                <p className="text-muted-foreground text-sm">The sort order of the maps in the playlist.</p>
+                <p className="text-muted-foreground text-sm">
+                  The sort order of the maps in the playlist.
+                </p>
               </div>
               <Controller
                 name="sort"

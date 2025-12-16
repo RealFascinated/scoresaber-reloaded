@@ -37,7 +37,10 @@ type PlayerData = {
  * @param params the params
  * @returns the player data and scores
  */
-const getPlayerData = async ({ params, searchParams }: Props, type: DetailType = "full"): Promise<PlayerData> => {
+const getPlayerData = async (
+  { params, searchParams }: Props,
+  type: DetailType = "full"
+): Promise<PlayerData> => {
   const { slug } = await params;
 
   const id = slug[0]; // The players id
@@ -90,7 +93,12 @@ Joined: ${formatDate(player.joinedDate, "Do MMMM, YYYY")}`,
 export default async function PlayerPage(props: Props) {
   const { player, platformType } = await getPlayerData(props);
   if (player == undefined) {
-    return <NotFound title="Player Not Found" description="The player you were looking for could not be found" />;
+    return (
+      <NotFound
+        title="Player Not Found"
+        description="The player you were looking for could not be found"
+      />
+    );
   }
   return (
     <main className="flex w-full justify-center">

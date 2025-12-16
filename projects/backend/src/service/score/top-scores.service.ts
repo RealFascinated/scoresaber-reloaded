@@ -1,4 +1,7 @@
-import { ScoreSaberScore, ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
+import {
+  ScoreSaberScore,
+  ScoreSaberScoreModel,
+} from "@ssr/common/model/score/impl/scoresaber-score";
 import { Page, Pagination } from "@ssr/common/pagination";
 import { PlayerScore } from "@ssr/common/score/player-score";
 import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score";
@@ -28,7 +31,9 @@ export class TopScoresService {
       ).map(scoreToObject);
 
       // Batch fetch leaderboards using getLeaderboards
-      const leaderboardIds = scoreObjects.map((score: ScoreSaberScore) => score.leaderboardId.toString());
+      const leaderboardIds = scoreObjects.map((score: ScoreSaberScore) =>
+        score.leaderboardId.toString()
+      );
       const leaderboardResponses = await LeaderboardCoreService.getLeaderboards(leaderboardIds, {
         includeBeatSaver: true,
       });
@@ -41,10 +46,14 @@ export class TopScoresService {
         ScoreSaberService.getCachedPlayer(playerId).catch(() => undefined)
       );
       const players = await Promise.all(playerPromises);
-      const playerMap = new Map(players.filter((p): p is NonNullable<typeof p> => p !== undefined).map(p => [p.id, p]));
+      const playerMap = new Map(
+        players.filter((p): p is NonNullable<typeof p> => p !== undefined).map(p => [p.id, p])
+      );
 
       // Create a map for quick leaderboard lookup
-      const leaderboardMap = new Map(leaderboardResponses.map(response => [response.leaderboard.id, response]));
+      const leaderboardMap = new Map(
+        leaderboardResponses.map(response => [response.leaderboard.id, response])
+      );
 
       // Process scores in parallel
       const processedScores = await Promise.all(

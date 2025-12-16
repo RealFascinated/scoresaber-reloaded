@@ -3,7 +3,10 @@ import * as CheckboxPrimitive from "@radix-ui/react-checkbox";
 import { CheckIcon } from "@radix-ui/react-icons";
 import * as React from "react";
 
-const Checkbox = ({ className, ...props }: React.ComponentPropsWithoutRef<typeof CheckboxPrimitive.Root>) => (
+const Checkbox = ({
+  className,
+  ...props
+}: React.ComponentPropsWithoutRef<typeof CheckboxPrimitive.Root>) => (
   <CheckboxPrimitive.Root
     data-slot="checkbox"
     className={cn(

@@ -4,7 +4,13 @@ import { cn } from "@/common/utils";
 import { ArrowPathIcon } from "@heroicons/react/24/solid";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import clsx from "clsx";
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, MoreHorizontal } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+  MoreHorizontal,
+} from "lucide-react";
 import React, { useCallback } from "react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -17,15 +23,17 @@ type PaginationItemWrapperProps = {
   children: React.ReactNode;
 };
 
-const PaginationItemWrapper = React.memo(({ isLoadingPage, children }: PaginationItemWrapperProps) => (
-  <div
-    className={clsx("relative", isLoadingPage ? "cursor-not-allowed" : "cursor-pointer")}
-    aria-disabled={isLoadingPage}
-    tabIndex={isLoadingPage ? -1 : undefined}
-  >
-    {children}
-  </div>
-));
+const PaginationItemWrapper = React.memo(
+  ({ isLoadingPage, children }: PaginationItemWrapperProps) => (
+    <div
+      className={clsx("relative", isLoadingPage ? "cursor-not-allowed" : "cursor-pointer")}
+      aria-disabled={isLoadingPage}
+      tabIndex={isLoadingPage ? -1 : undefined}
+    >
+      {children}
+    </div>
+  )
+);
 PaginationItemWrapper.displayName = "PaginationItemWrapper";
 
 type PageSelectorProps = {
@@ -69,7 +77,9 @@ const PageSelector = React.memo(({ totalPages, onPageSelect, isLoading }: PageSe
           <div className="grid gap-4">
             <div className="space-y-1.5 text-center">
               <h4 className="leading-none font-medium">Go to Page</h4>
-              <p className="text-muted-foreground text-sm">Max: {formatNumberWithCommas(totalPages)}</p>
+              <p className="text-muted-foreground text-sm">
+                Max: {formatNumberWithCommas(totalPages)}
+              </p>
             </div>
             <div className="flex items-center gap-2">
               <Input
@@ -158,7 +168,14 @@ type NavigationButtonProps = {
 };
 
 const NavigationButton = React.memo(
-  ({ page: buttonPage, disabled, isLoading, children, generatePageUrl, onClick }: NavigationButtonProps) => (
+  ({
+    page: buttonPage,
+    disabled,
+    isLoading,
+    children,
+    generatePageUrl,
+    onClick,
+  }: NavigationButtonProps) => (
     <Button
       asChild
       variant="ghost"
@@ -206,7 +223,9 @@ export default function SimplePagination({
 
   // Calculate loading state once and ensure it's consistent
   const isLoading = Boolean(loadingPage);
-  const loadingState = isLoading ? { isLoading: true, loadingPage } : { isLoading: false, loadingPage: undefined };
+  const loadingState = isLoading
+    ? { isLoading: true, loadingPage }
+    : { isLoading: false, loadingPage: undefined };
 
   const handlePageChange = useCallback(
     (newPage: number) => {
@@ -283,7 +302,12 @@ export default function SimplePagination({
     if (endPage < totalPages) {
       if (endPage < totalPages - 1)
         pageNumbers.push(
-          <PageSelector key="ellipsis-end" totalPages={totalPages} onPageSelect={handlePageChange} isLoading={false} />
+          <PageSelector
+            key="ellipsis-end"
+            totalPages={totalPages}
+            onPageSelect={handlePageChange}
+            isLoading={false}
+          />
         );
       pageNumbers.push(
         <PageButton
@@ -301,7 +325,15 @@ export default function SimplePagination({
     }
 
     return pageNumbers;
-  }, [mobilePagination, page, totalPages, loadingState, handleLinkClick, generatePageUrl, handlePageChange]);
+  }, [
+    mobilePagination,
+    page,
+    totalPages,
+    loadingState,
+    handleLinkClick,
+    generatePageUrl,
+    handlePageChange,
+  ]);
 
   // Calculate page numbers before render to ensure consistent timing
   const pageNumbers = renderPageNumbers();
@@ -315,10 +347,16 @@ export default function SimplePagination({
     >
       {/* Pagination Info */}
       {showStats && (
-        <div className={cn("text-muted-foreground text-sm select-none", !statsBelow && "left-0 lg:absolute")}>
+        <div
+          className={cn(
+            "text-muted-foreground text-sm select-none",
+            !statsBelow && "left-0 lg:absolute"
+          )}
+        >
           <p>
             {formatNumberWithCommas(Math.min((page - 1) * itemsPerPage + 1, totalItems))} -{" "}
-            {formatNumberWithCommas(Math.min(page * itemsPerPage, totalItems))} / {formatNumberWithCommas(totalItems)}
+            {formatNumberWithCommas(Math.min(page * itemsPerPage, totalItems))} /{" "}
+            {formatNumberWithCommas(totalItems)}
           </p>
         </div>
       )}

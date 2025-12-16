@@ -50,7 +50,12 @@ export default function LeaderboardInfo({
             <div className="flex items-center gap-1.5 rounded-md bg-purple-50 px-2 py-1 text-xs font-medium text-purple-700 dark:bg-purple-900/20 dark:text-purple-300">
               <MapIcon className="h-3 w-3" />
               <FallbackLink href={getBeatSaverMapperProfileUrl(beatSaver)}>
-                <span className={cn("font-medium", beatSaver ? "hover:text-primary/80 transition-all" : "")}>
+                <span
+                  className={cn(
+                    "font-medium",
+                    beatSaver ? "hover:text-primary/80 transition-all" : ""
+                  )}
+                >
                   {leaderboard.levelAuthorName}
                 </span>
               </FallbackLink>

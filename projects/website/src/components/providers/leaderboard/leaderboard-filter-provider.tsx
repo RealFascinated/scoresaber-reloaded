@@ -21,7 +21,9 @@ export const LeaderboardFilterProvider = ({
   initialCountry?: string;
 }) => {
   const database = useDatabase();
-  const defaultCountry = useStableLiveQuery(() => database.getSetting<string>(SettingIds.DefaultLeaderboardCountry));
+  const defaultCountry = useStableLiveQuery(() =>
+    database.getSetting<string>(SettingIds.DefaultLeaderboardCountry)
+  );
   const [country, setCountry] = useState<string | undefined>(initialCountry ?? undefined);
 
   useEffect(() => {

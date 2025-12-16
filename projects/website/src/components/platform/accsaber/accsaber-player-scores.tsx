@@ -31,7 +31,14 @@ import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import { useCallback, useEffect } from "react";
 import ScoresCard from "../../score/scores-card";
 import SimplePagination from "../../simple-pagination";
-import { ButtonGroup, ControlButton, ControlPanel, ControlRow, Tab, TabGroup } from "../../ui/control-panel";
+import {
+  ButtonGroup,
+  ControlButton,
+  ControlPanel,
+  ControlRow,
+  Tab,
+  TabGroup,
+} from "../../ui/control-panel";
 import { EmptyState } from "../../ui/empty-state";
 import PageTransition from "../../ui/page-transition";
 import { usePageTransition } from "../../ui/page-transition-context";

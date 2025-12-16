@@ -43,7 +43,8 @@ const settings = [
         name: "showScoreComparison",
         label: "Show Score Comparison",
         type: "checkbox",
-        description: "Displays a score comparison between your score and the player you are viewing",
+        description:
+          "Displays a score comparison between your score and the player you are viewing",
       },
     ],
   },

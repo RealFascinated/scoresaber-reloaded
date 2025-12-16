@@ -52,13 +52,23 @@ export default function ScoreSaberLeaderboardScore({
         </td>
 
         {/* Player */}
-        <td className={cn(TABLE_CELL_WIDTH, "flex w-full min-w-[300px] items-center gap-2 whitespace-nowrap")}>
+        <td
+          className={cn(
+            TABLE_CELL_WIDTH,
+            "flex w-full min-w-[300px] items-center gap-2 whitespace-nowrap"
+          )}
+        >
           {scorePlayer ? (
             <>
               <ScoreSaberScoreHMD score={score}>
                 <HMDIcon hmd={getHMDInfo(score.hmd as HMD)} />
               </ScoreSaberScoreHMD>
-              <PlayerInfo player={scorePlayer} highlightedPlayerId={highlightedPlayerId} useLink className="w-full" />
+              <PlayerInfo
+                player={scorePlayer}
+                highlightedPlayerId={highlightedPlayerId}
+                useLink
+                className="w-full"
+              />
             </>
           ) : (
             <p className="text-gray-500">Unknown Player</p>
@@ -71,7 +81,9 @@ export default function ScoreSaberLeaderboardScore({
         </td>
 
         {/* Score Accuracy */}
-        <td className={cn(TABLE_CELL_WIDTH, "text-center whitespace-nowrap")}>{formatScoreAccuracy(score.accuracy)}</td>
+        <td className={cn(TABLE_CELL_WIDTH, "text-center whitespace-nowrap")}>
+          {formatScoreAccuracy(score.accuracy)}
+        </td>
 
         {/* Score Misses */}
         <td
@@ -128,12 +140,18 @@ export default function ScoreSaberLeaderboardScore({
         {score.additionalData && (
           <td className={cn(TABLE_CELL_WIDTH_SMALL, "w-[45px] pr-3")}>
             <SimpleTooltip display="View score details">
-              <button className="size-6 cursor-pointer" onClick={() => setDetailsExpanded(!detailsExpanded)}>
+              <button
+                className="size-6 cursor-pointer"
+                onClick={() => setDetailsExpanded(!detailsExpanded)}
+              >
                 {isDetailsLoading ? (
                   <Spinner size="sm" />
                 ) : (
                   <ChevronDown
-                    className={cn("size-6 transition-transform duration-200", detailsExpanded ? "" : "rotate-180")}
+                    className={cn(
+                      "size-6 transition-transform duration-200",
+                      detailsExpanded ? "" : "rotate-180"
+                    )}
                   />
                 )}
               </button>

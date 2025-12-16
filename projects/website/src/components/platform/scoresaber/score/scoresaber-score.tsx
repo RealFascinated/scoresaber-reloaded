@@ -56,7 +56,8 @@ export default function ScoreSaberScoreDisplay({
   }, [score]);
 
   const accuracy = (baseScore / leaderboard.maxScore) * 100;
-  const pp = baseScore === score.score ? score.pp : ScoreSaberCurve.getPp(leaderboard.stars, accuracy);
+  const pp =
+    baseScore === score.score ? score.pp : ScoreSaberCurve.getPp(leaderboard.stars, accuracy);
 
   const isTracked = score.isTracked && score.additionalData;
 
@@ -105,19 +106,27 @@ export default function ScoreSaberScoreDisplay({
             )}
 
             {/* View Leaderboard button */}
-            {detailsExpanded != undefined && setDetailsExpanded != undefined && !settings?.hideDetailsDropdown && (
-              <SimpleTooltip display="View score details and leaderboard scores">
-                <button className="size-6 cursor-pointer" onClick={() => setDetailsExpanded(!detailsExpanded)}>
-                  {isDetailsLoading ? (
-                    <Spinner size="sm" />
-                  ) : (
-                    <ChevronDown
-                      className={cn("size-6 transition-transform duration-200", detailsExpanded ? "" : "rotate-180")}
-                    />
-                  )}
-                </button>
-              </SimpleTooltip>
-            )}
+            {detailsExpanded != undefined &&
+              setDetailsExpanded != undefined &&
+              !settings?.hideDetailsDropdown && (
+                <SimpleTooltip display="View score details and leaderboard scores">
+                  <button
+                    className="size-6 cursor-pointer"
+                    onClick={() => setDetailsExpanded(!detailsExpanded)}
+                  >
+                    {isDetailsLoading ? (
+                      <Spinner size="sm" />
+                    ) : (
+                      <ChevronDown
+                        className={cn(
+                          "size-6 transition-transform duration-200",
+                          detailsExpanded ? "" : "rotate-180"
+                        )}
+                      />
+                    )}
+                  </button>
+                </SimpleTooltip>
+              )}
           </div>
 
           <ScoreSaberScoreStats
@@ -130,7 +139,10 @@ export default function ScoreSaberScoreDisplay({
         {/* Score Page */}
         {!isMobile && (
           <FallbackLink href={isTracked ? `/score/${score.scoreId}` : undefined}>
-            <SimpleTooltip display={isTracked ? "Open score page" : "No score data found :("} className="pl-1.5">
+            <SimpleTooltip
+              display={isTracked ? "Open score page" : "No score data found :("}
+              className="pl-1.5"
+            >
               <svg
                 className={cn(
                   "h-8 w-3",

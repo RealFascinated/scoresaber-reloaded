@@ -16,7 +16,12 @@ export default function ReplayButton({ score }: { score: ScoreSaberScore }) {
   }
 
   return (
-    <SimpleLink href={viewer.generateUrl(score.additionalData?.scoreId, getBeatLeaderReplayRedirectUrl(score))}>
+    <SimpleLink
+      href={viewer.generateUrl(
+        score.additionalData?.scoreId,
+        getBeatLeaderReplayRedirectUrl(score)
+      )}
+    >
       <Button>View Replay</Button>
     </SimpleLink>
   );

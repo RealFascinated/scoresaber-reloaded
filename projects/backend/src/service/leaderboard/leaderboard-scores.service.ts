@@ -13,7 +13,9 @@ export class LeaderboardScoresService {
   /**
    * Fetches all scores for a specific leaderboard
    */
-  public static async fetchAllLeaderboardScores(leaderboardId: string): Promise<ScoreSaberScoreToken[]> {
+  public static async fetchAllLeaderboardScores(
+    leaderboardId: string
+  ): Promise<ScoreSaberScoreToken[]> {
     const scoreTokens: ScoreSaberScoreToken[] = [];
     let currentPage = 1;
     let hasMoreScores = true;
@@ -23,12 +25,16 @@ export class LeaderboardScoresService {
         .getScoreSaberService()
         .lookupLeaderboardScores(leaderboardId + "", currentPage);
       if (!response) {
-        Logger.warn(`Failed to fetch scoresaber api scores for leaderboard "${leaderboardId}" on page ${currentPage}`);
+        Logger.warn(
+          `Failed to fetch scoresaber api scores for leaderboard "${leaderboardId}" on page ${currentPage}`
+        );
         currentPage++;
         continue;
       }
       const totalPages = Math.ceil(response.metadata.total / response.metadata.itemsPerPage);
-      Logger.info(`Fetched scores for leaderboard "${leaderboardId}" on page ${currentPage}/${totalPages}`);
+      Logger.info(
+        `Fetched scores for leaderboard "${leaderboardId}" on page ${currentPage}/${totalPages}`
+      );
 
       scoreTokens.push(...response.scores);
       hasMoreScores = currentPage < totalPages;
@@ -71,7 +77,11 @@ export class LeaderboardScoresService {
 
     // Process scores in parallel
     const scorePromises = leaderboardScores.scores.map(async token => {
-      const score = getScoreSaberScoreFromToken(token, leaderboardResponse.leaderboard, token.leaderboardPlayerInfo.id);
+      const score = getScoreSaberScoreFromToken(
+        token,
+        leaderboardResponse.leaderboard,
+        token.leaderboardPlayerInfo.id
+      );
       if (score == undefined) {
         return undefined;
       }
@@ -98,7 +108,9 @@ export class LeaderboardScoresService {
     );
 
     return {
-      scores: (await Promise.all(scorePromises)).filter(score => score !== undefined) as ScoreSaberScore[],
+      scores: (await Promise.all(scorePromises)).filter(
+        score => score !== undefined
+      ) as ScoreSaberScore[],
       leaderboard: leaderboard,
       beatSaver: beatSaverMap,
       metadata: metadata,

@@ -140,7 +140,10 @@ const playerStats: Stat[] = [
               ))}
             </div>
           ) : undefined,
-        value: roles.length > 0 ? <p>{roles.map(role => role.shortName ?? role.name).join(", ")}</p> : undefined,
+        value:
+          roles.length > 0 ? (
+            <p>{roles.map(role => role.shortName ?? role.name).join(", ")}</p>
+          ) : undefined,
       };
     },
   },

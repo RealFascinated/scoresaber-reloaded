@@ -25,12 +25,20 @@ export default function OverlaySongInfoView({ overlayData }: OverlaySongInfoProp
       position={OverlayViewPosition.BOTTOM_LEFT}
       className={cn(paused ? "grayscale filter" : "", "flex gap-2 transition-all")}
     >
-      <Image className="rounded-md" src={beatSaverMap.songArt} alt={`${beatSaverMap.name}`} width={112} height={112} />
+      <Image
+        className="rounded-md"
+        src={beatSaverMap.songArt}
+        alt={`${beatSaverMap.name}`}
+        width={112}
+        height={112}
+      />
       <div className="text-md flex flex-col justify-between gap-2 py-1">
         <div>
           <p className="font-bold">{beatSaverMap.metadata.songName}</p>
           {beatSaverMap.metadata.songAuthorName && (
-            <p className="text-muted-foreground text-sm">by {beatSaverMap.metadata.songAuthorName}</p>
+            <p className="text-muted-foreground text-sm">
+              by {beatSaverMap.metadata.songAuthorName}
+            </p>
           )}
           <p className="text-muted-foreground text-sm">
             Mapped by {truncateText(beatSaverMap.metadata.levelAuthorName, 48)}
@@ -49,7 +57,9 @@ export default function OverlaySongInfoView({ overlayData }: OverlaySongInfoProp
           <div className="[&>*:not(:last-child)]:after:text-muted-foreground flex items-center [&>*:not(:last-child)]:after:mx-2 [&>*:not(:last-child)]:after:content-['|']">
             <span>!bsr {beatSaverMap.bsr}</span>
             <span>{formatNumberWithCommas(beatSaverMap.metadata.bpm)} BPM</span>
-            {leaderboard && leaderboard.stars > 0 && <span className="text-primary">{leaderboard.stars} ★</span>}
+            {leaderboard && leaderboard.stars > 0 && (
+              <span className="text-primary">{leaderboard.stars} ★</span>
+            )}
           </div>
         </div>
       </div>

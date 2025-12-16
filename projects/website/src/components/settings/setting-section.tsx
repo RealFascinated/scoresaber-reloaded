@@ -1,6 +1,12 @@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { useDebounce } from "@uidotdev/usehooks";
 import { ReactElement, ReactNode, useEffect, useRef } from "react";
@@ -47,10 +53,10 @@ export interface SliderField<
   labelDisplay?: "inline" | "thumb";
 }
 
-export interface TextField<TFormValues extends Record<string, any>, TName extends Path<TFormValues>> extends BaseField<
-  TFormValues,
-  TName
-> {
+export interface TextField<
+  TFormValues extends Record<string, any>,
+  TName extends Path<TFormValues>,
+> extends BaseField<TFormValues, TName> {
   type: "text";
 }
 
@@ -67,7 +73,10 @@ interface SettingSectionProps<TFormValues extends Record<string, any>> {
   form: UseFormReturn<TFormValues>;
 }
 
-interface FormFieldComponentProps<TFormValues extends Record<string, any>, TName extends Path<TFormValues>> {
+interface FormFieldComponentProps<
+  TFormValues extends Record<string, any>,
+  TName extends Path<TFormValues>,
+> {
   field: Field<TFormValues, TName>;
   formField: {
     value: TFormValues[TName];
@@ -82,18 +91,17 @@ type RenderFieldProps<TFormValues extends Record<string, any>, TName extends Pat
   onChange: (value: TFormValues[TName]) => void;
 };
 
-function renderCheckboxField<TFormValues extends Record<string, any>, TName extends Path<TFormValues>>({
-  value,
-  onChange,
-}: RenderFieldProps<TFormValues, TName>) {
+function renderCheckboxField<
+  TFormValues extends Record<string, any>,
+  TName extends Path<TFormValues>,
+>({ value, onChange }: RenderFieldProps<TFormValues, TName>) {
   return <Checkbox checked={value as boolean} onCheckedChange={onChange} />;
 }
 
-function renderSelectField<TFormValues extends Record<string, any>, TName extends Path<TFormValues>>({
-  field,
-  value,
-  onChange,
-}: RenderFieldProps<TFormValues, TName>) {
+function renderSelectField<
+  TFormValues extends Record<string, any>,
+  TName extends Path<TFormValues>,
+>({ field, value, onChange }: RenderFieldProps<TFormValues, TName>) {
   if (field.type !== "select") return null;
 
   return (
@@ -112,11 +120,10 @@ function renderSelectField<TFormValues extends Record<string, any>, TName extend
   );
 }
 
-function renderSliderField<TFormValues extends Record<string, any>, TName extends Path<TFormValues>>({
-  field,
-  value,
-  onChange,
-}: RenderFieldProps<TFormValues, TName>) {
+function renderSliderField<
+  TFormValues extends Record<string, any>,
+  TName extends Path<TFormValues>,
+>({ field, value, onChange }: RenderFieldProps<TFormValues, TName>) {
   if (field.type !== "slider") return null;
 
   const labelFormatter = field.labelFormatter ?? ((val: number | undefined) => `${val}%`);
@@ -155,11 +162,10 @@ function renderTextField<TFormValues extends Record<string, any>, TName extends 
   );
 }
 
-function FormFieldComponent<TFormValues extends Record<string, any>, TName extends Path<TFormValues>>({
-  field,
-  formField,
-  form,
-}: FormFieldComponentProps<TFormValues, TName>) {
+function FormFieldComponent<
+  TFormValues extends Record<string, any>,
+  TName extends Path<TFormValues>,
+>({ field, formField, form }: FormFieldComponentProps<TFormValues, TName>) {
   const debouncedValue = useDebounce(formField.value, 500);
   const hasChanged = useRef(false);
 
@@ -242,7 +248,9 @@ function FormFieldComponent<TFormValues extends Record<string, any>, TName exten
           <div className="flex-1 space-y-0 md:pr-4">
             <FormLabel className="text-sm leading-tight font-normal">{field.label}</FormLabel>
             {field.description && (
-              <FormDescription className="text-xs leading-tight">{field.description}</FormDescription>
+              <FormDescription className="text-xs leading-tight">
+                {field.description}
+              </FormDescription>
             )}
           </div>
           <FormControl>{renderControl()}</FormControl>
@@ -270,7 +278,9 @@ export function SettingSection<TFormValues extends Record<string, any>>({
             key={String(field.name)}
             control={form.control}
             name={field.name}
-            render={({ field: formField }) => <FormFieldComponent field={field} formField={formField} form={form} />}
+            render={({ field: formField }) => (
+              <FormFieldComponent field={field} formField={formField} form={form} />
+            )}
           />
         ))}
       </div>

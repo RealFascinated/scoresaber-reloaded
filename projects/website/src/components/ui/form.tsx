@@ -3,7 +3,14 @@
 import * as LabelPrimitive from "@radix-ui/react-label";
 import { Slot } from "@radix-ui/react-slot";
 import * as React from "react";
-import { Controller, ControllerProps, FieldPath, FieldValues, FormProvider, useFormContext } from "react-hook-form";
+import {
+  Controller,
+  ControllerProps,
+  FieldPath,
+  FieldValues,
+  FormProvider,
+  useFormContext,
+} from "react-hook-form";
 
 import { cn } from "@/common/utils";
 import { Label } from "@/components/ui/label";
@@ -71,10 +78,15 @@ const FormItem = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>)
   );
 };
 
-const FormLabel = ({ className, ...props }: React.ComponentPropsWithoutRef<typeof LabelPrimitive.Root>) => {
+const FormLabel = ({
+  className,
+  ...props
+}: React.ComponentPropsWithoutRef<typeof LabelPrimitive.Root>) => {
   const { error, formItemId } = useFormField();
 
-  return <Label className={cn(error && "text-destructive", className)} htmlFor={formItemId} {...props} />;
+  return (
+    <Label className={cn(error && "text-destructive", className)} htmlFor={formItemId} {...props} />
+  );
 };
 
 const FormControl = ({ ...props }: React.ComponentPropsWithoutRef<typeof Slot>) => {
@@ -93,10 +105,20 @@ const FormControl = ({ ...props }: React.ComponentPropsWithoutRef<typeof Slot>) 
 const FormDescription = ({ className, ...props }: React.HTMLAttributes<HTMLParagraphElement>) => {
   const { formDescriptionId } = useFormField();
 
-  return <p id={formDescriptionId} className={cn("text-muted-foreground text-[0.8rem]", className)} {...props} />;
+  return (
+    <p
+      id={formDescriptionId}
+      className={cn("text-muted-foreground text-[0.8rem]", className)}
+      {...props}
+    />
+  );
 };
 
-const FormMessage = ({ className, children, ...props }: React.HTMLAttributes<HTMLParagraphElement>) => {
+const FormMessage = ({
+  className,
+  children,
+  ...props
+}: React.HTMLAttributes<HTMLParagraphElement>) => {
   const { error, formMessageId } = useFormField();
   const body = error ? String(error?.message) : children;
 
@@ -105,10 +127,23 @@ const FormMessage = ({ className, children, ...props }: React.HTMLAttributes<HTM
   }
 
   return (
-    <p id={formMessageId} className={cn("text-destructive text-[0.8rem] font-medium", className)} {...props}>
+    <p
+      id={formMessageId}
+      className={cn("text-destructive text-[0.8rem] font-medium", className)}
+      {...props}
+    >
       {body}
     </p>
   );
 };
 
-export { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage, useFormField };
+export {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+  useFormField,
+};

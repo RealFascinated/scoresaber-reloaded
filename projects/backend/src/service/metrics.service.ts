@@ -141,7 +141,9 @@ export default class MetricsService implements EventListener {
    */
   private registerMetric(metric: Metric<unknown>): void {
     MetricsService.metrics.push(metric);
-    Logger.debug(`[METRICS] Registered metric ${metric.id} with interval ${formatDuration(metric.options.interval)}`);
+    Logger.debug(
+      `[METRICS] Registered metric ${metric.id} with interval ${formatDuration(metric.options.interval)}`
+    );
   }
 
   /**
@@ -164,7 +166,9 @@ export default class MetricsService implements EventListener {
       const fields = point.fields;
       for (const [key, value] of Object.entries(fields)) {
         if (value === undefined || value === null) {
-          Logger.warn(`[METRICS] Skipping write to InfluxDB - invalid value for field '${key}': ${value}`);
+          Logger.warn(
+            `[METRICS] Skipping write to InfluxDB - invalid value for field '${key}': ${value}`
+          );
           return;
         }
       }
@@ -200,7 +204,10 @@ export default class MetricsService implements EventListener {
    */
   public async cleanup(): Promise<void> {
     for (const metric of MetricsService.metrics) {
-      if ("cleanup" in metric && typeof (metric as { cleanup: () => void }).cleanup === "function") {
+      if (
+        "cleanup" in metric &&
+        typeof (metric as { cleanup: () => void }).cleanup === "function"
+      ) {
         (metric as { cleanup: () => void }).cleanup();
       }
     }

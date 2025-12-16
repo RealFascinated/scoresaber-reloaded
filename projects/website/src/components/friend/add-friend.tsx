@@ -76,7 +76,11 @@ export default function FriendAction({
     return null;
   }
 
-  const icon = isFriend ? <UserMinus className="size-5 text-red-300" /> : <UserPlus className="size-5 text-white" />;
+  const icon = isFriend ? (
+    <UserMinus className="size-5 text-red-300" />
+  ) : (
+    <UserPlus className="size-5 text-white" />
+  );
 
   const tooltipText = isFriend ? (
     <p>
@@ -90,7 +94,10 @@ export default function FriendAction({
 
   return (
     <SimpleTooltip display={tooltipText} side={"bottom"}>
-      <div onClick={isFriend ? removeFriend : addFriend} className={cn("w-fit cursor-pointer", className)}>
+      <div
+        onClick={isFriend ? removeFriend : addFriend}
+        className={cn("w-fit cursor-pointer", className)}
+      >
         {iconOnly ? icon : <Button variant={"outline"}>{icon}</Button>}
       </div>
     </SimpleTooltip>

@@ -4,7 +4,13 @@ import { useMapFilter } from "@/components/providers/maps/map-filter-provider";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DualRangeSlider } from "@/components/ui/dual-range-slider";
 import { FilterField, FilterSection } from "@/components/ui/filter-section";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { MapCategory, MapSort } from "@ssr/common/maps/types";
 import { SHARED_CONSTS } from "@ssr/common/shared-consts";
 import { Input } from "../ui/input";

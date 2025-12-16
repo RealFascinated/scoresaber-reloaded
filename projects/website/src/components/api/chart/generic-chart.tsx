@@ -30,7 +30,16 @@ import { Line } from "react-chartjs-2";
 
 dayjs.extend(utc);
 
-Chart.register(LineElement, PointElement, BarElement, LinearScale, CategoryScale, Legend, Tooltip, BarController);
+Chart.register(
+  LineElement,
+  PointElement,
+  BarElement,
+  LinearScale,
+  CategoryScale,
+  Legend,
+  Tooltip,
+  BarController
+);
 
 type Props = {
   config: ChartConfig;
@@ -49,9 +58,19 @@ const GenericChart = ({ config, labels }: Props) => {
     return datasets.map(dataset => {
       let transformedData: (number | null)[] | ({ x: number; y: number } | null)[] = dataset.data;
 
-      if (isXAxisLinear && isNumericLabels && Array.isArray(dataset.data) && dataset.data.length > 0) {
+      if (
+        isXAxisLinear &&
+        isNumericLabels &&
+        Array.isArray(dataset.data) &&
+        dataset.data.length > 0
+      ) {
         const firstItem = dataset.data[0];
-        if (firstItem !== null && typeof firstItem === "object" && "x" in firstItem && "y" in firstItem) {
+        if (
+          firstItem !== null &&
+          typeof firstItem === "object" &&
+          "x" in firstItem &&
+          "y" in firstItem
+        ) {
           transformedData = dataset.data as ({ x: number; y: number } | null)[];
         } else {
           transformedData = (dataset.data as (number | null)[]).map((y, index) => {
@@ -65,7 +84,8 @@ const GenericChart = ({ config, labels }: Props) => {
         label: dataset.label,
         data: transformedData,
         borderColor: dataset.color,
-        backgroundColor: dataset.type === "bar" || dataset.type === "point" ? dataset.color : undefined,
+        backgroundColor:
+          dataset.type === "bar" || dataset.type === "point" ? dataset.color : undefined,
         fill: false,
         lineTension: 0.4,
         spanGaps: true,
@@ -100,7 +120,9 @@ const GenericChart = ({ config, labels }: Props) => {
         ? {
             type: "linear",
             grid: { color: "#252525" },
-            ticks: axes.x?.valueFormatter ? { callback: (value: number) => axes.x!.valueFormatter!(value) } : undefined,
+            ticks: axes.x?.valueFormatter
+              ? { callback: (value: number) => axes.x!.valueFormatter!(value) }
+              : undefined,
           }
         : {
             grid: { color: "#252525" },
@@ -111,7 +133,8 @@ const GenericChart = ({ config, labels }: Props) => {
                 if (typeof labels[index] === "string") return labels[index];
                 if (typeof labels[index] === "number") return labels[index].toString();
 
-                const date = labels[index] instanceof Date ? labels[index] : parseDate(labels[index]);
+                const date =
+                  labels[index] instanceof Date ? labels[index] : parseDate(labels[index]);
                 const daysAgo = getDaysAgo(date);
                 const currentYear = new Date().getUTCFullYear();
                 const dateYear = date.getUTCFullYear();
@@ -270,9 +293,21 @@ const GenericChart = ({ config, labels }: Props) => {
           },
         },
       },
-      ...Object.fromEntries(Object.entries(customOptions || {}).filter(([key]) => key !== "scales")),
+      ...Object.fromEntries(
+        Object.entries(customOptions || {}).filter(([key]) => key !== "scales")
+      ),
     };
-  }, [chartAxes, labels, datasets, database, id, customOptions, isXAxisLinear, isNumericLabels, axes]);
+  }, [
+    chartAxes,
+    labels,
+    datasets,
+    database,
+    id,
+    customOptions,
+    isXAxisLinear,
+    isNumericLabels,
+    axes,
+  ]);
 
   const showNoData = !datasets.some(dataset => dataset.data.some(value => value !== null));
 

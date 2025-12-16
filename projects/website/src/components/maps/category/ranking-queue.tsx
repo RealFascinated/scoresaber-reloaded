@@ -15,7 +15,8 @@ import { useState } from "react";
 export default function RankingQueue() {
   const { data: rankingRequests, isLoading } = useQuery({
     queryKey: ["ranking-queue"],
-    queryFn: async () => ApiServiceRegistry.getInstance().getScoreSaberService().lookupRankingRequests(),
+    queryFn: async () =>
+      ApiServiceRegistry.getInstance().getScoreSaberService().lookupRankingRequests(),
   });
   const [showOpenRankUnrank, setShowOpenRankUnrank] = useState(false);
 
@@ -81,12 +82,16 @@ export default function RankingQueue() {
         onClick={() => setShowOpenRankUnrank(!showOpenRankUnrank)}
       >
         <ChevronDownIcon
-          className={cn("h-4 w-4 transition-transform duration-200", showOpenRankUnrank ? "rotate-180" : "")}
+          className={cn(
+            "h-4 w-4 transition-transform duration-200",
+            showOpenRankUnrank ? "rotate-180" : ""
+          )}
         />
         {(showOpenRankUnrank ? "Show" : "Hide") + " All Requests"}
       </Button>
 
-      {showOpenRankUnrank && renderRequests("Open rank/unrank requests", rankingRequests?.openRankUnrank || [])}
+      {showOpenRankUnrank &&
+        renderRequests("Open rank/unrank requests", rankingRequests?.openRankUnrank || [])}
     </div>
   );
 }

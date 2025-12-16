@@ -37,7 +37,11 @@ export function PlayerInfo({
 
   return (
     <div className="flex items-center gap-2">
-      <Avatar src={getScoreSaberAvatar(player)} size={26} alt={`${player.name}'s Profile Picture`} />
+      <Avatar
+        src={getScoreSaberAvatar(player)}
+        size={26}
+        alt={`${player.name}'s Profile Picture`}
+      />
       {!hideCountryFlag && <CountryFlag code={player.country!} size={10} />}
       {useLink ? <SimpleLink href={`/player/${player.id}`}>{name}</SimpleLink> : name}
     </div>

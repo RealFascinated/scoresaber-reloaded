@@ -4,7 +4,13 @@ import { HistoryMode } from "@/common/player/history-mode";
 import Card from "@/components/card";
 import { Spinner } from "@/components/spinner";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useIsMobile } from "@/contexts/viewport-context";
 import useDatabase from "@/hooks/use-database";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
@@ -71,7 +77,13 @@ function ViewSelector({
   );
 }
 
-function DateRangeSelector({ daysAgo, onDaysChange }: { daysAgo: number; onDaysChange: (days: number) => void }) {
+function DateRangeSelector({
+  daysAgo,
+  onDaysChange,
+}: {
+  daysAgo: number;
+  onDaysChange: (days: number) => void;
+}) {
   return (
     <Select
       value={daysAgo === Infinity ? "Infinity" : daysAgo.toString()}
@@ -107,7 +119,8 @@ export default function PlayerViews({ player }: { player: ScoreSaberPlayer }) {
 
   const { data: statisticHistory } = useQuery({
     queryKey: ["player-statistic-history", player.id, daysAgo],
-    queryFn: () => ssrApi.getPlayerStatisticHistory(player.id, getDaysAgoDate(actualDaysAgo), new Date()),
+    queryFn: () =>
+      ssrApi.getPlayerStatisticHistory(player.id, getDaysAgoDate(actualDaysAgo), new Date()),
   });
 
   const views: SelectedView[] = [
@@ -120,11 +133,26 @@ export default function PlayerViews({ player }: { player: ScoreSaberPlayer }) {
       chart: (_: ScoreSaberPlayer, statisticHistory: PlayerStatisticHistory) => {
         switch (historyMode) {
           case HistoryMode.SIMPLE:
-            return <PlayerSimpleRankingChart statisticHistory={statisticHistory} daysAmount={actualDaysAgo} />;
+            return (
+              <PlayerSimpleRankingChart
+                statisticHistory={statisticHistory}
+                daysAmount={actualDaysAgo}
+              />
+            );
           case HistoryMode.ADVANCED:
-            return <PlayerAdvancedRankingChart statisticHistory={statisticHistory} daysAmount={actualDaysAgo} />;
+            return (
+              <PlayerAdvancedRankingChart
+                statisticHistory={statisticHistory}
+                daysAmount={actualDaysAgo}
+              />
+            );
           default:
-            return <PlayerSimpleRankingChart statisticHistory={statisticHistory} daysAmount={actualDaysAgo} />;
+            return (
+              <PlayerSimpleRankingChart
+                statisticHistory={statisticHistory}
+                daysAmount={actualDaysAgo}
+              />
+            );
         }
       },
     },
@@ -180,7 +208,9 @@ export default function PlayerViews({ player }: { player: ScoreSaberPlayer }) {
 
       {statisticHistory && historyMode !== undefined ? (
         selectedView.wrapCard ? (
-          <Card className="bg-chart-card p-2.5">{selectedView.chart(player, statisticHistory)}</Card>
+          <Card className="bg-chart-card p-2.5">
+            {selectedView.chart(player, statisticHistory)}
+          </Card>
         ) : (
           selectedView.chart(player, statisticHistory)
         )

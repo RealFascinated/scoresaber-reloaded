@@ -34,7 +34,9 @@ export class PlayerScoreHistoryService {
         leaderboardId: leaderboardId,
       }),
     ]);
-    const scores = [...scoreHistory, ...currentScores].sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+    const scores = [...scoreHistory, ...currentScores].sort(
+      (a, b) => b.timestamp.getTime() - a.timestamp.getTime()
+    );
     if (scores == null || scores.length == 0) {
       throw new NotFoundError(`No previous scores found for ${playerId} in ${leaderboardId}`);
     }

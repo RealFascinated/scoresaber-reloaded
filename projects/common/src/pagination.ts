@@ -68,7 +68,10 @@ export class Pagination<T> {
       throw new Error("Items function is not set and no fetchItems callback provided");
     }
 
-    return new Page<T>(pageItems, new Metadata(totalPages, this.totalItems, page, this.itemsPerPage));
+    return new Page<T>(
+      pageItems,
+      new Metadata(totalPages, this.totalItems, page, this.itemsPerPage)
+    );
   }
 
   public static empty<T>(): Page<T> {

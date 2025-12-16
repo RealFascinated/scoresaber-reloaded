@@ -1,4 +1,10 @@
-import { getModelForClass, modelOptions, prop, ReturnModelType, Severity } from "@typegoose/typegoose";
+import {
+  getModelForClass,
+  modelOptions,
+  prop,
+  ReturnModelType,
+  Severity,
+} from "@typegoose/typegoose";
 import { Document } from "mongoose";
 import { type ScoreStatsAccuracyTrackerToken } from "../../types/token/beatleader/score-stats/accuracy-tracker";
 import { type ScoreStatsHitTrackerToken } from "../../types/token/beatleader/score-stats/hit-tracker";

@@ -87,7 +87,9 @@ async function main() {
     Logger.info("Connecting to MongoDB...");
     await mongoose.connect(env.MONGO_CONNECTION_STRING);
     Logger.info("Connected to MongoDB");
-    Logger.info(`Polling for slow queries (threshold: ${SLOW_QUERY_THRESHOLD_MS}ms, interval: ${POLL_INTERVAL_MS}ms)`);
+    Logger.info(
+      `Polling for slow queries (threshold: ${SLOW_QUERY_THRESHOLD_MS}ms, interval: ${POLL_INTERVAL_MS}ms)`
+    );
     Logger.info("Press Ctrl+C to stop\n");
 
     const seenQueries = new Set<string>();
@@ -115,9 +117,13 @@ async function main() {
         // Debug: log total operations every 20 iterations
         if (iteration % 20 === 0 && iteration > 0) {
           try {
-            const allOps = await mongoose.connection.db?.admin().command({ currentOp: 1, active: true });
+            const allOps = await mongoose.connection.db
+              ?.admin()
+              .command({ currentOp: 1, active: true });
             const totalOps = (allOps?.inprog as unknown[])?.length || 0;
-            Logger.info(`\n[Debug] Total active operations: ${totalOps}, Slow queries found: ${slowQueries.length}`);
+            Logger.info(
+              `\n[Debug] Total active operations: ${totalOps}, Slow queries found: ${slowQueries.length}`
+            );
           } catch {
             // Ignore debug errors
           }

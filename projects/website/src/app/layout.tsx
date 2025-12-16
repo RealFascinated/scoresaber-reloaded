@@ -47,12 +47,14 @@ export const metadata: Metadata = {
   openGraph: {
     siteName: env.NEXT_PUBLIC_WEBSITE_NAME,
     title: env.NEXT_PUBLIC_WEBSITE_NAME,
-    description: "ScoreSaber Reloaded is a new way to view your scores and get more stats about you and your plays",
+    description:
+      "ScoreSaber Reloaded is a new way to view your scores and get more stats about you and your plays",
     url: "https://ssr.fascinated.cc",
     locale: "en_US",
     type: "website",
   },
-  description: "ScoreSaber Reloaded is a new way to view your scores and get more stats about you and your plays",
+  description:
+    "ScoreSaber Reloaded is a new way to view your scores and get more stats about you and your plays",
 };
 
 export const viewport: Viewport = {

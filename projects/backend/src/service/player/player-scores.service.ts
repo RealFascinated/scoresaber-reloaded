@@ -5,14 +5,23 @@ import Logger from "@ssr/common/logger";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { Player, PlayerModel } from "@ssr/common/model/player/player";
 import { ScoreSaberMedalsScoreModel } from "@ssr/common/model/score/impl/scoresaber-medals-score";
-import { ScoreSaberScore, ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
+import {
+  ScoreSaberScore,
+  ScoreSaberScoreModel,
+} from "@ssr/common/model/score/impl/scoresaber-score";
 import { Pagination } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import { PlayerScoreChartDataPoint, PlayerScoresChartResponse } from "@ssr/common/schemas/response/player/scores-chart";
+import {
+  PlayerScoreChartDataPoint,
+  PlayerScoresChartResponse,
+} from "@ssr/common/schemas/response/player/scores-chart";
 import { PlayerScoresPageResponse } from "@ssr/common/schemas/response/score/player-scores";
 import { PlayerScore } from "@ssr/common/score/player-score";
 import { ScoreSaberScoreSort } from "@ssr/common/score/score-sort";
-import { getScoreSaberLeaderboardFromToken, getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
+import {
+  getScoreSaberLeaderboardFromToken,
+  getScoreSaberScoreFromToken,
+} from "@ssr/common/token-creators";
 import { ScoreQuery, SortDirection, SortField } from "@ssr/common/types/score-query";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import ScoreSaberPlayerScoreToken from "@ssr/common/types/token/scoresaber/player-score";
@@ -85,7 +94,9 @@ export class PlayerScoresService {
      * @param page the page to get
      * @returns the scores page
      */
-    async function getScoresPage(page: number): Promise<ScoreSaberPlayerScoresPageToken | undefined> {
+    async function getScoresPage(
+      page: number
+    ): Promise<ScoreSaberPlayerScoresPageToken | undefined> {
       return ApiServiceRegistry.getInstance().getScoreSaberService().lookupPlayerScores({
         playerId: playerId,
         page: page,
@@ -171,7 +182,10 @@ export class PlayerScoresService {
      * @param page the page to process
      * @returns whether the page has more scores to process
      */
-    async function processPage(currentPage: number, scoresPage: ScoreSaberPlayerScoresPageToken): Promise<boolean> {
+    async function processPage(
+      currentPage: number,
+      scoresPage: ScoreSaberPlayerScoresPageToken
+    ): Promise<boolean> {
       for (const scoreToken of scoresPage.playerScores) {
         const { score, leaderboard } = parseScoreToken(scoreToken);
         if (!score || !leaderboard) {
@@ -314,10 +328,13 @@ export class PlayerScoresService {
       throw new NotFoundError("Score not found");
     }
 
-    const leaderboardResponse = await LeaderboardCoreService.getLeaderboard(rawScore.leaderboardId + "", {
-      includeBeatSaver: true,
-      beatSaverType: "full",
-    });
+    const leaderboardResponse = await LeaderboardCoreService.getLeaderboard(
+      rawScore.leaderboardId + "",
+      {
+        includeBeatSaver: true,
+        beatSaverType: "full",
+      }
+    );
     if (!leaderboardResponse) {
       throw new NotFoundError("Leaderboard not found");
     }
@@ -502,9 +519,12 @@ export class PlayerScoresService {
       return (
         await Promise.all(
           rawScores.map(async rawScore => {
-            const leaderboardResponse = await LeaderboardCoreService.getLeaderboard(rawScore.leaderboardId + "", {
-              includeBeatSaver: true,
-            });
+            const leaderboardResponse = await LeaderboardCoreService.getLeaderboard(
+              rawScore.leaderboardId + "",
+              {
+                includeBeatSaver: true,
+              }
+            );
             if (!leaderboardResponse) {
               return null;
             }

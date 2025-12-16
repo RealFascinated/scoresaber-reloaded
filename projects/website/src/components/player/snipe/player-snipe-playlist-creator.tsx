@@ -6,11 +6,23 @@ import SimpleTooltip from "@/components/simple-tooltip";
 import { Spinner } from "@/components/spinner";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup, ControlButton } from "@/components/ui/control-panel";
-import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { DualRangeSlider } from "@/components/ui/dual-range-slider";
 import { Form, FormControl, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import useDatabase from "@/hooks/use-database";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
@@ -70,9 +82,15 @@ interface Props {
 
 function generateFilename(toSnipeId: string, data: SnipeSettings): string {
   const scoreType =
-    data.rankedStatus === "all" ? "all" : data.rankedStatus === "ranked" ? "ranked-only" : "unranked-only";
+    data.rankedStatus === "all"
+      ? "all"
+      : data.rankedStatus === "ranked"
+        ? "ranked-only"
+        : "unranked-only";
   const starRange =
-    data.rankedStatus === "ranked" && data.starRange ? `-${data.starRange.min}-${data.starRange.max}⭐` : "";
+    data.rankedStatus === "ranked" && data.starRange
+      ? `-${data.starRange.min}-${data.starRange.max}⭐`
+      : "";
   const accRange = `-${data.accuracyRange.min}-${data.accuracyRange.max}%`;
   const sortInfo = `${data.sort}-${data.sortDirection ?? "desc"}`;
   return `ssr-snipe-${toSnipeId}-${scoreType}${starRange}${accRange}-${sortInfo}.bplist`;
@@ -113,7 +131,10 @@ export default function SnipePlaylistCreator({ toSnipe }: Props) {
     (newSort: SortOption) => {
       const opt = SORT_OPTIONS[newSort];
       form.setValue("sort", newSort);
-      form.setValue("sortDirection", sort === newSort && sortDirection === "desc" ? "asc" : opt.defaultOrder);
+      form.setValue(
+        "sortDirection",
+        sort === newSort && sortDirection === "desc" ? "asc" : opt.defaultOrder
+      );
     },
     [form, sort, sortDirection]
   );
@@ -197,10 +218,16 @@ export default function SnipePlaylistCreator({ toSnipe }: Props) {
                           render={({ field, fieldState }) => (
                             <FormItem className="flex flex-col items-start space-y-2 py-1 md:flex-row md:items-center md:justify-between md:space-y-0">
                               <div className="flex-1 space-y-0 md:pr-4">
-                                <FormLabel className="text-sm leading-tight font-normal">Playlist Name</FormLabel>
+                                <FormLabel className="text-sm leading-tight font-normal">
+                                  Playlist Name
+                                </FormLabel>
                               </div>
                               <FormControl>
-                                <Input {...field} placeholder="Snipe Playlist" className="w-full md:w-52" />
+                                <Input
+                                  {...field}
+                                  placeholder="Snipe Playlist"
+                                  className="w-full md:w-52"
+                                />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -213,7 +240,9 @@ export default function SnipePlaylistCreator({ toSnipe }: Props) {
                           render={({ field, fieldState }) => (
                             <FormItem className="flex flex-col items-start space-y-2 py-1 md:flex-row md:items-center md:justify-between md:space-y-0">
                               <div className="flex-1 space-y-0 md:pr-4">
-                                <FormLabel className="text-sm leading-tight font-normal">Score Limit</FormLabel>
+                                <FormLabel className="text-sm leading-tight font-normal">
+                                  Score Limit
+                                </FormLabel>
                               </div>
                               <FormControl>
                                 <div className="flex w-full items-center gap-3 md:w-52">
@@ -242,7 +271,8 @@ export default function SnipePlaylistCreator({ toSnipe }: Props) {
                         {availableSorts.map(opt => {
                           const isActive = opt.value === sort;
                           const Icon = opt.icon;
-                          const DirectionIcon = isActive && sortDirection === "desc" ? ArrowDown : ArrowUp;
+                          const DirectionIcon =
+                            isActive && sortDirection === "desc" ? ArrowDown : ArrowUp;
                           return (
                             <ControlButton
                               key={opt.value}
@@ -250,7 +280,11 @@ export default function SnipePlaylistCreator({ toSnipe }: Props) {
                               onClick={() => handleSort(opt.value)}
                               type="button"
                             >
-                              {isActive ? <DirectionIcon className="h-4 w-4" /> : <Icon className="h-4 w-4" />}
+                              {isActive ? (
+                                <DirectionIcon className="h-4 w-4" />
+                              ) : (
+                                <Icon className="h-4 w-4" />
+                              )}
                               {opt.name}
                             </ControlButton>
                           );
@@ -271,7 +305,9 @@ export default function SnipePlaylistCreator({ toSnipe }: Props) {
                           render={({ field, fieldState }) => (
                             <FormItem className="flex flex-col items-start space-y-2 py-1 md:flex-row md:items-center md:justify-between md:space-y-0">
                               <div className="flex-1 space-y-0 md:pr-4">
-                                <FormLabel className="text-sm leading-tight font-normal">Score Type</FormLabel>
+                                <FormLabel className="text-sm leading-tight font-normal">
+                                  Score Type
+                                </FormLabel>
                               </div>
                               <FormControl>
                                 <Select value={field.value} onValueChange={field.onChange}>
@@ -307,7 +343,9 @@ export default function SnipePlaylistCreator({ toSnipe }: Props) {
                               return (
                                 <FormItem className="flex flex-col items-start space-y-2 py-1 md:flex-row md:items-center md:justify-between md:space-y-0">
                                   <div className="flex-1 space-y-0 md:pr-4">
-                                    <FormLabel className="text-sm leading-tight font-normal">Star Range</FormLabel>
+                                    <FormLabel className="text-sm leading-tight font-normal">
+                                      Star Range
+                                    </FormLabel>
                                   </div>
                                   <FormControl>
                                     <div className="flex w-full items-center gap-3 md:w-52">
@@ -318,7 +356,9 @@ export default function SnipePlaylistCreator({ toSnipe }: Props) {
                                         label={v => <span className="text-xs">{v}</span>}
                                         value={[val.min, val.max]}
                                         showLabelOnHover={false}
-                                        onValueChange={vals => field.onChange({ min: vals[0], max: vals[1] })}
+                                        onValueChange={vals =>
+                                          field.onChange({ min: vals[0], max: vals[1] })
+                                        }
                                         className="pt-10 pb-1 md:w-52"
                                       />
                                     </div>
@@ -338,7 +378,9 @@ export default function SnipePlaylistCreator({ toSnipe }: Props) {
                             return (
                               <FormItem className="flex flex-col items-start space-y-2 py-1 md:flex-row md:items-center md:justify-between md:space-y-0">
                                 <div className="flex-1 space-y-0 md:pr-4">
-                                  <FormLabel className="text-sm leading-tight font-normal">Accuracy Range</FormLabel>
+                                  <FormLabel className="text-sm leading-tight font-normal">
+                                    Accuracy Range
+                                  </FormLabel>
                                 </div>
                                 <FormControl>
                                   <div className="flex w-full items-center gap-3 md:w-52">
@@ -349,7 +391,9 @@ export default function SnipePlaylistCreator({ toSnipe }: Props) {
                                       label={v => <span className="text-xs">{v}%</span>}
                                       value={[val.min, val.max]}
                                       showLabelOnHover={false}
-                                      onValueChange={vals => field.onChange({ min: vals[0], max: vals[1] })}
+                                      onValueChange={vals =>
+                                        field.onChange({ min: vals[0], max: vals[1] })
+                                      }
                                       className="pt-10 pb-1"
                                     />
                                   </div>
@@ -369,7 +413,12 @@ export default function SnipePlaylistCreator({ toSnipe }: Props) {
 
           {/* Footer */}
           <div className="border-border flex flex-wrap items-center justify-end gap-(--spacing-sm) border-t px-(--spacing-lg) py-(--spacing-lg) md:gap-(--spacing-lg) md:px-(--spacing-xl) md:py-(--spacing-xl)">
-            <Button type="submit" form="snipe-playlist-form" className="gap-2" disabled={downloading}>
+            <Button
+              type="submit"
+              form="snipe-playlist-form"
+              className="gap-2"
+              disabled={downloading}
+            >
               {downloading ? <Spinner className="h-4 w-4" /> : <Download className="h-4 w-4" />}
               <span>Download Playlist</span>
             </Button>

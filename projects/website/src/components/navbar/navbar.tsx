@@ -16,9 +16,24 @@ import { FaMedal } from "react-icons/fa";
 
 const links: ReactElement<any>[] = [
   <FriendsButton key="friends" />,
-  <SimpleNavLink key="ranking" name="Ranking" icon={<TrendingUpIcon className="size-5" />} href="/ranking" />,
-  <SimpleNavLink key="medals" name="Medals" icon={<FaMedal className="size-4.5" />} href="/medals" />,
-  <SimpleNavLink key="maps" name="Maps" icon={<MusicIcon className="size-5" />} href="/maps/leaderboards" />,
+  <SimpleNavLink
+    key="ranking"
+    name="Ranking"
+    icon={<TrendingUpIcon className="size-5" />}
+    href="/ranking"
+  />,
+  <SimpleNavLink
+    key="medals"
+    name="Medals"
+    icon={<FaMedal className="size-4.5" />}
+    href="/medals"
+  />,
+  <SimpleNavLink
+    key="maps"
+    name="Maps"
+    icon={<MusicIcon className="size-5" />}
+    href="/maps/leaderboards"
+  />,
   <SimpleNavLink
     key="overlay"
     name="Overlay"
@@ -26,8 +41,18 @@ const links: ReactElement<any>[] = [
     href="/overlay/builder"
     className="hidden md:flex"
   />,
-  <SimpleNavLink key="top-scores" name="Top Scores" icon={<TrophyIcon className="size-5" />} href="/scores/top" />,
-  <SimpleNavLink key="statistics" name="Statistics" icon={<ChartBarIcon className="size-5" />} href="/statistics" />,
+  <SimpleNavLink
+    key="top-scores"
+    name="Top Scores"
+    icon={<TrophyIcon className="size-5" />}
+    href="/scores/top"
+  />,
+  <SimpleNavLink
+    key="statistics"
+    name="Statistics"
+    icon={<ChartBarIcon className="size-5" />}
+    href="/statistics"
+  />,
 ];
 
 export default function Navbar() {

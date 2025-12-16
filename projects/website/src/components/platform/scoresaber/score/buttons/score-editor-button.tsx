@@ -22,12 +22,17 @@ type ScoreEditorButtonProps = {
 
 const MIN_ACCURACY = 70;
 
-export default function ScoreSaberScoreEditorButton({ score, leaderboard, updateScore }: ScoreEditorButtonProps) {
+export default function ScoreSaberScoreEditorButton({
+  score,
+  leaderboard,
+  updateScore,
+}: ScoreEditorButtonProps) {
   const isMobile = useIsMobile();
   const [open, setOpen] = useState(false);
 
   const maxScore = leaderboard.maxScore || 1; // Use 1 to prevent division by zero
-  const accuracy = (score.score / maxScore) * 100 * (score.modifiers.includes(Modifier.NF) ? 0.5 : 1);
+  const accuracy =
+    (score.score / maxScore) * 100 * (score.modifiers.includes(Modifier.NF) ? 0.5 : 1);
 
   const [baseValue, setBaseValue] = useState(Math.max(MIN_ACCURACY, Math.floor(accuracy))); // 1, 2, 3, etc.
   const [decimalValue, setDecimalValue] = useState(accuracy - Math.floor(accuracy)); // 0.0, 0.1, 0.2, etc.
@@ -38,7 +43,8 @@ export default function ScoreSaberScoreEditorButton({ score, leaderboard, update
     enabled: open,
   });
 
-  const [modifiedScores, setModifiedScores] = useState<Pick<ScoreSaberScore, "pp" | "weight" | "scoreId">[]>();
+  const [modifiedScores, setModifiedScores] =
+    useState<Pick<ScoreSaberScore, "pp" | "weight" | "scoreId">[]>();
 
   const updateScoreAndPP = (accuracy: number) => {
     const newBaseScore = (accuracy / 100) * maxScore;
@@ -132,7 +138,10 @@ export default function ScoreSaberScoreEditorButton({ score, leaderboard, update
                   {score.additionalData !== undefined && !score.fullCombo && (
                     <SimpleTooltip
                       display={
-                        <p>Set accuracy to FC Accuracy ({formatScoreAccuracy(score.additionalData!.fcAccuracy!)})</p>
+                        <p>
+                          Set accuracy to FC Accuracy (
+                          {formatScoreAccuracy(score.additionalData!.fcAccuracy!)})
+                        </p>
                       }
                     >
                       <Button onClick={setAccuracyToFC} className="h-fit p-1.5" variant="ghost">
@@ -188,7 +197,8 @@ export default function ScoreSaberScoreEditorButton({ score, leaderboard, update
             {/* PP Gain */}
             {rankedPps && leaderboard.ranked && (
               <p className="text-muted-foreground text-sm">
-                Weighted PP Gain: <b className="text-pp">{ppGain > 0.1 ? ppGain.toFixed(2) : 0}pp</b>
+                Weighted PP Gain:{" "}
+                <b className="text-pp">{ppGain > 0.1 ? ppGain.toFixed(2) : 0}pp</b>
               </p>
             )}
           </div>

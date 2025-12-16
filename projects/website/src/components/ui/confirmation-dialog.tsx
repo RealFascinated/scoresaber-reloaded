@@ -2,7 +2,14 @@
 
 import { cloneElement, isValidElement, ReactElement, ReactNode, useState } from "react";
 import { Button } from "./button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "./dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "./dialog";
 
 interface ConfirmationDialogProps {
   trigger: ReactNode;

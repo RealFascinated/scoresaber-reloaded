@@ -8,7 +8,11 @@ import { EmbedBuilder } from "discord.js";
  * @param type the type of the embed
  * @returns the embed
  */
-export function createGenericEmbed(title: string, description: string, type: "success" | "error" = "success") {
+export function createGenericEmbed(
+  title: string,
+  description: string,
+  type: "success" | "error" = "success"
+) {
   return new EmbedBuilder()
     .setTitle(title)
     .setDescription(description)

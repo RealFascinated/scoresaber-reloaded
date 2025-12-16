@@ -70,9 +70,13 @@ export class AccSaberService extends ApiService {
     `;
 
     try {
-      const result = await this.fetchGQL<{ data?: { playerDatum?: { playerId: string } } }>(GQL_BASE, query, {
-        playerId: playerId,
-      });
+      const result = await this.fetchGQL<{ data?: { playerDatum?: { playerId: string } } }>(
+        GQL_BASE,
+        query,
+        {
+          playerId: playerId,
+        }
+      );
 
       return !!result?.data?.playerDatum?.playerId;
     } catch (error) {

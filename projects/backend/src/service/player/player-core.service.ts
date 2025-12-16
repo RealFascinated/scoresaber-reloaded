@@ -79,7 +79,10 @@ export class PlayerCoreService {
    * @param playerToken an optional player token
    * @returns the player if successfully tracked, undefined otherwise
    */
-  public static async createPlayer(id: string, playerToken?: ScoreSaberPlayerToken): Promise<Player | undefined> {
+  public static async createPlayer(
+    id: string,
+    playerToken?: ScoreSaberPlayerToken
+  ): Promise<Player | undefined> {
     try {
       if (await PlayerCoreService.playerExists(id)) {
         return undefined;
@@ -102,12 +105,16 @@ export class PlayerCoreService {
             trackedSince: new Date(),
           });
 
-          const seedQueue = QueueManager.getQueue(QueueId.PlayerScoreRefreshQueue) as FetchMissingScoresQueue;
+          const seedQueue = QueueManager.getQueue(
+            QueueId.PlayerScoreRefreshQueue
+          ) as FetchMissingScoresQueue;
           if (!(await seedQueue.hasItem({ id: id, data: id }))) {
-            (QueueManager.getQueue(QueueId.PlayerScoreRefreshQueue) as FetchMissingScoresQueue).add({
-              id,
-              data: id,
-            });
+            (QueueManager.getQueue(QueueId.PlayerScoreRefreshQueue) as FetchMissingScoresQueue).add(
+              {
+                id,
+                data: id,
+              }
+            );
           }
 
           // Notify in production
@@ -153,7 +160,9 @@ export class PlayerCoreService {
    * @returns the player document if found
    */
   public static async refreshPlayer(id: string): Promise<PlayerRefreshResponse> {
-    const response = await ApiServiceRegistry.getInstance().getScoreSaberService().refreshPlayer(id);
+    const response = await ApiServiceRegistry.getInstance()
+      .getScoreSaberService()
+      .refreshPlayer(id);
     if (response !== undefined) {
       CacheService.invalidate(`scoresaber:player:${id}`); // Remove the player from the cache
       return response;

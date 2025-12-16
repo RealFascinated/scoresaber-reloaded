@@ -22,7 +22,9 @@ export default function OverlayPlayerRank({ player }: OverlayPlayerRankProps) {
         <div className="flex w-6 justify-center">
           <GlobeAmericasIcon className="h-6 w-6 text-slate-300" />
         </div>
-        <p className={cn(getRankColor(rank), "text-2xl font-bold")}>#{formatNumberWithCommas(rank)}</p>
+        <p className={cn(getRankColor(rank), "text-2xl font-bold")}>
+          #{formatNumberWithCommas(rank)}
+        </p>
       </div>
       <DailyChange
         type={PlayerStatChange.Rank}

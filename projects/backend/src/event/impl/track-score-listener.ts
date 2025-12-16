@@ -26,7 +26,10 @@ export class TrackScoreListener implements EventListener {
     // Track BeatLeader score if available
     let beatLeaderScore: AdditionalScoreData | undefined;
     if (beatLeaderScoreToken) {
-      beatLeaderScore = await BeatLeaderService.trackBeatLeaderScore(beatLeaderScoreToken, isTop50GlobalScore);
+      beatLeaderScore = await BeatLeaderService.trackBeatLeaderScore(
+        beatLeaderScoreToken,
+        isTop50GlobalScore
+      );
     }
 
     // Track ScoreSaber score
@@ -42,7 +45,11 @@ export class TrackScoreListener implements EventListener {
     }
 
     // Update player daily score stats
-    PlayerHistoryService.updatePlayerDailyScoreStats(score.playerId, leaderboard.stars > 0, hasPreviousScore);
+    PlayerHistoryService.updatePlayerDailyScoreStats(
+      score.playerId,
+      leaderboard.stars > 0,
+      hasPreviousScore
+    );
 
     // Invalidate player caches
     CacheService.invalidate(`scoresaber:temp-cached-player:${player.id}`);

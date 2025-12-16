@@ -1,4 +1,8 @@
-import { CutDistribution, DecodedReplayResponse, SwingSpeed } from "../types/decoded-replay-response";
+import {
+  CutDistribution,
+  DecodedReplayResponse,
+  SwingSpeed,
+} from "../types/decoded-replay-response";
 import { NoteCutInfo, Replay, ReplayDecoder } from "./replay-decoder";
 
 /**
@@ -27,7 +31,9 @@ function getCutDistribution(replay: Replay): CutDistribution[] {
   const scoreCounts = new Map<number, number>();
 
   // Filter notes that have cut info (good/bad cuts)
-  const cutNotes = replay.notes.filter(note => note.noteCutInfo && (note.eventType === 0 || note.eventType === 1));
+  const cutNotes = replay.notes.filter(
+    note => note.noteCutInfo && (note.eventType === 0 || note.eventType === 1)
+  );
 
   for (const note of cutNotes) {
     // Calculate only the distance to center score (0-15)
@@ -55,7 +61,10 @@ export function getCutScore(cutInfo: NoteCutInfo): number {
   const followThroughScore = Math.max(0, Math.min(30, cutInfo.afterCutRating * 30));
 
   // cutDistanceToCenter: 15 * (1 - Clamp01(cutDistanceToCenter / 0.3f))
-  const centerCutScore = Math.max(0, Math.min(15, 15 * (1 - Math.min(1, cutInfo.cutDistanceToCenter / 0.3))));
+  const centerCutScore = Math.max(
+    0,
+    Math.min(15, 15 * (1 - Math.min(1, cutInfo.cutDistanceToCenter / 0.3)))
+  );
 
   const totalCutScore = Math.round(approachScore + followThroughScore + centerCutScore);
   return Math.max(0, Math.min(115, totalCutScore));
@@ -69,7 +78,10 @@ export function getCutScore(cutInfo: NoteCutInfo): number {
  */
 export function getDistanceToCenterScore(cutInfo: NoteCutInfo): number {
   // cutDistanceToCenter: 15 * (1 - Clamp01(cutDistanceToCenter / 0.3f))
-  const centerCutScore = Math.max(0, Math.min(15, 15 * (1 - Math.min(1, cutInfo.cutDistanceToCenter / 0.3))));
+  const centerCutScore = Math.max(
+    0,
+    Math.min(15, 15 * (1 - Math.min(1, cutInfo.cutDistanceToCenter / 0.3)))
+  );
 
   return Math.round(centerCutScore);
 }

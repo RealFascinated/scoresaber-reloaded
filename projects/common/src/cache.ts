@@ -215,7 +215,8 @@ export class SSRCache {
       hits: this.cacheHits,
       misses: this.cacheMisses,
       expired: this.expired,
-      hitPercentage: this.cacheHits === 0 ? 0 : (this.cacheHits / (this.cacheHits + this.cacheMisses)) * 100,
+      hitPercentage:
+        this.cacheHits === 0 ? 0 : (this.cacheHits / (this.cacheHits + this.cacheMisses)) * 100,
     };
   }
 }

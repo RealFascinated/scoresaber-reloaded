@@ -97,7 +97,10 @@ export default async function LeaderboardPage(props: Props) {
   const response = await getLeaderboardData(props, "full");
   if (response == undefined) {
     return (
-      <NotFound title="Leaderboard Not Found" description="The leaderboard you were looking for could not be found" />
+      <NotFound
+        title="Leaderboard Not Found"
+        description="The leaderboard you were looking for could not be found"
+      />
     );
   }
   return (

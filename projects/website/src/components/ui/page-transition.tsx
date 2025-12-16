@@ -40,7 +40,13 @@ const itemVariants = {
   }),
 };
 
-export default function PageTransition({ children, className }: { children: ReactNode; className?: string }) {
+export default function PageTransition({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
   const { currentPage, direction, isLoading } = usePageTransition();
   const stablePageRef = useRef(currentPage);
   const stableChildrenRef = useRef<ReactNode>(children);

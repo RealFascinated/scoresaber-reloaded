@@ -7,7 +7,10 @@ import { PlayerModel } from "@ssr/common/model/player/player";
 import { ScoreSaberMedalsScoreModel } from "@ssr/common/model/score/impl/scoresaber-medals-score";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { MedalChange } from "@ssr/common/schemas/medals/medal-changes";
-import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
+import {
+  getScoreSaberLeaderboardFromToken,
+  getScoreSaberScoreFromToken,
+} from "@ssr/common/token-creators";
 import { isProduction } from "@ssr/common/utils/utils";
 import { sendMedalScoreNotification } from "../../common/score/score.util";
 import { LeaderboardCoreService } from "../leaderboard/leaderboard-core.service";
@@ -28,36 +31,18 @@ export class MedalScoresService {
    */
   public static async rescanMedalScores() {
     MedalScoresService.IGNORE_SCORES = true;
-    
+
     // Delete all of the old scores
     await ScoreSaberMedalsScoreModel.deleteMany({});
 
     const rankedLeaderboards = await LeaderboardLeaderboardsService.getRankedLeaderboards();
     for (const [index, leaderboard] of rankedLeaderboards.entries()) {
-      const page = await ApiServiceRegistry.getInstance()
-        .getScoreSaberService()
-        .lookupLeaderboardScores(leaderboard.id, 1, {
-          priority: isProduction() ? CooldownPriority.BACKGROUND : CooldownPriority.NORMAL,
-        });
-      if (!page) {
-        continue;
-      }
-
-      for (const score of page.scores) {
-        // Ignore scores that aren't top 10
-        if (score.rank > 10) {
-          continue;
-        }
-
-        // Create a new medal score
-        new ScoreSaberMedalsScoreModel({
-          ...getScoreSaberScoreFromToken(score, leaderboard, score.leaderboardPlayerInfo.id),
-          medals: MEDAL_COUNTS[score.rank as keyof typeof MEDAL_COUNTS],
-        }).save();
-      }
+      await this.rescanLeaderboard(leaderboard.id + "");
 
       if (index % 100 === 0) {
-        Logger.info(`[MEDAL SCORES] Refreshed ${index} of ${rankedLeaderboards.length} ranked leaderboards`);
+        Logger.info(
+          `[MEDAL SCORES] Refreshed ${index} of ${rankedLeaderboards.length} ranked leaderboards`
+        );
       }
     }
 
@@ -69,6 +54,43 @@ export class MedalScoresService {
       await MedalScoresService.handleIncomingMedalsScoreUpdate(item.score, item.beatLeaderScore);
     }
     MedalScoresService.SCORES_INGEST_QUEUE.clear();
+  }
+
+  /**
+   * Rescans the medal scores for a leaderboard.
+   *
+   * @param leaderboardId the leaderboard id to rescan.
+   */
+  public static async rescanLeaderboard(leaderboardId: string, deleteScores: boolean = false) {
+    if (deleteScores) {
+      await ScoreSaberMedalsScoreModel.deleteMany({ leaderboardId });
+    }
+
+    const page = await ApiServiceRegistry.getInstance()
+      .getScoreSaberService()
+      .lookupLeaderboardScores(leaderboardId, 1, {
+        priority: isProduction() ? CooldownPriority.BACKGROUND : CooldownPriority.NORMAL,
+      });
+    if (!page) {
+      return;
+    }
+
+    for (const score of page.scores) {
+      // Ignore scores that aren't top 10
+      if (score.rank > 10) {
+        continue;
+      }
+
+      // Create a new medal score
+      new ScoreSaberMedalsScoreModel({
+        ...getScoreSaberScoreFromToken(
+          score,
+          getScoreSaberLeaderboardFromToken(score.leaderboard),
+          score.leaderboardPlayerInfo.id
+        ),
+        medals: MEDAL_COUNTS[score.rank as keyof typeof MEDAL_COUNTS],
+      }).save();
+    }
   }
 
   /**
@@ -181,7 +203,9 @@ export class MedalScoresService {
         .select("_id medals")
         .lean();
 
-      const medalsBefore = Object.fromEntries(playersBefore.map(p => [p._id.toString(), p.medals ?? 0]));
+      const medalsBefore = Object.fromEntries(
+        playersBefore.map(p => [p._id.toString(), p.medals ?? 0])
+      );
       const medalsAfter = await PlayerMedalsService.updatePlayerMedalCounts(...affectedPlayerIds);
 
       const changes = new Map<string, MedalChange>();
@@ -205,7 +229,9 @@ export class MedalScoresService {
     const changes = await getChanges(medalChanges);
 
     Logger.info(
-      `[MEDAL SCORES] Medal changes on leaderboard ${score.leaderboardId}: ${Array.from(changes.entries())
+      `[MEDAL SCORES] Medal changes on leaderboard ${score.leaderboardId}: ${Array.from(
+        changes.entries()
+      )
         .map(([playerId, change]) => `${playerId}: ${change.before} -> ${change.after}`)
         .join(", ")}`
     );

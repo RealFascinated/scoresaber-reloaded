@@ -2,7 +2,10 @@ import Logger from "@ssr/common/logger";
 import { AdditionalScoreData } from "@ssr/common/model/additional-score-data/additional-score-data";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberPreviousScoreModel } from "@ssr/common/model/score/impl/scoresaber-previous-score";
-import { ScoreSaberScore, ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
+import {
+  ScoreSaberScore,
+  ScoreSaberScoreModel,
+} from "@ssr/common/model/score/impl/scoresaber-score";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/leaderboard-player-info";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
@@ -151,30 +154,37 @@ export class ScoreCoreService {
       return score;
     }
 
-    const [isScoreTracked, additionalData, previousScore, playerInfo, comparisonScore] = await Promise.all([
-      ScoreCoreService.scoreExists(score.scoreId),
-      options?.insertAdditionalData
-        ? BeatLeaderService.getAdditionalScoreDataFromSong(
-            score.playerId,
-            leaderboard.songHash,
-            leaderboard.difficulty.difficulty,
-            leaderboard.difficulty.characteristic,
-            score.score
-          )
-        : undefined,
-      options?.insertPreviousScore
-        ? PlayerScoreHistoryService.getPlayerPreviousScore(score.playerId, score, leaderboard, score.timestamp)
-        : undefined,
-      options?.insertPlayerInfo
-        ? (score.playerInfo ?? (await ScoreSaberService.getCachedPlayer(score.playerId).catch(() => undefined)))
-        : undefined,
-      !options?.isComparisonPlayerScore && options?.comparisonPlayer
-        ? ScoreSaberScoreModel.findOne({
-            playerId: options.comparisonPlayer.id,
-            leaderboardId: leaderboard.id,
-          }).lean()
-        : undefined,
-    ]);
+    const [isScoreTracked, additionalData, previousScore, playerInfo, comparisonScore] =
+      await Promise.all([
+        ScoreCoreService.scoreExists(score.scoreId),
+        options?.insertAdditionalData
+          ? BeatLeaderService.getAdditionalScoreDataFromSong(
+              score.playerId,
+              leaderboard.songHash,
+              leaderboard.difficulty.difficulty,
+              leaderboard.difficulty.characteristic,
+              score.score
+            )
+          : undefined,
+        options?.insertPreviousScore
+          ? PlayerScoreHistoryService.getPlayerPreviousScore(
+              score.playerId,
+              score,
+              leaderboard,
+              score.timestamp
+            )
+          : undefined,
+        options?.insertPlayerInfo
+          ? (score.playerInfo ??
+            (await ScoreSaberService.getCachedPlayer(score.playerId).catch(() => undefined)))
+          : undefined,
+        !options?.isComparisonPlayerScore && options?.comparisonPlayer
+          ? ScoreSaberScoreModel.findOne({
+              playerId: options.comparisonPlayer.id,
+              leaderboardId: leaderboard.id,
+            }).lean()
+          : undefined,
+      ]);
 
     score.isTracked = isScoreTracked;
 
@@ -190,20 +200,25 @@ export class ScoreCoreService {
       score.playerInfo = {
         id: playerInfo.id,
         name: playerInfo.name,
-        profilePicture: playerInfo.profilePicture ?? "https://cdn.fascinated.cc/assets/oculus-avatar.jpg",
+        profilePicture:
+          playerInfo.profilePicture ?? "https://cdn.fascinated.cc/assets/oculus-avatar.jpg",
         country: playerInfo.country,
       };
     }
 
     if (comparisonScore) {
       const rawComparisonScore = scoreToObject(comparisonScore as unknown as ScoreSaberScore);
-      score.comparisonScore = await ScoreCoreService.insertScoreData(rawComparisonScore, leaderboard, {
-        comparisonPlayer: options.comparisonPlayer,
-        insertAdditionalData: options.insertAdditionalData,
-        insertPreviousScore: options.insertPreviousScore,
-        insertPlayerInfo: options.insertPlayerInfo,
-        isComparisonPlayerScore: true,
-      });
+      score.comparisonScore = await ScoreCoreService.insertScoreData(
+        rawComparisonScore,
+        leaderboard,
+        {
+          comparisonPlayer: options.comparisonPlayer,
+          insertAdditionalData: options.insertAdditionalData,
+          insertPreviousScore: options.insertPreviousScore,
+          insertPlayerInfo: options.insertPlayerInfo,
+          isComparisonPlayerScore: true,
+        }
+      );
     }
 
     if (options?.removeScoreWeightAndRank) {

@@ -14,7 +14,10 @@ export function isProduction() {
  * Checks if we're running on the server
  */
 export function isServer() {
-  return env.NEXT_PUBLIC_APPLICATION_NAME === "backend" || (!("window" in globalThis) && typeof window == undefined);
+  return (
+    env.NEXT_PUBLIC_APPLICATION_NAME === "backend" ||
+    (!("window" in globalThis) && typeof window == undefined)
+  );
 }
 
 /**

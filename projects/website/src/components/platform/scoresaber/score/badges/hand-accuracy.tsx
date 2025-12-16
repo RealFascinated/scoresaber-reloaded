@@ -17,7 +17,9 @@ export function HandAccuracyBadge({ score, hand }: HandAccuracyProps) {
   const { handAccuracy } = score.additionalData;
   const scoreImprovement = score.additionalData.scoreImprovement;
   const currentHandAccuracy = handAccuracy[hand];
-  const previousHandAccuracy = scoreImprovement ? handAccuracy[hand] - scoreImprovement.handAccuracy[hand] : undefined;
+  const previousHandAccuracy = scoreImprovement
+    ? handAccuracy[hand] - scoreImprovement.handAccuracy[hand]
+    : undefined;
   const formattedHand = capitalizeFirstLetter(hand);
 
   return (

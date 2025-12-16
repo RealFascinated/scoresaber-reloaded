@@ -51,7 +51,9 @@ type ScoreModeProps = {
 };
 
 export default function ScoreModeSwitcher({ initialMode, onModeChange }: ScoreModeProps) {
-  const [selectedMode, setSelectedMode] = useState<ScoreModeEnum>(initialMode ?? ScoreModeEnum.Global);
+  const [selectedMode, setSelectedMode] = useState<ScoreModeEnum>(
+    initialMode ?? ScoreModeEnum.Global
+  );
 
   return (
     <div className="flex flex-wrap items-center justify-center gap-(--spacing-sm)">

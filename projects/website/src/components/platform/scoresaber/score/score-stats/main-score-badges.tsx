@@ -79,7 +79,12 @@ type MainScoreBadgesProps = {
 export function MainScoreBadges({ score, leaderboard, medalsMode }: MainScoreBadgesProps) {
   return (
     <div className="grid w-full grid-cols-3 justify-center gap-1">
-      <ScoreBadges badges={mainBadges} score={score} leaderboard={leaderboard} medalsMode={medalsMode} />
+      <ScoreBadges
+        badges={mainBadges}
+        score={score}
+        leaderboard={leaderboard}
+        medalsMode={medalsMode}
+      />
     </div>
   );
 }

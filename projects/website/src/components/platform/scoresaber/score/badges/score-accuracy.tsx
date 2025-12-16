@@ -68,8 +68,12 @@ export function ScoreAccuracyBadge({ score, showDifference = true }: ScoreAccura
                 <div>
                   <p className="font-semibold">Previous Accuracy</p>
                   <p>Score: {getAccDetails(scoreBadge)}</p>
-                  {score.previousScore && <p>Accuracy: {formatScoreAccuracy(score.previousScore.accuracy)}</p>}
-                  {!score.fullCombo && fcAccuracy && <p>Full Combo: {formatScoreAccuracy(fcAccuracy)}</p>}
+                  {score.previousScore && (
+                    <p>Accuracy: {formatScoreAccuracy(score.previousScore.accuracy)}</p>
+                  )}
+                  {!score.fullCombo && fcAccuracy && (
+                    <p>Full Combo: {formatScoreAccuracy(fcAccuracy)}</p>
+                  )}
                 </div>
 
                 {previousModCount > 0 && score.previousScore && (

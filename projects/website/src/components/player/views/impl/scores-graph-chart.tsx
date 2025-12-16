@@ -27,7 +27,15 @@ import { useState } from "react";
 import { Line } from "react-chartjs-2";
 import PlayerSearch from "../../player-search";
 
-Chart.register(LineController, ScatterController, LineElement, PointElement, LinearScale, Tooltip, Legend);
+Chart.register(
+  LineController,
+  ScatterController,
+  LineElement,
+  PointElement,
+  LinearScale,
+  Tooltip,
+  Legend
+);
 
 const MINIMUM_STAR = 10;
 const MAX_COMPARISON_PLAYERS = 3;
@@ -179,7 +187,11 @@ export default function ScoresGraphChart({ player }: { player: ScoreSaberPlayer 
               {} as Record<number, number[]>
             );
 
-            const createLine = (aggregateFn: (values: number[]) => number, label: string, color: string) => {
+            const createLine = (
+              aggregateFn: (values: number[]) => number,
+              label: string,
+              color: string
+            ) => {
               const lineData = Object.entries(groupedByStars)
                 .map(([stars, accuracies]) => ({
                   x: parseFloat(stars),
@@ -305,12 +317,18 @@ export default function ScoresGraphChart({ player }: { player: ScoreSaberPlayer 
                     key={comparisonPlayer.id}
                     className="bg-primary/10 border-primary/20 flex w-full items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium md:w-auto"
                   >
-                    <span className="text-primary-foreground flex-1 md:flex-initial">{comparisonPlayer.name}</span>
+                    <span className="text-primary-foreground flex-1 md:flex-initial">
+                      {comparisonPlayer.name}
+                    </span>
                     <Button
                       variant="ghost"
                       size="icon"
                       className="hover:bg-primary/20 h-5 w-5 shrink-0"
-                      onClick={() => setComparisonPlayers(players => players.filter(p => p.id !== comparisonPlayer.id))}
+                      onClick={() =>
+                        setComparisonPlayers(players =>
+                          players.filter(p => p.id !== comparisonPlayer.id)
+                        )
+                      }
                     >
                       <X className="h-3 w-3" />
                     </Button>

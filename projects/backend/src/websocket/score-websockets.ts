@@ -1,6 +1,9 @@
 import { ScoreSaberLeaderboardModel } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { PlayerModel } from "@ssr/common/model/player/player";
-import { getScoreSaberLeaderboardFromToken, getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
+import {
+  getScoreSaberLeaderboardFromToken,
+  getScoreSaberScoreFromToken,
+} from "@ssr/common/token-creators";
 import { BeatLeaderScoreToken } from "@ssr/common/types/token/beatleader/score/score";
 import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/leaderboard";
 import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/leaderboard-player-info";
@@ -74,9 +77,17 @@ export class ScoreWebsockets implements EventListener {
           // No matching BeatLeader score yet, store this one
           const timeoutId = setTimeout(() => {
             const pendingScore = ScoreWebsockets.pendingScores.get(key);
-            if (pendingScore?.scoreSaberToken && pendingScore.leaderboardToken && pendingScore.player) {
+            if (
+              pendingScore?.scoreSaberToken &&
+              pendingScore.leaderboardToken &&
+              pendingScore.player
+            ) {
               ScoreWebsockets.clearPendingScore(key);
-              this.processScore(pendingScore.scoreSaberToken, pendingScore.leaderboardToken, pendingScore.player);
+              this.processScore(
+                pendingScore.scoreSaberToken,
+                pendingScore.leaderboardToken,
+                pendingScore.player
+              );
             }
           }, ScoreWebsockets.SCORE_MATCH_TIMEOUT);
 

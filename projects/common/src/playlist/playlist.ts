@@ -1,4 +1,10 @@
-import { getModelForClass, modelOptions, prop, ReturnModelType, Severity } from "@typegoose/typegoose";
+import {
+  getModelForClass,
+  modelOptions,
+  prop,
+  ReturnModelType,
+  Severity,
+} from "@typegoose/typegoose";
 import { PlaylistSong } from "./playlist-song";
 
 @modelOptions({
