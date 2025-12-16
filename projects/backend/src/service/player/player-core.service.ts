@@ -10,7 +10,6 @@ import { FetchMissingScoresQueue } from "../../queue/impl/fetch-missing-scores-q
 import { QueueId, QueueManager } from "../../queue/queue-manager";
 import CacheService, { CacheId } from "../cache.service";
 import { ScoreSaberApiService } from "../scoresaber-api.service";
-import ScoreSaberService from "../scoresaber.service";
 
 export const accountCreationLock: Record<string, Promise<Player>> = {};
 
@@ -88,7 +87,7 @@ export class PlayerCoreService {
         return undefined;
       }
 
-      playerToken = playerToken || (await ScoreSaberService.getCachedPlayer(id, true));
+      playerToken = playerToken || (await ScoreSaberApiService.lookupPlayer(id));
       if (!playerToken) {
         return undefined;
       }

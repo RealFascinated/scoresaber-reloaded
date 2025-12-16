@@ -35,7 +35,7 @@ export default class ScoreSaberService {
     type: DetailType = "basic",
     player?: ScoreSaberPlayerToken
   ): Promise<ScoreSaberPlayer> {
-    player ??= await ScoreSaberService.getCachedPlayer(id, true);
+    player ??= await ScoreSaberApiService.lookupPlayer(id);
     if (!player) {
       throw new NotFoundError(`Player "${id}" not found`);
     }
@@ -171,11 +171,8 @@ export default class ScoreSaberService {
    * @param useShortCache whether to use the short cache
    * @returns the player token
    */
-  public static async getCachedPlayer(
-    id: string,
-    useShortCache: boolean = false
-  ): Promise<ScoreSaberPlayerToken> {
-    const cacheKey = `scoresaber:${useShortCache ? "temp-" : ""}cached-player:${id}`;
+  public static async getCachedPlayer(id: string): Promise<ScoreSaberPlayerToken> {
+    const cacheKey = `scoresaber:cached-player:${id}`;
 
     const cachedData = await redisClient.get(cacheKey);
     if (cachedData) {
@@ -192,12 +189,7 @@ export default class ScoreSaberService {
       throw new NotFoundError(`Player "${id}" not found`);
     }
 
-    await redisClient.set(
-      cacheKey,
-      SuperJSON.stringify(player),
-      "EX",
-      useShortCache ? CacheService.CACHE_EXPIRY[CacheId.ScoreSaber] : CACHED_PLAYER_EXPIRY
-    );
+    await redisClient.set(cacheKey, SuperJSON.stringify(player), "EX", CACHED_PLAYER_EXPIRY);
     return player;
   }
 

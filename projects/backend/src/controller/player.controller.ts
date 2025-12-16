@@ -1,4 +1,5 @@
 import { DetailTypeSchema } from "@ssr/common/detail-type";
+import { NotFoundError } from "@ssr/common/error/not-found-error";
 import { getDaysAgoDate } from "@ssr/common/utils/time-utils";
 import { Elysia } from "elysia";
 import { z } from "zod";
@@ -9,6 +10,7 @@ import { PlayerRankedService } from "../service/player/player-ranked.service";
 import { PlayerScoreHistoryService } from "../service/player/player-score-history.service";
 import { PlayerScoresService } from "../service/player/player-scores.service";
 import { PlayerSearchService } from "../service/player/player-search.service";
+import { ScoreSaberApiService } from "../service/scoresaber-api.service";
 import ScoreSaberService from "../service/scoresaber.service";
 
 export default function playerController(app: Elysia) {
@@ -112,7 +114,10 @@ export default function playerController(app: Elysia) {
       .get(
         "/history/:playerId",
         async ({ params: { playerId }, query: { startDate, endDate, includeFields } }) => {
-          const player = await ScoreSaberService.getCachedPlayer(playerId, true);
+          const player = await ScoreSaberApiService.lookupPlayer(playerId);
+          if (!player) {
+            throw new NotFoundError(`Player "${playerId}" not found`);
+          }
           const projection =
             includeFields && includeFields !== ""
               ? includeFields.split(",").reduce(
