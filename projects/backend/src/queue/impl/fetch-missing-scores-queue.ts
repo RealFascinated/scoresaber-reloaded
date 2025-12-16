@@ -1,4 +1,3 @@
-import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
 import { PlayerModel } from "@ssr/common/model/player/player";
@@ -9,6 +8,7 @@ import { ButtonBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
 import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
 import { PlayerCoreService } from "../../service/player/player-core.service";
 import { PlayerScoresService } from "../../service/player/player-scores.service";
+import { ScoreSaberApiService } from "../../service/scoresaber-api.service";
 import { Queue, QueueItem } from "../queue";
 import { QueueId } from "../queue-manager";
 
@@ -48,9 +48,7 @@ export class FetchMissingScoresQueue extends Queue<QueueItem<string>> {
   protected async processItem(item: QueueItem<string>): Promise<void> {
     const { id: playerId } = item;
 
-    const playerToken = await ApiServiceRegistry.getInstance()
-      .getScoreSaberService()
-      .lookupPlayer(playerId);
+    const playerToken = await ScoreSaberApiService.lookupPlayer(playerId);
     if (!playerToken) {
       Logger.warn(`Player "${playerId}" not found on ScoreSaber`);
       return;

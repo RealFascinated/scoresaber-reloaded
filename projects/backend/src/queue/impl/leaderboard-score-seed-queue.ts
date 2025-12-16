@@ -5,6 +5,7 @@ import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 import { isProduction } from "@ssr/common/utils/utils";
 import { LeaderboardCoreService } from "../../service/leaderboard/leaderboard-core.service";
 import { ScoreCoreService } from "../../service/score/score-core.service";
+import { ScoreSaberApiService } from "../../service/scoresaber-api.service";
 import { Queue, QueueItem } from "../queue";
 import { QueueId } from "../queue-manager";
 
