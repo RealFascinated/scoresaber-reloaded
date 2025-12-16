@@ -57,11 +57,6 @@ if (fs.existsSync(".env")) {
 
 new EventsManager();
 
-/**
- * Mongoose Plugins
- */
-import "./common/mongoose/slow-query-plugin";
-
 try {
   Logger.info("Connecting to MongoDB...");
   await mongoose.connect(env.MONGO_CONNECTION_STRING);

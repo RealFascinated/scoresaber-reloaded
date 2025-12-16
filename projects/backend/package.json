@@ -2,7 +2,7 @@
   "name": "backend",
   "version": "1.0.0",
   "scripts": {
-    "dev": "bun run --inspect --watch src/index.ts",
+    "dev": "bun run --watch src/index.ts",
     "build": "bun build --compile --target bun --outfile ssr-backend src/index.js",
     "start": "NODE_ENV=production ./ssr-backend",
     "lint": "eslint src/**/*.ts"
