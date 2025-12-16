@@ -33,7 +33,7 @@ export class MedalScoresService {
 
     const rankedLeaderboards = await LeaderboardCoreService.getRankedLeaderboards();
     for (const [index, leaderboard] of rankedLeaderboards.entries()) {
-      await this.rescanLeaderboard(leaderboard.id + "");
+      await this.rescanLeaderboard(leaderboard.id);
 
       if (index % 100 === 0) {
         Logger.info(
@@ -57,7 +57,7 @@ export class MedalScoresService {
    *
    * @param leaderboardId the leaderboard id to rescan.
    */
-  public static async rescanLeaderboard(leaderboardId: string, deleteScores: boolean = false) {
+  public static async rescanLeaderboard(leaderboardId: number, deleteScores: boolean = false) {
     if (deleteScores) {
       await ScoreSaberMedalsScoreModel.deleteMany({ leaderboardId });
     }
@@ -238,7 +238,7 @@ export class MedalScoresService {
         .join(", ")}`
     );
 
-    const leaderboard = await LeaderboardCoreService.getLeaderboard(score.leaderboardId + "", {
+    const leaderboard = await LeaderboardCoreService.getLeaderboard(score.leaderboardId, {
       includeBeatSaver: false,
     });
     await sendMedalScoreNotification(score, leaderboard.leaderboard, beatLeaderScore, changes);

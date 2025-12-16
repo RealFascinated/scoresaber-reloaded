@@ -305,9 +305,9 @@ export class ScoreSaberApiService {
     );
     const response = await ScoreSaberApiService.fetch<ScoreSaberPlayerScoresPageToken>(
       LOOKUP_PLAYER_SCORES_ENDPOINT.replace(":id", playerId)
-        .replace(":limit", limit + "")
+        .replace(":limit", limit.toString())
         .replace(":sort", sort)
-        .replace(":page", page + "") + (search ? `&search=${search}` : ""),
+        .replace(":page", page.toString()) + (search ? `&search=${search}` : ""),
       {
         priority,
       }
@@ -365,7 +365,7 @@ export class ScoreSaberApiService {
     );
     const response = await ScoreSaberApiService.fetch<ScoreSaberLeaderboardToken>(
       LOOKUP_LEADERBOARD_BY_HASH_ENDPOINT.replace(":query", hash)
-        .replace(":difficulty", getDifficulty(difficulty).diffId + "")
+        .replace(":difficulty", getDifficulty(difficulty).diffId.toString())
         .replace(":gameMode", gameMode)
     );
     if (response === undefined) {
@@ -460,7 +460,7 @@ export class ScoreSaberApiService {
    * @returns the scores of the leaderboard, or undefined
    */
   public static async lookupLeaderboardScores(
-    leaderboardId: string | number,
+    leaderboardId: number,
     page: number,
     options?: {
       country?: string;

@@ -26,7 +26,7 @@ export class PlayerFriendScoresService {
     leaderboardId: number,
     page: number
   ): Promise<Page<ScoreSaberScore>> {
-    const leaderboard = await LeaderboardCoreService.getLeaderboard(leaderboardId + "", {
+    const leaderboard = await LeaderboardCoreService.getLeaderboard(leaderboardId, {
       includeBeatSaver: false,
     });
 
@@ -125,7 +125,7 @@ export class PlayerFriendScoresService {
         }
 
         // Get all leaderboard IDs for the current page
-        const leaderboardIds = friendScores.map(score => score.leaderboardId + "");
+        const leaderboardIds = friendScores.map(score => score.leaderboardId);
 
         // Fetch all leaderboards in parallel using getLeaderboards
         const leaderboardResults = await LeaderboardCoreService.getLeaderboards(leaderboardIds, {

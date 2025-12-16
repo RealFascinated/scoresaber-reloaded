@@ -14,7 +14,7 @@ export class LeaderboardScoresService {
    * Fetches all scores for a specific leaderboard
    */
   public static async fetchAllLeaderboardScores(
-    leaderboardId: string
+    leaderboardId: number
   ): Promise<ScoreSaberScoreToken[]> {
     const scoreTokens: ScoreSaberScoreToken[] = [];
     let currentPage = 1;
@@ -22,7 +22,7 @@ export class LeaderboardScoresService {
 
     while (hasMoreScores) {
       const response = await ScoreSaberApiService.lookupLeaderboardScores(
-        leaderboardId + "",
+        leaderboardId,
         currentPage
       );
       if (!response) {
@@ -54,7 +54,7 @@ export class LeaderboardScoresService {
    * @returns the scores
    */
   public static async getLeaderboardScores(
-    leaderboardId: string,
+    leaderboardId: number,
     page: number,
     country?: string
   ): Promise<LeaderboardScoresResponse | undefined> {

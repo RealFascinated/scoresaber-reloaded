@@ -21,7 +21,7 @@ export class PlayerScoreHistoryService {
    */
   public static async getPlayerScoreHistory(
     playerId: string,
-    leaderboardId: string,
+    leaderboardId: number,
     page: number
   ): Promise<Page<ScoreSaberScore>> {
     const [scoreHistory, currentScores] = await Promise.all([

@@ -99,7 +99,7 @@ export default function scoresController(app: Elysia) {
         {
           tags: ["Scores"],
           params: z.object({
-            leaderboardId: z.string(),
+            leaderboardId: z.coerce.number(),
             page: z.coerce.number(),
           }),
           query: z.object({

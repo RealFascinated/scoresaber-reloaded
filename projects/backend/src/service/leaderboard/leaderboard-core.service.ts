@@ -44,7 +44,7 @@ export class LeaderboardCoreService {
    * @returns the fetched leaderboard
    */
   public static async getLeaderboard(
-    id: string,
+    id: number,
     options?: LeaderboardOptions
   ): Promise<LeaderboardResponse> {
     const defaultOptions = {
@@ -92,7 +92,7 @@ export class LeaderboardCoreService {
    * @param id the ID of the leaderboard to check
    * @returns whether the leaderboard exists
    */
-  public static async leaderboardExists(id: string): Promise<boolean> {
+  public static async leaderboardExists(id: number): Promise<boolean> {
     return (await ScoreSaberLeaderboardModel.exists({ _id: id })) !== null;
   }
 
@@ -104,7 +104,7 @@ export class LeaderboardCoreService {
    * @returns the fetched leaderboard
    */
   public static async createLeaderboard(
-    id: string,
+    id: number,
     token?: ScoreSaberLeaderboardToken
   ): Promise<LeaderboardResponse> {
     const before = performance.now();
@@ -137,12 +137,12 @@ export class LeaderboardCoreService {
    * @returns the fetched leaderboards
    */
   public static async getLeaderboards(
-    ids: string[],
+    ids: number[],
     options?: LeaderboardOptions
   ): Promise<LeaderboardResponse[]> {
     options = { ...DEFAULT_OPTIONS, ...options };
     const leaderboardIds = [...new Set(ids)]; // deduplicate IDs
-    const leaderboards = new Map<string, LeaderboardResponse | null>();
+    const leaderboards = new Map<number, LeaderboardResponse | null>();
 
     // Get cached leaderboards from Redis
     const cacheKeys = leaderboardIds.map(id => `leaderboard:id:${id}`);
@@ -226,7 +226,7 @@ export class LeaderboardCoreService {
         }
 
         const leaderboard = await LeaderboardCoreService.saveLeaderboard(
-          leaderboardToken.id + "",
+          leaderboardToken.id,
           getScoreSaberLeaderboardFromToken(leaderboardToken)
         );
 
@@ -335,7 +335,7 @@ export class LeaderboardCoreService {
    * @returns the saved leaderboard
    */
   public static async saveLeaderboard(
-    id: string,
+    id: number,
     leaderboard: ScoreSaberLeaderboard
   ): Promise<ScoreSaberLeaderboard> {
     const savedLeaderboard = await ScoreSaberLeaderboardModel.findOneAndUpdate(

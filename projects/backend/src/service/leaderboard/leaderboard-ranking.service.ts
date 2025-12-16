@@ -65,10 +65,7 @@ export class LeaderboardRankingService {
       let updatedScoresCount = 0;
 
       while (hasMorePages) {
-        const response = await ScoreSaberApiService.lookupLeaderboardScores(
-          leaderboard.id + "",
-          page
-        );
+        const response = await ScoreSaberApiService.lookupLeaderboardScores(leaderboard.id, page);
         if (!response) {
           hasMorePages = false;
           continue;
@@ -108,14 +105,13 @@ export class LeaderboardRankingService {
       );
     }
 
-    const rankedLeaderboards: Map<string, ScoreSaberLeaderboard> =
+    const rankedLeaderboards: Map<number, ScoreSaberLeaderboard> =
       (await ScoreSaberLeaderboardModel.find({ ranked: true })
         .select({ _id: 1, stars: 1, ranked: 1, qualified: 1 })
         .lean()
         .then(
-          leaderboards =>
-            new Map(leaderboards.map(leaderboard => [leaderboard._id + "", leaderboard]))
-        )) as Map<string, ScoreSaberLeaderboard>;
+          leaderboards => new Map(leaderboards.map(leaderboard => [leaderboard._id, leaderboard]))
+        )) as Map<number, ScoreSaberLeaderboard>;
 
     const leaderboardBulkWrite: AnyBulkWriteOperation<ScoreSaberLeaderboard>[] = [];
     const updatedLeaderboards: LeaderboardUpdate[] = [];
@@ -128,7 +124,7 @@ export class LeaderboardRankingService {
         Logger.info(`[RANKED UPDATES] Checked ${checked} of ${leaderboards.length} leaderboards.`);
       }
 
-      const dbLeaderboard = rankedLeaderboards.get(apiLeaderboard.id + "");
+      const dbLeaderboard = rankedLeaderboards.get(apiLeaderboard.id);
       const leaderboardUpdated =
         dbLeaderboard?.ranked !== apiLeaderboard.ranked ||
         dbLeaderboard?.qualified !== apiLeaderboard.qualified ||
@@ -164,7 +160,7 @@ export class LeaderboardRankingService {
 
       // Previously unranked, now ranked
       if (!dbLeaderboard?.ranked && apiLeaderboard.ranked) {
-        await MedalScoresService.rescanLeaderboard(apiLeaderboard.id + "", true);
+        await MedalScoresService.rescanLeaderboard(apiLeaderboard.id, true);
         await updateLeaderboardScores(apiLeaderboard);
       }
     }

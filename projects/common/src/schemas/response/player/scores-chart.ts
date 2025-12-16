@@ -5,7 +5,7 @@ const PlayerScoreChartDataPointSchema = z.object({
   stars: z.number(),
   pp: z.number(),
   timestamp: z.date(),
-  leaderboardId: z.string(),
+  leaderboardId: z.number(),
   leaderboardName: z.string(),
   leaderboardDifficulty: z.string(),
 });

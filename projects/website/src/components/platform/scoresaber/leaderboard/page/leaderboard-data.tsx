@@ -45,7 +45,7 @@ export function ScoreSaberLeaderboardData({
   const { data } = useQuery({
     queryKey: ["leaderboard", currentLeaderboardId],
     queryFn: async (): Promise<LeaderboardResponse | undefined> => {
-      return ssrApi.fetchLeaderboard(currentLeaderboardId + "", "full");
+      return ssrApi.fetchLeaderboard(currentLeaderboardId, "full");
     },
     placeholderData: data => data ?? initialLeaderboard,
   });

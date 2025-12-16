@@ -22,7 +22,7 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
   }
 
   protected async processItem(item: QueueItem<number>): Promise<void> {
-    const leaderboardId = item.id;
+    const leaderboardId = Number(item.id);
 
     const leaderboardResponse = await LeaderboardCoreService.getLeaderboard(leaderboardId);
     if (!leaderboardResponse) {
@@ -36,7 +36,7 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
     let processedAnyScores = false;
     while (hasMoreScores) {
       const response = await ScoreSaberApiService.lookupLeaderboardScores(
-        leaderboardId + "",
+        Number(leaderboardId),
         currentPage,
         {
           priority: CooldownPriority.BACKGROUND,

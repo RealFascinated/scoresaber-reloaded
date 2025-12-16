@@ -116,7 +116,7 @@ class SSRApi {
    *
    * @param id the id for the leaderboard
    */
-  async fetchLeaderboard(id: string, type: DetailType = "basic") {
+  async fetchLeaderboard(id: number, type: DetailType = "basic") {
     return await this.request<LeaderboardResponse>(`/leaderboard/by-id/${id}`, {
       type: type,
     });

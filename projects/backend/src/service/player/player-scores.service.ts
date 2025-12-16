@@ -288,7 +288,7 @@ export class PlayerScoresService {
     }
 
     const leaderboardResponses = await LeaderboardCoreService.getLeaderboards(
-      playerScores.map(score => score.leaderboardId + ""),
+      playerScores.map(score => score.leaderboardId),
       { includeBeatSaver: false }
     );
 
@@ -305,7 +305,7 @@ export class PlayerScoresService {
         stars: leaderboard.stars,
         pp: score.pp,
         timestamp: score.timestamp,
-        leaderboardId: leaderboard.id + "",
+        leaderboardId: leaderboard.id,
         leaderboardName: leaderboard.fullName,
         leaderboardDifficulty: getDifficultyName(getDifficulty(leaderboard.difficulty.difficulty)),
       });
@@ -329,7 +329,7 @@ export class PlayerScoresService {
     }
 
     const leaderboardResponse = await LeaderboardCoreService.getLeaderboard(
-      rawScore.leaderboardId + "",
+      rawScore.leaderboardId,
       {
         includeBeatSaver: true,
         beatSaverType: "full",
@@ -518,7 +518,7 @@ export class PlayerScoresService {
         await Promise.all(
           rawScores.map(async rawScore => {
             const leaderboardResponse = await LeaderboardCoreService.getLeaderboard(
-              rawScore.leaderboardId + "",
+              rawScore.leaderboardId,
               {
                 includeBeatSaver: true,
               }

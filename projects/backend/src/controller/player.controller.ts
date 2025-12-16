@@ -160,7 +160,7 @@ export default function playerController(app: Elysia) {
           tags: ["Player"],
           params: z.object({
             playerId: z.string(),
-            leaderboardId: z.string(),
+            leaderboardId: z.coerce.number(),
             page: z.coerce.number(),
           }),
           detail: {

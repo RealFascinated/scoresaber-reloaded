@@ -68,7 +68,7 @@ export default function leaderboardController(app: Elysia) {
         {
           tags: ["Leaderboard"],
           params: z.object({
-            leaderboardId: z.string(),
+            leaderboardId: z.coerce.number(),
           }),
           detail: {
             description: "Fetch a leaderboard by its id",

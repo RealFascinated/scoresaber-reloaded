@@ -42,11 +42,11 @@ const getLeaderboardData = async (
   type: DetailType = "basic"
 ): Promise<LeaderboardData | undefined> => {
   const { slug } = await params;
-  const id = slug[0]; // The leaderboard id
+  const id = parseInt(slug[0]); // The leaderboard id
   const page = parseInt(slug[1]) || 1; // The page number
   const category = (await searchParams).category as ScoreModeEnum;
 
-  const leaderboard = await ssrApi.fetchLeaderboard(id + "", type);
+  const leaderboard = await ssrApi.fetchLeaderboard(id, type);
   if (leaderboard === undefined) {
     return undefined;
   }

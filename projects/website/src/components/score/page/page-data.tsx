@@ -28,7 +28,7 @@ export default function ScorePageData({ scoreId }: { scoreId: string }) {
 
   const { data: replay, isLoading: isReplayLoading } = useQuery({
     queryKey: ["replayAnalysis", score],
-    queryFn: () => getDecodedReplay(score?.score.additionalData?.scoreId + ""),
+    queryFn: () => getDecodedReplay(score?.score.additionalData?.scoreId.toString()!),
     enabled: !!score?.score.additionalData?.scoreId,
   });
 

@@ -26,7 +26,7 @@ export class BeatLeaderService extends ApiService {
     this.log(`Looking up scorestats for "${scoreId}"...`);
 
     const response = await this.fetch<ScoreStatsToken>(
-      LOOKUP_MAP_STATS_BY_SCORE_ID_ENDPOINT.replace(":scoreId", scoreId + "")
+      LOOKUP_MAP_STATS_BY_SCORE_ID_ENDPOINT.replace(":scoreId", scoreId.toString())
     );
     // Score stats not found
     if (response == undefined) {

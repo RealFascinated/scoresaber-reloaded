@@ -146,7 +146,7 @@ export class ScoreCoreService {
     };
 
     leaderboard = !leaderboard
-      ? (await LeaderboardCoreService.getLeaderboard(score.leaderboardId + "")).leaderboard
+      ? (await LeaderboardCoreService.getLeaderboard(score.leaderboardId)).leaderboard
       : leaderboard;
 
     // If the leaderboard is not found, return the plain score

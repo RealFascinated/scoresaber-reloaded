@@ -192,8 +192,8 @@ export class ScoreWebsockets implements EventListener {
       }
 
       // Fetch the leaderboard if it doesn't exist
-      if (!(await LeaderboardCoreService.leaderboardExists(leaderboard.id + ""))) {
-        await LeaderboardCoreService.createLeaderboard(leaderboard.id + "", leaderboardToken);
+      if (!(await LeaderboardCoreService.leaderboardExists(leaderboard.id))) {
+        await LeaderboardCoreService.createLeaderboard(leaderboard.id, leaderboardToken);
       } else {
         await ScoreSaberLeaderboardModel.updateOne(
           { _id: leaderboard.id },
