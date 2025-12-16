@@ -67,6 +67,8 @@ export class ScoreSaberApiService {
   private static currentProxy: string = ""; // No proxy by default
   private static proxyResetThreshold: number = 50;
 
+  public static totalRequests: number = 0;
+
   public constructor() {
     setInterval(() => {
       if (
@@ -101,6 +103,8 @@ export class ScoreSaberApiService {
       CacheId.ScoreSaberApi,
       `scoresaber:api-cache:${cacheHash}`,
       async () => {
+        ScoreSaberApiService.totalRequests++;
+
         await ScoreSaberApiService.cooldown.waitAndUse(
           options?.priority || CooldownPriority.NORMAL
         );
