@@ -46,6 +46,18 @@ export default function leaderboardController(app: Elysia) {
         }
       )
       .get(
+        "/ranking-queue",
+        async () => {
+          return await ScoreSaberApiService.lookupRankingRequests();
+        },
+        {
+          tags: ["Leaderboard"],
+          detail: {
+            description: "Fetch the ranking queue",
+          },
+        }
+      )
+      .get(
         "/by-id/:leaderboardId",
         async ({ params: { leaderboardId } }) => {
           return await LeaderboardCoreService.getLeaderboard(leaderboardId, {

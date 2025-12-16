@@ -20,6 +20,7 @@ import { PlayerSearchResponse } from "../schemas/response/player/player-search";
 import { PlayerScoresChartResponse } from "../schemas/response/player/scores-chart";
 import { PlayerMedalRankingsResponse } from "../schemas/response/ranking/medal-rankings";
 import { PlayerScoresPageResponse } from "../schemas/response/score/player-scores";
+import ScoreSaberRankingRequestsResponse from "../schemas/response/scoresaber/ranking-requests";
 import { MapDifficulty } from "../score/map-difficulty";
 import { PlayerScore } from "../score/player-score";
 import { ScoreSaberScoreSort } from "../score/score-sort";
@@ -428,6 +429,15 @@ class SSRApi {
       ...(options?.sort ? { sort: options.sort.toString() } : {}),
       ...(options?.search ? { search: options.search } : {}),
     });
+  }
+
+  /**
+   * Fetches the ranking queue.
+   *
+   * @returns the ranking queue
+   */
+  async fetchRankingQueue() {
+    return await this.request<ScoreSaberRankingRequestsResponse>(`/leaderboard/ranking-queue`);
   }
 }
 
