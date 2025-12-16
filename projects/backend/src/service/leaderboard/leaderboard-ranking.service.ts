@@ -10,7 +10,8 @@ import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-sc
 import { PlaylistSong } from "@ssr/common/playlist/playlist-song";
 import { LeaderboardStarChange } from "@ssr/common/schemas/leaderboard/leaderboard-star-change";
 import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
-import { formatDateMinimal } from "@ssr/common/utils/time-utils";
+import { formatDateMinimal, formatDuration } from "@ssr/common/utils/time-utils";
+import { AnyBulkWriteOperation } from "mongoose";
 import PlaylistService from "../playlist/playlist.service";
 import { MedalScoresService } from "../score/medal-scores.service";
 import { ScoreSaberApiService } from "../scoresaber-api.service";
@@ -107,34 +108,45 @@ export class LeaderboardRankingService {
       );
     }
 
+    const rankedLeaderboards: Map<string, ScoreSaberLeaderboard> =
+      (await ScoreSaberLeaderboardModel.find({ ranked: true })
+        .select({ _id: 1, stars: 1, ranked: 1, qualified: 1 })
+        .lean()
+        .then(
+          leaderboards =>
+            new Map(leaderboards.map(leaderboard => [leaderboard._id + "", leaderboard]))
+        )) as Map<string, ScoreSaberLeaderboard>;
+
+    const leaderboardBulkWrite: AnyBulkWriteOperation<ScoreSaberLeaderboard>[] = [];
+    const updatedLeaderboards: LeaderboardUpdate[] = [];
+
     // Process the leaderboards
     let checked = 0;
-    const updatedLeaderboards: LeaderboardUpdate[] = [];
     for (const apiLeaderboard of leaderboards) {
       checked++;
       if (checked % 500 === 0 || checked === 1 || checked === leaderboards.length) {
         Logger.info(`[RANKED UPDATES] Checked ${checked} of ${leaderboards.length} leaderboards.`);
       }
 
-      const dbLeaderboard = await ScoreSaberLeaderboardModel.findOne({ _id: apiLeaderboard.id })
-        .select({ stars: 1, ranked: 1, qualified: 1 })
-        .lean();
+      const dbLeaderboard = rankedLeaderboards.get(apiLeaderboard.id + "");
       const leaderboardUpdated =
         dbLeaderboard?.ranked !== apiLeaderboard.ranked ||
         dbLeaderboard?.qualified !== apiLeaderboard.qualified ||
         dbLeaderboard?.stars !== apiLeaderboard.stars;
 
       // Update or create the leaderboard
-      await ScoreSaberLeaderboardModel.findOneAndUpdate(
-        { _id: apiLeaderboard.id },
-        {
-          $set: {
-            ...apiLeaderboard,
-            difficulties: leaderboardDifficulties.get(apiLeaderboard.songHash) ?? [],
+      leaderboardBulkWrite.push({
+        updateOne: {
+          filter: { _id: apiLeaderboard.id },
+          update: {
+            $set: {
+              ...apiLeaderboard,
+              difficulties: leaderboardDifficulties.get(apiLeaderboard.songHash) ?? [],
+            },
           },
+          upsert: true,
         },
-        { upsert: true }
-      );
+      });
 
       if (!leaderboardUpdated) {
         continue;
@@ -154,7 +166,6 @@ export class LeaderboardRankingService {
       if (!dbLeaderboard?.ranked && apiLeaderboard.ranked) {
         await MedalScoresService.rescanLeaderboard(apiLeaderboard.id + "", true);
         await updateLeaderboardScores(apiLeaderboard);
-        continue;
       }
     }
 
@@ -186,13 +197,21 @@ export class LeaderboardRankingService {
       });
     }
 
+    const before = performance.now();
+    if (leaderboardBulkWrite.length > 0) {
+      Logger.info(`[RANKED UPDATES] Updating ${leaderboardBulkWrite.length} leaderboards...`);
+      await ScoreSaberLeaderboardModel.bulkWrite(leaderboardBulkWrite);
+      Logger.info(
+        `[RANKED UPDATES] Updated ${leaderboardBulkWrite.length} leaderboards in ${formatDuration(performance.now() - before)}`
+      );
+    }
+
     // Update the ranked playlist
     await PlaylistService.updatePlaylist("scoresaber-ranked-maps", {
       title: `ScoreSaber Ranked Maps (${formatDateMinimal(new Date())})`,
       songs: Array.from(playlistSongs.values()),
     });
-
-    Logger.info(`[RANKED UPDATES] Updated ${updatedLeaderboards.length} leaderboards.`);
+    Logger.info(`[RANKED UPDATES] Updated ranked playlist!`);
     return updatedLeaderboards;
   }
 

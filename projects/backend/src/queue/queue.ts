@@ -8,6 +8,7 @@ export type QueueItem<T> = {
   id: string;
   data: T;
 };
+type QueueMode = "fifo" | "lifo";
 
 export abstract class Queue<T> {
   /**
@@ -18,7 +19,7 @@ export abstract class Queue<T> {
   /**
    * The mode of the queue
    */
-  public queueMode: "fifo" | "lifo" = "lifo";
+  public queueMode: QueueMode = "lifo";
 
   /**
    * The lock for the queue
@@ -30,7 +31,7 @@ export abstract class Queue<T> {
    */
   private isStopped = false;
 
-  constructor(id: QueueId, queueMode: "fifo" | "lifo" = "lifo") {
+  constructor(id: QueueId, queueMode: QueueMode = "lifo") {
     this.id = id;
     this.queueMode = queueMode;
   }
