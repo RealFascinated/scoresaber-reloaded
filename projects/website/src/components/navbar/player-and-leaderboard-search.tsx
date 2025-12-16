@@ -35,7 +35,9 @@ export default function PlayerAndLeaderboardSearch() {
         return { players: [], leaderboards: [] };
       }
       const playerResults = await ssrApi.searchPlayers(debouncedQuery);
-      const leaderboardResults = await ScoreSaberApiService.searchLeaderboards(query);
+      const leaderboardResults = await ssrApi.searchLeaderboards(1, {
+        search: debouncedQuery,
+      });
 
       return {
         players: playerResults?.players || [],
