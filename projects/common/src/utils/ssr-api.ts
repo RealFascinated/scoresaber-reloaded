@@ -2,6 +2,7 @@ import { PpGainResponse } from "src/schemas/response/player/pp-boundary";
 import SuperJSON from "superjson";
 import { DetailType } from "../detail-type";
 import { env } from "../env";
+import { StarFilter } from "../maps/types";
 import { ScoreSaberScore } from "../model/score/impl/scoresaber-score";
 import { StatisticsType } from "../model/statistics/statistic-type";
 import { Page } from "../pagination";
@@ -25,6 +26,7 @@ import { ScoreSaberScoreSort } from "../score/score-sort";
 import { MapCharacteristic } from "../types/map-characteristic";
 import { ScoreCalendarData } from "../types/player/player-statistic";
 import { ScoreQuery, SortDirection, SortField } from "../types/score-query";
+import ScoreSaberLeaderboardPageToken from "../types/token/scoresaber/leaderboard-page";
 import { getQueryParamsFromObject } from "./utils";
 
 class SSRApi {
@@ -390,6 +392,42 @@ class SSRApi {
    */
   async getScore(scoreId: string) {
     return await this.request<PlayerScore>(`/scores/${scoreId}`);
+  }
+
+  /**
+   * Searches for leaderboards.
+   *
+   * @param page the page
+   * @param options the options
+   * @returns the leaderboards
+   */
+  async searchLeaderboards(
+    page: number,
+    options?: {
+      ranked?: boolean;
+      qualified?: boolean;
+      verified?: boolean;
+      category?: number;
+      stars?: StarFilter;
+      sort?: number;
+      search?: string;
+    }
+  ) {
+    return await this.request<ScoreSaberLeaderboardPageToken>(`/leaderboard/search`, {
+      page: page.toString(),
+      ...(options?.ranked ? { ranked: options.ranked.toString() } : {}),
+      ...(options?.qualified ? { qualified: options.qualified.toString() } : {}),
+      ...(options?.verified ? { verified: options.verified.toString() } : {}),
+      ...(options?.category ? { category: options.category.toString() } : {}),
+      ...(options?.stars
+        ? {
+            minStar: (options.stars.min ?? 0).toString(),
+            maxStar: (options.stars.max ?? 0).toString(),
+          }
+        : {}),
+      ...(options?.sort ? { sort: options.sort.toString() } : {}),
+      ...(options?.search ? { search: options.search } : {}),
+    });
   }
 }
 

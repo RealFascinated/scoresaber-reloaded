@@ -11,6 +11,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { useIsMobile } from "@/contexts/viewport-context";
 import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
+import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { formatDate, timeAgo } from "@ssr/common/utils/time-utils";
 import { useQuery } from "@tanstack/react-query";
 import { useDebounce } from "@uidotdev/usehooks";
@@ -31,7 +32,7 @@ export default function Leaderboards() {
   } = useQuery({
     queryKey: ["maps", filterDebounced, page],
     queryFn: async () =>
-      ScoreSaberApiService.lookupLeaderboards(page, {
+      ssrApi.searchLeaderboards(page, {
         category: filterDebounced.category,
         sort: filterDebounced.sort,
         stars: {

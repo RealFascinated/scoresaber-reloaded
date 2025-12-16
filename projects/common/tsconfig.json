@@ -16,6 +16,6 @@
     "declarationMap": true,
     "baseUrl": "./"
   },
-  "include": ["src/**/*.ts"],
+  "include": ["src/"],
   "exclude": ["node_modules", "dist"]
 }
