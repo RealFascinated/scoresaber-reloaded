@@ -8,10 +8,10 @@
   },
   "exports": {
     "./*": {
-      "types": "./dist/*.d.ts",
-      "import": "./dist/*.js",
-      "require": "./dist/*.js",
-      "default": "./dist/*.js"
+      "types": "./dist/common/src/*.d.ts",
+      "import": "./dist/common/src/*.js",
+      "require": "./dist/common/src/*.js",
+      "default": "./dist/common/src/*.js"
     }
   },
   "devDependencies": {

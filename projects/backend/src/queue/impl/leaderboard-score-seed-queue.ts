@@ -1,4 +1,3 @@
-import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { CooldownPriority } from "@ssr/common/cooldown";
 import Logger from "@ssr/common/logger";
 import { ScoreSaberLeaderboardModel } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
@@ -43,11 +42,13 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
     let consecutiveFailures = 0;
     let processedAnyScores = false;
     while (hasMoreScores) {
-      const response = await ApiServiceRegistry.getInstance()
-        .getScoreSaberService()
-        .lookupLeaderboardScores(leaderboardId + "", currentPage, {
+      const response = await ScoreSaberApiService.lookupLeaderboardScores(
+        leaderboardId + "",
+        currentPage,
+        {
           priority: CooldownPriority.BACKGROUND,
-        });
+        }
+      );
       if (!response) {
         Logger.warn(
           `Failed to fetch scoresaber api scores for leaderboard "${leaderboardId}" on page ${currentPage}`

@@ -1,4 +1,3 @@
-import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { CooldownPriority } from "@ssr/common/cooldown";
 import { DetailType } from "@ssr/common/detail-type";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
@@ -22,6 +21,7 @@ import { LeaderboardScoreSeedQueue } from "../../queue/impl/leaderboard-score-se
 import { QueueId, QueueManager } from "../../queue/queue-manager";
 import BeatSaverService from "../beatsaver.service";
 import CacheService, { CacheId } from "../cache.service";
+import { ScoreSaberApiService } from "../scoresaber-api.service";
 import { LeaderboardRankingService } from "./leaderboard-ranking.service";
 
 export type LeaderboardOptions = {
@@ -108,9 +108,7 @@ export class LeaderboardCoreService {
     token?: ScoreSaberLeaderboardToken
   ): Promise<LeaderboardResponse> {
     const before = performance.now();
-    const leaderboardToken =
-      token ??
-      (await ApiServiceRegistry.getInstance().getScoreSaberService().lookupLeaderboard(id));
+    const leaderboardToken = token ?? (await ScoreSaberApiService.lookupLeaderboard(id));
     if (leaderboardToken == undefined) {
       throw new NotFoundError(`Leaderboard not found for "${id}"`);
     }
@@ -216,9 +214,11 @@ export class LeaderboardCoreService {
         }
 
         const before = performance.now();
-        const leaderboardToken = await ApiServiceRegistry.getInstance()
-          .getScoreSaberService()
-          .lookupLeaderboardByHash(hash, difficulty, characteristic);
+        const leaderboardToken = await ScoreSaberApiService.lookupLeaderboardByHash(
+          hash,
+          difficulty,
+          characteristic
+        );
         if (leaderboardToken == undefined) {
           throw new NotFoundError(
             `Leaderboard not found for hash "${hash}", difficulty "${difficulty}", characteristic "${characteristic}"`
@@ -278,9 +278,10 @@ export class LeaderboardCoreService {
     let page = 1;
 
     while (hasMorePages) {
-      const response = await ApiServiceRegistry.getInstance()
-        .getScoreSaberService()
-        .lookupLeaderboards(page, { [status]: true, priority: CooldownPriority.LOW });
+      const response = await ScoreSaberApiService.lookupLeaderboards(page, {
+        [status]: true,
+        priority: CooldownPriority.LOW,
+      });
       if (!response) {
         hasMorePages = false;
         continue;
@@ -449,9 +450,7 @@ export class LeaderboardCoreService {
       CacheId.Leaderboards,
       "leaderboard:ranking-queue-maps",
       async () => {
-        const rankingQueueTokens = await ApiServiceRegistry.getInstance()
-          .getScoreSaberService()
-          .lookupRankingRequests();
+        const rankingQueueTokens = await ScoreSaberApiService.lookupRankingRequests();
         if (!rankingQueueTokens) {
           return [];
         }

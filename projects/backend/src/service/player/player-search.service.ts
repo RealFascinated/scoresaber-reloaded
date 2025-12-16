@@ -1,10 +1,10 @@
-import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { PlayerModel } from "@ssr/common/model/player/player";
 import { Pagination } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerRankingsResponse } from "@ssr/common/schemas/response/player/player-rankings";
 import { Metadata } from "@ssr/common/types/metadata";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
+import { ScoreSaberApiService } from "../scoresaber-api.service";
 import ScoreSaberService from "../scoresaber.service";
 
 export class PlayerSearchService {
@@ -16,9 +16,7 @@ export class PlayerSearchService {
    */
   public static async searchPlayers(query?: string): Promise<ScoreSaberPlayer[]> {
     const [scoreSaberResponse, foundPlayers] = await Promise.all([
-      ApiServiceRegistry.getInstance()
-        .getScoreSaberService()
-        .searchPlayers(query ?? ""),
+      ScoreSaberApiService.searchPlayers(query ?? ""),
       query && query.length > 0
         ? PlayerModel.find({
             name: { $regex: query, $options: "i" },
@@ -116,10 +114,8 @@ export class PlayerSearchService {
 
     const [foundPlayers, countryCounts] = await Promise.all([
       country
-        ? ApiServiceRegistry.getInstance()
-            .getScoreSaberService()
-            .lookupPlayersByCountry(page, country, search)
-        : ApiServiceRegistry.getInstance().getScoreSaberService().lookupPlayers(page, search),
+        ? ScoreSaberApiService.lookupPlayersByCountry(page, country, search)
+        : ScoreSaberApiService.lookupPlayers(page, search),
       getPlayerCountryCounts(),
     ]);
 

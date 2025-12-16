@@ -1,4 +1,3 @@
-import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger from "@ssr/common/logger";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
@@ -7,6 +6,7 @@ import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 import { Metadata } from "@ssr/common/types/metadata";
 import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score";
 import BeatLeaderService from "../beatleader.service";
+import { ScoreSaberApiService } from "../scoresaber-api.service";
 import { LeaderboardCoreService } from "./leaderboard-core.service";
 
 export class LeaderboardScoresService {
@@ -21,9 +21,10 @@ export class LeaderboardScoresService {
     let hasMoreScores = true;
 
     while (hasMoreScores) {
-      const response = await ApiServiceRegistry.getInstance()
-        .getScoreSaberService()
-        .lookupLeaderboardScores(leaderboardId + "", currentPage);
+      const response = await ScoreSaberApiService.lookupLeaderboardScores(
+        leaderboardId + "",
+        currentPage
+      );
       if (!response) {
         Logger.warn(
           `Failed to fetch scoresaber api scores for leaderboard "${leaderboardId}" on page ${currentPage}`
@@ -66,11 +67,13 @@ export class LeaderboardScoresService {
     const leaderboard = leaderboardResponse.leaderboard;
     const beatSaverMap = leaderboardResponse.beatsaver;
 
-    const leaderboardScores = await ApiServiceRegistry.getInstance()
-      .getScoreSaberService()
-      .lookupLeaderboardScores(leaderboardId, page, {
+    const leaderboardScores = await ScoreSaberApiService.lookupLeaderboardScores(
+      leaderboardId,
+      page,
+      {
         country: country,
-      });
+      }
+    );
     if (!leaderboardScores) {
       throw new NotFoundError(`Leaderboard scores for leaderboard "${leaderboardId}" not found`);
     }

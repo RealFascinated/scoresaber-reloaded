@@ -1,9 +1,9 @@
-import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { MiniRankingResponse } from "@ssr/common/schemas/response/player/around-player";
 import CacheService, { CacheId } from "./cache.service";
 import { PlayerMedalsService } from "./player/player-medals.service";
+import { ScoreSaberApiService } from "./scoresaber-api.service";
 import ScoreSaberService from "./scoresaber.service";
 
 type MiniRankingType = "global" | "country" | "medals";
@@ -101,10 +101,8 @@ export default class MiniRankingService {
           `scoresaber:mini-ranking:${type}:${page}${type === "country" ? `:${player.country}` : ""}`,
           async () =>
             type === "global"
-              ? ApiServiceRegistry.getInstance().getScoreSaberService().lookupPlayers(page)
-              : ApiServiceRegistry.getInstance()
-                  .getScoreSaberService()
-                  .lookupPlayersByCountry(page, player.country)
+              ? ScoreSaberApiService.lookupPlayers(page)
+              : ScoreSaberApiService.lookupPlayersByCountry(page, player.country)
         )
       )
     );

@@ -1,4 +1,3 @@
-import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { InternalServerError } from "@ssr/common/error/internal-server-error";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger from "@ssr/common/logger";
@@ -10,6 +9,7 @@ import { logNewTrackedPlayer } from "../../common/embds";
 import { FetchMissingScoresQueue } from "../../queue/impl/fetch-missing-scores-queue";
 import { QueueId, QueueManager } from "../../queue/queue-manager";
 import CacheService, { CacheId } from "../cache.service";
+import { ScoreSaberApiService } from "../scoresaber-api.service";
 import ScoreSaberService from "../scoresaber.service";
 
 export const accountCreationLock: Record<string, Promise<Player>> = {};
@@ -160,9 +160,7 @@ export class PlayerCoreService {
    * @returns the player document if found
    */
   public static async refreshPlayer(id: string): Promise<PlayerRefreshResponse> {
-    const response = await ApiServiceRegistry.getInstance()
-      .getScoreSaberService()
-      .refreshPlayer(id);
+    const response = await ScoreSaberApiService.refreshPlayer(id);
     if (response !== undefined) {
       CacheService.invalidate(`scoresaber:player:${id}`); // Remove the player from the cache
       return response;

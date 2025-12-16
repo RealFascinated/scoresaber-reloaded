@@ -1,4 +1,3 @@
-import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import Logger from "@ssr/common/logger";
 import { Player, PlayerModel } from "@ssr/common/model/player/player";
 import {
@@ -22,6 +21,7 @@ import { redisClient } from "../..";
 import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
 import { FetchMissingScoresQueue } from "../../queue/impl/fetch-missing-scores-queue";
 import { QueueId, QueueManager } from "../../queue/queue-manager";
+import { ScoreSaberApiService } from "../scoresaber-api.service";
 import { PlayerAccuraciesService } from "./player-accuracies.service";
 import { PlayerCoreService } from "./player-core.service";
 import { PlayerMedalsService } from "./player-medals.service";
@@ -39,9 +39,7 @@ export class PlayerHistoryService {
     const now = new Date();
     Logger.info("Starting player statistics update...");
 
-    const firstPage = await ApiServiceRegistry.getInstance()
-      .getScoreSaberService()
-      .lookupPlayers(1);
+    const firstPage = await ScoreSaberApiService.lookupPlayers(1);
     if (firstPage == undefined) {
       Logger.error("Failed to fetch players on page 1, skipping player statistics update...");
       return;
@@ -60,9 +58,7 @@ export class PlayerHistoryService {
       if (page % 10 === 0 || page === 1 || page === pages) {
         Logger.info(`Fetching page ${page} of ${pages}...`);
       }
-      const response = await ApiServiceRegistry.getInstance()
-        .getScoreSaberService()
-        .lookupPlayers(page);
+      const response = await ScoreSaberApiService.lookupPlayers(page);
       if (page == undefined) {
         Logger.error(`Failed to fetch players on page ${page}, skipping page...`);
         errorCount++;
@@ -156,9 +152,7 @@ export class PlayerHistoryService {
     playerToken?: ScoreSaberPlayerToken
   ): Promise<void> {
     const before = performance.now();
-    const player =
-      playerToken ??
-      (await ApiServiceRegistry.getInstance().getScoreSaberService().lookupPlayer(foundPlayer._id));
+    const player = playerToken ?? (await ScoreSaberApiService.lookupPlayer(foundPlayer._id));
 
     // Don't track inactive players
     if (!player || player.inactive) {

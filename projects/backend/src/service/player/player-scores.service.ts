@@ -1,4 +1,3 @@
-import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { CooldownPriority } from "@ssr/common/cooldown";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger from "@ssr/common/logger";
@@ -36,6 +35,7 @@ import { scoreToObject } from "../../common/score/score.util";
 import BeatSaverService from "../beatsaver.service";
 import { LeaderboardCoreService } from "../leaderboard/leaderboard-core.service";
 import { ScoreCoreService } from "../score/score-core.service";
+import { ScoreSaberApiService } from "../scoresaber-api.service";
 import ScoreSaberService from "../scoresaber.service";
 
 const FIELDS_MAP: Record<SortField, string> = {
@@ -97,7 +97,7 @@ export class PlayerScoresService {
     async function getScoresPage(
       page: number
     ): Promise<ScoreSaberPlayerScoresPageToken | undefined> {
-      return ApiServiceRegistry.getInstance().getScoreSaberService().lookupPlayerScores({
+      return ScoreSaberApiService.lookupPlayerScores({
         playerId: playerId,
         page: page,
         limit: 100,
@@ -371,14 +371,12 @@ export class PlayerScoresService {
     comparisonPlayerId?: string
   ): Promise<PlayerScoresPageResponse> {
     // Get the requested page directly
-    const requestedPage = await ApiServiceRegistry.getInstance()
-      .getScoreSaberService()
-      .lookupPlayerScores({
-        playerId,
-        page: pageNumber,
-        sort: sort as ScoreSaberScoreSort,
-        search,
-      });
+    const requestedPage = await ScoreSaberApiService.lookupPlayerScores({
+      playerId,
+      page: pageNumber,
+      sort: sort as ScoreSaberScoreSort,
+      search,
+    });
 
     if (!requestedPage) {
       return Pagination.empty<PlayerScore>();

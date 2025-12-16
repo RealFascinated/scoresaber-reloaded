@@ -90,3 +90,19 @@ export function darkenColor(hex: string, amount: number): string {
   const b = Math.max(0, (num & 0xff) - amount);
   return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, "0")}`;
 }
+
+/**
+ * Gets a query params string from an object.
+ *
+ * @param params the object to get the query params from
+ * @returns the query params string
+ */
+export function getQueryParamsFromObject(params: Record<string, string>) {
+  // Filter out undefined values and empty strings from the query params
+  const filteredQueryParams = Object.fromEntries(
+    Object.entries(params || {}).filter(([, value]) => value !== undefined && value !== "")
+  );
+  return filteredQueryParams && Object.keys(filteredQueryParams).length > 0
+    ? `?${new URLSearchParams(params)}`
+    : "";
+}

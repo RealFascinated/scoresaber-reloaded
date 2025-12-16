@@ -9,7 +9,6 @@ import SimpleTooltip from "@/components/simple-tooltip";
 import { Spinner } from "@/components/spinner";
 import { EmptyState } from "@/components/ui/empty-state";
 import { useIsMobile } from "@/contexts/viewport-context";
-import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { formatDate, timeAgo } from "@ssr/common/utils/time-utils";
@@ -32,20 +31,18 @@ export default function Leaderboards() {
   } = useQuery({
     queryKey: ["maps", filterDebounced, page],
     queryFn: async () =>
-      ApiServiceRegistry.getInstance()
-        .getScoreSaberService()
-        .lookupLeaderboards(page, {
-          category: filterDebounced.category,
-          sort: filterDebounced.sort,
-          stars: {
-            min: filterDebounced.starMin,
-            max: filterDebounced.starMax,
-          },
-          ranked: filterDebounced.ranked,
-          qualified: filterDebounced.qualified,
-          verified: filterDebounced.verified,
-          search: filterDebounced.search.length > 3 ? filterDebounced.search : undefined,
-        }),
+      ScoreSaberApiService.lookupLeaderboards(page, {
+        category: filterDebounced.category,
+        sort: filterDebounced.sort,
+        stars: {
+          min: filterDebounced.starMin,
+          max: filterDebounced.starMax,
+        },
+        ranked: filterDebounced.ranked,
+        qualified: filterDebounced.qualified,
+        verified: filterDebounced.verified,
+        search: filterDebounced.search.length > 3 ? filterDebounced.search : undefined,
+      }),
     placeholderData: data => data,
   });
 

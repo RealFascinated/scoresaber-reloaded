@@ -25,6 +25,7 @@ import { ScoreSaberScoreSort } from "../score/score-sort";
 import { MapCharacteristic } from "../types/map-characteristic";
 import { ScoreCalendarData } from "../types/player/player-statistic";
 import { ScoreQuery, SortDirection, SortField } from "../types/score-query";
+import { getQueryParamsFromObject } from "./utils";
 
 class SSRApi {
   /**
@@ -36,15 +37,7 @@ class SSRApi {
    * @throws an error if the request fails
    */
   async request<T>(url: string, queryParams?: Record<string, string>, body?: any) {
-    // Filter out undefined values and empty strings from the query params
-    const filteredQueryParams = Object.fromEntries(
-      Object.entries(queryParams || {}).filter(([_, value]) => value !== undefined && value !== "")
-    );
-    const queryString =
-      filteredQueryParams && Object.keys(filteredQueryParams).length > 0
-        ? `?${new URLSearchParams(filteredQueryParams)}`
-        : "";
-
+    const queryString = getQueryParamsFromObject(queryParams || {});
     const response = await fetch(`${env.NEXT_PUBLIC_API_URL}${url}${queryString}`, {
       method: body ? "POST" : "GET",
       headers: {

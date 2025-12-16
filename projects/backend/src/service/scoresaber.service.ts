@@ -1,4 +1,3 @@
-import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { DetailType } from "@ssr/common/detail-type";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import { HMD } from "@ssr/common/hmds";
@@ -19,6 +18,7 @@ import { PlayerHistoryService } from "./player/player-history.service";
 import { PlayerHmdService } from "./player/player-hmd.service";
 import { PlayerMedalsService } from "./player/player-medals.service";
 import { PlayerRankedService } from "./player/player-ranked.service";
+import { ScoreSaberApiService } from "./scoresaber-api.service";
 
 const CACHED_PLAYER_EXPIRY = TimeUnit.toSeconds(TimeUnit.Month, 3);
 
@@ -187,7 +187,7 @@ export default class ScoreSaberService {
       }
     }
 
-    const player = await ApiServiceRegistry.getInstance().getScoreSaberService().lookupPlayer(id);
+    const player = await ScoreSaberApiService.lookupPlayer(id);
     if (!player) {
       throw new NotFoundError(`Player "${id}" not found`);
     }

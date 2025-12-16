@@ -5,7 +5,6 @@ import PlayerSearchResultItem from "@/components/player/player-search-result-ite
 import { useSearch } from "@/components/providers/search-provider";
 import SearchDialog from "@/components/ui/search-dialog";
 import { StarIcon } from "@heroicons/react/24/solid";
-import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { truncateText } from "@ssr/common/string-utils";
@@ -36,9 +35,7 @@ export default function PlayerAndLeaderboardSearch() {
         return { players: [], leaderboards: [] };
       }
       const playerResults = await ssrApi.searchPlayers(debouncedQuery);
-      const leaderboardResults = await ApiServiceRegistry.getInstance()
-        .getScoreSaberService()
-        .searchLeaderboards(query);
+      const leaderboardResults = await ScoreSaberApiService.searchLeaderboards(query);
 
       return {
         players: playerResults?.players || [],

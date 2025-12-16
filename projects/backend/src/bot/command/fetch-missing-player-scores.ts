@@ -1,5 +1,4 @@
 import { IsGuildUser } from "@discordx/utilities";
-import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { PlayerModel } from "@ssr/common/model/player/player";
 import { ApplicationCommandOptionType, CommandInteraction } from "discord.js";
 import { Discord, Guard, Slash, SlashOption } from "discordx";
@@ -7,6 +6,7 @@ import { FetchMissingScoresQueue } from "../../queue/impl/fetch-missing-scores-q
 import { QueueId, QueueManager } from "../../queue/queue-manager";
 import { PlayerCoreService } from "../../service/player/player-core.service";
 import { PlayerScoresService } from "../../service/player/player-scores.service";
+import { ScoreSaberApiService } from "../../service/scoresaber-api.service";
 import { OwnerOnly } from "../lib/guards";
 
 @Discord()
@@ -52,9 +52,7 @@ class FetchMissingPlayerScores {
         return;
       }
 
-      const playerToken = await ApiServiceRegistry.getInstance()
-        .getScoreSaberService()
-        .lookupPlayer(playerId);
+      const playerToken = await ScoreSaberApiService.lookupPlayer(playerId);
       if (!playerToken) {
         throw new Error("Player not found");
       }

@@ -1,4 +1,3 @@
-import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { CooldownPriority } from "@ssr/common/cooldown";
 import Logger from "@ssr/common/logger";
 import { MEDAL_COUNTS } from "@ssr/common/medal";
@@ -15,6 +14,7 @@ import { isProduction } from "@ssr/common/utils/utils";
 import { sendMedalScoreNotification } from "../../common/score/score.util";
 import { LeaderboardCoreService } from "../leaderboard/leaderboard-core.service";
 import { PlayerMedalsService } from "../player/player-medals.service";
+import { ScoreSaberApiService } from "../scoresaber-api.service";
 
 type MedalScoresQueueItem = {
   score: ScoreSaberScore;
@@ -65,11 +65,9 @@ export class MedalScoresService {
       await ScoreSaberMedalsScoreModel.deleteMany({ leaderboardId });
     }
 
-    const page = await ApiServiceRegistry.getInstance()
-      .getScoreSaberService()
-      .lookupLeaderboardScores(leaderboardId, 1, {
-        priority: isProduction() ? CooldownPriority.BACKGROUND : CooldownPriority.NORMAL,
-      });
+    const page = await ScoreSaberApiService.lookupLeaderboardScores(leaderboardId, 1, {
+      priority: isProduction() ? CooldownPriority.BACKGROUND : CooldownPriority.NORMAL,
+    });
     if (!page) {
       return;
     }

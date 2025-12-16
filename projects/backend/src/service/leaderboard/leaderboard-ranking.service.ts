@@ -1,4 +1,3 @@
-import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { ScoreSaberCurve } from "@ssr/common/leaderboard-curve/scoresaber-curve";
 import Logger from "@ssr/common/logger";
 import {
@@ -14,6 +13,7 @@ import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 import { formatDateMinimal } from "@ssr/common/utils/time-utils";
 import PlaylistService from "../playlist/playlist.service";
 import { MedalScoresService } from "../score/medal-scores.service";
+import { ScoreSaberApiService } from "../scoresaber-api.service";
 import { LeaderboardCoreService } from "./leaderboard-core.service";
 
 export type LeaderboardUpdate = {
@@ -64,9 +64,10 @@ export class LeaderboardRankingService {
       let updatedScoresCount = 0;
 
       while (hasMorePages) {
-        const response = await ApiServiceRegistry.getInstance()
-          .getScoreSaberService()
-          .lookupLeaderboardScores(leaderboard.id + "", page);
+        const response = await ScoreSaberApiService.lookupLeaderboardScores(
+          leaderboard.id + "",
+          page
+        );
         if (!response) {
           hasMorePages = false;
           continue;
@@ -191,6 +192,7 @@ export class LeaderboardRankingService {
       songs: Array.from(playlistSongs.values()),
     });
 
+    Logger.info(`[RANKED UPDATES] Updated ${updatedLeaderboards.length} leaderboards.`);
     return updatedLeaderboards;
   }
 
