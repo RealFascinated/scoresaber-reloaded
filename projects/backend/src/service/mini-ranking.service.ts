@@ -109,10 +109,7 @@ export default class MiniRankingService {
     const allPlayers = pageResponses
       .filter((response): response is NonNullable<typeof response> => response !== undefined)
       .flatMap(response => response.players)
-      .map(
-        async player =>
-          await ScoreSaberService.getPlayer(player.id, "basic", player)
-      );
+      .map(async player => await ScoreSaberService.getPlayer(player.id, "basic", player));
 
     return this.processPlayersAndBuildResult(allPlayers, player, type, getRank);
   }

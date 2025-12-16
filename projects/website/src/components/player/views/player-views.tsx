@@ -21,8 +21,8 @@ import PlayerAccuracyChart from "./impl/player-accuracy-chart";
 import PlayerAdvancedRankingChart from "./impl/player-advanced-ranking-chart";
 import PlayerScoresChart from "./impl/player-scores-chart";
 import PlayerSimpleRankingChart from "./impl/player-simple-ranking-chart";
-import ScoresGraphChart from "./impl/scores-graph-chart";
 import PlusPpCalculator from "./impl/plus-pp-calculator";
+import ScoresGraphChart from "./impl/scores-graph-chart";
 
 // Constants
 const DATE_PRESETS = [
@@ -63,7 +63,7 @@ function ViewSelector({
           size="sm"
           className="flex items-center gap-2"
         >
-          <view.icon className="hidden md:block size-4" />
+          <view.icon className="hidden size-4 md:block" />
           <span>{view.label}</span>
         </Button>
       ))}

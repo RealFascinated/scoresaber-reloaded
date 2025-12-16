@@ -74,50 +74,37 @@ export default class ScoreSaberService {
        * @returns the statistic history
        */
       async function getStatisticHistory(player: ScoreSaberPlayerToken, date: Date) {
-        return await PlayerHistoryService.getPlayerStatisticHistory(
-          player,
-          date,
-          {
-            rank: true,
-            countryRank: true,
-            pp: true,
-            medals: true,
-          },
-          true
-        );
+        return await PlayerHistoryService.getPlayerStatisticHistory(player, date, true, {
+          rank: true,
+          countryRank: true,
+          pp: true,
+          medals: true,
+        });
       }
 
-      const [
-        updatedAccount,
-        plusOnePp,
-        accBadges,
-        hmdBreakdown,
-        medalsRank,
-        dailyChanges,
-        weeklyChanges,
-        monthlyChanges,
-      ] = await Promise.all([
-        account ? PlayerCoreService.updatePeakRank(account, player) : undefined,
-        account ? PlayerRankedService.getPlayerWeightedPpGainForRawPp(id) : 0,
-        account ? PlayerAccuraciesService.getAccBadges(id) : {},
-        // todo: cleanup this mess
-        account && player !== undefined
-          ? (async () => {
-              const hmdUsage = await PlayerHmdService.getPlayerHmdBreakdown(id);
-              const totalKnownHmdScores = Object.values(hmdUsage).reduce((sum, count) => sum + count, 0);
-              return Object.fromEntries(
-                Object.entries(hmdUsage).map(([hmd, count]) => [
-                  hmd,
-                  totalKnownHmdScores > 0 ? (count / totalKnownHmdScores) * 100 : 0,
-                ])
-              ) as Record<HMD, number>;
-            })()
-          : undefined,
-        account ? PlayerMedalsService.getPlayerMedalRank(id) : undefined,
-        account ? getPlayerStatisticChanges(await getStatisticHistory(player, getDaysAgoDate(1)), 1) : {},
-        account ? getPlayerStatisticChanges(await getStatisticHistory(player, getDaysAgoDate(7)), 7) : {},
-        account ? getPlayerStatisticChanges(await getStatisticHistory(player, getDaysAgoDate(30)), 30) : {},
-      ]);
+      const [, plusOnePp, accBadges, hmdBreakdown, medalsRank, dailyChanges, weeklyChanges, monthlyChanges] =
+        await Promise.all([
+          account ? PlayerCoreService.updatePeakRank(account, player) : undefined,
+          account ? PlayerRankedService.getPlayerWeightedPpGainForRawPp(id) : 0,
+          account ? PlayerAccuraciesService.getAccBadges(id) : {},
+          // todo: cleanup this mess
+          account && player !== undefined
+            ? (async () => {
+                const hmdUsage = await PlayerHmdService.getPlayerHmdBreakdown(id);
+                const totalKnownHmdScores = Object.values(hmdUsage).reduce((sum, count) => sum + count, 0);
+                return Object.fromEntries(
+                  Object.entries(hmdUsage).map(([hmd, count]) => [
+                    hmd,
+                    totalKnownHmdScores > 0 ? (count / totalKnownHmdScores) * 100 : 0,
+                  ])
+                ) as Record<HMD, number>;
+              })()
+            : undefined,
+          account ? PlayerMedalsService.getPlayerMedalRank(id) : undefined,
+          account ? getPlayerStatisticChanges(await getStatisticHistory(player, getDaysAgoDate(1)), 1) : {},
+          account ? getPlayerStatisticChanges(await getStatisticHistory(player, getDaysAgoDate(7)), 7) : {},
+          account ? getPlayerStatisticChanges(await getStatisticHistory(player, getDaysAgoDate(30)), 30) : {},
+        ]);
 
       return {
         ...basePlayer,
@@ -137,7 +124,7 @@ export default class ScoreSaberService {
         },
         plusOnePp: plusOnePp,
         accBadges,
-        peakRank: updatedAccount?.peakRank,
+        peakRank: account?.peakRank,
         statistics: player.scoreStats,
         hmdBreakdown: hmdBreakdown,
         rankPages: {

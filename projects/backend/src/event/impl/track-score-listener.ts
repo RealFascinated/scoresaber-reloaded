@@ -44,8 +44,10 @@ export class TrackScoreListener implements EventListener {
     // Update player daily score stats
     PlayerHistoryService.updatePlayerDailyScoreStats(score.playerId, leaderboard.stars > 0, hasPreviousScore);
 
-    // Invalidate caches
+    // Invalidate player caches
     CacheService.invalidate(`scoresaber:temp-cached-player:${player.id}`);
+    CacheService.invalidate(`scoresaber:player:${player.id}:basic`);
+    CacheService.invalidate(`scoresaber:player:${player.id}:full`);
 
     sendScoreNotification(
       DiscordChannels.SCORE_FLOODGATE_FEED,

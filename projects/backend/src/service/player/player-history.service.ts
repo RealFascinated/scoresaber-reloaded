@@ -180,8 +180,8 @@ export class PlayerHistoryService {
   public static async getPlayerStatisticHistory(
     player: ScoreSaberPlayerToken,
     date: Date,
-    projection?: Record<string, string | number | boolean | object>,
-    includeToday?: boolean
+    includeToday?: boolean,
+    projection?: Record<string, string | number | boolean | object>
   ): Promise<PlayerStatisticHistory> {
     const targetDate = getMidnightAlignedDate(date);
     const dateKey = formatDateMinimal(targetDate);
