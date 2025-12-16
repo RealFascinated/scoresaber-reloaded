@@ -31,9 +31,7 @@ export class TopScoresService {
       ).map(scoreToObject);
 
       // Batch fetch leaderboards using getLeaderboards
-      const leaderboardIds = scoreObjects.map((score: ScoreSaberScore) =>
-        score.leaderboardId.toString()
-      );
+      const leaderboardIds = scoreObjects.map((score: ScoreSaberScore) => score.leaderboardId);
       const leaderboardResponses = await LeaderboardCoreService.getLeaderboards(leaderboardIds, {
         includeBeatSaver: true,
       });
