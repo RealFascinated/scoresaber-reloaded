@@ -6,10 +6,7 @@ import { PlayerModel } from "@ssr/common/model/player/player";
 import { ScoreSaberMedalsScoreModel } from "@ssr/common/model/score/impl/scoresaber-medals-score";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { MedalChange } from "@ssr/common/schemas/medals/medal-changes";
-import {
-  getScoreSaberLeaderboardFromToken,
-  getScoreSaberScoreFromToken,
-} from "@ssr/common/token-creators";
+import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 import { isProduction } from "@ssr/common/utils/utils";
 import { sendMedalScoreNotification } from "../../common/score/score.util";
 import { LeaderboardCoreService } from "../leaderboard/leaderboard-core.service";
@@ -65,6 +62,14 @@ export class MedalScoresService {
       await ScoreSaberMedalsScoreModel.deleteMany({ leaderboardId });
     }
 
+    const leaderboard = await LeaderboardCoreService.getLeaderboard(leaderboardId, {
+      includeBeatSaver: false,
+      includeStarChangeHistory: false,
+    });
+    if (!leaderboard) {
+      return;
+    }
+
     const page = await ScoreSaberApiService.lookupLeaderboardScores(leaderboardId, 1, {
       priority: isProduction() ? CooldownPriority.BACKGROUND : CooldownPriority.NORMAL,
     });
@@ -82,7 +87,7 @@ export class MedalScoresService {
       new ScoreSaberMedalsScoreModel({
         ...getScoreSaberScoreFromToken(
           score,
-          getScoreSaberLeaderboardFromToken(score.leaderboard),
+          leaderboard.leaderboard,
           score.leaderboardPlayerInfo.id
         ),
         medals: MEDAL_COUNTS[score.rank as keyof typeof MEDAL_COUNTS],
