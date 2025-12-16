@@ -51,6 +51,11 @@ const RANKING_REQUESTS_ENDPOINT = `${API_BASE}/ranking/requests/:query`;
 const FOREGROUND_RATE_LIMIT = 250 * SERVER_PROXIES.length;
 const BACKGROUND_RATE_LIMIT = 150 * SERVER_PROXIES.length;
 
+type CachedResponse<T> = {
+  data: T | string;
+  type: "json" | "text";
+};
+
 export class ScoreSaberApiService {
   private static readonly cooldown: Cooldown = new Cooldown(
     cooldownRequestsPerMinute(FOREGROUND_RATE_LIMIT),
@@ -92,7 +97,7 @@ export class ScoreSaberApiService {
   ): Promise<T | undefined> {
     const cacheHash = Bun.hash(JSON.stringify({ url, options })).toString();
 
-    return CacheService.fetchWithCache(
+    const data = await CacheService.fetchWithCache<CachedResponse<T> | undefined>(
       CacheId.ScoreSaberApi,
       `scoresaber:api-cache:${cacheHash}`,
       async () => {
@@ -125,9 +130,18 @@ export class ScoreSaberApiService {
         if (!response.ok || response.status !== 200) {
           return undefined;
         }
-        return (await response.json()) as T;
+        return {
+          data: response.headers.get("content-type")?.includes("application/json")
+            ? ((await response.json()) as T)
+            : await response.text(),
+          type: response.headers.get("content-type")?.includes("application/json")
+            ? "json"
+            : "text",
+        };
       }
     );
+
+    return data?.data as T;
   }
 
   private static log(message: string): void {
