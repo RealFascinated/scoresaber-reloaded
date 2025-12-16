@@ -52,12 +52,6 @@ export class Player {
   public banned?: boolean;
 
   /**
-   * The date the player was last tracked.
-   */
-  @prop()
-  public lastTracked?: Date;
-
-  /**
    * The player's HMD (Head Mounted Display).
    */
   @prop()

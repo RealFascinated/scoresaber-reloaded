@@ -74,12 +74,17 @@ export default class ScoreSaberService {
        * @returns the statistic history
        */
       async function getStatisticHistory(player: ScoreSaberPlayerToken, date: Date) {
-        return await PlayerHistoryService.getPlayerStatisticHistory(player, date, {
-          rank: true,
-          countryRank: true,
-          pp: true,
-          medals: true,
-        });
+        return await PlayerHistoryService.getPlayerStatisticHistory(
+          player,
+          date,
+          {
+            rank: true,
+            countryRank: true,
+            pp: true,
+            medals: true,
+          },
+          true
+        );
       }
 
       const [
@@ -109,7 +114,7 @@ export default class ScoreSaberService {
             })()
           : undefined,
         account ? PlayerMedalsService.getPlayerMedalRank(id) : undefined,
-        account ? getPlayerStatisticChanges(await getStatisticHistory(player, new Date()), 1) : {},
+        account ? getPlayerStatisticChanges(await getStatisticHistory(player, getDaysAgoDate(1)), 1) : {},
         account ? getPlayerStatisticChanges(await getStatisticHistory(player, getDaysAgoDate(7)), 7) : {},
         account ? getPlayerStatisticChanges(await getStatisticHistory(player, getDaysAgoDate(30)), 30) : {},
       ]);

@@ -158,16 +158,12 @@ export class PlayerHistoryService {
       }).lean();
 
       const updatedHistory = await PlayerHistoryService.createHistoryEntry(player, existingEntry ?? undefined);
-
       await PlayerHistoryEntryModel.findOneAndUpdate(
         { playerId: foundPlayer._id, date: getMidnightAlignedDate(trackTime) },
         updatedHistory,
-        { upsert: true, new: false } // Don't return updated document
+        { upsert: true }
       );
     }
-
-    await PlayerModel.updateOne({ _id: foundPlayer._id }, { $set: { lastTracked: new Date() } });
-    foundPlayer.lastTracked = new Date();
 
     Logger.info(`Tracked player "${foundPlayer._id}" in ${(performance.now() - before).toFixed(0)}ms`);
   }
@@ -178,12 +174,14 @@ export class PlayerHistoryService {
    * @param player the player to get the statistic history for
    * @param date the date to get the statistic history for
    * @param projection the projection to use
+   * @param includeToday whether to include today's data even if the target date is not today
    * @returns the statistic history
    */
   public static async getPlayerStatisticHistory(
     player: ScoreSaberPlayerToken,
     date: Date,
-    projection?: Record<string, string | number | boolean | object>
+    projection?: Record<string, string | number | boolean | object>,
+    includeToday?: boolean
   ): Promise<PlayerStatisticHistory> {
     const targetDate = getMidnightAlignedDate(date);
     const dateKey = formatDateMinimal(targetDate);
@@ -204,13 +202,21 @@ export class PlayerHistoryService {
       history[dateKey] = PlayerHistoryService.playerHistoryToObject(entry);
     }
 
-    // Handle today's data if target is today
-    if (isTargetToday) {
+    // Handle today's data if target is today or includeToday is true
+    if (isTargetToday || includeToday) {
+      const today = getMidnightAlignedDate(new Date());
+      const todayKey = formatDateMinimal(today);
       const todayData = await PlayerHistoryService.getTodayPlayerStatistic(player, projection);
       if (todayData) {
-        history[dateKey] = todayData;
+        if (isTargetToday) {
+          history[dateKey] = todayData;
+        } else {
+          history[todayKey] = todayData;
+        }
       }
-    } else if (!entry) {
+    }
+
+    if (!isTargetToday && !entry && !includeToday) {
       // If no entry found and not today, try to get rank from history
       const playerRankHistory = parseRankHistory(player);
       const daysAgo = Math.floor((Date.now() - targetDate.getTime()) / (1000 * 60 * 60 * 24));
