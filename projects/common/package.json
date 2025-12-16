@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "rimraf dist && tsc --watch --preserveWatchOutput",
-    "build": "rimraf dist && tsc"
+    "dev": "tsc --watch --preserveWatchOutput",
+    "build": "tsc"
   },
   "exports": {
     "./*": {
@@ -17,7 +17,6 @@
   "devDependencies": {
     "@types/node": "^25.0.2",
     "@types/ws": "^8.18.1",
-    "rimraf": "^6.0.1",
     "typescript": "^5.9.3"
   },
   "dependencies": {
