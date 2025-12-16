@@ -13,6 +13,7 @@ import { LeaderboardStarChange } from "@ssr/common/schemas/leaderboard/leaderboa
 import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 import { formatDateMinimal } from "@ssr/common/utils/time-utils";
 import PlaylistService from "../playlist/playlist.service";
+import { MedalScoresService } from "../score/medal-scores.service";
 import { LeaderboardCoreService } from "./leaderboard-core.service";
 
 export type LeaderboardUpdate = {
@@ -134,11 +135,6 @@ export class LeaderboardRankingService {
         { upsert: true }
       );
 
-      // Reweight the history scores if the stars have changed
-      if (dbLeaderboard?.stars !== apiLeaderboard.stars) {
-        await reweightHistoryScores(apiLeaderboard);
-      }
-
       if (!leaderboardUpdated) {
         continue;
       }
@@ -148,8 +144,14 @@ export class LeaderboardRankingService {
         newLeaderboard: apiLeaderboard,
       });
 
-      // The leaderboard is now ranked, so we need to update the scores.
-      if (apiLeaderboard.ranked && !dbLeaderboard?.ranked) {
+      // Reweight the history scores if the stars have changed
+      if (dbLeaderboard?.stars !== apiLeaderboard.stars) {
+        await reweightHistoryScores(apiLeaderboard);
+      }
+
+      // Previously unranked, now ranked
+      if (!dbLeaderboard?.ranked && apiLeaderboard.ranked) {
+        await MedalScoresService.rescanLeaderboard(apiLeaderboard.id + "", true);
         await updateLeaderboardScores(apiLeaderboard);
         continue;
       }
