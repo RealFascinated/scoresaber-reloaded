@@ -2,6 +2,7 @@ import { CooldownPriority } from "@ssr/common/cooldown";
 import Logger from "@ssr/common/logger";
 import { ScoreSaberLeaderboardModel } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
+import { TimeUnit } from "@ssr/common/utils/time-utils";
 import { isProduction } from "@ssr/common/utils/utils";
 import { LeaderboardCoreService } from "../../service/leaderboard/leaderboard-core.service";
 import { ScoreCoreService } from "../../service/score/score-core.service";
@@ -10,22 +11,14 @@ import { Queue, QueueItem } from "../queue";
 import { QueueId } from "../queue-manager";
 
 export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
-  /**
-   * The leaderboards that have failed to seed scores,
-   * they will be marked as seeded if they are re-added to the queue
-   */
-  failedLeaderboards: string[] = [];
-
   constructor() {
-    super(QueueId.LeaderboardScoreSeedQueue, "fifo");
+    super(QueueId.LeaderboardScoreSeedQueue, "lifo");
     if (!isProduction()) {
       return;
     }
 
-    setImmediate(async () => {
-      await this.insertLeaderboards();
-      await this.processQueue();
-    });
+    setImmediate(() => this.insertLeaderboards());
+    setInterval(() => this.insertLeaderboards(), TimeUnit.toMillis(TimeUnit.Hour, 1));
   }
 
   protected async processItem(item: QueueItem<number>): Promise<void> {
@@ -40,7 +33,6 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
 
     let currentPage = 1;
     let hasMoreScores = true;
-    let consecutiveFailures = 0;
     let processedAnyScores = false;
     while (hasMoreScores) {
       const response = await ScoreSaberApiService.lookupLeaderboardScores(
@@ -54,20 +46,9 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
         Logger.warn(
           `Failed to fetch scoresaber api scores for leaderboard "${leaderboardId}" on page ${currentPage}`
         );
-        consecutiveFailures++;
-        // If we fail several pages in a row, abort this leaderboard to avoid spamming
-        if (consecutiveFailures >= 3) {
-          Logger.warn(
-            `Aborting seeding for leaderboard "${leaderboardId}" after ${consecutiveFailures} consecutive failures at page ${currentPage}`
-          );
-          this.failedLeaderboards.push(leaderboardId); // Add to failed leaderboards to prevent spamming
-          break;
-        }
-        currentPage++;
         continue;
       }
       const totalPages = Math.ceil(response.metadata.total / response.metadata.itemsPerPage);
-      consecutiveFailures = 0;
 
       // Log every 10 pages, the first page, and the last page
       if (currentPage % 10 === 0 || currentPage === 1 || currentPage === totalPages) {
@@ -100,9 +81,8 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
       currentPage++;
     }
 
-    // Update the seeded scores status only if we processed at least one score and did not abort immediately
-    // or if the leaderboard has failed to seed scores and has been re-added to the queue
-    if (processedAnyScores || this.failedLeaderboards.includes(leaderboardId)) {
+    // Update the seeded scores status only if we processed at least one score
+    if (processedAnyScores) {
       await ScoreSaberLeaderboardModel.updateOne(
         { _id: leaderboardId },
         { $set: { seededScores: true } }
@@ -118,7 +98,7 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
   /**
    * Inserts leaderboards that need to be seeded into the queue
    */
-  private async insertLeaderboards(): Promise<number> {
+  private async insertLeaderboards() {
     try {
       const leaderboards = await ScoreSaberLeaderboardModel.find({
         seededScores: { $in: [null, false] },
@@ -129,18 +109,18 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
       const leaderboardIds = leaderboards.map(p => p._id);
       if (leaderboardIds.length === 0) {
         Logger.info("No leaderboard to seed scores for");
-        return 0;
+        return;
       }
 
       for (const leaderboardId of leaderboardIds) {
         await this.add({ id: leaderboardId.toString(), data: leaderboardId });
       }
 
+      await this.processQueue(); // Process the queue immediately
       Logger.info(`Added ${leaderboardIds.length} leaderboards to score seed queue`);
-      return leaderboardIds.length;
     } catch (error) {
       Logger.error("Failed to load unseeded leaderboards:", error);
-      return 0;
+      return;
     }
   }
 }

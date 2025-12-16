@@ -2,7 +2,7 @@ import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
 import { PlayerModel } from "@ssr/common/model/player/player";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
-import { formatDuration } from "@ssr/common/utils/time-utils";
+import { formatDuration, TimeUnit } from "@ssr/common/utils/time-utils";
 import { isProduction } from "@ssr/common/utils/utils";
 import { ButtonBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
 import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
@@ -19,30 +19,8 @@ export class FetchMissingScoresQueue extends Queue<QueueItem<string>> {
       return;
     }
 
-    setImmediate(async () => {
-      try {
-        // If there are already items in the queue, don't add more
-        if ((await this.getSize()) !== 0) {
-          return;
-        }
-        const players = await PlayerModel.find({ seededScores: { $in: [null, false] } })
-          .select("_id")
-          .lean();
-        const playerIds = players.map(p => p._id);
-        if (playerIds.length === 0) {
-          Logger.info("No players to seed scores for");
-          return;
-        }
-
-        for (const playerId of playerIds) {
-          await this.add({ id: playerId, data: playerId });
-        }
-
-        Logger.info(`Added ${playerIds.length} players to score refresh queue`);
-      } catch (error) {
-        Logger.error("Failed to load unseeded players:", error);
-      }
-    });
+    setImmediate(() => this.addPlayersToQueue());
+    setInterval(() => this.addPlayersToQueue(), TimeUnit.toMillis(TimeUnit.Hour, 1));
   }
 
   protected async processItem(item: QueueItem<string>): Promise<void> {
@@ -93,5 +71,31 @@ export class FetchMissingScoresQueue extends Queue<QueueItem<string>> {
         },
       ]
     );
+  }
+
+  private async addPlayersToQueue() {
+    try {
+      // If there are already items in the queue, don't add more
+      if ((await this.getSize()) !== 0) {
+        return;
+      }
+      const players = await PlayerModel.find({ seededScores: { $in: [null, false] } })
+        .select("_id")
+        .lean();
+      const playerIds = players.map(p => p._id);
+      if (playerIds.length === 0) {
+        Logger.info("No players to seed scores for");
+        return;
+      }
+
+      for (const playerId of playerIds) {
+        await this.add({ id: playerId, data: playerId });
+      }
+
+      await this.processQueue(); // Process the queue immediately
+      Logger.info(`Added ${playerIds.length} players to score refresh queue`);
+    } catch (error) {
+      Logger.error("Failed to load unseeded players:", error);
+    }
   }
 }
