@@ -14,14 +14,21 @@ import { LeaderboardCoreService } from "../leaderboard/leaderboard-core.service"
 import { LeaderboardLeaderboardsService } from "../leaderboard/leaderboard-leaderboards.service";
 import { PlayerMedalsService } from "../player/player-medals.service";
 
+type MedalScoresQueueItem = {
+  score: ScoreSaberScore;
+  beatLeaderScore: AdditionalScoreData | undefined;
+};
+
 export class MedalScoresService {
   private static IGNORE_SCORES = false;
+  private static SCORES_INGEST_QUEUE = new Set<MedalScoresQueueItem>();
 
   /**
    * Refreshes the medal scores for all ranked leaderboards.
    */
   public static async rescanMedalScores() {
     MedalScoresService.IGNORE_SCORES = true;
+    
     // Delete all of the old scores
     await ScoreSaberMedalsScoreModel.deleteMany({});
 
@@ -56,22 +63,31 @@ export class MedalScoresService {
 
     Logger.info(`[MEDAL SCORES] Refreshed all ranked leaderboards`);
     MedalScoresService.IGNORE_SCORES = false;
+
+    // Process the scores queue
+    for (const item of MedalScoresService.SCORES_INGEST_QUEUE) {
+      await MedalScoresService.handleIncomingMedalsScoreUpdate(item.score, item.beatLeaderScore);
+    }
+    MedalScoresService.SCORES_INGEST_QUEUE.clear();
   }
 
   /**
    * Handles an incoming score to update the medals count for the player.
    *
-   * @param incomingScore the incoming score.
+   * @param score the incoming score.
    */
   public static async handleIncomingMedalsScoreUpdate(
-    incomingScore: ScoreSaberScore,
+    score: ScoreSaberScore,
     beatLeaderScore: AdditionalScoreData | undefined
   ) {
-    // Invalid score, or we're ignoring scores
-    if (MedalScoresService.IGNORE_SCORES || incomingScore.rank > 10 || incomingScore.pp <= 0) {
-      Logger.debug(
-        `[MEDAL SCORES] Ignoring score ${incomingScore.scoreId}. Ignore scores: ${MedalScoresService.IGNORE_SCORES}, rank: ${incomingScore.rank}, pp: ${incomingScore.pp}`
-      );
+    // Invalid score
+    if (score.rank > 10 || score.pp <= 0) {
+      return;
+    }
+
+    // Add to update queue
+    if (MedalScoresService.IGNORE_SCORES) {
+      MedalScoresService.SCORES_INGEST_QUEUE.add({ score, beatLeaderScore });
       return;
     }
 
@@ -82,7 +98,7 @@ export class MedalScoresService {
      */
     async function updateMedalScores(): Promise<string[]> {
       const existingScores = await ScoreSaberMedalsScoreModel.find({
-        leaderboardId: incomingScore.leaderboardId,
+        leaderboardId: score.leaderboardId,
       })
         .sort({ score: -1 })
         .lean();
@@ -94,15 +110,15 @@ export class MedalScoresService {
       }
 
       const existingScoreIndex = existingScores.findIndex(
-        s => s.playerId === incomingScore.playerId && s.leaderboardId === incomingScore.leaderboardId
+        s => s.playerId === score.playerId && s.leaderboardId === score.leaderboardId
       );
 
       const allScores = [...existingScores];
       if (existingScoreIndex >= 0) {
         const existingScore = existingScores[existingScoreIndex];
-        allScores[existingScoreIndex] = { ...existingScore, ...incomingScore, medals: 0 };
+        allScores[existingScoreIndex] = { ...existingScore, ...score, medals: 0 };
       } else {
-        allScores.push({ ...incomingScore, medals: 0 } as (typeof existingScores)[0]);
+        allScores.push({ ...score, medals: 0 } as (typeof existingScores)[0]);
       }
 
       allScores.sort((a, b) => b.score - a.score);
@@ -189,14 +205,14 @@ export class MedalScoresService {
     const changes = await getChanges(medalChanges);
 
     Logger.info(
-      `[MEDAL SCORES] Medal changes on leaderboard ${incomingScore.leaderboardId}: ${Array.from(changes.entries())
+      `[MEDAL SCORES] Medal changes on leaderboard ${score.leaderboardId}: ${Array.from(changes.entries())
         .map(([playerId, change]) => `${playerId}: ${change.before} -> ${change.after}`)
         .join(", ")}`
     );
 
-    const leaderboard = await LeaderboardCoreService.getLeaderboard(incomingScore.leaderboardId + "", {
+    const leaderboard = await LeaderboardCoreService.getLeaderboard(score.leaderboardId + "", {
       includeBeatSaver: false,
     });
-    await sendMedalScoreNotification(incomingScore, leaderboard.leaderboard, beatLeaderScore, changes);
+    await sendMedalScoreNotification(score, leaderboard.leaderboard, beatLeaderScore, changes);
   }
 }
