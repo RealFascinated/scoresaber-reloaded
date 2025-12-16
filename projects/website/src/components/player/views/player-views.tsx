@@ -14,7 +14,7 @@ import { PlayerStatisticHistory } from "@ssr/common/player/player-statistic-hist
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { getDaysAgo, getDaysAgoDate } from "@ssr/common/utils/time-utils";
 import { useQuery } from "@tanstack/react-query";
-import { ChartBarIcon, SwordIcon, TrendingUpIcon } from "lucide-react";
+import { CalculatorIcon, ChartBarIcon, SwordIcon, TrendingUpIcon } from "lucide-react";
 import { ReactElement, useState } from "react";
 import PlayerRankingsButton from "../buttons/player-rankings-button";
 import PlayerAccuracyChart from "./impl/player-accuracy-chart";
@@ -22,6 +22,7 @@ import PlayerAdvancedRankingChart from "./impl/player-advanced-ranking-chart";
 import PlayerScoresChart from "./impl/player-scores-chart";
 import PlayerSimpleRankingChart from "./impl/player-simple-ranking-chart";
 import ScoresGraphChart from "./impl/scores-graph-chart";
+import PlusPpCalculator from "./impl/plus-pp-calculator";
 
 // Constants
 const DATE_PRESETS = [
@@ -62,7 +63,7 @@ function ViewSelector({
           size="sm"
           className="flex items-center gap-2"
         >
-          <view.icon className="size-5 md:size-4" />
+          <view.icon className="hidden md:block size-4" />
           <span>{view.label}</span>
         </Button>
       ))}
@@ -155,14 +156,14 @@ export default function PlayerViews({ player }: { player: ScoreSaberPlayer }) {
       wrapCard: false,
       chart: player => <ScoresGraphChart player={player} />,
     },
-    // {
-    //   index: 4,
-    //   label: "+1 PP Calculator",
-    //   icon: CalculatorIcon,
-    //   showDateRangeSelector: false,
-    //   wrapCard: false,
-    //   chart: player => <PlusPpCalculator player={player} />,
-    // },
+    {
+      index: 4,
+      label: "PP Calculator",
+      icon: CalculatorIcon,
+      showDateRangeSelector: false,
+      wrapCard: false,
+      chart: player => <PlusPpCalculator player={player} />,
+    },
   ];
 
   const handleViewSelect = (view: SelectedView) => {
