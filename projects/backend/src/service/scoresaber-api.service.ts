@@ -130,13 +130,14 @@ export class ScoreSaberApiService {
         if (!response.ok || response.status !== 200) {
           return undefined;
         }
+
+        const isJson =
+          !url.includes("/players/count") && // Umbra once again can't code and returns JSON content-type but it's actually text !!
+          response.headers.get("content-type")?.includes("application/json");
+
         return {
-          data: response.headers.get("content-type")?.includes("application/json")
-            ? ((await response.json()) as T)
-            : await response.text(),
-          type: response.headers.get("content-type")?.includes("application/json")
-            ? "json"
-            : "text",
+          data: isJson ? ((await response.json()) as T) : await response.text(),
+          type: isJson ? "json" : "text",
         };
       }
     );
