@@ -14,7 +14,6 @@ import {
 import { isProduction } from "@ssr/common/utils/utils";
 import { sendMedalScoreNotification } from "../../common/score/score.util";
 import { LeaderboardCoreService } from "../leaderboard/leaderboard-core.service";
-import { LeaderboardLeaderboardsService } from "../leaderboard/leaderboard-leaderboards.service";
 import { PlayerMedalsService } from "../player/player-medals.service";
 
 type MedalScoresQueueItem = {
@@ -35,7 +34,7 @@ export class MedalScoresService {
     // Delete all of the old scores
     await ScoreSaberMedalsScoreModel.deleteMany({});
 
-    const rankedLeaderboards = await LeaderboardLeaderboardsService.getRankedLeaderboards();
+    const rankedLeaderboards = await LeaderboardCoreService.getRankedLeaderboards();
     for (const [index, leaderboard] of rankedLeaderboards.entries()) {
       await this.rescanLeaderboard(leaderboard.id + "");
 

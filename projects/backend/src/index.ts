@@ -34,7 +34,8 @@ import { metricsPlugin } from "./plugins/metrics.plugin";
 import { QueueManager } from "./queue/queue-manager";
 import BeatSaverService from "./service/beatsaver.service";
 import CacheService from "./service/cache.service";
-import { LeaderboardLeaderboardsService } from "./service/leaderboard/leaderboard-leaderboards.service";
+import { LeaderboardNotificationsService } from "./service/leaderboard/leaderboard-notifications.service";
+import { LeaderboardRankingService } from "./service/leaderboard/leaderboard-ranking.service";
 import MetricsService from "./service/metrics.service";
 import MinioService from "./service/minio.service";
 import { PlayerHistoryService } from "./service/player/player-history.service";
@@ -146,15 +147,10 @@ export const app = new Elysia()
       timezone: "Europe/London",
       protect: true,
       run: async () => {
-        await LeaderboardLeaderboardsService.refreshRankedLeaderboards();
-        await LeaderboardLeaderboardsService.refreshQualifiedLeaderboards();
-
-        const playlist = await PlaylistService.createRankingQueuePlaylist();
-        await PlaylistService.updatePlaylist("scoresaber-ranking-queue-maps", {
-          title: playlist.title,
-          image: playlist.image,
-          songs: playlist.songs,
-        });
+        await LeaderboardNotificationsService.logLeaderboardUpdates(
+          await LeaderboardRankingService.refreshRankedLeaderboards()
+        );
+        await LeaderboardRankingService.refreshQualifiedLeaderboards();
       },
     })
   )

@@ -18,13 +18,17 @@ import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/leade
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import SuperJSON from "superjson";
 import { redisClient } from "../../common/redis";
-import { LeaderboardOptions } from "../../common/types/leaderboard";
 import { LeaderboardScoreSeedQueue } from "../../queue/impl/leaderboard-score-seed-queue";
 import { QueueId, QueueManager } from "../../queue/queue-manager";
 import BeatSaverService from "../beatsaver.service";
 import CacheService, { CacheId } from "../cache.service";
 import { LeaderboardRankingService } from "./leaderboard-ranking.service";
 
+export type LeaderboardOptions = {
+  includeBeatSaver?: boolean;
+  includeStarChangeHistory?: boolean;
+  beatSaverType?: DetailType;
+};
 const DEFAULT_OPTIONS: LeaderboardOptions = {
   includeBeatSaver: false,
   includeStarChangeHistory: false,
@@ -260,46 +264,51 @@ export class LeaderboardCoreService {
    * @param filter the filter to use for the fetch
    * @returns the fetched leaderboards
    */
-  public static async fetchLeaderboardsFromAPI(status: "ranked" | "qualified"): Promise<{
+  public static async fetchLeaderboardsFromAPI(
+    status: "ranked" | "qualified",
+    logProgress: boolean = false
+  ): Promise<{
     leaderboards: ScoreSaberLeaderboard[];
-    rankedMapDiffs: Map<string, LeaderboardDifficulty[]>;
+    leaderboardDifficulties: Map<string, LeaderboardDifficulty[]>;
   }> {
-    let page = 1;
-    let hasMorePages = true;
     const leaderboards: ScoreSaberLeaderboard[] = [];
-    const rankedMapDiffs: Map<string, LeaderboardDifficulty[]> = new Map();
+    const leaderboardDifficulties: Map<string, LeaderboardDifficulty[]> = new Map();
+
+    let hasMorePages = true;
+    let page = 1;
 
     while (hasMorePages) {
       const response = await ApiServiceRegistry.getInstance()
         .getScoreSaberService()
         .lookupLeaderboards(page, { [status]: true, priority: CooldownPriority.LOW });
       if (!response) {
-        Logger.warn(`Failed to fetch leaderboards on page ${page}.`);
         hasMorePages = false;
         continue;
       }
 
       const totalPages = Math.ceil(response.metadata.total / response.metadata.itemsPerPage);
-      Logger.info(
-        `Fetched ${response.leaderboards.length} leaderboards on page ${page}/${totalPages}.`
-      );
-
       for (const token of response.leaderboards) {
         const leaderboard = getScoreSaberLeaderboardFromToken(token);
         leaderboards.push(leaderboard);
 
         // Since ScoreSaber only returns the difficulties for the
         // leaderboard, we need to store them in a map to fetch them all.
-        const difficulties = rankedMapDiffs.get(leaderboard.songHash) ?? [];
+        const difficulties = leaderboardDifficulties.get(leaderboard.songHash) ?? [];
         difficulties.push(leaderboard.difficulty);
-        rankedMapDiffs.set(leaderboard.songHash, difficulties);
+        leaderboardDifficulties.set(leaderboard.songHash, difficulties);
       }
 
-      hasMorePages = page < totalPages;
+      if (logProgress && (page % 10 === 0 || page === 1 || page >= totalPages)) {
+        Logger.info(
+          `Fetched ${response.leaderboards.length} leaderboards on page ${page}/${totalPages}.`
+        );
+      }
+
       page++;
+      hasMorePages = page < totalPages;
     }
 
-    return { leaderboards, rankedMapDiffs };
+    return { leaderboards, leaderboardDifficulties };
   }
 
   /**
@@ -398,6 +407,60 @@ export class LeaderboardCoreService {
       return null;
     }
     return matchingLeaderboards.map(lb => lb._id);
+  }
+
+  /**
+   * Gets all the ranked leaderboards
+   */
+  public static async getRankedLeaderboards(): Promise<ScoreSaberLeaderboard[]> {
+    return CacheService.fetchWithCache(
+      CacheId.Leaderboards,
+      "leaderboard:ranked-leaderboards",
+      async () => {
+        const leaderboards = await ScoreSaberLeaderboardModel.find({ ranked: true }).lean();
+        return leaderboards.map(leaderboard =>
+          LeaderboardCoreService.leaderboardToObject(leaderboard)
+        );
+      }
+    );
+  }
+
+  /**
+   * Gets all the qualified leaderboards
+   */
+  public static async getQualifiedLeaderboards(): Promise<ScoreSaberLeaderboard[]> {
+    return CacheService.fetchWithCache(
+      CacheId.Leaderboards,
+      "leaderboard:qualified-leaderboards",
+      async () => {
+        const leaderboards = await ScoreSaberLeaderboardModel.find({ qualified: true }).lean();
+        return leaderboards.map(leaderboard =>
+          LeaderboardCoreService.leaderboardToObject(leaderboard)
+        );
+      }
+    );
+  }
+
+  /**
+   * Gets the ranking queue leaderboards
+   */
+  public static async getRankingQueueLeaderboards(): Promise<ScoreSaberLeaderboard[]> {
+    return CacheService.fetchWithCache(
+      CacheId.Leaderboards,
+      "leaderboard:ranking-queue-maps",
+      async () => {
+        const rankingQueueTokens = await ApiServiceRegistry.getInstance()
+          .getScoreSaberService()
+          .lookupRankingRequests();
+        if (!rankingQueueTokens) {
+          return [];
+        }
+
+        return rankingQueueTokens.all.map(token =>
+          getScoreSaberLeaderboardFromToken(token.leaderboardInfo)
+        );
+      }
+    );
   }
 
   /**

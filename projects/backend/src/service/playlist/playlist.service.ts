@@ -3,7 +3,10 @@ import { BadRequestError } from "@ssr/common/error/bad-request-error";
 import { InternalServerError } from "@ssr/common/error/internal-server-error";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger from "@ssr/common/logger";
-import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
+import {
+  ScoreSaberLeaderboard,
+  ScoreSaberLeaderboardModel,
+} from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import {
   ScoreSaberScore,
   ScoreSaberScoreModel,
@@ -16,7 +19,6 @@ import { parseSnipePlaylistSettings } from "@ssr/common/snipe/snipe-playlist-uti
 import { capitalizeFirstLetter, truncateText } from "@ssr/common/string-utils";
 import { formatDateMinimal } from "@ssr/common/utils/time-utils";
 import { LeaderboardCoreService } from "../leaderboard/leaderboard-core.service";
-import { LeaderboardLeaderboardsService } from "../leaderboard/leaderboard-leaderboards.service";
 import { PlayerCoreService } from "../player/player-core.service";
 import ScoreSaberService from "../scoresaber.service";
 
@@ -56,6 +58,16 @@ export default class PlaylistService {
   }
 
   /**
+   * Checks if a playlist exists
+   *
+   * @param playlistId the ID of the playlist to check
+   * @returns true if the playlist exists, false otherwise
+   */
+  public static async playlistExists(playlistId: PlaylistId | string): Promise<boolean> {
+    return (await PlaylistModel.exists({ id: playlistId })) !== null;
+  }
+
+  /**
    * Creates a playlist
    *
    * @param playlist the playlist to create
@@ -87,24 +99,6 @@ export default class PlaylistService {
   }
 
   /**
-   * Processes leaderboards into maps and highlighted IDs
-   * @private
-   */
-  public static processLeaderboards(leaderboards: ScoreSaberLeaderboard[]) {
-    const maps = new Map<string, ScoreSaberLeaderboard>();
-    for (const leaderboard of leaderboards) {
-      if (!maps.has(leaderboard.songHash)) {
-        maps.set(leaderboard.songHash, leaderboard);
-      }
-    }
-
-    return {
-      maps,
-      highlightedIds: leaderboards.map(map => map.id),
-    };
-  }
-
-  /**
    * Creates a playlist for ranked maps
    *
    * @param leaderboards the leaderboards to use, if not provided, all ranked leaderboards will be used
@@ -114,7 +108,7 @@ export default class PlaylistService {
     leaderboards?: ScoreSaberLeaderboard[]
   ): Promise<Playlist> {
     if (!leaderboards) {
-      leaderboards = await LeaderboardLeaderboardsService.getRankedLeaderboards();
+      leaderboards = await LeaderboardCoreService.getRankedLeaderboards();
     }
 
     const title = `ScoreSaber Ranked Maps (${formatDateMinimal(new Date())})`;
@@ -139,7 +133,7 @@ export default class PlaylistService {
     leaderboards?: ScoreSaberLeaderboard[]
   ): Promise<Playlist> {
     if (!leaderboards) {
-      leaderboards = await LeaderboardLeaderboardsService.getQualifiedLeaderboards();
+      leaderboards = await LeaderboardCoreService.getQualifiedLeaderboards();
     }
 
     const title = `ScoreSaber Qualified Maps (${formatDateMinimal(new Date())})`;
@@ -169,7 +163,7 @@ export default class PlaylistService {
    * Creates a playlist for ranking queue maps
    */
   public static async createRankingQueuePlaylist(): Promise<Playlist> {
-    const leaderboards = await LeaderboardLeaderboardsService.getRankingQueueLeaderboards();
+    const leaderboards = await LeaderboardCoreService.getRankingQueueLeaderboards();
     const { maps } = this.processLeaderboards(leaderboards);
     const highlightedIds = leaderboards
       .map(map => map.id) // Add base leaderboard IDs
@@ -199,15 +193,13 @@ export default class PlaylistService {
     }
 
     const parsedConfig = parseCustomRankedPlaylistSettings(config);
-    const leaderboards = await LeaderboardLeaderboardsService.getRankedLeaderboards({
-      sort: parsedConfig.sort,
-      match: {
-        stars: {
-          $gte: parsedConfig.stars.min,
-          $lte: parsedConfig.stars.max,
-        },
+    const leaderboards = await ScoreSaberLeaderboardModel.find({
+      ranked: true,
+      stars: {
+        $gte: parsedConfig.stars.min,
+        $lte: parsedConfig.stars.max,
       },
-    });
+    }).lean();
 
     const title = `Custom Ranked Maps (${formatDateMinimal(new Date())})`;
     const { maps, highlightedIds } = this.processLeaderboards(leaderboards);
@@ -395,5 +387,23 @@ export default class PlaylistService {
       })),
       category
     );
+  }
+
+  /**
+   * Processes leaderboards into maps and highlighted IDs
+   * @private
+   */
+  public static processLeaderboards(leaderboards: ScoreSaberLeaderboard[]) {
+    const maps = new Map<string, ScoreSaberLeaderboard>();
+    for (const leaderboard of leaderboards) {
+      if (!maps.has(leaderboard.songHash)) {
+        maps.set(leaderboard.songHash, leaderboard);
+      }
+    }
+
+    return {
+      maps,
+      highlightedIds: leaderboards.map(map => map.id),
+    };
   }
 }
