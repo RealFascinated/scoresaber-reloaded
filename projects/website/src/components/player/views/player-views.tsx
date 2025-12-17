@@ -122,6 +122,7 @@ export default function PlayerViews({ player }: { player: ScoreSaberPlayer }) {
     queryFn: () =>
       ssrApi.getPlayerStatisticHistory(player.id, getDaysAgoDate(actualDaysAgo), new Date()),
   });
+  
 
   const views: SelectedView[] = [
     {
