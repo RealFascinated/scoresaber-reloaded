@@ -22,6 +22,7 @@ import { getDaysAgo, getDaysAgoDate } from "@ssr/common/utils/time-utils";
 import { useQuery } from "@tanstack/react-query";
 import { CalculatorIcon, ChartBarIcon, SwordIcon, TrendingUpIcon } from "lucide-react";
 import { ReactElement, useState } from "react";
+import { cn } from "../../../common/utils";
 import PlayerRankingsButton from "../buttons/player-rankings-button";
 import PlayerAccuracyChart from "./impl/player-accuracy-chart";
 import PlayerAdvancedRankingChart from "./impl/player-advanced-ranking-chart";
@@ -45,7 +46,7 @@ type SelectedView = {
   index: number;
   label: string;
   showDateRangeSelector: boolean;
-  wrapCard: boolean;
+  isChart: boolean;
   icon: React.ElementType;
   chart: (player: ScoreSaberPlayer, statisticHistory: PlayerStatisticHistory) => ReactElement;
 };
@@ -122,7 +123,7 @@ export default function PlayerViews({ player }: { player: ScoreSaberPlayer }) {
     queryFn: () =>
       ssrApi.getPlayerStatisticHistory(player.id, getDaysAgoDate(actualDaysAgo), new Date()),
   });
-  
+
 
   const views: SelectedView[] = [
     {
@@ -130,7 +131,7 @@ export default function PlayerViews({ player }: { player: ScoreSaberPlayer }) {
       label: "Ranking",
       icon: GlobeAmericasIcon,
       showDateRangeSelector: true,
-      wrapCard: true,
+      isChart: true,
       chart: (_: ScoreSaberPlayer, statisticHistory: PlayerStatisticHistory) => {
         switch (historyMode) {
           case HistoryMode.SIMPLE:
@@ -162,7 +163,7 @@ export default function PlayerViews({ player }: { player: ScoreSaberPlayer }) {
       label: "Accuracy",
       icon: TrendingUpIcon,
       showDateRangeSelector: true,
-      wrapCard: true,
+      isChart: true,
       chart: (_, statisticHistory) => (
         <PlayerAccuracyChart statisticHistory={statisticHistory} daysAmount={actualDaysAgo} />
       ),
@@ -172,7 +173,7 @@ export default function PlayerViews({ player }: { player: ScoreSaberPlayer }) {
       label: "Scores",
       icon: SwordIcon,
       showDateRangeSelector: true,
-      wrapCard: true,
+      isChart: true,
       chart: (_, statisticHistory) => (
         <PlayerScoresChart statisticHistory={statisticHistory} daysAmount={actualDaysAgo} />
       ),
@@ -182,7 +183,7 @@ export default function PlayerViews({ player }: { player: ScoreSaberPlayer }) {
       label: "Scores Graph",
       icon: ChartBarIcon,
       showDateRangeSelector: false,
-      wrapCard: false,
+      isChart: true,
       chart: player => <ScoresGraphChart player={player} />,
     },
     {
@@ -190,7 +191,7 @@ export default function PlayerViews({ player }: { player: ScoreSaberPlayer }) {
       label: "PP Calculator",
       icon: CalculatorIcon,
       showDateRangeSelector: false,
-      wrapCard: false,
+      isChart: false,
       chart: player => <PlusPpCalculator player={player} />,
     },
   ];
@@ -205,13 +206,9 @@ export default function PlayerViews({ player }: { player: ScoreSaberPlayer }) {
       />
 
       {statisticHistory && historyMode !== undefined ? (
-        selectedView.wrapCard ? (
-          <Card className="bg-chart-card p-2.5">
+          <Card className={cn("bg-chart-card", selectedView.isChart ? "p-2.5" : "")}>
             {selectedView.chart(player, statisticHistory)}
           </Card>
-        ) : (
-          selectedView.chart(player, statisticHistory)
-        )
       ) : (
         <Card className="bg-chart-card p-2.5">
           <div className="flex h-[400px] items-center justify-center">

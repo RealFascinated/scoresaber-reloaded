@@ -86,65 +86,69 @@ export default function PlusPpCalculator({ player }: { player: ScoreSaberPlayer 
   }, [scorePps, stars, accuracy]);
 
   return (
-    <div className="flex flex-col gap-6 p-4">
-      {isLoading ? (
-        <Spinner />
-      ) : (
-        <>
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            <div className="flex flex-col gap-3">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="accuracy-slider" className="text-base font-semibold">
-                  Accuracy
-                </Label>
-                <span className="text-muted-foreground text-sm font-medium">
-                  {accuracy.toFixed(2)}%
-                </span>
+    <div className="flex justify-center w-full">
+      <div className="flex h-full w-full max-w-2xl flex-col gap-6">
+        {isLoading ? (
+          <Spinner />
+        ) : (
+          <>
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="accuracy-slider" className="text-base font-semibold">
+                    Accuracy
+                  </Label>
+                  <span className="text-muted-foreground text-sm font-medium">
+                    {accuracy.toFixed(2)}%
+                  </span>
+                </div>
+                <Slider
+                  id="accuracy-slider"
+                  value={[accuracy]}
+                  onValueChange={value => setAccuracy(value[0])}
+                  min={75}
+                  max={100}
+                  step={0.05}
+                  labelPosition="none"
+                  className="w-full"
+                />
               </div>
-              <Slider
-                id="accuracy-slider"
-                value={[accuracy]}
-                onValueChange={value => setAccuracy(value[0])}
-                min={75}
-                max={100}
-                step={0.05}
-                labelPosition="none"
-                className="w-full"
-              />
-            </div>
-            <div className="flex flex-col gap-3">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="stars-slider" className="text-base font-semibold">
-                  Stars
-                </Label>
-                <span className="text-muted-foreground text-sm font-medium">
-                  {stars.toFixed(1)}★
-                </span>
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="stars-slider" className="text-base font-semibold">
+                    Stars
+                  </Label>
+                  <span className="text-muted-foreground text-sm font-medium">
+                    {stars.toFixed(1)}★
+                  </span>
+                </div>
+                <Slider
+                  id="stars-slider"
+                  value={[stars]}
+                  onValueChange={value => setStars(value[0])}
+                  min={0}
+                  max={SHARED_CONSTS.maxStars}
+                  step={0.1}
+                  labelPosition="none"
+                  className="w-full"
+                />
               </div>
-              <Slider
-                id="stars-slider"
-                value={[stars]}
-                onValueChange={value => setStars(value[0])}
-                min={0}
-                max={SHARED_CONSTS.maxStars}
-                step={0.1}
-                labelPosition="none"
-                className="w-full"
-              />
             </div>
-          </div>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div className="bg-muted/50 border-border flex flex-col gap-2 rounded-lg border p-4">
-              <Label className="text-muted-foreground text-sm font-medium">Raw PP</Label>
-              <p className="text-2xl font-bold">{formatPp(ppGain.rawPp)}pp</p>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div className="bg-muted/50 border-border flex flex-col gap-2 rounded-lg border p-4">
+                <Label className="text-muted-foreground text-sm font-medium">Raw PP</Label>
+                <p className="text-2xl font-bold">{formatPp(ppGain.rawPp)}pp</p>
+              </div>
+              <div className="bg-muted/50 border-border flex flex-col gap-2 rounded-lg border p-4">
+                <Label className="text-muted-foreground text-sm font-medium">
+                  Weighted PP Gain
+                </Label>
+                <p className="text-2xl font-bold">+{formatPp(ppGain.weightedPpGain)}pp</p>
+              </div>
             </div>
-            <div className="bg-muted/50 border-border flex flex-col gap-2 rounded-lg border p-4">
-              <Label className="text-muted-foreground text-sm font-medium">Weighted PP Gain</Label>
-              <p className="text-2xl font-bold">{formatPp(ppGain.weightedPpGain)}pp</p>
-            </div>
-          </div>
-        </>
-      )}
+          </>
+        )}
+      </div>
     </div>
   );
 }
