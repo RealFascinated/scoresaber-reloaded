@@ -98,7 +98,7 @@ export default class MiniRankingService {
       Array.from({ length: finalEndPage - startPage + 1 }, (_, i) => startPage + i).map(page =>
         CacheService.fetchWithCache(
           CacheId.ScoreSaber,
-          `scoresaber:mini-ranking:${type}:${page}${type === "country" ? `:${player.country}` : ""}`,
+          `scoresaber:mini-ranking:${type}${type === "country" ? `:${player.country}` : ""}:${page}`,
           async () =>
             type === "global"
               ? ScoreSaberApiService.lookupPlayers(page)
