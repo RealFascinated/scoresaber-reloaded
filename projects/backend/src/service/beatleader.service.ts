@@ -195,9 +195,7 @@ export default class BeatLeaderService {
     }
 
     await AdditionalScoreDataModel.create(data);
-    // Logger.info(
-    //   `Tracked BeatLeader score "${score.id}" for "${scorePlayer.name}"(${playerId})`
-    // );
+    Logger.info(`Tracked BeatLeader score "${score.id}" for "${player.name}"(${playerId})`);
 
     return data;
   }
