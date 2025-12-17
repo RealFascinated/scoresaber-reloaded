@@ -265,38 +265,53 @@ export class PlayerScoresService {
    * @param playerId the player's id
    */
   public static async getPlayerScoreChart(playerId: string): Promise<PlayerScoresChartResponse> {
-    const playerScores = await ScoreSaberScoreModel.find({
-      playerId: playerId,
-      leaderboardId: { $exists: true, $nin: [null, undefined] },
-      pp: { $gt: 0 },
-    })
-      .select({
-        accuracy: 1,
-        pp: 1,
-        timestamp: 1,
-        leaderboardId: 1,
-      })
-      .sort({
-        timestamp: -1,
-      })
-      .lean();
+    const scores = await ScoreSaberScoreModel.aggregate([
+      {
+        $match: {
+          playerId: playerId,
+          leaderboardId: { $exists: true, $nin: [null, undefined] },
+          pp: { $gt: 0 },
+        },
+      },
+      {
+        $lookup: {
+          from: "scoresaber-leaderboards",
+          localField: "leaderboardId",
+          foreignField: "_id",
+          as: "leaderboard",
+        },
+      },
+      {
+        $unwind: {
+          path: "$leaderboard",
+          preserveNullAndEmptyArrays: false,
+        },
+      },
+      {
+        $project: {
+          accuracy: 1,
+          pp: 1,
+          timestamp: 1,
+          leaderboardId: 1,
+          leaderboard: 1,
+        },
+      },
+      {
+        $sort: {
+          timestamp: -1,
+        },
+      },
+    ]);
 
-    if (!playerScores.length) {
+    if (!scores.length) {
       return {
         data: [],
       };
     }
 
-    const leaderboardResponses = await LeaderboardCoreService.getLeaderboards(
-      playerScores.map(score => score.leaderboardId),
-      { includeBeatSaver: false }
-    );
-
-    const leaderboardMap = new Map(leaderboardResponses.map(r => [r.leaderboard.id, r]));
-
     const dataPoints: PlayerScoreChartDataPoint[] = [];
-    for (const score of playerScores) {
-      const leaderboard = leaderboardMap.get(score.leaderboardId)?.leaderboard;
+    for (const score of scores) {
+      const leaderboard = score.leaderboard;
       if (!leaderboard) {
         continue;
       }
@@ -305,7 +320,7 @@ export class PlayerScoresService {
         stars: leaderboard.stars,
         pp: score.pp,
         timestamp: score.timestamp,
-        leaderboardId: leaderboard.id,
+        leaderboardId: leaderboard._id,
         leaderboardName: leaderboard.fullName,
         leaderboardDifficulty: getDifficultyName(getDifficulty(leaderboard.difficulty.difficulty)),
       });
