@@ -6,7 +6,7 @@ import {
   AdditionalScoreData,
   AdditionalScoreDataModel,
 } from "@ssr/common/model/additional-score-data/additional-score-data";
-import { PlayerDocument, PlayerModel } from "@ssr/common/model/player/player";
+import { Player, PlayerModel } from "@ssr/common/model/player/player";
 import { ScoreStatsResponse } from "@ssr/common/schemas/beatleader/score-stats";
 import { ScoreStatsToken } from "@ssr/common/types/token/beatleader/score-stats/score-stats";
 import { BeatLeaderScoreToken } from "@ssr/common/types/token/beatleader/score/score";
@@ -90,11 +90,11 @@ export default class BeatLeaderService {
     isTop50GlobalScore?: boolean
   ): Promise<AdditionalScoreData | undefined> {
     const { playerId, leaderboard } = score;
-    const player: PlayerDocument | null = await CacheService.fetchWithCache(
+    const player: Player | null = await CacheService.fetchWithCache(
       CacheId.Players,
       `player:${playerId}`,
       async () => {
-        return await PlayerModel.findById(playerId);
+        return await PlayerModel.findById(playerId).lean();
       }
     );
 
