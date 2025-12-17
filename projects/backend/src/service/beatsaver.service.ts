@@ -112,7 +112,8 @@ export default class BeatSaverService {
       { _id: map.id },
       { $set: map },
       { upsert: true, new: true }
-    );
+    ).lean();
+    
     // Add the id to the map
     newMap.id = (newMap as BeatSaverMapToken & { _id?: string })._id ?? newMap.id;
     return newMap;

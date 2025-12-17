@@ -410,42 +410,38 @@ export class PlayerScoresService {
       );
     }
     return await pagination.getPage(pageNumber, async () => {
-      
-        const scores = await Promise.all(
-          requestedPage.playerScores.map(async playerScore => {
-            const leaderboard = getScoreSaberLeaderboardFromToken(playerScore.leaderboard);
-            const score = getScoreSaberScoreFromToken(playerScore.score, leaderboard, playerId);
-            if (!score) {
-              return undefined;
-            }
+      const scores = await Promise.all(
+        requestedPage.playerScores.map(async playerScore => {
+          const leaderboard = getScoreSaberLeaderboardFromToken(playerScore.leaderboard);
+          const score = getScoreSaberScoreFromToken(playerScore.score, leaderboard, playerId);
+          if (!score) {
+            return undefined;
+          }
 
-            // Track missing scores
-            ScoreCoreService.trackScoreSaberScore(
-              score,
-              leaderboard,
-              await ScoreSaberService.getCachedPlayer(playerId),
-              undefined,
-              false
-            );
+          // Track missing scores
+          ScoreCoreService.trackScoreSaberScore(
+            score,
+            leaderboard,
+            await ScoreSaberService.getCachedPlayer(playerId),
+            undefined,
+            false
+          );
 
-            return {
-              score: await ScoreCoreService.insertScoreData(score, leaderboard, {
-                comparisonPlayer: comparisonPlayer,
-              }),
-              leaderboard: leaderboard,
-              beatSaver: await BeatSaverService.getMap(
-                leaderboard.songHash,
-                leaderboard.difficulty.difficulty,
-                leaderboard.difficulty.characteristic,
-                "full"
-              ),
-            } as PlayerScore;
-          })
-        );
-
-        console.log(scores);
-
-        return scores.filter((result): result is PlayerScore => result !== undefined);
+          return {
+            score: await ScoreCoreService.insertScoreData(score, leaderboard, {
+              comparisonPlayer: comparisonPlayer,
+            }),
+            leaderboard: leaderboard,
+            beatSaver: await BeatSaverService.getMap(
+              leaderboard.songHash,
+              leaderboard.difficulty.difficulty,
+              leaderboard.difficulty.characteristic,
+              "full"
+            ),
+          } as PlayerScore;
+        })
+      );
+      return scores.filter((result): result is PlayerScore => result !== undefined);
     });
   }
 

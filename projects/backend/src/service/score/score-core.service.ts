@@ -144,7 +144,7 @@ export class ScoreCoreService {
       removeScoreWeightAndRank: false,
       ...options,
     };
-
+    
     leaderboard = !leaderboard
       ? (await LeaderboardCoreService.getLeaderboard(score.leaderboardId)).leaderboard
       : leaderboard;
@@ -179,13 +179,10 @@ export class ScoreCoreService {
             (await ScoreSaberService.getCachedPlayer(score.playerId).catch(() => undefined)))
           : undefined,
         !options?.isComparisonPlayerScore && options?.comparisonPlayer
-          ? (async () => {
-              const rawScore = await ScoreSaberScoreModel.findOne({
-                playerId: options.comparisonPlayer!.id,
-                leaderboardId: leaderboard.id,
-              }).lean();
-              return rawScore ? scoreToObject(rawScore as unknown as ScoreSaberScore) : undefined;
-            })()
+          ? ScoreSaberScoreModel.findOne({
+              playerId: options.comparisonPlayer!.id,
+              leaderboardId: leaderboard.id,
+            }).lean()
           : undefined,
       ]);
 
@@ -210,13 +207,17 @@ export class ScoreCoreService {
     }
 
     if (comparisonScore) {
-      score.comparisonScore = await ScoreCoreService.insertScoreData(comparisonScore, leaderboard, {
-        comparisonPlayer: options.comparisonPlayer,
-        insertAdditionalData: options.insertAdditionalData,
-        insertPreviousScore: options.insertPreviousScore,
-        insertPlayerInfo: options.insertPlayerInfo,
-        isComparisonPlayerScore: true,
-      });
+      score.comparisonScore = await ScoreCoreService.insertScoreData(
+        scoreToObject(comparisonScore as unknown as ScoreSaberScore),
+        leaderboard,
+        {
+          comparisonPlayer: options.comparisonPlayer,
+          insertAdditionalData: options.insertAdditionalData,
+          insertPreviousScore: options.insertPreviousScore,
+          insertPlayerInfo: options.insertPlayerInfo,
+          isComparisonPlayerScore: true,
+        }
+      );
     }
 
     if (options?.removeScoreWeightAndRank) {
