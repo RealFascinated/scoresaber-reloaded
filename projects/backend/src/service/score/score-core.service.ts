@@ -9,7 +9,7 @@ import {
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/leaderboard-player-info";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
-import { scoreToObject } from "@ssr/common/utils/model-converters";
+import { additionalScoreDataToObject, scoreToObject } from "@ssr/common/utils/model-converters";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import BeatLeaderService from "../beatleader.service";
 import { LeaderboardCoreService } from "../leaderboard/leaderboard-core.service";
@@ -189,7 +189,7 @@ export class ScoreCoreService {
     score.isTracked = isScoreTracked;
 
     if (additionalData !== undefined) {
-      score.additionalData = additionalData;
+      score.additionalData = additionalScoreDataToObject(additionalData);
     }
 
     if (previousScore !== undefined) {
