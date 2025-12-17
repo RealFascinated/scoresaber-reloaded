@@ -254,7 +254,6 @@ export default function ScoresGraphChart({ player }: { player: ScoreSaberPlayer 
 
   const chartOptions: ChartOptions = {
     responsive: true,
-    animation: false,
     maintainAspectRatio: false,
     scales,
     plugins: {

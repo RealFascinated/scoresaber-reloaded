@@ -212,7 +212,6 @@ const GenericChart = ({ config, labels }: Props) => {
     }
 
     return {
-      animation: customOptions?.animation || { duration: 0 },
       maintainAspectRatio: false,
       responsive: true,
       interaction: { mode: "index" as const, intersect: false },
