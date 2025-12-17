@@ -215,9 +215,11 @@ export default function PlayerViews({ player }: { player: ScoreSaberPlayer }) {
           selectedView.chart(player, statisticHistory)
         )
       ) : (
-        <div className="flex h-[400px] items-center justify-center">
-          <Spinner />
-        </div>
+        <Card className="bg-chart-card p-2.5">
+          <div className="flex h-[400px] items-center justify-center">
+            <Spinner />
+          </div>
+        </Card>
       )}
 
       {selectedView.showDateRangeSelector && (
