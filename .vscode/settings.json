@@ -8,7 +8,7 @@
   "typescript.inlayHints.enumMemberValues.enabled": true,
 
   // Formatting
-  "editor.formatOnSave": true,
+  // "editor.formatOnSave": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "[typescript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"

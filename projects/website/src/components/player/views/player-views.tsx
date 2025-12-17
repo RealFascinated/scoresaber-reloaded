@@ -194,17 +194,14 @@ export default function PlayerViews({ player }: { player: ScoreSaberPlayer }) {
     },
   ];
 
-  const handleViewSelect = (view: SelectedView) => {
-    setSelectedViewIndex(view.index);
-  };
-  const handleDaysChange = (days: number) => {
-    setDaysAgo(days);
-  };
-
   const selectedView = views[selectedViewIndex];
   return (
     <div className="flex flex-col gap-(--spacing-md)">
-      <ViewSelector views={views} selectedView={selectedView} onViewSelect={handleViewSelect} />
+      <ViewSelector
+        views={views}
+        selectedView={selectedView}
+        onViewSelect={view => setSelectedViewIndex(view.index)}
+      />
 
       {statisticHistory && historyMode !== undefined ? (
         selectedView.wrapCard ? (
@@ -224,7 +221,7 @@ export default function PlayerViews({ player }: { player: ScoreSaberPlayer }) {
 
       {selectedView.showDateRangeSelector && (
         <div className="flex items-center justify-between gap-2">
-          <DateRangeSelector daysAgo={daysAgo} onDaysChange={handleDaysChange} />
+          <DateRangeSelector daysAgo={daysAgo} onDaysChange={days => setDaysAgo(days)} />
           {isMobile && <PlayerRankingsButton player={player} />}
         </div>
       )}
