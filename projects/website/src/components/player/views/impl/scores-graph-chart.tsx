@@ -38,6 +38,8 @@ Chart.register(
 );
 
 const MAX_COMPARISON_PLAYERS = 3;
+const STAR_TICK_SIZE = 0.5;
+const ACCURACY_TICK_SIZE = 2;
 
 type DataPoint = {
   x: number;
@@ -115,10 +117,12 @@ export default function ScoresGraphChart({ player }: { player: ScoreSaberPlayer 
   const starValues = allDataPoints.map(point => point.x);
   const accuracyValues = allDataPoints.map(point => point.y);
 
-  const minStar = allDataPoints.length > 0 ? Math.floor(Math.min(...starValues)) - 0.5 : 0;
-  const maxStar = allDataPoints.length > 0 ? Math.ceil(Math.max(...starValues)) : 10;
-  const minAccuracy = allDataPoints.length > 0 ? Math.floor(Math.min(...accuracyValues)) - 2 : 0;
-  const maxAccuracy = allDataPoints.length > 0 ? Math.ceil(Math.max(...accuracyValues)) : 100;
+  const minStar = Math.floor(Math.min(...starValues) / STAR_TICK_SIZE) * STAR_TICK_SIZE;
+  const maxStar = Math.ceil(Math.max(...starValues) / STAR_TICK_SIZE) * STAR_TICK_SIZE;
+  const minAccuracy =
+    Math.floor(Math.min(...accuracyValues) / ACCURACY_TICK_SIZE) * ACCURACY_TICK_SIZE;
+  const maxAccuracy =
+    Math.ceil(Math.max(...accuracyValues) / ACCURACY_TICK_SIZE) * ACCURACY_TICK_SIZE;
 
   const scales = {
     x: {
@@ -128,7 +132,11 @@ export default function ScoresGraphChart({ player }: { player: ScoreSaberPlayer 
       grid: { color: "#252525" },
       ticks: {
         color: "white",
-        stepSize: 0.5,
+        stepSize: STAR_TICK_SIZE,
+        callback: (value: any) => {
+          const numValue = Number(value);
+          return Math.abs((numValue * (1 / STAR_TICK_SIZE)) % 1) < 0.0001 ? numValue : "";
+        },
       },
       title: {
         display: true,
@@ -141,10 +149,7 @@ export default function ScoresGraphChart({ player }: { player: ScoreSaberPlayer 
       min: minAccuracy,
       max: showTop100 ? maxAccuracy : 100,
       grid: { color: "#252525" },
-      ticks: {
-        color: "white",
-        stepSize: 2,
-      },
+      ticks: { color: "white", stepSize: ACCURACY_TICK_SIZE },
       title: {
         display: true,
         text: "Score %",
@@ -187,10 +192,10 @@ export default function ScoresGraphChart({ player }: { player: ScoreSaberPlayer 
   // Build best/average line datasets (only when not comparing with other players)
   let lineDatasets: any[] = [];
   if (comparisonPlayers.length === 0) {
-    // Group data points by star rating (rounded to nearest 0.5)
+    // Group data points by star rating
     const groupedByStarRating: Record<number, number[]> = {};
     for (const point of mainPlayerDataPoints) {
-      const starGroup = Math.round(point.x * 2) / 2;
+      const starGroup = Math.round(point.x / STAR_TICK_SIZE) * STAR_TICK_SIZE;
       if (!groupedByStarRating[starGroup]) {
         groupedByStarRating[starGroup] = [];
       }
