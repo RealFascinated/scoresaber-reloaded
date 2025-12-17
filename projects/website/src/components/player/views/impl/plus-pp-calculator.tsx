@@ -166,6 +166,25 @@ export default function PlusPpCalculator({ player }: { player: ScoreSaberPlayer 
   const handleReset = () => {
     hasManualStarsAcc.current = false;
     setDesiredPpGain(DEFAULT_DESIRED_PP);
+    updateAccuracy(DEFAULT_ACCURACY);
+    
+    // Explicitly recalculate stars based on reset values
+    if (scoresPpsArray.length > 0) {
+      const targetRawPp = ScoreSaberCurve.calcRawPpForExpectedPp(scoresPpsArray, DEFAULT_DESIRED_PP);
+      let newStars = getStarsForAcc(targetRawPp, DEFAULT_ACCURACY);
+      
+      if (newStars < 0.5) {
+        newStars = 0.5;
+        const newAcc = getAccForStars(targetRawPp, newStars);
+        updateAccuracy(newAcc);
+      } else if (newStars > SHARED_CONSTS.maxStars) {
+        newStars = SHARED_CONSTS.maxStars;
+        const newAcc = getAccForStars(targetRawPp, newStars);
+        updateAccuracy(newAcc);
+      }
+      
+      setStars(roundStars(newStars));
+    }
   };
 
   const handleAccuracyChange = (value: number) => {
