@@ -410,8 +410,8 @@ export class PlayerScoresService {
       );
     }
     return await pagination.getPage(pageNumber, async () => {
-      return (
-        await Promise.all(
+      
+        const scores = await Promise.all(
           requestedPage.playerScores.map(async playerScore => {
             const leaderboard = getScoreSaberLeaderboardFromToken(playerScore.leaderboard);
             const score = getScoreSaberScoreFromToken(playerScore.score, leaderboard, playerId);
@@ -441,8 +441,11 @@ export class PlayerScoresService {
               ),
             } as PlayerScore;
           })
-        )
-      ).filter((result): result is PlayerScore => result !== undefined);
+        );
+
+        console.log(scores);
+
+        return scores.filter((result): result is PlayerScore => result !== undefined);
     });
   }
 
