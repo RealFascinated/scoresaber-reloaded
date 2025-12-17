@@ -33,7 +33,7 @@ export default function PlusPpCalculator({ player }: { player: ScoreSaberPlayer 
 
     // Use 10 stars and find the accuracy that gives this target raw PP
     const targetStars = 10;
-    let lowAcc = 75;
+    let lowAcc = 85;
     let highAcc = 100;
     let bestAccuracy = 95;
     let bestDiff = Infinity;
@@ -106,9 +106,9 @@ export default function PlusPpCalculator({ player }: { player: ScoreSaberPlayer 
                   id="accuracy-slider"
                   value={[accuracy]}
                   onValueChange={value => setAccuracy(value[0])}
-                  min={75}
+                  min={85}
                   max={100}
-                  step={0.05}
+                  step={0.01}
                   labelPosition="none"
                   className="w-full"
                 />
