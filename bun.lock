@@ -30,7 +30,7 @@
         "@typegoose/typegoose": "^12.20.0",
         "@typescript-eslint/eslint-plugin": "^8.49.0",
         "@typescript-eslint/parser": "^8.49.0",
-        "devalue": "^4.3.0",
+        "devalue": "^5.6.1",
         "discord.js": "^14.25.1",
         "discordx": "^11.13.3",
         "elysia": "^1.4.19",
@@ -54,7 +54,7 @@
         "@typegoose/typegoose": "^12.20.0",
         "axios": "^1.13.2",
         "dayjs": "^1.11.19",
-        "devalue": "^4.3.0",
+        "devalue": "^5.6.1",
         "discordx": "^11.13.2",
         "ioredis": "^5.8.2",
         "ws": "^8.18.3",
@@ -779,7 +779,7 @@
 
     "detect-node-es": ["detect-node-es@1.1.0", "", {}, "sha512-ypdmJU/TbBby2Dxibuv7ZLW3Bs1QEmM7nHjEANfohJLvE0XVujisn1qPJcZxg+qDucsr+bP6fLD1rPS3AhJ7EQ=="],
 
-    "devalue": ["devalue@4.3.3", "", {}, "sha512-UH8EL6H2ifcY8TbD2QsxwCC/pr5xSwPvv85LrLXVihmHVC3T3YqTCIwnR5ak0yO1KYqlxrPVOA/JVZJYPy2ATg=="],
+    "devalue": ["devalue@5.6.1", "", {}, "sha512-jDwizj+IlEZBunHcOuuFVBnIMPAEHvTsJj0BcIp94xYguLRVBcXO853px/MyIJvbVzWdsGvrRweIUWJw8hBP7A=="],
 
     "dexie": ["dexie@4.2.1", "", {}, "sha512-Ckej0NS6jxQ4Po3OrSQBFddayRhTCic2DoCAG5zacOfOVB9P2Q5Xc5uL/nVa7ZVs+HdMnvUPzLFCB/JwpB6Csg=="],
 
