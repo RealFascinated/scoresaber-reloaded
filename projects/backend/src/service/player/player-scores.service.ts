@@ -25,7 +25,7 @@ import { ScoreQuery, SortDirection, SortField } from "@ssr/common/types/score-qu
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import ScoreSaberPlayerScoreToken from "@ssr/common/types/token/scoresaber/player-score";
 import ScoreSaberPlayerScoresPageToken from "@ssr/common/types/token/scoresaber/player-scores-page";
-import { leaderboardToObject, scoreToObject } from "@ssr/common/utils/model-converters";
+import { scoreToObject } from "@ssr/common/utils/model-converters";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
 import { formatDuration } from "@ssr/common/utils/time-utils";
@@ -428,12 +428,11 @@ export class PlayerScoresService {
               false
             );
 
-            const scoreWithData = await ScoreCoreService.insertScoreData(score, leaderboard, {
-              comparisonPlayer: comparisonPlayer,
-            });
             return {
-              score: scoreToObject(scoreWithData),
-              leaderboard: leaderboardToObject(leaderboard),
+              score: await ScoreCoreService.insertScoreData(score, leaderboard, {
+                comparisonPlayer: comparisonPlayer,
+              }),
+              leaderboard: leaderboard,
               beatSaver: await BeatSaverService.getMap(
                 leaderboard.songHash,
                 leaderboard.difficulty.difficulty,
