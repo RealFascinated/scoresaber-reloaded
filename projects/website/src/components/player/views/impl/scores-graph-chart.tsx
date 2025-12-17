@@ -1,6 +1,4 @@
 import { openInNewTab } from "@/common/browser-utils";
-import { cn } from "@/common/utils";
-import Card from "@/components/card";
 import { Spinner } from "@/components/spinner";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -320,7 +318,7 @@ export default function ScoresGraphChart({ player }: { player: ScoreSaberPlayer 
     },
   };
 
-  if (!dataPoints || isComparisonLoading) {
+  if (!dataPoints) {
     return (
       <div className="flex h-[400px] items-center justify-center">
         <div className="flex flex-col items-center gap-3">
@@ -332,16 +330,15 @@ export default function ScoresGraphChart({ player }: { player: ScoreSaberPlayer 
   }
 
   return (
-    <div className="space-y-4">
-      <Card className="bg-chart-card h-[400px] p-2.5">
+    <>
+      <div className="h-[400px]">
         <Line data={datasets as any} options={chartOptions as any} />
-      </Card>
+      </div>
 
-      <div className="space-y-3">
+      {/* Comparison Players */}
+      <div className="flex flex-col gap-2 justify-center">
         <div
-          className={cn("flex flex-col gap-4", {
-            "md:flex-row md:items-center md:justify-between": true,
-          })}
+          className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between"
         >
           <div className="flex flex-col gap-3 md:flex-row md:items-center">
             <Button
@@ -395,6 +392,7 @@ export default function ScoresGraphChart({ player }: { player: ScoreSaberPlayer 
           </div>
         </div>
 
+        {/* Player Search */}
         <PlayerSearch
           isOpen={isSearchOpen}
           onOpenChange={setIsSearchOpen}
@@ -410,6 +408,6 @@ export default function ScoresGraphChart({ player }: { player: ScoreSaberPlayer 
           excludePlayerIds={[player.id, ...comparisonPlayers.map(p => p.id)]}
         />
       </div>
-    </div>
+    </>
   );
 }
