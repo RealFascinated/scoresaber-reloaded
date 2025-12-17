@@ -1,6 +1,7 @@
 import { Cooldown } from "../../cooldown";
 import Logger from "../../logger";
-import { Page, Pagination } from "../../pagination";
+import type { Page } from "../../pagination";
+import { Pagination } from "../../pagination";
 import ApiService from "../api-service";
 import { ApiServiceName } from "../api-service-registry";
 
@@ -234,12 +235,15 @@ export class AccSaberService extends ApiService {
       const totalItems = result.data.accSaberScores.totalCount;
       const totalPages = Math.ceil(totalItems / SCORES_PER_PAGE);
 
-      return new Page(scores, {
-        totalItems,
-        itemsPerPage: SCORES_PER_PAGE,
-        page,
-        totalPages,
-      });
+      return {
+        items: scores,
+        metadata: {
+          totalItems,
+          itemsPerPage: SCORES_PER_PAGE,
+          page,
+          totalPages,
+        },
+      };
     } catch (error) {
       Logger.error("Failed to fetch AccSaber scores: ", error);
       return Pagination.empty<AccSaberScore>();

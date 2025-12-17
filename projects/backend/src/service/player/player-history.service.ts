@@ -5,10 +5,10 @@ import {
   PlayerHistoryEntryModel,
 } from "@ssr/common/model/player/player-history-entry";
 import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
-import { removeObjectFields } from "@ssr/common/object.util";
 import { PlayerStatisticHistory } from "@ssr/common/player/player-statistic-history";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import { processInBatches } from "@ssr/common/utils/batch-utils";
+import { playerHistoryToObject } from "@ssr/common/utils/model-converters";
 import { parseRankHistory } from "@ssr/common/utils/player-utils";
 import {
   formatDateMinimal,
@@ -217,7 +217,7 @@ export class PlayerHistoryService {
       .hint({ playerId: 1, date: -1 });
 
     if (entry) {
-      history[dateKey] = PlayerHistoryService.playerHistoryToObject(entry);
+      history[dateKey] = playerHistoryToObject(entry);
     }
 
     // Handle today's data if target is today or includeToday is true
@@ -295,7 +295,7 @@ export class PlayerHistoryService {
     const history: PlayerStatisticHistory = {};
     for (const entry of entries) {
       const date = formatDateMinimal(entry.date);
-      history[date] = PlayerHistoryService.playerHistoryToObject(entry);
+      history[date] = playerHistoryToObject(entry);
     }
 
     // Process rank history in parallel chunks
@@ -470,18 +470,6 @@ export class PlayerHistoryService {
         upsert: true, // Create new entry if it doesn't exist
       }
     );
-  }
-
-  /**
-   * Converts a database player history entry to a PlayerHistoryEntry.
-   *
-   * @param history the player history entry to convert
-   * @returns the converted player history entry
-   */
-  public static playerHistoryToObject(history: PlayerHistoryEntry): PlayerHistoryEntry {
-    return {
-      ...removeObjectFields<PlayerHistoryEntry>(history, ["_id", "__v", "playerId", "date"]),
-    } as PlayerHistoryEntry;
   }
 
   /**

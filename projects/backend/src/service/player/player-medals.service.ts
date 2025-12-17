@@ -250,7 +250,7 @@ export class PlayerMedalsService {
     ]);
 
     return {
-      ...pageData.toJSON(),
+      ...pageData,
       countryMetadata: countryMetadata.reduce(
         (acc, curr) => {
           acc[curr._id] = curr.count;

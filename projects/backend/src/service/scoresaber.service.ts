@@ -8,7 +8,7 @@ import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player
 import { getPlayerStatisticChanges } from "@ssr/common/utils/player-utils";
 import { getDaysAgoDate, TimeUnit } from "@ssr/common/utils/time-utils";
 import { getPageFromRank } from "@ssr/common/utils/utils";
-import SuperJSON from "superjson";
+import { parse, stringify } from "devalue";
 import { redisClient } from "../common/redis";
 import CacheService, { CacheId } from "./cache.service";
 import MetricsService, { MetricType } from "./metrics.service";
@@ -177,7 +177,7 @@ export default class ScoreSaberService {
     const cachedData = await redisClient.get(cacheKey);
     if (cachedData) {
       try {
-        return SuperJSON.parse(cachedData) as ScoreSaberPlayerToken;
+        return parse(cachedData) as ScoreSaberPlayerToken;
       } catch {
         Logger.warn(`Failed to parse cached player data for ${id}, removing from cache`);
         await redisClient.del(cacheKey);
@@ -189,7 +189,7 @@ export default class ScoreSaberService {
       throw new NotFoundError(`Player "${id}" not found`);
     }
 
-    await redisClient.set(cacheKey, SuperJSON.stringify(player), "EX", CACHED_PLAYER_EXPIRY);
+    await redisClient.set(cacheKey, stringify(player), "EX", CACHED_PLAYER_EXPIRY);
     return player;
   }
 
@@ -207,7 +207,7 @@ export default class ScoreSaberService {
 
     try {
       if (cachedPlayer && player.name && player.profilePicture && player.country) {
-        const cachedPlayerData = SuperJSON.parse(cachedPlayer) as ScoreSaberPlayerToken;
+        const cachedPlayerData = parse(cachedPlayer) as ScoreSaberPlayerToken;
 
         cachedPlayerData.name = player.name;
         cachedPlayerData.profilePicture = player.profilePicture;
@@ -215,7 +215,7 @@ export default class ScoreSaberService {
 
         await redisClient.set(
           `scoresaber:cached-player:${id}`,
-          SuperJSON.stringify(cachedPlayerData),
+          stringify(cachedPlayerData),
           "EX",
           CACHED_PLAYER_EXPIRY
         );

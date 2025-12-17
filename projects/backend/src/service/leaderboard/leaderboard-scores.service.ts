@@ -3,7 +3,6 @@ import Logger from "@ssr/common/logger";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import LeaderboardScoresResponse from "@ssr/common/schemas/response/leaderboard/leaderboard-scores";
 import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
-import { Metadata } from "@ssr/common/types/metadata";
 import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score";
 import BeatLeaderService from "../beatleader.service";
 import { ScoreSaberApiService } from "../scoresaber-api.service";
@@ -58,8 +57,6 @@ export class LeaderboardScoresService {
     page: number,
     country?: string
   ): Promise<LeaderboardScoresResponse | undefined> {
-    let metadata: Metadata = new Metadata(0, 0, 0, 0); // Default values
-
     const leaderboardResponse = await LeaderboardCoreService.getLeaderboard(leaderboardId);
     if (leaderboardResponse == undefined) {
       throw new NotFoundError(`Leaderboard "${leaderboardId}" not found`);
@@ -103,11 +100,8 @@ export class LeaderboardScoresService {
       return score;
     });
 
-    metadata = new Metadata(
-      Math.ceil(leaderboardScores.metadata.total / leaderboardScores.metadata.itemsPerPage),
-      leaderboardScores.metadata.total,
-      leaderboardScores.metadata.page,
-      leaderboardScores.metadata.itemsPerPage
+    const totalPages = Math.ceil(
+      leaderboardScores.metadata.total / leaderboardScores.metadata.itemsPerPage
     );
 
     return {
@@ -116,7 +110,12 @@ export class LeaderboardScoresService {
       ) as ScoreSaberScore[],
       leaderboard: leaderboard,
       beatSaver: beatSaverMap,
-      metadata: metadata,
+      metadata: {
+        totalPages,
+        totalItems: leaderboardScores.metadata.total,
+        page: leaderboardScores.metadata.page,
+        itemsPerPage: leaderboardScores.metadata.itemsPerPage,
+      },
     };
   }
 }

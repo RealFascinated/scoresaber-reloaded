@@ -1,9 +1,7 @@
 import { env } from "@ssr/common/env";
 import { AdditionalScoreData } from "@ssr/common/model/additional-score-data/additional-score-data";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import { ScoreSaberMedalsScore } from "@ssr/common/model/score/impl/scoresaber-medals-score";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
-import { removeObjectFields } from "@ssr/common/object.util";
 import { ReplayViewers } from "@ssr/common/replay-viewer";
 import { MedalChange } from "@ssr/common/schemas/medals/medal-changes";
 import { BeatSaverMapResponse } from "@ssr/common/schemas/response/beatsaver/beatsaver-map";
@@ -19,21 +17,6 @@ import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
 import BeatSaverService from "../../service/beatsaver.service";
 import { PlayerCoreService } from "../../service/player/player-core.service";
 import { PlayerScoreHistoryService } from "../../service/player/player-score-history.service";
-
-/**
- * Converts a database score to a ScoreSaberScore.
- *
- * @param score the score to convert
- * @returns the converted score
- */
-export function scoreToObject(
-  score: ScoreSaberScore | ScoreSaberMedalsScore
-): ScoreSaberScore | ScoreSaberMedalsScore {
-  return {
-    ...removeObjectFields<ScoreSaberScore | ScoreSaberMedalsScore>(score, ["_id", "id", "__v"]),
-    id: score._id,
-  } as unknown as ScoreSaberScore | ScoreSaberMedalsScore;
-}
 
 /**
  * Sends a score notification to the number one feed.

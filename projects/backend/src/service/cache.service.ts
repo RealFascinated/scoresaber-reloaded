@@ -2,7 +2,7 @@ import { InternalServerError } from "@ssr/common/error/internal-server-error";
 import Logger from "@ssr/common/logger";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
 import { isProduction } from "@ssr/common/utils/utils";
-import SuperJSON from "superjson";
+import { parse, stringify } from "devalue";
 import { redisClient } from "../common/redis";
 
 export enum CacheId {
@@ -55,7 +55,7 @@ export default class CacheService {
     if (cachedData) {
       try {
         // Logger.debug(`[REDIS] Found ${cacheKey} in ${formatDuration(performance.now() - before)}`);
-        return SuperJSON.parse(cachedData) as T;
+        return parse(cachedData) as T;
       } catch {
         Logger.warn(`Failed to parse cached data for ${cacheKey}, removing from cache`);
         await redisClient.del(cacheKey);
@@ -66,7 +66,7 @@ export default class CacheService {
     if (data) {
       const result = await redisClient.set(
         cacheKey,
-        SuperJSON.stringify(data),
+        stringify(data),
         "EX", // EX is used to set the TTL for the item
         this.CACHE_EXPIRY[cache] // The TTL of the item
       );

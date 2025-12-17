@@ -1,4 +1,4 @@
-import { Page } from "../../../pagination";
+import type { Page } from "../../../pagination";
 import { ScoreSaberPlayerToken } from "../../../types/token/scoresaber/player";
 
 export type PlayerRankingsResponse = Page<ScoreSaberPlayerToken> & {

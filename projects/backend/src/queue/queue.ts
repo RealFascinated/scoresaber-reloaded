@@ -1,6 +1,6 @@
 import Logger from "@ssr/common/logger";
 import { isProduction } from "@ssr/common/utils/utils";
-import SuperJSON from "superjson";
+import { parse, stringify } from "devalue";
 import { redisClient } from "../common/redis";
 import { QueueId } from "./queue-manager";
 
@@ -46,7 +46,7 @@ export abstract class Queue<T> {
       return;
     }
 
-    await redisClient.lpush(`queue::${this.id}`, SuperJSON.stringify(item));
+    await redisClient.lpush(`queue::${this.id}`, stringify(item));
     // Use setImmediate to ensure the item is committed before processing
     setImmediate(() => this.processQueue());
   }
@@ -61,7 +61,7 @@ export abstract class Queue<T> {
       return;
     }
 
-    await redisClient.lpush(`queue::${this.id}`, SuperJSON.stringify(items));
+    await redisClient.lpush(`queue::${this.id}`, stringify(items));
     // Use setImmediate to ensure the items are committed before processing
     setImmediate(() => this.processQueue());
   }
@@ -89,7 +89,7 @@ export abstract class Queue<T> {
         return;
       }
 
-      const item = SuperJSON.parse(rawItem) as T;
+      const item = parse(rawItem) as T;
       if (!item) {
         Logger.info(`Invalid queue item found in the queue ${this.id}: ${rawItem}`);
         this.processQueue(); // Keep going
@@ -119,7 +119,7 @@ export abstract class Queue<T> {
   }
 
   public async hasItem(item: T): Promise<boolean> {
-    return (await redisClient.lindex(`queue::${this.id}`, 0)) === SuperJSON.stringify(item);
+    return (await redisClient.lindex(`queue::${this.id}`, 0)) === stringify(item);
   }
 
   /**

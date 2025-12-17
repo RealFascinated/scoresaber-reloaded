@@ -7,12 +7,12 @@ import {
   AdditionalScoreDataModel,
 } from "@ssr/common/model/additional-score-data/additional-score-data";
 import { PlayerDocument, PlayerModel } from "@ssr/common/model/player/player";
-import { removeObjectFields } from "@ssr/common/object.util";
 import { ScoreStatsResponse } from "@ssr/common/schemas/beatleader/score-stats";
 import { ScoreStatsToken } from "@ssr/common/types/token/beatleader/score-stats/score-stats";
 import { BeatLeaderScoreToken } from "@ssr/common/types/token/beatleader/score/score";
 import { BeatLeaderScoreImprovementToken } from "@ssr/common/types/token/beatleader/score/score-improvement";
 import { getBeatLeaderReplayId } from "@ssr/common/utils/beatleader-utils";
+import { additionalScoreDataToObject } from "@ssr/common/utils/model-converters";
 import Request from "@ssr/common/utils/request";
 import { isProduction } from "@ssr/common/utils/utils";
 import { DiscordChannels, sendEmbedToChannel } from "../bot/bot";
@@ -51,7 +51,7 @@ export default class BeatLeaderService {
         if (!additionalData) {
           return undefined;
         }
-        return this.additionalScoreDataToObject(additionalData);
+        return additionalScoreDataToObject(additionalData);
       }
     );
   }
@@ -75,7 +75,7 @@ export default class BeatLeaderService {
         if (!additionalData) {
           return undefined;
         }
-        return this.additionalScoreDataToObject(additionalData);
+        return additionalScoreDataToObject(additionalData);
       }
     );
   }
@@ -280,21 +280,6 @@ export default class BeatLeaderService {
     if (additionalData == undefined) {
       return undefined;
     }
-    return this.additionalScoreDataToObject(additionalData);
-  }
-
-  /**
-   * Converts a database additional score data to a AdditionalScoreData.
-   *
-   * @param additionalData the additional score data to convert
-   * @returns the converted additional score data
-   * @private
-   */
-  private static additionalScoreDataToObject(
-    additionalData: AdditionalScoreData
-  ): AdditionalScoreData {
-    return {
-      ...removeObjectFields<AdditionalScoreData>(additionalData, ["_id", "__v"]),
-    } as AdditionalScoreData;
+    return additionalScoreDataToObject(additionalData);
   }
 }

@@ -1,11 +1,11 @@
+import { parse } from "devalue";
 import { PpGainResponse } from "src/schemas/response/player/pp-boundary";
-import SuperJSON from "superjson";
 import { DetailType } from "../detail-type";
 import { env } from "../env";
 import { StarFilter } from "../maps/types";
 import { ScoreSaberScore } from "../model/score/impl/scoresaber-score";
 import { StatisticsType } from "../model/statistics/statistic-type";
-import { Page } from "../pagination";
+import type { Page } from "../pagination";
 import ScoreSaberPlayer from "../player/impl/scoresaber-player";
 import { PlayerStatisticHistory } from "../player/player-statistic-history";
 import { ScoreStatsResponse } from "../schemas/beatleader/score-stats";
@@ -44,7 +44,7 @@ class SSRApi {
     const response = await fetch(`${env.NEXT_PUBLIC_API_URL}${url}${queryString}`, {
       method: body ? "POST" : "GET",
       headers: {
-        Accept: "application/superjson",
+        Accept: "application/devalue",
         ...(body && { "Content-Type": "application/json" }),
       },
       body: body ? JSON.stringify(body) : undefined,
@@ -60,7 +60,7 @@ class SSRApi {
     if (!response.ok) {
       throw new Error(`Request failed with status ${response.status}: ${responseText}`);
     }
-    return SuperJSON.parse<T>(responseText);
+    return parse(responseText) as T;
   }
 
   /**

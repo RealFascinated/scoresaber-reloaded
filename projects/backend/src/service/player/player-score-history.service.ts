@@ -6,7 +6,8 @@ import {
   ScoreSaberScore,
   ScoreSaberScoreModel,
 } from "@ssr/common/model/score/impl/scoresaber-score";
-import { Page, Pagination } from "@ssr/common/pagination";
+import type { Page } from "@ssr/common/pagination";
+import { Pagination } from "@ssr/common/pagination";
 import CacheService, { CacheId } from "../cache.service";
 import { LeaderboardCoreService } from "../leaderboard/leaderboard-core.service";
 import { ScoreCoreService } from "../score/score-core.service";

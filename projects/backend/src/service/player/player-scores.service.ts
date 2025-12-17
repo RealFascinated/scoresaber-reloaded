@@ -25,13 +25,13 @@ import { ScoreQuery, SortDirection, SortField } from "@ssr/common/types/score-qu
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import ScoreSaberPlayerScoreToken from "@ssr/common/types/token/scoresaber/player-score";
 import ScoreSaberPlayerScoresPageToken from "@ssr/common/types/token/scoresaber/player-scores-page";
+import { scoreToObject } from "@ssr/common/utils/model-converters";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import { EmbedBuilder } from "discord.js";
 import { FilterQuery } from "mongoose";
 import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
-import { scoreToObject } from "../../common/score/score.util";
 import BeatSaverService from "../beatsaver.service";
 import { LeaderboardCoreService } from "../leaderboard/leaderboard-core.service";
 import { ScoreCoreService } from "../score/score-core.service";

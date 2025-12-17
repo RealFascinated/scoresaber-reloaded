@@ -11,12 +11,12 @@ import { formatDuration, TimeUnit } from "@ssr/common/utils/time-utils";
 import { isProduction } from "@ssr/common/utils/utils";
 import { logger } from "@tqman/nice-logger";
 import { mongoose } from "@typegoose/typegoose";
+import { stringify } from "devalue";
 import { EmbedBuilder } from "discord.js";
 import { Elysia, ValidationError } from "elysia";
 import { helmet } from "elysia-helmet";
 import fs from "fs";
 import Redis from "ioredis";
-import SuperJSON from "superjson";
 import { z } from "zod";
 import { DiscordChannels, initDiscordBot, sendEmbedToChannel } from "./bot/bot";
 import { getAppVersion } from "./common/app.util";
@@ -257,9 +257,9 @@ export const app = new Elysia()
     };
   })
   .onAfterHandle(({ request, response, set }) => {
-    if (request.headers.get("accept") === "application/superjson") {
-      set.headers["content-type"] = "application/superjson";
-      return SuperJSON.stringify(response);
+    if (request.headers.get("accept") === "application/devalue") {
+      set.headers["content-type"] = "application/devalue";
+      return stringify(response);
     }
 
     if (response instanceof Object && response !== null) {

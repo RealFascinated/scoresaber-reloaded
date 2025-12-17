@@ -9,7 +9,7 @@ import {
   AccSaberScoreSort,
   AccSaberScoreType,
 } from "@ssr/common/api-service/impl/accsaber";
-import { Page } from "@ssr/common/pagination";
+import type { Page } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { capitalizeFirstLetter } from "@ssr/common/string-utils";
 import { useQuery } from "@tanstack/react-query";

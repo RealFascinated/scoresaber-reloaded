@@ -36,15 +36,13 @@ export default function scoresController(app: Elysia) {
       .get(
         "/player/scoresaber/:playerId/:page/:sort",
         async ({ params: { playerId, page, sort }, query: { search, comparisonPlayerId } }) => {
-          return (
-            await PlayerScoresService.getScoreSaberLivePlayerScores(
-              playerId,
-              page,
-              sort,
-              search,
-              comparisonPlayerId
-            )
-          ).toJSON();
+          return await PlayerScoresService.getScoreSaberLivePlayerScores(
+            playerId,
+            page,
+            sort,
+            search,
+            comparisonPlayerId
+          );
         },
         {
           tags: ["Scores"],
@@ -65,16 +63,14 @@ export default function scoresController(app: Elysia) {
       .get(
         "/player/:mode/:playerId/:field/:direction/:page",
         async ({ params: { mode, playerId, page, field, direction }, query }) => {
-          return (
-            await PlayerScoresService.getPlayerScores(
-              mode,
-              playerId,
-              page,
-              field as SortField,
-              direction as SortDirection,
-              query
-            )
-          ).toJSON();
+          return await PlayerScoresService.getPlayerScores(
+            mode,
+            playerId,
+            page,
+            field as SortField,
+            direction as SortDirection,
+            query
+          );
         },
         {
           tags: ["Scores"],
@@ -154,7 +150,7 @@ export default function scoresController(app: Elysia) {
       .get(
         "/top/:page",
         async ({ params: { page } }) => {
-          return (await TopScoresService.getTopScores(page)).toJSON();
+          return await TopScoresService.getTopScores(page);
         },
         {
           tags: ["Scores"],

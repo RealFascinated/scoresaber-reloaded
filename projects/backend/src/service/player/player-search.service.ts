@@ -2,7 +2,6 @@ import { PlayerModel } from "@ssr/common/model/player/player";
 import { Pagination } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerRankingsResponse } from "@ssr/common/schemas/response/player/player-rankings";
-import { Metadata } from "@ssr/common/types/metadata";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import { ScoreSaberApiService } from "../scoresaber-api.service";
 import ScoreSaberService from "../scoresaber.service";
@@ -121,12 +120,14 @@ export class PlayerSearchService {
 
     return {
       items: foundPlayers?.players ?? [],
-      metadata: new Metadata(
-        Math.ceil((foundPlayers?.metadata.total ?? 0) / (foundPlayers?.metadata.itemsPerPage ?? 0)),
-        foundPlayers?.metadata.total ?? 0,
+      metadata: {
+        totalPages: Math.ceil(
+          (foundPlayers?.metadata.total ?? 0) / (foundPlayers?.metadata.itemsPerPage ?? 0)
+        ),
+        totalItems: foundPlayers?.metadata.total ?? 0,
         page,
-        foundPlayers?.metadata.itemsPerPage ?? 0
-      ),
+        itemsPerPage: foundPlayers?.metadata.itemsPerPage ?? 0,
+      },
       countryMetadata: countryCounts,
     } as PlayerRankingsResponse;
   }

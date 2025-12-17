@@ -68,14 +68,27 @@ export class Pagination<T> {
       throw new Error("Items function is not set and no fetchItems callback provided");
     }
 
-    return new Page<T>(
-      pageItems,
-      new Metadata(totalPages, this.totalItems, page, this.itemsPerPage)
-    );
+    return {
+      items: pageItems,
+      metadata: {
+        totalPages,
+        totalItems: this.totalItems,
+        page,
+        itemsPerPage: this.itemsPerPage,
+      },
+    };
   }
 
   public static empty<T>(): Page<T> {
-    return new Page<T>([], new Metadata(1, 0, 1, 0));
+    return {
+      items: [],
+      metadata: {
+        totalPages: 1,
+        totalItems: 0,
+        page: 1,
+        itemsPerPage: 0,
+      },
+    };
   }
 }
 
@@ -89,22 +102,7 @@ class FetchItems {
   }
 }
 
-export class Page<T> {
+export type Page<T> = {
   items: T[];
   readonly metadata: Metadata;
-
-  constructor(items: T[], metadata: Metadata) {
-    this.items = items;
-    this.metadata = metadata;
-  }
-
-  /**
-   * Converts the page to a JSON object.
-   */
-  toJSON(): Page<T> {
-    return {
-      items: this.items,
-      metadata: this.metadata,
-    } as Page<T>;
-  }
-}
+};

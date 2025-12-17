@@ -98,7 +98,7 @@ export default function playerController(app: Elysia) {
         "/search",
         async ({ query: { query } }) => {
           return {
-            players: PlayerSearchService.searchPlayers(query),
+            players: await PlayerSearchService.searchPlayers(query),
           };
         },
         {
@@ -154,7 +154,11 @@ export default function playerController(app: Elysia) {
       .get(
         "/score-history/:playerId/:leaderboardId/:page",
         async ({ params: { playerId, leaderboardId, page } }) => {
-          return PlayerScoreHistoryService.getPlayerScoreHistory(playerId, leaderboardId, page);
+          return await PlayerScoreHistoryService.getPlayerScoreHistory(
+            playerId,
+            leaderboardId,
+            page
+          );
         },
         {
           tags: ["Player"],

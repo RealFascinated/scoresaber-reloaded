@@ -2,10 +2,11 @@ import {
   ScoreSaberScore,
   ScoreSaberScoreModel,
 } from "@ssr/common/model/score/impl/scoresaber-score";
-import { Page, Pagination } from "@ssr/common/pagination";
+import type { Page } from "@ssr/common/pagination";
+import { Pagination } from "@ssr/common/pagination";
 import { PlayerScore } from "@ssr/common/score/player-score";
 import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score";
-import { scoreToObject } from "../../common/score/score.util";
+import { scoreToObject } from "@ssr/common/utils/model-converters";
 import { LeaderboardCoreService } from "../leaderboard/leaderboard-core.service";
 import ScoreSaberService from "../scoresaber.service";
 import { ScoreCoreService } from "./score-core.service";

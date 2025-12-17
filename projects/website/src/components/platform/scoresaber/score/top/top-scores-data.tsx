@@ -6,7 +6,7 @@ import SimplePagination from "@/components/simple-pagination";
 import { Spinner } from "@/components/spinner";
 import { useIsMobile } from "@/contexts/viewport-context";
 import { env } from "@ssr/common/env";
-import { Page } from "@ssr/common/pagination";
+import type { Page } from "@ssr/common/pagination";
 import { PlayerScore } from "@ssr/common/score/player-score";
 import Request from "@ssr/common/utils/request";
 import { useQuery } from "@tanstack/react-query";

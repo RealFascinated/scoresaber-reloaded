@@ -6,7 +6,7 @@ import {
 import { Page, Pagination } from "@ssr/common/pagination";
 import { PlayerScore } from "@ssr/common/score/player-score";
 import { processInBatches } from "@ssr/common/utils/batch-utils";
-import { scoreToObject } from "../../common/score/score.util";
+import { scoreToObject } from "@ssr/common/utils/model-converters";
 import { LeaderboardCoreService } from "../leaderboard/leaderboard-core.service";
 import { ScoreCoreService } from "../score/score-core.service";
 

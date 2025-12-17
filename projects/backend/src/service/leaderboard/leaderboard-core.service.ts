@@ -7,15 +7,15 @@ import {
   ScoreSaberLeaderboardModel,
 } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import LeaderboardDifficulty from "@ssr/common/model/leaderboard/leaderboard-difficulty";
-import { removeObjectFields } from "@ssr/common/object.util";
 import { BeatSaverMapResponse } from "@ssr/common/schemas/response/beatsaver/beatsaver-map";
 import { LeaderboardResponse } from "@ssr/common/schemas/response/leaderboard/leaderboard";
 import { MapDifficulty } from "@ssr/common/score/map-difficulty";
 import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
 import { MapCharacteristic } from "@ssr/common/types/map-characteristic";
 import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/leaderboard";
+import { leaderboardToObject } from "@ssr/common/utils/model-converters";
 import { formatDuration } from "@ssr/common/utils/time-utils";
-import SuperJSON from "superjson";
+import { parse } from "devalue";
 import { redisClient } from "../../common/redis";
 import { LeaderboardScoreSeedQueue } from "../../queue/impl/leaderboard-score-seed-queue";
 import { QueueId, QueueManager } from "../../queue/queue-manager";
@@ -150,7 +150,7 @@ export class LeaderboardCoreService {
     for (const [index] of cacheKeys.entries()) {
       const cached = cachedData[index];
       if (cached) {
-        leaderboards.set(leaderboardIds[index], SuperJSON.parse(cached) as LeaderboardResponse);
+        leaderboards.set(leaderboardIds[index], parse(cached) as LeaderboardResponse);
       }
     }
 
@@ -321,7 +321,7 @@ export class LeaderboardCoreService {
    */
   public static processLeaderboard(leaderboard: ScoreSaberLeaderboard): LeaderboardResponse {
     const processedLeaderboard = {
-      ...LeaderboardCoreService.leaderboardToObject(leaderboard),
+      ...leaderboardToObject(leaderboard),
       fullName: `${leaderboard.songName} ${leaderboard.songSubName}`.trim(),
     } as ScoreSaberLeaderboard;
     return { leaderboard: processedLeaderboard };
@@ -419,9 +419,7 @@ export class LeaderboardCoreService {
       "leaderboard:ranked-leaderboards",
       async () => {
         const leaderboards = await ScoreSaberLeaderboardModel.find({ ranked: true }).lean();
-        return leaderboards.map(leaderboard =>
-          LeaderboardCoreService.leaderboardToObject(leaderboard)
-        );
+        return leaderboards.map(leaderboard => leaderboardToObject(leaderboard));
       }
     );
   }
@@ -435,9 +433,7 @@ export class LeaderboardCoreService {
       "leaderboard:qualified-leaderboards",
       async () => {
         const leaderboards = await ScoreSaberLeaderboardModel.find({ qualified: true }).lean();
-        return leaderboards.map(leaderboard =>
-          LeaderboardCoreService.leaderboardToObject(leaderboard)
-        );
+        return leaderboards.map(leaderboard => leaderboardToObject(leaderboard));
       }
     );
   }
@@ -460,15 +456,5 @@ export class LeaderboardCoreService {
         );
       }
     );
-  }
-
-  /**
-   * Converts a database leaderboard to a ScoreSaberLeaderboard.
-   */
-  public static leaderboardToObject(leaderboard: ScoreSaberLeaderboard): ScoreSaberLeaderboard {
-    return {
-      ...removeObjectFields<ScoreSaberLeaderboard>(leaderboard, ["_id", "__v"]),
-      id: leaderboard.id ?? leaderboard._id,
-    } as ScoreSaberLeaderboard;
   }
 }
