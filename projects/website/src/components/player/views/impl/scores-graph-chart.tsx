@@ -37,6 +37,7 @@ Chart.register(
   Legend
 );
 
+const TOP_SCORE_COUNT = 500;
 const MAX_COMPARISON_PLAYERS = 3;
 const STAR_TICK_SIZE = 0.5;
 const ACCURACY_TICK_SIZE = 2;
@@ -56,7 +57,7 @@ export default function ScoresGraphChart({ player }: { player: ScoreSaberPlayer 
 
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [comparisonPlayers, setComparisonPlayers] = useState<ScoreSaberPlayer[]>([]);
-  const [showTop100, setShowTop100] = useState(false);
+  const [showTop, setShowTop] = useState(false);
 
   const { data: dataPoints } = useQuery({
     queryKey: ["player-maps-graph", player.id],
@@ -94,8 +95,8 @@ export default function ScoresGraphChart({ player }: { player: ScoreSaberPlayer 
       timestamp: point.timestamp,
     }));
 
-    if (showTop100) {
-      return [...transformed].sort((a, b) => (b.pp || 0) - (a.pp || 0)).slice(0, 100);
+    if (showTop) {
+      return [...transformed].sort((a, b) => (b.pp || 0) - (a.pp || 0)).slice(0, TOP_SCORE_COUNT);
     }
 
     return transformed;
@@ -127,7 +128,7 @@ export default function ScoresGraphChart({ player }: { player: ScoreSaberPlayer 
   const scales = {
     x: {
       type: "linear" as const,
-      min: showTop100 ? minStar : 0,
+      min: showTop ? minStar : 0,
       max: maxStar,
       grid: { color: "#252525" },
       ticks: {
@@ -147,7 +148,7 @@ export default function ScoresGraphChart({ player }: { player: ScoreSaberPlayer 
     y: {
       type: "linear" as const,
       min: minAccuracy,
-      max: showTop100 ? maxAccuracy : 100,
+      max: showTop ? maxAccuracy : 100,
       grid: { color: "#252525" },
       ticks: { color: "white", stepSize: ACCURACY_TICK_SIZE },
       title: {
@@ -388,9 +389,9 @@ export default function ScoresGraphChart({ player }: { player: ScoreSaberPlayer 
           </div>
 
           <div className="flex items-center justify-end gap-2">
-            <Switch checked={showTop100} onCheckedChange={setShowTop100} id="top100-mode" />
-            <label htmlFor="top100-mode" className="text-muted-foreground text-sm font-medium">
-              Only Top 100 Scores
+            <Switch checked={showTop} onCheckedChange={setShowTop} id="top-mode" />
+            <label htmlFor="top-mode" className="text-muted-foreground text-sm font-medium">
+              Only Top {TOP_SCORE_COUNT} Scores
             </label>
           </div>
         </div>
