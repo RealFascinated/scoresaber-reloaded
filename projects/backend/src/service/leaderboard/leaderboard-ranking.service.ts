@@ -11,7 +11,9 @@ import { PlaylistSong } from "@ssr/common/playlist/playlist-song";
 import { LeaderboardStarChange } from "@ssr/common/schemas/leaderboard/leaderboard-star-change";
 import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 import { formatDateMinimal, formatDuration } from "@ssr/common/utils/time-utils";
+import { EmbedBuilder } from "discord.js";
 import { AnyBulkWriteOperation } from "mongoose";
+import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
 import PlaylistService from "../playlist/playlist.service";
 import { MedalScoresService } from "../score/medal-scores.service";
 import { ScoreSaberApiService } from "../scoresaber-api.service";
@@ -193,12 +195,18 @@ export class LeaderboardRankingService {
       });
     }
 
-    const before = performance.now();
     if (leaderboardBulkWrite.length > 0) {
       Logger.info(`[RANKED UPDATES] Updating ${leaderboardBulkWrite.length} leaderboards...`);
+      const before = performance.now();
       await ScoreSaberLeaderboardModel.bulkWrite(leaderboardBulkWrite);
       Logger.info(
         `[RANKED UPDATES] Updated ${leaderboardBulkWrite.length} leaderboards in ${formatDuration(performance.now() - before)}`
+      );
+
+      sendEmbedToChannel(DiscordChannels.BACKEND_LOGS, new EmbedBuilder()
+        .setTitle("Ranked Leaderboards Updated")
+        .setDescription(`Updated ${leaderboardBulkWrite.length} leaderboards in ${formatDuration(performance.now() - before)}`)
+        .setColor("#00ff00")
       );
     }
 
@@ -220,6 +228,8 @@ export class LeaderboardRankingService {
       await LeaderboardCoreService.fetchLeaderboardsFromAPI("qualified", true);
     Logger.info(`[RANKED UPDATES] Found ${leaderboards.length} qualified leaderboards.`);
 
+    const leaderboardBulkWrite: AnyBulkWriteOperation<ScoreSaberLeaderboard>[] = [];
+
     for (const apiLeaderboard of leaderboards) {
       const dbLeaderboard = await ScoreSaberLeaderboardModel.findOne({ _id: apiLeaderboard.id })
         .select({ stars: 1, ranked: 1, qualified: 1 })
@@ -234,15 +244,32 @@ export class LeaderboardRankingService {
       }
 
       // Update or create the leaderboard
-      await ScoreSaberLeaderboardModel.findOneAndUpdate(
-        { _id: apiLeaderboard.id },
-        {
-          $set: {
-            ...apiLeaderboard,
-            difficulties: leaderboardDifficulties.get(apiLeaderboard.songHash) ?? [],
+      leaderboardBulkWrite.push({
+        updateOne: {
+          filter: { _id: apiLeaderboard.id },
+          update: {
+            $set: {
+              ...apiLeaderboard,
+              difficulties: leaderboardDifficulties.get(apiLeaderboard.songHash) ?? [],
+            },
           },
+          upsert: true,
         },
-        { upsert: true }
+      });
+    }
+
+    if (leaderboardBulkWrite.length > 0) {
+      Logger.info(`[RANKED UPDATES] Updating ${leaderboardBulkWrite.length} leaderboards...`);
+      const before = performance.now();
+      await ScoreSaberLeaderboardModel.bulkWrite(leaderboardBulkWrite);
+      Logger.info(
+        `[RANKED UPDATES] Updated ${leaderboardBulkWrite.length} leaderboards in ${formatDuration(performance.now() - before)}`
+      );
+
+      sendEmbedToChannel(DiscordChannels.BACKEND_LOGS, new EmbedBuilder()
+        .setTitle("Qualified Leaderboards Updated")
+        .setDescription(`Updated ${leaderboardBulkWrite.length} leaderboards in ${formatDuration(performance.now() - before)}`)
+        .setColor("#00ff00")
       );
     }
 
