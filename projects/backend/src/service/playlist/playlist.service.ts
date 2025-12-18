@@ -73,6 +73,7 @@ export default class PlaylistService {
       async () => {
         const rankingQueue = await LeaderboardCoreService.getRankingQueueLeaderboards();
         await this.updatePlaylist("scoresaber-ranking-queue-maps", {
+          title: `ScoreSaber ${PLAYLIST_NAMES["scoresaber-ranking-queue-maps"]} (${formatDate(new Date(), "DD-MM-YYYY")})`,
           songs: rankingQueue.map(leaderboard => ({
             songName: leaderboard.songName,
             songAuthor: leaderboard.songAuthorName,
