@@ -17,6 +17,7 @@ import { SnipePlaylist } from "@ssr/common/playlist/snipe/snipe-playlist";
 import { SHARED_CONSTS } from "@ssr/common/shared-consts";
 import { parseSnipePlaylistSettings } from "@ssr/common/snipe/snipe-playlist-utils";
 import { capitalizeFirstLetter, truncateText } from "@ssr/common/string-utils";
+import { playlistToObject } from "@ssr/common/utils/model-converters";
 import { formatDateMinimal } from "@ssr/common/utils/time-utils";
 import { LeaderboardCoreService } from "../leaderboard/leaderboard-core.service";
 import { PlayerCoreService } from "../player/player-core.service";
@@ -45,16 +46,16 @@ export default class PlaylistService {
    * @param config optional configuration for custom playlists
    * @returns the requested playlist
    */
-  public static async getPlaylist(playlistId: PlaylistId, config?: string): Promise<Playlist> {
+  public static async getPlaylist(playlistId: PlaylistId | string, config?: string): Promise<Playlist> {
     if (playlistId === "scoresaber-custom-ranked-maps") {
       return await this.createCustomRankedPlaylist(config);
     }
 
-    const playlist = await PlaylistModel.findOne({ id: playlistId });
+    const playlist = await PlaylistModel.findOne({ id: playlistId }).lean();
     if (!playlist) {
       throw new NotFoundError(`Playlist with id ${playlistId} does not exist`);
     }
-    return playlist;
+    return playlistToObject(playlist);
   }
 
   /**

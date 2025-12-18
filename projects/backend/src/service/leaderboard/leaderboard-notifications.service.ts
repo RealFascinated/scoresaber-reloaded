@@ -1,6 +1,6 @@
 import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
-import { generateBeatSaberPlaylist } from "@ssr/common/playlist/playlist-utils";
+import { playlistToBeatSaberPlaylist } from "@ssr/common/playlist/playlist-utils";
 import { uploadPaste } from "@ssr/common/utils/paste-utils";
 import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
 import { formatDate } from "@ssr/common/utils/time-utils";
@@ -103,7 +103,7 @@ export class LeaderboardNotificationsService {
     await sendFile(
       DiscordChannels.RANKED_BATCH_LOGS,
       `scoresaber-ranked-batch-${date}.bplist`,
-      JSON.stringify(await generateBeatSaberPlaylist(playlist), null, 2)
+      JSON.stringify(await playlistToBeatSaberPlaylist(playlist), null, 2)
     );
 
     console.log(changelog);

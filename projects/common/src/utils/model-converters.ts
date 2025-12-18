@@ -4,6 +4,7 @@ import { PlayerHistoryEntry } from "../model/player/player-history-entry";
 import { ScoreSaberMedalsScore } from "../model/score/impl/scoresaber-medals-score";
 import { ScoreSaberScore } from "../model/score/impl/scoresaber-score";
 import { removeObjectFields } from "../object.util";
+import { Playlist } from "../playlist/playlist";
 import { convertObjectId } from "./utils";
 
 const baseFields = ["_id", "__v"];
@@ -60,4 +61,16 @@ export function additionalScoreDataToObject(
   return {
     ...removeObjectFields<AdditionalScoreData>(additionalData, baseFields),
   } as AdditionalScoreData;
+}
+
+/**
+ * Converts a database playlist to a Playlist.
+ *
+ * @param playlist the playlist to convert
+ * @returns the converted playlist
+ */
+export function playlistToObject(playlist: Playlist): Playlist {
+  return {
+    ...removeObjectFields<Playlist>(playlist, baseFields),
+  } as Playlist;
 }

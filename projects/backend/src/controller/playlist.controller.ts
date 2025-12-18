@@ -1,34 +1,20 @@
-import { generateBeatSaberPlaylist } from "@ssr/common/playlist/playlist-utils";
+import { playlistToBeatSaberPlaylist } from "@ssr/common/playlist/playlist-utils";
 import { Elysia } from "elysia";
 import { z } from "zod";
-import PlaylistService, { PlaylistId } from "../service/playlist/playlist.service";
+import PlaylistService from "../service/playlist/playlist.service";
 
 export default function playlistController(app: Elysia) {
   return app.group("/playlist", app =>
     app
       .get(
         "/:playlistId",
-        async ({ params: { playlistId }, query: { config, download } }) => {
-          const id = (
-            playlistId.includes(".") ? playlistId.split(".")[0] : playlistId
-          ) as PlaylistId;
-          const extension = playlistId.includes(".") ? playlistId.split(".")[1] : "bplist";
-
-          const response = new Response(
-            JSON.stringify(
-              await generateBeatSaberPlaylist(await PlaylistService.getPlaylist(id, config)),
-              null,
-              2
+        async ({ params: { playlistId }, query: { config } }) => {
+          return playlistToBeatSaberPlaylist(
+            await PlaylistService.getPlaylist(
+              playlistId.includes(".") ? playlistId.split(".")[0] : playlistId,
+              config
             )
           );
-          response.headers.set("Content-Type", "application/json");
-          if (download) {
-            response.headers.set(
-              "Content-Disposition",
-              `attachment; filename="ssr-${id}.${extension}"`
-            );
-          }
-          return response;
         },
         {
           tags: ["Playlist"],
@@ -37,7 +23,6 @@ export default function playlistController(app: Elysia) {
           }),
           query: z.object({
             config: z.string().optional(),
-            download: z.coerce.boolean().optional(),
           }),
           detail: {
             description: "Fetch a playlist by its id",
@@ -49,7 +34,7 @@ export default function playlistController(app: Elysia) {
         async ({ query: { user, toSnipe, settings } }) => {
           const response = new Response(
             JSON.stringify(
-              await generateBeatSaberPlaylist(
+              await playlistToBeatSaberPlaylist(
                 await PlaylistService.getSnipePlaylist(user, toSnipe, settings)
               ),
               null,
