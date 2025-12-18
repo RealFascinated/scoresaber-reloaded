@@ -8,6 +8,8 @@ import {
 } from "@ssr/common/model/score/impl/scoresaber-score";
 import type { Page } from "@ssr/common/pagination";
 import { Pagination } from "@ssr/common/pagination";
+import { normalizeModifiers } from "@ssr/common/score/modifier";
+import { scoreToObject } from "@ssr/common/utils/model-converters";
 import CacheService, { CacheId } from "../cache.service";
 import { LeaderboardCoreService } from "../leaderboard/leaderboard-core.service";
 import { ScoreCoreService } from "../score/score-core.service";
@@ -55,7 +57,7 @@ export class PlayerScoreHistoryService {
       .getPage(page, async () => {
         return await Promise.all(
           scores.map(async scoreToken => {
-            let score = scoreToken.toObject() as unknown as ScoreSaberScore;
+            let score = scoreToObject(scoreToken.toObject() as unknown as ScoreSaberScore) as ScoreSaberScore;
             score = await ScoreCoreService.insertScoreData(score, leaderboard, {
               insertPreviousScore: false,
               removeScoreWeightAndRank: true,
@@ -101,7 +103,7 @@ export class PlayerScoreHistoryService {
         return {
           score: previousScore.score,
           accuracy: previousScore.accuracy || (score.score / leaderboard.maxScore) * 100,
-          modifiers: previousScore.modifiers,
+          modifiers: normalizeModifiers(previousScore.modifiers),
           misses: previousScore.misses,
           missedNotes: previousScore.missedNotes,
           badCuts: previousScore.badCuts,
