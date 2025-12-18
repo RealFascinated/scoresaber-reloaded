@@ -88,15 +88,14 @@ export class ScoreCoreService {
     }
 
     Logger.info(
-      `Tracked %s ScoreSaber score "%s" for "%s"(%s) on "%s" [%s / %s]%s in %s`,
+      `Tracked %s ScoreSaber score "%s" for "%s" on "%s" [%s / %s]%s in %s`,
       newScore ? "New" : "Missing",
       score.scoreId,
       player.name,
-      player.id,
-      leaderboard.fullName,
+      leaderboard.songName,
       leaderboard.difficulty.difficulty,
       leaderboard.difficulty.characteristic,
-      isImprovement ? ` (improvement - archived previous score)` : "",
+      isImprovement ? ` (improvement)` : "",
       formatDuration(performance.now() - before)
     );
     return { score: score, hasPreviousScore: isImprovement, tracked: true };
