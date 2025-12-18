@@ -217,7 +217,7 @@ export class LeaderboardRankingService {
 
     // Update the ranked playlist
     await PlaylistService.updatePlaylist("scoresaber-ranked-maps", {
-      title: `ScoreSaber ${PLAYLIST_NAMES["scoresaber-ranked-maps"]} (${formatDate(new Date(), "Do MMMM, YYYY")})`,
+      title: `${PLAYLIST_NAMES["scoresaber-ranked-maps"]} (${formatDate(new Date(), "Do MMMM, YYYY")})`,
       songs: Array.from(playlistSongs.values()),
     });
     Logger.info(`[RANKED UPDATES] Updated ranked playlist!`);
@@ -284,7 +284,7 @@ export class LeaderboardRankingService {
     }
 
     await PlaylistService.updatePlaylist("scoresaber-qualified-maps", {
-      title: `ScoreSaber ${PLAYLIST_NAMES["scoresaber-qualified-maps"]} (${formatDate(new Date(), "Do MMMM, YYYY")})`,
+      title: `${PLAYLIST_NAMES["scoresaber-qualified-maps"]} (${formatDate(new Date(), "Do MMMM, YYYY")})`,
       songs: leaderboards.map(leaderboard => ({
         songName: leaderboard.songName,
         songAuthor: leaderboard.songAuthorName,

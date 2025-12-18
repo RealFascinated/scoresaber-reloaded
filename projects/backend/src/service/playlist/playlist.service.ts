@@ -57,7 +57,7 @@ export default class PlaylistService {
         await this.createPlaylist(
           new Playlist(
             id,
-            `ScoreSaber ${PLAYLIST_NAMES[id]} (${formatDate(new Date(), "Do MMMM, YYYY")})`,
+            `${PLAYLIST_NAMES[id]} (${formatDate(new Date(), "Do MMMM, YYYY")})`,
             env.NEXT_PUBLIC_WEBSITE_NAME,
             this.PLAYLIST_IMAGE_BASE64,
             []
@@ -73,7 +73,7 @@ export default class PlaylistService {
       async () => {
         const rankingQueue = await LeaderboardCoreService.getRankingQueueLeaderboards();
         await this.updatePlaylist("scoresaber-ranking-queue-maps", {
-          title: `ScoreSaber ${PLAYLIST_NAMES["scoresaber-ranking-queue-maps"]} (${formatDate(new Date(), "Do MMMM, YYYY")})`,
+          title: `${PLAYLIST_NAMES["scoresaber-ranking-queue-maps"]} (${formatDate(new Date(), "Do MMMM, YYYY")})`,
           songs: rankingQueue.map(leaderboard => ({
             songName: leaderboard.songName,
             songAuthor: leaderboard.songAuthorName,

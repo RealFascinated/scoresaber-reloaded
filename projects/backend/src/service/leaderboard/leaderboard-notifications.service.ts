@@ -86,7 +86,7 @@ export class LeaderboardNotificationsService {
     // Create a playlist of the changes
     const playlist = new Playlist(
       playlistId,
-      `ScoreSaber Ranked Batch (${date})`,
+      `Ranked Batch (${formatDate(new Date(), "Do MMMM, YYYY")})`,
       env.NEXT_PUBLIC_WEBSITE_NAME,
       PlaylistService.PLAYLIST_IMAGE_BASE64,
       newlyRankedMaps.map(update => update.newLeaderboard),
