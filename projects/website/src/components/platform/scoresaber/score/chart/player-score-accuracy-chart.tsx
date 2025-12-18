@@ -100,9 +100,6 @@ export default function PlayerScoreAccuracyChart({ scoreStats, leaderboard }: Pr
     id: "player-score-accuracy-chart",
     datasetConfig,
     seriesByField: histories,
-    options: {
-      animation: true,
-    },
   });
 
   return (
