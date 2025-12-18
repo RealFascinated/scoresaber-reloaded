@@ -319,7 +319,7 @@ export class PlayerHistoryService {
       const dateKey = formatDateMinimal(date);
 
       // If the rank is missing, add it to the history
-      if (history[dateKey].rank === undefined) {
+      if (!history[dateKey] || history[dateKey].rank === undefined) {
         history[dateKey] = { rank };
 
         // Create a history entry for the date
