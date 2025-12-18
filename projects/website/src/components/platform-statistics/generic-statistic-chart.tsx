@@ -27,7 +27,7 @@ export default function GenericStatisticChart({ statistics, datasetConfig }: Pro
     histories[config.field] = Array(historyDays).fill(null);
   });
 
-  // Create a continuous array of dates for the last 365 days
+  // Create a continuous array of dates for the last `historyDays` days
   const labels: Date[] = [];
   const today = new Date();
   today.setHours(0, 0, 0, 0);
