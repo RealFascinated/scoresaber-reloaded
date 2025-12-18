@@ -113,27 +113,15 @@ export default function playerController(app: Elysia) {
       )
       .get(
         "/history/:playerId",
-        async ({ params: { playerId }, query: { startDate, endDate, includeFields } }) => {
+        async ({ params: { playerId }, query: { startDate, endDate } }) => {
           const player = await ScoreSaberApiService.lookupPlayer(playerId);
           if (!player) {
             throw new NotFoundError(`Player "${playerId}" not found`);
           }
-          const projection =
-            includeFields && includeFields !== ""
-              ? includeFields.split(",").reduce(
-                  (acc, field) => {
-                    acc[field] = 1;
-                    return acc;
-                  },
-                  {} as Record<string, string | number | boolean | object>
-                )
-              : undefined;
-
           return await PlayerHistoryService.getPlayerStatisticHistories(
             player,
             new Date(startDate),
             new Date(endDate),
-            projection
           );
         },
         {
@@ -144,7 +132,6 @@ export default function playerController(app: Elysia) {
           query: z.object({
             startDate: z.string().default(new Date().toISOString()),
             endDate: z.string().default(getDaysAgoDate(50).toISOString()),
-            includeFields: z.string().default("").optional(),
           }),
           detail: {
             description: "Fetch a player's statistics history",

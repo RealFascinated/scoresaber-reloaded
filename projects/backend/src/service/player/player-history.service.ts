@@ -224,7 +224,7 @@ export class PlayerHistoryService {
     if (isTargetToday || includeToday) {
       const today = getMidnightAlignedDate(new Date());
       const todayKey = formatDateMinimal(today);
-      const todayData = await PlayerHistoryService.getTodayPlayerStatistic(player, projection);
+      const todayData = await PlayerHistoryService.getTodayPlayerStatistic(player);
       if (todayData) {
         if (isTargetToday) {
           history[dateKey] = todayData;
@@ -262,8 +262,7 @@ export class PlayerHistoryService {
   public static async getPlayerStatisticHistories(
     player: ScoreSaberPlayerToken,
     startDate: Date,
-    endDate: Date,
-    projection?: Record<string, string | number | boolean | object>
+    endDate: Date
   ): Promise<PlayerStatisticHistory> {
     const startTimestamp = getMidnightAlignedDate(startDate).getTime();
     const endTimestamp = getMidnightAlignedDate(endDate).getTime();
@@ -285,7 +284,6 @@ export class PlayerHistoryService {
           $lte: new Date(queryEnd),
         },
       })
-        .select(projection ? { date: 1, ...projection } : {})
         .sort({ date: -1 })
         .lean()
         .hint({ playerId: 1, date: -1 }), // Force use of compound index
@@ -347,8 +345,7 @@ export class PlayerHistoryService {
       const today = getMidnightAlignedDate(new Date());
       const todayKey = formatDateMinimal(today);
 
-      // Get today's data from database or generate fresh
-      const todayData = await PlayerHistoryService.getTodayPlayerStatistic(player, projection);
+      const todayData = await PlayerHistoryService.getTodayPlayerStatistic(player);
       if (todayData) {
         history[todayKey] = todayData;
       }
@@ -368,26 +365,18 @@ export class PlayerHistoryService {
    * Gets today's player statistics, either from database or generates fresh data.
    */
   public static async getTodayPlayerStatistic(
-    player: ScoreSaberPlayerToken,
-    projection?: Record<string, string | number | boolean | object>
+    player: ScoreSaberPlayerToken
   ): Promise<Partial<PlayerHistoryEntry> | undefined> {
     const today = getMidnightAlignedDate(new Date());
-
-    // Try to get existing data from database
     const existingEntry = await PlayerHistoryEntryModel.findOne({
       playerId: player.id,
       date: today,
     }).lean();
 
-    // Generate fresh data, merging with existing if available
-    const todayData = await PlayerHistoryService.createHistoryEntry(
+    return await PlayerHistoryService.createHistoryEntry(
       player,
       existingEntry ?? undefined
     );
-
-    return projection && Object.keys(projection).length > 0
-      ? Object.fromEntries(Object.entries(todayData).filter(([key]) => key in projection))
-      : todayData;
   }
 
   /**
