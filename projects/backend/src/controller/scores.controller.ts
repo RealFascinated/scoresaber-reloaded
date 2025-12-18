@@ -29,7 +29,7 @@ export default function scoresController(app: Elysia) {
           }),
 
           detail: {
-            description: "Fetch a score by its ID",
+            description: "Fetch a score",
           },
         }
       )
@@ -56,7 +56,7 @@ export default function scoresController(app: Elysia) {
             comparisonPlayerId: z.string().optional(),
           }),
           detail: {
-            description: "Fetch a player's scores",
+            description: "Fetch player scores from ScoreSaber",
           },
         }
       )
@@ -83,7 +83,7 @@ export default function scoresController(app: Elysia) {
           }),
           query: QuerySchema,
           detail: {
-            description: "Lookup scores for a player",
+            description: "Fetch player scores",
           },
         }
       )
@@ -102,7 +102,7 @@ export default function scoresController(app: Elysia) {
             country: z.string().optional(),
           }),
           detail: {
-            description: "Fetch the scores for a leaderboard",
+            description: "Fetch leaderboard scores",
           },
         }
       )
@@ -125,7 +125,7 @@ export default function scoresController(app: Elysia) {
             friendIds: z.array(z.string()),
           }),
           detail: {
-            description: "Fetch friend leaderboard scores for a player",
+            description: "Fetch friends' scores for a leaderboard",
           },
         }
       )
@@ -143,7 +143,7 @@ export default function scoresController(app: Elysia) {
             friendIds: z.array(z.string()).min(1).max(SHARED_CONSTS.maxFriends),
           }),
           detail: {
-            description: "Fetch friend scores for a player",
+            description: "Fetch friends' scores",
           },
         }
       )
@@ -158,7 +158,7 @@ export default function scoresController(app: Elysia) {
             page: z.coerce.number().default(1),
           }),
           detail: {
-            description: "Fetch the all-time top scores",
+            description: "Fetch top scores",
           },
         }
       )

@@ -3,13 +3,16 @@ import { PlaysByHmdResponse } from "@ssr/common/schemas/response/leaderboard/pla
 
 export class LeaderboardHmdService {
   /**
-   * Gets the plays by HMD for a leaderboard
+   * Gets the play count by HMD for a leaderboard
+   *
+   * @param leaderboardId the leaderboard id
+   * @returns the play count by HMD
    */
-  public static async getPlaysByHmd(leaderboardId: string): Promise<PlaysByHmdResponse> {
+  public static async getPlayCountByHmd(leaderboardId: number): Promise<PlaysByHmdResponse> {
     const result = await ScoreSaberScoreModel.aggregate([
       {
         $match: {
-          leaderboardId: Number(leaderboardId),
+          leaderboardId: leaderboardId,
           hmd: { $exists: true, $nin: [null, "Unknown"] },
         },
       },

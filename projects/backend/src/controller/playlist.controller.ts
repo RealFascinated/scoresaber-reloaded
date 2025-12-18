@@ -21,7 +21,7 @@ export default function playlistController(app: Elysia) {
             playlistId: z.string().regex(/^[^/]+(?:\.[a-zA-Z0-9]+)?$/),
           }),
           detail: {
-            description: "Fetch a playlist by its id",
+            description: "Fetch playlist",
           },
         }
       )
@@ -36,7 +36,7 @@ export default function playlistController(app: Elysia) {
             config: z.string(),
           }),
           detail: {
-            description: "Fetch a custom ranked playlist",
+            description: "Create a custom ranked playlist",
           },
         }
       )
@@ -63,7 +63,7 @@ export default function playlistController(app: Elysia) {
             settings: z.string().optional(),
           }),
           detail: {
-            description: "Fetch a snipe playlist",
+            description: "Create a snipe playlist",
           },
         }
       )

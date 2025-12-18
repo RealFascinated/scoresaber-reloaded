@@ -14,6 +14,9 @@ export default function appController(app: Elysia) {
       },
       {
         tags: ["App"],
+        detail: {
+          description: "Return backend name and version",
+        },
       }
     )
     .get(
@@ -23,6 +26,9 @@ export default function appController(app: Elysia) {
       },
       {
         tags: ["App"],
+        detail: {
+          description: "Health check (returns OK)",
+        },
       }
     )
     .get(
@@ -32,6 +38,9 @@ export default function appController(app: Elysia) {
       },
       {
         tags: ["App"],
+        detail: {
+          description: "Return backend statistics",
+        },
       }
     );
 }

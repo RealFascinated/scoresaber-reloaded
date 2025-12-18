@@ -13,7 +13,7 @@ export default function statisticsController(app: Elysia) {
       {
         tags: ["Statistics"],
         detail: {
-          description: "Fetch the platform statistics for ScoreSaber",
+          description: "Fetch ScoreSaber platform statistics",
         },
       }
     )

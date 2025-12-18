@@ -24,7 +24,7 @@ export default function playerRankingController(app: Elysia) {
             search: z.string().default("").optional(),
           }),
           detail: {
-            description: "Fetch a player's ranking",
+            description: "Fetch player ranking",
           },
         }
       )
@@ -42,7 +42,7 @@ export default function playerRankingController(app: Elysia) {
             country: z.string().optional(),
           }),
           detail: {
-            description: "Fetch a player's medal ranking",
+            description: "Fetch medal ranking",
           },
         }
       )

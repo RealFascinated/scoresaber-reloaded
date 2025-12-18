@@ -41,7 +41,7 @@ export default function leaderboardController(app: Elysia) {
             search: z.coerce.string().optional(),
           }),
           detail: {
-            description: "Search for leaderboards",
+            description: "Search ScoreSaber leaderboards",
           },
         }
       )
@@ -53,7 +53,7 @@ export default function leaderboardController(app: Elysia) {
         {
           tags: ["Leaderboard"],
           detail: {
-            description: "Fetch the ranking queue",
+            description: "Fetch the ScoreSaber ranking request queue",
           },
         }
       )
@@ -71,7 +71,7 @@ export default function leaderboardController(app: Elysia) {
             leaderboardId: z.coerce.number(),
           }),
           detail: {
-            description: "Fetch a leaderboard by its id",
+            description: "Fetch leaderboard details",
           },
         }
       )
@@ -97,22 +97,22 @@ export default function leaderboardController(app: Elysia) {
             characteristic: MapCharacteristicSchema,
           }),
           detail: {
-            description: "Fetch a leaderboard by its hash, difficulty, and characteristic",
+            description: "Fetch leaderboard details",
           },
         }
       )
       .get(
-        "/plays-by-hmd/:leaderboardId",
+        "/play-count-by-hmd/:leaderboardId",
         async ({ params: { leaderboardId } }) => {
-          return LeaderboardHmdService.getPlaysByHmd(leaderboardId);
+          return LeaderboardHmdService.getPlayCountByHmd(leaderboardId);
         },
         {
           tags: ["Leaderboard"],
           params: z.object({
-            leaderboardId: z.string(),
+            leaderboardId: z.coerce.number(),
           }),
           detail: {
-            description: "Fetch the per hmd usage for a leaderboard",
+            description: "Fetch play count by HMD",
           },
         }
       )

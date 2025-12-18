@@ -28,7 +28,7 @@ export default function beatsaverController(app: Elysia) {
           type: DetailTypeSchema,
         }),
         detail: {
-          description: "Fetch a map by hash, difficulty, and characteristic",
+          description: "Fetch BeatSaver map details",
         },
       }
     )

@@ -337,7 +337,7 @@ class SSRApi {
    * @returns the plays by HMD
    */
   async getPlaysByHmdForLeaderboard(leaderboardId: string) {
-    return await this.request<PlaysByHmdResponse>(`/leaderboard/plays-by-hmd/${leaderboardId}`);
+    return await this.request<PlaysByHmdResponse>(`/leaderboard/play-count-by-hmd/${leaderboardId}`);
   }
 
   /**

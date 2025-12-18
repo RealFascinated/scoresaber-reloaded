@@ -30,7 +30,7 @@ export default function playerController(app: Elysia) {
             type: z.optional(DetailTypeSchema),
           }),
           detail: {
-            description: "Fetch a player by their id",
+            description: "Fetch ScoreSaber player profile",
           },
         }
       )
@@ -45,7 +45,7 @@ export default function playerController(app: Elysia) {
             playerId: z.string(),
           }),
           detail: {
-            description: "Fetch a player's scores chart data",
+            description: "Fetch player score chart data",
           },
         }
       )
@@ -60,7 +60,7 @@ export default function playerController(app: Elysia) {
             playerId: z.string(),
           }),
           detail: {
-            description: "Get the pp values for a player's scores",
+            description: "Fetch player PP values",
           },
         }
       )
@@ -75,7 +75,7 @@ export default function playerController(app: Elysia) {
             playerId: z.string(),
           }),
           detail: {
-            description: "Refresh a player's for ScoreSaber and update their avatar",
+            description: "Refresh player data from ScoreSaber",
           },
         }
       )
@@ -90,7 +90,7 @@ export default function playerController(app: Elysia) {
             playerId: z.string(),
           }),
           detail: {
-            description: "Fetch a player's mini ranking (global and country close rankings)",
+            description: "Fetch player mini-ranking",
           },
         }
       )
@@ -107,7 +107,7 @@ export default function playerController(app: Elysia) {
             query: z.string().optional(),
           }),
           detail: {
-            description: "Search for players",
+            description: "Search players",
           },
         }
       )
@@ -134,7 +134,7 @@ export default function playerController(app: Elysia) {
             endDate: z.string().default(getDaysAgoDate(50).toISOString()),
           }),
           detail: {
-            description: "Fetch a player's statistics history",
+            description: "Fetch player statistics history",
           },
         }
       )
@@ -155,7 +155,7 @@ export default function playerController(app: Elysia) {
             page: z.coerce.number(),
           }),
           detail: {
-            description: "Fetch a player's score history for a leaderboard",
+            description: "Fetch player score history for a leaderboard",
           },
         }
       )
