@@ -8,11 +8,10 @@ export default function playlistController(app: Elysia) {
     app
       .get(
         "/:playlistId",
-        async ({ params: { playlistId }, query: { config } }) => {
+        async ({ params: { playlistId } }) => {
           return playlistToBeatSaberPlaylist(
             await PlaylistService.getPlaylist(
-              playlistId.includes(".") ? playlistId.split(".")[0] : playlistId,
-              config
+              playlistId.includes(".") ? playlistId.split(".")[0] : playlistId
             )
           );
         },
@@ -21,11 +20,23 @@ export default function playlistController(app: Elysia) {
           params: z.object({
             playlistId: z.string().regex(/^[^/]+(?:\.[a-zA-Z0-9]+)?$/),
           }),
-          query: z.object({
-            config: z.string().optional(),
-          }),
           detail: {
             description: "Fetch a playlist by its id",
+          },
+        }
+      )
+      .get(
+        "/scoresaber-custom-ranked-maps",
+        async ({ query: { config } }) => {
+          return playlistToBeatSaberPlaylist(await PlaylistService.createCustomRankedPlaylist(config));
+        },
+        {
+          tags: ["Playlist"],
+          query: z.object({
+            config: z.string(),
+          }),
+          detail: {
+            description: "Fetch a custom ranked playlist",
           },
         }
       )

@@ -1,5 +1,5 @@
 export const SHARED_CONSTS = {
-  maxStars: 15,
+  maxStars: 20,
   maxFriends: 15,
 };
 

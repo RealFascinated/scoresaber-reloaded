@@ -43,14 +43,9 @@ export default class PlaylistService {
    * Gets a playlist by ID
    *
    * @param playlistId the ID of the playlist to get
-   * @param config optional configuration for custom playlists
    * @returns the requested playlist
    */
-  public static async getPlaylist(playlistId: PlaylistId | string, config?: string): Promise<Playlist> {
-    if (playlistId === "scoresaber-custom-ranked-maps") {
-      return await this.createCustomRankedPlaylist(config);
-    }
-
+  public static async getPlaylist(playlistId: PlaylistId | string): Promise<Playlist> {
     const playlist = await PlaylistModel.findOne({ id: playlistId }).lean();
     if (!playlist) {
       throw new NotFoundError(`Playlist with id ${playlistId} does not exist`);
@@ -186,9 +181,11 @@ export default class PlaylistService {
 
   /**
    * Creates a playlist for custom ranked maps
-   * @private
+   *
+   * @param config the configuration for the custom ranked playlist
+   * @returns the created custom ranked playlist
    */
-  private static async createCustomRankedPlaylist(config?: string): Promise<Playlist> {
+  public static async createCustomRankedPlaylist(config?: string): Promise<Playlist> {
     if (!config) {
       throw new BadRequestError("Config is required for custom ranked playlists");
     }
