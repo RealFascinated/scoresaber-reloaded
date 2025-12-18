@@ -11,6 +11,7 @@ import { PlaylistSong } from "@ssr/common/playlist/playlist-song";
 import { LeaderboardStarChange } from "@ssr/common/schemas/leaderboard/leaderboard-star-change";
 import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 import { formatDate, formatDuration } from "@ssr/common/utils/time-utils";
+import { chunkArray } from "@ssr/common/utils/utils";
 import { EmbedBuilder } from "discord.js";
 import { AnyBulkWriteOperation } from "mongoose";
 import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
@@ -199,7 +200,12 @@ export class LeaderboardRankingService {
 
     if (leaderboardBulkWrite.length > 0) {
       Logger.info(`[RANKED UPDATES] Updating ${leaderboardBulkWrite.length} leaderboards...`);
-      await ScoreSaberLeaderboardModel.bulkWrite(leaderboardBulkWrite);
+
+      for (const batch of chunkArray(leaderboardBulkWrite, 250)) {
+        await ScoreSaberLeaderboardModel.bulkWrite(batch);
+        Logger.info(`[RANKED UPDATES] Updated batch of ${batch.length} leaderboards!`);
+      }
+
       Logger.info(
         `[RANKED UPDATES] Updated ${leaderboardBulkWrite.length} leaderboards in ${formatDuration(performance.now() - before)}`
       );

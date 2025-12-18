@@ -129,3 +129,21 @@ export function convertObjectId(id: unknown): string | number | undefined {
   }
   return String(id);
 }
+
+/**
+ * Chunks an array into smaller arrays.
+ *
+ * @param array the array to chunk
+ * @param size the size of each chunk
+ * @returns the chunks
+ */
+export function chunkArray<T>(array: T[], size: number): T[][] {
+  return array.reduce((result, item, index) => {
+    const chunkIndex = Math.floor(index / size);
+    if (!result[chunkIndex]) {
+      result[chunkIndex] = [];
+    }
+    result[chunkIndex].push(item);
+    return result;
+  }, [] as T[][]);
+}
