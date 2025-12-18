@@ -15,7 +15,7 @@ import { Spinner } from "../spinner";
 export default function StatisticData() {
   const { data: statistics } = useQuery({
     queryKey: ["statistics"],
-    queryFn: () => ssrApi.getScoreSaberPlatformStatistics(),
+    queryFn: () => ssrApi.getScoreSaberStatistics(),
   }); 
   const { data: appStatistics } = useQuery({
     queryKey: ["app-statistics"],

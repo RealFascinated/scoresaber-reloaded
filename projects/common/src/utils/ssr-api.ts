@@ -4,7 +4,6 @@ import { DetailType } from "../detail-type";
 import { env } from "../env";
 import { StarFilter } from "../maps/types";
 import { ScoreSaberScore } from "../model/score/impl/scoresaber-score";
-import { StatisticsType } from "../model/statistics/statistic-type";
 import type { Page } from "../pagination";
 import ScoreSaberPlayer from "../player/impl/scoresaber-player";
 import { PlayerStatisticHistory } from "../player/player-statistic-history";
@@ -21,6 +20,7 @@ import { PlayerScoresChartResponse } from "../schemas/response/player/scores-cha
 import { PlayerMedalRankingsResponse } from "../schemas/response/ranking/medal-rankings";
 import { PlayerScoresPageResponse } from "../schemas/response/score/player-scores";
 import ScoreSaberRankingRequestsResponse from "../schemas/response/scoresaber/ranking-requests";
+import { StatisticsResponse } from "../schemas/response/ssr/platform-statistics";
 import { MapDifficulty } from "../score/map-difficulty";
 import { PlayerScore } from "../score/player-score";
 import { ScoreSaberScoreSort } from "../score/score-sort";
@@ -127,8 +127,8 @@ class SSRApi {
    *
    * @returns the statistics
    */
-  async getScoreSaberPlatformStatistics() {
-    return await this.request<{ statistics: StatisticsType }>(`/statistics/scoresaber`);
+  async getScoreSaberStatistics() {
+    return await this.request<StatisticsResponse>(`/statistics/scoresaber`);
   }
 
   /**
