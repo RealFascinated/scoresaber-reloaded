@@ -97,7 +97,10 @@ export default function LeaderboardPpChartButton({ leaderboard }: Props) {
             grid: { color: "#252525" },
             ticks: {
               stepSize: 1,
-              callback: (value: number) => `${value.toFixed(2)}%`,
+              callback: function (this, tickValue, _index, _ticks) {
+                const value = typeof tickValue === "number" ? tickValue : Number(tickValue);
+                return Number.isFinite(value) ? `${value.toFixed(2)}%` : String(tickValue);
+              },
               maxRotation: 45,
               minRotation: 45,
               color: "white",

@@ -22,6 +22,7 @@ import {
   LineElement,
   PointElement,
   Tooltip,
+  type ChartOptions,
 } from "chart.js";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc.js";
@@ -191,13 +192,16 @@ const GenericChart = ({ config, labels }: Props) => {
   }, [labels, isXAxisLinear, isNumericLabels]);
 
   const chartOptions = useMemo(() => {
-    const mergedScales: Record<string, any> = { ...chartAxes };
-    const customScales = customOptions?.scales;
+    type LineChartOptions = ChartOptions<"line">;
+    type LineScales = NonNullable<LineChartOptions["scales"]>;
+
+    const mergedScales: LineScales = { ...chartAxes };
+    const customScales = (customOptions as LineChartOptions | undefined)?.scales;
     if (customScales) {
       Object.keys(customScales).forEach(axisId => {
-        const existingAxis: any = mergedScales[axisId];
-        const customAxis: any = (customScales as any)[axisId];
-        mergedScales[axisId] = {
+        const existingAxis = mergedScales[axisId];
+        const customAxis = customScales[axisId];
+        mergedScales[axisId] = ({
           ...existingAxis,
           ...customAxis,
           ticks:
@@ -208,7 +212,7 @@ const GenericChart = ({ config, labels }: Props) => {
             existingAxis?.title && customAxis?.title
               ? { ...existingAxis.title, ...customAxis.title }
               : customAxis?.title || existingAxis?.title,
-        };
+        } as LineScales[string]);
       });
     }
 
