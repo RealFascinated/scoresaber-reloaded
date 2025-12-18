@@ -2,6 +2,8 @@ export type ChartType = "line" | "bar" | "point";
 
 export type AxisPosition = "left" | "right";
 
+import type { ChartOptions } from "chart.js";
+
 export type ChartAxis = {
   display: boolean;
   hideOnMobile?: boolean;
@@ -31,7 +33,7 @@ export type ChartConfig = {
   id?: string;
   datasets: ChartDataset[];
   axes: Record<string, ChartAxis>;
-  options?: any; // Allow custom options to be passed through
+  options?: ChartOptions; // Allow custom options to be passed through
 };
 
 export type DatasetConfig = {
@@ -45,5 +47,5 @@ export type DatasetConfig = {
   stack?: string;
   stackOrder?: number;
   labelFormatter?: (value: number) => string;
-  axisConfig: ChartAxis;
+  axisConfig?: Partial<ChartAxis>;
 };

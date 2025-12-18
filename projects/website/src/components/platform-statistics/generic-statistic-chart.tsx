@@ -1,6 +1,7 @@
 "use client";
 
-import { ChartConfig, DatasetConfig } from "@/common/chart/types";
+import { buildChartConfig } from "@/common/chart/build-chart-config";
+import { DatasetConfig } from "@/common/chart/types";
 import GenericChart from "@/components/api/chart/generic-chart";
 import { StatisticsType } from "@ssr/common/model/statistics/statistic-type";
 import { formatDateMinimal, parseDate } from "@ssr/common/utils/time-utils";
@@ -60,36 +61,11 @@ export default function GenericStatisticChart({ statistics, datasetConfig }: Pro
     }
   });
 
-  const config: ChartConfig = {
+  const config = buildChartConfig({
     id: "statistic-chart",
-    datasets: datasetConfig.map(config => ({
-      label: config.title,
-      data: histories[config.field],
-      color: config.color,
-      axisId: config.axisId,
-      type: config.type,
-      pointRadius: config.pointRadius,
-      showLegend: config.showLegend,
-      stack: config.stack,
-      stackOrder: config.stackOrder,
-      labelFormatter: config.labelFormatter,
-    })),
-    axes: Object.fromEntries(
-      datasetConfig.map(config => [
-        config.axisId,
-        {
-          display: config.axisConfig?.display ?? true,
-          position: config.axisConfig?.position ?? "left",
-          reverse: config.axisConfig?.reverse ?? false,
-          displayName: config.axisConfig?.displayName ?? config.title,
-          valueFormatter: config.axisConfig?.valueFormatter,
-          min: config.axisConfig?.min,
-          max: config.axisConfig?.max,
-          hideOnMobile: config.axisConfig?.hideOnMobile,
-        },
-      ])
-    ),
-  };
+    datasetConfig,
+    seriesByField: histories,
+  });
 
   // Render the chart with collected data
   return (

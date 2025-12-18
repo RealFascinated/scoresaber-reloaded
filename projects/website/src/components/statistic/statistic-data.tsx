@@ -16,10 +16,12 @@ export default function StatisticData() {
   const { data: statistics } = useQuery({
     queryKey: ["statistics"],
     queryFn: () => ssrApi.getScoreSaberStatistics(),
+    placeholderData: data => data,
   });
   const { data: appStatistics } = useQuery({
     queryKey: ["app-statistics"],
     queryFn: () => Request.get<AppStatisticsResponse>(env.NEXT_PUBLIC_API_URL + "/statistics"),
+    placeholderData: data => data,
   });
 
   if (statistics == undefined || appStatistics == undefined) {
