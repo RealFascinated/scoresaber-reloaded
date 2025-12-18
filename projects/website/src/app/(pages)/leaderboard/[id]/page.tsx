@@ -1,9 +1,6 @@
 import NotFound from "@/components/not-found";
 import { ScoreSaberLeaderboardData } from "@/components/platform/scoresaber/leaderboard/page/leaderboard-data";
-import { ScoreModeEnum } from "@/components/score/score-mode-switcher";
-import { DetailType } from "@ssr/common/detail-type";
 import { env } from "@ssr/common/env";
-import { LeaderboardResponse } from "@ssr/common/schemas/response/leaderboard/leaderboard";
 import { getDifficultyName } from "@ssr/common/utils/song-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { Metadata } from "next";
@@ -17,48 +14,13 @@ const UNKNOWN_LEADERBOARD = {
 
 type Props = {
   params: Promise<{
-    slug: string[];
+    id: number;
   }>;
-  searchParams: Promise<{
-    [key: string]: string | undefined;
-  }>;
-};
-
-type LeaderboardData = {
-  leaderboardResponse: LeaderboardResponse;
-  page: number;
-  category: ScoreModeEnum;
-};
-
-/**
- * Gets the leaderboard data and scores
- *
- * @param params the params
- * @param fetchScores whether to fetch the scores
- * @returns the leaderboard data and scores
- */
-const getLeaderboardData = async (
-  { params, searchParams }: Props,
-  type: DetailType = "basic"
-): Promise<LeaderboardData | undefined> => {
-  const { slug } = await params;
-  const id = parseInt(slug[0]); // The leaderboard id
-  const page = parseInt(slug[1]) || 1; // The page number
-  const category = (await searchParams).category as ScoreModeEnum;
-
-  const leaderboard = await ssrApi.fetchLeaderboard(id, type);
-  if (leaderboard === undefined) {
-    return undefined;
-  }
-  return {
-    leaderboardResponse: leaderboard,
-    page: page,
-    category: category,
-  };
 };
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
-  const response = await getLeaderboardData(props, "full");
+  const { id } = await props.params;
+  const response = await ssrApi.fetchLeaderboard(id, "basic");
   if (response === undefined) {
     return {
       title: UNKNOWN_LEADERBOARD.title,
@@ -71,7 +33,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     };
   }
 
-  const { leaderboard } = response.leaderboardResponse;
+  const { leaderboard } = response;
 
   return {
     title: `${leaderboard.fullName} - ${leaderboard.songAuthorName}`,
@@ -94,7 +56,8 @@ Difficulty: ${getDifficultyName(leaderboard.difficulty.difficulty)}${leaderboard
 }
 
 export default async function LeaderboardPage(props: Props) {
-  const response = await getLeaderboardData(props, "full");
+  const { id } = await props.params;
+  const response = await ssrApi.fetchLeaderboard(id, "full");
   if (response == undefined) {
     return (
       <NotFound
@@ -105,11 +68,7 @@ export default async function LeaderboardPage(props: Props) {
   }
   return (
     <main className="flex w-full justify-center">
-      <ScoreSaberLeaderboardData
-        initialLeaderboard={response.leaderboardResponse}
-        initialPage={response.page}
-        initialCategory={response.category}
-      />
+      <ScoreSaberLeaderboardData leaderboardData={response} />
     </main>
   );
 }

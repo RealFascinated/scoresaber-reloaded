@@ -2,12 +2,16 @@
 
 import ScoresaberLogo from "@/components/logos/logos/scoresaber-logo";
 import { usePageTransition } from "@/components/ui/page-transition-context";
+import { useQueryParamSelector } from "@/hooks/use-query-param-selector";
 import { ScoreSaberScoreDataMode } from "@ssr/common/types/score-data-mode";
 import { TrendingUpIcon } from "lucide-react";
-import { usePathname } from "next/navigation";
-import { parseAsString, useQueryState } from "nuqs";
-import { useCallback } from "react";
+import { parseAsStringLiteral } from "nuqs";
 import { Tab, TabGroup } from "../../ui/control-panel";
+
+const ALLOWED_SCORE_SABER_SCORE_MODES = ["live", "ssr"] as const;
+const SCORE_SABER_SCORE_MODE_QUERY = parseAsStringLiteral(
+  ALLOWED_SCORE_SABER_SCORE_MODES
+).withDefault("live");
 
 export const SCORES_MODES: Record<
   ScoreSaberScoreDataMode,
@@ -28,24 +32,14 @@ export const SCORES_MODES: Record<
 
 export function useScoreModeSelector() {
   const { setIsLoading } = usePageTransition();
-  const pathname = usePathname();
 
-  const [mode, setMode] = useQueryState("mode", parseAsString.withDefault("live")) as [
-    ScoreSaberScoreDataMode,
-    (value: ScoreSaberScoreDataMode | null) => void,
-  ];
-
-  const handleModeChange = useCallback(
-    (newMode: ScoreSaberScoreDataMode) => {
-      setIsLoading(true);
-      // Replace URL with only mode param, clearing all others
-      const newUrl = newMode === "live" ? pathname : `${pathname}?mode=${newMode}`;
-      window.history.replaceState({}, "", newUrl);
-      // Trigger a re-read of the URL by nuqs
-      setMode(newMode);
-    },
-    [setIsLoading, pathname, setMode]
-  );
+  const { value: mode, setValue: handleModeChange } = useQueryParamSelector({
+    param: "mode",
+    parser: SCORE_SABER_SCORE_MODE_QUERY,
+    clearOtherParams: true,
+    omitParamWhen: v => v === "live",
+    onStartTransition: () => setIsLoading(true),
+  });
 
   return { mode, handleModeChange };
 }

@@ -1,7 +1,6 @@
 "use client";
 
 import { cn } from "@/common/utils";
-import LeaderboardScores from "@/components/platform/scoresaber/leaderboard/leaderboard-scores";
 import { ScoreOverview } from "@/components/platform/scoresaber/score/score-views/score-overview";
 import { MapStats } from "@/components/score/map-stats";
 import { useLeaderboardDropdownData } from "@/hooks/use-leaderboard-dropdown-data";
@@ -11,6 +10,7 @@ import { BeatSaverMapResponse } from "@ssr/common/schemas/response/beatsaver/bea
 import { getPageFromRank } from "@ssr/common/utils/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect } from "react";
+import LeaderboardScoresDropdown from "../leaderboard/leaderboard-scores-dropdown";
 
 export default function ScoreDetailsDropdown({
   score,
@@ -81,12 +81,11 @@ export default function ScoreDetailsDropdown({
 
           {/* Leaderboard Scores */}
           {showLeaderboardScores && (
-            <LeaderboardScores
+            <LeaderboardScoresDropdown
               initialPage={scoresPage}
               leaderboard={leaderboard}
               highlightedPlayerId={highlightedPlayerId}
               historyPlayerId={score.playerId}
-              disableUrlChanging
             />
           )}
         </motion.div>

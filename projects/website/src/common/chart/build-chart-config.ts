@@ -47,5 +47,3 @@ export function buildChartConfig({
     ...(options ? { options } : {}),
   };
 }
-
-

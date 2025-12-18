@@ -1,7 +1,6 @@
 import { PlatformType } from "@/common/platform/platform-repository";
 import NotFound from "@/components/not-found";
 import PlayerData from "@/components/player/player-data";
-import { DetailType } from "@ssr/common/detail-type";
 import { env } from "@ssr/common/env";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
@@ -16,10 +15,7 @@ const UNKNOWN_PLAYER = {
 
 type Props = {
   params: Promise<{
-    slug: string[];
-  }>;
-  searchParams: Promise<{
-    [key: string]: string | undefined;
+    id: string;
   }>;
 };
 
@@ -31,31 +27,10 @@ type PlayerData = {
   };
 };
 
-/**
- * Gets the player data and scores
- *
- * @param params the params
- * @returns the player data and scores
- */
-const getPlayerData = async (
-  { params, searchParams }: Props,
-  type: DetailType = "full"
-): Promise<PlayerData> => {
-  const { slug } = await params;
-
-  const id = slug[0]; // The players id
-  const platformType = (slug[1] as PlatformType) ?? PlatformType.ScoreSaber;
-
-  const player = await ssrApi.getScoreSaberPlayer(id, type);
-  return {
-    player: player,
-    platformType: platformType,
-    searchParams: await searchParams,
-  };
-};
-
 export async function generateMetadata(props: Props): Promise<Metadata> {
-  const { player } = await getPlayerData(props, "full");
+  const { id } = await props.params;
+  const player = await ssrApi.getScoreSaberPlayer(id, "basic");
+
   if (player === undefined) {
     return {
       title: UNKNOWN_PLAYER.title,
@@ -91,7 +66,8 @@ Joined: ${formatDate(player.joinedDate, "Do MMMM, YYYY")}`,
 }
 
 export default async function PlayerPage(props: Props) {
-  const { player, platformType } = await getPlayerData(props);
+  const { id } = await props.params;
+  const player = await ssrApi.getScoreSaberPlayer(id, "full");
   if (player == undefined) {
     return (
       <NotFound
@@ -100,9 +76,10 @@ export default async function PlayerPage(props: Props) {
       />
     );
   }
+
   return (
     <main className="flex w-full justify-center">
-      <PlayerData player={player} platformType={platformType} />
+      <PlayerData player={player} />
     </main>
   );
 }

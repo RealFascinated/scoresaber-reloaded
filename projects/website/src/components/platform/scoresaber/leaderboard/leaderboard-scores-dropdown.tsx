@@ -10,10 +10,7 @@ import useDatabase from "@/hooks/use-database";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
-import { BeatSaverMapResponse } from "@ssr/common/schemas/response/beatsaver/beatsaver-map";
-import { parseAsInteger, parseAsStringLiteral, useQueryState } from "nuqs";
-import { useEffect } from "react";
-import { DifficultyButton } from "../../../leaderboard/button/difficulty-button";
+import { useState } from "react";
 import SimplePagination from "../../../simple-pagination";
 import ScoreSaberLeaderboardScore from "../score/leaderboard-score";
 
@@ -21,25 +18,24 @@ function getScoreId(score: ScoreSaberScore) {
   return score.scoreId + "-" + score.timestamp;
 }
 
-export default function LeaderboardScores({
+export default function LeaderboardScoresDropdown({
+  initialPage = 1,
   leaderboard,
-  beatSaver,
+  highlightedPlayerId,
+  historyPlayerId,
 }: {
+  initialPage?: number;
   leaderboard: ScoreSaberLeaderboard;
-  beatSaver?: BeatSaverMapResponse;
+  highlightedPlayerId?: string;
+  historyPlayerId?: string;
 }) {
   const isMobile = useIsMobile();
   const database = useDatabase();
   const mainPlayerId = useStableLiveQuery(() => database.getMainPlayerId());
   const filter = useLeaderboardFilter();
 
-  const [mode, setMode] = useQueryState(
-    "mode",
-    parseAsStringLiteral<ScoreModeEnum>(Object.values(ScoreModeEnum)).withDefault(
-      ScoreModeEnum.Global
-    )
-  );
-  const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
+  const [mode, setMode] = useState<ScoreModeEnum>(ScoreModeEnum.Global);
+  const [page, setPage] = useState(initialPage);
 
   const {
     data: scores,
@@ -48,15 +44,11 @@ export default function LeaderboardScores({
     isRefetching,
   } = useLeaderboardScores(
     leaderboard.id,
-    mainPlayerId ?? "",
+    historyPlayerId ?? mainPlayerId ?? "",
     page,
     mode,
     filter.country ?? undefined
   );
-
-  useEffect(() => {
-    setPage(1);
-  }, [filter.country]);
 
   const isFriends = mode === ScoreModeEnum.Friends;
   const noScores =
@@ -64,25 +56,8 @@ export default function LeaderboardScores({
 
   return (
     <div className="flex flex-col gap-(--spacing-md)">
-      <div
-        className={
-          "flex flex-col flex-wrap items-center justify-center gap-4 sm:flex-row sm:justify-between"
-        }
-      >
+      <div className="flex flex-col flex-wrap items-center justify-center gap-4 sm:flex-row">
         <ScoreModeSwitcher initialMode={mode} onModeChange={setMode} />
-
-        <div className="flex flex-wrap justify-center gap-(--spacing-sm)">
-          {leaderboard.difficulties.map((difficultyData, index) => (
-            <DifficultyButton
-              key={index}
-              {...difficultyData}
-              selectedId={leaderboard.id}
-              inGameDifficulty={
-                beatSaver?.difficultyLabels?.[difficultyData.difficulty] ?? undefined
-              }
-            />
-          ))}
-        </div>
       </div>
 
       {isLoading && !scores ? (
@@ -137,6 +112,7 @@ export default function LeaderboardScores({
                     key={getScoreId(playerScore)}
                     score={playerScore}
                     leaderboard={leaderboard}
+                    highlightedPlayerId={highlightedPlayerId}
                   />
                 ))}
             </table>
@@ -150,7 +126,6 @@ export default function LeaderboardScores({
               itemsPerPage={scores.metadata.itemsPerPage}
               loadingPage={isLoading || isRefetching ? page : undefined}
               onPageChange={setPage}
-              generatePageUrl={page => `/leaderboard/${leaderboard.id}?page=${page}`}
             />
           )}
         </>
