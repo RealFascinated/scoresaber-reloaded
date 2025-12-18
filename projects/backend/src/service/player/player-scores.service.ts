@@ -73,6 +73,11 @@ export class PlayerScoresService {
 
     // The player has the correct number of scores
     if (playerScoresCount === playerToken.scoreStats.totalPlayCount) {
+      // Mark player as seeded
+      if (!player.seededScores) {
+        await PlayerModel.updateOne({ _id: player._id }, { $set: { seededScores: true } });
+      }
+
       return {
         missingScores: 0,
         totalScores: playerScoresCount,
