@@ -108,7 +108,6 @@ function DateRangeSelector({
   );
 }
 
-// Main component
 export default function PlayerViews({ player }: { player: ScoreSaberPlayer }) {
   const isMobile = useIsMobile("2xl");
   const database = useDatabase();

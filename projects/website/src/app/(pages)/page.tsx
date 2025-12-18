@@ -1,4 +1,3 @@
-import { AppStats } from "@/components/landing/app-statistics";
 import { SearchButton } from "@/components/landing/search-button";
 import SimpleLink from "@/components/simple-link";
 import { Button } from "@/components/ui/button";
@@ -99,23 +98,9 @@ export default async function LandingPage() {
             />
           </div>
         </div>
-      </section>
 
-      {/* Statistics Section */}
-      <section className="py-(--spacing-2xl)">
-        <div className="mx-auto px-(--spacing-xl) md:px-(--spacing-2xl)">
-          <div className="mb-(--spacing-2xl) text-center">
-            <h2 className="mb-(--spacing-lg) text-2xl font-bold sm:text-3xl">
-              Platform Statistics
-            </h2>
-            <p className="text-muted-foreground text-lg">
-              Real-time data from our growing community
-            </p>
-          </div>
-          <div className="flex justify-center">
-            <AppStats className="grid w-full max-w-6xl grid-cols-1 gap-(--spacing-lg) md:grid-cols-3" />
-          </div>
-        </div>
+        {/* Buttom Padding */}
+        <div className="h-64" />
       </section>
     </div>
   );
