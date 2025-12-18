@@ -31,6 +31,8 @@ export class LeaderboardRankingService {
    * @returns the leaderboards that had an update (eg: unranked -> ranked)
    */
   public static async refreshRankedLeaderboards(): Promise<LeaderboardUpdate[]> {
+    const before = performance.now();
+
     Logger.info(`[RANKED UPDATES] Refreshing ranked leaderboards...`);
     const { leaderboards, leaderboardDifficulties } =
       await LeaderboardCoreService.fetchLeaderboardsFromAPI("ranked", true);
@@ -197,16 +199,19 @@ export class LeaderboardRankingService {
 
     if (leaderboardBulkWrite.length > 0) {
       Logger.info(`[RANKED UPDATES] Updating ${leaderboardBulkWrite.length} leaderboards...`);
-      const before = performance.now();
       await ScoreSaberLeaderboardModel.bulkWrite(leaderboardBulkWrite);
       Logger.info(
         `[RANKED UPDATES] Updated ${leaderboardBulkWrite.length} leaderboards in ${formatDuration(performance.now() - before)}`
       );
 
-      sendEmbedToChannel(DiscordChannels.BACKEND_LOGS, new EmbedBuilder()
-        .setTitle("Ranked Leaderboards Updated")
-        .setDescription(`Updated ${leaderboardBulkWrite.length} leaderboards in ${formatDuration(performance.now() - before)}`)
-        .setColor("#00ff00")
+      sendEmbedToChannel(
+        DiscordChannels.BACKEND_LOGS,
+        new EmbedBuilder()
+          .setTitle("Ranked Leaderboards Updated")
+          .setDescription(
+            `Updated ${leaderboardBulkWrite.length} leaderboards in ${formatDuration(performance.now() - before)}`
+          )
+          .setColor("#00ff00")
       );
     }
 
@@ -223,6 +228,8 @@ export class LeaderboardRankingService {
    * Refreshes the qualified leaderboards
    */
   public static async refreshQualifiedLeaderboards() {
+    const before = performance.now();
+
     Logger.info(`[RANKED UPDATES] Refreshing qualified leaderboards...`);
     const { leaderboards, leaderboardDifficulties } =
       await LeaderboardCoreService.fetchLeaderboardsFromAPI("qualified", true);
@@ -260,16 +267,19 @@ export class LeaderboardRankingService {
 
     if (leaderboardBulkWrite.length > 0) {
       Logger.info(`[RANKED UPDATES] Updating ${leaderboardBulkWrite.length} leaderboards...`);
-      const before = performance.now();
       await ScoreSaberLeaderboardModel.bulkWrite(leaderboardBulkWrite);
       Logger.info(
         `[RANKED UPDATES] Updated ${leaderboardBulkWrite.length} leaderboards in ${formatDuration(performance.now() - before)}`
       );
 
-      sendEmbedToChannel(DiscordChannels.BACKEND_LOGS, new EmbedBuilder()
-        .setTitle("Qualified Leaderboards Updated")
-        .setDescription(`Updated ${leaderboardBulkWrite.length} leaderboards in ${formatDuration(performance.now() - before)}`)
-        .setColor("#00ff00")
+      sendEmbedToChannel(
+        DiscordChannels.BACKEND_LOGS,
+        new EmbedBuilder()
+          .setTitle("Qualified Leaderboards Updated")
+          .setDescription(
+            `Updated ${leaderboardBulkWrite.length} leaderboards in ${formatDuration(performance.now() - before)}`
+          )
+          .setColor("#00ff00")
       );
     }
 

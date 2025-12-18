@@ -1,4 +1,3 @@
-import { SERVER_PROXIES } from "@ssr/common/api-service/api-service";
 import { Cooldown, CooldownPriority, cooldownRequestsPerMinute } from "@ssr/common/cooldown";
 import { DetailType } from "@ssr/common/detail-type";
 import Logger from "@ssr/common/logger";
@@ -7,6 +6,7 @@ import { PlayerRefreshResponse } from "@ssr/common/schemas/response/player/playe
 import ScoreSaberRankingRequestsResponse from "@ssr/common/schemas/response/scoresaber/ranking-requests";
 import { MapDifficulty } from "@ssr/common/score/map-difficulty";
 import { ScoreSaberScoreSort } from "@ssr/common/score/score-sort";
+import { SERVER_PROXIES } from "@ssr/common/shared-consts";
 import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/leaderboard";
 import ScoreSaberLeaderboardPageToken from "@ssr/common/types/token/scoresaber/leaderboard-page";
 import ScoreSaberLeaderboardScoresPageToken from "@ssr/common/types/token/scoresaber/leaderboard-scores-page";
@@ -17,7 +17,7 @@ import { ScoreSaberPlayersPageToken } from "@ssr/common/types/token/scoresaber/p
 import RankingRequestToken from "@ssr/common/types/token/scoresaber/ranking-request-token";
 import { getDifficulty } from "@ssr/common/utils/song-utils";
 import { formatDuration } from "@ssr/common/utils/time-utils";
-import { getQueryParamsFromObject, isServer } from "@ssr/common/utils/utils";
+import { getQueryParamsFromObject } from "@ssr/common/utils/utils";
 import CacheService, { CacheId } from "./cache.service";
 
 const API_BASE = "https://scoresaber.com/api";
@@ -65,23 +65,17 @@ export class ScoreSaberApiService {
   );
   private static lastRateLimitSeen: number | undefined = undefined;
   private static currentProxy: string = ""; // No proxy by default
-  private static proxyResetThreshold: number = 50;
+  private static proxySwitchThreshold: number = 50;
+  private static proxyResetThreshold: number = 150;
+
+  // Prevent proxy-switch flapping under concurrency.
+  private static readonly proxySwitchCooldownMs: number = 10_000;
+  private static lastProxySwitchAtMs: number = 0;
+  private static proxySwitchInProgress: boolean = false;
+
+  private static proxyResetTimerStarted: boolean = false;
 
   public static totalRequests: number = 0;
-
-  public constructor() {
-    setInterval(() => {
-      if (
-        ScoreSaberApiService.lastRateLimitSeen &&
-        ScoreSaberApiService.lastRateLimitSeen > ScoreSaberApiService.proxyResetThreshold &&
-        ScoreSaberApiService.currentProxy !== "" // Already not using a proxy
-      ) {
-        // Reset to no proxy
-        ScoreSaberApiService.currentProxy = "";
-        Logger.info("Switched back to no proxy for ScoreSaber API requests");
-      }
-    }, 1000 * 30);
-  }
 
   /**
    * Fetches data from the ScoreSaber API.
@@ -97,6 +91,7 @@ export class ScoreSaberApiService {
       searchParams?: Record<string, string>;
     }
   ): Promise<T | undefined> {
+    ScoreSaberApiService.ensureProxyResetTimer();
     const cacheHash = Bun.hash(JSON.stringify({ url, options })).toString();
 
     const data = await CacheService.fetchWithCache<CachedResponse<T> | undefined>(
@@ -110,25 +105,19 @@ export class ScoreSaberApiService {
         );
 
         const response = await fetch(
-          `${url}${getQueryParamsFromObject(options?.searchParams || {})}`
+          ScoreSaberApiService.buildRequestUrl(
+            `${url}${getQueryParamsFromObject(options?.searchParams || {})}`
+          )
         );
 
         // Handle rate limit errors
-        const remaining = response?.headers.get("x-ratelimit-remaining");
-        if (isServer()) {
-          if (remaining && Number(remaining) <= 50) {
-            // Get the next proxy in the list (circular)
-            const currentIndex = SERVER_PROXIES.indexOf(ScoreSaberApiService.currentProxy);
-            const nextIndex = (currentIndex + 1) % SERVER_PROXIES.length;
-            const nextProxy = SERVER_PROXIES[nextIndex];
-            ScoreSaberApiService.currentProxy = nextProxy;
-            Logger.info(
-              `Rate limit exceeded for ScoreSaber API, switching to another proxy: ${nextProxy}`
-            );
+        const remainingHeader = response?.headers.get("x-ratelimit-remaining");
+        if (remainingHeader !== null) {
+          const remaining = Number(remainingHeader);
+          if (Number.isFinite(remaining)) {
+            ScoreSaberApiService.lastRateLimitSeen = remaining;
+            ScoreSaberApiService.maybeSwitchProxy(remaining);
           }
-
-          // Update the last rate limit seen
-          ScoreSaberApiService.lastRateLimitSeen = Number(remaining);
         }
 
         if (!response.ok || response.status !== 200) {
@@ -147,10 +136,6 @@ export class ScoreSaberApiService {
     );
 
     return data?.data as T;
-  }
-
-  private static log(message: string): void {
-    Logger.debug(`[ScoreSaberService] ${message}`);
   }
 
   /**
@@ -535,5 +520,83 @@ export class ScoreSaberApiService {
       REFRESH_PLAYER_ENDPOINT.replace(":id", id)
     );
     return result;
+  }
+
+  private static log(message: string): void {
+    Logger.debug(`[ScoreSaberService] ${message}`);
+  }
+
+  private static ensureProxyResetTimer(): void {
+    if (ScoreSaberApiService.proxyResetTimerStarted) {
+      return;
+    }
+
+    ScoreSaberApiService.proxyResetTimerStarted = true;
+    setInterval(() => {
+      const remaining = ScoreSaberApiService.lastRateLimitSeen;
+      if (
+        typeof remaining === "number" &&
+        Number.isFinite(remaining) &&
+        remaining > ScoreSaberApiService.proxyResetThreshold &&
+        ScoreSaberApiService.currentProxy !== ""
+      ) {
+        ScoreSaberApiService.currentProxy = "";
+        Logger.info("Switched back to direct (no proxy) for ScoreSaber API requests");
+      }
+    }, 1000 * 30);
+  }
+
+  private static buildRequestUrl(url: string): string {
+    return `${ScoreSaberApiService.currentProxy}${url}`;
+  }
+
+  private static formatProxyLabel(proxy: string): string {
+    return proxy === "" ? "direct (no proxy)" : proxy;
+  }
+
+  private static maybeSwitchProxy(remaining: number): void {
+    if (!Number.isFinite(remaining) || remaining > ScoreSaberApiService.proxySwitchThreshold) {
+      return;
+    }
+
+    const now = Date.now();
+    if (now - ScoreSaberApiService.lastProxySwitchAtMs < ScoreSaberApiService.proxySwitchCooldownMs) {
+      return;
+    }
+
+    if (ScoreSaberApiService.proxySwitchInProgress) {
+      return;
+    }
+
+    ScoreSaberApiService.proxySwitchInProgress = true;
+    try {
+      const nowInner = Date.now();
+      if (
+        nowInner - ScoreSaberApiService.lastProxySwitchAtMs <
+        ScoreSaberApiService.proxySwitchCooldownMs
+      ) {
+        return;
+      }
+
+      const currentIndex = SERVER_PROXIES.indexOf(ScoreSaberApiService.currentProxy);
+      const nextIndex = (currentIndex + 1) % SERVER_PROXIES.length;
+      const nextProxy = SERVER_PROXIES[nextIndex] ?? "";
+
+      if (nextProxy === ScoreSaberApiService.currentProxy) {
+        return;
+      }
+
+      const previousProxy = ScoreSaberApiService.currentProxy;
+      ScoreSaberApiService.currentProxy = nextProxy;
+      ScoreSaberApiService.lastProxySwitchAtMs = nowInner;
+
+      Logger.info(
+        `ScoreSaber API rate limit low (remaining=${remaining}); switching from ${ScoreSaberApiService.formatProxyLabel(
+          previousProxy
+        )} to ${ScoreSaberApiService.formatProxyLabel(nextProxy)}`
+      );
+    } finally {
+      ScoreSaberApiService.proxySwitchInProgress = false;
+    }
   }
 }

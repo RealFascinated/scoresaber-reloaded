@@ -1,5 +1,6 @@
 import { Cooldown, CooldownPriority } from "../cooldown";
 import Logger from "../logger";
+import { CLIENT_PROXY, SERVER_PROXIES } from "../shared-consts";
 import Request, { RequestOptions } from "../utils/request";
 import { isServer } from "../utils/utils";
 import { ApiServiceName } from "./api-service-registry";
@@ -9,12 +10,6 @@ export interface ServiceConfig {
   proxySwitchThreshold: number;
   proxyResetThreshold: number;
 }
-
-export const SERVER_PROXIES = [
-  "", // No proxy
-  "https://proxy.fascinated.cc/",
-];
-export const CLIENT_PROXY = "https://proxy.fascinated.cc/";
 
 export default class ApiService {
   /**
