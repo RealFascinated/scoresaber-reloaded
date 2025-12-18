@@ -298,25 +298,36 @@ export class PlayerHistoryService {
       history[date] = playerHistoryToObject(entry);
     }
 
-    // Process rank history in parallel chunks
     const daysDiff =
       Math.abs(Math.ceil((endTimestamp - startTimestamp) / (1000 * 60 * 60 * 24))) + 1;
-    let daysAgo = 0;
 
+    let daysAgo = 0;
     for (
       let i = playerRankHistory.length - 1;
       i >= Math.max(0, playerRankHistory.length - daysDiff - 1);
       i--
     ) {
       const rank = playerRankHistory[i];
-      if (rank === INACTIVE_RANK || rank === 0) continue;
+      // Player was inactive on this day
+      if (rank === INACTIVE_RANK || rank === 0) {
+        continue;
+      }
 
-      const date = getMidnightAlignedDate(getDaysAgoDate(daysAgo));
       daysAgo += 1;
 
+      const date = getMidnightAlignedDate(getDaysAgoDate(daysAgo));
       const dateKey = formatDateMinimal(date);
-      if (!history[dateKey] || history[dateKey].rank === undefined) {
+
+      // If the rank is missing, add it to the history
+      if (history[dateKey].rank === undefined) {
         history[dateKey] = { rank };
+
+        // Create a history entry for the date
+        await PlayerHistoryEntryModel.findOneAndUpdate({
+          playerId: player.id,
+          date,
+        }, { rank }, { upsert: true });
+        Logger.info(`Created missing history entry for %s on %s`, player.name ?? player.id, dateKey);
       }
     }
 
