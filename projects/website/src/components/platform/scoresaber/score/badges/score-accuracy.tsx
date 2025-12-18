@@ -2,7 +2,7 @@ import { Change } from "@/components/change";
 import { ScoreBadgeProps } from "@/components/platform/scoresaber/score/badges/badge-props";
 import { ScoreSaberScoreModifiers } from "@/components/platform/scoresaber/score/score-modifiers";
 import SimpleTooltip from "@/components/simple-tooltip";
-import { Modifier } from "@ssr/common/score/modifier";
+import { hasModifier, Modifier } from "@ssr/common/score/modifier";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { formatScoreAccuracy } from "@ssr/common/utils/score.util";
 import { getAccDetails, getScoreBadgeFromAccuracy } from "@ssr/common/utils/song-utils";
@@ -20,10 +20,10 @@ export function ScoreAccuracyBadge({ score, showDifference = true }: ScoreAccura
   const fcAccuracy = score.additionalData?.fcAccuracy;
   const scoreBadge = getScoreBadgeFromAccuracy(score.accuracy);
 
-  const failed = score.modifiers.includes("No Fail" as Modifier);
+  const failed = hasModifier(score.modifiers, Modifier.NF);
   const modCount = score.modifiers.length;
 
-  const previousScoreFailed = previousScore?.modifiers?.includes("No Fail" as Modifier);
+  const previousScoreFailed = hasModifier(previousScore?.modifiers, Modifier.NF);
   const previousModCount = previousScore?.modifiers?.length ?? 0;
 
   return (

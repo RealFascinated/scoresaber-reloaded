@@ -1,6 +1,6 @@
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { PreviousScore } from "@ssr/common/model/score/previous-score";
-import { Modifier } from "@ssr/common/score/modifier";
+import { getModifierLabel, Modifier } from "@ssr/common/score/modifier";
 
 export function ScoreSaberScoreModifiers({
   score,
@@ -18,7 +18,7 @@ export function ScoreSaberScoreModifiers({
 
   switch (type) {
     case "full":
-      return <span>{modifiers.slice(0, limit).join(", ")}</span>;
+      return <span>{modifiers.slice(0, limit).map(getModifierLabel).join(", ")}</span>;
     case "simple":
       return (
         <span>

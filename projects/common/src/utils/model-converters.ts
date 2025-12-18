@@ -5,6 +5,7 @@ import { ScoreSaberMedalsScore } from "../model/score/impl/scoresaber-medals-sco
 import { ScoreSaberScore } from "../model/score/impl/scoresaber-score";
 import { removeObjectFields } from "../object.util";
 import { Playlist } from "../playlist/playlist";
+import { normalizeModifiers } from "../score/modifier";
 import { convertObjectId } from "./utils";
 
 const baseFields = ["_id", "__v"];
@@ -21,6 +22,7 @@ export function scoreToObject(
   return {
     ...removeObjectFields<ScoreSaberScore | ScoreSaberMedalsScore>(score, [...baseFields, "id"]),
     id: convertObjectId(score._id),
+    modifiers: normalizeModifiers(score.modifiers),
   } as unknown as ScoreSaberScore | ScoreSaberMedalsScore;
 }
 

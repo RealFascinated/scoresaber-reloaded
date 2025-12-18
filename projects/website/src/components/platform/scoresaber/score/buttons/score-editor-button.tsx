@@ -6,7 +6,7 @@ import { useIsMobile } from "@/contexts/viewport-context";
 import { ScoreSaberCurve } from "@ssr/common/leaderboard-curve/scoresaber-curve";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
-import { Modifier } from "@ssr/common/score/modifier";
+import { hasModifier, Modifier } from "@ssr/common/score/modifier";
 import { formatScoreAccuracy } from "@ssr/common/utils/score.util";
 import { updateScoreWeights } from "@ssr/common/utils/scoresaber.util";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
@@ -32,7 +32,7 @@ export default function ScoreSaberScoreEditorButton({
 
   const maxScore = leaderboard.maxScore || 1; // Use 1 to prevent division by zero
   const accuracy =
-    (score.score / maxScore) * 100 * (score.modifiers.includes(Modifier.NF) ? 0.5 : 1);
+    (score.score / maxScore) * 100 * (hasModifier(score.modifiers, Modifier.NF) ? 0.5 : 1);
 
   const [baseValue, setBaseValue] = useState(Math.max(MIN_ACCURACY, Math.floor(accuracy))); // 1, 2, 3, etc.
   const [decimalValue, setDecimalValue] = useState(accuracy - Math.floor(accuracy)); // 0.0, 0.1, 0.2, etc.

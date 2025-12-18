@@ -5,6 +5,7 @@ import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { ReplayViewers } from "@ssr/common/replay-viewer";
 import { MedalChange } from "@ssr/common/schemas/medals/medal-changes";
 import { BeatSaverMapResponse } from "@ssr/common/schemas/response/beatsaver/beatsaver-map";
+import { getModifierLabel } from "@ssr/common/score/modifier";
 import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/leaderboard-player-info";
 import { getBeatLeaderReplayRedirectUrl } from "@ssr/common/utils/beatleader-utils";
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
@@ -78,7 +79,9 @@ export async function sendScoreNotification(
           value: [
             `**Accuracy:** ${accuracy}`,
             ...(score.pp > 0 ? [`**PP:** ${formatPp(score.pp)}pp ${change ? change.pp : ""}`] : []),
-            `**Modifiers:** ${score.modifiers.length > 0 ? score.modifiers.join(", ") : "None"}`,
+            `**Modifiers:** ${
+              score.modifiers.length > 0 ? score.modifiers.map(getModifierLabel).join(", ") : "None"
+            }`,
           ].join("\n"),
           inline: false,
         },
