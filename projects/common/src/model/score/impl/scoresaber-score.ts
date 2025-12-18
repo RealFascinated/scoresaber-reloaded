@@ -25,7 +25,6 @@ import { ScoreSaberScoreBase } from "./scoresaber-score-base";
   trackerCollection: "increments",
   overwriteModelName: "scoresaber-scores",
 })
-@index({ leaderboardId: 1 })
 @index({ playerId: 1, leaderboardId: 1 })
 @index({ playerId: 1, timestamp: -1 })
 @index({ pp: -1 })

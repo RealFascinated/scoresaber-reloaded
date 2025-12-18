@@ -126,6 +126,42 @@ async function migrateModel(
 
   const cursor = model.find(query, { _id: 1, modifiers: 1 }).lean().cursor();
 
+  let batchIndex = 0;
+  let lastBatchAt = Date.now();
+
+  async function flushBatch(): Promise<void> {
+    if (ops.length === 0) {
+      return;
+    }
+
+    batchIndex++;
+    const batchSize = ops.length;
+    const before = Date.now();
+
+    if (opts.apply) {
+      const res = await model.bulkWrite(ops, { ordered: false });
+      updated += res.modifiedCount ?? 0;
+    } else {
+      updated += batchSize;
+    }
+
+    const after = Date.now();
+    const batchMs = after - before;
+    const sinceLastMs = after - lastBatchAt;
+    lastBatchAt = after;
+
+    const perSec =
+      sinceLastMs > 0 ? Math.round((batchSize / sinceLastMs) * 1000) : batchSize;
+
+    Logger.info(
+      `[${modelName}] batch=${batchIndex} ops=${batchSize} ${
+        opts.apply ? "modifiedTotal" : "wouldModifyTotal"
+      }=${updated} scanned=${scanned} rate≈${perSec}/s batchMs=${batchMs} skippedUnknown=${skippedUnknown} noChange=${noChange}`
+    );
+
+    ops.length = 0;
+  }
+
   for await (const doc of cursor) {
     scanned++;
     matched++;
@@ -176,27 +212,14 @@ async function migrateModel(
     });
 
     if (ops.length >= opts.batchSize) {
-      if (opts.apply) {
-        const res = await model.bulkWrite(ops, { ordered: false });
-        updated += res.modifiedCount ?? 0;
-      } else {
-        updated += ops.length;
-      }
-      ops.length = 0;
+      await flushBatch();
 
-      if (opts.limit && updated >= opts.limit) {
-        break;
-      }
+      if (opts.limit && updated >= opts.limit) break;
     }
   }
 
-  if (ops.length > 0 && (!opts.limit || updated < opts.limit)) {
-    if (opts.apply) {
-      const res = await model.bulkWrite(ops, { ordered: false });
-      updated += res.modifiedCount ?? 0;
-    } else {
-      updated += ops.length;
-    }
+  if (!opts.limit || updated < opts.limit) {
+    await flushBatch();
   }
 
   Logger.info(
