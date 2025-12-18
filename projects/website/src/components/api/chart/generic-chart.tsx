@@ -191,11 +191,12 @@ const GenericChart = ({ config, labels }: Props) => {
   }, [labels, isXAxisLinear, isNumericLabels]);
 
   const chartOptions = useMemo(() => {
-    const mergedScales = { ...chartAxes };
-    if (customOptions?.scales) {
-      Object.keys(customOptions.scales).forEach(axisId => {
-        const existingAxis = mergedScales[axisId];
-        const customAxis = customOptions.scales[axisId];
+    const mergedScales: Record<string, any> = { ...chartAxes };
+    const customScales = customOptions?.scales;
+    if (customScales) {
+      Object.keys(customScales).forEach(axisId => {
+        const existingAxis: any = mergedScales[axisId];
+        const customAxis: any = (customScales as any)[axisId];
         mergedScales[axisId] = {
           ...existingAxis,
           ...customAxis,
