@@ -301,10 +301,13 @@ export class PlayerHistoryService {
     const daysDiff =
       Math.abs(Math.ceil((endTimestamp - startTimestamp) / (1000 * 60 * 60 * 24))) + 1;
 
-    let daysAgo = 0;
+    // `parseRankHistory()` includes today's rank (playerToken.rank) as the last element.
+    // ScoreSaber's `histories` string ends at yesterday, so we start at "yesterday"
+    // (length - 2) and derive `daysAgo` from the array index to avoid off-by-one drift.
+    const historyLength = playerRankHistory.length;
     for (
-      let i = playerRankHistory.length - 1;
-      i >= Math.max(0, playerRankHistory.length - daysDiff - 1);
+      let i = historyLength - 2; // yesterday
+      i >= Math.max(0, historyLength - daysDiff);
       i--
     ) {
       const rank = playerRankHistory[i];
@@ -313,8 +316,8 @@ export class PlayerHistoryService {
         continue;
       }
 
-      daysAgo += 1;
-
+      // last element is "today" => 0d ago, then 1d ago, etc.
+      const daysAgo = historyLength - 1 - i;
       const date = getMidnightAlignedDate(getDaysAgoDate(daysAgo));
       const dateKey = formatDateMinimal(date);
 
@@ -323,11 +326,19 @@ export class PlayerHistoryService {
         history[dateKey] = { rank };
 
         // Create a history entry for the date
-        await PlayerHistoryEntryModel.findOneAndUpdate({
-          playerId: player.id,
-          date,
-        }, { rank }, { upsert: true });
-        Logger.info(`Created missing history entry for %s on %s`, player.name ?? player.id, dateKey);
+        await PlayerHistoryEntryModel.findOneAndUpdate(
+          {
+            playerId: player.id,
+            date,
+          },
+          { rank },
+          { upsert: true }
+        );
+        Logger.info(
+          `Created missing history entry for %s on %s`,
+          player.name ?? player.id,
+          dateKey
+        );
       }
     }
 
@@ -388,19 +399,20 @@ export class PlayerHistoryService {
     playerToken: ScoreSaberPlayerToken
   ): Promise<void> {
     const playerRankHistory = parseRankHistory(playerToken);
-    let daysAgo = 0;
+    const historyLength = playerRankHistory.length;
 
-    for (let i = playerRankHistory.length - daysAgo; i >= 0; i--) {
+    for (let i = historyLength - 1; i >= 0; i--) {
       const rank = playerRankHistory[i];
       if (rank === INACTIVE_RANK || rank === 0) continue;
 
+      // last element is "today" => 0d ago, then 1d ago, etc.
+      const daysAgo = historyLength - 1 - i;
       const date = getMidnightAlignedDate(getDaysAgoDate(daysAgo));
       await PlayerHistoryEntryModel.findOneAndUpdate(
         { playerId: player._id, date },
         { rank },
         { upsert: true }
       );
-      daysAgo += 1;
     }
   }
 
