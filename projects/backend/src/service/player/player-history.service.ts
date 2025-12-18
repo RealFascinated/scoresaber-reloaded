@@ -373,10 +373,7 @@ export class PlayerHistoryService {
       date: today,
     }).lean();
 
-    return await PlayerHistoryService.createHistoryEntry(
-      player,
-      existingEntry ?? undefined
-    );
+    return await PlayerHistoryService.createHistoryEntry(player, existingEntry ?? undefined);
   }
 
   /**

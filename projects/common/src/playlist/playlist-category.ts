@@ -1,1 +1,6 @@
-export type PlaylistCategory = "ranked-batch" | "custom-ranked" | "ranking-queue" | "qualified-maps" | "ranked-maps";
+export type PlaylistCategory =
+  | "ranked-batch"
+  | "custom-ranked"
+  | "ranking-queue"
+  | "qualified-maps"
+  | "ranked-maps";

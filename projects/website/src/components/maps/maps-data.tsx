@@ -54,7 +54,7 @@ export function MapsData({ type }: MapsDataProps) {
     <MapFilterProvider>
       <div className="flex w-full flex-col-reverse items-center gap-2 xl:flex-row xl:items-start xl:justify-center">
         <article className="flex w-full flex-col gap-2 2xl:w-[800px]">
-          <div className="flex w-full gap-2 flex-col md:flex-row">
+          <div className="flex w-full flex-col gap-2 md:flex-row">
             {categories.map(category => (
               <SimpleLink href={`/maps/${category.id}`} key={category.name} className="w-full">
                 <Button

@@ -282,33 +282,13 @@ export default class PlaylistService {
           return true;
         });
 
-      // Format the scores
-      const toSnipePlayer = await ScoreSaberService.getPlayer(toSnipe, "basic");
-      const formattedScores = filteredScores
-        .slice(0, settings.limit)
-        .map(({ score, leaderboard }) => {
-          const matchingDifficulties = leaderboard!.difficulties.filter(
-            difficulty => difficulty.leaderboardId === score.leaderboardId
-          );
-          return {
-            songName: leaderboard!.songName,
-            songAuthor: leaderboard!.songAuthorName,
-            songHash: leaderboard!.songHash,
-            difficulties: matchingDifficulties.map(difficulty => ({
-              difficulty: difficulty.difficulty,
-              characteristic: difficulty.characteristic,
-            })),
-          };
-        })
-        .filter(song => song.difficulties.length > 0);
-
       return new SnipePlaylist(
         toSnipe,
         user,
         settings,
         settings.name ||
-          `Snipe - ${truncateText(toSnipePlayer.name, 16)} (${capitalizeFirstLetter(settings.sort || "pp")})`,
-        formattedScores,
+          `Snipe - ${truncateText((await ScoreSaberService.getPlayer(toSnipe, "basic")).name, 16)} (${capitalizeFirstLetter(settings.sort || "pp")})`,
+        filteredScores.slice(0, settings.limit).map(({ leaderboard }) => leaderboard!),
         this.PLAYLIST_IMAGE_BASE64
       );
     } catch (error) {

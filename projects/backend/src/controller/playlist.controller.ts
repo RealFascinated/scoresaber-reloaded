@@ -28,7 +28,9 @@ export default function playlistController(app: Elysia) {
       .get(
         "/scoresaber-custom-ranked-maps",
         async ({ query: { config } }) => {
-          return playlistToBeatSaberPlaylist(await PlaylistService.createCustomRankedPlaylist(config));
+          return playlistToBeatSaberPlaylist(
+            await PlaylistService.createCustomRankedPlaylist(config)
+          );
         },
         {
           tags: ["Playlist"],

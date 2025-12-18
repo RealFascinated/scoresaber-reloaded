@@ -143,7 +143,7 @@ export class ScoreCoreService {
       removeScoreWeightAndRank: false,
       ...options,
     };
-    
+
     leaderboard = !leaderboard
       ? (await LeaderboardCoreService.getLeaderboard(score.leaderboardId)).leaderboard
       : leaderboard;

@@ -336,10 +336,8 @@ export default function ScoresGraphChart({ player }: { player: ScoreSaberPlayer 
       </div>
 
       {/* Comparison Players */}
-      <div className="flex flex-col gap-2 justify-center">
-        <div
-          className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between"
-        >
+      <div className="flex flex-col justify-center gap-2">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="flex flex-col gap-3 md:flex-row md:items-center">
             <Button
               variant="outline"

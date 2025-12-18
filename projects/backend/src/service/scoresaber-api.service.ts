@@ -560,7 +560,10 @@ export class ScoreSaberApiService {
     }
 
     const now = Date.now();
-    if (now - ScoreSaberApiService.lastProxySwitchAtMs < ScoreSaberApiService.proxySwitchCooldownMs) {
+    if (
+      now - ScoreSaberApiService.lastProxySwitchAtMs <
+      ScoreSaberApiService.proxySwitchCooldownMs
+    ) {
       return;
     }
 

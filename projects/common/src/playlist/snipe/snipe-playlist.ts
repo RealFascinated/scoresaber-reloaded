@@ -1,7 +1,7 @@
+import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { env } from "../../env";
 import type { SnipeSettings } from "../../snipe/snipe-settings-schema";
 import { Playlist } from "../playlist";
-import type { PlaylistSong } from "../playlist-song";
 
 export class SnipePlaylist extends Playlist {
   /**
@@ -24,7 +24,7 @@ export class SnipePlaylist extends Playlist {
     userId: string,
     settings: SnipeSettings,
     title: string,
-    songs: PlaylistSong[],
+    songs: ScoreSaberLeaderboard[],
     image: string
   ) {
     super(`scoresaber-snipe-${toSnipeId}`, title, env.NEXT_PUBLIC_WEBSITE_NAME, image, songs);

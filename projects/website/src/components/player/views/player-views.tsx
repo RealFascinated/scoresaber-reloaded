@@ -124,7 +124,6 @@ export default function PlayerViews({ player }: { player: ScoreSaberPlayer }) {
       ssrApi.getPlayerStatisticHistory(player.id, getDaysAgoDate(actualDaysAgo), new Date()),
   });
 
-
   const views: SelectedView[] = [
     {
       index: 0,
@@ -206,9 +205,9 @@ export default function PlayerViews({ player }: { player: ScoreSaberPlayer }) {
       />
 
       {statisticHistory && historyMode !== undefined ? (
-          <Card className={cn("bg-chart-card", selectedView.isChart ? "p-2.5" : "")}>
-            {selectedView.chart(player, statisticHistory)}
-          </Card>
+        <Card className={cn("bg-chart-card", selectedView.isChart ? "p-2.5" : "")}>
+          {selectedView.chart(player, statisticHistory)}
+        </Card>
       ) : (
         <Card className="bg-chart-card p-2.5">
           <div className="flex h-[400px] items-center justify-center">

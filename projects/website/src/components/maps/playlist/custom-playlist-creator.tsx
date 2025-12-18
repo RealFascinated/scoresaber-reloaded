@@ -69,7 +69,7 @@ export default function CustomPlaylistCreator() {
     <Dialog>
       <DialogTrigger asChild>
         <Button className="flex items-center gap-2">
-          <Star className="h-4 w-4 hidden md:block" />
+          <Star className="hidden h-4 w-4 md:block" />
           Custom Playlist
         </Button>
       </DialogTrigger>
@@ -119,7 +119,9 @@ export default function CustomPlaylistCreator() {
                                   label={v => <span className="text-xs">{v}</span>}
                                   value={[field.value.min, field.value.max]}
                                   showLabelOnHover={false}
-                                  onValueChange={vals => field.onChange({ min: vals[0], max: vals[1] })}
+                                  onValueChange={vals =>
+                                    field.onChange({ min: vals[0], max: vals[1] })
+                                  }
                                   className="pt-10 pb-1 md:w-52"
                                 />
                               </div>
@@ -137,7 +139,10 @@ export default function CustomPlaylistCreator() {
                       <span>Sort</span>
                     </div>
                     <ButtonGroup className="justify-start">
-                      <ControlButton isActive={sort === "stars"} onClick={() => handleSort("stars")}>
+                      <ControlButton
+                        isActive={sort === "stars"}
+                        onClick={() => handleSort("stars")}
+                      >
                         <Star className="h-4 w-4" />
                         Stars
                       </ControlButton>

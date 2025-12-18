@@ -121,7 +121,7 @@ export default function playerController(app: Elysia) {
           return await PlayerHistoryService.getPlayerStatisticHistories(
             player,
             new Date(startDate),
-            new Date(endDate),
+            new Date(endDate)
           );
         },
         {

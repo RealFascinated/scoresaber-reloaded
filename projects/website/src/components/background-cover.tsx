@@ -97,11 +97,11 @@ const getRandomIndex = (excludeIndex?: number): number => {
 export default function BackgroundCover() {
   const database = useDatabase();
   const pathname = usePathname();
-  
+
   const backgroundCover = useStableLiveQuery(async () => database.getBackgroundCover());
   const blur = useStableLiveQuery(async () => database.getBackgroundCoverBlur());
   const brightness = useStableLiveQuery(async () => database.getBackgroundCoverBrightness());
-  
+
   const [currentImageIndex, setCurrentImageIndex] = useState(() => getRandomIndex());
   const [isTransitioning, setIsTransitioning] = useState(false);
 
