@@ -10,7 +10,7 @@ import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-sc
 import { PlaylistSong } from "@ssr/common/playlist/playlist-song";
 import { LeaderboardStarChange } from "@ssr/common/schemas/leaderboard/leaderboard-star-change";
 import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
-import { formatDate, formatDateMinimal, formatDuration } from "@ssr/common/utils/time-utils";
+import { formatDate, formatDuration } from "@ssr/common/utils/time-utils";
 import { EmbedBuilder } from "discord.js";
 import { AnyBulkWriteOperation } from "mongoose";
 import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
@@ -217,7 +217,7 @@ export class LeaderboardRankingService {
 
     // Update the ranked playlist
     await PlaylistService.updatePlaylist("scoresaber-ranked-maps", {
-      title: `ScoreSaber Ranked Maps (${formatDateMinimal(new Date())})`,
+      title: `ScoreSaber ${PLAYLIST_NAMES["scoresaber-ranked-maps"]} (${formatDate(new Date(), "Do MMMM, YYYY")})`,
       songs: Array.from(playlistSongs.values()),
     });
     Logger.info(`[RANKED UPDATES] Updated ranked playlist!`);
@@ -284,7 +284,7 @@ export class LeaderboardRankingService {
     }
 
     await PlaylistService.updatePlaylist("scoresaber-qualified-maps", {
-      title: `ScoreSaber ${PLAYLIST_NAMES["scoresaber-qualified-maps"]} (${formatDate(new Date(), "DD-MM-YYYY")})`,
+      title: `ScoreSaber ${PLAYLIST_NAMES["scoresaber-qualified-maps"]} (${formatDate(new Date(), "Do MMMM, YYYY")})`,
       songs: leaderboards.map(leaderboard => ({
         songName: leaderboard.songName,
         songAuthor: leaderboard.songAuthorName,
