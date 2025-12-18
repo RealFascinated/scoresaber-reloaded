@@ -37,7 +37,7 @@ export default function playlistController(app: Elysia) {
           }),
           query: z.object({
             config: z.string().optional(),
-            download: z.boolean().optional(),
+            download: z.coerce.boolean().optional(),
           }),
           detail: {
             description: "Fetch a playlist by its id",
