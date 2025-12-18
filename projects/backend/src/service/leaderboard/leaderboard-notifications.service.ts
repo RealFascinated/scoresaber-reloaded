@@ -1,5 +1,6 @@
 import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
+import { Playlist } from "@ssr/common/playlist/playlist";
 import { playlistToBeatSaberPlaylist } from "@ssr/common/playlist/playlist-utils";
 import { uploadPaste } from "@ssr/common/utils/paste-utils";
 import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
@@ -80,29 +81,29 @@ export class LeaderboardNotificationsService {
       `<@&1338261690952978442> New Ranked Batch: ${pasteUrl}`
     );
 
-    const leaderboards = PlaylistService.processLeaderboards(
-      [...newlyRankedMaps, ...buffedMaps].map(update => update.newLeaderboard)
-    );
+    const playlistId = `scoresaber-ranked-batch-${date}`;
 
     // Create a playlist of the changes
-    const playlist = PlaylistService.createScoreSaberPlaylist(
-      `scoresaber-ranked-batch-${date}`,
+    const playlist = new Playlist(
+      playlistId,
       `ScoreSaber Ranked Batch (${date})`,
       env.NEXT_PUBLIC_WEBSITE_NAME,
-      leaderboards.maps,
-      leaderboards.highlightedIds,
       PlaylistService.PLAYLIST_IMAGE_BASE64,
+      newlyRankedMaps.map(update => update.newLeaderboard),
       "ranked-batch"
     );
 
-    if (await PlaylistService.playlistExists(`scoresaber-ranked-batch-${date}`)) {
-      await PlaylistService.updatePlaylist(`scoresaber-ranked-batch-${date}`, playlist);
+    if (await PlaylistService.playlistExists(playlistId)) {
+      const existingPlaylist = await PlaylistService.getPlaylist(playlistId);
+      await PlaylistService.updatePlaylist(playlistId, {
+        songs: [...existingPlaylist.songs, ...playlist.songs],
+      });
     } else {
       await PlaylistService.createPlaylist(playlist);
     }
     await sendFile(
       DiscordChannels.RANKED_BATCH_LOGS,
-      `scoresaber-ranked-batch-${date}.bplist`,
+      `${playlistId}.bplist`,
       JSON.stringify(await playlistToBeatSaberPlaylist(playlist), null, 2)
     );
 

@@ -10,11 +10,11 @@ import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-sc
 import { PlaylistSong } from "@ssr/common/playlist/playlist-song";
 import { LeaderboardStarChange } from "@ssr/common/schemas/leaderboard/leaderboard-star-change";
 import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
-import { formatDateMinimal, formatDuration } from "@ssr/common/utils/time-utils";
+import { formatDate, formatDateMinimal, formatDuration } from "@ssr/common/utils/time-utils";
 import { EmbedBuilder } from "discord.js";
 import { AnyBulkWriteOperation } from "mongoose";
 import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
-import PlaylistService from "../playlist/playlist.service";
+import PlaylistService, { PLAYLIST_NAMES } from "../playlist/playlist.service";
 import { MedalScoresService } from "../score/medal-scores.service";
 import { ScoreSaberApiService } from "../scoresaber-api.service";
 import { LeaderboardCoreService } from "./leaderboard-core.service";
@@ -283,37 +283,19 @@ export class LeaderboardRankingService {
       );
     }
 
-    const playlistSongs: Map<string, PlaylistSong> = new Map();
-    for (const leaderboard of leaderboards) {
-      // Ignore unranked leaderboards
-      if (!leaderboard.qualified) {
-        continue;
-      }
-
-      const song = playlistSongs.get(leaderboard.songHash);
-      if (!song) {
-        playlistSongs.set(leaderboard.songHash, {
-          songName: leaderboard.songName,
-          songAuthor: leaderboard.songAuthorName,
-          songHash: leaderboard.songHash,
-          difficulties: [
-            {
-              difficulty: leaderboard.difficulty.difficulty,
-              characteristic: leaderboard.difficulty.characteristic,
-            },
-          ],
-        });
-        continue;
-      }
-      song.difficulties.push({
-        difficulty: leaderboard.difficulty.difficulty,
-        characteristic: leaderboard.difficulty.characteristic,
-      });
-    }
-
-    await PlaylistService.updatePlaylist("scoresaber-ranking-queue-maps", {
-      songs: Array.from(playlistSongs.values()),
+    await PlaylistService.updatePlaylist("scoresaber-qualified-maps", {
+      title: `ScoreSaber ${PLAYLIST_NAMES["scoresaber-qualified-maps"]} (${formatDate(new Date(), "DD-MM-YYYY")})`,
+      songs: leaderboards.map(leaderboard => ({
+        songName: leaderboard.songName,
+        songAuthor: leaderboard.songAuthorName,
+        songHash: leaderboard.songHash,
+        difficulties: leaderboard.difficulties.map(difficulty => ({
+          difficulty: difficulty.difficulty,
+          characteristic: difficulty.characteristic,
+        })),
+      })),
     });
+    Logger.info(`[RANKED UPDATES] Updated qualified playlist!`);
   }
 
   /**

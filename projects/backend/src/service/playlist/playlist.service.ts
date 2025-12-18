@@ -3,10 +3,7 @@ import { BadRequestError } from "@ssr/common/error/bad-request-error";
 import { InternalServerError } from "@ssr/common/error/internal-server-error";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger from "@ssr/common/logger";
-import {
-  ScoreSaberLeaderboard,
-  ScoreSaberLeaderboardModel,
-} from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
+import { ScoreSaberLeaderboardModel } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import {
   ScoreSaberScore,
   ScoreSaberScoreModel,
@@ -18,7 +15,7 @@ import { SHARED_CONSTS } from "@ssr/common/shared-consts";
 import { parseSnipePlaylistSettings } from "@ssr/common/snipe/snipe-playlist-utils";
 import { capitalizeFirstLetter, truncateText } from "@ssr/common/string-utils";
 import { playlistToObject } from "@ssr/common/utils/model-converters";
-import { formatDateMinimal } from "@ssr/common/utils/time-utils";
+import { formatDate, formatDateMinimal, TimeUnit } from "@ssr/common/utils/time-utils";
 import { LeaderboardCoreService } from "../leaderboard/leaderboard-core.service";
 import { PlayerCoreService } from "../player/player-core.service";
 import ScoreSaberService from "../scoresaber.service";
@@ -30,13 +27,65 @@ export type PlaylistId =
   | "scoresaber-ranking-queue-maps"
   | "scoresaber-custom-ranked-maps";
 
+export const PLAYLIST_NAMES: Record<PlaylistId, string> = {
+  "scoresaber-ranked-maps": "Ranked Maps",
+  "scoresaber-qualified-maps": "Qualified Maps",
+  "scoresaber-ranking-queue-maps": "Ranking Queue Maps",
+  "scoresaber-custom-ranked-maps": "", // unused
+};
+
 export default class PlaylistService {
   public static PLAYLIST_IMAGE_BASE64 = "";
-  static {
-    (async () => {
-      this.PLAYLIST_IMAGE_BASE64 = `data:image/png;base64,${Buffer.from(await (await fetch("https://cdn.fascinated.cc/MW5WDvKW69.png")).arrayBuffer()).toString("base64")}`;
-      Logger.info(`Loaded playlists image!`);
-    })();
+
+  constructor() {
+    PlaylistService.init();
+  }
+
+  /**
+   * Initializes the playlist service
+   */
+  private static async init() {
+    this.PLAYLIST_IMAGE_BASE64 = `data:image/png;base64,${Buffer.from(await (await fetch("https://cdn.fascinated.cc/MW5WDvKW69.png")).arrayBuffer()).toString("base64")}`;
+    Logger.info(`Loaded playlists image!`);
+
+    for (const id of [
+      "scoresaber-ranked-maps",
+      "scoresaber-qualified-maps",
+      "scoresaber-ranking-queue-maps",
+    ] as PlaylistId[]) {
+      if (!(await this.playlistExists(id))) {
+        await this.createPlaylist(
+          new Playlist(
+            id,
+            `ScoreSaber ${PLAYLIST_NAMES[id]} (${formatDate(new Date(), "DD-MM-YYYY")})`,
+            env.NEXT_PUBLIC_WEBSITE_NAME,
+            this.PLAYLIST_IMAGE_BASE64,
+            []
+          )
+        );
+
+        Logger.info(`Created playlist ${id}!`);
+      }
+    }
+
+    // Update the ranking queue playlist
+    setInterval(
+      async () => {
+        const rankingQueue = await LeaderboardCoreService.getRankingQueueLeaderboards();
+        await this.updatePlaylist("scoresaber-ranking-queue-maps", {
+          songs: rankingQueue.map(leaderboard => ({
+            songName: leaderboard.songName,
+            songAuthor: leaderboard.songAuthorName,
+            songHash: leaderboard.songHash,
+            difficulties: leaderboard.difficulties.map(difficulty => ({
+              difficulty: difficulty.difficulty,
+              characteristic: difficulty.characteristic,
+            })),
+          })),
+        });
+      },
+      TimeUnit.toMillis(TimeUnit.Hour, 6)
+    );
   }
 
   /**
@@ -95,91 +144,6 @@ export default class PlaylistService {
   }
 
   /**
-   * Creates a playlist for ranked maps
-   *
-   * @param leaderboards the leaderboards to use, if not provided, all ranked leaderboards will be used
-   * @returns the created playlist
-   */
-  public static async createRankedPlaylist(
-    leaderboards?: ScoreSaberLeaderboard[]
-  ): Promise<Playlist> {
-    if (!leaderboards) {
-      leaderboards = await LeaderboardCoreService.getRankedLeaderboards();
-    }
-
-    const title = `ScoreSaber Ranked Maps (${formatDateMinimal(new Date())})`;
-    const highlightedIds = leaderboards.map(map => map.id);
-
-    const { maps } = this.processLeaderboards(leaderboards);
-    return this.createScoreSaberPlaylist(
-      "scoresaber-ranked-maps",
-      title,
-      env.NEXT_PUBLIC_WEBSITE_NAME,
-      maps,
-      highlightedIds,
-      this.PLAYLIST_IMAGE_BASE64
-    );
-  }
-
-  /**
-   * Creates a playlist for qualified maps
-   * @private
-   */
-  public static async createQualifiedPlaylist(
-    leaderboards?: ScoreSaberLeaderboard[]
-  ): Promise<Playlist> {
-    if (!leaderboards) {
-      leaderboards = await LeaderboardCoreService.getQualifiedLeaderboards();
-    }
-
-    const title = `ScoreSaber Qualified Maps (${formatDateMinimal(new Date())})`;
-
-    const highlightedIds = [...leaderboards.map(map => map.id)];
-    for (const map of leaderboards) {
-      if (!map.ranked) {
-        for (const difficulty of map.difficulties) {
-          highlightedIds.push(difficulty.leaderboardId);
-        }
-      }
-    }
-    const uniqueHighlightedIds = [...new Set(highlightedIds)];
-
-    const { maps } = this.processLeaderboards(leaderboards);
-    return this.createScoreSaberPlaylist(
-      "scoresaber-qualified-maps",
-      title,
-      env.NEXT_PUBLIC_WEBSITE_NAME,
-      maps,
-      uniqueHighlightedIds,
-      this.PLAYLIST_IMAGE_BASE64
-    );
-  }
-
-  /**
-   * Creates a playlist for ranking queue maps
-   */
-  public static async createRankingQueuePlaylist(): Promise<Playlist> {
-    const leaderboards = await LeaderboardCoreService.getRankingQueueLeaderboards();
-    const { maps } = this.processLeaderboards(leaderboards);
-    const highlightedIds = leaderboards
-      .map(map => map.id) // Add base leaderboard IDs
-      .concat(
-        leaderboards.flatMap(map => map.difficulties.map(difficulty => difficulty.leaderboardId))
-      ) // Add difficulties to the highlighted IDs
-      .filter((id, index, self) => self.indexOf(id) === index); // Remove duplicates
-
-    const title = `ScoreSaber Ranking Queue Maps (${formatDateMinimal(new Date())})`;
-    return this.createScoreSaberPlaylist(
-      "scoresaber-ranking-queue-maps",
-      title,
-      env.NEXT_PUBLIC_WEBSITE_NAME,
-      maps,
-      highlightedIds,
-      this.PLAYLIST_IMAGE_BASE64
-    );
-  }
-
-  /**
    * Creates a playlist for custom ranked maps
    *
    * @param config the configuration for the custom ranked playlist
@@ -200,15 +164,14 @@ export default class PlaylistService {
     }).lean();
 
     const title = `Custom Ranked Maps (${formatDateMinimal(new Date())})`;
-    const { maps, highlightedIds } = this.processLeaderboards(leaderboards);
 
-    return this.createScoreSaberPlaylist(
+    return new Playlist(
       "scoresaber-custom-ranked-maps",
       title,
       env.NEXT_PUBLIC_WEBSITE_NAME,
-      maps,
-      highlightedIds,
-      this.PLAYLIST_IMAGE_BASE64
+      this.PLAYLIST_IMAGE_BASE64,
+      leaderboards,
+      "custom-ranked"
     );
   }
 
@@ -352,56 +315,5 @@ export default class PlaylistService {
       Logger.error("Error creating snipe playlist", error);
       throw new InternalServerError((error as Error).message);
     }
-  }
-
-  /**
-   * Creates a ScoreSaber playlist
-   * @private
-   */
-  public static createScoreSaberPlaylist(
-    id: string,
-    title: string,
-    author: string,
-    maps: Map<string, ScoreSaberLeaderboard>,
-    selectedDifficulties: number[],
-    image: string,
-    category?: "ranked-batch"
-  ): Playlist {
-    return new Playlist(
-      id,
-      title,
-      author,
-      image,
-      Array.from(maps.values()).map(map => ({
-        songName: map.songName,
-        songAuthor: map.songAuthorName,
-        songHash: map.songHash,
-        difficulties: map.difficulties
-          .filter(difficulty => selectedDifficulties.includes(difficulty.leaderboardId))
-          .map(difficulty => ({
-            difficulty: difficulty.difficulty,
-            characteristic: difficulty.characteristic,
-          })),
-      })),
-      category
-    );
-  }
-
-  /**
-   * Processes leaderboards into maps and highlighted IDs
-   * @private
-   */
-  public static processLeaderboards(leaderboards: ScoreSaberLeaderboard[]) {
-    const maps = new Map<string, ScoreSaberLeaderboard>();
-    for (const leaderboard of leaderboards) {
-      if (!maps.has(leaderboard.songHash)) {
-        maps.set(leaderboard.songHash, leaderboard);
-      }
-    }
-
-    return {
-      maps,
-      highlightedIds: leaderboards.map(map => map.id),
-    };
   }
 }

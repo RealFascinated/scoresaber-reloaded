@@ -5,6 +5,8 @@ import {
   ReturnModelType,
   Severity,
 } from "@typegoose/typegoose";
+import { ScoreSaberLeaderboard } from "../model/leaderboard/impl/scoresaber-leaderboard";
+import type { PlaylistCategory } from "./playlist-category";
 import { PlaylistSong } from "./playlist-song";
 
 @modelOptions({
@@ -46,21 +48,29 @@ export class Playlist {
    * The category of the playlist.
    */
   @prop()
-  public category?: "ranked-batch";
+  public category?: PlaylistCategory;
 
   constructor(
     id: string,
     title: string,
     author: string,
     image: string,
-    songs: PlaylistSong[],
-    category?: "ranked-batch"
+    songs: ScoreSaberLeaderboard[],
+    category?: PlaylistCategory
   ) {
     this.id = id;
     this.title = title;
     this.author = author;
     this.image = image;
-    this.songs = songs;
+    this.songs = songs.map(song => ({
+      songName: song.songName,
+      songAuthor: song.songAuthorName,
+      songHash: song.songHash,
+      difficulties: song.difficulties.map(difficulty => ({
+        difficulty: difficulty.difficulty,
+        characteristic: difficulty.characteristic,
+      })),
+    }));
     this.category = category;
   }
 }
