@@ -16,7 +16,7 @@ export default function StatisticData() {
   const { data: statistics } = useQuery({
     queryKey: ["statistics"],
     queryFn: () => ssrApi.getScoreSaberStatistics(),
-  }); 
+  });
   const { data: appStatistics } = useQuery({
     queryKey: ["app-statistics"],
     queryFn: () => Request.get<AppStatisticsResponse>(env.NEXT_PUBLIC_API_URL + "/statistics"),
@@ -49,7 +49,10 @@ export default function StatisticData() {
               <p className="text-muted-foreground text-sm">Daily player activity and metrics</p>
             </div>
 
-            <AppStats statistics={appStatistics} className="grid grid-cols-1 gap-(--spacing-lg) md:grid-cols-2 lg:grid-cols-6" />
+            <AppStats
+              statistics={appStatistics}
+              className="grid grid-cols-1 gap-(--spacing-lg) md:grid-cols-2 lg:grid-cols-6"
+            />
             <ScoreSaberStatisticsChart statistics={statistics.statistics} />
             <HmdUsageChart hmdUsage={statistics.statistics.hmdUsage} />
           </Card>

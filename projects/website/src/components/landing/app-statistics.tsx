@@ -27,7 +27,13 @@ function StatCard({ icon: Icon, title, value }: StatCardProps) {
   );
 }
 
-export function AppStats({ statistics, className }: { statistics: AppStatisticsResponse, className?: string }) {
+export function AppStats({
+  statistics,
+  className,
+}: {
+  statistics: AppStatisticsResponse;
+  className?: string;
+}) {
   if (statistics == undefined) {
     return null;
   }
