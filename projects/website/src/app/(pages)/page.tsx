@@ -6,7 +6,7 @@ import { ArrowRight, BarChart3, Database, Globe, Heart, Monitor, Star, Users } f
 
 export default async function LandingPage() {
   return (
-    <div className="bg-background min-h-screen w-full">
+    <div className="w-full">
       {/* Hero Section */}
       <section className="mx-auto max-w-6xl px-(--spacing-xl) py-(--spacing-3xl) md:px-(--spacing-2xl)">
         <div className="text-center">

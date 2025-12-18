@@ -4,6 +4,7 @@ import { cn } from "@/common/utils";
 import useDatabase from "@/hooks/use-database";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
 const IMAGE_CHANGE_INTERVAL = TimeUnit.toMillis(TimeUnit.Second, 30);
@@ -95,11 +96,14 @@ const getRandomIndex = (excludeIndex?: number): number => {
 
 export default function BackgroundCover() {
   const database = useDatabase();
+  const pathname = usePathname();
+  
   const backgroundCover = useStableLiveQuery(async () => database.getBackgroundCover());
-  const [currentImageIndex, setCurrentImageIndex] = useState(() => getRandomIndex());
-  const [isTransitioning, setIsTransitioning] = useState(false);
   const blur = useStableLiveQuery(async () => database.getBackgroundCoverBlur());
   const brightness = useStableLiveQuery(async () => database.getBackgroundCoverBrightness());
+  
+  const [currentImageIndex, setCurrentImageIndex] = useState(() => getRandomIndex());
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   const cover = BACKGROUND_COVERS.find(cover => cover.id === backgroundCover);
 
@@ -125,7 +129,7 @@ export default function BackgroundCover() {
     return () => clearInterval(interval);
   }, [cover?.type]);
 
-  if (!cover) {
+  if (!cover || pathname === "/") {
     return null;
   }
 
