@@ -56,7 +56,8 @@ function parseArgs(argv: string[]): CliOptions {
 
 function printHelpAndExit(code: number): never {
   // Keep this as console output so it always prints, even if Logger config changes.
-  console.log(`
+  console.log(
+    `
 Finds and deletes duplicate scoreIds in the additional-score-data collection.
 For each duplicate group, keeps the document with the latest timestamp (or highest _id if timestamps are equal).
 
@@ -67,7 +68,8 @@ Flags:
   --apply         Actually delete duplicates (default: dry-run)
   --batch-size N  Bulk delete batch size (default: 1000)
   --limit N       Stop after deleting N duplicates (useful for testing)
-`.trim());
+`.trim()
+  );
   process.exit(code);
 }
 
@@ -88,11 +90,7 @@ type ModelLike<TDoc> = {
   ) => Promise<{ deletedCount?: number }>;
 };
 
-async function processDuplicates(
-  modelName: string,
-  model: ModelLike<AnyDoc>,
-  opts: CliOptions
-) {
+async function processDuplicates(modelName: string, model: ModelLike<AnyDoc>, opts: CliOptions) {
   Logger.info(
     `[${modelName}] scanning collection "${model.collection.collectionName}" for duplicate scoreIds...`
   );
@@ -151,9 +149,7 @@ async function processDuplicates(
     .aggregate<{ _id: unknown; scoreId: unknown }>(duplicatePipeline)
     .toArray();
 
-  Logger.info(
-    `[${modelName}] found ${duplicates.length} duplicate documents to delete`
-  );
+  Logger.info(`[${modelName}] found ${duplicates.length} duplicate documents to delete`);
 
   if (duplicates.length === 0) {
     Logger.info(`[${modelName}] no duplicates found`);
@@ -187,8 +183,7 @@ async function processDuplicates(
     const sinceLastMs = after - lastBatchAt;
     lastBatchAt = after;
 
-    const perSec =
-      sinceLastMs > 0 ? Math.round((batchSize / sinceLastMs) * 1000) : batchSize;
+    const perSec = sinceLastMs > 0 ? Math.round((batchSize / sinceLastMs) * 1000) : batchSize;
 
     Logger.info(
       `[${modelName}] batch=${batchIndex} ops=${batchSize} ${
@@ -251,4 +246,3 @@ main().catch(error => {
   Logger.error("Fatal error:", error);
   process.exit(1);
 });
-

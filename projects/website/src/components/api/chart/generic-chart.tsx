@@ -201,7 +201,7 @@ const GenericChart = ({ config, labels }: Props) => {
       Object.keys(customScales).forEach(axisId => {
         const existingAxis = mergedScales[axisId];
         const customAxis = customScales[axisId];
-        mergedScales[axisId] = ({
+        mergedScales[axisId] = {
           ...existingAxis,
           ...customAxis,
           ticks:
@@ -212,7 +212,7 @@ const GenericChart = ({ config, labels }: Props) => {
             existingAxis?.title && customAxis?.title
               ? { ...existingAxis.title, ...customAxis.title }
               : customAxis?.title || existingAxis?.title,
-        } as LineScales[string]);
+        } as LineScales[string];
       });
     }
 

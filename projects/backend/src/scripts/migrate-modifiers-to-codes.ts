@@ -66,7 +66,8 @@ function parseArgs(argv: string[]): CliOptions {
 
 function printHelpAndExit(code: number): never {
   // Keep this as console output so it always prints, even if Logger config changes.
-  console.log(`
+  console.log(
+    `
 Migrates legacy ScoreSaber modifier *labels* (e.g. "No Fail") to modifier *codes* (e.g. "NF").
 
 Usage:
@@ -77,7 +78,8 @@ Flags:
   --batch-size N  Bulk write batch size (default: 1000)
   --limit N       Stop after updating N docs (useful for testing)
   --drop-unknown  If a doc contains unknown modifier values, drop those values instead of skipping the doc
-`.trim());
+`.trim()
+  );
   process.exit(code);
 }
 
@@ -101,11 +103,7 @@ type ModelLike<TDoc> = {
   ) => Promise<{ modifiedCount?: number }>;
 };
 
-async function migrateModel(
-  modelName: string,
-  model: ModelLike<AnyDoc>,
-  opts: CliOptions
-) {
+async function migrateModel(modelName: string, model: ModelLike<AnyDoc>, opts: CliOptions) {
   const legacyLabels = Object.values(ModifierLabels);
 
   const query = {
@@ -150,8 +148,7 @@ async function migrateModel(
     const sinceLastMs = after - lastBatchAt;
     lastBatchAt = after;
 
-    const perSec =
-      sinceLastMs > 0 ? Math.round((batchSize / sinceLastMs) * 1000) : batchSize;
+    const perSec = sinceLastMs > 0 ? Math.round((batchSize / sinceLastMs) * 1000) : batchSize;
 
     Logger.info(
       `[${modelName}] batch=${batchIndex} ops=${batchSize} ${
@@ -196,8 +193,7 @@ async function migrateModel(
 
     // If the modifiers are already codes only (or normalize produced the same list), skip.
     const current = values.filter((v): v is string => typeof v === "string");
-    const changed =
-      current.length !== next.length || current.some((v, idx) => v !== next[idx]);
+    const changed = current.length !== next.length || current.some((v, idx) => v !== next[idx]);
 
     if (!changed) {
       noChange++;
@@ -266,5 +262,3 @@ main().catch(error => {
   Logger.error("Fatal error:", error);
   process.exit(1);
 });
-
-

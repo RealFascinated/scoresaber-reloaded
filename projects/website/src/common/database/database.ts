@@ -1,7 +1,7 @@
 import { BACKGROUND_COVERS } from "@/components/background-cover";
 import Logger from "@ssr/common/logger";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import { ReplayViewer, ReplayViewers } from "@ssr/common/replay-viewer";
+import { ReplayViewer, ReplayViewers, ReplayViewerTypes } from "@ssr/common/replay-viewer";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import Dexie, { EntityTable } from "dexie";
 import { deleteCookieValue, setCookieValue } from "../cookie.util";
@@ -58,6 +58,16 @@ export enum SettingIds {
 }
 
 export const DEFAULT_WHAT_IF_RANGE: [number, number] = [70, 98.5];
+const DEFAULT_CACHE_TTL: number = 60 * 60;
+const DEFAULT_PLAYER_CACHE_TTL: number = 60 * 60 * 6;
+const DEFAULT_CHART_LEGEND_STATE: boolean = false;
+const DEFAULT_BACKGROUND_COVER_BRIGHTNESS: number = 50;
+const DEFAULT_BACKGROUND_COVER_BLUR: number = 6;
+const DEFAULT_SHOW_KITTY: boolean = false;
+const DEFAULT_SNOW_PARTICLES: boolean = false;
+const DEFAULT_REPLAY_VIEWER: ReplayViewerTypes = "beatleader";
+const DEFAULT_SHOW_SCORE_COMPARISON: boolean = true;
+const DEFAULT_PLUS_PP_DEFAULT_ACCURACY: number = 95;
 
 export enum WebsiteLanding {
   PLAYER_HOME = "playerHome",
@@ -228,7 +238,7 @@ export default class Database extends Dexie {
    */
   private async getCache<T>(
     key: string,
-    ttl: number = 60 * 60,
+    ttl: number = DEFAULT_CACHE_TTL,
     insertCallback?: () => Promise<T | undefined>
   ): Promise<T | undefined> {
     const item = await this.cache.get(key);
@@ -273,7 +283,7 @@ export default class Database extends Dexie {
    * @returns the player
    */
   public async getPlayer(id: string): Promise<ScoreSaberPlayer | undefined> {
-    return this.getCache<ScoreSaberPlayer>(`player:${id}`, 60 * 60 * 6, async () => {
+    return this.getCache<ScoreSaberPlayer>(`player:${id}`, DEFAULT_PLAYER_CACHE_TTL, async () => {
       try {
         return await ssrApi.getScoreSaberPlayer(id, "basic");
       } catch (error) {
@@ -304,7 +314,7 @@ export default class Database extends Dexie {
    * @returns the chart legend
    */
   getChartLegend(id: string, title: string, defaultState?: boolean): boolean {
-    return this.chartLegendsCache[id]?.[title] ?? defaultState ?? false;
+    return this.chartLegendsCache[id]?.[title] ?? defaultState ?? DEFAULT_CHART_LEGEND_STATE;
   }
 
   /**
@@ -382,7 +392,10 @@ export default class Database extends Dexie {
    * @returns the background cover brightness
    */
   async getBackgroundCoverBrightness(): Promise<number> {
-    return (await this.getSetting<number>(SettingIds.BackgroundCoverBrightness, 50))!;
+    return (await this.getSetting<number>(
+      SettingIds.BackgroundCoverBrightness,
+      DEFAULT_BACKGROUND_COVER_BRIGHTNESS
+    ))!;
   }
 
   /**
@@ -400,7 +413,10 @@ export default class Database extends Dexie {
    * @returns the background cover blur
    */
   async getBackgroundCoverBlur(): Promise<number> {
-    return (await this.getSetting<number>(SettingIds.BackgroundCoverBlur, 6))!;
+    return (await this.getSetting<number>(
+      SettingIds.BackgroundCoverBlur,
+      DEFAULT_BACKGROUND_COVER_BLUR
+    ))!;
   }
 
   /**
@@ -418,7 +434,7 @@ export default class Database extends Dexie {
    * @returns the show kitty setting
    */
   async getShowKitty(): Promise<boolean> {
-    return (await this.getSetting<boolean>(SettingIds.ShowKitty, false))!;
+    return (await this.getSetting<boolean>(SettingIds.ShowKitty, DEFAULT_SHOW_KITTY))!;
   }
 
   /**
@@ -436,7 +452,7 @@ export default class Database extends Dexie {
    * @returns the snow particles setting
    */
   async getSnowParticles(): Promise<boolean> {
-    return (await this.getSetting<boolean>(SettingIds.SnowParticles, false))!;
+    return (await this.getSetting<boolean>(SettingIds.SnowParticles, DEFAULT_SNOW_PARTICLES))!;
   }
 
   /**
@@ -487,7 +503,9 @@ export default class Database extends Dexie {
    * @returns the replay viewer
    */
   async getReplayViewer(): Promise<ReplayViewer> {
-    return ReplayViewers[(await this.getSetting<string>(SettingIds.ReplayViewer, "beatleader"))!];
+    return ReplayViewers[
+      (await this.getSetting<string>(SettingIds.ReplayViewer, DEFAULT_REPLAY_VIEWER))!
+    ];
   }
 
   /**
@@ -514,7 +532,10 @@ export default class Database extends Dexie {
    * @returns the show score comparison setting
    */
   async getShowScoreComparison(): Promise<boolean> {
-    return (await this.getSetting<boolean>(SettingIds.ShowScoreComparison, true))!;
+    return (await this.getSetting<boolean>(
+      SettingIds.ShowScoreComparison,
+      DEFAULT_SHOW_SCORE_COMPARISON
+    ))!;
   }
 
   /**
@@ -554,7 +575,10 @@ export default class Database extends Dexie {
    * @returns the plus pp default accuracy setting
    */
   async getPlusPpDefaultAccuracy(): Promise<number> {
-    return (await this.getSetting<number>(SettingIds.PlusPpDefaultAccuracy, 95))!;
+    return (await this.getSetting<number>(
+      SettingIds.PlusPpDefaultAccuracy,
+      DEFAULT_PLUS_PP_DEFAULT_ACCURACY
+    ))!;
   }
 
   /**
@@ -572,7 +596,7 @@ export default class Database extends Dexie {
    * @returns the history mode
    */
   async getHistoryMode(): Promise<HistoryMode> {
-    return (await this.getSetting<HistoryMode>(SettingIds.HistoryMode, HistoryMode.SIMPLE))!;
+    return (await this.getSetting<HistoryMode>(SettingIds.HistoryMode, HistoryMode.ADVANCED))!;
   }
 
   /**

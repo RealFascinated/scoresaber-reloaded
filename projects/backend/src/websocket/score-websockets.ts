@@ -112,7 +112,11 @@ export class ScoreWebsockets implements EventListener {
           //   `[BL-WS] Received score for player ${player.id}(${player.platform}) with key ${key}`
           // );
 
-          if (pendingScore?.scoreSaberToken && pendingScore.leaderboardToken && pendingScore.player) {
+          if (
+            pendingScore?.scoreSaberToken &&
+            pendingScore.leaderboardToken &&
+            pendingScore.player
+          ) {
             // Found a matching ScoreSaber score, process both
             ScoreWebsockets.clearPendingScore(key);
             await this.processScore(
